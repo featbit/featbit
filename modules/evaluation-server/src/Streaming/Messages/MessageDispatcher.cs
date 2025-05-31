@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Streaming.Connections;
+using Streaming.Metrics;
 
 namespace Streaming.Messages;
 
@@ -21,11 +22,16 @@ public sealed partial class MessageDispatcher
 
     private readonly Dictionary<string, IMessageHandler> _handlers;
     private readonly ILogger<MessageDispatcher> _logger;
+    private readonly IStreamingMetrics _metrics;
 
-    public MessageDispatcher(IEnumerable<IMessageHandler> handlers, ILogger<MessageDispatcher> logger)
+    public MessageDispatcher(
+        IEnumerable<IMessageHandler> handlers, 
+        ILogger<MessageDispatcher> logger,
+        IStreamingMetrics metrics)
     {
         _handlers = handlers.ToDictionary(handler => handler.Type, StringComparer.OrdinalIgnoreCase);
         _logger = logger;
+        _metrics = metrics;
     }
 
     public async Task DispatchAsync(ConnectionContext connection, CancellationToken token)
@@ -49,6 +55,7 @@ public sealed partial class MessageDispatcher
             catch (Exception ex)
             {
                 Log.ErrorDispatchMessage(_logger, connection, ex);
+                _metrics.ConnectionError("MessageDispatchError");
             }
         }
     }
@@ -115,6 +122,7 @@ public sealed partial class MessageDispatcher
                     if (!receiveResult.EndOfMessage)
                     {
                         Log.TooManyFragments(_logger, connection);
+                        _metrics.ConnectionError("TooManyFragments");
                         return;
                     }
 
@@ -136,36 +144,59 @@ public sealed partial class MessageDispatcher
         }
     }
 
-    private async Task HandleMessageAsync(ConnectionContext connection, Memory<byte> bytes, CancellationToken token)
+    private async Task HandleMessageAsync(ConnectionContext connection, ReadOnlyMemory<byte> bytes, CancellationToken token)
     {
         try
         {
-            using var message = JsonDocument.Parse(bytes);
-
-            var root = message.RootElement;
-            if (!root.TryGetProperty(MessageTypePropertyName, out var messageTypeElement) ||
-                !root.TryGetProperty(DataPropertyName, out var dataElement))
+            var message = JsonSerializer.Deserialize<JsonDocument>(bytes.Span);
+            if (message == null)
             {
+                Log.InvalidMessage(_logger, connection, new JsonException("Failed to deserialize message"));
+                _metrics.ConnectionError("InvalidMessageFormat");
                 return;
             }
 
-            var messageType = messageTypeElement.GetString() ?? string.Empty;
+            var messageType = message.RootElement.GetProperty(MessageTypePropertyName).GetString();
+            if (string.IsNullOrEmpty(messageType))
+            {
+                Log.InvalidMessageType(_logger, connection);
+                _metrics.ConnectionError("InvalidMessageType");
+                return;
+            }
+
             if (!_handlers.TryGetValue(messageType, out var handler))
             {
-                Log.NoHandlerFor(_logger, messageType, connection);
+                Log.UnknownMessageType(_logger, messageType, connection);
+                _metrics.ConnectionError("UnknownMessageType");
                 return;
             }
 
-            var ctx = new MessageContext(connection, dataElement, token);
+            JsonElement data;
+            try 
+            {
+                data = message.RootElement.GetProperty(DataPropertyName);
+            }
+            catch (KeyNotFoundException)
+            {
+                Log.InvalidMessage(_logger, connection, new JsonException($"Missing required '{DataPropertyName}' property"));
+                _metrics.ConnectionError("InvalidMessageFormat");
+                return;
+            }
+
+            var ctx = new MessageContext(connection, data, token);
+
+            using var processingTimer = _metrics.TrackMessageProcessing(messageType, bytes.Length);
             await handler.HandleAsync(ctx);
         }
-        catch (JsonException)
+        catch (JsonException ex)
         {
-            Log.ReceivedInvalid(_logger, Encoding.UTF8.GetString(bytes.Span), connection);
+            Log.InvalidMessage(_logger, connection, ex);
+            _metrics.ConnectionError("InvalidMessageFormat");
         }
         catch (Exception ex)
         {
-            Log.ErrorHandleMessage(_logger, Encoding.UTF8.GetString(bytes.Span), connection, ex);
+            Log.ErrorHandleMessage(_logger, connection, ex);
+            _metrics.ConnectionError("MessageHandlingError");
         }
     }
 }

@@ -1,6 +1,8 @@
 using Infrastructure;
 using Serilog;
 using Streaming.DependencyInjection;
+using System.Diagnostics.Metrics;
+using Streaming.Metrics;
 
 namespace Api.Setup;
 
@@ -34,6 +36,9 @@ public static class ServicesRegister
 
         // add bounded memory cache
         services.AddSingleton<BoundedMemoryCache>();
+
+        // add meter factory
+        services.AddSingleton<IStreamingMetrics, StreamingMetrics>();
 
         // streaming services
         services

@@ -4,12 +4,14 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Streaming.Connections;
 using Streaming.Messages;
+using Streaming.Metrics;
 
 namespace Streaming;
 
 public class StreamingMiddleware(
     IHostApplicationLifetime applicationLifetime,
     ILogger<StreamingMiddleware> logger,
+    IStreamingMetrics metrics,
     RequestDelegate next)
 {
     private const string StreamingPath = "/streaming";
@@ -35,6 +37,7 @@ public class StreamingMiddleware(
         var validationResult = await requestValidator.ValidateAsync(connectionContext);
         if (!validationResult.IsValid)
         {
+            metrics.ConnectionRejected(validationResult.Reason);
             logger.RequestRejected(httpContext.Request.QueryString.Value, validationResult.Reason);
             await websocket.CloseOutputAsync(
                 (WebSocketCloseStatus)4003,
@@ -47,18 +50,32 @@ public class StreamingMiddleware(
         await connectionContext.PrepareForProcessingAsync(validationResult.Secrets);
 
         connectionManager.Add(connectionContext);
+        metrics.ConnectionEstablished(connectionContext.Type);
 
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(
             httpContext.RequestAborted,
             applicationLifetime.ApplicationStopping
         );
 
-        // dispatch connection messages
-        await dispatcher.DispatchAsync(connectionContext, cts.Token);
-
-        // dispatch end means the connection was closed
-        await connectionContext.CloseAsync();
-
-        connectionManager.Remove(connectionContext);
+        try
+        {
+            // dispatch connection messages
+            await dispatcher.DispatchAsync(connectionContext, cts.Token);
+        }
+        catch (WebSocketException ex)
+        {
+            metrics.ConnectionError(ex.WebSocketErrorCode.ToString());
+            throw;
+        }
+        finally
+        {
+            // dispatch end means the connection was closed
+            await connectionContext.CloseAsync();
+            
+            var duration = connectionContext.ClosedAt - connectionContext.ConnectAt;
+            metrics.ConnectionClosed(duration);
+            
+            connectionManager.Remove(connectionContext);
+        }
     }
 }

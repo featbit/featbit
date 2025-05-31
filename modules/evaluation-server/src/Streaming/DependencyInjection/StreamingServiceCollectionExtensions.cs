@@ -10,6 +10,7 @@ using Npgsql;
 using Streaming.Connections;
 using Streaming.Messages;
 using Streaming.Services;
+using Streaming.Metrics;
 
 namespace Streaming.DependencyInjection;
 
@@ -29,6 +30,9 @@ public static class StreamingServiceCollectionExtensions
 
         // request validator
         services.AddSingleton<IRequestValidator, RequestValidator>();
+
+        // metrics
+        services.AddSingleton<IStreamingMetrics, StreamingMetrics>();
 
         // services
         services

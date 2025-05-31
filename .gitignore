@@ -18,3 +18,10 @@ benchmark/k6-scripts/test-results/
 
 #Ignore IntelliJ IDEA files
 .idea/
+
+#ignore pyc files in data-analytics-migrator
+/modules/data-analytics-migrator/**/*.pyc
+#ignore wheel files in data-analytics-migrator
+/modules/data-analytics-migrator/**/*.whl
+#ignore dist files in data-analytics-migrator
+/modules/data-analytics-migrator/**/dist

@@ -23,15 +23,24 @@ sealed partial class MessageDispatcher
             ConnectionContext connection
         );
 
-        [LoggerMessage(EventId = 3, Level = LogLevel.Warning, Message = "No handler for message type: {MessageType}",
-            EventName = "NoHandlerFor")]
-        public static partial void NoHandlerFor(
+        [LoggerMessage(EventId = 3, Level = LogLevel.Warning, Message = "Invalid message type",
+            EventName = "InvalidMessageType")]
+        public static partial void InvalidMessageType(
+            ILogger logger,
+            [TagProvider(typeof(ConnectionContextTagProvider), nameof(ConnectionContextTagProvider.RecordTags))]
+            ConnectionContext connection
+        );
+
+        [LoggerMessage(EventId = 4, Level = LogLevel.Warning, Message = "Unknown message type: {MessageType}",
+            EventName = "UnknownMessageType")]
+        public static partial void UnknownMessageType(
             ILogger logger,
             string messageType,
             [TagProvider(typeof(ConnectionContextTagProvider), nameof(ConnectionContextTagProvider.RecordTags))]
-            ConnectionContext connection);
+            ConnectionContext connection
+        );
 
-        [LoggerMessage(EventId = 4, Level = LogLevel.Warning, Message = "Too many fragments for message",
+        [LoggerMessage(EventId = 5, Level = LogLevel.Warning, Message = "Too many fragments for message",
             EventName = "TooManyFragments")]
         public static partial void TooManyFragments(
             ILogger logger,
@@ -39,16 +48,16 @@ sealed partial class MessageDispatcher
             ConnectionContext connection
         );
 
-        [LoggerMessage(EventId = 5, Level = LogLevel.Warning, Message = "Received invalid message: {Message}",
-            EventName = "ReceivedInvalid")]
-        public static partial void ReceivedInvalid(
+        [LoggerMessage(EventId = 6, Level = LogLevel.Warning, Message = "Invalid message format",
+            EventName = "InvalidMessage")]
+        public static partial void InvalidMessage(
             ILogger logger,
-            string message,
             [TagProvider(typeof(ConnectionContextTagProvider), nameof(ConnectionContextTagProvider.RecordTags))]
-            ConnectionContext connection
+            ConnectionContext connection,
+            Exception ex
         );
 
-        [LoggerMessage(EventId = 6, Level = LogLevel.Trace, Message = "Received {Length} bytes message from client",
+        [LoggerMessage(EventId = 7, Level = LogLevel.Trace, Message = "Received {Length} bytes message from client",
             EventName = "Received")]
         public static partial void Received(
             ILogger logger,
@@ -57,7 +66,7 @@ sealed partial class MessageDispatcher
             ConnectionContext connection
         );
 
-        [LoggerMessage(EventId = 7, Level = LogLevel.Warning,
+        [LoggerMessage(EventId = 8, Level = LogLevel.Warning,
             Message = "Received multi-fragment message of length {Length} from client. This should be a rare case.",
             EventName = "ReceivedMultiFragment")]
         public static partial void ReceivedMultiFragment(
@@ -67,18 +76,17 @@ sealed partial class MessageDispatcher
             ConnectionContext connection
         );
 
-        [LoggerMessage(EventId = 8, Level = LogLevel.Error,
-            Message = "Exception occurred while processing message: {Message}",
+        [LoggerMessage(EventId = 9, Level = LogLevel.Error,
+            Message = "Exception occurred while handling message",
             EventName = "ErrorHandleMessage")]
         public static partial void ErrorHandleMessage(
             ILogger logger,
-            string message,
             [TagProvider(typeof(ConnectionContextTagProvider), nameof(ConnectionContextTagProvider.RecordTags))]
             ConnectionContext connection,
             Exception ex
         );
 
-        [LoggerMessage(EventId = 9, Level = LogLevel.Error, Message = "Exception occurred while dispatching message",
+        [LoggerMessage(EventId = 10, Level = LogLevel.Error, Message = "Exception occurred while dispatching message",
             EventName = "ErrorDispatchMessage")]
         public static partial void ErrorDispatchMessage(
             ILogger logger,

@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging.Testing;
 using Moq;
 using Streaming.Connections;
 using Streaming.Messages;
+using Streaming.Metrics;
 using Streaming.UnitTests.Connections;
 
 namespace Streaming.UnitTests.Messages;
@@ -14,6 +15,7 @@ public class MessageDispatcherTests
     private readonly ConnectionContext _connectionCtx;
     private readonly MessageDispatcher _dispatcher;
     private readonly FakeLogger<MessageDispatcher> _logger = new();
+    private readonly Mock<IStreamingMetrics> _metricsMock = new();
 
     private readonly byte[] _echoMessage = "{\"messageType\":\"echo\",\"data\":{\"value\":\"test\"}}"u8.ToArray();
 
@@ -35,7 +37,11 @@ public class MessageDispatcherTests
             .WithWebSocket(_wsMock.Object)
             .Build();
 
-        _dispatcher = new MessageDispatcher([new EchoMessageHandler()], _logger);
+        // Setup metrics mock
+        _metricsMock.Setup(m => m.TrackMessageProcessing(It.IsAny<string>(), It.IsAny<int>()))
+            .Returns(new Mock<IDisposable>().Object);
+
+        _dispatcher = new MessageDispatcher([new EchoMessageHandler()], _logger, _metricsMock.Object);
     }
 
     [Fact]
@@ -115,7 +121,8 @@ public class MessageDispatcherTests
 
         await _dispatcher.DispatchAsync(_connectionCtx, CancellationToken.None);
 
-        Assert.Equal("No handler for message type: unknown", _logger.LatestRecord.Message);
+        Assert.Equal("Unknown message type: unknown", _logger.LatestRecord.Message);
+        _metricsMock.Verify(m => m.ConnectionError("UnknownMessageType"), Times.Once);
 
         VerifyEchoHandlerNeverCalled();
     }
@@ -132,7 +139,8 @@ public class MessageDispatcherTests
 
         await _dispatcher.DispatchAsync(_connectionCtx, CancellationToken.None);
 
-        Assert.Equal($"Received invalid message: {message}", _logger.LatestRecord.Message);
+        Assert.Equal("Invalid message format", _logger.LatestRecord.Message);
+        _metricsMock.Verify(m => m.ConnectionError("InvalidMessageFormat"), Times.Once);
 
         VerifyEchoHandlerNeverCalled();
     }
