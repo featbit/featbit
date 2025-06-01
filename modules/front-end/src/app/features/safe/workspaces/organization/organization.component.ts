@@ -29,6 +29,7 @@ export class OrganizationComponent implements OnInit {
   allOrganizations: IOrganization[];
 
   canUpdateOrgName: boolean = false;
+  canCreateOrg: boolean = false;
   canUpdateDefaultPermissions: boolean = false;
 
   license: License;
@@ -66,6 +67,7 @@ export class OrganizationComponent implements OnInit {
 
   ngOnInit(): void {
     this.canUpdateOrgName = this.permissionsService.isGranted(generalResourceRNPattern.organization, permissionActions.UpdateOrgName);
+    this.canCreateOrg = this.permissionsService.isGranted(generalResourceRNPattern.organization, permissionActions.CreateOrg);
     this.canUpdateDefaultPermissions = this.permissionsService.isGranted(generalResourceRNPattern.organization, permissionActions.UpdateOrgDefaultUserPermissions);
     this.allOrganizations = this.organizationService.organizations;
 

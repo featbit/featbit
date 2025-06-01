@@ -405,6 +405,15 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     isOpenAPIApplicable: false,
     isSpecificApplicable: false
   },
+  CreateOrg: {
+    id: uuidv4(),
+    name: 'CreateOrg',
+    resourceType: ResourceTypeEnum.organization,
+    displayName: $localize`:@@iam.action.create-org:Create organization`,
+    description: $localize`:@@iam.action.create-org:Create organization`,
+    isOpenAPIApplicable: false,
+    isSpecificApplicable: false
+  },
 
   // iam
   CanManageIAM: {
