@@ -2,10 +2,22 @@
   messageType: data-sync,
   data: {
     eventType: full,
-    payloads: [
+    items: [
       {
         envId: Guid_1,
-        flags: [
+        secrets: [
+          {
+            envId: Guid_1,
+            type: server,
+            value: E0ZC__zC8EeQoxEDF-iR9g-JtrIvNK-k-bARYicOTNQA
+          },
+          {
+            envId: Guid_1,
+            type: client,
+            value: 0kqduqWZkESt2VSgsd9tEQ-JtrIvNK-k-bARYicOTNQA
+          }
+        ],
+        featureFlags: [
           {
             id: Guid_2,
             createdAt: DateTimeOffset_1,

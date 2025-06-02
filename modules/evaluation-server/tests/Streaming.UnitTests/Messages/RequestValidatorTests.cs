@@ -35,8 +35,8 @@ public class RequestValidatorTests
 
         Secret[] secrets =
         [
-            new(ConnectionType.Server, "p1", Guid.NewGuid(), "prod"),
-            new(ConnectionType.Server, "p2", Guid.NewGuid(), "prod")
+            new(SecretTypes.Server, "p1", Guid.NewGuid(), "prod"),
+            new(SecretTypes.Server, "p2", Guid.NewGuid(), "prod")
         ];
 
         rpService.Setup(x => x.GetServerSecretsAsync(It.IsAny<string>())).ReturnsAsync(secrets);
@@ -117,7 +117,7 @@ public class RequestValidatorTests
         );
 
         await EnsureInvalidAsync(
-            expectedReason: $"Inconsistent secret used: {ConnectionType.Client}. Request type: {ConnectionType.Server}",
+            expectedReason: $"Inconsistent secret used: {SecretTypes.Client}. Request type: {ConnectionType.Server}",
             type: ConnectionType.Server
         );
     }

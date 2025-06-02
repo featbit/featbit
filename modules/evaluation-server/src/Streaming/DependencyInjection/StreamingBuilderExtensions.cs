@@ -91,13 +91,6 @@ public static class StreamingBuilderExtensions
         }
     }
 
-    public static IStreamingBuilder UseStore<TStoreType>(this IStreamingBuilder builder) where TStoreType : IStore
-    {
-        builder.Services.AddSingleton(typeof(IStore), typeof(TStoreType));
-
-        return builder;
-    }
-
     public static IStreamingBuilder UseStore(this IStreamingBuilder builder, IConfiguration configuration)
     {
         var services = builder.Services;

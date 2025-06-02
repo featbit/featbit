@@ -111,7 +111,7 @@ public class DataSyncTests
             await ws.SendAsync(dataSync, WebSocketMessageType.Text, true, cancellationToken);
         }
 
-        var buffer = new byte[8 * 1024];
+        var buffer = new byte[16 * 1024];
         var result = await ws.ReceiveAsync(buffer, cancellationToken);
 
         Assert.True(result.EndOfMessage);
