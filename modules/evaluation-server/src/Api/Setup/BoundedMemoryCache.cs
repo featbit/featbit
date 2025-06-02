@@ -2,7 +2,7 @@
 
 namespace Api.Setup;
 
-public class BoundedMemoryCache
+public class BoundedMemoryCache : IBoundedMemoryCache
 {
     public MemoryCache Instance { get; } = new(
         new MemoryCacheOptions
