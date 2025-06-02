@@ -1,9 +1,9 @@
 \connect featbit
 
--- https://github.com/featbit/featbit/pull/754
+-- https://github.com/featbit/featbit/pull/759
 UPDATE policies
 SET statements = (
-  -- Rebuild the statements array without existing 'organization' statements
+-- rebuild the statements
   (
     SELECT jsonb_agg(stmt)
     FROM jsonb_array_elements(statements) AS stmt
