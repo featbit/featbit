@@ -7,13 +7,17 @@
         envId: Guid_1,
         secrets: [
           {
-            envId: Guid_1,
             type: server,
+            projectKey: webapp,
+            envId: Guid_1,
+            envKey: dev,
             value: E0ZC__zC8EeQoxEDF-iR9g-JtrIvNK-k-bARYicOTNQA
           },
           {
-            envId: Guid_1,
             type: client,
+            projectKey: webapp,
+            envId: Guid_1,
+            envKey: dev,
             value: 0kqduqWZkESt2VSgsd9tEQ-JtrIvNK-k-bARYicOTNQA
           }
         ],

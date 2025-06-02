@@ -96,7 +96,7 @@ public class DataSyncService(IStore store, IEvaluator evaluator, IRelayProxyServ
 
         List<RpPayloadItem> items = [];
 
-        var rpSecrets = await rpService.GetSecretSlimsAsync(token);
+        var rpSecrets = await rpService.GetSecretsAsync(token);
         var groupedRpSecrets = rpSecrets.GroupBy(x => x.EnvId);
 
         foreach (var group in groupedRpSecrets)

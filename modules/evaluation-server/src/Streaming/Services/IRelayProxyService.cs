@@ -4,7 +4,7 @@ namespace Streaming.Services;
 
 public interface IRelayProxyService
 {
-    Task<Secret[]> GetServerSecretsAsync(string key);
+    Task<SecretWithValue[]> GetSecretsAsync(string key);
 
-    Task<SecretSlim[]> GetSecretSlimsAsync(string key);
+    Task<Secret[]> GetServerSecretsAsync(string key);
 }

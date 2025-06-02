@@ -30,9 +30,4 @@ public class SecretWithValue
     {
         return new Secret(Type, ProjectKey, EnvId, EnvKey);
     }
-
-    public SecretSlim AsSecretSlim()
-    {
-        return new SecretSlim(EnvId, Type, Value);
-    }
 }

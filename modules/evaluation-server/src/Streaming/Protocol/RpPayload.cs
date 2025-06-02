@@ -7,7 +7,7 @@ public record RpPayload(string EventType, List<RpPayloadItem> Items);
 
 public record RpPayloadItem(
     Guid EnvId,
-    SecretSlim[] Secrets,
+    SecretWithValue[] Secrets,
     IEnumerable<JsonObject> FeatureFlags,
     IEnumerable<JsonObject> Segments
 );

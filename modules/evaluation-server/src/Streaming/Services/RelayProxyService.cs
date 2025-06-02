@@ -16,30 +16,7 @@ namespace Streaming.Services;
 public class RelayProxyService(IConfiguration configuration, IServiceProvider serviceProvider)
     : IRelayProxyService
 {
-    public async Task<Secret[]> GetServerSecretsAsync(string key)
-    {
-        var secretsWithValue = await GetSecretsAsync(key);
-
-        var secrets = secretsWithValue
-            .Where(x => x.Type == SecretTypes.Server)
-            .Select(x => x.AsSecret())
-            .ToArray();
-
-        return secrets;
-    }
-
-    public async Task<SecretSlim[]> GetSecretSlimsAsync(string key)
-    {
-        var secretsWithValue = await GetSecretsAsync(key);
-
-        var secrets = secretsWithValue
-            .Select(x => x.AsSecretSlim())
-            .ToArray();
-
-        return secrets;
-    }
-
-    private async Task<SecretWithValue[]> GetSecretsAsync(string key)
+    public async Task<SecretWithValue[]> GetSecretsAsync(string key)
     {
         var dbProvider = configuration.GetDbProvider();
 
@@ -213,5 +190,17 @@ public class RelayProxyService(IConfiguration configuration, IServiceProvider se
                 ];
             }
         }
+    }
+
+    public async Task<Secret[]> GetServerSecretsAsync(string key)
+    {
+        var secretsWithValue = await GetSecretsAsync(key);
+
+        var secrets = secretsWithValue
+            .Where(x => x.Type == SecretTypes.Server)
+            .Select(x => x.AsSecret())
+            .ToArray();
+
+        return secrets;
     }
 }
