@@ -41,33 +41,4 @@ public static class TestData
     }
 
     public const string RelayProxyTokenString = "rp-MDcwNTEzNDExNzQ3MQtXO7IPcN6U-z5fAktj18CQ";
-
-    private static readonly SecretWithValue[] RpSecrets =
-    [
-        new()
-        {
-            Type = SecretTypes.Server,
-            ProjectKey = "webapp",
-            EnvId = new Guid("226b9bf8-4af3-4ffa-9b01-162270e4cd40"),
-            EnvKey = "dev",
-            Value = "E0ZC__zC8EeQoxEDF-iR9g-JtrIvNK-k-bARYicOTNQA"
-        },
-        new()
-        {
-            Type = SecretTypes.Client,
-            ProjectKey = "webapp",
-            EnvId = new Guid("226b9bf8-4af3-4ffa-9b01-162270e4cd40"),
-            EnvKey = "dev",
-            Value = "0kqduqWZkESt2VSgsd9tEQ-JtrIvNK-k-bARYicOTNQA"
-        }
-    ];
-
-    public static SecretWithValue[] GetRpSecrets(string secretString)
-    {
-        return secretString switch
-        {
-            RelayProxyTokenString => RpSecrets,
-            _ => []
-        };
-    }
 }

@@ -1,7 +1,7 @@
 ﻿{
   messageType: data-sync,
   data: {
-    eventType: full,
+    eventType: rp_full,
     items: [
       {
         envId: Guid_1,

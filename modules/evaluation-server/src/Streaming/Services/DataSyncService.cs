@@ -29,7 +29,7 @@ public class DataSyncService(IStore store, IEvaluator evaluator, IRelayProxyServ
         {
             ConnectionType.Client => await GetClientSdkPayloadAsync(connection.EnvId, connection.User!, timestamp),
             ConnectionType.Server => await GetServerSdkPayloadAsync(connection.EnvId, timestamp),
-            ConnectionType.RelayProxy => await GetRelayProxyPayloadAsync(connectionContext.Token, timestamp, request),
+            ConnectionType.RelayProxy => await GetRelayProxyPayloadAsync(connectionContext, timestamp, request),
             _ => throw new ArgumentOutOfRangeException(
                 nameof(connection.Type), $"unsupported connection type {connection.Type}"
             )
@@ -78,44 +78,77 @@ public class DataSyncService(IStore store, IEvaluator evaluator, IRelayProxyServ
         return new ServerSdkPayload(eventType, featureFlags, segments);
     }
 
-    private async Task<RpPayload> GetRelayProxyPayloadAsync(string token, long timestamp, JsonElement request)
+    private async Task<RpPayload> GetRelayProxyPayloadAsync(
+        ConnectionContext connectionContext,
+        long timestamp,
+        JsonElement request)
     {
-        var eventType = timestamp == 0 ? DataSyncEventTypes.Full : DataSyncEventTypes.Patch;
+        var eventType = timestamp == 0 ? DataSyncEventTypes.RpFull : DataSyncEventTypes.RpPatch;
 
-        var timestampPerEnv = new Dictionary<Guid, long>();
-        if (request.TryGetProperty("envs", out var envs))
+        var payloadItems = eventType == DataSyncEventTypes.RpFull
+            ? await GetFullAsync()
+            : await GetPatchAsync();
+
+        return new RpPayload(eventType, payloadItems);
+
+        async Task<List<RpPayloadItem>> GetFullAsync()
         {
-            foreach (var env in envs.EnumerateArray())
+            var items = new List<RpPayloadItem>();
+            var rpSecrets = await rpService.GetSecretsAsync(connectionContext.Token);
+
+            var groupedRpSecrets = rpSecrets.GroupBy(x => x.EnvId);
+            foreach (var group in groupedRpSecrets)
             {
-                var envId = env.GetProperty("envId").GetGuid();
-                var ts = env.GetProperty("timestamp").GetInt64();
+                var envId = group.Key;
+                var serverSdkPayload = await GetServerSdkPayloadAsync(envId, 0);
 
-                timestampPerEnv[envId] = ts;
+                var payload = new RpPayloadItem(
+                    envId,
+                    group.ToArray(),
+                    serverSdkPayload.FeatureFlags,
+                    serverSdkPayload.Segments
+                );
+
+                items.Add(payload);
             }
+
+            return items;
         }
 
-        List<RpPayloadItem> items = [];
-
-        var rpSecrets = await rpService.GetSecretsAsync(token);
-        var groupedRpSecrets = rpSecrets.GroupBy(x => x.EnvId);
-
-        foreach (var group in groupedRpSecrets)
+        async Task<List<RpPayloadItem>> GetPatchAsync()
         {
-            var envId = group.Key;
-            var ts = timestampPerEnv.GetValueOrDefault(envId, 0);
-            var serverSdkPayload = await GetServerSdkPayloadAsync(envId, ts);
+            var timestampPerEnv = new Dictionary<Guid, long>();
+            if (request.TryGetProperty("envs", out var envs))
+            {
+                foreach (var env in envs.EnumerateArray())
+                {
+                    var envId = env.GetProperty("envId").GetGuid();
+                    var ts = env.GetProperty("timestamp").GetInt64();
 
-            var payload = new RpPayloadItem(
-                envId,
-                group.ToArray(),
-                serverSdkPayload.FeatureFlags,
-                serverSdkPayload.Segments
-            );
+                    timestampPerEnv[envId] = ts;
+                }
+            }
 
-            items.Add(payload);
+            var items = new List<RpPayloadItem>();
+            foreach (var rpConnection in connectionContext.MappedRpConnections)
+            {
+                var envId = rpConnection.EnvId;
+                var ts = timestampPerEnv.GetValueOrDefault(envId, 0);
+
+                var serverSdkPayload = await GetServerSdkPayloadAsync(envId, ts);
+
+                var payload = new RpPayloadItem(
+                    envId,
+                    [],
+                    serverSdkPayload.FeatureFlags,
+                    serverSdkPayload.Segments
+                );
+
+                items.Add(payload);
+            }
+
+            return items;
         }
-
-        return new RpPayload(eventType, items);
     }
 
     public async Task<object> GetFlagChangePayloadAsync(Connection connection, JsonElement flag)
