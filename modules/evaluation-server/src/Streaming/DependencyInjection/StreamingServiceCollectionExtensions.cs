@@ -34,10 +34,12 @@ public static class StreamingServiceCollectionExtensions
         services
             .AddEvaluator()
             .AddTransient<IDataSyncService, DataSyncService>();
-        if (options.SupportedTypes.Contains(ConnectionType.RelayProxy))
-        {
-            services.AddTransient<IRelayProxyService, RelayProxyService>();
-        }
+
+        var rpImplementationType = options.CustomRpService != null
+            ? options.CustomRpService.GetType()
+            : typeof(RelayProxyService);
+
+        services.AddTransient(typeof(IRelayProxyService), rpImplementationType);
 
         // connection
         services.AddSingleton<IConnectionManager, ConnectionManager>();

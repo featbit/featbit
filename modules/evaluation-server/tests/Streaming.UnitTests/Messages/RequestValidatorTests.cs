@@ -186,14 +186,11 @@ public class RequestValidatorTests
         IRelayProxyService? rpService = null,
         ILogger<RequestValidator>? logger = null)
     {
-        var spMock = new Mock<IServiceProvider>();
-        spMock.Setup(x => x.GetService(typeof(IRelayProxyService))).Returns(rpService);
-
         var validator = new RequestValidator(
             new TestSystemClock(current ?? TestData.ClientToken.Timestamp),
             store ?? new TestStore(),
             streamingOptions ?? new StreamingOptions(),
-            rpService == null ? null! : spMock.Object,
+            rpService ?? null!,
             logger ?? NullLogger<RequestValidator>.Instance
         );
 
