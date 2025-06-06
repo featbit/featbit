@@ -32,7 +32,9 @@ public class StoreAvailableSentinelTests
         _dbStore2.Setup(x => x.Name).Returns(DbStore2Name);
         _dbStores = [_dbStore1.Object, _dbStore2.Object];
 
-        serviceCollection.AddSingleton<IStore, TestStore>();
+        var mockedStore = Mock.Of<IStore>();
+        serviceCollection.AddSingleton(mockedStore);
+
         _serviceProvider = serviceCollection.BuildServiceProvider();
     }
 

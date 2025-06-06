@@ -186,9 +186,13 @@ public class RequestValidatorTests
         IRelayProxyService? rpService = null,
         ILogger<RequestValidator>? logger = null)
     {
+        var mockedStore = Mock.Of<IStore>(x =>
+            x.GetSecretAsync(TestData.ClientSecretString) == Task.FromResult(TestData.ClientSecret)
+        );
+
         var validator = new RequestValidator(
             new TestSystemClock(current ?? TestData.ClientToken.Timestamp),
-            store ?? new TestStore(),
+            store ?? mockedStore,
             streamingOptions ?? new StreamingOptions(),
             rpService ?? null!,
             logger ?? NullLogger<RequestValidator>.Instance
