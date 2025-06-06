@@ -1,0 +1,145 @@
+﻿{
+  messageType: data-sync,
+  data: {
+    eventType: rp_patch,
+    items: [
+      {
+        envId: Guid_1,
+        featureFlags: [
+          {
+            id: Guid_2,
+            createdAt: DateTimeOffset_1,
+            updatedAt: DateTimeOffset_2,
+            creatorId: Guid_3,
+            updatorId: Guid_3,
+            envId: Guid_1,
+            name: custom rule with segment,
+            key: custom-rule-with-segment,
+            variationType: boolean,
+            variations: [
+              {
+                id: Guid_4,
+                name: True,
+                value: true
+              },
+              {
+                id: Guid_5,
+                name: False,
+                value: false
+              }
+            ],
+            rules: [
+              {
+                id: Guid_6,
+                name: Rule 1,
+                dispatchKey: keyId,
+                includedInExpt: false,
+                conditions: [
+                  {
+                    property: User is in segment,
+                    op: null,
+                    value: ["0779d76b-afc6-4886-ab65-af8c004273ad"]
+                  }
+                ],
+                variations: [
+                  {
+                    id: Guid_4,
+                    rollout: [
+                      0,
+                      0.1
+                    ],
+                    exptRollout: 1
+                  },
+                  {
+                    id: Guid_5,
+                    rollout: [
+                      0.1,
+                      1
+                    ],
+                    exptRollout: 1
+                  }
+                ]
+              },
+              {
+                id: Guid_7,
+                name: Rule 2,
+                dispatchKey: null,
+                includedInExpt: false,
+                conditions: [
+                  {
+                    property: User is in segment,
+                    op: null,
+                    value: ["556c11b2-f08a-4e10-b0b7-af8e008125b3"]
+                  }
+                ],
+                variations: [
+                  {
+                    id: Guid_5,
+                    rollout: [
+                      0,
+                      1
+                    ],
+                    exptRollout: 1
+                  }
+                ]
+              }
+            ],
+            isEnabled: true,
+            disabledVariationId: Guid_5,
+            fallthrough: {
+              dispatchKey: null,
+              includedInExpt: true,
+              variations: [
+                {
+                  id: Guid_4,
+                  rollout: [
+                    0,
+                    1
+                  ],
+                  exptRollout: 1
+                }
+              ]
+            },
+            exptIncludeAllTargets: true,
+            isArchived: false
+          }
+        ],
+        segments: [
+          {
+            id: Guid_8,
+            createdAt: DateTimeOffset_3,
+            updatedAt: DateTimeOffset_4,
+            envId: Guid_1,
+            name: segment-02,
+            description: has two rules,
+            rules: [
+              {
+                id: Guid_9,
+                name: Rule 1,
+                conditions: [
+                  {
+                    property: age,
+                    op: BiggerThan,
+                    value: 20
+                  }
+                ]
+              },
+              {
+                id: Guid_10,
+                name: Rule 2,
+                conditions: [
+                  {
+                    property: age,
+                    op: BiggerThan,
+                    value: 30
+                  }
+                ]
+              }
+            ],
+            isArchived: false
+          }
+        ]
+      }
+    ]
+  }
+}

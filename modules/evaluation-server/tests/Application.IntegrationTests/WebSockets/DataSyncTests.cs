@@ -1,48 +1,54 @@
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
+using Infrastructure.Fakes;
 using Streaming.Connections;
+using Streaming.Protocol;
 
 namespace Application.IntegrationTests.WebSockets;
 
 [Collection(nameof(TestApp))]
-public class DataSyncTests
+public class DataSyncTests(TestApp app)
 {
-    private readonly TestApp _app;
-
-    public DataSyncTests(TestApp app)
-    {
-        _app = app;
-    }
+    // 2023-01-28T05:55:00.000Z, filter out 4 feature flags and 1 segment
+    private const long PatchTs = 1674885300000;
 
     [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public async Task DoServerDataSyncAsync(bool multiFragment)
+    [InlineData(DataSyncEventTypes.Full)]
+    [InlineData(DataSyncEventTypes.Patch)]
+    public async Task DoServerDataSyncAsync(string type)
     {
+        var timestamp = type == DataSyncEventTypes.Full ? 0 : PatchTs;
+
         var request = new
         {
             messageType = "data-sync",
             data = new
             {
-                timestamp = 0
+                timestamp
             }
         };
 
-        await DoDataSyncAndVerifyAsync(ConnectionType.Server, request, multiFragment);
+        var r1 = await DoDataSyncAsync(ConnectionType.Server, request, true);
+        var r2 = await DoDataSyncAsync(ConnectionType.Server, request, false);
+
+        Assert.Equal(r1, r2);
+        await VerifyJson(r1).UseParameters(type);
     }
 
     [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public async Task DoClientDataSyncAsync(bool multiFragment)
+    [InlineData(DataSyncEventTypes.Full)]
+    [InlineData(DataSyncEventTypes.Patch)]
+    public async Task DoClientDataSyncAsync(string type)
     {
+        var timestamp = type == DataSyncEventTypes.Full ? 0 : PatchTs;
+
         var request = new
         {
             messageType = "data-sync",
             data = new
             {
-                timestamp = 0,
+                timestamp,
                 user = new
                 {
                     keyId = "3db19c81-e149-4b97-8a0d-79d34531fe59",
@@ -69,32 +75,50 @@ public class DataSyncTests
             }
         };
 
-        await DoDataSyncAndVerifyAsync(ConnectionType.Client, request, multiFragment);
+        var r1 = await DoDataSyncAsync(ConnectionType.Client, request, true);
+        var r2 = await DoDataSyncAsync(ConnectionType.Client, request, false);
+
+        Assert.Equal(r1, r2);
+        await VerifyJson(r1).UseParameters(type);
     }
 
     [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public async Task DoRelayProxyDataSyncAsync(bool multiFragment)
+    [InlineData(DataSyncEventTypes.Full)]
+    [InlineData(DataSyncEventTypes.Patch)]
+    public async Task DoRelayProxyDataSyncAsync(string type)
     {
+        var timestamp = type == DataSyncEventTypes.Full ? 0 : PatchTs;
+
         var request = new
         {
             messageType = "data-sync",
             data = new
             {
-                timestamp = 0
+                timestamp,
+                envs = new object[]
+                {
+                    new
+                    {
+                        envId = FakeData.EnvId,
+                        timestamp
+                    }
+                }
             }
         };
 
-        await DoDataSyncAndVerifyAsync(ConnectionType.RelayProxy, request, multiFragment);
+        var r1 = await DoDataSyncAsync(ConnectionType.RelayProxy, request, true);
+        var r2 = await DoDataSyncAsync(ConnectionType.RelayProxy, request, false);
+
+        Assert.Equal(r1, r2);
+        await VerifyJson(r1).UseParameters(type);
     }
 
-    private async Task DoDataSyncAndVerifyAsync(string type, object request, bool multiFragment)
+    private async Task<string> DoDataSyncAsync(string type, object request, bool multiFragment)
     {
         var cts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
         var cancellationToken = cts.Token;
 
-        var ws = await _app.ConnectWithTokenAsync(type);
+        var ws = await app.ConnectWithTokenAsync(type);
 
         var dataSync = JsonSerializer.SerializeToUtf8Bytes(request);
 
@@ -118,6 +142,6 @@ public class DataSyncTests
         Assert.Equal(WebSocketMessageType.Text, result.MessageType);
 
         var jsonString = Encoding.UTF8.GetString(buffer[..result.Count]);
-        await VerifyJson(jsonString).UseParameters(multiFragment);
+        return jsonString;
     }
 }

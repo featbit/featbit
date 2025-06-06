@@ -1,6 +1,5 @@
 using System.Net.WebSockets;
 using Domain.Shared;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Logging;
 using Streaming.Services;
@@ -11,7 +10,7 @@ public sealed class RequestValidator(
     ISystemClock systemClock,
     IStore store,
     StreamingOptions options,
-    IServiceProvider serviceProvider,
+    IRelayProxyService rpService,
     ILogger<RequestValidator> logger)
     : IRequestValidator
 {
@@ -60,8 +59,6 @@ public sealed class RequestValidator(
 
         async Task<ValidationResult> ValidateRelayProxyAsync()
         {
-            var rpService = serviceProvider.GetRequiredService<IRelayProxyService>();
-
             var serverSecrets = await rpService.GetServerSecretsAsync(tokenString);
             return serverSecrets.Length == 0
                 ? ValidationResult.Failed($"Invalid relay proxy token: {tokenString}")

@@ -25,32 +25,31 @@ public class DataSyncMessageHandler : IMessageHandler
     {
         var connectionContext = ctx.Connection;
 
-        var message = ctx.Data.Deserialize<DataSyncMessage>(ReusableJsonSerializerOptions.Web);
-        if (message == null)
-        {
-            return;
-        }
-
         // handle client sdk prerequisites
         if (connectionContext.Type == ConnectionType.Client)
         {
-            // client sdk must attach user info when sync data
-            if (message.User == null || !message.User.IsValid())
+            if (!ctx.Data.TryGetProperty("user", out var userProp))
             {
-                throw new ArgumentException("client sdk must attach valid user info when sync data.");
+                throw new ArgumentException("client data sync message must attach user info.");
+            }
+
+            var user = userProp.Deserialize<EndUser?>(ReusableJsonSerializerOptions.Web);
+            if (user == null || !user.IsValid())
+            {
+                throw new ArgumentException("client data sync message must attach valid user info.");
             }
 
             var connection = connectionContext.Connection;
 
             // attach client-side sdk EndUser
-            connection.AttachUser(message.User);
+            connection.AttachUser(user);
 
             // publish end-user message
-            var endUserMessage = new EndUserMessage(connection.EnvId, message.User);
+            var endUserMessage = new EndUserMessage(connection.EnvId, user);
             await _producer.PublishAsync(Topics.EndUser, endUserMessage);
         }
 
-        var payload = await _service.GetPayloadAsync(connectionContext, message);
+        var payload = await _service.GetPayloadAsync(connectionContext, ctx.Data);
         var serverMessage = new ServerMessage(MessageTypes.DataSync, payload);
         await connectionContext.SendAsync(serverMessage, ctx.CancellationToken);
     }
