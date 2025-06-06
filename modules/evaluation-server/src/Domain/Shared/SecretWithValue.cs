@@ -17,12 +17,12 @@ public class SecretWithValue
     {
     }
 
-    public SecretWithValue(Secret secret, string value)
+    public SecretWithValue(string type, string projectKey, Guid envId, string envKey, string value)
     {
-        Type = secret.Type;
-        ProjectKey = secret.ProjectKey;
-        EnvId = secret.EnvId;
-        EnvKey = secret.EnvKey;
+        Type = type;
+        ProjectKey = projectKey;
+        EnvId = envId;
+        EnvKey = envKey;
         Value = value;
     }
 
