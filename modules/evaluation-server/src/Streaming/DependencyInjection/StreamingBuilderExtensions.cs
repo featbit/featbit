@@ -12,7 +12,6 @@ using Infrastructure.Persistence;
 using Infrastructure.Store;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Streaming.Consumers;
 
 namespace Streaming.DependencyInjection;
 
@@ -23,11 +22,6 @@ public static class StreamingBuilderExtensions
         var services = builder.Services;
 
         var mqProvider = configuration.GetMqProvider();
-        if (mqProvider != MqProvider.None)
-        {
-            AddConsumers();
-        }
-
         switch (mqProvider)
         {
             case MqProvider.None:
@@ -45,13 +39,6 @@ public static class StreamingBuilderExtensions
         }
 
         return builder;
-
-        void AddConsumers()
-        {
-            services
-                .AddSingleton<IMessageConsumer, FeatureFlagChangeMessageConsumer>()
-                .AddSingleton<IMessageConsumer, SegmentChangeMessageConsumer>();
-        }
 
         void AddNone()
         {

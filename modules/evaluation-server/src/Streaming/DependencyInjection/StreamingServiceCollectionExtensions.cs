@@ -1,4 +1,5 @@
 using Domain;
+using Domain.Messages;
 using Infrastructure;
 using Infrastructure.Persistence;
 using Infrastructure.Persistence.MongoDb;
@@ -8,6 +9,7 @@ using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 using Streaming.Connections;
+using Streaming.Consumers;
 using Streaming.Messages;
 using Streaming.Services;
 
@@ -50,6 +52,11 @@ public static class StreamingServiceCollectionExtensions
             .AddTransient<IMessageHandler, PingMessageHandler>()
             .AddTransient<IMessageHandler, EchoMessageHandler>()
             .AddTransient<IMessageHandler, DataSyncMessageHandler>();
+
+        // mq message consumers
+        services
+            .AddSingleton<IMessageConsumer, FeatureFlagChangeMessageConsumer>()
+            .AddSingleton<IMessageConsumer, SegmentChangeMessageConsumer>();
 
         return new StreamingBuilder(services);
     }
