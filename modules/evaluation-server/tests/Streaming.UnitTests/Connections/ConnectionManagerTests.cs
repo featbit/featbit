@@ -40,8 +40,8 @@ public class ConnectionManagerTests
 
         Secret[] secrets =
         [
-            new(ConnectionType.Server, "p1", Guid.NewGuid(), "prod"),
-            new(ConnectionType.Server, "p2", Guid.NewGuid(), "prod"),
+            new(SecretTypes.Server, "p1", Guid.NewGuid(), "prod"),
+            new(SecretTypes.Server, "p2", Guid.NewGuid(), "prod"),
         ];
 
         var context = new ConnectionContextBuilder()
@@ -69,8 +69,8 @@ public class ConnectionManagerTests
         var logger = new FakeLogger<ConnectionManager>();
         var manager = new ConnectionManager(logger);
 
-        var s1 = new Secret("client", "p1", envId: Guid.NewGuid(), "dev");
-        var s2 = new Secret("client", "p2", envId: Guid.NewGuid(), "dev");
+        var s1 = new Secret(SecretTypes.Client, "p1", envId: Guid.NewGuid(), "dev");
+        var s2 = new Secret(SecretTypes.Client, "p2", envId: Guid.NewGuid(), "dev");
 
         var c1 = new ConnectionContextBuilder()
             .WithSecret(s1)

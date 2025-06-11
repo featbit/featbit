@@ -1,11 +1,27 @@
 ﻿{
   messageType: data-sync,
   data: {
-    eventType: full,
-    payloads: [
+    eventType: rp_full,
+    items: [
       {
         envId: Guid_1,
-        flags: [
+        secrets: [
+          {
+            type: server,
+            projectKey: webapp,
+            envId: Guid_1,
+            envKey: dev,
+            value: E0ZC__zC8EeQoxEDF-iR9g-JtrIvNK-k-bARYicOTNQA
+          },
+          {
+            type: client,
+            projectKey: webapp,
+            envId: Guid_1,
+            envKey: dev,
+            value: 0kqduqWZkESt2VSgsd9tEQ-JtrIvNK-k-bARYicOTNQA
+          }
+        ],
+        featureFlags: [
           {
             id: Guid_2,
             createdAt: DateTimeOffset_1,

@@ -49,8 +49,8 @@ public class ConnectionLogTests
 
         Secret[] secrets =
         [
-            new(ConnectionType.Server, "p1", Guid.NewGuid(), "prod"),
-            new(ConnectionType.Server, "p2", Guid.NewGuid(), "prod"),
+            new(SecretTypes.Server, "p1", Guid.NewGuid(), "prod"),
+            new(SecretTypes.Server, "p2", Guid.NewGuid(), "prod"),
         ];
 
         var context = new ConnectionContextBuilder()

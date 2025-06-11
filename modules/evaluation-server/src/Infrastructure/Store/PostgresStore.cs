@@ -30,8 +30,8 @@ public class PostgresStore(NpgsqlDataSource dataSource) : IDbStore
         await using var connection = await dataSource.OpenConnectionAsync();
 
         var rows = await connection.QueryAsync(
-            "select * from feature_flags where env_id = @envId and updated_at > @time",
-            new { envId, time = DateTime.UnixEpoch.AddMilliseconds(timestamp) }
+            "select * from feature_flags where env_id = @envId and date_trunc('milliseconds', updated_at) > @time",
+            new { envId, time = DateTimeOffset.FromUnixTimeMilliseconds(timestamp) }
         );
 
         return rows.Select(row => SerializeFlag((row as IDictionary<string, object>)!));
@@ -79,10 +79,10 @@ public class PostgresStore(NpgsqlDataSource dataSource) : IDbStore
             return [];
         }
 
-        var rows = await connection.QueryAsync(
+        var results = await connection.QueryAsync(
             """
             select * from segments
-            where updated_at > @time
+            where date_trunc('milliseconds', updated_at) > @time
               and workspace_id = @workspaceId
               and exists (
                   select 1
@@ -92,11 +92,18 @@ public class PostgresStore(NpgsqlDataSource dataSource) : IDbStore
             """,
             new
             {
-                time = DateTime.UnixEpoch.AddMilliseconds(timestamp),
+                time = DateTimeOffset.FromUnixTimeMilliseconds(timestamp),
                 workspaceId = (Guid)rnRow["workspace_id"],
                 envRN = $"{rnRow["rn"] as string}:"
             }
         );
+
+        // replace env_id field for shared segments
+        var rows = results.AsList();
+        foreach (var row in rows)
+        {
+            row.env_id = envId;
+        }
 
         return rows.Select(row => SerializeSegment((row as IDictionary<string, object>)!));
     }
