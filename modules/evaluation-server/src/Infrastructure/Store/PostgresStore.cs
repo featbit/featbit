@@ -79,7 +79,7 @@ public class PostgresStore(NpgsqlDataSource dataSource) : IDbStore
             return [];
         }
 
-        var rows = await connection.QueryAsync(
+        var results = await connection.QueryAsync(
             """
             select * from segments
             where date_trunc('milliseconds', updated_at) > @time
@@ -97,6 +97,13 @@ public class PostgresStore(NpgsqlDataSource dataSource) : IDbStore
                 envRN = $"{rnRow["rn"] as string}:"
             }
         );
+
+        // replace env_id field for shared segments
+        var rows = results.AsList();
+        foreach (var row in rows)
+        {
+            row.env_id = envId;
+        }
 
         return rows.Select(row => SerializeSegment((row as IDictionary<string, object>)!));
     }
