@@ -10,6 +10,8 @@ namespace Streaming.Services;
 
 public class DataSyncService(IStore store, IEvaluator evaluator, IRelayProxyService rpService) : IDataSyncService
 {
+    private const long FullSyncTimestamp = 0;
+
     public async Task<object> GetPayloadAsync(ConnectionContext connectionContext, JsonElement request)
     {
         var connection = connectionContext.Connection;
@@ -21,8 +23,8 @@ public class DataSyncService(IStore store, IEvaluator evaluator, IRelayProxyServ
         }
         else
         {
-            // if timestamp is null or not specified, treat as 0 (default value)
-            timestamp = 0;
+            // if timestamp is null or not specified, treat as FullSyncTimestamp (default value)
+            timestamp = FullSyncTimestamp;
         }
 
         object payload = connectionContext.Type switch
@@ -40,7 +42,7 @@ public class DataSyncService(IStore store, IEvaluator evaluator, IRelayProxyServ
 
     public async Task<ClientSdkPayload> GetClientSdkPayloadAsync(Guid envId, EndUser user, long timestamp)
     {
-        var eventType = timestamp == 0 ? DataSyncEventTypes.Full : DataSyncEventTypes.Patch;
+        var eventType = timestamp == FullSyncTimestamp ? DataSyncEventTypes.Full : DataSyncEventTypes.Patch;
         var flagsBytes = await store.GetFlagsAsync(envId, timestamp);
 
         var clientSdkFlags = new List<ClientSdkFlag>();
@@ -57,7 +59,7 @@ public class DataSyncService(IStore store, IEvaluator evaluator, IRelayProxyServ
 
     public async Task<ServerSdkPayload> GetServerSdkPayloadAsync(Guid envId, long timestamp)
     {
-        var eventType = timestamp == 0 ? DataSyncEventTypes.Full : DataSyncEventTypes.Patch;
+        var eventType = timestamp == FullSyncTimestamp ? DataSyncEventTypes.Full : DataSyncEventTypes.Patch;
         var featureFlags = new List<JsonObject>();
         var segments = new List<JsonObject>();
 
@@ -83,7 +85,7 @@ public class DataSyncService(IStore store, IEvaluator evaluator, IRelayProxyServ
         long timestamp,
         JsonElement request)
     {
-        var eventType = timestamp == 0 ? DataSyncEventTypes.RpFull : DataSyncEventTypes.RpPatch;
+        var eventType = timestamp == FullSyncTimestamp ? DataSyncEventTypes.RpFull : DataSyncEventTypes.RpPatch;
 
         var payloadItems = eventType == DataSyncEventTypes.RpFull
             ? await GetFullAsync()
@@ -100,7 +102,7 @@ public class DataSyncService(IStore store, IEvaluator evaluator, IRelayProxyServ
             foreach (var group in groupedRpSecrets)
             {
                 var envId = group.Key;
-                var serverSdkPayload = await GetServerSdkPayloadAsync(envId, 0);
+                var serverSdkPayload = await GetServerSdkPayloadAsync(envId, FullSyncTimestamp);
 
                 var payload = new RpPayloadItem(
                     envId,
@@ -133,7 +135,7 @@ public class DataSyncService(IStore store, IEvaluator evaluator, IRelayProxyServ
             foreach (var rpConnection in connectionContext.MappedRpConnections)
             {
                 var envId = rpConnection.EnvId;
-                var ts = timestampPerEnv.GetValueOrDefault(envId, 0);
+                var ts = timestampPerEnv.GetValueOrDefault(envId, FullSyncTimestamp);
 
                 var serverSdkPayload = await GetServerSdkPayloadAsync(envId, ts);
 
