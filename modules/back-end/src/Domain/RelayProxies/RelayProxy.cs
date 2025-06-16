@@ -29,8 +29,8 @@ public class RelayProxy : AuditedEntity
         Description = description ?? string.Empty;
 
         IsAllEnvs = isAllEnvs;
-        Scopes = scopes ?? Array.Empty<Scope>();
-        Agents = agents ?? Array.Empty<Agent>();
+        Scopes = scopes ?? [];
+        Agents = agents ?? [];
 
         Key = $"rp-{TokenHelper.New(Guid.NewGuid())}";
     }
@@ -45,8 +45,8 @@ public class RelayProxy : AuditedEntity
         Name = name;
         Description = description ?? string.Empty;
         IsAllEnvs = isAllEnvs;
-        Scopes = scopes ?? Array.Empty<Scope>();
-        Agents = agents ?? Array.Empty<Agent>();
+        Scopes = scopes ?? [];
+        Agents = agents ?? [];
     }
 
     public void AgentSynced(Agent agent) => agent.SyncAt = DateTime.UtcNow;
