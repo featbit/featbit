@@ -16,7 +16,7 @@ namespace Streaming.Services;
 public class RelayProxyService(IConfiguration configuration, IServiceProvider serviceProvider)
     : IRelayProxyService
 {
-    public async Task<Secret[]> GetServerSecretsAsync(string key)
+    public async Task<SecretWithValue[]> GetSecretsAsync(string key)
     {
         var dbProvider = configuration.GetDbProvider();
 
@@ -31,7 +31,7 @@ public class RelayProxyService(IConfiguration configuration, IServiceProvider se
 
         return result;
 
-        async Task<Secret[]> GetFromPostgres()
+        async Task<SecretWithValue[]> GetFromPostgres()
         {
             var dataSource = serviceProvider.GetRequiredService<NpgsqlDataSource>();
 
@@ -56,7 +56,7 @@ public class RelayProxyService(IConfiguration configuration, IServiceProvider se
             var dynamicParameters = new DynamicParameters();
             var query = rp.isAllEnvs ? SearchByOrganization() : SearchByScopes();
 
-            var secrets = await connection.QueryAsync<Secret>(query, dynamicParameters);
+            var secrets = await connection.QueryAsync<SecretWithValue>(query, dynamicParameters);
             return secrets.AsList().ToArray();
 
             string SearchByOrganization()
@@ -65,12 +65,11 @@ public class RelayProxyService(IConfiguration configuration, IServiceProvider se
 
                 return
                     """
-                    select env.id as envId, env.key as envKey, project.key as projectKey, secret ->> 'type' as type
+                    select env.id as envId, env.key as envKey, project.key as projectKey, secret ->> 'type' as type, secret ->> 'value' as value
                     from environments env
                              join projects project on env.project_id = project.id,
                          jsonb_array_elements(env.secrets) as secret
                     where project.organization_id = @OrganizationId
-                      and secret ->> 'type' = 'server'
                     """;
             }
 
@@ -87,16 +86,16 @@ public class RelayProxyService(IConfiguration configuration, IServiceProvider se
                 dynamicParameters.Add("EnvIds", envIds);
 
                 return """
-                       select env.id as envId, env.key as envKey, project.key as projectKey, secret ->> 'type' as type
+                       select env.id as envId, env.key as envKey, project.key as projectKey, secret ->> 'type' as type, secret ->> 'value' as value
                        from environments env
                                 join projects project on env.project_id = project.id,
                              jsonb_array_elements(env.secrets) as secret
-                       where env.id = any(@EnvIds) and secret ->> 'type' = 'server'
+                       where env.id = any(@EnvIds)
                        """;
             }
         }
 
-        async Task<Secret[]> GetFromMongoDb()
+        async Task<SecretWithValue[]> GetFromMongoDb()
         {
             var mongodb = serviceProvider.GetRequiredService<IMongoDbClient>();
             var db = mongodb.Database;
@@ -127,18 +126,19 @@ public class RelayProxyService(IConfiguration configuration, IServiceProvider se
                 return [];
             }
 
-            var secrets = documents.SelectMany(document =>
+            var secretsWithValue = documents.SelectMany(document =>
             {
                 var envId = document["env"]["id"].AsGuid;
                 var envKey = document["env"]["key"].AsString;
                 var projectKey = document["project"]["key"].AsString;
-                var serverSecrets = document["env"]["secrets"].AsBsonArray
-                    .Where(x => x["type"].AsString == "server");
+                var secrets = document["env"]["secrets"].AsBsonArray;
 
-                return serverSecrets.Select(x => new Secret(x["type"].AsString, projectKey, envId, envKey));
+                return secrets.Select(x =>
+                    new SecretWithValue(x["type"].AsString, projectKey, envId, envKey, x["value"].AsString)
+                );
             });
 
-            return secrets.ToArray();
+            return secretsWithValue.ToArray();
 
             BsonDocument[] SearchByOrganization()
             {
@@ -186,5 +186,17 @@ public class RelayProxyService(IConfiguration configuration, IServiceProvider se
                 ];
             }
         }
+    }
+
+    public async Task<Secret[]> GetServerSecretsAsync(string key)
+    {
+        var secretsWithValue = await GetSecretsAsync(key);
+
+        var secrets = secretsWithValue
+            .Where(x => x.Type == SecretTypes.Server)
+            .Select(x => x.AsSecret())
+            .ToArray();
+
+        return secrets;
     }
 }
