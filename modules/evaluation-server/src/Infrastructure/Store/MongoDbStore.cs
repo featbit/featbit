@@ -60,6 +60,7 @@ public class MongoDbStore : IDbStore
                        x["workspaceId"].AsGuid == wsId &&
                        ((BsonArray)x["scopes"]).Any(y => $"{envRN}:".StartsWith(string.Concat(y, ":"))));
 
+        // replace envId for shared segments
         var segments = await query.ToListAsync();
         foreach (var segment in segments)
         {
