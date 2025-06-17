@@ -28,6 +28,17 @@ export class IndexComponent implements OnInit {
     totalCount: 0
   };
 
+  modalVisible: boolean = false;
+  selectedRp: RelayProxy | undefined = undefined;
+  openModal(rp: RelayProxy) {
+    this.selectedRp = rp;
+    this.modalVisible = true;
+  }
+  closeModal() {
+    this.selectedRp = undefined;
+    this.modalVisible = false;
+  }
+
   canMangeRelayProxies = false;
 
   constructor(

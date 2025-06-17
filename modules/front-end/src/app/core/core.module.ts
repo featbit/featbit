@@ -105,6 +105,7 @@ import { NzDescriptionsModule } from "ng-zorro-antd/descriptions";
 import { SegmentCreationModalComponent } from './components/segment-creation-modal/segment-creation-modal.component';
 import { CopyFeatureFlagModalComponent } from '@core/components/copy-feature-flag-modal/copy-feature-flag-modal.component';
 import { BroadcastService } from "@services/broadcast.service";
+import { RelayProxyModalComponent } from './components/relay-proxy-modal/relay-proxy-modal.component';
 
 @NgModule({
   declarations: [
@@ -149,7 +150,8 @@ import { BroadcastService } from "@services/broadcast.service";
     ImportUserComponent,
     EndUserDrawerComponent,
     SegmentCreationModalComponent,
-    CopyFeatureFlagModalComponent
+    CopyFeatureFlagModalComponent,
+    RelayProxyModalComponent
   ],
   imports: [
     CommonModule,
@@ -255,7 +257,8 @@ import { BroadcastService } from "@services/broadcast.service";
     ImportUserComponent,
     EndUserDrawerComponent,
     SegmentCreationModalComponent,
-    CopyFeatureFlagModalComponent
+    CopyFeatureFlagModalComponent,
+    RelayProxyModalComponent
   ]
 })
 export class CoreModule {
