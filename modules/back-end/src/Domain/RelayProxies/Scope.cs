@@ -1,6 +1,7 @@
 ﻿namespace Domain.RelayProxies;
 
-public class Scope
+// we will need to migrate this to ScopeString.cs in the future
+public record Scope
 {
     public string Id { get; set; }
 

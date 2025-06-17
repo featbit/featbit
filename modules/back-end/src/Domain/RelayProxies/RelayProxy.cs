@@ -12,17 +12,17 @@ public class RelayProxy : AuditedEntity
 
     public bool IsAllEnvs { get; set; }
 
-    public IEnumerable<Scope> Scopes { get; set; }
+    public Scope[] Scopes { get; set; }
 
-    public IEnumerable<Agent> Agents { get; set; }
+    public Agent[] Agents { get; set; }
 
     public RelayProxy(
         Guid organizationId,
         string name,
         string description,
         bool isAllEnvs,
-        IEnumerable<Scope> scopes,
-        IEnumerable<Agent> agents)
+        Scope[] scopes,
+        Agent[] agents)
     {
         OrganizationId = organizationId;
         Name = name;
@@ -39,8 +39,8 @@ public class RelayProxy : AuditedEntity
         string name,
         string description,
         bool isAllEnvs,
-        IEnumerable<Scope> scopes,
-        IEnumerable<Agent> agents)
+        Scope[] scopes,
+        Agent[] agents)
     {
         Name = name;
         Description = description ?? string.Empty;

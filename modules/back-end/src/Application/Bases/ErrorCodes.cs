@@ -39,10 +39,6 @@ public static class ErrorCodes
     // experiment metrics
     public const string MetricIsBeingUsedByExperiment = nameof(MetricIsBeingUsedByExperiment);
 
-    // relay proxies
-    public const string InvalidRelayProxyScope = nameof(InvalidRelayProxyScope);
-    public const string InvalidRelayProxyAgent = nameof(InvalidRelayProxyAgent);
-
     public static string Required(string parameterName) => $"{parameterName}_is_required";
     public static string Invalid(string parameterName) => $"{parameterName}_is_invalid";
 }
