@@ -1,6 +1,5 @@
 ﻿using System.Net.WebSockets;
 using Moq;
-using Streaming.Connections;
 using Streaming.Shared;
 
 namespace Streaming.UnitTests.Messages;
@@ -12,16 +11,18 @@ public class RequestHandlerTests
     public void Should_Validate_Request(
         WebSocket webSocket, string sdkType, string version, string tokenString, long currentTimestamp, bool isValid)
     {
-        Connection? TryAcceptRequest() =>
+        var (connection, rejectReason) =
             RequestHandler.TryAcceptRequest(webSocket, sdkType, version, tokenString, currentTimestamp);
 
         if (isValid)
         {
-            Assert.NotNull(TryAcceptRequest());
+            Assert.NotNull(connection);
+            Assert.Empty(rejectReason);
         }
         else
         {
-            Assert.Null(TryAcceptRequest());
+            Assert.Null(connection);
+            Assert.NotEmpty(rejectReason);
         }
     }
 }
