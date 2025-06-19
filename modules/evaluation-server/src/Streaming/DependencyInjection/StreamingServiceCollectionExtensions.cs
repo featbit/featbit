@@ -51,7 +51,8 @@ public static class StreamingServiceCollectionExtensions
             .AddSingleton<MessageDispatcher>()
             .AddTransient<IMessageHandler, PingMessageHandler>()
             .AddTransient<IMessageHandler, EchoMessageHandler>()
-            .AddTransient<IMessageHandler, DataSyncMessageHandler>();
+            .AddTransient<IMessageHandler, DataSyncMessageHandler>()
+            .AddTransient<IMessageHandler, RpAgentStatusMessageHandler>();
 
         // mq message consumers
         services

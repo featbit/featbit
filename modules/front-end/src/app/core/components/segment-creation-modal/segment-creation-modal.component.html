@@ -59,7 +59,7 @@
             (onClose)="closeResourceFinder($event)"
             [resources]="[ResourceTypeEnum.organization, ResourceTypeEnum.Project, ResourceTypeEnum.Env]"
             [spaceLevel]="ResourceSpaceLevel.Workspace"
-            [defaultSelected]="selectedScopes"
+            [defaultSelected]="defaultSelectedScopes"
             [unremovableRn]="currentEnvironment.rn">
           </resource-finder>
           <ng-container *ngFor="let scopeGroup of groupedSelectedScopes">

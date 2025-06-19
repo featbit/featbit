@@ -4,7 +4,7 @@ public record ScopeString
 {
     public Guid ProjectId { get; } = Guid.Empty;
 
-    public Guid[] EnvIds { get; } = Array.Empty<Guid>();
+    public Guid[] EnvIds { get; } = [];
 
     public ScopeString(string str)
     {

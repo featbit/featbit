@@ -4,7 +4,14 @@ import { debounceTime, first, map, switchMap } from "rxjs/operators";
 import { SegmentService } from "@services/segment.service";
 import { CreateSegment, ISegment, SegmentType } from "@features/safe/segments/types/segments-index";
 import { NzMessageService } from "ng-zorro-antd/message";
-import { GroupedResource, groupResources, ResourceSpaceLevel, ResourceTypeEnum, ResourceV2 } from "@shared/policy";
+import {
+  GroupedResource,
+  groupResources,
+  isChildResourceOf,
+  ResourceSpaceLevel,
+  ResourceTypeEnum,
+  ResourceV2
+} from "@shared/policy";
 import { getCurrentLicense, getCurrentOrganization, getCurrentProjectEnv } from "@utils/project-env";
 import { LicenseFeatureEnum } from "@shared/types";
 
@@ -105,6 +112,10 @@ export class SegmentCreationModalComponent {
     this.selectedScopes = this.selectedScopes.filter(x => x.rn !== scope.rn);
   }
 
+  get defaultSelectedScopes(): string[] {
+    return this.selectedScopes.map(x => x.id);
+  }
+
   groupedSelectedScopes: GroupedResource[] = [];
   resourceFinderVisible = false;
   openResourceFinder() {
@@ -129,7 +140,7 @@ export class SegmentCreationModalComponent {
     const scopes = this.selectedScopes
       .map(x => x.rn)
       .sort((a, b) => b.length - a.length);
-    if (scopes.find(x => x !== currentEnvRN && `${currentEnvRN}:`.startsWith(`${x}:`)) !== undefined) {
+    if (scopes.find(x => x !== currentEnvRN && isChildResourceOf(currentEnvRN, x)) !== undefined) {
       // remove current environment from scopes
       scopes.splice(scopes.indexOf(currentEnvRN), 1);
     }

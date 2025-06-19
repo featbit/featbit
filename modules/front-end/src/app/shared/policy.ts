@@ -23,6 +23,12 @@ export interface ResourceV2 {
   type: ResourceTypeEnum;
 }
 
+export function isChildResourceOf(childRN: string, parentRN: string) : boolean {
+  // check if childRN is a child resource of parentRN
+  // ex: childRN = organization/abc:project/def:env/ghi, parentRN = organization/abc:project/def
+  return childRN !== parentRN && `${childRN}:`.startsWith(`${parentRN}:`);
+}
+
 export interface ResourceFilter {
   type: ResourceTypeEnum;
   name: string;
