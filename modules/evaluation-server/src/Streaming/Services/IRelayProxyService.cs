@@ -11,4 +11,6 @@ public interface IRelayProxyService
     Task<Secret[]> GetServerSecretsAsync(string key);
 
     Task<string> RegisterAgentAsync(string key);
+
+    Task UpdateAgentStatusAsync(string key, string agentId, string status);
 }

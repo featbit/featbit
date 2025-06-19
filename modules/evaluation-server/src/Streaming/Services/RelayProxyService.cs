@@ -275,4 +275,33 @@ public class RelayProxyService(IConfiguration configuration, IServiceProvider se
             return agentId;
         }
     }
+
+    public Task UpdateAgentStatusAsync(string key, string agentId, string status)
+    {
+        var dbProvider = configuration.GetDbProvider();
+
+        return dbProvider.Name switch
+        {
+            DbProvider.MongoDb => UpdateMongoDbAsync(),
+            DbProvider.Postgres => UpdatePostgresAsync(),
+            _ => Task.CompletedTask,
+        };
+
+        async Task UpdateMongoDbAsync()
+        {
+            var mongodb = serviceProvider.GetRequiredService<IMongoDbClient>();
+            var db = mongodb.Database;
+
+            // TODO: update rp agent status
+            await Task.CompletedTask;
+        }
+
+        async Task UpdatePostgresAsync()
+        {
+            var dataSource = serviceProvider.GetRequiredService<NpgsqlDataSource>();
+            await using var connection = await dataSource.OpenConnectionAsync();
+
+            // TODO: update rp agent status
+        }
+    }
 }
