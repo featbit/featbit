@@ -16,14 +16,53 @@ namespace Streaming.Services;
 public class RelayProxyService(IConfiguration configuration, IServiceProvider serviceProvider)
     : IRelayProxyService
 {
+    public async Task<bool> IsKeyValidAsync(string key)
+    {
+        if (string.IsNullOrWhiteSpace(key) || !key.StartsWith("rp-"))
+        {
+            return false;
+        }
+
+        var dbProvider = configuration.GetDbProvider();
+        return dbProvider.Name switch
+        {
+            DbProvider.MongoDb => await MongoDbIsValidAsync(),
+            DbProvider.Postgres => await PostgresIsValidAsync(),
+            _ => false
+        };
+
+        async Task<bool> MongoDbIsValidAsync()
+        {
+            var mongodb = serviceProvider.GetRequiredService<IMongoDbClient>();
+            var db = mongodb.Database;
+
+            var count = await db.GetCollection<BsonDocument>("RelayProxies")
+                .CountDocumentsAsync(x => x["key"].AsString == key);
+
+            return count > 0;
+        }
+
+        async Task<bool> PostgresIsValidAsync()
+        {
+            var dataSource = serviceProvider.GetRequiredService<NpgsqlDataSource>();
+            await using var connection = await dataSource.OpenConnectionAsync();
+
+            var count = await connection.ExecuteScalarAsync<int>(
+                "select count(1) from relay_proxies where key = @Key", new { Key = key }
+            );
+
+            return count > 0;
+        }
+    }
+
     public async Task<SecretWithValue[]> GetSecretsAsync(string key)
     {
         var dbProvider = configuration.GetDbProvider();
 
         var result = dbProvider.Name switch
         {
-            DbProvider.MongoDb => await GetFromMongoDb(),
-            DbProvider.Postgres => await GetFromPostgres(),
+            DbProvider.MongoDb => await MongoDbGetAsync(),
+            DbProvider.Postgres => await PostgresGetAsync(),
             // Fake store is for integration tests
             DbProvider.Fake => FakeStore.GetRpSecrets(key),
             _ => []
@@ -31,7 +70,7 @@ public class RelayProxyService(IConfiguration configuration, IServiceProvider se
 
         return result;
 
-        async Task<SecretWithValue[]> GetFromPostgres()
+        async Task<SecretWithValue[]> PostgresGetAsync()
         {
             var dataSource = serviceProvider.GetRequiredService<NpgsqlDataSource>();
 
@@ -95,7 +134,7 @@ public class RelayProxyService(IConfiguration configuration, IServiceProvider se
             }
         }
 
-        async Task<SecretWithValue[]> GetFromMongoDb()
+        async Task<SecretWithValue[]> MongoDbGetAsync()
         {
             var mongodb = serviceProvider.GetRequiredService<IMongoDbClient>();
             var db = mongodb.Database;
@@ -198,5 +237,42 @@ public class RelayProxyService(IConfiguration configuration, IServiceProvider se
             .ToArray();
 
         return secrets;
+    }
+
+    public async Task<string> RegisterAgentAsync(string key)
+    {
+        var dbProvider = configuration.GetDbProvider();
+
+        var result = dbProvider.Name switch
+        {
+            DbProvider.MongoDb => await MongoDbRegisterAsync(),
+            DbProvider.Postgres => await PostgresRegisterAsync(),
+            _ => string.Empty
+        };
+
+        return result;
+
+        async Task<string> MongoDbRegisterAsync()
+        {
+            var mongodb = serviceProvider.GetRequiredService<IMongoDbClient>();
+            var db = mongodb.Database;
+
+            var agentId = Guid.NewGuid().ToString();
+
+            // TODO: insert new agent
+            await Task.CompletedTask;
+            return agentId;
+        }
+
+        async Task<string> PostgresRegisterAsync()
+        {
+            var dataSource = serviceProvider.GetRequiredService<NpgsqlDataSource>();
+            await using var connection = await dataSource.OpenConnectionAsync();
+
+            var agentId = Guid.NewGuid().ToString();
+
+            // TODO: insert new agent
+            return agentId;
+        }
     }
 }
