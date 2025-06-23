@@ -83,6 +83,52 @@
           </div>
         </ng-container>
       </nz-form-item>
+      <nz-form-item class="auto-agents">
+        <ng-container formArrayName="agents">
+          <nz-form-label nzRequired>
+            <span i18n="@@common.auto-agents">Auto Agents</span>
+            <i [nz-tooltip]="agentsTooltip" nz-icon nzType="icons:icon-info-outline">
+              <ng-template #agentsTooltip>
+                <ng-container i18n="@@relay-proxy.agents-tooltip">A relay proxy agent is the server running the FeatBit agent program</ng-container>
+                <br>
+                <a target="_blank" href="https://github.com/featbit/featbit-agent" i18n="@@common.check-the-repo">Check the repo</a>
+              </ng-template>
+            </i>
+          </nz-form-label>
+          <div class="table-content-area">
+            <div class="table-wrapper">
+                <nz-table #autoAgentTable
+                          nzTableLayout="fixed"
+                          nzSize="small"
+                          [nzFrontPagination]="false"
+                          [nzData]="autoAgents.controls">
+                  <thead>
+                  <tr>
+                    <th nzWidth="240px" i18n="@@common.name">Name</th>
+                    <th nzWidth="200px" nzAlign="center" i18n="@@common.actions">Actions</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  <ng-container *ngFor="let autoAgent of autoAgentTable.data; let i = index">
+                    <tr [formGroupName]="i">
+                      <td>
+                        <nz-form-control>
+                          {{ autoAgent.value.name }}
+                        </nz-form-control>
+                      </td>
+                      <td style="text-align: center">
+                        <ng-container *ngIf="!readonly">
+                          <button nzDanger nz-button nzSize="small" nzType="link" (click)="removeAutoAgent(i)" i18n="@@common.remove">Remove</button>
+                        </ng-container>
+                      </td>
+                    </tr>
+                  </ng-container>
+                  </tbody>
+                </nz-table>
+            </div>
+          </div>
+        </ng-container>
+      </nz-form-item>
       <nz-form-item class="agents">
         <ng-container formArrayName="agents">
           <nz-form-label nzRequired>

@@ -61,7 +61,7 @@ export class RelayProxyDrawerComponent implements OnInit {
     private notification: NzNotificationService,
     public permissionsService: PermissionsService,
   ) {
-    this.initForm('', '', true, this.fb.array([]), this.fb.array([]));
+    this.initForm('', '', true, this.fb.array([]), this.fb.array([]), this.fb.array([]));
   }
 
   async ngOnInit() {
@@ -74,13 +74,14 @@ export class RelayProxyDrawerComponent implements OnInit {
     this.isProjectsLoading = false;
   }
 
-  initForm(name: string, description: string, isAllEnvs: boolean, scopes: FormArray, agents: FormArray) {
+  initForm(name: string, description: string, isAllEnvs: boolean, scopes: FormArray, agents: FormArray, autoAgents: FormArray) {
     this.form = this.fb.group({
       name: [name, [Validators.required], [this.nameAsyncValidator], 'change'],
       description: [description,Validators.maxLength(512)],
       isAllEnvs: [isAllEnvs, [Validators.required]],
       scopes: scopes,
-      agents: agents
+      agents: agents,
+      autoAgents: autoAgents
     });
     this.form.get('isAllEnvs').valueChanges.subscribe((event) => {
       this.scopeTypeChange(event);
@@ -112,7 +113,17 @@ export class RelayProxyDrawerComponent implements OnInit {
       }));
     }
 
-    this.initForm(relayProxy.name, relayProxy.description, relayProxy.isAllEnvs, scopeArrayForm, agentArrayForm);
+    let autoAgentArrayForm: FormArray = this.fb.array([]);
+    if (relayProxy.autoAgents.length > 0) {
+      autoAgentArrayForm = this.fb.array(relayProxy.autoAgents.map((autoAgent) => {
+        return this.fb.group({
+          id: [autoAgent.id, Validators.required],
+          name: [autoAgent.name, Validators.required]
+        });
+      }));
+    }
+
+    this.initForm(relayProxy.name, relayProxy.description, relayProxy.isAllEnvs, scopeArrayForm, agentArrayForm, autoAgentArrayForm);
   }
 
   nameAsyncValidator = (control: FormControl) => control.valueChanges.pipe(
@@ -141,6 +152,10 @@ export class RelayProxyDrawerComponent implements OnInit {
     return this.form.get('agents') as FormArray;
   }
 
+  get autoAgents(): FormArray {
+    return this.form.get('autoAgents') as FormArray;
+  }
+
   addAgent() {
     const agentId = uuidv4();
     const agentForm = this.fb.group({
@@ -165,6 +180,11 @@ export class RelayProxyDrawerComponent implements OnInit {
   removeAgent(index: number) {
     this.agents.removeAt(index);
     this.refreshFormArray('agents');
+  }
+
+  removeAutoAgent(index: number) {
+    this.autoAgents.removeAt(index);
+    this.refreshFormArray('autoAgents');
   }
 
   async getAgentStatusInfo(agentId: string, host: string) {
@@ -293,11 +313,6 @@ export class RelayProxyDrawerComponent implements OnInit {
 
     if (!this.form.value.isAllEnvs && this.scopes.controls.length === 0) {
       this.message.error($localize`:@@relay-proxy.scope-required:At least one environment scope is required`);
-      return;
-    }
-
-    if (this.agents.controls.length === 0) {
-      this.message.error($localize`:@@relay-proxy.agent-required:At least one agent is required`);
       return;
     }
 

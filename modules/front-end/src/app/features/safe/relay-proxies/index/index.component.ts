@@ -72,6 +72,7 @@ export class IndexComponent implements OnInit {
               proxy.isAllEnvs,
               proxy.scopes,
               proxy.agents.map((agent) => ({ ...agent, status: AgentStatusEnum.Unknown })),
+              proxy.autoAgents,
               proxy.key
             ))
           };
@@ -115,10 +116,10 @@ export class IndexComponent implements OnInit {
     })
   }
 
-  currentRelayProxy: RelayProxy = new RelayProxy(null, null, null, true, [], []);
+  currentRelayProxy: RelayProxy = new RelayProxy(null, null, null, true, [], [], []);
 
-  showDetailDrawer(relayProxy: RelayProxy = new RelayProxy(null, null, null, true, [], [])) {
-    this.currentRelayProxy = new RelayProxy(relayProxy.id, relayProxy.name, relayProxy.description, relayProxy.isAllEnvs, relayProxy.scopes, relayProxy.agents);
+  showDetailDrawer(relayProxy: RelayProxy = new RelayProxy(null, null, null, true, [], [], [])) {
+    this.currentRelayProxy = new RelayProxy(relayProxy.id, relayProxy.name, relayProxy.description, relayProxy.isAllEnvs, relayProxy.scopes, relayProxy.agents, relayProxy.autoAgents);
     this.proxyDetailVisible = true;
   }
 
@@ -141,6 +142,7 @@ export class IndexComponent implements OnInit {
             data.isAllEnvs,
             data.scopes,
             data.agents.map((agent) => ({ ...agent, status: AgentStatusEnum.Unknown })),
+            data.autoAgents,
             rp.key);
 
           this.fetchRelayProxiesStatus([result]);

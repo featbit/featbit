@@ -15,6 +15,8 @@ public class RelayProxy : AuditedEntity
     public Scope[] Scopes { get; set; }
 
     public Agent[] Agents { get; set; }
+    
+    public AutoAgent[] AutoAgents { get; set; }
 
     public RelayProxy(
         Guid organizationId,
@@ -22,7 +24,8 @@ public class RelayProxy : AuditedEntity
         string description,
         bool isAllEnvs,
         Scope[] scopes,
-        Agent[] agents)
+        Agent[] agents,
+        AutoAgent[] autoAgents)
     {
         OrganizationId = organizationId;
         Name = name;
@@ -31,6 +34,7 @@ public class RelayProxy : AuditedEntity
         IsAllEnvs = isAllEnvs;
         Scopes = scopes ?? [];
         Agents = agents ?? [];
+        AutoAgents = autoAgents ?? [];
 
         Key = $"rp-{TokenHelper.New(Guid.NewGuid())}";
     }

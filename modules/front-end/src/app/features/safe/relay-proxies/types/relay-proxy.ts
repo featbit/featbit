@@ -47,6 +47,11 @@ export class RelayProxyAgent {
   status?: AgentStatusEnum; // UI only
 }
 
+export class RelayProxyAutoAgent {
+  id: string;
+  name: string;
+}
+
 export class RelayProxy {
   constructor(
     public id: string,
@@ -55,13 +60,14 @@ export class RelayProxy {
     public isAllEnvs: boolean,
     public scopes: RelayProxyScope[],
     public agents: RelayProxyAgent[],
+    public autoAgents: RelayProxyAutoAgent[],
     public key?: string) {
   }
   get healthyAgentCount(): number {
     return this.agents.filter((agent) => agent.status === AgentStatusEnum.Healthy).length;
   }
 
-  get healthyStatus(): ProxyStatusEnum {
+  get agentsHealthyStatus(): ProxyStatusEnum {
     switch (this.agents.length - this.healthyAgentCount) {
       case 0:
         return ProxyStatusEnum.Healthy;

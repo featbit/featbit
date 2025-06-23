@@ -18,5 +18,6 @@ public class RelayProxyConfiguration : IEntityTypeConfiguration<RelayProxy>
 
         builder.Property(x => x.Scopes).HasColumnType("jsonb");
         builder.Property(x => x.Agents).HasColumnType("jsonb");
+        builder.Property(x => x.AutoAgents).HasColumnType("jsonb");
     }
 }

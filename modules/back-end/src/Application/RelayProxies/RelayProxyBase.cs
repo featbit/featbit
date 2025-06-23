@@ -14,6 +14,8 @@ public class RelayProxyBase
     public Scope[] Scopes { get; set; }
 
     public Agent[] Agents { get; set; }
+    
+    public AutoAgent[] AutoAgents { get; set; }
 }
 
 public class WebhookBaseValidator : AbstractValidator<RelayProxyBase>
@@ -36,7 +38,6 @@ public class WebhookBaseValidator : AbstractValidator<RelayProxyBase>
             .WithErrorCode(ErrorCodes.Invalid("scopes"));
 
         RuleFor(x => x.Agents)
-            .NotEmpty()
             .Must(agents => agents.All(agent => agent.IsValid()))
             .WithErrorCode(ErrorCodes.Invalid("agents"));
     }

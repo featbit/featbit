@@ -8,7 +8,7 @@ public class CreateRelayProxy : RelayProxyBase, IRequest<RelayProxy>
 
     public RelayProxy AsRelayProxy()
     {
-        return new RelayProxy(OrganizationId, Name, Description, IsAllEnvs, Scopes, Agents);
+        return new RelayProxy(OrganizationId, Name, Description, IsAllEnvs, Scopes, Agents, []);
     }
 }
 

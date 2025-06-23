@@ -47,7 +47,7 @@
               <td>{{item.key}}</td>
               <td (click)="showDetailDrawer(item)">
                 <div class="status">
-                  <span [class]="item.healthyStatus">
+                  <span [class]="item.agentsHealthyStatus">
                     {{item.healthyAgentCount}}/{{item.agents.length}} <span i18n="@@common.healthy">Healthy</span>
                   </span>
                   <i nz-icon nzType="question-circle" nzTheme="outline"
@@ -57,10 +57,10 @@
               </td>
               <td>
                 <ng-container *ngIf="!canMangeRelayProxies">
-                  <a style="color: #23AD7F" (click)="openModal(item)" i18n="@@common.view">View</a>
+                  <a style="color: #23AD7F" (click)="showDetailDrawer(item)" i18n="@@common.view">View</a>
                 </ng-container>
                 <ng-container *ngIf="canMangeRelayProxies">
-                  <a style="color: #23AD7F" (click)="openModal(item)" i18n="@@common.edit">Edit</a>
+                  <a style="color: #23AD7F" (click)="showDetailDrawer(item)" i18n="@@common.edit">Edit</a>
                   <nz-divider nzType="vertical"></nz-divider>
                   <a
                     style="color: #717D8A"
