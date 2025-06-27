@@ -111,7 +111,7 @@ export class RelayProxyDrawerComponent {
         }
       },
       error: () => {
-        this.message.error($localize`:@@relay-proxy.drawer.sync-failed:Sync to agent failed`);
+        this.message.error($localize`:@@relay-proxy.drawer.sync-error:Error syncing to agent.`);
       }
     });
   }
