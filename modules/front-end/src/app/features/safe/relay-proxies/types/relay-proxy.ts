@@ -13,68 +13,51 @@ export class RelayProxyFilter {
   }
 }
 
-export interface IPagedRelayProxy {
+export interface PagedRelayProxy {
   totalCount: number;
   items: RelayProxy[];
 }
 
-export enum AgentStatusEnum {
-  Healthy = 'healthy',
-  Unhealthy = 'unhealthy',
-  Unknown = 'unknown',
-  Unreachable = 'unreachable',
-  Unauthorized = 'unauthorized',
-  Loading = 'loading'
+interface RelayProxyBase {
+  name: string;
+  description: string;
+  isAllEnvs: boolean;
+  scopes: string[];
+  agents: RelayProxyAgent[];
 }
 
-export enum ProxyStatusEnum {
-  Healthy = 'proxy-healthy', // all agents are healthy
-  Sick = 'proxy-sick', // at least one but not all the agents are unhealthy
-  Unhealthy = 'proxy-unhealthy', // all agents are unhealthy
-}
-
-export class RelayProxyScope {
+export interface RelayProxy extends RelayProxyBase {
   id: string;
-  projectId: string;
-  envIds: string[]
+  key: string;
+  serves: string[];
+  autoAgents: RelayProxyAutoAgent[];
+  updatedAt?: Date;
+
+  // for ui
+  parsedServes?: { id: string; pathName: string }[];
 }
 
-export class RelayProxyAgent {
+export interface RelayProxyAgent {
   id: string;
   name: string;
   host: string;
   syncAt?: Date;
-  status?: AgentStatusEnum; // UI only
+
+  // for ui
+  isChecking?: boolean;
+  isSyncing?: boolean;
 }
 
-export class RelayProxyAutoAgent {
+export interface RelayProxyAutoAgent {
   id: string;
   name: string;
 }
 
-export class RelayProxy {
-  constructor(
-    public id: string,
-    public name: string,
-    public description: string,
-    public isAllEnvs: boolean,
-    public scopes: RelayProxyScope[],
-    public agents: RelayProxyAgent[],
-    public autoAgents: RelayProxyAutoAgent[],
-    public key?: string) {
-  }
-  get healthyAgentCount(): number {
-    return this.agents.filter((agent) => agent.status === AgentStatusEnum.Healthy).length;
-  }
+export interface UpsertRelayProxyPayload extends RelayProxyBase {
+}
 
-  get agentsHealthyStatus(): ProxyStatusEnum {
-    switch (this.agents.length - this.healthyAgentCount) {
-      case 0:
-        return ProxyStatusEnum.Healthy;
-      case this.agents.length:
-        return ProxyStatusEnum.Unhealthy;
-      default:
-        return ProxyStatusEnum.Sick;
-    }
-  }
+export interface SyncAgentResult {
+  success: boolean;
+  syncAt?: Date;
+  reason: string;
 }
