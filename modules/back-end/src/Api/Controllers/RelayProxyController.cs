@@ -1,4 +1,5 @@
-﻿using Domain.RelayProxies;
+﻿using System.Net;
+using Domain.RelayProxies;
 using Application.Bases.Models;
 using Application.RelayProxies;
 
@@ -8,7 +9,7 @@ namespace Api.Controllers;
 public class RelayProxyController : ApiControllerBase
 {
     [HttpGet]
-    public async Task<ApiResponse<PagedResult<RelayProxy>>> GetListAsync([FromQuery] RelayProxyFilter filter)
+    public async Task<ApiResponse<PagedResult<RelayProxyVm>>> GetListAsync([FromQuery] RelayProxyFilter filter)
     {
         var request = new GetRelayProxyList
         {
@@ -16,8 +17,8 @@ public class RelayProxyController : ApiControllerBase
             Filter = filter
         };
 
-        var relayProxies = await Mediator.Send(request);
-        return Ok(relayProxies);
+        var rpVms = await Mediator.Send(request);
+        return Ok(rpVms);
     }
 
     [HttpPost]
@@ -63,12 +64,24 @@ public class RelayProxyController : ApiControllerBase
         return Ok(success);
     }
 
-    [HttpGet("{relayProxyId:guid}/agent-status")]
-    public async Task<ApiResponse<AgentStatus>> GetAgentStatusAsync(Guid relayProxyId, string host)
+    [HttpGet("agent-availability")]
+    public async Task<ApiResponse<HttpStatusCode>> CheckAgentAvailabilityAsync(string agentHost)
+    {
+        var request = new CheckAgentAvailability
+        {
+            Host = agentHost
+        };
+
+        var statusCode = await Mediator.Send(request);
+        return Ok(statusCode);
+    }
+
+    [HttpGet("{rpId:guid}/agent-status")]
+    public async Task<ApiResponse<AgentStatus>> GetAgentStatusAsync(Guid rpId, string host)
     {
         var request = new GetAgentStatus
         {
-            RelayProxyId = relayProxyId,
+            RelayProxyId = rpId,
             Host = host
         };
 
@@ -76,14 +89,15 @@ public class RelayProxyController : ApiControllerBase
         return Ok(status);
     }
 
-    [HttpPut("{relayProxyId:guid}/agents/{agentId}/sync")]
-    public async Task<ApiResponse<SyncResult>> SyncToAgentAsync(Guid relayProxyId, string agentId)
+    [HttpPut("{rpId:guid}/agents/{agentId}/sync")]
+    public async Task<ApiResponse<SyncResult>> SyncToAgentAsync(Guid rpId, string agentId, string host)
     {
         var request = new SyncToAgent
         {
             WorkspaceId = WorkspaceId,
-            RelayProxyId = relayProxyId,
-            AgentId = agentId
+            RelayProxyId = rpId,
+            AgentId = agentId,
+            Host = host
         };
 
         var syncResult = await Mediator.Send(request);

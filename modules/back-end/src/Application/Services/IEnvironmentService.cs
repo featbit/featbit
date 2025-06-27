@@ -5,6 +5,8 @@ namespace Application.Services;
 
 public interface IEnvironmentService : IService<Environment>
 {
+    Task<string[]> GetServesAsync(string[] scopes);
+
     Task<ResourceDescriptor> GetResourceDescriptorAsync(Guid envId);
 
     Task AddWithBuiltInPropsAsync(Environment env);

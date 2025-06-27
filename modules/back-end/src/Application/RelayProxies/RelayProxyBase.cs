@@ -11,11 +11,9 @@ public class RelayProxyBase
 
     public bool IsAllEnvs { get; set; }
 
-    public Scope[] Scopes { get; set; }
+    public string[] Scopes { get; set; }
 
     public Agent[] Agents { get; set; }
-    
-    public AutoAgent[] AutoAgents { get; set; }
 }
 
 public class WebhookBaseValidator : AbstractValidator<RelayProxyBase>
@@ -33,7 +31,7 @@ public class WebhookBaseValidator : AbstractValidator<RelayProxyBase>
                     return true;
                 }
 
-                return scopes?.All(scope => scope.IsValid()) ?? false;
+                return scopes is { Length: > 0 } && scopes.All(scope => Guid.TryParse(scope, out _));
             })
             .WithErrorCode(ErrorCodes.Invalid("scopes"));
 

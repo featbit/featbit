@@ -6,5 +6,5 @@ public class ResourceFilterV2
 
     public string Name { get; set; }
 
-    public string[] Types { get; set; } = Array.Empty<string>();
+    public string[] Types { get; set; } = [];
 }

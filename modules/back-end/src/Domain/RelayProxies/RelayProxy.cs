@@ -12,10 +12,10 @@ public class RelayProxy : AuditedEntity
 
     public bool IsAllEnvs { get; set; }
 
-    public Scope[] Scopes { get; set; }
+    public string[] Scopes { get; set; }
 
     public Agent[] Agents { get; set; }
-    
+
     public AutoAgent[] AutoAgents { get; set; }
 
     public RelayProxy(
@@ -23,9 +23,8 @@ public class RelayProxy : AuditedEntity
         string name,
         string description,
         bool isAllEnvs,
-        Scope[] scopes,
-        Agent[] agents,
-        AutoAgent[] autoAgents)
+        string[] scopes,
+        Agent[] agents)
     {
         OrganizationId = organizationId;
         Name = name;
@@ -34,7 +33,7 @@ public class RelayProxy : AuditedEntity
         IsAllEnvs = isAllEnvs;
         Scopes = scopes ?? [];
         Agents = agents ?? [];
-        AutoAgents = autoAgents ?? [];
+        AutoAgents = [];
 
         Key = $"rp-{TokenHelper.New(Guid.NewGuid())}";
     }
@@ -43,7 +42,7 @@ public class RelayProxy : AuditedEntity
         string name,
         string description,
         bool isAllEnvs,
-        Scope[] scopes,
+        string[] scopes,
         Agent[] agents)
     {
         Name = name;
@@ -51,6 +50,8 @@ public class RelayProxy : AuditedEntity
         IsAllEnvs = isAllEnvs;
         Scopes = scopes ?? [];
         Agents = agents ?? [];
+
+        UpdatedAt = DateTime.UtcNow;
     }
 
     public void AgentSynced(Agent agent) => agent.SyncAt = DateTime.UtcNow;

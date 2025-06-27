@@ -1,16 +1,24 @@
-﻿using System.Net.Http.Json;
+﻿using System.Net;
+using System.Net.Http.Json;
 using Domain.RelayProxies;
 using Microsoft.Net.Http.Headers;
 
 namespace Infrastructure.Services;
 
-public class AgentService : IAgentService
+public class AgentService(HttpClient httpClient) : IAgentService
 {
-    private readonly HttpClient _httpClient;
-
-    public AgentService(HttpClient httpClient)
+    public async Task<HttpStatusCode> CheckAvailabilityAsync(string host)
     {
-        _httpClient = httpClient;
+        var request = new HttpRequestMessage(HttpMethod.Get, $"{host}/health/readiness");
+        try
+        {
+            var response = await httpClient.SendAsync(request);
+            return response.StatusCode;
+        }
+        catch (HttpRequestException)
+        {
+            return HttpStatusCode.ServiceUnavailable;
+        }
     }
 
     public async Task<AgentStatus?> GetStatusAsync(string host, string key)
@@ -23,7 +31,7 @@ public class AgentService : IAgentService
             }
         };
 
-        var response = await _httpClient.SendAsync(request);
+        var response = await httpClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
 
         var status = await response.Content.ReadFromJsonAsync<AgentStatus>();
@@ -41,7 +49,7 @@ public class AgentService : IAgentService
             Content = JsonContent.Create(payload)
         };
 
-        var response = await _httpClient.SendAsync(request);
+        var response = await httpClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
     }
 }

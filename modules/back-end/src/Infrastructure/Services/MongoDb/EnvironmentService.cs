@@ -10,6 +10,27 @@ namespace Infrastructure.Services.MongoDb;
 
 public class EnvironmentService(MongoDbClient mongoDb) : MongoDbService<Environment>(mongoDb), IEnvironmentService
 {
+    public async Task<string[]> GetServesAsync(string[] scopes)
+    {
+        if (scopes.Length == 0)
+        {
+            return [];
+        }
+
+        var projects = MongoDb.QueryableOf<Project>();
+        var environments = MongoDb.QueryableOf<Environment>();
+
+        var envIds = scopes.Select(Guid.Parse).ToArray();
+        var query =
+            from environment in environments
+            join project in projects on environment.ProjectId equals project.Id
+            where envIds.Contains(environment.Id)
+            select $"{environment.Id},{project.Name}/{environment.Name}";
+
+        var result = await query.ToListAsync();
+        return result.ToArray();
+    }
+
     public async Task<ResourceDescriptor?> GetResourceDescriptorAsync(Guid envId)
     {
         var organizations = MongoDb.QueryableOf<Organization>();

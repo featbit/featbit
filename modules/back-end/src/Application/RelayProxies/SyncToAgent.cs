@@ -3,7 +3,7 @@ using Domain.Segments;
 
 namespace Application.RelayProxies;
 
-public class SyncToAgent : IRequest<SyncResult>
+public class SyncToAgent : RpAgentBase, IRequest<SyncResult>
 {
     public Guid WorkspaceId { get; set; }
 
@@ -12,31 +12,25 @@ public class SyncToAgent : IRequest<SyncResult>
     public string AgentId { get; set; }
 }
 
-public class SyncToAgentHandler : IRequestHandler<SyncToAgent, SyncResult>
+public class SyncToAgentValidator : AbstractValidator<SyncToAgent>
 {
-    private readonly IRelayProxyService _relayProxyService;
-    private readonly IProjectService _projectService;
-    private readonly IEnvironmentAppService _envAppService;
-    private readonly IFeatureFlagService _featureFlagService;
-    private readonly IAgentService _agentService;
-
-    public SyncToAgentHandler(
-        IRelayProxyService relayProxyService,
-        IProjectService projectService,
-        IEnvironmentAppService envAppService,
-        IFeatureFlagService featureFlagService,
-        IAgentService agentService)
+    public SyncToAgentValidator()
     {
-        _relayProxyService = relayProxyService;
-        _projectService = projectService;
-        _envAppService = envAppService;
-        _featureFlagService = featureFlagService;
-        _agentService = agentService;
+        Include(new RpAgentBaseValidator());
     }
+}
 
+public class SyncToAgentHandler(
+    IRelayProxyService relayProxyService,
+    IProjectService projectService,
+    IEnvironmentAppService envAppService,
+    IFeatureFlagService featureFlagService,
+    IAgentService agentService)
+    : IRequestHandler<SyncToAgent, SyncResult>
+{
     public async Task<SyncResult> Handle(SyncToAgent request, CancellationToken cancellationToken)
     {
-        var relayProxy = await _relayProxyService.GetAsync(request.RelayProxyId);
+        var relayProxy = await relayProxyService.GetAsync(request.RelayProxyId);
 
         var agent = relayProxy.Agents.FirstOrDefault(agent => agent.Id == request.AgentId);
         if (agent == null)
@@ -46,9 +40,9 @@ public class SyncToAgentHandler : IRequestHandler<SyncToAgent, SyncResult>
 
         var envIds = relayProxy.IsAllEnvs
             ? await GetAllEnvIdsAsync(relayProxy.OrganizationId)
-            : relayProxy.Scopes.SelectMany(scope => scope.EnvIds).Distinct().ToArray();
+            : relayProxy.Scopes.Select(Guid.Parse).ToArray();
 
-        if (!envIds.Any())
+        if (envIds.Length == 0)
         {
             return SyncResult.Ok(agent.SyncAt);
         }
@@ -58,7 +52,7 @@ public class SyncToAgentHandler : IRequestHandler<SyncToAgent, SyncResult>
             await PerformSyncAsync();
 
             relayProxy.AgentSynced(agent);
-            await _relayProxyService.UpdateAsync(relayProxy);
+            await relayProxyService.UpdateAsync(relayProxy);
 
             return SyncResult.Ok(agent.SyncAt);
         }
@@ -69,18 +63,18 @@ public class SyncToAgentHandler : IRequestHandler<SyncToAgent, SyncResult>
 
         async Task<Guid[]> GetAllEnvIdsAsync(Guid organizationId)
         {
-            var projectWithEnvs = await _projectService.GetListAsync(organizationId);
+            var projectWithEnvs = await projectService.GetListAsync(organizationId);
             return projectWithEnvs.SelectMany(p => p.Environments).Select(env => env.Id).ToArray();
         }
 
         async Task PerformSyncAsync()
         {
-            var flags = await _featureFlagService.FindManyAsync(flag => envIds.Contains(flag.EnvId));
+            var flags = await featureFlagService.FindManyAsync(flag => envIds.Contains(flag.EnvId));
 
             var segments = new Dictionary<Guid, ICollection<Segment>>();
             foreach (var envId in envIds)
             {
-                var envSegments = await _envAppService.GetSegmentsAsync(request.WorkspaceId, envId);
+                var envSegments = await envAppService.GetSegmentsAsync(request.WorkspaceId, envId);
                 segments[envId] = envSegments;
             }
 
@@ -91,7 +85,7 @@ public class SyncToAgentHandler : IRequestHandler<SyncToAgent, SyncResult>
                 Segments = segments[envId]
             });
 
-            await _agentService.BootstrapAsync(agent.Host, relayProxy.Key, payload);
+            await agentService.BootstrapAsync(request.Host, relayProxy.Key, payload);
         }
     }
 }

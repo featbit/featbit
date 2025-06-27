@@ -1,34 +1,28 @@
-using Domain.RelayProxies;
 using Application.Bases.Models;
 
 namespace Application.RelayProxies;
 
-public class GetRelayProxyList : IRequest<PagedResult<RelayProxy>>
+public class GetRelayProxyList : IRequest<PagedResult<RelayProxyVm>>
 {
     public Guid OrganizationId { get; set; }
 
     public RelayProxyFilter Filter { get; set; }
 }
 
-public class GetRelayProxyListHandler : IRequestHandler<GetRelayProxyList, PagedResult<RelayProxy>>
+public class GetRelayProxyListHandler(IRelayProxyService service, IEnvironmentService envService, IMapper mapper)
+    : IRequestHandler<GetRelayProxyList, PagedResult<RelayProxyVm>>
 {
-    private readonly IRelayProxyService _service;
-
-    public GetRelayProxyListHandler(IRelayProxyService service)
+    public async Task<PagedResult<RelayProxyVm>> Handle(GetRelayProxyList request, CancellationToken cancellationToken)
     {
-        _service = service;
-    }
+        var rps =
+            await service.GetListAsync(request.OrganizationId, request.Filter);
 
-    public async Task<PagedResult<RelayProxy>> Handle(GetRelayProxyList request, CancellationToken cancellationToken)
-    {
-        var relayProxies =
-            await _service.GetListAsync(request.OrganizationId, request.Filter);
-
-        foreach (var relayProxy in relayProxies.Items)
+        var rpVms = mapper.Map<PagedResult<RelayProxyVm>>(rps);
+        foreach (var rp in rpVms.Items)
         {
-            relayProxy.Key = relayProxy.Key[..15] + "**************";
+            rp.Serves = await envService.GetServesAsync(rp.Scopes);
         }
 
-        return relayProxies;
+        return rpVms;
     }
 }
