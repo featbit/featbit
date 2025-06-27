@@ -5252,7 +5252,7 @@
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
           <context context-type="linenumber">159</context>
         </context-group>
-        <target>创建新代理时不允许同步代理</target>
+        <target>新创建的代理无法执行同步操作</target>
       </trans-unit>
       <trans-unit id="common.add-maual-agent" datatype="html">
         <source>Add Manual Agent</source>

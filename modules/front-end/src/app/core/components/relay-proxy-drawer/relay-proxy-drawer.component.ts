@@ -99,7 +99,7 @@ export class RelayProxyDrawerComponent {
   }
   syncAgent(agent: RelayProxyAgent) {
     agent.isSyncing = true;
-    this.rpService.syncToAgent(this._rp!.id, agent.id)
+    this.rpService.syncToAgent(this._rp!.id, agent.id, agent.host)
     .pipe(finalize(() => agent.isSyncing = false))
     .subscribe({
       next: (syncResult) => {

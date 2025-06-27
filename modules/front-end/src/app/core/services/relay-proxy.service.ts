@@ -63,9 +63,9 @@ export class RelayProxyService {
     return this.http.put<boolean>(url, payload);
   }
 
-  syncToAgent(relayProxyId: string, agentId: string): Observable<SyncAgentResult> {
-    const url = `${this.baseUrl}/${relayProxyId}/agents/${agentId}/sync`;
+  syncToAgent(id: string, agentId: string, host: string): Observable<SyncAgentResult> {
+    const url = `${this.baseUrl}/${id}/agents/${agentId}/sync`;
 
-    return this.http.put<SyncAgentResult>(url, {});
+    return this.http.put<SyncAgentResult>(url, {}, { params: { host } });
   }
 }
