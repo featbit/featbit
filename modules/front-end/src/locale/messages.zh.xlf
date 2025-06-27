@@ -536,7 +536,7 @@
           <context context-type="sourcefile">src/app/core/components/resource-finder/resource-finder.component.html</context>
           <context context-type="linenumber">74</context>
         </context-group>
-        <target>OK</target>
+        <target>确认</target>
       </trans-unit>
       <trans-unit id="integrations.access-token.access-token-drawer.view-title" datatype="html">
         <source>View Access Token</source>
@@ -5148,7 +5148,7 @@
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
           <context context-type="linenumber">85</context>
         </context-group>
-        <target>自动同步的代理。这些代理将在启动时自行注册，因此您无需手动添加它们。</target>
+        <target>自动同步的代理。这些代理将在启动时自行注册，因此您无需手动添加它们</target>
       </trans-unit>
       <trans-unit id="relay-proxy.modal.no-auto-agents" datatype="html">
         <source>No auto agents registered yet.</source>
