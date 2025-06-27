@@ -122,7 +122,7 @@
                     <span i18n="@@common.host">Host</span>: {{ agentControl.value.host }}
                   </div>
                   <div class="ant-list-item-meta-description">
-                    <span i18n="@@relay-proxy.modal.last-synced-at">Last Synced At: </span>
+                    <span i18n="@@relay-proxy.modal.last-synced-at">Last Synced At</span>:
                     <ng-container *ngIf="agentControl.value.lastSyncedAt; then showLastSyncedAt; else notSyncYet"></ng-container>
                     <ng-template #showLastSyncedAt>
                       {{ agentControl.value.lastSyncedAt | date: 'yyyy/MM/dd HH:mm:ss' }}
