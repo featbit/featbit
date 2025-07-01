@@ -7,7 +7,7 @@ public class AgentController(IRelayProxyService rpService, ILogger<AgentControll
 {
     [HttpPost]
     [Route("register")]
-    public async Task<IActionResult> RegisterAsync()
+    public async Task<IActionResult> RegisterAsync([FromBody] string agentId)
     {
         var key = Request.Headers.Authorization.ToString();
 
@@ -19,7 +19,7 @@ public class AgentController(IRelayProxyService rpService, ILogger<AgentControll
 
         try
         {
-            var agentId = await rpService.RegisterAgentAsync(key);
+            await rpService.RegisterAgentAsync(key, agentId);
             return Ok(agentId);
         }
         catch (Exception ex)

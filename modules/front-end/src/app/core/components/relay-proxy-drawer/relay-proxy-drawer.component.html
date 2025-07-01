@@ -4,7 +4,7 @@
   [nzExtra]="extra"
   [(nzVisible)]="visible"
   [nzTitle]="title"
-  [nzWidth]="800"
+  [nzWidth]="900"
   (nzOnClose)="close()">
   <ng-container *nzDrawerContent>
     <form nz-form [formGroup]="form" nzLayout="vertical" (ngSubmit)="doSubmit()">
@@ -30,7 +30,7 @@
         <nz-form-label i18n="@@common.description">Description</nz-form-label>
         <nz-form-control
           nzExtra="Describe the purpose of this relay proxy."
-          i18n-nzExtra="@@relay-proxy.modal.description">
+          i18n-nzExtra="@@relay-proxy.drawer.description">
           <textarea
             style="resize: none"
             nz-input
@@ -48,9 +48,9 @@
           [nzValidateStatus]="scopes"
           formGroupName="scopes"
           nzErrorTip="Please select at least one environment."
-          i18n-nzErrorTip="@@relay-proxy.modal.scopes-cannot-be-empty"
+          i18n-nzErrorTip="@@relay-proxy.drawer.scopes-cannot-be-empty"
           nzExtra="Select the environments that the agent can serve. (At least one environment must be selected.)"
-          i18n-nzExtra="@@relay-proxy.modal.scopes-description">
+          i18n-nzExtra="@@relay-proxy.drawer.scopes-description">
           <nz-radio-group formControlName="isAllEnvs">
             <label nz-radio [nzValue]="false" i18n="@@common.custom-envs">Custom environments</label>
             <label nz-radio [nzValue]="true" i18n="@@common.all-envs">All environments</label>
@@ -83,26 +83,64 @@
         <nz-form-label i18n="@@common.auto-agents">Auto Agents</nz-form-label>
         <nz-form-control
           nzExtra="Agents that synchronize automatically. These agents will register themselves at startup, so you don't need to add them manually."
-          i18n-nzExtra="@@relay-proxy.modal.auto-agents-description">
+          i18n-nzExtra="@@relay-proxy.drawer.auto-agents-description">
           <ng-container *ngIf="autoAgents.length === 0">
-            <span i18n="@@relay-proxy.modal.no-auto-agents" class="no-auto-agents-tip">No auto agents registered yet.</span>
+            <span i18n="@@relay-proxy.drawer.no-auto-agents" class="no-auto-agents-tip">No auto agents registered yet.</span>
           </ng-container>
-          <nz-list>
-            <nz-list-item *ngFor="let autoAgent of autoAgents">
-              <nz-list-item-meta>
-                <nz-list-item-meta-description>
-                  <span>Last Synced At: </span>
-                  {{ autoAgent.lastSyncedAt | date: 'yyyy/MM/dd HH:mm:ss' }}
-                </nz-list-item-meta-description>
-                <nz-list-item-meta-title>
-                  {{ autoAgent.name }}
-                </nz-list-item-meta-title>
-              </nz-list-item-meta>
-              <nz-list-item-extra>
-                {{ autoAgent.name }}
-              </nz-list-item-extra>
-            </nz-list-item>
-          </nz-list>
+          <nz-table
+            *ngIf="autoAgents.length !== 0"
+            #autoAgentsTable
+            nzSize="small"
+            nzBordered
+            nzFrontPagination="false"
+            nzShowPagination="false"
+            [nzData]="autoAgents"
+            [nzTotal]="autoAgents.length">
+            <thead>
+            <tr>
+              <th i18n="relay-proxy.drawer.agent-id">Agent Id</th>
+              <th i18n="@@common.serves">Serves</th>
+              <th i18n="relay-proxy.drawer.sync-status">Sync Status</th>
+              <th i18n="@@common.action">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let autoAgent of autoAgentsTable.data">
+              <td>
+                {{ autoAgent.id }}
+                <br />
+                <span class="ant-list-item-meta-description">
+                  <span i18n="@@relay-proxy.drawer.registered-at">Registered At</span>
+                  : {{ autoAgent.registeredAt | date: 'yyyy/MM/dd HH:mm:ss' }}
+                </span>
+              </td>
+              <td>
+                {{ autoAgent.status.serves }}
+                <br>
+                <span class="ant-list-item-meta-description">
+                  <span i18n="@@relay-proxy.drawer.reported-at">Reported At</span>
+                  : {{ autoAgent.status.reportedAt | date: 'yyyy/MM/dd HH:mm:ss' }}
+                </span>
+              </td>
+              <td>
+                {{ autoAgent.status.syncState }}
+                <br />
+                <span class="ant-list-item-meta-description">
+                  <span i18n="@@relay-proxy.drawer.last-synced-at">Last Synced At</span>
+                  : {{ autoAgent.status.lastSyncedAt | date: 'yyyy/MM/dd HH:mm:ss' }}
+                </span>
+                <br />
+                <span class="ant-list-item-meta-description">
+                  <span i18n="@@relay-proxy.drawer.data-version">Data Version</span>
+                  : {{ autoAgent.status.dataVersion | date: 'yyyy/MM/dd HH:mm:ss' }}
+                </span>
+              </td>
+              <td>
+                <a nz-button nzType="link" i18n="@@common.remove">Remove</a>
+              </td>
+            </tr>
+            </tbody>
+          </nz-table>
         </nz-form-control>
       </nz-form-item>
 
@@ -113,7 +151,7 @@
           formGroupName="agents"
           class="manual-agents"
           nzExtra="Optionally, you can add agents that can be synchronized manually."
-          i18n-nzExtra="@@relay-proxy.modal.manual-agents-description">
+          i18n-nzExtra="@@relay-proxy.drawer.manual-agents-description">
           <nz-list>
             <nz-list-item nzNoFlex *ngFor="let agentControl of agents.controls; let i = index">
               <div class="agent-item">
@@ -122,13 +160,13 @@
                     <span i18n="@@common.host">Host</span>: {{ agentControl.value.host }}
                   </div>
                   <div class="ant-list-item-meta-description">
-                    <span i18n="@@relay-proxy.modal.last-synced-at">Last Synced At</span>:
+                    <span i18n="@@relay-proxy.drawer.last-synced-at">Last Synced At</span>:
                     <ng-container *ngIf="agentControl.value.lastSyncedAt; then showLastSyncedAt; else notSyncYet"></ng-container>
                     <ng-template #showLastSyncedAt>
                       {{ agentControl.value.lastSyncedAt | date: 'yyyy/MM/dd HH:mm:ss' }}
                     </ng-template>
                     <ng-template #notSyncYet>
-                      <span class="not-synced-yet" i18n="@@relay-proxy.modal.not-synced-yet">Not synced yet.</span>
+                      <span class="not-synced-yet" i18n="@@relay-proxy.drawer.not-synced-yet">Not synced yet.</span>
                     </ng-template>
                   </div>
                 </div>

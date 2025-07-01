@@ -176,7 +176,9 @@ export class RelayProxyDrawerComponent {
       agents: this.constructAgentsFormArray(this._rp?.agents || [])
     });
 
-    this.autoAgents = this._rp?.autoAgents || [];
+    this.autoAgents = (this._rp?.autoAgents || []).map(
+      agent => ({ ...agent, status: JSON.parse(agent.status as any as string) })
+    );
 
     if (this._rp) {
       setTimeout(() => {

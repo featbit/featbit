@@ -50,7 +50,14 @@ export interface RelayProxyAgent {
 
 export interface RelayProxyAutoAgent {
   id: string;
-  name: string;
+  status: {
+    serves: string;
+    reportedAt: Date;
+    syncState: string;
+    lastSyncedAt: Date;
+    dataVersion: number
+  };
+  registeredAt: Date;
 }
 
 export interface UpsertRelayProxyPayload extends RelayProxyBase {

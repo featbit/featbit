@@ -114,14 +114,7 @@ public class RelayProxyService(IConfiguration configuration, IServiceProvider se
 
             string SearchByScopes()
             {
-                List<Guid> envIds = [];
-
-                using var scopeArray = JsonDocument.Parse(rp.scopes);
-                foreach (var scopeElement in scopeArray.RootElement.EnumerateArray())
-                {
-                    envIds.AddRange(scopeElement.GetProperty("envIds").EnumerateArray().Select(x => x.GetGuid()));
-                }
-
+                var envIds = JsonSerializer.Deserialize<Guid[]>(rp.scopes) ?? [];
                 dynamicParameters.Add("EnvIds", envIds);
 
                 return """
@@ -204,7 +197,7 @@ public class RelayProxyService(IConfiguration configuration, IServiceProvider se
 
             BsonDocument[] SearchByScopes()
             {
-                var envIds = rp.scopes.AsBsonArray.SelectMany(s => s.AsBsonDocument["envIds"].AsBsonArray);
+                var envIds = rp.scopes.AsBsonArray;
 
                 return
                 [
@@ -239,61 +232,102 @@ public class RelayProxyService(IConfiguration configuration, IServiceProvider se
         return secrets;
     }
 
-    public async Task<string> RegisterAgentAsync(string key)
+    public async Task RegisterAgentAsync(string key, string agentId)
     {
         var dbProvider = configuration.GetDbProvider();
 
-        var result = dbProvider.Name switch
+        switch (dbProvider.Name)
         {
-            DbProvider.MongoDb => await MongoDbRegisterAsync(),
-            DbProvider.Postgres => await PostgresRegisterAsync(),
-            _ => string.Empty
-        };
+            case DbProvider.MongoDb:
+                await MongoDbRegisterAsync();
+                break;
+            case DbProvider.Postgres:
+                await PostgresRegisterAsync();
+                break;
+        }
 
-        return result;
+        return;
 
-        async Task<string> MongoDbRegisterAsync()
+        async Task MongoDbRegisterAsync()
         {
             var mongodb = serviceProvider.GetRequiredService<IMongoDbClient>();
             var db = mongodb.Database;
 
-            var agentId = Guid.NewGuid().ToString();
-
-            // TODO: insert new agent
-            await Task.CompletedTask;
-            return agentId;
+            await db.GetCollection<BsonDocument>("RelayProxies").UpdateOneAsync(
+                x => x["key"].AsString == key && x["autoAgents"].AsBsonArray.All(agent => agent["id"].AsString != agentId),
+                Builders<BsonDocument>.Update.Push("autoAgents", new BsonDocument
+                {
+                    { "id", agentId },
+                    { "status", "{}" },
+                    { "registeredAt", DateTime.UtcNow }
+                })
+            );
         }
 
-        async Task<string> PostgresRegisterAsync()
+        async Task PostgresRegisterAsync()
         {
             var dataSource = serviceProvider.GetRequiredService<NpgsqlDataSource>();
             await using var connection = await dataSource.OpenConnectionAsync();
 
-            var agentId = Guid.NewGuid().ToString();
+            var param = new
+            {
+                AgentId = agentId,
+                Key = key
+            };
 
-            // TODO: insert new agent
-            return agentId;
+            await connection.ExecuteAsync(
+                """
+                update relay_proxies
+                set auto_agents = jsonb_insert(
+                        auto_agents,
+                        '{0}',
+                        jsonb_build_object(
+                            'id', @AgentId,
+                            'status', '{}',
+                            'registeredAt', now()
+                        ))
+                where key = @Key
+                  and not exists(select 1 from jsonb_array_elements(auto_agents) as agent where agent ->> 'id' = @AgentId)
+                """, param
+            );
         }
     }
 
-    public Task UpdateAgentStatusAsync(string key, string agentId, string status)
+    public async Task UpdateAgentStatusAsync(string key, string agentId, string status)
     {
         var dbProvider = configuration.GetDbProvider();
 
-        return dbProvider.Name switch
+        switch (dbProvider.Name)
         {
-            DbProvider.MongoDb => UpdateMongoDbAsync(),
-            DbProvider.Postgres => UpdatePostgresAsync(),
-            _ => Task.CompletedTask,
-        };
+            case DbProvider.MongoDb:
+                await UpdateMongoDbAsync();
+                break;
+            case DbProvider.Postgres:
+                await UpdatePostgresAsync();
+                break;
+        }
+
+        return;
 
         async Task UpdateMongoDbAsync()
         {
             var mongodb = serviceProvider.GetRequiredService<IMongoDbClient>();
             var db = mongodb.Database;
 
-            // TODO: update rp agent status
-            await Task.CompletedTask;
+            var filter = Builders<BsonDocument>.Filter.Eq("key", key);
+            var update = Builders<BsonDocument>.Update.Set(
+                "autoAgents.$[agent].status",
+                status
+            );
+            var arrayFilter = new BsonDocumentArrayFilterDefinition<BsonDocument>(
+                new BsonDocument("agent.id", agentId)
+            );
+
+            await db.GetCollection<BsonDocument>("RelayProxies").UpdateOneAsync(
+                filter,
+                update,
+                new UpdateOptions { ArrayFilters = [ arrayFilter] }
+            );
         }
 
         async Task UpdatePostgresAsync()
@@ -301,7 +335,30 @@ public class RelayProxyService(IConfiguration configuration, IServiceProvider se
             var dataSource = serviceProvider.GetRequiredService<NpgsqlDataSource>();
             await using var connection = await dataSource.OpenConnectionAsync();
 
-            // TODO: update rp agent status
+            var param = new
+            {
+                Key = key,
+                AgentId = agentId,
+                Status = status
+            };
+
+            await connection.ExecuteAsync(
+                """
+                update relay_proxies
+                set auto_agents = jsonb_set(
+                        auto_agents,
+                        array [(idx - 1)::text, 'status'],
+                        to_jsonb(@Status),
+                        true
+                )
+                from (select idx
+                      from relay_proxies,
+                           jsonb_array_elements(auto_agents) with ordinality as arr(agent, idx)
+                      where key = @Key
+                        and arr.agent ->> 'id' = @AgentId) subq
+                where key = @Key
+                """, param
+            );
         }
     }
 }
