@@ -161,9 +161,9 @@
                   </div>
                   <div class="ant-list-item-meta-description">
                     <span i18n="@@relay-proxy.drawer.last-synced-at">Last Synced At</span>:
-                    <ng-container *ngIf="agentControl.value.lastSyncedAt; then showLastSyncedAt; else notSyncYet"></ng-container>
-                    <ng-template #showLastSyncedAt>
-                      {{ agentControl.value.lastSyncedAt | date: 'yyyy/MM/dd HH:mm:ss' }}
+                    <ng-container *ngIf="agentControl.value.syncAt; then showSyncAt; else notSyncYet"></ng-container>
+                    <ng-template #showSyncAt>
+                      {{ agentControl.value.syncAt | date: 'yyyy/MM/dd HH:mm:ss' }}
                     </ng-template>
                     <ng-template #notSyncYet>
                       <span class="not-synced-yet" i18n="@@relay-proxy.drawer.not-synced-yet">Not synced yet.</span>
