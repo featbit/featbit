@@ -76,19 +76,6 @@ public class RelayProxyController : ApiControllerBase
         return Ok(statusCode);
     }
 
-    [HttpGet("{rpId:guid}/agent-status")]
-    public async Task<ApiResponse<AgentStatus>> GetAgentStatusAsync(Guid rpId, string host)
-    {
-        var request = new GetAgentStatus
-        {
-            RelayProxyId = rpId,
-            Host = host
-        };
-
-        var status = await Mediator.Send(request);
-        return Ok(status);
-    }
-
     [HttpPut("{rpId:guid}/agents/{agentId}/sync")]
     public async Task<ApiResponse<SyncResult>> SyncToAgentAsync(Guid rpId, string agentId, string host)
     {

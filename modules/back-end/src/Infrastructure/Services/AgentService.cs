@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
-using Domain.RelayProxies;
 using Microsoft.Net.Http.Headers;
 
 namespace Infrastructure.Services;
@@ -19,23 +18,6 @@ public class AgentService(HttpClient httpClient) : IAgentService
         {
             return HttpStatusCode.ServiceUnavailable;
         }
-    }
-
-    public async Task<AgentStatus?> GetStatusAsync(string host, string key)
-    {
-        var request = new HttpRequestMessage(HttpMethod.Get, $"{host}/api/public/proxy/status")
-        {
-            Headers =
-            {
-                { HeaderNames.Authorization, key }
-            }
-        };
-
-        var response = await httpClient.SendAsync(request);
-        response.EnsureSuccessStatusCode();
-
-        var status = await response.Content.ReadFromJsonAsync<AgentStatus>();
-        return status;
     }
 
     public async Task BootstrapAsync(string host, string key, object payload)
