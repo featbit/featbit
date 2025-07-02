@@ -23,6 +23,7 @@ public class SyncToAgentValidator : AbstractValidator<SyncToAgent>
 public class SyncToAgentHandler(
     IRelayProxyService relayProxyService,
     IProjectService projectService,
+    IEnvironmentService envService,
     IEnvironmentAppService envAppService,
     IFeatureFlagService featureFlagService,
     IAgentService agentService)
@@ -69,6 +70,7 @@ public class SyncToAgentHandler(
 
         async Task PerformSyncAsync()
         {
+            var secrets = await envService.GetRpSecretsAsync(envIds);
             var flags = await featureFlagService.FindManyAsync(flag => envIds.Contains(flag.EnvId));
 
             var segments = new Dictionary<Guid, ICollection<Segment>>();
@@ -78,12 +80,17 @@ public class SyncToAgentHandler(
                 segments[envId] = envSegments;
             }
 
-            var payload = envIds.Select(envId => new
+            var payload = new
             {
-                EnvId = envId,
-                Flags = flags.Where(flag => flag.EnvId == envId),
-                Segments = segments[envId]
-            });
+                eventType = "rp_full",
+                items = envIds.Select(envId => new
+                {
+                    envId,
+                    secrets = secrets.Where(secret => secret.EnvId == envId),
+                    featureFlags = flags.Where(flag => flag.EnvId == envId),
+                    segments = segments[envId]
+                })
+            };
 
             await agentService.BootstrapAsync(request.Host, relayProxy.Key, payload);
         }
