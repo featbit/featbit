@@ -136,7 +136,21 @@
                 </span>
               </td>
               <td>
-                <a nz-button nzType="link" i18n="@@common.remove">Remove</a>
+                <ng-container *ngIf="isAutoAgentRemovable(autoAgent); then remove; else disableRemove"></ng-container>
+                <ng-template #remove>
+                  <a nz-popconfirm
+                     nzPopconfirmTitle="Are you sure to remove it?"
+                     i18n-nzPopconfirmTitle="@@common.simple-remove-confirm"
+                     (nzOnConfirm)="removeAutoAgent(autoAgent.id)"
+                     i18n="@@common.remove">Remove</a>
+                </ng-template>
+                <ng-template #disableRemove>
+                  <a disabled
+                     nz-tooltip
+                     nzTooltipTitle="Only agents that have been inactive for more than 5 minutes can be removed"
+                     i18n-nzTooltipTitle="@@relay-proxy.drawer.auto-agent-remove-disabled-reason"
+                     i18n="@@common.remove">Remove</a>
+                </ng-template>
               </td>
             </tr>
             </tbody>

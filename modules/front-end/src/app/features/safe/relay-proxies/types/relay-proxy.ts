@@ -61,6 +61,7 @@ export interface RelayProxyAutoAgent {
 }
 
 export interface UpsertRelayProxyPayload extends RelayProxyBase {
+  autoAgents: RelayProxyAutoAgent[];
 }
 
 export interface SyncAgentResult {

@@ -43,13 +43,15 @@ public class RelayProxy : AuditedEntity
         string description,
         bool isAllEnvs,
         string[] scopes,
-        Agent[] agents)
+        Agent[] agents,
+        AutoAgent[] autoAgents)
     {
         Name = name;
         Description = description ?? string.Empty;
         IsAllEnvs = isAllEnvs;
         Scopes = scopes ?? [];
         Agents = agents ?? [];
+        AutoAgents = autoAgents ?? [];
 
         UpdatedAt = DateTime.UtcNow;
     }

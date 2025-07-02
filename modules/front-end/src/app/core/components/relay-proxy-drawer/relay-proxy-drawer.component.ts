@@ -77,6 +77,15 @@ export class RelayProxyDrawerComponent {
     return this.envs.controls.map(x => x.value.id);
   }
 
+  isAutoAgentRemovable(agent: RelayProxyAutoAgent): boolean {
+    // only allow removal if the agent is inactive for more than 5 minutes
+    return Date.now() - new Date(agent.status.reportedAt).getTime() > 1000 * 60 * 5;
+  }
+
+  removeAutoAgent(id: string) {
+    this.autoAgents = this.autoAgents.filter(agent => agent.id !== id);
+  }
+
   agentModalVisible: boolean = false;
   selectedAgent: RelayProxyAgent | null = null;
   get agents(): FormArray {
@@ -286,7 +295,8 @@ export class RelayProxyDrawerComponent {
       description,
       isAllEnvs,
       scopes: isAllEnvs ? [] : envs.map(x => x.id),
-      agents
+      agents,
+      autoAgents: this.autoAgents
     };
 
     let responseHandler = {
