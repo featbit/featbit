@@ -68,8 +68,11 @@ export class IndexComponent implements OnInit {
         items: rps.items.map(rp => ({
           ...rp,
           parsedServes: rp.serves.map(serve => {
-            const [ id, pathName ] = serve.split(',');
-            return { id, pathName };
+            const index = serve.indexOf(',');
+            return {
+              id: serve.substring(0, index),
+              pathName: serve.substring(index + 1)
+            };
           })
         })),
         totalCount: rps.totalCount
