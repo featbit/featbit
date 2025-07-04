@@ -76,7 +76,7 @@
                 </ul>
               </ng-template>
             </td>
-            <td>{{getLocalDate(item.updatedAt) | date: 'yyyy-MM-dd HH:mm:ss'}}</td>
+            <td>{{item.updatedAt | date: 'yyyy-MM-dd HH:mm:ss'}}</td>
             <td>
               <a style="color:#23AD7F;" (click)="onIntoSegmentDetail(item)" i18n="@@common.details">Details</a>
               <nz-divider nzType="vertical"></nz-divider>
