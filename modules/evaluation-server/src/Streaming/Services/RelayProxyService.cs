@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using System.Text.Json;
 using Dapper;
 using Domain.Shared;
@@ -197,7 +198,9 @@ public class RelayProxyService(IConfiguration configuration, IServiceProvider se
 
             BsonDocument[] SearchByScopes()
             {
-                var envIds = rp.scopes.AsBsonArray;
+                var envIds = rp.scopes.AsBsonArray
+                    .Select(x => new BsonBinaryData(Guid.Parse(x.AsString), GuidRepresentation.Standard))
+                    .ToArray();
 
                 return
                 [
@@ -253,15 +256,18 @@ public class RelayProxyService(IConfiguration configuration, IServiceProvider se
             var mongodb = serviceProvider.GetRequiredService<IMongoDbClient>();
             var db = mongodb.Database;
 
-            await db.GetCollection<BsonDocument>("RelayProxies").UpdateOneAsync(
-                x => x["key"].AsString == key && x["autoAgents"].AsBsonArray.All(agent => agent["id"].AsString != agentId),
-                Builders<BsonDocument>.Update.Push("autoAgents", new BsonDocument
-                {
-                    { "id", agentId },
-                    { "status", "{}" },
-                    { "registeredAt", DateTime.UtcNow }
-                })
-            );
+            Expression<Func<BsonDocument, bool>> filter = x =>
+                x["key"].AsString == key &&
+                x["autoAgents"].AsBsonArray.All(agent => agent["_id"].AsString != agentId);
+
+            var updateDefinition = Builders<BsonDocument>.Update.Push("autoAgents", new BsonDocument
+            {
+                { "_id", agentId },
+                { "status", "{}" },
+                { "registeredAt", DateTime.UtcNow }
+            });
+
+            await db.GetCollection<BsonDocument>("RelayProxies").UpdateOneAsync(filter, updateDefinition);
         }
 
         async Task PostgresRegisterAsync()
@@ -320,13 +326,13 @@ public class RelayProxyService(IConfiguration configuration, IServiceProvider se
                 status
             );
             var arrayFilter = new BsonDocumentArrayFilterDefinition<BsonDocument>(
-                new BsonDocument("agent.id", agentId)
+                new BsonDocument("agent._id", agentId)
             );
 
             await db.GetCollection<BsonDocument>("RelayProxies").UpdateOneAsync(
                 filter,
                 update,
-                new UpdateOptions { ArrayFilters = [ arrayFilter] }
+                new UpdateOptions { ArrayFilters = [arrayFilter] }
             );
         }
 

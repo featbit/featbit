@@ -25,10 +25,17 @@ public class EnvironmentService(MongoDbClient mongoDb) : MongoDbService<Environm
             from environment in environments
             join project in projects on environment.ProjectId equals project.Id
             where envIds.Contains(environment.Id)
-            select $"{environment.Id},{project.Name}/{environment.Name}";
+            select new
+            {
+                envId = environment.Id,
+                projectName = project.Name,
+                envName = environment.Name
+            };
 
         var result = await query.ToListAsync();
-        return result.ToArray();
+        return result
+            .Select(x => $"{x.envId},{x.projectName}/{x.envName}")
+            .ToArray();
     }
 
     public async Task<RpSecret[]> GetRpSecretsAsync(Guid[] envIds)
