@@ -18,6 +18,6 @@ export class FormatDatePipe implements PipeTransform {
       return 'N/A';
     }
 
-    return format(new Date(value), dateFormat);
+    return format(new Date(value), dateFormat ?? 'yyyy-MM-dd HH:mm:ss');
   }
 }
