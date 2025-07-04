@@ -55,7 +55,7 @@
             <label nz-radio [nzValue]="false" i18n="@@common.custom-envs">Custom environments</label>
             <label nz-radio [nzValue]="true" i18n="@@common.all-envs">All environments</label>
           </nz-radio-group>
-          <div class="envs" *ngIf="form.get('scopes.isAllEnvs').value === false">
+          <div *ngIf="form.get('scopes.isAllEnvs').value === false">
             <resource-finder
               [isVisible]="resourceFinderVisible"
               (onClose)="closeResourceFinder($event)"
@@ -75,6 +75,11 @@
               </nz-tag>
             </div>
           </div>
+          <span
+            *ngIf="isScopeChanged"
+            class="scopes-changed-warning"
+            i18n="@@relay-proxy.drawer.scopes-changed-warning">To apply the new scopes: auto agents need to be restarted, while manual agents require a manual sync.
+          </span>
         </nz-form-control>
       </nz-form-item>
 

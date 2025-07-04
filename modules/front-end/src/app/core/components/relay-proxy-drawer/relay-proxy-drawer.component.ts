@@ -1,5 +1,10 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { RelayProxy, RelayProxyAgent, RelayProxyAutoAgent } from "@features/safe/relay-proxies/types/relay-proxy";
+import {
+  AutoAgentStatus,
+  RelayProxy,
+  RelayProxyAgent,
+  RelayProxyAutoAgent
+} from "@features/safe/relay-proxies/types/relay-proxy";
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
 import { SegmentType } from "@features/safe/segments/types/segments-index";
 import { ResourceSpaceLevel, ResourceTypeEnum, ResourceV2 } from "@shared/policy";
@@ -66,6 +71,28 @@ export class RelayProxyDrawerComponent {
     return this.form.get('scopes') as FormGroup;
   }
 
+  get isScopeChanged(): boolean {
+    if (this.operation === 'Add') {
+      return false;
+    }
+
+    const { isAllEnvs, envs } = this.scopes.value;
+    if (envs.length === 0) {
+      return false;
+    }
+
+    if (this._rp.isAllEnvs !== isAllEnvs) {
+      return true;
+    }
+
+    if (this._rp.scopes.length !== envs.length) {
+      return true;
+    }
+
+    const isSameScopes = this._rp.scopes.every(s => envs.some(env => env.id === s));
+    return !isSameScopes;
+  }
+
   get envs() {
     return this.scopes.get('envs') as FormArray;
   }
@@ -79,7 +106,7 @@ export class RelayProxyDrawerComponent {
 
   isAutoAgentRemovable(agent: RelayProxyAutoAgent): boolean {
     // only allow removal if the agent is inactive for more than 5 minutes
-    return Date.now() - new Date(agent.status.reportedAt).getTime() > 1000 * 60 * 5;
+    return Date.now() - new Date((agent.status as AutoAgentStatus).reportedAt).getTime() > 1000 * 60 * 5;
   }
 
   removeAutoAgent(id: string) {
@@ -135,8 +162,15 @@ export class RelayProxyDrawerComponent {
       next: (statusCode) => {
         if (statusCode === 200) {
           this.message.success($localize`:@@relay-proxy.drawer.agent-available:Agent is available.`);
+        } else if (statusCode === 404) {
+          this.message.error(
+            $localize`:@@relay-proxy.drawer.agent-not-found:Agent not found. ` + `(${agent.host}: ${statusCode})`
+          );
         } else {
-          this.message.error($localize`:@@relay-proxy.drawer.agent-unavailable:Agent is unavailable.` + `(${agent.host}: ${statusCode})`);
+          this.message.error(
+            $localize`:@@relay-proxy.drawer.agent-unavailable:Agent is unavailable and this usually due to network issues. `
+            + `(${agent.host}: ${statusCode})`
+          );
         }
       },
       error: () => {
@@ -146,6 +180,7 @@ export class RelayProxyDrawerComponent {
   }
   closeAgentModal(agent: RelayProxyAgent) {
     this.agentModalVisible = false;
+    this.selectedAgent = null;
 
     if (!agent) {
       return;
@@ -186,7 +221,7 @@ export class RelayProxyDrawerComponent {
     });
 
     this.autoAgents = (this._rp?.autoAgents || []).map(
-      agent => ({ ...agent, status: JSON.parse(agent.status as any as string) })
+      agent => ({ ...agent, status: JSON.parse(agent.status as string) })
     );
 
     if (this._rp) {
@@ -212,12 +247,12 @@ export class RelayProxyDrawerComponent {
 
   private constructScopesFormGroup(rp: RelayProxy): FormGroup {
     const scopesValidator = (group: FormGroup) => {
-      let scopes = group.value ?? {
+      const { isAllEnvs, envs } = group.value ?? {
         isAllEnvs: false,
         envs: []
       };
 
-      if (scopes.isAllEnvs === false && (!scopes.envs || scopes.envs.length === 0)) {
+      if (isAllEnvs === false && (!envs || envs.length === 0)) {
         return { error: true };
       }
     }
@@ -296,7 +331,7 @@ export class RelayProxyDrawerComponent {
       isAllEnvs,
       scopes: isAllEnvs ? [] : envs.map(x => x.id),
       agents,
-      autoAgents: this.autoAgents
+      autoAgents: this.autoAgents.map(x => ({ ...x,  status: JSON.stringify(x.status) }))
     };
 
     let responseHandler = {

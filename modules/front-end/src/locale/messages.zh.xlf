@@ -90,7 +90,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">187</context>
+          <context context-type="linenumber">192</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/segment-creation-modal/segment-creation-modal.component.html</context>
@@ -470,7 +470,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">246</context>
+          <context context-type="linenumber">251</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/segment-creation-modal/segment-creation-modal.component.html</context>
@@ -638,7 +638,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">309</context>
+          <context context-type="linenumber">344</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/test-webhook-modal/test-webhook-modal.component.ts</context>
@@ -806,7 +806,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/relay-proxies/index/index.component.ts</context>
-          <context context-type="linenumber">91</context>
+          <context context-type="linenumber">94</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.ts</context>
@@ -858,7 +858,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">312</context>
+          <context context-type="linenumber">347</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.ts</context>
@@ -2235,7 +2235,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/relay-proxies/index/index.component.ts</context>
-          <context context-type="linenumber">95</context>
+          <context context-type="linenumber">98</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.ts</context>
@@ -4347,11 +4347,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">142</context>
+          <context context-type="linenumber">147</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">218</context>
+          <context context-type="linenumber">223</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.html</context>
@@ -4371,15 +4371,15 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">145</context>
+          <context context-type="linenumber">150</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">152</context>
+          <context context-type="linenumber">157</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">221</context>
+          <context context-type="linenumber">226</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/metrics/metrics.component.html</context>
@@ -5146,11 +5146,19 @@
         </context-group>
         <target>选择环境</target>
       </trans-unit>
+      <trans-unit id="relay-proxy.drawer.scopes-changed-warning" datatype="html">
+        <source>To apply the new scopes: auto agents need to be restarted, while manual agents require a manual sync. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
+          <context context-type="linenumber">81,82</context>
+        </context-group>
+        <target>要使新环境生效：自动代理需要重新启动，手动代理需要手动同步一次。</target>
+      </trans-unit>
       <trans-unit id="common.auto-agents" datatype="html">
         <source>Auto Agents</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">83</context>
+          <context context-type="linenumber">88</context>
         </context-group>
         <target>自动代理</target>
       </trans-unit>
@@ -5158,7 +5166,7 @@
         <source>Agents that synchronize automatically. These agents will register themselves at startup, so you don&apos;t need to add them manually.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">85</context>
+          <context context-type="linenumber">90</context>
         </context-group>
         <target>自动同步的代理。这些代理将在启动时自行注册，因此您无需手动添加它们</target>
       </trans-unit>
@@ -5166,7 +5174,7 @@
         <source>No auto agents registered yet.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">88</context>
+          <context context-type="linenumber">93</context>
         </context-group>
         <target>暂无自动同步的代理</target>
       </trans-unit>
@@ -5174,7 +5182,7 @@
         <source>Agent Id</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">101</context>
+          <context context-type="linenumber">106</context>
         </context-group>
         <note priority="1" from="description">relay-proxy.drawer.agent-id</note>
         <target>代理 Id</target>
@@ -5183,7 +5191,7 @@
         <source>Serves</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">102</context>
+          <context context-type="linenumber">107</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/relay-proxies/index/index.component.html</context>
@@ -5195,7 +5203,7 @@
         <source>Sync Status</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">103</context>
+          <context context-type="linenumber">108</context>
         </context-group>
         <note priority="1" from="description">relay-proxy.drawer.sync-status</note>
         <target>同步状态</target>
@@ -5204,7 +5212,7 @@
         <source>Action</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">104</context>
+          <context context-type="linenumber">109</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/actions-selector/actions-selector.component.html</context>
@@ -5216,7 +5224,7 @@
         <source>Registered At</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">113</context>
+          <context context-type="linenumber">118</context>
         </context-group>
         <target>注册于</target>
       </trans-unit>
@@ -5224,7 +5232,7 @@
         <source>Reported At</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">121</context>
+          <context context-type="linenumber">126</context>
         </context-group>
         <target>报告于</target>
       </trans-unit>
@@ -5232,11 +5240,11 @@
         <source>Last Synced At</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">129</context>
+          <context context-type="linenumber">134</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">177</context>
+          <context context-type="linenumber">182</context>
         </context-group>
         <target>上次同步于</target>
       </trans-unit>
@@ -5244,7 +5252,7 @@
         <source>Data Version</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">134</context>
+          <context context-type="linenumber">139</context>
         </context-group>
         <target>数据版本</target>
       </trans-unit>
@@ -5252,7 +5260,7 @@
         <source>Only agents that have been inactive for more than 5 minutes can be removed</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">150</context>
+          <context context-type="linenumber">155</context>
         </context-group>
         <target>只能删除处于非活动状态超过 5 分钟的代理</target>
       </trans-unit>
@@ -5260,7 +5268,7 @@
         <source>Manual Agents</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">163</context>
+          <context context-type="linenumber">168</context>
         </context-group>
         <target>手动代理</target>
       </trans-unit>
@@ -5268,7 +5276,7 @@
         <source>Optionally, you can add agents that can be synchronized manually.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">167</context>
+          <context context-type="linenumber">172</context>
         </context-group>
         <target>（可选）您可以添加可手动同步的代理</target>
       </trans-unit>
@@ -5276,7 +5284,7 @@
         <source>Host</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">174</context>
+          <context context-type="linenumber">179</context>
         </context-group>
         <target>地址</target>
       </trans-unit>
@@ -5284,7 +5292,7 @@
         <source>Not synced yet.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">183</context>
+          <context context-type="linenumber">188</context>
         </context-group>
         <target>尚未同步</target>
       </trans-unit>
@@ -5292,7 +5300,7 @@
         <source>Edit</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">190</context>
+          <context context-type="linenumber">195</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/metrics/metrics.component.html</context>
@@ -5316,11 +5324,11 @@
         <source>Check Availability</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">197</context>
+          <context context-type="linenumber">202</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">230</context>
+          <context context-type="linenumber">235</context>
         </context-group>
         <target>检查可用性</target>
       </trans-unit>
@@ -5328,11 +5336,11 @@
         <source>Sync</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">206</context>
+          <context context-type="linenumber">211</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">213</context>
+          <context context-type="linenumber">218</context>
         </context-group>
         <target>同步</target>
       </trans-unit>
@@ -5340,7 +5348,7 @@
         <source>Syncing agent is not allowed when creating a new one</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">211</context>
+          <context context-type="linenumber">216</context>
         </context-group>
         <target>新创建的代理无法执行同步操作</target>
       </trans-unit>
@@ -5348,7 +5356,7 @@
         <source>Add Manual Agent</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">238</context>
+          <context context-type="linenumber">243</context>
         </context-group>
         <target>添加手动代理</target>
       </trans-unit>
@@ -5356,7 +5364,7 @@
         <source>View Relay Proxy</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">27</context>
+          <context context-type="linenumber">32</context>
         </context-group>
         <target>查看中继代理</target>
       </trans-unit>
@@ -5364,7 +5372,7 @@
         <source>Edit Relay Proxy</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">29</context>
+          <context context-type="linenumber">34</context>
         </context-group>
         <target>编辑中继代理</target>
       </trans-unit>
@@ -5372,7 +5380,7 @@
         <source>Add Relay Proxy</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">30</context>
+          <context context-type="linenumber">35</context>
         </context-group>
         <target>添加中继代理</target>
       </trans-unit>
@@ -5380,7 +5388,7 @@
         <source>Sync to agent succeeded</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">116</context>
+          <context context-type="linenumber">143</context>
         </context-group>
         <target>代理同步成功</target>
       </trans-unit>
@@ -5388,7 +5396,7 @@
         <source>Sync to agent failed: <x id="PH" equiv-text="syncResult.reason"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">119</context>
+          <context context-type="linenumber">146</context>
         </context-group>
         <target>同步到代理失败：<x id="PH" equiv-text="syncResult.reason"/></target>
       </trans-unit>
@@ -5396,7 +5404,7 @@
         <source>Error syncing to agent.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">123</context>
+          <context context-type="linenumber">150</context>
         </context-group>
         <target>同步到代理时发生错误</target>
       </trans-unit>
@@ -5404,23 +5412,31 @@
         <source>Agent is available.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">137</context>
+          <context context-type="linenumber">164</context>
         </context-group>
         <target>代理可用</target>
       </trans-unit>
-      <trans-unit id="relay-proxy.drawer.agent-unavailable" datatype="html">
-        <source>Agent is unavailable.</source>
+      <trans-unit id="relay-proxy.drawer.agent-not-found" datatype="html">
+        <source>Agent not found. </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">139</context>
+          <context context-type="linenumber">167</context>
         </context-group>
-        <target>代理不可用</target>
+        <target>找不到代理</target>
+      </trans-unit>
+      <trans-unit id="relay-proxy.drawer.agent-unavailable" datatype="html">
+        <source>Agent is unavailable and this usually due to network issues. </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
+          <context context-type="linenumber">171</context>
+        </context-group>
+        <target>代理不可用，这通常是网络原因造成的。</target>
       </trans-unit>
       <trans-unit id="relay-proxy.drawer.error-checking-agent" datatype="html">
         <source>Error checking agent availability</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.ts</context>
-          <context context-type="linenumber">143</context>
+          <context context-type="linenumber">177</context>
         </context-group>
         <target>检查代理可用性时发送错误</target>
       </trans-unit>
@@ -5433,12 +5449,12 @@
         <target>中继代理 Key</target>
       </trans-unit>
       <trans-unit id="relay-proxy.key-modal.copy-key-description" datatype="html">
-        <source>Make sure to copy and save this key now. You won&apos;t be able to see it again!</source>
+        <source>Make sure to copy and save this key now. You won&apos;t be able to see it again! You can close this dialog after copying the key.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-key-modal/relay-proxy-key-modal.component.html</context>
           <context context-type="linenumber">13</context>
         </context-group>
-        <target>请确保复制并保存此密钥，之后你将无法再次看到它。</target>
+        <target>请确保复制并保存此密钥，之后你将无法再次看到它。您可以在复制密钥后关闭此对话框。</target>
       </trans-unit>
       <trans-unit id="relay-proxy.key-modal.not-copied" datatype="html">
         <source>Not Copied</source>
@@ -5968,7 +5984,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/relay-proxies/index/index.component.ts</context>
-          <context context-type="linenumber">77</context>
+          <context context-type="linenumber">80</context>
         </context-group>
         <target>数据加载失败，请重试</target>
       </trans-unit>

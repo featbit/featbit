@@ -48,15 +48,17 @@ export interface RelayProxyAgent {
   isSyncing?: boolean;
 }
 
+export interface AutoAgentStatus {
+  serves: string;
+  reportedAt: Date;
+  syncState: string;
+  lastSyncedAt: Date;
+  dataVersion: number
+}
+
 export interface RelayProxyAutoAgent {
   id: string;
-  status: {
-    serves: string;
-    reportedAt: Date;
-    syncState: string;
-    lastSyncedAt: Date;
-    dataVersion: number
-  };
+  status: AutoAgentStatus | string;
   registeredAt: Date;
 }
 
