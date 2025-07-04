@@ -1,5 +1,7 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
+using Application.RelayProxies;
 using Microsoft.Net.Http.Headers;
 
 namespace Infrastructure.Services;
@@ -20,7 +22,7 @@ public class AgentService(HttpClient httpClient) : IAgentService
         }
     }
 
-    public async Task BootstrapAsync(string host, string key, object payload)
+    public async Task<SyncResult> BootstrapAsync(string host, string key, object payload)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, $"{host}/api/public/proxy/bootstrap")
         {
@@ -33,5 +35,19 @@ public class AgentService(HttpClient httpClient) : IAgentService
 
         var response = await httpClient.SendAsync(request);
         response.EnsureSuccessStatusCode();
+
+        var body = await response.Content.ReadAsStringAsync();
+
+        using var json = JsonDocument.Parse(body);
+        var root = json.RootElement;
+
+        var serves = root.TryGetProperty("serves", out var servesElem)
+            ? servesElem.ToString()
+            : string.Empty;
+        var dataVersion = root.TryGetProperty("dataVersion", out var dataVersionElem)
+            ? dataVersionElem.GetInt64()
+            : 0;
+
+        return SyncResult.Ok(serves, dataVersion);
     }
 }

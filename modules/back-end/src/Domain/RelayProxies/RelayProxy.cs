@@ -55,6 +55,4 @@ public class RelayProxy : AuditedEntity
 
         UpdatedAt = DateTime.UtcNow;
     }
-
-    public void AgentSynced(Agent agent) => agent.SyncAt = DateTime.UtcNow;
 }

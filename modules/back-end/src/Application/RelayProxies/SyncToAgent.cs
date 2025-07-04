@@ -45,21 +45,21 @@ public class SyncToAgentHandler(
 
         if (envIds.Length == 0)
         {
-            return SyncResult.Ok(agent.SyncAt);
+            return SyncResult.Ok();
         }
 
         try
         {
-            await PerformSyncAsync();
+            var syncResult = await PerformSyncAsync();
+            agent.Synced(syncResult.Serves, syncResult.DataVersion);
 
-            relayProxy.AgentSynced(agent);
             await relayProxyService.UpdateAsync(relayProxy);
 
-            return SyncResult.Ok(agent.SyncAt);
+            return syncResult;
         }
         catch (Exception ex)
         {
-            return SyncResult.Failed(ex.Message);
+            return SyncResult.Fail(ex.Message);
         }
 
         async Task<Guid[]> GetAllEnvIdsAsync(Guid organizationId)
@@ -68,7 +68,7 @@ public class SyncToAgentHandler(
             return projectWithEnvs.SelectMany(p => p.Environments).Select(env => env.Id).ToArray();
         }
 
-        async Task PerformSyncAsync()
+        async Task<SyncResult> PerformSyncAsync()
         {
             var secrets = await envService.GetRpSecretsAsync(envIds);
             var flags = await featureFlagService.FindManyAsync(flag => envIds.Contains(flag.EnvId));
@@ -92,7 +92,7 @@ public class SyncToAgentHandler(
                 })
             };
 
-            await agentService.BootstrapAsync(request.Host, relayProxy.Key, payload);
+            return await agentService.BootstrapAsync(request.Host, relayProxy.Key, payload);
         }
     }
 }
