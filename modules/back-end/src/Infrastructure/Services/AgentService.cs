@@ -8,7 +8,7 @@ public class AgentService(HttpClient httpClient) : IAgentService
 {
     public async Task<HttpStatusCode> CheckAvailabilityAsync(string host)
     {
-        var request = new HttpRequestMessage(HttpMethod.Get, $"{host}/health/readiness");
+        var request = new HttpRequestMessage(HttpMethod.Get, $"{host}/health/liveness");
         try
         {
             var response = await httpClient.SendAsync(request);
