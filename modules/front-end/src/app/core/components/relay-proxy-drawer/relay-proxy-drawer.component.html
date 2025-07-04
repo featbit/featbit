@@ -116,7 +116,7 @@
                 <br />
                 <span class="ant-list-item-meta-description">
                   <span i18n="@@relay-proxy.drawer.registered-at">Registered At</span>
-                  : {{ autoAgent.registeredAt | date: 'yyyy/MM/dd HH:mm:ss' }}
+                  : {{ autoAgent.registeredAt | formatDate: 'yyyy/MM/dd HH:mm:ss' }}
                 </span>
               </td>
               <td>
@@ -124,7 +124,7 @@
                 <br>
                 <span class="ant-list-item-meta-description">
                   <span i18n="@@relay-proxy.drawer.reported-at">Reported At</span>
-                  : {{ autoAgent.status.reportedAt | date: 'yyyy/MM/dd HH:mm:ss' }}
+                  : {{ autoAgent.status.reportedAt | formatDate: 'yyyy/MM/dd HH:mm:ss' }}
                 </span>
               </td>
               <td>
@@ -132,12 +132,12 @@
                 <br />
                 <span class="ant-list-item-meta-description">
                   <span i18n="@@relay-proxy.drawer.last-synced-at">Last Synced At</span>
-                  : {{ autoAgent.status.lastSyncedAt | date: 'yyyy/MM/dd HH:mm:ss' }}
+                  : {{ autoAgent.status.lastSyncedAt | formatDate: 'yyyy/MM/dd HH:mm:ss' }}
                 </span>
                 <br />
                 <span class="ant-list-item-meta-description">
                   <span i18n="@@relay-proxy.drawer.data-version">Data Version</span>
-                  : {{ autoAgent.status.dataVersion | date: 'yyyy/MM/dd HH:mm:ss' }}
+                  : {{ autoAgent.status.dataVersion | formatDate: 'yyyy/MM/dd HH:mm:ss' }}
                 </span>
               </td>
               <td>
@@ -175,21 +175,38 @@
             <nz-list-item nzNoFlex *ngFor="let agentControl of agents.controls; let i = index">
               <div class="agent-item">
                 <div class="meta">
-                  <div class="ant-list-item-meta-title">
-                    <span i18n="@@common.host">Host</span>: {{ agentControl.value.host }}
+                  <div class="column">
+                    <div class="ant-list-item-meta-title">
+                      <span i18n="@@common.name">Name</span>: {{ agentControl.value.name }}
+                    </div>
+                    <div class="ant-list-item-meta-description">
+                      <span i18n="@@common.host">Host</span>: {{ agentControl.value.host }}
+                    </div>
+                    <div class="ant-list-item-meta-description">
+                      <span i18n="@@common.created-at">Created At</span>:
+                      {{ agentControl.value.createdAt | formatDate: 'yyyy/MM/dd HH:mm:ss' }}
+                    </div>
                   </div>
-                  <div class="ant-list-item-meta-description">
-                    <span i18n="@@relay-proxy.drawer.last-synced-at">Last Synced At</span>:
-                    <ng-container *ngIf="agentControl.value.syncAt; then showSyncAt; else notSyncYet"></ng-container>
-                    <ng-template #showSyncAt>
-                      {{ agentControl.value.syncAt | date: 'yyyy/MM/dd HH:mm:ss' }}
-                    </ng-template>
-                    <ng-template #notSyncYet>
-                      <span class="not-synced-yet" i18n="@@relay-proxy.drawer.not-synced-yet">Not synced yet.</span>
-                    </ng-template>
+                  <div class="column">
+                    <div class="ant-list-item-meta-title">
+                      <span i18n="@@common.serves">Serves</span>: {{ agentControl.value.serves || 'N/A' }}
+                    </div>
+                    <div class="ant-list-item-meta-description">
+                      <span i18n="@@relay-proxy.drawer.last-synced-at">Last Synced At</span>:
+                      <ng-container *ngIf="agentControl.value.syncAt; then showSyncAt; else notSyncYet"></ng-container>
+                      <ng-template #showSyncAt>
+                        {{ agentControl.value.syncAt | date: 'yyyy/MM/dd HH:mm:ss' }}
+                      </ng-template>
+                      <ng-template #notSyncYet>
+                        <span class="not-synced-yet" i18n="@@relay-proxy.drawer.not-synced-yet">Not synced yet.</span>
+                      </ng-template>
+                    </div>
+                    <div class="ant-list-item-meta-description">
+                      <span i18n="@@relay-proxy.drawer.data-version">Data Version</span>:
+                      {{ agentControl.value.dataVersion | formatDate: 'yyyy/MM/dd HH:mm:ss' }}
+                    </div>
                   </div>
                 </div>
-                <span><span i18n="@@common.name">Name</span>: {{ agentControl.value.name }}</span>
                 <ul nz-list-item-actions *ngIf="!readonly">
                   <nz-list-item-action>
                     <a (click)="editAgent(agentControl.value)" i18n="@@common.edit">Edit</a>

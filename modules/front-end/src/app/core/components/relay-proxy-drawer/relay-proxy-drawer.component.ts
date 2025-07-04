@@ -1,10 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import {
-  AutoAgentStatus,
-  RelayProxy,
-  RelayProxyAgent,
-  RelayProxyAutoAgent
-} from "@features/safe/relay-proxies/types/relay-proxy";
+import { RelayProxy, RelayProxyAgent, RelayProxyAutoAgent } from "@features/safe/relay-proxies/types/relay-proxy";
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
 import { SegmentType } from "@features/safe/segments/types/segments-index";
 import { ResourceSpaceLevel, ResourceTypeEnum, ResourceV2 } from "@shared/policy";
@@ -106,7 +101,7 @@ export class RelayProxyDrawerComponent {
 
   isAutoAgentRemovable(agent: RelayProxyAutoAgent): boolean {
     // only allow removal if the agent is inactive for more than 5 minutes
-    return Date.now() - new Date((agent.status as AutoAgentStatus).reportedAt).getTime() > 1000 * 60 * 5;
+    return Date.now() - new Date(agent.status.reportedAt).getTime() > 1000 * 60 * 5;
   }
 
   removeAutoAgent(id: string) {
@@ -141,6 +136,8 @@ export class RelayProxyDrawerComponent {
       next: (syncResult) => {
         if (syncResult.success) {
           this.message.success($localize`:@@relay-proxy.drawer.sync-success:Sync to agent succeeded`);
+          agent.serves = syncResult.serves;
+          agent.dataVersion = syncResult.dataVersion;
           agent.syncAt = syncResult.syncAt;
         } else {
           this.message.error($localize`:@@relay-proxy.drawer.sync-failed:Sync to agent failed: ${syncResult.reason}`);
@@ -187,15 +184,8 @@ export class RelayProxyDrawerComponent {
     }
 
     const existingIndex = this.agents.controls.findIndex(a => a.value.id === agent.id);
-    const formGroup = this.fb.group({
-      id: agent.id,
-      name: agent.name,
-      host: agent.host,
-      syncAt: agent.syncAt,
-      isNew: existingIndex === -1,
-      isChecking: false,
-      isSyncing: false
-    });
+    const data = { ...agent, isChecking: false, isSyncing: false };
+    const formGroup = this.fb.group(data);
 
     if (existingIndex !== -1) {
       this.agents.setControl(existingIndex, formGroup);
@@ -281,14 +271,8 @@ export class RelayProxyDrawerComponent {
     }
 
     const groups = agents.map(agent => {
-      return this.fb.group({
-        id: [ agent.id ],
-        name: [ agent.name, Validators.required ],
-        host: [ agent.host, Validators.required ],
-        syncAt: [ agent.syncAt ],
-        isChecking: [ false ],
-        isSyncing: [ false ]
-      });
+      const data = { ...agent,  isChecking: false, isSyncing: false };
+      return this.fb.group(data);
     });
 
     return this.fb.array(groups);

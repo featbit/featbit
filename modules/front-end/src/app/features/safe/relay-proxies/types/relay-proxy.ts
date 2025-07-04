@@ -42,23 +42,18 @@ export interface RelayProxyAgent {
   name: string;
   host: string;
   syncAt?: Date;
+  serves: string;
+  dataVersion?: number;
+  createdAt?: Date;
 
   // for ui
   isChecking?: boolean;
   isSyncing?: boolean;
 }
 
-export interface AutoAgentStatus {
-  serves: string;
-  reportedAt: Date;
-  syncState: string;
-  lastSyncedAt: Date;
-  dataVersion: number
-}
-
 export interface RelayProxyAutoAgent {
   id: string;
-  status: AutoAgentStatus | string;
+  status: any;
   registeredAt: Date;
 }
 
@@ -69,5 +64,7 @@ export interface UpsertRelayProxyPayload extends RelayProxyBase {
 export interface SyncAgentResult {
   success: boolean;
   syncAt?: Date;
+  serves: string;
+  dataVersion: number;
   reason: string;
 }

@@ -70,7 +70,10 @@ export class RelayProxyAgentModalComponent {
       id: this._agent?.id ?? uuidv4(),
       name: this.form.value.name,
       host: this.form.value.url,
-      syncAt: this._agent?.syncAt || null
+      syncAt: this._agent?.syncAt || null,
+      serves: this._agent?.serves || '',
+      dataVersion: this._agent?.dataVersion || 0,
+      createdAt: this._agent?.createdAt || new Date(),
     };
 
     this.onClose.emit(agent);
