@@ -3,7 +3,7 @@
     <div class="table-search-area">
       <div class="search-inputs">
         <nz-input-group [nzPrefix]="prefixIconSearch">
-          <input nz-input type="text" placeholder="Filter by name" i18n-placeholder="@@segment.idx.filter-by-name" [(ngModel)]="segmentFilter.name" (ngModelChange)="onSearch(true)">
+          <input nz-input type="text" placeholder="Filter by name" i18n-placeholder="@@common.filter-by-name" [(ngModel)]="segmentFilter.name" (ngModelChange)="onSearch(true)">
         </nz-input-group>
         <label nz-checkbox [(ngModel)]="segmentFilter.isArchived" (ngModelChange)="onSearch(true)" i18n="@@segment.idx.archived">Archived</label>
         <ng-template #prefixIconSearch>
@@ -76,7 +76,7 @@
                 </ul>
               </ng-template>
             </td>
-            <td>{{getLocalDate(item.updatedAt) | date: 'yyyy-MM-dd HH:mm:ss'}}</td>
+            <td>{{item.updatedAt | date: 'yyyy-MM-dd HH:mm:ss'}}</td>
             <td>
               <a style="color:#23AD7F;" (click)="onIntoSegmentDetail(item)" i18n="@@common.details">Details</a>
               <nz-divider nzType="vertical"></nz-divider>

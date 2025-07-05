@@ -1,0 +1,30 @@
+<nz-modal
+  nzClassName="relay-proxy-key-modal"
+  nzCentered
+  [(nzVisible)]="visible"
+  i18n-nzTitle="@@relay-proxy.key-modal.title"
+  nzTitle="Relay Proxy Key"
+  nzMaskClosable="false"
+  nzClosable="false">
+  <div class="content" *nzModalContent>
+    <nz-alert
+      nzType="info"
+      i18n-nzDescription="@@relay-proxy.key-modal.copy-key-description"
+      nzDescription="Make sure to copy and save this key now. You won't be able to see it again! You can close this dialog after copying the key."
+    ></nz-alert>
+
+    <div class="key" (click)="copyKey()">
+      {{ key }}
+      <i class="copy-icon" nz-icon nzType="icons:icon-copy"></i>
+    </div>
+  </div>
+  <div class="footer" *nzModalFooter>
+    <ng-container *ngIf="copied; then ok; else notCopied"></ng-container>
+    <ng-template #ok>
+      <button nz-button nzType="primary" (click)="close()" i18n="@@common.ok">Ok</button>
+    </ng-template>
+    <ng-template #notCopied>
+      <button nz-button nzType="primary" disabled i18n="@@relay-proxy.key-modal.not-copied">Not Copied</button>
+    </ng-template>
+  </div>
+</nz-modal>

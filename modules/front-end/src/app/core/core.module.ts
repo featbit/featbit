@@ -82,7 +82,6 @@ import { AccessTokenStatusPipe } from "@core/pipes/access-token-status.pipe";
 import { NzCollapseModule } from "ng-zorro-antd/collapse";
 import { GuideComponent } from "@core/components/guide/guide.component";
 import { PrismComponent } from './components/prism/prism.component';
-import { RelayProxyDrawerComponent } from "@core/components/relay-proxy-drawer/relay-proxy-drawer.component";
 import { FeatureFlagDrawerComponent } from "@core/components/feature-flag-drawer/feature-flag-drawer.component";
 import { NzSwitchModule } from "ng-zorro-antd/switch";
 import {
@@ -105,6 +104,9 @@ import { NzDescriptionsModule } from "ng-zorro-antd/descriptions";
 import { SegmentCreationModalComponent } from './components/segment-creation-modal/segment-creation-modal.component';
 import { CopyFeatureFlagModalComponent } from '@core/components/copy-feature-flag-modal/copy-feature-flag-modal.component';
 import { BroadcastService } from "@services/broadcast.service";
+import { RelayProxyDrawerComponent } from '@core/components/relay-proxy-drawer/relay-proxy-drawer.component';
+import { RelayProxyAgentModalComponent } from './components/relay-proxy-agent-modal/relay-proxy-agent-modal.component';
+import { RelayProxyKeyModalComponent } from './components/relay-proxy-key-modal/relay-proxy-key-modal.component';
 
 @NgModule({
   declarations: [
@@ -149,7 +151,10 @@ import { BroadcastService } from "@services/broadcast.service";
     ImportUserComponent,
     EndUserDrawerComponent,
     SegmentCreationModalComponent,
-    CopyFeatureFlagModalComponent
+    CopyFeatureFlagModalComponent,
+    RelayProxyDrawerComponent,
+    RelayProxyAgentModalComponent,
+    RelayProxyKeyModalComponent
   ],
   imports: [
     CommonModule,
@@ -255,7 +260,10 @@ import { BroadcastService } from "@services/broadcast.service";
     ImportUserComponent,
     EndUserDrawerComponent,
     SegmentCreationModalComponent,
-    CopyFeatureFlagModalComponent
+    CopyFeatureFlagModalComponent,
+    RelayProxyDrawerComponent,
+    RelayProxyAgentModalComponent,
+    RelayProxyKeyModalComponent
   ]
 })
 export class CoreModule {

@@ -10,6 +10,71 @@ namespace Infrastructure.Services.MongoDb;
 
 public class EnvironmentService(MongoDbClient mongoDb) : MongoDbService<Environment>(mongoDb), IEnvironmentService
 {
+    public async Task<string[]> GetServesAsync(string[] scopes)
+    {
+        if (scopes.Length == 0)
+        {
+            return [];
+        }
+
+        var projects = MongoDb.QueryableOf<Project>();
+        var environments = MongoDb.QueryableOf<Environment>();
+
+        var envIds = scopes.Select(Guid.Parse).ToArray();
+        var query =
+            from environment in environments
+            join project in projects on environment.ProjectId equals project.Id
+            where envIds.Contains(environment.Id)
+            select new
+            {
+                envId = environment.Id,
+                projectName = project.Name,
+                envName = environment.Name
+            };
+
+        var result = await query.ToListAsync();
+        return result
+            .Select(x => $"{x.envId},{x.projectName}/{x.envName}")
+            .ToArray();
+    }
+
+    public async Task<RpSecret[]> GetRpSecretsAsync(Guid[] envIds)
+    {
+        if (envIds.Length == 0)
+        {
+            return [];
+        }
+
+        var projects = MongoDb.QueryableOf<Project>();
+        var environments = MongoDb.QueryableOf<Environment>();
+
+        var query = from environment in environments
+            join project in projects on environment.ProjectId equals project.Id
+            where envIds.Contains(environment.Id)
+            select new
+            {
+                EnvId = environment.Id,
+                EnvKey = environment.Key,
+                ProjectKey = project.Key,
+                Secrets = environment.Secrets,
+            };
+
+        var result = await query.ToListAsync();
+
+        var rpSecrets = result.Select(x => x.Secrets.Select(secret => new RpSecret
+            {
+                EnvId = x.EnvId,
+                EnvKey = x.EnvKey,
+                ProjectKey = x.ProjectKey,
+                Type = secret.Type,
+                Value = secret.Value
+            }))
+            .SelectMany(x => x)
+            .ToArray();
+
+        return rpSecrets;
+    }
+
     public async Task<ResourceDescriptor?> GetResourceDescriptorAsync(Guid envId)
     {
         var organizations = MongoDb.QueryableOf<Organization>();

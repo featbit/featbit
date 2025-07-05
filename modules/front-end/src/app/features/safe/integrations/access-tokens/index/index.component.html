@@ -2,7 +2,7 @@
   <div class="table-search-area">
     <div class="search-inputs">
       <nz-input-group [nzPrefix]="prefixIconSearch">
-        <input nz-input type="text" placeholder="Filter by name" [(ngModel)]="filter.name" (ngModelChange)="doSearch(true)" i18n-placeholder="@@common.searchNamePlaceholder">
+        <input nz-input type="text" placeholder="Filter by name" [(ngModel)]="filter.name" (ngModelChange)="doSearch(true)" i18n-placeholder="@@common.filter-by-name">
       </nz-input-group>
       <ng-template #prefixIconSearch>
         <i nz-icon nzType="icons:icon-search"></i>

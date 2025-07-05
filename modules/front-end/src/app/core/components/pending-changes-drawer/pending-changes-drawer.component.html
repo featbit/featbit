@@ -74,7 +74,7 @@
               <div>{{changeCategories.changeRequestReason}}</div>
             </div>
             <change-list *ngIf="changeCategories.instructions.length > 0" [param]="{ instructions: changeCategories.instructions, previous: changeCategories.previous, current: changeCategories.current }"></change-list>
-            <div class="creator-creation-time">{{changeCategories.creator}} <span i18n="@@common.created-at">created at</span>: {{ changeCategories.createdAt | date: 'yyyy-MM-dd HH:mm' }}</div>
+            <div class="creator-creation-time">{{changeCategories.creator}} <span i18n="@@common.created-at">Created At</span>: {{ changeCategories.createdAt | date: 'yyyy-MM-dd HH:mm' }}</div>
           </nz-card>
         </nz-list-item>
         <nz-list-empty *ngIf="changeCategoriesList.length === 0"></nz-list-empty>

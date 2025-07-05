@@ -1,261 +1,288 @@
 <nz-drawer
-  [nzClosable]="false"
-  [nzExtra]="extra"
+  nzClosable="false"
   nzPlacement="right"
+  [nzExtra]="extra"
+  [(nzVisible)]="visible"
   [nzTitle]="title"
-  [nzBodyStyle]="{'padding-top': '12px'}"
-  [nzWidth]="1100"
-  [nzVisible]="visible"
-  (nzOnClose)="cancel()">
+  [nzWidth]="900"
+  (nzOnClose)="close()">
   <ng-container *nzDrawerContent>
-    <form nz-form [formGroup]="form" nzLayout="vertical" class="proxy-form">
+    <form nz-form [formGroup]="form" nzLayout="vertical" (ngSubmit)="doSubmit()">
+      <!-- Name  -->
       <nz-form-item>
         <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>
-        <nz-form-control nzHasFeedback nzValidatingTip="Validating..." i18n-nzValidatingTip="@@common.validating" [nzErrorTip]="errorTpl">
-          <input type="text" nz-input formControlName="name" placeholder="Name" i18n-placeholder="@@common.name"/>
+        <nz-form-control
+          nzHasFeedback
+          nzValidatingTip="Validating..."
+          i18n-nzValidatingTip="@@common.validating"
+          [nzErrorTip]="nameErrorTpl">
+          <input nz-input formControlName="name"/>
+          <ng-template #nameErrorTpl let-control>
+            <ng-container *ngIf="control.hasError('required')" i18n="@@common.name-cannot-be-empty">Name cannot be empty</ng-container>
+            <ng-container *ngIf="control.hasError('duplicated')" i18n="@@common.name-has-been-used">This name has been used</ng-container>
+            <ng-container *ngIf="control.hasError('unknown')" i18n="@@common.name-validation-failed">Name validation failed</ng-container>
+          </ng-template>
         </nz-form-control>
-        <ng-template #errorTpl let-control>
-          <ng-container *ngIf="control.hasError('required')" i18n="@@common.name-cannot-be-empty">Name cannot be empty</ng-container>
-          <ng-container *ngIf="control.hasError('duplicated')" i18n="@@common.name-unavailable">Name is not available</ng-container>
-        </ng-template>
       </nz-form-item>
+
+      <!-- Description  -->
       <nz-form-item>
         <nz-form-label i18n="@@common.description">Description</nz-form-label>
-        <nz-form-control nzHasFeedback nzErrorTip="Cannot exceed 512 characters" i18n-nzErrorTip="@@common.description.cannot-exceed-512-characters">
-          <nz-textarea-count [nzMaxCharacterCount]="512">
-            <textarea nz-input formControlName="description" i18n-placeholder="@@common.description" placeholder="Description">
-            </textarea>
-          </nz-textarea-count>
+        <nz-form-control
+          nzExtra="Describe the purpose of this relay proxy."
+          i18n-nzExtra="@@relay-proxy.drawer.description">
+          <textarea
+            style="resize: none"
+            nz-input
+            formControlName="description"
+            placeholder="Description"
+            i18n-placeholder="@@common.description"
+          ></textarea>
         </nz-form-control>
       </nz-form-item>
+
+      <!-- Scopes  -->
       <nz-form-item>
-        <nz-form-label nzRequired>
-          <span i18n="@@common.scopes">Scopes</span>
-          <i i18n-nz-tooltip="@@relay-proxy.scopes-tooltip" nz-tooltip="Define the environments that should be synchronized to the agents" nz-icon nzType="icons:icon-info-outline"></i>
-          <i *ngIf="!readonly && !form.value.isAllEnvs" nz-icon (click)="addScope()" nzType="icons:icon-add-outline"></i>
-        </nz-form-label>
-        <nz-form-control>
-          <nz-radio-group formControlName="isAllEnvs" class="custom-scope-type">
+        <nz-form-label nzRequired i18n="@@common.scopes">Scopes</nz-form-label>
+        <nz-form-control
+          [nzValidateStatus]="scopes"
+          formGroupName="scopes"
+          nzErrorTip="Please select at least one environment."
+          i18n-nzErrorTip="@@relay-proxy.drawer.scopes-cannot-be-empty"
+          nzExtra="Select the environments that the agent can serve. (At least one environment must be selected.)"
+          i18n-nzExtra="@@relay-proxy.drawer.scopes-description">
+          <nz-radio-group formControlName="isAllEnvs">
+            <label nz-radio [nzValue]="false" i18n="@@common.custom-envs">Custom environments</label>
             <label nz-radio [nzValue]="true" i18n="@@common.all-envs">All environments</label>
-            <label nz-radio [nzValue]="false" i18n="@@common.customize-envs">Customize environments</label>
           </nz-radio-group>
-        </nz-form-control>
-        <ng-container formArrayName="scopes" *ngIf="!form.value.isAllEnvs">
-          <div class="scope-selectors">
-            <ng-container *ngFor="let _ of scopes.controls; let i = index">
-              <div class="scope-form-row" [formGroupName]="i">
-                <div class="proj-env-selectors">
-                  <nz-form-control>
-                    <nz-select
-                      class="nz-select-40 project-selector"
-                      i18n-nzPlaceHolder="@@common.project"
-                      nzPlaceHolder="Project"
-                      formControlName="projectId">
-                      <ng-container *ngFor="let project of projects">
-                        <nz-option *ngIf="!isProjectsLoading" [nzLabel]="project.name" [nzValue]="project.id" [nzHide]="isProjectSelected(project.id)"></nz-option>
-                      </ng-container>
-                      <nz-option *ngIf="isProjectsLoading" nzDisabled nzCustomContent>
-                        <i nz-icon nzType="loading" class="loading-icon"></i> <ng-container i18n="@@common.loading">Loading...</ng-container>
-                      </nz-option>
-                    </nz-select>
-                  </nz-form-control>
-                  <nz-form-control>
-                    <nz-select
-                      class="nz-select-40 env-selector"
-                      nzMode="multiple"
-                      i18n-nzPlaceHolder="@@common.environments"
-                      nzPlaceHolder="Environments"
-                      formControlName="envIds">
-                      <ng-container *ngFor="let env of getProjectEnvs(i)">
-                        <nz-option *ngIf="!isProjectsLoading" [nzLabel]="env.name" [nzValue]="env.id" [nzHide]="isEnvSelected(env.id)"></nz-option>
-                      </ng-container>
-                      <nz-option *ngIf="isProjectsLoading" nzDisabled nzCustomContent>
-                        <i nz-icon nzType="loading" class="loading-icon"></i> <ng-container i18n="@@common.loading">Loading...</ng-container>
-                      </nz-option>
-                    </nz-select>
-                  </nz-form-control>
-                </div>
-                <button *ngIf="!readonly" nzDanger nz-button nzSize="small" nzType="link" (click)="removeEnv(i)">
-                  <i nz-icon nzType="icons:icon-delete"></i>
-                </button>
-              </div>
-            </ng-container>
-          </div>
-        </ng-container>
-      </nz-form-item>
-      <nz-form-item class="agents">
-        <ng-container formArrayName="agents">
-          <nz-form-label nzRequired>
-            <span i18n="@@common.agents">Agents</span>
-            <i [nz-tooltip]="agentsTooltip" nz-icon nzType="icons:icon-info-outline">
-              <ng-template #agentsTooltip>
-                <ng-container i18n="@@relay-proxy.agents-tooltip">A relay proxy agent is the server running the FeatBit agent program</ng-container>
-                <br>
-                <a target="_blank" href="https://github.com/featbit/featbit-agent" i18n="@@common.check-the-repo">Check the repo</a>
-              </ng-template>
-            </i>
-            <i *ngIf="!readonly" nz-icon (click)="addAgent()" nzType="icons:icon-add-outline"></i>
-            <a nz-button nzType="link" i18n="@@common.sync-all" [nzLoading]="isSyncingAll" [disabled]="isSyncAllBtnDisabled" (click)="syncAll()">Sync all</a>
-          </nz-form-label>
-          <div class="table-content-area">
-            <div class="table-wrapper">
-              <nz-spin [nzSpinning]="isSyncingAll">
-                <nz-table #agentTable
-                          nzTableLayout="fixed"
-                          nzSize="small"
-                          [nzFrontPagination]="false"
-                          [nzData]="agents.controls">
-                  <thead>
-                  <tr>
-                    <th nzWidth="240px" i18n="@@common.name">Name</th>
-                    <th nzWidth="290px" i18n="@@common.host">Host</th>
-                    <th nzWidth="100px" nzAlign="center">
-                      <ng-container i18n="@@common.status">Status</ng-container>
-                      <i [nz-tooltip]="statusTooltip" style="margin-left: 4px" nz-icon nzType="question-circle" nzTheme="outline">
-                        <ng-template #statusTooltip>
-                          <ng-container i18n="@@relay-proxy.click-status-icon-to-refresh-and-view-status-detail">The status of the agent, click icon to refresh and view the status detail</ng-container>
-                          <br>
-                          <a target="_blank" href="https://docs.featbit.co/docs/relay-proxy/relay-proxy#agent-status" i18n="@@common.check-status-definition">Check the status definition</a>
-                        </ng-template>
-                      </i>
-                    </th>
-                    <th nzWidth="120px" nzAlign="center" i18n="@@common.last-sync">Last Sync</th>
-                    <th nzWidth="200px" nzAlign="center" i18n="@@common.actions">Actions</th>
-                  </tr>
-                  </thead>
-                  <tbody>
-                  <ng-container *ngFor="let agent of agentTable.data; let i = index">
-                    <tr [formGroupName]="i">
-                      <td>
-                        <nz-form-control>
-                          <input type="text" nz-input formControlName="name" placeholder="Name" i18n-placeholder="@@common.name"/>
-                        </nz-form-control>
-                      </td>
-                      <td>
-                        <nz-form-control>
-                          <input type="text" nz-input formControlName="host" placeholder="Host" i18n-placeholder="@@common.host"/>
-                        </nz-form-control>
-                      </td>
-                      <td style="text-align: center" class="status status-{{agentStatusDict[agent.value['id']]}}">
-                        <div class="status-wrapper"
-                             *ngIf="agentStatusDict[agent.value['id']] === AgentStatusEnum.Healthy"
-                             (click)="getAgentStatusInfo(agent.value['id'], agent.value['host'])">
-                          <i nz-icon nzType="check-circle"></i>
-                          <span i18n="@@common.healthy">Healthy</span>
-                        </div>
-                        <div class="status-wrapper"
-                             *ngIf="agentStatusDict[agent.value['id']] === AgentStatusEnum.Unhealthy"
-                             (click)="getAgentStatusInfo(agent.value['id'], agent.value['host'])">
-                          <i nz-icon nzType="issues-close"></i>
-                          <span i18n="@@common.unhealthy">Unhealthy</span>
-                        </div>
-                        <div class="status-wrapper"
-                             *ngIf="agentStatusDict[agent.value['id']] === AgentStatusEnum.Unreachable"
-                             (click)="getAgentStatusInfo(agent.value['id'], agent.value['host'])">
-                          <i nz-icon nzType="close-circle"></i>
-                          <span i18n="@@common.unreachable">Unreachable</span>
-                        </div>
-                        <div class="status-wrapper"
-                             *ngIf="agentStatusDict[agent.value['id']] === AgentStatusEnum.Unauthorized"
-                             (click)="getAgentStatusInfo(agent.value['id'], agent.value['host'])">
-                          <i nz-icon nzType="stop"></i>
-                          <span i18n="@@common.unauthorized">Unauthorized</span>
-                        </div>
-                        <div class="status-wrapper" *ngIf="agentStatusDict[agent.value['id']] === AgentStatusEnum.Loading">
-                          <i nz-icon nzType="loading" i18n-nz-tooltip="@@common.loading" nz-tooltip="Loading..."></i>
-                        </div>
-                        <button class="status-wrapper" nz-button nzSize="small" nzType="link"
-                                [disabled]="agent.value['host'] === ''"
-                                *ngIf="isEditing && agentStatusDict[agent.value['id']] === AgentStatusEnum.Unknown"
-                                (click)="getAgentStatusInfo(agent.value['id'], agent.value['host'])">
-                          <span i18n="@@common.check">Check</span>
-                        </button>
-                      </td>
-                      <td style="text-align: center">
-                        {{agent.value['syncAt'] | date: 'yyyy-MM-dd HH:mm'}}
-                      </td>
-                      <td style="text-align: center">
-                        <ng-container *ngIf="!readonly">
-                          <span *ngIf="isEditing">
-                            <i *ngIf="agent.value['isNew'] || agent.controls['host'].dirty" nz-icon nzType="question-circle" nzTheme="outline"
-                               i18n-nz-tooltip="@@relay-proxy.save-to-sync-to-agent"
-                               nz-tooltip="The agent setting must be saved to enable the synchronization"></i>
-                            <button [class]="{'sync-button-new': agent.value['isNew']}" nz-button nzSize="small" nzType="link"
-                                    (click)="sync(agent)"
-                                    [nzLoading]="agentSyncProcessingDic[agent.value['id']]"
-                                    [disabled]="agent.value['isNew'] || agent.controls['host'].dirty"
-                                    i18n="@@common.sync"
-                                    i18n-nz-tooltip="@@relay-proxy.sync-to-agent"
-                                    nz-tooltip="Synchronize the flags and segments within the scopes to FeatBit agent">Sync</button>
-                          </span>
-                          <button nzDanger nz-button nzSize="small" nzType="link" (click)="removeAgent(i)" i18n="@@common.remove">Remove</button>
-                        </ng-container>
-                      </td>
-                    </tr>
-                  </ng-container>
-                  </tbody>
-                </nz-table>
-              </nz-spin>
+          <div *ngIf="form.get('scopes.isAllEnvs').value === false">
+            <resource-finder
+              [isVisible]="resourceFinderVisible"
+              (onClose)="closeResourceFinder($event)"
+              [resources]="[ResourceTypeEnum.Env]"
+              [spaceLevel]="ResourceSpaceLevel.Organization"
+              [defaultSelected]="selectedEnvs">
+            </resource-finder>
+            <button type="button" class="choose-env-button" nz-button nzType="link" (click)="openResourceFinder()">
+              <i nz-icon nzType="icons:icon-choose" nzTheme="outline"></i>
+              <span i18n="@@common.choose-environment">Choose Environments</span>
+            </button>
+            <div formArrayName="envs">
+              <nz-tag
+                *ngFor="let control of envs.controls; index as i"
+                nzMode="closeable" (nzOnClose)="removeEnv(i)">
+                {{ control.value.pathName }}
+              </nz-tag>
             </div>
           </div>
-        </ng-container>
+          <span
+            *ngIf="isScopeChanged"
+            class="scopes-changed-warning"
+            i18n="@@relay-proxy.drawer.scopes-changed-warning">To apply the new scopes: auto agents need to be restarted, while manual agents require a manual sync.
+          </span>
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- Auto Agents -->
+      <nz-form-item>
+        <nz-form-label i18n="@@common.auto-agents">Auto Agents</nz-form-label>
+        <nz-form-control
+          nzExtra="Agents that synchronize automatically. These agents will register themselves at startup, so you don't need to add them manually."
+          i18n-nzExtra="@@relay-proxy.drawer.auto-agents-description">
+          <ng-container *ngIf="autoAgents.length === 0">
+            <span i18n="@@relay-proxy.drawer.no-auto-agents" class="no-auto-agents-tip">No auto agents registered yet.</span>
+          </ng-container>
+          <nz-table
+            *ngIf="autoAgents.length !== 0"
+            #autoAgentsTable
+            nzSize="small"
+            nzBordered
+            nzFrontPagination="false"
+            nzShowPagination="false"
+            [nzData]="autoAgents"
+            [nzTotal]="autoAgents.length">
+            <thead>
+            <tr>
+              <th i18n="relay-proxy.drawer.agent-id">Agent Id</th>
+              <th i18n="@@common.serves">Serves</th>
+              <th i18n="relay-proxy.drawer.sync-status">Sync Status</th>
+              <th i18n="@@common.action">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let autoAgent of autoAgentsTable.data">
+              <td>
+                {{ autoAgent.id }}
+                <br />
+                <span class="ant-list-item-meta-description">
+                  <span i18n="@@relay-proxy.drawer.registered-at">Registered At</span>
+                  : {{ autoAgent.registeredAt | formatDate: 'yyyy/MM/dd HH:mm:ss' }}
+                </span>
+              </td>
+              <td>
+                {{ autoAgent.status.serves }}
+                <br>
+                <span class="ant-list-item-meta-description">
+                  <span i18n="@@relay-proxy.drawer.reported-at">Reported At</span>
+                  : {{ autoAgent.status.reportedAt | formatDate: 'yyyy/MM/dd HH:mm:ss' }}
+                </span>
+              </td>
+              <td>
+                {{ autoAgent.status.syncState }}
+                <br />
+                <span class="ant-list-item-meta-description">
+                  <span i18n="@@relay-proxy.drawer.last-synced-at">Last Synced At</span>
+                  : {{ autoAgent.status.lastSyncedAt | formatDate: 'yyyy/MM/dd HH:mm:ss' }}
+                </span>
+                <br />
+                <span class="ant-list-item-meta-description">
+                  <span i18n="@@relay-proxy.drawer.data-version">Data Version</span>
+                  : {{ autoAgent.status.dataVersion | formatDate: 'yyyy/MM/dd HH:mm:ss' }}
+                </span>
+              </td>
+              <td>
+                <ng-container *ngIf="isAutoAgentRemovable(autoAgent); then remove; else disableRemove"></ng-container>
+                <ng-template #remove>
+                  <a nz-popconfirm
+                     nzPopconfirmTitle="Are you sure to remove it?"
+                     i18n-nzPopconfirmTitle="@@common.simple-remove-confirm"
+                     (nzOnConfirm)="removeAutoAgent(autoAgent.id)"
+                     i18n="@@common.remove">Remove</a>
+                </ng-template>
+                <ng-template #disableRemove>
+                  <a disabled
+                     nz-tooltip
+                     nzTooltipTitle="Only agents that have been inactive for more than 5 minutes can be removed"
+                     i18n-nzTooltipTitle="@@relay-proxy.drawer.auto-agent-remove-disabled-reason"
+                     i18n="@@common.remove">Remove</a>
+                </ng-template>
+              </td>
+            </tr>
+            </tbody>
+          </nz-table>
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- Manual Agents -->
+      <nz-form-item>
+        <nz-form-label i18n="@@common.manual-agents">Manual Agents</nz-form-label>
+        <nz-form-control
+          formGroupName="agents"
+          class="manual-agents"
+          nzExtra="Optionally, you can add agents that can be synchronized manually."
+          i18n-nzExtra="@@relay-proxy.drawer.manual-agents-description">
+          <nz-list>
+            <nz-list-item nzNoFlex *ngFor="let agentControl of agents.controls; let i = index">
+              <div class="agent-item">
+                <div class="meta">
+                  <div class="column">
+                    <div class="ant-list-item-meta-title">
+                      <span i18n="@@common.name">Name</span>: {{ agentControl.value.name }}
+                    </div>
+                    <div class="ant-list-item-meta-description">
+                      <span i18n="@@common.host">Host</span>: {{ agentControl.value.host }}
+                    </div>
+                    <div class="ant-list-item-meta-description">
+                      <span i18n="@@common.created-at">Created At</span>:
+                      {{ agentControl.value.createdAt | formatDate: 'yyyy/MM/dd HH:mm:ss' }}
+                    </div>
+                  </div>
+                  <div class="column">
+                    <div class="ant-list-item-meta-title">
+                      <span i18n="@@common.serves">Serves</span>: {{ agentControl.value.serves || 'N/A' }}
+                    </div>
+                    <div class="ant-list-item-meta-description">
+                      <span i18n="@@relay-proxy.drawer.last-synced-at">Last Synced At</span>:
+                      <ng-container *ngIf="agentControl.value.syncAt; then showSyncAt; else notSyncYet"></ng-container>
+                      <ng-template #showSyncAt>
+                        {{ agentControl.value.syncAt | date: 'yyyy/MM/dd HH:mm:ss' }}
+                      </ng-template>
+                      <ng-template #notSyncYet>
+                        <span class="not-synced-yet" i18n="@@relay-proxy.drawer.not-synced-yet">Not synced yet.</span>
+                      </ng-template>
+                    </div>
+                    <div class="ant-list-item-meta-description">
+                      <span i18n="@@relay-proxy.drawer.data-version">Data Version</span>:
+                      {{ agentControl.value.dataVersion | formatDate: 'yyyy/MM/dd HH:mm:ss' }}
+                    </div>
+                  </div>
+                </div>
+                <ul nz-list-item-actions *ngIf="!readonly">
+                  <nz-list-item-action>
+                    <a (click)="editAgent(agentControl.value)" i18n="@@common.edit">Edit</a>
+                  </nz-list-item-action>
+                  <nz-list-item-action>
+                    <a nz-button
+                       nzType="link"
+                       [nzLoading]="agentControl.value.isChecking"
+                       (click)="checkAgentAvailability(agentControl.value)"
+                       i18n="@@relay-proxy.drawer.check-availability">Check Availability</a>
+                  </nz-list-item-action>
+                  <nz-list-item-action>
+                    <ng-container *ngIf="agentCanSync(agentControl.value); then sync; else disabledSync"></ng-container>
+                    <ng-template #sync>
+                      <a nz-button
+                         nzType="link"
+                         [nzLoading]="agentControl.value.isSyncing"
+                         (click)="syncAgent(agentControl.value)"
+                         i18n="@@common.sync">Sync</a>
+                    </ng-template>
+                    <ng-template #disabledSync>
+                      <a disabled
+                         nz-tooltip
+                         nzTooltipTitle="Syncing agent is not allowed when creating a new one"
+                         i18n-nzTooltipTitle="@@relay-proxy.drawer.sync-agent-not-allowed"
+                         i18n="@@common.sync">Sync</a>
+                    </ng-template>
+                  </nz-list-item-action>
+                  <nz-list-item-action>
+                    <a nz-popconfirm
+                       nzPopconfirmTitle="Are you sure to remove it?"
+                       i18n-nzPopconfirmTitle="@@common.simple-remove-confirm"
+                       (nzOnConfirm)="removeAgent(i)"
+                       i18n="@@common.remove">Remove</a>
+                  </nz-list-item-action>
+                </ul>
+                <ul nz-list-item-actions *ngIf="readonly">
+                  <nz-list-item-action>
+                    <a nz-button
+                       nzType="link"
+                       [nzLoading]="agentControl.value.isChecking"
+                       (click)="checkAgentAvailability(agentControl.value)"
+                       i18n="@@relay-proxy.drawer.check-availability">Check Availability</a>
+                  </nz-list-item-action>
+                </ul>
+              </div>
+            </nz-list-item>
+          </nz-list>
+          <button type="button" class="add-manual-agent-button" nz-button nzType="link" (click)="addAgent()">
+            <span nz-icon nzType="icons:icon-plus" nzTheme="outline"></span>
+            <span i18n="@@common.add-maual-agent">Add Manual Agent</span>
+          </button>
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- Submit -->
+      <nz-form-item *ngIf="!readonly">
+        <nz-form-control class="align-end">
+          <button [disabled]="!form.valid" nz-button class="standard-btn" nzType="primary" i18n="@@common.save">Save</button>
+        </nz-form-control>
       </nz-form-item>
     </form>
-    <button *ngIf="!readonly" (click)="doSubmit()" nz-button class="submit-btn" [nzType]="'primary'" i18n="@@common.save">Save</button>
   </ng-container>
   <ng-template #extra>
-    <i (click)="close.emit()" nz-icon nzType="icons:icon-close"></i>
+    <i (click)="close()" nz-icon nzType="icons:icon-close"></i>
   </ng-template>
 </nz-drawer>
 
-<nz-modal
-  nzCentered
-  [nzWidth]="800"
-  [nzVisible]="agentStatusModalVisible"
-  (nzOnCancel)="closeAgentStatusModal()"
-  (nzOnOk)="closeAgentStatusModal()"
-  [nzFooter]="modalFooter"
-  [nzTitle]="modalTitle">
-  <ng-template #modalTitle>
-    <span i18n="@@relay-proxy.agent-status">Agent status</span>
-  </ng-template>
-  <ng-container *nzModalContent>
-    <prism [code]="agentStatus" language="javascript"></prism>
-  </ng-container>
-  <ng-template #modalFooter>
-    <button nz-button nzType="primary" (click)="closeAgentStatusModal()">
-      <span i18n="@@common.ok">OK</span>
-    </button>
-  </ng-template>
-</nz-modal>
+<relay-proxy-agent-modal
+  [visible]="agentModalVisible"
+  [agent]="selectedAgent"
+  (onClose)="closeAgentModal($event)"
+></relay-proxy-agent-modal>
 
-<nz-modal
-  [(nzVisible)]="isCreationConfirmModalVisible"
-  i18n-nzTitle="@@relay-proxy.relay-proxy-created"
-  nzTitle="Relay proxy created"
-  (nzOnCancel)="isCreationConfirmModalVisible = false"
-  [nzFooter]="confirmFooter"
-  (nzOnOk)="isCreationConfirmModalVisible = false">
-  <ng-container *nzModalContent>
-    <div class="">
-      <nz-alert
-        nzType="warning"
-        i18n-nzDescription="@@common.copy-key-warning"
-        nzDescription="Copy and save this key now, the key will be masked once you leave the page."
-        nzShowIcon
-        nzIconType="icons:icon-warning"
-      ></nz-alert>
-
-      <div class="token-wrapper">
-        <div class="token-name">{{_relayProxy.name}}:</div>
-        <div>
-          <span>{{_relayProxy.key}}</span>
-          <i (click)="copyText($event, _relayProxy.key)" class="copy-icon" nz-icon nzType="icons:icon-copy"></i>
-        </div>
-      </div>
-    </div>
-  </ng-container>
-  <ng-template #confirmFooter>
-    <button id="confirm-modal-ok" nz-button nzType="primary" (click)="isCreationConfirmModalVisible = false" i18n="@@common.ok">OK</button>
-  </ng-template>
-</nz-modal>
+<relay-proxy-key-modal
+  [visible]="keyModalVisible"
+  [key]="fullKey"
+  (onClose)="closeKeyModal()">
+</relay-proxy-key-modal>

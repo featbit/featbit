@@ -1,0 +1,36 @@
+<nz-modal
+  nzClassName="relay-proxy-agent-modal"
+  [nzCentered]="true"
+  [nzTitle]="title"
+  nzMaskClosable="false"
+  [(nzVisible)]="visible"
+  (nzOnCancel)="cancel()">
+  <div *nzModalContent>
+    <form nz-form [formGroup]="form" nzLayout="vertical">
+      <!-- Name -->
+      <nz-form-item>
+        <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>
+        <nz-form-control nzErrorTip="Name cannot be empty" i18n-nzErrorTip="@@common.name-cannot-be-empty">
+          <input nz-input formControlName="name"/>
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- URL -->
+      <nz-form-item>
+        <nz-form-label nzRequired i18n="@@relay-proxy.agent-modal.url">URL</nz-form-label>
+        <nz-form-control
+          nzHasFeedback
+          nzErrorTip="Please provide a valid URL"
+          i18n-nzErrorTip="@@relay-proxy.agent-modal.url-validation-message"
+          nzExtra="The URL of your agent that FeatBit can access."
+          i18n-nzExtra="@@relay-proxy.agent-modal.url-description">
+          <input type="text" nz-input formControlName="url" placeholder="https://my-manual-agent.com" />
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </div>
+  <div class="footer" *nzModalFooter>
+    <button nz-button nzType="text" (click)="cancel()" i18n="@@common.cancel">Cancel</button>
+    <button [disabled]="!form.valid" nz-button nzType="primary" (click)="ok()" i18n="@@common.ok">Ok</button>
+  </div>
+</nz-modal>

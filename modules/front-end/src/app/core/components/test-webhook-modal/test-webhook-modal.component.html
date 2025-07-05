@@ -12,14 +12,14 @@
         <nz-option *ngFor="let event of events" [nzValue]="event" [nzLabel]="event"></nz-option>
       </nz-select>
     </div>
-    <nz-skeleton nzActive="true" [nzLoading]="isSending">
+    <nz-skeleton [nzActive]="true" [nzLoading]="isSending">
     </nz-skeleton>
     <ng-container *ngIf="!isSending && delivery">
       <webhook-delivery [delivery]="delivery"></webhook-delivery>
     </ng-container>
   </div>
   <div class="footer" *nzModalFooter>
-    <button nz-button nzType="text" (click)="onClose()">Cancel</button>
+    <button nz-button nzType="text" (click)="onClose()" i18n="@@common.cancel">Cancel</button>
     <button nz-button nzType="primary" (click)="sendTest()" [nzLoading]="isSending" i18n="@@integration.webhooks.send-test-webhook">Send test webhook</button>
   </div>
 </nz-modal>

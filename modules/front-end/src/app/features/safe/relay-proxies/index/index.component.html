@@ -1,81 +1,123 @@
-<section class="body-container">
-  <div class="table-content-area">
-    <div class="table-search-area">
-      <div class="search-inputs">
-        <nz-input-group class="query" [nzPrefix]="prefixIconSearch">
-          <input nz-input type="text" placeholder="Filter by name" i18n-placeholder="@@common.searchNamePlaceholder" [(ngModel)]="filter.name" (ngModelChange)="doSearch(true)">
-        </nz-input-group>
-        <ng-template #prefixIconSearch>
-          <i nz-icon nzType="icons:icon-search"></i>
-        </ng-template>
-      </div>
-      <button *ngIf="canMangeRelayProxies" nz-button nzType="primary" (click)="showDetailDrawer()">
-        <i nz-icon nzType="icons:icon-add"></i>
-        <ng-container i18n="@@common.add">Add</ng-container>
-      </button>
+<div class="table-content-area">
+  <div class="table-search-area">
+    <div class="search-inputs">
+      <nz-input-group class="query" [nzPrefix]="prefixIconSearch">
+        <input nz-input type="text" placeholder="Filter by name" i18n-placeholder="@@common.filter-by-name" [(ngModel)]="filter.name" (ngModelChange)="doSearch(true)">
+      </nz-input-group>
+      <ng-template #prefixIconSearch>
+        <i nz-icon nzType="icons:icon-search"></i>
+      </ng-template>
     </div>
-    <div class="table-wrapper">
-      <nz-table #basicTable nzSize="small"
-        nzShowSizeChanger
-        [nzData]="relayProxies.items"
-        [nzFrontPagination]="false"
-        [nzLoading]="isLoading"
-        [nzTotal]="relayProxies.totalCount"
-        [(nzPageSize)]="filter.pageSize"
-        (nzPageSizeChange)="doSearch()"
-        [nzPageSizeOptions]="[10,20,30]"
-        (nzPageIndexChange)="doSearch()"
-        [(nzPageIndex)]="filter.pageIndex">
-        <thead>
-            <tr>
-              <th nzWidth="30%" i18n="@@common.name">Name</th>
-              <th nzWidth="25%">Key</th>
-              <th nzWidth="25%" i18n="@@common.status">Status</th>
-              <th i18n="@@common.actions">Actions</th>
-            </tr>
-        </thead>
-        <tbody style="width: calc(100% - 200px);">
-          <ng-container *ngFor="let item of basicTable.data">
-            <tr>
-              <td (click)="showDetailDrawer(item)">
-                {{ item.name }}
-              </td>
-              <td>{{item.key}}</td>
-              <td (click)="showDetailDrawer(item)">
-                <div class="status">
-                  <span [class]="item.healthyStatus">
-                    {{item.healthyAgentCount}}/{{item.agents.length}} <span i18n="@@common.healthy">Healthy</span>
-                  </span>
-                  <i nz-icon nzType="question-circle" nzTheme="outline"
-                     i18n-nz-tooltip="@@relay-proxy.click-to-view-agents-status"
-                     nz-tooltip="Click to view agent status"></i>
-                </div>
-              </td>
-              <td>
-                <ng-container *ngIf="!canMangeRelayProxies">
-                  <a style="color: #23AD7F" (click)="showDetailDrawer(item)" i18n="@@common.view">View</a>
-                </ng-container>
-                <ng-container *ngIf="canMangeRelayProxies">
-                  <a style="color: #23AD7F" (click)="showDetailDrawer(item)" i18n="@@common.edit">Edit</a>
-                  <nz-divider nzType="vertical"></nz-divider>
-                  <a
-                    style="color: #717D8A"
-                    i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it?"
-                    nzPopconfirmPlacement="bottomRight"
-                    [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
-                    (nzOnConfirm)="delete(item)" [nzIcon]="iconTplDelete">
-                    <ng-container i18n="@@common.remove">Remove</ng-container>
-                  </a>
-                  <ng-template #iconTplDelete>
-                    <i nz-icon nzType="question-circle" nzTheme="fill"></i>
-                  </ng-template>
-                </ng-container>
-              </td>
-            </tr>
-          </ng-container>
-        </tbody>
-      </nz-table>
-    </div>
+    <button *ngIf="canManageRp" nz-button nzType="primary" (click)="openDrawer(null)">
+      <i nz-icon nzType="icons:icon-add"></i>
+      <ng-container i18n="@@common.add">Add</ng-container>
+    </button>
   </div>
-</section>
-<relay-proxy-drawer [readonly]="!canMangeRelayProxies" [visible]="proxyDetailVisible" (close)="relayProxyDrawerClosed($event)" [relayProxy]="currentRelayProxy"></relay-proxy-drawer>
+  <div class="table-wrapper">
+    <nz-table
+      #basicTable
+      nzSize="small"
+      nzShowSizeChanger
+      [nzData]="rps.items"
+      [nzFrontPagination]="false"
+      [nzLoading]="isLoading"
+      [nzTotal]="rps.totalCount"
+      [(nzPageSize)]="filter.pageSize"
+      (nzPageSizeChange)="doSearch()"
+      [nzPageSizeOptions]="[10,20,30]"
+      (nzPageIndexChange)="doSearch()"
+      [(nzPageIndex)]="filter.pageIndex">
+      <thead>
+      <tr>
+        <th nzWidth="20%" i18n="@@common.name">Name</th>
+        <th nzWidth="20%" i18n="@@common.serves">Serves</th>
+        <th nzWidth="10%" i18n="@@common.agents">Agents</th>
+        <th nzWidth="30%" i18n="@@common.description">Description</th>
+        <th i18n="@@common.actions">Actions</th>
+      </tr>
+      </thead>
+      <tbody style="width: calc(100% - 200px);">
+      <ng-container *ngFor="let item of basicTable.data">
+        <tr>
+          <td>
+            {{ item.name }}
+            <br />
+            <div class="additional-info">
+              {{ item.key }}
+            </div>
+          </td>
+          <td class="scopes">
+            <ng-container *ngIf="item.isAllEnvs; then allEnvs; else customEnvs"></ng-container>
+            <ng-template #allEnvs>
+              <span i18n="@@common.all-envs">All environments</span>
+              <div class="additional-info">
+                <span i18n="@@relay-proxy.index.all-envs-description">All within the organization</span>
+              </div>
+            </ng-template>
+            <ng-template #customEnvs>
+              <span nz-tooltip nzTooltipPlacement="topLeft" [nzTooltipTitle]="scopesTooltip">
+                <ng-container *ngFor="let serve of item.parsedServes; let last = last">
+                  {{ serve.pathName }}<span *ngIf="!last">, </span>
+                </ng-container>
+              </span>
+              <ng-template #scopesTooltip>
+                <ul>
+                  <li *ngFor="let serve of item.parsedServes;">{{ serve.pathName }}</li>
+                </ul>
+              </ng-template>
+              <div class="additional-info">
+                <span i18n="@@common.total">Total</span>: {{ item.scopes.length }}
+              </div>
+            </ng-template>
+          </td>
+          <td>
+            <span i18n="@@common.auto">Auto</span>: {{ item.autoAgents.length }}
+            <br />
+            <span i18n="@@common.manual">Manual</span>: {{ item.agents.length }}
+          </td>
+          <td>
+            <ng-container *ngIf="item.description; then showDescription; else noDescription"></ng-container>
+            <ng-template #showDescription>{{ item.description }}</ng-template>
+            <ng-template #noDescription>
+              <span class="no-description-hint" i18n="@@common.no-description-provided">No description provided.</span>
+            </ng-template>
+            <br />
+            <div class="additional-info">
+              <span i18n="@common.last-updated-at">Last updated at</span>: {{ item.updatedAt | date: 'yyyy-MM-dd HH:mm:ss' }}
+            </div>
+          </td>
+          <td>
+            <ng-container *ngIf="canManageRp; then manageRp; else viewRp"></ng-container>
+            <ng-template #manageRp>
+              <a style="color: #23AD7F" (click)="openDrawer(item)" i18n="@@common.edit">Edit</a>
+              <nz-divider nzType="vertical"></nz-divider>
+              <a
+                style="color: #717D8A"
+                i18n-nz-popconfirm="@@common.remove-confirm"
+                nz-popconfirm="This operation cannot be reverted, are you sure to remove it?"
+                nzPopconfirmPlacement="bottomRight"
+                [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
+                (nzOnConfirm)="delete(item)" [nzIcon]="iconTplDelete">
+                <ng-container i18n="@@common.remove">Remove</ng-container>
+              </a>
+              <ng-template #iconTplDelete>
+                <i nz-icon nzType="question-circle" nzTheme="fill"></i>
+              </ng-template>
+            </ng-template>
+            <ng-template #viewRp>
+              <a style="color: #23AD7F" (click)="openDrawer(item)" i18n="@@common.view">View</a>
+            </ng-template>
+          </td>
+        </tr>
+      </ng-container>
+      </tbody>
+    </nz-table>
+  </div>
+</div>
+
+<relay-proxy-drawer
+  [readonly]="!canManageRp"
+  [visible]="drawerVisible"
+  [rp]="selectedRp"
+  (onClose)="closeDrawer($event)">
+</relay-proxy-drawer>

@@ -17,7 +17,7 @@ public static class DbServiceCollectionExtensions
                 AddMongoDbServices();
                 break;
 
-            default:
+            case DbProvider.Postgres:
                 AddEntityFrameworkCoreServices();
                 break;
         }

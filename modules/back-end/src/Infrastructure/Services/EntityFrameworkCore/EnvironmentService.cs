@@ -11,6 +11,63 @@ namespace Infrastructure.Services.EntityFrameworkCore;
 public class EnvironmentService(AppDbContext dbContext)
     : EntityFrameworkCoreService<Environment>(dbContext), IEnvironmentService
 {
+    public async Task<string[]> GetServesAsync(string[] scopes)
+    {
+        if (scopes.Length == 0)
+        {
+            return [];
+        }
+
+        var projects = QueryableOf<Project>();
+        var environments = QueryableOf<Environment>();
+
+        var envIds = scopes.Select(Guid.Parse).ToArray();
+        var query =
+            from environment in environments
+            join project in projects on environment.ProjectId equals project.Id
+            where envIds.Contains(environment.Id)
+            select $"{environment.Id},{project.Name}/{environment.Name}";
+
+        return await query.ToArrayAsync();
+    }
+
+    public async Task<RpSecret[]> GetRpSecretsAsync(Guid[] envIds)
+    {
+        if (envIds.Length == 0)
+        {
+            return [];
+        }
+
+        var projects = QueryableOf<Project>();
+        var environments = QueryableOf<Environment>();
+
+        var query = from environment in environments
+            join project in projects on environment.ProjectId equals project.Id
+            where envIds.Contains(environment.Id)
+            select new
+            {
+                EnvId = environment.Id,
+                EnvKey = environment.Key,
+                ProjectKey = project.Key,
+                Secrets = environment.Secrets,
+            };
+
+        var result = await query.ToListAsync();
+
+        var rpSecrets = result.Select(x => x.Secrets.Select(secret => new RpSecret
+            {
+                EnvId = x.EnvId,
+                EnvKey = x.EnvKey,
+                ProjectKey = x.ProjectKey,
+                Type = secret.Type,
+                Value = secret.Value
+            }))
+            .SelectMany(x => x)
+            .ToArray();
+
+        return rpSecrets;
+    }
+
     public async Task<ResourceDescriptor?> GetResourceDescriptorAsync(Guid envId)
     {
         var organizations = QueryableOf<Organization>();

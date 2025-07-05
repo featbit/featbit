@@ -3,9 +3,11 @@ import { HttpClient, HttpParams } from "@angular/common/http";
 import { environment } from "../../../environments/environment";
 import { Observable, of } from "rxjs";
 import {
-  IPagedRelayProxy,
+  UpsertRelayProxyPayload,
+  PagedRelayProxy,
   RelayProxy,
-  RelayProxyFilter
+  RelayProxyFilter,
+  SyncAgentResult
 } from "@features/safe/relay-proxies/types/relay-proxy";
 import { catchError } from "rxjs/operators";
 
@@ -19,14 +21,14 @@ export class RelayProxyService {
     return `${environment.url}/api/v1/relay-proxies`;
   }
 
-  getList(filter: RelayProxyFilter = new RelayProxyFilter()): Observable<IPagedRelayProxy> {
+  getList(filter: RelayProxyFilter = new RelayProxyFilter()): Observable<PagedRelayProxy> {
     const queryParam = {
       name: filter.name ?? '',
       pageIndex: filter.pageIndex - 1,
       pageSize: filter.pageSize,
     };
 
-    return this.http.get<IPagedRelayProxy>(
+    return this.http.get<PagedRelayProxy>(
       this.baseUrl,
       {params: new HttpParams({fromObject: queryParam})}
     );
@@ -36,12 +38,12 @@ export class RelayProxyService {
     return this.http.delete<boolean>(`${this.baseUrl}/${id}`);
   }
 
-  getAgentStatus(relayProxyId: string, host: string): Observable<any> {
-    const url = `${this.baseUrl}/${relayProxyId}/agent-status`;
+  checkAgentAvailability(agentHost: string): Observable<number> {
+    const url = `${this.baseUrl}/agent-availability`;
 
-    return this.http.get<any>(
+    return this.http.get<number>(
       url,
-      { params: { host } }
+      { params: { agentHost } }
     );
   }
 
@@ -51,19 +53,19 @@ export class RelayProxyService {
     return this.http.get<boolean>(url).pipe(catchError(() => of(undefined)));
   }
 
-  create(payload: RelayProxy): Observable<RelayProxy> {
+  create(payload: UpsertRelayProxyPayload): Observable<RelayProxy> {
     return this.http.post<RelayProxy>(this.baseUrl, payload);
   }
 
-  update(payload: RelayProxy): Observable<boolean> {
-    const url = `${this.baseUrl}/${payload.id}`;
+  update(id: string, payload: UpsertRelayProxyPayload): Observable<boolean> {
+    const url = `${this.baseUrl}/${id}`;
 
     return this.http.put<boolean>(url, payload);
   }
 
-  syncToAgent(relayProxyId: string, agentId: string): Observable<any> {
-    const url = `${this.baseUrl}/${relayProxyId}/agents/${agentId}/sync`;
+  syncToAgent(id: string, agentId: string, host: string): Observable<SyncAgentResult> {
+    const url = `${this.baseUrl}/${id}/agents/${agentId}/sync`;
 
-    return this.http.put(url, {});
+    return this.http.put<SyncAgentResult>(url, {}, { params: { host } });
   }
 }
