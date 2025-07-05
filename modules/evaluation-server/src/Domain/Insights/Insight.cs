@@ -5,23 +5,38 @@ namespace Domain.Insights;
 
 public class Insight
 {
-    public EndUser? User { get; set; }
+    public virtual EndUser? User { get; set; }
 
     public IEnumerable<VariationInsight> Variations { get; set; } = Array.Empty<VariationInsight>();
 
     public IEnumerable<MetricInsight> Metrics { get; set; } = Array.Empty<MetricInsight>();
 
-    public bool IsValid()
+    public virtual bool IsValid()
     {
-        return User != null && User.IsValid();
+        if (User == null || !User.IsValid())
+        {
+            return false;
+        }
+
+        if (Variations.Any(x => !x.IsValid()))
+        {
+            return false;
+        }
+
+        if (Metrics.Any(x => !x.IsValid()))
+        {
+            return false;
+        }
+
+        return true;
     }
 
-    public EndUserMessage EndUserMessage(Guid envId)
+    public virtual EndUserMessage EndUserMessage(Guid envId)
     {
         return new EndUserMessage(envId, User!);
     }
 
-    public ICollection<InsightMessage> InsightMessages(Guid envId)
+    public virtual ICollection<InsightMessage> InsightMessages(Guid envId)
     {
         var messages = new List<InsightMessage>();
 
