@@ -7,9 +7,10 @@ alter table relay_proxies
     add column auto_agents JSONB default '[]'::jsonb;
 
 -- flatten the envIds array in relay_proxies.scopes
-update relay_proxies
-set scopes = (select jsonb_agg(envId)
-              from relay_proxies,
+update relay_proxies outer_rp
+set scopes = (select coalesce(jsonb_agg(envId), '[]'::jsonb)
+              from relay_proxies inner_rp,
                    jsonb_array_elements(scopes) as scope,
-                   jsonb_array_elements_text(scope -> 'envIds') as envId)
-where true;
+                   jsonb_array_elements_text(scope -> 'envIds') as envId
+              where inner_rp.id = outer_rp.id)
+where is_all_envs = false;
