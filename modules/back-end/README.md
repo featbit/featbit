@@ -51,11 +51,11 @@ requests, and that it can connect to its dependencies (a database, message queue
 
 ### JWT
 
-| Name            | Description     | Default Value            |
-|-----------------|-----------------|--------------------------|
-| `Jwt__Issuer`   | JWT Issuer Name | `"featbit"`              |
-| `Jwt__Audience` | JWT Audience    | `"featbit-api"`          |
-| `Jwt__Key`      | JWT Private Key | `"featbit-identity-key"` |
+| Name            | Description     | Default Value                                           |
+|-----------------|-----------------|---------------------------------------------------------|
+| `Jwt__Issuer`   | JWT Issuer Name | `"featbit"`                                             |
+| `Jwt__Audience` | JWT Audience    | `"featbit-api"`                                         |
+| `Jwt__Key`      | JWT Private Key | `"featbit-identity-key-must-longer-than-32-characters"` |
 
 ### MongoDB
 
