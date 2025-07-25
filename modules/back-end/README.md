@@ -51,11 +51,23 @@ requests, and that it can connect to its dependencies (a database, message queue
 
 ### JWT
 
-| Name            | Description     | Default Value            |
-|-----------------|-----------------|--------------------------|
-| `Jwt__Issuer`   | JWT Issuer Name | `"featbit"`              |
-| `Jwt__Audience` | JWT Audience    | `"featbit-api"`          |
-| `Jwt__Key`      | JWT Private Key | `"featbit-identity-key"` |
+JWT (JSON Web Token) configuration for authentication and authorization.
+
+| Name            | Description     | Default Value                                           |
+|-----------------|-----------------|---------------------------------------------------------|
+| `Jwt__Issuer`   | JWT Issuer Name | `"featbit"`                                             |
+| `Jwt__Audience` | JWT Audience    | `"featbit-api"`                                         |
+| `Jwt__Key`      | JWT Private Key | `"featbit-identity-key-must-longer-than-32-characters"` |
+
+> [!IMPORTANT]
+> **Security Notice**: You must change the `Jwt__Key` value to a secure, randomly generated key that is at least 32
+> characters long.
+>
+> - **Recommended length**: 64 characters (32 characters minimum)
+> - **Generation**: Use a cryptographically secure random generator or tools like [JWT Secrets](https://jwtsecrets.com/)
+> - **Storage**: Keep this key secret and never commit it to version control
+>
+> This key is used for signing JWT tokens and must remain consistent across all API instances.
 
 ### MongoDB
 
