@@ -4,7 +4,7 @@
       <nz-form-label i18n="@@common.name">Name</nz-form-label>
       <nz-form-control>
         <nz-input-group [nzPrefix]="userPrefix">
-          <input id="name" type="text" nz-input formControlName="name" placeholder="Name" i18n-placeholder="@@common.name"/>
+          <input type="text" nz-input formControlName="name" placeholder="Name" i18n-placeholder="@@common.name"/>
         </nz-input-group>
         <ng-template #userPrefix>
           <i nz-icon nzType="icons:icon-user"></i>
@@ -15,7 +15,7 @@
       <nz-form-label i18n="@@org.profile.email">Email</nz-form-label>
       <nz-form-control nzErrorTip="Email is mandatory!" i18n-nzErrorTip="@@org.profile.emailMandatory">
         <nz-input-group [nzPrefix]="emailPrefix">
-          <input id="email" type="text" nz-input formControlName="email" placeholder="Email" i18n-placeholder="@@org.profile.emailPlaceholder"/>
+          <input type="text" nz-input formControlName="email" placeholder="Email" i18n-placeholder="@@org.profile.emailPlaceholder"/>
         </nz-input-group>
         <ng-template #emailPrefix>
           <i nz-icon nzType="icons:icon-email"></i>

@@ -12,31 +12,31 @@
     "test-coverage": "ng test --code-coverage"
   },
   "dependencies": {
-    "@angular/animations": "^17.3.12",
-    "@angular/common": "^17.3.12",
-    "@angular/compiler": "^17.3.12",
-    "@angular/core": "^17.3.12",
-    "@angular/forms": "^17.3.12",
-    "@angular/platform-browser": "^17.3.12",
-    "@angular/platform-browser-dynamic": "^17.3.12",
-    "@angular/router": "^17.3.12",
+    "@angular/animations": "^18.2.13",
+    "@angular/common": "^18.2.13",
+    "@angular/compiler": "^18.2.13",
+    "@angular/core": "^18.2.13",
+    "@angular/forms": "^18.2.13",
+    "@angular/platform-browser": "^18.2.13",
+    "@angular/platform-browser-dynamic": "^18.2.13",
+    "@angular/router": "^18.2.13",
     "@antv/g2": "^4.2.10",
     "@ctrl/tinycolor": "^4.1.0",
     "date-fns": "^3.2.0",
     "handlebars": "4.7.8",
     "lodash-es": "^4.17.21",
     "monaco-editor": "0.39.0",
-    "ng-zorro-antd": "^17.4.1",
+    "ng-zorro-antd": "^18.2.1",
     "prismjs": "^1.29.0",
     "rxjs": "~7.8.1",
     "tslib": "^2.6.0",
     "zone.js": "~0.14.2"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^17.3.17",
-    "@angular/cli": "~17.3.17",
-    "@angular/compiler-cli": "^17.3.12",
-    "@angular/localize": "^17.3.12",
+    "@angular-devkit/build-angular": "^18.2.20",
+    "@angular/cli": "~18.2.20",
+    "@angular/compiler-cli": "^18.2.13",
+    "@angular/localize": "^18.2.13",
     "@types/jasmine": "~4.3.5",
     "@types/karma-coverage": "^2.0.1",
     "angular-locales-generator": "^1.0.4",
@@ -46,6 +46,6 @@
     "karma-coverage": "~2.2.1",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
-    "typescript": "~5.2.0"
+    "typescript": "~5.5.4"
   }
 }
