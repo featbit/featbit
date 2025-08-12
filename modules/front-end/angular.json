@@ -107,13 +107,13 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "featbit:build:production"
+              "buildTarget": "featbit:build:production"
             },
             "development": {
-              "browserTarget": "featbit:build:development"
+              "buildTarget": "featbit:build:development"
             },
             "zh": {
-              "browserTarget": "featbit:build:zh"
+              "buildTarget": "featbit:build:zh"
             }
           },
           "defaultConfiguration": "development"
@@ -121,7 +121,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "featbit:build"
+            "buildTarget": "featbit:build"
           }
         },
         "test": {
