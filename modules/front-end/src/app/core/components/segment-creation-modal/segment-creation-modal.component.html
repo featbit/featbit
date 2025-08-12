@@ -28,84 +28,94 @@
     </div>
 
     <!-- Segment Form -->
-    <form
-      *ngIf="selectedType === SegmentType.EnvironmentSpecific || (selectedType == SegmentType.Shared && isShareableSegmentGranted)"
-      nz-form [formGroup]="form" nzLayout="vertical">
-      <!-- Name  -->
-      <nz-form-item>
-        <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>
-        <nz-form-control
-          nzHasFeedback
-          nzValidatingTip="Validating..."
-          i18n-nzValidatingTip="@@common.validating"
-          [nzErrorTip]="segmentNameErrorTpl">
-          <input nz-input formControlName="name"/>
-          <ng-template #segmentNameErrorTpl let-control>
-            <ng-container *ngIf="control.hasError('required')" i18n="@@common.name-cannot-be-empty">Name cannot be empty</ng-container>
-            <ng-container *ngIf="control.hasError('duplicated')" i18n="@@common.name-has-been-used">This name has been used</ng-container>
-            <ng-container *ngIf="control.hasError('unknown')" i18n="@@common.name-validation-failed">Name validation failed</ng-container>
-          </ng-template>
-        </nz-form-control>
-      </nz-form-item>
+    @if (selectedType === SegmentType.EnvironmentSpecific || (selectedType == SegmentType.Shared && isShareableSegmentGranted)) {
+      <form
+        nz-form [formGroup]="form" nzLayout="vertical">
+        <!-- Name  -->
+        <nz-form-item>
+          <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>
+          <nz-form-control
+            nzHasFeedback
+            nzValidatingTip="Validating..."
+            i18n-nzValidatingTip="@@common.validating"
+            [nzErrorTip]="segmentNameErrorTpl">
+            <input nz-input formControlName="name"/>
+            <ng-template #segmentNameErrorTpl let-control>
+              @if (control.hasError('required')) {
+                <ng-container i18n="@@common.name-cannot-be-empty">Name cannot be empty</ng-container>
+              }
+              @if (control.hasError('duplicated')) {
+                <ng-container i18n="@@common.name-has-been-used">This name has been used</ng-container>
+              }
+              @if (control.hasError('unknown')) {
+                <ng-container i18n="@@common.name-validation-failed">Name validation failed</ng-container>
+              }
+            </ng-template>
+          </nz-form-control>
+        </nz-form-item>
+        <!-- Scopes  -->
+        @if (selectedType === SegmentType.Shared) {
+          <nz-form-item>
+            <nz-form-label nzRequired i18n="@@common.scopes">Scopes</nz-form-label>
+            <nz-form-control
+              nzExtra="Select the environments that this segment will be shared with. And by default, current environment (marked as 'blue') is selected and unremovable."
+              i18n-nzExtra="@@segment.creation-modal.scopes-description">
+              <resource-finder
+                [isVisible]="resourceFinderVisible"
+                (onClose)="closeResourceFinder($event)"
+                [resources]="[ResourceTypeEnum.organization, ResourceTypeEnum.Project, ResourceTypeEnum.Env]"
+                [spaceLevel]="ResourceSpaceLevel.Workspace"
+                [defaultSelected]="defaultSelectedScopes"
+                [unremovableRn]="currentEnvironment.rn">
+              </resource-finder>
+              @for (scopeGroup of groupedSelectedScopes; track scopeGroup) {
+                <div class="scopes-group">
+                  <span>{{ scopeGroup.name }}</span>
+                  @for (scope of scopeGroup.items; track scope) {
+                    <nz-tag
+                      [nzColor]="scope.id === currentEnvironment.id ? 'blue' : 'default'"
+                      [nzMode]="scope.id === currentEnvironment.id ? 'default' : 'closeable'"
+                      (nzOnClose)="removeScope(scope)">
+                      {{ scope.pathName }}
+                    </nz-tag>
+                  }
+                </div>
+              }
+              <button type="button" class="add-scope-button" nz-button nzType="link" (click)="openResourceFinder()">
+                <i nz-icon nzType="icons:icon-choose" nzTheme="outline"></i>
+                <span i18n="@@common.choose-scopes">Choose Scopes</span>
+              </button>
+            </nz-form-control>
+          </nz-form-item>
+        }
+        <!-- Description  -->
+        <nz-form-item>
+          <nz-form-label i18n="@@common.description">Description</nz-form-label>
+          <nz-form-control>
+            <textarea
+              style="resize: none"
+              nz-input
+              formControlName="description"
+              placeholder="Description"
+              i18n-placeholder="@@common.description"
+            ></textarea>
+          </nz-form-control>
+        </nz-form-item>
+      </form>
+    }
 
-      <!-- Scopes  -->
-      <nz-form-item *ngIf="selectedType === SegmentType.Shared">
-        <nz-form-label nzRequired i18n="@@common.scopes">Scopes</nz-form-label>
-        <nz-form-control
-          nzExtra="Select the environments that this segment will be shared with. And by default, current environment (marked as 'blue') is selected and unremovable."
-          i18n-nzExtra="@@segment.creation-modal.scopes-description">
-          <resource-finder
-            [isVisible]="resourceFinderVisible"
-            (onClose)="closeResourceFinder($event)"
-            [resources]="[ResourceTypeEnum.organization, ResourceTypeEnum.Project, ResourceTypeEnum.Env]"
-            [spaceLevel]="ResourceSpaceLevel.Workspace"
-            [defaultSelected]="defaultSelectedScopes"
-            [unremovableRn]="currentEnvironment.rn">
-          </resource-finder>
-          <ng-container *ngFor="let scopeGroup of groupedSelectedScopes">
-            <div class="scopes-group">
-              <span>{{ scopeGroup.name }}</span>
-              <nz-tag
-                *ngFor="let scope of scopeGroup.items"
-                [nzColor]="scope.id === currentEnvironment.id ? 'blue' : 'default'"
-                [nzMode]="scope.id === currentEnvironment.id ? 'default' : 'closeable'"
-                (nzOnClose)="removeScope(scope)">
-                {{ scope.pathName }}
-              </nz-tag>
-            </div>
-          </ng-container>
-          <button type="button" class="add-scope-button" nz-button nzType="link" (click)="openResourceFinder()">
-            <i nz-icon nzType="icons:icon-choose" nzTheme="outline"></i>
-            <span i18n="@@common.choose-scopes">Choose Scopes</span>
-          </button>
-        </nz-form-control>
-      </nz-form-item>
-
-      <!-- Description  -->
-      <nz-form-item>
-        <nz-form-label i18n="@@common.description">Description</nz-form-label>
-        <nz-form-control>
-          <textarea
-            style="resize: none"
-            nz-input
-            formControlName="description"
-            placeholder="Description"
-            i18n-placeholder="@@common.description"
-          ></textarea>
-        </nz-form-control>
-      </nz-form-item>
-    </form>
-
-    <div *ngIf="selectedType === SegmentType.Shared && !isShareableSegmentGranted">
-      <nz-alert
-        nzType="info"
-        i18n-nzDescription="@@segment.creation-modal.shareable-segment-description"
-        nzDescription="Shareable segment can be used across multiple environments, projects and organizations."
-      ></nz-alert>
-      <div class="need-license-description">
-        <p i18n="@@common.need-license">You don't have a license or your current license doesn't grant this feature, please contact FeatBit team to get a license.</p>
+    @if (selectedType === SegmentType.Shared && !isShareableSegmentGranted) {
+      <div>
+        <nz-alert
+          nzType="info"
+          i18n-nzDescription="@@segment.creation-modal.shareable-segment-description"
+          nzDescription="Shareable segment can be used across multiple environments, projects and organizations."
+        ></nz-alert>
+        <div class="need-license-description">
+          <p i18n="@@common.need-license">You don't have a license or your current license doesn't grant this feature, please contact FeatBit team to get a license.</p>
+        </div>
       </div>
-    </div>
+    }
   </ng-template>
 
   <ng-template #modalFooter>
@@ -117,7 +127,7 @@
         [nzLoading]="this.creating"
         [disabled]="!form.valid"
         (click)="create()"
-        i18n="@@common.save">Save</button>
+      i18n="@@common.save">Save</button>
     </div>
   </ng-template>
 </nz-modal>

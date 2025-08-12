@@ -10,114 +10,129 @@
     <div class="">
       <section class="context">
         <div><span>{{refName}}</span>
-        </div>
-      </section>
-      <section class="warning-message">
-        <div class="warning">
-          <span class="warning-icon"><i nz-icon nzType="warning" nzTheme="fill"></i></span>
-          <div class="warning-content" i18n="@@ff.targeting.the-following-changes-may-affect-insights">The following changes may affects the insights data</div>
-        </div>
-      </section>
-      <section class="pending-changes">
-        <div class="section-title" i18n="@@common.changes">Changes</div>
-        <div class="change">
-          <p class="change-count">
-            <span>{{instructions.length}} </span>
-            <ng-container i18n="@@common.number-of-changes-to-submit">changes to submit</ng-container>
-          </p>
-          <change-list class="change-list" *ngIf="instructions.length > 0" [param]="{ instructions: instructions, previous: previous, current: current }"></change-list>
-        </div>
-      </section>
-      <section class="form-wrapper" >
-        <form nz-form [formGroup]="form" nzLayout="vertical">
-          <ng-container *ngIf="license?.isGranted(LicenseFeatureEnum.Schedule) && refType === RefTypeEnum.Flag">
-            <div class="section-title with-extension-icon">
-              <span i18n="@@common.schedule">Schedule</span>
-              <span *ngIf="!ReviewModalMode.isScheduleEnabled(kind)"
-                    (click)="toggleSchedule()" nz-icon nzType="plus" nzTheme="outline"></span>
-              <span *ngIf="ReviewModalMode.isScheduleEnabled(kind)"
-                    (click)="toggleSchedule()" nz-icon nzType="minus" nzTheme="outline"></span>
-            </div>
-            <ng-container *ngIf="ReviewModalMode.isScheduleEnabled(kind)">
-              <nz-form-item>
-                <nz-form-label nzRequired i18n="@@common.title">Title</nz-form-label>
-                <nz-form-control>
-                  <input type="text" nz-input formControlName="scheduleTitle" placeholder="Title" i18n-placeholder="@@common.title"/>
-                </nz-form-control>
-              </nz-form-item>
-              <nz-form-item>
-                <nz-form-label nzRequired i18n="@@common.scheduled-time">Scheduled time</nz-form-label>
-                <nz-form-control>
-                  <nz-date-picker
-                    nzShowTime
-                    [nzShowNow]="false"
-                    nzFormat="yyyy-MM-dd HH:mm"
-                    formControlName="scheduledTime"
-                    [nzDisabledDate]="disabledDate"
-                    [nzDisabledTime]="disabledDateTime"
-                    [nzShowTime]="{ nzHideDisabledOptions: true, nzDefaultOpenValue: timeDefaultValue, nzFormat: 'HH:mm' }"
-                  ></nz-date-picker>
-                </nz-form-control>
-              </nz-form-item>
-            </ng-container>
-          </ng-container>
-          <ng-container *ngIf="license?.isGranted(LicenseFeatureEnum.ChangeRequest) && refType === RefTypeEnum.Flag">
-            <div class="section-title with-extension-icon">
-              <span i18n="@@common.change-request">Change Request</span>
-              <span *ngIf="!ReviewModalMode.isChangeRequestEnabled(kind)"
-                    (click)="toggleChangeRequest()" nz-icon nzType="plus" nzTheme="outline"></span>
-              <span *ngIf="ReviewModalMode.isChangeRequestEnabled(kind)"
-                    (click)="toggleChangeRequest()" nz-icon nzType="minus" nzTheme="outline"></span>
-            </div>
-            <ng-container *ngIf="ReviewModalMode.isChangeRequestEnabled(kind)">
-              <nz-form-item>
-                <nz-form-label nzRequired i18n="@@common.reason">Reason</nz-form-label>
-                <nz-form-control i18n-nzErrorTip="@@common.reason-cannot-be-empty" nzErrorTip="Reason cannot be empty">
-                  <input type="text" nz-input formControlName="changeRequestReason" placeholder="Add a description of your changes" i18n-placeholder="@@common.change-request-reason"/>
-                </nz-form-control>
-              </nz-form-item>
-              <nz-form-item>
-                <nz-form-label nzRequired i18n="@@common.reviewers">Reviewers</nz-form-label>
-                <nz-form-control i18n-nzErrorTip="@@common.reviewers-cannot-be-empty" nzErrorTip="Reviewers cannot be empty">
-                  <nz-select
-                    class="nz-select-40"
-                    nzMode="multiple"
-                    i18n-nzPlaceHolder="@@common.select-reviewers"
-                    nzPlaceHolder="Select reviewers"
-                    nzAllowClear
-                    nzShowSearch
-                    nzServerSearch
-                    formControlName="reviewers"
-                    (nzOnSearch)="onSearchMember($event)">
-                    <ng-container *ngFor="let o of memberList">
+      </div>
+    </section>
+    <section class="warning-message">
+      <div class="warning">
+        <span class="warning-icon"><i nz-icon nzType="warning" nzTheme="fill"></i></span>
+        <div class="warning-content" i18n="@@ff.targeting.the-following-changes-may-affect-insights">The following changes may affects the insights data</div>
+      </div>
+    </section>
+    <section class="pending-changes">
+      <div class="section-title" i18n="@@common.changes">Changes</div>
+      <div class="change">
+        <p class="change-count">
+          <span>{{instructions.length}} </span>
+          <ng-container i18n="@@common.number-of-changes-to-submit">changes to submit</ng-container>
+        </p>
+        @if (instructions.length > 0) {
+          <change-list class="change-list" [param]="{ instructions: instructions, previous: previous, current: current }"></change-list>
+        }
+      </div>
+    </section>
+    <section class="form-wrapper" >
+      <form nz-form [formGroup]="form" nzLayout="vertical">
+        @if (license?.isGranted(LicenseFeatureEnum.Schedule) && refType === RefTypeEnum.Flag) {
+          <div class="section-title with-extension-icon">
+            <span i18n="@@common.schedule">Schedule</span>
+            @if (!ReviewModalMode.isScheduleEnabled(kind)) {
+              <span
+              (click)="toggleSchedule()" nz-icon nzType="plus" nzTheme="outline"></span>
+            }
+            @if (ReviewModalMode.isScheduleEnabled(kind)) {
+              <span
+              (click)="toggleSchedule()" nz-icon nzType="minus" nzTheme="outline"></span>
+            }
+          </div>
+          @if (ReviewModalMode.isScheduleEnabled(kind)) {
+            <nz-form-item>
+              <nz-form-label nzRequired i18n="@@common.title">Title</nz-form-label>
+              <nz-form-control>
+                <input type="text" nz-input formControlName="scheduleTitle" placeholder="Title" i18n-placeholder="@@common.title"/>
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label nzRequired i18n="@@common.scheduled-time">Scheduled time</nz-form-label>
+              <nz-form-control>
+                <nz-date-picker
+                  nzShowTime
+                  [nzShowNow]="false"
+                  nzFormat="yyyy-MM-dd HH:mm"
+                  formControlName="scheduledTime"
+                  [nzDisabledDate]="disabledDate"
+                  [nzDisabledTime]="disabledDateTime"
+                  [nzShowTime]="{ nzHideDisabledOptions: true, nzDefaultOpenValue: timeDefaultValue, nzFormat: 'HH:mm' }"
+                ></nz-date-picker>
+              </nz-form-control>
+            </nz-form-item>
+          }
+        }
+        @if (license?.isGranted(LicenseFeatureEnum.ChangeRequest) && refType === RefTypeEnum.Flag) {
+          <div class="section-title with-extension-icon">
+            <span i18n="@@common.change-request">Change Request</span>
+            @if (!ReviewModalMode.isChangeRequestEnabled(kind)) {
+              <span
+              (click)="toggleChangeRequest()" nz-icon nzType="plus" nzTheme="outline"></span>
+            }
+            @if (ReviewModalMode.isChangeRequestEnabled(kind)) {
+              <span
+              (click)="toggleChangeRequest()" nz-icon nzType="minus" nzTheme="outline"></span>
+            }
+          </div>
+          @if (ReviewModalMode.isChangeRequestEnabled(kind)) {
+            <nz-form-item>
+              <nz-form-label nzRequired i18n="@@common.reason">Reason</nz-form-label>
+              <nz-form-control i18n-nzErrorTip="@@common.reason-cannot-be-empty" nzErrorTip="Reason cannot be empty">
+                <input type="text" nz-input formControlName="changeRequestReason" placeholder="Add a description of your changes" i18n-placeholder="@@common.change-request-reason"/>
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label nzRequired i18n="@@common.reviewers">Reviewers</nz-form-label>
+              <nz-form-control i18n-nzErrorTip="@@common.reviewers-cannot-be-empty" nzErrorTip="Reviewers cannot be empty">
+                <nz-select
+                  class="nz-select-40"
+                  nzMode="multiple"
+                  i18n-nzPlaceHolder="@@common.select-reviewers"
+                  nzPlaceHolder="Select reviewers"
+                  nzAllowClear
+                  nzShowSearch
+                  nzServerSearch
+                  formControlName="reviewers"
+                  (nzOnSearch)="onSearchMember($event)">
+                  @for (o of memberList; track o) {
+                    @if (!isMemberLoading) {
                       <nz-option
-                        *ngIf="!isMemberLoading"
                         [nzValue]="o.id"
                         [nzLabel]="o.name || o.email">
                       </nz-option>
-                    </ng-container>
-                    <nz-option *ngIf="isMemberLoading" nzDisabled nzCustomContent>
+                    }
+                  }
+                  @if (isMemberLoading) {
+                    <nz-option nzDisabled nzCustomContent>
                       <i nz-icon nzType="loading" class="loading-icon"></i>
                       <ng-container i18n="@@common.loading">Loading...</ng-container>
                     </nz-option>
-                  </nz-select>
-                </nz-form-control>
-              </nz-form-item>
-            </ng-container>
-          </ng-container>
-          <nz-form-item *ngIf="!ReviewModalMode.isScheduleEnabled(kind) && !ReviewModalMode.isChangeRequestEnabled(kind)">
+                  }
+                </nz-select>
+              </nz-form-control>
+            </nz-form-item>
+          }
+        }
+        @if (!ReviewModalMode.isScheduleEnabled(kind) && !ReviewModalMode.isChangeRequestEnabled(kind)) {
+          <nz-form-item>
             <nz-form-label class="section-title" i18n="@@common.comment">Comment</nz-form-label>
             <nz-form-control>
               <textarea rows="4" nz-input i18n-placeholder="@@common.comment" placeholder="Comment" formControlName="comment"></textarea>
             </nz-form-control>
           </nz-form-item>
-        </form>
-      </section>
-    </div>
-  </ng-container>
-  <div *nzModalFooter>
-    <button nz-button nzType="default" (click)="closeModal()" i18n="@@common.cancel">Cancel</button>
-    <button [disabled]="instructions.length === 0" nz-button nzType="primary"
-            (click)="onValidate()" i18n="@@common.save">Save</button>
+        }
+      </form>
+    </section>
   </div>
+</ng-container>
+<div *nzModalFooter>
+  <button nz-button nzType="default" (click)="closeModal()" i18n="@@common.cancel">Cancel</button>
+  <button [disabled]="instructions.length === 0" nz-button nzType="primary"
+  (click)="onValidate()" i18n="@@common.save">Save</button>
+</div>
 </nz-modal>

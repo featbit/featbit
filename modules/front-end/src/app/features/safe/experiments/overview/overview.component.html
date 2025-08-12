@@ -47,74 +47,86 @@
     </div>
     <div class="table-wrapper">
       <nz-table #borderedTable
-                nzSize="small"
-                nzShowSizeChanger
-                [nzData]="pagedExpt.items"
-                [nzFrontPagination]="false"
-                [nzLoading]="isLoading"
-                [nzTotal]="pagedExpt.totalCount"
-                [(nzPageSize)]="filter.pageSize"
-                (nzPageSizeChange)="onSearch()"
-                [nzPageSizeOptions]="[10,20,30]"
-                [(nzPageIndex)]="filter.pageIndex"
-                (nzPageIndexChange)="onSearch()"
-                style="margin-top: 20px;">
+        nzSize="small"
+        nzShowSizeChanger
+        [nzData]="pagedExpt.items"
+        [nzFrontPagination]="false"
+        [nzLoading]="isLoading"
+        [nzTotal]="pagedExpt.totalCount"
+        [(nzPageSize)]="filter.pageSize"
+        (nzPageSizeChange)="onSearch()"
+        [nzPageSizeOptions]="[10,20,30]"
+        [(nzPageIndex)]="filter.pageIndex"
+        (nzPageIndexChange)="onSearch()"
+        style="margin-top: 20px;">
         <thead>
-        <tr>
-          <th i18n="@@expt.overview.ff-name">Feature flag name</th>
-          <th i18n="@@expt.overview.metric-name">Metric name</th>
-          <th i18n="@@expt.overview.event-name">Event name</th>
-          <th i18n="@@expt.overview.event-type">Event type</th>
-          <th i18n="@@common.baseline-variation">Baseline</th>
-          <th i18n="@@expt.overview.status">Status</th>
-          <th nzAlign="center" i18n="@@common.actions">Actions</th>
-        </tr>
+          <tr>
+            <th i18n="@@expt.overview.ff-name">Feature flag name</th>
+            <th i18n="@@expt.overview.metric-name">Metric name</th>
+            <th i18n="@@expt.overview.event-name">Event name</th>
+            <th i18n="@@expt.overview.event-type">Event type</th>
+            <th i18n="@@common.baseline-variation">Baseline</th>
+            <th i18n="@@expt.overview.status">Status</th>
+            <th nzAlign="center" i18n="@@common.actions">Actions</th>
+          </tr>
         </thead>
         <tbody>
-        <tr *ngFor="let data of borderedTable.data">
-          <td>{{data.featureFlagName}}</td>
-          <td>{{data.metricName}}</td>
-          <td>
-            <ng-container *ngIf="data.metricEventType === customEventType">
-              {{data.metricEventName}}
-            </ng-container>
-            <ng-container *ngIf="data.metricEventType === pageViewEventType">
-              pageview
-            </ng-container>
-            <ng-container *ngIf="data.metricEventType === clickEventType">
-              click
-            </ng-container>
-          </td>
-          <td>
-            <span class="tag">
-              <ng-container *ngIf="data.metricEventType === customEventType">
-                <ng-container i18n="@@common.custom">Custom</ng-container>:&nbsp;
-                <ng-container *ngIf="data.metricCustomEventTrackOption === customEventTrackConversion" i18n="@@common.conversion-rate">Conversion rate</ng-container>
-                <ng-container *ngIf="data.metricCustomEventTrackOption === customEventTrackNumeric" i18n="@@common.numeric">Numeric</ng-container>
-              </ng-container>
-              <ng-container *ngIf="data.metricEventType === pageViewEventType">
-                PageView: <ng-container i18n="@@common.conversion-rate">Conversion rate</ng-container>
-              </ng-container>
-              <ng-container *ngIf="data.metricEventType === clickEventType">
-                Click: <ng-container i18n="@@common.conversion-rate">Conversion rate</ng-container>
-              </ng-container>
-            </span>
-          </td>
-          <td>
-            {{data.baselineVariation.value}}
-          </td>
-          <td class="expt-status-col">
-            <div *ngIf="data.status === exptStatusRecording" class="expt-status ongoing"></div>
-            <div *ngIf="data.status === exptStatusPaused" class="expt-status paused"></div>
-            <div *ngIf="data.status === exptStatusNotStarted" class="expt-status not-started"></div>
-            <div>
-              {{data.status | T: data.status: 'expt-status'}}
-            </div>
-          </td>
-          <td style="text-align: center">
-            <a (click)="goToExperimentPage(data.featureFlagKey, data.id)" i18n="expt.overview.check-experiment">Check experiment</a>
-          </td>
-        </tr>
+          @for (data of borderedTable.data; track data) {
+            <tr>
+              <td>{{data.featureFlagName}}</td>
+              <td>{{data.metricName}}</td>
+              <td>
+                @if (data.metricEventType === customEventType) {
+                  {{data.metricEventName}}
+                }
+                @if (data.metricEventType === pageViewEventType) {
+                  pageview
+                }
+                @if (data.metricEventType === clickEventType) {
+                  click
+                }
+              </td>
+              <td>
+                <span class="tag">
+                  @if (data.metricEventType === customEventType) {
+                    <ng-container i18n="@@common.custom">Custom</ng-container>:&nbsp;
+                    @if (data.metricCustomEventTrackOption === customEventTrackConversion) {
+                      <ng-container i18n="@@common.conversion-rate">Conversion rate</ng-container>
+                    }
+                    @if (data.metricCustomEventTrackOption === customEventTrackNumeric) {
+                      <ng-container i18n="@@common.numeric">Numeric</ng-container>
+                    }
+                  }
+                  @if (data.metricEventType === pageViewEventType) {
+                    PageView: <ng-container i18n="@@common.conversion-rate">Conversion rate</ng-container>
+                  }
+                  @if (data.metricEventType === clickEventType) {
+                    Click: <ng-container i18n="@@common.conversion-rate">Conversion rate</ng-container>
+                  }
+                </span>
+              </td>
+              <td>
+                {{data.baselineVariation.value}}
+              </td>
+              <td class="expt-status-col">
+                @if (data.status === exptStatusRecording) {
+                  <div class="expt-status ongoing"></div>
+                }
+                @if (data.status === exptStatusPaused) {
+                  <div class="expt-status paused"></div>
+                }
+                @if (data.status === exptStatusNotStarted) {
+                  <div class="expt-status not-started"></div>
+                }
+                <div>
+                  {{data.status | T: data.status: 'expt-status'}}
+                </div>
+              </td>
+              <td style="text-align: center">
+                <a (click)="goToExperimentPage(data.featureFlagKey, data.id)" i18n="expt.overview.check-experiment">Check experiment</a>
+              </td>
+            </tr>
+          }
         </tbody>
       </nz-table>
     </div>

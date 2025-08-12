@@ -13,27 +13,45 @@ import { InstructionKindEnum } from "@core/components/change-list/constants";
 @Component({
   selector: 'update-values-of-rule-condition',
   template: `
-    <div class="instruction" *ngIf="!isLoading">
-      <span i18n="@@common.add-values" *ngIf="isAddingValue">Add value(s)</span>
-      <span i18n="@@common.remove-values" *ngIf="!isAddingValue">Remove value(s)</span>
-      <nz-tag *ngFor="let value of values">
-        {{value}}
-      </nz-tag>
-      <span i18n="@@common.to-condition" *ngIf="isAddingValue">to condition</span>
-      <span i18n="@@common.from-condition" *ngIf="!isAddingValue">from condition</span>
-      <div class="clause">
-        <span i18n="@@common.capitalize-if">If</span>
-        <span>{{condition.property}}</span>
-        <span *ngIf="condition.op !== null">{{condition.opLabel}}</span>
-        <ng-container *ngIf="condition.displayValue">
-          <nz-tag *ngIf="!condition.isMultiValue">{{condition.value}}</nz-tag>
-          <ng-container *ngIf="condition.isMultiValue">
-            <nz-tag *ngFor="let value of condition.value">{{value}}</nz-tag>
-          </ng-container>
-        </ng-container>
+    @if (!isLoading) {
+      <div class="instruction">
+        @if (isAddingValue) {
+          <span i18n="@@common.add-values">Add value(s)</span>
+        }
+        @if (!isAddingValue) {
+          <span i18n="@@common.remove-values">Remove value(s)</span>
+        }
+        @for (value of values; track value) {
+          <nz-tag>
+            {{value}}
+          </nz-tag>
+        }
+        @if (isAddingValue) {
+          <span i18n="@@common.to-condition">to condition</span>
+        }
+        @if (!isAddingValue) {
+          <span i18n="@@common.from-condition">from condition</span>
+        }
+        <div class="clause">
+          <span i18n="@@common.capitalize-if">If</span>
+          <span>{{condition.property}}</span>
+          @if (condition.op !== null) {
+            <span>{{condition.opLabel}}</span>
+          }
+          @if (condition.displayValue) {
+            @if (!condition.isMultiValue) {
+              <nz-tag>{{condition.value}}</nz-tag>
+            }
+            @if (condition.isMultiValue) {
+              @for (value of condition.value; track value) {
+                <nz-tag>{{value}}</nz-tag>
+              }
+            }
+          }
+        </div>
       </div>
-    </div>
-  `,
+    }
+    `,
   styleUrls: ['./update-values-of-rule-condition.component.less']
 })
 export class UpdateValuesOfRuleConditionComponent implements IInstructionComponent, OnInit {

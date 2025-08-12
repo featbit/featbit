@@ -1,19 +1,31 @@
 <nz-collapse [nzBordered]="false">
-  <nz-collapse-panel *ngFor="let category of categories; let index=index" [nzHeader]="category.label" [nzActive]="index === 0">
-    <ul class="instructions" *ngIf="category.instructions">
-      <li class="instruction-item" *ngFor="let instruction of category.instructions">
-        <instruction [instruction]="instruction"></instruction>
-      </li>
-    </ul>
-    <div *ngIf="category.groups">
-      <div *ngFor="let group of category.groups">
-        <div class="group-title" [innerHTML]="group.label"></div>
-        <ul class="group-instructions">
-          <li class="instruction-item" *ngFor="let instruction of group.instructions">
-            <instruction [instruction]="instruction"></instruction>
-          </li>
+  @for (category of categories; track category; let index = $index) {
+    <nz-collapse-panel [nzHeader]="category.label" [nzActive]="index === 0">
+      @if (category.instructions) {
+        <ul class="instructions">
+          @for (instruction of category.instructions; track instruction) {
+            <li class="instruction-item">
+              <instruction [instruction]="instruction"></instruction>
+            </li>
+          }
         </ul>
-      </div>
-    </div>
-  </nz-collapse-panel>
+      }
+      @if (category.groups) {
+        <div>
+          @for (group of category.groups; track group) {
+            <div>
+              <div class="group-title" [innerHTML]="group.label"></div>
+              <ul class="group-instructions">
+                @for (instruction of group.instructions; track instruction) {
+                  <li class="instruction-item">
+                    <instruction [instruction]="instruction"></instruction>
+                  </li>
+                }
+              </ul>
+            </div>
+          }
+        </div>
+      }
+    </nz-collapse-panel>
+  }
 </nz-collapse>

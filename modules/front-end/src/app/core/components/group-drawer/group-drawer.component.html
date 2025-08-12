@@ -15,8 +15,12 @@
         <nz-form-control nzHasFeedback nzValidatingTip="Validating..." i18n-nzValidatingTip="@@common.validating" [nzErrorTip]="groupNameErrorTpl">
           <input type="text" nz-input formControlName="name" placeholder="Name" i18n-placeholder="@@common.name"/>
           <ng-template #groupNameErrorTpl let-control>
-            <ng-container *ngIf="control.hasError('required')" i18n="@@iam.groups.group-drawer.group-name-cannot-be-empty">Group name cannot be empty</ng-container>
-            <ng-container *ngIf="control.hasError('duplicated')" i18n="@@iam.groups.group-drawer.group-name-unavailable">This group name is not available</ng-container>
+            @if (control.hasError('required')) {
+              <ng-container i18n="@@iam.groups.group-drawer.group-name-cannot-be-empty">Group name cannot be empty</ng-container>
+            }
+            @if (control.hasError('duplicated')) {
+              <ng-container i18n="@@iam.groups.group-drawer.group-name-unavailable">This group name is not available</ng-container>
+            }
           </ng-template>
         </nz-form-control>
       </nz-form-item>

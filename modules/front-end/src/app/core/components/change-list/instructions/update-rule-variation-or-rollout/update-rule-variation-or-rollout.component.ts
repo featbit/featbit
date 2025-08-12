@@ -16,9 +16,11 @@ interface IRuleRollout {
   template: `
     <div class="instruction">
       <span i18n="@@common.update-serve-value-to">Update serve value to </span>
-      <nz-tag *ngFor="let value of values">{{value.label}} ({{value.percentage}}%)</nz-tag>
+      @for (value of values; track value) {
+        <nz-tag>{{value.label}} ({{value.percentage}}%)</nz-tag>
+      }
     </div>
-  `,
+    `,
   styles: [`
     nz-tag {
       line-height: 12px;

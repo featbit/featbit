@@ -1,47 +1,54 @@
 <section class="body-container">
-  <ng-template #loadingTem>
+
+  @if (!isLoading) {
+    <div class="block">
+      <div class="title">
+        @if (segmentDetail.type === SegmentType.Shared) {
+          <nz-tag nzColor="#23AD7F" i18n="@@segment.shared">Shared</nz-tag>
+        }
+        <div class="name">
+          @if (!isEditingTitle) {
+            <span [nz-tooltip]="segmentDetail?.name" class="text">{{segmentDetail?.name}}</span>
+            <i class="edit-save" (click)="toggleTitleEditState()" nz-icon nzType="icons:icon-edit"></i>
+          }
+          @if (isEditingTitle) {
+            <input nz-input i18n-placeholder="@@common.name" placeholder="Name" [(ngModel)]="segmentDetail.name" />
+            <div class="actions">
+              <i nz-icon nzType="close" (click)="toggleTitleEditState()"></i>
+              <i nz-icon nzType="icons:icon-save" (click)="saveTitle()" ></i>
+            </div>
+          }
+        </div>
+      </div>
+      <div class="description" [class]="{editing: isEditingDescription}">
+        @if (!isEditingDescription) {
+          <span>{{segmentDetail?.description}}</span>
+          <i class="edit-save" (click)="toggleDescriptionEditState()" nz-icon nzType="icons:icon-edit"></i>
+        }
+        @if (isEditingDescription) {
+          <textarea nz-input i18n-placeholder="@@common.description" placeholder="Description" [(ngModel)]="segmentDetail.description" [nzAutosize]="{ minRows: 2 }"></textarea>
+          <div class="actions">
+            <i nz-icon nzType="close" (click)="toggleDescriptionEditState()"></i>
+            <i nz-icon nzType="icons:icon-save" (click)="saveDescription()"></i>
+          </div>
+        }
+      </div>
+      @if (segmentDetail.type === SegmentType.Shared) {
+        <div>
+          <div class="shared-scopes">
+            <span i18n="@@common.shared-scopes">Shared Scopes</span>
+            <ul>
+              @for (scope of segmentDetail.scopes; track scope) {
+                <li>{{scope}}</li>
+              }
+            </ul>
+          </div>
+        </div>
+      }
+    </div>
+  } @else {
     <div class="block">
       <nz-skeleton [nzActive]="true"></nz-skeleton>
     </div>
-  </ng-template>
-
-  <div class="block" *ngIf="!isLoading; else loadingTem;">
-    <div class="title">
-      <nz-tag *ngIf="segmentDetail.type === SegmentType.Shared" nzColor="#23AD7F" i18n="@@segment.shared">Shared</nz-tag>
-      <div class="name">
-        <ng-container *ngIf="!isEditingTitle">
-          <span [nz-tooltip]="segmentDetail?.name" class="text">{{segmentDetail?.name}}</span>
-          <i class="edit-save" (click)="toggleTitleEditState()" nz-icon nzType="icons:icon-edit"></i>
-        </ng-container>
-        <ng-container *ngIf="isEditingTitle">
-          <input nz-input i18n-placeholder="@@common.name" placeholder="Name" [(ngModel)]="segmentDetail.name" />
-          <div class="actions">
-            <i nz-icon nzType="close" (click)="toggleTitleEditState()"></i>
-            <i nz-icon nzType="icons:icon-save" (click)="saveTitle()" ></i>
-          </div>
-        </ng-container>
-      </div>
-    </div>
-    <div class="description" [class]="{editing: isEditingDescription}">
-      <ng-container *ngIf="!isEditingDescription">
-        <span>{{segmentDetail?.description}}</span>
-        <i class="edit-save" (click)="toggleDescriptionEditState()" nz-icon nzType="icons:icon-edit"></i>
-      </ng-container>
-      <ng-container *ngIf="isEditingDescription">
-        <textarea nz-input i18n-placeholder="@@common.description" placeholder="Description" [(ngModel)]="segmentDetail.description" [nzAutosize]="{ minRows: 2 }"></textarea>
-        <div class="actions">
-          <i nz-icon nzType="close" (click)="toggleDescriptionEditState()"></i>
-          <i nz-icon nzType="icons:icon-save" (click)="saveDescription()"></i>
-        </div>
-      </ng-container>
-    </div>
-    <div *ngIf="segmentDetail.type === SegmentType.Shared">
-      <div class="shared-scopes">
-        <span i18n="@@common.shared-scopes">Shared Scopes</span>
-        <ul>
-          <li *ngFor="let scope of segmentDetail.scopes">{{scope}}</li>
-        </ul>
-      </div>
-    </div>
-  </div>
+  }
 </section>

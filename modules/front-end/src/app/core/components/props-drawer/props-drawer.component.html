@@ -27,90 +27,95 @@
       </div>
       <div class="table-wrapper">
         <nz-table #propTable
-                  nzTableLayout="fixed"
-                  nzSize="small"
-                  nzFrontPagination
-                  nzShowPagination
-                  [nzData]="displayedProps"
-                  [(nzPageIndex)]="propsPageIndex"
-                  [nzLoading]="isLoading">
+          nzTableLayout="fixed"
+          nzSize="small"
+          nzFrontPagination
+          nzShowPagination
+          [nzData]="displayedProps"
+          [(nzPageIndex)]="propsPageIndex"
+          [nzLoading]="isLoading">
           <thead>
-          <tr>
-            <th nzWidth="130px" i18n="@@common.name">Name</th>
-            <th nzWidth="150px">
-              <ng-container i18n="@@users.idx.mark-as-digest-field">Mark as digest field</ng-container>
-              <i style="margin-left: 4px" nz-icon nzType="question-circle" nzTheme="outline" i18n-nz-tooltip="@@users.idx.used-to-display-user-digest-info" nz-tooltip="Used to display user's digest information"></i>
-            </th>
-            <th nzAlign="center" nzWidth="190px" i18n="@@common.comment">Comment</th>
-            <th i18n="@@common.actions">Actions</th>
-          </tr>
+            <tr>
+              <th nzWidth="130px" i18n="@@common.name">Name</th>
+              <th nzWidth="150px">
+                <ng-container i18n="@@users.idx.mark-as-digest-field">Mark as digest field</ng-container>
+                <i style="margin-left: 4px" nz-icon nzType="question-circle" nzTheme="outline" i18n-nz-tooltip="@@users.idx.used-to-display-user-digest-info" nz-tooltip="Used to display user's digest information"></i>
+              </th>
+              <th nzAlign="center" nzWidth="190px" i18n="@@common.comment">Comment</th>
+              <th i18n="@@common.actions">Actions</th>
+            </tr>
           </thead>
           <tbody>
-          <tr *ngFor="let row of propTable.data; index as index">
-            <div *ngIf="row.isBuiltIn, then builtInPropRow else customPropRow"></div>
-            <ng-template #builtInPropRow>
-              <td>{{row.name}}</td>
-              <td style="text-align: center">
-                <label nzDisabled nz-checkbox [(ngModel)]="row.isDigestField"></label>
-              </td>
-              <td>{{row.remark}}</td>
-              <td i18n="@@users.idx.built-in-property">Built in property</td>
-            </ng-template>
-            <ng-template #customPropRow>
-              <div *ngIf="row.isEditing, then editingPropRow else showPropRow"></div>
-              <ng-template #showPropRow>
-                <td nzEllipsis>
-                  <span nz-tooltip="{{row.name}}">{{row.name}}</span>
-                </td>
-                <td style="text-align: center">
-                  <label nz-checkbox [(ngModel)]="row.isDigestField" (ngModelChange)="toggleIsDigestField(row)"></label>
-                </td>
-                <td style="text-align: center" nzEllipsis i18n-nz-tooltip="@@users.idx.click-to-edit-comment" nz-tooltip="Click to edit comment" (click)="editProp(row)">
-                  {{row.remark}}
-                </td>
-              </ng-template>
-              <ng-template #editingPropRow>
-                <td *ngIf="row.isNew">
-                  <input nz-input [(ngModel)]="row.name" i18n-placeholder="@@common.name" placeholder="Name">
-                </td>
-                <td *ngIf="!row.isNew" nzEllipsis>
-                  <span nz-tooltip="{{row.name}}">{{row.name}}</span>
-                </td>
-                <td style="text-align: center">
-                  <label nz-checkbox [(ngModel)]="row.isDigestField" (ngModelChange)="toggleIsDigestField(row)">
-                  </label>
-                </td>
-                <td>
-                  <input [(ngModel)]="row.remark" nz-input i18n="@@common.comment" placeholder="Comment">
-                </td>
-              </ng-template>
-              <td class="row-operations">
-                <button nz-button nzSize="default" nzType="link" *ngIf="row.isEditing"
+            @for (row of propTable.data; track row; let index = $index) {
+              <tr>
+                @if (row.isBuiltIn) {
+                  <td>{{row.name}}</td>
+                  <td style="text-align: center">
+                    <label nzDisabled nz-checkbox [(ngModel)]="row.isDigestField"></label>
+                  </td>
+                  <td>{{row.remark}}</td>
+                  <td i18n="@@users.idx.built-in-property">Built in property</td>
+                } @else {
+                  @if (row.isEditing) {
+                    @if (row.isNew) {
+                      <td>
+                        <input nz-input [(ngModel)]="row.name" i18n-placeholder="@@common.name" placeholder="Name">
+                      </td>
+                    }
+                    @if (!row.isNew) {
+                      <td nzEllipsis>
+                        <span nz-tooltip="{{row.name}}">{{row.name}}</span>
+                      </td>
+                    }
+                    <td style="text-align: center">
+                      <label nz-checkbox [(ngModel)]="row.isDigestField" (ngModelChange)="toggleIsDigestField(row)">
+                      </label>
+                    </td>
+                    <td>
+                      <input [(ngModel)]="row.remark" nz-input i18n="@@common.comment" placeholder="Comment">
+                    </td>
+                  } @else {
+                    <td nzEllipsis>
+                      <span nz-tooltip="{{row.name}}">{{row.name}}</span>
+                    </td>
+                    <td style="text-align: center">
+                      <label nz-checkbox [(ngModel)]="row.isDigestField" (ngModelChange)="toggleIsDigestField(row)"></label>
+                    </td>
+                    <td style="text-align: center" nzEllipsis i18n-nz-tooltip="@@users.idx.click-to-edit-comment" nz-tooltip="Click to edit comment" (click)="editProp(row)">
+                      {{row.remark}}
+                    </td>
+                  }
+                  <td class="row-operations">
+                    @if (row.isEditing) {
+                      <button nz-button nzSize="default" nzType="link"
                         [nzLoading]="row.isSaving" (click)="saveProp(row)">
-                  <i nz-icon nzType="save" nzTheme="outline"></i> <ng-container i18n="@@common.save">Save</ng-container>
-                </button>
-
-                <button nz-button nzSize="default" nzType="link" [nzLoading]="row.isDeleting" nzDanger
-                        [nzIcon]="iconTpl" i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it?" (nzOnConfirm)="archiveProp(row)">
-                  <i nz-icon nzType="delete" nzTheme="outline"></i> <ng-container i18n="@@common.remove">Remove</ng-container>
-                  <ng-template #iconTpl>
-                    <i nz-icon nzType="question-circle-o" style="color: red;"></i>
-                  </ng-template>
-                </button>
-
-                <button nz-button nzSize="default" nzType="link" (click)="cancelEditProp(row)" *ngIf="row.isEditing"
+                        <i nz-icon nzType="save" nzTheme="outline"></i> <ng-container i18n="@@common.save">Save</ng-container>
+                      </button>
+                    }
+                    <button nz-button nzSize="default" nzType="link" [nzLoading]="row.isDeleting" nzDanger
+                      [nzIcon]="iconTpl" i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it?" (nzOnConfirm)="archiveProp(row)">
+                      <i nz-icon nzType="delete" nzTheme="outline"></i> <ng-container i18n="@@common.remove">Remove</ng-container>
+                      <ng-template #iconTpl>
+                        <i nz-icon nzType="question-circle-o" style="color: red;"></i>
+                      </ng-template>
+                    </button>
+                    @if (row.isEditing) {
+                      <button nz-button nzSize="default" nzType="link" (click)="cancelEditProp(row)"
                         style="color: #717D8A;">
-                  <i nz-icon nzType="close" nzTheme="outline"></i> <ng-container i18n="@@common.cancel">Cancel</ng-container>
-                </button>
-
-                <button nz-button nzSize="default" nzType="link" (click)="openPropPresetValuesModal(row)"
-                        *ngIf="!row.isEditing">
-                  <i nz-icon nzType="edit" nzTheme="outline"></i>
-                  <ng-container i18n="@@users.idx.preset-value">Preset value</ng-container>（<span>{{row?.presetValues?.length || 0}}</span>）
-                </button>
-              </td>
-            </ng-template>
-          </tr>
+                        <i nz-icon nzType="close" nzTheme="outline"></i> <ng-container i18n="@@common.cancel">Cancel</ng-container>
+                      </button>
+                    }
+                    @if (!row.isEditing) {
+                      <button nz-button nzSize="default" nzType="link" (click)="openPropPresetValuesModal(row)"
+                        >
+                        <i nz-icon nzType="edit" nzTheme="outline"></i>
+                        <ng-container i18n="@@users.idx.preset-value">Preset value</ng-container>（<span>{{row?.presetValues?.length || 0}}</span>）
+                      </button>
+                    }
+                  </td>
+                }
+              </tr>
+            }
           </tbody>
         </nz-table>
       </div>
@@ -144,25 +149,27 @@
         </div>
         <div class="preset-value-add">
           <button nz-button nzSize="default" nzType="primary" (click)="addPropPresetValue()" [disabled]="currentPresetValueKey.trim().length === 0 || currentPresetValueDescription.trim().length === 0" i18n="@@common.add">Add</button>
+          </div>
         </div>
+        @if (currentUserPropRow.presetValues.length > 0) {
+          <div class="preset-value-wrapper">
+            <nz-list class="preset-values">
+              @for (presetValue of currentUserPropRow.presetValues; track presetValue) {
+                <nz-list-item class="preset-value">
+                  <div>
+                    <div class="value-item"><div>Key</div>: &nbsp;<span nz-tooltip="{{ presetValue.value }}" nzTooltipPlacement="right">{{ presetValue.value }}</span></div>
+                    <div class="value-item"><div i18n="@@common.description">Description</div>: &nbsp;<span nz-tooltip="{{ presetValue.description }}" nzTooltipPlacement="right">{{ presetValue.description }}</span></div>
+                  </div>
+                  <button nz-button nzType="default" [nzSize]="'large'" (click)="removePropPresetValue(presetValue)"><i nz-icon nzType="close"></i></button>
+                </nz-list-item>
+              }
+            </nz-list>
+          </div>
+          <label class="use-preset-values-only-label" nz-checkbox [(ngModel)]="currentUserPropRow.usePresetValuesOnly">
+            <ng-container i18n="@@uses.idx-force-user-to-use">Force user to select from preset valus when using</ng-container><span style="display:inline-block;padding: 0 5px; font-weight: 600">{{currentUserPropRow.name}}</span><ng-container i18n="@@uses.idx-force-user-to-use-suffix"></ng-container>
+            <i nz-icon i18n-nz-tooltip="@@users.idx.once-saved-be-causion" nzType="icons:icon-warning" nz-tooltip="Once saved, the value used by rules of feature flag or segment but not in above list, would still be kept there, but if it is removed from the rule, you cannot select it again."></i>
+          </label>
+        }
       </div>
-      <ng-container *ngIf="currentUserPropRow.presetValues.length > 0">
-        <div class="preset-value-wrapper">
-          <nz-list class="preset-values">
-            <nz-list-item *ngFor="let presetValue of currentUserPropRow.presetValues" class="preset-value">
-              <div>
-                <div class="value-item"><div>Key</div>: &nbsp;<span nz-tooltip="{{ presetValue.value }}" nzTooltipPlacement="right">{{ presetValue.value }}</span></div>
-                <div class="value-item"><div i18n="@@common.description">Description</div>: &nbsp;<span nz-tooltip="{{ presetValue.description }}" nzTooltipPlacement="right">{{ presetValue.description }}</span></div>
-              </div>
-              <button nz-button nzType="default" [nzSize]="'large'" (click)="removePropPresetValue(presetValue)"><i nz-icon nzType="close"></i></button>
-            </nz-list-item>
-          </nz-list>
-        </div>
-        <label class="use-preset-values-only-label" nz-checkbox [(ngModel)]="currentUserPropRow.usePresetValuesOnly">
-          <ng-container i18n="@@uses.idx-force-user-to-use">Force user to select from preset valus when using</ng-container><span style="display:inline-block;padding: 0 5px; font-weight: 600">{{currentUserPropRow.name}}</span><ng-container i18n="@@uses.idx-force-user-to-use-suffix"></ng-container>
-          <i nz-icon i18n-nz-tooltip="@@users.idx.once-saved-be-causion" nzType="icons:icon-warning" nz-tooltip="Once saved, the value used by rules of feature flag or segment but not in above list, would still be kept there, but if it is removed from the rule, you cannot select it again."></i>
-        </label>
-      </ng-container>
-    </div>
-  </ng-container>
-</nz-modal>
+    </ng-container>
+  </nz-modal>

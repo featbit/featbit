@@ -11,11 +11,15 @@ import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
   selector: 'change-variations',
   template: `
     <div class="instruction">
-      <span i18n="@@common.add-variation" *ngIf="kind === InstructionKindEnum.AddVariation">Add variation</span>
-      <span i18n="@@common.remove-variation" *ngIf="kind === InstructionKindEnum.RemoveVariation">Remove variation</span>
+      @if (kind === InstructionKindEnum.AddVariation) {
+        <span i18n="@@common.add-variation">Add variation</span>
+      }
+      @if (kind === InstructionKindEnum.RemoveVariation) {
+        <span i18n="@@common.remove-variation">Remove variation</span>
+      }
       <nz-tag>{{variation.name}}: {{variation.value}}</nz-tag>
     </div>
-  `,
+    `,
   styles: [`
     nz-tag {
       line-height: 12px;

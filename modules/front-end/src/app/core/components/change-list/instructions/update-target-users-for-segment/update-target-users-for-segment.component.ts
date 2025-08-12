@@ -9,19 +9,25 @@ import { InstructionKindEnum } from "@core/components/change-list/constants";
   selector: 'update-target-users',
   template: `
     <div class="instruction">
-      <ng-container *ngIf="kind === InstructionKindEnum.AddTargetUsersToExcluded || kind === InstructionKindEnum.RemoveTargetUsersFromExcluded">
+      @if (kind === InstructionKindEnum.AddTargetUsersToExcluded || kind === InstructionKindEnum.RemoveTargetUsersFromExcluded) {
         <span class="variation" i18n="@@common.excluding-users" >Excluding users</span>:
-      </ng-container>
-      <ng-container *ngIf="kind === InstructionKindEnum.AddTargetUsersToIncluded || kind === InstructionKindEnum.RemoveTargetUsersFromIncluded">
+      }
+      @if (kind === InstructionKindEnum.AddTargetUsersToIncluded || kind === InstructionKindEnum.RemoveTargetUsersFromIncluded) {
         <span class="variation" i18n="@@common.including-users" >Including users</span>:
-      </ng-container>
-      <span i18n="@@common.add-users" *ngIf="kind === InstructionKindEnum.AddTargetUsersToExcluded || kind === InstructionKindEnum.AddTargetUsersToIncluded">Add user(s)</span>
-      <span i18n="@@common.remove-users" *ngIf="kind === InstructionKindEnum.RemoveTargetUsersFromExcluded || kind === InstructionKindEnum.RemoveTargetUsersFromIncluded">Remove user(s)</span>
-      <nz-tag *ngFor="let keyId of keyIds">
-        {{keyId}}
-      </nz-tag>
+      }
+      @if (kind === InstructionKindEnum.AddTargetUsersToExcluded || kind === InstructionKindEnum.AddTargetUsersToIncluded) {
+        <span i18n="@@common.add-users">Add user(s)</span>
+      }
+      @if (kind === InstructionKindEnum.RemoveTargetUsersFromExcluded || kind === InstructionKindEnum.RemoveTargetUsersFromIncluded) {
+        <span i18n="@@common.remove-users">Remove user(s)</span>
+      }
+      @for (keyId of keyIds; track keyId) {
+        <nz-tag>
+          {{keyId}}
+        </nz-tag>
+      }
     </div>
-  `,
+    `,
   styles: [`
     .variation {
       font-weight: 600;

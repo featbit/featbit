@@ -9,20 +9,20 @@ import { ISegment } from "@features/safe/segments/types/segments-index";
   selector: 'update-description',
   template: `
     <div class="instruction">
-      <ng-container *ngIf="!isClear">
+      @if (!isClear) {
         <span i18n="@@common.update-description-with-sufix-space">Update description </span>
-        <ng-container *ngIf="previousDescription.length > 0">
+        @if (previousDescription.length > 0) {
           <span i18n="@@common.from-description">from</span>
           <span class="value remove-value">{{previousDescription}}</span>
-        </ng-container>
+        }
         <span i18n="@@common.to-description">to</span>
         <span class="value">{{data.value}}</span>
-      </ng-container>
-      <ng-container *ngIf="isClear">
+      }
+      @if (isClear) {
         <span i18n="@@common.clear-description">Clear description</span>
-      </ng-container>
+      }
     </div>
-  `,
+    `,
   styles: [`
     .value {
       font-weight: 700;

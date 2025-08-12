@@ -14,66 +14,82 @@
     <ul nz-menu [nzMode]="menuExtended ? 'inline' : 'vertical'">
       <ng-container *ngTemplateOutlet="menuTpl; context: { $implicit: menus }"></ng-container>
       <ng-template #menuTpl let-menus>
-        <ng-container *ngFor="let menu of menus">
-          <ng-container *ngIf="menu.line;else menuItem">
+        @for (menu of menus; track menu) {
+          @if (menu.line) {
             <div class="menu-item-line">
               <div class="line"></div>
             </div>
-          </ng-container>
-          <ng-template #menuItem>
-            <li
-              *ngIf="!menu.children && !menu.hide"
-              nz-menu-item
-              nzMatchRouter
-              [nzPaddingLeft]="32"
-              [nzDisabled]="menu.disabled"
-              [nzSelected]="menu.selected">
-              <ng-container *ngIf="menuExtended; else menuItemWithTooltip">
-                <a class="menu-item" [routerLink]="menu.path" *ngIf="menu.path; else targetMenuItem">
-                  <i nz-icon [nzType]="menu.icon"></i>
-                  <span class="menu-item-title">{{ menu.title }}</span>
-                </a>
-              </ng-container>
-              <ng-template #menuItemWithTooltip>
-                <a [routerLink]="menu.path" *ngIf="menu.path; else targetMenuItem" [nz-tooltip]="menu.title" nzTooltipPlacement="top">
-                  <i nz-icon [nzType]="menu.icon"></i>
-                  <span class="menu-item-title">{{ menu.title }}</span>
-                </a>
-              </ng-template>
-              <ng-template #targetMenuItem>
-                <ng-container *ngIf="menuExtended; else targetMenuItemWithTooltip">
-                  <a target="_blank" [href]="menu.target">
-                    <i nz-icon [nzType]="menu.icon"></i>
-                    <span class="menu-item-title">{{ menu.title }}</span>
-                  </a>
-                </ng-container>
-              </ng-template>
-              <ng-template #targetMenuItemWithTooltip>
-                <ng-container>
-                  <a target="_blank" [href]="menu.target" [nz-tooltip]="menu.title" nzTooltipPlacement="top">
-                    <i nz-icon [nzType]="menu.icon"></i>
-                    <span class="menu-item-title">{{ menu.title }}</span>
-                  </a>
-                </ng-container>
-              </ng-template>
-            </li>
-            <li
-              *ngIf="menu.children && !menu.hide"
-              nz-submenu
-              [nzPaddingLeft]="32"
-              [nzOpen]="menu.open"
-              [nzTitle]="menu.title"
-              [nzIcon]="menu.icon"
-              [nzDisabled]="menu.disabled">
-              <ul>
-                <ng-container
+          } @else {
+            @if (!menu.children && !menu.hide) {
+              <li
+                nz-menu-item
+                nzMatchRouter
+                [nzPaddingLeft]="32"
+                [nzDisabled]="menu.disabled"
+                [nzSelected]="menu.selected">
+                @if (menuExtended) {
+                  @if (menu.path) {
+                    <a class="menu-item" [routerLink]="menu.path">
+                      <i nz-icon [nzType]="menu.icon"></i>
+                      <span class="menu-item-title">{{ menu.title }}</span>
+                    </a>
+                  } @else {
+                    @if (menuExtended) {
+                      <a target="_blank" [href]="menu.target">
+                        <i nz-icon [nzType]="menu.icon"></i>
+                        <span class="menu-item-title">{{ menu.title }}</span>
+                      </a>
+                    } @else {
+                      <ng-container>
+                        <a target="_blank" [href]="menu.target" [nz-tooltip]="menu.title" nzTooltipPlacement="top">
+                          <i nz-icon [nzType]="menu.icon"></i>
+                          <span class="menu-item-title">{{ menu.title }}</span>
+                        </a>
+                      </ng-container>
+                    }
+                  }
+                } @else {
+                  @if (menu.path) {
+                    <a [routerLink]="menu.path" [nz-tooltip]="menu.title" nzTooltipPlacement="top">
+                      <i nz-icon [nzType]="menu.icon"></i>
+                      <span class="menu-item-title">{{ menu.title }}</span>
+                    </a>
+                  } @else {
+                    @if (menuExtended) {
+                      <a target="_blank" [href]="menu.target">
+                        <i nz-icon [nzType]="menu.icon"></i>
+                        <span class="menu-item-title">{{ menu.title }}</span>
+                      </a>
+                    } @else {
+                      <ng-container>
+                        <a target="_blank" [href]="menu.target" [nz-tooltip]="menu.title" nzTooltipPlacement="top">
+                          <i nz-icon [nzType]="menu.icon"></i>
+                          <span class="menu-item-title">{{ menu.title }}</span>
+                        </a>
+                      </ng-container>
+                    }
+                  }
+                }
+              </li>
+            }
+            @if (menu.children && !menu.hide) {
+              <li
+                nz-submenu
+                [nzPaddingLeft]="32"
+                [nzOpen]="menu.open"
+                [nzTitle]="menu.title"
+                [nzIcon]="menu.icon"
+                [nzDisabled]="menu.disabled">
+                <ul>
+                  <ng-container
                   *ngTemplateOutlet="menuTpl;
                   context: { $implicit: menu.children }">
-                </ng-container>
-              </ul>
-            </li>
-          </ng-template>
-        </ng-container>
+                  </ng-container>
+                </ul>
+              </li>
+            }
+          }
+        }
       </ng-template>
     </ul>
   </div>
@@ -101,12 +117,14 @@
             <ng-container i18n="@@common.feedback">Feedback</ng-container>
           </span>
         </li>
-        <li *ngIf="isInitialized" nz-menu-item [routerLink]="['/workspace/profile']">
-          <span class="menu-item">
-            <i nz-icon nzType="icons:icon-user"></i>
-            <ng-container i18n="@@common.profile">Profile</ng-container>
-          </span>
-        </li>
+        @if (isInitialized) {
+          <li nz-menu-item [routerLink]="['/workspace/profile']">
+            <span class="menu-item">
+              <i nz-icon nzType="icons:icon-user"></i>
+              <ng-container i18n="@@common.profile">Profile</ng-container>
+            </span>
+          </li>
+        }
         <li nz-menu-item (click)="logout.emit()">
           <span class="menu-item">
             <i nz-icon nzType="icons:icon-logout"></i>
@@ -125,11 +143,11 @@
 </section>
 
 <nz-modal [nzVisible]="feedbackModalVisible"
-          [nzTitle]="feedbackModalTitle"
-          [nzCentered]="true"
-          [nzContent]="feedbackModalContent"
-          [nzFooter]="feedbackModalFooter"
-          (nzOnCancel)="feedbackModalVisible=false">
+  [nzTitle]="feedbackModalTitle"
+  [nzCentered]="true"
+  [nzContent]="feedbackModalContent"
+  [nzFooter]="feedbackModalFooter"
+  (nzOnCancel)="feedbackModalVisible=false">
   <ng-template #feedbackModalTitle><ng-container i18n="@@common.send-feedback">Send feedback</ng-container></ng-template>
   <ng-template #feedbackModalContent>
     <form nz-form [formGroup]="feedbackForm" nzLayout="vertical">

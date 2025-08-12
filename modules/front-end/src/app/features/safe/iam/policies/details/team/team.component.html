@@ -14,48 +14,50 @@
     </div>
     <div class="table-wrapper">
       <nz-table #table nzSize="small"
-                [nzData]="members.items"
-                [nzFrontPagination]="false"
-                [nzLoading]="isLoading"
-                [nzTotal]="members.totalCount"
-                [(nzPageSize)]="filter.pageSize"
-                (nzPageSizeChange)="doSearch()"
-                [(nzPageIndex)]="filter.pageIndex"
-                (nzPageIndexChange)="doSearch()"
-      >
+        [nzData]="members.items"
+        [nzFrontPagination]="false"
+        [nzLoading]="isLoading"
+        [nzTotal]="members.totalCount"
+        [(nzPageSize)]="filter.pageSize"
+        (nzPageSizeChange)="doSearch()"
+        [(nzPageIndex)]="filter.pageIndex"
+        (nzPageIndexChange)="doSearch()"
+        >
         <thead>
-        <tr>
-          <th style="min-width: 100px" i18n="@@common.name">Name</th>
-          <th i18n="@@common.email">Email</th>
-          <th i18n="@@common.mobile">Mobile</th>
-          <th i18n="@@common.actions">Actions</th>
-        </tr>
+          <tr>
+            <th style="min-width: 100px" i18n="@@common.name">Name</th>
+            <th i18n="@@common.email">Email</th>
+            <th i18n="@@common.mobile">Mobile</th>
+            <th i18n="@@common.actions">Actions</th>
+          </tr>
         </thead>
         <tbody>
-        <tr *ngFor="let item of table.data">
-          <td (click)="navigateToMember(item.id)">{{ item.name ?? '--' }}</td>
-          <td (click)="navigateToMember(item.id)">{{ item.email ?? '--' }}</td>
-          <td (click)="navigateToMember(item.id)">{{ item.phoneNumber ?? '--' }}</td>
-          <td>
-            <a (click)="navigateToMember(item.id)" i18n="@@common.details">Details</a>
-            <nz-divider nzType="vertical"></nz-divider>
-            <ng-container *ngIf="item.isPolicyMember">
-              <a style="color: #717D8A"
-                 i18n-nz-popconfirm="@@iam.policies.details.remove-member-confirm"  nz-popconfirm="Are you sure to remove the member from the current policy?"
-                 nzPopconfirmPlacement="bottomRight"
-                 [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
-                 (nzOnConfirm)="removePolicy(item.id)" [nzIcon]="iconTplIamUser">
-                <ng-container i18n="@@common.remove">Remove</ng-container>
-              </a>
-              <ng-template #iconTplIamUser>
-                <i nz-icon nzType="question-circle" nzTheme="fill" style="color: #FAAD14;"></i>
-              </ng-template>
-            </ng-container>
-            <ng-container *ngIf="!item.isPolicyMember">
-              <a class="primary-link-btn" (click)="addPolicy(item.id)" i18n="@@common.add">Add</a>
-            </ng-container>
-          </td>
-        </tr>
+          @for (item of table.data; track item) {
+            <tr>
+              <td (click)="navigateToMember(item.id)">{{ item.name ?? '--' }}</td>
+              <td (click)="navigateToMember(item.id)">{{ item.email ?? '--' }}</td>
+              <td (click)="navigateToMember(item.id)">{{ item.phoneNumber ?? '--' }}</td>
+              <td>
+                <a (click)="navigateToMember(item.id)" i18n="@@common.details">Details</a>
+                <nz-divider nzType="vertical"></nz-divider>
+                @if (item.isPolicyMember) {
+                  <a style="color: #717D8A"
+                    i18n-nz-popconfirm="@@iam.policies.details.remove-member-confirm"  nz-popconfirm="Are you sure to remove the member from the current policy?"
+                    nzPopconfirmPlacement="bottomRight"
+                    [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
+                    (nzOnConfirm)="removePolicy(item.id)" [nzIcon]="iconTplIamUser">
+                    <ng-container i18n="@@common.remove">Remove</ng-container>
+                  </a>
+                  <ng-template #iconTplIamUser>
+                    <i nz-icon nzType="question-circle" nzTheme="fill" style="color: #FAAD14;"></i>
+                  </ng-template>
+                }
+                @if (!item.isPolicyMember) {
+                  <a class="primary-link-btn" (click)="addPolicy(item.id)" i18n="@@common.add">Add</a>
+                }
+              </td>
+            </tr>
+          }
         </tbody>
       </nz-table>
     </div>

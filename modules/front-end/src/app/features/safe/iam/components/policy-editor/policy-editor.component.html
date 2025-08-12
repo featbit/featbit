@@ -1,59 +1,70 @@
-<message *ngIf="readonly" [type]="'warning'" i18n-content="@@iam.policies.details.managed-policies-cannot-be-modified" content="System Managed policies cannot be modified. If needed, you can make a copy and modify it for your own needs."></message>
+@if (readonly) {
+  <message [type]="'warning'" i18n-content="@@iam.policies.details.managed-policies-cannot-be-modified" content="System Managed policies cannot be modified. If needed, you can make a copy and modify it for your own needs."></message>
+}
 <div class="operations">
   <button class="standard-btn copy-btn" nz-button nzType="primary" (click)="copyPolicy()">
     <i nz-icon nzType="icons:icon-copy"></i>
     <ng-container i18n="@@common.copy">Copy</ng-container>
   </button>
-  <button *ngIf="!readonly" class="standard-btn" nz-button nzType="primary" (click)="saveStatements()">
-    <i nz-icon nzType="icons:icon-save"></i>
-    <ng-container i18n="@@common.save">Save</ng-container>
-  </button>
+  @if (!readonly) {
+    <button class="standard-btn" nz-button nzType="primary" (click)="saveStatements()">
+      <i nz-icon nzType="icons:icon-save"></i>
+      <ng-container i18n="@@common.save">Save</ng-container>
+    </button>
+  }
 </div>
 <div class="policy-editor body-container standard-div" [class]="{'sys-managed': readonly}">
   <div class="statements-banner">
     <div class="title" i18n="@@common.permissions">Permissions</div>
-    <i nz-icon *ngIf="!readonly" (click)="addStatement()" nzType="icons:icon-add-outline"></i>
+    @if (!readonly) {
+      <i nz-icon (click)="addStatement()" nzType="icons:icon-add-outline"></i>
+    }
   </div>
   <div class="statements-wrapper">
-    <div *ngFor="let statement of statements" class="statement">
-      <nz-card style="margin-bottom: 10px; border-radius: 20px">
-        <div class="input-item" style="margin-top: 0;">
-          <div style="display: flex; justify-content: space-between">
-            <div class="title" i18n="@@iam.policies.details.resource-type">Resource type</div>
-            <div style="display:flex;justify-content: flex-end;">
-              <button *ngIf="!readonly" class="action-btn" nz-button nzType="default" nzSize="small"
-                      i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it?"
-                      nzPopconfirmPlacement="bottomRight"
-                      (nzOnConfirm)="removeStatement(statement)">
-                <i nz-icon nzType="icons:icon-delete"></i>
-                <ng-container i18n="@@common.remove">Remove</ng-container>
-              </button>
+    @for (statement of statements; track statement) {
+      <div class="statement">
+        <nz-card style="margin-bottom: 10px; border-radius: 20px">
+          <div class="input-item" style="margin-top: 0;">
+            <div style="display: flex; justify-content: space-between">
+              <div class="title" i18n="@@iam.policies.details.resource-type">Resource type</div>
+              <div style="display:flex;justify-content: flex-end;">
+                @if (!readonly) {
+                  <button class="action-btn" nz-button nzType="default" nzSize="small"
+                    i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it?"
+                    nzPopconfirmPlacement="bottomRight"
+                    (nzOnConfirm)="removeStatement(statement)">
+                    <i nz-icon nzType="icons:icon-delete"></i>
+                    <ng-container i18n="@@common.remove">Remove</ng-container>
+                  </button>
+                }
+              </div>
             </div>
+            <nz-select class="extend nz-select-36"
+              nzShowSearch
+              [compareWith]="statement.compareResourceType"
+              [(ngModel)]="statement.resourceType"
+              (ngModelChange)="statement.onResourceTypeChange()">
+              @for (rt of resourcesTypes; track rt) {
+                <nz-option [nzLabel]="rt.displayName" [nzValue]="rt"></nz-option>
+              }
+            </nz-select>
           </div>
-
-          <nz-select class="extend nz-select-36"
-                     nzShowSearch
-                     [compareWith]="statement.compareResourceType"
-                     [(ngModel)]="statement.resourceType"
-                     (ngModelChange)="statement.onResourceTypeChange()">
-            <nz-option *ngFor="let rt of resourcesTypes" [nzLabel]="rt.displayName" [nzValue]="rt"></nz-option>
-          </nz-select>
-        </div>
-        <div class="input-item">
-          <resources-selector [isInvalid]="statement.isResourcesInvalid" [selectedResources]="statement.selectedResources" [resourceType]="statement.resourceType" (onSelectedResourcesChange)="statement.onSelectedResourcesChange($event)"></resources-selector>
-        </div>
-        <div class="input-item">
-          <div class="title" i18n="@@iam.policies.details.allow-or-deny">Allow or deny</div>
-          <nz-select class="nz-select-36" i18n-nzPlaceHolder="@@iam.policies.details.allow-or-deny" nzPlaceHolder="Allow or deny" [(ngModel)]="statement.effect">
-            <nz-option [nzLabel]="'Allow' | T: 'Allow': 'effect'" [nzValue]="'allow'"></nz-option>
-            <nz-option [nzLabel]="'Deny' | T: 'Deny': 'effect'" [nzValue]="'deny'"></nz-option>
-          </nz-select>
-        </div>
-        <div class="input-item">
-          <actions-selector [isInvalid]="statement.isActionsInvalid" [selectedActions]="statement.selectedActions" [actions]="statement.availableActions" (onSelectedActionsChange)="statement.onSelectedActionsChange($event)"></actions-selector>
-        </div>
-      </nz-card>
-    </div>
+          <div class="input-item">
+            <resources-selector [isInvalid]="statement.isResourcesInvalid" [selectedResources]="statement.selectedResources" [resourceType]="statement.resourceType" (onSelectedResourcesChange)="statement.onSelectedResourcesChange($event)"></resources-selector>
+          </div>
+          <div class="input-item">
+            <div class="title" i18n="@@iam.policies.details.allow-or-deny">Allow or deny</div>
+            <nz-select class="nz-select-36" i18n-nzPlaceHolder="@@iam.policies.details.allow-or-deny" nzPlaceHolder="Allow or deny" [(ngModel)]="statement.effect">
+              <nz-option [nzLabel]="'Allow' | T: 'Allow': 'effect'" [nzValue]="'allow'"></nz-option>
+              <nz-option [nzLabel]="'Deny' | T: 'Deny': 'effect'" [nzValue]="'deny'"></nz-option>
+            </nz-select>
+          </div>
+          <div class="input-item">
+            <actions-selector [isInvalid]="statement.isActionsInvalid" [selectedActions]="statement.selectedActions" [actions]="statement.availableActions" (onSelectedActionsChange)="statement.onSelectedActionsChange($event)"></actions-selector>
+          </div>
+        </nz-card>
+      </div>
+    }
   </div>
 </div>
 

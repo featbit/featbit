@@ -10,74 +10,95 @@
   <ng-container *nzDrawerContent>
     <div class="changes-container">
       <nz-list nzItemLayout="horizontal">
-        <nz-list-item *ngFor="let changeCategories of changeCategoriesList">
-          <ng-template #extraTemplate>
-            <i class="more-actions" nz-icon nzType="ellipsis" nz-dropdown [nzDropdownMenu]="options" [nzClickHide]="false"></i>
-            <nz-dropdown-menu #options="nzDropdownMenu">
-              <ul nz-menu nzSelectable style="min-width: 100px;">
-                <li nz-menu-item
-                    (click)="declineChangeRequest(changeCategories)"
-                    *ngIf="changeCategories.canDecline(profile.id)">
-                  <ng-container i18n="@@common.decline">Decline</ng-container>
-                </li>
-                <li nz-menu-item
-                    (click)="approveChangeRequest(changeCategories)"
-                    *ngIf="changeCategories.canApprove(profile.id)">
-                  <ng-container i18n="@@common.approve">Approve</ng-container>
-                </li>
-                <li nz-menu-item
-                    *ngIf="changeCategories.canApply(profile.id)"
-                    (click)="applyChangeRequest(changeCategories)">
-                  <ng-container i18n="@@common.apply">Apply</ng-container>
-                </li>
-                <li nz-menu-item
+        @for (changeCategories of changeCategoriesList; track changeCategories) {
+          <nz-list-item>
+            <ng-template #extraTemplate>
+              <i class="more-actions" nz-icon nzType="ellipsis" nz-dropdown [nzDropdownMenu]="options" [nzClickHide]="false"></i>
+              <nz-dropdown-menu #options="nzDropdownMenu">
+                <ul nz-menu nzSelectable style="min-width: 100px;">
+                  @if (changeCategories.canDecline(profile.id)) {
+                    <li nz-menu-item
+                      (click)="declineChangeRequest(changeCategories)"
+                      >
+                      <ng-container i18n="@@common.decline">Decline</ng-container>
+                    </li>
+                  }
+                  @if (changeCategories.canApprove(profile.id)) {
+                    <li nz-menu-item
+                      (click)="approveChangeRequest(changeCategories)"
+                      >
+                      <ng-container i18n="@@common.approve">Approve</ng-container>
+                    </li>
+                  }
+                  @if (changeCategories.canApply(profile.id)) {
+                    <li nz-menu-item
+                      (click)="applyChangeRequest(changeCategories)">
+                      <ng-container i18n="@@common.apply">Apply</ng-container>
+                    </li>
+                  }
+                  <li nz-menu-item
                     nz-popconfirm
                     i18n-nzPopconfirmTitle="@@common.simple-remove-confirm"
                     nzPopconfirmTitle="Are you sure to remove it?"
                     (nzOnConfirm)="removePendingChange(changeCategories.id, changeCategories.type)"
                     [nzIcon]="iconTplDelete">
-                  <ng-container i18n="@@common.remove">Remove</ng-container>
-                </li>
-              </ul>
-              <ng-template #iconTplDelete>
-                <span nz-icon nzType="question-circle" nzTheme="fill"></span>
-              </ng-template>
-            </nz-dropdown-menu>
-          </ng-template>
-          <ng-template #titleTemplate>
-            <div class="title">
-              <ng-container *ngIf="changeCategories.type === PendingChangeType.Schedule">
-                <i nz-icon nzType="schedule" nzTheme="outline"></i>
-                <span i18n="@@common.scheduled-for">Scheduled for</span>
-                <span class="scheduled-time"> {{ changeCategories.scheduledTime | date: 'yyyy-MM-dd HH:mm' }}</span>&nbsp;
-                <nz-tag [class]="{approved: changeCategories.status === PendingChangeStatus.Approved, declined: changeCategories.status === PendingChangeStatus.Declined, 'pending-execution': changeCategories.status === PendingChangeStatus.PendingExecution}">
-                  <span *ngIf="changeCategories.status === PendingChangeStatus.Approved" nz-icon nzType="check-circle" nzTheme="outline"></span>
-                  <span *ngIf="changeCategories.status === PendingChangeStatus.Declined" nz-icon nzType="close-circle" nzTheme="outline"></span>
-                  <span *ngIf="changeCategories.status === PendingChangeStatus.PendingExecution" nz-icon nzType="field-time" nzTheme="outline"></span>
-                  {{changeCategories.statusLabel}}
-                </nz-tag>
-              </ng-container>
-              <ng-container *ngIf="changeCategories.type === PendingChangeType.ChangeRequest">
-                <i nz-icon nzType="pull-request" nzTheme="outline"></i>
-                <span i18n="@@common.change-requested">Change requested</span>&nbsp;
-                <nz-tag [class]="{approved: [PendingChangeStatus.Approved, PendingChangeStatus.Applied].includes(changeCategories.status), declined: changeCategories.status === PendingChangeStatus.Declined}">
-                  <span *ngIf="[PendingChangeStatus.Approved, PendingChangeStatus.Applied].includes(changeCategories.status)" nz-icon nzType="check-circle" nzTheme="outline"></span>
-                  <span *ngIf="changeCategories.status === PendingChangeStatus.Declined" nz-icon nzType="close-circle" nzTheme="outline"></span>
-                  {{changeCategories.statusLabel}}
-                </nz-tag>
-              </ng-container>
-            </div>
-          </ng-template>
-          <nz-card [nzTitle]="titleTemplate" [nzExtra]="extraTemplate">
-            <div class="pending-change-comment">
-              <div>{{changeCategories.scheduleTitle}}</div>
-              <div>{{changeCategories.changeRequestReason}}</div>
-            </div>
-            <change-list *ngIf="changeCategories.instructions.length > 0" [param]="{ instructions: changeCategories.instructions, previous: changeCategories.previous, current: changeCategories.current }"></change-list>
-            <div class="creator-creation-time">{{changeCategories.creator}} <span i18n="@@common.created-at">Created At</span>: {{ changeCategories.createdAt | date: 'yyyy-MM-dd HH:mm' }}</div>
-          </nz-card>
-        </nz-list-item>
-        <nz-list-empty *ngIf="changeCategoriesList.length === 0"></nz-list-empty>
+                    <ng-container i18n="@@common.remove">Remove</ng-container>
+                  </li>
+                </ul>
+                <ng-template #iconTplDelete>
+                  <span nz-icon nzType="question-circle" nzTheme="fill"></span>
+                </ng-template>
+              </nz-dropdown-menu>
+            </ng-template>
+            <ng-template #titleTemplate>
+              <div class="title">
+                @if (changeCategories.type === PendingChangeType.Schedule) {
+                  <i nz-icon nzType="schedule" nzTheme="outline"></i>
+                  <span i18n="@@common.scheduled-for">Scheduled for</span>
+                  <span class="scheduled-time"> {{ changeCategories.scheduledTime | date: 'yyyy-MM-dd HH:mm' }}</span>&nbsp;
+                  <nz-tag [class]="{approved: changeCategories.status === PendingChangeStatus.Approved, declined: changeCategories.status === PendingChangeStatus.Declined, 'pending-execution': changeCategories.status === PendingChangeStatus.PendingExecution}">
+                    @if (changeCategories.status === PendingChangeStatus.Approved) {
+                      <span nz-icon nzType="check-circle" nzTheme="outline"></span>
+                    }
+                    @if (changeCategories.status === PendingChangeStatus.Declined) {
+                      <span nz-icon nzType="close-circle" nzTheme="outline"></span>
+                    }
+                    @if (changeCategories.status === PendingChangeStatus.PendingExecution) {
+                      <span nz-icon nzType="field-time" nzTheme="outline"></span>
+                    }
+                    {{changeCategories.statusLabel}}
+                  </nz-tag>
+                }
+                @if (changeCategories.type === PendingChangeType.ChangeRequest) {
+                  <i nz-icon nzType="pull-request" nzTheme="outline"></i>
+                  <span i18n="@@common.change-requested">Change requested</span>&nbsp;
+                  <nz-tag [class]="{approved: [PendingChangeStatus.Approved, PendingChangeStatus.Applied].includes(changeCategories.status), declined: changeCategories.status === PendingChangeStatus.Declined}">
+                    @if ([PendingChangeStatus.Approved, PendingChangeStatus.Applied].includes(changeCategories.status)) {
+                      <span nz-icon nzType="check-circle" nzTheme="outline"></span>
+                    }
+                    @if (changeCategories.status === PendingChangeStatus.Declined) {
+                      <span nz-icon nzType="close-circle" nzTheme="outline"></span>
+                    }
+                    {{changeCategories.statusLabel}}
+                  </nz-tag>
+                }
+              </div>
+            </ng-template>
+            <nz-card [nzTitle]="titleTemplate" [nzExtra]="extraTemplate">
+              <div class="pending-change-comment">
+                <div>{{changeCategories.scheduleTitle}}</div>
+                <div>{{changeCategories.changeRequestReason}}</div>
+              </div>
+              @if (changeCategories.instructions.length > 0) {
+                <change-list [param]="{ instructions: changeCategories.instructions, previous: changeCategories.previous, current: changeCategories.current }"></change-list>
+              }
+              <div class="creator-creation-time">{{changeCategories.creator}} <span i18n="@@common.created-at">Created At</span>: {{ changeCategories.createdAt | date: 'yyyy-MM-dd HH:mm' }}</div>
+            </nz-card>
+          </nz-list-item>
+        }
+        @if (changeCategoriesList.length === 0) {
+          <nz-list-empty></nz-list-empty>
+        }
       </nz-list>
     </div>
   </ng-container>

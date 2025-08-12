@@ -14,46 +14,48 @@
     </div>
     <div class="table-wrapper">
       <nz-table #table nzSize="small"
-                [nzData]="groups.items"
-                [nzFrontPagination]="false"
-                [nzLoading]="isLoading"
-                [nzTotal]="groups.totalCount"
-                [(nzPageSize)]="filter.pageSize"
-                (nzPageSizeChange)="doSearch()"
-                [(nzPageIndex)]="filter.pageIndex"
-                (nzPageIndexChange)="doSearch()">
+        [nzData]="groups.items"
+        [nzFrontPagination]="false"
+        [nzLoading]="isLoading"
+        [nzTotal]="groups.totalCount"
+        [(nzPageSize)]="filter.pageSize"
+        (nzPageSizeChange)="doSearch()"
+        [(nzPageIndex)]="filter.pageIndex"
+        (nzPageIndexChange)="doSearch()">
         <thead>
-        <tr>
-          <th i18n="@@common.name">Name</th>
-          <th i18n="@@common.description">Description</th>
-          <th i18n="@@common.actions">Actions</th>
-        </tr>
+          <tr>
+            <th i18n="@@common.name">Name</th>
+            <th i18n="@@common.description">Description</th>
+            <th i18n="@@common.actions">Actions</th>
+          </tr>
         </thead>
         <tbody>
-        <tr *ngFor="let item of table.data">
-          <td (click)="navigateToGroup(item.id)">{{item.name}}</td>
-          <td>{{item.description}}</td>
-          <td>
-            <a class="primary-link-btn" style="margin-right: 5px" (click)="navigateToGroup(item.id)" i18n="@@common.details">Details</a>
-            <nz-divider nzType="vertical"></nz-divider>
-            <ng-container *ngIf="item.isPolicyGroup">
-              <a style="color: #717D8A"
-                 i18n-nz-popconfirm="@@iam.policies.details.remove-policy-confirm"
-                 nz-popconfirm="Are you sure to remove the policy from the group?"
-                 nzPopconfirmPlacement="bottomRight"
-                 [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
-                 (nzOnConfirm)="removePolicy(item.id)" [nzIcon]="iconTplIamUser">
-                <ng-container i18n="@@common.remove">Remove</ng-container>
-              </a>
-              <ng-template #iconTplIamUser>
-                <i nz-icon nzType="question-circle" nzTheme="fill" style="color: #FAAD14;"></i>
-              </ng-template>
-            </ng-container>
-            <ng-container *ngIf="!item.isPolicyGroup">
-              <a class="primary-link-btn" (click)="addPolicy(item.id)" i18n="@@common.add">Add</a>
-            </ng-container>
-          </td>
-        </tr>
+          @for (item of table.data; track item) {
+            <tr>
+              <td (click)="navigateToGroup(item.id)">{{item.name}}</td>
+              <td>{{item.description}}</td>
+              <td>
+                <a class="primary-link-btn" style="margin-right: 5px" (click)="navigateToGroup(item.id)" i18n="@@common.details">Details</a>
+                <nz-divider nzType="vertical"></nz-divider>
+                @if (item.isPolicyGroup) {
+                  <a style="color: #717D8A"
+                    i18n-nz-popconfirm="@@iam.policies.details.remove-policy-confirm"
+                    nz-popconfirm="Are you sure to remove the policy from the group?"
+                    nzPopconfirmPlacement="bottomRight"
+                    [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
+                    (nzOnConfirm)="removePolicy(item.id)" [nzIcon]="iconTplIamUser">
+                    <ng-container i18n="@@common.remove">Remove</ng-container>
+                  </a>
+                  <ng-template #iconTplIamUser>
+                    <i nz-icon nzType="question-circle" nzTheme="fill" style="color: #FAAD14;"></i>
+                  </ng-template>
+                }
+                @if (!item.isPolicyGroup) {
+                  <a class="primary-link-btn" (click)="addPolicy(item.id)" i18n="@@common.add">Add</a>
+                }
+              </td>
+            </tr>
+          }
         </tbody>
       </nz-table>
     </div>

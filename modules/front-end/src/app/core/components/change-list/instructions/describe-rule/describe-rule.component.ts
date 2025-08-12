@@ -21,33 +21,51 @@ interface IRuleRollout {
 @Component({
   selector: 'describe-rule',
   template: `
-    <div class="instruction" *ngIf="!isLoading">
-      <div class="clause" *ngFor="let condition of conditions; let idx = index">
-        <span *ngIf="idx !==0">And</span>
-        <span i18n="@@common.capitalize-if">If</span>
-        <span>{{condition.property}}</span>
-        <span *ngIf="condition.op !== null">{{condition.opLabel}}</span>
-        <ng-container *ngIf="condition.displayValue">
-          <nz-tag *ngIf="!condition.isMultiValue">{{condition.value}}</nz-tag>
-          <ng-container *ngIf="condition.isMultiValue">
-            <nz-tag *ngFor="let value of condition.value">{{value}}</nz-tag>
-          </ng-container>
-        </ng-container>
-      </div>
-      <ng-container *ngIf="rollouts?.length > 0">
-        <div class="serve">
-          <span i18n="@@differ.serve">Serve</span>
-          <nz-tag class="serve-value" *ngFor="let rollout of rollouts">
-            {{rollout.label}} <ng-container *ngIf="rollouts.length > 1">({{rollout.percentage}}%)</ng-container>
-          </nz-tag>
+    @if (!isLoading) {
+      <div class="instruction">
+        @for (condition of conditions; track condition; let idx = $index) {
+          <div class="clause">
+            @if (idx !==0) {
+              <span>And</span>
+            }
+            <span i18n="@@common.capitalize-if">If</span>
+            <span>{{condition.property}}</span>
+            @if (condition.op !== null) {
+              <span>{{condition.opLabel}}</span>
+            }
+            @if (condition.displayValue) {
+              @if (!condition.isMultiValue) {
+                <nz-tag>{{condition.value}}</nz-tag>
+              }
+              @if (condition.isMultiValue) {
+                @for (value of condition.value; track value) {
+                  <nz-tag>{{value}}</nz-tag>
+                }
+              }
+            }
+          </div>
+        }
+        @if (rollouts?.length > 0) {
+          <div class="serve">
+            <span i18n="@@differ.serve">Serve</span>
+            @for (rollout of rollouts; track rollout) {
+              <nz-tag class="serve-value">
+                {{rollout.label}} @if (rollouts.length > 1) {
+                ({{rollout.percentage}}%)
+              }
+            </nz-tag>
+          }
         </div>
-        <div class="dispatch-by" *ngIf="rollouts?.length > 1">
-          <span i18n="@@differ.dispatch-by">Dispatch by</span>
-          <nz-tag>{{rule.dispatchKey}}</nz-tag>
-        </div>
-      </ng-container>
+        @if (rollouts?.length > 1) {
+          <div class="dispatch-by">
+            <span i18n="@@differ.dispatch-by">Dispatch by</span>
+            <nz-tag>{{rule.dispatchKey}}</nz-tag>
+          </div>
+        }
+      }
     </div>
-  `,
+    }
+    `,
   styleUrls: ['./describe-rule.component.less']
 })
 export class DescribeRuleComponent implements IInstructionComponent, OnInit {

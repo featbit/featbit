@@ -21,14 +21,20 @@
   </nz-steps>
 
   <div class="step-content">
-    <div *ngIf="currentStep === 0">
-      <create-feature-flag [flag]="flag" (onComplete)="onFlagCreated($event)"></create-feature-flag>
-    </div>
-    <div *ngIf="currentStep === 1">
-      <connect-an-sdk [flagKey]="flag?.key" (onComplete)="goNext()" (onPrev)="goPrev()"></connect-an-sdk>
-    </div>
-    <div *ngIf="currentStep === 2">
-      <test-app [flagKey]="flag?.key" (onComplete)="navigateToFlagList()" (onPrev)="goPrev()"></test-app>
-    </div>
+    @if (currentStep === 0) {
+      <div>
+        <create-feature-flag [flag]="flag" (onComplete)="onFlagCreated($event)"></create-feature-flag>
+      </div>
+    }
+    @if (currentStep === 1) {
+      <div>
+        <connect-an-sdk [flagKey]="flag?.key" (onComplete)="goNext()" (onPrev)="goPrev()"></connect-an-sdk>
+      </div>
+    }
+    @if (currentStep === 2) {
+      <div>
+        <test-app [flagKey]="flag?.key" (onComplete)="navigateToFlagList()" (onPrev)="goPrev()"></test-app>
+      </div>
+    }
   </div>
 </nz-card>

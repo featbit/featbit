@@ -5,24 +5,28 @@
       <span>{{selectedActions.length}} <ng-container i18n="@@common.num-actions">Action(s)</ng-container></span>
     </div>
   </div>
-  <div class="selected-actions" *ngIf="selectedActions.length">
-    <div nz-col class="action" *ngFor="let act of selectedActions">
-      <div class="inner-box" nz-tooltip="{{act.name}} ({{act.description}})">
-        {{act.displayName}} ({{act.name}})
-      </div>
-      <button nz-button nzType="default" [nzSize]="'large'" (click)="removeAction(act)"><i nz-icon nzType="close"></i></button>
+  @if (selectedActions.length) {
+    <div class="selected-actions">
+      @for (act of selectedActions; track act) {
+        <div nz-col class="action">
+          <div class="inner-box" nz-tooltip="{{act.name}} ({{act.description}})">
+            {{act.displayName}} ({{act.name}})
+          </div>
+          <button nz-button nzType="default" [nzSize]="'large'" (click)="removeAction(act)"><i nz-icon nzType="close"></i></button>
+        </div>
+      }
     </div>
-  </div>
+  }
   <nz-select class="nz-select-36" [class]="{invalid: isInvalid}" #actionsSelector
-             i18n-nzPlaceHolder="@@iam.policies.details.select-action"
-             nzPlaceHolder="Select action"
-             nzShowSearch
-             nzServerSearch
-             [(ngModel)]="actionSelectModel"
-             (ngModelChange)="onActionChange()"
-             (nzOnSearch)="onSearchActions($event)"
-             [nzOptionHeightPx]="54">
-    <ng-container *ngFor="let action of filteredActions">
+    i18n-nzPlaceHolder="@@iam.policies.details.select-action"
+    nzPlaceHolder="Select action"
+    nzShowSearch
+    nzServerSearch
+    [(ngModel)]="actionSelectModel"
+    (ngModelChange)="onActionChange()"
+    (nzOnSearch)="onSearchActions($event)"
+    [nzOptionHeightPx]="54">
+    @for (action of filteredActions; track action) {
       <nz-option
         nzCustomContent
         [nzValue]="action"
@@ -33,6 +37,6 @@
           <div class="digest">{{ getActionDigest(action) }}</div>
         </div>
       </nz-option>
-    </ng-container>
+    }
   </nz-select>
 </div>
