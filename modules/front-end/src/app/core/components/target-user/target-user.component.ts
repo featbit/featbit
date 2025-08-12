@@ -9,9 +9,10 @@ import { EnvUserPropService } from "@services/env-user-prop.service";
 import { EnvUserFilter } from "@features/safe/end-users/types/featureflag-user";
 
 @Component({
-  selector: 'target-user',
-  templateUrl: './target-user.component.html',
-  styleUrls: ['./target-user.component.less']
+    selector: 'target-user',
+    templateUrl: './target-user.component.html',
+    styleUrls: ['./target-user.component.less'],
+    standalone: false
 })
 export class TargetUserComponent implements OnInit {
 

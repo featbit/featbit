@@ -9,9 +9,10 @@ import { IMember, IMemberListModel, MemberFilter, memberRn } from "@features/saf
 import { IProfile } from "@shared/types";
 
 @Component({
-  selector: 'iam-users',
-  templateUrl: './index.component.html',
-  styleUrls: ['./index.component.less']
+    selector: 'iam-users',
+    templateUrl: './index.component.html',
+    styleUrls: ['./index.component.less'],
+    standalone: false
 })
 export class IndexComponent implements OnInit {
   get profile(): IProfile {

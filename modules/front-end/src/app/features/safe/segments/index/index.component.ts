@@ -14,9 +14,10 @@ import { SegmentService } from "@services/segment.service";
 import { debounceTime } from 'rxjs/operators';
 
 @Component({
-  selector: 'segments-index',
-  templateUrl: './index.component.html',
-  styleUrls: ['./index.component.less']
+    selector: 'segments-index',
+    templateUrl: './index.component.html',
+    styleUrls: ['./index.component.less'],
+    standalone: false
 })
 export class IndexComponent implements OnInit {
 

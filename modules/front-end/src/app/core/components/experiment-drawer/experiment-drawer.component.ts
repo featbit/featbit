@@ -13,9 +13,10 @@ import { IPagedMetric, MetricListFilter } from "@features/safe/experiments/types
 
 
 @Component({
-  selector: 'app-experiment-drawer',
-  templateUrl: './experiment-drawer.component.html',
-  styleUrls: ['./experiment-drawer.component.less']
+    selector: 'app-experiment-drawer',
+    templateUrl: './experiment-drawer.component.html',
+    styleUrls: ['./experiment-drawer.component.less'],
+    standalone: false
 })
 export class ExperimentDrawerComponent {
 

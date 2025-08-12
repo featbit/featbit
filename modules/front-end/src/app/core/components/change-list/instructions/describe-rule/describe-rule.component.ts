@@ -19,8 +19,8 @@ interface IRuleRollout {
 }
 
 @Component({
-  selector: 'describe-rule',
-  template: `
+    selector: 'describe-rule',
+    template: `
     @if (!isLoading) {
       <div class="instruction">
         @for (condition of conditions; track condition; let idx = $index) {
@@ -66,7 +66,8 @@ interface IRuleRollout {
     </div>
     }
     `,
-  styleUrls: ['./describe-rule.component.less']
+    styleUrls: ['./describe-rule.component.less'],
+    standalone: false
 })
 export class DescribeRuleComponent implements IInstructionComponent, OnInit {
   data: IInstructionComponentData;

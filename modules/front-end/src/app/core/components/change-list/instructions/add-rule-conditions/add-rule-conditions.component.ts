@@ -9,8 +9,8 @@ import { getSegmentRefs, mapToIInstructionCondition } from "@core/components/cha
 import { ICondition } from "@shared/rules";
 
 @Component({
-  selector: 'add-rule-conditions',
-  template: `
+    selector: 'add-rule-conditions',
+    template: `
     @if (!isLoading) {
       <div class="instruction">
         <span i18n="@@common.add-conditions">Add conditions</span>
@@ -39,7 +39,8 @@ import { ICondition } from "@shared/rules";
       </div>
     }
     `,
-  styleUrls: ['./add-rule-conditions.component.less']
+    styleUrls: ['./add-rule-conditions.component.less'],
+    standalone: false
 })
 export class AddRuleConditionsComponent implements IInstructionComponent, OnInit {
   data: IInstructionComponentData;

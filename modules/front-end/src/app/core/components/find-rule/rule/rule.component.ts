@@ -14,9 +14,10 @@ import { IUserProp } from "@shared/types";
 import { ICondition } from "@shared/rules";
 
 @Component({
-  selector: 'app-rule',
-  templateUrl: './rule.component.html',
-  styleUrls: ['./rule.component.less']
+    selector: 'app-rule',
+    templateUrl: './rule.component.html',
+    styleUrls: ['./rule.component.less'],
+    standalone: false
 })
 export class RuleComponent {
 

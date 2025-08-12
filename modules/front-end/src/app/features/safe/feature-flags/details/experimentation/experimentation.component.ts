@@ -18,9 +18,10 @@ import {
 import { getCurrentProjectEnv } from "@utils/project-env";
 
 @Component({
-  selector: 'ff-experimentations',
-  templateUrl: './experimentation.component.html',
-  styleUrls: ['./experimentation.component.less']
+    selector: 'ff-experimentations',
+    templateUrl: './experimentation.component.html',
+    styleUrls: ['./experimentation.component.less'],
+    standalone: false
 })
 export class ExperimentationComponent implements OnInit, OnDestroy {
 

@@ -11,8 +11,8 @@ import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
 import { getSegmentRefs, mapToIInstructionCondition } from "@core/components/change-list/instructions/utils";
 
 @Component({
-  selector: 'remove-rule-condition',
-  template: `
+    selector: 'remove-rule-condition',
+    template: `
     @if (!isLoading) {
       <div class="instruction">
         <span i18n="@@common.remove-conditions">Remove conditions</span>
@@ -41,7 +41,8 @@ import { getSegmentRefs, mapToIInstructionCondition } from "@core/components/cha
       </div>
     }
     `,
-  styleUrls: ['./remove-rule-conditions.component.less']
+    styleUrls: ['./remove-rule-conditions.component.less'],
+    standalone: false
 })
 export class RemoveRuleConditionsComponent implements IInstructionComponent, OnInit {
   data: IInstructionComponentData;

@@ -1,6 +1,9 @@
 import { Pipe, PipeTransform } from "@angular/core";
 
-@Pipe({ name: "percentage" })
+@Pipe({
+    name: "percentage",
+    standalone: false
+})
 export class PercentagePipe implements PipeTransform {
   constructor() {}
 

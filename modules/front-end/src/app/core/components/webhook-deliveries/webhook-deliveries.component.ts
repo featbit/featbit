@@ -11,9 +11,10 @@ import { NzMessageService } from "ng-zorro-antd/message";
 import { debounceTime, finalize } from "rxjs/operators";
 
 @Component({
-  selector: 'webhook-deliveries',
-  templateUrl: './webhook-deliveries.component.html',
-  styleUrls: ['./webhook-deliveries.component.less']
+    selector: 'webhook-deliveries',
+    templateUrl: './webhook-deliveries.component.html',
+    styleUrls: ['./webhook-deliveries.component.less'],
+    standalone: false
 })
 export class WebhookDeliveriesComponent {
   @Input()

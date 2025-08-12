@@ -6,8 +6,8 @@ import {
 import { InstructionKindEnum } from "@core/components/change-list/constants";
 
 @Component({
-  selector: 'update-target-users',
-  template: `
+    selector: 'update-target-users',
+    template: `
     <div class="instruction">
       @if (kind === InstructionKindEnum.AddTargetUsersToExcluded || kind === InstructionKindEnum.RemoveTargetUsersFromExcluded) {
         <span class="variation" i18n="@@common.excluding-users" >Excluding users</span>:
@@ -28,7 +28,7 @@ import { InstructionKindEnum } from "@core/components/change-list/constants";
       }
     </div>
     `,
-  styles: [`
+    styles: [`
     .variation {
       font-weight: 600;
     }
@@ -40,7 +40,8 @@ import { InstructionKindEnum } from "@core/components/change-list/constants";
       margin-left: 2px;
       margin-right: 2px;
     }
-  `]
+  `],
+    standalone: false
 })
 export class UpdateTargetUsersForSegmentComponent implements IInstructionComponent {
   data: IInstructionComponentData;

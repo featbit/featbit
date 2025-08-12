@@ -91,9 +91,10 @@ class PolicyStatementViewModel {
 }
 
 @Component({
-  selector: 'iam-policy-editor',
-  templateUrl: './policy-editor.component.html',
-  styleUrls: ['./policy-editor.component.less']
+    selector: 'iam-policy-editor',
+    templateUrl: './policy-editor.component.html',
+    styleUrls: ['./policy-editor.component.less'],
+    standalone: false
 })
 export class PolicyEditorComponent {
 

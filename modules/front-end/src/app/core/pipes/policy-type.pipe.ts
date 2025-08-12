@@ -2,7 +2,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { PolicyTypeEnum } from "@features/safe/iam/types/policy";
 
 @Pipe({
-  name: 'policyType'
+    name: 'policyType',
+    standalone: false
 })
 export class PolicyTypePipe implements PipeTransform {
   typeDict = {

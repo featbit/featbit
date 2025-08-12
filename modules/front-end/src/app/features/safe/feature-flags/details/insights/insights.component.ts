@@ -15,9 +15,10 @@ import {
 } from "@features/safe/feature-flags/details/insights/types";
 
 @Component({
-  selector: 'insights',
-  templateUrl: './insights.component.html',
-  styleUrls: ['./insights.component.less']
+    selector: 'insights',
+    templateUrl: './insights.component.html',
+    styleUrls: ['./insights.component.less'],
+    standalone: false
 })
 export class InsightsComponent implements OnInit {
 

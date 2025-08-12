@@ -27,9 +27,10 @@ import {
 import { PolicyTypeEnum } from "@features/safe/iam/types/policy";
 
 @Component({
-  selector: 'access-token-drawer',
-  templateUrl: './access-token-drawer.component.html',
-  styleUrls: ['./access-token-drawer.component.less']
+    selector: 'access-token-drawer',
+    templateUrl: './access-token-drawer.component.html',
+    styleUrls: ['./access-token-drawer.component.less'],
+    standalone: false
 })
 export class AccessTokenDrawerComponent {
   private _accessToken: IAccessToken;

@@ -6,8 +6,8 @@ import {
 import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
 import { ISegment } from "@features/safe/segments/types/segments-index";
 @Component({
-  selector: 'update-description',
-  template: `
+    selector: 'update-description',
+    template: `
     <div class="instruction">
       @if (!isClear) {
         <span i18n="@@common.update-description-with-sufix-space">Update description </span>
@@ -23,7 +23,7 @@ import { ISegment } from "@features/safe/segments/types/segments-index";
       }
     </div>
     `,
-  styles: [`
+    styles: [`
     .value {
       font-weight: 700;
       display: inline-block;
@@ -34,7 +34,8 @@ import { ISegment } from "@features/safe/segments/types/segments-index";
     .remove-value {
       text-decoration: line-through;
     }
-  `]
+  `],
+    standalone: false
 })
 export class UpdateDescriptionComponent implements IInstructionComponent {
   data: IInstructionComponentData;

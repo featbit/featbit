@@ -6,9 +6,10 @@ import { AuditLogOpEnum, IAuditLog, RefTypeEnum } from "@core/components/audit-l
 import { ISegment } from "@features/safe/segments/types/segments-index";
 
 @Component({
-  selector: 'audit-log',
-  templateUrl: './audit-log.component.html',
-  styleUrls: ['./audit-log.component.less']
+    selector: 'audit-log',
+    templateUrl: './audit-log.component.html',
+    styleUrls: ['./audit-log.component.less'],
+    standalone: false
 })
 export class AuditLogComponent {
   private previous: IFeatureFlag | ISegment | string;

@@ -6,9 +6,10 @@ import { debounceTime, first, map, switchMap } from "rxjs/operators";
 import { slugify } from "@utils/index";
 
 @Component({
-  selector: 'organization-drawer',
-  templateUrl: './organization-drawer.component.html',
-  styleUrls: [ './organization-drawer.component.less' ]
+    selector: 'organization-drawer',
+    templateUrl: './organization-drawer.component.html',
+    styleUrls: ['./organization-drawer.component.less'],
+    standalone: false
 })
 export class OrganizationDrawerComponent {
   form: FormGroup;

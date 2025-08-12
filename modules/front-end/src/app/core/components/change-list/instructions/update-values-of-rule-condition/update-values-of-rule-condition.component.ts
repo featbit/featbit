@@ -11,8 +11,8 @@ import { getSegmentRefs, mapToIInstructionCondition } from "@core/components/cha
 import { InstructionKindEnum } from "@core/components/change-list/constants";
 
 @Component({
-  selector: 'update-values-of-rule-condition',
-  template: `
+    selector: 'update-values-of-rule-condition',
+    template: `
     @if (!isLoading) {
       <div class="instruction">
         @if (isAddingValue) {
@@ -52,7 +52,8 @@ import { InstructionKindEnum } from "@core/components/change-list/constants";
       </div>
     }
     `,
-  styleUrls: ['./update-values-of-rule-condition.component.less']
+    styleUrls: ['./update-values-of-rule-condition.component.less'],
+    standalone: false
 })
 export class UpdateValuesOfRuleConditionComponent implements IInstructionComponent, OnInit {
   data: IInstructionComponentData;

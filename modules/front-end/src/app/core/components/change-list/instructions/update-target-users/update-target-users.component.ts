@@ -7,8 +7,8 @@ import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
 import { InstructionKindEnum } from "@core/components/change-list/constants";
 
 @Component({
-  selector: 'update-target-users',
-  template: `
+    selector: 'update-target-users',
+    template: `
     <div class="instruction">
       <span class="variation">{{variation}}</span>:
       @if (kind === InstructionKindEnum.SetTargetUsers) {
@@ -39,7 +39,7 @@ import { InstructionKindEnum } from "@core/components/change-list/constants";
       }
     </div>
     `,
-  styles: [`
+    styles: [`
     .variation {
       font-weight: 600;
     }
@@ -51,7 +51,8 @@ import { InstructionKindEnum } from "@core/components/change-list/constants";
       margin-left: 2px;
       margin-right: 2px;
     }
-  `]
+  `],
+    standalone: false
 })
 export class UpdateTargetUsersComponent implements IInstructionComponent {
   data: IInstructionComponentData;

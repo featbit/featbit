@@ -6,9 +6,10 @@ import { Subject } from "rxjs";
 import { NzMessageService } from "ng-zorro-antd/message";
 
 @Component({
-  selector: 'global-user',
-  templateUrl: './global-user.component.html',
-  styleUrls: ['./global-user.component.less']
+    selector: 'global-user',
+    templateUrl: './global-user.component.html',
+    styleUrls: ['./global-user.component.less'],
+    standalone: false
 })
 export class GlobalUserComponent implements OnInit {
 

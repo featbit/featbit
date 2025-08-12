@@ -3,8 +3,8 @@ import { IInstructionComponent, IInstructionComponentData } from "@core/componen
 import { InstructionKindEnum } from "@core/components/change-list/constants";
 
 @Component({
-  selector: 'update-tags',
-  template: `
+    selector: 'update-tags',
+    template: `
     <div class="instruction">
       @if (kind === InstructionKindEnum.AddTags) {
         <span i18n="@@common.add-tags">Add tags</span>
@@ -19,7 +19,7 @@ import { InstructionKindEnum } from "@core/components/change-list/constants";
       }
     </div>
     `,
-  styles: [`
+    styles: [`
     nz-tag {
       line-height: 12px;
       height: 19px;
@@ -27,7 +27,8 @@ import { InstructionKindEnum } from "@core/components/change-list/constants";
       margin-left: 2px;
       margin-right: 2px;
     }
-  `]
+  `],
+    standalone: false
 })
 export class UpdateTagsComponent implements IInstructionComponent {
   data: IInstructionComponentData;

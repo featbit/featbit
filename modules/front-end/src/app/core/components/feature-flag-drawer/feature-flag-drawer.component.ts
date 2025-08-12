@@ -12,9 +12,10 @@ import { editor } from "monaco-editor";
 import { FlagKeyPattern, IFeatureFlagCreationPayload } from "@features/safe/feature-flags/types/feature-flag";
 
 @Component({
-  selector: 'feature-flag-drawer',
-  templateUrl: './feature-flag-drawer.component.html',
-  styleUrls: ['./feature-flag-drawer.component.less']
+    selector: 'feature-flag-drawer',
+    templateUrl: './feature-flag-drawer.component.html',
+    styleUrls: ['./feature-flag-drawer.component.less'],
+    standalone: false
 })
 export class FeatureFlagDrawerComponent implements OnInit {
 

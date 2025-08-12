@@ -5,9 +5,10 @@ import { SegmentService } from "@services/segment.service";
 import { SegmentType } from "@features/safe/segments/types/segments-index";
 
 @Component({
-  selector: 'segment-auditlogs',
-  templateUrl: './audit-logs.component.html',
-  styleUrls: [ './audit-logs.component.less' ]
+    selector: 'segment-auditlogs',
+    templateUrl: './audit-logs.component.html',
+    styleUrls: ['./audit-logs.component.less'],
+    standalone: false
 })
 export class AuditLogsComponent implements OnInit {
   isLoading: boolean = true;

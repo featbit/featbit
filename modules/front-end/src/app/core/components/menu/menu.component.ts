@@ -8,9 +8,10 @@ import { FeedbackService } from "@services/feedback.service";
 import { NzMessageService } from "ng-zorro-antd/message";
 
 @Component({
-  selector: 'app-menu',
-  templateUrl: './menu.component.html',
-  styleUrls: ['./menu.component.less']
+    selector: 'app-menu',
+    templateUrl: './menu.component.html',
+    styleUrls: ['./menu.component.less'],
+    standalone: false
 })
 export class MenuComponent implements OnInit {
   @Input() menus: IMenuItem[];

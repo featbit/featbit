@@ -6,9 +6,10 @@ import { IProjectEnv } from "@shared/types";
 import { getCurrentProjectEnv } from "@utils/project-env";
 
 @Component({
-  selector: 'local-sync',
-  templateUrl: './local-sync.component.html',
-  styleUrls: ['./local-sync.component.less']
+    selector: 'local-sync',
+    templateUrl: './local-sync.component.html',
+    styleUrls: ['./local-sync.component.less'],
+    standalone: false
 })
 export class LocalSyncComponent {
 

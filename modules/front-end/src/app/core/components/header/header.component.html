@@ -1,6 +1,6 @@
 <section class="header-body">
   <nz-breadcrumb class="breadcrumb-nav" nzSeparator=">">
-    @for (breadcrumb of (breadcrumbs$ | async); track breadcrumb) {
+    @for (breadcrumb of (breadcrumbs$ | async); track breadcrumb.url || breadcrumb.label) {
       <nz-breadcrumb-item>
         <a [routerLink]="breadcrumb.url">{{ breadcrumb.label }}</a>
       </nz-breadcrumb-item>
@@ -52,7 +52,7 @@
             {{currentProjectEnv?.envName}}
           </span>
           <ng-template #environmentSecretContent>
-            @for (secret of env?.secrets; track secret) {
+            @for (secret of env?.secrets; track secret.value || secret.name) {
               <div class="env-secret-popover-content" (click)="copyText(secret.value)">
                 <i class="copy-icon" nz-icon nzType="icons:icon-copy"></i>
                 <span>{{secret.name}}</span>
@@ -82,7 +82,7 @@
   <ng-container *nzModalContent>
     <div class="project-envs">
       <nz-list class="overflow-y-list" style="--list-height: 320px" [nzHeader]="projectHeader">
-        @for (project of availableProjects; track project) {
+        @for (project of availableProjects; track project.id) {
           <nz-list-item [ngClass]="{'item-selected': selectedProject?.id === project.id}"
             (click)="onSelectProject(project)">
             {{ project.name }}
@@ -96,7 +96,7 @@
         </ng-template>
       </nz-list>
       <nz-list class="overflow-y-list" style="--list-height: 320px" [nzHeader]="envHeader">
-        @for (env of availableEnvs; track env) {
+        @for (env of availableEnvs; track env.id) {
           <nz-list-item [ngClass]="{'item-selected': selectedEnv?.id === env.id}"
             (click)="onSelectEnv(env)">
             {{ env.name }} @if (isCurrentEnv(env)) {

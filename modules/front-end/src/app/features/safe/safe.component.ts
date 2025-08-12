@@ -5,9 +5,10 @@ import { getProfile } from '@shared/utils';
 import { IdentityService } from "@services/identity.service";
 
 @Component({
-  selector: 'app-safe',
-  templateUrl: './safe.component.html',
-  styleUrls: ['./safe.component.less']
+    selector: 'app-safe',
+    templateUrl: './safe.component.html',
+    styleUrls: ['./safe.component.less'],
+    standalone: false
 })
 export class SafeComponent implements OnInit {
 

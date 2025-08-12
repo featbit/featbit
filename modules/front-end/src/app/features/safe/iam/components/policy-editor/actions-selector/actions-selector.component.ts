@@ -3,9 +3,10 @@ import {NzSelectComponent} from "ng-zorro-antd/select";
 import {IamPolicyAction} from "@shared/policy";
 
 @Component({
-  selector: 'actions-selector',
-  templateUrl: './actions-selector.component.html',
-  styleUrls: ['./actions-selector.component.less']
+    selector: 'actions-selector',
+    templateUrl: './actions-selector.component.html',
+    styleUrls: ['./actions-selector.component.less'],
+    standalone: false
 })
 export class ActionsSelectorComponent {
 
