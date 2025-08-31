@@ -16,7 +16,7 @@ interface IRuleRollout {
     template: `
     <div class="instruction">
       <span i18n="@@common.update-serve-value-to">Update serve value to </span>
-      @for (value of values; track value) {
+      @for (value of values; track value.label || value.percentage) {
         <nz-tag>{{value.label}} ({{value.percentage}}%)</nz-tag>
       }
     </div>

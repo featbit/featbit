@@ -47,7 +47,7 @@
       <div class="permissions">
         <nz-form-label nzNoColon nzRequired i18n="@@common.permissions">Permissions</nz-form-label>
         <nz-collapse nzExpandIconPosition="right">
-          @for (rt of authorizedResourceTypes; track rt; let first = $first) {
+          @for (rt of authorizedResourceTypes; track rt.type; let first = $first) {
             <nz-collapse-panel
               class="resource-type"
               [nzHeader]="rt.displayName"
@@ -63,7 +63,7 @@
                     i18n="@@common.all"
                   >All</label>
                 }
-                @for (permission of permissions[rt.type].statements; track permission) {
+                @for (permission of permissions[rt.type].statements; track permission.id) {
                   <div class="permission">
                     <div class="permission-header">
                       @if (isEditing) {

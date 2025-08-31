@@ -18,7 +18,7 @@
           (ngModelChange)="onSearch(true)"
           i18n-nzPlaceHolder="@@auditlogs.idx.filter-by-team-member"
           nzPlaceHolder="Filter by team member">
-          @for (member of memberListModel.items; track member) {
+          @for (member of memberListModel.items; track member.id) {
             @if (!membersLoading) {
               <nz-option [nzValue]="member.id" [nzLabel]="getMemberLabel(member)"></nz-option>
             }
@@ -51,12 +51,12 @@
         <nz-empty i18n-nzNotFoundContent="@@common.no-data" nzNotFoundContent="No data"></nz-empty>
       }
       <nz-timeline>
-        @for (group of groupedAuditLogs; track group) {
+        @for (group of groupedAuditLogs; track group.key) {
           <nz-timeline-item>
             <div  class="audit-logs-group">
               <div class="group-title">{{group.key}}</div>
               <div class="group-items">
-                @for (auditLog of group.items; track auditLog) {
+                @for (auditLog of group.items; track auditLog.id) {
                   <audit-log [auditLog]="auditLog"></audit-log>
                 }
               </div>

@@ -23,7 +23,7 @@ interface IRuleRollout {
     template: `
     @if (!isLoading) {
       <div class="instruction">
-        @for (condition of conditions; track condition; let idx = $index) {
+        @for (condition of conditions; track condition.id || condition.property; let idx = $index) {
           <div class="clause">
             @if (idx !==0) {
               <span>And</span>
@@ -48,7 +48,7 @@ interface IRuleRollout {
         @if (rollouts?.length > 0) {
           <div class="serve">
             <span i18n="@@differ.serve">Serve</span>
-            @for (rollout of rollouts; track rollout) {
+            @for (rollout of rollouts; track rollout.label || rollout.percentage) {
               <nz-tag class="serve-value">
                 {{rollout.label}} @if (rollouts.length > 1) {
                 ({{rollout.percentage}}%)

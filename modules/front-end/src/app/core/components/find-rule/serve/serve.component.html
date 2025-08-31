@@ -23,7 +23,7 @@
             <div class="item">
               <div class="percentage-number">
                 <nz-input-group nzSearch [nzAddOnAfter]="suffixTemplateInfo">
-                  <nz-input-number type="number" [nzMin]="0" [nzMax]="100" [nzPrecision]="3" [(ngModel)]="rule.percentageValue" (ngModelChange)="modelChange()"></nz-input-number>
+                  <nz-input-number type="number" [nzMin]="0" [nzMax]="100" [nzPrecision]="0" [(ngModel)]="rule.percentageValue" (ngModelChange)="modelChange()"></nz-input-number>
                 </nz-input-group>
                 <ng-template #suffixTemplateInfo>
                   <button nz-button nzType="default" nzSearch style="border-left: none;border-top-right-radius: 8px;border-bottom-right-radius: 8px;height: 36px">%</button>
