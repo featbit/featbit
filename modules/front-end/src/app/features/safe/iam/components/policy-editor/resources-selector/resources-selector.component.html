@@ -31,7 +31,7 @@
     (ngModelChange)="onResourceChange()"
     (nzOnSearch)="onSearchResources($event)"
     [nzOptionHeightPx]="isResourceLoading ? 32 : 54">
-    @for (rsc of availableResources; track rsc) {
+    @for (rsc of availableResources; track rsc.id) {
       @if (!isResourceLoading) {
         <nz-option
           nzCustomContent [nzValue]="rsc" [nzHide]="isSelected(rsc)">
@@ -68,7 +68,7 @@
           <div class="label" i18n="@@common.resource-name">Resource name (RN)</div>
           <input style="color: rgba(0, 0, 0, 0.85)" nz-input [(ngModel)]="currentRn.val" disabled="true"/>
         </div>
-        @for (param of rscParams; track param) {
+        @for (param of rscParams; track param.resourceType) {
           <div class="config">
             <div class="label">{{param.placeholder.displayName}}</div>
             <input nz-input [(ngModel)]="param.val" (ngModelChange)="vmValChanged()" [class]="{invalid: param.isInvalid}"/>
@@ -84,7 +84,7 @@
     </div>
   </ng-template>
   <ng-template #modalFooter>
-    <button nz-button nzType="default" (click)="closeModal()" i18n="@@common.cancel">Cancel</button>
+    <button nz-button nzType="default" (click)="closeModal()" i18n="@@common.cancel">Cancel1</button>
     <button nz-button nzType="primary" [disabled]="false" (click)="save()" i18n="@@common.save">Save</button>
   </ng-template>
 </nz-modal>

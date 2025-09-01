@@ -21,7 +21,7 @@
     }
   </div>
   <div class="statements-wrapper">
-    @for (statement of statements; track statement) {
+    @for (statement of statements; track statement.id) {
       <div class="statement">
         <nz-card style="margin-bottom: 10px; border-radius: 20px">
           <div class="input-item" style="margin-top: 0;">
@@ -44,7 +44,7 @@
               [compareWith]="statement.compareResourceType"
               [(ngModel)]="statement.resourceType"
               (ngModelChange)="statement.onResourceTypeChange()">
-              @for (rt of resourcesTypes; track rt) {
+              @for (rt of resourcesTypes; track rt.type) {
                 <nz-option [nzLabel]="rt.displayName" [nzValue]="rt"></nz-option>
               }
             </nz-select>

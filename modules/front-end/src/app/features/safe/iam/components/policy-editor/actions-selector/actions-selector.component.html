@@ -7,7 +7,7 @@
   </div>
   @if (selectedActions.length) {
     <div class="selected-actions">
-      @for (act of selectedActions; track act) {
+      @for (act of selectedActions; track act.id) {
         <div nz-col class="action">
           <div class="inner-box" nz-tooltip="{{act.name}} ({{act.description}})">
             {{act.displayName}} ({{act.name}})
@@ -26,7 +26,7 @@
     (ngModelChange)="onActionChange()"
     (nzOnSearch)="onSearchActions($event)"
     [nzOptionHeightPx]="54">
-    @for (action of filteredActions; track action) {
+    @for (action of filteredActions; track action.id) {
       <nz-option
         nzCustomContent
         [nzValue]="action"

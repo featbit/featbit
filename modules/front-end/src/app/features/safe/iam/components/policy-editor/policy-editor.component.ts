@@ -66,7 +66,7 @@ class PolicyStatementViewModel {
   onSelectedResourcesChange(resources: Resource[]) {
     this.selectedResources = [...resources];
     // All the resources here are the same type, and if it's general type, resources only contains one element
-    const isGeneralResource = isResourceGeneral(resources[0].type, resources[0].rn);
+    const isGeneralResource = isResourceGeneral(resources[0]?.type, resources[0]?.rn);
 
     this.availableActions = [...Object.values(permissionActions)].filter((rs) => rs.resourceType === this.resourceType?.type && (isGeneralResource || rs.isSpecificApplicable));
   }
