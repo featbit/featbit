@@ -32,7 +32,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (item of table.data; track item) {
+          @for (item of table.data; track item.id) {
             <tr>
               <td (click)="navigateToMember(item.id)">{{ item.name ?? '--' }}</td>
               <td (click)="navigateToMember(item.id)">{{ item.email ?? '--' }}</td>

@@ -35,7 +35,7 @@
         </tr>
       </thead>
       <tbody>
-        @for (item of table.data; track item) {
+        @for (item of table.data; track item.id) {
           <tr>
             <td (click)="navigateToDetail(item.id)">{{ item.name || '--' }}</td>
             <td (click)="navigateToDetail(item.id)">{{ item.email || '--' }}</td>
@@ -44,7 +44,7 @@
               {{ resourceName(item) }}
             </td>
             <td>
-              @for (group of item.groups.slice(0, 3); track group) {
+              @for (group of item.groups.slice(0, 3); track group.id) {
                 <span class="tag" [nz-tooltip]="group.name">
                   {{group.name}}
                 </span>

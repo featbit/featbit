@@ -30,7 +30,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (item of table.data; track item) {
+          @for (item of table.data; track item.id) {
             <tr>
               <td (click)="goToGroup(item.id)">{{item.name}}</td>
               <td>{{item.description}}</td>

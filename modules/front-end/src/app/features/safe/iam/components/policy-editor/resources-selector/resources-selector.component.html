@@ -12,7 +12,7 @@
   </div>
   @if (selectedResources.length) {
     <div class="selected-resources">
-      @for (rsc of selectedResources; track rsc) {
+      @for (rsc of selectedResources; track rsc.id) {
         <div class="resource">
           <div i18n-nz-tooltip="@@common.click-to-edit" nz-tooltip="Click to edit" class="inner-box" (click)="openEditModal(rsc)">
             {{rsc.rn}}
