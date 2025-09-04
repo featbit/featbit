@@ -39,7 +39,7 @@
     "@types/jasmine": "~4.3.5",
     "@types/karma-coverage": "^2.0.1",
     "angular-locales-generator": "^1.0.4",
-    "jasmine-core": "~5.0.1",
+    "jasmine-core": "~5.10.0",
     "karma": "~6.4.2",
     "karma-chrome-launcher": "~3.2.0",
     "karma-coverage": "~2.2.1",
