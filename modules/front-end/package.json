@@ -21,7 +21,7 @@
     "@angular/platform-browser-dynamic": "^19.2.14",
     "@angular/router": "^19.2.14",
     "@antv/g2": "^4.2.10",
-    "date-fns": "^3.2.0",
+    "date-fns": "^4.1.0",
     "handlebars": "4.7.8",
     "lodash-es": "^4.17.21",
     "monaco-editor": "0.39.0",
