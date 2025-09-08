@@ -35,7 +35,7 @@
     "@angular-devkit/build-angular": "^19.2.15",
     "@angular/cli": "~19.2.15",
     "@angular/compiler-cli": "^19.2.14",
-    "@angular/localize": "^19.2.14",
+    "@angular/localize": "^20.2.4",
     "@types/jasmine": "~5.1.9",
     "@types/karma-coverage": "^2.0.1",
     "angular-locales-generator": "^1.0.4",
