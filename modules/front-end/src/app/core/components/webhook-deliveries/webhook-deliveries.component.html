@@ -35,7 +35,7 @@
         </tr>
       </thead>
       <tbody>
-        @for (item of table.data; track item) {
+        @for (item of table.data; track item.id) {
           <tr>
             <td (click)="expandRow(item.id)">
               <i class="animated" nz-icon nzType="right" [nzRotate]="isRowExpanded(item.id) ? 90 : 0"></i>

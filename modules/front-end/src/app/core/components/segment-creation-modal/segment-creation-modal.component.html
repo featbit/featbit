@@ -68,10 +68,10 @@
                 [defaultSelected]="defaultSelectedScopes"
                 [unremovableRn]="currentEnvironment.rn">
               </resource-finder>
-              @for (scopeGroup of groupedSelectedScopes; track scopeGroup) {
+              @for (scopeGroup of groupedSelectedScopes; track scopeGroup.name) {
                 <div class="scopes-group">
                   <span>{{ scopeGroup.name }}</span>
-                  @for (scope of scopeGroup.items; track scope) {
+                  @for (scope of scopeGroup.items; track scope.id) {
                     <nz-tag
                       [nzColor]="scope.id === currentEnvironment.id ? 'blue' : 'default'"
                       [nzMode]="scope.id === currentEnvironment.id ? 'default' : 'closeable'"

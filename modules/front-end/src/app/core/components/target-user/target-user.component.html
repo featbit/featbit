@@ -7,7 +7,7 @@
   </div>
   @if (selectedUserDetailList.length) {
     <div class="selected-target-users" nz-row>
-      @for (user of selectedUserDetailList; track user) {
+      @for (user of selectedUserDetailList; track user.id) {
         <div nz-col class="target-user">
           @if (user.envId !== null) {
             <div
@@ -43,7 +43,7 @@
     (ngModelChange)="onSelectChange()"
     (nzOnSearch)="onSearch($event)"
     [nzOptionHeightPx]="isLoading ? 32 : 54">
-    @for (item of userList; track item) {
+    @for (item of userList; track item.id) {
       @if (!isLoading) {
         <nz-option
           nzCustomContent
