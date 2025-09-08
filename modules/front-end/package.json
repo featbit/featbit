@@ -19,7 +19,7 @@
     "@angular/forms": "^19.2.14",
     "@angular/platform-browser": "^19.2.14",
     "@angular/platform-browser-dynamic": "^19.2.14",
-    "@angular/router": "^19.2.14",
+    "@angular/router": "^20.2.4",
     "@antv/g2": "^4.2.10",
     "date-fns": "^4.1.0",
     "handlebars": "4.7.8",
