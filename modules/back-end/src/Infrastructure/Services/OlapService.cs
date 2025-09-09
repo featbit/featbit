@@ -19,6 +19,7 @@ public class OlapService : IOlapService
         param.EndTime *= 1000; // milliseconds to microseconds
         
         var response = await _httpClient.PostAsJsonAsync("/api/events/stat/enduser", param);
+        response.EnsureSuccessStatusCode();
 
         var result = await response.Content.ReadFromJsonAsync<FeatureFlagEndUserStatsResponse>();
 
@@ -31,6 +32,7 @@ public class OlapService : IOlapService
         param.EndTime *= 1000; // milliseconds to microseconds
         
         var response = await _httpClient.PostAsJsonAsync("/api/events/stat/featureflag", param);
+        response.EnsureSuccessStatusCode();
 
         var result = await response.Content.ReadFromJsonAsync<InsightsResponse>();
 
@@ -46,6 +48,7 @@ public class OlapService : IOlapService
         }
 
         var response = await _httpClient.PostAsJsonAsync("/api/expt/results", param);
+        response.EnsureSuccessStatusCode();
 
         var result = await response.Content.ReadFromJsonAsync<OlapExptIterationResponse>();
 
