@@ -1,11 +1,7 @@
-name: featbit-dev
+name: featbit
 services:
   ui:
-    image: featbit/ui:dev
-    container_name: ui
-    build:
-      context: ./modules/front-end
-      dockerfile: ./Dockerfile
+    image: featbit/featbit-ui:latest
     environment:
       - API_URL=http://localhost:5000
       - DEMO_URL=http://localhost:5173
@@ -19,11 +15,7 @@ services:
       - featbit-network
 
   api-server:
-    image: featbit/api:dev
-    container_name: api
-    build:
-      context: ./modules/back-end
-      dockerfile: ./deploy/Dockerfile
+    image: featbit/featbit-api-server:latest
     environment:
       - SSOEnabled=true
       - DbProvider=MongoDb
@@ -41,11 +33,7 @@ services:
       - featbit-network
 
   evaluation-server:
-    image: featbit/evaluation-server:dev
-    container_name: evaluation-server
-    build:
-      context: ./modules/evaluation-server
-      dockerfile: ./deploy/Dockerfile
+    image: featbit/featbit-evaluation-server:latest
     environment:
       - DbProvider=MongoDb
       - MqProvider=Redis
@@ -61,11 +49,7 @@ services:
       - featbit-network
 
   da-server:
-    image: featbit/data-analytics-server:dev
-    container_name: data-analytics-server
-    build:
-      context: ./modules/data-analytics
-      dockerfile: ./Dockerfile
+    image: featbit/featbit-data-analytics-server:latest
     depends_on:
       - mongodb
     ports:
