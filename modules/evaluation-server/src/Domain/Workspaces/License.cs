@@ -45,5 +45,21 @@ public record License
         return true;
     }
 
-    public bool IsGranted(string feature) => Features.Contains(feature) || Features.Contains(LicenseFeatures.Asterisk);
+    public int GetAllowedAutoAgents()
+    {
+        if (Metadata == null)
+        {
+            return WorkspaceConstants.DefaultAllowedAutoAgents;
+        }
+
+        var metadata = Metadata.Value;
+        if (!metadata.TryGetProperty("autoAgents", out var autoAgentsProperty) ||
+            !autoAgentsProperty.TryGetProperty("limit", out var limitProperty) ||
+            limitProperty.ValueKind != JsonValueKind.Number)
+        {
+            return WorkspaceConstants.DefaultAllowedAutoAgents;
+        }
+
+        return limitProperty.GetInt32();
+    }
 }
