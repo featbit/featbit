@@ -18,6 +18,7 @@ public class Workspace
         var isValid = LicenseVerifier.TryParse(Id, License, out var license);
         if (!isValid)
         {
+            // return 0 for invalid license
             return 0;
         }
 

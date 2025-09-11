@@ -5,6 +5,7 @@ using Domain.Shared;
 
 namespace Domain.Workspaces;
 
+// from: modules/back-end/src/Domain/Workspaces/LicenseVerifier.cs
 public static class LicenseVerifier
 {
     private static bool _isInitialized;

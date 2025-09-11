@@ -2,6 +2,7 @@ using System.Text.Json;
 
 namespace Domain.Workspaces;
 
+// from: modules/back-end/src/Domain/Workspaces/License.cs
 public record License
 {
     private const string LicenseIssuer = "https://www.featbit.co";
@@ -43,23 +44,5 @@ public record License
         }
 
         return true;
-    }
-
-    public int GetAllowedAutoAgents()
-    {
-        if (Metadata == null)
-        {
-            return WorkspaceConstants.DefaultAllowedAutoAgents;
-        }
-
-        var metadata = Metadata.Value;
-        if (!metadata.TryGetProperty("autoAgents", out var autoAgentsProperty) ||
-            !autoAgentsProperty.TryGetProperty("limit", out var limitProperty) ||
-            limitProperty.ValueKind != JsonValueKind.Number)
-        {
-            return WorkspaceConstants.DefaultAllowedAutoAgents;
-        }
-
-        return limitProperty.GetInt32();
     }
 }
