@@ -20,7 +20,7 @@ public class AgentController(IRelayProxyAppService rpService, ILogger<AgentContr
         var isQuotaAllowed = await rpService.CheckQuotaAsync(workspace);
         if (!isQuotaAllowed)
         {
-            return Forbid();
+            return StatusCode(403);
         }
 
         try
