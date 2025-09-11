@@ -104,6 +104,8 @@ public class RelayProxyAppService(IConfiguration configuration, IServiceProvider
         }
 
         var dbProvider = configuration.GetDbProvider();
+
+        // get workspace level auto agent usage
         var usage = dbProvider.Name switch
         {
             DbProvider.Postgres => await PostgresGetUsageAsync(),
