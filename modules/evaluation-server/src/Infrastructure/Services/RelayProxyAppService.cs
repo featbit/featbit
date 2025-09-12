@@ -199,9 +199,13 @@ public class RelayProxyAppService(IConfiguration configuration, IServiceProvider
             var mongodb = serviceProvider.GetRequiredService<IMongoDbClient>();
             var db = mongodb.Database;
 
-            Expression<Func<BsonDocument, bool>> filter = x =>
-                x["key"].AsString == key &&
-                x["autoAgents"].AsBsonArray.All(agent => agent["_id"].AsString != agentId);
+            var filterBuilder = Builders<BsonDocument>.Filter;
+            var filter = filterBuilder.And(
+                filterBuilder.Eq("key", key),
+                filterBuilder.Not(
+                    filterBuilder.ElemMatch("autoAgents", filterBuilder.Eq("_id", agentId))
+                )
+            );
 
             var updateDefinition = Builders<BsonDocument>.Update.Push("autoAgents", new BsonDocument
             {
