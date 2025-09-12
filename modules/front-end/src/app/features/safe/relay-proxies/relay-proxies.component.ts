@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 
 @Component({
-  selector: 'relay-proxies',
-  template: `<router-outlet></router-outlet>`
+    selector: 'relay-proxies',
+    template: `<router-outlet></router-outlet>`,
+    standalone: false
 })
 export class RelayProxiesComponent implements OnInit {
 

@@ -5,7 +5,8 @@ import {
 } from "@features/safe/integrations/access-tokens/types/access-token";
 
 @Pipe({
-  name: 'accessTokenStatus'
+    name: 'accessTokenStatus',
+    standalone: false
 })
 export class AccessTokenStatusPipe implements PipeTransform {
   typeDict = {

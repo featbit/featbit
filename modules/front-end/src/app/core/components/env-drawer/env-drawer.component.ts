@@ -9,9 +9,10 @@ import { debounceTime, first, map, switchMap } from "rxjs/operators";
 import { slugify } from "@utils/index";
 
 @Component({
-  selector: 'app-env-drawer',
-  templateUrl: './env-drawer.component.html',
-  styleUrls: ['./env-drawer.component.less']
+    selector: 'app-env-drawer',
+    templateUrl: './env-drawer.component.html',
+    styleUrls: ['./env-drawer.component.less'],
+    standalone: false
 })
 export class EnvDrawerComponent {
 

@@ -17,7 +17,7 @@
         [nzDescription]="description"
         nzShowIcon
         nzIconType="icons:icon-info-outline"
-      >
+        >
         <ng-template #description>
           <ul>
             <li>
@@ -35,7 +35,9 @@
       <div class="select-environment">
         <nz-form-label nzRequired i18n="@@ff.bulk-copy.select-target-environment">Select target environment</nz-form-label>
         <nz-select nzShowSearch [(ngModel)]="targetEnvId" (ngModelChange)="onSelectTargetEnvironment()">
-          <nz-option *ngFor="let env of envs" [nzValue]="env.id" [nzLabel]="env.name"></nz-option>
+          @for (env of envs; track env) {
+            <nz-option [nzValue]="env.id" [nzLabel]="env.name"></nz-option>
+          }
         </nz-select>
       </div>
 
@@ -45,37 +47,50 @@
         [nzSpinning]="checking">
         <nz-form-label nzNoColon nzRequired i18n="@@ff.bulk-copy.choose-feature-flags-to-copy">Choose feature flags to copy</nz-form-label>
         <nz-collapse nzBordered="false" [ngClass]="{'collapse-overflow': flags.length >= 10}">
-          <nz-collapse-panel
-            *ngFor="let flag of flags"
-            [nzHeader]="flag.name"
-            [nzExtra]="extraTpl"
-            [nzDisabled]="flag.disabled"
-            [nzActive]="flag.active"
-          >
-            <ng-template #extraTpl>
-              <label *ngIf="!flag.disabled" nz-checkbox [(ngModel)]="flag.checked" (click)="$event.stopPropagation()">
-                <span i18n="@ff.bulk-copy.copy-anyway" *ngIf="!flag.passed">Copy Anyway</span>
-              </label>
-            </ng-template>
-            <div class="description">
-              <p *ngIf="!flag.keyCheck">
-                <span nz-icon nzType="close" nzTheme="outline" style="color: #ff4d4f"></span>&nbsp;
-                <span i18n="@@ff.bulk-copy.key-check-failed">This flag already exists in the target environment.</span>
-              </p>
-              <p *ngIf="!flag.targetUserCheck">
-                <span nz-icon nzType="warning" nzTheme="outline" style="color: #faad14"></span>&nbsp;
-                <span i18n="@@ff.bulk-copy.target-user-will-not-be-copied">Individual Targeting will not be copied.</span>
-              </p>
-              <p *ngIf="!flag.targetRuleCheck">
-                <span nz-icon nzType="warning" nzTheme="outline" style="color: #faad14"></span>&nbsp;
-                <span i18n="@@ff.bulk-copy.target-rules-will-not-be-copied">Targeting Rules will not be copied.</span>
-              </p>
-              <p *ngIf="flag.passed">
-                <span nz-icon nzType="check" nzTheme="outline" style="color: #3CC798"></span>&nbsp;
-                <span i18n="@@ff.bulk-copy.flag-safe-to-copy">This flag is safe to copy.</span>
-              </p>
-            </div>
-          </nz-collapse-panel>
+          @for (flag of flags; track flag) {
+            <nz-collapse-panel
+              [nzHeader]="flag.name"
+              [nzExtra]="extraTpl"
+              [nzDisabled]="flag.disabled"
+              [nzActive]="flag.active"
+              >
+              <ng-template #extraTpl>
+                @if (!flag.disabled) {
+                  <label nz-checkbox [(ngModel)]="flag.checked" (click)="$event.stopPropagation()">
+                    @if (!flag.passed) {
+                      <span i18n="@ff.bulk-copy.copy-anyway">Copy Anyway</span>
+                    }
+                  </label>
+                }
+              </ng-template>
+              <div class="description">
+                @if (!flag.keyCheck) {
+                  <p>
+                    <span nz-icon nzType="close" nzTheme="outline" style="color: #ff4d4f"></span>&nbsp;
+                    <span i18n="@@ff.bulk-copy.key-check-failed">This flag already exists in the target environment.</span>
+                  </p>
+                }
+                @if (!flag.targetUserCheck) {
+                  <p>
+                    <span nz-icon nzType="warning" nzTheme="outline" style="color: #faad14"></span>&nbsp;
+                    <span i18n="@@ff.bulk-copy.target-user-will-not-be-copied">Individual Targeting will not be copied.</span>
+                  </p>
+                }
+                @if (!flag.targetRuleCheck) {
+                  <p>
+                    <span nz-icon nzType="warning" nzTheme="outline" style="color: #faad14"></span>&nbsp;
+                    <span i18n="@@ff.bulk-copy.target-rules-will-not-be-copied">Targeting Rules will not be copied.</span>
+                  </p>
+                }
+                @if (flag.passed) {
+                  <p>
+                    <span nz-icon nzType="check" nzTheme="outline" style="color: #3CC798"></span>&nbsp;
+                    <span i18n="@@ff.bulk-copy.flag-safe-to-copy">This flag is safe to copy.</span>
+                  </p>
+                }
+              </div>
+            </nz-collapse-panel>
+          }
         </nz-collapse>
       </nz-spin>
     </div>
@@ -93,7 +108,7 @@
           [nzLoading]="this.copying"
           [disabled]="precheckResults.length === 0 || selectedFlags.length === 0"
           (click)="batchCopy()"
-          i18n="@@common.save">Save</button>
+        i18n="@@common.save">Save</button>
       </div>
     </div>
   </ng-template>

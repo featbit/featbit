@@ -8,9 +8,10 @@ import { getProfile } from "@utils/index";
 import { NzMessageService } from "ng-zorro-antd/message";
 
 @Component({
-  selector: 'select-organization',
-  templateUrl: './select-organization.component.html',
-  styleUrls: ['./select-organization.component.less']
+    selector: 'select-organization',
+    templateUrl: './select-organization.component.html',
+    styleUrls: ['./select-organization.component.less'],
+    standalone: false
 })
 export class SelectOrganizationComponent {
 

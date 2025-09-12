@@ -8,9 +8,10 @@ import { IdentityService } from "@services/identity.service";
 import { UserOriginEnum } from "@features/safe/workspaces/types/profiles";
 
 @Component({
-  selector: 'app-profile',
-  templateUrl: './profile.component.html',
-  styleUrls: ['./profile.component.less']
+    selector: 'app-profile',
+    templateUrl: './profile.component.html',
+    styleUrls: ['./profile.component.less'],
+    standalone: false
 })
 export class ProfileComponent implements OnInit {
 

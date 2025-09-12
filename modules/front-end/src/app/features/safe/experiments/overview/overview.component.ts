@@ -14,9 +14,10 @@ import {
 import {getPathPrefix} from "@utils/index";
 
 @Component({
-  selector: 'experiments-overview',
-  templateUrl: './overview.component.html',
-  styleUrls: ['./overview.component.less']
+    selector: 'experiments-overview',
+    templateUrl: './overview.component.html',
+    styleUrls: ['./overview.component.less'],
+    standalone: false
 })
 export class OverviewComponent implements OnInit, OnDestroy {
 

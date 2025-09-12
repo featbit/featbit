@@ -27,9 +27,10 @@ interface SyncUrlSettingRow {
 }
 
 @Component({
-  selector: 'remote-sync',
-  templateUrl: './remote-sync.component.html',
-  styleUrls: ['./remote-sync.component.less']
+    selector: 'remote-sync',
+    templateUrl: './remote-sync.component.html',
+    styleUrls: ['./remote-sync.component.less'],
+    standalone: false
 })
 export class RemoteSyncComponent implements OnInit {
 

@@ -30,9 +30,10 @@ interface IFlagValidationError {
 }
 
 @Component({
-  selector: 'ff-targeting',
-  templateUrl: './targeting.component.html',
-  styleUrls: ['./targeting.component.less']
+    selector: 'ff-targeting',
+    templateUrl: './targeting.component.html',
+    styleUrls: ['./targeting.component.less'],
+    standalone: false
 })
 export class TargetingComponent implements OnInit {
   trackRuleById(_, rule: IRule) {

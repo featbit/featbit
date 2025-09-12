@@ -19,9 +19,10 @@ import { NzSelectComponent } from "ng-zorro-antd/select";
 import { FormArray, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators } from "@angular/forms";
 
 @Component({
-  selector: 'ff-setting',
-  templateUrl: './setting.component.html',
-  styleUrls: ['./setting.component.less']
+    selector: 'ff-setting',
+    templateUrl: './setting.component.html',
+    styleUrls: ['./setting.component.less'],
+    standalone: false
 })
 export class SettingComponent {
 

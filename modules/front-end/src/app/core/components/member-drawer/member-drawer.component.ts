@@ -9,9 +9,10 @@ import { GroupService } from "@services/group.service";
 import {OrganizationService} from "@services/organization.service";
 
 @Component({
-  selector: 'app-member-drawer',
-  templateUrl: './member-drawer.component.html',
-  styleUrls: ['./member-drawer.component.less']
+    selector: 'app-member-drawer',
+    templateUrl: './member-drawer.component.html',
+    styleUrls: ['./member-drawer.component.less'],
+    standalone: false
 })
 export class MemberDrawerComponent {
 

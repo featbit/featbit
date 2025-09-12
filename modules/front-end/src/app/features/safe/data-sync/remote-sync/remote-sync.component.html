@@ -2,7 +2,9 @@
   <div class="table-search-area">
     <nz-select class="middle-select" nzShowSearch nzAllowClear i18n-nzPlaceHolder="@@filter-by-type" nzPlaceHolder="Filter by type" [(ngModel)]="filterTag"
       (ngModelChange)="filterRow()">
-      <nz-option *ngFor="let item of tags" [nzLabel]="item" [nzValue]="item"></nz-option>
+      @for (item of tags; track item) {
+        <nz-option [nzLabel]="item" [nzValue]="item"></nz-option>
+      }
     </nz-select>
 
     <div class="search-inputs">
@@ -30,82 +32,86 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let row of editRowTable.data" class="editable-row">
-
-          <div *ngIf="row.isEditing, then editingRow else showRow"></div>
-          <ng-template #editingRow>
-            <td>
-              <input class="standard-bordered-input" type="text" nz-input [(ngModel)]="row.key" i18n-placeholder="@@name" placeholder="Name" />
-            </td>
-            <td>
-              <nz-select nzShowSearch nzAllowClear [nzDropdownRender]="newItemTpl" i18n-nzPlaceHolder="@@select-type" nzPlaceHolder="Select type"
-                [(ngModel)]="row.tag">
-                <nz-option *ngFor="let item of tags" [nzLabel]="item" [nzValue]="item"></nz-option>
-              </nz-select>
-              <ng-template #newItemTpl>
-                <nz-divider></nz-divider>
-                <div class="add-tag-container">
-                  <input #addTagInput type="text" nz-input />
-                  <a class="add-tag-link" (click)="newTag(addTagInput)">
-                    <i nz-icon nzType="plus"></i>
-                    <ng-container i18n="@@add">Add</ng-container>
-                  </a>
+        @for (row of editRowTable.data; track row) {
+          <tr class="editable-row">
+            @if (row.isEditing) {
+              <td>
+                <input class="standard-bordered-input" type="text" nz-input [(ngModel)]="row.key" i18n-placeholder="@@name" placeholder="Name" />
+              </td>
+              <td>
+                <nz-select nzShowSearch nzAllowClear [nzDropdownRender]="newItemTpl" i18n-nzPlaceHolder="@@select-type" nzPlaceHolder="Select type"
+                  [(ngModel)]="row.tag">
+                  @for (item of tags; track item) {
+                    <nz-option [nzLabel]="item" [nzValue]="item"></nz-option>
+                  }
+                </nz-select>
+                <ng-template #newItemTpl>
+                  <nz-divider></nz-divider>
+                  <div class="add-tag-container">
+                    <input #addTagInput type="text" nz-input />
+                    <a class="add-tag-link" (click)="newTag(addTagInput)">
+                      <i nz-icon nzType="plus"></i>
+                      <ng-container i18n="@@add">Add</ng-container>
+                    </a>
+                  </div>
+                </ng-template>
+              </td>
+              <td>
+                <input class="standard-bordered-input" type="text" nz-input [(ngModel)]="row.value" i18n-placeholder="@@url" placeholder="URL" />
+              </td>
+            } @else {
+              <td style="padding-left: 12px;">
+                <div class="editable-cell" (click)="edit(row)">
+                  <span>{{ row.key }}</span>
                 </div>
-              </ng-template>
-            </td>
+              </td>
+              <td>
+                <div class="editable-cell" (click)="edit(row)">
+                  <span>{{ row.tag }}</span>
+                </div>
+              </td>
+              <td>
+                <div class="editable-cell" (click)="edit(row)">
+                  <span>{{ row.value }}</span>
+                </div>
+              </td>
+            }
             <td>
-              <input class="standard-bordered-input" type="text" nz-input [(ngModel)]="row.value" i18n-placeholder="@@url" placeholder="URL" />
+              @if (!row.isEditing) {
+                <button nz-button nzSize="default" nzType="link" (click)="edit(row)">
+                  <i nz-icon nzType="edit" nzTheme="outline"></i>
+                </button>
+              }
+              @if (row.isEditing) {
+                <button nz-button nzSize="default" nzType="link" [nzLoading]="row.isSaving" (click)="save(row)"
+                  >
+                  <i nz-icon nzType="save" nzTheme="outline"></i>
+                </button>
+              }
+              <button nz-button nzSize="default" nzType="link" [nzLoading]="row.isDeleting" nzDanger [nzIcon]="iconTpl"
+                i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it?" (nzOnConfirm)="deleteRow(row)">
+                <i nz-icon nzType="delete" nzTheme="outline"></i>
+                <ng-template #iconTpl>
+                  <i nz-icon nzType="question-circle-o" style="color: red;"></i>
+                </ng-template>
+              </button>
+              <button nz-button nzSize="small" nzType="link" (click)="sync(row)" [nzLoading]="row.isSyncing">
+                <i nz-icon [nzType]="'sync'"></i>
+                <ng-container i18n="@@synchronize">Synchronize</ng-container>
+              </button>
             </td>
-          </ng-template>
-          <ng-template #showRow>
-            <td style="padding-left: 12px;">
-              <div class="editable-cell" (click)="edit(row)">
-                <span>{{ row.key }}</span>
-              </div>
-            </td>
-            <td>
-              <div class="editable-cell" (click)="edit(row)">
-                <span>{{ row.tag }}</span>
-              </div>
-            </td>
-            <td>
-              <div class="editable-cell" (click)="edit(row)">
-                <span>{{ row.value }}</span>
-              </div>
-            </td>
-          </ng-template>
-
-          <td>
-            <button nz-button nzSize="default" nzType="link" (click)="edit(row)" *ngIf="!row.isEditing">
-              <i nz-icon nzType="edit" nzTheme="outline"></i>
-            </button>
-
-            <button nz-button nzSize="default" nzType="link" [nzLoading]="row.isSaving" (click)="save(row)"
-              *ngIf="row.isEditing">
-              <i nz-icon nzType="save" nzTheme="outline"></i>
-            </button>
-
-            <button nz-button nzSize="default" nzType="link" [nzLoading]="row.isDeleting" nzDanger [nzIcon]="iconTpl"
-              i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it?" (nzOnConfirm)="deleteRow(row)">
-              <i nz-icon nzType="delete" nzTheme="outline"></i>
-              <ng-template #iconTpl>
-                <i nz-icon nzType="question-circle-o" style="color: red;"></i>
-              </ng-template>
-            </button>
-
-            <button nz-button nzSize="small" nzType="link" (click)="sync(row)" [nzLoading]="row.isSyncing">
-              <i nz-icon [nzType]="'sync'"></i>
-              <ng-container i18n="@@synchronize">Synchronize</ng-container>
-            </button>
-          </td>
-
-          <td style="text-align: center">
-            <span style="color: #4CB287" *ngIf="row.syncResult?.success"><ng-container i18n>Succeeded at</ng-container> {{row.syncResult.time}}</span>
-            <span style="color: #ff7875" *ngIf="!row.syncResult?.success && row.syncResult?.time"><ng-container i18n="@@failure-sync-time">Failed at</ng-container>
+            <td style="text-align: center">
+              @if (row.syncResult?.success) {
+                <span style="color: #4CB287"><ng-container i18n>Succeeded at</ng-container> {{row.syncResult.time}}</span>
+              }
+              @if (!row.syncResult?.success && row.syncResult?.time) {
+                <span style="color: #ff7875"><ng-container i18n="@@failure-sync-time">Failed at</ng-container>
               {{row.syncResult.time}}</span>
+            }
           </td>
         </tr>
-      </tbody>
-    </nz-table>
-  </div>
+      }
+    </tbody>
+  </nz-table>
+</div>
 </div>

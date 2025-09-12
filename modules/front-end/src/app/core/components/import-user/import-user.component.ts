@@ -5,9 +5,10 @@ import { Observable, Observer } from "rxjs";
 import { GlobalUserService } from "@services/global-user.service";
 
 @Component({
-  selector: 'import-user',
-  templateUrl: './import-user.component.html',
-  styleUrls: ['./import-user.component.less']
+    selector: 'import-user',
+    templateUrl: './import-user.component.html',
+    styleUrls: ['./import-user.component.less'],
+    standalone: false
 })
 export class ImportUserComponent implements OnInit {
   @Input()

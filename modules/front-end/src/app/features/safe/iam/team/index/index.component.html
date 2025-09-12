@@ -13,74 +13,82 @@
   </div>
   <div class="table-wrapper">
     <nz-table #table nzSize="small"
-              nzShowSizeChanger
-              [nzData]="pagedMember.items"
-              [nzFrontPagination]="false"
-              [nzLoading]="isLoading"
-              [nzTotal]="pagedMember.totalCount"
-              [(nzPageSize)]="filter.pageSize"
-              (nzPageSizeChange)="doSearch()"
-              [nzPageSizeOptions]="[10,20,30]"
-              [(nzPageIndex)]="filter.pageIndex"
-              (nzPageIndexChange)="doSearch()"
-              >
+      nzShowSizeChanger
+      [nzData]="pagedMember.items"
+      [nzFrontPagination]="false"
+      [nzLoading]="isLoading"
+      [nzTotal]="pagedMember.totalCount"
+      [(nzPageSize)]="filter.pageSize"
+      (nzPageSizeChange)="doSearch()"
+      [nzPageSizeOptions]="[10,20,30]"
+      [(nzPageIndex)]="filter.pageIndex"
+      (nzPageIndexChange)="doSearch()"
+      >
       <thead>
-      <tr>
-        <th style="min-width: 100px" i18n="@@common.name">Name</th>
-        <th i18n="@@common.email">Email</th>
-        <th i18n="@@common.rn">Resource name (RN)</th>
-        <th i18n="@@iam.team.idx.group">Group</th>
-        <th i18n="@@iam.team.idx.initial-password">Initial password</th>
-        <th i18n="@@common.actions">Actions</th>
-      </tr>
+        <tr>
+          <th style="min-width: 100px" i18n="@@common.name">Name</th>
+          <th i18n="@@common.email">Email</th>
+          <th i18n="@@common.rn">Resource name (RN)</th>
+          <th i18n="@@iam.team.idx.group">Group</th>
+          <th i18n="@@iam.team.idx.initial-password">Initial password</th>
+          <th i18n="@@common.actions">Actions</th>
+        </tr>
       </thead>
       <tbody>
-      <tr *ngFor="let item of table.data">
-        <td (click)="navigateToDetail(item.id)">{{ item.name || '--' }}</td>
-        <td (click)="navigateToDetail(item.id)">{{ item.email || '--' }}</td>
-        <td>
-          <i (click)="copyText(resourceName(item))" class="copy-icon" nz-icon nzType="icons:icon-copy"></i>
-          {{ resourceName(item) }}
-        </td>
-        <td>
-          <span class="tag" [nz-tooltip]="group.name" *ngFor="let group of item.groups.slice(0, 3)">
-            {{group.name}}
-          </span>
-          <ng-container *ngIf="item.groups.length > 3">
-            <span class="tag more-tags-item">
-              <ng-container i18n="@@iam.team.idx.etc">+</ng-container> {{ item.groups.length - 3 }} <ng-container i18n="@@iam.team.idx.entries">more</ng-container>
-            </span>
-          </ng-container>
-        </td>
-        <td>
-          <span *ngIf="item.initialPassword?.length > 0">
-            <i class="copy-icon" nz-icon nzType="icons:icon-copy" (click)="copyText(item.initialPassword)"></i>
-            {{ item.initialPassword }}
-          </span>
-          <span *ngIf="!item.initialPassword || item.initialPassword?.length === 0">
-            ******
-          </span>
-        </td>
-        <td>
-          <a class="primary-link-btn" (click)="navigateToDetail(item.id)" i18n="@@common.details">Details</a>
-          <ng-container *ngIf="canDelete(item)">
-            <nz-divider nzType="vertical"></nz-divider>
-            <a style="color: #717D8A" i18n-nz-popconfirm="@@common.remove-from-organization-confirm"  nz-popconfirm="This operation will remove the user from the current organization, are you sure to do this?"
-               nzPopconfirmPlacement="bottomRight"
-               [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
-               (nzOnConfirm)="deleteMemberFromOrg(item)" [nzIcon]="questionIconTpl">
-              <ng-container i18n="@@common.remove-from-org">Remove from Organization</ng-container>
-            </a>
-            <nz-divider nzType="vertical"></nz-divider>
-            <a style="color: #717D8A" i18n-nz-popconfirm="@@common.remove-from-workspace-confirm"  nz-popconfirm="This operation will remove the user from the workspace and all the related organizations, are you sure to do this?"
-               nzPopconfirmPlacement="bottomRight"
-               [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
-               (nzOnConfirm)="deleteMemberFromWorkspace(item)" [nzIcon]="questionIconTpl">
-              <ng-container i18n="@@common.remove-from-workspace">Remove from workspace</ng-container>
-            </a>
-          </ng-container>
-        </td>
-      </tr>
+        @for (item of table.data; track item.id) {
+          <tr>
+            <td (click)="navigateToDetail(item.id)">{{ item.name || '--' }}</td>
+            <td (click)="navigateToDetail(item.id)">{{ item.email || '--' }}</td>
+            <td>
+              <i (click)="copyText(resourceName(item))" class="copy-icon" nz-icon nzType="icons:icon-copy"></i>
+              {{ resourceName(item) }}
+            </td>
+            <td>
+              @for (group of item.groups.slice(0, 3); track group.id) {
+                <span class="tag" [nz-tooltip]="group.name">
+                  {{group.name}}
+                </span>
+              }
+              @if (item.groups.length > 3) {
+                <span class="tag more-tags-item">
+                  <ng-container i18n="@@iam.team.idx.etc">+</ng-container> {{ item.groups.length - 3 }} <ng-container i18n="@@iam.team.idx.entries">more</ng-container>
+                </span>
+              }
+            </td>
+            <td>
+              @if (item.initialPassword?.length > 0) {
+                <span>
+                  <i class="copy-icon" nz-icon nzType="icons:icon-copy" (click)="copyText(item.initialPassword)"></i>
+                  {{ item.initialPassword }}
+                </span>
+              }
+              @if (!item.initialPassword || item.initialPassword?.length === 0) {
+                <span>
+                  ******
+                </span>
+              }
+            </td>
+            <td>
+              <a class="primary-link-btn" (click)="navigateToDetail(item.id)" i18n="@@common.details">Details</a>
+              @if (canDelete(item)) {
+                <nz-divider nzType="vertical"></nz-divider>
+                <a style="color: #717D8A" i18n-nz-popconfirm="@@common.remove-from-organization-confirm"  nz-popconfirm="This operation will remove the user from the current organization, are you sure to do this?"
+                  nzPopconfirmPlacement="bottomRight"
+                  [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
+                  (nzOnConfirm)="deleteMemberFromOrg(item)" [nzIcon]="questionIconTpl">
+                  <ng-container i18n="@@common.remove-from-org">Remove from Organization</ng-container>
+                </a>
+                <nz-divider nzType="vertical"></nz-divider>
+                <a style="color: #717D8A" i18n-nz-popconfirm="@@common.remove-from-workspace-confirm"  nz-popconfirm="This operation will remove the user from the workspace and all the related organizations, are you sure to do this?"
+                  nzPopconfirmPlacement="bottomRight"
+                  [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
+                  (nzOnConfirm)="deleteMemberFromWorkspace(item)" [nzIcon]="questionIconTpl">
+                  <ng-container i18n="@@common.remove-from-workspace">Remove from workspace</ng-container>
+                </a>
+              }
+            </td>
+          </tr>
+        }
       </tbody>
     </nz-table>
     <ng-template #questionIconTpl>

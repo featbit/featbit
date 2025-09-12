@@ -6,9 +6,10 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { MessageQueueService } from "@services/message-queue.service";
 
 @Component({
-  selector: 'segment-setting',
-  templateUrl: './setting.component.html',
-  styleUrls: ['./setting.component.less']
+    selector: 'segment-setting',
+    templateUrl: './setting.component.html',
+    styleUrls: ['./setting.component.less'],
+    standalone: false
 })
 export class SettingComponent implements OnInit {
   id: string;

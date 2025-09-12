@@ -10,7 +10,10 @@ const translationType = {
   triggerType: 'trigger-type'
 }
 
-@Pipe({ name: "T" })
+@Pipe({
+    name: "T",
+    standalone: false
+})
 export class TranslationPipe implements PipeTransform {
   constructor(@Inject(LOCALE_ID) private locale: string) {
   }

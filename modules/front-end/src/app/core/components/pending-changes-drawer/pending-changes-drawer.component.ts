@@ -96,9 +96,10 @@ class ChangeCategory {
 }
 
 @Component({
-  selector: 'pending-changes-drawer',
-  templateUrl: './pending-changes-drawer.component.html',
-  styleUrls: ['./pending-changes-drawer.component.less']
+    selector: 'pending-changes-drawer',
+    templateUrl: './pending-changes-drawer.component.html',
+    styleUrls: ['./pending-changes-drawer.component.less'],
+    standalone: false
 })
 export class PendingChangesDrawerComponent {
   changeCategoriesList: ChangeCategory[] = [];

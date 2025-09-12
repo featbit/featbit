@@ -9,9 +9,10 @@ import { of } from "rxjs";
 import { NzMessageService } from "ng-zorro-antd/message";
 
 @Component({
-  selector: 'relay-proxy-drawer',
-  templateUrl: './relay-proxy-drawer.component.html',
-  styleUrls: ['./relay-proxy-drawer.component.less']
+    selector: 'relay-proxy-drawer',
+    templateUrl: './relay-proxy-drawer.component.html',
+    styleUrls: ['./relay-proxy-drawer.component.less'],
+    standalone: false
 })
 export class RelayProxyDrawerComponent {
   title: string = '';

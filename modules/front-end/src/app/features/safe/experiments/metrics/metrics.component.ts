@@ -16,9 +16,10 @@ import {
 import { getCurrentProjectEnv } from "@utils/project-env";
 
 @Component({
-  selector: 'experiments-metrics',
-  templateUrl: './metrics.component.html',
-  styleUrls: ['./metrics.component.less']
+    selector: 'experiments-metrics',
+    templateUrl: './metrics.component.html',
+    styleUrls: ['./metrics.component.less'],
+    standalone: false
 })
 export class MetricsComponent implements OnInit, OnDestroy {
 

@@ -14,9 +14,10 @@ import { GroupService } from "@services/group.service";
 import { BroadcastService } from "@services/broadcast.service";
 
 @Component({
-  selector: 'organization',
-  templateUrl: './organization.component.html',
-  styleUrls: ['./organization.component.less']
+    selector: 'organization',
+    templateUrl: './organization.component.html',
+    styleUrls: ['./organization.component.less'],
+    standalone: false
 })
 export class OrganizationComponent implements OnInit {
 

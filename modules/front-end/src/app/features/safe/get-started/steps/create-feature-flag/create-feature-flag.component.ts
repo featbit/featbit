@@ -16,9 +16,10 @@ import {
 import { GET_STARTED } from "@utils/localstorage-keys";
 
 @Component({
-  selector: 'create-feature-flag',
-  templateUrl: './create-feature-flag.component.html',
-  styleUrls: ['./create-feature-flag.component.less']
+    selector: 'create-feature-flag',
+    templateUrl: './create-feature-flag.component.html',
+    styleUrls: ['./create-feature-flag.component.less'],
+    standalone: false
 })
 export class CreateFeatureFlagComponent implements OnInit {
 

@@ -10,36 +10,40 @@
     </div>
     <div class="table-wrapper">
       <nz-table #table2 nzSize="small"
-                [nzData]="policies.items"
-                [nzFrontPagination]="false"
-                [nzLoading]="isLoading"
-                [nzTotal]="policies.totalCount"
-                [(nzPageSize)]="filter.pageSize"
-                (nzPageSizeChange)="doSearch(false)"
-                [(nzPageIndex)]="filter.pageIndex"
-                (nzPageIndexChange)="doSearch(false)">
+        [nzData]="policies.items"
+        [nzFrontPagination]="false"
+        [nzLoading]="isLoading"
+        [nzTotal]="policies.totalCount"
+        [(nzPageSize)]="filter.pageSize"
+        (nzPageSizeChange)="doSearch(false)"
+        [(nzPageIndex)]="filter.pageIndex"
+        (nzPageIndexChange)="doSearch(false)">
         <thead>
-        <tr>
-          <th i18n="@@common.name">Name</th>
-          <th i18n="@@iam.team.details.groups">Groups</th>
-          <th i18n="@@common.type">Type</th>
-          <th i18n="@@common.description">Description</th>
-          <th i18n="@@common.actions">Actions</th>
-        </tr>
+          <tr>
+            <th i18n="@@common.name">Name</th>
+            <th i18n="@@iam.team.details.groups">Groups</th>
+            <th i18n="@@common.type">Type</th>
+            <th i18n="@@common.description">Description</th>
+            <th i18n="@@common.actions">Actions</th>
+          </tr>
         </thead>
         <tbody>
-        <tr *ngFor="let item of table2.data">
-          <td (click)="navigateToPolicy(item.id)">{{item.name}}</td>
-          <td>{{item.groupName}}</td>
-          <td>
-            <i *ngIf="item.type === 'SysManaged'" style="color: #28a17d;" nz-icon nzType="star" nzTheme="outline"></i>
-            {{item.type | policyType}}
-          </td>
-          <td>{{item.description}}</td>
-          <td class="primary-link-btn" style="text-align: center">
-            <a (click)="navigateToPolicy(item.id)" i18n="@@common.details">Details</a>
-          </td>
-        </tr>
+          @for (item of table2.data; track item.id) {
+            <tr>
+              <td (click)="navigateToPolicy(item.id)">{{item.name}}</td>
+              <td>{{item.groupName}}</td>
+              <td>
+                @if (item.type === 'SysManaged') {
+                  <i style="color: #28a17d;" nz-icon nzType="star" nzTheme="outline"></i>
+                }
+                {{item.type | policyType}}
+              </td>
+              <td>{{item.description}}</td>
+              <td class="primary-link-btn" style="text-align: center">
+                <a (click)="navigateToPolicy(item.id)" i18n="@@common.details">Details</a>
+              </td>
+            </tr>
+          }
         </tbody>
       </nz-table>
     </div>

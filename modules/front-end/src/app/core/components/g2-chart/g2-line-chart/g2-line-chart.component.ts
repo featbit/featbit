@@ -5,11 +5,12 @@ import {MacaronColors} from "../g2-chart";
 import { fromEvent, Subscription } from 'rxjs';
 
 @Component({
-  selector: 'g2-line-chart',
-  template: `
+    selector: 'g2-line-chart',
+    template: `
     <div id="line-chart-container-{{this.containerId ? this.containerId : ''}}" [ngStyle]="{width, height}">
     </div>
-  `
+  `,
+    standalone: false
 })
 export class G2LineChartComponent implements AfterViewInit, OnDestroy {
   @Input()

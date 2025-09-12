@@ -16,9 +16,10 @@ import { MessageQueueService } from "@services/message-queue.service";
 import { getCurrentProjectEnv } from "@utils/project-env";
 
 @Component({
-  selector: 'segment-targeting',
-  templateUrl: './targeting.component.html',
-  styleUrls: ['./targeting.component.less']
+    selector: 'segment-targeting',
+    templateUrl: './targeting.component.html',
+    styleUrls: ['./targeting.component.less'],
+    standalone: false
 })
 export class TargetingComponent implements OnInit {
   public segmentDetail: Segment;

@@ -2,9 +2,10 @@ import { Component, Input } from '@angular/core';
 import { License, LicenseFeatureEnum } from "@shared/types";
 
 @Component({
-  selector: 'license',
-  templateUrl: './license.component.html',
-  styleUrls: [ './license.component.less' ]
+    selector: 'license',
+    templateUrl: './license.component.html',
+    styleUrls: ['./license.component.less'],
+    standalone: false
 })
 export class LicenseComponent {
 

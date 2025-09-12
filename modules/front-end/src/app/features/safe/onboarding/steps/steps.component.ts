@@ -9,9 +9,10 @@ import { slugify } from "@utils/index";
 import { IOrganizationPermissions } from "@shared/types";
 
 @Component({
-  selector: 'init-steps',
-  templateUrl: './steps.component.html',
-  styleUrls: ['./steps.component.less']
+    selector: 'init-steps',
+    templateUrl: './steps.component.html',
+    styleUrls: ['./steps.component.less'],
+    standalone: false
 })
 export class StepsComponent implements OnInit {
 

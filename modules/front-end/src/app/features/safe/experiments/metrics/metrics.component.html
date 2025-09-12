@@ -22,68 +22,74 @@
 
     <div class="table-wrapper">
       <nz-table #borderedTable style="margin-top: 20px;"
-                nzFrontPagination
-                nzShowPagination
-                nzShowSizeChanger
-                [nzPageSizeOptions]="[10, 20, 30]"
-                nzSize="small"
-                [nzLoading]="isLoading"
-                [nzData]="pagedMetric.items">
+        nzFrontPagination
+        nzShowPagination
+        nzShowSizeChanger
+        [nzPageSizeOptions]="[10, 20, 30]"
+        nzSize="small"
+        [nzLoading]="isLoading"
+        [nzData]="pagedMetric.items">
         <thead>
-        <tr>
-          <th nzWidth="20%">Metric</th>
-          <th nzWidth="20%" i18n="@@expt.metric.event-type">Event type</th>
-          <th nzWidth="20%" i18n="@@expt.metric.event-name">Event name</th>
-          <th nzWidth="20%" i18n="@@expt.metric.maintainer">Maintainer</th>
-          <th i18n="@@common.actions">Actions</th>
-        </tr>
+          <tr>
+            <th nzWidth="20%">Metric</th>
+            <th nzWidth="20%" i18n="@@expt.metric.event-type">Event type</th>
+            <th nzWidth="20%" i18n="@@expt.metric.event-name">Event name</th>
+            <th nzWidth="20%" i18n="@@expt.metric.maintainer">Maintainer</th>
+            <th i18n="@@common.actions">Actions</th>
+          </tr>
         </thead>
         <tbody>
-        <tr  *ngFor="let data of borderedTable.data">
-          <td>{{data.name}}</td>
-          <td>
-            <span class="tag">
-              <ng-container *ngIf="data.eventType === customEventType">
-                <ng-container i18n="@@common.custom">Custom</ng-container>:&nbsp;
-                <ng-container *ngIf="data.customEventTrackOption === customEventTrackConversion" i18n="@@common.conversion">Conversion</ng-container>
-                <ng-container *ngIf="data.customEventTrackOption === customEventTrackNumeric" i18n="@@common.numeric">Numeric</ng-container>
-              </ng-container>
-              <ng-container *ngIf="data.eventType === pageViewEventType">
-                Page View: <ng-container i18n="@@common.conversion">Conversion</ng-container>
-              </ng-container>
-              <ng-container *ngIf="data.eventType === clickEventType">
-                Click: <ng-container i18n="@@common.conversion">Conversion</ng-container>
-              </ng-container>
-            </span>
-          </td>
-          <td>
-            <ng-container *ngIf="data.eventType === customEventType">
-              {{data.eventName}}
-            </ng-container>
-            <ng-container *ngIf="data.eventType === pageViewEventType">
-              pageview
-            </ng-container>
-            <ng-container *ngIf="data.eventType === clickEventType">
-              click
-            </ng-container>
-          </td>
-          <td>{{ data.maintainerName || data.maintainerEmail }}</td>
-          <td>
-            <a style="color: #23AD7F" (click)="onCreateOrEditClick(data)" i18n="@@common.edit">Edit</a>
-            <nz-divider nzType="vertical"></nz-divider>
-            <a
-              style="color: #717D8A"
-              i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it?"
-              nzPopconfirmPlacement="bottomRight"
-              [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
-              (nzOnConfirm)="archiveMetric(data)" [nzIcon]="iconTplDelete">
-              <ng-container i18n="@@common.remove">Remove</ng-container>
-            </a>
-            <ng-template #iconTplDelete>
-              <i nz-icon nzType="question-circle" nzTheme="fill"></i>
-            </ng-template>
-          </td>
-        </tr>
+          @for (data of borderedTable.data; track data) {
+            <tr >
+              <td>{{data.name}}</td>
+              <td>
+                <span class="tag">
+                  @if (data.eventType === customEventType) {
+                    <ng-container i18n="@@common.custom">Custom</ng-container>:&nbsp;
+                    @if (data.customEventTrackOption === customEventTrackConversion) {
+                      <ng-container i18n="@@common.conversion">Conversion</ng-container>
+                    }
+                    @if (data.customEventTrackOption === customEventTrackNumeric) {
+                      <ng-container i18n="@@common.numeric">Numeric</ng-container>
+                    }
+                  }
+                  @if (data.eventType === pageViewEventType) {
+                    Page View: <ng-container i18n="@@common.conversion">Conversion</ng-container>
+                  }
+                  @if (data.eventType === clickEventType) {
+                    Click: <ng-container i18n="@@common.conversion">Conversion</ng-container>
+                  }
+                </span>
+              </td>
+              <td>
+                @if (data.eventType === customEventType) {
+                  {{data.eventName}}
+                }
+                @if (data.eventType === pageViewEventType) {
+                  pageview
+                }
+                @if (data.eventType === clickEventType) {
+                  click
+                }
+              </td>
+              <td>{{ data.maintainerName || data.maintainerEmail }}</td>
+              <td>
+                <a style="color: #23AD7F" (click)="onCreateOrEditClick(data)" i18n="@@common.edit">Edit</a>
+                <nz-divider nzType="vertical"></nz-divider>
+                <a
+                  style="color: #717D8A"
+                  i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it?"
+                  nzPopconfirmPlacement="bottomRight"
+                  [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
+                  (nzOnConfirm)="archiveMetric(data)" [nzIcon]="iconTplDelete">
+                  <ng-container i18n="@@common.remove">Remove</ng-container>
+                </a>
+                <ng-template #iconTplDelete>
+                  <i nz-icon nzType="question-circle" nzTheme="fill"></i>
+                </ng-template>
+              </td>
+            </tr>
+          }
         </tbody>
       </nz-table>
     </div>

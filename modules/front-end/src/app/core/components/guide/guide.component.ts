@@ -4,9 +4,10 @@ import { getCurrentProjectEnv } from "@utils/project-env";
 import { SecretTypeEnum } from "@shared/types";
 
 @Component({
-  selector: 'guide',
-  templateUrl: './guide.component.html',
-  styleUrls: ['./guide.component.less']
+    selector: 'guide',
+    templateUrl: './guide.component.html',
+    styleUrls: ['./guide.component.less'],
+    standalone: false
 })
 export class GuideComponent {
 

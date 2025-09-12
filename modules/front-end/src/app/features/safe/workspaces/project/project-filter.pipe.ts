@@ -1,7 +1,10 @@
 import {Pipe, PipeTransform} from '@angular/core';
 import {IProject} from "@shared/types";
 
-@Pipe({ name: 'projectFilter' })
+@Pipe({
+    name: 'projectFilter',
+    standalone: false
+})
 export class ProjectFilterPipe implements PipeTransform {
   transform(projects: IProject[], searchValue: string): any {
     if (!projects) {

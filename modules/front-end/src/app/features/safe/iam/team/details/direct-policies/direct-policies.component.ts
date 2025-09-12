@@ -8,9 +8,10 @@ import { IPagedMemberPolicy, MemberPolicyFilter } from "@features/safe/iam/types
 import { MemberService } from "@services/member.service";
 
 @Component({
-  selector: 'direct-policies',
-  templateUrl: './direct-policies.component.html',
-  styleUrls: ['./direct-policies.component.less']
+    selector: 'direct-policies',
+    templateUrl: './direct-policies.component.html',
+    styleUrls: ['./direct-policies.component.less'],
+    standalone: false
 })
 export class DirectPoliciesComponent implements OnInit {
 

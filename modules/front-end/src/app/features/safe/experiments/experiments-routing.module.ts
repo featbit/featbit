@@ -24,7 +24,7 @@ const routes: Routes = [
         },
       }, {
         path: '',
-        redirectTo: '/experiments',
+        redirectTo: 'overview',
         pathMatch: 'full'
       }
     ]

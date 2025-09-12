@@ -16,8 +16,12 @@
           <input type="text" nz-input formControlName="name" placeholder="Name" i18n-placeholder="@@common.name"/>
         </nz-form-control>
         <ng-template #errorTpl let-control>
-          <ng-container *ngIf="control.hasError('required')" i18n="@@iam.policies.policy-drawer.policy-name-cannot-be-empty">Policy name cannot be empty</ng-container>
-          <ng-container *ngIf="control.hasError('duplicated')" i18n="@@iam.policies.policy-drawer.policy-name-unavailable">This policy name is not available</ng-container>
+          @if (control.hasError('required')) {
+            <ng-container i18n="@@iam.policies.policy-drawer.policy-name-cannot-be-empty">Policy name cannot be empty</ng-container>
+          }
+          @if (control.hasError('duplicated')) {
+            <ng-container i18n="@@iam.policies.policy-drawer.policy-name-unavailable">This policy name is not available</ng-container>
+          }
         </ng-template>
       </nz-form-item>
 

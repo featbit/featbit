@@ -19,9 +19,10 @@ import { getCurrentLicense, getCurrentOrganization, getCurrentProjectEnv } from 
 import { BroadcastService } from "@services/broadcast.service";
 
 @Component({
-  selector: 'app-header',
-  templateUrl: './header.component.html',
-  styleUrls: [ './header.component.less' ]
+    selector: 'app-header',
+    templateUrl: './header.component.html',
+    styleUrls: ['./header.component.less'],
+    standalone: false
 })
 export class HeaderComponent implements OnInit {
 

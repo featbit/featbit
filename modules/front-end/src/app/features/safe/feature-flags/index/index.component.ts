@@ -15,9 +15,10 @@ import { NzModalService } from "ng-zorro-antd/modal";
 import { copyToClipboard } from '@utils/index';
 
 @Component({
-  selector: 'index',
-  templateUrl: './index.component.html',
-  styleUrls: ['./index.component.less']
+    selector: 'index',
+    templateUrl: './index.component.html',
+    styleUrls: ['./index.component.less'],
+    standalone: false
 })
 export class IndexComponent implements OnInit {
 

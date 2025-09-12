@@ -4,8 +4,9 @@ import { InstructionDirective } from "@core/components/change-list/instructions/
 import { IInstructionComponent } from "@core/components/change-list/instructions/types";
 
 @Component({
-  selector: 'instruction',
-  template: `<div instruction-host></div>`
+    selector: 'instruction',
+    template: `<div instruction-host></div>`,
+    standalone: false
 })
 export class InstructionComponent {
 

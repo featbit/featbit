@@ -2,9 +2,10 @@ import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 @Component({
-  selector: 'segment-details',
-  templateUrl: './details.component.html',
-  styleUrls: ['./details.component.less']
+    selector: 'segment-details',
+    templateUrl: './details.component.html',
+    styleUrls: ['./details.component.less'],
+    standalone: false
 })
 export class DetailsComponent {
   public id: string;

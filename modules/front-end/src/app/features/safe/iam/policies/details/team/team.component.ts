@@ -9,9 +9,10 @@ import { PolicyService } from "@services/policy.service";
 import { IPagedPolicyMember, PolicyMemberFilter } from "@features/safe/iam/types/policy";
 
 @Component({
-  selector: 'policies-team',
-  templateUrl: './team.component.html',
-  styleUrls: ['./team.component.less']
+    selector: 'policies-team',
+    templateUrl: './team.component.html',
+    styleUrls: ['./team.component.less'],
+    standalone: false
 })
 export class TeamComponent implements OnInit {
 

@@ -6,9 +6,10 @@ import {
 import {CURRENT_LANGUAGE} from "@utils/localstorage-keys";
 
 @Component({
-  selector: 'app-locale-switcher',
-  templateUrl: './locale-switcher.component.html',
-  styleUrls: ['./locale-switcher.component.less']
+    selector: 'app-locale-switcher',
+    templateUrl: './locale-switcher.component.html',
+    styleUrls: ['./locale-switcher.component.less'],
+    standalone: false
 })
 export class LocaleSwitcherComponent {
   constructor(

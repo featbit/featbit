@@ -15,9 +15,10 @@ import { TeamService } from "@services/team.service";
 import { getProfile } from "@utils/index";
 
 @Component({
-  selector: 'change-review',
-  templateUrl: './change-review.component.html',
-  styleUrls: ['./change-review.component.less']
+    selector: 'change-review',
+    templateUrl: './change-review.component.html',
+    styleUrls: ['./change-review.component.less'],
+    standalone: false
 })
 export class ChangeReviewComponent implements OnChanges, OnInit {
   @Input() visible = false;

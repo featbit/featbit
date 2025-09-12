@@ -7,9 +7,10 @@ import { PolicyService } from "@services/policy.service";
 import { copyToClipboard } from '@utils/index';
 
 @Component({
-  selector: 'user-setting',
-  templateUrl: './setting.component.html',
-  styleUrls: ['./setting.component.less']
+    selector: 'user-setting',
+    templateUrl: './setting.component.html',
+    styleUrls: ['./setting.component.less'],
+    standalone: false
 })
 export class SettingComponent implements OnInit {
 

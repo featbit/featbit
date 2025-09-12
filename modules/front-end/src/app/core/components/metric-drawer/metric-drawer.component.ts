@@ -15,9 +15,10 @@ import {
 } from "@features/safe/experiments/types";
 
 @Component({
-  selector: 'app-metric-drawer',
-  templateUrl: './metric-drawer.component.html',
-  styleUrls: ['./metric-drawer.component.less']
+    selector: 'app-metric-drawer',
+    templateUrl: './metric-drawer.component.html',
+    styleUrls: ['./metric-drawer.component.less'],
+    standalone: false
 })
 export class MetricDrawerComponent implements OnInit {
 

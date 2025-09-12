@@ -15,9 +15,10 @@ import {FeatureFlagService} from "@services/feature-flag.service";
 import {IUserType} from "@shared/types";
 
 @Component({
-  selector: 'app-expt-rules-drawer',
-  templateUrl: './expt-rules-drawer.component.html',
-  styleUrls: ['./expt-rules-drawer.component.less']
+    selector: 'app-expt-rules-drawer',
+    templateUrl: './expt-rules-drawer.component.html',
+    styleUrls: ['./expt-rules-drawer.component.less'],
+    standalone: false
 })
 export class ExptRulesDrawerComponent {
 

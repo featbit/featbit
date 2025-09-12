@@ -3,9 +3,10 @@ import { LicenseFeatureEnum } from "@shared/types";
 import { getCurrentLicense } from "@utils/project-env";
 
 @Component({
-  selector: 'workspaces',
-  templateUrl: './workspaces.component.html',
-  styleUrls: ['./workspaces.component.less']
+    selector: 'workspaces',
+    templateUrl: './workspaces.component.html',
+    styleUrls: ['./workspaces.component.less'],
+    standalone: false
 })
 export class WorkspacesComponent implements OnInit {
   isGlobalUserGranted: boolean = false;

@@ -5,9 +5,10 @@ import {debounceTime, first, map, switchMap} from "rxjs/operators";
 import { PolicyService } from "@services/policy.service";
 
 @Component({
-  selector: 'policy-drawer',
-  templateUrl: './policy-drawer.component.html',
-  styleUrls: ['./policy-drawer.component.less']
+    selector: 'policy-drawer',
+    templateUrl: './policy-drawer.component.html',
+    styleUrls: ['./policy-drawer.component.less'],
+    standalone: false
 })
 export class PolicyDrawerComponent implements OnInit {
 

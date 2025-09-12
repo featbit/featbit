@@ -10,9 +10,10 @@ import { generalResourceRNPattern, permissionActions } from "@shared/policy";
 import { PermissionsService } from "@services/permissions.service";
 
 @Component({
-  selector: 'workspace',
-  templateUrl: './workspace.component.html',
-  styleUrls: ['./workspace.component.less']
+    selector: 'workspace',
+    templateUrl: './workspace.component.html',
+    styleUrls: ['./workspace.component.less'],
+    standalone: false
 })
 export class WorkspaceComponent implements OnInit {
 

@@ -3,7 +3,7 @@ import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { HTTP_INTERCEPTORS, HttpClientModule } from "@angular/common/http";
+import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { RequestResponseInterceptor } from "@interceptors/request-response.interceptor";
 import { NZ_I18N, zh_CN, en_US } from "ng-zorro-antd/i18n";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
@@ -18,11 +18,11 @@ import { NzNotificationModule } from "ng-zorro-antd/notification";
   declarations: [
     AppComponent
   ],
+  bootstrap: [AppComponent],
   imports: [
     BrowserModule,
     AppRoutingModule,
     FormsModule,
-    HttpClientModule,
     BrowserAnimationsModule,
     IconsProviderModule,
     NzLayoutModule,
@@ -45,8 +45,9 @@ import { NzNotificationModule } from "ng-zorro-antd/notification";
       },
       deps: [LOCALE_ID]
     },
-    { provide: HTTP_INTERCEPTORS, useClass: RequestResponseInterceptor, multi: true },
-  ],
-  bootstrap: [AppComponent]
+    {provide: HTTP_INTERCEPTORS, useClass: RequestResponseInterceptor, multi: true},
+    provideHttpClient(withInterceptorsFromDi()),
+  ]
 })
-export class AppModule { }
+export class AppModule {
+}

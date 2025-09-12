@@ -8,9 +8,10 @@ import { Subscription } from "rxjs";
 import { getTestPayload } from "./test-webhook";
 
 @Component({
-  selector: 'test-webhook-modal',
-  templateUrl: './test-webhook-modal.component.html',
-  styleUrls: ['./test-webhook-modal.component.less']
+    selector: 'test-webhook-modal',
+    templateUrl: './test-webhook-modal.component.html',
+    styleUrls: ['./test-webhook-modal.component.less'],
+    standalone: false
 })
 export class TestWebhookModalComponent {
   @Input()

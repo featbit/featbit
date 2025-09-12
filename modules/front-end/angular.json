@@ -23,14 +23,18 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:browser",
+          "builder": "@angular-devkit/build-angular:application",
           "options": {
             "localize": true,
             "aot": true,
-            "outputPath": "dist/featbit",
+            "outputPath": {
+              "base": "dist/featbit"
+            },
             "index": "src/index.html",
-            "main": "src/main.ts",
-            "polyfills": "src/polyfills.ts",
+            "polyfills": [
+              "src/polyfills.ts",
+              "@angular/localize/init"
+            ],
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "less",
             "assets": [
@@ -55,7 +59,8 @@
                 "src/"
               ]
             },
-            "scripts": []
+            "scripts": [],
+            "browser": "src/main.ts"
           },
           "configurations": {
             "production": {
@@ -80,18 +85,14 @@
               "outputHashing": "all"
             },
             "development": {
-              "buildOptimizer": false,
               "optimization": false,
-              "vendorChunk": true,
               "extractLicenses": false,
               "sourceMap": true,
               "namedChunks": true,
               "localize": ["en"]
             },
             "zh": {
-              "buildOptimizer": false,
               "optimization": false,
-              "vendorChunk": true,
               "extractLicenses": false,
               "sourceMap": true,
               "namedChunks": true,
@@ -107,13 +108,13 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "featbit:build:production"
+              "buildTarget": "featbit:build:production"
             },
             "development": {
-              "browserTarget": "featbit:build:development"
+              "buildTarget": "featbit:build:development"
             },
             "zh": {
-              "browserTarget": "featbit:build:zh"
+              "buildTarget": "featbit:build:zh"
             }
           },
           "defaultConfiguration": "development"
@@ -121,7 +122,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "featbit:build"
+            "buildTarget": "featbit:build"
           }
         },
         "test": {

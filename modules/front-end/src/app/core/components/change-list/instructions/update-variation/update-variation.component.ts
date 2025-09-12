@@ -6,8 +6,8 @@ import {
 import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
 
 @Component({
-  selector: 'update-variation',
-  template: `
+    selector: 'update-variation',
+    template: `
     <div class="instruction">
       <span i18n="@@common.update-variation">Update variation</span>
       <nz-tag>{{previous.name}}: {{previous.value}}</nz-tag>
@@ -15,7 +15,7 @@ import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
       <nz-tag>{{current.name}}:{{current.value}}</nz-tag>
     </div>
   `,
-  styles: [`
+    styles: [`
     nz-tag {
       line-height: 12px;
       height: 19px;
@@ -23,7 +23,8 @@ import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
       margin-left: 2px;
       margin-right: 2px;
     }
-  `]
+  `],
+    standalone: false
 })
 export class UpdateVariationComponent implements IInstructionComponent {
   data: IInstructionComponentData;

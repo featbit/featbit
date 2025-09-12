@@ -8,10 +8,12 @@
         <i nz-icon nzType="icons:icon-search"></i>
       </ng-template>
     </div>
-    <button *ngIf="canManageRp" nz-button nzType="primary" (click)="openDrawer(null)">
-      <i nz-icon nzType="icons:icon-add"></i>
-      <ng-container i18n="@@common.add">Add</ng-container>
-    </button>
+    @if (canManageRp) {
+      <button nz-button nzType="primary" (click)="openDrawer(null)">
+        <i nz-icon nzType="icons:icon-add"></i>
+        <ng-container i18n="@@common.add">Add</ng-container>
+      </button>
+    }
   </div>
   <div class="table-wrapper">
     <nz-table
@@ -28,47 +30,49 @@
       (nzPageIndexChange)="doSearch()"
       [(nzPageIndex)]="filter.pageIndex">
       <thead>
-      <tr>
-        <th nzWidth="20%" i18n="@@common.name">Name</th>
-        <th nzWidth="20%" i18n="@@common.serves">Serves</th>
-        <th nzWidth="10%" i18n="@@common.agents">Agents</th>
-        <th nzWidth="30%" i18n="@@common.description">Description</th>
-        <th i18n="@@common.actions">Actions</th>
-      </tr>
+        <tr>
+          <th nzWidth="20%" i18n="@@common.name">Name</th>
+          <th nzWidth="20%" i18n="@@common.serves">Serves</th>
+          <th nzWidth="10%" i18n="@@common.agents">Agents</th>
+          <th nzWidth="30%" i18n="@@common.description">Description</th>
+          <th i18n="@@common.actions">Actions</th>
+        </tr>
       </thead>
       <tbody style="width: calc(100% - 200px);">
-      <ng-container *ngFor="let item of basicTable.data">
-        <tr>
-          <td>
-            {{ item.name }}
-            <br />
-            <div class="additional-info">
-              {{ item.key }}
-            </div>
-          </td>
-          <td class="scopes">
-            <ng-container *ngIf="item.isAllEnvs; then allEnvs; else customEnvs"></ng-container>
-            <ng-template #allEnvs>
-              <span i18n="@@common.all-envs">All environments</span>
+        @for (item of basicTable.data; track item) {
+          <tr>
+            <td>
+              {{ item.name }}
+              <br />
               <div class="additional-info">
-                <span i18n="@@relay-proxy.index.all-envs-description">All within the organization</span>
+                {{ item.key }}
               </div>
-            </ng-template>
-            <ng-template #customEnvs>
-              <span nz-tooltip nzTooltipPlacement="topLeft" [nzTooltipTitle]="scopesTooltip">
-                <ng-container *ngFor="let serve of item.parsedServes; let last = last">
-                  {{ serve.pathName }}<span *ngIf="!last">, </span>
-                </ng-container>
+            </td>
+            <td class="scopes">
+              @if (item.isAllEnvs) {
+                <span i18n="@@common.all-envs">All environments</span>
+                <div class="additional-info">
+                  <span i18n="@@relay-proxy.index.all-envs-description">All within the organization</span>
+                </div>
+              } @else {
+                <span nz-tooltip nzTooltipPlacement="topLeft" [nzTooltipTitle]="scopesTooltip">
+                  @for (serve of item.parsedServes; track serve; let last = $last) {
+                    {{ serve.pathName }}@if (!last) {
+                    <span>, </span>
+                  }
+                }
               </span>
               <ng-template #scopesTooltip>
                 <ul>
-                  <li *ngFor="let serve of item.parsedServes;">{{ serve.pathName }}</li>
+                  @for (serve of item.parsedServes; track serve) {
+                    <li>{{ serve.pathName }}</li>
+                  }
                 </ul>
               </ng-template>
               <div class="additional-info">
                 <span i18n="@@common.total">Total</span>: {{ item.scopes.length }}
               </div>
-            </ng-template>
+            }
           </td>
           <td>
             <span i18n="@@common.auto">Auto</span>: {{ item.autoAgents.length }}
@@ -76,19 +80,18 @@
             <span i18n="@@common.manual">Manual</span>: {{ item.agents.length }}
           </td>
           <td>
-            <ng-container *ngIf="item.description; then showDescription; else noDescription"></ng-container>
-            <ng-template #showDescription>{{ item.description }}</ng-template>
-            <ng-template #noDescription>
+            @if (item.description) {
+              {{ item.description }}
+            } @else {
               <span class="no-description-hint" i18n="@@common.no-description-provided">No description provided.</span>
-            </ng-template>
+            }
             <br />
             <div class="additional-info">
               <span i18n="@common.last-updated-at">Last updated at</span>: {{ item.updatedAt | date: 'yyyy-MM-dd HH:mm:ss' }}
             </div>
           </td>
           <td>
-            <ng-container *ngIf="canManageRp; then manageRp; else viewRp"></ng-container>
-            <ng-template #manageRp>
+            @if (canManageRp) {
               <a style="color: #23AD7F" (click)="openDrawer(item)" i18n="@@common.edit">Edit</a>
               <nz-divider nzType="vertical"></nz-divider>
               <a
@@ -103,16 +106,15 @@
               <ng-template #iconTplDelete>
                 <i nz-icon nzType="question-circle" nzTheme="fill"></i>
               </ng-template>
-            </ng-template>
-            <ng-template #viewRp>
+            } @else {
               <a style="color: #23AD7F" (click)="openDrawer(item)" i18n="@@common.view">View</a>
-            </ng-template>
+            }
           </td>
         </tr>
-      </ng-container>
-      </tbody>
-    </nz-table>
-  </div>
+      }
+    </tbody>
+  </nz-table>
+</div>
 </div>
 
 <relay-proxy-drawer

@@ -13,8 +13,8 @@
     },
     "outDir": "./dist/out-tsc",
     "sourceMap": true,
+    "esModuleInterop": true,
     "declaration": false,
-    "downlevelIteration": true,
     "experimentalDecorators": true,
     "moduleResolution": "node",
     "importHelpers": true,
@@ -26,8 +26,7 @@
       "es2022",
       "dom"
     ],
-    "skipLibCheck": true,
-    "allowSyntheticDefaultImports": true
+    "skipLibCheck": true
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

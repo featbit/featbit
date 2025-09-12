@@ -3,9 +3,10 @@ import { PermissionsService } from "@services/permissions.service";
 import { IamPolicyAction } from "@shared/policy";
 
 @Component({
-  selector: 'permission-check',
-  templateUrl: './permission-check.component.html',
-  styleUrls: ['./permission-check.component.less']
+    selector: 'permission-check',
+    templateUrl: './permission-check.component.html',
+    styleUrls: ['./permission-check.component.less'],
+    standalone: false
 })
 export class PermissionCheckComponent implements OnInit {
 

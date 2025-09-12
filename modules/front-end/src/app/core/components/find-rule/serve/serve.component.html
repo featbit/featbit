@@ -3,58 +3,70 @@
     <div class="tip" i18n="@@core.components.findrule.serve">Serve</div>
     <div class="select">
       <nz-select class="nz-select-36" [(ngModel)]="selectedVariationId" (ngModelChange)="modelChange()"
-                 nzPlaceHolder="variation" i18n-nzPlaceHolder="@@app.components.findrule.selectvariation">
-        <nz-option *ngFor="let variationOption of availableVariations; let i = index" nzCustomContent [nzValue]="variationOption.id" [nzLabel]="variationOption.name">
+        nzPlaceHolder="variation" i18n-nzPlaceHolder="@@app.components.findrule.selectvariation">
+        @for (variationOption of availableVariations; track variationOption; let i = $index) {
+          <nz-option nzCustomContent [nzValue]="variationOption.id" [nzLabel]="variationOption.name">
             {{variationOption.name}}
-        </nz-option>
-        <nz-option *ngIf="availableVariations.length > 1" [nzValue]="'-1'"
-                   nzLabel="Rollout percentage"
-                   i18n-nzLabel="@@app.components.findrule.rolloutpercentage"></nz-option>
+          </nz-option>
+        }
+        @if (availableVariations.length > 1) {
+          <nz-option [nzValue]="'-1'"
+            nzLabel="Rollout percentage"
+          i18n-nzLabel="@@app.components.findrule.rolloutpercentage"></nz-option>
+        }
       </nz-select>
     </div>
-    <div class="percentage-body" *ngIf="selectedVariationId === '-1'">
-      <div class="percentage">
-        <div class="item" *ngFor="let rule of ruleVariationValues; let i = index">
-          <div class="percentage-number">
-            <nz-input-group nzSearch [nzAddOnAfter]="suffixTemplateInfo">
-              <nz-input-number type="number" [nzMin]="0" [nzMax]="100" [nzPrecision]="3" [(ngModel)]="rule.percentageValue" (ngModelChange)="modelChange()"></nz-input-number>
-            </nz-input-group>
-            <ng-template #suffixTemplateInfo>
-              <button nz-button nzType="default" nzSearch style="border-left: none;border-top-right-radius: 8px;border-bottom-right-radius: 8px;height: 36px">%</button>
-            </ng-template>
+    @if (selectedVariationId === '-1') {
+      <div class="percentage-body">
+        <div class="percentage">
+          @for (rule of ruleVariationValues; track rule; let i = $index) {
+            <div class="item">
+              <div class="percentage-number">
+                <nz-input-group nzSearch [nzAddOnAfter]="suffixTemplateInfo">
+                  <nz-input-number type="number" [nzMin]="0" [nzMax]="100" [nzPrecision]="0" [(ngModel)]="rule.percentageValue" (ngModelChange)="modelChange()"></nz-input-number>
+                </nz-input-group>
+                <ng-template #suffixTemplateInfo>
+                  <button nz-button nzType="default" nzSearch style="border-left: none;border-top-right-radius: 8px;border-bottom-right-radius: 8px;height: 36px">%</button>
+                </ng-template>
+              </div>
+              <div class="variation-tip {{'tip-' + i % 9}}"></div>
+              <div class="variation">
+                {{ rule.id | RVV: availableVariations }}
+              </div>
+            </div>
+          }
+          <div class="dispatch-key">
+            <div i18n="@@core.components.findrule.dispatch-by">Dispatch By</div>
+            <div class="select">
+              <nz-select
+                class="nz-select-36"
+                nzShowSearch
+                nzPlaceHolder="Select property"
+                i18n-nzPlaceHolder="@@core.components.findrule.serve.selectuserproperty"
+                [(ngModel)]="dispatchKey"
+                (ngModelChange)="dispatchKeyChange()">
+                @for (key of filteredDispatchKeys; track key) {
+                  <nz-option [nzValue]="key" [nzLabel]="key"></nz-option>
+                }
+              </nz-select>
+            </div>
+            <i class="tooltip" [nz-tooltip]="defaultTooltip" nz-icon nzType="icons:icon-info-outline">
+              <ng-template #defaultTooltip>
+                <ng-container i18n="@@core.components.findrule.serve.dispatch-by-tooltip">Use a custom attribute for percentage rollouts.</ng-container>
+              </ng-template>
+            </i>
           </div>
-          <div class="variation-tip {{'tip-' + i % 9}}"></div>
-          <div class="variation">
-            {{ rule.id | RVV: availableVariations }}
-          </div>
-        </div>
-        <div class="dispatch-key">
-          <div i18n="@@core.components.findrule.dispatch-by">Dispatch By</div>
-          <div class="select">
-            <nz-select
-              class="nz-select-36"
-              nzShowSearch
-              nzPlaceHolder="Select property"
-              i18n-nzPlaceHolder="@@core.components.findrule.serve.selectuserproperty"
-              [(ngModel)]="dispatchKey"
-              (ngModelChange)="dispatchKeyChange()">
-              <nz-option *ngFor="let key of filteredDispatchKeys" [nzValue]="key" [nzLabel]="key"></nz-option>
-            </nz-select>
-          </div>
-          <i class="tooltip" [nz-tooltip]="defaultTooltip" nz-icon nzType="icons:icon-info-outline">
-            <ng-template #defaultTooltip>
-              <ng-container i18n="@@core.components.findrule.serve.dispatch-by-tooltip">Use a custom attribute for percentage rollouts.</ng-container>
-            </ng-template>
-          </i>
-        </div>
-        <div class="total-percentage" *ngIf="percentageToBeAssigned !== 0">
-          <nz-divider style="margin: 15px 0"></nz-divider>
-          <div class="rest-to-assign">
-            <span class="hundred-percent">{{percentageToBeAssigned}}%</span>
-            <ng-container i18n="@@core.components.findrule.percentage-to-be-assigned">need to be assigned to a variation</ng-container>
-          </div>
+          @if (percentageToBeAssigned !== 0) {
+            <div class="total-percentage">
+              <nz-divider style="margin: 15px 0"></nz-divider>
+              <div class="rest-to-assign">
+                <span class="hundred-percent">{{percentageToBeAssigned}}%</span>
+                <ng-container i18n="@@core.components.findrule.percentage-to-be-assigned">need to be assigned to a variation</ng-container>
+              </div>
+            </div>
+          }
         </div>
       </div>
-    </div>
+    }
   </div>
 </section>

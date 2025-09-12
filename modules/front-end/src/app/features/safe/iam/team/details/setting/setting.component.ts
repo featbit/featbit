@@ -8,9 +8,10 @@ import { MemberService } from "@services/member.service";
 import { UserService } from "@services/user.service";
 
 @Component({
-  selector: 'user-setting',
-  templateUrl: './setting.component.html',
-  styleUrls: ['./setting.component.less']
+    selector: 'user-setting',
+    templateUrl: './setting.component.html',
+    styleUrls: ['./setting.component.less'],
+    standalone: false
 })
 export class SettingComponent implements OnInit {
 

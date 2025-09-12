@@ -12,10 +12,11 @@ import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
 import { ISegment } from "@features/safe/segments/types/segments-index";
 
 @Component({
-  selector: 'change-list',
-  templateUrl: './change-list.component.html',
-  styleUrls: ['./change-list.component.less'],
-  encapsulation: ViewEncapsulation.None,
+    selector: 'change-list',
+    templateUrl: './change-list.component.html',
+    styleUrls: ['./change-list.component.less'],
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class ChangeListComponent {
 

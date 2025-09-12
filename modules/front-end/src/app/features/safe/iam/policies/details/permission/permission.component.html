@@ -1,16 +1,15 @@
 <section class="body-container">
   <div class="detail-body">
     <div class="content-container">
-      <ng-container *ngIf="!isLoading; else loadingTem;">
+      @if (!isLoading) {
         <iam-policy-editor [policy]="policy" (saveStatementsEvent)="saveStatements($event)"></iam-policy-editor>
-      </ng-container>
+      } @else {
+        <div class="block">
+          <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 4 }"></nz-skeleton>
+        </div>
+      }
     </div>
   </div>
-  <ng-template #loadingTem>
-    <div class="block">
-      <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 4 }"></nz-skeleton>
-    </div>
-  </ng-template>
 </section>
 
 

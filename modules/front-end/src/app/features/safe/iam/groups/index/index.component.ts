@@ -8,9 +8,10 @@ import { GroupService } from "@services/group.service";
 import { GroupListFilter, groupRn, IGroup, IPagedGroup } from "@features/safe/iam/types/group";
 
 @Component({
-  selector: 'iam-users',
-  templateUrl: './index.component.html',
-  styleUrls: ['./index.component.less']
+    selector: 'iam-users',
+    templateUrl: './index.component.html',
+    styleUrls: ['./index.component.less'],
+    standalone: false
 })
 export class IndexComponent implements OnInit {
 

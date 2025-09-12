@@ -5,9 +5,10 @@ import {debounceTime, first, map, switchMap} from "rxjs/operators";
 import { GroupService } from "@services/group.service";
 
 @Component({
-  selector: 'group-drawer',
-  templateUrl: './group-drawer.component.html',
-  styleUrls: ['./group-drawer.component.less']
+    selector: 'group-drawer',
+    templateUrl: './group-drawer.component.html',
+    styleUrls: ['./group-drawer.component.less'],
+    standalone: false
 })
 export class GroupDrawerComponent implements OnInit {
 
