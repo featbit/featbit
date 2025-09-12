@@ -1,9 +1,9 @@
+using Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
-using Streaming.Services;
 
 namespace Api.Public;
 
-public class AgentController(IRelayProxyService rpService, ILogger<AgentController> logger) : PublicApiControllerBase
+public class AgentController(IRelayProxyAppService rpService, ILogger<AgentController> logger) : PublicApiControllerBase
 {
     [HttpPost]
     [Route("register")]
@@ -11,10 +11,16 @@ public class AgentController(IRelayProxyService rpService, ILogger<AgentControll
     {
         var key = Request.Headers.Authorization.ToString();
 
-        var isKeyValid = await rpService.IsKeyValidAsync(key);
-        if (!isKeyValid)
+        var workspace = await rpService.GetWorkspaceAsync(key);
+        if (workspace is null)
         {
             return Unauthorized();
+        }
+
+        var isQuotaAllowed = await rpService.CheckQuotaAsync(workspace);
+        if (!isQuotaAllowed)
+        {
+            return StatusCode(403);
         }
 
         try

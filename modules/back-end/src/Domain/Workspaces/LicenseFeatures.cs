@@ -9,9 +9,10 @@ public static class LicenseFeatures
     public const string ChangeRequest = "change-request";
     public const string GlobalUser = "global-user";
     public const string ShareableSegment = "shareable-segment";
+    public const string AutoAgents = "auto-agents";
 
     public static readonly string[] All =
-        { Asterisk, Sso, Schedule, MultiOrg, ChangeRequest, GlobalUser, ShareableSegment };
+        [Asterisk, Sso, Schedule, MultiOrg, ChangeRequest, GlobalUser, ShareableSegment, AutoAgents];
 
     public static bool IsDefined(string feature)
     {

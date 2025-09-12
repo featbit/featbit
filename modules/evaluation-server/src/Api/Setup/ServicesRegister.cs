@@ -1,4 +1,6 @@
+using Domain.Workspaces;
 using Infrastructure;
+using Infrastructure.Services;
 using Serilog;
 using Streaming.DependencyInjection;
 
@@ -40,6 +42,10 @@ public static class ServicesRegister
             .AddStreamingCore()
             .UseStore(configuration)
             .UseMq(configuration);
+
+        // application services
+        LicenseVerifier.ImportPublicKey(configuration["PublicKey"]);
+        services.AddTransient<IRelayProxyAppService, RelayProxyAppService>();
 
         return builder;
     }

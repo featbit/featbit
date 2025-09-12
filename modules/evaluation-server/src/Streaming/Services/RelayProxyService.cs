@@ -1,4 +1,3 @@
-using System.Linq.Expressions;
 using System.Text.Json;
 using Dapper;
 using Domain.Shared;
@@ -17,45 +16,6 @@ namespace Streaming.Services;
 public class RelayProxyService(IConfiguration configuration, IServiceProvider serviceProvider)
     : IRelayProxyService
 {
-    public async Task<bool> IsKeyValidAsync(string key)
-    {
-        if (string.IsNullOrWhiteSpace(key) || !key.StartsWith("rp-"))
-        {
-            return false;
-        }
-
-        var dbProvider = configuration.GetDbProvider();
-        return dbProvider.Name switch
-        {
-            DbProvider.MongoDb => await MongoDbIsValidAsync(),
-            DbProvider.Postgres => await PostgresIsValidAsync(),
-            _ => false
-        };
-
-        async Task<bool> MongoDbIsValidAsync()
-        {
-            var mongodb = serviceProvider.GetRequiredService<IMongoDbClient>();
-            var db = mongodb.Database;
-
-            var count = await db.GetCollection<BsonDocument>("RelayProxies")
-                .CountDocumentsAsync(x => x["key"].AsString == key);
-
-            return count > 0;
-        }
-
-        async Task<bool> PostgresIsValidAsync()
-        {
-            var dataSource = serviceProvider.GetRequiredService<NpgsqlDataSource>();
-            await using var connection = await dataSource.OpenConnectionAsync();
-
-            var count = await connection.ExecuteScalarAsync<int>(
-                "select count(1) from relay_proxies where key = @Key", new { Key = key }
-            );
-
-            return count > 0;
-        }
-    }
-
     public async Task<SecretWithValue[]> GetSecretsAsync(string key)
     {
         var dbProvider = configuration.GetDbProvider();
@@ -233,70 +193,6 @@ public class RelayProxyService(IConfiguration configuration, IServiceProvider se
             .ToArray();
 
         return secrets;
-    }
-
-    public async Task RegisterAgentAsync(string key, string agentId)
-    {
-        var dbProvider = configuration.GetDbProvider();
-
-        switch (dbProvider.Name)
-        {
-            case DbProvider.MongoDb:
-                await MongoDbRegisterAsync();
-                break;
-            case DbProvider.Postgres:
-                await PostgresRegisterAsync();
-                break;
-        }
-
-        return;
-
-        async Task MongoDbRegisterAsync()
-        {
-            var mongodb = serviceProvider.GetRequiredService<IMongoDbClient>();
-            var db = mongodb.Database;
-
-            Expression<Func<BsonDocument, bool>> filter = x =>
-                x["key"].AsString == key &&
-                x["autoAgents"].AsBsonArray.All(agent => agent["_id"].AsString != agentId);
-
-            var updateDefinition = Builders<BsonDocument>.Update.Push("autoAgents", new BsonDocument
-            {
-                { "_id", agentId },
-                { "status", "{}" },
-                { "registeredAt", DateTime.UtcNow }
-            });
-
-            await db.GetCollection<BsonDocument>("RelayProxies").UpdateOneAsync(filter, updateDefinition);
-        }
-
-        async Task PostgresRegisterAsync()
-        {
-            var dataSource = serviceProvider.GetRequiredService<NpgsqlDataSource>();
-            await using var connection = await dataSource.OpenConnectionAsync();
-
-            var param = new
-            {
-                AgentId = agentId,
-                Key = key
-            };
-
-            await connection.ExecuteAsync(
-                """
-                update relay_proxies
-                set auto_agents = jsonb_insert(
-                        auto_agents,
-                        '{0}',
-                        jsonb_build_object(
-                            'id', @AgentId,
-                            'status', '{}',
-                            'registeredAt', now()
-                        ))
-                where key = @Key
-                  and not exists(select 1 from jsonb_array_elements(auto_agents) as agent where agent ->> 'id' = @AgentId)
-                """, param
-            );
-        }
     }
 
     public async Task UpdateAgentStatusAsync(string key, string agentId, string status)

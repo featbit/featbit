@@ -17,4 +17,3 @@ public class StringHelperTests
         Assert.Equal(actual, expected);
     }
 }
-

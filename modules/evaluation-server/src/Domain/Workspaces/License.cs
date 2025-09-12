@@ -2,6 +2,7 @@ using System.Text.Json;
 
 namespace Domain.Workspaces;
 
+// from: modules/back-end/src/Domain/Workspaces/License.cs
 public record License
 {
     private const string LicenseIssuer = "https://www.featbit.co";
@@ -44,6 +45,4 @@ public record License
 
         return true;
     }
-
-    public bool IsGranted(string feature) => Features.Contains(feature) || Features.Contains(LicenseFeatures.Asterisk);
 }
