@@ -1,5 +1,5 @@
 name: FeatBit UI change validations
-on: 
+on:
   workflow_dispatch:
   push:
     branches:
@@ -8,7 +8,7 @@ on:
       - 'modules/front-end/**'
       - '.github/workflows/ui-change-validations.yml'
   pull_request:
-    branches: 
+    branches:
       - main
     paths:
       - 'modules/front-end/**'
@@ -16,28 +16,25 @@ on:
 
 jobs:
   build:
-    name : UI Change Validations
+    name: UI Change Validations
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [22]
     steps:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Setup Node.js ${{ matrix.node-version }}
+      - name: Setup Node.js 22
         uses: actions/setup-node@v5
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 22
           cache: 'npm'
           cache-dependency-path: "modules/front-end/package-lock.json"
 
       - name: npm build & i18n validations & build
         run: |
-              cd 'modules/front-end'
-              npm ci
-              npm run i18n
-              chmod +x ./change_validations.sh
-              ./change_validations.sh
-              npm run build --if-present
+          cd 'modules/front-end'
+          npm ci
+          npm run i18n
+          chmod +x ./change_validations.sh
+          ./change_validations.sh
+          npm run build --if-present
         shell: bash
