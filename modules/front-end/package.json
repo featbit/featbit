@@ -17,7 +17,7 @@
     "@angular/compiler": "^19.2.14",
     "@angular/core": "^19.2.14",
     "@angular/forms": "^19.2.14",
-    "@angular/platform-browser": "^19.2.14",
+    "@angular/platform-browser": "^20.2.4",
     "@angular/platform-browser-dynamic": "^19.2.14",
     "@angular/router": "^19.2.14",
     "@antv/g2": "^4.2.10",
