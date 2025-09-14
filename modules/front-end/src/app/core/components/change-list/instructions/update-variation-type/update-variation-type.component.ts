@@ -3,14 +3,16 @@ import {
   IInstructionComponent,
   IInstructionComponentData,
 } from "@core/components/change-list/instructions/types";
+
 @Component({
-    selector: 'update-variation-type',
-    template: `
+  selector: 'update-variation-type',
+  template: `
     <div class="instruction">
-      <span i18n="@@common.update-variation-type-to">Update variation type to</span><nz-tag>{{data.value}}</nz-tag>
+      <span i18n="@@common.update-variation-type-to">Update variation type to</span>
+      <nz-tag>{{ data.value }}</nz-tag>
     </div>
   `,
-    styles: [`
+  styles: [ `
     nz-tag {
       line-height: 12px;
       height: 19px;
@@ -18,8 +20,8 @@ import {
       margin-left: 2px;
       margin-right: 2px;
     }
-  `],
-    standalone: false
+  ` ],
+  standalone: false
 })
 export class UpdateVariationTypeComponent implements IInstructionComponent {
   data: IInstructionComponentData;

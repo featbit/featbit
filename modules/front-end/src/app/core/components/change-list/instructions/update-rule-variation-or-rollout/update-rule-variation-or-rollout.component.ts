@@ -12,16 +12,16 @@ interface IRuleRollout {
 }
 
 @Component({
-    selector: 'rule-variation-or-rollout',
-    template: `
+  selector: 'rule-variation-or-rollout',
+  template: `
     <div class="instruction">
       <span i18n="@@common.update-serve-value-to">Update serve value to </span>
       @for (value of values; track value.label || value.percentage) {
-        <nz-tag>{{value.label}} ({{value.percentage}}%)</nz-tag>
+        <nz-tag>{{ value.label }} ({{ value.percentage }}%)</nz-tag>
       }
     </div>
-    `,
-    styles: [`
+  `,
+  styles: [ `
     nz-tag {
       line-height: 12px;
       height: 19px;
@@ -29,8 +29,8 @@ interface IRuleRollout {
       margin-left: 2px;
       margin-right: 2px;
     }
-  `],
-    standalone: false
+  ` ],
+  standalone: false
 })
 export class UpdateRuleVariationOrRolloutComponent implements IInstructionComponent {
   data: IInstructionComponentData;

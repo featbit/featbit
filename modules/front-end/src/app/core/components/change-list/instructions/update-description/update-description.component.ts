@@ -5,25 +5,25 @@ import {
 } from "@core/components/change-list/instructions/types";
 import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
 import { ISegment } from "@features/safe/segments/types/segments-index";
+
 @Component({
-    selector: 'update-description',
-    template: `
+  selector: 'update-description',
+  template: `
     <div class="instruction">
-      @if (!isClear) {
+      @if (isClear) {
+        <span i18n="@@common.clear-description">Clear description</span>
+      } @else {
         <span i18n="@@common.update-description-with-sufix-space">Update description </span>
         @if (previousDescription.length > 0) {
           <span i18n="@@common.from-description">from</span>
-          <span class="value remove-value">{{previousDescription}}</span>
+          <span class="value remove-value">{{ previousDescription }}</span>
         }
         <span i18n="@@common.to-description">to</span>
-        <span class="value">{{data.value}}</span>
-      }
-      @if (isClear) {
-        <span i18n="@@common.clear-description">Clear description</span>
+        <span class="value">{{ data.value }}</span>
       }
     </div>
-    `,
-    styles: [`
+  `,
+  styles: [ `
     .value {
       font-weight: 700;
       display: inline-block;
@@ -34,8 +34,8 @@ import { ISegment } from "@features/safe/segments/types/segments-index";
     .remove-value {
       text-decoration: line-through;
     }
-  `],
-    standalone: false
+  ` ],
+  standalone: false
 })
 export class UpdateDescriptionComponent implements IInstructionComponent {
   data: IInstructionComponentData;

@@ -7,15 +7,15 @@ import { IVariation } from "@shared/rules";
 import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
 
 @Component({
-    selector: 'update-off-variation',
-    template: `
+  selector: 'update-off-variation',
+  template: `
     <div class="instruction">
       <span i18n="@@common.update-to">Update to</span>
-      <nz-tag>{{variation.name}}: {{variation.value}}</nz-tag>
+      <nz-tag>{{ variation.name }}: {{ variation.value }}</nz-tag>
     </div>
   `,
-    styleUrls: ['./update-off-variation.component.less'],
-    standalone: false
+  styleUrls: [ './update-off-variation.component.less' ],
+  standalone: false
 })
 export class UpdateOffVariationComponent implements IInstructionComponent {
   data: IInstructionComponentData;

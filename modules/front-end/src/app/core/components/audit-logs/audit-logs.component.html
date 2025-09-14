@@ -18,16 +18,15 @@
           (ngModelChange)="onSearch(true)"
           i18n-nzPlaceHolder="@@auditlogs.idx.filter-by-team-member"
           nzPlaceHolder="Filter by team member">
-          @for (member of memberListModel.items; track member.id) {
-            @if (!membersLoading) {
-              <nz-option [nzValue]="member.id" [nzLabel]="getMemberLabel(member)"></nz-option>
-            }
-          }
           @if (membersLoading) {
             <nz-option nzDisabled nzCustomContent>
               <i nz-icon nzType="loading" class="loading-icon"></i>
               <ng-container i18n="@@common.loading">Loading...</ng-container>
             </nz-option>
+          } @else {
+            @for (member of memberListModel.items; track member.id) {
+              <nz-option [nzValue]="member.id" [nzLabel]="getMemberLabel(member)"></nz-option>
+            }
           }
         </nz-select>
         @if (!auditLogFilter?.refId) {

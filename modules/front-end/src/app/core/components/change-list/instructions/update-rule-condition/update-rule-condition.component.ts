@@ -9,33 +9,32 @@ import { getSegmentRefs, mapToIInstructionCondition } from "@core/components/cha
 import { ICondition } from "@shared/rules";
 
 @Component({
-    selector: 'update-rule-condition',
-    template: `
+  selector: 'update-rule-condition',
+  template: `
     @if (!isLoading) {
       <div class="instruction">
         <span i18n="@@common.update-conditions">Update condition</span>
         <div class="clause">
           <span i18n="@@common.capitalize-if">If</span>
-          <span>{{condition.property}}</span>
+          <span>{{ condition.property }}</span>
           @if (condition.op !== null) {
-            <span>{{condition.opLabel}}</span>
+            <span>{{ condition.opLabel }}</span>
           }
           @if (condition.displayValue) {
-            @if (!condition.isMultiValue) {
-              <nz-tag>{{condition.value}}</nz-tag>
-            }
             @if (condition.isMultiValue) {
               @for (value of condition.value; track value) {
-                <nz-tag>{{value}}</nz-tag>
+                <nz-tag>{{ value }}</nz-tag>
               }
+            } @else {
+              <nz-tag>{{ condition.value }}</nz-tag>
             }
           }
         </div>
       </div>
     }
-    `,
-    styleUrls: ['./update-rule-condition.component.less'],
-    standalone: false
+  `,
+  styleUrls: [ './update-rule-condition.component.less' ],
+  standalone: false
 })
 export class UpdateRuleConditionComponent implements IInstructionComponent, OnInit {
   data: IInstructionComponentData;
@@ -43,7 +42,8 @@ export class UpdateRuleConditionComponent implements IInstructionComponent, OnIn
   isLoading: boolean = true;
   condition: IInstructionCondition;
 
-  constructor(private segmentService: SegmentService) { }
+  constructor(private segmentService: SegmentService) {
+  }
 
   async ngOnInit() {
     await this.getCondition();
@@ -56,7 +56,7 @@ export class UpdateRuleConditionComponent implements IInstructionComponent, OnIn
 
     let segmentRefs = isSegmentCondition(originalCondition.property)
       ? await getSegmentRefs(this.segmentService, JSON.parse(originalCondition.value))
-      : { };
+      : {};
 
     this.condition = mapToIInstructionCondition(originalCondition, segmentRefs);
   }

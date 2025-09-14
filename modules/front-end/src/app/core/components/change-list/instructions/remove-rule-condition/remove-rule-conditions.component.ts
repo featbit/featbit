@@ -27,13 +27,12 @@ import { getSegmentRefs, mapToIInstructionCondition } from "@core/components/cha
               <span>{{condition.opLabel}}</span>
             }
             @if (condition.displayValue) {
-              @if (!condition.isMultiValue) {
-                <nz-tag>{{condition.value}}</nz-tag>
-              }
               @if (condition.isMultiValue) {
                 @for (value of condition.value; track value) {
                   <nz-tag>{{value}}</nz-tag>
                 }
+              } @else {
+                <nz-tag>{{condition.value}}</nz-tag>
               }
             }
           </div>

@@ -6,14 +6,14 @@ import {
 import { InstructionKindEnum } from "@core/components/change-list/constants";
 
 @Component({
-    selector: 'update-target-users',
-    template: `
+  selector: 'update-target-users',
+  template: `
     <div class="instruction">
       @if (kind === InstructionKindEnum.AddTargetUsersToExcluded || kind === InstructionKindEnum.RemoveTargetUsersFromExcluded) {
-        <span class="variation" i18n="@@common.excluding-users" >Excluding users</span>:
+        <span class="variation" i18n="@@common.excluding-users">Excluding users</span>:
       }
       @if (kind === InstructionKindEnum.AddTargetUsersToIncluded || kind === InstructionKindEnum.RemoveTargetUsersFromIncluded) {
-        <span class="variation" i18n="@@common.including-users" >Including users</span>:
+        <span class="variation" i18n="@@common.including-users">Including users</span>:
       }
       @if (kind === InstructionKindEnum.AddTargetUsersToExcluded || kind === InstructionKindEnum.AddTargetUsersToIncluded) {
         <span i18n="@@common.add-users">Add user(s)</span>
@@ -23,12 +23,12 @@ import { InstructionKindEnum } from "@core/components/change-list/constants";
       }
       @for (keyId of keyIds; track keyId) {
         <nz-tag>
-          {{keyId}}
+          {{ keyId }}
         </nz-tag>
       }
     </div>
-    `,
-    styles: [`
+  `,
+  styles: [ `
     .variation {
       font-weight: 600;
     }
@@ -40,8 +40,8 @@ import { InstructionKindEnum } from "@core/components/change-list/constants";
       margin-left: 2px;
       margin-right: 2px;
     }
-  `],
-    standalone: false
+  ` ],
+  standalone: false
 })
 export class UpdateTargetUsersForSegmentComponent implements IInstructionComponent {
   data: IInstructionComponentData;

@@ -8,8 +8,8 @@ import { InstructionKindEnum } from "@core/components/change-list/constants";
 import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
 
 @Component({
-    selector: 'change-variations',
-    template: `
+  selector: 'change-variations',
+  template: `
     <div class="instruction">
       @if (kind === InstructionKindEnum.AddVariation) {
         <span i18n="@@common.add-variation">Add variation</span>
@@ -17,10 +17,10 @@ import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
       @if (kind === InstructionKindEnum.RemoveVariation) {
         <span i18n="@@common.remove-variation">Remove variation</span>
       }
-      <nz-tag>{{variation.name}}: {{variation.value}}</nz-tag>
+      <nz-tag>{{ variation.name }}: {{ variation.value }}</nz-tag>
     </div>
-    `,
-    styles: [`
+  `,
+  styles: [ `
     nz-tag {
       line-height: 12px;
       height: 19px;
@@ -28,13 +28,14 @@ import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
       margin-left: 2px;
       margin-right: 2px;
     }
-  `],
-    standalone: false
+  ` ],
+  standalone: false
 })
 export class ChangeVariationsComponent implements IInstructionComponent {
   data: IInstructionComponentData;
 
   protected readonly InstructionKindEnum = InstructionKindEnum;
+
   get kind() {
     return this.data.kind;
   }
