@@ -30,14 +30,9 @@
         <nz-form-control>
           <nz-select
             class="nz-select-40"
+            [nzOptions]="tokenTypes"
             [nzDisabled]="isEditing"
             formControlName="type">
-            @for (at of actionTokenTypes; track at) {
-              <nz-option
-                [nzValue]="at"
-                [nzLabel]="at | accessTokenType">
-              </nz-option>
-            }
           </nz-select>
         </nz-form-control>
       </nz-form-item>

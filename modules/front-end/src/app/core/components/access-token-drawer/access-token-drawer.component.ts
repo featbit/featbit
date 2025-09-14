@@ -249,8 +249,8 @@ export class AccessTokenDrawerComponent {
     );
   }
 
-  actionTokenTypes = [
-    AccessTokenTypeEnum.Personal,
-    AccessTokenTypeEnum.Service
+  tokenTypes = [
+    { label: $localize `:@@integrations.access-token.personal:Personal`, value: AccessTokenTypeEnum.Personal },
+    { label: $localize `:@@integrations.access-token.service:Service`, value: AccessTokenTypeEnum.Service },
   ]
 }

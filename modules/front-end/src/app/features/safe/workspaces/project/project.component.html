@@ -12,12 +12,12 @@
     </button>
   </div>
   <div class="project-list">
-    @for (project of projects | projectFilter: searchValue; track project) {
+    @for (project of projects | projectFilter: searchValue; track project.id) {
       <div class="project">
         <nz-card nzBorderless>
           <nz-descriptions [nzTitle]="titleTemplate" [nzExtra]="extraTemplate"></nz-descriptions>
           <div class="env-list">
-            @for (env of project.environments; track env) {
+            @for (env of project.environments; track env.id) {
               <div>
                 <div class="env">
                   <div class="env-basis">
