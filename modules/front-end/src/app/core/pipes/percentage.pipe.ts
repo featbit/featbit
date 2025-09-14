@@ -1,11 +1,11 @@
 import { Pipe, PipeTransform } from "@angular/core";
 
 @Pipe({
-    name: "percentage",
-    standalone: false
+  name: "percentage",
+  standalone: false
 })
 export class PercentagePipe implements PipeTransform {
-  constructor() {}
+  constructor() { }
 
   transform(value, precision: number = 2) {
     if (value === -1 || value === '--') {

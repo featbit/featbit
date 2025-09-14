@@ -4,8 +4,8 @@ import { PermissionsService } from "@services/permissions.service";
 import { IamPolicyAction } from "@shared/policy";
 
 @Directive({
-    selector: '[permission-check]',
-    standalone: false
+  selector: '[permission-check]',
+  standalone: false
 })
 export class PermissionCheckDirective {
 

@@ -17,19 +17,18 @@
         (ngModelChange)="doSearch(true)"
         [(ngModel)]="filter.creatorId"
         (nzOnSearch)="onSearchCreators($event)">
-        @for (o of creatorList; track o) {
-          @if (!isCreatorsLoading) {
-            <nz-option
-              [nzValue]="o.id"
-              [nzLabel]="o.name || o.email">
-            </nz-option>
-          }
-        }
         @if (isCreatorsLoading) {
           <nz-option nzDisabled nzCustomContent>
             <i nz-icon nzType="loading" class="loading-icon"></i>
             <ng-container i18n="@@common.loading">Loading...</ng-container>
           </nz-option>
+        } @else {
+          @for (o of creatorList; track o) {
+            <nz-option
+              [nzValue]="o.id"
+              [nzLabel]="o.name || o.email">
+            </nz-option>
+          }
         }
       </nz-select>
       <nz-select class="nz-select-40 rounded filter" nzAllowClear [(ngModel)]="filter.type" (ngModelChange)="doSearch(true)" i18n-nzPlaceHolder="@@integrations.access-tokens.filter-by-type" nzPlaceHolder="Filter by type">

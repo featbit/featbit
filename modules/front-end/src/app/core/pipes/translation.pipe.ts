@@ -1,4 +1,4 @@
-import {Inject, LOCALE_ID, Pipe, PipeTransform} from "@angular/core";
+import { Inject, LOCALE_ID, Pipe, PipeTransform } from "@angular/core";
 import ResourceTranslation from "@core/translations/resource.translation";
 import ExptStatusTranslation from "@core/translations/expt-status.translation";
 import TriggerTypeTranslation from "@core/translations/trigger-type.translation";
@@ -11,8 +11,8 @@ const translationType = {
 }
 
 @Pipe({
-    name: "T",
-    standalone: false
+  name: "T",
+  standalone: false
 })
 export class TranslationPipe implements PipeTransform {
   constructor(@Inject(LOCALE_ID) private locale: string) {
@@ -20,7 +20,7 @@ export class TranslationPipe implements PipeTransform {
 
   transform(value, defaultValue, type: 'resource' | 'effect' | 'expt-status' | 'trigger-type') {
     let result = null;
-    switch (type){
+    switch (type) {
       case translationType.resource:
         result = ResourceTranslation[value] ? ResourceTranslation[value][this.locale] : null
         break;
@@ -29,9 +29,9 @@ export class TranslationPipe implements PipeTransform {
         const effectDeny = new RegExp('deny', 'i');
 
         if (value.match(effectAllow)) {
-          result = $localize `:@@iam.effect.allow:Allow`;
+          result = $localize`:@@iam.effect.allow:Allow`;
         } else if (value.match(effectDeny)) {
-          result = $localize `:@@iam.effect.deny:Deny`;
+          result = $localize`:@@iam.effect.deny:Deny`;
         }
 
         break;
