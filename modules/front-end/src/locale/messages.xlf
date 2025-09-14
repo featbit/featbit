@@ -6090,7 +6090,7 @@
         </context-group>
       </trans-unit>
       <trans-unit id="sync-with-server-side-sdk" datatype="html">
-        <source>Sync with server side SDK</source>
+        <source>Sync with Server Side SDK</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/data-sync/data-sync.component.html</context>
           <context context-type="linenumber">5,7</context>

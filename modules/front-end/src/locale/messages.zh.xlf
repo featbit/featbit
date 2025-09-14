@@ -6585,12 +6585,12 @@
         <target>下载/上传</target>
       </trans-unit>
       <trans-unit id="sync-with-server-side-sdk" datatype="html">
-        <source>Sync with server side SDK</source>
+        <source>Sync with Server Side SDK</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/data-sync/data-sync.component.html</context>
           <context context-type="linenumber">5,7</context>
         </context-group>
-        <target>与 server side SDK 同步</target>
+        <target>与 Server Side SDK 同步</target>
       </trans-unit>
       <trans-unit id="downloading" datatype="html">
         <source>Downloading...</source>
