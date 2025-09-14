@@ -4093,7 +4093,7 @@
           <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.html</context>
           <context context-type="linenumber">13</context>
         </context-group>
-        <target>Metric 名称不能为空</target>
+        <target>指标名称不能为空</target>
       </trans-unit>
       <trans-unit id="expt.metric.maintainer" datatype="html">
         <source>Maintainer</source>
@@ -6902,7 +6902,7 @@
           <context context-type="sourcefile">src/app/features/safe/experiments/experiments.component.html</context>
           <context context-type="linenumber">9,10</context>
         </context-group>
-        <target>Metrics</target>
+        <target>指标</target>
       </trans-unit>
       <trans-unit id="expt.overview" datatype="html">
         <source>Overview</source>
@@ -6926,7 +6926,7 @@
           <context context-type="sourcefile">src/app/features/safe/experiments/metrics/metrics.component.html</context>
           <context context-type="linenumber">19,21</context>
         </context-group>
-        <target>添加 Metric</target>
+        <target>添加指标</target>
       </trans-unit>
       <trans-unit id="expt.metric.event-type" datatype="html">
         <source>Event type</source>
@@ -6958,7 +6958,7 @@
           <context context-type="sourcefile">src/app/features/safe/experiments/metrics/metrics.component.ts</context>
           <context context-type="linenumber">91</context>
         </context-group>
-        <target>该 Metric 正在被实验所引用，无法删除</target>
+        <target>该指标正在被实验所引用，无法删除</target>
       </trans-unit>
       <trans-unit id="expt.overview.in-progress" datatype="html">
         <source>In Progress</source>
@@ -7018,7 +7018,7 @@
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
           <context context-type="linenumber">328,329</context>
         </context-group>
-        <target>Metric 名称</target>
+        <target>指标名称</target>
       </trans-unit>
       <trans-unit id="expt.overview.event-name" datatype="html">
         <source>Event name</source>
@@ -7059,7 +7059,7 @@
           <context context-type="sourcefile">src/app/features/safe/experiments/overview/overview.component.ts</context>
           <context context-type="linenumber">111</context>
         </context-group>
-        <target>相同开关和 Metric 的实验已经存在</target>
+        <target>相同开关和指标的实验已经存在</target>
       </trans-unit>
       <trans-unit id="ff.triggers.triggers" datatype="html">
         <source>Event triggers</source>
