@@ -1,5 +1,6 @@
-import { Component, Input } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { License, LicenseFeatureEnum } from "@shared/types";
+import { getCurrentLicense } from "@utils/project-env";
 
 @Component({
     selector: 'license',
@@ -7,9 +8,12 @@ import { License, LicenseFeatureEnum } from "@shared/types";
     styleUrls: ['./license.component.less'],
     standalone: false
 })
-export class LicenseComponent {
+export class LicenseComponent implements OnInit {
+  license: License | undefined = undefined;
 
-  @Input() license: License;
+  ngOnInit(): void {
+    this.license = getCurrentLicense();
+  }
 
   features: LicenseFeatureEnum[] = [
     LicenseFeatureEnum.Sso,
@@ -20,9 +24,22 @@ export class LicenseComponent {
     LicenseFeatureEnum.ShareableSegment
   ];
 
-  getLocalDate(date: number) {
+  getLocalDate(date: number): Date | string {
     if (!date) return '';
     return new Date(date);
+  }
+
+  getStatusIcon(): string {
+    if (this.isExpired()) return 'close-circle';
+    if (this.isExpiringSoon()) return 'exclamation-circle';
+    return 'check-circle';
+  }
+
+  getDaysUntilExpiry(): number {
+    if (!this.license.data?.exp) return 0;
+    const expDate = this.getLocalDate(this.license.data.exp);
+    if (typeof expDate === 'string') return 0;
+    return Math.ceil((expDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
   }
 
   getFeatureName(feature: LicenseFeatureEnum): string {
@@ -42,5 +59,30 @@ export class LicenseComponent {
       default:
         return '';
     }
+  }
+
+  isExpired(): boolean {
+    if (!this.license.data?.exp) return false;
+    const expDate = this.getLocalDate(this.license.data.exp);
+    if (typeof expDate === 'string') return false;
+    return new Date() > expDate;
+  }
+
+  isExpiringSoon(): boolean {
+    if (!this.license.data?.exp) return false;
+    const expDate = this.getLocalDate(this.license.data.exp);
+    if (typeof expDate === 'string') return false;
+    const daysUntilExpiry = Math.ceil((expDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+    return daysUntilExpiry <= 30 && daysUntilExpiry > 0;
+  }
+
+  getStatusText(): string {
+    if (this.isExpired()) return 'Expired';
+    if (this.isExpiringSoon()) return 'Expiring Soon';
+    return 'Active';
+  }
+
+  getGrantedFeaturesCount(): number {
+    return this.features.filter(feature => this.license.isGranted(feature)).length;
   }
 }

@@ -3,7 +3,6 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { copyToClipboard } from '@utils/index';
 import { IWorkspace, License, LicenseFeatureEnum } from '@shared/types';
-import { MessageQueueService } from '@core/services/message-queue.service';
 import { WorkspaceService } from "@services/workspace.service";
 import { debounceTime, first, map, switchMap } from "rxjs/operators";
 import { generalResourceRNPattern, permissionActions } from "@shared/policy";
@@ -37,7 +36,6 @@ export class WorkspaceComponent implements OnInit {
   isLicenseLoading: boolean = false;
 
   constructor(
-    private messageQueueService: MessageQueueService,
     private workspaceService: WorkspaceService,
     private permissionsService: PermissionsService,
     private message: NzMessageService

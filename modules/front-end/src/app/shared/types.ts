@@ -103,7 +103,8 @@ export interface ILicense {
   iat: number,
   exp: number,
   issuer: string,
-  features: LicenseFeatureEnum[]
+  features: LicenseFeatureEnum[],
+  metadata?: any
 }
 
 export class License {
