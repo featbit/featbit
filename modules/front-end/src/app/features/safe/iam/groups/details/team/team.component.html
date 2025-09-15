@@ -49,8 +49,7 @@
                   <ng-template #iconTpl>
                     <i nz-icon nzType="question-circle" nzTheme="fill" style="color: #FAAD14;"></i>
                   </ng-template>
-                }
-                @if (!item.isGroupMember) {
+                } @else {
                   <a class="primary-link-btn" (click)="addMember(item.id)" i18n="@@common.add">Add</a>
                 }
               </td>

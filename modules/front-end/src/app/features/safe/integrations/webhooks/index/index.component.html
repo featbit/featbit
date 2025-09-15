@@ -15,16 +15,15 @@
         (ngModelChange)="onSelectProject($event)"
         i18n-nzPlaceHolder="@@common.filter-by-project"
         nzPlaceHolder="Filter by project">
-        @for (project of projects; track project) {
-          @if (!isProjectsLoading) {
-            <nz-option [nzValue]="project.id" [nzLabel]="project.name"></nz-option>
-          }
-        }
         @if (isProjectsLoading) {
           <nz-option nzDisabled nzCustomContent>
             <i nz-icon nzType="loading" class="loading-icon"></i>
             <ng-container i18n="@@common.loading">Loading...</ng-container>
           </nz-option>
+        } @else {
+          @for (project of projects; track project.id) {
+            <nz-option [nzValue]="project.id" [nzLabel]="project.name"></nz-option>
+          }
         }
       </nz-select>
       @if (filter.projectId) {
@@ -36,7 +35,7 @@
           (ngModelChange)="doSearch()"
           i18n-nzPlaceHolder="@@common.filter-by-enviroment"
           nzPlaceHolder="Filter by environment">
-          @for (env of projectEnvs; track env) {
+          @for (env of projectEnvs; track env.id) {
             <nz-option [nzValue]="env.id" [nzLabel]="env.name"></nz-option>
           }
         </nz-select>
@@ -98,17 +97,14 @@
                       [nzType]="item.lastDelivery.success ? 'check-circle' : 'close-circle'">
                     </i>
                     <span>{{ item.lastDelivery.happenedAt | date: 'medium' }}</span>
-                  }
-                  @if (!item.lastDelivery) {
+                  } @else {
                     <span class="never" i18n="@@integrations.webhooks.never-triggered">Never Triggered</span>
                   }
                   <ng-template #statusTooltip>
                     @if (item.isActive) {
                       <span i18n="@@integrations.webhooks.status-active-tooltip">This hook is active.</span>
-                    }
-                    @if (!item.isActive) {
-                      <span
-                      i18n="@@integrations.webhooks.status-inactive-tooltip">This hook is inactive.</span>
+                    } @else {
+                      <span i18n="@@integrations.webhooks.status-inactive-tooltip">This hook is inactive.</span>
                     }
                     @if (item.lastDelivery) {
                       <span>

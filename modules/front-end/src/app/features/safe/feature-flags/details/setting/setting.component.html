@@ -21,29 +21,27 @@
     @if (!isLoading) {
       <div class="block standard-div">
         <div class="title">
-          @if (!isEditingTitle) {
-            <span class="text">{{featureFlag.name}}</span>
-            <i class="edit-save" (click)="toggleTitleEditState()" nz-icon nzType="icons:icon-edit"></i>
-          }
           @if (isEditingTitle) {
             <input nz-input i18n-placeholder="@@common.name" placeholder="Name" [(ngModel)]="featureFlag.name" />
             <div class="actions">
               <i nz-icon nzType="close" (click)="toggleTitleEditState()"></i>
               <i nz-icon nzType="icons:icon-save" (click)="onSaveSettings()" ></i>
             </div>
+          } @else {
+            <span class="text">{{featureFlag.name}}</span>
+            <i class="edit-save" (click)="toggleTitleEditState()" nz-icon nzType="icons:icon-edit"></i>
           }
         </div>
         <div class="flag-description" [class]="{editing: isEditingDescription}">
-          @if (!isEditingDescription) {
-            <span>{{featureFlag.description}}</span>
-            <i class="edit-save" (click)="toggleDescriptionEditState()" nz-icon nzType="icons:icon-edit"></i>
-          }
           @if (isEditingDescription) {
             <textarea nz-input placeholder="Description" i18n-placeholder="@@common.description" [(ngModel)]="featureFlag.description" [nzAutosize]="{ minRows: 3 }"></textarea>
             <div class="actions">
               <i nz-icon nzType="close" (click)="toggleDescriptionEditState()"></i>
               <i nz-icon nzType="icons:icon-save" (click)="onSaveSettings()" ></i>
             </div>
+          } @else {
+            <span>{{featureFlag.description}}</span>
+            <i class="edit-save" (click)="toggleDescriptionEditState()" nz-icon nzType="icons:icon-edit"></i>
           }
         </div>
         <div class="flag-key">

@@ -23,7 +23,7 @@
             <ng-container i18n="@@common.loading">Loading...</ng-container>
           </nz-option>
         } @else {
-          @for (o of creatorList; track o) {
+          @for (o of creatorList; track o.id) {
             <nz-option
               [nzValue]="o.id"
               [nzLabel]="o.name || o.email">
@@ -97,8 +97,7 @@
             <td style="text-align: center">
               @if (canTakeActionOnAccessToken(item.type)) {
                 <i class="options" nzPlacement="bottomCenter" nz-icon style="cursor: pointer;font-size: 25px; font-weight: bold;" nzType="ellipsis" nzTheme="outline" nz-dropdown [nzDropdownMenu]="options" [nzClickHide]="false"></i>
-              }
-              @if (!canTakeActionOnAccessToken(item.type)) {
+              } @else {
                 <a style="color: #23AD7F" (click)="showDetailDrawer(item, true)" i18n="@@common.view">View</a>
               }
               <nz-dropdown-menu #options="nzDropdownMenu">

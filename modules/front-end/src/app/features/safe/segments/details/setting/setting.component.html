@@ -7,30 +7,28 @@
           <nz-tag nzColor="#23AD7F" i18n="@@segment.shared">Shared</nz-tag>
         }
         <div class="name">
-          @if (!isEditingTitle) {
-            <span [nz-tooltip]="segmentDetail?.name" class="text">{{segmentDetail?.name}}</span>
-            <i class="edit-save" (click)="toggleTitleEditState()" nz-icon nzType="icons:icon-edit"></i>
-          }
           @if (isEditingTitle) {
             <input nz-input i18n-placeholder="@@common.name" placeholder="Name" [(ngModel)]="segmentDetail.name" />
             <div class="actions">
               <i nz-icon nzType="close" (click)="toggleTitleEditState()"></i>
               <i nz-icon nzType="icons:icon-save" (click)="saveTitle()" ></i>
             </div>
+          } @else {
+            <span [nz-tooltip]="segmentDetail?.name" class="text">{{segmentDetail?.name}}</span>
+            <i class="edit-save" (click)="toggleTitleEditState()" nz-icon nzType="icons:icon-edit"></i>
           }
         </div>
       </div>
       <div class="description" [class]="{editing: isEditingDescription}">
-        @if (!isEditingDescription) {
-          <span>{{segmentDetail?.description}}</span>
-          <i class="edit-save" (click)="toggleDescriptionEditState()" nz-icon nzType="icons:icon-edit"></i>
-        }
         @if (isEditingDescription) {
           <textarea nz-input i18n-placeholder="@@common.description" placeholder="Description" [(ngModel)]="segmentDetail.description" [nzAutosize]="{ minRows: 2 }"></textarea>
           <div class="actions">
             <i nz-icon nzType="close" (click)="toggleDescriptionEditState()"></i>
             <i nz-icon nzType="icons:icon-save" (click)="saveDescription()"></i>
           </div>
+        } @else {
+          <span>{{segmentDetail?.description}}</span>
+          <i class="edit-save" (click)="toggleDescriptionEditState()" nz-icon nzType="icons:icon-edit"></i>
         }
       </div>
       @if (segmentDetail.type === SegmentType.Shared) {

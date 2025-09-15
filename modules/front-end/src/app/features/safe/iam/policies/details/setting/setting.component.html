@@ -5,28 +5,26 @@
       <div class="item title">
         <div class="label" i18n="@@common.name">Name</div>
         <div class="value">
-          @if (!isEditingTitle) {
+          @if (isEditingTitle) {
+            <input nz-input placeholder="Name" i18n-placeholder="@@common.name" [(ngModel)]="policy.name" />
+            <i class="edit-save" (click)="saveTitle()" nz-icon nzType="icons:icon-save"></i>
+          } @else {
             <span [nz-tooltip]="policy.name" class="text">{{policy.name}}</span>
             @if (!isReadonly) {
               <i class="edit-save" (click)="toggleTitleEditState()" nz-icon nzType="icons:icon-edit"></i>
             }
           }
-          @if (isEditingTitle) {
-            <input nz-input placeholder="Name" i18n-placeholder="@@common.name" [(ngModel)]="policy.name" />
-            <i class="edit-save" (click)="saveTitle()" nz-icon nzType="icons:icon-save"></i>
-          }
         </div>
       </div>
       <div class="item description" [class]="{editing: isEditingDescription}">
-        @if (!isEditingDescription) {
+        @if (isEditingDescription) {
+          <textarea nz-input placeholder="Description" i18n-placeholder="@@common.description" [(ngModel)]="policy.description" [nzAutosize]="{ minRows: 3 }"></textarea>
+          <i class="edit-save" (click)="saveDescription()" nz-icon nzType="icons:icon-save"></i>
+        } @else {
           <span>{{policy.description}}</span>
           @if (!isReadonly) {
             <i class="edit-save" (click)="toggleDescriptionEditState()" nz-icon nzType="icons:icon-edit"></i>
           }
-        }
-        @if (isEditingDescription) {
-          <textarea nz-input placeholder="Description" i18n-placeholder="@@common.description" [(ngModel)]="policy.description" [nzAutosize]="{ minRows: 3 }"></textarea>
-          <i class="edit-save" (click)="saveDescription()" nz-icon nzType="icons:icon-save"></i>
         }
       </div>
       <div class="item">

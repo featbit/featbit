@@ -50,8 +50,7 @@
                       <ng-container i18n="@@iam.team.details.remove-member-from">Are you sure to remove the member from group: </ng-container> <strong>{{item.name}}</strong> <ng-container i18n="@@iam.team.details.remove-member-from-suffix">?</ng-container>
                     </span>
                   </ng-template>
-                }
-                @if (!item.isGroupMember) {
+                } @else {
                   <a class="primary-link-btn" (click)="addToGroup(item.id)" i18n="@@common.add">Add</a>
                 }
               </td>

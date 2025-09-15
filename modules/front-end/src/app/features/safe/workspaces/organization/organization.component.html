@@ -26,7 +26,7 @@
     <div class="row-title" i18n="@@org.org.switchorg">Switch organization</div>
     <div class="row-content">
       <nz-select class="nz-select-40 extend" nzShowSearch nzPlaceHolder="Select organization" [(ngModel)]="currentOrganization" (ngModelChange)="onOrganizationChange()" i18n-nzPlaceHolder="@@org.org.selectOrg">
-        @for (org of allOrganizations; track org) {
+        @for (org of allOrganizations; track org.id) {
           <nz-option [nzLabel]="org.name" [nzValue]="org"></nz-option>
         }
       </nz-select>
@@ -58,7 +58,8 @@
           formControlName="policyId">
           @if (isPoliciesLoading) {
             <nz-option nzDisabled nzCustomContent>
-              <i nz-icon nzType="loading" class="loading-icon"></i> <ng-container i18n="@@common.loading">Loading...</ng-container>
+              <i nz-icon nzType="loading" class="loading-icon"></i>
+              <ng-container i18n="@@common.loading">Loading...</ng-container>
             </nz-option>
           } @else {
             @for (policy of policies.items; track policy) {
@@ -84,15 +85,15 @@
           nzPlaceHolder="Group"
           (nzOnSearch)="getGroups($event)"
           formControlName="groupId">
-          @for (group of groups.items; track group) {
-            @if (!isGroupsLoading) {
-              <nz-option [nzLabel]="group.name" [nzValue]="group.id"></nz-option>
-            }
-          }
           @if (isGroupsLoading) {
             <nz-option nzDisabled nzCustomContent>
-              <i nz-icon nzType="loading" class="loading-icon"></i> <ng-container i18n="@@common.loading">Loading...</ng-container>
+              <i nz-icon nzType="loading" class="loading-icon"></i>
+              <ng-container i18n="@@common.loading">Loading...</ng-container>
             </nz-option>
+          } @else {
+            @for (group of groups.items; track group) {
+              <nz-option [nzLabel]="group.name" [nzValue]="group.id"></nz-option>
+            }
           }
         </nz-select>
       </nz-form-control>

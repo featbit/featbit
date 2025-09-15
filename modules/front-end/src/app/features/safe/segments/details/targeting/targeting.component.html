@@ -45,8 +45,7 @@
               <div class="title" i18n="@@common.targeting-users">Targeting users</div>
               @if (targetUsersActive) {
                 <i nz-icon (click)="targetUsersActive = !targetUsersActive" nzType="icons:icon-arrow-down"></i>
-              }
-              @if (!targetUsersActive) {
+              } @else {
                 <i nz-icon (click)="targetUsersActive = !targetUsersActive" nzType="icons:icon-arrow-right"></i>
               }
             </div>

@@ -47,7 +47,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (item of table.data; track item) {
+          @for (item of table.data; track item.id) {
             <tr>
               <td style="cursor: pointer;" (click)="onIntoSegmentDetail(item)">
                 <span>{{item.name}}</span>
@@ -125,8 +125,7 @@
   <ng-template #deleteArchiveModalTitle>
     @if (isDelete) {
       <span style="font-size:18px" i18n="@@segment.remove-segment">Remove segment: {{currentDeletingArchivingSegment.name}}</span>
-    }
-    @if (!isDelete) {
+    } @else {
       <span style="font-size:18px" i18n="@@segment.archive-segment">Archive segment: {{currentDeletingArchivingSegment.name}}</span>
     }
   </ng-template>
@@ -137,8 +136,7 @@
       <span style="font-weight:800;display:inline-block;margin:0 3px;">{{currentDeletingArchivingSegment.name}}</span>
       @if (isDelete) {
         <ng-container i18n="@@segment.permanent-remove-msg">will be permanently removed, this operation cannot be recovered!</ng-container>
-      }
-      @if (!isDelete) {
+      } @else {
         <ng-container i18n="@@segment.archive-msg">will be archived!</ng-container>
       }
     </div>
@@ -166,8 +164,7 @@
       (click)="deleteArchive(currentDeletingArchivingSegment.id)" >
       @if (isDelete) {
         <ng-container i18n="@@common.remove">Remove</ng-container>
-      }
-      @if (!isDelete) {
+      } @else {
         <ng-container i18n="@@common.archive">Archive</ng-container>
       }
     </button>
