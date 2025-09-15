@@ -11,10 +11,10 @@ import { NzMessageService } from "ng-zorro-antd/message";
 import { debounceTime, finalize } from "rxjs/operators";
 
 @Component({
-    selector: 'webhook-deliveries',
-    templateUrl: './webhook-deliveries.component.html',
-    styleUrls: ['./webhook-deliveries.component.less'],
-    standalone: false
+  selector: 'webhook-deliveries',
+  templateUrl: './webhook-deliveries.component.html',
+  styleUrls: [ './webhook-deliveries.component.less' ],
+  standalone: false
 })
 export class WebhookDeliveriesComponent {
   @Input()
@@ -42,7 +42,12 @@ export class WebhookDeliveriesComponent {
     this.search$.pipe(debounceTime(250)).subscribe(() => this.loadDeliveries());
   }
 
-  events: string[] = WebhookEvents.map(e => e.value);
+  events = WebhookEvents.map(event => (
+    {
+      label: event.value,
+      value: event.value
+    }
+  ));
   statuses: string[] = ['All', 'Succeeded', 'Failed'];
 
   loadDeliveries() {

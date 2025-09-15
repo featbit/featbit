@@ -27,10 +27,10 @@ interface SyncUrlSettingRow {
 }
 
 @Component({
-    selector: 'remote-sync',
-    templateUrl: './remote-sync.component.html',
-    styleUrls: ['./remote-sync.component.less'],
-    standalone: false
+  selector: 'remote-sync',
+  templateUrl: './remote-sync.component.html',
+  styleUrls: [ './remote-sync.component.less' ],
+  standalone: false
 })
 export class RemoteSyncComponent implements OnInit {
 
@@ -85,7 +85,10 @@ export class RemoteSyncComponent implements OnInit {
     let newTags = [];
     settings.map(s => s.tag).forEach(tag => {
       if (tag && newTags.indexOf(tag) === -1) {
-        newTags.push(tag);
+        newTags.push({
+          label: tag,
+          value: tag
+        });
       }
     });
 
@@ -199,7 +202,10 @@ export class RemoteSyncComponent implements OnInit {
   newTag(el: HTMLInputElement): void {
     const tag = el.value;
     if (tag) {
-      this.tags = [...this.tags, tag];
+      this.tags = [...this.tags, {
+        label: tag,
+        value: tag
+      }];
     }
 
     el.value = '';

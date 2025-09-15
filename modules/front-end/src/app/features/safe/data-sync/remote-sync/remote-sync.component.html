@@ -1,10 +1,14 @@
 <div class="table-content-area">
   <div class="table-search-area">
-    <nz-select class="middle-select" nzShowSearch nzAllowClear i18n-nzPlaceHolder="@@filter-by-type" nzPlaceHolder="Filter by type" [(ngModel)]="filterTag"
+    <nz-select
+      class="middle-select"
+      nzShowSearch
+      nzAllowClear
+      nzPlaceHolder="Filter by type"
+      i18n-nzPlaceHolder="@@filter-by-type"
+      [nzOptions]="tags"
+      [(ngModel)]="filterTag"
       (ngModelChange)="filterRow()">
-      @for (item of tags; track item) {
-        <nz-option [nzLabel]="item" [nzValue]="item"></nz-option>
-      }
     </nz-select>
 
     <div class="search-inputs">
@@ -20,8 +24,7 @@
     </div>
   </div>
   <div class="table-wrapper">
-    <nz-table nzSize="small" #editRowTable [nzData]="filteredSettings" nzShowPagination nzFrontPagination
-      nzShowSizeChanger [nzPageSizeOptions]="[10, 20, 30]" [nzLoading]="isLoading">
+    <nz-table nzSize="small" #editRowTable [nzData]="filteredSettings" nzShowPagination nzFrontPagination nzShowSizeChanger [nzPageSizeOptions]="[10, 20, 30]" [nzLoading]="isLoading">
       <thead>
         <tr>
           <th nzWidth="10%" i18n="@@common.name">Name</th>
@@ -39,11 +42,14 @@
                 <input class="standard-bordered-input" type="text" nz-input [(ngModel)]="row.key" i18n-placeholder="@@name" placeholder="Name" />
               </td>
               <td>
-                <nz-select nzShowSearch nzAllowClear [nzDropdownRender]="newItemTpl" i18n-nzPlaceHolder="@@select-type" nzPlaceHolder="Select type"
+                <nz-select
+                  nzShowSearch
+                  nzAllowClear
+                  [nzDropdownRender]="newItemTpl"
+                  nzPlaceHolder="Select type"
+                  i18n-nzPlaceHolder="@@select-type"
+                  [nzOptions]="tags"
                   [(ngModel)]="row.tag">
-                  @for (item of tags; track item) {
-                    <nz-option [nzLabel]="item" [nzValue]="item"></nz-option>
-                  }
                 </nz-select>
                 <ng-template #newItemTpl>
                   <nz-divider></nz-divider>
@@ -81,10 +87,8 @@
                 <button nz-button nzSize="default" nzType="link" (click)="edit(row)">
                   <i nz-icon nzType="edit" nzTheme="outline"></i>
                 </button>
-              }
-              @if (row.isEditing) {
-                <button nz-button nzSize="default" nzType="link" [nzLoading]="row.isSaving" (click)="save(row)"
-                  >
+              } @else {
+                <button nz-button nzSize="default" nzType="link" [nzLoading]="row.isSaving" (click)="save(row)">
                   <i nz-icon nzType="save" nzTheme="outline"></i>
                 </button>
               }

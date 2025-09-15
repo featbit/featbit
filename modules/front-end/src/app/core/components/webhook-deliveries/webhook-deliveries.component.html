@@ -9,10 +9,7 @@
   <ng-container *nzDrawerContent>
     <div class="searches">
       <span i18n="@@integrations.webhooks.webhook-deliveries-tip" class="tip">Webhook deliveries sent to your endpoint in the past 15 days.</span>
-      <nz-select nzShowSearch nzAllowClear nzPlaceHolder="Filter by event" [(ngModel)]="filter.event" (ngModelChange)="doSearch()">
-        @for (event of events; track event) {
-          <nz-option [nzValue]="event" [nzLabel]="event"></nz-option>
-        }
+      <nz-select nzShowSearch nzAllowClear nzPlaceHolder="Filter by event" [nzOptions]="events" [(ngModel)]="filter.event" (ngModelChange)="doSearch()">
       </nz-select>
       <nz-segmented [nzOptions]="statuses" (nzValueChange)="onStatusChange($event)"></nz-segmented>
     </div>
@@ -26,7 +23,7 @@
       [nzPageSize]="filter.pageSize"
       [(nzPageIndex)]="filter.pageIndex"
       (nzPageIndexChange)="loadDeliveries()"
-      >
+    >
       <thead>
         <tr>
           <th i18n="@@common.status">Status</th>

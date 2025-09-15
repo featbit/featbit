@@ -3,10 +3,10 @@ import { IDENTITY_TOKEN } from "@utils/localstorage-keys";
 import { Router } from "@angular/router";
 
 @Component({
-    selector: 'app-login',
-    templateUrl: './login.component.html',
-    styleUrls: ['./login.component.less'],
-    standalone: false
+  selector: 'app-login',
+  templateUrl: './login.component.html',
+  styleUrls: [ './login.component.less' ],
+  standalone: false
 })
 export class LoginComponent implements OnInit {
 

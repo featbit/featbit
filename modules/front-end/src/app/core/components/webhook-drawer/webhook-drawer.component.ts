@@ -20,10 +20,10 @@ import { uuidv4 } from "@utils/index";
 import { getTestPayload } from "@core/components/test-webhook-modal/test-webhook";
 
 @Component({
-    selector: 'webhook-drawer',
-    templateUrl: './webhook-drawer.component.html',
-    styleUrls: ['./webhook-drawer.component.less'],
-    standalone: false
+  selector: 'webhook-drawer',
+  templateUrl: './webhook-drawer.component.html',
+  styleUrls: [ './webhook-drawer.component.less' ],
+  standalone: false
 })
 export class WebhookDrawerComponent implements OnInit {
 

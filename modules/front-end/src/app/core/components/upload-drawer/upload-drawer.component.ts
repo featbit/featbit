@@ -4,10 +4,10 @@ import { NzUploadChangeParam } from 'ng-zorro-antd/upload';
 import { EnvUserService } from "@services/env-user.service";
 
 @Component({
-    selector: 'app-upload-drawer',
-    templateUrl: './upload-drawer.component.html',
-    styleUrls: ['./upload-drawer.component.less'],
-    standalone: false
+  selector: 'app-upload-drawer',
+  templateUrl: './upload-drawer.component.html',
+  styleUrls: [ './upload-drawer.component.less' ],
+  standalone: false
 })
 export class UploadDrawerComponent implements OnInit {
 
