@@ -5,7 +5,7 @@
   [nzContent]="modalContent"
   [nzFooter]="modalFooter"
   (nzOnCancel)="onCancel()"
->
+  >
   <ng-template #modalTitle>
     <span i18n="@@common.resource-finder.title" class="title">Find a resource</span>
     <p i18n="@@common.resource-finder.description" class="description">Resources include projects, environments, feature flags, and segments.</p>
@@ -22,56 +22,68 @@
             placeholder="Search by resource name"
             [(ngModel)]="filter.name"
             (ngModelChange)="onSearch()"
-          />
-        </nz-input-group>
-        <ng-template #prefixIconSearch>
-          <span nz-icon nzType="icons:icon-search"></span>
-        </ng-template>
-      </div>
-      <div *ngIf="isLoading" class="loading-spinner">
-        <nz-spin class="spinner"></nz-spin>
-      </div>
-      <div *ngIf="selectedItems.length > 0" class="selected-items">
-        <div class="text" i18n="@@common.resource-finder.selected-items">Selected Items</div>
-        <div class="tags">
-          <ng-container *ngFor="let item of selectedItems">
-            <nz-tag
-              [nzColor]="item.rn === unremovableRn ? 'blue' : 'default'"
-              [nzMode]="item.rn === unremovableRn ? 'default' : 'closeable'"
-              (nzOnClose)="removeFromSelected(item)">
-              {{ item.pathName }}
-            </nz-tag>
-          </ng-container>
-        </div>
-      </div>
-      <div *ngIf="!isLoading" class="resources">
-        <nz-list-empty *ngIf="groupedItems.length === 0"></nz-list-empty>
-        <ng-container *ngFor="let itemsGroup of groupedItems">
-          <nz-list [nzHeader]="listHeader">
-            <nz-list-item [ngClass]="{ 'disabled': item.disabled }" (click)="toggleSelected(item)" *ngFor="let item of itemsGroup.items">
-              <div class="resource-item">
-                <div class="text">
-                  <span>{{ item.pathName }}</span>
-                  <span class="rn">{{ item.rn }}</span>
-                </div>
-                <div *ngIf="item.selected" class="icon">
-                  <span nz-icon nzType="check" nzTheme="outline"></span>
-                </div>
-              </div>
-            </nz-list-item>
-          </nz-list>
-          <ng-template #listHeader>
-            {{ itemsGroup.name }}
+            />
+          </nz-input-group>
+          <ng-template #prefixIconSearch>
+            <span nz-icon nzType="icons:icon-search"></span>
           </ng-template>
-        </ng-container>
+        </div>
+        @if (isLoading) {
+          <div class="loading-spinner">
+            <nz-spin class="spinner"></nz-spin>
+          </div>
+        }
+        @if (selectedItems.length > 0) {
+          <div class="selected-items">
+            <div class="text" i18n="@@common.resource-finder.selected-items">Selected Items</div>
+            <div class="tags">
+              @for (item of selectedItems; track item) {
+                <nz-tag
+                  [nzColor]="item.rn === unremovableRn ? 'blue' : 'default'"
+                  [nzMode]="item.rn === unremovableRn ? 'default' : 'closeable'"
+                  (nzOnClose)="removeFromSelected(item)">
+                  {{ item.pathName }}
+                </nz-tag>
+              }
+            </div>
+          </div>
+        }
+        @if (!isLoading) {
+          <div class="resources">
+            @if (groupedItems.length === 0) {
+              <nz-list-empty></nz-list-empty>
+            }
+            @for (itemsGroup of groupedItems; track itemsGroup) {
+              <nz-list [nzHeader]="listHeader">
+                @for (item of itemsGroup.items; track item) {
+                  <nz-list-item [ngClass]="{ 'disabled': item.disabled }" (click)="toggleSelected(item)">
+                    <div class="resource-item">
+                      <div class="text">
+                        <span>{{ item.pathName }}</span>
+                        <span class="rn">{{ item.rn }}</span>
+                      </div>
+                      @if (item.selected) {
+                        <div class="icon">
+                          <span nz-icon nzType="check" nzTheme="outline"></span>
+                        </div>
+                      }
+                    </div>
+                  </nz-list-item>
+                }
+              </nz-list>
+              <ng-template #listHeader>
+                {{ itemsGroup.name }}
+              </ng-template>
+            }
+          </div>
+        }
       </div>
-    </div>
-  </ng-template>
+    </ng-template>
 
-  <ng-template #modalFooter>
-    <div class="actions">
-      <button nz-button nzType="default" (click)="onCancel()" i18n="@@common.cancel">Cancel</button>
-      <button nz-button nzType="primary" (click)="onOk()" i18n="@@common.ok">Ok</button>
-    </div>
-  </ng-template>
-</nz-modal>
+    <ng-template #modalFooter>
+      <div class="actions">
+        <button nz-button nzType="default" (click)="onCancel()" i18n="@@common.cancel">Cancel</button>
+        <button nz-button nzType="primary" (click)="onOk()" i18n="@@common.ok">Ok</button>
+      </div>
+    </ng-template>
+  </nz-modal>

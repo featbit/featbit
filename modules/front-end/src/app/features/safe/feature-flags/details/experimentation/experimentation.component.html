@@ -1,265 +1,331 @@
 <section class="body-container">
-  <ng-template #loadingTem>
+  @if (!isInitLoading) {
+    @if (featureFlag?.id) {
+      <div class="detail-body">
+        @if (!isInitLoading && experimentList.length === 0) {
+          <nz-empty style="margin-top: 50px"
+            [nzNotFoundContent]="contentTpl"
+            >
+            <ng-template #contentTpl>
+              <h2>
+                <span i18n="@@ff.expt.currently-no-expts">You haven't created any experiments for this feature flag,</span>&nbsp;
+                <a style="color: green;text-decoration: underline;" [routerLink]="['/experiments']" i18n="@@ff.expt.please-click-to-to-create-expt">Please click here to create experiments.</a>
+              </h2>
+            </ng-template>
+          </nz-empty>
+        }
+        @if (experimentList.length > 0) {
+          <div class="banner">
+            <div class="placeholder"></div>
+            <div class="action-btns">
+              <button nz-button nzType="primary" (click)="onSetExptRulesClick()">
+                <i nz-icon nzType="filter" nzTheme="outline"></i>
+                <ng-container i18n="@@ff.expt.set-data-filtering">Data filter</ng-container>
+              </button>
+            </div>
+          </div>
+          <div class="content-container" id="expt-wrapper">
+            @for (experiment of experimentList; track experiment) {
+              <div class="standard-div" [id]="experiment.id" [class]="{active: experiment.id === exptId}">
+                <nz-card class="experiment">
+                  <div class="head">
+                    <div class="first-line">
+                      <div class="title-area">
+                        <div class="title">{{experiment.metricName}}</div>
+                        <nz-tag nzNoAnimation style="border-radius: 8px">
+                          @if (experiment.metricEventType === customEventType) {
+                            <ng-container i18n="@@common.custom-event">Custom event</ng-container>:
+                            @if (experiment.metricCustomEventTrackOption === customEventTrackConversion) {
+                              <ng-container i18n="@@common.conversion-rate">Conversion rate</ng-container>
+                            } @else {
+                              <ng-container i18n="@@common.numeric">Numeric</ng-container>
+                            }
+                          }
+                          @if (experiment.metricEventType === pageViewEventType) {
+                            Page View: <ng-container i18n="@@common.conversion-rate">Conversion rate</ng-container>
+                          }
+                          @if (experiment.metricEventType === clickEventType) {
+                            Click: <ng-container i18n="@@common.conversion-rate">Conversion rate</ng-container>
+                          }
+                        </nz-tag>
+                      </div>
+                      <div style="display: flex;flex-direction: row">
+                        <div>
+                          @if (experiment?.selectedIteration?.updatedAt) {
+                            <span>
+                              <ng-container i18n="@@common.last-updated">Last updated</ng-container>： {{experiment?.selectedIteration?.updatedAt | date: 'yyyy-MM-dd HH:mm'}}
+                            </span>
+                          }
+                          @if (experiment.status !== exptStatusNotStarted) {
+                            <button style="margin-left: 15px;border-radius:8px" nz-button nzType="default" nz-tooltip i18n-nzTooltipTitle="@@ff.expt.refresh-every-1-min" nzTooltipTitle="Automatically refresh every 1 minute" nzTooltipColor="#87d068" (click)="onReloadIterationResultsClick(experiment)">
+                              @if (experiment.isLoading) {
+                                <i nz-icon nzType="sync" [nzSpin]="true"></i>
+                              } @else {
+                                <i nz-icon nzType="reload" nzTheme="outline"></i>
+                              }
+                              <ng-container i18n="@@ff.expt.refresh">Refresh</ng-container>
+                            </button>
+                          }
+                        </div>
+                        <i class="options" nzPlacement="bottomCenter" nz-icon style="cursor: pointer;font-size: 25px; font-weight: bold; margin-left: 20px" nzType="ellipsis" [nzRotate]="90" nzTheme="outline" nz-dropdown [nzDropdownMenu]="options" [nzClickHide]="false"></i>
+                        <nz-dropdown-menu #options="nzDropdownMenu">
+                          <ul nz-menu nzSelectable style="min-width: 150px;">
+                            @if (experiment.status !== exptStatusRecording) {
+                              <li nz-menu-item
+                                nz-popconfirm
+                                i18n-nzPopconfirmTitle="@@ff.expt.remove-expt-data-confirm"
+                                nzPopconfirmTitle="This would remove all data of this experiment, it cannot be reverted, are you sure to remove it?"
+                                nzPopconfirmPlacement="bottomRight"
+                                [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
+                                (nzOnConfirm)="onDeleteExptDataClick(experiment)">
+                                <ng-container i18n="@@ff.expt.remove-data">Remove Data</ng-container>
+                              </li>
+                            }
+                            <li nz-menu-item
+                              nz-popconfirm
+                              i18n-nzPopconfirmTitle="@@ff.expt.remove-expt-and-data-confirm"
+                              nzPopconfirmTitle="This would remove the experiment and all data, it cannot be reverted, are you sure to remove it?"
+                              nzPopconfirmPlacement="bottomRight"
+                              [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
+                              (nzOnConfirm)="onDeleteExptClick(experiment)">
+                              <ng-container i18n="@@ff.expt.remove-experiment">Remove experiment</ng-container>
+                            </li>
+                          </ul>
+                          <ng-template #iconTplExpt>
+                            <i nz-icon nzType="question-circle-o" style="color: red;"></i>
+                          </ng-template>
+                        </nz-dropdown-menu>
+                      </div>
+                    </div>
+                    @if (experiment.status !== exptStatusNotStarted) {
+                      <div class="second-line">
+                        <div class="action-wrapper">
+                          @if (experiment.status === exptStatusPaused) {
+                            <button class="status paused" nz-button nzType="default" (click)="onStartIterationClick(experiment)">
+                              <i class="status paused" nz-icon nzType="pause-circle" nzTheme="outline"></i>
+                              <ng-container i18n="@@ff.expt.start-experiment">Start experiment</ng-container>
+                            </button>
+                          }
+                          @if (experiment.status === exptStatusRecording) {
+                            <button class="status on-going" nz-button nzType="default" (click)="onStopExptClick(experiment)">
+                              <i class="status on-going" nz-icon nzType="right-circle" nzTheme="outline"></i>
+                              <ng-container i18n="@@ff.expt.stop-experiment">Stop experiment</ng-container>
+                            </button>
+                          }
+                        </div>
+                        <div class="right">
+                          <div class="confidence-level">
+                            <ng-container i18n="@@ff.expt.default-confidence-level">Default confidence level: </ng-container>
+                            {{(1-(experiment.alpha ?? 0.05))*100 + "%"}}
+                            <i nz-icon
+                              nzType="info-circle"
+                              nzTheme="outline"
+                              nz-tooltip
+                              i18n-nzTooltipTitle="@@ff.expt.reacreated-to-change-default-confidence-level"
+                              nzTooltipTitle="You need to create a new experiment to change this value"
+                              [nzTooltipColor]="'cyan'">
+                            </i>
+                          </div>
+                          @if (experiment.iterations.length > 0) {
+                            <div>
+                              <ng-container i18n="@@ff.expt.period">Period</ng-container>:
+                              <nz-select class="nz-select-40" name="iterations_{{experiment.id}}" [compareWith]="compareWith" [(ngModel)]="experiment.selectedIteration">
+                                @for (iteration of experiment.iterations; track iteration) {
+                                  <nz-option [nzLabel]="iteration.dateTimeInterval" [nzValue]="iteration"></nz-option>
+                                }
+                              </nz-select>
+                            </div>
+                          }
+                        </div>
+                      </div>
+                    }
+                    @if (experiment.status !== exptStatusNotStarted) {
+                      <div class="third-line">
+                        @if (experiment.selectedIteration?.results?.length > 0) {
+                          <ul>
+                            @if (!experiment.selectedIteration.winnerVariation) {
+                              <li>
+                                <i nz-icon nzType="info-circle" nzTheme="outline"></i>&ngsp;
+                                <ng-container i18n="@@ff.expt.need-more-data-to-confirm-expt">Need more data to confirm the results of the experiment</ng-container>
+                              </li>
+                            }
+                            @if (experiment.selectedIteration.invalidVariation) {
+                              <li>
+                                <i nz-icon class="invalid_icon" nzType="close-circle" nzTheme="outline"></i>&ngsp;
+                                <ng-container i18n="@@ff.expt.result-not-significant">The difference is not significant compared to the baseline</ng-container>
+                              </li>
+                            }
+                            @if (experiment.selectedIteration.winnerVariation) {
+                              <li>
+                                <i nz-icon class="winner_icon" nzType="check-circle" nzTheme="outline"></i>&ngsp;
+                                <ng-container i18n="@@ff.expt.winner">Winner</ng-container>
+                              </li>
+                            }
+                          </ul>
+                        }
+                      </div>
+                    }
+                  </div>
+                  @if (experiment.status === exptStatusNotStarted) {
+                    <div class="empty-experiment">
+                      <button nz-button nzType="primary" (click)="onStartIterationClick(experiment)" [nzLoading]="experiment.isLoading">
+                        <i class="status on-going" nz-icon nzType="right-circle" nzTheme="outline"></i>
+                        <ng-container i18n="@@ff.expt.start">Start</ng-container>
+                      </button>
+                    </div>
+                  }
+                  @if (experiment.status !== exptStatusNotStarted) {
+                    <nz-spin [nzSpinning]="experiment.isLoading" i18n-nzTip="@@common.loading" nzTip="Loading...">
+                      <div class="table-content-area" style="padding-bottom: 10px;">
+                        <div class="table-wrapper">
+                          <nz-table
+                            nzSize="small"
+                            #borderedTable
+                            [nzFrontPagination]="false"
+                            [nzShowPagination]="false"
+                            [nzData]="experiment?.selectedIteration?.results"
+                            style="margin-top: 10px;">
+                            <thead>
+                              <tr>
+                                <th i18n="@@common.variation">Variation</th>
+                                @if ([undefined, customEventTrackConversion].includes(experiment.metricCustomEventTrackOption)) {
+                                  <th i18n="@@common.conversion-num-user">Conversion / Users</th>
+                                  <th i18n="@@common.conversion-rate">Conversion rate</th>
+                                }
+                                @if (experiment.metricCustomEventTrackOption === customEventTrackNumeric) {
+                                  <th i18n="@@common.totoal-events">Total events</th>
+                                  <th i18n="@@common.average">Average</th>
+                                }
+                                <th style="width: 210px" i18n="@@common.confidence-interval">Confidence interval</th>
+                                <th i18n="@@common.changes">Changes</th>
+                                <th>
+                                  <ng-container i18n="@@ff.expt.p-value">P-Value</ng-container>&nbsp;
+                                  <span [nzTooltipOverlayStyle]="{'max-width': '300px'}"
+                                    nz-tooltip
+                                    i18n-nzTooltipTitle="@@ff.expt.p-significant-if-less-than-alpha"
+                                    nzTooltipTitle="The result is significant if P value is less than α(0.05)"
+                                    [nzTooltipColor]="'cyan'">
+                                    <i nz-icon nzType="info-circle" nzTheme="outline"></i>
+                                  </span>
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              @for (data of borderedTable.data; track data) {
+                                @if (data.isEmpty) {
+                                  <tr class="empty_variation">
+                                    <td>
+                                      <span nz-tooltip
+                                        i18n-nzTooltipTitle="@@ff.expt.no-expt-data"
+                                        nzTooltipTitle="Data is not available yet" [nzTooltipColor]="'cyan'">
+                                        <i nz-icon nzType="info-circle" nzTheme="outline"></i>
+                                      </span>
+                                      &nbsp;{{ data.variationValue }}
+                                    </td>
+                                    <td> --/-- </td>
+                                    <td> -- </td>
+                                    @if (data.isBaseline) {
+                                      <td colspan="2" class="baseline_cell">
+                                        <div i18n="@@common.baseline">Baseline</div>
+                                      </td>
+                                    }
+                                    @if (!data.isBaseline) {
+                                      <td> -- </td>
+                                    }
+                                    @if (!data.isBaseline) {
+                                      <td> -- </td>
+                                    }
+                                    <td> -- </td>
+                                  </tr>
+                                }
+                                @if (!data.isEmpty) {
+                                  <tr [class.winner]="data.isWinner" >
+                                    <td>
+                                      @if (data.isWinner) {
+                                        <span nz-tooltip i18n-nzTooltipTitle="@@common.winner" nzTooltipTitle="Winner" [nzTooltipColor]="'cyan'">
+                                          <i nz-icon class="winner_icon" nzType="check-circle" nzTheme="outline"></i>
+                                        </span>
+                                      }
+                                      @if (data.isInvalid && !data.isBaseline) {
+                                        <span nz-tooltip i18n-nzTooltipTitle="@@ff.expt.not-significant-compared-to-baseline" nzTooltipTitle="It's not significant compared to baseline" [nzTooltipColor]="'cyan'">
+                                          <i nz-icon class="invalid_icon" nzType="close-circle" nzTheme="outline"></i>
+                                        </span>
+                                      }
+                                      @if (data.isBaseline) {
+                                        <span class="icon_placeholder"></span>
+                                      }
+                                      @if (!data.isWinner && !data.isInvalid) {
+                                        <span class="icon_placeholder"></span>
+                                      }
+                                      &nbsp;{{ data.variationValue }}
+                                    </td>
+                                    @if ([undefined, customEventTrackConversion].includes(experiment.metricCustomEventTrackOption)) {
+                                      <td>{{ data.conversion }}/{{data.uniqueUsers}}</td>
+                                      <td>{{ data.conversionRate | percentage }}</td>
+                                    }
+                                    @if (experiment.metricCustomEventTrackOption === customEventTrackNumeric) {
+                                      <td>{{ data.totalEvents }}</td>
+                                      <td>{{ data.average }} @if (data.average !== '--') {
+                                        <span>{{experiment.metricCustomEventUnit}}</span>
+                                      }</td>
+                                    }
+                                    @if (data.isBaseline) {
+                                      <td colspan="2" class="baseline_cell">
+                                        <div i18n="@@common.baseline">Baseline</div>
+                                      </td>
+                                    }
+                                    <ng-container>
+                                      @if (!data.isBaseline) {
+                                        <td>
+                                          <div class="confidence_interval">{{data.confidenceInterval[0] | percentage}} - {{data.confidenceInterval[1] | percentage}}</div>
+                                        </td>
+                                      }
+                                    </ng-container>
+                                    @if (!data.isBaseline) {
+                                      <td>
+                                        {{ data.effectSize | percentage }}
+                                      </td>
+                                    }
+                                    <td>
+                                      {{ data.pValue }}
+                                    </td>
+                                  </tr>
+                                }
+                              }
+                            </tbody>
+                          </nz-table>
+                        </div>
+                        @if (experiment.isChartExpanded) {
+                          <g2-line-chart [containerId]="experiment.id" [chartConfig]="experiment.chartConfig"></g2-line-chart>
+                        }
+                        @if (experiment.metricCustomEventTrackOption !== customEventTrackNumeric) {
+                          <div style="text-align: center; margin-top: 10px; margin-bottom: 10px;"
+                            >
+                            <button nz-button nzType="default" style="border-radius:8px" (click)="experiment.isChartExpanded = !experiment.isChartExpanded">
+                              @if (experiment.isChartExpanded) {
+                                <ng-container i18n="@@ff.expt.hide-chart">Hide chart</ng-container>
+                              }
+                              @if (!experiment.isChartExpanded) {
+                                <ng-container i18n="@@ff.expt.show-chart">Show chart</ng-container>
+                              }
+                            </button>
+                          </div>
+                        }
+                      </div>
+                    </nz-spin>
+                  }
+                </nz-card>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  } @else {
     <div class="block">
       <nz-skeleton [nzActive]="true"></nz-skeleton>
     </div>
-  </ng-template>
-  <ng-container *ngIf="!isInitLoading; else loadingTem;">
-    <div class="detail-body" *ngIf="featureFlag?.id">
-      <nz-empty style="margin-top: 50px" *ngIf="!isInitLoading && experimentList.length === 0"
-      [nzNotFoundContent]="contentTpl"
-      >
-        <ng-template #contentTpl>
-          <h2>
-            <span i18n="@@ff.expt.currently-no-expts">You haven't created any experiments for this feature flag,</span>&nbsp;
-            <a style="color: green;text-decoration: underline;" [routerLink]="['/experiments']" i18n="@@ff.expt.please-click-to-to-create-expt">Please click here to create experiments.</a>
-          </h2>
-        </ng-template>
-      </nz-empty>
-
-      <ng-container *ngIf="experimentList.length > 0">
-        <div class="banner">
-          <div class="placeholder"></div>
-          <div class="action-btns">
-            <button nz-button nzType="primary" (click)="onSetExptRulesClick()">
-              <i nz-icon nzType="filter" nzTheme="outline"></i>
-              <ng-container i18n="@@ff.expt.set-data-filtering">Data filter</ng-container>
-            </button>
-          </div>
-        </div>
-        <div class="content-container" id="expt-wrapper">
-          <div *ngFor="let experiment of experimentList" class="standard-div" [id]="experiment.id" [class]="{active: experiment.id === exptId}">
-            <nz-card class="experiment">
-              <div class="head">
-                <div class="first-line">
-                  <div class="title-area">
-                    <div class="title">{{experiment.metricName}}</div>
-                    <nz-tag nzNoAnimation style="border-radius: 8px">
-                      <ng-container *ngIf="experiment.metricEventType === customEventType">
-                        <ng-container i18n="@@common.custom-event">Custom event</ng-container>:
-                        <ng-container i18n="@@common.conversion-rate" *ngIf="experiment.metricCustomEventTrackOption === customEventTrackConversion">Conversion rate</ng-container>
-                        <ng-container i18n="@@common.numeric" *ngIf="experiment.metricCustomEventTrackOption !== customEventTrackConversion">Numeric</ng-container>
-                      </ng-container>
-                      <ng-container *ngIf="experiment.metricEventType === pageViewEventType">
-                        Page View: <ng-container i18n="@@common.conversion-rate">Conversion rate</ng-container>
-                      </ng-container>
-                      <ng-container *ngIf="experiment.metricEventType === clickEventType">
-                        Click: <ng-container i18n="@@common.conversion-rate">Conversion rate</ng-container>
-                      </ng-container>
-                    </nz-tag>
-                  </div>
-                  <div style="display: flex;flex-direction: row">
-                    <div>
-                      <span *ngIf="experiment?.selectedIteration?.updatedAt">
-                        <ng-container i18n="@@common.last-updated">Last updated</ng-container>： {{experiment?.selectedIteration?.updatedAt | date: 'yyyy-MM-dd HH:mm'}}
-                      </span>
-                      <button *ngIf="experiment.status !== exptStatusNotStarted" style="margin-left: 15px;border-radius:8px" nz-button nzType="default" nz-tooltip i18n-nzTooltipTitle="@@ff.expt.refresh-every-1-min" nzTooltipTitle="Automatically refresh every 1 minute" nzTooltipColor="#87d068" (click)="onReloadIterationResultsClick(experiment)">
-                        <i *ngIf="!experiment.isLoading" nz-icon nzType="reload" nzTheme="outline"></i>
-                        <i *ngIf="experiment.isLoading" nz-icon [nzType]="'sync'" [nzSpin]="true"></i>
-                        <ng-container i18n="@@ff.expt.refresh">Refresh</ng-container>
-                      </button>
-                    </div>
-                    <i class="options" nzPlacement="bottomCenter" nz-icon style="cursor: pointer;font-size: 25px; font-weight: bold; margin-left: 20px" nzType="ellipsis" [nzRotate]="90" nzTheme="outline" nz-dropdown [nzDropdownMenu]="options" [nzClickHide]="false"></i>
-
-                    <nz-dropdown-menu #options="nzDropdownMenu">
-                      <ul nz-menu nzSelectable style="min-width: 150px;">
-                        <li *ngIf="experiment.status !== exptStatusRecording" nz-menu-item
-                            nz-popconfirm
-                            i18n-nzPopconfirmTitle="@@ff.expt.remove-expt-data-confirm"
-                            nzPopconfirmTitle="This would remove all data of this experiment, it cannot be reverted, are you sure to remove it?"
-                            nzPopconfirmPlacement="bottomRight"
-                            [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
-                            (nzOnConfirm)="onDeleteExptDataClick(experiment)">
-                          <ng-container i18n="@@ff.expt.remove-data">Remove Data</ng-container>
-                        </li>
-                        <li nz-menu-item
-                            nz-popconfirm
-                            i18n-nzPopconfirmTitle="@@ff.expt.remove-expt-and-data-confirm"
-                            nzPopconfirmTitle="This would remove the experiment and all data, it cannot be reverted, are you sure to remove it?"
-                            nzPopconfirmPlacement="bottomRight"
-                            [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
-                            (nzOnConfirm)="onDeleteExptClick(experiment)">
-                          <ng-container i18n="@@ff.expt.remove-experiment">Remove experiment</ng-container>
-                        </li>
-                      </ul>
-                      <ng-template #iconTplExpt>
-                        <i nz-icon nzType="question-circle-o" style="color: red;"></i>
-                      </ng-template>
-                    </nz-dropdown-menu>
-                  </div>
-                </div>
-                <div class="second-line" *ngIf="experiment.status !== exptStatusNotStarted">
-                  <div class="action-wrapper">
-                    <button class="status paused" *ngIf="experiment.status === exptStatusPaused" nz-button nzType="default" (click)="onStartIterationClick(experiment)">
-                      <i class="status paused" nz-icon nzType="pause-circle" nzTheme="outline"></i>
-                      <ng-container i18n="@@ff.expt.start-experiment">Start experiment</ng-container>
-                    </button>
-                    <button class="status on-going" *ngIf="experiment.status === exptStatusRecording" nz-button nzType="default" (click)="onStopExptClick(experiment)">
-                      <i class="status on-going" nz-icon nzType="right-circle" nzTheme="outline"></i>
-                      <ng-container i18n="@@ff.expt.stop-experiment">Stop experiment</ng-container>
-                    </button>
-                  </div>
-                  <div class="right">
-                    <div class="confidence-level">
-                      <ng-container i18n="@@ff.expt.default-confidence-level">Default confidence level: </ng-container>
-                      {{(1-(experiment.alpha ?? 0.05))*100 + "%"}}
-                      <i nz-icon
-                         nzType="info-circle"
-                         nzTheme="outline"
-                         nz-tooltip
-                         i18n-nzTooltipTitle="@@ff.expt.reacreated-to-change-default-confidence-level"
-                         nzTooltipTitle="You need to create a new experiment to change this value"
-                         [nzTooltipColor]="'cyan'">
-                      </i>
-                    </div>
-                    <div *ngIf="experiment.iterations.length > 0">
-                      <ng-container i18n="@@ff.expt.period">Period</ng-container>:
-                      <nz-select class="nz-select-40" name="iterations_{{experiment.id}}" [compareWith]="compareWith" [(ngModel)]="experiment.selectedIteration">
-                        <nz-option *ngFor="let iteration of experiment.iterations" [nzLabel]="iteration.dateTimeInterval" [nzValue]="iteration"></nz-option>
-                      </nz-select>
-                    </div>
-                  </div>
-                </div>
-                <div class="third-line" *ngIf="experiment.status !== exptStatusNotStarted">
-                  <ul *ngIf="experiment.selectedIteration?.results?.length > 0">
-                    <li *ngIf="!experiment.selectedIteration.winnerVariation">
-                      <i nz-icon nzType="info-circle" nzTheme="outline"></i>&ngsp;
-                      <ng-container i18n="@@ff.expt.need-more-data-to-confirm-expt">Need more data to confirm the results of the experiment</ng-container>
-                    </li>
-                    <li *ngIf="experiment.selectedIteration.invalidVariation">
-                      <i nz-icon class="invalid_icon" nzType="close-circle" nzTheme="outline"></i>&ngsp;
-                      <ng-container i18n="@@ff.expt.result-not-significant">The difference is not significant compared to the baseline</ng-container>
-                    </li>
-                    <li *ngIf="experiment.selectedIteration.winnerVariation">
-                      <i nz-icon class="winner_icon" nzType="check-circle" nzTheme="outline"></i>&ngsp;
-                      <ng-container i18n="@@ff.expt.winner">Winner</ng-container>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-              <div *ngIf="experiment.status === exptStatusNotStarted" class="empty-experiment">
-                <button nz-button nzType="primary" (click)="onStartIterationClick(experiment)" [nzLoading]="experiment.isLoading">
-                  <i class="status on-going" nz-icon nzType="right-circle" nzTheme="outline"></i>
-                  <ng-container i18n="@@ff.expt.start">Start</ng-container>
-                </button>
-              </div>
-              <nz-spin [nzSpinning]="experiment.isLoading" i18n-nzTip="@@common.loading" nzTip="Loading..." *ngIf="experiment.status !== exptStatusNotStarted">
-                <div class="table-content-area" style="padding-bottom: 10px;">
-                  <div class="table-wrapper">
-                    <nz-table
-                      nzSize="small"
-                      #borderedTable
-                      [nzFrontPagination]="false"
-                      [nzShowPagination]="false"
-                      [nzData]="experiment?.selectedIteration?.results"
-                      style="margin-top: 10px;">
-                      <thead>
-                        <tr>
-                          <th i18n="@@common.variation">Variation</th>
-                          <ng-container *ngIf="[undefined, customEventTrackConversion].includes(experiment.metricCustomEventTrackOption)">
-                            <th i18n="@@common.conversion-num-user">Conversion / Users</th>
-                            <th i18n="@@common.conversion-rate">Conversion rate</th>
-                          </ng-container>
-                          <ng-container *ngIf="experiment.metricCustomEventTrackOption === customEventTrackNumeric">
-                            <th i18n="@@common.totoal-events">Total events</th>
-                            <th i18n="@@common.average">Average</th>
-                          </ng-container>
-                          <th style="width: 210px" i18n="@@common.confidence-interval">Confidence interval</th>
-                          <th i18n="@@common.changes">Changes</th>
-                          <th>
-                            <ng-container i18n="@@ff.expt.p-value">P-Value</ng-container>&nbsp;
-                            <span [nzTooltipOverlayStyle]="{'max-width': '300px'}"
-                                  nz-tooltip
-                                  i18n-nzTooltipTitle="@@ff.expt.p-significant-if-less-than-alpha"
-                                  nzTooltipTitle="The result is significant if P value is less than α(0.05)"
-                                  [nzTooltipColor]="'cyan'">
-                              <i nz-icon nzType="info-circle" nzTheme="outline"></i>
-                            </span>
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <ng-container *ngFor="let data of borderedTable.data">
-                          <tr *ngIf="data.isEmpty" class="empty_variation">
-                            <td>
-                              <span nz-tooltip
-                                    i18n-nzTooltipTitle="@@ff.expt.no-expt-data"
-                                    nzTooltipTitle="Data is not available yet" [nzTooltipColor]="'cyan'">
-                                <i nz-icon nzType="info-circle" nzTheme="outline"></i>
-                              </span>
-                              &nbsp;{{ data.variationValue }}
-                            </td>
-                            <td> --/-- </td>
-                            <td> -- </td>
-                            <td *ngIf="data.isBaseline" colspan="2" class="baseline_cell">
-                              <div i18n="@@common.baseline">Baseline</div>
-                            </td>
-                            <td *ngIf="!data.isBaseline"> -- </td>
-                            <td *ngIf="!data.isBaseline"> -- </td>
-                            <td> -- </td>
-                          </tr>
-                          <tr *ngIf="!data.isEmpty" [class.winner]="data.isWinner" >
-                            <td>
-                              <span *ngIf="data.isWinner" nz-tooltip i18n-nzTooltipTitle="@@common.winner" nzTooltipTitle="Winner" [nzTooltipColor]="'cyan'">
-                                <i nz-icon class="winner_icon" nzType="check-circle" nzTheme="outline"></i>
-                              </span>
-                              <span *ngIf="data.isInvalid && !data.isBaseline" nz-tooltip i18n-nzTooltipTitle="@@ff.expt.not-significant-compared-to-baseline" nzTooltipTitle="It's not significant compared to baseline" [nzTooltipColor]="'cyan'">
-                                <i nz-icon class="invalid_icon" nzType="close-circle" nzTheme="outline"></i>
-                              </span>
-                              <ng-container *ngIf="data.isBaseline">
-                                <span class="icon_placeholder"></span>
-                              </ng-container>
-                              <span class="icon_placeholder" *ngIf="!data.isWinner && !data.isInvalid"></span>
-                              &nbsp;{{ data.variationValue }}
-                            </td>
-                            <ng-container *ngIf="[undefined, customEventTrackConversion].includes(experiment.metricCustomEventTrackOption)">
-                              <td>{{ data.conversion }}/{{data.uniqueUsers}}</td>
-                              <td>{{ data.conversionRate | percentage }}</td>
-                            </ng-container>
-                            <ng-container *ngIf="experiment.metricCustomEventTrackOption === customEventTrackNumeric">
-                              <td>{{ data.totalEvents }}</td>
-                              <td>{{ data.average }} <span *ngIf="data.average !== '--'">{{experiment.metricCustomEventUnit}}</span></td>
-                            </ng-container>
-
-                            <td *ngIf="data.isBaseline" colspan="2" class="baseline_cell">
-                              <div i18n="@@common.baseline">Baseline</div>
-                            </td>
-
-                            <ng-container>
-                              <td *ngIf="!data.isBaseline">
-                                <div class="confidence_interval">{{data.confidenceInterval[0] | percentage}} - {{data.confidenceInterval[1] | percentage}}</div>
-                              </td>
-                            </ng-container>
-
-                            <td *ngIf="!data.isBaseline">
-                              {{ data.effectSize | percentage }}
-                            </td>
-                            <td>
-                              {{ data.pValue }}
-                            </td>
-                          </tr>
-                        </ng-container>
-                      </tbody>
-                    </nz-table>
-                  </div>
-                  <ng-container *ngIf="experiment.isChartExpanded">
-                    <g2-line-chart [containerId]="experiment.id" [chartConfig]="experiment.chartConfig"></g2-line-chart>
-                  </ng-container>
-                  <div style="text-align: center; margin-top: 10px; margin-bottom: 10px;"
-                       *ngIf="experiment.metricCustomEventTrackOption !== customEventTrackNumeric">
-                    <button nz-button nzType="default" style="border-radius:8px" (click)="experiment.isChartExpanded = !experiment.isChartExpanded">
-                      <ng-container *ngIf="experiment.isChartExpanded" i18n="@@ff.expt.hide-chart">Hide chart</ng-container>
-                      <ng-container *ngIf="!experiment.isChartExpanded" i18n="@@ff.expt.show-chart">Show chart</ng-container>
-                    </button>
-                  </div>
-                </div>
-              </nz-spin>
-          </nz-card>
-          </div>
-        </div>
-      </ng-container>
-    </div>
-  </ng-container>
+  }
 </section>
 
 <app-expt-rules-drawer [visible]="exptRulesVisible" (close)="onSetExptRulesClosed()" [featureFlag]="featureFlag"></app-expt-rules-drawer>

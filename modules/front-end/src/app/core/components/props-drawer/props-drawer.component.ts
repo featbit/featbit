@@ -5,9 +5,10 @@ import { uuidv4 } from "@utils/index";
 import { EnvUserPropService } from "@services/env-user-prop.service";
 
 @Component({
-  selector: 'app-props-drawer',
-  templateUrl: './props-drawer.component.html',
-  styleUrls: ['./props-drawer.component.less']
+    selector: 'app-props-drawer',
+    templateUrl: './props-drawer.component.html',
+    styleUrls: ['./props-drawer.component.less'],
+    standalone: false
 })
 export class PropsDrawerComponent {
 

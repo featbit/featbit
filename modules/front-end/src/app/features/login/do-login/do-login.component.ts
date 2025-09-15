@@ -18,7 +18,8 @@ enum LoginStep {
 @Component({
   selector: 'app-do-login',
   templateUrl: './do-login.component.html',
-  styleUrls: ['./do-login.component.less', '../login.component.less']
+  styleUrls: [ './do-login.component.less', '../login.component.less' ],
+  standalone: false
 })
 export class DoLoginComponent implements OnInit {
 

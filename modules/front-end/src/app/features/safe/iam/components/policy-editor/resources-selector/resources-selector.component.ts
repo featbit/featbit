@@ -12,9 +12,10 @@ import { ResourceService } from "@services/resource.service";
 import { deepCopy } from "@utils/index";
 
 @Component({
-  selector: 'resources-selector',
-  templateUrl: './resources-selector.component.html',
-  styleUrls: ['./resources-selector.component.less']
+    selector: 'resources-selector',
+    templateUrl: './resources-selector.component.html',
+    styleUrls: ['./resources-selector.component.less'],
+    standalone: false
 })
 export class ResourcesSelectorComponent {
   rscParams: ResourceParamViewModel[] = [];

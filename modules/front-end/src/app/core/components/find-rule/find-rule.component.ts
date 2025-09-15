@@ -9,7 +9,8 @@ import {ICondition, IRule, IRuleVariation, IVariation} from "@shared/rules";
 @Component({
   selector: 'find-rule',
   templateUrl: './find-rule.component.html',
-  styleUrls: ['./find-rule.component.less']
+  styleUrls: [ './find-rule.component.less' ],
+  standalone: false
 })
 export class FindRuleComponent {
 

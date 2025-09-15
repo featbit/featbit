@@ -11,7 +11,8 @@ import { EnvUserFilter } from "@features/safe/end-users/types/featureflag-user";
 @Component({
   selector: 'target-user',
   templateUrl: './target-user.component.html',
-  styleUrls: ['./target-user.component.less']
+  styleUrls: [ './target-user.component.less' ],
+  standalone: false
 })
 export class TargetUserComponent implements OnInit {
 

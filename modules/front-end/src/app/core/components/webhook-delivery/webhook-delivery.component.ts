@@ -4,7 +4,8 @@ import { WebhookDelivery } from "@features/safe/integrations/webhooks/webhooks";
 @Component({
   selector: 'webhook-delivery',
   templateUrl: './webhook-delivery.component.html',
-  styleUrls: ['./webhook-delivery.component.less']
+  styleUrls: [ './webhook-delivery.component.less' ],
+  standalone: false
 })
 export class WebhookDeliveryComponent {
   _delivery: WebhookDelivery;

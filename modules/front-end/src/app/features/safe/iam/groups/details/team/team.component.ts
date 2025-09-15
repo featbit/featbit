@@ -8,9 +8,10 @@ import { GroupService } from "@services/group.service";
 import { GroupMemberFilter, IPagedGroupMember } from "@features/safe/iam/types/group";
 
 @Component({
-  selector: 'groups-team',
-  templateUrl: './team.component.html',
-  styleUrls: ['./team.component.less']
+    selector: 'groups-team',
+    templateUrl: './team.component.html',
+    styleUrls: ['./team.component.less'],
+    standalone: false
 })
 export class TeamComponent implements OnInit {
 

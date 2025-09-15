@@ -14,9 +14,10 @@ import 'prismjs/components/prism-json'
 import 'prismjs/plugins/normalize-whitespace/prism-normalize-whitespace'
 
 @Component({
-  selector: 'prism',
-  templateUrl: './prism.component.html',
-  styleUrls: ['./prism.component.less']
+    selector: 'prism',
+    templateUrl: './prism.component.html',
+    styleUrls: ['./prism.component.less'],
+    standalone: false
 })
 export class PrismComponent implements AfterViewInit {
   private _code: string;

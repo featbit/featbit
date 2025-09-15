@@ -1,57 +1,62 @@
 <section class="body-container">
-  <ng-template #loadingTem>
+
+  @if (!isLoading) {
+    <div class="block standard-div">
+      <div class="item title">
+        <div class="label" i18n="@@common.name">Name</div>
+        <div class="value">
+          @if (isEditingTitle) {
+            <input nz-input placeholder="Name" i18n-placeholder="@@common.name" [(ngModel)]="group.name" />
+            <i class="edit-save" (click)="saveTitle()" nz-icon nzType="icons:icon-save"></i>
+          } @else {
+            <span [nz-tooltip]="group.name" class="text">{{group.name}}</span>
+            <i class="edit-save" (click)="toggleTitleEditState()" nz-icon nzType="icons:icon-edit"></i>
+          }
+        </div>
+      </div>
+      <div class="item description" [class]="{editing: isEditingDescription}">
+        @if (isEditingDescription) {
+          <textarea nz-input placeholder="Description" i18n-placeholder="@@common.description" [(ngModel)]="group.description" [nzAutosize]="{ minRows: 3 }"></textarea>
+          <i class="edit-save" (click)="saveDescription()" nz-icon nzType="icons:icon-save"></i>
+        } @else {
+          <span>{{group.description}}</span>
+          <i class="edit-save" (click)="toggleDescriptionEditState()" nz-icon nzType="icons:icon-edit"></i>
+        }
+      </div>
+      <div class="item">
+        <div class="label" i18n="@@common.rn">Resource name (RN)</div>
+        <div class="value">
+          <i class="copy-icon" nz-icon nzType="icons:icon-copy" (click)="copyText(resourceName())"></i>
+          {{resourceName()}}
+        </div>
+      </div>
+    </div>
+  } @else {
     <div class="block">
       <nz-skeleton [nzActive]="true"></nz-skeleton>
     </div>
-  </ng-template>
+  }
 
-  <div class="block standard-div" *ngIf="!isLoading; else loadingTem;">
-    <div class="item title">
-      <div class="label" i18n="@@common.name">Name</div>
-      <div class="value">
-        <ng-container *ngIf="!isEditingTitle">
-          <span [nz-tooltip]="group.name" class="text">{{group.name}}</span>
-          <i class="edit-save" (click)="toggleTitleEditState()" nz-icon nzType="icons:icon-edit"></i>
-        </ng-container>
-        <ng-container *ngIf="isEditingTitle">
-          <input nz-input placeholder="Name" i18n-placeholder="@@common.name" [(ngModel)]="group.name" />
-          <i class="edit-save" (click)="saveTitle()" nz-icon nzType="icons:icon-save"></i>
-        </ng-container>
+  @if (!isLoading) {
+    <div class="block" >
+      <div class="delete">
+        <button nz-button nzType="default" i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it?"
+          nzPopconfirmPlacement="bottomRight"
+          [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
+          (nzOnConfirm)="deleteGroup()" [nzIcon]="iconTplIamUser">
+          <i class="delete-icon" nz-icon nzType="icons:icon-delete"></i>
+          <ng-container i18n="@@common.remove">Remove</ng-container>
+        </button>
+        <ng-template #iconTplIamUser>
+          <i nz-icon nzType="question-circle" nzTheme="fill" style="color: #FAAD14;"></i>
+        </ng-template>
       </div>
     </div>
-    <div class="item description" [class]="{editing: isEditingDescription}">
-      <ng-container *ngIf="!isEditingDescription">
-        <span>{{group.description}}</span>
-        <i class="edit-save" (click)="toggleDescriptionEditState()" nz-icon nzType="icons:icon-edit"></i>
-      </ng-container>
-      <ng-container *ngIf="isEditingDescription">
-        <textarea nz-input placeholder="Description" i18n-placeholder="@@common.description" [(ngModel)]="group.description" [nzAutosize]="{ minRows: 3 }"></textarea>
-        <i class="edit-save" (click)="saveDescription()" nz-icon nzType="icons:icon-save"></i>
-      </ng-container>
+  } @else {
+    <div class="block">
+      <nz-skeleton [nzActive]="true"></nz-skeleton>
     </div>
-    <div class="item">
-      <div class="label" i18n="@@common.rn">Resource name (RN)</div>
-      <div class="value">
-        <i class="copy-icon" nz-icon nzType="icons:icon-copy" (click)="copyText(resourceName())"></i>
-        {{resourceName()}}
-      </div>
-    </div>
-  </div>
-
-  <div class="block" *ngIf="!isLoading; else loadingTem;" >
-    <div class="delete">
-      <button nz-button nzType="default" i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it?"
-              nzPopconfirmPlacement="bottomRight"
-              [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
-              (nzOnConfirm)="deleteGroup()" [nzIcon]="iconTplIamUser">
-        <i class="delete-icon" nz-icon nzType="icons:icon-delete"></i>
-        <ng-container i18n="@@common.remove">Remove</ng-container>
-      </button>
-      <ng-template #iconTplIamUser>
-        <i nz-icon nzType="question-circle" nzTheme="fill" style="color: #FAAD14;"></i>
-      </ng-template>
-    </div>
-  </div>
+  }
 </section>
 
 

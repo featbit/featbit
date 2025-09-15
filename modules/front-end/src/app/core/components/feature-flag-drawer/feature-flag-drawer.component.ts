@@ -14,7 +14,8 @@ import { FlagKeyPattern, IFeatureFlagCreationPayload } from "@features/safe/feat
 @Component({
   selector: 'feature-flag-drawer',
   templateUrl: './feature-flag-drawer.component.html',
-  styleUrls: ['./feature-flag-drawer.component.less']
+  styleUrls: [ './feature-flag-drawer.component.less' ],
+  standalone: false
 })
 export class FeatureFlagDrawerComponent implements OnInit {
 

@@ -10,7 +10,8 @@ import { getTestPayload } from "./test-webhook";
 @Component({
   selector: 'test-webhook-modal',
   templateUrl: './test-webhook-modal.component.html',
-  styleUrls: ['./test-webhook-modal.component.less']
+  styleUrls: [ './test-webhook-modal.component.less' ],
+  standalone: false
 })
 export class TestWebhookModalComponent {
   @Input()
@@ -20,8 +21,11 @@ export class TestWebhookModalComponent {
   @Output()
   close: EventEmitter<void> = new EventEmitter();
 
-  events: string[] = WebhookEvents.map(x => x.value);
-  event: string = this.events[1];
+  events = WebhookEvents.map(x => ({
+    label: x.value,
+    value: x.value
+  }));
+  event: string = this.events[1].value;
 
   constructor(
     private message: NzMessageService,
@@ -32,7 +36,7 @@ export class TestWebhookModalComponent {
     // reset status
     this.delivery = null;
     this.isSending = false;
-    this.event = this.events[1];
+    this.event = this.events[1].value;
     this.sendSubscription?.unsubscribe();
 
     this.visible = false;

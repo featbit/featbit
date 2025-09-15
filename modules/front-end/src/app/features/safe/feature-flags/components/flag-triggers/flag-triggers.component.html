@@ -1,87 +1,100 @@
-<div class="detail-body" *ngIf="featureFlagKey">
-  <ng-template #loadingTem>
-    <div class="block">
-      <nz-skeleton [nzActive]="true"></nz-skeleton>
-    </div>
-  </ng-template>
-  <div class="banner">
-    <div class="title">
-      <div class="label">
-        <div i18n="@@ff.triggers.triggers">Event triggers</div>
-        <div style="color: rgba(0, 0, 0, 0.4);font-weight: normal;margin: 20px 0;" i18n="@@ff.triggers.programmatically-turn-on-off">Programmatically turn ON or Off the feature flag.</div>
+@if (featureFlagKey) {
+  <div class="detail-body">
+    <div class="banner">
+      <div class="title">
+        <div class="label">
+          <div i18n="@@ff.triggers.triggers">Event triggers</div>
+          <div style="color: rgba(0, 0, 0, 0.4);font-weight: normal;margin: 20px 0;" i18n="@@ff.triggers.programmatically-turn-on-off">Programmatically turn ON or Off the feature flag.</div>
+        </div>
+      </div>
+      <div class="action-btns">
+        <button nz-button nzType="primary" (click)="onCreateTrigger()">
+          <i nz-icon nzType="icons:icon-add"></i>
+          <ng-container i18n="@@common.add">Add</ng-container>
+        </button>
       </div>
     </div>
-    <div class="action-btns">
-      <button nz-button nzType="primary" (click)="onCreateTrigger()">
-        <i nz-icon nzType="icons:icon-add"></i>
-        <ng-container i18n="@@common.add">Add</ng-container>
-      </button>
-    </div>
-  </div>
-
-  <div class="content-container" *ngIf="!isLoading; else loadingTem;">
-      <div *ngFor="let trigger of triggers" class="standard-div">
-        <nz-card nzBorderless [nzTitle]="trigger.type | T: flagTriggerTypeLabel[trigger.type] : 'trigger-type'" [nzExtra]="triggerInfo" [nzActions]="[actionStatus, actionReset, actionRemove]">
-          <div class="trigger-body">
-            <div class="trigger-body-main">
-              <div class="trigger-main">
-                <div class="first-line">
-                  <div class="trigger-action">
-                    <ng-container i18n="@@ff.triggers.turn-the-feature-flag">Turn the feature flag</ng-container>&nbsp;
-                    <nz-tag [class]="'action_' + trigger.action" class="action">{{flagTriggerActionLabel[trigger.action]}}</nz-tag>
+    @if (!isLoading) {
+      <div class="content-container">
+        @for (trigger of triggers; track trigger) {
+          <div class="standard-div">
+            <nz-card nzBorderless [nzTitle]="trigger.type | T: flagTriggerTypeLabel[trigger.type] : 'trigger-type'" [nzExtra]="triggerInfo" [nzActions]="[actionStatus, actionReset, actionRemove]">
+              <div class="trigger-body">
+                <div class="trigger-body-main">
+                  <div class="trigger-main">
+                    <div class="first-line">
+                      <div class="trigger-action">
+                        <ng-container i18n="@@ff.triggers.turn-the-feature-flag">Turn the feature flag</ng-container>&nbsp;
+                        <nz-tag [class]="'action_' + trigger.action" class="action">{{flagTriggerActionLabel[trigger.action]}}</nz-tag>
+                      </div>
+                      <div class="trigger-status">
+                        <span>The trigger is</span>
+                        @if (trigger.isEnabled) {
+                          <nz-tag class="status_enabled status" i18n="@@common.enabled">Enabled</nz-tag>
+                        } @else {
+                          <nz-tag class="status_disabled status" i18n="@@common.disabled">Disabled</nz-tag>
+                        }
+                      </div>
+                    </div>
+                    <div class="trigger-description">{{trigger.description}}</div>
+                    <div class="trigger-url">
+                      <span>{{getTriggerUrl(trigger.token)}}</span>
+                      @if (trigger.canCopyToken) {
+                        <i (click)="copyText($event, getTriggerUrl(trigger.token))" class="copy-icon" nz-icon nzType="icons:icon-copy"></i>
+                      }
+                      <i nz-icon nz-tooltip="curl -X POST {{ getTriggerUrl(trigger.token) }}" nzType="icons:icon-info-outline"></i>
+                    </div>
+                    @if (trigger.canCopyToken) {
+                      <div class="warning">
+                        <span class="warning-icon"><i nz-icon nzType="warning" nzTheme="fill"></i></span>
+                        <div class="warning-content" i18n="@@ff.triggers.copy-url-warning">Copy and save this URL now, the URL will be masked once you leave the page.</div>
+                      </div>
+                    }
                   </div>
-                  <div class="trigger-status">
-                    <span>The trigger is</span>
-                    <nz-tag class="status_enabled status" *ngIf="trigger.isEnabled" i18n="@@common.enabled">Enabled</nz-tag>
-                    <nz-tag class="status_disabled status" *ngIf="!trigger.isEnabled" i18n="@@common.disabled">Disabled</nz-tag>
-                  </div>
-                </div>
-                <div class="trigger-description">{{trigger.description}}</div>
-                <div class="trigger-url">
-                  <span>{{getTriggerUrl(trigger.token)}}</span>
-                  <i *ngIf="trigger.canCopyToken" (click)="copyText($event, getTriggerUrl(trigger.token))" class="copy-icon" nz-icon nzType="icons:icon-copy"></i>
-                  <i nz-icon nz-tooltip="curl -X POST {{ getTriggerUrl(trigger.token) }}" nzType="icons:icon-info-outline"></i>
-                </div>
-                <div class="warning" *ngIf="trigger.canCopyToken">
-                  <span class="warning-icon"><i nz-icon nzType="warning" nzTheme="fill"></i></span>
-                  <div class="warning-content" i18n="@@ff.triggers.copy-url-warning">Copy and save this URL now, the URL will be masked once you leave the page.</div>
                 </div>
               </div>
-            </div>
+            </nz-card>
+            <ng-template #triggerInfo>
+              <div style="color: #9A95CC">
+                <div><ng-container i18n="@@ff.triggers.triggered">Triggered</ng-container>&nbsp;<strong>{{trigger.triggeredTimes}}</strong>&nbsp;<ng-container i18n="@@common.times">Times</ng-container></div>
+                @if (!!trigger.lastTriggeredAt) {
+                  <div><ng-container i18n="@@ff.triggers.last_triggered_at">Last triggered at</ng-container> {{trigger.lastTriggeredAt | date: 'yyyy-MM-dd HH:mm'}}</div>
+                }
+                <div><ng-container i18n="@@ff.triggers.updated_at">Last updated at</ng-container> {{trigger.updatedAt | date: 'yyyy-MM-dd HH:mm'}}</div>
+              </div>
+            </ng-template>
+            <ng-template #actionStatus>
+              <nz-switch [ngModel]="trigger.isEnabled" (click)="onToggleTriggerStatus(trigger)" i18n-nzCheckedChildren="@@common.enable" nzCheckedChildren="Enable" i18n-nzUnCheckedChildren="@@common.disable" nzUnCheckedChildren="Disable"></nz-switch>
+            </ng-template>
+            <ng-template #actionReset>
+              <a style="color: #9A95CC;" i18n-nz-popconfirm="@@ff.triggers.current-url-will-expire" nz-popconfirm="Current URL will expire, please copy and save it when regenerated."
+                nzPopconfirmPlacement="bottom" [nzPopconfirmOverlayStyle]="{minWidth: '370px'}"
+                (nzOnConfirm)="resetToken(trigger)" [nzIcon]="iconTpl">
+                <i nz-icon nzType="edit" nzTheme="outline"></i>&nbsp;
+                <ng-container i18n="@@ff.triggers.regenerate-url">Reset URL</ng-container>
+              </a>
+            </ng-template>
+            <ng-template #actionRemove>
+              <a i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it?" nzPopconfirmPlacement="bottom"
+                [nzPopconfirmOverlayStyle]="{minWidth: '230px'}"
+                (nzOnConfirm)="removeTrigger(trigger)" [nzIcon]="iconTpl">
+                <i style="color: #9A95CC;" nz-icon nzType="delete" nzTheme="fill"></i>&nbsp;
+                <ng-container i18n="@@common.remove">Remove</ng-container>
+              </a>
+            </ng-template>
+            <ng-template #iconTpl>
+              <i nz-icon nzType="question-circle" nzTheme="fill" style="color: #FAAD14;"></i>
+            </ng-template>
           </div>
-        </nz-card>
-        <ng-template #triggerInfo>
-          <div style="color: #9A95CC">
-            <div><ng-container i18n="@@ff.triggers.triggered">Triggered</ng-container>&nbsp;<strong>{{trigger.triggeredTimes}}</strong>&nbsp;<ng-container i18n="@@common.times">Times</ng-container></div>
-            <div *ngIf="!!trigger.lastTriggeredAt"><ng-container i18n="@@ff.triggers.last_triggered_at">Last triggered at</ng-container> {{trigger.lastTriggeredAt | date: 'yyyy-MM-dd HH:mm'}}</div>
-            <div><ng-container i18n="@@ff.triggers.updated_at">Last updated at</ng-container> {{trigger.updatedAt | date: 'yyyy-MM-dd HH:mm'}}</div>
-          </div>
-        </ng-template>
-        <ng-template #actionStatus>
-          <nz-switch [ngModel]="trigger.isEnabled" (click)="onToggleTriggerStatus(trigger)" i18n-nzCheckedChildren="@@common.enable" nzCheckedChildren="Enable" i18n-nzUnCheckedChildren="@@common.disable" nzUnCheckedChildren="Disable"></nz-switch>
-        </ng-template>
-        <ng-template #actionReset>
-          <a style="color: #9A95CC;" i18n-nz-popconfirm="@@ff.triggers.current-url-will-expire" nz-popconfirm="Current URL will expire, please copy and save it when regenerated."
-             nzPopconfirmPlacement="bottom" [nzPopconfirmOverlayStyle]="{minWidth: '370px'}"
-             (nzOnConfirm)="resetToken(trigger)" [nzIcon]="iconTpl">
-            <i nz-icon nzType="edit" nzTheme="outline"></i>&nbsp;
-            <ng-container i18n="@@ff.triggers.regenerate-url">Reset URL</ng-container>
-          </a>
-        </ng-template>
-        <ng-template #actionRemove>
-          <a i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it?" nzPopconfirmPlacement="bottom"
-             [nzPopconfirmOverlayStyle]="{minWidth: '230px'}"
-             (nzOnConfirm)="removeTrigger(trigger)" [nzIcon]="iconTpl">
-            <i style="color: #9A95CC;" nz-icon nzType="delete" nzTheme="fill"></i>&nbsp;
-            <ng-container i18n="@@common.remove">Remove</ng-container>
-          </a>
-        </ng-template>
-        <ng-template #iconTpl>
-          <i nz-icon nzType="question-circle" nzTheme="fill" style="color: #FAAD14;"></i>
-        </ng-template>
+        }
       </div>
+    } @else {
+      <div class="block">
+        <nz-skeleton [nzActive]="true"></nz-skeleton>
+      </div>
+    }
   </div>
-</div>
+}
 
 <nz-modal [(nzVisible)]="isCreationModalVisible" i18n-nzTitle="@@ff.triggers.create-trigger" nzTitle="Create trigger" [nzOkLoading]="isCreationLoading" (nzOnCancel)="cancelCreation()" (nzOnOk)="createTrigger()">
   <ng-container *nzModalContent>
@@ -89,7 +102,9 @@
       <div class="info-item">
         <div i18n="@@ff.triggers.trigger-type">Type</div>
         <nz-select class="nz-select-40" [(ngModel)]="newFlagTrigger.type" i18n-nzPlaceHolder="@@ff.triggers.trigger-type" nzPlaceHolder="Type" [nzCustomTemplate]="typeTemplate">
-          <nz-option *ngFor="let type of flagTriggerTypes;" [nzLabel]="type | T: flagTriggerTypeLabel[type] : 'trigger-type'" [nzValue]="type"></nz-option>
+          @for (type of flagTriggerTypes; track type) {
+            <nz-option [nzLabel]="type | T: flagTriggerTypeLabel[type] : 'trigger-type'" [nzValue]="type"></nz-option>
+          }
         </nz-select>
         <ng-template #typeTemplate let-selected>
           <i nz-icon nzType="aim"></i>
@@ -99,7 +114,9 @@
       <div class="info-item" style="margin-top: 10px">
         <div i18n="@@ff.triggers.trigger-action">Action</div>
         <nz-select  class="nz-select-40" [(ngModel)]="newFlagTrigger.action" i18n-nzPlaceHolder="@@ff.triggers.trigger-action" nzPlaceHolder="Action" [nzCustomTemplate]="actionTemplate">
-          <nz-option *ngFor="let action of flagTriggerActions" [nzLabel]="flagTriggerActionLabel[action]" [nzValue]="action"></nz-option>
+          @for (action of flagTriggerActions; track action) {
+            <nz-option [nzLabel]="flagTriggerActionLabel[action]" [nzValue]="action"></nz-option>
+          }
         </nz-select>
         <ng-template #actionTemplate let-selected>
           <div style="margin-top: 2px" i18n="@@ff.triggers.turn-the-feature-flag">Turn the feature flag</div>

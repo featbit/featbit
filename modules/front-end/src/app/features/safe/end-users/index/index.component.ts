@@ -11,9 +11,10 @@ import { getCurrentProjectEnv } from "@utils/project-env";
 
 
 @Component({
-  selector: 'app-user-index',
-  templateUrl: './index.component.html',
-  styleUrls: ['./index.component.less']
+    selector: 'app-user-index',
+    templateUrl: './index.component.html',
+    styleUrls: ['./index.component.less'],
+    standalone: false
 })
 export class IndexComponent implements OnInit {
   $search: Subject<void> = new Subject();

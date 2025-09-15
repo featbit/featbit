@@ -7,9 +7,10 @@ import { getCurrentProjectEnv } from "@utils/project-env";
 import { EnvService } from "@services/env.service";
 
 @Component({
-  selector: 'connect-an-sdk',
-  templateUrl: './connect-an-sdk.component.html',
-  styleUrls: ['./connect-an-sdk.component.less']
+    selector: 'connect-an-sdk',
+    templateUrl: './connect-an-sdk.component.html',
+    styleUrls: ['./connect-an-sdk.component.less'],
+    standalone: false
 })
 export class ConnectAnSdkComponent implements OnChanges {
 

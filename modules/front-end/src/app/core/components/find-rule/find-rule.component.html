@@ -1,6 +1,6 @@
 <section class="find-rule">
   <nz-card style="margin-bottom: 10px;font-size: 16px; border-radius: 20px" [nzTitle]="titleTemplate">
-    <ng-container *ngFor="let condition of conditions; let key=index; let first=first; let last=last; trackBy: trackByFunction">
+    @for (condition of conditions; track trackByFunction(key, condition); let key = $index; let first = $first; let last = $last) {
       <app-rule
         [condition]="condition"
         [isFirst]="first"
@@ -12,8 +12,8 @@
         (deleteRule)="onDeleteRuleItem(key)"
         (ruleChange)="onRuleChange($event, key)">
       </app-rule>
-    </ng-container>
-    <ng-container *ngIf="variationOptions.length > 0">
+    }
+    @if (variationOptions.length > 0) {
       <app-serve
         [dispatchKey]="dispatchKey"
         [userProps]="userProps"
@@ -22,7 +22,7 @@
         [ruleVariations]="variations"
         (onPercentageChange)="onServeChange.next($event)">
       </app-serve>
-    </ng-container>
+    }
   </nz-card>
 
   <ng-template #titleTemplate>

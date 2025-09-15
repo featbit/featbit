@@ -14,47 +14,48 @@
     </div>
     <div class="table-wrapper">
       <nz-table #table nzSize="small"
-                [nzData]="groups.items"
-                [nzFrontPagination]="false"
-                [nzLoading]="isLoading"
-                [nzTotal]="groups.totalCount"
-                [(nzPageSize)]="filter.pageSize"
-                (nzPageSizeChange)="doSearch()"
-                [(nzPageIndex)]="filter.pageIndex"
-                (nzPageIndexChange)="doSearch()">
+        [nzData]="groups.items"
+        [nzFrontPagination]="false"
+        [nzLoading]="isLoading"
+        [nzTotal]="groups.totalCount"
+        [(nzPageSize)]="filter.pageSize"
+        (nzPageSizeChange)="doSearch()"
+        [(nzPageIndex)]="filter.pageIndex"
+        (nzPageIndexChange)="doSearch()">
         <thead>
-        <tr>
-          <th i18n="@@common.name">Name</th>
-          <th i18n="@@iam.team.details.description">Description</th>
-          <th i18n="@@common.actions">Actions</th>
-        </tr>
+          <tr>
+            <th i18n="@@common.name">Name</th>
+            <th i18n="@@iam.team.details.description">Description</th>
+            <th i18n="@@common.actions">Actions</th>
+          </tr>
         </thead>
         <tbody>
-        <tr *ngFor="let item of table.data">
-          <td (click)="goToGroup(item.id)">{{item.name}}</td>
-          <td>{{item.description}}</td>
-          <td>
-            <a class="primary-link-btn" (click)="goToGroup(item.id)" i18n="@@common.details">Details</a>
-            <nz-divider nzType="vertical"></nz-divider>
-            <ng-container *ngIf="item.isGroupMember">
-              <a style="color: #717D8A"
-                 [nz-popconfirm]="confirm"
-                 nzPopconfirmPlacement="bottomRight"
-                 (nzOnConfirm)="removeFromGroup(item.id)">
-                <ng-container i18n="@@common.remove">Remove</ng-container>
-              </a>
-              <ng-template #confirm>
-                <span>
-                  <i nz-icon nzType="question-circle" nzTheme="fill" style="margin-right: 4px; color: #FAAD14;"></i>
-                  <ng-container i18n="@@iam.team.details.remove-member-from">Are you sure to remove the member from group: </ng-container> <strong>{{item.name}}</strong> <ng-container i18n="@@iam.team.details.remove-member-from-suffix">?</ng-container>
-                </span>
-              </ng-template>
-            </ng-container>
-            <ng-container *ngIf="!item.isGroupMember">
-              <a class="primary-link-btn" (click)="addToGroup(item.id)" i18n="@@common.add">Add</a>
-            </ng-container>
-          </td>
-        </tr>
+          @for (item of table.data; track item.id) {
+            <tr>
+              <td (click)="goToGroup(item.id)">{{item.name}}</td>
+              <td>{{item.description}}</td>
+              <td>
+                <a class="primary-link-btn" (click)="goToGroup(item.id)" i18n="@@common.details">Details</a>
+                <nz-divider nzType="vertical"></nz-divider>
+                @if (item.isGroupMember) {
+                  <a style="color: #717D8A"
+                    [nz-popconfirm]="confirm"
+                    nzPopconfirmPlacement="bottomRight"
+                    (nzOnConfirm)="removeFromGroup(item.id)">
+                    <ng-container i18n="@@common.remove">Remove</ng-container>
+                  </a>
+                  <ng-template #confirm>
+                    <span>
+                      <i nz-icon nzType="question-circle" nzTheme="fill" style="margin-right: 4px; color: #FAAD14;"></i>
+                      <ng-container i18n="@@iam.team.details.remove-member-from">Are you sure to remove the member from group: </ng-container> <strong>{{item.name}}</strong> <ng-container i18n="@@iam.team.details.remove-member-from-suffix">?</ng-container>
+                    </span>
+                  </ng-template>
+                } @else {
+                  <a class="primary-link-btn" (click)="addToGroup(item.id)" i18n="@@common.add">Add</a>
+                }
+              </td>
+            </tr>
+          }
         </tbody>
       </nz-table>
     </div>

@@ -9,9 +9,10 @@ import { IEnvironment, IProject } from "@shared/types";
 import { Subject } from "rxjs";
 
 @Component({
-  selector: 'index',
-  templateUrl: './index.component.html',
-  styleUrls: ['./index.component.less']
+    selector: 'index',
+    templateUrl: './index.component.html',
+    styleUrls: ['./index.component.less'],
+    standalone: false
 })
 export class IndexComponent implements OnInit {
 

@@ -19,11 +19,13 @@
       </tr>
       </thead>
       <tbody>
-      <tr *ngFor="let prop of basicTable.data">
-        <td>{{ prop.name }}</td>
-        <td>{{ prop.value }}</td>
-        <td>{{ getPropRemark(prop.name) }} </td>
-      </tr>
+        @for (prop of basicTable.data; track $index) {
+          <tr>
+            <td>{{ prop.name }}</td>
+            <td>{{ prop.value }}</td>
+            <td>{{ getPropRemark(prop.name) }}</td>
+          </tr>
+        }
       </tbody>
     </nz-table>
   </div>

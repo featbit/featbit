@@ -5,9 +5,10 @@ import { IntervalType } from "@features/safe/feature-flags/details/insights/type
 import { getTimezoneString } from "@utils/index";
 
 @Component({
-  selector: 'test-app',
-  templateUrl: './test-app.component.html',
-  styleUrls: ['./test-app.component.less']
+    selector: 'test-app',
+    templateUrl: './test-app.component.html',
+    styleUrls: ['./test-app.component.less'],
+    standalone: false
 })
 export class TestAppComponent implements OnInit, OnDestroy {
 

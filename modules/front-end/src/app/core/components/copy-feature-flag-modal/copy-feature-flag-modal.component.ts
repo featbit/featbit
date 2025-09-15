@@ -23,7 +23,8 @@ type BulkCopyCheckItem = {
 @Component({
   selector: 'copy-feature-flag-modal',
   templateUrl: './copy-feature-flag-modal.component.html',
-  styleUrls: [ './copy-feature-flag-modal.component.less' ]
+  styleUrls: [ './copy-feature-flag-modal.component.less' ],
+  standalone: false
 })
 export class CopyFeatureFlagModalComponent implements OnInit {
   @Input()

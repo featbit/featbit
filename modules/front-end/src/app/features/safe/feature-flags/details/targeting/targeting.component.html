@@ -1,159 +1,187 @@
 <section class="body-container">
   <div class="detail-body">
-    <div class="banner" *ngIf="!isLoading">
-      <!-- a placeholder, do not delete it -->
-      <div *ngIf="featureFlag.isEnabled"></div>
-      <div class="warning" *ngIf="!featureFlag.isEnabled">
-        <i nz-icon nzType="icons:icon-warning"></i>
-        <ng-container i18n="@@ff.components.details.targeting.settings-ineffective-warning">Following settings won't be effective until you turn the flag on</ng-container>
+    @if (!isLoading) {
+      <div class="banner">
+        <!-- a placeholder, do not delete it -->
+        @if (featureFlag.isEnabled) {
+          <div></div>
+        } @else {
+          <div class="warning">
+            <i nz-icon nzType="icons:icon-warning"></i>
+            <ng-container i18n="@@ff.components.details.targeting.settings-ineffective-warning">Following settings won't be effective until you turn the flag on</ng-container>
+          </div>
+        }
+        <div class="action-btns">
+          <button class="pending-changes" (click)="openPendingChangesDrawer()">
+            <i nz-icon nzType="field-time" nzTheme="outline"></i>
+            <span>{{pendingChangesList.length}}</span>
+          </button>
+          <button class="save" nz-button nzType="primary" (click)="onReviewChanges(validationErrorTpl, ReviewModalKindEnum.Save)">
+            <i nz-icon nzType="icons:icon-save"></i>
+            <ng-container i18n="@@common.save">Save</ng-container>
+          </button>
+          <button class="more-action" nz-dropdown [nzDropdownMenu]="menu" nzOverlayClassName="target-more-actions">
+            <i nz-icon nzType="icons:icon-menu"></i>
+          </button>
+          <nz-dropdown-menu #menu="nzDropdownMenu">
+            <ul nz-menu>
+              <ng-template #needLicenseTooltip>
+                <ng-container i18n="@@common.need-license">You don't have a license or your current license doesn't grant this feature, please contact FeatBit team to get a license.</ng-container>
+              </ng-template>
+              <li [class]="{disabled: !license?.isGranted(LicenseFeatureEnum.Schedule)}" nz-menu-item (click)="onScheduleClick(validationErrorTpl)">
+                @if (license?.isGranted(LicenseFeatureEnum.Schedule)) {
+                  <span i18n="@@common.schedule-changes">Schedule changes</span>
+                } @else {
+                  <span [nz-tooltip]="needLicenseTooltip" i18n="@@common.schedule-changes">Schedule changes</span>
+                }
+              </li>
+              <li [class]="{disabled: !license?.isGranted(LicenseFeatureEnum.ChangeRequest)}" nz-menu-item (click)="onChangeRequestClick(validationErrorTpl)">
+                @if (license?.isGranted(LicenseFeatureEnum.ChangeRequest)) {
+                  <span i18n="@@common.change-request">Change Request</span>
+                } @else {
+                  <span [nz-tooltip]="needLicenseTooltip" i18n="@@common.change-request">Change Request</span>
+                }
+              </li>
+              <li nz-menu-item (click)="onSetExptRulesClick()" i18n="@@ff.components.details.targeting.setabtestrule">Set A/B test rule</li>
+            </ul>
+          </nz-dropdown-menu>
+        </div>
       </div>
-      <div class="action-btns">
-        <button class="pending-changes" (click)="openPendingChangesDrawer()">
-          <i nz-icon nzType="field-time" nzTheme="outline"></i>
-          <span>{{pendingChangesList.length}}</span>
-        </button>
-        <button class="save" nz-button nzType="primary" (click)="onReviewChanges(validationErrorTpl, ReviewModalKindEnum.Save)">
-          <i nz-icon nzType="icons:icon-save"></i>
-          <ng-container i18n="@@common.save">Save</ng-container>
-        </button>
-        <button class="more-action" nz-dropdown [nzDropdownMenu]="menu" nzOverlayClassName="target-more-actions">
-          <i nz-icon nzType="icons:icon-menu"></i>
-        </button>
-        <nz-dropdown-menu #menu="nzDropdownMenu">
-          <ul nz-menu>
-            <ng-template #needLicenseTooltip>
-              <ng-container i18n="@@common.need-license">You don't have a license or your current license doesn't grant this feature, please contact FeatBit team to get a license.</ng-container>
-            </ng-template>
-            <li [class]="{disabled: !license?.isGranted(LicenseFeatureEnum.Schedule)}" nz-menu-item
-                (click)="onScheduleClick(validationErrorTpl)">
-              <span *ngIf="license?.isGranted(LicenseFeatureEnum.Schedule)" i18n="@@common.schedule-changes">Schedule changes</span>
-              <span *ngIf="!license?.isGranted(LicenseFeatureEnum.Schedule)" [nz-tooltip]="needLicenseTooltip" i18n="@@common.schedule-changes">Schedule changes</span>
-            </li>
-            <li [class]="{disabled: !license?.isGranted(LicenseFeatureEnum.ChangeRequest)}" nz-menu-item
-                (click)="onChangeRequestClick(validationErrorTpl)">
-              <span *ngIf="license?.isGranted(LicenseFeatureEnum.ChangeRequest)" i18n="@@common.change-request">Change Request</span>
-              <span *ngIf="!license?.isGranted(LicenseFeatureEnum.ChangeRequest)" [nz-tooltip]="needLicenseTooltip" i18n="@@common.change-request">Change Request</span>
-            </li>
-            <li nz-menu-item
-                (click)="onSetExptRulesClick()"
-                i18n="@@ff.components.details.targeting.setabtestrule">Set A/B test rule</li>
-          </ul>
-        </nz-dropdown-menu>
-      </div>
-    </div>
+    }
 
     <div class="content-container">
-      <div class="standard-div" *ngIf="!isLoading; else loadingTem;">
-        <div class="rule-banner">
-          <div class="title" i18n="@@ff.targeting.default">Default</div>
-          <i [nz-tooltip]="defaultTooltip" nz-icon nzType="icons:icon-info-outline">
-            <ng-template #defaultTooltip>
-              <ng-container i18n="@@ff.components.details.targeting.default-tooltip">Serve a variation if the user doesn't met Individual targeting or Targeting Rules.</ng-container>
-              <br>
-              <a target="_blank" href="https://docs.featbit.co/feature-flags/targeting-users-with-flags/targeting-rules#setting-the-default-rule" i18n="@@common.check.the.docs">Check the docs</a>
-            </ng-template>
-          </i>
-        </div>
-        <div class="find-rule">
-          <app-serve
-            [dispatchKey]="featureFlag.fallthrough.dispatchKey"
-            [userProps]="userProps"
-            (onDispatchKeyChange)="onFallthroughDispatchKeyChangeChange($event)"
-            [variationOptions]="featureFlag.variations"
-            [ruleVariations]="featureFlag.fallthrough.variations"
-            (onPercentageChange)="onFallthroughChange($event)">
-          </app-serve>
-        </div>
-      </div>
-      <div class="standard-div target-users" *ngIf="!isLoading; else loadingTem;">
-        <div class="rule-banner">
-          <div class="title-wraper">
-            <div class="title" i18n="@@ff.components.details.targeting.individual">Individual targeting</div>
-            <i *ngIf="isTargetUsersActive" nz-icon (click)="isTargetUsersActive = !isTargetUsersActive"
-               nzType="icons:icon-arrow-down"></i>
-            <i *ngIf="!isTargetUsersActive" nz-icon (click)="isTargetUsersActive = !isTargetUsersActive"
-               nzType="icons:icon-arrow-right"></i>
-          </div>
-          <i [nz-tooltip]="individualTooltip" nz-icon nzType="icons:icon-info-outline">
-            <ng-template #individualTooltip>
-              <ng-container i18n="@@ff.components.details.targeting.individual-tooltip">Serve a variation to specific targets based on their key</ng-container>
-              <br>
-              <a target="_blank" href="https://docs.featbit.co/feature-flags/targeting-users-with-flags/individual-user-targeting" i18n="@@common.check.the.docs">Check the docs</a>
-            </ng-template>
-          </i>
-        </div>
-        <div *ngIf="isTargetUsersActive" style="margin-left: -12px;margin-top: 16px">
-          <div class="content" *ngFor="let variation of featureFlag.variations; let i = index">
-            <target-user
-              [type]="variation.name"
-              [userList]="userList"
-              [selectedUserDetailList]="targetingUsersByVariation[variation.id]"
-              (search)="onSearchUser($event)"
-              (onSelectedUserListChange)="onSelectedUserListChange($event, variation.id)">
-            </target-user>
-          </div>
-        </div>
-      </div>
-      <div class="standard-div" *ngIf="!isLoading; else loadingTem;">
-        <div class="rule-banner">
-          <div class="title" i18n="@@ff.components.details.targeting.rules">Targeting rules</div>
-          <i [nz-tooltip]="rulesTooltip" nz-icon nzType="icons:icon-info-outline">
-            <ng-template #rulesTooltip>
-              <ng-container i18n="@@ff.components.details.targeting.rules-tooltip">Serve a variation to specific targets based on their attributes</ng-container>
-              <br>
-              <a target="_blank" href="https://docs.featbit.co/feature-flags/targeting-users-with-flags/targeting-rules#creating-targeting-rules" i18n="@@common.check.the.docs">Check the docs</a>
-            </ng-template>
-          </i>
-          <i nz-icon (click)="onAddRule()" nzType="icons:icon-add-outline"></i>
-        </div>
-        <div class="drop-list" cdkDropList (cdkDropListDropped)="onDragEnd($event)">
-          <ng-container *ngFor="let rule of featureFlag.rules; trackBy: trackRuleById;">
-            <div class="drop-box rule" cdkDrag [class]="{'validation-error': isRuleInvalid(rule.id)}">
-              <find-rule
-                [data]="rule"
-                [variationOptions]="featureFlag.variations"
-                [userProps]="userProps"
-                (onDispatchKeyChange)="onRuleDispatchKeyChange($event)"
-                (addProperty)="onAddProperty($event)"
-                (deleteRule)="onDeleteRule(rule.id)"
-                (onConditionChange)="onRuleConditionChange($event, rule.id)"
-                (updateRuleName)="rule.name = $event"
-                (onServeChange)="onRuleVariationsChange($event, rule.id)">
-              </find-rule>
+      @if (!isLoading) {
+        <div class="standard-div">
+          <div class="rule-banner">
+            <div class="title" i18n="@@ff.targeting.default">Default</div>
+            <i [nz-tooltip]="defaultTooltip" nz-icon nzType="icons:icon-info-outline">
+              <ng-template #defaultTooltip>
+                <ng-container i18n="@@ff.components.details.targeting.default-tooltip">Serve a variation if the user doesn't met Individual targeting or Targeting Rules.</ng-container>
+                <br>
+                  <a target="_blank" href="https://docs.featbit.co/feature-flags/targeting-users-with-flags/targeting-rules#setting-the-default-rule" i18n="@@common.check.the.docs">Check the docs</a>
+                </ng-template>
+              </i>
             </div>
-          </ng-container>
+            <div class="find-rule">
+              <app-serve
+                [dispatchKey]="featureFlag.fallthrough.dispatchKey"
+                [userProps]="userProps"
+                (onDispatchKeyChange)="onFallthroughDispatchKeyChangeChange($event)"
+                [variationOptions]="featureFlag.variations"
+                [ruleVariations]="featureFlag.fallthrough.variations"
+                (onPercentageChange)="onFallthroughChange($event)">
+              </app-serve>
+            </div>
+          </div>
+        } @else {
+          <div class="block" style="margin: auto;text-align: center">
+            <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 4 }"></nz-skeleton>
+          </div>
+        }
+        @if (!isLoading) {
+          <div class="standard-div target-users">
+            <div class="rule-banner">
+              <div class="title-wraper">
+                <div class="title" i18n="@@ff.components.details.targeting.individual">Individual targeting</div>
+                @if (isTargetUsersActive) {
+                  <i nz-icon (click)="isTargetUsersActive = !isTargetUsersActive" nzType="icons:icon-arrow-down"></i>
+                } @else {
+                  <i nz-icon (click)="isTargetUsersActive = !isTargetUsersActive" nzType="icons:icon-arrow-right"></i>
+                }
+              </div>
+              <i [nz-tooltip]="individualTooltip" nz-icon nzType="icons:icon-info-outline">
+                <ng-template #individualTooltip>
+                  <ng-container i18n="@@ff.components.details.targeting.individual-tooltip">Serve a variation to specific targets based on their key</ng-container>
+                  <br>
+                    <a target="_blank" href="https://docs.featbit.co/feature-flags/targeting-users-with-flags/individual-user-targeting" i18n="@@common.check.the.docs">Check the docs</a>
+                  </ng-template>
+                </i>
+              </div>
+              @if (isTargetUsersActive) {
+                <div style="margin-left: -12px;margin-top: 16px">
+                  @for (variation of featureFlag.variations; track variation.id) {
+                    <div class="content">
+                      <target-user
+                        [type]="variation.name"
+                        [userList]="userList"
+                        [selectedUserDetailList]="targetingUsersByVariation[variation.id]"
+                        (search)="onSearchUser($event)"
+                        (onSelectedUserListChange)="onSelectedUserListChange($event, variation.id)">
+                      </target-user>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="block" style="margin: auto;text-align: center">
+              <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 4 }"></nz-skeleton>
+            </div>
+          }
+          @if (!isLoading) {
+            <div class="standard-div">
+              <div class="rule-banner">
+                <div class="title" i18n="@@ff.components.details.targeting.rules">Targeting rules</div>
+                <i [nz-tooltip]="rulesTooltip" nz-icon nzType="icons:icon-info-outline">
+                  <ng-template #rulesTooltip>
+                    <ng-container i18n="@@ff.components.details.targeting.rules-tooltip">Serve a variation to specific targets based on their attributes</ng-container>
+                    <br>
+                      <a target="_blank" href="https://docs.featbit.co/feature-flags/targeting-users-with-flags/targeting-rules#creating-targeting-rules" i18n="@@common.check.the.docs">Check the docs</a>
+                    </ng-template>
+                  </i>
+                  <i nz-icon (click)="onAddRule()" nzType="icons:icon-add-outline"></i>
+                </div>
+                <div class="drop-list" cdkDropList (cdkDropListDropped)="onDragEnd($event)">
+                  @for (rule of featureFlag.rules; track trackRuleById($index, rule)) {
+                    <div class="drop-box rule" cdkDrag [class]="{'validation-error': isRuleInvalid(rule.id)}">
+                      <find-rule
+                        [data]="rule"
+                        [variationOptions]="featureFlag.variations"
+                        [userProps]="userProps"
+                        (onDispatchKeyChange)="onRuleDispatchKeyChange($event)"
+                        (addProperty)="onAddProperty($event)"
+                        (deleteRule)="onDeleteRule(rule.id)"
+                        (onConditionChange)="onRuleConditionChange($event, rule.id)"
+                        (updateRuleName)="rule.name = $event"
+                        (onServeChange)="onRuleVariationsChange($event, rule.id)">
+                      </find-rule>
+                    </div>
+                  }
+                </div>
+              </div>
+            } @else {
+              <div class="block" style="margin: auto;text-align: center">
+                <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 4 }"></nz-skeleton>
+              </div>
+            }
+          </div>
         </div>
-      </div>
-    </div>
-  </div>
-  <ng-template #loadingTem>
-    <div class="block" style="margin: auto;text-align: center">
-      <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 4 }"></nz-skeleton>
-    </div>
-  </ng-template>
-  <ng-template #validationErrorTpl>
-    <i nz-icon nzType="close-circle" nzTheme="outline" style="color: #ff4d4f"></i>
-    <span class="validation-errors-title" i18n="@@common.errors">Validation errors</span>
-    <ul style="list-style-type:none;padding:0;margin:5px 0">
-      <li style="text-align: center;" *ngFor="let msg of validationErrors">{{msg.message}}</li>
-    </ul>
-  </ng-template>
-</section>
+        <ng-template #validationErrorTpl>
+          <i nz-icon nzType="close-circle" nzTheme="outline" style="color: #ff4d4f"></i>
+          <span class="validation-errors-title" i18n="@@common.errors">Validation errors</span>
+          <ul style="list-style-type:none;padding:0;margin:5px 0">
+            @for (msg of validationErrors; track msg) {
+              <li style="text-align: center;">{{msg.message}}</li>
+            }
+          </ul>
+        </ng-template>
+      </section>
 
-<change-review
-  *ngIf="!isLoading"
-  [visible]="reviewModalVisible"
-  [refName]="featureFlag.name"
-  [(kind)]="reviewModalKind"
-  [previous]="originalData"
-  [current]="currentData"
-  [refType]="refType"
-  (onSave)="onSave($event)"
-  (onCancel)="onCloseReviewModal()"
->
-</change-review>
+      @if (!isLoading) {
+        <change-review
+          [visible]="reviewModalVisible"
+          [refName]="featureFlag.name"
+          [(kind)]="reviewModalKind"
+          [previous]="originalData"
+          [current]="currentData"
+          [refType]="refType"
+          (onSave)="onSave($event)"
+          (onCancel)="onCloseReviewModal()"
+          >
+        </change-review>
+      }
 
-<app-expt-rules-drawer [visible]="exptRulesVisible" (close)="onSetExptRulesClosed($event)"
-  [featureFlag]="featureFlag"></app-expt-rules-drawer>
+      <app-expt-rules-drawer [visible]="exptRulesVisible" (close)="onSetExptRulesClosed($event)"
+      [featureFlag]="featureFlag"></app-expt-rules-drawer>
 
-<pending-changes-drawer [visible]="pendingChangesDrawerVisible" [pendingChangesList]="pendingChangesList" (onItemRemoved)="onPendingChangesRemoved($event)" (close)="onPendingChangesDrawerClosed()"></pending-changes-drawer>
+      <pending-changes-drawer [visible]="pendingChangesDrawerVisible" [pendingChangesList]="pendingChangesList" (onItemRemoved)="onPendingChangesRemoved($event)" (close)="onPendingChangesDrawerClosed()"></pending-changes-drawer>

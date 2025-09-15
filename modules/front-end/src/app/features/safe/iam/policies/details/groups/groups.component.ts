@@ -9,9 +9,10 @@ import { GroupService } from "@services/group.service";
 import { PolicyService } from "@services/policy.service";
 
 @Component({
-  selector: 'groups',
-  templateUrl: './groups.component.html',
-  styleUrls: ['./groups.component.less']
+    selector: 'groups',
+    templateUrl: './groups.component.html',
+    styleUrls: ['./groups.component.less'],
+    standalone: false
 })
 export class GroupsComponent implements OnInit {
 

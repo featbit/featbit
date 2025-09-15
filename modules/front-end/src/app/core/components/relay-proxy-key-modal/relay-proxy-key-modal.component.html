@@ -19,12 +19,10 @@
     </div>
   </div>
   <div class="footer" *nzModalFooter>
-    <ng-container *ngIf="copied; then ok; else notCopied"></ng-container>
-    <ng-template #ok>
+    @if (copied) {
       <button nz-button nzType="primary" (click)="close()" i18n="@@common.ok">Ok</button>
-    </ng-template>
-    <ng-template #notCopied>
+    } @else {
       <button nz-button nzType="primary" disabled i18n="@@relay-proxy.key-modal.not-copied">Not Copied</button>
-    </ng-template>
+    }
   </div>
 </nz-modal>

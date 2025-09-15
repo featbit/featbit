@@ -1,12 +1,8 @@
 <section class="body-container">
   <div class="filters-area">
-    <nz-select class="nz-select-40 rounded filter" [(ngModel)]="filter.period" (ngModelChange)="periodChanged()">
-      <nz-option *ngFor="let period of periodOptions" [nzValue]="period.value" [nzLabel]="period.label"></nz-option>
-    </nz-select>
+    <nz-select class="nz-select-40 rounded filter" [nzOptions]="periodOptions" [(ngModel)]="filter.period" (ngModelChange)="periodChanged()"></nz-select>
 
-    <nz-select class="nz-select-40 rounded filter" [(ngModel)]="filter.intervalType" (ngModelChange)="filterChanged()">
-      <nz-option *ngFor="let intervalType of intervalTypes" [nzValue]="intervalType.value" [nzLabel]="intervalType.label"></nz-option>
-    </nz-select>
+    <nz-select class="nz-select-40 rounded filter" [nzOptions]="intervalTypes" [(ngModel)]="filter.intervalType" (ngModelChange)="filterChanged()"></nz-select>
   </div>
   <div class="content-container">
     <div class="standard-div" name="detail">
@@ -16,59 +12,64 @@
       <div style="text-align: center;">{{usage}}</div>
       <div class="chart-container" style="width:97%">
         <nz-spin [nzSpinning]="isLoading" i18n-nzTip="@@common.loading" nzTip="Loading...">
-          <ng-container *ngIf="!isLoading">
+          @if (!isLoading) {
             <g2-line-chart [containerId]="filter.featureFlagKey" [defaultChartHeight]="450" containerStyle="width: 95%; margin: 0 auto;" [chartConfig]="chartConfig"></g2-line-chart>
-          </ng-container>
+          }
         </nz-spin>
       </div>
     </div>
-    <div class="standard-div" *ngIf="filter">
-      <div class="header">
-        <div class="title" i18n="@@ff.reporting.end-users">End users</div>
-      </div>
-      <div class="table-content-area">
-        <div class="table-search-area">
-          <div class="filters-area">
-            <nz-input-group [nzPrefix]="prefixIconSearch" style="width:500px">
-              <input nz-input type="text" i18n-placeholder="@@ff.reporting.filter-by-keyid-or-name" placeholder="Filter by keyId or name" [(ngModel)]="filter.userQuery" (ngModelChange)="endUserFilterChanged()">
-            </nz-input-group>
-            <ng-template #prefixIconSearch>
-              <i nz-icon nzType="icons:icon-search"></i>
-            </ng-template>
-            <nz-select class="nz-select-40 rounded filter" [(ngModel)]="filter.variationId" (ngModelChange)="endUserFilterChanged()">
-              <nz-option *ngFor="let variation of variations" [nzValue]="variation.id" [nzLabel]="variation.name"></nz-option>
-            </nz-select>
+    @if (filter) {
+      <div class="standard-div">
+        <div class="header">
+          <div class="title" i18n="@@ff.reporting.end-users">End users</div>
+        </div>
+        <div class="table-content-area">
+          <div class="table-search-area">
+            <div class="filters-area">
+              <nz-input-group [nzPrefix]="prefixIconSearch" style="width:500px">
+                <input nz-input type="text" i18n-placeholder="@@ff.reporting.filter-by-keyid-or-name" placeholder="Filter by keyId or name" [(ngModel)]="filter.userQuery" (ngModelChange)="endUserFilterChanged()">
+              </nz-input-group>
+              <ng-template #prefixIconSearch>
+                <i nz-icon nzType="icons:icon-search"></i>
+              </ng-template>
+              <nz-select class="nz-select-40 rounded filter" [(ngModel)]="filter.variationId" (ngModelChange)="endUserFilterChanged()">
+                @for (variation of variations; track variation.id) {
+                  <nz-option [nzValue]="variation.id" [nzLabel]="variation.name"></nz-option>
+                }
+              </nz-select>
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <nz-table #table nzSize="small"
+              [nzData]="pagedEndUser.items"
+              [nzFrontPagination]="false"
+              [nzLoading]="isEndUserLoading"
+              [nzTotal]="pagedEndUser.totalCount"
+              [(nzPageSize)]="filter.endUserPageSize"
+              [(nzPageIndex)]="filter.endUserPageIndex"
+              (nzPageIndexChange)="endUserFilterChanged()">
+              <thead>
+                <tr>
+                  <th>KeyId</th>
+                  <th i18n="@@common.name">Name</th>
+                  <th i18n="@@common.variation">Variation</th>
+                  <th i18n="@@ff.reporting.last-evaluated-at">Last evaluated at</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (endUser of table.data; track endUser.id) {
+                  <tr>
+                    <td>{{ endUser.keyId }}</td>
+                    <td>{{ endUser.name ?? '--' }}</td>
+                    <td>{{ endUser.variation }}</td>
+                    <td>{{ endUser.lastEvaluatedAt | date: 'yyyy-MM-dd HH:mm:ss' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </nz-table>
           </div>
         </div>
-
-        <div class="table-wrapper">
-          <nz-table #table nzSize="small"
-                    [nzData]="pagedEndUser.items"
-                    [nzFrontPagination]="false"
-                    [nzLoading]="isEndUserLoading"
-                    [nzTotal]="pagedEndUser.totalCount"
-                    [(nzPageSize)]="filter.endUserPageSize"
-                    [(nzPageIndex)]="filter.endUserPageIndex"
-                    (nzPageIndexChange)="endUserFilterChanged()">
-            <thead>
-            <tr>
-              <th>KeyId</th>
-              <th i18n="@@common.name">Name</th>
-              <th i18n="@@common.variation">Variation</th>
-              <th i18n="@@ff.reporting.last-evaluated-at">Last evaluated at</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr *ngFor="let endUser of table.data">
-              <td>{{ endUser.keyId }}</td>
-              <td>{{ endUser.name ?? '--' }}</td>
-              <td>{{ endUser.variation }}</td>
-              <td>{{ endUser.lastEvaluatedAt | date: 'yyyy-MM-dd HH:mm:ss' }}</td>
-            </tr>
-            </tbody>
-          </nz-table>
-        </div>
       </div>
-    </div>
+    }
   </div>
 </section>

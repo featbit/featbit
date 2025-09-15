@@ -3,7 +3,7 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { IEnvironment } from '@shared/types';
 import { EnvService } from '@services/env.service';
-import { generalResourceRNPattern, permissionActions } from "@shared/policy";
+import { permissionActions } from "@shared/policy";
 import { PermissionsService } from "@services/permissions.service";
 import { debounceTime, first, map, switchMap } from "rxjs/operators";
 import { slugify } from "@utils/index";
@@ -11,7 +11,8 @@ import { slugify } from "@utils/index";
 @Component({
   selector: 'app-env-drawer',
   templateUrl: './env-drawer.component.html',
-  styleUrls: ['./env-drawer.component.less']
+  styleUrls: [ './env-drawer.component.less' ],
+  standalone: false
 })
 export class EnvDrawerComponent {
 

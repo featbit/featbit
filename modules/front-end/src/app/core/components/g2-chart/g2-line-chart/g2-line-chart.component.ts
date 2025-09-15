@@ -9,7 +9,8 @@ import { fromEvent, Subscription } from 'rxjs';
   template: `
     <div id="line-chart-container-{{this.containerId ? this.containerId : ''}}" [ngStyle]="{width, height}">
     </div>
-  `
+  `,
+  standalone: false
 })
 export class G2LineChartComponent implements AfterViewInit, OnDestroy {
   @Input()

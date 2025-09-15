@@ -3,9 +3,10 @@ import { copyToClipboard } from "@utils/index";
 import { NzMessageService } from "ng-zorro-antd/message";
 
 @Component({
-  selector: 'relay-proxy-key-modal',
-  templateUrl: './relay-proxy-key-modal.component.html',
-  styleUrls: [ './relay-proxy-key-modal.component.less' ]
+    selector: 'relay-proxy-key-modal',
+    templateUrl: './relay-proxy-key-modal.component.html',
+    styleUrls: ['./relay-proxy-key-modal.component.less'],
+    standalone: false
 })
 export class RelayProxyKeyModalComponent {
   @Input()

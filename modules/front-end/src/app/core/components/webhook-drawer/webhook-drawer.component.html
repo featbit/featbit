@@ -18,9 +18,15 @@
           [nzErrorTip]="errorTpl">
           <input type="text" nz-input formControlName="name" placeholder="Name" i18n-placeholder="@@common.name"/>
           <ng-template #errorTpl let-control>
-            <ng-container *ngIf="control.hasError('required')" i18n="@@common.name-cannot-be-empty">Name cannot be empty</ng-container>
-            <ng-container *ngIf="control.hasError('duplicated')" i18n="@@common.name-has-been-used">This name has been used</ng-container>
-            <ng-container *ngIf="control.hasError('unknown')" i18n="@@common.name-validation-failed">Name validation failed</ng-container>
+            @if (control.hasError('required')) {
+              <ng-container i18n="@@common.name-cannot-be-empty">Name cannot be empty</ng-container>
+            }
+            @if (control.hasError('duplicated')) {
+              <ng-container i18n="@@common.name-has-been-used">This name has been used</ng-container>
+            }
+            @if (control.hasError('unknown')) {
+              <ng-container i18n="@@common.name-validation-failed">Name validation failed</ng-container>
+            }
           </ng-template>
         </nz-form-control>
       </nz-form-item>
@@ -53,38 +59,46 @@
             <span class="placeholder"></span>
           </div>
           <ng-container formArrayName="scopes">
-            <div *ngFor="let control of scopes.controls; index as i">
-              <ng-container  [formGroupName]="i">
-                <div class="scopes-form">
-                  <nz-select
-                    class="nz-select-36"
-                    nzPlaceHolder="Select a Project"
-                    i18n-nzPlaceHolder="@@common.select-a-project"
-                    formControlName="projectId">
-                    <ng-container *ngFor="let project of projects">
-                      <nz-option *ngIf="!isProjectsLoading" [nzLabel]="project.name" [nzValue]="project.id" [nzHide]="isProjectSelected(project.id)"></nz-option>
-                    </ng-container>
-                    <nz-option *ngIf="isProjectsLoading" nzDisabled nzCustomContent>
-                      <i nz-icon nzType="loading" class="loading-icon"></i> <ng-container i18n="@@common.loading">Loading...</ng-container>
-                    </nz-option>
-                  </nz-select>
-                  <nz-select
-                    class="nz-select-36"
-                    nzMode="multiple"
-                    nzPlaceHolder="Select Project Environments"
-                    i18n-nzPlaceHolder="@@common.select-project-environments"
-                    formControlName="envIds">
-                    <ng-container *ngFor="let env of getProjectEnvs(i)">
-                      <nz-option *ngIf="!isProjectsLoading" [nzLabel]="env.name" [nzValue]="env.id" [nzHide]="isEnvironmentSelected(env.id)"></nz-option>
-                    </ng-container>
-                    <nz-option *ngIf="isProjectsLoading" nzDisabled nzCustomContent>
-                      <i nz-icon nzType="loading" class="loading-icon"></i> <ng-container i18n="@@common.loading">Loading...</ng-container>
-                    </nz-option>
-                  </nz-select>
-                  <i nz-icon nzType="icons:icon-minus-outline" (click)="removeScope(i)"></i>
-                </div>
-              </ng-container>
-            </div>
+            @for (control of scopes.controls; track scopesTrackByFn($index, control); let i = $index) {
+              <div>
+                <ng-container  [formGroupName]="i">
+                  <div class="scopes-form">
+                    <nz-select
+                      class="nz-select-36"
+                      nzPlaceHolder="Select a Project"
+                      i18n-nzPlaceHolder="@@common.select-a-project"
+                      formControlName="projectId">
+                      @if (isProjectsLoading) {
+                        <nz-option nzDisabled nzCustomContent>
+                          <i nz-icon nzType="loading" class="loading-icon"></i> <ng-container i18n="@@common.loading">Loading...</ng-container>
+                        </nz-option>
+                      } @else {
+                        @for (project of projects; track project.id) {
+                          <nz-option [nzLabel]="project.name" [nzValue]="project.id" [nzHide]="isProjectSelected(project.id)"></nz-option>
+                        }
+                      }
+                    </nz-select>
+                    <nz-select
+                      class="nz-select-36"
+                      nzMode="multiple"
+                      nzPlaceHolder="Select Project Environments"
+                      i18n-nzPlaceHolder="@@common.select-project-environments"
+                      formControlName="envIds">
+                      @if (isProjectsLoading) {
+                        <nz-option nzDisabled nzCustomContent>
+                          <i nz-icon nzType="loading" class="loading-icon"></i> <ng-container i18n="@@common.loading">Loading...</ng-container>
+                        </nz-option>
+                      } @else {
+                        @for (env of getProjectEnvs(i); track env.id) {
+                          <nz-option [nzLabel]="env.name" [nzValue]="env.id" [nzHide]="isEnvironmentSelected(env.id)"></nz-option>
+                        }
+                      }
+                    </nz-select>
+                    <i nz-icon nzType="icons:icon-minus-outline" (click)="removeScope(i)"></i>
+                  </div>
+                </ng-container>
+              </div>
+            }
           </ng-container>
           <button type="button" class="add-scope-button" nz-button nzType="link" (click)="addScope()">
             <span nz-icon nzType="icons:icon-plus" nzTheme="outline"></span>
@@ -104,21 +118,19 @@
           nzExtra="Choose the events you would like to trigger this webhook"
           i18n-nzExtra="@@integrations.webhooks.events-description">
           <ng-container formArrayName="events">
-            <div *ngFor="let control of events.controls; index as i">
-              <ng-container [formGroupName]="i">
-                <div class="events-checkbox-group">
-                  <div class="check-all-label" formGroupName="group">
-                    <label
-                      nz-checkbox
-                      formControlName="checked"
-                      [nzIndeterminate]="control.value.group.indeterminate">
-                      {{control.value.group.label}}
-                    </label>
-                  </div>
-                  <nz-checkbox-group formControlName="events"></nz-checkbox-group>
+            @for (control of events.controls; track $index; let i = $index) {
+              <div [formGroupName]="i" class="events-checkbox-group">
+                <div class="check-all-label" formGroupName="group">
+                  <label
+                    nz-checkbox
+                    formControlName="checked"
+                    [nzIndeterminate]="control.value.group.indeterminate">
+                    {{control.value.group.label}}
+                  </label>
                 </div>
-              </ng-container>
-            </div>
+                <nz-checkbox-group [nzOptions]="control.value.events" formControlName="selectedEvents"></nz-checkbox-group>
+              </div>
+            }
           </ng-container>
         </nz-form-control>
       </nz-form-item>
@@ -135,15 +147,17 @@
               <span class="text" i18n="@@common.value">Value</span>
               <span class="placeholder"></span>
             </div>
-            <div *ngFor="let control of headers.controls; index as i">
-              <ng-container [formGroupName]="i">
-                <div class="header-form">
-                  <input nz-input formControlName="key" placeholder="Key" i18n-placeholder="@@common.key"/>
-                  <input nz-input formControlName="value" placeholder="Value" i18n-placeholder="@@common.value"/>
-                  <i nz-icon nzType="icons:icon-minus-outline" (click)="removeHeader(i)"></i>
-                </div>
-              </ng-container>
-            </div>
+            @for (control of headers.controls; track control.value.key; let i = $index) {
+              <div>
+                <ng-container [formGroupName]="i">
+                  <div class="header-form">
+                    <input nz-input formControlName="key" placeholder="Key" i18n-placeholder="@@common.key"/>
+                    <input nz-input formControlName="value" placeholder="Value" i18n-placeholder="@@common.value"/>
+                    <i nz-icon nzType="icons:icon-minus-outline" (click)="removeHeader(i)"></i>
+                  </div>
+                </ng-container>
+              </div>
+            }
           </ng-container>
           <button type="button" class="add-header-button" nz-button nzType="link" (click)="addHeader()">
             <span nz-icon nzType="icons:icon-plus" nzTheme="outline"></span>
@@ -154,7 +168,7 @@
 
       <!-- Payload Template -->
       <nz-form-item>
-        <nz-form-label nzRequired i18n="@@integrations.webhooks.payload-template">Payload Template</nz-form-label>
+        <nz-form-label class="payload-template-label" nzRequired i18n="@@integrations.webhooks.payload-template">Payload Template</nz-form-label>
         <div class="select-payload-template">
           <span class="title" i18n="@@integrations.webhooks.selecte-template-type">Select Template Type</span>
           <nz-radio-group formControlName="payloadTemplateType">

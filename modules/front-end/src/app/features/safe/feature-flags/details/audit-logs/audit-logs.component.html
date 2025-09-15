@@ -1,8 +1,5 @@
-<ng-template #loadingTem>
-  <nz-spin class="loader" [nzSpinning]="loading">
-  </nz-spin>
-</ng-template>
-
-<ng-container *ngIf="!loading; else loadingTem;">
+@if (loading) {
+  <nz-spin class="loader" [nzSpinning]="loading"></nz-spin>
+} @else {
   <audit-logs [auditLogFilter]="auditLogFilter"></audit-logs>
-</ng-container>
+}

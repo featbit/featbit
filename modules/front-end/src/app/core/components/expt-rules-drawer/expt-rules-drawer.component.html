@@ -1,202 +1,229 @@
 <nz-drawer nzClosable [nzVisible]="visible" nzPlacement="right" i18n-nzTitle="@@expt-drawer.configure-data-sent-to-expt" nzTitle="Configure data sent to experiments" [nzFooter]="create"
-           [nzWidth]="900" (nzOnClose)="onClose()">
+  [nzWidth]="900" (nzOnClose)="onClose()">
   <ng-container *nzDrawerContent>
-    <div class="drawer-layout" *ngIf="featureFlag">
-      <div class="warning-message">
-        <div class="warning">
-          <span class="warning-icon"><i nz-icon nzType="warning" nzTheme="fill"></i></span>
-          <div class="warning-content" i18n="@@expt.rule-drawer.warning">When saved, the following changes would be effective immediately, all experiments related to this feature flag would be affected. We strongly recommend that you pause all those experiments and start over.</div>
+    @if (featureFlag) {
+      <div class="drawer-layout">
+        <div class="warning-message">
+          <div class="warning">
+            <span class="warning-icon"><i nz-icon nzType="warning" nzTheme="fill"></i></span>
+            <div class="warning-content" i18n="@@expt.rule-drawer.warning">When saved, the following changes would be effective immediately, all experiments related to this feature flag would be affected. We strongly recommend that you pause all those experiments and start over.</div>
+          </div>
         </div>
-      </div>
-
-      <div class="select-option-row">
-        <nz-radio-group [(ngModel)]="featureFlag.exptIncludeAllTargets">
-          <label nz-radio [nzValue]="includeAllRules" i18n="@@expt.rule-drawer.all-rules">All</label>
-          <label nz-radio [nzValue]="customRules" i18n="@@expt.rule-drawer.customized-rules">Customize</label>
-        </nz-radio-group>
-
-        <label nz-checkbox
-               [nzChecked]="experimentRolloutType === 'recommended'"
-               (nzCheckedChange)="toggleExperimentRolloutType()" i18n="@@expt.rule-drawer.use-recommendations">
+        <div class="select-option-row">
+          <nz-radio-group [(ngModel)]="featureFlag.exptIncludeAllTargets">
+            <label nz-radio [nzValue]="includeAllRules" i18n="@@expt.rule-drawer.all-rules">All</label>
+            <label nz-radio [nzValue]="customRules" i18n="@@expt.rule-drawer.customized-rules">Customize</label>
+          </nz-radio-group>
+          <label nz-checkbox
+            [nzChecked]="experimentRolloutType === 'recommended'"
+            (nzCheckedChange)="toggleExperimentRolloutType()" i18n="@@expt.rule-drawer.use-recommendations">
           Use recommendations
         </label>
+        </div>
+        <nz-table style="margin-top:15px" nzSize="small" #basicTable [nzData]="['']"
+          [nzFrontPagination]="false"
+          [nzOuterBordered]="true"
+          >
+          <tbody>
+            @if (featureFlag.exptIncludeAllTargets) {
+              <tr>
+                <td>
+                  <label nz-checkbox [(ngModel)]="featureFlag.exptIncludeAllTargets" [nzDisabled]="true" i18n="@@expt.rule-drawer.targeting-users">Targeting users</label>
+                </td>
+                <td class="rule-content">
+                  @for (target of featureFlag.targetUsers; track target) {
+                    <div>
+                      <span>{{getVariationValue(target.variationId)}}</span> ({{target.keyIds.length}} <ng-container i18n="@@expt.rule-drawer.num-users">Users</ng-container>)
+                    </div>
+                  }
+                </td>
+              </tr>
+              @for (rule of featureFlag.rules; track rule) {
+                <tr>
+                  <td>
+                    <label nz-checkbox [(ngModel)]="rule.includedInExpt" [nzDisabled]="true" i18n="@@expt.rule-drawer.rule">Rule</label>
+                  </td>
+                  <td class="rule-content">
+                    @for (clause of rule.conditions; track clause) {
+                      <div>
+                        if {{clause.property}} {{clause.op}}
+                        @if (!clause.isSingleOperator) {
+                          @if (clause.type === 'multi') {
+                            @if (clause.isSegment) {
+                              @for (value of clause.multipleValue; track value) {
+                                <span class="ant-tag">
+                                  {{selectedSegmentDetailsDict[value]?.name}}
+                                </span>
+                              }
+                            }
+                            @if (!clause.isSegment) {
+                              @for (value of clause.multipleValue; track value) {
+                                <span class="ant-tag">{{value}}</span>
+                              }
+                            }
+                          }
+                          @if (clause.type !== 'multi') {
+                            <span class="ant-tag">{{clause.value}}</span>
+                          }
+                        }
+                      </div>
+                    }
+                    <span i18n="@@expt.rule-drawer.serve">serve</span>
+                    <div class="rollout-table">
+                      <div>
+                        <div></div>
+                        <div><span i18n="@@expt.rule-drawer.user-percentage-to-expt">Percentage of users dispatched to experiment</span>&nbsp;<i nz-icon i18n-nz-tooltip="@@expt.rule-drawer.user-percentage-to-expt-tooltip" nz-tooltip="Compared to all users matching this rule" nzType="icons:icon-info-outline"></i></div>
+                      </div>
+                      @for (variation of rule.variations; track variation) {
+                        <div>
+                          <div>
+                            {{getVariationValue(variation.id)}}
+                            @if (!rule.isNotPercentageRollout) {
+                              ({{variation.percentage}}%)
+                            }
+                          </div>
+                          <div>
+                            <nz-input-group nzSearch [nzAddOnAfter]="suffixTemplateInfo">
+                              <nz-input-number type="number" [nzMin]="0" [nzMax]="100" [nzPrecision]="0" [(ngModel)]="variation.exptPercentage" (ngModelChange)="exptPercentageChange(variation)"></nz-input-number>
+                            </nz-input-group>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              }
+              <tr>
+                <td>
+                  <label nz-checkbox [(ngModel)]="featureFlag.fallthrough.includedInExpt" [nzDisabled]="true" i18n="@@expt.rule-drawer.default-rule">Default rule</label>
+                </td>
+                <td class="rule-content">
+                  <div class="rollout-table">
+                    <div>
+                      <div></div>
+                      <div><span i18n="@@expt.rule-drawer.user-percentage-to-expt">Percentage of users dispatched to experiment</span>&nbsp;<i nz-icon i18n-nz-tooltip="@@expt.rule-drawer.user-percentage-to-expt-tooltip" nz-tooltip="Compared to all users matching this rule" nzType="icons:icon-info-outline"></i></div>
+                    </div>
+                    @for (variation of featureFlag.fallthrough.variations; track variation) {
+                      <div>
+                        <div>
+                          {{getVariationValue(variation.id)}}
+                          @if (!featureFlag.fallthrough.isNotPercentageRollout) {
+                            ({{variation.percentage}}%)
+                          }
+                        </div>
+                        <div>
+                          <nz-input-group nzSearch [nzAddOnAfter]="suffixTemplateInfo">
+                            <nz-input-number type="number" [nzMin]="0" [nzMax]="100" [nzPrecision]="0" [(ngModel)]="variation.exptPercentage" (ngModelChange)="exptPercentageChange(variation)"></nz-input-number>
+                          </nz-input-group>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+            @if (!featureFlag.exptIncludeAllTargets) {
+              <tr>
+                <td>
+                  <!-- It's always false here -->
+                  <label nz-checkbox [(ngModel)]="customRules" [nzDisabled]="true" i18n="@@expt.rule-drawer.targeting-users">Targeting users</label>
+                </td>
+                <td class="rule-content">
+                  @for (target of featureFlag.targetUsers; track target) {
+                    <div>
+                      <span>{{getVariationValue(target.variationId)}}</span> ({{target.keyIds.length}} <ng-container i18n="@@expt.rule-drawer.num-users">Users</ng-container>)
+                    </div>
+                  }
+                </td>
+              </tr>
+              @for (rule of featureFlag.rules; track rule) {
+                <tr>
+                  <td>
+                    <label nz-checkbox [(ngModel)]="rule.includedInExpt" i18n="@@expt.rule-drawer.rule">Rule</label>
+                  </td>
+                  <td class="rule-content">
+                    @for (clause of rule.conditions; track clause) {
+                      <div>
+                        if {{clause.property}} {{clause.op}}
+                        @if (!clause.isSingleOperator) {
+                          @if (clause.type === 'multi') {
+                            @if (clause.isSegment) {
+                              @for (value of clause.multipleValue; track value) {
+                                <span class="ant-tag">
+                                  {{selectedSegmentDetailsDict[value]?.name}}
+                                </span>
+                              }
+                            }
+                            @if (!clause.isSegment) {
+                              @for (value of clause.multipleValue; track value) {
+                                <span class="ant-tag">{{value}}</span>
+                              }
+                            }
+                          }
+                          @if (clause.type !== 'multi') {
+                            <span class="ant-tag">{{clause.value}}</span>
+                          }
+                        }
+                      </div>
+                    }
+                    <span i18n="@@expt.rule-drawer.serve">serve</span>
+                    <div class="rollout-table">
+                      <div>
+                        <div></div>
+                        <div><span i18n="@@expt.rule-drawer.user-percentage-to-expt">Percentage of users dispatched to experiment</span>&nbsp;<i nz-icon i18n-nz-tooltip="@@expt.rule-drawer.user-percentage-to-expt-tooltip" nz-tooltip="Compared to all users matching this rule" nzType="icons:icon-info-outline"></i></div>
+                      </div>
+                      @for (variation of rule.variations; track variation) {
+                        <div>
+                          <div>
+                            {{getVariationValue(variation.id)}}
+                            @if (!rule.isNotPercentageRollout) {
+                              ({{variation.percentage}}%)
+                            }
+                          </div>
+                          <div>
+                            <nz-input-group nzSearch [nzAddOnAfter]="suffixTemplateInfo">
+                              <nz-input-number type="number" [nzMin]="0" [nzMax]="100" [nzPrecision]="0" [(ngModel)]="variation.exptPercentage" (ngModelChange)="exptPercentageChange(variation)"></nz-input-number>
+                            </nz-input-group>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              }
+              <tr>
+                <td>
+                  <label nz-checkbox [(ngModel)]="featureFlag.fallthrough.includedInExpt" i18n="@@expt.rule-drawer.default-rule">Default rule</label>
+                </td>
+                <td class="rule-content">
+                  <div class="rollout-table">
+                    <div>
+                      <div></div>
+                      <div><span i18n="@@expt.rule-drawer.user-percentage-to-expt">Percentage of users dispatched to experiment</span>&nbsp;<i nz-icon i18n-nz-tooltip="@@expt.rule-drawer.user-percentage-to-expt-tooltip" nz-tooltip="Compared to all users matching this rule" nzType="icons:icon-info-outline"></i></div>
+                    </div>
+                    @for (variation of featureFlag.fallthrough.variations; track variation) {
+                      <div>
+                        <div>
+                          {{getVariationValue(variation.id)}}
+                          @if (!featureFlag.fallthrough.isNotPercentageRollout) {
+                            ({{variation.percentage}}%)
+                          }
+                        </div>
+                        <div>
+                          <nz-input-group nzSearch [nzAddOnAfter]="suffixTemplateInfo">
+                            <nz-input-number type="number" [nzMin]="0" [nzMax]="100" [nzPrecision]="0" [(ngModel)]="variation.exptPercentage" (ngModelChange)="exptPercentageChange(variation)"></nz-input-number>
+                          </nz-input-group>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </nz-table>
       </div>
-
-      <nz-table style="margin-top:15px" nzSize="small" #basicTable [nzData]="['']"
-                [nzFrontPagination]="false"
-                [nzOuterBordered]="true"
-      >
-        <tbody>
-        <ng-container *ngIf="featureFlag.exptIncludeAllTargets">
-          <tr>
-            <td>
-              <label nz-checkbox [(ngModel)]="featureFlag.exptIncludeAllTargets" [nzDisabled]="true" i18n="@@expt.rule-drawer.targeting-users">Targeting users</label>
-            </td>
-            <td class="rule-content">
-              <div *ngFor="let target of featureFlag.targetUsers">
-                <span>{{getVariationValue(target.variationId)}}</span> ({{target.keyIds.length}} <ng-container i18n="@@expt.rule-drawer.num-users">Users</ng-container>)
-              </div>
-            </td>
-          </tr>
-          <tr *ngFor="let rule of featureFlag.rules">
-            <td>
-              <label nz-checkbox [(ngModel)]="rule.includedInExpt" [nzDisabled]="true" i18n="@@expt.rule-drawer.rule">Rule</label>
-            </td>
-            <td class="rule-content">
-              <div *ngFor="let clause of rule.conditions">
-                if {{clause.property}} {{clause.op}}
-                <ng-container *ngIf="!clause.isSingleOperator">
-                  <ng-container *ngIf="clause.type === 'multi'">
-                    <ng-container *ngIf="clause.isSegment">
-                          <span class="ant-tag" *ngFor="let value of clause.multipleValue">
-                            {{selectedSegmentDetailsDict[value]?.name}}
-                          </span>
-                    </ng-container>
-                    <ng-container *ngIf="!clause.isSegment">
-                      <span class="ant-tag" *ngFor="let value of clause.multipleValue">{{value}}</span>
-                    </ng-container>
-                  </ng-container>
-                  <ng-container *ngIf="clause.type !== 'multi'">
-                    <span class="ant-tag">{{clause.value}}</span>
-                  </ng-container>
-                </ng-container>
-              </div>
-              <span i18n="@@expt.rule-drawer.serve">serve</span>
-              <div class="rollout-table">
-                <div>
-                  <div></div>
-                  <div><span i18n="@@expt.rule-drawer.user-percentage-to-expt">Percentage of users dispatched to experiment</span>&nbsp;<i nz-icon i18n-nz-tooltip="@@expt.rule-drawer.user-percentage-to-expt-tooltip" nz-tooltip="Compared to all users matching this rule" nzType="icons:icon-info-outline"></i></div>
-                </div>
-                <div *ngFor="let variation of rule.variations">
-                  <div>
-                    {{getVariationValue(variation.id)}}
-                    <ng-container *ngIf="!rule.isNotPercentageRollout">
-                      ({{variation.percentage}}%)
-                    </ng-container>
-                  </div>
-                  <div>
-                    <nz-input-group nzSearch [nzAddOnAfter]="suffixTemplateInfo">
-                      <nz-input-number type="number" [nzMin]="0" [nzMax]="100" [nzPrecision]="3" [(ngModel)]="variation.exptPercentage" (ngModelChange)="exptPercentageChange(variation)"></nz-input-number>
-                    </nz-input-group>
-                  </div>
-                </div>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <label nz-checkbox [(ngModel)]="featureFlag.fallthrough.includedInExpt" [nzDisabled]="true" i18n="@@expt.rule-drawer.default-rule">Default rule</label>
-            </td>
-            <td class="rule-content">
-              <div class="rollout-table">
-                <div>
-                  <div></div>
-                  <div><span i18n="@@expt.rule-drawer.user-percentage-to-expt">Percentage of users dispatched to experiment</span>&nbsp;<i nz-icon i18n-nz-tooltip="@@expt.rule-drawer.user-percentage-to-expt-tooltip" nz-tooltip="Compared to all users matching this rule" nzType="icons:icon-info-outline"></i></div>
-                </div>
-                <div *ngFor="let variation of featureFlag.fallthrough.variations">
-                  <div>
-                    {{getVariationValue(variation.id)}}
-                    <ng-container *ngIf="!featureFlag.fallthrough.isNotPercentageRollout">
-                      ({{variation.percentage}}%)
-                    </ng-container>
-                  </div>
-                  <div>
-                    <nz-input-group nzSearch [nzAddOnAfter]="suffixTemplateInfo">
-                      <nz-input-number type="number" [nzMin]="0" [nzMax]="100" [nzPrecision]="3" [(ngModel)]="variation.exptPercentage" (ngModelChange)="exptPercentageChange(variation)"></nz-input-number>
-                    </nz-input-group>
-                  </div>
-                </div>
-              </div>
-            </td>
-          </tr>
-        </ng-container>
-        <ng-container *ngIf="!featureFlag.exptIncludeAllTargets">
-          <tr>
-            <td>
-              <!-- It's always false here -->
-              <label nz-checkbox [(ngModel)]="customRules" [nzDisabled]="true" i18n="@@expt.rule-drawer.targeting-users">Targeting users</label>
-            </td>
-            <td class="rule-content">
-              <div *ngFor="let target of featureFlag.targetUsers">
-                <span>{{getVariationValue(target.variationId)}}</span> ({{target.keyIds.length}} <ng-container i18n="@@expt.rule-drawer.num-users">Users</ng-container>)
-              </div>
-            </td>
-          </tr>
-          <tr *ngFor="let rule of featureFlag.rules">
-            <td>
-              <label nz-checkbox [(ngModel)]="rule.includedInExpt" i18n="@@expt.rule-drawer.rule">Rule</label>
-            </td>
-            <td class="rule-content">
-              <div *ngFor="let clause of rule.conditions">
-                if {{clause.property}} {{clause.op}}
-                <ng-container *ngIf="!clause.isSingleOperator">
-                  <ng-container *ngIf="clause.type === 'multi'">
-                    <ng-container *ngIf="clause.isSegment">
-                            <span class="ant-tag" *ngFor="let value of clause.multipleValue">
-                              {{selectedSegmentDetailsDict[value]?.name}}
-                            </span>
-                    </ng-container>
-                    <ng-container *ngIf="!clause.isSegment">
-                      <span class="ant-tag" *ngFor="let value of clause.multipleValue">{{value}}</span>
-                    </ng-container>
-                  </ng-container>
-                  <ng-container *ngIf="clause.type !== 'multi'">
-                    <span class="ant-tag">{{clause.value}}</span>
-                  </ng-container>
-                </ng-container>
-              </div>
-              <span i18n="@@expt.rule-drawer.serve">serve</span>
-              <div class="rollout-table">
-                <div>
-                  <div></div>
-                  <div><span i18n="@@expt.rule-drawer.user-percentage-to-expt">Percentage of users dispatched to experiment</span>&nbsp;<i nz-icon i18n-nz-tooltip="@@expt.rule-drawer.user-percentage-to-expt-tooltip" nz-tooltip="Compared to all users matching this rule" nzType="icons:icon-info-outline"></i></div>
-                </div>
-                <div *ngFor="let variation of rule.variations">
-                  <div>
-                    {{getVariationValue(variation.id)}}
-                    <ng-container *ngIf="!rule.isNotPercentageRollout">
-                      ({{variation.percentage}}%)
-                    </ng-container>
-                  </div>
-                  <div>
-                    <nz-input-group nzSearch [nzAddOnAfter]="suffixTemplateInfo">
-                      <nz-input-number type="number" [nzMin]="0" [nzMax]="100" [nzPrecision]="3" [(ngModel)]="variation.exptPercentage" (ngModelChange)="exptPercentageChange(variation)"></nz-input-number>
-                    </nz-input-group>
-                  </div>
-                </div>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <label nz-checkbox [(ngModel)]="featureFlag.fallthrough.includedInExpt" i18n="@@expt.rule-drawer.default-rule">Default rule</label>
-            </td>
-            <td class="rule-content">
-              <div class="rollout-table">
-                <div>
-                  <div></div>
-                  <div><span i18n="@@expt.rule-drawer.user-percentage-to-expt">Percentage of users dispatched to experiment</span>&nbsp;<i nz-icon i18n-nz-tooltip="@@expt.rule-drawer.user-percentage-to-expt-tooltip" nz-tooltip="Compared to all users matching this rule" nzType="icons:icon-info-outline"></i></div>
-                </div>
-                <div *ngFor="let variation of featureFlag.fallthrough.variations">
-                  <div>
-                    {{getVariationValue(variation.id)}}
-                    <ng-container *ngIf="!featureFlag.fallthrough.isNotPercentageRollout">
-                      ({{variation.percentage}}%)
-                    </ng-container>
-                  </div>
-                  <div>
-                    <nz-input-group nzSearch [nzAddOnAfter]="suffixTemplateInfo">
-                      <nz-input-number type="number" [nzMin]="0" [nzMax]="100" [nzPrecision]="3" [(ngModel)]="variation.exptPercentage" (ngModelChange)="exptPercentageChange(variation)"></nz-input-number>
-                    </nz-input-group>
-                  </div>
-                </div>
-              </div>
-            </td>
-          </tr>
-        </ng-container>
-        </tbody>
-      </nz-table>
-    </div>
+    }
   </ng-container>
   <ng-template #create>
     <button (click)="doSubmit()" nz-button style="float: right" class="form-button form-margin" [nzType]="'primary'" i18n="@@common.save">Save</button>

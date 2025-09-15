@@ -18,49 +18,59 @@
           (ngModelChange)="onSearch(true)"
           i18n-nzPlaceHolder="@@auditlogs.idx.filter-by-team-member"
           nzPlaceHolder="Filter by team member">
-          <ng-container *ngFor="let member of memberListModel.items">
-            <nz-option *ngIf="!membersLoading" [nzValue]="member.id" [nzLabel]="getMemberLabel(member)"></nz-option>
-          </ng-container>
-          <nz-option *ngIf="membersLoading" nzDisabled nzCustomContent>
-            <i nz-icon nzType="loading" class="loading-icon"></i>
-            <ng-container i18n="@@common.loading">Loading...</ng-container>
-          </nz-option>
+          @if (membersLoading) {
+            <nz-option nzDisabled nzCustomContent>
+              <i nz-icon nzType="loading" class="loading-icon"></i>
+              <ng-container i18n="@@common.loading">Loading...</ng-container>
+            </nz-option>
+          } @else {
+            @for (member of memberListModel.items; track member.id) {
+              <nz-option [nzValue]="member.id" [nzLabel]="getMemberLabel(member)"></nz-option>
+            }
+          }
         </nz-select>
-        <nz-select
-          class="nz-select-40 rounded filter"
-          *ngIf="!auditLogFilter?.refId"
-          nzAllowClear
-          [(ngModel)]="auditLogFilter.refType"
-          (ngModelChange)="onSearch(true)"
-          i18n-nzPlaceHolder="@@ff.idx.filter-by-type"
-          nzPlaceHolder="Filter by type">
-          <nz-option [nzValue]="refTypeFlag" i18n-nzLabel="@@auditlogs.idx.ref-type-flag" nzLabel="Feature flag"></nz-option>
-          <nz-option [nzValue]="refTypeSegment" i18n-nzLabel="@@auditlogs.idx.ref-type-segment" nzLabel="Segment"></nz-option>
-        </nz-select>
+        @if (!auditLogFilter?.refId) {
+          <nz-select
+            class="nz-select-40 rounded filter"
+            nzAllowClear
+            [(ngModel)]="auditLogFilter.refType"
+            (ngModelChange)="onSearch(true)"
+            i18n-nzPlaceHolder="@@ff.idx.filter-by-type"
+            nzPlaceHolder="Filter by type">
+            <nz-option [nzValue]="refTypeFlag" i18n-nzLabel="@@auditlogs.idx.ref-type-flag" nzLabel="Feature flag"></nz-option>
+            <nz-option [nzValue]="refTypeSegment" i18n-nzLabel="@@auditlogs.idx.ref-type-segment" nzLabel="Segment"></nz-option>
+          </nz-select>
+        }
         <nz-range-picker [(ngModel)]="auditLogFilter.range" (ngModelChange)="onDateRangeChange()"></nz-range-picker>
       </div>
     </div>
 
     <div class="audit-logs standard-div">
-      <nz-empty i18n-nzNotFoundContent="@@common.no-data" nzNotFoundContent="No data" *ngIf="!loading && groupedAuditLogs.length === 0"></nz-empty>
+      @if (!loading && groupedAuditLogs.length === 0) {
+        <nz-empty i18n-nzNotFoundContent="@@common.no-data" nzNotFoundContent="No data"></nz-empty>
+      }
       <nz-timeline>
-        <nz-timeline-item *ngFor="let group of groupedAuditLogs">
-          <div  class="audit-logs-group">
-            <div class="group-title">{{group.key}}</div>
-            <div class="group-items">
-              <ng-container *ngFor="let auditLog of group.items">
-                <audit-log [auditLog]="auditLog"></audit-log>
-              </ng-container>
+        @for (group of groupedAuditLogs; track group.key) {
+          <nz-timeline-item>
+            <div  class="audit-logs-group">
+              <div class="group-title">{{group.key}}</div>
+              <div class="group-items">
+                @for (auditLog of group.items; track auditLog.id) {
+                  <audit-log [auditLog]="auditLog"></audit-log>
+                }
+              </div>
             </div>
-          </div>
-        </nz-timeline-item>
+          </nz-timeline-item>
+        }
       </nz-timeline>
-      <div *ngIf="auditLogs.length < totalCount" class="load-more">
-        <button nz-button nzType="primary" class="save-btn" (click)="loadMoreAuditLogs()">
-          <i nz-icon nzType="icons:icon-sync"></i>
-          <ng-container i18n="@@common.more">More</ng-container>
-        </button>
-      </div>
+      @if (auditLogs.length < totalCount) {
+        <div class="load-more">
+          <button nz-button nzType="primary" class="save-btn" (click)="loadMoreAuditLogs()">
+            <i nz-icon nzType="icons:icon-sync"></i>
+            <ng-container i18n="@@common.more">More</ng-container>
+          </button>
+        </div>
+      }
     </div>
   </div>
 </section>

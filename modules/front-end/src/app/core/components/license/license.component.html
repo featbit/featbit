@@ -13,11 +13,16 @@
   </div>
   <div class="features">
     <div>Features</div>
-    <div class="feature" *ngFor="let feature of features">
-      <i *ngIf="license.isGranted(feature)" class="issued" nz-icon nzType="check" nzTheme="outline"></i>
-      <i *ngIf="!license.isGranted(feature)" nz-icon nzType="close" nzTheme="outline"></i>
-      <span>{{ getFeatureName(feature) }}</span>
-    </div>
+    @for (feature of features; track feature) {
+      <div class="feature">
+        @if (license.isGranted(feature)) {
+          <i class="issued" nz-icon nzType="check" nzTheme="outline"></i>
+        } @else {
+          <i nz-icon nzType="close" nzTheme="outline"></i>
+        }
+        <span>{{ getFeatureName(feature) }}</span>
+      </div>
+    }
   </div>
 </div>
 

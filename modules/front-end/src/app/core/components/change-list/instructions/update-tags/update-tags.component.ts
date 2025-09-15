@@ -6,14 +6,20 @@ import { InstructionKindEnum } from "@core/components/change-list/constants";
   selector: 'update-tags',
   template: `
     <div class="instruction">
-      <span i18n="@@common.add-tags" *ngIf="kind === InstructionKindEnum.AddTags">Add tags</span>
-      <span i18n="@@common.remove-tags" *ngIf="kind === InstructionKindEnum.RemoveTags">Remove tags</span>
-      <nz-tag *ngFor="let tag of tags">
-        {{tag}}
-      </nz-tag>
+      @if (kind === InstructionKindEnum.AddTags) {
+        <span i18n="@@common.add-tags">Add tags</span>
+      }
+      @if (kind === InstructionKindEnum.RemoveTags) {
+        <span i18n="@@common.remove-tags">Remove tags</span>
+      }
+      @for (tag of tags; track tag) {
+        <nz-tag>
+          {{ tag }}
+        </nz-tag>
+      }
     </div>
   `,
-  styles: [`
+  styles: [ `
     nz-tag {
       line-height: 12px;
       height: 19px;
@@ -21,12 +27,14 @@ import { InstructionKindEnum } from "@core/components/change-list/constants";
       margin-left: 2px;
       margin-right: 2px;
     }
-  `]
+  ` ],
+  standalone: false
 })
 export class UpdateTagsComponent implements IInstructionComponent {
   data: IInstructionComponentData;
 
   protected readonly InstructionKindEnum = InstructionKindEnum;
+
   get kind(): string {
     return this.data.kind;
   }

@@ -100,12 +100,12 @@ public class WebhookHandler : IGeneralWebhookHandler
         if (dataChange.IsCreation())
         {
             events = SegmentCreatedEvents;
-            changes = new[] { $"Created Segment: ${segment.Name}" };
+            changes = [$"Created Segment: {segment.Name}"];
         }
         else if (dataChange.IsDeletion())
         {
             events = SegmentDeletedEvents;
-            changes = new[] { $"Deleted Segment: ${segment.Name}" };
+            changes = [$"Deleted Segment: {segment.Name}"];
         }
         else
         {

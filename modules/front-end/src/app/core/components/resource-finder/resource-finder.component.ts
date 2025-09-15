@@ -22,9 +22,10 @@ interface GroupedSelectableResource {
 }
 
 @Component({
-  selector: 'resource-finder',
-  templateUrl: './resource-finder.component.html',
-  styleUrls: [ './resource-finder.component.less' ]
+    selector: 'resource-finder',
+    templateUrl: './resource-finder.component.html',
+    styleUrls: ['./resource-finder.component.less'],
+    standalone: false
 })
 export class ResourceFinderComponent implements OnInit {
   private _isVisible: boolean = false;

@@ -14,9 +14,10 @@ import { PermissionsService } from "@services/permissions.service";
 import { generalResourceRNPattern, permissionActions } from "@shared/policy";
 
 @Component({
-  selector: 'access-tokens',
-  templateUrl: './index.component.html',
-  styleUrls: ['./index.component.less']
+    selector: 'access-tokens',
+    templateUrl: './index.component.html',
+    styleUrls: ['./index.component.less'],
+    standalone: false
 })
 export class IndexComponent implements OnInit {
 

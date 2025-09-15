@@ -16,9 +16,10 @@ import { getCurrentLicense, getCurrentOrganization, getCurrentProjectEnv } from 
 import { LicenseFeatureEnum } from "@shared/types";
 
 @Component({
-  selector: 'segment-creation-modal',
-  templateUrl: './segment-creation-modal.component.html',
-  styleUrls: [ './segment-creation-modal.component.less' ]
+    selector: 'segment-creation-modal',
+    templateUrl: './segment-creation-modal.component.html',
+    styleUrls: ['./segment-creation-modal.component.less'],
+    standalone: false
 })
 export class SegmentCreationModalComponent {
   private _isVisible: boolean = false;

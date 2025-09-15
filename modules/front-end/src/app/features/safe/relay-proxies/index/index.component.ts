@@ -12,9 +12,10 @@ import { generalResourceRNPattern, permissionActions } from "@shared/policy";
 import { PermissionsService } from "@services/permissions.service";
 
 @Component({
-  selector: 'relay-proxies',
-  templateUrl: './index.component.html',
-  styleUrls: ['./index.component.less']
+    selector: 'relay-proxies',
+    templateUrl: './index.component.html',
+    styleUrls: ['./index.component.less'],
+    standalone: false
 })
 export class IndexComponent implements OnInit {
   $search = new BehaviorSubject('');

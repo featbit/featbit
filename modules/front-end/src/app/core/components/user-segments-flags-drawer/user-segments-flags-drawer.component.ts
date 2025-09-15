@@ -17,7 +17,8 @@ import { debounceTime } from "rxjs/operators";
 @Component({
   selector: 'user-segments-flags-drawer',
   templateUrl: './user-segments-flags-drawer.component.html',
-  styleUrls: ['./user-segments-flags-drawer.component.less']
+  styleUrls: [ './user-segments-flags-drawer.component.less' ],
+  standalone: false
 })
 export class UserSegmentsFlagsDrawerComponent implements OnInit {
 

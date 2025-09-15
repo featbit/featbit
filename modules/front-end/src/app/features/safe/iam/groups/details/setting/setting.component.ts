@@ -7,9 +7,10 @@ import { groupRn, IGroup } from "@features/safe/iam/types/group";
 import { copyToClipboard } from '@utils/index';
 
 @Component({
-  selector: 'user-setting',
-  templateUrl: './setting.component.html',
-  styleUrls: ['./setting.component.less']
+    selector: 'user-setting',
+    templateUrl: './setting.component.html',
+    styleUrls: ['./setting.component.less'],
+    standalone: false
 })
 export class SettingComponent implements OnInit {
 

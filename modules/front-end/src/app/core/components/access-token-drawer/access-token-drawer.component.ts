@@ -27,9 +27,10 @@ import {
 import { PolicyTypeEnum } from "@features/safe/iam/types/policy";
 
 @Component({
-  selector: 'access-token-drawer',
-  templateUrl: './access-token-drawer.component.html',
-  styleUrls: ['./access-token-drawer.component.less']
+    selector: 'access-token-drawer',
+    templateUrl: './access-token-drawer.component.html',
+    styleUrls: ['./access-token-drawer.component.less'],
+    standalone: false
 })
 export class AccessTokenDrawerComponent {
   private _accessToken: IAccessToken;
@@ -248,8 +249,8 @@ export class AccessTokenDrawerComponent {
     );
   }
 
-  actionTokenTypes = [
-    AccessTokenTypeEnum.Personal,
-    AccessTokenTypeEnum.Service
+  tokenTypes = [
+    { label: $localize `:@@integrations.access-token.personal:Personal`, value: AccessTokenTypeEnum.Personal },
+    { label: $localize `:@@integrations.access-token.service:Service`, value: AccessTokenTypeEnum.Service },
   ]
 }

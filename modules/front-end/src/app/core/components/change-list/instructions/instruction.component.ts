@@ -5,7 +5,8 @@ import { IInstructionComponent } from "@core/components/change-list/instructions
 
 @Component({
   selector: 'instruction',
-  template: `<div instruction-host></div>`
+  template: `<div instruction-host></div>`,
+  standalone: false
 })
 export class InstructionComponent {
 

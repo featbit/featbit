@@ -8,15 +8,13 @@
     <p i18n="@@integrations.webhooks.test-webhook-tip">Attempt to deliver an example event to your webhook target.</p>
     <div class="select-event">
       <nz-form-label nzRequired i18n="@@integrations.webhooks.select-an-event">Select an Event</nz-form-label>
-      <nz-select nzShowSearch nzAllowClear [(ngModel)]="event">
-        <nz-option *ngFor="let event of events" [nzValue]="event" [nzLabel]="event"></nz-option>
-      </nz-select>
+      <nz-select nzShowSearch nzAllowClear [(ngModel)]="event" [nzOptions]="events"></nz-select>
     </div>
     <nz-skeleton [nzActive]="true" [nzLoading]="isSending">
     </nz-skeleton>
-    <ng-container *ngIf="!isSending && delivery">
+    @if (!isSending && delivery) {
       <webhook-delivery [delivery]="delivery"></webhook-delivery>
-    </ng-container>
+    }
   </div>
   <div class="footer" *nzModalFooter>
     <button nz-button nzType="text" (click)="onClose()" i18n="@@common.cancel">Cancel</button>

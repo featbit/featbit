@@ -6,19 +6,21 @@
   </div>
 
   <div id="steps">
-    <div class="step step1" *ngIf="currentStep === 0">
-      <form [formGroup]="form">
-        <div class="info-item">
-          <p nz-typography i18n="@@common.org">Organization</p>
-          <input nz-input placeholder="Organization name. E.g. FeatBit" formControlName="organizationName" />
-        </div>
-        <div class="info-item">
-          <p nz-typography i18n="@@common.project">Project</p>
-          <input nz-input placeholder="Project name. E.g. Official website" formControlName="projectName" />
-          <input nz-input placeholder="Project key. E.g. official-website" formControlName="projectKey" />
-        </div>
-      </form>
-    </div>
+    @if (currentStep === 0) {
+      <div class="step step1">
+        <form [formGroup]="form">
+          <div class="info-item">
+            <p nz-typography i18n="@@common.org">Organization</p>
+            <input nz-input placeholder="Organization name. E.g. FeatBit" formControlName="organizationName" />
+          </div>
+          <div class="info-item">
+            <p nz-typography i18n="@@common.project">Project</p>
+            <input nz-input placeholder="Project name. E.g. Official website" formControlName="projectName" />
+            <input nz-input placeholder="Project key. E.g. official-website" formControlName="projectKey" />
+          </div>
+        </form>
+      </div>
+    }
   </div>
 
   <div class="steps-action">

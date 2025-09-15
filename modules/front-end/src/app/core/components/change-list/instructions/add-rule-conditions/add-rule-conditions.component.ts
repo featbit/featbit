@@ -9,25 +9,37 @@ import { getSegmentRefs, mapToIInstructionCondition } from "@core/components/cha
 import { ICondition } from "@shared/rules";
 
 @Component({
-  selector: 'add-rule-conditions',
-  template: `
-    <div class="instruction" *ngIf="!isLoading">
-      <span i18n="@@common.add-conditions">Add conditions</span>
-      <div class="clause" *ngFor="let condition of conditions; let idx = index">
-        <span *ngIf="idx !==0">And</span>
-        <span i18n="@@common.capitalize-if">If</span>
-        <span>{{condition.property}}</span>
-        <span *ngIf="condition.op !== null">{{condition.opLabel}}</span>
-        <ng-container *ngIf="condition.displayValue">
-          <nz-tag *ngIf="!condition.isMultiValue">{{condition.value}}</nz-tag>
-          <ng-container *ngIf="condition.isMultiValue">
-            <nz-tag *ngFor="let value of condition.value">{{value}}</nz-tag>
-          </ng-container>
-        </ng-container>
+    selector: 'add-rule-conditions',
+    template: `
+    @if (!isLoading) {
+      <div class="instruction">
+        <span i18n="@@common.add-conditions">Add conditions</span>
+        @for (condition of conditions; track condition; let idx = $index) {
+          <div class="clause">
+            @if (idx !==0) {
+              <span>And</span>
+            }
+            <span i18n="@@common.capitalize-if">If</span>
+            <span>{{condition.property}}</span>
+            @if (condition.op !== null) {
+              <span>{{condition.opLabel}}</span>
+            }
+            @if (condition.displayValue) {
+              @if (condition.isMultiValue) {
+                @for (value of condition.value; track value) {
+                  <nz-tag>{{value}}</nz-tag>
+                }
+              } @else {
+                <nz-tag>{{condition.value}}</nz-tag>
+              }
+            }
+          </div>
+        }
       </div>
-    </div>
-  `,
-  styleUrls: ['./add-rule-conditions.component.less']
+    }
+    `,
+    styleUrls: ['./add-rule-conditions.component.less'],
+    standalone: false
 })
 export class AddRuleConditionsComponent implements IInstructionComponent, OnInit {
   data: IInstructionComponentData;

@@ -1,28 +1,31 @@
 <section class="header-body">
   <nz-breadcrumb class="breadcrumb-nav" nzSeparator=">">
-    <nz-breadcrumb-item *ngFor="let breadcrumb of (breadcrumbs$ | async)">
-      <a [routerLink]="breadcrumb.url">{{ breadcrumb.label }}</a>
-    </nz-breadcrumb-item>
+    @for (breadcrumb of (breadcrumbs$ | async); track breadcrumb.url || breadcrumb.label) {
+      <nz-breadcrumb-item>
+        <a [routerLink]="breadcrumb.url">{{ breadcrumb.label }}</a>
+      </nz-breadcrumb-item>
+    }
   </nz-breadcrumb>
 
   <div class="header-btns">
-    <div *ngIf="license.data" class="license-plan-wrapper" nz-popover i18n-nzPopoverTitle="@@common.current-license" nzPopoverTitle="Current License" [nzPopoverContent]="licenseData" nzPopoverOverlayClassName="license-data-popover" nzPopoverPlacement="bottom">
-      <span class="plan-name">{{license.data?.plan}}</span>
-      <i nz-icon nzType="icons:icon-medal"></i>
-    </div>
-    <div *ngIf="!license.data" class="license-plan-wrapper" nz-popover i18n-nz-popover="@@common.upgrade-to-enterprise" nzPopoverTitle="Upgrade to Enterprise" [nzPopoverContent]="upgradeLicense" nzPopoverOverlayClassName="license-data-popover" nzPopoverPlacement="bottom">
-      <span i18n="@@common.upgrade-to-enterprise">Upgrade to Enterprise</span>
-      <i nz-icon nzType="icons:icon-medal"></i>
-    </div>
+    @if (license.data) {
+      <div class="license-plan-wrapper" nz-popover i18n-nzPopoverTitle="@@common.current-license" nzPopoverTitle="Current License" [nzPopoverContent]="licenseData" nzPopoverOverlayClassName="license-data-popover" nzPopoverPlacement="bottom">
+        <span class="plan-name">{{license.data?.plan}}</span>
+        <i nz-icon nzType="icons:icon-medal"></i>
+      </div>
+    } @else {
+      <div class="license-plan-wrapper" nz-popover i18n-nz-popover="@@common.upgrade-to-enterprise" nzPopoverTitle="Upgrade to Enterprise" [nzPopoverContent]="upgradeLicense" nzPopoverOverlayClassName="license-data-popover" nzPopoverPlacement="bottom">
+        <span i18n="@@common.upgrade-to-enterprise">Upgrade to Enterprise</span>
+        <i nz-icon nzType="icons:icon-medal"></i>
+      </div>
+    }
     <ng-template #licenseData>
       <license [license]="license"></license>
     </ng-template>
     <ng-template #upgradeLicense>
       <div>
         <span i18n="@@common.contact-featbit-team-to-get-license">Please contact FeatBit team to get a license or generate a trial license from</span>
-        <a href="https://dashboard.featbit.co/account"
-           class="bash-board-link"
-           target="_blank">https://dashboard.featbit.co/account</a>
+        <a href="https://dashboard.featbit.co/account" class="bash-board-link" target="_blank">https://dashboard.featbit.co/account</a>
       </div>
     </ng-template>
 
@@ -34,27 +37,31 @@
             <i nz-icon nzType="icons:icon-org"></i>
             {{currentOrganization?.name}}
           </span>
-            <span (click)="envModalVisible=true">
+          <span (click)="envModalVisible=true">
             <i nz-icon nzType="icons:icon-proj"></i>
-              {{currentProjectEnv?.projectName}}
+            {{currentProjectEnv?.projectName}}
           </span>
           <span (click)="envModalVisible=true" nz-popover i18n-nz-popover="@@common.env-secret" nzPopoverTitle="Environment Secrets"
-                [nzPopoverContent]="environmentSecretContent"
-                style="background-color: transparent;"
-                nzPopoverOverlayClassName="env-secret-popover">
+            [nzPopoverContent]="environmentSecretContent"
+            style="background-color: transparent;"
+            nzPopoverOverlayClassName="env-secret-popover">
             <i nz-icon nzType="icons:icon-env"></i>
             {{currentProjectEnv?.envName}}
           </span>
           <ng-template #environmentSecretContent>
-            <ng-container *ngFor="let secret of env?.secrets">
+            @for (secret of env?.secrets; track secret.value || secret.name) {
               <div class="env-secret-popover-content" (click)="copyText(secret.value)">
                 <i class="copy-icon" nz-icon nzType="icons:icon-copy"></i>
                 <span>{{secret.name}}</span>
-                <nz-tag nzColor="geekblue" *ngIf="secret.type == SecretTypeEnum.Server" i18n="@@common.server">server</nz-tag>
-                <nz-tag nzColor="cyan" *ngIf="secret.type == SecretTypeEnum.Client" i18n="@@common.client">client</nz-tag>
+                @if (secret.type == SecretTypeEnum.Server) {
+                  <nz-tag nzColor="geekblue" i18n="@@common.server">server</nz-tag>
+                }
+                @if (secret.type == SecretTypeEnum.Client) {
+                  <nz-tag nzColor="cyan" i18n="@@common.client">client</nz-tag>
+                }
                 <span>{{secret.value}}</span>
               </div>
-            </ng-container>
+            }
           </ng-template>
         </div>
         <div class="switch" (click)="envModalVisible=true">
@@ -72,28 +79,36 @@
   <ng-container *nzModalContent>
     <div class="project-envs">
       <nz-list class="overflow-y-list" style="--list-height: 320px" [nzHeader]="projectHeader">
-        <nz-list-item [ngClass]="{'item-selected': selectedProject?.id === project.id}"
-          *ngFor="let project of availableProjects" (click)="onSelectProject(project)">
-           {{ project.name }}
-          <nz-tag nzColor="green" *ngIf="isCurrentProject(project)" i18n="@@common.current">Current</nz-tag>
-        </nz-list-item>
+        @for (project of availableProjects; track project.id) {
+          <nz-list-item [ngClass]="{'item-selected': selectedProject?.id === project.id}"
+            (click)="onSelectProject(project)">
+            {{ project.name }}
+            @if (isCurrentProject(project)) {
+              <nz-tag nzColor="green" i18n="@@common.current">Current</nz-tag>
+            }
+          </nz-list-item>
+        }
         <ng-template #projectHeader>
           <span class="header" i18n="@@common.projects">Projects</span>
         </ng-template>
       </nz-list>
       <nz-list class="overflow-y-list" style="--list-height: 320px" [nzHeader]="envHeader">
-        <nz-list-item [ngClass]="{'item-selected': selectedEnv?.id === env.id}" *ngFor="let env of availableEnvs"
-          (click)="onSelectEnv(env)">
-          {{ env.name }} <nz-tag nzColor="green" *ngIf="isCurrentEnv(env)" i18n="@@common.current">Current</nz-tag>
+        @for (env of availableEnvs; track env.id) {
+          <nz-list-item [ngClass]="{'item-selected': selectedEnv?.id === env.id}"
+            (click)="onSelectEnv(env)">
+            {{ env.name }} @if (isCurrentEnv(env)) {
+            <nz-tag nzColor="green" i18n="@@common.current">Current</nz-tag>
+          }
         </nz-list-item>
-        <ng-template #envHeader>
-          <span class="header" i18n="@@common.environments">Environments</span>
-        </ng-template>
-      </nz-list>
-    </div>
-  </ng-container>
-  <ng-template #modalFooter>
-    <button nz-button nzType="default" (click)="envModelCancel()" i18n="@@common.cancel">Cancel</button>
-    <button nz-button nzType="primary" (click)="envModalConfirm()" i18n="@@common.save">Save</button>
-  </ng-template>
+      }
+      <ng-template #envHeader>
+        <span class="header" i18n="@@common.environments">Environments</span>
+      </ng-template>
+    </nz-list>
+  </div>
+</ng-container>
+<ng-template #modalFooter>
+  <button nz-button nzType="default" (click)="envModelCancel()" i18n="@@common.cancel">Cancel</button>
+  <button nz-button nzType="primary" (click)="envModalConfirm()" i18n="@@common.save">Save</button>
+</ng-template>
 </nz-modal>

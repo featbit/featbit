@@ -10,7 +10,8 @@ import { NzMessageService } from "ng-zorro-antd/message";
 @Component({
   selector: 'audit-logs',
   templateUrl: './audit-logs.component.html',
-  styleUrls: ['./audit-logs.component.less']
+  styleUrls: [ './audit-logs.component.less' ],
+  standalone: false
 })
 export class AuditLogsComponent implements OnInit {
   @Input() auditLogFilter: AuditLogListFilter;

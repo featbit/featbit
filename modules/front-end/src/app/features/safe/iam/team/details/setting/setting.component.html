@@ -1,50 +1,57 @@
 <section class="body-container">
-  <ng-template #loadingTem>
+
+  @if (!isLoading) {
+    <div class="block standard-div">
+      <div class="item title">
+        <div class="label" i18n="@@common.name">Name</div>
+        <div class="value">
+          <ng-container>
+            <div class="text">{{member.name || member.email || '--'}}</div>
+          </ng-container>
+        </div>
+      </div>
+      <div class="item">
+        <div class="label" i18n="@@common.email">Email</div>
+        <div class="value">{{member.email ?? '--'}}</div>
+      </div>
+      <div class="item">
+        <div class="label" i18n="@@common.rn">Resource name (RN)</div>
+        <div class="value">
+          <i class="copy-icon" nz-icon nzType="icons:icon-copy" (click)="copyText(member.resourceName)"></i>
+          {{member.resourceName}}
+        </div>
+      </div>
+    </div>
+  } @else {
     <div class="block">
       <nz-skeleton [nzActive]="true"></nz-skeleton>
     </div>
-  </ng-template>
+  }
 
-  <div class="block standard-div" *ngIf="!isLoading; else loadingTem;">
-    <div class="item title">
-      <div class="label" i18n="@@common.name">Name</div>
-      <div class="value">
-        <ng-container>
-          <div class="text">{{member.name || member.email || '--'}}</div>
-        </ng-container>
+  @if (!isLoading && canDelete()) {
+    @if (!isLoading) {
+      <div class="block" >
+        <div class="delete">
+          <button nz-button nzType="default"
+            nz-popconfirm="This operation will remove the user from the current organization, are you sure to do this?"
+            i18n-nz-popconfirm="@@common.remove-from-organization-confirm"
+            nzPopconfirmPlacement="bottomRight"
+            [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
+            (nzOnConfirm)="deleteMemberFromOrg()" [nzIcon]="questionIconTpl">
+            <i class="delete-icon" nz-icon nzType="icons:icon-delete"></i>
+            <ng-container i18n="@@common.remove">Remove</ng-container>
+          </button>
+          <ng-template #questionIconTpl>
+            <i nz-icon nzType="question-circle" nzTheme="fill" style="color: #FAAD14;"></i>
+          </ng-template>
+        </div>
       </div>
-    </div>
-    <div class="item">
-      <div class="label" i18n="@@common.email">Email</div>
-      <div class="value">{{member.email ?? '--'}}</div>
-    </div>
-    <div class="item">
-      <div class="label" i18n="@@common.rn">Resource name (RN)</div>
-      <div class="value">
-        <i class="copy-icon" nz-icon nzType="icons:icon-copy" (click)="copyText(member.resourceName)"></i>
-        {{member.resourceName}}
+    } @else {
+      <div class="block">
+        <nz-skeleton [nzActive]="true"></nz-skeleton>
       </div>
-    </div>
-  </div>
-
-  <ng-container *ngIf="!isLoading && canDelete()">
-    <div class="block" *ngIf="!isLoading; else loadingTem;" >
-      <div class="delete">
-        <button nz-button nzType="default"
-                nz-popconfirm="This operation will remove the user from the current organization, are you sure to do this?"
-                i18n-nz-popconfirm="@@common.remove-from-organization-confirm"
-                nzPopconfirmPlacement="bottomRight"
-                [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
-                (nzOnConfirm)="deleteMemberFromOrg()" [nzIcon]="questionIconTpl">
-          <i class="delete-icon" nz-icon nzType="icons:icon-delete"></i>
-          <ng-container i18n="@@common.remove">Remove</ng-container>
-        </button>
-        <ng-template #questionIconTpl>
-          <i nz-icon nzType="question-circle" nzTheme="fill" style="color: #FAAD14;"></i>
-        </ng-template>
-      </div>
-    </div>
-  </ng-container>
+    }
+  }
 
 </section>
 

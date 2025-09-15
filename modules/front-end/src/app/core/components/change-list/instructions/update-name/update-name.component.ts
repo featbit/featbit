@@ -5,25 +5,25 @@ import {
 } from "@core/components/change-list/instructions/types";
 import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
 import { ISegment } from "@features/safe/segments/types/segments-index";
+
 @Component({
   selector: 'update-name',
   template: `
     <div class="instruction">
-      <ng-container *ngIf="!isClear">
-        <span i18n="@@common.update-name-with-sufix-space">Update name </span>
-        <ng-container *ngIf="previousName.length > 0">
-          <span i18n="@@common.from-name">from</span>
-          <span class="value remove-value">{{previousName}}</span>
-        </ng-container>
-        <span i18n="@@common.to-name">to</span>
-        <span class="value">{{data.value}}</span>
-      </ng-container>
-      <ng-container *ngIf="isClear">
+      @if (isClear) {
         <span i18n="@@common.clear-name">Clear name</span>
-      </ng-container>
+      } @else {
+        <span i18n="@@common.update-name-with-sufix-space">Update name </span>
+        @if (previousName.length > 0) {
+          <span i18n="@@common.from-name">from</span>
+          <span class="value remove-value">{{ previousName }}</span>
+        }
+        <span i18n="@@common.to-name">to</span>
+        <span class="value">{{ data.value }}</span>
+      }
     </div>
   `,
-  styles: [`
+  styles: [ `
     .value {
       font-weight: 700;
       display: inline-block;
@@ -34,7 +34,8 @@ import { ISegment } from "@features/safe/segments/types/segments-index";
     .remove-value {
       text-decoration: line-through;
     }
-  `]
+  ` ],
+  standalone: false
 })
 export class UpdateNameComponent implements IInstructionComponent {
   data: IInstructionComponentData;

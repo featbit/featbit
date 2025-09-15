@@ -5,9 +5,10 @@ import { urlValidator } from "@utils/form-validators";
 import { uuidv4 } from "@utils/index";
 
 @Component({
-  selector: 'relay-proxy-agent-modal',
-  templateUrl: './relay-proxy-agent-modal.component.html',
-  styleUrls: [ './relay-proxy-agent-modal.component.less' ]
+    selector: 'relay-proxy-agent-modal',
+    templateUrl: './relay-proxy-agent-modal.component.html',
+    styleUrls: ['./relay-proxy-agent-modal.component.less'],
+    standalone: false
 })
 export class RelayProxyAgentModalComponent {
   title: string = '';
