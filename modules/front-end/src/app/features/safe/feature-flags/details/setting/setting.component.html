@@ -57,15 +57,17 @@
           <div class="switcher">
             @if (featureFlag.isEnabled) {
               <nz-switch i18n-nz-popconfirm="@@ff.are-you-sure-to-turn-ff-off" nz-popconfirm="Are you sure to turn it off? The flag will return the variation that you specified for its off state." nzPopconfirmPlacement="bottomRight" [nzPopconfirmOverlayStyle]="{minWidth: '240px'}" (nzOnConfirm)="onChangeStatus()" [ngModel]="featureFlag.isEnabled" [nzControl]="true" nzCheckedChildren="ON" nzUnCheckedChildren="OFF"></nz-switch>
-            }
-            @if (!featureFlag.isEnabled) {
+            } @else {
               <nz-switch i18n-nz-popconfirm="@@ff.are-you-sure-to-turn-ff-on" nz-popconfirm="Are you sure to turn it on? The flag will return the matching targeting users' or rules' serving variation." nzPopconfirmPlacement="bottomRight" [nzPopconfirmOverlayStyle]="{minWidth: '240px'}" (nzOnConfirm)="onChangeStatus()" [ngModel]="featureFlag.isEnabled" [nzControl]="true" nzCheckedChildren="ON" nzUnCheckedChildren="OFF"></nz-switch>
             }
-            <span><ng-container i18n="@@ff.ff-is">The feature flag is</ng-container>&nbsp;@if (featureFlag.isEnabled) {
-            <nz-tag class="status on">ON</nz-tag>
-            }@if (!featureFlag.isEnabled) {
-            <nz-tag class="status off">OFF</nz-tag>
-          }</span>
+            <span>
+              <span i18n="@@ff.ff-is">The feature flag is</span>&nbsp;
+              @if (featureFlag.isEnabled) {
+                <nz-tag class="status on">ON</nz-tag>
+              } @else {
+                <nz-tag class="status off">OFF</nz-tag>
+              }
+            </span>
         </div>
         <div class="disabled-variation">
           <span class="label" i18n="@@ff.if-off-return">If OFF, serve</span>
@@ -76,7 +78,7 @@
             (ngModelChange)="onChangeDisabledVariation()"
             i18n-nzPlaceHolder="@@ff.select-variation"
             nzPlaceHolder="Select variation">
-            @for (variation of featureFlag.variations; track variation) {
+            @for (variation of featureFlag.variations; track variation.id) {
               <nz-option nzCustomContent [nzValue]="variation.id" [nzLabel]="variation.name">
                 {{variation.name}}
               </nz-option>
@@ -146,16 +148,15 @@
           [(ngModel)]="selectedTag"
           (nzOnSearch)="onSearchTag($event)"
           (ngModelChange)="onAddTag()">
-          @for (tag of currentAllTags; track tag) {
-            @if (!isLoadingTags) {
-              <nz-option [nzValue]="tag" [nzLabel]="tag" [nzHide]="isTagSelected(tag)"></nz-option>
-            }
-          }
           @if (isLoadingTags) {
             <nz-option nzDisabled nzCustomContent>
               <i nz-icon nzType="loading" class="loading-icon"></i>
               <ng-container i18n="@@common.loading">Loading...</ng-container>
             </nz-option>
+          } @else {
+            @for (tag of currentAllTags; track tag) {
+              <nz-option [nzValue]="tag" [nzLabel]="tag" [nzHide]="isTagSelected(tag)"></nz-option>
+            }
           }
         </nz-select>
       </div>
@@ -189,22 +190,21 @@
   <ng-template #modalFooter>
     <div style="display: flex;justify-content: space-between">
       <button nz-button nzType="default" (click)="formatCode()" i18n="@@common.format">Format</button>
-        <div>
-          <button nz-button nzType="default" (click)="variationValueExpandVisible=false">
-            @if (expandReadonly) {
-              <ng-container i18n="@@common.close">Close</ng-container>
-              }
-              @if (!expandReadonly) {
-                <ng-container i18n="@@common.cancel">Cancel</ng-container>
-                }
-              </button>
-              @if (!expandReadonly) {
-                <button nz-button nzType="primary" (click)="updateVariationValue()" i18n="@@common.save">Save</button>
-                }
-              </div>
-            </div>
-          </ng-template>
-        </nz-modal>
+      <div>
+        <button nz-button nzType="default" (click)="variationValueExpandVisible=false">
+          @if (expandReadonly) {
+            <ng-container i18n="@@common.close">Close</ng-container>
+          } @else {
+            <ng-container i18n="@@common.cancel">Cancel</ng-container>
+          }
+        </button>
+        @if (!expandReadonly) {
+          <button nz-button nzType="primary" (click)="updateVariationValue()" i18n="@@common.save">Save</button>
+        }
+      </div>
+    </div>
+  </ng-template>
+</nz-modal>
 
         <!-- Edit Variations Modal -->
         <nz-modal
@@ -248,9 +248,6 @@
                           <nz-form-item>
                             <nz-form-label nzRequired i18n="@@common.value">Value</nz-form-label>
                               <nz-form-control nzHasFeedback [nzErrorTip]="valueErrorTpl">
-                                @if (!showExpandVariationIcon) {
-                                  <input type="text" nz-input formControlName="value" placeholder="Value" i18n-placeholder="@@common.value"/>
-                                }
                                 @if (showExpandVariationIcon) {
                                   <nz-input-group [nzSuffix]="suffixIconButton">
                                     <input type="text" nz-input formControlName="value" placeholder="Value" i18n-placeholder="@@common.value"/>
@@ -258,6 +255,8 @@
                                       <i class="expand-icon" nz-icon nzType="expand" (click)="expandVariation(this.variations.at(i).value)"></i>
                                     </ng-template>
                                   </nz-input-group>
+                                } @else {
+                                  <input type="text" nz-input formControlName="value" placeholder="Value" i18n-placeholder="@@common.value"/>
                                 }
                                 <ng-template #valueErrorTpl let-control>
                                   @if (control.hasError('required')) {

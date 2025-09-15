@@ -85,8 +85,7 @@
                   <i nz-icon [nzType]="item.isActive ? 'check-circle' : 'close-circle'"></i>
                   @if (item.isActive) {
                     <span i18n="@@common.active">Active</span>
-                  }
-                  @if (!item.isActive) {
+                  } @else {
                     <span i18n="@@common.inactive">Inactive</span>
                   }
                 </span>

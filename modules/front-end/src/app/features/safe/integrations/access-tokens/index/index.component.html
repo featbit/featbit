@@ -69,7 +69,7 @@
         </tr>
       </thead>
       <tbody>
-        @for (item of table.data; track item) {
+        @for (item of table.data; track item.id) {
           <tr>
             <td>{{ item.name }}</td>
             <td>

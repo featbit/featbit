@@ -19,8 +19,13 @@
               (nzOnSearch)="onSearchFeatureFlag($event)"
               (ngModelChange)="onFeatureFlagChange($event)"
               >
-              @for (ff of featureFlagList?.items; track ff) {
-                @if (!isFeatureFlagsLoading) {
+              @if (isFeatureFlagsLoading) {
+                <nz-option nzDisabled nzCustomContent>
+                  <i nz-icon nzType="loading" class="loading-icon"></i>
+                  <ng-container i18n="@@common.loading">Loading...</ng-container>
+                </nz-option>
+              } @else {
+                @for (ff of featureFlagList?.items; track ff) {
                   <nz-option nzCustomContent [nzValue]="ff" [nzLabel]="ff.name">
                     <div class="flag-selection-item" [class]="{'creation-selection-item': ff.isNew}">
                       <div class="title">
@@ -32,12 +37,6 @@
                     </div>
                   </nz-option>
                 }
-              }
-              @if (isFeatureFlagsLoading) {
-                <nz-option nzDisabled nzCustomContent>
-                  <i nz-icon nzType="loading" class="loading-icon"></i>
-                  <ng-container i18n="@@common.loading">Loading...</ng-container>
-                </nz-option>
               }
             </nz-select>
           </div>

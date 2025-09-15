@@ -31,8 +31,13 @@
     (ngModelChange)="onResourceChange()"
     (nzOnSearch)="onSearchResources($event)"
     [nzOptionHeightPx]="isResourceLoading ? 32 : 54">
-    @for (rsc of availableResources; track rsc.id) {
-      @if (!isResourceLoading) {
+    @if (isResourceLoading) {
+      <nz-option nzDisabled nzCustomContent>
+        <i nz-icon nzType="loading" class="loading-icon"></i>
+        <ng-container i18n="@@common.loading">Loading...</ng-container>
+      </nz-option>
+    } @else {
+      @for (rsc of availableResources; track rsc.id) {
         <nz-option
           nzCustomContent [nzValue]="rsc" [nzHide]="isSelected(rsc)">
           <div class="resource-selection-item">
@@ -41,11 +46,6 @@
           </div>
         </nz-option>
       }
-    }
-    @if (isResourceLoading) {
-      <nz-option nzDisabled nzCustomContent>
-        <i nz-icon nzType="loading" class="loading-icon"></i> <ng-container i18n="@@common.loading">Loading...</ng-container>
-      </nz-option>
     }
   </nz-select>
 </div>

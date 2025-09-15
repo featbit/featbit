@@ -150,7 +150,7 @@
         </div>
       </div>
     }
-    @for (flag of currentDeletingArchivingSegmentFlagReferences; track flag) {
+    @for (flag of currentDeletingArchivingSegmentFlagReferences; track flag.id) {
       <div style="margin-top:5px">
         <a (click)="openFlagPage(flag.key)">{{flag.name}}</a>
       </div>

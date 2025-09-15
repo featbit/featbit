@@ -17,7 +17,7 @@
         }
         <nz-dropdown-menu #menu="nzDropdownMenu">
           <ul nz-menu>
-            @for (flag of flagReferences; track flag) {
+            @for (flag of flagReferences; track flag.id) {
               <li [nzDisabled]="flag.envId !== currentEnvId" nz-menu-item (click)="openFlagPage(flag)">
                 {{ flag.name }}
                 @if (flag.envId !== currentEnvId) {

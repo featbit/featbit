@@ -51,8 +51,7 @@
                   <ng-template #iconTplIamUser>
                     <i nz-icon nzType="question-circle" nzTheme="fill" style="color: #FAAD14;"></i>
                   </ng-template>
-                }
-                @if (!item.isPolicyMember) {
+                } @else {
                   <a class="primary-link-btn" (click)="addPolicy(item.id)" i18n="@@common.add">Add</a>
                 }
               </td>

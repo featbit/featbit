@@ -5,8 +5,7 @@
         <!-- a placeholder, do not delete it -->
         @if (featureFlag.isEnabled) {
           <div></div>
-        }
-        @if (!featureFlag.isEnabled) {
+        } @else {
           <div class="warning">
             <i nz-icon nzType="icons:icon-warning"></i>
             <ng-container i18n="@@ff.components.details.targeting.settings-ineffective-warning">Following settings won't be effective until you turn the flag on</ng-container>
@@ -29,27 +28,21 @@
               <ng-template #needLicenseTooltip>
                 <ng-container i18n="@@common.need-license">You don't have a license or your current license doesn't grant this feature, please contact FeatBit team to get a license.</ng-container>
               </ng-template>
-              <li [class]="{disabled: !license?.isGranted(LicenseFeatureEnum.Schedule)}" nz-menu-item
-                (click)="onScheduleClick(validationErrorTpl)">
+              <li [class]="{disabled: !license?.isGranted(LicenseFeatureEnum.Schedule)}" nz-menu-item (click)="onScheduleClick(validationErrorTpl)">
                 @if (license?.isGranted(LicenseFeatureEnum.Schedule)) {
                   <span i18n="@@common.schedule-changes">Schedule changes</span>
-                }
-                @if (!license?.isGranted(LicenseFeatureEnum.Schedule)) {
+                } @else {
                   <span [nz-tooltip]="needLicenseTooltip" i18n="@@common.schedule-changes">Schedule changes</span>
                 }
               </li>
-              <li [class]="{disabled: !license?.isGranted(LicenseFeatureEnum.ChangeRequest)}" nz-menu-item
-                (click)="onChangeRequestClick(validationErrorTpl)">
+              <li [class]="{disabled: !license?.isGranted(LicenseFeatureEnum.ChangeRequest)}" nz-menu-item (click)="onChangeRequestClick(validationErrorTpl)">
                 @if (license?.isGranted(LicenseFeatureEnum.ChangeRequest)) {
                   <span i18n="@@common.change-request">Change Request</span>
-                }
-                @if (!license?.isGranted(LicenseFeatureEnum.ChangeRequest)) {
+                } @else {
                   <span [nz-tooltip]="needLicenseTooltip" i18n="@@common.change-request">Change Request</span>
                 }
               </li>
-              <li nz-menu-item
-                (click)="onSetExptRulesClick()"
-              i18n="@@ff.components.details.targeting.setabtestrule">Set A/B test rule</li>
+              <li nz-menu-item (click)="onSetExptRulesClick()" i18n="@@ff.components.details.targeting.setabtestrule">Set A/B test rule</li>
             </ul>
           </nz-dropdown-menu>
         </div>
@@ -109,7 +102,7 @@
               </div>
               @if (isTargetUsersActive) {
                 <div style="margin-left: -12px;margin-top: 16px">
-                  @for (variation of featureFlag.variations; track variation; let i = $index) {
+                  @for (variation of featureFlag.variations; track variation.id) {
                     <div class="content">
                       <target-user
                         [type]="variation.name"

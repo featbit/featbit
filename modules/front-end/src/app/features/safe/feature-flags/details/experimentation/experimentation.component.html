@@ -37,8 +37,7 @@
                             <ng-container i18n="@@common.custom-event">Custom event</ng-container>:
                             @if (experiment.metricCustomEventTrackOption === customEventTrackConversion) {
                               <ng-container i18n="@@common.conversion-rate">Conversion rate</ng-container>
-                            }
-                            @if (experiment.metricCustomEventTrackOption !== customEventTrackConversion) {
+                            } @else {
                               <ng-container i18n="@@common.numeric">Numeric</ng-container>
                             }
                           }
@@ -59,11 +58,10 @@
                           }
                           @if (experiment.status !== exptStatusNotStarted) {
                             <button style="margin-left: 15px;border-radius:8px" nz-button nzType="default" nz-tooltip i18n-nzTooltipTitle="@@ff.expt.refresh-every-1-min" nzTooltipTitle="Automatically refresh every 1 minute" nzTooltipColor="#87d068" (click)="onReloadIterationResultsClick(experiment)">
-                              @if (!experiment.isLoading) {
-                                <i nz-icon nzType="reload" nzTheme="outline"></i>
-                              }
                               @if (experiment.isLoading) {
-                                <i nz-icon [nzType]="'sync'" [nzSpin]="true"></i>
+                                <i nz-icon nzType="sync" [nzSpin]="true"></i>
+                              } @else {
+                                <i nz-icon nzType="reload" nzTheme="outline"></i>
                               }
                               <ng-container i18n="@@ff.expt.refresh">Refresh</ng-container>
                             </button>
