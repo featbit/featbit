@@ -17,7 +17,7 @@
         [nzDescription]="description"
         nzShowIcon
         nzIconType="icons:icon-info-outline"
-        >
+      >
         <ng-template #description>
           <ul>
             <li>
@@ -35,7 +35,7 @@
       <div class="select-environment">
         <nz-form-label nzRequired i18n="@@ff.bulk-copy.select-target-environment">Select target environment</nz-form-label>
         <nz-select nzShowSearch [(ngModel)]="targetEnvId" (ngModelChange)="onSelectTargetEnvironment()">
-          @for (env of envs; track env) {
+          @for (env of envs; track env.id) {
             <nz-option [nzValue]="env.id" [nzLabel]="env.name"></nz-option>
           }
         </nz-select>
@@ -47,7 +47,7 @@
         [nzSpinning]="checking">
         <nz-form-label nzNoColon nzRequired i18n="@@ff.bulk-copy.choose-feature-flags-to-copy">Choose feature flags to copy</nz-form-label>
         <nz-collapse nzBordered="false" [ngClass]="{'collapse-overflow': flags.length >= 10}">
-          @for (flag of flags; track flag) {
+          @for (flag of flags; track flag.id) {
             <nz-collapse-panel
               [nzHeader]="flag.name"
               [nzExtra]="extraTpl"
@@ -108,7 +108,7 @@
           [nzLoading]="this.copying"
           [disabled]="precheckResults.length === 0 || selectedFlags.length === 0"
           (click)="batchCopy()"
-        i18n="@@common.save">Save</button>
+          i18n="@@common.save">Save</button>
       </div>
     </div>
   </ng-template>
