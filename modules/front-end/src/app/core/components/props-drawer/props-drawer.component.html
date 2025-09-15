@@ -46,7 +46,7 @@
             </tr>
           </thead>
           <tbody>
-            @for (row of propTable.data; track row; let index = $index) {
+            @for (row of propTable.data; track row.id) {
               <tr>
                 @if (row.isBuiltIn) {
                   <td>{{row.name}}</td>
@@ -104,10 +104,8 @@
                         style="color: #717D8A;">
                         <i nz-icon nzType="close" nzTheme="outline"></i> <ng-container i18n="@@common.cancel">Cancel</ng-container>
                       </button>
-                    }
-                    @if (!row.isEditing) {
-                      <button nz-button nzSize="default" nzType="link" (click)="openPropPresetValuesModal(row)"
-                        >
+                    } @else {
+                      <button nz-button nzSize="default" nzType="link" (click)="openPropPresetValuesModal(row)">
                         <i nz-icon nzType="edit" nzTheme="outline"></i>
                         <ng-container i18n="@@users.idx.preset-value">Preset value</ng-container>（<span>{{row?.presetValues?.length || 0}}</span>）
                       </button>

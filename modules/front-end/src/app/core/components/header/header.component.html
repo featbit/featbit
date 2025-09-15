@@ -13,8 +13,7 @@
         <span class="plan-name">{{license.data?.plan}}</span>
         <i nz-icon nzType="icons:icon-medal"></i>
       </div>
-    }
-    @if (!license.data) {
+    } @else {
       <div class="license-plan-wrapper" nz-popover i18n-nz-popover="@@common.upgrade-to-enterprise" nzPopoverTitle="Upgrade to Enterprise" [nzPopoverContent]="upgradeLicense" nzPopoverOverlayClassName="license-data-popover" nzPopoverPlacement="bottom">
         <span i18n="@@common.upgrade-to-enterprise">Upgrade to Enterprise</span>
         <i nz-icon nzType="icons:icon-medal"></i>
@@ -26,9 +25,7 @@
     <ng-template #upgradeLicense>
       <div>
         <span i18n="@@common.contact-featbit-team-to-get-license">Please contact FeatBit team to get a license or generate a trial license from</span>
-        <a href="https://dashboard.featbit.co/account"
-          class="bash-board-link"
-        target="_blank">https://dashboard.featbit.co/account</a>
+        <a href="https://dashboard.featbit.co/account" class="bash-board-link" target="_blank">https://dashboard.featbit.co/account</a>
       </div>
     </ng-template>
 

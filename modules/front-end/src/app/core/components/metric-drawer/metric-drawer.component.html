@@ -32,19 +32,18 @@
             nzServerSearch
             formControlName="maintainerUserId"
             (nzOnSearch)="onSearchMaintainer($event)">
-            @for (o of maintainerList; track o) {
-              @if (!isMaintainersLoading) {
-                <nz-option
-                  [nzValue]="o.id"
-                  [nzLabel]="o.name || o.email">
-                </nz-option>
-              }
-            }
             @if (isMaintainersLoading) {
               <nz-option nzDisabled nzCustomContent>
                 <i nz-icon nzType="loading" class="loading-icon"></i>
                 <ng-container i18n="@@common.loading">Loading...</ng-container>
               </nz-option>
+            } @else {
+              @for (o of maintainerList; track o) {
+                <nz-option
+                  [nzValue]="o.id"
+                  [nzLabel]="o.name || o.email">
+                </nz-option>
+              }
             }
           </nz-select>
         </nz-form-control>

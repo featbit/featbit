@@ -17,8 +17,7 @@
       <div class="feature">
         @if (license.isGranted(feature)) {
           <i class="issued" nz-icon nzType="check" nzTheme="outline"></i>
-        }
-        @if (!license.isGranted(feature)) {
+        } @else {
           <i nz-icon nzType="close" nzTheme="outline"></i>
         }
         <span>{{ getFeatureName(feature) }}</span>

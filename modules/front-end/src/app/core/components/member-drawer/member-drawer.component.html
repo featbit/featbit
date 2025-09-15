@@ -30,8 +30,12 @@
           nzPlaceHolder="Policy"
           (nzOnSearch)="getPolicies($event)"
           formControlName="policyId">
-          @for (policy of policies.items; track policy) {
-            @if (!isPoliciesLoading) {
+          @if (isPoliciesLoading) {
+            <nz-option nzDisabled nzCustomContent>
+              <i nz-icon nzType="loading" class="loading-icon"></i> <ng-container i18n="@@common.loading">Loading...</ng-container>
+            </nz-option>
+          } @else {
+            @for (policy of policies.items; track policy.id) {
               <nz-option nzCustomContent [nzLabel]="policy.name" [nzValue]="policy.id">
                 @if (policy.type === 'SysManaged') {
                   <i style="color: #28a17d;" nz-icon nzType="star" nzTheme="outline"></i>
@@ -39,11 +43,6 @@
                 {{ policy.name }}
               </nz-option>
             }
-          }
-          @if (isPoliciesLoading) {
-            <nz-option nzDisabled nzCustomContent>
-              <i nz-icon nzType="loading" class="loading-icon"></i> <ng-container i18n="@@common.loading">Loading...</ng-container>
-            </nz-option>
           }
         </nz-select>
       </nz-form-control>
@@ -56,15 +55,14 @@
           nzPlaceHolder="Group"
           (nzOnSearch)="getGroups($event)"
           formControlName="groupId">
-          @for (group of groups.items; track group) {
-            @if (!isGroupsLoading) {
-              <nz-option [nzLabel]="group.name" [nzValue]="group.id"></nz-option>
-            }
-          }
           @if (isGroupsLoading) {
             <nz-option nzDisabled nzCustomContent>
               <i nz-icon nzType="loading" class="loading-icon"></i> <ng-container i18n="@@common.loading">Loading...</ng-container>
             </nz-option>
+          } @else {
+            @for (group of groups.items; track group.id) {
+              <nz-option [nzLabel]="group.name" [nzValue]="group.id"></nz-option>
+            }
           }
         </nz-select>
       </nz-form-control>
