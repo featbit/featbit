@@ -11,10 +11,10 @@ interface IRuleVariationValue extends IRuleVariation {
 const DefaultDispatchKey = 'keyId';
 
 @Component({
-    selector: 'app-serve',
-    templateUrl: './serve.component.html',
-    styleUrls: ['./serve.component.less'],
-    standalone: false
+  selector: 'app-serve',
+  templateUrl: './serve.component.html',
+  styleUrls: [ './serve.component.less' ],
+  standalone: false
 })
 export class ServeComponent implements OnChanges {
 

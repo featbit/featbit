@@ -24,24 +24,22 @@
             [nzOptionHeightPx]="36"
             [nzCustomTemplate]="ffTemplate"
             >
-            @for (ff of featureFlagList?.items; track ff) {
-              @if (!isFeatureFlagsLoading) {
-                <nz-option nzCustomContent [nzValue]="ff" [nzLabel]="ff.name">
-                  <span>{{ff.name}}</span>
-                  @if (ff.isEnabled) {
-                    <nz-tag class="status on">ON</nz-tag>
-                  }
-                  @if (!ff.isEnabled) {
-                    <nz-tag class="status off">OFF</nz-tag>
-                  }
-                </nz-option>
-              }
-            }
             @if (isFeatureFlagsLoading) {
               <nz-option nzDisabled nzCustomContent>
                 <i nz-icon nzType="loading" class="loading-icon"></i>
                 <ng-container i18n="@@common.loading">Loading...</ng-container>
               </nz-option>
+            } @else {
+              @for (ff of featureFlagList?.items; track ff) {
+                <nz-option nzCustomContent [nzValue]="ff" [nzLabel]="ff.name">
+                  <span>{{ ff.name }}</span>
+                  @if (ff.isEnabled) {
+                    <nz-tag class="status on">ON</nz-tag>
+                  } @else {
+                    <nz-tag class="status off">OFF</nz-tag>
+                  }
+                </nz-option>
+              }
             }
           </nz-select>
           <ng-template #ffTemplate let-selected>
@@ -49,8 +47,7 @@
               <span>{{selected.nzValue.name}}</span>
               @if (selected.nzValue.isEnabled) {
                 <nz-tag class="status on">ON</nz-tag>
-              }
-              @if (!selected.nzValue.isEnabled) {
+              } @else {
                 <nz-tag class="status off">OFF</nz-tag>
               }
             </div>
@@ -68,17 +65,16 @@
             formControlName="metricId"
             (nzOnSearch)="onSearchMetrics($event)"
             >
-            @for (o of pagedMetric?.items; track o) {
-              @if (!isMetricsLoading) {
-                <nz-option [nzValue]="o.id" [nzLabel]="o.name">
-                </nz-option>
-              }
-            }
             @if (isMetricsLoading) {
               <nz-option nzDisabled nzCustomContent>
                 <i nz-icon nzType="loading" class="loading-icon"></i>
                 <ng-container i18n="@@common.loading">Loading...</ng-container>
               </nz-option>
+            } @else {
+              @for (o of pagedMetric?.items; track o) {
+                <nz-option [nzValue]="o.id" [nzLabel]="o.name">
+                </nz-option>
+              }
             }
           </nz-select>
         </nz-form-control>
@@ -90,13 +86,8 @@
             class="nz-select-40"
             i18n-nzPlaceHolder="@@expt.overview.select-baseline-variation"
             nzPlaceHolder="Select baseline variation"
+            [nzOptions]="variations"
             formControlName="baselineVariationId">
-            @for (o of currentVariations; track o) {
-              <nz-option
-                [nzValue]="o.id"
-                [nzLabel]="o.value">
-              </nz-option>
-            }
           </nz-select>
         </nz-form-control>
       </nz-form-item>

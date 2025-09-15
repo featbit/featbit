@@ -2,8 +2,8 @@ import {Pipe, PipeTransform} from "@angular/core";
 import {IVariation} from "@shared/rules";
 
 @Pipe({
-    name: "RVV",
-    standalone: false
+  name: "RVV",
+  standalone: false
 })
 export class RuleVariationValuePipe implements PipeTransform {
   constructor() {

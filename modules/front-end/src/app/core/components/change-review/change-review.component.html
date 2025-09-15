@@ -35,13 +35,10 @@
         @if (license?.isGranted(LicenseFeatureEnum.Schedule) && refType === RefTypeEnum.Flag) {
           <div class="section-title with-extension-icon">
             <span i18n="@@common.schedule">Schedule</span>
-            @if (!ReviewModalMode.isScheduleEnabled(kind)) {
-              <span
-              (click)="toggleSchedule()" nz-icon nzType="plus" nzTheme="outline"></span>
-            }
             @if (ReviewModalMode.isScheduleEnabled(kind)) {
-              <span
-              (click)="toggleSchedule()" nz-icon nzType="minus" nzTheme="outline"></span>
+              <span (click)="toggleSchedule()" nz-icon nzType="minus" nzTheme="outline"></span>
+            } @else {
+              <span (click)="toggleSchedule()" nz-icon nzType="plus" nzTheme="outline"></span>
             }
           </div>
           @if (ReviewModalMode.isScheduleEnabled(kind)) {
@@ -70,13 +67,10 @@
         @if (license?.isGranted(LicenseFeatureEnum.ChangeRequest) && refType === RefTypeEnum.Flag) {
           <div class="section-title with-extension-icon">
             <span i18n="@@common.change-request">Change Request</span>
-            @if (!ReviewModalMode.isChangeRequestEnabled(kind)) {
-              <span
-              (click)="toggleChangeRequest()" nz-icon nzType="plus" nzTheme="outline"></span>
-            }
             @if (ReviewModalMode.isChangeRequestEnabled(kind)) {
-              <span
-              (click)="toggleChangeRequest()" nz-icon nzType="minus" nzTheme="outline"></span>
+              <span (click)="toggleChangeRequest()" nz-icon nzType="minus" nzTheme="outline"></span>
+            } @else {
+              <span (click)="toggleChangeRequest()" nz-icon nzType="plus" nzTheme="outline"></span>
             }
           </div>
           @if (ReviewModalMode.isChangeRequestEnabled(kind)) {
@@ -99,19 +93,18 @@
                   nzServerSearch
                   formControlName="reviewers"
                   (nzOnSearch)="onSearchMember($event)">
-                  @for (o of memberList; track o) {
-                    @if (!isMemberLoading) {
-                      <nz-option
-                        [nzValue]="o.id"
-                        [nzLabel]="o.name || o.email">
-                      </nz-option>
-                    }
-                  }
                   @if (isMemberLoading) {
                     <nz-option nzDisabled nzCustomContent>
                       <i nz-icon nzType="loading" class="loading-icon"></i>
                       <ng-container i18n="@@common.loading">Loading...</ng-container>
                     </nz-option>
+                  } @else {
+                    @for (o of memberList; track o.id) {
+                      <nz-option
+                        [nzValue]="o.id"
+                        [nzLabel]="o.name || o.email">
+                      </nz-option>
+                    }
                   }
                 </nz-select>
               </nz-form-control>
@@ -130,9 +123,9 @@
     </section>
   </div>
 </ng-container>
-<div *nzModalFooter>
-  <button nz-button nzType="default" (click)="closeModal()" i18n="@@common.cancel">Cancel</button>
-  <button [disabled]="instructions.length === 0" nz-button nzType="primary"
-  (click)="onValidate()" i18n="@@common.save">Save</button>
-</div>
+  <div *nzModalFooter>
+    <button nz-button nzType="default" (click)="closeModal()" i18n="@@common.cancel">Cancel</button>
+    <button [disabled]="instructions.length === 0" nz-button nzType="primary"
+    (click)="onValidate()" i18n="@@common.save">Save</button>
+  </div>
 </nz-modal>

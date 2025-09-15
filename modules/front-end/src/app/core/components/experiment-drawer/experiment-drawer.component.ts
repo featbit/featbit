@@ -13,10 +13,10 @@ import { IPagedMetric, MetricListFilter } from "@features/safe/experiments/types
 
 
 @Component({
-    selector: 'app-experiment-drawer',
-    templateUrl: './experiment-drawer.component.html',
-    styleUrls: ['./experiment-drawer.component.less'],
-    standalone: false
+  selector: 'app-experiment-drawer',
+  templateUrl: './experiment-drawer.component.html',
+  styleUrls: [ './experiment-drawer.component.less' ],
+  standalone: false
 })
 export class ExperimentDrawerComponent {
 
@@ -97,12 +97,12 @@ export class ExperimentDrawerComponent {
     }
   }
 
-  currentVariations: IVariation[] = [];
+  variations = [];
   onFeatureFlagChange(data: IFeatureFlag) {
     this.experimentForm.patchValue({
       baselineVariationId: null,
     });
-    this.currentVariations = [...data.variations];
+    this.variations = data.variations.map(v => ({ label: v.value, value: v.id }));
   }
 
   metricSearchChange$ = new BehaviorSubject('');

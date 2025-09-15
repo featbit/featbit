@@ -19,7 +19,7 @@
               formControlName="name"
               placeholder="A human-friendly name for your feature flag"
               i18n-placeholder="@@common.feature-flag-name"
-              />
+            />
             </nz-form-control>
           </nz-form-item>
           <nz-form-item>
@@ -80,16 +80,15 @@
             [(ngModel)]="selectedTag"
             (nzOnSearch)="onSearchTag($event)"
             (ngModelChange)="onAddTag()">
-            @for (tag of currentAllTags; track tag) {
-              @if (!isLoadingTags) {
-                <nz-option [nzValue]="tag" [nzLabel]="tag" [nzHide]="isTagSelected(tag)"></nz-option>
-              }
-            }
             @if (isLoadingTags) {
               <nz-option nzDisabled nzCustomContent>
                 <i nz-icon nzType="loading" class="loading-icon"></i>
                 <ng-container i18n="@@common.loading">Loading...</ng-container>
               </nz-option>
+            } @else {
+              @for (tag of currentAllTags; track tag) {
+                <nz-option [nzValue]="tag" [nzLabel]="tag" [nzHide]="isTagSelected(tag)"></nz-option>
+              }
             }
           </nz-select>
         </div>
