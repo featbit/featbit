@@ -71,7 +71,7 @@
         </tr>
       </thead>
       <tbody>
-        @for (item of table.data; track item) {
+        @for (item of table.data; track item.id) {
           <tr>
             <td class="name" (click)="openDrawer(item)">
               <span>{{ item.name }}</span>

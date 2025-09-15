@@ -131,9 +131,6 @@
               <nz-form-item>
                 <nz-form-label nzRequired i18n="@@common.value">Value</nz-form-label>
                 <nz-form-control nzHasFeedback [nzErrorTip]="valueErrorTpl">
-                  @if (!showExpandVariationIcon) {
-                    <input type="text" nz-input formControlName="value" placeholder="Value" i18n-placeholder="@@common.value"/>
-                  }
                   @if (showExpandVariationIcon) {
                     <nz-input-group [nzSuffix]="suffixIconButton">
                       <input type="text" nz-input formControlName="value" placeholder="Value" i18n-placeholder="@@common.value"/>
@@ -141,6 +138,8 @@
                         <i class="expand-icon" nz-icon nzType="expand" (click)="expandVariationOption(i)"></i>
                       </ng-template>
                     </nz-input-group>
+                  } @else {
+                    <input type="text" nz-input formControlName="value" placeholder="Value" i18n-placeholder="@@common.value"/>
                   }
                   <ng-template #valueErrorTpl let-control>
                     @if (control.hasError('required')) {
