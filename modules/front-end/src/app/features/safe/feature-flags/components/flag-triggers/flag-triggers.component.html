@@ -31,8 +31,7 @@
                         <span>The trigger is</span>
                         @if (trigger.isEnabled) {
                           <nz-tag class="status_enabled status" i18n="@@common.enabled">Enabled</nz-tag>
-                        }
-                        @if (!trigger.isEnabled) {
+                        } @else {
                           <nz-tag class="status_disabled status" i18n="@@common.disabled">Disabled</nz-tag>
                         }
                       </div>

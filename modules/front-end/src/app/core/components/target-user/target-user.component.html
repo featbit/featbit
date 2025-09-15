@@ -44,7 +44,12 @@
     (nzOnSearch)="onSearch($event)"
     [nzOptionHeightPx]="isLoading ? 32 : 54">
     @for (item of userList; track item.id) {
-      @if (!isLoading) {
+      @if (isLoading) {
+        <nz-option nzDisabled nzCustomContent>
+          <i nz-icon nzType="loading" class="loading-icon"></i>
+          <ng-container i18n="@@common.loading">Loading...</ng-container>
+        </nz-option>
+      } @else {
         <nz-option
           nzCustomContent
           [nzValue]="item"
@@ -54,21 +59,16 @@
             <div class="title">
               @if (item.isNew) {
                 <ng-container i18n="@@common.create-with-comma">Create:</ng-container>
-                } {{ item.name }}
-                @if (item.envId === null) {
-                  <nz-tag i18n="@@common.global-user">Global User</nz-tag>
-                }
-              </div>
-              <div class="digest">{{getUserDigest(item)}}</div>
+              } {{ item.name }}
+              @if (item.envId === null) {
+                <nz-tag i18n="@@common.global-user">Global User</nz-tag>
+              }
             </div>
-          </nz-option>
-        }
-      }
-      @if (isLoading) {
-        <nz-option nzDisabled nzCustomContent>
-          <i nz-icon nzType="loading" class="loading-icon"></i> <ng-container i18n="@@common.loading">Loading...</ng-container>
+            <div class="digest">{{ getUserDigest(item) }}</div>
+          </div>
         </nz-option>
       }
+    }
     </nz-select>
   </section>
 

@@ -18,16 +18,15 @@
           (ngModelChange)="onSearch(true)"
           i18n-nzPlaceHolder="@@ff.idx.filter-by-tags"
           nzPlaceHolder="Filter by tags">
-          @for (tag of allTags; track tag) {
-            @if (!isLoadingTags) {
-              <nz-option [nzValue]="tag" [nzLabel]="tag"></nz-option>
-            }
-          }
           @if (isLoadingTags) {
             <nz-option nzDisabled nzCustomContent>
               <i nz-icon nzType="loading" class="loading-icon"></i>
               <ng-container i18n="@@common.loading">Loading...</ng-container>
             </nz-option>
+          } @else {
+            @for (tag of allTags; track tag) {
+              <nz-option [nzValue]="tag" [nzLabel]="tag"></nz-option>
+            }
           }
           <ng-template #tagPlaceHolder let-selectedList>and {{ selectedList.length }} more</ng-template>
         </nz-select>
@@ -106,8 +105,7 @@
                     nzControl="true"
                     [ngModel]="featureFlag.isEnabled" nzCheckedChildren="ON" nzUnCheckedChildren="OFF">
                   </nz-switch>
-                }
-                @if (!featureFlag.isEnabled) {
+                } @else {
                   <nz-switch
                     i18n-nz-popconfirm="@@ff.are-you-sure-to-turn-ff-on"
                     nz-popconfirm="Are you sure to turn it on? The flag will return the matching targeting users' or rules' serving variation."

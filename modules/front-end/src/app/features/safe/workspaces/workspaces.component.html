@@ -32,8 +32,7 @@
     </ng-template>
     @if (isGlobalUserGranted) {
       <a *nzTabLink nz-tab-link [routerLink]="['./global-users']" i18n="@@workspace.global-users.tabtitle">Global Users</a>
-    }
-    @if (!isGlobalUserGranted) {
+    } @else {
       <a *nzTabLink nz-tab-link [nz-tooltip]="needLicenseTooltip" i18n="@@workspace.global-users.tabtitle">Global Users</a>
     }
     <ng-template nz-tab>

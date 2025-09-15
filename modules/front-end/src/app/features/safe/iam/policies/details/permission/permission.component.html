@@ -1,15 +1,13 @@
 <section class="body-container">
   <div class="detail-body">
     <div class="content-container">
-      @if (!isLoading) {
-        <iam-policy-editor [policy]="policy" (saveStatementsEvent)="saveStatements($event)"></iam-policy-editor>
-      } @else {
+      @if (isLoading) {
         <div class="block">
           <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 4 }"></nz-skeleton>
         </div>
+      } @else {
+        <iam-policy-editor [policy]="policy" (saveStatementsEvent)="saveStatements($event)"></iam-policy-editor>
       }
     </div>
   </div>
 </section>
-
-

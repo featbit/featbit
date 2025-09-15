@@ -1,8 +1,5 @@
-
-
-@if (!loading) {
-  <audit-logs [auditLogFilter]="auditLogFilter"></audit-logs>
+@if (loading) {
+  <nz-spin class="loader" [nzSpinning]="loading"></nz-spin>
 } @else {
-  <nz-spin class="loader" [nzSpinning]="loading">
-  </nz-spin>
+  <audit-logs [auditLogFilter]="auditLogFilter"></audit-logs>
 }
