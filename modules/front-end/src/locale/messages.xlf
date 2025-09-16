@@ -3636,6 +3636,13 @@
           <context context-type="linenumber">62,63</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="license.enabled" datatype="html">
+        <source>enabled</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/license/license-card.component.html</context>
+          <context context-type="linenumber">63,66</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="license.available" datatype="html">
         <source>Available</source>
         <context-group purpose="location">
