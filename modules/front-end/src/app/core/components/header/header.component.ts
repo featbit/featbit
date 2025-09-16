@@ -161,7 +161,7 @@ export class HeaderComponent implements OnInit {
   }
 
   navigateToWorkspace() {
-    this.router.navigateByUrl('/workspace').then();
+    this.router.navigateByUrl('/workspace/license').then();
   }
 
   // copy environment key

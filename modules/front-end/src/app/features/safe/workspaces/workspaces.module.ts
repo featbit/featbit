@@ -32,6 +32,8 @@ import { CoreModule } from "@core/core.module";
 import { NzToolTipModule } from "ng-zorro-antd/tooltip";
 import { WorkspaceComponent } from "@features/safe/workspaces/workspace/workspace.component";
 import { GlobalUserComponent } from './global-user/global-user.component';
+import { LicenseComponent } from './license/license.component';
+import { NzAlertComponent } from "ng-zorro-antd/alert";
 
 @NgModule({
   declarations: [
@@ -41,7 +43,8 @@ import { GlobalUserComponent } from './global-user/global-user.component';
     ProfileComponent,
     ProjectComponent,
     ProjectFilterPipe,
-    GlobalUserComponent
+    GlobalUserComponent,
+    LicenseComponent
   ],
   imports: [
     CommonModule,
@@ -70,7 +73,8 @@ import { GlobalUserComponent } from './global-user/global-user.component';
     ReactiveFormsModule,
     WorkspacesRoutingModule,
     CoreModule,
-    NzToolTipModule
+    NzToolTipModule,
+    NzAlertComponent
   ]
 })
 export class WorkspacesModule { }

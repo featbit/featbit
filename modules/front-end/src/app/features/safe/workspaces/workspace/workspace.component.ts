@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { copyToClipboard } from '@utils/index';
 import { IWorkspace, License, LicenseFeatureEnum } from '@shared/types';
 import { WorkspaceService } from "@services/workspace.service";
 import { debounceTime, first, map, switchMap } from "rxjs/operators";
@@ -17,12 +16,10 @@ import { PermissionsService } from "@services/permissions.service";
 export class WorkspaceComponent implements OnInit {
 
   isLoading: boolean = false;
-  nameKeyForm!: FormGroup;
+  nameKeyForm: FormGroup;
   ssoForm!: FormGroup;
-  licenseForm!: FormGroup;
 
   canUpdateGeneralSettings: boolean = false;
-  canUpdateLicense: boolean = false;
   canUpdateSSOSettings: boolean = false;
 
   isSsoGranted: boolean = false;
@@ -33,7 +30,6 @@ export class WorkspaceComponent implements OnInit {
 
   isNameKeyLoading: boolean = false;
   isSsoLoading: boolean = false;
-  isLicenseLoading: boolean = false;
 
   constructor(
     private workspaceService: WorkspaceService,
@@ -49,7 +45,6 @@ export class WorkspaceComponent implements OnInit {
     this.isSsoGranted = this.license.isGranted(LicenseFeatureEnum.Sso);
 
     this.canUpdateGeneralSettings = this.permissionsService.isGranted(generalResourceRNPattern.workspace, permissionActions.UpdateWorkspaceGeneralSettings);
-    this.canUpdateLicense = this.permissionsService.isGranted(generalResourceRNPattern.workspace, permissionActions.UpdateWorkspaceLicense);
     this.canUpdateSSOSettings = this.permissionsService.isGranted(generalResourceRNPattern.workspace, permissionActions.UpdateWorkspaceSSOSettings);
 
     this.initForm();
@@ -89,16 +84,6 @@ export class WorkspaceComponent implements OnInit {
         userEmailClaim: new FormControl(this.workspace.sso?.oidc?.userEmailClaim, [Validators.required]),
       });
     }
-
-    this.licenseForm = new FormGroup({
-      license: new FormControl(this.workspace.license, [Validators.required]),
-    });
-  }
-
-  copyText(text: string) {
-    copyToClipboard(text).then(
-      () => this.message.success($localize`:@@common.copy-success:Copied`)
-    );
   }
 
   updateWorkspace() {
@@ -151,34 +136,5 @@ export class WorkspaceComponent implements OnInit {
         },
         error: () => this.isSsoLoading = false
       });
-  }
-
-  updateLicense() {
-    if (!this.licenseForm.valid) {
-      for (const i in this.licenseForm.controls) {
-        this.licenseForm.controls[i].markAsDirty();
-        this.licenseForm.controls[i].updateValueAndValidity();
-      }
-      return;
-    }
-
-    const { license } = this.licenseForm.value;
-
-    this.isLicenseLoading = true;
-    this.workspaceService.updateLicense(license).subscribe({
-      next: (workspace) => {
-        this.isLicenseLoading = false;
-
-        this.workspaceService.setWorkspace(workspace);
-        this.message.success($localize`:@@org.org.license-update-success:License updated!`);
-
-        // reload page to apply new license
-        location.reload();
-      },
-      error: () => {
-        this.message.error($localize`:@@org.org.invalid-license:Invalid license, please contact FeatBit team to get a license!`);
-        this.isLicenseLoading = false;
-      }
-    });
   }
 }

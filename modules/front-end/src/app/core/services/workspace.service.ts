@@ -5,9 +5,6 @@ import { firstValueFrom, Observable, of } from "rxjs";
 import { IOidc, IWorkspace } from "@shared/types";
 import { CURRENT_WORKSPACE } from "@utils/localstorage-keys";
 import { catchError } from "rxjs/operators";
-import { getCurrentLicense } from "@utils/project-env";
-
-const DEFAULT_ALLOWED_AUTO_AGENTS = 9;
 
 @Injectable({
   providedIn: 'root'
@@ -34,25 +31,14 @@ export class WorkspaceService {
     );
   }
 
-  getAutoAgentQuota(): number {
-    const license = getCurrentLicense();
-    if (!license) {
-      // no license, use default quota
-      return DEFAULT_ALLOWED_AUTO_AGENTS;
+  getUsages(): Observable<{
+    [key: string]: {
+      total: number;
+      used: number;
     }
-
-    const metadata = license.data.metadata;
-    if (!metadata) {
-      // compatible with existing license without metadata
-      return DEFAULT_ALLOWED_AUTO_AGENTS;
-    }
-
-    if (!metadata.autoAgent?.limit) {
-      // malformed metadata, return 0
-      return 0;
-    }
-
-    return metadata.autoAgent.limit;
+  }> {
+    const url = `${this.baseUrl}/usages`;
+    return this.http.get<any>(url).pipe(catchError(() => of(undefined)));
   }
 
   isKeyUsed(key: string): Observable<boolean> {

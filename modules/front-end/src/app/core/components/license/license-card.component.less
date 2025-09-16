@@ -14,8 +14,17 @@
   // License Status Header
   .license-header {
     background: linear-gradient(135deg, @grey5-color 0%, @grey10-color 100%);
-    padding: 20px 24px;
+    padding: 10px 12px;
     border-bottom: 1px solid @divider-color;
+
+    .license-plan {
+      font-weight: 500;
+      color: @grey70-color;
+      background: white;
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid @grey20-color;
+    }
 
     .license-status {
       display: flex;
@@ -27,11 +36,14 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        padding: 8px 16px;
+        padding: 6px 12px;
         border-radius: 20px;
         font-weight: 500;
-        font-size: 14px;
         transition: all 0.2s ease;
+
+        i {
+          font-size: 16px;
+        }
 
         &.active {
           background: @green5-color;
@@ -62,16 +74,6 @@
             color: @red40-color;
           }
         }
-      }
-
-      .license-plan {
-        font-size: 16px;
-        font-weight: 600;
-        color: @grey70-color;
-        background: white;
-        padding: 8px 16px;
-        border-radius: 8px;
-        border: 1px solid @grey20-color;
       }
     }
   }
@@ -111,22 +113,20 @@
 
           &.warning {
             color: #FA8C16;
-            
+
             i {
               color: #FA8C16;
             }
 
             .expiry-note {
-              font-size: 12px;
               color: #FA8C16;
               font-weight: 400;
-              margin-left: 4px;
             }
           }
 
           &.expired {
             color: @red40-color;
-            
+
             i {
               color: @red40-color;
             }
@@ -268,61 +268,6 @@
       i {
         font-size: 18px;
         color: rgba(255, 255, 255, 0.9);
-      }
-    }
-  }
-
-  // Responsive Design
-  @media (max-width: 768px) {
-    .license-header {
-      padding: 16px 20px;
-
-      .license-status {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
-
-        .status-badge {
-          font-size: 13px;
-          padding: 6px 12px;
-        }
-
-        .license-plan {
-          font-size: 14px;
-          padding: 6px 12px;
-        }
-      }
-    }
-
-    .license-info {
-      padding: 20px;
-
-      .info-grid {
-        grid-template-columns: 1fr;
-        gap: 16px;
-      }
-    }
-
-    .license-features {
-      padding: 0 20px 20px 20px;
-
-      .features-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .features-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
-      }
-    }
-
-    .upgrade-notice {
-      margin: 0 20px 20px 20px;
-      padding: 14px;
-
-      .upgrade-content {
-        font-size: 13px;
       }
     }
   }
