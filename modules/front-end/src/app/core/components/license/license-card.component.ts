@@ -13,7 +13,7 @@ class LicenseDetail {
     name: string,
     isGranted: boolean,
     usage?: {
-      total: number,
+      quota: number,
       used: number
     }
   }[];
@@ -46,7 +46,7 @@ class LicenseDetail {
     }))
   }
 
-  updateUsage(id: LicenseFeatureEnum, usage: { total: number, used: number }) {
+  updateUsage(id: LicenseFeatureEnum, usage: { quota: number, used: number }) {
     const featureDetail = this.features.find(f => f.id === id);
     if (featureDetail) {
       featureDetail.usage = { ...usage };

@@ -3879,6 +3879,14 @@
         </context-group>
         <target>有效期至</target>
       </trans-unit>
+      <trans-unit id="license.days-remaining" datatype="html">
+        <source>days remaining</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/license/license-card.component.html</context>
+          <context context-type="linenumber">52,54</context>
+        </context-group>
+        <target>剩余天数</target>
+      </trans-unit>
       <trans-unit id="license.features" datatype="html">
         <source>Licensed Features</source>
         <context-group purpose="location">
@@ -3902,6 +3910,22 @@
           <context context-type="linenumber">82,84</context>
         </context-group>
         <target>不可用</target>
+      </trans-unit>
+      <trans-unit id="license.used" datatype="html">
+        <source>Used</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/license/license-card.component.html</context>
+          <context context-type="linenumber">85</context>
+        </context-group>
+        <target>已使用</target>
+      </trans-unit>
+      <trans-unit id="license.quota" datatype="html">
+        <source>Quota</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/license/license-card.component.html</context>
+          <context context-type="linenumber">85</context>
+        </context-group>
+        <target>配额</target>
       </trans-unit>
       <trans-unit id="common.sso" datatype="html">
         <source>SSO</source>
@@ -10052,7 +10076,7 @@
           <context context-type="sourcefile">src/app/features/safe/workspaces/license/license.component.html</context>
           <context context-type="linenumber">24,25</context>
         </context-group>
-        <target>生成 License 时需要提供您的 Workspace Id</target>
+        <target>生成许可证时需要提供您的 Workspace Id</target>
       </trans-unit>
       <trans-unit id="common.license" datatype="html">
         <source>License</source>

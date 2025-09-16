@@ -20,13 +20,8 @@ public class GetWorkspaceUsageHandler(IWorkspaceService service) : IRequestHandl
         foreach (var feature in LicenseFeatures.UsageFeatures)
         {
             var quota = GetQuota(feature);
-            var usage = await CountUsageAsync(feature);
-
-            dic[feature] = new
-            {
-                total =quota,
-                used = usage
-            };
+            var used = await CountUsageAsync(feature);
+            dic[feature] = new { quota, used };
         }
 
         return dic;

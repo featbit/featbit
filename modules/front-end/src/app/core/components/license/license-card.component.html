@@ -49,7 +49,7 @@
             <i nz-icon nzType="clock-circle" nzTheme="outline"></i>
             <span>{{ detail.exp | date: 'MMM dd, yyyy' }}</span>
             <span class="expiry-note" *ngIf="detail.isExpiringSoon() && !detail.isExpired()">
-            ({{ detail.getDaysUntilExpiry() }} days remaining)
+            ({{ detail.getDaysUntilExpiry() }} <span i18n="@@license.days-remaining">days remaining</span>)
             </span>
           </div>
         </div>
@@ -82,7 +82,7 @@
                   <span i18n="@@license.unavailable">Unavailable</span>
                 }
                 @if (feature.usage) {
-                  <span class="feature-usage"> ( Used: {{ feature.usage.used }} / Total: {{ feature.usage.total }} )</span>
+                  <span class="feature-usage"> ( <span i18n="@@license.used">Used</span>: {{ feature.usage.used }} / <span i18n="@@license.quota">Quota</span>: {{ feature.usage.quota }} )</span>
                 }
               </span>
             </div>

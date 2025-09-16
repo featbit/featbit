@@ -33,7 +33,7 @@ export class WorkspaceService {
 
   getUsages(): Observable<{
     [key: string]: {
-      total: number;
+      quota: number;
       used: number;
     }
   }> {

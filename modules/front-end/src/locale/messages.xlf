@@ -3622,6 +3622,13 @@
           <context context-type="linenumber">47,48</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="license.days-remaining" datatype="html">
+        <source>days remaining</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/license/license-card.component.html</context>
+          <context context-type="linenumber">52,54</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="license.features" datatype="html">
         <source>Licensed Features</source>
         <context-group purpose="location">
@@ -3641,6 +3648,20 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.html</context>
           <context context-type="linenumber">82,84</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="license.used" datatype="html">
+        <source>Used</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/license/license-card.component.html</context>
+          <context context-type="linenumber">85</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="license.quota" datatype="html">
+        <source>Quota</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/license/license-card.component.html</context>
+          <context context-type="linenumber">85</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.sso" datatype="html">
