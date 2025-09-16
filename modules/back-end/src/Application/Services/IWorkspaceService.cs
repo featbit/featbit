@@ -7,4 +7,6 @@ public interface IWorkspaceService : IService<Workspace>
     Task<bool> HasKeyBeenUsedAsync(Guid workspaceId, string key);
 
     Task<string> GetDefaultWorkspaceAsync();
+
+    Task<int> GetUsageAsync(Guid workspaceId, string feature);
 }

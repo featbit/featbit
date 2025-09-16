@@ -14,6 +14,8 @@ public static class LicenseFeatures
     public static readonly string[] All =
         [Asterisk, Sso, Schedule, MultiOrg, ChangeRequest, GlobalUser, ShareableSegment, AutoAgents];
 
+    public static readonly string[] UsageFeatures = [AutoAgents];
+
     public static bool IsDefined(string feature)
     {
         return All.Contains(feature);

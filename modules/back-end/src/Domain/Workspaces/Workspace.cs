@@ -2,6 +2,11 @@ namespace Domain.Workspaces;
 
 public class Workspace : AuditedEntity
 {
+    public static readonly Dictionary<string, int> DefaultQuotas = new()
+    {
+        { LicenseFeatures.AutoAgents, 9 }
+    };
+
     public string Name { get; set; }
 
     public string Key { get; set; }
