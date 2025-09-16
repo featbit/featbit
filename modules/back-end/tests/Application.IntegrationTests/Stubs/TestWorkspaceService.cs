@@ -16,4 +16,9 @@ public class TestWorkspaceService : NullServiceBase<Workspace>, IWorkspaceServic
     {
         return Task.FromResult(TestWorkspace.Key);
     }
+
+    public Task<int> GetUsageAsync(Guid workspaceId, string feature)
+    {
+        return Task.FromResult(0);
+    }
 }
