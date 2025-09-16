@@ -66,6 +66,10 @@ class LicenseDetail {
     return daysUntilExpiry <= 30 && daysUntilExpiry > 0;
   }
 
+  grantedFeaturesCount(): number {
+    return this.features.filter(f => f.isGranted).length;
+  }
+
   private getFeatureName(feature: LicenseFeatureEnum): string {
     switch (feature) {
       case LicenseFeatureEnum.Sso:
@@ -131,9 +135,5 @@ export class LicenseCardComponent implements OnInit {
         this.loading = false;
       }
     });
-  }
-
-  getGrantedFeaturesCount(): number {
-    return this.detail.features.filter(feature => feature.isGranted).length;
   }
 }
