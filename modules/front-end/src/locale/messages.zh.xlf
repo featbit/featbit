@@ -9692,7 +9692,7 @@
           <context context-type="sourcefile">src/app/features/safe/safe-routing.module.ts</context>
           <context context-type="linenumber">65</context>
         </context-group>
-        <target>Workspace</target>
+        <target>工作区</target>
       </trans-unit>
       <trans-unit id="relay-proxies" datatype="html">
         <source>Relay Proxies</source>
@@ -10740,7 +10740,7 @@
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
           <context context-type="linenumber">117</context>
         </context-group>
-        <target>Workspace</target>
+        <target>工作区</target>
       </trans-unit>
       <trans-unit id="iam.rsc-type.organization" datatype="html">
         <source>Organization</source>
