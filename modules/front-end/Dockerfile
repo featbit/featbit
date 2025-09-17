@@ -1,5 +1,5 @@
 # Stage 0, "build-stage", based on Node.js, to build and compile Angular
-FROM node:16.17 AS build-stage
+FROM node:22.19 AS build-stage
 
 WORKDIR /app
 COPY package*.json /app/
