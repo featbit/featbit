@@ -20,7 +20,7 @@ public class GetWorkspaceUsageHandler(IWorkspaceService service) : IRequestHandl
         foreach (var feature in LicenseFeatures.UsageFeatures)
         {
             var quota = GetQuota(feature);
-            var used = await CountUsageAsync(feature);
+            var used = await service.GetUsageAsync(request.WorkspaceId, feature);
             dic[feature] = new { quota, used };
         }
 
@@ -33,6 +33,7 @@ public class GetWorkspaceUsageHandler(IWorkspaceService service) : IRequestHandl
             var licenseString = workspace.License;
             if (string.IsNullOrWhiteSpace(licenseString))
             {
+                // return default quota for no license
                 return defaultQuota;
             }
 
@@ -59,7 +60,7 @@ public class GetWorkspaceUsageHandler(IWorkspaceService service) : IRequestHandl
             var propertyName = feature switch
             {
                 LicenseFeatures.AutoAgents => "autoAgent",
-                _ => throw new InvalidOperationException($"Not a usage feature '{feature}'"),
+                _ => throw new InvalidOperationException($"No property mapping for feature '{feature}'")
             };
 
             if (!metadataValue.TryGetProperty(propertyName, out var autoAgentsProperty) ||
@@ -70,15 +71,6 @@ public class GetWorkspaceUsageHandler(IWorkspaceService service) : IRequestHandl
             }
 
             return limitProperty.GetInt32();
-        }
-
-        async Task<int> CountUsageAsync(string feature)
-        {
-            return feature switch
-            {
-                LicenseFeatures.AutoAgents => await service.GetUsageAsync(request.WorkspaceId, feature),
-                _ => throw new InvalidOperationException($"Not a usage feature '{feature}'"),
-            };
         }
     }
 }

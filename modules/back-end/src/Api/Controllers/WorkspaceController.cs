@@ -42,8 +42,8 @@ public class WorkspaceController : ApiControllerBase
             WorkspaceId = WorkspaceId,
         };
 
-        var quota = await Mediator.Send(request);
-        return Ok(quota);
+        var usage = await Mediator.Send(request);
+        return Ok(usage);
     }
 
     [HttpPut("sso-oidc")]

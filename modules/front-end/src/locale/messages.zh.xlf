@@ -1766,7 +1766,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.ts</context>
-          <context context-type="linenumber">78</context>
+          <context context-type="linenumber">82</context>
         </context-group>
         <target>计划变更</target>
       </trans-unit>
@@ -1802,7 +1802,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.ts</context>
-          <context context-type="linenumber">80</context>
+          <context context-type="linenumber">84</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
@@ -3835,7 +3835,7 @@
         <source>Expired</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.html</context>
-          <context context-type="linenumber">15,16</context>
+          <context context-type="linenumber">17,18</context>
         </context-group>
         <target>已过期</target>
       </trans-unit>
@@ -3843,7 +3843,7 @@
         <source>Expiring Soon</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.html</context>
-          <context context-type="linenumber">18,20</context>
+          <context context-type="linenumber">20,22</context>
         </context-group>
         <target>即将到期</target>
       </trans-unit>
@@ -3851,7 +3851,7 @@
         <source>Active</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.html</context>
-          <context context-type="linenumber">21,23</context>
+          <context context-type="linenumber">23,25</context>
         </context-group>
         <target>有效</target>
       </trans-unit>
@@ -3859,7 +3859,7 @@
         <source>Issued To</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.html</context>
-          <context context-type="linenumber">31,32</context>
+          <context context-type="linenumber">33,34</context>
         </context-group>
         <target>颁发给</target>
       </trans-unit>
@@ -3867,7 +3867,7 @@
         <source>Issued At</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.html</context>
-          <context context-type="linenumber">39,40</context>
+          <context context-type="linenumber">41,42</context>
         </context-group>
         <target>颁发于</target>
       </trans-unit>
@@ -3875,7 +3875,7 @@
         <source>Expires At</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.html</context>
-          <context context-type="linenumber">47,48</context>
+          <context context-type="linenumber">49,50</context>
         </context-group>
         <target>有效期至</target>
       </trans-unit>
@@ -3883,7 +3883,7 @@
         <source>days remaining</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.html</context>
-          <context context-type="linenumber">52,54</context>
+          <context context-type="linenumber">54,56</context>
         </context-group>
         <target>剩余天数</target>
       </trans-unit>
@@ -3891,7 +3891,7 @@
         <source>Licensed Features</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.html</context>
-          <context context-type="linenumber">62,63</context>
+          <context context-type="linenumber">64,65</context>
         </context-group>
         <target>全部功能</target>
       </trans-unit>
@@ -3899,7 +3899,7 @@
         <source>enabled</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.html</context>
-          <context context-type="linenumber">63,66</context>
+          <context context-type="linenumber">65,68</context>
         </context-group>
         <target>已启用</target>
       </trans-unit>
@@ -3907,7 +3907,7 @@
         <source>Available</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.html</context>
-          <context context-type="linenumber">80,81</context>
+          <context context-type="linenumber">82,83</context>
         </context-group>
         <target>可用</target>
       </trans-unit>
@@ -3915,7 +3915,7 @@
         <source>Unavailable</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.html</context>
-          <context context-type="linenumber">82,84</context>
+          <context context-type="linenumber">84,86</context>
         </context-group>
         <target>不可用</target>
       </trans-unit>
@@ -3923,7 +3923,7 @@
         <source>Used</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.html</context>
-          <context context-type="linenumber">85</context>
+          <context context-type="linenumber">87</context>
         </context-group>
         <target>已使用</target>
       </trans-unit>
@@ -3931,7 +3931,7 @@
         <source>Quota</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.html</context>
-          <context context-type="linenumber">85</context>
+          <context context-type="linenumber">87</context>
         </context-group>
         <target>配额</target>
       </trans-unit>
@@ -3939,7 +3939,7 @@
         <source>SSO</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.ts</context>
-          <context context-type="linenumber">76</context>
+          <context context-type="linenumber">80</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
@@ -3951,7 +3951,7 @@
         <source>Multiple Organization</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.ts</context>
-          <context context-type="linenumber">82</context>
+          <context context-type="linenumber">86</context>
         </context-group>
         <target>多机构</target>
       </trans-unit>
@@ -3959,7 +3959,7 @@
         <source>Global User</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.ts</context>
-          <context context-type="linenumber">84</context>
+          <context context-type="linenumber">88</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
@@ -3975,7 +3975,7 @@
         <source>Shareable Segment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.ts</context>
-          <context context-type="linenumber">86</context>
+          <context context-type="linenumber">90</context>
         </context-group>
         <target>共享用户组</target>
       </trans-unit>
@@ -3983,7 +3983,7 @@
         <source>Auto Agents</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.ts</context>
-          <context context-type="linenumber">88</context>
+          <context context-type="linenumber">92</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
@@ -3995,7 +3995,7 @@
         <source>Failed to load license usage, please try again later!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.ts</context>
-          <context context-type="linenumber">134</context>
+          <context context-type="linenumber">138</context>
         </context-group>
         <target>加载许可证用量失败，请稍后再试</target>
       </trans-unit>
@@ -10054,27 +10054,11 @@
         </context-group>
         <target>加载数据失败</target>
       </trans-unit>
-      <trans-unit id="license.no-license-available" datatype="html">
-        <source>No License Available</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/workspaces/license/license.component.html</context>
-          <context context-type="linenumber">7,8</context>
-        </context-group>
-        <target>没有可用的许可证</target>
-      </trans-unit>
-      <trans-unit id="license.contact-featbit-team-to-get-license" datatype="html">
-        <source>Please contact FeatBit team to get a license or generate a trial license from</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/workspaces/license/license.component.html</context>
-          <context context-type="linenumber">14,15</context>
-        </context-group>
-        <target>请联系 FeatBit 团队获取许可证或从</target>
-      </trans-unit>
       <trans-unit id="common.workspace-id" datatype="html">
         <source>Workspace Id</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/license/license.component.html</context>
-          <context context-type="linenumber">22,23</context>
+          <context context-type="linenumber">4,5</context>
         </context-group>
         <target>工作区 Id</target>
       </trans-unit>
@@ -10082,7 +10066,7 @@
         <source>You will need to provide this Id to generate the license</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/license/license.component.html</context>
-          <context context-type="linenumber">24,25</context>
+          <context context-type="linenumber">6,7</context>
         </context-group>
         <target>生成许可证时需要提供您的 Workspace Id</target>
       </trans-unit>
@@ -10090,23 +10074,19 @@
         <source>License</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/license/license.component.html</context>
-          <context context-type="linenumber">29</context>
+          <context context-type="linenumber">11</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/license/license.component.html</context>
-          <context context-type="linenumber">42,43</context>
+          <context context-type="linenumber">24,25</context>
         </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/workspaces/license/license.component.html</context>
-          <context context-type="linenumber">47</context>
-        </context-group>
-        <target>License</target>
+        <target>许可证</target>
       </trans-unit>
       <trans-unit id="common.copyId" datatype="html">
         <source>Copy Id</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/license/license.component.html</context>
-          <context context-type="linenumber">36,37</context>
+          <context context-type="linenumber">18,19</context>
         </context-group>
         <target>复制 Id</target>
       </trans-unit>
@@ -10114,17 +10094,41 @@
         <source>License cannot be empty</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/license/license.component.html</context>
-          <context context-type="linenumber">43</context>
+          <context context-type="linenumber">25</context>
         </context-group>
         <target>许可证不可为空</target>
+      </trans-unit>
+      <trans-unit id="license.enter-your-license-here" datatype="html">
+        <source>Enter your license here</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/license/license.component.html</context>
+          <context context-type="linenumber">28</context>
+        </context-group>
+        <target>在此填入您的许可证</target>
       </trans-unit>
       <trans-unit id="common.updateLicense" datatype="html">
         <source>Update</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/license/license.component.html</context>
-          <context context-type="linenumber">54,55</context>
+          <context context-type="linenumber">35,36</context>
         </context-group>
         <target>更新</target>
+      </trans-unit>
+      <trans-unit id="license.no-license-available" datatype="html">
+        <source>No License Available</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/license/license.component.html</context>
+          <context context-type="linenumber">46,47</context>
+        </context-group>
+        <target>没有可用的许可证</target>
+      </trans-unit>
+      <trans-unit id="license.contact-featbit-team-to-get-license" datatype="html">
+        <source>Please contact FeatBit team to get a license or generate a trial license from</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/license/license.component.html</context>
+          <context context-type="linenumber">53,54</context>
+        </context-group>
+        <target>请联系 FeatBit 团队获取许可证或从该网站获取一个试用许可证</target>
       </trans-unit>
       <trans-unit id="org.org.license-update-success" datatype="html">
         <source>License updated!</source>

@@ -8,8 +8,10 @@
     <div class="license-header">
       <div class="license-status">
         <div class="license-plan" *ngIf="detail.plan">{{ detail.plan | titlecase }} Plan</div>
-        <div class="status-badge" [class.active]="!detail.isExpired() && !detail.isExpiringSoon()"
-             [class.warning]="detail.isExpiringSoon()" [class.expired]="detail.isExpired()">
+        <div class="status-badge"
+             [class.active]="detail.isActive()"
+             [class.warning]="detail.isExpiringSoon()"
+             [class.expired]="detail.isExpired()">
           @if (detail.isExpired()) {
             <i nz-icon nzType="close-circle" nzTheme="outline"></i>
             <span i18n="@@license.expired">Expired</span>

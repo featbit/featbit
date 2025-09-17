@@ -57,6 +57,10 @@ class LicenseDetail {
     return Math.ceil((this.exp.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
   }
 
+  isActive(): boolean {
+    return !this.isExpiringSoon() && !this.isExpired();
+  }
+
   isExpired(): boolean {
     return new Date() > this.exp;
   }

@@ -28,11 +28,6 @@ public class WorkspaceService(AppDbContext dbContext)
 
     public async Task<int> GetUsageAsync(Guid workspaceId, string feature)
     {
-        if (!LicenseFeatures.UsageFeatures.Contains(feature))
-        {
-            return 0;
-        }
-
         return feature switch
         {
             LicenseFeatures.AutoAgents => await GetAutoAgentsUsageAsync(),

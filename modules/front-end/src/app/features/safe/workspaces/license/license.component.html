@@ -1,22 +1,4 @@
 <div class="standard-div rows">
-  @if (license?.data) {
-    <license-card [license]="license"></license-card>
-  } @else {
-    <nz-alert
-      nzType="info"
-      nzMessage="No License Available"
-      i18n-nzMessage="@@license.no-license-available"
-      [nzDescription]="notice"
-      nzIconType="icons:icon-info-outline"
-      nzShowIcon>
-      <ng-template #notice>
-        <div>
-          <span i18n="@@license.contact-featbit-team-to-get-license">Please contact FeatBit team to get a license or generate a trial license from</span>&nbsp;
-          <a href="https://dashboard.featbit.co/account" class="bash-board-link" target="_blank">https://dashboard.featbit.co/account</a>
-        </div>
-      </ng-template>
-    </nz-alert>
-  }
   <form class="form" nz-form [formGroup]="form" [nzLayout]="'vertical'">
     <nz-form-item>
       <nz-form-label i18n="@@common.workspace-id">Workspace Id</nz-form-label>
@@ -43,8 +25,7 @@
       <nz-form-control nzErrorTip="License cannot be empty" i18n-nzErrorTip="@@common.license-cannot-be-empty">
         <div class="form-item">
           <nz-input-group [nzPrefix]="licenseIcon">
-            <input type="text" nz-input formControlName="license" placeholder="License"
-                   i18n-placeholder="@@common.license"/>
+            <input type="text" nz-input formControlName="license" placeholder="Enter your license here" i18n-placeholder="@@license.enter-your-license-here"/>
             <ng-template #licenseIcon>
               <i nz-icon nzType="icons:icon-license"></i>
             </ng-template>
@@ -57,4 +38,22 @@
       </nz-form-control>
     </nz-form-item>
   </form>
+  @if (license?.data) {
+    <license-card [license]="license"></license-card>
+  } @else {
+    <nz-alert
+      nzType="info"
+      nzMessage="No License Available"
+      i18n-nzMessage="@@license.no-license-available"
+      [nzDescription]="notice"
+      nzIconType="icons:icon-info-outline"
+      nzShowIcon>
+      <ng-template #notice>
+        <div>
+          <span i18n="@@license.contact-featbit-team-to-get-license">Please contact FeatBit team to get a license or generate a trial license from</span>&nbsp;
+          <a href="https://dashboard.featbit.co/account" class="bash-board-link" target="_blank">https://dashboard.featbit.co/account</a>
+        </div>
+      </ng-template>
+    </nz-alert>
+  }
 </div>
