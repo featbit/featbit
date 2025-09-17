@@ -41,7 +41,7 @@
     @if (isServiceAccessToken) {
       <div class="permissions">
         <nz-form-label nzNoColon nzRequired i18n="@@common.permissions">Permissions</nz-form-label>
-        <nz-collapse nzExpandIconPosition="right">
+        <nz-collapse nzExpandIconPosition="end">
           @for (rt of authorizedResourceTypes; track rt.type; let first = $first) {
             <nz-collapse-panel
               class="resource-type"

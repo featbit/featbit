@@ -18,7 +18,7 @@
       <div class="content-container">
         @for (trigger of triggers; track trigger) {
           <div class="standard-div">
-            <nz-card nzBorderless [nzTitle]="trigger.type | T: flagTriggerTypeLabel[trigger.type] : 'trigger-type'" [nzExtra]="triggerInfo" [nzActions]="[actionStatus, actionReset, actionRemove]">
+            <nz-card [nzBordered]="false" [nzTitle]="trigger.type | T: flagTriggerTypeLabel[trigger.type] : 'trigger-type'" [nzExtra]="triggerInfo" [nzActions]="[actionStatus, actionReset, actionRemove]">
               <div class="trigger-body">
                 <div class="trigger-body-main">
                   <div class="trigger-main">
