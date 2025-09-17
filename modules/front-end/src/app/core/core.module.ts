@@ -89,7 +89,7 @@ import {
 } from "@core/components/pending-changes-drawer/pending-changes-drawer.component";
 import { ChangeListModule } from "@core/components/change-list/change-list.module";
 import { PipesModule } from "@core/pipes/pipes.module";
-import { LicenseComponent } from "@core/components/license/license.component";
+import { LicenseCardComponent } from "@core/components/license/license-card.component";
 import { WebhookDrawerComponent } from './components/webhook-drawer/webhook-drawer.component';
 import { HandlebarsService } from "@services/handlebars.service";
 import { TestWebhookModalComponent } from './components/test-webhook-modal/test-webhook-modal.component';
@@ -142,7 +142,7 @@ import { RelayProxyKeyModalComponent } from './components/relay-proxy-key-modal/
     AccessTokenDrawerComponent,
     RelayProxyDrawerComponent,
     PrismComponent,
-    LicenseComponent,
+    LicenseCardComponent,
     WebhookDrawerComponent,
     TestWebhookModalComponent,
     WebhookDeliveryComponent,
@@ -251,7 +251,7 @@ import { RelayProxyKeyModalComponent } from './components/relay-proxy-key-modal/
     AccessTokenDrawerComponent,
     RelayProxyDrawerComponent,
     PrismComponent,
-    LicenseComponent,
+    LicenseCardComponent,
     WebhookDrawerComponent,
     TestWebhookModalComponent,
     WebhookDeliveryComponent,

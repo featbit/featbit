@@ -94,6 +94,7 @@ export enum LicenseFeatureEnum {
   MultiOrg = 'multi-organization',
   GlobalUser = 'global-user',
   ShareableSegment = 'shareable-segment',
+  AutoAgents = 'auto-agents',
 }
 
 export interface ILicense {
@@ -103,7 +104,8 @@ export interface ILicense {
   iat: number,
   exp: number,
   issuer: string,
-  features: LicenseFeatureEnum[]
+  features: LicenseFeatureEnum[],
+  metadata?: any
 }
 
 export class License {

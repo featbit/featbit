@@ -1,0 +1,96 @@
+@if (loading) {
+  <div class="loading-container">
+    <nz-spin nzTip="Loading..." i18n-nzTip="@@common.loading"></nz-spin>
+  </div>
+} @else {
+  <div class="license-card">
+    <!-- License Status Header -->
+    <div class="license-header">
+      <div class="license-status">
+        <div class="license-plan" *ngIf="detail.plan">{{ detail.plan | titlecase }} Plan</div>
+        <div class="status-badge"
+             [class.active]="detail.isActive()"
+             [class.warning]="detail.isExpiringSoon()"
+             [class.expired]="detail.isExpired()">
+          @if (detail.isExpired()) {
+            <i nz-icon nzType="close-circle" nzTheme="outline"></i>
+            <span i18n="@@license.expired">Expired</span>
+          } @else if (detail.isExpiringSoon()) {
+            <i nz-icon nzType="exclamation-circle" nzTheme="outline"></i>
+            <span i18n="@@license.expiring-soon">Expiring Soon</span>
+          } @else {
+            <i nz-icon nzType="check-circle" nzTheme="outline"></i>
+            <span i18n="@@license.active">Active</span>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- License Information -->
+    <div class="license-info">
+      <div class="info-grid">
+        <div class="info-item">
+          <div class="info-label" i18n="@@license.subject">Issued To</div>
+          <div class="info-value">
+            <i nz-icon nzType="user" nzTheme="outline"></i>
+            <span>{{ detail.sub || 'N/A' }}</span>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <div class="info-label" i18n="@@license.iat">Issued At</div>
+          <div class="info-value">
+            <i nz-icon nzType="calendar" nzTheme="outline"></i>
+            <span>{{ detail.iat | date: 'MMM dd, yyyy' }}</span>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <div class="info-label" i18n="@@license.exp">Expires At</div>
+          <div class="info-value" [class.warning]="detail.isExpiringSoon()" [class.expired]="detail.isExpired()">
+            <i nz-icon nzType="clock-circle" nzTheme="outline"></i>
+            <span>{{ detail.exp | date: 'MMM dd, yyyy' }}</span>
+            <span class="expiry-note" *ngIf="detail.isExpiringSoon() && !detail.isExpired()">
+            ({{ detail.getDaysUntilExpiry() }} <span i18n="@@license.days-remaining">days remaining</span>)
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="license-features">
+      <div class="features-header">
+        <span class="features-title" i18n="@@license.features">Licensed Features</span>
+        <span class="features-count">{{ detail.grantedFeaturesCount() }} of {{ detail.features.length }} <span i18n="@@license.enabled">enabled</span></span>
+      </div>
+
+      <div class="features-grid">
+        @for (feature of detail.features; track $index) {
+          <div class="feature-item" [class.granted]="feature.isGranted" [class.denied]="!feature.isGranted">
+            <div class="feature-icon">
+              @if (feature.isGranted) {
+                <i nz-icon nzType="check-circle" nzTheme="fill"></i>
+              } @else {
+                <i nz-icon nzType="close-circle" nzTheme="fill"></i>
+              }
+            </div>
+            <div class="feature-content">
+              <span class="feature-name">{{ feature.name }}</span>
+              <span class="feature-status">
+                @if (feature.isGranted) {
+                  <span i18n="@@license.available">Available</span>
+                } @else {
+                  <span i18n="@@license.unavailable">Unavailable</span>
+                }
+                @if (feature.usage) {
+                  <span class="feature-usage"> ( <span i18n="@@license.used">Used</span>: {{ feature.usage.used }} / <span i18n="@@license.quota">Quota</span>: {{ feature.usage.quota }} )</span>
+                }
+              </span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+}

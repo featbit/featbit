@@ -5,6 +5,7 @@ import { OrganizationComponent } from './organization/organization.component';
 import { ProfileComponent } from './profile/profile.component';
 import { ProjectComponent } from './project/project.component';
 import { GlobalUserComponent } from "@features/safe/workspaces/global-user/global-user.component";
+import { LicenseComponent } from "@features/safe/workspaces/license/license.component";
 
 const routes: Routes = [
   {
@@ -16,6 +17,12 @@ const routes: Routes = [
         component: OrganizationComponent,
         data: {
           breadcrumb: $localize`:@@workspace.routing.org:Organization`
+        },
+      }, {
+        path: 'license',
+        component: LicenseComponent,
+        data: {
+          breadcrumb: $localize`:@@workspace.routing.license:License`
         },
       }, {
         path: 'projects',

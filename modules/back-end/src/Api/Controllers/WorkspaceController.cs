@@ -34,6 +34,18 @@ public class WorkspaceController : ApiControllerBase
         return Ok(workspace);
     }
 
+    [HttpGet("usages")]
+    public async Task<ApiResponse<object>> GetUsagesAsync()
+    {
+        var request = new GetWorkspaceUsages
+        {
+            WorkspaceId = WorkspaceId,
+        };
+
+        var usage = await Mediator.Send(request);
+        return Ok(usage);
+    }
+
     [HttpPut("sso-oidc")]
     public async Task<ApiResponse<WorkspaceVm>> UpdateOidcAsync(UpdateOidc request)
     {

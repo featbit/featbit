@@ -31,6 +31,16 @@ export class WorkspaceService {
     );
   }
 
+  getUsages(): Observable<{
+    [key: string]: {
+      quota: number;
+      used: number;
+    }
+  }> {
+    const url = `${this.baseUrl}/usages`;
+    return this.http.get<any>(url).pipe(catchError(() => of(undefined)));
+  }
+
   isKeyUsed(key: string): Observable<boolean> {
     const url = `${this.baseUrl}/is-key-used?key=${key}`;
 

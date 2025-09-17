@@ -1,6 +1,5 @@
 @if (!isLoading) {
   <div class="standard-div rows">
-    <h5 nz-typography i18n="@@common.general-settings">General settings</h5>
     <form nz-form [formGroup]="nameKeyForm" [nzLayout]="'vertical'" (ngSubmit)="updateWorkspace()">
       <nz-form-item>
         <nz-form-label i18n="@@common.name">Name</nz-form-label>
@@ -46,56 +45,7 @@
     <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 4 }"></nz-skeleton>
   </div>
 }
-@if (canUpdateLicense) {
-  @if (!isLoading) {
-    <div class="standard-div rows">
-      <h5 nz-typography i18n="@@common.license-settings">License settings</h5>
-      <div class="row">
-        <div class="row-title">
-          <span i18n="@@common.id">Id</span>
-          <i nz-icon i18n-nz-tooltip="@@common.workspace-id-copy-hint" nz-tooltip="You will need to provide this Id to generate the license, please contact us to get a license." nzType="icons:icon-info-outline"></i>
-        </div>
-        <div class="row-content">
-          <nz-form-item class="extend">
-            <nz-input-group class="row-input-group" [nzPrefix]="idIcon">
-              <input disabled type="text" nz-input [ngModel]="workspace?.id" placeholder="License" i18n-placeholder="@@common.license"/>
-              <ng-template #idIcon>
-                <i nz-icon nzType="icons:icon-id"></i>
-              </ng-template>
-            </nz-input-group>
-          </nz-form-item>
-          <button nz-button class="copy-id-btn" nzType="primary" (click)="copyText(workspace?.id)">
-            <i nz-icon nzType="icons:icon-copy"></i>
-            <ng-container i18n="@@common.copy">Copy</ng-container>
-          </button>
-        </div>
-      </div>
-      <div class="row">
-        <div class="row-title" i18n="@@common.license">License</div>
-        <form class="row-content" nz-form [formGroup]="licenseForm" [nzLayout]="'inline'" (ngSubmit)="updateLicense()">
-          <nz-form-item class="extend">
-            <nz-form-control nzErrorTip="License is mandatory!" i18n-nzErrorTip="@@common.license-mandatory">
-              <nz-input-group class="row-input-group" [nzPrefix]="licenseIcon">
-                <input type="text" nz-input formControlName="license" placeholder="License" i18n-placeholder="@@common.license"/>
-                <ng-template #licenseIcon>
-                  <i nz-icon nzType="icons:icon-license"></i>
-                </ng-template>
-              </nz-input-group>
-            </nz-form-control>
-          </nz-form-item>
-          <button nz-button class="update-license-btn" nzType="primary" [nzLoading]="isLicenseLoading">
-            <i nz-icon nzType="icons:icon-sync"></i>
-            <ng-container i18n="@@common.updateLicense">Update</ng-container>
-          </button>
-        </form>
-      </div>
-    </div>
-  } @else {
-    <div class="block" style="margin: auto;text-align: center">
-      <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 4 }"></nz-skeleton>
-    </div>
-  }
-}
+
 @if (canUpdateSSOSettings && isSsoGranted) {
   @if (!isLoading) {
     <div class="standard-div rows">

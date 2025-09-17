@@ -8,26 +8,14 @@
   </nz-breadcrumb>
 
   <div class="header-btns">
-    @if (license.data) {
-      <div class="license-plan-wrapper" nz-popover i18n-nzPopoverTitle="@@common.current-license" nzPopoverTitle="Current License" [nzPopoverContent]="licenseData" nzPopoverOverlayClassName="license-data-popover" nzPopoverPlacement="bottom">
-        <span class="plan-name">{{license.data?.plan}}</span>
-        <i nz-icon nzType="icons:icon-medal"></i>
-      </div>
-    } @else {
-      <div class="license-plan-wrapper" nz-popover i18n-nz-popover="@@common.upgrade-to-enterprise" nzPopoverTitle="Upgrade to Enterprise" [nzPopoverContent]="upgradeLicense" nzPopoverOverlayClassName="license-data-popover" nzPopoverPlacement="bottom">
+    <div (click)="navigateToWorkspace()" class="license-plan-wrapper">
+      @if (license.data) {
+        <span class="plan-name">{{ license.data?.plan }}</span>
+      } @else {
         <span i18n="@@common.upgrade-to-enterprise">Upgrade to Enterprise</span>
-        <i nz-icon nzType="icons:icon-medal"></i>
-      </div>
-    }
-    <ng-template #licenseData>
-      <license [license]="license"></license>
-    </ng-template>
-    <ng-template #upgradeLicense>
-      <div>
-        <span i18n="@@common.contact-featbit-team-to-get-license">Please contact FeatBit team to get a license or generate a trial license from</span>
-        <a href="https://dashboard.featbit.co/account" class="bash-board-link" target="_blank">https://dashboard.featbit.co/account</a>
-      </div>
-    </ng-template>
+      }
+      <i nz-icon nzType="icons:icon-medal"></i>
+    </div>
 
     <a target="_blank" class="header-btn doc-btn" href="https://docs.featbit.co"><span nz-icon nzType="read" nzTheme="outline"></span></a>
     <div class="org-btns">
