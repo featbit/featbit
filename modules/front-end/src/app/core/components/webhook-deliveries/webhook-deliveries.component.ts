@@ -48,7 +48,20 @@ export class WebhookDeliveriesComponent {
       value: event.value
     }
   ));
-  statuses: string[] = ['All', 'Succeeded', 'Failed'];
+  statuses = [
+    {
+      label: $localize`:@@common.all:All`,
+      value: 'All'
+    },
+    {
+      label: $localize`:@@common.succeeded:Succeeded`,
+      value: 'Succeeded'
+    },
+    {
+      label: $localize`:@@common.failed:Failed`,
+      value: 'Failed'
+    }
+  ];
 
   loadDeliveries() {
     this.isLoading = true;
@@ -69,9 +82,10 @@ export class WebhookDeliveriesComponent {
     this.search$.next();
   }
 
-  onStatusChange(index: number) {
-    const status = this.statuses[index];
-    this.filter.success = status === 'All' ? null : status === 'Succeeded';
+  onStatusChange(selectedStatus: string) {
+    this.filter.success = selectedStatus === 'All'
+      ? null
+      : selectedStatus === 'Succeeded';
     this.doSearch();
   }
 
