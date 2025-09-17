@@ -1,4 +1,4 @@
-FROM python:3.9-slim-buster
+FROM python:3.9-slim-bookworm
 ENV TEST=false \
     KAFKA_HOSTS=kafka:9092 \
     KAFKA_SECURITY_PROTOCOL=PLAINTEXT \
