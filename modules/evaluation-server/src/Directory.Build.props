@@ -1,6 +1,6 @@
 <Project>
     <PropertyGroup>
-        <PackageVersion>5.1.0-preview</PackageVersion>
+        <PackageVersion>5.1.0</PackageVersion>
         <Authors>FeatBit</Authors>
         <Owners>FeatBit</Owners>
         <Company>FeatBit</Company>
