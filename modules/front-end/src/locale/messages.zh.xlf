@@ -389,6 +389,10 @@
           <context context-type="linenumber">59,60</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/webhook-deliveries/webhook-deliveries.component.ts</context>
+          <context context-type="linenumber">53</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/metrics/metrics.component.html</context>
           <context context-type="linenumber">12,13</context>
         </context-group>
@@ -2143,7 +2147,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/segment-creation-modal/segment-creation-modal.component.ts</context>
-          <context context-type="linenumber">162</context>
+          <context context-type="linenumber">168</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
@@ -5696,7 +5700,7 @@
         <source>Current Environment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/segment-creation-modal/segment-creation-modal.component.ts</context>
-          <context context-type="linenumber">47</context>
+          <context context-type="linenumber">48</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
@@ -5708,7 +5712,7 @@
         <source>Shareable</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/segment-creation-modal/segment-creation-modal.component.ts</context>
-          <context context-type="linenumber">48</context>
+          <context context-type="linenumber">52</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
@@ -6076,11 +6080,27 @@
         </context-group>
         <target>发生于</target>
       </trans-unit>
+      <trans-unit id="common.succeeded" datatype="html">
+        <source>Succeeded</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/webhook-deliveries/webhook-deliveries.component.ts</context>
+          <context context-type="linenumber">57</context>
+        </context-group>
+        <target>成功</target>
+      </trans-unit>
+      <trans-unit id="common.failed" datatype="html">
+        <source>Failed</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/webhook-deliveries/webhook-deliveries.component.ts</context>
+          <context context-type="linenumber">61</context>
+        </context-group>
+        <target>失败</target>
+      </trans-unit>
       <trans-unit id="common.loading-failed-try-again" datatype="html">
         <source>Loading failed, please try again</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-deliveries/webhook-deliveries.component.ts</context>
-          <context context-type="linenumber">62</context>
+          <context context-type="linenumber">75</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/metrics/metrics.component.ts</context>
