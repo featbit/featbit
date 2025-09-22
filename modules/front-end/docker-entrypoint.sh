@@ -16,7 +16,7 @@ for locale in /usr/share/nginx/featbit/*; do
       sed -i "s|<base href=\"/${lang}/\"|<base href=\"${BASE_HREF}/${lang}/\"|g" "$locale/index.html"
     fi
 
-   # Generate env.js from env.template.js if available
+    # Generate env.js from env.template.js if available
     if [ -f "$locale/assets/env.template.js" ]; then
       envsubst < "$locale/assets/env.template.js" > "$locale/assets/env.js"
     fi
