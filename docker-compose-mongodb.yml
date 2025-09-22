@@ -6,6 +6,7 @@ services:
       - API_URL=http://localhost:5000
       - DEMO_URL=http://localhost:5173
       - EVALUATION_URL=http://localhost:5100
+      - BASE_HREF=/
     depends_on:
       - api-server
       - demo-dino-game-vue
