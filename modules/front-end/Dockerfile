@@ -19,7 +19,9 @@ ENV API_URL \
 RUN apt-get update -y && apt-get install gettext-base
 
 COPY --from=build-stage /app/dist/featbit/browser/ /usr/share/nginx/featbit/
-COPY ./nginx.conf /etc/nginx/conf.d/default.conf
+COPY ./nginx.conf /etc/nginx/conf.d/nginx.default.conf
+COPY ./nginx.base_href.conf /etc/nginx/conf.d/nginx.base_href.conf
+
 COPY docker-entrypoint.sh /scripts/
 WORKDIR /scripts
 RUN chmod +x docker-entrypoint.sh
