@@ -7,7 +7,7 @@ set -e
 BASE_HREF="${BASE_HREF%/}"
 
 # Select and process nginx configuration based on BASE_HREF
-if [ -n "$BASE_HREF" ] && [ "$BASE_HREF" != "" ]; then
+if [ -n "$BASE_HREF" ]; then
   echo "Using nginx.base_href.conf with BASE_HREF=$BASE_HREF"
   envsubst '$BASE_HREF' < /etc/nginx/conf.d/nginx.base_href.conf > /etc/nginx/conf.d/default.conf
 else
