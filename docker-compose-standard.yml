@@ -6,6 +6,7 @@ services:
       - API_URL=http://localhost:5000
       - DEMO_URL=https://featbit-samples.vercel.app
       - EVALUATION_URL=http://localhost:5100
+      - BASE_HREF=/
     depends_on:
       - api-server
     ports:
