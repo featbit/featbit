@@ -63,7 +63,7 @@ public partial class PostgresMessageConsumer(
                 Log.MessagePolled(logger, topic, messages.Count);
 
                 // handle messages
-                await HandleTopicMessagesAsync(topic, messages, stoppingToken);
+                await HandleMessagesAsync(topic, messages, stoppingToken);
 
                 // if messages are less than batch size, delay consumer by PollIntervalInSeconds
                 if (messages.Count < PollBatchSize)
@@ -102,7 +102,7 @@ public partial class PostgresMessageConsumer(
         return messages.AsList();
     }
 
-    private async Task HandleTopicMessagesAsync(
+    private async Task HandleMessagesAsync(
         string topic,
         List<(long id, string payload)> messages,
         CancellationToken stoppingToken)
