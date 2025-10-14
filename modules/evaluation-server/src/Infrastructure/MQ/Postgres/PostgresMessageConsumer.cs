@@ -196,17 +196,25 @@ public partial class PostgresMessageConsumer : BackgroundService
                 return;
             }
 
-            await using var connection = await _dataSource.OpenConnectionAsync(stoppingToken);
-            var payload = await connection.QueryFirstOrDefaultAsync<string>(
-                "select payload from queue_messages where id = @Id", new { Id = messageId }
-            );
-
+            var payload = await GetPayloadAsync();
             if (string.IsNullOrWhiteSpace(payload))
             {
                 return;
             }
 
             await handler.HandleAsync(payload, stoppingToken);
+
+            return;
+
+            // ensure the connection is disposed after the payload is retrieved
+            async Task<string?> GetPayloadAsync()
+            {
+                await using var connection = await _dataSource.OpenConnectionAsync(stoppingToken);
+
+                return await connection.QueryFirstOrDefaultAsync<string>(
+                    "select payload from queue_messages where id = @Id", new { Id = messageId }
+                );
+            }
         }
     }
 
