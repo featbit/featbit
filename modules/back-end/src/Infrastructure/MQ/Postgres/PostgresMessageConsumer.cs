@@ -63,13 +63,7 @@ public partial class PostgresMessageConsumer(
                 Log.MessagePolled(logger, topic, messages.Count);
 
                 // handle messages
-                await using var connection = await dataSource.OpenConnectionAsync(stoppingToken);
-                foreach (var (id, payload) in messages)
-                {
-                    var error = await HandleAsync(topic, payload);
-
-                    await MarkAsProcessed(connection, id, error);
-                }
+                await HandleMessagesAsync(topic, messages, stoppingToken);
 
                 // if messages are less than batch size, delay consumer by PollIntervalInSeconds
                 if (messages.Count < PollBatchSize)
@@ -90,8 +84,63 @@ public partial class PostgresMessageConsumer(
                 await Task.Delay(TimeSpan.FromSeconds(RetryIntervalInSeconds), stoppingToken);
             }
         }
+    }
+
+    private async Task<List<(long id, string payload)>> PollAsync(string topic, CancellationToken stoppingToken)
+    {
+        await using var connection = await dataSource.OpenConnectionAsync(stoppingToken);
+
+        await using var transaction =
+            await connection.BeginTransactionAsync(IsolationLevel.ReadCommitted, stoppingToken);
+
+        var messages = await connection.QueryAsync<(long id, string payload)>(
+            FetchSql, new { Topic = topic, BatchSize = PollBatchSize }
+        );
+
+        await transaction.CommitAsync(stoppingToken);
+
+        return messages.AsList();
+    }
+
+    private async Task HandleMessagesAsync(
+        string topic,
+        List<(long id, string payload)> messages,
+        CancellationToken stoppingToken)
+    {
+        await using var connection = await dataSource.OpenConnectionAsync(stoppingToken);
+        foreach (var (id, payload) in messages)
+        {
+            var error = await HandleAsync(payload);
+            await MarkAsProcessed(connection, id, error);
+        }
 
         return;
+
+        async Task<string> HandleAsync(string payload)
+        {
+            var handler = scopeFactory.CreateScope()
+                .ServiceProvider
+                .GetKeyedService<IMessageHandler>(topic);
+
+            if (handler is null)
+            {
+                Log.NoHandlerForTopic(logger, topic);
+                return $"No handler for topic: {topic}";
+            }
+
+            try
+            {
+                await handler.HandleAsync(payload);
+                Log.MessageHandled(logger, payload);
+
+                return string.Empty;
+            }
+            catch (Exception ex)
+            {
+                Log.ErrorConsumeMessage(logger, payload, ex);
+                return ex.Message;
+            }
+        }
 
         async Task MarkAsProcessed(NpgsqlConnection conn, long id, string error)
         {
@@ -115,48 +164,6 @@ public partial class PostgresMessageConsumer(
             }
 
             Log.MessageProcessed(logger, id, status, error);
-        }
-    }
-
-    private async Task<List<(long id, string payload)>> PollAsync(string topic, CancellationToken stoppingToken)
-    {
-        await using var connection = await dataSource.OpenConnectionAsync(stoppingToken);
-
-        await using var transaction =
-            await connection.BeginTransactionAsync(IsolationLevel.ReadCommitted, stoppingToken);
-
-        var messages = await connection.QueryAsync<(long id, string payload)>(
-            FetchSql, new { Topic = topic, BatchSize = PollBatchSize }
-        );
-
-        await transaction.CommitAsync(stoppingToken);
-
-        return messages.AsList();
-    }
-
-    private async Task<string> HandleAsync(string topic, string payload)
-    {
-        var handler = scopeFactory.CreateScope()
-            .ServiceProvider
-            .GetKeyedService<IMessageHandler>(topic);
-
-        if (handler is null)
-        {
-            Log.NoHandlerForTopic(logger, topic);
-            return $"No handler for topic: {topic}";
-        }
-
-        try
-        {
-            await handler.HandleAsync(payload);
-            Log.MessageHandled(logger, payload);
-
-            return string.Empty;
-        }
-        catch (Exception ex)
-        {
-            Log.ErrorConsumeMessage(logger, payload, ex);
-            return ex.Message;
         }
     }
 }
