@@ -24,6 +24,7 @@ export interface ISegment {
   name: string;
   type: SegmentType;
   scopes: string[];
+  tags: string[];
   description: string;
   updatedAt: Date;
   included: string[];

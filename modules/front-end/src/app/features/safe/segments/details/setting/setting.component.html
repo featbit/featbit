@@ -1,12 +1,12 @@
 <section class="body-container">
 
   @if (!isLoading) {
-    <div class="block">
+    <div class="block standard-div">
       <div class="title">
         @if (segmentDetail.type === SegmentType.Shared) {
           <nz-tag nzColor="#23AD7F" i18n="@@segment.shared">Shared</nz-tag>
         }
-        <div class="name">
+
           @if (isEditingTitle) {
             <input nz-input i18n-placeholder="@@common.name" placeholder="Name" [(ngModel)]="segmentDetail.name" />
             <div class="actions">
@@ -17,7 +17,7 @@
             <span [nz-tooltip]="segmentDetail?.name" class="text">{{segmentDetail?.name}}</span>
             <i class="edit-save" (click)="toggleTitleEditState()" nz-icon nzType="icons:icon-edit"></i>
           }
-        </div>
+
       </div>
       <div class="description" [class]="{editing: isEditingDescription}">
         @if (isEditingDescription) {
@@ -43,6 +43,46 @@
           </div>
         </div>
       }
+    </div>
+  } @else {
+    <div class="block">
+      <nz-skeleton [nzActive]="true"></nz-skeleton>
+    </div>
+  }
+
+  @if (!isLoading) {
+    <div class="block standard-div">
+      <div class="title">Tags</div>
+      <div class="tags">
+        @if (this.segmentDetail.tags?.length) {
+          <div class="selected">
+            @for (tag of this.segmentDetail.tags; track tag) {
+              <nz-tag nzMode="closeable" (nzOnClose)="onRemoveTag(tag)">
+                {{ tag }}
+              </nz-tag>
+            }
+          </div>
+        }
+        <nz-select
+          class="nz-select-36"
+          #tags
+          nzPlaceHolder="Add Tags"
+          nzShowSearch
+          [(ngModel)]="selectedTag"
+          (nzOnSearch)="onSearchTag($event)"
+          (ngModelChange)="onAddTag()">
+          @if (isLoadingTags) {
+            <nz-option nzDisabled nzCustomContent>
+              <i nz-icon nzType="loading" class="loading-icon"></i>
+              <ng-container i18n="@@common.loading">Loading...</ng-container>
+            </nz-option>
+          } @else {
+            @for (tag of currentAllTags; track tag) {
+              <nz-option [nzValue]="tag" [nzLabel]="tag" [nzHide]="isTagSelected(tag)"></nz-option>
+            }
+          }
+        </nz-select>
+      </div>
     </div>
   } @else {
     <div class="block">

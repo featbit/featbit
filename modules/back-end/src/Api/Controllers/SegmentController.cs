@@ -193,4 +193,30 @@ public class SegmentController : ApiControllerBase
         var references = await Mediator.Send(request);
         return Ok(references);
     }
+    
+    [HttpGet("all-tags")]
+    public async Task<ApiResponse<ICollection<string>>> GetAllTagsAsync(Guid envId)
+    {
+        var request = new GetAllTag
+        {
+            WorkspaceId = WorkspaceId,
+            EnvId = envId
+        };
+
+        var tags = await Mediator.Send(request);
+        return Ok(tags);
+    }
+    
+    [HttpPut("{id:guid}/tags")]
+    public async Task<ApiResponse<bool>> SetTagsAsync(Guid id, string[] tags)
+    {
+        var request = new SetTags
+        {
+            Id = id,
+            Tags = tags
+        };
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
+    }
 }

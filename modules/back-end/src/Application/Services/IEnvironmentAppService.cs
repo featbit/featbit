@@ -9,4 +9,6 @@ public interface IEnvironmentAppService
     Task<PagedResult<Segment>> GetPagedSegmentsAsync(GetSegmentList request);
 
     Task<ICollection<Segment>> GetSegmentsAsync(Guid workspaceId, Guid envId);
+
+    Task<ICollection<string>> GetSegmentAllTagsAsync(GetAllTag request);
 }

@@ -26,6 +26,8 @@ public class Segment : AuditedEntity
 
     public ICollection<MatchRule> Rules { get; set; }
 
+    public string[] Tags { get; set; }
+    
     public bool IsArchived { get; set; }
 
     public bool IsEnvironmentSpecific => Type == SegmentType.EnvironmentSpecific;
@@ -39,6 +41,7 @@ public class Segment : AuditedEntity
         string[] included,
         string[] excluded,
         ICollection<MatchRule> rules,
+        string[] tags,
         string description)
     {
         WorkspaceId = workspaceId;
@@ -53,6 +56,7 @@ public class Segment : AuditedEntity
 
         CreatedAt = DateTime.UtcNow;
         IsArchived = false;
+        Tags = tags ?? [];
     }
 
     public DataChange Update(
@@ -127,5 +131,14 @@ public class Segment : AuditedEntity
         json.Remove("isEnvironmentSpecific");
 
         return json;
+    }
+    
+    public DataChange SetTags(string[] tags)
+    {
+        var dataChange = new DataChange(this);
+
+        Tags = tags ?? [];
+
+        return dataChange.To(this);
     }
 }

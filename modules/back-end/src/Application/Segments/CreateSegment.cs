@@ -14,10 +14,12 @@ public class CreateSegment : SegmentBase, IRequest<Segment>
     public Guid EnvId { get; set; }
 
     public string Type { get; set; }
+    
+    public string[] Tags { get; set; }
 
     public Segment AsSegment()
     {
-        return new Segment(WorkspaceId, EnvId, Name, Type, Scopes, Included, Excluded, Rules, Description);
+        return new Segment(WorkspaceId, EnvId, Name, Type, Scopes, Included, Excluded, Rules, Tags, Description);
     }
 }
 

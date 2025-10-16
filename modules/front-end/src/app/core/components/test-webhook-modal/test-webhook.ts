@@ -60,6 +60,7 @@ const testSegment: ISegment = {
   name: 'Test Segment',
   type: SegmentType.EnvironmentSpecific,
   scopes: ['organization/organization-key:project/project-key:env/env-key'],
+  tags: [],
   description: 'This is a test segment',
   rules: [
     {

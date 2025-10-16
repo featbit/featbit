@@ -162,4 +162,21 @@ public class SegmentService(AppDbContext dbContext, ILogger<SegmentService> logg
 
         return await AnyAsync(predicate);
     }
+    
+    public async Task<ICollection<string>> GetAllTagsAsync(Guid workspaceId, string rn, Guid envId)
+    {
+        // https://github.com/npgsql/efcore.pg/issues/1525
+        // https://github.com/dotnet/efcore/issues/32505
+        // SelectMany is not supported in efcore 8.x
+
+        var allTags = await Queryable
+            .Where(
+                x => x.WorkspaceId == workspaceId && !x.IsArchived &&
+                     x.Scopes.Any(y => $"{rn}:".StartsWith(string.Concat(y, ":")))
+            )
+            .Select(x => x.Tags)
+            .ToListAsync();
+
+        return allTags.SelectMany(x => x).Distinct().ToArray();
+    }
 }

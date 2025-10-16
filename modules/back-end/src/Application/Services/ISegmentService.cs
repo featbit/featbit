@@ -15,4 +15,6 @@ public interface ISegmentService : IService<Segment>
     Task<ICollection<Guid>> GetEnvironmentIdsAsync(Segment segment);
 
     Task<bool> IsNameUsedAsync(Guid workspaceId, string type, Guid envId, string name);
+    
+    Task<ICollection<string>> GetAllTagsAsync(Guid workspaceId, string rn, Guid envId);
 }
