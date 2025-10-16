@@ -56,9 +56,9 @@ public class DescriptionInstruction : FlagInstruction
     }
 }
 
-public class TagsInstruction : FlagInstruction
+public class FlagTagsInstruction : FlagInstruction
 {
-    public TagsInstruction(string kind, ICollection<string> value) : base(kind, value)
+    public FlagTagsInstruction(string kind, ICollection<string> value) : base(kind, value)
     {
     }
 
