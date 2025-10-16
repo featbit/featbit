@@ -15,7 +15,7 @@ public class CreateSegment : SegmentBase, IRequest<Segment>
 
     public string Type { get; set; }
     
-    public string[] Tags { get; set; } = new string[0];
+    public string[] Tags { get; set; } = Array.Empty<string>();
 
     public Segment AsSegment()
     {
