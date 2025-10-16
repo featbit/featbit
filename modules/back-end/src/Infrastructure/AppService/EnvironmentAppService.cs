@@ -46,7 +46,6 @@ public class EnvironmentAppService : IEnvironmentAppService
     {
         var rn = await _resourceService.GetRNAsync(request.EnvId, ResourceTypes.Env);
 
-        var tags = await _segmentService.GetAllTagsAsync(request.WorkspaceId, rn, request.EnvId);
-        return tags.Where(t => !string.IsNullOrWhiteSpace(t)).ToList();
+        return await _segmentService.GetAllTagsAsync(request.WorkspaceId, rn, request.EnvId);
     }
 }
