@@ -59,8 +59,8 @@ public class SegmentTagsInstruction : SegmentInstruction
 
         segment.Tags = Kind switch
         {
-            FlagInstructionKind.AddTags => segment.Tags.Union(tags).ToArray(),
-            FlagInstructionKind.RemoveTags => segment.Tags.Except(tags).ToArray(),
+            SegmentInstructionKind.AddTags => segment.Tags.Union(tags).ToArray(),
+            SegmentInstructionKind.RemoveTags => segment.Tags.Except(tags).ToArray(),
             _ => segment.Tags
         };
     }

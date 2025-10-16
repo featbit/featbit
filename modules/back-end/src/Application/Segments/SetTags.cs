@@ -19,7 +19,7 @@ public class SetTagsHandler(ISegmentService service, ICurrentUser currentUser, I
         var dataChange = segment.SetTags(request.Tags);
         await service.UpdateAsync(segment);
 
-        // publish on feature flag change notification
+        // publish on segment change notification
         var notification = new OnSegmentChange(segment, Operations.Update, dataChange, currentUser.Id);
         await publisher.Publish(notification, cancellationToken);
 
