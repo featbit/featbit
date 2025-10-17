@@ -16,11 +16,11 @@ ENV API_URL \
     EVALUATION_URL \
     BASE_HREF
 
-RUN apt-get update -y && apt-get install gettext-base
+RUN apt-get update -y && apt-get install --no-install-recommends -y gettext-base && rm -rf /var/lib/apt/lists/*
 
 COPY --from=build-stage /app/dist/featbit/browser/ /usr/share/nginx/featbit/
-COPY ./nginx.conf /etc/nginx/conf.d/nginx.default.conf
-COPY ./nginx.base_href.conf /etc/nginx/conf.d/nginx.base_href.conf
+COPY ./nginx.conf.template /etc/nginx/conf.d/nginx.conf.template
+COPY ./nginx.base_href.conf.template /etc/nginx/conf.d/nginx.base_href.conf.template
 
 COPY docker-entrypoint.sh /scripts/
 WORKDIR /scripts
