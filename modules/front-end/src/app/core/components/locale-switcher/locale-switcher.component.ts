@@ -23,7 +23,7 @@ export class LocaleSwitcherComponent {
   }
 
   onLocaleChange(lang: string) {
-    const regex = /^\/(en|zh)\//ig;
+    const regex = /\/(en|zh)\//ig;
     if (regex.test(location.pathname)) {
       // only reload the page on not ng serve mode
       localStorage.setItem(CURRENT_LANGUAGE(), lang);
