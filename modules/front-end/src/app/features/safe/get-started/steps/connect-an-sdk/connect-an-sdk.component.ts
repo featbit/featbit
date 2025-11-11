@@ -20,11 +20,23 @@ export class ConnectAnSdkComponent implements OnChanges {
 
   protected readonly SecretTypeEnum = SecretTypeEnum;
 
-  featbituDisplayApiURL: string | undefined = environment.featbitDisplayApiUrl;
-  featbitDisplayEvalURL: string | undefined = environment.featbitDisplayEvalUrl;
-  streamingURL: string = this.featbitDisplayEvalURL?.replace(/^http/, 'ws') ?? environment.evaluationUrl?.replace(/^http/, 'ws');
-  eventURL: string = this.featbitDisplayEvalURL ?? environment.evaluationUrl;
-  apiHost: string = this.featbituDisplayApiURL ?? environment.url;
+  featbitDisplayApiURL: string = environment.featbitDisplayApiUrl;
+  featbitDisplayEvalURL: string = environment.featbitDisplayEvalUrl;
+
+  streamingURL: string =
+    this.featbitDisplayEvalURL && this.featbitDisplayEvalURL.trim() !== ''
+      ? this.featbitDisplayEvalURL.replace(/^http/, 'ws')
+      : environment.evaluationUrl?.replace(/^http/, 'ws')
+
+  eventURL: string =
+    this.featbitDisplayEvalURL && this.featbitDisplayEvalURL.trim() !== ''
+      ? this.featbitDisplayEvalURL
+      : environment.evaluationUrl
+
+  apiHost: string =
+    this.featbitDisplayApiURL && this.featbitDisplayApiURL.trim() !== ''
+      ? this.featbitDisplayApiURL
+      : environment.url;
 
   selectedSecret: ISecret;
   get secret(): string {
