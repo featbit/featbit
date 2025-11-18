@@ -63,9 +63,9 @@ internal sealed class DefaultConnectionContext : ConnectionContext
         {
             var ipAddr = GetIpAddr();
 
-            var host = _streamingOptions.TrackClientHostName
-                ? await GetHostAsync()
-                : string.Empty;
+            var host = string.IsNullOrEmpty(ipAddr) || !_streamingOptions.TrackClientHostName
+                ? string.Empty
+                : await GetHostAsync();
 
             Client = new Client(ipAddr, host);
             return;
@@ -102,11 +102,6 @@ internal sealed class DefaultConnectionContext : ConnectionContext
 
             async Task<string> GetHostAsync()
             {
-                if (string.IsNullOrEmpty(ipAddr))
-                {
-                    return string.Empty;
-                }
-
                 try
                 {
                     using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(2));
