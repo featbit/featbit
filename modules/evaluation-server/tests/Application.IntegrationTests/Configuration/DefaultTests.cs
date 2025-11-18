@@ -14,12 +14,14 @@ public class DefaultTests
     {
         _app = app;
     }
-    
+
     [Fact]
     public void DefaultToDevelopmentEnvironment()
     {
         var environment = _app.Services.GetRequiredService<IWebHostEnvironment>();
 
+        // https://learn.microsoft.com/en-us/aspnet/core/test/integration-tests?view=aspnetcore-10.0&pivots=xunit#sut-environment
+        // If the SUT's environment isn't set, the environment defaults to Development.
         Assert.Equal("Development", environment.EnvironmentName);
     }
 
