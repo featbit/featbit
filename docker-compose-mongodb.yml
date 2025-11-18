@@ -80,7 +80,7 @@ services:
       - featbit-network
 
   redis:
-    image: bitnami/redis:6.2.10
+    image: bitnamilegacy/redis:6.2.10
     container_name: redis
     restart: on-failure
     environment:
