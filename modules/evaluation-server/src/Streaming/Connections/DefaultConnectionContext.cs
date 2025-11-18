@@ -71,14 +71,24 @@ internal sealed class DefaultConnectionContext : ConnectionContext
             {
                 if (_httpContext.Request.Headers.TryGetValue("X-Forwarded-For", out var forwardForHeaders))
                 {
-                    return forwardForHeaders.FirstOrDefault(string.Empty)!;
+                    var headerValue = forwardForHeaders.FirstOrDefault(string.Empty);
+                    // X-Forwarded-For can contain multiple IPs (client, proxy1, proxy2...)
+                    // The first IP is the original client IP
+                    if (!string.IsNullOrEmpty(headerValue))
+                    {
+                        return headerValue.Split(',')[0].Trim();
+                    }
                 }
 
                 // cloudflare connecting IP header
                 // https://developers.cloudflare.com/fundamentals/reference/http-request-headers/#cf-connecting-ip
                 if (_httpContext.Request.Headers.TryGetValue("CF-Connecting-IP", out var cfConnectingIpHeaders))
                 {
-                    return cfConnectingIpHeaders.FirstOrDefault(string.Empty)!;
+                    var headerValue = cfConnectingIpHeaders.FirstOrDefault(string.Empty);
+                    if (!string.IsNullOrEmpty(headerValue))
+                    {
+                        return headerValue;
+                    }
                 }
 
                 var remoteIpAddr = _httpContext.Connection.RemoteIpAddress?.ToString();
@@ -97,9 +107,9 @@ internal sealed class DefaultConnectionContext : ConnectionContext
                     using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(2));
                     return (await Dns.GetHostEntryAsync(ipAddr, cancellationTokenSource.Token)).HostName;
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    logger.FailedToResolveHost(ipAddr);
+                    logger.FailedToResolveHost(ipAddr, ex);
 
                     // allow clientHost to stay empty without failing the connection.
                     return string.Empty;
