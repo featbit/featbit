@@ -10,6 +10,7 @@ namespace Streaming.Connections;
 internal sealed class DefaultConnectionContext : ConnectionContext
 {
     private readonly HttpContext _httpContext;
+    private readonly StreamingOptions _streamingOptions;
 
     public override string? RawQuery { get; }
     public override WebSocket WebSocket { get; }
@@ -26,6 +27,7 @@ internal sealed class DefaultConnectionContext : ConnectionContext
     {
         _httpContext = httpContext;
 
+        _streamingOptions = _httpContext.RequestServices.GetRequiredService<StreamingOptions>();
         RawQuery = httpContext.Request.QueryString.Value;
         WebSocket = websocket;
 
@@ -57,28 +59,41 @@ internal sealed class DefaultConnectionContext : ConnectionContext
 
         return;
 
-        async Task ResolveClientAsync()
+        async ValueTask ResolveClientAsync()
         {
-            var logger = _httpContext.RequestServices.GetRequiredService<ILogger<ConnectionContext>>();
-
             var ipAddr = GetIpAddr();
-            var host = await GetHostAsync();
+
+            var host = string.IsNullOrEmpty(ipAddr) || !_streamingOptions.TrackClientHostName
+                ? string.Empty
+                : await GetHostAsync();
 
             Client = new Client(ipAddr, host);
             return;
 
             string GetIpAddr()
             {
+                // x-forwarded-for header
+                // https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Forwarded-For
                 if (_httpContext.Request.Headers.TryGetValue("X-Forwarded-For", out var forwardForHeaders))
                 {
-                    return forwardForHeaders.FirstOrDefault(string.Empty)!;
+                    var headerValue = forwardForHeaders.FirstOrDefault(string.Empty);
+                    if (!string.IsNullOrEmpty(headerValue))
+                    {
+                        // X-Forwarded-For can contain multiple IPs (client, proxy1, proxy2...)
+                        // The first IP is the original client IP
+                        return headerValue.Split(',')[0].Trim();
+                    }
                 }
 
                 // cloudflare connecting IP header
                 // https://developers.cloudflare.com/fundamentals/reference/http-request-headers/#cf-connecting-ip
                 if (_httpContext.Request.Headers.TryGetValue("CF-Connecting-IP", out var cfConnectingIpHeaders))
                 {
-                    return cfConnectingIpHeaders.FirstOrDefault(string.Empty)!;
+                    var headerValue = cfConnectingIpHeaders.FirstOrDefault(string.Empty);
+                    if (!string.IsNullOrEmpty(headerValue))
+                    {
+                        return headerValue;
+                    }
                 }
 
                 var remoteIpAddr = _httpContext.Connection.RemoteIpAddress?.ToString();
@@ -87,19 +102,15 @@ internal sealed class DefaultConnectionContext : ConnectionContext
 
             async Task<string> GetHostAsync()
             {
-                if (string.IsNullOrEmpty(ipAddr))
-                {
-                    return string.Empty;
-                }
-
                 try
                 {
                     using var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(2));
                     return (await Dns.GetHostEntryAsync(ipAddr, cancellationTokenSource.Token)).HostName;
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    logger.FailedToResolveHost(ipAddr);
+                    var logger = _httpContext.RequestServices.GetService<ILogger<ConnectionContext>>();
+                    logger?.FailedToResolveHost(ipAddr, ex);
 
                     // allow clientHost to stay empty without failing the connection.
                     return string.Empty;

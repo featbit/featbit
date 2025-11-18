@@ -10,7 +10,7 @@ internal static partial class StreamingLoggingExtensions
 
     [LoggerMessage(2, LogLevel.Error, "Failed to resolve host for IP address: {IpAddress}.",
         EventName = "FailedToResolveHost")]
-    public static partial void FailedToResolveHost(this ILogger logger, string ipAddress);
+    public static partial void FailedToResolveHost(this ILogger logger, string ipAddress, Exception ex);
 
     [LoggerMessage(3, LogLevel.Error, "Exception occurred while validating request: {Request}.",
         EventName = "ErrorValidateRequest")]
