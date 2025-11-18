@@ -10,6 +10,7 @@ namespace Streaming.Connections;
 internal sealed class DefaultConnectionContext : ConnectionContext
 {
     private readonly HttpContext _httpContext;
+    private readonly StreamingOptions _streamingOptions;
 
     public override string? RawQuery { get; }
     public override WebSocket WebSocket { get; }
@@ -26,6 +27,7 @@ internal sealed class DefaultConnectionContext : ConnectionContext
     {
         _httpContext = httpContext;
 
+        _streamingOptions = _httpContext.RequestServices.GetRequiredService<StreamingOptions>();
         RawQuery = httpContext.Request.QueryString.Value;
         WebSocket = websocket;
 
@@ -57,12 +59,13 @@ internal sealed class DefaultConnectionContext : ConnectionContext
 
         return;
 
-        async Task ResolveClientAsync()
+        async ValueTask ResolveClientAsync()
         {
-            var logger = _httpContext.RequestServices.GetRequiredService<ILogger<ConnectionContext>>();
-
             var ipAddr = GetIpAddr();
-            var host = await GetHostAsync();
+
+            var host = _streamingOptions.TrackClientHostName
+                ? await GetHostAsync()
+                : string.Empty;
 
             Client = new Client(ipAddr, host);
             return;
@@ -111,7 +114,8 @@ internal sealed class DefaultConnectionContext : ConnectionContext
                 }
                 catch (Exception ex)
                 {
-                    logger.FailedToResolveHost(ipAddr, ex);
+                    var logger = _httpContext.RequestServices.GetService<ILogger<ConnectionContext>>();
+                    logger?.FailedToResolveHost(ipAddr, ex);
 
                     // allow clientHost to stay empty without failing the connection.
                     return string.Empty;
