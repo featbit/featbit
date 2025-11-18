@@ -69,13 +69,15 @@ internal sealed class DefaultConnectionContext : ConnectionContext
 
             string GetIpAddr()
             {
+                // x-forwarded-for header
+                // https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Forwarded-For
                 if (_httpContext.Request.Headers.TryGetValue("X-Forwarded-For", out var forwardForHeaders))
                 {
                     var headerValue = forwardForHeaders.FirstOrDefault(string.Empty);
-                    // X-Forwarded-For can contain multiple IPs (client, proxy1, proxy2...)
-                    // The first IP is the original client IP
                     if (!string.IsNullOrEmpty(headerValue))
                     {
+                        // X-Forwarded-For can contain multiple IPs (client, proxy1, proxy2...)
+                        // The first IP is the original client IP
                         return headerValue.Split(',')[0].Trim();
                     }
                 }
