@@ -1,3 +1,67 @@
+name: featbit
+services:
+  ui:
+    image: featbit/featbit-ui:latest
+    environment:
+      - API_URL=http://localhost:5000
+      - DEMO_URL=http://localhost:5173
+      - EVALUATION_URL=http://localhost:5100
+      - BASE_HREF=/
+    depends_on:
+      - api-server
+      - demo-dino-game-vue
+    ports:
+      - "8081:80"
+    networks:
+      - featbit-network
+
+  api-server:
+    image: featbit/featbit-api-server:latest
+    environment:
+      - SSOEnabled=true
+      - DbProvider=MongoDb
+      - MqProvider=Redis
+      - CacheProvider=Redis
+      - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
+      - Redis__ConnectionString=redis:6379
+    depends_on:
+      - mongodb
+      - redis
+      - da-server
+    ports:
+      - "5000:5000"
+    networks:
+      - featbit-network
+
+  evaluation-server:
+    image: featbit/featbit-evaluation-server:latest
+    environment:
+      - DbProvider=MongoDb
+      - MqProvider=Redis
+      - CacheProvider=Redis
+      - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
+      - Redis__ConnectionString=redis:6379
+    depends_on:
+      - mongodb
+      - redis
+    ports:
+      - "5100:5100"
+    networks:
+      - featbit-network
+
+  da-server:
+    image: featbit/featbit-data-analytics-server:latest
+    depends_on:
+      - mongodb
+    ports:
+      - "8200:80"
+    networks:
+      - featbit-network
+    environment:
+      DB_PROVIDER: MongoDb
+      MONGO_URI: mongodb://admin:password@mongodb:27017
+      MONGO_INITDB_DATABASE: featbit
+      MONGO_HOST: mongodb
 
   mongodb:
     image: mongo:5.0.14
