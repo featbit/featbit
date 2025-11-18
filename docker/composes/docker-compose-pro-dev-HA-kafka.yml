@@ -103,7 +103,7 @@ services:
       - featbit-network
 
   redis:
-    image: bitnami/redis:6.2.10
+    image: bitnamilegacy/redis:6.2.10
     container_name: redis
     restart: on-failure
     environment:
@@ -116,7 +116,7 @@ services:
       - redis:/bitnami/redis/data
 
   kafka:
-    image: bitnami/kafka:3.5
+    image: bitnamilegacy/kafka:3.5
     container_name: kafka
     restart: on-failure
     ports:
@@ -138,7 +138,7 @@ services:
       - kafka:/bitnami/kafka
 
   kafka-consumer:
-    image: bitnami/kafka:3.5
+    image: bitnamilegacy/kafka:3.5
     container_name: kafka-consumer
     restart: on-failure
     ports:
@@ -176,7 +176,7 @@ services:
       - featbit-network
   
   init-kafka-topics:
-    image: bitnami/kafka:3.5
+    image: bitnamilegacy/kafka:3.5
     depends_on:
       kafka:
         condition: service_started

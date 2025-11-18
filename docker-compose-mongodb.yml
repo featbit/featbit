@@ -1,0 +1,49 @@
+
+  mongodb:
+    image: mongo:5.0.14
+    container_name: mongodb
+    restart: on-failure
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password
+      - MONGO_INITDB_DATABASE=featbit
+    volumes:
+      - mongodb:/data/db
+      - ./infra/mongodb/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d/
+    networks:
+      - featbit-network
+
+  redis:
+    image: bitnamilegacy/redis:6.2.10
+    container_name: redis
+    restart: on-failure
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    networks:
+      - featbit-network
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis:/bitnami/redis/data
+
+  demo-dino-game-vue:
+    image: featbit/demo-dino-game-vue:latest
+    container_name: demo-dino-game-vue
+    networks:
+      - featbit-network
+    ports:
+      - "5173:80"
+
+networks:
+  featbit-network:
+    name: featbit-network
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.1.0.0/16
+
+volumes:
+  mongodb:
+  redis:

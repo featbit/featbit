@@ -85,7 +85,7 @@ services:
       CHECK_DB_LIVNESS: true
 
   kafka:
-    image: bitnami/kafka:3.5
+    image: bitnamilegacy/kafka:3.5
     restart: on-failure
     ports:
       - '9092:9092'
@@ -120,7 +120,7 @@ services:
       - featbit-network
   
   init-kafka-topics:
-    image: bitnami/kafka:3.5
+    image: bitnamilegacy/kafka:3.5
     depends_on:
       kafka:
         condition: service_started
@@ -175,7 +175,7 @@ services:
       - featbit-network
 
   redis:
-    image: bitnami/redis:6.2.10
+    image: bitnamilegacy/redis:6.2.10
     container_name: redis
     restart: on-failure
     environment:
