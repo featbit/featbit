@@ -15,8 +15,8 @@ ENV API_URL \
     DEMO_URL \
     EVALUATION_URL \
     BASE_HREF \
-    FEATBIT_DISPLAY_API_URL \
-    FEATBIT_DISPLAY_EVAL_URL
+    DISPLAY_API_URL \
+    DISPLAY_EVALUATION_URL
 
 RUN apt-get update -y && apt-get install --no-install-recommends -y gettext-base && rm -rf /var/lib/apt/lists/*
 

@@ -5,6 +5,6 @@
   window["env"]["apiUrl"] = "${API_URL}";
   window["env"]["demoUrl"] = "${DEMO_URL}";
   window["env"]["evaluationUrl"] = "${EVALUATION_URL}";
-  window["env"]["featbitDisplayApiUrl"] = "${FEATBIT_DISPLAY_API_URL}";
-  window["env"]["featbitDisplayEvalUrl"] = "${FEATBIT_DISPLAY_EVAL_URL}";
+  window["env"]["displayApiUrl"] = "${DISPLAY_API_URL}";
+  window["env"]["displayEvaluationUrl"] = "${DISPLAY_EVALUATION_URL}";
 })(this);

@@ -5,6 +5,6 @@
   window["env"]["apiUrl"] = "";
   window["env"]["demoUrl"] = "";
   window["env"]["evaluationUrl"] = "";
-  window["env"]["featbitDisplayApiUrl"] = "";
-  window["env"]["featbitDisplayEvalUrl"] = "";
+  window["env"]["displayApiUrl"] = "";
+  window["env"]["displayEvaluationUrl"] = "";
 })(this);
