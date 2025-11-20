@@ -58,6 +58,8 @@ Three variables could be overridden by environment variables when running the co
 - **API_URL**: the url of the API Server, default value is http://localhost:5000, it overrides **url**
 - **DEMO_URL**: set the value if you deploy the [dino-game demo](https://github.com/featbit/featbit-samples/tree/main/samples/dino-game/interactive-demo-vue) on your own server, otherwise it would use our demo deployed on https://featbit-samples.vercel.app. The link doesn't work if you click directly on it, it needs extra parameters. **demoUrl**
 - **EVALUATION_URL**: the url of the evaluation server, this is used by the demo, ignore it if you don't want to run the demo, the default value is http://localhost:5100. It overrides **evaluationUrl**
+- **DISPLAY_API_URL**: the display url of the API server. This is an optional variable used when you want to override the API URL displayed in the 'Getting Started' UI. 
+- **DISPLAY_EVALUATION_URL**: the display url of the Evaluation server. This is an optional variable used when you want to override the Event and Streaming URL displayed in the 'Getting Started' UI.
 
 Bind the port 8081 or any other available port to 80.
 
