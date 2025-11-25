@@ -1,4 +1,4 @@
 export enum FlagSortByEnum {
-  UpdatedAt = 1,
+  CreatedAt = 1,
   Key = 2
 }

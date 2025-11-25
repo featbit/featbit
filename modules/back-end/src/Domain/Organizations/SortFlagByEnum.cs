@@ -2,6 +2,6 @@
 
 public enum SortFlagByEnum
 {
-    UpdatedAt = 1,
+    CreatedAt = 1,
     Key = 2
 }

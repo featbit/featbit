@@ -66,6 +66,7 @@ public class EndUserController : ApiControllerBase
     {
         var request = new GetEndUserFlags
         {
+            OrgId = OrgId,
             EnvId = envId,
             Id = id,
             SearchText = searchText

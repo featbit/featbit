@@ -164,7 +164,7 @@ export class OrganizationComponent implements OnInit {
       next: () => {
         this.isDefaultPermissionsLoading = false;
         this.message.success($localize`:@@org.org.orgDefaultPermissionsUpdateSuccess:Default permissions updated!`);
-        this.organizationService.setOrganization({ id, initialized, name, key, settings: settings, defaultPermissions });
+        this.organizationService.setOrganization({ id, initialized, name, key, settings, defaultPermissions });
         this.messageQueueService.emit(this.messageQueueService.topics.CURRENT_ORG_PROJECT_ENV_CHANGED);
       },
       error: () => {
@@ -212,7 +212,7 @@ export class OrganizationComponent implements OnInit {
       next: () => {
         this.isLoading = false;
         this.message.success($localize`:@@org.org.orgNameUpdateSuccess:Organization updated!`);
-        this.organizationService.setOrganization({ id, initialized, name, key, settings: settings, defaultPermissions });
+        this.organizationService.setOrganization({ id, initialized, name, key, settings, defaultPermissions });
         this.messageQueueService.emit(this.messageQueueService.topics.CURRENT_ORG_PROJECT_ENV_CHANGED);
       },
       error: () => {

@@ -28,7 +28,7 @@ public class Organization : AuditedEntity
         Key = key;
         Initialized = false;
         License = string.Empty;
-        Settings = new OrganizationSetting { SortFlagBy = SortFlagByEnum.UpdatedAt };
+        Settings = new OrganizationSetting { SortFlagBy = SortFlagByEnum.CreatedAt };
         DefaultPermissions = new OrganizationPermissions();
     }
 
