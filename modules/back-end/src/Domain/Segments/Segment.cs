@@ -41,7 +41,6 @@ public class Segment : AuditedEntity
         string[] included,
         string[] excluded,
         ICollection<MatchRule> rules,
-        string[] tags,
         string description)
     {
         WorkspaceId = workspaceId;
@@ -56,7 +55,7 @@ public class Segment : AuditedEntity
 
         CreatedAt = DateTime.UtcNow;
         IsArchived = false;
-        Tags = tags ?? [];
+        Tags = [];
     }
 
     public DataChange Update(
