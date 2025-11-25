@@ -23,6 +23,23 @@
     </form>
   </div>
   <div class="row">
+    <div class="row-title" i18n="@@org.org.sort-flags-by">Sort Feature flags by</div>
+    <form class="row-content" nz-form [formGroup]="settingsForm" [nzLayout]="'inline'" (ngSubmit)="updateSettings()">
+      <nz-form-item class="extend">
+        <nz-form-control>
+          <nz-select class="nz-select-40" nzPlaceHolder="Select sort option" formControlName="sortFlagBy" i18n-nzPlaceHolder="@@org.org.selectSortOption">
+            <nz-option [nzValue]="flagSortByEnum.UpdatedAt" nzLabel="Updated date" i18n-nzLabel="@@org.org.updated-date"></nz-option>
+            <nz-option [nzValue]="flagSortByEnum.Key" nzLabel="Key" i18n-nzLabel="@@org.org.key"></nz-option>
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+      <button nz-button nzType="primary" [nzLoading]="isLoading">
+        <i nz-icon nzType="icons:icon-sync"></i>
+        <ng-container i18n="@@common.update">Update</ng-container>
+      </button>
+    </form>
+  </div>
+  <div class="row">
     <div class="row-title" i18n="@@org.org.switchorg">Switch organization</div>
     <div class="row-content">
       <nz-select class="nz-select-40 extend" nzShowSearch nzPlaceHolder="Select organization" [(ngModel)]="currentOrganization" (ngModelChange)="onOrganizationChange()" i18n-nzPlaceHolder="@@org.org.selectOrg">

@@ -1,4 +1,5 @@
 import { UserOriginEnum } from "@features/safe/workspaces/types/profiles";
+import { FlagSortByEnum } from "@features/safe/workspaces/types/organization";
 
 export interface IResponse {
   success: boolean,
@@ -78,11 +79,16 @@ export interface IOrganizationPermissions {
   groupIds: string[];
 }
 
+export interface IOrganizationSetting {
+  sortFlagBy: FlagSortByEnum;
+}
+
 export interface IOrganization {
   id: string,
   initialized: boolean,
   name: string,
   key: string,
+  settings: IOrganizationSetting,
   defaultPermissions: IOrganizationPermissions
 }
 

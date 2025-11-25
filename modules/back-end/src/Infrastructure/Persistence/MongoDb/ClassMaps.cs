@@ -30,6 +30,7 @@ public static class ClassMaps
         {
             map.AutoMap();
             map.MapMember(x => x.DefaultPermissions).SetDefaultValue(new OrganizationPermissions());
+            map.MapMember(x => x.Settings).SetDefaultValue(new OrganizationSetting());
         });
     }
 }

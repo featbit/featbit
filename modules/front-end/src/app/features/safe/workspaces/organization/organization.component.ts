@@ -12,6 +12,7 @@ import { GroupListFilter, IPagedGroup } from "@features/safe/iam/types/group";
 import { PolicyService } from "@services/policy.service";
 import { GroupService } from "@services/group.service";
 import { BroadcastService } from "@services/broadcast.service";
+import { FlagSortByEnum } from "@features/safe/workspaces/types/organization";
 
 @Component({
     selector: 'organization',
@@ -20,11 +21,11 @@ import { BroadcastService } from "@services/broadcast.service";
     standalone: false
 })
 export class OrganizationComponent implements OnInit {
-
   creatOrganizationFormVisible: boolean = false;
 
   organizationForm!: FormGroup;
   defaultPermissionsForm!: FormGroup;
+  settingsForm!: FormGroup;
 
   currentOrganization: IOrganization;
   allOrganizations: IOrganization[];
@@ -32,6 +33,7 @@ export class OrganizationComponent implements OnInit {
   canUpdateOrgName: boolean = false;
   canCreateOrg: boolean = false;
   canUpdateDefaultPermissions: boolean = false;
+  canUpdateFeatureFlagSort: boolean = false;
 
   license: License;
 
@@ -65,11 +67,11 @@ export class OrganizationComponent implements OnInit {
     this.getPolicies();
     this.getGroups();
   }
-
   ngOnInit(): void {
     this.canUpdateOrgName = this.permissionsService.isGranted(generalResourceRNPattern.organization, permissionActions.UpdateOrgName);
     this.canCreateOrg = this.permissionsService.isGranted(generalResourceRNPattern.organization, permissionActions.CreateOrg);
     this.canUpdateDefaultPermissions = this.permissionsService.isGranted(generalResourceRNPattern.organization, permissionActions.UpdateOrgDefaultUserPermissions);
+    //this.canUpdateFeatureFlagSort = this.permissionsService.isGranted(generalResourceRNPattern.organization, permissionActions.UpdateOrgName);
     this.allOrganizations = this.organizationService.organizations;
 
     const currentOrganizationId = getCurrentOrganization().id;
@@ -87,6 +89,10 @@ export class OrganizationComponent implements OnInit {
       },
       { validators: this.permissionsValidator }
     );
+
+    this.settingsForm = new FormGroup({
+      sortFlagBy: new FormControl(this.currentOrganization.settings.sortFlagBy, [ Validators.required ]),
+    });
   }
 
   getPolicies(query?: string) {
@@ -150,15 +156,15 @@ export class OrganizationComponent implements OnInit {
       groupIds: groupId ? [ groupId ] : [],
     }
 
-    const { id, initialized, name, key } = this.currentOrganization;
+    const { id, initialized, name, key, settings } = this.currentOrganization;
 
     this.isDefaultPermissionsLoading = true;
-    this.organizationService.update({ name, defaultPermissions })
+    this.organizationService.update({ name, settings: settings, defaultPermissions })
     .subscribe({
       next: () => {
         this.isDefaultPermissionsLoading = false;
         this.message.success($localize`:@@org.org.orgDefaultPermissionsUpdateSuccess:Default permissions updated!`);
-        this.organizationService.setOrganization({ id, initialized, name, key, defaultPermissions });
+        this.organizationService.setOrganization({ id, initialized, name, key, settings: settings, defaultPermissions });
         this.messageQueueService.emit(this.messageQueueService.topics.CURRENT_ORG_PROJECT_ENV_CHANGED);
       },
       error: () => {
@@ -186,12 +192,7 @@ export class OrganizationComponent implements OnInit {
     this.broadcastService.organizationChanged();
   }
 
-  updateOrganizationName() {
-    if (!this.canUpdateOrgName) {
-      this.message.warning(this.permissionsService.genericDenyMessage);
-      return;
-    }
-
+  updateOrganization() {
     if (this.organizationForm.invalid) {
       for (const i in this.organizationForm.controls) {
         this.organizationForm.controls[i].markAsDirty();
@@ -201,23 +202,44 @@ export class OrganizationComponent implements OnInit {
     }
 
     const { name } = this.organizationForm.value;
+    const { sortFlagBy } = this.settingsForm.value;
     const { id, initialized, key, defaultPermissions} = this.currentOrganization;
 
+    const settings = { sortFlagBy };
     this.isLoading = true;
-    this.organizationService.update({ name, defaultPermissions })
-      .subscribe({
-        next: () => {
-          this.isLoading = false;
-          this.message.success($localize`:@@org.org.orgNameUpdateSuccess:Organization name updated!`);
-          this.organizationService.setOrganization({ id, initialized, name, key, defaultPermissions });
-          this.messageQueueService.emit(this.messageQueueService.topics.CURRENT_ORG_PROJECT_ENV_CHANGED);
-        },
-        error: () => {
-          this.message.error($localize`:@@common.operation-failed:Operation failed`);
-          this.isLoading = false;
-        }
-      });
+    this.organizationService.update({ name, settings, defaultPermissions })
+    .subscribe({
+      next: () => {
+        this.isLoading = false;
+        this.message.success($localize`:@@org.org.orgNameUpdateSuccess:Organization updated!`);
+        this.organizationService.setOrganization({ id, initialized, name, key, settings: settings, defaultPermissions });
+        this.messageQueueService.emit(this.messageQueueService.topics.CURRENT_ORG_PROJECT_ENV_CHANGED);
+      },
+      error: () => {
+        this.message.error($localize`:@@common.operation-failed:Operation failed`);
+        this.isLoading = false;
+      }
+    });
+  }
+
+  updateOrganizationName() {
+    if (!this.canUpdateOrgName) {
+      this.message.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
+    this.updateOrganization();
+  }
+
+  updateSettings() {
+    // if (!this.canUpdateFeatureFlagSort) {
+    //   this.message.warning(this.permissionsService.genericDenyMessage);
+    //   return;
+    // }
+
+    this.updateOrganization();
   }
 
   protected readonly LicenseFeatureEnum = LicenseFeatureEnum;
+  protected readonly flagSortByEnum = FlagSortByEnum;
 }

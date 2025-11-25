@@ -17,5 +17,6 @@ public class OrganizationConfiguration : IEntityTypeConfiguration<Organization>
         builder.Property(x => x.Initialized).HasDefaultValue(false).IsRequired();
 
         builder.Property(x => x.DefaultPermissions).HasColumnType("jsonb").IsRequired();
+        builder.Property(x => x.Settings).HasColumnType("jsonb").IsRequired();
     }
 }
