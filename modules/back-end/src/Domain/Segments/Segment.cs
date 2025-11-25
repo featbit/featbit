@@ -83,7 +83,7 @@ public class Segment : AuditedEntity
         var dataChange = new DataChange(this);
 
         Tags = tags ?? [];
-
+        UpdatedAt = DateTime.UtcNow;
         return dataChange.To(this);
     }
 
