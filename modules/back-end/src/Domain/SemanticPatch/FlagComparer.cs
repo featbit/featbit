@@ -99,12 +99,12 @@ public static class FlagComparer
         var instructions = new List<FlagInstruction>();
         if (removedTags.Any())
         {
-            instructions.Add(new FlagTagsInstruction(FlagInstructionKind.RemoveTags, removedTags));
+            instructions.Add(new TagsInstruction(FlagInstructionKind.RemoveTags, removedTags));
         }
 
         if (addedTags.Any())
         {
-            instructions.Add(new FlagTagsInstruction(FlagInstructionKind.AddTags, addedTags));
+            instructions.Add(new TagsInstruction(FlagInstructionKind.AddTags, addedTags));
         }
 
         return instructions;
