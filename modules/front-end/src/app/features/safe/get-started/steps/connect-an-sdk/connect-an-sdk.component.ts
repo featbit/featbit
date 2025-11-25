@@ -20,9 +20,14 @@ export class ConnectAnSdkComponent implements OnChanges {
 
   protected readonly SecretTypeEnum = SecretTypeEnum;
 
-  streamingURL: string = environment.evaluationUrl?.replace(/^http/, 'ws');
-  eventURL: string = environment.evaluationUrl;
-  apiHost: string = environment.url;
+  displayApiUrl: string = environment.displayApiUrl?.trim();
+  displayEvaluationUrl: string = environment.displayEvaluationUrl?.trim();
+
+  streamingURL: string = this.displayEvaluationUrl?.replace(/^http/, 'ws') || environment.evaluationUrl?.replace(/^http/, 'ws');
+
+  eventURL: string = this.displayEvaluationUrl || environment.evaluationUrl;
+
+  apiHost: string = this.displayApiUrl || environment.url;
 
   selectedSecret: ISecret;
   get secret(): string {

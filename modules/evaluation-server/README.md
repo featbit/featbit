@@ -74,3 +74,9 @@ and [consumer configs](https://kafka.apache.org/documentation/#consumerconfigs) 
 | `Kafka__Consumer__enable.auto.commit`       | Enables auto commit of offset                                                       | `true`         |
 | `Kafka__Consumer__auto.commit.interval.ms`  | The frequency in ms that the consumer offsets are auto-committed to Kafka           | `"5000"`       |
 | `Kafka__Consumer__enable.auto.offset.store` | Whether to automatically store the offset of the last message prior to calling poll | `false`        |
+
+## Streaming
+
+| Name                             | Description                                                  | Default Value |
+|----------------------------------|--------------------------------------------------------------|---------------|
+| `Streaming__TrackClientHostName` | Whether to resolve client's IP hostname for detailed logging | `true`        |

@@ -2,6 +2,7 @@ using Domain.Workspaces;
 using Infrastructure;
 using Infrastructure.Services;
 using Serilog;
+using Streaming;
 using Streaming.DependencyInjection;
 
 namespace Api.Setup;
@@ -39,7 +40,7 @@ public static class ServicesRegister
 
         // streaming services
         services
-            .AddStreamingCore()
+            .AddStreamingCore(options => configuration.GetSection(StreamingOptions.Streaming).Bind(options))
             .UseStore(configuration)
             .UseMq(configuration);
 

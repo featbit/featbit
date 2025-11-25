@@ -72,12 +72,13 @@ export class BroadcastService {
   private reloadPageAfterEnvironmentChanged() {
     const { protocol, host, pathname } = window.location;
 
+    const basePath = document.querySelector('base')?.getAttribute('href')?.split('/') ?? [];
     let path = this.router.url.split('/').slice(0, 2);
 
-    const match = pathname.match(/^\/(en|zh)\//);
-    if (match) {
-      path = [ match[1], ...path ].filter(x => x !== '');
-    }
+    path = [
+      ...basePath,
+      ...path
+    ].filter(x => x !== '');
 
     window.location.href = `${protocol}//${host}/${path.join('/')}`;
   }
