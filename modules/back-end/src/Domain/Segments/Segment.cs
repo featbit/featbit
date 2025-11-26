@@ -84,6 +84,7 @@ public class Segment : AuditedEntity
 
         Tags = tags ?? [];
         UpdatedAt = DateTime.UtcNow;
+
         return dataChange.To(this);
     }
 

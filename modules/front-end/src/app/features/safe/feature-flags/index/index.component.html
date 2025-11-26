@@ -117,7 +117,7 @@
               </td>
               <td style="max-width: 168px;">
                 @for (tag of featureFlag.tags; track tag) {
-                  <span class="tag">{{tag}}</span>
+                  <span class="tag" nz-tooltip [nzTooltipTitle]="tag">{{tag}}</span>
                 }
               </td>
               <td>
