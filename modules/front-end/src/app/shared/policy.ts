@@ -402,6 +402,15 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     isOpenAPIApplicable: false,
     isSpecificApplicable: false
   },
+  UpdateOrgSortFlagsBy: {
+    id: uuidv4(),
+    name: 'UpdateOrgSortFlagsBy',
+    resourceType: ResourceTypeEnum.organization,
+    displayName: $localize`:@@iam.action.update-org-sort-flags-by:Update sort flags by`,
+    description: $localize`:@@iam.action.update-org-sort-flags-by:Update sort flags by`,
+    isOpenAPIApplicable: false,
+    isSpecificApplicable: false
+  },
   UpdateOrgDefaultUserPermissions: {
     id: uuidv4(),
     name: 'UpdateOrgDefaultUserPermissions',

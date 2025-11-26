@@ -23,7 +23,7 @@
     </form>
   </div>
   <div class="row">
-    <div class="row-title" i18n="@@org.org.sort-flags-by">Sort Feature flags by</div>
+    <div class="row-title" i18n="@@org.org.sort-flags-by">Sort flags by</div>
     <form class="row-content" nz-form [formGroup]="settingsForm" [nzLayout]="'inline'" (ngSubmit)="updateSettings()">
       <nz-form-item class="extend">
         <nz-form-control>
@@ -33,7 +33,7 @@
           </nz-select>
         </nz-form-control>
       </nz-form-item>
-      <button nz-button nzType="primary" [nzLoading]="isLoading">
+      <button nz-button nzType="primary" [nzLoading]="isLoading" [disabled]="!canUpdateSortFlagsBy">
         <i nz-icon nzType="icons:icon-sync"></i>
         <ng-container i18n="@@common.update">Update</ng-container>
       </button>

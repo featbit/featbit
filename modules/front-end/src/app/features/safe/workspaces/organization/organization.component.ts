@@ -33,7 +33,7 @@ export class OrganizationComponent implements OnInit {
   canUpdateOrgName: boolean = false;
   canCreateOrg: boolean = false;
   canUpdateDefaultPermissions: boolean = false;
-  canUpdateFeatureFlagSort: boolean = false;
+  canUpdateSortFlagsBy: boolean = false;
 
   license: License;
 
@@ -71,7 +71,7 @@ export class OrganizationComponent implements OnInit {
     this.canUpdateOrgName = this.permissionsService.isGranted(generalResourceRNPattern.organization, permissionActions.UpdateOrgName);
     this.canCreateOrg = this.permissionsService.isGranted(generalResourceRNPattern.organization, permissionActions.CreateOrg);
     this.canUpdateDefaultPermissions = this.permissionsService.isGranted(generalResourceRNPattern.organization, permissionActions.UpdateOrgDefaultUserPermissions);
-    //this.canUpdateFeatureFlagSort = this.permissionsService.isGranted(generalResourceRNPattern.organization, permissionActions.UpdateOrgName);
+    this.canUpdateSortFlagsBy = this.permissionsService.isGranted(generalResourceRNPattern.organization, permissionActions.UpdateOrgSortFlagsBy);
     this.allOrganizations = this.organizationService.organizations;
 
     const currentOrganizationId = getCurrentOrganization().id;
@@ -232,10 +232,10 @@ export class OrganizationComponent implements OnInit {
   }
 
   updateSettings() {
-    // if (!this.canUpdateFeatureFlagSort) {
-    //   this.message.warning(this.permissionsService.genericDenyMessage);
-    //   return;
-    // }
+    if (!this.canUpdateSortFlagsBy) {
+      this.message.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
 
     this.updateOrganization();
   }
