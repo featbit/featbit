@@ -1222,7 +1222,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.html</context>
-          <context context-type="linenumber">77,78</context>
+          <context context-type="linenumber">78,79</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/organization/organization.component.html</context>
@@ -1616,6 +1616,10 @@
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
           <context context-type="linenumber">78,80</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.html</context>
+          <context context-type="linenumber">69,70</context>
+        </context-group>
         <target>添加标签</target>
       </trans-unit>
       <trans-unit id="common.remove-tags" datatype="html">
@@ -1958,7 +1962,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">161,162</context>
+          <context context-type="linenumber">167,168</context>
         </context-group>
         <target>取消</target>
       </trans-unit>
@@ -4599,11 +4603,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">99,100</context>
+          <context context-type="linenumber">105,106</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">166,167</context>
+          <context context-type="linenumber">172,173</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/project/project.component.html</context>
@@ -4987,7 +4991,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">46,48</context>
+          <context context-type="linenumber">47,49</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/global-user/global-user.component.html</context>
@@ -5720,7 +5724,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">63,65</context>
+          <context context-type="linenumber">64,66</context>
         </context-group>
         <target>当前环境</target>
       </trans-unit>
@@ -5732,7 +5736,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">74,75</context>
+          <context context-type="linenumber">75,76</context>
         </context-group>
         <target>共享</target>
       </trans-unit>
@@ -5984,7 +5988,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">88,89</context>
+          <context context-type="linenumber">94,95</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/global-user/global-user.component.html</context>
@@ -6016,7 +6020,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">45,46</context>
+          <context context-type="linenumber">46,47</context>
         </context-group>
         <target>更新于</target>
       </trans-unit>
@@ -7893,7 +7897,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">95,96</context>
+          <context context-type="linenumber">101,102</context>
         </context-group>
         <target>复位</target>
       </trans-unit>
@@ -8263,6 +8267,14 @@
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
           <context context-type="linenumber">79,80</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.html</context>
+          <context context-type="linenumber">55,56</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
+          <context context-type="linenumber">45,46</context>
+        </context-group>
         <target>标签</target>
       </trans-unit>
       <trans-unit id="common.num-variations" datatype="html">
@@ -8289,11 +8301,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">102,104</context>
+          <context context-type="linenumber">108,110</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">168,170</context>
+          <context context-type="linenumber">174,176</context>
         </context-group>
         <target>存档（软删除）</target>
       </trans-unit>
@@ -9898,7 +9910,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">78,79</context>
+          <context context-type="linenumber">79,80</context>
         </context-group>
         <target>共享范围</target>
       </trans-unit>
@@ -9954,7 +9966,7 @@
         <source>This segment can only be used in current environment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">61,62</context>
+          <context context-type="linenumber">62,63</context>
         </context-group>
         <target>此用户组只能在当前环境中使用</target>
       </trans-unit>
@@ -9962,7 +9974,7 @@
         <source>Are you sure to restore this segment?</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">93,94</context>
+          <context context-type="linenumber">99,100</context>
         </context-group>
         <target>确定要恢复该用户组吗？</target>
       </trans-unit>
@@ -9970,7 +9982,7 @@
         <source>Remove segment: <x id="INTERPOLATION" equiv-text="{{currentDeletingArchivingSegment.name}}"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">127,128</context>
+          <context context-type="linenumber">133,134</context>
         </context-group>
         <target>删除用户组</target>
       </trans-unit>
@@ -9978,7 +9990,7 @@
         <source>Archive segment: <x id="INTERPOLATION" equiv-text="{{currentDeletingArchivingSegment.name}}"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">129,131</context>
+          <context context-type="linenumber">135,137</context>
         </context-group>
         <target>存档用户组：<x id="INTERPOLATION" equiv-text="{{currentDeletingArchivingSegment.name}}"/></target>
       </trans-unit>
@@ -9986,7 +9998,7 @@
         <source>Segment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">135,136</context>
+          <context context-type="linenumber">141,142</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
@@ -9998,7 +10010,7 @@
         <source>will be permanently removed, this operation cannot be recovered!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">138,140</context>
+          <context context-type="linenumber">144,146</context>
         </context-group>
         <target>将被永久删除，且删除后不可恢复！</target>
       </trans-unit>
@@ -10006,7 +10018,7 @@
         <source>will be archived!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">140,142</context>
+          <context context-type="linenumber">146,148</context>
         </context-group>
         <target>将被存档！</target>
       </trans-unit>
@@ -10014,7 +10026,7 @@
         <source>This segment is used by <x id="INTERPOLATION" equiv-text="{{currentDeletingArchivingSegmentFlagReferences.length}}"/> flags(s), remove all references before this operation!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">148,149</context>
+          <context context-type="linenumber">154,155</context>
         </context-group>
         <target>该用户组正在被 <x id="INTERPOLATION" equiv-text="{{currentDeletingArchivingSegmentFlagReferences.length}}"/> 个开关所引用，在操作之前需要先移除这些引用！</target>
       </trans-unit>
