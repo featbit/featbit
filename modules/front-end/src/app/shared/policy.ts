@@ -393,21 +393,21 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
   },
 
   // org
-  UpdateOrgName: {
-    id: uuidv4(),
-    name: 'UpdateOrgName',
-    resourceType: ResourceTypeEnum.organization,
-    displayName: $localize`:@@iam.action.update-org-name:Update org name`,
-    description: $localize`:@@iam.action.update-org-name:Update org name`,
-    isOpenAPIApplicable: false,
-    isSpecificApplicable: false
-  },
   UpdateOrgSortFlagsBy: {
     id: uuidv4(),
     name: 'UpdateOrgSortFlagsBy',
     resourceType: ResourceTypeEnum.organization,
     displayName: $localize`:@@iam.action.update-org-sort-flags-by:Update sort flags by`,
     description: $localize`:@@iam.action.update-org-sort-flags-by:Update sort flags by`,
+    isOpenAPIApplicable: false,
+    isSpecificApplicable: false
+  },
+  UpdateOrgName: {
+    id: uuidv4(),
+    name: 'UpdateOrgName',
+    resourceType: ResourceTypeEnum.organization,
+    displayName: $localize`:@@iam.action.update-org-name:Update org name`,
+    description: $localize`:@@iam.action.update-org-name:Update org name`,
     isOpenAPIApplicable: false,
     isSpecificApplicable: false
   },

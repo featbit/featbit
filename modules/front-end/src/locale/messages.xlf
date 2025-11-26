@@ -10134,8 +10134,8 @@
           <context context-type="linenumber">390</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="iam.action.update-org-name" datatype="html">
-        <source>Update org name</source>
+      <trans-unit id="iam.action.update-org-sort-flags-by" datatype="html">
+        <source>Update sort flags by</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
           <context context-type="linenumber">400</context>
@@ -10145,8 +10145,8 @@
           <context context-type="linenumber">401</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="iam.action.update-org-sort-flags-by" datatype="html">
-        <source>Update sort flags by</source>
+      <trans-unit id="iam.action.update-org-name" datatype="html">
+        <source>Update org name</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
           <context context-type="linenumber">409</context>
