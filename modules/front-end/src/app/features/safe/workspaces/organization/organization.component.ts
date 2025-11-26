@@ -159,7 +159,7 @@ export class OrganizationComponent implements OnInit {
     const { id, initialized, name, key, settings } = this.currentOrganization;
 
     this.isDefaultPermissionsLoading = true;
-    this.organizationService.update({ name, settings: settings, defaultPermissions })
+    this.organizationService.update({ name, settings, defaultPermissions })
     .subscribe({
       next: () => {
         this.isDefaultPermissionsLoading = false;
