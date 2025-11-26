@@ -42,6 +42,7 @@
                 nzType="icons:icon-info-outline">
               </i>
             </th>
+            <th i18n="@@common.tags">Tags</th>
             <th i18n="@@common.last-updated">Last updated</th>
             <th i18n="@@common.actions">Actions</th>
           </tr>
@@ -82,6 +83,11 @@
                     }
                   </ul>
                 </ng-template>
+              </td>
+              <td style="max-width: 168px;">
+                @for (tag of item.tags; track tag) {
+                  <span class="tag" nz-tooltip [nzTooltipTitle]="tag">{{tag}}</span>
+                }
               </td>
               <td>{{item.updatedAt | date: 'yyyy-MM-dd HH:mm:ss'}}</td>
               <td>

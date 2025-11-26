@@ -184,4 +184,11 @@ public class SegmentService(MongoDbClient mongoDb, ILogger<SegmentService> logge
 
         return await AnyAsync(predicate);
     }
+
+    public async Task<ICollection<string>> GetAllTagsAsync(Guid envId)
+    {
+        var filter = new ExpressionFilterDefinition<Segment>(x => x.EnvId == envId && !x.IsArchived);
+        var cursor = await Collection.DistinctAsync<string>("tags", filter);
+        return await cursor.ToListAsync();
+    }
 }

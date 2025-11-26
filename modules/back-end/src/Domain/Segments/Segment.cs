@@ -26,6 +26,8 @@ public class Segment : AuditedEntity
 
     public ICollection<MatchRule> Rules { get; set; }
 
+    public string[] Tags { get; set; }
+
     public bool IsArchived { get; set; }
 
     public bool IsEnvironmentSpecific => Type == SegmentType.EnvironmentSpecific;
@@ -53,6 +55,7 @@ public class Segment : AuditedEntity
 
         CreatedAt = DateTime.UtcNow;
         IsArchived = false;
+        Tags = [];
     }
 
     public DataChange Update(
@@ -70,6 +73,16 @@ public class Segment : AuditedEntity
         Rules = rules;
         Description = description ?? string.Empty;
 
+        UpdatedAt = DateTime.UtcNow;
+
+        return dataChange.To(this);
+    }
+
+    public DataChange SetTags(string[] tags)
+    {
+        var dataChange = new DataChange(this);
+
+        Tags = tags ?? [];
         UpdatedAt = DateTime.UtcNow;
 
         return dataChange.To(this);
