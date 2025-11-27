@@ -1,6 +1,10 @@
 @import "variables";
 
 .block {
+  &:not(:first-child) {
+    margin-top: 10px;
+  }
+
   padding: 20px 24px 24px 24px;
   background-color: @grey5-color;
   border-radius: 20px;
@@ -13,18 +17,12 @@
   .title {
     display: flex;
     align-items: center;
-    gap: 4px;
-
-    .name {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-weight: 600;
-      font-size: 16px;
-      line-height: 150%;
-      color: @grey80-color;
-      height: 30px;
-    }
+    gap: 8px;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 150%;
+    color: @grey80-color;
+    height: 30px;
 
     nz-tag {
       padding: 0 4px;
@@ -58,12 +56,45 @@
 
     .edit-save {
       width: 100%;
-      text-align: right;
+      display: flex;
+      justify-content: flex-end;
     }
 
     textarea {
       border-radius: 8px;
       margin-bottom: 8px;
+    }
+  }
+
+  .tags {
+    margin-top: 16px;
+
+    .selected {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0;
+      row-gap: 4px;
+      border: 1px solid @grey20-color;
+      background-color: #ffffff;
+      padding: 5px;
+      box-sizing: border-box;
+      border-radius: 8px;
+      margin-bottom: 12px;
+
+      nz-tag {
+        background: @grey20-color;
+        border-radius: 4px;
+        padding: 2px 4px 2px 5px;
+        line-height: 15px;
+        margin-right: 10px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+
+    nz-select {
+      width: 100%;
     }
   }
 

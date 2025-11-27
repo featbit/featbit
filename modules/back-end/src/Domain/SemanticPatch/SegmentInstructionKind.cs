@@ -9,6 +9,10 @@ public static class SegmentInstructionKind
     public const string UpdateName = nameof(UpdateName);
 
     public const string UpdateDescription = nameof(UpdateDescription);
+    
+    public const string AddTags = nameof(AddTags);
+
+    public const string RemoveTags = nameof(RemoveTags);
 
     public const string AddRule = nameof(AddRule);
 
@@ -44,6 +48,8 @@ public static class SegmentInstructionKind
         Restore,
         UpdateName,
         UpdateDescription,
+        AddTags,
+        RemoveTags,
         AddRule,
         RemoveRule,
         SetRules,

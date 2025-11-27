@@ -40,6 +40,7 @@ export const WebhookDefaultPayloadTemplate: string = `{
       "id": "{{data.object.id}}",
       "name": "{{data.object.name}}",
       "description": "{{data.object.description}}",
+      "tags": {{json data.object.tags}},
 {{#eq data.kind "feature flag"}}
       "key": "{{data.object.key}}",
       "variationType": "{{data.object.variationType}}",
@@ -50,7 +51,6 @@ export const WebhookDefaultPayloadTemplate: string = `{
       "disabledVariationId": "{{data.object.disabledVariationId}}",
       "fallthrough": {{json data.object.fallthrough}},
       "exptIncludeAllTargets": {{data.object.exptIncludeAllTargets}},
-      "tags": {{json data.object.tags}},
 {{/eq}}
 {{#eq data.kind "segment"}}
       "included": {{json data.object.included}},

@@ -85,4 +85,14 @@ export class SegmentService {
 
     return this.http.get<ISegmentFlagReference[]>(url).pipe(catchError(() => of(undefined)));
   }
+
+  getAllTags(): Observable<string[]> {
+    const url = `${this.baseUrl}/all-tags`;
+    return this.http.get<string[]>(url);
+  }
+
+  setTags(id: string, tags: string[]): Observable<boolean> {
+    const url = `${this.baseUrl}/${id}/tags`;
+    return this.http.put<boolean>(url, tags);
+  }
 }
