@@ -40,4 +40,23 @@ public class Connection
     {
         User = user;
     }
+
+    public override string ToString()
+    {
+        // do not use Enum.ToString() here to avoid memory allocation
+        var status = WebSocket.State switch
+        {
+            WebSocketState.None => nameof(WebSocketState.None),
+            WebSocketState.Connecting => nameof(WebSocketState.Connecting),
+            WebSocketState.Open => nameof(WebSocketState.Open),
+            WebSocketState.CloseSent => nameof(WebSocketState.CloseSent),
+            WebSocketState.CloseReceived => nameof(WebSocketState.CloseReceived),
+            WebSocketState.Closed => nameof(WebSocketState.Closed),
+            WebSocketState.Aborted => nameof(WebSocketState.Aborted),
+            _ => throw new ArgumentOutOfRangeException()
+        };
+
+        return
+            $"id={Id},type={Type},projectEnv={ProjectKey}:{EnvKey},user={User?.KeyId ?? string.Empty},status={status}";
+    }
 }
