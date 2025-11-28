@@ -1,10 +1,10 @@
 <Project>
     <PropertyGroup>
-        <PackageVersion>5.1.0</PackageVersion>
+        <PackageVersion>5.1.4</PackageVersion>
         <Authors>FeatBit</Authors>
         <Owners>FeatBit</Owners>
         <Company>FeatBit</Company>
-        <Copyright>Copyright 2023 FeatBit</Copyright>
+        <Copyright>Copyright 2025 FeatBit</Copyright>
         <EmbedUntrackedSources>true</EmbedUntrackedSources>
         <IncludeSymbols>true</IncludeSymbols>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
