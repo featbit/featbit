@@ -2,6 +2,7 @@ using Application.Bases.Exceptions;
 using Application.Bases.Models;
 using Application.FeatureFlags;
 using Domain.FeatureFlags;
+using Domain.Organizations;
 using MongoDB.Driver;
 
 namespace Infrastructure.Services.MongoDb;
@@ -12,7 +13,7 @@ public class FeatureFlagService : MongoDbService<FeatureFlag>, IFeatureFlagServi
     {
     }
 
-    public async Task<PagedResult<FeatureFlag>> GetListAsync(Guid envId, FeatureFlagFilter userFilter)
+    public async Task<PagedResult<FeatureFlag>> GetListAsync(Guid envId, FeatureFlagFilter userFilter, SortFlagByEnum sortBy)
     {
         var filterBuilder = Builders<FeatureFlag>.Filter;
 
@@ -55,9 +56,14 @@ public class FeatureFlagService : MongoDbService<FeatureFlag>, IFeatureFlagServi
 
         var totalCount = await Collection.CountDocumentsAsync(filter);
 
-        var itemsQuery = Collection
-            .Find(filter)
-            .SortByDescending(flag => flag.UpdatedAt)
+        var query = Collection.Find(filter);
+        query = sortBy switch
+        {
+            SortFlagByEnum.Key => query.SortBy(x => x.Key),
+            _ => query.SortByDescending(x => x.CreatedAt)
+        };
+        
+        var itemsQuery = query
             .Skip(userFilter.PageIndex * userFilter.PageSize)
             .Limit(userFilter.PageSize);
 

@@ -15,4 +15,6 @@ public class OrganizationVm
     public string License { get; set; }
 
     public OrganizationPermissions DefaultPermissions { get; set; }
+    
+    public OrganizationSetting Settings { get; set; }
 }

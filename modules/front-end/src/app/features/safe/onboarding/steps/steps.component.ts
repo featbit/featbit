@@ -6,7 +6,7 @@ import { OrganizationService } from "@services/organization.service";
 import { GET_STARTED } from "@utils/localstorage-keys";
 import { getCurrentOrganization } from "@utils/project-env";
 import { slugify } from "@utils/index";
-import { IOrganizationPermissions } from "@shared/types";
+import { IOrganizationPermissions, IOrganizationSetting } from "@shared/types";
 
 @Component({
     selector: 'init-steps',
@@ -19,6 +19,7 @@ export class StepsComponent implements OnInit {
   currentStep = 0;
   currentOrganizationId: string;
   organizationPermission: IOrganizationPermissions;
+  organizationSettings: IOrganizationSetting;
   form: FormGroup;
 
   constructor(
@@ -42,6 +43,7 @@ export class StepsComponent implements OnInit {
     const organization = getCurrentOrganization();
     this.currentOrganizationId = organization.id;
     this.organizationPermission = organization.defaultPermissions;
+    this.organizationSettings = organization.settings;
     this.form.patchValue({
       organizationName: organization.name
     });
@@ -65,6 +67,7 @@ export class StepsComponent implements OnInit {
           initialized: true,
           name: organizationName,
           key: organizationKey,
+          settings: this.organizationSettings,
           defaultPermissions: this.organizationPermission
         });
 

@@ -68,6 +68,7 @@ export class OrganizationService {
       currentOrganization.key = organization.key;
       currentOrganization.initialized = organization.initialized;
       currentOrganization.defaultPermissions = organization.defaultPermissions;
+      currentOrganization.settings = organization.settings;
       localStorage.setItem(CURRENT_ORGANIZATION(), JSON.stringify(currentOrganization));
     } else {
       localStorage.setItem(CURRENT_ORGANIZATION(), '');
