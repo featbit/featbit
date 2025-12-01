@@ -1,38 +1,46 @@
 using System.Text.Json;
 using Domain.Messages;
+using Microsoft.Extensions.Logging;
 using Streaming.Connections;
 using Streaming.Protocol;
 using Streaming.Services;
 
 namespace Streaming.Consumers;
 
-public class FeatureFlagChangeMessageConsumer : IMessageConsumer
+public class FeatureFlagChangeMessageConsumer(
+    IConnectionManager connectionManager,
+    IDataSyncService dataSyncService,
+    ILogger<FeatureFlagChangeMessageConsumer> logger)
+    : IMessageConsumer
 {
     public string Topic => Topics.FeatureFlagChange;
-
-    private readonly IConnectionManager _connectionManager;
-    private readonly IDataSyncService _dataSyncService;
-
-    public FeatureFlagChangeMessageConsumer(IConnectionManager connectionManager, IDataSyncService dataSyncService)
-    {
-        _connectionManager = connectionManager;
-        _dataSyncService = dataSyncService;
-    }
 
     public async Task HandleAsync(string message, CancellationToken cancellationToken)
     {
         using var document = JsonDocument.Parse(message);
         var flag = document.RootElement;
 
-        // push change messages to sdk
         var envId = flag.GetProperty("envId").GetGuid();
-        var connections = _connectionManager.GetEnvConnections(envId);
+
+        var connections = connectionManager.GetEnvConnections(envId);
         foreach (var connection in connections)
         {
-            var payload = await _dataSyncService.GetFlagChangePayloadAsync(connection, flag);
-            var serverMessage = new ServerMessage(MessageTypes.DataSync, payload);
+            try
+            {
+                var payload = await dataSyncService.GetFlagChangePayloadAsync(connection, flag);
+                var serverMessage = new ServerMessage(MessageTypes.DataSync, payload);
 
-            await connection.SendAsync(serverMessage, cancellationToken);
+                await connection.SendAsync(serverMessage, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(
+                    ex,
+                    "Exception occurred while processing feature flag change message for connection {ConnectionId} in env {EnvId}.",
+                    connection.Id,
+                    envId
+                );
+            }
         }
     }
 }
