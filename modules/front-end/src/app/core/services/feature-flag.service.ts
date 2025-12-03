@@ -11,14 +11,11 @@ import {
   IFeatureFlagListModel
 } from "@features/safe/feature-flags/types/feature-flag";
 import { catchError } from "rxjs/operators";
-import {
-  IFeatureFlag,
-  IFeatureFlagTargeting,
-  ISettingPayload
-} from "@features/safe/feature-flags/types/details";
-import {IInsightsFilter, IInsights} from "@features/safe/feature-flags/details/insights/types";
+import { IFeatureFlag, IFeatureFlagTargeting, ISettingPayload } from "@features/safe/feature-flags/types/details";
+import { IInsights, IInsightsFilter } from "@features/safe/feature-flags/details/insights/types";
 import { IVariation } from "@shared/rules";
 import { IPendingChanges } from "@core/components/pending-changes-drawer/types";
+import { FlagSortedBy } from "@features/safe/workspaces/types/organization";
 
 @Injectable({
   providedIn: 'root'
@@ -49,7 +46,7 @@ export class FeatureFlagService {
       name: filter.name ?? '',
       tags: filter.tags ?? [],
       isArchived: filter.isArchived,
-      sortBy: org.settings?.flagSortedBy ?? 'created_at',
+      sortBy: org.settings?.flagSortedBy ?? FlagSortedBy.CreatedAt,
       pageIndex: filter.pageIndex - 1,
       pageSize: filter.pageSize,
       isEnabled: filter.isEnabled ?? ''

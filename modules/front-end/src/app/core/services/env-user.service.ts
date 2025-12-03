@@ -14,6 +14,7 @@ import {
   IFeatureFlagEndUserFilter,
   IFeatureFlagEndUserPagedResult
 } from "@features/safe/feature-flags/details/insights/types";
+import { FlagSortedBy } from "@features/safe/workspaces/types/organization";
 
 @Injectable({
   providedIn: 'root'
@@ -67,7 +68,7 @@ export class EnvUserService {
 
     const queryParam = {
       name: filter.searchText ?? '',
-      sortBy: org.settings?.flagSortedBy ?? 'created_at',
+      sortBy: org.settings?.flagSortedBy ?? FlagSortedBy.CreatedAt,
       pageIndex: filter.pageIndex - 1,
       pageSize: filter.pageSize,
     };
