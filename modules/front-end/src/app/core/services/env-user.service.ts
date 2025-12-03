@@ -67,7 +67,7 @@ export class EnvUserService {
 
     const queryParam = {
       name: filter.searchText ?? '',
-      sortBy: org.settings.flagSortedBy ?? '',
+      sortBy: org.settings?.flagSortedBy ?? 'created_at',
       pageIndex: filter.pageIndex - 1,
       pageSize: filter.pageSize,
     };
