@@ -35,6 +35,7 @@ public class FeatureFlagService(AppDbContext dbContext)
 
         var totalCount = await query.CountAsync();
 
+        // sorting
         query = userFilter.SortBy switch
         {
             "key" => query.OrderBy(x => x.Key),

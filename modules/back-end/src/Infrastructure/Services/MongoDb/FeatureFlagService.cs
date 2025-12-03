@@ -56,6 +56,8 @@ public class FeatureFlagService : MongoDbService<FeatureFlag>, IFeatureFlagServi
         var totalCount = await Collection.CountDocumentsAsync(filter);
 
         var query = Collection.Find(filter);
+
+        // sorting
         query = userFilter.SortBy switch
         {
             "key" => query.SortBy(x => x.Key),
