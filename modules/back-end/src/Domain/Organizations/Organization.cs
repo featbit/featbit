@@ -6,6 +6,8 @@ public class Organization : AuditedEntity
 
     public string Name { get; set; }
 
+    public OrganizationSetting Settings { get; set; }
+
     public string Key { get; set; }
 
     public bool Initialized { get; set; }
@@ -26,12 +28,14 @@ public class Organization : AuditedEntity
         Key = key;
         Initialized = false;
         License = string.Empty;
+        Settings = new OrganizationSetting();
         DefaultPermissions = new OrganizationPermissions();
     }
 
-    public void Update(string name, OrganizationPermissions permissions)
+    public void Update(string name, OrganizationSetting settings, OrganizationPermissions permissions)
     {
         Name = name;
+        Settings = settings;
         DefaultPermissions = permissions;
 
         UpdatedAt = DateTime.UtcNow;

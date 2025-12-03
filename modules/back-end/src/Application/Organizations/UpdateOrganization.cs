@@ -10,6 +10,8 @@ public class UpdateOrganization : IRequest<OrganizationVm>
     public string Name { get; set; }
 
     public OrganizationPermissions DefaultPermissions { get; set; }
+
+    public OrganizationSetting Settings { get; set; }
 }
 
 public class UpdateOrganizationValidator : AbstractValidator<UpdateOrganization>
@@ -22,6 +24,9 @@ public class UpdateOrganizationValidator : AbstractValidator<UpdateOrganization>
         RuleFor(x => x.DefaultPermissions)
             .NotNull().WithErrorCode(ErrorCodes.Required("defaultPermissions"))
             .Must(x => x.IsValid()).WithErrorCode(ErrorCodes.Invalid("defaultPermissions"));
+
+        RuleFor(x => x.Settings)
+            .NotNull().WithErrorCode(ErrorCodes.Required("settings"));
     }
 }
 
@@ -40,7 +45,7 @@ public class UpdateOrganizationHandler : IRequestHandler<UpdateOrganization, Org
     {
         var organization = await _service.GetAsync(request.Id);
 
-        organization.Update(request.Name, request.DefaultPermissions);
+        organization.Update(request.Name, request.Settings, request.DefaultPermissions);
 
         await _service.UpdateAsync(organization);
 

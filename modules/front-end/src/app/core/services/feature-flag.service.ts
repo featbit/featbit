@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { environment } from "../../../environments/environment";
 import { HttpClient, HttpParams } from "@angular/common/http";
-import { getCurrentProjectEnv } from "@utils/project-env";
+import { getCurrentOrganization, getCurrentProjectEnv } from "@utils/project-env";
 import { firstValueFrom, Observable, of } from "rxjs";
 import {
   CopyToEnvPrecheckResult,
@@ -11,14 +11,11 @@ import {
   IFeatureFlagListModel
 } from "@features/safe/feature-flags/types/feature-flag";
 import { catchError } from "rxjs/operators";
-import {
-  IFeatureFlag,
-  IFeatureFlagTargeting,
-  ISettingPayload
-} from "@features/safe/feature-flags/types/details";
-import {IInsightsFilter, IInsights} from "@features/safe/feature-flags/details/insights/types";
+import { IFeatureFlag, IFeatureFlagTargeting, ISettingPayload } from "@features/safe/feature-flags/types/details";
+import { IInsights, IInsightsFilter } from "@features/safe/feature-flags/details/insights/types";
 import { IVariation } from "@shared/rules";
 import { IPendingChanges } from "@core/components/pending-changes-drawer/types";
+import { FlagSortedBy } from "@features/safe/workspaces/types/organization";
 
 @Injectable({
   providedIn: 'root'
@@ -43,10 +40,13 @@ export class FeatureFlagService {
   }
 
   getList(filter: IFeatureFlagListFilter = new IFeatureFlagListFilter()): Observable<IFeatureFlagListModel> {
+    const org = getCurrentOrganization();
+
     const queryParam = {
       name: filter.name ?? '',
       tags: filter.tags ?? [],
       isArchived: filter.isArchived,
+      sortBy: org.settings?.flagSortedBy ?? FlagSortedBy.CreatedAt,
       pageIndex: filter.pageIndex - 1,
       pageSize: filter.pageSize,
       isEnabled: filter.isEnabled ?? ''

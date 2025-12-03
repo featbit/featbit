@@ -55,9 +55,16 @@ public class FeatureFlagService : MongoDbService<FeatureFlag>, IFeatureFlagServi
 
         var totalCount = await Collection.CountDocumentsAsync(filter);
 
-        var itemsQuery = Collection
-            .Find(filter)
-            .SortByDescending(flag => flag.UpdatedAt)
+        var query = Collection.Find(filter);
+
+        // sorting
+        var sortQuery = userFilter.SortBy switch
+        {
+            "key" => query.SortBy(x => x.Key),
+            _ => query.SortByDescending(x => x.CreatedAt)
+        };
+
+        var itemsQuery = sortQuery
             .Skip(userFilter.PageIndex * userFilter.PageSize)
             .Limit(userFilter.PageSize);
 
