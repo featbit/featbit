@@ -66,7 +66,7 @@ export class EnvUserService {
     const org = getCurrentOrganization();
 
     const queryParam = {
-      searchText: filter.searchText ?? '',
+      name: filter.searchText ?? '',
       sortBy: org.settings.flagSortedBy ?? '',
       pageIndex: filter.pageIndex - 1,
       pageSize: filter.pageSize,

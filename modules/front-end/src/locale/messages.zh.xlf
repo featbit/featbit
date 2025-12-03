@@ -841,6 +841,10 @@
           <context context-type="linenumber">79</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/organization/organization.component.ts</context>
+          <context context-type="linenumber">206</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.ts</context>
           <context context-type="linenumber">107</context>
         </context-group>
@@ -2295,11 +2299,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/organization/organization.component.ts</context>
-          <context context-type="linenumber">171</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/workspaces/organization/organization.component.ts</context>
-          <context context-type="linenumber">218</context>
+          <context context-type="linenumber">211</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/profile/profile.component.ts</context>
@@ -10301,22 +10301,6 @@
           <context context-type="linenumber">95,96</context>
         </context-group>
         <target>组</target>
-      </trans-unit>
-      <trans-unit id="org.org.orgDefaultPermissionsUpdateSuccess" datatype="html">
-        <source>Default permissions updated!</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/workspaces/organization/organization.component.ts</context>
-          <context context-type="linenumber">166</context>
-        </context-group>
-        <target>更新成功！</target>
-      </trans-unit>
-      <trans-unit id="org.org.orgNameUpdateSuccess" datatype="html">
-        <source>Organization updated!</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/workspaces/organization/organization.component.ts</context>
-          <context context-type="linenumber">213</context>
-        </context-group>
-        <target>机构名称更新成功！</target>
       </trans-unit>
       <trans-unit id="org.profile.email" datatype="html">
         <source>Email</source>

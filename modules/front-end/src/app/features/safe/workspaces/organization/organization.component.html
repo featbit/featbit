@@ -16,7 +16,7 @@
           </nz-input-group>
         </nz-form-control>
       </nz-form-item>
-      <button nz-button nzType="primary" [nzLoading]="isLoading" [disabled]="!canUpdateOrgName">
+      <button nz-button nzType="primary" [nzLoading]="isUpdating" [disabled]="!organizationForm.valid || !canUpdateOrgName">
         <i nz-icon nzType="icons:icon-sync"></i>
         <ng-container i18n="@@org.org.updateOrgName">Update</ng-container>
       </button>
@@ -33,7 +33,7 @@
           </nz-select>
         </nz-form-control>
       </nz-form-item>
-      <button nz-button nzType="primary" [nzLoading]="isLoading" [disabled]="!canUpdateSortFlagsBy">
+      <button nz-button nzType="primary" [nzLoading]="isUpdating" [disabled]="!settingsForm.valid || !canUpdateSortFlagsBy">
         <i nz-icon nzType="icons:icon-sync"></i>
         <ng-container i18n="@@common.update">Update</ng-container>
       </button>
@@ -115,7 +115,7 @@
         </nz-select>
       </nz-form-control>
     </nz-form-item>
-    <button nz-button class="permissions-btn" nzType="primary" [nzLoading]="isDefaultPermissionsLoading" [disabled]="!canUpdateDefaultPermissions">
+    <button nz-button class="permissions-btn" nzType="primary" [nzLoading]="isUpdating" [disabled]="!defaultPermissionsForm.valid || !canUpdateDefaultPermissions">
       <i nz-icon nzType="icons:icon-sync"></i>
       <ng-container i18n="@@common.update">Update</ng-container>
     </button>

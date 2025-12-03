@@ -6,6 +6,7 @@ import { IOnboarding, IOrganization } from '@shared/types';
 import { ProjectService } from './project.service';
 import { CURRENT_ORGANIZATION } from "@utils/localstorage-keys";
 import { catchError } from "rxjs/operators";
+import { UpdateOrganizationPayload } from "@features/safe/workspaces/types/organization";
 
 @Injectable({
   providedIn: 'root'
@@ -34,8 +35,8 @@ export class OrganizationService {
     return this.http.post(url, params);
   }
 
-  update(params: any): Observable<any> {
-    return this.http.put(this.baseUrl, params);
+  update(payload: UpdateOrganizationPayload): Observable<any> {
+    return this.http.put(this.baseUrl, payload);
   }
 
   addUser(params: any): Observable<any> {

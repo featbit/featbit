@@ -3,6 +3,7 @@ using Application.Bases;
 using Application.Bases.Exceptions;
 using Application.Bases.Models;
 using Application.EndUsers;
+using Application.FeatureFlags;
 using Domain.EndUsers;
 using Domain.Utils;
 
@@ -62,13 +63,16 @@ public class EndUserController : ApiControllerBase
     }
 
     [HttpGet("{id:guid}/flags")]
-    public async Task<ApiResponse<PagedResult<EndUserFlagVm>>> GetFlagsAsync(Guid envId, Guid id, string? searchText)
+    public async Task<ApiResponse<PagedResult<EndUserFlagVm>>> GetFlagsAsync(
+        Guid envId,
+        Guid id, 
+        [FromQuery] FeatureFlagFilter filter)
     {
         var request = new GetEndUserFlags
         {
             EnvId = envId,
             Id = id,
-            SearchText = searchText
+            Filter = filter
         };
 
         var flags = await Mediator.Send(request);
