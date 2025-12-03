@@ -58,13 +58,13 @@ public class FeatureFlagService : MongoDbService<FeatureFlag>, IFeatureFlagServi
         var query = Collection.Find(filter);
 
         // sorting
-        query = userFilter.SortBy switch
+        var sortQuery = userFilter.SortBy switch
         {
             "key" => query.SortBy(x => x.Key),
             _ => query.SortByDescending(x => x.CreatedAt)
         };
 
-        var itemsQuery = query
+        var itemsQuery = sortQuery
             .Skip(userFilter.PageIndex * userFilter.PageSize)
             .Limit(userFilter.PageSize);
 

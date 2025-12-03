@@ -36,13 +36,13 @@ public class FeatureFlagService(AppDbContext dbContext)
         var totalCount = await query.CountAsync();
 
         // sorting
-        query = userFilter.SortBy switch
+        var sortQuery = userFilter.SortBy switch
         {
             "key" => query.OrderBy(x => x.Key),
             _ => query.OrderByDescending(x => x.CreatedAt)
         };
 
-        var itemsQuery = query
+        var itemsQuery = sortQuery
             .Skip(userFilter.PageIndex * userFilter.PageSize)
             .Take(userFilter.PageSize);
 
