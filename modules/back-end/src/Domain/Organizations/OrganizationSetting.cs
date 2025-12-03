@@ -2,5 +2,5 @@
 
 public class OrganizationSetting
 {
-    public SortFlagByEnum SortFlagBy { get; set; } = SortFlagByEnum.CreatedAt;
+    public string FlagSortedBy { get; set; } = "created_at";
 }

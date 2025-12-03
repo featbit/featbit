@@ -31,7 +31,6 @@ public class FeatureFlagController : ApiControllerBase
     {
         var request = new GetFeatureFlagList
         {
-            OrgId = OrgId,
             EnvId = envId,
             Filter = filter
         };

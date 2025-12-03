@@ -1,4 +1,4 @@
-export enum FlagSortByEnum {
-  CreatedAt = 1,
-  Key = 2
+export enum FlagSortedBy {
+  CreatedAt = "created_at",
+  Key = "key"
 }

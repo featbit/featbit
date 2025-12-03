@@ -2,7 +2,6 @@ using Application.Bases.Exceptions;
 using Application.Bases.Models;
 using Application.FeatureFlags;
 using Domain.FeatureFlags;
-using Domain.Organizations;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services.EntityFrameworkCore;
@@ -10,7 +9,7 @@ namespace Infrastructure.Services.EntityFrameworkCore;
 public class FeatureFlagService(AppDbContext dbContext)
     : EntityFrameworkCoreService<FeatureFlag>(dbContext), IFeatureFlagService
 {
-    public async Task<PagedResult<FeatureFlag>> GetListAsync(Guid envId, FeatureFlagFilter userFilter, SortFlagByEnum sortBy)
+    public async Task<PagedResult<FeatureFlag>> GetListAsync(Guid envId, FeatureFlagFilter userFilter)
     {
         var query = Queryable.Where(x => x.EnvId == envId && x.IsArchived == userFilter.IsArchived);
 
@@ -36,9 +35,9 @@ public class FeatureFlagService(AppDbContext dbContext)
 
         var totalCount = await query.CountAsync();
 
-        query = sortBy switch
+        query = userFilter.SortBy switch
         {
-            SortFlagByEnum.Key => query.OrderBy(x => x.Key),
+            "key" => query.OrderBy(x => x.Key),
             _ => query.OrderByDescending(x => x.CreatedAt)
         };
 

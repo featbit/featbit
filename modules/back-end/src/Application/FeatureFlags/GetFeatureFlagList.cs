@@ -4,20 +4,17 @@ namespace Application.FeatureFlags;
 
 public class GetFeatureFlagList : IRequest<PagedResult<FeatureFlagVm>>
 {
-    public Guid OrgId { get; set; }
-    
     public Guid EnvId { get; set; }
 
     public FeatureFlagFilter Filter { get; set; }
 }
 
-public class GetFeatureFlagListHandler(IOrganizationService orgService, IFeatureFlagService service, IMapper mapper)
+public class GetFeatureFlagListHandler(IFeatureFlagService service, IMapper mapper)
     : IRequestHandler<GetFeatureFlagList, PagedResult<FeatureFlagVm>>
 {
     public async Task<PagedResult<FeatureFlagVm>> Handle(GetFeatureFlagList request, CancellationToken cancellationToken)
     {
-        var org = await orgService.GetAsync(request.OrgId);
-        var flags = await service.GetListAsync(request.EnvId, request.Filter, org.Settings.SortFlagBy);
+        var flags = await service.GetListAsync(request.EnvId, request.Filter);
         return mapper.Map<PagedResult<FeatureFlagVm>>(flags);
     }
 }

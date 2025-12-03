@@ -12,7 +12,7 @@ import { GroupListFilter, IPagedGroup } from "@features/safe/iam/types/group";
 import { PolicyService } from "@services/policy.service";
 import { GroupService } from "@services/group.service";
 import { BroadcastService } from "@services/broadcast.service";
-import { FlagSortByEnum } from "@features/safe/workspaces/types/organization";
+import { FlagSortedBy } from "@features/safe/workspaces/types/organization";
 
 @Component({
     selector: 'organization',
@@ -91,7 +91,7 @@ export class OrganizationComponent implements OnInit {
     );
 
     this.settingsForm = new FormGroup({
-      sortFlagBy: new FormControl(this.currentOrganization.settings.sortFlagBy, [ Validators.required ]),
+      flagSortedBy: new FormControl(this.currentOrganization.settings.flagSortedBy, [ Validators.required ]),
     });
   }
 
@@ -202,10 +202,9 @@ export class OrganizationComponent implements OnInit {
     }
 
     const { name } = this.organizationForm.value;
-    const { sortFlagBy } = this.settingsForm.value;
+    const settings = this.settingsForm.value;
     const { id, initialized, key, defaultPermissions} = this.currentOrganization;
 
-    const settings = { sortFlagBy };
     this.isLoading = true;
     this.organizationService.update({ name, settings, defaultPermissions })
     .subscribe({
@@ -241,5 +240,5 @@ export class OrganizationComponent implements OnInit {
   }
 
   protected readonly LicenseFeatureEnum = LicenseFeatureEnum;
-  protected readonly flagSortByEnum = FlagSortByEnum;
+  protected readonly flagSortedBy = FlagSortedBy;
 }

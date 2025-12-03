@@ -27,9 +27,9 @@
     <form class="row-content" nz-form [formGroup]="settingsForm" [nzLayout]="'inline'" (ngSubmit)="updateSettings()">
       <nz-form-item class="extend">
         <nz-form-control>
-          <nz-select class="nz-select-40" nzPlaceHolder="Select sort option" formControlName="sortFlagBy" i18n-nzPlaceHolder="@@org.org.selectSortOption">
-            <nz-option [nzValue]="flagSortByEnum.CreatedAt" nzLabel="Created date" i18n-nzLabel="@@org.org.created-date"></nz-option>
-            <nz-option [nzValue]="flagSortByEnum.Key" nzLabel="Key" i18n-nzLabel="@@org.org.key"></nz-option>
+          <nz-select class="nz-select-40" nzPlaceHolder="Select sort option" formControlName="flagSortedBy" i18n-nzPlaceHolder="@@org.org.selectSortOption">
+            <nz-option [nzValue]="flagSortedBy.CreatedAt" nzLabel="Created At" i18n-nzLabel="@@common.created-at"></nz-option>
+            <nz-option [nzValue]="flagSortedBy.Key" nzLabel="Key" i18n-nzLabel="@@common.key"></nz-option>
           </nz-select>
         </nz-form-control>
       </nz-form-item>

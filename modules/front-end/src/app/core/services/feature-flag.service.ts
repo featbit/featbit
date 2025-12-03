@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { environment } from "../../../environments/environment";
 import { HttpClient, HttpParams } from "@angular/common/http";
-import { getCurrentProjectEnv } from "@utils/project-env";
+import { getCurrentOrganization, getCurrentProjectEnv } from "@utils/project-env";
 import { firstValueFrom, Observable, of } from "rxjs";
 import {
   CopyToEnvPrecheckResult,
@@ -43,10 +43,13 @@ export class FeatureFlagService {
   }
 
   getList(filter: IFeatureFlagListFilter = new IFeatureFlagListFilter()): Observable<IFeatureFlagListModel> {
+    const org = getCurrentOrganization();
+
     const queryParam = {
       name: filter.name ?? '',
       tags: filter.tags ?? [],
       isArchived: filter.isArchived,
+      sortBy: org.settings.flagSortedBy ?? '',
       pageIndex: filter.pageIndex - 1,
       pageSize: filter.pageSize,
       isEnabled: filter.isEnabled ?? ''

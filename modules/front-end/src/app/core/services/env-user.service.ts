@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { getCurrentProjectEnv } from '@utils/project-env';
+import { getCurrentOrganization, getCurrentProjectEnv } from '@utils/project-env';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { EnvUserFilter, EnvUserPagedResult } from "@features/safe/end-users/types/featureflag-user";
@@ -63,8 +63,11 @@ export class EnvUserService {
   }
 
   getFlags(id: string, filter: EndUserFlagFilter = new EndUserFlagFilter()): Observable<IPagedEndUserFlag> {
+    const org = getCurrentOrganization();
+
     const queryParam = {
       searchText: filter.searchText ?? '',
+      sortBy: org.settings.flagSortedBy ?? '',
       pageIndex: filter.pageIndex - 1,
       pageSize: filter.pageSize,
     };

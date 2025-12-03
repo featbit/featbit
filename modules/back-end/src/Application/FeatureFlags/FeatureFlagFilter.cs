@@ -24,4 +24,9 @@ public class FeatureFlagFilter : PagedRequest
     /// Return only archived feature flags if true, the default value is false
     /// </summary>
     public bool IsArchived { get; set; }
+
+    /// <summary>
+    /// The field to sort by, the default is createdAt
+    /// </summary>
+    public string SortBy { get; set; } = "created_at";
 }

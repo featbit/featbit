@@ -24,11 +24,9 @@ public class UpdateOrganizationValidator : AbstractValidator<UpdateOrganization>
         RuleFor(x => x.DefaultPermissions)
             .NotNull().WithErrorCode(ErrorCodes.Required("defaultPermissions"))
             .Must(x => x.IsValid()).WithErrorCode(ErrorCodes.Invalid("defaultPermissions"));
-        
+
         RuleFor(x => x.Settings)
-            .NotNull().WithErrorCode(ErrorCodes.Required("settings"))
-            .Must(x => Enum.IsDefined(typeof(SortFlagByEnum), x.SortFlagBy))
-            .WithErrorCode(ErrorCodes.Invalid("settings"));
+            .NotNull().WithErrorCode(ErrorCodes.Required("settings"));
     }
 }
 
