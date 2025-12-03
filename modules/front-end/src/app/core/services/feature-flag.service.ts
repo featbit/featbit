@@ -49,7 +49,7 @@ export class FeatureFlagService {
       name: filter.name ?? '',
       tags: filter.tags ?? [],
       isArchived: filter.isArchived,
-      sortBy: org.settings.flagSortedBy ?? '',
+      sortBy: org.settings?.flagSortedBy ?? 'created_at',
       pageIndex: filter.pageIndex - 1,
       pageSize: filter.pageSize,
       isEnabled: filter.isEnabled ?? ''
