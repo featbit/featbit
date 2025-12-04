@@ -99,7 +99,7 @@ public class SegmentService(MongoDbClient mongoDb, ILogger<SegmentService> logge
         return references;
     }
 
-    public async Task<ICollection<Guid>> GetEnvironmentIdsAsync(Segment segment)
+    public async ValueTask<ICollection<Guid>> GetEnvironmentIdsAsync(Segment segment)
     {
         if (segment.IsEnvironmentSpecific)
         {

@@ -84,7 +84,7 @@ public class SegmentService(AppDbContext dbContext, ILogger<SegmentService> logg
         return references.AsList();
     }
 
-    public async Task<ICollection<Guid>> GetEnvironmentIdsAsync(Segment segment)
+    public async ValueTask<ICollection<Guid>> GetEnvironmentIdsAsync(Segment segment)
     {
         if (segment.IsEnvironmentSpecific)
         {
