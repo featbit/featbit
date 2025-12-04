@@ -191,4 +191,26 @@ public class SegmentService(MongoDbClient mongoDb, ILogger<SegmentService> logge
         var cursor = await Collection.DistinctAsync<string>("tags", filter);
         return await cursor.ToListAsync();
     }
+
+    public async Task<ICollection<SegmentCache>> GetCachesAsync()
+    {
+        var segments = await Queryable.ToListAsync();
+
+        var caches = new List<SegmentCache>();
+
+        foreach (var segment in segments)
+        {
+            try
+            {
+                var envIds = await GetEnvironmentIdsAsync(segment);
+                caches.Add(new SegmentCache(envIds, segment));
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error getting environment IDs for segment with ID {SegmentId}", segment.Id);
+            }
+        }
+
+        return caches;
+    }
 }

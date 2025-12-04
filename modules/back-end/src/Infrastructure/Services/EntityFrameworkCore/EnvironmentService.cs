@@ -4,11 +4,12 @@ using Domain.Environments;
 using Domain.Organizations;
 using Domain.Projects;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Environment = Domain.Environments.Environment;
 
 namespace Infrastructure.Services.EntityFrameworkCore;
 
-public class EnvironmentService(AppDbContext dbContext)
+public class EnvironmentService(AppDbContext dbContext, ILogger<EnvironmentService> logger)
     : EntityFrameworkCoreService<Environment>(dbContext), IEnvironmentService
 {
     public async Task<string[]> GetServesAsync(string[] scopes)
@@ -102,6 +103,62 @@ public class EnvironmentService(AppDbContext dbContext)
 
         var descriptor = await query.FirstOrDefaultAsync();
         return descriptor;
+    }
+
+    public async Task<ICollection<SecretCache>> GetCachesAsync()
+    {
+        var organizations = QueryableOf<Organization>();
+        var projects = QueryableOf<Project>();
+        var environments = QueryableOf<Environment>();
+
+        var descriptors = from environment in environments
+            join project in projects on environment.ProjectId equals project.Id
+            join organization in organizations on project.OrganizationId equals organization.Id
+            select new ResourceDescriptor
+            {
+                Organization = new IdNameKeyProps
+                {
+                    Id = organization.Id,
+                    Name = organization.Name,
+                    Key = organization.Key
+                },
+                Project = new IdNameKeyProps
+                {
+                    Id = project.Id,
+                    Name = project.Name,
+                    Key = project.Key
+                },
+                Environment = new IdNameKeyProps
+                {
+                    Id = environment.Id,
+                    Name = environment.Name,
+                    Key = environment.Key
+                }
+            };
+
+        var rds = await descriptors.ToListAsync();
+        var envs = await environments.ToListAsync();
+
+        var caches = new List<SecretCache>();
+
+        foreach (var env in envs)
+        {
+            var descriptor = rds.FirstOrDefault(x => x.Environment.Id == env.Id);
+            if (descriptor != null)
+            {
+                var secretCaches = env.Secrets.Select(x => new SecretCache(descriptor, x));
+                caches.AddRange(secretCaches);
+            }
+            else
+            {
+                logger.LogWarning(
+                    "Data inconsistency detected: Resource descriptor not found for environment with ID {EnvId}. Please verify the integrity of the environment data in the database.",
+                    env.Id
+                );
+            }
+        }
+
+        return caches;
     }
 
     public async Task AddWithBuiltInPropsAsync(Environment env)

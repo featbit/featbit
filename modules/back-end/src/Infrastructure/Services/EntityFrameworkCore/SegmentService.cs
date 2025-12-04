@@ -176,4 +176,26 @@ public class SegmentService(AppDbContext dbContext, ILogger<SegmentService> logg
 
         return allTags.SelectMany(x => x).Distinct().ToArray();
     }
+
+    public async Task<ICollection<SegmentCache>> GetCachesAsync()
+    {
+        var segments = await Queryable.ToListAsync();
+
+        var caches = new List<SegmentCache>();
+
+        foreach (var segment in segments)
+        {
+            try
+            {
+                var envIds = await GetEnvironmentIdsAsync(segment);
+                caches.Add(new SegmentCache(envIds, segment));
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error getting environment IDs for segment with ID {SegmentId}", segment.Id);
+            }
+        }
+
+        return caches;
+    }
 }
