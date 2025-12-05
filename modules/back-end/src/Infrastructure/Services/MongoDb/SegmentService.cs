@@ -1,6 +1,4 @@
 using System.Linq.Expressions;
-using Application.Bases;
-using Application.Bases.Exceptions;
 using Application.Bases.Models;
 using Application.Segments;
 using Domain.FeatureFlags;
@@ -109,62 +107,12 @@ public class SegmentService(MongoDbClient mongoDb, ILogger<SegmentService> logge
         var envIds = new List<Guid>();
         foreach (var scope in segment.Scopes)
         {
-            var scopeEnvIds = await SearchScope(scope);
+            var (_, scopeEnvIds) = await TranslateScopeAsync(scope);
             envIds.AddRange(scopeEnvIds);
         }
 
-        return envIds;
-
-        async Task<ICollection<Guid>> SearchScope(string scope)
-        {
-            if (!RN.TryParse(scope, out var props))
-            {
-                logger.LogError(
-                    "Inconsistent segment data for {Segment}: the scope '{Scope}' is not a valid RN.",
-                    segment.Id,
-                    scope
-                );
-
-                throw new BusinessException(ErrorCodes.InconsistentData);
-            }
-
-            var match = new Dictionary<string, string>();
-
-            var envProp = props.FirstOrDefault(x => x.Type == ResourceTypes.Env);
-            if (envProp != null && envProp.Key != "*")
-            {
-                match.Add("key", envProp.Key);
-            }
-
-            var projectProp = props.FirstOrDefault(x => x.Type == ResourceTypes.Project);
-            if (projectProp != null && projectProp.Key != "*")
-            {
-                match.Add("projects.key", projectProp.Key);
-            }
-
-            var orgProp = props.FirstOrDefault(x => x.Type == ResourceTypes.Organization);
-            if (orgProp != null && orgProp.Key != "*")
-            {
-                match.Add("organizations.key", orgProp.Key);
-            }
-
-            var query = MongoDb.CollectionOf<Environment>().Aggregate()
-                .Lookup("Projects", "projectId", "_id", "projects")
-                .Unwind("projects")
-                .Lookup("Organizations", "projects.organizationId", "_id", "organizations")
-                .Unwind("organizations")
-                .Match(new BsonDocument
-                {
-                    {
-                        "$and",
-                        new BsonArray(match.Select(x => new BsonDocument(x.Key, x.Value)))
-                    }
-                })
-                .Project(new BsonDocument("_id", 1));
-
-            var documents = await query.ToListAsync();
-            return documents.Select(x => x["_id"].AsGuid).ToList();
-        }
+        var distinct = envIds.Distinct().ToArray();
+        return distinct;
     }
 
     public async Task<bool> IsNameUsedAsync(Guid workspaceId, string type, Guid envId, string name)
@@ -198,19 +146,82 @@ public class SegmentService(MongoDbClient mongoDb, ILogger<SegmentService> logge
 
         var caches = new List<SegmentCache>();
 
-        foreach (var segment in segments)
-        {
-            try
-            {
-                var envIds = await GetEnvironmentIdsAsync(segment);
-                caches.Add(new SegmentCache(envIds, segment));
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Error getting environment IDs for segment with ID {SegmentId}", segment.Id);
-            }
-        }
+        // environment specific segments
+        var envSegments = segments.Where(x => x.IsEnvironmentSpecific);
+        caches.AddRange(envSegments.Select(x => new SegmentCache([x.EnvId], x)));
+
+        // shared segments
+        await AddSharedSegmentCachesAsync();
 
         return caches;
+
+        async Task AddSharedSegmentCachesAsync()
+        {
+            var sharedSegments = segments.Where(x => !x.IsEnvironmentSpecific).ToArray();
+
+            var scopesToTranslate = sharedSegments.SelectMany(x => x.Scopes)
+                .Distinct()
+                .ToArray();
+
+            var searchScopeTasks = scopesToTranslate.Select(x => TranslateScopeAsync(x));
+            var scopes = await Task.WhenAll(searchScopeTasks);
+
+            foreach (var sharedSegment in sharedSegments)
+            {
+                var envIds = sharedSegment.Scopes
+                    .SelectMany(scope => scopes.First(x => x.scope == scope).envIds)
+                    .Distinct()
+                    .ToArray();
+
+                caches.Add(new SegmentCache(envIds, sharedSegment));
+            }
+        }
+    }
+
+    private async Task<(string scope, ICollection<Guid> envIds)> TranslateScopeAsync(string scope)
+    {
+        if (!RN.TryParse(scope, out var props))
+        {
+            logger.LogError("Segment scope '{Scope}' is not a valid RN.", scope);
+
+            return (scope, []);
+        }
+
+        var match = new Dictionary<string, string>();
+
+        var envProp = props.FirstOrDefault(x => x.Type == ResourceTypes.Env);
+        if (envProp != null && envProp.Key != "*")
+        {
+            match.Add("key", envProp.Key);
+        }
+
+        var projectProp = props.FirstOrDefault(x => x.Type == ResourceTypes.Project);
+        if (projectProp != null && projectProp.Key != "*")
+        {
+            match.Add("projects.key", projectProp.Key);
+        }
+
+        var orgProp = props.FirstOrDefault(x => x.Type == ResourceTypes.Organization);
+        if (orgProp != null && orgProp.Key != "*")
+        {
+            match.Add("organizations.key", orgProp.Key);
+        }
+
+        var query = MongoDb.CollectionOf<Environment>().Aggregate()
+            .Lookup("Projects", "projectId", "_id", "projects")
+            .Unwind("projects")
+            .Lookup("Organizations", "projects.organizationId", "_id", "organizations")
+            .Unwind("organizations")
+            .Match(new BsonDocument
+            {
+                {
+                    "$and",
+                    new BsonArray(match.Select(x => new BsonDocument(x.Key, x.Value)))
+                }
+            })
+            .Project(new BsonDocument("_id", 1));
+
+        var documents = await query.ToListAsync();
+        return (scope, documents.Select(x => x["_id"].AsGuid).ToArray());
     }
 }

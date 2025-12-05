@@ -148,11 +148,11 @@ public class EnvironmentService(MongoDbClient mongoDb, ILogger<EnvironmentServic
         var envs = await environments.ToListAsync();
 
         var caches = new List<SecretCache>();
+        var descriptorDictionary = rds.ToDictionary(x => x.Environment.Id, x => x);
 
         foreach (var env in envs)
         {
-            var descriptor = rds.FirstOrDefault(x => x.Environment.Id == env.Id);
-            if (descriptor != null)
+            if (descriptorDictionary.TryGetValue(env.Id, out var descriptor))
             {
                 var secretCaches = env.Secrets.Select(x => new SecretCache(descriptor, x));
                 caches.AddRange(secretCaches);

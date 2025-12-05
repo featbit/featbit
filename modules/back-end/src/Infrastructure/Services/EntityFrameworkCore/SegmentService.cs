@@ -1,6 +1,4 @@
 using System.Linq.Expressions;
-using Application.Bases;
-using Application.Bases.Exceptions;
 using Application.Bases.Models;
 using Application.Segments;
 using Dapper;
@@ -94,55 +92,12 @@ public class SegmentService(AppDbContext dbContext, ILogger<SegmentService> logg
         var envIds = new List<Guid>();
         foreach (var scope in segment.Scopes)
         {
-            var scopeEnvIds = await SearchScope(scope);
+            var (_, scopeEnvIds) = await TranslateScopeAsync(scope);
             envIds.AddRange(scopeEnvIds);
         }
 
-        return envIds;
-
-        async Task<ICollection<Guid>> SearchScope(string scope)
-        {
-            if (!RN.TryParse(scope, out var props))
-            {
-                logger.LogError(
-                    "Inconsistent segment data for {Segment}: the scope '{Scope}' is not a valid RN.",
-                    segment.Id,
-                    scope
-                );
-
-                throw new BusinessException(ErrorCodes.InconsistentData);
-            }
-
-            var environments = QueryableOf<Environment>();
-            var projects = QueryableOf<Project>();
-            var organizations = QueryableOf<Organization>();
-
-            var envProp = props.FirstOrDefault(x => x.Type == ResourceTypes.Env);
-            if (envProp != null && envProp.Key != "*")
-            {
-                environments = environments.Where(x => x.Key == envProp.Key);
-            }
-
-            var projectProp = props.FirstOrDefault(x => x.Type == ResourceTypes.Project);
-            if (projectProp != null && projectProp.Key != "*")
-            {
-                projects = projects.Where(x => x.Key == projectProp.Key);
-            }
-
-            var orgProp = props.FirstOrDefault(x => x.Type == ResourceTypes.Organization);
-            if (orgProp != null && orgProp.Key != "*")
-            {
-                organizations = organizations.Where(x => x.Key == orgProp.Key);
-            }
-
-            var query = from env in environments
-                join project in projects on env.ProjectId equals project.Id
-                join org in organizations on project.OrganizationId equals org.Id
-                select env.Id;
-
-            var ids = await query.ToListAsync();
-            return ids;
-        }
+        var distinct = envIds.Distinct().ToArray();
+        return distinct;
     }
 
     public async Task<bool> IsNameUsedAsync(Guid workspaceId, string type, Guid envId, string name)
@@ -183,19 +138,75 @@ public class SegmentService(AppDbContext dbContext, ILogger<SegmentService> logg
 
         var caches = new List<SegmentCache>();
 
-        foreach (var segment in segments)
-        {
-            try
-            {
-                var envIds = await GetEnvironmentIdsAsync(segment);
-                caches.Add(new SegmentCache(envIds, segment));
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Error getting environment IDs for segment with ID {SegmentId}", segment.Id);
-            }
-        }
+        // environment specific segments
+        var envSegments = segments.Where(x => x.IsEnvironmentSpecific);
+        caches.AddRange(envSegments.Select(x => new SegmentCache([x.EnvId], x)));
+
+        // shared segments
+        await AddSharedSegmentCachesAsync();
 
         return caches;
+
+        async Task AddSharedSegmentCachesAsync()
+        {
+            var sharedSegments = segments.Where(x => !x.IsEnvironmentSpecific).ToArray();
+
+            var scopesToTranslate = sharedSegments.SelectMany(x => x.Scopes)
+                .Distinct()
+                .ToArray();
+
+            var searchScopeTasks = scopesToTranslate.Select(x => TranslateScopeAsync(x));
+            var scopes = await Task.WhenAll(searchScopeTasks);
+
+            foreach (var sharedSegment in sharedSegments)
+            {
+                var envIds = sharedSegment.Scopes
+                    .SelectMany(scope => scopes.First(x => x.scope == scope).envIds)
+                    .Distinct()
+                    .ToArray();
+
+                caches.Add(new SegmentCache(envIds, sharedSegment));
+            }
+        }
+    }
+
+    private async Task<(string scope, ICollection<Guid> envIds)> TranslateScopeAsync(string scope)
+    {
+        if (!RN.TryParse(scope, out var props))
+        {
+            logger.LogError("Segment scope '{Scope}' is not a valid RN.", scope);
+
+            return (scope, []);
+        }
+
+        var environments = QueryableOf<Environment>();
+        var projects = QueryableOf<Project>();
+        var organizations = QueryableOf<Organization>();
+
+        var envProp = props.FirstOrDefault(x => x.Type == ResourceTypes.Env);
+        if (envProp != null && envProp.Key != "*")
+        {
+            environments = environments.Where(x => x.Key == envProp.Key);
+        }
+
+        var projectProp = props.FirstOrDefault(x => x.Type == ResourceTypes.Project);
+        if (projectProp != null && projectProp.Key != "*")
+        {
+            projects = projects.Where(x => x.Key == projectProp.Key);
+        }
+
+        var orgProp = props.FirstOrDefault(x => x.Type == ResourceTypes.Organization);
+        if (orgProp != null && orgProp.Key != "*")
+        {
+            organizations = organizations.Where(x => x.Key == orgProp.Key);
+        }
+
+        var query = from env in environments
+            join project in projects on env.ProjectId equals project.Id
+            join org in organizations on project.OrganizationId equals org.Id
+            select env.Id;
+
+        var ids = await query.ToListAsync();
+        return (scope, ids);
     }
 }
