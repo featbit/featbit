@@ -147,7 +147,7 @@ public class SegmentService(MongoDbClient mongoDb, ILogger<SegmentService> logge
         var caches = new List<SegmentCache>();
 
         // environment specific segments
-        var envSegments = segments.Where(x => x.IsEnvironmentSpecific);
+        var envSegments = segments.Where(x => x.Type == SegmentType.EnvironmentSpecific);
         caches.AddRange(envSegments.Select(x => new SegmentCache([x.EnvId], x)));
 
         // shared segments
@@ -157,7 +157,7 @@ public class SegmentService(MongoDbClient mongoDb, ILogger<SegmentService> logge
 
         async Task AddSharedSegmentCachesAsync()
         {
-            var sharedSegments = segments.Where(x => !x.IsEnvironmentSpecific).ToArray();
+            var sharedSegments = segments.Where(x => x.Type == SegmentType.Shared).ToArray();
 
             var scopesToTranslate = sharedSegments.SelectMany(x => x.Scopes)
                 .Distinct()
