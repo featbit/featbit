@@ -163,8 +163,8 @@ public class SegmentService(MongoDbClient mongoDb, ILogger<SegmentService> logge
                 .Distinct()
                 .ToArray();
 
-            var searchScopeTasks = scopesToTranslate.Select(x => TranslateScopeAsync(x));
-            var scopes = await Task.WhenAll(searchScopeTasks);
+            var translateScopeTasks = scopesToTranslate.Select(x => TranslateScopeAsync(x));
+            var scopes = await Task.WhenAll(translateScopeTasks);
 
             foreach (var sharedSegment in sharedSegments)
             {
