@@ -3,9 +3,8 @@ import { FeatureFlagService } from "@services/feature-flag.service";
 import { NzMessageService } from "ng-zorro-antd/message";
 import { ProjectService } from "@services/project.service";
 import { getCurrentProjectEnv } from "@utils/project-env";
-import { IEnvironment } from "@shared/types";
+import { IEnvironment, IProject, IProjectEnv } from "@shared/types";
 import { CopyToEnvPrecheckResult, FeatureFlagListCheckItem } from "@features/safe/feature-flags/types/feature-flag";
-import { map } from "rxjs/operators";
 
 type BulkCopyCheckItem = {
   id: string;
@@ -55,8 +54,10 @@ export class CopyFeatureFlagModalComponent implements OnInit {
   @Output()
   close: EventEmitter<void> = new EventEmitter();
 
+  isLoading: boolean = true;
   targetEnvId: string = '';
-  envs: IEnvironment[] = [];
+  envs: { label: string, value: string }[] = [];
+  currentProjectEnv: IProjectEnv;
 
   get selectedFlags() {
     return this.flags.filter(x => x.checked)
@@ -68,13 +69,19 @@ export class CopyFeatureFlagModalComponent implements OnInit {
     private msg: NzMessageService,
   ) { }
 
-  ngOnInit() {
-    let currentProjectEnv = getCurrentProjectEnv();
+  async ngOnInit() {
+    this.currentProjectEnv = getCurrentProjectEnv();
 
-    this.projectService
-    .get(currentProjectEnv.projectId)
-    .pipe(map(project => project.environments))
-    .subscribe(envs => this.envs = envs.filter(x => x.id !== currentProjectEnv.envId));
+    const projects = await this.projectService.getListAsync();
+    this.envs = projects.flatMap((project: IProject) =>
+      project.environments.map((env: IEnvironment) => ({
+        value: env.id,
+        label: `${project.name}/${env.name}`
+      }))
+    )
+    .filter(env => env.value !== this.currentProjectEnv.envId);
+
+    this.isLoading = false;
   }
 
   onClose() {
