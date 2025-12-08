@@ -32,10 +32,12 @@
         </ng-template>
       </nz-alert>
 
-      <div class="current-environment">
-        <span class="label" i18n="@ff.bulk-copy.current-environment">Current Environment:</span>
-        <span class="value">{{this.currentProjectEnv.projectName}}/{{ this.currentProjectEnv.envName }}</span>
-      </div>
+      @if (currentProjectEnv) {
+        <div class="current-environment">
+          <span class="label" i18n="@ff.bulk-copy.current-environment">Current Environment:</span>
+          <span class="value">{{this.currentProjectEnv.projectName}}/{{ this.currentProjectEnv.envName }}</span>
+        </div>
+      }
 
       <div class="select-environment">
         <nz-form-label nzRequired i18n="@@ff.bulk-copy.select-target-environment">Select target environment</nz-form-label>
