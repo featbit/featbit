@@ -26,7 +26,8 @@ public class CopyToEnvHandler(
 {
     public async Task<CopyToEnvResult> Handle(CopyToEnv request, CancellationToken cancellationToken)
     {
-        var srcEnvRn = await resourceService.GetRNAsync(request.SourceEnvId, ResourceTypes.Env);
+        var srcEnv = await GetSrcEnvAsync();
+
         var flags = await flagService.FindManyAsync(x => request.FlagIds.Contains(x.Id));
         var precheckResults = request.PrecheckResults;
 
@@ -43,6 +44,20 @@ public class CopyToEnvHandler(
 
         return new CopyToEnvResult(flags.Count);
 
+        async Task<string> GetSrcEnvAsync()
+        {
+            var rnString = await resourceService.GetRNAsync(request.SourceEnvId, ResourceTypes.Env);
+            if (!RN.TryParse(rnString, out var props))
+            {
+                return rnString;
+            }
+
+            var project = props.FirstOrDefault(x => x.Type == ResourceTypes.Project);
+            var env = props.FirstOrDefault(x => x.Type == ResourceTypes.Env);
+
+            return $"{project?.Key}/{env?.Key}";
+        }
+
         async Task CopyAsync(FeatureFlag flag)
         {
             var precheckResult = precheckResults.FirstOrDefault(x => x.Id == flag.Id);
@@ -57,7 +72,7 @@ public class CopyToEnvHandler(
             // publish on feature flag change notification
             var dataChange = new DataChange(null).To(flag);
             var notification = new OnFeatureFlagChanged(
-                flag, Operations.Create, dataChange, currentUser.Id, $"Copied from {srcEnvRn}"
+                flag, Operations.Create, dataChange, currentUser.Id, $"Copied from \"{srcEnv}\""
             );
             await publisher.Publish(notification, cancellationToken);
         }
