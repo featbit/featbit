@@ -11,7 +11,7 @@ public interface IEnvironmentService : IService<Environment>
 
     Task<ResourceDescriptor> GetResourceDescriptorAsync(Guid envId);
 
-    Task<ICollection<SecretCache>> GetCachesAsync();
+    Task<ICollection<SecretCache>> GetSecretCachesAsync();
 
     Task AddWithBuiltInPropsAsync(Environment env);
 

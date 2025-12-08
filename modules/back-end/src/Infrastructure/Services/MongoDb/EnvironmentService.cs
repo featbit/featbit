@@ -113,7 +113,7 @@ public class EnvironmentService(MongoDbClient mongoDb, ILogger<EnvironmentServic
         return descriptor;
     }
 
-    public async Task<ICollection<SecretCache>> GetCachesAsync()
+    public async Task<ICollection<SecretCache>> GetSecretCachesAsync()
     {
         var organizations = MongoDb.QueryableOf<Organization>();
         var projects = MongoDb.QueryableOf<Project>();

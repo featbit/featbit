@@ -105,7 +105,7 @@ public class EnvironmentService(AppDbContext dbContext, ILogger<EnvironmentServi
         return descriptor;
     }
 
-    public async Task<ICollection<SecretCache>> GetCachesAsync()
+    public async Task<ICollection<SecretCache>> GetSecretCachesAsync()
     {
         var organizations = QueryableOf<Organization>();
         var projects = QueryableOf<Project>();

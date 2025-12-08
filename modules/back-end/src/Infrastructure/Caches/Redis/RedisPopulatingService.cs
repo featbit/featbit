@@ -75,7 +75,7 @@ public class RedisPopulatingService(
 
     private async Task PopulateSecretsAsync()
     {
-        var caches = await envService.GetCachesAsync();
+        var caches = await envService.GetSecretCachesAsync();
         var tasks = caches.Select(x => cacheService.UpsertSecretAsync(x.Descriptor, x.Secret));
 
         await Task.WhenAll(tasks);
