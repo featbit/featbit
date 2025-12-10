@@ -12,7 +12,6 @@ import { NzDrawerModule } from 'ng-zorro-antd/drawer';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzInputModule } from 'ng-zorro-antd/input';
-import { NzMessageModule } from 'ng-zorro-antd/message';
 import { NzOverlayModule } from 'ng-zorro-antd/core/overlay';
 import { NzOutletModule } from 'ng-zorro-antd/core/outlet';
 import { NzSelectModule } from 'ng-zorro-antd/select';
@@ -171,7 +170,6 @@ import { RelayProxyKeyModalComponent } from './components/relay-proxy-key-modal/
     NzOutletModule,
     NzButtonModule,
     NzDrawerModule,
-    NzMessageModule,
     NzOverlayModule,
     NzDropDownModule,
     NzTableModule,

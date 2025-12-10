@@ -17,7 +17,6 @@ import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzSpaceModule } from 'ng-zorro-antd/space';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
-import { NzMessageModule } from 'ng-zorro-antd/message';
 import { NzTypographyModule } from 'ng-zorro-antd/typography';
 import { NzDividerModule } from 'ng-zorro-antd/divider';
 import { NzModalModule  } from 'ng-zorro-antd/modal';
@@ -54,7 +53,6 @@ import {NzFormModule} from "ng-zorro-antd/form";
     NzSpaceModule,
     NzPopconfirmModule,
     CommonModule,
-    NzMessageModule,
     NzTypographyModule,
     NzDividerModule,
     NzModalModule,

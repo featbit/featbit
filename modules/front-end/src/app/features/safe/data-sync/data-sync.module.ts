@@ -4,7 +4,6 @@ import { DataSyncComponent } from './data-sync.component';
 import { DataSyncRoutingModule } from './data-sync-routing.module';
 import { FormsModule } from '@angular/forms';
 import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzMessageModule } from 'ng-zorro-antd/message';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzListModule } from 'ng-zorro-antd/list';
 import { NzSpaceModule } from 'ng-zorro-antd/space';
@@ -32,7 +31,6 @@ import {CoreModule} from "@core/core.module";
     FormsModule,
     NzSpinModule,
     NzButtonModule,
-    NzMessageModule,
     NzListModule,
     NzSpaceModule,
     NzDividerModule,
