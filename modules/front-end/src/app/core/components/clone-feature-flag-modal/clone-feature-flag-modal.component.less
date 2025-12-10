@@ -1,0 +1,47 @@
+@import "variables";
+
+nz-alert {
+  margin-bottom: 16px;
+}
+
+.flag-to-clone {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background-color: @grey5-color;
+  border-radius: 4px;
+
+  .label {
+    color: @grey50-color;
+    font-weight: 500;
+  }
+
+  a {
+    color: @primary-color;
+    font-weight: 600;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.name-key-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+
+  nz-form-item {
+    flex: 1;
+  }
+}
+
+.actions {
+  button {
+    width: unset;
+    height: unset;
+  }
+}

@@ -106,6 +106,7 @@ import { BroadcastService } from "@services/broadcast.service";
 import { RelayProxyDrawerComponent } from '@core/components/relay-proxy-drawer/relay-proxy-drawer.component';
 import { RelayProxyAgentModalComponent } from './components/relay-proxy-agent-modal/relay-proxy-agent-modal.component';
 import { RelayProxyKeyModalComponent } from './components/relay-proxy-key-modal/relay-proxy-key-modal.component';
+import { CloneFeatureFlagModalComponent } from './components/clone-feature-flag-modal/clone-feature-flag-modal.component';
 
 @NgModule({
   declarations: [
@@ -153,7 +154,8 @@ import { RelayProxyKeyModalComponent } from './components/relay-proxy-key-modal/
     CopyFeatureFlagModalComponent,
     RelayProxyDrawerComponent,
     RelayProxyAgentModalComponent,
-    RelayProxyKeyModalComponent
+    RelayProxyKeyModalComponent,
+    CloneFeatureFlagModalComponent
   ],
   imports: [
     CommonModule,
@@ -261,7 +263,8 @@ import { RelayProxyKeyModalComponent } from './components/relay-proxy-key-modal/
     CopyFeatureFlagModalComponent,
     RelayProxyDrawerComponent,
     RelayProxyAgentModalComponent,
-    RelayProxyKeyModalComponent
+    RelayProxyKeyModalComponent,
+    CloneFeatureFlagModalComponent
   ]
 })
 export class CoreModule {

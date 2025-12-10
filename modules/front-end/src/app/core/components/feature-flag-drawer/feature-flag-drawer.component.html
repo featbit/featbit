@@ -17,8 +17,8 @@
             <input
               nz-input
               formControlName="name"
-              placeholder="A human-friendly name for your feature flag"
-              i18n-placeholder="@@common.feature-flag-name"
+              placeholder="A human-friendly name"
+              i18n-placeholder="@@ff.feature-flag-name-placeholder"
             />
             </nz-form-control>
           </nz-form-item>
@@ -120,7 +120,7 @@
           </nz-form-control>
         </nz-form-item>
         <div class="variations-wrapper" formArrayName="variations">
-          @for (variation of variations.controls; track variation; let i = $index) {
+          @for (variation of variations.controls; track variation.value["id"]; let i = $index) {
             <div class="variation-wrapper" [class]="{'with-extra-options': showDeleteVariationButton}" [formGroupName]="i">
               <nz-form-item>
                 <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>
@@ -192,7 +192,7 @@
               i18n-nzPlaceHolder="@@common.select-variation"
               nzPlaceHolder="Select variation"
               formControlName="enabledVariationId">
-              @for (variation of variations.controls; track variation) {
+              @for (variation of variations.controls; track variation.value["id"]) {
                 <nz-option [nzLabel]="variation.value['name']" [nzValue]="variation.value['id']"></nz-option>
               }
             </nz-select>
@@ -206,7 +206,7 @@
               i18n-nzPlaceHolder="@@common.select-variation"
               nzPlaceHolder="Select variation"
               formControlName="disabledVariationId">
-              @for (variation of variations.controls; track variation) {
+              @for (variation of variations.controls; track variation.value["id"]) {
                 <nz-option [nzLabel]="variation.value['name']" [nzValue]="variation.value['id']"></nz-option>
               }
             </nz-select>

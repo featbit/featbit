@@ -147,7 +147,12 @@ export class IndexComponent implements OnInit {
     this.copyVisible = true;
   }
 
-  //#region switch list
+  cloneVisible: boolean = false;
+  flagToClone: IFeatureFlagListItem;
+  clone(flag: IFeatureFlagListItem) {
+    this.flagToClone = flag;
+    this.cloneVisible = true;
+  }
 
   featureFlagListModel: IFeatureFlagListModel = {
     items: [],
