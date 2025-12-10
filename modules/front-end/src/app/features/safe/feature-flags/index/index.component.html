@@ -198,6 +198,6 @@
 </copy-feature-flag-modal>
 <clone-feature-flag-modal
   [flag]="flagToClone"
-  (close)="cloneVisible = false"
+  (close)="cloneModalClosed($event)"
   [visible]="cloneVisible">
 </clone-feature-flag-modal>

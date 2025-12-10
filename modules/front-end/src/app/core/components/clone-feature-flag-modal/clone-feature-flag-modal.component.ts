@@ -4,6 +4,7 @@ import { FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms"
 import { FeatureFlagService } from "@services/feature-flag.service";
 import { slugify } from "@utils/index";
 import { FlagKeyValidator } from "@shared/flag-key-validator.service";
+import { NzMessageService } from "ng-zorro-antd/message";
 
 @Component({
   selector: 'clone-feature-flag-modal',
@@ -30,7 +31,7 @@ export class CloneFeatureFlagModalComponent {
   flag: IFeatureFlagListItem;
 
   @Output()
-  close: EventEmitter<void> = new EventEmitter();
+  close: EventEmitter<boolean> = new EventEmitter(false);
 
   form: FormGroup<{
     name: FormControl<string>;
@@ -41,6 +42,7 @@ export class CloneFeatureFlagModalComponent {
 
   constructor(
     private fb: FormBuilder,
+    private msg: NzMessageService,
     private flagKeyAsyncValidator: FlagKeyValidator,
     private flagServices: FeatureFlagService
   ) { }
@@ -81,14 +83,25 @@ export class CloneFeatureFlagModalComponent {
     });
   }
 
-  onClose() {
-    this.close.emit();
+  onClose(completed: boolean = false) {
+    this.close.emit(completed);
   }
 
   isCloning: boolean = false;
 
   doClone() {
-    // this.isCloning = true;
-    console.log(this.form.value);
+    this.isCloning = true;
+    const payload = this.form.value;
+    this.flagServices.clone(this.flag.key, payload as any).subscribe({
+      next: () => {
+        this.isCloning = false;
+        this.msg.success($localize `:@@common.operation-success:Operation succeeded`);
+        this.onClose(true);
+      },
+      error: () => {
+        this.msg.error($localize`:@@common.operation-failed:Operation failed`);
+        this.isCloning = false;
+      }
+    });
   }
 }

@@ -44,6 +44,13 @@ export interface ICopyToEnvResult {
   copiedCount: number;
 }
 
+export type CloneFlagPayload = {
+  name: string;
+  key: string;
+  description: string;
+  tags: string[];
+}
+
 export class IFeatureFlagListFilter {
   name?: string;
   isEnabled?: boolean;

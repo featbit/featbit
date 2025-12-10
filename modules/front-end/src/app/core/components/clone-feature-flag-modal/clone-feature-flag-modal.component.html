@@ -7,7 +7,7 @@
   [nzWidth]="620"
   [nzContent]="content"
   [nzFooter]="footer"
-  (nzOnCancel)="onClose()">
+  (nzOnCancel)="onClose(false)">
   <ng-template #content>
     <nz-alert nzType="success" [nzDescription]="description" nzShowIcon>
       <ng-template #description>

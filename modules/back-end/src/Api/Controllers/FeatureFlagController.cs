@@ -353,6 +353,16 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(copyToEnvResult);
     }
 
+    [HttpPost("clone/{key}")]
+    public async Task<ApiResponse<bool>> CloneAsync(Guid envId, string key, CloneFlag request)
+    {
+        request.EnvId = envId;
+        request.OriginFlagKey = key;
+
+        var flag = await Mediator.Send(request);
+        return Ok(flag);
+    }
+
     [HttpGet("all-tags")]
     public async Task<ApiResponse<ICollection<string>>> GetAllTagsAsync(Guid envId)
     {

@@ -200,6 +200,24 @@ public class FeatureFlag : FullAuditedEntity
         MarkAsUpdated(currentUserId);
     }
 
+    public FeatureFlag Clone(string name, string key, string description, string[] tags, Guid currentUserId)
+    {
+        // clear id
+        Id = Guid.Empty;
+
+        Name = name;
+        Key = key;
+        Description = description;
+        Tags = tags ?? [];
+
+        // change audited properties
+        CreatedAt = DateTime.UtcNow;
+        CreatorId = currentUserId;
+        MarkAsUpdated(currentUserId);
+
+        return this;
+    }
+
     public DataChange Toggle(Guid currentUserId)
     {
         var dataChange = new DataChange(this);
