@@ -99,6 +99,10 @@ export class CopyFeatureFlagModalComponent implements OnInit {
   precheckResults: CopyToEnvPrecheckResult[] = [];
 
   onSelectTargetEnvironment() {
+    if (!this.targetEnvId) {
+      return;
+    }
+
     this.checking = true;
 
     const flagIds = this.flags.map(x => x.id);

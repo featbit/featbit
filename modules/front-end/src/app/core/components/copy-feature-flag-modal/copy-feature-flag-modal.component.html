@@ -50,11 +50,10 @@
           </nz-select>
         } @else {
           <nz-select
+            nzShowSearch
             [nzOptions]="envs"
             [(ngModel)]="targetEnvId"
-            (ngModelChange)="onSelectTargetEnvironment()"
-            nzAllowClear
-            nzShowSearch>
+            (ngModelChange)="onSelectTargetEnvironment()">
           </nz-select>
         }
       </div>
