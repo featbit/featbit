@@ -418,7 +418,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
-          <context context-type="linenumber">111,113</context>
+          <context context-type="linenumber">128,130</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
@@ -590,7 +590,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.ts</context>
-          <context context-type="linenumber">136</context>
+          <context context-type="linenumber">147</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/expt-rules-drawer/expt-rules-drawer.component.ts</context>
@@ -1143,6 +1143,10 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-review/change-review.component.html</context>
           <context context-type="linenumber">99,100</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
+          <context context-type="linenumber">48,49</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/experiment-drawer/experiment-drawer.component.html</context>
@@ -1918,7 +1922,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
-          <context context-type="linenumber">104,106</context>
+          <context context-type="linenumber">121,123</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
@@ -2046,11 +2050,20 @@
         </context-group>
         <target>如果任意一条规则使用了当前环境下的用户组或其使用的共享用户组在目标环境无法使用，则无法复制。</target>
       </trans-unit>
+      <trans-unit id="7826131589469362277" datatype="html">
+        <source>Current Environment:</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
+          <context context-type="linenumber">37,38</context>
+        </context-group>
+        <note priority="1" from="description">@ff.bulk-copy.current-environment</note>
+        <target>当前环境：</target>
+      </trans-unit>
       <trans-unit id="ff.bulk-copy.select-target-environment" datatype="html">
         <source>Select target environment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
-          <context context-type="linenumber">36,37</context>
+          <context context-type="linenumber">43,45</context>
         </context-group>
         <target>请选择目标环境</target>
       </trans-unit>
@@ -2058,7 +2071,7 @@
         <source>Checking if the selected flags can be copied...</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
-          <context context-type="linenumber">45,46</context>
+          <context context-type="linenumber">62,63</context>
         </context-group>
         <target>正在检查所选开关是否能被复制...</target>
       </trans-unit>
@@ -2066,7 +2079,7 @@
         <source>Choose feature flags to copy</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
-          <context context-type="linenumber">48,49</context>
+          <context context-type="linenumber">65,66</context>
         </context-group>
         <target>请选择要复制的开关</target>
       </trans-unit>
@@ -2074,7 +2087,7 @@
         <source>Copy Anyway</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
-          <context context-type="linenumber">61,63</context>
+          <context context-type="linenumber">78,80</context>
         </context-group>
         <note priority="1" from="description">@ff.bulk-copy.copy-anyway</note>
         <target>仍然复制</target>
@@ -2083,7 +2096,7 @@
         <source>This flag already exists in the target environment.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
-          <context context-type="linenumber">70,72</context>
+          <context context-type="linenumber">87,89</context>
         </context-group>
         <target>此开关在目标环境中已存在。</target>
       </trans-unit>
@@ -2091,7 +2104,7 @@
         <source>Individual Targeting will not be copied.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
-          <context context-type="linenumber">76,79</context>
+          <context context-type="linenumber">93,96</context>
         </context-group>
         <target>目标用户不会被复制。</target>
       </trans-unit>
@@ -2099,7 +2112,7 @@
         <source>Targeting Rules will not be copied.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
-          <context context-type="linenumber">82,85</context>
+          <context context-type="linenumber">99,102</context>
         </context-group>
         <target>匹配规则不会被复制。</target>
       </trans-unit>
@@ -2107,7 +2120,7 @@
         <source>This flag is safe to copy.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
-          <context context-type="linenumber">88,90</context>
+          <context context-type="linenumber">105,107</context>
         </context-group>
         <target>此开关可以被完全复制。</target>
       </trans-unit>
@@ -2115,7 +2128,7 @@
         <source>Selected</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
-          <context context-type="linenumber">101,103</context>
+          <context context-type="linenumber">118,120</context>
         </context-group>
         <target>已选择</target>
       </trans-unit>
@@ -2123,7 +2136,7 @@
         <source>Bulk copy precheck failed. Please try again.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.ts</context>
-          <context context-type="linenumber">117</context>
+          <context context-type="linenumber">128</context>
         </context-group>
         <target>批量复制失败，请重试。</target>
       </trans-unit>
@@ -2131,7 +2144,7 @@
         <source>Operation failed</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.ts</context>
-          <context context-type="linenumber">141</context>
+          <context context-type="linenumber">152</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/expt-rules-drawer/expt-rules-drawer.component.ts</context>

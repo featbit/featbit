@@ -344,8 +344,9 @@ public class FeatureFlagController : ApiControllerBase
 
 
     [HttpPost("copy-to-env/{targetEnvId:guid}")]
-    public async Task<ApiResponse<CopyToEnvResult>> CopyToEnvAsync(Guid targetEnvId, CopyToEnv request)
+    public async Task<ApiResponse<CopyToEnvResult>> CopyToEnvAsync(Guid envId, Guid targetEnvId, CopyToEnv request)
     {
+        request.SourceEnvId = envId;
         request.TargetEnvId = targetEnvId;
 
         var copyToEnvResult = await Mediator.Send(request);
