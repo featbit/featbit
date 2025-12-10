@@ -61,8 +61,7 @@
                 <ng-container i18n="@@common.key-cannot-be-empty">Key cannot be empty</ng-container>
               }
               @if (control.hasError('pattern')) {
-                <ng-container i18n="@@common.key-format-error">Only allow letters, numbers, '.', '_' or '-'
-                </ng-container>
+                <ng-container i18n="@@common.key-format-error">Only allow letters, numbers, '.', '_' or '-'</ng-container>
               }
               @if (control.hasError('duplicated')) {
                 <ng-container i18n="@@common.key-has-been-used">This key has been used</ng-container>
@@ -99,6 +98,7 @@
             class="nz-select-36"
             nzMode="tags"
             nzPlaceHolder="Select Tags"
+            i18n-nzPlaceHolder="@@common.select-tags"
             nzAllowClear
             nzShowSearch
             [nzMaxTagCount]="3"
