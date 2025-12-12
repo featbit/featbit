@@ -12,7 +12,6 @@ import { NzDrawerModule } from 'ng-zorro-antd/drawer';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzInputModule } from 'ng-zorro-antd/input';
-import { NzMessageModule } from 'ng-zorro-antd/message';
 import { NzOverlayModule } from 'ng-zorro-antd/core/overlay';
 import { NzOutletModule } from 'ng-zorro-antd/core/outlet';
 import { NzSelectModule } from 'ng-zorro-antd/select';
@@ -107,6 +106,7 @@ import { BroadcastService } from "@services/broadcast.service";
 import { RelayProxyDrawerComponent } from '@core/components/relay-proxy-drawer/relay-proxy-drawer.component';
 import { RelayProxyAgentModalComponent } from './components/relay-proxy-agent-modal/relay-proxy-agent-modal.component';
 import { RelayProxyKeyModalComponent } from './components/relay-proxy-key-modal/relay-proxy-key-modal.component';
+import { CloneFeatureFlagModalComponent } from './components/clone-feature-flag-modal/clone-feature-flag-modal.component';
 
 @NgModule({
   declarations: [
@@ -154,7 +154,8 @@ import { RelayProxyKeyModalComponent } from './components/relay-proxy-key-modal/
     CopyFeatureFlagModalComponent,
     RelayProxyDrawerComponent,
     RelayProxyAgentModalComponent,
-    RelayProxyKeyModalComponent
+    RelayProxyKeyModalComponent,
+    CloneFeatureFlagModalComponent
   ],
   imports: [
     CommonModule,
@@ -171,7 +172,6 @@ import { RelayProxyKeyModalComponent } from './components/relay-proxy-key-modal/
     NzOutletModule,
     NzButtonModule,
     NzDrawerModule,
-    NzMessageModule,
     NzOverlayModule,
     NzDropDownModule,
     NzTableModule,
@@ -263,7 +263,8 @@ import { RelayProxyKeyModalComponent } from './components/relay-proxy-key-modal/
     CopyFeatureFlagModalComponent,
     RelayProxyDrawerComponent,
     RelayProxyAgentModalComponent,
-    RelayProxyKeyModalComponent
+    RelayProxyKeyModalComponent,
+    CloneFeatureFlagModalComponent
   ]
 })
 export class CoreModule {

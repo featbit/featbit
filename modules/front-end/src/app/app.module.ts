@@ -9,10 +9,8 @@ import { NZ_I18N, zh_CN, en_US } from "ng-zorro-antd/i18n";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { IconsProviderModule } from "./icons-provider.module";
 import { NzLayoutModule } from "ng-zorro-antd/layout";
-import { NzMessageModule } from "ng-zorro-antd/message";
 import { FormsModule } from "@angular/forms";
 import { NzSelectModule } from "ng-zorro-antd/select";
-import { NzNotificationModule } from "ng-zorro-antd/notification";
 
 @NgModule({
   declarations: [
@@ -26,8 +24,6 @@ import { NzNotificationModule } from "ng-zorro-antd/notification";
     BrowserAnimationsModule,
     IconsProviderModule,
     NzLayoutModule,
-    NzMessageModule,
-    NzNotificationModule,
     NzSelectModule
   ],
   providers: [

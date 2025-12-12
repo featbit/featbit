@@ -13,6 +13,10 @@
           <context context-type="linenumber">15</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/clone-feature-flag-modal/clone-feature-flag-modal.component.html</context>
+          <context context-type="linenumber">27,28</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
           <context context-type="linenumber">15,16</context>
         </context-group>
@@ -262,6 +266,10 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
           <context context-type="linenumber">14</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/clone-feature-flag-modal/clone-feature-flag-modal.component.html</context>
+          <context context-type="linenumber">51,52</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
@@ -574,6 +582,10 @@
           <context context-type="linenumber">229</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/clone-feature-flag-modal/clone-feature-flag-modal.component.ts</context>
+          <context context-type="linenumber">98</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.ts</context>
           <context context-type="linenumber">147</context>
         </context-group>
@@ -683,15 +695,15 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">228</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
           <context context-type="linenumber">241</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">251</context>
+          <context context-type="linenumber">254</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
+          <context context-type="linenumber">264</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/groups/details/policies/policies.component.ts</context>
@@ -846,7 +858,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.ts</context>
-          <context context-type="linenumber">367</context>
+          <context context-type="linenumber">371</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.ts</context>
@@ -898,7 +910,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">231</context>
+          <context context-type="linenumber">244</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/onboarding/steps/steps.component.ts</context>
@@ -960,7 +972,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">265</context>
+          <context context-type="linenumber">278</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.ts</context>
@@ -1111,6 +1123,10 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-review/change-review.component.html</context>
           <context context-type="linenumber">99,100</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/clone-feature-flag-modal/clone-feature-flag-modal.component.html</context>
+          <context context-type="linenumber">110,111</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
@@ -1821,6 +1837,10 @@
           <context context-type="linenumber">127,128</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/clone-feature-flag-modal/clone-feature-flag-modal.component.html</context>
+          <context context-type="linenumber">127,129</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
           <context context-type="linenumber">121,123</context>
         </context-group>
@@ -1899,129 +1919,429 @@
           <context context-type="linenumber">35,37</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="ff.copy-flag.title" datatype="html">
-        <source>Copy Flag</source>
+      <trans-unit id="ff.clone-flag.title" datatype="html">
+        <source>Clone feature flag</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
+          <context context-type="sourcefile">src/app/core/components/clone-feature-flag-modal/clone-feature-flag-modal.component.html</context>
           <context context-type="linenumber">5,6</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="common.restrictions" datatype="html">
-        <source>Restrictions</source>
+      <trans-unit id="8547352425968039763" datatype="html">
+        <source>Cloning a flag copies the full targeting configuration from the source flag to the new flag.</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
-          <context context-type="linenumber">15,16</context>
+          <context context-type="sourcefile">src/app/core/components/clone-feature-flag-modal/clone-feature-flag-modal.component.html</context>
+          <context context-type="linenumber">14,16</context>
+        </context-group>
+        <note priority="1" from="description">@ff.clone.description</note>
+      </trans-unit>
+      <trans-unit id="ff.clone.flag-to-clone" datatype="html">
+        <source>Flag to clone:</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/clone-feature-flag-modal/clone-feature-flag-modal.component.html</context>
+          <context context-type="linenumber">19,20</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="ff.bulk-copy.individual-targeting" datatype="html">
-        <source>Individual Targeting: </source>
+      <trans-unit id="common.name-cannot-be-empty" datatype="html">
+        <source>Name cannot be empty</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
-          <context context-type="linenumber">24,25</context>
+          <context context-type="sourcefile">src/app/core/components/clone-feature-flag-modal/clone-feature-flag-modal.component.html</context>
+          <context context-type="linenumber">30,31</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
+          <context context-type="linenumber">16,18</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
+          <context context-type="linenumber">127,128</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/organization-drawer/organization-drawer.component.html</context>
+          <context context-type="linenumber">16,17</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/relay-proxy-agent-modal/relay-proxy-agent-modal.component.html</context>
+          <context context-type="linenumber">13</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
+          <context context-type="linenumber">22,24</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/segment-creation-modal/segment-creation-modal.component.html</context>
+          <context context-type="linenumber">45,47</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
+          <context context-type="linenumber">22,24</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
+          <context context-type="linenumber">265,266</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
+          <context context-type="linenumber">50,52</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/organization/organization.component.html</context>
+          <context context-type="linenumber">10</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/project/project.component.html</context>
+          <context context-type="linenumber">151,153</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="ff.bulk-copy.target-user-restriction" datatype="html">
-        <source>Cannot be copied as they are environment specific.</source>
+      <trans-unit id="ff.feature-flag-name-placeholder" datatype="html">
+        <source>A human-friendly name</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
-          <context context-type="linenumber">25,28</context>
+          <context context-type="sourcefile">src/app/core/components/clone-feature-flag-modal/clone-feature-flag-modal.component.html</context>
+          <context context-type="linenumber">35,36</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
+          <context context-type="linenumber">20,21</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="ff.bulk-copy.targeting-rules" datatype="html">
-        <source>Targeting Rules: </source>
+      <trans-unit id="ff.key-creation-description" datatype="html">
+        <source>Use key (case-sensitive) in your code to get the feature flag variation. Keys must only contain letters, numbers, ., _ or -.</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
+          <context context-type="sourcefile">src/app/core/components/clone-feature-flag-modal/clone-feature-flag-modal.component.html</context>
+          <context context-type="linenumber">45,46</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
+          <context context-type="linenumber">29,31</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
+          <context context-type="linenumber">63,65</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.key-generated-from-name" datatype="html">
+        <source>Key can be auto-generated from name</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/clone-feature-flag-modal/clone-feature-flag-modal.component.html</context>
+          <context context-type="linenumber">57,58</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
+          <context context-type="linenumber">33,34</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
+          <context context-type="linenumber">33,34</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/organization-drawer/organization-drawer.component.html</context>
+          <context context-type="linenumber">29,30</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/project-drawer/project-drawer.component.html</context>
+          <context context-type="linenumber">29,30</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
+          <context context-type="linenumber">67,68</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.key-cannot-be-empty" datatype="html">
+        <source>Key cannot be empty</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/clone-feature-flag-modal/clone-feature-flag-modal.component.html</context>
+          <context context-type="linenumber">61,63</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
+          <context context-type="linenumber">36,38</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
+          <context context-type="linenumber">36,38</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/organization-drawer/organization-drawer.component.html</context>
+          <context context-type="linenumber">32,34</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/project-drawer/project-drawer.component.html</context>
+          <context context-type="linenumber">32,34</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
+          <context context-type="linenumber">70,71</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
+          <context context-type="linenumber">26,28</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.key-format-error" datatype="html">
+        <source>Only allow letters, numbers, &apos;.&apos;, &apos;_&apos; or &apos;-&apos;</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/clone-feature-flag-modal/clone-feature-flag-modal.component.html</context>
+          <context context-type="linenumber">64,66</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
+          <context context-type="linenumber">39,41</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
+          <context context-type="linenumber">73,74</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.key-has-been-used" datatype="html">
+        <source>This key has been used</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/clone-feature-flag-modal/clone-feature-flag-modal.component.html</context>
+          <context context-type="linenumber">67,69</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
+          <context context-type="linenumber">39,41</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
+          <context context-type="linenumber">42,44</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/organization-drawer/organization-drawer.component.html</context>
+          <context context-type="linenumber">35,37</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/project-drawer/project-drawer.component.html</context>
+          <context context-type="linenumber">35,37</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
+          <context context-type="linenumber">76,77</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
+          <context context-type="linenumber">29,31</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.key-validation-failed" datatype="html">
+        <source>Key validation failed</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/clone-feature-flag-modal/clone-feature-flag-modal.component.html</context>
+          <context context-type="linenumber">70,72</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
+          <context context-type="linenumber">42,44</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
+          <context context-type="linenumber">45,47</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/organization-drawer/organization-drawer.component.html</context>
+          <context context-type="linenumber">38,40</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/project-drawer/project-drawer.component.html</context>
+          <context context-type="linenumber">38,40</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
+          <context context-type="linenumber">79,80</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
+          <context context-type="linenumber">32,34</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.description" datatype="html">
+        <source>Description</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/clone-feature-flag-modal/clone-feature-flag-modal.component.html</context>
+          <context context-type="linenumber">79,80</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/clone-feature-flag-modal/clone-feature-flag-modal.component.html</context>
+          <context context-type="linenumber">87,88</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
+          <context context-type="linenumber">52,53</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
+          <context context-type="linenumber">54,56</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/group-drawer/group-drawer.component.html</context>
+          <context context-type="linenumber">30,31</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/group-drawer/group-drawer.component.html</context>
+          <context context-type="linenumber">31</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/group-drawer/group-drawer.component.html</context>
+          <context context-type="linenumber">32</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.html</context>
+          <context context-type="linenumber">18,19</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.html</context>
+          <context context-type="linenumber">20,22</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/policy-drawer/policy-drawer.component.html</context>
+          <context context-type="linenumber">30,31</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/policy-drawer/policy-drawer.component.html</context>
+          <context context-type="linenumber">31</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/policy-drawer/policy-drawer.component.html</context>
+          <context context-type="linenumber">32</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/props-drawer/props-drawer.component.html</context>
+          <context context-type="linenumber">144</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/props-drawer/props-drawer.component.html</context>
+          <context context-type="linenumber">159</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
+          <context context-type="linenumber">36,37</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
+          <context context-type="linenumber">44,45</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/segment-creation-modal/segment-creation-modal.component.html</context>
+          <context context-type="linenumber">93,94</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/segment-creation-modal/segment-creation-modal.component.html</context>
+          <context context-type="linenumber">99,100</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/components/flag-triggers/flag-triggers.component.html</context>
+          <context context-type="linenumber">127,128</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/components/flag-triggers/flag-triggers.component.html</context>
+          <context context-type="linenumber">128,130</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
+          <context context-type="linenumber">40</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
+          <context context-type="linenumber">85,86</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
+          <context context-type="linenumber">89,90</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/groups/details/setting/setting.component.html</context>
+          <context context-type="linenumber">19</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/groups/index/index.component.html</context>
+          <context context-type="linenumber">30,31</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/policies/details/groups/groups.component.html</context>
           <context context-type="linenumber">28,29</context>
         </context-group>
-      </trans-unit>
-      <trans-unit id="ff.bulk-copy.target-rule-restriction" datatype="html">
-        <source>Cannot be copied if any of them has references to environment-specific segments or uses shared segments incompatible with the target environment.</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
-          <context context-type="linenumber">29,32</context>
+          <context context-type="sourcefile">src/app/features/safe/iam/policies/details/setting/setting.component.html</context>
+          <context context-type="linenumber">21</context>
         </context-group>
-      </trans-unit>
-      <trans-unit id="7826131589469362277" datatype="html">
-        <source>Current Environment:</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
+          <context context-type="sourcefile">src/app/features/safe/iam/policies/index/index.component.html</context>
+          <context context-type="linenumber">31,32</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/team/details/direct-policies/direct-policies.component.html</context>
+          <context context-type="linenumber">32,33</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/team/details/inherited-policies/inherited-policies.component.html</context>
+          <context context-type="linenumber">26,27</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/relay-proxies/index/index.component.html</context>
           <context context-type="linenumber">37,38</context>
         </context-group>
-        <note priority="1" from="description">@ff.bulk-copy.current-environment</note>
-      </trans-unit>
-      <trans-unit id="ff.bulk-copy.select-target-environment" datatype="html">
-        <source>Select target environment</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
-          <context context-type="linenumber">43,45</context>
+          <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.html</context>
+          <context context-type="linenumber">24</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/project/project.component.html</context>
+          <context context-type="linenumber">38,39</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="ff.bulk-copy.checking-tip" datatype="html">
-        <source>Checking if the selected flags can be copied...</source>
+      <trans-unit id="common.description.cannot-exceed-512-characters" datatype="html">
+        <source>Cannot exceed 512 characters</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
-          <context context-type="linenumber">62,63</context>
+          <context context-type="sourcefile">src/app/core/components/clone-feature-flag-modal/clone-feature-flag-modal.component.html</context>
+          <context context-type="linenumber">82,83</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
+          <context context-type="linenumber">53</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="ff.bulk-copy.choose-feature-flags-to-copy" datatype="html">
-        <source>Choose feature flags to copy</source>
+      <trans-unit id="common.tags" datatype="html">
+        <source>Tags</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
-          <context context-type="linenumber">65,66</context>
+          <context context-type="sourcefile">src/app/core/components/clone-feature-flag-modal/clone-feature-flag-modal.component.html</context>
+          <context context-type="linenumber">95,96</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
+          <context context-type="linenumber">79,80</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.html</context>
+          <context context-type="linenumber">55,56</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
+          <context context-type="linenumber">45,46</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="2262908100512430779" datatype="html">
-        <source>Copy Anyway</source>
+      <trans-unit id="common.select-tags" datatype="html">
+        <source>Select Tags</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
-          <context context-type="linenumber">78,80</context>
-        </context-group>
-        <note priority="1" from="description">@ff.bulk-copy.copy-anyway</note>
-      </trans-unit>
-      <trans-unit id="ff.bulk-copy.key-check-failed" datatype="html">
-        <source>This flag already exists in the target environment.</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
-          <context context-type="linenumber">87,89</context>
+          <context context-type="sourcefile">src/app/core/components/clone-feature-flag-modal/clone-feature-flag-modal.component.html</context>
+          <context context-type="linenumber">100,101</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="ff.bulk-copy.target-user-will-not-be-copied" datatype="html">
-        <source>Individual Targeting will not be copied.</source>
+      <trans-unit id="common.clone" datatype="html">
+        <source>Clone</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
-          <context context-type="linenumber">93,96</context>
+          <context context-type="sourcefile">src/app/core/components/clone-feature-flag-modal/clone-feature-flag-modal.component.html</context>
+          <context context-type="linenumber">134,136</context>
         </context-group>
-      </trans-unit>
-      <trans-unit id="ff.bulk-copy.target-rules-will-not-be-copied" datatype="html">
-        <source>Targeting Rules will not be copied.</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
-          <context context-type="linenumber">99,102</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="ff.bulk-copy.flag-safe-to-copy" datatype="html">
-        <source>This flag is safe to copy.</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
-          <context context-type="linenumber">105,107</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="common.selected" datatype="html">
-        <source>Selected</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
-          <context context-type="linenumber">118,120</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="ff.bulk-copy.precheck-failed" datatype="html">
-        <source>Bulk copy precheck failed. Please try again.</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.ts</context>
-          <context context-type="linenumber">128</context>
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
+          <context context-type="linenumber">165,166</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.operation-failed" datatype="html">
         <source>Operation failed</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/clone-feature-flag-modal/clone-feature-flag-modal.component.ts</context>
+          <context context-type="linenumber">102</context>
+        </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.ts</context>
           <context context-type="linenumber">152</context>
@@ -2068,11 +2388,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">244</context>
+          <context context-type="linenumber">257</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">254</context>
+          <context context-type="linenumber">267</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.ts</context>
@@ -2199,6 +2519,127 @@
           <context context-type="linenumber">115</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="ff.copy-flag.title" datatype="html">
+        <source>Copy Flag</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
+          <context context-type="linenumber">5,6</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.restrictions" datatype="html">
+        <source>Restrictions</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
+          <context context-type="linenumber">15,16</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="ff.bulk-copy.individual-targeting" datatype="html">
+        <source>Individual Targeting: </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
+          <context context-type="linenumber">24,25</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="ff.bulk-copy.target-user-restriction" datatype="html">
+        <source>Cannot be copied as they are environment specific.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
+          <context context-type="linenumber">25,28</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="ff.bulk-copy.targeting-rules" datatype="html">
+        <source>Targeting Rules: </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
+          <context context-type="linenumber">28,29</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="ff.bulk-copy.target-rule-restriction" datatype="html">
+        <source>Cannot be copied if any of them has references to environment-specific segments or uses shared segments incompatible with the target environment.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
+          <context context-type="linenumber">29,32</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="7826131589469362277" datatype="html">
+        <source>Current Environment:</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
+          <context context-type="linenumber">37,38</context>
+        </context-group>
+        <note priority="1" from="description">@ff.bulk-copy.current-environment</note>
+      </trans-unit>
+      <trans-unit id="ff.bulk-copy.select-target-environment" datatype="html">
+        <source>Select target environment</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
+          <context context-type="linenumber">43,45</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="ff.bulk-copy.checking-tip" datatype="html">
+        <source>Checking if the selected flags can be copied...</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
+          <context context-type="linenumber">62,63</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="ff.bulk-copy.choose-feature-flags-to-copy" datatype="html">
+        <source>Choose feature flags to copy</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
+          <context context-type="linenumber">65,66</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="2262908100512430779" datatype="html">
+        <source>Copy Anyway</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
+          <context context-type="linenumber">78,80</context>
+        </context-group>
+        <note priority="1" from="description">@ff.bulk-copy.copy-anyway</note>
+      </trans-unit>
+      <trans-unit id="ff.bulk-copy.key-check-failed" datatype="html">
+        <source>This flag already exists in the target environment.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
+          <context context-type="linenumber">87,89</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="ff.bulk-copy.target-user-will-not-be-copied" datatype="html">
+        <source>Individual Targeting will not be copied.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
+          <context context-type="linenumber">93,96</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="ff.bulk-copy.target-rules-will-not-be-copied" datatype="html">
+        <source>Targeting Rules will not be copied.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
+          <context context-type="linenumber">99,102</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="ff.bulk-copy.flag-safe-to-copy" datatype="html">
+        <source>This flag is safe to copy.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
+          <context context-type="linenumber">105,107</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.selected" datatype="html">
+        <source>Selected</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
+          <context context-type="linenumber">118,120</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="ff.bulk-copy.precheck-failed" datatype="html">
+        <source>Bulk copy precheck failed. Please try again.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.ts</context>
+          <context context-type="linenumber">128</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="users.user-profile" datatype="html">
         <source>User Profile</source>
         <context-group purpose="location">
@@ -2244,110 +2685,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/project/project.component.html</context>
           <context context-type="linenumber">34</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="common.key-generated-from-name" datatype="html">
-        <source>Key can be auto-generated from name</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
-          <context context-type="linenumber">33,34</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">33,34</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/organization-drawer/organization-drawer.component.html</context>
-          <context context-type="linenumber">29,30</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/project-drawer/project-drawer.component.html</context>
-          <context context-type="linenumber">29,30</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
-          <context context-type="linenumber">67,68</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="common.key-cannot-be-empty" datatype="html">
-        <source>Key cannot be empty</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
-          <context context-type="linenumber">36,38</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">36,38</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/organization-drawer/organization-drawer.component.html</context>
-          <context context-type="linenumber">32,34</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/project-drawer/project-drawer.component.html</context>
-          <context context-type="linenumber">32,34</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
-          <context context-type="linenumber">70,71</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
-          <context context-type="linenumber">26,28</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="common.key-has-been-used" datatype="html">
-        <source>This key has been used</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
-          <context context-type="linenumber">39,41</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">42,44</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/organization-drawer/organization-drawer.component.html</context>
-          <context context-type="linenumber">35,37</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/project-drawer/project-drawer.component.html</context>
-          <context context-type="linenumber">35,37</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
-          <context context-type="linenumber">76,77</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
-          <context context-type="linenumber">29,31</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="common.key-validation-failed" datatype="html">
-        <source>Key validation failed</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
-          <context context-type="linenumber">42,44</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">45,47</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/organization-drawer/organization-drawer.component.html</context>
-          <context context-type="linenumber">38,40</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/project-drawer/project-drawer.component.html</context>
-          <context context-type="linenumber">38,40</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
-          <context context-type="linenumber">79,80</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
-          <context context-type="linenumber">32,34</context>
         </context-group>
       </trans-unit>
       <trans-unit id="org.project.envDescription" datatype="html">
@@ -2626,216 +2963,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
           <context context-type="linenumber">5,6</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="common.name-cannot-be-empty" datatype="html">
-        <source>Name cannot be empty</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">16,18</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">127,128</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/organization-drawer/organization-drawer.component.html</context>
-          <context context-type="linenumber">16,17</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/relay-proxy-agent-modal/relay-proxy-agent-modal.component.html</context>
-          <context context-type="linenumber">13</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">22,24</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/segment-creation-modal/segment-creation-modal.component.html</context>
-          <context context-type="linenumber">45,47</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
-          <context context-type="linenumber">22,24</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">265,266</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
-          <context context-type="linenumber">50,52</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/workspaces/organization/organization.component.html</context>
-          <context context-type="linenumber">10</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/workspaces/project/project.component.html</context>
-          <context context-type="linenumber">151,153</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="common.feature-flag-name" datatype="html">
-        <source>A human-friendly name for your feature flag</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">20,21</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="ff.key-creation-description" datatype="html">
-        <source>Use key (case-sensitive) in your code to get the feature flag variation. Keys must only contain letters, numbers, ., _ or -.</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">29,31</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
-          <context context-type="linenumber">63,65</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="common.key-format-error" datatype="html">
-        <source>Only allow letters, numbers, &apos;.&apos;, &apos;_&apos; or &apos;-&apos;</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">39,41</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
-          <context context-type="linenumber">73,74</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="common.description" datatype="html">
-        <source>Description</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">52,53</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">54,56</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/group-drawer/group-drawer.component.html</context>
-          <context context-type="linenumber">30,31</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/group-drawer/group-drawer.component.html</context>
-          <context context-type="linenumber">31</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/group-drawer/group-drawer.component.html</context>
-          <context context-type="linenumber">32</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.html</context>
-          <context context-type="linenumber">18,19</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.html</context>
-          <context context-type="linenumber">20,22</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/policy-drawer/policy-drawer.component.html</context>
-          <context context-type="linenumber">30,31</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/policy-drawer/policy-drawer.component.html</context>
-          <context context-type="linenumber">31</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/policy-drawer/policy-drawer.component.html</context>
-          <context context-type="linenumber">32</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/props-drawer/props-drawer.component.html</context>
-          <context context-type="linenumber">144</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/props-drawer/props-drawer.component.html</context>
-          <context context-type="linenumber">159</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">36,37</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">44,45</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/segment-creation-modal/segment-creation-modal.component.html</context>
-          <context context-type="linenumber">93,94</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/segment-creation-modal/segment-creation-modal.component.html</context>
-          <context context-type="linenumber">99,100</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/components/flag-triggers/flag-triggers.component.html</context>
-          <context context-type="linenumber">127,128</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/components/flag-triggers/flag-triggers.component.html</context>
-          <context context-type="linenumber">128,130</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">40</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
-          <context context-type="linenumber">85,86</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
-          <context context-type="linenumber">89,90</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/groups/details/setting/setting.component.html</context>
-          <context context-type="linenumber">19</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/groups/index/index.component.html</context>
-          <context context-type="linenumber">30,31</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/policies/details/groups/groups.component.html</context>
-          <context context-type="linenumber">28,29</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/policies/details/setting/setting.component.html</context>
-          <context context-type="linenumber">21</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/policies/index/index.component.html</context>
-          <context context-type="linenumber">31,32</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/team/details/direct-policies/direct-policies.component.html</context>
-          <context context-type="linenumber">32,33</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/team/details/inherited-policies/inherited-policies.component.html</context>
-          <context context-type="linenumber">26,27</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/relay-proxies/index/index.component.html</context>
-          <context context-type="linenumber">37,38</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.html</context>
-          <context context-type="linenumber">24</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/workspaces/project/project.component.html</context>
-          <context context-type="linenumber">38,39</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="common.description.cannot-exceed-512-characters" datatype="html">
-        <source>Cannot exceed 512 characters</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">53</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.variation-settings" datatype="html">
@@ -4234,7 +4361,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
-          <context context-type="linenumber">177,178</context>
+          <context context-type="linenumber">179,180</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.html</context>
@@ -4712,7 +4839,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
-          <context context-type="linenumber">175,176</context>
+          <context context-type="linenumber">177,178</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.html</context>
@@ -7267,7 +7394,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
-          <context context-type="linenumber">168,169</context>
+          <context context-type="linenumber">170,171</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.restore" datatype="html">
@@ -7278,7 +7405,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
-          <context context-type="linenumber">170,171</context>
+          <context context-type="linenumber">172,173</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
@@ -7606,21 +7733,6 @@
           <context context-type="linenumber">49,51</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="common.tags" datatype="html">
-        <source>Tags</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
-          <context context-type="linenumber">79,80</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.html</context>
-          <context context-type="linenumber">55,56</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
-          <context context-type="linenumber">45,46</context>
-        </context-group>
-      </trans-unit>
       <trans-unit id="common.num-variations" datatype="html">
         <source>Variations</source>
         <context-group purpose="location">
@@ -7639,7 +7751,7 @@
         <source>Archive</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
-          <context context-type="linenumber">180,182</context>
+          <context context-type="linenumber">182,184</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
@@ -7661,35 +7773,35 @@
         <source>The status of feature flag &lt;b&gt;<x id="PH" equiv-text="data.name"/>&lt;/b&gt; is changed to OFF</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">201</context>
+          <context context-type="linenumber">214</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.idx.flag-turned-on" datatype="html">
         <source>The status of feature flag &lt;b&gt;<x id="PH" equiv-text="data.name"/>&lt;/b&gt; is changed to ON</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">202</context>
+          <context context-type="linenumber">215</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.idx.status-change-failed" datatype="html">
         <source>Failed to change feature flag status</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">209</context>
+          <context context-type="linenumber">222</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.archive-flag-warning" datatype="html">
         <source>Flag &lt;strong&gt;<x id="PH" equiv-text="flag.name"/>&lt;/strong&gt; will be archived, and the value defined in your code will be returned for all your users. Remove code references to &lt;strong&gt;<x id="PH_1" equiv-text="flag.key"/>&lt;/strong&gt; from your application before archiving.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">218</context>
+          <context context-type="linenumber">231</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.are-you-sure-to-archive-ff" datatype="html">
         <source>Are you sure to archive this feature flag?</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">222</context>
+          <context context-type="linenumber">235</context>
         </context-group>
       </trans-unit>
       <trans-unit id="get-started.integrate-sdk-title" datatype="html">

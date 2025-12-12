@@ -13,7 +13,6 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzDividerModule } from 'ng-zorro-antd/divider';
 import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzMessageModule } from 'ng-zorro-antd/message';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzSelectModule } from 'ng-zorro-antd/select';
@@ -55,7 +54,6 @@ import { NzAlertComponent } from "ng-zorro-antd/alert";
     NzIconModule,
     NzInputModule,
     NzButtonModule,
-    NzMessageModule,
     NzDividerModule,
     NzTypographyModule,
     NzModalModule,

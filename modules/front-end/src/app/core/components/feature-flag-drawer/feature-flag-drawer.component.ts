@@ -125,15 +125,19 @@ export class FeatureFlagDrawerComponent implements OnInit {
   }
 
   onAddTag() {
-    let actualTag = this.selectedTag.startsWith(this.createTagPrefix)
+    const isNewTag = this.selectedTag.startsWith(this.createTagPrefix);
+
+    let actualTag = isNewTag
       ? this.selectedTag.replace(this.createTagPrefix, '').replace(/'/g, '').trim()
       : this.selectedTag.trim();
 
     this.selectedTags = [...this.selectedTags, actualTag];
 
-    this.allTags = [...this.allTags, actualTag];
+    if (isNewTag) {
+      this.allTags = [...this.allTags, actualTag];
+    }
+
     this.currentAllTags = this.allTags;
-    // clear current selected
     this.tagsSelect.writeValue(null);
   }
   //#endregion

@@ -19,7 +19,7 @@
           nzPlaceHolder="Add columns"
           [nzShowArrow]="true"
           [(ngModel)]="extraShowedColumns"
-          nzMaxTagCount="1"
+          [nzMaxTagCount]="1"
           [nzMaxTagPlaceholder]="morePlaceholder"
           >
           @for (item of allExtraColumns; track item) {

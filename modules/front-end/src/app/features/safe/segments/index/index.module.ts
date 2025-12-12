@@ -8,7 +8,6 @@ import { IndexComponent } from './index.component';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzModalModule  } from 'ng-zorro-antd/modal';
 import { NzGridModule } from 'ng-zorro-antd/grid';
-import { NzMessageModule } from 'ng-zorro-antd/message';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzSwitchModule } from 'ng-zorro-antd/switch';
@@ -33,7 +32,6 @@ import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
     NzButtonModule,
     NzGridModule,
     NzModalModule,
-    NzMessageModule,
     FormsModule,
     NzTableModule,
     NzSpinModule,

@@ -4,6 +4,7 @@ import { HttpClient, HttpParams } from "@angular/common/http";
 import { getCurrentOrganization, getCurrentProjectEnv } from "@utils/project-env";
 import { firstValueFrom, Observable, of } from "rxjs";
 import {
+  CloneFlagPayload,
   CopyToEnvPrecheckResult,
   ICopyToEnvResult,
   IFeatureFlagCreationPayload,
@@ -133,6 +134,11 @@ export class FeatureFlagService {
       flagIds,
       precheckResults
     });
+  }
+
+  clone(originFlagKey: string, payload: CloneFlagPayload) {
+    const url = `${this.baseUrl}/clone/${originFlagKey}`;
+    return this.http.post(url, payload);
   }
 
   archive(key: string): Observable<any> {
