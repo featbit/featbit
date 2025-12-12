@@ -18,12 +18,16 @@
                    [(ngModel)]="filter.properties"
                    (ngModelChange)="storeFilterAndAttribute(true)"
                    (nzOnSearch)="onSearchUserProperties($event)">
-          <ng-container *ngFor="let item of filteredProps">
-            <nz-option *ngIf="!isUserPropsLoading" nzCustomContent [nzValue]="item" [nzLabel]="item">{{item}}</nz-option>
-          </ng-container>
-          <nz-option *ngIf="isUserPropsLoading" nzDisabled nzCustomContent>
-            <i nz-icon nzType="loading" class="loading-icon"></i> <ng-container i18n="@@common.loading">Loading...</ng-container>
-          </nz-option>
+          @if (isUserPropsLoading) {
+            <nz-option nzDisabled nzCustomContent>
+              <i nz-icon nzType="loading" class="loading-icon"></i>
+              <ng-container i18n="@@common.loading">Loading...</ng-container>
+            </nz-option>
+          } @else {
+            @for (item of filteredProps; track item) {
+              <nz-option [nzValue]="item" [nzLabel]="item">{{item}}</nz-option>
+            }
+          }
 
           <ng-template #omittedPlaceHolderFilter>
             <div class="ant-select-selection-item-content" i18n-nz-popover="@@users.idx.all-selected-items"
@@ -43,22 +47,27 @@
             </div>
           </ng-template>
         </nz-select>
-        <nz-select class="attribute-multi-select nz-select-40 rounded filter"
-                   nzMode="multiple"
-                   i18n-nzPlaceHolder="@@users.idx.select-columns-to-add"
-                   nzPlaceHolder="Add columns"
-                   [nzMaxTagCount]="1"
-                   [nzMaxTagPlaceholder]="omittedPlaceHolderAttribute"
-                   [nzCustomTemplate]="multipleTemplate"
-                   [(ngModel)]="extraColumns"
-                   (ngModelChange)="storeFilterAndAttribute()"
-                   (nzOnSearch)="onSearchExtraColumns($event)">
-          <ng-container *ngFor="let item of filteredExtraColumns">
-            <nz-option *ngIf="!isUserPropsLoading" nzCustomContent [nzValue]="item" [nzLabel]="item">{{item}}</nz-option>
-          </ng-container>
-          <nz-option *ngIf="isUserPropsLoading" nzDisabled nzCustomContent>
-            <i nz-icon nzType="loading" class="loading-icon"></i> <ng-container i18n="@@common.loading">Loading...</ng-container>
-          </nz-option>
+        <nz-select
+          class="attribute-multi-select nz-select-40 rounded filter"
+          nzMode="multiple"
+          i18n-nzPlaceHolder="@@users.idx.select-columns-to-add"
+          nzPlaceHolder="Add columns"
+          [nzMaxTagCount]="1"
+          [nzMaxTagPlaceholder]="omittedPlaceHolderAttribute"
+          [nzCustomTemplate]="multipleTemplate"
+          [(ngModel)]="extraColumns"
+          (ngModelChange)="storeFilterAndAttribute()"
+          (nzOnSearch)="onSearchExtraColumns($event)">、
+          @if (isUserPropsLoading) {
+            <nz-option nzDisabled nzCustomContent>
+              <i nz-icon nzType="loading" class="loading-icon"></i>
+              <ng-container i18n="@@common.loading">Loading...</ng-container>
+            </nz-option>
+          } @else {
+            @for (item of filteredExtraColumns; track item) {
+              <nz-option [nzValue]="item" [nzLabel]="item">{{ item }}</nz-option>
+            }
+          }
 
           <ng-template #omittedPlaceHolderAttribute>
             <div class="ant-select-selection-item-content" i18n-nz-popover="@@users.idx.all-selected-items"

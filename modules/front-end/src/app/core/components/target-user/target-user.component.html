@@ -43,13 +43,13 @@
     (ngModelChange)="onSelectChange()"
     (nzOnSearch)="onSearch($event)"
     [nzOptionHeightPx]="isLoading ? 32 : 54">
-    @for (item of userList; track item.id) {
-      @if (isLoading) {
-        <nz-option nzDisabled nzCustomContent>
-          <i nz-icon nzType="loading" class="loading-icon"></i>
-          <ng-container i18n="@@common.loading">Loading...</ng-container>
-        </nz-option>
-      } @else {
+    @if (isLoading) {
+      <nz-option nzDisabled nzCustomContent>
+        <i nz-icon nzType="loading" class="loading-icon"></i>
+        <ng-container i18n="@@common.loading">Loading...</ng-container>
+      </nz-option>
+    } @else {
+      @for (item of userList; track item.id) {
         <nz-option
           nzCustomContent
           [nzValue]="item"
