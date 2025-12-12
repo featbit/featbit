@@ -1,5 +1,6 @@
 using Application.AuditLogs;
 using Application.Bases.Models;
+using Dapper;
 using Domain.AuditLogs;
 using Microsoft.EntityFrameworkCore;
 
@@ -72,5 +73,57 @@ public class AuditLogService(AppDbContext dbContext) : EntityFrameworkCoreServic
             .ToListAsync();
 
         return new PagedResult<AuditLog>(totalCount, items);
+    }
+
+    public async Task<LastChange?> GetLastChangeAsync(Guid envId, string refType, string refId)
+    {
+        var lastChange = await Queryable.Where(x =>
+                x.EnvId == envId &&
+                x.RefType == refType &&
+                x.RefId == refId &&
+                x.Operation != Operations.Create
+            )
+            .Select(x => new LastChange
+            {
+                OperatorId = x.CreatorId,
+                HappenedAt = x.CreatedAt,
+                Comment = x.Comment
+            })
+            .OrderByDescending(x => x.HappenedAt)
+            .FirstOrDefaultAsync();
+
+        return lastChange;
+    }
+
+    public async Task<ICollection<LastChange>> GetLastChangesAsync(
+        Guid envId,
+        string refType,
+        ICollection<string> refIds)
+    {
+        const string sql =
+            """
+            SELECT ref_id AS RefId, creator_id AS OperatorId, created_at AS HappenedAt, comment AS Comment
+            FROM (
+                SELECT 
+                    creator_id, 
+                    created_at, 
+                    comment, 
+                    ref_id, 
+                    row_number() over(partition by ref_id order by created_at desc) AS rn
+                FROM audit_logs
+                WHERE env_id = @envId AND ref_type = @refType AND ref_id = ANY (@refIds) AND operation != 'Create'
+            ) AS ranked
+            WHERE rn = 1
+            """;
+
+        var parameters = new
+        {
+            envId,
+            refType,
+            refIds
+        };
+
+        var lastChanges = await DbConnection.QueryAsync<LastChange>(sql, parameters);
+        return lastChanges.AsList();
     }
 }

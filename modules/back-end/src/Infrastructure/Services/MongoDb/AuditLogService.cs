@@ -75,4 +75,52 @@ public class AuditLogService(MongoDbClient mongoDb) : MongoDbService<AuditLog>(m
 
         return new PagedResult<AuditLog>(totalCount, items);
     }
+
+    public async Task<LastChange?> GetLastChangeAsync(Guid envId, string refType, string refId)
+    {
+        var lastChange = await Queryable.Where(x =>
+                x.EnvId == envId &&
+                x.RefType == refType &&
+                x.RefId == refId &&
+                x.Operation != Operations.Create
+            )
+            .Select(x => new LastChange
+            {
+                OperatorId = x.CreatorId,
+                HappenedAt = x.CreatedAt,
+                Comment = x.Comment
+            })
+            .OrderByDescending(x => x.HappenedAt)
+            .FirstOrDefaultAsync();
+
+        return lastChange;
+    }
+
+    public async Task<ICollection<LastChange>> GetLastChangesAsync(
+        Guid envId,
+        string refType,
+        ICollection<string> refIds)
+    {
+        var query = Collection.Aggregate()
+            .Match(x =>
+                x.EnvId == envId &&
+                x.RefType == refType &&
+                refIds.Contains(x.RefId) &&
+                x.Operation != Operations.Create
+            )
+            .Group(x => x.RefId, group => new
+            {
+                RefId = group.Key,
+                LastChange = group.OrderByDescending(x => x.CreatedAt).Select(x => new LastChange
+                {
+                    OperatorId = x.CreatorId,
+                    HappenedAt = x.CreatedAt,
+                    Comment = x.Comment
+                }).FirstOrDefault()
+            });
+
+        var lastChanges = await query.ToListAsync();
+        // TODO: debug this
+        return [];
+    }
 }

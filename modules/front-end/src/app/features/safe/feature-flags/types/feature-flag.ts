@@ -1,4 +1,5 @@
 ﻿import { IVariation } from "@shared/rules";
+import { SimpleUser } from "@shared/users";
 
 export interface IFeatureFlagListModel {
   items: IFeatureFlagListItem[];
@@ -15,9 +16,18 @@ export interface IFeatureFlagListItem {
   updatedAt: Date;
   variationType: string;
   serves: IVariationOverview,
+  creator: SimpleUser,
+  lastChange?: LastChange,
 
   // UI only
   isNew?: boolean
+  isToggling?: boolean;
+}
+
+export type LastChange = {
+  operator: SimpleUser;
+  happenedAt: Date;
+  comment: string;
 }
 
 export interface IVariationOverview {

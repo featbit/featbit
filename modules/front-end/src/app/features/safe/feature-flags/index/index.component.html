@@ -36,7 +36,7 @@
         </nz-select>
         <label nz-checkbox [(ngModel)]="featureFlagFilter.isArchived" (ngModelChange)="onSearch(true)" i18n="@@ff.idx.archived">Archived</label>
       </div>
-      <div class="middle-btn">
+      <div class="table-actions">
         <button nz-button nzType="primary" (click)="creationDrawerVisible = true">
           <i nz-icon nzType="icons:icon-add"></i>
           <ng-container i18n="@@common.add">Add</ng-container>
@@ -71,115 +71,154 @@
           <tr>
             <th [nzChecked]="allChecked" [nzIndeterminate]="indeterminate" (nzCheckedChange)="onAllChecked($event)"></th>
             <th i18n="@@common.name">Name</th>
-            <th>
-              Key
-              <i nz-icon i18n-nz-tooltip="@@ff.key-description" nz-tooltip="Use key (case-sensitive) in your code to get the feature flag variation" nzType="icons:icon-info-outline"></i>
-            </th>
             <th i18n="@@common.status">Status</th>
             <th i18n="@@common.tags">Tags</th>
-            <th i18n="@@common.variations">Variations</th>
-            <th i18n="@@common.last-updated">Last updated</th>
+            <th i18n="@@common.last-change">Last Change</th>
             <th i18n="@@common.actions">Actions</th>
           </tr>
         </thead>
         <tbody>
-          @for (featureFlag of table.data; track featureFlag) {
+          @for (flag of table.data; track flag) {
             <tr>
               <td
-                [nzChecked]="itemChecked(featureFlag)"
-                (nzCheckedChange)="onItemChecked(featureFlag)"
+                [nzChecked]="itemChecked(flag)"
+                (nzCheckedChange)="onItemChecked(flag)"
               ></td>
-              <td style="cursor:pointer" (click)="navigateToFlagDetail(featureFlag.key)">
-                <span>{{featureFlag.name}}</span>
+              <!-- Name Column: name, key, created by, created at -->
+              <td class="name-cell">
+                <div class="flag-name" (click)="navigateToFlagDetail(flag.key)">{{flag.name}}</div>
+                <div class="flag-key" (click)="copyText($event, flag.key)">
+                  {{flag.key}}
+                  <i class="copy-icon" nz-icon nzType="icons:icon-copy"></i>
+                </div>
+                @if (flag.creator) {
+                  <div class="flag-meta">
+                    <span i18n="@@common.created-by">Created by</span>
+                    <span class="creator-name">{{flag.creator.name}}</span>
+                    @if (flag.updatedAt) {
+                      <span class="created-at">{{getLocalDate(flag.updatedAt) | date: 'MMM d, yyyy'}}</span>
+                    }
+                  </div>
+                }
               </td>
-              <td>
-                <i (click)="copyText($event, featureFlag.key)" class="copy-icon" nz-icon nzType="icons:icon-copy"></i>
-                {{featureFlag.key}}
-              </td>
-              <td>
-                @if (featureFlag.isEnabled) {
+              <!-- Status Column: on/off switch + serves variations -->
+              <td class="status-cell">
+                @if (flag.isEnabled) {
                   <nz-switch
                     i18n-nz-popconfirm="@@ff.are-you-sure-to-turn-ff-off"
                     nz-popconfirm="Are you sure to turn it off? The flag will return the variation that you specified for its off state."
-                    (nzOnConfirm)="onToggleFeatureFlagStatus(featureFlag)"
+                    (nzOnConfirm)="onToggleFeatureFlagStatus(flag)"
                     nzControl="true"
-                    [ngModel]="featureFlag.isEnabled" nzCheckedChildren="ON" nzUnCheckedChildren="OFF">
+                    [ngModel]="flag.isEnabled"
+                    [nzLoading]="flag.isToggling"
+                    nzCheckedChildren="ON"
+                    nzUnCheckedChildren="OFF">
                   </nz-switch>
                 } @else {
                   <nz-switch
                     i18n-nz-popconfirm="@@ff.are-you-sure-to-turn-ff-on"
                     nz-popconfirm="Are you sure to turn it on? The flag will return the matching targeting users' or rules' serving variation."
-                    (nzOnConfirm)="onToggleFeatureFlagStatus(featureFlag)"
+                    (nzOnConfirm)="onToggleFeatureFlagStatus(flag)"
                     nzControl="true"
-                    [ngModel]="featureFlag.isEnabled" nzCheckedChildren="ON" nzUnCheckedChildren="OFF">
+                    [ngModel]="flag.isEnabled"
+                    [nzLoading]="flag.isToggling"
+                    nzCheckedChildren="ON"
+                    nzUnCheckedChildren="OFF">
                   </nz-switch>
                 }
-              </td>
-              <td style="max-width: 168px;">
-                @for (tag of featureFlag.tags; track tag) {
-                  <span class="tag" nz-tooltip [nzTooltipTitle]="tag">{{tag}}</span>
-                }
-              </td>
-              <td>
-                <div style="min-width: 60px;" >
-                  @if (featureFlag.isEnabled && featureFlag.serves?.enabledVariations?.length === 1) {
-                    <div>
-                      <span class="variation-tip tip-0" style="margin-bottom:2px;"></span>
-                <span nz-tooltip="{{featureFlag.serves.enabledVariations[0]}}" style="margin-left: 0;margin-right:-3px;text-overflow: ellipsis;white-space: nowrap;max-width: 100px;display: inline-block;
-                             height: 18px;margin-top: 2px;overflow: hidden;">
-                        {{featureFlag.serves.enabledVariations[0]}}
+                <div>
+                  @if (flag.isEnabled && flag.serves?.enabledVariations?.length === 1) {
+                    <div class="variation-item">
+                      <span i18n="@@ff.serving-variations">Serving: </span>
+                      <span class="variation-tip tip-0"></span>
+                      <span class="variation-text" nz-tooltip="{{flag.serves.enabledVariations[0]}}">
+                        {{ flag.serves.enabledVariations[0] }}
                       </span>
                     </div>
                   }
-                  @if (featureFlag.isEnabled && featureFlag.serves?.enabledVariations?.length > 1) {
-                    <div
-                      style="cursor: pointer;">
-                      @for (_ of featureFlag.serves?.enabledVariations; track _; let key = $index) {
-                        <span>
-                          <span  class="variation-tip {{'tip-' + key % 9}}" style="margin-right:-3px;margin-bottom:2px;"></span>
-                        </span>
-                      }
-                <span nz-tooltip="{{ getVaritonsWithTitles(featureFlag.serves?.enabledVariations) }}" style="margin-left: 10px;margin-right:-3px;text-overflow: ellipsis;white-space: nowrap;max-width: 100px;display: inline-block;
-                             height: 18px;margin-top: 2px;overflow: hidden;">
-                        {{featureFlag.serves?.enabledVariations?.length}} <ng-container i18n="@@common.num-variations">Variations</ng-container>
+                  @if (flag.isEnabled && flag.serves?.enabledVariations?.length > 1) {
+                    <div class="variation-item multiple">
+                      <span i18n="@@ff.serving-variations">Serving: </span>
+                      <div>
+                        @for (_ of flag.serves?.enabledVariations; track _; let key = $index) {
+                          <span class="variation-tip {{'tip-' + key % 9}}"></span>
+                        }
+                      </div>
+                      <span class="variation-text" nz-tooltip [nzTooltipTitle]="variationsList">
+                        {{ flag.serves?.enabledVariations?.length }} <ng-container i18n="@@common.num-variations">Variations</ng-container>
+                        <ng-template #variationsList>
+                          <ul>
+                            @for (variation of flag.serves?.enabledVariations; track variation) {
+                              <li>{{ variation }}</li>
+                            }
+                          </ul>
+                        </ng-template>
                       </span>
                     </div>
                   }
-                  @if (!featureFlag.isEnabled) {
-                    <div style="opacity: .5;">
-                      <span class="variation-tip tip-9" style="margin-bottom:2px;background-color:darkgray;"></span>
-                <span nz-tooltip="{{featureFlag.serves.disabledVariation}}" style="margin-left: 0;margin-right:-3px;text-overflow: ellipsis;white-space: nowrap;max-width: 100px;display: inline-block;
-                             height: 18px;margin-top: 2px;overflow: hidden;">
-                        {{featureFlag.serves?.disabledVariation}}
+                  @if (!flag.isEnabled) {
+                    <div class="variation-item disabled">
+                      <span i18n="@@ff.serving-variations">Serving: </span>
+                      <span class="variation-tip tip-disabled"></span>
+                      <span class="variation-text" nz-tooltip="{{flag.serves?.disabledVariation}}">
+                        {{ flag.serves?.disabledVariation }}
                       </span>
                     </div>
                   }
                 </div>
               </td>
-              <td>{{getLocalDate(featureFlag.updatedAt) | date: 'yyyy-MM-dd HH:mm'}}</td>
-              <td>
-                <a style="color: #23AD7F" (click)="navigateToFlagDetail(featureFlag.key)" i18n="@@common.details">Details</a>
+              <!-- Tags Column -->
+              <td class="tags-cell">
+                @for (tag of flag.tags; track tag) {
+                  <span class="tag" nz-tooltip [nzTooltipTitle]="tag">{{tag}}</span>
+                }
+              </td>
+              <!-- Last Change Column -->
+              <td class="last-change-cell">
+                @if (flag.lastChange) {
+                  <div class="last-change-info">
+                    <div class="change-time">{{getLocalDate(flag.lastChange.happenedAt) | date: 'MMM d, yyyy HH:mm'}}</div>
+                    @if (flag.lastChange.operator) {
+                      <div class="change-operator">
+                        <span i18n="@@common.updated-by">Updated by</span> {{flag.lastChange.operator.name}}
+                      </div>
+                    }
+                    @if (flag.lastChange.comment) {
+                      <div class="change-comment" nz-tooltip [nzTooltipTitle]="flag.lastChange.comment">
+                        {{flag.lastChange.comment}}
+                      </div>
+                    }
+                  </div>
+                } @else {
+                  <div class="last-change-info">
+                    <span class="no-changes" i18n="@@ff.no-changes-since-creation">No changes since creation</span>
+                  </div>
+                }
+              </td>
+              <!-- Actions Column -->
+              <td class="actions-cell">
+                <a class="action-link primary" (click)="navigateToFlagDetail(flag.key)" i18n="@@common.details">Details</a>
                 <nz-divider nzType="vertical"></nz-divider>
-                <a style="color: #23AD7F" (click)="copy(featureFlag)" i18n="@@common.copy-to">Copy To</a>
+                <a class="action-link primary" (click)="copy(flag)" i18n="@@common.copy-to">Copy To</a>
                 <nz-divider nzType="vertical"></nz-divider>
-                <a style="color: #23AD7F" (click)="clone(featureFlag)" i18n="@@common.clone">Clone</a>
+                <a class="action-link primary" (click)="clone(flag)" i18n="@@common.clone">Clone</a>
                 <nz-divider nzType="vertical"></nz-divider>
                 @if (isArchived) {
-                  <a style="color: #717D8A"
+                  <a class="action-link secondary"
                     i18n-nz-popconfirm="@@ff.are-you-sure-to-restore-ff"
                     nz-popconfirm="Are you sure to restore this feature flag?"
-                    (nzOnConfirm)="restore(featureFlag)">
+                    (nzOnConfirm)="restore(flag)">
                     <ng-container i18n="@@common.restore">Restore</ng-container>
                   </a>
                   <nz-divider nzType="vertical"></nz-divider>
-                  <a style="color: #FF513A"
+                  <a class="action-link danger"
                     i18n-nz-popconfirm="@@common.remove-confirm"
                     nz-popconfirm="This operation cannot be reverted, are you sure to remove it?"
-                    (nzOnConfirm)="delete(featureFlag)">
+                    (nzOnConfirm)="delete(flag)">
                     <ng-container i18n="@@common.remove">Remove</ng-container>
                   </a>
                 } @else {
-                  <a style="color: #717D8A" i18n="@@common.archive" (click)="archive(featureFlag)">Archive</a>
+                  <a class="action-link secondary" i18n="@@common.archive" (click)="archive(flag)">Archive</a>
                 }
               </td>
             </tr>
