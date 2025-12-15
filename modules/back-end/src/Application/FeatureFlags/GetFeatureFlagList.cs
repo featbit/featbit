@@ -37,16 +37,19 @@ public class GetFeatureFlagListHandler(
         foreach (var flag in flags.Items)
         {
             var vm = flagVms.Items.First(x => x.Id == flag.Id);
-            vm.Creator = mapper.Map<UserVm>(users.FirstOrDefault(x => x.Id == flag.CreatorId));
 
-            var lastChange = lastChanges.FirstOrDefault(x => x.RefId == flag.Id.ToString());
-            if (lastChange == null)
+            var creator = users.FirstOrDefault(x => x.Id == flag.CreatorId);
+            if (creator != null)
             {
-                continue;
+                vm.Creator = mapper.Map<UserVm>(creator);
             }
 
-            var updator = users.FirstOrDefault(x => x.Id == lastChange.OperatorId);
-            vm.LastChange = new LastChangeVm(lastChange, updator);
+            var lastChange = lastChanges.FirstOrDefault(x => x.RefId == flag.Id.ToString());
+            if (lastChange != null)
+            {
+                var updator = users.FirstOrDefault(x => x.Id == lastChange.OperatorId);
+                vm.LastChange = new LastChangeVm(lastChange, updator);
+            }
         }
 
         return flagVms;

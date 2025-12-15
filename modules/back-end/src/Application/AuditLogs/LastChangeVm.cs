@@ -1,3 +1,5 @@
+#nullable enable
+
 using Application.Users;
 using Domain.AuditLogs;
 using Domain.Users;
@@ -12,13 +14,13 @@ public class LastChangeVm
 
     public string Comment { get; set; }
 
-    public LastChangeVm(LastChange lastChange, User user)
+    public LastChangeVm(LastChange lastChange, User? user)
     {
         Operator = new UserVm
         {
-            Id = user.Id,
-            Name = user.Name,
-            Email = user.Email
+            Id = user?.Id ?? Guid.Empty,
+            Name = user?.Name ?? "Ghost",
+            Email = user?.Email ?? "Ghost"
         };
         HappenedAt = lastChange.HappenedAt;
         Comment = lastChange.Comment;
