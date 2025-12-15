@@ -91,6 +91,41 @@
     margin-bottom: 6px;
   }
 
+  .variation-type-badge {
+    width: fit-content;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-top: 2px;
+
+    &[data-type="boolean"] {
+      background-color: #E8F5E9;
+      color: #2E7D32;
+      border: 1px solid #A5D6A7;
+    }
+
+    &[data-type="string"] {
+      background-color: #E3F2FD;
+      color: #1565C0;
+      border: 1px solid #90CAF9;
+    }
+
+    &[data-type="number"] {
+      background-color: #FFF3E0;
+      color: #E65100;
+      border: 1px solid #FFCC80;
+    }
+
+    &[data-type="json"] {
+      background-color: #F3E5F5;
+      color: #7B1FA2;
+      border: 1px solid #CE93D8;
+    }
+  }
+
   .variation-item {
     display: flex;
     align-items: center;
