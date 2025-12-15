@@ -224,8 +224,10 @@ export class IndexComponent implements OnInit {
         };
         data.isToggling = false;
       },
-      error: _ => this.msg.error($localize`:@@ff.idx.status-change-failed:Failed to change feature flag status`)
-    });
+      error: _ => {
+        this.msg.error($localize`:@@ff.idx.status-change-failed:Failed to change feature flag status`);
+        data.isToggling = false;
+      }
   }
 
   navigateToFlagDetail(key: string) {
