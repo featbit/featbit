@@ -13,6 +13,7 @@ export interface IFeatureFlagListItem {
   description: string;
   tags: string[];
   isEnabled: boolean;
+  createdAt: Date;
   updatedAt: Date;
   variationType: string;
   serves: IVariationOverview,

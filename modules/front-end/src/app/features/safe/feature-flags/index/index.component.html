@@ -95,8 +95,8 @@
                   <div class="flag-meta">
                     <span i18n="@@common.created-by">Created by</span>
                     <span class="creator-name">{{flag.creator.name}}</span>
-                    @if (flag.updatedAt) {
-                      <span class="created-at">{{getLocalDate(flag.updatedAt) | date: 'MMM d, yyyy'}}</span>
+                    @if (flag.createdAt) {
+                      <span class="created-at">{{getLocalDate(flag.createdAt) | date: 'MMM d, yyyy'}}</span>
                     }
                   </div>
                 }

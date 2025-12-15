@@ -20,6 +20,8 @@ public class FeatureFlagVm
 
     public ICollection<Variation> Variations { get; set; }
 
+    public DateTime CreatedAt { get; set; }
+
     public DateTime UpdatedAt { get; set; }
 
     public UserVm Creator { get; set; }
