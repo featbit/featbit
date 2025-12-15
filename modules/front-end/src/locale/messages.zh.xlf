@@ -710,15 +710,15 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">246</context>
+          <context context-type="linenumber">249</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">259</context>
+          <context context-type="linenumber">262</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">269</context>
+          <context context-type="linenumber">272</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/groups/details/policies/policies.component.ts</context>
@@ -926,7 +926,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">249</context>
+          <context context-type="linenumber">252</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/onboarding/steps/steps.component.ts</context>
@@ -990,7 +990,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">283</context>
+          <context context-type="linenumber">286</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.ts</context>
@@ -2507,11 +2507,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">262</context>
+          <context context-type="linenumber">265</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">272</context>
+          <context context-type="linenumber">275</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.ts</context>
@@ -8523,7 +8523,7 @@
         <source>Failed to change feature flag status</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">227</context>
+          <context context-type="linenumber">228</context>
         </context-group>
         <target>开关状态切换失败</target>
       </trans-unit>
@@ -8531,7 +8531,7 @@
         <source>Flag &lt;strong&gt;<x id="PH" equiv-text="flag.name"/>&lt;/strong&gt; will be archived, and the value defined in your code will be returned for all your users. Remove code references to &lt;strong&gt;<x id="PH_1" equiv-text="flag.key"/>&lt;/strong&gt; from your application before archiving.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">236</context>
+          <context context-type="linenumber">239</context>
         </context-group>
         <target>开关 &lt;strong&gt;<x id="PH" equiv-text="this.featureFlag.name"/>&lt;/strong&gt; 将被归档，在你的代码中定义的值将被返回给所有的用户。在归档之前，你应该从你的应用程序中删除对 &lt;strong&gt;<x id="PH_1" equiv-text="this.featureFlag.key"/>&lt;/strong&gt; 的代码引用。</target>
       </trans-unit>
@@ -8539,7 +8539,7 @@
         <source>Are you sure to archive this feature flag?</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">240</context>
+          <context context-type="linenumber">243</context>
         </context-group>
         <target>确定要存档该开关吗？</target>
       </trans-unit>
