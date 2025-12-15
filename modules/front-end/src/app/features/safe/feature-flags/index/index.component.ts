@@ -228,6 +228,7 @@ export class IndexComponent implements OnInit {
         this.msg.error($localize`:@@ff.idx.status-change-failed:Failed to change feature flag status`);
         data.isToggling = false;
       }
+    });
   }
 
   navigateToFlagDetail(key: string) {
