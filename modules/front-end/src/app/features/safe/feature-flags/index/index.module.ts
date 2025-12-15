@@ -24,7 +24,6 @@ import { NzPopconfirmModule } from "ng-zorro-antd/popconfirm";
 import { NzListModule } from "ng-zorro-antd/list";
 import { NzAlertModule } from "ng-zorro-antd/alert";
 import { NzCheckboxModule } from "ng-zorro-antd/checkbox";
-import { NzNotificationModule } from "ng-zorro-antd/notification";
 import { CoreModule } from "@core/core.module";
 import { NzDividerModule } from "ng-zorro-antd/divider";
 
@@ -57,7 +56,6 @@ import { NzDividerModule } from "ng-zorro-antd/divider";
     NzListModule,
     NzAlertModule,
     NzCheckboxModule,
-    NzNotificationModule,
     NzDividerModule
   ]
 })

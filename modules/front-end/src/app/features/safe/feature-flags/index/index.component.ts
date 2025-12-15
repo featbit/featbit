@@ -2,7 +2,7 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Subject } from 'rxjs';
-import { encodeURIComponentFfc, getQueryParamsFromObject } from '@shared/utils';
+import { encodeURIComponentFfc, getProfile, getQueryParamsFromObject } from '@shared/utils';
 import {
   FeatureFlagListCheckItem,
   IFeatureFlagListFilter,
@@ -201,15 +201,14 @@ export class IndexComponent implements OnInit {
 
   //#endregion
 
-  //#region create switch
   creationDrawerVisible: boolean = false;
-
   closeCreationDrawer() {
     this.creationDrawerVisible = false;
   }
 
-  //#endregion
   onToggleFeatureFlagStatus(data: IFeatureFlagListItem): void {
+    data.isToggling = true;
+
     let msg: string = data.isEnabled
       ? $localize`:@@ff.idx.flag-turned-off:The status of feature flag <b>${data.name}</b> is changed to OFF`
       : $localize`:@@ff.idx.flag-turned-on:The status of feature flag <b>${data.name}</b> is changed to ON`;
@@ -218,8 +217,17 @@ export class IndexComponent implements OnInit {
       next: _ => {
         this.msg.success(msg);
         data.isEnabled = !data.isEnabled;
+        data.lastChange = {
+          operator: getProfile(),
+          happenedAt: new Date(),
+          comment: ''
+        };
+        data.isToggling = false;
       },
-      error: _ => this.msg.error($localize`:@@ff.idx.status-change-failed:Failed to change feature flag status`)
+      error: _ => {
+        this.msg.error($localize`:@@ff.idx.status-change-failed:Failed to change feature flag status`);
+        data.isToggling = false;
+      }
     });
   }
 
@@ -273,13 +281,9 @@ export class IndexComponent implements OnInit {
     return new Date(date);
   }
 
-  copyText(event, text: string) {
+  copyText(event: any, text: string) {
     copyToClipboard(text).then(
       () => this.msg.success($localize `:@@common.copy-success:Copied`)
     );
-  }
-
-  getVaritonsWithTitles(variations: string[]) {
-    return variations.map((v: string, index: number) => (`Variation ${index + 1}: ${v}`)).join(', ')
   }
 }

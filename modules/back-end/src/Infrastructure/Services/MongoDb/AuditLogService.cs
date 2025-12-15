@@ -1,6 +1,7 @@
 using Application.AuditLogs;
 using Application.Bases.Models;
 using Domain.AuditLogs;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
@@ -74,5 +75,64 @@ public class AuditLogService(MongoDbClient mongoDb) : MongoDbService<AuditLog>(m
             .ToListAsync();
 
         return new PagedResult<AuditLog>(totalCount, items);
+    }
+
+    public async Task<LastChange?> GetLastChangeAsync(Guid envId, string refType, string refId)
+    {
+        var lastChange = await Queryable.Where(x =>
+                x.EnvId == envId &&
+                x.RefType == refType &&
+                x.RefId == refId &&
+                x.Operation != Operations.Create
+            )
+            .Select(x => new LastChange
+            {
+                OperatorId = x.CreatorId,
+                HappenedAt = x.CreatedAt,
+                Comment = x.Comment
+            })
+            .OrderByDescending(x => x.HappenedAt)
+            .FirstOrDefaultAsync();
+
+        return lastChange;
+    }
+
+    public async Task<ICollection<LastChange>> GetLastChangesAsync(
+        Guid envId,
+        string refType,
+        ICollection<string> refIds)
+    {
+        var pipeline = new[]
+        {
+            new BsonDocument("$match", new BsonDocument
+            {
+                { "envId", new BsonBinaryData(envId, GuidRepresentation.Standard) },
+                { "refType", refType },
+                { "refId", new BsonDocument("$in", new BsonArray(refIds)) },
+                { "operation", new BsonDocument("$ne", Operations.Create) }
+            }),
+            new BsonDocument("$sort", new BsonDocument("createdAt", -1)),
+            new BsonDocument("$group", new BsonDocument
+            {
+                { "_id", "$refId" },
+                { "operatorId", new BsonDocument("$first", "$creatorId") },
+                { "happenedAt", new BsonDocument("$first", "$createdAt") },
+                { "comment", new BsonDocument("$first", "$comment") }
+            }),
+            new BsonDocument("$project", new BsonDocument
+            {
+                { "_id", 0 },
+                { "refId", "$_id" },
+                { "operatorId", 1 },
+                { "happenedAt", 1 },
+                { "comment", 1 }
+            })
+        };
+
+        var lastChanges = await Collection
+            .Aggregate<LastChange>(pipeline)
+            .ToListAsync();
+
+        return lastChanges;
     }
 }
