@@ -103,70 +103,74 @@
               </td>
               <!-- Status Column: on/off switch + serves variations -->
               <td class="status-cell">
-                @if (flag.isEnabled) {
-                  <nz-switch
-                    i18n-nz-popconfirm="@@ff.are-you-sure-to-turn-ff-off"
-                    nz-popconfirm="Are you sure to turn it off? The flag will return the variation that you specified for its off state."
-                    (nzOnConfirm)="onToggleFeatureFlagStatus(flag)"
-                    nzControl="true"
-                    [ngModel]="flag.isEnabled"
-                    [nzLoading]="flag.isToggling"
-                    nzCheckedChildren="ON"
-                    nzUnCheckedChildren="OFF">
-                  </nz-switch>
-                } @else {
-                  <nz-switch
-                    i18n-nz-popconfirm="@@ff.are-you-sure-to-turn-ff-on"
-                    nz-popconfirm="Are you sure to turn it on? The flag will return the matching targeting users' or rules' serving variation."
-                    (nzOnConfirm)="onToggleFeatureFlagStatus(flag)"
-                    nzControl="true"
-                    [ngModel]="flag.isEnabled"
-                    [nzLoading]="flag.isToggling"
-                    nzCheckedChildren="ON"
-                    nzUnCheckedChildren="OFF">
-                  </nz-switch>
-                }
-                <div>
-                  @if (flag.isEnabled && flag.serves?.enabledVariations?.length === 1) {
-                    <div class="variation-item">
-                      <span i18n="@@ff.serving-variations">Serving: </span>
-                      <span class="variation-tip tip-0"></span>
-                      <span class="variation-text" nz-tooltip="{{flag.serves.enabledVariations[0]}}">
-                        {{ flag.serves.enabledVariations[0] }}
-                      </span>
-                    </div>
-                  }
-                  @if (flag.isEnabled && flag.serves?.enabledVariations?.length > 1) {
-                    <div class="variation-item multiple">
-                      <span i18n="@@ff.serving-variations">Serving: </span>
-                      <div>
-                        @for (_ of flag.serves?.enabledVariations; track _; let key = $index) {
-                          <span class="variation-tip {{'tip-' + key % 9}}"></span>
-                        }
+                <div class="status-container">
+                  <div class="status-row">
+                    @if (flag.isEnabled) {
+                      <nz-switch
+                        i18n-nz-popconfirm="@@ff.are-you-sure-to-turn-ff-off"
+                        nz-popconfirm="Are you sure to turn it off? The flag will return the variation that you specified for its off state."
+                        (nzOnConfirm)="onToggleFeatureFlagStatus(flag)"
+                        nzControl="true"
+                        [ngModel]="flag.isEnabled"
+                        [nzLoading]="flag.isToggling"
+                        nzCheckedChildren="ON"
+                        nzUnCheckedChildren="OFF">
+                      </nz-switch>
+                    } @else {
+                      <nz-switch
+                        i18n-nz-popconfirm="@@ff.are-you-sure-to-turn-ff-on"
+                        nz-popconfirm="Are you sure to turn it on? The flag will return the matching targeting users' or rules' serving variation."
+                        (nzOnConfirm)="onToggleFeatureFlagStatus(flag)"
+                        nzControl="true"
+                        [ngModel]="flag.isEnabled"
+                        [nzLoading]="flag.isToggling"
+                        nzCheckedChildren="ON"
+                        nzUnCheckedChildren="OFF">
+                      </nz-switch>
+                    }
+                    <span class="variation-type-badge" [attr.data-type]="flag.variationType">{{flag.variationType}}</span>
+                  </div>
+                  <div class="serving-section" [class.disabled]="!flag.isEnabled">
+                    @if (flag.isEnabled && flag.serves?.enabledVariations?.length === 1) {
+                      <div class="serving-row">
+                        <span class="serving-label" i18n="@@ff.serving-variations">Serving: </span>
+                        <div class="serving-value" nz-tooltip="{{flag.serves.enabledVariations[0]}}">
+                          <span class="variation-tip tip-0"></span>
+                          <span class="value-text">{{ flag.serves.enabledVariations[0] }}</span>
+                        </div>
                       </div>
-                      <span class="variation-text" nz-tooltip [nzTooltipTitle]="variationsList">
-                        {{ flag.serves?.enabledVariations?.length }} <ng-container i18n="@@common.num-variations">Variations</ng-container>
-                        <ng-template #variationsList>
-                          <ul>
-                            @for (variation of flag.serves?.enabledVariations; track variation) {
-                              <li>{{ variation }}</li>
+                    }
+                    @if (flag.isEnabled && flag.serves?.enabledVariations?.length > 1) {
+                      <div class="serving-row">
+                        <span class="serving-label" i18n="@@ff.serving-variations">Serving: </span>
+                        <div class="serving-value multiple" nz-tooltip [nzTooltipTitle]="variationsList">
+                          <div class="dots-group">
+                            @for (_ of flag.serves?.enabledVariations; track _; let key = $index) {
+                              <span class="variation-tip {{'tip-' + key % 9}}"></span>
                             }
-                          </ul>
-                        </ng-template>
-                      </span>
-                    </div>
-                  }
-                  @if (!flag.isEnabled) {
-                    <div class="variation-item disabled">
-                      <span i18n="@@ff.serving-variations">Serving: </span>
-                      <span class="variation-tip tip-disabled"></span>
-                      <span class="variation-text" nz-tooltip="{{flag.serves?.disabledVariation}}">
-                        {{ flag.serves?.disabledVariation }}
-                      </span>
-                    </div>
-                  }
+                          </div>
+                          <span class="value-text">{{ flag.serves?.enabledVariations?.length }} <ng-container i18n="@@common.num-variations">Variations</ng-container></span>
+                          <ng-template #variationsList>
+                            <ul>
+                              @for (variation of flag.serves?.enabledVariations; track variation) {
+                                <li>{{ variation }}</li>
+                              }
+                            </ul>
+                          </ng-template>
+                        </div>
+                      </div>
+                    }
+                    @if (!flag.isEnabled) {
+                      <div class="serving-row">
+                        <span class="serving-label" i18n="@@ff.serving-variations">Serving: </span>
+                        <div class="serving-value" nz-tooltip="{{flag.serves?.disabledVariation}}">
+                          <span class="variation-tip tip-disabled"></span>
+                          <span class="value-text">{{ flag.serves?.disabledVariation }}</span>
+                        </div>
+                      </div>
+                    }
+                  </div>
                 </div>
-                <div class="variation-type-badge" [attr.data-type]="flag.variationType">{{flag.variationType}}</div>
               </td>
               <!-- Tags Column -->
               <td class="tags-cell">

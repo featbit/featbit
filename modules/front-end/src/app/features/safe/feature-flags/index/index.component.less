@@ -85,65 +85,76 @@
   max-width: 168px;
 }
 
-// Status column styles (merged with variations)
+// Status column styles
 .status-cell {
-  nz-switch {
-    margin-bottom: 6px;
+  min-width: 180px;
+
+  .status-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .status-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
   }
 
   .variation-type-badge {
-    width: fit-content;
+    display: inline-flex;
+    align-items: center;
     font-size: 10px;
     font-weight: 600;
-    padding: 2px 6px;
-    border-radius: 4px;
+    padding: 3px 8px;
+    border-radius: 10px;
     text-transform: uppercase;
-    letter-spacing: 0.3px;
-    margin-top: 2px;
+    letter-spacing: 0.5px;
 
     &[data-type="boolean"] {
       background-color: #E8F5E9;
       color: #2E7D32;
-      border: 1px solid #A5D6A7;
     }
 
     &[data-type="string"] {
       background-color: #E3F2FD;
       color: #1565C0;
-      border: 1px solid #90CAF9;
     }
 
     &[data-type="number"] {
       background-color: #FFF3E0;
       color: #E65100;
-      border: 1px solid #FFCC80;
     }
 
     &[data-type="json"] {
       background-color: #F3E5F5;
       color: #7B1FA2;
-      border: 1px solid #CE93D8;
     }
   }
 
-  .variation-item {
+  .serving-section {
+    width: fit-content;
+    background-color: @grey5-color;
+    border-radius: 6px;
+    padding: 4px 8px;
+  }
+
+  .serving-row {
     display: flex;
     align-items: center;
+    gap: 6px;
+  }
+
+  .serving-label {
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+
+  .serving-value {
+    display: flex;
+    align-items: center;
+    min-width: 0;
     gap: 4px;
-    cursor: help;
-    width: fit-content;
-
-    .variation-tip {
-      margin-right: unset;
-    }
-
-    &.disabled {
-      opacity: 0.5;
-
-      .variation-tip {
-        background-color: darkgray !important;
-      }
-    }
   }
 
   .variation-tip {
@@ -152,18 +163,22 @@
     height: 8px;
     border-radius: 50%;
     flex-shrink: 0;
+    margin-right: 0;
 
     &.tip-disabled {
       background-color: darkgray;
     }
   }
 
-  .variation-text {
+  .value-text {
+    font-size: 12px;
+    font-weight: 500;
+    color: @grey70-color;
     text-overflow: ellipsis;
     white-space: nowrap;
-    max-width: 120px;
     overflow: hidden;
-    font-size: 13px;
+    max-width: 100px;
+    cursor: help;
   }
 }
 
