@@ -57,7 +57,7 @@
           [nzCustomTemplate]="multipleTemplate"
           [(ngModel)]="extraColumns"
           (ngModelChange)="storeFilterAndAttribute()"
-          (nzOnSearch)="onSearchExtraColumns($event)">、
+          (nzOnSearch)="onSearchExtraColumns($event)">
           @if (isUserPropsLoading) {
             <nz-option nzDisabled nzCustomContent>
               <i nz-icon nzType="loading" class="loading-icon"></i>
