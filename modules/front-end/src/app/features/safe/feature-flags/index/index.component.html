@@ -3,7 +3,7 @@
     <div class="table-search-area">
       <div class="search-inputs">
         <nz-input-group style="width: 220px" [nzPrefix]="prefixIconSearch">
-          <input nz-input type="text" placeholder="Filter by name or key" i18n-placeholder="@@ff.idx.filter-by-name-and-key" [(ngModel)]="featureFlagFilter.name" (ngModelChange)="onSearch(true)">
+          <input nz-input type="text" placeholder="Filter flags by name or key" i18n-placeholder="@@ff.filter-by-name-and-key" [(ngModel)]="featureFlagFilter.name" (ngModelChange)="onSearch(true)">
         </nz-input-group>
         <ng-template #prefixIconSearch>
           <i nz-icon nzType="icons:icon-search"></i>
@@ -207,6 +207,8 @@
                 <a class="action-link primary" (click)="copy(flag)" i18n="@@common.copy-to">Copy To</a>
                 <nz-divider nzType="vertical"></nz-divider>
                 <a class="action-link primary" (click)="clone(flag)" i18n="@@common.clone">Clone</a>
+                <nz-divider nzType="vertical"></nz-divider>
+                <a class="action-link primary" (click)="compare(flag)" i18n="@@common.compare">Compare</a>
                 <nz-divider nzType="vertical"></nz-divider>
                 @if (isArchived) {
                   <a class="action-link secondary"

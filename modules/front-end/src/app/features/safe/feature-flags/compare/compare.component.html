@@ -1,0 +1,148 @@
+<div class="choose-target-envs">
+  <div class="source-env">
+    <label>Source Environment</label>
+    <nz-tag>
+      <i nz-icon nzType="environment" nzTheme="outline"></i>
+      {{ sourceEnvironment.fullName }}
+    </nz-tag>
+  </div>
+  <div class="target-envs">
+    <label>Target Environments</label>
+    <nz-select
+      nzShowSearch
+      nzPlaceHolder="Select target environments to compare"
+      [(ngModel)]="selectedEnvironmentIds"
+      nzMode="multiple"
+    >
+      @for (env of availableEnvironments; track env.id) {
+        <nz-option [nzLabel]="env.fullName" [nzValue]="env.id"></nz-option>
+      }
+    </nz-select>
+  </div>
+</div>
+
+@if (selectedEnvironmentIds.length === 0) {
+  <div class="empty-state">
+    <i nz-icon nzType="swap" [style.fontSize.px]="48"></i>
+    <p>Select target environments to start comparing feature flags</p>
+  </div>
+} @else {
+  <div class="table-content-area">
+    <div class="table-search-area">
+      <nz-input-group [nzPrefix]="prefixIconSearch">
+        <input
+          type="text"
+          nz-input
+          [(ngModel)]="searchText"
+          placeholder="Filter flags by name or key"
+          i18n-placeholder="@@ff.filter-by-name-and-key"
+        />
+        <ng-template #prefixIconSearch>
+          <i nz-icon nzType="search"></i>
+        </ng-template>
+      </nz-input-group>
+      <button
+        nzType="text"
+        nz-button
+        nzTrigger="click"
+        nz-dropdown
+        nzClickHide="false"
+        nzOverlayClassName="select-tags-dropdown"
+        (nzVisibleChange)="onSelectTags($event)"
+        [nzDropdownMenu]="tags">
+        Tags: {{ getSelectedTagsLabel() }}
+        <nz-icon nzType="down" />
+      </button>
+      <nz-dropdown-menu #tags>
+        <div class="tags-filter-input">
+          <nz-input-group [nzPrefix]="tagSearchIcon" nzSize="small">
+            <input
+              type="text"
+              nz-input
+              [(ngModel)]="tagSearchText"
+              placeholder="Search tags..."
+              i18n-placeholder="@@ff.compare.search-tags"
+            />
+            <ng-template #tagSearchIcon>
+              <i nz-icon nzType="search"></i>
+            </ng-template>
+          </nz-input-group>
+        </div>
+        <ul nz-menu class="tags-menu-list">
+          @if (filteredTags.length === 0) {
+            <li class="no-tags-found">No tags found</li>
+          }
+          @for (tag of filteredTags; track tag) {
+            <li nz-menu-item (click)="tag.selected = !tag.selected">
+              <label nz-checkbox [(ngModel)]="tag.selected"></label>
+              {{ tag.name }}
+            </li>
+          }
+        </ul>
+      </nz-dropdown-menu>
+      <span class="summary-text">
+          Showing {{ filteredFeatureFlags.length }} of {{ featureFlags.length }} flags
+      </span>
+    </div>
+    <div class="table-wrapper">
+      <nz-table
+        #flagTable
+        nzSize="small"
+        [nzData]="filteredFeatureFlags"
+        nzShowPagination="false"
+        nzFrontPagination="false"
+        [nzScroll]="{ y: 'calc(100vh - 340px)' }"
+      >
+        <thead>
+        <tr>
+          <th i18n="@@common.name" nzWidth="300px">Name</th>
+          @for (env of selectedEnvironments; track env.id) {
+            <th nzWidth="250px">{{ env.fullName }}</th>
+          }
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let flag of flagTable.data">
+          <!-- Name Column -->
+          <td class="flag-name-cell">
+            <div class="flag-info">
+              <div class="flag-name">{{ flag.name }}</div>
+              <div class="flag-key">{{ flag.key }}</div>
+              <div class="flag-tags" *ngIf="flag.tags.length > 0">
+                <nz-tag *ngFor="let tag of flag.tags" class="flag-tag">
+                  {{ tag }}
+                </nz-tag>
+              </div>
+              <div class="flag-description" [title]="flag.description">
+                {{ truncateText(flag.description) }}
+              </div>
+            </div>
+          </td>
+
+          @for (env of selectedEnvironments; track env.id) {
+            <td class="diff-cell">
+              <div class="diff-container" [class.has-diff]="hasDifferences(flag, env.id)">
+                <div class="diff-status">
+                  <ng-container *ngIf="hasDifferences(flag, env.id)">
+                    <i nz-icon nzType="warning" nzTheme="fill"></i>
+                    <span>{{ getDiffCountForFlag(flag, env.id) }} difference{{ getDiffCountForFlag(flag, env.id) > 1 ? 's' : '' }}</span>
+                  </ng-container>
+                  <ng-container *ngIf="!hasDifferences(flag, env.id)">
+                    <i nz-icon nzType="check-circle" nzTheme="fill"></i>
+                    <span>Identical</span>
+                  </ng-container>
+                </div>
+                <ul class="diff-list">
+                  <ng-container *ngFor="let diff of getDiffForEnvironment(flag, env.id)">
+                    <li *ngIf="diff.hasDiff">{{ diff.label }}</li>
+                  </ng-container>
+                </ul>
+              </div>
+            </td>
+          }
+        </tr>
+        </tbody>
+      </nz-table>
+    </div>
+  </div>
+}

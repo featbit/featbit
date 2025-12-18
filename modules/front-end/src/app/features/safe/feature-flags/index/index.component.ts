@@ -162,6 +162,10 @@ export class IndexComponent implements OnInit {
     }
   }
 
+  compare(flag: IFeatureFlagListItem) {
+    console.log('compare', flag);
+  }
+
   featureFlagListModel: IFeatureFlagListModel = {
     items: [],
     totalCount: 0
