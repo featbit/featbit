@@ -247,3 +247,7 @@
   (close)="cloneModalClosed($event)"
   [visible]="cloneVisible">
 </clone-feature-flag-modal>
+<compare-feature-flag-drawer
+  [visible]="compareVisible"
+  (close)="compareVisible = false">
+</compare-feature-flag-drawer>

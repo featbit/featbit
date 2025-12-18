@@ -120,24 +120,21 @@
           </td>
 
           @for (env of selectedEnvironments; track env.id) {
-            <td class="diff-cell">
-              <div class="diff-container" [class.has-diff]="hasDifferences(flag, env.id)">
-                <div class="diff-status">
-                  <ng-container *ngIf="hasDifferences(flag, env.id)">
-                    <i nz-icon nzType="warning" nzTheme="fill"></i>
-                    <span>{{ getDiffCountForFlag(flag, env.id) }} difference{{ getDiffCountForFlag(flag, env.id) > 1 ? 's' : '' }}</span>
-                  </ng-container>
-                  <ng-container *ngIf="!hasDifferences(flag, env.id)">
-                    <i nz-icon nzType="check-circle" nzTheme="fill"></i>
-                    <span>Identical</span>
-                  </ng-container>
-                </div>
-                <ul class="diff-list">
-                  <ng-container *ngFor="let diff of getDiffForEnvironment(flag, env.id)">
-                    <li *ngIf="diff.hasDiff">{{ diff.label }}</li>
-                  </ng-container>
-                </ul>
+            <td class="diff-cell" (click)="openDiffDrawer(flag, env)">
+              <div class="diff-status" [class.has-diff]="hasDifferences(flag, env.id)">
+                @if (hasDifferences(flag, env.id)) {
+                  <i nz-icon nzType="diff"></i>
+                  <span>{{ getDiffCountLabel(flag, env.id) }}</span>
+                } @else {
+                  <i nz-icon nzType="check-circle"></i>
+                  <span>Identical</span>
+                }
               </div>
+              <ul class="diff-list">
+                <ng-container *ngFor="let diff of getDiffForEnvironment(flag, env.id)">
+                  <li *ngIf="diff.hasDiff">{{ diff.label }}</li>
+                </ng-container>
+              </ul>
             </td>
           }
         </tr>
@@ -146,3 +143,8 @@
     </div>
   </div>
 }
+
+<compare-feature-flag-drawer
+  [visible]="compareVisible"
+  (close)="compareVisible = false">
+</compare-feature-flag-drawer>

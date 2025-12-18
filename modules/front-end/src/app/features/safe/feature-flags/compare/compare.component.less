@@ -75,42 +75,41 @@
 
 .diff-cell {
   vertical-align: middle;
-  padding: 12px;
 
-  .diff-container {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  &:hover {
+    background-color: @grey10-color !important;
+  }
+
+  .diff-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 500;
+
+    i {
+      font-size: 14px;
+    }
+
     &.has-diff {
-      .diff-status {
-        color: #fa8c16;
-      }
+      color: #fa8c16;
     }
 
     &:not(.has-diff) {
-      .diff-status {
-        color: #52c41a;
-      }
+      color: #52c41a;
     }
+  }
 
-    .diff-status {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 13px;
-      font-weight: 500;
+  .diff-list {
+    margin: 6px 0 0 0;
+    padding: 0 0 0 20px;
+    font-size: 12px;
+    color: #8c8c8c;
 
-      i {
-        font-size: 14px;
-      }
-    }
-
-    .diff-list {
-      margin: 6px 0 0 0;
-      padding: 0 0 0 20px;
-      font-size: 12px;
-      color: #8c8c8c;
-
-      li {
-        line-height: 1.6;
-      }
+    li {
+      line-height: 1.6;
     }
   }
 }

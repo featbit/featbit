@@ -1,0 +1,15 @@
+<nz-drawer
+  nzClosable="false"
+  [nzExtra]="extra"
+  [nzVisible]="visible"
+  nzTitle="Compare Flag"
+  i18n-nzTitle="@@ff.compare-flag-drawer.title"
+  [nzWidth]="1000"
+  (nzOnClose)="onClose()">
+  <ng-container *nzDrawerContent>
+    Drawer Content
+  </ng-container>
+  <ng-template #extra>
+    <i (click)="onClose()" nz-icon nzType="icons:icon-close"></i>
+  </ng-template>
+</nz-drawer>

@@ -11,6 +11,7 @@ import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { FormsModule } from '@angular/forms';
 import { NzDropDownModule } from "ng-zorro-antd/dropdown";
 import { NzCheckboxModule } from "ng-zorro-antd/checkbox";
+import { CoreModule } from "@core/core.module";
 
 interface Environment {
   id: string;
@@ -53,7 +54,8 @@ type SelectableTag = {
     NzButtonModule,
     NzSpinModule,
     NzDropDownModule,
-    NzCheckboxModule
+    NzCheckboxModule,
+    CoreModule
   ],
   templateUrl: './compare.component.html',
   styleUrl: './compare.component.less'
@@ -740,9 +742,13 @@ export class CompareComponent implements OnInit {
     return diffs.some(diff => diff.hasDiff);
   }
 
-  getDiffCountForFlag(flag: FeatureFlag, envId: string): number {
+  getDiffCountLabel(flag: FeatureFlag, envId: string): string {
     const diffs = this.getDiffForEnvironment(flag, envId);
-    return diffs.filter(diff => diff.hasDiff).length;
+
+    const count = diffs.filter(diff => diff.hasDiff).length;
+    return count == 1 ?
+      '1 difference' :
+      `${count} differences`;
   }
 
   onSelectTags(visible: boolean) {
@@ -751,5 +757,11 @@ export class CompareComponent implements OnInit {
         .filter(tag => tag.selected)
         .map(tag => tag.name);
     }
+  }
+
+  compareVisible: boolean = false;
+  openDiffDrawer(flag: FeatureFlag, env: Environment) {
+    this.compareVisible = true;
+    console.log(this.compareVisible);
   }
 }
