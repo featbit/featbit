@@ -24,12 +24,6 @@ interface DiffItem {
   hasDiff: boolean;
 }
 
-interface FlagTag {
-  id: string;
-  name: string;
-  color: string;
-}
-
 interface FeatureFlag {
   id: string;
   name: string;
