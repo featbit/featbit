@@ -271,7 +271,7 @@ export class CompareFeatureFlagDrawerComponent {
     targets.forEach(target => {
       lines.push(`<strong>${target.variationName}</strong>`);
       if (target.users.length === 0) {
-        lines.push($localize`:@@ff.compare.no-targets:No individual targets`);
+        lines.push($localize`:@@ff.compare.no-individual-targets:No individual targets`);
       } else {
         lines.push(target.users.join(', '));
       }
@@ -351,7 +351,7 @@ export class CompareFeatureFlagDrawerComponent {
     // Simulate API call
     setTimeout(() => {
       const selectedKeys = this.diffRows.filter(row => row.selected).map(row => row.label);
-      this.msg.success($localize`:@@ff.compare.copy-success:Successfully copied ${selectedKeys.length} setting(s)`);
+      this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
       this.isCopying = false;
       this.onClose();
     }, 1000);
