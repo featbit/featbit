@@ -760,8 +760,22 @@ export class CompareComponent implements OnInit {
   }
 
   compareVisible: boolean = false;
-  openDiffDrawer(flag: FeatureFlag, env: Environment) {
+  flagToCompare: { id: string; name: string; key: string; } | null = null;
+  targetEnvToCompare: Environment | null = null;
+
+  compare(flag: FeatureFlag, env: Environment) {
+    this.flagToCompare = {
+      id: flag.id,
+      name: flag.name,
+      key: flag.key
+    };
+    this.targetEnvToCompare = env;
     this.compareVisible = true;
-    console.log(this.compareVisible);
+  }
+
+  closeCompareDrawer() {
+    this.compareVisible = false;
+    this.flagToCompare = null;
+    this.targetEnvToCompare = null;
   }
 }

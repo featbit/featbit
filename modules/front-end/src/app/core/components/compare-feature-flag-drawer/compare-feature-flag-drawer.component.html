@@ -2,12 +2,144 @@
   nzClosable="false"
   [nzExtra]="extra"
   [nzVisible]="visible"
-  nzTitle="Compare Flag"
-  i18n-nzTitle="@@ff.compare-flag-drawer.title"
-  [nzWidth]="1000"
+  [nzTitle]="title"
+  [nzWidth]="900"
   (nzOnClose)="onClose()">
+  <ng-template #title>
+    <strong>{{ flag?.name || 'Unknown Flag' }}</strong>
+  </ng-template>
   <ng-container *nzDrawerContent>
-    Drawer Content
+    <div class="environments-row">
+      <div class="env-item source">
+        <span class="env-label" i18n="@@ff.compare.source-environment">Source Environment:</span>
+        <nz-tag nzBordered="false" nzColor="green">
+          <i nz-icon nzType="environment" nzTheme="outline"></i>
+          {{ sourceEnvironment?.fullName }}
+        </nz-tag>
+      </div>
+
+      <i nz-icon nzType="arrow-right" class="arrow-icon"></i>
+
+      <div class="env-item target">
+        <span class="env-label" i18n="@@ff.compare.target-environment">Target Environment:</span>
+        @if (isTargetEnvLocked) {
+          <nz-tag nzBordered="false" nzColor="volcano">
+            <i nz-icon nzType="environment" nzTheme="outline"></i>
+            {{ currentTargetEnv?.fullName }}
+            <i nz-icon nzType="lock" nzTheme="outline" class="lock-icon"></i>
+          </nz-tag>
+        } @else {
+          <nz-select
+            nzShowSearch
+            nzPlaceHolder="Select target environment"
+            i18n-nzPlaceHolder="@@ff.compare.select-target-env"
+            [(ngModel)]="selectedTargetEnvId"
+            (ngModelChange)="onTargetEnvChange()"
+            [nzCustomTemplate]="targetEnvOption"
+          >
+            @for (env of availableEnvironments; track env.id) {
+              <nz-option [nzLabel]="env.fullName" [nzValue]="env.id"></nz-option>
+            }
+            <ng-template #targetEnvOption let-selected>
+              <i nz-icon nzType="environment" nzTheme="outline"></i>
+              {{ selected.nzLabel }}
+            </ng-template>
+          </nz-select>
+        }
+      </div>
+    </div>
+    @if (!currentTargetEnv) {
+      <div class="empty-state">
+        <i nz-icon nzType="swap" [style.fontSize.px]="48"></i>
+        <p i18n="@@ff.compare.select-target-env-tip">Please select a target environment to compare flag settings</p>
+      </div>
+    } @else if (isLoading) {
+      <div class="loading-state">
+        <nz-spin nzTip="Loading comparison data..." i18n-nzTip="@@ff.compare.loading-comparision-data"></nz-spin>
+      </div>
+    } @else {
+      <p class="tip">
+        Select the settings you want to copy from <strong>{{ sourceEnvironment?.fullName }}</strong> to <strong>{{ currentTargetEnv?.fullName }}</strong>.
+        Differences are highlighted.
+      </p>
+      <nz-table
+        [nzData]="diffRows"
+        nzShowPagination="false"
+        nzFrontPagination="false"
+        nzBordered="true"
+        class="comparison-table"
+      >
+        <thead>
+          <tr>
+            <th>
+              <label
+                nz-checkbox
+                [nzChecked]="allSelected"
+                [nzIndeterminate]="someSelected"
+                (nzCheckedChange)="onSelectAll($event)"
+              >
+                <span i18n="@@ff.compare.select-all">Select All</span>
+              </label>
+            </th>
+            <th>
+              <span i18n="@@ff.compare.settings-in">Settings in </span><strong>{{ sourceEnvironment?.fullName }}</strong>
+            </th>
+            <th>
+              <span i18n="@@ff.compare.settings-in">Settings in </span><strong>{{ currentTargetEnv?.fullName }}</strong>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of diffRows; track row.key) {
+            <tr [class.has-diff]="row.hasDiff">
+              <td class="setting-label-cell">
+                <label nz-checkbox [(ngModel)]="row.selected">{{ row.label }}</label>
+              </td>
+              <td class="setting-value-cell source-value">
+                <div class="value-content">
+                  @for (line of getSourceDisplayValue(row.key); track $index) {
+                    <div class="value-line" [innerHTML]="line"></div>
+                  }
+                </div>
+              </td>
+              <td class="setting-value-cell target-value" [class.will-change]="row.selected && row.hasDiff">
+                <div class="value-content">
+                  @for (line of getTargetDisplayValue(row.key); track $index) {
+                    <div class="value-line" [innerHTML]="line"></div>
+                  }
+                </div>
+                @if (row.selected && row.hasDiff) {
+                  <div class="change-indicator">
+                    <i nz-icon nzType="check-circle" nzTheme="fill"></i>
+                    <span i18n="@@ff.compare.value-after-applied">Value after applied</span>
+                  </div>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </nz-table>
+
+      <div class="action-section">
+        <div class="selection-summary">
+          @if (selectedCount > 0) {
+            {{ selectedCount }} <span i18n="@@ff.compare.settings-selected">setting(s) selected</span>
+          } @else {
+            <span class="no-selection" i18n="@@ff.compare.no-selection">No settings selected</span>
+          }
+        </div>
+        <button
+          nz-button
+          nzType="primary"
+          [nzLoading]="isCopying"
+          [disabled]="selectedCount === 0"
+          (click)="copySettings()"
+        >
+          <i nz-icon nzType="icons:icon-copy" nzTheme="outline"></i>
+          <span i18n="@@ff.compare.copy-settings">Copy Settings</span>
+        </button>
+      </div>
+    }
   </ng-container>
   <ng-template #extra>
     <i (click)="onClose()" nz-icon nzType="icons:icon-close"></i>

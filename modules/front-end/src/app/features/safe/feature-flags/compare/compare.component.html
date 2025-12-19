@@ -1,7 +1,7 @@
 <div class="choose-target-envs">
   <div class="source-env">
     <label>Source Environment</label>
-    <nz-tag>
+    <nz-tag nzColor="green">
       <i nz-icon nzType="environment" nzTheme="outline"></i>
       {{ sourceEnvironment.fullName }}
     </nz-tag>
@@ -95,9 +95,9 @@
       >
         <thead>
         <tr>
-          <th i18n="@@common.name" nzWidth="300px">Name</th>
+          <th i18n="@@common.name">Name</th>
           @for (env of selectedEnvironments; track env.id) {
-            <th nzWidth="250px">{{ env.fullName }}</th>
+            <th>{{ env.fullName }}</th>
           }
         </tr>
         </thead>
@@ -120,10 +120,10 @@
           </td>
 
           @for (env of selectedEnvironments; track env.id) {
-            <td class="diff-cell" (click)="openDiffDrawer(flag, env)">
+            <td class="diff-cell" (click)="compare(flag, env)">
               <div class="diff-status" [class.has-diff]="hasDifferences(flag, env.id)">
                 @if (hasDifferences(flag, env.id)) {
-                  <i nz-icon nzType="diff"></i>
+                  <i nz-icon nzType="icons:icon-diff"></i>
                   <span>{{ getDiffCountLabel(flag, env.id) }}</span>
                 } @else {
                   <i nz-icon nzType="check-circle"></i>
@@ -145,6 +145,8 @@
 }
 
 <compare-feature-flag-drawer
+  [flag]="flagToCompare"
+  [targetEnvironment]="targetEnvToCompare"
   [visible]="compareVisible"
-  (close)="compareVisible = false">
+  (close)="closeCompareDrawer()">
 </compare-feature-flag-drawer>
