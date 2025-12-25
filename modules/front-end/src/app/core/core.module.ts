@@ -107,6 +107,7 @@ import { RelayProxyDrawerComponent } from '@core/components/relay-proxy-drawer/r
 import { RelayProxyAgentModalComponent } from './components/relay-proxy-agent-modal/relay-proxy-agent-modal.component';
 import { RelayProxyKeyModalComponent } from './components/relay-proxy-key-modal/relay-proxy-key-modal.component';
 import { CloneFeatureFlagModalComponent } from './components/clone-feature-flag-modal/clone-feature-flag-modal.component';
+import { CompareFeatureFlagDrawerComponent } from './components/compare-feature-flag-drawer/compare-feature-flag-drawer.component';
 
 @NgModule({
   declarations: [
@@ -155,7 +156,8 @@ import { CloneFeatureFlagModalComponent } from './components/clone-feature-flag-
     RelayProxyDrawerComponent,
     RelayProxyAgentModalComponent,
     RelayProxyKeyModalComponent,
-    CloneFeatureFlagModalComponent
+    CloneFeatureFlagModalComponent,
+    CompareFeatureFlagDrawerComponent
   ],
   imports: [
     CommonModule,
@@ -264,7 +266,8 @@ import { CloneFeatureFlagModalComponent } from './components/clone-feature-flag-
     RelayProxyDrawerComponent,
     RelayProxyAgentModalComponent,
     RelayProxyKeyModalComponent,
-    CloneFeatureFlagModalComponent
+    CloneFeatureFlagModalComponent,
+    CompareFeatureFlagDrawerComponent
   ]
 })
 export class CoreModule {

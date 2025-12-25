@@ -12,6 +12,13 @@ const routes: Routes = [
         loadChildren: () => import("./index/index.module").then(m => m.IndexModule)
       },
       {
+        path: 'compare',
+        loadComponent: () => import("./compare/compare.component").then(m => m.CompareComponent),
+        data: {
+          breadcrumb: $localize `:@@ff.routing.compare:Compare`
+        }
+      },
+      {
         path: ':key',
         loadChildren: () => import("./details/details.module").then(m => m.DetailsModule),
       },

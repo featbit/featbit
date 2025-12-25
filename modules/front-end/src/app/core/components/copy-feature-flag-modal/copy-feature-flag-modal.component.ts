@@ -29,9 +29,21 @@ export class CopyFeatureFlagModalComponent implements OnInit {
   @Input()
   visible: boolean = false;
 
+  private _targetEnvId: string = '';
+  @Input()
+  set targetEnvId(value: string) {
+    this._targetEnvId = value;
+    if (value) {
+      this.onSelectTargetEnvironment();
+    }
+  }
+  get targetEnvId(): string {
+    return this._targetEnvId;
+  }
+
   private _flags: BulkCopyCheckItem[] = [];
   @Input()
-  set flags(value: FeatureFlagListCheckItem[]) {
+  set flags(value: {id: string, name: string}[]) {
     this._flags = value.map(x => ({
         id: x.id,
         name: x.name,
@@ -55,7 +67,6 @@ export class CopyFeatureFlagModalComponent implements OnInit {
   close: EventEmitter<void> = new EventEmitter();
 
   isLoading: boolean = true;
-  targetEnvId: string = '';
   envs: { label: string, value: string }[] = [];
   currentProjectEnv: IProjectEnv;
 
@@ -99,7 +110,7 @@ export class CopyFeatureFlagModalComponent implements OnInit {
   precheckResults: CopyToEnvPrecheckResult[] = [];
 
   onSelectTargetEnvironment() {
-    if (!this.targetEnvId) {
+    if (!this._targetEnvId) {
       return;
     }
 
@@ -107,7 +118,7 @@ export class CopyFeatureFlagModalComponent implements OnInit {
 
     const flagIds = this.flags.map(x => x.id);
 
-    this.flagService.copyToEnvPrecheck(this.targetEnvId, flagIds).subscribe({
+    this.flagService.copyToEnvPrecheck(this._targetEnvId, flagIds).subscribe({
       next: precheckResults => {
         this.precheckResults = precheckResults;
 
@@ -141,7 +152,7 @@ export class CopyFeatureFlagModalComponent implements OnInit {
     const selectedFlagIds = this.selectedFlags.map(x => x.id);
     const precheckResults = this.precheckResults.filter(x => selectedFlagIds.includes(x.id));
 
-    this.flagService.copyToEnv(this.targetEnvId, selectedFlagIds, precheckResults).subscribe({
+    this.flagService.copyToEnv(this._targetEnvId, selectedFlagIds, precheckResults).subscribe({
       next: _ => {
         this.copying = false;
         this.msg.success($localize `:@@common.operation-success:Operation succeeded`);

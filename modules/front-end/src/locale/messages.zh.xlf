@@ -133,6 +133,10 @@
           <context context-type="linenumber">16,17</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.html</context>
+          <context context-type="linenumber">109,110</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/insights/insights.component.html</context>
           <context context-type="linenumber">54,55</context>
         </context-group>
@@ -601,8 +605,12 @@
           <context context-type="linenumber">98</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.ts</context>
+          <context context-type="linenumber">354</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.ts</context>
-          <context context-type="linenumber">147</context>
+          <context context-type="linenumber">158</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/expt-rules-drawer/expt-rules-drawer.component.ts</context>
@@ -710,15 +718,15 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">249</context>
+          <context context-type="linenumber">256</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">262</context>
+          <context context-type="linenumber">269</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">272</context>
+          <context context-type="linenumber">279</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/groups/details/policies/policies.component.ts</context>
@@ -926,7 +934,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">252</context>
+          <context context-type="linenumber">259</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/onboarding/steps/steps.component.ts</context>
@@ -965,6 +973,10 @@
           <context context-type="linenumber">248</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.ts</context>
+          <context context-type="linenumber">362</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.ts</context>
           <context context-type="linenumber">170</context>
         </context-group>
@@ -990,7 +1002,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">286</context>
+          <context context-type="linenumber">293</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.ts</context>
@@ -2463,7 +2475,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.ts</context>
-          <context context-type="linenumber">152</context>
+          <context context-type="linenumber">163</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/expt-rules-drawer/expt-rules-drawer.component.ts</context>
@@ -2507,11 +2519,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">265</context>
+          <context context-type="linenumber">272</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">275</context>
+          <context context-type="linenumber">282</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.ts</context>
@@ -2638,6 +2650,186 @@
           <context context-type="linenumber">115</context>
         </context-group>
         <target>操作失败</target>
+      </trans-unit>
+      <trans-unit id="ff.compare.source-environment" datatype="html">
+        <source>Source Environment</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.html</context>
+          <context context-type="linenumber">14,15</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.html</context>
+          <context context-type="linenumber">3,5</context>
+        </context-group>
+        <target>源环境：</target>
+      </trans-unit>
+      <trans-unit id="ff.compare.target-environment" datatype="html">
+        <source>Target Environment</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.html</context>
+          <context context-type="linenumber">24,26</context>
+        </context-group>
+        <target>目标环境：</target>
+      </trans-unit>
+      <trans-unit id="ff.compare.select-target-env" datatype="html">
+        <source>Select target environment</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.html</context>
+          <context context-type="linenumber">34,35</context>
+        </context-group>
+        <target>请选择目标环境</target>
+      </trans-unit>
+      <trans-unit id="ff.compare.select-target-env-tip" datatype="html">
+        <source>Please select a target environment to compare flag settings</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.html</context>
+          <context context-type="linenumber">54,56</context>
+        </context-group>
+        <target>请选择待比较的目标环境</target>
+      </trans-unit>
+      <trans-unit id="ff.compare.loading-comparision-data" datatype="html">
+        <source>Loading comparison data...</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.html</context>
+          <context context-type="linenumber">58</context>
+        </context-group>
+        <target>加载对比数据中...</target>
+      </trans-unit>
+      <trans-unit id="ff.compare.select-all" datatype="html">
+        <source>Select All</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.html</context>
+          <context context-type="linenumber">81,83</context>
+        </context-group>
+        <target>选择全部</target>
+      </trans-unit>
+      <trans-unit id="ff.compare.settings-in" datatype="html">
+        <source>Settings in </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.html</context>
+          <context context-type="linenumber">85</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.html</context>
+          <context context-type="linenumber">88</context>
+        </context-group>
+        <target>配置在</target>
+      </trans-unit>
+      <trans-unit id="ff.compare.value-after-applied" datatype="html">
+        <source>Value after applied</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.html</context>
+          <context context-type="linenumber">114,116</context>
+        </context-group>
+        <target>复制之后的值</target>
+      </trans-unit>
+      <trans-unit id="ff.compare.settings-selected" datatype="html">
+        <source>setting(s) selected</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.html</context>
+          <context context-type="linenumber">126,128</context>
+        </context-group>
+        <target>个配置项</target>
+      </trans-unit>
+      <trans-unit id="ff.compare.no-selection" datatype="html">
+        <source>No settings selected</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.html</context>
+          <context context-type="linenumber">128,131</context>
+        </context-group>
+        <target>尚未选择配置项</target>
+      </trans-unit>
+      <trans-unit id="ff.compare.copy-settings" datatype="html">
+        <source>Copy Settings</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.html</context>
+          <context context-type="linenumber">139,141</context>
+        </context-group>
+        <target>复制配置</target>
+      </trans-unit>
+      <trans-unit id="ff.compare.on-off-state" datatype="html">
+        <source>On/OFF State</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.ts</context>
+          <context context-type="linenumber">217</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.ts</context>
+          <context context-type="linenumber">183</context>
+        </context-group>
+        <target>开启/关闭 状态</target>
+      </trans-unit>
+      <trans-unit id="ff.compare.individual-targeting" datatype="html">
+        <source>Individual Targeting</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.ts</context>
+          <context context-type="linenumber">223</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.ts</context>
+          <context context-type="linenumber">184</context>
+        </context-group>
+        <target>目标用户</target>
+      </trans-unit>
+      <trans-unit id="ff.compare.targeting-rules" datatype="html">
+        <source>Targeting Rules</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.ts</context>
+          <context context-type="linenumber">229</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.ts</context>
+          <context context-type="linenumber">185</context>
+        </context-group>
+        <target>匹配规则</target>
+      </trans-unit>
+      <trans-unit id="ff.compare.default-rule" datatype="html">
+        <source>Default Rule</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.ts</context>
+          <context context-type="linenumber">235</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.ts</context>
+          <context context-type="linenumber">186</context>
+        </context-group>
+        <target>默认规则</target>
+      </trans-unit>
+      <trans-unit id="ff.compare.off-variation-description" datatype="html">
+        <source>If flag is OFF, serve</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.ts</context>
+          <context context-type="linenumber">241</context>
+        </context-group>
+        <target>开关关闭时，返回</target>
+      </trans-unit>
+      <trans-unit id="ff.compare.no-individual-targets" datatype="html">
+        <source>No individual targets</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.ts</context>
+          <context context-type="linenumber">267</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.ts</context>
+          <context context-type="linenumber">274</context>
+        </context-group>
+        <target>无目标用户</target>
+      </trans-unit>
+      <trans-unit id="ff.compare.no-rules-defined" datatype="html">
+        <source>No rules defined</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.ts</context>
+          <context context-type="linenumber">285</context>
+        </context-group>
+        <target>没有自定义规则</target>
+      </trans-unit>
+      <trans-unit id="ff.compare.select-settings-to-copy" datatype="html">
+        <source>Please select at least one setting to copy</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.ts</context>
+          <context context-type="linenumber">345</context>
+        </context-group>
+        <target>请至少选择一个配置项进行复制</target>
       </trans-unit>
       <trans-unit id="ff.copy-flag.title" datatype="html">
         <source>Copy Flag</source>
@@ -2773,7 +2965,7 @@
         <source>Bulk copy precheck failed. Please try again.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.ts</context>
-          <context context-type="linenumber">128</context>
+          <context context-type="linenumber">139</context>
         </context-group>
         <target>批量复制失败，请重试。</target>
       </trans-unit>
@@ -4685,7 +4877,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
-          <context context-type="linenumber">223,224</context>
+          <context context-type="linenumber">225,226</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.html</context>
@@ -5189,7 +5381,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
-          <context context-type="linenumber">221,222</context>
+          <context context-type="linenumber">223,224</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.html</context>
@@ -6277,6 +6469,10 @@
           <context context-type="linenumber">82</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.ts</context>
+          <context context-type="linenumber">85</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.ts</context>
           <context context-type="linenumber">179</context>
         </context-group>
@@ -7327,6 +7523,93 @@
         </context-group>
         <target>相同开关和指标的实验已经存在</target>
       </trans-unit>
+      <trans-unit id="ff.compare.target-environments" datatype="html">
+        <source>Target Environments</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.html</context>
+          <context context-type="linenumber">11,13</context>
+        </context-group>
+        <target>目标环境</target>
+      </trans-unit>
+      <trans-unit id="ff.compare.pending-hint" datatype="html">
+        <source>Click Apply to see the latest comparison results</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.html</context>
+          <context context-type="linenumber">15,18</context>
+        </context-group>
+        <target>点击"应用"按钮以查看最新的比较结果</target>
+      </trans-unit>
+      <trans-unit id="ff.compare.empty-state-hint" datatype="html">
+        <source>Select target environments to start comparing feature flags</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.html</context>
+          <context context-type="linenumber">34,37</context>
+        </context-group>
+        <target>选择目标环境以开始比较开关配置</target>
+      </trans-unit>
+      <trans-unit id="ff.filter-by-name-and-key" datatype="html">
+        <source>Filter flags by name or key</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.html</context>
+          <context context-type="linenumber">45,46</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
+          <context context-type="linenumber">6</context>
+        </context-group>
+        <target>根据开关名称或者 Key 筛选</target>
+      </trans-unit>
+      <trans-unit id="ff.compare.search-tags" datatype="html">
+        <source>Search tags...</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.html</context>
+          <context context-type="linenumber">71,72</context>
+        </context-group>
+        <target>搜索标签...</target>
+      </trans-unit>
+      <trans-unit id="5605276442492353188" datatype="html">
+        <source>Flag does not exist</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.html</context>
+          <context context-type="linenumber">137,139</context>
+        </context-group>
+        <note priority="1" from="description">ff.compare.flag-not-exist</note>
+        <target>开关不存在</target>
+      </trans-unit>
+      <trans-unit id="ff.compare.copy-now" datatype="html">
+        <source>Copy Now?</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.html</context>
+          <context context-type="linenumber">139,140</context>
+        </context-group>
+        <target>现在复制？</target>
+      </trans-unit>
+      <trans-unit id="ff.compare.off-variation" datatype="html">
+        <source>Off Variation</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.ts</context>
+          <context context-type="linenumber">187</context>
+        </context-group>
+        <target>开关关闭时，返回</target>
+      </trans-unit>
+      <trans-unit id="2207820498839575819" datatype="html">
+        <source>difference</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.ts</context>
+          <context context-type="linenumber">201</context>
+        </context-group>
+        <note priority="1" from="description">common.difference</note>
+        <target>个不同</target>
+      </trans-unit>
+      <trans-unit id="7442934414072562947" datatype="html">
+        <source>differences</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.ts</context>
+          <context context-type="linenumber">202</context>
+        </context-group>
+        <note priority="1" from="description">common.differences</note>
+        <target>个不同</target>
+      </trans-unit>
       <trans-unit id="ff.triggers.triggers" datatype="html">
         <source>Event triggers</source>
         <context-group purpose="location">
@@ -8031,7 +8314,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
-          <context context-type="linenumber">214,215</context>
+          <context context-type="linenumber">216,217</context>
         </context-group>
         <target>确定复位此开关么？</target>
       </trans-unit>
@@ -8043,7 +8326,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
-          <context context-type="linenumber">216,217</context>
+          <context context-type="linenumber">218,219</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
@@ -8367,13 +8650,13 @@
         </context-group>
         <target>请确认匹配条件中每条规则的总百分比必须为100%！</target>
       </trans-unit>
-      <trans-unit id="ff.idx.filter-by-name-and-key" datatype="html">
-        <source>Filter by name or key</source>
+      <trans-unit id="ff.routing.compare" datatype="html">
+        <source>Compare</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
-          <context context-type="linenumber">6</context>
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/feature-flags-routing.module.ts</context>
+          <context context-type="linenumber">18</context>
         </context-group>
-        <target>按名称或 key 查找</target>
+        <target>对比</target>
       </trans-unit>
       <trans-unit id="ff.idx.filter-by-tags" datatype="html">
         <source>Filter by tags</source>
@@ -8479,11 +8762,19 @@
         </context-group>
         <target>复制到</target>
       </trans-unit>
+      <trans-unit id="common.compare" datatype="html">
+        <source>Compare</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
+          <context context-type="linenumber">211,212</context>
+        </context-group>
+        <target>对比</target>
+      </trans-unit>
       <trans-unit id="common.archive" datatype="html">
         <source>Archive</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
-          <context context-type="linenumber">226,228</context>
+          <context context-type="linenumber">228,230</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
@@ -8507,7 +8798,7 @@
         <source>The status of feature flag &lt;b&gt;<x id="PH" equiv-text="data.name"/>&lt;/b&gt; is changed to OFF</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">213</context>
+          <context context-type="linenumber">220</context>
         </context-group>
         <target>开关  &lt;b&gt;<x id="PH" equiv-text="data.name"/>&lt;/b&gt; 状态已切换至 OFF</target>
       </trans-unit>
@@ -8515,7 +8806,7 @@
         <source>The status of feature flag &lt;b&gt;<x id="PH" equiv-text="data.name"/>&lt;/b&gt; is changed to ON</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">214</context>
+          <context context-type="linenumber">221</context>
         </context-group>
         <target>开关 &lt;b&gt;<x id="PH" equiv-text="data.name"/>&lt;/b&gt; 状态已切换至 ON</target>
       </trans-unit>
@@ -8523,7 +8814,7 @@
         <source>Failed to change feature flag status</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">228</context>
+          <context context-type="linenumber">235</context>
         </context-group>
         <target>开关状态切换失败</target>
       </trans-unit>
@@ -8531,7 +8822,7 @@
         <source>Flag &lt;strong&gt;<x id="PH" equiv-text="flag.name"/>&lt;/strong&gt; will be archived, and the value defined in your code will be returned for all your users. Remove code references to &lt;strong&gt;<x id="PH_1" equiv-text="flag.key"/>&lt;/strong&gt; from your application before archiving.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">239</context>
+          <context context-type="linenumber">246</context>
         </context-group>
         <target>开关 &lt;strong&gt;<x id="PH" equiv-text="this.featureFlag.name"/>&lt;/strong&gt; 将被归档，在你的代码中定义的值将被返回给所有的用户。在归档之前，你应该从你的应用程序中删除对 &lt;strong&gt;<x id="PH_1" equiv-text="this.featureFlag.key"/>&lt;/strong&gt; 的代码引用。</target>
       </trans-unit>
@@ -8539,7 +8830,7 @@
         <source>Are you sure to archive this feature flag?</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">243</context>
+          <context context-type="linenumber">250</context>
         </context-group>
         <target>确定要存档该开关吗？</target>
       </trans-unit>

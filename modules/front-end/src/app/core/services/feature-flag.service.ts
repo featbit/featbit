@@ -5,6 +5,7 @@ import { getCurrentOrganization, getCurrentProjectEnv } from "@utils/project-env
 import { firstValueFrom, Observable, of } from "rxjs";
 import {
   CloneFlagPayload,
+  CompareFlagOverviews,
   CopyToEnvPrecheckResult,
   ICopyToEnvResult,
   IFeatureFlagCreationPayload,
@@ -61,6 +62,23 @@ export class FeatureFlagService {
 
   getPendingChanges(key: string): Promise<IPendingChanges[]> {
     return firstValueFrom(this.http.get<IPendingChanges[]>(`${this.baseUrl}/${key}/pending-changes`));
+  }
+
+  getCompareOverview(targetEnvIds: string[], flagFilter: IFeatureFlagListFilter): Observable<CompareFlagOverviews> {
+    const org = getCurrentOrganization();
+
+    const filter = {
+      name: flagFilter.name ?? '',
+      tags: flagFilter.tags ?? [],
+      sortBy: org.settings?.flagSortedBy ?? FlagSortedBy.CreatedAt,
+      pageIndex: flagFilter.pageIndex - 1,
+      pageSize: flagFilter.pageSize
+    };
+
+    return this.http.post<CompareFlagOverviews>(
+      `${this.baseUrl}/compare-overview`,
+      { targetEnvIds, filter }
+    );
   }
 
   deleteSchedule(id: string): Observable<boolean> {

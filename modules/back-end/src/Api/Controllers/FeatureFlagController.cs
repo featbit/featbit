@@ -363,6 +363,29 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(flag);
     }
 
+    [HttpPost("compare-overview")]
+    public async Task<ApiResponse<PagedResult<CompareFlagOverview>>> GetCompareOverviewAsync(Guid envId, GetCompareFlagOverview request)
+    {
+        request.SourceEnvId = envId;
+
+        var overview = await Mediator.Send(request);
+        return Ok(overview);
+    }
+
+    [HttpGet("compare/{targetEnvId:guid}/{key}")]
+    public async Task<ApiResponse<FlagDiff>> CompareAsync(Guid envId, Guid targetEnvId, string key)
+    {
+        var request = new CompareFlag
+        {
+            Key = key,
+            SourceEnvId = envId,
+            TargetEnvId = targetEnvId
+        };
+
+        var diff = await Mediator.Send(request);
+        return Ok(diff);
+    }
+
     [HttpGet("all-tags")]
     public async Task<ApiResponse<ICollection<string>>> GetAllTagsAsync(Guid envId)
     {
