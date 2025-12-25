@@ -11,7 +11,7 @@
   <ng-container *nzDrawerContent>
     <div class="environments-row">
       <div class="env-item source">
-        <span class="env-label" i18n="@@ff.compare.source-environment">Source Environment:</span>
+        <span class="env-label" i18n="@@ff.compare.source-environment">Source Environment</span>
         <nz-tag nzBordered="false" nzColor="green">
           <i nz-icon nzType="environment" nzTheme="outline"></i>
           {{ sourceEnvironment?.fullName }}
@@ -21,7 +21,7 @@
       <i nz-icon nzType="arrow-right" class="arrow-icon"></i>
 
       <div class="env-item target">
-        <span class="env-label" i18n="@@ff.compare.target-environment">Target Environment:</span>
+        <span class="env-label" i18n="@@ff.compare.target-environment">Target Environment</span>
         @if (isTargetEnvLocked) {
           <nz-tag nzBordered="false" nzColor="volcano">
             <i nz-icon nzType="environment" nzTheme="outline"></i>

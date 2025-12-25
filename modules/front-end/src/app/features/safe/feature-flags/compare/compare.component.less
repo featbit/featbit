@@ -15,6 +15,24 @@
 
   .target-envs {
     flex: 1;
+
+    .pending-hint {
+      margin-left: 8px;
+      color: @grey40-color;
+      font-size: 12px;
+      font-weight: 400;
+
+      i {
+        margin-right: 2px;
+        font-size: 14px;
+      }
+    }
+  }
+
+  button {
+    margin-top: auto;
+    border-radius: 8px;
+    width: 72px;
   }
 }
 
@@ -94,11 +112,11 @@
     }
 
     &.has-diff {
-      color: #fa8c16;
+      color: #f3a14a;
     }
 
     &:not(.has-diff) {
-      color: #52c41a;
+      color: #389e0d;
     }
   }
 
@@ -112,11 +130,27 @@
       line-height: 1.6;
     }
   }
-}
 
-.summary-text {
-  margin-left: auto;
-  color: @grey50-color;
+  .not-exist {
+    cursor: default;
+    color: @grey40-color;
+    font-size: 12px;
+
+    i {
+      font-size: 13px;
+      margin-right: 2px;
+    }
+
+    &:hover {
+      background-color: unset;
+    }
+
+    .create-now {
+      font-weight: bold;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+  }
 }
 
 .empty-state {

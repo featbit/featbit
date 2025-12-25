@@ -238,7 +238,7 @@ export class CompareFeatureFlagDrawerComponent {
       },
       {
         key: 'offVariation',
-        label: $localize`:@@ff.compare.off-variation:If flag is OFF, serve`,
+        label: $localize`:@@ff.compare.off-variation-description:If flag is OFF, serve`,
         selected: false,
         hasDiff: this.targetEnvSettings?.offVariation !== this.sourceEnvSettings?.offVariation
       }
