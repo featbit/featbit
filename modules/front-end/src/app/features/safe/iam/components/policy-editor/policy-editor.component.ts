@@ -154,7 +154,7 @@ export class PolicyEditorComponent {
   }
 
   addStatement() {
-    this.statements = [...this.statements, new PolicyStatementViewModel()];
+    this.statements = [new PolicyStatementViewModel(), ...this.statements];
   }
 
   removeStatement(statement: PolicyStatementViewModel) {

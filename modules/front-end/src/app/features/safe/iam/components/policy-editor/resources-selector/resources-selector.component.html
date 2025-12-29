@@ -2,7 +2,7 @@
   <div class="top-title">
     <div class="prefix title">
       <span i18n="@@iam.policies.details.resource">Resource</span>
-      @if (resourceType?.type === 'general') {
+      @if (isResourceTypeGeneral) {
         <span style="display: inline-block;margin-left: 12px;">( <ng-container i18n="@@iam.policies.details.when-resource-type-is">Can only select one resource</ng-container>)</span>
       }
     </div>

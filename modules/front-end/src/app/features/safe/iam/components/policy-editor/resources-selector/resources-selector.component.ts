@@ -25,12 +25,14 @@ export class ResourcesSelectorComponent {
   availableResources: Resource[];
 
   @Output() onSelectedResourcesChange = new EventEmitter<Resource[]>();
+  isResourceTypeGeneral: boolean = false;
   resourceType: ResourceType;
   @Input('resourceType')
   set _(data: ResourceType){
     if (data) {
       const previousType = this.resourceType?.type;
       this.resourceType = data;
+      this.isResourceTypeGeneral = isResourceGeneral(this.resourceType.type, this.resourceType.pattern);
       this.resetModalParams();
       if (data.type !== previousType) {
         this.onSearchResources('');
