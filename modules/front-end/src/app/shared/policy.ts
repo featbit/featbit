@@ -259,7 +259,7 @@ export const rscParamsDict: { [key in ResourceTypeEnum]: ResourceParamViewModel[
       type: ResourceParamTypeEnum.Flag,
       placeholder: {
         name: '{flag}',
-        displayName: $localize`:@@iam.policy.tags:Flags`
+        displayName: $localize`:@@iam.policy.flags:Flags`
       },
       isAnyChecked: false,
       isInvalid: false
