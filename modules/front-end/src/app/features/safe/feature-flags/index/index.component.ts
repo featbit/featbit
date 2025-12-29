@@ -213,7 +213,7 @@ export class IndexComponent implements OnInit {
       ? $localize`:@@ff.idx.flag-turned-off:The status of feature flag <b>${data.name}</b> is changed to OFF`
       : $localize`:@@ff.idx.flag-turned-on:The status of feature flag <b>${data.name}</b> is changed to ON`;
 
-    this.featureFlagService.toggleStatus(data.key).subscribe({
+    this.featureFlagService.toggleStatus(data.key, !data.isEnabled).subscribe({
       next: _ => {
         this.msg.success(msg);
         data.isEnabled = !data.isEnabled;

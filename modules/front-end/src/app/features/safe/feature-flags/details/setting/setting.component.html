@@ -28,7 +28,7 @@
           <input nz-input i18n-placeholder="@@common.name" placeholder="Name" [(ngModel)]="featureFlag.name"/>
           <div class="actions">
             <i nz-icon nzType="close" (click)="toggleTitleEditState()"></i>
-            <i nz-icon nzType="icons:icon-save" (click)="onSaveSettings()"></i>
+            <i nz-icon nzType="icons:icon-save" (click)="onSaveName()"></i>
           </div>
         } @else {
           <span class="text">{{ featureFlag.name }}</span>
@@ -41,7 +41,7 @@
                     [(ngModel)]="featureFlag.description" [nzAutosize]="{ minRows: 3 }"></textarea>
           <div class="actions">
             <i nz-icon nzType="close" (click)="toggleDescriptionEditState()"></i>
-            <i nz-icon nzType="icons:icon-save" (click)="onSaveSettings()"></i>
+            <i nz-icon nzType="icons:icon-save" (click)="onSaveDescription()"></i>
           </div>
         } @else {
           <span>{{ featureFlag.description }}</span>
@@ -90,7 +90,7 @@
             class="nz-select-36"
             [compareWith]="compareWith"
             [(ngModel)]="featureFlag.disabledVariationId"
-            (ngModelChange)="onChangeDisabledVariation()"
+            (ngModelChange)="onSaveOffVariation()"
             i18n-nzPlaceHolder="@@ff.select-variation"
             nzPlaceHolder="Select variation">
             @for (variation of featureFlag.variations; track variation.id) {

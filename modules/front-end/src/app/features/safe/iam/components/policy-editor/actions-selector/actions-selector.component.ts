@@ -45,7 +45,7 @@ export class ActionsSelectorComponent {
 
   onSearchActions(query: string) {
     const regex = new RegExp(query, 'ig');
-    this.filteredActions = this.allActions.filter(act => regex.test(act.name) || regex.test(act.displayName));
+    this.filteredActions = this.allActions.filter(act => regex.test(act.name) || regex.test(act.description));
   }
 
   isActionSelected(act: IamPolicyAction) {
@@ -53,6 +53,6 @@ export class ActionsSelectorComponent {
   }
 
   getActionDigest(act: IamPolicyAction) {
-    return act.name;
+    return act.description;
   }
 }

@@ -142,6 +142,36 @@ public class FeatureFlag : FullAuditedEntity
         return dataChange.To(this);
     }
 
+    public DataChange UpdateName(string name, Guid currentUserId)
+    {
+        var dataChange = new DataChange(this);
+
+        Name = name;
+        MarkAsUpdated(currentUserId);
+
+        return dataChange.To(this);
+    }
+    
+    public DataChange UpdateDescription(string description, Guid currentUserId)
+    {
+        var dataChange = new DataChange(this);
+
+        Description = description;
+        MarkAsUpdated(currentUserId);
+
+        return dataChange.To(this);
+    }
+    
+    public DataChange UpdateOffVariation(string offVariationId, Guid currentUserId)
+    {
+        var dataChange = new DataChange(this);
+
+        DisabledVariationId = offVariationId;
+        MarkAsUpdated(currentUserId);
+
+        return dataChange.To(this);
+    }
+    
     public DataChange UpdateSetting(string name, string description, bool isEnabled, string disabledVariationId, Guid currentUserId)
     {
         var dataChange = new DataChange(this);
@@ -218,11 +248,11 @@ public class FeatureFlag : FullAuditedEntity
         return this;
     }
 
-    public DataChange Toggle(Guid currentUserId)
+    public DataChange Toggle(Guid currentUserId, bool status)
     {
         var dataChange = new DataChange(this);
 
-        IsEnabled = !IsEnabled;
+        IsEnabled = status;
         MarkAsUpdated(currentUserId);
 
         return dataChange.To(this);

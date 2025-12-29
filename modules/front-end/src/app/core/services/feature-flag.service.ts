@@ -31,8 +31,8 @@ export class FeatureFlagService {
   constructor(private http: HttpClient) {
   }
 
-  toggleStatus(key: string): Observable<any> {
-    const url = `${this.baseUrl}/${key}/toggle`;
+  toggleStatus(key: string, status: boolean): Observable<any> {
+    const url = `${this.baseUrl}/${key}/toggle/${status}`;
     return this.http.put(url, {})
   }
 
@@ -93,10 +93,22 @@ export class FeatureFlagService {
     return this.http.put<boolean>(url, {});
   }
 
-  updateSetting(key: string, payload: ISettingPayload): Observable<boolean> {
-    const url = `${this.baseUrl}/${key}/settings`;
+  updateName(key: string, name: string): Observable<boolean> {
+    const url = `${this.baseUrl}/${key}/name`;
 
-    return this.http.put<boolean>(url, payload);
+    return this.http.put<boolean>(url, {name});
+  }
+
+  updateDescription(key: string, description: string): Observable<boolean> {
+    const url = `${this.baseUrl}/${key}/description`;
+
+    return this.http.put<boolean>(url, {description});
+  }
+
+  updateOffVariation(key: string, offVariationId: string): Observable<boolean> {
+    const url = `${this.baseUrl}/${key}/off-variation`;
+
+    return this.http.put<boolean>(url, {offVariationId});
   }
 
   updateVariations(key: string, variations: IVariation[]): Observable<boolean> {

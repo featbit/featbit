@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, Output, ViewChild } from "@angular/core
 import { NzSelectComponent } from "ng-zorro-antd/select";
 import {
   isResourceGeneral,
-  Resource, ResourceFilter,
+  Resource, ResourceFilter, ResourceParamTypeEnum,
   ResourceParamViewModel,
   ResourceType,
   RNViewModel,
@@ -97,17 +97,34 @@ export class ResourcesSelectorComponent {
     this.editModalVisible = true;
     this.currentRn = { id: rsc.id, val: rsc.rn, isInvalid: false };
 
+    // a complete RN example: project/*;tag1,tag2:env/*-env;tag3,tag4
     const paramValues = rsc.rn.split(':')
-      .map(r => {
-        const part = r.split('/');
-        return {type: part[0], val: part[1], isAnyChecked: part[1] === '*' }})
+      .flatMap(r => {
+        // example of r: project/*;tag1,tag2
+        // split key and others (currently only tags, we may have other params here)
+        const parts = r.split(';');
+        // get param type and key
+        const typeParts = parts[0].split('/');
+
+        // split others (tags etc.)
+        let tagsParam = [];
+        const tags = parts[1]?.split(',')?.map(part => part.trim());
+        if (tags && tags.length > 0) {
+          tagsParam = [{type: ResourceParamTypeEnum.Tag, val: tags.join(','), isAnyChecked: undefined }];
+        }
+
+        return [
+          {type: typeParts[0], val: typeParts[1], isAnyChecked: typeParts[1] === '*' },
+          ...tagsParam
+        ];
+      })
       .reduce((acc, { type, val, isAnyChecked}) => {
         acc[type] = { val: val, isAnyChecked };
         return acc;
       }, {});
 
     if (paramValues) {
-      this.rscParams = this.rscParams.map(p => ({...p, val: paramValues[p.resourceType].val, isAnyChecked: paramValues[p.resourceType].isAnyChecked}));
+      this.rscParams = this.rscParams.map(p => ({...p, val: paramValues[p.type]?.val, isAnyChecked: paramValues[p.type]?.isAnyChecked}));
     }
   }
 
@@ -155,17 +172,25 @@ export class ResourcesSelectorComponent {
   vmValChanged() {
     this.currentRn.isInvalid = false;
 
-    this.rscParams.forEach((val, idx) => {
-      const regex = new RegExp(val.placeholder.name, 'ig');
-
-      if (idx === 0) {
-        this.currentRn.val = this.resourceType.pattern.replace(regex, val.val);
-      } else {
-        this.currentRn.val = this.currentRn.val.replace(regex, val.val);
+    this.rscParams.forEach((param, idx) => {
+      switch (param.type) {
+        case ResourceParamTypeEnum.Tag:
+          const tags = param.val?.split(',')?.map(tag => tag.trim());
+          if (tags && tags.length > 0) {
+            this.currentRn.val = `${this.currentRn.val};${tags.join(',')}`;
+          }
+          break;
+        default:
+          const regex = new RegExp(param.placeholder.name, 'ig');
+          if (idx === 0) {
+            this.currentRn.val = this.resourceType.pattern.replace(regex, param.val);
+          } else {
+            this.currentRn.val = this.currentRn.val.replace(regex, param.val);
+          }
       }
 
-      val.isInvalid = val.val.includes(':') || val.val.includes('{') || val.val.includes('}');
-      this.currentRn.isInvalid ||= val.isInvalid;
+      param.isInvalid = param.val?.includes(':') || param.val?.includes('{') || param.val?.includes('}');
+      this.currentRn.isInvalid ||= param.isInvalid;
     });
   }
 }

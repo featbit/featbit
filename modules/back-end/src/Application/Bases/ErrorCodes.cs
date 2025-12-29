@@ -30,7 +30,7 @@ public static class ErrorCodes
     public const string SegmentIsBeingUsed = nameof(SegmentIsBeingUsed);
 
     // feature flag
-    public const string CannotDeleteUnArchivedFeatureFlag = nameof(CannotDeleteUnArchivedFeatureFlag);
+    public const string CannotDeleteUnarchivedFeatureFlag = nameof(CannotDeleteUnarchivedFeatureFlag);
 
     // triggers
     public const string InvalidTriggerToken = nameof(InvalidTriggerToken);

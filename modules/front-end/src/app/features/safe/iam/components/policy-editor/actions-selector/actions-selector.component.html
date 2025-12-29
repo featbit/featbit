@@ -9,8 +9,8 @@
     <div class="selected-actions">
       @for (act of selectedActions; track act.id) {
         <div nz-col class="action">
-          <div class="inner-box" nz-tooltip="{{act.name}} ({{act.description}})">
-            {{act.displayName}} ({{act.name}})
+          <div class="inner-box" nz-tooltip="{{act.name}} ({{getActionDigest(act)}})">
+            {{act.name}}
           </div>
           <button nz-button nzType="default" [nzSize]="'large'" (click)="removeAction(act)"><i nz-icon nzType="close"></i></button>
         </div>
@@ -33,7 +33,7 @@
         [nzLabel]="action.displayName"
         [nzHide]="isActionSelected(action)">
         <div class="action-selection-item">
-          <div class="title">{{ action.displayName}}</div>
+          <div class="title">{{ action.name}}</div>
           <div class="digest">{{ getActionDigest(action) }}</div>
         </div>
       </nz-option>

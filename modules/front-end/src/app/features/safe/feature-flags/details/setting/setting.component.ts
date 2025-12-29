@@ -144,11 +144,18 @@ export class SettingComponent {
 
   onChangeStatus() {
     this.featureFlag.isEnabled = !this.featureFlag.isEnabled;
-    this.onSaveSettings(() => this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key)));
-  }
 
-  onChangeDisabledVariation() {
-    this.onSaveSettings(() => this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key)));
+    const { isEnabled } = this.featureFlag;
+
+    this.featureFlagService.toggleStatus(this.key, isEnabled).subscribe({
+      next: () => {
+        this.message.success($localize `:@@common.operation-success:Operation succeeded`);
+        this.isEditingTitle = false;
+        this.isEditingDescription = false;
+        this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key))
+      },
+      error: err => this.message.error(err.error)
+    });
   }
 
   toggleTitleEditState(): void {
@@ -326,21 +333,38 @@ export class SettingComponent {
     this.exptReferenceModalVisible = false;
   }
 
-  onSaveSettings(cb?: Function) {
-    const { name, description, isEnabled, disabledVariationId } = this.featureFlag;
-    const payload: ISettingPayload = {
-      name,
-      description,
-      isEnabled,
-      disabledVariationId,
-    };
+  onSaveName() {
+    const { name } = this.featureFlag;
 
-    this.featureFlagService.updateSetting(this.key, payload).subscribe({
+    this.featureFlagService.updateName(this.key, name).subscribe({
       next: () => {
         this.message.success($localize `:@@common.operation-success:Operation succeeded`);
         this.isEditingTitle = false;
+      },
+      error: err => this.message.error(err.error)
+    });
+  }
+
+  onSaveDescription() {
+    const { description } = this.featureFlag;
+
+    this.featureFlagService.updateDescription(this.key, description).subscribe({
+      next: () => {
+        this.message.success($localize `:@@common.operation-success:Operation succeeded`);
         this.isEditingDescription = false;
-        cb && cb();
+      },
+      error: err => this.message.error(err.error)
+    });
+  }
+
+  onSaveOffVariation() {
+    const { disabledVariationId } = this.featureFlag;
+
+    this.featureFlagService.updateOffVariation(this.key, disabledVariationId).subscribe({
+      next: () => {
+        this.message.success($localize `:@@common.operation-success:Operation succeeded`);
+        this.isEditingTitle = false;
+        this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key))
       },
       error: err => this.message.error(err.error)
     });
