@@ -17,6 +17,8 @@ import { ChangeReviewOutput, ReviewModalKindEnum, ReviewModalMode } from "@core/
 import { IPendingChanges } from "@core/components/pending-changes-drawer/types";
 import { environment } from "src/environments/environment";
 import { getCurrentLicense } from "@utils/project-env";
+import { PermissionsService } from "@services/permissions.service";
+import { permissionActions } from "@shared/policy";
 
 enum FlagValidationErrorKindEnum {
   fallthrough = 0,
@@ -39,6 +41,10 @@ export class TargetingComponent implements OnInit {
   trackRuleById(_, rule: IRule) {
     return rule.id;
   }
+
+  canUpdateFallthrough: boolean = false;
+  canUpdateIndividualTargeting: boolean = false;
+  canUpdateRules: boolean = false;
 
   license: License;
   featureFlag: FeatureFlag = {} as FeatureFlag;
@@ -89,6 +95,11 @@ export class TargetingComponent implements OnInit {
   }
 
   onReviewChanges(validationErrortpl: TemplateRef<void>, modalKind: ReviewModalKindEnum) {
+    if (!this.canUpdateFallthrough && !this.canUpdateIndividualTargeting && !this.canUpdateIndividualTargeting) {
+      this.msg.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
     this.validationErrors = this.validateFeatureFlag();
 
     if (this.validationErrors.length > 0) {
@@ -115,17 +126,23 @@ export class TargetingComponent implements OnInit {
     private envUserService: EnvUserService,
     private envUserPropService: EnvUserPropService,
     private msg: NzMessageService,
-    private messageQueueService: MessageQueueService
+    private messageQueueService: MessageQueueService,
+    private permissionsService: PermissionsService,
   ) { }
 
   ngOnInit(): void {
     this.license = getCurrentLicense();
 
     this.isLoading = true;
-    this.route.paramMap.subscribe(paramMap => {
-      this.key = decodeURIComponent(paramMap.get('key'));
-      this.messageQueueService.subscribe(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key), () => this.refreshFeatureFlag());
-      this.loadData();
+    this.route.paramMap.subscribe({
+      next: async (paramMap) => {
+        this.key = decodeURIComponent(paramMap.get('key'));
+        this.messageQueueService.subscribe(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key), () => this.refreshFeatureFlag());
+        await this.loadData();
+        this.canUpdateFallthrough = this.permissionsService.isGranted(this.featureFlag.rn, permissionActions.UpdateFlagFallthrough);
+        this.canUpdateIndividualTargeting = this.permissionsService.isGranted(this.featureFlag.rn, permissionActions.UpdateFlagIndividualTargeting);
+        this.canUpdateRules = this.permissionsService.isGranted(this.featureFlag.rn, permissionActions.UpdateFlagRules);
+      }
     });
   }
 
@@ -241,6 +258,11 @@ export class TargetingComponent implements OnInit {
   }
 
   onAddRule() {
+    if (!this.canUpdateRules) {
+      this.msg.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
     this.featureFlag.rules.push({
       id: uuidv4(),
       name: ($localize `:@@common.rule:Rule`) + ' ' + (this.featureFlag.rules.length + 1),

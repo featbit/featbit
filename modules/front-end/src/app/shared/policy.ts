@@ -454,7 +454,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'UpdateFlagTags',
     resourceType: ResourceTypeEnum.Flag,
     description: $localize`:@@iam.action.update-flag-tags:Change the tags associated with a feature flag`,
-    isOpenAPIApplicable: false,
+    isOpenAPIApplicable: true,
     isSpecificApplicable: true
   },
   UpdateFlagIndividualTargeting: {

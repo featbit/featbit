@@ -2,6 +2,7 @@
   <nz-card style="margin-bottom: 10px;font-size: 16px; border-radius: 20px" [nzTitle]="titleTemplate">
     @for (condition of conditions; track trackByFunction(key, condition); let key = $index; let first = $first; let last = $last) {
       <app-rule
+        [disabled]="disabled"
         [condition]="condition"
         [isFirst]="first"
         [isLast]="last"
@@ -15,6 +16,7 @@
     }
     @if (variationOptions.length > 0) {
       <app-serve
+        [disabled]="disabled"
         [dispatchKey]="dispatchKey"
         [userProps]="userProps"
         (onDispatchKeyChange)="dispatchKeyChange($event)"
@@ -27,16 +29,18 @@
 
   <ng-template #titleTemplate>
     <div style="display:flex;justify-content: flex-start;">
-      <input type="text" class="standard-bordered-input" nz-input style="width: 500px;height: 36px;" [(ngModel)]="name" (ngModelChange)="onRuleNameChange()" />
-      <div class="rule-title" style="margin-left: 12px;">
-        <i nz-icon
-          i18n-nz-popconfirm="@@common.remove-rule-confirm"
-          nz-popconfirm="Are you sure to remove the rule?"
-          nzType="icons:icon-delete"
-          nzPopconfirmPlacement="bottomRight"
-          [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
-          (nzOnConfirm)="onDeleteRule()"></i>
-      </div>
+      <input type="text" class="standard-bordered-input" nz-input style="width: 500px;height: 36px;" [(ngModel)]="name" [disabled]="disabled" (ngModelChange)="onRuleNameChange()" />
+      @if (!disabled) {
+        <div class="rule-title" style="margin-left: 12px;">
+          <i nz-icon
+             i18n-nz-popconfirm="@@common.remove-rule-confirm"
+             nz-popconfirm="Are you sure to remove the rule?"
+             nzType="icons:icon-delete"
+             nzPopconfirmPlacement="bottomRight"
+             [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
+             (nzOnConfirm)="onDeleteRule()"></i>
+        </div>
+      }
     </div>
   </ng-template>
 </section>

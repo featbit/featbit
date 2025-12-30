@@ -64,6 +64,7 @@
             </div>
             <div class="find-rule">
               <app-serve
+                [disabled]="!canUpdateFallthrough"
                 [dispatchKey]="featureFlag.fallthrough.dispatchKey"
                 [userProps]="userProps"
                 (onDispatchKeyChange)="onFallthroughDispatchKeyChangeChange($event)"
@@ -102,6 +103,7 @@
                   @for (variation of featureFlag.variations; track variation.id) {
                     <div class="content">
                       <target-user
+                        [disabled]="!canUpdateIndividualTargeting"
                         [type]="variation.name"
                         [userList]="userList"
                         [selectedUserDetailList]="targetingUsersByVariation[variation.id]"
@@ -135,6 +137,7 @@
                   @for (rule of featureFlag.rules; track trackRuleById($index, rule)) {
                     <div class="drop-box rule" cdkDrag [class]="{'validation-error': isRuleInvalid(rule.id)}">
                       <find-rule
+                        [disabled]="!canUpdateRules"
                         [data]="rule"
                         [variationOptions]="featureFlag.variations"
                         [userProps]="userProps"

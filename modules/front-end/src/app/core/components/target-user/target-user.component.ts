@@ -7,6 +7,7 @@ import { EnvUserService } from '@services/env-user.service';
 import { IUserProp, IUserType } from '@shared/types';
 import { EnvUserPropService } from "@services/env-user-prop.service";
 import { EnvUserFilter } from "@features/safe/end-users/types/featureflag-user";
+import { PermissionsService } from "@services/permissions.service";
 
 @Component({
   selector: 'target-user',
@@ -24,6 +25,7 @@ export class TargetUserComponent implements OnInit {
     }
   };
 
+  @Input() disabled: boolean = true;
   @Input() type: string = '';
   @Input() disableCreation: boolean = false;
   @Input() selectedUserDetailList: IUserType[];
@@ -81,6 +83,7 @@ export class TargetUserComponent implements OnInit {
   constructor(
     private envUserService: EnvUserService,
     private envUserPropService: EnvUserPropService,
+    private permissionsService: PermissionsService,
     private msg: NzMessageService) {
     this.debouncer.pipe(
       debounceTime(500),
@@ -109,6 +112,11 @@ export class TargetUserComponent implements OnInit {
   }
 
   removeUser(user: IUserType){
+    if (this.disabled) {
+      this.msg.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
     this.selectedUserDetailList = this.selectedUserDetailList.filter(s => s.id !== user.id);
     this.onSelectedUserListChange.next(this.selectedUserDetailList);
   }
@@ -144,6 +152,11 @@ export class TargetUserComponent implements OnInit {
   }
 
   save() {
+    if (this.disabled) {
+      this.msg.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
     this.saving = true;
     const { keyId, name, customizedProperties } = this.currentEditingUser;
 

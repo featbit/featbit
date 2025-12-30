@@ -38,6 +38,7 @@
     nzPlaceHolder="Select targeting users"
     nzShowSearch
     nzServerSearch
+    [disabled]="disabled"
     [compareWith]="compareWith"
     [(ngModel)]="selectModel"
     (ngModelChange)="onSelectChange()"

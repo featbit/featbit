@@ -13,7 +13,7 @@ import {ICondition, IRule, IRuleVariation, IVariation} from "@shared/rules";
   standalone: false
 })
 export class FindRuleComponent {
-
+  @Input() disabled: boolean = true;
   @Input() userProps: IUserProp[] = [];
   @Output() addProperty = new EventEmitter<IUserProp>();
   @Output() deleteRule = new EventEmitter<string>();

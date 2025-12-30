@@ -2,7 +2,7 @@
   <div class="rule-serve">
     <div class="tip" i18n="@@core.components.findrule.serve">Serve</div>
     <div class="select">
-      <nz-select class="nz-select-36" [(ngModel)]="selectedVariationId" (ngModelChange)="modelChange()"
+      <nz-select class="nz-select-36" [(ngModel)]="selectedVariationId" (ngModelChange)="modelChange()" [disabled]="disabled"
         nzPlaceHolder="variation" i18n-nzPlaceHolder="@@app.components.findrule.selectvariation">
         @for (variationOption of availableVariations; track variationOption; let i = $index) {
           <nz-option nzCustomContent [nzValue]="variationOption.id" [nzLabel]="variationOption.name">
@@ -23,7 +23,7 @@
             <div class="item">
               <div class="percentage-number">
                 <nz-input-group nzSearch [nzAddOnAfter]="suffixTemplateInfo">
-                  <nz-input-number type="number" [nzMin]="0" [nzMax]="100" [nzPrecision]="0" [(ngModel)]="rule.percentageValue" (ngModelChange)="modelChange()"></nz-input-number>
+                  <nz-input-number type="number" [nzMin]="0" [nzMax]="100" [nzPrecision]="0" [disabled]="disabled" [(ngModel)]="rule.percentageValue" (ngModelChange)="modelChange()"></nz-input-number>
                 </nz-input-group>
                 <ng-template #suffixTemplateInfo>
                   <button nz-button nzType="default" nzSearch style="border-left: none;border-top-right-radius: 8px;border-bottom-right-radius: 8px;height: 36px">%</button>
@@ -43,6 +43,7 @@
                 nzShowSearch
                 nzPlaceHolder="Select property"
                 i18n-nzPlaceHolder="@@core.components.findrule.serve.selectuserproperty"
+                [disabled]="disabled"
                 [(ngModel)]="dispatchKey"
                 (ngModelChange)="dispatchKeyChange()">
                 @for (key of filteredDispatchKeys; track key) {
