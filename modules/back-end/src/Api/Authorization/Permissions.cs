@@ -14,12 +14,15 @@ public static class Permissions
     public const string UpdateFlagName = nameof(UpdateFlagName);
     public const string UpdateFlagDescription = nameof(UpdateFlagDescription);
     public const string UpdateFlagOffVariation = nameof(UpdateFlagOffVariation);
+    public const string UpdateFlagVariations = nameof(UpdateFlagVariations);
+    public const string UpdateFlagTags = nameof(UpdateFlagTags);
     
     public const string ManageSegment = nameof(ManageSegment);
     public const string CanAccessProject = nameof(CanAccessProject);
 
     public static readonly Dictionary<string, string> ResourceMap = new(StringComparer.OrdinalIgnoreCase)
     {
+        // Flags
         { CreateFlag, ResourceTypes.FeatureFlag },
         { ArchiveFlag, ResourceTypes.FeatureFlag },
         { RestoreFlag, ResourceTypes.FeatureFlag },
@@ -29,6 +32,9 @@ public static class Permissions
         { UpdateFlagName, ResourceTypes.FeatureFlag },
         { UpdateFlagDescription, ResourceTypes.FeatureFlag },
         { UpdateFlagOffVariation, ResourceTypes.FeatureFlag },
+        { UpdateFlagVariations, ResourceTypes.FeatureFlag },
+        { UpdateFlagTags, ResourceTypes.FeatureFlag },
+        
         { ManageSegment, ResourceTypes.Segment },
         { CanAccessProject, ResourceTypes.Project }
     };

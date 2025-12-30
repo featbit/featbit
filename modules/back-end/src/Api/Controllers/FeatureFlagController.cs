@@ -217,7 +217,9 @@ public class FeatureFlagController : ApiControllerBase
         return result.Success ? Ok(true) : Error<bool>(result.Message);
     }
 
+    [OpenApi]
     [HttpPut("{key}/variations")]
+    [Authorize(Permissions.UpdateFlagOffVariation)]
     public async Task<ApiResponse<bool>> UpdateVariationsAsync(Guid envId, string key, UpdateVariations request)
     {
         request.Key = key;
@@ -409,7 +411,9 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(tags);
     }
 
+    [OpenApi]
     [HttpPut("{key}/tags")]
+    [Authorize(Permissions.UpdateFlagTags)]
     public async Task<ApiResponse<bool>> SetTagsAsync(Guid envId, string key, string[] tags)
     {
         var request = new SetTags

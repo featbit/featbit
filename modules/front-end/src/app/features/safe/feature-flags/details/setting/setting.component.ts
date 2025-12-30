@@ -84,6 +84,12 @@ export class SettingComponent {
   }
 
   onAddTag() {
+    const isGranted = this.permissionsService.isGranted(this.featureFlag.rn, permissionActions.UpdateFlagTags);
+    if (!isGranted) {
+      this.message.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
     let actualTag = this.selectedTag.startsWith(this.createTagPrefix)
       ? this.selectedTag.replace(this.createTagPrefix, '').replace(/'/g, '').trim()
       : this.selectedTag.trim();
@@ -262,6 +268,12 @@ export class SettingComponent {
   }
 
   saveVariations() {
+    const isGranted = this.permissionsService.isGranted(this.featureFlag.rn, permissionActions.UpdateFlagVariations);
+    if (!isGranted) {
+      this.message.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
     if (!this.variationForm.valid) {
       return;
     }
