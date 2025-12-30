@@ -1,5 +1,6 @@
 import { IOrganization, IProjectEnv, IWorkspace, License } from "@shared/types";
 import { CURRENT_ORGANIZATION, CURRENT_PROJECT, CURRENT_WORKSPACE } from "./localstorage-keys";
+import { ResourceTypeEnum } from "@shared/policy";
 
 export function getCurrentWorkspace(): IWorkspace {
   const json = localStorage.getItem(CURRENT_WORKSPACE());
@@ -23,6 +24,15 @@ export function getCurrentProjectEnv(): IProjectEnv {
   const json = localStorage.getItem(CURRENT_PROJECT());
   if (json) {
     return JSON.parse(json);
+  }
+
+  return undefined;
+}
+
+export function getCurrentEnvRN() {
+  const projEnv = getCurrentProjectEnv();
+  if (projEnv) {
+    return `${ResourceTypeEnum.Project}/${projEnv.projectKey}:${ResourceTypeEnum.Env}/${projEnv.envKey}`;
   }
 
   return undefined;

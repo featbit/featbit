@@ -17,6 +17,9 @@ import { ExperimentService } from "@services/experiment.service";
 import { ExperimentStatus, IExpt } from "@features/safe/experiments/types";
 import { NzSelectComponent } from "ng-zorro-antd/select";
 import { FormArray, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators } from "@angular/forms";
+import { PermissionsService } from "@services/permissions.service";
+import { generalResourceRNPattern, permissionActions } from "@shared/policy";
+import { IEnvironment } from "@shared/types";
 
 @Component({
     selector: 'ff-setting',
@@ -103,7 +106,8 @@ export class SettingComponent {
     private message: NzMessageService,
     private messageQueueService: MessageQueueService,
     private formBuilder: FormBuilder,
-    private router: Router
+    private router: Router,
+    private permissionsService: PermissionsService,
   ) {
     this.isLoading = true;
     this.route.paramMap.subscribe( paramMap => {
@@ -136,13 +140,22 @@ export class SettingComponent {
   }
 
   private loadData() {
-    this.featureFlagService.getByKey(this.key).subscribe((result: IFeatureFlag) => {
-      this.featureFlag = new FeatureFlag(result);
-      this.isLoading = false;
-    }, () => this.isLoading = false)
+    this.featureFlagService.getByKey(this.key).subscribe({
+      next: (result: IFeatureFlag) => {
+        this.featureFlag = new FeatureFlag(result);
+        this.isLoading = false;
+      },
+      error: () => this.isLoading = false
+    });
   }
 
   onChangeStatus() {
+    const isGranted = this.permissionsService.isGranted(this.featureFlag.rn, permissionActions.UpdateFlagOn);
+    if (!isGranted) {
+      this.message.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
     this.featureFlag.isEnabled = !this.featureFlag.isEnabled;
 
     const { isEnabled } = this.featureFlag;
@@ -334,6 +347,12 @@ export class SettingComponent {
   }
 
   onSaveName() {
+    const isGranted = this.permissionsService.isGranted(this.featureFlag.rn, permissionActions.UpdateFlagName);
+    if (!isGranted) {
+      this.message.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
     const { name } = this.featureFlag;
 
     this.featureFlagService.updateName(this.key, name).subscribe({
@@ -346,6 +365,12 @@ export class SettingComponent {
   }
 
   onSaveDescription() {
+    const isGranted = this.permissionsService.isGranted(this.featureFlag.rn, permissionActions.UpdateFlagDescription);
+    if (!isGranted) {
+      this.message.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
     const { description } = this.featureFlag;
 
     this.featureFlagService.updateDescription(this.key, description).subscribe({
@@ -358,6 +383,12 @@ export class SettingComponent {
   }
 
   onSaveOffVariation() {
+    const isGranted = this.permissionsService.isGranted(this.featureFlag.rn, permissionActions.UpdateFlagOffVariation);
+    if (!isGranted) {
+      this.message.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
     const { disabledVariationId } = this.featureFlag;
 
     this.featureFlagService.updateOffVariation(this.key, disabledVariationId).subscribe({
@@ -371,6 +402,12 @@ export class SettingComponent {
   }
 
   restoreFlag() {
+    const isGranted = this.permissionsService.isGranted(this.featureFlag.rn, permissionActions.RestoreFlag);
+    if (!isGranted) {
+      this.message.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
     this.featureFlagService.restore(this.featureFlag.key).subscribe(_ => {
       this.featureFlag.isArchived = false;
       this.message.success($localize `:@@common.operation-success:Operation succeeded`);
@@ -379,6 +416,12 @@ export class SettingComponent {
   }
 
   deleteFlag() {
+    const isGranted = this.permissionsService.isGranted(this.featureFlag.rn, permissionActions.DeleteFlag);
+    if (!isGranted) {
+      this.message.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
     this.featureFlagService.delete(this.featureFlag.key).subscribe(success => {
       if (success) {
         this.message.success($localize `:@@common.operation-success:Operation succeeded`);

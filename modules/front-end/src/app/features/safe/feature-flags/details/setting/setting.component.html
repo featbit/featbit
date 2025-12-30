@@ -7,16 +7,16 @@
         <span class="text" i18n="@@ff.ff-archived">Archived</span>
       </div>
       <div class="content">
-        <ng-container i18n="@@ff.you-can">You can</ng-container>
+        <ng-container i18n="@@ff.you-can">You can</ng-container>&nbsp;
         <a class="restore"
            i18n-nz-popconfirm="@@ff.are-you-sure-to-restore-ff"
            nz-popconfirm="Are you sure to restore this feature flag?"
-           (nzOnConfirm)="restoreFlag()">&nbsp;<ng-container i18n="@@common.restore">Restore</ng-container>&nbsp;</a>
-        <ng-container i18n="@@common.or">or</ng-container>
+           (nzOnConfirm)="restoreFlag()"><ng-container i18n="@@common.restore">Restore</ng-container></a>&nbsp;
+        <ng-container i18n="@@common.or">or</ng-container>&nbsp;
         <a class="delete" i18n-nz-popconfirm="@@common.remove-confirm"
-           nz-popconfirm="This operation cannot be reverted, are you sure to remove it?" (nzOnConfirm)="deleteFlag()">&nbsp;
+           nz-popconfirm="This operation cannot be reverted, are you sure to remove it?" (nzOnConfirm)="deleteFlag()">
           <ng-container i18n="@@common.remove">Remove</ng-container>
-        </a>
+        </a>&nbsp;
         <ng-container i18n="@@ff.the-ff">the feature flag</ng-container>
       </div>
     </div>

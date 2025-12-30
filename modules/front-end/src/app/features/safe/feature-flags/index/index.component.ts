@@ -4,7 +4,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { Subject } from 'rxjs';
 import { encodeURIComponentFfc, getProfile, getQueryParamsFromObject } from '@shared/utils';
 import {
-  FeatureFlagListCheckItem,
+  FeatureFlagListCheckItem, getFlagRN,
   IFeatureFlagListFilter,
   IFeatureFlagListItem,
   IFeatureFlagListModel,
@@ -13,6 +13,9 @@ import { debounceTime } from 'rxjs/operators';
 import { FeatureFlagService } from "@services/feature-flag.service";
 import { NzModalService } from "ng-zorro-antd/modal";
 import { copyToClipboard } from '@utils/index';
+import { permissionActions } from "@shared/policy";
+import { getCurrentEnvRN } from "@utils/project-env";
+import { PermissionsService } from "@services/permissions.service";
 
 @Component({
     selector: 'index',
@@ -29,6 +32,7 @@ export class IndexComponent implements OnInit {
     private featureFlagService: FeatureFlagService,
     private msg: NzMessageService,
     private modal: NzModalService,
+    private permissionsService: PermissionsService,
   ) { }
 
   featureFlagFilter: IFeatureFlagListFilter = new IFeatureFlagListFilter();
@@ -150,6 +154,13 @@ export class IndexComponent implements OnInit {
   cloneVisible: boolean = false;
   flagToClone: IFeatureFlagListItem;
   clone(flag: IFeatureFlagListItem) {
+    const rn = getFlagRN(flag.key, flag.tags);
+    const isGranted = this.permissionsService.isGranted(rn, permissionActions.CloneFlag);
+    if (!isGranted) {
+      this.msg.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
     this.flagToClone = flag;
     this.cloneVisible = true;
   }
@@ -207,6 +218,13 @@ export class IndexComponent implements OnInit {
   }
 
   onToggleFeatureFlagStatus(data: IFeatureFlagListItem): void {
+    const rn = getFlagRN(data.key, data.tags);
+    const isGranted = this.permissionsService.isGranted(rn, permissionActions.UpdateFlagOn);
+    if (!isGranted) {
+      this.msg.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
     data.isToggling = true;
 
     let msg: string = data.isEnabled
@@ -244,6 +262,13 @@ export class IndexComponent implements OnInit {
       nzCentered: true,
       nzClassName: 'information-modal-dialog',
       nzOnOk: () => {
+        const rn = getFlagRN(flag.key, flag.tags);
+        const isGranted = this.permissionsService.isGranted(rn, permissionActions.ArchiveFlag);
+        if (!isGranted) {
+          this.msg.warning(this.permissionsService.genericDenyMessage);
+          return;
+        }
+
         this.featureFlagService.archive(flag.key).subscribe({
             next: () => {
               this.msg.success($localize`:@@common.operation-success:Operation succeeded`);

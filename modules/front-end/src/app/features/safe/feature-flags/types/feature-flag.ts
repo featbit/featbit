@@ -1,5 +1,6 @@
 ﻿import { IVariation } from "@shared/rules";
 import { SimpleUser } from "@shared/users";
+import { getCurrentEnvRN } from "@utils/project-env";
 
 export interface IFeatureFlagListModel {
   items: IFeatureFlagListItem[];
@@ -96,6 +97,21 @@ export interface IFeatureFlagCreationPayload {
   enabledVariationId: string;
   disabledVariationId: string;
   variations: IVariation[];
+}
+
+export const getFlagRN = (key: string, tags: string[]) => {
+  const prefix = getCurrentEnvRN();
+
+  if (!prefix) {
+    return undefined;
+  }
+
+  let rn = `${prefix}:flag/${key}`;
+  if (tags.length > 0) {
+    rn = `${rn};${tags.join(",")}`;
+  }
+
+  return rn;
 }
 
 export const FlagKeyPattern: RegExp = /^[a-zA-Z0-9._-]+$/;

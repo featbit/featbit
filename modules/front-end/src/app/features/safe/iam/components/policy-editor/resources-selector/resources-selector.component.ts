@@ -175,9 +175,11 @@ export class ResourcesSelectorComponent {
     this.rscParams.forEach((param, idx) => {
       switch (param.type) {
         case ResourceParamTypeEnum.Tag:
-          const tags = param.val?.split(',')?.map(tag => tag.trim());
-          if (tags && tags.length > 0) {
-            this.currentRn.val = `${this.currentRn.val};${tags.join(',')}`;
+          if (param.val?.trim()?.length > 0) {
+            const tags = param.val?.split(',')?.map(tag => tag.trim());
+            if (tags && tags.length > 0) {
+              this.currentRn.val = `${this.currentRn.val};${tags.join(',')}`;
+            }
           }
           break;
         default:
