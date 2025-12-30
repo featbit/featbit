@@ -141,7 +141,7 @@ export class CompareFeatureFlagDrawerComponent {
     this.rows = [
       {
         key: 'onOffState',
-        label: $localize`:@@ff.compare.on-off-state:On/Off State`,
+        label: $localize`:@@ff.compare.on-off-state:On/OFF State`,
         selected: false,
         hasDiff: onOffState.isDifferent,
         render: RenderOnOffState

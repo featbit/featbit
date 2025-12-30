@@ -57,7 +57,7 @@
     } @else if (targetFlagNotExists) {
       <div class="empty-state">
         <i nz-icon nzType="exclamation-circle" [style.fontSize.px]="48" nzTheme="outline"></i>
-        <p i18n="@@ff.compare.target-flag-not-exist-tip">
+        <p>
           The feature flag <strong>{{flag?.name}}</strong> does not exist in the target environment <strong>{{ targetEnv?.name }}</strong>.
         </p>
       </div>

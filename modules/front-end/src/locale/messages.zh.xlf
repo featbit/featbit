@@ -606,7 +606,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.ts</context>
-          <context context-type="linenumber">354</context>
+          <context context-type="linenumber">276</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.ts</context>
@@ -614,7 +614,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/expt-rules-drawer/expt-rules-drawer.component.ts</context>
-          <context context-type="linenumber">194</context>
+          <context context-type="linenumber">193</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/group-drawer/group-drawer.component.ts</context>
@@ -971,10 +971,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.ts</context>
           <context context-type="linenumber">248</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.ts</context>
-          <context context-type="linenumber">362</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.ts</context>
@@ -2474,12 +2470,16 @@
           <context context-type="linenumber">102</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.ts</context>
+          <context context-type="linenumber">279</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.ts</context>
-          <context context-type="linenumber">163</context>
+          <context context-type="linenumber">162</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/expt-rules-drawer/expt-rules-drawer.component.ts</context>
-          <context context-type="linenumber">197</context>
+          <context context-type="linenumber">196</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/pending-changes-drawer/pending-changes-drawer.component.ts</context>
@@ -2651,6 +2651,14 @@
         </context-group>
         <target>操作失败</target>
       </trans-unit>
+      <trans-unit id="ff.compare.compare-flag" datatype="html">
+        <source>Compare Flag</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.html</context>
+          <context context-type="linenumber">9</context>
+        </context-group>
+        <target>比较开关</target>
+      </trans-unit>
       <trans-unit id="ff.compare.source-environment" datatype="html">
         <source>Source Environment</source>
         <context-group purpose="location">
@@ -2683,7 +2691,7 @@
         <source>Please select a target environment to compare flag settings</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">54,56</context>
+          <context context-type="linenumber">51,53</context>
         </context-group>
         <target>请选择待比较的目标环境</target>
       </trans-unit>
@@ -2691,7 +2699,7 @@
         <source>Loading comparison data...</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">58</context>
+          <context context-type="linenumber">55</context>
         </context-group>
         <target>加载对比数据中...</target>
       </trans-unit>
@@ -2699,27 +2707,67 @@
         <source>Select All</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">81,83</context>
+          <context context-type="linenumber">85,87</context>
         </context-group>
         <target>选择全部</target>
       </trans-unit>
       <trans-unit id="ff.compare.settings-in" datatype="html">
-        <source>Settings in </source>
+        <source>Settings in</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">85</context>
+          <context context-type="linenumber">89</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">88</context>
+          <context context-type="linenumber">92</context>
         </context-group>
         <target>配置在</target>
+      </trans-unit>
+      <trans-unit id="ff.compare.rules-not-copyable-warning" datatype="html">
+        <source>Targeting rules cannot be copied because one of them has references to environment-specific segments or uses shared segments incompatible with the target environment.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.html</context>
+          <context context-type="linenumber">107,109</context>
+        </context-group>
+        <target>由于源开关中的一条规则使用了当前环境下的用户组或其使用的共享用户组在目标环境无法使用，无法复制目标规则。</target>
+      </trans-unit>
+      <trans-unit id="ff.compare.overwrite-users" datatype="html">
+        <source>Overwrite existing users</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.html</context>
+          <context context-type="linenumber">126,127</context>
+        </context-group>
+        <target>覆盖现有用户</target>
+      </trans-unit>
+      <trans-unit id="ff.compare.overwrite-rules" datatype="html">
+        <source>Overwrite existing rules</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.html</context>
+          <context context-type="linenumber">128,130</context>
+        </context-group>
+        <target>覆盖现有规则</target>
+      </trans-unit>
+      <trans-unit id="ff.compare.append-users" datatype="html">
+        <source>Append to existing users</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.html</context>
+          <context context-type="linenumber">133,134</context>
+        </context-group>
+        <target>追加现有用户</target>
+      </trans-unit>
+      <trans-unit id="ff.compare.append-rules" datatype="html">
+        <source>Append to existing rules</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.html</context>
+          <context context-type="linenumber">135,137</context>
+        </context-group>
+        <target>追加现有规则</target>
       </trans-unit>
       <trans-unit id="ff.compare.value-after-applied" datatype="html">
         <source>Value after applied</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">114,116</context>
+          <context context-type="linenumber">160,162</context>
         </context-group>
         <target>复制之后的值</target>
       </trans-unit>
@@ -2727,7 +2775,7 @@
         <source>setting(s) selected</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">126,128</context>
+          <context context-type="linenumber">177,179</context>
         </context-group>
         <target>个配置项</target>
       </trans-unit>
@@ -2735,7 +2783,7 @@
         <source>No settings selected</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">128,131</context>
+          <context context-type="linenumber">179,182</context>
         </context-group>
         <target>尚未选择配置项</target>
       </trans-unit>
@@ -2743,19 +2791,67 @@
         <source>Copy Settings</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">139,141</context>
+          <context context-type="linenumber">190,192</context>
         </context-group>
         <target>复制配置</target>
+      </trans-unit>
+      <trans-unit id="common.loading-failed-try-again" datatype="html">
+        <source>Loading failed, please try again</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.ts</context>
+          <context context-type="linenumber">116</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/webhook-deliveries/webhook-deliveries.component.ts</context>
+          <context context-type="linenumber">75</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/experiments/metrics/metrics.component.ts</context>
+          <context context-type="linenumber">63</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/experiments/overview/overview.component.ts</context>
+          <context context-type="linenumber">82</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.ts</context>
+          <context context-type="linenumber">82</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.ts</context>
+          <context context-type="linenumber">179</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.ts</context>
+          <context context-type="linenumber">259</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
+          <context context-type="linenumber">220</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.ts</context>
+          <context context-type="linenumber">94</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.ts</context>
+          <context context-type="linenumber">63</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/relay-proxies/index/index.component.ts</context>
+          <context context-type="linenumber">81</context>
+        </context-group>
+        <target>数据加载失败，请重试</target>
       </trans-unit>
       <trans-unit id="ff.compare.on-off-state" datatype="html">
         <source>On/OFF State</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.ts</context>
-          <context context-type="linenumber">217</context>
+          <context context-type="linenumber">144</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.ts</context>
-          <context context-type="linenumber">183</context>
+          <context context-type="linenumber">180</context>
         </context-group>
         <target>开启/关闭 状态</target>
       </trans-unit>
@@ -2763,11 +2859,11 @@
         <source>Individual Targeting</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.ts</context>
-          <context context-type="linenumber">223</context>
+          <context context-type="linenumber">151</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.ts</context>
-          <context context-type="linenumber">184</context>
+          <context context-type="linenumber">181</context>
         </context-group>
         <target>目标用户</target>
       </trans-unit>
@@ -2775,11 +2871,11 @@
         <source>Targeting Rules</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.ts</context>
-          <context context-type="linenumber">229</context>
+          <context context-type="linenumber">159</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.ts</context>
-          <context context-type="linenumber">185</context>
+          <context context-type="linenumber">182</context>
         </context-group>
         <target>匹配规则</target>
       </trans-unit>
@@ -2787,49 +2883,97 @@
         <source>Default Rule</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.ts</context>
-          <context context-type="linenumber">235</context>
+          <context context-type="linenumber">167</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.ts</context>
-          <context context-type="linenumber">186</context>
+          <context context-type="linenumber">183</context>
         </context-group>
         <target>默认规则</target>
       </trans-unit>
-      <trans-unit id="ff.compare.off-variation-description" datatype="html">
-        <source>If flag is OFF, serve</source>
+      <trans-unit id="ff.compare.off-variation" datatype="html">
+        <source>Off Variation</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.ts</context>
-          <context context-type="linenumber">241</context>
+          <context context-type="linenumber">174</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.ts</context>
+          <context context-type="linenumber">184</context>
         </context-group>
         <target>开关关闭时，返回</target>
-      </trans-unit>
-      <trans-unit id="ff.compare.no-individual-targets" datatype="html">
-        <source>No individual targets</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.ts</context>
-          <context context-type="linenumber">267</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.ts</context>
-          <context context-type="linenumber">274</context>
-        </context-group>
-        <target>无目标用户</target>
-      </trans-unit>
-      <trans-unit id="ff.compare.no-rules-defined" datatype="html">
-        <source>No rules defined</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.ts</context>
-          <context context-type="linenumber">285</context>
-        </context-group>
-        <target>没有自定义规则</target>
       </trans-unit>
       <trans-unit id="ff.compare.select-settings-to-copy" datatype="html">
         <source>Please select at least one setting to copy</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.ts</context>
-          <context context-type="linenumber">345</context>
+          <context context-type="linenumber">254</context>
         </context-group>
         <target>请至少选择一个配置项进行复制</target>
+      </trans-unit>
+      <trans-unit id="ff.compare.no-individual-targeting" datatype="html">
+        <source>No Individual Targeting</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/render-individual-targeting.ts</context>
+          <context context-type="linenumber">8,10</context>
+        </context-group>
+        <target>没有定义目标用户</target>
+      </trans-unit>
+      <trans-unit id="ff.compare.variation" datatype="html">
+        <source>Variation:</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/render-individual-targeting.ts</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
+        <target>返回值：</target>
+      </trans-unit>
+      <trans-unit id="ff.compare.users" datatype="html">
+        <source>Users:</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/render-individual-targeting.ts</context>
+          <context context-type="linenumber">15</context>
+        </context-group>
+        <target>用户：</target>
+      </trans-unit>
+      <trans-unit id="ff.compare.no-targeting-rules" datatype="html">
+        <source>No Targeting Rules</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/render-target-rules.component.ts</context>
+          <context context-type="linenumber">11,13</context>
+        </context-group>
+        <target>没有定义目标规则</target>
+      </trans-unit>
+      <trans-unit id="common.if" datatype="html">
+        <source>IF</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/render-target-rules.component.ts</context>
+          <context context-type="linenumber">17</context>
+        </context-group>
+        <target>如果</target>
+      </trans-unit>
+      <trans-unit id="common.and" datatype="html">
+        <source>AND</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/render-target-rules.component.ts</context>
+          <context context-type="linenumber">20</context>
+        </context-group>
+        <target>并且</target>
+      </trans-unit>
+      <trans-unit id="common.serve" datatype="html">
+        <source>SERVE</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/render-target-rules.component.ts</context>
+          <context context-type="linenumber">24</context>
+        </context-group>
+        <target>返回</target>
+      </trans-unit>
+      <trans-unit id="common.dispatch-by" datatype="html">
+        <source>dispatch by</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/utils.ts</context>
+          <context context-type="linenumber">25</context>
+        </context-group>
+        <target>基于属性</target>
       </trans-unit>
       <trans-unit id="ff.copy-flag.title" datatype="html">
         <source>Copy Flag</source>
@@ -3528,134 +3672,6 @@
           <context context-type="linenumber">34,36</context>
         </context-group>
         <target>确认删除该规则吗？</target>
-      </trans-unit>
-      <trans-unit id="core.components.findrule.operators.istrue" datatype="html">
-        <source>is true</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
-          <context context-type="linenumber">10</context>
-        </context-group>
-        <target>为真</target>
-      </trans-unit>
-      <trans-unit id="core.components.findrule.operators.isfalse" datatype="html">
-        <source>is false</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
-          <context context-type="linenumber">15</context>
-        </context-group>
-        <target>为假</target>
-      </trans-unit>
-      <trans-unit id="core.components.findrule.operators.equals" datatype="html">
-        <source>equals</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
-          <context context-type="linenumber">20</context>
-        </context-group>
-        <target>等于</target>
-      </trans-unit>
-      <trans-unit id="core.components.findrule.operators.notequal" datatype="html">
-        <source>not equal</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
-          <context context-type="linenumber">24</context>
-        </context-group>
-        <target>不等于</target>
-      </trans-unit>
-      <trans-unit id="core.components.findrule.operators.lessthan" datatype="html">
-        <source>less than</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
-          <context context-type="linenumber">29</context>
-        </context-group>
-        <target>小于</target>
-      </trans-unit>
-      <trans-unit id="core.components.findrule.operators.biggerthan" datatype="html">
-        <source>bigger than</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
-          <context context-type="linenumber">34</context>
-        </context-group>
-        <target>大于</target>
-      </trans-unit>
-      <trans-unit id="core.components.findrule.operators.lessequalthan" datatype="html">
-        <source>less equal than</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
-          <context context-type="linenumber">39</context>
-        </context-group>
-        <target>小于等于</target>
-      </trans-unit>
-      <trans-unit id="core.components.findrule.operators.biggerequalthan" datatype="html">
-        <source>bigger equal than</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
-          <context context-type="linenumber">44</context>
-        </context-group>
-        <target>大于等于</target>
-      </trans-unit>
-      <trans-unit id="core.components.findrule.operators.isoneof" datatype="html">
-        <source>is one of</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
-          <context context-type="linenumber">49</context>
-        </context-group>
-        <target>属于</target>
-      </trans-unit>
-      <trans-unit id="core.components.findrule.operators.notoneof" datatype="html">
-        <source>not one of</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
-          <context context-type="linenumber">54</context>
-        </context-group>
-        <target>不属于</target>
-      </trans-unit>
-      <trans-unit id="core.components.findrule.operators.contains" datatype="html">
-        <source>contains</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
-          <context context-type="linenumber">59</context>
-        </context-group>
-        <target>包含</target>
-      </trans-unit>
-      <trans-unit id="core.components.findrule.operators.notcontain" datatype="html">
-        <source>not contain</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
-          <context context-type="linenumber">64</context>
-        </context-group>
-        <target>不包含</target>
-      </trans-unit>
-      <trans-unit id="core.components.findrule.operators.startwith" datatype="html">
-        <source>start with</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
-          <context context-type="linenumber">69</context>
-        </context-group>
-        <target>以指定字符串开头</target>
-      </trans-unit>
-      <trans-unit id="core.components.findrule.operators.endswith" datatype="html">
-        <source>ends with</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
-          <context context-type="linenumber">74</context>
-        </context-group>
-        <target>以指定字符串结尾</target>
-      </trans-unit>
-      <trans-unit id="core.components.findrule.operators.matchregex" datatype="html">
-        <source>match regex</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
-          <context context-type="linenumber">79</context>
-        </context-group>
-        <target>正则匹配</target>
-      </trans-unit>
-      <trans-unit id="core.components.findrule.operators.notmatchregex" datatype="html">
-        <source>not match regex</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/find-rule/ruleConfig.ts</context>
-          <context context-type="linenumber">84</context>
-        </context-group>
-        <target>正则不匹配</target>
       </trans-unit>
       <trans-unit id="core.components.findrule.if" datatype="html">
         <source>If</source>
@@ -6454,50 +6470,6 @@
         </context-group>
         <target>失败</target>
       </trans-unit>
-      <trans-unit id="common.loading-failed-try-again" datatype="html">
-        <source>Loading failed, please try again</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/webhook-deliveries/webhook-deliveries.component.ts</context>
-          <context context-type="linenumber">75</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/experiments/metrics/metrics.component.ts</context>
-          <context context-type="linenumber">63</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/experiments/overview/overview.component.ts</context>
-          <context context-type="linenumber">82</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.ts</context>
-          <context context-type="linenumber">85</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.ts</context>
-          <context context-type="linenumber">179</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.ts</context>
-          <context context-type="linenumber">259</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">220</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.ts</context>
-          <context context-type="linenumber">94</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.ts</context>
-          <context context-type="linenumber">63</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/relay-proxies/index/index.component.ts</context>
-          <context context-type="linenumber">81</context>
-        </context-group>
-        <target>数据加载失败，请重试</target>
-      </trans-unit>
       <trans-unit id="integrations.webhooks.url" datatype="html">
         <source>URL</source>
         <context-group purpose="location">
@@ -7584,19 +7556,11 @@
         </context-group>
         <target>现在复制？</target>
       </trans-unit>
-      <trans-unit id="ff.compare.off-variation" datatype="html">
-        <source>Off Variation</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.ts</context>
-          <context context-type="linenumber">187</context>
-        </context-group>
-        <target>开关关闭时，返回</target>
-      </trans-unit>
       <trans-unit id="2207820498839575819" datatype="html">
         <source>difference</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.ts</context>
-          <context context-type="linenumber">201</context>
+          <context context-type="linenumber">198</context>
         </context-group>
         <note priority="1" from="description">common.difference</note>
         <target>个不同</target>
@@ -7605,7 +7569,7 @@
         <source>differences</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.ts</context>
-          <context context-type="linenumber">202</context>
+          <context context-type="linenumber">199</context>
         </context-group>
         <note priority="1" from="description">common.differences</note>
         <target>个不同</target>
@@ -11726,6 +11690,134 @@
           <context context-type="linenumber">526</context>
         </context-group>
         <target>开关</target>
+      </trans-unit>
+      <trans-unit id="core.rule.operators.istrue" datatype="html">
+        <source>is true</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/rules.ts</context>
+          <context context-type="linenumber">22</context>
+        </context-group>
+        <target>为真</target>
+      </trans-unit>
+      <trans-unit id="core.rule.operators.isfalse" datatype="html">
+        <source>is false</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/rules.ts</context>
+          <context context-type="linenumber">27</context>
+        </context-group>
+        <target>为假</target>
+      </trans-unit>
+      <trans-unit id="core.rule.operators.equals" datatype="html">
+        <source>equals</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/rules.ts</context>
+          <context context-type="linenumber">32</context>
+        </context-group>
+        <target>等于</target>
+      </trans-unit>
+      <trans-unit id="core.rule.operators.notequal" datatype="html">
+        <source>not equal</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/rules.ts</context>
+          <context context-type="linenumber">36</context>
+        </context-group>
+        <target>不等于</target>
+      </trans-unit>
+      <trans-unit id="core.rule.operators.lessthan" datatype="html">
+        <source>less than</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/rules.ts</context>
+          <context context-type="linenumber">41</context>
+        </context-group>
+        <target>小于</target>
+      </trans-unit>
+      <trans-unit id="core.rule.operators.biggerthan" datatype="html">
+        <source>bigger than</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/rules.ts</context>
+          <context context-type="linenumber">46</context>
+        </context-group>
+        <target>大于</target>
+      </trans-unit>
+      <trans-unit id="core.rule.operators.lessequalthan" datatype="html">
+        <source>less equal than</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/rules.ts</context>
+          <context context-type="linenumber">51</context>
+        </context-group>
+        <target>小于等于</target>
+      </trans-unit>
+      <trans-unit id="core.rule.operators.biggerequalthan" datatype="html">
+        <source>bigger equal than</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/rules.ts</context>
+          <context context-type="linenumber">56</context>
+        </context-group>
+        <target>大于等于</target>
+      </trans-unit>
+      <trans-unit id="core.rule.operators.isoneof" datatype="html">
+        <source>is one of</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/rules.ts</context>
+          <context context-type="linenumber">61</context>
+        </context-group>
+        <target>属于</target>
+      </trans-unit>
+      <trans-unit id="core.rule.operators.notoneof" datatype="html">
+        <source>not one of</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/rules.ts</context>
+          <context context-type="linenumber">66</context>
+        </context-group>
+        <target>不属于</target>
+      </trans-unit>
+      <trans-unit id="core.rule.operators.contains" datatype="html">
+        <source>contains</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/rules.ts</context>
+          <context context-type="linenumber">71</context>
+        </context-group>
+        <target>包含</target>
+      </trans-unit>
+      <trans-unit id="core.rule.operators.notcontain" datatype="html">
+        <source>not contain</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/rules.ts</context>
+          <context context-type="linenumber">76</context>
+        </context-group>
+        <target>不包含</target>
+      </trans-unit>
+      <trans-unit id="core.rule.operators.startwith" datatype="html">
+        <source>start with</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/rules.ts</context>
+          <context context-type="linenumber">81</context>
+        </context-group>
+        <target>以指定字符串开头</target>
+      </trans-unit>
+      <trans-unit id="core.rule.operators.endswith" datatype="html">
+        <source>ends with</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/rules.ts</context>
+          <context context-type="linenumber">86</context>
+        </context-group>
+        <target>以指定字符串结尾</target>
+      </trans-unit>
+      <trans-unit id="core.rule.operators.matchregex" datatype="html">
+        <source>match regex</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/rules.ts</context>
+          <context context-type="linenumber">91</context>
+        </context-group>
+        <target>正则匹配</target>
+      </trans-unit>
+      <trans-unit id="core.rule.operators.notmatchregex" datatype="html">
+        <source>not match regex</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/rules.ts</context>
+          <context context-type="linenumber">96</context>
+        </context-group>
+        <target>正则不匹配</target>
       </trans-unit>
     </body>
   </file>
