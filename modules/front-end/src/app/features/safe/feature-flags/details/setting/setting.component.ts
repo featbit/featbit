@@ -219,6 +219,12 @@ export class SettingComponent {
 
   editVariationModalVisible: boolean = false;
   editVariations(): void {
+    const isGranted = this.permissionsService.isGranted(this.featureFlag.rn, permissionActions.UpdateFlagVariations);
+    if (!isGranted) {
+      this.message.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
     const { variationType, variations } = this.featureFlag;
 
     this.variationForm = this.formBuilder.group({
