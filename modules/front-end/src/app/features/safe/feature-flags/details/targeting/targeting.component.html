@@ -133,8 +133,8 @@
                 <a target="_blank" href="https://docs.featbit.co/feature-flags/targeting-users-with-flags/targeting-rules#creating-targeting-rules" i18n="@@common.check.the.docs">Check the docs</a>
               </ng-template>
             </i>
-            <i [nz-tooltip]="noPermissionTooltipTpl" nz-icon nzType="warning"></i>
             <i nz-icon (click)="onAddRule()" nzType="icons:icon-add-outline"></i>
+            <i [nz-tooltip]="noPermissionTooltipTpl" nz-icon nzType="warning"></i>
           </div>
           <div class="drop-list" cdkDropList (cdkDropListDropped)="onDragEnd($event)">
             @for (rule of featureFlag.rules; track trackRuleById($index, rule)) {
