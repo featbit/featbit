@@ -156,7 +156,7 @@ export class SettingComponent {
   }
 
   onChangeStatus() {
-    const isGranted = this.permissionsService.isGranted(this.featureFlag.rn, permissionActions.UpdateFlagOn);
+    const isGranted = this.permissionsService.isGranted(this.featureFlag.rn, permissionActions.ToggleFlag);
     if (!isGranted) {
       this.message.warning(this.permissionsService.genericDenyMessage);
       return;
@@ -178,10 +178,22 @@ export class SettingComponent {
   }
 
   toggleTitleEditState(): void {
+    const isGranted = this.permissionsService.isGranted(this.featureFlag.rn, permissionActions.UpdateFlagName);
+    if (!isGranted) {
+      this.message.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
     this.isEditingTitle = !this.isEditingTitle;
   }
 
   toggleDescriptionEditState(): void {
+    const isGranted = this.permissionsService.isGranted(this.featureFlag.rn, permissionActions.UpdateFlagDescription);
+    if (!isGranted) {
+      this.message.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
     this.isEditingDescription = !this.isEditingDescription;
   }
 
@@ -359,12 +371,6 @@ export class SettingComponent {
   }
 
   onSaveName() {
-    const isGranted = this.permissionsService.isGranted(this.featureFlag.rn, permissionActions.UpdateFlagName);
-    if (!isGranted) {
-      this.message.warning(this.permissionsService.genericDenyMessage);
-      return;
-    }
-
     const { name } = this.featureFlag;
 
     this.featureFlagService.updateName(this.key, name).subscribe({
@@ -377,12 +383,6 @@ export class SettingComponent {
   }
 
   onSaveDescription() {
-    const isGranted = this.permissionsService.isGranted(this.featureFlag.rn, permissionActions.UpdateFlagDescription);
-    if (!isGranted) {
-      this.message.warning(this.permissionsService.genericDenyMessage);
-      return;
-    }
-
     const { description } = this.featureFlag;
 
     this.featureFlagService.updateDescription(this.key, description).subscribe({

@@ -230,7 +230,7 @@ export class IndexComponent implements OnInit {
 
   onToggleFeatureFlagStatus(data: IFeatureFlagListItem): void {
     const rn = getFlagRN(data.key, data.tags);
-    const isGranted = this.permissionsService.isGranted(rn, permissionActions.UpdateFlagOn);
+    const isGranted = this.permissionsService.isGranted(rn, permissionActions.ToggleFlag);
     if (!isGranted) {
       this.msg.warning(this.permissionsService.genericDenyMessage);
       return;
