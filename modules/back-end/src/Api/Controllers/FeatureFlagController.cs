@@ -219,7 +219,7 @@ public class FeatureFlagController : ApiControllerBase
 
     [OpenApi]
     [HttpPut("{key}/variations")]
-    [Authorize(Permissions.UpdateFlagOffVariation)]
+    [Authorize(Permissions.UpdateFlagVariations)]
     public async Task<ApiResponse<bool>> UpdateVariationsAsync(Guid envId, string key, UpdateVariations request)
     {
         request.Key = key;
