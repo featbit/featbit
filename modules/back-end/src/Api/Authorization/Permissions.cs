@@ -10,7 +10,7 @@ public static class Permissions
     public const string RestoreFlag = nameof(RestoreFlag);
     public const string DeleteFlag = nameof(DeleteFlag);
     public const string CloneFlag = nameof(CloneFlag);
-    public const string UpdateFlagOn = nameof(UpdateFlagOn);
+    public const string ToggleFlag = nameof(ToggleFlag);
     public const string UpdateFlagName = nameof(UpdateFlagName);
     public const string UpdateFlagDescription = nameof(UpdateFlagDescription);
     public const string UpdateFlagOffVariation = nameof(UpdateFlagOffVariation);
@@ -28,7 +28,7 @@ public static class Permissions
         { RestoreFlag, ResourceTypes.FeatureFlag },
         { DeleteFlag, ResourceTypes.FeatureFlag },
         { CloneFlag, ResourceTypes.FeatureFlag },
-        { UpdateFlagOn, ResourceTypes.FeatureFlag },
+        { ToggleFlag, ResourceTypes.FeatureFlag },
         { UpdateFlagName, ResourceTypes.FeatureFlag },
         { UpdateFlagDescription, ResourceTypes.FeatureFlag },
         { UpdateFlagOffVariation, ResourceTypes.FeatureFlag },

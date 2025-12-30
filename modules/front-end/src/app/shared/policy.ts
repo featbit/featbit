@@ -425,9 +425,9 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     isOpenAPIApplicable: true,
     isSpecificApplicable: true
   },
-  UpdateFlagOn: {
+  ToggleFlag: {
     id: uuidv4(),
-    name: 'UpdateFlagOn',
+    name: 'ToggleFlag',
     resourceType: ResourceTypeEnum.Flag,
     description: $localize`:@@iam.action.update-flag-on:Toggle a feature on or off`,
     isOpenAPIApplicable: true,
@@ -467,15 +467,15 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
   },
   UpdateFlagRules: {
     id: uuidv4(),
-    name: 'UpdateFlagRules',
+    name: 'UpdateFlagTargetingRules',
     resourceType: ResourceTypeEnum.Flag,
     description: $localize`:@@iam.action.update-flag-rules:Change a flag's custom targeting rules`,
     isOpenAPIApplicable: false,
     isSpecificApplicable: true
   },
-  UpdateFlagFallthrough: {
+  UpdateFlagDefaultRule: {
     id: uuidv4(),
-    name: 'UpdateFlagFallthrough',
+    name: 'UpdateFlagDefaultRule',
     resourceType: ResourceTypeEnum.Flag,
     description: $localize`:@@iam.action.update-flag-fallthrough:Change a flag's default rule`,
     isOpenAPIApplicable: false,

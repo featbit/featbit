@@ -144,7 +144,7 @@ public class FeatureFlagController : ApiControllerBase
 
     [OpenApi]
     [HttpPut("{key}/toggle/{status}")]
-    [Authorize(Permissions.UpdateFlagOn)]
+    [Authorize(Permissions.ToggleFlag)]
     public async Task<ApiResponse<bool>> ToggleAsync(Guid envId, string key, bool status)
     {
         var request = new ToggleFeatureFlag

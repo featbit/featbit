@@ -13,7 +13,7 @@ import { debounceTime } from 'rxjs/operators';
 import { FeatureFlagService } from "@services/feature-flag.service";
 import { NzModalService } from "ng-zorro-antd/modal";
 import { copyToClipboard } from '@utils/index';
-import { permissionActions } from "@shared/policy";
+import { generalResourceRNPattern, permissionActions } from "@shared/policy";
 import { getCurrentEnvRN } from "@utils/project-env";
 import { PermissionsService } from "@services/permissions.service";
 
@@ -213,6 +213,17 @@ export class IndexComponent implements OnInit {
   //#endregion
 
   creationDrawerVisible: boolean = false;
+
+  openCreationDrawer(): void {
+    const rnPrefix = getCurrentEnvRN();
+    const isGranted = this.permissionsService.isGranted(`${rnPrefix}:flag/*`, permissionActions.CreateFlag);
+    if (!isGranted) {
+      this.msg.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+    this.creationDrawerVisible = true;
+  }
+
   closeCreationDrawer() {
     this.creationDrawerVisible = false;
   }
