@@ -61,11 +61,13 @@
                 <a target="_blank" href="https://docs.featbit.co/feature-flags/targeting-users-with-flags/targeting-rules#setting-the-default-rule" i18n="@@common.check.the.docs">Check the docs</a>
               </ng-template>
             </i>
-            <i [nz-tooltip]="noPermissionTooltipTpl" nz-icon nzType="warning"></i>
+            @if (!canUpdateDefaultRule) {
+              <i [nz-tooltip]="noPermissionTooltipTpl" nz-icon nzType="warning"></i>
+            }
           </div>
           <div class="find-rule">
             <app-serve
-              [disabled]="!canUpdateFallthrough"
+              [disabled]="!canUpdateDefaultRule"
               [dispatchKey]="featureFlag.fallthrough.dispatchKey"
               [userProps]="userProps"
               (onDispatchKeyChange)="onFallthroughDispatchKeyChangeChange($event)"
@@ -98,7 +100,9 @@
                   <a target="_blank" href="https://docs.featbit.co/feature-flags/targeting-users-with-flags/individual-user-targeting" i18n="@@common.check.the.docs">Check the docs</a>
               </ng-template>
             </i>
-            <i [nz-tooltip]="noPermissionTooltipTpl" nz-icon nzType="warning"></i>
+            @if (!canUpdateIndividualTargeting) {
+              <i [nz-tooltip]="noPermissionTooltipTpl" nz-icon nzType="warning"></i>
+            }
           </div>
           @if (isTargetUsersActive) {
             <div style="margin-left: -12px;margin-top: 16px">
@@ -134,7 +138,9 @@
               </ng-template>
             </i>
             <i nz-icon (click)="onAddRule()" nzType="icons:icon-add-outline"></i>
-            <i [nz-tooltip]="noPermissionTooltipTpl" nz-icon nzType="warning"></i>
+            @if (!canUpdateRules) {
+              <i [nz-tooltip]="noPermissionTooltipTpl" nz-icon nzType="warning"></i>
+            }
           </div>
           <div class="drop-list" cdkDropList (cdkDropListDropped)="onDragEnd($event)">
             @for (rule of featureFlag.rules; track trackRuleById($index, rule)) {

@@ -42,7 +42,7 @@ export class TargetingComponent implements OnInit {
     return rule.id;
   }
 
-  canUpdateFallthrough: boolean = false;
+  canUpdateDefaultRule: boolean = false;
   canUpdateIndividualTargeting: boolean = false;
   canUpdateRules: boolean = false;
 
@@ -95,7 +95,7 @@ export class TargetingComponent implements OnInit {
   }
 
   onReviewChanges(validationErrortpl: TemplateRef<void>, modalKind: ReviewModalKindEnum) {
-    if (!this.canUpdateFallthrough && !this.canUpdateIndividualTargeting && !this.canUpdateIndividualTargeting) {
+    if (!this.canUpdateDefaultRule && !this.canUpdateIndividualTargeting && !this.canUpdateIndividualTargeting) {
       this.msg.warning(this.permissionsService.genericDenyMessage);
       return;
     }
@@ -139,7 +139,7 @@ export class TargetingComponent implements OnInit {
         this.key = decodeURIComponent(paramMap.get('key'));
         this.messageQueueService.subscribe(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key), () => this.refreshFeatureFlag());
         await this.loadData();
-        this.canUpdateFallthrough = this.permissionsService.isGranted(this.featureFlag.rn, permissionActions.UpdateFlagFallthrough);
+        this.canUpdateDefaultRule = this.permissionsService.isGranted(this.featureFlag.rn, permissionActions.UpdateFlagDefaultRule);
         this.canUpdateIndividualTargeting = this.permissionsService.isGranted(this.featureFlag.rn, permissionActions.UpdateFlagIndividualTargeting);
         this.canUpdateRules = this.permissionsService.isGranted(this.featureFlag.rn, permissionActions.UpdateFlagRules);
       }
