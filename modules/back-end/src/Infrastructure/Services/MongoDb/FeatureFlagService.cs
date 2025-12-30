@@ -1,8 +1,11 @@
+using System.Text.Json;
 using Application.Bases.Exceptions;
 using Application.Bases.Models;
 using Application.FeatureFlags;
 using Domain.FeatureFlags;
+using Domain.Segments;
 using MongoDB.Driver;
+using MongoDB.Driver.Linq;
 
 namespace Infrastructure.Services.MongoDb;
 
@@ -97,5 +100,28 @@ public class FeatureFlagService : MongoDbService<FeatureFlag>, IFeatureFlagServi
         var filter = new ExpressionFilterDefinition<FeatureFlag>(x => x.EnvId == envId && !x.IsArchived);
         var cursor = await Collection.DistinctAsync<string>("tags", filter);
         return await cursor.ToListAsync();
+    }
+
+    public async Task<ICollection<Segment>> GetRelatedSegmentsAsync(ICollection<FeatureFlag> flags)
+    {
+        var segmentIds = flags
+            .SelectMany(flag => flag.Rules)
+            .SelectMany(rule => rule.Conditions)
+            .Where(condition => condition.IsSegmentCondition())
+            .SelectMany(condition => JsonSerializer.Deserialize<string[]>(condition.Value)!)
+            .Distinct()
+            .Select(Guid.Parse)
+            .ToArray();
+
+        if (segmentIds.Length == 0)
+        {
+            return [];
+        }
+
+        var segments = await MongoDb.QueryableOf<Segment>()
+            .Where(x => segmentIds.Contains(x.Id))
+            .ToListAsync();
+
+        return segments;
     }
 }

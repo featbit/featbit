@@ -1,52 +1,28 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { getCurrentProjectEnv } from '@utils/project-env';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { copyToClipboard } from "@utils/index";
+import { FeatureFlagService } from "@services/feature-flag.service";
+import { CompareFlagDetail } from "@features/safe/feature-flags/types/compare-flag";
+import { finalize } from "rxjs/operators";
+import { IEnvironment, IProject } from "@shared/types";
+import { ProjectService } from "@services/project.service";
+import { FlagDiffRow } from "@core/components/compare-feature-flag-drawer/types";
+import { RenderOnOffState } from "@core/components/compare-feature-flag-drawer/render-on-off-state";
+import { RenderIndividualTargeting } from "@core/components/compare-feature-flag-drawer/render-individual-targeting";
+import { RenderTargetRules } from "@core/components/compare-feature-flag-drawer/render-target-rules.component";
+import { RenderDefaultRule } from "@core/components/compare-feature-flag-drawer/render-default-rule";
+import { RenderOffVariation } from "@core/components/compare-feature-flag-drawer/render-off-variation";
+import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
+import {
+  getAppliedDefaultRule,
+  getAppliedOffVariation,
+  getAppliedTargetRules,
+  getAppliedTargetUsers
+} from "@core/components/compare-feature-flag-drawer/utils";
 
-// Interfaces for the component
-export interface CompareEnvironment {
-  id: string;
-  name: string;
-  projectName: string;
-  fullName: string;
-}
-
-export interface CompareFeatureFlag {
-  id: string;
-  name: string;
-  key: string;
-}
-
-export interface IndividualTarget {
-  variationName: string;
-  users: string[];
-}
-
-export interface RuleCondition {
-  property: string;
-  operator: string;
-  value: string;
-}
-
-export interface TargetingRule {
-  conditions: RuleCondition[];
-  serveType: 'percentage' | 'variation';
-  serveValue: string; // variation name or percentage distribution
-}
-
-export interface FlagSettings {
-  isEnabled: boolean;
-  individualTargeting: IndividualTarget[];
-  targetingRules: TargetingRule[];
-  defaultRule: string; // variation name
-  offVariation: string; // variation name
-}
-
-export interface DiffRow {
-  key: 'isEnabled' | 'individualTargeting' | 'targetingRules' | 'defaultRule' | 'offVariation';
-  label: string;
-  selected: boolean;
-  hasDiff: boolean;
+type Env = {
+  id: string,
+  name: string
 }
 
 @Component({
@@ -56,315 +32,256 @@ export interface DiffRow {
   styleUrl: './compare-feature-flag-drawer.component.less'
 })
 export class CompareFeatureFlagDrawerComponent {
-  private _visible: boolean = false;
+  private flagService: FeatureFlagService = inject(FeatureFlagService);
+  private projectService: ProjectService = inject(ProjectService);
+  private message: NzMessageService = inject(NzMessageService);
 
+  private _visible: boolean = false;
   @Input()
   get visible(): boolean {
     return this._visible;
   }
-
   set visible(value: boolean) {
     this._visible = value;
     if (value) {
-      this.initializeComponent();
+      this.init().then();
     }
   }
 
   @Input()
-  flag: CompareFeatureFlag;
+  flag: {name: string, key: string};
 
   @Input()
-  targetEnvironment: CompareEnvironment | null = null;
+  set targetEnv(value: Env) {
+    if (value) {
+      this.isTargetEnvLocked = true;
+      this.selectedTargetEnvId = value.id;
+      this.loadDiff();
+    }
+  }
 
   @Output()
-  close: EventEmitter<void> = new EventEmitter();
+  close: EventEmitter<boolean> = new EventEmitter();
 
-  // Source environment (current environment)
-  sourceEnvironment: CompareEnvironment;
-
-  // Available environments for selection
-  availableEnvironments: CompareEnvironment[] = [];
-
-  // Selected target environment ID (when targetEnvironment is not provided)
   selectedTargetEnvId: string = '';
-
-  // Whether target environment can be changed
-  get isTargetEnvLocked(): boolean {
-    return this.targetEnvironment !== null;
-  }
-
-  // Current target environment (either from input or selected)
-  get currentTargetEnv(): CompareEnvironment | null {
-    if (this.targetEnvironment) {
-      return this.targetEnvironment;
+  isTargetEnvLocked: boolean = false;
+  get targetEnv(): Env | null {
+    const targetEnv =
+      this.envs.find(env => env.value === this.selectedTargetEnvId) || null;
+    if (targetEnv) {
+      return {
+        id: targetEnv.value,
+        name: targetEnv.label
+      }
     }
-    return this.availableEnvironments.find(env => env.id === this.selectedTargetEnvId) || null;
+
+    return null;
   }
 
-  // Mock settings data
-  targetEnvSettings: FlagSettings | null = null;
-  sourceEnvSettings: FlagSettings | null = null;
+  isLoadingEnvs: boolean = true;
+  envs: {label: string, value: string}[] = [];
+  async loadEnvs() {
+    const currentEnv = getCurrentProjectEnv();
 
-  // Diff rows configuration
-  diffRows: DiffRow[] = [];
+    this.isLoadingEnvs = true;
+    const projects = await this.projectService.getListAsync();
+    this.envs = projects.flatMap((project: IProject) =>
+      project.environments.map((env: IEnvironment) => ({
+        value: env.id,
+        label: `${project.name}/${env.name}`
+      }))
+    )
+    .filter(env => env.value !== currentEnv.envId);
 
-  // Select all state
-  get allSelected(): boolean {
-    return this.diffRows.length > 0 && this.diffRows.every(row => row.selected);
+    this.isLoadingEnvs = false;
   }
 
-  get someSelected(): boolean {
-    return this.diffRows.some(row => row.selected) && !this.allSelected;
+  detail: CompareFlagDetail;
+  isLoadingDiff: boolean = false;
+  targetFlagNotExists: boolean = true;
+  loadDiff() {
+    this.isLoadingDiff = true;
+    this.targetFlagNotExists = false;
+    this.flagService.compareFlag(this.selectedTargetEnvId, this.flag.key)
+    .pipe(finalize(() => this.isLoadingDiff = false))
+    .subscribe({
+      next: (detail) => {
+        if (!detail) {
+          this.targetFlagNotExists = true;
+        }
+
+        this.detail = detail;
+        this.initRows();
+      },
+      error: () => this.message.error($localize`:@@common.loading-failed-try-again:Loading failed, please try again`)
+    })
   }
 
-  get selectedCount(): number {
-    return this.diffRows.filter(row => row.selected).length;
-  }
-
-  isLoading: boolean = false;
-  isCopying: boolean = false;
-
-  constructor(private msg: NzMessageService) {}
-
-  initializeComponent() {
-    // Reset state
-    this.selectedTargetEnvId = '';
-    this.targetEnvSettings = null;
-    this.sourceEnvSettings = null;
-    this.diffRows = [];
-
-    // Get current environment as source
-    const currentProjectEnv = getCurrentProjectEnv();
-    this.sourceEnvironment = {
-      id: currentProjectEnv?.envId || 'env-1',
-      name: currentProjectEnv?.envName || 'Development',
-      projectName: currentProjectEnv?.projectName || 'webapp',
-      fullName: `${currentProjectEnv?.projectName || 'webapp'}/${currentProjectEnv?.envName || 'development'}`
+  sourceEnv: Env;
+  async init() {
+    const currentEnv = getCurrentProjectEnv();
+    this.sourceEnv = {
+      id: currentEnv.envId,
+      name: `${currentEnv.projectName}/${currentEnv.envName}`
     };
 
-    // Mock available environments
-    this.availableEnvironments = [
-      { id: 'env-2', name: 'Staging', projectName: 'webapp', fullName: 'webapp/staging' },
-      { id: 'env-3', name: 'Production', projectName: 'webapp', fullName: 'webapp/prod' },
-      { id: 'env-4', name: 'Development', projectName: 'mobile-app', fullName: 'mobile-app/development' },
-      { id: 'env-5', name: 'Production', projectName: 'mobile-app', fullName: 'mobile-app/prod' }
-    ].filter(env => env.id !== this.sourceEnvironment.id);
-
-    // If target environment is provided, load comparison data immediately
-    if (this.targetEnvironment) {
-      this.loadComparisonData();
-    }
+    await this.loadEnvs();
   }
 
   onTargetEnvChange() {
     if (this.selectedTargetEnvId) {
-      this.loadComparisonData();
+      this.loadDiff();
     }
   }
 
-  loadComparisonData() {
-    this.isLoading = true;
+  rows: FlagDiffRow[] = [];
+  initRows() {
+    const { onOffState, individualTargeting, targetingRule, defaultRule, offVariation } = this.detail.diff;
 
-    // Simulate API call with mock data
-    setTimeout(() => {
-      this.generateMockData();
-      this.initializeDiffRows();
-      this.isLoading = false;
-    }, 500);
-  }
-
-  generateMockData() {
-    // Mock data for target environment (current settings)
-    this.targetEnvSettings = {
-      isEnabled: true,
-      individualTargeting: [
-        { variationName: 'Variation 1', users: [] },
-        { variationName: 'Variation 2', users: ['user1', 'user2'] }
-      ],
-      targetingRules: [],
-      defaultRule: 'Variation 1',
-      offVariation: 'Variation 2'
-    };
-
-    // Mock data for source environment (settings to copy from)
-    this.sourceEnvSettings = {
-      isEnabled: false,
-      individualTargeting: [
-        { variationName: 'Variation 1', users: ['user1', 'user2'] },
-        { variationName: 'Variation 2', users: [] }
-      ],
-      targetingRules: [
-        {
-          conditions: [{ property: 'user', operator: 'is one of', value: 'testing, betauser' }],
-          serveType: 'percentage',
-          serveValue: '10% Variation 1, 90% Variation 2'
-        },
-        {
-          conditions: [{ property: 'email', operator: 'ends with', value: "'vip'" }],
-          serveType: 'variation',
-          serveValue: 'Variation 2'
-        }
-      ],
-      defaultRule: 'Variation 2',
-      offVariation: 'Variation 1'
-    };
-  }
-
-  initializeDiffRows() {
-    this.diffRows = [
+    this.rows = [
       {
-        key: 'isEnabled',
-        label: $localize`:@@ff.compare.on-off-state:On/OFF State`,
+        key: 'onOffState',
+        label: $localize`:@@ff.compare.on-off-state:On/Off State`,
         selected: false,
-        hasDiff: this.targetEnvSettings?.isEnabled !== this.sourceEnvSettings?.isEnabled
+        hasDiff: onOffState.isDifferent,
+        render: RenderOnOffState
       },
       {
         key: 'individualTargeting',
         label: $localize`:@@ff.compare.individual-targeting:Individual Targeting`,
         selected: false,
-        hasDiff: this.hasIndividualTargetingDiff()
+        hasDiff: individualTargeting.some(item => item.isDifferent),
+        copyMode: 'overwrite',
+        render: RenderIndividualTargeting
       },
       {
-        key: 'targetingRules',
+        key: 'targetingRule',
         label: $localize`:@@ff.compare.targeting-rules:Targeting Rules`,
         selected: false,
-        hasDiff: this.hasTargetingRulesDiff()
+        hasDiff: targetingRule.some(item => item.isDifferent),
+        copyMode: 'overwrite',
+        render: RenderTargetRules
       },
       {
         key: 'defaultRule',
         label: $localize`:@@ff.compare.default-rule:Default Rule`,
         selected: false,
-        hasDiff: this.targetEnvSettings?.defaultRule !== this.sourceEnvSettings?.defaultRule
+        hasDiff: defaultRule.isDifferent,
+        render: RenderDefaultRule
       },
       {
         key: 'offVariation',
-        label: $localize`:@@ff.compare.off-variation-description:If flag is OFF, serve`,
+        label: $localize`:@@ff.compare.off-variation:Off Variation`,
         selected: false,
-        hasDiff: this.targetEnvSettings?.offVariation !== this.sourceEnvSettings?.offVariation
+        hasDiff: offVariation.isDifferent,
+        render: RenderOffVariation
       }
-    ];
+    ]
   }
 
-  hasIndividualTargetingDiff(): boolean {
-    if (!this.targetEnvSettings || !this.sourceEnvSettings) return false;
-    return JSON.stringify(this.targetEnvSettings.individualTargeting) !==
-           JSON.stringify(this.sourceEnvSettings.individualTargeting);
+  getAppliedFlag(row: FlagDiffRow): IFeatureFlag {
+    const { source, target, diff } = this.detail;
+    if (row.key === 'onOffState') {
+      return {
+        ...target,
+        isEnabled: source.isEnabled
+      }
+    }
+
+    const missingVariationsInTarget = source.variations.filter(sv =>
+      !target.variations.some(tv => tv.value === sv.value)
+    );
+    const targetVariationsIfApplied = [ ...target.variations, ...missingVariationsInTarget ];
+
+    if (row.key === 'individualTargeting') {
+      const targetUsers = getAppliedTargetUsers(source, target, targetVariationsIfApplied, row.copyMode);
+
+      return {
+        ...target,
+        variations: targetVariationsIfApplied,
+        targetUsers
+      }
+    }
+
+    if (row.key === 'targetingRule') {
+      return {
+        ...target,
+        variations: targetVariationsIfApplied,
+        rules: getAppliedTargetRules(source, target, diff.targetingRule, row.copyMode)
+      }
+    }
+
+    if (row.key === 'defaultRule') {
+      return {
+        ...target,
+        variations: targetVariationsIfApplied,
+        fallthrough: getAppliedDefaultRule(source, targetVariationsIfApplied)
+      }
+    }
+
+    if (row.key === 'offVariation') {
+      return {
+        ...target,
+        disabledVariationId: getAppliedOffVariation(source, targetVariationsIfApplied)
+      }
+    }
+
+    return target;
   }
 
-  hasTargetingRulesDiff(): boolean {
-    if (!this.targetEnvSettings || !this.sourceEnvSettings) return false;
-    return JSON.stringify(this.targetEnvSettings.targetingRules) !==
-           JSON.stringify(this.sourceEnvSettings.targetingRules);
+  // Select all state
+  get allSelected(): boolean {
+    return this.rows.length > 0 && this.rows.every(row => row.selected);
+  }
+
+  get someSelected(): boolean {
+    return this.rows.some(row => row.selected) && !this.allSelected;
+  }
+
+  get selectedCount(): number {
+    return this.rows.filter(row => row.selected).length;
   }
 
   onSelectAll(checked: boolean) {
-    this.diffRows.forEach(row => row.selected = checked);
+    this.rows
+      .filter(row => row.hasDiff)
+      .forEach(row => row.selected = checked);
   }
 
-  // Format individual targeting for display
-  formatIndividualTargeting(targets: IndividualTarget[]): string[] {
-    if (!targets || targets.length === 0) {
-      return [$localize`:@@ff.compare.no-individual-targets:No individual targets`];
-    }
-
-    const lines: string[] = [];
-    targets.forEach(target => {
-      lines.push(`<strong>${target.variationName}</strong>`);
-      if (target.users.length === 0) {
-        lines.push($localize`:@@ff.compare.no-individual-targets:No individual targets`);
-      } else {
-        lines.push(target.users.join(', '));
-      }
-    });
-    return lines;
-  }
-
-  // Format targeting rules for display
-  formatTargetingRules(rules: TargetingRule[]): string[] {
-    if (!rules || rules.length === 0) {
-      return [$localize`:@@ff.compare.no-rules-defined:No rules defined`];
-    }
-
-    const lines: string[] = [];
-    rules.forEach((rule, index) => {
-      const conditionStr = rule.conditions.map(c => `${c.property} ${c.operator} ${c.value}`).join(' AND ');
-      lines.push(`<strong>If</strong> ${conditionStr}`);
-      if (rule.serveType === 'percentage') {
-        lines.push(`serve <strong>${rule.serveValue}</strong>`);
-      } else {
-        lines.push(`serve <strong>${rule.serveValue}</strong>`);
-      }
-      if (index < rules.length - 1) {
-        lines.push(''); // Empty line between rules
-      }
-    });
-    return lines;
-  }
-
-  // Get display value for a setting
-  getTargetDisplayValue(key: string): string[] {
-    if (!this.targetEnvSettings) return [];
-
-    switch (key) {
-      case 'isEnabled':
-        return [this.targetEnvSettings.isEnabled ? 'On' : 'Off'];
-      case 'individualTargeting':
-        return this.formatIndividualTargeting(this.targetEnvSettings.individualTargeting);
-      case 'targetingRules':
-        return this.formatTargetingRules(this.targetEnvSettings.targetingRules);
-      case 'defaultRule':
-        return [this.targetEnvSettings.defaultRule];
-      case 'offVariation':
-        return [this.targetEnvSettings.offVariation];
-      default:
-        return [];
-    }
-  }
-
-  getSourceDisplayValue(key: string): string[] {
-    if (!this.sourceEnvSettings) return [];
-
-    switch (key) {
-      case 'isEnabled':
-        return [this.sourceEnvSettings.isEnabled ? 'On' : 'Off'];
-      case 'individualTargeting':
-        return this.formatIndividualTargeting(this.sourceEnvSettings.individualTargeting);
-      case 'targetingRules':
-        return this.formatTargetingRules(this.sourceEnvSettings.targetingRules);
-      case 'defaultRule':
-        return [this.sourceEnvSettings.defaultRule];
-      case 'offVariation':
-        return [this.sourceEnvSettings.offVariation];
-      default:
-        return [];
-    }
-  }
-
+  isCopying: boolean = false;
   copySettings() {
     if (this.selectedCount === 0) {
-      this.msg.warning($localize`:@@ff.compare.select-settings-to-copy:Please select at least one setting to copy`);
+      this.message.warning($localize`:@@ff.compare.select-settings-to-copy:Please select at least one setting to copy`);
       return;
     }
 
     this.isCopying = true;
 
-    // Simulate API call
-    setTimeout(() => {
-      const selectedKeys = this.diffRows.filter(row => row.selected).map(row => row.label);
-      this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
-      this.isCopying = false;
-      this.onClose();
-    }, 1000);
+    this.flagService.copySettings(this.selectedTargetEnvId, this.flag.key, {
+      onOffState: this.rows[0].selected,
+      individualTargeting: {
+        copy: this.rows[1].selected,
+        mode: this.rows[1].copyMode
+      },
+      targetingRule: {
+        copy: this.rows[2].selected,
+        mode: this.rows[2].copyMode
+      },
+      defaultRule: this.rows[3].selected,
+      offVariation: this.rows[4].selected
+    })
+    .pipe(finalize(() => this.isCopying = false))
+    .subscribe({
+      next: () => {
+        this.message.success($localize`:@@common.operation-success:Operation succeeded`);
+        this.onClose(false);
+      },
+      error: () => this.message.error($localize`:@@common.operation-failed:Operation failed`)
+    })
   }
 
-  copyText(event: any, text: string) {
-    copyToClipboard(text).then(
-      () => this.msg.success($localize `:@@common.copy-success:Copied`)
-    );
-  }
-
-  onClose() {
-    this._visible = false;
+  onClose(canceled: boolean) {
+    this.selectedTargetEnvId = '';
     this.close.emit();
   }
 }

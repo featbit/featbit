@@ -13,19 +13,16 @@ import { NzDropDownModule } from "ng-zorro-antd/dropdown";
 import { NzCheckboxModule } from "ng-zorro-antd/checkbox";
 import { CoreModule } from "@core/core.module";
 import { FeatureFlagService } from "@services/feature-flag.service";
-import {
-  CompareFlagOverviews,
-  CompareFlagOverview,
-  IFeatureFlagListFilter
-} from "@features/safe/feature-flags/types/feature-flag";
+import { IFeatureFlagListFilter } from "@features/safe/feature-flags/types/feature-flag";
 import { NzMessageService } from "ng-zorro-antd/message";
 import { debounceTime, finalize } from "rxjs/operators";
 import { Subject } from "rxjs";
 import { IEnvironment, IProject, IProjectEnv } from "@shared/types";
 import { ProjectService } from "@services/project.service";
 import { getCurrentProjectEnv } from "@utils/project-env";
+import { CompareFlagOverview, CompareFlagOverviews } from "@features/safe/feature-flags/types/compare-flag";
 
-type EnvironmentSelectOption = {
+type EnvSelectOption = {
   label: string,
   value: string
 }
@@ -98,7 +95,7 @@ export class CompareComponent implements OnInit {
   }
 
   isLoadingEnvs: boolean = true;
-  envs: EnvironmentSelectOption[] = [];
+  envs: EnvSelectOption[] = [];
   currentProjectEnv: IProjectEnv;
   async loadEnvs() {
     this.currentProjectEnv = getCurrentProjectEnv();
@@ -117,7 +114,7 @@ export class CompareComponent implements OnInit {
   }
 
   selectedEnvs: string[] = [];
-  targetEnvs: EnvironmentSelectOption[] = [];
+  targetEnvs: EnvSelectOption[] = [];
   hasUnappliedChanges: boolean = false;
   onSelectedEnvChanged() {
     if (this.targetEnvs.length === 0) {
@@ -208,13 +205,23 @@ export class CompareComponent implements OnInit {
     }
   }
 
+  compareFlag: {name: string, key: string};
+  compareTargetEnv: {id: string, name: string};
   compareVisible: boolean = false;
-  compare(item: CompareFlagOverview, targetEnvId: string) {
+  compare(item: CompareFlagOverview, targetEnv: EnvSelectOption) {
     this.compareVisible = true;
+    this.compareFlag = { name: item.name, key: item.key };
+    this.compareTargetEnv = { id: targetEnv.value, name: targetEnv.label };
   }
 
-  closeCompareDrawer() {
+  closeCompareDrawer(canceled: boolean) {
     this.compareVisible = false;
+    this.compareFlag = null;
+    this.compareTargetEnv = null;
+
+    if (!canceled) {
+      this.loadOverview();
+    }
   }
 
   copyVisible: boolean = false;
@@ -225,9 +232,13 @@ export class CompareComponent implements OnInit {
     this.targetEnvIdForCopy = targetEnvId;
     this.copyVisible = true;
   }
-  onCopyModalClose() {
+  onCopyModalClose(canceled: boolean) {
     this.flagsToCopy = [];
     this.copyVisible = false;
     this.targetEnvIdForCopy = '';
+
+    if (!canceled) {
+      this.loadOverview();
+    }
   }
 }

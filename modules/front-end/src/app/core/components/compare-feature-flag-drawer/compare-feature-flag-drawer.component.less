@@ -3,6 +3,7 @@
 .environments-row {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 16px;
   margin-bottom: 12px;
 
@@ -38,7 +39,7 @@
     }
   }
 
-  .arrow-icon {
+  .compare-icon {
     font-size: 20px;
     color: #8c8c8c;
   }
@@ -55,48 +56,62 @@
 .comparison-table {
   margin-bottom: 20px;
 
-  .setting-value-cell {
-    .value-content {
-      .value-line {
-        margin-bottom: 4px;
-        line-height: 1.6;
-        word-break: break-word;
+  .copy-mode-options {
+    margin-top: 8px;
+    padding-left: 24px;
 
-        &:last-child {
-          margin-bottom: 0;
-        }
+    nz-radio-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
 
-        &:empty {
-          height: 12px;
-        }
-
-        strong {
-          color: #1890ff;
-        }
+      label[nz-radio] {
+        font-size: 13px;
+        color: #595959;
       }
     }
+  }
 
-    &.target-value {
-      position: relative;
+  .value-content {
+    .value-line {
+      margin-bottom: 4px;
+      line-height: 1.6;
+      word-break: break-word;
 
-      &.will-change {
-        background-color: #f6ffed;
-        border-left: 3px solid #52c41a;
+      &:last-child {
+        margin-bottom: 0;
       }
 
-      .change-indicator {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        margin-top: 12px;
-        padding-top: 8px;
-        border-top: 1px dashed #d9d9d9;
-        color: #52c41a;
-        font-size: 12px;
+      &:empty {
+        height: 12px;
+      }
 
-        i {
-          font-size: 14px;
-        }
+      strong {
+        color: #1890ff;
+      }
+    }
+  }
+
+  .target-value {
+    position: relative;
+
+    .will-change {
+      background-color: #f6ffed;
+      border-left: 3px solid #52c41a;
+    }
+
+    .change-indicator {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin: 12px 0;
+      padding-top: 8px;
+      border-top: 1px dashed #d9d9d9;
+      color: #52c41a;
+      font-size: 12px;
+
+      i {
+        font-size: 14px;
       }
     }
   }
@@ -129,17 +144,17 @@
   align-items: center;
   justify-content: center;
   padding: 80px 20px;
-  color: #8c8c8c;
+  color: @grey40-color;
 
   i {
-    color: #d9d9d9;
-    margin-bottom: 16px;
+    color: @grey30-color;
+    margin-bottom: 24px;
   }
 
   p {
     font-size: 14px;
     text-align: center;
-    max-width: 400px;
+    max-width: 600px;
   }
 }
 

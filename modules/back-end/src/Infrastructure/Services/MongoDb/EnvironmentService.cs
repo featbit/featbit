@@ -229,4 +229,22 @@ public class EnvironmentService(MongoDbClient mongoDb, ILogger<EnvironmentServic
             string.Equals(environment.Key, key, StringComparison.OrdinalIgnoreCase)
         );
     }
+
+    public async Task<string?> GetProjectEnvAsync(Guid envId)
+    {
+        var query =
+            from project in MongoDb.QueryableOf<Project>()
+            join environment in MongoDb.QueryableOf<Environment>() on project.Id equals environment.ProjectId
+            where environment.Id == envId
+            select new
+            {
+                project = project.Key,
+                env = environment.Key
+            };
+
+        var result = await query.FirstOrDefaultAsync();
+        return result == null
+            ? string.Empty
+            : $"{result.project}/{result.env}";
+    }
 }

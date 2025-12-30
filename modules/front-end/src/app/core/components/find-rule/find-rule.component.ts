@@ -1,10 +1,9 @@
 import { Component, EventEmitter, Input, Output, } from '@angular/core';
 import { SegmentService } from '@services/segment.service';
 import { isSegmentCondition, trackByFunction, uuidv4 } from '@utils/index';
-import { IRuleOp, ruleOps } from './ruleConfig';
 import { ISegment } from "@features/safe/segments/types/segments-index";
 import { IRuleIdDispatchKey, IUserProp } from "@shared/types";
-import {ICondition, IRule, IRuleVariation, IVariation} from "@shared/rules";
+import { ICondition, IRule, IRuleVariation, IVariation, RULE_OPS } from "@shared/rules";
 
 @Component({
   selector: 'find-rule',
@@ -53,7 +52,7 @@ export class FindRuleComponent {
     } else {
       const segmentIds = value.conditions.flatMap((item: ICondition) => {
         const isSegment = isSegmentCondition(item.property);
-        let opType: string = isSegment ? 'multi': ruleOps.filter((op: IRuleOp) => op.value === item.op)[0].type;
+        let opType: string = isSegment ? 'multi': RULE_OPS.filter(op => op.value === item.op)[0].type;
 
         let defaultValue: string;
         let multipleValue: string[];

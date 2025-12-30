@@ -200,6 +200,18 @@ public class FeatureFlag : FullAuditedEntity
         MarkAsUpdated(currentUserId);
     }
 
+    public DataChange CopySettingsFrom(FlagCopyContext context, Guid currentUserId)
+    {
+        var dataChange = new DataChange(this);
+
+        FlagCopyHelper.CopySettings(context);
+        MarkAsUpdated(currentUserId);
+
+        dataChange.To(this);
+
+        return dataChange;
+    }
+
     public FeatureFlag Clone(string name, string key, string description, string[] tags, Guid currentUserId)
     {
         // clear id

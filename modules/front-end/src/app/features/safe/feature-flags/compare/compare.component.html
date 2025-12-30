@@ -140,7 +140,7 @@
                   </div>
                 </td>
               } @else {
-                <td class="diff-cell" (click)="compare(flag, env.value)">
+                <td class="diff-cell" (click)="compare(flag, env)">
                   <div class="diff-status" [class.has-diff]="hasDifferences(flag, env.value)">
                     @if (hasDifferences(flag, env.value)) {
                       <i nz-icon nzType="icons:icon-diff"></i>
@@ -168,13 +168,15 @@
 }
 
 <compare-feature-flag-drawer
+  [flag]="compareFlag"
+  [targetEnv]="compareTargetEnv"
   [visible]="compareVisible"
-  (close)="closeCompareDrawer()">
+  (close)="closeCompareDrawer($event)">
 </compare-feature-flag-drawer>
 
 <copy-feature-flag-modal
   [flags]="flagsToCopy"
   [visible]="copyVisible"
   [targetEnvId]="targetEnvIdForCopy"
-  (close)="onCopyModalClose()">
+  (close)="onCopyModalClose($event)">
 </copy-feature-flag-modal>

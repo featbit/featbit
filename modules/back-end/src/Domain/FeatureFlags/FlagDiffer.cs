@@ -1,8 +1,10 @@
+using System.Text.Json;
+using Domain.Segments;
 using Domain.Targeting;
 
 namespace Domain.FeatureFlags;
 
-internal record CompareServeVariationsParameter(
+public record CompareServeVariationsParameter(
     Guid Id,
     ICollection<Variation> Variations,
     ICollection<RolloutVariation> ServeVariations
@@ -10,11 +12,11 @@ internal record CompareServeVariationsParameter(
 
 public static class FlagDiffer
 {
-    public static FlagDiff Diff(FeatureFlag source, FeatureFlag target)
+    public static FlagDiff Diff(FeatureFlag source, FeatureFlag target, ICollection<Segment> relatedSegments)
     {
         var onOffDiff = CompareOnOff(source, target);
         var individualTargetingDiff = CompareIndividualTargeting(source, target);
-        var targetingRulesDiff = CompareRules(source, target);
+        var targetingRulesDiff = CompareRules(source, target, relatedSegments);
         var defaultRuleDiff = CompareDefaultRule(source, target);
         var offVariationDiff = CompareOffVariation(source, target);
 
@@ -38,7 +40,6 @@ public static class FlagDiffer
         {
             var srcUsers = source.TargetUsers.Where(x => x.VariationId == srcVariation.Id)
                 .SelectMany(x => x.KeyIds)
-                .OrderBy(x => x)
                 .ToArray();
 
             IndividualTargetingDiff diff;
@@ -55,13 +56,12 @@ public static class FlagDiffer
             {
                 var targetUsers = target.TargetUsers.Where(x => x.VariationId == targetVariation.Id)
                     .SelectMany(x => x.KeyIds)
-                    .OrderBy(x => x)
                     .ToArray();
 
                 diff = new IndividualTargetingDiff(
                     new VariationUsers(srcVariation, srcUsers),
                     new VariationUsers(targetVariation, targetUsers),
-                    !srcUsers.SequenceEqual(targetUsers)
+                    !srcUsers.AreEquivalent(targetUsers)
                 );
             }
 
@@ -93,7 +93,10 @@ public static class FlagDiffer
         return diffs;
     }
 
-    public static List<TargetingRuleDiff> CompareRules(FeatureFlag source, FeatureFlag target)
+    public static List<TargetingRuleDiff> CompareRules(
+        FeatureFlag source,
+        FeatureFlag target,
+        ICollection<Segment> relatedSegments)
     {
         var diffs = new List<TargetingRuleDiff>();
 
@@ -102,7 +105,8 @@ public static class FlagDiffer
             TargetingRuleDiff diff;
 
             // find target rule with same conditions
-            var targetRule = target.Rules.FirstOrDefault(rule => IsSameConditions(sourceRule.Conditions, rule.Conditions));
+            var targetRule =
+                target.Rules.FirstOrDefault(rule => IsSameConditions(sourceRule.Conditions, rule.Conditions, relatedSegments));
             if (targetRule == null)
             {
                 diff = new TargetingRuleDiff(sourceRule, null, true);
@@ -141,30 +145,6 @@ public static class FlagDiffer
         );
 
         return diffs;
-
-        bool IsSameConditions(ICollection<Condition> sourceConditions, ICollection<Condition> targetConditions)
-        {
-            if (sourceConditions.Count != targetConditions.Count)
-            {
-                return false;
-            }
-
-            foreach (var srcCondition in sourceConditions)
-            {
-                var targetCondition = targetConditions.FirstOrDefault(condition =>
-                    condition.Property == srcCondition.Property &&
-                    condition.Op == srcCondition.Op &&
-                    condition.Value == srcCondition.Value
-                );
-
-                if (targetCondition == null)
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
     }
 
     public static DefaultRuleDiff CompareDefaultRule(FeatureFlag source, FeatureFlag target)
@@ -219,6 +199,78 @@ public static class FlagDiffer
 
         var hasDiff = srcOffVariation.Value != targetOffVariation.Value;
         return new OffVariationDiff(srcOffVariation, targetOffVariation, hasDiff);
+    }
+
+    public static bool IsSameConditions(
+        ICollection<Condition> sourceConditions,
+        ICollection<Condition> targetConditions,
+        ICollection<Segment> relatedSegments)
+    {
+        if (sourceConditions.Count != targetConditions.Count)
+        {
+            return false;
+        }
+
+        foreach (var source in sourceConditions)
+        {
+            if (!FindSameCondition(source))
+            {
+                return false;
+            }
+        }
+
+        return true;
+
+        bool FindSameCondition(Condition source)
+        {
+            // find similar conditions in target conditions
+            var similarConditions = targetConditions.Where(condition =>
+                condition.Property == source.Property &&
+                condition.Op == source.Op
+            );
+
+            // compare segment condition values
+            foreach (var similarCondition in similarConditions)
+            {
+                if (!source.IsMultiValue() && source.Value == similarCondition.Value)
+                {
+                    return true;
+                }
+
+                if (source.IsSegmentCondition())
+                {
+                    var srcSegmentIds = JsonSerializer.Deserialize<string[]>(source.Value);
+                    var targetSegmentIds = JsonSerializer.Deserialize<string[]>(similarCondition.Value);
+
+                    var srcSegments = relatedSegments
+                        .Where(s => srcSegmentIds.Contains(s.Id.ToString()))
+                        .Select(s => s.Name)
+                        .ToArray();
+                    var targetSegments = relatedSegments
+                        .Where(s => targetSegmentIds.Contains(s.Id.ToString()))
+                        .Select(s => s.Name)
+                        .ToArray();
+
+                    if (srcSegments.AreEquivalent(targetSegments))
+                    {
+                        return true;
+                    }
+                }
+
+                if (source.IsMultiValue())
+                {
+                    var srcValues = JsonSerializer.Deserialize<string[]>(source.Value);
+                    var targetValues = JsonSerializer.Deserialize<string[]>(similarCondition.Value);
+
+                    if (srcValues.AreEquivalent(targetValues))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
     }
 
     private static bool IsServeVariationsDifferent(

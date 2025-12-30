@@ -3,8 +3,8 @@ using Domain.Targeting;
 namespace Domain.FeatureFlags;
 
 public record OnOffDiff(
-    bool SourceOn,
-    bool TargetOn,
+    bool Source,
+    bool Target,
     bool IsDifferent
 );
 

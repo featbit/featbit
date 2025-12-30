@@ -372,8 +372,8 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(overview);
     }
 
-    [HttpGet("compare/{targetEnvId:guid}/{key}")]
-    public async Task<ApiResponse<FlagDiff>> CompareAsync(Guid envId, Guid targetEnvId, string key)
+    [HttpGet("{key}/compare-with/{targetEnvId:guid}")]
+    public async Task<ApiResponse<CompareFlagDetail>> CompareAsync(Guid envId, Guid targetEnvId, string key)
     {
         var request = new CompareFlag
         {
@@ -384,6 +384,17 @@ public class FeatureFlagController : ApiControllerBase
 
         var diff = await Mediator.Send(request);
         return Ok(diff);
+    }
+
+    [HttpPut("{key}/copy-settings-to/{targetEnvId:guid}")]
+    public async Task<ApiResponse<bool>> CopySettingsAsync(Guid envId, string key, Guid targetEnvId, CopyFlagSettings request)
+    {
+        request.Key = key;
+        request.SourceEnvId = envId;
+        request.TargetEnvId = targetEnvId;
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
     }
 
     [HttpGet("all-tags")]

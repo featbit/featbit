@@ -162,7 +162,7 @@ export class IndexComponent implements OnInit {
     }
   }
 
-  compareVisible: boolean = true;
+  compareVisible: boolean = false;
   flagToCompare: IFeatureFlagListItem;
   compare(flag: IFeatureFlagListItem) {
     this.flagToCompare = flag;

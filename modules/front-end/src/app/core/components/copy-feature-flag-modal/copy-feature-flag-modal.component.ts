@@ -4,7 +4,7 @@ import { NzMessageService } from "ng-zorro-antd/message";
 import { ProjectService } from "@services/project.service";
 import { getCurrentProjectEnv } from "@utils/project-env";
 import { IEnvironment, IProject, IProjectEnv } from "@shared/types";
-import { CopyToEnvPrecheckResult, FeatureFlagListCheckItem } from "@features/safe/feature-flags/types/feature-flag";
+import { CopyToEnvPrecheckResult } from "@features/safe/feature-flags/types/feature-flag";
 
 type BulkCopyCheckItem = {
   id: string;
@@ -64,7 +64,7 @@ export class CopyFeatureFlagModalComponent implements OnInit {
   }
 
   @Output()
-  close: EventEmitter<void> = new EventEmitter();
+  close: EventEmitter<boolean> = new EventEmitter();
 
   isLoading: boolean = true;
   envs: { label: string, value: string }[] = [];
@@ -95,7 +95,7 @@ export class CopyFeatureFlagModalComponent implements OnInit {
     this.isLoading = false;
   }
 
-  onClose() {
+  onClose(canceled: boolean) {
     this.targetEnvId = '';
 
     this.checking = false;
@@ -103,7 +103,7 @@ export class CopyFeatureFlagModalComponent implements OnInit {
 
     this.copying = false;
 
-    this.close.emit();
+    this.close.emit(canceled);
   }
 
   checking: boolean = false;
@@ -156,8 +156,7 @@ export class CopyFeatureFlagModalComponent implements OnInit {
       next: _ => {
         this.copying = false;
         this.msg.success($localize `:@@common.operation-success:Operation succeeded`);
-
-        this.onClose();
+        this.onClose(false);
       },
       error: _ => {
         this.msg.error($localize`:@@common.operation-failed:Operation failed`);

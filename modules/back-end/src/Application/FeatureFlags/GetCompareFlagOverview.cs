@@ -40,6 +40,9 @@ public class GetCompareFlagOverviewHandler(IFeatureFlagService service)
             !x.IsArchived
         );
 
+        var allFlags = flags.Concat(targetFlags).ToArray();
+        var relatedSegments = await service.GetRelatedSegmentsAsync(allFlags);
+
         var overviews = new List<CompareFlagOverview>();
         foreach (var sourceFlag in flags)
         {
@@ -57,7 +60,7 @@ public class GetCompareFlagOverviewHandler(IFeatureFlagService service)
                     continue;
                 }
 
-                var diff = FlagDiffer.Diff(sourceFlag, targetFlag);
+                var diff = FlagDiffer.Diff(sourceFlag, targetFlag, relatedSegments);
                 overview.AddDiff(targetEnvId, diff);
             }
 

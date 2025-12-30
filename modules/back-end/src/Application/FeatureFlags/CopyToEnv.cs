@@ -1,7 +1,6 @@
 using Application.Users;
 using Domain.AuditLogs;
 using Domain.FeatureFlags;
-using Domain.Resources;
 
 namespace Application.FeatureFlags;
 
@@ -19,18 +18,17 @@ public class CopyToEnv : IRequest<CopyToEnvResult>
 public class CopyToEnvHandler(
     IFeatureFlagService flagService,
     IEndUserService endUserService,
-    IResourceServiceV2 resourceService,
+    IEnvironmentService envService,
     ICurrentUser currentUser,
     IPublisher publisher)
     : IRequestHandler<CopyToEnv, CopyToEnvResult>
 {
     public async Task<CopyToEnvResult> Handle(CopyToEnv request, CancellationToken cancellationToken)
     {
-        var srcEnv = await GetSrcEnvAsync();
-
         var flags = await flagService.FindManyAsync(x => request.FlagIds.Contains(x.Id));
         var precheckResults = request.PrecheckResults;
 
+        var projectEnv = await envService.GetProjectEnvAsync(request.SourceEnvId);
         foreach (var flag in flags)
         {
             await CopyAsync(flag);
@@ -43,20 +41,6 @@ public class CopyToEnvHandler(
         }
 
         return new CopyToEnvResult(flags.Count);
-
-        async Task<string> GetSrcEnvAsync()
-        {
-            var rnString = await resourceService.GetRNAsync(request.SourceEnvId, ResourceTypes.Env);
-            if (!RN.TryParse(rnString, out var props))
-            {
-                return rnString;
-            }
-
-            var project = props.FirstOrDefault(x => x.Type == ResourceTypes.Project);
-            var env = props.FirstOrDefault(x => x.Type == ResourceTypes.Env);
-
-            return $"{project?.Key}/{env?.Key}";
-        }
 
         async Task CopyAsync(FeatureFlag flag)
         {
@@ -72,7 +56,7 @@ public class CopyToEnvHandler(
             // publish on feature flag change notification
             var dataChange = new DataChange(null).To(flag);
             var notification = new OnFeatureFlagChanged(
-                flag, Operations.Create, dataChange, currentUser.Id, $"Copied from \"{srcEnv}\""
+                flag, Operations.Create, dataChange, currentUser.Id, $"Copied from \"{projectEnv}\""
             );
             await publisher.Publish(notification, cancellationToken);
         }

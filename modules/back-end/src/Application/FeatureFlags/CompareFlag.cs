@@ -1,9 +1,9 @@
 using Application.Bases;
-using Domain.FeatureFlags;
+using Domain.Resources;
 
 namespace Application.FeatureFlags;
 
-public class CompareFlag : IRequest<FlagDiff>
+public class CompareFlag : IRequest<CompareFlagDetail>
 {
     public string Key { get; set; }
 
@@ -25,15 +25,21 @@ public class CompareFlagValidator : AbstractValidator<CompareFlag>
     }
 }
 
-public class CompareFlagHandler(IFeatureFlagService service)
-    : IRequestHandler<CompareFlag, FlagDiff>
+public class CompareFlagHandler(IFeatureFlagService flagService, IResourceServiceV2 resourceService)
+    : IRequestHandler<CompareFlag, CompareFlagDetail>
 {
-    public async Task<FlagDiff> Handle(CompareFlag request, CancellationToken cancellationToken)
+    public async Task<CompareFlagDetail> Handle(CompareFlag request, CancellationToken cancellationToken)
     {
-        var sourceFlag = await service.GetAsync(request.SourceEnvId, request.Key);
-        var targetFlag = await service.GetAsync(request.TargetEnvId, request.Key);
+        var sourceFlag = await flagService.GetAsync(request.SourceEnvId, request.Key);
+        var targetFlag = await flagService.FindOneAsync(x => x.EnvId == request.TargetEnvId && x.Key == request.Key);
+        if (targetFlag == null)
+        {
+            return null;
+        }
 
-        var diff = FlagDiffer.Diff(sourceFlag, targetFlag);
-        return diff;
+        var targetEnvRN = await resourceService.GetRNAsync(request.TargetEnvId, ResourceTypes.Env);
+        var relatedSegments = await flagService.GetRelatedSegmentsAsync([sourceFlag, targetFlag]);
+
+        return new CompareFlagDetail(sourceFlag, targetFlag, relatedSegments, targetEnvRN);
     }
 }

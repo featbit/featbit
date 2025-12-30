@@ -86,29 +86,6 @@ export class IFeatureFlagListFilter {
   }
 }
 
-export type CompareFlagOverviews = {
-  items: CompareFlagOverview[];
-  totalCount: number;
-}
-
-export type CompareFlagOverview = {
-  id: string;
-  name: string;
-  key: string;
-  tags: string[];
-  description: string;
-  diffs: FlagDiffOverview[];
-}
-
-export type FlagDiffOverview = {
-  targetEnvId: string;
-  onOffState: boolean;
-  individualTargeting: boolean;
-  targetingRule: boolean;
-  defaultRule: boolean;
-  offVariation: boolean;
-}
-
 export interface IFeatureFlagCreationPayload {
   name: string;
   key: string;

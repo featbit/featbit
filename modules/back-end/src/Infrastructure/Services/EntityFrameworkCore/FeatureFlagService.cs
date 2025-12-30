@@ -1,7 +1,9 @@
+using System.Text.Json;
 using Application.Bases.Exceptions;
 using Application.Bases.Models;
 using Application.FeatureFlags;
 using Domain.FeatureFlags;
+using Domain.Segments;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services.EntityFrameworkCore;
@@ -82,5 +84,28 @@ public class FeatureFlagService(AppDbContext dbContext)
             .ToListAsync();
 
         return allTags.SelectMany(x => x).Distinct().ToArray();
+    }
+
+    public async Task<ICollection<Segment>> GetRelatedSegmentsAsync(ICollection<FeatureFlag> flags)
+    {
+        var segmentIds = flags
+            .SelectMany(flag => flag.Rules)
+            .SelectMany(rule => rule.Conditions)
+            .Where(condition => condition.IsSegmentCondition())
+            .SelectMany(condition => JsonSerializer.Deserialize<string[]>(condition.Value)!)
+            .Distinct()
+            .Select(Guid.Parse)
+            .ToArray();
+
+        if (segmentIds.Length == 0)
+        {
+            return [];
+        }
+
+        var segments = await QueryableOf<Segment>()
+            .Where(x => segmentIds.Contains(x.Id))
+            .ToListAsync();
+
+        return segments;
     }
 }
