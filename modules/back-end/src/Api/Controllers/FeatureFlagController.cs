@@ -144,7 +144,7 @@ public class FeatureFlagController : ApiControllerBase
 
     [OpenApi]
     [HttpPut("{key}/toggle/{status}")]
-    [Authorize(Permissions.DeleteFlag)]
+    [Authorize(Permissions.UpdateFlagOn)]
     public async Task<ApiResponse<bool>> ToggleAsync(Guid envId, string key, bool status)
     {
         var request = new ToggleFeatureFlag
@@ -385,7 +385,9 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(copyToEnvResult);
     }
 
+    [OpenApi]
     [HttpPost("clone/{key}")]
+    [Authorize(Permissions.CloneFlag)]
     public async Task<ApiResponse<bool>> CloneAsync(Guid envId, string key, CloneFlag request)
     {
         request.EnvId = envId;
