@@ -69,7 +69,7 @@
         nzOverlayClassName="select-tags-dropdown"
         (nzVisibleChange)="onSelectTags($event)"
         [nzDropdownMenu]="tags">
-        Tags: {{ getSelectedTagsLabel() }}
+        <span i18n="@@common.tags">Tags</span>:&nbsp;{{ getSelectedTagsLabel() }}
         <nz-icon nzType="down" />
       </button>
       <nz-dropdown-menu #tags>

@@ -1822,7 +1822,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.ts</context>
-          <context context-type="linenumber">82</context>
+          <context context-type="linenumber">83</context>
         </context-group>
         <target>计划变更</target>
       </trans-unit>
@@ -1858,7 +1858,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.ts</context>
-          <context context-type="linenumber">84</context>
+          <context context-type="linenumber">85</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
@@ -2432,6 +2432,10 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/clone-feature-flag-modal/clone-feature-flag-modal.component.html</context>
           <context context-type="linenumber">95,96</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.html</context>
+          <context context-type="linenumber">72</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
@@ -3162,6 +3166,10 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
           <context context-type="linenumber">118,120</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.ts</context>
+          <context context-type="linenumber">174</context>
         </context-group>
         <target>已选择</target>
       </trans-unit>
@@ -4377,7 +4385,7 @@
         <source>SSO</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.ts</context>
-          <context context-type="linenumber">80</context>
+          <context context-type="linenumber">81</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
@@ -4389,7 +4397,7 @@
         <source>Multiple Organization</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.ts</context>
-          <context context-type="linenumber">86</context>
+          <context context-type="linenumber">87</context>
         </context-group>
         <target>多机构</target>
       </trans-unit>
@@ -4397,7 +4405,7 @@
         <source>Global User</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.ts</context>
-          <context context-type="linenumber">88</context>
+          <context context-type="linenumber">89</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
@@ -4413,7 +4421,7 @@
         <source>Shareable Segment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.ts</context>
-          <context context-type="linenumber">90</context>
+          <context context-type="linenumber">91</context>
         </context-group>
         <target>共享用户组</target>
       </trans-unit>
@@ -4421,7 +4429,7 @@
         <source>Auto Agents</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.ts</context>
-          <context context-type="linenumber">92</context>
+          <context context-type="linenumber">93</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
@@ -4429,11 +4437,19 @@
         </context-group>
         <target>自动代理</target>
       </trans-unit>
+      <trans-unit id="common.flag-comparison" datatype="html">
+        <source>Flag Comparison</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/license/license-card.component.ts</context>
+          <context context-type="linenumber">95</context>
+        </context-group>
+        <target>开关对比</target>
+      </trans-unit>
       <trans-unit id="org.org.load-license-failed" datatype="html">
         <source>Failed to load license usage, please try again later!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.ts</context>
-          <context context-type="linenumber">138</context>
+          <context context-type="linenumber">141</context>
         </context-group>
         <target>加载许可证用量失败，请稍后再试</target>
       </trans-unit>
@@ -7620,6 +7636,18 @@
         </context-group>
         <target>没有差异</target>
       </trans-unit>
+      <trans-unit id="common.any" datatype="html">
+        <source>Any</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.ts</context>
+          <context context-type="linenumber">168</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/resources-selector/resources-selector.component.html</context>
+          <context context-type="linenumber">79,80</context>
+        </context-group>
+        <target>任意</target>
+      </trans-unit>
       <trans-unit id="2207820498839575819" datatype="html">
         <source>difference</source>
         <context-group purpose="location">
@@ -9425,14 +9453,6 @@
           <context context-type="linenumber">68,69</context>
         </context-group>
         <target>资源名 (RN)</target>
-      </trans-unit>
-      <trans-unit id="common.any" datatype="html">
-        <source>Any</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/resources-selector/resources-selector.component.html</context>
-          <context context-type="linenumber">79,80</context>
-        </context-group>
-        <target>任意</target>
       </trans-unit>
       <trans-unit id="iam.routing.team" datatype="html">
         <source>Team</source>

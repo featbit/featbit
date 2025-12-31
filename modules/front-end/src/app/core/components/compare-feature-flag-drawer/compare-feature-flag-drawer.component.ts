@@ -217,7 +217,7 @@ export class CompareFeatureFlagDrawerComponent {
       return {
         ...target,
         variations: targetVariationsIfApplied,
-        rules: getAppliedTargetRules(source, target, diff.targetingRule, row.copyMode)
+        rules: getAppliedTargetRules(source, target, diff.targetingRule, targetVariationsIfApplied, row.copyMode)
       }
     }
 

@@ -36,7 +36,7 @@ export function getAppliedTargetUsers(
   for (const targetVariation of targetVariations) {
     const sourceKeyIds = source.targetUsers.find(stu => {
       const sourceVariation = source.variations.find(v => v.value === targetVariation.value);
-      return stu.variationId === sourceVariation.id;
+      return stu.variationId === sourceVariation?.id;
     })?.keyIds ?? [];
 
     if (copyMode === 'overwrite') {
@@ -58,16 +58,16 @@ export function getAppliedTargetUsers(
   return newValue;
 }
 
-
 export function getAppliedTargetRules(
   source: IFeatureFlag,
   target: IFeatureFlag,
   ruleDiffs: TargetingRuleDiff[],
+  targetVariations: IVariation[],
   copyMode: string): IRule[] {
   function mapSourceRule(rule: IRule) {
     const newRuleVariations: IRuleVariation[] = rule.variations.map(sv => {
       const sourceVariation = source.variations.find(v => v.id === sv.id);
-      const targetVariation = target.variations.find(tv => tv.value === sourceVariation.value);
+      const targetVariation = targetVariations.find(tv => tv.value === sourceVariation.value);
       return {
         ...sv,
         id: targetVariation.id

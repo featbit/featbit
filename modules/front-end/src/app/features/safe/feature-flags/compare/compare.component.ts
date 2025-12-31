@@ -165,13 +165,13 @@ export class CompareComponent implements OnInit {
   getSelectedTagsLabel(): string {
     const selectedTags = this.availableTags.filter(tag => tag.selected);
     if (selectedTags.length === 0) {
-      return 'any';
+      return $localize`:@@common.any:Any`;
     }
 
     if (selectedTags.length === 1) {
       return selectedTags[0].name;
     }
-    return `${selectedTags.length} selected`;
+    return `${selectedTags.length} ` + $localize`:@@common.selected:Selected`;
   }
 
   truncateText(text: string, maxLength: number = 80): string {
