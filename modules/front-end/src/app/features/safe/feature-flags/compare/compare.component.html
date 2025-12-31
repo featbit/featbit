@@ -28,9 +28,19 @@
   <button [disabled]="selectedEnvs.length === 0" nz-button nzType="primary" (click)="apply()">Apply</button>
 </div>
 
-@if (targetEnvs.length === 0) {
+@if (!isCompareGranted) {
+  <div class="empty-state no-license">
+    <i nz-icon nzType="icons:icon-lock" [style.fontSize.px]="64"></i>
+    <nz-alert
+      nzType="info"
+      i18n-nzDescription="@@ff.compare.compare-description"
+      nzDescription="Comparing and copy flag settings across environments helps you to manage your feature flags easier."
+    ></nz-alert>
+    <p i18n="@@common.need-license">You don't have a license or your current license doesn't grant this feature, please contact FeatBit team to get a license.</p>
+  </div>
+} @else if (targetEnvs.length === 0) {
   <div class="empty-state">
-    <i nz-icon nzType="swap" [style.fontSize.px]="48"></i>
+    <i nz-icon nzType="swap" [style.fontSize.px]="64"></i>
     <p i18n="@@ff.compare.empty-state-hint">Select target environments to start comparing feature flags</p>
   </div>
 } @else {

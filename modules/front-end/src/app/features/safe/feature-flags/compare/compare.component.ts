@@ -17,10 +17,11 @@ import { IFeatureFlagListFilter } from "@features/safe/feature-flags/types/featu
 import { NzMessageService } from "ng-zorro-antd/message";
 import { debounceTime, finalize } from "rxjs/operators";
 import { Subject } from "rxjs";
-import { IEnvironment, IProject, IProjectEnv } from "@shared/types";
+import { IEnvironment, IProject, IProjectEnv, LicenseFeatureEnum } from "@shared/types";
 import { ProjectService } from "@services/project.service";
-import { getCurrentProjectEnv } from "@utils/project-env";
+import { getCurrentLicense, getCurrentProjectEnv } from "@utils/project-env";
 import { CompareFlagOverview, CompareFlagOverviews } from "@features/safe/feature-flags/types/compare-flag";
+import { NzAlertComponent } from "ng-zorro-antd/alert";
 
 type EnvSelectOption = {
   label: string,
@@ -48,7 +49,8 @@ type SelectableTag = {
     NzSpinModule,
     NzDropDownModule,
     NzCheckboxModule,
-    CoreModule
+    CoreModule,
+    NzAlertComponent
   ],
   templateUrl: './compare.component.html',
   styleUrl: './compare.component.less'
@@ -58,10 +60,15 @@ export class CompareComponent implements OnInit {
   private projectService = inject(ProjectService);
   private message: NzMessageService = inject(NzMessageService);
 
+  isCompareGranted: boolean = false;
+
   ngOnInit() {
     this.loadEnvs().then();
     this.loadTags();
     this.search$.pipe(debounceTime(250)).subscribe(() => this.loadOverview());
+
+    const license = getCurrentLicense();
+    this.isCompareGranted = license.isGranted(LicenseFeatureEnum.FlagComparison);
   }
 
   isLoadingOverview: boolean = false;
@@ -74,6 +81,10 @@ export class CompareComponent implements OnInit {
   filter: IFeatureFlagListFilter = new IFeatureFlagListFilter();
 
   loadOverview() {
+    if (!this.isCompareGranted) {
+      return;
+    }
+
     this.isLoadingOverview = true;
     this.flagService.getCompareOverview(this.targetEnvs.map(env => env.value), this.filter)
     .pipe(finalize(() => this.isLoadingOverview = false))

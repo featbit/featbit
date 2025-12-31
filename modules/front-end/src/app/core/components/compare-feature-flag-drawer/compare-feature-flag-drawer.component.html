@@ -45,7 +45,17 @@
         }
       </div>
     </div>
-    @if (!targetEnv) {
+    @if (!isCompareGranted) {
+      <div class="empty-state no-license">
+        <i nz-icon nzType="icons:icon-lock" [style.fontSize.px]="48"></i>
+        <nz-alert
+          nzType="info"
+          i18n-nzDescription="@@ff.compare.compare-description"
+          nzDescription="Comparing and copy flag settings across environments helps you to manage your feature flags easier."
+        ></nz-alert>
+        <p i18n="@@common.need-license">You don't have a license or your current license doesn't grant this feature, please contact FeatBit team to get a license.</p>
+      </div>
+    } @else if (!targetEnv) {
       <div class="empty-state">
         <i nz-icon nzType="swap" [style.fontSize.px]="48"></i>
         <p i18n="@@ff.compare.select-target-env-tip">Please select a target environment to compare flag settings</p>

@@ -363,6 +363,7 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(flag);
     }
 
+    [Authorize(LicenseFeatures.FlagComparison)]
     [HttpPost("compare-overview")]
     public async Task<ApiResponse<PagedResult<CompareFlagOverview>>> GetCompareOverviewAsync(Guid envId, GetCompareFlagOverview request)
     {
@@ -372,6 +373,7 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(overview);
     }
 
+    [Authorize(LicenseFeatures.FlagComparison)]
     [HttpGet("{key}/compare-with/{targetEnvId:guid}")]
     public async Task<ApiResponse<CompareFlagDetail>> CompareAsync(Guid envId, Guid targetEnvId, string key)
     {
@@ -386,6 +388,7 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(diff);
     }
 
+    [Authorize(LicenseFeatures.FlagComparison)]
     [HttpPut("{key}/copy-settings-to/{targetEnvId:guid}")]
     public async Task<ApiResponse<bool>> CopySettingsAsync(Guid envId, string key, Guid targetEnvId, CopyFlagSettings request)
     {

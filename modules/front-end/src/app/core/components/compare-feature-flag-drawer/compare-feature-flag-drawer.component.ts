@@ -1,10 +1,10 @@
 import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
-import { getCurrentProjectEnv } from '@utils/project-env';
+import { getCurrentLicense, getCurrentProjectEnv } from '@utils/project-env';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { FeatureFlagService } from "@services/feature-flag.service";
 import { CompareFlagDetail } from "@features/safe/feature-flags/types/compare-flag";
 import { finalize } from "rxjs/operators";
-import { IEnvironment, IProject } from "@shared/types";
+import { IEnvironment, IProject, LicenseFeatureEnum } from "@shared/types";
 import { ProjectService } from "@services/project.service";
 import { FlagDiffRow } from "@core/components/compare-feature-flag-drawer/types";
 import { RenderOnOffState } from "@core/components/compare-feature-flag-drawer/render-on-off-state";
@@ -100,17 +100,22 @@ export class CompareFeatureFlagDrawerComponent {
   isLoadingDiff: boolean = false;
   targetFlagNotExists: boolean = true;
   loadDiff() {
+    if (!this.isCompareGranted) {
+      return;
+    }
+
     this.isLoadingDiff = true;
     this.targetFlagNotExists = false;
     this.flagService.compareFlag(this.selectedTargetEnvId, this.flag.key)
     .pipe(finalize(() => this.isLoadingDiff = false))
     .subscribe({
       next: (detail) => {
+        this.detail = detail;
         if (!detail) {
           this.targetFlagNotExists = true;
+          return;
         }
 
-        this.detail = detail;
         this.initRows();
       },
       error: () => this.message.error($localize`:@@common.loading-failed-try-again:Loading failed, please try again`)
@@ -118,12 +123,16 @@ export class CompareFeatureFlagDrawerComponent {
   }
 
   sourceEnv: Env;
+  isCompareGranted: boolean = false;
   async init() {
     const currentEnv = getCurrentProjectEnv();
     this.sourceEnv = {
       id: currentEnv.envId,
       name: `${currentEnv.projectName}/${currentEnv.envName}`
     };
+
+    const license = getCurrentLicense();
+    this.isCompareGranted = license.isGranted(LicenseFeatureEnum.FlagComparison);
 
     await this.loadEnvs();
   }

@@ -159,15 +159,28 @@
   align-items: center;
   justify-content: center;
   padding: 80px 20px;
+  min-height: calc(100vh - 320px);
   color: #8c8c8c;
 
+  &.no-license {
+    i {
+      color: #23d393;
+      margin-bottom: 16px;
+    }
+
+    nz-alert {
+      margin-bottom: 12px;
+    }
+  }
+
   i {
-    margin-bottom: 16px;
     color: #d9d9d9;
+    margin-bottom: 16px;
   }
 
   p {
     font-size: 14px;
-    margin: 0;
+    text-align: center;
+    max-width: 650px;
   }
 }
