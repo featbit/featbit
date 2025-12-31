@@ -21,18 +21,13 @@
     }
   </div>
   @if (!isFineGrainedAccessControlGranted) {
-    <nz-alert
-      nzType="info"
-      nzShowIcon
-      [nzDescription]="description"
-      class="license-info-alert"
-      style="margin: 16px 0; border-radius: 8px;">
-      <ng-template #description>
-        <div style="padding-top: 2px;">
-          <ng-container i18n="@@iam.policies.details.flag-rbac-license-description">Feature flag resource type is a paid feature. Upgrade your plan to enable fine-grained access control.</ng-container>
-        </div>
-      </ng-template>
-    </nz-alert>
+    <div style="margin-top: 12px">
+      <message
+        [type]="'info'"
+        content="Feature flag resource type is a paid feature. Upgrade your plan to enable fine-grained access control."
+        i18n-content="@@iam.policies.details.flag-rbac-license-description">
+      </message>
+    </div>
   }
   <div class="statements-wrapper">
     @for (statement of statements; track statement.id) {
