@@ -2,7 +2,15 @@ const dbName = "featbit";
 print('use', dbName, 'database')
 db = db.getSiblingDB(dbName)
 
+// https://github.com/featbit/featbit/pull/802
+
+db.Segments.updateMany(
+    { tags: { $exists: false } },
+    { $set: { tags: [] } }
+);
+
 // https://github.com/featbit/featbit/pull/811
+
 db.Organizations.updateMany(
     {},
     {

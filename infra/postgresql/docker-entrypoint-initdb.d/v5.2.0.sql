@@ -1,5 +1,10 @@
 \connect featbit
 
+-- https://github.com/featbit/featbit/pull/802
+
+alter table segments
+    add column tags text[] default array []::text[];
+
 -- https://github.com/featbit/featbit/pull/811
 
 alter table organizations
