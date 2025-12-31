@@ -4,7 +4,7 @@ import { NzMessageService } from "ng-zorro-antd/message";
 import { ProjectService } from "@services/project.service";
 import { getCurrentProjectEnv } from "@utils/project-env";
 import { IEnvironment, IProject, IProjectEnv } from "@shared/types";
-import { CopyToEnvPrecheckResult, FeatureFlagListCheckItem } from "@features/safe/feature-flags/types/feature-flag";
+import { CopyToEnvPrecheckResult } from "@features/safe/feature-flags/types/feature-flag";
 
 type BulkCopyCheckItem = {
   id: string;
@@ -29,9 +29,21 @@ export class CopyFeatureFlagModalComponent implements OnInit {
   @Input()
   visible: boolean = false;
 
+  private _targetEnvId: string = '';
+  @Input()
+  set targetEnvId(value: string) {
+    this._targetEnvId = value;
+    if (value) {
+      this.onSelectTargetEnvironment();
+    }
+  }
+  get targetEnvId(): string {
+    return this._targetEnvId;
+  }
+
   private _flags: BulkCopyCheckItem[] = [];
   @Input()
-  set flags(value: FeatureFlagListCheckItem[]) {
+  set flags(value: {id: string, name: string}[]) {
     this._flags = value.map(x => ({
         id: x.id,
         name: x.name,
@@ -52,10 +64,9 @@ export class CopyFeatureFlagModalComponent implements OnInit {
   }
 
   @Output()
-  close: EventEmitter<void> = new EventEmitter();
+  close: EventEmitter<boolean> = new EventEmitter();
 
   isLoading: boolean = true;
-  targetEnvId: string = '';
   envs: { label: string, value: string }[] = [];
   currentProjectEnv: IProjectEnv;
 
@@ -84,7 +95,7 @@ export class CopyFeatureFlagModalComponent implements OnInit {
     this.isLoading = false;
   }
 
-  onClose() {
+  onClose(canceled: boolean) {
     this.targetEnvId = '';
 
     this.checking = false;
@@ -92,14 +103,14 @@ export class CopyFeatureFlagModalComponent implements OnInit {
 
     this.copying = false;
 
-    this.close.emit();
+    this.close.emit(canceled);
   }
 
   checking: boolean = false;
   precheckResults: CopyToEnvPrecheckResult[] = [];
 
   onSelectTargetEnvironment() {
-    if (!this.targetEnvId) {
+    if (!this._targetEnvId) {
       return;
     }
 
@@ -107,7 +118,7 @@ export class CopyFeatureFlagModalComponent implements OnInit {
 
     const flagIds = this.flags.map(x => x.id);
 
-    this.flagService.copyToEnvPrecheck(this.targetEnvId, flagIds).subscribe({
+    this.flagService.copyToEnvPrecheck(this._targetEnvId, flagIds).subscribe({
       next: precheckResults => {
         this.precheckResults = precheckResults;
 
@@ -141,12 +152,11 @@ export class CopyFeatureFlagModalComponent implements OnInit {
     const selectedFlagIds = this.selectedFlags.map(x => x.id);
     const precheckResults = this.precheckResults.filter(x => selectedFlagIds.includes(x.id));
 
-    this.flagService.copyToEnv(this.targetEnvId, selectedFlagIds, precheckResults).subscribe({
+    this.flagService.copyToEnv(this._targetEnvId, selectedFlagIds, precheckResults).subscribe({
       next: _ => {
         this.copying = false;
         this.msg.success($localize `:@@common.operation-success:Operation succeeded`);
-
-        this.onClose();
+        this.onClose(false);
       },
       error: _ => {
         this.msg.error($localize`:@@common.operation-failed:Operation failed`);

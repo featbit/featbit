@@ -1,7 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { ISegment } from '@features/safe/segments/types/segments-index';
-import { ruleOps, IRuleOp } from "@core/components/find-rule/ruleConfig";
 import { SegmentService } from '@services/segment.service';
 import {
   getPercentageFromDecimal,
@@ -10,7 +9,7 @@ import {
   isSingleOperator
 } from '@utils/index';
 import {FeatureFlag, IFeatureFlag} from "@features/safe/feature-flags/types/details";
-import {IRuleVariation, isNotPercentageRollout} from "@shared/rules";
+import { IRuleVariation, isNotPercentageRollout, RULE_OPS } from "@shared/rules";
 import {FeatureFlagService} from "@services/feature-flag.service";
 import {IUserType} from "@shared/types";
 
@@ -50,7 +49,7 @@ export class ExptRulesDrawerComponent {
           const result = {
             conditions: rule.conditions.map(condition => {
               const isSegment = isSegmentCondition(condition.property);
-              let ruleType: string = isSegment ? 'multi': ruleOps.filter((rule: IRuleOp) => rule.value === condition.op)[0].type;
+              let ruleType: string = isSegment ? 'multi': RULE_OPS.filter(ruleOp => ruleOp.value === condition.op)[0].type;
 
               let multipleValue: string[] = [];
 

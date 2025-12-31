@@ -1,0 +1,215 @@
+<nz-drawer
+  nzClosable="false"
+  [nzExtra]="extra"
+  [nzVisible]="visible"
+  [nzTitle]="title"
+  [nzWidth]="1000"
+  (nzOnClose)="onClose(true)">
+  <ng-template #title>
+    <span i18n="@@common.compare">Compare</span>&nbsp;<strong>{{ flag?.name || 'Unknown Flag' }}</strong>
+  </ng-template>
+  <ng-container *nzDrawerContent>
+    <div class="environments-row">
+      <div class="env-item source">
+        <span class="env-label" i18n="@@ff.compare.source-environment">Source Environment</span>
+        <nz-tag nzBordered="false" nzColor="green">
+          <i nz-icon nzType="environment" nzTheme="outline"></i>
+          {{ sourceEnv?.name }}
+        </nz-tag>
+      </div>
+
+      <i nz-icon nzType="arrow-right" class="compare-icon"></i>
+
+      <div class="env-item target">
+        <span class="env-label" i18n="@@ff.compare.target-environment">Target Environment</span>
+        @if (isTargetEnvLocked) {
+          <nz-tag nzBordered="false" nzColor="volcano">
+            <i nz-icon nzType="environment" nzTheme="outline"></i>
+            {{ targetEnv?.name }}
+            <i nz-icon nzType="lock" nzTheme="outline" class="lock-icon"></i>
+          </nz-tag>
+        } @else {
+          <nz-select
+            nzShowSearch
+            nzPlaceHolder="Select target environment"
+            i18n-nzPlaceHolder="@@ff.compare.select-target-env"
+            [nzOptions]="envs"
+            [(ngModel)]="selectedTargetEnvId"
+            (ngModelChange)="onTargetEnvChange()"
+            [nzCustomTemplate]="targetEnvOption">
+            <ng-template #targetEnvOption let-selected>
+              <i nz-icon nzType="environment" nzTheme="outline"></i>
+              {{ selected.nzLabel }}
+            </ng-template>
+          </nz-select>
+        }
+      </div>
+    </div>
+    @if (!isCompareGranted) {
+      <div class="empty-state no-license">
+        <i nz-icon nzType="icons:icon-lock" [style.fontSize.px]="48"></i>
+        <nz-alert
+          nzType="info"
+          i18n-nzDescription="@@ff.compare.compare-description"
+          nzDescription="Comparing and copy flag settings across environments helps you to manage your feature flags easier."
+        ></nz-alert>
+        <p i18n="@@common.need-license">You don't have a license or your current license doesn't grant this feature, please contact FeatBit team to get a license.</p>
+      </div>
+    } @else if (!targetEnv) {
+      <div class="empty-state">
+        <i nz-icon nzType="swap" [style.fontSize.px]="48"></i>
+        <p i18n="@@ff.compare.select-target-env-tip">Please select a target environment to compare flag settings</p>
+      </div>
+    } @else if (isLoadingDiff) {
+      <div class="loading-state">
+        <nz-spin nzTip="Loading comparison data..." i18n-nzTip="@@ff.compare.loading-comparision-data"></nz-spin>
+      </div>
+    } @else if (targetFlagNotExists) {
+      <div class="empty-state">
+        <i nz-icon nzType="exclamation-circle" [style.fontSize.px]="48" nzTheme="outline"></i>
+        <p>
+          <span i18n="@@ff.compare.the-feature-flag">The feature flag</span>&nbsp;
+          <strong>{{flag?.name}}</strong>&nbsp;
+          <span i18n="@@ff.compare.does-not-exist-in-target-env">does not exist in the target environment</span>&nbsp;
+          <strong>{{ targetEnv?.name }}</strong>.
+        </p>
+      </div>
+    } @else {
+      <p class="tip">
+        <span i18n="@@ff.compare.copy-setting-tip">Select the settings you want to copy from</span>&nbsp;
+        <strong>{{ sourceEnv?.name }}</strong>&nbsp;
+        <span i18n="@@common.to">to</span>&nbsp;
+        <strong>{{ targetEnv?.name }}</strong>.
+      </p>
+      <nz-table
+        [nzData]="rows"
+        nzShowPagination="false"
+        nzFrontPagination="false"
+        nzOuterBordered
+        class="comparison-table"
+      >
+        <thead>
+          <tr>
+            <th nzWidth="300px">
+              <label
+                nz-checkbox
+                [nzChecked]="allSelected"
+                [nzIndeterminate]="someSelected"
+                (nzCheckedChange)="onSelectAll($event)"
+              >
+                <span i18n="@@ff.compare.select-all">Select All</span>
+              </label>
+            </th>
+            <th>
+              <span i18n="@@ff.compare.settings-in">Settings in</span>&nbsp;<strong>{{ sourceEnv?.name }}</strong>
+            </th>
+            <th>
+              <span i18n="@@ff.compare.settings-in">Settings in</span>&nbsp;<strong>{{ targetEnv?.name }}</strong>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of rows; track row.key) {
+            @if (row.key === 'targetingRule' && !detail.isRulesCopyable) {
+              <tr colspan="3">
+                <td rowspan="2">
+                  <label nz-checkbox [nzDisabled]="true">
+                    {{ row.label }}
+                  </label>
+                </td>
+                <td colspan="2">
+                  <div class="warning-text">
+                    <span i18n="@@ff.compare.rules-not-copyable-warning">Targeting rules cannot be copied because one of them has references to environment-specific segments or uses shared segments incompatible with the target environment.</span>
+                  </div>
+                </td>
+              </tr>
+            }
+            <tr [class.has-diff]="row.hasDiff">
+              @if (row.key !== 'targetingRule' || detail.isRulesCopyable) {
+                <td>
+                  <label
+                    nz-checkbox
+                    [nzDisabled]="!row.hasDiff || (row.key === 'targetingRule' && !detail.isRulesCopyable)"
+                    [(ngModel)]="row.selected">
+                    {{ row.label }}
+                  </label>
+                  @if (row.selected && (row.key === 'individualTargeting' || row.key === 'targetingRule')) {
+                    <div class="copy-mode-options">
+                      <nz-radio-group [(ngModel)]="row.copyMode" nzSize="small">
+                        <label nz-radio nzValue="overwrite">
+                          @if (row.key === 'individualTargeting') {
+                            <span i18n="@@ff.compare.overwrite-users">Overwrite existing users</span>
+                          } @else {
+                            <span i18n="@@ff.compare.overwrite-rules">Overwrite existing rules</span>
+                          }
+                        </label>
+                        <label nz-radio nzValue="append">
+                          @if (row.key === 'individualTargeting') {
+                            <span i18n="@@ff.compare.append-users">Append to existing users</span>
+                          } @else {
+                            <span i18n="@@ff.compare.append-rules">Append to existing rules</span>
+                          }
+                        </label>
+                      </nz-radio-group>
+                    </div>
+                  }
+                </td>
+              }
+              <td>
+                <div class="value-content source-value" [class.will-change]="row.selected && row.hasDiff">
+                  <ng-container
+                    *ngComponentOutlet="row.render;
+                    inputs: {'data': {flag: detail.source, relatedSegments: detail.relatedSegments}}"
+                  />
+                </div>
+              </td>
+              <td>
+                <div class="value-content target-value" [class.will-change]="row.selected && row.hasDiff">
+                  <ng-container
+                    *ngComponentOutlet="row.render;
+                    inputs: {'data': {flag: detail.target, relatedSegments: detail.relatedSegments}}"
+                  />
+                </div>
+                @if (row.selected && row.hasDiff) {
+                  <div class="change-indicator">
+                    <i nz-icon nzType="check-circle" nzTheme="fill"></i>
+                    <span i18n="@@ff.compare.value-after-applied">Value after applied</span>
+                  </div>
+                  <div class="value-content applied-value">
+                    <ng-container
+                      *ngComponentOutlet="row.render;
+                      inputs: {'data': { flag: getAppliedFlag(row), relatedSegments: detail.relatedSegments}}"
+                    />
+                  </div>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </nz-table>
+
+      <div class="action-section">
+        <div class="selection-summary">
+          @if (selectedCount > 0) {
+            {{ selectedCount }} <span i18n="@@ff.compare.settings-selected">setting(s) selected</span>
+          } @else {
+            <span class="no-selection" i18n="@@ff.compare.no-selection">No settings selected</span>
+          }
+        </div>
+        <button
+          nz-button
+          nzType="primary"
+          [nzLoading]="isCopying"
+          [disabled]="selectedCount === 0"
+          (click)="copySettings()"
+        >
+          <i nz-icon nzType="icons:icon-copy" nzTheme="outline"></i>
+          <span i18n="@@ff.compare.copy-settings">Copy Settings</span>
+        </button>
+      </div>
+    }
+  </ng-container>
+  <ng-template #extra>
+    <i (click)="onClose(true)" nz-icon nzType="icons:icon-close"></i>
+  </ng-template>
+</nz-drawer>

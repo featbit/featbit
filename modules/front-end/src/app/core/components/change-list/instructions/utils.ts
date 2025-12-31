@@ -1,10 +1,10 @@
 import { firstValueFrom } from "rxjs";
 import { SegmentService } from "@services/segment.service";
-import { ICondition } from "@shared/rules";
+import { ICondition, RULE_OPS } from "@shared/rules";
 import { ISegment } from "@features/safe/segments/types/segments-index";
 import { IInstructionCondition } from "@core/components/change-list/instructions/types";
 import { isSegmentCondition } from "@utils/index";
-import { findIndex, ruleOps } from "@core/components/find-rule/ruleConfig";
+import { findIndex } from "@core/components/find-rule/ruleConfig";
 
 export const getSegmentRefs = async (segmentService: SegmentService, segmentIds: string[]) => {
   if (segmentIds.length === 0) {
@@ -24,11 +24,11 @@ export const mapToIInstructionCondition = (condition: ICondition, segmentRefs: {
 
   if (!isSegment) {
     const ruleOpIdx = findIndex(condition.op);
-    const isMultiValue = ruleOps[ruleOpIdx].type === 'multi';
+    const isMultiValue = RULE_OPS[ruleOpIdx].type === 'multi';
     return {
       property: condition.property,
       op: condition.op,
-      opLabel: ruleOps[ruleOpIdx].label,
+      opLabel: RULE_OPS[ruleOpIdx].label,
       displayValue: !['IsTrue', 'IsFalse'].includes(condition.op),
       value: isMultiValue ? JSON.parse(condition.value) : condition.value,
       isMultiValue

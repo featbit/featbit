@@ -1,8 +1,8 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Subject } from 'rxjs';
-import { encodeURIComponentFfc, getProfile, getQueryParamsFromObject } from '@shared/utils';
+import { getProfile, getQueryParamsFromObject } from '@shared/utils';
 import {
   FeatureFlagListCheckItem,
   IFeatureFlagListFilter,
@@ -25,7 +25,6 @@ export class IndexComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef,
-    private router: Router,
     private featureFlagService: FeatureFlagService,
     private msg: NzMessageService,
     private modal: NzModalService,
@@ -162,6 +161,13 @@ export class IndexComponent implements OnInit {
     }
   }
 
+  compareVisible: boolean = false;
+  flagToCompare: IFeatureFlagListItem;
+  compare(flag: IFeatureFlagListItem) {
+    this.flagToCompare = flag;
+    this.compareVisible = true;
+  }
+
   featureFlagListModel: IFeatureFlagListModel = {
     items: [],
     totalCount: 0
@@ -229,10 +235,6 @@ export class IndexComponent implements OnInit {
         data.isToggling = false;
       }
     });
-  }
-
-  navigateToFlagDetail(key: string) {
-    this.router.navigateByUrl(`/feature-flags/${encodeURIComponentFfc(key)}/targeting`).then();
   }
 
   archive(flag: IFeatureFlagListItem) {

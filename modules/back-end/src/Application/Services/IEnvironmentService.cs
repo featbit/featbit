@@ -24,4 +24,6 @@ public interface IEnvironmentService : IService<Environment>
     Task<IEnumerable<Setting>> GetSettingsAsync(Guid envId, string type);
 
     Task<bool> HasKeyBeenUsedAsync(Guid projectId, string key);
+
+    Task<string> GetProjectEnvAsync(Guid envId);
 }

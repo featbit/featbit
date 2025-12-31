@@ -28,6 +28,17 @@ public class Condition
         return theOperator.IsMatch(userValue, Value);
     }
 
+    public bool IsMultiValue()
+    {
+        if (IsSegmentCondition())
+        {
+            return true;
+        }
+
+        string[] multiOps = [OperatorTypes.IsOneOf, OperatorTypes.NotOneOf];
+        return multiOps.Contains(Op);
+    }
+
     public void Assign(Condition source)
     {
         if (source.Id != Id)

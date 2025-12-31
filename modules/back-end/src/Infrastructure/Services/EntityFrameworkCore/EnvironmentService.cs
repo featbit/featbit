@@ -225,4 +225,22 @@ public class EnvironmentService(AppDbContext dbContext, ILogger<EnvironmentServi
             string.Equals(environment.Key.ToLower(), key.ToLower())
         );
     }
+
+    public async Task<string?> GetProjectEnvAsync(Guid envId)
+    {
+        var query =
+            from project in QueryableOf<Project>()
+            join environment in QueryableOf<Environment>() on project.Id equals environment.ProjectId
+            where environment.Id == envId
+            select new
+            {
+                project = project.Key,
+                env = environment.Key
+            };
+
+        var result = await query.FirstOrDefaultAsync();
+        return result == null
+            ? string.Empty
+            : $"{result.project}/{result.env}";
+    }
 }

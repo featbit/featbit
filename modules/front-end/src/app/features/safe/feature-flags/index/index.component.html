@@ -3,7 +3,7 @@
     <div class="table-search-area">
       <div class="search-inputs">
         <nz-input-group style="width: 220px" [nzPrefix]="prefixIconSearch">
-          <input nz-input type="text" placeholder="Filter by name or key" i18n-placeholder="@@ff.idx.filter-by-name-and-key" [(ngModel)]="featureFlagFilter.name" (ngModelChange)="onSearch(true)">
+          <input nz-input type="text" placeholder="Filter flags by name or key" i18n-placeholder="@@ff.filter-by-name-and-key" [(ngModel)]="featureFlagFilter.name" (ngModelChange)="onSearch(true)">
         </nz-input-group>
         <ng-template #prefixIconSearch>
           <i nz-icon nzType="icons:icon-search"></i>
@@ -40,6 +40,10 @@
         <button nz-button nzType="primary" (click)="creationDrawerVisible = true">
           <i nz-icon nzType="icons:icon-add"></i>
           <ng-container i18n="@@common.add">Add</ng-container>
+        </button>
+        <button class="compare-btn" nz-button nzType="primary" [routerLink]="['/feature-flags/compare']">
+          <i nz-icon nzType="swap"></i>
+          <span i18n="@@common.compare">Compare</span>
         </button>
         <button class="more-action" nz-dropdown [nzDropdownMenu]="menu" >
           <i nz-icon nzType="icons:icon-menu"></i>
@@ -86,7 +90,7 @@
               ></td>
               <!-- Name Column: name, key, created by, created at -->
               <td class="name-cell">
-                <div class="flag-name" (click)="navigateToFlagDetail(flag.key)">{{flag.name}}</div>
+                <div class="flag-name" [routerLink]="[flag.key, 'targeting']">{{flag.name}}</div>
                 <div class="flag-key" (click)="copyText($event, flag.key)">
                   {{flag.key}}
                   <i class="copy-icon" nz-icon nzType="icons:icon-copy"></i>
@@ -202,11 +206,13 @@
               </td>
               <!-- Actions Column -->
               <td class="actions-cell">
-                <a class="action-link primary" (click)="navigateToFlagDetail(flag.key)" i18n="@@common.details">Details</a>
+                <a class="action-link primary" [routerLink]="[flag.key, 'targeting']" i18n="@@common.details">Details</a>
                 <nz-divider nzType="vertical"></nz-divider>
                 <a class="action-link primary" (click)="copy(flag)" i18n="@@common.copy-to">Copy To</a>
                 <nz-divider nzType="vertical"></nz-divider>
                 <a class="action-link primary" (click)="clone(flag)" i18n="@@common.clone">Clone</a>
+                <nz-divider nzType="vertical"></nz-divider>
+                <a class="action-link primary" (click)="compare(flag)" i18n="@@common.compare">Compare</a>
                 <nz-divider nzType="vertical"></nz-divider>
                 @if (isArchived) {
                   <a class="action-link secondary"
@@ -245,3 +251,8 @@
   (close)="cloneModalClosed($event)"
   [visible]="cloneVisible">
 </clone-feature-flag-modal>
+<compare-feature-flag-drawer
+  [flag]="flagToCompare"
+  [visible]="compareVisible"
+  (close)="compareVisible = false">
+</compare-feature-flag-drawer>

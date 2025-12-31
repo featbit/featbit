@@ -363,6 +363,43 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(flag);
     }
 
+    [Authorize(LicenseFeatures.FlagComparison)]
+    [HttpPost("compare-overview")]
+    public async Task<ApiResponse<PagedResult<CompareFlagOverview>>> GetCompareOverviewAsync(Guid envId, GetCompareFlagOverview request)
+    {
+        request.SourceEnvId = envId;
+
+        var overview = await Mediator.Send(request);
+        return Ok(overview);
+    }
+
+    [Authorize(LicenseFeatures.FlagComparison)]
+    [HttpGet("{key}/compare-with/{targetEnvId:guid}")]
+    public async Task<ApiResponse<CompareFlagDetail>> CompareAsync(Guid envId, Guid targetEnvId, string key)
+    {
+        var request = new CompareFlag
+        {
+            Key = key,
+            SourceEnvId = envId,
+            TargetEnvId = targetEnvId
+        };
+
+        var diff = await Mediator.Send(request);
+        return Ok(diff);
+    }
+
+    [Authorize(LicenseFeatures.FlagComparison)]
+    [HttpPut("{key}/copy-settings-to/{targetEnvId:guid}")]
+    public async Task<ApiResponse<bool>> CopySettingsAsync(Guid envId, string key, Guid targetEnvId, CopyFlagSettings request)
+    {
+        request.Key = key;
+        request.SourceEnvId = envId;
+        request.TargetEnvId = targetEnvId;
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
+    }
+
     [HttpGet("all-tags")]
     public async Task<ApiResponse<ICollection<string>>> GetAllTagsAsync(Guid envId)
     {

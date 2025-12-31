@@ -10,7 +10,7 @@ public class CopyToEnvPrecheckResult
 
     public bool TargetRuleCheck { get; set; }
 
-    public string[] NewProperties { get; set; }
+    public ICollection<string> NewProperties { get; set; }
 
     public bool Passed => KeyCheck && TargetUserCheck && TargetRuleCheck;
 }
