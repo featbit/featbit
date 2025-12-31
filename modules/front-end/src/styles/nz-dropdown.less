@@ -1,0 +1,39 @@
+.select-tags-dropdown {
+  .tags-filter-input {
+    width: 180px;
+    margin-bottom: 4px;
+
+    nz-input-group {
+      width: 100%;
+      height: 28px;
+      border-radius: 8px;
+    }
+  }
+
+  .tags-menu-list {
+    max-height: 200px;
+    overflow-y: auto;
+
+    li {
+      display: flex;
+      align-items: center;
+      max-width: 180px;
+      padding: 4px 8px;
+
+      label {
+        margin-right: 4px;
+      }
+    }
+
+    .no-tags-found {
+      color: #8c8c8c;
+      text-align: center;
+      padding: 12px;
+      cursor: default;
+
+      &:hover {
+        background: transparent;
+      }
+    }
+  }
+}

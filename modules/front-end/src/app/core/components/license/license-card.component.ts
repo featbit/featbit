@@ -37,7 +37,8 @@ class LicenseDetail {
       LicenseFeatureEnum.GlobalUser,
       LicenseFeatureEnum.ShareableSegment,
       LicenseFeatureEnum.AutoAgents,
-      LicenseFeatureEnum.FineGrainedAccessControl
+      LicenseFeatureEnum.FineGrainedAccessControl,
+      LicenseFeatureEnum.FlagComparison
     ];
 
     this.features = allFeatures.map(feature => ({
@@ -93,6 +94,8 @@ class LicenseDetail {
         return $localize`:@@common.auto-agents:Auto Agents`;
       case LicenseFeatureEnum.FineGrainedAccessControl:
         return $localize`:@@common.fine-grained-access-control:Fine-grained Access Control`;
+      case LicenseFeatureEnum.FlagComparison:
+        return $localize`:@@common.flag-comparison:Flag Comparison`;
       default:
         return '';
     }

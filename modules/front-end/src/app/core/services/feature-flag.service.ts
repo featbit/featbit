@@ -17,6 +17,11 @@ import { IInsights, IInsightsFilter } from "@features/safe/feature-flags/details
 import { IVariation } from "@shared/rules";
 import { IPendingChanges } from "@core/components/pending-changes-drawer/types";
 import { FlagSortedBy } from "@features/safe/workspaces/types/organization";
+import {
+  CompareFlagDetail,
+  CompareFlagOverviews,
+  FlagSettingCopyOptions
+} from "@features/safe/feature-flags/types/compare-flag";
 
 @Injectable({
   providedIn: 'root'
@@ -61,6 +66,35 @@ export class FeatureFlagService {
 
   getPendingChanges(key: string): Promise<IPendingChanges[]> {
     return firstValueFrom(this.http.get<IPendingChanges[]>(`${this.baseUrl}/${key}/pending-changes`));
+  }
+
+  getCompareOverview(targetEnvIds: string[], flagFilter: IFeatureFlagListFilter): Observable<CompareFlagOverviews> {
+    const org = getCurrentOrganization();
+
+    const filter = {
+      name: flagFilter.name ?? '',
+      tags: flagFilter.tags ?? [],
+      sortBy: org.settings?.flagSortedBy ?? FlagSortedBy.CreatedAt,
+      pageIndex: flagFilter.pageIndex - 1,
+      pageSize: flagFilter.pageSize
+    };
+
+    return this.http.post<CompareFlagOverviews>(
+      `${this.baseUrl}/compare-overview`,
+      { targetEnvIds, filter }
+    );
+  }
+
+  compareFlag(targetEnvId: string, flagKey: string): Observable<CompareFlagDetail> {
+    const url = `${this.baseUrl}/${flagKey}/compare-with/${targetEnvId}`;
+
+    return this.http.get<CompareFlagDetail>(url);
+  }
+
+  copySettings(targetEnvId: string, flagKey: string, options: FlagSettingCopyOptions) {
+    const url = `${this.baseUrl}/${flagKey}/copy-settings-to/${targetEnvId}`;
+
+    return this.http.put(url, { options });
   }
 
   deleteSchedule(id: string): Observable<boolean> {

@@ -1,0 +1,193 @@
+<div class="choose-target-envs">
+  <div class="source-env">
+    <span i18n="@@ff.compare.source-environment">Source Environment</span>
+    <nz-tag nzColor="green">
+      <i nz-icon nzType="environment" nzTheme="outline"></i>
+      {{ currentProjectEnv.projectName }}/{{ currentProjectEnv.envName }}
+    </nz-tag>
+  </div>
+  <div class="target-envs">
+    <span>
+      <span i18n="@@ff.compare.target-environments">Target Environments</span>
+      @if (hasUnappliedChanges) {
+        <span class="pending-hint">
+          <i nz-icon nzType="alert" nzTheme="outline"></i>
+          <span i18n="@@ff.compare.pending-hint">Click Apply to see the latest comparison results</span>
+        </span>
+      }
+    </span>
+    <nz-select
+      nzShowSearch
+      [nzOptions]="envs"
+      nzPlaceHolder="Select target environments to compare"
+      i18n-nzPlaceHolder="@@ff.compare.select-target-envs-placeholder"
+      [(ngModel)]="selectedEnvs"
+      (ngModelChange)="onSelectedEnvChanged()"
+      nzMode="multiple">
+    </nz-select>
+  </div>
+  <button [disabled]="selectedEnvs.length === 0" nz-button nzType="primary" (click)="apply()" i18n="@@common.apply">Apply</button>
+</div>
+
+@if (!isCompareGranted) {
+  <div class="empty-state no-license">
+    <i nz-icon nzType="icons:icon-lock" [style.fontSize.px]="64"></i>
+    <nz-alert
+      nzType="info"
+      i18n-nzDescription="@@ff.compare.compare-description"
+      nzDescription="Comparing and copy flag settings across environments helps you to manage your feature flags easier."
+    ></nz-alert>
+    <p i18n="@@common.need-license">You don't have a license or your current license doesn't grant this feature, please contact FeatBit team to get a license.</p>
+  </div>
+} @else if (targetEnvs.length === 0) {
+  <div class="empty-state">
+    <i nz-icon nzType="swap" [style.fontSize.px]="64"></i>
+    <p i18n="@@ff.compare.empty-state-hint">Select target environments to start comparing feature flags</p>
+  </div>
+} @else {
+  <div class="table-content-area">
+    <div class="table-search-area">
+      <nz-input-group [nzPrefix]="prefixIconSearch">
+        <input
+          type="text"
+          nz-input
+          [(ngModel)]="filter.name"
+          (ngModelChange)="doSearch()"
+          placeholder="Filter flags by name or key"
+          i18n-placeholder="@@ff.filter-by-name-and-key"
+        />
+        <ng-template #prefixIconSearch>
+          <i nz-icon nzType="search"></i>
+        </ng-template>
+      </nz-input-group>
+      <button
+        nzType="text"
+        nz-button
+        nzTrigger="click"
+        nz-dropdown
+        nzClickHide="false"
+        nzOverlayClassName="select-tags-dropdown"
+        (nzVisibleChange)="onSelectTags($event)"
+        [nzDropdownMenu]="tags">
+        <span i18n="@@common.tags">Tags</span>:&nbsp;{{ getSelectedTagsLabel() }}
+        <nz-icon nzType="down" />
+      </button>
+      <nz-dropdown-menu #tags>
+        <div class="tags-filter-input">
+          <nz-input-group [nzPrefix]="tagSearchIcon" nzSize="small">
+            <input
+              type="text"
+              nz-input
+              [(ngModel)]="tagSearchText"
+              placeholder="Search tags..."
+              i18n-placeholder="@@ff.compare.search-tags"
+            />
+            <ng-template #tagSearchIcon>
+              <i nz-icon nzType="search"></i>
+            </ng-template>
+          </nz-input-group>
+        </div>
+        <ul nz-menu class="tags-menu-list">
+          @if (filteredTags.length === 0) {
+            <li class="no-tags-found">No tags found</li>
+          }
+          @for (tag of filteredTags; track tag) {
+            <li nz-menu-item (click)="tag.selected = !tag.selected">
+              <label nz-checkbox [(ngModel)]="tag.selected"></label>
+              {{ tag.name }}
+            </li>
+          }
+        </ul>
+      </nz-dropdown-menu>
+    </div>
+    <div class="table-wrapper">
+        <nz-table
+          #flagTable
+          nzSize="small"
+          [nzData]="overview.items"
+          [nzLoading]="isLoadingOverview"
+          [nzFrontPagination]="false"
+          [nzTotal]="overview.totalCount"
+          [(nzPageSize)]="filter.pageSize"
+          (nzPageSizeChange)="loadOverview()"
+          [nzPageSizeOptions]="[10,20,30]"
+          [(nzPageIndex)]="filter.pageIndex"
+          (nzPageIndexChange)="loadOverview()"
+          [nzScroll]="{ y: 'calc(100vh - 380px)' }"
+        >
+          <thead>
+          <tr>
+            <th i18n="@@common.name">Name</th>
+            @for (env of targetEnvs; track env.value) {
+              <th>{{ env.label }}</th>
+            }
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let flag of flagTable.data">
+            <!-- Name Column -->
+            <td class="flag-name-cell">
+              <div class="flag-info">
+                <div class="flag-name">{{ flag.name }}</div>
+                <div class="flag-key">{{ flag.key }}</div>
+                <div class="flag-tags" *ngIf="flag.tags.length > 0">
+                  <nz-tag *ngFor="let tag of flag.tags" class="flag-tag">
+                    {{ tag }}
+                  </nz-tag>
+                </div>
+                <div class="flag-description" [title]="flag.description">
+                  {{ truncateText(flag.description) }}
+                </div>
+              </div>
+            </td>
+            @for (env of targetEnvs; track env.value) {
+              @if (getEnvDiffs(flag, env.value) === undefined) {
+                <td class="diff-cell">
+                  <div class="not-exist">
+                    <i nz-icon nzType="info-circle" nzTheme="outline"></i>
+                    <span i18n="ff.compare.flag-not-exist">Flag does not exist</span>
+                    <br />
+                    <span class="create-now" i18n="@@ff.compare.copy-now" (click)="copy(flag, env.value)">Copy Now?</span>
+                  </div>
+                </td>
+              } @else {
+                <td class="diff-cell" (click)="compare(flag, env)">
+                  <div class="diff-status" [class.has-diff]="hasDifferences(flag, env.value)">
+                    @if (hasDifferences(flag, env.value)) {
+                      <i nz-icon nzType="icons:icon-diff"></i>
+                      <span>{{ diffCountLabel(flag, env.value) }}</span>
+                    } @else {
+                      <i nz-icon nzType="check-circle"></i>
+                      <span i18n="@@ff.compare.no-difference">No Difference</span>
+                    }
+                  </div>
+                  <ul class="diff-list">
+                    @for (diff of getEnvDiffs(flag, env.value); track diff.label) {
+                      @if (diff.hasDiff) {
+                        <li>{{ diff.label }}</li>
+                      }
+                    }
+                  </ul>
+                </td>
+              }
+            }
+          </tr>
+          </tbody>
+        </nz-table>
+      </div>
+  </div>
+}
+
+<compare-feature-flag-drawer
+  [flag]="compareFlag"
+  [targetEnv]="compareTargetEnv"
+  [visible]="compareVisible"
+  (close)="closeCompareDrawer($event)">
+</compare-feature-flag-drawer>
+
+<copy-feature-flag-modal
+  [flags]="flagsToCopy"
+  [visible]="copyVisible"
+  [targetEnvId]="targetEnvIdForCopy"
+  (close)="onCopyModalClose($event)">
+</copy-feature-flag-modal>
