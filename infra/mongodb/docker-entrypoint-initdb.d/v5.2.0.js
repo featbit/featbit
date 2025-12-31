@@ -31,3 +31,45 @@ db.Policies.updateOne(
         ]
     }
 );
+
+// https://github.com/featbit/featbit/pull/821
+
+db.Policies.updateMany(
+    {
+        "statements.resourceType": "flag",
+        "statements.actions": "ManageFeatureFlag"
+    },
+    {
+        $set: {
+            "statements.$[stmt].actions": ["*"]
+        }
+    },
+    {
+        arrayFilters: [
+            {
+                "stmt.resourceType": "flag",
+                "stmt.actions": "ManageFeatureFlag"
+            }
+        ]
+    }
+)
+
+db.AccessTokens.updateMany(
+    {
+        "permissions.resourceType": "flag",
+        "permissions.actions": "ManageFeatureFlag"
+    },
+    {
+        $set: {
+            "permissions.$[perm].actions": ["*"]
+        }
+    },
+    {
+        arrayFilters: [
+            {
+                "perm.resourceType": "flag",
+                "perm.actions": "ManageFeatureFlag"
+            }
+        ]
+    }
+);

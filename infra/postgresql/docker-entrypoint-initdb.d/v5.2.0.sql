@@ -22,3 +22,45 @@ SET statements = (
     FROM jsonb_array_elements(policy.statements) AS elem
 )
 WHERE policy.type = 'SysManaged' AND policy.name = 'Administrator';
+
+-- https://github.com/featbit/featbit/pull/821
+
+UPDATE policies
+SET statements =
+        (SELECT jsonb_agg(
+                        CASE
+                            WHEN stmt ->> 'resourceType' = 'flag'
+                                AND stmt -> 'actions' ? 'ManageFeatureFlag'
+                                THEN
+                                jsonb_set(
+                                        stmt,
+                                        '{actions}',
+                                        '["*"]'::jsonb,
+                                        false
+                                )
+                            ELSE
+                                stmt
+                            END
+                )
+         FROM jsonb_array_elements(statements) AS stmt)
+WHERE statements @> '[{"resourceType":"flag"}]';
+
+UPDATE access_tokens
+SET permissions =
+        (SELECT jsonb_agg(
+                        CASE
+                            WHEN stmt ->> 'resourceType' = 'flag'
+                                AND stmt -> 'actions' ? 'ManageFeatureFlag'
+                                THEN
+                                jsonb_set(
+                                        stmt,
+                                        '{actions}',
+                                        '["*"]'::jsonb,
+                                        false
+                                )
+                            ELSE
+                                stmt
+                            END
+                )
+         FROM jsonb_array_elements(permissions) AS stmt)
+WHERE permissions @> '[{"resourceType":"flag"}]';
