@@ -43,6 +43,10 @@ export class CompareFeatureFlagDrawerComponent {
   }
   set visible(value: boolean) {
     this._visible = value;
+
+    const license = getCurrentLicense();
+    this.isCompareGranted = license.isGranted(LicenseFeatureEnum.FlagComparison);
+
     if (value) {
       this.init().then();
     }
@@ -98,25 +102,23 @@ export class CompareFeatureFlagDrawerComponent {
 
   detail: CompareFlagDetail;
   isLoadingDiff: boolean = false;
-  targetFlagNotExists: boolean = true;
+  targetFlagNotExists: boolean;
   loadDiff() {
     if (!this.isCompareGranted) {
       return;
     }
 
     this.isLoadingDiff = true;
-    this.targetFlagNotExists = false;
     this.flagService.compareFlag(this.selectedTargetEnvId, this.flag.key)
     .pipe(finalize(() => this.isLoadingDiff = false))
     .subscribe({
       next: (detail) => {
         this.detail = detail;
-        if (!detail) {
+        if (detail) {
+          this.initRows();
+        } else {
           this.targetFlagNotExists = true;
-          return;
         }
-
-        this.initRows();
       },
       error: () => this.message.error($localize`:@@common.loading-failed-try-again:Loading failed, please try again`)
     })
@@ -131,15 +133,14 @@ export class CompareFeatureFlagDrawerComponent {
       name: `${currentEnv.projectName}/${currentEnv.envName}`
     };
 
-    const license = getCurrentLicense();
-    this.isCompareGranted = license.isGranted(LicenseFeatureEnum.FlagComparison);
-
     await this.loadEnvs();
   }
 
   onTargetEnvChange() {
     if (this.selectedTargetEnvId) {
-      this.loadDiff();
+      setTimeout(() => {
+        this.loadDiff();
+      });
     }
   }
 
@@ -291,6 +292,7 @@ export class CompareFeatureFlagDrawerComponent {
 
   onClose(canceled: boolean) {
     this.selectedTargetEnvId = '';
-    this.close.emit();
+    this.targetFlagNotExists = false;
+    this.close.emit(canceled);
   }
 }
