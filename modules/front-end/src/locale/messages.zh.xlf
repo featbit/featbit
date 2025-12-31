@@ -4459,7 +4459,7 @@
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.ts</context>
           <context context-type="linenumber">96</context>
         </context-group>
-        <target></target>
+        <target>细粒度访问控制</target>
       </trans-unit>
       <trans-unit id="common.flag-comparison" datatype="html">
         <source>Flag Comparison</source>
@@ -9392,7 +9392,7 @@
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.html</context>
           <context context-type="linenumber">32,35</context>
         </context-group>
-        <target></target>
+        <target>开关资源类型是付费功能，升级套餐即可启用细粒度的访问控制</target>
       </trans-unit>
       <trans-unit id="iam.policies.details.resource-type" datatype="html">
         <source>Resource type</source>
@@ -11457,7 +11457,7 @@
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
           <context context-type="linenumber">262</context>
         </context-group>
-        <target></target>
+        <target>开关</target>
       </trans-unit>
       <trans-unit id="iam.policy.tags" datatype="html">
         <source>Tags</source>
@@ -11465,7 +11465,7 @@
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
           <context context-type="linenumber">272</context>
         </context-group>
-        <target></target>
+        <target>标签</target>
       </trans-unit>
       <trans-unit id="iam.action.all" datatype="html">
         <source>All</source>
@@ -11569,7 +11569,7 @@
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
           <context context-type="linenumber">384</context>
         </context-group>
-        <target></target>
+        <target>创建开关</target>
       </trans-unit>
       <trans-unit id="iam.action.archive-flag" datatype="html">
         <source>Archive feature flag</source>
@@ -11577,7 +11577,7 @@
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
           <context context-type="linenumber">392</context>
         </context-group>
-        <target></target>
+        <target>存档开关</target>
       </trans-unit>
       <trans-unit id="iam.action.restore-flag" datatype="html">
         <source>Restore feature flag</source>
@@ -11585,7 +11585,7 @@
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
           <context context-type="linenumber">400</context>
         </context-group>
-        <target></target>
+        <target>复位开关</target>
       </trans-unit>
       <trans-unit id="iam.action.delete-flag" datatype="html">
         <source>Delete feature flag</source>
@@ -11593,7 +11593,7 @@
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
           <context context-type="linenumber">408</context>
         </context-group>
-        <target></target>
+        <target>删除开关</target>
       </trans-unit>
       <trans-unit id="iam.action.clone-flag" datatype="html">
         <source>Clone feature flag</source>
@@ -11601,7 +11601,7 @@
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
           <context context-type="linenumber">416</context>
         </context-group>
-        <target></target>
+        <target>克隆开关</target>
       </trans-unit>
       <trans-unit id="iam.action.update-flag-name" datatype="html">
         <source>Rename a feature flag</source>
@@ -11609,7 +11609,7 @@
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
           <context context-type="linenumber">424</context>
         </context-group>
-        <target></target>
+        <target>更新名称</target>
       </trans-unit>
       <trans-unit id="iam.action.update-flag-on" datatype="html">
         <source>Toggle a feature on or off</source>
@@ -11617,7 +11617,7 @@
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
           <context context-type="linenumber">432</context>
         </context-group>
-        <target></target>
+        <target>打开或关闭开关</target>
       </trans-unit>
       <trans-unit id="iam.action.update-flag-description" datatype="html">
         <source>Update the description of a feature flag</source>
@@ -11625,7 +11625,7 @@
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
           <context context-type="linenumber">440</context>
         </context-group>
-        <target></target>
+        <target>更新描述</target>
       </trans-unit>
       <trans-unit id="iam.action.update-flag-off-variation" datatype="html">
         <source>Change the variation returned when a feature flag is set to off</source>
@@ -11633,7 +11633,7 @@
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
           <context context-type="linenumber">448</context>
         </context-group>
-        <target></target>
+        <target>更新关闭时的返回值</target>
       </trans-unit>
       <trans-unit id="iam.action.update-flag-tags" datatype="html">
         <source>Change the tags associated with a feature flag</source>
@@ -11641,7 +11641,7 @@
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
           <context context-type="linenumber">456</context>
         </context-group>
-        <target></target>
+        <target>更新标签</target>
       </trans-unit>
       <trans-unit id="iam.action.update-flag-individual-targeting" datatype="html">
         <source>Change a flag&apos;s individual user targeting rules</source>
@@ -11649,7 +11649,7 @@
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
           <context context-type="linenumber">464</context>
         </context-group>
-        <target></target>
+        <target>更新目标用户</target>
       </trans-unit>
       <trans-unit id="iam.action.update-flag-rules" datatype="html">
         <source>Change a flag&apos;s custom targeting rules</source>
@@ -11657,7 +11657,7 @@
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
           <context context-type="linenumber">472</context>
         </context-group>
-        <target></target>
+        <target>更新匹配规则</target>
       </trans-unit>
       <trans-unit id="iam.action.update-flag-fallthrough" datatype="html">
         <source>Change a flag&apos;s default rule</source>
@@ -11665,7 +11665,7 @@
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
           <context context-type="linenumber">480</context>
         </context-group>
-        <target></target>
+        <target>更新默认规则</target>
       </trans-unit>
       <trans-unit id="iam.action.update-flag-variations" datatype="html">
         <source>Change a flag&apos;s variations</source>
@@ -11673,7 +11673,7 @@
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
           <context context-type="linenumber">488</context>
         </context-group>
-        <target></target>
+        <target>更新返回值</target>
       </trans-unit>
       <trans-unit id="iam.action.manage-segment" datatype="html">
         <source>Manage segment</source>
