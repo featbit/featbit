@@ -92,7 +92,7 @@ class LicenseDetail {
       case LicenseFeatureEnum.AutoAgents:
         return $localize`:@@common.auto-agents:Auto Agents`;
       case LicenseFeatureEnum.FineGrainedAccessControl:
-        return $localize`:@@common.fined-grained-access-control:Fine-grained Access Control`;
+        return $localize`:@@common.fine-grained-access-control:Fine-grained Access Control`;
       default:
         return '';
     }

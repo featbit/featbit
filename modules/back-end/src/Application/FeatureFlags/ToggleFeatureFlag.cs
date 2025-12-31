@@ -9,7 +9,7 @@ public class ToggleFeatureFlag : IRequest<bool>
 
     public string Key { get; set; }
 
-    public bool status { get; set; }
+    public bool Status { get; set; }
 }
 
 public class ToggleFeatureFlagHandler : IRequestHandler<ToggleFeatureFlag, bool>
@@ -31,7 +31,7 @@ public class ToggleFeatureFlagHandler : IRequestHandler<ToggleFeatureFlag, bool>
     public async Task<bool> Handle(ToggleFeatureFlag request, CancellationToken cancellationToken)
     {
         var flag = await _service.GetAsync(request.EnvId, request.Key);
-        var dataChange = flag.Toggle(_currentUser.Id, request.status);
+        var dataChange = flag.Toggle(_currentUser.Id, request.Status);
         await _service.UpdateAsync(flag);
 
         // publish on feature flag change notification

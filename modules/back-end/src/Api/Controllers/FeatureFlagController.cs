@@ -151,7 +151,7 @@ public class FeatureFlagController : ApiControllerBase
         {
             EnvId = envId,
             Key = key,
-            status = status
+            Status = status
         };
 
         var success = await Mediator.Send(request);

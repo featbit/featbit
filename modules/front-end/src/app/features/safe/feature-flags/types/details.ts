@@ -1,6 +1,5 @@
 import { IRule, IRuleVariation, IVariation } from "@shared/rules";
 import { deepCopy, isNumeric, tryParseJSONObject } from "@utils/index";
-import { getCurrentEnvRN } from "@utils/project-env";
 import { getFlagRN } from "@features/safe/feature-flags/types/feature-flag";
 
 export class FeatureFlag implements IFeatureFlag {
