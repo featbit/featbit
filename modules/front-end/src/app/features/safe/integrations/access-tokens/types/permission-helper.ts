@@ -1,4 +1,4 @@
-import { IamPolicyAction, IPolicyStatement, permissionActions } from "@shared/policy";
+import { IamPolicyAction, IPolicyStatement, permissionActions, ResourceTypeEnum } from "@shared/policy";
 import { uuidv4 } from "@utils/index";
 
 export interface IPermissionStatementGroup {
@@ -15,12 +15,25 @@ export interface IPermissionStatement extends IPolicyStatement {
 export const preProcessPermissions = (statements: IPolicyStatement[]): { [key: string]: IPermissionStatementGroup} => {
   return statements.flatMap((statement) => {
     const {effect, resourceType, resources} = statement;
-    return statement.actions.map((action) => ({
-      effect,
-      resourceType,
-      resources,
-      action: permissionActions[action]
-    }));
+    return statement.actions.flatMap((action) => {
+      if (action === '*') {
+        return Object.values(permissionActions)
+        .filter(pa => pa.resourceType === resourceType)
+        .map(pa => ({
+          effect,
+          resourceType,
+          resources,
+          action: pa
+        }));
+      }
+
+      return [{
+       effect,
+       resourceType,
+       resources,
+       action: permissionActions[action]
+      }];
+    });
   }).filter(({effect, resourceType, resources, action}) => action && action.isOpenAPIApplicable)
     .reduce((acc, cur) => {
       acc[cur.resourceType] = acc[cur.resourceType] || { allChecked: true, indeterminate: false, statements: [] };
