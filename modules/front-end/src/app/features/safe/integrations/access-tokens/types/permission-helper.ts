@@ -1,4 +1,4 @@
-import { IamPolicyAction, IPolicyStatement, permissionActions, ResourceTypeEnum } from "@shared/policy";
+import { IamPolicyAction, IPolicyStatement, permissionActions } from "@shared/policy";
 import { uuidv4 } from "@utils/index";
 
 export interface IPermissionStatementGroup {
