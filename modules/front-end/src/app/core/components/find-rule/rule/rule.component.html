@@ -10,7 +10,7 @@
       nzServerSearch
       nzPlaceHolder="Select property"
       i18n-nzPlaceHolder="@@core.components.findrule.rule.selectuserproperty"
-      [disabled]="disabled"
+      [nzDisabled]="disabled"
       (nzOnSearch)="onSearchProperty($event)"
       [(ngModel)]="selectedProp"
       (ngModelChange)="onPropertyChange()">
@@ -29,7 +29,7 @@
       nzPlaceHolder="Select operation"
       i18n-nzPlaceHolder="@@core.components.findrule.rule.select-operation"
       nzShowSearch
-      [disabled]="disabled"
+      [nzDisabled]="disabled"
       [(ngModel)]="condition.op"
       (ngModelChange)="onOperationChange()">
       <nz-option *ngFor="let rule of ruleValueConfig" [nzValue]="rule.value" [nzLabel]="rule.label"></nz-option>
@@ -43,7 +43,7 @@
                    nzShowSearch
                    nzPlaceHolder="values"
                    i18n-nzPlaceHolder="@@core.components.findrule.rule.selectvalues"
-                   [disabled]="disabled"
+                   [nzDisabled]="disabled"
                    [(ngModel)]="condition.value" (ngModelChange)="onDebounceTimeModelChange()">
           <nz-option
             *ngFor="let presetValue of currentUserProp.presetValues"
@@ -55,7 +55,7 @@
       <ng-container *ngSwitchCase="'string'">
         <div class="value" *ngIf="!currentUserProp.usePresetValuesOnly; else presetSelect">
           <input class="standard-bordered-input" nz-input [(ngModel)]="condition.value" (ngModelChange)="onDebounceTimeModelChange()"
-                 [disabled]="disabled"
+                 [nzDisabled]="disabled"
                  placeholder="input string or number"
                  i18n-placeholder="@@core.components.findrule.rule.pleaseinput" />
         </div>
@@ -63,7 +63,7 @@
       <ng-container *ngSwitchCase="'number'">
         <div class="value" *ngIf="!currentUserProp.usePresetValuesOnly; else presetSelect">
           <nz-input-number class="standard-bordered-input" [(ngModel)]="condition.value" (ngModelChange)="onDebounceTimeModelChange()" nzPlaceHolder="input a number"
-                           [disabled]="disabled"
+                           [nzDisabled]="disabled"
                            i18n-nzPlaceHolder="@@core.components.findrule.rule.inputnumber"></nz-input-number>
         </div>
       </ng-container>
@@ -81,7 +81,7 @@
             nzPlaceHolder="values"
             i18n-nzPlaceHolder="@@core.components.findrule.rule.selectvalues"
             nzShowSearch
-            [disabled]="disabled"
+            [nzDisabled]="disabled"
             [(ngModel)]="condition.multipleValue"
             (ngModelChange)="onModelChange()">
             <nz-option
@@ -106,7 +106,7 @@
           nzShowSearch
           nzAllowClear
           nzServerSearch
-          [disabled]="disabled"
+          [nzDisabled]="disabled"
           [(ngModel)]="condition.multipleValue"
           [nzMaxTagPlaceholder]="omittedPlaceHolder"
           [nzMaxTagCount]="2"

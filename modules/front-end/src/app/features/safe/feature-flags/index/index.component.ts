@@ -4,7 +4,8 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { Subject } from 'rxjs';
 import { encodeURIComponentFfc, getProfile, getQueryParamsFromObject } from '@shared/utils';
 import {
-  FeatureFlagListCheckItem, getFlagRN,
+  FeatureFlagListCheckItem,
+  getFlagRN,
   IFeatureFlagListFilter,
   IFeatureFlagListItem,
   IFeatureFlagListModel,
@@ -13,8 +14,10 @@ import { debounceTime } from 'rxjs/operators';
 import { FeatureFlagService } from "@services/feature-flag.service";
 import { NzModalService } from "ng-zorro-antd/modal";
 import { copyToClipboard } from '@utils/index';
-import { generalResourceRNPattern, permissionActions } from "@shared/policy";
+import { permissionActions } from "@shared/policy";
 import { getCurrentEnvRN } from "@utils/project-env";
+import { PermissionLicenseService } from "@services/permission-license.service";
+import { LicenseFeatureEnum } from "@shared/types";
 import { PermissionsService } from "@services/permissions.service";
 
 @Component({
@@ -33,6 +36,7 @@ export class IndexComponent implements OnInit {
     private msg: NzMessageService,
     private modal: NzModalService,
     private permissionsService: PermissionsService,
+    private permissionLicenseService: PermissionLicenseService,
   ) { }
 
   featureFlagFilter: IFeatureFlagListFilter = new IFeatureFlagListFilter();
@@ -155,7 +159,7 @@ export class IndexComponent implements OnInit {
   flagToClone: IFeatureFlagListItem;
   clone(flag: IFeatureFlagListItem) {
     const rn = getFlagRN(flag.key, flag.tags);
-    const isGranted = this.permissionsService.isGranted(rn, permissionActions.CloneFlag);
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(rn, permissionActions.CloneFlag, LicenseFeatureEnum.FineGrainedAccessControl, true);
     if (!isGranted) {
       this.msg.warning(this.permissionsService.genericDenyMessage);
       return;
@@ -216,7 +220,7 @@ export class IndexComponent implements OnInit {
 
   openCreationDrawer(): void {
     const rnPrefix = getCurrentEnvRN();
-    const isGranted = this.permissionsService.isGranted(`${rnPrefix}:flag/*`, permissionActions.CreateFlag);
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(`${rnPrefix}:flag/*`, permissionActions.CreateFlag, LicenseFeatureEnum.FineGrainedAccessControl, true);
     if (!isGranted) {
       this.msg.warning(this.permissionsService.genericDenyMessage);
       return;
@@ -230,7 +234,7 @@ export class IndexComponent implements OnInit {
 
   onToggleFeatureFlagStatus(data: IFeatureFlagListItem): void {
     const rn = getFlagRN(data.key, data.tags);
-    const isGranted = this.permissionsService.isGranted(rn, permissionActions.ToggleFlag);
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(rn, permissionActions.ToggleFlag, LicenseFeatureEnum.FineGrainedAccessControl, true);
     if (!isGranted) {
       this.msg.warning(this.permissionsService.genericDenyMessage);
       return;
@@ -274,7 +278,7 @@ export class IndexComponent implements OnInit {
       nzClassName: 'information-modal-dialog',
       nzOnOk: () => {
         const rn = getFlagRN(flag.key, flag.tags);
-        const isGranted = this.permissionsService.isGranted(rn, permissionActions.ArchiveFlag);
+        const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(rn, permissionActions.ArchiveFlag, LicenseFeatureEnum.FineGrainedAccessControl, true);
         if (!isGranted) {
           this.msg.warning(this.permissionsService.genericDenyMessage);
           return;

@@ -8,7 +8,6 @@ import { FeatureFlagService } from "@services/feature-flag.service";
 import {
   FeatureFlag,
   IFeatureFlag,
-  ISettingPayload,
   isVariationValueValid,
   VariationTypeEnum
 } from "@features/safe/feature-flags/types/details";
@@ -18,8 +17,9 @@ import { ExperimentStatus, IExpt } from "@features/safe/experiments/types";
 import { NzSelectComponent } from "ng-zorro-antd/select";
 import { FormArray, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators } from "@angular/forms";
 import { PermissionsService } from "@services/permissions.service";
-import { generalResourceRNPattern, permissionActions } from "@shared/policy";
-import { IEnvironment } from "@shared/types";
+import { permissionActions } from "@shared/policy";
+import { PermissionLicenseService } from "@services/permission-license.service";
+import { LicenseFeatureEnum } from "@shared/types";
 
 @Component({
     selector: 'ff-setting',
@@ -84,7 +84,7 @@ export class SettingComponent {
   }
 
   onAddTag() {
-    const isGranted = this.permissionsService.isGranted(this.featureFlag.rn, permissionActions.UpdateFlagTags);
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.UpdateFlagTags, LicenseFeatureEnum.FineGrainedAccessControl, true);
     if (!isGranted) {
       this.message.warning(this.permissionsService.genericDenyMessage);
       return;
@@ -114,6 +114,7 @@ export class SettingComponent {
     private formBuilder: FormBuilder,
     private router: Router,
     private permissionsService: PermissionsService,
+    private permissionLicenseService: PermissionLicenseService
   ) {
     this.isLoading = true;
     this.route.paramMap.subscribe( paramMap => {
@@ -156,7 +157,7 @@ export class SettingComponent {
   }
 
   onChangeStatus() {
-    const isGranted = this.permissionsService.isGranted(this.featureFlag.rn, permissionActions.ToggleFlag);
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.ToggleFlag, LicenseFeatureEnum.FineGrainedAccessControl, true);
     if (!isGranted) {
       this.message.warning(this.permissionsService.genericDenyMessage);
       return;
@@ -178,7 +179,7 @@ export class SettingComponent {
   }
 
   toggleTitleEditState(): void {
-    const isGranted = this.permissionsService.isGranted(this.featureFlag.rn, permissionActions.UpdateFlagName);
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.UpdateFlagName, LicenseFeatureEnum.FineGrainedAccessControl, true);
     if (!isGranted) {
       this.message.warning(this.permissionsService.genericDenyMessage);
       return;
@@ -188,7 +189,7 @@ export class SettingComponent {
   }
 
   toggleDescriptionEditState(): void {
-    const isGranted = this.permissionsService.isGranted(this.featureFlag.rn, permissionActions.UpdateFlagDescription);
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.UpdateFlagDescription, LicenseFeatureEnum.FineGrainedAccessControl, true);
     if (!isGranted) {
       this.message.warning(this.permissionsService.genericDenyMessage);
       return;
@@ -219,7 +220,7 @@ export class SettingComponent {
 
   editVariationModalVisible: boolean = false;
   editVariations(): void {
-    const isGranted = this.permissionsService.isGranted(this.featureFlag.rn, permissionActions.UpdateFlagVariations);
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.UpdateFlagVariations, LicenseFeatureEnum.FineGrainedAccessControl, true);
     if (!isGranted) {
       this.message.warning(this.permissionsService.genericDenyMessage);
       return;
@@ -286,7 +287,7 @@ export class SettingComponent {
   }
 
   saveVariations() {
-    const isGranted = this.permissionsService.isGranted(this.featureFlag.rn, permissionActions.UpdateFlagVariations);
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.UpdateFlagVariations, LicenseFeatureEnum.FineGrainedAccessControl, true);
     if (!isGranted) {
       this.message.warning(this.permissionsService.genericDenyMessage);
       return;
@@ -401,7 +402,7 @@ export class SettingComponent {
   }
 
   onSaveOffVariation() {
-    const isGranted = this.permissionsService.isGranted(this.featureFlag.rn, permissionActions.UpdateFlagOffVariation);
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.UpdateFlagOffVariation, LicenseFeatureEnum.FineGrainedAccessControl, true);
     if (!isGranted) {
       this.message.warning(this.permissionsService.genericDenyMessage);
       return;
@@ -420,7 +421,7 @@ export class SettingComponent {
   }
 
   restoreFlag() {
-    const isGranted = this.permissionsService.isGranted(this.featureFlag.rn, permissionActions.RestoreFlag);
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.RestoreFlag, LicenseFeatureEnum.FineGrainedAccessControl, true);
     if (!isGranted) {
       this.message.warning(this.permissionsService.genericDenyMessage);
       return;
@@ -434,7 +435,7 @@ export class SettingComponent {
   }
 
   deleteFlag() {
-    const isGranted = this.permissionsService.isGranted(this.featureFlag.rn, permissionActions.DeleteFlag);
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.DeleteFlag, LicenseFeatureEnum.FineGrainedAccessControl, true);
     if (!isGranted) {
       this.message.warning(this.permissionsService.genericDenyMessage);
       return;

@@ -19,6 +19,7 @@ import { environment } from "src/environments/environment";
 import { getCurrentLicense } from "@utils/project-env";
 import { PermissionsService } from "@services/permissions.service";
 import { permissionActions } from "@shared/policy";
+import { PermissionLicenseService } from "@services/permission-license.service";
 
 enum FlagValidationErrorKindEnum {
   fallthrough = 0,
@@ -128,6 +129,7 @@ export class TargetingComponent implements OnInit {
     private msg: NzMessageService,
     private messageQueueService: MessageQueueService,
     private permissionsService: PermissionsService,
+    private permissionLicenseService: PermissionLicenseService,
   ) { }
 
   ngOnInit(): void {
@@ -139,9 +141,9 @@ export class TargetingComponent implements OnInit {
         this.key = decodeURIComponent(paramMap.get('key'));
         this.messageQueueService.subscribe(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key), () => this.refreshFeatureFlag());
         await this.loadData();
-        this.canUpdateDefaultRule = this.permissionsService.isGranted(this.featureFlag.rn, permissionActions.UpdateFlagDefaultRule);
-        this.canUpdateIndividualTargeting = this.permissionsService.isGranted(this.featureFlag.rn, permissionActions.UpdateFlagIndividualTargeting);
-        this.canUpdateRules = this.permissionsService.isGranted(this.featureFlag.rn, permissionActions.UpdateFlagRules);
+        this.canUpdateDefaultRule = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.UpdateFlagDefaultRule, LicenseFeatureEnum.FineGrainedAccessControl, true);
+        this.canUpdateIndividualTargeting = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.UpdateFlagIndividualTargeting, LicenseFeatureEnum.FineGrainedAccessControl, true);
+        this.canUpdateRules = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.UpdateFlagRules, LicenseFeatureEnum.FineGrainedAccessControl, true);
       }
     });
   }
