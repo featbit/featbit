@@ -591,7 +591,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.ts</context>
-          <context context-type="linenumber">285</context>
+          <context context-type="linenumber">286</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.ts</context>
@@ -2352,7 +2352,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.ts</context>
-          <context context-type="linenumber">288</context>
+          <context context-type="linenumber">289</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.ts</context>
@@ -2680,35 +2680,35 @@
         <source>Value after applied</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">170,172</context>
+          <context context-type="linenumber">171,173</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.compare.settings-selected" datatype="html">
         <source>setting(s) selected</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">187,189</context>
+          <context context-type="linenumber">189,191</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.compare.no-selection" datatype="html">
         <source>No settings selected</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">189,192</context>
+          <context context-type="linenumber">191,194</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.compare.copy-settings" datatype="html">
         <source>Copy Settings</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">200,202</context>
+          <context context-type="linenumber">202,204</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.loading-failed-try-again" datatype="html">
         <source>Loading failed, please try again</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.ts</context>
-          <context context-type="linenumber">121</context>
+          <context context-type="linenumber">123</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-deliveries/webhook-deliveries.component.ts</context>
@@ -2755,7 +2755,7 @@
         <source>On/OFF State</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.ts</context>
-          <context context-type="linenumber">153</context>
+          <context context-type="linenumber">154</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.ts</context>
@@ -2766,7 +2766,7 @@
         <source>Individual Targeting</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.ts</context>
-          <context context-type="linenumber">160</context>
+          <context context-type="linenumber">161</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.ts</context>
@@ -2777,7 +2777,7 @@
         <source>Targeting Rules</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.ts</context>
-          <context context-type="linenumber">168</context>
+          <context context-type="linenumber">169</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.ts</context>
@@ -2788,7 +2788,7 @@
         <source>Default Rule</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.ts</context>
-          <context context-type="linenumber">176</context>
+          <context context-type="linenumber">177</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.ts</context>
@@ -2799,7 +2799,7 @@
         <source>Off Variation</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.ts</context>
-          <context context-type="linenumber">183</context>
+          <context context-type="linenumber">184</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.ts</context>
@@ -2810,28 +2810,14 @@
         <source>Please select at least one setting to copy</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.ts</context>
-          <context context-type="linenumber">263</context>
+          <context context-type="linenumber">264</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.compare.no-individual-targeting" datatype="html">
         <source>No Individual Targeting</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/render-individual-targeting.ts</context>
-          <context context-type="linenumber">8,10</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="ff.compare.variation" datatype="html">
-        <source>Variation:</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/render-individual-targeting.ts</context>
-          <context context-type="linenumber">12</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="ff.compare.users" datatype="html">
-        <source>Users:</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/render-individual-targeting.ts</context>
-          <context context-type="linenumber">15</context>
+          <context context-type="linenumber">10,12</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.compare.no-targeting-rules" datatype="html">
@@ -2845,21 +2831,21 @@
         <source>IF</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/render-target-rules.component.ts</context>
-          <context context-type="linenumber">17</context>
+          <context context-type="linenumber">21,22</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.and" datatype="html">
         <source>AND</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/render-target-rules.component.ts</context>
-          <context context-type="linenumber">20</context>
+          <context context-type="linenumber">23,24</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.serve" datatype="html">
         <source>SERVE</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/render-target-rules.component.ts</context>
-          <context context-type="linenumber">24</context>
+          <context context-type="linenumber">31,32</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.dispatch-by" datatype="html">
