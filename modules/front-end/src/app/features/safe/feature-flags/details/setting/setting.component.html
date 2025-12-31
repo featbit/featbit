@@ -66,13 +66,13 @@
             <nz-switch i18n-nz-popconfirm="@@ff.are-you-sure-to-turn-ff-off"
                        nz-popconfirm="Are you sure to turn it off? The flag will return the variation that you specified for its off state."
                        nzPopconfirmPlacement="bottomRight" [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
-                       (nzOnConfirm)="onChangeStatus()" [ngModel]="featureFlag.isEnabled" [nzControl]="true"
+                       (nzOnConfirm)="onChangeStatus()" [ngModel]="featureFlag.isEnabled" [nzControl]="true" [nzLoading]="isToggling"
                        nzCheckedChildren="ON" nzUnCheckedChildren="OFF"></nz-switch>
           } @else {
             <nz-switch i18n-nz-popconfirm="@@ff.are-you-sure-to-turn-ff-on"
                        nz-popconfirm="Are you sure to turn it on? The flag will return the matching targeting users' or rules' serving variation."
                        nzPopconfirmPlacement="bottomRight" [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
-                       (nzOnConfirm)="onChangeStatus()" [ngModel]="featureFlag.isEnabled" [nzControl]="true"
+                       (nzOnConfirm)="onChangeStatus()" [ngModel]="featureFlag.isEnabled" [nzControl]="true" [nzLoading]="isToggling"
                        nzCheckedChildren="ON" nzUnCheckedChildren="OFF"></nz-switch>
           }
           <span>

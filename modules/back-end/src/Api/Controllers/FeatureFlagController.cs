@@ -169,7 +169,7 @@ public class FeatureFlagController : ApiControllerBase
         var success = await Mediator.Send(request);
         return Ok(success);
     }
-    
+
     [OpenApi]
     [HttpPut("{key}/description")]
     [Authorize(Permissions.UpdateFlagDescription)]
@@ -181,7 +181,7 @@ public class FeatureFlagController : ApiControllerBase
         var success = await Mediator.Send(request);
         return Ok(success);
     }
-    
+
     [OpenApi]
     [HttpPut("{key}/off-variation")]
     [Authorize(Permissions.UpdateFlagOffVariation)]

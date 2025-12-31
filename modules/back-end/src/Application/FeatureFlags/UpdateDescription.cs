@@ -1,4 +1,3 @@
-using Application.Bases;
 using Application.Users;
 using Domain.AuditLogs;
 
@@ -11,15 +10,6 @@ public class UpdateDescription : IRequest<bool>
     public string Key { get; set; }
 
     public string Description { get; set; }
-}
-
-public class UpdateDescriptionValidator : AbstractValidator<UpdateDescription>
-{
-    public UpdateDescriptionValidator()
-    {
-        RuleFor(x => x.Description)
-            .NotEmpty().WithErrorCode(ErrorCodes.Required("description"));
-    }
 }
 
 public class UpdateDescriptionHandler : IRequestHandler<UpdateDescription, bool>

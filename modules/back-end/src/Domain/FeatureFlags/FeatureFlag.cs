@@ -151,7 +151,7 @@ public class FeatureFlag : FullAuditedEntity
 
         return dataChange.To(this);
     }
-    
+
     public DataChange UpdateDescription(string description, Guid currentUserId)
     {
         var dataChange = new DataChange(this);
@@ -161,7 +161,7 @@ public class FeatureFlag : FullAuditedEntity
 
         return dataChange.To(this);
     }
-    
+
     public DataChange UpdateOffVariation(string offVariationId, Guid currentUserId)
     {
         var dataChange = new DataChange(this);
@@ -171,7 +171,7 @@ public class FeatureFlag : FullAuditedEntity
 
         return dataChange.To(this);
     }
-    
+
     public DataChange UpdateSetting(string name, string description, bool isEnabled, string disabledVariationId, Guid currentUserId)
     {
         var dataChange = new DataChange(this);

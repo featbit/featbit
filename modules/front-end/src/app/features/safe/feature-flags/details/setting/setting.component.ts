@@ -20,6 +20,7 @@ import { PermissionsService } from "@services/permissions.service";
 import { permissionActions } from "@shared/policy";
 import { PermissionLicenseService } from "@services/permission-license.service";
 import { LicenseFeatureEnum } from "@shared/types";
+import { finalize } from "rxjs/operators";
 
 @Component({
     selector: 'ff-setting',
@@ -156,6 +157,7 @@ export class SettingComponent {
     });
   }
 
+  isToggling: boolean = false;
   onChangeStatus() {
     const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.ToggleFlag, LicenseFeatureEnum.FineGrainedAccessControl, true);
     if (!isGranted) {
@@ -163,15 +165,15 @@ export class SettingComponent {
       return;
     }
 
-    this.featureFlag.isEnabled = !this.featureFlag.isEnabled;
-
     const { isEnabled } = this.featureFlag;
 
-    this.featureFlagService.toggleStatus(this.key, isEnabled).subscribe({
+    this.isToggling = true;
+    this.featureFlagService.toggleStatus(this.key, !isEnabled)
+    .pipe(finalize(() => this.isToggling = false))
+    .subscribe({
       next: () => {
-        this.message.success($localize `:@@common.operation-success:Operation succeeded`);
-        this.isEditingTitle = false;
-        this.isEditingDescription = false;
+        this.message.success($localize`:@@common.operation-success:Operation succeeded`);
+        this.featureFlag.isEnabled = !isEnabled;
         this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key))
       },
       error: err => this.message.error(err.error)

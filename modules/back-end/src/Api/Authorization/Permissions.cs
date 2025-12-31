@@ -16,7 +16,7 @@ public static class Permissions
     public const string UpdateFlagOffVariation = nameof(UpdateFlagOffVariation);
     public const string UpdateFlagVariations = nameof(UpdateFlagVariations);
     public const string UpdateFlagTags = nameof(UpdateFlagTags);
-    
+
     public const string ManageSegment = nameof(ManageSegment);
     public const string CanAccessProject = nameof(CanAccessProject);
 
@@ -34,7 +34,7 @@ public static class Permissions
         { UpdateFlagOffVariation, ResourceTypes.FeatureFlag },
         { UpdateFlagVariations, ResourceTypes.FeatureFlag },
         { UpdateFlagTags, ResourceTypes.FeatureFlag },
-        
+
         { ManageSegment, ResourceTypes.Segment },
         { CanAccessProject, ResourceTypes.Project }
     };
