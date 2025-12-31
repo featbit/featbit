@@ -59,7 +59,7 @@
                     i18n="@@common.all"
                   >All</label>
                 }
-                @for (permission of permissions[rt.type].statements; track permission.id) {
+                @for (permission of permissions[rt.type].statements; track permission.action.id) {
                   <div class="permission">
                     <div class="permission-header">
                       @if (isEditing) {
