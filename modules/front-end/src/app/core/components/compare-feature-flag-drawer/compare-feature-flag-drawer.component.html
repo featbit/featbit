@@ -164,17 +164,19 @@
                     *ngComponentOutlet="row.render;
                     inputs: {'data': {flag: detail.target, relatedSegments: detail.relatedSegments}}"
                   />
-                  @if (row.selected && row.hasDiff) {
-                    <div class="change-indicator">
-                      <i nz-icon nzType="check-circle" nzTheme="fill"></i>
-                      <span i18n="@@ff.compare.value-after-applied">Value after applied</span>
-                    </div>
+                </div>
+                @if (row.selected && row.hasDiff) {
+                  <div class="change-indicator">
+                    <i nz-icon nzType="check-circle" nzTheme="fill"></i>
+                    <span i18n="@@ff.compare.value-after-applied">Value after applied</span>
+                  </div>
+                  <div class="value-content applied-value">
                     <ng-container
                       *ngComponentOutlet="row.render;
                       inputs: {'data': { flag: getAppliedFlag(row), relatedSegments: detail.relatedSegments}}"
                     />
-                  }
-                </div>
+                  </div>
+                }
               </td>
             </tr>
           }

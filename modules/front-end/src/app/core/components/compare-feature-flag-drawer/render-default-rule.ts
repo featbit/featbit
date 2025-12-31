@@ -4,7 +4,14 @@ import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
 
 @Component({
   selector: 'render-default-rule',
-  template: `{{ getDefaultServe() }}`
+  template: `<span class="serve-content">{{ getDefaultServe() }}</span>`,
+  styles: `
+    .serve-content {
+      color: #262626;
+      font-size: 13px;
+      font-weight: 500;
+    }
+  `
 })
 export class RenderDefaultRule {
   @Input()

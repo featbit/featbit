@@ -8,34 +8,123 @@ import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
   selector: 'render-targeting-rules',
   template: `
     @if (data.flag.rules.length === 0) {
-      <span i18n="@@ff.compare.no-targeting-rules">No Targeting Rules</span>
+      <span class="empty-state-text" i18n="@@ff.compare.no-targeting-rules">No Targeting Rules</span>
     } @else {
       @for (rule of data.flag.rules; track rule.id) {
         <div class="targeting-rule-entry">
-          @for (condition of rule.conditions; track condition.id; let condIdx = $index) {
-            @if (condIdx === 0) {
-              <span i18n="@@common.if">IF</span> {{ describeCondition(condition) }}
-            } @else {
-              <br/>
-              <span i18n="@@common.and">AND</span> {{ describeCondition(condition) }}
+          <div class="rule-name">{{ rule.name }}</div>
+          <div class="conditions-section">
+            @for (condition of rule.conditions; track condition.id; let condIdx = $index) {
+              <div class="condition-row">
+              <span class="condition-keyword" [class.if-keyword]="condIdx === 0" [class.and-keyword]="condIdx > 0">
+                @if (condIdx === 0) {
+                  <span i18n="@@common.if">IF</span>
+                } @else {
+                  <span i18n="@@common.and">AND</span>
+                }
+              </span>
+                <span class="condition-content">{{ describeCondition(condition) }}</span>
+              </div>
             }
-          }
-          <br/>
-          <span i18n="@@common.serve">SERVE</span> {{ getServe(rule) }}
+          </div>
+          <div class="serve-section">
+            <span class="serve-keyword" i18n="@@common.serve">SERVE</span>
+            <span class="serve-content">{{ getServe(rule) }}</span>
+          </div>
         </div>
       }
     }
   `,
   styles: `
+    .empty-state-text {
+      color: #8c8c8c;
+      font-style: italic;
+    }
+
     .targeting-rule-entry {
       margin-bottom: 8px;
       padding: 8px;
       background-color: #fafafa;
-      border-left: 3px solid #1890ff;
 
       &:last-child {
         margin-bottom: 0;
       }
+    }
+
+    .rule-name {
+      font-size: 11px;
+      font-weight: 600;
+      color: #8c8c8c;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      letter-spacing: 0.5px;
+    }
+
+    .conditions-section {
+      margin-bottom: 8px;
+    }
+
+    .condition-row {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 6px;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    .condition-keyword {
+      display: inline-block;
+      padding: 2px 6px;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 3px;
+      flex-shrink: 0;
+
+      &.if-keyword {
+        background-color: #e6f7ff;
+        color: #0050b3;
+      }
+
+      &.and-keyword {
+        background-color: #f0f5ff;
+        color: #2f54eb;
+      }
+    }
+
+    .condition-content {
+      flex: 1;
+      color: #262626;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .serve-section {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      padding-top: 8px;
+      border-top: 1px dashed #e0e0e0;
+    }
+
+    .serve-keyword {
+      display: inline-block;
+      padding: 2px 6px;
+      background-color: #f6ffed;
+      color: #389e0d;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    .serve-content {
+      flex: 1;
+      color: #262626;
+      font-size: 12px;
+      font-weight: 500;
     }
   `
 })

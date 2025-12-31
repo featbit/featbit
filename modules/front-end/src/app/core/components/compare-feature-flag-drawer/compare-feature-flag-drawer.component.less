@@ -73,9 +73,28 @@
   }
 
   .value-content {
+    line-height: 1.6;
+    padding: 12px 8px;
+    border-left: 3px solid transparent;
+    border-radius: 4px;
+
+    &.source-value {
+      border-left-color: #87e8de;
+      background-color: #e6fffb;
+    }
+
+    &.target-value {
+      background-color: #f0f5ff;
+      border-left-color: #adc6ff;
+    }
+
+    &.applied-value {
+      background-color: #f6ffed;
+      border-left-color: #b7eb8f;
+    }
+
     .value-line {
       margin-bottom: 4px;
-      line-height: 1.6;
       word-break: break-word;
 
       &:last-child {
@@ -92,28 +111,26 @@
     }
   }
 
-  .target-value {
-    position: relative;
+  .change-indicator {
+    margin: 10px 0;
+    color: #52c41a;
+    font-size: 12px;
+    font-weight: 500;
 
-    .will-change {
-      background-color: #f6ffed;
-      border-left: 3px solid #52c41a;
+    i {
+      margin-right: 4px;
+      font-size: 14px;
     }
+  }
 
-    .change-indicator {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      margin: 12px 0;
-      padding-top: 8px;
-      border-top: 1px dashed #d9d9d9;
-      color: #52c41a;
-      font-size: 12px;
-
-      i {
-        font-size: 14px;
-      }
-    }
+  .warning-text {
+    padding: 12px;
+    color: #d46b08;
+    background-color: #fff7e6;
+    border: 1px solid #ffd591;
+    border-radius: 4px;
+    font-size: 13px;
+    line-height: 1.6;
   }
 }
 

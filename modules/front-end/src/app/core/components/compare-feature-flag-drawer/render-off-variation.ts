@@ -1,10 +1,14 @@
 import { Component, Input } from "@angular/core";
 import { IVariation } from "@shared/rules";
 import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
+import { NzTooltipDirective } from "ng-zorro-antd/tooltip";
 
 @Component({
   selector: 'render-off-variation',
-  template: `{{ offVariation.value }}`
+  imports: [
+    NzTooltipDirective
+  ],
+  template: `<span nz-tooltip [nzTooltipTitle]="offVariation.value">{{ offVariation.name }}</span>`
 })
 export class RenderOffVariation {
   @Input()

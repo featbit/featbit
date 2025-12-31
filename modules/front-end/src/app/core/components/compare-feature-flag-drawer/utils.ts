@@ -10,7 +10,7 @@ export function describeServe(serve: {
   const ruleVariations = serve.variations;
   if (ruleVariations.length === 1) {
     const servedVariation = variations.find(v => v.id === ruleVariations[0].id);
-    return servedVariation ? servedVariation.value : '';
+    return servedVariation ? servedVariation.name : '';
   }
 
   let serves: string[] = [];
@@ -18,7 +18,7 @@ export function describeServe(serve: {
     const servedVariation = variations.find(v => v.id === rv.id);
     if (servedVariation) {
       const percentage = Math.round((rv.rollout[1] - rv.rollout[0]) * 100);
-      serves.push(`${percentage}% ${servedVariation.value}`);
+      serves.push(`${percentage}% ${servedVariation.name}`);
     }
   }
 
