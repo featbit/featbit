@@ -15,7 +15,7 @@ const routes: Routes = [
         path: 'compare',
         loadComponent: () => import("./compare/compare.component").then(m => m.CompareComponent),
         data: {
-          breadcrumb: $localize `:@@ff.routing.compare:Compare`
+          breadcrumb: $localize `:@@common.compare:Compare`
         }
       },
       {

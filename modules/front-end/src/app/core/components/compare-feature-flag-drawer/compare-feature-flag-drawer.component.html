@@ -6,7 +6,7 @@
   [nzWidth]="1000"
   (nzOnClose)="onClose(true)">
   <ng-template #title>
-    <span i18n="@@ff.compare.compare-flag">Compare Flag</span>: <strong>{{ flag?.name || 'Unknown Flag' }}</strong>
+    <span i18n="@@common.compare">Compare</span>&nbsp;<strong>{{ flag?.name || 'Unknown Flag' }}</strong>
   </ng-template>
   <ng-container *nzDrawerContent>
     <div class="environments-row">
