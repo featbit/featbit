@@ -18,6 +18,7 @@ const DefaultDispatchKey = 'keyId';
 })
 export class ServeComponent implements OnChanges {
 
+  @Input() disabled: boolean = true;
   @Input() ruleVariations: IRuleVariation[] = [];
 
   availableVariations: IVariation[] = [];

@@ -37,6 +37,7 @@ class LicenseDetail {
       LicenseFeatureEnum.GlobalUser,
       LicenseFeatureEnum.ShareableSegment,
       LicenseFeatureEnum.AutoAgents,
+      LicenseFeatureEnum.FineGrainedAccessControl,
       LicenseFeatureEnum.FlagComparison
     ];
 
@@ -91,6 +92,8 @@ class LicenseDetail {
         return $localize`:@@common.shareable-segment:Shareable Segment`;
       case LicenseFeatureEnum.AutoAgents:
         return $localize`:@@common.auto-agents:Auto Agents`;
+      case LicenseFeatureEnum.FineGrainedAccessControl:
+        return $localize`:@@common.fine-grained-access-control:Fine-grained Access Control`;
       case LicenseFeatureEnum.FlagComparison:
         return $localize`:@@common.flag-comparison:Flag Comparison`;
       default:

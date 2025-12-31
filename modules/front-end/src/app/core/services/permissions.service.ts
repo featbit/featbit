@@ -23,6 +23,10 @@ export class PermissionsService {
     this.userPermissions = policies.flatMap(p => p.statements);
   }
 
+  // Prefix-based segment matching:
+  // The rule segments are matched from left to right.
+  // A match succeeds if all rule segments match the corresponding
+  // prefix segments of the target string.
   // use "*" (star) as a wildcard for example:
   // "a*b" => everything that starts with "a" and ends with "b"
   // "a*" => everything that starts with "a"
@@ -31,7 +35,61 @@ export class PermissionsService {
   // "*a*b*"=> everything that has an "a" in it, followed by anything, followed by a "b", followed by anything
   private matchRule(str: string, rule: string): boolean {
     var escapeRegex = (s) => s.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
-    return new RegExp("^" + rule.split("*").map(escapeRegex).join(".*") + "$").test(str);
+
+    const wildcardToRegex = (pattern: string) =>
+      new RegExp(
+        "^" +
+        pattern
+        .split("*")
+        .map(escapeRegex)
+        .join(".*") +
+        "$"
+      );
+
+    const parseSegments = (input: string) =>
+      input.split(":").map(segment => {
+        const [path, tagsPart = ""] = segment.split(";");
+        const tags = tagsPart ? tagsPart.split(",") : [];
+        return { path, tags };
+      });
+
+    const strSegments = parseSegments(str);
+    const ruleSegments = parseSegments(rule);
+
+    if (ruleSegments.length > strSegments.length) {
+      return false;
+    }
+
+    for (let i = 0; i < ruleSegments.length; i++) {
+      const { path: rulePath, tags: ruleTags } = ruleSegments[i];
+      const { path: strPath, tags: strTags } = strSegments[i];
+
+      // —— path match（support *）——
+      const pathRegex = wildcardToRegex(rulePath);
+      if (!pathRegex.test(strPath)) {
+        return false;
+      }
+
+      // —— tag match（support *，OR）——
+      if (ruleTags.length > 0) {
+        let hit = false;
+
+        for (const ruleTag of ruleTags) {
+          const tagRegex = wildcardToRegex(ruleTag);
+
+          if (strTags.some(strTag => tagRegex.test(strTag))) {
+            hit = true;
+            break;
+          }
+        }
+
+        if (!hit) {
+          return false;
+        }
+      }
+    }
+
+    return true;
   }
 
   // //Explanation code

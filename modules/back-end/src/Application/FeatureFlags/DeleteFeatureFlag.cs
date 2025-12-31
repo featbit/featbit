@@ -32,7 +32,7 @@ public class DeleteFeatureFlagHandler : IRequestHandler<DeleteFeatureFlag, bool>
         var flag = await _service.GetAsync(request.EnvId, request.Key);
         if (!flag.IsArchived)
         {
-            throw new BusinessException(ErrorCodes.CannotDeleteUnArchivedFeatureFlag);
+            throw new BusinessException(ErrorCodes.CannotDeleteUnarchivedFeatureFlag);
         }
 
         await _service.DeleteOneAsync(flag.Id);

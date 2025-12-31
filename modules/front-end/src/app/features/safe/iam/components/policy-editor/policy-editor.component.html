@@ -20,6 +20,15 @@
       <i nz-icon (click)="addStatement()" nzType="icons:icon-add-outline"></i>
     }
   </div>
+  @if (!isFineGrainedAccessControlGranted) {
+    <div style="margin-top: 12px">
+      <message
+        [type]="'info'"
+        content="Feature flag resource type is a paid feature. Upgrade your plan to enable fine-grained access control."
+        i18n-content="@@iam.policies.details.flag-rbac-license-description">
+      </message>
+    </div>
+  }
   <div class="statements-wrapper">
     @for (statement of statements; track statement.id) {
       <div class="statement">
@@ -45,7 +54,7 @@
               [(ngModel)]="statement.resourceType"
               (ngModelChange)="statement.onResourceTypeChange()">
               @for (rt of resourcesTypes; track rt.type) {
-                <nz-option [nzLabel]="rt.displayName" [nzValue]="rt"></nz-option>
+                <nz-option [nzLabel]="rt.displayName" [nzValue]="rt" [nzDisabled]="isResourceTypeDisabled(rt)"></nz-option>
               }
             </nz-select>
           </div>

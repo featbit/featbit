@@ -181,7 +181,7 @@ export class OrganizationComponent implements OnInit {
     this.updateOrganization({ name, settings, defaultPermissions });
   }
 
-  updateSettings() {
+  updateSortFlagsBy() {
     if (!this.canUpdateSortFlagsBy) {
       this.message.warning(this.permissionsService.genericDenyMessage);
       return;

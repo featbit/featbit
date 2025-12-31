@@ -24,7 +24,7 @@
   </div>
   <div class="row">
     <div class="row-title" i18n="@@org.org.sort-flags-by">Sort flags by</div>
-    <form class="row-content" nz-form [formGroup]="settingsForm" [nzLayout]="'inline'" (ngSubmit)="updateSettings()">
+    <form class="row-content" nz-form [formGroup]="settingsForm" [nzLayout]="'inline'" (ngSubmit)="updateSortFlagsBy()">
       <nz-form-item class="extend">
         <nz-form-control>
           <nz-select class="nz-select-40" nzPlaceHolder="Select sort option" formControlName="flagSortedBy" i18n-nzPlaceHolder="@@org.org.selectSortOption">

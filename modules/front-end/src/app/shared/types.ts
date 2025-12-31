@@ -101,7 +101,8 @@ export enum LicenseFeatureEnum {
   GlobalUser = 'global-user',
   ShareableSegment = 'shareable-segment',
   AutoAgents = 'auto-agents',
-  FlagComparison = 'flag-comparison',
+  FineGrainedAccessControl = 'fine-grained-ac',
+  FlagComparison = 'flag-comparison'
 }
 
 export interface ILicense {

@@ -1,30 +1,29 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { debounceTime, first, map, switchMap } from "rxjs/operators";
-import { PolicyService } from "@services/policy.service";
-import {
-  AccessTokenTypeEnum,
-  IAccessToken,
-} from "@features/safe/integrations/access-tokens/types/access-token";
+import { AccessTokenTypeEnum, IAccessToken, } from "@features/safe/integrations/access-tokens/types/access-token";
 import { AccessTokenService } from "@services/access-token.service";
 import { PermissionsService } from "@services/permissions.service";
 import {
-  ResourceType,
   EffectEnum,
   generalResourceRNPattern,
   permissionActions,
+  ResourceType, ResourceTypeEnum,
   ResourceTypeFlag,
-  ResourceTypeSegment,
-  ResourceTypeProject
+  ResourceTypeProject,
+  ResourceTypeSegment
 } from "@shared/policy";
-import { NzModalService } from "ng-zorro-antd/modal";
 import { copyToClipboard, uuidv4 } from "@utils/index";
 import {
-  preProcessPermissions,
-  IPermissionStatementGroup, postProcessPermissions
+  IPermissionStatementGroup,
+  postProcessPermissions,
+  preProcessPermissions
 } from "@features/safe/integrations/access-tokens/types/permission-helper";
 import { PolicyTypeEnum } from "@features/safe/iam/types/policy";
+import { PermissionLicenseService } from "@services/permission-license.service";
+import { LicenseFeatureEnum } from "@shared/types";
+import { getCurrentLicense } from "@utils/project-env";
 
 @Component({
     selector: 'access-token-drawer',
@@ -32,7 +31,7 @@ import { PolicyTypeEnum } from "@features/safe/iam/types/policy";
     styleUrls: ['./access-token-drawer.component.less'],
     standalone: false
 })
-export class AccessTokenDrawerComponent {
+export class AccessTokenDrawerComponent implements OnInit {
   private _accessToken: IAccessToken;
   isEditing: boolean = false;
 
@@ -43,6 +42,7 @@ export class AccessTokenDrawerComponent {
     ResourceTypeProject
   ];
 
+  fineGrainedAccessControlEnabled: boolean = false;
   authorizedResourceTypes: ResourceType[] = [];
   permissions: { [key: string]: IPermissionStatementGroup };
 
@@ -80,14 +80,17 @@ export class AccessTokenDrawerComponent {
 
   constructor(
     private fb: FormBuilder,
-    private policyService: PolicyService,
     private permissionsService: PermissionsService,
     private accessTokenService: AccessTokenService,
-    private modal: NzModalService,
-    private message: NzMessageService
+    private message: NzMessageService,
+    private permissionLicenseService: PermissionLicenseService
   ) {
+  }
+
+  ngOnInit(): void {
     this.initForm('', AccessTokenTypeEnum.Personal);
 
+    this.fineGrainedAccessControlEnabled = this.permissionLicenseService.isGrantedByLicense(LicenseFeatureEnum.FineGrainedAccessControl);
     this.canTakeActionOnPersonalAccessToken = this.permissionsService.isGranted(generalResourceRNPattern.accessToken, permissionActions.ManagePersonalAccessTokens);
     this.canTakeActionOnServiceAccessToken = this.permissionsService.isGranted(generalResourceRNPattern.accessToken, permissionActions.ManageServiceAccessTokens);
   }
@@ -101,6 +104,10 @@ export class AccessTokenDrawerComponent {
     this.form.get('type').valueChanges.subscribe((newType) => {
       this.isServiceAccessToken = newType === AccessTokenTypeEnum.Service;
     });
+  }
+
+  isResourceTypeDisabled(rt: ResourceType): boolean {
+    return rt.type === ResourceTypeEnum.Flag && !this.fineGrainedAccessControlEnabled;
   }
 
   isServiceAccessToken: boolean = false

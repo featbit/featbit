@@ -6,13 +6,15 @@ import {
   isResourceGeneral, permissionActions,
   Resource,
   resourcesTypes,
-  ResourceType
+  ResourceType, ResourceTypeEnum
 } from "@shared/policy";
 import {deepCopy, encodeURIComponentFfc, uuidv4} from "@utils/index";
 import { IPolicy, PolicyTypeEnum } from "@features/safe/iam/types/policy";
 import {NzMessageService} from "ng-zorro-antd/message";
 import {PolicyService} from "@services/policy.service";
 import {Router} from "@angular/router";
+import { PermissionLicenseService } from "@services/permission-license.service";
+import { LicenseFeatureEnum } from "@shared/types";
 
 class PolicyStatementViewModel {
   id: string;
@@ -102,11 +104,16 @@ export class PolicyEditorComponent {
   statements: PolicyStatementViewModel[] = [];
   readonly: boolean; // true if SysManaged
 
+  isFineGrainedAccessControlGranted: boolean = false;
+
   constructor(
     private router: Router,
     private message: NzMessageService,
-    private policyService: PolicyService
-  ) { }
+    private policyService: PolicyService,
+    private permissionLicenseService: PermissionLicenseService
+  ) {
+    this.isFineGrainedAccessControlGranted = permissionLicenseService.isGrantedByLicense(LicenseFeatureEnum.FineGrainedAccessControl);
+  }
 
   @Output()
   saveStatementsEvent = new EventEmitter<IPolicyStatement[]>();
@@ -119,6 +126,10 @@ export class PolicyEditorComponent {
       this.readonly = policy.type === PolicyTypeEnum.SysManaged;
       this.statements = policy.statements.map(statement => new PolicyStatementViewModel(statement));
     }
+  }
+
+  isResourceTypeDisabled(rt: ResourceType): boolean {
+    return !this.isFineGrainedAccessControlGranted && rt.type === ResourceTypeEnum.Flag;
   }
 
   copyPolicy() {
@@ -154,7 +165,7 @@ export class PolicyEditorComponent {
   }
 
   addStatement() {
-    this.statements = [...this.statements, new PolicyStatementViewModel()];
+    this.statements = [new PolicyStatementViewModel(), ...this.statements];
   }
 
   removeStatement(statement: PolicyStatementViewModel) {

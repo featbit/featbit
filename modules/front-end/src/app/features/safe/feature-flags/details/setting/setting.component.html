@@ -7,16 +7,16 @@
         <span class="text" i18n="@@ff.ff-archived">Archived</span>
       </div>
       <div class="content">
-        <ng-container i18n="@@ff.you-can">You can</ng-container>
+        <ng-container i18n="@@ff.you-can">You can</ng-container>&nbsp;
         <a class="restore"
            i18n-nz-popconfirm="@@ff.are-you-sure-to-restore-ff"
            nz-popconfirm="Are you sure to restore this feature flag?"
-           (nzOnConfirm)="restoreFlag()">&nbsp;<ng-container i18n="@@common.restore">Restore</ng-container>&nbsp;</a>
-        <ng-container i18n="@@common.or">or</ng-container>
+           (nzOnConfirm)="restoreFlag()"><ng-container i18n="@@common.restore">Restore</ng-container></a>&nbsp;
+        <ng-container i18n="@@common.or">or</ng-container>&nbsp;
         <a class="delete" i18n-nz-popconfirm="@@common.remove-confirm"
-           nz-popconfirm="This operation cannot be reverted, are you sure to remove it?" (nzOnConfirm)="deleteFlag()">&nbsp;
+           nz-popconfirm="This operation cannot be reverted, are you sure to remove it?" (nzOnConfirm)="deleteFlag()">
           <ng-container i18n="@@common.remove">Remove</ng-container>
-        </a>
+        </a>&nbsp;
         <ng-container i18n="@@ff.the-ff">the feature flag</ng-container>
       </div>
     </div>
@@ -28,7 +28,7 @@
           <input nz-input i18n-placeholder="@@common.name" placeholder="Name" [(ngModel)]="featureFlag.name"/>
           <div class="actions">
             <i nz-icon nzType="close" (click)="toggleTitleEditState()"></i>
-            <i nz-icon nzType="icons:icon-save" (click)="onSaveSettings()"></i>
+            <i nz-icon nzType="icons:icon-save" (click)="onSaveName()"></i>
           </div>
         } @else {
           <span class="text">{{ featureFlag.name }}</span>
@@ -41,7 +41,7 @@
                     [(ngModel)]="featureFlag.description" [nzAutosize]="{ minRows: 3 }"></textarea>
           <div class="actions">
             <i nz-icon nzType="close" (click)="toggleDescriptionEditState()"></i>
-            <i nz-icon nzType="icons:icon-save" (click)="onSaveSettings()"></i>
+            <i nz-icon nzType="icons:icon-save" (click)="onSaveDescription()"></i>
           </div>
         } @else {
           <span>{{ featureFlag.description }}</span>
@@ -66,13 +66,13 @@
             <nz-switch i18n-nz-popconfirm="@@ff.are-you-sure-to-turn-ff-off"
                        nz-popconfirm="Are you sure to turn it off? The flag will return the variation that you specified for its off state."
                        nzPopconfirmPlacement="bottomRight" [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
-                       (nzOnConfirm)="onChangeStatus()" [ngModel]="featureFlag.isEnabled" [nzControl]="true"
+                       (nzOnConfirm)="onChangeStatus()" [ngModel]="featureFlag.isEnabled" [nzControl]="true" [nzLoading]="isToggling"
                        nzCheckedChildren="ON" nzUnCheckedChildren="OFF"></nz-switch>
           } @else {
             <nz-switch i18n-nz-popconfirm="@@ff.are-you-sure-to-turn-ff-on"
                        nz-popconfirm="Are you sure to turn it on? The flag will return the matching targeting users' or rules' serving variation."
                        nzPopconfirmPlacement="bottomRight" [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
-                       (nzOnConfirm)="onChangeStatus()" [ngModel]="featureFlag.isEnabled" [nzControl]="true"
+                       (nzOnConfirm)="onChangeStatus()" [ngModel]="featureFlag.isEnabled" [nzControl]="true" [nzLoading]="isToggling"
                        nzCheckedChildren="ON" nzUnCheckedChildren="OFF"></nz-switch>
           }
           <span>
@@ -90,7 +90,7 @@
             class="nz-select-36"
             [compareWith]="compareWith"
             [(ngModel)]="featureFlag.disabledVariationId"
-            (ngModelChange)="onChangeDisabledVariation()"
+            (ngModelChange)="onSaveOffVariation()"
             i18n-nzPlaceHolder="@@ff.select-variation"
             nzPlaceHolder="Select variation">
             @for (variation of featureFlag.variations; track variation.id) {

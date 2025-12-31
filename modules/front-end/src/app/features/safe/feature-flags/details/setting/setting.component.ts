@@ -8,7 +8,6 @@ import { FeatureFlagService } from "@services/feature-flag.service";
 import {
   FeatureFlag,
   IFeatureFlag,
-  ISettingPayload,
   isVariationValueValid,
   VariationTypeEnum
 } from "@features/safe/feature-flags/types/details";
@@ -17,6 +16,11 @@ import { ExperimentService } from "@services/experiment.service";
 import { ExperimentStatus, IExpt } from "@features/safe/experiments/types";
 import { NzSelectComponent } from "ng-zorro-antd/select";
 import { FormArray, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators } from "@angular/forms";
+import { PermissionsService } from "@services/permissions.service";
+import { permissionActions } from "@shared/policy";
+import { PermissionLicenseService } from "@services/permission-license.service";
+import { LicenseFeatureEnum } from "@shared/types";
+import { finalize } from "rxjs/operators";
 
 @Component({
     selector: 'ff-setting',
@@ -81,6 +85,12 @@ export class SettingComponent {
   }
 
   onAddTag() {
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.UpdateFlagTags, LicenseFeatureEnum.FineGrainedAccessControl, true);
+    if (!isGranted) {
+      this.message.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
     let actualTag = this.selectedTag.startsWith(this.createTagPrefix)
       ? this.selectedTag.replace(this.createTagPrefix, '').replace(/'/g, '').trim()
       : this.selectedTag.trim();
@@ -103,7 +113,9 @@ export class SettingComponent {
     private message: NzMessageService,
     private messageQueueService: MessageQueueService,
     private formBuilder: FormBuilder,
-    private router: Router
+    private router: Router,
+    private permissionsService: PermissionsService,
+    private permissionLicenseService: PermissionLicenseService
   ) {
     this.isLoading = true;
     this.route.paramMap.subscribe( paramMap => {
@@ -136,26 +148,55 @@ export class SettingComponent {
   }
 
   private loadData() {
-    this.featureFlagService.getByKey(this.key).subscribe((result: IFeatureFlag) => {
-      this.featureFlag = new FeatureFlag(result);
-      this.isLoading = false;
-    }, () => this.isLoading = false)
+    this.featureFlagService.getByKey(this.key).subscribe({
+      next: (result: IFeatureFlag) => {
+        this.featureFlag = new FeatureFlag(result);
+        this.isLoading = false;
+      },
+      error: () => this.isLoading = false
+    });
   }
 
+  isToggling: boolean = false;
   onChangeStatus() {
-    this.featureFlag.isEnabled = !this.featureFlag.isEnabled;
-    this.onSaveSettings(() => this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key)));
-  }
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.ToggleFlag, LicenseFeatureEnum.FineGrainedAccessControl, true);
+    if (!isGranted) {
+      this.message.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
 
-  onChangeDisabledVariation() {
-    this.onSaveSettings(() => this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key)));
+    const { isEnabled } = this.featureFlag;
+
+    this.isToggling = true;
+    this.featureFlagService.toggleStatus(this.key, !isEnabled)
+    .pipe(finalize(() => this.isToggling = false))
+    .subscribe({
+      next: () => {
+        this.message.success($localize`:@@common.operation-success:Operation succeeded`);
+        this.featureFlag.isEnabled = !isEnabled;
+        this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key))
+      },
+      error: err => this.message.error(err.error)
+    });
   }
 
   toggleTitleEditState(): void {
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.UpdateFlagName, LicenseFeatureEnum.FineGrainedAccessControl, true);
+    if (!isGranted) {
+      this.message.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
     this.isEditingTitle = !this.isEditingTitle;
   }
 
   toggleDescriptionEditState(): void {
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.UpdateFlagDescription, LicenseFeatureEnum.FineGrainedAccessControl, true);
+    if (!isGranted) {
+      this.message.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
     this.isEditingDescription = !this.isEditingDescription;
   }
 
@@ -181,6 +222,12 @@ export class SettingComponent {
 
   editVariationModalVisible: boolean = false;
   editVariations(): void {
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.UpdateFlagVariations, LicenseFeatureEnum.FineGrainedAccessControl, true);
+    if (!isGranted) {
+      this.message.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
     const { variationType, variations } = this.featureFlag;
 
     this.variationForm = this.formBuilder.group({
@@ -242,6 +289,12 @@ export class SettingComponent {
   }
 
   saveVariations() {
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.UpdateFlagVariations, LicenseFeatureEnum.FineGrainedAccessControl, true);
+    if (!isGranted) {
+      this.message.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
     if (!this.variationForm.valid) {
       return;
     }
@@ -326,27 +379,56 @@ export class SettingComponent {
     this.exptReferenceModalVisible = false;
   }
 
-  onSaveSettings(cb?: Function) {
-    const { name, description, isEnabled, disabledVariationId } = this.featureFlag;
-    const payload: ISettingPayload = {
-      name,
-      description,
-      isEnabled,
-      disabledVariationId,
-    };
+  onSaveName() {
+    const { name } = this.featureFlag;
 
-    this.featureFlagService.updateSetting(this.key, payload).subscribe({
+    this.featureFlagService.updateName(this.key, name).subscribe({
       next: () => {
         this.message.success($localize `:@@common.operation-success:Operation succeeded`);
         this.isEditingTitle = false;
+      },
+      error: err => this.message.error(err.error)
+    });
+  }
+
+  onSaveDescription() {
+    const { description } = this.featureFlag;
+
+    this.featureFlagService.updateDescription(this.key, description).subscribe({
+      next: () => {
+        this.message.success($localize `:@@common.operation-success:Operation succeeded`);
         this.isEditingDescription = false;
-        cb && cb();
+      },
+      error: err => this.message.error(err.error)
+    });
+  }
+
+  onSaveOffVariation() {
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.UpdateFlagOffVariation, LicenseFeatureEnum.FineGrainedAccessControl, true);
+    if (!isGranted) {
+      this.message.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
+    const { disabledVariationId } = this.featureFlag;
+
+    this.featureFlagService.updateOffVariation(this.key, disabledVariationId).subscribe({
+      next: () => {
+        this.message.success($localize `:@@common.operation-success:Operation succeeded`);
+        this.isEditingTitle = false;
+        this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key))
       },
       error: err => this.message.error(err.error)
     });
   }
 
   restoreFlag() {
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.RestoreFlag, LicenseFeatureEnum.FineGrainedAccessControl, true);
+    if (!isGranted) {
+      this.message.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
     this.featureFlagService.restore(this.featureFlag.key).subscribe(_ => {
       this.featureFlag.isArchived = false;
       this.message.success($localize `:@@common.operation-success:Operation succeeded`);
@@ -355,6 +437,12 @@ export class SettingComponent {
   }
 
   deleteFlag() {
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.DeleteFlag, LicenseFeatureEnum.FineGrainedAccessControl, true);
+    if (!isGranted) {
+      this.message.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
     this.featureFlagService.delete(this.featureFlag.key).subscribe(success => {
       if (success) {
         this.message.success($localize `:@@common.operation-success:Operation succeeded`);

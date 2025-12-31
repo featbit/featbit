@@ -13,7 +13,6 @@ using Swashbuckle.AspNetCore.Filters;
 
 namespace Api.Controllers;
 
-[Authorize(Permissions.ManageFeatureFlag)]
 [Route("api/v{version:apiVersion}/envs/{envId:guid}/feature-flags")]
 public class FeatureFlagController : ApiControllerBase
 {
@@ -80,6 +79,7 @@ public class FeatureFlagController : ApiControllerBase
     /// </remarks>
     [OpenApi]
     [HttpPost]
+    [Authorize(Permissions.CreateFlag)]
     public async Task<ApiResponse<FeatureFlag>> CreateAsync(Guid envId, CreateFeatureFlag request)
     {
         request.EnvId = envId;
@@ -93,6 +93,7 @@ public class FeatureFlagController : ApiControllerBase
     /// </summary>
     [OpenApi]
     [HttpPut("{key}/archive")]
+    [Authorize(Permissions.ArchiveFlag)]
     public async Task<ApiResponse<bool>> ArchiveAsync(Guid envId, string key)
     {
         var request = new ArchiveFeatureFlag
@@ -110,6 +111,7 @@ public class FeatureFlagController : ApiControllerBase
     /// </summary>
     [OpenApi]
     [HttpPut("{key}/restore")]
+    [Authorize(Permissions.RestoreFlag)]
     public async Task<ApiResponse<bool>> RestoreAsync(Guid envId, string key)
     {
         var request = new RestoreFeatureFlag
@@ -127,6 +129,7 @@ public class FeatureFlagController : ApiControllerBase
     /// </summary>
     [OpenApi]
     [HttpDelete("{key}")]
+    [Authorize(Permissions.DeleteFlag)]
     public async Task<ApiResponse<bool>> DeleteAsync(Guid envId, string key)
     {
         var request = new DeleteFeatureFlag
@@ -139,21 +142,50 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(success);
     }
 
-    [HttpPut("{key}/toggle")]
-    public async Task<ApiResponse<bool>> ToggleAsync(Guid envId, string key)
+    [OpenApi]
+    [HttpPut("{key}/toggle/{status}")]
+    [Authorize(Permissions.ToggleFlag)]
+    public async Task<ApiResponse<bool>> ToggleAsync(Guid envId, string key, bool status)
     {
         var request = new ToggleFeatureFlag
         {
             EnvId = envId,
-            Key = key
+            Key = key,
+            Status = status
         };
 
         var success = await Mediator.Send(request);
         return Ok(success);
     }
 
-    [HttpPut("{key}/settings")]
-    public async Task<ApiResponse<bool>> UpdateSettingAsync(Guid envId, string key, UpdateSetting request)
+    [OpenApi]
+    [HttpPut("{key}/name")]
+    [Authorize(Permissions.UpdateFlagName)]
+    public async Task<ApiResponse<bool>> UpdateNameAsync(Guid envId, string key, UpdateName request)
+    {
+        request.Key = key;
+        request.EnvId = envId;
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
+    }
+
+    [OpenApi]
+    [HttpPut("{key}/description")]
+    [Authorize(Permissions.UpdateFlagDescription)]
+    public async Task<ApiResponse<bool>> UpdateDescriptionAsync(Guid envId, string key, UpdateDescription request)
+    {
+        request.Key = key;
+        request.EnvId = envId;
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
+    }
+
+    [OpenApi]
+    [HttpPut("{key}/off-variation")]
+    [Authorize(Permissions.UpdateFlagOffVariation)]
+    public async Task<ApiResponse<bool>> UpdateOffVariationAsync(Guid envId, string key, UpdateOffVariation request)
     {
         request.Key = key;
         request.EnvId = envId;
@@ -185,7 +217,9 @@ public class FeatureFlagController : ApiControllerBase
         return result.Success ? Ok(true) : Error<bool>(result.Message);
     }
 
+    [OpenApi]
     [HttpPut("{key}/variations")]
+    [Authorize(Permissions.UpdateFlagVariations)]
     public async Task<ApiResponse<bool>> UpdateVariationsAsync(Guid envId, string key, UpdateVariations request)
     {
         request.Key = key;
@@ -353,7 +387,9 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(copyToEnvResult);
     }
 
+    [OpenApi]
     [HttpPost("clone/{key}")]
+    [Authorize(Permissions.CloneFlag)]
     public async Task<ApiResponse<bool>> CloneAsync(Guid envId, string key, CloneFlag request)
     {
         request.EnvId = envId;
@@ -412,7 +448,9 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(tags);
     }
 
+    [OpenApi]
     [HttpPut("{key}/tags")]
+    [Authorize(Permissions.UpdateFlagTags)]
     public async Task<ApiResponse<bool>> SetTagsAsync(Guid envId, string key, string[] tags)
     {
         var request = new SetTags

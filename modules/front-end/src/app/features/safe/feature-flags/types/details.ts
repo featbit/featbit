@@ -1,5 +1,6 @@
 import { IRule, IRuleVariation, IVariation } from "@shared/rules";
 import { deepCopy, isNumeric, tryParseJSONObject } from "@utils/index";
+import { getFlagRN } from "@features/safe/feature-flags/types/feature-flag";
 
 export class FeatureFlag implements IFeatureFlag {
   originalData: IFeatureFlag;
@@ -13,6 +14,10 @@ export class FeatureFlag implements IFeatureFlag {
     }
 
     this.originalData = deepCopy(data);
+  }
+
+  get rn(): string {
+    return getFlagRN(this.originalData.key, this.originalData.tags);
   }
 
   addTag(tag: string) {

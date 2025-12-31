@@ -36,6 +36,7 @@ export class RuleComponent {
     }
   };
 
+  @Input() disabled: boolean = true;
   @Input() isFirst: boolean;
   @Input() isLast: boolean;
 

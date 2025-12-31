@@ -10,6 +10,7 @@
       nzServerSearch
       nzPlaceHolder="Select property"
       i18n-nzPlaceHolder="@@core.components.findrule.rule.selectuserproperty"
+      [nzDisabled]="disabled"
       (nzOnSearch)="onSearchProperty($event)"
       [(ngModel)]="selectedProp"
       (ngModelChange)="onPropertyChange()">
@@ -28,6 +29,7 @@
       nzPlaceHolder="Select operation"
       i18n-nzPlaceHolder="@@core.components.findrule.rule.select-operation"
       nzShowSearch
+      [nzDisabled]="disabled"
       [(ngModel)]="condition.op"
       (ngModelChange)="onOperationChange()">
       <nz-option *ngFor="let rule of ruleValueConfig" [nzValue]="rule.value" [nzLabel]="rule.label"></nz-option>
@@ -36,9 +38,12 @@
   <div class="target-flex-rule-container" *ngIf="!isSegmentRule && condition.type">
     <ng-container [ngSwitch]="condition.type" >
       <ng-template #presetSelect>
-        <nz-select class="nz-select-36 target-flex-rule-select" style="min-width: 200px" nzShowSearch
+        <nz-select class="nz-select-36 target-flex-rule-select"
+                   style="min-width: 200px"
+                   nzShowSearch
                    nzPlaceHolder="values"
                    i18n-nzPlaceHolder="@@core.components.findrule.rule.selectvalues"
+                   [nzDisabled]="disabled"
                    [(ngModel)]="condition.value" (ngModelChange)="onDebounceTimeModelChange()">
           <nz-option
             *ngFor="let presetValue of currentUserProp.presetValues"
@@ -50,6 +55,7 @@
       <ng-container *ngSwitchCase="'string'">
         <div class="value" *ngIf="!currentUserProp.usePresetValuesOnly; else presetSelect">
           <input class="standard-bordered-input" nz-input [(ngModel)]="condition.value" (ngModelChange)="onDebounceTimeModelChange()"
+                 [nzDisabled]="disabled"
                  placeholder="input string or number"
                  i18n-placeholder="@@core.components.findrule.rule.pleaseinput" />
         </div>
@@ -57,12 +63,13 @@
       <ng-container *ngSwitchCase="'number'">
         <div class="value" *ngIf="!currentUserProp.usePresetValuesOnly; else presetSelect">
           <nz-input-number class="standard-bordered-input" [(ngModel)]="condition.value" (ngModelChange)="onDebounceTimeModelChange()" nzPlaceHolder="input a number"
+                           [nzDisabled]="disabled"
                            i18n-nzPlaceHolder="@@core.components.findrule.rule.inputnumber"></nz-input-number>
         </div>
       </ng-container>
       <ng-container *ngSwitchCase="'regex'">
         <div class="value" *ngIf="!currentUserProp.usePresetValuesOnly; else presetSelect">
-          <input class="standard-bordered-input" nz-input [(ngModel)]="condition.value" (ngModelChange)="onDebounceTimeModelChange()" placeholder="Eg. ^foo$"/>
+          <input class="standard-bordered-input" nz-input [(ngModel)]="condition.value" (ngModelChange)="onDebounceTimeModelChange()" [disabled]="disabled" placeholder="Eg. ^foo$"/>
         </div>
       </ng-container>
       <ng-container *ngSwitchCase="'multi'">
@@ -74,6 +81,7 @@
             nzPlaceHolder="values"
             i18n-nzPlaceHolder="@@core.components.findrule.rule.selectvalues"
             nzShowSearch
+            [nzDisabled]="disabled"
             [(ngModel)]="condition.multipleValue"
             (ngModelChange)="onModelChange()">
             <nz-option
@@ -98,6 +106,7 @@
           nzShowSearch
           nzAllowClear
           nzServerSearch
+          [nzDisabled]="disabled"
           [(ngModel)]="condition.multipleValue"
           [nzMaxTagPlaceholder]="omittedPlaceHolder"
           [nzMaxTagCount]="2"
@@ -151,10 +160,12 @@
       </ng-template>
     </div>
   </ng-template>
-  <div class="operator">
-    <i nz-icon nzType="icons:icon-add-outline" *ngIf="isLast" (click)="addRule.emit()"></i>
-    <i nz-icon nzType="icons:icon-minus-outline" (click)="deleteRule.emit()"></i>
-  </div>
+  @if (!disabled) {
+    <div class="operator">
+      <i nz-icon nzType="icons:icon-add-outline" *ngIf="isLast" (click)="addRule.emit()"></i>
+      <i nz-icon nzType="icons:icon-minus-outline" (click)="deleteRule.emit()"></i>
+    </div>
+  }
 </section>
 
 

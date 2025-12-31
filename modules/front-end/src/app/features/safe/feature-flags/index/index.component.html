@@ -37,7 +37,7 @@
         <label nz-checkbox [(ngModel)]="featureFlagFilter.isArchived" (ngModelChange)="onSearch(true)" i18n="@@ff.idx.archived">Archived</label>
       </div>
       <div class="table-actions">
-        <button nz-button nzType="primary" (click)="creationDrawerVisible = true">
+        <button nz-button nzType="primary" (click)="openCreationDrawer()">
           <i nz-icon nzType="icons:icon-add"></i>
           <ng-container i18n="@@common.add">Add</ng-container>
         </button>
