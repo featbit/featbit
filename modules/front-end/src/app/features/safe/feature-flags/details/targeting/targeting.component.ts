@@ -96,7 +96,7 @@ export class TargetingComponent implements OnInit {
   }
 
   onReviewChanges(validationErrortpl: TemplateRef<void>, modalKind: ReviewModalKindEnum) {
-    if (!this.canUpdateDefaultRule && !this.canUpdateIndividualTargeting && !this.canUpdateIndividualTargeting) {
+    if (!this.canUpdateDefaultRule && !this.canUpdateIndividualTargeting && !this.canUpdateRules) {
       this.msg.warning(this.permissionsService.genericDenyMessage);
       return;
     }

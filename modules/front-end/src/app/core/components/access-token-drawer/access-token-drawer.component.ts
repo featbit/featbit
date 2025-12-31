@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { debounceTime, first, map, switchMap } from "rxjs/operators";
@@ -23,6 +23,7 @@ import {
 import { PolicyTypeEnum } from "@features/safe/iam/types/policy";
 import { PermissionLicenseService } from "@services/permission-license.service";
 import { LicenseFeatureEnum } from "@shared/types";
+import { getCurrentLicense } from "@utils/project-env";
 
 @Component({
     selector: 'access-token-drawer',
@@ -30,7 +31,7 @@ import { LicenseFeatureEnum } from "@shared/types";
     styleUrls: ['./access-token-drawer.component.less'],
     standalone: false
 })
-export class AccessTokenDrawerComponent {
+export class AccessTokenDrawerComponent implements OnInit {
   private _accessToken: IAccessToken;
   isEditing: boolean = false;
 
@@ -84,6 +85,9 @@ export class AccessTokenDrawerComponent {
     private message: NzMessageService,
     private permissionLicenseService: PermissionLicenseService
   ) {
+  }
+
+  ngOnInit(): void {
     this.initForm('', AccessTokenTypeEnum.Personal);
 
     this.fineGrainedAccessControlEnabled = this.permissionLicenseService.isGrantedByLicense(LicenseFeatureEnum.FineGrainedAccessControl);
