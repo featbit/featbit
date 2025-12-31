@@ -1,6 +1,6 @@
 import { Component, Input } from "@angular/core";
 import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
-import { NgClass, SlicePipe } from "@angular/common";
+import { SlicePipe } from "@angular/common";
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 
 @Component({

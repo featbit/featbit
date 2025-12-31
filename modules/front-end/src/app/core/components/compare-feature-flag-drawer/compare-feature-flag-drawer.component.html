@@ -68,13 +68,18 @@
       <div class="empty-state">
         <i nz-icon nzType="exclamation-circle" [style.fontSize.px]="48" nzTheme="outline"></i>
         <p>
-          The feature flag <strong>{{flag?.name}}</strong> does not exist in the target environment <strong>{{ targetEnv?.name }}</strong>.
+          <span i18n="@@ff.compare.the-feature-flag">The feature flag</span>&nbsp;
+          <strong>{{flag?.name}}</strong>&nbsp;
+          <span i18n="@@ff.compare.does-not-exist-in-target-env">does not exist in the target environment</span>&nbsp;
+          <strong>{{ targetEnv?.name }}</strong>.
         </p>
       </div>
     } @else {
       <p class="tip">
-        Select the settings you want to copy from <strong>{{ sourceEnv?.name }}</strong> to <strong>{{ targetEnv?.name }}</strong>.
-        Differences are highlighted.
+        <span i18n="@@ff.compare.copy-setting-tip">Select the settings you want to copy from</span>&nbsp;
+        <strong>{{ sourceEnv?.name }}</strong>&nbsp;
+        <span i18n="@@common.to">to</span>&nbsp;
+        <strong>{{ targetEnv?.name }}</strong>.
       </p>
       <nz-table
         [nzData]="rows"

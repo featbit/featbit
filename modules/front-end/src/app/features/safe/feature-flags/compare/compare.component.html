@@ -20,12 +20,13 @@
       nzShowSearch
       [nzOptions]="envs"
       nzPlaceHolder="Select target environments to compare"
+      i18n-nzPlaceHolder="@@ff.compare.select-target-envs-placeholder"
       [(ngModel)]="selectedEnvs"
       (ngModelChange)="onSelectedEnvChanged()"
       nzMode="multiple">
     </nz-select>
   </div>
-  <button [disabled]="selectedEnvs.length === 0" nz-button nzType="primary" (click)="apply()">Apply</button>
+  <button [disabled]="selectedEnvs.length === 0" nz-button nzType="primary" (click)="apply()" i18n="@@common.apply">Apply</button>
 </div>
 
 @if (!isCompareGranted) {
@@ -157,7 +158,7 @@
                       <span>{{ diffCountLabel(flag, env.value) }}</span>
                     } @else {
                       <i nz-icon nzType="check-circle"></i>
-                      <span>Identical</span>
+                      <span i18n="@@ff.compare.no-difference">No Difference</span>
                     }
                   </div>
                   <ul class="diff-list">
