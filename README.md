@@ -53,25 +53,29 @@
 <br/>
 
 
-## Try FeatBit Online
-
-Try FeatBit immediately with [our online demo](https://app.featbit.co). The video below shows you how to get started quickly.
-
-https://github.com/featbit/featbit/assets/68597908/d836702d-6096-4025-9b9e-5128a8b52dcb
-
 ## About FeatBit
 
-[FeatBit](https://www.featbit.co) is an open-source [feature flags](https://blog.jetbrains.com/space/2022/06/16/feature-flags/) management tool that empowers developers:
+[FeatBit](https://www.featbit.co) is an open-source [feature flags](https://blog.jetbrains.com/space/2022/06/16/feature-flags/) management tool. Control feature releases with simple code:
 
-**Ship Code Safely**. Mitigate risks with Production Testing, roll out features to 1% of users initially then expanding progressively, and ensure instant error recovery without redeployment.
+```csharp
+var user = FbUser.Builder("tester-id").Name("tester").Build();
+if (featbit.BoolVariation("user-new-algorithm", user, defaultValue: false))
+{
+    // run new algorithm
+}
+else
+{
+    // run old algorithm
+}
+```
 
-**Targeted Experiences**. Giving you control over who sees each feature and when they see it. Release features to specific target users, and continuously measure and improve your business.
+**Why FeatBit:**
 
-**Innovate Faster**. Decouples code deployments from feature releases. Deploy at will, and release any feature immediately upon request from the boss.
-
-**Host Anywhere**. FeatBit allows you to host your feature flags service wherever your business needs it, ensuring compliance and data protection.
-
-**Born for developers**. Use simple if/else statements to control and release features, eliminating complex DevOps tasks. This enables developers to directly drive business value.
+- **Ship Code Safely** - Roll out features progressively and recover instantly from errors without redeployment
+- **Targeted Experiences** - Control who sees each feature and when, continuously measure and improve your business
+- **Innovate Faster** - Decouple code deployments from feature releases, deploy at will
+- **Host Anywhere** - Self-host your feature flags service wherever you need it
+- **Born for Developers** - Simple if/else statements to control features, no complex DevOps tasks
 
 <a href="https://www.featbit.co">
   <img src="https://github.com/featbit/featbit/assets/68597908/eed06178-7b10-4d60-a932-83e8627f52b6" width="100%" />
@@ -105,21 +109,15 @@ You can also learn how to connect an SDK in the "Getting Started" section after 
 
 ![image](https://github.com/featbit/featbit/assets/68597908/f6fe85dd-0753-4896-8f84-fa17c0037c21)
 
-### 3. Check a feature flag
+### 3. Use feature flags in your code
 
-To check the state of a feature flag in your code, you just need a simple function call to verify the expected value. Here's how it might look in C#:
+Import the SDK and use feature flags with simple if/else statements as shown in the code example above.
 
-```csharp
-var user = FbUser.Builder("tester-id").Name("tester").Build();
-if (featbit.BoolVariation("user-new-algorithm", user, defaultValue: false))
-{
-    // run new algorithm
-}
-else
-{
-    // run old algorithm
-}
-```
+## Try FeatBit Online
+
+Try FeatBit immediately with [our online demo](https://app.featbit.co). The video below shows you how to get started quickly.
+
+https://github.com/featbit/featbit/assets/68597908/d836702d-6096-4025-9b9e-5128a8b52dcb
 
 --------
 
