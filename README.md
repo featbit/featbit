@@ -58,22 +58,22 @@
 [FeatBit](https://www.featbit.co) is an open-source [feature flags](https://blog.jetbrains.com/space/2022/06/16/feature-flags/) management tool. Control feature releases with simple code:
 
 ```csharp
-if (featureFlag.BoolVariation("enable-review-by-copilot"))
+if (featureFlag.BoolVariation("enable-review-by-copilot", specificUserOrContext))
 {
     // run review program
     ...
 }
 ```
 
-**Why FeatBit:**
+**How does it work:**
+- One line code to wrap the execution feature.
+- Control the return value in remote dashboard
 
+**The result:**
 - **Ship Code Safely** - Roll out features progressively and recover instantly from errors without redeployment
 - **Targeted Experiences** - Control who sees each feature and when, continuously measure and improve your business
-- **Innovate Faster** - Decouple code deployments from feature releases, deploy at will
-- **Host Anywhere** - Self-host your feature flags service wherever you need it
-- **Born for Developers** - Simple if/else statements to control features, no complex DevOps tasks
 
-
+> **A must-have tool for AI Agents**
 
 ## Get started in 3 steps
 
