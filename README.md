@@ -1,5 +1,5 @@
 
-![image](https://github.com/featbit/featbit/assets/68597908/ff7a611e-9504-4f99-bf11-8ba9bccea696)
+![image](https://github.com/featbit/featbit/assets/68597908/eed06178-7b10-4d60-a932-83e8627f52b6)
 
 <div id="header" align="center">
   <div id="badges">
@@ -58,14 +58,10 @@
 [FeatBit](https://www.featbit.co) is an open-source [feature flags](https://blog.jetbrains.com/space/2022/06/16/feature-flags/) management tool. Control feature releases with simple code:
 
 ```csharp
-var user = FbUser.Builder("tester-id").Name("tester").Build();
-if (featbit.BoolVariation("user-new-algorithm", user, defaultValue: false))
+if (featureFlag.BoolVariation("enable-review-by-copilot"))
 {
-    // run new algorithm
-}
-else
-{
-    // run old algorithm
+    // run review program
+    ...
 }
 ```
 
@@ -77,9 +73,7 @@ else
 - **Host Anywhere** - Self-host your feature flags service wherever you need it
 - **Born for Developers** - Simple if/else statements to control features, no complex DevOps tasks
 
-<a href="https://www.featbit.co">
-  <img src="https://github.com/featbit/featbit/assets/68597908/eed06178-7b10-4d60-a932-83e8627f52b6" width="100%" />
-</a>
+
 
 ## Get started in 3 steps
 
@@ -119,11 +113,6 @@ Try FeatBit immediately with [our online demo](https://app.featbit.co). The vide
 
 https://github.com/featbit/featbit/assets/68597908/d836702d-6096-4025-9b9e-5128a8b52dcb
 
---------
-
-🙏 If you are using FeatBit, we have launched the [**FeatBit Usage Survey**](https://forms.gle/gZT715wE9aMPpoBw8). It would be greatly appreciated and incredibly helpful if you could take the time to fill it out (5 questions).
-
---------
 
 ## Configure and run FeatBit anywhere
 
