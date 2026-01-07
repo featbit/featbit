@@ -128,10 +128,6 @@ export class PolicyEditorComponent {
     }
   }
 
-  isResourceTypeDisabled(rt: ResourceType): boolean {
-    return !this.isFineGrainedAccessControlGranted && rt.type === ResourceTypeEnum.Flag;
-  }
-
   copyPolicy() {
     const { name, description, statements } = this._policy;
 
