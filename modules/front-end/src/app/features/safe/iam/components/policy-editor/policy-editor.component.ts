@@ -35,7 +35,7 @@ class PolicyStatementViewModel {
 
       const allActions = [...Object.values(permissionActions)];
       this.selectedActions = statement.actions.map(act => {
-        const find = allActions.find(a => act === a.name);
+        const find = allActions.find(a => this.resourceType.type === a.resourceType && act === a.name);
         return find || act as unknown as IamPolicyAction;
       });
 
