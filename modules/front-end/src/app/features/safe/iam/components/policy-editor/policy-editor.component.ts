@@ -135,9 +135,8 @@ export class PolicyEditorComponent {
   copyPolicy() {
     const { name, description, statements } = this._policy;
 
-    this.policyService.create(`${name}_copy`, description).subscribe(
+    this.policyService.create(`${name}_copy`, 'TODO', description).subscribe(
       (p: IPolicy) => {
-
         this.policyService.updateStatements(p.id, statements).subscribe(() => {
           this.message.success($localize `:@@common.copy-success:Copied`);
           this.router.navigateByUrl(`/iam/policies/${encodeURIComponentFfc(p.id)}/permission`);

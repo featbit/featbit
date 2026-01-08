@@ -161,4 +161,12 @@ public class PolicyService(AppDbContext dbContext) : EntityFrameworkCoreService<
             string.Equals(x.Name.ToLower(), name.ToLower())
         );
     }
+    
+    public async Task<bool> IsKeyUsedAsync(Guid organizationId, string key)
+    {
+        return await AnyAsync(x =>
+            x.OrganizationId == organizationId &&
+            string.Equals(x.Key.ToLower(), key.ToLower())
+        );
+    }
 }

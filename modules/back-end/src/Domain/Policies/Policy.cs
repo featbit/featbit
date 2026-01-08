@@ -5,6 +5,8 @@ public class Policy : AuditedEntity
     public Guid? OrganizationId { get; set; }
 
     public string Name { get; set; }
+    
+    public string Key { get; set; }
 
     public string Description { get; set; }
 
@@ -17,10 +19,11 @@ public class Policy : AuditedEntity
     {
     }
 
-    public Policy(Guid organizationId, string name, string description)
+    public Policy(Guid organizationId, string name, string key, string description)
     {
         OrganizationId = organizationId;
         Name = name;
+        Key = key;
         Description = description;
 
         Type = PolicyTypes.CustomerManaged;

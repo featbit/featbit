@@ -164,4 +164,12 @@ public class PolicyService(MongoDbClient mongoDb) : MongoDbService<Policy>(mongo
             string.Equals(x.Name, name, StringComparison.CurrentCultureIgnoreCase)
         );
     }
+    
+    public async Task<bool> IsKeyUsedAsync(Guid organizationId, string key)
+    {
+        return await AnyAsync(x =>
+            x.OrganizationId == organizationId &&
+            string.Equals(x.Key, key, StringComparison.CurrentCultureIgnoreCase)
+        );
+    }
 }

@@ -44,6 +44,19 @@ public class PolicyController : ApiControllerBase
         var isNameUsed = await Mediator.Send(request);
         return Ok(isNameUsed);
     }
+    
+    [HttpGet("is-key-used")]
+    public async Task<ApiResponse<bool>> IsKeyUsedAsync(string key)
+    {
+        var request = new IsPolicyKeyUsed
+        {
+            OrganizationId = OrgId,
+            Key = key
+        };
+
+        var isUsed = await Mediator.Send(request);
+        return Ok(isUsed);
+    }
 
     [HttpPost]
     public async Task<ApiResponse<PolicyVm>> CreateAsync(CreatePolicy request)

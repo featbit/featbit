@@ -24,6 +24,34 @@
           }
         </ng-template>
       </nz-form-item>
+      <!-- key -->
+      <nz-form-item>
+        <nz-form-label
+          nzRequired
+          i18n-nzTooltipTitle="@@common.key-input-description"
+          nzTooltipTitle="We use the key to give you friendly URLs & RNs. Keys should only contain letters, numbers, ., _ or -.">
+          Key
+        </nz-form-label>
+        <nz-form-control
+          nzHasFeedback
+          nzValidatingTip="Validating..."
+          i18n-nzValidatingTip="@@common.validating"
+          [nzErrorTip]="keyErrorTpl">
+          <input nz-input formControlName="key" i18n-placeholder="@@common.key-generated-from-name"
+                 placeholder="Key can be auto-generated from name"/>
+          <ng-template #keyErrorTpl let-control>
+            @if (control.hasError('required')) {
+              <ng-container i18n="@@common.key-cannot-be-empty">Key cannot be empty</ng-container>
+            }
+            @if (control.hasError('duplicated')) {
+              <ng-container i18n="@@common.key-has-been-used">This key has been used</ng-container>
+            }
+            @if (control.hasError('unknown')) {
+              <ng-container i18n="@@common.key-validation-failed">Key validation failed</ng-container>
+            }
+          </ng-template>
+        </nz-form-control>
+      </nz-form-item>
 
       <!-- description -->
       <nz-form-item>

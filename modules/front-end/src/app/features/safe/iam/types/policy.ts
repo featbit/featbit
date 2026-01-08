@@ -4,6 +4,7 @@ export interface IPolicy {
   id: string;
   type: string;
   name: string;
+  key: string;
   description: string;
   statements: IPolicyStatement[],
   updatedAt: Date;
@@ -93,7 +94,7 @@ export interface IPagedPolicyMember {
 }
 
 export function policyRn(policy: IPolicy) {
-  return `policy/${policy.name}`;
+  return `policy/${policy.key}`;
 }
 
 export enum PolicyTypeEnum {

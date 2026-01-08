@@ -47,8 +47,14 @@ export class PolicyService {
     return this.http.get<boolean>(url).pipe(catchError(() => of(undefined)));
   }
 
-  create(name: string, description: string): Observable<IPolicy> {
-    return this.http.post<IPolicy>(this.baseUrl, { name: name, description: description });
+  isKeyUsed(key: string) {
+    const url = `${this.baseUrl}/is-key-used?key=${key}`;
+
+    return this.http.get<boolean>(url).pipe(catchError(() => of(undefined)));
+  }
+
+  create(name: string, key: string, description: string): Observable<IPolicy> {
+    return this.http.post<IPolicy>(this.baseUrl, { name: name, key: key, description: description });
   }
 
   updateSetting(policy: IPolicy): Observable<IPolicy> {
