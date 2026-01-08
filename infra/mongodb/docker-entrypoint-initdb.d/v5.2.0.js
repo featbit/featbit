@@ -88,15 +88,64 @@ db.Policies.updateMany(
     type: "SysManaged",
     name: { $in: ["Administrator", "Developer"] }
   },
-  {
-    $push: {
-      statements: {
-        _id: UUID().toString().split('"')[1],
-        resourceType: "flag",
-        effect: "allow",
-        actions: ["*"],
-        resources: ["project/*:env/*:flag/*"]
+  [
+    {
+      $set: {
+        statements: {
+          $cond: [
+            {
+              $gt: [
+                {
+                  $size: {
+                    $filter: {
+                      input: { $ifNull: ["$statements", []] },
+                      as: "s",
+                      cond: {
+                        $and: [
+                          { $eq: ["$$s.resourceType", "flag"] },
+                          { $eq: ["$$s.effect", "allow"] },
+                          { $eq: ["$$s.actions", ["*"]] },
+                          {
+                            $eq: [
+                              "$$s.resources",
+                              ["project/*:env/*:flag/*"]
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                0
+              ]
+            },
+            "$statements",
+            {
+              $concatArrays: [
+                { $ifNull: ["$statements", []] },
+                [
+                  {
+                    _id: {
+                      $function: {
+                        body: function () {
+                          return UUID().toString().split('"')[1];
+                        },
+                        args: [],
+                        lang: "js"
+                      }
+                    },
+                    resourceType: "flag",
+                    effect: "allow",
+                    actions: ["*"],
+                    resources: ["project/*:env/*:flag/*"]
+                  }
+                ]
+              ]
+            }
+          ]
+        }
       }
     }
-  }
-)
+  ]
+);
+
