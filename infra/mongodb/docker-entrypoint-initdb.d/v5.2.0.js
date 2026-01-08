@@ -81,3 +81,22 @@ db.AccessTokens.updateMany(
         ]
     }
 );
+
+db.Policies.updateMany(
+  {
+    organizationId: null,
+    type: "SysManaged",
+    name: { $in: ["Administrator", "Developer"] }
+  },
+  {
+    $push: {
+      statements: {
+        _id: UUID().toString().split('"')[1],
+        resourceType: "flag",
+        effect: "allow",
+        actions: ["*"],
+        resources: ["project/*:env/*:flag/*"]
+      }
+    }
+  }
+)
