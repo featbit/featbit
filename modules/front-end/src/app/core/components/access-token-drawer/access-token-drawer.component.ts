@@ -152,7 +152,9 @@ export class AccessTokenDrawerComponent implements OnInit {
           if(p.actions.some((action) => action === '*')) {
             return {
               ...p,
-              actions: Object.values(permissionActions).filter(act => act.resourceType === ResourceTypeEnum.Flag && act.name !== '*' && act.isFineGrainedAction).map(act => act.name),
+              actions: Object.values(permissionActions)
+              .filter(act => act.resourceType === ResourceTypeEnum.Flag && act.name !== '*' && act.isFineGrainedAction)
+              .map(act => act.name),
             };
           }
         }

@@ -1,9 +1,6 @@
 import {Component, EventEmitter, Input, Output, ViewChild} from "@angular/core";
 import {NzSelectComponent} from "ng-zorro-antd/select";
 import {IamPolicyAction} from "@shared/policy";
-import { Router } from "@angular/router";
-import { NzMessageService } from "ng-zorro-antd/message";
-import { PolicyService } from "@services/policy.service";
 import { PermissionLicenseService } from "@services/permission-license.service";
 import { LicenseFeatureEnum } from "@shared/types";
 

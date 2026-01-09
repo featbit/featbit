@@ -55,7 +55,6 @@
                     [(ngModel)]="permissions[rt.type].allChecked"
                     (ngModelChange)="updatePermissionsAllChecked(permissions[rt.type])"
                     [nzIndeterminate]="permissions[rt.type].indeterminate"
-                    [nzDisabled]="isActionDisabled(rt)"
                     i18n="@@common.all"
                   >All</label>
                 }
