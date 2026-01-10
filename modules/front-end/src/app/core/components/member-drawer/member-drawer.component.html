@@ -6,72 +6,91 @@
   i18n-nzTitle="@@iam.team.member-drawer.title"
   nzTitle="Add team member"
   [nzWidth]="500"
+  [nzContent]="content"
   (nzOnClose)="onClose()">
-  <ng-container *nzDrawerContent>
-    <form nz-form [formGroup]="memberForm" (ngSubmit)="doSubmit()" nzLayout="vertical">
+  <ng-template #content>
+    <form nz-form [formGroup]="form" (ngSubmit)="doSubmit()" nzLayout="vertical">
       <!-- email -->
       <nz-form-item>
         <nz-form-label nzRequired i18n="@@iam.team.member-drawer.email">Email</nz-form-label>
-        <nz-form-control nzErrorTip="Invalid Email" i18n-nzErrorTip="@@iam.team.member-drawer.invalid-email">
-          <input type="text" nz-input formControlName="email" placeholder="Email" i18n-placeholder="@@iam.team.member-drawer.email-placeholder"/>
+        <nz-form-control
+          nzHasFeedback
+          nzErrorTip="User email is invalid"
+          i18n-nzErrorTip="@@common.user-email-invalid">
+          <input type="text" nz-input formControlName="email" placeholder="Email" i18n-placeholder="@@common.email"/>
         </nz-form-control>
       </nz-form-item>
 
+      <!-- permissions -->
       <nz-form-item>
-        <nz-form-label nzRequired><ng-container i18n="@@iam.team.member-drawer.permissions">Permissions</ng-container> @if (isPermissionInvalid) {
-        <span style="margin-left: 4px; color: #ff4d4f" i18n="@@iam.team.member-drawer.policy-group-set-at-least-one">(Policy and group cannot be both empty)</span>
-      }</nz-form-label>
-      <nz-form-control>
-        <nz-select
-          class="nz-select-40"
-          nzShowSearch
-          nzServerSearch
-          i18n-nzPlaceholder="@@iam.team.member-drawer.policy-placeholder"
-          nzPlaceHolder="Policy"
-          (nzOnSearch)="getPolicies($event)"
-          formControlName="policyId">
-          @if (isPoliciesLoading) {
-            <nz-option nzDisabled nzCustomContent>
-              <i nz-icon nzType="loading" class="loading-icon"></i> <ng-container i18n="@@common.loading">Loading...</ng-container>
-            </nz-option>
-          } @else {
-            @for (policy of policies.items; track policy.id) {
-              <nz-option nzCustomContent [nzLabel]="policy.name" [nzValue]="policy.id">
-                @if (policy.type === 'SysManaged') {
-                  <i style="color: #28a17d;" nz-icon nzType="star" nzTheme="outline"></i>
-                }
-                {{ policy.name }}
+        <nz-form-label nzRequired>
+          <span i18n="@@iam.team.member-drawer.permissions">Permissions</span>
+        </nz-form-label>
+        <nz-form-control
+          class="permissions-control"
+          [nzValidateStatus]="form.get('permissions')"
+          nzErrorTip="At least one permission must be selected"
+          i18n-nzErrorTip="@@iam.team.member-drawer.at-least-one-permission"
+          formGroupName="permissions">
+          <nz-select
+            class="nz-select-40"
+            nzShowSearch
+            nzServerSearch
+            nzAllowClear
+            i18n-nzPlaceholder="@@iam.team.member-drawer.policy-placeholder"
+            nzPlaceHolder="Policy"
+            (nzOnSearch)="loadPolicies($event)"
+            formControlName="policyId">
+            @if (isPoliciesLoading) {
+              <nz-option nzDisabled nzCustomContent>
+                <i nz-icon nzType="loading" class="loading-icon"></i>
+                <span i18n="@@common.loading">Loading...</span>
               </nz-option>
+            } @else {
+              @for (policy of policies.items; track policy.id) {
+                <nz-option nzCustomContent [nzLabel]="policy.name" [nzValue]="policy.id">
+                  @if (policy.type === 'SysManaged') {
+                    <i style="color: #28a17d;" nz-icon nzType="star" nzTheme="outline"></i>
+                  }
+                  {{ policy.name }}
+                </nz-option>
+              }
             }
-          }
-        </nz-select>
-      </nz-form-control>
-      <nz-form-control style="margin-top: 10px;">
-        <nz-select
-          class="nz-select-40"
-          nzShowSearch
-          nzServerSearch
-          i18n-nzPlaceholder="@@iam.team.member-drawer.group-placeholder"
-          nzPlaceHolder="Group"
-          (nzOnSearch)="getGroups($event)"
-          formControlName="groupId">
-          @if (isGroupsLoading) {
-            <nz-option nzDisabled nzCustomContent>
-              <i nz-icon nzType="loading" class="loading-icon"></i> <ng-container i18n="@@common.loading">Loading...</ng-container>
-            </nz-option>
-          } @else {
-            @for (group of groups.items; track group.id) {
-              <nz-option [nzLabel]="group.name" [nzValue]="group.id"></nz-option>
+          </nz-select>
+          <nz-select
+            class="nz-select-40"
+            nzShowSearch
+            nzServerSearch
+            nzAllowClear
+            i18n-nzPlaceholder="@@iam.team.member-drawer.group-placeholder"
+            nzPlaceHolder="Group"
+            (nzOnSearch)="loadGroups($event)"
+            formControlName="groupId">
+            @if (isGroupsLoading) {
+              <nz-option nzDisabled nzCustomContent>
+                <i nz-icon nzType="loading" class="loading-icon"></i>
+                <span i18n="@@common.loading">Loading...</span>
+              </nz-option>
+            } @else {
+              @for (group of groups.items; track group.id) {
+                <nz-option [nzLabel]="group.name" [nzValue]="group.id"></nz-option>
+              }
             }
-          }
-        </nz-select>
-      </nz-form-control>
-    </nz-form-item>
-  </form>
-  <button (click)="doSubmit()" nz-button class="submit-btn" [nzType]="'primary'" [nzLoading]="isLoading" i18n="@@common.save">Save</button>
-</ng-container>
-<ng-template #extra>
-  <i (click)="onClose()" nz-icon nzType="icons:icon-close"></i>
-</ng-template>
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+    <button
+      (click)="doSubmit()"
+      [disabled]="!form?.valid"
+      nz-button
+      nzType="primary"
+      class="submit-btn"
+      [nzLoading]="isAddingUser"
+      i18n="@@common.save">Save</button>
+  </ng-template>
+  <ng-template #extra>
+    <i (click)="onClose()" nz-icon nzType="icons:icon-close"></i>
+  </ng-template>
 </nz-drawer>
 
