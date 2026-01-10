@@ -30,7 +30,8 @@
       <nz-option
         nzCustomContent
         [nzValue]="action"
-        [nzLabel]="action.displayName"
+        [nzLabel]="action.name"
+        [nzDisabled]="isActionDisabled(action)"
         [nzHide]="isActionSelected(action)">
         <div class="action-selection-item">
           <div class="title">{{ action.name}}</div>
