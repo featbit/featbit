@@ -30,7 +30,7 @@ export class ProjectService {
     }).map((project) => {
       project.environments = project.environments.filter((env) => {
         const envRN = this.permissionsService.getEnvRN(project, env);
-        return !this.permissionsService.isDenied(envRN, permissionActions.CanAccessEnv);
+        return this.permissionsService.isGranted(envRN, permissionActions.CanAccessEnv);
       });
 
       return project;
@@ -45,7 +45,7 @@ export class ProjectService {
       map(project => {
         project.environments = project.environments.filter((env) => {
           const envRN = this.permissionsService.getEnvRN(project, env);
-          return !this.permissionsService.isDenied(envRN, permissionActions.CanAccessEnv);
+          return this.permissionsService.isGranted(envRN, permissionActions.CanAccessEnv);
         });
 
         return project;
