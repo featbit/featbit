@@ -35,14 +35,14 @@
       <tbody>
         @for (item of table.data; track item.id) {
           <tr>
-            <td (click)="navigateToDetail(item.id)">{{ item.name }}</td>
+            <td style="cursor: pointer" [routerLink]="[item.id, 'team']">{{ item.name }}</td>
             <td>{{ item.description }}</td>
             <td>
               <i (click)="copyText(resourceName(item))" class="copy-icon" nz-icon nzType="icons:icon-copy"></i>
               {{ resourceName(item) }}
             </td>
             <td>
-              <a class="primary-link-btn" (click)="navigateToDetail(item.id)" i18n="@@common.details">Details</a>
+              <a class="primary-link-btn" [routerLink]="[item.id, 'team']" i18n="@@common.details">Details</a>
               <nz-divider nzType="vertical"></nz-divider>
               <a style="color: #717D8A" i18n-nz-popconfirm="@@common.remove-confirm"  nz-popconfirm="This operation cannot be reverted, are you sure to remove it?"
                 nzPopconfirmPlacement="bottomRight"

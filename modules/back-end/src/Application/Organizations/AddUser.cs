@@ -7,52 +7,34 @@ namespace Application.Organizations;
 
 public class AddUser : IRequest<bool>
 {
-    public string Method { get; set; }
-
     public Guid WorkspaceId { get; set; }
 
     public Guid OrganizationId { get; set; }
 
     public string Email { get; set; }
 
-    public ICollection<Guid> PolicyIds { get; set; } = Array.Empty<Guid>();
+    public ICollection<Guid> PolicyIds { get; set; } = [];
 
-    public ICollection<Guid> GroupIds { get; set; } = Array.Empty<Guid>();
+    public ICollection<Guid> GroupIds { get; set; } = [];
 }
 
 public class AddUserValidator : AbstractValidator<AddUser>
 {
     public AddUserValidator()
     {
-        RuleFor(x => x.Method)
-            .NotEmpty().WithErrorCode(ErrorCodes.Required("method"))
-            .Equal(x => "Email").WithErrorCode(ErrorCodes.Invalid("method"));
-
         RuleFor(x => x.Email)
             .NotEmpty().WithErrorCode(ErrorCodes.Required("email"))
             .EmailAddress().WithErrorCode(ErrorCodes.Invalid("email"));
     }
 }
 
-public class AddUserHandler : IRequestHandler<AddUser, bool>
+public class AddUserHandler(
+    IOrganizationService organizationService,
+    IUserService userService,
+    IIdentityService identityService,
+    ICurrentUser currentUser)
+    : IRequestHandler<AddUser, bool>
 {
-    private readonly IOrganizationService _organizationService;
-    private readonly IUserService _userService;
-    private readonly IIdentityService _identityService;
-    private readonly ICurrentUser _currentUser;
-
-    public AddUserHandler(
-        IOrganizationService organizationService,
-        IUserService userService,
-        IIdentityService identityService,
-        ICurrentUser currentUser)
-    {
-        _organizationService = organizationService;
-        _userService = userService;
-        _currentUser = currentUser;
-        _identityService = identityService;
-    }
-
     public async Task<bool> Handle(AddUser request, CancellationToken cancellationToken)
     {
         var email = request.Email;
@@ -60,13 +42,13 @@ public class AddUserHandler : IRequestHandler<AddUser, bool>
         string initialPwd;
         Guid userId;
 
-        var user = await _userService.FindOneAsync(x => x.Email == email && x.WorkspaceId == request.WorkspaceId);
+        var user = await userService.FindOneAsync(x => x.Email == email && x.WorkspaceId == request.WorkspaceId);
         // automatically register users if they do not exist
         if (user == null)
         {
             initialPwd = PasswordGenerator.New(email);
             var registerResult =
-                await _identityService.RegisterByEmailAsync(request.WorkspaceId, email, initialPwd, UserOrigin.Local);
+                await identityService.RegisterByEmailAsync(request.WorkspaceId, email, initialPwd, UserOrigin.Local);
             userId = registerResult.UserId;
         }
         else
@@ -78,13 +60,13 @@ public class AddUserHandler : IRequestHandler<AddUser, bool>
         // if no policies or groups are specified, use the organization's default permissions
         if (!request.PolicyIds.Any() && !request.GroupIds.Any())
         {
-            var organization = await _organizationService.GetAsync(request.OrganizationId);
+            var organization = await organizationService.GetAsync(request.OrganizationId);
             request.PolicyIds = organization.DefaultPermissions.PolicyIds;
             request.GroupIds = organization.DefaultPermissions.GroupIds;
         }
 
-        var organizationUser = new OrganizationUser(request.OrganizationId, userId, _currentUser.Id, initialPwd);
-        await _organizationService.AddUserAsync(
+        var organizationUser = new OrganizationUser(request.OrganizationId, userId, currentUser.Id, initialPwd);
+        await organizationService.AddUserAsync(
             organizationUser,
             request.PolicyIds,
             request.GroupIds

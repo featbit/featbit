@@ -37,8 +37,8 @@
       <tbody>
         @for (item of table.data; track item.id) {
           <tr>
-            <td (click)="navigateToDetail(item.id)">{{ item.name || '--' }}</td>
-            <td (click)="navigateToDetail(item.id)">{{ item.email || '--' }}</td>
+            <td style="cursor: pointer" [routerLink]="[item.id, 'groups']">{{ item.name || '--' }}</td>
+            <td>{{ item.email || '--' }}</td>
             <td>
               <i (click)="copyText(resourceName(item))" class="copy-icon" nz-icon nzType="icons:icon-copy"></i>
               {{ resourceName(item) }}
@@ -69,7 +69,7 @@
               }
             </td>
             <td>
-              <a class="primary-link-btn" (click)="navigateToDetail(item.id)" i18n="@@common.details">Details</a>
+              <a class="primary-link-btn" [routerLink]="[item.id, 'groups']" i18n="@@common.details">Details</a>
               @if (canDelete(item)) {
                 <nz-divider nzType="vertical"></nz-divider>
                 <a style="color: #717D8A" i18n-nz-popconfirm="@@common.remove-from-organization-confirm"  nz-popconfirm="This operation will remove the user from the current organization, are you sure to do this?"

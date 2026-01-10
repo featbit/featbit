@@ -28,8 +28,8 @@ export interface IPagedGroup {
 
 export interface IGroupMember {
   id: string;
+  name: string;
   email: string;
-  phoneNumber: string;
   isGroupMember: boolean;
 }
 

@@ -98,7 +98,7 @@
                 @if (flag.creator) {
                   <div class="flag-meta">
                     <span i18n="@@common.created-by">Created by</span>
-                    <span class="creator-name">{{flag.creator.name}}</span>
+                    <span class="creator-name">{{flag.creator.name || flag.creator.email}}</span>
                     @if (flag.createdAt) {
                       <span class="created-at">{{getLocalDate(flag.createdAt) | date: 'MMM d, yyyy'}}</span>
                     }
@@ -188,8 +188,9 @@
                   <div class="last-change-info">
                     <div class="change-time">{{getLocalDate(flag.lastChange.happenedAt) | date: 'MMM d, yyyy HH:mm'}}</div>
                     @if (flag.lastChange.operator) {
-                      <div class="change-operator">
-                        <span i18n="@@common.updated-by">Updated by</span> {{flag.lastChange.operator.name}}
+                      <div class="updated-by">
+                        <span i18n="@@common.updated-by">Updated by</span>
+                        <span class="user">{{flag.lastChange.operator.name || flag.lastChange.operator.email}}</span>
                       </div>
                     }
                     @if (flag.lastChange.comment) {

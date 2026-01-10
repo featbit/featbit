@@ -194,7 +194,8 @@ public class EnvironmentService(AppDbContext dbContext, ILogger<EnvironmentServi
         await SetOf<EndUserProperty>().Where(x => x.EnvId == id).ExecuteDeleteAsync();
 
         // delete environment events
-        await DbConnection.ExecuteAsync("DELETE FROM events WHERE env_id = @id", new { id });
+        var stringId = id.ToString();
+        await DbConnection.ExecuteAsync("DELETE FROM events WHERE env_id = @id", new { id = stringId });
     }
 
     public async Task DeleteManyAsync(ICollection<Guid> ids)
@@ -208,7 +209,8 @@ public class EnvironmentService(AppDbContext dbContext, ILogger<EnvironmentServi
         await SetOf<EndUserProperty>().Where(x => ids.Contains(x.EnvId)).ExecuteDeleteAsync();
 
         // delete environment events
-        await DbConnection.ExecuteAsync("DELETE FROM events WHERE env_id = ANY(@ids)", new { ids });
+        var stringIds = ids.Select(id => id.ToString()).ToArray();
+        await DbConnection.ExecuteAsync("DELETE FROM events WHERE env_id = ANY(@ids)", new { ids = stringIds });
     }
 
     public async Task<IEnumerable<Setting>> GetSettingsAsync(Guid envId, string type)

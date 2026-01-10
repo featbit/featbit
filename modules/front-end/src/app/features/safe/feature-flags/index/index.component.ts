@@ -170,10 +170,6 @@ export class IndexComponent implements OnInit {
   cloneModalClosed(completed: boolean) {
     this.flagToClone = undefined;
     this.cloneVisible = false;
-
-    if (completed) {
-      this.loadFeatureFlagList();
-    }
   }
 
   compareVisible: boolean = false;
