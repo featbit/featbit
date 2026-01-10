@@ -62,6 +62,50 @@ npm run start // English, available at localhost:4200
 npm run start:zh // Chinese, available at localhost:4201
 ```
 
+### Serve UI under a path
+
+Instead of serving the UI directly at the domain root, you may need to serve it under a specific path, for example `http://localhost:4200/abc/def/`.
+
+#### Development Mode
+
+For local development, use the **start:base-href** command:
+
+```bash
+npm run start:base-href
+```
+
+This command is defined in `package.json` as:
+```json
+"start:base-href": "ng serve --serve-path /abc/def/ --configuration=development --port=4200"
+```
+
+**Important:** You must also update the `<base href>` tag in [index.html](./modules/front-end/src/index.html):
+
+```html
+<!-- Change from: -->
+<base href="/">
+
+<!-- To: -->
+<base href="/abc/def/">
+```
+
+You can replace `/abc/def/` with your own path in both the npm script and the index.html file.
+
+#### Production Mode (Docker)
+
+When running the UI in a Docker container, set the `BASE_HREF` environment variable in docker-compose.yml:
+
+```yaml
+services:
+  ui:
+    image: featbit/ui:latest
+    environment:
+      - BASE_HREF=/abc/def
+```
+
+The Docker entrypoint script will automatically configure nginx and update all locale-specific index.html files with the correct base href.
+
+
 ### Internationalization
 
 FeatBit should be available to everyone everywhere, and we don't want language to be a barrier. So for this reason we
