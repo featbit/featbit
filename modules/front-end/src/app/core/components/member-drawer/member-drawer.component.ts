@@ -43,8 +43,8 @@ export class MemberDrawerComponent implements OnInit {
     this.form = this.formBuilder.group({
       email: [ '', [ phoneNumberOrEmailValidator, Validators.required ] ],
       permissions: this.formBuilder.group({
-        policyId: [ [] ],
-        groupId: [ [] ]
+        policyId: [ null ],
+        groupId: [ null ]
       }, { validators: this.permissionsValidator })
     });
 
