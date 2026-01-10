@@ -32,8 +32,8 @@
         <tbody>
           @for (item of table.data; track item.id) {
             <tr>
-              <td style="cursor: pointer" (click)="navigateToUserDetail(item.id)">{{ item.name ?? '--' }}</td>
-              <td>{{ item.email ?? '--' }}</td>
+              <td style="cursor: pointer" (click)="navigateToUserDetail(item.id)">{{ item.name || '--' }}</td>
+              <td>{{ item.email || '--' }}</td>
               <td>
                 <a class="primary-link-btn" (click)="navigateToUserDetail(item.id)" i18n="@@common.details">Details</a>
                 <nz-divider nzType="vertical"></nz-divider>
