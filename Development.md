@@ -100,7 +100,7 @@ services:
   ui:
     image: featbit/ui:latest
     environment:
-      - BASE_HREF=/abc/def
+      - BASE_HREF=/abc/def/
 ```
 
 The Docker entrypoint script will automatically configure nginx and update all locale-specific index.html files with the correct base href.
