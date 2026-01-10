@@ -36,7 +36,7 @@
       <tbody>
         @for (item of table.data; track item.id) {
           <tr>
-            <td (click)="navigateToDetail(item.id)">{{ item.name }}</td>
+            <td style="cursor: pointer" [routerLink]="[item.id, 'permission']">{{ item.name }}</td>
             <td>
               @if (item.type === 'SysManaged') {
                 <i style="color: #28a17d;" nz-icon nzType="star" nzTheme="outline"></i>
@@ -49,7 +49,7 @@
               {{ resourceName(item) }}
             </td>
             <td>
-              <a class="primary-link-btn" (click)="navigateToDetail(item.id)" i18n="@@common.details">Details</a>
+              <a class="primary-link-btn" [routerLink]="[item.id, 'permission']" i18n="@@common.details">Details</a>
               <nz-divider nzType="vertical"></nz-divider>
               @if (item.type !== 'SysManaged') {
                 <a style="color: #717D8A" i18n-nz-popconfirm="@@common.remove-confirm"  nz-popconfirm="This operation cannot be reverted, are you sure to remove it?"

@@ -72,10 +72,6 @@ export class IndexComponent implements OnInit {
     }
   }
 
-  navigateToDetail(id: string) {
-    this.router.navigateByUrl(`/iam/policies/${encodeURIComponentFfc(id)}/permission`);
-  }
-
   delete(policy: IPolicy) {
     this.policyService.delete(policy.id).subscribe(() => {
       this.message.success($localize `:@@common.operation-success:Operation succeeded`);

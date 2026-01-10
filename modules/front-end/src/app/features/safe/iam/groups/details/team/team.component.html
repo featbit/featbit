@@ -26,16 +26,14 @@
           <tr>
             <th style="min-width: 100px" i18n="@@common.name">Name</th>
             <th i18n="@@common.email">Email</th>
-            <th i18n="@@common.mobile">Mobile</th>
             <th i18n="@@common.actions">Actions</th>
           </tr>
         </thead>
         <tbody>
           @for (item of table.data; track item.id) {
             <tr>
-              <td (click)="navigateToUserDetail(item.id)">{{ item.name ?? '--' }}</td>
-              <td (click)="navigateToUserDetail(item.id)">{{ item.email ?? '--' }}</td>
-              <td (click)="navigateToUserDetail(item.id)">{{ item.phoneNumber ?? '--' }}</td>
+              <td style="cursor: pointer" (click)="navigateToUserDetail(item.id)">{{ item.name ?? '--' }}</td>
+              <td>{{ item.email ?? '--' }}</td>
               <td>
                 <a class="primary-link-btn" (click)="navigateToUserDetail(item.id)" i18n="@@common.details">Details</a>
                 <nz-divider nzType="vertical"></nz-divider>
