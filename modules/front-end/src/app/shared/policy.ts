@@ -52,6 +52,7 @@ export interface IamPolicyAction {
   description: string;
   isOpenAPIApplicable: boolean;
   isSpecificApplicable: boolean; // can it be applied to a specific resource, ex: an environment with name "abc"
+  isFineGrainedAction: boolean;
 }
 
 export enum ResourceTypeEnum {
@@ -285,7 +286,8 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     resourceType: ResourceTypeEnum.All,
     description: $localize`:@@iam.action.all:All`,
     isOpenAPIApplicable: false,
-    isSpecificApplicable: false
+    isSpecificApplicable: false,
+    isFineGrainedAction: false
   },
   CanAccessProject: {
     id: uuidv4(),
@@ -293,7 +295,8 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     resourceType: ResourceTypeEnum.Project,
     description: $localize`:@@iam.action.can-access-project:Can access project`,
     isOpenAPIApplicable: true,
-    isSpecificApplicable: true
+    isSpecificApplicable: true,
+    isFineGrainedAction: false
   },
   CreateProject: {
     id: uuidv4(),
@@ -301,7 +304,8 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     resourceType: ResourceTypeEnum.Project,
     description: $localize`:@@iam.action.create-projects:Create projects`,
     isOpenAPIApplicable: false,
-    isSpecificApplicable: false
+    isSpecificApplicable: false,
+    isFineGrainedAction: false
   },
   DeleteProject: {
     id: uuidv4(),
@@ -309,7 +313,8 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     resourceType: ResourceTypeEnum.Project,
     description: $localize`:@@iam.action.delete-projects:Delete projects`,
     isOpenAPIApplicable: false,
-    isSpecificApplicable: true
+    isSpecificApplicable: true,
+    isFineGrainedAction: false
   },
   UpdateProjectSettings: {
     id: uuidv4(),
@@ -317,7 +322,8 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     resourceType: ResourceTypeEnum.Project,
     description: $localize`:@@iam.action.update-project-settings:Update project settings`,
     isOpenAPIApplicable: false,
-    isSpecificApplicable: true
+    isSpecificApplicable: true,
+    isFineGrainedAction: false
   },
   CreateEnv: {
     id: uuidv4(),
@@ -325,7 +331,8 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     resourceType: ResourceTypeEnum.Project,
     description: $localize`:@@iam.action.create-env:Create environment`,
     isOpenAPIApplicable: false,
-    isSpecificApplicable: true
+    isSpecificApplicable: true,
+    isFineGrainedAction: false
   },
   CanAccessEnv: {
     id: uuidv4(),
@@ -333,7 +340,8 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     resourceType: ResourceTypeEnum.Env,
     description: $localize`:@@iam.action.can-access-env:Can access environment`,
     isOpenAPIApplicable: false,
-    isSpecificApplicable: true
+    isSpecificApplicable: true,
+    isFineGrainedAction: false
   },
   DeleteEnv: {
     id: uuidv4(),
@@ -341,7 +349,8 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     resourceType: ResourceTypeEnum.Env,
     description: $localize`:@@iam.action.delete-envs:Delete environments`,
     isOpenAPIApplicable: false,
-    isSpecificApplicable: true
+    isSpecificApplicable: true,
+    isFineGrainedAction: false
   },
   UpdateEnvSettings: {
     id: uuidv4(),
@@ -349,7 +358,8 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     resourceType: ResourceTypeEnum.Env,
     description: $localize`:@@iam.action.update-env-settings:Update environment settings`,
     isOpenAPIApplicable: false,
-    isSpecificApplicable: true
+    isSpecificApplicable: true,
+    isFineGrainedAction: false
   },
   DeleteEnvSecret: {
     id: uuidv4(),
@@ -357,7 +367,8 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     resourceType: ResourceTypeEnum.Env,
     description: $localize`:@@iam.action.delete-env-secret:Delete environment secret`,
     isOpenAPIApplicable: false,
-    isSpecificApplicable: true
+    isSpecificApplicable: true,
+    isFineGrainedAction: false
   },
   CreateEnvSecret: {
     id: uuidv4(),
@@ -365,7 +376,8 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     resourceType: ResourceTypeEnum.Env,
     description: $localize`:@@iam.action.create-env-secret:Create environment secret`,
     isOpenAPIApplicable: false,
-    isSpecificApplicable: true
+    isSpecificApplicable: true,
+    isFineGrainedAction: false
   },
   UpdateEnvSecret: {
     id: uuidv4(),
@@ -373,17 +385,28 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     resourceType: ResourceTypeEnum.Env,
     description: $localize`:@@iam.action.update-env-secret:Update environment secret`,
     isOpenAPIApplicable: false,
-    isSpecificApplicable: true
+    isSpecificApplicable: true,
+    isFineGrainedAction: false
   },
 
   // feature flag
+  FlagAllActions: {
+    id: uuidv4(),
+    name: '*',
+    resourceType: ResourceTypeEnum.Flag,
+    description: $localize`:@@iam.action.flag-all-actions:All actions`,
+    isOpenAPIApplicable: true,
+    isSpecificApplicable: true,
+    isFineGrainedAction: false
+  },
   CreateFlag: {
     id: uuidv4(),
     name: 'CreateFlag',
     resourceType: ResourceTypeEnum.Flag,
     description: $localize`:@@iam.action.create-flag:Create feature flag`,
     isOpenAPIApplicable: true,
-    isSpecificApplicable: true
+    isSpecificApplicable: true,
+    isFineGrainedAction: true
   },
   ArchiveFlag: {
     id: uuidv4(),
@@ -391,7 +414,8 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     resourceType: ResourceTypeEnum.Flag,
     description: $localize`:@@iam.action.archive-flag:Archive feature flag`,
     isOpenAPIApplicable: true,
-    isSpecificApplicable: true
+    isSpecificApplicable: true,
+    isFineGrainedAction: true
   },
   RestoreFlag: {
     id: uuidv4(),
@@ -399,7 +423,8 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     resourceType: ResourceTypeEnum.Flag,
     description: $localize`:@@iam.action.restore-flag:Restore feature flag`,
     isOpenAPIApplicable: true,
-    isSpecificApplicable: true
+    isSpecificApplicable: true,
+    isFineGrainedAction: true
   },
   DeleteFlag: {
     id: uuidv4(),
@@ -407,7 +432,8 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     resourceType: ResourceTypeEnum.Flag,
     description: $localize`:@@iam.action.delete-flag:Delete feature flag`,
     isOpenAPIApplicable: true,
-    isSpecificApplicable: true
+    isSpecificApplicable: true,
+    isFineGrainedAction: true
   },
   CloneFlag: {
     id: uuidv4(),
@@ -415,7 +441,8 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     resourceType: ResourceTypeEnum.Flag,
     description: $localize`:@@iam.action.clone-flag:Clone feature flag`,
     isOpenAPIApplicable: true,
-    isSpecificApplicable: true
+    isSpecificApplicable: true,
+    isFineGrainedAction: true
   },
   UpdateFlagName: {
     id: uuidv4(),
@@ -423,7 +450,8 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     resourceType: ResourceTypeEnum.Flag,
     description: $localize`:@@iam.action.update-flag-name:Rename a feature flag`,
     isOpenAPIApplicable: true,
-    isSpecificApplicable: true
+    isSpecificApplicable: true,
+    isFineGrainedAction: true
   },
   ToggleFlag: {
     id: uuidv4(),
@@ -431,7 +459,8 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     resourceType: ResourceTypeEnum.Flag,
     description: $localize`:@@iam.action.update-flag-on:Toggle a feature on or off`,
     isOpenAPIApplicable: true,
-    isSpecificApplicable: true
+    isSpecificApplicable: true,
+    isFineGrainedAction: true
   },
   UpdateFlagDescription: {
     id: uuidv4(),
@@ -439,7 +468,8 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     resourceType: ResourceTypeEnum.Flag,
     description: $localize`:@@iam.action.update-flag-description:Update the description of a feature flag`,
     isOpenAPIApplicable: true,
-    isSpecificApplicable: true
+    isSpecificApplicable: true,
+    isFineGrainedAction: true
   },
   UpdateFlagOffVariation: {
     id: uuidv4(),
@@ -447,7 +477,8 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     resourceType: ResourceTypeEnum.Flag,
     description: $localize`:@@iam.action.update-flag-off-variation:Change the variation returned when a feature flag is set to off`,
     isOpenAPIApplicable: true,
-    isSpecificApplicable: true
+    isSpecificApplicable: true,
+    isFineGrainedAction: true
   },
   UpdateFlagTags: {
     id: uuidv4(),
@@ -455,7 +486,8 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     resourceType: ResourceTypeEnum.Flag,
     description: $localize`:@@iam.action.update-flag-tags:Change the tags associated with a feature flag`,
     isOpenAPIApplicable: true,
-    isSpecificApplicable: true
+    isSpecificApplicable: true,
+    isFineGrainedAction: true
   },
   UpdateFlagIndividualTargeting: {
     id: uuidv4(),
@@ -463,7 +495,8 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     resourceType: ResourceTypeEnum.Flag,
     description: $localize`:@@iam.action.update-flag-individual-targeting:Change a flag's individual user targeting rules`,
     isOpenAPIApplicable: false,
-    isSpecificApplicable: true
+    isSpecificApplicable: true,
+    isFineGrainedAction: true
   },
   UpdateFlagRules: {
     id: uuidv4(),
@@ -471,7 +504,8 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     resourceType: ResourceTypeEnum.Flag,
     description: $localize`:@@iam.action.update-flag-rules:Change a flag's custom targeting rules`,
     isOpenAPIApplicable: false,
-    isSpecificApplicable: true
+    isSpecificApplicable: true,
+    isFineGrainedAction: true
   },
   UpdateFlagDefaultRule: {
     id: uuidv4(),
@@ -479,7 +513,8 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     resourceType: ResourceTypeEnum.Flag,
     description: $localize`:@@iam.action.update-flag-fallthrough:Change a flag's default rule`,
     isOpenAPIApplicable: false,
-    isSpecificApplicable: true
+    isSpecificApplicable: true,
+    isFineGrainedAction: true
   },
   UpdateFlagVariations: {
     id: uuidv4(),
@@ -487,7 +522,8 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     resourceType: ResourceTypeEnum.Flag,
     description: $localize`:@@iam.action.update-flag-variations:Change a flag's variations`,
     isOpenAPIApplicable: false,
-    isSpecificApplicable: true
+    isSpecificApplicable: true,
+    isFineGrainedAction: true
   },
 
   // segment
@@ -497,7 +533,8 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     resourceType: ResourceTypeEnum.Segment,
     description: $localize`:@@iam.action.manage-segment:Manage segment`,
     isOpenAPIApplicable: true,
-    isSpecificApplicable: false
+    isSpecificApplicable: false,
+    isFineGrainedAction: false
   },
 
   // workspace
@@ -507,7 +544,8 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     resourceType: ResourceTypeEnum.workspace,
     description: $localize`:@@iam.action.update-ws-general:Update workspace general settings`,
     isOpenAPIApplicable: false,
-    isSpecificApplicable: false
+    isSpecificApplicable: false,
+    isFineGrainedAction: false
   },
   UpdateWorkspaceLicense: {
     id: uuidv4(),
@@ -515,7 +553,8 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     resourceType: ResourceTypeEnum.workspace,
     description: $localize`:@@iam.action.update-ws-license:Update workspace license`,
     isOpenAPIApplicable: false,
-    isSpecificApplicable: false
+    isSpecificApplicable: false,
+    isFineGrainedAction: false
   },
   UpdateWorkspaceSSOSettings: {
     id: uuidv4(),
@@ -523,7 +562,8 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     resourceType: ResourceTypeEnum.workspace,
     description: $localize`:@@iam.action.update-ws-sso:Update workspace SSO settings`,
     isOpenAPIApplicable: false,
-    isSpecificApplicable: false
+    isSpecificApplicable: false,
+    isFineGrainedAction: false
   },
 
   // org
@@ -533,7 +573,8 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     resourceType: ResourceTypeEnum.organization,
     description: $localize`:@@iam.action.update-org-sort-flags-by:Update sort flags by`,
     isOpenAPIApplicable: false,
-    isSpecificApplicable: false
+    isSpecificApplicable: false,
+    isFineGrainedAction: false
   },
   UpdateOrgName: {
     id: uuidv4(),
@@ -541,7 +582,8 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     resourceType: ResourceTypeEnum.organization,
     description: $localize`:@@iam.action.update-org-name:Update org name`,
     isOpenAPIApplicable: false,
-    isSpecificApplicable: false
+    isSpecificApplicable: false,
+    isFineGrainedAction: false
   },
   UpdateOrgDefaultUserPermissions: {
     id: uuidv4(),
@@ -549,7 +591,8 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     resourceType: ResourceTypeEnum.organization,
     description: $localize`:@@iam.action.update-org-default-user-permissions:Update org default user permissions`,
     isOpenAPIApplicable: false,
-    isSpecificApplicable: false
+    isSpecificApplicable: false,
+    isFineGrainedAction: false
   },
   CreateOrg: {
     id: uuidv4(),
@@ -557,7 +600,8 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     resourceType: ResourceTypeEnum.organization,
     description: $localize`:@@iam.action.create-org:Create organization`,
     isOpenAPIApplicable: false,
-    isSpecificApplicable: false
+    isSpecificApplicable: false,
+    isFineGrainedAction: false
   },
 
   // iam
@@ -567,7 +611,8 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     resourceType: ResourceTypeEnum.IAM,
     description: $localize`:@@iam.action.iam:IAM`,
     isOpenAPIApplicable: false,
-    isSpecificApplicable: false
+    isSpecificApplicable: false,
+    isFineGrainedAction: false
   },
 
   // access tokens
@@ -577,7 +622,8 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     resourceType: ResourceTypeEnum.AccessToken,
     description: $localize`:@@iam.action.list-access-tokens:List access tokens`,
     isOpenAPIApplicable: false,
-    isSpecificApplicable: false
+    isSpecificApplicable: false,
+    isFineGrainedAction: false
   },
   ManageServiceAccessTokens: {
     id: uuidv4(),
@@ -585,7 +631,8 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     resourceType: ResourceTypeEnum.AccessToken,
     description: $localize`:@@iam.action.manage-service-access-tokens:Manage service access tokens`,
     isOpenAPIApplicable: false,
-    isSpecificApplicable: false
+    isSpecificApplicable: false,
+    isFineGrainedAction: false
   },
   ManagePersonalAccessTokens: {
     id: uuidv4(),
@@ -593,7 +640,8 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     resourceType: ResourceTypeEnum.AccessToken,
     description: $localize`:@@iam.action.manage-personal-access-tokens:Manage personal access tokens`,
     isOpenAPIApplicable: false,
-    isSpecificApplicable: false
+    isSpecificApplicable: false,
+    isFineGrainedAction: false
   },
 
   // relay proxy
@@ -603,7 +651,8 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     resourceType: ResourceTypeEnum.RelayProxy,
     description: $localize`:@@iam.action.list-relay-proxies:List relay proxies`,
     isOpenAPIApplicable: false,
-    isSpecificApplicable: false
+    isSpecificApplicable: false,
+    isFineGrainedAction: false
   },
   ManageRelayProxies: {
     id: uuidv4(),
@@ -611,7 +660,8 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     resourceType: ResourceTypeEnum.RelayProxy,
     description: $localize`:@@iam.action.manage-relay-proxies:Manage relay proxies`,
     isOpenAPIApplicable: false,
-    isSpecificApplicable: false
+    isSpecificApplicable: false,
+    isFineGrainedAction: false
   },
 }
 

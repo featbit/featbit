@@ -54,7 +54,7 @@
               [(ngModel)]="statement.resourceType"
               (ngModelChange)="statement.onResourceTypeChange()">
               @for (rt of resourcesTypes; track rt.type) {
-                <nz-option [nzLabel]="rt.displayName" [nzValue]="rt" [nzDisabled]="isResourceTypeDisabled(rt)"></nz-option>
+                <nz-option [nzLabel]="rt.displayName" [nzValue]="rt"></nz-option>
               }
             </nz-select>
           </div>

@@ -31,12 +31,12 @@ public class User : AuditedEntity
         UpdatedAt = CreatedAt;
     }
 
-    public User(Guid workspaceId, string email, string password, string name = "", string origin = UserOrigin.Local)
+    public User(Guid workspaceId, string email, string password, string name = null, string origin = UserOrigin.Local)
     {
         WorkspaceId = workspaceId;
         Email = email;
         Password = password;
-        Name = name;
+        Name = string.IsNullOrWhiteSpace(name) ? email.Split('@')[0] : name;
         Origin = origin;
 
         CreatedAt = DateTime.UtcNow;

@@ -136,14 +136,4 @@ export class PermissionsService {
 
     return matchedPermissions.every(s => s.effect === EffectEnum.Allow);
   }
-
-  isDenied(rn: string, action: IamPolicyAction): boolean {
-    const matchedPermissions = this.getMatchedPermissions(rn, action);
-
-    if (matchedPermissions.length === 0) {
-      return false;
-    }
-
-    return matchedPermissions.some(s => s.effect === EffectEnum.Deny);
-  }
 }

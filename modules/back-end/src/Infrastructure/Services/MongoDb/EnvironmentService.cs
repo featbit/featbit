@@ -198,7 +198,8 @@ public class EnvironmentService(MongoDbClient mongoDb, ILogger<EnvironmentServic
         await MongoDb.CollectionOf<EndUserProperty>().DeleteManyAsync(x => x.EnvId == id);
 
         // delete environment events
-        await MongoDb.CollectionOf("Events").DeleteManyAsync(x => x["env_id"].AsGuid == id);
+        var stringId = id.ToString();
+        await MongoDb.CollectionOf("Events").DeleteManyAsync(x => x["env_id"].AsString == stringId);
     }
 
     public async Task DeleteManyAsync(ICollection<Guid> ids)
@@ -212,7 +213,8 @@ public class EnvironmentService(MongoDbClient mongoDb, ILogger<EnvironmentServic
         await MongoDb.CollectionOf<EndUserProperty>().DeleteManyAsync(x => ids.Contains(x.EnvId));
 
         // delete environment events
-        await MongoDb.CollectionOf("Events").DeleteManyAsync(x => ids.Contains(x["env_id"].AsGuid));
+        var stringIds = ids.Select(id => id.ToString()).ToArray();
+        await MongoDb.CollectionOf("Events").DeleteManyAsync(x => stringIds.Contains(x["env_id"].AsString));
     }
 
     public async Task<IEnumerable<Setting>> GetSettingsAsync(Guid envId, string type)

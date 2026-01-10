@@ -257,12 +257,13 @@
       </nz-form-item>
       <div class="variations-wrapper" formArrayName="variations">
         @for (variation of variations.controls; track variation; let i = $index) {
-          <div class="variation-wrapper" [class]="{'with-extra-options': showDeleteVariationButton}"
-               [formGroupName]="i">
+          <div class="variation-wrapper" [class]="{'with-extra-options': showDeleteVariationButton}" [formGroupName]="i">
             <nz-form-item>
               <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>
-              <nz-form-control nzHasFeedback i18n-nzErrorTip="@@common.name-cannot-be-empty"
-                               nzErrorTip="Name cannot be empty">
+              <nz-form-control
+                nzHasFeedback
+                nzErrorTip="Name cannot be empty"
+                i18n-nzErrorTip="@@common.name-cannot-be-empty">
                 <input type="text" nz-input formControlName="name" placeholder="Name" i18n-placeholder="@@common.name"/>
               </nz-form-control>
             </nz-form-item>
@@ -271,16 +272,26 @@
               <nz-form-control nzHasFeedback [nzErrorTip]="valueErrorTpl">
                 @if (showExpandVariationIcon) {
                   <nz-input-group [nzSuffix]="suffixIconButton">
-                    <input type="text" nz-input formControlName="value" placeholder="Value"
-                           i18n-placeholder="@@common.value"/>
+                    <input
+                      type="text"
+                      nz-input formControlName="value"
+                      placeholder="Value"
+                      i18n-placeholder="@@common.value"/>
                     <ng-template #suffixIconButton>
-                      <i class="expand-icon" nz-icon nzType="expand"
-                         (click)="expandVariation(this.variations.at(i).value)"></i>
+                      <i
+                        class="expand-icon"
+                        nz-icon
+                        nzType="expand"
+                        (click)="expandVariation(this.variations.at(i).value)"></i>
                     </ng-template>
                   </nz-input-group>
                 } @else {
-                  <input type="text" nz-input formControlName="value" placeholder="Value"
-                         i18n-placeholder="@@common.value"/>
+                  <input
+                    type="text"
+                    nz-input
+                    formControlName="value"
+                    placeholder="Value"
+                    i18n-placeholder="@@common.value"/>
                 }
                 <ng-template #valueErrorTpl let-control>
                   @if (control.hasError('required')) {
@@ -346,7 +357,7 @@
                   [nzFrontPagination]="true"
                   [nzLoading]="isLoading"
                   [nzTotal]="variationExptReferences.length"
-                  nzPageSize="10"
+                  [nzPageSize]="10"
                   style="margin-top: 20px;">
           <thead>
           <tr>

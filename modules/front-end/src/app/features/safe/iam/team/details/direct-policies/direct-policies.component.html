@@ -36,7 +36,7 @@
         <tbody>
           @for (item of table.data; track item.id) {
             <tr>
-              <td (click)="navigateToPolicy(item.id)">{{item.name}}</td>
+              <td style="cursor: pointer" (click)="navigateToPolicy(item.id)">{{item.name}}</td>
               <td>
                 @if (item.type === 'SysManaged') {
                   <i style="color: #28a17d;" nz-icon nzType="star" nzTheme="outline"></i>

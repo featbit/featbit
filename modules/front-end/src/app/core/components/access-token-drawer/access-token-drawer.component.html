@@ -55,11 +55,10 @@
                     [(ngModel)]="permissions[rt.type].allChecked"
                     (ngModelChange)="updatePermissionsAllChecked(permissions[rt.type])"
                     [nzIndeterminate]="permissions[rt.type].indeterminate"
-                    [nzDisabled]="isResourceTypeDisabled(rt)"
                     i18n="@@common.all"
                   >All</label>
                 }
-                @for (permission of permissions[rt.type].statements; track permission.id) {
+                @for (permission of permissions[rt.type].statements; track permission.action.id) {
                   <div class="permission">
                     <div class="permission-header">
                       @if (isEditing) {
@@ -69,7 +68,7 @@
                         <label nz-checkbox
                                [(ngModel)]="permission.checked"
                                (ngModelChange)="updatePermissionSingleChecked(permissions[rt.type])"
-                               [nzDisabled]="isResourceTypeDisabled(rt)">{{permission.action.name}}</label>
+                               [nzDisabled]="isActionDisabled(permission.action)">{{permission.action.name}}</label>
                       }
                       <i nz-icon [nz-tooltip]="permission.action.description" nzType="icons:icon-info-outline"></i>
                     </div>

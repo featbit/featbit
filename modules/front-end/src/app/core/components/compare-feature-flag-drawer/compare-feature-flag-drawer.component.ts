@@ -114,10 +114,9 @@ export class CompareFeatureFlagDrawerComponent {
     .subscribe({
       next: (detail) => {
         this.detail = detail;
+        this.targetFlagNotExists = !detail;
         if (detail) {
           this.initRows();
-        } else {
-          this.targetFlagNotExists = true;
         }
       },
       error: () => this.message.error($localize`:@@common.loading-failed-try-again:Loading failed, please try again`)

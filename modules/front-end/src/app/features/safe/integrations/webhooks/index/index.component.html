@@ -77,7 +77,7 @@
               <span>{{ item.name }}</span>
               <br>
                 <div class="additional-info">
-                  <span i18n="@@common.created-by">Created by</span>: {{item.creator.name ?? item.creator.email}}
+                  <span i18n="@@common.created-by">Created by</span>: {{item.creator.name || item.creator.email}}
                 </div>
               </td>
               <td class="status" (click)="openLogsModal(item)" nz-tooltip [nzTooltipTitle]="statusTooltip" nzTooltipPlacement="topLeft">

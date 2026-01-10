@@ -5,6 +5,7 @@ import { FeatureFlagService } from "@services/feature-flag.service";
 import { slugify } from "@utils/index";
 import { FlagKeyValidator } from "@shared/flag-key-validator.service";
 import { NzMessageService } from "ng-zorro-antd/message";
+import { Router } from "@angular/router";
 
 @Component({
   selector: 'clone-feature-flag-modal',
@@ -41,14 +42,15 @@ export class CloneFeatureFlagModalComponent {
   }>;
 
   constructor(
-    private fb: FormBuilder,
-    private msg: NzMessageService,
+    private formBuilder: FormBuilder,
+    private messageService: NzMessageService,
     private flagKeyAsyncValidator: FlagKeyValidator,
-    private flagServices: FeatureFlagService
+    private flagServices: FeatureFlagService,
+    private router: Router
   ) { }
 
   initForm() {
-    this.form = this.fb.group({
+    this.form = this.formBuilder.group({
       name: new FormControl('', {
         validators: [ Validators.required ]
       }),
@@ -95,11 +97,14 @@ export class CloneFeatureFlagModalComponent {
     this.flagServices.clone(this.flag.key, payload as any).subscribe({
       next: () => {
         this.isCloning = false;
-        this.msg.success($localize `:@@common.operation-success:Operation succeeded`);
+        this.messageService.success($localize `:@@common.operation-success:Operation succeeded`);
         this.onClose(true);
+
+        // navigate to the new flag detail page
+        this.router.navigate(['/feature-flags', payload.key, 'targeting']).then();
       },
       error: () => {
-        this.msg.error($localize`:@@common.operation-failed:Operation failed`);
+        this.messageService.error($localize`:@@common.operation-failed:Operation failed`);
         this.isCloning = false;
       }
     });
