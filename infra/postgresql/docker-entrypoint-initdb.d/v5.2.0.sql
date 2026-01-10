@@ -70,7 +70,7 @@ SET permissions =
          FROM jsonb_array_elements(permissions) AS stmt)
 WHERE permissions @> '[{"resourceType":"flag"}]';
 
--- update built-in 'Administrator' and 'Developer' policies to ensure they have flag full access to feature flags
+-- update built-in 'Administrator' and 'Developer' policies to ensure they have full access to feature flags
 UPDATE policies policy
 SET statements = COALESCE(policy.statements, '[]'::jsonb) ||
                  jsonb_build_array(
