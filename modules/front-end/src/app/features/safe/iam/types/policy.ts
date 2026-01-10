@@ -64,8 +64,8 @@ export interface IPagedPolicyGroup {
 
 export interface IPolicyMember {
   id: string;
+  name: string;
   email: string;
-  phoneNumber: string;
   isPolicyMember: boolean;
 }
 

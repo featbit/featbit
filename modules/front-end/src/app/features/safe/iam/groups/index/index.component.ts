@@ -21,10 +21,6 @@ export class IndexComponent implements OnInit {
     private groupService: GroupService
   ) { }
 
-  navigateToDetail(id: string) {
-    this.router.navigateByUrl(`/iam/groups/${encodeURIComponentFfc(id)}/team`);
-  }
-
   private search$ = new Subject();
   ngOnInit(): void {
     this.search$.pipe(
