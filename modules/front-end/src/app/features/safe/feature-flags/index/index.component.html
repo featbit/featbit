@@ -188,8 +188,9 @@
                   <div class="last-change-info">
                     <div class="change-time">{{getLocalDate(flag.lastChange.happenedAt) | date: 'MMM d, yyyy HH:mm'}}</div>
                     @if (flag.lastChange.operator) {
-                      <div class="change-operator">
-                        <span i18n="@@common.updated-by">Updated by</span> {{flag.lastChange.operator.name || flag.lastChange.operator.email}}
+                      <div class="updated-by">
+                        <span i18n="@@common.updated-by">Updated by</span>
+                        <span class="user">{{flag.lastChange.operator.name || flag.lastChange.operator.email}}</span>
                       </div>
                     }
                     @if (flag.lastChange.comment) {
