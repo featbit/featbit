@@ -25,7 +25,7 @@ export class MemberDrawerComponent implements OnInit {
   set visible(value: boolean) {
     this._visible = value;
     if (value) {
-      this.form.reset();
+      this.form?.reset();
     }
   }
 
