@@ -91,7 +91,7 @@ This command is defined in `package.json` as:
 
 You can replace `/abc/def/` with your own path in both the npm script and the index.html file.
 
-#### Production Mode (Docker)
+#### Docker Mode
 
 When running the UI in a Docker container, set the `BASE_HREF` environment variable in docker-compose.yml:
 
@@ -101,8 +101,11 @@ services:
     image: featbit/ui:latest
     environment:
       - BASE_HREF=/abc/def/
+    ports:
+      - "80:80"
 ```
 
+The **ports** is important if you run this in your local machine.
 The Docker entrypoint script will automatically configure nginx and update all locale-specific index.html files with the correct base href.
 
 
