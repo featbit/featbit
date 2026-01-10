@@ -82,6 +82,7 @@ db.AccessTokens.updateMany(
     }
 );
 
+// update built-in 'Administrator' and 'Developer' policies to ensure they have flag full access to feature flags
 db.Policies.updateMany(
   {
     organizationId: null,

@@ -70,24 +70,21 @@ SET permissions =
          FROM jsonb_array_elements(permissions) AS stmt)
 WHERE permissions @> '[{"resourceType":"flag"}]';
 
-UPDATE policies p
-SET
-    statements = COALESCE(p.statements, '[]'::jsonb) ||
-        jsonb_build_array(
-            jsonb_build_object(
-                'id', gen_random_uuid(),
-                'resourceType', 'flag',
-                'effect', 'allow',
-                'actions', ARRAY['*'],
-                'resources', ARRAY['project/*:env/*:flag/*']
-            )
-        )
-WHERE
-    p.organization_id IS NULL
-    AND p.type = 'SysManaged'
-    AND p.name IN ('Administrator', 'Developer')
-    AND NOT EXISTS (
-        SELECT 1
-        FROM jsonb_array_elements(COALESCE(p.statements, '[]'::jsonb)) s
-        WHERE s->>'resourceType' = 'flag'
-    );
+-- update built-in 'Administrator' and 'Developer' policies to ensure they have flag full access to feature flags
+UPDATE policies policy
+SET statements = COALESCE(policy.statements, '[]'::jsonb) ||
+                 jsonb_build_array(
+                         jsonb_build_object(
+                                 'id', gen_random_uuid(),
+                                 'resourceType', 'flag',
+                                 'effect', 'allow',
+                                 'actions', ARRAY ['*'],
+                                 'resources', ARRAY ['project/*:env/*:flag/*']
+                         )
+                 )
+WHERE policy.organization_id IS NULL
+  AND policy.type = 'SysManaged'
+  AND policy.name IN ('Administrator', 'Developer')
+  AND NOT EXISTS (SELECT 1
+                  FROM jsonb_array_elements(COALESCE(policy.statements, '[]'::jsonb)) s
+                  WHERE s ->> 'resourceType' = 'flag');
