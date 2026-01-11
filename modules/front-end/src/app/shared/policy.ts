@@ -444,6 +444,15 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     isSpecificApplicable: true,
     isFineGrainedAction: true
   },
+  CopyFlagTo: {
+    id: uuidv4(),
+    name: 'CopyFlagTo',
+    resourceType: ResourceTypeEnum.Flag,
+    description: $localize`:@@iam.action.copy-flag-to:Copy feature flag to another environment`,
+    isOpenAPIApplicable: false,
+    isSpecificApplicable: true,
+    isFineGrainedAction: true
+  },
   UpdateFlagName: {
     id: uuidv4(),
     name: 'UpdateFlagName',

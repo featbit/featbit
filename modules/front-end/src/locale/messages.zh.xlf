@@ -734,15 +734,15 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">287</context>
+          <context context-type="linenumber">290</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">300</context>
+          <context context-type="linenumber">303</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">310</context>
+          <context context-type="linenumber">313</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/groups/details/policies/policies.component.ts</context>
@@ -950,7 +950,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">290</context>
+          <context context-type="linenumber">293</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/onboarding/steps/steps.component.ts</context>
@@ -1014,7 +1014,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">324</context>
+          <context context-type="linenumber">327</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.ts</context>
@@ -2547,11 +2547,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">303</context>
+          <context context-type="linenumber">306</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">313</context>
+          <context context-type="linenumber">316</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.ts</context>
@@ -6630,7 +6630,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">696</context>
+          <context context-type="linenumber">705</context>
         </context-group>
         <target>项目</target>
       </trans-unit>
@@ -8870,7 +8870,7 @@
         <source>Please select at least one feature flag to copy</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">140</context>
+          <context context-type="linenumber">128</context>
         </context-group>
         <target>请先选择需要复制的开关</target>
       </trans-unit>
@@ -8878,7 +8878,7 @@
         <source>The status of feature flag &lt;b&gt;<x id="PH" equiv-text="data.name"/>&lt;/b&gt; is changed to OFF</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">248</context>
+          <context context-type="linenumber">251</context>
         </context-group>
         <target>开关  &lt;b&gt;<x id="PH" equiv-text="data.name"/>&lt;/b&gt; 状态已切换至 OFF</target>
       </trans-unit>
@@ -8886,7 +8886,7 @@
         <source>The status of feature flag &lt;b&gt;<x id="PH" equiv-text="data.name"/>&lt;/b&gt; is changed to ON</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">249</context>
+          <context context-type="linenumber">252</context>
         </context-group>
         <target>开关 &lt;b&gt;<x id="PH" equiv-text="data.name"/>&lt;/b&gt; 状态已切换至 ON</target>
       </trans-unit>
@@ -8894,7 +8894,7 @@
         <source>Failed to change feature flag status</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">263</context>
+          <context context-type="linenumber">266</context>
         </context-group>
         <target>开关状态切换失败</target>
       </trans-unit>
@@ -8902,7 +8902,7 @@
         <source>Flag &lt;strong&gt;<x id="PH" equiv-text="flag.name"/>&lt;/strong&gt; will be archived, and the value defined in your code will be returned for all your users. Remove code references to &lt;strong&gt;<x id="PH_1" equiv-text="flag.key"/>&lt;/strong&gt; from your application before archiving.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">270</context>
+          <context context-type="linenumber">273</context>
         </context-group>
         <target>开关 &lt;strong&gt;<x id="PH" equiv-text="this.featureFlag.name"/>&lt;/strong&gt; 将被归档，在你的代码中定义的值将被返回给所有的用户。在归档之前，你应该从你的应用程序中删除对 &lt;strong&gt;<x id="PH_1" equiv-text="this.featureFlag.key"/>&lt;/strong&gt; 的代码引用。</target>
       </trans-unit>
@@ -8910,7 +8910,7 @@
         <source>Are you sure to archive this feature flag?</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
-          <context context-type="linenumber">274</context>
+          <context context-type="linenumber">277</context>
         </context-group>
         <target>确定要存档该开关吗？</target>
       </trans-unit>
@@ -10535,7 +10535,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">702</context>
+          <context context-type="linenumber">711</context>
         </context-group>
         <target>用户组</target>
       </trans-unit>
@@ -11615,11 +11615,19 @@
         </context-group>
         <target>克隆开关</target>
       </trans-unit>
+      <trans-unit id="iam.action.copy-flag-to" datatype="html">
+        <source>Copy feature flag to another environment</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/policy.ts</context>
+          <context context-type="linenumber">451</context>
+        </context-group>
+        <target>将开关复制到其他环境</target>
+      </trans-unit>
       <trans-unit id="iam.action.update-flag-name" datatype="html">
         <source>Rename a feature flag</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">451</context>
+          <context context-type="linenumber">460</context>
         </context-group>
         <target>更新名称</target>
       </trans-unit>
@@ -11627,7 +11635,7 @@
         <source>Toggle a feature on or off</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">460</context>
+          <context context-type="linenumber">469</context>
         </context-group>
         <target>打开或关闭开关</target>
       </trans-unit>
@@ -11635,7 +11643,7 @@
         <source>Update the description of a feature flag</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">469</context>
+          <context context-type="linenumber">478</context>
         </context-group>
         <target>更新描述</target>
       </trans-unit>
@@ -11643,7 +11651,7 @@
         <source>Change the variation returned when a feature flag is set to off</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">478</context>
+          <context context-type="linenumber">487</context>
         </context-group>
         <target>更新关闭时的返回值</target>
       </trans-unit>
@@ -11651,7 +11659,7 @@
         <source>Change the tags associated with a feature flag</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">487</context>
+          <context context-type="linenumber">496</context>
         </context-group>
         <target>更新标签</target>
       </trans-unit>
@@ -11659,7 +11667,7 @@
         <source>Change a flag&apos;s individual user targeting rules</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">496</context>
+          <context context-type="linenumber">505</context>
         </context-group>
         <target>更新目标用户</target>
       </trans-unit>
@@ -11667,7 +11675,7 @@
         <source>Change a flag&apos;s custom targeting rules</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">505</context>
+          <context context-type="linenumber">514</context>
         </context-group>
         <target>更新匹配规则</target>
       </trans-unit>
@@ -11675,7 +11683,7 @@
         <source>Change a flag&apos;s default rule</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">514</context>
+          <context context-type="linenumber">523</context>
         </context-group>
         <target>更新默认规则</target>
       </trans-unit>
@@ -11683,7 +11691,7 @@
         <source>Change a flag&apos;s variations</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">523</context>
+          <context context-type="linenumber">532</context>
         </context-group>
         <target>更新返回值</target>
       </trans-unit>
@@ -11691,7 +11699,7 @@
         <source>Manage segment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">534</context>
+          <context context-type="linenumber">543</context>
         </context-group>
         <target>管理用户组</target>
       </trans-unit>
@@ -11699,7 +11707,7 @@
         <source>Update workspace general settings</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">545</context>
+          <context context-type="linenumber">554</context>
         </context-group>
         <target>修改 workspace 通用设置</target>
       </trans-unit>
@@ -11707,7 +11715,7 @@
         <source>Update workspace license</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">554</context>
+          <context context-type="linenumber">563</context>
         </context-group>
         <target>更新 License</target>
       </trans-unit>
@@ -11715,7 +11723,7 @@
         <source>Update workspace SSO settings</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">563</context>
+          <context context-type="linenumber">572</context>
         </context-group>
         <target>更新 SSO 设置</target>
       </trans-unit>
@@ -11723,7 +11731,7 @@
         <source>Update sort flags by</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">574</context>
+          <context context-type="linenumber">583</context>
         </context-group>
         <target>修改开关排序方式</target>
       </trans-unit>
@@ -11731,7 +11739,7 @@
         <source>Update org name</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">583</context>
+          <context context-type="linenumber">592</context>
         </context-group>
         <target>修改机构名称</target>
       </trans-unit>
@@ -11739,7 +11747,7 @@
         <source>Update org default user permissions</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">592</context>
+          <context context-type="linenumber">601</context>
         </context-group>
         <target>修改机构默认用户权限</target>
       </trans-unit>
@@ -11747,7 +11755,7 @@
         <source>Create organization</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">601</context>
+          <context context-type="linenumber">610</context>
         </context-group>
         <target>新建机构</target>
       </trans-unit>
@@ -11755,7 +11763,7 @@
         <source>IAM</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">612</context>
+          <context context-type="linenumber">621</context>
         </context-group>
         <target>权限管理</target>
       </trans-unit>
@@ -11763,7 +11771,7 @@
         <source>List access tokens</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">623</context>
+          <context context-type="linenumber">632</context>
         </context-group>
         <target>查看访问策略列表</target>
       </trans-unit>
@@ -11771,7 +11779,7 @@
         <source>Manage service access tokens</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">632</context>
+          <context context-type="linenumber">641</context>
         </context-group>
         <target>管理 Service 访问策略</target>
       </trans-unit>
@@ -11779,7 +11787,7 @@
         <source>Manage personal access tokens</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">641</context>
+          <context context-type="linenumber">650</context>
         </context-group>
         <target>管理 Personal 访问策略</target>
       </trans-unit>
@@ -11787,7 +11795,7 @@
         <source>List relay proxies</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">652</context>
+          <context context-type="linenumber">661</context>
         </context-group>
         <target>查看中继代理列表</target>
       </trans-unit>
@@ -11795,7 +11803,7 @@
         <source>Manage relay proxies</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">661</context>
+          <context context-type="linenumber">670</context>
         </context-group>
         <target>管理中继代理</target>
       </trans-unit>
@@ -11803,7 +11811,7 @@
         <source>Organization</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">694</context>
+          <context context-type="linenumber">703</context>
         </context-group>
         <target>组织机构</target>
       </trans-unit>
@@ -11811,7 +11819,7 @@
         <source>Environment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">698</context>
+          <context context-type="linenumber">707</context>
         </context-group>
         <target>环境</target>
       </trans-unit>
@@ -11819,7 +11827,7 @@
         <source>Flag</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">700</context>
+          <context context-type="linenumber">709</context>
         </context-group>
         <target>开关</target>
       </trans-unit>
