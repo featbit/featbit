@@ -82,71 +82,66 @@ db.AccessTokens.updateMany(
     }
 );
 
-// update built-in 'Administrator' and 'Developer' policies to ensure they have full access to feature flags
-db.Policies.updateMany(
-  {
-    organizationId: null,
-    type: "SysManaged",
-    name: { $in: ["Administrator", "Developer"] }
-  },
-  [
+// update built-in 'Administrator' and 'Developer' policies
+
+// add access to envs for 'Developer' policy
+db.Policies.updateOne(
     {
-      $set: {
-        statements: {
-          $cond: [
-            {
-              $gt: [
-                {
-                  $size: {
-                    $filter: {
-                      input: { $ifNull: ["$statements", []] },
-                      as: "s",
-                      cond: {
-                        $and: [
-                          { $eq: ["$$s.resourceType", "flag"] },
-                          { $eq: ["$$s.effect", "allow"] },
-                          { $eq: ["$$s.actions", ["*"]] },
-                          {
-                            $eq: [
-                              "$$s.resources",
-                              ["project/*:env/*:flag/*"]
-                            ]
-                          }
-                        ]
-                      }
-                    }
-                  }
-                },
-                0
-              ]
-            },
-            "$statements",
-            {
-              $concatArrays: [
-                { $ifNull: ["$statements", []] },
-                [
-                  {
-                    _id: {
-                      $function: {
-                        body: function () {
-                          return UUID().toString().split('"')[1];
-                        },
-                        args: [],
-                        lang: "js"
-                      }
-                    },
-                    resourceType: "flag",
-                    effect: "allow",
-                    actions: ["*"],
-                    resources: ["project/*:env/*:flag/*"]
-                  }
-                ]
-              ]
+        organizationId: { $eq: null },
+        type: "SysManaged",
+        name: "Developer",
+        "statements.resourceType": { $ne: "env" }
+    },
+    {
+        $push: {
+            statements: {
+                id: UUID().toString().split('"')[1],
+                resourceType: "env",
+                effect: "allow",
+                actions: ["CanAccessEnv"],
+                resources: ["project/*:env/*"]
             }
-          ]
         }
-      }
     }
-  ]
+);
+
+// add access to envs for 'Administrator' policy
+db.Policies.updateOne(
+    {
+        organizationId: { $eq: null },
+        type: "SysManaged",
+        name: "Administrator"
+    },
+    {
+        $set: {
+            "statements.$[stmt].actions": ["CanAccessEnv", "DeleteEnv", "UpdateEnvSettings", "CreateEnvSecret", "DeleteEnvSecret", "UpdateEnvSecret"]
+        }
+    },
+    {
+        arrayFilters: [
+            { "stmt.resourceType": "env" }
+        ]
+    }
+);
+
+// add full access to feature flags
+db.Policies.updateMany(
+    {
+        organizationId: { $eq: null },
+        type: "SysManaged",
+        name: { $in: ["Administrator", "Developer"] },
+        "statements.resourceType": { $ne: "flag" }
+    },
+    {
+        $push: {
+            statements: {
+                id: UUID(),
+                resourceType: "flag",
+                effect: "allow",
+                actions: ["*"],
+                resources: ["project/*:env/*:flag/*"]
+            }
+        }
+    }
 );
 
