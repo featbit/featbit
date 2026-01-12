@@ -83,7 +83,7 @@ export class IndexComponent implements OnInit {
 
   onAllChecked(checked: boolean): void {
     this.listOfCurrentPageData
-      .forEach(item => this.updateCheckedSet(this.getItemKey(item), checked));
+      .forEach(item => this.updateCheckedSet(item, checked));
 
     this.refreshCheckedStatus();
   }
@@ -101,55 +101,58 @@ export class IndexComponent implements OnInit {
     this.indeterminate = !this.allChecked && currentPageData.some(item => this.itemChecked(item));
   }
 
-  getItemKey(item: IFeatureFlagListItem) {
-    return `${item.id};${item.name};`;
-  }
-
-  parseItemKey(key: string): { id: string, name: string } {
-    let [id, name] = key.split(';');
-    return { id, name };
-  }
-
   itemChecked(item: IFeatureFlagListItem): boolean {
-    const key = this.getItemKey(item);
-
-    return this.checkedItemKeys.has(key);
+    return !!this.checkedFlags[item.id];
   }
 
-  checkedItemKeys = new Set<string>();
-  updateCheckedSet(key: string, checked: boolean) {
+  checkedFlags: Record<string, IFeatureFlagListItem> = {};
+  updateCheckedSet(item: IFeatureFlagListItem, checked: boolean) {
     if (checked) {
-      this.checkedItemKeys.add(key);
+      this.checkedFlags[item.id] = item;
     } else {
-      this.checkedItemKeys.delete(key);
+      delete this.checkedFlags[item.id];
     }
   }
 
   onItemChecked(item: IFeatureFlagListItem): void {
-    const key = this.getItemKey(item);
-    const checked = this.checkedItemKeys.has(key);
+    const checked = this.itemChecked(item);
 
-    this.updateCheckedSet(key, !checked);
+    this.updateCheckedSet(item, !checked);
     this.refreshCheckedStatus();
   }
 
   copyVisible: boolean = false;
   copyItems: FeatureFlagListCheckItem[] = [];
   batchCopy() {
-    if (this.checkedItemKeys.size === 0) {
+    if (Object.keys(this.checkedFlags).length === 0) {
       this.msg.warning($localize `:@@ff.idx.select-ff-to-copy:Please select at least one feature flag to copy`);
       return;
     }
 
     this.copyItems = [];
-    for (const key of this.checkedItemKeys) {
-      const { id, name } = this.parseItemKey(key);
+    for (const flag of Object.values(this.checkedFlags)) {
+      const rn = getFlagRN(flag.key, flag.tags);
+      const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(rn, permissionActions.CopyFlagTo, LicenseFeatureEnum.FineGrainedAccessControl, true);
+      if (!isGranted) {
+        this.msg.warning(this.permissionsService.flagActionDenyMessage($localize `:@@common.copy-lowercase:copy`, flag.name));
+        return;
+      }
+
+      const { id, name } = flag;
       this.copyItems.push({ id, name, checked: true });
     }
 
     this.copyVisible = true;
   }
+
   copy(flag: IFeatureFlagListItem) {
+    const rn = getFlagRN(flag.key, flag.tags);
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(rn, permissionActions.CopyFlagTo, LicenseFeatureEnum.FineGrainedAccessControl, true);
+    if (!isGranted) {
+      this.msg.warning(this.permissionsService.flagActionDenyMessage($localize `:@@common.copy-lowercase:copy`, flag.name));
+      return;
+    }
+
     this.copyItems = [ { id: flag.id, name: flag.name, checked: true } ];
     this.copyVisible = true;
   }
@@ -160,7 +163,7 @@ export class IndexComponent implements OnInit {
     const rn = getFlagRN(flag.key, flag.tags);
     const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(rn, permissionActions.CloneFlag, LicenseFeatureEnum.FineGrainedAccessControl, true);
     if (!isGranted) {
-      this.msg.warning(this.permissionsService.genericDenyMessage);
+      this.msg.warning(this.permissionsService.flagActionDenyMessage($localize `:@@common.clone-lowercase:clone`, flag.name));
       return;
     }
 

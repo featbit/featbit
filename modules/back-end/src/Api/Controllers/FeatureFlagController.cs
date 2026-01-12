@@ -376,7 +376,6 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(results);
     }
 
-
     [HttpPost("copy-to-env/{targetEnvId:guid}")]
     public async Task<ApiResponse<CopyToEnvResult>> CopyToEnvAsync(Guid envId, Guid targetEnvId, CopyToEnv request)
     {
