@@ -626,16 +626,14 @@ $$
                                 'id', gen_random_uuid(),
                                 'resourceType', 'project',
                                 'effect', 'allow',
-                                'actions',
-                                ARRAY ['CanAccessProject', 'CreateProject', 'DeleteProject', 'UpdateProjectSettings', 'CreateEnv'],
+                                'actions', ARRAY ['CanAccessProject', 'CreateProject', 'DeleteProject', 'UpdateProjectSettings', 'CreateEnv'],
                                 'resources', ARRAY ['project/*']
                         ),
                         jsonb_build_object(
                                 'id', gen_random_uuid(),
                                 'resourceType', 'env',
                                 'effect', 'allow',
-                                'actions',
-                                ARRAY ['DeleteEnv', 'UpdateEnvSettings', 'CreateEnvSecret', 'DeleteEnvSecret', 'UpdateEnvSecret'],
+                                'actions', ARRAY ['DeleteEnv', 'UpdateEnvSettings', 'CreateEnvSecret', 'DeleteEnvSecret', 'UpdateEnvSecret'],
                                 'resources', ARRAY ['project/*:env/*']
                         )
                 ),
