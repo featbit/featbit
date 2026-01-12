@@ -6442,6 +6442,13 @@
           <context context-type="linenumber">34</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="permissions.need-permissions-for-flag" datatype="html">
+        <source>You don&apos;t have permissions to <x id="PH" equiv-text="action"/> the feature flag &quot;<x id="PH_1" equiv-text="flag"/>&quot;, please contact the admin to grant you the necessary permissions</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/services/permissions.service.ts</context>
+          <context context-type="linenumber">17</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="common.login" datatype="html">
         <source>Login</source>
         <context-group purpose="location">
@@ -8150,6 +8157,24 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
           <context context-type="linenumber">128</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.copy-lowercase" datatype="html">
+        <source>copy</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
+          <context context-type="linenumber">137</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
+          <context context-type="linenumber">152</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.clone-lowercase" datatype="html">
+        <source>clone</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
+          <context context-type="linenumber">166</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.idx.flag-turned-off" datatype="html">

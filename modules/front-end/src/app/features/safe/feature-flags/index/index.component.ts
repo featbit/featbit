@@ -134,7 +134,7 @@ export class IndexComponent implements OnInit {
       const rn = getFlagRN(flag.key, flag.tags);
       const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(rn, permissionActions.CopyFlagTo, LicenseFeatureEnum.FineGrainedAccessControl, true);
       if (!isGranted) {
-        this.msg.warning(this.permissionsService.genericDenyMessage);
+        this.msg.warning(this.permissionsService.flagActionDenyMessage($localize `:@@common.copy-lowercase:copy`, flag.name));
         return;
       }
 
@@ -149,7 +149,7 @@ export class IndexComponent implements OnInit {
     const rn = getFlagRN(flag.key, flag.tags);
     const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(rn, permissionActions.CopyFlagTo, LicenseFeatureEnum.FineGrainedAccessControl, true);
     if (!isGranted) {
-      this.msg.warning(this.permissionsService.genericDenyMessage);
+      this.msg.warning(this.permissionsService.flagActionDenyMessage($localize `:@@common.copy-lowercase:copy`, flag.name));
       return;
     }
 
@@ -163,7 +163,7 @@ export class IndexComponent implements OnInit {
     const rn = getFlagRN(flag.key, flag.tags);
     const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(rn, permissionActions.CloneFlag, LicenseFeatureEnum.FineGrainedAccessControl, true);
     if (!isGranted) {
-      this.msg.warning(this.permissionsService.genericDenyMessage);
+      this.msg.warning(this.permissionsService.flagActionDenyMessage($localize `:@@common.clone-lowercase:clone`, flag.name));
       return;
     }
 
