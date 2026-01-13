@@ -15,24 +15,16 @@ export interface IPermissionStatement extends IPolicyStatement {
 export const preProcessPermissions = (statements: IPolicyStatement[]): { [key: string]: IPermissionStatementGroup} => {
   return statements.flatMap((statement) => {
     const {effect, resourceType, resources} = statement;
-    return statement.actions.flatMap((action) => {
-      if (action === '*') {
-        return Object.values(permissionActions)
-        .filter(pa => pa.resourceType === resourceType)
-        .map(pa => ({
-          effect,
-          resourceType,
-          resources,
-          action: pa
-        }));
-      }
+    return statement.actions.map((action) => {
+      const pa = Object.values(permissionActions)
+                                .find(act => act.resourceType === resourceType && act.name === action);
 
-      return [{
+      return {
        effect,
        resourceType,
        resources,
-       action: permissionActions[action]
-      }];
+       action: pa
+      };
     });
   }).filter(({effect, resourceType, resources, action}) => action && action.isOpenAPIApplicable)
     .reduce((acc, cur) => {

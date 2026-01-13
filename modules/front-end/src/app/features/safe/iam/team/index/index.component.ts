@@ -36,10 +36,6 @@ export class IndexComponent implements OnInit {
     this.search$.next(null);
   }
 
-  navigateToDetail(id: string) {
-    this.router.navigateByUrl(`/iam/team/${encodeURIComponentFfc(id)}/groups`);
-  }
-
   isLoading: boolean = true;
   pagedMember: IMemberListModel = {
     items: [],

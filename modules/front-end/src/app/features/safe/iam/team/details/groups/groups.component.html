@@ -32,7 +32,7 @@
         <tbody>
           @for (item of table.data; track item.id) {
             <tr>
-              <td (click)="goToGroup(item.id)">{{item.name}}</td>
+              <td style="cursor: pointer" (click)="goToGroup(item.id)">{{item.name}}</td>
               <td>{{item.description}}</td>
               <td>
                 <a class="primary-link-btn" (click)="goToGroup(item.id)" i18n="@@common.details">Details</a>

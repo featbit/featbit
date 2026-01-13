@@ -35,7 +35,7 @@ class PolicyStatementViewModel {
 
       const allActions = [...Object.values(permissionActions)];
       this.selectedActions = statement.actions.map(act => {
-        const find = allActions.find(a => act === a.name);
+        const find = allActions.find(a => this.resourceType.type === a.resourceType && act === a.name);
         return find || act as unknown as IamPolicyAction;
       });
 
@@ -126,10 +126,6 @@ export class PolicyEditorComponent {
       this.readonly = policy.type === PolicyTypeEnum.SysManaged;
       this.statements = policy.statements.map(statement => new PolicyStatementViewModel(statement));
     }
-  }
-
-  isResourceTypeDisabled(rt: ResourceType): boolean {
-    return !this.isFineGrainedAccessControlGranted && rt.type === ResourceTypeEnum.Flag;
   }
 
   copyPolicy() {

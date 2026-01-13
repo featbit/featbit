@@ -13,6 +13,9 @@ export class PermissionsService {
   userPermissions: IPolicyStatement[];
 
   genericDenyMessage: string = $localize`:@@permissions.need-permissions-to-operate:You don't have permissions to take this action, please contact the admin to grant you the necessary permissions`;
+  flagActionDenyMessage(action: string, flag: string): string {
+    return $localize`:@@permissions.need-permissions-for-flag:You don't have permissions to ${action} the feature flag "${flag}", please contact the admin to grant you the necessary permissions`;
+  }
 
   constructor(private memberSvc: MemberService) {
   }
@@ -135,15 +138,5 @@ export class PermissionsService {
     }
 
     return matchedPermissions.every(s => s.effect === EffectEnum.Allow);
-  }
-
-  isDenied(rn: string, action: IamPolicyAction): boolean {
-    const matchedPermissions = this.getMatchedPermissions(rn, action);
-
-    if (matchedPermissions.length === 0) {
-      return false;
-    }
-
-    return matchedPermissions.some(s => s.effect === EffectEnum.Deny);
   }
 }
