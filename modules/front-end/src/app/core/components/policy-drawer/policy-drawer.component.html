@@ -12,17 +12,9 @@
       <!-- name -->
       <nz-form-item>
         <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>
-        <nz-form-control nzHasFeedback nzValidatingTip="Validating..." i18n-nzValidatingTip="@@common.validating" [nzErrorTip]="errorTpl">
+        <nz-form-control nzErrorTip="Policy name cannot be empty" i18n-nzErrorTip="@@iam.policies.policy-drawer.policy-name-cannot-be-empty">
           <input type="text" nz-input formControlName="name" placeholder="Name" i18n-placeholder="@@common.name"/>
         </nz-form-control>
-        <ng-template #errorTpl let-control>
-          @if (control.hasError('required')) {
-            <ng-container i18n="@@iam.policies.policy-drawer.policy-name-cannot-be-empty">Policy name cannot be empty</ng-container>
-          }
-          @if (control.hasError('duplicated')) {
-            <ng-container i18n="@@iam.policies.policy-drawer.policy-name-unavailable">This policy name is not available</ng-container>
-          }
-        </ng-template>
       </nz-form-item>
       <!-- key -->
       <nz-form-item>

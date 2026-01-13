@@ -153,14 +153,6 @@ public class PolicyService(AppDbContext dbContext) : EntityFrameworkCoreService<
 
         return new PagedResult<PolicyMember>(totalCount, vms);
     }
-
-    public async Task<bool> IsNameUsedAsync(Guid organizationId, string name)
-    {
-        return await AnyAsync(x =>
-            x.OrganizationId == organizationId &&
-            string.Equals(x.Name.ToLower(), name.ToLower())
-        );
-    }
     
     public async Task<bool> IsKeyUsedAsync(Guid organizationId, string key)
     {

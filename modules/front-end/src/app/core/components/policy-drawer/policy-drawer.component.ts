@@ -26,7 +26,7 @@ export class PolicyDrawerComponent implements OnInit {
   form: FormGroup;
   ngOnInit(): void {
     this.form = this.fb.group({
-      name: ['', [Validators.required], [this.nameAsyncValidator]],
+      name: ['', [Validators.required]],
       key: ['', [Validators.required], [this.keyAsyncValidator]],
       description: ['', []],
     });
@@ -46,22 +46,6 @@ export class PolicyDrawerComponent implements OnInit {
     keyControl.setValue(slugify(name ?? ''));
     keyControl.markAsDirty();
   }
-
-  nameAsyncValidator = (control: FormControl) => control.valueChanges.pipe(
-    debounceTime(300),
-    switchMap(value => this.policyService.isNameUsed(value as string)),
-    map(isNameUsed => {
-      switch (isNameUsed) {
-        case true:
-          return { error: true, duplicated: true };
-        case undefined:
-          return { error: true, unknown: true };
-        default:
-          return null;
-      }
-    }),
-    first()
-  );
 
   keyAsyncValidator = (control: FormControl) => control.valueChanges.pipe(
     debounceTime(300),

@@ -31,19 +31,6 @@ public class PolicyController : ApiControllerBase
         var policies = await Mediator.Send(request);
         return Ok(policies);
     }
-
-    [HttpGet("is-name-used")]
-    public async Task<ApiResponse<bool>> IsNameUsedAsync(string name)
-    {
-        var request = new IsPolicyNameUsed
-        {
-            OrganizationId = OrgId,
-            Name = name
-        };
-
-        var isNameUsed = await Mediator.Send(request);
-        return Ok(isNameUsed);
-    }
     
     [HttpGet("is-key-used")]
     public async Task<ApiResponse<bool>> IsKeyUsedAsync(string key)

@@ -41,12 +41,6 @@ export class PolicyService {
     return this.http.get<IPolicy>(`${this.baseUrl}/${id}`);
   }
 
-  isNameUsed(name: string) {
-    const url = `${this.baseUrl}/is-name-used?name=${name}`;
-
-    return this.http.get<boolean>(url).pipe(catchError(() => of(undefined)));
-  }
-
   isKeyUsed(key: string) {
     const url = `${this.baseUrl}/is-key-used?key=${key}`;
 
