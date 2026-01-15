@@ -3,6 +3,7 @@ using Infrastructure.Caches.Redis;
 using Infrastructure.MQ;
 using Infrastructure.MQ.Kafka;
 using Infrastructure.Persistence;
+using Infrastructure.Persistence.MongoDb;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -25,7 +26,7 @@ public static class HealthCheckBuilderExtensions
         {
             case DbProvider.MongoDb:
                 builder.AddMongoDb(
-                    dbProvider.ConnectionString,
+                    sp => sp.GetRequiredService<IMongoDbClient>().Database,
                     tags: tags,
                     timeout: Timeout
                 );

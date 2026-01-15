@@ -14,14 +14,14 @@
 
     <ItemGroup>
         <PackageReference Include="AspNetCore.HealthChecks.Kafka" Version="9.0.0" />
-        <PackageReference Include="AspNetCore.HealthChecks.MongoDb" Version="8.1.0" />
+        <PackageReference Include="AspNetCore.HealthChecks.MongoDb" Version="9.0.0" />
         <PackageReference Include="AspNetCore.HealthChecks.Redis" Version="9.0.0" />
         <PackageReference Include="Dapper" Version="2.1.66" />
         <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="10.0.2" />
         <PackageReference Include="Confluent.Kafka" Version="2.13.0" />
         <PackageReference Include="LinqKit.Core" Version="1.2.9" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.2" />
-        <PackageReference Include="MongoDB.Driver" Version="2.29.0" />
+        <PackageReference Include="MongoDB.Driver" Version="3.5.2" />
         <PackageReference Include="Npgsql.DependencyInjection" Version="10.0.1" />
         <PackageReference Include="SqlKata" Version="4.0.1" />
         <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />

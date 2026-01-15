@@ -23,9 +23,6 @@ public static class Initialization
         ConventionRegistry.Register("global-conventions", conventions, _ => true);
 
         // guid handling
-#pragma warning disable 618
-        BsonDefaults.GuidRepresentationMode = GuidRepresentationMode.V3;
-#pragma warning restore
         BsonSerializer.RegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
         BsonSerializer.RegisterIdGenerator(
             typeof(Guid),

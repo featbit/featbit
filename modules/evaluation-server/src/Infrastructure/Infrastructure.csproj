@@ -15,12 +15,12 @@
 
     <ItemGroup>
         <PackageReference Include="AspNetCore.HealthChecks.Kafka" Version="9.0.0" />
-        <PackageReference Include="AspNetCore.HealthChecks.MongoDb" Version="8.1.0" />
+        <PackageReference Include="AspNetCore.HealthChecks.MongoDb" Version="9.0.0" />
         <PackageReference Include="AspNetCore.HealthChecks.NpgSql" Version="9.0.0" />
         <PackageReference Include="AspNetCore.HealthChecks.Redis" Version="9.0.0" />
         <PackageReference Include="Confluent.Kafka" Version="2.13.0" />
         <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.2" />
-        <PackageReference Include="MongoDB.Driver" Version="2.29.0" />
+        <PackageReference Include="MongoDB.Driver" Version="3.5.2" />
         <PackageReference Include="Npgsql" Version="10.0.1" />
         <PackageReference Include="Npgsql.DependencyInjection" Version="10.0.1" />
         <PackageReference Include="StackExchange.Redis" Version="2.10.1" />
