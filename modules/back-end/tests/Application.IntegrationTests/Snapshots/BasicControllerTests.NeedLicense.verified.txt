@@ -1,8 +1,8 @@
 ﻿{
   Status: 403 Forbidden,
-  Headers: {},
   Content: {
     Headers: {
+      Content-Length: 52,
       Content-Type: application/json; charset=utf-8
     },
     Value: {
