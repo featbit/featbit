@@ -56,6 +56,7 @@
                 <target-user
                   i18n-type="@@common.including-users"
                   type="Including users"
+                  [disabled]="false"
                   [disableCreation]="segmentDetail.isShared"
                   [userList]="userList"
                   [selectedUserDetailList]="segmentDetail.includedUsers"
@@ -67,6 +68,7 @@
                 <target-user
                   i18n-type="@@common.excluding-users"
                   type="Excluding users"
+                  [disabled]="false"
                   [disableCreation]="segmentDetail.isShared"
                   [userList]="userList"
                   [selectedUserDetailList]="segmentDetail.excludedUsers"
@@ -92,6 +94,7 @@
             @for (rule of segmentDetail.rules; track trackRuleById(index, rule); let index = $index) {
               <div class="drop-box rule" cdkDrag>
                 <find-rule
+                  [disabled]="false"
                   [data]="rule"
                   [userProps]="userProps"
                   (addProperty)="onAddProperty($event)"

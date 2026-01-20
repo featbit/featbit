@@ -17,14 +17,6 @@
           <context context-type="linenumber">27,28</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/clone-policy-modal/clone-policy-modal.component.html</context>
-          <context context-type="linenumber">21,22</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/clone-policy-modal/clone-policy-modal.component.html</context>
-          <context context-type="linenumber">30</context>
-        </context-group>
-        <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
           <context context-type="linenumber">15,16</context>
         </context-group>
@@ -142,7 +134,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.html</context>
-          <context context-type="linenumber">120,121</context>
+          <context context-type="linenumber">121,122</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/insights/insights.component.html</context>
@@ -284,10 +276,6 @@
           <context context-type="linenumber">51,52</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/clone-policy-modal/clone-policy-modal.component.html</context>
-          <context context-type="linenumber">45,46</context>
-        </context-group>
-        <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
           <context context-type="linenumber">29,30</context>
         </context-group>
@@ -305,7 +293,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/policy-drawer/policy-drawer.component.html</context>
-          <context context-type="linenumber">29,30</context>
+          <context context-type="linenumber">15</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/project-drawer/project-drawer.component.html</context>
@@ -343,7 +331,7 @@
         <source>This access token name is not available</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
-          <context context-type="linenumber">22,26</context>
+          <context context-type="linenumber">22,27</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.type" datatype="html">
@@ -397,7 +385,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/policies/details/details.component.html</context>
-          <context context-type="linenumber">7,8</context>
+          <context context-type="linenumber">7,9</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.all" datatype="html">
@@ -463,7 +451,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">100,101</context>
+          <context context-type="linenumber">100,102</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
@@ -479,7 +467,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/policy-drawer/policy-drawer.component.html</context>
-          <context context-type="linenumber">56,57</context>
+          <context context-type="linenumber">36,37</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/project-drawer/project-drawer.component.html</context>
@@ -499,7 +487,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
-          <context context-type="linenumber">107,108</context>
+          <context context-type="linenumber">107,109</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
@@ -548,11 +536,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-key-modal/relay-proxy-key-modal.component.html</context>
-          <context context-type="linenumber">23,24</context>
+          <context context-type="linenumber">23,25</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/resource-finder/resource-finder.component.html</context>
-          <context context-type="linenumber">86,87</context>
+          <context context-type="linenumber">86,88</context>
         </context-group>
       </trans-unit>
       <trans-unit id="integrations.access-token.access-token-drawer.view-title" datatype="html">
@@ -606,10 +594,6 @@
           <context context-type="linenumber">100</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/clone-policy-modal/clone-policy-modal.component.ts</context>
-          <context context-type="linenumber">99</context>
-        </context-group>
-        <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.ts</context>
           <context context-type="linenumber">285</context>
         </context-group>
@@ -651,7 +635,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/policy-drawer/policy-drawer.component.ts</context>
-          <context context-type="linenumber">82</context>
+          <context context-type="linenumber">69</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/props-drawer/props-drawer.component.ts</context>
@@ -1019,6 +1003,10 @@
           <context context-type="linenumber">74</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.ts</context>
+          <context context-type="linenumber">138</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/groups/details/setting/setting.component.ts</context>
           <context context-type="linenumber">81</context>
         </context-group>
@@ -1376,7 +1364,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">88,89</context>
+          <context context-type="linenumber">90,91</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.variations" datatype="html">
@@ -1424,7 +1412,7 @@
         <source>Archive feature flag</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/instructions/archive-flag/archive-flag.component.ts</context>
-          <context context-type="linenumber">8,10</context>
+          <context context-type="linenumber">8,11</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.add-variation" datatype="html">
@@ -1474,21 +1462,21 @@
         <source>Restore feature flag</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/instructions/restore-flag/restore-flag.component.ts</context>
-          <context context-type="linenumber">8,10</context>
+          <context context-type="linenumber">8,11</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.turn-flag-off" datatype="html">
         <source>Turn feature flag </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/instructions/turn-flag-off/turn-flag-off.component.ts</context>
-          <context context-type="linenumber">8,9</context>
+          <context context-type="linenumber">8,10</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.turn-flag-on" datatype="html">
         <source>Turn feature flag </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/instructions/turn-flag-on/turn-flag-on.component.ts</context>
-          <context context-type="linenumber">8,9</context>
+          <context context-type="linenumber">8,10</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.update-dispatch-key-to" datatype="html">
@@ -1625,7 +1613,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">69,70</context>
+          <context context-type="linenumber">70,71</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.including-users" datatype="html">
@@ -1881,10 +1869,6 @@
           <context context-type="linenumber">127,129</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/clone-policy-modal/clone-policy-modal.component.html</context>
-          <context context-type="linenumber">91,93</context>
-        </context-group>
-        <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/copy-feature-flag-modal/copy-feature-flag-modal.component.html</context>
           <context context-type="linenumber">121,123</context>
         </context-group>
@@ -1926,7 +1910,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">217,218</context>
+          <context context-type="linenumber">217,219</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/resources-selector/resources-selector.component.html</context>
@@ -1992,10 +1976,6 @@
           <context context-type="linenumber">30,31</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/clone-policy-modal/clone-policy-modal.component.html</context>
-          <context context-type="linenumber">24,25</context>
-        </context-group>
-        <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
           <context context-type="linenumber">16,18</context>
         </context-group>
@@ -2037,7 +2017,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/project/project.component.html</context>
-          <context context-type="linenumber">151,153</context>
+          <context context-type="linenumber">151,154</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.feature-flag-name-placeholder" datatype="html">
@@ -2073,10 +2053,6 @@
           <context context-type="linenumber">57,58</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/clone-policy-modal/clone-policy-modal.component.html</context>
-          <context context-type="linenumber">51,52</context>
-        </context-group>
-        <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
           <context context-type="linenumber">33,34</context>
         </context-group>
@@ -2087,10 +2063,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/organization-drawer/organization-drawer.component.html</context>
           <context context-type="linenumber">29,30</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/policy-drawer/policy-drawer.component.html</context>
-          <context context-type="linenumber">33,34</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/project-drawer/project-drawer.component.html</context>
@@ -2108,10 +2080,6 @@
           <context context-type="linenumber">61,63</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/clone-policy-modal/clone-policy-modal.component.html</context>
-          <context context-type="linenumber">55,57</context>
-        </context-group>
-        <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
           <context context-type="linenumber">36,38</context>
         </context-group>
@@ -2122,10 +2090,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/organization-drawer/organization-drawer.component.html</context>
           <context context-type="linenumber">32,34</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/policy-drawer/policy-drawer.component.html</context>
-          <context context-type="linenumber">36,38</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/project-drawer/project-drawer.component.html</context>
@@ -2147,10 +2111,6 @@
           <context context-type="linenumber">64,66</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/clone-policy-modal/clone-policy-modal.component.html</context>
-          <context context-type="linenumber">58,60</context>
-        </context-group>
-        <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
           <context context-type="linenumber">39,41</context>
         </context-group>
@@ -2166,10 +2126,6 @@
           <context context-type="linenumber">67,69</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/clone-policy-modal/clone-policy-modal.component.html</context>
-          <context context-type="linenumber">61,63</context>
-        </context-group>
-        <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
           <context context-type="linenumber">39,41</context>
         </context-group>
@@ -2180,10 +2136,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/organization-drawer/organization-drawer.component.html</context>
           <context context-type="linenumber">35,37</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/policy-drawer/policy-drawer.component.html</context>
-          <context context-type="linenumber">39,41</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/project-drawer/project-drawer.component.html</context>
@@ -2205,10 +2157,6 @@
           <context context-type="linenumber">70,72</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/clone-policy-modal/clone-policy-modal.component.html</context>
-          <context context-type="linenumber">64,66</context>
-        </context-group>
-        <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
           <context context-type="linenumber">42,44</context>
         </context-group>
@@ -2221,16 +2169,12 @@
           <context context-type="linenumber">38,40</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/policy-drawer/policy-drawer.component.html</context>
-          <context context-type="linenumber">42,44</context>
-        </context-group>
-        <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/project-drawer/project-drawer.component.html</context>
           <context context-type="linenumber">38,40</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
-          <context context-type="linenumber">79,80</context>
+          <context context-type="linenumber">79,81</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
@@ -2246,14 +2190,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/clone-feature-flag-modal/clone-feature-flag-modal.component.html</context>
           <context context-type="linenumber">87,88</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/clone-policy-modal/clone-policy-modal.component.html</context>
-          <context context-type="linenumber">73,74</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/clone-policy-modal/clone-policy-modal.component.html</context>
-          <context context-type="linenumber">81,82</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
@@ -2285,15 +2221,15 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/policy-drawer/policy-drawer.component.html</context>
-          <context context-type="linenumber">50,51</context>
+          <context context-type="linenumber">30,31</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/policy-drawer/policy-drawer.component.html</context>
-          <context context-type="linenumber">51</context>
+          <context context-type="linenumber">31</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/policy-drawer/policy-drawer.component.html</context>
-          <context context-type="linenumber">52</context>
+          <context context-type="linenumber">32</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/props-drawer/props-drawer.component.html</context>
@@ -2387,10 +2323,6 @@
           <context context-type="linenumber">82,83</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/clone-policy-modal/clone-policy-modal.component.html</context>
-          <context context-type="linenumber">76,77</context>
-        </context-group>
-        <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
           <context context-type="linenumber">53</context>
         </context-group>
@@ -2432,16 +2364,8 @@
           <context context-type="linenumber">134,136</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/clone-policy-modal/clone-policy-modal.component.html</context>
-          <context context-type="linenumber">98,100</context>
-        </context-group>
-        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
           <context context-type="linenumber">214,215</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.html</context>
-          <context context-type="linenumber">7,8</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.operation-failed" datatype="html">
@@ -2449,10 +2373,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/clone-feature-flag-modal/clone-feature-flag-modal.component.ts</context>
           <context context-type="linenumber">107</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/clone-policy-modal/clone-policy-modal.component.ts</context>
-          <context context-type="linenumber">106</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.ts</context>
@@ -2513,6 +2433,14 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
           <context context-type="linenumber">316</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.ts</context>
+          <context context-type="linenumber">140</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.ts</context>
+          <context context-type="linenumber">143</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/groups/details/policies/policies.component.ts</context>
@@ -2631,47 +2559,6 @@
           <context context-type="linenumber">115</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="ff.clone-policy.title" datatype="html">
-        <source>Clone Policy</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/clone-policy-modal/clone-policy-modal.component.html</context>
-          <context context-type="linenumber">5,6</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="iam.policy-to-clone" datatype="html">
-        <source>Policy to clone:</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/clone-policy-modal/clone-policy-modal.component.html</context>
-          <context context-type="linenumber">13,14</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="common.key-input-description" datatype="html">
-        <source>We use the key to give you friendly URLs &amp; RNs. Keys should only contain letters, numbers, ., _ or -.</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/clone-policy-modal/clone-policy-modal.component.html</context>
-          <context context-type="linenumber">40,42</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
-          <context context-type="linenumber">24,26</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/organization-drawer/organization-drawer.component.html</context>
-          <context context-type="linenumber">25,27</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/policy-drawer/policy-drawer.component.html</context>
-          <context context-type="linenumber">24,26</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/project-drawer/project-drawer.component.html</context>
-          <context context-type="linenumber">25,27</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/workspaces/project/project.component.html</context>
-          <context context-type="linenumber">34</context>
-        </context-group>
-      </trans-unit>
       <trans-unit id="common.compare" datatype="html">
         <source>Compare</source>
         <context-group purpose="location">
@@ -2735,7 +2622,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/segment-creation-modal/segment-creation-modal.component.html</context>
-          <context context-type="linenumber">115,117</context>
+          <context context-type="linenumber">115,118</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.html</context>
@@ -2863,7 +2750,7 @@
         <source>Copy Settings</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">207,209</context>
+          <context context-type="linenumber">207,210</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.loading-failed-try-again" datatype="html">
@@ -2886,7 +2773,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.ts</context>
-          <context context-type="linenumber">93</context>
+          <context context-type="linenumber">100</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.ts</context>
@@ -2921,7 +2808,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.ts</context>
-          <context context-type="linenumber">191</context>
+          <context context-type="linenumber">198</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.compare.individual-targeting" datatype="html">
@@ -2932,7 +2819,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.ts</context>
-          <context context-type="linenumber">192</context>
+          <context context-type="linenumber">199</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.compare.targeting-rules" datatype="html">
@@ -2943,7 +2830,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.ts</context>
-          <context context-type="linenumber">193</context>
+          <context context-type="linenumber">200</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.compare.default-rule" datatype="html">
@@ -2954,7 +2841,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.ts</context>
-          <context context-type="linenumber">194</context>
+          <context context-type="linenumber">201</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.compare.off-variation" datatype="html">
@@ -2965,7 +2852,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.ts</context>
-          <context context-type="linenumber">195</context>
+          <context context-type="linenumber">202</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.compare.select-settings-to-copy" datatype="html">
@@ -3132,7 +3019,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.ts</context>
-          <context context-type="linenumber">174</context>
+          <context context-type="linenumber">181</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.bulk-copy.precheck-failed" datatype="html">
@@ -3168,6 +3055,25 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
           <context context-type="linenumber">16</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.key-input-description" datatype="html">
+        <source>We use the key to give you friendly URLs &amp; RNs. Keys should only contain letters, numbers, ., _ or -.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
+          <context context-type="linenumber">24,27</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/organization-drawer/organization-drawer.component.html</context>
+          <context context-type="linenumber">25,28</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/project-drawer/project-drawer.component.html</context>
+          <context context-type="linenumber">25,28</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/project/project.component.html</context>
+          <context context-type="linenumber">34</context>
         </context-group>
       </trans-unit>
       <trans-unit id="org.project.envDescription" datatype="html">
@@ -3224,7 +3130,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/experiment-drawer/experiment-drawer.component.html</context>
-          <context context-type="linenumber">14,15</context>
+          <context context-type="linenumber">14,16</context>
         </context-group>
       </trans-unit>
       <trans-unit id="expt.overview.select-ff" datatype="html">
@@ -3324,7 +3230,7 @@
         <source>When saved, the following changes would be effective immediately, all experiments related to this feature flag would be affected. We strongly recommend that you pause all those experiments and start over.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/expt-rules-drawer/expt-rules-drawer.component.html</context>
-          <context context-type="linenumber">9,11</context>
+          <context context-type="linenumber">9,12</context>
         </context-group>
       </trans-unit>
       <trans-unit id="expt.rule-drawer.all-rules" datatype="html">
@@ -3554,7 +3460,7 @@
         <source>Define which variation users will see by default when the flag is Enabled or Disabled</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">174,175</context>
+          <context context-type="linenumber">174,176</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
@@ -3642,7 +3548,7 @@
         <source>If</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
-          <context context-type="linenumber">2,4</context>
+          <context context-type="linenumber">3,4</context>
         </context-group>
       </trans-unit>
       <trans-unit id="core.components.findrule.and" datatype="html">
@@ -3875,7 +3781,7 @@
         <source> to your organization</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
-          <context context-type="linenumber">42,44</context>
+          <context context-type="linenumber">42,45</context>
         </context-group>
       </trans-unit>
       <trans-unit id="guide.manage" datatype="html">
@@ -3959,7 +3865,7 @@
         <source>server</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">45,46</context>
+          <context context-type="linenumber">45,47</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
@@ -3978,7 +3884,7 @@
         <source>client</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">48,49</context>
+          <context context-type="linenumber">48,50</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
@@ -4048,7 +3954,7 @@
         <source>Click to view the template</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.html</context>
-          <context context-type="linenumber">14,17</context>
+          <context context-type="linenumber">14,18</context>
         </context-group>
       </trans-unit>
       <trans-unit id="users.import.users-note" datatype="html">
@@ -4062,7 +3968,7 @@
         <source>Any new user properties in the file will be added, but existing properties will not be changed.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.html</context>
-          <context context-type="linenumber">23,26</context>
+          <context context-type="linenumber">23,27</context>
         </context-group>
       </trans-unit>
       <trans-unit id="users.import.upload-text" datatype="html">
@@ -4174,7 +4080,7 @@
         <source>enabled</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.html</context>
-          <context context-type="linenumber">65,67</context>
+          <context context-type="linenumber">65,68</context>
         </context-group>
       </trans-unit>
       <trans-unit id="license.available" datatype="html">
@@ -4288,7 +4194,7 @@
         <source>Email</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
-          <context context-type="linenumber">15,16</context>
+          <context context-type="linenumber">15,17</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.user-email-invalid" datatype="html">
@@ -4535,11 +4441,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/overview/overview.component.html</context>
-          <context context-type="linenumber">101,102</context>
+          <context context-type="linenumber">101,103</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/overview/overview.component.html</context>
-          <context context-type="linenumber">104,105</context>
+          <context context-type="linenumber">104,106</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
@@ -4585,7 +4491,7 @@
         <source>To obtain a accurate result, a numeraic value must be sent for numeric experiment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.html</context>
-          <context context-type="linenumber">100,103</context>
+          <context context-type="linenumber">100,104</context>
         </context-group>
       </trans-unit>
       <trans-unit id="expt.metric.event-name" datatype="html">
@@ -4915,14 +4821,21 @@
         <source>Add policy</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/policy-drawer/policy-drawer.component.html</context>
-          <context context-type="linenumber">7,9</context>
+          <context context-type="linenumber">7,10</context>
         </context-group>
       </trans-unit>
       <trans-unit id="iam.policies.policy-drawer.policy-name-cannot-be-empty" datatype="html">
         <source>Policy name cannot be empty</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/policy-drawer/policy-drawer.component.html</context>
-          <context context-type="linenumber">15</context>
+          <context context-type="linenumber">20,22</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="iam.policies.policy-drawer.policy-name-unavailable" datatype="html">
+        <source>This policy name is not available</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/policy-drawer/policy-drawer.component.html</context>
+          <context context-type="linenumber">23,26</context>
         </context-group>
       </trans-unit>
       <trans-unit id="org.project.projectNameMandatory" datatype="html">
@@ -5212,7 +5125,7 @@
         <source>This operation cannot be reverted, are you sure to remove it?</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/props-drawer/props-drawer.component.html</context>
-          <context context-type="linenumber">96</context>
+          <context context-type="linenumber">96,97</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
@@ -5338,7 +5251,7 @@
         <source>URL</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-agent-modal/relay-proxy-agent-modal.component.html</context>
-          <context context-type="linenumber">20,21</context>
+          <context context-type="linenumber">20,22</context>
         </context-group>
       </trans-unit>
       <trans-unit id="relay-proxy.agent-modal.url-validation-message" datatype="html">
@@ -5520,7 +5433,7 @@
         <source>Action</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">119,120</context>
+          <context context-type="linenumber">119,121</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/actions-selector/actions-selector.component.html</context>
@@ -5602,11 +5515,11 @@
         <source>Edit</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">230,231</context>
+          <context context-type="linenumber">231</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/metrics/metrics.component.html</context>
-          <context context-type="linenumber">77,78</context>
+          <context context-type="linenumber">78</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.html</context>
@@ -5618,33 +5531,33 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/relay-proxies/index/index.component.html</context>
-          <context context-type="linenumber">95,96</context>
+          <context context-type="linenumber">96</context>
         </context-group>
       </trans-unit>
       <trans-unit id="relay-proxy.drawer.check-availability" datatype="html">
         <source>Check Availability</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">237,238</context>
+          <context context-type="linenumber">237,239</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">277,278</context>
+          <context context-type="linenumber">277,279</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.sync" datatype="html">
         <source>Sync</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">245,246</context>
+          <context context-type="linenumber">246</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">251,252</context>
+          <context context-type="linenumber">252</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">258,259</context>
+          <context context-type="linenumber">259</context>
         </context-group>
       </trans-unit>
       <trans-unit id="relay-proxy.drawer.sync-agent-not-allowed" datatype="html">
@@ -6116,7 +6029,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">404,405</context>
+          <context context-type="linenumber">404,406</context>
         </context-group>
       </trans-unit>
       <trans-unit id="integrations.webhooks.webhook-deliveries" datatype="html">
@@ -6160,7 +6073,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
-          <context context-type="linenumber">112,113</context>
+          <context context-type="linenumber">112,114</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.html</context>
@@ -6196,7 +6109,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.html</context>
-          <context context-type="linenumber">67,68</context>
+          <context context-type="linenumber">68</context>
         </context-group>
       </trans-unit>
       <trans-unit id="integrations.webhooks.url-validation-message" datatype="html">
@@ -6389,7 +6302,7 @@
         <source>Secret</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
-          <context context-type="linenumber">203,204</context>
+          <context context-type="linenumber">203,205</context>
         </context-group>
       </trans-unit>
       <trans-unit id="integrations.webhooks.secret-description" datatype="html">
@@ -6569,7 +6482,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">74,75</context>
+          <context context-type="linenumber">74,76</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.workspace-key-cannot-be-empty" datatype="html">
@@ -6811,14 +6724,14 @@
         <source>URL</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
-          <context context-type="linenumber">32,33</context>
+          <context context-type="linenumber">33</context>
         </context-group>
       </trans-unit>
       <trans-unit id="name" datatype="html">
         <source>Name</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
-          <context context-type="linenumber">42,43</context>
+          <context context-type="linenumber">43</context>
         </context-group>
       </trans-unit>
       <trans-unit id="select-type" datatype="html">
@@ -7093,7 +7006,7 @@
         <source>Check experiment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/overview/overview.component.html</context>
-          <context context-type="linenumber">126,128</context>
+          <context context-type="linenumber">126,129</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
@@ -7158,7 +7071,7 @@
         <source>Flag does not exist</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.html</context>
-          <context context-type="linenumber">148,150</context>
+          <context context-type="linenumber">149,151</context>
         </context-group>
         <note priority="1" from="description">ff.compare.flag-not-exist</note>
       </trans-unit>
@@ -7166,21 +7079,21 @@
         <source>Copy Now?</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.html</context>
-          <context context-type="linenumber">150,151</context>
+          <context context-type="linenumber">151,153</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.compare.no-difference" datatype="html">
         <source>No Difference</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.html</context>
-          <context context-type="linenumber">161,163</context>
+          <context context-type="linenumber">162,164</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.any" datatype="html">
         <source>Any</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.ts</context>
-          <context context-type="linenumber">168</context>
+          <context context-type="linenumber">175</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/resources-selector/resources-selector.component.html</context>
@@ -7191,7 +7104,7 @@
         <source>difference</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.ts</context>
-          <context context-type="linenumber">209</context>
+          <context context-type="linenumber">216</context>
         </context-group>
         <note priority="1" from="description">common.difference</note>
       </trans-unit>
@@ -7199,7 +7112,7 @@
         <source>differences</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.ts</context>
-          <context context-type="linenumber">210</context>
+          <context context-type="linenumber">217</context>
         </context-group>
         <note priority="1" from="description">common.differences</note>
       </trans-unit>
@@ -7416,14 +7329,14 @@
         <source>Please click here to create experiments.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">12,14</context>
+          <context context-type="linenumber">12,15</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.expt.set-data-filtering" datatype="html">
         <source>Data filter</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">23,24</context>
+          <context context-type="linenumber">23,25</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.custom-event" datatype="html">
@@ -7514,7 +7427,7 @@
         <source>Need more data to confirm the results of the experiment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">149,150</context>
+          <context context-type="linenumber">149,151</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.expt.result-not-significant" datatype="html">
@@ -8135,7 +8048,7 @@
         <source>Filter by tags</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
-          <context context-type="linenumber">20,21</context>
+          <context context-type="linenumber">20,22</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.idx.filter-by-status" datatype="html">
@@ -8566,7 +8479,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/test-app/test-app.component.html</context>
-          <context context-type="linenumber">45,46</context>
+          <context context-type="linenumber">45,47</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.next" datatype="html">
@@ -8736,7 +8649,14 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.ts</context>
-          <context context-type="linenumber">135</context>
+          <context context-type="linenumber">150</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.copy" datatype="html">
+        <source>Copy</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.html</context>
+          <context context-type="linenumber">7,8</context>
         </context-group>
       </trans-unit>
       <trans-unit id="iam.policies.details.flag-rbac-license-description" datatype="html">
@@ -8768,14 +8688,14 @@
         <source>Make sure resource and operation are set for all permissions</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.ts</context>
-          <context context-type="linenumber">141</context>
+          <context context-type="linenumber">156</context>
         </context-group>
       </trans-unit>
       <trans-unit id="iam.policies.details.resource" datatype="html">
         <source>Resource</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/resources-selector/resources-selector.component.html</context>
-          <context context-type="linenumber">4,5</context>
+          <context context-type="linenumber">4,6</context>
         </context-group>
       </trans-unit>
       <trans-unit id="iam.policies.details.when-resource-type-is" datatype="html">
@@ -8857,11 +8777,11 @@
         <source>Team</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/groups/details/details.component.html</context>
-          <context context-type="linenumber">7,8</context>
+          <context context-type="linenumber">8</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/policies/details/details.component.html</context>
-          <context context-type="linenumber">13,14</context>
+          <context context-type="linenumber">14</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.policies" datatype="html">
@@ -9202,7 +9122,7 @@
         <source>Add</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.html</context>
-          <context context-type="linenumber">11,12</context>
+          <context context-type="linenumber">11,13</context>
         </context-group>
       </trans-unit>
       <trans-unit id="iam.team.idx.group" datatype="html">
@@ -9237,7 +9157,7 @@
         <source>Remove from Organization</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.html</context>
-          <context context-type="linenumber">79,80</context>
+          <context context-type="linenumber">79,81</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.remove-from-workspace-confirm" datatype="html">
@@ -9286,11 +9206,11 @@
         <source>View</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.html</context>
-          <context context-type="linenumber">101,103</context>
+          <context context-type="linenumber">102,103</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/relay-proxies/index/index.component.html</context>
-          <context context-type="linenumber">110,112</context>
+          <context context-type="linenumber">111,112</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.activate" datatype="html">
@@ -9845,7 +9765,7 @@
         <source>License</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/license/license.component.html</context>
-          <context context-type="linenumber">10,11</context>
+          <context context-type="linenumber">11</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/license/license.component.html</context>
@@ -10064,7 +9984,7 @@
         <source>Password must be at least 6 characters</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/profile/profile.component.html</context>
-          <context context-type="linenumber">55,57</context>
+          <context context-type="linenumber">55,58</context>
         </context-group>
       </trans-unit>
       <trans-unit id="org.profile.confirm-password" datatype="html">
