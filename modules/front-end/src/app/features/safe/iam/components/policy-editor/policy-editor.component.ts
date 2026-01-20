@@ -100,6 +100,8 @@ class PolicyStatementViewModel {
 })
 export class PolicyEditorComponent {
 
+  cloneVisible: boolean = false;
+
   resourcesTypes: ResourceType[] = resourcesTypes;
   statements: PolicyStatementViewModel[] = [];
   readonly: boolean; // true if SysManaged
@@ -118,30 +120,14 @@ export class PolicyEditorComponent {
   @Output()
   saveStatementsEvent = new EventEmitter<IPolicyStatement[]>();
 
-  private _policy: IPolicy;
+  policy: IPolicy;
   @Input('policy')
-  set _(policy: IPolicy) {
-    if (policy) {
-      this._policy = deepCopy(policy);
-      this.readonly = policy.type === PolicyTypeEnum.SysManaged;
-      this.statements = policy.statements.map(statement => new PolicyStatementViewModel(statement));
+  set _(data: IPolicy) {
+    if (data) {
+      this.policy = deepCopy(data);
+      this.readonly = data.type === PolicyTypeEnum.SysManaged;
+      this.statements = data.statements.map(statement => new PolicyStatementViewModel(statement));
     }
-  }
-
-  copyPolicy() {
-    const { name, description, statements } = this._policy;
-
-    this.policyService.create(`${name}_copy`, 'TODO', description).subscribe(
-      (p: IPolicy) => {
-        this.policyService.updateStatements(p.id, statements).subscribe(() => {
-          this.message.success($localize `:@@common.copy-success:Copied`);
-          this.router.navigateByUrl(`/iam/policies/${encodeURIComponentFfc(p.id)}/permission`);
-        }, _ => this.message.error($localize `:@@common.operation-failed:Operation failed`));
-      },
-      _ => {
-        this.message.success($localize `:@@common.operation-failed:Operation failed`);
-      }
-    )
   }
 
   saveStatements() {

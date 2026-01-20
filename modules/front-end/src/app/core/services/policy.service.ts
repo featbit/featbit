@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from "@angular/common/http";
 import { environment } from "src/environments/environment";
 import { Observable, of } from "rxjs";
 import {
+  ClonePolicyPayload,
   IPagedPolicy,
   IPagedPolicyGroup,
   IPagedPolicyMember,
@@ -49,6 +50,11 @@ export class PolicyService {
 
   create(name: string, key: string, description: string): Observable<IPolicy> {
     return this.http.post<IPolicy>(this.baseUrl, { name: name, key: key, description: description });
+  }
+
+  clone(originPolicyKey: string, payload: ClonePolicyPayload) {
+    const url = `${this.baseUrl}/clone/${originPolicyKey}`;
+    return this.http.post<IPolicy>(url, payload);
   }
 
   updateSetting(policy: IPolicy): Observable<IPolicy> {

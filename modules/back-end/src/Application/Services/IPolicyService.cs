@@ -8,6 +8,8 @@ public interface IPolicyService : IService<Policy>
 {
     Task DeleteAsync(Guid id);
 
+    Task<Policy> GetAsync(Guid orgId, string key);
+
     Task<PagedResult<Policy>> GetListAsync(Guid organizationId, PolicyFilter filter);
 
     Task<PagedResult<PolicyGroup>> GetGroupsAsync(Guid organizationId, Guid policyId, PolicyGroupFilter filter);

@@ -44,4 +44,21 @@ public class Policy : AuditedEntity
 
         UpdatedAt = DateTime.UtcNow;
     }
+    
+    public Policy Clone(string name, string key, string description)
+    {
+        // clear id
+        Id = Guid.Empty;
+
+        Name = name;
+        Key = key;
+        Description = description;
+
+        // change audited properties
+        var now = DateTime.UtcNow;
+        CreatedAt = now;
+        CreatedAt = now;
+
+        return this;
+    }
 }

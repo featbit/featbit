@@ -1,3 +1,4 @@
+using Application.Bases.Exceptions;
 using Application.Bases.Models;
 using Application.Policies;
 using Domain.Groups;
@@ -11,6 +12,18 @@ namespace Infrastructure.Services.EntityFrameworkCore;
 
 public class PolicyService(AppDbContext dbContext) : EntityFrameworkCoreService<Policy>(dbContext), IPolicyService
 {
+    public async Task<Policy> GetAsync(Guid orgId, string key)
+    {
+        var policy = await FindOneAsync(x => x.OrganizationId == orgId && x.Key == key);
+        if (policy == null)
+        {
+            throw new EntityNotFoundException(nameof(Policy), $"{orgId}-{key}");
+        }
+
+        return policy;
+    }
+
+    
     public async Task DeleteAsync(Guid id)
     {
         // delete policy

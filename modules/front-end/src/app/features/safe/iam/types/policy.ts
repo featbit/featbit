@@ -101,3 +101,9 @@ export enum PolicyTypeEnum {
   SysManaged = 'SysManaged',
   CustomerManaged = 'CustomerManaged'
 }
+
+export type ClonePolicyPayload = {
+  name: string;
+  key: string;
+  description: string;
+}

@@ -53,7 +53,17 @@ public class PolicyController : ApiControllerBase
         var policy = await Mediator.Send(request);
         return Ok(policy);
     }
+    
+    [HttpPost("clone/{key}")]
+    public async Task<ApiResponse<PolicyVm>> CloneAsync(string key, ClonePolicy request)
+    {
+        request.OrgId = OrgId;
+        request.OriginPolicyKey = key;
 
+        var policy = await Mediator.Send(request);
+        return Ok(policy);
+    }
+    
     [HttpPut("{policyId:guid}/settings")]
     public async Task<ApiResponse<PolicyVm>> UpdateSettingAsync(Guid policyId, UpdatePolicySetting request)
     {

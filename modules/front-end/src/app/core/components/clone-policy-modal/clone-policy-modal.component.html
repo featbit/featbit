@@ -1,0 +1,101 @@
+<nz-modal
+  nzClassName="clone-policy-modal"
+  [nzVisible]="visible"
+  [nzCentered]="true"
+  nzTitle="Clone Policy"
+  i18n-nzTitle="@@ff.clone-policy.title"
+  [nzWidth]="620"
+  [nzContent]="content"
+  [nzFooter]="footer"
+  (nzOnCancel)="onClose(false)">
+  <ng-template #content>
+    <div class="policy-to-clone">
+      <span class="label" i18n="@@iam.policy-to-copy">Policy to copy:</span>
+      <span>{{policy?.name}}</span>
+    </div>
+
+    <form nz-form [formGroup]="form" nzLayout="vertical">
+      <div class="name-key-wrapper">
+        <!--  Name  -->
+        <nz-form-item>
+          <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>
+          <nz-form-control
+            nzHasFeedback
+            nzErrorTip="Name cannot be empty"
+            i18n-nzErrorTip="@@common.name-cannot-be-empty">
+            <input
+              nz-input
+              formControlName="name"
+              placeholder="Name"
+              i18n-placeholder="@@common.name"
+            />
+          </nz-form-control>
+        </nz-form-item>
+
+        <!--  Key  -->
+        <nz-form-item>
+          <nz-form-label
+            nzRequired
+            i18n-nzTooltipTitle="@@common.key-input-description"
+            nzTooltipTitle="We use the key to give you friendly URLs & RNs. Keys should only contain letters, numbers, ., _ or -.">
+            Key
+          </nz-form-label>
+          <nz-form-control
+            nzHasFeedback
+            nzValidatingTip="Validating..."
+            i18n-nzValidatingTip="@@common.validating"
+            [nzErrorTip]="keyErrorTpl">
+            <input
+              nz-input
+              formControlName="key"
+              placeholder="Key can be auto-generated from name"
+              i18n-placeholder="@@common.key-generated-from-name"/>
+            <ng-template #keyErrorTpl let-control>
+              @if (control.hasError('required')) {
+                <ng-container i18n="@@common.key-cannot-be-empty">Key cannot be empty</ng-container>
+              }
+              @if (control.hasError('pattern')) {
+                <ng-container i18n="@@common.key-format-error">Only allow letters, numbers, '.', '_' or '-'</ng-container>
+              }
+              @if (control.hasError('duplicated')) {
+                <ng-container i18n="@@common.key-has-been-used">This key has been used</ng-container>
+              }
+              @if (control.hasError('unknown')) {
+                <ng-container i18n="@@common.key-validation-failed">Key validation failed</ng-container>
+              }
+            </ng-template>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
+      <!--  Description  -->
+      <nz-form-item>
+        <nz-form-label i18n="@@common.description">Description</nz-form-label>
+        <nz-form-control
+          nzHasFeedback
+          nzErrorTip="Cannot exceed 512 characters"
+          i18n-nzErrorTip="@@common.description.cannot-exceed-512-characters">
+          <textarea
+            nz-input
+            formControlName="description"
+            placeholder="Description"
+            i18n-placeholder="@@common.description">
+          </textarea>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </ng-template>
+
+  <ng-template #footer>
+    <div class="actions">
+      <button nz-button nzType="default" (click)="onClose()" i18n="@@common.cancel">Cancel</button>
+      <button
+        nz-button
+        nzType="primary"
+        [disabled]="!form.valid"
+        [nzLoading]="isCloning"
+        (click)="doClone()"
+        i18n="@@common.clone">Clone</button>
+    </div>
+  </ng-template>
+</nz-modal>
