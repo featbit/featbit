@@ -16,6 +16,18 @@ public class ClonePolicy : IRequest<PolicyVm>
     public string Description { get; set; }
 }
 
+public class ClonePolicyValidator : AbstractValidator<ClonePolicy>
+{
+    public ClonePolicyValidator()
+    {
+        RuleFor(x => x.Name)
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("name"));
+        
+        RuleFor(x => x.Key)
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("key"));
+    }
+}
+
 public class ClonePolicyHandler(
     IPolicyService policyService,
     IMapper _mapper)

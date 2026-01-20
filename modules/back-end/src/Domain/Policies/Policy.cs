@@ -57,7 +57,7 @@ public class Policy : AuditedEntity
         // change audited properties
         var now = DateTime.UtcNow;
         CreatedAt = now;
-        CreatedAt = now;
+        UpdatedAt = now;
 
         return this;
     }

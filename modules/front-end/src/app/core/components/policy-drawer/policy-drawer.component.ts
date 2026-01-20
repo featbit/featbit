@@ -3,7 +3,6 @@ import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import {debounceTime, first, map, switchMap} from "rxjs/operators";
 import { PolicyService } from "@services/policy.service";
-import { FlagKeyPattern } from "@features/safe/feature-flags/types/feature-flag";
 import { slugify } from "@utils/index";
 
 @Component({
@@ -50,8 +49,8 @@ export class PolicyDrawerComponent implements OnInit {
   keyAsyncValidator = (control: FormControl) => control.valueChanges.pipe(
     debounceTime(300),
     switchMap(value => this.policyService.isKeyUsed(value as string)),
-    map(isNameUsed => {
-      switch (isNameUsed) {
+    map(isUsed => {
+      switch (isUsed) {
         case true:
           return { error: true, duplicated: true };
         case undefined:

@@ -65,8 +65,8 @@ export class ClonePolicyModalComponent {
   keyAsyncValidator = (control: FormControl) => control.valueChanges.pipe(
     debounceTime(300),
     switchMap(value => this.policyService.isKeyUsed(value as string)),
-    map(isNameUsed => {
-      switch (isNameUsed) {
+    map(isUsed => {
+      switch (isUsed) {
         case true:
           return { error: true, duplicated: true };
         case undefined:
