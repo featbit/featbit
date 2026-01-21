@@ -4119,7 +4119,7 @@
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
           <context context-type="linenumber">26,27</context>
         </context-group>
-        <target></target>
+        <target>许可证已过期</target>
       </trans-unit>
       <trans-unit id="common.license-expiring-soon" datatype="html">
         <source>Expiring in <x id="INTERPOLATION" equiv-text="{{ license.getDaysUntilExpiration() }}"/> days</source>
@@ -4127,7 +4127,7 @@
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
           <context context-type="linenumber">29,30</context>
         </context-group>
-        <target></target>
+        <target>将在 <x id="INTERPOLATION" equiv-text="{{ license.getDaysUntilExpiration() }}"/> 天后过期</target>
       </trans-unit>
       <trans-unit id="common.current-plan" datatype="html">
         <source>Current Plan</source>
@@ -4135,7 +4135,7 @@
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
           <context context-type="linenumber">32,33</context>
         </context-group>
-        <target></target>
+        <target>当前订阅</target>
       </trans-unit>
       <trans-unit id="common.upgrade-now" datatype="html">
         <source>Upgrade Now</source>
@@ -4143,7 +4143,7 @@
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
           <context context-type="linenumber">36,37</context>
         </context-group>
-        <target></target>
+        <target>现在升级</target>
       </trans-unit>
       <trans-unit id="common.get-enterprise" datatype="html">
         <source>Get Enterprise</source>
@@ -4151,7 +4151,7 @@
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
           <context context-type="linenumber">37,40</context>
         </context-group>
-        <target></target>
+        <target>获取企业版</target>
       </trans-unit>
       <trans-unit id="common.organization" datatype="html">
         <source>Organization</source>
