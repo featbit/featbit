@@ -12,18 +12,6 @@ namespace Infrastructure.Services.EntityFrameworkCore;
 
 public class PolicyService(AppDbContext dbContext) : EntityFrameworkCoreService<Policy>(dbContext), IPolicyService
 {
-    public async Task<Policy> GetAsync(Guid orgId, string key)
-    {
-        var policy = await FindOneAsync(x => x.OrganizationId == orgId && x.Key == key);
-        if (policy == null)
-        {
-            throw new EntityNotFoundException(nameof(Policy), $"{orgId}-{key}");
-        }
-
-        return policy;
-    }
-
-    
     public async Task DeleteAsync(Guid id)
     {
         // delete policy
@@ -34,6 +22,17 @@ public class PolicyService(AppDbContext dbContext) : EntityFrameworkCoreService<
 
         // delete policy members
         await SetOf<MemberPolicy>().Where(x => x.PolicyId == id).ExecuteDeleteAsync();
+    }
+
+    public async Task<Policy> GetAsync(Guid organizationId, string key)
+    {
+        var policy = await FindOneAsync(x => x.OrganizationId == organizationId && x.Key == key);
+        if (policy == null)
+        {
+            throw new EntityNotFoundException(nameof(Policy), $"{organizationId}-{key}");
+        }
+
+        return policy;
     }
 
     public async Task<PagedResult<Policy>> GetListAsync(Guid organizationId, PolicyFilter filter)
@@ -166,7 +165,7 @@ public class PolicyService(AppDbContext dbContext) : EntityFrameworkCoreService<
 
         return new PagedResult<PolicyMember>(totalCount, vms);
     }
-    
+
     public async Task<bool> IsKeyUsedAsync(Guid organizationId, string key)
     {
         return await AnyAsync(x =>

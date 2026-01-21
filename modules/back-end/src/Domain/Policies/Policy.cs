@@ -5,7 +5,7 @@ public class Policy : AuditedEntity
     public Guid? OrganizationId { get; set; }
 
     public string Name { get; set; }
-    
+
     public string Key { get; set; }
 
     public string Description { get; set; }
@@ -44,7 +44,7 @@ public class Policy : AuditedEntity
 
         UpdatedAt = DateTime.UtcNow;
     }
-    
+
     public Policy Clone(string name, string key, string description)
     {
         // clear id

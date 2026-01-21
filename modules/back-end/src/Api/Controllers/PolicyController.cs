@@ -31,7 +31,7 @@ public class PolicyController : ApiControllerBase
         var policies = await Mediator.Send(request);
         return Ok(policies);
     }
-    
+
     [HttpGet("is-key-used")]
     public async Task<ApiResponse<bool>> IsKeyUsedAsync(string key)
     {
@@ -53,7 +53,7 @@ public class PolicyController : ApiControllerBase
         var policy = await Mediator.Send(request);
         return Ok(policy);
     }
-    
+
     [HttpPost("clone/{key}")]
     public async Task<ApiResponse<PolicyVm>> CloneAsync(string key, ClonePolicy request)
     {
@@ -63,7 +63,7 @@ public class PolicyController : ApiControllerBase
         var policy = await Mediator.Send(request);
         return Ok(policy);
     }
-    
+
     [HttpPut("{policyId:guid}/settings")]
     public async Task<ApiResponse<PolicyVm>> UpdateSettingAsync(Guid policyId, UpdatePolicySetting request)
     {

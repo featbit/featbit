@@ -28,24 +28,22 @@ public class ClonePolicyValidator : AbstractValidator<ClonePolicy>
     }
 }
 
-public class ClonePolicyHandler(
-    IPolicyService policyService,
-    IMapper _mapper)
+public class ClonePolicyHandler(IPolicyService service, IMapper mapper)
     : IRequestHandler<ClonePolicy, PolicyVm>
 {
     public async Task<PolicyVm> Handle(ClonePolicy request, CancellationToken cancellationToken)
     {
-        var hasKeyBeenUsed = await policyService.IsKeyUsedAsync(request.OrgId, request.Key);
+        var hasKeyBeenUsed = await service.IsKeyUsedAsync(request.OrgId, request.Key);
         if (hasKeyBeenUsed)
         {
             throw new BusinessException(ErrorCodes.KeyHasBeenUsed);
         }
 
-        var policyToClone = await policyService.GetAsync(request.OrgId, request.OriginPolicyKey);
+        var policyToClone = await service.GetAsync(request.OrgId, request.OriginPolicyKey);
 
         var clonedPolicy = policyToClone.Clone(request.Name, request.Key, request.Description);
-        await policyService.AddOneAsync(clonedPolicy);
+        await service.AddOneAsync(clonedPolicy);
 
-        return _mapper.Map<PolicyVm>(clonedPolicy);
+        return mapper.Map<PolicyVm>(clonedPolicy);
     }
 }
