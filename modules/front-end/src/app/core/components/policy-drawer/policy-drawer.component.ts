@@ -1,7 +1,7 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import {debounceTime, first, map, switchMap} from "rxjs/operators";
+import { debounceTime, finalize, first, map, switchMap } from "rxjs/operators";
 import { PolicyService } from "@services/policy.service";
 import { slugify } from "@utils/index";
 
@@ -62,28 +62,19 @@ export class PolicyDrawerComponent implements OnInit {
     first()
   );
 
-  isLoading: boolean = false;
+  isAdding: boolean = false;
   doSubmit() {
-    if (this.form.invalid) {
-      for (const i in this.form.controls) {
-        this.form.controls[i].markAsDirty();
-        this.form.controls[i].updateValueAndValidity();
-      }
-      return;
-    }
-
-    this.isLoading = true;
-    const {name, key, description} = this.form.value;
-    this.policyService.create(name, key, description).subscribe({
+    this.isAdding = true;
+    const { name, key, description } = this.form.value;
+    this.policyService.create(name, key, description)
+    .pipe(finalize(() => this.isAdding = false))
+    .subscribe({
       next: () => {
-        this.isLoading = false;
         this.close.emit(true);
-        this.message.success($localize `:@@common.operation-success:Operation succeeded`);
+        this.message.success($localize`:@@common.operation-success:Operation succeeded`);
         this.form.reset();
       },
-      error: _ => {
-        this.isLoading = false;
-      }
+      error: () => this.message.error($localize`:@@common.operation-failed:Operation failed`)
     })
   }
 }

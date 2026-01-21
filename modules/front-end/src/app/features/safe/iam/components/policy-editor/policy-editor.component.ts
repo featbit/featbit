@@ -109,10 +109,8 @@ export class PolicyEditorComponent {
   isFineGrainedAccessControlGranted: boolean = false;
 
   constructor(
-    private router: Router,
     private message: NzMessageService,
-    private policyService: PolicyService,
-    private permissionLicenseService: PermissionLicenseService
+    permissionLicenseService: PermissionLicenseService
   ) {
     this.isFineGrainedAccessControlGranted = permissionLicenseService.isGrantedByLicense(LicenseFeatureEnum.FineGrainedAccessControl);
   }

@@ -89,7 +89,6 @@ export class ClonePolicyModalComponent {
   }
 
   isCloning: boolean = false;
-
   doClone() {
     this.isCloning = true;
     const payload = this.form.value;
@@ -100,7 +99,7 @@ export class ClonePolicyModalComponent {
         this.onClose(true);
 
         // navigate to the new policy detail page
-        this.router.navigate(['/iam/policies', encodeURIComponentFfc(res.id), 'permission']).then();
+        this.router.navigate(['/iam/policies', res.id, 'permission']).then();
       },
       error: () => {
         this.messageService.error($localize`:@@common.operation-failed:Operation failed`);
