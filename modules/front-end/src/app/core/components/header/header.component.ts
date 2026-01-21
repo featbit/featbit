@@ -16,7 +16,6 @@ import { copyToClipboard } from '@utils/index';
 import { EnvService } from '@core/services/env.service';
 import { getCurrentLicense, getCurrentOrganization, getCurrentProjectEnv } from "@utils/project-env";
 import { BroadcastService } from "@services/broadcast.service";
-import { Router } from "@angular/router";
 
 @Component({
     selector: 'app-header',
@@ -29,7 +28,10 @@ export class HeaderComponent implements OnInit {
 
   currentProjectEnv: IProjectEnv;
   currentOrganization: IOrganization;
+
   license: License;
+  isLicenseExpired: boolean = false;
+  isLicenseExpiring: boolean = false;
 
   allProjects: IProject[] = [];
   selectedProject: IProject;
@@ -48,13 +50,16 @@ export class HeaderComponent implements OnInit {
     private breadcrumbService: BreadcrumbService,
     private messageQueueService: MessageQueueService,
     private envService: EnvService,
-    private broadcastService: BroadcastService,
-    private router: Router
+    private broadcastService: BroadcastService
   ) {
     this.breadcrumbs$ = breadcrumbService.breadcrumbs$;
   }
 
   async ngOnInit() {
+    this.license = getCurrentLicense();
+    this.isLicenseExpired = this.license?.isExpired() ?? false;
+    this.isLicenseExpiring = this.license?.isExpiringSoon() ?? false;
+
     this.setSelectedProjectEnv();
     await this.setAllProjects();
 
@@ -137,7 +142,6 @@ export class HeaderComponent implements OnInit {
   private setSelectedProjectEnv() {
     this.currentOrganization = getCurrentOrganization();
     this.currentProjectEnv = getCurrentProjectEnv();
-    this.license = getCurrentLicense();
 
     this.setCurrentEnv();
 
@@ -154,10 +158,6 @@ export class HeaderComponent implements OnInit {
 
   private async setAllProjects() {
     this.allProjects = await this.projectService.getListAsync();
-  }
-
-  navigateToWorkspace() {
-    this.router.navigateByUrl('/workspace/license').then();
   }
 
   // copy environment key

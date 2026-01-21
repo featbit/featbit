@@ -8,16 +8,24 @@
   </nz-breadcrumb>
 
   <div class="header-btns">
-    <div (click)="navigateToWorkspace()" class="license-badge" [ngClass]="{'license-expiring': license.isExpiringSoon(), 'license-expired': license.isExpired()}">
+    <div
+      [routerLink]="['/workspace/license']"
+      class="license-badge"
+      [ngClass]="{
+        'license-expiring': isLicenseExpiring,
+        'license-expired': isLicenseExpired,
+        'license-active': license.data && !isLicenseExpired && !isLicenseExpiring
+      }"
+    >
       <div class="badge-icon">
         <i nz-icon nzType="icons:icon-medal"></i>
       </div>
       <div class="badge-content">
         @if (license.data) {
-          @if (license.isExpired()) {
+          @if (isLicenseExpired) {
             <span class="badge-label badge-warning" i18n="@@common.license-expired">License Expired</span>
             <span class="badge-plan">{{ license.data?.plan }}</span>
-          } @else if (license.isExpiringSoon()) {
+          } @else if (isLicenseExpiring) {
             <span class="badge-label badge-warning" i18n="@@common.license-expiring-soon">Expiring in {{ license.getDaysUntilExpiration() }} days</span>
             <span class="badge-plan">{{ license.data?.plan }}</span>
           } @else {
@@ -57,8 +65,11 @@
             </div>
           </div>
           <div class="selector-divider"></div>
-          <div class="selector-item" (click)="envModalVisible=true" 
-               nz-popover i18n-nz-popover="@@common.env-secret" nzPopoverTitle="Environment Secrets"
+          <div class="selector-item" (click)="envModalVisible=true"
+               nz-popover
+               i18n-nz-popover="@@common.env-secret"
+               nzPopoverTitle="Environment Secrets"
+               nzPopoverPlacement="bottomLeft"
                [nzPopoverContent]="environmentSecretContent"
                nzPopoverOverlayClassName="env-secret-popover">
             <div class="item-icon env-icon">

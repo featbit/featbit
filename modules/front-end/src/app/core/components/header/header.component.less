@@ -26,7 +26,7 @@
   background: @white;
   border: 2px solid @grey20-color;
   border-radius: 12px;
-  padding: 8px 16px;
+  padding: 4px 8px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 
@@ -145,44 +145,6 @@ i:hover {
   color: @green70-color;
 }
 
-.bash-board-link {
-  padding-left: 5px;
-}
-
-.switch-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  background: linear-gradient(135deg, @green60-color 0%, @green70-color 100%);
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 8px rgba(60, 199, 152, 0.2);
-
-  i {
-    font-size: 20px;
-    color: @white;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(60, 199, 152, 0.3);
-    background: linear-gradient(135deg, @green50-color 0%, @green60-color 100%);
-
-    i {
-      transform: rotate(180deg);
-    }
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
-}
-
 .project-envs {
   display: flex;
   gap: 32px;
@@ -234,14 +196,14 @@ i:hover {
     display: flex;
     align-items: center;
     gap: 12px;
-    background: linear-gradient(135deg, #FFF9E6 0%, #FFF4E0 100%);
-    border: 2px solid @yellow55-color;
+    background: linear-gradient(135deg, @grey5-color 0%, @grey10-color 100%);
+    border: 2px solid @grey30-color;
     border-radius: 12px;
     padding: 8px 12px;
     cursor: pointer;
     margin-right: 12px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 2px 8px rgba(250, 173, 20, 0.15);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     position: relative;
     overflow: hidden;
 
@@ -252,14 +214,14 @@ i:hover {
       left: -100%;
       width: 100%;
       height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
       transition: left 0.6s;
     }
 
     &:hover {
       transform: translateY(-2px);
-      box-shadow: 0 4px 16px rgba(250, 173, 20, 0.25);
-      border-color: @yellow5-color;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+      border-color: @grey40-color;
 
       &::before {
         left: 100%;
@@ -278,9 +240,9 @@ i:hover {
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 36px;
-      height: 36px;
-      background: linear-gradient(135deg, @yellow55-color 0%, @yellow5-color 100%);
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, @grey40-color 0%, @grey50-color 100%);
       border-radius: 8px;
       flex-shrink: 0;
 
@@ -298,7 +260,7 @@ i:hover {
       min-width: 100px;
 
       .badge-label {
-        font-size: 11px;
+        font-size: 10px;
         font-weight: 500;
         line-height: 1;
         color: @grey60-color;
@@ -307,7 +269,7 @@ i:hover {
       }
 
       .badge-plan {
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 700;
         line-height: 1.2;
         color: @grey90-color;
@@ -323,8 +285,28 @@ i:hover {
 
       i {
         font-size: 14px;
-        color: @yellow55-color;
+        color: @grey50-color;
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+    }
+
+    // Active license state
+    &.license-active {
+      background: linear-gradient(135deg, @green5-color 0%, lighten(@green5-color, 2%) 100%);
+      border-color: @green50-color;
+      box-shadow: 0 2px 8px rgba(60, 199, 152, 0.15);
+
+      &:hover {
+        box-shadow: 0 4px 16px rgba(60, 199, 152, 0.3);
+        border-color: @green60-color;
+      }
+
+      .badge-icon {
+        background: linear-gradient(135deg, @green60-color 0%, @green70-color 100%);
+      }
+
+      .badge-arrow i {
+        color: @green60-color;
       }
     }
 
