@@ -116,6 +116,7 @@ export interface ILicense {
   metadata?: any
 }
 
+const LICENSE_EXPIRING_DAYS_THRESHOLD = 30;
 export class License {
   data: ILicense;
   constructor(licenseStr: string) {
@@ -135,7 +136,6 @@ export class License {
   }
 
   isExpiringSoon(): boolean {
-    const EXPIRING_DAYS_THRESHOLD = 30;
     if (!this.data || !this.data.exp) {
       return false;
     }
@@ -144,7 +144,7 @@ export class License {
     const expirationDate = this.data.exp;
     const daysUntilExpiration = (expirationDate - now) / (1000 * 60 * 60 * 24);
 
-    return daysUntilExpiration > 0 && daysUntilExpiration <= EXPIRING_DAYS_THRESHOLD;
+    return daysUntilExpiration > 0 && daysUntilExpiration <= LICENSE_EXPIRING_DAYS_THRESHOLD;
   }
 
   getDaysUntilExpiration(): number {

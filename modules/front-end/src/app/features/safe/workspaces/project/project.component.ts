@@ -149,7 +149,7 @@ export class ProjectComponent implements OnInit {
     // close after create project
     else if (data.project) {
       // insert the newly created project at the second position
-      this.projects.splice(1, 0, data.project);
+      this.projects = [this.projects[0], data.project, ...this.projects.slice(1)];
     }
 
     // emit project list change event
