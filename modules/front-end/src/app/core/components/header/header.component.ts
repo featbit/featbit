@@ -1,6 +1,5 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import {
-  IProfile,
   IOrganization,
   IProject,
   IEnvironment,
@@ -26,9 +25,6 @@ import { Router } from "@angular/router";
     standalone: false
 })
 export class HeaderComponent implements OnInit {
-
-  @Input() profile: IProfile;
-
   protected readonly SecretTypeEnum = SecretTypeEnum;
 
   currentProjectEnv: IProjectEnv;
