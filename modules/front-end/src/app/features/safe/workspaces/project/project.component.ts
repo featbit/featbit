@@ -44,12 +44,22 @@ export class ProjectComponent implements OnInit {
     private envSecretService: EnvSecretService,
     private messageService: NzMessageService,
     public permissionsService: PermissionsService
-  ) {
-  }
+  ) { }
 
   async ngOnInit() {
     this.currentProjectEnv = getCurrentProjectEnv();
     this.projects = await this.projectService.getListAsync();
+    this.sortProjects();
+  }
+
+  private sortProjects() {
+    // Move current project to the top
+    const currentProject = this.projects.find(p => p.id === this.currentProjectEnv?.projectId);
+    const otherProjects = this.projects.filter(p => p.id !== this.currentProjectEnv?.projectId);
+
+    if (currentProject) {
+      this.projects = [currentProject, ...otherProjects];
+    }
   }
 
   isCurrentProject(project: IProject): boolean {
@@ -138,8 +148,8 @@ export class ProjectComponent implements OnInit {
 
     // close after create project
     else if (data.project) {
-      // put the newly created project at the first place
-      this.projects.unshift(data.project);
+      // insert the newly created project at the second position
+      this.projects.splice(1, 0, data.project);
     }
 
     // emit project list change event
