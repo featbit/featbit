@@ -127,7 +127,9 @@ public class Segment : AuditedEntity
         }
 
         // if any rule match this user
-        return Rules.Any(rule => rule.Conditions.All(condition => condition.IsMatch(user)));
+        return Rules.Any(
+            rule => rule.Conditions.All(condition => condition.IsMatch(user))
+        );
     }
 
     public JsonObject SerializeAsEnvironmentSpecific(Guid? envId = null)
