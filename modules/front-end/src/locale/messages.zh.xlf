@@ -470,7 +470,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">100,101</context>
+          <context context-type="linenumber">139,140</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
@@ -978,15 +978,15 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/project/project.component.ts</context>
-          <context context-type="linenumber">250</context>
+          <context context-type="linenumber">260</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/project/project.component.ts</context>
-          <context context-type="linenumber">293</context>
+          <context context-type="linenumber">303</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/project/project.component.ts</context>
-          <context context-type="linenumber">313</context>
+          <context context-type="linenumber">323</context>
         </context-group>
         <target>操作失败，请重试</target>
       </trans-unit>
@@ -1006,7 +1006,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.ts</context>
-          <context context-type="linenumber">170</context>
+          <context context-type="linenumber">168</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/prism/prism.component.ts</context>
@@ -1074,7 +1074,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/project/project.component.ts</context>
-          <context context-type="linenumber">175</context>
+          <context context-type="linenumber">185</context>
         </context-group>
         <target>复制成功</target>
       </trans-unit>
@@ -1858,7 +1858,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.ts</context>
-          <context context-type="linenumber">84</context>
+          <context context-type="linenumber">74</context>
         </context-group>
         <target>计划变更</target>
       </trans-unit>
@@ -1894,7 +1894,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.ts</context>
-          <context context-type="linenumber">86</context>
+          <context context-type="linenumber">76</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
@@ -2002,7 +2002,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">99,100</context>
+          <context context-type="linenumber">138,139</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
@@ -2801,7 +2801,7 @@
           <context context-type="sourcefile">src/app/core/components/clone-policy-modal/clone-policy-modal.component.html</context>
           <context context-type="linenumber">13,14</context>
         </context-group>
-        <target>待克隆的策略</target>
+        <target>待克隆的策略：</target>
       </trans-unit>
       <trans-unit id="common.key-input-description" datatype="html">
         <source>We use the key to give you friendly URLs &amp; RNs. Keys should only contain letters, numbers, ., _ or -.</source>
@@ -3509,7 +3509,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.ts</context>
-          <context context-type="linenumber">127</context>
+          <context context-type="linenumber">130</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.ts</context>
@@ -4245,19 +4245,95 @@
         </context-group>
         <target>或者</target>
       </trans-unit>
-      <trans-unit id="common.upgrade-to-enterprise" datatype="html">
-        <source>Upgrade to Enterprise</source>
+      <trans-unit id="common.license-expired" datatype="html">
+        <source>License Expired</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">15,17</context>
+          <context context-type="linenumber">26,27</context>
         </context-group>
-        <target>升级到企业版</target>
+        <target>许可证已过期</target>
+      </trans-unit>
+      <trans-unit id="common.license-expiring-soon" datatype="html">
+        <source>Expiring in <x id="INTERPOLATION" equiv-text="{{ daysUntilExpiration }}"/> days</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
+          <context context-type="linenumber">29,30</context>
+        </context-group>
+        <target>将在 <x id="INTERPOLATION" equiv-text="{{ daysUntilExpiration }}"/> 天后过期</target>
+      </trans-unit>
+      <trans-unit id="common.current-plan" datatype="html">
+        <source>Current Plan</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
+          <context context-type="linenumber">32,33</context>
+        </context-group>
+        <target>当前订阅</target>
+      </trans-unit>
+      <trans-unit id="common.upgrade-now" datatype="html">
+        <source>Upgrade Now</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
+          <context context-type="linenumber">36,37</context>
+        </context-group>
+        <target>现在升级</target>
+      </trans-unit>
+      <trans-unit id="common.get-enterprise" datatype="html">
+        <source>Get Enterprise</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
+          <context context-type="linenumber">37,40</context>
+        </context-group>
+        <target>获取企业版</target>
+      </trans-unit>
+      <trans-unit id="common.organization" datatype="html">
+        <source>Organization</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
+          <context context-type="linenumber">53,54</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/policy.ts</context>
+          <context context-type="linenumber">703</context>
+        </context-group>
+        <target>组织机构</target>
+      </trans-unit>
+      <trans-unit id="common.project" datatype="html">
+        <source>Project</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
+          <context context-type="linenumber">63,64</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
+          <context context-type="linenumber">57,58</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/onboarding/steps/steps.component.html</context>
+          <context context-type="linenumber">17,18</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/policy.ts</context>
+          <context context-type="linenumber">705</context>
+        </context-group>
+        <target>项目</target>
+      </trans-unit>
+      <trans-unit id="common.environment" datatype="html">
+        <source>Environment</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
+          <context context-type="linenumber">79,80</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/shared/policy.ts</context>
+          <context context-type="linenumber">707</context>
+        </context-group>
+        <target>环境</target>
       </trans-unit>
       <trans-unit id="common.server" datatype="html">
         <source>server</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">45,46</context>
+          <context context-type="linenumber">89,90</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
@@ -4277,7 +4353,7 @@
         <source>client</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">48,49</context>
+          <context context-type="linenumber">92,93</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
@@ -4297,7 +4373,7 @@
         <source>Change environment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">66,68</context>
+          <context context-type="linenumber">105,107</context>
         </context-group>
         <target>更改环境</target>
       </trans-unit>
@@ -4305,11 +4381,11 @@
         <source>Current</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">75,77</context>
+          <context context-type="linenumber">114,116</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">88,90</context>
+          <context context-type="linenumber">127,129</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/project/project.component.html</context>
@@ -4325,7 +4401,7 @@
         <source>Projects</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">80,81</context>
+          <context context-type="linenumber">119,120</context>
         </context-group>
         <target>项目</target>
       </trans-unit>
@@ -4333,7 +4409,7 @@
         <source>Environments</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">93,95</context>
+          <context context-type="linenumber">132,134</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
@@ -4537,7 +4613,7 @@
         <source>SSO</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.ts</context>
-          <context context-type="linenumber">82</context>
+          <context context-type="linenumber">72</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
@@ -4549,7 +4625,7 @@
         <source>Multiple Organization</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.ts</context>
-          <context context-type="linenumber">88</context>
+          <context context-type="linenumber">78</context>
         </context-group>
         <target>多机构</target>
       </trans-unit>
@@ -4557,7 +4633,7 @@
         <source>Global User</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.ts</context>
-          <context context-type="linenumber">90</context>
+          <context context-type="linenumber">80</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
@@ -4573,7 +4649,7 @@
         <source>Shareable Segment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.ts</context>
-          <context context-type="linenumber">92</context>
+          <context context-type="linenumber">82</context>
         </context-group>
         <target>共享用户组</target>
       </trans-unit>
@@ -4581,7 +4657,7 @@
         <source>Auto Agents</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.ts</context>
-          <context context-type="linenumber">94</context>
+          <context context-type="linenumber">84</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
@@ -4593,7 +4669,7 @@
         <source>Fine-grained Access Control</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.ts</context>
-          <context context-type="linenumber">96</context>
+          <context context-type="linenumber">86</context>
         </context-group>
         <target>细粒度访问控制</target>
       </trans-unit>
@@ -4601,7 +4677,7 @@
         <source>Flag Comparison</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.ts</context>
-          <context context-type="linenumber">98</context>
+          <context context-type="linenumber">88</context>
         </context-group>
         <target>开关对比</target>
       </trans-unit>
@@ -4609,7 +4685,7 @@
         <source>Failed to load license usage, please try again later!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.ts</context>
-          <context context-type="linenumber">144</context>
+          <context context-type="linenumber">134</context>
         </context-group>
         <target>加载许可证用量失败，请稍后再试</target>
       </trans-unit>
@@ -6737,22 +6813,6 @@
           <context context-type="linenumber">54,55</context>
         </context-group>
         <target>选择此 Webhook 应监视的环境。当事件在这些环境中发生时，将触发此 Webhook。</target>
-      </trans-unit>
-      <trans-unit id="common.project" datatype="html">
-        <source>Project</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
-          <context context-type="linenumber">57,58</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/onboarding/steps/steps.component.html</context>
-          <context context-type="linenumber">17,18</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">705</context>
-        </context-group>
-        <target>项目</target>
       </trans-unit>
       <trans-unit id="common.select-a-project" datatype="html">
         <source>Select a Project</source>
@@ -11211,7 +11271,7 @@
         <source>Environment successfully removed</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/project/project.component.ts</context>
-          <context context-type="linenumber">95</context>
+          <context context-type="linenumber">105</context>
         </context-group>
         <target>环境创建成功</target>
       </trans-unit>
@@ -11219,7 +11279,7 @@
         <source>Project successfully removed</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/project/project.component.ts</context>
-          <context context-type="linenumber">111</context>
+          <context context-type="linenumber">121</context>
         </context-group>
         <target>项目删除成功</target>
       </trans-unit>
@@ -11227,7 +11287,7 @@
         <source>Add secret</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/project/project.component.ts</context>
-          <context context-type="linenumber">199</context>
+          <context context-type="linenumber">209</context>
         </context-group>
         <target>添加秘钥</target>
       </trans-unit>
@@ -11235,7 +11295,7 @@
         <source>Edit secret: <x id="PH" equiv-text="secret.name"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/project/project.component.ts</context>
-          <context context-type="linenumber">225</context>
+          <context context-type="linenumber">235</context>
         </context-group>
         <target>编辑：<x id="PH" equiv-text="secret.name"/></target>
       </trans-unit>
@@ -11958,22 +12018,6 @@
           <context context-type="linenumber">670</context>
         </context-group>
         <target>管理中继代理</target>
-      </trans-unit>
-      <trans-unit id="common.organization" datatype="html">
-        <source>Organization</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">703</context>
-        </context-group>
-        <target>组织机构</target>
-      </trans-unit>
-      <trans-unit id="common.environment" datatype="html">
-        <source>Environment</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/shared/policy.ts</context>
-          <context context-type="linenumber">707</context>
-        </context-group>
-        <target>环境</target>
       </trans-unit>
       <trans-unit id="common.flag" datatype="html">
         <source>Flag</source>

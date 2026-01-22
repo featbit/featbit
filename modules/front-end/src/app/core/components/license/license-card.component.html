@@ -9,13 +9,13 @@
       <div class="license-status">
         <div class="license-plan" *ngIf="detail.plan">{{ detail.plan | titlecase }} Plan</div>
         <div class="status-badge"
-             [class.active]="detail.isActive()"
-             [class.warning]="detail.isExpiringSoon()"
-             [class.expired]="detail.isExpired()">
-          @if (detail.isExpired()) {
+             [class.active]="!detail.isExpiringSoon && !detail.isExpired"
+             [class.warning]="detail.isExpiringSoon"
+             [class.expired]="detail.isExpired">
+          @if (detail.isExpired) {
             <i nz-icon nzType="close-circle" nzTheme="outline"></i>
             <span i18n="@@license.expired">Expired</span>
-          } @else if (detail.isExpiringSoon()) {
+          } @else if (detail.isExpiringSoon) {
             <i nz-icon nzType="exclamation-circle" nzTheme="outline"></i>
             <span i18n="@@license.expiring-soon">Expiring Soon</span>
           } @else {
@@ -47,11 +47,11 @@
 
         <div class="info-item">
           <div class="info-label" i18n="@@license.exp">Expires At</div>
-          <div class="info-value" [class.warning]="detail.isExpiringSoon()" [class.expired]="detail.isExpired()">
+          <div class="info-value" [class.warning]="detail.isExpiringSoon" [class.expired]="detail.isExpired">
             <i nz-icon nzType="clock-circle" nzTheme="outline"></i>
             <span>{{ detail.exp | date: 'MMM dd, yyyy' }}</span>
-            <span class="expiry-note" *ngIf="detail.isExpiringSoon() && !detail.isExpired()">
-            ({{ detail.getDaysUntilExpiry() }} <span i18n="@@license.days-remaining">days remaining</span>)
+            <span class="expiry-note" *ngIf="detail.isExpiringSoon && !detail.isExpired">
+            ({{ detail.daysUntilExpiry }} <span i18n="@@license.days-remaining">days remaining</span>)
             </span>
           </div>
         </div>

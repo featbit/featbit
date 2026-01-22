@@ -155,8 +155,11 @@ public class SegmentService(AppDbContext dbContext, ILogger<SegmentService> logg
                 .Distinct()
                 .ToArray();
 
-            var translateScopeTasks = scopesToTranslate.Select(x => TranslateScopeAsync(x));
-            var scopes = await Task.WhenAll(translateScopeTasks);
+            var scopes = new List<(string scope, ICollection<Guid> envIds)>();
+            foreach (var scopeToTranslate in scopesToTranslate)
+            {
+                scopes.Add(await TranslateScopeAsync(scopeToTranslate));
+            }
 
             foreach (var sharedSegment in sharedSegments)
             {
