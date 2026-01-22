@@ -87,3 +87,48 @@ WHERE p.id = ranked.id
 -- make key not nullable
 ALTER TABLE policies
     ALTER COLUMN key SET NOT NULL;
+
+-- https://github.com/featbit/featbit/pull/844
+-- added key to segments table
+ALTER TABLE segments
+    ADD COLUMN key varchar(128);
+
+UPDATE segments
+SET key =
+        regexp_replace(
+                regexp_replace(
+                        regexp_replace(
+                                lower(trim(name)),
+                                '[^\w\s-]', '', 'g'
+                        ),
+                        '[\s_-]+', '-', 'g'
+                ),
+                '^-+|-+$', '', 'g'
+        )
+WHERE key IS NULL;
+
+WITH ranked AS (
+    SELECT
+        id,
+        key,
+        ROW_NUMBER() OVER (
+            PARTITION BY
+                CASE
+                    WHEN type = 'shared' THEN workspace_id
+                    WHEN type = 'environment-specific' THEN env_id
+                    END,
+                key
+            ORDER BY created_at, id
+            ) AS rn
+    FROM segments
+    WHERE key IS NOT NULL
+      AND type IN ('shared', 'environment-specific')
+)
+UPDATE segments s
+SET key = s.key || '-' || ranked.rn
+FROM ranked
+WHERE s.id = ranked.id
+  AND ranked.rn > 1;
+
+ALTER TABLE segments
+    ALTER COLUMN key SET NOT NULL;
