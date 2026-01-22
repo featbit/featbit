@@ -5,9 +5,12 @@ import { NzMessageService } from "ng-zorro-antd/message";
 
 class LicenseDetail {
   plan: string;
-  sub: string
+  sub: string;
   iat: Date;
   exp: Date;
+  isExpiringSoon: boolean;
+  isExpired: boolean;
+  daysUntilExpiry: number;
   features: {
     id: LicenseFeatureEnum,
     name: string,
@@ -28,6 +31,10 @@ class LicenseDetail {
     this.sub = data.sub;
     this.iat = new Date(data.iat);
     this.exp = new Date(data.exp);
+
+    this.isExpiringSoon = license.isExpiringSoon();
+    this.isExpired = license.isExpired();
+    this.daysUntilExpiry = license.getDaysUntilExpiration();
 
     const allFeatures = [
       LicenseFeatureEnum.Sso,
@@ -53,23 +60,6 @@ class LicenseDetail {
     if (featureDetail) {
       featureDetail.usage = { ...usage };
     }
-  }
-
-  getDaysUntilExpiry(): number {
-    return Math.ceil((this.exp.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-  }
-
-  isActive(): boolean {
-    return !this.isExpiringSoon() && !this.isExpired();
-  }
-
-  isExpired(): boolean {
-    return new Date() > this.exp;
-  }
-
-  isExpiringSoon(): boolean {
-    const daysUntilExpiry = Math.ceil((this.exp.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-    return daysUntilExpiry <= 30 && daysUntilExpiry > 0;
   }
 
   grantedFeaturesCount(): number {

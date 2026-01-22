@@ -1,6 +1,5 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import {
-  IProfile,
   IOrganization,
   IProject,
   IEnvironment,
@@ -17,7 +16,6 @@ import { copyToClipboard } from '@utils/index';
 import { EnvService } from '@core/services/env.service';
 import { getCurrentLicense, getCurrentOrganization, getCurrentProjectEnv } from "@utils/project-env";
 import { BroadcastService } from "@services/broadcast.service";
-import { Router } from "@angular/router";
 
 @Component({
     selector: 'app-header',
@@ -26,14 +24,15 @@ import { Router } from "@angular/router";
     standalone: false
 })
 export class HeaderComponent implements OnInit {
-
-  @Input() profile: IProfile;
-
   protected readonly SecretTypeEnum = SecretTypeEnum;
 
   currentProjectEnv: IProjectEnv;
   currentOrganization: IOrganization;
+
   license: License;
+  isLicenseExpired: boolean = false;
+  isLicenseExpiring: boolean = false;
+  daysUntilExpiration: number = 0;
 
   allProjects: IProject[] = [];
   selectedProject: IProject;
@@ -52,13 +51,17 @@ export class HeaderComponent implements OnInit {
     private breadcrumbService: BreadcrumbService,
     private messageQueueService: MessageQueueService,
     private envService: EnvService,
-    private broadcastService: BroadcastService,
-    private router: Router
+    private broadcastService: BroadcastService
   ) {
     this.breadcrumbs$ = breadcrumbService.breadcrumbs$;
   }
 
   async ngOnInit() {
+    this.license = getCurrentLicense();
+    this.isLicenseExpired = this.license?.isExpired() ?? false;
+    this.isLicenseExpiring = this.license?.isExpiringSoon() ?? false;
+    this.daysUntilExpiration = this.license?.getDaysUntilExpiration() ?? 0;
+
     this.setSelectedProjectEnv();
     await this.setAllProjects();
 
@@ -141,7 +144,6 @@ export class HeaderComponent implements OnInit {
   private setSelectedProjectEnv() {
     this.currentOrganization = getCurrentOrganization();
     this.currentProjectEnv = getCurrentProjectEnv();
-    this.license = getCurrentLicense();
 
     this.setCurrentEnv();
 
@@ -158,10 +160,6 @@ export class HeaderComponent implements OnInit {
 
   private async setAllProjects() {
     this.allProjects = await this.projectService.getListAsync();
-  }
-
-  navigateToWorkspace() {
-    this.router.navigateByUrl('/workspace/license').then();
   }
 
   // copy environment key
