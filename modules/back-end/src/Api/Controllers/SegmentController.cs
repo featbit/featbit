@@ -176,8 +176,8 @@ public class SegmentController : ApiControllerBase
             Key = key
         };
 
-        var isNameUsed = await Mediator.Send(request);
-        return Ok(isNameUsed);
+        var isUsed = await Mediator.Send(request);
+        return Ok(isUsed);
     }
 
     [HttpGet]

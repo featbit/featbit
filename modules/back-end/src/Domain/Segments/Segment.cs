@@ -8,6 +8,8 @@ namespace Domain.Segments;
 
 public class Segment : AuditedEntity
 {
+    public const string KeyPattern = "^[a-zA-Z0-9._-]+$";
+    
     public Guid WorkspaceId { get; set; }
 
     public Guid EnvId { get; set; }

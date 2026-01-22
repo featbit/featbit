@@ -15,6 +15,7 @@ import {
 import { getCurrentLicense, getCurrentOrganization, getCurrentProjectEnv } from "@utils/project-env";
 import { LicenseFeatureEnum } from "@shared/types";
 import { slugify } from "@utils/index";
+import { FlagKeyPattern } from "@features/safe/feature-flags/types/feature-flag";
 
 @Component({
     selector: 'segment-creation-modal',
@@ -73,7 +74,10 @@ export class SegmentCreationModalComponent {
   init() {
     this.form = this.formBuilder.group({
       name: new FormControl('', [ Validators.required ]),
-      key: ['', [Validators.required], [this.segmentKeyAsyncValidator]],
+      key: new FormControl('', {
+        validators: [ Validators.required, Validators.pattern(FlagKeyPattern) ],
+        asyncValidators: [ this.segmentKeyAsyncValidator ],
+      }),
       description: new FormControl('')
     });
 
