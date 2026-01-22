@@ -26,7 +26,7 @@
             <span class="badge-label badge-warning" i18n="@@common.license-expired">License Expired</span>
             <span class="badge-plan">{{ license.data?.plan }}</span>
           } @else if (isLicenseExpiring) {
-            <span class="badge-label badge-warning" i18n="@@common.license-expiring-soon">Expiring in {{ license.getDaysUntilExpiration() }} days</span>
+            <span class="badge-label badge-warning" i18n="@@common.license-expiring-soon">Expiring in {{ daysUntilExpiration }} days</span>
             <span class="badge-plan">{{ license.data?.plan }}</span>
           } @else {
             <span class="badge-label" i18n="@@common.current-plan">Current Plan</span>

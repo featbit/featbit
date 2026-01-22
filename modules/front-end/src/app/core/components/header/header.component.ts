@@ -32,6 +32,7 @@ export class HeaderComponent implements OnInit {
   license: License;
   isLicenseExpired: boolean = false;
   isLicenseExpiring: boolean = false;
+  daysUntilExpiration: number = 0;
 
   allProjects: IProject[] = [];
   selectedProject: IProject;
@@ -59,6 +60,7 @@ export class HeaderComponent implements OnInit {
     this.license = getCurrentLicense();
     this.isLicenseExpired = this.license?.isExpired() ?? false;
     this.isLicenseExpiring = this.license?.isExpiringSoon() ?? false;
+    this.daysUntilExpiration = this.license?.getDaysUntilExpiration() ?? 0;
 
     this.setSelectedProjectEnv();
     await this.setAllProjects();
