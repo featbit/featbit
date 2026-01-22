@@ -1829,6 +1829,7 @@ public class TargetingRulesDifferTests
             workspaceId: Guid.NewGuid(),
             envId: Guid.NewGuid(),
             name: name,
+            key: "key",
             type: SegmentType.EnvironmentSpecific,
             scopes: [],
             included: [],
