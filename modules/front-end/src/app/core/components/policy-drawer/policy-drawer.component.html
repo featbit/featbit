@@ -53,7 +53,7 @@
         </nz-form-control>
       </nz-form-item>
     </form>
-    <button (click)="doSubmit()" nz-button class="submit-btn" nzType="primary" [nzLoading]="isAdding" i18n="@@common.save">Save</button>
+    <button (click)="doSubmit()" nz-button class="submit-btn" nzType="primary" [disabled]="!form.valid" [nzLoading]="isAdding" i18n="@@common.save">Save</button>
   </ng-container>
   <ng-template #extra>
     <i (click)="onClose()" nz-icon nzType="icons:icon-close"></i>
