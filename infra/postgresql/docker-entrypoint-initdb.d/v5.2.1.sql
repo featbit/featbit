@@ -44,3 +44,46 @@ $$
 
     END
 $$;
+
+-- https://github.com/featbit/featbit/pull/841
+-- added key to policies table
+ALTER TABLE policies
+    ADD COLUMN key varchar(128);
+
+-- fill keys if null
+UPDATE policies
+SET key =
+        regexp_replace(
+                regexp_replace(
+                        regexp_replace(
+                                lower(trim(name)),
+                                '[^\w\s-]', '', 'g'
+                        ),
+                        '[\s_-]+', '-', 'g'
+                ),
+                '^-+|-+$', '', 'g'
+        )
+WHERE key IS NULL;
+
+-- make sure keys are unique per organization
+WITH ranked AS (
+    SELECT
+        id,
+        organization_id,
+        key,
+        ROW_NUMBER() OVER (
+            PARTITION BY organization_id, key
+            ORDER BY created_at, id
+            ) AS rn
+    FROM policies
+    WHERE key IS NOT NULL
+)
+UPDATE policies p
+SET key = p.key || '-' || ranked.rn
+FROM ranked
+WHERE p.id = ranked.id
+  AND ranked.rn > 1;
+
+-- make key not nullable
+ALTER TABLE policies
+    ALTER COLUMN key SET NOT NULL;
