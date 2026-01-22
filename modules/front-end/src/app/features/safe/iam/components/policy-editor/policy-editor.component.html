@@ -2,9 +2,9 @@
   <message [type]="'warning'" i18n-content="@@iam.policies.details.managed-policies-cannot-be-modified" content="System Managed policies cannot be modified. If needed, you can make a copy and modify it for your own needs."></message>
 }
 <div class="operations">
-  <button class="standard-btn copy-btn" nz-button nzType="primary" (click)="copyPolicy()">
+  <button class="standard-btn copy-btn" nz-button nzType="primary" (click)="cloneVisible = true">
     <i nz-icon nzType="icons:icon-copy"></i>
-    <ng-container i18n="@@common.copy">Copy</ng-container>
+    <ng-container i18n="@@common.clone">Clone</ng-container>
   </button>
   @if (!readonly) {
     <button class="standard-btn" nz-button nzType="primary" (click)="saveStatements()">
@@ -76,4 +76,10 @@
     }
   </div>
 </div>
+
+<clone-policy-modal
+  [policy]="policy"
+  (close)="cloneVisible = false"
+  [visible]="cloneVisible">
+</clone-policy-modal>
 

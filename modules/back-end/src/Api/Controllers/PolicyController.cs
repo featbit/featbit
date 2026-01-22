@@ -32,23 +32,33 @@ public class PolicyController : ApiControllerBase
         return Ok(policies);
     }
 
-    [HttpGet("is-name-used")]
-    public async Task<ApiResponse<bool>> IsNameUsedAsync(string name)
+    [HttpGet("is-key-used")]
+    public async Task<ApiResponse<bool>> IsKeyUsedAsync(string key)
     {
-        var request = new IsPolicyNameUsed
+        var request = new IsPolicyKeyUsed
         {
             OrganizationId = OrgId,
-            Name = name
+            Key = key
         };
 
-        var isNameUsed = await Mediator.Send(request);
-        return Ok(isNameUsed);
+        var isUsed = await Mediator.Send(request);
+        return Ok(isUsed);
     }
 
     [HttpPost]
     public async Task<ApiResponse<PolicyVm>> CreateAsync(CreatePolicy request)
     {
         request.OrganizationId = OrgId;
+
+        var policy = await Mediator.Send(request);
+        return Ok(policy);
+    }
+
+    [HttpPost("clone/{key}")]
+    public async Task<ApiResponse<PolicyVm>> CloneAsync(string key, ClonePolicy request)
+    {
+        request.OrgId = OrgId;
+        request.OriginPolicyKey = key;
 
         var policy = await Mediator.Send(request);
         return Ok(policy);
