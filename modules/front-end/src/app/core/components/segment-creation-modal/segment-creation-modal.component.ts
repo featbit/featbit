@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { FormControl, FormGroup, Validators } from "@angular/forms";
+import { FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
 import { debounceTime, first, map, switchMap } from "rxjs/operators";
 import { SegmentService } from "@services/segment.service";
 import { CreateSegment, ISegment, SegmentType } from "@features/safe/segments/types/segments-index";
@@ -14,6 +14,7 @@ import {
 } from "@shared/policy";
 import { getCurrentLicense, getCurrentOrganization, getCurrentProjectEnv } from "@utils/project-env";
 import { LicenseFeatureEnum } from "@shared/types";
+import { slugify } from "@utils/index";
 
 @Component({
     selector: 'segment-creation-modal',
@@ -39,6 +40,7 @@ export class SegmentCreationModalComponent {
 
   form: FormGroup<{
     name: FormControl<string>,
+    key: FormControl<string>;
     description: FormControl<string>
   }>;
 
@@ -63,14 +65,20 @@ export class SegmentCreationModalComponent {
   currentEnvironment: ResourceV2;
 
   constructor(
+    private formBuilder: FormBuilder,
     private service: SegmentService,
     private msg: NzMessageService
   ) { }
 
   init() {
-    this.form = new FormGroup({
-      name: new FormControl('', [ Validators.required ], [ this.segmentNameAsyncValidator ]),
+    this.form = this.formBuilder.group({
+      name: new FormControl('', [ Validators.required ]),
+      key: ['', [Validators.required], [this.segmentKeyAsyncValidator]],
       description: new FormControl('')
+    });
+
+    this.form.get('name').valueChanges.subscribe((name) => {
+      this.nameChange(name);
     });
 
     const currentOrg = getCurrentOrganization();
@@ -91,11 +99,17 @@ export class SegmentCreationModalComponent {
     this.selectedScopes = [ this.currentEnvironment ];
   }
 
-  segmentNameAsyncValidator = (control: FormControl) => control.valueChanges.pipe(
+  nameChange(name: string) {
+    let keyControl = this.form.get('key')!;
+    keyControl.setValue(slugify(name ?? ''));
+    keyControl.markAsDirty();
+  }
+
+  segmentKeyAsyncValidator = (control: FormControl) => control.valueChanges.pipe(
     debounceTime(300),
-    switchMap(value => this.service.isNameUsed(value as string, this.selectedType)),
-    map(isNameUsed => {
-      switch (isNameUsed) {
+    switchMap(value => this.service.isKeyUsed(value as string, this.selectedType)),
+    map(isUsed => {
+      switch (isUsed) {
         case true:
           return { error: true, duplicated: true };
         case undefined:
@@ -140,7 +154,7 @@ export class SegmentCreationModalComponent {
   create() {
     this.creating = true;
 
-    const { name, description } = this.form.value;
+    const { name, key, description } = this.form.value;
     const type = this.selectedType;
 
     const currentEnvRN = this.currentEnvironment.rn;
@@ -154,6 +168,7 @@ export class SegmentCreationModalComponent {
 
     const payload: CreateSegment = {
       name,
+      key,
       description,
       type,
       scopes

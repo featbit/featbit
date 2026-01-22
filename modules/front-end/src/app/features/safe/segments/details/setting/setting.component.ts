@@ -5,6 +5,7 @@ import { SegmentService } from '@services/segment.service';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { MessageQueueService } from "@services/message-queue.service";
 import { NzSelectComponent } from "ng-zorro-antd/select";
+import { copyToClipboard } from "@utils/index";
 
 @Component({
     selector: 'segment-setting',
@@ -130,6 +131,12 @@ export class SettingComponent implements OnInit {
     this.currentAllTags = this.allTags;
     // clear current selected
     this.tagsSelect.writeValue(null);
+  }
+
+  copyText(text: string) {
+    copyToClipboard(text).then(
+      () => this.msg.success($localize `:@@common.copy-success:Copied`)
+    );
   }
 
   protected readonly SegmentType = SegmentType;

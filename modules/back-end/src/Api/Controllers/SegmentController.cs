@@ -165,15 +165,15 @@ public class SegmentController : ApiControllerBase
         return Ok(success);
     }
 
-    [HttpGet("is-name-used")]
-    public async Task<ApiResponse<bool>> IsNameUsedAsync(Guid envId, string name, string type)
+    [HttpGet("is-key-used")]
+    public async Task<ApiResponse<bool>> IsKeyUsedAsync(Guid envId, string key, string type)
     {
-        var request = new IsSegmentNameUsed
+        var request = new IsSegmentKeyUsed
         {
             WorkspaceId = WorkspaceId,
             EnvId = envId,
             Type = type,
-            Name = name
+            Key = key
         };
 
         var isNameUsed = await Mediator.Send(request);

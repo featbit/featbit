@@ -19,7 +19,9 @@
     </div>
 
     <div class="table-wrapper">
-      <nz-table #table nzSize="small"
+      <nz-table
+        #table
+        nzSize="small"
         nzShowSizeChanger
         [nzData]="segmentListModel.items"
         [nzFrontPagination]="false"
@@ -43,15 +45,20 @@
               </i>
             </th>
             <th i18n="@@common.tags">Tags</th>
-            <th i18n="@@common.last-updated">Last updated</th>
+            <th i18n="@@common.last-change">Last Change</th>
             <th i18n="@@common.actions">Actions</th>
           </tr>
         </thead>
         <tbody>
           @for (item of table.data; track item.id) {
             <tr>
-              <td style="cursor: pointer;" (click)="onIntoSegmentDetail(item)">
-                <span>{{item.name}}</span>
+              <!-- Name Column: name, key, created by, created at -->
+              <td class="name-cell">
+                <div class="name" [routerLink]="[item.id, 'targeting']">{{item.name}}</div>
+                <div class="key" (click)="copyText($event, item.key)">
+                  {{item.key}}
+                  <i class="copy-icon" nz-icon nzType="icons:icon-copy"></i>
+                </div>
               </td>
               <td>
                 @if (item.type === SegmentType.EnvironmentSpecific) {
@@ -84,14 +91,14 @@
                   </ul>
                 </ng-template>
               </td>
-              <td style="max-width: 168px;">
+              <td class="tags-cell">
                 @for (tag of item.tags; track tag) {
                   <span class="tag" nz-tooltip [nzTooltipTitle]="tag">{{tag}}</span>
                 }
               </td>
               <td>{{item.updatedAt | date: 'yyyy-MM-dd HH:mm:ss'}}</td>
-              <td>
-                <a style="color:#23AD7F;" (click)="onIntoSegmentDetail(item)" i18n="@@common.details">Details</a>
+              <td class="actions-cell">
+                <a class="action-link primary" [routerLink]="[item.id, 'targeting']" i18n="@@common.details">Details</a>
                 <nz-divider nzType="vertical"></nz-divider>
                 @if (segmentFilter.isArchived) {
                   <a style="color: #717D8A"

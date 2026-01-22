@@ -7,6 +7,8 @@ public class SegmentBase
 {
     public string Name { get; set; }
 
+    public string Key { get; set; }
+    
     public string Description { get; set; }
 
     public string[] Scopes { get; set; } = [];
@@ -24,6 +26,9 @@ public class SegmentBaseValidator : AbstractValidator<SegmentBase>
     {
         RuleFor(x => x.Name)
             .NotEmpty().WithErrorCode(ErrorCodes.Invalid("name"));
+        
+        RuleFor(x => x.Key)
+            .NotEmpty().WithErrorCode(ErrorCodes.Invalid("key"));
 
         RuleFor(x => x.Scopes)
             .NotEmpty().WithErrorCode(ErrorCodes.Invalid("scopes"))

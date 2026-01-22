@@ -50,3 +50,64 @@ section.body-container {
     display: block;
   }
 }
+
+// Tags column styles
+.tags-cell {
+  max-width: 168px;
+}
+
+// Name column styles
+.name-cell {
+  min-width: 200px;
+
+  .name {
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 14px;
+    color: @grey80-color;
+    margin-bottom: 4px;
+
+    &:hover {
+      color: @primary-color;
+    }
+  }
+
+  .key {
+    margin-bottom: 2px;
+    cursor: pointer;
+    width: fit-content;
+    font-size: 12px;
+    color: @grey50-color;
+    font-family: monospace;
+    background-color: @grey10-color;
+    padding: 2px 6px;
+    border-radius: 4px;
+
+    i {
+      margin: 0;
+    }
+
+    &:hover {
+      color: @primary-color;
+    }
+  }
+}
+
+// Actions column styles
+.actions-cell {
+  white-space: nowrap;
+
+  .action-link {
+    &.primary {
+      color: @green70-color;
+    }
+
+    &.secondary {
+      color: @grey50-color;
+    }
+
+    &.danger {
+      color: @red50-color;
+    }
+  }
+}

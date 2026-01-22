@@ -115,19 +115,19 @@ public class SegmentService(MongoDbClient mongoDb, ILogger<SegmentService> logge
         return distinct;
     }
 
-    public async Task<bool> IsNameUsedAsync(Guid workspaceId, string type, Guid envId, string name)
+    public async Task<bool> IsKeyUsedAsync(Guid workspaceId, string type, Guid envId, string key)
     {
         Expression<Func<Segment, bool>> predicate = type switch
         {
             SegmentType.Shared => x =>
                 x.WorkspaceId == workspaceId &&
                 x.Type == SegmentType.Shared &&
-                string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase),
+                string.Equals(x.Key, key, StringComparison.OrdinalIgnoreCase),
 
             _ => x =>
                 x.EnvId == envId &&
                 x.Type == SegmentType.EnvironmentSpecific &&
-                string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase)
+                string.Equals(x.Key, key, StringComparison.OrdinalIgnoreCase)
         };
 
         return await AnyAsync(predicate);
