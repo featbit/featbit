@@ -21,7 +21,6 @@ import { debounceTime } from 'rxjs/operators';
 })
 export class IndexComponent implements OnInit {
 
-  isIntoing: boolean = false;
   isDelete: boolean = false; // to differencing delete and archive
   deleteArchiveModalVisible: boolean = false;
 

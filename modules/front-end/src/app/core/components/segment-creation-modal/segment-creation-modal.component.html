@@ -5,7 +5,7 @@
   [nzCentered]="true"
   [nzContent]="modalContent"
   [nzFooter]="modalFooter"
-  [nzWidth]="620"
+  [nzWidth]="550"
   (nzOnCancel)="close(null)">
   <ng-template #modalTitle>
     <ng-container i18n="@@segment.creation-modal.add-segment">Add segment</ng-container>
@@ -31,58 +31,56 @@
     @if (selectedType === SegmentType.EnvironmentSpecific || (selectedType == SegmentType.Shared && isShareableSegmentGranted)) {
       <form
         nz-form [formGroup]="form" nzLayout="vertical">
-        <div class="name-key-wrapper">
-          <!-- Name  -->
-          <nz-form-item>
-            <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>
-            <nz-form-control
-              nzHasFeedback
-              nzErrorTip="Name cannot be empty"
-              i18n-nzErrorTip="@@common.name-cannot-be-empty">
-              <input
-                nz-input
-                formControlName="name"
-                placeholder="A human-friendly name"
-                i18n-placeholder="@@ff.feature-flag-name-placeholder"
-              />
-            </nz-form-control>
-          </nz-form-item>
+        <!-- Name  -->
+        <nz-form-item>
+          <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>
+          <nz-form-control
+            nzHasFeedback
+            nzErrorTip="Name cannot be empty"
+            i18n-nzErrorTip="@@common.name-cannot-be-empty">
+            <input
+              nz-input
+              formControlName="name"
+              placeholder="A human-friendly name"
+              i18n-placeholder="@@ff.feature-flag-name-placeholder"
+            />
+          </nz-form-control>
+        </nz-form-item>
 
-          <!--  Key  -->
-          <nz-form-item>
-            <nz-form-label
-              nzRequired
-              nzTooltipTitle="Keys must only contain letters, numbers, ., _ or -."
-              i18n-nzTooltipTitle="@@segment.key-creation-description">
-              Key
-            </nz-form-label>
-            <nz-form-control
-              nzHasFeedback
-              nzValidatingTip="Validating..."
-              i18n-nzValidatingTip="@@common.validating"
-              [nzErrorTip]="keyErrorTpl">
-              <input
-                nz-input
-                formControlName="key"
-                placeholder="Key can be auto-generated from name"
-                i18n-placeholder="@@common.key-generated-from-name"/>
-              <ng-template #keyErrorTpl let-control>
-                @if (control.hasError('required')) {
-                  <ng-container i18n="@@common.key-cannot-be-empty">Key cannot be empty</ng-container>
-                }
-                @if (control.hasError('pattern')) {
-                  <ng-container i18n="@@common.key-format-error">Only allow letters, numbers, '.', '_' or '-'</ng-container>
-                }
-                @if (control.hasError('duplicated')) {
-                  <ng-container i18n="@@common.key-has-been-used">This key has been used</ng-container>
-                }
-                @if (control.hasError('unknown')) {
-                  <ng-container i18n="@@common.key-validation-failed">Key validation failed</ng-container>
-                }
-              </ng-template>
-            </nz-form-control>
-          </nz-form-item>
-        </div>
+        <!--  Key  -->
+        <nz-form-item>
+          <nz-form-label
+            nzRequired
+            nzTooltipTitle="Keys must only contain letters, numbers, ., _ or -."
+            i18n-nzTooltipTitle="@@segment.key-creation-description">
+            Key
+          </nz-form-label>
+          <nz-form-control
+            nzHasFeedback
+            nzValidatingTip="Validating..."
+            i18n-nzValidatingTip="@@common.validating"
+            [nzErrorTip]="keyErrorTpl">
+            <input
+              nz-input
+              formControlName="key"
+              placeholder="Key can be auto-generated from name"
+              i18n-placeholder="@@common.key-generated-from-name"/>
+            <ng-template #keyErrorTpl let-control>
+              @if (control.hasError('required')) {
+                <ng-container i18n="@@common.key-cannot-be-empty">Key cannot be empty</ng-container>
+              }
+              @if (control.hasError('pattern')) {
+                <ng-container i18n="@@common.key-format-error">Only allow letters, numbers, '.', '_' or '-'</ng-container>
+              }
+              @if (control.hasError('duplicated')) {
+                <ng-container i18n="@@common.key-has-been-used">This key has been used</ng-container>
+              }
+              @if (control.hasError('unknown')) {
+                <ng-container i18n="@@common.key-validation-failed">Key validation failed</ng-container>
+              }
+            </ng-template>
+          </nz-form-control>
+        </nz-form-item>
         <!-- Scopes  -->
         @if (selectedType === SegmentType.Shared) {
           <nz-form-item>

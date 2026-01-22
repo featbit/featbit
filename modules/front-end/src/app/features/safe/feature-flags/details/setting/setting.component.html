@@ -48,13 +48,17 @@
           <i class="edit-save" (click)="toggleDescriptionEditState()" nz-icon nzType="icons:icon-edit"></i>
         }
       </div>
-      <div class="flag-key">
+      <div class="key">
         <div class="title">
-          <span class="text" i18n="@@common.key">Key</span> <i nz-icon i18n-nz-tooltip="@@ff.key-description"
-                                                               nz-tooltip="Use key (case-sensitive) in your code to get the feature flag variation"
-                                                               nzType="icons:icon-info-outline"></i>
+          <span class="text" i18n="@@common.key">Key</span>
+          <i
+            nz-icon
+            i18n-nz-tooltip="@@ff.key-description"
+            nz-tooltip="Use key (case-sensitive) in your code to get the feature flag variation"
+            nzType="icons:icon-info-outline">
+          </i>
         </div>
-        <div class="key-container">
+        <div class="value">
           {{ featureFlag.key }}
           <i class="copy-icon" i18n-nz-tooltip="@@common.click-to-copy" nz-tooltip="Click to copy" nz-icon
              nzType="icons:icon-copy" (click)="copyText(featureFlag.key)"></i>
