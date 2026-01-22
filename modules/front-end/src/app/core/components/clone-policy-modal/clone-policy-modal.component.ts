@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
-import { encodeURIComponentFfc, slugify } from "@utils/index";
+import { slugify } from "@utils/index";
 import { NzMessageService } from "ng-zorro-antd/message";
 import { Router } from "@angular/router";
 import { PolicyService } from "@services/policy.service";
