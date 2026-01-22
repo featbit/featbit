@@ -58,6 +58,7 @@ export function getTestPayload(event: string, payloadTemplate: string): string {
 const testSegment: ISegment = {
   id: '510766ab-bf7d-4a80-a601-68beced8360e',
   name: 'Test Segment',
+  key: 'test-segment',
   type: SegmentType.EnvironmentSpecific,
   scopes: ['organization/organization-key:project/project-key:env/env-key'],
   tags: ['test', 'demo'],

@@ -240,3 +240,5 @@ export interface SsoPreCheck {
   isEnabled: boolean;
   workspaceKey?: string;
 }
+
+export const ResourceKeyPattern: RegExp = /^[a-zA-Z0-9._-]+$/;

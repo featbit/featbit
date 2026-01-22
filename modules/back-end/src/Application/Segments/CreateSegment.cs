@@ -17,7 +17,7 @@ public class CreateSegment : SegmentBase, IRequest<Segment>
 
     public Segment AsSegment()
     {
-        return new Segment(WorkspaceId, EnvId, Name, Type, Scopes, Included, Excluded, Rules, Description);
+        return new Segment(WorkspaceId, EnvId, Name, Key, Type, Scopes, Included, Excluded, Rules, Description);
     }
 }
 

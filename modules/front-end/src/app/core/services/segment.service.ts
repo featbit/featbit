@@ -51,8 +51,8 @@ export class SegmentService {
     return this.http.get<ISegment>(`${this.baseUrl}/${id}`);
   }
 
-  public isNameUsed(name: string, type: SegmentType): Observable<boolean> {
-    const url = `${this.baseUrl}/is-name-used?name=${name}&type=${type}`;
+  public isKeyUsed(key: string, type: SegmentType): Observable<boolean> {
+    const url = `${this.baseUrl}/is-key-used?key=${key}&type=${type}`;
 
     return this.http.get<boolean>(url).pipe(catchError(() => of(undefined)));
   }

@@ -42,6 +42,27 @@
     }
   }
 
+  .key {
+    margin-top: 16px;
+
+    .value {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 2px;
+
+      i {
+        cursor: pointer;
+        font-size: 13px;
+        color: @grey50-color;
+
+        &:hover {
+          color: @grey70-color;
+        }
+      }
+    }
+  }
+
   .description {
     margin-top: 12px;
     color: @grey50-color;

@@ -9,7 +9,8 @@ import { Router } from "@angular/router";
 import { NzSelectComponent } from "ng-zorro-antd/select";
 import { IVariation } from "@shared/rules";
 import { editor } from "monaco-editor";
-import { FlagKeyPattern, IFeatureFlagCreationPayload } from "@features/safe/feature-flags/types/feature-flag";
+import { IFeatureFlagCreationPayload } from "@features/safe/feature-flags/types/feature-flag";
+import { ResourceKeyPattern } from "@shared/types";
 
 @Component({
   selector: 'feature-flag-drawer',
@@ -53,7 +54,7 @@ export class FeatureFlagDrawerComponent implements OnInit {
   initForm() {
     this.basicForm = this.fb.group({
       name: ['', Validators.required],
-      key: ['', [Validators.required, Validators.pattern(FlagKeyPattern)], [this.flagKeyAsyncValidator]],
+      key: ['', [Validators.required, Validators.pattern(ResourceKeyPattern)], [this.flagKeyAsyncValidator]],
       description: ['', Validators.maxLength(512)]
     });
 

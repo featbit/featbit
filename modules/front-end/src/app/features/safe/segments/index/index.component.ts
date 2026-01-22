@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Subject } from 'rxjs';
-import { encodeURIComponentFfc, getPathPrefix } from '@shared/utils';
+import { copyToClipboard, encodeURIComponentFfc, getPathPrefix } from '@shared/utils';
 import {
   SegmentListFilter,
   ISegment,
@@ -21,7 +21,6 @@ import { debounceTime } from 'rxjs/operators';
 })
 export class IndexComponent implements OnInit {
 
-  isIntoing: boolean = false;
   isDelete: boolean = false; // to differencing delete and archive
   deleteArchiveModalVisible: boolean = false;
 
@@ -141,14 +140,8 @@ export class IndexComponent implements OnInit {
     this.$search.next();
   }
 
-  onIntoSegmentDetail(data: ISegment) {
-    if(this.isIntoing) return;
-    this.isIntoing = true;
-    this.toRouter(data.id);
-  }
-
   private toRouter(id: string) {
-    this.router.navigateByUrl(`/segments/details/${encodeURIComponentFfc(id)}/targeting`);
+    this.router.navigateByUrl(`/segments/${encodeURIComponentFfc(id)}/targeting`);
   }
 
   openFlagPage(flagKey: string) {
@@ -172,5 +165,10 @@ export class IndexComponent implements OnInit {
     }
   }
 
+  copyText(event: any, text: string) {
+    copyToClipboard(text).then(
+      () => this.msg.success($localize `:@@common.copy-success:Copied`)
+    );
+  }
   protected readonly SegmentType = SegmentType;
 }

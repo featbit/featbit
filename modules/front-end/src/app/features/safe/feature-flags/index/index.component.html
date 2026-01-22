@@ -88,7 +88,7 @@
                 [nzChecked]="itemChecked(flag)"
                 (nzCheckedChange)="onItemChecked(flag)"
               ></td>
-              <!-- Name Column: name, key, created by, created at -->
+              <!-- Name Column: name, key-->
               <td class="name-cell">
                 <div class="flag-name" [routerLink]="[flag.key, 'targeting']">{{flag.name}}</div>
                 <div class="flag-key" (click)="copyText($event, flag.key)">

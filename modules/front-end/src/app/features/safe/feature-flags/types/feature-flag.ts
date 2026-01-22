@@ -113,5 +113,3 @@ export const getFlagRN = (key: string, tags: string[]) => {
 
   return rn;
 }
-
-export const FlagKeyPattern: RegExp = /^[a-zA-Z0-9._-]+$/;

@@ -1,4 +1,5 @@
 using Application.Bases;
+using Domain.Segments;
 using Domain.Targeting;
 
 namespace Application.Segments;
@@ -6,6 +7,8 @@ namespace Application.Segments;
 public class SegmentBase
 {
     public string Name { get; set; }
+
+    public string Key { get; set; }
 
     public string Description { get; set; }
 
@@ -24,6 +27,10 @@ public class SegmentBaseValidator : AbstractValidator<SegmentBase>
     {
         RuleFor(x => x.Name)
             .NotEmpty().WithErrorCode(ErrorCodes.Invalid("name"));
+
+        RuleFor(x => x.Key)
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("key"))
+            .Matches(Segment.KeyPattern).WithErrorCode(ErrorCodes.Invalid("key"));
 
         RuleFor(x => x.Scopes)
             .NotEmpty().WithErrorCode(ErrorCodes.Invalid("scopes"))

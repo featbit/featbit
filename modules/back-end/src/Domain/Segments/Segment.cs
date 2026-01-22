@@ -8,11 +8,15 @@ namespace Domain.Segments;
 
 public class Segment : AuditedEntity
 {
+    public const string KeyPattern = "^[a-zA-Z0-9._-]+$";
+
     public Guid WorkspaceId { get; set; }
 
     public Guid EnvId { get; set; }
 
     public string Name { get; set; }
+
+    public string Key { get; set; }
 
     public string Type { get; set; }
 
@@ -36,6 +40,7 @@ public class Segment : AuditedEntity
         Guid workspaceId,
         Guid envId,
         string name,
+        string key,
         string type,
         string[] scopes,
         string[] included,
@@ -46,6 +51,7 @@ public class Segment : AuditedEntity
         WorkspaceId = workspaceId;
         EnvId = envId;
         Name = name;
+        Key = key;
         Type = type;
         Scopes = scopes;
         Included = included ?? [];
