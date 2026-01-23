@@ -88,7 +88,7 @@ services:
       CLICKHOUSE_KAFKA_HOSTS: kafka-consumer:9092
 
   mongodb:
-    image: mongo:5.0.14
+    image: mongo:5.0.32
     container_name: mongodb
     restart: on-failure
     ports:
