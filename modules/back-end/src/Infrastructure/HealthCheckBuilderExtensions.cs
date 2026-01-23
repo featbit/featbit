@@ -24,7 +24,7 @@ public static class HealthCheckBuilderExtensions
         if (dbProvider.Name == DbProvider.MongoDb)
         {
             builder.AddMongoDb(
-                dbProvider.ConnectionString,
+                sp => sp.GetRequiredService<MongoDbClient>().Database,
                 tags: tags,
                 timeout: Timeout
             );
