@@ -1,3 +1,5 @@
+\connect featbit
+
 -- https://github.com/featbit/featbit/pull/836
 -- fix incorrect developer_policy_id
 
