@@ -85,7 +85,7 @@ services:
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
 
   mongodb:
-    image: mongo:5.0.14
+    image: mongo:5.0.32
     container_name: mongodb
     restart: on-failure
     ports:
