@@ -12,7 +12,10 @@ public class DefaultPermissionChecker : IPermissionChecker
         _logger = logger;
     }
 
-    public bool IsGranted(IEnumerable<PolicyStatement> statements, PermissionRequirement requirement)
+    public bool IsGranted(
+        AuthorizationHandlerContext context, 
+        IEnumerable<PolicyStatement> statements, 
+        PermissionRequirement requirement)
     {
         var permission = requirement.PermissionName;
 
@@ -22,6 +25,8 @@ public class DefaultPermissionChecker : IPermissionChecker
             _logger.LogWarning("The permission '{Permission}' has no corresponding resourceType.", permission);
             return false;
         }
+        
+        // TODO get RN
 
         var rn = ResourceHelper.GetRn(resourceType);
 

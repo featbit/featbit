@@ -29,7 +29,7 @@ public class PermissionRequirementHandler : AuthorizationHandler<PermissionRequi
 
         if (httpContext.Items[OpenApiConstants.PermissionStoreKey] is IEnumerable<PolicyStatement> permissions)
         {
-            if (_permissionChecker.IsGranted(permissions, requirement))
+            if (_permissionChecker.IsGranted(context, permissions, requirement))
             {
                 context.Succeed(requirement);
             }

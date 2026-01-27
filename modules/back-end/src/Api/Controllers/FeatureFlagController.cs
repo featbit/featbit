@@ -46,6 +46,7 @@ public class FeatureFlagController : ApiControllerBase
     /// </remarks>
     [OpenApi]
     [HttpGet("{key}")]
+    [ResourceParameter("key")]
     public async Task<ApiResponse<FeatureFlag>> GetAsync(Guid envId, string key)
     {
         var request = new GetFeatureFlag
