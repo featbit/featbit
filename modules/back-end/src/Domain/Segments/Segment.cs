@@ -64,20 +64,36 @@ public class Segment : AuditedEntity
         Tags = [];
     }
 
-    public DataChange Update(
-        string name,
-        string[] included,
-        string[] excluded,
-        ICollection<MatchRule> rules,
-        string description)
+    public DataChange UpdateName(string name)
     {
         var dataChange = new DataChange(this);
 
         Name = name;
+        UpdatedAt = DateTime.UtcNow;
+
+        return dataChange.To(this);
+    }
+
+    public DataChange UpdateDescription(string description)
+    {
+        var dataChange = new DataChange(this);
+
+        Description = description;
+        UpdatedAt = DateTime.UtcNow;
+
+        return dataChange.To(this);
+    }
+
+    public DataChange UpdateTargeting(
+        string[] included,
+        string[] excluded,
+        ICollection<MatchRule> rules)
+    {
+        var dataChange = new DataChange(this);
+
         Included = included ?? [];
         Excluded = excluded ?? [];
         Rules = rules;
-        Description = description ?? string.Empty;
 
         UpdatedAt = DateTime.UtcNow;
 
