@@ -330,7 +330,6 @@ export class TargetingComponent implements OnInit {
       next: () => {
         this.loadData();
         this.msg.success($localize `:@@common.save-success:Saved Successfully`);
-        this.messageQueueService.emit(this.messageQueueService.topics.FLAG_TARGETING_CHANGED(this.key));
       },
       error: () => {
         this.msg.error($localize `:@@common.save-fail:Failed to Save`);
