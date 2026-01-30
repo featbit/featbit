@@ -49,7 +49,7 @@ public class UpdateTargetingHandler(
             Operations.Update,
             dataChange,
             currentUser.Id,
-            request.Comment,
+            comment: request.Comment,
             isTargetingChange: true
         );
         await publisher.Publish(notification, cancellationToken);

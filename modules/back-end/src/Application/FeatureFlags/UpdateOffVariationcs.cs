@@ -45,7 +45,13 @@ public class UpdateOffVariationHandler : IRequestHandler<UpdateOffVariation, boo
         await _service.UpdateAsync(flag);
 
         // publish on feature flag change notification
-        var notification = new OnFeatureFlagChanged(flag, Operations.Update, dataChange, _currentUser.Id);
+        var notification = new OnFeatureFlagChanged(
+            flag, 
+            Operations.Update, 
+            dataChange, 
+            _currentUser.Id, 
+            comment: "Updated off variation"
+        );
         await _publisher.Publish(notification, cancellationToken);
 
         return true;
