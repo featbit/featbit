@@ -58,7 +58,7 @@ public static class ServicesRegister
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
-        builder.Services.AddSwaggerGen();
+        builder.Services.AddSwaggerGen(options => options.CustomSchemaIds(type => SwashbuckleSchemaHelper.GetSchemaId(type)));
         builder.Services.AddSwaggerExamplesFromAssemblyOf<Program>();
 
         // health check dependencies

@@ -40,8 +40,13 @@ public class UpdateTargetingHandler : IRequestHandler<UpdateTargeting, bool>
         await _flagService.UpdateAsync(flag);
 
         // publish on feature flag change notification
-        var notification =
-            new OnFeatureFlagChanged(flag, Operations.Update, dataChange, _currentUser.Id, request.Comment);
+        var notification = new OnFeatureFlagChanged(
+            flag, 
+            Operations.Update,
+            dataChange, 
+            _currentUser.Id,
+            comment: request.Comment
+        );
         await _publisher.Publish(notification, cancellationToken);
 
         return true;

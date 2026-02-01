@@ -343,7 +343,7 @@
         <source>This access token name is not available</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
-          <context context-type="linenumber">22,26</context>
+          <context context-type="linenumber">22,27</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.type" datatype="html">
@@ -397,7 +397,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/policies/details/details.component.html</context>
-          <context context-type="linenumber">7,8</context>
+          <context context-type="linenumber">7,9</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.all" datatype="html">
@@ -463,7 +463,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">139,140</context>
+          <context context-type="linenumber">139,141</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
@@ -499,7 +499,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
-          <context context-type="linenumber">107,108</context>
+          <context context-type="linenumber">107,109</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
@@ -548,11 +548,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-key-modal/relay-proxy-key-modal.component.html</context>
-          <context context-type="linenumber">23,24</context>
+          <context context-type="linenumber">23,25</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/resource-finder/resource-finder.component.html</context>
-          <context context-type="linenumber">86,87</context>
+          <context context-type="linenumber">86,88</context>
         </context-group>
       </trans-unit>
       <trans-unit id="integrations.access-token.access-token-drawer.view-title" datatype="html">
@@ -707,31 +707,31 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">175</context>
+          <context context-type="linenumber">174</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">309</context>
+          <context context-type="linenumber">308</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">387</context>
+          <context context-type="linenumber">386</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">399</context>
+          <context context-type="linenumber">398</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">417</context>
+          <context context-type="linenumber">416</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">434</context>
+          <context context-type="linenumber">433</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">448</context>
+          <context context-type="linenumber">447</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
@@ -851,19 +851,23 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">66</context>
+          <context context-type="linenumber">65</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">116</context>
+          <context context-type="linenumber">75</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">127</context>
+          <context context-type="linenumber">115</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.ts</context>
+          <context context-type="linenumber">126</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">153</context>
+          <context context-type="linenumber">150</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.ts</context>
@@ -946,7 +950,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">287</context>
+          <context context-type="linenumber">286</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
@@ -1044,7 +1048,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">138</context>
+          <context context-type="linenumber">140</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.ts</context>
@@ -1432,7 +1436,7 @@
         <source>Archive feature flag</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/instructions/archive-flag/archive-flag.component.ts</context>
-          <context context-type="linenumber">8,10</context>
+          <context context-type="linenumber">8,11</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.add-variation" datatype="html">
@@ -1482,21 +1486,21 @@
         <source>Restore feature flag</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/instructions/restore-flag/restore-flag.component.ts</context>
-          <context context-type="linenumber">8,10</context>
+          <context context-type="linenumber">8,11</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.turn-flag-off" datatype="html">
         <source>Turn feature flag </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/instructions/turn-flag-off/turn-flag-off.component.ts</context>
-          <context context-type="linenumber">8,9</context>
+          <context context-type="linenumber">8,10</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.turn-flag-on" datatype="html">
         <source>Turn feature flag </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-list/instructions/turn-flag-on/turn-flag-on.component.ts</context>
-          <context context-type="linenumber">8,9</context>
+          <context context-type="linenumber">8,10</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.update-dispatch-key-to" datatype="html">
@@ -1934,7 +1938,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">221,222</context>
+          <context context-type="linenumber">221,223</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/resources-selector/resources-selector.component.html</context>
@@ -2045,7 +2049,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/project/project.component.html</context>
-          <context context-type="linenumber">151,153</context>
+          <context context-type="linenumber">151,154</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.feature-flag-name-placeholder" datatype="html">
@@ -2262,7 +2266,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
-          <context context-type="linenumber">79,80</context>
+          <context context-type="linenumber">79,81</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
@@ -2540,7 +2544,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">451</context>
+          <context context-type="linenumber">450</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
@@ -2651,8 +2655,16 @@
           <context context-type="linenumber">99</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.ts</context>
+          <context context-type="linenumber">66</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.ts</context>
+          <context context-type="linenumber">76</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">159</context>
+          <context context-type="linenumber">151</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.ts</context>
@@ -2689,19 +2701,19 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/env-drawer/env-drawer.component.html</context>
-          <context context-type="linenumber">24,26</context>
+          <context context-type="linenumber">24,27</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/organization-drawer/organization-drawer.component.html</context>
-          <context context-type="linenumber">25,27</context>
+          <context context-type="linenumber">25,28</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/policy-drawer/policy-drawer.component.html</context>
-          <context context-type="linenumber">24,26</context>
+          <context context-type="linenumber">24,27</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/project-drawer/project-drawer.component.html</context>
-          <context context-type="linenumber">25,27</context>
+          <context context-type="linenumber">25,28</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/project/project.component.html</context>
@@ -2771,7 +2783,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/segment-creation-modal/segment-creation-modal.component.html</context>
-          <context context-type="linenumber">143,145</context>
+          <context context-type="linenumber">143,146</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.html</context>
@@ -2899,7 +2911,7 @@
         <source>Copy Settings</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/compare-feature-flag-drawer/compare-feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">207,209</context>
+          <context context-type="linenumber">207,210</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.loading-failed-try-again" datatype="html">
@@ -3260,7 +3272,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/experiment-drawer/experiment-drawer.component.html</context>
-          <context context-type="linenumber">14,15</context>
+          <context context-type="linenumber">14,16</context>
         </context-group>
       </trans-unit>
       <trans-unit id="expt.overview.select-ff" datatype="html">
@@ -3360,7 +3372,7 @@
         <source>When saved, the following changes would be effective immediately, all experiments related to this feature flag would be affected. We strongly recommend that you pause all those experiments and start over.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/expt-rules-drawer/expt-rules-drawer.component.html</context>
-          <context context-type="linenumber">9,11</context>
+          <context context-type="linenumber">9,12</context>
         </context-group>
       </trans-unit>
       <trans-unit id="expt.rule-drawer.all-rules" datatype="html">
@@ -3590,7 +3602,7 @@
         <source>Define which variation users will see by default when the flag is Enabled or Disabled</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/feature-flag-drawer/feature-flag-drawer.component.html</context>
-          <context context-type="linenumber">174,175</context>
+          <context context-type="linenumber">174,176</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
@@ -3664,7 +3676,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">95</context>
+          <context context-type="linenumber">94</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.remove-rule-confirm" datatype="html">
@@ -3678,7 +3690,7 @@
         <source>If</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/find-rule/rule/rule.component.html</context>
-          <context context-type="linenumber">2,4</context>
+          <context context-type="linenumber">3,4</context>
         </context-group>
       </trans-unit>
       <trans-unit id="core.components.findrule.and" datatype="html">
@@ -3911,7 +3923,7 @@
         <source> to your organization</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
-          <context context-type="linenumber">42,44</context>
+          <context context-type="linenumber">42,45</context>
         </context-group>
       </trans-unit>
       <trans-unit id="guide.manage" datatype="html">
@@ -4064,7 +4076,7 @@
         <source>server</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">89,90</context>
+          <context context-type="linenumber">89,91</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
@@ -4083,7 +4095,7 @@
         <source>client</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">92,93</context>
+          <context context-type="linenumber">92,94</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
@@ -4153,7 +4165,7 @@
         <source>Click to view the template</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.html</context>
-          <context context-type="linenumber">14,17</context>
+          <context context-type="linenumber">14,18</context>
         </context-group>
       </trans-unit>
       <trans-unit id="users.import.users-note" datatype="html">
@@ -4167,7 +4179,7 @@
         <source>Any new user properties in the file will be added, but existing properties will not be changed.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.html</context>
-          <context context-type="linenumber">23,26</context>
+          <context context-type="linenumber">23,27</context>
         </context-group>
       </trans-unit>
       <trans-unit id="users.import.upload-text" datatype="html">
@@ -4279,7 +4291,7 @@
         <source>enabled</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.html</context>
-          <context context-type="linenumber">65,67</context>
+          <context context-type="linenumber">65,68</context>
         </context-group>
       </trans-unit>
       <trans-unit id="license.available" datatype="html">
@@ -4393,7 +4405,7 @@
         <source>Email</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
-          <context context-type="linenumber">15,16</context>
+          <context context-type="linenumber">15,17</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.user-email-invalid" datatype="html">
@@ -4640,11 +4652,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/overview/overview.component.html</context>
-          <context context-type="linenumber">101,102</context>
+          <context context-type="linenumber">101,103</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/overview/overview.component.html</context>
-          <context context-type="linenumber">104,105</context>
+          <context context-type="linenumber">104,106</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
@@ -4690,7 +4702,7 @@
         <source>To obtain a accurate result, a numeraic value must be sent for numeric experiment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.html</context>
-          <context context-type="linenumber">100,103</context>
+          <context context-type="linenumber">100,104</context>
         </context-group>
       </trans-unit>
       <trans-unit id="expt.metric.event-name" datatype="html">
@@ -5020,7 +5032,7 @@
         <source>Add policy</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/policy-drawer/policy-drawer.component.html</context>
-          <context context-type="linenumber">7,9</context>
+          <context context-type="linenumber">7,10</context>
         </context-group>
       </trans-unit>
       <trans-unit id="iam.policies.policy-drawer.policy-name-cannot-be-empty" datatype="html">
@@ -5317,7 +5329,7 @@
         <source>This operation cannot be reverted, are you sure to remove it?</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/props-drawer/props-drawer.component.html</context>
-          <context context-type="linenumber">96</context>
+          <context context-type="linenumber">96,97</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
@@ -5443,7 +5455,7 @@
         <source>URL</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-agent-modal/relay-proxy-agent-modal.component.html</context>
-          <context context-type="linenumber">20,21</context>
+          <context context-type="linenumber">20,22</context>
         </context-group>
       </trans-unit>
       <trans-unit id="relay-proxy.agent-modal.url-validation-message" datatype="html">
@@ -5617,7 +5629,7 @@
         <source>Action</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">119,120</context>
+          <context context-type="linenumber">119,121</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/actions-selector/actions-selector.component.html</context>
@@ -5699,11 +5711,11 @@
         <source>Edit</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">230,231</context>
+          <context context-type="linenumber">231</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/metrics/metrics.component.html</context>
-          <context context-type="linenumber">77,78</context>
+          <context context-type="linenumber">78</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.html</context>
@@ -5715,33 +5727,33 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/relay-proxies/index/index.component.html</context>
-          <context context-type="linenumber">95,96</context>
+          <context context-type="linenumber">96</context>
         </context-group>
       </trans-unit>
       <trans-unit id="relay-proxy.drawer.check-availability" datatype="html">
         <source>Check Availability</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">237,238</context>
+          <context context-type="linenumber">237,239</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">277,278</context>
+          <context context-type="linenumber">277,279</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.sync" datatype="html">
         <source>Sync</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">245,246</context>
+          <context context-type="linenumber">246</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">251,252</context>
+          <context context-type="linenumber">252</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
-          <context context-type="linenumber">258,259</context>
+          <context context-type="linenumber">259</context>
         </context-group>
       </trans-unit>
       <trans-unit id="relay-proxy.drawer.sync-agent-not-allowed" datatype="html">
@@ -6220,7 +6232,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">408,409</context>
+          <context context-type="linenumber">408,410</context>
         </context-group>
       </trans-unit>
       <trans-unit id="integrations.webhooks.webhook-deliveries" datatype="html">
@@ -6264,7 +6276,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
-          <context context-type="linenumber">112,113</context>
+          <context context-type="linenumber">112,114</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.html</context>
@@ -6300,7 +6312,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.html</context>
-          <context context-type="linenumber">67,68</context>
+          <context context-type="linenumber">68</context>
         </context-group>
       </trans-unit>
       <trans-unit id="integrations.webhooks.url-validation-message" datatype="html">
@@ -6482,7 +6494,7 @@
         <source>Secret</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
-          <context context-type="linenumber">203,204</context>
+          <context context-type="linenumber">203,205</context>
         </context-group>
       </trans-unit>
       <trans-unit id="integrations.webhooks.secret-description" datatype="html">
@@ -6662,7 +6674,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">74,75</context>
+          <context context-type="linenumber">74,76</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.workspace-key-cannot-be-empty" datatype="html">
@@ -6904,14 +6916,14 @@
         <source>URL</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
-          <context context-type="linenumber">32,33</context>
+          <context context-type="linenumber">33</context>
         </context-group>
       </trans-unit>
       <trans-unit id="name" datatype="html">
         <source>Name</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/data-sync/remote-sync/remote-sync.component.html</context>
-          <context context-type="linenumber">42,43</context>
+          <context context-type="linenumber">43</context>
         </context-group>
       </trans-unit>
       <trans-unit id="select-type" datatype="html">
@@ -7186,7 +7198,7 @@
         <source>Check experiment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/overview/overview.component.html</context>
-          <context context-type="linenumber">126,128</context>
+          <context context-type="linenumber">126,129</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
@@ -7259,7 +7271,7 @@
         <source>Copy Now?</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.html</context>
-          <context context-type="linenumber">151,152</context>
+          <context context-type="linenumber">151,153</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.compare.no-difference" datatype="html">
@@ -7509,14 +7521,14 @@
         <source>Please click here to create experiments.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">12,14</context>
+          <context context-type="linenumber">12,15</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.expt.set-data-filtering" datatype="html">
         <source>Data filter</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">23,24</context>
+          <context context-type="linenumber">23,25</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.custom-event" datatype="html">
@@ -7607,7 +7619,7 @@
         <source>Need more data to confirm the results of the experiment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
-          <context context-type="linenumber">149,150</context>
+          <context context-type="linenumber">149,151</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.expt.result-not-significant" datatype="html">
@@ -8069,28 +8081,28 @@
         <source>This variation is used by targeting users, remove the reference before it can be safely removed</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">259</context>
+          <context context-type="linenumber">258</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.variation-used-by-rules" datatype="html">
         <source>This variation is used by rules, remove the reference before it can be safely removed</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">264</context>
+          <context context-type="linenumber">263</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.variation-used-by-default-rule" datatype="html">
         <source>This variation is used by default rule, remove the reference before it can be safely removed</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">269</context>
+          <context context-type="linenumber">268</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.variation-used-by-off" datatype="html">
         <source>This variation is used by the value returned when the feature flag is OFF, remove the reference before it can be safely removed</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">274</context>
+          <context context-type="linenumber">273</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.components.details.targeting.settings-ineffective-warning" datatype="html">
@@ -8186,53 +8198,53 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/types/segments-index.ts</context>
-          <context context-type="linenumber">129</context>
+          <context context-type="linenumber">136</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.save-fail" datatype="html">
         <source>Failed to Save</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">336</context>
+          <context context-type="linenumber">335</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.components.details.targeting.fallthrough-mandatory" datatype="html">
         <source>Fallthrough rule can not be empty</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">366</context>
+          <context context-type="linenumber">365</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.components.details.targeting.fallthrough-rollout-sum-must-be-100%" datatype="html">
         <source>The sum of fallthrough rollout must be 100%</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">378</context>
+          <context context-type="linenumber">377</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.components.details.targeting.rule-conditions-must-be-set" datatype="html">
         <source>The conditions of each rule must be set</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">388</context>
+          <context context-type="linenumber">387</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">404</context>
+          <context context-type="linenumber">403</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.components.details.targeting.rule-rollout-must-be-100%" datatype="html">
         <source>The sum of each rule&apos;s rollout must be 100%</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">416</context>
+          <context context-type="linenumber">415</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.idx.filter-by-tags" datatype="html">
         <source>Filter by tags</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
-          <context context-type="linenumber">20,21</context>
+          <context context-type="linenumber">20,22</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.idx.filter-by-status" datatype="html">
@@ -8663,7 +8675,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/test-app/test-app.component.html</context>
-          <context context-type="linenumber">45,46</context>
+          <context context-type="linenumber">45,47</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.next" datatype="html">
@@ -8872,7 +8884,7 @@
         <source>Resource</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/resources-selector/resources-selector.component.html</context>
-          <context context-type="linenumber">4,5</context>
+          <context context-type="linenumber">4,6</context>
         </context-group>
       </trans-unit>
       <trans-unit id="iam.policies.details.when-resource-type-is" datatype="html">
@@ -8954,11 +8966,11 @@
         <source>Team</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/groups/details/details.component.html</context>
-          <context context-type="linenumber">7,8</context>
+          <context context-type="linenumber">8</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/policies/details/details.component.html</context>
-          <context context-type="linenumber">13,14</context>
+          <context context-type="linenumber">14</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.policies" datatype="html">
@@ -9299,7 +9311,7 @@
         <source>Add</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.html</context>
-          <context context-type="linenumber">11,12</context>
+          <context context-type="linenumber">11,13</context>
         </context-group>
       </trans-unit>
       <trans-unit id="iam.team.idx.group" datatype="html">
@@ -9334,7 +9346,7 @@
         <source>Remove from Organization</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.html</context>
-          <context context-type="linenumber">79,80</context>
+          <context context-type="linenumber">79,81</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.remove-from-workspace-confirm" datatype="html">
@@ -9383,11 +9395,11 @@
         <source>View</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.html</context>
-          <context context-type="linenumber">101,103</context>
+          <context context-type="linenumber">102,103</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/relay-proxies/index/index.component.html</context>
-          <context context-type="linenumber">110,112</context>
+          <context context-type="linenumber">111,112</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.activate" datatype="html">
@@ -9942,7 +9954,7 @@
         <source>License</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/license/license.component.html</context>
-          <context context-type="linenumber">10,11</context>
+          <context context-type="linenumber">11</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/license/license.component.html</context>
@@ -10161,7 +10173,7 @@
         <source>Password must be at least 6 characters</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/profile/profile.component.html</context>
-          <context context-type="linenumber">55,57</context>
+          <context context-type="linenumber">55,58</context>
         </context-group>
       </trans-unit>
       <trans-unit id="org.profile.confirm-password" datatype="html">

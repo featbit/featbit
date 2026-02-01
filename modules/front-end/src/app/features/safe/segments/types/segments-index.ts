@@ -43,6 +43,13 @@ export interface ISegmentFlagReference {
   key: string
 }
 
+export type UpdateSegmentTargetingPayload = {
+  included: string[];
+  excluded: string[];
+  rules: IRule[];
+  comment: string;
+}
+
 export class SegmentListFilter {
   constructor(
     public name?: string,

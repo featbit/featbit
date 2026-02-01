@@ -120,7 +120,6 @@ export class SettingComponent {
     this.isLoading = true;
     this.route.paramMap.subscribe( paramMap => {
       this.key = decodeURIComponent(paramMap.get('key'));
-      this.messageQueueService.subscribe(this.messageQueueService.topics.FLAG_TARGETING_CHANGED(this.key), () => this.loadData());
       this.loadData();
     })
 

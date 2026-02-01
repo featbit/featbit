@@ -10,9 +10,6 @@ interface Events {
 export class MessageQueueService {
   topics = {
     FLAG_SETTING_CHANGED: (key: string) => `flag_setting_changed:${key}`,
-    FLAG_TARGETING_CHANGED: (key: string) => `flag_targeting_changed:${key}`,
-    SEGMENT_SETTING_CHANGED: (id: string) => `segment_setting_changed:${id}`,
-    SEGMENT_TARGETING_CHANGED: (id: string) => `segment_targeting_changed:${id}`,
     POLICY_CHANGED: (key: string) => `policy_changed:${key}`,
     CURRENT_ORG_PROJECT_ENV_CHANGED: 'current_org_project_env_changed',
     CURRENT_ENV_SECRETS_CHANGED: 'current_env_secrets_changed',

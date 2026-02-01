@@ -12,8 +12,8 @@ import { EnvUserFilter } from "@features/safe/end-users/types/featureflag-user";
 import { ICondition, IRule } from "@shared/rules";
 import { getPathPrefix } from "@utils/index";
 import { RefTypeEnum } from "@core/components/audit-log/types";
-import { MessageQueueService } from "@services/message-queue.service";
 import { getCurrentProjectEnv } from "@utils/project-env";
+import { finalize } from 'rxjs';
 
 @Component({
     selector: 'segment-targeting',
@@ -50,11 +50,10 @@ export class TargetingComponent implements OnInit {
 
   constructor(
     private router: Router,
-    private route:ActivatedRoute,
+    private route: ActivatedRoute,
     private segmentService: SegmentService,
     private envUserService: EnvUserService,
     private envUserPropService: EnvUserPropService,
-    private messageQueueService: MessageQueueService,
     private msg: NzMessageService
   ) {
     // user properties
@@ -67,23 +66,12 @@ export class TargetingComponent implements OnInit {
   ngOnInit(): void {
     this.currentEnvId = getCurrentProjectEnv().envId;
 
-    this.route.paramMap.subscribe( paramMap => {
+    this.route.paramMap.subscribe(paramMap => {
       this.id = decodeURIComponent(paramMap.get('id'));
-      this.messageQueueService.subscribe(this.messageQueueService.topics.SEGMENT_SETTING_CHANGED(this.id), () => this.refreshData());
       this.loadData();
       this.segmentService.getFeatureFlagReferences(this.id).subscribe((flags: ISegmentFlagReference[]) => {
         this.flagReferences = [...flags];
       });
-    })
-  }
-
-  private async refreshData() {
-    return this.segmentService.getSegment(this.id).subscribe((result: ISegment) => {
-      if (result) {
-        const { name, description } = result;
-        this.segmentDetail.name = name;
-        this.segmentDetail.description = description;
-      }
     })
   }
 
@@ -148,18 +136,20 @@ export class TargetingComponent implements OnInit {
   public onSave(data: any) {
     this.isLoading = true;
 
-    this.segmentService.update({...this.segmentDetail.dataToSave, comment: data.comment}).subscribe({
-      next: (result) => {
-        this.msg.success($localize `:@@common.operation-success:Operation succeeded`);
-        this.messageQueueService.emit(this.messageQueueService.topics.SEGMENT_TARGETING_CHANGED(this.id));
-        this.loadSegment(result);
-        this.isLoading = false;
-      },
-      error: _ => {
-        this.msg.error($localize `:@@common.operation-failed:Operation failed`);
-        this.isLoading = false;
-      }
-    });
+    const { included, excluded, rules } = this.segmentDetail.dataToSave;
+    const payload = {
+      included,
+      excluded,
+      rules,
+      comment: data.comment
+    };
+
+    this.segmentService.updateTargeting(this.id, payload)
+      .pipe(finalize(() => this.isLoading = false))
+      .subscribe({
+        next: () => this.msg.success($localize`:@@common.operation-success:Operation succeeded`),
+        error: () => this.msg.error($localize`:@@common.operation-failed:Operation failed`)
+      });
 
     this.reviewModalVisible = false;
   }

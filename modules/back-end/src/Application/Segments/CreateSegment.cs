@@ -3,17 +3,32 @@ using Application.Bases.Exceptions;
 using Application.Users;
 using Domain.AuditLogs;
 using Domain.Segments;
+using Domain.Targeting;
 using Domain.Workspaces;
 
 namespace Application.Segments;
 
-public class CreateSegment : SegmentBase, IRequest<Segment>
+public class CreateSegment : IRequest<Segment>
 {
     public Guid WorkspaceId { get; set; }
 
     public Guid EnvId { get; set; }
 
     public string Type { get; set; }
+
+    public string Name { get; set; }
+
+    public string Key { get; set; }
+
+    public string Description { get; set; }
+
+    public string[] Scopes { get; set; } = [];
+
+    public string[] Included { get; set; } = [];
+
+    public string[] Excluded { get; set; } = [];
+
+    public ICollection<MatchRule> Rules { get; set; } = [];
 
     public Segment AsSegment()
     {
@@ -25,10 +40,26 @@ public class CreateSegmentValidator : AbstractValidator<CreateSegment>
 {
     public CreateSegmentValidator()
     {
-        Include(new SegmentBaseValidator());
-
         RuleFor(x => x.Type)
             .Must(SegmentType.IsDefined).WithErrorCode(ErrorCodes.Invalid("type"));
+
+        RuleFor(x => x.Name)
+            .NotEmpty().WithErrorCode(ErrorCodes.Invalid("name"));
+
+        RuleFor(x => x.Key)
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("key"))
+            .Matches(Segment.KeyPattern).WithErrorCode(ErrorCodes.Invalid("key"));
+
+        RuleFor(x => x.Scopes)
+            .NotEmpty().WithErrorCode(ErrorCodes.Invalid("scopes"))
+            .Must(scopes => !scopes.Any(x => x.Contains('*'))).WithErrorCode(ErrorCodes.Invalid("scopes"));
+
+        RuleFor(x => x.Rules)
+            .Must(rules =>
+            {
+                var conditions = rules.SelectMany(x => x.Conditions);
+                return conditions.All(x => !x.IsSegmentCondition());
+            }).WithErrorCode(ErrorCodes.Invalid("rules"));
     }
 }
 

@@ -48,7 +48,13 @@ public class UpdateVariationsHandler : IRequestHandler<UpdateVariations, bool>
         await _service.UpdateAsync(flag);
 
         // publish on feature flag change notification
-        var notification = new OnFeatureFlagChanged(flag, Operations.Update, dataChange, _currentUser.Id);
+        var notification = new OnFeatureFlagChanged(
+            flag, 
+            Operations.Update, 
+            dataChange, 
+            _currentUser.Id,
+            comment: "Updated variations"
+        );
         await _publisher.Publish(notification, cancellationToken);
 
         return true;

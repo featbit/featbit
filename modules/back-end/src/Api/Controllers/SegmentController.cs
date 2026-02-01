@@ -85,13 +85,39 @@ public class SegmentController : ApiControllerBase
         return Ok(segment);
     }
 
-    [HttpPut("{id:guid}")]
-    public async Task<ApiResponse<Segment>> UpdateAsync(Guid id, UpdateSegment request)
+    /// <summary>
+    /// Update a segment name
+    /// </summary>
+    [OpenApi]
+    [HttpPut("{id:guid}/name")]
+    public async Task<ApiResponse<bool>> UpdateNameAsync(Guid id, UpdateName request)
     {
         request.Id = id;
 
-        var segment = await Mediator.Send(request);
-        return Ok(segment);
+        var success = await Mediator.Send(request);
+        return Ok(success);
+    }
+
+    /// <summary>
+    /// Update a segment description
+    /// </summary>
+    [OpenApi]
+    [HttpPut("{id:guid}/description")]
+    public async Task<ApiResponse<bool>> UpdateDescriptionAsync(Guid id, UpdateDescription request)
+    {
+        request.Id = id;
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
+    }
+
+    [HttpPut("{id:guid}/targeting")]
+    public async Task<ApiResponse<bool>> UpdateTargetingAsync(Guid id, UpdateTargeting request)
+    {
+        request.Id = id;
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
     }
 
     /// <summary>
