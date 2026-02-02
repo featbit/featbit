@@ -1,4 +1,5 @@
 using Application.Bases;
+using Application.Bases.Exceptions;
 using Application.Users;
 using Domain.AuditLogs;
 using Domain.FeatureFlags;
@@ -12,6 +13,8 @@ public class UpdateVariations : IRequest<bool>
     public string Key { get; set; }
 
     public ICollection<Variation> Variations { get; set; }
+
+    public Guid Revision { get; set; }
 }
 
 public class UpdateVariationsValidator : AbstractValidator<UpdateVariations>
@@ -25,37 +28,32 @@ public class UpdateVariationsValidator : AbstractValidator<UpdateVariations>
     }
 }
 
-public class UpdateVariationsHandler : IRequestHandler<UpdateVariations, bool>
+public class UpdateVariationsHandler(
+    IFeatureFlagService service,
+    ICurrentUser currentUser,
+    IPublisher publisher)
+    : IRequestHandler<UpdateVariations, bool>
 {
-    private readonly IFeatureFlagService _service;
-    private readonly ICurrentUser _currentUser;
-    private readonly IPublisher _publisher;
-
-    public UpdateVariationsHandler(
-        IFeatureFlagService service,
-        ICurrentUser currentUser,
-        IPublisher publisher)
-    {
-        _service = service;
-        _currentUser = currentUser;
-        _publisher = publisher;
-    }
-
     public async Task<bool> Handle(UpdateVariations request, CancellationToken cancellationToken)
     {
-        var flag = await _service.GetAsync(request.EnvId, request.Key);
-        var dataChange = flag.UpdateVariations(request.Variations, _currentUser.Id);
-        await _service.UpdateAsync(flag);
+        var flag = await service.GetAsync(request.EnvId, request.Key);
+        if (!flag.Revision.Equals(request.Revision))
+        {
+            throw new ConflictException(nameof(FeatureFlag), flag.Id);
+        }
+
+        var dataChange = flag.UpdateVariations(request.Variations, currentUser.Id);
+        await service.UpdateAsync(flag);
 
         // publish on feature flag change notification
         var notification = new OnFeatureFlagChanged(
-            flag, 
-            Operations.Update, 
-            dataChange, 
-            _currentUser.Id,
+            flag,
+            Operations.Update,
+            dataChange,
+            currentUser.Id,
             comment: "Updated variations"
         );
-        await _publisher.Publish(notification, cancellationToken);
+        await publisher.Publish(notification, cancellationToken);
 
         return true;
     }
