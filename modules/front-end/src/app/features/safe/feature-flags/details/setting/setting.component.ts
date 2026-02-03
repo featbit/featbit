@@ -1,6 +1,7 @@
 import { Component, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
+import { NzModalService } from 'ng-zorro-antd/modal';
 import { MessageQueueService } from '@services/message-queue.service';
 import { copyToClipboard, getPathPrefix, uuidv4 } from "@utils/index";
 import { editor } from "monaco-editor";
@@ -20,6 +21,7 @@ import { PermissionsService } from "@services/permissions.service";
 import { permissionActions } from "@shared/policy";
 import { PermissionLicenseService } from "@services/permission-license.service";
 import { finalize } from "rxjs/operators";
+import { handleUpdateError } from "@features/safe/feature-flags/types/feature-flag";
 
 @Component({
     selector: 'ff-setting',
@@ -47,6 +49,7 @@ export class SettingComponent {
     );
   }
 
+  revision: string = '';
   featureFlag: FeatureFlag = {} as FeatureFlag;
   isLoading = true;
   isEditingTitle = false;
@@ -114,13 +117,17 @@ export class SettingComponent {
     private formBuilder: FormBuilder,
     private router: Router,
     private permissionsService: PermissionsService,
-    private permissionLicenseService: PermissionLicenseService
+    private permissionLicenseService: PermissionLicenseService,
+    private modal: NzModalService
   ) {
-    this.isLoading = true;
     this.route.paramMap.subscribe( paramMap => {
       this.key = decodeURIComponent(paramMap.get('key'));
+      this.messageQueueService.subscribe(
+        this.messageQueueService.topics.FLAG_TARGETING_CHANGED(this.key),
+        (revision: string) => this.revision = revision
+      );
       this.loadData();
-    })
+    });
 
     this.featureFlagService.getAllTags().subscribe(allTags => {
       this.allTags = allTags;
@@ -146,12 +153,15 @@ export class SettingComponent {
   }
 
   private loadData() {
-    this.featureFlagService.getByKey(this.key).subscribe({
+    this.isLoading = true;
+    this.featureFlagService.getByKey(this.key)
+    .pipe(finalize(() => this.isLoading = false))
+    .subscribe({
       next: (result: IFeatureFlag) => {
         this.featureFlag = new FeatureFlag(result);
-        this.isLoading = false;
+        this.revision = result.revision;
       },
-      error: () => this.isLoading = false
+      error: () => this.message.error($localize`:@@common.failed-to-load-data:Failed to load data`)
     });
   }
 
@@ -169,12 +179,11 @@ export class SettingComponent {
     this.featureFlagService.toggleStatus(this.key, !isEnabled)
     .pipe(finalize(() => this.isToggling = false))
     .subscribe({
-      next: () => {
-        this.message.success($localize`:@@common.operation-success:Operation succeeded`);
+      next: (revision) => {
         this.featureFlag.isEnabled = !isEnabled;
-        this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key))
+        this.onSettingUpdated(revision);
       },
-      error: err => this.message.error(err.error)
+      error: () => this.message.error($localize`:@@common.operation-failed:Operation failed`)
     });
   }
 
@@ -298,15 +307,13 @@ export class SettingComponent {
     }
 
     const variations = this.variations.getRawValue();
-    this.featureFlagService.updateVariations(this.key, variations).subscribe({
-      next: () => {
+    this.featureFlagService.updateVariations(this.key, variations, this.revision).subscribe({
+      next: (revision) => {
         this.featureFlag.variations = variations;
-        this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key));
         this.editVariationModalVisible = false;
-
-        this.message.success($localize`:@@common.operation-success:Operation succeeded`);
+        this.onSettingUpdated(revision);
       },
-      error: err => this.message.error(err.error)
+      error: (err) => handleUpdateError(err, this.message, this.modal)
     });
   }
 
@@ -381,9 +388,9 @@ export class SettingComponent {
     const { name } = this.featureFlag;
 
     this.featureFlagService.updateName(this.key, name).subscribe({
-      next: () => {
-        this.message.success($localize `:@@common.operation-success:Operation succeeded`);
+      next: (revision) => {
         this.isEditingTitle = false;
+        this.onSettingUpdated(revision);
       },
       error: err => this.message.error(err.error)
     });
@@ -393,11 +400,11 @@ export class SettingComponent {
     const { description } = this.featureFlag;
 
     this.featureFlagService.updateDescription(this.key, description).subscribe({
-      next: () => {
-        this.message.success($localize `:@@common.operation-success:Operation succeeded`);
+      next: (revision) => {
         this.isEditingDescription = false;
+        this.onSettingUpdated(revision);
       },
-      error: err => this.message.error(err.error)
+      error: () => this.message.error($localize`:@@common.operation-failed:Operation failed`)
     });
   }
 
@@ -410,13 +417,12 @@ export class SettingComponent {
 
     const { disabledVariationId } = this.featureFlag;
 
-    this.featureFlagService.updateOffVariation(this.key, disabledVariationId).subscribe({
-      next: () => {
-        this.message.success($localize `:@@common.operation-success:Operation succeeded`);
+    this.featureFlagService.updateOffVariation(this.key, disabledVariationId, this.revision).subscribe({
+      next: (revision) => {
         this.isEditingTitle = false;
-        this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key))
+        this.onSettingUpdated(revision);
       },
-      error: err => this.message.error(err.error)
+      error: (err) => handleUpdateError(err, this.message, this.modal)
     });
   }
 
@@ -449,5 +455,11 @@ export class SettingComponent {
         this.message.error($localize `:@@common.operation-failed:Operation failed`);
       }
     });
+  }
+
+  private onSettingUpdated(revision: string) {
+    this.message.success($localize `:@@common.operation-success:Operation succeeded`);
+    this.revision = revision;
+    this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key));
   }
 }

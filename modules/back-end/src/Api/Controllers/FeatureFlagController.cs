@@ -145,7 +145,7 @@ public class FeatureFlagController : ApiControllerBase
     [OpenApi]
     [HttpPut("{key}/toggle/{status}")]
     [Authorize(Permissions.ToggleFlag)]
-    public async Task<ApiResponse<bool>> ToggleAsync(Guid envId, string key, bool status)
+    public async Task<ApiResponse<Guid>> ToggleAsync(Guid envId, string key, bool status)
     {
         var request = new ToggleFeatureFlag
         {
@@ -154,44 +154,44 @@ public class FeatureFlagController : ApiControllerBase
             Status = status
         };
 
-        var success = await Mediator.Send(request);
-        return Ok(success);
+        var revision = await Mediator.Send(request);
+        return Ok(revision);
     }
 
     [OpenApi]
     [HttpPut("{key}/name")]
     [Authorize(Permissions.UpdateFlagName)]
-    public async Task<ApiResponse<bool>> UpdateNameAsync(Guid envId, string key, UpdateName request)
+    public async Task<ApiResponse<Guid>> UpdateNameAsync(Guid envId, string key, UpdateName request)
     {
         request.Key = key;
         request.EnvId = envId;
 
-        var success = await Mediator.Send(request);
-        return Ok(success);
+        var revision = await Mediator.Send(request);
+        return Ok(revision);
     }
 
     [OpenApi]
     [HttpPut("{key}/description")]
     [Authorize(Permissions.UpdateFlagDescription)]
-    public async Task<ApiResponse<bool>> UpdateDescriptionAsync(Guid envId, string key, UpdateDescription request)
+    public async Task<ApiResponse<Guid>> UpdateDescriptionAsync(Guid envId, string key, UpdateDescription request)
     {
         request.Key = key;
         request.EnvId = envId;
 
-        var success = await Mediator.Send(request);
-        return Ok(success);
+        var revision = await Mediator.Send(request);
+        return Ok(revision);
     }
 
     [OpenApi]
     [HttpPut("{key}/off-variation")]
     [Authorize(Permissions.UpdateFlagOffVariation)]
-    public async Task<ApiResponse<bool>> UpdateOffVariationAsync(Guid envId, string key, UpdateOffVariation request)
+    public async Task<ApiResponse<Guid>> UpdateOffVariationAsync(Guid envId, string key, UpdateOffVariation request)
     {
         request.Key = key;
         request.EnvId = envId;
 
-        var success = await Mediator.Send(request);
-        return Ok(success);
+        var revision = await Mediator.Send(request);
+        return Ok(revision);
     }
 
     /// <summary>
@@ -220,13 +220,13 @@ public class FeatureFlagController : ApiControllerBase
     [OpenApi]
     [HttpPut("{key}/variations")]
     [Authorize(Permissions.UpdateFlagVariations)]
-    public async Task<ApiResponse<bool>> UpdateVariationsAsync(Guid envId, string key, UpdateVariations request)
+    public async Task<ApiResponse<Guid>> UpdateVariationsAsync(Guid envId, string key, UpdateVariations request)
     {
         request.Key = key;
         request.EnvId = envId;
 
-        var success = await Mediator.Send(request);
-        return Ok(success);
+        var revision = await Mediator.Send(request);
+        return Ok(revision);
     }
 
     /// <summary>
@@ -351,14 +351,14 @@ public class FeatureFlagController : ApiControllerBase
     }
 
     [HttpPut("{key}/targeting")]
-    public async Task<ApiResponse<bool>> UpdateTargetingAsync(Guid envId, string key, UpdateTargeting request)
+    public async Task<ApiResponse<Guid>> UpdateTargetingAsync(Guid envId, string key, UpdateTargeting request)
     {
         request.OrgId = OrgId;
         request.Key = key;
         request.EnvId = envId;
 
-        var success = await Mediator.Send(request);
-        return Ok(success);
+        var revision = await Mediator.Send(request);
+        return Ok(revision);
     }
 
     [HttpPost("copy-to-env-precheck/{targetEnvId:guid}")]

@@ -269,21 +269,23 @@ export class IndexComponent implements OnInit {
   }
 
   archive(flag: IFeatureFlagListItem) {
-    let msg = $localize`:@@ff.archive-flag-warning:Flag <strong>${flag.name}</strong> will be archived, and the value defined in your code will be returned for all your users. Remove code references to <strong>${flag.key}</strong> from your application before archiving.`;
+    const rn = getFlagRN(flag.key, flag.tags);
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(rn, permissionActions.ArchiveFlag);
+    if (!isGranted) {
+      this.msg.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
+    let msg = $localize`:@@ff.archive-flag-warning:After archiving, the fallback value defined in your code will be returned for all your users. Be sure to remove code references to <strong>${flag.key}</strong> from your application before archiving.`;
 
     this.modal.confirm({
       nzContent: msg,
-      nzTitle: $localize`:@@ff.are-you-sure-to-archive-ff:Are you sure to archive this feature flag?`,
+      nzTitle: $localize`:@@ff.are-you-sure-to-archive-ff:Are you sure to archive flag "${flag.name}"`,
       nzCentered: true,
-      nzClassName: 'information-modal-dialog',
+      nzClassName: 'warning-modal-dialog',
+      nzOkText: $localize`:@@common.archive:Archive`,
+      nzWidth: '550px',
       nzOnOk: () => {
-        const rn = getFlagRN(flag.key, flag.tags);
-        const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(rn, permissionActions.ArchiveFlag);
-        if (!isGranted) {
-          this.msg.warning(this.permissionsService.genericDenyMessage);
-          return;
-        }
-
         this.featureFlagService.archive(flag.key).subscribe({
             next: () => {
               this.msg.success($localize`:@@common.operation-success:Operation succeeded`);

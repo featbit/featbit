@@ -3,7 +3,7 @@ using Domain.AuditLogs;
 
 namespace Application.FeatureFlags;
 
-public class UpdateDescription : IRequest<bool>
+public class UpdateDescription : IRequest<Guid>
 {
     public Guid EnvId { get; set; }
 
@@ -12,38 +12,33 @@ public class UpdateDescription : IRequest<bool>
     public string Description { get; set; }
 }
 
-public class UpdateDescriptionHandler : IRequestHandler<UpdateDescription, bool>
+public class UpdateDescriptionHandler(
+    IFeatureFlagService service,
+    ICurrentUser currentUser,
+    IPublisher publisher)
+    : IRequestHandler<UpdateDescription, Guid>
 {
-    private readonly IFeatureFlagService _service;
-    private readonly ICurrentUser _currentUser;
-    private readonly IPublisher _publisher;
-
-    public UpdateDescriptionHandler(
-        IFeatureFlagService service,
-        ICurrentUser currentUser,
-        IPublisher publisher)
+    public async Task<Guid> Handle(UpdateDescription request, CancellationToken cancellationToken)
     {
-        _service = service;
-        _currentUser = currentUser;
-        _publisher = publisher;
-    }
+        var flag = await service.GetAsync(request.EnvId, request.Key);
+        if (flag.Description == request.Description)
+        {
+            return flag.Revision;
+        }
 
-    public async Task<bool> Handle(UpdateDescription request, CancellationToken cancellationToken)
-    {
-        var flag = await _service.GetAsync(request.EnvId, request.Key);
-        var dataChange = flag.UpdateDescription(request.Description, _currentUser.Id);
-        await _service.UpdateAsync(flag);
+        var dataChange = flag.UpdateDescription(request.Description, currentUser.Id);
+        await service.UpdateAsync(flag);
 
         // publish on feature flag change notification
         var notification = new OnFeatureFlagChanged(
-            flag, 
-            Operations.Update, 
-            dataChange, 
-            _currentUser.Id,
+            flag,
+            Operations.Update,
+            dataChange,
+            currentUser.Id,
             comment: "Updated description"
         );
-        await _publisher.Publish(notification, cancellationToken);
+        await publisher.Publish(notification, cancellationToken);
 
-        return true;
+        return flag.Revision;
     }
 }
