@@ -11,7 +11,7 @@ public class PatchResult
         var ok = new PatchResult
         {
             Success = true,
-            Message = string.Empty,
+            Message = string.Empty
         };
 
         return ok;
