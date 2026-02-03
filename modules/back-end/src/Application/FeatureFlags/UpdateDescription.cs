@@ -21,6 +21,11 @@ public class UpdateDescriptionHandler(
     public async Task<Guid> Handle(UpdateDescription request, CancellationToken cancellationToken)
     {
         var flag = await service.GetAsync(request.EnvId, request.Key);
+        if (flag.Description == request.Description)
+        {
+            return flag.Revision;
+        }
+
         var dataChange = flag.UpdateDescription(request.Description, currentUser.Id);
         await service.UpdateAsync(flag);
 

@@ -31,6 +31,11 @@ public class UpdateNameHandler(
     public async Task<Guid> Handle(UpdateName request, CancellationToken cancellationToken)
     {
         var flag = await service.GetAsync(request.EnvId, request.Key);
+        if (flag.Name == request.Name)
+        {
+            return flag.Revision;
+        }
+
         var dataChange = flag.UpdateName(request.Name, currentUser.Id);
         await service.UpdateAsync(flag);
 

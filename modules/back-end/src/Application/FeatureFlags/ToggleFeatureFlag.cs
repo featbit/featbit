@@ -31,6 +31,11 @@ public class ToggleFeatureFlagHandler : IRequestHandler<ToggleFeatureFlag, Guid>
     public async Task<Guid> Handle(ToggleFeatureFlag request, CancellationToken cancellationToken)
     {
         var flag = await _service.GetAsync(request.EnvId, request.Key);
+        if (flag.IsEnabled == request.Status)
+        {
+            return flag.Revision;
+        }
+
         var dataChange = flag.Toggle(_currentUser.Id, request.Status);
         await _service.UpdateAsync(flag);
 

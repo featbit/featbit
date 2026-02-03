@@ -20,7 +20,6 @@ import { getCurrentLicense } from "@utils/project-env";
 import { PermissionsService } from "@services/permissions.service";
 import { permissionActions } from "@shared/policy";
 import { PermissionLicenseService } from "@services/permission-license.service";
-import { finalize } from "rxjs/operators";
 import { handleUpdateError } from "@features/safe/feature-flags/types/feature-flag";
 import { NzModalService } from "ng-zorro-antd/modal";
 
@@ -152,10 +151,7 @@ export class TargetingComponent implements OnInit {
   }
 
   private async refreshFeatureFlag() {
-    this.isLoading = true;
-    this.featureFlagService.getByKey(this.key)
-    .pipe(finalize(() => this.isLoading = false))
-    .subscribe({
+    this.featureFlagService.getByKey(this.key).subscribe({
       next: (result: IFeatureFlag) => {
         this.featureFlag = new FeatureFlag(result);
         this.featureFlag.variations.forEach(v => {
