@@ -12,7 +12,12 @@ import {
   IFeatureFlagListModel
 } from "@features/safe/feature-flags/types/feature-flag";
 import { catchError } from "rxjs/operators";
-import { IFeatureFlag, IFeatureFlagTargeting, ISettingPayload } from "@features/safe/feature-flags/types/details";
+import {
+  CreateChangeRequestPayload,
+  CreateSchedulePayload,
+  IFeatureFlag,
+  UpdateFlagTargetingPayload
+} from "@features/safe/feature-flags/types/details";
 import { IInsights, IInsightsFilter } from "@features/safe/feature-flags/details/insights/types";
 import { IVariation } from "@shared/rules";
 import { IPendingChanges } from "@core/components/pending-changes-drawer/types";
@@ -36,9 +41,9 @@ export class FeatureFlagService {
   constructor(private http: HttpClient) {
   }
 
-  toggleStatus(key: string, status: boolean): Observable<any> {
+  toggleStatus(key: string, status: boolean): Observable<string> {
     const url = `${this.baseUrl}/${key}/toggle/${status}`;
-    return this.http.put(url, {})
+    return this.http.put<string>(url, {})
   }
 
   getByKey(key: string): Observable<IFeatureFlag> {
@@ -127,28 +132,28 @@ export class FeatureFlagService {
     return this.http.put<boolean>(url, {});
   }
 
-  updateName(key: string, name: string): Observable<boolean> {
+  updateName(key: string, name: string): Observable<string> {
     const url = `${this.baseUrl}/${key}/name`;
 
-    return this.http.put<boolean>(url, {name});
+    return this.http.put<string>(url, {name});
   }
 
-  updateDescription(key: string, description: string): Observable<boolean> {
+  updateDescription(key: string, description: string): Observable<string> {
     const url = `${this.baseUrl}/${key}/description`;
 
-    return this.http.put<boolean>(url, {description});
+    return this.http.put<string>(url, {description});
   }
 
-  updateOffVariation(key: string, offVariationId: string): Observable<boolean> {
+  updateOffVariation(key: string, offVariationId: string, revision: string): Observable<string> {
     const url = `${this.baseUrl}/${key}/off-variation`;
 
-    return this.http.put<boolean>(url, {offVariationId});
+    return this.http.put<string>(url, {offVariationId, revision});
   }
 
-  updateVariations(key: string, variations: IVariation[]): Observable<boolean> {
+  updateVariations(key: string, variations: IVariation[], revision: string): Observable<string> {
     const url = `${this.baseUrl}/${key}/variations`;
 
-    return this.http.put<boolean>(url, { variations });
+    return this.http.put<string>(url, { variations, revision });
   }
 
   delete(key: string): Observable<boolean> {
@@ -187,52 +192,32 @@ export class FeatureFlagService {
     return this.http.post(url, payload);
   }
 
-  archive(key: string): Observable<any> {
+  archive(key: string): Observable<boolean> {
     const url = `${this.baseUrl}/${key}/archive`;
-    return this.http.put(url, {});
+    return this.http.put<boolean>(url, {});
   }
 
-  restore(key: string): Observable<any> {
+  restore(key: string): Observable<boolean> {
     const url = `${this.baseUrl}/${key}/restore`;
-    return this.http.put(url, {});
+    return this.http.put<boolean>(url, {});
   }
 
-  updateTargeting(targeting: IFeatureFlagTargeting, comment?: string): Observable<boolean> {
-    const url = `${this.baseUrl}/${targeting.key}/targeting`;
+  updateTargeting(key: string,  payload: UpdateFlagTargetingPayload): Observable<string> {
+    const url = `${this.baseUrl}/${key}/targeting`;
 
-    const payload = {
-      targeting,
-      comment
-    };
-
-    return this.http.put<boolean>(url, payload);
+    return this.http.put<string>(url, payload);
   }
 
-  createSchedule(targeting: IFeatureFlagTargeting, scheduledTime: Date, title: string, reviewers: string[], reason: string, withChangeRequest: boolean = false): Observable<boolean> {
-    const url = `${this.baseUrl}/${targeting.key}/schedules`;
+  createSchedule(key: string, payload: CreateSchedulePayload): Observable<string> {
+    const url = `${this.baseUrl}/${key}/schedules`;
 
-    const payload = {
-      targeting,
-      scheduledTime,
-      title,
-      reason,
-      reviewers,
-      withChangeRequest
-    };
-
-    return this.http.post<boolean>(url, payload);
+    return this.http.post<string>(url, payload);
   }
 
-  createChangeRequest(targeting: IFeatureFlagTargeting, reviewers: string[], reason: string): Observable<boolean> {
-    const url = `${this.baseUrl}/${targeting.key}/change-requests`;
+  createChangeRequest(key: string, payload: CreateChangeRequestPayload): Observable<string> {
+    const url = `${this.baseUrl}/${key}/change-requests`;
 
-    const payload = {
-      targeting,
-      reviewers,
-      reason
-    };
-
-    return this.http.post<boolean>(url, payload);
+    return this.http.post<string>(url, payload);
   }
 
   getAllTags(): Observable<string[]> {

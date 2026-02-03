@@ -32,6 +32,7 @@ export class FeatureFlag implements IFeatureFlag {
   creatorId: string;
   disabledVariationId: string;
   envId: string;
+  revision: string;
   exptIncludeAllTargets: boolean;
   tags: string[];
   fallthrough: IFallthrough;
@@ -52,6 +53,7 @@ export class FeatureFlag implements IFeatureFlag {
 export interface IFeatureFlag {
   id: string,
   envId: string,
+  revision: string,
   name: string,
   key: string,
   variationType: VariationTypeEnum,
@@ -71,13 +73,30 @@ export interface IFeatureFlag {
   description: string
 }
 
-export interface IFeatureFlagTargeting {
-  key: string,
+export type FlagTargeting = {
   targetUsers: IVariationUser[],
   rules: IRule[],
   fallthrough: IFallthrough,
   exptIncludeAllTargets: boolean
 }
+
+export type UpdateFlagTargetingPayload = FlagTargeting & {
+  revision: string,
+  comment: string
+}
+
+export type CreateSchedulePayload = FlagTargeting & {
+  scheduledTime: Date,
+  title: string,
+  reviewers: string[],
+  reason: string,
+  withChangeRequest: boolean
+};
+
+export type CreateChangeRequestPayload = FlagTargeting & {
+  reviewers: string[],
+  reason: string
+};
 
 export interface IFallthrough {
   includedInExpt: boolean,
