@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { PermissionsService } from "@services/permissions.service";
 import { getCurrentWorkspace } from "@utils/project-env";
 import { License, LicenseFeatureEnum } from "@shared/types";
-import { IamPolicyAction } from "@shared/policy";
+import { IamPolicyAction, permissionActions, ResourceTypeEnum } from "@shared/policy";
 
 
 @Injectable({
@@ -16,32 +16,54 @@ export class PermissionLicenseService {
     this.license = new License(workspace.license);
   }
 
+  private getLicenseFeatureByAction(action: IamPolicyAction): LicenseFeatureEnum | null {
+    const found = Object.values(permissionActions).find(pa => pa.name === action.name && pa.resourceType === action.resourceType);
+
+    // currently, only fine-grained actions need license
+    if (found?.isFineGrainedAction) {
+      return LicenseFeatureEnum.FineGrainedAccessControl;
+    }
+
+    return null;
+  }
+
   isGrantedByLicense(feature: LicenseFeatureEnum): boolean {
     return this.license.isGranted(feature);
   }
 
   /**
-   * Checks whether an action is allowed by combining license constraints
-   * with IAM policy permissions.
+   * Checks if a user is granted access based on both license and permission policies.
    *
-   * Evaluation order:
-   * 1. The feature must be granted by the current license.
-   * 2. If the license allows the feature, IAM permissions are evaluated.
-   * 3. If the license does NOT allow the feature, `defaultValue` is returned
-   *    and IAM permissions are NOT checked.
+   * This method evaluates access control through a multi-layered approach:
+   * 1. First checks if the user has the required permission via IAM policy
+   * 2. Then validates if the action requires a specific license feature
+   * 3. If a license feature is required, ensures the license is valid and grants the feature
+   *
+   * Special handling for expired licenses:
+   * - For feature flag resources, falls back to checking FlagAllActions permission
+   * - For other resources, access is denied
    *
    * @param rn Resource name to check permissions against
    * @param action IAM action to evaluate
-   * @param feature License feature required for this action
-   * @param fallbackValue Value to return when the license does not grant the feature
    * @returns `true` if the action is allowed, otherwise `false`
    */
-  isGrantedByLicenseAndPermission(rn: string, action: IamPolicyAction, feature: LicenseFeatureEnum, fallbackValue: boolean): boolean {
-    const isGrantedByLicense = this.license.isGranted(feature);
-    if (!isGrantedByLicense) {
-      return fallbackValue;
+  isGrantedByLicenseAndPermission(rn: string, action: IamPolicyAction): boolean {
+    const isGrantedByPolicy = this.permissionService.isGranted(rn, action);
+    const feature = this.getLicenseFeatureByAction(action);
+
+    if (!feature) {
+      return isGrantedByPolicy;
     }
 
-    return this.permissionService.isGranted(rn, action);
+    if (!this.license.isExpired()) {
+      return this.license.isGranted(feature) && isGrantedByPolicy;
+    }
+
+    // special handling for expired license
+    if (action.resourceType === ResourceTypeEnum.Flag) {
+      return this.permissionService.isGranted(rn, permissionActions.FlagAllActions);
+    }
+
+    return false;
   }
 }

@@ -141,9 +141,9 @@ export class TargetingComponent implements OnInit {
         this.key = decodeURIComponent(paramMap.get('key'));
         this.messageQueueService.subscribe(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key), () => this.refreshFeatureFlag());
         await this.loadData();
-        this.canUpdateDefaultRule = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.UpdateFlagDefaultRule, LicenseFeatureEnum.FineGrainedAccessControl, true);
-        this.canUpdateIndividualTargeting = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.UpdateFlagIndividualTargeting, LicenseFeatureEnum.FineGrainedAccessControl, true);
-        this.canUpdateRules = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.UpdateFlagRules, LicenseFeatureEnum.FineGrainedAccessControl, true);
+        this.canUpdateDefaultRule = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.UpdateFlagDefaultRule);
+        this.canUpdateIndividualTargeting = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.UpdateFlagIndividualTargeting);
+        this.canUpdateRules = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.UpdateFlagRules);
       }
     });
   }
