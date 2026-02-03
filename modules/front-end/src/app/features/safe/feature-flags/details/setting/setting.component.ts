@@ -123,7 +123,10 @@ export class SettingComponent {
   ) {
     this.route.paramMap.subscribe( paramMap => {
       this.key = decodeURIComponent(paramMap.get('key'));
-      this.messageQueueService.subscribe(this.messageQueueService.topics.FLAG_TARGETING_CHANGED(this.key), () => this.loadData());
+      this.messageQueueService.subscribe(
+        this.messageQueueService.topics.FLAG_TARGETING_CHANGED(this.key),
+        (revision: string) => this.revision = revision
+      );
       this.loadData();
     });
 
@@ -413,9 +416,9 @@ export class SettingComponent {
       return;
     }
 
-    const { disabledVariationId, revision } = this.featureFlag;
+    const { disabledVariationId } = this.featureFlag;
 
-    this.featureFlagService.updateOffVariation(this.key, disabledVariationId, revision).subscribe({
+    this.featureFlagService.updateOffVariation(this.key, disabledVariationId, this.revision).subscribe({
       next: (revision) => {
         this.isEditingTitle = false;
         this.onSettingUpdated(revision);

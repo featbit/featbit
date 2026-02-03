@@ -157,9 +157,7 @@ export class TargetingComponent implements OnInit {
     .pipe(finalize(() => this.isLoading = false))
     .subscribe({
       next: (result: IFeatureFlag) => {
-        this.featureFlag.isEnabled = result.isEnabled;
-        this.featureFlag.variations = [ ...result.variations ];
-        this.featureFlag.originalData.variations = [ ...result.variations ];
+        this.featureFlag = new FeatureFlag(result);
         this.featureFlag.variations.forEach(v => {
           this.targetingUsersByVariation[v.id] = this.targetingUsersByVariation[v.id] ?? [];
         });
@@ -339,9 +337,10 @@ export class TargetingComponent implements OnInit {
     };
 
     const observer = {
-      next: () => {
+      next: (revision: string) => {
         this.loadData();
         this.message.success($localize`:@@common.operation-success:Operation succeeded`);
+        this.messageQueueService.emit(this.messageQueueService.topics.FLAG_TARGETING_CHANGED(this.key), revision);
       },
       error: (err) => handleUpdateError(err, this.message, this.modal)
     };
