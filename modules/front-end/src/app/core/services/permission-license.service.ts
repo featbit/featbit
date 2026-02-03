@@ -17,10 +17,8 @@ export class PermissionLicenseService {
   }
 
   private getLicenseFeatureByAction(action: IamPolicyAction): LicenseFeatureEnum | null {
-    const found = Object.values(permissionActions).find(pa => pa.name === action.name && pa.resourceType === action.resourceType);
-
     // currently, only fine-grained actions need license
-    if (found?.isFineGrainedAction) {
+    if (action.isFineGrainedAction) {
       return LicenseFeatureEnum.FineGrainedAccessControl;
     }
 
