@@ -12,7 +12,7 @@ public class MongoDbService<TEntity> : IService<TEntity> where TEntity : Entity
 
     public IMongoCollection<TEntity> Collection { get; }
 
-    public IMongoQueryable<TEntity> Queryable { get; }
+    public IQueryable<TEntity> Queryable { get; }
 
     public MongoDbService(MongoDbClient mongoDb)
     {

@@ -75,7 +75,7 @@ public class ResourceServiceV2(MongoDbClient mongoDb) : IResourceServiceV2
         var items = await HandleQueryAsync(query, name, ResourceV2.AllProject);
         return items;
 
-        IMongoQueryable<ResourceV2> GetWorkspaceProjectsQuery()
+        IQueryable<ResourceV2> GetWorkspaceProjectsQuery()
         {
             var workspaceLevelQuery =
                 from workspace in mongoDb.QueryableOf<Workspace>()
@@ -94,7 +94,7 @@ public class ResourceServiceV2(MongoDbClient mongoDb) : IResourceServiceV2
             return workspaceLevelQuery;
         }
 
-        IMongoQueryable<ResourceV2> GetOrganizationProjectsQuery()
+        IQueryable<ResourceV2> GetOrganizationProjectsQuery()
         {
             var organizationLevelQuery =
                 from organization in mongoDb.QueryableOf<Organization>()
@@ -122,7 +122,7 @@ public class ResourceServiceV2(MongoDbClient mongoDb) : IResourceServiceV2
         var items = await HandleQueryAsync(query, name, ResourceV2.AllProjectEnv);
         return items;
 
-        IMongoQueryable<ResourceV2> GetWorkspaceEnvsQuery()
+        IQueryable<ResourceV2> GetWorkspaceEnvsQuery()
         {
             var workspaceLevelQuery =
                 from workspace in mongoDb.QueryableOf<Workspace>()
@@ -142,7 +142,7 @@ public class ResourceServiceV2(MongoDbClient mongoDb) : IResourceServiceV2
             return workspaceLevelQuery;
         }
 
-        IMongoQueryable<ResourceV2> GetOrganizationEnvsQuery()
+        IQueryable<ResourceV2> GetOrganizationEnvsQuery()
         {
             var organizationLevelQuery =
                 from organization in mongoDb.QueryableOf<Organization>()
@@ -163,7 +163,7 @@ public class ResourceServiceV2(MongoDbClient mongoDb) : IResourceServiceV2
     }
 
     private static async Task<IEnumerable<ResourceV2>> HandleQueryAsync(
-        IMongoQueryable<ResourceV2> query,
+        IQueryable<ResourceV2> query,
         string name,
         ResourceV2 allResource)
     {

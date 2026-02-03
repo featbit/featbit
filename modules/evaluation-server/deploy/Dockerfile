@@ -2,7 +2,7 @@
 # https://hub.docker.com/_/microsoft-dotnet
 ARG INSTALL_DIR=/app
 
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG TARGETARCH
 WORKDIR /source
 
@@ -29,7 +29,7 @@ WORKDIR /source/src/Api
 RUN dotnet publish -a $TARGETARCH --no-restore -o $INSTALL_DIR
 
 # final stage/image
-FROM mcr.microsoft.com/dotnet/aspnet:8.0
+FROM mcr.microsoft.com/dotnet/aspnet:10.0
 
 RUN apt-get update && apt-get install -y curl unzip && rm -rf /var/lib/apt/lists/*
 
