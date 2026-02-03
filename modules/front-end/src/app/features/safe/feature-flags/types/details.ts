@@ -80,12 +80,15 @@ export type FlagTargeting = {
   exptIncludeAllTargets: boolean
 }
 
-export type UpdateFlagTargetingPayload = FlagTargeting & {
+export type UpdateFlagTargetingPayload = {
+  targeting: FlagTargeting,
   revision: string,
   comment: string
 }
 
-export type CreateSchedulePayload = FlagTargeting & {
+export type CreateSchedulePayload = {
+  targeting: FlagTargeting,
+  revision: string,
   scheduledTime: Date,
   title: string,
   reviewers: string[],
@@ -93,7 +96,9 @@ export type CreateSchedulePayload = FlagTargeting & {
   withChangeRequest: boolean
 };
 
-export type CreateChangeRequestPayload = FlagTargeting & {
+export type CreateChangeRequestPayload = {
+  targeting: FlagTargeting,
+  revision: string,
   reviewers: string[],
   reason: string
 };

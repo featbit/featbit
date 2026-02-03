@@ -190,11 +190,15 @@ export class ExptRulesDrawerComponent {
   doSubmit() {
     const { key, targetUsers, rules, fallthrough, exptIncludeAllTargets, revision } = this.featureFlag;
 
-    const payload = {
+    const targeting = {
       targetUsers,
       rules,
       fallthrough,
       exptIncludeAllTargets,
+    };
+
+    const payload = {
+      targeting,
       revision,
       comment: 'Updated A/B test rule percentage'
     };

@@ -335,7 +335,7 @@ export class TargetingComponent implements OnInit {
       targetUsers,
       rules,
       fallthrough,
-      exptIncludeAllTargets
+      exptIncludeAllTargets,
     };
 
     const observer = {
@@ -348,14 +348,15 @@ export class TargetingComponent implements OnInit {
 
     if (!ReviewModalMode.isScheduleEnabled(this.reviewModalKind) && !ReviewModalMode.isChangeRequestEnabled(this.reviewModalKind)) {
       const payload = {
-        ...targeting,
+        targeting,
         revision,
         comment: data.comment
       };
       this.featureFlagService.updateTargeting(key, payload).subscribe(observer);
     } else if (ReviewModalMode.isScheduleEnabled(this.reviewModalKind)) { // schedule (with or without change request)
       const payload = {
-        ...targeting,
+        targeting,
+        revision,
         scheduledTime: data.schedule.scheduledTime,
         title: data.schedule.title,
         reviewers: data.changeRequest?.reviewers || [],
@@ -366,7 +367,8 @@ export class TargetingComponent implements OnInit {
       this.featureFlagService.createSchedule(key, payload).subscribe(observer);
     } else if (ReviewModalMode.isChangeRequestEnabled(this.reviewModalKind)){ // change request only
       const payload = {
-        ...targeting,
+        targeting,
+        revision,
         reviewers: data.changeRequest.reviewers,
         reason: data.changeRequest.reason
       };

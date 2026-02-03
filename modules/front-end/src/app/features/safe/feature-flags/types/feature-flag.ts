@@ -124,6 +124,7 @@ export function handleUpdateError(err: any, message: NzMessageService, modal: Nz
       nzOkText: $localize`:@@common.reload:Reload`,
       nzClassName: 'warning-modal-dialog',
       nzWidth: '500px',
+      nzClosable: false,
       nzCentered: true,
       nzOnOk: () => {
         window.location.reload();
