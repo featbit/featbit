@@ -5,7 +5,7 @@ using Domain.FeatureFlags;
 
 namespace Application.FeatureFlags;
 
-public class UpdateTargeting : IRequest<bool>
+public class UpdateTargeting : IRequest<Guid>
 {
     public Guid OrgId { get; set; }
 
@@ -24,9 +24,9 @@ public class UpdateTargetingHandler(
     IFeatureFlagService flagService,
     ICurrentUser currentUser,
     IPublisher publisher)
-    : IRequestHandler<UpdateTargeting, bool>
+    : IRequestHandler<UpdateTargeting, Guid>
 {
-    public async Task<bool> Handle(UpdateTargeting request, CancellationToken cancellationToken)
+    public async Task<Guid> Handle(UpdateTargeting request, CancellationToken cancellationToken)
     {
         var flag = await flagService.GetAsync(request.EnvId, request.Key);
         if (!flag.Revision.Equals(request.Revision))
@@ -47,6 +47,6 @@ public class UpdateTargetingHandler(
         );
         await publisher.Publish(notification, cancellationToken);
 
-        return true;
+        return flag.Revision;
     }
 }

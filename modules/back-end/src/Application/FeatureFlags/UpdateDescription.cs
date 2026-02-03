@@ -3,7 +3,7 @@ using Domain.AuditLogs;
 
 namespace Application.FeatureFlags;
 
-public class UpdateDescription : IRequest<bool>
+public class UpdateDescription : IRequest<Guid>
 {
     public Guid EnvId { get; set; }
 
@@ -16,9 +16,9 @@ public class UpdateDescriptionHandler(
     IFeatureFlagService service,
     ICurrentUser currentUser,
     IPublisher publisher)
-    : IRequestHandler<UpdateDescription, bool>
+    : IRequestHandler<UpdateDescription, Guid>
 {
-    public async Task<bool> Handle(UpdateDescription request, CancellationToken cancellationToken)
+    public async Task<Guid> Handle(UpdateDescription request, CancellationToken cancellationToken)
     {
         var flag = await service.GetAsync(request.EnvId, request.Key);
         var dataChange = flag.UpdateDescription(request.Description, currentUser.Id);
@@ -34,6 +34,6 @@ public class UpdateDescriptionHandler(
         );
         await publisher.Publish(notification, cancellationToken);
 
-        return true;
+        return flag.Revision;
     }
 }

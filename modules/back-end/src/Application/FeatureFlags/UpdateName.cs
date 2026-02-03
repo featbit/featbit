@@ -4,7 +4,7 @@ using Domain.AuditLogs;
 
 namespace Application.FeatureFlags;
 
-public class UpdateName : IRequest<bool>
+public class UpdateName : IRequest<Guid>
 {
     public Guid EnvId { get; set; }
 
@@ -26,9 +26,9 @@ public class UpdateNameHandler(
     IFeatureFlagService service,
     ICurrentUser currentUser,
     IPublisher publisher)
-    : IRequestHandler<UpdateName, bool>
+    : IRequestHandler<UpdateName, Guid>
 {
-    public async Task<bool> Handle(UpdateName request, CancellationToken cancellationToken)
+    public async Task<Guid> Handle(UpdateName request, CancellationToken cancellationToken)
     {
         var flag = await service.GetAsync(request.EnvId, request.Key);
         var dataChange = flag.UpdateName(request.Name, currentUser.Id);
@@ -44,6 +44,6 @@ public class UpdateNameHandler(
         );
         await publisher.Publish(notification, cancellationToken);
 
-        return true;
+        return flag.Revision;
     }
 }

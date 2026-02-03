@@ -6,7 +6,7 @@ using Domain.FeatureFlags;
 
 namespace Application.FeatureFlags;
 
-public class UpdateOffVariation : IRequest<bool>
+public class UpdateOffVariation : IRequest<Guid>
 {
     public Guid EnvId { get; set; }
 
@@ -30,9 +30,9 @@ public class UpdateOffVariationHandler(
     IFeatureFlagService service,
     ICurrentUser currentUser,
     IPublisher publisher)
-    : IRequestHandler<UpdateOffVariation, bool>
+    : IRequestHandler<UpdateOffVariation, Guid>
 {
-    public async Task<bool> Handle(UpdateOffVariation request, CancellationToken cancellationToken)
+    public async Task<Guid> Handle(UpdateOffVariation request, CancellationToken cancellationToken)
     {
         var flag = await service.GetAsync(request.EnvId, request.Key);
         if (!flag.Revision.Equals(request.Revision))
@@ -53,6 +53,6 @@ public class UpdateOffVariationHandler(
         );
         await publisher.Publish(notification, cancellationToken);
 
-        return true;
+        return flag.Revision;
     }
 }
