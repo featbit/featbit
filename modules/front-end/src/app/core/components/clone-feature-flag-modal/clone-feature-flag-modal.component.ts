@@ -33,7 +33,7 @@ export class CloneFeatureFlagModalComponent {
   flag: IFeatureFlagListItem;
 
   @Output()
-  close: EventEmitter<boolean> = new EventEmitter(false);
+  close: EventEmitter<boolean> = new EventEmitter();
 
   form: FormGroup<{
     name: FormControl<string>;

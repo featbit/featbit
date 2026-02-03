@@ -6,35 +6,33 @@ using Domain.FeatureFlags;
 
 namespace Application.FeatureFlags;
 
-public class UpdateVariations : IRequest<Guid>
+public class UpdateOffVariation : IRequest<Guid>
 {
     public Guid EnvId { get; set; }
 
+    public Guid Revision { get; set; }
+
     public string Key { get; set; }
 
-    public ICollection<Variation> Variations { get; set; }
-
-    public Guid Revision { get; set; }
+    public string OffVariationId { get; set; }
 }
 
-public class UpdateVariationsValidator : AbstractValidator<UpdateVariations>
+public class UpdateOffVariationValidator : AbstractValidator<UpdateOffVariation>
 {
-    public UpdateVariationsValidator()
+    public UpdateOffVariationValidator()
     {
-        RuleFor(x => x.Variations)
-            .NotEmpty()
-            .Must(variations => variations.All(variation => variation.IsValid()))
-            .WithErrorCode(ErrorCodes.Invalid("variations"));
+        RuleFor(x => x.OffVariationId)
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("offVariationId"));
     }
 }
 
-public class UpdateVariationsHandler(
+public class UpdateOffVariationHandler(
     IFeatureFlagService service,
     ICurrentUser currentUser,
     IPublisher publisher)
-    : IRequestHandler<UpdateVariations, Guid>
+    : IRequestHandler<UpdateOffVariation, Guid>
 {
-    public async Task<Guid> Handle(UpdateVariations request, CancellationToken cancellationToken)
+    public async Task<Guid> Handle(UpdateOffVariation request, CancellationToken cancellationToken)
     {
         var flag = await service.GetAsync(request.EnvId, request.Key);
         if (!flag.Revision.Equals(request.Revision))
@@ -42,7 +40,7 @@ public class UpdateVariationsHandler(
             throw new ConflictException(nameof(FeatureFlag), flag.Id);
         }
 
-        var dataChange = flag.UpdateVariations(request.Variations, currentUser.Id);
+        var dataChange = flag.UpdateOffVariation(request.OffVariationId, currentUser.Id);
         await service.UpdateAsync(flag);
 
         // publish on feature flag change notification
@@ -51,7 +49,7 @@ public class UpdateVariationsHandler(
             Operations.Update,
             dataChange,
             currentUser.Id,
-            comment: "Updated variations"
+            comment: "Updated off variation"
         );
         await publisher.Publish(notification, cancellationToken);
 
