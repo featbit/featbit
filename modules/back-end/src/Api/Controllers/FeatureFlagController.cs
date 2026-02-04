@@ -177,7 +177,7 @@ public class FeatureFlagController : ApiControllerBase
     /// <summary>
     /// Update the name of a feature flag
     /// </summary>
-    /// /// <remarks>
+    /// <remarks>
     /// Update the display name of an existing feature flag.
     /// </remarks>
     [OpenApi]
