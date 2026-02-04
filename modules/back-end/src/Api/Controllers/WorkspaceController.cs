@@ -42,7 +42,7 @@ public class WorkspaceController : ApiControllerBase
     }
 
     /// <summary>
-    /// Get workspace usage statistics
+    /// Get workspace usage statistics. ID is retrieved from the request header.
     /// </summary>
     /// <remarks>
     /// Retrieve usage metrics and statistics for the workspace, including resource consumption and limits.
