@@ -17,6 +17,7 @@ public class UpdateVariations : IRequest<Guid>
     /// The unique key of the feature flag. Retrieved from the URL path.
     /// </summary>
     public string Key { get; set; }
+
     /// <summary>
     /// The revision ID of the feature flag for optimistic concurrency control
     /// </summary>
