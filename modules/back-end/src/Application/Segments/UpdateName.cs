@@ -6,8 +6,14 @@ namespace Application.Segments;
 
 public class UpdateName : IRequest<bool>
 {
+    /// <summary>
+    /// The ID of the segment to update. Retrieved from the URL path.
+    /// </summary>
     public Guid Id { get; set; }
 
+    /// <summary>
+    /// The new name for the segment.
+    /// </summary>
     public string Name { get; set; }
 }
 

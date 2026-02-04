@@ -5,12 +5,24 @@ namespace Domain.Targeting;
 
 public class Condition
 {
+    /// <summary>
+    /// The condition ID. Usually a UUID.
+    /// </summary>
     public string Id { get; set; }
 
+    /// <summary>
+    /// The property to evaluate.
+    /// </summary>
     public string Property { get; set; }
 
+    /// <summary>
+    /// The operator to use for evaluation.
+    /// </summary>
     public string Op { get; set; }
 
+    /// <summary>
+    /// The value to compare against.
+    /// </summary>
     public string Value { get; set; }
 
     public bool IsSegmentCondition()

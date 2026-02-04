@@ -3,36 +3,50 @@ using Application.Bases.Exceptions;
 using Application.Users;
 using Domain.AuditLogs;
 using Domain.Segments;
-using Domain.Targeting;
 using Domain.Workspaces;
 
 namespace Application.Segments;
 
 public class CreateSegment : IRequest<Segment>
 {
+    /// <summary>
+    /// The ID of the workspace the segment belongs to. Retrieved from the request header.
+    /// </summary>
     public Guid WorkspaceId { get; set; }
 
+    /// <summary>
+    /// The ID of the environment the segment belongs to. Retrieved from URL path.
+    /// </summary>
     public Guid EnvId { get; set; }
 
+    /// <summary>
+    /// The type of the segment. Can be "environment-specific" or "shared".
+    /// </summary>
     public string Type { get; set; }
 
+    /// <summary>
+    /// The name of the segment.
+    /// </summary>
     public string Name { get; set; }
 
+    /// <summary>
+    /// The unique key of the segment.
+    /// </summary>
     public string Key { get; set; }
 
+    /// <summary>
+    /// The description of the segment.
+    /// </summary>
     public string Description { get; set; }
 
+    /// <summary>
+    /// The scopes where the segment is applicable.
+    /// </summary>
     public string[] Scopes { get; set; } = [];
-
-    public string[] Included { get; set; } = [];
-
-    public string[] Excluded { get; set; } = [];
-
-    public ICollection<MatchRule> Rules { get; set; } = [];
 
     public Segment AsSegment()
     {
-        return new Segment(WorkspaceId, EnvId, Name, Key, Type, Scopes, Included, Excluded, Rules, Description);
+        return new Segment(WorkspaceId, EnvId, Name, Key, Type, Scopes, [], [], [], Description);
     }
 }
 
@@ -53,13 +67,6 @@ public class CreateSegmentValidator : AbstractValidator<CreateSegment>
         RuleFor(x => x.Scopes)
             .NotEmpty().WithErrorCode(ErrorCodes.Invalid("scopes"))
             .Must(scopes => !scopes.Any(x => x.Contains('*'))).WithErrorCode(ErrorCodes.Invalid("scopes"));
-
-        RuleFor(x => x.Rules)
-            .Must(rules =>
-            {
-                var conditions = rules.SelectMany(x => x.Conditions);
-                return conditions.All(x => !x.IsSegmentCondition());
-            }).WithErrorCode(ErrorCodes.Invalid("rules"));
     }
 }
 
