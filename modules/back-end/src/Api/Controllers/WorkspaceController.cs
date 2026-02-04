@@ -10,7 +10,7 @@ public class WorkspaceController : ApiControllerBase
     /// Get a workspace
     /// </summary>
     /// <remarks>
-    /// Get a workspace by id.
+    /// Get a workspace by id. ID is retrieved from the request header.
     /// </remarks>
     [OpenApi]
     [HttpGet]
