@@ -177,6 +177,9 @@ public class FeatureFlagController : ApiControllerBase
     /// <summary>
     /// Update the name of a feature flag
     /// </summary>
+    /// /// <remarks>
+    /// Update the display name of an existing feature flag.
+    /// </remarks>
     [OpenApi]
     [HttpPut("{key}/name")]
     [Authorize(Permissions.UpdateFlagName)]
@@ -479,6 +482,13 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(success);
     }
 
+    /// <summary>
+    /// Get all feature flag tags within an environment
+    /// </summary>
+    /// <remarks>
+    /// Retrieve all unique tags used across feature flags in the environment.
+    /// </remarks>
+    [OpenApi]
     [HttpGet("all-tags")]
     public async Task<ApiResponse<ICollection<string>>> GetAllTagsAsync(Guid envId)
     {
