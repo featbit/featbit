@@ -91,6 +91,10 @@ public class FeatureFlagController : ApiControllerBase
     /// <summary>
     /// Archive a feature flag
     /// </summary>
+    /// <remarks>
+    /// Archive a feature flag with the specified key. Archived flags are hidden from the main list by default
+    /// but can be restored later.
+    /// </remarks>
     [OpenApi]
     [HttpPut("{key}/archive")]
     [Authorize(Permissions.ArchiveFlag)]
@@ -109,6 +113,9 @@ public class FeatureFlagController : ApiControllerBase
     /// <summary>
     /// Restore a feature flag
     /// </summary>
+    /// <remarks>
+    /// Restore an archived feature flag with the specified key, making it visible and usable again.
+    /// </remarks>
     [OpenApi]
     [HttpPut("{key}/restore")]
     [Authorize(Permissions.RestoreFlag)]
@@ -127,6 +134,9 @@ public class FeatureFlagController : ApiControllerBase
     /// <summary>
     /// Delete a feature flag
     /// </summary>
+    /// <remarks>
+    /// Permanently delete a feature flag with the specified key. This action cannot be undone.
+    /// </remarks>
     [OpenApi]
     [HttpDelete("{key}")]
     [Authorize(Permissions.DeleteFlag)]
@@ -142,6 +152,12 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(success);
     }
 
+    /// <summary>
+    /// Toggle a feature flag on or off
+    /// </summary>
+    /// <remarks>
+    /// Enable or disable a feature flag.
+    /// </remarks>
     [OpenApi]
     [HttpPut("{key}/toggle/{status}")]
     [Authorize(Permissions.ToggleFlag)]
@@ -158,6 +174,9 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(revision);
     }
 
+    /// <summary>
+    /// Update the name of a feature flag
+    /// </summary>
     [OpenApi]
     [HttpPut("{key}/name")]
     [Authorize(Permissions.UpdateFlagName)]
@@ -170,6 +189,12 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(revision);
     }
 
+    /// <summary>
+    /// Update the description of a feature flag
+    /// </summary>
+    /// <remarks>
+    /// Update the description field of a feature flag to provide additional context and documentation.
+    /// </remarks>
     [OpenApi]
     [HttpPut("{key}/description")]
     [Authorize(Permissions.UpdateFlagDescription)]
@@ -182,6 +207,12 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(revision);
     }
 
+    /// <summary>
+    /// Update the off variation of a feature flag
+    /// </summary>
+    /// <remarks>
+    /// Set which variation should be served when the feature flag is disabled (off).
+    /// </remarks>
     [OpenApi]
     [HttpPut("{key}/off-variation")]
     [Authorize(Permissions.UpdateFlagOffVariation)]
@@ -217,6 +248,12 @@ public class FeatureFlagController : ApiControllerBase
         return result.Success ? Ok(true) : Error<bool>(result.Message);
     }
 
+    /// <summary>
+    /// Update the variations of a feature flag
+    /// </summary>
+    /// <remarks>
+    /// Update the list of possible variations (different return values) for a feature flag.
+    /// </remarks>
     [OpenApi]
     [HttpPut("{key}/variations")]
     [Authorize(Permissions.UpdateFlagVariations)]
@@ -235,6 +272,7 @@ public class FeatureFlagController : ApiControllerBase
     /// <remarks>
     /// Get the list of pending changes of a particular flag
     /// </remarks>
+    [OpenApi]
     [HttpGet("{key}/pending-changes")]
     public async Task<ApiResponse<IEnumerable<PendingChangesVm>>> GetPendingChangesAsync(Guid envId, string key)
     {
@@ -386,6 +424,12 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(copyToEnvResult);
     }
 
+    /// <summary>
+    /// Clone a feature flag
+    /// </summary>
+    /// <remarks>
+    /// Create a new feature flag by cloning an existing one with all its settings, variations, and targeting rules.
+    /// </remarks>
     [OpenApi]
     [HttpPost("clone/{key}")]
     [Authorize(Permissions.CloneFlag)]
@@ -447,6 +491,12 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(tags);
     }
 
+    /// <summary>
+    /// Set tags for a feature flag
+    /// </summary>
+    /// <remarks>
+    /// Assign a list of tags to a feature flag for organization and filtering purposes.
+    /// </remarks>
     [OpenApi]
     [HttpPut("{key}/tags")]
     [Authorize(Permissions.UpdateFlagTags)]
