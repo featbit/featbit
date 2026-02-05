@@ -10,7 +10,7 @@ public class WorkspaceController : ApiControllerBase
     /// Get a workspace
     /// </summary>
     /// <remarks>
-    /// Get a workspace by id.
+    /// Get a workspace by id. ID is retrieved from the request header.
     /// </remarks>
     [OpenApi]
     [HttpGet]
@@ -25,6 +25,13 @@ public class WorkspaceController : ApiControllerBase
         return Ok(workspace);
     }
 
+    /// <summary>
+    /// Update workspace license
+    /// </summary>
+    /// <remarks>
+    /// Apply a license key to the workspace to unlock premium features.
+    /// </remarks>
+    [OpenApi]
     [HttpPut("license")]
     public async Task<ApiResponse<WorkspaceVm>> UpdateLicenseAsync(UpdateLicense request)
     {
@@ -34,6 +41,13 @@ public class WorkspaceController : ApiControllerBase
         return Ok(workspace);
     }
 
+    /// <summary>
+    /// Get workspace usage statistics. ID is retrieved from the request header.
+    /// </summary>
+    /// <remarks>
+    /// Retrieve usage metrics and statistics for the workspace, including resource consumption and limits.
+    /// </remarks>
+    [OpenApi]
     [HttpGet("usages")]
     public async Task<ApiResponse<object>> GetUsagesAsync()
     {
@@ -46,6 +60,13 @@ public class WorkspaceController : ApiControllerBase
         return Ok(usage);
     }
 
+    /// <summary>
+    /// Update workspace OIDC SSO configuration
+    /// </summary>
+    /// <remarks>
+    /// Configure OpenID Connect (OIDC) single sign-on settings for the workspace.
+    /// </remarks>
+    [OpenApi]
     [HttpPut("sso-oidc")]
     public async Task<ApiResponse<WorkspaceVm>> UpdateOidcAsync(UpdateOidc request)
     {
@@ -68,6 +89,13 @@ public class WorkspaceController : ApiControllerBase
         return Ok(isUsed);
     }
 
+    /// <summary>
+    /// Update workspace
+    /// </summary>
+    /// <remarks>
+    /// Update the name and key of the workspace.
+    /// </remarks>
+    [OpenApi]
     [HttpPut]
     public async Task<ApiResponse<WorkspaceVm>> UpdateAsync(UpdateWorkspace request)
     {

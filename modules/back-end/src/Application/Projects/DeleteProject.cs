@@ -2,6 +2,9 @@ namespace Application.Projects;
 
 public class DeleteProject : IRequest<bool>
 {
+    /// <summary>
+    /// The ID of the project to delete
+    /// </summary>
     public Guid Id { get; set; }
 }
 

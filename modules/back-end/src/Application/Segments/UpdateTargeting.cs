@@ -7,14 +7,29 @@ namespace Application.Segments;
 
 public class UpdateTargeting : IRequest<bool>
 {
+    /// <summary>
+    /// The ID of the segment to update. Retrieved from the URL path.
+    /// </summary>
     public Guid Id { get; set; }
 
+    /// <summary>
+    /// The list of user keys explicitly included in the segment
+    /// </summary>
     public string[] Included { get; set; } = [];
 
+    /// <summary>
+    /// The list of user keys explicitly excluded from the segment
+    /// </summary>
     public string[] Excluded { get; set; } = [];
 
-    public ICollection<MatchRule> Rules { get; set; } = Array.Empty<MatchRule>();
+    /// <summary>
+    /// The collection of match rules for targeting users in the segment
+    /// </summary>
+    public ICollection<MatchRule> Rules { get; set; } = [];
 
+    /// <summary>
+    /// Optional comment describing the targeting change
+    /// </summary>
     public string Comment { get; set; }
 }
 

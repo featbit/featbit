@@ -9,13 +9,14 @@ namespace Api.Swagger
         {
             operation.Parameters.Add(new OpenApiParameter
             {
-                Name = "Organization",
+                Name = ApiConstants.OrgIdHeaderKey,
                 In = ParameterLocation.Header,
                 Required = false,
                 Schema = new OpenApiSchema
                 {
                     Type = "string"
-                }
+                },
+                Description = "The organization ID associated with the request. Some APIs may require this header to identify the organization context."
             });
         }
     }

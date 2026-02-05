@@ -5,8 +5,14 @@ namespace Application.Segments;
 
 public class UpdateDescription : IRequest<bool>
 {
+    /// <summary>
+    /// The ID of the segment to update. Retrieved from the URL path.
+    /// </summary>
     public Guid Id { get; set; }
 
+    /// <summary>
+    /// The new description for the segment.
+    /// </summary>
     public string Description { get; set; }
 }
 

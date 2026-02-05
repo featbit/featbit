@@ -5,10 +5,19 @@ namespace Application.FeatureFlags;
 
 public class UpdateDescription : IRequest<Guid>
 {
+    /// <summary>
+    /// The ID of the environment the feature flag belongs to. Retrieved from the URL path.
+    /// </summary>
     public Guid EnvId { get; set; }
 
+    /// <summary>
+    /// The unique key of the feature flag. Retrieved from the URL path.
+    /// </summary>
     public string Key { get; set; }
 
+    /// <summary>
+    /// The new description for the feature flag
+    /// </summary>
     public string Description { get; set; }
 }
 

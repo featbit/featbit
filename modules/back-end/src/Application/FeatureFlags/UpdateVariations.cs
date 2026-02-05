@@ -8,13 +8,25 @@ namespace Application.FeatureFlags;
 
 public class UpdateVariations : IRequest<Guid>
 {
+    /// <summary>
+    /// The ID of the environment the feature flag belongs to. Retrieved from the URL path.
+    /// </summary>
     public Guid EnvId { get; set; }
 
+    /// <summary>
+    /// The unique key of the feature flag. Retrieved from the URL path.
+    /// </summary>
     public string Key { get; set; }
 
-    public ICollection<Variation> Variations { get; set; }
-
+    /// <summary>
+    /// The revision ID of the feature flag for optimistic concurrency control
+    /// </summary>
     public Guid Revision { get; set; }
+
+    /// <summary>
+    /// The collection of variations (different values the feature flag can return)
+    /// </summary>
+    public ICollection<Variation> Variations { get; set; }
 }
 
 public class UpdateVariationsValidator : AbstractValidator<UpdateVariations>
