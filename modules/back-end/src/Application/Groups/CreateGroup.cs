@@ -5,10 +5,19 @@ namespace Application.Groups;
 
 public class CreateGroup : IRequest<GroupVm>
 {
+    /// <summary>
+    /// The ID of the organization the group belongs to. Retrieved from the request header.
+    /// </summary>
     public Guid OrganizationId { get; set; }
 
+    /// <summary>
+    /// The name of the group.
+    /// </summary>
     public string Name { get; set; }
 
+    /// <summary>
+    /// The description of the group.
+    /// </summary>
     public string Description { get; set; }
 }
 

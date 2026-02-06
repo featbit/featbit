@@ -5,12 +5,24 @@ namespace Application.Policies;
 
 public class CreatePolicy : IRequest<PolicyVm>
 {
+    /// <summary>
+    /// The ID of the organization the policy belongs to. Retrieved from the request header.
+    /// </summary>
     public Guid OrganizationId { get; set; }
 
+    /// <summary>
+    /// The name of the policy.
+    /// </summary>
     public string Name { get; set; }
 
+    /// <summary>
+    /// The unique key of the policy.
+    /// </summary>
     public string Key { get; set; }
 
+    /// <summary>
+    /// The description of the policy.
+    /// </summary>
     public string Description { get; set; }
 }
 

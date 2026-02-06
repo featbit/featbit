@@ -96,7 +96,7 @@
                     <nz-divider nzType="vertical"></nz-divider>
                     <a (click)="copyText(env.id)" class="copy-id">
                       <span style="color: #717D8A;" i18n="@@org.project.copy-id">Copy Id</span>
-                      <i style="color: #717D8A;" nz-icon i18n-nz-tooltip="@@org.project.env-id-copy-description" nz-tooltip="Copy Id of the environment, the Id is needed when calling FeatBit REST API" nzType="icons:icon-info-outline"></i>
+                      <i style="color: #717D8A;" nz-icon i18n-nz-tooltip="@@org.project.env-id-copy-description" nz-tooltip="Copy ID of the environment, the ID may be needed when calling FeatBit REST API" nzType="icons:icon-info-outline"></i>
                     </a>
                   </div>
                 </div>
@@ -133,6 +133,10 @@
             >
             <i style="color: #3CC798" nz-icon nzType="icons:icon-plus"></i>
             <ng-container i18n="@@org.project.addEnv">Add environment</ng-container>
+          </button>
+          <button class="action-btn" nz-button nzType="default" nzSize="small" (click)="copyText(project.id)">
+            <span i18n="@@org.project.copy-id">Copy Id</span>
+            <i nz-icon i18n-nz-tooltip="@@org.project.project-id-copy-description" nz-tooltip="Copy ID of the project, this ID may be needed when calling FeatBit REST API" nzType="icons:icon-info-outline"></i>
           </button>
         </ng-template>
       </div>

@@ -8,6 +8,12 @@ namespace Api.Controllers;
 [Route("api/v{version:apiVersion}/envs/{envId:guid}/audit-logs")]
 public class AuditLogController : ApiControllerBase
 {
+    /// <summary>
+    /// Get a list of audit logs
+    /// </summary>
+    /// <remarks>
+    /// Get the list of audit logs for a specific environment, with optional filtering and pagination.
+    /// </remarks>
     [OpenApi]
     [HttpGet]
     public async Task<ApiResponse<PagedResult<AuditLogVm>>> GetListAsync(Guid envId, [FromQuery] AuditLogFilter filter)

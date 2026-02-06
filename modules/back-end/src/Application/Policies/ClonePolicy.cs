@@ -5,14 +5,29 @@ namespace Application.Policies;
 
 public class ClonePolicy : IRequest<PolicyVm>
 {
+    /// <summary>
+    /// The ID of the organization the policy belongs to. Retrieved from the request header.
+    /// </summary>
     public Guid OrgId { get; set; }
 
+    /// <summary>
+    /// The key of the policy from which the policy is cloned. Retrieved from the URL path.
+    /// </summary>
     public string OriginPolicyKey { get; set; }
 
+    /// <summary>
+    /// The name of the cloned policy.
+    /// </summary>
     public string Name { get; set; }
 
+    /// <summary>
+    /// The unique key of the cloned policy.
+    /// </summary>
     public string Key { get; set; }
 
+    /// <summary>
+    /// The description of the cloned policy.
+    /// </summary>
     public string Description { get; set; }
 }
 

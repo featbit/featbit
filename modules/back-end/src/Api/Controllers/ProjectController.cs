@@ -57,6 +57,7 @@ public class ProjectController : ApiControllerBase
     /// </remarks>
     [OpenApi]
     [HttpPost]
+    [Authorize(Permissions.CreateProject)]
     public async Task<ApiResponse<ProjectWithEnvs>> CreateAsync(CreateProject request)
     {
         request.OrganizationId = OrgId;
@@ -73,6 +74,7 @@ public class ProjectController : ApiControllerBase
     /// </remarks>
     [OpenApi]
     [HttpPut("{id:guid}")]
+    [Authorize(Permissions.UpdateProjectSettings)]
     public async Task<ApiResponse<ProjectVm>> UpdateAsync(Guid id, UpdateProject request)
     {
         request.Id = id;
@@ -90,6 +92,7 @@ public class ProjectController : ApiControllerBase
     [OpenApi]
     [HttpDelete]
     [Route("{id:guid}")]
+    [Authorize(Permissions.DeleteProject)]
     public async Task<ApiResponse<bool>> DeleteAsync(Guid id)
     {
         var request = new DeleteProject
@@ -107,7 +110,6 @@ public class ProjectController : ApiControllerBase
     /// <remarks>
     /// Check whether the given key is already used by another project in the organization.
     /// </remarks>
-    [OpenApi]
     [HttpGet("is-key-used")]
     public async Task<ApiResponse<bool>> IsKeyUsedAsync(string key)
     {
