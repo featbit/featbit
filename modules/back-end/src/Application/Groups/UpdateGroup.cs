@@ -4,10 +4,19 @@ namespace Application.Groups;
 
 public class UpdateGroup : IRequest<GroupVm>
 {
+    /// <summary>
+    /// The ID of the group to update. Retrieved from the URL path.
+    /// </summary>
     public Guid Id { get; set; }
 
+    /// <summary>
+    /// The new name for the group
+    /// </summary>
     public string Name { get; set; }
 
+    /// <summary>
+    /// The new description for the group
+    /// </summary>
     public string Description { get; set; }
 }
 
