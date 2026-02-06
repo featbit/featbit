@@ -74,7 +74,7 @@ public static class Permissions
         { CreateEnvSecret, ResourceTypes.Env },
         { UpdateEnvSecret, ResourceTypes.Env },
         
-        { CanManageIAM, ResourceTypes.Iam },
+        { CanManageIAM, ResourceTypes.Iam }
     };
 
     public static readonly string[] All = ResourceMap.Keys.ToArray();

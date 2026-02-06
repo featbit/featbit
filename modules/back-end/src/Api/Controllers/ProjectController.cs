@@ -57,7 +57,7 @@ public class ProjectController : ApiControllerBase
     /// </remarks>
     [OpenApi]
     [HttpPost]
-    [Authorize(Permissions.CreateFlag)]
+    [Authorize(Permissions.CreateProject)]
     public async Task<ApiResponse<ProjectWithEnvs>> CreateAsync(CreateProject request)
     {
         request.OrganizationId = OrgId;

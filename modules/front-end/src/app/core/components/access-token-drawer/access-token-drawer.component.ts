@@ -167,7 +167,6 @@ export class AccessTokenDrawerComponent implements OnInit {
     }
 
     permissions = permissions.filter((permission) => this.resourceTypes.some((rt) => rt.type === permission.resourceType));
-    console.log(preProcessPermissions(permissions));
     this.permissions = preProcessPermissions(permissions);
   }
 

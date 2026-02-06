@@ -10,10 +10,10 @@ public class PolicyGroupFilter : PagedRequest
     public string Name { get; set; }
 
     /// <summary>
-    /// Whether to filter on all group of the current organization
+    /// Whether to filter on all groups of the current organization
     /// </summary>
     /// <remarks>
-    /// True if you want to filter on all group of the current organization,
+    /// True if you want to filter on all groups of the current organization,
     /// False if you want to filter only on the groups containing the current policy,
     /// </remarks>
     public bool GetAllGroups { get; set; }
