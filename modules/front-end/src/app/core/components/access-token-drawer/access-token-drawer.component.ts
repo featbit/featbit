@@ -11,10 +11,13 @@ import {
   IamPolicyAction,
   permissionActions,
   ResourceType,
-  ResourceTypeEnum, ResourceTypeEnv,
-  ResourceTypeFlag, ResourceTypeIAM,
+  ResourceTypeEnum,
+  ResourceTypeEnv,
+  ResourceTypeFlag,
+  ResourceTypeIAM,
   ResourceTypeProject,
-  ResourceTypeSegment, ResourceTypeWorkspace
+  ResourceTypeSegment,
+  ResourceTypeWorkspace
 } from "@shared/policy";
 import { copyToClipboard, uuidv4 } from "@utils/index";
 import {
