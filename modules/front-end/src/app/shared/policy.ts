@@ -320,7 +320,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     id: uuidv4(),
     name: 'UpdateProjectSettings',
     resourceType: ResourceTypeEnum.Project,
-    description: $localize`:@@iam.action.update-project:Update project`,
+    description: $localize`:@@iam.action.update-project-settings:Update project settings`,
     isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: false
@@ -356,7 +356,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     id: uuidv4(),
     name: 'UpdateEnvSettings',
     resourceType: ResourceTypeEnum.Env,
-    description: $localize`:@@iam.action.update-env:Update environment`,
+    description: $localize`:@@iam.action.update-env-settings:Update environment settings`,
     isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: false
