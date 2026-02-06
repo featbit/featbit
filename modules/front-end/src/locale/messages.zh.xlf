@@ -262,7 +262,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/project/project.component.html</context>
-          <context context-type="linenumber">150,151</context>
+          <context context-type="linenumber">154,155</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspace/workspace.component.html</context>
@@ -2143,7 +2143,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/project/project.component.html</context>
-          <context context-type="linenumber">151,153</context>
+          <context context-type="linenumber">155,157</context>
         </context-group>
         <target>名称不能为空</target>
       </trans-unit>
@@ -11245,21 +11245,33 @@
           <context context-type="sourcefile">src/app/features/safe/workspaces/project/project.component.html</context>
           <context context-type="linenumber">98,99</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/project/project.component.html</context>
+          <context context-type="linenumber">138,139</context>
+        </context-group>
         <target>复制 Id</target>
       </trans-unit>
       <trans-unit id="org.project.env-id-copy-description" datatype="html">
-        <source>Copy Id of the environment, the Id is needed when calling FeatBit REST API</source>
+        <source>Copy ID of the environment, the ID may be needed when calling FeatBit REST API</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/project/project.component.html</context>
           <context context-type="linenumber">99,100</context>
         </context-group>
-        <target>复制环境 Id, 当调用 FeatBit REST API 时需要提供此 Id</target>
+        <target>复制环境 Id, 当调用 FeatBit REST API 时可能需要提供此 Id</target>
+      </trans-unit>
+      <trans-unit id="org.project.project-id-copy-description" datatype="html">
+        <source>Copy ID of the project, this ID may be needed when calling FeatBit REST API</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/project/project.component.html</context>
+          <context context-type="linenumber">139,140</context>
+        </context-group>
+        <target>复制项目 Id，当调用 FeatBit REST API 时可能需要提供此 Id</target>
       </trans-unit>
       <trans-unit id="org.project.secret-name" datatype="html">
         <source>The name of the secret</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/project/project.component.html</context>
-          <context context-type="linenumber">155,156</context>
+          <context context-type="linenumber">159,160</context>
         </context-group>
         <target>秘钥名称</target>
       </trans-unit>
@@ -11267,7 +11279,7 @@
         <source>The secret would be used by a client side or server side SDK</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/project/project.component.html</context>
-          <context context-type="linenumber">165,166</context>
+          <context context-type="linenumber">169,170</context>
         </context-group>
         <target>该秘钥将被用于客户端还是服务端 SDK</target>
       </trans-unit>
@@ -11275,7 +11287,7 @@
         <source>Type</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/project/project.component.html</context>
-          <context context-type="linenumber">165,166</context>
+          <context context-type="linenumber">169,170</context>
         </context-group>
         <target>类型</target>
       </trans-unit>
@@ -11283,7 +11295,7 @@
         <source>Client Side SDK</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/project/project.component.html</context>
-          <context context-type="linenumber">168,169</context>
+          <context context-type="linenumber">172,173</context>
         </context-group>
         <target>客户端 SDK</target>
       </trans-unit>
@@ -11291,7 +11303,7 @@
         <source>Server Side SDK</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/project/project.component.html</context>
-          <context context-type="linenumber">169,171</context>
+          <context context-type="linenumber">173,175</context>
         </context-group>
         <target>服务端 SDK</target>
       </trans-unit>
