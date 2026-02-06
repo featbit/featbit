@@ -29,7 +29,7 @@ public class GroupController : ApiControllerBase
     }
 
     /// <summary>
-    /// Get group list of current organization
+    /// Get list of groups within the current organization
     /// </summary>
     /// <remarks>
     /// Get the list of all groups within the current organization.
@@ -51,9 +51,6 @@ public class GroupController : ApiControllerBase
     /// <summary>
     /// Check if a name is available for creating a new group
     /// </summary>
-    /// <remarks>
-    /// Check if a name is available for creating a new group.
-    /// </remarks>
     [HttpGet("is-name-used")]
     public async Task<ApiResponse<bool>> IsNameUsedAsync(string name)
     {

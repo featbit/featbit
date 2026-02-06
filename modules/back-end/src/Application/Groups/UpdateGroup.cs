@@ -45,7 +45,7 @@ public class UpdateGroupHandler : IRequestHandler<UpdateGroup, GroupVm>
         var group = await _service.GetAsync(request.Id);
 
         group.Update(request.Name, request.Description);
-        
+
         await _service.UpdateAsync(group);
 
         return _mapper.Map<GroupVm>(group);

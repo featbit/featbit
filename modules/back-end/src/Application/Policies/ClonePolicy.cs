@@ -16,17 +16,17 @@ public class ClonePolicy : IRequest<PolicyVm>
     public string OriginPolicyKey { get; set; }
 
     /// <summary>
-    /// The name of the policy.
+    /// The name of the cloned policy.
     /// </summary>
     public string Name { get; set; }
 
     /// <summary>
-    /// The unique key of the policy.
+    /// The unique key of the cloned policy.
     /// </summary>
     public string Key { get; set; }
 
     /// <summary>
-    /// The description of the policy.
+    /// The description of the cloned policy.
     /// </summary>
     public string Description { get; set; }
 }
