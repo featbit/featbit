@@ -16,6 +16,15 @@ public static class ResourceHelper
 
             case ResourceTypes.Project:
                 return "project/*";
+            
+            case ResourceTypes.Env:
+                return "project/*:env/*";
+            
+            case ResourceTypes.Iam:
+                return "iam/*";
+            
+            case ResourceTypes.Workspace:
+                return "workspace/*";
         }
 
         return string.Empty;
