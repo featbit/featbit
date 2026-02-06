@@ -11,7 +11,7 @@ public static class RowSerializer
         using Utf8JsonWriter writer = new(stream);
 
         // ignore the following properties as they're unnecessary: 
-        // revision, tags, created_at, creator_id, updator_id
+        // revision, created_at, creator_id, updator_id
 
         writer.WriteStartObject();
 

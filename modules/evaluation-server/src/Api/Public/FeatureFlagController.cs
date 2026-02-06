@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Public;
 
-[Route("api/public/feature-flags")]
 public class FeatureFlagController(IFeatureFlagService flagService, IEvaluator evaluator) : PublicApiControllerBase
 {
     [HttpPost("evaluate")]

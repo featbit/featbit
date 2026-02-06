@@ -45,8 +45,8 @@ public class FeatureFlagService(IConfiguration configuration, IServiceProvider s
             {
                 var tagsFilter = userFilter.TagFilterMode switch
                 {
-                    TagFilterMode.And => filterBuilder.All("tags", userFilter.Tags),
-                    TagFilterMode.Or => filterBuilder.In("tags", userFilter.Tags),
+                    TagFilterMode.And => filterBuilder.All("tags", tags),
+                    TagFilterMode.Or => filterBuilder.In("tags", tags),
                     _ => filterBuilder.Empty
                 };
 
@@ -57,7 +57,7 @@ public class FeatureFlagService(IConfiguration configuration, IServiceProvider s
             var keys = userFilter.Keys ?? [];
             if (keys.Length > 0)
             {
-                var keysFilter = filterBuilder.In("key", userFilter.Keys);
+                var keysFilter = filterBuilder.In("key", keys);
                 filters.Add(keysFilter);
             }
 
@@ -72,7 +72,6 @@ public class FeatureFlagService(IConfiguration configuration, IServiceProvider s
             var dataSource = serviceProvider.GetRequiredService<NpgsqlDataSource>();
             await using var connection = await dataSource.OpenConnectionAsync();
 
-            // Build the SQL query using to_jsonb to convert rows to JSON
             var sql = "SELECT * FROM feature_flags WHERE env_id = @envId";
             var parameters = new DynamicParameters();
             parameters.Add("envId", envId);
@@ -91,7 +90,7 @@ public class FeatureFlagService(IConfiguration configuration, IServiceProvider s
                 if (!string.IsNullOrWhiteSpace(tagFilterSql))
                 {
                     sql += tagFilterSql;
-                    parameters.Add("tags", userFilter.Tags);
+                    parameters.Add("tags", tags);
                 }
             }
 
@@ -100,7 +99,7 @@ public class FeatureFlagService(IConfiguration configuration, IServiceProvider s
             if (keys.Length > 0)
             {
                 sql += " AND key = ANY(@keys)";
-                parameters.Add("keys", userFilter.Keys);
+                parameters.Add("keys", keys);
             }
 
             var rows = await connection.QueryAsync(sql, parameters);
