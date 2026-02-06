@@ -53,7 +53,7 @@ export class PermissionLicenseService {
       return isGrantedByPolicy;
     }
 
-    if (!this.license.isExpired()) {
+    if (this.license.data && !this.license.isExpired()) {
       return this.license.isGranted(feature) && isGrantedByPolicy;
     }
 
