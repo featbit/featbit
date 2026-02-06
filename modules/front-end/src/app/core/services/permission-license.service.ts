@@ -38,8 +38,8 @@ export class PermissionLicenseService {
    * 3. If a license feature is required, ensures the license is valid and grants the feature
    *
    * Special handling for expired licenses:
-   * - For feature flag resources, falls back to checking FlagAllActions permission
-   * - For other resources, access is denied
+   * If the license is expired or not present, access is only granted for flag-related actions if the user has the `FlagAllActions` permission,
+   * allowing continued access to flag management features while restricting access to features that require a valid license.
    *
    * @param rn Resource name to check permissions against
    * @param action IAM action to evaluate
@@ -53,11 +53,12 @@ export class PermissionLicenseService {
       return isGrantedByPolicy;
     }
 
+    // if license exists, check if the feature is granted and also check permission
     if (this.license.data && !this.license.isExpired()) {
       return this.license.isGranted(feature) && isGrantedByPolicy;
     }
 
-    // special handling for expired license
+    // no license or license expired, only allow access if it's a flag related action and user has FlagAllActions permission
     if (action.resourceType === ResourceTypeEnum.Flag) {
       return this.permissionService.isGranted(rn, permissionActions.FlagAllActions);
     }
