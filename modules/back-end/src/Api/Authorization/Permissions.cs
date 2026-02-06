@@ -59,10 +59,10 @@ public static class Permissions
         { CreateProject, ResourceTypes.Project },
         { DeleteProject, ResourceTypes.Project },
         { UpdateProjectSettings, ResourceTypes.Project },
+        { CreateEnv, ResourceTypes.Project },
 
         // Environments
         { CanAccessEnv, ResourceTypes.Env },
-        { CreateEnv, ResourceTypes.Env },
         { DeleteEnv, ResourceTypes.Env },
         { UpdateEnvSettings, ResourceTypes.Env },
         { DeleteEnvSecret, ResourceTypes.Env },
