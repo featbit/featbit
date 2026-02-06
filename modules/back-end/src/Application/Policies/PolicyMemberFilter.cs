@@ -14,7 +14,7 @@ public class PolicyMemberFilter : PagedRequest
     /// </summary>
     /// <remarks>
     /// True if you want to filter on all member users of the current organization,
-    /// False if you want to filter only on the member users that the current policy is assigned to
+    /// False if you want to filter only on the member users that the current policy is assigned to.
     /// </remarks>
     public bool GetAllMembers { get; set; }
 }

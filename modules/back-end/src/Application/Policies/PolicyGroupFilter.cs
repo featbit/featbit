@@ -14,7 +14,7 @@ public class PolicyGroupFilter : PagedRequest
     /// </summary>
     /// <remarks>
     /// True if you want to filter on all groups of the current organization,
-    /// False if you want to filter only on the groups containing the current policy,
+    /// False if you want to filter only on the groups containing the current policy.
     /// </remarks>
     public bool GetAllGroups { get; set; }
 }

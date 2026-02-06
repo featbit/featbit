@@ -11,7 +11,7 @@ public class ClonePolicy : IRequest<PolicyVm>
     public Guid OrgId { get; set; }
 
     /// <summary>
-    /// The key of the policy from which the policy is cloned.
+    /// The key of the policy from which the policy is cloned. Retrieved from the URL path.
     /// </summary>
     public string OriginPolicyKey { get; set; }
 
