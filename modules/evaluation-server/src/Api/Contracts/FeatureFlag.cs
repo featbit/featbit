@@ -55,6 +55,17 @@ public class EvaluateFlagRequest
             return false;
         }
 
+        var filterMode = Filter?.TagFilterMode;
+        if (!string.IsNullOrWhiteSpace(filterMode))
+        {
+            var isValidMode = filterMode is TagFilterMode.And or TagFilterMode.Or;
+            if (!isValidMode)
+            {
+                validationError = $"Invalid tag filter mode: {filterMode}. Valid values are 'and' or 'or'.";
+                return false;
+            }
+        }
+
         return true;
     }
 }

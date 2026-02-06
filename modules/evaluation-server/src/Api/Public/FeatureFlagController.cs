@@ -23,10 +23,9 @@ public class FeatureFlagController(IFeatureFlagService flagService, IEvaluator e
         }
 
         var filter = request.Filter ?? new FeatureFlagFilter();
-
         var flags = await flagService.GetListAsync(EnvId, filter);
-        var evalResults = new List<EvalResult>();
 
+        var evalResults = new List<EvalResult>();
         foreach (var flag in flags)
         {
             var variations =

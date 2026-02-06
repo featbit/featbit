@@ -62,8 +62,8 @@ public class FeatureFlagService(IConfiguration configuration, IServiceProvider s
             }
 
             var filter = filterBuilder.And(filters);
-            var flags = await collection.Find(filter).ToListAsync();
 
+            var flags = await collection.Find(filter).ToListAsync();
             return flags.Select(x => x.ToJsonElement()).ToArray();
         }
 
@@ -84,7 +84,7 @@ public class FeatureFlagService(IConfiguration configuration, IServiceProvider s
                 {
                     TagFilterMode.And => " AND tags @> @tags", // contains all tags
                     TagFilterMode.Or => " AND tags && @tags", // overlaps with tags
-                    _ => ""
+                    _ => string.Empty
                 };
 
                 if (!string.IsNullOrWhiteSpace(tagFilterSql))
