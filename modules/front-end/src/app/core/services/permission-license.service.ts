@@ -34,12 +34,13 @@ export class PermissionLicenseService {
    *
    * This method evaluates access control through a multi-layered approach:
    * 1. First checks if the user has the required permission via IAM policy
-   * 2. Then validates if the action requires a specific license feature
-   * 3. If a license feature is required, ensures the license is valid and grants the feature
+   * 2. If the user has `FlagAllActions` permission for flag resources, grants access immediately (bypasses license validation)
+   * 3. For actions that don't require a license feature, grants access
+   * 4. For actions requiring a license feature, validates the license grants that feature
    *
-   * Special handling for expired licenses:
-   * If the license is expired or not present, access is only granted for flag-related actions if the user has the `FlagAllActions` permission,
-   * allowing continued access to flag management features while restricting access to features that require a valid license.
+   * Special handling for `FlagAllActions` permission:
+   * Users with the `FlagAllActions` permission have unrestricted access to all flag operations,
+   * bypassing any license requirements. This provides backward compatibility for broad flag management access.
    *
    * @param rn Resource name to check permissions against
    * @param action IAM action to evaluate
@@ -47,22 +48,21 @@ export class PermissionLicenseService {
    */
   isGrantedByLicenseAndPermission(rn: string, action: IamPolicyAction): boolean {
     const isGrantedByPolicy = this.permissionService.isGranted(rn, action);
-    const feature = this.getLicenseFeatureByAction(action);
-
-    if (!feature) {
-      return isGrantedByPolicy;
+    if (!isGrantedByPolicy) {
+      return false;
     }
 
-    // if license exists, check if the feature is granted and also check permission
-    if (this.license.data && !this.license.isExpired()) {
-      return this.license.isGranted(feature) && isGrantedByPolicy;
+    // if user has FlagAllActions permission, allow access to all flag-related actions regardless of license status
+    if (action.resourceType === ResourceTypeEnum.Flag && this.permissionService.isGranted(rn, permissionActions.FlagAllActions)) {
+      return true;
     }
 
-    // no license or license expired, only allow access if it's a flag related action and user has FlagAllActions permission
-    if (action.resourceType === ResourceTypeEnum.Flag) {
-      return this.permissionService.isGranted(rn, permissionActions.FlagAllActions);
+    const licenseFeature = this.getLicenseFeatureByAction(action);
+    if (!licenseFeature) {
+      // if this is not a license-related action
+      return true;
     }
 
-    return false;
+    return this.license.isGranted(licenseFeature);
   }
 }
