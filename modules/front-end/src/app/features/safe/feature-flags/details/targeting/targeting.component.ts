@@ -20,6 +20,8 @@ import { getCurrentLicense } from "@utils/project-env";
 import { PermissionsService } from "@services/permissions.service";
 import { permissionActions } from "@shared/policy";
 import { PermissionLicenseService } from "@services/permission-license.service";
+import { handleUpdateError } from "@features/safe/feature-flags/types/feature-flag";
+import { NzModalService } from "ng-zorro-antd/modal";
 
 enum FlagValidationErrorKindEnum {
   fallthrough = 0,
@@ -62,8 +64,8 @@ export class TargetingComponent implements OnInit {
     this.exptRulesVisible = true;
   }
 
-  async onSetExptRulesClosed(data: any) {
-    if (data.isSaved) {
+  async onSetExptRulesClosed(saved: boolean) {
+    if (saved) {
       this.isLoading = true;
       await this.loadFeatureFlag();
       this.isLoading = false;
@@ -97,14 +99,14 @@ export class TargetingComponent implements OnInit {
 
   onReviewChanges(validationErrortpl: TemplateRef<void>, modalKind: ReviewModalKindEnum) {
     if (!this.canUpdateDefaultRule && !this.canUpdateIndividualTargeting && !this.canUpdateRules) {
-      this.msg.warning(this.permissionsService.genericDenyMessage);
+      this.message.warning(this.permissionsService.genericDenyMessage);
       return;
     }
 
     this.validationErrors = this.validateFeatureFlag();
 
     if (this.validationErrors.length > 0) {
-      this.msg.create('', validationErrortpl, { nzDuration: 5000 });
+      this.message.create('', validationErrortpl, { nzDuration: 5000 });
       return false;
     }
 
@@ -126,24 +128,24 @@ export class TargetingComponent implements OnInit {
     private featureFlagService: FeatureFlagService,
     private envUserService: EnvUserService,
     private envUserPropService: EnvUserPropService,
-    private msg: NzMessageService,
+    private message: NzMessageService,
     private messageQueueService: MessageQueueService,
     private permissionsService: PermissionsService,
     private permissionLicenseService: PermissionLicenseService,
+    private modal: NzModalService
   ) { }
 
   ngOnInit(): void {
     this.license = getCurrentLicense();
 
-    this.isLoading = true;
     this.route.paramMap.subscribe({
       next: async (paramMap) => {
         this.key = decodeURIComponent(paramMap.get('key'));
         this.messageQueueService.subscribe(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key), () => this.refreshFeatureFlag());
         await this.loadData();
-        this.canUpdateDefaultRule = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.UpdateFlagDefaultRule, LicenseFeatureEnum.FineGrainedAccessControl, true);
-        this.canUpdateIndividualTargeting = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.UpdateFlagIndividualTargeting, LicenseFeatureEnum.FineGrainedAccessControl, true);
-        this.canUpdateRules = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.UpdateFlagRules, LicenseFeatureEnum.FineGrainedAccessControl, true);
+        this.canUpdateDefaultRule = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.UpdateFlagDefaultRule);
+        this.canUpdateIndividualTargeting = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.UpdateFlagIndividualTargeting);
+        this.canUpdateRules = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.UpdateFlagRules);
       }
     });
   }
@@ -151,17 +153,17 @@ export class TargetingComponent implements OnInit {
   private async refreshFeatureFlag() {
     this.featureFlagService.getByKey(this.key).subscribe({
       next: (result: IFeatureFlag) => {
-        this.featureFlag.variations = [...result.variations];
-        this.featureFlag.originalData.variations = [...result.variations];
+        this.featureFlag = new FeatureFlag(result);
         this.featureFlag.variations.forEach(v => {
           this.targetingUsersByVariation[v.id] = this.targetingUsersByVariation[v.id] ?? [];
         });
       },
-      error: (err) => console.log('Error', err)
+      error: () => this.message.error($localize`:@@common.failed-to-load-data:Failed to load data`)
     })
   }
 
   async loadData() {
+    this.isLoading = true;
     await Promise.all([this.loadUserPropsData(), this.loadFeatureFlag(), this.loadPendingChangesList()]);
     this.isLoading = false;
   }
@@ -174,7 +176,7 @@ export class TargetingComponent implements OnInit {
     try {
       this.pendingChangesList = await this.featureFlagService.getPendingChanges(this.key);
     } catch (err) {
-      this.msg.error($localize`:@@common.loading-pending-changes-failed:Loading pending changes failed`);
+      this.message.error($localize`:@@common.failed-to-load-data:Failed to load data`)
     }
   }
 
@@ -236,7 +238,7 @@ export class TargetingComponent implements OnInit {
           }
         },
         error: _ => {
-          this.msg.error($localize`:@@common.loading-failed-try-again:Loading failed, please try again`);
+          this.message.error($localize`:@@common.failed-to-load-data:Failed to load data`);
           resolve(null);
         }
       });
@@ -261,7 +263,7 @@ export class TargetingComponent implements OnInit {
 
   onAddRule() {
     if (!this.canUpdateRules) {
-      this.msg.warning(this.permissionsService.genericDenyMessage);
+      this.message.warning(this.permissionsService.genericDenyMessage);
       return;
     }
 
@@ -320,30 +322,52 @@ export class TargetingComponent implements OnInit {
   validationErrors: IFlagValidationError[] = [];
 
   onSave(data: ChangeReviewOutput) {
-    this.isLoading = true;
-
-    const { key, rules, fallthrough, exptIncludeAllTargets } = this.featureFlag;
+    const { key, rules, fallthrough, exptIncludeAllTargets, revision } = this.featureFlag;
     const targetUsers = this.featureFlag.targetUsers.filter(x => x.keyIds.length > 0);
-    const targeting = { key, targetUsers, rules, fallthrough, exptIncludeAllTargets };
+
+    const targeting = {
+      targetUsers,
+      rules,
+      fallthrough,
+      exptIncludeAllTargets,
+    };
 
     const observer = {
-      next: () => {
+      next: (revision: string) => {
         this.loadData();
-        this.msg.success($localize `:@@common.save-success:Saved Successfully`);
-        this.messageQueueService.emit(this.messageQueueService.topics.FLAG_TARGETING_CHANGED(this.key));
+        this.message.success($localize`:@@common.operation-success:Operation succeeded`);
+        this.messageQueueService.emit(this.messageQueueService.topics.FLAG_TARGETING_CHANGED(this.key), revision);
       },
-      error: () => {
-        this.msg.error($localize `:@@common.save-fail:Failed to Save`);
-        this.isLoading = false;
-      }
+      error: (err) => handleUpdateError(err, this.message, this.modal)
     };
 
     if (!ReviewModalMode.isScheduleEnabled(this.reviewModalKind) && !ReviewModalMode.isChangeRequestEnabled(this.reviewModalKind)) {
-      this.featureFlagService.updateTargeting(targeting, data.comment).subscribe(observer);
+      const payload = {
+        targeting,
+        revision,
+        comment: data.comment
+      };
+      this.featureFlagService.updateTargeting(key, payload).subscribe(observer);
     } else if (ReviewModalMode.isScheduleEnabled(this.reviewModalKind)) { // schedule (with or without change request)
-      this.featureFlagService.createSchedule(targeting, data.schedule.scheduledTime, data.schedule.title, data.changeRequest?.reviewers, data.changeRequest?.reason, ReviewModalMode.isChangeRequestEnabled(this.reviewModalKind)).subscribe(observer);
+      const payload = {
+        targeting,
+        revision,
+        scheduledTime: data.schedule.scheduledTime,
+        title: data.schedule.title,
+        reviewers: data.changeRequest?.reviewers || [],
+        reason: data.changeRequest?.reason || '',
+        withChangeRequest: ReviewModalMode.isChangeRequestEnabled(this.reviewModalKind)
+      };
+
+      this.featureFlagService.createSchedule(key, payload).subscribe(observer);
     } else if (ReviewModalMode.isChangeRequestEnabled(this.reviewModalKind)){ // change request only
-      this.featureFlagService.createChangeRequest(targeting, data.changeRequest.reviewers, data.changeRequest.reason).subscribe(observer);
+      const payload = {
+        targeting,
+        revision,
+        reviewers: data.changeRequest.reviewers,
+        reason: data.changeRequest.reason
+      };
+      this.featureFlagService.createChangeRequest(key, payload).subscribe(observer);
     } else {
       // error
     }

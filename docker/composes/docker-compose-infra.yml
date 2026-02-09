@@ -1,7 +1,7 @@
 name: featbit-infra
 services:
   mongodb:
-    image: mongo:5.0.14
+    image: mongo:5.0.32
     restart: on-failure
     ports:
       - "27017:27017"

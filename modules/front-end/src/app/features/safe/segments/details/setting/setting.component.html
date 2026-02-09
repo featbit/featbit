@@ -7,17 +7,16 @@
           <nz-tag nzColor="#23AD7F" i18n="@@segment.shared">Shared</nz-tag>
         }
 
-          @if (isEditingTitle) {
-            <input nz-input i18n-placeholder="@@common.name" placeholder="Name" [(ngModel)]="segmentDetail.name" />
-            <div class="actions">
-              <i nz-icon nzType="close" (click)="toggleTitleEditState()"></i>
-              <i nz-icon nzType="icons:icon-save" (click)="saveTitle()" ></i>
-            </div>
-          } @else {
-            <span [nz-tooltip]="segmentDetail?.name" class="text">{{segmentDetail?.name}}</span>
-            <i class="edit-save" (click)="toggleTitleEditState()" nz-icon nzType="icons:icon-edit"></i>
-          }
-
+        @if (isEditingTitle) {
+          <input nz-input i18n-placeholder="@@common.name" placeholder="Name" [(ngModel)]="segmentDetail.name" />
+          <div class="actions">
+            <i nz-icon nzType="close" (click)="toggleTitleEditState()"></i>
+            <i nz-icon nzType="icons:icon-save" (click)="saveTitle()" ></i>
+          </div>
+        } @else {
+          <span [nz-tooltip]="segmentDetail?.name" class="text">{{segmentDetail?.name}}</span>
+          <i class="edit-save" (click)="toggleTitleEditState()" nz-icon nzType="icons:icon-edit"></i>
+        }
       </div>
       <div class="description" [class]="{editing: isEditingDescription}">
         @if (isEditingDescription) {
@@ -30,6 +29,16 @@
           <span>{{segmentDetail?.description}}</span>
           <i class="edit-save" (click)="toggleDescriptionEditState()" nz-icon nzType="icons:icon-edit"></i>
         }
+      </div>
+      <div class="key">
+        <div class="title">
+          <span class="text" i18n="@@common.key">Key</span>
+        </div>
+        <div class="value">
+          {{ segmentDetail.key }}
+          <i class="copy-icon" i18n-nz-tooltip="@@common.click-to-copy" nz-tooltip="Click to copy" nz-icon
+             nzType="icons:icon-copy" (click)="copyText(segmentDetail.key)"></i>
+        </div>
       </div>
       @if (segmentDetail.type === SegmentType.Shared) {
         <div>

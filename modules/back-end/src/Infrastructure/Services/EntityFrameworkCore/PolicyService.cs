@@ -1,3 +1,4 @@
+using Application.Bases.Exceptions;
 using Application.Bases.Models;
 using Application.Policies;
 using Domain.Groups;
@@ -21,6 +22,17 @@ public class PolicyService(AppDbContext dbContext) : EntityFrameworkCoreService<
 
         // delete policy members
         await SetOf<MemberPolicy>().Where(x => x.PolicyId == id).ExecuteDeleteAsync();
+    }
+
+    public async Task<Policy> GetAsync(Guid organizationId, string key)
+    {
+        var policy = await FindOneAsync(x => x.OrganizationId == organizationId && x.Key == key);
+        if (policy == null)
+        {
+            throw new EntityNotFoundException(nameof(Policy), $"{organizationId}-{key}");
+        }
+
+        return policy;
     }
 
     public async Task<PagedResult<Policy>> GetListAsync(Guid organizationId, PolicyFilter filter)
@@ -154,11 +166,11 @@ public class PolicyService(AppDbContext dbContext) : EntityFrameworkCoreService<
         return new PagedResult<PolicyMember>(totalCount, vms);
     }
 
-    public async Task<bool> IsNameUsedAsync(Guid organizationId, string name)
+    public async Task<bool> IsKeyUsedAsync(Guid organizationId, string key)
     {
         return await AnyAsync(x =>
             x.OrganizationId == organizationId &&
-            string.Equals(x.Name.ToLower(), name.ToLower())
+            string.Equals(x.Key.ToLower(), key.ToLower())
         );
     }
 }

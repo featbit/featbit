@@ -1,11 +1,12 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { FlagKeyPattern, IFeatureFlagListItem } from "@features/safe/feature-flags/types/feature-flag";
+import { IFeatureFlagListItem } from "@features/safe/feature-flags/types/feature-flag";
 import { FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
 import { FeatureFlagService } from "@services/feature-flag.service";
 import { slugify } from "@utils/index";
 import { FlagKeyValidator } from "@shared/flag-key-validator.service";
 import { NzMessageService } from "ng-zorro-antd/message";
 import { Router } from "@angular/router";
+import { ResourceKeyPattern } from "@shared/types";
 
 @Component({
   selector: 'clone-feature-flag-modal',
@@ -32,7 +33,7 @@ export class CloneFeatureFlagModalComponent {
   flag: IFeatureFlagListItem;
 
   @Output()
-  close: EventEmitter<boolean> = new EventEmitter(false);
+  close: EventEmitter<boolean> = new EventEmitter();
 
   form: FormGroup<{
     name: FormControl<string>;
@@ -55,7 +56,7 @@ export class CloneFeatureFlagModalComponent {
         validators: [ Validators.required ]
       }),
       key: new FormControl('', {
-        validators: [ Validators.required, Validators.pattern(FlagKeyPattern) ],
+        validators: [ Validators.required, Validators.pattern(ResourceKeyPattern) ],
         asyncValidators: [ this.flagKeyAsyncValidator.validate.bind(this.flagKeyAsyncValidator) ],
       }),
       description: new FormControl(this.flag?.description ?? '', {

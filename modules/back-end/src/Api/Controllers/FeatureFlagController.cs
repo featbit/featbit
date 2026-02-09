@@ -91,6 +91,10 @@ public class FeatureFlagController : ApiControllerBase
     /// <summary>
     /// Archive a feature flag
     /// </summary>
+    /// <remarks>
+    /// Archive a feature flag with the specified key. Archived flags are hidden from the main list by default
+    /// but can be restored later.
+    /// </remarks>
     [OpenApi]
     [HttpPut("{key}/archive")]
     [Authorize(Permissions.ArchiveFlag)]
@@ -109,6 +113,9 @@ public class FeatureFlagController : ApiControllerBase
     /// <summary>
     /// Restore a feature flag
     /// </summary>
+    /// <remarks>
+    /// Restore an archived feature flag with the specified key, making it visible and usable again.
+    /// </remarks>
     [OpenApi]
     [HttpPut("{key}/restore")]
     [Authorize(Permissions.RestoreFlag)]
@@ -127,6 +134,9 @@ public class FeatureFlagController : ApiControllerBase
     /// <summary>
     /// Delete a feature flag
     /// </summary>
+    /// <remarks>
+    /// Permanently delete a feature flag with the specified key. This action cannot be undone.
+    /// </remarks>
     [OpenApi]
     [HttpDelete("{key}")]
     [Authorize(Permissions.DeleteFlag)]
@@ -142,10 +152,16 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(success);
     }
 
+    /// <summary>
+    /// Toggle a feature flag on or off
+    /// </summary>
+    /// <remarks>
+    /// Enable or disable a feature flag.
+    /// </remarks>
     [OpenApi]
     [HttpPut("{key}/toggle/{status}")]
     [Authorize(Permissions.ToggleFlag)]
-    public async Task<ApiResponse<bool>> ToggleAsync(Guid envId, string key, bool status)
+    public async Task<ApiResponse<Guid>> ToggleAsync(Guid envId, string key, bool status)
     {
         var request = new ToggleFeatureFlag
         {
@@ -154,44 +170,62 @@ public class FeatureFlagController : ApiControllerBase
             Status = status
         };
 
-        var success = await Mediator.Send(request);
-        return Ok(success);
+        var revision = await Mediator.Send(request);
+        return Ok(revision);
     }
 
+    /// <summary>
+    /// Update the name of a feature flag
+    /// </summary>
+    /// <remarks>
+    /// Update the display name of an existing feature flag.
+    /// </remarks>
     [OpenApi]
     [HttpPut("{key}/name")]
     [Authorize(Permissions.UpdateFlagName)]
-    public async Task<ApiResponse<bool>> UpdateNameAsync(Guid envId, string key, UpdateName request)
+    public async Task<ApiResponse<Guid>> UpdateNameAsync(Guid envId, string key, UpdateName request)
     {
         request.Key = key;
         request.EnvId = envId;
 
-        var success = await Mediator.Send(request);
-        return Ok(success);
+        var revision = await Mediator.Send(request);
+        return Ok(revision);
     }
 
+    /// <summary>
+    /// Update the description of a feature flag
+    /// </summary>
+    /// <remarks>
+    /// Update the description field of a feature flag to provide additional context and documentation.
+    /// </remarks>
     [OpenApi]
     [HttpPut("{key}/description")]
     [Authorize(Permissions.UpdateFlagDescription)]
-    public async Task<ApiResponse<bool>> UpdateDescriptionAsync(Guid envId, string key, UpdateDescription request)
+    public async Task<ApiResponse<Guid>> UpdateDescriptionAsync(Guid envId, string key, UpdateDescription request)
     {
         request.Key = key;
         request.EnvId = envId;
 
-        var success = await Mediator.Send(request);
-        return Ok(success);
+        var revision = await Mediator.Send(request);
+        return Ok(revision);
     }
 
+    /// <summary>
+    /// Update the off variation of a feature flag
+    /// </summary>
+    /// <remarks>
+    /// Set which variation should be served when the feature flag is disabled (off).
+    /// </remarks>
     [OpenApi]
     [HttpPut("{key}/off-variation")]
     [Authorize(Permissions.UpdateFlagOffVariation)]
-    public async Task<ApiResponse<bool>> UpdateOffVariationAsync(Guid envId, string key, UpdateOffVariation request)
+    public async Task<ApiResponse<Guid>> UpdateOffVariationAsync(Guid envId, string key, UpdateOffVariation request)
     {
         request.Key = key;
         request.EnvId = envId;
 
-        var success = await Mediator.Send(request);
-        return Ok(success);
+        var revision = await Mediator.Send(request);
+        return Ok(revision);
     }
 
     /// <summary>
@@ -217,16 +251,22 @@ public class FeatureFlagController : ApiControllerBase
         return result.Success ? Ok(true) : Error<bool>(result.Message);
     }
 
+    /// <summary>
+    /// Update the variations of a feature flag
+    /// </summary>
+    /// <remarks>
+    /// Update the list of possible variations (different return values) for a feature flag.
+    /// </remarks>
     [OpenApi]
     [HttpPut("{key}/variations")]
     [Authorize(Permissions.UpdateFlagVariations)]
-    public async Task<ApiResponse<bool>> UpdateVariationsAsync(Guid envId, string key, UpdateVariations request)
+    public async Task<ApiResponse<Guid>> UpdateVariationsAsync(Guid envId, string key, UpdateVariations request)
     {
         request.Key = key;
         request.EnvId = envId;
 
-        var success = await Mediator.Send(request);
-        return Ok(success);
+        var revision = await Mediator.Send(request);
+        return Ok(revision);
     }
 
     /// <summary>
@@ -235,6 +275,7 @@ public class FeatureFlagController : ApiControllerBase
     /// <remarks>
     /// Get the list of pending changes of a particular flag
     /// </remarks>
+    [OpenApi]
     [HttpGet("{key}/pending-changes")]
     public async Task<ApiResponse<IEnumerable<PendingChangesVm>>> GetPendingChangesAsync(Guid envId, string key)
     {
@@ -351,14 +392,14 @@ public class FeatureFlagController : ApiControllerBase
     }
 
     [HttpPut("{key}/targeting")]
-    public async Task<ApiResponse<bool>> UpdateTargetingAsync(Guid envId, string key, UpdateTargeting request)
+    public async Task<ApiResponse<Guid>> UpdateTargetingAsync(Guid envId, string key, UpdateTargeting request)
     {
         request.OrgId = OrgId;
         request.Key = key;
         request.EnvId = envId;
 
-        var success = await Mediator.Send(request);
-        return Ok(success);
+        var revision = await Mediator.Send(request);
+        return Ok(revision);
     }
 
     [HttpPost("copy-to-env-precheck/{targetEnvId:guid}")]
@@ -386,6 +427,12 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(copyToEnvResult);
     }
 
+    /// <summary>
+    /// Clone a feature flag
+    /// </summary>
+    /// <remarks>
+    /// Create a new feature flag by cloning an existing one with all its settings, variations, and targeting rules.
+    /// </remarks>
     [OpenApi]
     [HttpPost("clone/{key}")]
     [Authorize(Permissions.CloneFlag)]
@@ -435,6 +482,13 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(success);
     }
 
+    /// <summary>
+    /// Get all feature flag tags within an environment
+    /// </summary>
+    /// <remarks>
+    /// Retrieve all unique tags used across feature flags in the environment.
+    /// </remarks>
+    [OpenApi]
     [HttpGet("all-tags")]
     public async Task<ApiResponse<ICollection<string>>> GetAllTagsAsync(Guid envId)
     {
@@ -447,6 +501,12 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(tags);
     }
 
+    /// <summary>
+    /// Set tags for a feature flag
+    /// </summary>
+    /// <remarks>
+    /// Assign a list of tags to a feature flag for organization and filtering purposes.
+    /// </remarks>
     [OpenApi]
     [HttpPut("{key}/tags")]
     [Authorize(Permissions.UpdateFlagTags)]

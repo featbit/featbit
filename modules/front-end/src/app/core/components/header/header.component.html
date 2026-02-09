@@ -8,34 +8,78 @@
   </nz-breadcrumb>
 
   <div class="header-btns">
-    <div (click)="navigateToWorkspace()" class="license-plan-wrapper">
-      @if (license.data) {
-        <span class="plan-name">{{ license.data?.plan }}</span>
-      } @else {
-        <span i18n="@@common.upgrade-to-enterprise">Upgrade to Enterprise</span>
-      }
-      <i nz-icon nzType="icons:icon-medal"></i>
+    <div
+      [routerLink]="['/workspace/license']"
+      class="license-badge"
+      [ngClass]="{
+        'license-expiring': isLicenseExpiring,
+        'license-expired': isLicenseExpired,
+        'license-active': license.data && !isLicenseExpired && !isLicenseExpiring
+      }"
+    >
+      <div class="badge-icon">
+        <i nz-icon nzType="icons:icon-medal"></i>
+      </div>
+      <div class="badge-content">
+        @if (license.data) {
+          @if (isLicenseExpired) {
+            <span class="badge-label badge-warning" i18n="@@common.license-expired">License Expired</span>
+            <span class="badge-plan">{{ license.data?.plan }}</span>
+          } @else if (isLicenseExpiring) {
+            <span class="badge-label badge-warning" i18n="@@common.license-expiring-soon">Expiring in {{ daysUntilExpiration }} days</span>
+            <span class="badge-plan">{{ license.data?.plan }}</span>
+          } @else {
+            <span class="badge-label" i18n="@@common.current-plan">Current Plan</span>
+            <span class="badge-plan">{{ license.data?.plan }}</span>
+          }
+        } @else {
+          <span class="badge-label" i18n="@@common.upgrade-now">Upgrade Now</span>
+          <span class="badge-plan" i18n="@@common.get-enterprise">Get Enterprise</span>
+        }
+      </div>
+      <div class="badge-arrow">
+        <i nz-icon nzType="right" nzTheme="outline"></i>
+      </div>
     </div>
 
-    <a target="_blank" class="header-btn doc-btn" href="https://docs.featbit.co"><span nz-icon nzType="read" nzTheme="outline"></span></a>
     <div class="org-btns">
-      <div class="header-info">
-        <div class="org-proj-env">
-          <span [routerLink]="['/workspace/organization']">
-            <i nz-icon nzType="icons:icon-org"></i>
-            {{currentOrganization?.name}}
-          </span>
-          <span (click)="envModalVisible=true">
-            <i nz-icon nzType="icons:icon-proj"></i>
-            {{currentProjectEnv?.projectName}}
-          </span>
-          <span (click)="envModalVisible=true" nz-popover i18n-nz-popover="@@common.env-secret" nzPopoverTitle="Environment Secrets"
-            [nzPopoverContent]="environmentSecretContent"
-            style="background-color: transparent;"
-            nzPopoverOverlayClassName="env-secret-popover">
-            <i nz-icon nzType="icons:icon-env"></i>
-            {{currentProjectEnv?.envName}}
-          </span>
+      <div class="workspace-selector">
+        <div class="selector-items">
+          <div class="selector-item" [routerLink]="['/workspace/organization']">
+            <div class="item-icon org-icon">
+              <i nz-icon nzType="icons:icon-org"></i>
+            </div>
+            <div class="item-content">
+              <span class="item-label" i18n="@@common.organization">Organization</span>
+              <span class="item-value">{{currentOrganization?.name}}</span>
+            </div>
+          </div>
+          <div class="selector-divider"></div>
+          <div class="selector-item" [routerLink]="['/workspace/projects']">
+            <div class="item-icon proj-icon">
+              <i nz-icon nzType="icons:icon-proj"></i>
+            </div>
+            <div class="item-content">
+              <span class="item-label" i18n="@@common.project">Project</span>
+              <span class="item-value">{{currentProjectEnv?.projectName}}</span>
+            </div>
+          </div>
+          <div class="selector-divider"></div>
+          <div class="selector-item" (click)="envModalVisible=true"
+               nz-popover
+               i18n-nz-popover="@@common.env-secret"
+               nzPopoverTitle="Environment Secrets"
+               nzPopoverPlacement="bottomLeft"
+               [nzPopoverContent]="environmentSecretContent"
+               nzPopoverOverlayClassName="env-secret-popover">
+            <div class="item-icon env-icon">
+              <i nz-icon nzType="icons:icon-env"></i>
+            </div>
+            <div class="item-content">
+              <span class="item-label" i18n="@@common.environment">Environment</span>
+              <span class="item-value">{{currentProjectEnv?.envName}}</span>
+            </div>
+          </div>
           <ng-template #environmentSecretContent>
             @for (secret of env?.secrets; track secret.value || secret.name) {
               <div class="env-secret-popover-content" (click)="copyText(secret.value)">
@@ -51,11 +95,6 @@
               </div>
             }
           </ng-template>
-        </div>
-        <div class="switch" (click)="envModalVisible=true">
-          <button class="switch-link-btn" nz-button nzType="link">
-            <i nz-icon nzType="icons:icon-swap"></i>
-          </button>
         </div>
       </div>
     </div>

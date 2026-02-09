@@ -6,19 +6,16 @@ public static class ResourceHelper
 {
     public static string GetRn(string resourceType)
     {
-        switch (resourceType)
+        return resourceType switch
         {
-            case ResourceTypes.FeatureFlag:
-                return "project/*:env/*:flag/*";
-
-            case ResourceTypes.Segment:
-                return "project/*:env/*:segment/*";
-
-            case ResourceTypes.Project:
-                return "project/*";
-        }
-
-        return string.Empty;
+            ResourceTypes.Workspace => "workspace/*",
+            ResourceTypes.Iam => "iam/*",
+            ResourceTypes.Project => "project/*",
+            ResourceTypes.Env => "project/*:env/*",
+            ResourceTypes.FeatureFlag => "project/*:env/*:flag/*",
+            ResourceTypes.Segment => "project/*:env/*:segment/*",
+            _ => string.Empty
+        };
     }
 
     public static bool IsRnMatchPattern(string rn, string pattern)

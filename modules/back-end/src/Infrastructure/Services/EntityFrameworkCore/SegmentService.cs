@@ -100,19 +100,19 @@ public class SegmentService(AppDbContext dbContext, ILogger<SegmentService> logg
         return distinct;
     }
 
-    public async Task<bool> IsNameUsedAsync(Guid workspaceId, string type, Guid envId, string name)
+    public async Task<bool> IsKeyUsedAsync(Guid workspaceId, string type, Guid envId, string key)
     {
         Expression<Func<Segment, bool>> predicate = type switch
         {
             SegmentType.Shared => x =>
                 x.WorkspaceId == workspaceId &&
                 x.Type == SegmentType.Shared &&
-                string.Equals(x.Name.ToLower(), name.ToLower()),
+                string.Equals(x.Key.ToLower(), key.ToLower()),
 
             _ => x =>
                 x.EnvId == envId &&
                 x.Type == SegmentType.EnvironmentSpecific &&
-                string.Equals(x.Name.ToLower(), name.ToLower())
+                string.Equals(x.Key.ToLower(), key.ToLower())
         };
 
         return await AnyAsync(predicate);
@@ -155,8 +155,11 @@ public class SegmentService(AppDbContext dbContext, ILogger<SegmentService> logg
                 .Distinct()
                 .ToArray();
 
-            var translateScopeTasks = scopesToTranslate.Select(x => TranslateScopeAsync(x));
-            var scopes = await Task.WhenAll(translateScopeTasks);
+            var scopes = new List<(string scope, ICollection<Guid> envIds)>();
+            foreach (var scopeToTranslate in scopesToTranslate)
+            {
+                scopes.Add(await TranslateScopeAsync(scopeToTranslate));
+            }
 
             foreach (var sharedSegment in sharedSegments)
             {

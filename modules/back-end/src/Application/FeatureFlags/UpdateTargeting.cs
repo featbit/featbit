@@ -1,14 +1,17 @@
+using Application.Bases.Exceptions;
 using Application.Users;
 using Domain.AuditLogs;
 using Domain.FeatureFlags;
 
 namespace Application.FeatureFlags;
 
-public class UpdateTargeting : IRequest<bool>
+public class UpdateTargeting : IRequest<Guid>
 {
     public Guid OrgId { get; set; }
 
     public Guid EnvId { get; set; }
+
+    public Guid Revision { get; set; }
 
     public string Key { get; set; }
 
@@ -17,33 +20,33 @@ public class UpdateTargeting : IRequest<bool>
     public string Comment { get; set; }
 }
 
-public class UpdateTargetingHandler : IRequestHandler<UpdateTargeting, bool>
+public class UpdateTargetingHandler(
+    IFeatureFlagService flagService,
+    ICurrentUser currentUser,
+    IPublisher publisher)
+    : IRequestHandler<UpdateTargeting, Guid>
 {
-    private readonly IFeatureFlagService _flagService;
-    private readonly ICurrentUser _currentUser;
-    private readonly IPublisher _publisher;
-
-    public UpdateTargetingHandler(
-        IFeatureFlagService flagService,
-        ICurrentUser currentUser,
-        IPublisher publisher)
+    public async Task<Guid> Handle(UpdateTargeting request, CancellationToken cancellationToken)
     {
-        _flagService = flagService;
-        _currentUser = currentUser;
-        _publisher = publisher;
-    }
+        var flag = await flagService.GetAsync(request.EnvId, request.Key);
+        if (!flag.Revision.Equals(request.Revision))
+        {
+            throw new ConflictException(nameof(FeatureFlag), flag.Id);
+        }
 
-    public async Task<bool> Handle(UpdateTargeting request, CancellationToken cancellationToken)
-    {
-        var flag = await _flagService.GetAsync(request.EnvId, request.Key);
-        var dataChange = flag.UpdateTargeting(request.Targeting, _currentUser.Id);
-        await _flagService.UpdateAsync(flag);
+        var dataChange = flag.UpdateTargeting(request.Targeting, currentUser.Id);
+        await flagService.UpdateAsync(flag);
 
         // publish on feature flag change notification
-        var notification =
-            new OnFeatureFlagChanged(flag, Operations.Update, dataChange, _currentUser.Id, request.Comment);
-        await _publisher.Publish(notification, cancellationToken);
+        var notification = new OnFeatureFlagChanged(
+            flag,
+            Operations.Update,
+            dataChange,
+            currentUser.Id,
+            comment: request.Comment
+        );
+        await publisher.Publish(notification, cancellationToken);
 
-        return true;
+        return flag.Revision;
     }
 }

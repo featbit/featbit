@@ -1,5 +1,5 @@
 <nz-collapse [nzBordered]="false">
-  @for (category of categories; track category.category; let index = $index) {
+  @for (category of categories; track $index; let index = $index) {
     <nz-collapse-panel [nzHeader]="category.label" [nzActive]="index === 0">
       @if (category.instructions) {
         <ul class="instructions">
@@ -12,7 +12,7 @@
       }
       @if (category.groups) {
         <div>
-          @for (group of category.groups; track group.label) {
+          @for (group of category.groups; track $index) {
             <div>
               <div class="group-title" [innerHTML]="group.label"></div>
               <ul class="group-instructions">

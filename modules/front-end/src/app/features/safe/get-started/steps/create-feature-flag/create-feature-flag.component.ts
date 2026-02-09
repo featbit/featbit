@@ -7,13 +7,13 @@ import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
 import { NzMessageService } from "ng-zorro-antd/message";
 import { BehaviorSubject } from "rxjs";
 import {
-  FlagKeyPattern,
   IFeatureFlagCreationPayload,
   IFeatureFlagListFilter,
   IFeatureFlagListItem,
   IFeatureFlagListModel
 } from "@features/safe/feature-flags/types/feature-flag";
 import { GET_STARTED } from "@utils/localstorage-keys";
+import { ResourceKeyPattern } from "@shared/types";
 
 @Component({
     selector: 'create-feature-flag',
@@ -117,7 +117,7 @@ export class CreateFeatureFlagComponent implements OnInit {
 
     this.form = this.fb.group({
       name: [name, Validators.required],
-      key: [key, [Validators.required, Validators.pattern(FlagKeyPattern)], [this.flagKeyAsyncValidator]],
+      key: [key, [Validators.required, Validators.pattern(ResourceKeyPattern)], [this.flagKeyAsyncValidator]],
       description: [description, Validators.maxLength(512)]
     });
 

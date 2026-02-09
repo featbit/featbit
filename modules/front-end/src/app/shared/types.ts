@@ -116,6 +116,7 @@ export interface ILicense {
   metadata?: any
 }
 
+const LICENSE_EXPIRING_DAYS_THRESHOLD = 30;
 export class License {
   data: ILicense;
   constructor(licenseStr: string) {
@@ -132,6 +133,36 @@ export class License {
     }
 
     return this.data.features?.includes(feature) || this.data.features?.includes(LicenseFeatureEnum.Asterisk);
+  }
+
+  isExpiringSoon(): boolean {
+    if (!this.data || !this.data.exp) {
+      return false;
+    }
+
+    const now = new Date().getTime();
+    const expirationDate = this.data.exp;
+    const daysUntilExpiration = (expirationDate - now) / (1000 * 60 * 60 * 24);
+
+    return daysUntilExpiration > 0 && daysUntilExpiration <= LICENSE_EXPIRING_DAYS_THRESHOLD;
+  }
+
+  getDaysUntilExpiration(): number {
+    if (!this.data || !this.data.exp) {
+      return -1;
+    }
+
+    const now = new Date().getTime();
+    const expirationDate = this.data.exp;
+    return Math.ceil((expirationDate - now) / (1000 * 60 * 60 * 24));
+  }
+
+  isExpired(): boolean {
+    if (!this.data || !this.data.exp) {
+      return false;
+    }
+
+    return this.data.exp < new Date().getTime();
   }
 }
 
@@ -209,3 +240,5 @@ export interface SsoPreCheck {
   isEnabled: boolean;
   workspaceKey?: string;
 }
+
+export const ResourceKeyPattern: RegExp = /^[a-zA-Z0-9._-]+$/;

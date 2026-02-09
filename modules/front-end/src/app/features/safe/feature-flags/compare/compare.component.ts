@@ -77,6 +77,8 @@ export class CompareComponent implements OnInit {
     totalCount: 0
   }
 
+  widthConfig: string[] = [];
+
   search$ = new Subject<void>();
   filter: IFeatureFlagListFilter = new IFeatureFlagListFilter();
 
@@ -84,6 +86,11 @@ export class CompareComponent implements OnInit {
     if (!this.isCompareGranted) {
       return;
     }
+
+    // calculate width config
+    const baseWidth = 200;
+    const perEnvWidth = 150;
+    this.widthConfig = [`${baseWidth}px`, ...Array(this.targetEnvs.length).fill(`${perEnvWidth}px`)];
 
     this.isLoadingOverview = true;
     this.flagService.getCompareOverview(this.targetEnvs.map(env => env.value), this.filter)

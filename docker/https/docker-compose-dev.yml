@@ -83,7 +83,7 @@ services:
       - VIRTUAL_PORT=5173
 
   mongodb:
-    image: mongo:5.0.14
+    image: mongo:5.0.32
     container_name: mongodb
     ports:
       - "27017:27017"

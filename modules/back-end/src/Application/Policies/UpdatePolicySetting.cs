@@ -6,10 +6,19 @@ namespace Application.Policies;
 
 public class UpdatePolicySetting : IRequest<PolicyVm>
 {
+    /// <summary>
+    /// The ID of the policy to update. Retrieved from the URL path.
+    /// </summary>
     public Guid PolicyId { get; set; }
 
+    /// <summary>
+    /// The new name for the policy.
+    /// </summary>
     public string Name { get; set; }
 
+    /// <summary>
+    /// The new description for the policy.
+    /// </summary>
     public string Description { get; set; }
 }
 

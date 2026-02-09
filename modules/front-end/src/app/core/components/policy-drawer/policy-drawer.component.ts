@@ -1,8 +1,9 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import {debounceTime, first, map, switchMap} from "rxjs/operators";
+import { debounceTime, finalize, first, map, switchMap } from "rxjs/operators";
 import { PolicyService } from "@services/policy.service";
+import { slugify } from "@utils/index";
 
 @Component({
     selector: 'policy-drawer',
@@ -24,9 +25,14 @@ export class PolicyDrawerComponent implements OnInit {
   form: FormGroup;
   ngOnInit(): void {
     this.form = this.fb.group({
-      name: ['', [Validators.required], [this.nameAsyncValidator], 'change'],
+      name: ['', [Validators.required]],
+      key: ['', [Validators.required], [this.keyAsyncValidator]],
       description: ['', []],
     });
+
+    this.form.get('name').valueChanges.subscribe((event)=>{
+      this.nameChange(event);
+    })
   }
 
   onClose() {
@@ -34,11 +40,17 @@ export class PolicyDrawerComponent implements OnInit {
     this.close.emit();
   }
 
-  nameAsyncValidator = (control: FormControl) => control.valueChanges.pipe(
+  nameChange(name: string) {
+    let keyControl = this.form.get('key')!;
+    keyControl.setValue(slugify(name ?? ''));
+    keyControl.markAsDirty();
+  }
+
+  keyAsyncValidator = (control: FormControl) => control.valueChanges.pipe(
     debounceTime(300),
-    switchMap(value => this.policyService.isNameUsed(value as string)),
-    map(isNameUsed => {
-      switch (isNameUsed) {
+    switchMap(value => this.policyService.isKeyUsed(value as string)),
+    map(isUsed => {
+      switch (isUsed) {
         case true:
           return { error: true, duplicated: true };
         case undefined:
@@ -50,28 +62,19 @@ export class PolicyDrawerComponent implements OnInit {
     first()
   );
 
-  isLoading: boolean = false;
+  isAdding: boolean = false;
   doSubmit() {
-    if (this.form.invalid) {
-      for (const i in this.form.controls) {
-        this.form.controls[i].markAsDirty();
-        this.form.controls[i].updateValueAndValidity();
-      }
-      return;
-    }
-
-    this.isLoading = true;
-    const {name, description} = this.form.value;
-    this.policyService.create(name, description).subscribe(
-      () => {
-        this.isLoading = false;
+    this.isAdding = true;
+    const { name, key, description } = this.form.value;
+    this.policyService.create(name, key, description)
+    .pipe(finalize(() => this.isAdding = false))
+    .subscribe({
+      next: () => {
         this.close.emit(true);
-        this.message.success($localize `:@@common.operation-success:Operation succeeded`);
+        this.message.success($localize`:@@common.operation-success:Operation succeeded`);
         this.form.reset();
       },
-      _ => {
-        this.isLoading = false;
-      }
-    )
+      error: () => this.message.error($localize`:@@common.operation-failed:Operation failed`)
+    })
   }
 }

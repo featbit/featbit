@@ -9,10 +9,9 @@ public static class ErrorCodes
 
     // application
     public const string ResourceNotFound = nameof(ResourceNotFound);
-    public const string InvalidJson = nameof(InvalidJson);
+    public const string Conflict = nameof(Conflict);
     public const string NameHasBeenUsed = nameof(NameHasBeenUsed);
     public const string KeyHasBeenUsed = nameof(KeyHasBeenUsed);
-    public const string InconsistentData = nameof(InconsistentData);
 
     // identity error codes
     public const string EmailPasswordMismatch = nameof(EmailPasswordMismatch);

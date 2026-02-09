@@ -6,8 +6,14 @@ namespace Application.Workspaces;
 
 public class UpdateLicense : IRequest<WorkspaceVm>
 {
+    /// <summary>
+    /// The ID of the workspace. Retrieved from the request header.
+    /// </summary>
     public Guid Id { get; set; }
 
+    /// <summary>
+    /// The license key to apply to the workspace
+    /// </summary>
     public string License { get; set; }
 }
 

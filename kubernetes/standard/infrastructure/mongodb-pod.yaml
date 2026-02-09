@@ -13,7 +13,7 @@ spec:
           value: password
         - name: MONGO_INITDB_ROOT_USERNAME
           value: admin
-      image: mongo:5.0.14
+      image: mongo:5.0.32
       name: mongodb
       ports:
         - containerPort: 27017

@@ -14,6 +14,7 @@ export enum SegmentType {
 
 export interface CreateSegment {
   name: string;
+  key: string;
   type: SegmentType;
   scopes: string[];
   description: string;
@@ -22,6 +23,7 @@ export interface CreateSegment {
 export interface ISegment {
   id: string;
   name: string;
+  key: string;
   type: SegmentType;
   scopes: string[];
   tags: string[];
@@ -39,6 +41,13 @@ export interface ISegmentFlagReference {
   id: string,
   name: string,
   key: string
+}
+
+export type UpdateSegmentTargetingPayload = {
+  included: string[];
+  excluded: string[];
+  rules: IRule[];
+  comment: string;
 }
 
 export class SegmentListFilter {

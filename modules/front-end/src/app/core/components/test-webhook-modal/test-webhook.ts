@@ -58,6 +58,7 @@ export function getTestPayload(event: string, payloadTemplate: string): string {
 const testSegment: ISegment = {
   id: '510766ab-bf7d-4a80-a601-68beced8360e',
   name: 'Test Segment',
+  key: 'test-segment',
   type: SegmentType.EnvironmentSpecific,
   scopes: ['organization/organization-key:project/project-key:env/env-key'],
   tags: ['test', 'demo'],
@@ -86,6 +87,7 @@ const testSegment: ISegment = {
 const testFeatureFlag: IFeatureFlag = {
   envId: 'de41a713-d02a-4e84-a87f-eab812942ab2',
   id: 'eac7cb6e-9860-4d58-b1fb-82c7bf5d5025',
+  revision: 'c55d5bd8-7f45-4ed9-a5c1-5c6e4f2637c9',
   name: 'Test Feature Flag',
   description: 'This is a test feature flag',
   key: 'test',

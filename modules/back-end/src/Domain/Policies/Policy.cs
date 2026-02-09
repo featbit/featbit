@@ -6,6 +6,8 @@ public class Policy : AuditedEntity
 
     public string Name { get; set; }
 
+    public string Key { get; set; }
+
     public string Description { get; set; }
 
     public string Type { get; set; }
@@ -17,10 +19,11 @@ public class Policy : AuditedEntity
     {
     }
 
-    public Policy(Guid organizationId, string name, string description)
+    public Policy(Guid organizationId, string name, string key, string description)
     {
         OrganizationId = organizationId;
         Name = name;
+        Key = key;
         Description = description;
 
         Type = PolicyTypes.CustomerManaged;
@@ -40,5 +43,22 @@ public class Policy : AuditedEntity
         Statements = statements ?? Array.Empty<PolicyStatement>();
 
         UpdatedAt = DateTime.UtcNow;
+    }
+
+    public Policy Clone(string name, string key, string description)
+    {
+        // clear id
+        Id = Guid.Empty;
+
+        Name = name;
+        Key = key;
+        Description = description;
+
+        // change audited properties
+        var now = DateTime.UtcNow;
+        CreatedAt = now;
+        UpdatedAt = now;
+
+        return this;
     }
 }

@@ -56,5 +56,5 @@ public record ApiResponse<TData>
     /// </summary>
     /// <param name="error">The error message returned by the API call.</param>
     /// <returns>A new instance of the <see cref="ApiResponse{TData}"/> class with an error result.</returns>
-    public static ApiResponse<TData> Error(string error) => Error(new[] { error });
+    public static ApiResponse<TData> Error(string error) => Error([error]);
 }
