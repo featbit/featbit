@@ -14,15 +14,21 @@ public partial class KafkaMessageConsumer : BackgroundService
     private readonly IConsumer<Null, string> _consumer;
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<KafkaMessageConsumer> _logger;
+    private readonly IEnumerable<IMessageConsumer> _messageConsumers;
 
+    //TODO: MOdify this to be able to handle multiple message consumers
+    //TODO: For now assume that we will handle all of the messages so add the topics to the subscribelist.
+    //Long term we need to consider multiple types of consumers such as redis or postgres and give us the ability to specify which topics they will consume.
     public KafkaMessageConsumer(
         ConsumerConfig config,
         IServiceProvider serviceProvider,
+        IEnumerable<IMessageConsumer> messageConsumers,
         ILogger<KafkaMessageConsumer> logger)
     {
         _consumer = new ConsumerBuilder<Null, string>(config).Build();
         _serviceProvider = serviceProvider;
         _logger = logger;
+        _messageConsumers = messageConsumers;
     }
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -35,7 +41,7 @@ public partial class KafkaMessageConsumer : BackgroundService
 
     private async Task StartConsumerLoop(CancellationToken cancellationToken)
     {
-        _consumer.Subscribe(Topics.EndUser);
+        _consumer.Subscribe([Topics.EndUser, Topics.ConnectionMade]);
         _logger.LogInformation("Start consuming {Topic} messages...", Topics.EndUser);
 
         ConsumeResult<Null, string>? consumeResult = null;
@@ -47,29 +53,20 @@ public partial class KafkaMessageConsumer : BackgroundService
                 consumeResult = _consumer.Consume(cancellationToken);
                 if (consumeResult.IsPartitionEOF)
                 {
+                    // reached end of topic
                     continue;
                 }
 
-                message = consumeResult.Message.Value;
-                if (string.IsNullOrWhiteSpace(message))
+                var handler = _messageConsumers.FirstOrDefault(x => x.Topic == consumeResult.Topic);
+                if (handler == null)
                 {
+                    //Log.NoHandlerForTopic(_logger, consumeResult.Topic);
+                    Console.WriteLine($"No handler for topic {consumeResult.Topic}");
                     continue;
                 }
 
-                var endUserMessage =
-                    JsonSerializer.Deserialize<EndUserMessage>(message, ReusableJsonSerializerOptions.Web);
-                if (endUserMessage == null)
-                {
-                    continue;
-                }
-
-                using var scope = _serviceProvider.CreateScope();
-                var endUserService = scope.ServiceProvider.GetRequiredService<IEndUserService>();
-
-                // upsert endUser and it's properties
-                var endUser = endUserMessage.AsEndUser();
-                await endUserService.UpsertAsync(endUser);
-                await endUserService.AddNewPropertiesAsync(endUser);
+                message = consumeResult.Message == null ? string.Empty : consumeResult.Message.Value;
+                await handler.HandleAsync(message, cancellationToken);
             }
             catch (ConsumeException ex)
             {
