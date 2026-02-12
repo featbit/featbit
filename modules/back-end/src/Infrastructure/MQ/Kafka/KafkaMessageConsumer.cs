@@ -16,9 +16,6 @@ public partial class KafkaMessageConsumer : BackgroundService
     private readonly ILogger<KafkaMessageConsumer> _logger;
     private readonly IEnumerable<IMessageConsumer> _messageConsumers;
 
-    //TODO: MOdify this to be able to handle multiple message consumers
-    //TODO: For now assume that we will handle all of the messages so add the topics to the subscribelist.
-    //Long term we need to consider multiple types of consumers such as redis or postgres and give us the ability to specify which topics they will consume.
     public KafkaMessageConsumer(
         ConsumerConfig config,
         IServiceProvider serviceProvider,
