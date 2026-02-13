@@ -16,7 +16,7 @@ public class FeatureFlagFilter
 
     public string[]? Keys { get; set; } = [];
 
-    public long? Timestamp { get; set; } = 0;
+    public long? Timestamp { get; set; }
 }
 
 public interface IFeatureFlagService

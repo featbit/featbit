@@ -62,7 +62,7 @@ public class FeatureFlagService(IConfiguration configuration, IServiceProvider s
             }
 
             // timestamp filter
-            var timestamp = userFilter.Timestamp.GetValueOrDefault();
+            var timestamp = userFilter.Timestamp ?? 0;
             if (timestamp > 0)
             {
                 var timeFilter = filterBuilder.Gt("updatedAt", DateTime.UnixEpoch.AddMilliseconds(timestamp));
@@ -111,7 +111,7 @@ public class FeatureFlagService(IConfiguration configuration, IServiceProvider s
             }
 
             // timestamp filter
-            var timestamp = userFilter.Timestamp.GetValueOrDefault();
+            var timestamp = userFilter.Timestamp ?? 0;
             if (timestamp > 0)
             {
                 sql += " AND date_trunc('milliseconds', updated_at) > @time";
