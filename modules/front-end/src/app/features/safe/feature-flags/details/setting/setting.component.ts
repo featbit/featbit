@@ -95,7 +95,7 @@ export class SettingComponent {
 
     const isNewTag = this.selectedTag.startsWith(this.createTagPrefix);
 
-    let actualTag = isNewTag
+    const actualTag = isNewTag
       ? this.selectedTag.replace(this.createTagPrefix, '').replace(/'/g, '').trim()
       : this.selectedTag.trim();
 
@@ -105,7 +105,7 @@ export class SettingComponent {
     });
 
     if (isNewTag) {
-      this.allTags = [ ...this.allTags, actualTag ];
+      this.allTags = [...this.allTags, actualTag];
     }
 
     this.currentAllTags = this.allTags;
