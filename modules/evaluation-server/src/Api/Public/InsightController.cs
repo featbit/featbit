@@ -33,7 +33,7 @@ public class InsightController : PublicApiControllerBase
         }
 
         var validInsights = insights.Where(x => x.IsValid()).ToArray();
-        if (!validInsights.Any())
+        if (validInsights.Length == 0)
         {
             return Ok();
         }

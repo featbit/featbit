@@ -61,6 +61,14 @@ public class FeatureFlagService(IConfiguration configuration, IServiceProvider s
                 filters.Add(keysFilter);
             }
 
+            // timestamp filter
+            var timestamp = userFilter.Timestamp ?? 0;
+            if (timestamp > 0)
+            {
+                var timeFilter = filterBuilder.Gt("updatedAt", DateTime.UnixEpoch.AddMilliseconds(timestamp));
+                filters.Add(timeFilter);
+            }
+
             var filter = filterBuilder.And(filters);
 
             var flags = await collection.Find(filter).ToListAsync();
@@ -100,6 +108,14 @@ public class FeatureFlagService(IConfiguration configuration, IServiceProvider s
             {
                 sql += " AND key = ANY(@keys)";
                 parameters.Add("keys", keys);
+            }
+
+            // timestamp filter
+            var timestamp = userFilter.Timestamp ?? 0;
+            if (timestamp > 0)
+            {
+                sql += " AND date_trunc('milliseconds', updated_at) > @time";
+                parameters.Add("time", DateTimeOffset.FromUnixTimeMilliseconds(timestamp));
             }
 
             var rows = await connection.QueryAsync(sql, parameters);
