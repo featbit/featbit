@@ -15,12 +15,15 @@ public class EvalResultVariation
 
     public string MatchReason { get; set; }
 
+    public bool SendToExperiment { get; set; }
+
     public EvalResultVariation(string type, UserVariation uv)
     {
         Id = uv.Variation.Id;
         Type = type;
         Value = uv.Variation.Value;
         MatchReason = uv.MatchReason;
+        SendToExperiment = uv.SendToExperiment;
     }
 }
 
