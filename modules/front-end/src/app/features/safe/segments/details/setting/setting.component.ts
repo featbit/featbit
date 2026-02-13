@@ -117,7 +117,9 @@ export class SettingComponent implements OnInit {
   }
 
   onAddTag() {
-    let actualTag = this.selectedTag.startsWith(this.createTagPrefix)
+    const isNewTag = this.selectedTag.startsWith(this.createTagPrefix);
+
+    const actualTag = isNewTag
       ? this.selectedTag.replace(this.createTagPrefix, '').replace(/'/g, '').trim()
       : this.selectedTag.trim();
 
@@ -126,7 +128,7 @@ export class SettingComponent implements OnInit {
       this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
     });
 
-    if (this.allTags.findIndex(t => t === actualTag) === -1) {
+    if (isNewTag) {
       this.allTags = [...this.allTags, actualTag];
       this.currentAllTags = this.allTags;
     }
