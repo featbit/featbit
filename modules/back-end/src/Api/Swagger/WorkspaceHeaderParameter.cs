@@ -1,4 +1,4 @@
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace Api.Swagger;
@@ -14,7 +14,7 @@ public class WorkspaceHeaderParameter : IOperationFilter
             Required = false,
             Schema = new OpenApiSchema
             {
-                Type = "string"
+                Type = JsonSchemaType.String
             },
             Description = "The workspace ID associated with the request. Some APIs may require this header to identify the workspace context."
         });
