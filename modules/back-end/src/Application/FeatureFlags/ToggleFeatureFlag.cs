@@ -3,7 +3,7 @@ using Domain.AuditLogs;
 
 namespace Application.FeatureFlags;
 
-public class ToggleFeatureFlag : IRequest<bool>
+public class ToggleFeatureFlag : IRequest<Guid>
 {
     public Guid EnvId { get; set; }
 
@@ -12,7 +12,7 @@ public class ToggleFeatureFlag : IRequest<bool>
     public bool Status { get; set; }
 }
 
-public class ToggleFeatureFlagHandler : IRequestHandler<ToggleFeatureFlag, bool>
+public class ToggleFeatureFlagHandler : IRequestHandler<ToggleFeatureFlag, Guid>
 {
     private readonly IFeatureFlagService _service;
     private readonly ICurrentUser _currentUser;
@@ -28,9 +28,14 @@ public class ToggleFeatureFlagHandler : IRequestHandler<ToggleFeatureFlag, bool>
         _publisher = publisher;
     }
 
-    public async Task<bool> Handle(ToggleFeatureFlag request, CancellationToken cancellationToken)
+    public async Task<Guid> Handle(ToggleFeatureFlag request, CancellationToken cancellationToken)
     {
         var flag = await _service.GetAsync(request.EnvId, request.Key);
+        if (flag.IsEnabled == request.Status)
+        {
+            return flag.Revision;
+        }
+
         var dataChange = flag.Toggle(_currentUser.Id, request.Status);
         await _service.UpdateAsync(flag);
 
@@ -38,6 +43,6 @@ public class ToggleFeatureFlagHandler : IRequestHandler<ToggleFeatureFlag, bool>
         var notification = new OnFeatureFlagChanged(flag, Operations.Update, dataChange, _currentUser.Id);
         await _publisher.Publish(notification, cancellationToken);
 
-        return true;
+        return flag.Revision;
     }
 }

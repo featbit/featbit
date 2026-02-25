@@ -16,24 +16,19 @@ public static class KafkaHealthCheckBuilderExtensions
         string[] tags,
         TimeSpan timeout)
     {
-        var producerServer = configuration["Kafka:Producer:bootstrap.servers"];
-        var consumerServer = configuration["Kafka:Consumer:bootstrap.servers"];
-
-        if (string.IsNullOrEmpty(producerServer) || string.IsNullOrEmpty(consumerServer))
-        {
-            throw new InvalidOperationException("Kafka producer and consumer servers must be configured.");
-        }
+        var producerConfig = BuildHealthCheckProducerConfig(configuration.GetSection("Kafka:Producer"));
+        var consumerConfig = BuildHealthCheckProducerConfig(configuration.GetSection("Kafka:Consumer"));
 
         builder
             .AddKafka(
                 "Kafka Producer Cluster",
-                producerServer,
+                producerConfig,
                 tags,
                 timeout
             )
             .AddKafka(
                 "Kafka Consumer Cluster",
-                consumerServer,
+                consumerConfig,
                 tags,
                 timeout
             );
@@ -44,15 +39,10 @@ public static class KafkaHealthCheckBuilderExtensions
     private static IHealthChecksBuilder AddKafka(
         this IHealthChecksBuilder builder,
         string name,
-        string bootstrapServers,
+        ProducerConfig producerConfig,
         IEnumerable<string> tags,
         TimeSpan timeout)
     {
-        var producerConfig = new ProducerConfig
-        {
-            BootstrapServers = bootstrapServers
-        };
-
         var kafkaOptions = new KafkaHealthCheckOptions
         {
             Configuration = producerConfig,
@@ -69,5 +59,18 @@ public static class KafkaHealthCheckBuilderExtensions
         );
 
         return builder.Add(registration);
+    }
+
+    private static ProducerConfig BuildHealthCheckProducerConfig(IConfigurationSection section)
+    {
+        var configDictionary = new Dictionary<string, string>();
+        section.Bind(configDictionary);
+
+        if (!configDictionary.ContainsKey("bootstrap.servers"))
+        {
+            throw new InvalidOperationException($"{section.Path}:bootstrap.servers must be configured.");
+        }
+
+        return new ProducerConfig(configDictionary);
     }
 }

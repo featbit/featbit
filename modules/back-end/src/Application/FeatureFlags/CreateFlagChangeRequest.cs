@@ -1,4 +1,5 @@
-﻿using Application.Users;
+﻿using Application.Bases.Exceptions;
+using Application.Users;
 using Domain.FeatureFlags;
 using Domain.FlagChangeRequests;
 using Domain.FlagDrafts;
@@ -10,6 +11,8 @@ public class CreateFlagChangeRequest : IRequest<bool>
     public Guid OrgId { get; set; }
 
     public Guid EnvId { get; set; }
+
+    public Guid Revision { get; set; }
 
     public string Key { get; set; }
 
@@ -42,6 +45,10 @@ public class CreateFlagChangeRequestHandler : IRequestHandler<CreateFlagChangeRe
     public async Task<bool> Handle(CreateFlagChangeRequest request, CancellationToken cancellationToken)
     {
         var flag = await _flagService.GetAsync(request.EnvId, request.Key);
+        if (!flag.Revision.Equals(request.Revision))
+        {
+            throw new ConflictException(nameof(FeatureFlag), flag.Id);
+        }
 
         // create flag draft
         var dataChange = flag.UpdateTargeting(request.Targeting, _currentUser.Id);

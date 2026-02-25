@@ -1,6 +1,8 @@
 ﻿import { IVariation } from "@shared/rules";
 import { SimpleUser } from "@shared/users";
 import { getCurrentEnvRN } from "@utils/project-env";
+import { NzModalService } from "ng-zorro-antd/modal";
+import { NzMessageService } from "ng-zorro-antd/message";
 
 export interface IFeatureFlagListModel {
   items: IFeatureFlagListItem[];
@@ -112,4 +114,23 @@ export const getFlagRN = (key: string, tags: string[]) => {
   }
 
   return rn;
+}
+
+export function handleUpdateError(err: any, message: NzMessageService, modal: NzModalService) {
+  if (err.errors && err.errors.length === 1 && err.errors[0] === 'Conflict') {
+    modal.warning({
+      nzTitle: $localize`:@@ff.conflict-detected:Conflict Detected`,
+      nzContent: $localize`:@@ff.conflict-reload-message:This feature flag has been modified by another user, so your changes could not be applied. Reload the page to get the latest version and re-apply your changes.`,
+      nzOkText: $localize`:@@common.reload:Reload`,
+      nzClassName: 'warning-modal-dialog',
+      nzWidth: '500px',
+      nzClosable: false,
+      nzCentered: true,
+      nzOnOk: () => {
+        window.location.reload();
+      }
+    });
+  } else {
+    message.error($localize `:@@common.operation-failed:Operation failed`);
+  }
 }

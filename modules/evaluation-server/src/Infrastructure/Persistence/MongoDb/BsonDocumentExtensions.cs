@@ -15,4 +15,14 @@ public static class BsonDocumentExtensions
 
         return Encoding.UTF8.GetBytes(normalizedJson);
     }
+
+    public static JsonElement ToJsonElement(this BsonDocument bsonDocument)
+    {
+        var dictionary = bsonDocument.ToDictionary();
+
+        var json = JsonSerializer.Serialize(dictionary);
+        var normalizedJson = json.Replace("\"_id\":", "\"id\":");
+
+        return JsonSerializer.Deserialize<JsonElement>(normalizedJson);
+    }
 }

@@ -6,12 +6,24 @@ namespace Application.Environments;
 
 public class CreateEnvironment : IRequest<EnvironmentVm>
 {
+    /// <summary>
+    /// The ID of the project the environment belongs to. Retrieved from the URL path.
+    /// </summary>
     public Guid ProjectId { get; set; }
 
+    /// <summary>
+    /// The name of the environment.
+    /// </summary>
     public string Name { get; set; }
 
+    /// <summary>
+    /// The unique key of the environment.
+    /// </summary>
     public string Key { get; set; }
 
+    /// <summary>
+    /// The description of the environment.
+    /// </summary>
     public string Description { get; set; }
 }
 

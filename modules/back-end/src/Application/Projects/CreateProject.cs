@@ -6,10 +6,19 @@ namespace Application.Projects;
 
 public class CreateProject : IRequest<ProjectWithEnvs>
 {
+    /// <summary>
+    /// The ID of the organization the project belongs to. Retrieved from the request header.
+    /// </summary>
     public Guid OrganizationId { get; set; }
 
+    /// <summary>
+    /// The name of the project
+    /// </summary>
     public string Name { get; set; }
 
+    /// <summary>
+    /// The unique key of the project
+    /// </summary>
     public string Key { get; set; }
 }
 

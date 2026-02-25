@@ -7,6 +7,7 @@ import { getCurrentLicense, getCurrentOrganization } from "@utils/project-env";
 import { PermissionsService } from "@services/permissions.service";
 import { generalResourceRNPattern, permissionActions } from "@shared/policy";
 import { MessageQueueService } from '@core/services/message-queue.service';
+import { copyToClipboard } from '@utils/index';
 import { IPagedPolicy, PolicyFilter } from "@features/safe/iam/types/policy";
 import { GroupListFilter, IPagedGroup } from "@features/safe/iam/types/group";
 import { PolicyService } from "@services/policy.service";
@@ -212,6 +213,12 @@ export class OrganizationComponent implements OnInit {
         this.isUpdating = false;
       }
     });
+  }
+
+  copyText(text: string) {
+    copyToClipboard(text).then(
+      () => this.message.success($localize`:@@common.copy-success:Copied`)
+    );
   }
 
   protected readonly LicenseFeatureEnum = LicenseFeatureEnum;

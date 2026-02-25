@@ -49,7 +49,7 @@ public class GlobalUserController : ApiControllerBase
         }
         catch (JsonException)
         {
-            throw new BusinessException(ErrorCodes.InvalidJson);
+            throw new BusinessException(ErrorCodes.Invalid("file"));
         }
 
         var success = await Mediator.Send(request);

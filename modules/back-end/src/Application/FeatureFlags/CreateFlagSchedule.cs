@@ -17,6 +17,8 @@ public class CreateFlagSchedule : IRequest<bool>
 
     public Guid EnvId { get; set; }
 
+    public Guid Revision { get; set; }
+
     public string Key { get; set; }
 
     public FlagTargeting Targeting { get; set; }
@@ -60,6 +62,11 @@ public class CreateFlagScheduleHandler : IRequestHandler<CreateFlagSchedule, boo
     public async Task<bool> Handle(CreateFlagSchedule request, CancellationToken cancellationToken)
     {
         var flag = await _flagService.GetAsync(request.EnvId, request.Key);
+        if (!flag.Revision.Equals(request.Revision))
+        {
+            throw new ConflictException(nameof(FeatureFlag), flag.Id);
+        }
+
         var dataChange = flag.UpdateTargeting(request.Targeting, _currentUser.Id);
 
         // create draft

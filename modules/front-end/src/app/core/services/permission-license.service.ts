@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { PermissionsService } from "@services/permissions.service";
 import { getCurrentWorkspace } from "@utils/project-env";
 import { License, LicenseFeatureEnum } from "@shared/types";
-import { IamPolicyAction } from "@shared/policy";
+import { IamPolicyAction, permissionActions, ResourceTypeEnum } from "@shared/policy";
 
 
 @Injectable({
@@ -16,32 +16,50 @@ export class PermissionLicenseService {
     this.license = new License(workspace.license);
   }
 
+  private getLicenseFeatureByAction(action: IamPolicyAction): LicenseFeatureEnum | null {
+    // currently, only fine-grained actions need license
+    if (action.isFineGrainedAction) {
+      return LicenseFeatureEnum.FineGrainedAccessControl;
+    }
+
+    return null;
+  }
+
   isGrantedByLicense(feature: LicenseFeatureEnum): boolean {
     return this.license.isGranted(feature);
   }
 
   /**
-   * Checks whether an action is allowed by combining license constraints
-   * with IAM policy permissions.
+   * Checks if a user is granted access based on both license and permission policies.
    *
-   * Evaluation order:
-   * 1. The feature must be granted by the current license.
-   * 2. If the license allows the feature, IAM permissions are evaluated.
-   * 3. If the license does NOT allow the feature, `defaultValue` is returned
-   *    and IAM permissions are NOT checked.
+   * This method evaluates access control through a multi-layered approach:
+   * 1. Verifies the user has the required permission via IAM policy
+   * 2. Determines if the action requires a specific license feature
+   * 3. For actions that don't require a license, grants access immediately
+   * 4. For flag resources, checks if user has `FlagAllActions` permission (bypasses license validation)
+   * 5. For other license-protected actions, validates the license grants the required feature
    *
    * @param rn Resource name to check permissions against
    * @param action IAM action to evaluate
-   * @param feature License feature required for this action
-   * @param fallbackValue Value to return when the license does not grant the feature
    * @returns `true` if the action is allowed, otherwise `false`
    */
-  isGrantedByLicenseAndPermission(rn: string, action: IamPolicyAction, feature: LicenseFeatureEnum, fallbackValue: boolean): boolean {
-    const isGrantedByLicense = this.license.isGranted(feature);
-    if (!isGrantedByLicense) {
-      return fallbackValue;
+  isGrantedByLicenseAndPermission(rn: string, action: IamPolicyAction): boolean {
+    const isGrantedByPolicy = this.permissionService.isGranted(rn, action);
+    if (!isGrantedByPolicy) {
+      return false;
     }
 
-    return this.permissionService.isGranted(rn, action);
+    const licenseFeature = this.getLicenseFeatureByAction(action);
+    if (!licenseFeature) {
+      // if this is not a license-related action
+      return true;
+    }
+
+    // if user has FlagAllActions permission, allow access to all flag-related actions regardless of license status
+    if (action.resourceType === ResourceTypeEnum.Flag && this.permissionService.isGranted(rn, permissionActions.FlagAllActions)) {
+      return true;
+    }
+
+    return this.license.isGranted(licenseFeature);
   }
 }

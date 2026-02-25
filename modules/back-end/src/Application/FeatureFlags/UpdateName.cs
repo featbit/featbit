@@ -4,12 +4,21 @@ using Domain.AuditLogs;
 
 namespace Application.FeatureFlags;
 
-public class UpdateName : IRequest<bool>
+public class UpdateName : IRequest<Guid>
 {
+    /// <summary>
+    /// The ID of the environment the feature flag belongs to. Retrieved from the URL path.
+    /// </summary>
     public Guid EnvId { get; set; }
 
+    /// <summary>
+    /// The unique key of the feature flag. Retrieved from the URL path.
+    /// </summary>
     public string Key { get; set; }
 
+    /// <summary>
+    /// The new name for the feature flag
+    /// </summary>
     public string Name { get; set; }
 }
 
@@ -22,32 +31,33 @@ public class UpdateNameValidator : AbstractValidator<UpdateName>
     }
 }
 
-public class UpdateNameHandler : IRequestHandler<UpdateName, bool>
+public class UpdateNameHandler(
+    IFeatureFlagService service,
+    ICurrentUser currentUser,
+    IPublisher publisher)
+    : IRequestHandler<UpdateName, Guid>
 {
-    private readonly IFeatureFlagService _service;
-    private readonly ICurrentUser _currentUser;
-    private readonly IPublisher _publisher;
-
-    public UpdateNameHandler(
-        IFeatureFlagService service,
-        ICurrentUser currentUser,
-        IPublisher publisher)
+    public async Task<Guid> Handle(UpdateName request, CancellationToken cancellationToken)
     {
-        _service = service;
-        _currentUser = currentUser;
-        _publisher = publisher;
-    }
+        var flag = await service.GetAsync(request.EnvId, request.Key);
+        if (flag.Name == request.Name)
+        {
+            return flag.Revision;
+        }
 
-    public async Task<bool> Handle(UpdateName request, CancellationToken cancellationToken)
-    {
-        var flag = await _service.GetAsync(request.EnvId, request.Key);
-        var dataChange = flag.UpdateName(request.Name, _currentUser.Id);
-        await _service.UpdateAsync(flag);
+        var dataChange = flag.UpdateName(request.Name, currentUser.Id);
+        await service.UpdateAsync(flag);
 
         // publish on feature flag change notification
-        var notification = new OnFeatureFlagChanged(flag, Operations.Update, dataChange, _currentUser.Id);
-        await _publisher.Publish(notification, cancellationToken);
+        var notification = new OnFeatureFlagChanged(
+            flag,
+            Operations.Update,
+            dataChange,
+            currentUser.Id,
+            comment: "Updated name"
+        );
+        await publisher.Publish(notification, cancellationToken);
 
-        return true;
+        return flag.Revision;
     }
 }

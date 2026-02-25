@@ -12,9 +12,12 @@ import {
   permissionActions,
   ResourceType,
   ResourceTypeEnum,
+  ResourceTypeEnv,
   ResourceTypeFlag,
+  ResourceTypeIAM,
   ResourceTypeProject,
-  ResourceTypeSegment
+  ResourceTypeSegment,
+  ResourceTypeWorkspace
 } from "@shared/policy";
 import { copyToClipboard, uuidv4 } from "@utils/index";
 import {
@@ -40,7 +43,10 @@ export class AccessTokenDrawerComponent implements OnInit {
   resourceTypes: ResourceType[] = [
     ResourceTypeFlag,
     ResourceTypeSegment,
-    ResourceTypeProject
+    ResourceTypeProject,
+    ResourceTypeEnv,
+    ResourceTypeIAM,
+    ResourceTypeWorkspace
   ];
 
   fineGrainedAccessControlEnabled: boolean = false;

@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { NzModalService } from 'ng-zorro-antd/modal';
 import { GroupService } from "@services/group.service";
 import { groupRn, IGroup } from "@features/safe/iam/types/group";
 import { copyToClipboard } from '@utils/index';
@@ -18,7 +17,6 @@ export class SettingComponent implements OnInit {
     private route: ActivatedRoute,
     private message: NzMessageService,
     private groupService: GroupService,
-    private modal: NzModalService,
     private router: Router
   ) { }
 

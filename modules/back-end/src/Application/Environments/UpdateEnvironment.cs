@@ -4,10 +4,19 @@ namespace Application.Environments;
 
 public class UpdateEnvironment : IRequest<EnvironmentVm>
 {
+    /// <summary>
+    /// The ID of the environment to update. Retrieved from the URL path.
+    /// </summary>
     public Guid Id { get; set; }
 
+    /// <summary>
+    /// The new name for the environment.
+    /// </summary>
     public string Name { get; set; }
 
+    /// <summary>
+    /// The new description for the environment.
+    /// </summary>
     public string Description { get; set; }
 }
 

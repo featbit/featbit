@@ -16,4 +16,6 @@ public interface IFeatureFlagService : IService<FeatureFlag>
     Task<ICollection<string>> GetAllTagsAsync(Guid envId);
 
     Task<ICollection<Segment>> GetRelatedSegmentsAsync(ICollection<FeatureFlag> flags);
+
+    Task MarkAsUpdatedAsync(ICollection<Guid> flagIds, Guid operatorId);
 }

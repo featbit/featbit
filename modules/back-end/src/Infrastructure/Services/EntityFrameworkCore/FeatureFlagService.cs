@@ -108,4 +108,16 @@ public class FeatureFlagService(AppDbContext dbContext)
 
         return segments;
     }
+
+    public async Task MarkAsUpdatedAsync(ICollection<Guid> flagIds, Guid operatorId)
+    {
+        var now = DateTime.UtcNow;
+
+        await Set
+            .Where(x => flagIds.Contains(x.Id))
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(f => f.UpdatedAt, now)
+                .SetProperty(f => f.UpdatorId, operatorId)
+            );
+    }
 }

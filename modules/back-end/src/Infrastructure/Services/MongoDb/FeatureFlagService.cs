@@ -124,4 +124,16 @@ public class FeatureFlagService : MongoDbService<FeatureFlag>, IFeatureFlagServi
 
         return segments;
     }
+
+    public async Task MarkAsUpdatedAsync(ICollection<Guid> flagIds, Guid operatorId)
+    {
+        var now = DateTime.UtcNow;
+
+        var filter = Builders<FeatureFlag>.Filter.In(x => x.Id, flagIds);
+        var update = Builders<FeatureFlag>.Update
+            .Set(x => x.UpdatedAt, now)
+            .Set(x => x.UpdatorId, operatorId);
+
+        await Collection.UpdateManyAsync(filter, update);
+    }
 }

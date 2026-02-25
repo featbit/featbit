@@ -56,6 +56,13 @@ public class SegmentController : ApiControllerBase
         return Ok(segments);
     }
 
+    /// <summary>
+    /// Get segments by IDs
+    /// </summary>
+    /// <remarks>
+    /// Retrieve multiple segments by providing an array of segment IDs.
+    /// </remarks>
+    [OpenApi]
     [HttpGet("by-ids")]
     public async Task<ApiResponse<IEnumerable<Segment>>> GetByIdsAsync([FromQuery] Guid[] ids)
     {
@@ -85,13 +92,52 @@ public class SegmentController : ApiControllerBase
         return Ok(segment);
     }
 
-    [HttpPut("{id:guid}")]
-    public async Task<ApiResponse<Segment>> UpdateAsync(Guid id, UpdateSegment request)
+    /// <summary>
+    /// Update a segment name
+    /// </summary>
+    /// <remarks>
+    /// Update the display name of an existing segment.
+    /// </remarks>
+    [OpenApi]
+    [HttpPut("{id:guid}/name")]
+    public async Task<ApiResponse<bool>> UpdateNameAsync(Guid id, UpdateName request)
     {
         request.Id = id;
 
-        var segment = await Mediator.Send(request);
-        return Ok(segment);
+        var success = await Mediator.Send(request);
+        return Ok(success);
+    }
+
+    /// <summary>
+    /// Update a segment description
+    /// </summary>
+    /// <remarks>
+    /// Update the description field of an existing segment to provide additional context.
+    /// </remarks>
+    [OpenApi]
+    [HttpPut("{id:guid}/description")]
+    public async Task<ApiResponse<bool>> UpdateDescriptionAsync(Guid id, UpdateDescription request)
+    {
+        request.Id = id;
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
+    }
+
+    /// <summary>
+    /// Update segment targeting rules
+    /// </summary>
+    /// <remarks>
+    /// Update the targeting rules, included and excluded users for a segment.
+    /// </remarks>
+    [OpenApi]
+    [HttpPut("{id:guid}/targeting")]
+    public async Task<ApiResponse<bool>> UpdateTargetingAsync(Guid id, UpdateTargeting request)
+    {
+        request.Id = id;
+
+        var success = await Mediator.Send(request);
+        return Ok(success);
     }
 
     /// <summary>
@@ -119,6 +165,9 @@ public class SegmentController : ApiControllerBase
     /// <summary>
     /// Archive a segment
     /// </summary>
+    /// <remarks>
+    /// Archive a segment with the specified ID. Archived segments are hidden from the main list but can be restored later.
+    /// </remarks>
     [OpenApi]
     [HttpPut("{id:guid}/archive")]
     public async Task<ApiResponse<bool>> ArchiveAsync(Guid envId, Guid id)
@@ -136,6 +185,9 @@ public class SegmentController : ApiControllerBase
     /// <summary>
     /// Restore a segment
     /// </summary>
+    /// <remarks>
+    /// Restore an archived segment with the specified ID, making it visible and usable again.
+    /// </remarks>
     [OpenApi]
     [HttpPut("{id:guid}/restore")]
     public async Task<ApiResponse<bool>> RestoreAsync(Guid id)
@@ -152,6 +204,9 @@ public class SegmentController : ApiControllerBase
     /// <summary>
     /// Delete a segment
     /// </summary>
+    /// <remarks>
+    /// Permanently delete a segment with the specified ID. This action cannot be undone.
+    /// </remarks>
     [OpenApi]
     [HttpDelete("{id:guid}")]
     public async Task<ApiResponse<bool>> DeleteAsync(Guid id)
@@ -180,6 +235,13 @@ public class SegmentController : ApiControllerBase
         return Ok(isUsed);
     }
 
+    /// <summary>
+    /// Get feature flag references for a segment
+    /// </summary>
+    /// <remarks>
+    /// Get the list of feature flags that reference this segment in their targeting rules.
+    /// </remarks>
+    [OpenApi]
     [HttpGet]
     [Route("{id:guid}/flag-references")]
     public async Task<ApiResponse<IEnumerable<FlagReference>>> GetFlagReferencesAsync(Guid envId, Guid id)
@@ -194,6 +256,13 @@ public class SegmentController : ApiControllerBase
         return Ok(references);
     }
 
+    /// <summary>
+    /// Get all segment tags within an environment
+    /// </summary>
+    /// <remarks>
+    /// Retrieve all unique tags used across segments in the environment.
+    /// </remarks>
+    [OpenApi]
     [HttpGet("all-tags")]
     public async Task<ApiResponse<ICollection<string>>> GetAllTagsAsync(Guid envId)
     {
@@ -206,6 +275,13 @@ public class SegmentController : ApiControllerBase
         return Ok(tags);
     }
 
+    /// <summary>
+    /// Set tags for a segment
+    /// </summary>
+    /// <remarks>
+    /// Assign a list of tags to a segment for organization and filtering purposes.
+    /// </remarks>
+    [OpenApi]
     [HttpPut("{id:guid}/tags")]
     public async Task<ApiResponse<bool>> SetTagsAsync(Guid id, string[] tags)
     {

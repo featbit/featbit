@@ -299,6 +299,12 @@ public class FeatureFlag : FullAuditedEntity
         return dataChange.To(this);
     }
 
+    /// <summary>
+    /// Mark the feature flag as updated when a referenced segment's targeting is updated.
+    /// </summary>
+    /// <param name="operatorId">The ID of the operator making the change to the segment.</param>
+    public void ReferencedSegmentTargetingUpdated(Guid operatorId) => base.MarkAsUpdated(operatorId);
+
     public override void MarkAsUpdated(Guid updatorId)
     {
         Revision = Guid.NewGuid();

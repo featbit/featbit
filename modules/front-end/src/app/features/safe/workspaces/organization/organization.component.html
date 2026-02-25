@@ -3,6 +3,10 @@
     <div class="row-title">
       <span i18n="@@common.name">Name</span>
       <nz-tag nzColor="blue">Key: {{currentOrganization.key}}</nz-tag>
+      <nz-tag class="copy-id" nzColor="geekblue" (click)="copyText(currentOrganization.id)">
+        <span i18n="@@common.copyId">Copy Id</span>
+        <i nz-icon i18n-nz-tooltip="@@org.org.org-id-copy-description" nz-tooltip="Copy ID of the organization, this ID may be needed when calling FeatBit REST API" nzType="icons:icon-info-outline"></i>
+      </nz-tag>
     </div>
 
     <form class="row-content" nz-form [formGroup]="organizationForm" [nzLayout]="'inline'" (ngSubmit)="updateOrganizationName()">

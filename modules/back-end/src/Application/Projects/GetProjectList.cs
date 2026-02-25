@@ -4,6 +4,9 @@ namespace Application.Projects;
 
 public class GetProjectList : IRequest<IEnumerable<ProjectWithEnvs>>
 {
+    /// <summary>
+    /// The ID of the organization the projects belong to. Retrieved from the request header.
+    /// </summary>
     public Guid OrganizationId { get; set; }
 }
 

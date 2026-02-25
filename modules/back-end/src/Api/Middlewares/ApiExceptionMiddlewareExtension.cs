@@ -37,7 +37,7 @@ public static class ApiExceptionMiddlewareExtension
 
             return;
         }
-        
+
         // EntityNotFound exception
         if (ex is EntityNotFoundException)
         {
@@ -45,6 +45,17 @@ public static class ApiExceptionMiddlewareExtension
 
             var entityNotFoundError = ApiResponse<object>.Error(ErrorCodes.ResourceNotFound);
             await httpResponse.WriteAsJsonAsync(entityNotFoundError);
+
+            return;
+        }
+
+        // Conflict exception
+        if (ex is ConflictException)
+        {
+            httpResponse.StatusCode = StatusCodes.Status409Conflict;
+
+            var conflictError = ApiResponse<object>.Error(ErrorCodes.Conflict);
+            await httpResponse.WriteAsJsonAsync(conflictError);
 
             return;
         }

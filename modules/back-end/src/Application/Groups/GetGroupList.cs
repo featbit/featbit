@@ -19,7 +19,7 @@ public class GetGroupListHandler : IRequestHandler<GetGroupList, PagedResult<Gro
         _service = service;
         _mapper = mapper;
     }
-    
+
     public async Task<PagedResult<GroupVm>> Handle(GetGroupList request, CancellationToken cancellationToken)
     {
         var groups = await _service.GetListAsync(request.OrganizationId, request.Filter);

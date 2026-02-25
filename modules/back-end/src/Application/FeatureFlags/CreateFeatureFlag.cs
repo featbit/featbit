@@ -8,24 +8,54 @@ namespace Application.FeatureFlags;
 
 public class CreateFeatureFlag : IRequest<FeatureFlag>
 {
+    /// <summary>
+    /// The ID of the environment the feature flag belongs to. Retrieved from the URL path.
+    /// </summary>
     public Guid EnvId { get; set; }
 
+    /// <summary>
+    /// The name of the feature flag.
+    /// </summary>
     public string Name { get; set; }
 
+    /// <summary>
+    /// The unique key of the feature flag.
+    /// </summary>
     public string Key { get; set; }
 
+    /// <summary>
+    /// The status of the feature flag.
+    /// </summary>
     public bool IsEnabled { get; set; }
 
+    /// <summary>
+    /// The description of the feature flag.
+    /// </summary>
     public string Description { get; set; }
 
+    /// <summary>
+    /// The variation type of the feature flag.
+    /// </summary>
     public string VariationType { get; set; }
 
+    /// <summary>
+    /// The collection of variations (different values the feature flag can return).
+    /// </summary>
     public ICollection<Variation> Variations { get; set; }
 
+    /// <summary>
+    /// The ID of the variation to serve when the flag is enabled.
+    /// </summary>
     public string EnabledVariationId { get; set; }
 
+    /// <summary>
+    /// The ID of the variation to serve when the flag is disabled.
+    /// </summary>
     public string DisabledVariationId { get; set; }
 
+    /// <summary>
+    /// The list of tags associated with the feature flag.
+    /// </summary>
     public string[] Tags { get; set; }
 
     public FeatureFlag AsFeatureFlag(Guid currentUserId)

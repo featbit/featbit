@@ -3,7 +3,6 @@ import { ActivatedRoute } from '@angular/router';
 import { ISegment, ISegmentFlagReference, SegmentType } from '@features/safe/segments/types/segments-index';
 import { SegmentService } from '@services/segment.service';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { MessageQueueService } from "@services/message-queue.service";
 import { NzSelectComponent } from "ng-zorro-antd/select";
 import { copyToClipboard } from "@utils/index";
 
@@ -25,8 +24,7 @@ export class SettingComponent implements OnInit {
   constructor(
     private route:ActivatedRoute,
     private msg: NzMessageService,
-    private segmentService: SegmentService,
-    private messageQueueService: MessageQueueService,
+    private segmentService: SegmentService
   ) {
     this.segmentService.getAllTags().subscribe(allTags => {
       this.allTags = allTags;
@@ -38,7 +36,6 @@ export class SettingComponent implements OnInit {
   ngOnInit(): void {
     this.route.paramMap.subscribe( paramMap => {
       this.id = decodeURIComponent(paramMap.get('id'));
-      this.messageQueueService.subscribe(this.messageQueueService.topics.SEGMENT_TARGETING_CHANGED(this.id), () => this.loadData());
       this.loadData();
       this.segmentService.getFeatureFlagReferences(this.id).subscribe((flags: ISegmentFlagReference[]) => {
         this.flagReferences = [...flags];
@@ -60,22 +57,24 @@ export class SettingComponent implements OnInit {
     this.isLoading = false;
   }
 
-  save() {
-    this.segmentService.update(this.segmentDetail).subscribe((result) => {
-      this.segmentDetail = {...result};
-      this.msg.success($localize `:@@common.operation-success:Operation succeeded`);
-      this.messageQueueService.emit(this.messageQueueService.topics.SEGMENT_SETTING_CHANGED(this.id));
-    }, errResponse => this.msg.error(errResponse.error));
-  }
-
   saveTitle() {
     this.toggleTitleEditState();
-    this.save();
+
+    const { id, name } = this.segmentDetail;
+    this.segmentService.updateName(id, name).subscribe({
+      next: () => this.msg.success($localize `:@@common.operation-success:Operation succeeded`),
+      error: () => this.msg.error($localize `:@@common.operation-failed:Operation failed`)
+    });
   }
 
   saveDescription() {
     this.toggleDescriptionEditState();
-    this.save();
+
+    const { id, description } = this.segmentDetail;
+    this.segmentService.updateDescription(id, description).subscribe({
+      next: () => this.msg.success($localize `:@@common.operation-success:Operation succeeded`),
+      error: () => this.msg.error($localize `:@@common.operation-failed:Operation failed`)
+    });
   }
 
   toggleTitleEditState(): void {
@@ -118,7 +117,9 @@ export class SettingComponent implements OnInit {
   }
 
   onAddTag() {
-    let actualTag = this.selectedTag.startsWith(this.createTagPrefix)
+    const isNewTag = this.selectedTag.startsWith(this.createTagPrefix);
+
+    const actualTag = isNewTag
       ? this.selectedTag.replace(this.createTagPrefix, '').replace(/'/g, '').trim()
       : this.selectedTag.trim();
 
@@ -127,8 +128,11 @@ export class SettingComponent implements OnInit {
       this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
     });
 
-    this.allTags = [...this.allTags, actualTag];
-    this.currentAllTags = this.allTags;
+    if (isNewTag) {
+      this.allTags = [...this.allTags, actualTag];
+      this.currentAllTags = this.allTags;
+    }
+
     // clear current selected
     this.tagsSelect.writeValue(null);
   }

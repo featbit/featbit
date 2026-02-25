@@ -33,7 +33,7 @@ public class PatchFeatureFlagExamples : IMultipleExamplesProvider<List<Operation
                 new()
                 {
                     op = "replace",
-                    path = "isArchived",
+                    path = "/isArchived",
                     value = true
                 }
             }
@@ -46,7 +46,7 @@ public class PatchFeatureFlagExamples : IMultipleExamplesProvider<List<Operation
                 new()
                 {
                     op = "replace",
-                    path = "isArchived",
+                    path = "/isArchived",
                     value = false
                 }
             }
@@ -59,7 +59,7 @@ public class PatchFeatureFlagExamples : IMultipleExamplesProvider<List<Operation
                 new()
                 {
                     op = "replace",
-                    path = "isEnabled",
+                    path = "/isEnabled",
                     value = true
                 }
             }
@@ -72,7 +72,7 @@ public class PatchFeatureFlagExamples : IMultipleExamplesProvider<List<Operation
                 new()
                 {
                     op = "replace",
-                    path = "isEnabled",
+                    path = "/isEnabled",
                     value = false
                 }
             }

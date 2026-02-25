@@ -147,19 +147,19 @@ export const ResourceTypeProject: ResourceType = {
   displayName: $localize`:@@iam.rsc-type.project:Project`
 };
 
-export const ResourceTypeEnv = {
+export const ResourceTypeEnv: ResourceType = {
   type: ResourceTypeEnum.Env,
   pattern: 'project/{project}:env/{env}',
   displayName: $localize`:@@iam.rsc-type.env:Environment`
 };
 
-export const ResourceTypeFlag = {
+export const ResourceTypeFlag: ResourceType = {
   type: ResourceTypeEnum.Flag,
   pattern: 'project/{project}:env/{env}:flag/{flag}',
   displayName: $localize`:@@iam.rsc-type.feature-flag:Feature flag`
 };
 
-export const ResourceTypeSegment = {
+export const ResourceTypeSegment: ResourceType = {
   type: ResourceTypeEnum.Segment,
   pattern: 'project/{project}:env/{env}:segment/*',
   displayName: $localize`:@@iam.rsc-type.segment:Segment`
@@ -303,7 +303,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'CreateProject',
     resourceType: ResourceTypeEnum.Project,
     description: $localize`:@@iam.action.create-projects:Create projects`,
-    isOpenAPIApplicable: false,
+    isOpenAPIApplicable: true,
     isSpecificApplicable: false,
     isFineGrainedAction: false
   },
@@ -312,7 +312,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'DeleteProject',
     resourceType: ResourceTypeEnum.Project,
     description: $localize`:@@iam.action.delete-projects:Delete projects`,
-    isOpenAPIApplicable: false,
+    isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: false
   },
@@ -321,7 +321,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'UpdateProjectSettings',
     resourceType: ResourceTypeEnum.Project,
     description: $localize`:@@iam.action.update-project-settings:Update project settings`,
-    isOpenAPIApplicable: false,
+    isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: false
   },
@@ -330,7 +330,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'CreateEnv',
     resourceType: ResourceTypeEnum.Project,
     description: $localize`:@@iam.action.create-env:Create environment`,
-    isOpenAPIApplicable: false,
+    isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: false
   },
@@ -339,7 +339,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'CanAccessEnv',
     resourceType: ResourceTypeEnum.Env,
     description: $localize`:@@iam.action.can-access-env:Can access environment`,
-    isOpenAPIApplicable: false,
+    isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: false
   },
@@ -348,7 +348,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'DeleteEnv',
     resourceType: ResourceTypeEnum.Env,
     description: $localize`:@@iam.action.delete-envs:Delete environments`,
-    isOpenAPIApplicable: false,
+    isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: false
   },
@@ -357,7 +357,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'UpdateEnvSettings',
     resourceType: ResourceTypeEnum.Env,
     description: $localize`:@@iam.action.update-env-settings:Update environment settings`,
-    isOpenAPIApplicable: false,
+    isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: false
   },
@@ -366,7 +366,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'DeleteEnvSecret',
     resourceType: ResourceTypeEnum.Env,
     description: $localize`:@@iam.action.delete-env-secret:Delete environment secret`,
-    isOpenAPIApplicable: false,
+    isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: false
   },
@@ -375,7 +375,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'CreateEnvSecret',
     resourceType: ResourceTypeEnum.Env,
     description: $localize`:@@iam.action.create-env-secret:Create environment secret`,
-    isOpenAPIApplicable: false,
+    isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: false
   },
@@ -384,7 +384,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'UpdateEnvSecret',
     resourceType: ResourceTypeEnum.Env,
     description: $localize`:@@iam.action.update-env-secret:Update environment secret`,
-    isOpenAPIApplicable: false,
+    isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: false
   },
@@ -552,7 +552,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'UpdateWorkspaceGeneralSettings',
     resourceType: ResourceTypeEnum.workspace,
     description: $localize`:@@iam.action.update-ws-general:Update workspace general settings`,
-    isOpenAPIApplicable: false,
+    isOpenAPIApplicable: true,
     isSpecificApplicable: false,
     isFineGrainedAction: false
   },
@@ -561,7 +561,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'UpdateWorkspaceLicense',
     resourceType: ResourceTypeEnum.workspace,
     description: $localize`:@@iam.action.update-ws-license:Update workspace license`,
-    isOpenAPIApplicable: false,
+    isOpenAPIApplicable: true,
     isSpecificApplicable: false,
     isFineGrainedAction: false
   },
@@ -570,7 +570,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'UpdateWorkspaceSSOSettings',
     resourceType: ResourceTypeEnum.workspace,
     description: $localize`:@@iam.action.update-ws-sso:Update workspace SSO settings`,
-    isOpenAPIApplicable: false,
+    isOpenAPIApplicable: true,
     isSpecificApplicable: false,
     isFineGrainedAction: false
   },
@@ -619,7 +619,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'CanManageIAM',
     resourceType: ResourceTypeEnum.IAM,
     description: $localize`:@@iam.action.iam:IAM`,
-    isOpenAPIApplicable: false,
+    isOpenAPIApplicable: true,
     isSpecificApplicable: false,
     isFineGrainedAction: false
   },

@@ -31,7 +31,7 @@ export class ClonePolicyModalComponent {
   policy: IPolicy;
 
   @Output()
-  close: EventEmitter<boolean> = new EventEmitter(false);
+  close: EventEmitter<boolean> = new EventEmitter();
 
   form: FormGroup<{
     name: FormControl<string>;

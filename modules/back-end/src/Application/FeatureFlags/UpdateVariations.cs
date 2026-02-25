@@ -1,16 +1,31 @@
 using Application.Bases;
+using Application.Bases.Exceptions;
 using Application.Users;
 using Domain.AuditLogs;
 using Domain.FeatureFlags;
 
 namespace Application.FeatureFlags;
 
-public class UpdateVariations : IRequest<bool>
+public class UpdateVariations : IRequest<Guid>
 {
+    /// <summary>
+    /// The ID of the environment the feature flag belongs to. Retrieved from the URL path.
+    /// </summary>
     public Guid EnvId { get; set; }
 
+    /// <summary>
+    /// The unique key of the feature flag. Retrieved from the URL path.
+    /// </summary>
     public string Key { get; set; }
 
+    /// <summary>
+    /// The revision ID of the feature flag for optimistic concurrency control
+    /// </summary>
+    public Guid Revision { get; set; }
+
+    /// <summary>
+    /// The collection of variations (different values the feature flag can return)
+    /// </summary>
     public ICollection<Variation> Variations { get; set; }
 }
 
@@ -25,32 +40,33 @@ public class UpdateVariationsValidator : AbstractValidator<UpdateVariations>
     }
 }
 
-public class UpdateVariationsHandler : IRequestHandler<UpdateVariations, bool>
+public class UpdateVariationsHandler(
+    IFeatureFlagService service,
+    ICurrentUser currentUser,
+    IPublisher publisher)
+    : IRequestHandler<UpdateVariations, Guid>
 {
-    private readonly IFeatureFlagService _service;
-    private readonly ICurrentUser _currentUser;
-    private readonly IPublisher _publisher;
-
-    public UpdateVariationsHandler(
-        IFeatureFlagService service,
-        ICurrentUser currentUser,
-        IPublisher publisher)
+    public async Task<Guid> Handle(UpdateVariations request, CancellationToken cancellationToken)
     {
-        _service = service;
-        _currentUser = currentUser;
-        _publisher = publisher;
-    }
+        var flag = await service.GetAsync(request.EnvId, request.Key);
+        if (!flag.Revision.Equals(request.Revision))
+        {
+            throw new ConflictException(nameof(FeatureFlag), flag.Id);
+        }
 
-    public async Task<bool> Handle(UpdateVariations request, CancellationToken cancellationToken)
-    {
-        var flag = await _service.GetAsync(request.EnvId, request.Key);
-        var dataChange = flag.UpdateVariations(request.Variations, _currentUser.Id);
-        await _service.UpdateAsync(flag);
+        var dataChange = flag.UpdateVariations(request.Variations, currentUser.Id);
+        await service.UpdateAsync(flag);
 
         // publish on feature flag change notification
-        var notification = new OnFeatureFlagChanged(flag, Operations.Update, dataChange, _currentUser.Id);
-        await _publisher.Publish(notification, cancellationToken);
+        var notification = new OnFeatureFlagChanged(
+            flag,
+            Operations.Update,
+            dataChange,
+            currentUser.Id,
+            comment: "Updated variations"
+        );
+        await publisher.Publish(notification, cancellationToken);
 
-        return true;
+        return flag.Revision;
     }
 }

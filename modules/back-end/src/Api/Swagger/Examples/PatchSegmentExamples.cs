@@ -33,7 +33,7 @@ public class PatchSegmentExamples : IMultipleExamplesProvider<List<Operation>>
                 new()
                 {
                     op = "replace",
-                    path = "isArchived",
+                    path = "/isArchived",
                     value = true
                 }
             }
@@ -46,7 +46,7 @@ public class PatchSegmentExamples : IMultipleExamplesProvider<List<Operation>>
                 new()
                 {
                     op = "replace",
-                    path = "isArchived",
+                    path = "/isArchived",
                     value = false
                 }
             }
