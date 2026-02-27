@@ -1,4 +1,4 @@
-﻿using Microsoft.OpenApi.Models;
+﻿using Microsoft.OpenApi;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace Api.Swagger
@@ -14,7 +14,7 @@ namespace Api.Swagger
                 Required = false,
                 Schema = new OpenApiSchema
                 {
-                    Type = "string"
+                    Type = JsonSchemaType.String
                 },
                 Description = "The organization ID associated with the request. Some APIs may require this header to identify the organization context."
             });

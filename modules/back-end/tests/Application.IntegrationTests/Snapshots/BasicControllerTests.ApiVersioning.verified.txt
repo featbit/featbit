@@ -6,6 +6,7 @@
     },
     Content: {
       Headers: {
+        Content-Length: 40,
         Content-Type: application/json; charset=utf-8
       },
       Value: {
@@ -22,6 +23,7 @@
     },
     Content: {
       Headers: {
+        Content-Length: 40,
         Content-Type: application/json; charset=utf-8
       },
       Value: {
