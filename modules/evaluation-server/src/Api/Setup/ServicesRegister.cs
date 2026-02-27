@@ -37,7 +37,7 @@ public static class ServicesRegister
         }));
 
         // add bounded memory cache
-        services.AddSingleton<BoundedMemoryCache>();
+        services.AddSingleton<IBoundedMemoryCache, BoundedMemoryCache>();
 
         // streaming services
         services

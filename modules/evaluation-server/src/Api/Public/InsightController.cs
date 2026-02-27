@@ -13,7 +13,7 @@ public class InsightController : PublicApiControllerBase
     private readonly MemoryCache _cache;
     private readonly MemoryCacheEntryOptions _cacheEntryOptions;
 
-    public InsightController(IMessageProducer producer, BoundedMemoryCache boundedMemoryCache)
+    public InsightController(IMessageProducer producer, IBoundedMemoryCache boundedMemoryCache)
     {
         _producer = producer;
         _cache = boundedMemoryCache.Instance;
