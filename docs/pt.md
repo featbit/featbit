@@ -2,7 +2,6 @@
 
 **Version:** 1.1  
 **Date:** [YYYY-MM-DD]  
-**Prepared for:** [Customer / Organization Name]  
 **Prepared by:** FeatBit Inc.
 
 ---
@@ -209,7 +208,7 @@ The final report will include:
 For security-related questions or follow-up requests:
 
 **FeatBit Security Team**  
-Email: [your email address]  
+Email: contact@featbit.co
 Company: FeatBit Inc.
 
 ---
