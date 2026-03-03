@@ -1,28 +1,48 @@
-# FeatBit Application Security Summary (Interim)
+https://owasp.org/Top10/2025/
 
-**Version:** 1.1  
-**Date:** [YYYY-MM-DD]  
-**Prepared by:** FeatBit Inc.
+# FeatBit Application-Layer Penetration Test Report
+(Aligned with FeatBit Application Security Summary v1.1)
 
----
+Product: FeatBit (Self-Hosted Edition)  
+Version Tested: [vX.X.X]  
+Assessment Window: [Start – End Date]  
+Report Date: [YYYY-MM-DD]  
+Prepared by: FeatBit Inc.  
 
-## 1. Purpose and Executive Context
-
-FeatBit is a self-hosted feature flag and experimentation platform for enterprise environments. This interim document provides a high-level application-layer security summary to support customer internal security review and provisioning decisions while formal penetration testing is in progress.
-
-This document is intended to:
-
-- provide an immediate, credible application-security artifact for internal approval workflows
-- describe current application-layer security controls and design principles
-- confirm assessment scope and boundaries for the formal report
-
-This document does **not** replace a formal penetration test report.
+This report represents the formal application-layer assessment referenced in
+the “FeatBit Application Security Summary (Interim), Version 1.1”.
 
 ---
 
-## 2. Scope and Responsibility Boundary
+# 1. Objective
 
-### In Scope (Application Layer)
+The objective of this assessment is to validate the effectiveness of
+application-layer security controls described in the
+“FeatBit Application Security Summary (Interim), Version 1.1”.
+
+This assessment focuses on identifying potential Critical and High-risk
+vulnerabilities within the application layer of FeatBit (Self-Hosted Edition).
+
+Testing is aligned with OWASP Top 10:2025 and contemporary
+application security best practices.
+
+Infrastructure, operating system, network-layer security, and source-code
+review are explicitly out of scope.
+
+---
+
+# 2. Scope Alignment with Security Summary
+
+This assessment scope is fully aligned with the boundaries defined in:
+
+“FeatBit Application Security Summary (Interim), Version 1.1”.
+
+The scope of this assessment reflects the application-layer responsibilities
+as defined in Section 2 of the Security Summary.
+
+## 2.1 In Scope (Application Layer)
+
+The following application-layer components and control domains were included in testing:
 
 - FeatBit Dashboard (web front-end for user operations and administration)
 - FeatBit API service (REST APIs for dashboard and feature/configuration management)
@@ -35,186 +55,401 @@ This document does **not** replace a formal penetration test report.
 - Administrative operation protections
 - Feature flag data access isolation by project/environment context
 
-### Out of Scope (Customer-Managed Infrastructure Layer)
+## 2.2 Out of Scope (Customer-Managed Infrastructure Layer)
+
+Consistent with the Security Summary, the following elements were not included in this assessment:
 
 - Host, OS, network perimeter, and firewall controls
 - Kubernetes/VM/container hardening
 - Database platform patching, encryption-at-rest implementation, and key management
 - WAF, SIEM, and infrastructure monitoring policy configuration
 
-FeatBit is deployed in a customer-controlled self-hosted model; therefore infrastructure and platform controls remain under customer ownership.
+FeatBit is deployed in a customer-controlled self-hosted model; therefore,
+infrastructure and platform controls remain under customer ownership.
 
 ---
 
-## 3. Architecture and Deployment Model
+# 3. Methodology
 
-FeatBit is deployed within customer infrastructure boundaries. Typical components include:
+his assessment was conducted as an application-layer security evaluation
+to validate the controls described in the
+“FeatBit Application Security Summary (Interim), Version 1.1”.
 
-- FeatBit Dashboard (front-end for user operations)
-- FeatBit API service (backend REST APIs)
-- FeatBit evaluation service (including WebSocket-based real-time delivery)
-- FeatBit data analytics service
-- FeatBit SDKs integrated in endpoint applications
-- Customer-managed data platform components, which may include Redis, PostgreSQL, Kafka, and ClickHouse depending on deployment architecture
+Testing methodology aligns with OWASP Top 10:2025 risk categories where
+applicable to FeatBit components, as outlined in Section 9 of the Security Summary.
 
-Security posture assumptions for production deployment:
+## 3.1 Testing Approach
 
-- support for HTTPS/TLS and secure WebSocket (WSS), enabled according to customer deployment configuration
-- restricted network exposure according to customer segmentation policy
-- principle-of-least-privilege identity and secret management in customer runtime environment
+The testing approach included:
 
-### Product-Specific Architecture Notes
+- Black-box dynamic testing against exposed application interfaces
+- Authenticated testing using multiple user roles
+- Manual authorization and privilege boundary validation
+- Injection payload simulation (aligned with OWASP Injection category)
+- Token and session manipulation testing (Authentication risk category)
+- Cross-project and cross-environment isolation validation (Access Control category)
+- WebSocket authentication and scope validation
+- Webhook integrity and signature validation
+- Error-handling behavior analysis (Exceptional Conditions category)
 
-- **Composable data-layer architecture:** FeatBit can be deployed with different infrastructure combinations (for example Redis/PostgreSQL/Kafka/ClickHouse) based on customer requirements and operating model.
-- **Open-source transparency:** FeatBit source code is publicly reviewable, enabling customer security teams to inspect implementation details, validate controls, and run independent verification.
+## 3.2 Testing Accounts
 
----
+The following account types were used during testing:
 
-## 4. Authentication and Session Security
+- Administrator account
+- Standard user account
+- Unauthenticated access attempts
 
-FeatBit applies application-layer authentication and session controls including:
+This ensured validation of role-based access boundaries and privilege enforcement.
 
-- token-based authentication for management/API access
-- optional enterprise SSO integration via OIDC for federated user login (when configured)
-- authenticated access required for administrative and management operations
-- session lifecycle and expiration handling
-- secure transport support (HTTPS/TLS and WSS), configured by customer deployment policy
+## 3.3 Tooling
 
-Security objective: prevent unauthorized access and reduce credential/session misuse risk at the application layer.
+Primary tooling used:
 
----
+- OWASP ZAP (automated dynamic analysis)
+- Manual HTTP request manipulation
+- Browser developer tools
 
-## 5. Authorization and RBAC Model
+Automated scanning results were manually reviewed to eliminate false positives.
 
-FeatBit applies permission-based access control in current product workflows, including:
+## 3.4 Environment
 
-- application-layer permission controls across dashboard and API workflows for management operations
-- project-level and environment-level isolation in application workflows
-- elevated privileges required for sensitive administrative actions
-- OpenAPI integration access controlled via personal/service access tokens and scoped permissions
+All testing was conducted against a controlled self-hosted deployment
+environment consistent with the architecture described in
+Section 3 of the Security Summary.
 
-Security objective: reduce unauthorized operations and maintain scoped access boundaries.
-
-Detailed finding-level enforcement validation is provided in the formal assessment report.
-
----
-
-## 6. API, SDK, and Real-Time Channel Security
-
-### API and SDK Controls
-
-- management APIs require authenticated and authorized requests
-- request handling uses structured input validation patterns
-- feature flag evaluation endpoints are read-only and environment-scoped
-- selected SDK-facing endpoints support write operations for usage insights/custom event collection, which can be enabled or disabled by deployment/workspace configuration
-- access to configuration data is constrained by project/environment context
-- public SDK/evaluation access is controlled by environment secret-based authentication
-
-### SDK Security Boundary Model
-
-- server-side SDK paths are designed for multi-user environments and receive environment-scoped definitions for local evaluation
-- client-side SDK paths are designed for single-user contexts and receive user-context-relevant evaluated results
-- SDK integrations support local cache and real-time update patterns to reduce stale data risk during transient network events
-- insights/event submission from SDKs follows environment/project scoping expectations
-
-### WebSocket / Streaming Security Model
-
-Where real-time streaming channels are enabled, the model follows these principles:
-
-- authenticated channel establishment
-- scope-consistent stream authorization (project/environment boundaries)
-- controlled payload structure and server-side validation
-- transport security over TLS when deployed with HTTPS/WSS
-
-Security objective: maintain integrity and confidentiality for real-time flag/configuration delivery.
-
-### Webhook and Integration Security Controls
-
-- webhook subscriptions are configurable by environment scope and event type
-- webhook delivery supports built-in request metadata headers (delivery ID, event, webhook ID)
-- optional webhook signing supports HMAC-SHA256 signature validation via `X-FeatBit-Signature-256`
-- delivery behavior includes retry/timeout controls to improve delivery reliability for transient failures
-- API-token-based integrations support scoped permissions and least-privilege patterns
-
-Security objective: reduce unauthorized integration access risk and protect integrity of outbound integration events.
+Testing was isolated from production customer workloads.
 
 ---
 
-## 7. Data Protection
-
-FeatBit applies standard application data protection principles:
-
-- encryption in transit support via HTTPS/TLS (enabled per customer deployment configuration)
-- sensitive tokens/credentials are not intentionally exposed through normal application logs
-- data at rest resides in customer-managed infrastructure and follows customer storage/encryption policy controls
+# 4. Control Validation by Security Domain
 
 ---
 
-## 8. Operational Security and Auditability
+# 4.1 Authentication & Session Security
+(Summary Section 4 Validation)
 
-Operational controls available to support secure operations include:
+### 4.1.1 Unauthenticated Access
 
-- application logging for operational diagnosis and monitoring integration
-- audit log coverage for feature flag and segment change history
-- compatibility with customer monitoring and alerting workflows
+**Action**:
 
-Security objective: support traceability for core flag/segment governance events.
+Attempted direct access to representative protected management
+endpoints without providing an authentication token.
 
----
+**Endpoints Tested (Representative Sample)**:
 
-## 9. OWASP Top 10 Alignment (High-Level)
+- GET /api/v1/xxx
+  (获取workspace的所有项目)
+- GET /api/v1/xxx
+  (获取某个项目的所有环境)
+- GET /api/v1/xxx
+  (获取环境的所有feature flags)
+- GET /api/v1/xxx
+  (获取feature flag的详细信息)
+- POST /api/v1/xxx
+  (更新feature flag的状态)
+- POST /api/v1/xxx
+  (更新某个member的policy)
+- GET /api/v1/xxx
+  (获取环境的 server env secret)
 
-Current application-layer controls are designed with OWASP Top 10 risk categories in mind, including:
+**Observed Behavior**:
 
-- Injection: validated and structured input handling
-- Broken Authentication: token/session control model
-- Broken Access Control: application-layer permission controls and scoped access boundaries
-- Security Misconfiguration: secure deployment expectations and HTTPS/TLS use
-- Cryptographic/Sensitive Data Exposure: encrypted transport and controlled access
-- Cross-Site Scripting (XSS): standard output handling and UI-layer protections
-- Cross-Site Request Forgery (CSRF): anti-forgery protections in web interaction flows
+All tested endpoints returned HTTP 401 Unauthorized
+or 403 Forbidden responses.
 
-For formal assessment execution, testing coverage is expanded to the broader OWASP Top 10 risk set where applicable to FeatBit components, including:
+No data payload was returned.
+No internal stack traces or implementation details were exposed.
 
-- Identification and Authentication Failures
-- Software and Data Integrity Failures
-- Security Logging and Monitoring Failures
-- Vulnerable and Outdated Components
-- Server-Side Request Forgery (SSRF)
+**Pass Criteria**:
 
-This section is a control-alignment summary and not a substitute for finding-level test evidence.
+Protected management endpoints must reject unauthenticated requests
+and must not disclose sensitive data.
 
----
+**Conclusion**:
 
-## 10. Formal Assessment Status and Next Deliverable
-
-A formal application-layer penetration test and security assessment is currently in progress.
-
-At the time of this interim summary, no validated finding-level results are included, because execution and validation are being completed in the scheduled assessment window.
-
-The final report will include:
-
-- detailed scope and methodology (OWASP-aligned, automated + manual testing)
-- validated findings with severity classification (Critical/High/Medium/Low, if any)
-- risk impact statements
-- remediation guidance and mitigation status
-
-**Committed delivery target:** within 5–7 business days from assessment kickoff.
+Authentication enforcement is consistently applied across
+representative read, write, destructive, and administrative operations.
 
 ---
 
-## 11. Contact
+### 4.1.2 Token Replay
 
-For security-related questions or follow-up requests:
+**Action**:
 
-**FeatBit Security Team**  
-Email: contact@featbit.co
-Company: FeatBit Inc.
+A previously captured authenticated request was replayed using OWASP ZAP
+under different session conditions to evaluate token lifecycle enforcement.
+
+**Test Scenarios**:
+
+1. Replay after logout:
+   - User session was terminated via logout.
+   - Previously captured request containing a valid token was replayed.
+
+2. Token tampering:
+   - The token value was modified to invalidate its signature.
+   - The request was resent with the altered token.
+
+3. Token expiration:
+   - Token validity period configured at approximately 2 hours.
+
+**Observed Behavior**:
+
+- Replay after logout returned HTTP 401 Unauthorized.
+- Token tampering returned HTTP 403 Forbidden.
+- Token expiration window is enforced at approximately 2 hours.
+
+No protected data was returned in any invalid-token scenario.
+
+**Conclusion**:
+
+Session lifecycle controls are functioning as expected.
+Invalid, tampered, or post-logout tokens were rejected by the application.
+
+Token validity duration (approximately 2 hours) is enforced
+according to current authentication configuration.
 
 ---
 
-## 12. Disclaimer
+### 4.1.3 OIDC (If Enabled)
 
-This document is an interim, high-level application security summary intended to support customer internal review before formal assessment completion.
+Action:
+- Attempted direct API access bypassing federated login.
 
-It does not constitute a full third-party penetration test report and should be read together with the forthcoming formal Application-Layer Security Assessment Report.
+Result:
+[Rejected]
+
+Conclusion:
+Federated authentication boundary respected.
+
+---
+
+# 4.2 Authorization & RBAC Enforcement
+(Summary Section 5 Validation)
+
+### 4.2.1 Cross-Project Access
+
+Action:
+- Modified project ID in API request.
+
+Result:
+[403 Forbidden]
+
+Conclusion:
+Project-level isolation enforced.
+
+---
+
+### 4.2.2 Privilege Escalation Attempt
+
+Action:
+- Attempted admin-only operation as standard user.
+- Modified role field in request payload.
+
+Result:
+[Denied]
+
+Conclusion:
+RBAC enforcement validated.
+
+---
+
+### 4.2.3 Administrative Operation Protection
+
+Action:
+- Attempted destructive operation without elevated privileges.
+
+Result:
+[Denied]
+
+Conclusion:
+Administrative boundary enforced.
+
+---
+
+# 4.3 API, SDK & Real-Time Channel Security
+(Summary Section 6 Validation)
+
+---
+
+## 4.3.1 Management API Enforcement
+
+Action:
+- Attempted API calls using invalid or insufficient tokens.
+
+Result:
+[Rejected]
+
+Conclusion:
+API authorization validated.
+
+---
+
+## 4.3.2 SDK Boundary Isolation
+
+Action:
+- Attempted cross-environment access using environment secrets.
+- Attempted misuse of client SDK key for management APIs.
+
+Result:
+[Rejected]
+
+Conclusion:
+Environment-scoped isolation validated.
+
+---
+
+## 4.3.3 WebSocket Authentication & Scope
+
+Action:
+- Attempted WebSocket connection without authentication.
+- Attempted subscription outside authorized project scope.
+
+Result:
+[Handshake rejected / 401]
+
+Conclusion:
+Authenticated channel enforcement validated.
+
+---
+
+## 4.3.4 Webhook Signature Validation
+
+Action:
+- Modified webhook payload while keeping original signature.
+
+Result:
+[Rejected]
+
+Conclusion:
+HMAC signature validation enforced.
+
+---
+
+# 4.4 Injection & Input Validation
+(Summary Section 9 – Injection Control Validation)
+
+Payloads tested:
+
+' OR 1=1 --  
+<script>alert(1)</script>  
+../../etc/passwd  
+
+Observed:
+
+- SQL injection: Not exploitable
+- Reflected XSS: Properly sanitized
+- Path traversal: Blocked
+
+Conclusion:
+Structured input validation functioning as expected.
+
+---
+
+# 4.5 Cryptographic & Transport Security
+(Summary Section 7 Validation)
+
+Action:
+- Verified HTTPS enforcement
+- Attempted downgrade to HTTP
+- Reviewed transport configuration
+
+Result:
+[HTTPS enforced]
+
+Conclusion:
+Transport encryption validated at application layer.
+
+---
+
+# 4.6 Data Protection & Secret Exposure
+(Summary Section 7 Validation)
+
+Action:
+- Reviewed logs for token leakage
+- Inspected API responses for secret exposure
+
+Result:
+No sensitive credential exposure observed.
+
+Conclusion:
+No unintended token leakage detected.
+
+---
+
+# 4.7 Logging & Auditability
+(Summary Section 8 Validation)
+
+Action:
+- Modified feature flag
+- Deleted segment
+- Changed role
+
+Verification:
+Audit logs recorded actions appropriately.
+
+Conclusion:
+Core governance events logged.
+
+---
+
+# 4.8 Exception Handling & Error Exposure
+
+Action:
+- Triggered malformed JSON
+- Triggered invalid input
+- Triggered unauthorized operations
+
+Observed:
+No stack trace or sensitive internal details exposed.
+
+Conclusion:
+Error handling does not leak internal implementation details.
+
+---
+
+# 5. OWASP Top 10:2025 Mapping Summary
+
+| Category | Status |
+|-----------|---------|
+| A01 Broken Access Control | Validated |
+| A02 Security Misconfiguration | Validated |
+| A03 Software Supply Chain Failures | Reviewed (Application Layer Scope) |
+| A04 Cryptographic Failures | Validated |
+| A05 Injection | Validated |
+| A06 Insecure Design | No logical bypass observed |
+| A07 Authentication Failures | Validated |
+| A08 Software/Data Integrity Failures | Validated |
+| A09 Logging & Alerting Failures | Validated |
+| A10 Mishandling of Exceptional Conditions | Validated |
+
+---
+
+# 6. Findings Summary
+
+| ID | Category | Severity | Status |
+|----|----------|----------|--------|
+| FB-PT-001 | Broken Access Control | None | Validated |
+| FB-PT-002 | Injection | None | Validated |
+
+(No Critical or High findings identified during assessment window.)
+
+---
+
+# 7. Conclusion
+
+This assessment validates the application-layer controls described in the
+FeatBit Application Security Summary.
+
+No Critical or High-risk vulnerabilities were identified during testing.
+
+FeatBit demonstrates:
+
+- Enforced authentication
+- Scoped authorization boundaries
+- Structured input validation
+- Secure real-time communication handling
+- Proper error handling behavior
+- Audit traceability for governance events
+
+This report completes the formal assessment referenced in the Interim Summary.
