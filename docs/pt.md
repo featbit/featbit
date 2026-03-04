@@ -234,14 +234,45 @@ Invalid or missing tokens are rejected before protected resources are returned.
 
 ### 4.2.1 Cross-Project Access
 
-Action:
-- Modified project ID in API request.
+**Action**:
 
-Result:
-[403 Forbidden]
+Tested whether an authenticated user could access or modify resources belonging to another project by manipulating project identifiers within API requests.
 
-Conclusion:
-Project-level isolation enforced.
+Representative API endpoints covering different resource types and privilege levels were tested.
+
+**Endpoints Tested (Representative Sample)**:
+
+- GET /api/v1/projects/{projectId}/envs/{envId}/flags  
+  (retrieve feature flag definitions)
+
+- GET /api/v1/projects/{projectId}/segments  
+  (retrieve user segmentation configuration)
+
+- POST /api/v1/projects/{projectId}/flags  
+  (create or update feature flag configuration)
+
+- GET /api/v1/projects/{projectId}/members  
+  (retrieve project member permissions)
+
+- PUT /api/v1/projects/{projectId}/members/{memberId}  
+  (update project member permissions)
+
+**Test Scenario**:
+
+1. A valid request was captured for resources belonging to Project A.
+2. The `projectId` parameter was replaced with the identifier of Project B.
+3. The request was resent using the original authenticated user token.
+
+**Observed Behavior**:
+
+All modified requests attempting to access resources from another project were rejected with HTTP 403 Forbidden.
+
+No data belonging to other projects was returned.
+
+**Conclusion**:
+
+- Project-level isolation is enforced correctly.
+- Authenticated users cannot access or manipulate resources belonging to other projects.
 
 ---
 
