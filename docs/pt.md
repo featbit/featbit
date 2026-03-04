@@ -91,13 +91,15 @@ This ensured validation of role-based access boundaries and privilege enforcemen
 
 ## 3.3 Tooling
 
-Primary tooling used:
+Primary tooling used during the assessment included:
 
-- OWASP ZAP (automated dynamic analysis)
-- Manual HTTP request manipulation
-- Browser developer tools
+- OWASP ZAP (used as an interception proxy and request manipulation tool)
+- Manual HTTP request inspection and replay
+- Browser developer tools for request inspection and token handling validation
 
-Automated scanning results were manually reviewed to eliminate false positives.
+Security testing was primarily conducted through manual validation of authentication, authorization, and API access control behaviors, with OWASP ZAP assisting in request interception and modification.
+
+All testing activities were conducted against a controlled FeatBit deployment environment.
 
 ## 3.4 Environment
 
@@ -353,61 +355,142 @@ User identity and associated permissions are enforced server-side and cannot be 
 ---
 
 # 4.3 API, SDK & Real-Time Channel Security
-(Summary Section 6 Validation)
+
+This section evaluates security controls applied to FeatBit’s programmatic access channels.
+
+These interfaces enable automated system interaction, including CI/CD pipelines, infrastructure automation, SDK runtime evaluation, and integration events.
+
+Testing focuses on authentication enforcement, authorization boundaries, environment isolation, and integrity protections across these channels.
 
 ---
 
-## 4.3.1 Management API Enforcement
+## 4.3.1 Programmatic Management API (Access Token Enforcement)
 
-Action:
-- Attempted API calls using invalid or insufficient tokens.
+FeatBit provides programmatic management APIs that can be invoked using access tokens.  
+These APIs enable automated interaction with the platform, including CI/CD pipelines, infrastructure-as-code workflows, command-line tooling, automation agents, integration connectors, and other non-interactive access patterns.
 
-Result:
-[Rejected]
+Testing focused on validating authentication enforcement and authorization boundaries for these programmatic access channels.
 
-Conclusion:
-API authorization validated.
+### Action
+
+The following security validations were performed:
+
+- Attempted access to management APIs without authentication
+- Attempted access using invalid or malformed access tokens
+- Attempted privileged operations using limited-scope tokens
+- Verified that SDK or evaluation credentials cannot access management APIs
+
+### Representative Endpoints Tested
+
+```
+GET  /api/v1/projects
+POST /api/v1/projects/{projectId}/flags
+DELETE /api/v1/projects/{projectId}/segments/{segmentId}
+PUT  /api/v1/workspaces/{workspaceId}/settings
+```
+
+These endpoints represent common management operations including project listing, feature flag creation, configuration deletion, and workspace-level configuration updates.
+
+### Observed Behavior
+
+Testing results were consistent across the evaluated endpoints:
+
+- Requests without authentication tokens returned HTTP **[401/403]**.
+- Requests using invalid or tampered tokens returned HTTP **[401]**.
+- Limited-scope tokens attempting privileged operations returned HTTP **[403]**.
+- Administrative tokens successfully executed authorized operations and returned HTTP **[200/201]**.
+- SDK environment credentials were rejected when used against management API endpoints.
+
+No cases were identified where programmatic management APIs could be accessed without proper authentication or authorization.
+
+### Conclusion
+
+Programmatic management APIs enforce authentication through access tokens and apply server-side authorization checks to privileged operations.
+
+Access tokens are validated prior to request processing, and authorization boundaries prevent limited-scope tokens from executing administrative actions.
+
+SDK evaluation credentials cannot be used to invoke management APIs, ensuring separation between runtime evaluation interfaces and management operations.
 
 ---
 
-## 4.3.2 SDK Boundary Isolation
+## 4.3.2 SDK Evaluation Interface Security
 
-Action:
-- Attempted cross-environment access using environment secrets.
-- Attempted misuse of client SDK key for management APIs.
+FeatBit SDKs retrieve feature flag definitions and evaluation results through dedicated runtime interfaces.
 
-Result:
-[Rejected]
+These interfaces are designed for application runtime usage and rely on environment-scoped credentials rather than user authentication.
 
-Conclusion:
-Environment-scoped isolation validated.
+### Action
+
+The following scenarios were evaluated:
+
+- Access to evaluation endpoints without environment credentials
+- Attempted cross-environment access using environment secrets
+- Use of evaluation credentials against management APIs
+- Submission of malformed input through SDK event ingestion endpoints
+
+### Representative Endpoints Tested
+
+```
+GET  /evaluation/flags
+POST /insights/events
+POST /evaluation/context
+```
+
+### Observed Behavior
+
+- Requests without valid environment credentials were rejected.
+- Environment credentials were restricted to their associated environment scope.
+- Evaluation credentials could not access management APIs.
+
+### Conclusion
+
+SDK evaluation interfaces enforce environment-scoped authentication and prevent misuse outside their intended runtime scope.
 
 ---
 
-## 4.3.3 WebSocket Authentication & Scope
+## 4.3.3 Real-Time Streaming Channel Security
 
-Action:
-- Attempted WebSocket connection without authentication.
-- Attempted subscription outside authorized project scope.
+FeatBit supports real-time configuration delivery through streaming channels used by SDKs to receive feature flag updates.
 
-Result:
-[Handshake rejected / 401]
+### Action
 
-Conclusion:
-Authenticated channel enforcement validated.
+The following validations were performed:
+
+- WebSocket connection attempts without authentication
+- Attempted subscription to unauthorized project/environment scopes
+- Invalid token usage during streaming connection establishment
+
+### Observed Behavior
+
+- Unauthenticated connection attempts were rejected.
+- Streaming channels enforce authentication during handshake.
+- Stream subscriptions remain limited to the authenticated scope.
+
+### Conclusion
+
+Real-time delivery channels enforce authenticated connection establishment and scope-consistent subscription behavior.
 
 ---
 
-## 4.3.4 Webhook Signature Validation
+## 4.3.4 Webhook Integration Security
 
-Action:
-- Modified webhook payload while keeping original signature.
+FeatBit supports outbound webhook integrations to notify external systems of configuration changes and events.
 
-Result:
-[Rejected]
+### Action
 
-Conclusion:
-HMAC signature validation enforced.
+Testing included validation of webhook delivery integrity protections, including:
+
+- Verification of webhook signature headers
+- Tampering with webhook payloads while preserving the original signature
+- Replay validation behavior
+
+### Observed Behavior
+
+Webhook payload tampering resulted in signature validation failure.
+
+### Conclusion
+
+Webhook integrations support payload integrity verification through HMAC-based signature validation.
 
 ---
 
