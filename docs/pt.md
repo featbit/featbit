@@ -9,36 +9,27 @@ Assessment Window: [Start – End Date]
 Report Date: [YYYY-MM-DD]  
 Prepared by: FeatBit Inc.  
 
-This report represents the formal application-layer assessment referenced in
-the “FeatBit Application Security Summary (Interim), Version 1.1”.
+This report represents the formal application-layer assessment referenced in the "FeatBit Application Security Summary (Interim), Version 1.1".
 
 ---
 
 # 1. Objective
 
-The objective of this assessment is to validate the effectiveness of
-application-layer security controls described in the
-“FeatBit Application Security Summary (Interim), Version 1.1”.
+The objective of this assessment is to validate the effectiveness of application-layer security controls described in the "FeatBit Application Security Summary (Interim), Version 1.1".
 
-This assessment focuses on identifying potential Critical and High-risk
-vulnerabilities within the application layer of FeatBit (Self-Hosted Edition).
+This assessment focuses on identifying potential Critical and High-risk vulnerabilities within the application layer of FeatBit (Self-Hosted Edition).
 
-Testing is aligned with OWASP Top 10:2025 and contemporary
-application security best practices.
+Testing is aligned with OWASP Top 10:2025 and contemporary application security best practices.
 
-Infrastructure, operating system, network-layer security, and source-code
-review are explicitly out of scope.
+Infrastructure, operating system, network-layer security, and source-code review are explicitly out of scope.
 
 ---
 
 # 2. Scope Alignment with Security Summary
 
-This assessment scope is fully aligned with the boundaries defined in:
+This assessment scope is fully aligned with the boundaries defined in:"FeatBit Application Security Summary (Interim), Version 1.1".
 
-“FeatBit Application Security Summary (Interim), Version 1.1”.
-
-The scope of this assessment reflects the application-layer responsibilities
-as defined in Section 2 of the Security Summary.
+The scope of this assessment reflects the application-layer responsibilities as defined in Section 2 of the Security Summary.
 
 ## 2.1 In Scope (Application Layer)
 
@@ -64,19 +55,15 @@ Consistent with the Security Summary, the following elements were not included i
 - Database platform patching, encryption-at-rest implementation, and key management
 - WAF, SIEM, and infrastructure monitoring policy configuration
 
-FeatBit is deployed in a customer-controlled self-hosted model; therefore,
-infrastructure and platform controls remain under customer ownership.
+FeatBit is deployed in a customer-controlled self-hosted model; therefore, infrastructure and platform controls remain under customer ownership.
 
 ---
 
 # 3. Methodology
 
-his assessment was conducted as an application-layer security evaluation
-to validate the controls described in the
-“FeatBit Application Security Summary (Interim), Version 1.1”.
+This assessment was conducted as an application-layer security evaluation to validate the controls described in the "FeatBit Application Security Summary (Interim), Version 1.1".
 
-Testing methodology aligns with OWASP Top 10:2025 risk categories where
-applicable to FeatBit components, as outlined in Section 9 of the Security Summary.
+Testing methodology aligns with OWASP Top 10:2025 risk categories where applicable to FeatBit components, as outlined in Section 9 of the Security Summary.
 
 ## 3.1 Testing Approach
 
@@ -139,19 +126,19 @@ endpoints without providing an authentication token.
 **Endpoints Tested (Representative Sample)**:
 
 - GET /api/v1/xxx
-  (获取workspace的所有项目)
+  (List all projects in the workspace)
 - GET /api/v1/xxx
-  (获取某个项目的所有环境)
+  (List all environments in a project)
 - GET /api/v1/xxx
-  (获取环境的所有feature flags)
+  (List all feature flags in an environment)
 - GET /api/v1/xxx
-  (获取feature flag的详细信息)
+  (Get feature flag details)
 - POST /api/v1/xxx
-  (更新feature flag的状态)
+  (Update the status of a feature flag)
 - POST /api/v1/xxx
-  (更新某个member的policy)
+  (Update a member's policy)
 - GET /api/v1/xxx
-  (获取环境的 server env secret)
+  (Get the server environment secret)
 
 **Observed Behavior**:
 
@@ -213,14 +200,32 @@ according to current authentication configuration.
 
 ### 4.1.3 OIDC (If Enabled)
 
-Action:
-- Attempted direct API access bypassing federated login.
+**Action**:
 
-Result:
-[Rejected]
+Tested whether management APIs could be accessed without
+a valid federated authentication token when OIDC authentication
+is enabled.
 
-Conclusion:
-Federated authentication boundary respected.
+**Test Scenarios**:
+
+1. Direct API access without Authorization token
+2. API access using a forged Bearer token
+
+**Observed Behavior**:
+
+- Requests without an Authorization header returned HTTP 401 Unauthorized.
+- Requests using forged or invalid Bearer tokens were rejected with HTTP 401 or 403 responses.
+
+**Token Validation Behavior**:
+
+API access requires a valid Bearer token issued through the OIDC authentication flow.
+
+Invalid or missing tokens are rejected before protected resources are returned.
+
+**Conclusion**:
+
+- Federated authentication boundaries are enforced correctly.
+- Access to management APIs requires a valid authentication token issued through the OIDC login flow.
 
 ---
 
