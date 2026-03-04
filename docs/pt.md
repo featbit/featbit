@@ -330,39 +330,25 @@ Server-side authorization checks correctly prevent non-administrative users from
 
 **Action**:
 
-Tested whether an authenticated user could access or modify resources belonging to another user within the same project by manipulating user identifiers in API requests.
+Evaluated whether an authenticated user could access resources belonging to another user by manipulating user-related identifiers in API requests.
 
-Endpoints Tested (Representative Sample):
+**Assessment Notes**:
 
-- GET /api/v1/projects/{projectId}/members/{memberId}  
-  (retrieve project member information)
+FeatBit derives user identity exclusively from validated authentication tokens. User identifiers and roles are not accepted as client-supplied parameters in API requests.
 
-- PUT /api/v1/projects/{projectId}/members/{memberId}  
-  (modify member configuration)
-
-- DELETE /api/v1/projects/{projectId}/members/{memberId}  
-  (remove project member)
-
-**Test Scenario**:
-
-1. A standard user account (User A) was authenticated.
-
-2. API requests referencing User A's member identifier were captured during normal operations.
-
-3. The member identifier in the request was replaced with the identifier of another user (User B).
-
-4. Requests were executed using OWASP ZAP to determine whether User A could access or manipulate User B's data.
+Authorization decisions are performed server-side based on the authenticated user's identity and associated permissions.
 
 **Observed Behavior**:
 
-- All attempts to access or modify another user's resources were rejected with HTTP 403 Forbidden responses.
-- No unauthorized data was returned and no operations were executed.
+No user-controlled identifiers were identified that could be manipulated to access resources belonging to other users.
+
+All authorization decisions are enforced based on the validated authentication token.
 
 **Conclusion**:
 
-User-level access boundaries are enforced correctly.
-Authenticated users cannot access or manipulate
-resources belonging to other users.
+No horizontal privilege escalation attack surface was identified in the tested API endpoints.
+
+User identity and associated permissions are enforced server-side and cannot be overridden through request manipulation.
 
 ---
 
