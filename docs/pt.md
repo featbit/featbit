@@ -278,28 +278,91 @@ No data belonging to other projects was returned.
 
 ### 4.2.2 Privilege Escalation Attempt
 
-Action:
-- Attempted admin-only operation as standard user.
-- Modified role field in request payload.
+**Action**:
 
-Result:
-[Denied]
+Tested whether an authenticated non-administrative user could perform privileged administrative operations by directly invoking restricted API endpoints.
 
-Conclusion:
-RBAC enforcement validated.
+This test validates that role-based authorization controls are enforced server-side and cannot be bypassed by replaying or modifying requests.
+
+**Endpoints Tested (Representative Sample)**:
+
+- PUT /api/v1/projects/{projectId}/flags/{flagId}  
+  (modify feature flag configuration)
+
+- DELETE /api/v1/projects/{projectId}/segments/{segmentId}  
+  (delete segmentation rule)
+
+- PUT /api/v1/projects/{projectId}/members/{memberId}  
+  (modify project member permissions)
+
+**Test Scenario**:
+
+The "standard user" used in this test refers to an authenticated
+user account without administrative privileges.
+
+1. A standard user account was authenticated through the normal
+   application login process.
+
+2. Administrative API requests were captured from legitimate
+   administrator actions.
+
+3. The captured requests were replayed using the standard
+   user's authentication token.
+
+4. Requests were executed using OWASP ZAP to determine whether
+   the server allowed unauthorized administrative operations.
+
+**Observed Behavior**:
+
+All administrative API requests executed using the standard user token were rejected with HTTP 403 Forbidden responses.
+
+No configuration changes were applied and no privileged operations were executed.
+
+**Conclusion**:
+
+Privilege escalation attempts were unsuccessful.
+
+Server-side authorization checks correctly prevent non-administrative users from executing restricted administrative operations.
 
 ---
 
 ### 4.2.3 Administrative Operation Protection
 
-Action:
-- Attempted destructive operation without elevated privileges.
+**Action**:
 
-Result:
-[Denied]
+Tested whether an authenticated user could access or modify resources belonging to another user within the same project by manipulating user identifiers in API requests.
 
-Conclusion:
-Administrative boundary enforced.
+Endpoints Tested (Representative Sample):
+
+- GET /api/v1/projects/{projectId}/members/{memberId}  
+  (retrieve project member information)
+
+- PUT /api/v1/projects/{projectId}/members/{memberId}  
+  (modify member configuration)
+
+- DELETE /api/v1/projects/{projectId}/members/{memberId}  
+  (remove project member)
+
+**Test Scenario**:
+
+1. A standard user account (User A) was authenticated.
+
+2. API requests referencing User A's member identifier were captured during normal operations.
+
+3. The member identifier in the request was replaced with the identifier of another user (User B).
+
+4. Requests were executed using OWASP ZAP to determine whether User A could access or manipulate User B's data.
+
+**Observed Behavior**:
+
+- All attempts to access or modify another user's resources were rejected with HTTP 403 Forbidden responses.
+- No unauthorized data was returned and no operations were executed.
+
+**Conclusion**:
+
+User-level access boundaries are enforced correctly.
+Authenticated users cannot access or manipulate
+resources belonging to other users.
 
 ---
 
