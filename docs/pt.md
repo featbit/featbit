@@ -115,8 +115,7 @@ Testing was isolated from production customer workloads.
 
 ---
 
-# 4.1 Authentication & Session Security
-(Summary Section 4 Validation)
+## 4.1 Authentication & Session Security
 
 ### 4.1.1 Unauthenticated Access
 
@@ -231,8 +230,7 @@ Invalid or missing tokens are rejected before protected resources are returned.
 
 ---
 
-# 4.2 Authorization & RBAC Enforcement
-(Summary Section 5 Validation)
+## 4.2 Authorization & RBAC Enforcement
 
 ### 4.2.1 Cross-Project Access
 
@@ -354,7 +352,7 @@ User identity and associated permissions are enforced server-side and cannot be 
 
 ---
 
-# 4.3 API, SDK & Real-Time Channel Security
+## 4.3 API, SDK & Real-Time Channel Security
 
 This section evaluates security controls applied to FeatBit’s programmatic access channels.
 
@@ -364,14 +362,14 @@ Testing focuses on authentication enforcement, authorization boundaries, environ
 
 ---
 
-## 4.3.1 Programmatic Management API (Access Token Enforcement)
+### 4.3.1 Programmatic Management API (Access Token Enforcement)
 
 FeatBit provides programmatic management APIs that can be invoked using access tokens.  
 These APIs enable automated interaction with the platform, including CI/CD pipelines, infrastructure-as-code workflows, command-line tooling, automation agents, integration connectors, and other non-interactive access patterns.
 
 Testing focused on validating authentication enforcement and authorization boundaries for these programmatic access channels.
 
-### Action
+**Action**:
 
 The following security validations were performed:
 
@@ -380,7 +378,7 @@ The following security validations were performed:
 - Attempted privileged operations using limited-scope tokens
 - Verified that SDK or evaluation credentials cannot access management APIs
 
-### Representative Endpoints Tested
+**Representative Endpoints Tested**:
 
 ```
 GET  /api/v1/projects
@@ -391,7 +389,7 @@ PUT  /api/v1/workspaces/{workspaceId}/settings
 
 These endpoints represent common management operations including project listing, feature flag creation, configuration deletion, and workspace-level configuration updates.
 
-### Observed Behavior
+**Observed Behavior**:
 
 Testing results were consistent across the evaluated endpoints:
 
@@ -403,7 +401,7 @@ Testing results were consistent across the evaluated endpoints:
 
 No cases were identified where programmatic management APIs could be accessed without proper authentication or authorization.
 
-### Conclusion
+**Conclusion**:
 
 Programmatic management APIs enforce authentication through access tokens and apply server-side authorization checks to privileged operations.
 
@@ -413,108 +411,306 @@ SDK evaluation credentials cannot be used to invoke management APIs, ensuring se
 
 ---
 
-## 4.3.2 SDK Evaluation Interface Security
+### 4.3.2 Feature Flag Evaluation Interface Security
 
-FeatBit SDKs retrieve feature flag definitions and evaluation results through dedicated runtime interfaces.
+FeatBit provides runtime evaluation interfaces that allow client applications to retrieve feature flag configurations and submit runtime events.
 
-These interfaces are designed for application runtime usage and rely on environment-scoped credentials rather than user authentication.
+These interfaces may be accessed by official SDKs, client polling implementations, or customer-managed evaluation services.
 
-### Action
+Unlike management APIs, these endpoints rely on environment-scoped credentials and are intended for application runtime usage.
 
-The following scenarios were evaluated:
+**Action**:
 
-- Access to evaluation endpoints without environment credentials
-- Attempted cross-environment access using environment secrets
-- Use of evaluation credentials against management APIs
-- Submission of malformed input through SDK event ingestion endpoints
+The following security validations were performed:
 
-### Representative Endpoints Tested
+- Attempted access to evaluation interfaces without environment credentials
+- Attempted cross-environment access using environment-specific credentials
+- Attempted use of evaluation credentials against management API endpoints
+- Submission of malformed input through runtime event ingestion endpoints
+
+**Representative Endpoints Tested**:
 
 ```
-GET  /evaluation/flags
-POST /insights/events
-POST /evaluation/context
+GET  [feature flag evaluation endpoint]
+POST [runtime event/insight endpoint]
+POST [evaluation context endpoint]
 ```
 
-### Observed Behavior
+These endpoints represent typical runtime interactions used by SDKs, polling clients, or custom evaluation services.
 
-- Requests without valid environment credentials were rejected.
-- Environment credentials were restricted to their associated environment scope.
-- Evaluation credentials could not access management APIs.
+**Observed Behavior**:
 
-### Conclusion
+Testing results were consistent across evaluated endpoints:
 
-SDK evaluation interfaces enforce environment-scoped authentication and prevent misuse outside their intended runtime scope.
+- Requests without environment credentials returned HTTP **[401/403]**
+- Environment credentials were restricted to their associated environment scope
+- Evaluation credentials could not access management API endpoints
+- Malformed or unexpected payloads were rejected by server-side validation
 
----
+No cases were identified where runtime evaluation credentials could access management operations or resources outside their authorized environment scope.
 
-## 4.3.3 Real-Time Streaming Channel Security
+**Conclusion**:
 
-FeatBit supports real-time configuration delivery through streaming channels used by SDKs to receive feature flag updates.
+Runtime evaluation interfaces enforce environment-scoped authentication and prevent misuse of runtime credentials.
 
-### Action
-
-The following validations were performed:
-
-- WebSocket connection attempts without authentication
-- Attempted subscription to unauthorized project/environment scopes
-- Invalid token usage during streaming connection establishment
-
-### Observed Behavior
-
-- Unauthenticated connection attempts were rejected.
-- Streaming channels enforce authentication during handshake.
-- Stream subscriptions remain limited to the authenticated scope.
-
-### Conclusion
-
-Real-time delivery channels enforce authenticated connection establishment and scope-consistent subscription behavior.
+Evaluation credentials cannot be used to invoke management APIs and remain restricted to their intended feature flag evaluation scope.
 
 ---
 
-## 4.3.4 Webhook Integration Security
+### 4.3.3 Real-Time Streaming Channel Security (WebSocket)
 
-FeatBit supports outbound webhook integrations to notify external systems of configuration changes and events.
+FeatBit supports real-time configuration delivery through WebSocket streaming channels used by SDKs to receive feature flag updates.
 
-### Action
+**Observed Endpoints (Redacted):**
+- Client SDK streaming:
+  - `wss://app-eval.featbit.co/streaming?type=client&token=<redacted>`
+- Server SDK streaming:
+  - `wss://app-eval.featbit.co/streaming?type=server&token=<redacted>`
 
-Testing included validation of webhook delivery integrity protections, including:
+Successful protocol upgrade was observed as HTTP **101 Switching Protocols**.
 
-- Verification of webhook signature headers
-- Tampering with webhook payloads while preserving the original signature
-- Replay validation behavior
+In the tested deployment, the WebSocket channel is authenticated using an **opaque credential token** provided via the `token` query parameter. This token is generated based on the environment secret and is **decrypted/validated server-side** to recover the effective environment secret for authorization decisions.
 
-### Observed Behavior
+Client and Server streaming tokens are **type-scoped** and are not interchangeable. Tokens issued for `type=client` cannot be used for `type=server`, and vice versa.
 
-Webhook payload tampering resulted in signature validation failure.
+> Note: The `token` query parameter is an authentication credential. Anyone in possession of this token could attempt to establish a streaming connection, so it must be treated as sensitive.
 
-### Conclusion
+**Action**:
 
-Webhook integrations support payload integrity verification through HMAC-based signature validation.
+Validations were performed using browser developer tools and OWASP ZAP-assisted request manipulation:
+
+1) **Handshake & Credential Validation (Client + Server)**
+- Established connections using valid client/server tokens and observed normal streaming behavior
+- Tampered token values (character-level modification) and re-attempted connection establishment
+- Verified invalid/expired credentials are rejected at the application layer (post-upgrade)
+
+2) **Token Type Separation (Client vs Server)**
+- Attempted to use a `type=client` token against the `type=server` streaming endpoint
+- Attempted to use a `type=server` token against the `type=client` streaming endpoint
+
+3) **Environment Scope Isolation (Behavioral Validation)**
+- Established a connection using Env A token and observed that updates were delivered only when flags changed in Env A
+- Triggered flag changes in Env B and verified no updates were delivered to the Env A connection
+- Repeated the same validation using Env B token as a control
+- Performed the same behavioral isolation validation for both `type=client` and `type=server` where applicable
+
+4) **Protocol & Message Handling Observation**
+- Observed application-level message patterns including:
+  - `messageType: "data-sync"` payloads for runtime configuration synchronization
+  - periodic `ping/pong` keepalive messages
+- Verified that no protected runtime payloads were delivered in invalid-credential scenarios
+
+5) **SDK Resilience / Reconnect Behavior (Observation)**
+- Observed SDK behavior when the streaming channel was terminated by the server (automatic reconnect attempts)
+
+**Observed Behavior**:
+
+- With **valid tokens**, the server upgraded the connection to WebSocket (HTTP **101**) and the SDK received runtime synchronization payloads (e.g., `messageType: "data-sync"`) followed by periodic `ping/pong` keepalive messages.
+
+- With an **invalid / expired / tampered token**:
+  - The server still returned HTTP **101 Switching Protocols** (WebSocket upgrade completed).
+  - **No runtime data** (no `data-sync` payloads) was delivered after the upgrade.
+  - The server then **actively closed** the WebSocket connection with close code **4003**, indicating application-layer credential validation failure.
+  - The SDK automatically attempted to **re-establish** the WebSocket connection (expected reconnect behavior).
+
+- **Token type separation** was enforced:
+  - Using a `type=client` token against `type=server` did not result in any runtime data being delivered, and the connection was closed with **4003**.
+  - Using a `type=server` token against `type=client` behaved similarly (no runtime data, closed with **4003**).
+
+- **Environment isolation** was enforced through behavioral validation:
+  - A connection established using an Env A token only received updates when changes occurred within Env A.
+  - Changes made in Env B did **not** result in any updates delivered to the Env A connection (and vice versa when tested with Env B token).
+
+**Interpretation Note**:
+
+HTTP **101** indicates protocol upgrade only. Authorization is enforced at the application layer after the WebSocket channel is established; invalid or mis-scoped credentials result in the server closing the channel (close code **4003**) before any protected data is streamed.
+
+**Client-Side Caching Note (Operational Behavior)**:
+
+The client SDK stores the most recent runtime flag data in **browser local storage** to support resilience under intermittent connectivity and allow retrieval of the last known configuration when the connection is unstable.
+
+This caching behavior is client-side and does not provide additional server-side access; streaming and evaluation access remains gated by server-side token validation.
+
+**Conclusion**:
+
+The WebSocket streaming channels enforce environment-scoped authentication using an encrypted/opaque credential token that is decrypted and validated server-side.
+
+Invalid, expired, or mis-scoped credentials do not result in any protected runtime data being streamed; instead, the server terminates the channel with close code **4003** shortly after upgrade.  
+Behavioral testing confirms strict environment isolation and **type separation** between client and server streaming channels, making the real-time delivery mechanism suitable for SDK runtime usage under authenticated, scope-consistent controls.
 
 ---
 
-# 4.4 Injection & Input Validation
-(Summary Section 9 – Injection Control Validation)
+### 4.3.4 Webhook Integration Security
 
-Payloads tested:
+FeatBit supports outbound webhook integrations that notify external systems when selected Feature Flag or Segment events occur. When a subscribed event is triggered, FeatBit sends an HTTP **POST** request to the configured webhook URL.
 
-' OR 1=1 --  
-<script>alert(1)</script>  
-../../etc/passwd  
+Webhooks can be configured with:
+- **Scopes (environments)**: the webhook triggers only for events occurring in selected environments
+- **Events**: selectable event types (e.g., `feature_flag.toggled`, `feature_flag.targeting_rules_changed`, `segment.rules_changed`)
+- **Custom headers**: optional headers added to outbound requests
+- **Payload template**: a Handlebars-based template to generate the POST body
+- **Secret** (optional): enables payload signing via `X-FeatBit-Signature-256`
 
-Observed:
+> Note: Webhook endpoints should be treated as security-sensitive integration surfaces because they can carry configuration change context. Receivers should validate the signature (when enabled) and implement idempotent processing.
 
-- SQL injection: Not exploitable
-- Reflected XSS: Properly sanitized
-- Path traversal: Blocked
+**Action**:
 
-Conclusion:
-Structured input validation functioning as expected.
+Webhook security validation focuses on authenticity, integrity, and replay resilience using a controlled receiver endpoint:
+
+1) **Event & Scope Enforcement**
+- Configure a webhook with a constrained set of **environment scopes** and **event types**
+- Trigger subscribed events inside selected environments and verify deliveries occur
+- Trigger similar events in non-selected environments and verify no deliveries occur
+
+2) **Delivery Header Verification**
+- Capture outbound webhook requests and verify FeatBit includes delivery correlation headers:
+  - `X-FeatBit-Delivery` (delivery GUID)
+  - `X-FeatBit-Event` (event name)
+  - `X-FeatBit-Hook-ID` (webhook identifier)
+- Confirm optional **custom headers** are attached when configured
+
+3) **Payload Integrity via Signature Verification (Secret Enabled)**
+- Configure a webhook **secret** and validate that FeatBit includes `X-FeatBit-Signature-256`
+- Recompute an **HMAC-SHA256** signature over the raw request body using the shared secret and compare with the header value
+- Tamper with the payload at the receiver side (simulate MITM/modification) and confirm signature validation fails
+
+4) **Retry / Replay Considerations**
+- Validate receiver-side idempotency using `X-FeatBit-Delivery` (dedupe repeated deliveries)
+- Simulate transient failures (non-2xx responses / slow response) and observe retry behavior
+- Confirm re-deliveries preserve the same `X-FeatBit-Delivery` identifier for safe deduplication
+
+5) **Operational Validation (Live Debug)**
+- Use FeatBit’s Live Debug functionality to send test deliveries and inspect request/response details during setup and troubleshooting
+
+**Observed Behavior**:
+
+- FeatBit sends webhook deliveries as HTTP POST requests to the configured URL when subscribed events occur within selected environment scopes.
+- Outbound deliveries include built-in headers `X-FeatBit-Delivery`, `X-FeatBit-Event`, and `X-FeatBit-Hook-ID`.
+- When a webhook secret is configured, FeatBit includes `X-FeatBit-Signature-256`, documented as an HMAC hex digest of the request body using SHA-256 with the webhook secret as the HMAC key. The signature value is prefixed with `sha256=`.
+- Each webhook request has a **10-second timeout**. Failed deliveries are retried up to **3 times** with a **2-second delay** between retries.
+- For redelivery scenarios, `X-FeatBit-Delivery` remains consistent with the original delivery, enabling receiver-side replay protection through deduplication.
+
+**Conclusion**:
+
+FeatBit webhook integrations provide practical application-layer integrity and replay-resilience mechanisms:
+
+- **Integrity & authenticity** can be enforced by receivers using `X-FeatBit-Signature-256` (HMAC-SHA256) when a webhook secret is enabled.
+- **Replay/duplicate delivery handling** is supported via `X-FeatBit-Delivery`, allowing idempotent processing and deduplication across retries/redeliveries.
+- Operational tooling (Live Debug, payload templates, scopes, and custom headers) supports secure and maintainable integration workflows when combined with receiver-side signature validation and fast 2xx responses.
 
 ---
 
-# 4.5 Cryptographic & Transport Security
+## 4.4 Injection & Input Validation
+
+### 4.4.1 Stored Cross-Site Scripting (XSS) Validation
+
+This section validates that user-controlled inputs entered via the FeatBit Dashboard are safely handled when persisted and later rendered back in the UI (stored XSS).
+
+**Action**
+
+Stored XSS probes were submitted through representative Dashboard input fields that are persisted server-side and displayed back in the UI after save.
+
+**Tested Inputs (Representative)**
+
+- Representative persisted text fields in the Dashboard UI (e.g., name/description or other user-editable display fields that appear in list/detail views).
+
+**Payloads Tested (Safe Sampling)**
+
+- `<img src=x onerror=alert(1)>`
+- `<svg onload=alert(1)>`
+- `<script>alert(1)</script>`
+- `"><script>alert(1)</script>`
+
+**Observed Behavior**
+
+- After saving the inputs and revisiting the relevant Dashboard pages where the stored values are rendered (e.g., list/detail views), no script execution occurred.
+- The payloads did not trigger JavaScript execution and did not result in unexpected DOM/script injection behavior.
+- No error pages, stack traces, or security-relevant exceptions were observed during rendering.
+
+**Conclusion**
+
+No stored XSS behavior was identified in the tested Dashboard inputs. User-provided content appears to be safely handled when persisted and rendered back in the UI, and the tested payloads did not execute.
+
+---
+
+### 4.4.2 Reflected / DOM XSS Validation (Dashboard Search Parameters)
+
+This section validates that user-controlled query parameters used by the FeatBit Dashboard (single-page application) do not result in reflected or DOM-based XSS when rendered in the UI.
+
+The Feature Flags list page was used as a representative surface due to its use of URL query parameters and search filtering behavior.
+
+**Action**:
+
+Reflected/DOM XSS probes were tested through Dashboard search inputs that are propagated into URL query parameters and API requests.
+
+Representative test surface:
+- Feature Flags list page search parameter (e.g., `name=...`) reflected in the browser URL and used for list filtering.
+
+Payloads tested (safe sampling):
+- `<img src=x onerror=alert(1)>`
+- `<svg/onload=alert(1)>`
+- `"><svg/onload=alert(1)>` (quote-escape variant)
+
+**Validation steps**:
+- Inject payloads into the Dashboard search field and observe whether JavaScript execution occurs.
+- Confirm payload handling in the URL query string (encoding behavior).
+- Inspect network requests/responses associated with list filtering to ensure no unsafe reflection in returned data.
+- Observe any UI locations beyond the input field (e.g., chips, filter labels, empty-state text, toast messages) for unsafe rendering.
+
+**Observed Behavior**:
+
+- Payloads entered into the search field were represented in the URL query parameters in an encoded form (e.g., percent-encoded characters), and no direct HTML interpretation was observed.
+- The search value was displayed as plain text within the input field; no script execution occurred and no alert was triggered.
+- No evidence was observed of the payload being rendered as HTML in other UI components (e.g., filter labels, badges, empty-state messages).
+- Network responses related to filtering did not exhibit unsafe reflection that led to execution, and no server-side error pages, stack traces, or exception details were observed during testing.
+
+**Conclusion**
+
+No reflected or DOM-based XSS behavior was identified in the tested Dashboard search/query parameter surfaces. User-provided search values appear to be safely handled and rendered as text without script execution.
+
+### 4.4.3 API Query Injection & Parameter Validation (Open API)
+
+This section validates that FeatBit’s Open API query parameters cannot be abused for SQL/Query injection and that filtering/pagination parameters enforce safe server-side validation.
+
+**Representative Endpoints**:
+
+- Tested: `GET /api/v1/envs/{envId}/audit-logs`
+- Recommended additional coverage (quick sampling):
+  - `GET [Feature Flags list endpoint]`
+  - `GET [Segments list endpoint]`
+
+**Action**:
+
+1) **Query Injection Probes (Search/Filter Parameters)**
+- Baseline request with an empty query string (where applicable)
+- Injection probes applied to search/filter parameters (e.g., `query`, `name`, `q`):
+  - `'`
+  - `"` (optional)
+  - `' OR 1=1 --`
+  - `') OR ('1'='1` (optional)
+
+2) **Pagination Parameter Type & Boundary Tests**
+- Non-integer input for page sizing (e.g., `pageSize=1 OR 1=1`)
+- Negative boundary test (e.g., `pageSize=-1`)
+- Excessively large value test (e.g., `pageSize=999999`)
+
+**Observed Behavior (Audit Logs Endpoint)**:
+
+- Baseline (query empty) returned HTTP **200 OK** with a non-zero result set (`totalCount=1`).
+- Injection probes on `query` returned HTTP **200 OK** with stable response structure and did not expand results beyond baseline (e.g., `totalCount=0` under `'` and `' OR 1=1 --`). No SQL/ORM errors, stack traces, or backend details were disclosed.
+- `pageSize=1 OR 1=1` was rejected with HTTP **400 Bad Request** and a structured validation error (type enforcement).
+- `pageSize=999999` was accepted (no maximum enforced).
+- `pageSize=-1` triggered HTTP **500 Internal Server Error** (unhandled boundary case).
+
+**Conclusion**:
+
+No exploitable SQL/Query injection behavior was observed for tested search parameters. Type validation is enforced for numeric pagination inputs.
+
+A robustness gap was identified in pagination bounds and negative-value handling, which may pose availability/stability risk under large datasets or repeated invalid requests.
+
+---
+
+## 4.5 Cryptographic & Transport Security
 (Summary Section 7 Validation)
 
 Action:
@@ -530,7 +726,7 @@ Transport encryption validated at application layer.
 
 ---
 
-# 4.6 Data Protection & Secret Exposure
+## 4.6 Data Protection & Secret Exposure
 (Summary Section 7 Validation)
 
 Action:
@@ -597,10 +793,38 @@ Error handling does not leak internal implementation details.
 
 | ID | Category | Severity | Status |
 |----|----------|----------|--------|
-| FB-PT-001 | Broken Access Control | None | Validated |
-| FB-PT-002 | Injection | None | Validated |
+| FB-PT-003 | Input Validation / Exceptional Conditions (Pagination) | Low | Open |
 
-(No Critical or High findings identified during assessment window.)
+## FB-PT-003 — Pagination Parameter Validation Weakness
+
+**Category:** Input Validation / Exceptional Conditions  
+**Severity:** Low (Availability / Robustness)  
+**Affected Surface (Representative):** `GET /api/v1/envs/{envId}/audit-logs`
+
+**Description**:
+
+Pagination parameter validation is inconsistent:
+
+- No enforced upper bound on `pageSize` (e.g., `pageSize=999999` is accepted).
+- Negative `pageSize` can trigger an unhandled error path resulting in HTTP **500 Internal Server Error**.
+
+**Evidence (Observed)**:
+
+- `pageSize=1 OR 1=1` → HTTP **400 Bad Request** with structured validation error (type enforcement present).
+- `pageSize=999999` → HTTP **200 OK** (no maximum limit enforced).
+- `pageSize=-1` → HTTP **500 InternalServerError**.
+
+**Impact**:
+
+- Although this endpoint requires authenticated access, an authenticated user (or compromised token) could request extremely large pages, potentially increasing backend load and response sizes under larger datasets (availability risk).
+- Negative values triggering HTTP 500 enable repeated exception generation, increasing error logs and potentially degrading service stability (robustness risk).
+- No authentication bypass or data access control weakness was identified as part of this behavior.
+
+**Recommendation**:
+
+1) Enforce server-side bounds for pagination (e.g., `1 <= pageSize <= 100` or a configurable maximum).  
+2) Reject invalid pagination values (negative, non-integer, overly large) using controlled **400/422** validation errors (avoid HTTP 500).  
+3) Optionally clamp oversized values to the configured maximum and add rate limiting for high-frequency list endpoints.
 
 ---
 
