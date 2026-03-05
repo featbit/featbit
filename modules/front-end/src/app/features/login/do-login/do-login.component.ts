@@ -15,6 +15,11 @@ enum LoginStep {
   Step2 = 'step2' // workspace and (or) password
 }
 
+enum LoginTab {
+  Login,
+  Sso
+}
+
 @Component({
   selector: 'app-do-login',
   templateUrl: './do-login.component.html',
@@ -36,6 +41,25 @@ export class DoLoginComponent implements OnInit {
 
   isSocialEnabled: boolean = false;
   oauthProviders: OAuthProvider[] = [];
+
+  selectedTabIndex = 0;
+
+  private preferredInitialTab: LoginTab = LoginTab.Login;
+
+  private getAvailableTabsInOrder(): LoginTab[] {
+    const tabs: LoginTab[] = [];
+
+    if (!this.isSSO) tabs.push(LoginTab.Login);
+    if (this.isSsoEnabled) tabs.push(LoginTab.Sso);
+
+    return tabs;
+  }
+
+  private updateSelectedTabIndex() {
+    const available = this.getAvailableTabsInOrder();
+    const idx = available.indexOf(this.preferredInitialTab);
+    this.selectedTabIndex = idx >= 0 ? idx : 0;
+  }
 
   constructor(
     private fb: FormBuilder,
@@ -64,6 +88,9 @@ export class DoLoginComponent implements OnInit {
     this.isSsoEnabled = preCheck.isEnabled;
     this.oauthProviders = providers;
     this.isSocialEnabled = this.oauthProviders.length > 0;
+
+    this.preferredInitialTab = this.isSsoEnabled ? LoginTab.Sso : LoginTab.Login;
+    this.updateSelectedTabIndex();
 
     this.ssoForm = this.fb.group({
       workspaceKey: [
@@ -186,6 +213,8 @@ export class DoLoginComponent implements OnInit {
 
         if (params["sso-logged-in"]) {
           this.isSSO = true;
+          this.updateSelectedTabIndex();
+
           this.ssoService.oidcLogin(code, state).subscribe(observer);
         } else if (params["social-logged-in"]) {
           this.socialService.login(code, state).subscribe(observer);
