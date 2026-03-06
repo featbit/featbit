@@ -116,6 +116,7 @@ Testing was isolated from production customer workloads.
 ---
 
 ## 4.1 Authentication & Session Security
+(Summary Section 4 Validation)
 
 ### 4.1.1 Unauthenticated Access
 
@@ -231,6 +232,7 @@ Invalid or missing tokens are rejected before protected resources are returned.
 ---
 
 ## 4.2 Authorization & RBAC Enforcement
+(Summary Section 5 Validation)
 
 ### 4.2.1 Cross-Project Access
 
@@ -353,6 +355,7 @@ User identity and associated permissions are enforced server-side and cannot be 
 ---
 
 ## 4.3 API, SDK & Real-Time Channel Security
+(Summary Section 6 Validation)
 
 This section evaluates security controls applied to FeatBit’s programmatic access channels.
 
@@ -601,6 +604,7 @@ FeatBit webhook integrations provide practical application-layer integrity and r
 ---
 
 ## 4.4 Injection & Input Validation
+(Summary Sections 6 and 9 Validation)
 
 ### 4.4.1 Stored Cross-Site Scripting (XSS) Validation
 
@@ -710,34 +714,154 @@ A robustness gap was identified in pagination bounds and negative-value handling
 
 ---
 
+### 4.4.4 Schema / Type / Boundary Validation (Write APIs)
+
+This section validates that FeatBit write APIs enforce structured server-side validation for JSON request bodies, including required fields, JSON parsing, type enforcement, and safe handling of unexpected fields.
+
+**Representative Endpoints Tested**:
+
+- Create / Update Feature Flag (management APIs)
+- Create / Update Segment (management APIs)
+- Create Audit Log (administrative / governance surface)
+- Create Change Request (administrative workflow surface)
+
+**Action**:
+
+The following input validation scenarios were tested by capturing baseline POST/PUT requests and replaying modified payloads:
+
+1) **Invalid JSON**
+- Submitted malformed JSON payloads (e.g., missing closing braces, invalid commas).
+
+2) **Missing Required Fields**
+- Removed required fields from request bodies (e.g., omitting `key` during feature flag creation).
+
+3) **Type Mismatch / Type Confusion**
+- Replaced expected scalar types with incorrect types (e.g., string fields replaced with objects/arrays; arrays replaced with strings).
+
+4) **Oversized Strings (Boundary / Length Testing)**
+- Submitted unusually long strings in representative text fields to validate length handling.
+
+5) **Unexpected / Extra Fields**
+- Added non-schema fields to request bodies to validate that they do not alter behavior or authorization outcomes.
+
+**Observed Behavior**:
+
+- **Invalid JSON** payloads were rejected with HTTP **400 Bad Request**.
+- **Missing required fields** were rejected with HTTP **400 Bad Request** and clear validation messages (e.g., `success:false` with errors such as `key_is_required`).
+- **Type mismatch** payloads were rejected with HTTP **400 Bad Request**.
+- **Unexpected fields** did not change behavior or authorization outcomes (fields were safely ignored and did not produce privileged effects).
+- **Oversized string inputs** were handled inconsistently:
+  - Some endpoints returned controlled **4xx** validation errors.
+  - Some endpoints returned HTTP **500 Internal Server Error** for oversized string inputs.
+  - No performance degradation or service instability was observed during these tests; however, returning **500** indicates an unhandled validation boundary case.
+
+**Conclusion**:
+
+FeatBit demonstrates strong baseline schema validation for malformed JSON, missing required fields, type mismatches, and unexpected fields across tested write APIs.
+
+A robustness gap was identified for oversized string handling, where certain inputs can trigger HTTP 500 responses. This behavior should be normalized to controlled 4xx validation errors with consistent length limits.
+
+---
+
 ## 4.5 Cryptographic & Transport Security
 (Summary Section 7 Validation)
 
-Action:
-- Verified HTTPS enforcement
-- Attempted downgrade to HTTP
-- Reviewed transport configuration
+This section validates that FeatBit communicates over encrypted transport channels and that application endpoints are compatible with secure deployment configurations.
 
-Result:
-[HTTPS enforced]
+**Action**:
 
-Conclusion:
-Transport encryption validated at application layer.
+The following transport-layer security checks were performed during testing:
+
+- Verified that Dashboard and API endpoints operate over HTTPS.
+- Verified that streaming connections use secure WebSocket (`wss://`).
+- Attempted access to resources to observe whether mixed content occurs (HTTPS pages loading HTTP resources).
+- Observed transport security headers returned by API responses.
+- Attempted HTTP access behavior to determine whether downgrade protection is enforced by the deployment configuration.
+
+**Observed Behavior**:
+
+- All tested application endpoints (Dashboard, APIs, and streaming interfaces) operated over **HTTPS** or **WSS** in the test environment.
+- Real-time streaming connections were established via **`wss://`**, ensuring TLS protection for feature flag streaming data.
+- No **mixed-content** issues were observed; HTTPS pages did not attempt to load HTTP resources.
+- API responses included transport hardening headers such as  
+  `Strict-Transport-Security: max-age=31536000; includeSubDomains`.
+- In the test environment configured with HTTPS enforcement, HTTP downgrade attempts were not permitted and all application communication remained encrypted.
+
+**Deployment Considerations**:
+
+FeatBit supports deployment behind customer-managed infrastructure (e.g., reverse proxies, ingress controllers, or load balancers).  
+As such, enforcement of HTTPS-only access, TLS configuration, and HTTP-to-HTTPS redirection behavior may depend on the deployment environment rather than the application itself.
+
+**Conclusion**:
+
+Transport encryption was successfully validated at the application layer.  
+The FeatBit platform operates correctly over **HTTPS and WSS**, does not introduce mixed-content issues, and is compatible with secure HTTPS-enforced deployments.  
+TLS enforcement policies (e.g., HTTP redirection or listener configuration) are deployment-specific responsibilities in self-hosted environments.
 
 ---
 
 ## 4.6 Data Protection & Secret Exposure
 (Summary Section 7 Validation)
 
-Action:
-- Reviewed logs for token leakage
-- Inspected API responses for secret exposure
+This section evaluates whether FeatBit exposes sensitive information through API responses, error messages, client-side storage, or audit logs.
 
-Result:
-No sensitive credential exposure observed.
+**Action**:
 
-Conclusion:
-No unintended token leakage detected.
+The following checks were performed:
+
+- Reviewed representative API responses for exposure of sensitive credentials or internal secrets.
+- Triggered various error conditions (invalid JSON, schema violations, injection probes) to inspect error responses.
+- Inspected browser storage used by the Dashboard application.
+- Reviewed audit log records for potential leakage of credentials or secrets.
+
+**Observed Behavior**:
+
+**API Responses**
+
+Certain API responses intentionally return credentials that are required for authorized users to configure and operate the platform:
+
+- Authentication endpoints return **JWT access tokens** as part of the login process.
+- Access Token management APIs return **user-generated access tokens** for programmatic access.
+- Project configuration APIs expose **environment secrets (envSecret)** used by SDKs for runtime feature flag evaluation.
+
+These values are returned only to authenticated users with appropriate permissions and are necessary for normal platform operation.
+
+No unintended exposure of internal secrets (e.g., database credentials, private keys, connection strings) was observed in API responses.
+
+**Error Responses**
+
+Error responses generated during testing returned controlled HTTP **4xx/5xx** responses without exposing:
+
+- stack traces
+- internal class or namespace information
+- SQL queries
+- database connection strings
+
+This indicates proper exception handling and error sanitization.
+
+**Client-Side Storage**
+
+The FeatBit Dashboard stores certain session data in browser storage as part of its single-page application architecture, including:
+
+- user authentication token
+- user information
+- feature flag cache
+
+The authentication token is cleared on logout and subject to expiration.
+
+SDK clients may locally cache evaluated feature flags for runtime performance.
+
+No environment secrets or private access tokens were observed stored in browser storage for the Dashboard.
+
+**Audit Logs**
+
+Audit log records were reviewed and do not contain sensitive credentials such as tokens, secrets, or passwords.
+
+**Conclusion**:
+
+Testing did not identify unintended exposure of sensitive information through API responses, error handling, client-side storage, or audit logs.
+
+Certain credentials (JWT tokens, access tokens, and envSecret values) are intentionally exposed to authorized users as part of normal platform operation and do not represent a vulnerability when used within authenticated contexts.
 
 ---
 
@@ -794,6 +918,7 @@ Error handling does not leak internal implementation details.
 | ID | Category | Severity | Status |
 |----|----------|----------|--------|
 | FB-PT-003 | Input Validation / Exceptional Conditions (Pagination) | Low | Open |
+| FB-PT-004 | Input Validation / Exceptional Conditions (Oversized Strings) | Low | Open  |
 
 ## FB-PT-003 — Pagination Parameter Validation Weakness
 
@@ -825,6 +950,44 @@ Pagination parameter validation is inconsistent:
 1) Enforce server-side bounds for pagination (e.g., `1 <= pageSize <= 100` or a configurable maximum).  
 2) Reject invalid pagination values (negative, non-integer, overly large) using controlled **400/422** validation errors (avoid HTTP 500).  
 3) Optionally clamp oversized values to the configured maximum and add rate limiting for high-frequency list endpoints.
+
+---
+
+## FB-PT-004 — Oversized String Input Can Trigger HTTP 500
+
+**Category:** Input Validation / Exceptional Conditions  
+**Severity:** Low (Robustness / Availability)  
+**Affected Surface:** Write APIs (observed on a subset of endpoints during create/update operations)
+
+**Description**
+
+During schema/boundary testing, oversized string values submitted in JSON request bodies caused **HTTP 500 Internal Server Error** responses on certain endpoints. Other endpoints correctly returned controlled 4xx validation responses for similar oversized inputs.
+
+**Evidence (Observed)**
+
+- Invalid JSON, missing required fields, and type mismatches consistently returned HTTP **400** with structured validation responses.
+- Oversized string inputs:
+  - In some cases: returned controlled **4xx** validation errors.
+  - In some cases: returned **500 Internal Server Error**.
+
+**Impact**
+
+- Exploitation requires authenticated API access; no authentication bypass was identified.
+- The primary risk is robustness and operational noise:
+  - repeated invalid requests can generate avoidable server exceptions/logs
+  - inconsistent validation behavior complicates client-side error handling
+- No measurable service performance degradation was observed during testing; however, returning 500 for validation failures is not best practice and can create availability and monitoring/alerting noise under abuse or misconfiguration.
+
+**Recommendation**
+
+1) Implement consistent server-side maximum lengths for relevant text fields (e.g., name/description/comments) and enforce them uniformly.  
+2) For oversized inputs, return controlled **400/422** validation responses (avoid **500**).  
+3) Add regression tests for boundary length validation to prevent reintroduction.  
+4) Review error handling to ensure oversized inputs never produce unhandled exceptions.
+
+**Suggested Fix Priority**
+
+- Medium priority as a hardening/robustness fix (severity remains Low due to authenticated access requirement and lack of observed service degradation).
 
 ---
 
