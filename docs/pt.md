@@ -1,35 +1,89 @@
-https://owasp.org/Top10/2025/
-
 # FeatBit Application-Layer Penetration Test Report
-(Aligned with FeatBit Application Security Summary v1.1)
 
 Product: FeatBit (Self-Hosted Edition)  
 Version Tested: [vX.X.X]  
-Assessment Window: [Start – End Date]  
+Document Classification: Customer Confidential
+Assessment Window: [Start Date – End Date]  
 Report Date: [YYYY-MM-DD]  
-Prepared by: FeatBit Inc.  
+Prepared by: FeatBit Inc.
 
-This report represents the formal application-layer assessment referenced in the "FeatBit Application Security Summary (Interim), Version 1.1".
+---
 
+This document presents the results of an application-layer penetration test conducted against the FeatBit (Self-Hosted Edition).
+
+---
+# ---
+---
+
+# Executive Summary
+
+FeatBit conducted an application-layer penetration test of the **FeatBit (Self-Hosted Edition)** to validate the security controls described in the *FeatBit Application Security Summary (Interim), Version 1.1*.
+
+Testing focused on authentication, authorization, API access control, runtime communication channels, input validation, and exception handling behavior.
+
+No **Critical** or **High severity vulnerabilities** were identified during the assessment.
+
+Two **Low severity robustness findings** related to input validation boundary conditions were identified. These findings do not allow authentication bypass, privilege escalation, or unauthorized data access.
+
+**Overall Risk Rating: Low**
+
+---
+
+**Assessment Conclusion:**  
+No Critical or High-risk vulnerabilities identified.
+
+---
+# ---
+---
+
+# Risk Rating Summary
+
+The following table summarizes the vulnerability severity distribution identified during the assessment.
+
+| Severity | Count |
+|--------|------|
+| Critical | 0 |
+| High | 0 |
+| Medium | 0 |
+| Low | 2 |
+| Informational | 0 |
+
+---
+
+## Identified Findings
+
+| ID | Title | Severity |
+|----|------|---------|
+| FB-PT-001 | Pagination Parameter Validation Weakness | Low |
+| FB-PT-002 | Oversized String Input Handling | Low |
+
+---
+
+## Overall Risk Rating
+
+**Low**
+
+No vulnerabilities with significant security impact were identified.
+
+---
+# ---
 ---
 
 # 1. Objective
 
-The objective of this assessment is to validate the effectiveness of application-layer security controls described in the "FeatBit Application Security Summary (Interim), Version 1.1".
+The objective of this assessment is to validate the effectiveness of the application-layer security controls described in the **FeatBit Application Security Summary (Interim), Version 1.1**.
 
-This assessment focuses on identifying potential Critical and High-risk vulnerabilities within the application layer of FeatBit (Self-Hosted Edition).
+This assessment focuses on identifying potential **Critical** and **High-risk** vulnerabilities within the application layer of **FeatBit (Self-Hosted Edition)**, while also documenting lower-severity robustness issues observed during testing.
 
-Testing is aligned with OWASP Top 10:2025 and contemporary application security best practices.
+Testing was performed in alignment with **OWASP Top 10:2025** and contemporary application security assessment practices.
 
-Infrastructure, operating system, network-layer security, and source-code review are explicitly out of scope.
+Infrastructure security, operating system security, network-layer controls, and source-code review were explicitly out of scope for this assessment.
 
 ---
 
 # 2. Scope Alignment with Security Summary
 
-This assessment scope is fully aligned with the boundaries defined in:"FeatBit Application Security Summary (Interim), Version 1.1".
-
-The scope of this assessment reflects the application-layer responsibilities as defined in Section 2 of the Security Summary.
+The assessment scope of this assessment reflects the application-layer responsibilities defined in the **FeatBit Application Security Summary (Interim), Version 1.1**.
 
 ## 2.1 In Scope (Application Layer)
 
@@ -39,7 +93,7 @@ The following application-layer components and control domains were included in 
 - FeatBit API service (REST APIs for dashboard and feature/configuration management)
 - FeatBit evaluation service (SDK-facing evaluation paths, including real-time channel behavior)
 - FeatBit data analytics service (insight retrieval and analytics APIs)
-- FeatBit SDK behavior and integration security boundaries (application-layer perspective)
+- FeatBit SDK behavior and integration security boundaries (from an application-layer perspective)
 - Integration capabilities, including webhook-based outbound integrations and API-token-based integrations
 - Authentication and session management controls
 - Authorization and role-based access control (RBAC)
@@ -50,20 +104,21 @@ The following application-layer components and control domains were included in 
 
 Consistent with the Security Summary, the following elements were not included in this assessment:
 
-- Host, OS, network perimeter, and firewall controls
-- Kubernetes/VM/container hardening
+- Host, operating system, network perimeter, and firewall controls
+- Kubernetes / VM / container hardening
 - Database platform patching, encryption-at-rest implementation, and key management
 - WAF, SIEM, and infrastructure monitoring policy configuration
+- TLS termination, certificate lifecycle management, and reverse-proxy / load-balancer security configuration
 
-FeatBit is deployed in a customer-controlled self-hosted model; therefore, infrastructure and platform controls remain under customer ownership.
+FeatBit is deployed using a customer-controlled self-hosted model. As such, infrastructure and platform controls remain under customer ownership and were not part of this application-layer penetration test.
 
 ---
 
 # 3. Methodology
 
-This assessment was conducted as an application-layer security evaluation to validate the controls described in the "FeatBit Application Security Summary (Interim), Version 1.1".
+This assessment was conducted as an **application-layer security evaluation** to validate the controls described in the **FeatBit Application Security Summary (Interim), Version 1.1**.
 
-Testing methodology aligns with OWASP Top 10:2025 risk categories where applicable to FeatBit components, as outlined in Section 9 of the Security Summary.
+The testing methodology aligns with **OWASP Top 10:2025** risk categories where applicable to FeatBit components, as referenced in Section 9 of the Security Summary.
 
 ## 3.1 Testing Approach
 
@@ -71,13 +126,13 @@ The testing approach included:
 
 - Black-box dynamic testing against exposed application interfaces
 - Authenticated testing using multiple user roles
-- Manual authorization and privilege boundary validation
-- Injection payload simulation (aligned with OWASP Injection category)
-- Token and session manipulation testing (Authentication risk category)
-- Cross-project and cross-environment isolation validation (Access Control category)
+- Manual authorization and privilege-boundary validation
+- Injection payload simulation aligned with OWASP Injection risk categories
+- Token and session manipulation testing aligned with Authentication risk categories
+- Cross-project and cross-environment isolation validation aligned with Access Control risk categories
 - WebSocket authentication and scope validation
 - Webhook integrity and signature validation
-- Error-handling behavior analysis (Exceptional Conditions category)
+- Error-handling and boundary-condition analysis aligned with Exceptional Conditions risk categories
 
 ## 3.2 Testing Accounts
 
@@ -87,27 +142,39 @@ The following account types were used during testing:
 - Standard user account
 - Unauthenticated access attempts
 
-This ensured validation of role-based access boundaries and privilege enforcement.
+This ensured meaningful validation of authentication requirements, role-based access boundaries, and privilege enforcement behavior.
 
 ## 3.3 Tooling
 
 Primary tooling used during the assessment included:
 
-- OWASP ZAP (used as an interception proxy and request manipulation tool)
+- **OWASP ZAP** (used as an interception proxy and request manipulation tool)
 - Manual HTTP request inspection and replay
-- Browser developer tools for request inspection and token handling validation
+- Browser developer tools for request inspection, token handling observation, and client-side behavior validation
 
-Security testing was primarily conducted through manual validation of authentication, authorization, and API access control behaviors, with OWASP ZAP assisting in request interception and modification.
+Security testing was conducted primarily through manual validation of authentication, authorization, API behavior, and runtime communication controls, with OWASP ZAP assisting in interception, replay, and parameter manipulation.
 
 All testing activities were conducted against a controlled FeatBit deployment environment.
 
 ## 3.4 Environment
 
-All testing was conducted against a controlled self-hosted deployment
-environment consistent with the architecture described in
-Section 3 of the Security Summary.
+All testing was conducted against a controlled self-hosted deployment environment consistent with the architecture described in **Section 3** of the Security Summary.
 
 Testing was isolated from production customer workloads.
+
+## 3.5 Assessment Limitations
+
+This assessment represents a point-in-time application-layer penetration test.
+
+The following activities were not performed as part of this engagement:
+
+- Source code review
+- Infrastructure or network penetration testing
+- Denial-of-service or load testing
+- Third-party dependency / software composition analysis
+- Cryptographic implementation review beyond observable application-layer behavior
+
+Accordingly, the absence of findings in this report should not be interpreted as a guarantee that no vulnerabilities exist.
 
 ---
 
@@ -865,51 +932,139 @@ Certain credentials (JWT tokens, access tokens, and envSecret values) are intent
 
 ---
 
-# 4.7 Logging & Auditability
+## 4.7 Logging & Auditability
 (Summary Section 8 Validation)
 
-Action:
-- Modified feature flag
-- Deleted segment
-- Changed role
+This section evaluates whether FeatBit provides sufficient audit logging for security-relevant actions and whether audit records avoid exposing sensitive information.
 
-Verification:
-Audit logs recorded actions appropriately.
+**Action**:
 
-Conclusion:
-Core governance events logged.
+The following configuration changes were performed during testing in the **FeatBit internal testing environment**:
+
+- Creation and modification of feature flags
+- Segment creation and modification
+
+After performing these actions, the Audit Logs interface and corresponding API responses were reviewed through:
+
+- Dashboard UI
+- API endpoint:
+
+```
+GET https://app-api.featbit.co/api/v1/envs/{envId}/audit-logs
+```
+
+Representative request used during testing:
+
+```
+# All feature flags and segments changes audit logs for a specific environment (crossEnvironment=false)
+https://app-api.featbit.co/api/v1/envs/{envId}/audit-logs?crossEnvironment=false&query=&creatorId=&refType=&refId=&from=&to=&pageIndex=0&pageSize=1
+
+# A specific feature flags changes for a specific environment (crossEnvironment=false)
+https://app-api.featbit.co/api/v1/envs/{envId}/audit-logs?crossEnvironment=false&query=&creatorId=&refType=FeatureFlag&refId={refId}&from=&to=&pageIndex=0&pageSize=10
+
+# A specific shared segment changes across the scope of shared environment (crossEnvironment=true)
+https://app-api.featbit.co/api/v1/envs/{envId}/audit-logs?crossEnvironment=true&query=&creatorId=&refType=Segment&refId={refId}&from=&to=&pageIndex=0&pageSize=10
+```
+
+The `refType` filter supports the following values:
+
+- `FeatureFlag`
+- `Segment`
+- empty (return all supported resource types)
+
+**Observed Behavior**
+
+Configuration changes to **Feature Flags** and **Segments** generated corresponding audit log entries.
+
+Audit log entries contained the following metadata:
+
+- action type (e.g., feature flag modification, segment update)
+- target resource identifiers (e.g., `flagId`, `segmentId`)
+- actor/user information associated with the action
+- timestamp of the operation
+
+Audit records were successfully retrievable through both the Dashboard interface and the audit log API.
+
+During inspection of audit log entries:
+
+- No authentication tokens were recorded
+- No environment secrets were recorded
+- No passwords or credentials were recorded
+
+Audit log payloads contained only operational metadata necessary for governance and traceability.
+
+Audit log filtering using the `refType` parameter successfully limited results to specific resource categories (`FeatureFlag` or `Segment`).
+
+It should be noted that audit logging currently covers configuration changes for **Feature Flags** and **Segments**. Other administrative operations may not yet generate audit log entries.
+
+**Conclusion**
+
+Audit logging functionality is implemented for key configuration resources (Feature Flags and Segments) and provides traceability for configuration changes.
+
+Audit records do not contain sensitive credentials or secrets and support operational accountability for configuration management activities within FeatBit deployments.
 
 ---
 
-# 4.8 Exception Handling & Error Exposure
+## 4.8 Exception Handling & Error Exposure
+(Summary Section 9 Validation)
 
-Action:
-- Triggered malformed JSON
-- Triggered invalid input
-- Triggered unauthorized operations
+This section evaluates whether FeatBit properly handles application errors without exposing sensitive internal implementation details.
 
-Observed:
-No stack trace or sensitive internal details exposed.
+**Action**
 
-Conclusion:
-Error handling does not leak internal implementation details.
+Various invalid or unexpected inputs were submitted to the system in order to trigger error conditions, including:
+
+- malformed JSON payloads
+- missing required fields
+- invalid parameter types
+- injection-style input payloads
+- boundary conditions for pagination and string length
+
+The resulting responses were inspected for potential information leakage.
+
+**Observed Behavior**
+
+Across tested endpoints:
+
+- Invalid JSON payloads returned HTTP **400 Bad Request** responses.
+- Missing required fields returned HTTP **400** validation responses.
+- Type mismatches returned HTTP **400** validation responses.
+- Injection probes did not produce SQL errors or internal stack traces.
+- Error responses did not expose:
+  - stack traces
+  - internal class names
+  - database queries
+  - connection strings
+
+In certain boundary conditions (e.g., invalid pagination values or oversized inputs), HTTP **500 Internal Server Error** responses were observed. These responses did not expose internal implementation details but indicate unhandled validation paths (documented in the Findings section).
+
+**Conclusion**
+
+Exception handling is generally implemented correctly and prevents disclosure of sensitive internal information.  
+Most invalid inputs are handled through controlled validation responses.
+
+Some boundary cases currently produce HTTP 500 responses instead of controlled validation errors; these cases have been documented separately as robustness findings.
 
 ---
 
-# 5. OWASP Top 10:2025 Mapping Summary
+# 5. OWASP Top 10:2025 Coverage Summary
 
-| Category | Status |
-|-----------|---------|
-| A01 Broken Access Control | Validated |
-| A02 Security Misconfiguration | Validated |
-| A03 Software Supply Chain Failures | Reviewed (Application Layer Scope) |
-| A04 Cryptographic Failures | Validated |
-| A05 Injection | Validated |
-| A06 Insecure Design | No logical bypass observed |
-| A07 Authentication Failures | Validated |
-| A08 Software/Data Integrity Failures | Validated |
-| A09 Logging & Alerting Failures | Validated |
-| A10 Mishandling of Exceptional Conditions | Validated |
+The following table summarizes how the FeatBit application-layer assessment aligns with **OWASP Top 10:2025** categories.
+
+| OWASP Category | Validation Coverage | Result |
+|----------------|--------------------|--------|
+| A01 Broken Access Control | Cross-project access isolation, RBAC enforcement, privilege escalation attempts, environment scope separation | No bypass observed |
+| A02 Security Misconfiguration | Authentication enforcement, protected endpoint behavior, secure transport compatibility, validation of exposed application interfaces | No application-layer misconfiguration identified |
+| A03 Software Supply Chain Failures | Not directly assessed within the scope of this application-layer penetration test | Informational / Out of scope |
+| A04 Cryptographic Failures | HTTPS/WSS transport usage, credential exposure review, secure delivery of runtime communication channels | No cryptographic misuse observed at the application boundary |
+| A05 Injection | Stored XSS, reflected / DOM XSS, API query injection tests, payload manipulation, schema validation | No exploitable injection identified |
+| A06 Insecure Design | Review of authentication model, environment isolation, runtime channel separation, and secret exposure design assumptions | No logical bypass observed |
+| A07 Authentication Failures | Unauthenticated access attempts, token replay testing, invalid token rejection, OIDC validation, runtime credential enforcement | Controls functioning as expected |
+| A08 Software/Data Integrity Failures | Webhook signature verification and payload integrity protections | Integrity protections validated |
+| A09 Logging & Monitoring Failures | Audit log coverage and traceability validation for configuration changes | Audit traceability confirmed for supported resources |
+| A10 Mishandling of Exceptional Conditions | Error handling behavior, malformed input handling, pagination boundary testing, oversized input testing | Minor robustness gaps observed |
+
+Overall, testing did not identify any **Critical** or **High severity** vulnerabilities aligned with OWASP Top 10:2025 critical risk categories.
 
 ---
 
@@ -917,10 +1072,10 @@ Error handling does not leak internal implementation details.
 
 | ID | Category | Severity | Status |
 |----|----------|----------|--------|
-| FB-PT-003 | Input Validation / Exceptional Conditions (Pagination) | Low | Open |
-| FB-PT-004 | Input Validation / Exceptional Conditions (Oversized Strings) | Low | Open  |
+| FB-PT-001 | Input Validation / Exceptional Conditions (Pagination) | Low | Open |
+| FB-PT-002 | Input Validation / Exceptional Conditions (Oversized Strings) | Low | Open  |
 
-## FB-PT-003 — Pagination Parameter Validation Weakness
+## FB-PT-001 — Pagination Parameter Validation Weakness
 
 **Category:** Input Validation / Exceptional Conditions  
 **Severity:** Low (Availability / Robustness)  
@@ -953,7 +1108,7 @@ Pagination parameter validation is inconsistent:
 
 ---
 
-## FB-PT-004 — Oversized String Input Can Trigger HTTP 500
+## FB-PT-002 — Oversized String Input Can Trigger HTTP 500
 
 **Category:** Input Validation / Exceptional Conditions  
 **Severity:** Low (Robustness / Availability)  
@@ -991,20 +1146,33 @@ During schema/boundary testing, oversized string values submitted in JSON reques
 
 ---
 
-# 7. Conclusion
+# 7. Overall Security Assessment
 
-This assessment validates the application-layer controls described in the
-FeatBit Application Security Summary.
+This assessment validates the application-layer security controls described in the **FeatBit Application Security Summary (Interim), Version 1.1**.
 
-No Critical or High-risk vulnerabilities were identified during testing.
+Testing covered authentication mechanisms, authorization boundaries, API access controls, runtime evaluation interfaces, real-time communication channels, webhook integrations, input validation behavior, transport security compatibility, secret exposure handling, audit logging, and exception handling.
 
-FeatBit demonstrates:
+Across the tested application surfaces, FeatBit demonstrated the following security characteristics:
 
-- Enforced authentication
-- Scoped authorization boundaries
-- Structured input validation
-- Secure real-time communication handling
-- Proper error handling behavior
-- Audit traceability for governance events
+- Consistent enforcement of authentication requirements across protected interfaces
+- Strong server-side authorization controls with project and environment isolation
+- Clear separation between runtime evaluation credentials and management API access
+- Secure real-time streaming channel authentication with scope-consistent enforcement
+- Safe handling of webhook delivery integrity through signature-based verification
+- Controlled error responses that avoid disclosure of internal implementation details
+- Structured input validation across representative management and write APIs
+- Audit logging support for key configuration resources
+- Compatibility with secure HTTPS / WSS deployments in self-hosted environments
 
-This report completes the formal assessment referenced in the Interim Summary.
+No **Critical** or **High severity** vulnerabilities were identified during testing.
+
+Two **Low severity** findings were observed:
+
+- **FB-PT-001** — Pagination parameter validation weakness
+- **FB-PT-002** — Oversized string input can trigger HTTP 500 responses on certain write APIs
+
+These findings do not enable authentication bypass, privilege escalation, unauthorized data access, or other high-impact security control failures. They primarily represent **robustness and validation consistency issues** that should be remediated as part of ongoing hardening work.
+
+Overall, the FeatBit platform demonstrates a **strong application-layer security posture** with well-defined authentication, authorization, runtime isolation, and integration security controls suitable for production deployment in self-hosted environments, provided that recommended infrastructure-layer security practices are implemented by the deploying party.
+
+This report completes the formal application-layer security assessment referenced in the **FeatBit Application Security Summary (Interim), Version 1.1**.
