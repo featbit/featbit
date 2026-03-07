@@ -1,10 +1,10 @@
 # FeatBit Application-Layer Penetration Test Report
 
 Product: FeatBit (Self-Hosted Edition)  
-Version Tested: [vX.X.X]  
+Version Tested: [v5.2.5]  
 Document Classification: Customer Confidential
-Assessment Window: [Start Date – End Date]  
-Report Date: [YYYY-MM-DD]  
+Assessment Window: [2026-03-02 – 2026-03-11]  
+Report Date: [2026-03-11]  
 Prepared by: FeatBit Inc.
 
 ---
@@ -194,20 +194,20 @@ endpoints without providing an authentication token.
 
 **Endpoints Tested (Representative Sample)**:
 
-- GET /api/v1/xxx
-  (List all projects in the workspace)
-- GET /api/v1/xxx
-  (List all environments in a project)
-- GET /api/v1/xxx
+- `GET /api/v1/projects`  
+  (List all projects in the organization)
+- `GET /api/v1/projects/{projectId}`  
+  (Get a project with its environments)
+- `GET /api/v1/envs/{envId}/feature-flags`  
   (List all feature flags in an environment)
-- GET /api/v1/xxx
-  (Get feature flag details)
-- POST /api/v1/xxx
-  (Update the status of a feature flag)
-- POST /api/v1/xxx
-  (Update a member's policy)
-- GET /api/v1/xxx
-  (Get the server environment secret)
+- `GET /api/v1/envs/{envId}/feature-flags/{key}`  
+  (Get a single feature flag by key)
+- `PUT /api/v1/envs/{envId}/feature-flags/{key}/toggle/{status}`  
+  (Toggle a feature flag on or off)
+- `PUT /api/v1/members/{memberId}/add-policy/{policyId}`  
+  (Add an RBAC policy to a member)
+- `GET /api/v1/projects/{projectId}/envs/{envId}`  
+  (Get environment details, including SDK secrets)
 
 **Observed Behavior**:
 
@@ -311,25 +311,28 @@ Representative API endpoints covering different resource types and privilege lev
 
 **Endpoints Tested (Representative Sample)**:
 
-- GET /api/v1/projects/{projectId}/envs/{envId}/flags  
-  (retrieve feature flag definitions)
+- `GET /api/v1/envs/{envId}/feature-flags`  
+  (retrieve feature flag definitions scoped to an environment)
 
-- GET /api/v1/projects/{projectId}/segments  
+- `GET /api/v1/envs/{envId}/segments`  
   (retrieve user segmentation configuration)
 
-- POST /api/v1/projects/{projectId}/flags  
-  (create or update feature flag configuration)
+- `POST /api/v1/envs/{envId}/feature-flags`  
+  (create a feature flag in an environment)
 
-- GET /api/v1/projects/{projectId}/members  
-  (retrieve project member permissions)
+- `GET /api/v1/members`  
+  (retrieve organization member list)
 
-- PUT /api/v1/projects/{projectId}/members/{memberId}  
-  (update project member permissions)
+- `PUT /api/v1/members/{memberId}/add-policy/{policyId}`  
+  (add an RBAC policy to a member)
+
+- `PUT /api/v1/members/{memberId}/remove-policy/{policyId}`  
+  (remove an RBAC policy from a member)
 
 **Test Scenario**:
 
-1. A valid request was captured for resources belonging to Project A.
-2. The `projectId` parameter was replaced with the identifier of Project B.
+1. A valid request was captured for resources belonging to Project A (using an `envId` from an environment in Project A).
+2. The `envId` parameter was replaced with an environment identifier belonging to Project B.
 3. The request was resent using the original authenticated user token.
 
 **Observed Behavior**:
@@ -355,14 +358,20 @@ This test validates that role-based authorization controls are enforced server-s
 
 **Endpoints Tested (Representative Sample)**:
 
-- PUT /api/v1/projects/{projectId}/flags/{flagId}  
-  (modify feature flag configuration)
+- `PUT /api/v1/envs/{envId}/feature-flags/{key}/targeting`  
+  (update feature flag targeting rules)
 
-- DELETE /api/v1/projects/{projectId}/segments/{segmentId}  
-  (delete segmentation rule)
+- `PATCH /api/v1/envs/{envId}/feature-flags/{key}`  
+  (partial update of feature flag configuration via JSON Patch)
 
-- PUT /api/v1/projects/{projectId}/members/{memberId}  
-  (modify project member permissions)
+- `DELETE /api/v1/envs/{envId}/segments/{id}`  
+  (delete a segment)
+
+- `PUT /api/v1/members/{memberId}/add-policy/{policyId}`  
+  (add an RBAC policy to a member)
+
+- `PUT /api/v1/members/{memberId}/remove-policy/{policyId}`  
+  (remove an RBAC policy from a member)
 
 **Test Scenario**:
 
@@ -451,10 +460,10 @@ The following security validations were performed:
 **Representative Endpoints Tested**:
 
 ```
-GET  /api/v1/projects
-POST /api/v1/projects/{projectId}/flags
-DELETE /api/v1/projects/{projectId}/segments/{segmentId}
-PUT  /api/v1/workspaces/{workspaceId}/settings
+GET    /api/v1/projects
+POST   /api/v1/envs/{envId}/feature-flags
+DELETE /api/v1/envs/{envId}/segments/{id}
+PUT    /api/v1/workspaces
 ```
 
 These endpoints represent common management operations including project listing, feature flag creation, configuration deletion, and workspace-level configuration updates.
@@ -501,12 +510,13 @@ The following security validations were performed:
 **Representative Endpoints Tested**:
 
 ```
-GET  [feature flag evaluation endpoint]
-POST [runtime event/insight endpoint]
-POST [evaluation context endpoint]
+POST /api/public/feature-flag/evaluate
+POST /api/public/insight/track
+GET  /api/public/sdk/server/latest-all
+POST /api/public/sdk/client/latest-all
 ```
 
-These endpoints represent typical runtime interactions used by SDKs, polling clients, or custom evaluation services.
+These endpoints represent typical runtime interactions used by SDKs, polling clients, or custom evaluation services. `feature-flag/evaluate` returns per-user flag evaluation results; `insight/track` ingests runtime events; `sdk/server/latest-all` and `sdk/client/latest-all` deliver the full flag/segment payload for server-side and client-side SDK data-sync respectively.
 
 **Observed Behavior**:
 
@@ -747,8 +757,34 @@ This section validates that FeatBit’s Open API query parameters cannot be abus
 
 - Tested: `GET /api/v1/envs/{envId}/audit-logs`
 - Recommended additional coverage (quick sampling):
-  - `GET [Feature Flags list endpoint]`
-  - `GET [Segments list endpoint]`
+
+  *Environment-scoped resources*
+  - `GET /api/v1/envs/{envId}/feature-flags`  
+    (filter: `name`, `tags`, `status`, `isArchived`; pagination: `pageIndex`, `pageSize`)
+  - `GET /api/v1/envs/{envId}/segments`  
+    (filter: `name`, `isArchived`; pagination: `pageIndex`, `pageSize`)
+  - `GET /api/v1/envs/{envId}/experiments`  
+    (filter: `featureFlagName`, `featureFlagId`; pagination: `pageIndex`, `pageSize`)
+  - `GET /api/v1/envs/{envId}/experiment-metrics`  
+    (filter: `metricName`, `eventType`; pagination: `pageIndex`, `pageSize`)
+
+  *Organization-scoped resources (IAM & configuration)*
+  - `GET /api/v1/members`  
+    (filter: `name`, `email`; pagination: `pageIndex`, `pageSize`)
+  - `GET /api/v1/policies`  
+    (filter: `name`; pagination: `pageIndex`, `pageSize`)
+  - `GET /api/v1/groups`  
+    (filter: `name`; pagination: `pageIndex`, `pageSize`)
+  - `GET /api/v1/access-tokens`  
+    (filter: `name`, `type`; pagination: `pageIndex`, `pageSize`)
+  - `GET /api/v1/relay-proxies`  
+    (filter: `name`; pagination: `pageIndex`, `pageSize`)
+
+  *Webhook resources*
+  - `GET /api/v1/webhooks`  
+    (filter: `name`, `envId`; pagination: `pageIndex`, `pageSize`)
+  - `GET /api/v1/webhooks/{id}/deliveries`  
+    (list webhook delivery history; pagination: `pageIndex`, `pageSize`)
 
 **Action**:
 
@@ -787,10 +823,28 @@ This section validates that FeatBit write APIs enforce structured server-side va
 
 **Representative Endpoints Tested**:
 
-- Create / Update Feature Flag (management APIs)
-- Create / Update Segment (management APIs)
-- Create Audit Log (administrative / governance surface)
-- Create Change Request (administrative workflow surface)
+- `POST /api/v1/envs/{envId}/feature-flags`  
+  (Create Feature Flag)
+- `PATCH /api/v1/envs/{envId}/feature-flags/{key}`  
+  (Partial update of Feature Flag via JSON Patch)
+- `PUT /api/v1/envs/{envId}/feature-flags/{key}/targeting`  
+  (Update Feature Flag targeting rules)
+- `POST /api/v1/envs/{envId}/segments`  
+  (Create Segment)
+- `PUT /api/v1/envs/{envId}/segments/{id}/targeting`  
+  (Update Segment targeting rules)
+- `POST /api/v1/envs/{envId}/feature-flags/{key}/change-requests`  
+  (Create Change Request for a Feature Flag)
+- `PUT /api/v1/envs/{envId}/feature-flags/change-requests/{id}/approve`  
+  (Approve a pending Change Request)
+- `PUT /api/v1/envs/{envId}/feature-flags/change-requests/{id}/decline`  
+  (Decline a pending Change Request)
+- `PUT /api/v1/envs/{envId}/feature-flags/change-requests/{id}/apply`  
+  (Apply an approved Change Request)
+- `DELETE /api/v1/envs/{envId}/feature-flags/change-requests/{id}`  
+  (Delete a Change Request)
+- `POST /api/v1/envs/{envId}/audit-logs/compare`  
+  (Compare two audit log snapshots — accepts a structured JSON body; no audit log creation endpoint exists, as audit logs are auto-generated as immutable side effects of flag/segment operations)
 
 **Action**:
 
