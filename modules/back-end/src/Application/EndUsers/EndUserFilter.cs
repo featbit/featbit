@@ -17,6 +17,8 @@ public class EndUserFilter : PagedRequest
 
     public bool GlobalUserOnly { get; set; }
 
+    public PageCursor Cursor { get; set; }
+
     public EndUserFilter(SearchEndUser query)
     {
         CustomizedProperties = [];
@@ -79,3 +81,4 @@ public class EndUserFilter : PagedRequest
         }
     }
 }
+

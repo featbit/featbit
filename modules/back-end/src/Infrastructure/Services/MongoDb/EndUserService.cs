@@ -1,3 +1,5 @@
+using System.Text;
+using System.Text.Json;
 using Application.Bases;
 using Application.Bases.Exceptions;
 using Application.Bases.Models;
@@ -77,15 +79,79 @@ public class EndUserService(MongoDbClient mongoDb) : MongoDbService<EndUser>(mon
             filter &= filterBuilder.Or(orFilters);
         }
 
-        var totalCount = await Collection.CountDocumentsAsync(filter);
-        var itemsQuery = Collection
-            .Find(filter)
-            .SortByDescending(x => x.UpdatedAt)
-            .Skip(userFilter.PageIndex * userFilter.PageSize)
-            .Limit(userFilter.PageSize);
+        FilterDefinition<EndUser> BuildCursorFilter(PageCursor cursor)
+        {
+            var builder = Builders<EndUser>.Filter;
+
+            if (cursor.Direction == CursorDirection.Forward)
+            {
+                return builder.Or(
+                    builder.Lt(x => x.UpdatedAt, cursor.UpdatedAt),
+                    builder.And(
+                        builder.Eq(x => x.UpdatedAt, cursor.UpdatedAt),
+                        builder.Lt(x => x.Id, cursor.Id)
+                    )
+                );
+            }
+
+            return builder.Or(
+                builder.Gt(x => x.UpdatedAt, cursor.UpdatedAt),
+                builder.And(
+                    builder.Eq(x => x.UpdatedAt, cursor.UpdatedAt),
+                    builder.Gt(x => x.Id, cursor.Id)
+                )
+            );
+        }
+
+        var cursor = userFilter.Cursor;
+        var isBackward = cursor?.Direction == CursorDirection.Backward;
+        var pageSize = userFilter.PageSize;
+        var limit = pageSize + 1;
+
+        var cursorFilter = cursor != null
+            ? BuildCursorFilter(cursor)
+            : Builders<EndUser>.Filter.Empty;
+
+        var itemsQuery = isBackward
+            ? Collection.Find(filter & cursorFilter)
+                .SortBy(x => x.UpdatedAt)
+                .ThenBy(x => x.Id)
+                .Limit(limit)
+            : Collection.Find(filter & cursorFilter)
+                .SortByDescending(x => x.UpdatedAt)
+                .ThenByDescending(x => x.Id)
+                .Limit(limit);
+
         var items = await itemsQuery.ToListAsync();
 
-        return new PagedResult<EndUser>(totalCount, items);
+        var hasMoreInRequestedDirection = items.Count > pageSize;
+        if (hasMoreInRequestedDirection)
+        {
+            items = items.Take(pageSize).ToList();
+        }
+
+        if (isBackward)
+        {
+            items.Reverse();
+        }
+
+        var hasPrevious = isBackward
+            ? hasMoreInRequestedDirection
+            : cursor != null;
+
+        var hasNext = isBackward
+            ? cursor != null
+            : hasMoreInRequestedDirection;
+
+        var previousCursor = hasPrevious && items.Count > 0
+            ? new PageCursor(items[0].Id, items[0].UpdatedAt, CursorDirection.Backward)
+            : null;
+
+        var nextCursor = hasNext && items.Count > 0
+            ? new PageCursor(items[^1].Id, items[^1].UpdatedAt, CursorDirection.Forward)
+            : null;
+
+        return new PagedResult<EndUser>(0, items, nextCursor, previousCursor);
     }
 
     public async Task<EndUser> UpsertAsync(EndUser user)
