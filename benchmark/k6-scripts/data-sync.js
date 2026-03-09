@@ -94,7 +94,11 @@ export default function () {
   ws.onmessage = (e) => {
     const message = JSON.parse(e.data);
 
-    if (message.messageType === 'data-sync' && message.data.eventType === "full" && message.data.userKeyId === keyId) {
+    if (
+      message.messageType === 'data-sync' &&
+      message.data.eventType === "full" &&
+      message.data.userKeyId === keyId
+    ) {
       const latency = Date.now() - dataSyncSendTime;
       LATENCY.add(latency);
 
