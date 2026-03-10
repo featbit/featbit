@@ -35,7 +35,7 @@ public class GroupService(AppDbContext dbContext) : EntityFrameworkCoreService<G
 
         var totalCount = await query.CountAsync();
         var itemsQuery = query
-            .OrderByDescending(x => x.UpdatedAt)
+            .OrderByDescending(x => x.CreatedAt)
             .Skip(groupFilter.PageIndex * groupFilter.PageSize)
             .Take(groupFilter.PageSize);
 
@@ -66,6 +66,7 @@ public class GroupService(AppDbContext dbContext) : EntityFrameworkCoreService<G
                 Id = member.Id,
                 Name = member.Name,
                 member.Email,
+                member.CreatedAt,
                 Groups = allGroups,
             };
 
@@ -83,6 +84,7 @@ public class GroupService(AppDbContext dbContext) : EntityFrameworkCoreService<G
 
         var totalCount = await query.CountAsync();
         var items = await query
+            .OrderByDescending(x => x.CreatedAt)
             .Skip(filter.PageIndex * filter.PageSize)
             .Take(filter.PageSize)
             .ToListAsync();
@@ -118,6 +120,7 @@ public class GroupService(AppDbContext dbContext) : EntityFrameworkCoreService<G
                 policy.Name,
                 policy.Type,
                 policy.Description,
+                policy.CreatedAt,
                 AllPolicyGroups = allPolicyGroups
             };
 
@@ -135,6 +138,7 @@ public class GroupService(AppDbContext dbContext) : EntityFrameworkCoreService<G
 
         var totalCount = await query.CountAsync();
         var items = await query
+            .OrderByDescending(x => x.CreatedAt)
             .Skip(filter.PageIndex * filter.PageSize)
             .Take(filter.PageSize)
             .ToListAsync();

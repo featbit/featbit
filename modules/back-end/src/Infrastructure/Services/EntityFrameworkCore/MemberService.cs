@@ -30,8 +30,9 @@ public class MemberService(AppDbContext dbContext) : IMemberService
                 Id = user.Id,
                 Email = user.Email,
                 Name = user.Name,
+                CreatedAt = user.CreatedAt,
                 InvitorId = organizationUser.InvitorId,
-                InitialPassword = organizationUser.InitialPassword,
+                InitialPassword = organizationUser.InitialPassword
             };
 
         var member = await query.FirstOrDefaultAsync();
@@ -79,8 +80,9 @@ public class MemberService(AppDbContext dbContext) : IMemberService
                 Id = user.Id,
                 Email = user.Email,
                 Name = user.Name,
+                CreatedAt = user.CreatedAt,
                 InvitorId = organizationUser.InvitorId,
-                InitialPassword = organizationUser.InitialPassword,
+                InitialPassword = organizationUser.InitialPassword
             };
 
         // email/name filter
@@ -92,6 +94,7 @@ public class MemberService(AppDbContext dbContext) : IMemberService
 
         var totalCount = await query.CountAsync();
         var items = await query
+            .OrderByDescending(x => x.CreatedAt)
             .Skip(filter.PageIndex * filter.PageSize)
             .Take(filter.PageSize)
             .ToListAsync();
@@ -150,6 +153,7 @@ public class MemberService(AppDbContext dbContext) : IMemberService
                 theGroup.Id,
                 theGroup.Name,
                 theGroup.Description,
+                theGroup.CreatedAt,
                 GroupMembers = allGroupMembers
             };
 
@@ -166,6 +170,7 @@ public class MemberService(AppDbContext dbContext) : IMemberService
 
         var totalCount = await query.CountAsync();
         var items = await query
+            .OrderByDescending(x => x.CreatedAt)
             .Skip(filter.PageIndex * filter.PageSize)
             .Take(filter.PageSize)
             .ToListAsync();
@@ -215,7 +220,10 @@ public class MemberService(AppDbContext dbContext) : IMemberService
         var inheritedPolicies = await inheritedPolicyQuery.ToListAsync();
 
         // distinct by policy name
-        var allPolicies = directPolicies.Concat(inheritedPolicies).GroupBy(x => x.Name).Select(x => x.First());
+        var allPolicies = directPolicies.Concat(inheritedPolicies)
+            .GroupBy(x => x.Name)
+            .Select(x => x.First())
+            .OrderByDescending(x => x.CreatedAt);
         return allPolicies;
     }
 
@@ -239,6 +247,7 @@ public class MemberService(AppDbContext dbContext) : IMemberService
                 policy.Name,
                 policy.Type,
                 policy.Description,
+                policy.CreatedAt,
                 AllPolicyMembers = allPolicyMembers
             };
 
@@ -258,6 +267,7 @@ public class MemberService(AppDbContext dbContext) : IMemberService
 
         var totalCount = await query.CountAsync();
         var items = await query
+            .OrderByDescending(x => x.CreatedAt)
             .Skip(filter.PageIndex * filter.PageSize)
             .Take(filter.PageSize)
             .ToListAsync();
@@ -299,6 +309,7 @@ public class MemberService(AppDbContext dbContext) : IMemberService
                 Name = policy.Name,
                 Description = policy.Description,
                 Type = policy.Type,
+                CreatedAt = policy.CreatedAt,
                 GroupName = theGroup.Name
             };
 
@@ -310,6 +321,7 @@ public class MemberService(AppDbContext dbContext) : IMemberService
 
         var totalCount = await query.CountAsync();
         var items = await query
+            .OrderByDescending(x => x.CreatedAt)
             .Skip(filter.PageIndex * filter.PageSize)
             .Take(filter.PageSize)
             .ToListAsync();
