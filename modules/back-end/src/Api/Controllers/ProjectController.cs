@@ -16,13 +16,13 @@ public class ProjectController : ApiControllerBase
     /// </remarks>
     [OpenApi]
     [HttpGet]
-    [Route("{projectId:guid}")]
+    [Route("{id:guid}")]
     [Authorize(Permissions.CanAccessProject)]
-    public async Task<ApiResponse<ProjectWithEnvs>> GetAsync(Guid projectId)
+    public async Task<ApiResponse<ProjectWithEnvs>> GetAsync(Guid id)
     {
         var request = new GetProject
         {
-            Id = projectId
+            Id = id
         };
 
         var project = await Mediator.Send(request);

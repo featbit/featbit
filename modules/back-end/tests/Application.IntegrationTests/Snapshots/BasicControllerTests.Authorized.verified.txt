@@ -9,7 +9,8 @@
     },
     Value: {
       data: {
-        id: Guid_1
+        id: Guid_1,
+        permissions: []
       },
       errors: [],
       success: true

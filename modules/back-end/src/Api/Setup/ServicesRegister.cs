@@ -1,4 +1,3 @@
-using System.Text;
 using Api.Authentication;
 using Api.Authentication.OAuth;
 using Api.Authentication.OpenIdConnect;
@@ -11,7 +10,6 @@ using Infrastructure;
 using Infrastructure.Services;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Swashbuckle.AspNetCore.Filters;
 using Swashbuckle.AspNetCore.SwaggerGen;
@@ -90,28 +88,13 @@ public static class ServicesRegister
                     return Schemes.OpenApi;
                 };
             })
-            .AddJwtBearer(Schemes.JwtBearer, options =>
-            {
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    AuthenticationType = Schemes.JwtBearer,
-
-                    ValidateIssuer = true,
-                    ValidIssuer = jwtOption["Issuer"],
-
-                    ValidateAudience = true,
-                    ValidAudience = jwtOption["Audience"],
-
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOption["Key"]!))
-                };
-            })
-            .AddOpenApi(Schemes.OpenApi);
+            .AddJwtBearer(jwtOption)
+            .AddOpenApi();
 
         // authorization
         LicenseVerifier.ImportPublicKey(builder.Configuration["PublicKey"]);
         builder.Services.AddTransient<ILicenseService, LicenseService>();
-        builder.Services.AddSingleton<IPermissionChecker, DefaultPermissionChecker>();
+        builder.Services.AddScoped<IPermissionChecker, DefaultPermissionChecker>();
         builder.Services.AddScoped<IAuthorizationHandler, PermissionRequirementHandler>();
         builder.Services.AddScoped<IAuthorizationHandler, LicenseRequirementHandler>();
         builder.Services.AddAuthorization(options =>

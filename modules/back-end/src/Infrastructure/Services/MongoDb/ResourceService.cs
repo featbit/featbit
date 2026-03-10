@@ -1,4 +1,5 @@
 ﻿using Application.Resources;
+using Domain.FeatureFlags;
 using Domain.Organizations;
 using Domain.Projects;
 using Domain.Resources;
@@ -10,6 +11,8 @@ namespace Infrastructure.Services.MongoDb;
 
 public class ResourceService(MongoDbClient mongoDb) : IResourceService
 {
+    private IMongoQueryable<TEntity> QueryableOf<TEntity>() where TEntity : class => mongoDb.QueryableOf<TEntity>();
+
     public async Task<IEnumerable<Resource>> GetResourcesAsync(Guid organizationId, ResourceFilter filter)
     {
         var name = filter.Name;
@@ -30,9 +33,49 @@ public class ResourceService(MongoDbClient mongoDb) : IResourceService
         };
     }
 
-    public async Task<IEnumerable<Resource>> GetProjectsAsync(Guid organizationId, string name)
+    public Task<string> GetProjectRnAsync(Guid projectId)
     {
-        var query = mongoDb.QueryableOf<Project>()
+        return QueryableOf<Project>()
+            .Where(project => project.Id == projectId)
+            .Select(project => $"projects/{project.Key}")
+            .FirstOrDefaultAsync();
+    }
+
+    public Task<string> GetEnvRnAsync(Guid envId)
+    {
+        var query =
+            from env in QueryableOf<Environment>()
+            join project in QueryableOf<Project>() on env.ProjectId equals project.Id
+            where env.Id == envId
+            select $"project/{project.Key}:env/{env.Key}";
+
+        return query.FirstOrDefaultAsync();
+    }
+
+    public async Task<string?> GetFlagRnAsync(Guid envId, string key)
+    {
+        var query =
+            from project in QueryableOf<Project>()
+            join env in QueryableOf<Environment>() on project.Id equals env.ProjectId
+            join flag in QueryableOf<FeatureFlag>() on env.Id equals flag.EnvId
+            where flag.EnvId == envId && flag.Key == key
+            select new
+            {
+                projectKey = project.Key,
+                envKey = env.Key,
+                flagKey = flag.Key,
+                flagTags = flag.Tags
+            };
+
+        var data = await query.FirstOrDefaultAsync();
+        return data == null
+            ? null
+            : $"project/{data.projectKey}:env/{data.envKey}:flag/{data.flagKey};{string.Join(",", data.flagTags)}";
+    }
+
+    private async Task<IEnumerable<Resource>> GetProjectsAsync(Guid organizationId, string name)
+    {
+        var query = QueryableOf<Project>()
             .Where(project => project.OrganizationId == organizationId)
             .Select(project => new
             {
@@ -59,11 +102,11 @@ public class ResourceService(MongoDbClient mongoDb) : IResourceService
         return resources;
     }
 
-    public async Task<IEnumerable<Resource>> GetEnvsAsync(Guid organizationId, string name)
+    private async Task<IEnumerable<Resource>> GetEnvsAsync(Guid organizationId, string name)
     {
-        var organizations = mongoDb.QueryableOf<Organization>();
-        var projects = mongoDb.QueryableOf<Project>();
-        var envs = mongoDb.QueryableOf<Environment>();
+        var organizations = QueryableOf<Organization>();
+        var projects = QueryableOf<Project>();
+        var envs = QueryableOf<Environment>();
 
         var query =
             from env in envs

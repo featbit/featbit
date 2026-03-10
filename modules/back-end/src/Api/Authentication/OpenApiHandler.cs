@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using System.Text.Encodings.Web;
+using Application;
 using Application.Services;
 using Domain.AccessTokens;
 using Domain.Users;
@@ -52,7 +53,7 @@ public class OpenApiHandler : AuthenticationHandler<OpenApiOptions>
             Context.Request.Headers.TryAdd(ApiConstants.OrgIdHeaderKey, org.Id.ToString());
             if (accessToken.Type == AccessTokenTypes.Service)
             {
-                Context.Items[OpenApiConstants.PermissionStoreKey] = accessToken.Permissions;
+                Context.Items[ApplicationConsts.UserPermissionsItem] = accessToken.Permissions;
             }
             else
             {
@@ -60,7 +61,7 @@ public class OpenApiHandler : AuthenticationHandler<OpenApiOptions>
                     await _memberService.GetPoliciesAsync(accessToken.OrganizationId, accessToken.CreatorId);
 
                 var statements = policies.SelectMany(x => x.Statements);
-                Context.Items[OpenApiConstants.PermissionStoreKey] = statements;
+                Context.Items[ApplicationConsts.UserPermissionsItem] = statements;
             }
 
             // construct ticket

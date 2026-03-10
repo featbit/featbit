@@ -15,13 +15,13 @@ public class EnvironmentController : ApiControllerBase
     /// </remarks>
     [OpenApi]
     [HttpGet]
-    [Route("{envId:guid}")]
+    [Route("{id:guid}")]
     [Authorize(Permissions.CanAccessEnv)]
-    public async Task<ApiResponse<EnvironmentVm>> GetAsync(Guid envId)
+    public async Task<ApiResponse<EnvironmentVm>> GetAsync(Guid id)
     {
         var request = new GetEnvironment
         {
-            Id = envId
+            Id = id
         };
 
         var project = await Mediator.Send(request);

@@ -24,6 +24,7 @@ public class FeatureFlagController : ApiControllerBase
     /// </remarks>
     [OpenApi]
     [HttpGet]
+    [Authorize(Permissions.CanAccessEnv)]
     public async Task<ApiResponse<PagedResult<FeatureFlagVm>>> GetListAsync(
         Guid envId,
         [FromQuery] FeatureFlagFilter filter)
@@ -46,7 +47,7 @@ public class FeatureFlagController : ApiControllerBase
     /// </remarks>
     [OpenApi]
     [HttpGet("{key}")]
-    [ResourceParameter("key")]
+    [Authorize(Permissions.CanAccessEnv)]
     public async Task<ApiResponse<FeatureFlag>> GetAsync(Guid envId, string key)
     {
         var request = new GetFeatureFlag
