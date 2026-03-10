@@ -3,7 +3,10 @@
     <div class="table-search-area">
       <div class="search-inputs">
         <nz-input-group class="query" [nzPrefix]="prefixIconSearch">
-          <input nz-input type="text" placeholder="Filter by property" i18n-placeholder="@@users.idx.filter-by-property" [(ngModel)]="filter.searchText" (ngModelChange)="onSearch(true)">
+          <input nz-input type="text" placeholder="Filter by property"
+                 i18n-placeholder="@@users.idx.filter-by-property"
+                 [(ngModel)]="filter.searchText"
+                 (ngModelChange)="onSearch()">
         </nz-input-group>
         <ng-template #prefixIconSearch>
           <i nz-icon nzType="icons:icon-search"></i>
@@ -25,22 +28,30 @@
             </nz-option>
           } @else {
             @for (item of filteredProps; track item) {
-              <nz-option [nzValue]="item" [nzLabel]="item">{{item}}</nz-option>
+              <nz-option [nzValue]="item" [nzLabel]="item">{{ item }}
+              </nz-option>
             }
           }
 
           <ng-template #omittedPlaceHolderFilter>
-            <div class="ant-select-selection-item-content" i18n-nz-popover="@@users.idx.all-selected-items"
-                 nz-popover="All" [nzPopoverContent]="allSelectedItems" nzPopoverOverlayClassName="selected-items-popover">
+            <div class="ant-select-selection-item-content"
+                 i18n-nz-popover="@@users.idx.all-selected-items"
+                 nz-popover="All" [nzPopoverContent]="allSelectedItems"
+                 nzPopoverOverlayClassName="selected-items-popover">
             <span class="more-select-selection-item">
-              <ng-container i18n="@@users.idx.etc">+</ng-container> {{ filter.properties.length - 1}} <ng-container i18n="@@users.idx.entries">more</ng-container>
+              <ng-container i18n="@@users.idx.etc">+</ng-container>
+              {{ filter.properties.length - 1 }}
+              <ng-container i18n="@@users.idx.entries">more</ng-container>
               <i nz-icon nzType="expand"></i>
             </span>
               <ng-template #allSelectedItems>
                 <div class="more-select-items">
-                  <span class="more-select-item-content" *ngFor="let prop of filter.properties">
-                    <span class="more-select-item-content-text" [nz-tooltip]="prop">{{ prop }}</span>
-                    <i (click)="onRemoveFilterItem(prop)" nz-icon nzType="close"></i>
+                  <span class="more-select-item-content"
+                        *ngFor="let prop of filter.properties">
+                    <span class="more-select-item-content-text"
+                          [nz-tooltip]="prop">{{ prop }}</span>
+                    <i (click)="onRemoveFilterItem(prop)" nz-icon
+                       nzType="close"></i>
                   </span>
                 </div>
               </ng-template>
@@ -65,22 +76,30 @@
             </nz-option>
           } @else {
             @for (item of filteredExtraColumns; track item) {
-              <nz-option [nzValue]="item" [nzLabel]="item">{{ item }}</nz-option>
+              <nz-option [nzValue]="item" [nzLabel]="item">{{ item }}
+              </nz-option>
             }
           }
 
           <ng-template #omittedPlaceHolderAttribute>
-            <div class="ant-select-selection-item-content" i18n-nz-popover="@@users.idx.all-selected-items"
-                 nz-popover="All" [nzPopoverContent]="allSelectedItems" nzPopoverOverlayClassName="selected-items-popover">
+            <div class="ant-select-selection-item-content"
+                 i18n-nz-popover="@@users.idx.all-selected-items"
+                 nz-popover="All" [nzPopoverContent]="allSelectedItems"
+                 nzPopoverOverlayClassName="selected-items-popover">
             <span class="more-select-selection-item">
-              <ng-container i18n="@@users.idx.etc">+</ng-container> {{ extraColumns.length - 1}} <ng-container i18n="@@users.idx.entries">more</ng-container>
+              <ng-container i18n="@@users.idx.etc">+</ng-container>
+              {{ extraColumns.length - 1 }}
+              <ng-container i18n="@@users.idx.entries">more</ng-container>
               <i nz-icon nzType="expand"></i>
             </span>
               <ng-template #allSelectedItems>
                 <div class="more-select-items">
-                  <span class="more-select-item-content" *ngFor="let prop of extraColumns">
-                    <span class="more-select-item-content-text" [nz-tooltip]="prop">{{ prop }}</span>
-                    <i (click)="onRemoveAttributeItem(prop)" nz-icon nzType="close"></i>
+                  <span class="more-select-item-content"
+                        *ngFor="let prop of extraColumns">
+                    <span class="more-select-item-content-text"
+                          [nz-tooltip]="prop">{{ prop }}</span>
+                    <i (click)="onRemoveAttributeItem(prop)" nz-icon
+                       nzType="close"></i>
                   </span>
                 </div>
               </ng-template>
@@ -97,48 +116,75 @@
       </div>
       <button nz-button nzType="primary" (click)="onPropsSettingClick()">
         <i nz-icon nzType="icons:icon-setting"></i>
-        <ng-container i18n="@@users.idx.manage-properties">Properties</ng-container>
+        <ng-container i18n="@@users.idx.manage-properties">Properties
+        </ng-container>
       </button>
     </div>
-    <div class="table-wrapper">
-      <nz-table #basicTable nzSize="small"
-        nzShowSizeChanger
-        [nzData]="list"
-        [nzFrontPagination]="false"
-        [nzLoading]="isLoading"
-        [nzTotal]="totalCount"
-        [(nzPageSize)]="filter.pageSize"
-        (nzPageSizeChange)="onSearch()"
-        [nzPageSizeOptions]="[10,20,30]"
-        (nzPageIndexChange)="onSearch()"
-        [(nzPageIndex)]="filter.pageIndex">
-        <thead>
-            <tr>
-              <th>name</th>
-              <th>keyId</th>
-              <th *ngFor="let prop of extraColumns">{{prop}}</th>
-              <th i18n="@@common.actions">Actions</th>
-            </tr>
-        </thead>
-        <tbody style="width: calc(100% - 200px);">
-          <ng-container *ngFor="let user of basicTable.data">
-            <tr>
-              <td (click)="navigateToUserDetail(user)">
-                <span>{{ user.name }}</span>
-              </td>
-              <td>{{ user.keyId }}</td>
-              <td *ngFor="let prop of extraColumns">{{getCustomizePropertyValue(user, prop)}}</td>
-              <td>
-                <a class="primary-link-btn" (click)="onSegmentsAndFlagsClick(user)" i18n="@@users.idx.ff-segments">Evaluate on flags and segments</a>
-                <nz-divider nzType="vertical"></nz-divider>
-                <a class="primary-link-btn" nz-button nzType="link" (click)="navigateToUserDetail(user)" i18n="@@common.details">Details</a>
-              </td>
-            </tr>
-          </ng-container>
-        </tbody>
-      </nz-table>
+    <nz-table #basicTable nzSize="small"
+              [nzData]="list"
+              [nzFrontPagination]="false"
+              [nzShowPagination]="false"
+              [nzLoading]="isLoading">
+      <thead>
+      <tr>
+        <th>name</th>
+        <th>keyId</th>
+        <th *ngFor="let prop of extraColumns">{{ prop }}</th>
+        <th i18n="@@common.actions">Actions</th>
+      </tr>
+      </thead>
+      <tbody style="width: calc(100% - 200px);">
+      <ng-container *ngFor="let user of basicTable.data">
+        <tr>
+          <td (click)="navigateToUserDetail(user)">
+            <span>{{ user.name }}</span>
+          </td>
+          <td>{{ user.keyId }}</td>
+          <td
+            *ngFor="let prop of extraColumns">{{ getCustomizePropertyValue(user, prop) }}
+          </td>
+          <td>
+            <a class="primary-link-btn" (click)="onSegmentsAndFlagsClick(user)"
+               i18n="@@users.idx.ff-segments">Evaluate on flags and segments</a>
+            <nz-divider nzType="vertical"></nz-divider>
+            <a class="primary-link-btn" nz-button nzType="link"
+               (click)="navigateToUserDetail(user)" i18n="@@common.details">Details</a>
+          </td>
+        </tr>
+      </ng-container>
+      </tbody>
+    </nz-table>
+
+    <div
+      style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span>Rows per page</span>
+        <nz-select
+          [ngModel]="filter.pageSize"
+          (ngModelChange)="onPageSizeChange($event)"
+          nzSize="small"
+          style="width: 100px;">
+          <nz-option [nzValue]="10" [nzLabel]="10"></nz-option>
+          <nz-option [nzValue]="20" [nzLabel]="20"></nz-option>
+          <nz-option [nzValue]="30" [nzLabel]="30"></nz-option>
+        </nz-select>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <button nz-button nzSize="small" (click)="loadPrevious()"
+                [disabled]="!previousCursor || isLoading">
+          Previous
+        </button>
+        <button nz-button nzType="primary" nzSize="small" (click)="loadNext()"
+                [disabled]="!nextCursor || isLoading">
+          Next
+        </button>
+      </div>
     </div>
   </div>
 </section>
-<app-props-drawer [visible]="attributeManagevisible" [envId]="currentEnvId" (close)="onPropsSettingClose()"></app-props-drawer>
-<user-segments-flags-drawer [visible]="segmentsAndFlagsVisible" [user]="currentUser" (close)="onSegmentsAndFlagsClose()"></user-segments-flags-drawer>
+<app-props-drawer [visible]="attributeManagevisible" [envId]="currentEnvId"
+                  (close)="onPropsSettingClose()"></app-props-drawer>
+<user-segments-flags-drawer [visible]="segmentsAndFlagsVisible"
+                            [user]="currentUser"
+                            (close)="onSegmentsAndFlagsClose()"></user-segments-flags-drawer>

@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { EnvUserPropService } from "@services/env-user-prop.service";
-import { IUserProp, IUserType } from "@shared/types";
+import {IUserProp, IUserType, PageCursor} from "@shared/types";
 import { EnvUserFilter } from "@features/safe/end-users/types/featureflag-user";
 import { CURRENT_USER_FILTER_ATTRIBUTE } from "@utils/localstorage-keys";
 import { EnvUserService } from "@services/env-user.service";
@@ -23,6 +23,9 @@ export class IndexComponent implements OnInit {
 
   list = [];
   totalCount: number;
+  nextCursor?: PageCursor;
+  previousCursor?: PageCursor;
+  currentCursor?: PageCursor;
 
   isLoading: boolean = true;
   attributeManagevisible: boolean = false;
@@ -107,20 +110,54 @@ export class IndexComponent implements OnInit {
     this.extraColumns = this.extraColumns.filter(p => p !== prop);
   }
 
-  onSearch(resetPage?: boolean) {
-    if (resetPage) {
-      this.filter.pageIndex = 1;
-    }
+  onSearch() {
+    this.resetCursorPagination();
     this.$search.next();
   }
 
-  fetchUserList() {
+  onPageSizeChange(pageSize: number) {
+    this.filter.pageSize = pageSize;
+    this.onSearch();
+  }
+
+  loadNext() {
+    if (!this.nextCursor || this.isLoading) {
+      return;
+    }
+
+    this.fetchUserList(this.nextCursor);
+  }
+
+  loadPrevious() {
+    if (!this.previousCursor || this.isLoading) {
+      return;
+    }
+
+    this.fetchUserList(this.previousCursor);
+  }
+
+  resetCursorPagination() {
+    this.currentCursor = undefined;
+    this.nextCursor = undefined;
+    this.previousCursor = undefined;
+  }
+
+  fetchUserList(cursor?: PageCursor) {
     this.isLoading = true;
-    this.envUserService.search(this.filter).subscribe(
+    this.currentCursor = cursor;
+
+    const request = {
+      ...this.filter,
+      cursor
+    };
+
+    this.envUserService.search(request).subscribe(
       pagedResult => {
         this.isLoading = false;
         this.list = pagedResult.items;
         this.totalCount = pagedResult.totalCount;
+        this.nextCursor = pagedResult.nextCursor;
+        this.previousCursor = pagedResult.previousCursor;
       },
       _ => {
         this.isLoading = false;

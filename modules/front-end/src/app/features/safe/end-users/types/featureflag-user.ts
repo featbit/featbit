@@ -1,4 +1,4 @@
-import { IUserType } from "@shared/types";
+import {IUserType, PageCursor} from "@shared/types";
 
 export class EnvUserFilter {
   searchText?: string;
@@ -8,6 +8,7 @@ export class EnvUserFilter {
   globalUserOnly?: boolean;
   pageIndex: number;
   pageSize: number;
+  cursor?: PageCursor;
 
   constructor(
     searchText?: string,
@@ -16,7 +17,8 @@ export class EnvUserFilter {
     includeGlobalUser?: boolean,
     globalUserOnly?: boolean,
     pageIndex: number = 1,
-    pageSize: number = 10) {
+    pageSize: number = 10,
+    cursor?: PageCursor) {
     this.searchText = searchText ?? '';
     this.properties = properties ?? [];
     this.excludedKeyIds = excludeKeyIds ?? [];
@@ -24,10 +26,13 @@ export class EnvUserFilter {
     this.globalUserOnly = globalUserOnly ?? false;
     this.pageIndex = pageIndex;
     this.pageSize = pageSize;
+    this.cursor = cursor;
   }
 }
 
 export interface EnvUserPagedResult {
   totalCount: number;
   items: IUserType[];
+  nextCursor?: PageCursor;
+  previousCursor?: PageCursor;
 }
