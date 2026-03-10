@@ -62,20 +62,9 @@ public class EndUserService(AppDbContext dbContext)
 
         Query ApplyCursor(Query query, PageCursor cursor)
         {
-            if (cursor.Direction == CursorDirection.Forward)
-            {
-                return query.Where(q => q
-                    .Where("updated_at", "<", cursor.UpdatedAt)
-                    .OrWhere(nested => nested
-                        .Where("updated_at", cursor.UpdatedAt)
-                        .Where("id", "<", cursor.Id)));
-            }
-
-            return query.Where(q => q
-                .Where("updated_at", ">", cursor.UpdatedAt)
-                .OrWhere(nested => nested
-                    .Where("updated_at", cursor.UpdatedAt)
-                    .Where("id", ">", cursor.Id)));
+            return cursor.Direction == CursorDirection.Forward
+                ? query.WhereRaw("(updated_at, id) < (?, ?)", cursor.UpdatedAt, cursor.Id)
+                : query.WhereRaw("(updated_at, id) > (?, ?)", cursor.UpdatedAt, cursor.Id);
         }
 
         var cursor = userFilter.Cursor;

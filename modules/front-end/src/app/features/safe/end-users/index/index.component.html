@@ -120,6 +120,7 @@
         </ng-container>
       </button>
     </div>
+    <div class="table-wrapper">
     <nz-table #basicTable nzSize="small"
               [nzData]="list"
               [nzFrontPagination]="false"
@@ -155,8 +156,18 @@
       </tbody>
     </nz-table>
 
+
     <div
-      style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px;">
+      style="display: flex; justify-content: flex-end; align-items: center; gap: 12px; margin-top: 12px;">
+      <button nz-button nzSize="small" (click)="loadPrevious()"
+              [disabled]="!previousCursor || isLoading">
+        Previous
+      </button>
+      <button nz-button nzType="primary" nzSize="small" (click)="loadNext()"
+              [disabled]="!nextCursor || isLoading">
+        Next
+      </button>
+
       <div style="display: flex; align-items: center; gap: 8px;">
         <span>Rows per page</span>
         <nz-select
@@ -169,17 +180,7 @@
           <nz-option [nzValue]="30" [nzLabel]="30"></nz-option>
         </nz-select>
       </div>
-
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <button nz-button nzSize="small" (click)="loadPrevious()"
-                [disabled]="!previousCursor || isLoading">
-          Previous
-        </button>
-        <button nz-button nzType="primary" nzSize="small" (click)="loadNext()"
-                [disabled]="!nextCursor || isLoading">
-          Next
-        </button>
-      </div>
+    </div>
     </div>
   </div>
 </section>
