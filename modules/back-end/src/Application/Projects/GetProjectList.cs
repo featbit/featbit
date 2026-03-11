@@ -22,7 +22,7 @@ public class GetProjectListHandler(
     public async Task<IEnumerable<ProjectWithEnvs>> Handle(GetProjectList request, CancellationToken cancellationToken)
     {
         var projectWithEnvs = await projectService.GetListAsync(request.OrganizationId);
-        var statements = 
+        var statements =
             await memberService.GetPermissionsAsync(request.OrganizationId, currentUser.Id);
 
         // filter projects/envs based on permissions
@@ -31,13 +31,14 @@ public class GetProjectListHandler(
             let projectRN = RN.ForProject(project.Key)
             let canAccessProject = PolicyHelper.IsAllowed(statements, projectRN, Permissions.CanAccessProject)
             where canAccessProject
-            let allowedEnvs =
+            let allowedEnvs = (
                 from env in project.Environments
                 let envRN = RN.ForEnv(project.Key, env.Key)
                 let canAccessEnv = PolicyHelper.IsAllowed(statements, envRN, Permissions.CanAccessEnv)
                 where canAccessEnv
                 select env
-            where allowedEnvs.Any()
+            ).ToArray()
+            where allowedEnvs.Length != 0
             select new ProjectWithEnvs
             {
                 Id = project.Id,

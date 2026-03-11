@@ -85,7 +85,7 @@ public class DefaultPermissionChecker(
             var rn = await resourceService.GetProjectRnAsync(projectId);
             return permission == Permissions.CreateEnv
                 // return env level wildcard for `CreateEnv` permission
-                ? $"{rn}:env/*"
+                ? rn == null ? null : $"{rn}:env/*"
                 : rn;
         }
 
