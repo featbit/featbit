@@ -6,6 +6,7 @@ using Api.Swagger;
 using Application.Services;
 using Domain.Workspaces;
 using Domain.Identity;
+using Domain.Policies;
 using Infrastructure;
 using Infrastructure.Services;
 using Microsoft.Extensions.DependencyInjection.Extensions;

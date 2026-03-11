@@ -1,6 +1,6 @@
 using Api.Authentication;
-using Api.Authorization;
 using Application.Projects;
+using Domain.Policies;
 using Domain.Projects;
 
 namespace Api.Controllers;
