@@ -37,7 +37,6 @@ public class ProjectController : ApiControllerBase
     /// </remarks>
     [OpenApi]
     [HttpGet]
-    [Authorize(Permissions.CanAccessProject)]
     public async Task<ApiResponse<IEnumerable<ProjectWithEnvs>>> GetListAsync()
     {
         var request = new GetProjectList

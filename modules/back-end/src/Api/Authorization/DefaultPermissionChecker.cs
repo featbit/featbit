@@ -32,25 +32,7 @@ public class DefaultPermissionChecker(IResourceService resourceService, ILogger<
             return false;
         }
 
-        // get matched statements
-        var matchedStatements = statements.Where(statement =>
-        {
-            if (statement.ResourceType == ResourceTypes.All)
-            {
-                return true;
-            }
-
-            return statement.Resources.Any(pattern => RNMather.IsMatch(resourceRN, pattern)) &&
-                   statement.Actions.Any(act => act == "*" || act == permission);
-        }).ToArray();
-
-        // no matched statements
-        if (matchedStatements.Length == 0)
-        {
-            return false;
-        }
-
-        return matchedStatements.All(x => x.Effect == EffectType.Allow);
+        return PolicyHelper.IsAllowed(statements, resourceRN, permission);
     }
 
     private async ValueTask<string?> GetRnAsync(string resourceType, HttpRequest request)
