@@ -3,7 +3,6 @@ using Api.Authentication;
 using Api.Swagger.Examples;
 using Application.Bases.Models;
 using Application.Segments;
-using Domain.Policies;
 using Domain.Segments;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
@@ -12,7 +11,6 @@ using Swashbuckle.AspNetCore.Filters;
 
 namespace Api.Controllers;
 
-[Authorize(Permissions.ManageSegment)]
 [Route("api/v{version:apiVersion}/envs/{envId:guid}/segments")]
 public class SegmentController : ApiControllerBase
 {
@@ -148,7 +146,7 @@ public class SegmentController : ApiControllerBase
     /// </remarks>
     [OpenApi]
     [SwaggerRequestExample(typeof(Operation), typeof(PatchSegmentExamples))]
-    [HttpPatch("{id}")]
+    [HttpPatch("{id:guid}")]
     public async Task<ApiResponse<bool>> PatchAsync(Guid id, [FromBody] JsonElement jsonElement)
     {
         var patch = JsonConvert.DeserializeObject<JsonPatchDocument>(jsonElement.GetRawText());
