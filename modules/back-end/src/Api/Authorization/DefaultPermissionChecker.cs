@@ -25,7 +25,7 @@ public class DefaultPermissionChecker(
             return false;
         }
 
-        var resourceRN = await GetRnAsync(resourceType, httpContext.Request);
+        var resourceRN = await GetRnAsync(permission, resourceType, httpContext.Request);
         if (string.IsNullOrWhiteSpace(resourceRN))
         {
             // failed to get resource RN, return false to be safe. This usually indicates bad requests, e.g. invalid or missing route parameters.
@@ -36,7 +36,7 @@ public class DefaultPermissionChecker(
         return PolicyHelper.IsAllowed(statements, resourceRN, permission);
     }
 
-    private async ValueTask<string?> GetRnAsync(string resourceType, HttpRequest request)
+    private async ValueTask<string?> GetRnAsync(string permission, string resourceType, HttpRequest request)
     {
         if (resourceType == ResourceTypes.Workspace)
         {
@@ -61,19 +61,20 @@ public class DefaultPermissionChecker(
 
         async Task<string?> GetProjectRnAsync()
         {
+            if (permission == Permissions.CreateProject)
+            {
+                // `CreateProject` is a special case as it doesn't have projectId in route values.
+                // It operates on organization level, so we can return project level wildcard.
+                return "project/*";
+            }
+
             var routeValue = routeValues.TryGetValue("projectId", out var projectIdRouteValue)
                 ? projectIdRouteValue
                 : routeValues.TryGetValue("id", out var idRouteValue)
                     ? idRouteValue
                     : null;
 
-            if (routeValue == null)
-            {
-                // no specific project id in route values, return project level wildcard
-                return "project/*";
-            }
-
-            var projectIdString = routeValue.ToString()!;
+            var projectIdString = routeValue?.ToString()!;
             if (!Guid.TryParse(projectIdString, out var projectId))
             {
                 // invalid project id, return empty
@@ -82,7 +83,10 @@ public class DefaultPermissionChecker(
             }
 
             var rn = await resourceService.GetProjectRnAsync(projectId);
-            return rn;
+            return permission == Permissions.CreateEnv
+                // return env level wildcard for `CreateEnv` permission
+                ? $"{rn}:env/*"
+                : rn;
         }
 
         async Task<string?> GetEnvRnAsync()
@@ -93,28 +97,7 @@ public class DefaultPermissionChecker(
                     ? idRouteValue
                     : null;
 
-            if (routeValue == null)
-            {
-                if (routeValues.TryGetValue("projectId", out var projectIdRouteValue))
-                {
-                    var projectIdString = projectIdRouteValue?.ToString();
-                    if (!Guid.TryParse(projectIdString, out var projectId))
-                    {
-                        // invalid project id, return empty
-                        logger.LogWarning("Invalid projectId '{ProjectId}' in route values.", projectIdString);
-                        return string.Empty;
-                    }
-
-                    // no specific env id in route values, return env level wildcard
-                    var projectRn = await resourceService.GetProjectRnAsync(projectId);
-                    return projectRn == null ? null : $"{projectRn}:env/*";
-                }
-
-                logger.LogWarning("No projectId or envId found in route values for env level permission check.");
-                return string.Empty;
-            }
-
-            var envIdString = routeValue.ToString();
+            var envIdString = routeValue?.ToString();
             if (!Guid.TryParse(envIdString, out var envId))
             {
                 // invalid env id, return empty
