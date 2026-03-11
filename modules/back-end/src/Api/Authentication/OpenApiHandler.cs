@@ -14,8 +14,7 @@ public class OpenApiHandler(
     ILoggerFactory logger,
     UrlEncoder encoder,
     IOrganizationService organizationService,
-    IAccessTokenService accessTokenService,
-    IMemberService memberService)
+    IAccessTokenService accessTokenService)
     : AuthenticationHandler<OpenApiOptions>(options, logger, encoder)
 {
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
@@ -41,16 +40,9 @@ public class OpenApiHandler(
             var org = await organizationService.GetAsync(accessToken.OrganizationId);
             Context.Request.Headers.TryAdd(ApiConstants.WorkspaceHeaderKey, org.WorkspaceId.ToString());
             Context.Request.Headers.TryAdd(ApiConstants.OrgIdHeaderKey, org.Id.ToString());
-            if (accessToken.Type == AccessTokenTypes.Service)
-            {
-                Context.Items[ApplicationConsts.UserPermissionsItem] = accessToken.Permissions;
-            }
-            else
-            {
-                var statements =
-                    await memberService.GetPermissionsAsync(accessToken.OrganizationId, accessToken.CreatorId);
-                Context.Items[ApplicationConsts.UserPermissionsItem] = statements;
-            }
+
+            // store access token in context for later use
+            Context.Items[ApplicationConsts.AccessTokenItem] = accessToken;
 
             // construct ticket
             var identity = new ClaimsIdentity(Schemes.OpenApi);

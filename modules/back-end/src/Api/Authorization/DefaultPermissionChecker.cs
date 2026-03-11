@@ -1,11 +1,17 @@
+using Api.Authentication;
 using Application;
 using Application.Services;
+using Domain.AccessTokens;
 using Domain.Policies;
 using Domain.Resources;
+using Domain.Users;
 
 namespace Api.Authorization;
 
-public class DefaultPermissionChecker(IResourceService resourceService, ILogger<DefaultPermissionChecker> logger)
+public class DefaultPermissionChecker(
+    IResourceService resourceService,
+    IMemberService memberService,
+    ILogger<DefaultPermissionChecker> logger)
     : IPermissionChecker
 {
     public async Task<bool> IsGrantedAsync(HttpContext httpContext, PermissionRequirement requirement)
@@ -19,12 +25,6 @@ public class DefaultPermissionChecker(IResourceService resourceService, ILogger<
             return false;
         }
 
-        if (httpContext.Items[ApplicationConsts.UserPermissionsItem] is not IEnumerable<PolicyStatement> statements)
-        {
-            logger.LogWarning("No permission statements found in HttpContext.Items.");
-            return false;
-        }
-
         var resourceRN = await GetRnAsync(resourceType, httpContext.Request);
         if (string.IsNullOrWhiteSpace(resourceRN))
         {
@@ -32,7 +32,54 @@ public class DefaultPermissionChecker(IResourceService resourceService, ILogger<
             return false;
         }
 
+        var statements = await GetPermissionsAsync(httpContext);
         return PolicyHelper.IsAllowed(statements, resourceRN, permission);
+    }
+
+    private async Task<IEnumerable<PolicyStatement>> GetPermissionsAsync(HttpContext context)
+    {
+        var authenticationType = context.User.Identity?.AuthenticationType;
+
+        var statements = authenticationType switch
+        {
+            Schemes.JwtBearer => await GetUserPermissionsAsync(),
+            Schemes.OpenApi => await GetAccessTokenPermissionsAsync(),
+            _ => []
+        };
+
+        return statements;
+
+        async Task<IEnumerable<PolicyStatement>> GetUserPermissionsAsync()
+        {
+            var userIdClaim = context.User.Claims.FirstOrDefault(x => x.Type == UserClaims.Id);
+            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+            {
+                logger.LogWarning("Malformed user id claim in JWT token.");
+                return [];
+            }
+
+            var organizationId = context.Request.OrganizationId();
+            if (organizationId == Guid.Empty)
+            {
+                logger.LogWarning("Malformed or missing organization id in request headers.");
+                return [];
+            }
+
+            return await memberService.GetPermissionsAsync(organizationId, userId);
+        }
+
+        async Task<IEnumerable<PolicyStatement>> GetAccessTokenPermissionsAsync()
+        {
+            if (context.Items[ApplicationConsts.AccessTokenItem] is not AccessToken accessToken)
+            {
+                logger.LogWarning("Access token not found in HttpContext.Items.");
+                return [];
+            }
+
+            return accessToken.Type == AccessTokenTypes.Service
+                ? accessToken.Permissions
+                : await memberService.GetPermissionsAsync(accessToken.OrganizationId, accessToken.CreatorId);
+        }
     }
 
     private async ValueTask<string?> GetRnAsync(string resourceType, HttpRequest request)
