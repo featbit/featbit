@@ -125,8 +125,8 @@ export class PermissionsService {
         return true;
       }
 
-      return permission.resources.some(rsc => this.matchRule(rn, rsc)) &&
-        permission.actions.some(act => act === '*' || act === action.name);
+      return permission.actions.some(act => act === '*' || act === action.name) &&
+             permission.resources.some(rsc => this.matchRule(rn, rsc));
     });
   }
 

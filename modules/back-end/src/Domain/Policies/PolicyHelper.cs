@@ -14,8 +14,8 @@ public static class PolicyHelper
                 return true;
             }
 
-            return statement.Resources.Any(pattern => RNMatcher.IsMatch(resourceRN, pattern)) &&
-                   statement.Actions.Any(act => act == "*" || act == permission);
+            return statement.Actions.Any(act => act == "*" || act == permission) &&
+                   statement.Resources.Any(pattern => RNMatcher.IsMatch(resourceRN, pattern));
         }).ToArray();
 
         // no matched statements
