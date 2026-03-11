@@ -47,6 +47,15 @@ public static class AuthenticationBuilderExtensions
         {
             var httpContext = context.HttpContext;
 
+            // Only when the endpoint has `Authorize` attribute with permissions defined,
+            // we will try to get user permissions and put it into `HttpContext.Items` for later use.
+            var endpoint = httpContext.GetEndpoint();
+            if (endpoint == null ||
+                endpoint.Metadata.OfType<AuthorizeAttribute>().All(x => !Permissions.All.Contains(x.Policy)))
+            {
+                return;
+            }
+
             var orgIdHeaderValue = httpContext.Request.Headers[ApiConstants.OrgIdHeaderKey];
             if (orgIdHeaderValue == StringValues.Empty)
             {
