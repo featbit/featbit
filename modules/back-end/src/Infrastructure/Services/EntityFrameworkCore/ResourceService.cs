@@ -32,23 +32,30 @@ public class ResourceService(AppDbContext dbContext) : IResourceService
         };
     }
 
-    public Task<string?> GetProjectRnAsync(Guid projectId)
+    public async Task<string?> GetProjectRnAsync(Guid projectId)
     {
-        return QueryableOf<Project>()
-            .Where(project => project.Id == projectId)
-            .Select(project => "projects/" + project.Key)
+        var key = await QueryableOf<Project>()
+            .Where(x => x.Id == projectId)
+            .Select(x => x.Key)
             .FirstOrDefaultAsync();
+
+        return key == null ? null : RN.ForProject(key);
     }
 
-    public Task<string?> GetEnvRnAsync(Guid envId)
+    public async Task<string?> GetEnvRnAsync(Guid envId)
     {
         var query =
             from env in QueryableOf<Environment>()
             join project in QueryableOf<Project>() on env.ProjectId equals project.Id
             where env.Id == envId
-            select "project/" + project.Key + ":env/" + env.Key;
+            select new
+            {
+                projectKey = project.Key,
+                envKey = env.Key
+            };
 
-        return query.FirstOrDefaultAsync();
+        var data = await query.FirstOrDefaultAsync();
+        return data == null ? null : RN.ForEnv(data.projectKey, data.envKey);
     }
 
     public async Task<string?> GetFlagRnAsync(Guid envId, string key)
@@ -67,9 +74,7 @@ public class ResourceService(AppDbContext dbContext) : IResourceService
             };
 
         var data = await query.FirstOrDefaultAsync();
-        return data == null
-            ? null
-            : $"project/{data.projectKey}:env/{data.envKey}:flag/{data.flagKey};{string.Join(",", data.flagTags)}";
+        return data == null ? null : RN.ForFlag(data.projectKey, data.envKey, data.flagKey, data.flagTags);
     }
 
     private async Task<IEnumerable<Resource>> GetProjectsAsync(Guid organizationId, string name)
@@ -80,7 +85,7 @@ public class ResourceService(AppDbContext dbContext) : IResourceService
             {
                 project.Id,
                 project.Name,
-                Rn = "project/" + project.Key
+                project.Key
             });
         if (!string.IsNullOrWhiteSpace(name))
         {
@@ -93,7 +98,7 @@ public class ResourceService(AppDbContext dbContext) : IResourceService
         {
             Id = x.Id,
             Name = x.Name,
-            Rn = x.Rn,
+            Rn = RN.ForProject(x.Key),
             Type = ResourceTypes.Project
         }).ToList();
 
@@ -116,7 +121,8 @@ public class ResourceService(AppDbContext dbContext) : IResourceService
             {
                 env.Id,
                 env.Name,
-                Rn = "project/" + project.Key + ":env/" + env.Key
+                projectKey = project.Key,
+                envKey = env.Key
             };
 
         if (!string.IsNullOrWhiteSpace(name))
@@ -130,7 +136,7 @@ public class ResourceService(AppDbContext dbContext) : IResourceService
         {
             Id = x.Id,
             Name = x.Name,
-            Rn = x.Rn,
+            Rn = RN.ForEnv(x.projectKey, x.envKey),
             Type = ResourceTypes.Env
         }).ToList();
 

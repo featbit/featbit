@@ -47,6 +47,13 @@ public static class RN
     }
 
     public static bool IsInScope(string rn, string scope) => $"{rn}:".StartsWith($"{scope}:");
+
+    public static string ForProject(string projectKey) => $"project/{projectKey}";
+
+    public static string ForEnv(string projectKey, string envKey) => $"project/{projectKey}:env/{envKey}";
+
+    public static string ForFlag(string projectKey, string envKey, string flagKey, ICollection<string> tags) =>
+        $"project/{projectKey}:env/{envKey}:flag/{flagKey};{string.Join(",", tags)}";
 }
 
 public record TypeKeyProps

@@ -1,6 +1,7 @@
 using Application.Users;
 using Domain.Policies;
 using Domain.Projects;
+using Domain.Resources;
 
 namespace Application.Projects;
 
@@ -23,12 +24,12 @@ public class GetProjectListHandler(IProjectService service, ICurrentUser current
         // filter projects/envs based on permissions
         var allowedProjectEnvs =
             from project in projectWithEnvs
-            let projectRN = $"project/{project.Key}"
+            let projectRN = RN.ForProject(project.Key)
             let canAccessProject = PolicyHelper.IsAllowed(statements, projectRN, Permissions.CanAccessProject)
             where canAccessProject
             let allowedEnvs =
                 from env in project.Environments
-                let envRN = $"project/{project.Key}:env/{env.Key}"
+                let envRN = RN.ForEnv(project.Key, env.Key)
                 let canAccessEnv = PolicyHelper.IsAllowed(statements, envRN, Permissions.CanAccessEnv)
                 where canAccessEnv
                 select env
