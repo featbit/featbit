@@ -61,17 +61,16 @@ public class DefaultPermissionChecker(
 
         async Task<string?> GetProjectRnAsync()
         {
-            var routeValue = routeValues.TryGetValue("id", out var idRouteValue)
-                ? idRouteValue
-                : routeValues.TryGetValue("projectId", out var projectIdRouteValue)
-                    ? projectIdRouteValue
+            var routeValue = routeValues.TryGetValue("projectId", out var projectIdRouteValue)
+                ? projectIdRouteValue
+                : routeValues.TryGetValue("id", out var idRouteValue)
+                    ? idRouteValue
                     : null;
 
             if (routeValue == null)
             {
-                // invalid request without project id in route values, return empty
-                logger.LogWarning("Missing projectId in route values.");
-                return string.Empty;
+                // no specific project id in route values, return project level wildcard
+                return "project/*";
             }
 
             var projectIdString = routeValue.ToString()!;
@@ -88,16 +87,30 @@ public class DefaultPermissionChecker(
 
         async Task<string?> GetEnvRnAsync()
         {
-            var routeValue = routeValues.TryGetValue("id", out var idRouteValue)
-                ? idRouteValue
-                : routeValues.TryGetValue("envId", out var envIdRouteValue)
-                    ? envIdRouteValue
+            var routeValue = routeValues.TryGetValue("envId", out var envIdRouteValue)
+                ? envIdRouteValue
+                : routeValues.TryGetValue("id", out var idRouteValue)
+                    ? idRouteValue
                     : null;
 
             if (routeValue == null)
             {
-                // invalid request without env id in route values, return empty
-                logger.LogWarning("Missing envId in route values.");
+                if (routeValues.TryGetValue("projectId", out var projectIdRouteValue))
+                {
+                    var projectIdString = projectIdRouteValue?.ToString();
+                    if (!Guid.TryParse(projectIdString, out var projectId))
+                    {
+                        // invalid project id, return empty
+                        logger.LogWarning("Invalid projectId '{ProjectId}' in route values.", projectIdString);
+                        return string.Empty;
+                    }
+
+                    // no specific env id in route values, return env level wildcard
+                    var projectRn = await resourceService.GetProjectRnAsync(projectId);
+                    return projectRn == null ? null : $"{projectRn}:env/*";
+                }
+
+                logger.LogWarning("No projectId or envId found in route values for env level permission check.");
                 return string.Empty;
             }
 
