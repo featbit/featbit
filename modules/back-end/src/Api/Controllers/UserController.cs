@@ -31,7 +31,7 @@ public class UserController : ApiControllerBase
         return Ok(hasMultipleWorkspaces);
     }
 
-    [HttpGet("polices")]
+    [HttpGet("policies")]
     public async Task<ApiResponse<IEnumerable<PolicyVm>>> GetPoliciesAsync()
     {
         var request = new GetMemberPolicy
