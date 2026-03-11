@@ -79,9 +79,7 @@ public static class AuthenticationBuilderExtensions
 
             var memberService = httpContext.RequestServices.GetRequiredService<IMemberService>();
 
-            var policies = await memberService.GetPoliciesAsync(orgId, userId);
-
-            var statements = policies.SelectMany(x => x.Statements);
+            var statements = await memberService.GetPermissionsAsync(orgId, userId);
             httpContext.Items[ApplicationConsts.UserPermissionsItem] = statements;
         }
     }

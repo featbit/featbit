@@ -225,6 +225,14 @@ public class MemberService(MongoDbClient mongoDb) : IMemberService
         return allPolicies;
     }
 
+    public async Task<IEnumerable<PolicyStatement>> GetPermissionsAsync(Guid organizationId, Guid memberId)
+    {
+        var policies = await GetPoliciesAsync(organizationId, memberId);
+
+        var statements = policies.SelectMany(x => x.Statements);
+        return statements;
+    }
+
     public async Task<PagedResult<MemberPolicyVm>> GetDirectPoliciesAsync(
         Guid organizationId,
         Guid memberId,

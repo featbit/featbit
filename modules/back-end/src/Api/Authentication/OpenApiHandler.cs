@@ -9,25 +9,15 @@ using Microsoft.Extensions.Options;
 
 namespace Api.Authentication;
 
-public class OpenApiHandler : AuthenticationHandler<OpenApiOptions>
+public class OpenApiHandler(
+    IOptionsMonitor<OpenApiOptions> options,
+    ILoggerFactory logger,
+    UrlEncoder encoder,
+    IOrganizationService organizationService,
+    IAccessTokenService accessTokenService,
+    IMemberService memberService)
+    : AuthenticationHandler<OpenApiOptions>(options, logger, encoder)
 {
-    private readonly IOrganizationService _organizationService;
-    private readonly IAccessTokenService _accessTokenService;
-    private readonly IMemberService _memberService;
-
-    public OpenApiHandler(
-        IOptionsMonitor<OpenApiOptions> options,
-        ILoggerFactory logger,
-        UrlEncoder encoder,
-        IOrganizationService organizationService,
-        IAccessTokenService accessTokenService,
-        IMemberService memberService) : base(options, logger, encoder)
-    {
-        _organizationService = organizationService;
-        _accessTokenService = accessTokenService;
-        _memberService = memberService;
-    }
-
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
         try
@@ -41,14 +31,14 @@ public class OpenApiHandler : AuthenticationHandler<OpenApiOptions>
             }
 
             var accessToken =
-                await _accessTokenService.FindOneAsync(x => x.Token == token && x.Status == AccessTokenStatus.Active);
+                await accessTokenService.FindOneAsync(x => x.Token == token && x.Status == AccessTokenStatus.Active);
             if (accessToken == null)
             {
                 return AuthenticateResult.Fail("invalid-access-token");
             }
 
             // set workspace, organization id header & store permissions
-            var org = await _organizationService.GetAsync(accessToken.OrganizationId);
+            var org = await organizationService.GetAsync(accessToken.OrganizationId);
             Context.Request.Headers.TryAdd(ApiConstants.WorkspaceHeaderKey, org.WorkspaceId.ToString());
             Context.Request.Headers.TryAdd(ApiConstants.OrgIdHeaderKey, org.Id.ToString());
             if (accessToken.Type == AccessTokenTypes.Service)
@@ -57,10 +47,8 @@ public class OpenApiHandler : AuthenticationHandler<OpenApiOptions>
             }
             else
             {
-                var policies =
-                    await _memberService.GetPoliciesAsync(accessToken.OrganizationId, accessToken.CreatorId);
-
-                var statements = policies.SelectMany(x => x.Statements);
+                var statements =
+                    await memberService.GetPermissionsAsync(accessToken.OrganizationId, accessToken.CreatorId);
                 Context.Items[ApplicationConsts.UserPermissionsItem] = statements;
             }
 

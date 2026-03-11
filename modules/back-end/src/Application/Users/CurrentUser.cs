@@ -1,4 +1,3 @@
-using Domain.Policies;
 using Domain.Users;
 using Microsoft.AspNetCore.Http;
 
@@ -18,20 +17,6 @@ public class CurrentUser(IHttpContextAccessor httpContextAccessor) : ICurrentUse
 
             var claim = httpContext.User.Claims.FirstOrDefault(x => x.Type == UserClaims.Id);
             return claim == null ? Guid.Empty : Guid.Parse(claim.Value);
-        }
-    }
-
-    public IEnumerable<PolicyStatement> Permissions
-    {
-        get
-        {
-            var httpContext = httpContextAccessor.HttpContext;
-            if (httpContext == null)
-            {
-                return [];
-            }
-
-            return httpContext.Items[ApplicationConsts.UserPermissionsItem] as IEnumerable<PolicyStatement> ?? [];
         }
     }
 }

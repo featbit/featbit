@@ -13,13 +13,17 @@ public class GetProjectList : IRequest<IEnumerable<ProjectWithEnvs>>
     public Guid OrganizationId { get; set; }
 }
 
-public class GetProjectListHandler(IProjectService service, ICurrentUser currentUser)
+public class GetProjectListHandler(
+    IProjectService projectService,
+    IMemberService memberService,
+    ICurrentUser currentUser)
     : IRequestHandler<GetProjectList, IEnumerable<ProjectWithEnvs>>
 {
     public async Task<IEnumerable<ProjectWithEnvs>> Handle(GetProjectList request, CancellationToken cancellationToken)
     {
-        var projectWithEnvs = await service.GetListAsync(request.OrganizationId);
-        var statements = currentUser.Permissions;
+        var projectWithEnvs = await projectService.GetListAsync(request.OrganizationId);
+        var statements = 
+            await memberService.GetPermissionsAsync(request.OrganizationId, currentUser.Id);
 
         // filter projects/envs based on permissions
         var allowedProjectEnvs =
