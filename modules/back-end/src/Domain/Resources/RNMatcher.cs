@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace Domain.Resources;
 
-public static class RNMather
+public static class RNMatcher
 {
     private static readonly ConcurrentDictionary<string, Regex> RegexCache = new();
 

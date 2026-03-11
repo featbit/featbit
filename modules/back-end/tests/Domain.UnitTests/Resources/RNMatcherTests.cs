@@ -2,7 +2,7 @@ using Domain.Resources;
 
 namespace Domain.UnitTests.Resources;
 
-public class RNMatchTests
+public class RNMatcherTests
 {
     // —— Exact path matching ——
 
@@ -13,7 +13,7 @@ public class RNMatchTests
     [InlineData("project/foo:env/prod", "project/foo:env/staging", false)]
     public void ExactPathMatch(string resource, string pattern, bool expected)
     {
-        Assert.Equal(expected, RNMather.IsMatch(resource, pattern));
+        Assert.Equal(expected, RNMatcher.IsMatch(resource, pattern));
     }
 
     // —— Wildcard path matching ——
@@ -31,7 +31,7 @@ public class RNMatchTests
     [InlineData("project/foo-bar-baz", "project/*-*-*", true)] // multiple wildcards
     public void WildcardPathMatch(string resource, string pattern, bool expected)
     {
-        Assert.Equal(expected, RNMather.IsMatch(resource, pattern));
+        Assert.Equal(expected, RNMatcher.IsMatch(resource, pattern));
     }
 
     // —— Segment count rules ——
@@ -42,7 +42,7 @@ public class RNMatchTests
     [InlineData("project/foo:env/prod:flag/x", "project/foo:env/prod", true)]
     public void RuleWithFewerSegmentsMatches(string resource, string pattern, bool expected)
     {
-        Assert.Equal(expected, RNMather.IsMatch(resource, pattern));
+        Assert.Equal(expected, RNMatcher.IsMatch(resource, pattern));
     }
 
     [Theory]
@@ -51,7 +51,7 @@ public class RNMatchTests
     [InlineData("env/prod", "project/foo:env/prod:flag/x", false)]
     public void RuleWithMoreSegmentsDoesNotMatch(string resource, string pattern, bool expected)
     {
-        Assert.Equal(expected, RNMather.IsMatch(resource, pattern));
+        Assert.Equal(expected, RNMatcher.IsMatch(resource, pattern));
     }
 
     // —— Tag matching ——
@@ -63,7 +63,7 @@ public class RNMatchTests
     [InlineData("project/foo;tagA,tagB", "project/foo;tagC", false)]
     public void ExactTagMatch(string resource, string pattern, bool expected)
     {
-        Assert.Equal(expected, RNMather.IsMatch(resource, pattern));
+        Assert.Equal(expected, RNMatcher.IsMatch(resource, pattern));
     }
 
     [Theory]
@@ -73,7 +73,7 @@ public class RNMatchTests
     [InlineData("project/foo;staging", "project/foo;prod*", false)]
     public void WildcardTagMatch(string resource, string pattern, bool expected)
     {
-        Assert.Equal(expected, RNMather.IsMatch(resource, pattern));
+        Assert.Equal(expected, RNMatcher.IsMatch(resource, pattern));
     }
 
     [Theory]
@@ -86,7 +86,7 @@ public class RNMatchTests
     public void TagOrSemantics(string resource, string pattern, bool expected)
     {
         // Rule tags use OR semantics: at least one rule tag must match a source tag
-        Assert.Equal(expected, RNMather.IsMatch(resource, pattern));
+        Assert.Equal(expected, RNMatcher.IsMatch(resource, pattern));
     }
 
     [Theory]
@@ -95,7 +95,7 @@ public class RNMatchTests
     public void RuleWithoutTagsMatchesSourceWithTags(string resource, string pattern, bool expected)
     {
         // When rule has no tags, tag check is skipped
-        Assert.Equal(expected, RNMather.IsMatch(resource, pattern));
+        Assert.Equal(expected, RNMatcher.IsMatch(resource, pattern));
     }
 
     [Theory]
@@ -104,7 +104,7 @@ public class RNMatchTests
     public void RuleWithTagsDoesNotMatchSourceWithoutTags(string resource, string pattern, bool expected)
     {
         // Source has no tags but rule requires them → no match
-        Assert.Equal(expected, RNMather.IsMatch(resource, pattern));
+        Assert.Equal(expected, RNMatcher.IsMatch(resource, pattern));
     }
 
     // —— Multi-segment with tags ——
@@ -115,7 +115,7 @@ public class RNMatchTests
     [InlineData("project/foo;dev:env/prod;us-east", "project/*:env/*;us-east", true)]
     public void MultiSegmentWithTags(string resource, string pattern, bool expected)
     {
-        Assert.Equal(expected, RNMather.IsMatch(resource, pattern));
+        Assert.Equal(expected, RNMatcher.IsMatch(resource, pattern));
     }
 
     // —— Real-world RN patterns from ResourceService ——
@@ -128,7 +128,7 @@ public class RNMatchTests
     [InlineData("project/my-proj:env/staging:flag/login", "project/my-proj:env/production:flag/*", false)]
     public void RealWorldPatterns(string resource, string pattern, bool expected)
     {
-        Assert.Equal(expected, RNMather.IsMatch(resource, pattern));
+        Assert.Equal(expected, RNMatcher.IsMatch(resource, pattern));
     }
 
     // —— Edge cases ——
@@ -142,14 +142,14 @@ public class RNMatchTests
     {
         // "*" is a single-segment pattern; the "fewer segments" rule means it also
         // matches multi-segment resources — critical for Resource.All (Rn = "*")
-        Assert.True(RNMather.IsMatch(resource, "*"));
+        Assert.True(RNMatcher.IsMatch(resource, "*"));
     }
 
     [Fact]
     public void EmptySourceAndEmptyRule()
     {
         // Both are empty → single empty segment matches
-        Assert.False(RNMather.IsMatch("", ""));
+        Assert.False(RNMatcher.IsMatch("", ""));
     }
 
     [Theory]
@@ -159,7 +159,7 @@ public class RNMatchTests
     public void SpecialRegexCharsInPathAreEscaped(string resource, string pattern, bool expected)
     {
         // Dots and other regex-special chars in paths should be treated as literals
-        Assert.Equal(expected, RNMather.IsMatch(resource, pattern));
+        Assert.Equal(expected, RNMatcher.IsMatch(resource, pattern));
     }
 
     // —— Case sensitivity ——
@@ -170,6 +170,6 @@ public class RNMatchTests
     [InlineData("project/FOO", "project/*", true)]    // wildcard is case-agnostic
     public void PathMatchingIsCaseSensitive(string resource, string pattern, bool expected)
     {
-        Assert.Equal(expected, RNMather.IsMatch(resource, pattern));
+        Assert.Equal(expected, RNMatcher.IsMatch(resource, pattern));
     }
 }
