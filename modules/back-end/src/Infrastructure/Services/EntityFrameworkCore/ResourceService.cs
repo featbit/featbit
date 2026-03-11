@@ -36,7 +36,7 @@ public class ResourceService(AppDbContext dbContext) : IResourceService
     {
         return QueryableOf<Project>()
             .Where(project => project.Id == projectId)
-            .Select(project => $"projects/{project.Key}")
+            .Select(project => "projects/" + project.Key)
             .FirstOrDefaultAsync();
     }
 
@@ -46,7 +46,7 @@ public class ResourceService(AppDbContext dbContext) : IResourceService
             from env in QueryableOf<Environment>()
             join project in QueryableOf<Project>() on env.ProjectId equals project.Id
             where env.Id == envId
-            select $"project/{project.Key}:env/{env.Key}";
+            select "project/" + project.Key + ":env/" + env.Key;
 
         return query.FirstOrDefaultAsync();
     }

@@ -29,7 +29,7 @@ public class ResourceService(MongoDbClient mongoDb) : IResourceService
             ResourceTypes.Segment => [Resource.AllSegments],
             ResourceTypes.Env => await GetEnvsAsync(organizationId, name),
             ResourceTypes.Project => await GetProjectsAsync(organizationId, name),
-            _ => Array.Empty<Resource>()
+            _ => []
         };
     }
 
@@ -37,7 +37,7 @@ public class ResourceService(MongoDbClient mongoDb) : IResourceService
     {
         return QueryableOf<Project>()
             .Where(project => project.Id == projectId)
-            .Select(project => $"projects/{project.Key}")
+            .Select(project => "projects/" + project.Key)
             .FirstOrDefaultAsync();
     }
 
@@ -47,7 +47,7 @@ public class ResourceService(MongoDbClient mongoDb) : IResourceService
             from env in QueryableOf<Environment>()
             join project in QueryableOf<Project>() on env.ProjectId equals project.Id
             where env.Id == envId
-            select $"project/{project.Key}:env/{env.Key}";
+            select "project/" + project.Key + ":env/" + env.Key;
 
         return query.FirstOrDefaultAsync();
     }
