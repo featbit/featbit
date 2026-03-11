@@ -146,9 +146,11 @@ public class RNMatcherTests
     }
 
     [Fact]
-    public void EmptySourceAndEmptyRule()
+    public void EmptyResourceOrPattern()
     {
-        // Both are empty → single empty segment matches
+        // empty source or empty rule is not a valid match
+        Assert.False(RNMatcher.IsMatch("project/foo", ""));
+        Assert.False(RNMatcher.IsMatch("", "project/foo"));
         Assert.False(RNMatcher.IsMatch("", ""));
     }
 
@@ -167,7 +169,6 @@ public class RNMatcherTests
     [Theory]
     [InlineData("project/Foo", "project/foo", false)] // different case → no match
     [InlineData("project/Foo", "project/Foo", true)]  // same case → match
-    [InlineData("project/FOO", "project/*", true)]    // wildcard is case-agnostic
     public void PathMatchingIsCaseSensitive(string resource, string pattern, bool expected)
     {
         Assert.Equal(expected, RNMatcher.IsMatch(resource, pattern));

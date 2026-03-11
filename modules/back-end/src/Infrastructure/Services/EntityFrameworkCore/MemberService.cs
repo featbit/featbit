@@ -220,10 +220,7 @@ public class MemberService(AppDbContext dbContext) : IMemberService
         var inheritedPolicies = await inheritedPolicyQuery.ToListAsync();
 
         // distinct by policy name
-        var allPolicies = directPolicies.Concat(inheritedPolicies)
-            .GroupBy(x => x.Name)
-            .Select(x => x.First())
-            .OrderByDescending(x => x.CreatedAt);
+        var allPolicies = directPolicies.Concat(inheritedPolicies).GroupBy(x => x.Name).Select(x => x.First());
         return allPolicies;
     }
 

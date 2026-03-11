@@ -52,8 +52,12 @@ public static class RN
 
     public static string ForEnv(string projectKey, string envKey) => $"project/{projectKey}:env/{envKey}";
 
-    public static string ForFlag(string projectKey, string envKey, string flagKey, ICollection<string> tags) =>
-        $"project/{projectKey}:env/{envKey}:flag/{flagKey};{string.Join(",", tags)}";
+    public static string ForFlag(string projectKey, string envKey, string flagKey, ICollection<string> tags)
+    {
+        var tagsPart = tags.Count > 0 ? $";{string.Join(",", tags)}" : string.Empty;
+
+        return $"project/{projectKey}:env/{envKey}:flag/{flagKey}{tagsPart}";
+    }
 }
 
 public record TypeKeyProps

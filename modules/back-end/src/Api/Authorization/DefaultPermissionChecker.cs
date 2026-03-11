@@ -61,13 +61,20 @@ public class DefaultPermissionChecker(
 
         async Task<string?> GetProjectRnAsync()
         {
-            if (!routeValues.TryGetValue("id", out var projectIdRouteValue))
+            var routeValue = routeValues.TryGetValue("id", out var idRouteValue)
+                ? idRouteValue
+                : routeValues.TryGetValue("projectId", out var projectIdRouteValue)
+                    ? projectIdRouteValue
+                    : null;
+
+            if (routeValue == null)
             {
-                // no specific project id in route values, return project level wildcard
-                return "project/*";
+                // invalid request without project id in route values, return empty
+                logger.LogWarning("Missing projectId in route values.");
+                return string.Empty;
             }
 
-            var projectIdString = projectIdRouteValue?.ToString()!;
+            var projectIdString = routeValue.ToString()!;
             if (!Guid.TryParse(projectIdString, out var projectId))
             {
                 // invalid project id, return empty
