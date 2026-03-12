@@ -151,7 +151,7 @@ public class EndUserService(MongoDbClient mongoDb) : MongoDbService<EndUser>(mon
             ? new PageCursor(items[^1].Id, items[^1].UpdatedAt, CursorDirection.Forward)
             : null;
 
-        return new PagedResult<EndUser>(0, items, nextCursor, previousCursor);
+        return new PagedResult<EndUser>(items, nextCursor, previousCursor);
     }
 
     public async Task<EndUser> UpsertAsync(EndUser user)

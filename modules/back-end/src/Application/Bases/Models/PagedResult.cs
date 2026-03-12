@@ -27,11 +27,20 @@ public class PagedResult<TValue>
     /// </summary>
     /// <param name="totalCount">The total count of items.</param>
     /// <param name="items">The items in the current page.</param>
-    /// <param name="nextCursor">The next cursor for pagination</param>
-    /// <param name="previousCursor">The previous cursor for pagination</param>
-    public PagedResult(long totalCount, IReadOnlyList<TValue> items, PageCursor nextCursor = null, PageCursor previousCursor = null)
+    public PagedResult(long totalCount, IReadOnlyList<TValue> items)
     {
         TotalCount = totalCount;
+        Items = items;
+    }
+    
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PagedResult{TValue}"/> class.
+    /// </summary>
+    /// <param name="items">The items in the current page.</param>
+    /// <param name="nextCursor">The next cursor for pagination</param>
+    /// <param name="previousCursor">The previous cursor for pagination</param>
+    public PagedResult(IReadOnlyList<TValue> items, PageCursor nextCursor, PageCursor previousCursor)
+    {
         Items = items;
         NextCursor = nextCursor;
         PreviousCursor = previousCursor;
