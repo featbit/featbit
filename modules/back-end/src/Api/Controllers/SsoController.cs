@@ -10,8 +10,6 @@ namespace Api.Controllers;
 [Route("api/v{version:apiVersion}/sso")]
 public class SsoController : ApiControllerBase
 {
-    const string REFRESH_TOKEN_COOKIE_PATH = "/api/v1/identity/refresh-token";
-    
     private readonly bool _isEnabled;
 
     private readonly OidcClient _client;
