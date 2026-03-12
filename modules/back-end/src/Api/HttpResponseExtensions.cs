@@ -13,8 +13,8 @@ public static class HttpResponseExtensions
         // can be configured through environment variables, for now we set it to false to make it works in any environment
         Secure = false,
 
-        // we need to allow cookies are sent on cross-site XHR/fetch with withCredentials
-        SameSite = SameSiteMode.None,
+        // we need to allow cookies are sent on cross-origin XHR/fetch with withCredentials
+        SameSite = SameSiteMode.Lax,
 
         MaxAge = RefreshTokenConsts.CookieMaxAge,
         Path = ApiConstants.RefreshTokenCookiePath
