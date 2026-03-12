@@ -14,8 +14,6 @@ namespace Infrastructure.Services;
 
 public class IdentityService : IIdentityService
 {
-    private const int RefreshTokenExpiryDays = 30;
-
     private readonly IUserService _userService;
     private readonly IPasswordHasher<User> _passwordHasher;
     private readonly IRefreshTokenService _refreshTokenService;
@@ -84,7 +82,7 @@ public class IdentityService : IIdentityService
         {
             var rawToken = Guid.NewGuid().ToString("N");
 
-            var record = new RefreshToken(rawToken, user.Id, RefreshTokenExpiryDays, ipAddress);
+            var record = new RefreshToken(rawToken, user.Id, RefreshTokenConsts.ExpiryDays, ipAddress);
             await _refreshTokenService.AddOneAsync(record);
 
             return rawToken;

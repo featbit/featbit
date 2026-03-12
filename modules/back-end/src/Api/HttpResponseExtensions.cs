@@ -1,3 +1,5 @@
+using Domain.RefreshTokens;
+
 namespace Api;
 
 public static class HttpResponseExtensions
@@ -14,7 +16,7 @@ public static class HttpResponseExtensions
         // we need to allow the cookie to be sent in cross-domain requests
         SameSite = SameSiteMode.Lax,
 
-        Expires = DateTimeOffset.UtcNow.AddDays(30),
+        MaxAge = RefreshTokenConsts.CookieMaxAge,
         Path = ApiConstants.RefreshTokenCookiePath
     };
 
