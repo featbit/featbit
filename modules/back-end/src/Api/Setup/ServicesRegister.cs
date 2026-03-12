@@ -52,7 +52,7 @@ public static class ServicesRegister
         builder.Services.AddCors(options => options.AddDefaultPolicy(policyBuilder =>
         {
             policyBuilder
-                .SetIsOriginAllowed(_ => true)  // allow any origin dynamically
+                .SetIsOriginAllowed(_ => true)
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials();
@@ -106,9 +106,9 @@ public static class ServicesRegister
 
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOption["Key"]!)),
-                    
-                    ValidateLifetime = true, // check expires
-                    ClockSkew = TimeSpan.Zero  // Optional: remove default 5-minute tolerance
+
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero
                 };
             })
             .AddOpenApi(Schemes.OpenApi);
