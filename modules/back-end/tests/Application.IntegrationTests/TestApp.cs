@@ -40,6 +40,7 @@ public class TestApp : WebApplicationFactory<Program>
 
             collection.Replace(ServiceDescriptor.Transient<IWorkspaceService, TestWorkspaceService>());
             collection.Replace(ServiceDescriptor.Transient<IUserService, TestUserService>());
+            collection.Replace(ServiceDescriptor.Transient<IRefreshTokenService, TestRefreshTokenService>());
 
             var hostedServices = collection.Where(x =>
                 x.ServiceType.IsAssignableTo(typeof(IHostedService)) &&
