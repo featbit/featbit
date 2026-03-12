@@ -19,9 +19,4 @@ public class RefreshTokenService(MongoDbClient mongoDb, ITokenHashService tokenH
 
         return (refreshTokenValue, hashedRefreshToken);
     }
-
-    public async Task<RefreshToken> GetByTokenAsync(string token)
-    {
-        return await FindOneAsync(x => x.Token == token);
-    }
 }

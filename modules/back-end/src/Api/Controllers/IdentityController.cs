@@ -50,7 +50,7 @@ public class IdentityController : ApiControllerBase
         var refreshRequest = new RefreshToken 
         { 
             Token = refreshToken,
-            IpAddress = ipAddress
+            IpAddress = ipAddress ?? string.Empty
         };
         
         var refreshResult = await Mediator.Send(refreshRequest);

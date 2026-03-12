@@ -31,11 +31,11 @@ public class RefreshTokenHandler : IRequestHandler<RefreshToken, RefreshTokenRes
     public async Task<RefreshTokenResult> Handle(RefreshToken request, CancellationToken cancellationToken)
     {
         var hashedToken = _hashService.HashToken(request.Token);
-        var storedToken = await _refreshTokenService.GetByTokenAsync(hashedToken);
+        var storedToken = await _refreshTokenService.FindOneAsync(x => x.Token == hashedToken);
 
         if (storedToken == null || !storedToken.IsActive)
         {
-            return RefreshTokenResult.Failed("INVALID_REFRESH_TOKEN");
+            return RefreshTokenResult.Failed(ErrorCodes.Invalid(nameof(RefreshToken)));
         }
         
         // Get user

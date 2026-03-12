@@ -21,7 +21,7 @@ public class RefreshTokenResult
         };
     }
 
-    public static RefreshTokenResult Succeed(string accessToken, string? refreshToken = null)
+    public static RefreshTokenResult Succeed(string accessToken, string refreshToken)
     {
         return new RefreshTokenResult
         {

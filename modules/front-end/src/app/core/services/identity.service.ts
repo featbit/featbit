@@ -104,7 +104,12 @@ export class IdentityService {
       }
 
       localStorage.clear();
-      Object.keys(storageToKeep).forEach(k => localStorage.setItem(k, storageToKeep[k]));
+      Object.entries(storageToKeep).forEach(([key, value]) => {
+        if (value !== null && value !== undefined) {
+          localStorage.setItem(key, value);
+        }
+      });
+
       this.broadcastService.userLoggedOut();
     }
   }

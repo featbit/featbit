@@ -1,5 +1,4 @@
-﻿using Domain.AccessTokens;
-using Domain.RefreshTokens;
+﻿using Domain.RefreshTokens;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -12,7 +11,9 @@ public class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken>
         builder.ToTable("refresh_tokens");
 
         builder.HasIndex(x => x.Token).IsUnique();
+        builder.HasIndex(x => x.RevokedAt);
 
+        builder.Property(x => x.Token).IsRequired();
         builder.Property(x => x.UserId).IsRequired();
         builder.Property(x => x.IsRevoked).IsRequired();
         builder.Property(x => x.ExpiresAt).IsRequired();

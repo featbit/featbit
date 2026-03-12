@@ -22,7 +22,7 @@ public class RevokeRefreshTokenHandler : IRequestHandler<RevokeRefreshToken, boo
     public async Task<bool> Handle(RevokeRefreshToken request, CancellationToken cancellationToken)
     {
         var hashedToken = _hashService.HashToken(request.Token);
-        var storedToken = await _refreshTokenService.GetByTokenAsync(hashedToken);
+        var storedToken = await _refreshTokenService.FindOneAsync(x => x.Token == hashedToken);
 
         if (storedToken == null || !storedToken.IsActive)
         {
