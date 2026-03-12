@@ -45,9 +45,8 @@ public class MongoDbClient
     private readonly Dictionary<Type, string> _collectionNameMap = new()
     {
         { typeof(User), "Users" },
-        
         { typeof(RefreshToken), "RefreshTokens" },
-        
+
         { typeof(Workspace), "Workspaces" },
 
         { typeof(Organization), "Organizations" },
