@@ -3,6 +3,7 @@ using System.Text;
 using Application.Bases;
 using Application.Identity;
 using Domain.Identity;
+using Domain.RefreshTokens;
 using Domain.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
@@ -15,15 +16,18 @@ public class IdentityService : IIdentityService
 {
     private readonly IUserService _userService;
     private readonly IPasswordHasher<User> _passwordHasher;
+    private readonly IRefreshTokenService _refreshTokenService;
     private readonly JwtOptions _options;
 
     public IdentityService(
         IUserService userService,
         IPasswordHasher<User> passwordHasher,
+        IRefreshTokenService refreshTokenService,
         IOptions<JwtOptions> options)
     {
         _userService = userService;
         _passwordHasher = passwordHasher;
+        _refreshTokenService = refreshTokenService;
         _options = options.Value;
     }
 
@@ -49,25 +53,43 @@ public class IdentityService : IIdentityService
         return IdentityResult.Success;
     }
 
-    public string IssueToken(User user)
+    public async Task<AuthTokens> IssueTokensAsync(User user, string ipAddress)
     {
-        var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Key));
-        var credentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
+        var accessToken = IssueAccessToken();
+        var refreshToken = await IssueRefreshTokenAsync();
 
-        var descriptor = new SecurityTokenDescriptor
+        return new AuthTokens(accessToken, refreshToken);
+
+        string IssueAccessToken()
         {
-            Issuer = _options.Issuer,
-            Audience = _options.Audience,
-            Expires = DateTime.Now.AddMonths(1),
-            Subject = new ClaimsIdentity(user.Claims()),
-            SigningCredentials = credentials
-        };
+            var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Key));
+            var credentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
 
-        var handler = new JsonWebTokenHandler();
-        return handler.CreateToken(descriptor);
+            var descriptor = new SecurityTokenDescriptor
+            {
+                Issuer = _options.Issuer,
+                Audience = _options.Audience,
+                Expires = DateTime.UtcNow.AddMinutes(5),
+                Subject = new ClaimsIdentity(user.Claims()),
+                SigningCredentials = credentials
+            };
+
+            var handler = new JsonWebTokenHandler();
+            return handler.CreateToken(descriptor);
+        }
+
+        async Task<string> IssueRefreshTokenAsync()
+        {
+            var rawToken = Guid.NewGuid().ToString("N");
+
+            var record = RefreshToken.NewRecord(rawToken, user.Id, RefreshTokenConsts.ExpiryDays, ipAddress);
+            await _refreshTokenService.AddOneAsync(record);
+
+            return rawToken;
+        }
     }
 
-    public async Task<LoginResult> LoginByEmailAsync(Guid? workspaceId, string email, string password)
+    public async Task<LoginResult> LoginByEmailAsync(Guid? workspaceId, string email, string password, string ipAddress)
     {
         if (workspaceId is null)
         {
@@ -86,8 +108,8 @@ public class IdentityService : IIdentityService
             return LoginResult.Failed(ErrorCodes.EmailPasswordMismatch);
         }
 
-        var token = IssueToken(user);
-        return LoginResult.Ok(token);
+        var tokens = await IssueTokensAsync(user, ipAddress);
+        return LoginResult.Ok(tokens);
     }
 
     public async Task<RegisterResult> RegisterByEmailAsync(Guid workspaceId, string email, string password, string origin)
@@ -100,7 +122,6 @@ public class IdentityService : IIdentityService
 
         await _userService.AddOneAsync(user);
 
-        var token = IssueToken(user);
-        return RegisterResult.Ok(user.Id, token);
+        return RegisterResult.Ok(user);
     }
 }

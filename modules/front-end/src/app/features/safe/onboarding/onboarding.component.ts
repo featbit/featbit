@@ -17,7 +17,7 @@ export class OnboardingComponent {
     this.menuExtended = extended;
   }
 
-  logout() {
-    this.identityService.doLogoutUser();
+  async logout() {
+    await this.identityService.doLogoutUser();
   }
 }

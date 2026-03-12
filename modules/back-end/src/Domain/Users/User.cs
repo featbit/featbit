@@ -47,9 +47,7 @@ public class User : AuditedEntity
     {
         var claims = new List<Claim>
         {
-            new(UserClaims.Id, Id.ToString()),
-            new(UserClaims.Email, Email),
-            new(UserClaims.WorkspaceId, WorkspaceId.ToString()),
+            new(UserClaims.Id, Id.ToString())
         };
 
         return claims;

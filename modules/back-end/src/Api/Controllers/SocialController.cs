@@ -47,7 +47,6 @@ public class SocialController : ApiControllerBase
                 return Error<LoginToken>("Can not get email by OAuth code.");
             }
 
-            LoginToken token;
             var user = await _userService.FindOneAsync(x => x.Email == email);
             if (user == null)
             {
@@ -59,14 +58,14 @@ public class SocialController : ApiControllerBase
                 };
 
                 var registerResult = await Mediator.Send(createWorkspace);
-                token = new LoginToken(false, registerResult.Token);
-            }
-            else
-            {
-                token = new LoginToken(false, _identityService.IssueToken(user));
+                user = registerResult.User;
             }
 
-            return Ok(token);
+            var (accessToken, refreshToken) = 
+                await _identityService.IssueTokensAsync(user, Request.ClientIpAddress());
+            Response.SetRefreshTokenCookie(refreshToken);
+            
+            return Ok(new LoginToken(false, accessToken));
         }
         catch (Exception ex)
         {

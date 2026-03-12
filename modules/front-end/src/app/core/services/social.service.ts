@@ -36,6 +36,6 @@ export class SocialService {
   }
 
   login(code: string, providerName: string) {
-    return this.http.post(`${this.baseUrl}/login`, {code, providerName, redirectUri: this.redirectUri});
+    return this.http.post(`${this.baseUrl}/login`, {code, providerName, redirectUri: this.redirectUri}, { withCredentials: true });
   }
 }
