@@ -8,6 +8,8 @@ public class Member
 
     public string Name { get; set; }
 
+    public DateTime CreatedAt { get; set; }
+
     public Guid? InvitorId { get; set; }
 
     public string InitialPassword { get; set; }

@@ -78,6 +78,7 @@ public class PolicyService(MongoDbClient mongoDb) : MongoDbService<Policy>(mongo
                 theGroup.Id,
                 theGroup.Name,
                 theGroup.Description,
+                theGroup.CreatedAt,
                 AllGroupPolicies = allGroupPolicies
             };
 
@@ -95,6 +96,7 @@ public class PolicyService(MongoDbClient mongoDb) : MongoDbService<Policy>(mongo
 
         var totalCount = await query.CountAsync();
         var items = await query
+            .OrderByDescending(x => x.CreatedAt)
             .Skip(filter.PageIndex * filter.PageSize)
             .Take(filter.PageSize)
             .ToListAsync();
@@ -132,6 +134,7 @@ public class PolicyService(MongoDbClient mongoDb) : MongoDbService<Policy>(mongo
                 user.Id,
                 user.Name,
                 user.Email,
+                user.CreatedAt,
                 AllMemberPolicies = allMemberPolicies,
             };
 
@@ -153,6 +156,7 @@ public class PolicyService(MongoDbClient mongoDb) : MongoDbService<Policy>(mongo
 
         var totalCount = await query.CountAsync();
         var items = await query
+            .OrderByDescending(x => x.CreatedAt)
             .Skip(filter.PageIndex * filter.PageSize)
             .Take(filter.PageSize)
             .ToListAsync();

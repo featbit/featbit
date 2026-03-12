@@ -37,15 +37,11 @@ public class ApiControllerBase : ControllerBase
                 return _orgId.Value;
             }
 
-            var orgIdHeaderValue = HttpContext.Request.Headers[ApiConstants.OrgIdHeaderKey];
-
-            _orgId = Guid.TryParse(orgIdHeaderValue, out var orgId)
-                ? orgId
-                : Guid.Empty;
+            _orgId = HttpContext.Request.OrganizationId();
             return _orgId.Value;
         }
     }
-    
+
     private Guid? _workspaceId;
     protected Guid WorkspaceId
     {
@@ -56,11 +52,7 @@ public class ApiControllerBase : ControllerBase
                 return _workspaceId.Value;
             }
 
-            var workspaceIdHeaderValue = HttpContext.Request.Headers[ApiConstants.WorkspaceHeaderKey];
-
-            _workspaceId = Guid.TryParse(workspaceIdHeaderValue, out var workspaceId)
-                ? workspaceId
-                : Guid.Empty;
+            _workspaceId = HttpContext.Request.WorkspaceId();
             return _workspaceId.Value;
         }
     }

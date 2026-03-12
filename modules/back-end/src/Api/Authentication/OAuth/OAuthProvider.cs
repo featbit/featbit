@@ -1,4 +1,3 @@
-using Domain.Users;
 using Microsoft.AspNetCore.WebUtilities;
 
 namespace Api.Authentication.OAuth;

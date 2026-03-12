@@ -1,8 +1,8 @@
 using Api.Authentication;
-using Api.Authorization;
 using Application.Bases.Models;
 using Application.Members;
 using Application.Policies;
+using Domain.Policies;
 
 namespace Api.Controllers;
 

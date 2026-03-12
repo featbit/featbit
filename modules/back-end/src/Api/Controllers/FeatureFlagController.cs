@@ -1,12 +1,12 @@
 using Newtonsoft.Json;
 using System.Text.Json;
 using Api.Authentication;
-using Api.Authorization;
 using Api.Swagger.Examples;
 using Application.Bases.Models;
 using Application.FeatureFlags;
 using Domain.Workspaces;
 using Domain.FeatureFlags;
+using Domain.Policies;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using Swashbuckle.AspNetCore.Filters;
@@ -24,6 +24,7 @@ public class FeatureFlagController : ApiControllerBase
     /// </remarks>
     [OpenApi]
     [HttpGet]
+    [Authorize(Permissions.CanAccessEnv)]
     public async Task<ApiResponse<PagedResult<FeatureFlagVm>>> GetListAsync(
         Guid envId,
         [FromQuery] FeatureFlagFilter filter)
@@ -46,6 +47,7 @@ public class FeatureFlagController : ApiControllerBase
     /// </remarks>
     [OpenApi]
     [HttpGet("{key}")]
+    [Authorize(Permissions.CanAccessEnv)]
     public async Task<ApiResponse<FeatureFlag>> GetAsync(Guid envId, string key)
     {
         var request = new GetFeatureFlag
