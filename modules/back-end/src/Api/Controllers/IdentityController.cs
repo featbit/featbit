@@ -1,3 +1,4 @@
+using Application.Bases;
 using Application.Identity;
 
 namespace Api.Controllers;
@@ -33,7 +34,7 @@ public class IdentityController : ApiControllerBase
         var currentRefreshToken = Request.RefreshToken();
         if (string.IsNullOrWhiteSpace(currentRefreshToken))
         {
-            return Unauthorized(Error<LoginToken>("REFRESH_TOKEN_NOT_FOUND"));
+            return Unauthorized(Error<LoginToken>(ErrorCodes.Required("refresh-token")));
         }
 
         var refreshRequest = new RefreshTokens
