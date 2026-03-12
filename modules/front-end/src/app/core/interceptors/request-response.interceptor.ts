@@ -51,7 +51,7 @@ export class RequestResponseInterceptor implements HttpInterceptor {
 
         // Exclude auth-related endpoints from 401 refresh handling
         const url = request.url ?? '';
-        const excludeUrls = ['/refresh-token', '/login-by-email', '/logout', '/oidc/login', '/social/login'];
+        const excludeUrls = ['/refresh-token', '/login-by-email', '/oidc/login', '/social/login'];
 
         if (excludeUrls.some(x => url.includes(x))) {
           // If refresh token itself fails, force logout
