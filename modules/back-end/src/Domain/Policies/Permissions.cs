@@ -1,6 +1,6 @@
 using Domain.Resources;
 
-namespace Api.Authorization;
+namespace Domain.Policies;
 
 public static class Permissions
 {

@@ -1,6 +1,6 @@
 using Api.Authentication;
-using Api.Authorization;
 using Application.Projects;
+using Domain.Policies;
 using Domain.Projects;
 
 namespace Api.Controllers;
@@ -16,13 +16,13 @@ public class ProjectController : ApiControllerBase
     /// </remarks>
     [OpenApi]
     [HttpGet]
-    [Route("{projectId:guid}")]
+    [Route("{id:guid}")]
     [Authorize(Permissions.CanAccessProject)]
-    public async Task<ApiResponse<ProjectWithEnvs>> GetAsync(Guid projectId)
+    public async Task<ApiResponse<ProjectWithEnvs>> GetAsync(Guid id)
     {
         var request = new GetProject
         {
-            Id = projectId
+            Id = id
         };
 
         var project = await Mediator.Send(request);
@@ -37,7 +37,6 @@ public class ProjectController : ApiControllerBase
     /// </remarks>
     [OpenApi]
     [HttpGet]
-    [Authorize(Permissions.CanAccessProject)]
     public async Task<ApiResponse<IEnumerable<ProjectWithEnvs>>> GetListAsync()
     {
         var request = new GetProjectList

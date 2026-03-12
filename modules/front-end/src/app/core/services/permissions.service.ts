@@ -1,9 +1,9 @@
 import { Injectable } from "@angular/core";
 import { firstValueFrom } from "rxjs";
 import { IPolicy } from "@features/safe/iam/types/policy";
-import { MemberService } from "@services/member.service";
 import { EffectEnum, IamPolicyAction, IPolicyStatement, ResourceTypeEnum } from "@shared/policy";
 import { IEnvironment, IProject } from "@shared/types";
+import { UserService } from "@services/user.service";
 
 @Injectable({
   providedIn: 'root'
@@ -17,11 +17,11 @@ export class PermissionsService {
     return $localize`:@@permissions.need-permissions-for-flag:You don't have permissions to ${action} the feature flag "${flag}", please contact the admin to grant you the necessary permissions`;
   }
 
-  constructor(private memberSvc: MemberService) {
+  constructor(private userService: UserService) {
   }
 
-  async initUserPolicies(memberId: string) {
-    const policies = await firstValueFrom<IPolicy[]>(this.memberSvc.getAllPolicies(memberId));
+  async initUserPermissions() {
+    const policies = await firstValueFrom<IPolicy[]>(this.userService.getPolicies());
     this.userPolicies = [...policies];
     this.userPermissions = policies.flatMap(p => p.statements);
   }
@@ -125,8 +125,8 @@ export class PermissionsService {
         return true;
       }
 
-      return permission.resources.some(rsc => this.matchRule(rn, rsc)) &&
-        permission.actions.some(act => act === '*' || act === action.name);
+      return permission.actions.some(act => act === '*' || act === action.name) &&
+             permission.resources.some(rsc => this.matchRule(rn, rsc));
     });
   }
 
