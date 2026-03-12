@@ -68,7 +68,7 @@ export const authGuard = async (
   organizationService.setOrganization(organization);
 
   // init user permission
-  await permissionService.initUserPolicies(profile.id);
+  await permissionService.initUserPermissions();
 
   // if we're going to onboarding page
   if (url.startsWith("/onboarding")) {

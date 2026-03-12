@@ -7,6 +7,7 @@ using Api.Swagger;
 using Application.Services;
 using Domain.Workspaces;
 using Domain.Identity;
+using Domain.Policies;
 using Infrastructure;
 using Infrastructure.Services;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -115,7 +116,7 @@ public static class ServicesRegister
         // authorization
         LicenseVerifier.ImportPublicKey(builder.Configuration["PublicKey"]);
         builder.Services.AddTransient<ILicenseService, LicenseService>();
-        builder.Services.AddSingleton<IPermissionChecker, DefaultPermissionChecker>();
+        builder.Services.AddScoped<IPermissionChecker, DefaultPermissionChecker>();
         builder.Services.AddScoped<IAuthorizationHandler, PermissionRequirementHandler>();
         builder.Services.AddScoped<IAuthorizationHandler, LicenseRequirementHandler>();
         builder.Services.AddAuthorization(options =>

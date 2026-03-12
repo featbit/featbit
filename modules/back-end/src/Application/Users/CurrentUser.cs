@@ -3,20 +3,19 @@ using Microsoft.AspNetCore.Http;
 
 namespace Application.Users;
 
-public class CurrentUser : ICurrentUser
+public class CurrentUser(IHttpContextAccessor httpContextAccessor) : ICurrentUser
 {
-    private readonly IHttpContextAccessor _httpContextAccessor;
-
-    public CurrentUser(IHttpContextAccessor httpContextAccessor)
-    {
-        _httpContextAccessor = httpContextAccessor;
-    }
-
     public Guid Id
     {
         get
         {
-            var claim = _httpContextAccessor.HttpContext?.User.Claims.FirstOrDefault(x => x.Type == UserClaims.Id);
+            var httpContext = httpContextAccessor.HttpContext;
+            if (httpContext == null)
+            {
+                return Guid.Empty;
+            }
+
+            var claim = httpContext.User.Claims.FirstOrDefault(x => x.Type == UserClaims.Id);
             return claim == null ? Guid.Empty : Guid.Parse(claim.Value);
         }
     }

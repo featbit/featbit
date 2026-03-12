@@ -1,5 +1,6 @@
 using Application.Environments;
 using Domain.Environments;
+using Domain.Policies;
 
 namespace Api.Controllers;
 
@@ -7,6 +8,7 @@ namespace Api.Controllers;
 public class EnvironmentSecretController : ApiControllerBase
 {
     [HttpPost]
+    [Authorize(Permissions.CreateEnvSecret)]
     public async Task<ApiResponse<Secret>> CreateAsync(Guid envId, AddSecret request)
     {
         request.EnvId = envId;
@@ -16,6 +18,7 @@ public class EnvironmentSecretController : ApiControllerBase
     }
 
     [HttpPut("{id}")]
+    [Authorize(Permissions.UpdateEnvSecret)]
     public async Task<ApiResponse<bool>> UpdateAsync(Guid envId, string id, UpdateSecret request)
     {
         request.EnvId = envId;
@@ -26,6 +29,7 @@ public class EnvironmentSecretController : ApiControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Permissions.DeleteEnvSecret)]
     public async Task<ApiResponse<bool>> DeleteAsync(Guid envId, string id)
     {
         var request = new DeleteSecret
