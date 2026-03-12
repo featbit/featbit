@@ -6,31 +6,27 @@ public class LoginResult
 
     public string ErrorCode { get; private init; } = string.Empty;
 
-    public string AccessToken { get; private init; } = string.Empty;
-    
-    public string RefreshToken { get; private init; } = string.Empty;
-    
+    public AuthTokens Tokens { get; private init; }
+
     public static LoginResult Failed(string errorCode)
     {
         var failed = new LoginResult
         {
             Success = false,
             ErrorCode = errorCode,
-            AccessToken = string.Empty,
-            RefreshToken =  string.Empty
+            Tokens = null
         };
 
         return failed;
     }
 
-    public static LoginResult Ok(string accessToken, string refreshToken)
+    public static LoginResult Ok(AuthTokens tokens)
     {
         var success = new LoginResult
         {
             Success = true,
             ErrorCode = string.Empty,
-            AccessToken = accessToken,
-            RefreshToken = refreshToken
+            Tokens = tokens
         };
 
         return success;

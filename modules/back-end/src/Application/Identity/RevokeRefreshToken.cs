@@ -1,36 +1,29 @@
+using Domain.RefreshTokens;
+
 namespace Application.Identity;
 
 public class RevokeRefreshToken : IRequest<bool>
 {
     public string Token { get; set; }
-    public string? IpAddress { get; set; }
+
+    public string IpAddress { get; set; }
 }
 
-public class RevokeRefreshTokenHandler : IRequestHandler<RevokeRefreshToken, bool>
+public class RevokeRefreshTokenHandler(IRefreshTokenService refreshTokenService)
+    : IRequestHandler<RevokeRefreshToken, bool>
 {
-    private readonly IRefreshTokenService _refreshTokenService;
-    private readonly ITokenHashService _hashService;
-
-    public RevokeRefreshTokenHandler(
-        IRefreshTokenService refreshTokenService,
-        ITokenHashService hashService)
-    {
-        _refreshTokenService = refreshTokenService;
-        _hashService = hashService;
-    }
-
     public async Task<bool> Handle(RevokeRefreshToken request, CancellationToken cancellationToken)
     {
-        var hashedToken = _hashService.HashToken(request.Token);
-        var storedToken = await _refreshTokenService.FindOneAsync(x => x.Token == hashedToken);
+        var hashedToken = RefreshToken.HashToken(request.Token);
 
-        if (storedToken == null || !storedToken.IsActive)
+        var storedToken = await refreshTokenService.FindOneAsync(x => x.Token == hashedToken);
+        if (storedToken is not { IsActive: true })
         {
             return false;
         }
 
-        storedToken.Revoke(request.IpAddress);
-        await _refreshTokenService.UpdateAsync(storedToken);
+        storedToken.Revoke(request.IpAddress, null);
+        await refreshTokenService.UpdateAsync(storedToken);
 
         return true;
     }

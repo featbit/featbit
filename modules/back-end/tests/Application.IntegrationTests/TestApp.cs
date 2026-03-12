@@ -2,6 +2,7 @@ using System.Net.Http.Headers;
 using System.Net.Mime;
 using System.Text;
 using System.Text.Json;
+using Application.Identity;
 using Application.Services;
 using Application.Users;
 using Domain.Users;
@@ -62,7 +63,7 @@ public class TestApp : WebApplicationFactory<Program>
         var client = CreateClient();
         if (authenticated)
         {
-            AddAuthorizationHeader(client);
+            await AddAuthorizationHeader(client);
         }
 
         return await client.GetAsync(uri);
@@ -76,7 +77,7 @@ public class TestApp : WebApplicationFactory<Program>
         var client = CreateClient();
         if (authenticated)
         {
-            AddAuthorizationHeader(client);
+            await AddAuthorizationHeader(client);
         }
 
         var body = JsonSerializer.Serialize(payload);
@@ -85,21 +86,21 @@ public class TestApp : WebApplicationFactory<Program>
         return await client.PostAsync(uri, content);
     }
 
-    public string GetToken(User user)
+    public async Task<AuthTokens> GetTokenAsync(User user)
     {
         var scopeFactory = Services.GetRequiredService<IServiceScopeFactory>();
         using var scope = scopeFactory.CreateScope();
         var identityService = scope.ServiceProvider.GetRequiredService<IIdentityService>();
 
-        var token = identityService.IssueToken(user);
-        return token;
+        var tokens = await identityService.IssueTokensAsync(user, "::1");
+        return tokens;
     }
 
-    private void AddAuthorizationHeader(HttpClient client)
+    private async Task AddAuthorizationHeader(HttpClient client)
     {
-        var token = GetToken(TestUser.Instance());
+        var authTokens = await GetTokenAsync(TestUser.Instance());
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
-            JwtBearerDefaults.AuthenticationScheme, token
+            JwtBearerDefaults.AuthenticationScheme, authTokens.AccessToken
         );
     }
 }

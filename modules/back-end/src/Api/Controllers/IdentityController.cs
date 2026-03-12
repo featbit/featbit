@@ -9,103 +9,78 @@ public class IdentityController : ApiControllerBase
     [Route("login-by-email")]
     public async Task<ApiResponse<LoginToken>> LoginByEmailAsync(LoginByEmail request)
     {
-        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
-        request.IpAddress = ipAddress;
-        
-        var loginResult = await Mediator.Send(request);
+        request.IpAddress = Request.ClientIpAddress();
 
+        var loginResult = await Mediator.Send(request);
         if (!loginResult.Success)
         {
             return Error<LoginToken>(loginResult.ErrorCode);
         }
 
-        // Set refresh token in HttpOnly cookie
-        var cookieOptions = new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = false, // dev only if using http
-            SameSite = SameSiteMode.Lax,
-            Expires = DateTimeOffset.UtcNow.AddDays(30),
-            Path = ApiConstants.RefreshTokenCookiePath
-        };
+        var (accessToken, refreshToken) = loginResult.Tokens;
 
-        Response.Cookies.Append(ApiConstants.RefreshTokenCookieName, loginResult.RefreshToken, cookieOptions);
+        // set refresh token cookie
+        Response.SetRefreshTokenCookie(refreshToken);
 
-        return Ok(new LoginToken(false, loginResult.AccessToken));
+        return Ok(new LoginToken(false, accessToken));
     }
-    
+
     [HttpPost]
     [AllowAnonymous]
     [Route("refresh-token")]
-    public async Task<ApiResponse<LoginToken>> RefreshTokenAsync()
+    public async Task<ActionResult<ApiResponse<LoginToken>>> RefreshTokenAsync()
     {
-        if (!Request.Cookies.TryGetValue(ApiConstants.RefreshTokenCookieName, out var refreshToken))
+        var currentRefreshToken = Request.RefreshToken();
+        if (string.IsNullOrWhiteSpace(currentRefreshToken))
         {
-            Response.StatusCode = StatusCodes.Status401Unauthorized;
-            return Error<LoginToken>("REFRESH_TOKEN_NOT_FOUND");
+            return Unauthorized(Error<LoginToken>("REFRESH_TOKEN_NOT_FOUND"));
         }
-        
-        // Get client IP address
-        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
-        
-        var refreshRequest = new RefreshToken 
-        { 
-            Token = refreshToken,
-            IpAddress = ipAddress ?? string.Empty
-        };
-        
-        var refreshResult = await Mediator.Send(refreshRequest);
-    
-        if (!refreshResult.Success)
+
+        var refreshRequest = new RefreshTokens
         {
-            Response.Cookies.Delete(ApiConstants.RefreshTokenCookieName, new CookieOptions { Path = ApiConstants.RefreshTokenCookiePath });
-            Response.StatusCode = StatusCodes.Status401Unauthorized;
-            return Error<LoginToken>(refreshResult.ErrorCode);
-        }
-        
-        var cookieOptions = new CookieOptions
-        {
-            HttpOnly = true,
-            Secure = false,
-            SameSite = SameSiteMode.Lax,
-            Expires = DateTimeOffset.UtcNow.AddDays(30),
-            Path = ApiConstants.RefreshTokenCookiePath
+            Token = currentRefreshToken,
+            IpAddress = Request.ClientIpAddress()
         };
 
-        Response.Cookies.Append(ApiConstants.RefreshTokenCookieName, refreshResult.RefreshToken, cookieOptions);
-        
-        return Ok(new LoginToken(false, refreshResult.AccessToken));
+        var refreshResult = await Mediator.Send(refreshRequest);
+        if (!refreshResult.Success)
+        {
+            Response.DeleteRefreshTokenCookie();
+            return Unauthorized(Error<LoginToken>(refreshResult.ErrorCode));
+        }
+
+        var (accessToken, refreshToken) = refreshResult.Tokens;
+
+        // set new refresh token cookie
+        Response.SetRefreshTokenCookie(refreshToken);
+
+        return Ok(new LoginToken(false, accessToken));
     }
 
     [HttpPost]
     [Route("logout")]
     public async Task<ApiResponse<bool>> LogoutAsync()
     {
-        // Get refresh token from cookie
-        if (Request.Cookies.TryGetValue(ApiConstants.RefreshTokenCookieName, out var refreshToken))
+        var refreshToken = Request.RefreshToken();
+        if (string.IsNullOrWhiteSpace(refreshToken))
         {
-            // Get client IP address
-            var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
-            
-            // Revoke the refresh token
-            var revokeRequest = new RevokeRefreshToken
-            {
-                Token = refreshToken,
-                IpAddress = ipAddress
-            };
-            
-            await Mediator.Send(revokeRequest);
+            return Ok(true);
         }
 
-        // Clear refresh token cookie
-        Response.Cookies.Delete(ApiConstants.RefreshTokenCookieName, new CookieOptions 
-        { 
-            Path = ApiConstants.RefreshTokenCookiePath 
-        });
+        // revoke the refresh token
+        var revokeRequest = new RevokeRefreshToken
+        {
+            Token = refreshToken,
+            IpAddress = Request.ClientIpAddress()
+        };
+        await Mediator.Send(revokeRequest);
+
+        // delete refresh token cookie
+        Response.DeleteRefreshTokenCookie();
 
         return Ok(true);
     }
-    
+
     [HttpPut("reset-password")]
     public async Task<ApiResponse<ResetPasswordResult>> ResetPasswordAsync(ResetPassword request)
     {

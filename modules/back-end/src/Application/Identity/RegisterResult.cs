@@ -1,10 +1,10 @@
+using Domain.Users;
+
 namespace Application.Identity;
 
 public class RegisterResult
 {
-    public Guid UserId { get; set; }
-
-    public string Token { get; set; }
+    public User User { get; set; }
 
     public bool Success { get; set; }
 
@@ -14,8 +14,7 @@ public class RegisterResult
     {
         var failed = new RegisterResult
         {
-            UserId = Guid.Empty,
-            Token = string.Empty,
+            User = null,
             Success = false,
             Message = message
         };
@@ -23,12 +22,11 @@ public class RegisterResult
         return failed;
     }
 
-    public static RegisterResult Ok(Guid userId, string token)
+    public static RegisterResult Ok(User user)
     {
         var success = new RegisterResult
         {
-            UserId = userId,
-            Token = token,
+            User = user,
             Success = true,
             Message = string.Empty
         };

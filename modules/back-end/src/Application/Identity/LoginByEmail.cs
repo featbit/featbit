@@ -10,7 +10,7 @@ public class LoginByEmail : IRequest<LoginResult>
     public string WorkspaceKey { get; set; } = string.Empty;
 
     public string Password { get; init; } = string.Empty;
-    
+
     public string IpAddress { get; set; } = string.Empty;
 }
 
@@ -60,6 +60,7 @@ public class LoginByEmailHandler : IRequestHandler<LoginByEmail, LoginResult>
             _ => workspaces.FirstOrDefault(x => x.Key == request.WorkspaceKey)?.Id
         };
 
-        return await _identityService.LoginByEmailAsync(workspaceId, request.Email, request.Password, request.IpAddress);
+        return await _identityService.LoginByEmailAsync(workspaceId, request.Email, request.Password,
+            request.IpAddress);
     }
 }

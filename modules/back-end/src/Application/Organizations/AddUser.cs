@@ -49,7 +49,7 @@ public class AddUserHandler(
             initialPwd = PasswordGenerator.New(email);
             var registerResult =
                 await identityService.RegisterByEmailAsync(request.WorkspaceId, email, initialPwd, UserOrigin.Local);
-            userId = registerResult.UserId;
+            userId = registerResult.User.Id;
         }
         else
         {

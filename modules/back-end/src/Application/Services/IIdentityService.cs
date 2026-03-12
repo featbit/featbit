@@ -10,7 +10,7 @@ public interface IIdentityService
 
     Task<IdentityResult> ResetPasswordAsync(User user, string newPassword);
 
-    string IssueToken(User user);
+    Task<AuthTokens> IssueTokensAsync(User user, string ipAddress);
 
     Task<LoginResult> LoginByEmailAsync(Guid? workspaceId, string email, string password, string ipAddress);
 
