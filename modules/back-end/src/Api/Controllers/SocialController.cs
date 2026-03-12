@@ -63,7 +63,6 @@ public class SocialController : ApiControllerBase
 
             var (accessToken, refreshToken) = 
                 await _identityService.IssueTokensAsync(user, Request.ClientIpAddress());
-
             Response.SetRefreshTokenCookie(refreshToken);
             
             return Ok(new LoginToken(false, accessToken));

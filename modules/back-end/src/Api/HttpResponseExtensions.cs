@@ -11,7 +11,7 @@ public static class HttpResponseExtensions
         // can be configured through environment variables, for now we set it to false to make it works in any environment
         Secure = false,
 
-        // we need to allow the cookie to be sent in cross-site requests
+        // we need to allow the cookie to be sent in cross-domain requests
         SameSite = SameSiteMode.Lax,
 
         Expires = DateTimeOffset.UtcNow.AddDays(30),

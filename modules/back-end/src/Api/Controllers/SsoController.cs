@@ -87,7 +87,8 @@ public class SsoController : ApiControllerBase
                 isSsoFirstLogin = false;
             }
 
-            var (accessToken, refreshToken) = await _identityService.IssueTokensAsync(user, Request.ClientIpAddress());
+            var (accessToken, refreshToken) = 
+                await _identityService.IssueTokensAsync(user, Request.ClientIpAddress());
             Response.SetRefreshTokenCookie(refreshToken);
 
             return Ok(new LoginToken(isSsoFirstLogin, accessToken));

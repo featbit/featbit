@@ -20,19 +20,19 @@ public class RefreshTokensHandler(
     {
         var hashedToken = RefreshToken.HashToken(request.Token);
 
-        var storedToken = await refreshTokenService.FindOneAsync(x => x.Token == hashedToken);
-        if (storedToken is not { IsActive: true })
+        var existingToken = await refreshTokenService.FindOneAsync(x => x.Token == hashedToken);
+        if (existingToken is not { IsActive: true })
         {
             return RefreshTokensResult.Failed(ErrorCodes.Invalid(nameof(RefreshTokens)));
         }
 
         // generate new oauth tokens
-        var user = await userService.GetAsync(storedToken.UserId);
+        var user = await userService.GetAsync(existingToken.UserId);
         var authTokens = await identityService.IssueTokensAsync(user, request.IpAddress);
 
-        // revoke the old refresh token
-        storedToken.Revoke(request.IpAddress, authTokens.RefreshToken);
-        await refreshTokenService.UpdateAsync(storedToken);
+        // revoke the existing refresh token
+        existingToken.Revoke(request.IpAddress, authTokens.RefreshToken);
+        await refreshTokenService.UpdateAsync(existingToken);
 
         return RefreshTokensResult.Succeed(authTokens);
     }
