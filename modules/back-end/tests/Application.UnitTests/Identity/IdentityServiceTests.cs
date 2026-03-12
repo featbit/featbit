@@ -1,3 +1,4 @@
+using Application.Services;
 using Domain.Identity;
 using Domain.Users;
 using Infrastructure.Services;
@@ -9,6 +10,7 @@ namespace Application.UnitTests.Identity;
 public class IdentityServiceTests
 {
     private readonly Mock<IPasswordHasher<User>> _passwordHasherMock = new();
+    private readonly Mock<IRefreshTokenService> _refreshTokenServiceMock = new();
     private readonly IdentityService _identityService;
 
     public IdentityServiceTests()
@@ -16,6 +18,7 @@ public class IdentityServiceTests
         _identityService = new IdentityService(
             null!,
             _passwordHasherMock.Object,
+            _refreshTokenServiceMock.Object,
             Options.Create(new JwtOptions())
         );
     }

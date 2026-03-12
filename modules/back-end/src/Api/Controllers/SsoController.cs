@@ -10,12 +10,15 @@ namespace Api.Controllers;
 [Route("api/v{version:apiVersion}/sso")]
 public class SsoController : ApiControllerBase
 {
+    const string REFRESH_TOKEN_COOKIE_PATH = "/api/v1/identity/refresh-token";
+    
     private readonly bool _isEnabled;
 
     private readonly OidcClient _client;
     private readonly IUserService _userService;
     private readonly IIdentityService _identityService;
     private readonly IWorkspaceService _workspaceService;
+    private readonly IRefreshTokenService _refreshTokenService;
     private readonly ILogger<SsoController> _logger;
 
     public SsoController(
@@ -24,6 +27,7 @@ public class SsoController : ApiControllerBase
         IIdentityService identityService,
         IWorkspaceService workspaceService,
         IConfiguration configuration,
+        IRefreshTokenService refreshTokenService,
         ILogger<SsoController> logger)
     {
         _isEnabled = "true".Equals(configuration["SSOEnabled"], StringComparison.CurrentCultureIgnoreCase);
@@ -32,6 +36,7 @@ public class SsoController : ApiControllerBase
         _userService = userService;
         _identityService = identityService;
         _workspaceService = workspaceService;
+        _refreshTokenService = refreshTokenService;
         _logger = logger;
     }
 
@@ -74,10 +79,14 @@ public class SsoController : ApiControllerBase
 
             LoginToken token;
             var user = await _userService.FindOneAsync(x => x.Email == email && x.WorkspaceId == workspace.Id);
+            var userId = user?.Id;
+            
             if (user == null)
             {
                 var registerResult =
                     await _identityService.RegisterByEmailAsync(workspace.Id, email, string.Empty, UserOrigin.Sso);
+                
+                userId = registerResult.UserId;
                 token = new LoginToken(true, registerResult.Token);
             }
             else
@@ -85,6 +94,20 @@ public class SsoController : ApiControllerBase
                 token = new LoginToken(false, _identityService.IssueToken(user));
             }
 
+            // Set refresh token in HttpOnly cookie
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false, // dev only if using http
+                SameSite = SameSiteMode.Lax,
+                Expires = DateTimeOffset.UtcNow.AddDays(30),
+                Path = ApiConstants.RefreshTokenCookiePath
+            };
+
+            var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
+            var refreshTokenPair = await _refreshTokenService.CreateAsync(userId.Value, ipAddress);
+            Response.Cookies.Append(ApiConstants.RefreshTokenCookieName, refreshTokenPair.Item1, cookieOptions);
+            
             return Ok(token);
         }
         catch (Exception ex)

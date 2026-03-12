@@ -38,7 +38,7 @@ export const authGuard = async (
   // if workspaceId is invalid, logout user
   const workspace = await workspaceService.getWorkspace();
   if (!workspace) {
-    identityService.doLogoutUser(false);
+    await identityService.doLogoutUser(false);
     return router.parseUrl('/login');
   }
 
@@ -89,7 +89,7 @@ export const authGuard = async (
   const success = await trySetAccessibleProjectEnv(projectService);
   if (!success) {
     showDenyMessage(notification);
-    identityService.doLogoutUser(false);
+    await identityService.doLogoutUser(false);
     return false;
   }
 

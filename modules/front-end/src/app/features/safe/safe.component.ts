@@ -120,7 +120,7 @@ export class SafeComponent implements OnInit {
     ];
   }
 
-  logout() {
-    this.identityService.doLogoutUser();
+  async logout() {
+    await this.identityService.doLogoutUser();
   }
 }

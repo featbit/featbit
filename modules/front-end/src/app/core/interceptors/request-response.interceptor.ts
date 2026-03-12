@@ -6,8 +6,8 @@ import {
   HttpRequest,
   HttpResponse
 } from "@angular/common/http";
-import { Observable } from "rxjs";
-import { catchError, map } from 'rxjs/operators';
+import { BehaviorSubject, Observable, take, throwError } from "rxjs";
+import { catchError, filter, map, switchMap } from 'rxjs/operators';
 import { Router } from "@angular/router";
 import { NzMessageService } from "ng-zorro-antd/message";
 import { Injectable } from "@angular/core";
@@ -15,13 +15,18 @@ import { IDENTITY_TOKEN } from "@utils/localstorage-keys";
 import { IResponse } from "@shared/types";
 import { getCurrentOrganization } from "@utils/project-env";
 import { getProfile } from "@utils/index";
+import { IdentityService } from "@services/identity.service";
 
 @Injectable()
 export class RequestResponseInterceptor implements HttpInterceptor {
 
+  private isRefreshing = false;
+  private refreshTokenSubject: BehaviorSubject<string | null> = new BehaviorSubject<string | null>(null);
+
   constructor(
     private message: NzMessageService,
-    private router: Router
+    private router: Router,
+    private identity: IdentityService,
   ) { }
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<unknown>> {
@@ -36,36 +41,94 @@ export class RequestResponseInterceptor implements HttpInterceptor {
       .set('Workspace', currentWorkspaceId)
     });
 
-    const excludeUrls = [ '/login-by-email', '/oidc/login', '/social/login' ];
     return next.handle(authedReq)
     .pipe(
-      map(event => {
-        if (!(event instanceof HttpResponse)) {
-          return event;
-        }
-
-        const url = event.url;
-        if (excludeUrls.some(x => url.endsWith(x))) {
-          return event;
-        }
-
-        const body = event.body as IResponse;
-        if (!body.success && body.errors.length > 0) {
-          this.message.error(body.errors.join('/'));
-        } else {
-          event = event.clone({ body: event.body.data });
-        }
-
-        return event;
-      }),
+      map(event => this.handleResponse(event)),
       catchError((errorResponse: HttpErrorResponse) => {
-        if (errorResponse.status === 401) {
-          localStorage.clear();
-          this.router.navigateByUrl('/login');
+        if (errorResponse.status !== 401) {
+          return throwError(() => errorResponse);
         }
 
-        throw errorResponse.error;
+        return this.handle401Error(request, next);
       })
     );
+  }
+
+  private handle401Error(
+    request: HttpRequest<any>,
+    next: HttpHandler
+  ): Observable<HttpEvent<any>> {
+    if (!this.isRefreshing) {
+      this.isRefreshing = true;
+      this.refreshTokenSubject.next(null);
+
+      return this.identity.refreshToken().pipe(
+        switchMap((res: any) => {
+          this.isRefreshing = false;
+
+          const newToken = res.token;
+          localStorage.setItem(IDENTITY_TOKEN, newToken);
+
+          this.refreshTokenSubject.next(newToken);
+
+          const currentOrgId = getCurrentOrganization()?.id ?? '';
+          const currentWorkspaceId = getProfile()?.workspaceId ?? '';
+
+          const retryReq = request.clone({
+            headers: request.headers
+              .set('Authorization', `Bearer ${newToken}`)
+              .set('Organization', currentOrgId)
+              .set('Workspace', currentWorkspaceId)
+          });
+
+          return next.handle(retryReq).pipe(
+            map(event => this.handleResponse(event))
+          );
+        }),
+        catchError((err) => {
+          this.isRefreshing = false;
+          localStorage.clear();
+          this.router.navigateByUrl('/login');
+          return throwError(() => err);
+        })
+      );
+    }
+
+    return this.refreshTokenSubject.pipe(
+      filter(token => token != null),
+      take(1),
+      switchMap(token => {
+        const retryReq = request.clone({
+          headers: request.headers.set('Authorization', `Bearer ${token}`)
+        });
+
+        return next.handle(retryReq).pipe(
+          map(event => this.handleResponse(event))
+        );
+      })
+    );
+  }
+
+  private handleResponse(event: HttpEvent<any>) {
+    if (!(event instanceof HttpResponse)) {
+      return event;
+    }
+
+    const url = event.url ?? '';
+
+    const excludeUrls = ['/login-by-email', '/oidc/login', '/social/login'];
+
+    if (excludeUrls.some(x => url.endsWith(x))) {
+      return event;
+    }
+
+    const body = event.body as IResponse;
+
+    if (!body.success && body.errors?.length > 0) {
+      this.message.error(body.errors.join('/'));
+      return event;
+    }
+
+    return event.clone({ body: body.data });
   }
 }

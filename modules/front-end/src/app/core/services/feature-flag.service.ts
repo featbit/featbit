@@ -43,7 +43,7 @@ export class FeatureFlagService {
 
   toggleStatus(key: string, status: boolean): Observable<string> {
     const url = `${this.baseUrl}/${key}/toggle/${status}`;
-    return this.http.put<string>(url, {})
+    return this.http.put<string>(url, {}, {withCredentials: true})
   }
 
   getByKey(key: string): Observable<IFeatureFlag> {

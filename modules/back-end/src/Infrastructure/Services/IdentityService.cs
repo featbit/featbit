@@ -15,15 +15,18 @@ public class IdentityService : IIdentityService
 {
     private readonly IUserService _userService;
     private readonly IPasswordHasher<User> _passwordHasher;
+    private readonly IRefreshTokenService _refreshTokenService;
     private readonly JwtOptions _options;
 
     public IdentityService(
         IUserService userService,
         IPasswordHasher<User> passwordHasher,
+        IRefreshTokenService refreshTokenService,
         IOptions<JwtOptions> options)
     {
         _userService = userService;
         _passwordHasher = passwordHasher;
+        _refreshTokenService = refreshTokenService;
         _options = options.Value;
     }
 
@@ -58,7 +61,7 @@ public class IdentityService : IIdentityService
         {
             Issuer = _options.Issuer,
             Audience = _options.Audience,
-            Expires = DateTime.Now.AddMonths(1),
+            Expires = DateTime.Now.AddMinutes(5),
             Subject = new ClaimsIdentity(user.Claims()),
             SigningCredentials = credentials
         };
@@ -67,7 +70,7 @@ public class IdentityService : IIdentityService
         return handler.CreateToken(descriptor);
     }
 
-    public async Task<LoginResult> LoginByEmailAsync(Guid? workspaceId, string email, string password)
+    public async Task<LoginResult> LoginByEmailAsync(Guid? workspaceId, string email, string password, string ipAddress)
     {
         if (workspaceId is null)
         {
@@ -86,8 +89,11 @@ public class IdentityService : IIdentityService
             return LoginResult.Failed(ErrorCodes.EmailPasswordMismatch);
         }
 
-        var token = IssueToken(user);
-        return LoginResult.Ok(token);
+        var accessToken = IssueToken(user);
+        
+        var refreshTokenPair = await _refreshTokenService.CreateAsync(user.Id, ipAddress);
+        
+        return LoginResult.Ok(accessToken, refreshTokenPair.Item1);
     }
 
     public async Task<RegisterResult> RegisterByEmailAsync(Guid workspaceId, string email, string password, string origin)

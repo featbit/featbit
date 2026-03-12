@@ -29,6 +29,7 @@ public static class ConfigureServices
         // identity
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
         services.AddScoped<IIdentityService, Services.IdentityService>();
+        services.AddScoped<ITokenHashService, Services.TokenHashService>();
 
         // http clients
         services.AddHttpClient<IOlapService, Services.OlapService>(httpClient =>

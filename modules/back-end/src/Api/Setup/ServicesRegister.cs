@@ -51,9 +51,10 @@ public static class ServicesRegister
         builder.Services.AddCors(options => options.AddDefaultPolicy(policyBuilder =>
         {
             policyBuilder
-                .AllowAnyOrigin()
+                .SetIsOriginAllowed(_ => true)  // allow any origin dynamically
                 .AllowAnyHeader()
-                .AllowAnyMethod();
+                .AllowAnyMethod()
+                .AllowCredentials();
         }));
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -103,7 +104,10 @@ public static class ServicesRegister
                     ValidAudience = jwtOption["Audience"],
 
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOption["Key"]!))
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOption["Key"]!)),
+                    
+                    ValidateLifetime = true, // check expires
+                    ClockSkew = TimeSpan.Zero  // Optional: remove default 5-minute tolerance
                 };
             })
             .AddOpenApi(Schemes.OpenApi);

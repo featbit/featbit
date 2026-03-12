@@ -12,7 +12,7 @@ import {
 import { Router } from "@angular/router";
 import { UserService } from "@services/user.service";
 import { IResponse } from "@shared/types";
-import { Observable } from "rxjs";
+import { firstValueFrom, Observable } from "rxjs";
 import { IResetPasswordResult } from "@features/safe/workspaces/types/profiles";
 import { BroadcastService } from "@services/broadcast.service";
 
@@ -33,11 +33,19 @@ export class IdentityService {
   ) { }
 
   loginByEmail(email: string, password: string, workspaceKey: string) {
-    return this.http.post(`${this.baseUrl}/login-by-email`, { email, password, workspaceKey });
+    return this.http.post(`${this.baseUrl}/login-by-email`, { email, password, workspaceKey }, { withCredentials: true });
   }
 
   resetPassword(currentPassword: string, newPassword: string): Observable<IResetPasswordResult> {
     return this.http.put<IResetPasswordResult>(`${this.baseUrl}/reset-password`, { currentPassword, newPassword })
+  }
+
+  refreshToken() {
+    return this.http.post(`${this.baseUrl}/refresh-token`, {}, { withCredentials: true });
+  }
+
+  logout() {
+    return this.http.post(`${this.baseUrl}/logout`, {}, { withCredentials: true });
   }
 
   async doLoginUser(token: string): Promise<void> {
@@ -77,20 +85,27 @@ export class IdentityService {
     });
   }
 
-  doLogoutUser(keepOrgProject: boolean = true) {
-    const storageToKeep = {
-      [CURRENT_LANGUAGE()]: localStorage.getItem(CURRENT_LANGUAGE()),
-      [GET_STARTED()]: localStorage.getItem(GET_STARTED()),
-    };
+  async doLogoutUser(keepOrgProject: boolean = true) {
+    try {
+      await firstValueFrom(this.logout());
+    } catch (error) {
+      // Continue with logout even if API call fails
+      console.error('Logout API call failed', error);
+    } finally {
+      const storageToKeep = {
+        [CURRENT_LANGUAGE()]: localStorage.getItem(CURRENT_LANGUAGE()),
+        [GET_STARTED()]: localStorage.getItem(GET_STARTED()),
+      };
 
-    if (keepOrgProject) {
-      // restore org and project, so when user login, he would always see the same project & env
-      storageToKeep[CURRENT_ORGANIZATION()] = localStorage.getItem(CURRENT_ORGANIZATION());
-      storageToKeep[CURRENT_PROJECT()] = localStorage.getItem(CURRENT_PROJECT());
+      if (keepOrgProject) {
+        // restore org and project, so when user login, he would always see the same project & env
+        storageToKeep[CURRENT_ORGANIZATION()] = localStorage.getItem(CURRENT_ORGANIZATION());
+        storageToKeep[CURRENT_PROJECT()] = localStorage.getItem(CURRENT_PROJECT());
+      }
+
+      localStorage.clear();
+      Object.keys(storageToKeep).forEach(k => localStorage.setItem(k, storageToKeep[k]));
+      this.broadcastService.userLoggedOut();
     }
-
-    localStorage.clear();
-    Object.keys(storageToKeep).forEach(k => localStorage.setItem(k, storageToKeep[k]));
-    this.broadcastService.userLoggedOut();
   }
 }
