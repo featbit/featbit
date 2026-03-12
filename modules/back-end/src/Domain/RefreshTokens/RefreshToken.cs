@@ -29,13 +29,24 @@ public class RefreshToken : AuditedEntity
 
     public bool IsActive => !IsRevoked && !IsExpired;
 
-    public RefreshToken(string rawToken, Guid userId, int expiryDays, string? createdByIp = null)
+    // for ef core
+    protected RefreshToken()
     {
-        Token = HashToken(rawToken);
-        UserId = userId;
-        ExpiresAt = DateTime.UtcNow.AddDays(expiryDays);
-        CreatedByIp = createdByIp;
-        IsRevoked = false;
+        Token = string.Empty;
+        UserId = Guid.Empty;
+        IsRevoked = true;
+    }
+
+    public static RefreshToken NewRecord(string rawToken, Guid userId, int expiryDays, string? createdByIp = null)
+    {
+        return new RefreshToken
+        {
+            Token = HashToken(rawToken),
+            UserId = userId,
+            ExpiresAt = DateTime.UtcNow.AddDays(expiryDays),
+            CreatedByIp = createdByIp,
+            IsRevoked = false
+        };
     }
 
     public void Revoke(string revokedByIp, string? replacedByRawToken)
