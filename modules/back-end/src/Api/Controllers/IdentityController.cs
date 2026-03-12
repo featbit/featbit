@@ -41,6 +41,7 @@ public class IdentityController : ApiControllerBase
     {
         if (!Request.Cookies.TryGetValue(ApiConstants.RefreshTokenCookieName, out var refreshToken))
         {
+            Response.StatusCode = StatusCodes.Status401Unauthorized;
             return Error<LoginToken>("REFRESH_TOKEN_NOT_FOUND");
         }
         
@@ -58,6 +59,7 @@ public class IdentityController : ApiControllerBase
         if (!refreshResult.Success)
         {
             Response.Cookies.Delete(ApiConstants.RefreshTokenCookieName, new CookieOptions { Path = ApiConstants.RefreshTokenCookiePath });
+            Response.StatusCode = StatusCodes.Status401Unauthorized;
             return Error<LoginToken>(refreshResult.ErrorCode);
         }
         
