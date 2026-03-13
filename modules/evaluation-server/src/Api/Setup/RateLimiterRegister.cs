@@ -4,7 +4,6 @@ using Domain.Shared;
 using Infrastructure;
 using Infrastructure.Caches;
 using Infrastructure.Caches.Redis;
-using Microsoft.Extensions.Options;
 using Serilog;
 
 namespace Api.Setup;
@@ -65,23 +64,18 @@ public static class RateLimiterRegister
 
                 context.HttpContext.Response.ContentType = "application/json";
 
-                // Prefer the retry-after value from the lease metadata (set by Redis
-                // limiter and by the built-in FixedWindow / TokenBucket limiters).
-                // Fall back to the configured window as a reasonable estimate when
-                // the limiter doesn't provide one (e.g. SlidingWindowRateLimiter).
+                // Set Retry-After only when the lease carries the value.
+                // The Redis limiter and the built-in FixedWindow/TokenBucket limiters
+                // always populate this metadata on rejection.
+                // The built-in SlidingWindowRateLimiter does not, so we omit the header
+                // rather than emitting a potentially incorrect value from the global config
+                // (which wouldn't reflect per-endpoint WindowSeconds overrides).
                 if (context.Lease.TryGetMetadata(
                         RedisRateLimitLease.RetryAfterMetadataName, out var retryAfterObj)
                     && retryAfterObj is TimeSpan retryAfter)
                 {
-                    context.HttpContext.Response.Headers.RetryAfter =
+                    context.HttpContext.Response.Headers["Retry-After"] =
                         ((int)retryAfter.TotalSeconds).ToString();
-                }
-                else
-                {
-                    var opts = context.HttpContext.RequestServices
-                        .GetRequiredService<IOptions<RateLimitingOptions>>().Value;
-                    context.HttpContext.Response.Headers.RetryAfter =
-                        opts.WindowSeconds.ToString();
                 }
 
                 await context.HttpContext.Response.WriteAsJsonAsync(
