@@ -45,6 +45,9 @@ public static class ServicesRegister
             .UseStore(configuration)
             .UseMq(configuration);
 
+        // rate limiting
+        builder.AddRateLimiting();
+
         // application services
         LicenseVerifier.ImportPublicKey(configuration["PublicKey"]);
         services.AddTransient<IRelayProxyAppService, RelayProxyAppService>();

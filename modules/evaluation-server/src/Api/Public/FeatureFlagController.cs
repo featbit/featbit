@@ -4,9 +4,11 @@ using Api.Services;
 using Domain.Evaluation;
 using Domain.Shared;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Api.Public;
 
+[EnableRateLimiting("FeatureFlag")]
 public class FeatureFlagController(IFeatureFlagService flagService, IEvaluator evaluator) : PublicApiControllerBase
 {
     [HttpPost("evaluate")]

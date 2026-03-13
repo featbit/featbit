@@ -3,10 +3,12 @@ using Domain.EndUsers;
 using Domain.Insights;
 using Domain.Messages;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace Api.Public;
 
+[EnableRateLimiting("Insight")]
 public class InsightController : PublicApiControllerBase
 {
     private readonly IMessageProducer _producer;

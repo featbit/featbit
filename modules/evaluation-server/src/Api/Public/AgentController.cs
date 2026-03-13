@@ -1,8 +1,10 @@
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Api.Public;
 
+[EnableRateLimiting("Agent")]
 public class AgentController(IRelayProxyAppService rpService, ILogger<AgentController> logger) : PublicApiControllerBase
 {
     [HttpPost]
