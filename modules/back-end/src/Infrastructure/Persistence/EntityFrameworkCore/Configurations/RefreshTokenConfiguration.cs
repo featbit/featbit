@@ -10,7 +10,7 @@ public class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken>
     {
         builder.ToTable("refresh_tokens");
 
-        builder.HasIndex(x => x.Token).IsUnique();
+        builder.HasIndex(x => x.Token);
         builder.HasIndex(x => x.RevokedAt);
 
         builder.Property(x => x.Token).IsRequired();
