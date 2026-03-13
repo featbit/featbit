@@ -61,8 +61,10 @@ public sealed class RedisRateLimiter : RateLimiter
         local key = KEYS[1]
         local limit = tonumber(ARGV[1])
         local window = tonumber(ARGV[2])
-        local now = tonumber(ARGV[3])
-        local id = ARGV[4]
+        local id = ARGV[3]
+        -- Use Redis server time to avoid client clock skew across replicas
+        local t = redis.call('TIME')
+        local now = (tonumber(t[1]) * 1000) + math.floor(tonumber(t[2]) / 1000)
         local clearBefore = now - window
         redis.call('ZREMRANGEBYSCORE', key, 0, clearBefore)
         local count = redis.call('ZCARD', key)
@@ -90,36 +92,53 @@ public sealed class RedisRateLimiter : RateLimiter
         local tokenLimit = tonumber(ARGV[1])
         local tokensPerPeriod = tonumber(ARGV[2])
         local replenishMs = tonumber(ARGV[3])
-        local now = tonumber(ARGV[4])
-        local requested = tonumber(ARGV[5])
+        local requested = tonumber(ARGV[4])
+        -- Use Redis server time to avoid client clock skew across replicas
+        local t = redis.call('TIME')
+        local now = (tonumber(t[1]) * 1000) + math.floor(tonumber(t[2]) / 1000)
+        -- Load state
         local bucket = redis.call('HMGET', key, 'tokens', 'last_refill')
         local tokens = tonumber(bucket[1])
         local lastRefill = tonumber(bucket[2])
-        if tokens == nil then
+        -- Initialize if either field is missing or corrupt
+        if tokens == nil or lastRefill == nil then
             tokens = tokenLimit
             lastRefill = now
         end
+        -- Guard against bad configuration (prevents divide-by-zero)
+        if tokensPerPeriod <= 0 or replenishMs <= 0 then
+            if tokens >= requested then
+                tokens = tokens - requested
+                redis.call('HMSET', key, 'tokens', tokens, 'last_refill', lastRefill)
+                redis.call('EXPIRE', key, 3600)
+                return tokens
+            end
+            redis.call('HMSET', key, 'tokens', tokens, 'last_refill', lastRefill)
+            redis.call('EXPIRE', key, 3600)
+            return -1
+        end
+        -- Refill based on elapsed time
         local elapsed = now - lastRefill
-        if elapsed > 0 and replenishMs > 0 then
+        if elapsed > 0 then
             local newTokens = math.floor(elapsed * tokensPerPeriod / replenishMs)
             if newTokens > 0 then
                 tokens = math.min(tokenLimit, tokens + newTokens)
                 lastRefill = lastRefill + math.floor(newTokens * replenishMs / tokensPerPeriod)
             end
         end
+        -- TTL: time to go from empty to full, plus padding
+        local ttlSeconds = math.ceil((replenishMs * tokenLimit / tokensPerPeriod) / 1000) + 60
         if tokens >= requested then
             tokens = tokens - requested
             redis.call('HMSET', key, 'tokens', tokens, 'last_refill', lastRefill)
-            local ttl = math.ceil(replenishMs * tokenLimit / tokensPerPeriod / 1000) + 60
-            redis.call('EXPIRE', key, ttl)
-            return tostring(tokens)
+            redis.call('EXPIRE', key, ttlSeconds)
+            return tokens
         else
             redis.call('HMSET', key, 'tokens', tokens, 'last_refill', lastRefill)
-            local ttl = math.ceil(replenishMs * tokenLimit / tokensPerPeriod / 1000) + 60
-            redis.call('EXPIRE', key, ttl)
+            redis.call('EXPIRE', key, ttlSeconds)
             local deficit = requested - tokens
             local retryMs = math.ceil(deficit * replenishMs / tokensPerPeriod)
-            return tostring(-math.ceil(retryMs / 1000))
+            return -math.max(1, math.ceil(retryMs / 1000))
         end
         """;
 
@@ -207,14 +226,13 @@ public sealed class RedisRateLimiter : RateLimiter
     private async Task<long> EvalSlidingWindowAsync(IDatabase db)
     {
         var key = $"rl:sw:{_partitionKey}";
-        var nowMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         var windowMs = (long)_window.TotalMilliseconds;
-        var uniqueId = $"{nowMs}:{Guid.NewGuid():N}";
+        var uniqueId = Guid.NewGuid().ToString("N");
 
         var result = await db.ScriptEvaluateAsync(
             SlidingWindowScript,
             [(RedisKey)key],
-            [(RedisValue)_permitLimit, (RedisValue)windowMs, (RedisValue)nowMs, (RedisValue)uniqueId]);
+            [(RedisValue)_permitLimit, (RedisValue)windowMs, (RedisValue)uniqueId]);
 
         return long.Parse(result.ToString()!);
     }
@@ -222,13 +240,12 @@ public sealed class RedisRateLimiter : RateLimiter
     private async Task<long> EvalTokenBucketAsync(IDatabase db)
     {
         var key = $"rl:tb:{_partitionKey}";
-        var nowMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
         var replenishMs = (long)_replenishmentPeriod.TotalMilliseconds;
 
         var result = await db.ScriptEvaluateAsync(
             TokenBucketScript,
             [(RedisKey)key],
-            [(RedisValue)_tokenLimit, (RedisValue)_tokensPerPeriod, (RedisValue)replenishMs, (RedisValue)nowMs, (RedisValue)1]);
+            [(RedisValue)_tokenLimit, (RedisValue)_tokensPerPeriod, (RedisValue)replenishMs, (RedisValue)1]);
 
         return long.Parse(result.ToString()!);
     }
