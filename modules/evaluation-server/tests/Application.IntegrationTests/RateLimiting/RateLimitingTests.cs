@@ -160,14 +160,11 @@ public class RateLimitingTests
             ("RateLimiting:Endpoints:Streaming:PermitLimit", "1")
         );
 
-        var (firstConnected, firstSocket, _) = await TryConnectStreamingAsync(app, TestData.ClientTokenString);
+        // Consume the single permit for the Streaming endpoint.
+        // FixedWindowRateLimiter does not restore permits on lease disposal — they reset
+        // only at the end of the window — so no need to close the first socket first.
+        var (firstConnected, _, _) = await TryConnectStreamingAsync(app, TestData.ClientTokenString);
         Assert.True(firstConnected);
-
-        if (firstSocket is not null)
-        {
-            await firstSocket.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None);
-            firstSocket.Dispose();
-        }
 
         var (_, _, secondError) = await TryConnectStreamingAsync(app, TestData.ClientTokenString);
         Assert.NotNull(secondError);
