@@ -38,9 +38,18 @@ public sealed class RedisRateLimiter : RateLimiter
         end
         if current > limit then
             local ttl = redis.call('TTL', key)
-            return tostring(-ttl)
+            -- -2: key vanished between INCR and TTL -> treat as retry-after window
+            if ttl == -2 then
+                return -window
+            end
+            -- -1: no expiry set (e.g. after a PERSIST) -> self-heal and deny
+            if ttl == -1 then
+                redis.call('EXPIRE', key, window)
+                ttl = window
+            end
+            return -ttl
         end
-        return tostring(limit - current)
+        return limit - current
         """;
 
     /// <summary>
