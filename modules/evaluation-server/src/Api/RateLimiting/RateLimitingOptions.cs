@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Api.RateLimiting;
 
 /// <summary>
@@ -44,9 +46,10 @@ public class RateLimitingOptions
     public int PermitLimit { get; set; } = 100;
 
     /// <summary>
-    /// Time window length in seconds.
+    /// Time window length in seconds. Must be between 1 and 86400 (24 hours).
     /// Used by <see cref="RateLimiterType.FixedWindow"/> and <see cref="RateLimiterType.SlidingWindow"/>.
     /// </summary>
+    [Range(1, 86_400, ErrorMessage = "WindowSeconds must be between 1 and 86400 (24 hours).")]
     public int WindowSeconds { get; set; } = 60;
 
     /// <summary>
@@ -77,9 +80,10 @@ public class RateLimitingOptions
     public int TokensPerPeriod { get; set; } = 50;
 
     /// <summary>
-    /// Time between token replenishments in seconds.
+    /// Time between token replenishments in seconds. Must be between 1 and 86400 (24 hours).
     /// Only used when <see cref="Type"/> is <see cref="RateLimiterType.TokenBucket"/>.
     /// </summary>
+    [Range(1, 86_400, ErrorMessage = "ReplenishmentPeriodSeconds must be between 1 and 86400 (24 hours).")]
     public int ReplenishmentPeriodSeconds { get; set; } = 60;
 
     /// <summary>

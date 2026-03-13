@@ -1,5 +1,6 @@
 using System.Threading.RateLimiting;
 using Infrastructure.Caches.Redis;
+using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 
 namespace Api.RateLimiting;
@@ -20,25 +21,33 @@ public sealed class RedisRateLimiter : RateLimiter
     private readonly int _tokenLimit;
     private readonly int _tokensPerPeriod;
     private readonly TimeSpan _replenishmentPeriod;
+    private readonly ILogger _logger;
     private long _lastActivity = Environment.TickCount64;
 
     #region Lua scripts – executed atomically on Redis
 
     /// <summary>
     /// Fixed-window: increments a counter keyed by the current window slot.
+    /// Uses Redis server time to derive the slot, avoiding client clock skew.
     /// Returns remaining permits (positive) or negative retry-after seconds.
     /// </summary>
     private const string FixedWindowScript = """
-        local key = KEYS[1]
-        local limit = tonumber(ARGV[1])
-        local window = tonumber(ARGV[2])
-        local current = redis.call('INCR', key)
-        if current == 1 then
+        local keyPrefix = ARGV[1]
+        local limit = tonumber(ARGV[2])
+        local window = tonumber(ARGV[3])
+        local requested = tonumber(ARGV[4])
+        -- Use Redis server time to avoid client clock skew across replicas
+        local t = redis.call('TIME')
+        local nowSec = tonumber(t[1])
+        local slot = math.floor(nowSec / window)
+        local key = keyPrefix .. ":" .. slot
+        local current = redis.call('INCRBY', key, requested)
+        if current == requested then
             redis.call('EXPIRE', key, window)
         end
         if current > limit then
             local ttl = redis.call('TTL', key)
-            -- -2: key vanished between INCR and TTL -> treat as retry-after window
+            -- -2: key vanished between INCRBY and TTL -> treat as retry-after window
             if ttl == -2 then
                 return -window
             end
@@ -54,7 +63,10 @@ public sealed class RedisRateLimiter : RateLimiter
 
     /// <summary>
     /// Sliding-window: uses a sorted set scored by timestamp.
-    /// Removes expired entries, checks count, adds new entry if under limit.
+    /// Each member is stored as "uniqueId:weight" so a single ZADD represents
+    /// multiple permits without memory bloat. The weighted count is computed by
+    /// iterating members and summing parsed weights — O(n) per call where n is
+    /// the number of active members in the window, acceptable for typical rate limits.
     /// Returns remaining permits (positive) or negative retry-after seconds.
     /// </summary>
     private const string SlidingWindowScript = """
@@ -62,13 +74,20 @@ public sealed class RedisRateLimiter : RateLimiter
         local limit = tonumber(ARGV[1])
         local window = tonumber(ARGV[2])
         local id = ARGV[3]
+        local requested = tonumber(ARGV[4])
         -- Use Redis server time to avoid client clock skew across replicas
         local t = redis.call('TIME')
         local now = (tonumber(t[1]) * 1000) + math.floor(tonumber(t[2]) / 1000)
         local clearBefore = now - window
         redis.call('ZREMRANGEBYSCORE', key, 0, clearBefore)
-        local count = redis.call('ZCARD', key)
-        if count >= limit then
+        -- Sum weights from all active members (each member is "id:weight")
+        local members = redis.call('ZRANGE', key, 0, -1)
+        local weightedCount = 0
+        for i = 1, #members do
+            local w = tonumber(string.match(members[i], ':(%d+)$')) or 1
+            weightedCount = weightedCount + w
+        end
+        if weightedCount + requested > limit then
             local oldest = redis.call('ZRANGE', key, 0, 0, 'WITHSCORES')
             if #oldest > 0 then
                 local retryAfterMs = tonumber(oldest[2]) + window - now
@@ -77,9 +96,9 @@ public sealed class RedisRateLimiter : RateLimiter
             end
             return -math.ceil(window / 1000)
         end
-        redis.call('ZADD', key, now, id)
+        redis.call('ZADD', key, now, id .. ":" .. requested)
         redis.call('EXPIRE', key, math.ceil(window / 1000) + 1)
-        return limit - count - 1
+        return limit - weightedCount - requested
         """;
 
     /// <summary>
@@ -152,8 +171,25 @@ public sealed class RedisRateLimiter : RateLimiter
         TimeSpan window,
         int tokenLimit,
         int tokensPerPeriod,
-        TimeSpan replenishmentPeriod)
+        TimeSpan replenishmentPeriod,
+        ILogger logger)
     {
+        ArgumentNullException.ThrowIfNull(redisClient);
+        ArgumentNullException.ThrowIfNull(logger);
+
+        if (type is RateLimiterType.FixedWindow or RateLimiterType.SlidingWindow
+            && window.TotalSeconds < 1)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(window), window, "Window must be at least 1 second.");
+        }
+
+        if (type is RateLimiterType.TokenBucket && replenishmentPeriod.TotalSeconds < 1)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(replenishmentPeriod), replenishmentPeriod, "Replenishment period must be at least 1 second.");
+        }
+
         _redisClient = redisClient;
         _partitionKey = partitionKey;
         _type = type;
@@ -162,6 +198,7 @@ public sealed class RedisRateLimiter : RateLimiter
         _tokenLimit = tokenLimit;
         _tokensPerPeriod = tokensPerPeriod;
         _replenishmentPeriod = replenishmentPeriod;
+        _logger = logger;
     }
 
     public override TimeSpan? IdleDuration =>
@@ -186,9 +223,9 @@ public sealed class RedisRateLimiter : RateLimiter
             var db = _redisClient.GetDatabase();
             var result = _type switch
             {
-                RateLimiterType.FixedWindow => await EvalFixedWindowAsync(db),
-                RateLimiterType.SlidingWindow => await EvalSlidingWindowAsync(db),
-                RateLimiterType.TokenBucket => await EvalTokenBucketAsync(db),
+                RateLimiterType.FixedWindow => await EvalFixedWindowAsync(db, permitCount),
+                RateLimiterType.SlidingWindow => await EvalSlidingWindowAsync(db, permitCount),
+                RateLimiterType.TokenBucket => await EvalTokenBucketAsync(db, permitCount),
                 _ => throw new InvalidOperationException($"Unknown rate limiter type: {_type}")
             };
 
@@ -201,28 +238,36 @@ public sealed class RedisRateLimiter : RateLimiter
             var retryAfter = TimeSpan.FromSeconds(Math.Max(1, Math.Abs(result)));
             return new RedisRateLimitLease(false, retryAfter);
         }
-        catch
+        catch (RedisException ex)
         {
             // Fail open – if Redis is unreachable, allow the request through.
+            _logger.LogWarning(ex, "Redis rate-limit evaluation failed for {PartitionKey}; failing open", _partitionKey);
+            return new RedisRateLimitLease(true);
+        }
+        catch (RedisTimeoutException ex)
+        {
+            // Fail open – if Redis times out, allow the request through.
+            _logger.LogWarning(ex, "Redis rate-limit evaluation timed out for {PartitionKey}; failing open", _partitionKey);
             return new RedisRateLimitLease(true);
         }
     }
 
-    private async Task<long> EvalFixedWindowAsync(IDatabase db)
+    private async Task<long> EvalFixedWindowAsync(IDatabase db, int permitCount)
     {
         var windowSeconds = (int)_window.TotalSeconds;
-        var windowSlot = DateTimeOffset.UtcNow.ToUnixTimeSeconds() / windowSeconds;
-        var key = $"rl:fw:{_partitionKey}:{windowSlot}";
+        var keyPrefix = $"rl:fw:{_partitionKey}";
 
+        // Key construction and slot derivation happen inside the Lua script
+        // using Redis server time to avoid cross-node clock skew.
         var result = await db.ScriptEvaluateAsync(
             FixedWindowScript,
-            [(RedisKey)key],
-            [(RedisValue)_permitLimit, (RedisValue)windowSeconds]);
+            keys: [],
+            [(RedisValue)keyPrefix, (RedisValue)_permitLimit, (RedisValue)windowSeconds, (RedisValue)permitCount]);
 
         return long.Parse(result.ToString()!);
     }
 
-    private async Task<long> EvalSlidingWindowAsync(IDatabase db)
+    private async Task<long> EvalSlidingWindowAsync(IDatabase db, int permitCount)
     {
         var key = $"rl:sw:{_partitionKey}";
         var windowMs = (long)_window.TotalMilliseconds;
@@ -231,12 +276,12 @@ public sealed class RedisRateLimiter : RateLimiter
         var result = await db.ScriptEvaluateAsync(
             SlidingWindowScript,
             [(RedisKey)key],
-            [(RedisValue)_permitLimit, (RedisValue)windowMs, (RedisValue)uniqueId]);
+            [(RedisValue)_permitLimit, (RedisValue)windowMs, (RedisValue)uniqueId, (RedisValue)permitCount]);
 
         return long.Parse(result.ToString()!);
     }
 
-    private async Task<long> EvalTokenBucketAsync(IDatabase db)
+    private async Task<long> EvalTokenBucketAsync(IDatabase db, int permitCount)
     {
         var key = $"rl:tb:{_partitionKey}";
         var replenishMs = (long)_replenishmentPeriod.TotalMilliseconds;
@@ -244,7 +289,7 @@ public sealed class RedisRateLimiter : RateLimiter
         var result = await db.ScriptEvaluateAsync(
             TokenBucketScript,
             [(RedisKey)key],
-            [(RedisValue)_tokenLimit, (RedisValue)_tokensPerPeriod, (RedisValue)replenishMs, (RedisValue)1]);
+            [(RedisValue)_tokenLimit, (RedisValue)_tokensPerPeriod, (RedisValue)replenishMs, (RedisValue)permitCount]);
 
         return long.Parse(result.ToString()!);
     }

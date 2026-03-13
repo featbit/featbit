@@ -23,8 +23,10 @@ public static class RateLimiterRegister
     {
         var configuration = builder.Configuration;
 
-        builder.Services.Configure<RateLimitingOptions>(
-            configuration.GetSection(RateLimitingOptions.SectionName));
+        builder.Services
+            .AddOptionsWithValidateOnStart<RateLimitingOptions>()
+            .Bind(configuration.GetSection(RateLimitingOptions.SectionName))
+            .ValidateDataAnnotations();
 
         // Bind options early to decide whether to wire up the middleware
         var options = new RateLimitingOptions();
@@ -138,6 +140,9 @@ public static class RateLimiterRegister
             return RateLimitPartition.Get(partitionKey, key =>
             {
                 var redisClient = httpContext.RequestServices.GetRequiredService<IRedisClient>();
+                var logger = httpContext.RequestServices
+                    .GetRequiredService<ILoggerFactory>()
+                    .CreateLogger<RedisRateLimiter>();
                 return new RedisRateLimiter(
                     redisClient,
                     key,
@@ -146,7 +151,8 @@ public static class RateLimiterRegister
                     TimeSpan.FromSeconds(effective.WindowSeconds),
                     effective.TokenLimit,
                     effective.TokensPerPeriod,
-                    TimeSpan.FromSeconds(effective.ReplenishmentPeriodSeconds));
+                    TimeSpan.FromSeconds(effective.ReplenishmentPeriodSeconds),
+                    logger);
             });
         }
 

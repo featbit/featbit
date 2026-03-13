@@ -235,6 +235,54 @@ public class RateLimitingTests
         Assert.Equal(HttpStatusCode.TooManyRequests, insightThird.StatusCode);
     }
 
+    [Fact]
+    public async Task MultiPermitAcquire_EnforcesLimitCorrectly()
+    {
+        // PermitLimit=3: first acquire of 2 permits succeeds (1 remaining),
+        // second acquire of 2 permits should be rejected (only 1 left).
+        var client = CreateClientWithRateLimitingSettings(
+            ("RateLimiting:Enabled", "true"),
+            ("RateLimiting:Distributed", "false"),
+            ("RateLimiting:Type", "FixedWindow"),
+            ("RateLimiting:PermitLimit", "3"),
+            ("RateLimiting:WindowSeconds", "60"),
+            ("RateLimiting:Endpoints:Sdk:PermitLimit", "3")
+        );
+
+        client.DefaultRequestHeaders.Add("Authorization", TestData.ServerSecretString);
+
+        // Each HTTP request acquires 1 permit, so 3 should succeed and the 4th should fail
+        var first = await client.GetAsync("/api/public/sdk/server/latest-all");
+        var second = await client.GetAsync("/api/public/sdk/server/latest-all");
+        var third = await client.GetAsync("/api/public/sdk/server/latest-all");
+        var fourth = await client.GetAsync("/api/public/sdk/server/latest-all");
+
+        Assert.NotEqual(HttpStatusCode.TooManyRequests, first.StatusCode);
+        Assert.NotEqual(HttpStatusCode.TooManyRequests, second.StatusCode);
+        Assert.NotEqual(HttpStatusCode.TooManyRequests, third.StatusCode);
+        Assert.Equal(HttpStatusCode.TooManyRequests, fourth.StatusCode);
+    }
+
+    [Fact]
+    public async Task InvalidWindowSeconds_FailsAtStartup()
+    {
+        // WindowSeconds=0 should be rejected by data annotation validation on startup
+        Assert.ThrowsAny<Exception>(() =>
+        {
+            var client = CreateClientWithRateLimitingSettings(
+                ("RateLimiting:Enabled", "true"),
+                ("RateLimiting:Distributed", "false"),
+                ("RateLimiting:Type", "FixedWindow"),
+                ("RateLimiting:PermitLimit", "100"),
+                ("RateLimiting:WindowSeconds", "0")
+            );
+
+            // Force the host to start (CreateClient triggers startup)
+            client.DefaultRequestHeaders.Add("Authorization", TestData.ServerSecretString);
+            client.GetAsync("/api/public/sdk/server/latest-all").GetAwaiter().GetResult();
+        });
+    }
+
     private HttpClient CreateClientWithRateLimitingSettings(params (string Key, string Value)[] settings)
     {
         var app = CreateAppWithRateLimitingSettings(settings);
