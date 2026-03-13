@@ -5,7 +5,7 @@
 CREATE TABLE refresh_tokens
 (
     id                uuid primary key                  default gen_random_uuid(),
-    token             varchar(500)             not null unique,
+    token             varchar(500)             not null,
     user_id           uuid                     not null,
     is_revoked        boolean                  not null default false,
     replaced_by_token varchar(500)             null,
