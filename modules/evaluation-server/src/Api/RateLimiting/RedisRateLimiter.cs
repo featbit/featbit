@@ -71,14 +71,14 @@ public sealed class RedisRateLimiter : RateLimiter
         if count >= limit then
             local oldest = redis.call('ZRANGE', key, 0, 0, 'WITHSCORES')
             if #oldest > 0 then
-                local retryAfter = tonumber(oldest[2]) + window - now
-                retryAfter = math.max(1, retryAfter)
-                return -math.ceil(retryAfter)
+                local retryAfterMs = tonumber(oldest[2]) + window - now
+                retryAfterMs = math.max(1000, retryAfterMs)
+                return -math.ceil(retryAfterMs / 1000)
             end
-            return -math.ceil(window)
+            return -math.ceil(window / 1000)
         end
         redis.call('ZADD', key, now, id)
-        redis.call('EXPIRE', key, math.ceil(window) + 1)
+        redis.call('EXPIRE', key, math.ceil(window / 1000) + 1)
         return limit - count - 1
         """;
 
