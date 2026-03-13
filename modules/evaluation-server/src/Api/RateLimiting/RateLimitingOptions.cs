@@ -90,8 +90,10 @@ public class RateLimitingOptions
     /// Per-endpoint overrides keyed by policy name.
     /// Supported keys: <c>"Sdk"</c>, <c>"Insight"</c>, <c>"FeatureFlag"</c>, <c>"Agent"</c>, <c>"Streaming"</c>.
     /// Any property left <c>null</c> inherits from the global default above.
+    /// The dictionary is case-insensitive so JSON config using any casing (e.g. <c>"sdk"</c>) is matched correctly.
     /// </summary>
-    public Dictionary<string, EndpointRateLimitOptions> Endpoints { get; set; } = new();
+    public Dictionary<string, EndpointRateLimitOptions> Endpoints { get; set; } =
+        new(StringComparer.OrdinalIgnoreCase);
 }
 
 /// <summary>
