@@ -4,6 +4,7 @@ using Domain.Shared;
 using Infrastructure;
 using Infrastructure.Caches;
 using Infrastructure.Caches.Redis;
+using Serilog;
 
 namespace Api.Setup;
 
@@ -28,8 +29,15 @@ public static class RateLimiterRegister
         var options = new RateLimitingOptions();
         configuration.GetSection(RateLimitingOptions.SectionName).Bind(options);
 
+        // Startup diagnostics
+        var rawEnabled = configuration[$"{RateLimitingOptions.SectionName}:Enabled"];
+        Log.Information(
+            "RateLimiting config: Enabled={Enabled} (raw={RawEnabled}), Distributed={Distributed}, Type={Type}, PermitLimit={PermitLimit}, WindowSeconds={WindowSeconds}",
+            options.Enabled, rawEnabled, options.Distributed, options.Type, options.PermitLimit, options.WindowSeconds);
+
         if (!options.Enabled)
         {
+            Log.Information("Rate limiting is disabled, skipping registration");
             return builder;
         }
 

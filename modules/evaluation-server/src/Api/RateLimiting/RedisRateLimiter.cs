@@ -171,10 +171,9 @@ public sealed class RedisRateLimiter : RateLimiter
 
     protected override RateLimitLease AttemptAcquireCore(int permitCount)
     {
-        // Synchronous acquire is not meaningful for a distributed limiter.
-        // The ASP.NET Core middleware uses the async path; return success here
-        // so the middleware falls through to AcquireAsync.
-        return new RedisRateLimitLease(true);
+        // Distributed limiter requires a network call to Redis, which is inherently async.
+        // Return a failed lease so the ASP.NET Core middleware falls through to AcquireAsync.
+        return new RedisRateLimitLease(false);
     }
 
     protected override async ValueTask<RateLimitLease> AcquireAsyncCore(
