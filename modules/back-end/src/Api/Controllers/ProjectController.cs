@@ -17,7 +17,6 @@ public class ProjectController : ApiControllerBase
     [OpenApi]
     [HttpGet]
     [Route("{id:guid}")]
-    [Authorize(Permissions.CanAccessProject)]
     public async Task<ApiResponse<ProjectWithEnvs>> GetAsync(Guid id)
     {
         var request = new GetProject

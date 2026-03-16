@@ -159,7 +159,7 @@ public class DefaultPermissionChecker(
 
         return statements;
 
-        async Task<IEnumerable<PolicyStatement>> GetUserPermissionsAsync()
+        async Task<PolicyStatement[]> GetUserPermissionsAsync()
         {
             var userIdClaim = context.User.Claims.FirstOrDefault(x => x.Type == UserClaims.Id);
             if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
