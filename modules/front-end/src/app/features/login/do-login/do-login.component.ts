@@ -15,6 +15,11 @@ enum LoginStep {
   Step2 = 'step2' // workspace and (or) password
 }
 
+enum LoginTab {
+  Login = 0,
+  Sso = 1
+}
+
 @Component({
   selector: 'app-do-login',
   templateUrl: './do-login.component.html',
@@ -36,6 +41,8 @@ export class DoLoginComponent implements OnInit {
 
   isSocialEnabled: boolean = false;
   oauthProviders: OAuthProvider[] = [];
+
+  selectedTabIndex = 0;
 
   constructor(
     private fb: FormBuilder,
@@ -64,6 +71,7 @@ export class DoLoginComponent implements OnInit {
     this.isSsoEnabled = preCheck.isEnabled;
     this.oauthProviders = providers;
     this.isSocialEnabled = this.oauthProviders.length > 0;
+    this.selectedTabIndex = this.isSsoEnabled ? LoginTab.Sso : LoginTab.Login;
 
     this.ssoForm = this.fb.group({
       workspaceKey: [
