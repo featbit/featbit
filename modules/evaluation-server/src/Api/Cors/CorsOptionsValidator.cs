@@ -1,17 +1,9 @@
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
 namespace Api.Cors;
 
 public sealed class CorsOptionsValidator : IValidateOptions<CorsOptions>
 {
-    private readonly IConfiguration _configuration;
-
-    public CorsOptionsValidator(IConfiguration configuration)
-    {
-        _configuration = configuration;
-    }
-
     public ValidateOptionsResult Validate(string? name, CorsOptions options)
     {
         if (!options.Enabled)
@@ -21,16 +13,12 @@ public sealed class CorsOptionsValidator : IValidateOptions<CorsOptions>
 
         var failures = new List<string>();
 
-        // Comma-delimiter guard — check the raw config strings before they were parsed.
-        var rawOrigins = _configuration[$"{CorsOptions.Cors}:{nameof(CorsOptions.AllowedOrigins)}"];
-        var rawHeaders = _configuration[$"{CorsOptions.Cors}:{nameof(CorsOptions.AllowedHeaders)}"];
-        var rawMethods = _configuration[$"{CorsOptions.Cors}:{nameof(CorsOptions.AllowedMethods)}"];
-
-        if (ContainsComma(rawOrigins))
+        // Comma-delimiter guard — detect values that look like comma-separated input.
+        if (AnyContainsComma(options.AllowedOrigins))
             failures.Add("AllowedOrigins uses ';' as the delimiter. Commas are not supported.");
-        if (ContainsComma(rawHeaders))
+        if (AnyContainsComma(options.AllowedHeaders))
             failures.Add("AllowedHeaders uses ';' as the delimiter. Commas are not supported.");
-        if (ContainsComma(rawMethods))
+        if (AnyContainsComma(options.AllowedMethods))
             failures.Add("AllowedMethods uses ';' as the delimiter. Commas are not supported.");
 
         // Required-value checks.
@@ -74,8 +62,8 @@ public sealed class CorsOptionsValidator : IValidateOptions<CorsOptions>
         return values.Length > 1 && values.Any(v => v == "*");
     }
 
-    private static bool ContainsComma(string? value)
+    private static bool AnyContainsComma(string[] values)
     {
-        return !string.IsNullOrWhiteSpace(value) && value.Contains(',');
+        return values.Any(v => v.Contains(','));
     }
 }

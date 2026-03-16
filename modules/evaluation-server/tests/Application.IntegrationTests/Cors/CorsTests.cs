@@ -4,8 +4,6 @@ using Infrastructure.MQ;
 using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
 
 namespace Application.IntegrationTests.Cors;
 
@@ -266,16 +264,6 @@ public class CorsTests : IDisposable
     [Fact]
     public void Validation_FailsWhen_CommaDelimiterIsUsed()
     {
-        // The comma check operates on raw config strings, so provide an IConfiguration with a comma.
-        var config = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                ["Cors:AllowedOrigins"] = "https://app.example.com,https://admin.example.com",
-                ["Cors:AllowedHeaders"] = "*",
-                ["Cors:AllowedMethods"] = "*",
-            })
-            .Build();
-
         var options = new CorsOptions
         {
             Enabled = true,
@@ -283,8 +271,7 @@ public class CorsTests : IDisposable
             AllowedHeaders = ["*"],
             AllowedMethods = ["*"]
         };
-        var validator = new CorsOptionsValidator(config);
-        var result = validator.Validate(null, options);
+        var result = CreateValidator().Validate(null, options);
 
         Assert.True(result.Failed);
         Assert.Contains("Commas are not supported", result.FailureMessage);
@@ -337,15 +324,7 @@ public class CorsTests : IDisposable
         Assert.True(result.Succeeded);
     }
 
-    /// <summary>
-    /// Creates a <see cref="CorsOptionsValidator"/> backed by an empty configuration
-    /// (no raw config strings to check for commas — suitable for most validation tests).
-    /// </summary>
-    private static CorsOptionsValidator CreateValidator()
-    {
-        var config = new ConfigurationBuilder().Build();
-        return new CorsOptionsValidator(config);
-    }
+    private static CorsOptionsValidator CreateValidator() => new();
 
     public void Dispose()
     {
