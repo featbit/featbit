@@ -27,15 +27,6 @@ public static class ServicesRegister
         // health check dependencies
         services.AddHealthChecks().AddReadinessChecks(configuration);
 
-        // cors
-        builder.Services.AddCors(options => options.AddDefaultPolicy(policyBuilder =>
-        {
-            policyBuilder
-                .AllowAnyOrigin()
-                .AllowAnyHeader()
-                .AllowAnyMethod();
-        }));
-
         // add bounded memory cache
         services.AddSingleton<BoundedMemoryCache>();
 

@@ -1,6 +1,8 @@
+using Api.Cors;
 using Streaming;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Infrastructure;
+using Microsoft.Extensions.Options;
 
 namespace Api.Setup;
 
@@ -23,11 +25,15 @@ public static class MiddlewaresRegister
             app.UseSwaggerUI();
         }
 
+        // enable cors when configured
+        var corsOptions = app.Services.GetRequiredService<IOptions<CorsOptions>>().Value;
+        if (corsOptions.Enabled)
+        {
+            app.UseCors();
+        }
+
         // enable streaming
         app.UseStreaming();
-
-        // enable cors
-        app.UseCors();
 
         app.MapControllers();
 

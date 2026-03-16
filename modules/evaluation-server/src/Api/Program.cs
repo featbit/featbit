@@ -1,3 +1,4 @@
+using Api.Cors;
 using Api.Setup;
 using Serilog;
 
@@ -14,6 +15,7 @@ try
 
     WebApplication.CreateBuilder(args)
         .RegisterServices()
+        .AddCorsPolicy()
         .Build()
         .SetupMiddleware()
         .Run();
