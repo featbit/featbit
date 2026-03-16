@@ -1,10 +1,11 @@
-using System.ComponentModel.DataAnnotations;
 using Api.Cors;
 using Infrastructure.Caches;
 using Infrastructure.MQ;
 using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace Application.IntegrationTests.Cors;
 
@@ -146,7 +147,13 @@ public class CorsTests : IDisposable
 
         var response = await client.SendAsync(request);
 
-        Assert.False(response.Headers.Contains("Access-Control-Allow-Origin"));
+        // ASP.NET Core advertises the policy's allowed headers in Access-Control-Allow-Headers
+        // rather than silently omitting the header.  The browser rejects the preflight
+        // because the requested header (X-Forbidden) is absent from the advertised list.
+        var allowedHeaders = response.Headers.TryGetValues("Access-Control-Allow-Headers", out var headerValues)
+            ? string.Join(",", headerValues)
+            : string.Empty;
+        Assert.DoesNotContain("X-Forbidden", allowedHeaders, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
@@ -161,7 +168,13 @@ public class CorsTests : IDisposable
 
         var response = await client.SendAsync(request);
 
-        Assert.False(response.Headers.Contains("Access-Control-Allow-Origin"));
+        // ASP.NET Core advertises the policy's allowed methods in Access-Control-Allow-Methods
+        // rather than silently omitting the header.  The browser rejects the preflight
+        // because the requested method (DELETE) is absent from the advertised list.
+        var allowedMethods = response.Headers.TryGetValues("Access-Control-Allow-Methods", out var methodValues)
+            ? string.Join(",", methodValues)
+            : string.Empty;
+        Assert.DoesNotContain("DELETE", allowedMethods, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
@@ -190,40 +203,31 @@ public class CorsTests : IDisposable
     [Fact]
     public void Validation_FailsWhen_Enabled_WithEmptyOrigins()
     {
-        var options = new CorsOptions { Enabled = true, AllowedOrigins = "" };
-        var context = new ValidationContext(options);
-        var results = new List<ValidationResult>();
+        var options = new CorsOptions { Enabled = true, AllowedOrigins = [], AllowedHeaders = ["*"], AllowedMethods = ["*"] };
+        var result = CreateValidator().Validate(null, options);
 
-        var isValid = Validator.TryValidateObject(options, context, results, validateAllProperties: true);
-
-        Assert.False(isValid);
-        Assert.Contains(results, r => r.MemberNames.Contains(nameof(CorsOptions.AllowedOrigins)));
+        Assert.True(result.Failed);
+        Assert.Contains("AllowedOrigins must contain at least one value", result.FailureMessage);
     }
 
     [Fact]
     public void Validation_FailsWhen_Enabled_WithEmptyHeaders()
     {
-        var options = new CorsOptions { Enabled = true, AllowedOrigins = "*", AllowedHeaders = "", AllowedMethods = "*" };
-        var context = new ValidationContext(options);
-        var results = new List<ValidationResult>();
+        var options = new CorsOptions { Enabled = true, AllowedOrigins = ["*"], AllowedHeaders = [], AllowedMethods = ["*"] };
+        var result = CreateValidator().Validate(null, options);
 
-        var isValid = Validator.TryValidateObject(options, context, results, validateAllProperties: true);
-
-        Assert.False(isValid);
-        Assert.Contains(results, r => r.MemberNames.Contains(nameof(CorsOptions.AllowedHeaders)));
+        Assert.True(result.Failed);
+        Assert.Contains("AllowedHeaders must contain at least one value", result.FailureMessage);
     }
 
     [Fact]
     public void Validation_FailsWhen_Enabled_WithEmptyMethods()
     {
-        var options = new CorsOptions { Enabled = true, AllowedOrigins = "*", AllowedHeaders = "*", AllowedMethods = "" };
-        var context = new ValidationContext(options);
-        var results = new List<ValidationResult>();
+        var options = new CorsOptions { Enabled = true, AllowedOrigins = ["*"], AllowedHeaders = ["*"], AllowedMethods = [] };
+        var result = CreateValidator().Validate(null, options);
 
-        var isValid = Validator.TryValidateObject(options, context, results, validateAllProperties: true);
-
-        Assert.False(isValid);
-        Assert.Contains(results, r => r.MemberNames.Contains(nameof(CorsOptions.AllowedMethods)));
+        Assert.True(result.Failed);
+        Assert.Contains("AllowedMethods must contain at least one value", result.FailureMessage);
     }
 
     [Fact]
@@ -232,18 +236,15 @@ public class CorsTests : IDisposable
         var options = new CorsOptions
         {
             Enabled = true,
-            AllowedOrigins = "*",
-            AllowedHeaders = "*",
-            AllowedMethods = "*",
+            AllowedOrigins = ["*"],
+            AllowedHeaders = ["*"],
+            AllowedMethods = ["*"],
             AllowCredentials = true
         };
-        var context = new ValidationContext(options);
-        var results = new List<ValidationResult>();
+        var result = CreateValidator().Validate(null, options);
 
-        var isValid = Validator.TryValidateObject(options, context, results, validateAllProperties: true);
-
-        Assert.False(isValid);
-        Assert.Contains(results, r => r.MemberNames.Contains(nameof(CorsOptions.AllowCredentials)));
+        Assert.True(result.Failed);
+        Assert.Contains("AllowCredentials cannot be used with a wildcard", result.FailureMessage);
     }
 
     [Fact]
@@ -252,36 +253,41 @@ public class CorsTests : IDisposable
         var options = new CorsOptions
         {
             Enabled = true,
-            AllowedOrigins = "*;https://app.example.com",
-            AllowedHeaders = "*",
-            AllowedMethods = "*"
+            AllowedOrigins = ["*", "https://app.example.com"],
+            AllowedHeaders = ["*"],
+            AllowedMethods = ["*"]
         };
-        var context = new ValidationContext(options);
-        var results = new List<ValidationResult>();
+        var result = CreateValidator().Validate(null, options);
 
-        var isValid = Validator.TryValidateObject(options, context, results, validateAllProperties: true);
-
-        Assert.False(isValid);
-        Assert.Contains(results, r => r.MemberNames.Contains(nameof(CorsOptions.AllowedOrigins)));
+        Assert.True(result.Failed);
+        Assert.Contains("AllowedOrigins cannot mix wildcard", result.FailureMessage);
     }
 
     [Fact]
     public void Validation_FailsWhen_CommaDelimiterIsUsed()
     {
+        // The comma check operates on raw config strings, so provide an IConfiguration with a comma.
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Cors:AllowedOrigins"] = "https://app.example.com,https://admin.example.com",
+                ["Cors:AllowedHeaders"] = "*",
+                ["Cors:AllowedMethods"] = "*",
+            })
+            .Build();
+
         var options = new CorsOptions
         {
             Enabled = true,
-            AllowedOrigins = "https://app.example.com,https://admin.example.com",
-            AllowedHeaders = "*",
-            AllowedMethods = "*"
+            AllowedOrigins = ["https://app.example.com,https://admin.example.com"],
+            AllowedHeaders = ["*"],
+            AllowedMethods = ["*"]
         };
-        var context = new ValidationContext(options);
-        var results = new List<ValidationResult>();
+        var validator = new CorsOptionsValidator(config);
+        var result = validator.Validate(null, options);
 
-        var isValid = Validator.TryValidateObject(options, context, results, validateAllProperties: true);
-
-        Assert.False(isValid);
-        Assert.Contains(results, r => r.MemberNames.Contains(nameof(CorsOptions.AllowedOrigins)));
+        Assert.True(result.Failed);
+        Assert.Contains("Commas are not supported", result.FailureMessage);
     }
 
     [Fact]
@@ -290,17 +296,14 @@ public class CorsTests : IDisposable
         var options = new CorsOptions
         {
             Enabled = true,
-            AllowedOrigins = "example.com",
-            AllowedHeaders = "*",
-            AllowedMethods = "*"
+            AllowedOrigins = ["example.com"],
+            AllowedHeaders = ["*"],
+            AllowedMethods = ["*"]
         };
-        var context = new ValidationContext(options);
-        var results = new List<ValidationResult>();
+        var result = CreateValidator().Validate(null, options);
 
-        var isValid = Validator.TryValidateObject(options, context, results, validateAllProperties: true);
-
-        Assert.False(isValid);
-        Assert.Contains(results, r => r.MemberNames.Contains(nameof(CorsOptions.AllowedOrigins)));
+        Assert.True(result.Failed);
+        Assert.Contains("invalid value 'example.com'", result.FailureMessage);
     }
 
     [Fact]
@@ -309,17 +312,13 @@ public class CorsTests : IDisposable
         var options = new CorsOptions
         {
             Enabled = true,
-            AllowedOrigins = "https://app.example.com;https://admin.example.com",
-            AllowedHeaders = "Authorization;X-Custom",
-            AllowedMethods = "GET;POST"
+            AllowedOrigins = ["https://app.example.com", "https://admin.example.com"],
+            AllowedHeaders = ["Authorization", "X-Custom"],
+            AllowedMethods = ["GET", "POST"]
         };
-        var context = new ValidationContext(options);
-        var results = new List<ValidationResult>();
+        var result = CreateValidator().Validate(null, options);
 
-        var isValid = Validator.TryValidateObject(options, context, results, validateAllProperties: true);
-
-        Assert.True(isValid);
-        Assert.Empty(results);
+        Assert.True(result.Succeeded);
     }
 
     [Fact]
@@ -328,18 +327,24 @@ public class CorsTests : IDisposable
         var options = new CorsOptions
         {
             Enabled = false,
-            AllowedOrigins = "",
-            AllowedHeaders = "",
-            AllowedMethods = "",
+            AllowedOrigins = [],
+            AllowedHeaders = [],
+            AllowedMethods = [],
             AllowCredentials = true
         };
-        var context = new ValidationContext(options);
-        var results = new List<ValidationResult>();
+        var result = CreateValidator().Validate(null, options);
 
-        var isValid = Validator.TryValidateObject(options, context, results, validateAllProperties: true);
+        Assert.True(result.Succeeded);
+    }
 
-        Assert.True(isValid);
-        Assert.Empty(results);
+    /// <summary>
+    /// Creates a <see cref="CorsOptionsValidator"/> backed by an empty configuration
+    /// (no raw config strings to check for commas — suitable for most validation tests).
+    /// </summary>
+    private static CorsOptionsValidator CreateValidator()
+    {
+        var config = new ConfigurationBuilder().Build();
+        return new CorsOptionsValidator(config);
     }
 
     public void Dispose()

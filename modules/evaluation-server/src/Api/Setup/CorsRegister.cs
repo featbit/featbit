@@ -1,5 +1,5 @@
-using System.ComponentModel.DataAnnotations;
 using Api.Cors;
+using Microsoft.Extensions.Options;
 
 namespace Api.Setup;
 
@@ -7,49 +7,40 @@ public static class CorsRegister
 {
     public static WebApplicationBuilder AddCorsPolicy(this WebApplicationBuilder builder)
     {
-        var services = builder.Services;
-        var configuration = builder.Configuration;
+        var corsSection = builder.Configuration.GetSection(CorsOptions.Cors);
 
-        var corsOptions = new CorsOptions();
-        configuration.GetSection(CorsOptions.Cors).Bind(corsOptions);
-        Validator.ValidateObject(corsOptions, new ValidationContext(corsOptions), validateAllProperties: true);
+        builder.Services.AddCors();
 
-        services.AddOptionsWithValidateOnStart<CorsOptions>()
-            .Bind(configuration.GetSection(CorsOptions.Cors))
-            .ValidateDataAnnotations();
+        builder.Services
+            .AddOptions<CorsOptions>()
+            .Configure(options =>
+            {
+                // Bind scalar properties (Enabled, AllowCredentials) from configuration.
+                options.Enabled = corsSection.GetValue<bool>(nameof(CorsOptions.Enabled));
+                options.AllowCredentials = corsSection.GetValue<bool>(nameof(CorsOptions.AllowCredentials));
 
-        if (!corsOptions.Enabled)
-        {
-            return builder;
-        }
+                // Parse semicolon-delimited strings into arrays once at startup.
+                options.AllowedOrigins = ParseDelimited(corsSection[nameof(CorsOptions.AllowedOrigins)]);
+                options.AllowedHeaders = ParseDelimited(corsSection[nameof(CorsOptions.AllowedHeaders)]);
+                options.AllowedMethods = ParseDelimited(corsSection[nameof(CorsOptions.AllowedMethods)]);
+            })
+            .ValidateOnStart();
 
-        services.AddCors(options => options.AddDefaultPolicy(policyBuilder =>
-        {
-            // origins
-            if (corsOptions.AllowAnyOrigins)
-                policyBuilder.AllowAnyOrigin();
-            else
-                policyBuilder.WithOrigins(corsOptions.Origins);
-
-            // headers
-            if (corsOptions.AllowAnyHeaders)
-                policyBuilder.AllowAnyHeader();
-            else
-                policyBuilder.WithHeaders(corsOptions.Headers);
-
-            // methods
-            if (corsOptions.AllowAnyMethods)
-                policyBuilder.AllowAnyMethod();
-            else
-                policyBuilder.WithMethods(corsOptions.Methods);
-
-            // credentials
-            if (corsOptions.AllowCredentials)
-                policyBuilder.AllowCredentials();
-            else
-                policyBuilder.DisallowCredentials();
-        }));
+        builder.Services.AddSingleton<IValidateOptions<CorsOptions>, CorsOptionsValidator>();
 
         return builder;
+    }
+
+    internal static string[] ParseDelimited(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return [];
+        }
+
+        return value
+            .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Where(s => s.Length > 0)
+            .ToArray();
     }
 }

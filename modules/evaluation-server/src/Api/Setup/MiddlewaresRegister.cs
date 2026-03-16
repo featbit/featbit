@@ -22,7 +22,28 @@ public static class MiddlewaresRegister
         var corsOptions = app.Services.GetRequiredService<IOptions<CorsOptions>>().Value;
         if (corsOptions.Enabled)
         {
-            app.UseCors();
+            app.UseCors(policy =>
+            {
+                if (corsOptions.AllowAnyOrigins)
+                    policy.AllowAnyOrigin();
+                else
+                    policy.WithOrigins(corsOptions.AllowedOrigins);
+
+                if (corsOptions.AllowAnyHeaders)
+                    policy.AllowAnyHeader();
+                else
+                    policy.WithHeaders(corsOptions.AllowedHeaders);
+
+                if (corsOptions.AllowAnyMethods)
+                    policy.AllowAnyMethod();
+                else
+                    policy.WithMethods(corsOptions.AllowedMethods);
+
+                if (corsOptions.AllowCredentials)
+                    policy.AllowCredentials();
+                else
+                    policy.DisallowCredentials();
+            });
         }
 
         // enable swagger in dev mode
