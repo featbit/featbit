@@ -4,7 +4,7 @@
   [nzVisible]="visible"
   nzPlacement="right"
   [nzTitle]="title"
-  [nzWidth]="500"
+  [nzWidth]="850"
   (nzOnClose)="onClose()">
   <ng-container *nzDrawerContent>
     <form nz-form [formGroup]="form" (ngSubmit)="doSubmit()" nzLayout="vertical">
@@ -36,55 +36,53 @@
           </nz-select>
         </nz-form-control>
       </nz-form-item>
-    </form>
-    <!-- Permissions -->
+    </form>    <!-- Permissions -->
     @if (isServiceAccessToken) {
-      <div class="permissions">
+      <div class="permissions-section">
         <nz-form-label nzNoColon nzRequired i18n="@@common.permissions">Permissions</nz-form-label>
-        <nz-collapse nzExpandIconPosition="end">
-          @for (rt of authorizedResourceTypes; track rt.type; let first = $first) {
-            <nz-collapse-panel
-              class="resource-type"
-              [nzHeader]="rt.displayName"
-              [nzActive]="first"
-              >
-              <div class="permissions">
+        <div class="permissions-list">
+          @for (rt of authorizedResourceTypes; track rt.type) {
+            <div class="permission-category">
+              <div class="category-header">
+                <span class="category-name">{{rt.displayName}}</span>
                 @if (!isEditing) {
                   <label
                     nz-checkbox
+                    class="select-all"
                     [(ngModel)]="permissions[rt.type].allChecked"
                     (ngModelChange)="updatePermissionsAllChecked(permissions[rt.type])"
                     [nzIndeterminate]="permissions[rt.type].indeterminate"
-                    i18n="@@common.all"
-                  >All</label>
-                }
-                @for (permission of permissions[rt.type].statements; track permission.action.id) {
-                  <div class="permission">
-                    <div class="permission-header">
-                      @if (isEditing) {
-                        <label>{{permission.action.name}}</label>
-                      }
-                      @else {
-                        <label nz-checkbox
-                               [(ngModel)]="permission.checked"
-                               (ngModelChange)="updatePermissionSingleChecked(permissions[rt.type])"
-                               [nzDisabled]="isActionDisabled(permission.action)">{{permission.action.name}}</label>
-                      }
-                      <i nz-icon [nz-tooltip]="permission.action.description" nzType="icons:icon-info-outline"></i>
-                    </div>
-                    <div class="permission-resources">
-                      @for (resource of permission['resources']; track resource) {
-                        <div class="permission-resource">
-                          {{resource}}
-                        </div>
-                      }
-                    </div>
-                  </div>
+                    i18n="@@common.select-all"
+                  >Select all</label>
                 }
               </div>
-            </nz-collapse-panel>
+
+              <!-- Resource Parameters -->
+              @if (hasResourceParameters(rt.type)) {
+                <div class="resource-parameters">
+                  <resources-selector
+                    [selectedResources]="permissions[rt.type].statements[0]?.resources || []"
+                    [resourceType]="rt"
+                    [readonly]="isEditing"
+                    (onSelectedResourcesChange)="onResourcesChange(rt.type, $event)">
+                  </resources-selector>
+                </div>
+              }              <!-- Actions -->
+              <div class="actions-list">
+                @for (permission of permissions[rt.type].statements; track permission.action.id) {
+                  <label nz-checkbox
+                    class="action-item"
+                    [(ngModel)]="permission.checked"
+                    (ngModelChange)="updatePermissionSingleChecked(permissions[rt.type])"
+                    [nzDisabled]="isEditing || isActionDisabled(permission.action)">
+                    <span class="action-name">{{permission.action.name}}</span>
+                    <i nz-icon [nz-tooltip]="permission.action.description" nzType="icons:icon-info-outline"></i>
+                  </label>
+                }
+              </div>
+            </div>
           }
-        </nz-collapse>
+        </div>
       </div>
     }
     @if (!readonly) {

@@ -51,13 +51,38 @@ export class AccessTokenDrawerComponent implements OnInit {
 
   fineGrainedAccessControlEnabled: boolean = false;
   authorizedResourceTypes: ResourceType[] = [];
-  permissions: { [key: string]: IPermissionStatementGroup };
-
-  @Input()
+  permissions: { [key: string]: IPermissionStatementGroup };  @Input()
   set accessToken(accessToken: IAccessToken) {
     this.isEditing = accessToken && !!accessToken.id;
     if (this.isEditing) {
-      this.permissions = preProcessPermissions(accessToken.permissions);
+      // First get all available actions for the user
+      this.setAuthorizedPermissions();
+
+      // Then merge with token's saved permissions to mark which ones are checked
+      const savedPermissions = preProcessPermissions(accessToken.permissions);
+      Object.keys(this.permissions).forEach(resourceType => {
+        if (savedPermissions[resourceType]) {
+          const savedStatements = savedPermissions[resourceType].statements;
+          const savedMap = new Map(savedStatements.map(stmt => [stmt.action.id, stmt]));
+
+          // Mark statements as checked if they exist in saved permissions
+          this.permissions[resourceType].statements.forEach(stmt => {
+            const saved = savedMap.get(stmt.action.id);
+            if (saved) {
+              stmt.checked = true;
+              stmt.resources = saved.resources;
+            } else {
+              stmt.checked = false;
+            }
+          });
+        } else {
+          // If resource type not in saved permissions, mark all as unchecked
+          this.permissions[resourceType].statements.forEach(stmt => {
+            stmt.checked = false;
+          });
+        }
+      });
+
       if (this.readonly) {
         this.title = $localize`:@@integrations.access-token.access-token-drawer.view-title:View Access Token`;
       } else {
@@ -163,9 +188,7 @@ export class AccessTokenDrawerComponent implements OnInit {
               .map(act => act.name),
             };
           }
-        }
-
-        return {...p};
+        }        return {...p};
       });
     }
 
@@ -216,8 +239,22 @@ export class AccessTokenDrawerComponent implements OnInit {
     }
   }
 
-  isLoading: boolean = false;
+  hasResourceParameters(resourceType: string): boolean {
+    // Resource types that support resource-level parameters
+    return resourceType === ResourceTypeEnum.Flag ||
+           resourceType === ResourceTypeEnum.Segment;
+  }
 
+  onResourcesChange(resourceType: string, resources: string[]) {
+    if (this.permissions[resourceType]) {
+      // Apply resources to all statements in this resource type
+      this.permissions[resourceType].statements.forEach(stmt => {
+        stmt.resources = resources;
+      });
+    }
+  }
+
+  isLoading: boolean = false;
   tokenName = '';
   tokenValue = '';
   isCreationConfirmModalVisible = false;
@@ -230,9 +267,7 @@ export class AccessTokenDrawerComponent implements OnInit {
       }
 
       return;
-    }
-
-    const {name, type} = this.form.value;
+    }    const {name, type} = this.form.value;
 
     if ((type === AccessTokenTypeEnum.Personal && !this.canTakeActionOnPersonalAccessToken) || (type === AccessTokenTypeEnum.Service && !this.canTakeActionOnServiceAccessToken)) {
       this.message.warning($localize`:@@permissions.need-permissions-to-operate:You don't have permissions to take this action, please contact the admin to grant you the necessary permissions`);
@@ -276,7 +311,6 @@ export class AccessTokenDrawerComponent implements OnInit {
       )
     }
   }
-
   copyText(event, text: string) {
     copyToClipboard(text).then(
       () => this.message.success($localize`:@@common.copy-success:Copied`)
@@ -284,7 +318,7 @@ export class AccessTokenDrawerComponent implements OnInit {
   }
 
   tokenTypes = [
-    { label: $localize `:@@integrations.access-token.personal:Personal`, value: AccessTokenTypeEnum.Personal },
-    { label: $localize `:@@integrations.access-token.service:Service`, value: AccessTokenTypeEnum.Service },
+    { label: $localize`:@@integrations.access-token.personal:Personal`, value: AccessTokenTypeEnum.Personal },
+    { label: $localize`:@@integrations.access-token.service:Service`, value: AccessTokenTypeEnum.Service },
   ]
 }
