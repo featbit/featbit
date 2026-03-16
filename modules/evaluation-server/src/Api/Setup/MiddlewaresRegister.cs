@@ -18,18 +18,18 @@ public static class MiddlewaresRegister
             Predicate = registration => registration.Tags.Contains(HealthCheckBuilderExtensions.ReadinessTag)
         });
 
-        // enable swagger in dev mode
-        if (app.Environment.IsDevelopment())
-        {
-            app.UseSwagger();
-            app.UseSwaggerUI();
-        }
-
         // enable cors when configured
         var corsOptions = app.Services.GetRequiredService<IOptions<CorsOptions>>().Value;
         if (corsOptions.Enabled)
         {
             app.UseCors();
+        }
+
+        // enable swagger in dev mode
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseSwagger();
+            app.UseSwaggerUI();
         }
 
         // enable streaming

@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using System.Net;
 using Api.Cors;
 using Infrastructure.Caches;
 using Infrastructure.MQ;
@@ -21,6 +20,7 @@ public class CorsTests : IDisposable
         string methods = "*",
         bool allowCredentials = false)
     {
+        _app?.Dispose();
         _app = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
         {
             builder.UseSetting(DbProvider.SectionName, DbProvider.Fake);
@@ -134,6 +134,60 @@ public class CorsTests : IDisposable
     }
 
     [Fact]
+    public async Task Enabled_RejectsDisallowedHeader()
+    {
+        var app = CreateApp(enabled: true, origins: "https://app.example.com", headers: "X-Custom;Authorization");
+        var client = app.CreateClient();
+
+        var request = new HttpRequestMessage(HttpMethod.Options, "/health/liveness");
+        request.Headers.Add("Origin", "https://app.example.com");
+        request.Headers.Add("Access-Control-Request-Method", "GET");
+        request.Headers.Add("Access-Control-Request-Headers", "X-Forbidden");
+
+        var response = await client.SendAsync(request);
+
+        Assert.False(response.Headers.Contains("Access-Control-Allow-Origin"));
+    }
+
+    [Fact]
+    public async Task Enabled_RejectsDisallowedMethod()
+    {
+        var app = CreateApp(enabled: true, origins: "https://app.example.com", methods: "GET;POST");
+        var client = app.CreateClient();
+
+        var request = new HttpRequestMessage(HttpMethod.Options, "/health/liveness");
+        request.Headers.Add("Origin", "https://app.example.com");
+        request.Headers.Add("Access-Control-Request-Method", "DELETE");
+
+        var response = await client.SendAsync(request);
+
+        Assert.False(response.Headers.Contains("Access-Control-Allow-Origin"));
+    }
+
+    [Fact]
+    public async Task Enabled_AllowsCredentials_WithExplicitOrigin()
+    {
+        var app = CreateApp(
+            enabled: true,
+            origins: "https://app.example.com",
+            headers: "*",
+            methods: "*",
+            allowCredentials: true);
+        var client = app.CreateClient();
+
+        var request = new HttpRequestMessage(HttpMethod.Options, "/health/liveness");
+        request.Headers.Add("Origin", "https://app.example.com");
+        request.Headers.Add("Access-Control-Request-Method", "GET");
+
+        var response = await client.SendAsync(request);
+
+        Assert.True(response.Headers.Contains("Access-Control-Allow-Origin"));
+        Assert.Equal("https://app.example.com", response.Headers.GetValues("Access-Control-Allow-Origin").First());
+        Assert.True(response.Headers.Contains("Access-Control-Allow-Credentials"));
+        Assert.Equal("true", response.Headers.GetValues("Access-Control-Allow-Credentials").First());
+    }
+
+    [Fact]
     public void Validation_FailsWhen_Enabled_WithEmptyOrigins()
     {
         var options = new CorsOptions { Enabled = true, AllowedOrigins = "" };
@@ -218,6 +272,25 @@ public class CorsTests : IDisposable
         {
             Enabled = true,
             AllowedOrigins = "https://app.example.com,https://admin.example.com",
+            AllowedHeaders = "*",
+            AllowedMethods = "*"
+        };
+        var context = new ValidationContext(options);
+        var results = new List<ValidationResult>();
+
+        var isValid = Validator.TryValidateObject(options, context, results, validateAllProperties: true);
+
+        Assert.False(isValid);
+        Assert.Contains(results, r => r.MemberNames.Contains(nameof(CorsOptions.AllowedOrigins)));
+    }
+
+    [Fact]
+    public void Validation_FailsWhen_OriginIsNotAbsoluteUri()
+    {
+        var options = new CorsOptions
+        {
+            Enabled = true,
+            AllowedOrigins = "example.com",
             AllowedHeaders = "*",
             AllowedMethods = "*"
         };

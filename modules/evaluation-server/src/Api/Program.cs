@@ -1,4 +1,3 @@
-using Api.Cors;
 using Api.Setup;
 using Serilog;
 

@@ -8,28 +8,40 @@ public class CorsOptions : IValidatableObject
 
     public bool Enabled { get; set; }
 
-    [MaxLength(4096, ErrorMessage = "AllowedOrigins must not exceed 4096 characters.")]
-    public string AllowedOrigins { get; set; } = string.Empty;
-
-    [MaxLength(1024, ErrorMessage = "AllowedHeaders must not exceed 1024 characters.")]
-    public string AllowedHeaders { get; set; } = string.Empty;
-
-    [MaxLength(256, ErrorMessage = "AllowedMethods must not exceed 256 characters.")]
-    public string AllowedMethods { get; set; } = string.Empty;
-
     public bool AllowCredentials { get; set; }
 
-    public string[] ParsedOrigins => ParseDelimited(AllowedOrigins);
+    private string _rawOrigins = string.Empty;
+    private string _rawHeaders = string.Empty;
+    private string _rawMethods = string.Empty;
 
-    public string[] ParsedHeaders => ParseDelimited(AllowedHeaders);
+    // Write-only setters for configuration binding; values are parsed on assignment.
+    // Consumers read the parsed arrays below — the raw strings are not exposed.
+    public string AllowedOrigins
+    {
+        set { _rawOrigins = value ?? string.Empty; Origins = ParseDelimited(_rawOrigins); }
+    }
 
-    public string[] ParsedMethods => ParseDelimited(AllowedMethods);
+    public string AllowedHeaders
+    {
+        set { _rawHeaders = value ?? string.Empty; Headers = ParseDelimited(_rawHeaders); }
+    }
 
-    public bool AllowAnyOrigins => IsSingleWildcard(ParsedOrigins);
+    public string AllowedMethods
+    {
+        set { _rawMethods = value ?? string.Empty; Methods = ParseDelimited(_rawMethods); }
+    }
 
-    public bool AllowAnyHeaders => IsSingleWildcard(ParsedHeaders);
+    public string[] Origins { get; private set; } = [];
 
-    public bool AllowAnyMethods => IsSingleWildcard(ParsedMethods);
+    public string[] Headers { get; private set; } = [];
+
+    public string[] Methods { get; private set; } = [];
+
+    public bool AllowAnyOrigins => IsSingleWildcard(Origins);
+
+    public bool AllowAnyHeaders => IsSingleWildcard(Headers);
+
+    public bool AllowAnyMethods => IsSingleWildcard(Methods);
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
@@ -38,9 +50,34 @@ public class CorsOptions : IValidatableObject
             yield break;
         }
 
-        var origins = ParsedOrigins;
-        var headers = ParsedHeaders;
-        var methods = ParsedMethods;
+        // Length guards — validated here because [MaxLength] cannot introspect write-only setters.
+        if (_rawOrigins.Length > 4096)
+        {
+            yield return new ValidationResult(
+                "AllowedOrigins must not exceed 4096 characters.",
+                [nameof(AllowedOrigins)]
+            );
+        }
+
+        if (_rawHeaders.Length > 1024)
+        {
+            yield return new ValidationResult(
+                "AllowedHeaders must not exceed 1024 characters.",
+                [nameof(AllowedHeaders)]
+            );
+        }
+
+        if (_rawMethods.Length > 256)
+        {
+            yield return new ValidationResult(
+                "AllowedMethods must not exceed 256 characters.",
+                [nameof(AllowedMethods)]
+            );
+        }
+
+        var origins = Origins;
+        var headers = Headers;
+        var methods = Methods;
 
         if (origins.Length == 0)
         {
@@ -66,7 +103,7 @@ public class CorsOptions : IValidatableObject
             );
         }
 
-        if (ContainsComma(AllowedOrigins))
+        if (ContainsComma(_rawOrigins))
         {
             yield return new ValidationResult(
                 "AllowedOrigins uses ';' as the delimiter. Commas are not supported.",
@@ -74,7 +111,7 @@ public class CorsOptions : IValidatableObject
             );
         }
 
-        if (ContainsComma(AllowedHeaders))
+        if (ContainsComma(_rawHeaders))
         {
             yield return new ValidationResult(
                 "AllowedHeaders uses ';' as the delimiter. Commas are not supported.",
@@ -82,7 +119,7 @@ public class CorsOptions : IValidatableObject
             );
         }
 
-        if (ContainsComma(AllowedMethods))
+        if (ContainsComma(_rawMethods))
         {
             yield return new ValidationResult(
                 "AllowedMethods uses ';' as the delimiter. Commas are not supported.",
@@ -120,6 +157,18 @@ public class CorsOptions : IValidatableObject
                 "AllowCredentials cannot be used with a wildcard '*' origin. Specify explicit origins instead.",
                 [nameof(AllowCredentials), nameof(AllowedOrigins)]
             );
+        }
+
+        foreach (var origin in origins.Where(o => o != "*"))
+        {
+            if (!Uri.TryCreate(origin, UriKind.Absolute, out var uri) ||
+                (uri.Scheme != "http" && uri.Scheme != "https"))
+            {
+                yield return new ValidationResult(
+                    $"AllowedOrigins contains an invalid value '{origin}'. Each origin must be an absolute URI with an 'http' or 'https' scheme (e.g. 'https://example.com').",
+                    [nameof(AllowedOrigins)]
+                );
+            }
         }
     }
 
