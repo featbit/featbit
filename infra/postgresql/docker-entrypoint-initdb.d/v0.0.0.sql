@@ -521,6 +521,21 @@ CREATE INDEX ix_webhook_deliveries_webhook_id_started_at ON webhook_deliveries (
 
 CREATE INDEX ix_webhooks_org_id_created_at ON webhooks (org_id, created_at);
 
+CREATE INDEX ix_end_users_env_id_updated_at_id
+    ON end_users (env_id, updated_at DESC, id DESC);
+
+CREATE INDEX ix_end_users_workspace_id_updated_at_id
+    ON end_users (workspace_id, updated_at DESC, id DESC);
+
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
+CREATE INDEX gin_end_users_key_id_trgm
+    ON end_users USING gin (key_id gin_trgm_ops);
+
+CREATE INDEX gin_end_users_name_trgm
+    ON end_users USING gin (name gin_trgm_ops);
+
+
 -- 2. seed data
 
 DO

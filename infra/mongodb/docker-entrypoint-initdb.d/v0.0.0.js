@@ -271,4 +271,7 @@ db.RelayProxies.createIndex({createdAt: 1});
 db.Webhooks.createIndex({createdAt: 1});
 db.Webhooks.createIndex({startedAt: 1});
 db.WebhookDeliveries.createIndex({startedAt: 1});
+db.EndUsers.createIndex({envId: 1, updatedAt: -1, _id: -1})
+db.EndUsers.createIndex({workspaceId: 1, updatedAt: -1, _id: -1})
+
 print('indexes added')
