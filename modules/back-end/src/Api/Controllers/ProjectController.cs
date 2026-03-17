@@ -19,9 +19,12 @@ public class ProjectController : ApiControllerBase
     [Route("{id:guid}")]
     public async Task<ApiResponse<ProjectWithEnvs>> GetAsync(Guid id)
     {
+        var permissions = await GetRequestPermissionsAsync();
+
         var request = new GetProject
         {
-            Id = id
+            Id = id,
+            Permissions = permissions
         };
 
         var project = await Mediator.Send(request);
@@ -38,9 +41,12 @@ public class ProjectController : ApiControllerBase
     [HttpGet]
     public async Task<ApiResponse<IEnumerable<ProjectWithEnvs>>> GetListAsync()
     {
+        var permissions = await GetRequestPermissionsAsync();
+
         var request = new GetProjectList
         {
-            OrganizationId = OrgId
+            OrganizationId = OrgId,
+            Permissions = permissions
         };
 
         var projects = await Mediator.Send(request);

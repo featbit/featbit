@@ -15,7 +15,7 @@ public class CreateAccessToken : IRequest<AccessTokenVm>
 
     public string Type { get; set; }
 
-    public IEnumerable<PolicyStatement> Permissions { get; set; }
+    public PolicyStatement[] Permissions { get; set; }
 }
 
 public class CreateAccessTokenValidator : AbstractValidator<CreateAccessToken>
@@ -29,7 +29,7 @@ public class CreateAccessTokenValidator : AbstractValidator<CreateAccessToken>
             .Must(AccessTokenTypes.IsDefined).WithErrorCode(ErrorCodes.Invalid("type"));
 
         RuleFor(x => x.Permissions)
-            .Must(permissions => permissions.Any())
+            .Must(permissions => permissions.Length != 0)
             .Unless(x => x.Type == AccessTokenTypes.Personal)
             .WithErrorCode(ErrorCodes.Invalid("permissions"));
     }

@@ -1,16 +1,12 @@
-using Api.Authentication;
-using Application;
 using Application.Services;
-using Domain.AccessTokens;
 using Domain.Policies;
 using Domain.Resources;
-using Domain.Users;
 
 namespace Api.Authorization;
 
 public class DefaultPermissionChecker(
     IResourceService resourceService,
-    IMemberService memberService,
+    IRequestPermissions requestPermissions,
     ILogger<DefaultPermissionChecker> logger)
     : IPermissionChecker
 {
@@ -32,7 +28,7 @@ public class DefaultPermissionChecker(
             return false;
         }
 
-        var statements = await GetPermissionsAsync(httpContext);
+        var statements = await requestPermissions.GetAsync(httpContext);
         return PolicyHelper.IsAllowed(statements, resourceRN, permission);
     }
 
@@ -143,52 +139,6 @@ public class DefaultPermissionChecker(
             // segment has no fine-grained access control for now, return env level wildcard
             var envRN = await resourceService.GetEnvRnAsync(envId);
             return envRN == null ? null : $"{envRN}:segment/*";
-        }
-    }
-
-    private async Task<IEnumerable<PolicyStatement>> GetPermissionsAsync(HttpContext context)
-    {
-        var authenticationType = context.User.Identity?.AuthenticationType;
-
-        var statements = authenticationType switch
-        {
-            Schemes.JwtBearer => await GetUserPermissionsAsync(),
-            Schemes.OpenApi => await GetAccessTokenPermissionsAsync(),
-            _ => []
-        };
-
-        return statements;
-
-        async Task<PolicyStatement[]> GetUserPermissionsAsync()
-        {
-            var userIdClaim = context.User.Claims.FirstOrDefault(x => x.Type == UserClaims.Id);
-            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
-            {
-                logger.LogWarning("Malformed user id claim in JWT token.");
-                return [];
-            }
-
-            var organizationId = context.Request.OrganizationId();
-            if (organizationId == Guid.Empty)
-            {
-                logger.LogWarning("Malformed or missing organization id in request headers.");
-                return [];
-            }
-
-            return await memberService.GetPermissionsAsync(organizationId, userId);
-        }
-
-        async Task<IEnumerable<PolicyStatement>> GetAccessTokenPermissionsAsync()
-        {
-            if (context.Items[ApplicationConsts.AccessTokenItem] is not AccessToken accessToken)
-            {
-                logger.LogWarning("Access token not found in HttpContext.Items.");
-                return [];
-            }
-
-            return accessToken.Type == AccessTokenTypes.Service
-                ? accessToken.Permissions
-                : await memberService.GetPermissionsAsync(accessToken.OrganizationId, accessToken.CreatorId);
         }
     }
 }
