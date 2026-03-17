@@ -38,7 +38,6 @@ public class GetProjectListHandler(IProjectService projectService)
                 where canAccessEnv
                 select env
             ).ToArray()
-            where allowedEnvs.Length != 0
             select new ProjectWithEnvs
             {
                 Id = project.Id,
