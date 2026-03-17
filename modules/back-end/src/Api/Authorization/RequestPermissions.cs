@@ -1,11 +1,11 @@
-using Api.Authorization;
+using Api.Authentication;
 using Application;
 using Application.Services;
 using Domain.AccessTokens;
 using Domain.Policies;
 using Domain.Users;
 
-namespace Api.Authentication;
+namespace Api.Authorization;
 
 public class RequestPermissions(IMemberService memberService, ILogger<RequestPermissions> logger) : IRequestPermissions
 {
