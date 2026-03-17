@@ -9,6 +9,8 @@ namespace Api.Authentication;
 
 public class RequestPermissions(IMemberService memberService, ILogger<RequestPermissions> logger) : IRequestPermissions
 {
+    // this class is intended to be registered as a scoped service
+    // so it's safe to cache permissions in a private field for the duration of the request
     private PolicyStatement[]? _permissions;
 
     public async Task<PolicyStatement[]> GetAsync(HttpContext context)
