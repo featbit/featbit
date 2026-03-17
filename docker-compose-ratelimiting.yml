@@ -1,0 +1,191 @@
+name: featbit-ratelimit-test
+services:
+  ui:
+    image: featbit/featbit-ui:latest
+    environment:
+      - API_URL=http://localhost:5000
+      - DEMO_URL=https://featbit-samples.vercel.app
+      - EVALUATION_URL=http://localhost:5100
+      - BASE_HREF=/
+    depends_on:
+      - api-server
+    ports:
+      - "8081:80"
+    networks:
+      - featbit-network
+
+  api-server:
+    image: featbit/featbit-api-server:latest
+    environment:
+      - DbProvider=Postgres
+      - MqProvider=Kafka
+      - CacheProvider=Redis
+      - Postgres__ConnectionString=Host=postgresql;Port=5432;Username=postgres;Password=please_change_me;Database=featbit
+      - Kafka__Producer__bootstrap.servers=kafka:9092
+      - Kafka__Consumer__bootstrap.servers=kafka:9092
+      - Redis__ConnectionString=redis:6379
+      - OLAP__ServiceHost=http://da-server
+    depends_on:
+      - postgresql
+      - redis
+      - kafka
+      - da-server
+    ports:
+      - "5000:5000"
+    networks:
+      - featbit-network
+
+  evaluation-server:
+    build:
+      context: ./modules/evaluation-server
+      dockerfile: deploy/Dockerfile
+    environment:
+      - DbProvider=Postgres
+      - MqProvider=Kafka
+      - CacheProvider=Redis
+      - Postgres__ConnectionString=Host=postgresql;Port=5432;Username=postgres;Password=please_change_me;Database=featbit
+      - Kafka__Producer__bootstrap.servers=kafka:9092
+      - Kafka__Consumer__bootstrap.servers=kafka:9092
+      - Redis__ConnectionString=redis:6379
+      # Rate limiting — values injected via env vars or overridden by the test orchestrator
+      - RateLimiting__Enabled=${RATELIMIT_ENABLED:-true}
+      - RateLimiting__Distributed=${RATELIMIT_DISTRIBUTED:-true}
+      - RateLimiting__Type=${RATELIMIT_TYPE:-FixedWindow}
+      - RateLimiting__PermitLimit=${RATELIMIT_PERMIT_LIMIT:-5}
+      - RateLimiting__WindowSeconds=${RATELIMIT_WINDOW_SECONDS:-10}
+      - RateLimiting__SegmentsPerWindow=${RATELIMIT_SEGMENTS_PER_WINDOW:-4}
+      - RateLimiting__TokenLimit=${RATELIMIT_TOKEN_LIMIT:-5}
+      - RateLimiting__TokensPerPeriod=${RATELIMIT_TOKENS_PER_PERIOD:-5}
+      - RateLimiting__ReplenishmentPeriodSeconds=${RATELIMIT_REPLENISHMENT_SECONDS:-10}
+      # CORS — enabled by default in permissive mode; set Cors__Enabled=false to disable headers
+      - Cors__Enabled=${CORS_ENABLED:-true}
+      - Cors__AllowedOrigins=${CORS_ALLOWED_ORIGINS:-*}
+      - Cors__AllowedHeaders=${CORS_ALLOWED_HEADERS:-*}
+      - Cors__AllowedMethods=${CORS_ALLOWED_METHODS:-*}
+      - Cors__AllowCredentials=${CORS_ALLOW_CREDENTIALS:-false}
+    depends_on:
+      - postgresql
+      - kafka
+      - redis
+    ports:
+      - "5100:5100"
+    networks:
+      - featbit-network
+
+  da-server:
+    image: featbit/featbit-data-analytics-server:latest
+    depends_on:
+      - kafka
+      - clickhouse-server
+    ports:
+      - "8200:80"
+    networks:
+      - featbit-network
+    environment:
+      DB_PROVIDER: ClickHouse
+      KAFKA_HOSTS: kafka:9092
+      CLICKHOUSE_HOST: clickhouse-server
+      CLICKHOUSE_KAFKA_HOSTS: kafka:9092
+      CHECK_DB_LIVNESS: true
+
+  postgresql:
+    image: postgres:15.10
+    container_name: postgresql
+    restart: on-failure
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: please_change_me
+    volumes:
+      - ./infra/postgresql/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d/
+      - postgres:/var/lib/postgresql/data
+    networks:
+      - featbit-network
+
+  redis:
+    image: bitnamilegacy/redis:6.2.10
+    restart: on-failure
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    networks:
+      - featbit-network
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis:/data
+
+  kafka:
+    image: bitnamilegacy/kafka:3.5
+    restart: on-failure
+    ports:
+      - '9092:9092'
+      - '29092:29092'
+    environment:
+      KAFKA_CFG_NODE_ID: 0
+      KAFKA_CFG_PROCESS_ROLES: controller,broker
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 0@kafka:9093
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,PLAINTEXT_HOST://:29092,CONTROLLER://:9093
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      ALLOW_PLAINTEXT_LISTENER: 'true'
+    networks:
+      - featbit-network
+    volumes:
+      - kafka:/bitnami/kafka
+
+  init-kafka-topics:
+    image: bitnamilegacy/kafka:3.5
+    depends_on:
+      kafka:
+        condition: service_started
+    networks:
+      - featbit-network
+    entrypoint:
+      - bash
+      - "-c"
+      - |
+        echo "Waiting for Kafka to be ready..."
+        until /opt/bitnami/kafka/bin/kafka-topics.sh --list --bootstrap-server kafka:9092; do sleep 5; done;
+        echo "Kafka is ready now, start creating topics."
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-feature-flag-change;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-segment-change;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-endusers;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-insights;
+        echo "Seed kafka topic finished."
+
+  clickhouse-server:
+    image: clickhouse/clickhouse-server:23.7
+    container_name: clickhouse-server
+    restart: on-failure
+    depends_on:
+      - kafka
+    ports:
+      - "8123:8123"
+      - "8443:8443"
+      - "9000:9000"
+      - "9009:9009"
+      - "9440:9440"
+      - "9181:9181"
+    networks:
+      - featbit-network
+    volumes:
+      - ./infra/clickhouse/single_node/config.xml:/etc/clickhouse-server/config.xml
+      - ./infra/clickhouse/users.xml:/etc/clickhouse-server/users.xml
+      - clickhouse-server:/var/lib/clickhouse
+
+networks:
+  featbit-network:
+    name: featbit-network
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.10.0.0/16
+
+volumes:
+  postgres:
+  redis:
+  kafka:
+  clickhouse-server:
