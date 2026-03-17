@@ -46,7 +46,7 @@ public class GetProjectHandler(IProjectService projectService)
             Id = project.Id,
             Key = project.Key,
             Name = project.Name,
-            Environments = accessibleEnvs
+            Environments = accessibleEnvs.ToArray()
         };
     }
 }

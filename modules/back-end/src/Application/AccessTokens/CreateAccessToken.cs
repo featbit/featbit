@@ -15,7 +15,7 @@ public class CreateAccessToken : IRequest<AccessTokenVm>
 
     public string Type { get; set; }
 
-    public PolicyStatement[] Permissions { get; set; }
+    public PolicyStatement[] Permissions { get; set; } = [];
 }
 
 public class CreateAccessTokenValidator : AbstractValidator<CreateAccessToken>
