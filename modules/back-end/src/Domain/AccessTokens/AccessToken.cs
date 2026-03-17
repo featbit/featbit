@@ -16,7 +16,7 @@ public class AccessToken : AuditedEntity
 
     public Guid CreatorId { get; set; }
 
-    public IEnumerable<PolicyStatement> Permissions { get; set; }
+    public PolicyStatement[] Permissions { get; set; }
 
     public DateTime? LastUsedAt { get; set; }
 
@@ -25,7 +25,7 @@ public class AccessToken : AuditedEntity
         Guid creatorId,
         string name,
         string type,
-        IEnumerable<PolicyStatement> permissions)
+        PolicyStatement[] permissions)
     {
         OrganizationId = organizationId;
         CreatorId = creatorId;

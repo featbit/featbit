@@ -65,7 +65,7 @@ public class CreateWorkspaceHandler : IRequestHandler<CreateWorkspace, RegisterR
             WorkspaceId = workspace.Id,
             Name = "Default Organization",
             Key = "default-organization",
-            CurrentUserId = registerResult.UserId
+            CurrentUserId = registerResult.User.Id
         }, cancellationToken);
 
         return registerResult;

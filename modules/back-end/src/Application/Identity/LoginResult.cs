@@ -6,7 +6,7 @@ public class LoginResult
 
     public string ErrorCode { get; private init; } = string.Empty;
 
-    public string Token { get; private init; } = string.Empty;
+    public AuthTokens Tokens { get; private init; }
 
     public static LoginResult Failed(string errorCode)
     {
@@ -14,19 +14,19 @@ public class LoginResult
         {
             Success = false,
             ErrorCode = errorCode,
-            Token = string.Empty
+            Tokens = null
         };
 
         return failed;
     }
 
-    public static LoginResult Ok(string token)
+    public static LoginResult Ok(AuthTokens tokens)
     {
         var success = new LoginResult
         {
             Success = true,
             ErrorCode = string.Empty,
-            Token = token
+            Tokens = tokens
         };
 
         return success;

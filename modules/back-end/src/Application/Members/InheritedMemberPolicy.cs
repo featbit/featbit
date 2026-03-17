@@ -10,5 +10,7 @@ public class InheritedMemberPolicy
 
     public string Description { get; set; }
 
+    public DateTime CreatedAt { get; set; }
+
     public string GroupName { get; set; }
 }

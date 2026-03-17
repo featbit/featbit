@@ -20,6 +20,7 @@ public class GlobalUserService(MongoDbClient mongoDb) : MongoDbService<EndUser>(
 
         var total = await query.CountAsync();
         var data = await query
+            .OrderByDescending(x => x.UpdatedAt)
             .Skip(filter.PageIndex * filter.PageSize)
             .Take(filter.PageSize)
             .ToListAsync();

@@ -29,7 +29,7 @@ public class UserControllerTests
     public async Task GetUserProfile_NotExist()
     {
         var userNotExist = new User(Guid.NewGuid(), Guid.NewGuid(), "email", "pwd");
-        var token = _app.GetToken(userNotExist);
+        var authTokens = await _app.GetTokenAsync(userNotExist);
 
         var factory = _app.WithWebHostBuilder(builder => builder.ConfigureTestServices(collection =>
         {
@@ -37,7 +37,7 @@ public class UserControllerTests
         }));
 
         var client = factory.CreateClient();
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authTokens.AccessToken);
 
         var response = await client.GetAsync("/api/v1/user/profile");
         await Verify(response);

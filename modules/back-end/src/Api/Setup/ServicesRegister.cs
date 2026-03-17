@@ -7,6 +7,7 @@ using Api.Swagger;
 using Application.Services;
 using Domain.Workspaces;
 using Domain.Identity;
+using Domain.Policies;
 using Infrastructure;
 using Infrastructure.Services;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -51,9 +52,10 @@ public static class ServicesRegister
         builder.Services.AddCors(options => options.AddDefaultPolicy(policyBuilder =>
         {
             policyBuilder
-                .AllowAnyOrigin()
+                .SetIsOriginAllowed(_ => true)
                 .AllowAnyHeader()
-                .AllowAnyMethod();
+                .AllowAnyMethod()
+                .AllowCredentials();
         }));
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -103,7 +105,10 @@ public static class ServicesRegister
                     ValidAudience = jwtOption["Audience"],
 
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOption["Key"]!))
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOption["Key"]!)),
+
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero
                 };
             })
             .AddOpenApi(Schemes.OpenApi);
@@ -111,7 +116,8 @@ public static class ServicesRegister
         // authorization
         LicenseVerifier.ImportPublicKey(builder.Configuration["PublicKey"]);
         builder.Services.AddTransient<ILicenseService, LicenseService>();
-        builder.Services.AddSingleton<IPermissionChecker, DefaultPermissionChecker>();
+        builder.Services.AddScoped<IRequestPermissions, RequestPermissions>();
+        builder.Services.AddScoped<IPermissionChecker, DefaultPermissionChecker>();
         builder.Services.AddScoped<IAuthorizationHandler, PermissionRequirementHandler>();
         builder.Services.AddScoped<IAuthorizationHandler, LicenseRequirementHandler>();
         builder.Services.AddAuthorization(options =>

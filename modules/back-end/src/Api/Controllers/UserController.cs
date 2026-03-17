@@ -1,3 +1,5 @@
+using Application.Members;
+using Application.Policies;
 using Application.Users;
 
 namespace Api.Controllers;
@@ -27,5 +29,18 @@ public class UserController : ApiControllerBase
     {
         var hasMultipleWorkspaces = await Mediator.Send(request);
         return Ok(hasMultipleWorkspaces);
+    }
+
+    [HttpGet("policies")]
+    public async Task<ApiResponse<IEnumerable<PolicyVm>>> GetPoliciesAsync()
+    {
+        var request = new GetMemberPolicy
+        {
+            OrganizationId = OrgId,
+            MemberId = CurrentUser.Id
+        };
+
+        var policies = await Mediator.Send(request);
+        return Ok(policies);
     }
 }

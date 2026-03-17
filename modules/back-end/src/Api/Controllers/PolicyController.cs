@@ -1,5 +1,4 @@
 using Api.Authentication;
-using Api.Authorization;
 using Application.Bases.Models;
 using Application.Policies;
 using Domain.Policies;
