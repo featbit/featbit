@@ -26,7 +26,7 @@ public class PolicyService(AppDbContext dbContext) : EntityFrameworkCoreService<
 
     public async Task<Policy> GetAsync(Guid organizationId, string key)
     {
-        var policy = await FindOneAsync(x => x.OrganizationId == organizationId && x.Key == key );
+        var policy = await FindOneAsync(x => x.OrganizationId == organizationId && x.Key == key);
         if (policy == null)
         {
             throw new EntityNotFoundException(nameof(Policy), $"{organizationId}-{key}");
