@@ -143,10 +143,10 @@ var module;
 
         return disclosure("{", "...", "}", "object", function () {
             var os = append(span("object"), themetext("object syntax", "{", null, "\n"));
-            for (var k in json) var last = k;
             var keys = Object.keys(json);
             if (sort_objects)
                 keys = keys.sort();
+            var last = keys[keys.length - 1];
             for (var i in keys) {
                 var k = keys[i];
                 append(os, themetext(null, indent+"    ", "key", '"'+k+'"', "object syntax", ': '),
