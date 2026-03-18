@@ -906,11 +906,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.ts</context>
-          <context context-type="linenumber">133</context>
+          <context context-type="linenumber">132</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.ts</context>
-          <context context-type="linenumber">176</context>
+          <context context-type="linenumber">175</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/test-webhook-modal/test-webhook-modal.component.ts</context>
@@ -1218,11 +1218,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
-          <context context-type="linenumber">24,25</context>
+          <context context-type="linenumber">27,28</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
-          <context context-type="linenumber">64,65</context>
+          <context context-type="linenumber">75,76</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/experimentation/experimentation.component.html</context>
@@ -5228,7 +5228,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
-          <context context-type="linenumber">120,122</context>
+          <context context-type="linenumber">134,136</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/metrics/metrics.component.html</context>
@@ -6003,7 +6003,7 @@
         <source>Saved Successfully</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.ts</context>
-          <context context-type="linenumber">174</context>
+          <context context-type="linenumber">173</context>
         </context-group>
       </trans-unit>
       <trans-unit id="integrations.webhooks.send-test-event" datatype="html">
@@ -6135,7 +6135,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
-          <context context-type="linenumber">134,136</context>
+          <context context-type="linenumber">152,154</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
@@ -6975,54 +6975,54 @@
         <source>Filter by property</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
-          <context context-type="linenumber">6</context>
+          <context context-type="linenumber">6,7</context>
         </context-group>
       </trans-unit>
       <trans-unit id="users.idx.select-properties-to-search" datatype="html">
         <source>Select properties to search</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
-          <context context-type="linenumber">14,16</context>
+          <context context-type="linenumber">17,19</context>
         </context-group>
       </trans-unit>
       <trans-unit id="users.idx.all-selected-items" datatype="html">
         <source>All</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
-          <context context-type="linenumber">34</context>
+          <context context-type="linenumber">39,40</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
-          <context context-type="linenumber">74</context>
+          <context context-type="linenumber">87,88</context>
         </context-group>
       </trans-unit>
       <trans-unit id="users.idx.etc" datatype="html">
         <source>+</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
-          <context context-type="linenumber">36</context>
+          <context context-type="linenumber">42,43</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
-          <context context-type="linenumber">76</context>
+          <context context-type="linenumber">90,91</context>
         </context-group>
       </trans-unit>
       <trans-unit id="users.idx.entries" datatype="html">
         <source>more</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
-          <context context-type="linenumber">36,37</context>
+          <context context-type="linenumber">44,45</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
-          <context context-type="linenumber">76,77</context>
+          <context context-type="linenumber">92,93</context>
         </context-group>
       </trans-unit>
       <trans-unit id="users.idx.select-columns-to-add" datatype="html">
         <source>Add columns</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
-          <context context-type="linenumber">54,56</context>
+          <context context-type="linenumber">65,67</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/global-user/global-user.component.html</context>
@@ -7030,17 +7030,17 @@
         </context-group>
       </trans-unit>
       <trans-unit id="users.idx.manage-properties" datatype="html">
-        <source>Properties</source>
+        <source>Properties </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
-          <context context-type="linenumber">100,102</context>
+          <context context-type="linenumber">119,121</context>
         </context-group>
       </trans-unit>
       <trans-unit id="users.idx.ff-segments" datatype="html">
         <source>Evaluate on flags and segments</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
-          <context context-type="linenumber">132,133</context>
+          <context context-type="linenumber">149,150</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/global-user/global-user.component.html</context>
