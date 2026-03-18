@@ -52,8 +52,8 @@ export class PolicyService {
     return this.http.post<IPolicy>(this.baseUrl, { name: name, key: key, description: description });
   }
 
-  clone(originPolicyKey: string, payload: ClonePolicyPayload) {
-    const url = `${this.baseUrl}/clone/${originPolicyKey}`;
+  clone(payload: ClonePolicyPayload) {
+    const url = `${this.baseUrl}/clone`;
     return this.http.post<IPolicy>(url, payload);
   }
 

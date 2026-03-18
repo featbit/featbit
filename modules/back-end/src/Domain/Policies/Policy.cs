@@ -45,7 +45,7 @@ public class Policy : AuditedEntity
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public Policy Clone(string name, string key, string description)
+    public Policy Clone(string name, string key, string description, string type)
     {
         // clear id
         Id = Guid.Empty;
@@ -53,7 +53,7 @@ public class Policy : AuditedEntity
         Name = name;
         Key = key;
         Description = description;
-        Type = PolicyTypes.CustomerManaged;
+        Type = type;
 
         // change audited properties
         var now = DateTime.UtcNow;

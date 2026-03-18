@@ -1,5 +1,6 @@
 using Application.Bases;
 using Application.Bases.Exceptions;
+using Domain.Policies;
 
 namespace Application.Policies;
 
@@ -11,9 +12,9 @@ public class ClonePolicy : IRequest<PolicyVm>
     public Guid OrgId { get; set; }
 
     /// <summary>
-    /// The key of the policy from which the policy is cloned. Retrieved from the URL path.
+    /// The Id of the policy from which the policy is cloned.
     /// </summary>
-    public string OriginPolicyKey { get; set; }
+    public Guid OriginalPolicyId { get; set; }
 
     /// <summary>
     /// The name of the cloned policy.
@@ -54,9 +55,9 @@ public class ClonePolicyHandler(IPolicyService service, IMapper mapper)
             throw new BusinessException(ErrorCodes.KeyHasBeenUsed);
         }
 
-        var policyToClone = await service.GetAsync(request.OrgId, request.OriginPolicyKey);
+        var policyToClone = await service.GetAsync(request.OriginalPolicyId);
 
-        var clonedPolicy = policyToClone.Clone(request.Name, request.Key, request.Description);
+        var clonedPolicy = policyToClone.Clone(request.Name, request.Key, request.Description, PolicyTypes.CustomerManaged);
         await service.AddOneAsync(clonedPolicy);
 
         return mapper.Map<PolicyVm>(clonedPolicy);

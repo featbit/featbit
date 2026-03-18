@@ -90,11 +90,10 @@ public class PolicyController : ApiControllerBase
     /// Clone a policy.
     /// </remarks>
     [OpenApi]
-    [HttpPost("clone/{key}")]
-    public async Task<ApiResponse<PolicyVm>> CloneAsync(string key, ClonePolicy request)
+    [HttpPost("clone")]
+    public async Task<ApiResponse<PolicyVm>> CloneAsync(ClonePolicy request)
     {
         request.OrgId = OrgId;
-        request.OriginPolicyKey = key;
 
         var policy = await Mediator.Send(request);
         return Ok(policy);
