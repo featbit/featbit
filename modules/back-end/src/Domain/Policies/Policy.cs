@@ -53,6 +53,7 @@ public class Policy : AuditedEntity
         Name = name;
         Key = key;
         Description = description;
+        Type = PolicyTypes.CustomerManaged;
 
         // change audited properties
         var now = DateTime.UtcNow;
