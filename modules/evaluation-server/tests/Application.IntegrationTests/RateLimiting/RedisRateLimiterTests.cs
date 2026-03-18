@@ -23,17 +23,17 @@ public class RedisRateLimiterTests
             .Setup(x => x.GetDatabase())
             .Throws(new RedisException("redis unavailable"));
 
-        using var limiter = new RedisRateLimiter(
-            redisClient.Object,
-            partitionKey: "Sdk:env-1",
-            type: limiterType,
-            permitLimit: 1,
-            window: TimeSpan.FromSeconds(60),
-            tokenLimit: 1,
-            tokensPerPeriod: 1,
-            replenishmentPeriod: TimeSpan.FromSeconds(60),
-            logger: NullLogger);
+        var options = new EffectiveOptions("Sdk", new RateLimitingOptions
+        {
+            Type = limiterType,
+            PermitLimit = 1,
+            WindowSeconds = 60,
+            TokenLimit = 1,
+            TokensPerPeriod = 1,
+            ReplenishmentPeriodSeconds = 60
+        });
 
+        var limiter = new RedisRateLimiter(redisClient.Object, "Sdk:env-1", options, NullLogger);
         var lease = await limiter.AcquireAsync(permitCount: 1, cancellationToken: CancellationToken.None);
 
         Assert.True(lease.IsAcquired);
@@ -50,17 +50,17 @@ public class RedisRateLimiterTests
             .Setup(x => x.GetDatabase())
             .Throws(new RedisTimeoutException("redis timed out", CommandStatus.Unknown));
 
-        using var limiter = new RedisRateLimiter(
-            redisClient.Object,
-            partitionKey: "Sdk:env-1",
-            type: limiterType,
-            permitLimit: 1,
-            window: TimeSpan.FromSeconds(60),
-            tokenLimit: 1,
-            tokensPerPeriod: 1,
-            replenishmentPeriod: TimeSpan.FromSeconds(60),
-            logger: NullLogger);
+        var options = new EffectiveOptions("Sdk", new RateLimitingOptions
+        {
+            Type = limiterType,
+            PermitLimit = 1,
+            WindowSeconds = 60,
+            TokenLimit = 1,
+            TokensPerPeriod = 1,
+            ReplenishmentPeriodSeconds = 60
+        });
 
+        var limiter = new RedisRateLimiter(redisClient.Object, "Sdk:env-1", options, NullLogger);
         var lease = await limiter.AcquireAsync(permitCount: 1, cancellationToken: CancellationToken.None);
 
         Assert.True(lease.IsAcquired);
@@ -77,97 +77,21 @@ public class RedisRateLimiterTests
             .Setup(x => x.GetDatabase())
             .Throws(new InvalidOperationException("unexpected error"));
 
-        using var limiter = new RedisRateLimiter(
-            redisClient.Object,
-            partitionKey: "Sdk:env-1",
-            type: limiterType,
-            permitLimit: 1,
-            window: TimeSpan.FromSeconds(60),
-            tokenLimit: 1,
-            tokensPerPeriod: 1,
-            replenishmentPeriod: TimeSpan.FromSeconds(60),
-            logger: NullLogger);
+        var options = new EffectiveOptions("Sdk", new RateLimitingOptions
+        {
+            Type = limiterType,
+            PermitLimit = 1,
+            WindowSeconds = 60,
+            TokenLimit = 1,
+            TokensPerPeriod = 1,
+            ReplenishmentPeriodSeconds = 60
+        });
 
-        await Assert.ThrowsAsync<InvalidOperationException>(
-            () => limiter.AcquireAsync(permitCount: 1, cancellationToken: CancellationToken.None).AsTask());
-    }
+        var limiter = new RedisRateLimiter(redisClient.Object, "Sdk:env-1", options, NullLogger);
 
-    [Theory]
-    [InlineData(RateLimiterType.FixedWindow)]
-    [InlineData(RateLimiterType.SlidingWindow)]
-    public void Constructor_Throws_WhenWindowLessThanOneSecond(RateLimiterType limiterType)
-    {
-        var redisClient = new Mock<IRedisClient>();
-
-        Assert.Throws<ArgumentOutOfRangeException>(() => new RedisRateLimiter(
-            redisClient.Object,
-            partitionKey: "Sdk:env-1",
-            type: limiterType,
-            permitLimit: 1,
-            window: TimeSpan.FromMilliseconds(500),
-            tokenLimit: 1,
-            tokensPerPeriod: 1,
-            replenishmentPeriod: TimeSpan.FromSeconds(60),
-            logger: NullLogger));
-    }
-
-    [Fact]
-    public void Constructor_Throws_WhenReplenishmentPeriodLessThanOneSecond()
-    {
-        var redisClient = new Mock<IRedisClient>();
-
-        Assert.Throws<ArgumentOutOfRangeException>(() => new RedisRateLimiter(
-            redisClient.Object,
-            partitionKey: "Sdk:env-1",
-            type: RateLimiterType.TokenBucket,
-            permitLimit: 1,
-            window: TimeSpan.FromSeconds(60),
-            tokenLimit: 1,
-            tokensPerPeriod: 1,
-            replenishmentPeriod: TimeSpan.FromMilliseconds(500),
-            logger: NullLogger));
-    }
-
-    [Fact]
-    public void Constructor_DoesNotThrow_WhenWindowBelowMinimum_ForTokenBucket()
-    {
-        // TokenBucket does not use window; sub-second value should not throw.
-        var redisClient = new Mock<IRedisClient>();
-
-        var ex = Record.Exception(() => new RedisRateLimiter(
-            redisClient.Object,
-            partitionKey: "Sdk:env-1",
-            type: RateLimiterType.TokenBucket,
-            permitLimit: 1,
-            window: TimeSpan.FromMilliseconds(500),
-            tokenLimit: 1,
-            tokensPerPeriod: 1,
-            replenishmentPeriod: TimeSpan.FromSeconds(60),
-            logger: NullLogger));
-
-        Assert.Null(ex);
-    }
-
-    [Theory]
-    [InlineData(RateLimiterType.FixedWindow)]
-    [InlineData(RateLimiterType.SlidingWindow)]
-    public void Constructor_DoesNotThrow_WhenReplenishmentPeriodBelowMinimum_ForWindowLimiters(RateLimiterType limiterType)
-    {
-        // FixedWindow and SlidingWindow do not use replenishmentPeriod; sub-second value should not throw.
-        var redisClient = new Mock<IRedisClient>();
-
-        var ex = Record.Exception(() => new RedisRateLimiter(
-            redisClient.Object,
-            partitionKey: "Sdk:env-1",
-            type: limiterType,
-            permitLimit: 1,
-            window: TimeSpan.FromSeconds(60),
-            tokenLimit: 1,
-            tokensPerPeriod: 1,
-            replenishmentPeriod: TimeSpan.FromMilliseconds(500),
-            logger: NullLogger));
-
-        Assert.Null(ex);
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            limiter.AcquireAsync(permitCount: 1, cancellationToken: CancellationToken.None).AsTask()
+        );
     }
 
     [Fact]
@@ -175,16 +99,16 @@ public class RedisRateLimiterTests
     {
         var redisClient = new Mock<IRedisClient>();
 
-        using var limiter = new RedisRateLimiter(
-            redisClient.Object,
-            partitionKey: "Sdk:env-1",
-            type: RateLimiterType.FixedWindow,
-            permitLimit: 1,
-            window: TimeSpan.FromSeconds(60),
-            tokenLimit: 1,
-            tokensPerPeriod: 1,
-            replenishmentPeriod: TimeSpan.FromSeconds(60),
-            logger: NullLogger);
+        var options = new EffectiveOptions("Sdk", new RateLimitingOptions
+        {
+            Type = RateLimiterType.FixedWindow,
+            PermitLimit = 1,
+            WindowSeconds = 60,
+            TokenLimit = 1,
+            TokensPerPeriod = 1,
+            ReplenishmentPeriodSeconds = 60
+        });
+        using var limiter = new RedisRateLimiter(redisClient.Object, "Sdk:env-1", options, NullLogger);
 
         var idleDuration = limiter.IdleDuration;
 

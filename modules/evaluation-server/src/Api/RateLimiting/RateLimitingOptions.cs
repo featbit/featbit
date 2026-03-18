@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Threading.RateLimiting;
 
 namespace Api.RateLimiting;
 
@@ -15,7 +16,7 @@ public enum RateLimiterType
 /// <summary>
 /// Global rate limiting configuration. Bound from the "RateLimiting" configuration section.
 /// </summary>
-public class RateLimitingOptions
+public sealed class RateLimitingOptions
 {
     public const string SectionName = "RateLimiting";
 
@@ -87,19 +88,68 @@ public class RateLimitingOptions
     public int ReplenishmentPeriodSeconds { get; set; } = 60;
 
     /// <summary>
-    /// Per-endpoint overrides keyed by policy name.
-    /// Supported keys: <c>"Sdk"</c>, <c>"Insight"</c>, <c>"FeatureFlag"</c>, <c>"Agent"</c>, <c>"Streaming"</c>.
-    /// Any property left <c>null</c> inherits from the global default above.
-    /// The dictionary is case-insensitive so JSON config using any casing (e.g. <c>"sdk"</c>) is matched correctly.
+    /// Per-endpoint rate limit overrides, keyed by policy name.
+    /// Any property omitted from an endpoint entry inherits from the global defaults defined on this class.
     /// </summary>
+    /// <remarks>
+    /// Supported keys correspond to the policy names defined in <see cref="RateLimitingPolicies"/>.
+    /// The dictionary is case-insensitive, so keys such as <c>"sdk"</c> or <c>"SDK"</c> are matched correctly.
+    /// <para>Example (appsettings.json):</para>
+    /// <code>
+    /// "RateLimiting": {
+    ///   "Endpoints": {
+    ///     "Sdk":       { "PermitLimit": 500, "WindowSeconds": 30 },
+    ///     "Streaming": { "Type": "TokenBucket", "TokenLimit": 200, "TokensPerPeriod": 50 }
+    ///   }
+    /// }
+    /// </code>
+    /// </remarks>
     public Dictionary<string, EndpointRateLimitOptions> Endpoints { get; set; } =
         new(StringComparer.OrdinalIgnoreCase);
+
+    public override string ToString()
+    {
+        if (!Enabled)
+        {
+            return "RateLimiting: Disabled";
+        }
+
+        var sb = new System.Text.StringBuilder();
+        sb.Append($"RateLimiting: Enabled | Distributed={Distributed} | Type={Type}");
+
+        switch (Type)
+        {
+            case RateLimiterType.FixedWindow:
+                sb.Append($" | PermitLimit={PermitLimit} | WindowSeconds={WindowSeconds}");
+                break;
+            case RateLimiterType.SlidingWindow:
+                sb.Append($" | PermitLimit={PermitLimit} | WindowSeconds={WindowSeconds} | SegmentsPerWindow={SegmentsPerWindow}");
+                break;
+            case RateLimiterType.TokenBucket:
+                sb.Append($" | TokenLimit={TokenLimit} | TokensPerPeriod={TokensPerPeriod} | ReplenishmentPeriodSeconds={ReplenishmentPeriodSeconds}");
+                break;
+        }
+
+        if (QueueLimit > 0)
+        {
+            sb.Append($" | QueueLimit={QueueLimit}");
+        }
+
+        if (Endpoints.Count > 0)
+        {
+            sb.Append(" | Endpoints=[");
+            sb.Append(string.Join(", ", Endpoints.Select(kvp => $"{kvp.Key}: {kvp.Value}")));
+            sb.Append(']');
+        }
+
+        return sb.ToString();
+    }
 }
 
 /// <summary>
 /// Per-endpoint rate limit overrides. Properties left <c>null</c> inherit from the global defaults.
 /// </summary>
-public class EndpointRateLimitOptions
+public sealed class EndpointRateLimitOptions
 {
     public RateLimiterType? Type { get; set; }
     public int? PermitLimit { get; set; }
@@ -109,4 +159,124 @@ public class EndpointRateLimitOptions
     public int? TokenLimit { get; set; }
     public int? TokensPerPeriod { get; set; }
     public int? ReplenishmentPeriodSeconds { get; set; }
+
+    public override string ToString()
+    {
+        var parts = new List<string>();
+        if (Type.HasValue)
+        {
+            parts.Add($"Type={Type}");
+        }
+
+        if (PermitLimit.HasValue)
+        {
+            parts.Add($"PermitLimit={PermitLimit}");
+        }
+
+        if (WindowSeconds.HasValue)
+        {
+            parts.Add($"WindowSeconds={WindowSeconds}");
+        }
+
+        if (QueueLimit.HasValue)
+        {
+            parts.Add($"QueueLimit={QueueLimit}");
+        }
+
+        if (SegmentsPerWindow.HasValue)
+        {
+            parts.Add($"SegmentsPerWindow={SegmentsPerWindow}");
+        }
+
+        if (TokenLimit.HasValue)
+        {
+            parts.Add($"TokenLimit={TokenLimit}");
+        }
+
+        if (TokensPerPeriod.HasValue)
+        {
+            parts.Add($"TokensPerPeriod={TokensPerPeriod}");
+        }
+
+        if (ReplenishmentPeriodSeconds.HasValue)
+        {
+            parts.Add($"ReplenishmentPeriodSeconds={ReplenishmentPeriodSeconds}");
+        }
+
+        return string.Join(", ", parts);
+    }
+}
+
+/// <summary>
+/// Resolved/merged options ready for limiter construction.
+/// </summary>
+public sealed class EffectiveOptions
+{
+    public RateLimiterType Type { get; set; }
+    public int PermitLimit { get; set; }
+    public int WindowSeconds { get; set; }
+    public int QueueLimit { get; set; }
+    public int SegmentsPerWindow { get; set; }
+    public int TokenLimit { get; set; }
+    public int TokensPerPeriod { get; set; }
+    public int ReplenishmentPeriodSeconds { get; set; }
+
+    public EffectiveOptions(string policyName, RateLimitingOptions global)
+    {
+        Type = global.Type;
+        PermitLimit = global.PermitLimit;
+        WindowSeconds = global.WindowSeconds;
+        QueueLimit = global.QueueLimit;
+        SegmentsPerWindow = global.SegmentsPerWindow;
+        TokenLimit = global.TokenLimit;
+        TokensPerPeriod = global.TokensPerPeriod;
+        ReplenishmentPeriodSeconds = global.ReplenishmentPeriodSeconds;
+
+        if (global.Endpoints.TryGetValue(policyName, out var overwriteOptions))
+        {
+            Type = overwriteOptions.Type ?? Type;
+            PermitLimit = overwriteOptions.PermitLimit ?? PermitLimit;
+            WindowSeconds = overwriteOptions.WindowSeconds ?? WindowSeconds;
+            QueueLimit = overwriteOptions.QueueLimit ?? QueueLimit;
+            SegmentsPerWindow = overwriteOptions.SegmentsPerWindow ?? SegmentsPerWindow;
+            TokenLimit = overwriteOptions.TokenLimit ?? TokenLimit;
+            TokensPerPeriod = overwriteOptions.TokensPerPeriod ?? TokensPerPeriod;
+            ReplenishmentPeriodSeconds = overwriteOptions.ReplenishmentPeriodSeconds ?? ReplenishmentPeriodSeconds;
+        }
+        
+        switch (Type)
+        {
+            case RateLimiterType.FixedWindow or RateLimiterType.SlidingWindow when WindowSeconds < 1:
+                throw new ArgumentOutOfRangeException(nameof(WindowSeconds), WindowSeconds, "Window must be at least 1 second.");
+            case RateLimiterType.TokenBucket when ReplenishmentPeriodSeconds < 1:
+                throw new ArgumentOutOfRangeException(
+                    nameof(ReplenishmentPeriodSeconds),
+                    ReplenishmentPeriodSeconds,
+                    "Replenishment period must be at least 1 second."
+                );
+        }
+    }
+
+    public FixedWindowRateLimiterOptions ToFixedWindowOptions() => new()
+    {
+        PermitLimit = PermitLimit,
+        Window = TimeSpan.FromSeconds(WindowSeconds),
+        QueueLimit = QueueLimit
+    };
+
+    public SlidingWindowRateLimiterOptions ToSlidingWindowOptions() => new()
+    {
+        PermitLimit = PermitLimit,
+        Window = TimeSpan.FromSeconds(WindowSeconds),
+        SegmentsPerWindow = SegmentsPerWindow,
+        QueueLimit = QueueLimit
+    };
+
+    public TokenBucketRateLimiterOptions ToTokenBucketOptions() => new()
+    {
+        TokenLimit = TokenLimit,
+        TokensPerPeriod = TokensPerPeriod,
+        ReplenishmentPeriod = TimeSpan.FromSeconds(ReplenishmentPeriodSeconds),
+        QueueLimit = QueueLimit
+    };
 }

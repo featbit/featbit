@@ -12,18 +12,14 @@ public class StreamingMiddleware(
     ILogger<StreamingMiddleware> logger,
     RequestDelegate next)
 {
-    private const string StreamingPath = "/streaming";
-
     public async Task InvokeAsync(
         HttpContext httpContext,
         IRequestValidator requestValidator,
         MessageDispatcher dispatcher,
         IConnectionManager connectionManager)
     {
-        var request = httpContext.Request;
-
         // if not streaming request
-        if (!request.Path.StartsWithSegments(StreamingPath) || !httpContext.WebSockets.IsWebSocketRequest)
+        if (!StreamingHelper.IsStreamingRequest(httpContext))
         {
             await next.Invoke(httpContext);
             return;

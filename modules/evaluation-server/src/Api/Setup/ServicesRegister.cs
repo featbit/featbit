@@ -1,3 +1,4 @@
+using Api.RateLimiting;
 using Api.Services;
 using Domain.Workspaces;
 using Infrastructure;
@@ -46,7 +47,10 @@ public static class ServicesRegister
             .UseMq(configuration);
 
         // rate limiting
-        builder.AddRateLimiting();
+        if (configuration.IsRateLimitingEnabled())
+        {
+            builder.AddRateLimiting();
+        }
 
         // application services
         LicenseVerifier.ImportPublicKey(configuration["PublicKey"]);

@@ -1,4 +1,3 @@
-using Api.RateLimiting;
 using Streaming;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Infrastructure;
@@ -25,10 +24,7 @@ public static class MiddlewaresRegister
         }
 
         // enable rate limiting (before streaming so WebSocket upgrades are covered)
-        var rateLimitingOptions = app.Configuration
-            .GetSection(RateLimitingOptions.SectionName)
-            .Get<RateLimitingOptions>();
-        if (rateLimitingOptions?.Enabled == true)
+        if (app.Configuration.IsRateLimitingEnabled())
         {
             app.UseRateLimiter();
         }

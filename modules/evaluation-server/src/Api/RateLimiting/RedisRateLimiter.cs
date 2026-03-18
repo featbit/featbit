@@ -1,6 +1,5 @@
 using System.Threading.RateLimiting;
 using Infrastructure.Caches.Redis;
-using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 
 namespace Api.RateLimiting;
@@ -163,41 +162,19 @@ public sealed class RedisRateLimiter : RateLimiter
 
     #endregion
 
-    public RedisRateLimiter(
-        IRedisClient redisClient,
-        string partitionKey,
-        RateLimiterType type,
-        int permitLimit,
-        TimeSpan window,
-        int tokenLimit,
-        int tokensPerPeriod,
-        TimeSpan replenishmentPeriod,
-        ILogger logger)
+    public RedisRateLimiter(IRedisClient redisClient, string partitionKey, EffectiveOptions options, ILogger logger)
     {
         ArgumentNullException.ThrowIfNull(redisClient);
         ArgumentNullException.ThrowIfNull(logger);
 
-        if (type is RateLimiterType.FixedWindow or RateLimiterType.SlidingWindow
-            && window.TotalSeconds < 1)
-        {
-            throw new ArgumentOutOfRangeException(
-                nameof(window), window, "Window must be at least 1 second.");
-        }
-
-        if (type is RateLimiterType.TokenBucket && replenishmentPeriod.TotalSeconds < 1)
-        {
-            throw new ArgumentOutOfRangeException(
-                nameof(replenishmentPeriod), replenishmentPeriod, "Replenishment period must be at least 1 second.");
-        }
-
         _redisClient = redisClient;
         _partitionKey = partitionKey;
-        _type = type;
-        _permitLimit = permitLimit;
-        _window = window;
-        _tokenLimit = tokenLimit;
-        _tokensPerPeriod = tokensPerPeriod;
-        _replenishmentPeriod = replenishmentPeriod;
+        _type = options.Type;
+        _permitLimit = options.PermitLimit;
+        _window = TimeSpan.FromSeconds(options.WindowSeconds);
+        _tokenLimit = options.TokenLimit;
+        _tokensPerPeriod = options.TokensPerPeriod;
+        _replenishmentPeriod = TimeSpan.FromSeconds(options.ReplenishmentPeriodSeconds);
         _logger = logger;
     }
 

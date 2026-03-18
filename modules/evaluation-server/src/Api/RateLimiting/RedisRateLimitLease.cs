@@ -11,14 +11,13 @@ public sealed class RedisRateLimitLease : RateLimitLease
     /// <summary>
     /// Standard metadata key used by the built-in rate limiters for the Retry-After value.
     /// </summary>
-    public const string RetryAfterMetadataName = "RETRY_AFTER";
+    public static readonly string RetryAfterMetadataName = MetadataName.RetryAfter.Name;
 
     private static readonly string[] s_metadataNames = [RetryAfterMetadataName];
 
     public override bool IsAcquired { get; }
 
-    public override IEnumerable<string> MetadataNames =>
-        _retryAfter.HasValue ? s_metadataNames : [];
+    public override IEnumerable<string> MetadataNames => _retryAfter.HasValue ? s_metadataNames : [];
 
     private readonly TimeSpan? _retryAfter;
 
@@ -44,8 +43,7 @@ public sealed class RedisRateLimitLease : RateLimitLease
     {
         if (_retryAfter.HasValue)
         {
-            yield return new KeyValuePair<string, object?>(
-                RetryAfterMetadataName, _retryAfter.Value);
+            yield return new KeyValuePair<string, object?>(RetryAfterMetadataName, _retryAfter.Value);
         }
     }
 }

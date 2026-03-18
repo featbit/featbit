@@ -1,3 +1,4 @@
+using Api.RateLimiting;
 using Api.Setup;
 using Domain.EndUsers;
 using Domain.Insights;
@@ -8,7 +9,7 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace Api.Public;
 
-[EnableRateLimiting("Insight")]
+[EnableRateLimiting(RateLimitingPolicies.Insight)]
 public class InsightController : PublicApiControllerBase
 {
     private readonly IMessageProducer _producer;
