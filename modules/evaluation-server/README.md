@@ -117,6 +117,7 @@ The following endpoint keys are supported. Each key maps to the routes listed be
 | `Insight`     | `POST /api/public/insight/track`                                                      | Used by FeatBit SDKs to track flag evaluation results and A/B testing events |
 | `FeatureFlag` | `POST /api/public/featureflag/evaluate`                                               | Used to evaluate feature flag variations for a given user                    |
 | `Agent`       | `POST /api/public/agent/register`                                                     | Used to register relay proxy agents                                          |
+| `Streaming`   | `GET /streaming`                                                                      | Used by FeatBit SDKs to establish streaming connections                      |
 
 The environment variable pattern is `RateLimiting__Endpoints__<Key>__<Property>`, for example
 `RateLimiting__Endpoints__Sdk__PermitLimit` overrides `PermitLimit` for the `Sdk` endpoint.
