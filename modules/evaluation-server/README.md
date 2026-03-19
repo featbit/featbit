@@ -99,7 +99,7 @@ per endpoint.
 | `RateLimiting__Enabled`                    | Whether rate limiting is enabled                                                                                   | `false`         |
 | `RateLimiting__Distributed`                | Use Redis for distributed rate limiting across multiple instances. Requires `CacheProvider` to be set to `"Redis"` | `false`         |
 | `RateLimiting__Type`                       | Rate limiter algorithm: `FixedWindow`, `SlidingWindow`, or `TokenBucket`                                           | `"FixedWindow"` |
-| `RateLimiting__QueueLimit`                 | Maximum number of requests queued when the limit is reached                                                        | `0`             |
+| `RateLimiting__QueueLimit`                 | Maximum number of requests queued when the limit is reached. Only used when `RateLimiting__Distributed` is `false` | `0`             |
 | `RateLimiting__PermitLimit`                | Maximum number of requests allowed in the time window. Used by `FixedWindow` and `SlidingWindow`                   | `100`           |
 | `RateLimiting__WindowSeconds`              | Length of the time window in seconds (1–86400). Used by `FixedWindow` and `SlidingWindow`                          | `60`            |
 | `RateLimiting__SegmentsPerWindow`          | Number of segments the window is divided into. Only used by `SlidingWindow`                                        | `4`             |

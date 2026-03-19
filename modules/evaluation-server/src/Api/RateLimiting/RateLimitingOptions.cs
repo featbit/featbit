@@ -55,6 +55,7 @@ public sealed class RateLimitingOptions
 
     /// <summary>
     /// Maximum number of requests queued when the limit is reached.
+    /// Only used when <see cref="Distributed" /> is <c>false</c>.
     /// </summary>
     public int QueueLimit { get; set; } = 0;
 
