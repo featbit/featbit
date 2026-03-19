@@ -103,7 +103,7 @@ export enum PolicyTypeEnum {
 }
 
 export type ClonePolicyPayload = {
-  originalPolicyId: string;
+  originalPolicyType: string;
   name: string;
   key: string;
   description: string;

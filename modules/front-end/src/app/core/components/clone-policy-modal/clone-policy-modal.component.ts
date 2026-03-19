@@ -5,7 +5,7 @@ import { NzMessageService } from "ng-zorro-antd/message";
 import { Router } from "@angular/router";
 import { PolicyService } from "@services/policy.service";
 import { debounceTime, first, map, switchMap } from "rxjs/operators";
-import { ClonePolicyPayload, IPolicy } from "@features/safe/iam/types/policy";
+import { IPolicy } from "@features/safe/iam/types/policy";
 
 @Component({
   selector: 'clone-policy-modal',
@@ -91,8 +91,9 @@ export class ClonePolicyModalComponent {
   isCloning: boolean = false;
   doClone() {
     this.isCloning = true;
+    const { key: originalPolicyKey, type: originalPolicyType } = this.policy;
     const { key, name, description } = this.form.value;
-    this.policyService.clone({key, name, description, originalPolicyId: this.policy.id} as ClonePolicyPayload).subscribe({
+    this.policyService.clone(originalPolicyKey, {key, name, description, originalPolicyType}).subscribe({
       next: (res) => {
         this.isCloning = false;
         this.messageService.success($localize `:@@common.operation-success:Operation succeeded`);

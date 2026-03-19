@@ -12,9 +12,14 @@ public class ClonePolicy : IRequest<PolicyVm>
     public Guid OrgId { get; set; }
 
     /// <summary>
-    /// The Id of the policy from which the policy is cloned.
+    /// The key of the policy from which the policy is cloned. Retrieved from the URL path.
     /// </summary>
-    public Guid OriginalPolicyId { get; set; }
+    public string OriginalPolicyKey { get; set; }
+
+    /// <summary>
+    /// The type of the policy from which the policy is cloned. Should be either "CustomerManaged" or "SysManaged".
+    /// </summary>
+    public string OriginalPolicyType { get; set; }
 
     /// <summary>
     /// The name of the cloned policy.
@@ -38,9 +43,12 @@ public class ClonePolicyValidator : AbstractValidator<ClonePolicy>
     {
         RuleFor(x => x.Name)
             .NotEmpty().WithErrorCode(ErrorCodes.Required("name"));
-        
+
         RuleFor(x => x.Key)
             .NotEmpty().WithErrorCode(ErrorCodes.Required("key"));
+
+        RuleFor(x => x.OriginalPolicyType)
+            .Must(x => PolicyTypes.All.Contains(x)).WithErrorCode(ErrorCodes.Invalid("originPolicyType"));
     }
 }
 
@@ -55,9 +63,19 @@ public class ClonePolicyHandler(IPolicyService service, IMapper mapper)
             throw new BusinessException(ErrorCodes.KeyHasBeenUsed);
         }
 
-        var policyToClone = await service.GetAsync(request.OriginalPolicyId);
+        var policyToClone = request.OriginalPolicyType == PolicyTypes.CustomerManaged
+            ? await service.FindOneAsync(x => x.OrganizationId == request.OrgId && x.Key == request.OriginalPolicyKey)
+            : await service.FindOneAsync(x => x.Key == request.OriginalPolicyKey && x.Type == PolicyTypes.SysManaged);
 
-        var clonedPolicy = policyToClone.Clone(request.Name, request.Key, request.Description, PolicyTypes.CustomerManaged);
+        if (policyToClone == null)
+        {
+            throw new EntityNotFoundException(
+                nameof(Policy),
+                $"{request.OrgId}.{request.OriginalPolicyType}.{request.OriginalPolicyKey}"
+            );
+        }
+
+        var clonedPolicy = policyToClone.Clone(request.OrgId, request.Name, request.Key, request.Description);
         await service.AddOneAsync(clonedPolicy);
 
         return mapper.Map<PolicyVm>(clonedPolicy);
