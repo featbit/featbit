@@ -190,8 +190,7 @@ public sealed class RedisRateLimiter : RateLimiter
         return new RedisRateLimitLease(false);
     }
 
-    protected override async ValueTask<RateLimitLease> AcquireAsyncCore(
-        int permitCount, CancellationToken cancellationToken)
+    protected override async ValueTask<RateLimitLease> AcquireAsyncCore(int permitCount, CancellationToken cancellationToken)
     {
         Volatile.Write(ref _lastActivity, Environment.TickCount64);
 
@@ -232,43 +231,46 @@ public sealed class RedisRateLimiter : RateLimiter
     private async Task<long> EvalFixedWindowAsync(IDatabase db, int permitCount)
     {
         var windowSeconds = (int)_window.TotalSeconds;
-        var keyPrefix = $"rl:fw:{_partitionKey}";
+        var key = RedisKeys.RateLimit("fw", _partitionKey).ToString();
 
         // Key construction and slot derivation happen inside the Lua script
         // using Redis server time to avoid cross-node clock skew.
         var result = await db.ScriptEvaluateAsync(
             FixedWindowScript,
             keys: [],
-            [(RedisValue)keyPrefix, (RedisValue)_permitLimit, (RedisValue)windowSeconds, (RedisValue)permitCount]);
+            [key, _permitLimit, windowSeconds, permitCount]
+        );
 
         return long.Parse(result.ToString()!);
     }
 
     private async Task<long> EvalSlidingWindowAsync(IDatabase db, int permitCount)
     {
-        var key = $"rl:sw:{_partitionKey}";
+        var key = RedisKeys.RateLimit("sw", _partitionKey);
         var windowMs = (long)_window.TotalMilliseconds;
         var uniqueId = Guid.NewGuid().ToString("N");
 
         var result = await db.ScriptEvaluateAsync(
             SlidingWindowScript,
-            [(RedisKey)key],
-            [(RedisValue)_permitLimit, (RedisValue)windowMs, (RedisValue)uniqueId, (RedisValue)permitCount]);
+            [key],
+            [_permitLimit, windowMs, uniqueId, permitCount]
+        );
 
-        return long.Parse(result.ToString()!);
+        return long.Parse(result.ToString());
     }
 
     private async Task<long> EvalTokenBucketAsync(IDatabase db, int permitCount)
     {
-        var key = $"rl:tb:{_partitionKey}";
+        var key = RedisKeys.RateLimit("tb", _partitionKey);
         var replenishMs = (long)_replenishmentPeriod.TotalMilliseconds;
 
         var result = await db.ScriptEvaluateAsync(
             TokenBucketScript,
-            [(RedisKey)key],
-            [(RedisValue)_tokenLimit, (RedisValue)_tokensPerPeriod, (RedisValue)replenishMs, (RedisValue)permitCount]);
+            [key],
+            [_tokenLimit, _tokensPerPeriod, replenishMs, permitCount]
+        );
 
-        return long.Parse(result.ToString()!);
+        return long.Parse(result.ToString());
     }
 
     protected override void Dispose(bool disposing) { }

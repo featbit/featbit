@@ -26,6 +26,7 @@ public static class RateLimiterRegister
         var options = new RateLimitingOptions();
         configuration.GetSection(RateLimitingOptions.SectionName).Bind(options);
 
+        // Log the rate limiting configuration on startup for visibility
         Log.Information("Rate limiting is enabled with the following configuration: {RateLimitingOptions}", options);
 
         var useDistributed = options.Distributed && configuration.GetCacheProvider() == CacheProvider.Redis;

@@ -243,11 +243,12 @@ public sealed class EffectiveOptions
             TokensPerPeriod = overwriteOptions.TokensPerPeriod ?? TokensPerPeriod;
             ReplenishmentPeriodSeconds = overwriteOptions.ReplenishmentPeriodSeconds ?? ReplenishmentPeriodSeconds;
         }
-        
+
         switch (Type)
         {
             case RateLimiterType.FixedWindow or RateLimiterType.SlidingWindow when WindowSeconds < 1:
                 throw new ArgumentOutOfRangeException(nameof(WindowSeconds), WindowSeconds, "Window must be at least 1 second.");
+
             case RateLimiterType.TokenBucket when ReplenishmentPeriodSeconds < 1:
                 throw new ArgumentOutOfRangeException(
                     nameof(ReplenishmentPeriodSeconds),

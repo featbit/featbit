@@ -7,14 +7,14 @@ public class EffectiveOptionsTests
     [Theory]
     [InlineData(RateLimiterType.FixedWindow)]
     [InlineData(RateLimiterType.SlidingWindow)]
-    public void Constructor_Throws_WhenWindowSeconds_IsZero_ForWindowLimiters(RateLimiterType limiterType)
+    public void WindowLimiters_Throw_WhenWindowSecondsIsZero(RateLimiterType limiterType)
     {
         Assert.Throws<ArgumentOutOfRangeException>(() =>
             new EffectiveOptions("Sdk", new RateLimitingOptions { Type = limiterType, WindowSeconds = 0 }));
     }
 
     [Fact]
-    public void Constructor_Throws_WhenReplenishmentPeriodSeconds_IsZero_ForTokenBucket()
+    public void TokenBucket_Throws_WhenReplenishmentPeriodSecondsIsZero()
     {
         Assert.Throws<ArgumentOutOfRangeException>(() =>
             new EffectiveOptions("Sdk", new RateLimitingOptions
@@ -25,7 +25,7 @@ public class EffectiveOptionsTests
     }
 
     [Fact]
-    public void Constructor_DoesNotThrow_WhenWindowSeconds_IsZero_ForTokenBucket()
+    public void TokenBucket_DoesNotThrow_WhenWindowSecondsIsZero()
     {
         // TokenBucket does not validate WindowSeconds.
         var ex = Record.Exception(() =>
@@ -41,7 +41,7 @@ public class EffectiveOptionsTests
     [Theory]
     [InlineData(RateLimiterType.FixedWindow)]
     [InlineData(RateLimiterType.SlidingWindow)]
-    public void Constructor_DoesNotThrow_WhenReplenishmentPeriodSeconds_IsZero_ForWindowLimiters(
+    public void WindowLimiters_DoesNotThrow_WhenReplenishmentPeriodSecondsIsZero(
         RateLimiterType limiterType)
     {
         // FixedWindow and SlidingWindow do not validate ReplenishmentPeriodSeconds.
