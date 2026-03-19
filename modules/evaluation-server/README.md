@@ -88,6 +88,9 @@ Rate limiting **is disabled by default**. When enabled, it protects the API from
 algorithms: **FixedWindow**, **SlidingWindow**, or **TokenBucket**. Limits can be configured globally and overridden
 per endpoint.
 
+Limits are enforced **per environment**: each environment gets its own independent rate limit bucket,
+so traffic from one environment does not consume another environment's quota.
+
 > [!IMPORTANT]
 > Before enabling rate limiting in production, be sure to have a clear understanding of your traffic patterns and load
 > test your configuration to ensure limits are appropriate and effective.
