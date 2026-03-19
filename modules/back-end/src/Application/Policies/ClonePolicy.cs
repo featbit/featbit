@@ -48,6 +48,7 @@ public class ClonePolicyValidator : AbstractValidator<ClonePolicy>
             .NotEmpty().WithErrorCode(ErrorCodes.Required("key"));
 
         RuleFor(x => x.OriginPolicyType)
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("originPolicyType"))
             .Must(x => PolicyTypes.All.Contains(x)).WithErrorCode(ErrorCodes.Invalid("originPolicyType"));
     }
 }
