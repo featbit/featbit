@@ -63,9 +63,9 @@ public class ClonePolicyHandler(IPolicyService service, IMapper mapper)
             throw new BusinessException(ErrorCodes.KeyHasBeenUsed);
         }
 
-        var policyToClone = request.OriginPolicyType == PolicyTypes.CustomerManaged
-            ? await service.FindOneAsync(x => x.OrganizationId == request.OrgId && x.Key == request.OriginPolicyKey)
-            : await service.FindOneAsync(x => x.Key == request.OriginPolicyKey && x.Type == PolicyTypes.SysManaged);
+        Guid? organizationId = request.OriginPolicyType == PolicyTypes.CustomerManaged ? request.OrgId : null;
+        var policyToClone =
+            await service.FindOneAsync(x => x.OrganizationId == organizationId && x.Key == request.OriginPolicyKey);
 
         if (policyToClone == null)
         {
