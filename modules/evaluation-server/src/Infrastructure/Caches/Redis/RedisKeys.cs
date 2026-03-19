@@ -21,5 +21,5 @@ public static class RedisKeys
 
     public static RedisKey Secret(string secretString) => new($"{SecretPrefix}{secretString}");
     
-    public static RedisKey RateLimit(string type, string partitionKey) => new($"{RateLimitPrefix}{type}_{partitionKey}");
+    public static RedisKey RateLimit(string type, string partitionKey) => new($"{RateLimitPrefix}{type}:{partitionKey}");
 }
