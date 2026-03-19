@@ -94,7 +94,7 @@ public class PolicyController : ApiControllerBase
     public async Task<ApiResponse<PolicyVm>> CloneAsync(string key, ClonePolicy request)
     {
         request.OrgId = OrgId;
-        request.OriginalPolicyKey = key;
+        request.OriginPolicyKey = key;
 
         var policy = await Mediator.Send(request);
         return Ok(policy);

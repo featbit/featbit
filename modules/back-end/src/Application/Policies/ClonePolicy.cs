@@ -14,12 +14,12 @@ public class ClonePolicy : IRequest<PolicyVm>
     /// <summary>
     /// The key of the policy from which the policy is cloned. Retrieved from the URL path.
     /// </summary>
-    public string OriginalPolicyKey { get; set; }
+    public string OriginPolicyKey { get; set; }
 
     /// <summary>
     /// The type of the policy from which the policy is cloned. Should be either "CustomerManaged" or "SysManaged".
     /// </summary>
-    public string OriginalPolicyType { get; set; }
+    public string OriginPolicyType { get; set; }
 
     /// <summary>
     /// The name of the cloned policy.
@@ -47,7 +47,7 @@ public class ClonePolicyValidator : AbstractValidator<ClonePolicy>
         RuleFor(x => x.Key)
             .NotEmpty().WithErrorCode(ErrorCodes.Required("key"));
 
-        RuleFor(x => x.OriginalPolicyType)
+        RuleFor(x => x.OriginPolicyType)
             .Must(x => PolicyTypes.All.Contains(x)).WithErrorCode(ErrorCodes.Invalid("originPolicyType"));
     }
 }
@@ -63,15 +63,15 @@ public class ClonePolicyHandler(IPolicyService service, IMapper mapper)
             throw new BusinessException(ErrorCodes.KeyHasBeenUsed);
         }
 
-        var policyToClone = request.OriginalPolicyType == PolicyTypes.CustomerManaged
-            ? await service.FindOneAsync(x => x.OrganizationId == request.OrgId && x.Key == request.OriginalPolicyKey)
-            : await service.FindOneAsync(x => x.Key == request.OriginalPolicyKey && x.Type == PolicyTypes.SysManaged);
+        var policyToClone = request.OriginPolicyType == PolicyTypes.CustomerManaged
+            ? await service.FindOneAsync(x => x.OrganizationId == request.OrgId && x.Key == request.OriginPolicyKey)
+            : await service.FindOneAsync(x => x.Key == request.OriginPolicyKey && x.Type == PolicyTypes.SysManaged);
 
         if (policyToClone == null)
         {
             throw new EntityNotFoundException(
                 nameof(Policy),
-                $"{request.OrgId}.{request.OriginalPolicyType}.{request.OriginalPolicyKey}"
+                $"{request.OrgId}.{request.OriginPolicyType}.{request.OriginPolicyKey}"
             );
         }
 
