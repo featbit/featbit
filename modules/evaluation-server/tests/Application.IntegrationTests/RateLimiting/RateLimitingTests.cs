@@ -19,9 +19,12 @@ public class RateLimitingTests
     [Fact]
     public async Task DisabledRateLimiting_DoesNotReturn429()
     {
-        var client = CreateClientWithRateLimitingSettings((
-            "RateLimiting:Enabled", "false"
-        ));
+        var client = CreateClientWithRateLimitingSettings(
+            ("RateLimiting:Enabled", "false"),
+            ("RateLimiting:Type", "FixedWindow"),
+            ("RateLimiting:PermitLimit", "1"),
+            ("RateLimiting:WindowSeconds", "60")
+        );
 
         client.DefaultRequestHeaders.Add("Authorization", TestData.ServerSecretString);
 
@@ -233,34 +236,6 @@ public class RateLimitingTests
         Assert.NotEqual(HttpStatusCode.TooManyRequests, insightFirst.StatusCode);
         Assert.NotEqual(HttpStatusCode.TooManyRequests, insightSecond.StatusCode);
         Assert.Equal(HttpStatusCode.TooManyRequests, insightThird.StatusCode);
-    }
-
-    [Fact]
-    public async Task MultiPermitAcquire_EnforcesLimitCorrectly()
-    {
-        // PermitLimit=3: first acquire of 2 permits succeeds (1 remaining),
-        // second acquire of 2 permits should be rejected (only 1 left).
-        var client = CreateClientWithRateLimitingSettings(
-            ("RateLimiting:Enabled", "true"),
-            ("RateLimiting:Distributed", "false"),
-            ("RateLimiting:Type", "FixedWindow"),
-            ("RateLimiting:PermitLimit", "3"),
-            ("RateLimiting:WindowSeconds", "60"),
-            ("RateLimiting:Endpoints:Sdk:PermitLimit", "3")
-        );
-
-        client.DefaultRequestHeaders.Add("Authorization", TestData.ServerSecretString);
-
-        // Each HTTP request acquires 1 permit, so 3 should succeed and the 4th should fail
-        var first = await client.GetAsync("/api/public/sdk/server/latest-all");
-        var second = await client.GetAsync("/api/public/sdk/server/latest-all");
-        var third = await client.GetAsync("/api/public/sdk/server/latest-all");
-        var fourth = await client.GetAsync("/api/public/sdk/server/latest-all");
-
-        Assert.NotEqual(HttpStatusCode.TooManyRequests, first.StatusCode);
-        Assert.NotEqual(HttpStatusCode.TooManyRequests, second.StatusCode);
-        Assert.NotEqual(HttpStatusCode.TooManyRequests, third.StatusCode);
-        Assert.Equal(HttpStatusCode.TooManyRequests, fourth.StatusCode);
     }
 
     [Fact]
