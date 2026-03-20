@@ -62,10 +62,8 @@ public sealed class RedisRateLimiter : RateLimiter
 
     /// <summary>
     /// Sliding-window: uses a sorted set scored by timestamp.
-    /// Each member is stored as "uniqueId:weight" so a single ZADD represents
-    /// multiple permits without memory bloat. The weighted count is computed by
-    /// iterating members and summing parsed weights — O(n) per call where n is
-    /// the number of active members in the window, acceptable for typical rate limits.
+    /// Each member is keyed by a unique ID scored at the current ms timestamp.
+    /// Active count is derived via ZCARD — O(1) — since each call acquires exactly one permit.
     /// Returns remaining permits (positive) or negative retry-after seconds.
     /// </summary>
     private const string SlidingWindowScript = """
@@ -73,20 +71,13 @@ public sealed class RedisRateLimiter : RateLimiter
         local limit = tonumber(ARGV[1])
         local window = tonumber(ARGV[2])
         local id = ARGV[3]
-        local requested = tonumber(ARGV[4])
         -- Use Redis server time to avoid client clock skew across replicas
         local t = redis.call('TIME')
         local now = (tonumber(t[1]) * 1000) + math.floor(tonumber(t[2]) / 1000)
         local clearBefore = now - window
         redis.call('ZREMRANGEBYSCORE', key, 0, clearBefore)
-        -- Sum weights from all active members (each member is "id:weight")
-        local members = redis.call('ZRANGE', key, 0, -1)
-        local weightedCount = 0
-        for i = 1, #members do
-            local w = tonumber(string.match(members[i], ':(%d+)$')) or 1
-            weightedCount = weightedCount + w
-        end
-        if weightedCount + requested > limit then
+        local count = redis.call('ZCARD', key)
+        if count >= limit then
             local oldest = redis.call('ZRANGE', key, 0, 0, 'WITHSCORES')
             if #oldest > 0 then
                 local retryAfterMs = tonumber(oldest[2]) + window - now
@@ -95,9 +86,9 @@ public sealed class RedisRateLimiter : RateLimiter
             end
             return -math.ceil(window / 1000)
         end
-        redis.call('ZADD', key, now, id .. ":" .. requested)
+        redis.call('ZADD', key, now, id)
         redis.call('EXPIRE', key, math.ceil(window / 1000) + 1)
-        return limit - weightedCount - requested
+        return limit - count - 1
         """;
 
     /// <summary>
@@ -199,8 +190,12 @@ public sealed class RedisRateLimiter : RateLimiter
             var db = _redisClient.GetDatabase();
             var result = _type switch
             {
+                // The `permitCount` will always be 1 in our usage since `RateLimitingMiddleware` always acquires
+                // one permit. That's why we didn't support multi-permit acquisition for SlidingWindow,
+                // which would make the Lua script more complex and less efficient.
+
                 RateLimiterType.FixedWindow => await EvalFixedWindowAsync(db, permitCount),
-                RateLimiterType.SlidingWindow => await EvalSlidingWindowAsync(db, permitCount),
+                RateLimiterType.SlidingWindow => await EvalSlidingWindowAsync(db),
                 RateLimiterType.TokenBucket => await EvalTokenBucketAsync(db, permitCount),
                 _ => throw new InvalidOperationException($"Unknown rate limiter type: {_type}")
             };
@@ -244,7 +239,7 @@ public sealed class RedisRateLimiter : RateLimiter
         return long.Parse(result.ToString()!);
     }
 
-    private async Task<long> EvalSlidingWindowAsync(IDatabase db, int permitCount)
+    private async Task<long> EvalSlidingWindowAsync(IDatabase db)
     {
         var key = RedisKeys.RateLimit("sw", _partitionKey);
         var windowMs = (long)_window.TotalMilliseconds;
@@ -253,7 +248,7 @@ public sealed class RedisRateLimiter : RateLimiter
         var result = await db.ScriptEvaluateAsync(
             SlidingWindowScript,
             [key],
-            [_permitLimit, windowMs, uniqueId, permitCount]
+            [_permitLimit, windowMs, uniqueId]
         );
 
         return long.Parse(result.ToString());
