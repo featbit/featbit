@@ -53,6 +53,12 @@ public static class MiddlewaresRegister
             app.UseSwaggerUI();
         }
 
+        // enable rate limiting (before streaming so WebSocket upgrades are covered)
+        if (app.Configuration.IsRateLimitingEnabled())
+        {
+            app.UseRateLimiter();
+        }
+
         // enable streaming
         app.UseStreaming();
 

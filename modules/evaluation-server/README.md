@@ -81,3 +81,50 @@ and [consumer configs](https://kafka.apache.org/documentation/#consumerconfigs) 
 |----------------------------------|--------------------------------------------------------------|---------------|
 | `Streaming__TrackClientHostName` | Whether to resolve client's IP hostname for detailed logging | `true`        |
 | `Streaming__TokenExpirySeconds`  | Streaming token expiry time in seconds                       | `30`          |
+
+## Rate Limiting
+
+Rate limiting **is disabled by default**. When enabled, it protects the API from excessive traffic using one of three
+algorithms: **FixedWindow**, **SlidingWindow**, or **TokenBucket**. Limits can be configured globally and overridden
+per endpoint.
+
+Limits are enforced **per environment**: each environment gets its own independent rate limit bucket,
+so traffic from one environment does not consume another environment's quota.
+
+> [!IMPORTANT]
+> Before enabling rate limiting in production, be sure to have a clear understanding of your traffic patterns and load
+> test your configuration to ensure limits are appropriate and effective.
+
+### Global Options
+
+| Name                                       | Description                                                                                                        | Default Value   |
+|--------------------------------------------|--------------------------------------------------------------------------------------------------------------------|-----------------|
+| `RateLimiting__Enabled`                    | Whether rate limiting is enabled                                                                                   | `false`         |
+| `RateLimiting__Distributed`                | Use Redis for distributed rate limiting across multiple instances. Requires `CacheProvider` to be set to `"Redis"` | `false`         |
+| `RateLimiting__Type`                       | Rate limiter algorithm: `FixedWindow`, `SlidingWindow`, or `TokenBucket`                                           | `"FixedWindow"` |
+| `RateLimiting__QueueLimit`                 | Maximum number of requests queued when the limit is reached. Only used when `RateLimiting__Distributed` is `false` | `0`             |
+| `RateLimiting__PermitLimit`                | Maximum number of requests allowed in the time window. Used by `FixedWindow` and `SlidingWindow`                   | `100`           |
+| `RateLimiting__WindowSeconds`              | Length of the time window in seconds (1–86400). Used by `FixedWindow` and `SlidingWindow`                          | `60`            |
+| `RateLimiting__SegmentsPerWindow`          | Number of segments the window is divided into. Only used by `SlidingWindow`                                        | `4`             |
+| `RateLimiting__TokenLimit`                 | Maximum number of tokens in the bucket. Only used by `TokenBucket`                                                 | `100`           |
+| `RateLimiting__TokensPerPeriod`            | Number of tokens added per replenishment period. Only used by `TokenBucket`                                        | `50`            |
+| `RateLimiting__ReplenishmentPeriodSeconds` | Time between token replenishments in seconds (1–86400). Only used by `TokenBucket`                                 | `60`            |
+
+### Per-Endpoint Overrides
+
+The following endpoint keys are supported. Each key maps to the routes listed below:
+
+| Key           | Routes                                                                                | Description                                                                  |
+|---------------|---------------------------------------------------------------------------------------|------------------------------------------------------------------------------|
+| `Sdk`         | `GET /api/public/sdk/server/latest-all` <br> `POST /api/public/sdk/client/latest-all` | Used by FeatBit SDKs to fetch the latest feature flags via polling           |
+| `Insight`     | `POST /api/public/insight/track`                                                      | Used by FeatBit SDKs to track flag evaluation results and A/B testing events |
+| `FeatureFlag` | `POST /api/public/featureflag/evaluate`                                               | Used to evaluate feature flag variations for a given user                    |
+| `Agent`       | `POST /api/public/agent/register`                                                     | Used to register relay proxy agents                                          |
+| `Streaming`   | `GET /streaming`                                                                      | Used by FeatBit SDKs to establish streaming connections                      |
+
+The environment variable pattern is `RateLimiting__Endpoints__<Key>__<Property>`, for example
+`RateLimiting__Endpoints__Sdk__PermitLimit` overrides `PermitLimit` for the `Sdk` endpoint.
+
+Notes:
+- Any property not specified for an endpoint key inherits from the global defaults above. 
+- All per-endpoint properties are optional and omit any property to fall back to the global value.

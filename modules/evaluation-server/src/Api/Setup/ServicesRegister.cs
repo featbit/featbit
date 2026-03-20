@@ -1,3 +1,4 @@
+using Api.RateLimiting;
 using Api.Services;
 using Domain.Workspaces;
 using Infrastructure;
@@ -35,6 +36,12 @@ public static class ServicesRegister
             .AddStreamingCore(options => configuration.GetSection(StreamingOptions.Streaming).Bind(options))
             .UseStore(configuration)
             .UseMq(configuration);
+
+        // rate limiting
+        if (configuration.IsRateLimitingEnabled())
+        {
+            builder.AddRateLimiting();
+        }
 
         // application services
         LicenseVerifier.ImportPublicKey(configuration["PublicKey"]);
