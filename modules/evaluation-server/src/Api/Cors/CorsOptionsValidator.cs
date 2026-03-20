@@ -17,7 +17,7 @@ public sealed class CorsOptionsValidator : IValidateOptions<CorsOptions>
         ValidateArrayValues(options.AllowedHeaders, nameof(options.AllowedHeaders));
         ValidateArrayValues(options.AllowedMethods, nameof(options.AllowedMethods));
 
-        // AllowCredentials cannot be used with a wildcard origin, as it would pose a security risk by allowing credentials to be sent to any origin.
+        // Specifying AllowAnyOrigin and AllowCredentials is an insecure configuration and can result in cross-site request forgery.
         if (options.AllowCredentials && options.AllowedOrigins.Any(o => o == "*"))
         {
             failures.Add(
