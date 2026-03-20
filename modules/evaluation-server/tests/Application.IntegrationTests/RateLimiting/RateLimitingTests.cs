@@ -154,7 +154,7 @@ public class RateLimitingTests
     [Fact]
     public async Task StreamingHandshake_IsRateLimited()
     {
-        var app = CreateAppWithRateLimitingSettings(
+        var app = _app.WithSettings(
             ("RateLimiting:Enabled", "true"),
             ("RateLimiting:Distributed", "false"),
             ("RateLimiting:Type", "FixedWindow"),
@@ -260,22 +260,8 @@ public class RateLimitingTests
 
     private HttpClient CreateClientWithRateLimitingSettings(params (string Key, string Value)[] settings)
     {
-        var app = CreateAppWithRateLimitingSettings(settings);
+        var app = _app.WithSettings(settings);
         return app.CreateClient();
-    }
-
-    private WebApplicationFactory<Program> CreateAppWithRateLimitingSettings(
-        params (string Key, string Value)[] settings)
-    {
-        var app = _app.WithWebHostBuilder(builder =>
-        {
-            foreach (var (key, value) in settings)
-            {
-                builder.UseSetting(key, value);
-            }
-        });
-
-        return app;
     }
 
     private static async Task<(bool Connected, WebSocket? Socket, string? Error)> TryConnectStreamingAsync(

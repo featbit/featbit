@@ -2,7 +2,6 @@ using Api.Cors;
 using Streaming;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Infrastructure;
-using Microsoft.Extensions.Options;
 
 namespace Api.Setup;
 
@@ -17,34 +16,6 @@ public static class MiddlewaresRegister
         {
             Predicate = registration => registration.Tags.Contains(HealthCheckBuilderExtensions.ReadinessTag)
         });
-
-        // enable cors when configured
-        var corsOptions = app.Services.GetRequiredService<IOptions<CorsOptions>>().Value;
-        if (corsOptions.Enabled)
-        {
-            app.UseCors(policy =>
-            {
-                if (corsOptions.AllowAnyOrigins)
-                    policy.AllowAnyOrigin();
-                else
-                    policy.WithOrigins(corsOptions.AllowedOrigins);
-
-                if (corsOptions.AllowAnyHeaders)
-                    policy.AllowAnyHeader();
-                else
-                    policy.WithHeaders(corsOptions.AllowedHeaders);
-
-                if (corsOptions.AllowAnyMethods)
-                    policy.AllowAnyMethod();
-                else
-                    policy.WithMethods(corsOptions.AllowedMethods);
-
-                if (corsOptions.AllowCredentials)
-                    policy.AllowCredentials();
-                else
-                    policy.DisallowCredentials();
-            });
-        }
 
         // enable swagger in dev mode
         if (app.Environment.IsDevelopment())
@@ -61,6 +32,9 @@ public static class MiddlewaresRegister
 
         // enable streaming
         app.UseStreaming();
+
+        // cors
+        app.UseCustomCors();
 
         app.MapControllers();
 

@@ -1,14 +1,12 @@
-using Api.Cors;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 
-namespace Api.Setup;
+namespace Api.Cors;
 
-public static class CorsRegister
+public static class CorsServiceExtensions
 {
-    public static WebApplicationBuilder AddCorsPolicy(this WebApplicationBuilder builder)
+    public static WebApplicationBuilder AddCustomCors(this WebApplicationBuilder builder)
     {
-        var corsSection = builder.Configuration.GetSection(CorsOptions.Cors);
-
+        var corsSection = builder.Configuration.GetSection(CorsOptions.SectionName);
         builder.Services.AddCors();
 
         builder.Services
@@ -29,18 +27,18 @@ public static class CorsRegister
         builder.Services.AddSingleton<IValidateOptions<CorsOptions>, CorsOptionsValidator>();
 
         return builder;
-    }
 
-    internal static string[] ParseDelimited(string? value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
+        static string[] ParseDelimited(string? value)
         {
-            return [];
-        }
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return [];
+            }
 
-        return value
-            .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .Where(s => s.Length > 0)
-            .ToArray();
+            return value
+                .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Where(s => s.Length > 0)
+                .ToArray();
+        }
     }
 }

@@ -1,3 +1,4 @@
+using Api.Cors;
 using Api.RateLimiting;
 using Api.Services;
 using Domain.Workspaces;
@@ -27,6 +28,9 @@ public static class ServicesRegister
 
         // health check dependencies
         services.AddHealthChecks().AddReadinessChecks(configuration);
+
+        // cors
+        builder.AddCustomCors();
 
         // add bounded memory cache
         services.AddSingleton<BoundedMemoryCache>();

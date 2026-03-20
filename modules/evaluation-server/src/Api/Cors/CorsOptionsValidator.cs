@@ -13,39 +13,21 @@ public sealed class CorsOptionsValidator : IValidateOptions<CorsOptions>
 
         var failures = new List<string>();
 
-        // Comma-delimiter guard — detect values that look like comma-separated input.
-        if (AnyContainsComma(options.AllowedOrigins))
-            failures.Add("AllowedOrigins uses ';' as the delimiter. Commas are not supported.");
-        if (AnyContainsComma(options.AllowedHeaders))
-            failures.Add("AllowedHeaders uses ';' as the delimiter. Commas are not supported.");
-        if (AnyContainsComma(options.AllowedMethods))
-            failures.Add("AllowedMethods uses ';' as the delimiter. Commas are not supported.");
+        ValidateArrayValues(options.AllowedOrigins, nameof(options.AllowedOrigins));
+        ValidateArrayValues(options.AllowedHeaders, nameof(options.AllowedHeaders));
+        ValidateArrayValues(options.AllowedMethods, nameof(options.AllowedMethods));
 
-        // Required-value checks.
-        if (options.AllowedOrigins.Length == 0)
-            failures.Add("AllowedOrigins must contain at least one value when CORS is enabled. Use ';' as the delimiter and '*' for wildcard.");
-        if (options.AllowedHeaders.Length == 0)
-            failures.Add("AllowedHeaders must contain at least one value when CORS is enabled. Use ';' as the delimiter and '*' for wildcard.");
-        if (options.AllowedMethods.Length == 0)
-            failures.Add("AllowedMethods must contain at least one value when CORS is enabled. Use ';' as the delimiter and '*' for wildcard.");
-
-        // Wildcard-mixing checks.
-        if (ContainsWildcardAndExplicitValues(options.AllowedOrigins))
-            failures.Add("AllowedOrigins cannot mix wildcard '*' with explicit values.");
-        if (ContainsWildcardAndExplicitValues(options.AllowedHeaders))
-            failures.Add("AllowedHeaders cannot mix wildcard '*' with explicit values.");
-        if (ContainsWildcardAndExplicitValues(options.AllowedMethods))
-            failures.Add("AllowedMethods cannot mix wildcard '*' with explicit values.");
-
-        // Credential + wildcard origin check.
+        // AllowCredentials cannot be used with a wildcard origin, as it would pose a security risk by allowing credentials to be sent to any origin.
         if (options.AllowCredentials && options.AllowedOrigins.Any(o => o == "*"))
-            failures.Add("AllowCredentials cannot be used with a wildcard '*' origin. Specify explicit origins instead.");
+        {
+            failures.Add(
+                "AllowCredentials cannot be used with a wildcard '*' origin. Specify explicit origins instead."
+            );
+        }
 
-        // Origin URI format check.
         foreach (var origin in options.AllowedOrigins.Where(o => o != "*"))
         {
-            if (!Uri.TryCreate(origin, UriKind.Absolute, out var uri) ||
-                (uri.Scheme != "http" && uri.Scheme != "https"))
+            if (!Uri.TryCreate(origin, UriKind.Absolute, out var uri) || (uri.Scheme != "http" && uri.Scheme != "https"))
             {
                 failures.Add(
                     $"AllowedOrigins contains an invalid value '{origin}'. Each origin must be an absolute URI with an 'http' or 'https' scheme (e.g. 'https://example.com').");
@@ -55,15 +37,25 @@ public sealed class CorsOptionsValidator : IValidateOptions<CorsOptions>
         return failures.Count > 0
             ? ValidateOptionsResult.Fail(failures)
             : ValidateOptionsResult.Success;
-    }
 
-    private static bool ContainsWildcardAndExplicitValues(string[] values)
-    {
-        return values.Length > 1 && values.Any(v => v == "*");
-    }
+        void ValidateArrayValues(string[] values, string fieldName)
+        {
+            if (values.Length == 0)
+            {
+                failures.Add(
+                    $"{fieldName} must contain at least one value when CORS is enabled. Use ';' as the delimiter and '*' for wildcard."
+                );
+            }
 
-    private static bool AnyContainsComma(string[] values)
-    {
-        return values.Any(v => v.Contains(','));
+            if (values.Any(v => v.Contains(',')))
+            {
+                failures.Add($"{fieldName} uses ';' as the delimiter. Commas are not supported.");
+            }
+
+            if (values.Length > 1 && values.Any(v => v == "*"))
+            {
+                failures.Add($"{fieldName} cannot mix wildcard '*' with explicit values.");
+            }
+        }
     }
 }

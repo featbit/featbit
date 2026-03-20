@@ -14,7 +14,6 @@ try
 
     WebApplication.CreateBuilder(args)
         .RegisterServices()
-        .AddCorsPolicy()
         .Build()
         .SetupMiddleware()
         .Run();
