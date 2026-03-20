@@ -43,9 +43,66 @@ i {
         font-size: 13px;
       }
     }
+
+    .customize-resource {
+      margin: 0 0 4px 4px;
+    }
+
+    .selected-resources {
+      margin-bottom: 12px;
+      display: flex;
+      flex-flow: row wrap;
+
+      .add-resource-btn {
+        padding: 0;
+        height: 26px;
+        margin: 2px 0 0 8px;
+      }
+
+      nz-tag[nzmode="closeable"] {
+        cursor: pointer;
+      }
+
+      .resource {
+        display: flex;
+        margin-bottom: 4px;
+
+        .inner-box {
+          font-size: 13px;
+          border-top-left-radius: 4px;
+          border-bottom-left-radius: 4px;
+          padding: 4px 7px 6px 7px;
+          background: @grey20-color;
+          height: 23px;
+          line-height: 15px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          cursor: pointer;
+          white-space: nowrap;
+        }
+
+        button {
+          display: flex;
+          background: @grey20-color;
+          border-top-right-radius: 4px;
+          border-bottom-right-radius: 4px;
+          height: 23px;
+          width: 15px;
+          border: 0;
+
+          i {
+            width:10px;
+            height: 10px;
+            font-size: 10px;
+          }
+        }
+      }
+    }
+
     .resource-parameters {
       margin-bottom: 12px;
-    }    .actions-list {
+    }
+    .actions-list {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 4px 16px;      .action-item {

@@ -1,10 +1,48 @@
-import { IamPolicyAction, IPolicyStatement, permissionActions } from "@shared/policy";
+import {
+  generalResourceRNPattern,
+  IamPolicyAction,
+  IPolicyStatement,
+  permissionActions,
+  ResourceType,
+} from "@shared/policy";
 import { uuidv4 } from "@utils/index";
 
-export interface IPermissionStatementGroup {
-  allChecked: boolean,
-  indeterminate: boolean,
-  statements: IPermissionStatement[]
+export interface ResourceTypeExtension extends ResourceType {
+  isConfigurable: boolean;
+  isResourceEditorVisible: boolean;
+}
+
+export class PermissionStatementGroup {
+  currentResource: string = '';
+  currentResourceIndex: number = 0;
+
+  constructor(
+    public allChecked: boolean,
+    public indeterminate: boolean,
+    public isAllResources: boolean,
+    public resourceType: string,
+    public resources: string[] = [],
+    public statements: IPermissionStatement[] = [],
+    ) {
+  }
+
+  saveResource = (rsc: string) => {
+    if(this.currentResourceIndex > this.resources.length - 1) { // add new item
+      this.resources = [...this.resources, rsc];
+    } else { // replace existing item
+      this.resources = this.resources.map((item, i) => i === this.currentResourceIndex ? rsc : item);
+    }
+  }
+
+  onIsAllResourcesChange = (isAllResources: boolean) => {
+    if (isAllResources) {
+      this.resources = [generalResourceRNPattern[this.resourceType]];
+    } else {
+      this.resources = [];
+    }
+  }
+
+  removeResource = (rsc: string) => this.resources.filter(resource => resource !== rsc);
 }
 
 export interface IPermissionStatement extends IPolicyStatement {
@@ -12,7 +50,7 @@ export interface IPermissionStatement extends IPolicyStatement {
   checked: boolean
 }
 
-export const preProcessPermissions = (statements: IPolicyStatement[]): { [key: string]: IPermissionStatementGroup} => {
+export const preProcessPermissions = (statements: IPolicyStatement[]): { [key: string]: PermissionStatementGroup} => {
   return statements.flatMap((statement) => {
     const {effect, resourceType, resources} = statement;
     return statement.actions.map((action) => {
@@ -28,7 +66,7 @@ export const preProcessPermissions = (statements: IPolicyStatement[]): { [key: s
     });
   }).filter(({effect, resourceType, resources, action}) => action && action.isOpenAPIApplicable)
     .reduce((acc, cur) => {
-      acc[cur.resourceType] = acc[cur.resourceType] || { allChecked: true, indeterminate: false, statements: [] };
+      acc[cur.resourceType] = acc[cur.resourceType] || new PermissionStatementGroup(true, false, true, cur.resourceType, [generalResourceRNPattern[cur.resourceType]], []);
       const idx = acc[cur.resourceType].statements.findIndex((api) => api.effect ===cur.effect && api.action.name ===cur.action.name && api.effect === 'allow');
 
       if (idx !== -1) { // duplicate exists
@@ -43,15 +81,24 @@ export const preProcessPermissions = (statements: IPolicyStatement[]): { [key: s
     }, {});
 }
 
-export const postProcessPermissions = (permissions: { [key: string]: IPermissionStatementGroup}): IPolicyStatement[] => {
-  return Object.keys(permissions)
-    .flatMap((property) => permissions[property].statements)
-    .filter((statement) => statement.checked)
-    .map(({id, effect, resourceType, resources, action}) => ({
-      id: uuidv4(),
-      effect,
-      resourceType,
-      resources,
-      actions: [action.name]
-    }));
+export const postProcessPermissions = (permissions: { [key: string]: PermissionStatementGroup}): IPolicyStatement[] => {
+  return Object.values(permissions)
+  .flatMap(permission => {
+      const checkedStatements = permission.statements.filter((statement) => statement.checked);
+      if (checkedStatements.length === 0) {
+        return [];
+      }
+
+      const { resources } = permission;
+      const { effect, resourceType } = checkedStatements[0];
+      const actions = checkedStatements.map(statement => statement.action.name);
+
+      return [{
+        id: uuidv4(),
+        effect,
+        resourceType,
+        resources,
+        actions
+      }];
+  });
 }

@@ -9,7 +9,7 @@ import {
   EffectEnum,
   generalResourceRNPattern,
   IamPolicyAction,
-  permissionActions,
+  permissionActions, Resource, ResourceSpaceLevel,
   ResourceType,
   ResourceTypeEnum,
   ResourceTypeEnv,
@@ -21,9 +21,9 @@ import {
 } from "@shared/policy";
 import { copyToClipboard, uuidv4 } from "@utils/index";
 import {
-  IPermissionStatementGroup,
+  PermissionStatementGroup,
   postProcessPermissions,
-  preProcessPermissions
+  preProcessPermissions, ResourceTypeExtension
 } from "@features/safe/integrations/access-tokens/types/permission-helper";
 import { PolicyTypeEnum } from "@features/safe/iam/types/policy";
 import { PermissionLicenseService } from "@services/permission-license.service";
@@ -50,8 +50,10 @@ export class AccessTokenDrawerComponent implements OnInit {
   ];
 
   fineGrainedAccessControlEnabled: boolean = false;
-  authorizedResourceTypes: ResourceType[] = [];
-  permissions: { [key: string]: IPermissionStatementGroup };  @Input()
+  authorizedResourceTypes: ResourceTypeExtension[] = [];
+  permissions: { [key: string]: PermissionStatementGroup };
+
+  @Input()
   set accessToken(accessToken: IAccessToken) {
     this.isEditing = accessToken && !!accessToken.id;
     if (this.isEditing) {
@@ -97,7 +99,13 @@ export class AccessTokenDrawerComponent implements OnInit {
     this.isServiceAccessToken = accessToken.type === AccessTokenTypeEnum.Service;
     this.initForm(accessToken.name, accessToken.type);
     this._accessToken = accessToken;
-    this.authorizedResourceTypes = this.resourceTypes.filter((rt) => this.permissions[rt.type]?.statements?.length > 0);
+    this.authorizedResourceTypes = this.resourceTypes
+      .filter((rt) => this.permissions[rt.type]?.statements?.length > 0)
+      .map(rt => ({
+        ...rt,
+        isResourceEditorVisible: false,
+        isConfigurable: [ResourceTypeEnum.Flag, ResourceTypeEnum.Segment, ResourceTypeEnum.Project, ResourceTypeEnum.Env].some(x => x === rt.type)
+      }));
   }
 
   @Input() visible: boolean = false;
@@ -106,6 +114,19 @@ export class AccessTokenDrawerComponent implements OnInit {
 
   @Output() close: EventEmitter<any> = new EventEmitter();
   title: string = '';
+
+  selectedResources: Resource[] = [{
+    id: 'abc',
+    name: 'fe',
+    rn: 'fff',
+    type: ResourceTypeEnum.Flag
+  },
+    {
+      id: 'abc',
+      name: 'fe',
+      rn: 'fff awefa fawefawefaw awef awwefawe f',
+      type: ResourceTypeEnum.Flag
+    }];
 
   canTakeActionOnPersonalAccessToken = false;
   canTakeActionOnServiceAccessToken = false;
@@ -188,7 +209,9 @@ export class AccessTokenDrawerComponent implements OnInit {
               .map(act => act.name),
             };
           }
-        }        return {...p};
+        }
+
+        return {...p};
       });
     }
 
@@ -212,7 +235,7 @@ export class AccessTokenDrawerComponent implements OnInit {
     first()
   );
 
-  updatePermissionsAllChecked(statementGroup: IPermissionStatementGroup) {
+  updatePermissionsAllChecked(statementGroup: PermissionStatementGroup) {
     statementGroup.indeterminate = false;
     if (statementGroup.allChecked) {
       statementGroup.statements = statementGroup.statements.map(item => ({
@@ -227,7 +250,7 @@ export class AccessTokenDrawerComponent implements OnInit {
     }
   }
 
-  updatePermissionSingleChecked(statementGroup: IPermissionStatementGroup) {
+  updatePermissionSingleChecked(statementGroup: PermissionStatementGroup) {
     if (statementGroup.statements.every(item => !item.checked)) {
       statementGroup.allChecked = false;
       statementGroup.indeterminate = false;
@@ -289,9 +312,9 @@ export class AccessTokenDrawerComponent implements OnInit {
         }
       );
     } else {
-      const policies = this.isServiceAccessToken ? postProcessPermissions(this.permissions) : [];
+      const permissions = this.isServiceAccessToken ? postProcessPermissions(this.permissions) : [];
 
-      this.accessTokenService.create(name, type, policies).subscribe({
+      this.accessTokenService.create(name, type, permissions).subscribe({
           next: ({name, token}) => {
             this.isLoading = false;
             this.close.emit({isEditing: false});
@@ -317,8 +340,27 @@ export class AccessTokenDrawerComponent implements OnInit {
     );
   }
 
+  editResource = (resourceType: ResourceTypeExtension, rsc: string, index: number) => {
+    this.permissions[resourceType.type].currentResource = rsc;
+    this.permissions[resourceType.type].currentResourceIndex = index;
+    resourceType.isResourceEditorVisible = true;
+  };
+
+  addResource = (resourceType: ResourceTypeExtension) => {
+    this.permissions[resourceType.type].currentResource = generalResourceRNPattern[resourceType.type];
+    this.permissions[resourceType.type].currentResourceIndex = this.permissions[resourceType.type].resources.length;
+    resourceType.isResourceEditorVisible = true;
+  };
+
+  onResourceAdded = (resourceType: ResourceTypeExtension, rsc: string) => {
+    this.permissions[resourceType.type].saveResource(rsc);
+    resourceType.isResourceEditorVisible = false;
+  }
+
   tokenTypes = [
     { label: $localize`:@@integrations.access-token.personal:Personal`, value: AccessTokenTypeEnum.Personal },
     { label: $localize`:@@integrations.access-token.service:Service`, value: AccessTokenTypeEnum.Service },
   ]
+  protected readonly ResourceSpaceLevel = ResourceSpaceLevel;
+  protected readonly ResourceTypeEnum = ResourceTypeEnum;
 }

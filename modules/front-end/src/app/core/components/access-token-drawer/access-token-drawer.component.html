@@ -44,7 +44,6 @@
           @for (rt of authorizedResourceTypes; track rt.type) {
             <div class="permission-category">
               <div class="category-header">
-                <span class="category-name">{{rt.displayName}}</span>
                 @if (!isEditing) {
                   <label
                     nz-checkbox
@@ -53,21 +52,53 @@
                     (ngModelChange)="updatePermissionsAllChecked(permissions[rt.type])"
                     [nzIndeterminate]="permissions[rt.type].indeterminate"
                     i18n="@@common.select-all"
-                  >Select all</label>
+                  ><span class="category-name">{{rt.displayName}}</span></label>
+                } @else {
+                  <span class="category-name">{{rt.displayName}}</span>
                 }
               </div>
-
-              <!-- Resource Parameters -->
-              @if (hasResourceParameters(rt.type)) {
-                <div class="resource-parameters">
-                  <resources-selector
-                    [selectedResources]="permissions[rt.type].statements[0]?.resources || []"
-                    [resourceType]="rt"
-                    [readonly]="isEditing"
-                    (onSelectedResourcesChange)="onResourcesChange(rt.type, $event)">
-                  </resources-selector>
-                </div>
-              }              <!-- Actions -->
+              <div class="customize-resource">
+                <nz-radio-group
+                  (ngModelChange)="permissions[rt.type].onIsAllResourcesChange($event)"
+                  [(ngModel)]="permissions[rt.type].isAllResources"
+                  [nzDisabled]="!rt.isConfigurable">
+                    <label nz-radio [nzValue]="true" i18n="@@common.all-resources">All resources</label>
+                    <label nz-radio [nzValue]="false" i18n="@@common.customize-resources">Customize resources</label>
+                </nz-radio-group>
+              </div>
+              <div class="selected-resources">
+                @for (rsc of permissions[rt.type].resources; track rsc; let i = $index) {
+                  <div class="resource">
+                    @if(rt.isConfigurable && !permissions[rt.type].isAllResources) {
+                      <nz-tag
+                        i18n-nz-tooltip="@@common.click-to-edit" nz-tooltip="Click to edit"
+                        (click)="editResource(rt, rsc, i)"
+                        nzMode="closeable" (nzOnClose)="permissions[rt.type].removeResource(rsc)">
+                        {{rsc}}
+                      </nz-tag>
+                    } @else {
+                      <nz-tag
+                        (nzOnClose)="permissions[rt.type].removeResource(rsc)">
+                        {{rsc}}
+                      </nz-tag>
+                    }
+                  </div>
+                }
+                @if(rt.isConfigurable && !permissions[rt.type].isAllResources) {
+                  <button class="add-resource-btn" nz-button nzType="link" (click)="addResource(rt)">
+                    <span nz-icon nzType="icons:icon-plus"></span>
+                    <span i18n="@@common.add-resource">Add Resource</span>
+                  </button>
+                }
+                <resource-editor
+                  [visible]="rt.isResourceEditorVisible"
+                  [rn]="permissions[rt.type].currentResource"
+                  [resourceType]="rt"
+                  (onCancel)="rt.isResourceEditorVisible=false"
+                  (onSave)="onResourceAdded(rt, $event)"
+                />
+              </div>
+              <!-- Actions -->
               <div class="actions-list">
                 @for (permission of permissions[rt.type].statements; track permission.action.id) {
                   <label nz-checkbox
