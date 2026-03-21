@@ -8,6 +8,7 @@ public class MapperProfile : Profile
     public MapperProfile()
     {
         CreateMap<AccessToken, AccessTokenVm>();
+        CreateMap<AccessToken, AccessTokenEditVm>();
         CreateMap<PagedResult<AccessToken>, PagedResult<AccessTokenVm>>();
     }
 }

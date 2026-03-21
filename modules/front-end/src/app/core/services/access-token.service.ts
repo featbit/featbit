@@ -53,8 +53,8 @@ export class AccessTokenService {
     return this.http.put(`${this.baseUrl}/${id}/toggle`, {});
   }
 
-  update(id: string, name: string): Observable<boolean> {
+  update(id: string, name: string, permissions: IPolicyStatement[] = []): Observable<IAccessToken> {
     const url = this.baseUrl;
-    return this.http.put<boolean>(url + `/${id}`, { name });
+    return this.http.put<IAccessToken>(url + `/${id}`, { name, permissions });
   }
 }

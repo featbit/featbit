@@ -1,12 +1,18 @@
 using Application.Bases;
+using Domain.AccessTokens;
+using Domain.Policies;
 
 namespace Application.AccessTokens;
 
-public class UpdateAccessToken : IRequest<bool>
+public class UpdateAccessToken : IRequest<AccessTokenEditVm>
 {
+    public Guid OrganizationId { get; set; }
+    
     public Guid Id { get; set; }
 
     public string Name { get; set; }
+    
+    public IEnumerable<PolicyStatement> Permissions { get; set; }
 }
 
 public class UpdateAccessTokenValidator : AbstractValidator<UpdateAccessToken>
@@ -18,22 +24,28 @@ public class UpdateAccessTokenValidator : AbstractValidator<UpdateAccessToken>
     }
 }
 
-public class UpdateAccessTokenHandler : IRequestHandler<UpdateAccessToken, bool>
+public class UpdateAccessTokenHandler : IRequestHandler<UpdateAccessToken, AccessTokenEditVm>
 {
     private readonly IAccessTokenService _service;
+    private readonly IMapper _mapper;
 
-    public UpdateAccessTokenHandler(IAccessTokenService service)
+    public UpdateAccessTokenHandler(IAccessTokenService service, IMapper mapper)
     {
         _service = service;
+        _mapper = mapper;
     }
 
-    public async Task<bool> Handle(UpdateAccessToken request, CancellationToken cancellationToken)
+    public async Task<AccessTokenEditVm> Handle(UpdateAccessToken request, CancellationToken cancellationToken)
     {
         var accessToken = await _service.GetAsync(request.Id);
         accessToken.UpdateName(request.Name);
+        if (accessToken.Type == AccessTokenTypes.Service)
+        {
+            accessToken.Permissions = request.Permissions;
+        }
 
         await _service.UpdateAsync(accessToken);
 
-        return true;
+        return _mapper.Map<AccessTokenEditVm>(accessToken);
     }
 }

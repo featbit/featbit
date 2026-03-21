@@ -66,8 +66,9 @@ public class AccessTokenController : ApiControllerBase
     }
 
     [HttpPut("{id:guid}")]
-    public async Task<ApiResponse<bool>> UpdateAsync(Guid id, UpdateAccessToken request)
+    public async Task<ApiResponse<AccessTokenEditVm>> UpdateAsync(Guid id, UpdateAccessToken request)
     {
+        request.OrganizationId = OrgId;
         request.Id = id;
 
         var accessTokenVm = await Mediator.Send(request);

@@ -55,20 +55,23 @@ export class AccessTokenDrawerComponent implements OnInit {
 
   @Input()
   set accessToken(accessToken: IAccessToken) {
+    const authorizedStatements = this.setAuthorizedPermissions();
+    this.permissions = preProcessPermissions(authorizedStatements);
+
     this.isEditing = accessToken && !!accessToken.id;
     if (this.isEditing) {
-      // First get all available actions for the user
-      this.setAuthorizedPermissions();
-
-      // Then merge with token's saved permissions to mark which ones are checked
       const savedPermissions = preProcessPermissions(accessToken.permissions);
-      Object.keys(this.permissions).forEach(resourceType => {
+      Object.entries(this.permissions).forEach(([resourceType, statementGroup]) => {
         if (savedPermissions[resourceType]) {
-          const savedStatements = savedPermissions[resourceType].statements;
+          const savedStatementGroup = savedPermissions[resourceType];
+          statementGroup.resources = savedStatementGroup.resources;
+          statementGroup.isAllResources = savedStatementGroup.isAllResources; // resources contains at least one general RN
+
+          const savedStatements = savedStatementGroup.statements;
           const savedMap = new Map(savedStatements.map(stmt => [stmt.action.id, stmt]));
 
           // Mark statements as checked if they exist in saved permissions
-          this.permissions[resourceType].statements.forEach(stmt => {
+          statementGroup.statements.forEach(stmt => {
             const saved = savedMap.get(stmt.action.id);
             if (saved) {
               stmt.checked = true;
@@ -79,10 +82,12 @@ export class AccessTokenDrawerComponent implements OnInit {
           });
         } else {
           // If resource type not in saved permissions, mark all as unchecked
-          this.permissions[resourceType].statements.forEach(stmt => {
+          statementGroup.statements.forEach(stmt => {
             stmt.checked = false;
           });
         }
+
+        this.updatePermissionSingleChecked(statementGroup);
       });
 
       if (this.readonly) {
@@ -92,7 +97,6 @@ export class AccessTokenDrawerComponent implements OnInit {
       }
     } else {
       accessToken = {name: null, type: AccessTokenTypeEnum.Personal};
-      this.setAuthorizedPermissions();
       this.title = $localize`:@@integrations.access-token.access-token-drawer.add-title:Add Access Token`;
     }
 
@@ -104,7 +108,7 @@ export class AccessTokenDrawerComponent implements OnInit {
       .map(rt => ({
         ...rt,
         isResourceEditorVisible: false,
-        isConfigurable: [ResourceTypeEnum.Flag, ResourceTypeEnum.Segment, ResourceTypeEnum.Project, ResourceTypeEnum.Env].some(x => x === rt.type)
+        isConfigurable: [ResourceTypeEnum.Flag, ResourceTypeEnum.Project, ResourceTypeEnum.Env].some(x => x === rt.type)
       }));
   }
 
@@ -114,19 +118,6 @@ export class AccessTokenDrawerComponent implements OnInit {
 
   @Output() close: EventEmitter<any> = new EventEmitter();
   title: string = '';
-
-  selectedResources: Resource[] = [{
-    id: 'abc',
-    name: 'fe',
-    rn: 'fff',
-    type: ResourceTypeEnum.Flag
-  },
-    {
-      id: 'abc',
-      name: 'fe',
-      rn: 'fff awefa fawefawefaw awef awwefawe f',
-      type: ResourceTypeEnum.Flag
-    }];
 
   canTakeActionOnPersonalAccessToken = false;
   canTakeActionOnServiceAccessToken = false;
@@ -215,8 +206,7 @@ export class AccessTokenDrawerComponent implements OnInit {
       });
     }
 
-    permissions = permissions.filter((permission) => this.resourceTypes.some((rt) => rt.type === permission.resourceType));
-    this.permissions = preProcessPermissions(permissions);
+    return permissions.filter((permission) => this.resourceTypes.some((rt) => rt.type === permission.resourceType));
   }
 
   nameAsyncValidator = (control: FormControl) => control.valueChanges.pipe(
@@ -262,21 +252,6 @@ export class AccessTokenDrawerComponent implements OnInit {
     }
   }
 
-  hasResourceParameters(resourceType: string): boolean {
-    // Resource types that support resource-level parameters
-    return resourceType === ResourceTypeEnum.Flag ||
-           resourceType === ResourceTypeEnum.Segment;
-  }
-
-  onResourcesChange(resourceType: string, resources: string[]) {
-    if (this.permissions[resourceType]) {
-      // Apply resources to all statements in this resource type
-      this.permissions[resourceType].statements.forEach(stmt => {
-        stmt.resources = resources;
-      });
-    }
-  }
-
   isLoading: boolean = false;
   tokenName = '';
   tokenValue = '';
@@ -297,13 +272,16 @@ export class AccessTokenDrawerComponent implements OnInit {
       return;
     }
 
+    const permissions = this.isServiceAccessToken ? postProcessPermissions(this.permissions) : [];
+
     this.isLoading = true;
     if (this.isEditing) {
-      this.accessTokenService.update(this.accessToken.id, name).subscribe({
-          next: _ => {
+      this.accessTokenService.update(this.accessToken.id, name, permissions).subscribe({
+          next: ({name, permissions}) => {
             this.isLoading = false;
-            this.close.emit({isEditing: true, id: this.accessToken.id, name: name});
+            this.close.emit({isEditing: true, id: this.accessToken.id, name, permissions });
             this.message.success($localize`:@@common.operation-success:Operation succeeded`);
+            this.form.reset();
           },
           error: _ => {
             this.message.error($localize`:@@common.operation-failed-try-again:Operation failed, please try again`);
@@ -312,8 +290,6 @@ export class AccessTokenDrawerComponent implements OnInit {
         }
       );
     } else {
-      const permissions = this.isServiceAccessToken ? postProcessPermissions(this.permissions) : [];
-
       this.accessTokenService.create(name, type, permissions).subscribe({
           next: ({name, token}) => {
             this.isLoading = false;

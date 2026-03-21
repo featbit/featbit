@@ -16,13 +16,14 @@ export class PermissionStatementGroup {
   currentResource: string = '';
   currentResourceIndex: number = 0;
 
+  allChecked: boolean = false;
+  indeterminate: boolean = false;
+  isAllResources: boolean = true;
+
   constructor(
-    public allChecked: boolean,
-    public indeterminate: boolean,
-    public isAllResources: boolean,
     public resourceType: string,
-    public resources: string[] = [],
-    public statements: IPermissionStatement[] = [],
+    public resources: string[],
+    public statements: IPermissionStatement[],
     ) {
   }
 
@@ -42,7 +43,9 @@ export class PermissionStatementGroup {
     }
   }
 
-  removeResource = (rsc: string) => this.resources.filter(resource => resource !== rsc);
+  removeResource = (rsc: string) => {
+    this.resources = this.resources.filter(resource => resource !== rsc);
+  };
 }
 
 export interface IPermissionStatement extends IPolicyStatement {
@@ -51,6 +54,7 @@ export interface IPermissionStatement extends IPolicyStatement {
 }
 
 export const preProcessPermissions = (statements: IPolicyStatement[]): { [key: string]: PermissionStatementGroup} => {
+  console.log(statements);
   return statements.flatMap((statement) => {
     const {effect, resourceType, resources} = statement;
     return statement.actions.map((action) => {
@@ -64,19 +68,23 @@ export const preProcessPermissions = (statements: IPolicyStatement[]): { [key: s
        action: pa
       };
     });
-  }).filter(({effect, resourceType, resources, action}) => action && action.isOpenAPIApplicable)
+  }).filter(({action}) => action && action.isOpenAPIApplicable)
     .reduce((acc, cur) => {
-      acc[cur.resourceType] = acc[cur.resourceType] || new PermissionStatementGroup(true, false, true, cur.resourceType, [generalResourceRNPattern[cur.resourceType]], []);
-      const idx = acc[cur.resourceType].statements.findIndex((api) => api.effect ===cur.effect && api.action.name ===cur.action.name && api.effect === 'allow');
+      acc[cur.resourceType] = acc[cur.resourceType] || new PermissionStatementGroup(cur.resourceType, [], []);
 
+      // statements
+      const idx = acc[cur.resourceType].statements.findIndex((statement) => statement.effect === cur.effect && statement.action.name === cur.action.name && statement.effect === 'allow');
       if (idx !== -1) { // duplicate exists
         const statement = acc[cur.resourceType].statements[idx];
         const resources = [...statement.resources, ...cur.resources];
+        acc[cur.resourceType].resources = resources;
         acc[cur.resourceType].statements.splice(idx, 1, { ...cur, checked: true, resources: resources.filter((resource, idx) => resources.indexOf(resource) === idx)});
       } else {
+        acc[cur.resourceType].resources = [...cur.resources];
         acc[cur.resourceType].statements.push({...cur, checked: true});
       }
 
+      acc[cur.resourceType].isAllResources = acc[cur.resourceType].resources.length === 1 && acc[cur.resourceType].resources[0] === generalResourceRNPattern[cur.resourceType];
       return acc;
     }, {});
 }
