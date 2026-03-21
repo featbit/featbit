@@ -14,8 +14,8 @@ public static class CorsServiceExtensions
             .Configure(options =>
             {
                 // Bind scalar properties (Enabled, AllowCredentials) from configuration.
-                options.Enabled = corsSection.GetValue<bool>(nameof(CorsOptions.Enabled));
-                options.AllowCredentials = corsSection.GetValue<bool>(nameof(CorsOptions.AllowCredentials));
+                options.Enabled = corsSection.GetValue(nameof(CorsOptions.Enabled), defaultValue: true);
+                options.AllowCredentials = corsSection.GetValue(nameof(CorsOptions.AllowCredentials), defaultValue: false);
 
                 // Parse semicolon-delimited strings into arrays once at startup.
                 options.AllowedOrigins = ParseDelimited(corsSection[nameof(CorsOptions.AllowedOrigins)]);
