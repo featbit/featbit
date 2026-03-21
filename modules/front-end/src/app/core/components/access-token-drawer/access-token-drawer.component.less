@@ -105,7 +105,9 @@ i {
     .actions-list {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 4px 16px;      .action-item {
+      gap: 4px 16px;
+
+      .action-item {
         display: flex;
         align-items: center;
         padding: 0;
@@ -121,13 +123,17 @@ i {
 
         ::ng-deep .ant-checkbox-inner {
           vertical-align: middle;
-        }        .action-name {
-          font-size: 13px;
-          color: @grey70-color;
-          flex: 1;
-          line-height: 22px;
-          padding-top: 1px;
-        }i {
+        }
+
+        .action-name {
+            font-size: 13px;
+            color: @grey70-color;
+            flex: 1;
+            line-height: 22px;
+            padding-top: 1px;
+        }
+
+        i {
           cursor: pointer;
           color: @grey50-color;
           font-size: 14px;
