@@ -50,7 +50,6 @@
                   [(ngModel)]="permissions[rt.type].allChecked"
                   (ngModelChange)="updatePermissionsAllChecked(permissions[rt.type])"
                   [nzIndeterminate]="permissions[rt.type].indeterminate"
-                  i18n="@@common.select-all"
                 >
                   <span class="category-name">{{rt.displayName}}</span>
                 </label>

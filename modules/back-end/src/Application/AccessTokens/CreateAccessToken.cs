@@ -42,7 +42,6 @@ public class CreateAccessTokenHandler : IRequestHandler<CreateAccessToken, Acces
 
     public CreateAccessTokenHandler(
         IAccessTokenService service,
-        IMemberService memberService,
         ICurrentUser currentUser,
         IMapper mapper)
     {

@@ -265,7 +265,9 @@ export class AccessTokenDrawerComponent implements OnInit {
       }
 
       return;
-    }    const {name, type} = this.form.value;
+    }
+
+    const {name, type} = this.form.value;
 
     if ((type === AccessTokenTypeEnum.Personal && !this.canTakeActionOnPersonalAccessToken) || (type === AccessTokenTypeEnum.Service && !this.canTakeActionOnServiceAccessToken)) {
       this.message.warning($localize`:@@permissions.need-permissions-to-operate:You don't have permissions to take this action, please contact the admin to grant you the necessary permissions`);

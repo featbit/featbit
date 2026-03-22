@@ -12,7 +12,7 @@ public class UpdateAccessToken : IRequest<AccessTokenEditVm>
 
     public string Name { get; set; }
     
-    public IEnumerable<PolicyStatement> Permissions { get; set; }
+    public IEnumerable<PolicyStatement> Permissions { get; set; } = [];
 }
 
 public class UpdateAccessTokenValidator : AbstractValidator<UpdateAccessToken>
@@ -37,11 +37,11 @@ public class UpdateAccessTokenHandler : IRequestHandler<UpdateAccessToken, Acces
 
     public async Task<AccessTokenEditVm> Handle(UpdateAccessToken request, CancellationToken cancellationToken)
     {
-        var accessToken = await _service.GetAsync(request.Id);
+        var accessToken = await _service.FindOneAsync(x => x.OrganizationId == request.OrganizationId && x.Id == request.Id);
         accessToken.UpdateName(request.Name);
         if (accessToken.Type == AccessTokenTypes.Service)
         {
-            accessToken.Permissions = request.Permissions;
+            accessToken.Permissions = request.Permissions.Where(p => p != null).ToArray();
         }
 
         await _service.UpdateAsync(accessToken);

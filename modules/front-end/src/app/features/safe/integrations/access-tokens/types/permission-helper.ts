@@ -54,7 +54,6 @@ export interface IPermissionStatement extends IPolicyStatement {
 }
 
 export const preProcessPermissions = (statements: IPolicyStatement[]): { [key: string]: PermissionStatementGroup} => {
-  console.log(statements);
   return statements.flatMap((statement) => {
     const {effect, resourceType, resources} = statement;
     return statement.actions.map((action) => {
@@ -71,20 +70,43 @@ export const preProcessPermissions = (statements: IPolicyStatement[]): { [key: s
   }).filter(({action}) => action && action.isOpenAPIApplicable)
     .reduce((acc, cur) => {
       acc[cur.resourceType] = acc[cur.resourceType] || new PermissionStatementGroup(cur.resourceType, [], []);
+      const group = acc[cur.resourceType];
 
       // statements
-      const idx = acc[cur.resourceType].statements.findIndex((statement) => statement.effect === cur.effect && statement.action.name === cur.action.name && statement.effect === 'allow');
+      const idx = group.statements.findIndex(
+        (statement) =>
+          statement.effect === cur.effect &&
+          statement.action.name === cur.action.name &&
+          statement.effect === 'allow'
+      );
+
       if (idx !== -1) { // duplicate exists
-        const statement = acc[cur.resourceType].statements[idx];
-        const resources = [...statement.resources, ...cur.resources];
-        acc[cur.resourceType].resources = resources;
-        acc[cur.resourceType].statements.splice(idx, 1, { ...cur, checked: true, resources: resources.filter((resource, idx) => resources.indexOf(resource) === idx)});
+        const statement = group.statements[idx];
+        const mergedStatementResources = Array.from(
+          new Set([...statement.resources, ...cur.resources])
+        );
+        const mergedGroupResources = Array.from(
+          new Set([...group.resources, ...cur.resources])
+        );
+
+        group.resources = mergedGroupResources;
+        group.statements.splice(idx, 1, {
+          ...cur,
+          checked: true,
+          resources: mergedStatementResources
+        });
       } else {
-        acc[cur.resourceType].resources = [...cur.resources];
-        acc[cur.resourceType].statements.push({...cur, checked: true});
+        const mergedGroupResources = Array.from(
+          new Set([...group.resources, ...cur.resources])
+        );
+        group.resources = mergedGroupResources;
+        group.statements.push({...cur, checked: true});
       }
 
-      acc[cur.resourceType].isAllResources = acc[cur.resourceType].resources.length === 1 && acc[cur.resourceType].resources[0] === generalResourceRNPattern[cur.resourceType];
+      group.isAllResources =
+        group.resources.length === 1 &&
+        group.resources[0] === generalResourceRNPattern[cur.resourceType];
+
       return acc;
     }, {});
 }

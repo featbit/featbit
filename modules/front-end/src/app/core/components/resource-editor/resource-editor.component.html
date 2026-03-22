@@ -7,7 +7,7 @@
   <ng-template #modalContent>
     <div class="rsc-config-modal">
       <div>
-        <ng-container i18n="@@iam.policies.details.resource-name-description">Resource name (RN) uniquely identify resources. Every data can be seen as a resource, Project, Environment and Feature flag for example.</ng-container>
+        <ng-container i18n="@@iam.policies.details.resource-name-description">Resource name (RN) uniquely identifies resources. All data can be seen as a resource, Project, Environment and Feature flag for example.</ng-container>
         <div style="display: inline-block;font-weight: 600;" i18n="@@iam.policies.details.legal-resource-name">Legal resource name (RN) cannot include {{'{'}} {{'}'}} and :</div>
       </div>
 
@@ -37,6 +37,6 @@
   </ng-template>
   <ng-template #modalFooter>
     <button nz-button nzType="default" (click)="close()" i18n="@@common.cancel">Cancel</button>
-    <button nz-button nzType="primary" [disabled]="false" (click)="save()" i18n="@@common.save">Save</button>
+    <button nz-button nzType="primary" [disabled]="model?.isInvalid" (click)="save()" i18n="@@common.save">Save</button>
   </ng-template>
 </nz-modal>
