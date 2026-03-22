@@ -1,4 +1,5 @@
 using Application.Bases;
+using Application.Bases.Exceptions;
 using Domain.AccessTokens;
 using Domain.Policies;
 
@@ -37,6 +38,13 @@ public class UpdateAccessTokenHandler : IRequestHandler<UpdateAccessToken, Acces
 
     public async Task<AccessTokenEditVm> Handle(UpdateAccessToken request, CancellationToken cancellationToken)
     {
+        var accessTokenWithSameName = await _service.FindOneAsync(x => x.OrganizationId == request.OrganizationId && x.Id != request.Id && string.Equals(x.Name.ToLower(), request.Name.ToLower()));
+
+        if (accessTokenWithSameName != null)
+        {
+            throw new BusinessException(ErrorCodes.NameHasBeenUsed);
+        }
+
         var accessToken = await _service.FindOneAsync(x => x.OrganizationId == request.OrganizationId && x.Id == request.Id);
         accessToken.UpdateName(request.Name);
         if (accessToken.Type == AccessTokenTypes.Service)
