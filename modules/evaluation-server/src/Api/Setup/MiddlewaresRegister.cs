@@ -1,3 +1,4 @@
+using Api.Cors;
 using Streaming;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Infrastructure;
@@ -32,8 +33,8 @@ public static class MiddlewaresRegister
         // enable streaming
         app.UseStreaming();
 
-        // enable cors
-        app.UseCors();
+        // cors
+        app.UseCustomCors();
 
         app.MapControllers();
 

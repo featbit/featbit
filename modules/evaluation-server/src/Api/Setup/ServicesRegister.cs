@@ -1,3 +1,4 @@
+using Api.Cors;
 using Api.RateLimiting;
 using Api.Services;
 using Domain.Workspaces;
@@ -29,13 +30,7 @@ public static class ServicesRegister
         services.AddHealthChecks().AddReadinessChecks(configuration);
 
         // cors
-        builder.Services.AddCors(options => options.AddDefaultPolicy(policyBuilder =>
-        {
-            policyBuilder
-                .AllowAnyOrigin()
-                .AllowAnyHeader()
-                .AllowAnyMethod();
-        }));
+        builder.AddCustomCors();
 
         // add bounded memory cache
         services.AddSingleton<BoundedMemoryCache>();

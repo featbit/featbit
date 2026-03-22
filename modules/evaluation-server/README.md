@@ -82,6 +82,19 @@ and [consumer configs](https://kafka.apache.org/documentation/#consumerconfigs) 
 | `Streaming__TrackClientHostName` | Whether to resolve client's IP hostname for detailed logging | `true`        |
 | `Streaming__TokenExpirySeconds`  | Streaming token expiry time in seconds                       | `30`          |
 
+## CORS
+
+[CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS) **is enabled by default** with wildcard settings,
+allowing requests from any origin, any header, and any method.
+
+| Name                     | Description                                                                                            | Default Value |
+|--------------------------|--------------------------------------------------------------------------------------------------------|---------------|
+| `Cors__Enabled`          | Whether CORS is enabled                                                                                | `true`        |
+| `Cors__AllowedOrigins`   | Allowed origins. Use `*` for wildcard or specify explicit origins using `';'` as the delimiter         | `"*"`         |
+| `Cors__AllowedHeaders`   | Allowed request headers. Use `*` for wildcard or specify explicit headers using `';'` as the delimiter | `"*"`         |
+| `Cors__AllowedMethods`   | Allowed HTTP methods. Use `*` for wildcard or specify explicit methods using `';'` as the delimiter    | `"*"`         |
+| `Cors__AllowCredentials` | Whether to allow credentials. Cannot be used with a wildcard `*` origin                                | `false`       |
+
 ## Rate Limiting
 
 Rate limiting **is disabled by default**. When enabled, it protects the API from excessive traffic using one of three
