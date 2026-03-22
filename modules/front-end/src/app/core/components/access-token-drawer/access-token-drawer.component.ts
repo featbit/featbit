@@ -65,7 +65,7 @@ export class AccessTokenDrawerComponent implements OnInit {
         if (savedPermissions[resourceType]) {
           const savedStatementGroup = savedPermissions[resourceType];
           statementGroup.resources = savedStatementGroup.resources;
-          statementGroup.isAllResources = savedStatementGroup.isAllResources; // resources contains at least one general RN
+          statementGroup.isAllResources = savedStatementGroup.isAllResources;
 
           const savedStatements = savedStatementGroup.statements;
           const savedMap = new Map(savedStatements.map(stmt => [stmt.action.id, stmt]));
@@ -86,8 +86,6 @@ export class AccessTokenDrawerComponent implements OnInit {
             stmt.checked = false;
           });
         }
-
-        this.updatePermissionSingleChecked(statementGroup);
       });
 
       if (this.readonly) {
@@ -99,6 +97,8 @@ export class AccessTokenDrawerComponent implements OnInit {
       accessToken = {name: null, type: AccessTokenTypeEnum.Personal};
       this.title = $localize`:@@integrations.access-token.access-token-drawer.add-title:Add Access Token`;
     }
+
+    Object.values(this.permissions).forEach((statementGroup) => this.updatePermissionSingleChecked(statementGroup));
 
     this.isServiceAccessToken = accessToken.type === AccessTokenTypeEnum.Service;
     this.initForm(accessToken.name, accessToken.type);
