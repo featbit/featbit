@@ -28,6 +28,7 @@ import {
 import { PolicyTypeEnum } from "@features/safe/iam/types/policy";
 import { PermissionLicenseService } from "@services/permission-license.service";
 import { LicenseFeatureEnum } from "@shared/types";
+import { IResourceEditorOutputModel } from "@core/components/resource-editor/resource-editor.component";
 
 @Component({
     selector: 'access-token-drawer',
@@ -330,8 +331,8 @@ export class AccessTokenDrawerComponent implements OnInit {
     resourceType.isResourceEditorVisible = true;
   };
 
-  onResourceAdded = (resourceType: ResourceTypeExtension, rsc: string) => {
-    this.permissions[resourceType.type].saveResource(rsc);
+  onResourceAdded = (resourceType: ResourceTypeExtension, rsc: IResourceEditorOutputModel) => {
+    this.permissions[resourceType.type].saveResource(rsc.val);
     resourceType.isResourceEditorVisible = false;
   }
 

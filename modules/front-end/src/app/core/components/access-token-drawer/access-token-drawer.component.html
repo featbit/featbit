@@ -81,7 +81,7 @@
                   </button>
                   <resource-editor
                     [visible]="rt.isResourceEditorVisible"
-                    [rn]="permissions[rt.type].currentResource"
+                    [rn]="{val: permissions[rt.type].currentResource, id: null}"
                     [resourceType]="rt"
                     (onCancel)="rt.isResourceEditorVisible=false"
                     (onSave)="onResourceAdded(rt, $event)"

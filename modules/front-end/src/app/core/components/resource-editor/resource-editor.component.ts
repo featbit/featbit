@@ -8,6 +8,11 @@ import {
 } from "@shared/policy";
 import { deepCopy, uuidv4 } from "@utils/index";
 
+export interface IResourceEditorOutputModel {
+  id: string;
+  val: string;
+}
+
 @Component({
   selector: 'resource-editor',
   templateUrl: './resource-editor.component.html',
@@ -20,7 +25,7 @@ export class ResourceEditorComponent implements OnInit, OnChanges {
 
   @Input() visible: boolean = false;
   @Input() resourceType: ResourceType;
-  @Input() rn: string;
+  @Input() rn: RNViewModel;
 
   async ngOnInit() {
     this.initFromRn();
@@ -39,12 +44,15 @@ export class ResourceEditorComponent implements OnInit, OnChanges {
 
     this.reset(); // always reset rscParams first
 
-    this.model = { id: uuidv4(), val: this.rn, isInvalid: false };
+    // nothing to parse for a new resource
+    if (!this.rn) {
+      return;
+    }
 
-    if (!this.rn) return; // nothing to parse for a new resource
+    this.model = { id: this.rn.id || uuidv4(), val: this.rn.val, isInvalid: false };
 
     // a complete RN example: project/*;tag1,tag2:env/*-env;tag3,tag4
-    const paramValues = this.rn.split(':')
+    const paramValues = this.rn.val.split(':')
     .flatMap(r => {
       // example of r: project/*;tag1,tag2
       // split key and others (currently only tags, we may have other params here)
@@ -102,6 +110,9 @@ export class ResourceEditorComponent implements OnInit, OnChanges {
           }
       }
 
+      if (param.val !== '*') {
+        param.isAnyChecked = false;
+      }
       param.isInvalid = param.val?.includes(':') || param.val?.includes('{') || param.val?.includes('}');
       this.model.isInvalid ||= param.isInvalid;
     });
@@ -118,13 +129,14 @@ export class ResourceEditorComponent implements OnInit, OnChanges {
   }
 
   @Output() onCancel: EventEmitter<boolean> = new EventEmitter();
-  @Output() onSave: EventEmitter<string> = new EventEmitter();
+  @Output() onSave: EventEmitter<IResourceEditorOutputModel> = new EventEmitter();
 
   close = () => {
     this.onCancel.emit();
   }
 
   save = () => {
-    this.onSave.emit(this.model.val);
+    const {id, val} = this.model;
+    this.onSave.emit({id, val});
   }
 }
