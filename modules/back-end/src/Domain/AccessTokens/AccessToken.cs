@@ -49,9 +49,14 @@ public class AccessToken : AuditedEntity
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void UpdateName(string name)
+    public void Update(string name, IEnumerable<PolicyStatement> permissions)
     {
         Name = name;
+        if (Type == AccessTokenTypes.Service)
+        {
+            Permissions = permissions;
+        }
+
         UpdatedAt = DateTime.UtcNow;
     }
 }

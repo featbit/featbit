@@ -5,14 +5,14 @@ using Domain.Policies;
 
 namespace Application.AccessTokens;
 
-public class UpdateAccessToken : IRequest<AccessTokenEditVm>
+public class UpdateAccessToken : IRequest<AccessTokenVm>
 {
     public Guid OrganizationId { get; set; }
-    
+
     public Guid Id { get; set; }
 
     public string Name { get; set; }
-    
+
     public IEnumerable<PolicyStatement> Permissions { get; set; } = [];
 }
 
@@ -25,35 +25,26 @@ public class UpdateAccessTokenValidator : AbstractValidator<UpdateAccessToken>
     }
 }
 
-public class UpdateAccessTokenHandler : IRequestHandler<UpdateAccessToken, AccessTokenEditVm>
+public class UpdateAccessTokenHandler(IAccessTokenService service, IMapper mapper)
+    : IRequestHandler<UpdateAccessToken, AccessTokenVm>
 {
-    private readonly IAccessTokenService _service;
-    private readonly IMapper _mapper;
-
-    public UpdateAccessTokenHandler(IAccessTokenService service, IMapper mapper)
+    public async Task<AccessTokenVm> Handle(UpdateAccessToken request, CancellationToken cancellationToken)
     {
-        _service = service;
-        _mapper = mapper;
-    }
-
-    public async Task<AccessTokenEditVm> Handle(UpdateAccessToken request, CancellationToken cancellationToken)
-    {
-        var accessTokenWithSameName = await _service.FindOneAsync(x => x.OrganizationId == request.OrganizationId && x.Id != request.Id && string.Equals(x.Name.ToLower(), request.Name.ToLower()));
-
-        if (accessTokenWithSameName != null)
+        var isNameUsed = await service.FindOneAsync(x =>
+            x.OrganizationId == request.OrganizationId &&
+            x.Id != request.Id &&
+            string.Equals(x.Name.ToLower(), request.Name.ToLower())
+        );
+        if (isNameUsed != null)
         {
             throw new BusinessException(ErrorCodes.NameHasBeenUsed);
         }
 
-        var accessToken = await _service.FindOneAsync(x => x.OrganizationId == request.OrganizationId && x.Id == request.Id);
-        accessToken.UpdateName(request.Name);
-        if (accessToken.Type == AccessTokenTypes.Service)
-        {
-            accessToken.Permissions = request.Permissions.Where(p => p != null).ToArray();
-        }
+        var accessToken = await service.GetAsync(request.Id);
+        accessToken.Update(request.Name, request.Permissions);
 
-        await _service.UpdateAsync(accessToken);
+        await service.UpdateAsync(accessToken);
 
-        return _mapper.Map<AccessTokenEditVm>(accessToken);
+        return mapper.Map<AccessTokenVm>(accessToken);
     }
 }

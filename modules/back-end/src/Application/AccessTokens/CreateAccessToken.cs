@@ -6,7 +6,7 @@ using Domain.Policies;
 
 namespace Application.AccessTokens;
 
-public class CreateAccessToken : IRequest<AccessTokenVm>
+public class CreateAccessToken : IRequest<AccessToken>
 {
     public Guid OrganizationId { get; set; }
 
@@ -34,35 +34,22 @@ public class CreateAccessTokenValidator : AbstractValidator<CreateAccessToken>
     }
 }
 
-public class CreateAccessTokenHandler : IRequestHandler<CreateAccessToken, AccessTokenVm>
+public class CreateAccessTokenHandler(IAccessTokenService service, ICurrentUser currentUser)
+    : IRequestHandler<CreateAccessToken, AccessToken>
 {
-    private readonly ICurrentUser _currentUser;
-    private readonly IAccessTokenService _service;
-    private readonly IMapper _mapper;
-
-    public CreateAccessTokenHandler(
-        IAccessTokenService service,
-        ICurrentUser currentUser,
-        IMapper mapper)
+    public async Task<AccessToken> Handle(CreateAccessToken request, CancellationToken cancellationToken)
     {
-        _service = service;
-        _currentUser = currentUser;
-        _mapper = mapper;
-    }
-
-    public async Task<AccessTokenVm> Handle(CreateAccessToken request, CancellationToken cancellationToken)
-    {
-        var isNameUsed = await _service.IsNameUsedAsync(request.OrganizationId, request.Name);
+        var isNameUsed = await service.IsNameUsedAsync(request.OrganizationId, request.Name);
         if (isNameUsed)
         {
             throw new BusinessException(ErrorCodes.NameHasBeenUsed);
         }
 
         var accessToken =
-            new AccessToken(request.OrganizationId, _currentUser.Id, request.Name, request.Type, request.Permissions);
+            new AccessToken(request.OrganizationId, currentUser.Id, request.Name, request.Type, request.Permissions);
 
-        await _service.AddOneAsync(accessToken);
+        await service.AddOneAsync(accessToken);
 
-        return _mapper.Map<AccessTokenVm>(accessToken);
+        return accessToken;
     }
 }
