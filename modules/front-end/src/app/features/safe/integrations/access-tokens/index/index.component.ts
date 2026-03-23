@@ -117,7 +117,7 @@ export class IndexComponent implements OnInit {
     } else {
       this.accessTokens.items = this.accessTokens.items.map((ac) => {
         if (ac.id === data.id) {
-          return {...ac, ...data};
+          return {...ac, name: data.name, permissions: data.permissions};
         }
 
         return ac;

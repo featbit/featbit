@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using Application.Bases;
 using Application.Bases.Exceptions;
 using Application.Users;
@@ -27,12 +26,6 @@ public class CreateAccessTokenValidator : AbstractValidator<CreateAccessToken>
 
         RuleFor(x => x.Type)
             .Must(AccessTokenTypes.IsDefined).WithErrorCode(ErrorCodes.Invalid("type"));
-
-        RuleFor(x => x.Permissions)
-            .NotNull().WithErrorCode(ErrorCodes.Required("permissions"))
-            .Must(permissions => permissions.Length != 0)
-            .Unless(x => x.Type == AccessTokenTypes.Personal)
-            .WithErrorCode(ErrorCodes.Invalid("permissions"));
     }
 }
 
