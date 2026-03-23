@@ -1,3 +1,4 @@
+using Api.Cors;
 using Streaming;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Infrastructure;
@@ -23,11 +24,17 @@ public static class MiddlewaresRegister
             app.UseSwaggerUI();
         }
 
+        // enable rate limiting (before streaming so WebSocket upgrades are covered)
+        if (app.Configuration.IsRateLimitingEnabled())
+        {
+            app.UseRateLimiter();
+        }
+
         // enable streaming
         app.UseStreaming();
 
-        // enable cors
-        app.UseCors();
+        // cors
+        app.UseCustomCors();
 
         app.MapControllers();
 

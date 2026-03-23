@@ -224,11 +224,11 @@ public class MemberService(AppDbContext dbContext) : IMemberService
         return allPolicies;
     }
 
-    public async Task<IEnumerable<PolicyStatement>> GetPermissionsAsync(Guid organizationId, Guid memberId)
+    public async Task<PolicyStatement[]> GetPermissionsAsync(Guid organizationId, Guid memberId)
     {
         var policies = await GetPoliciesAsync(organizationId, memberId);
 
-        var statements = policies.SelectMany(x => x.Statements);
+        var statements = policies.SelectMany(x => x.Statements).ToArray();
         return statements;
     }
 

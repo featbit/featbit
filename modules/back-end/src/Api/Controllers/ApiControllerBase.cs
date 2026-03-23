@@ -1,6 +1,8 @@
 using System.Net.Mime;
+using Api.Authorization;
 using Api.Filters;
 using Application.Users;
+using Domain.Policies;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Api.Controllers;
@@ -55,6 +57,13 @@ public class ApiControllerBase : ControllerBase
             _workspaceId = HttpContext.Request.WorkspaceId();
             return _workspaceId.Value;
         }
+    }
+
+    protected Task<PolicyStatement[]> GetRequestPermissionsAsync()
+    {
+        var requestPermissions = HttpContext.RequestServices.GetRequiredService<IRequestPermissions>();
+
+        return requestPermissions.GetAsync(HttpContext);
     }
 
     protected static ApiResponse<TData> Ok<TData>(TData data) => ApiResponse<TData>.Ok(data);
