@@ -24,7 +24,8 @@ import { copyToClipboard, uuidv4 } from "@utils/index";
 import {
   PermissionStatementGroup,
   postProcessPermissions,
-  preProcessPermissions, ResourceTypeExtension
+  preProcessPermissions,
+  ResourceTypeExtension
 } from "@features/safe/integrations/access-tokens/types/permission-helper";
 import { PolicyTypeEnum } from "@features/safe/iam/types/policy";
 import { PermissionLicenseService } from "@services/permission-license.service";
@@ -69,8 +70,7 @@ export class AccessTokenDrawerComponent implements OnInit {
           statementGroup.resources = savedStatementGroup.resources;
           statementGroup.isAllResources = savedStatementGroup.isAllResources;
 
-          const savedStatements = savedStatementGroup.statements;
-          const savedMap = new Map(savedStatements.map(stmt => [stmt.action.id, stmt]));
+          const savedMap = new Map(savedStatementGroup.statements.map(stmt => [stmt.action.id, stmt]));
 
           // Mark statements as checked if they exist in saved permissions
           statementGroup.statements.forEach(stmt => {
@@ -333,7 +333,11 @@ export class AccessTokenDrawerComponent implements OnInit {
   };
 
   onResourceAdded = (resourceType: ResourceTypeExtension, rsc: IResourceEditorOutputModel) => {
-    this.permissions[resourceType.type].saveResource(rsc.val);
+    const permissionGroup = this.permissions[resourceType.type];
+    if (!permissionGroup.resources.includes(rsc.val)) {
+      permissionGroup.saveResource(rsc.val);
+    }
+
     resourceType.isResourceEditorVisible = false;
   }
 
