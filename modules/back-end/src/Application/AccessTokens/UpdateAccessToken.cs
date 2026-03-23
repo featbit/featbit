@@ -1,6 +1,5 @@
 using Application.Bases;
 using Application.Bases.Exceptions;
-using Domain.AccessTokens;
 using Domain.Policies;
 
 namespace Application.AccessTokens;
@@ -13,7 +12,7 @@ public class UpdateAccessToken : IRequest<AccessTokenVm>
 
     public string Name { get; set; }
 
-    public IEnumerable<PolicyStatement> Permissions { get; set; } = [];
+    public PolicyStatement[] Permissions { get; set; } = [];
 }
 
 public class UpdateAccessTokenValidator : AbstractValidator<UpdateAccessToken>
