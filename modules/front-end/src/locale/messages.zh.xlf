@@ -394,7 +394,7 @@
         <source>Permissions</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
-          <context context-type="linenumber">42,43</context>
+          <context context-type="linenumber">43,44</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/components/policy-editor/policy-editor.component.html</context>
@@ -410,7 +410,7 @@
         <source>All resources</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
-          <context context-type="linenumber">63,64</context>
+          <context context-type="linenumber">64,65</context>
         </context-group>
         <target>全部资源</target>
       </trans-unit>
@@ -418,7 +418,7 @@
         <source>Customize resources</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
-          <context context-type="linenumber">64,65</context>
+          <context context-type="linenumber">65,66</context>
         </context-group>
         <target>自定义资源</target>
       </trans-unit>
@@ -426,7 +426,7 @@
         <source>Click to edit</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
-          <context context-type="linenumber">74</context>
+          <context context-type="linenumber">75</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
@@ -442,7 +442,7 @@
         <source>Add Resource</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
-          <context context-type="linenumber">80,81</context>
+          <context context-type="linenumber">81,82</context>
         </context-group>
         <target>添加资源</target>
       </trans-unit>
@@ -450,7 +450,7 @@
         <source>Save</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
-          <context context-type="linenumber">110,112</context>
+          <context context-type="linenumber">111,113</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-review/change-review.component.html</context>
@@ -550,7 +550,7 @@
         <source>Access token created</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
-          <context context-type="linenumber">121,123</context>
+          <context context-type="linenumber">122,124</context>
         </context-group>
         <target>成功创建访问秘钥</target>
       </trans-unit>
@@ -558,7 +558,7 @@
         <source>Copy and save this token now, the token value will be masked once you leave the page.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
-          <context context-type="linenumber">130,132</context>
+          <context context-type="linenumber">131,133</context>
         </context-group>
         <target>请复制并保存 Token，一旦离开该页面后，该 Token 将会被隐藏。</target>
       </trans-unit>
@@ -566,7 +566,7 @@
         <source>Ok</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.html</context>
-          <context context-type="linenumber">145,146</context>
+          <context context-type="linenumber">146,147</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-agent-modal/relay-proxy-agent-modal.component.html</context>
@@ -586,7 +586,7 @@
         <source>View Access Token</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.ts</context>
-          <context context-type="linenumber">93</context>
+          <context context-type="linenumber">95</context>
         </context-group>
         <target>查看访问令牌</target>
       </trans-unit>
@@ -594,7 +594,7 @@
         <source>Edit Access Token</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.ts</context>
-          <context context-type="linenumber">95</context>
+          <context context-type="linenumber">97</context>
         </context-group>
         <target>编辑访问令牌</target>
       </trans-unit>
@@ -602,7 +602,7 @@
         <source>Add Access Token</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.ts</context>
-          <context context-type="linenumber">99</context>
+          <context context-type="linenumber">101</context>
         </context-group>
         <target>添加访问令牌</target>
       </trans-unit>
@@ -1094,7 +1094,7 @@
         <source>Personal</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.ts</context>
-          <context context-type="linenumber">340</context>
+          <context context-type="linenumber">344</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/pipes/access-token-type.pipe.ts</context>
@@ -1106,7 +1106,7 @@
         <source>Service</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/access-token-drawer/access-token-drawer.component.ts</context>
-          <context context-type="linenumber">341</context>
+          <context context-type="linenumber">345</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/pipes/access-token-type.pipe.ts</context>
@@ -5297,7 +5297,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.html</context>
-          <context context-type="linenumber">134,135</context>
+          <context context-type="linenumber">133,134</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.html</context>
@@ -5765,7 +5765,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.html</context>
-          <context context-type="linenumber">129,130</context>
+          <context context-type="linenumber">128,129</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/relay-proxies/index/index.component.html</context>
@@ -6150,7 +6150,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.html</context>
-          <context context-type="linenumber">106,107</context>
+          <context context-type="linenumber">105,106</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.html</context>
@@ -10294,7 +10294,7 @@
         <source>View</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.html</context>
-          <context context-type="linenumber">101,103</context>
+          <context context-type="linenumber">100,102</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/relay-proxies/index/index.component.html</context>
@@ -10306,7 +10306,7 @@
         <source>Activate</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.html</context>
-          <context context-type="linenumber">110,111</context>
+          <context context-type="linenumber">109,110</context>
         </context-group>
         <target>激活</target>
       </trans-unit>
@@ -10314,7 +10314,7 @@
         <source>Deactivate this access token? You can&apos;t use an inactive access token to make API calls but you can activate it again later.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.html</context>
-          <context context-type="linenumber">118,120</context>
+          <context context-type="linenumber">117,119</context>
         </context-group>
         <target>停用访问密钥？您不能使用非活动密钥来进行 API 调用，但您可以在以后重新将其激活。</target>
       </trans-unit>
@@ -10322,7 +10322,7 @@
         <source>Deactivate</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.html</context>
-          <context context-type="linenumber">123,124</context>
+          <context context-type="linenumber">122,123</context>
         </context-group>
         <target>停用</target>
       </trans-unit>
