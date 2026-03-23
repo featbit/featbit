@@ -77,9 +77,8 @@
             </td>
             <td>
               @if (item.creator.name) {
-                {{ item.creator.name }} ({{ item.creator.email }})
-              }
-              @if (!item.creator.name) {
+                {{ item.creator.name }}
+              } @else {
                 {{ item.creator.email }}
               }
             </td>

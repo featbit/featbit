@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using Application.Bases;
 using Application.Bases.Exceptions;
 using Application.Users;
@@ -7,7 +6,7 @@ using Domain.Policies;
 
 namespace Application.AccessTokens;
 
-public class CreateAccessToken : IRequest<AccessTokenVm>
+public class CreateAccessToken : IRequest<AccessToken>
 {
     public Guid OrganizationId { get; set; }
 
@@ -27,90 +26,25 @@ public class CreateAccessTokenValidator : AbstractValidator<CreateAccessToken>
 
         RuleFor(x => x.Type)
             .Must(AccessTokenTypes.IsDefined).WithErrorCode(ErrorCodes.Invalid("type"));
-
-        RuleFor(x => x.Permissions)
-            .NotNull().WithErrorCode(ErrorCodes.Required("permissions"))
-            .Must(permissions => permissions.Length != 0)
-            .Unless(x => x.Type == AccessTokenTypes.Personal)
-            .WithErrorCode(ErrorCodes.Invalid("permissions"));
     }
 }
 
-public class CreateAccessTokenHandler : IRequestHandler<CreateAccessToken, AccessTokenVm>
+public class CreateAccessTokenHandler(IAccessTokenService service, ICurrentUser currentUser)
+    : IRequestHandler<CreateAccessToken, AccessToken>
 {
-    private readonly IMemberService _memberService;
-    private readonly ICurrentUser _currentUser;
-    private readonly IAccessTokenService _service;
-    private readonly IMapper _mapper;
-
-    public CreateAccessTokenHandler(
-        IAccessTokenService service,
-        IMemberService memberService,
-        ICurrentUser currentUser,
-        IMapper mapper)
+    public async Task<AccessToken> Handle(CreateAccessToken request, CancellationToken cancellationToken)
     {
-        _service = service;
-        _currentUser = currentUser;
-        _memberService = memberService;
-        _mapper = mapper;
-    }
-
-    public async Task<AccessTokenVm> Handle(CreateAccessToken request, CancellationToken cancellationToken)
-    {
-        if (request.Type == AccessTokenTypes.Service)
-        {
-            var authorizedPolices =
-                await _memberService.GetPoliciesAsync(request.OrganizationId, _currentUser.Id);
-
-            var haveUnauthorizedPermissions = request.Permissions.Any(x =>
-            {
-                var matchedPolicy = authorizedPolices.FirstOrDefault(policy =>
-                    policy.Statements.Any(statement =>
-                        (statement.ResourceType == x.ResourceType || statement.ResourceType == "*") &&
-                        statement.Effect == "allow" &&
-                        x.Resources.All(rsc => statement.Resources.Any(resource => MatchRule(rsc, resource))) &&
-                        x.Actions.All(act => statement.Actions.Any(action => MatchRule(act, action))))
-                );
-
-                return matchedPolicy == null;
-            });
-
-            if (haveUnauthorizedPermissions)
-            {
-                throw new BusinessException(ErrorCodes.Forbidden);
-            }
-        }
-
-        var isNameUsed = await _service.IsNameUsedAsync(request.OrganizationId, request.Name);
+        var isNameUsed = await service.IsNameUsedAsync(request.OrganizationId, request.Name);
         if (isNameUsed)
         {
             throw new BusinessException(ErrorCodes.NameHasBeenUsed);
         }
 
         var accessToken =
-            new AccessToken(request.OrganizationId, _currentUser.Id, request.Name, request.Type, request.Permissions);
+            new AccessToken(request.OrganizationId, currentUser.Id, request.Name, request.Type, request.Permissions);
 
-        await _service.AddOneAsync(accessToken);
+        await service.AddOneAsync(accessToken);
 
-        return _mapper.Map<AccessTokenVm>(accessToken);
-    }
-
-    // use "*" (star) as a wildcard for example:
-    // "a*b" => everything that starts with "a" and ends with "b"
-    // "a*" => everything that starts with "a"
-    // "*b" => everything that ends with "b"
-    // "*a*" => everything that has an "a" in it
-    // "*a*b*"=> everything that has an "a" in it, followed by anything, followed by a "b", followed by anything
-    private static bool MatchRule(string str, string rule)
-    {
-        string EscapeRegex(string s) => Regex.Replace(s, "([.*+?^=!:${}()|\\[\\]\\\\/])", "\\$1");
-
-        var matchPattern = rule
-            .Split('*')
-            .Select(EscapeRegex)
-            .Aggregate((x, y) => $"{x}.*{y}");
-
-        var regex = new Regex($"^{matchPattern}$");
-        return regex.IsMatch(str);
+        return accessToken;
     }
 }

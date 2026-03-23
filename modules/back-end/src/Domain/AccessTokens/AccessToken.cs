@@ -33,7 +33,7 @@ public class AccessToken : AuditedEntity
 
         Status = AccessTokenStatus.Active;
         Type = type;
-        Permissions = permissions;
+        Permissions = permissions ?? [];
 
         Token = $"api-{TokenHelper.New(Guid.NewGuid())}";
     }
@@ -49,9 +49,14 @@ public class AccessToken : AuditedEntity
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void UpdateName(string name)
+    public void Update(string name, PolicyStatement[] permissions)
     {
         Name = name;
+        if (Type == AccessTokenTypes.Service)
+        {
+            Permissions = permissions ?? [];
+        }
+
         UpdatedAt = DateTime.UtcNow;
     }
 }

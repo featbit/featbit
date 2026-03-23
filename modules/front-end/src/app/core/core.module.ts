@@ -109,6 +109,7 @@ import { RelayProxyKeyModalComponent } from './components/relay-proxy-key-modal/
 import { CloneFeatureFlagModalComponent } from './components/clone-feature-flag-modal/clone-feature-flag-modal.component';
 import { CompareFeatureFlagDrawerComponent } from './components/compare-feature-flag-drawer/compare-feature-flag-drawer.component';
 import { ClonePolicyModalComponent } from "@core/components/clone-policy-modal/clone-policy-modal.component";
+import { ResourceEditorComponent } from "@core/components/resource-editor/resource-editor.component";
 
 @NgModule({
   declarations: [
@@ -160,6 +161,7 @@ import { ClonePolicyModalComponent } from "@core/components/clone-policy-modal/c
     CloneFeatureFlagModalComponent,
     CompareFeatureFlagDrawerComponent,
     ClonePolicyModalComponent,
+    ResourceEditorComponent,
   ],
   imports: [
     CommonModule,
@@ -270,7 +272,8 @@ import { ClonePolicyModalComponent } from "@core/components/clone-policy-modal/c
     RelayProxyKeyModalComponent,
     CloneFeatureFlagModalComponent,
     CompareFeatureFlagDrawerComponent,
-    ClonePolicyModalComponent
+    ClonePolicyModalComponent,
+    ResourceEditorComponent
   ]
 })
 export class CoreModule {

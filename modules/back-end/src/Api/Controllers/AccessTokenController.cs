@@ -1,5 +1,6 @@
 using Application.AccessTokens;
 using Application.Bases.Models;
+using Domain.AccessTokens;
 
 namespace Api.Controllers;
 
@@ -33,7 +34,7 @@ public class AccessTokenController : ApiControllerBase
     }
 
     [HttpPost]
-    public async Task<ApiResponse<AccessTokenVm>> CreateAsync(CreateAccessToken request)
+    public async Task<ApiResponse<AccessToken>> CreateAsync(CreateAccessToken request)
     {
         request.OrganizationId = OrgId;
 
@@ -66,8 +67,9 @@ public class AccessTokenController : ApiControllerBase
     }
 
     [HttpPut("{id:guid}")]
-    public async Task<ApiResponse<bool>> UpdateAsync(Guid id, UpdateAccessToken request)
+    public async Task<ApiResponse<AccessTokenVm>> UpdateAsync(Guid id, UpdateAccessToken request)
     {
+        request.OrganizationId = OrgId;
         request.Id = id;
 
         var accessTokenVm = await Mediator.Send(request);
