@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { debounceTime, first, map, switchMap } from "rxjs/operators";
+import { catchError, debounceTime, first, map, switchMap } from "rxjs/operators";
 import { AccessTokenTypeEnum, IAccessToken, } from "@features/safe/integrations/access-tokens/types/access-token";
 import { AccessTokenService } from "@services/access-token.service";
 import { PermissionsService } from "@services/permissions.service";
@@ -31,6 +31,7 @@ import { PolicyTypeEnum } from "@features/safe/iam/types/policy";
 import { PermissionLicenseService } from "@services/permission-license.service";
 import { LicenseFeatureEnum } from "@shared/types";
 import { IResourceEditorOutputModel } from "@core/components/resource-editor/resource-editor.component";
+import { of } from "rxjs";
 
 @Component({
     selector: 'access-token-drawer',
@@ -211,21 +212,19 @@ export class AccessTokenDrawerComponent implements OnInit {
     return permissions.filter((permission) => this.resourceTypes.some((rt) => rt.type === permission.resourceType));
   }
 
-  nameAsyncValidator = (control: FormControl) => control.valueChanges.pipe(
-    debounceTime(300),
-    switchMap(value => this.accessTokenService.isNameUsed(value as string)),
-    map(isNameUsed => {
-      switch (isNameUsed) {
-        case true:
-          return {error: true, duplicated: true};
-        case undefined:
-          return {error: true, unknown: true};
-        default:
-          return null;
-      }
-    }),
-    first()
-  );
+  nameAsyncValidator = (control: FormControl) => {
+    if (this.isEditing && control.value === this._accessToken.name) {
+      return of(null);
+    }
+
+    return control.valueChanges.pipe(
+      debounceTime(300),
+      switchMap(value => this.accessTokenService.isNameUsed(value as string)),
+      map(isUsed => isUsed ? { error: true, duplicated: true } : null),
+      catchError(() => [{ error: true, unknown: true }]),
+      first()
+    );
+  }
 
   updatePermissionsAllChecked(statementGroup: PermissionStatementGroup) {
     statementGroup.indeterminate = false;
