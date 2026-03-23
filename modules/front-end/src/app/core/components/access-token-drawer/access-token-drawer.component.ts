@@ -10,7 +10,6 @@ import {
   generalResourceRNPattern,
   IamPolicyAction,
   permissionActions,
-  ResourceSpaceLevel,
   ResourceType,
   ResourceTypeEnum,
   ResourceTypeEnv,
@@ -344,6 +343,5 @@ export class AccessTokenDrawerComponent implements OnInit {
     { label: $localize`:@@integrations.access-token.personal:Personal`, value: AccessTokenTypeEnum.Personal },
     { label: $localize`:@@integrations.access-token.service:Service`, value: AccessTokenTypeEnum.Service },
   ]
-  protected readonly ResourceSpaceLevel = ResourceSpaceLevel;
   protected readonly ResourceTypeEnum = ResourceTypeEnum;
 }
