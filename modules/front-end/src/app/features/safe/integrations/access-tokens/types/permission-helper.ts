@@ -24,8 +24,7 @@ export class PermissionStatementGroup {
     public resourceType: string,
     public resources: string[],
     public statements: IPermissionStatement[],
-    ) {
-  }
+    ) { }
 
   saveResource = (rsc: string) => {
     if(this.currentResourceIndex > this.resources.length - 1) { // add new item
@@ -92,7 +91,7 @@ export const preProcessPermissions = (statements: IPolicyStatement[]): { [key: s
         group.resources = mergedGroupResources;
         group.statements.splice(idx, 1, {
           ...cur,
-          checked: true,
+          checked: false,
           resources: mergedStatementResources
         });
       } else {
@@ -100,7 +99,7 @@ export const preProcessPermissions = (statements: IPolicyStatement[]): { [key: s
           new Set([...group.resources, ...cur.resources])
         );
         group.resources = mergedGroupResources;
-        group.statements.push({...cur, checked: true});
+        group.statements.push({...cur, checked: false});
       }
 
       group.isAllResources =
