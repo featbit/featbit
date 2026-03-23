@@ -30,19 +30,18 @@ public class UpdateAccessTokenHandler(IAccessTokenService service, IMapper mappe
 {
     public async Task<AccessTokenVm> Handle(UpdateAccessToken request, CancellationToken cancellationToken)
     {
-        var isNameUsed = await service.FindOneAsync(x =>
+        var accessTokenWithSameName = await service.FindOneAsync(x =>
             x.OrganizationId == request.OrganizationId &&
             x.Id != request.Id &&
             string.Equals(x.Name.ToLower(), request.Name.ToLower())
         );
-        if (isNameUsed != null)
+        if (accessTokenWithSameName != null)
         {
             throw new BusinessException(ErrorCodes.NameHasBeenUsed);
         }
 
         var accessToken = await service.GetAsync(request.Id);
         accessToken.Update(request.Name, request.Permissions);
-
         await service.UpdateAsync(accessToken);
 
         return mapper.Map<AccessTokenVm>(accessToken);
