@@ -636,7 +636,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     id: uuidv4(),
     name: 'UpdateSegmentDescription',
     resourceType: ResourceTypeEnum.Segment,
-    description: $localize`:@@iam.action.update-flag-segment:Update the description of a segment`,
+    description: $localize`:@@iam.action.update-segment-description:Update the description of a segment`,
     isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: true

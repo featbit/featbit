@@ -120,6 +120,13 @@ export class SettingComponent implements OnInit {
   }
 
   onRemoveTag(tag: string) {
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.segmentDetail.rn, permissionActions.UpdateSegmentTags);
+    if (!isGranted) {
+      this.segmentDetail.tags = [...this.segmentDetail.tags, tag]; // restore the removed tag
+      this.msg.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
     this.segmentDetail.removeTag(tag);
     this.segmentService.setTags(this.segmentDetail.id, this.segmentDetail.tags).subscribe(_ => {
       this.msg.success($localize`:@@common.operation-success:Operation succeeded`);

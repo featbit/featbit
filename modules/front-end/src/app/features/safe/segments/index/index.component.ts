@@ -8,7 +8,8 @@ import {
   ISegment,
   ISegmentListModel,
   ISegmentFlagReference,
-  SegmentType
+  SegmentType,
+  getSegmentRN
 } from "../types/segments";
 import { SegmentService } from "@services/segment.service";
 import { debounceTime } from 'rxjs/operators';
@@ -16,7 +17,6 @@ import { getCurrentEnvRN } from "@utils/project-env";
 import { permissionActions } from "@shared/policy";
 import { PermissionLicenseService } from "@services/permission-license.service";
 import { PermissionsService } from "@services/permissions.service";
-import { getFlagRN } from "@features/safe/feature-flags/types/feature-flag";
 
 @Component({
     selector: 'segments-index',
@@ -51,7 +51,7 @@ export class IndexComponent implements OnInit {
   }
 
   restore(segment: ISegment) {
-    const rn = getFlagRN(segment.key, segment.tags);
+    const rn = getSegmentRN(segment.key, segment.tags);
     const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(rn, permissionActions.RestoreSegment);
     if (!isGranted) {
       this.msg.warning(this.permissionsService.genericDenyMessage);
@@ -74,7 +74,7 @@ export class IndexComponent implements OnInit {
   deletingOrArchiving: boolean = false;
   deleteArchive(segment: ISegment) {
     this.deletingOrArchiving = true;
-    const rn = getFlagRN(segment.key, segment.tags);
+    const rn = getSegmentRN(segment.key, segment.tags);
 
     if (this.isDelete) {
       const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(rn, permissionActions.DeleteSegment);

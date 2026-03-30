@@ -150,7 +150,6 @@ public class DefaultPermissionChecker(
                 return string.Empty;
             }
             
-            // segment has no fine-grained access control for now, return env level wildcard
             var rn = await resourceService.GetSegmentRnAsync(envId, segmentId);
             return rn;
         }

@@ -214,7 +214,7 @@ public class SegmentController : ApiControllerBase
     /// Permanently delete a segment with the specified ID. This action cannot be undone.
     /// </remarks>
     [OpenApi]
-    [HttpDelete("{id:guid}")]
+    [HttpDelete("{segmentId:guid}")]
     [Authorize(Permissions.DeleteSegment)]
     public async Task<ApiResponse<bool>> DeleteAsync(Guid segmentId)
     {

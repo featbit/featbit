@@ -80,6 +80,13 @@ export class SettingComponent {
   }
 
   onRemoveTag(tag: string) {
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.UpdateFlagTags);
+    if (!isGranted) {
+      this.featureFlag.tags = [...this.featureFlag.tags, tag]; // restore the removed tag
+      this.message.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
     this.featureFlag.removeTag(tag);
     this.featureFlagService.setTags(this.featureFlag.key, this.featureFlag.tags).subscribe(_ => {
       this.message.success($localize`:@@common.operation-success:Operation succeeded`);

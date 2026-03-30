@@ -3,6 +3,7 @@ using Domain.FeatureFlags;
 using Domain.Organizations;
 using Domain.Projects;
 using Domain.Resources;
+using Domain.Segments;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 using Environment = Domain.Environments.Environment;
@@ -83,7 +84,7 @@ public class ResourceService(MongoDbClient mongoDb) : IResourceService
         var query =
             from project in QueryableOf<Project>()
             join env in QueryableOf<Environment>() on project.Id equals env.ProjectId
-            join segment in QueryableOf<FeatureFlag>() on env.Id equals segment.EnvId
+            join segment in QueryableOf<Segment>() on env.Id equals segment.EnvId
             where segment.EnvId == envId && segment.Id == id
             select new
             {
