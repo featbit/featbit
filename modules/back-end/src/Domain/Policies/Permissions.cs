@@ -42,7 +42,13 @@ public static class Permissions
     public const string UpdateFlagTags = nameof(UpdateFlagTags);
 
     // Segments
-    public const string ManageSegment = nameof(ManageSegment);
+    public const string CreateSegment = nameof(CreateSegment);
+    public const string ArchiveSegment = nameof(ArchiveSegment);
+    public const string RestoreSegment = nameof(RestoreSegment);
+    public const string DeleteSegment = nameof(DeleteSegment);
+    public const string UpdateSegmentName = nameof(UpdateSegmentName);
+    public const string UpdateSegmentDescription = nameof(UpdateSegmentDescription);
+    public const string UpdateSegmentTags = nameof(UpdateSegmentTags);
 
     public static readonly Dictionary<string, string> ResourceMap = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -84,7 +90,13 @@ public static class Permissions
         { UpdateFlagTags, ResourceTypes.FeatureFlag },
 
         // Segments
-        { ManageSegment, ResourceTypes.Segment }
+        { CreateSegment, ResourceTypes.Segment },
+        { ArchiveSegment, ResourceTypes.Segment },
+        { RestoreSegment, ResourceTypes.Segment },
+        { DeleteSegment, ResourceTypes.Segment },
+        { UpdateSegmentName, ResourceTypes.Segment },
+        { UpdateSegmentDescription, ResourceTypes.Segment },
+        { UpdateSegmentTags, ResourceTypes.Segment }
     };
 
     public static readonly string[] All = ResourceMap.Keys.ToArray();

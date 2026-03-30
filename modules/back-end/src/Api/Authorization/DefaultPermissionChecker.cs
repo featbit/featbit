@@ -135,10 +135,24 @@ public class DefaultPermissionChecker(
                 // invalid or missing env id, return empty
                 return string.Empty;
             }
-
+            
+            if (!routeValues.TryGetValue("segmentId", out var segmentIdRouteValue))
+            {
+                // missing id, return env level wildcard
+                var envRn = await resourceService.GetEnvRnAsync(envId);
+                return envRn == null ? null : $"{envRn}:segment/*";
+            }
+            
+            if (!Guid.TryParse(segmentIdRouteValue?.ToString(), out var segmentId))
+            {
+                // invalid segment id, return empty
+                logger.LogWarning("Invalid segmentId '{SegmentId}' in route values.", segmentIdRouteValue);
+                return string.Empty;
+            }
+            
             // segment has no fine-grained access control for now, return env level wildcard
-            var envRN = await resourceService.GetEnvRnAsync(envId);
-            return envRN == null ? null : $"{envRN}:segment/*";
+            var rn = await resourceService.GetSegmentRnAsync(envId, segmentId);
+            return rn;
         }
     }
 }

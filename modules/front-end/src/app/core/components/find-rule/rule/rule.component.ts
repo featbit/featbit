@@ -8,7 +8,7 @@ import {
   ISegmentListModel,
   SegmentListFilter,
   SegmentType
-} from '@features/safe/segments/types/segments-index';
+} from '@features/safe/segments/types/segments';
 import { SegmentService } from '@services/segment.service';
 import { IUserProp } from "@shared/types";
 import { ICondition, IRuleOp, RULE_OPS } from "@shared/rules";

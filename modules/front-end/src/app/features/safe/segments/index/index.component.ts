@@ -9,9 +9,14 @@ import {
   ISegmentListModel,
   ISegmentFlagReference,
   SegmentType
-} from "../types/segments-index";
+} from "../types/segments";
 import { SegmentService } from "@services/segment.service";
 import { debounceTime } from 'rxjs/operators';
+import { getCurrentEnvRN } from "@utils/project-env";
+import { permissionActions } from "@shared/policy";
+import { PermissionLicenseService } from "@services/permission-license.service";
+import { PermissionsService } from "@services/permissions.service";
+import { getFlagRN } from "@features/safe/feature-flags/types/feature-flag";
 
 @Component({
     selector: 'segments-index',
@@ -27,6 +32,14 @@ export class IndexComponent implements OnInit {
   currentDeletingArchivingSegment: ISegment;
   currentDeletingArchivingSegmentFlagReferences: ISegmentFlagReference[] = [];
 
+  constructor(
+    private router: Router,
+    private segmentService: SegmentService,
+    private msg: NzMessageService,
+    private permissionsService: PermissionsService,
+    private permissionLicenseService: PermissionLicenseService,
+  ) { }
+
   deleteArchiveValidation(segment: ISegment, isDelete: boolean) {
     this.isDelete = isDelete;
     this.currentDeletingArchivingSegment = segment;
@@ -38,6 +51,13 @@ export class IndexComponent implements OnInit {
   }
 
   restore(segment: ISegment) {
+    const rn = getFlagRN(segment.key, segment.tags);
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(rn, permissionActions.RestoreSegment);
+    if (!isGranted) {
+      this.msg.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
     this.segmentService.restore(segment.id).subscribe({
       next: () => {
         this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
@@ -52,13 +72,20 @@ export class IndexComponent implements OnInit {
   }
 
   deletingOrArchiving: boolean = false;
-  deleteArchive(id: string) {
+  deleteArchive(segment: ISegment) {
     this.deletingOrArchiving = true;
+    const rn = getFlagRN(segment.key, segment.tags);
 
     if (this.isDelete) {
-      this.segmentService.delete(id).subscribe({
+      const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(rn, permissionActions.DeleteSegment);
+      if (!isGranted) {
+        this.msg.warning(this.permissionsService.genericDenyMessage);
+        return;
+      }
+
+      this.segmentService.delete(segment.id).subscribe({
         next: () => {
-          this.segmentListModel.items = this.segmentListModel.items.filter(it => it.id !== id);
+          this.segmentListModel.items = this.segmentListModel.items.filter(it => it.id !== segment.id);
           this.segmentListModel.totalCount--;
           this.deletingOrArchiving = false;
           this.closeDeleteArchiveModal();
@@ -70,7 +97,13 @@ export class IndexComponent implements OnInit {
         }
       });
     } else { // archiving
-      this.segmentService.archive(id).subscribe({
+      const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(rn, permissionActions.ArchiveSegment);
+      if (!isGranted) {
+        this.msg.warning(this.permissionsService.genericDenyMessage);
+        return;
+      }
+
+      this.segmentService.archive(segment.id).subscribe({
         next: () => {
           this.deletingOrArchiving = false;
           this.onSearch();
@@ -129,12 +162,6 @@ export class IndexComponent implements OnInit {
   }
 
   //#endregion
-  constructor(
-    private router: Router,
-    private segmentService: SegmentService,
-    private msg: NzMessageService
-  ) { }
-
   ngOnInit(): void {
     this.subscribeSearch();
     this.$search.next();
@@ -154,8 +181,15 @@ export class IndexComponent implements OnInit {
 
   creationModalVisible: boolean = false;
   showCreationModal() {
+    const rnPrefix = getCurrentEnvRN();
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(`${rnPrefix}:segment/*`, permissionActions.CreateSegment);
+    if (!isGranted) {
+      this.msg.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
     this.creationModalVisible = true;
   }
+
   closeCreationModal(segment: ISegment) {
     this.creationModalVisible = false;
     if (segment) {

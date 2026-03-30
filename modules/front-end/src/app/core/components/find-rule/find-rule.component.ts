@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output, } from '@angular/core';
 import { SegmentService } from '@services/segment.service';
 import { isSegmentCondition, trackByFunction, uuidv4 } from '@utils/index';
-import { ISegment } from "@features/safe/segments/types/segments-index";
+import { ISegment } from "@features/safe/segments/types/segments";
 import { IRuleIdDispatchKey, IUserProp } from "@shared/types";
 import { ICondition, IRule, IRuleVariation, IVariation, RULE_OPS } from "@shared/rules";
 

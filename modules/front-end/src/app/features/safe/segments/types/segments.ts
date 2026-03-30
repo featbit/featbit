@@ -1,6 +1,8 @@
 ﻿import { IUserType } from "@shared/types";
 import {deepCopy, uuidv4} from "@utils/index";
 import {handleRulesBeforeSave, ICondition, IRule} from "@shared/rules";
+import { getCurrentEnvRN } from "@utils/project-env";
+import { getFlagRN } from "@features/safe/feature-flags/types/feature-flag";
 
 export interface ISegmentListModel {
   items: ISegment[];
@@ -63,41 +65,45 @@ export class SegmentListFilter {
   }
 }
 
+export const getSegmentRN = (key: string, tags: string[]) => {
+  const prefix = getCurrentEnvRN();
+
+  if (!prefix) {
+    return undefined;
+  }
+
+  let rn = `${prefix}:segment/${key}`;
+  if (tags.length > 0) {
+    rn = `${rn};${tags.join(",")}`;
+  }
+
+  return rn;
+}
+
 export class Segment {
-  private readonly _data: ISegment;
   private _includedUsers: IUserType[] = [];
   private _excludedUsers: IUserType[] = [];
 
   originalData: ISegment;
 
-  constructor(segment: ISegment) {
-    this.originalData = deepCopy(segment);
+  constructor(data: ISegment) {
+    for (let p in data) {
+      if (data[p] !== null && (Array.isArray(data[p]) || typeof data[p] === 'object')) {
+        this[p] = deepCopy(data[p]);
+      } else {
+        this[p] = data[p];
+      }
+    }
 
-    this._data = {...segment};
-
-    this._data.rules = segment.rules ?? [];
+    this.originalData = deepCopy(data);
   }
 
-  get segment() {
-    return {...this._data};
-  }
-
-  set name(val: string) {
-    this._data.name = val;
-    this.originalData.name = val;
-  }
-
-  set description(val: string) {
-    this._data.description = val;
-    this.originalData.description = val;
-  }
-
-  get dataToSave() {
+  get targetingDataToSave() {
     try{
-      this._data.rules = handleRulesBeforeSave(this._data.rules);
+      this.rules = handleRulesBeforeSave(this.rules);
 
       return {
-        ...this._data,
+        rules: this.rules,
         included: this._includedUsers.map(u => u.keyId),
         excluded: this._excludedUsers.map(u => u.keyId)
       };
@@ -106,8 +112,24 @@ export class Segment {
     }
   }
 
+  get dataToSave() {
+    try{
+      this.rules = handleRulesBeforeSave(this.rules);
+
+      const res = {};
+      for (let p in this.originalData) {
+        res[p] = this[p];
+      }
+
+      return res;
+    } catch (err){
+      console.log(err);
+    }
+  }
+
   set includedUsers(value: IUserType[]) {
     this._includedUsers = [...value];
+    this.included = value.map(v => v.keyId);
   }
 
   get includedUsers() {
@@ -116,18 +138,15 @@ export class Segment {
 
   set excludedUsers(value: IUserType[]) {
     this._excludedUsers = [...value];
+    this.excluded = value.map(v => v.keyId);
   }
 
   get excludedUsers() {
     return this._excludedUsers;
   }
 
-  get rules(): IRule[] {
-    return this._data.rules;
-  }
-
   get isShared(): boolean {
-    return this._data.type === SegmentType.Shared;
+    return this.type === SegmentType.Shared;
   }
 
   newRule() {
@@ -145,4 +164,26 @@ export class Segment {
   updateRuleConditions(condition: ICondition[], index: number) {
     this.rules[index].conditions = condition;
   }
+
+  addTag(tag: string) {
+    this.tags = [...this.tags, tag];
+  }
+
+  removeTag(tag: string) {
+    this.tags = this.tags.filter(x => x !== tag);
+  }
+
+  get rn(): string {
+    return getSegmentRN(this.originalData.key, this.originalData.tags);
+  }
+
+  id: string;
+  key: string;
+  type: SegmentType;
+  name: string;
+  description: string;
+  included: string[];
+  excluded: string[];
+  tags: string[];
+  rules: IRule[];
 }

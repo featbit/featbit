@@ -49,6 +49,9 @@
                 <i nz-icon (click)="targetUsersActive = !targetUsersActive" nzType="icons:icon-arrow-right"></i>
               }
             </div>
+            @if (!canUpdateTargetingUsers) {
+              <i [nz-tooltip]="noPermissionTooltipTpl" nz-icon nzType="warning"></i>
+            }
           </div>
           @if (targetUsersActive) {
             <div style="margin-left: -12px;margin-top: 16px">
@@ -56,7 +59,7 @@
                 <target-user
                   i18n-type="@@common.including-users"
                   type="Including users"
-                  [disabled]="false"
+                  [disabled]="!canUpdateTargetingUsers"
                   [disableCreation]="segmentDetail.isShared"
                   [userList]="userList"
                   [selectedUserDetailList]="segmentDetail.includedUsers"
@@ -68,7 +71,7 @@
                 <target-user
                   i18n-type="@@common.excluding-users"
                   type="Excluding users"
-                  [disabled]="false"
+                  [disabled]="!canUpdateTargetingUsers"
                   [disableCreation]="segmentDetail.isShared"
                   [userList]="userList"
                   [selectedUserDetailList]="segmentDetail.excludedUsers"
@@ -89,12 +92,15 @@
           <div class="rule-banner">
             <div class="title" i18n="@@common.rules">Rules</div>
             <i nz-icon (click)="addRule()" nzType="icons:icon-add-outline"></i>
+            @if (!canUpdateRules) {
+              <i [nz-tooltip]="noPermissionTooltipTpl" nz-icon nzType="warning"></i>
+            }
           </div>
           <div class="drop-list" cdkDropList (cdkDropListDropped)="onDrop($event)">
             @for (rule of segmentDetail.rules; track trackRuleById(index, rule); let index = $index) {
               <div class="drop-box rule" cdkDrag>
                 <find-rule
-                  [disabled]="false"
+                  [disabled]="!canUpdateRules"
                   [data]="rule"
                   [userProps]="userProps"
                   (addProperty)="onAddProperty($event)"
@@ -113,11 +119,15 @@
       }
     </div>
   </div>
+
+  <ng-template #noPermissionTooltipTpl>
+    <span class="validation-errors-title" i18n="@@permissions.need-permissions-to-operate">You don't have permissions to take this action, please contact the admin to grant you the necessary permissions</span>
+  </ng-template>
 </section>
 @if (!isLoading) {
   <change-review
     [visible]="reviewModalVisible"
-    [refName]="segmentDetail.segment.name"
+    [refName]="segmentDetail.name"
     [previous]="originalData"
     [current]="currentData"
     [refType]="refType"

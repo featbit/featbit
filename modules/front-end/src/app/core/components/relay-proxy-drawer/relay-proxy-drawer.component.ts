@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { RelayProxy, RelayProxyAgent, RelayProxyAutoAgent } from "@features/safe/relay-proxies/types/relay-proxy";
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
-import { SegmentType } from "@features/safe/segments/types/segments-index";
+import { SegmentType } from "@features/safe/segments/types/segments";
 import { ResourceSpaceLevel, ResourceTypeEnum, ResourceV2 } from "@shared/policy";
 import { catchError, debounceTime, finalize, first, map, switchMap } from "rxjs/operators";
 import { RelayProxyService } from "@services/relay-proxy.service";
