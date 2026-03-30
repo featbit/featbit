@@ -58,7 +58,7 @@ export class AccessTokenDrawerComponent implements OnInit {
 
   @Input()
   set accessToken(accessToken: IAccessToken) {
-    const authorizedStatements = this.setAuthorizedPermissions();
+    const authorizedStatements = this.loadAllPermissions();
     this.permissions = preProcessPermissions(authorizedStatements);
 
     this.isEditing = accessToken && !!accessToken.id;
@@ -110,7 +110,7 @@ export class AccessTokenDrawerComponent implements OnInit {
       .map(rt => ({
         ...rt,
         isResourceEditorVisible: false,
-        isConfigurable: [ResourceTypeEnum.Flag, ResourceTypeEnum.Project, ResourceTypeEnum.Env].some(x => x === rt.type)
+        isConfigurable: [ResourceTypeEnum.Flag, ResourceTypeEnum.Segment, ResourceTypeEnum.Project, ResourceTypeEnum.Env].some(x => x === rt.type)
       }));
   }
 
@@ -153,7 +153,10 @@ export class AccessTokenDrawerComponent implements OnInit {
   }
 
   isActionDisabled(act: IamPolicyAction): boolean {
-    return act.isFineGrainedAction && !this.fineGrainedAccessControlEnabled;
+    const authorizedPermissions = this.getAuthorizedPermissions();
+
+    const isActionAuthorized = authorizedPermissions.some((r) => r.resourceType === act.resourceType && r.actions.includes(act.name));
+    return !isActionAuthorized || (act.isFineGrainedAction && !this.fineGrainedAccessControlEnabled);
   }
 
   isServiceAccessToken: boolean = false
@@ -168,33 +171,33 @@ export class AccessTokenDrawerComponent implements OnInit {
     this.close.emit();
   }
 
-  setAuthorizedPermissions() {
+  getAuthorizedPermissions() {
     const hasOwnerPolicy = this.permissionsService.userPolicies.some((policy) => policy.name === 'Owner' && policy.type === PolicyTypeEnum.SysManaged);
 
     let permissions;
     if (hasOwnerPolicy) {
       permissions = Object.keys(permissionActions)
-        .filter(act => {
-          if (this.fineGrainedAccessControlEnabled) {
-            return act !== 'FlagAllActions'
-          }
+      .filter(act => {
+        if (this.fineGrainedAccessControlEnabled) {
+          return act !== 'FlagAllActions'
+        }
 
-          return !permissionActions[act].isFineGrainedAction;
-        })
-        .map((property) => {
-          const {resourceType, name} = permissionActions[property];
-          return {
-            id: uuidv4(),
-            resourceType,
-            effect: EffectEnum.Allow,
-            actions: [name],
-            resources: [generalResourceRNPattern[resourceType]]
-          }
-        })
+        return !permissionActions[act].isFineGrainedAction;
+      })
+      .map((property) => {
+        const {resourceType, name} = permissionActions[property];
+        return {
+          id: uuidv4(),
+          resourceType,
+          effect: EffectEnum.Allow,
+          actions: [name],
+          resources: [generalResourceRNPattern[resourceType]]
+        }
+      })
     } else {
       permissions = this.permissionsService.userPermissions.map(p => {
         if (this.fineGrainedAccessControlEnabled && p.resourceType === ResourceTypeEnum.Flag) {
-          if(p.actions.some((action) => action === '*')) {
+          if (p.actions.some((action) => action === '*')) {
             return {
               ...p,
               actions: Object.values(permissionActions)
@@ -204,9 +207,32 @@ export class AccessTokenDrawerComponent implements OnInit {
           }
         }
 
-        return {...p};
+        return { ...p };
       });
     }
+
+    return permissions.filter((permission) => this.resourceTypes.some((rt) => rt.type === permission.resourceType));
+  }
+
+  loadAllPermissions() {
+    const permissions = Object.keys(permissionActions)
+      .filter(act => {
+        if (this.fineGrainedAccessControlEnabled) {
+          return act !== 'FlagAllActions' && act !== 'SegmentAllActions';
+        }
+
+        return !permissionActions[act].isFineGrainedAction;
+      })
+      .map((property) => {
+        const {resourceType, name} = permissionActions[property];
+        return {
+          id: uuidv4(),
+          resourceType,
+          effect: EffectEnum.Allow,
+          actions: [name],
+          resources: [generalResourceRNPattern[resourceType]]
+        }
+      })
 
     return permissions.filter((permission) => this.resourceTypes.some((rt) => rt.type === permission.resourceType));
   }
