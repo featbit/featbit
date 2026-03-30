@@ -70,18 +70,27 @@ export class AccessTokenDrawerComponent implements OnInit {
           statementGroup.resources = savedStatementGroup.resources;
           statementGroup.isAllResources = savedStatementGroup.isAllResources;
 
-          const savedMap = new Map(savedStatementGroup.statements.map(stmt => [stmt.action.id, stmt]));
+          const allActions = savedStatementGroup.statements.find(stmt => stmt.action.name === '*');
 
-          // Mark statements as checked if they exist in saved permissions
-          statementGroup.statements.forEach(stmt => {
-            const saved = savedMap.get(stmt.action.id);
-            if (saved) {
+          if(allActions) {
+            statementGroup.statements.forEach(stmt => {
               stmt.checked = true;
-              stmt.resources = saved.resources;
-            } else {
-              stmt.checked = false;
-            }
-          });
+              stmt.resources = allActions.resources;
+            });
+          } else {
+            const savedMap = new Map(savedStatementGroup.statements.map(stmt => [stmt.action.id, stmt]));
+
+            // Mark statements as checked if they exist in saved permissions
+            statementGroup.statements.forEach(stmt => {
+              const saved = savedMap.get(stmt.action.id);
+              if (saved) {
+                stmt.checked = true;
+                stmt.resources = saved.resources;
+              } else {
+                stmt.checked = false;
+              }
+            });
+          }
         } else {
           // If resource type not in saved permissions, mark all as unchecked
           statementGroup.statements.forEach(stmt => {
