@@ -58,7 +58,7 @@ public static class RN
 
         return $"project/{projectKey}:env/{envKey}:flag/{flagKey}{tagsPart}";
     }
-    
+
     public static string ForSegment(string projectKey, string envKey, string segmentKey, ICollection<string> tags)
     {
         var tagsPart = tags.Count > 0 ? $";{string.Join(",", tags)}" : string.Empty;

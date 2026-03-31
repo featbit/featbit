@@ -77,7 +77,7 @@ public class ResourceService(AppDbContext dbContext) : IResourceService
         var data = await query.FirstOrDefaultAsync();
         return data == null ? null : RN.ForFlag(data.projectKey, data.envKey, data.flagKey, data.flagTags);
     }
-    
+
     public async Task<string?> GetSegmentRnAsync(Guid envId, Guid id)
     {
         var query =
