@@ -188,7 +188,7 @@ export class AccessTokenDrawerComponent implements OnInit {
       permissions = Object.keys(permissionActions)
       .filter(act => {
         if (this.fineGrainedAccessControlEnabled) {
-          return act !== 'FlagAllActions'
+          return act !== 'FlagAllActions' && act !== 'SegmentAllActions';
         }
 
         return !permissionActions[act].isFineGrainedAction;
@@ -205,12 +205,12 @@ export class AccessTokenDrawerComponent implements OnInit {
       })
     } else {
       permissions = this.permissionsService.userPermissions.map(p => {
-        if (this.fineGrainedAccessControlEnabled && p.resourceType === ResourceTypeEnum.Flag) {
+        if (this.fineGrainedAccessControlEnabled && (p.resourceType === ResourceTypeEnum.Flag || p.resourceType === ResourceTypeEnum.Segment)) {
           if (p.actions.some((action) => action === '*')) {
             return {
               ...p,
               actions: Object.values(permissionActions)
-              .filter(act => act.resourceType === ResourceTypeEnum.Flag && act.name !== '*' && act.isFineGrainedAction)
+              .filter(act => act.resourceType === p.resourceType && act.name !== '*' && act.isFineGrainedAction)
               .map(act => act.name),
             };
           }
