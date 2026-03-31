@@ -49,6 +49,7 @@
                   nz-checkbox
                   class="select-all"
                   [(ngModel)]="permissions[rt.type].allChecked"
+                  [nzDisabled]="isResourceDisabled(permissions[rt.type])"
                   (ngModelChange)="updatePermissionsAllChecked(permissions[rt.type])"
                   [nzIndeterminate]="permissions[rt.type].indeterminate"
                 >
@@ -91,14 +92,14 @@
               }
               <!-- Actions -->
               <div class="actions-list">
-                @for (permission of permissions[rt.type].statements; track permission.action.id) {
+                @for (statement of permissions[rt.type].statements; track statement.action.id) {
                   <label nz-checkbox
                     class="action-item"
-                    [(ngModel)]="permission.checked"
+                    [(ngModel)]="statement.checked"
                     (ngModelChange)="updatePermissionSingleChecked(permissions[rt.type])"
-                    [nzDisabled]="isActionDisabled(permission.action)">
-                    <span class="action-name">{{permission.action.name}}</span>
-                    <i nz-icon [nz-tooltip]="permission.action.description" nzType="icons:icon-info-outline"></i>
+                    [nzDisabled]="isActionDisabled(statement.action)">
+                    <span class="action-name">{{statement.action.name}}</span>
+                    <i nz-icon [nz-tooltip]="statement.action.description" nzType="icons:icon-info-outline"></i>
                   </label>
                 }
               </div>

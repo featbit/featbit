@@ -58,7 +58,7 @@ export class AccessTokenDrawerComponent implements OnInit {
 
   @Input()
   set accessToken(accessToken: IAccessToken) {
-    const authorizedStatements = this.loadAllPermissions();
+    const authorizedStatements = this.loadAllPermissionActions();
     this.permissions = preProcessPermissions(authorizedStatements);
 
     this.isEditing = accessToken && !!accessToken.id;
@@ -161,8 +161,13 @@ export class AccessTokenDrawerComponent implements OnInit {
     });
   }
 
+  isResourceDisabled(statementGroup: PermissionStatementGroup) {
+    const hasEnabledActions = statementGroup.statements.some(s => !this.isActionDisabled(s.action));
+    return !hasEnabledActions;
+  }
+
   isActionDisabled(act: IamPolicyAction): boolean {
-    const authorizedPermissions = this.getAuthorizedPermissions();
+    const authorizedPermissions = this.getAuthorizedPermissionActions();
 
     const isActionAuthorized = authorizedPermissions.some((r) => r.resourceType === act.resourceType && r.actions.includes(act.name));
     return !isActionAuthorized || (act.isFineGrainedAction && !this.fineGrainedAccessControlEnabled);
@@ -180,7 +185,7 @@ export class AccessTokenDrawerComponent implements OnInit {
     this.close.emit();
   }
 
-  getAuthorizedPermissions() {
+  getAuthorizedPermissionActions() {
     const hasOwnerPolicy = this.permissionsService.userPolicies.some((policy) => policy.name === 'Owner' && policy.type === PolicyTypeEnum.SysManaged);
 
     let permissions;
@@ -223,7 +228,7 @@ export class AccessTokenDrawerComponent implements OnInit {
     return permissions.filter((permission) => this.resourceTypes.some((rt) => rt.type === permission.resourceType));
   }
 
-  loadAllPermissions() {
+  loadAllPermissionActions() {
     const permissions = Object.keys(permissionActions)
       .filter(act => {
         if (this.fineGrainedAccessControlEnabled) {
@@ -261,18 +266,31 @@ export class AccessTokenDrawerComponent implements OnInit {
   }
 
   updatePermissionsAllChecked(statementGroup: PermissionStatementGroup) {
-    statementGroup.indeterminate = false;
     if (statementGroup.allChecked) {
-      statementGroup.statements = statementGroup.statements.map(item => ({
-        ...item,
-        checked: true
-      }));
+      statementGroup.statements = statementGroup.statements.map(item => {
+        if (this.isActionDisabled(item.action)) {
+          return item;
+        }
+
+        return {
+          ...item,
+          checked: true
+        };
+      });
     } else {
-      statementGroup.statements = statementGroup.statements.map(item => ({
-        ...item,
-        checked: false
-      }));
+      statementGroup.statements = statementGroup.statements.map(item => {
+        if (this.isActionDisabled(item.action)) {
+          return item;
+        }
+
+        return {
+          ...item,
+          checked: false
+        };
+      });
     }
+
+    this.updatePermissionSingleChecked(statementGroup);
   }
 
   updatePermissionSingleChecked(statementGroup: PermissionStatementGroup) {
@@ -284,6 +302,7 @@ export class AccessTokenDrawerComponent implements OnInit {
       statementGroup.indeterminate = false;
     } else {
       statementGroup.indeterminate = true;
+      statementGroup.allChecked = false;
     }
   }
 
