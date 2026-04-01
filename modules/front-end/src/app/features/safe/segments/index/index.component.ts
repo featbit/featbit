@@ -41,6 +41,15 @@ export class IndexComponent implements OnInit {
   ) { }
 
   deleteArchiveValidation(segment: ISegment, isDelete: boolean) {
+    const action = isDelete ? permissionActions.DeleteSegment : permissionActions.ArchiveSegment;
+    const rn = getSegmentRN(segment.key, segment.tags);
+
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(rn, action);
+    if (!isGranted) {
+      this.msg.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
     this.isDelete = isDelete;
     this.currentDeletingArchivingSegment = segment;
     this.currentDeletingArchivingSegmentFlagReferences = [];
@@ -72,20 +81,13 @@ export class IndexComponent implements OnInit {
   }
 
   deletingOrArchiving: boolean = false;
-  deleteArchive(segment: ISegment) {
+  deleteArchive(id: string) {
     this.deletingOrArchiving = true;
-    const rn = getSegmentRN(segment.key, segment.tags);
 
     if (this.isDelete) {
-      const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(rn, permissionActions.DeleteSegment);
-      if (!isGranted) {
-        this.msg.warning(this.permissionsService.genericDenyMessage);
-        return;
-      }
-
-      this.segmentService.delete(segment.id).subscribe({
+      this.segmentService.delete(id).subscribe({
         next: () => {
-          this.segmentListModel.items = this.segmentListModel.items.filter(it => it.id !== segment.id);
+          this.segmentListModel.items = this.segmentListModel.items.filter(it => it.id !== id);
           this.segmentListModel.totalCount--;
           this.deletingOrArchiving = false;
           this.closeDeleteArchiveModal();
@@ -96,15 +98,9 @@ export class IndexComponent implements OnInit {
           this.closeDeleteArchiveModal();
         }
       });
-    } else { // archiving
-      const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(rn, permissionActions.ArchiveSegment);
-      if (!isGranted) {
-        this.msg.warning(this.permissionsService.genericDenyMessage);
-        return;
-      }
-
-      this.segmentService.archive(segment.id).subscribe({
-        next: () => {
+    } else {
+      this.segmentService.archive(id).subscribe({
+        next: () => { // archiving
           this.deletingOrArchiving = false;
           this.onSearch();
           this.closeDeleteArchiveModal();
