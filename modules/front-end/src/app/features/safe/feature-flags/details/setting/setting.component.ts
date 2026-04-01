@@ -79,11 +79,12 @@ export class SettingComponent {
     }
   }
 
-  onRemoveTag(tag: string) {
+  onRemoveTag(event: MouseEvent, tag: string) {
     const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.UpdateFlagTags);
     if (!isGranted) {
-      this.featureFlag.tags = [...this.featureFlag.tags, tag]; // restore the removed tag
       this.message.warning(this.permissionsService.genericDenyMessage);
+      event.preventDefault();
+      event.stopPropagation();
       return;
     }
 

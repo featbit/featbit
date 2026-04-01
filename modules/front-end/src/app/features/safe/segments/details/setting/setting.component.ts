@@ -133,11 +133,12 @@ export class SettingComponent implements OnInit {
     }
   }
 
-  onRemoveTag(tag: string) {
+  onRemoveTag(event: MouseEvent, tag: string) {
     const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.segmentDetail.rn, permissionActions.UpdateSegmentTags);
     if (!isGranted) {
-      this.segmentDetail.tags = [...this.segmentDetail.tags, tag]; // restore the removed tag
       this.msg.warning(this.permissionsService.genericDenyMessage);
+      event.preventDefault();
+      event.stopPropagation();
       return;
     }
 
