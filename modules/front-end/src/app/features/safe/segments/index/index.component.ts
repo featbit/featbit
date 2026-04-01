@@ -98,7 +98,7 @@ export class IndexComponent implements OnInit {
           this.closeDeleteArchiveModal();
         }
       });
-    } else {  // archiving
+    } else { // archiving
       this.segmentService.archive(id).subscribe({
         next: () => {
           this.deletingOrArchiving = false;
