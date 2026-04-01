@@ -58,8 +58,8 @@ export class AccessTokenDrawerComponent implements OnInit {
 
   @Input()
   set accessToken(accessToken: IAccessToken) {
-    const authorizedStatements = this.loadAllPermissionActions();
-    this.permissions = preProcessPermissions(authorizedStatements);
+    const allPermissionActions = this.loadAllPermissionActions();
+    this.permissions = preProcessPermissions(allPermissionActions);
 
     this.isEditing = accessToken && !!accessToken.id;
     if (this.isEditing) {
