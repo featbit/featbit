@@ -105,7 +105,8 @@ export class TargetingComponent implements OnInit {
             this.id = result.id;
             this.loadSegment(result);
           }
-        }
+        },
+        error: (err) => this.msg.success($localize`:@@common.load-data-failed:Failed to load data, please refresh the page.`)
       });
     });
   }

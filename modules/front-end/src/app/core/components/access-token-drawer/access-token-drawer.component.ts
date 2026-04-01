@@ -140,14 +140,13 @@ export class AccessTokenDrawerComponent implements OnInit {
     private message: NzMessageService,
     private permissionLicenseService: PermissionLicenseService
   ) {
+    this.fineGrainedAccessControlEnabled = this.permissionLicenseService.isGrantedByLicense(LicenseFeatureEnum.FineGrainedAccessControl);
+    this.canTakeActionOnPersonalAccessToken = this.permissionsService.isGranted(generalResourceRNPattern.accessToken, permissionActions.ManagePersonalAccessTokens);
+    this.canTakeActionOnServiceAccessToken = this.permissionsService.isGranted(generalResourceRNPattern.accessToken, permissionActions.ManageServiceAccessTokens);
   }
 
   ngOnInit(): void {
     this.initForm('', AccessTokenTypeEnum.Personal);
-
-    this.fineGrainedAccessControlEnabled = this.permissionLicenseService.isGrantedByLicense(LicenseFeatureEnum.FineGrainedAccessControl);
-    this.canTakeActionOnPersonalAccessToken = this.permissionsService.isGranted(generalResourceRNPattern.accessToken, permissionActions.ManagePersonalAccessTokens);
-    this.canTakeActionOnServiceAccessToken = this.permissionsService.isGranted(generalResourceRNPattern.accessToken, permissionActions.ManageServiceAccessTokens);
   }
 
   private initForm(name: string, type: AccessTokenTypeEnum) {
@@ -167,9 +166,7 @@ export class AccessTokenDrawerComponent implements OnInit {
   }
 
   isActionDisabled(act: IamPolicyAction): boolean {
-    const authorizedPermissions = this.getAuthorizedPermissionActions();
-
-    const isActionAuthorized = authorizedPermissions.some((r) => r.resourceType === act.resourceType && r.actions.includes(act.name));
+    const isActionAuthorized = this.authorizedPermissionActions.some((r) => r.resourceType === act.resourceType && r.actions.includes(act.name));
     return !isActionAuthorized || (act.isFineGrainedAction && !this.fineGrainedAccessControlEnabled);
   }
 
@@ -185,7 +182,13 @@ export class AccessTokenDrawerComponent implements OnInit {
     this.close.emit();
   }
 
-  getAuthorizedPermissionActions() {
+  private _authorizedPermissionActions;
+
+  get authorizedPermissionActions() {
+    if (this._authorizedPermissionActions) {
+      return this._authorizedPermissionActions;
+    }
+
     const hasOwnerPolicy = this.permissionsService.userPolicies.some((policy) => policy.name === 'Owner' && policy.type === PolicyTypeEnum.SysManaged);
 
     let permissions;
@@ -225,7 +228,8 @@ export class AccessTokenDrawerComponent implements OnInit {
       });
     }
 
-    return permissions.filter((permission) => this.resourceTypes.some((rt) => rt.type === permission.resourceType));
+    this._authorizedPermissionActions = permissions.filter((permission) => this.resourceTypes.some((rt) => rt.type === permission.resourceType));
+    return this._authorizedPermissionActions;
   }
 
   loadAllPermissionActions() {

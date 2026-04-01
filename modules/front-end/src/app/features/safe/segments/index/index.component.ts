@@ -42,7 +42,7 @@ export class IndexComponent implements OnInit {
 
   deleteArchiveValidation(segment: ISegment, isDelete: boolean) {
     const action = isDelete ? permissionActions.DeleteSegment : permissionActions.ArchiveSegment;
-    const rn = getSegmentRN(segment.key, segment.tags);
+    const rn = getSegmentRN(segment.key, segment.tags || []);
 
     const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(rn, action);
     if (!isGranted) {
@@ -178,7 +178,7 @@ export class IndexComponent implements OnInit {
   creationModalVisible: boolean = false;
   showCreationModal() {
     const rnPrefix = getCurrentEnvRN();
-    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(`${rnPrefix}:segment/*`, permissionActions.CreateSegment);
+    const isGranted = !!rnPrefix && this.permissionLicenseService.isGrantedByLicenseAndPermission(`${rnPrefix}:segment/*`, permissionActions.CreateSegment);
     if (!isGranted) {
       this.msg.warning(this.permissionsService.genericDenyMessage);
       return;
