@@ -98,7 +98,7 @@
           </div>
           <div class="drop-list" cdkDropList (cdkDropListDropped)="onDrop($event)">
             @for (rule of segmentDetail.rules; track trackRuleById(index, rule); let index = $index) {
-              <div class="drop-box rule" cdkDrag>
+              <div class="drop-box rule" cdkDrag [cdkDragDisabled]="!canUpdateRules">
                 <find-rule
                   [disabled]="!canUpdateRules"
                   [data]="rule"
