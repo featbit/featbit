@@ -2,7 +2,6 @@
 import {deepCopy, uuidv4} from "@utils/index";
 import {handleRulesBeforeSave, ICondition, IRule} from "@shared/rules";
 import { getCurrentEnvRN } from "@utils/project-env";
-import { getFlagRN } from "@features/safe/feature-flags/types/feature-flag";
 
 export interface ISegmentListModel {
   items: ISegment[];
