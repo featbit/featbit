@@ -68,30 +68,44 @@ export class SettingComponent implements OnInit {
   }
 
   saveTitle() {
-    this.toggleTitleEditState();
-
     const { id, name } = this.segmentDetail;
     this.segmentService.updateName(id, name).subscribe({
-      next: () => this.msg.success($localize `:@@common.operation-success:Operation succeeded`),
+      next: () => {
+        this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
+        this.isEditingTitle = false;
+      },
       error: () => this.msg.error($localize `:@@common.operation-failed:Operation failed`)
     });
   }
 
   saveDescription() {
-    this.toggleDescriptionEditState();
-
     const { id, description } = this.segmentDetail;
     this.segmentService.updateDescription(id, description).subscribe({
-      next: () => this.msg.success($localize `:@@common.operation-success:Operation succeeded`),
+      next: () => {
+        this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
+        this.isEditingDescription = false;
+      },
       error: () => this.msg.error($localize `:@@common.operation-failed:Operation failed`)
     });
   }
 
   toggleTitleEditState(): void {
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.segmentDetail.rn, permissionActions.UpdateSegmentName);
+    if (!isGranted) {
+      this.msg.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
     this.isEditingTitle = !this.isEditingTitle;
   }
 
   toggleDescriptionEditState(): void {
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.segmentDetail.rn, permissionActions.UpdateSegmentDescription);
+    if (!isGranted) {
+      this.msg.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
     this.isEditingDescription = !this.isEditingDescription;
   }
 

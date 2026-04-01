@@ -174,7 +174,7 @@
     <button nz-button nzType="default" (click)="this.closeDeleteArchiveModal()" i18n="@@common.cancel">Cancel</button>
     <button nz-button nzType="primary" [nzLoading]="this.deletingOrArchiving"
       [disabled]="currentDeletingArchivingSegmentFlagReferences.length > 0"
-      (click)="deleteArchive(currentDeletingArchivingSegment)" >
+      (click)="deleteArchive(currentDeletingArchivingSegment.id)" >
       @if (isDelete) {
         <ng-container i18n="@@common.remove">Remove</ng-container>
       } @else {
