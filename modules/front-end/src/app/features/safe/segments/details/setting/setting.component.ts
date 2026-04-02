@@ -1,11 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import {
-  ISegment,
-  ISegmentFlagReference,
-  Segment,
-  SegmentType
-} from '@features/safe/segments/types/segments';
+import { ISegment, ISegmentFlagReference, Segment, SegmentType } from '@features/safe/segments/types/segments';
 import { SegmentService } from '@services/segment.service';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzSelectComponent } from "ng-zorro-antd/select";
