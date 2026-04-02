@@ -3,6 +3,7 @@ using Api.Authentication;
 using Api.Swagger.Examples;
 using Application.Bases.Models;
 using Application.Segments;
+using Domain.Policies;
 using Domain.Segments;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
@@ -21,12 +22,13 @@ public class SegmentController : ApiControllerBase
     /// Get a single segment by id.
     /// </remarks>
     [OpenApi]
-    [HttpGet("{id:guid}")]
-    public async Task<ApiResponse<Segment>> GetAsync(Guid id)
+    [HttpGet("{segmentId:guid}")]
+    [Authorize(Permissions.CanAccessEnv)]
+    public async Task<ApiResponse<Segment>> GetAsync(Guid segmentId)
     {
         var request = new GetSegment
         {
-            Id = id
+            Id = segmentId
         };
 
         var segment = await Mediator.Send(request);
@@ -41,6 +43,7 @@ public class SegmentController : ApiControllerBase
     /// </remarks>
     [OpenApi]
     [HttpGet]
+    [Authorize(Permissions.CanAccessEnv)]
     public async Task<ApiResponse<PagedResult<SegmentVm>>> GetListAsync(Guid envId, [FromQuery] SegmentFilter filter)
     {
         var request = new GetSegmentList
@@ -62,6 +65,7 @@ public class SegmentController : ApiControllerBase
     /// </remarks>
     [OpenApi]
     [HttpGet("by-ids")]
+    [Authorize(Permissions.CanAccessEnv)]
     public async Task<ApiResponse<IEnumerable<Segment>>> GetByIdsAsync([FromQuery] Guid[] ids)
     {
         var request = new GetSegmentByIds
@@ -81,6 +85,7 @@ public class SegmentController : ApiControllerBase
     /// </remarks>
     [OpenApi]
     [HttpPost]
+    [Authorize(Permissions.CreateSegment)]
     public async Task<ApiResponse<Segment>> CreateAsync(Guid envId, CreateSegment request)
     {
         request.WorkspaceId = WorkspaceId;
@@ -97,10 +102,11 @@ public class SegmentController : ApiControllerBase
     /// Update the display name of an existing segment.
     /// </remarks>
     [OpenApi]
-    [HttpPut("{id:guid}/name")]
-    public async Task<ApiResponse<bool>> UpdateNameAsync(Guid id, UpdateName request)
+    [HttpPut("{segmentId:guid}/name")]
+    [Authorize(Permissions.UpdateSegmentName)]
+    public async Task<ApiResponse<bool>> UpdateNameAsync(Guid segmentId, UpdateName request)
     {
-        request.Id = id;
+        request.Id = segmentId;
 
         var success = await Mediator.Send(request);
         return Ok(success);
@@ -113,10 +119,11 @@ public class SegmentController : ApiControllerBase
     /// Update the description field of an existing segment to provide additional context.
     /// </remarks>
     [OpenApi]
-    [HttpPut("{id:guid}/description")]
-    public async Task<ApiResponse<bool>> UpdateDescriptionAsync(Guid id, UpdateDescription request)
+    [HttpPut("{segmentId:guid}/description")]
+    [Authorize(Permissions.UpdateSegmentDescription)]
+    public async Task<ApiResponse<bool>> UpdateDescriptionAsync(Guid segmentId, UpdateDescription request)
     {
-        request.Id = id;
+        request.Id = segmentId;
 
         var success = await Mediator.Send(request);
         return Ok(success);
@@ -128,11 +135,10 @@ public class SegmentController : ApiControllerBase
     /// <remarks>
     /// Update the targeting rules, included and excluded users for a segment.
     /// </remarks>
-    [OpenApi]
-    [HttpPut("{id:guid}/targeting")]
-    public async Task<ApiResponse<bool>> UpdateTargetingAsync(Guid id, UpdateTargeting request)
+    [HttpPut("{segmentId:guid}/targeting")]
+    public async Task<ApiResponse<bool>> UpdateTargetingAsync(Guid segmentId, UpdateTargeting request)
     {
-        request.Id = id;
+        request.Id = segmentId;
 
         var success = await Mediator.Send(request);
         return Ok(success);
@@ -146,13 +152,13 @@ public class SegmentController : ApiControllerBase
     /// </remarks>
     [OpenApi]
     [SwaggerRequestExample(typeof(Operation), typeof(PatchSegmentExamples))]
-    [HttpPatch("{id:guid}")]
-    public async Task<ApiResponse<bool>> PatchAsync(Guid id, [FromBody] JsonElement jsonElement)
+    [HttpPatch("{segmentId:guid}")]
+    public async Task<ApiResponse<bool>> PatchAsync(Guid segmentId, [FromBody] JsonElement jsonElement)
     {
         var patch = JsonConvert.DeserializeObject<JsonPatchDocument>(jsonElement.GetRawText());
         var request = new PatchSegment
         {
-            Id = id,
+            Id = segmentId,
             Patch = patch
         };
 
@@ -167,13 +173,14 @@ public class SegmentController : ApiControllerBase
     /// Archive a segment with the specified ID. Archived segments are hidden from the main list but can be restored later.
     /// </remarks>
     [OpenApi]
-    [HttpPut("{id:guid}/archive")]
-    public async Task<ApiResponse<bool>> ArchiveAsync(Guid envId, Guid id)
+    [HttpPut("{segmentId:guid}/archive")]
+    [Authorize(Permissions.ArchiveSegment)]
+    public async Task<ApiResponse<bool>> ArchiveAsync(Guid envId, Guid segmentId)
     {
         var request = new ArchiveSegment
         {
             EnvId = envId,
-            Id = id
+            Id = segmentId
         };
 
         var success = await Mediator.Send(request);
@@ -187,12 +194,13 @@ public class SegmentController : ApiControllerBase
     /// Restore an archived segment with the specified ID, making it visible and usable again.
     /// </remarks>
     [OpenApi]
-    [HttpPut("{id:guid}/restore")]
-    public async Task<ApiResponse<bool>> RestoreAsync(Guid id)
+    [HttpPut("{segmentId:guid}/restore")]
+    [Authorize(Permissions.RestoreSegment)]
+    public async Task<ApiResponse<bool>> RestoreAsync(Guid segmentId)
     {
         var request = new RestoreSegment
         {
-            Id = id
+            Id = segmentId
         };
 
         var success = await Mediator.Send(request);
@@ -206,12 +214,13 @@ public class SegmentController : ApiControllerBase
     /// Permanently delete a segment with the specified ID. This action cannot be undone.
     /// </remarks>
     [OpenApi]
-    [HttpDelete("{id:guid}")]
-    public async Task<ApiResponse<bool>> DeleteAsync(Guid id)
+    [HttpDelete("{segmentId:guid}")]
+    [Authorize(Permissions.DeleteSegment)]
+    public async Task<ApiResponse<bool>> DeleteAsync(Guid segmentId)
     {
         var request = new DeleteSegment
         {
-            Id = id
+            Id = segmentId
         };
 
         var success = await Mediator.Send(request);
@@ -239,15 +248,14 @@ public class SegmentController : ApiControllerBase
     /// <remarks>
     /// Get the list of feature flags that reference this segment in their targeting rules.
     /// </remarks>
-    [OpenApi]
     [HttpGet]
-    [Route("{id:guid}/flag-references")]
-    public async Task<ApiResponse<IEnumerable<FlagReference>>> GetFlagReferencesAsync(Guid envId, Guid id)
+    [Route("{segmentId:guid}/flag-references")]
+    public async Task<ApiResponse<IEnumerable<FlagReference>>> GetFlagReferencesAsync(Guid envId, Guid segmentId)
     {
         var request = new GetFlagReferences
         {
             EnvId = envId,
-            Id = id
+            Id = segmentId
         };
 
         var references = await Mediator.Send(request);
@@ -280,12 +288,13 @@ public class SegmentController : ApiControllerBase
     /// Assign a list of tags to a segment for organization and filtering purposes.
     /// </remarks>
     [OpenApi]
-    [HttpPut("{id:guid}/tags")]
-    public async Task<ApiResponse<bool>> SetTagsAsync(Guid id, string[] tags)
+    [HttpPut("{segmentId:guid}/tags")]
+    [Authorize(Permissions.UpdateSegmentTags)]
+    public async Task<ApiResponse<bool>> SetTagsAsync(Guid segmentId, string[] tags)
     {
         var request = new SetTags
         {
-            Id = id,
+            Id = segmentId,
             Tags = tags
         };
 

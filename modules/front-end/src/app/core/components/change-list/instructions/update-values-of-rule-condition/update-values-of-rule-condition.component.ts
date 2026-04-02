@@ -5,7 +5,7 @@ import {
 } from "@core/components/change-list/instructions/types";
 import { isSegmentCondition } from "@utils/index";
 import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
-import { ISegment } from "@features/safe/segments/types/segments-index";
+import { ISegment } from "@features/safe/segments/types/segments";
 import { SegmentService } from "@services/segment.service";
 import { getSegmentRefs, mapToIInstructionCondition } from "@core/components/change-list/instructions/utils";
 import { InstructionKindEnum } from "@core/components/change-list/constants";

@@ -14,4 +14,6 @@ public interface IResourceService
     Task<string?> GetEnvRnAsync(Guid envId);
 
     Task<string?> GetFlagRnAsync(Guid envId, string key);
+
+    Task<string?> GetSegmentRnAsync(Guid envId, Guid id);
 }

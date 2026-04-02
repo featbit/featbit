@@ -55,7 +55,7 @@
       <ng-container *ngSwitchCase="'string'">
         <div class="value" *ngIf="!currentUserProp.usePresetValuesOnly; else presetSelect">
           <input class="standard-bordered-input" nz-input [(ngModel)]="condition.value" (ngModelChange)="onDebounceTimeModelChange()"
-                 [nzDisabled]="disabled"
+                 [disabled]="disabled"
                  placeholder="input string or number"
                  i18n-placeholder="@@core.components.findrule.rule.pleaseinput" />
         </div>

@@ -182,6 +182,7 @@ export enum ResourceParamTypeEnum {
   Project = 'project',
   Env = 'env',
   Flag = 'flag',
+  Segment = 'segment',
   Tag = 'tag',
 }
 
@@ -276,7 +277,48 @@ export const rscParamsDict: { [key in ResourceTypeEnum]: ResourceParamViewModel[
       isInvalid: false
     }
   ],
-  [ResourceTypeEnum.Segment]: [],
+  [ResourceTypeEnum.Segment]: [
+    {
+      val: '',
+      type: ResourceParamTypeEnum.Project,
+      placeholder: {
+        name: '{project}',
+        displayName: $localize`:@@iam.policy.project:Project`
+      },
+      isAnyChecked: false,
+      isInvalid: false
+    },
+    {
+      val: '',
+      type: ResourceParamTypeEnum.Env,
+      placeholder: {
+        name: '{env}',
+        displayName: $localize`:@@iam.policy.environment:Environment`
+      },
+      isAnyChecked: false,
+      isInvalid: false
+    },
+    {
+      val: '',
+      type: ResourceParamTypeEnum.Segment,
+      placeholder: {
+        name: '{segment}',
+        displayName: $localize`:@@iam.policy.segments:Segments`
+      },
+      isAnyChecked: false,
+      isInvalid: false
+    },
+    {
+      val: '',
+      type: ResourceParamTypeEnum.Tag,
+      placeholder: {
+        name: undefined,
+        displayName: $localize`:@@iam.policy.tags:Tags`
+      },
+      isAnyChecked: false,
+      isInvalid: false
+    }
+  ],
 };
 
 export const permissionActions: { [key: string]: IamPolicyAction } = {
@@ -536,14 +578,95 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
   },
 
   // segment
-  ManageSegment: {
+  SegmentAllActions: {
     id: uuidv4(),
-    name: 'ManageSegment',
+    name: '*',
     resourceType: ResourceTypeEnum.Segment,
-    description: $localize`:@@iam.action.manage-segment:Manage segment`,
+    description: $localize`:@@iam.action.segment-all-actions:All actions`,
     isOpenAPIApplicable: true,
-    isSpecificApplicable: false,
+    isSpecificApplicable: true,
     isFineGrainedAction: false
+  },
+  CreateSegment: {
+    id: uuidv4(),
+    name: 'CreateSegment',
+    resourceType: ResourceTypeEnum.Segment,
+    description: $localize`:@@iam.action.create-segment:Create segment`,
+    isOpenAPIApplicable: true,
+    isSpecificApplicable: true,
+    isFineGrainedAction: true
+  },
+  ArchiveSegment: {
+    id: uuidv4(),
+    name: 'ArchiveSegment',
+    resourceType: ResourceTypeEnum.Segment,
+    description: $localize`:@@iam.action.archive-segment:Archive segment`,
+    isOpenAPIApplicable: true,
+    isSpecificApplicable: true,
+    isFineGrainedAction: true
+  },
+  RestoreSegment: {
+    id: uuidv4(),
+    name: 'RestoreSegment',
+    resourceType: ResourceTypeEnum.Segment,
+    description: $localize`:@@iam.action.restore-segment:Restore segment`,
+    isOpenAPIApplicable: true,
+    isSpecificApplicable: true,
+    isFineGrainedAction: true
+  },
+  DeleteSegment: {
+    id: uuidv4(),
+    name: 'DeleteSegment',
+    resourceType: ResourceTypeEnum.Segment,
+    description: $localize`:@@iam.action.delete-segment:Delete segment`,
+    isOpenAPIApplicable: true,
+    isSpecificApplicable: true,
+    isFineGrainedAction: true
+  },
+  UpdateSegmentName: {
+    id: uuidv4(),
+    name: 'UpdateSegmentName',
+    resourceType: ResourceTypeEnum.Segment,
+    description: $localize`:@@iam.action.update-segment-name:Rename a segment`,
+    isOpenAPIApplicable: true,
+    isSpecificApplicable: true,
+    isFineGrainedAction: true
+  },
+  UpdateSegmentDescription: {
+    id: uuidv4(),
+    name: 'UpdateSegmentDescription',
+    resourceType: ResourceTypeEnum.Segment,
+    description: $localize`:@@iam.action.update-segment-description:Update the description of a segment`,
+    isOpenAPIApplicable: true,
+    isSpecificApplicable: true,
+    isFineGrainedAction: true
+  },
+  UpdateSegmentTags: {
+    id: uuidv4(),
+    name: 'UpdateSegmentTags',
+    resourceType: ResourceTypeEnum.Segment,
+    description: $localize`:@@iam.action.update-segment-tags:Change the tags associated with a segment`,
+    isOpenAPIApplicable: true,
+    isSpecificApplicable: true,
+    isFineGrainedAction: true
+  },
+  UpdateSegmentTargetingUsers: {
+    id: uuidv4(),
+    name: 'UpdateSegmentTargetingUsers',
+    resourceType: ResourceTypeEnum.Segment,
+    description: $localize`:@@iam.action.update-segment-targeting-users:Change a segment's targeting users`,
+    isOpenAPIApplicable: false,
+    isSpecificApplicable: true,
+    isFineGrainedAction: true
+  },
+  UpdateSegmentRules: {
+    id: uuidv4(),
+    name: 'UpdateSegmentRules',
+    resourceType: ResourceTypeEnum.Segment,
+    description: $localize`:@@iam.action.update-segment-rules:Change a segment's custom targeting rules`,
+    isOpenAPIApplicable: false,
+    isSpecificApplicable: true,
+    isFineGrainedAction: true
   },
 
   // workspace

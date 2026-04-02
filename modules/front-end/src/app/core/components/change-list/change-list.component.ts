@@ -9,7 +9,7 @@ import {
 import { CategoryEnum, instructionCategories, InstructionKindEnum, RuleInstructionKinkOpEnum } from "@core/components/change-list/constants";
 import { IRule } from "@shared/rules";
 import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
-import { ISegment } from "@features/safe/segments/types/segments-index";
+import { ISegment } from "@features/safe/segments/types/segments";
 
 @Component({
     selector: 'change-list',

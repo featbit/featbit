@@ -3,6 +3,7 @@ using Domain.FeatureFlags;
 using Domain.Organizations;
 using Domain.Projects;
 using Domain.Resources;
+using Domain.Segments;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 using Environment = Domain.Environments.Environment;
@@ -76,6 +77,25 @@ public class ResourceService(MongoDbClient mongoDb) : IResourceService
 
         var data = await query.FirstOrDefaultAsync();
         return data == null ? null : RN.ForFlag(data.projectKey, data.envKey, data.flagKey, data.flagTags);
+    }
+
+    public async Task<string?> GetSegmentRnAsync(Guid envId, Guid id)
+    {
+        var query =
+            from project in QueryableOf<Project>()
+            join env in QueryableOf<Environment>() on project.Id equals env.ProjectId
+            join segment in QueryableOf<Segment>() on env.Id equals segment.EnvId
+            where segment.EnvId == envId && segment.Id == id
+            select new
+            {
+                projectKey = project.Key,
+                envKey = env.Key,
+                segmentKey = segment.Key,
+                segmentTags = segment.Tags
+            };
+
+        var data = await query.FirstOrDefaultAsync();
+        return data == null ? null : RN.ForSegment(data.projectKey, data.envKey, data.segmentKey, data.segmentTags);
     }
 
     private async Task<IEnumerable<Resource>> GetProjectsAsync(Guid organizationId, string name)

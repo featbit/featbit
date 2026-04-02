@@ -1,10 +1,14 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { ISegment, ISegmentFlagReference, SegmentType } from '@features/safe/segments/types/segments-index';
+import { ISegment, ISegmentFlagReference, Segment, SegmentType } from '@features/safe/segments/types/segments';
 import { SegmentService } from '@services/segment.service';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzSelectComponent } from "ng-zorro-antd/select";
 import { copyToClipboard } from "@utils/index";
+import { permissionActions } from "@shared/policy";
+import { PermissionsService } from "@services/permissions.service";
+import { PermissionLicenseService } from "@services/permission-license.service";
+import { finalize } from "rxjs/operators";
 
 @Component({
     selector: 'segment-setting',
@@ -14,7 +18,7 @@ import { copyToClipboard } from "@utils/index";
 })
 export class SettingComponent implements OnInit {
   id: string;
-  segmentDetail: ISegment = null;
+  segmentDetail: Segment = {} as Segment;
   isLoading: boolean = true;
   flagReferences: ISegmentFlagReference[] = [];
 
@@ -24,7 +28,9 @@ export class SettingComponent implements OnInit {
   constructor(
     private route:ActivatedRoute,
     private msg: NzMessageService,
-    private segmentService: SegmentService
+    private segmentService: SegmentService,
+    private permissionsService: PermissionsService,
+    private permissionLicenseService: PermissionLicenseService,
   ) {
     this.segmentService.getAllTags().subscribe(allTags => {
       this.allTags = allTags;
@@ -44,44 +50,56 @@ export class SettingComponent implements OnInit {
   }
 
   private async loadData() {
-    return this.segmentService.getSegment(this.id).subscribe((result: ISegment) => {
-      if (result) {
-        this.id = result.id;
-        this.loadSegment(result);
-      }
-    })
-  }
-
-  private loadSegment(segment: ISegment) {
-    this.segmentDetail = {...segment, tags: segment.tags || []};
-    this.isLoading = false;
+    this.isLoading = true;
+    this.segmentService.getSegment(this.id)
+    .pipe(finalize(() => this.isLoading = false))
+    .subscribe({
+      next: (result: ISegment) => {
+        this.segmentDetail = new Segment(result);
+      },
+      error: () => this.msg.error($localize`:@@common.failed-to-load-data:Failed to load data`)
+    });
   }
 
   saveTitle() {
-    this.toggleTitleEditState();
-
     const { id, name } = this.segmentDetail;
     this.segmentService.updateName(id, name).subscribe({
-      next: () => this.msg.success($localize `:@@common.operation-success:Operation succeeded`),
+      next: () => {
+        this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
+        this.isEditingTitle = false;
+      },
       error: () => this.msg.error($localize `:@@common.operation-failed:Operation failed`)
     });
   }
 
   saveDescription() {
-    this.toggleDescriptionEditState();
-
     const { id, description } = this.segmentDetail;
     this.segmentService.updateDescription(id, description).subscribe({
-      next: () => this.msg.success($localize `:@@common.operation-success:Operation succeeded`),
+      next: () => {
+        this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
+        this.isEditingDescription = false;
+      },
       error: () => this.msg.error($localize `:@@common.operation-failed:Operation failed`)
     });
   }
 
   toggleTitleEditState(): void {
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.segmentDetail.rn, permissionActions.UpdateSegmentName);
+    if (!isGranted) {
+      this.msg.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
     this.isEditingTitle = !this.isEditingTitle;
   }
 
   toggleDescriptionEditState(): void {
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.segmentDetail.rn, permissionActions.UpdateSegmentDescription);
+    if (!isGranted) {
+      this.msg.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
     this.isEditingDescription = !this.isEditingDescription;
   }
 
@@ -109,30 +127,44 @@ export class SettingComponent implements OnInit {
     }
   }
 
-  onRemoveTag(tag: string) {
-    this.segmentDetail.tags = this.segmentDetail.tags.filter(t => t !== tag);
+  onRemoveTag(event: MouseEvent, tag: string) {
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.segmentDetail.rn, permissionActions.UpdateSegmentTags);
+    if (!isGranted) {
+      this.msg.warning(this.permissionsService.genericDenyMessage);
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+
+    this.segmentDetail.removeTag(tag);
     this.segmentService.setTags(this.segmentDetail.id, this.segmentDetail.tags).subscribe(_ => {
       this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
     });
   }
 
   onAddTag() {
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.segmentDetail.rn, permissionActions.UpdateSegmentTags);
+    if (!isGranted) {
+      this.msg.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
     const isNewTag = this.selectedTag.startsWith(this.createTagPrefix);
 
     const actualTag = isNewTag
       ? this.selectedTag.replace(this.createTagPrefix, '').replace(/'/g, '').trim()
       : this.selectedTag.trim();
 
-    this.segmentDetail.tags = [...this.segmentDetail.tags, actualTag];
+    this.segmentDetail.addTag(actualTag);
     this.segmentService.setTags(this.segmentDetail.id, this.segmentDetail.tags).subscribe(_ => {
       this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
     });
 
     if (isNewTag) {
       this.allTags = [...this.allTags, actualTag];
-      this.currentAllTags = this.allTags;
     }
 
+    this.currentAllTags = this.allTags;
     // clear current selected
     this.tagsSelect.writeValue(null);
   }

@@ -108,11 +108,12 @@ export class ResourceEditorComponent implements OnInit, OnChanges {
           } else {
             this.model.val = this.model.val.replace(regex, param.val);
           }
+
+          if (param.val !== '*') {
+            param.isAnyChecked = false;
+          }
       }
 
-      if (param.val !== '*') {
-        param.isAnyChecked = false;
-      }
       param.isInvalid = param.val?.includes(':') || param.val?.includes('{') || param.val?.includes('}');
       this.model.isInvalid ||= param.isInvalid;
     });

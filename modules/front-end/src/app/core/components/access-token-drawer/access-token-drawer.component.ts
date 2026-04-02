@@ -58,8 +58,8 @@ export class AccessTokenDrawerComponent implements OnInit {
 
   @Input()
   set accessToken(accessToken: IAccessToken) {
-    const authorizedStatements = this.setAuthorizedPermissions();
-    this.permissions = preProcessPermissions(authorizedStatements);
+    const allPermissionActions = this.loadAllPermissionActions();
+    this.permissions = preProcessPermissions(allPermissionActions);
 
     this.isEditing = accessToken && !!accessToken.id;
     if (this.isEditing) {
@@ -70,18 +70,27 @@ export class AccessTokenDrawerComponent implements OnInit {
           statementGroup.resources = savedStatementGroup.resources;
           statementGroup.isAllResources = savedStatementGroup.isAllResources;
 
-          const savedMap = new Map(savedStatementGroup.statements.map(stmt => [stmt.action.id, stmt]));
+          const allActions = savedStatementGroup.statements.find(stmt => stmt.action.name === '*');
 
-          // Mark statements as checked if they exist in saved permissions
-          statementGroup.statements.forEach(stmt => {
-            const saved = savedMap.get(stmt.action.id);
-            if (saved) {
+          if(allActions) {
+            statementGroup.statements.forEach(stmt => {
               stmt.checked = true;
-              stmt.resources = saved.resources;
-            } else {
-              stmt.checked = false;
-            }
-          });
+              stmt.resources = allActions.resources;
+            });
+          } else {
+            const savedMap = new Map(savedStatementGroup.statements.map(stmt => [stmt.action.id, stmt]));
+
+            // Mark statements as checked if they exist in saved permissions
+            statementGroup.statements.forEach(stmt => {
+              const saved = savedMap.get(stmt.action.id);
+              if (saved) {
+                stmt.checked = true;
+                stmt.resources = saved.resources;
+              } else {
+                stmt.checked = false;
+              }
+            });
+          }
         } else {
           // If resource type not in saved permissions, mark all as unchecked
           statementGroup.statements.forEach(stmt => {
@@ -110,7 +119,7 @@ export class AccessTokenDrawerComponent implements OnInit {
       .map(rt => ({
         ...rt,
         isResourceEditorVisible: false,
-        isConfigurable: [ResourceTypeEnum.Flag, ResourceTypeEnum.Project, ResourceTypeEnum.Env].some(x => x === rt.type)
+        isConfigurable: [ResourceTypeEnum.Flag, ResourceTypeEnum.Segment, ResourceTypeEnum.Project, ResourceTypeEnum.Env].some(x => x === rt.type)
       }));
   }
 
@@ -131,14 +140,13 @@ export class AccessTokenDrawerComponent implements OnInit {
     private message: NzMessageService,
     private permissionLicenseService: PermissionLicenseService
   ) {
+    this.fineGrainedAccessControlEnabled = this.permissionLicenseService.isGrantedByLicense(LicenseFeatureEnum.FineGrainedAccessControl);
+    this.canTakeActionOnPersonalAccessToken = this.permissionsService.isGranted(generalResourceRNPattern.accessToken, permissionActions.ManagePersonalAccessTokens);
+    this.canTakeActionOnServiceAccessToken = this.permissionsService.isGranted(generalResourceRNPattern.accessToken, permissionActions.ManageServiceAccessTokens);
   }
 
   ngOnInit(): void {
     this.initForm('', AccessTokenTypeEnum.Personal);
-
-    this.fineGrainedAccessControlEnabled = this.permissionLicenseService.isGrantedByLicense(LicenseFeatureEnum.FineGrainedAccessControl);
-    this.canTakeActionOnPersonalAccessToken = this.permissionsService.isGranted(generalResourceRNPattern.accessToken, permissionActions.ManagePersonalAccessTokens);
-    this.canTakeActionOnServiceAccessToken = this.permissionsService.isGranted(generalResourceRNPattern.accessToken, permissionActions.ManageServiceAccessTokens);
   }
 
   private initForm(name: string, type: AccessTokenTypeEnum) {
@@ -152,8 +160,14 @@ export class AccessTokenDrawerComponent implements OnInit {
     });
   }
 
+  isResourceDisabled(statementGroup: PermissionStatementGroup) {
+    const hasEnabledActions = statementGroup.statements.some(s => !this.isActionDisabled(s.action));
+    return !hasEnabledActions;
+  }
+
   isActionDisabled(act: IamPolicyAction): boolean {
-    return act.isFineGrainedAction && !this.fineGrainedAccessControlEnabled;
+    const isActionAuthorized = this.authorizedPermissionActions.some((r) => r.resourceType === act.resourceType && r.actions.includes(act.name));
+    return !isActionAuthorized || (act.isFineGrainedAction && !this.fineGrainedAccessControlEnabled);
   }
 
   isServiceAccessToken: boolean = false
@@ -168,45 +182,75 @@ export class AccessTokenDrawerComponent implements OnInit {
     this.close.emit();
   }
 
-  setAuthorizedPermissions() {
+  private _authorizedPermissionActions;
+
+  get authorizedPermissionActions() {
+    if (this._authorizedPermissionActions) {
+      return this._authorizedPermissionActions;
+    }
+
     const hasOwnerPolicy = this.permissionsService.userPolicies.some((policy) => policy.name === 'Owner' && policy.type === PolicyTypeEnum.SysManaged);
 
     let permissions;
     if (hasOwnerPolicy) {
       permissions = Object.keys(permissionActions)
-        .filter(act => {
-          if (this.fineGrainedAccessControlEnabled) {
-            return act !== 'FlagAllActions'
-          }
+      .filter(act => {
+        if (this.fineGrainedAccessControlEnabled) {
+          return act !== 'FlagAllActions' && act !== 'SegmentAllActions';
+        }
 
-          return !permissionActions[act].isFineGrainedAction;
-        })
-        .map((property) => {
-          const {resourceType, name} = permissionActions[property];
-          return {
-            id: uuidv4(),
-            resourceType,
-            effect: EffectEnum.Allow,
-            actions: [name],
-            resources: [generalResourceRNPattern[resourceType]]
-          }
-        })
+        return !permissionActions[act].isFineGrainedAction;
+      })
+      .map((property) => {
+        const {resourceType, name} = permissionActions[property];
+        return {
+          id: uuidv4(),
+          resourceType,
+          effect: EffectEnum.Allow,
+          actions: [name],
+          resources: [generalResourceRNPattern[resourceType]]
+        }
+      })
     } else {
       permissions = this.permissionsService.userPermissions.map(p => {
-        if (this.fineGrainedAccessControlEnabled && p.resourceType === ResourceTypeEnum.Flag) {
-          if(p.actions.some((action) => action === '*')) {
+        if (this.fineGrainedAccessControlEnabled && (p.resourceType === ResourceTypeEnum.Flag || p.resourceType === ResourceTypeEnum.Segment)) {
+          if (p.actions.some((action) => action === '*')) {
             return {
               ...p,
               actions: Object.values(permissionActions)
-              .filter(act => act.resourceType === ResourceTypeEnum.Flag && act.name !== '*' && act.isFineGrainedAction)
+              .filter(act => act.resourceType === p.resourceType && act.name !== '*' && act.isFineGrainedAction)
               .map(act => act.name),
             };
           }
         }
 
-        return {...p};
+        return { ...p };
       });
     }
+
+    this._authorizedPermissionActions = permissions.filter((permission) => this.resourceTypes.some((rt) => rt.type === permission.resourceType));
+    return this._authorizedPermissionActions;
+  }
+
+  loadAllPermissionActions() {
+    const permissions = Object.keys(permissionActions)
+      .filter(act => {
+        if (this.fineGrainedAccessControlEnabled) {
+          return act !== 'FlagAllActions' && act !== 'SegmentAllActions';
+        }
+
+        return !permissionActions[act].isFineGrainedAction;
+      })
+      .map((property) => {
+        const {resourceType, name} = permissionActions[property];
+        return {
+          id: uuidv4(),
+          resourceType,
+          effect: EffectEnum.Allow,
+          actions: [name],
+          resources: [generalResourceRNPattern[resourceType]]
+        }
+      })
 
     return permissions.filter((permission) => this.resourceTypes.some((rt) => rt.type === permission.resourceType));
   }
@@ -226,18 +270,31 @@ export class AccessTokenDrawerComponent implements OnInit {
   }
 
   updatePermissionsAllChecked(statementGroup: PermissionStatementGroup) {
-    statementGroup.indeterminate = false;
     if (statementGroup.allChecked) {
-      statementGroup.statements = statementGroup.statements.map(item => ({
-        ...item,
-        checked: true
-      }));
+      statementGroup.statements = statementGroup.statements.map(item => {
+        if (this.isActionDisabled(item.action)) {
+          return item;
+        }
+
+        return {
+          ...item,
+          checked: true
+        };
+      });
     } else {
-      statementGroup.statements = statementGroup.statements.map(item => ({
-        ...item,
-        checked: false
-      }));
+      statementGroup.statements = statementGroup.statements.map(item => {
+        if (this.isActionDisabled(item.action)) {
+          return item;
+        }
+
+        return {
+          ...item,
+          checked: false
+        };
+      });
     }
+
+    this.updatePermissionSingleChecked(statementGroup);
   }
 
   updatePermissionSingleChecked(statementGroup: PermissionStatementGroup) {
@@ -249,6 +306,7 @@ export class AccessTokenDrawerComponent implements OnInit {
       statementGroup.indeterminate = false;
     } else {
       statementGroup.indeterminate = true;
+      statementGroup.allChecked = false;
     }
   }
 

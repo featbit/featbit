@@ -79,7 +79,15 @@ export class SettingComponent {
     }
   }
 
-  onRemoveTag(tag: string) {
+  onRemoveTag(event: MouseEvent, tag: string) {
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.UpdateFlagTags);
+    if (!isGranted) {
+      this.message.warning(this.permissionsService.genericDenyMessage);
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+
     this.featureFlag.removeTag(tag);
     this.featureFlagService.setTags(this.featureFlag.key, this.featureFlag.tags).subscribe(_ => {
       this.message.success($localize`:@@common.operation-success:Operation succeeded`);

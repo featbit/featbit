@@ -8,10 +8,15 @@ import {
   ISegment,
   ISegmentListModel,
   ISegmentFlagReference,
-  SegmentType
-} from "../types/segments-index";
+  SegmentType,
+  getSegmentRN
+} from "../types/segments";
 import { SegmentService } from "@services/segment.service";
 import { debounceTime } from 'rxjs/operators';
+import { getCurrentEnvRN } from "@utils/project-env";
+import { permissionActions } from "@shared/policy";
+import { PermissionLicenseService } from "@services/permission-license.service";
+import { PermissionsService } from "@services/permissions.service";
 
 @Component({
     selector: 'segments-index',
@@ -27,7 +32,24 @@ export class IndexComponent implements OnInit {
   currentDeletingArchivingSegment: ISegment;
   currentDeletingArchivingSegmentFlagReferences: ISegmentFlagReference[] = [];
 
+  constructor(
+    private router: Router,
+    private segmentService: SegmentService,
+    private msg: NzMessageService,
+    private permissionsService: PermissionsService,
+    private permissionLicenseService: PermissionLicenseService,
+  ) { }
+
   deleteArchiveValidation(segment: ISegment, isDelete: boolean) {
+    const action = isDelete ? permissionActions.DeleteSegment : permissionActions.ArchiveSegment;
+    const rn = getSegmentRN(segment.key, segment.tags || []);
+
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(rn, action);
+    if (!isGranted) {
+      this.msg.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
     this.isDelete = isDelete;
     this.currentDeletingArchivingSegment = segment;
     this.currentDeletingArchivingSegmentFlagReferences = [];
@@ -38,6 +60,13 @@ export class IndexComponent implements OnInit {
   }
 
   restore(segment: ISegment) {
+    const rn = getSegmentRN(segment.key, segment.tags);
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(rn, permissionActions.RestoreSegment);
+    if (!isGranted) {
+      this.msg.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
     this.segmentService.restore(segment.id).subscribe({
       next: () => {
         this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
@@ -129,12 +158,6 @@ export class IndexComponent implements OnInit {
   }
 
   //#endregion
-  constructor(
-    private router: Router,
-    private segmentService: SegmentService,
-    private msg: NzMessageService
-  ) { }
-
   ngOnInit(): void {
     this.subscribeSearch();
     this.$search.next();
@@ -154,8 +177,15 @@ export class IndexComponent implements OnInit {
 
   creationModalVisible: boolean = false;
   showCreationModal() {
+    const rnPrefix = getCurrentEnvRN();
+    const isGranted = !!rnPrefix && this.permissionLicenseService.isGrantedByLicenseAndPermission(`${rnPrefix}:segment/*`, permissionActions.CreateSegment);
+    if (!isGranted) {
+      this.msg.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
     this.creationModalVisible = true;
   }
+
   closeCreationModal(segment: ISegment) {
     this.creationModalVisible = false;
     if (segment) {

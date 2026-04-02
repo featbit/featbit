@@ -1,4 +1,4 @@
-import { ISegment, SegmentType } from "@features/safe/segments/types/segments-index";
+import { ISegment, SegmentType } from "@features/safe/segments/types/segments";
 import { IFeatureFlag, VariationTypeEnum } from "@features/safe/feature-flags/types/details";
 import Handlebars from 'handlebars/lib/handlebars';
 import { getCurrentOrganization, getCurrentProjectEnv } from "@utils/project-env";
