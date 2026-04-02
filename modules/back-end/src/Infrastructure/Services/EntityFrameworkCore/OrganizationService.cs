@@ -30,7 +30,7 @@ public class OrganizationService(AppDbContext dbContext, IProjectService project
         return aggregation.ToArray();
     }
 
-    public async Task<ICollection<Organization>> GetListAsync(Guid userId)
+    public async Task<ICollection<Organization>> GetUserOrganizationsAsync(Guid workspaceId, Guid userId)
     {
         var organizations = QueryableOf<Organization>();
         var users = QueryableOf<OrganizationUser>();
@@ -39,7 +39,7 @@ public class OrganizationService(AppDbContext dbContext, IProjectService project
             from organization in organizations
             join user in users
                 on organization.Id equals user.OrganizationId
-            where user.UserId == userId
+            where user.UserId == userId && organization.WorkspaceId == workspaceId
             select organization;
 
         return await query.ToListAsync();
@@ -94,24 +94,6 @@ public class OrganizationService(AppDbContext dbContext, IProjectService project
         }
 
         await SaveChangesAsync();
-    }
-
-    public async Task RemoveUserAsync(Guid organizationId, Guid userId)
-    {
-        // delete organization user
-        await SetOf<OrganizationUser>()
-            .Where(x => x.OrganizationId == organizationId && x.UserId == userId)
-            .ExecuteDeleteAsync();
-
-        // delete member policies
-        await SetOf<MemberPolicy>()
-            .Where(x => x.OrganizationId == organizationId && x.MemberId == userId)
-            .ExecuteDeleteAsync();
-
-        // delete member groups
-        await SetOf<GroupMember>()
-            .Where(x => x.OrganizationId == organizationId && x.MemberId == userId)
-            .ExecuteDeleteAsync();
     }
 
     public async Task DeleteAsync(Guid id)

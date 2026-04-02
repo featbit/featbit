@@ -6,6 +6,7 @@ import { Router } from "@angular/router";
 import { IS_SSO_FIRST_LOGIN, LOGIN_REDIRECT_URL } from "@utils/localstorage-keys";
 import { getProfile } from "@utils/index";
 import { NzMessageService } from "ng-zorro-antd/message";
+import { MemberService } from "@services/member.service";
 
 @Component({
     selector: 'select-organization',
@@ -21,8 +22,9 @@ export class SelectOrganizationComponent {
 
   constructor(
     private router: Router,
-    private organizationService: OrganizationService,
     private message: NzMessageService,
+    private organizationService: OrganizationService,
+    private memberService: MemberService,
     private identityService: IdentityService) {
     this.organizations = organizationService.organizations;
     this.profile = getProfile();
@@ -34,7 +36,7 @@ export class SelectOrganizationComponent {
 
   async setOrganization(organization: any) {
     this.organizationService.switchOrganization(organization);
-    this.organizationService.addUser({ method: 'Email', email: this.profile.email, policyIds: [], groupIds: [] }).subscribe(
+    this.memberService.addMember({ email: this.profile.email, policyIds: [], groupIds: [] }).subscribe(
       async () => {
         localStorage.removeItem(IS_SSO_FIRST_LOGIN);
         const redirectUrl = localStorage.getItem(LOGIN_REDIRECT_URL);

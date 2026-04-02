@@ -3,24 +3,39 @@ using Application.Users;
 using Domain.Organizations;
 using Domain.Users;
 
-namespace Application.Organizations;
+namespace Application.Members;
 
-public class AddUser : IRequest<bool>
+public class AddMember : IRequest<bool>
 {
+    /// <summary>
+    /// The ID of the workspace to which the user belongs. Retrieved from the request header.
+    /// </summary>
     public Guid WorkspaceId { get; set; }
 
+    /// <summary>
+    /// The ID of the organization to which the user will be added. Retrieved from the request header.
+    /// </summary>
     public Guid OrganizationId { get; set; }
 
+    /// <summary>
+    /// The email of the user to be added to the organization.
+    /// </summary>
     public string Email { get; set; }
 
+    /// <summary>
+    /// The IDs of the initial policies to assign to the user.
+    /// </summary>
     public ICollection<Guid> PolicyIds { get; set; } = [];
 
+    /// <summary>
+    /// The IDs of the initial groups to assign to the user.
+    /// </summary>
     public ICollection<Guid> GroupIds { get; set; } = [];
 }
 
-public class AddUserValidator : AbstractValidator<AddUser>
+public class AddMemberValidator : AbstractValidator<AddMember>
 {
-    public AddUserValidator()
+    public AddMemberValidator()
     {
         RuleFor(x => x.Email)
             .NotEmpty().WithErrorCode(ErrorCodes.Required("email"))
@@ -28,14 +43,14 @@ public class AddUserValidator : AbstractValidator<AddUser>
     }
 }
 
-public class AddUserHandler(
+public class AddMemberHandler(
     IOrganizationService organizationService,
     IUserService userService,
     IIdentityService identityService,
     ICurrentUser currentUser)
-    : IRequestHandler<AddUser, bool>
+    : IRequestHandler<AddMember, bool>
 {
-    public async Task<bool> Handle(AddUser request, CancellationToken cancellationToken)
+    public async Task<bool> Handle(AddMember request, CancellationToken cancellationToken)
     {
         var email = request.Email;
 

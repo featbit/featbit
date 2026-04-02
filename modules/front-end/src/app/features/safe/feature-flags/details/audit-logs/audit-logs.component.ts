@@ -17,8 +17,7 @@ export class AuditLogsComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private featureFlagService: FeatureFlagService,
-  ) {
-  }
+  ) { }
 
   ngOnInit(): void {
     this.route.paramMap.subscribe( paramMap => {

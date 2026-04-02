@@ -31,7 +31,7 @@ public class OrganizationService(MongoDbClient mongoDb, IProjectService projectS
         return aggregation.ToArray();
     }
 
-    public async Task<ICollection<Organization>> GetListAsync(Guid userId)
+    public async Task<ICollection<Organization>> GetUserOrganizationsAsync(Guid workspaceId, Guid userId)
     {
         var organizations = MongoDb.QueryableOf<Organization>();
         var users = MongoDb.QueryableOf<OrganizationUser>();
@@ -40,7 +40,7 @@ public class OrganizationService(MongoDbClient mongoDb, IProjectService projectS
             from organization in organizations
             join user in users
                 on organization.Id equals user.OrganizationId
-            where user.UserId == userId
+            where user.UserId == userId && organization.WorkspaceId == workspaceId
             select organization;
 
         return await query.ToListAsync();
@@ -93,24 +93,6 @@ public class OrganizationService(MongoDbClient mongoDb, IProjectService projectS
 
             await MongoDb.CollectionOf<GroupMember>().InsertManyAsync(groupMembers);
         }
-    }
-
-    public async Task RemoveUserAsync(Guid organizationId, Guid userId)
-    {
-        // delete organization user
-        await MongoDb.CollectionOf<OrganizationUser>().DeleteManyAsync(
-            x => x.OrganizationId == organizationId && x.UserId == userId
-        );
-
-        // delete member policies
-        await MongoDb.CollectionOf<MemberPolicy>().DeleteManyAsync(
-            x => x.OrganizationId == organizationId && x.MemberId == userId
-        );
-
-        // delete member groups
-        await MongoDb.CollectionOf<GroupMember>().DeleteManyAsync(
-            x => x.OrganizationId == organizationId && x.MemberId == userId
-        );
     }
 
     public async Task DeleteAsync(Guid id)

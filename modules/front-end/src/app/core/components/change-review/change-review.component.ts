@@ -11,8 +11,9 @@ import { License, LicenseFeatureEnum } from "@shared/types";
 import { getCurrentLicense } from "@utils/project-env";
 import { BehaviorSubject } from "rxjs";
 import { debounceTime } from "rxjs/operators";
-import { TeamService } from "@services/team.service";
 import { getProfile } from "@utils/index";
+import { OrganizationService } from "@services/organization.service";
+import { MemberFilter } from "@features/safe/iam/types/member";
 
 @Component({
   selector: 'change-review',
@@ -41,7 +42,7 @@ export class ChangeReviewComponent implements OnChanges, OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private teamService: TeamService,
+    private organizationService: OrganizationService,
     private auditLogService: AuditLogService
   ) { }
 
@@ -52,7 +53,7 @@ export class ChangeReviewComponent implements OnChanges, OnInit {
     this.memberSearchChange$.pipe(
       debounceTime(500)
     ).subscribe(searchText => {
-      this.teamService.search(searchText).subscribe({
+      this.organizationService.getMemberList(new MemberFilter(searchText)).subscribe({
         next: (result) => {
           this.memberList = result.items.filter(itm => itm.id !== profile.id);
           this.isMemberLoading = false;

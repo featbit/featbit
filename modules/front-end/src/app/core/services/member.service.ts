@@ -50,6 +50,11 @@ export class MemberService {
     );
   }
 
+  addMember(params: any): Observable<any> {
+    const url = `${this.baseUrl}/add`;
+    return this.http.post<boolean>(url, params);
+  }
+
   deleteFromOrg(id: string): Observable<boolean> {
     return this.http.delete<boolean>(`${this.baseUrl}/remove-from-org/${id}`);
   }

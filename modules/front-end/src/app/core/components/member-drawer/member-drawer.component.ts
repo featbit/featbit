@@ -6,8 +6,8 @@ import { PolicyService } from "@services/policy.service";
 import { IPagedPolicy, PolicyFilter } from "@features/safe/iam/types/policy";
 import { GroupListFilter, IPagedGroup } from "@features/safe/iam/types/group";
 import { GroupService } from "@services/group.service";
-import {OrganizationService} from "@services/organization.service";
 import { finalize } from "rxjs/operators";
+import { MemberService } from "@services/member.service";
 
 @Component({
     selector: 'app-member-drawer',
@@ -34,7 +34,7 @@ export class MemberDrawerComponent implements OnInit {
   form: FormGroup;
 
   private formBuilder: FormBuilder = inject(FormBuilder);
-  private organizationService: OrganizationService = inject(OrganizationService);
+  private memberService: MemberService = inject(MemberService);
   private message: NzMessageService = inject(NzMessageService);
   private policyService: PolicyService = inject(PolicyService);
   private groupService: GroupService = inject(GroupService);
@@ -109,7 +109,7 @@ export class MemberDrawerComponent implements OnInit {
     }
 
     this.isAddingUser = true;
-    this.organizationService.addUser(payload)
+    this.memberService.addMember(payload)
     .pipe(finalize(() => this.isAddingUser = false))
     .subscribe({
       next: () => {
