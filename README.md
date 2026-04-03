@@ -18,13 +18,13 @@
     </div>
     <div id="badges">
     <a href="https://dotnet.microsoft.com/">
-      <img src="https://img.shields.io/badge/.NET-%3E=6.0-6E359E?style=flat-square&logo=csharp&logoColor=white"/>
+      <img src="https://img.shields.io/badge/.NET-8.0-6E359E?style=flat-square&logo=csharp&logoColor=white"/>
     </a>
     <a href="https://www.python.org/">
       <img src="https://img.shields.io/badge/Python-%3E=3.9-FFDD53?style=flat-square&logo=python&logoColor=white"/>
     </a>
     <a href="https://angular.io/">
-      <img src="https://img.shields.io/badge/Angular-16.0-DD0031?style=flat-square&logo=angular&logoColor=white"/>
+      <img src="https://img.shields.io/badge/Angular-19.0-DD0031?style=flat-square&logo=angular&logoColor=white"/>
     </a>
   </div>
 
