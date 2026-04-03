@@ -15,7 +15,7 @@
             <span i18n="@@common.zero-org-info">You don't have any organization yet. Please contact your admin to add you to an organization.</span>
           </div>
         }
-        @if (organizations.length > 1) {
+        @if (organizations.length >= 1) {
           <div class="orgs-wrapper">
             <div class="title" i18n="@@common.select-an-organization">Select an organization</div>
             <ul nz-list [nzDataSource]="organizations" nzBordered nzSize="large" class="org-list">

@@ -6,6 +6,7 @@ import { Router } from "@angular/router";
 import { IS_SSO_FIRST_LOGIN, LOGIN_REDIRECT_URL } from "@utils/localstorage-keys";
 import { getProfile } from "@utils/index";
 import { NzMessageService } from "ng-zorro-antd/message";
+import { UserService } from "@services/user.service";
 
 @Component({
     selector: 'select-organization',
@@ -24,7 +25,8 @@ export class SelectOrganizationComponent {
     private router: Router,
     private message: NzMessageService,
     private organizationService: OrganizationService,
-    private identityService: IdentityService) {
+    private identityService: IdentityService,
+    private userService: UserService) {
     this.organizations = organizationService.organizations;
     this.profile = getProfile();
 
@@ -36,7 +38,7 @@ export class SelectOrganizationComponent {
   setOrganization(organization: any) {
     this.isLoading = true;
     this.organizationService.switchOrganization(organization);
-    this.organizationService.addMember({ email: this.profile.email, policyIds: [], groupIds: [] }).subscribe({
+    this.userService.joinOrganization().subscribe({
       next: () => {
         localStorage.removeItem(IS_SSO_FIRST_LOGIN);
         const redirectUrl = localStorage.getItem(LOGIN_REDIRECT_URL);
@@ -47,7 +49,10 @@ export class SelectOrganizationComponent {
           this.router.navigateByUrl(`/`).then(() => this.isLoading = false);
         }
       },
-      error: _ => this.message.error($localize `:@@common.error-happened-please-relogin:Error happened, please login again!` )
+      error: _ => {
+        this.message.error($localize`:@@common.error-happened-please-relogin:Error happened, please login again!`);
+        this.isLoading = false;
+      }
     });
   }
 

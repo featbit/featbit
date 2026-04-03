@@ -10,6 +10,8 @@ public interface IOrganizationService : IService<Organization>
 
     Task<bool> HasKeyBeenUsedAsync(Guid workspaceId, string key);
 
+    Task<bool> ContainsUserAsync(Guid organizationId, Guid userId);
+
     Task AddUserAsync(
         OrganizationUser organizationUser,
         ICollection<Guid> policies = null,

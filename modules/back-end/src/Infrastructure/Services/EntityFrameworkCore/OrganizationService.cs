@@ -53,6 +53,15 @@ public class OrganizationService(AppDbContext dbContext, IProjectService project
         );
     }
 
+    public async Task<bool> ContainsUserAsync(Guid organizationId, Guid userId)
+    {
+        var exists = await QueryableOf<OrganizationUser>().AnyAsync(
+            x => x.OrganizationId == organizationId && x.UserId == userId
+        );
+
+        return exists;
+    }
+
     public async Task AddUserAsync(
         OrganizationUser organizationUser,
         ICollection<Guid>? policies,
@@ -61,11 +70,9 @@ public class OrganizationService(AppDbContext dbContext, IProjectService project
         var organizationId = organizationUser.OrganizationId;
         var userId = organizationUser.UserId;
 
-        // if organization user already exists
-        var existingUser = await QueryableOf<OrganizationUser>().FirstOrDefaultAsync(
-            x => x.OrganizationId == organizationId && x.UserId == userId
-        );
-        if (existingUser != null)
+        // if user is already in organization, do nothing
+        var exists = await ContainsUserAsync(organizationId, userId);
+        if (exists)
         {
             return;
         }

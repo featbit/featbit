@@ -54,6 +54,15 @@ public class OrganizationService(MongoDbClient mongoDb, IProjectService projectS
         );
     }
 
+    public async Task<bool> ContainsUserAsync(Guid organizationId, Guid userId)
+    {
+        var exists = await MongoDb.QueryableOf<OrganizationUser>().AnyAsync(
+            x => x.OrganizationId == organizationId && x.UserId == userId
+        );
+
+        return exists;
+    }
+
     public async Task AddUserAsync(
         OrganizationUser organizationUser,
         ICollection<Guid>? policies,
@@ -62,11 +71,9 @@ public class OrganizationService(MongoDbClient mongoDb, IProjectService projectS
         var organizationId = organizationUser.OrganizationId;
         var userId = organizationUser.UserId;
 
-        // if organization user already exists
-        var existingUser = await MongoDb.QueryableOf<OrganizationUser>().FirstOrDefaultAsync(
-            x => x.OrganizationId == organizationId && x.UserId == userId
-        );
-        if (existingUser != null)
+        // if user is already in organization, do nothing
+        var exists = await ContainsUserAsync(organizationId, userId);
+        if (exists)
         {
             return;
         }
