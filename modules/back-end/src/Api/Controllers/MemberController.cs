@@ -40,10 +40,6 @@ public class MemberController : ApiControllerBase
     /// If neither <c>policyIds</c> nor <c>groupIds</c> are provided, the organization's default permissions
     /// are applied to the new member.
     /// </remarks>
-    /// <param name="request">
-    /// The request body. <c>email</c> is required. <c>policyIds</c> and <c>groupIds</c> are optional;
-    /// omit both to apply the organization's default permissions.
-    /// </param>
     [OpenApi]
     [HttpPost("add")]
     public async Task<ApiResponse<bool>> AddMemberAsync([FromBody] AddMember request)
