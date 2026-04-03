@@ -4225,13 +4225,13 @@
         </context-group>
         <target>加入</target>
       </trans-unit>
-      <trans-unit id="guide.slack-chaneel" datatype="html">
-        <source>Slack Channel</source>
+      <trans-unit id="guide.discord-channel" datatype="html">
+        <source>Discord Channel</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/guide/guide.component.html</context>
           <context context-type="linenumber">57,58</context>
         </context-group>
-        <target>Slack</target>
+        <target>Discord</target>
       </trans-unit>
       <trans-unit id="guide.for-discussions" datatype="html">
         <source>for discussions</source>
