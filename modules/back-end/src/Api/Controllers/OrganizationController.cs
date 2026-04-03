@@ -56,6 +56,17 @@ public class OrganizationController : ApiControllerBase
         return Ok(organization);
     }
 
+    [HttpPost("add-member")]
+    public async Task<ApiResponse<bool>> AddMemberAsync([FromBody] AddMember request)
+    {
+        request.WorkspaceId = WorkspaceId;
+        request.OrganizationId = OrgId;
+
+        var success = await Mediator.Send(request);
+
+        return Ok(success);
+    }
+
     [HttpGet("members")]
     public async Task<ApiResponse<PagedResult<MemberVm>>> GetMembersAsync([FromQuery] MemberFilter filter)
     {

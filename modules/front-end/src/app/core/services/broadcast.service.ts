@@ -70,7 +70,7 @@ export class BroadcastService {
   }
 
   private reloadPageAfterEnvironmentChanged() {
-    const { protocol, host, pathname } = window.location;
+    const { protocol, host } = window.location;
 
     const basePath = document.querySelector('base')?.getAttribute('href')?.split('/') ?? [];
     let path = this.router.url.split('/').slice(0, 2);

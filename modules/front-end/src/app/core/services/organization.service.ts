@@ -7,7 +7,7 @@ import { ProjectService } from './project.service';
 import { CURRENT_ORGANIZATION } from "@utils/localstorage-keys";
 import { catchError } from "rxjs/operators";
 import { UpdateOrganizationPayload } from "@features/safe/workspaces/types/organization";
-import { IMemberListModel, MemberFilter } from "@features/safe/iam/types/member";
+import { AddMemberPayload, IMemberListModel, MemberFilter } from "@features/safe/iam/types/member";
 
 @Injectable({
   providedIn: 'root'
@@ -38,6 +38,11 @@ export class OrganizationService {
 
   update(payload: UpdateOrganizationPayload): Observable<any> {
     return this.http.put(this.baseUrl, payload);
+  }
+
+  addMember(payload: AddMemberPayload): Observable<any> {
+    const url = `${this.baseUrl}/add-member`;
+    return this.http.post<boolean>(url, payload);
   }
 
   getMemberList(filter: MemberFilter = new MemberFilter()): Observable<IMemberListModel> {

@@ -8,7 +8,8 @@ import {
   IPagedMemberGroup, IPagedMemberPolicy,
   MemberFilter,
   MemberGroupFilter,
-  MemberPolicyFilter
+  MemberPolicyFilter,
+  AddMemberPayload
 } from "@features/safe/iam/types/member";
 import { IPolicy } from "@features/safe/iam/types/policy";
 
@@ -50,9 +51,9 @@ export class MemberService {
     );
   }
 
-  addMember(params: any): Observable<any> {
+  addMember(payload: AddMemberPayload): Observable<any> {
     const url = `${this.baseUrl}/add`;
-    return this.http.post<boolean>(url, params);
+    return this.http.post<boolean>(url, payload);
   }
 
   deleteFromOrg(id: string): Observable<boolean> {

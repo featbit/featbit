@@ -73,7 +73,7 @@ public class AddMemberHandler(
         }
 
         // if no policies or groups are specified, use the organization's default permissions
-        if (!request.PolicyIds.Any() && !request.GroupIds.Any())
+        if (request.PolicyIds.Count == 0 && request.GroupIds.Count == 0)
         {
             var organization = await organizationService.GetAsync(request.OrganizationId);
             request.PolicyIds = organization.DefaultPermissions.PolicyIds;

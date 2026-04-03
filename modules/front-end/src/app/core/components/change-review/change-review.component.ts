@@ -9,7 +9,7 @@ import { AuditLogService } from "@services/audit-log.service";
 import { IInstruction } from "@core/components/change-list/instructions/types";
 import { License, LicenseFeatureEnum } from "@shared/types";
 import { getCurrentLicense } from "@utils/project-env";
-import { BehaviorSubject } from "rxjs";
+import { Subject } from "rxjs";
 import { debounceTime } from "rxjs/operators";
 import { getProfile } from "@utils/index";
 import { OrganizationService } from "@services/organization.service";
@@ -203,7 +203,7 @@ export class ChangeReviewComponent implements OnChanges, OnInit {
     }
   }
 
-  memberSearchChange$ = new BehaviorSubject('');
+  memberSearchChange$ = new Subject<string>();
   isMemberLoading = false;
   memberList: any[];
   onSearchMember(value: string) {
