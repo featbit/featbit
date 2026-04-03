@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { copyToClipboard, encodeURIComponentFfc, getProfile } from '@utils/index';
+import { copyToClipboard, getProfile } from '@utils/index';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
-import { Router } from "@angular/router";
 import { NzMessageService } from "ng-zorro-antd/message";
 import { MemberService } from "@services/member.service";
 import { IMember, IMemberListModel, MemberFilter, memberRn } from "@features/safe/iam/types/member";
@@ -20,7 +19,6 @@ export class IndexComponent implements OnInit {
   }
 
   constructor(
-    private router: Router,
     private message: NzMessageService,
     private memberService: MemberService
   ) { }

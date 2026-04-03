@@ -39,4 +39,8 @@ export class UserService {
   getPolicies(): Observable<IPolicy[]> {
     return this.http.get<IPolicy[]>(`${this.baseUrl}/policies`);
   }
+
+  joinOrganization(): Observable<boolean> {
+    return this.http.post<boolean>(`${this.baseUrl}/join-organization`, {});
+  }
 }

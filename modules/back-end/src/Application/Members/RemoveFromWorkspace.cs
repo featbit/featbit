@@ -7,33 +7,24 @@ public class RemoveFromWorkspace : IRequest<bool>
     public Guid MemberId { get; set; }
 }
 
-public class RemoveFromWorkspaceHandler : IRequestHandler<RemoveFromWorkspace, bool>
+public class RemoveFromWorkspaceHandler(
+    IUserService userService,
+    IOrganizationService organizationService,
+    IMemberService memberService)
+    : IRequestHandler<RemoveFromWorkspace, bool>
 {
-    private readonly IUserService _userService;
-    private readonly IOrganizationService _organizationService;
-    private readonly IMemberService _memberService;
-
-    public RemoveFromWorkspaceHandler(
-        IUserService userService,
-        IOrganizationService organizationService,
-        IMemberService memberService)
-    {
-        _userService = userService;
-        _organizationService = organizationService;
-        _memberService = memberService;
-    }
-
     public async Task<bool> Handle(RemoveFromWorkspace request, CancellationToken cancellationToken)
     {
-        // remove member from all organizations
-        var organizations = await _organizationService.GetListAsync(request.MemberId);
+        // remove member from all organizations within the workspace
+        var organizations = 
+            await organizationService.GetUserOrganizationsAsync(request.WorkspaceId, request.MemberId);
         foreach (var organization in organizations)
         {
-            await _memberService.DeleteAsync(organization.Id, request.MemberId);
+            await memberService.DeleteAsync(organization.Id, request.MemberId);
         }
 
         // remove member from workspace
-        await _userService.DeleteOneAsync(request.MemberId);
+        await userService.DeleteOneAsync(request.MemberId);
 
         return true;
     }

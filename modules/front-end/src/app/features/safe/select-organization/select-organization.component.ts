@@ -6,6 +6,7 @@ import { Router } from "@angular/router";
 import { IS_SSO_FIRST_LOGIN, LOGIN_REDIRECT_URL } from "@utils/localstorage-keys";
 import { getProfile } from "@utils/index";
 import { NzMessageService } from "ng-zorro-antd/message";
+import { UserService } from "@services/user.service";
 
 @Component({
     selector: 'select-organization',
@@ -18,12 +19,14 @@ export class SelectOrganizationComponent {
   menuExtended: boolean = false;
   organizations: IOrganization[] = [];
   profile: IProfile = null;
+  isLoading: boolean = false;
 
   constructor(
     private router: Router,
-    private organizationService: OrganizationService,
     private message: NzMessageService,
-    private identityService: IdentityService) {
+    private organizationService: OrganizationService,
+    private identityService: IdentityService,
+    private userService: UserService) {
     this.organizations = organizationService.organizations;
     this.profile = getProfile();
 
@@ -32,23 +35,25 @@ export class SelectOrganizationComponent {
     }
   }
 
-  async setOrganization(organization: any) {
+  setOrganization(organization: any) {
+    this.isLoading = true;
     this.organizationService.switchOrganization(organization);
-    this.organizationService.addUser({ method: 'Email', email: this.profile.email, policyIds: [], groupIds: [] }).subscribe(
-      async () => {
+    this.userService.joinOrganization().subscribe({
+      next: () => {
         localStorage.removeItem(IS_SSO_FIRST_LOGIN);
         const redirectUrl = localStorage.getItem(LOGIN_REDIRECT_URL);
         if (redirectUrl) {
           localStorage.removeItem(LOGIN_REDIRECT_URL);
-          await this.router.navigateByUrl(redirectUrl);
+          this.router.navigateByUrl(redirectUrl).then(() => this.isLoading = false);
         } else {
-          await this.router.navigateByUrl(`/`);
+          this.router.navigateByUrl(`/`).then(() => this.isLoading = false);
         }
       },
-      _ => {
-        this.message.error($localize `:@@common.error-happened-please-relogin:Error happened, please login again!` );
+      error: _ => {
+        this.message.error($localize`:@@common.error-happened-please-relogin:Error happened, please login again!`);
+        this.isLoading = false;
       }
-    )
+    });
   }
 
   toggleMenu(extended: boolean) {

@@ -666,11 +666,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.ts</context>
-          <context context-type="linenumber">242</context>
+          <context context-type="linenumber">243</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.ts</context>
-          <context context-type="linenumber">259</context>
+          <context context-type="linenumber">260</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/pending-changes-drawer/pending-changes-drawer.component.ts</context>
@@ -850,19 +850,19 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.ts</context>
-          <context context-type="linenumber">70</context>
+          <context context-type="linenumber">68</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.ts</context>
-          <context context-type="linenumber">81</context>
+          <context context-type="linenumber">79</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.ts</context>
-          <context context-type="linenumber">141</context>
+          <context context-type="linenumber">140</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.ts</context>
-          <context context-type="linenumber">152</context>
+          <context context-type="linenumber">151</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.ts</context>
@@ -930,7 +930,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.ts</context>
-          <context context-type="linenumber">245</context>
+          <context context-type="linenumber">246</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/organization-drawer/organization-drawer.component.ts</context>
@@ -1070,7 +1070,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.ts</context>
-          <context context-type="linenumber">103</context>
+          <context context-type="linenumber">101</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.ts</context>
@@ -1311,6 +1311,10 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.html</context>
           <context context-type="linenumber">87,88</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/select-organization/select-organization.component.html</context>
+          <context context-type="linenumber">8</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/organization/organization.component.html</context>
@@ -1906,7 +1910,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-review/change-review.component.ts</context>
-          <context context-type="linenumber">98</context>
+          <context context-type="linenumber">99</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.ts</context>
@@ -2066,7 +2070,7 @@
         <source>Review and save</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-review/change-review.component.ts</context>
-          <context context-type="linenumber">93</context>
+          <context context-type="linenumber">94</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.html</context>
@@ -2078,7 +2082,7 @@
         <source>Schedule changes</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/change-review/change-review.component.ts</context>
-          <context context-type="linenumber">102</context>
+          <context context-type="linenumber">103</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
@@ -2771,19 +2775,19 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.ts</context>
-          <context context-type="linenumber">74</context>
+          <context context-type="linenumber">72</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.ts</context>
-          <context context-type="linenumber">85</context>
+          <context context-type="linenumber">83</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.ts</context>
-          <context context-type="linenumber">145</context>
+          <context context-type="linenumber">144</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.ts</context>
-          <context context-type="linenumber">155</context>
+          <context context-type="linenumber">154</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.ts</context>
@@ -3111,7 +3115,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/access-tokens/index/index.component.ts</context>
-          <context context-type="linenumber">94</context>
+          <context context-type="linenumber">93</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/integrations/webhooks/index/index.component.ts</context>
@@ -3541,7 +3545,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.ts</context>
-          <context context-type="linenumber">262</context>
+          <context context-type="linenumber">263</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/components/flag-triggers/flag-triggers.component.ts</context>
@@ -10243,7 +10247,7 @@
         <target>项</target>
       </trans-unit>
       <trans-unit id="common.remove-from-org" datatype="html">
-        <source>Remove from Organization</source>
+        <source>Remove from organization</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/iam/team/index/index.component.html</context>
           <context context-type="linenumber">79,80</context>
@@ -10859,7 +10863,7 @@
         <source>You don&apos;t have any organization yet. Please contact your admin to add you to an organization.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/select-organization/select-organization.component.html</context>
-          <context context-type="linenumber">10,13</context>
+          <context context-type="linenumber">15,17</context>
         </context-group>
         <target>您当前没有任何机构，请联系管理员将您添加到相关机构中.</target>
       </trans-unit>
@@ -10867,7 +10871,7 @@
         <source>Select an organization</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/select-organization/select-organization.component.html</context>
-          <context context-type="linenumber">15,16</context>
+          <context context-type="linenumber">20,21</context>
         </context-group>
         <target>选择机构</target>
       </trans-unit>
@@ -10875,7 +10879,7 @@
         <source>Organizations for</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/select-organization/select-organization.component.html</context>
-          <context context-type="linenumber">17</context>
+          <context context-type="linenumber">22</context>
         </context-group>
         <target>以下机构属于用户</target>
       </trans-unit>
@@ -10883,7 +10887,7 @@
         <source>Select</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/select-organization/select-organization.component.html</context>
-          <context context-type="linenumber">22,23</context>
+          <context context-type="linenumber">27,28</context>
         </context-group>
         <target>选择</target>
       </trans-unit>
@@ -10891,7 +10895,7 @@
         <source>Sign in with another Email</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/select-organization/select-organization.component.html</context>
-          <context context-type="linenumber">28,30</context>
+          <context context-type="linenumber">33,35</context>
         </context-group>
         <target>使用其它邮箱登录</target>
       </trans-unit>
@@ -10899,7 +10903,7 @@
         <source>Error happened, please login again!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/select-organization/select-organization.component.ts</context>
-          <context context-type="linenumber">49</context>
+          <context context-type="linenumber">53</context>
         </context-group>
         <target>未知错误发生，请重新登录！</target>
       </trans-unit>

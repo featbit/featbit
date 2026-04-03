@@ -31,6 +31,28 @@ public class MemberController : ApiControllerBase
     }
 
     /// <summary>
+    /// Add a member user to the organization
+    /// </summary>
+    /// <remarks>
+    /// Adds an existing workspace user to the current organization. If no user with the given email exists
+    /// in the workspace, a new local account is automatically registered and then added to the organization.
+    ///
+    /// If neither <c>policyIds</c> nor <c>groupIds</c> are provided, the organization's default permissions
+    /// are applied to the new member.
+    /// </remarks>
+    [OpenApi]
+    [HttpPost("add")]
+    public async Task<ApiResponse<bool>> AddMemberAsync([FromBody] AddMember request)
+    {
+        request.WorkspaceId = WorkspaceId;
+        request.OrganizationId = OrgId;
+
+        var success = await Mediator.Send(request);
+
+        return Ok(success);
+    }
+
+    /// <summary>
     /// Remove a member user from organization
     /// </summary>
     /// <remarks>
@@ -182,9 +204,6 @@ public class MemberController : ApiControllerBase
     /// <summary>
     /// Add a policy to a member user
     /// </summary>
-    /// <remarks>
-    /// Add a policy to a member user.
-    /// </remarks>
     [OpenApi]
     [HttpPut("{memberId:guid}/add-policy/{policyId:guid}")]
     public async Task<ApiResponse<bool>> AddPolicyAsync(Guid memberId, Guid policyId)
@@ -203,9 +222,6 @@ public class MemberController : ApiControllerBase
     /// <summary>
     /// Remove a policy from a member user
     /// </summary>
-    /// <remarks>
-    /// Remove a policy from a member user.
-    /// </remarks>
     [OpenApi]
     [HttpPut("{memberId:guid}/remove-policy/{policyId:guid}")]
     public async Task<ApiResponse<bool>> RemovePolicyAsync(Guid memberId, Guid policyId)

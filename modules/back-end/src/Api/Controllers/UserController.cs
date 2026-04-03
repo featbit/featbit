@@ -43,4 +43,14 @@ public class UserController : ApiControllerBase
         var policies = await Mediator.Send(request);
         return Ok(policies);
     }
+
+    [HttpPost("join-organization")]
+    public async Task<ApiResponse<bool>> JoinOrganizationAsync(JoinOrganization request)
+    {
+        request.WorkspaceId = WorkspaceId;
+        request.OrganizationId = OrgId;
+
+        var result = await Mediator.Send(request);
+        return Ok(result);
+    }
 }

@@ -16,7 +16,9 @@ namespace Api.Swagger
                 {
                     Type = "string"
                 },
-                Description = "The organization ID associated with the request. Some APIs may require this header to identify the organization context."
+                Description =
+                    "The organization ID associated with the request. Some APIs require this header to identify the organization context. " +
+                    "When authenticating with an Access Token, this header is automatically populated from the token and does not need to be provided manually."
             });
         }
     }
