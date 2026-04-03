@@ -205,5 +205,5 @@ Made with [contrib.rocks](https://contrib.rocks).
 
 FeatBit is an Open Core product. The bulk of the code is under permissive MIT license. See the [LICENSE](https://github.com/featbit/featbit/blob/main/LICENSE) file for details.
 
-Certain features in FeatBit are subject to licensing restrictions and require a valid license key. Checkout the [License Documentation](https://docs.featbit.co/licenses/overview) for more information.
+Certain features in FeatBit are subject to licensing restrictions and require a valid license key. Check out the [License Documentation](https://docs.featbit.co/licenses/overview) for more information.
 
