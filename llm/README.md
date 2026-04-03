@@ -64,4 +64,4 @@ The image below illustrates the trial steps:
 
 ## Contribution
 
-If you're interested in what I'm doing, please join our [online Community](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ).
+If you're interested in what I'm doing, please join our [online Community](https://discord.gg/h9dVMsQH).

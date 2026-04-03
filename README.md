@@ -12,8 +12,8 @@
     <a href="https://awsmfoss.com/featbit/">
       <img src="https://img.shields.io/badge/Awesome_F%2FOSS-Certified-purple?style=flat-square" alt="Read about RATH on medium"/>
     </a>
-    <a href="https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ">
-      <img src="https://img.shields.io/badge/Slack-green?style=flat-square&logo=slack&logoColor=white" alt="Join FeatBit on Slack"/>
+    <a href="https://discord.gg/h9dVMsQH">
+      <img src="https://img.shields.io/badge/Discord-5865F2?style=flat-square&logo=discord&logoColor=white" alt="Join FeatBit on Discord"/>
     </a>
     </div>
     <div id="badges">
@@ -34,8 +34,8 @@
       Documentation
     </a>
     |
-    <a href="https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ">
-      Community (Slack)
+    <a href="https://discord.gg/h9dVMsQH">
+      Community (Discord)
     </a>
     |
     <a href="https://www.linkedin.com/company/featbit">
@@ -135,7 +135,7 @@ The above sections show you how to get up and running quickly and easily. When y
 
 [Official Documentation](https://docs.featbit.co)
 
-[Join our Online Slack Support & Community](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ)
+[Join our Online Discord Support & Community](https://discord.gg/h9dVMsQH)
 
 [Connect with FeatBit on LinkedIn](https://www.linkedin.com/company/featbit)
 
@@ -189,7 +189,7 @@ FeatBit offers a range of features including:
 
 Building FeatBit is a collaborative effort, and we owe much gratitude to many intelligent and talented individuals.
 
-[**Join Slack to get your assignment**](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ).
+[**Join Discord to get your assignment**](https://discord.gg/h9dVMsQH).
 
 ### Contributors
 
@@ -205,11 +205,5 @@ Made with [contrib.rocks](https://contrib.rocks).
 
 FeatBit is an Open Core product. The bulk of the code is under permissive MIT license. See the [LICENSE](https://github.com/featbit/featbit/blob/main/LICENSE) file for details.
 
-The following listed features are protected by a commercial license key, please contact us by [Slack](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) or [Email](mailto:contact@featbit.co) to get a license key or a trial license key:
-- Schedule
-- Change request
-- SSO
-- Multi-organizations
-- Global User
-- Shareable Segment
+Certain features in FeatBit are subject to licensing restrictions and require a valid license key. Checkout the [License Documentation](https://docs.featbit.co/licenses/overview) for more information.
 
