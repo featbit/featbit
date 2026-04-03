@@ -17,7 +17,7 @@ public class WorkspaceHeaderParameter : IOperationFilter
                 Type = "string"
             },
             Description =
-                "The workspace ID associated with the request. Some APIs require this header to identify the workspace context." +
+                "The workspace ID associated with the request. Some APIs require this header to identify the workspace context. " +
                 "When authenticating with an Access Token, this header is automatically populated from the token and does not need to be provided manually."
         });
     }
