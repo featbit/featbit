@@ -3,6 +3,7 @@ using Api.Setup;
 using Domain.EndUsers;
 using Domain.Insights;
 using Domain.Messages;
+using Domain.Usages;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Caching.Memory;
@@ -45,6 +46,7 @@ public class InsightController : PublicApiControllerBase
 
         var endUserMessages = new List<EndUserMessage>();
         var insightMessages = new List<InsightMessage>();
+        var usage = new InsightUsage(EnvId);
         foreach (var insight in validInsights)
         {
             var key = $"{envId:N}:{insight.User!.KeyId}";
@@ -55,6 +57,7 @@ public class InsightController : PublicApiControllerBase
             }
 
             insightMessages.AddRange(insight.InsightMessages(envId));
+            usage.AddInsight(insight);
         }
 
         await Task.WhenAll(
@@ -63,6 +66,7 @@ public class InsightController : PublicApiControllerBase
         await Task.WhenAll(
             insightMessages.Select(x => _producer.PublishAsync(Topics.Insights, x))
         );
+        await _producer.PublishAsync(Topics.Usage, usage);
 
         return Ok();
     }

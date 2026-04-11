@@ -45,7 +45,8 @@ public partial class PostgresMessageConsumer(
         var tasks = new[]
         {
             ProcessAsync(Topics.EndUser, stoppingToken),
-            ProcessAsync(Topics.Insights, stoppingToken)
+            ProcessAsync(Topics.Insights, stoppingToken),
+            ProcessAsync(Topics.Usage, stoppingToken)
         };
 
         return Task.WhenAll(tasks);
