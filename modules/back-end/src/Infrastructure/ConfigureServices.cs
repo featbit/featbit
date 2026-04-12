@@ -51,6 +51,7 @@ public static class ConfigureServices
         services.AddDbSpecificServices(configuration);
         services.AddTransient<IEnvironmentAppService, AppServices.EnvironmentAppService>();
         services.AddTransient<IFeatureFlagAppService, AppServices.FeatureFlagAppService>();
+        services.AddTransient<IUsageAppService, AppServices.UsageAppService>();
 
         // InsightsWriter must be a singleton service
         services.AddSingleton(typeof(AppServices.InsightsWriter));
