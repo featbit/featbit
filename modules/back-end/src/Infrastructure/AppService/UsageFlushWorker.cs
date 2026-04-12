@@ -12,7 +12,7 @@ public class UsageFlushWorker(
     IServiceProvider serviceProvider,
     ILogger<UsageFlushWorker> logger) : BackgroundService
 {
-    private readonly PeriodicTimer _timer = new(TimeSpan.FromMilliseconds(options.Value.FlushInterval));
+    private readonly PeriodicTimer _timer = new(TimeSpan.FromMilliseconds(options.Value.FlushIntervalMs));
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
