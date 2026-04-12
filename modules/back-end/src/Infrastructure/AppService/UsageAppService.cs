@@ -137,9 +137,12 @@ public class UsageAppService(IConfiguration configuration, IServiceProvider serv
 
                         return new UpdateOneModel<BsonDocument>(filter, update) { IsUpsert = true };
                     })
-                );
+                ).ToArray();
 
-                await mauCollection.BulkWriteAsync(mauUpdates);
+                if (mauUpdates.Length > 0)
+                {
+                    await mauCollection.BulkWriteAsync(mauUpdates);
+                }
             }
 
             // Accumulate daily flag evaluation and custom metric counts via $inc upsert.
