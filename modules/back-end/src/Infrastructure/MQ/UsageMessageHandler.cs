@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Application.Usages;
 using Domain.Messages;
+using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.MQ;
 
@@ -9,7 +10,7 @@ public static class UsageTypes
     public const string Insight = "insight";
 }
 
-public class UsageMessageHandler(UsageTracker usageTracker) : IMessageHandler
+public class UsageMessageHandler(UsageTracker usageTracker, ILogger<UsageMessageHandler> logger) : IMessageHandler
 {
     public string Topic => Topics.Usage;
 
@@ -23,6 +24,7 @@ public class UsageMessageHandler(UsageTracker usageTracker) : IMessageHandler
             !rootElement.TryGetProperty("envId", out var envIdProp) ||
             !envIdProp.TryGetGuid(out var envId))
         {
+            logger.LogWarning("Received invalid usage message: {Message}", message);
             return Task.CompletedTask;
         }
 
