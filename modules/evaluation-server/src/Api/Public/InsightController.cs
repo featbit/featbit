@@ -54,19 +54,19 @@ public class InsightController : PublicApiControllerBase
             {
                 _cache.Set(key, string.Empty, _cacheEntryOptions);
                 endUserMessages.Add(insight.EndUserMessage(envId));
+                usage.AddUser(insight.User!.KeyId);
             }
 
             insightMessages.AddRange(insight.InsightMessages(envId));
-            usage.AddInsight(insight);
+            usage.AddEvents(insight.Variations.Length, insight.Metrics.Length);
         }
 
-        await Task.WhenAll(
-            endUserMessages.Select(x => _producer.PublishAsync(Topics.EndUser, x))
-        );
-        await Task.WhenAll(
-            insightMessages.Select(x => _producer.PublishAsync(Topics.Insights, x))
-        );
-        await _producer.PublishAsync(Topics.Usage, usage);
+        var tasks = endUserMessages.Select(x => _producer.PublishAsync(Topics.EndUser, x))
+            .Concat(insightMessages.Select(x => _producer.PublishAsync(Topics.Insights, x)))
+            .Append(_producer.PublishAsync(Topics.Usage, usage))
+            .ToArray();
+
+        await Task.WhenAll(tasks);
 
         return Ok();
     }

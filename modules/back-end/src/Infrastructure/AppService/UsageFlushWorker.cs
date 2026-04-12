@@ -33,11 +33,11 @@ public class UsageFlushWorker(
                     continue;
                 }
 
-                await FlushCoreAsync(records, stoppingToken);
+                await FlushCoreAsync(records);
             }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
             {
-                // ignore cancellation
+                // ignore cancellation from the timer loop itself
             }
             catch (Exception ex)
             {
@@ -60,11 +60,11 @@ public class UsageFlushWorker(
 
         if (remaining.Count > 0)
         {
-            await FlushCoreAsync(remaining, cancellationToken);
+            await FlushCoreAsync(remaining);
         }
     }
 
-    private async Task FlushCoreAsync(List<UsageRecord> records, CancellationToken cancellationToken)
+    private async Task FlushCoreAsync(List<UsageRecord> records)
     {
         var endUserRecords = new Dictionary<Guid, HashSet<string>>();
         var insightRecords = new Dictionary<Guid, (int flagEvals, int customMetrics)>();
@@ -100,6 +100,6 @@ public class UsageFlushWorker(
 
         using var scope = serviceProvider.CreateScope();
         var usageAppService = scope.ServiceProvider.GetRequiredService<IUsageAppService>();
-        await usageAppService.SaveRecordsAsync(endUserRecords, insightRecords, cancellationToken);
+        await usageAppService.SaveRecordsAsync(endUserRecords, insightRecords);
     }
 }

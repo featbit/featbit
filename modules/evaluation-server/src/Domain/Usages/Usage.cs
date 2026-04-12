@@ -1,5 +1,3 @@
-using Domain.Insights;
-
 namespace Domain.Usages;
 
 public class UsageTypes
@@ -23,7 +21,7 @@ public class InsightUsage : Usage
 {
     public override string Type => UsageTypes.Insight;
 
-    public List<string> EndUsers { get; set; }
+    public HashSet<string> EndUsers { get; set; }
 
     public int FlagEvaluations { get; set; }
 
@@ -36,14 +34,11 @@ public class InsightUsage : Usage
         CustomMetrics = 0;
     }
 
-    public void AddInsight(Insight insight)
-    {
-        if (insight.User != null)
-        {
-            EndUsers.Add(insight.User.KeyId);
-        }
+    public void AddUser(string userKeyId) => EndUsers.Add(userKeyId);
 
-        FlagEvaluations += insight.Variations.Length;
-        CustomMetrics += insight.Metrics.Length;
+    public void AddEvents(int flagEvaluations, int customMetrics)
+    {
+        FlagEvaluations += flagEvaluations;
+        CustomMetrics += customMetrics;
     }
 }

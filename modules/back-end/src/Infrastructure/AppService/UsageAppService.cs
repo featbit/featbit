@@ -12,8 +12,7 @@ public class UsageAppService(IConfiguration configuration, IServiceProvider serv
 {
     public async Task SaveRecordsAsync(
         Dictionary<Guid, HashSet<string>> endUsers,
-        Dictionary<Guid, (int flagEvaluations, int customMetrics)> insights,
-        CancellationToken cancellationToken)
+        Dictionary<Guid, (int flagEvaluations, int customMetrics)> insights)
     {
         var dbProvider = configuration.GetDbProvider();
 
@@ -132,7 +131,7 @@ public class UsageAppService(IConfiguration configuration, IServiceProvider serv
                         );
 
                         var update = Builders<BsonDocument>.Update
-                            .SetOnInsert("envId", kvp.Key)
+                            .SetOnInsert("envId", new BsonBinaryData(kvp.Key, GuidRepresentation.Standard))
                             .SetOnInsert("yearMonth", yearMonth)
                             .SetOnInsert("userKey", userKey)
                             .SetOnInsert("firstSeenAt", today);
@@ -141,7 +140,7 @@ public class UsageAppService(IConfiguration configuration, IServiceProvider serv
                     })
                 );
 
-                await mauCollection.BulkWriteAsync(mauUpdates, cancellationToken: cancellationToken);
+                await mauCollection.BulkWriteAsync(mauUpdates);
             }
 
             // Accumulate daily flag evaluation and custom metric counts via $inc upsert.
@@ -163,7 +162,7 @@ public class UsageAppService(IConfiguration configuration, IServiceProvider serv
                     return new UpdateOneModel<BsonDocument>(filter, update) { IsUpsert = true };
                 });
 
-                await statsCollection.BulkWriteAsync(statsUpdates, cancellationToken: cancellationToken);
+                await statsCollection.BulkWriteAsync(statsUpdates);
             }
         }
     }
