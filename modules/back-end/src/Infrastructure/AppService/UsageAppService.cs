@@ -65,7 +65,7 @@ public class UsageAppService(IConfiguration configuration, IServiceProvider serv
                         EnvIds = mauEnvIds.ToArray(),
                         YearMonth = now.Year * 100 + now.Month,
                         UserKeys = mauUserKeys.ToArray(),
-                        FirstSeenAt = DateOnly.FromDateTime(now)
+                        FirstSeenAt = now.Date
                     }
                 );
             }
@@ -102,7 +102,7 @@ public class UsageAppService(IConfiguration configuration, IServiceProvider serv
                     new
                     {
                         EnvIds = envIds.ToArray(),
-                        StatsDate = DateOnly.FromDateTime(now),
+                        StatsDate = now.Date,
                         FlagEvaluations = flagEvaluations.ToArray(),
                         CustomMetrics = customMetrics.ToArray()
                     }
@@ -119,7 +119,6 @@ public class UsageAppService(IConfiguration configuration, IServiceProvider serv
             if (endUsers.Count > 0)
             {
                 var yearMonth = now.Year * 100 + now.Month;
-                var today = DateOnly.FromDateTime(now);
 
                 var mauCollection = mongoClient.CollectionOf("UsageEndUserStats");
                 var mauUpdates = endUsers.SelectMany(kvp => kvp.Value.Select(userKey =>
@@ -134,7 +133,7 @@ public class UsageAppService(IConfiguration configuration, IServiceProvider serv
                             .SetOnInsert("envId", new BsonBinaryData(kvp.Key, GuidRepresentation.Standard))
                             .SetOnInsert("yearMonth", yearMonth)
                             .SetOnInsert("userKey", userKey)
-                            .SetOnInsert("firstSeenAt", today);
+                            .SetOnInsert("firstSeenAt", now.Date);
 
                         return new UpdateOneModel<BsonDocument>(filter, update) { IsUpsert = true };
                     })
