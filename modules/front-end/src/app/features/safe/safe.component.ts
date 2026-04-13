@@ -42,7 +42,7 @@ export class SafeComponent implements OnInit {
       },
       {
         title: $localize `:@@menu.end-users:End Users`,
-        icon: 'icons:icon-switch-user',
+        icon: 'icons:icon-end-users',
         path: '/users'
       },
       {
@@ -52,7 +52,7 @@ export class SafeComponent implements OnInit {
       },
       {
         title: $localize `:@@menu.experiments:Experiments`,
-        icon: 'icons:icon-expt',
+        icon: 'icons:icon-experiment',
         path: '/experiments'
       },
       {
@@ -70,8 +70,13 @@ export class SafeComponent implements OnInit {
       },
       {
         title: $localize `:@@menu.workspace:Workspace`,
-        icon: 'bank',
+        icon: 'icons:icon-workspace',
         path: '/workspace'
+      },
+      {
+        title: $localize `:@@menu.organization:Organization`,
+        icon: 'icons:icon-organization',
+        path: '/organization'
       },
       {
         title: $localize `:@@menu.relay-proxies:Relay Proxies`,

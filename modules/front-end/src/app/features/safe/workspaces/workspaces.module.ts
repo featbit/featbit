@@ -4,9 +4,6 @@ import { CommonModule } from '@angular/common';
 import { WorkspacesRoutingModule } from './workspaces-routing.module';
 import { WorkspacesComponent } from './workspaces.component';
 import { NzTabsModule } from 'ng-zorro-antd/tabs';
-import { ProfileComponent } from './profile/profile.component';
-import { OrganizationComponent } from './organization/organization.component';
-import { ProjectComponent } from './project/project.component';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzTypographyModule } from 'ng-zorro-antd/typography';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -24,26 +21,21 @@ import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { NzRadioModule } from 'ng-zorro-antd/radio';
-import { ProjectFilterPipe } from "./project/project-filter.pipe";
 import { NzSkeletonModule } from "ng-zorro-antd/skeleton";
 import { NzTagModule } from "ng-zorro-antd/tag";
 import { CoreModule } from "@core/core.module";
 import { NzToolTipModule } from "ng-zorro-antd/tooltip";
 import { WorkspaceComponent } from "@features/safe/workspaces/workspace/workspace.component";
-import { GlobalUserComponent } from './global-user/global-user.component';
 import { LicenseComponent } from './license/license.component';
 import { NzAlertComponent } from "ng-zorro-antd/alert";
+import { GlobalUserComponent } from "@features/safe/workspaces/global-user/global-user.component";
 
 @NgModule({
   declarations: [
     WorkspacesComponent,
     WorkspaceComponent,
-    OrganizationComponent,
-    ProfileComponent,
-    ProjectComponent,
-    ProjectFilterPipe,
-    GlobalUserComponent,
-    LicenseComponent
+    LicenseComponent,
+    GlobalUserComponent
   ],
   imports: [
     CommonModule,
@@ -70,7 +62,6 @@ import { NzAlertComponent } from "ng-zorro-antd/alert";
     ScrollingModule,
     ReactiveFormsModule,
     WorkspacesRoutingModule,
-    CoreModule,
     NzToolTipModule,
     NzAlertComponent
   ]

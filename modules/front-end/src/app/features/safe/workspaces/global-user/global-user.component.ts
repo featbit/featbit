@@ -13,7 +13,6 @@ import { NzMessageService } from "ng-zorro-antd/message";
 })
 export class GlobalUserComponent implements OnInit {
 
-
   isLoading: boolean = true;
   users: GlobalUser[] = [];
   totalCount = 0;
