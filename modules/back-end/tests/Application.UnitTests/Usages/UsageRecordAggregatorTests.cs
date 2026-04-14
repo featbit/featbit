@@ -45,7 +45,7 @@ public class UsageRecordAggregatorTests
         Assert.Single(result);
         var agg = result[0];
         Assert.Equal(Today, agg.RecordedAt);
-        Assert.Equal(["user1", "user2", "user3"], agg.EndUsers[EnvId1]);
+        Assert.Equal(new HashSet<string> { "user1", "user2", "user3" }, agg.EndUsers[EnvId1]);
         Assert.Equal((15, 5), agg.Events[EnvId1]);
     }
 
@@ -64,10 +64,10 @@ public class UsageRecordAggregatorTests
         var todayAgg = result.Single(r => r.RecordedAt == Today);
         var yesterdayAgg = result.Single(r => r.RecordedAt == Yesterday);
 
-        Assert.Equal(["user1"], todayAgg.EndUsers[EnvId1]);
+        Assert.Equal(new HashSet<string> { "user1" }, todayAgg.EndUsers[EnvId1]);
         Assert.Equal((10, 2), todayAgg.Events[EnvId1]);
 
-        Assert.Equal(["user2"], yesterdayAgg.EndUsers[EnvId1]);
+        Assert.Equal(new HashSet<string> { "user2" }, yesterdayAgg.EndUsers[EnvId1]);
         Assert.Equal((4, 1), yesterdayAgg.Events[EnvId1]);
     }
 
@@ -85,10 +85,10 @@ public class UsageRecordAggregatorTests
         Assert.Single(result);
 
         var agg = result[0];
-        Assert.Equal(["user1"], agg.EndUsers[EnvId1]);
+        Assert.Equal(new HashSet<string> { "user1" }, agg.EndUsers[EnvId1]);
         Assert.Equal((10, 1), agg.Events[EnvId1]);
 
-        Assert.Equal(["user2"], agg.EndUsers[EnvId2]);
+        Assert.Equal(new HashSet<string> { "user2" }, agg.EndUsers[EnvId2]);
         Assert.Equal((20, 2), agg.Events[EnvId2]);
     }
 
@@ -104,7 +104,7 @@ public class UsageRecordAggregatorTests
         var result = UsageRecordsAggregator.Aggregate(records);
 
         Assert.Single(result);
-        Assert.Equal(["user1", "user2"], result[0].EndUsers[EnvId1]);
+        Assert.Equal(new HashSet<string> { "user1", "user2" }, result[0].EndUsers[EnvId1]);
     }
 
     [Fact]
