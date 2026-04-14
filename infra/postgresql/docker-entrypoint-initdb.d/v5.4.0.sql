@@ -1,0 +1,95 @@
+\connect featbit
+
+-- https://github.com/featbit/featbit/pull/885
+
+UPDATE policies
+SET statements = (
+    SELECT jsonb_agg(
+                   jsonb_set(
+                           elem,
+                           '{actions}',
+                           (
+                               SELECT jsonb_agg(
+                                              CASE
+                                                  WHEN action = '"ManageSegment"'::jsonb THEN '"*"'::jsonb
+                                                  ELSE action
+                                                  END
+                                      )
+                               FROM jsonb_array_elements(elem->'actions') AS action
+                           )
+                   )
+           )
+    FROM jsonb_array_elements(statements) AS elem
+)
+WHERE statements IS NOT NULL;
+
+UPDATE policies
+SET statements = statements || jsonb_build_array(
+        jsonb_build_object(
+                'id', gen_random_uuid(),
+                'effect', 'allow',
+                'actions', jsonb_build_array('*'),
+                'resources', jsonb_build_array('project/*:env/*:segment/*'),
+                'resourceType', 'segment'
+        )
+                               )
+WHERE id IN (
+             '3e961f0f-6fd4-4cf4-910f-52d356f8cc08', -- admin
+             '66f3687f-939d-4257-bd3f-c3553d39e1b6' -- developer
+    );
+
+UPDATE access_tokens
+SET
+    permissions = (
+        SELECT jsonb_agg(
+                       jsonb_set(
+                               elem,
+                               '{actions}',
+                               (
+                                   SELECT jsonb_agg(
+                                                  CASE
+                                                      WHEN action = '"ManageSegment"'::jsonb THEN '"*"'::jsonb
+                                                      ELSE action
+                                                      END
+                                          )
+                                   FROM jsonb_array_elements(elem->'actions') AS action
+                               )
+                       )
+               )
+        FROM jsonb_array_elements(permissions) AS elem
+    )
+WHERE permissions IS NOT NULL;    
+    
+
+-- https://github.com/featbit/featbit/pull/888
+
+-- Monthly unique end users per environment
+-- One row per (env_id, year_month, user_key); first_seen_at is written once on insert and never updated.
+-- Equivalent of Redis ZADD NX: only the first occurrence in a month is recorded.
+--
+-- Queries this enables:
+--   MAU  : SELECT COUNT(*) FROM usage_end_user_stats WHERE env_id = ? AND year_month = ?
+--   DAU  : SELECT COUNT(*) FROM usage_end_user_stats WHERE env_id = ? AND year_month = ? AND first_seen_at = ?
+CREATE TABLE usage_end_user_stats
+(
+    env_id        uuid                     NOT NULL,
+    year_month    integer                  NOT NULL, -- format YYYYMM, e.g. 202604
+    user_key      varchar(512)             NOT NULL,
+    first_seen_at date                     NOT NULL,
+    CONSTRAINT pk_usage_end_user_stats PRIMARY KEY (env_id, year_month, user_key)
+);
+
+-- Supports efficient daily-unique-user queries within a month
+CREATE INDEX ix_usage_end_user_stats_env_ym_date ON usage_end_user_stats (env_id, year_month, first_seen_at);
+
+-- Daily aggregated metrics per environment
+-- Tracks total flag_evaluations and custom_metrics per day
+-- Upsert with increment so multiple writes on the same day accumulate correctly
+CREATE TABLE usage_event_stats
+(
+    env_id           uuid   NOT NULL,
+    stats_date       date   NOT NULL,
+    flag_evaluations integer NOT NULL DEFAULT 0,
+    custom_metrics   integer NOT NULL DEFAULT 0,
+    CONSTRAINT pk_usage_event_stats PRIMARY KEY (env_id, stats_date)
+);
