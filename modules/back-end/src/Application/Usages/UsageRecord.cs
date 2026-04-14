@@ -1,6 +1,10 @@
 namespace Application.Usages;
 
-public abstract record UsageRecord(Guid EnvId);
+public abstract record UsageRecord(Guid EnvId, DateOnly RecordedAt);
 
-public record InsightsUsageRecord(Guid EnvId, string[] EndUsers, int FlagEvaluations, int CustomMetrics)
-    : UsageRecord(EnvId);
+public record InsightsUsageRecord(
+    Guid EnvId,
+    DateOnly RecordedAt,
+    string[] EndUsers,
+    int FlagEvaluations,
+    int CustomMetrics) : UsageRecord(EnvId, RecordedAt);

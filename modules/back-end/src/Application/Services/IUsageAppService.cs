@@ -1,9 +1,8 @@
+using Application.Usages;
+
 namespace Application.Services;
 
 public interface IUsageAppService
 {
-    Task SaveRecordsAsync(
-        Dictionary<Guid, HashSet<string>> endUsers,
-        Dictionary<Guid, (int flagEvaluations, int customMetrics)> insights
-    );
+    Task SaveRecordsAsync(AggregatedUsageRecords records);
 }

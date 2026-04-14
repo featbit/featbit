@@ -14,9 +14,9 @@ public class UsageTracker(IOptions<UsageTrackingOptions> options)
         }
     );
 
-    public void RecordInsights(Guid envId, string[] endUsers, int flagEvaluations, int customMetrics)
+    public void RecordInsights(Guid envId, DateOnly recordedAt, string[] endUsers, int flagEvaluations, int customMetrics)
     {
-        var record = new InsightsUsageRecord(envId, endUsers, flagEvaluations, customMetrics);
+        var record = new InsightsUsageRecord(envId, recordedAt, endUsers, flagEvaluations, customMetrics);
         _recordsChannel.Writer.TryWrite(record);
     }
 

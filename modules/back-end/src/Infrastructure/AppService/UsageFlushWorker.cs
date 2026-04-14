@@ -66,40 +66,25 @@ public class UsageFlushWorker(
 
     private async Task FlushCoreAsync(List<UsageRecord> records)
     {
-        var endUserRecords = new Dictionary<Guid, HashSet<string>>();
-        var insightRecords = new Dictionary<Guid, (int flagEvals, int customMetrics)>();
-
-        // aggregate records by envId, so we can batch upserts by envId
-        foreach (var record in records)
-        {
-            switch (record)
-            {
-                case InsightsUsageRecord iur:
-                    if (!endUserRecords.TryGetValue(iur.EnvId, out var endUsers))
-                    {
-                        endUsers = [];
-                        endUserRecords[iur.EnvId] = endUsers;
-                    }
-
-                    // for end users, we only care about unique count
-                    foreach (var endUser in iur.EndUsers)
-                    {
-                        endUsers.Add(endUser);
-                    }
-
-                    // for flag evaluations and custom metrics, we sum them up
-                    var existing = insightRecords.GetValueOrDefault(iur.EnvId, (flagEvals: 0, customMetrics: 0));
-                    insightRecords[iur.EnvId] = (
-                        existing.flagEvals + iur.FlagEvaluations,
-                        existing.customMetrics + iur.CustomMetrics
-                    );
-
-                    break;
-            }
-        }
+        var aggregatedRecords = UsageRecordsAggregator.Aggregate(records);
 
         using var scope = serviceProvider.CreateScope();
         var usageAppService = scope.ServiceProvider.GetRequiredService<IUsageAppService>();
-        await usageAppService.SaveRecordsAsync(endUserRecords, insightRecords);
+
+        if (aggregatedRecords.Length == 1)
+        {
+            // this is the most common case
+            await usageAppService.SaveRecordsAsync(aggregatedRecords[0]);
+        }
+        else
+        {
+            var tasks = new Task[aggregatedRecords.Length];
+            for (var i = 0; i < aggregatedRecords.Length; i++)
+            {
+                tasks[i] = usageAppService.SaveRecordsAsync(aggregatedRecords[i]);
+            }
+
+            await Task.WhenAll(tasks);
+        }
     }
 }

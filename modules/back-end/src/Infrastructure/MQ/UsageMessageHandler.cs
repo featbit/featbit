@@ -38,6 +38,10 @@ public class UsageMessageHandler(UsageTracker usageTracker, ILogger<UsageMessage
 
         void RecordInsightUsage()
         {
+            var recordedAt = rootElement.TryGetProperty("recordedAt", out var recordedAtElem)
+                ? DateOnly.Parse(recordedAtElem.GetString()!)
+                : DateOnly.FromDateTime(DateTime.UtcNow);
+
             var endUsers = rootElement.TryGetProperty("endUsers", out var endUsersElem)
                 ? endUsersElem.Deserialize<string[]>()!
                 : [];
@@ -50,7 +54,7 @@ public class UsageMessageHandler(UsageTracker usageTracker, ILogger<UsageMessage
                 ? customMetricsElem.GetInt32()
                 : 0;
 
-            usageTracker.RecordInsights(envId, endUsers, flagEvaluations, customMetrics);
+            usageTracker.RecordInsights(envId, recordedAt, endUsers, flagEvaluations, customMetrics);
         }
     }
 }

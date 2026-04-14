@@ -21,6 +21,8 @@ public class InsightUsage : Usage
 {
     public override string Type => UsageTypes.Insight;
 
+    public DateOnly RecordedAt { get; set; }
+
     public HashSet<string> EndUsers { get; set; }
 
     public int FlagEvaluations { get; set; }
@@ -29,6 +31,7 @@ public class InsightUsage : Usage
 
     public InsightUsage(Guid envId) : base(envId)
     {
+        RecordedAt = DateOnly.FromDateTime(DateTime.UtcNow.Date);
         EndUsers = [];
         FlagEvaluations = 0;
         CustomMetrics = 0;
