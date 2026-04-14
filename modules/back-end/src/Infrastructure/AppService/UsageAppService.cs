@@ -63,7 +63,10 @@ public class UsageAppService(IConfiguration configuration, IServiceProvider serv
                     EnvIds = mauEnvIds.ToArray(),
                     YearMonth = recordedAt.Year * 100 + recordedAt.Month,
                     UserKeys = mauUserKeys.ToArray(),
-                    FirstSeenAt = recordedAt.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc)
+                    // The date time must be Unspecified kind, which PG already considered as local, and so timezone conversion wasn't applied when converting to date.
+                    // Check https://github.com/npgsql/npgsql/issues/4471#issuecomment-1134314277 for details.
+                    // https://www.npgsql.org/doc/types/datetime.html#net-types-and-postgresql-types
+                    FirstSeenAt = recordedAt.ToDateTime(TimeOnly.MinValue)
                 }
             );
         }
@@ -100,7 +103,10 @@ public class UsageAppService(IConfiguration configuration, IServiceProvider serv
                 new
                 {
                     EnvIds = envIds.ToArray(),
-                    StatsDate = recordedAt.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc),
+                    // The date time must be Unspecified kind, which PG already considered as local, and so timezone conversion wasn't applied when converting to date.
+                    // Check https://github.com/npgsql/npgsql/issues/4471#issuecomment-1134314277 for details.
+                    // https://www.npgsql.org/doc/types/datetime.html#net-types-and-postgresql-types
+                    StatsDate = recordedAt.ToDateTime(TimeOnly.MinValue),
                     FlagEvaluations = flagEvaluations.ToArray(),
                     CustomMetrics = customMetrics.ToArray()
                 }
