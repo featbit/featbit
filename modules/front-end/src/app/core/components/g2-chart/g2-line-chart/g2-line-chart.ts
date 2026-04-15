@@ -13,6 +13,11 @@ export interface TooltipConfig {
   readonly tplFormatter?: (tpl: string) => string;
 }
 
+export interface AreaStyleConfig {
+  readonly fill?: string;
+  readonly fillOpacity?: number;
+}
+
 export interface ChartConfig {
   readonly source: Data[];
   readonly dataGroupBy?: string;
@@ -21,6 +26,7 @@ export interface ChartConfig {
   readonly padding: ViewPadding;
   readonly toolTip?: TooltipConfig;
   readonly lineShape?: string;
+  readonly areaStyle?: AreaStyleConfig;
 }
 
 export const defaultTooltipItemTplPlaceholder: string =

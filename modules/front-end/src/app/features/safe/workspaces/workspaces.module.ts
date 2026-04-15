@@ -21,6 +21,7 @@ import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { NzRadioModule } from 'ng-zorro-antd/radio';
+import { NzSegmentedModule } from 'ng-zorro-antd/segmented';
 import { NzSkeletonModule } from "ng-zorro-antd/skeleton";
 import { NzTagModule } from "ng-zorro-antd/tag";
 import { CoreModule } from "@core/core.module";
@@ -59,6 +60,7 @@ import { UsageComponent } from './usage/usage.component';
     NzSpaceModule,
     NzPopconfirmModule,
     NzRadioModule,
+    NzSegmentedModule,
     NzSkeletonModule,
     NzTagModule,
     ScrollingModule,

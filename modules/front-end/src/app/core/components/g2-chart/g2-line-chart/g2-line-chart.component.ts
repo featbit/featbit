@@ -48,13 +48,11 @@ export class G2LineChartComponent implements AfterViewInit, OnDestroy {
     this.listenerWindowResize();
   }
 
-  // 计算当前图表的高度
   private computeCurrentChartHeight() {
     const bodyHeight = document.body.clientHeight;
     this.height = this.defaultChartMaxHeight * (bodyHeight / this.defaultWindowHeight) + 'px';
   }
 
-  // 监听窗口大小改变
   private listenerWindowResize() {
     this.resizeSubscription = fromEvent(window, "resize").subscribe(_ => {
       this.defaultWindowHeight && this.computeCurrentChartHeight();
@@ -84,6 +82,18 @@ export class G2LineChartComponent implements AfterViewInit, OnDestroy {
         ? toolTip.tplFormatter(defaultTooltipItemTplPlaceholder)
         : defaultTooltipItemTplPlaceholder
     });
+
+    if (this.chartConfig.areaStyle) {
+      const area = this.chart
+        .area()
+        .position(`${xAxis.field}*${yAxis.field}`)
+        .shape(this.chartConfig.lineShape || 'circle')
+        .style(this.chartConfig.areaStyle);
+
+      if (this.chartConfig.dataGroupBy) {
+        area.color(this.chartConfig.dataGroupBy, MacaronColors);
+      }
+    }
 
     const line = this.chart
       .line()
