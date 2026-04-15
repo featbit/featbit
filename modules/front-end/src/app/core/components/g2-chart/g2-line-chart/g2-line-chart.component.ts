@@ -108,6 +108,9 @@ export class G2LineChartComponent implements AfterViewInit, OnDestroy {
     if (dataGroupBy) {
       line.color(this.chartConfig.dataGroupBy, MacaronColors);
       point.color(this.chartConfig.dataGroupBy, MacaronColors);
+    } else if (this.chartConfig.lineColor) {
+      line.color(this.chartConfig.lineColor);
+      point.color(this.chartConfig.lineColor);
     }
 
     this.chart.legend({

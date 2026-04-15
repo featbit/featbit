@@ -2947,7 +2947,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspaces.component.html</context>
-          <context context-type="linenumber">25,26</context>
+          <context context-type="linenumber">32,33</context>
         </context-group>
         <target>您没有 License，或者你当前的 License 不包括该功能，请联系 FeatBit 团队获取 License。</target>
       </trans-unit>
@@ -11455,6 +11455,170 @@
         </context-group>
         <target>无效 License, 请联系 FeatBit 团队获取 License。</target>
       </trans-unit>
+      <trans-unit id="workspace.usage.mau" datatype="html">
+        <source>Monthly Active Users</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.html</context>
+          <context context-type="linenumber">23,24</context>
+        </context-group>
+        <target>月活用户</target>
+      </trans-unit>
+      <trans-unit id="workspace.usage.change-vs-last-month" datatype="html">
+        <source>vs last month</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.html</context>
+          <context context-type="linenumber">28,31</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.html</context>
+          <context context-type="linenumber">43,46</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.html</context>
+          <context context-type="linenumber">58,61</context>
+        </context-group>
+        <target>对比上个月</target>
+      </trans-unit>
+      <trans-unit id="workspace.usage.flag-evaluations" datatype="html">
+        <source>Flag Evaluations</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.html</context>
+          <context context-type="linenumber">38,39</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.html</context>
+          <context context-type="linenumber">96,97</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.ts</context>
+          <context context-type="linenumber">84</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.ts</context>
+          <context context-type="linenumber">221</context>
+        </context-group>
+        <target>开关评估数</target>
+      </trans-unit>
+      <trans-unit id="workspace.usage.custom-metrics" datatype="html">
+        <source>Custom Metrics</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.html</context>
+          <context context-type="linenumber">53,54</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.html</context>
+          <context context-type="linenumber">97,100</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.ts</context>
+          <context context-type="linenumber">85</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.ts</context>
+          <context context-type="linenumber">226</context>
+        </context-group>
+        <target>自定义指标</target>
+      </trans-unit>
+      <trans-unit id="workspace.usage.daily-trend" datatype="html">
+        <source>Daily Trend</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.html</context>
+          <context context-type="linenumber">68,69</context>
+        </context-group>
+        <target>每日趋势</target>
+      </trans-unit>
+      <trans-unit id="workspace.usage.per-environment" datatype="html">
+        <source>Per Environment</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.html</context>
+          <context context-type="linenumber">83,84</context>
+        </context-group>
+        <target>按环境</target>
+      </trans-unit>
+      <trans-unit id="workspace.usage.per-environment-subtitle" datatype="html">
+        <source>See which environments contribute the most to your usage</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.html</context>
+          <context context-type="linenumber">84,88</context>
+        </context-group>
+        <target>看看哪些环境对你的用量贡献最大</target>
+      </trans-unit>
+      <trans-unit id="workspace.usage.environment" datatype="html">
+        <source>Environment</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.html</context>
+          <context context-type="linenumber">94,95</context>
+        </context-group>
+        <target>环境</target>
+      </trans-unit>
+      <trans-unit id="workspace.usage.mau-short" datatype="html">
+        <source>MAU</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.html</context>
+          <context context-type="linenumber">95,96</context>
+        </context-group>
+        <target>月活用户</target>
+      </trans-unit>
+      <trans-unit id="workspace.usage.no-data-for-now" datatype="html">
+        <source>No data for now</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.ts</context>
+          <context context-type="linenumber">74</context>
+        </context-group>
+        <target>目前没有数据</target>
+      </trans-unit>
+      <trans-unit id="workspace.usage.daily-new-users" datatype="html">
+        <source>Daily New Users</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.ts</context>
+          <context context-type="linenumber">83</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.ts</context>
+          <context context-type="linenumber">231</context>
+        </context-group>
+        <target>每日新用户</target>
+      </trans-unit>
+      <trans-unit id="workspace.usage.this-month" datatype="html">
+        <source>This month</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.ts</context>
+          <context context-type="linenumber">103</context>
+        </context-group>
+        <target>当前月</target>
+      </trans-unit>
+      <trans-unit id="workspace.usage.last-7-days" datatype="html">
+        <source>Last 7 days</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.ts</context>
+          <context context-type="linenumber">104</context>
+        </context-group>
+        <target>过去 7 天</target>
+      </trans-unit>
+      <trans-unit id="workspace.usage.last-30-days" datatype="html">
+        <source>Last 30 days</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.ts</context>
+          <context context-type="linenumber">105</context>
+        </context-group>
+        <target>过去 30 天</target>
+      </trans-unit>
+      <trans-unit id="workspace.usage.current-billing-cycle" datatype="html">
+        <source>Current billing cycle</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.ts</context>
+          <context context-type="linenumber">110</context>
+        </context-group>
+        <target>当前付费周期</target>
+      </trans-unit>
+      <trans-unit id="workspace.usage.previous-billing-cycle" datatype="html">
+        <source>Previous billing cycle</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.ts</context>
+          <context context-type="linenumber">111</context>
+        </context-group>
+        <target>上一付费周期</target>
+      </trans-unit>
       <trans-unit id="workspace.workspace.nameMandatory" datatype="html">
         <source>Workspace name is mandatory!</source>
         <context-group purpose="location">
@@ -11615,15 +11779,23 @@
         <source>License</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspaces-routing.module.ts</context>
-          <context context-type="linenumber">16</context>
+          <context context-type="linenumber">17</context>
         </context-group>
         <target>许可证</target>
+      </trans-unit>
+      <trans-unit id="workspace.routing.usage" datatype="html">
+        <source>Usage</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/workspaces-routing.module.ts</context>
+          <context context-type="linenumber">23</context>
+        </context-group>
+        <target>用量</target>
       </trans-unit>
       <trans-unit id="workspace.routing.global-users" datatype="html">
         <source>Global Users</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspaces-routing.module.ts</context>
-          <context context-type="linenumber">22</context>
+          <context context-type="linenumber">29</context>
         </context-group>
         <target>全局用户</target>
       </trans-unit>
@@ -11655,15 +11827,23 @@
         </context-group>
         <target>许可证</target>
       </trans-unit>
+      <trans-unit id="workspace.usage.tabtitle" datatype="html">
+        <source>Usage</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/workspaces.component.html</context>
+          <context context-type="linenumber">24,26</context>
+        </context-group>
+        <target>用量</target>
+      </trans-unit>
       <trans-unit id="workspace.global-users.tabtitle" datatype="html">
         <source>Global Users</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspaces.component.html</context>
-          <context context-type="linenumber">28,30</context>
+          <context context-type="linenumber">35,37</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/workspaces.component.html</context>
-          <context context-type="linenumber">30,33</context>
+          <context context-type="linenumber">37,40</context>
         </context-group>
         <target>全局用户</target>
       </trans-unit>

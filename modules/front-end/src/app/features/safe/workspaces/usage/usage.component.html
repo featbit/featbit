@@ -9,9 +9,7 @@
         }
       </nz-select>
     </div>
-    @if (isSaas) {
-      <span class="subscription-info">Workspace is on the <strong>{{ planName }}</strong> / {{ billingCycleStart }} - {{ billingCycleEnd }}</span>
-    }
+    <span class="selected-period-label">{{ selectedPeriodRange }}</span>
   </div>
 
   <!-- Summary Cards -->
@@ -22,12 +20,12 @@
           <i nz-icon nzType="team" nzTheme="outline"></i>
         </div>
         <div class="stat-body">
-          <div class="stat-label">Monthly Active Users</div>
+          <div class="stat-label" i18n="@@workspace.usage.mau">Monthly Active Users</div>
           <div class="stat-value">{{ summary.mau | number }}</div>
           <div class="stat-change"
                [class.positive]="getChangePercent(summary.mau, summary.prevMau) >= 0"
                [class.negative]="getChangePercent(summary.mau, summary.prevMau) < 0">
-            {{ getChangePercent(summary.mau, summary.prevMau) >= 0 ? '+' : '' }}{{ getChangePercent(summary.mau, summary.prevMau) }}% vs last month
+            {{ getChangePercent(summary.mau, summary.prevMau) >= 0 ? '+' : '' }}{{ getChangePercent(summary.mau, summary.prevMau) }}% <span i18n="@@workspace.usage.change-vs-last-month">vs last month</span>
           </div>
         </div>
       </div>
@@ -37,12 +35,12 @@
           <i nz-icon nzType="thunderbolt" nzTheme="outline"></i>
         </div>
         <div class="stat-body">
-          <div class="stat-label">Flag Evaluations</div>
+          <div class="stat-label" i18n="@@workspace.usage.flag-evaluations">Flag Evaluations</div>
           <div class="stat-value">{{ summary.totalFlagEvaluations | number }}</div>
           <div class="stat-change"
                [class.positive]="getChangePercent(summary.totalFlagEvaluations, summary.prevFlagEvaluations) >= 0"
                [class.negative]="getChangePercent(summary.totalFlagEvaluations, summary.prevFlagEvaluations) < 0">
-            {{ getChangePercent(summary.totalFlagEvaluations, summary.prevFlagEvaluations) >= 0 ? '+' : '' }}{{ getChangePercent(summary.totalFlagEvaluations, summary.prevFlagEvaluations) }}% vs last month
+            {{ getChangePercent(summary.totalFlagEvaluations, summary.prevFlagEvaluations) >= 0 ? '+' : '' }}{{ getChangePercent(summary.totalFlagEvaluations, summary.prevFlagEvaluations) }}% <span i18n="@@workspace.usage.change-vs-last-month">vs last month</span>
           </div>
         </div>
       </div>
@@ -52,12 +50,12 @@
           <i nz-icon nzType="bar-chart" nzTheme="outline"></i>
         </div>
         <div class="stat-body">
-          <div class="stat-label">Custom Metrics</div>
+          <div class="stat-label" i18n="@@workspace.usage.custom-metrics">Custom Metrics</div>
           <div class="stat-value">{{ summary.totalCustomMetrics | number }}</div>
           <div class="stat-change"
                [class.positive]="getChangePercent(summary.totalCustomMetrics, summary.prevCustomMetrics) >= 0"
                [class.negative]="getChangePercent(summary.totalCustomMetrics, summary.prevCustomMetrics) < 0">
-            {{ getChangePercent(summary.totalCustomMetrics, summary.prevCustomMetrics) >= 0 ? '+' : '' }}{{ getChangePercent(summary.totalCustomMetrics, summary.prevCustomMetrics) }}% vs last month
+            {{ getChangePercent(summary.totalCustomMetrics, summary.prevCustomMetrics) >= 0 ? '+' : '' }}{{ getChangePercent(summary.totalCustomMetrics, summary.prevCustomMetrics) }}% <span i18n="@@workspace.usage.change-vs-last-month">vs last month</span>
           </div>
         </div>
       </div>
@@ -67,7 +65,7 @@
   <!-- Daily Trend Chart -->
   <div class="section-card">
     <div class="section-header">
-      <h5>Daily Trend</h5>
+      <h5 i18n="@@workspace.usage.daily-trend">Daily Trend</h5>
       <nz-segmented [nzOptions]="metricOptions" (nzValueChange)="onMetricChange($event)"></nz-segmented>
     </div>
     @if (chartConfig && chartVisible) {
@@ -82,8 +80,8 @@
   <!-- Usage Breakdown by Environment -->
   <div class="section-card">
     <div class="section-header">
-      <h5>Per Environment</h5>
-      <span class="section-subtitle">See which environments contribute the most to your usage</span>
+      <h5 i18n="@@workspace.usage.per-environment">Per Environment</h5>
+      <span class="section-subtitle" i18n="@@workspace.usage.per-environment-subtitle">See which environments contribute the most to your usage</span>
     </div>
     <nz-table
       #envTable
@@ -93,10 +91,10 @@
       [nzLoading]="isLoading">
       <thead>
         <tr>
-          <th>Environment</th>
-          <th [nzSortFn]="sortByMau" [nzSortDirections]="['descend', 'ascend']">MAU</th>
-          <th [nzSortFn]="sortByFlagEvals" [nzSortDirections]="['descend', 'ascend']">Flag Evaluations</th>
-          <th [nzSortFn]="sortByCustomMetrics" [nzSortDirections]="['descend', 'ascend']">Custom Metrics</th>
+          <th i18n="@@workspace.usage.environment">Environment</th>
+          <th [nzSortFn]="sortByMau" [nzSortDirections]="['descend', 'ascend']" i18n="@@workspace.usage.mau-short">MAU</th>
+          <th [nzSortFn]="sortByFlagEvals" [nzSortDirections]="['descend', 'ascend']" i18n="@@workspace.usage.flag-evaluations">Flag Evaluations</th>
+          <th [nzSortFn]="sortByCustomMetrics" [nzSortDirections]="['descend', 'ascend']" i18n="@@workspace.usage.custom-metrics">Custom Metrics</th>
         </tr>
       </thead>
       <tbody>

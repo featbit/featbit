@@ -26,6 +26,7 @@ export interface ChartConfig {
   readonly padding: ViewPadding;
   readonly toolTip?: TooltipConfig;
   readonly lineShape?: string;
+  readonly lineColor?: string;
   readonly areaStyle?: AreaStyleConfig;
 }
 
