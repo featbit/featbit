@@ -10,6 +10,8 @@ public static class Topics
 
     public const string Insights = "featbit-insights";
 
+    public const string Usage = "featbit-usage";
+
     public static string ToChannel(string topic) => topic switch
     {
         FeatureFlagChange => "featbit_feature_flag_change_channel",

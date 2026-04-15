@@ -111,3 +111,10 @@ and [consumer configs](https://kafka.apache.org/documentation/#consumerconfigs) 
 | Name                | Description                       | Default Value        |
 |---------------------|-----------------------------------|----------------------|
 | `OLAP__ServiceHost` | URI for the data analytics server | `"http://da-server"` |
+
+### UsageTracking
+
+| Name                             | Description                                            | Default Value |
+|----------------------------------|--------------------------------------------------------|---------------|
+| `UsageTracking__FlushIntervalMs` | Interval in milliseconds between usage data flushes    | `5000`        |
+| `UsageTracking__ChannelCapacity` | Maximum number of usage events buffered in the channel | `10000`       |
