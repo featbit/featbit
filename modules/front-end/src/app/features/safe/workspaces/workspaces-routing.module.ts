@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { WorkspacesComponent } from './workspaces.component';
 import { LicenseComponent } from "@features/safe/workspaces/license/license.component";
 import { GlobalUserComponent } from "@features/safe/workspaces/global-user/global-user.component";
+import { UsageComponent } from "@features/safe/workspaces/usage/usage.component";
 
 const routes: Routes = [
   {
@@ -16,6 +17,12 @@ const routes: Routes = [
           breadcrumb: $localize`:@@workspace.routing.license:License`
         },
       }, {
+        path: 'usage',
+        component: UsageComponent,
+        data: {
+          breadcrumb: $localize`:@@workspace.routing.usage:Usage`
+        }
+      },{
         path: 'global-users',
         component: GlobalUserComponent,
         data: {

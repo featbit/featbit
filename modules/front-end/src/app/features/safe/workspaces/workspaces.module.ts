@@ -29,13 +29,15 @@ import { WorkspaceComponent } from "@features/safe/workspaces/workspace/workspac
 import { LicenseComponent } from './license/license.component';
 import { NzAlertComponent } from "ng-zorro-antd/alert";
 import { GlobalUserComponent } from "@features/safe/workspaces/global-user/global-user.component";
+import { UsageComponent } from './usage/usage.component';
 
 @NgModule({
   declarations: [
     WorkspacesComponent,
     WorkspaceComponent,
     LicenseComponent,
-    GlobalUserComponent
+    GlobalUserComponent,
+    UsageComponent
   ],
   imports: [
     CommonModule,
