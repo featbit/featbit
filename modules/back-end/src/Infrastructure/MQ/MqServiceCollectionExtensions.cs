@@ -31,6 +31,8 @@ public static class MqServiceCollectionExtensions
                 break;
         }
 
+        AddMessageHandlers();
+
         return;
 
         void AddNone()
@@ -44,9 +46,6 @@ public static class MqServiceCollectionExtensions
 
             services.AddSingleton<IMessageProducer, RedisMessageProducer>();
             services.AddHostedService<RedisMessageConsumer>();
-
-            services.AddKeyedTransient<IMessageHandler, EndUserMessageHandler>(Topics.EndUser);
-            services.AddKeyedTransient<IMessageHandler, InsightMessageHandler>(Topics.Insights);
         }
 
         void AddKafka()
@@ -68,12 +67,16 @@ public static class MqServiceCollectionExtensions
         void AddPostgres()
         {
             services.TryAddPostgres(configuration);
-            
+
             services.AddSingleton<IMessageProducer, PostgresMessageProducer>();
             services.AddHostedService<PostgresMessageConsumer>();
+        }
 
+        void AddMessageHandlers()
+        {
             services.AddKeyedTransient<IMessageHandler, EndUserMessageHandler>(Topics.EndUser);
             services.AddKeyedTransient<IMessageHandler, InsightMessageHandler>(Topics.Insights);
+            services.AddKeyedTransient<IMessageHandler, UsageMessageHandler>(Topics.Usage);
         }
     }
 }
