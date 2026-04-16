@@ -1,4 +1,5 @@
 ﻿using Application.Services;
+using Application.Usages;
 using Domain.Workspaces;
 
 namespace Application.IntegrationTests.Stubs;
@@ -17,8 +18,13 @@ public class TestWorkspaceService : NullServiceBase<Workspace>, IWorkspaceServic
         return Task.FromResult(TestWorkspace.Key);
     }
 
-    public Task<int> GetUsageAsync(Guid workspaceId, string feature)
+    public Task<int> GetFeatureUsageAsync(Guid workspaceId, string feature)
     {
         return Task.FromResult(0);
+    }
+
+    public Task SaveRecordsAsync(AggregatedUsageRecords records)
+    {
+        return Task.CompletedTask;
     }
 }

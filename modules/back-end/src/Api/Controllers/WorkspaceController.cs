@@ -43,18 +43,24 @@ public class WorkspaceController : ApiControllerBase
         return Ok(workspace);
     }
 
-    /// <summary>
-    /// Get workspace usage statistics. ID is retrieved from the request header.
-    /// </summary>
-    /// <remarks>
-    /// Retrieve usage metrics and statistics for the workspace, including resource consumption and limits.
-    /// </remarks>
     [HttpGet("usages")]
     public async Task<ApiResponse<object>> GetUsagesAsync()
     {
         var request = new GetWorkspaceUsages
         {
-            WorkspaceId = WorkspaceId,
+            WorkspaceId = WorkspaceId
+        };
+
+        var usage = await Mediator.Send(request);
+        return Ok(usage);
+    }
+
+    [HttpGet("license-quota")]
+    public async Task<ApiResponse<object>> GetLicenseQuotaAsync()
+    {
+        var request = new GetLicenseQuota
+        {
+            WorkspaceId = WorkspaceId
         };
 
         var usage = await Mediator.Send(request);

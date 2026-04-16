@@ -1,3 +1,4 @@
+using Application.Usages;
 using Domain.Workspaces;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -26,7 +27,7 @@ public class WorkspaceService(MongoDbClient mongoDb) : MongoDbService<Workspace>
         return first.Key;
     }
 
-    public async Task<int> GetUsageAsync(Guid workspaceId, string feature)
+    public async Task<int> GetFeatureUsageAsync(Guid workspaceId, string feature)
     {
         return feature switch
         {
@@ -73,6 +74,66 @@ public class WorkspaceService(MongoDbClient mongoDb) : MongoDbService<Workspace>
                 .FirstOrDefaultAsync();
 
             return result == null ? 0 : result["totalAutoAgents"].AsInt32;
+        }
+    }
+
+    public async Task SaveRecordsAsync(AggregatedUsageRecords records)
+    {
+        var (recordedAt, endUsers, events) = records;
+        var recordedDateTime = recordedAt.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
+
+        // Record each unique user once per month; $setOnInsert ensures firstSeenAt is never overwritten.
+        if (endUsers.Count > 0)
+        {
+            var yearMonth = recordedAt.Year * 100 + recordedAt.Month;
+
+            var mauCollection = MongoDb.CollectionOf("UsageEndUserStats");
+            var mauUpdates = endUsers.SelectMany(kvp => kvp.Value.Select(userKey =>
+                {
+                    var envId = new BsonBinaryData(kvp.Key, GuidRepresentation.Standard);
+
+                    var filter = Builders<BsonDocument>.Filter.And(
+                        Builders<BsonDocument>.Filter.Eq("envId", envId),
+                        Builders<BsonDocument>.Filter.Eq("yearMonth", yearMonth),
+                        Builders<BsonDocument>.Filter.Eq("userKey", userKey)
+                    );
+
+                    var update = Builders<BsonDocument>.Update
+                        .SetOnInsert("envId", envId)
+                        .SetOnInsert("yearMonth", yearMonth)
+                        .SetOnInsert("userKey", userKey)
+                        .SetOnInsert("firstSeenAt", recordedDateTime);
+
+                    return new UpdateOneModel<BsonDocument>(filter, update) { IsUpsert = true };
+                })
+            ).ToArray();
+
+            if (mauUpdates.Length > 0)
+            {
+                await mauCollection.BulkWriteAsync(mauUpdates);
+            }
+        }
+
+        // Accumulate daily flag evaluation and custom metric counts via $inc upsert.
+        if (events.Count > 0)
+        {
+            var statsCollection = MongoDb.CollectionOf("UsageEventStats");
+
+            var statsUpdates = events.Select(kvp =>
+            {
+                var filter = Builders<BsonDocument>.Filter.And(
+                    Builders<BsonDocument>.Filter.Eq("envId", new BsonBinaryData(kvp.Key, GuidRepresentation.Standard)),
+                    Builders<BsonDocument>.Filter.Eq("statsDate", recordedDateTime)
+                );
+
+                var update = Builders<BsonDocument>.Update
+                    .Inc("flagEvaluations", kvp.Value.FlagEvaluations)
+                    .Inc("customMetrics", kvp.Value.CustomMetrics);
+
+                return new UpdateOneModel<BsonDocument>(filter, update) { IsUpsert = true };
+            });
+
+            await statsCollection.BulkWriteAsync(statsUpdates);
         }
     }
 }

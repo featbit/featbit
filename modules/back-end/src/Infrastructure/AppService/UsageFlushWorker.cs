@@ -69,19 +69,19 @@ public class UsageFlushWorker(
         var aggregatedRecords = UsageRecordsAggregator.Aggregate(records);
 
         using var scope = serviceProvider.CreateScope();
-        var usageAppService = scope.ServiceProvider.GetRequiredService<IUsageAppService>();
+        var workspaceService = scope.ServiceProvider.GetRequiredService<IWorkspaceService>();
 
         if (aggregatedRecords.Length == 1)
         {
             // this is the most common case
-            await usageAppService.SaveRecordsAsync(aggregatedRecords[0]);
+            await workspaceService.SaveRecordsAsync(aggregatedRecords[0]);
         }
         else
         {
             var tasks = new Task[aggregatedRecords.Length];
             for (var i = 0; i < aggregatedRecords.Length; i++)
             {
-                tasks[i] = usageAppService.SaveRecordsAsync(aggregatedRecords[i]);
+                tasks[i] = workspaceService.SaveRecordsAsync(aggregatedRecords[i]);
             }
 
             await Task.WhenAll(tasks);
