@@ -1289,6 +1289,10 @@
           <context context-type="sourcefile">src/app/features/safe/select-organization/select-organization.component.html</context>
           <context context-type="linenumber">8</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.html</context>
+          <context context-type="linenumber">33,34</context>
+        </context-group>
       </trans-unit>
       <trans-unit id="ff.idx.filter-by-type" datatype="html">
         <source>Filter by type</source>
@@ -8152,6 +8156,10 @@
           <context context-type="sourcefile">src/app/features/safe/workspaces/global-user/global-user.component.ts</context>
           <context context-type="linenumber">57</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.ts</context>
+          <context context-type="linenumber">144</context>
+        </context-group>
       </trans-unit>
       <trans-unit id="ff.variation-used-by-targeting-users" datatype="html">
         <source>This variation is used by targeting users, remove the reference before it can be safely removed</source>
@@ -10468,148 +10476,148 @@
         <source>Monthly Active Users</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.html</context>
-          <context context-type="linenumber">23,24</context>
+          <context context-type="linenumber">44,45</context>
         </context-group>
       </trans-unit>
       <trans-unit id="workspace.usage.change-vs-last-month" datatype="html">
         <source>vs last month</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.html</context>
-          <context context-type="linenumber">28,31</context>
+          <context context-type="linenumber">49,52</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.html</context>
-          <context context-type="linenumber">43,46</context>
+          <context context-type="linenumber">64,67</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.html</context>
-          <context context-type="linenumber">58,61</context>
+          <context context-type="linenumber">79,82</context>
         </context-group>
       </trans-unit>
       <trans-unit id="workspace.usage.flag-evaluations" datatype="html">
         <source>Flag Evaluations</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.html</context>
-          <context context-type="linenumber">38,39</context>
+          <context context-type="linenumber">59,60</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.html</context>
-          <context context-type="linenumber">96,97</context>
+          <context context-type="linenumber">114,115</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.ts</context>
-          <context context-type="linenumber">84</context>
+          <context context-type="linenumber">77</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.ts</context>
-          <context context-type="linenumber">221</context>
+          <context context-type="linenumber">157</context>
         </context-group>
       </trans-unit>
       <trans-unit id="workspace.usage.custom-metrics" datatype="html">
         <source>Custom Metrics</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.html</context>
-          <context context-type="linenumber">53,54</context>
+          <context context-type="linenumber">74,75</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.html</context>
-          <context context-type="linenumber">97,100</context>
+          <context context-type="linenumber">115,118</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.ts</context>
-          <context context-type="linenumber">85</context>
+          <context context-type="linenumber">78</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.ts</context>
-          <context context-type="linenumber">226</context>
+          <context context-type="linenumber">162</context>
         </context-group>
       </trans-unit>
       <trans-unit id="workspace.usage.daily-trend" datatype="html">
         <source>Daily Trend</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.html</context>
-          <context context-type="linenumber">68,69</context>
+          <context context-type="linenumber">88,89</context>
         </context-group>
       </trans-unit>
       <trans-unit id="workspace.usage.per-environment" datatype="html">
         <source>Per Environment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.html</context>
-          <context context-type="linenumber">83,84</context>
+          <context context-type="linenumber">102,103</context>
         </context-group>
       </trans-unit>
       <trans-unit id="workspace.usage.per-environment-subtitle" datatype="html">
         <source>See which environments contribute the most to your usage</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.html</context>
-          <context context-type="linenumber">84,88</context>
+          <context context-type="linenumber">103,106</context>
         </context-group>
       </trans-unit>
       <trans-unit id="workspace.usage.environment" datatype="html">
         <source>Environment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.html</context>
-          <context context-type="linenumber">94,95</context>
+          <context context-type="linenumber">112,113</context>
         </context-group>
       </trans-unit>
       <trans-unit id="workspace.usage.mau-short" datatype="html">
         <source>MAU</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.html</context>
-          <context context-type="linenumber">95,96</context>
+          <context context-type="linenumber">113,114</context>
         </context-group>
       </trans-unit>
       <trans-unit id="workspace.usage.no-data-for-now" datatype="html">
         <source>No data for now</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.ts</context>
-          <context context-type="linenumber">74</context>
+          <context context-type="linenumber">60</context>
         </context-group>
       </trans-unit>
       <trans-unit id="workspace.usage.daily-new-users" datatype="html">
         <source>Daily New Users</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.ts</context>
-          <context context-type="linenumber">83</context>
+          <context context-type="linenumber">76</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.ts</context>
-          <context context-type="linenumber">231</context>
+          <context context-type="linenumber">167</context>
         </context-group>
       </trans-unit>
       <trans-unit id="workspace.usage.this-month" datatype="html">
         <source>This month</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.ts</context>
-          <context context-type="linenumber">103</context>
+          <context context-type="linenumber">96</context>
         </context-group>
       </trans-unit>
       <trans-unit id="workspace.usage.last-7-days" datatype="html">
         <source>Last 7 days</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.ts</context>
-          <context context-type="linenumber">104</context>
+          <context context-type="linenumber">97</context>
         </context-group>
       </trans-unit>
       <trans-unit id="workspace.usage.last-30-days" datatype="html">
         <source>Last 30 days</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.ts</context>
-          <context context-type="linenumber">105</context>
+          <context context-type="linenumber">98</context>
         </context-group>
       </trans-unit>
       <trans-unit id="workspace.usage.current-billing-cycle" datatype="html">
         <source>Current billing cycle</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.ts</context>
-          <context context-type="linenumber">110</context>
+          <context context-type="linenumber">103</context>
         </context-group>
       </trans-unit>
       <trans-unit id="workspace.usage.previous-billing-cycle" datatype="html">
         <source>Previous billing cycle</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.ts</context>
-          <context context-type="linenumber">111</context>
+          <context context-type="linenumber">104</context>
         </context-group>
       </trans-unit>
       <trans-unit id="workspace.workspace.nameMandatory" datatype="html">

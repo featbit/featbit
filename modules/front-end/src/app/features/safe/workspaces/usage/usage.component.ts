@@ -1,31 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { ChartConfig } from '@core/components/g2-chart/g2-line-chart/g2-line-chart';
 import { Data } from '@antv/g2/src/interface';
 import { environment } from 'src/environments/environment';
 import { HOSTING_MODE } from "@shared/constants";
-
-interface UsageSummary {
-  mau: number;
-  totalFlagEvaluations: number;
-  totalCustomMetrics: number;
-  prevMau: number;
-  prevFlagEvaluations: number;
-  prevCustomMetrics: number;
-}
+import { WorkspaceService } from '@core/services/workspace.service';
+import { EnvironmentUsage, UsageSummary } from '@features/safe/workspaces/types/workspace';
+import { NzMessageService } from "ng-zorro-antd/message";
+import { finalize } from 'rxjs/operators';
 
 interface DailyUsage {
   date: string;
   value: number;
-}
-
-interface EnvironmentUsage {
-  orgName: string;
-  projectName: string;
-  envName: string;
-  envId: string;
-  mau: number;
-  flagEvaluations: number;
-  customMetrics: number;
 }
 
 interface BillingPeriod {
@@ -40,13 +25,14 @@ interface BillingPeriod {
   styleUrls: ['./usage.component.less']
 })
 export class UsageComponent implements OnInit {
+  private workspaceService = inject(WorkspaceService);
+  private message = inject(NzMessageService);
+
   isLoading = false;
+  isFirstLoad = true;
+
   isSaas = environment.hostingMode === HOSTING_MODE.SAAS;
   chartVisible = true;
-
-  planName = 'Pro Plan';
-  billingCycleStart = 'Apr 12, 2026';
-  billingCycleEnd = 'May 12, 2026';
 
   billingPeriods: BillingPeriod[] = [];
   selectedPeriod!: string;
@@ -77,7 +63,14 @@ export class UsageComponent implements OnInit {
     }
   }
 
-  summary!: UsageSummary;
+  summary: UsageSummary = {
+    mau: 0,
+    totalFlagEvaluations: 0,
+    totalCustomMetrics: 0,
+    prevMau: 0,
+    prevFlagEvaluations: 0,
+    prevCustomMetrics: 0,
+  }
 
   metricOptions = [
     { label: $localize`:@@workspace.usage.daily-new-users:Daily New Users`, value: 'danu' },
@@ -98,7 +91,7 @@ export class UsageComponent implements OnInit {
     this.loadUsageData();
   }
 
-  private initBillingPeriods(): void {
+  initBillingPeriods(): void {
     this.billingPeriods = [
       { label: $localize`:@@workspace.usage.this-month:This month`, value: 'thisMonth' },
       { label: $localize`:@@workspace.usage.last-7-days:Last 7 days`, value: 'last7d' },
@@ -128,89 +121,32 @@ export class UsageComponent implements OnInit {
 
   private loadUsageData(): void {
     this.isLoading = true;
+    this.workspaceService.getUsage().pipe(
+      finalize(() => {
+        this.isLoading = false;
+        this.isFirstLoad = false;
+      })
+    ).subscribe({
+      next: (usage) => {
+        if (usage) {
+          this.summary = usage.summary;
+          this.envUsages = usage.environmentUsages;
+          this.dailyDau = usage.dailyTrend.map(item => ({ date: item.date, value: item.newUsers }));
+          this.dailyFlagEvals = usage.dailyTrend.map(item => ({ date: item.date, value: item.flagEvaluations }));
+          this.dailyCustomMetrics = usage.dailyTrend.map(item => ({ date: item.date, value: item.customMetrics }));
 
-    // Mock data - replace with real API call later
-    this.mockData();
-    this.updateChart();
-
-    this.isLoading = false;
+          this.chartVisible = false;
+          this.updateChart();
+          setTimeout(() => this.chartVisible = true);
+        }
+      },
+      error: () => {
+        this.message.error($localize`:@@common.failed-to-load-data:Failed to load data`);
+      }
+    });
   }
 
-  private mockData(): void {
-    this.summary = {
-      mau: 12_458,
-      totalFlagEvaluations: 3_847_291,
-      totalCustomMetrics: 156_723,
-      prevMau: 11_203,
-      prevFlagEvaluations: 3_521_880,
-      prevCustomMetrics: 142_109,
-    };
-
-    this.envUsages = [
-      {
-        orgName: 'Acme Corp',
-        projectName: 'Web Platform',
-        envName: 'Production',
-        envId: 'env-prod-001',
-        mau: 8_932,
-        flagEvaluations: 2_541_873,
-        customMetrics: 98_421,
-      },
-      {
-        orgName: 'Acme Corp',
-        projectName: 'Web Platform',
-        envName: 'Staging',
-        envId: 'env-stg-001',
-        mau: 1_247,
-        flagEvaluations: 523_418,
-        customMetrics: 24_302,
-      },
-      {
-        orgName: 'Acme Corp',
-        projectName: 'Mobile App',
-        envName: 'Production',
-        envId: 'env-prod-002',
-        mau: 2_104,
-        flagEvaluations: 689_234,
-        customMetrics: 30_912,
-      },
-      {
-        orgName: 'Beta Labs',
-        projectName: 'API Gateway',
-        envName: 'Production',
-        envId: 'env-prod-003',
-        mau: 175,
-        flagEvaluations: 92_766,
-        customMetrics: 3_088,
-      },
-    ];
-
-    // Generate daily data for 15 days (April 1-15, 2026)
-    this.dailyDau = [];
-    this.dailyFlagEvals = [];
-    this.dailyCustomMetrics = [];
-
-    for (let day = 1; day <= 15; day++) {
-      const dateStr = `Apr ${day.toString().padStart(2, '0')}`;
-      const dayOfWeek = new Date(2026, 3, day).getDay();
-      const weekendFactor = (dayOfWeek === 0 || dayOfWeek === 6) ? 0.6 : 1;
-
-      this.dailyDau.push({
-        date: dateStr,
-        value: Math.floor((800 + Math.floor(Math.random() * 200)) * weekendFactor),
-      });
-      this.dailyFlagEvals.push({
-        date: dateStr,
-        value: Math.floor((240_000 + Math.floor(Math.random() * 40_000)) * weekendFactor),
-      });
-      this.dailyCustomMetrics.push({
-        date: dateStr,
-        value: Math.floor((9_000 + Math.floor(Math.random() * 3_000)) * weekendFactor),
-      });
-    }
-  }
-
-  private updateChart(): void {
+  updateChart(): void {
     let source: DailyUsage[];
     let yAxisName: string;
     let lineColor: string;

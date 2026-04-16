@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, Input, OnDestroy} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, Input, OnDestroy, ViewChild} from '@angular/core';
 import {Chart} from "@antv/g2";
 import {AxisConfig, ChartConfig, defaultTooltipItemTplPlaceholder} from "./g2-line-chart";
 import {MacaronColors} from "../g2-chart";
@@ -7,15 +7,15 @@ import { fromEvent, Subscription } from 'rxjs';
 @Component({
   selector: 'g2-line-chart',
   template: `
-    <div id="line-chart-container-{{this.containerId ? this.containerId : ''}}" [ngStyle]="{width, height}">
+    <div #containerRef [ngStyle]="{width, height}">
     </div>
   `,
   standalone: false
 })
 export class G2LineChartComponent implements AfterViewInit, OnDestroy {
   @Input()
-  containerId: string = '';
-  @Input() width: string = "100%";
+  width: string = "100%";
+
   @Input()
   chartConfig: ChartConfig;
 
@@ -32,6 +32,9 @@ export class G2LineChartComponent implements AfterViewInit, OnDestroy {
   private resizeSubscription: Subscription;
   private defaultChartMaxHeight: number = 0;
   public height: string = "400px";
+
+  @ViewChild('containerRef')
+  containerRef: ElementRef<HTMLDivElement>;
 
   chart: Chart;
 
@@ -60,8 +63,13 @@ export class G2LineChartComponent implements AfterViewInit, OnDestroy {
   }
 
   private renderChart() {
+    if (!this.containerRef?.nativeElement) {
+      console.error('failed to render chart, container not found...');
+      return;
+    }
+
     this.chart = new Chart({
-      container: `line-chart-container-${this.containerId}`,
+      container: this.containerRef.nativeElement,
       autoFit: true,
       padding: this.chartConfig.padding
     });
@@ -141,5 +149,6 @@ export class G2LineChartComponent implements AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.resizeSubscription && this.resizeSubscription.unsubscribe();
+    this.chart && this.chart.destroy();
   }
 }

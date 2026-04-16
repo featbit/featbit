@@ -12,130 +12,150 @@
     <span class="selected-period-label">{{ selectedPeriodRange }}</span>
   </div>
 
-  <!-- Summary Cards -->
-  @if (!isLoading && summary) {
+  @if (isLoading && isFirstLoad) {
     <div class="summary-cards">
-      <div class="stat-card">
-        <div class="stat-icon mau">
-          <i nz-icon nzType="team" nzTheme="outline"></i>
+      @for (card of [1, 2, 3]; track card) {
+        <div class="stat-card">
+          <nz-skeleton [nzActive]="true" [nzLoading]="true" [nzTitle]="{ width: '55%' }" [nzParagraph]="{ rows: 2, width: ['80%', '45%'] }"></nz-skeleton>
         </div>
-        <div class="stat-body">
-          <div class="stat-label" i18n="@@workspace.usage.mau">Monthly Active Users</div>
-          <div class="stat-value">{{ summary.mau | number }}</div>
-          <div class="stat-change"
-               [class.positive]="getChangePercent(summary.mau, summary.prevMau) >= 0"
-               [class.negative]="getChangePercent(summary.mau, summary.prevMau) < 0">
-            {{ getChangePercent(summary.mau, summary.prevMau) >= 0 ? '+' : '' }}{{ getChangePercent(summary.mau, summary.prevMau) }}% <span i18n="@@workspace.usage.change-vs-last-month">vs last month</span>
+      }
+    </div>
+
+    <div class="section-card">
+      <nz-skeleton [nzActive]="true" [nzLoading]="true" [nzTitle]="{ width: '20%' }" [nzParagraph]="{ rows: 6, width: ['100%', '100%', '96%', '92%', '88%', '84%'] }"></nz-skeleton>
+    </div>
+
+    <div class="section-card">
+      <nz-skeleton [nzActive]="true" [nzLoading]="true" [nzTitle]="{ width: '24%' }" [nzParagraph]="{ rows: 8, width: ['100%', '98%', '96%', '94%', '92%', '90%', '88%', '86%'] }"></nz-skeleton>
+    </div>
+  } @else {
+    <nz-spin
+      nzTip="Loading..."
+      i18n-nzTip="@@common.loading"
+      [nzSpinning]="isLoading && !isFirstLoad"
+      [nzDelay]="200">
+      <!-- Summary Cards -->
+      <div class="summary-cards">
+        <div class="stat-card">
+          <div class="stat-icon mau">
+            <i nz-icon nzType="team" nzTheme="outline"></i>
+          </div>
+          <div class="stat-body">
+            <div class="stat-label" i18n="@@workspace.usage.mau">Monthly Active Users</div>
+            <div class="stat-value">{{ summary.mau | number }}</div>
+            <div class="stat-change"
+                 [class.positive]="getChangePercent(summary.mau, summary.prevMau) >= 0"
+                 [class.negative]="getChangePercent(summary.mau, summary.prevMau) < 0">
+              {{ getChangePercent(summary.mau, summary.prevMau) >= 0 ? '+' : '' }}{{ getChangePercent(summary.mau, summary.prevMau) }}% <span i18n="@@workspace.usage.change-vs-last-month">vs last month</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon evals">
+            <i nz-icon nzType="thunderbolt" nzTheme="outline"></i>
+          </div>
+          <div class="stat-body">
+            <div class="stat-label" i18n="@@workspace.usage.flag-evaluations">Flag Evaluations</div>
+            <div class="stat-value">{{ summary.totalFlagEvaluations | number }}</div>
+            <div class="stat-change"
+                 [class.positive]="getChangePercent(summary.totalFlagEvaluations, summary.prevFlagEvaluations) >= 0"
+                 [class.negative]="getChangePercent(summary.totalFlagEvaluations, summary.prevFlagEvaluations) < 0">
+              {{ getChangePercent(summary.totalFlagEvaluations, summary.prevFlagEvaluations) >= 0 ? '+' : '' }}{{ getChangePercent(summary.totalFlagEvaluations, summary.prevFlagEvaluations) }}% <span i18n="@@workspace.usage.change-vs-last-month">vs last month</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon metrics">
+            <i nz-icon nzType="bar-chart" nzTheme="outline"></i>
+          </div>
+          <div class="stat-body">
+            <div class="stat-label" i18n="@@workspace.usage.custom-metrics">Custom Metrics</div>
+            <div class="stat-value">{{ summary.totalCustomMetrics | number }}</div>
+            <div class="stat-change"
+                 [class.positive]="getChangePercent(summary.totalCustomMetrics, summary.prevCustomMetrics) >= 0"
+                 [class.negative]="getChangePercent(summary.totalCustomMetrics, summary.prevCustomMetrics) < 0">
+              {{ getChangePercent(summary.totalCustomMetrics, summary.prevCustomMetrics) >= 0 ? '+' : '' }}{{ getChangePercent(summary.totalCustomMetrics, summary.prevCustomMetrics) }}% <span i18n="@@workspace.usage.change-vs-last-month">vs last month</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="stat-card">
-        <div class="stat-icon evals">
-          <i nz-icon nzType="thunderbolt" nzTheme="outline"></i>
+      <!-- Daily Trend Chart -->
+      <div class="section-card">
+        <div class="section-header">
+          <h5 i18n="@@workspace.usage.daily-trend">Daily Trend</h5>
+          <nz-segmented [nzOptions]="metricOptions" (nzValueChange)="onMetricChange($event)"></nz-segmented>
         </div>
-        <div class="stat-body">
-          <div class="stat-label" i18n="@@workspace.usage.flag-evaluations">Flag Evaluations</div>
-          <div class="stat-value">{{ summary.totalFlagEvaluations | number }}</div>
-          <div class="stat-change"
-               [class.positive]="getChangePercent(summary.totalFlagEvaluations, summary.prevFlagEvaluations) >= 0"
-               [class.negative]="getChangePercent(summary.totalFlagEvaluations, summary.prevFlagEvaluations) < 0">
-            {{ getChangePercent(summary.totalFlagEvaluations, summary.prevFlagEvaluations) >= 0 ? '+' : '' }}{{ getChangePercent(summary.totalFlagEvaluations, summary.prevFlagEvaluations) }}% <span i18n="@@workspace.usage.change-vs-last-month">vs last month</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-icon metrics">
-          <i nz-icon nzType="bar-chart" nzTheme="outline"></i>
-        </div>
-        <div class="stat-body">
-          <div class="stat-label" i18n="@@workspace.usage.custom-metrics">Custom Metrics</div>
-          <div class="stat-value">{{ summary.totalCustomMetrics | number }}</div>
-          <div class="stat-change"
-               [class.positive]="getChangePercent(summary.totalCustomMetrics, summary.prevCustomMetrics) >= 0"
-               [class.negative]="getChangePercent(summary.totalCustomMetrics, summary.prevCustomMetrics) < 0">
-            {{ getChangePercent(summary.totalCustomMetrics, summary.prevCustomMetrics) >= 0 ? '+' : '' }}{{ getChangePercent(summary.totalCustomMetrics, summary.prevCustomMetrics) }}% <span i18n="@@workspace.usage.change-vs-last-month">vs last month</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  }
-
-  <!-- Daily Trend Chart -->
-  <div class="section-card">
-    <div class="section-header">
-      <h5 i18n="@@workspace.usage.daily-trend">Daily Trend</h5>
-      <nz-segmented [nzOptions]="metricOptions" (nzValueChange)="onMetricChange($event)"></nz-segmented>
-    </div>
-    @if (chartConfig && chartVisible) {
-      <g2-line-chart
-        containerId="usage-trend"
-        [chartConfig]="chartConfig"
-        [defaultChartHeight]="280">
-      </g2-line-chart>
-    }
-  </div>
-
-  <!-- Usage Breakdown by Environment -->
-  <div class="section-card">
-    <div class="section-header">
-      <h5 i18n="@@workspace.usage.per-environment">Per Environment</h5>
-      <span class="section-subtitle" i18n="@@workspace.usage.per-environment-subtitle">See which environments contribute the most to your usage</span>
-    </div>
-    <nz-table
-      #envTable
-      nzSize="middle"
-      [nzData]="envUsages"
-      [nzShowPagination]="false"
-      [nzLoading]="isLoading">
-      <thead>
-        <tr>
-          <th i18n="@@workspace.usage.environment">Environment</th>
-          <th [nzSortFn]="sortByMau" [nzSortDirections]="['descend', 'ascend']" i18n="@@workspace.usage.mau-short">MAU</th>
-          <th [nzSortFn]="sortByFlagEvals" [nzSortDirections]="['descend', 'ascend']" i18n="@@workspace.usage.flag-evaluations">Flag Evaluations</th>
-          <th [nzSortFn]="sortByCustomMetrics" [nzSortDirections]="['descend', 'ascend']" i18n="@@workspace.usage.custom-metrics">Custom Metrics</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (env of envTable.data; track env.envId) {
-          <tr>
-            <td>
-              <div class="env-info">
-                <span class="env-path">{{ env.orgName }} / {{ env.projectName }}</span>
-                <span class="env-name">{{ env.envName }}</span>
-              </div>
-            </td>
-            <td>
-              <div class="usage-cell">
-                <span class="usage-number">{{ env.mau | number }}</span>
-                <span class="usage-percent">{{ getUsagePercent(env.mau, summary.mau) }}%</span>
-              </div>
-              <div class="usage-bar">
-                <div class="usage-bar-fill mau" [style.width.%]="getUsagePercent(env.mau, summary.mau)"></div>
-              </div>
-            </td>
-            <td>
-              <div class="usage-cell">
-                <span class="usage-number">{{ env.flagEvaluations | number }}</span>
-                <span class="usage-percent">{{ getUsagePercent(env.flagEvaluations, summary.totalFlagEvaluations) }}%</span>
-              </div>
-              <div class="usage-bar">
-                <div class="usage-bar-fill evals" [style.width.%]="getUsagePercent(env.flagEvaluations, summary.totalFlagEvaluations)"></div>
-              </div>
-            </td>
-            <td>
-              <div class="usage-cell">
-                <span class="usage-number">{{ env.customMetrics | number }}</span>
-                <span class="usage-percent">{{ getUsagePercent(env.customMetrics, summary.totalCustomMetrics) }}%</span>
-              </div>
-              <div class="usage-bar">
-                <div class="usage-bar-fill metrics" [style.width.%]="getUsagePercent(env.customMetrics, summary.totalCustomMetrics)"></div>
-              </div>
-            </td>
-          </tr>
+        @if (chartConfig && chartVisible) {
+          <g2-line-chart
+            [chartConfig]="chartConfig"
+            [defaultChartHeight]="280">
+          </g2-line-chart>
         }
-      </tbody>
-    </nz-table>
-  </div>
+      </div>
+
+      <!-- Usage Breakdown by Environment -->
+      <div class="section-card">
+        <div class="section-header">
+          <h5 i18n="@@workspace.usage.per-environment">Per Environment</h5>
+          <span class="section-subtitle" i18n="@@workspace.usage.per-environment-subtitle">See which environments contribute the most to your usage</span>
+        </div>
+        <nz-table
+          #envTable
+          nzSize="middle"
+          [nzData]="envUsages"
+          [nzShowPagination]="false">
+          <thead>
+          <tr>
+            <th i18n="@@workspace.usage.environment">Environment</th>
+            <th [nzSortFn]="sortByMau" [nzSortDirections]="['descend', 'ascend']" i18n="@@workspace.usage.mau-short">MAU</th>
+            <th [nzSortFn]="sortByFlagEvals" [nzSortDirections]="['descend', 'ascend']" i18n="@@workspace.usage.flag-evaluations">Flag Evaluations</th>
+            <th [nzSortFn]="sortByCustomMetrics" [nzSortDirections]="['descend', 'ascend']" i18n="@@workspace.usage.custom-metrics">Custom Metrics</th>
+          </tr>
+          </thead>
+          <tbody>
+            @for (env of envTable.data; track env.envId) {
+              <tr>
+                <td>
+                  <div class="env-info">
+                    <span class="env-path">{{ env.orgName }} / {{ env.projectName }}</span>
+                    <span class="env-name">{{ env.envName }}</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="usage-cell">
+                    <span class="usage-number">{{ env.mau | number }}</span>
+                    <span class="usage-percent">{{ getUsagePercent(env.mau, summary.mau) }}%</span>
+                  </div>
+                  <div class="usage-bar">
+                    <div class="usage-bar-fill mau" [style.width.%]="getUsagePercent(env.mau, summary.mau)"></div>
+                  </div>
+                </td>
+                <td>
+                  <div class="usage-cell">
+                    <span class="usage-number">{{ env.flagEvaluations | number }}</span>
+                    <span class="usage-percent">{{ getUsagePercent(env.flagEvaluations, summary.totalFlagEvaluations) }}%</span>
+                  </div>
+                  <div class="usage-bar">
+                    <div class="usage-bar-fill evals" [style.width.%]="getUsagePercent(env.flagEvaluations, summary.totalFlagEvaluations)"></div>
+                  </div>
+                </td>
+                <td>
+                  <div class="usage-cell">
+                    <span class="usage-number">{{ env.customMetrics | number }}</span>
+                    <span class="usage-percent">{{ getUsagePercent(env.customMetrics, summary.totalCustomMetrics) }}%</span>
+                  </div>
+                  <div class="usage-bar">
+                    <div class="usage-bar-fill metrics" [style.width.%]="getUsagePercent(env.customMetrics, summary.totalCustomMetrics)"></div>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </nz-table>
+      </div>
+    </nz-spin>
+  }
 </div>
