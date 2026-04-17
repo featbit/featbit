@@ -44,11 +44,12 @@ public class WorkspaceController : ApiControllerBase
     }
 
     [HttpGet("usages")]
-    public async Task<ApiResponse<object>> GetUsagesAsync()
+    public async Task<ApiResponse<WorkspaceUsageVm>> GetUsagesAsync([FromQuery] WorkspaceUsageFilter filter)
     {
         var request = new GetWorkspaceUsages
         {
-            WorkspaceId = WorkspaceId
+            WorkspaceId = WorkspaceId,
+            Filter = filter
         };
 
         var usage = await Mediator.Send(request);
