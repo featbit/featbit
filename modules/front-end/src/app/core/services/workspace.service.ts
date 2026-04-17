@@ -5,8 +5,7 @@ import { firstValueFrom, Observable, of } from "rxjs";
 import { IOidc, IWorkspace } from "@shared/types";
 import { CURRENT_WORKSPACE } from "@utils/localstorage-keys";
 import { catchError } from "rxjs/operators";
-import { delay } from "rxjs/operators";
-import { LicenseQuota, WorkspaceUsage, WORKSPACE_USAGE_MOCK_DATA } from "@features/safe/workspaces/types/workspace";
+import { LicenseQuota, WorkspaceUsage, WorkspaceUsageFilter } from "@features/safe/workspaces/types/workspace";
 
 @Injectable({
   providedIn: 'root'
@@ -38,13 +37,11 @@ export class WorkspaceService {
     return this.http.get<LicenseQuota>(url).pipe(catchError(() => of(undefined)));
   }
 
-  getUsage(): Observable<WorkspaceUsage | undefined> {
-    return of(WORKSPACE_USAGE_MOCK_DATA).pipe(delay(2000));
-
-    // const url = `${this.baseUrl}/usage`;
-    // return this.http
-    //   .get<IWorkspaceUsage>(url)
-    //   .pipe(catchError(() => of(undefined)));
+  getUsage(filter: WorkspaceUsageFilter): Observable<WorkspaceUsage | undefined> {
+    const url = `${this.baseUrl}/usages`;
+    return this.http
+      .get<WorkspaceUsage>(url, { params: { ...filter } })
+      .pipe(catchError(() => of(undefined)));
   }
 
   isKeyUsed(key: string): Observable<boolean> {

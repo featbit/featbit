@@ -4,7 +4,7 @@ import { Data } from '@antv/g2/src/interface';
 import { environment } from 'src/environments/environment';
 import { HOSTING_MODE } from "@shared/constants";
 import { WorkspaceService } from '@core/services/workspace.service';
-import { EnvironmentUsage, UsageSummary } from '@features/safe/workspaces/types/workspace';
+import { EnvironmentUsage, UsageSummary, WorkspaceUsageFilter } from '@features/safe/workspaces/types/workspace';
 import { NzMessageService } from "ng-zorro-antd/message";
 import { finalize } from 'rxjs/operators';
 
@@ -119,9 +119,64 @@ export class UsageComponent implements OnInit {
     setTimeout(() => this.chartVisible = true);
   }
 
+  private buildUsageFilter(): WorkspaceUsageFilter {
+    const now = new Date();
+    const fmt = (d: Date) => d.toISOString().split('T')[0];
+    let startDate: Date, endDate: Date, prevStartDate: Date, prevEndDate: Date;
+
+    switch (this.selectedPeriod) {
+      case 'last7d': {
+        endDate = now;
+        startDate = new Date(now); startDate.setDate(now.getDate() - 6);
+        prevEndDate = new Date(startDate); prevEndDate.setDate(startDate.getDate() - 1);
+        prevStartDate = new Date(prevEndDate); prevStartDate.setDate(prevEndDate.getDate() - 6);
+        break;
+      }
+      case 'last30d': {
+        endDate = now;
+        startDate = new Date(now); startDate.setDate(now.getDate() - 29);
+        prevEndDate = new Date(startDate); prevEndDate.setDate(startDate.getDate() - 1);
+        prevStartDate = new Date(prevEndDate); prevStartDate.setDate(prevEndDate.getDate() - 29);
+        break;
+      }
+      case 'thisMonth':
+      default: {
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        prevStartDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        prevEndDate = new Date(now.getFullYear(), now.getMonth(), 0);
+        break;
+      }
+    }
+
+    return {
+      startDate: fmt(startDate),
+      endDate: fmt(endDate),
+      prevStartDate: fmt(prevStartDate),
+      prevEndDate: fmt(prevEndDate),
+    };
+  }
+
+  private generateDateRange(startDate: string, endDate: string): string[] {
+    const dates: string[] = [];
+    const current = new Date(startDate);
+    const end = new Date(endDate);
+    while (current <= end) {
+      dates.push(current.toISOString().split('T')[0]);
+      current.setDate(current.getDate() + 1);
+    }
+    return dates;
+  }
+
+  private formatDateLabel(isoDate: string): string {
+    const d = new Date(isoDate);
+    return d.toLocaleDateString('en-US', { month: 'short', day: '2-digit' });
+  }
+
   private loadUsageData(): void {
     this.isLoading = true;
-    this.workspaceService.getUsage().pipe(
+    const filter = this.buildUsageFilter();
+    this.workspaceService.getUsage(filter).pipe(
       finalize(() => {
         this.isLoading = false;
         this.isFirstLoad = false;
@@ -131,9 +186,13 @@ export class UsageComponent implements OnInit {
         if (usage) {
           this.summary = usage.summary;
           this.envUsages = usage.environmentUsages;
-          this.dailyDau = usage.dailyTrend.map(item => ({ date: item.date, value: item.newUsers }));
-          this.dailyFlagEvals = usage.dailyTrend.map(item => ({ date: item.date, value: item.flagEvaluations }));
-          this.dailyCustomMetrics = usage.dailyTrend.map(item => ({ date: item.date, value: item.customMetrics }));
+
+          const dateRange = this.generateDateRange(filter.startDate, filter.endDate);
+          const trendMap = new Map((usage.dailyTrend ?? []).map(item => [item.date, item]));
+
+          this.dailyDau = dateRange.map(date => ({ date: this.formatDateLabel(date), value: trendMap.get(date)?.newUsers ?? 0 }));
+          this.dailyFlagEvals = dateRange.map(date => ({ date: this.formatDateLabel(date), value: trendMap.get(date)?.flagEvaluations ?? 0 }));
+          this.dailyCustomMetrics = dateRange.map(date => ({ date: this.formatDateLabel(date), value: trendMap.get(date)?.customMetrics ?? 0 }));
 
           this.chartVisible = false;
           this.updateChart();
