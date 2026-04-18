@@ -40,9 +40,6 @@ import { OrganizationsComponent } from "@features/safe/organizations/organizatio
     ProjectFilterPipe,
     ProfileComponent
   ],
-  exports: [
-    OrganizationComponent
-  ],
   imports: [
     CommonModule,
     FormsModule,

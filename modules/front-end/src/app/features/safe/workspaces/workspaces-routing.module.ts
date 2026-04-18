@@ -2,8 +2,8 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { WorkspacesComponent } from './workspaces.component';
 import { LicenseComponent } from "@features/safe/workspaces/license/license.component";
-import { GlobalUserComponent } from "@features/safe/workspaces/global-user/global-user.component";
 import { UsageComponent } from "@features/safe/workspaces/usage/usage.component";
+import { GlobalUserComponent } from "@features/safe/workspaces/global-user/global-user.component";
 
 const routes: Routes = [
   {

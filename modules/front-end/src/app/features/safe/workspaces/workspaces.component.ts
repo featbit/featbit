@@ -1,8 +1,8 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { generalResourceRNPattern, permissionActions } from "@shared/policy";
-import { PermissionsService } from "@services/permissions.service";
 import { getCurrentLicense } from "@utils/project-env";
 import { LicenseFeatureEnum } from "@shared/types";
+import { generalResourceRNPattern, permissionActions } from "@shared/policy";
+import { PermissionsService } from "@services/permissions.service";
 
 @Component({
   selector: 'workspaces',
@@ -18,8 +18,7 @@ export class WorkspacesComponent implements OnInit {
 
   ngOnInit(): void {
     const license = getCurrentLicense();
-
-    this.canUpdateLicense = this.permissionsService.isGranted(generalResourceRNPattern.workspace, permissionActions.UpdateWorkspaceLicense);
     this.isGlobalUserGranted = license.isGranted(LicenseFeatureEnum.GlobalUser);
+    this.canUpdateLicense = this.permissionsService.isGranted(generalResourceRNPattern.workspace, permissionActions.UpdateWorkspaceLicense);
   }
 }
