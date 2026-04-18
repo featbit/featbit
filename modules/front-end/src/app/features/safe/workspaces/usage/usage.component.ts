@@ -294,7 +294,7 @@ export class UsageComponent implements OnInit {
     }
   }
 
-  sortByMau = (a: EnvironmentUsage, b: EnvironmentUsage) => a.mau - b.mau;
+  sortByUniqueUsers = (a: EnvironmentUsage, b: EnvironmentUsage) => a.mau - b.mau;
   sortByFlagEvals = (a: EnvironmentUsage, b: EnvironmentUsage) => a.flagEvaluations - b.flagEvaluations;
   sortByCustomMetrics = (a: EnvironmentUsage, b: EnvironmentUsage) => a.customMetrics - b.customMetrics;
 }

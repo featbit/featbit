@@ -11463,13 +11463,17 @@
         </context-group>
         <target>无效 License, 请联系 FeatBit 团队获取 License。</target>
       </trans-unit>
-      <trans-unit id="workspace.usage.mau" datatype="html">
-        <source>Monthly Active Users</source>
+      <trans-unit id="workspace.usage.unique-users" datatype="html">
+        <source>Unique Users</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.html</context>
           <context context-type="linenumber">44,45</context>
         </context-group>
-        <target>月活用户</target>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.html</context>
+          <context context-type="linenumber">113,114</context>
+        </context-group>
+        <target>独立用户</target>
       </trans-unit>
       <trans-unit id="workspace.usage.flag-evaluations" datatype="html">
         <source>Flag Evaluations</source>
@@ -11542,14 +11546,6 @@
           <context context-type="linenumber">112,113</context>
         </context-group>
         <target>环境</target>
-      </trans-unit>
-      <trans-unit id="workspace.usage.mau-short" datatype="html">
-        <source>MAU</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.html</context>
-          <context context-type="linenumber">113,114</context>
-        </context-group>
-        <target>月活用户</target>
       </trans-unit>
       <trans-unit id="workspace.usage.no-data-for-now" datatype="html">
         <source>No data for now</source>

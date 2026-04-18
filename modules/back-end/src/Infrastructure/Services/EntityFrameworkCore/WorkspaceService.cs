@@ -151,34 +151,34 @@ public class WorkspaceService(AppDbContext dbContext)
 
         const string query =
             """
-            -- 1. Current MAU
+            -- 1. Current Unique Users
             SELECT COUNT(*)
             FROM usage_end_user_stats
-            WHERE env_id = ANY(@EnvIds) AND year_month = @CurrentYearMonth;
+            WHERE env_id = ANY(@EnvIds) AND first_seen_at >= @StartDate AND first_seen_at <= @EndDate;
 
             -- 2. Current flag evaluations & custom metrics
             SELECT COALESCE(SUM(flag_evaluations), 0) AS flag_evaluations,
                    COALESCE(SUM(custom_metrics), 0)   AS custom_metrics
             FROM usage_event_stats
             WHERE env_id = ANY(@EnvIds)
-                AND stats_date >= @StartDate AND stats_date < @EndDate;
+                AND stats_date >= @StartDate AND stats_date <= @EndDate;
 
-            -- 3. Previous MAU
+            -- 3. Previous Unique Users
             SELECT COUNT(*)
             FROM usage_end_user_stats
-            WHERE env_id = ANY(@EnvIds) AND year_month = @PrevYearMonth;
+            WHERE env_id = ANY(@EnvIds) AND first_seen_at >= @PrevStartDate AND first_seen_at <= @PrevEndDate;
 
             -- 4. Previous flag evaluations & custom metrics
             SELECT COALESCE(SUM(flag_evaluations), 0) AS flag_evaluations,
                    COALESCE(SUM(custom_metrics), 0)   AS custom_metrics
             FROM usage_event_stats
             WHERE env_id = ANY(@EnvIds)
-                AND stats_date >= @PrevStartDate AND stats_date < @PrevEndDate;
+                AND stats_date >= @PrevStartDate AND stats_date <= @PrevEndDate;
 
             -- 5. Daily new users
             SELECT first_seen_at AS date, COUNT(*)::int AS new_users
             FROM usage_end_user_stats
-            WHERE env_id = ANY(@EnvIds) AND year_month = @CurrentYearMonth
+            WHERE env_id = ANY(@EnvIds) AND first_seen_at >= @StartDate AND first_seen_at <= @EndDate
             GROUP BY first_seen_at
             ORDER BY first_seen_at;
 
@@ -188,14 +188,14 @@ public class WorkspaceService(AppDbContext dbContext)
                    SUM(custom_metrics)   AS custom_metrics
             FROM usage_event_stats
             WHERE env_id = ANY(@EnvIds)
-                AND stats_date >= @StartDate AND stats_date < @EndDate
+                AND stats_date >= @StartDate AND stats_date <= @EndDate
             GROUP BY stats_date
             ORDER BY stats_date;
 
             -- 7. Per-environment MAU
             SELECT env_id, COUNT(*)::int AS mau
             FROM usage_end_user_stats
-            WHERE env_id = ANY(@EnvIds) AND year_month = @CurrentYearMonth
+            WHERE env_id = ANY(@EnvIds) AND first_seen_at >= @StartDate AND first_seen_at <= @EndDate
             GROUP BY env_id;
 
             -- 8. Per-environment flag evaluations & custom metrics
@@ -204,7 +204,7 @@ public class WorkspaceService(AppDbContext dbContext)
                    COALESCE(SUM(custom_metrics), 0)   AS custom_metrics
             FROM usage_event_stats
             WHERE env_id = ANY(@EnvIds)
-                AND stats_date >= @StartDate AND stats_date < @EndDate
+                AND stats_date >= @StartDate AND stats_date <= @EndDate
             GROUP BY env_id;
             """;
 
@@ -213,8 +213,6 @@ public class WorkspaceService(AppDbContext dbContext)
         var parameters = new
         {
             EnvIds = envs.Select(x => (Guid)x.env_id).ToArray(),
-            CurrentYearMonth = startDate.Year * 100 + startDate.Month,
-            PrevYearMonth = prevStartDate.Year * 100 + prevStartDate.Month,
             StartDate = startDate.ToDateTime(TimeOnly.MinValue),
             EndDate = endDate.ToDateTime(TimeOnly.MinValue),
             PrevStartDate = prevStartDate.ToDateTime(TimeOnly.MinValue),

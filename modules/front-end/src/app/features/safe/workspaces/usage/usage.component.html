@@ -41,7 +41,7 @@
             <i nz-icon nzType="team" nzTheme="outline"></i>
           </div>
           <div class="stat-body">
-            <div class="stat-label" i18n="@@workspace.usage.mau">Monthly Active Users</div>
+            <div class="stat-label" i18n="@@workspace.usage.unique-users">Unique Users</div>
             <div class="stat-value">{{ summary.mau | number }}</div>
             <div class="stat-change"
                  [class.positive]="getChangePercent(summary.mau, summary.prevMau) >= 0"
@@ -110,7 +110,7 @@
           <thead>
           <tr>
             <th i18n="@@workspace.usage.environment">Environment</th>
-            <th [nzSortFn]="sortByMau" [nzSortDirections]="['descend', 'ascend']" i18n="@@workspace.usage.mau-short">MAU</th>
+            <th [nzSortFn]="sortByUniqueUsers" [nzSortDirections]="['descend', 'ascend']" i18n="@@workspace.usage.unique-users">Unique Users</th>
             <th [nzSortFn]="sortByFlagEvals" [nzSortDirections]="['descend', 'ascend']" i18n="@@workspace.usage.flag-evaluations">Flag Evaluations</th>
             <th [nzSortFn]="sortByCustomMetrics" [nzSortDirections]="['descend', 'ascend']" i18n="@@workspace.usage.custom-metrics">Custom Metrics</th>
           </tr>

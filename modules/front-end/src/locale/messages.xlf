@@ -10472,11 +10472,15 @@
           <context context-type="linenumber">61</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="workspace.usage.mau" datatype="html">
-        <source>Monthly Active Users</source>
+      <trans-unit id="workspace.usage.unique-users" datatype="html">
+        <source>Unique Users</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.html</context>
           <context context-type="linenumber">44,45</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.html</context>
+          <context context-type="linenumber">113,114</context>
         </context-group>
       </trans-unit>
       <trans-unit id="workspace.usage.flag-evaluations" datatype="html">
@@ -10543,13 +10547,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.html</context>
           <context context-type="linenumber">112,113</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="workspace.usage.mau-short" datatype="html">
-        <source>MAU</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.html</context>
-          <context context-type="linenumber">113,114</context>
         </context-group>
       </trans-unit>
       <trans-unit id="workspace.usage.no-data-for-now" datatype="html">

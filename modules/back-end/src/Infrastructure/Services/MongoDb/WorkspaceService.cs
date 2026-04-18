@@ -152,8 +152,6 @@ public class WorkspaceService(MongoDbClient mongoDb) : MongoDbService<Workspace>
         }
 
         var (startDate, endDate, prevStartDate, prevEndDate) = filter;
-        var currentYearMonth = startDate.Year * 100 + startDate.Month;
-        var prevYearMonth = prevStartDate.Year * 100 + prevStartDate.Month;
         var startDateTime = startDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
         var endDateTime = endDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
         var prevStartDateTime = prevStartDate.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
@@ -171,23 +169,50 @@ public class WorkspaceService(MongoDbClient mongoDb) : MongoDbService<Workspace>
             new BsonDocument("$facet", new BsonDocument
             {
                 {
-                    "currentMau", new BsonArray
+                    "currentUniqueUsers", new BsonArray
                     {
-                        new BsonDocument("$match", new BsonDocument("yearMonth", currentYearMonth)),
+                        new BsonDocument("$match", new BsonDocument
+                        {
+                            {
+                                "firstSeenAt", new BsonDocument
+                                {
+                                    { "$gte", startDateTime },
+                                    { "$lte", endDateTime }
+                                }
+                            }
+                        }),
                         new BsonDocument("$count", "count")
                     }
                 },
                 {
-                    "prevMau", new BsonArray
+                    "prevUniqueUsers", new BsonArray
                     {
-                        new BsonDocument("$match", new BsonDocument("yearMonth", prevYearMonth)),
+                        new BsonDocument("$match", new BsonDocument
+                        {
+                            {
+                                "firstSeenAt", new BsonDocument
+                                {
+                                    { "$gte", prevStartDateTime },
+                                    { "$lte", prevEndDateTime }
+                                }
+                            }
+                        }),
                         new BsonDocument("$count", "count")
                     }
                 },
                 {
                     "dailyNewUsers", new BsonArray
                     {
-                        new BsonDocument("$match", new BsonDocument("yearMonth", currentYearMonth)),
+                        new BsonDocument("$match", new BsonDocument
+                        {
+                            {
+                                "firstSeenAt", new BsonDocument
+                                {
+                                    { "$gte", startDateTime },
+                                    { "$lte", endDateTime }
+                                }
+                            }
+                        }),
                         new BsonDocument("$group", new BsonDocument
                         {
                             { "_id", "$firstSeenAt" },
@@ -197,9 +222,18 @@ public class WorkspaceService(MongoDbClient mongoDb) : MongoDbService<Workspace>
                     }
                 },
                 {
-                    "perEnvMau", new BsonArray
+                    "perEnvUniqueUsers", new BsonArray
                     {
-                        new BsonDocument("$match", new BsonDocument("yearMonth", currentYearMonth)),
+                        new BsonDocument("$match", new BsonDocument
+                        {
+                            {
+                                "firstSeenAt", new BsonDocument
+                                {
+                                    { "$gte", startDateTime },
+                                    { "$lte", endDateTime }
+                                }
+                            }
+                        }),
                         new BsonDocument("$group", new BsonDocument
                         {
                             { "_id", "$envId" },
@@ -218,7 +252,7 @@ public class WorkspaceService(MongoDbClient mongoDb) : MongoDbService<Workspace>
                 {
                     "currentEvents", new BsonArray
                     {
-                        new BsonDocument("$match", new BsonDocument("statsDate", new BsonDocument { { "$gte", startDateTime }, { "$lt", endDateTime } })),
+                        new BsonDocument("$match", new BsonDocument("statsDate", new BsonDocument { { "$gte", startDateTime }, { "$lte", endDateTime } })),
                         new BsonDocument("$group", new BsonDocument
                         {
                             { "_id", BsonNull.Value },
@@ -230,7 +264,7 @@ public class WorkspaceService(MongoDbClient mongoDb) : MongoDbService<Workspace>
                 {
                     "prevEvents", new BsonArray
                     {
-                        new BsonDocument("$match", new BsonDocument("statsDate", new BsonDocument { { "$gte", prevStartDateTime }, { "$lt", prevEndDateTime } })),
+                        new BsonDocument("$match", new BsonDocument("statsDate", new BsonDocument { { "$gte", prevStartDateTime }, { "$lte", prevEndDateTime } })),
                         new BsonDocument("$group", new BsonDocument
                         {
                             { "_id", BsonNull.Value },
@@ -242,7 +276,7 @@ public class WorkspaceService(MongoDbClient mongoDb) : MongoDbService<Workspace>
                 {
                     "dailyEvents", new BsonArray
                     {
-                        new BsonDocument("$match", new BsonDocument("statsDate", new BsonDocument { { "$gte", startDateTime }, { "$lt", endDateTime } })),
+                        new BsonDocument("$match", new BsonDocument("statsDate", new BsonDocument { { "$gte", startDateTime }, { "$lte", endDateTime } })),
                         new BsonDocument("$group", new BsonDocument
                         {
                             { "_id", "$statsDate" },
@@ -255,7 +289,7 @@ public class WorkspaceService(MongoDbClient mongoDb) : MongoDbService<Workspace>
                 {
                     "perEnvEvents", new BsonArray
                     {
-                        new BsonDocument("$match", new BsonDocument("statsDate", new BsonDocument { { "$gte", startDateTime }, { "$lt", endDateTime } })),
+                        new BsonDocument("$match", new BsonDocument("statsDate", new BsonDocument { { "$gte", startDateTime }, { "$lte", endDateTime } })),
                         new BsonDocument("$group", new BsonDocument
                         {
                             { "_id", "$envId" },
@@ -274,8 +308,8 @@ public class WorkspaceService(MongoDbClient mongoDb) : MongoDbService<Workspace>
         var mauResult = mauTask.Result ?? new BsonDocument();
         var eventResult = eventTask.Result ?? new BsonDocument();
 
-        var currentMauArr = mauResult.GetValue("currentMau", new BsonArray()).AsBsonArray;
-        var prevMauArr = mauResult.GetValue("prevMau", new BsonArray()).AsBsonArray;
+        var currentMauArr = mauResult.GetValue("currentUniqueUsers", new BsonArray()).AsBsonArray;
+        var prevMauArr = mauResult.GetValue("prevUniqueUsers", new BsonArray()).AsBsonArray;
         var currentEventsArr = eventResult.GetValue("currentEvents", new BsonArray()).AsBsonArray;
         var prevEventsArr = eventResult.GetValue("prevEvents", new BsonArray()).AsBsonArray;
 
@@ -310,7 +344,7 @@ public class WorkspaceService(MongoDbClient mongoDb) : MongoDbService<Workspace>
             );
         }).ToArray();
 
-        var perEnvMau = mauResult.GetValue("perEnvMau", new BsonArray()).AsBsonArray
+        var perEnvMau = mauResult.GetValue("perEnvUniqueUsers", new BsonArray()).AsBsonArray
             .ToDictionary(
                 r => r["_id"].AsGuid,
                 r => r["mau"].AsInt32
