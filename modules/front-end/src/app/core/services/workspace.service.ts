@@ -5,6 +5,7 @@ import { firstValueFrom, Observable, of } from "rxjs";
 import { IOidc, IWorkspace } from "@shared/types";
 import { CURRENT_WORKSPACE } from "@utils/localstorage-keys";
 import { catchError } from "rxjs/operators";
+import { LicenseQuota, WorkspaceUsage, WorkspaceUsageFilter } from "@features/safe/workspaces/types/workspace";
 
 @Injectable({
   providedIn: 'root'
@@ -31,14 +32,16 @@ export class WorkspaceService {
     );
   }
 
-  getUsages(): Observable<{
-    [key: string]: {
-      quota: number;
-      used: number;
-    }
-  }> {
+  getLicenseQuota(): Observable<LicenseQuota | undefined> {
+    const url = `${this.baseUrl}/license-quota`;
+    return this.http.get<LicenseQuota>(url).pipe(catchError(() => of(undefined)));
+  }
+
+  getUsage(filter: WorkspaceUsageFilter): Observable<WorkspaceUsage | undefined> {
     const url = `${this.baseUrl}/usages`;
-    return this.http.get<any>(url).pipe(catchError(() => of(undefined)));
+    return this.http
+      .get<WorkspaceUsage>(url, { params: { ...filter } })
+      .pipe(catchError(() => of(undefined)));
   }
 
   isKeyUsed(key: string): Observable<boolean> {

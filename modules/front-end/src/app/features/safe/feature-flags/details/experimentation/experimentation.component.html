@@ -296,7 +296,7 @@
                           </nz-table>
                         </div>
                         @if (experiment.isChartExpanded) {
-                          <g2-line-chart [containerId]="experiment.id" [chartConfig]="experiment.chartConfig"></g2-line-chart>
+                          <g2-line-chart [chartConfig]="experiment.chartConfig"></g2-line-chart>
                         }
                         @if (experiment.metricCustomEventTrackOption !== customEventTrackNumeric) {
                           <div style="text-align: center; margin-top: 10px; margin-bottom: 10px;"

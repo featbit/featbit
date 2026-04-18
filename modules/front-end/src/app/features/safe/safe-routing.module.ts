@@ -66,6 +66,13 @@ const routes: Routes = [
         },
       },
       {
+        path: 'organization',
+        loadChildren: () => import("./organizations/organization.module").then(m => m.OrganizationModule),
+        data: {
+          breadcrumb: $localize `:@@organization:Organization`
+        },
+      },
+      {
         path: 'relay-proxies',
         canActivate: [relayProxiesGuard],
         loadChildren: () => import("./relay-proxies/relay-proxies.module").then(m => m.RelayProxiesModule),
