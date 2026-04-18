@@ -121,7 +121,12 @@ export class UsageComponent implements OnInit {
 
   private buildUsageFilter(): WorkspaceUsageFilter {
     const now = new Date();
-    const fmt = (d: Date) => d.toISOString().split('T')[0];
+    const fmt = (d: Date) => {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    };
     let startDate: Date, endDate: Date, prevStartDate: Date, prevEndDate: Date;
 
     switch (this.selectedPeriod) {
@@ -272,6 +277,21 @@ export class UsageComponent implements OnInit {
   getUsagePercent(envValue: number, total: number): number {
     if (total === 0) return 0;
     return Math.round((envValue / total) * 1000) / 10;
+  }
+
+  get vsLabel(): string {
+    switch (this.selectedPeriod) {
+      case 'last7d':
+        return $localize`:@@workspace.usage.change-vs-prev-7-days:vs prev 7 days`;
+      case 'last30d':
+        return $localize`:@@workspace.usage.change-vs-prev-30-days:vs prev 30 days`;
+      case 'currentBilling':
+      case 'previousBilling':
+        return $localize`:@@workspace.usage.change-vs-prev-period:vs prev period`;
+      case 'thisMonth':
+      default:
+        return $localize`:@@workspace.usage.change-vs-last-month:vs last month`;
+    }
   }
 
   sortByMau = (a: EnvironmentUsage, b: EnvironmentUsage) => a.mau - b.mau;

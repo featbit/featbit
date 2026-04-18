@@ -46,7 +46,7 @@
             <div class="stat-change"
                  [class.positive]="getChangePercent(summary.mau, summary.prevMau) >= 0"
                  [class.negative]="getChangePercent(summary.mau, summary.prevMau) < 0">
-              {{ getChangePercent(summary.mau, summary.prevMau) >= 0 ? '+' : '' }}{{ getChangePercent(summary.mau, summary.prevMau) }}% <span i18n="@@workspace.usage.change-vs-last-month">vs last month</span>
+              {{ getChangePercent(summary.mau, summary.prevMau) >= 0 ? '+' : '' }}{{ getChangePercent(summary.mau, summary.prevMau) }}% <span>{{ vsLabel }}</span>
             </div>
           </div>
         </div>
@@ -61,7 +61,7 @@
             <div class="stat-change"
                  [class.positive]="getChangePercent(summary.totalFlagEvaluations, summary.prevFlagEvaluations) >= 0"
                  [class.negative]="getChangePercent(summary.totalFlagEvaluations, summary.prevFlagEvaluations) < 0">
-              {{ getChangePercent(summary.totalFlagEvaluations, summary.prevFlagEvaluations) >= 0 ? '+' : '' }}{{ getChangePercent(summary.totalFlagEvaluations, summary.prevFlagEvaluations) }}% <span i18n="@@workspace.usage.change-vs-last-month">vs last month</span>
+              {{ getChangePercent(summary.totalFlagEvaluations, summary.prevFlagEvaluations) >= 0 ? '+' : '' }}{{ getChangePercent(summary.totalFlagEvaluations, summary.prevFlagEvaluations) }}% <span>{{ vsLabel }}</span>
             </div>
           </div>
         </div>
@@ -76,7 +76,7 @@
             <div class="stat-change"
                  [class.positive]="getChangePercent(summary.totalCustomMetrics, summary.prevCustomMetrics) >= 0"
                  [class.negative]="getChangePercent(summary.totalCustomMetrics, summary.prevCustomMetrics) < 0">
-              {{ getChangePercent(summary.totalCustomMetrics, summary.prevCustomMetrics) >= 0 ? '+' : '' }}{{ getChangePercent(summary.totalCustomMetrics, summary.prevCustomMetrics) }}% <span i18n="@@workspace.usage.change-vs-last-month">vs last month</span>
+              {{ getChangePercent(summary.totalCustomMetrics, summary.prevCustomMetrics) >= 0 ? '+' : '' }}{{ getChangePercent(summary.totalCustomMetrics, summary.prevCustomMetrics) }}% <span>{{ vsLabel }}</span>
             </div>
           </div>
         </div>
