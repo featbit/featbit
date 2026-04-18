@@ -364,7 +364,7 @@ public class WorkspaceService(MongoDbClient mongoDb) : MongoDbService<Workspace>
                     envId, envMau, envEv.FlagEvaluations, envEv.CustomMetrics
                 );
             })
-            .OrderByDescending(e => e.Mau)
+            .OrderByDescending(e => e.UniqueUsers)
             .ToArray();
 
         return new WorkspaceUsageVm(summary, dailyTrend, envUsages);

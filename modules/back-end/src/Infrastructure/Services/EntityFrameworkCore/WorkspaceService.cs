@@ -294,7 +294,7 @@ public class WorkspaceService(AppDbContext dbContext)
                     envEvents.Item2
                 );
             })
-            .OrderByDescending(e => e.Mau)
+            .OrderByDescending(e => e.UniqueUsers)
             .ToArray();
 
         return new WorkspaceUsageVm(summary, dailyTrend, envUsages);

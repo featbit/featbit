@@ -64,10 +64,10 @@ export class UsageComponent implements OnInit {
   }
 
   summary: UsageSummary = {
-    mau: 0,
+    uniqueUsers: 0,
     totalFlagEvaluations: 0,
     totalCustomMetrics: 0,
-    prevMau: 0,
+    prevUniqueUsers: 0,
     prevFlagEvaluations: 0,
     prevCustomMetrics: 0,
   }
@@ -294,7 +294,7 @@ export class UsageComponent implements OnInit {
     }
   }
 
-  sortByUniqueUsers = (a: EnvironmentUsage, b: EnvironmentUsage) => a.mau - b.mau;
+  sortByUniqueUsers = (a: EnvironmentUsage, b: EnvironmentUsage) => a.uniqueUsers - b.uniqueUsers;
   sortByFlagEvals = (a: EnvironmentUsage, b: EnvironmentUsage) => a.flagEvaluations - b.flagEvaluations;
   sortByCustomMetrics = (a: EnvironmentUsage, b: EnvironmentUsage) => a.customMetrics - b.customMetrics;
 }

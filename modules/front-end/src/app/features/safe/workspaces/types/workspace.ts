@@ -5,10 +5,10 @@ export interface WorkspaceUsage {
 }
 
 export interface UsageSummary {
-  mau: number;
+  uniqueUsers: number;
   totalFlagEvaluations: number;
   totalCustomMetrics: number;
-  prevMau: number;
+  prevUniqueUsers: number;
   prevFlagEvaluations: number;
   prevCustomMetrics: number;
 }
@@ -25,7 +25,7 @@ export interface EnvironmentUsage {
   projectName: string;
   envName: string;
   envId: string;
-  mau: number;
+  uniqueUsers: number;
   flagEvaluations: number;
   customMetrics: number;
 }

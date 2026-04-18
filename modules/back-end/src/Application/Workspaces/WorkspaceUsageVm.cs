@@ -7,10 +7,10 @@ public record WorkspaceUsageVm(
 );
 
 public record UsageSummaryVm(
-    int Mau,
+    int UniqueUsers,
     long TotalFlagEvaluations,
     long TotalCustomMetrics,
-    int PrevMau,
+    int PrevUniqueUsers,
     long PrevFlagEvaluations,
     long PrevCustomMetrics
 );
@@ -27,7 +27,7 @@ public record EnvironmentUsageVm(
     string ProjectName,
     string EnvName,
     Guid EnvId,
-    int Mau,
+    int UniqueUsers,
     long FlagEvaluations,
     long CustomMetrics
 );

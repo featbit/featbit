@@ -42,11 +42,11 @@
           </div>
           <div class="stat-body">
             <div class="stat-label" i18n="@@workspace.usage.unique-users">Unique Users</div>
-            <div class="stat-value">{{ summary.mau | number }}</div>
+            <div class="stat-value">{{ summary.uniqueUsers | number }}</div>
             <div class="stat-change"
-                 [class.positive]="getChangePercent(summary.mau, summary.prevMau) >= 0"
-                 [class.negative]="getChangePercent(summary.mau, summary.prevMau) < 0">
-              {{ getChangePercent(summary.mau, summary.prevMau) >= 0 ? '+' : '' }}{{ getChangePercent(summary.mau, summary.prevMau) }}% <span>{{ vsLabel }}</span>
+                 [class.positive]="getChangePercent(summary.uniqueUsers, summary.prevUniqueUsers) >= 0"
+                 [class.negative]="getChangePercent(summary.uniqueUsers, summary.prevUniqueUsers) < 0">
+              {{ getChangePercent(summary.uniqueUsers, summary.prevUniqueUsers) >= 0 ? '+' : '' }}{{ getChangePercent(summary.uniqueUsers, summary.prevUniqueUsers) }}% <span>{{ vsLabel }}</span>
             </div>
           </div>
         </div>
@@ -126,11 +126,11 @@
                 </td>
                 <td>
                   <div class="usage-cell">
-                    <span class="usage-number">{{ env.mau | number }}</span>
-                    <span class="usage-percent">{{ getUsagePercent(env.mau, summary.mau) }}%</span>
+                    <span class="usage-number">{{ env.uniqueUsers | number }}</span>
+                    <span class="usage-percent">{{ getUsagePercent(env.uniqueUsers, summary.uniqueUsers) }}%</span>
                   </div>
                   <div class="usage-bar">
-                    <div class="usage-bar-fill mau" [style.width.%]="getUsagePercent(env.mau, summary.mau)"></div>
+                    <div class="usage-bar-fill mau" [style.width.%]="getUsagePercent(env.uniqueUsers, summary.uniqueUsers)"></div>
                   </div>
                 </td>
                 <td>
