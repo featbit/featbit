@@ -13,7 +13,7 @@ interface DailyUsage {
   value: number;
 }
 
-interface BillingPeriod {
+interface Period {
   label: string;
   value: string;
 }
@@ -34,7 +34,7 @@ export class UsageComponent implements OnInit {
   isSaas = environment.hostingMode === HOSTING_MODE.SAAS;
   chartVisible = true;
 
-  billingPeriods: BillingPeriod[] = [];
+  periods: Period[] = [];
   selectedPeriod!: string;
 
   get selectedPeriodRange(): string {
@@ -92,20 +92,20 @@ export class UsageComponent implements OnInit {
   }
 
   initBillingPeriods(): void {
-    this.billingPeriods = [
+    this.periods = [
       { label: $localize`:@@workspace.usage.this-month:This month`, value: 'thisMonth' },
       { label: $localize`:@@workspace.usage.last-7-days:Last 7 days`, value: 'last7d' },
       { label: $localize`:@@workspace.usage.last-30-days:Last 30 days`, value: 'last30d' },
     ];
 
     if (this.isSaas) {
-      this.billingPeriods.unshift(
+      this.periods.unshift(
         { label: $localize`:@@workspace.usage.current-billing-cycle:Current billing cycle`, value: 'currentBilling' },
         { label: $localize`:@@workspace.usage.previous-billing-cycle:Previous billing cycle`, value: 'previousBilling' },
       );
     }
 
-    this.selectedPeriod = this.billingPeriods[0].value;
+    this.selectedPeriod = this.periods[0].value;
   }
 
   onPeriodChange(): void {

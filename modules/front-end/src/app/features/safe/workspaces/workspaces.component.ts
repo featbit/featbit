@@ -1,6 +1,6 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { getCurrentLicense } from "@utils/project-env";
 import { LicenseFeatureEnum } from "@shared/types";
+import { getCurrentLicense } from "@utils/project-env";
 import { generalResourceRNPattern, permissionActions } from "@shared/policy";
 import { PermissionsService } from "@services/permissions.service";
 

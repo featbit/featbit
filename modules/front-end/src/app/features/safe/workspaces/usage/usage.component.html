@@ -4,7 +4,7 @@
   <div class="usage-header">
     <div class="period-selector">
       <nz-select [(ngModel)]="selectedPeriod" (ngModelChange)="onPeriodChange()" style="width: 200px;">
-        @for (period of billingPeriods; track period.value) {
+        @for (period of periods; track period.value) {
           <nz-option [nzValue]="period.value" [nzLabel]="period.label"></nz-option>
         }
       </nz-select>
