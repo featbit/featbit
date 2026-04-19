@@ -1,0 +1,29 @@
+<div class="checkout-result">
+  @if (isSuccess) {
+    <nz-result
+      nzStatus="success"
+      i18n-nzTitle="@@checkout.success-title"
+      nzTitle="Payment Successful!"
+      i18n-nzSubTitle="@@checkout.success-subtitle"
+      nzSubTitle="Thank you for your purchase. Your plan has been upgraded.">
+      <div nz-result-extra>
+        <button nz-button nzType="primary" (click)="goHome()" i18n="@@common.back-to-feature-flags">
+          Back to Feature Flags
+        </button>
+      </div>
+    </nz-result>
+  } @else {
+    <nz-result
+      nzStatus="error"
+      i18n-nzTitle="@@checkout.cancel-title"
+      nzTitle="Payment Cancelled"
+      i18n-nzSubTitle="@@checkout.cancel-subtitle"
+      nzSubTitle="Your payment was not completed. You can try again anytime.">
+      <div nz-result-extra>
+        <button nz-button nzType="primary" (click)="goHome()" i18n="@@common.back-to-feature-flags">
+          Back to Feature Flags
+        </button>
+      </div>
+    </nz-result>
+  }
+</div>
