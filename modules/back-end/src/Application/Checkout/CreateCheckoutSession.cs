@@ -11,10 +11,6 @@ public class CreateCheckoutSession : IRequest<CheckoutSessionVm>
     public long Amount { get; set; }
 
     public string Currency { get; set; } = "usd";
-
-    public string SuccessUrl { get; set; }
-
-    public string CancelUrl { get; set; }
 }
 
 public class CreateCheckoutSessionValidator : AbstractValidator<CreateCheckoutSession>
@@ -26,12 +22,6 @@ public class CreateCheckoutSessionValidator : AbstractValidator<CreateCheckoutSe
 
         RuleFor(x => x.Currency)
             .NotEmpty().WithErrorCode(ErrorCodes.Required("currency"));
-
-        RuleFor(x => x.SuccessUrl)
-            .NotEmpty().WithErrorCode(ErrorCodes.Required("successUrl"));
-
-        RuleFor(x => x.CancelUrl)
-            .NotEmpty().WithErrorCode(ErrorCodes.Required("cancelUrl"));
     }
 }
 
@@ -48,8 +38,6 @@ public class CreateCheckoutSessionHandler(ICheckoutService checkoutService)
         var session = await checkoutService.CreateSessionAsync(
             request.Amount,
             request.Currency,
-            request.SuccessUrl,
-            request.CancelUrl,
             cancellationToken
         );
 

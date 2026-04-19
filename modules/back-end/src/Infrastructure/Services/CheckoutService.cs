@@ -23,16 +23,12 @@ public class CheckoutService(
     public async Task<CheckoutSessionVm?> CreateSessionAsync(
         long amount,
         string currency,
-        string successUrl,
-        string cancelUrl,
         CancellationToken cancellationToken = default)
     {
         var payload = new
         {
             amount,
-            currency,
-            successUrl,
-            cancelUrl
+            currency
         };
         
         var response = await httpClient.PostAsJsonAsync($"{options.Value.BaseUrl}/api/subscriptions/checkout", payload, cancellationToken);
