@@ -1,11 +1,14 @@
+using Application.Cloud;
 using Dapper;
 using Domain.EndUsers;
 using Domain.Utils;
 using Infrastructure.Caches.Redis;
 using Infrastructure.Persistence.Dapper;
+using Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Npgsql;
 
 namespace Infrastructure;
@@ -77,5 +80,25 @@ public static class ServiceCollectionExtensions
                 .UseSnakeCaseNamingConvention()
                 .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
         });
+    }
+    
+    public static void TryAddCloud(this IServiceCollection services, IConfiguration configuration)
+    {
+        var section = configuration.GetSection(CloudOptions.Cloud);
+        if (!section.Exists())
+        {
+            return;
+        }
+
+        if (services.Any(service => service.ServiceType == typeof(IConfigureOptions<CloudOptions>)))
+        {
+            return;
+        }
+
+        services.AddOptionsWithValidateOnStart<CloudOptions>()
+            .Bind(section)
+            .ValidateDataAnnotations();
+        
+        services.AddTransient<ICheckoutService, CheckoutService>();
     }
 }

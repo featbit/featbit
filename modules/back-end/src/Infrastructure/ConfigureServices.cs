@@ -1,5 +1,7 @@
+using Application.Cloud;
 using Application.Usages;
 using Domain.Users;
+using Infrastructure;
 using Infrastructure.Caches;
 using Infrastructure.MQ;
 using Infrastructure.Persistence;
@@ -55,6 +57,9 @@ public static class ConfigureServices
         // InsightsWriter must be a singleton service
         services.AddSingleton(typeof(AppServices.InsightsWriter));
 
+        // Add Cloud options
+        services.TryAddCloud(configuration);
+        
         return services;
     }
 }

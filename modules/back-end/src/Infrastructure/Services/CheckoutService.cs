@@ -1,22 +1,14 @@
 using System.Net.Http.Json;
 using Application.Checkout;
+using Application.Cloud;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Services;
 
-public class CheckoutOptions
-{
-    public const string Checkout = nameof(Checkout);
-
-    public string BaseUrl { get; set; }
-
-    public string ApiKey { get; set; }
-}
-
 public class CheckoutService(
     HttpClient httpClient,
-    IOptions<CheckoutOptions> options,
+    IOptions<CloudOptions> options,
     ILogger<CheckoutService> logger)
     : ICheckoutService
 {
@@ -31,7 +23,7 @@ public class CheckoutService(
             currency
         };
         
-        var response = await httpClient.PostAsJsonAsync($"{options.Value.BaseUrl}/api/subscriptions/checkout", payload, cancellationToken);
+        var response = await httpClient.PostAsJsonAsync($"{options.Value.ServiceUrl}/api/subscriptions/checkout", payload, cancellationToken);
         response.EnsureSuccessStatusCode();
 
         var result = await response.Content.ReadFromJsonAsync<CheckoutSessionResponse>(cancellationToken: cancellationToken);
