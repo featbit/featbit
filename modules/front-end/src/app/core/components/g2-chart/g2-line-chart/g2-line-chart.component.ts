@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, Input, OnDestroy} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, Input, OnDestroy, ViewChild} from '@angular/core';
 import {Chart} from "@antv/g2";
 import {AxisConfig, ChartConfig, defaultTooltipItemTplPlaceholder} from "./g2-line-chart";
 import {MacaronColors} from "../g2-chart";
@@ -7,15 +7,15 @@ import { fromEvent, Subscription } from 'rxjs';
 @Component({
   selector: 'g2-line-chart',
   template: `
-    <div id="line-chart-container-{{this.containerId ? this.containerId : ''}}" [ngStyle]="{width, height}">
+    <div #containerRef [ngStyle]="{width, height}">
     </div>
   `,
   standalone: false
 })
 export class G2LineChartComponent implements AfterViewInit, OnDestroy {
   @Input()
-  containerId: string = '';
-  @Input() width: string = "100%";
+  width: string = "100%";
+
   @Input()
   chartConfig: ChartConfig;
 
@@ -33,6 +33,9 @@ export class G2LineChartComponent implements AfterViewInit, OnDestroy {
   private defaultChartMaxHeight: number = 0;
   public height: string = "400px";
 
+  @ViewChild('containerRef')
+  containerRef: ElementRef<HTMLDivElement>;
+
   chart: Chart;
 
   ngAfterViewInit(): void {
@@ -48,13 +51,11 @@ export class G2LineChartComponent implements AfterViewInit, OnDestroy {
     this.listenerWindowResize();
   }
 
-  // 计算当前图表的高度
   private computeCurrentChartHeight() {
     const bodyHeight = document.body.clientHeight;
     this.height = this.defaultChartMaxHeight * (bodyHeight / this.defaultWindowHeight) + 'px';
   }
 
-  // 监听窗口大小改变
   private listenerWindowResize() {
     this.resizeSubscription = fromEvent(window, "resize").subscribe(_ => {
       this.defaultWindowHeight && this.computeCurrentChartHeight();
@@ -62,8 +63,13 @@ export class G2LineChartComponent implements AfterViewInit, OnDestroy {
   }
 
   private renderChart() {
+    if (!this.containerRef?.nativeElement) {
+      console.error('failed to render chart, container not found...');
+      return;
+    }
+
     this.chart = new Chart({
-      container: `line-chart-container-${this.containerId}`,
+      container: this.containerRef.nativeElement,
       autoFit: true,
       padding: this.chartConfig.padding
     });
@@ -85,6 +91,18 @@ export class G2LineChartComponent implements AfterViewInit, OnDestroy {
         : defaultTooltipItemTplPlaceholder
     });
 
+    if (this.chartConfig.areaStyle) {
+      const area = this.chart
+        .area()
+        .position(`${xAxis.field}*${yAxis.field}`)
+        .shape(this.chartConfig.lineShape || 'circle')
+        .style(this.chartConfig.areaStyle);
+
+      if (this.chartConfig.dataGroupBy) {
+        area.color(this.chartConfig.dataGroupBy, MacaronColors);
+      }
+    }
+
     const line = this.chart
       .line()
       .position(`${xAxis.field}*${yAxis.field}`)
@@ -98,6 +116,9 @@ export class G2LineChartComponent implements AfterViewInit, OnDestroy {
     if (dataGroupBy) {
       line.color(this.chartConfig.dataGroupBy, MacaronColors);
       point.color(this.chartConfig.dataGroupBy, MacaronColors);
+    } else if (this.chartConfig.lineColor) {
+      line.color(this.chartConfig.lineColor);
+      point.color(this.chartConfig.lineColor);
     }
 
     this.chart.legend({
@@ -128,5 +149,6 @@ export class G2LineChartComponent implements AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.resizeSubscription && this.resizeSubscription.unsubscribe();
+    this.chart && this.chart.destroy();
   }
 }

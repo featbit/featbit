@@ -28,7 +28,7 @@ public class SendWebhookValidator : AbstractValidator<SendWebhook>
             {
                 try
                 {
-                    JsonDocument.Parse(x);
+                    using var _ = JsonDocument.Parse(x);
                     return true;
                 }
                 catch (JsonException)
@@ -50,7 +50,7 @@ public class SendWebhookHandler : IRequestHandler<SendWebhook, WebhookDelivery>
 
     public async Task<WebhookDelivery> Handle(SendWebhook request, CancellationToken cancellationToken)
     {
-        var json = JsonDocument.Parse(request.Payload);
+        using var json = JsonDocument.Parse(request.Payload);
         if (request.PreventEmptyPayloads && json.RootElement.IsEmptyObject())
         {
             return WebhookDelivery.Ignored("Not allowed to send an empty JSON object", request.Url, request.Payload);

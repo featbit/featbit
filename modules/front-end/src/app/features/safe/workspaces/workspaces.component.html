@@ -21,16 +21,9 @@
   </nz-tab>
 
   <nz-tab>
-    <a *nzTabLink nz-tab-link [routerLink]="['./organization']" i18n="@@workspace.org.tabtitle">Organization</a>
+    <a *nzTabLink nz-tab-link [routerLink]="['./usage']" i18n="@@workspace.usage.tabtitle">Usage</a>
     <ng-template nz-tab>
-      <organization></organization>
-    </ng-template>
-  </nz-tab>
-
-  <nz-tab>
-    <a *nzTabLink nz-tab-link [routerLink]="['./projects']" i18n="@@workspace.project.tabtitle">Projects</a>
-    <ng-template nz-tab>
-      <app-project></app-project>
+      <usage></usage>
     </ng-template>
   </nz-tab>
 
@@ -45,13 +38,6 @@
     }
     <ng-template nz-tab>
       <global-user></global-user>
-    </ng-template>
-  </nz-tab>
-
-  <nz-tab>
-    <a *nzTabLink nz-tab-link [routerLink]="['./profile']" i18n="@@workspace.profile.tabtitle">Profile</a>
-    <ng-template nz-tab>
-      <app-profile></app-profile>
     </ng-template>
   </nz-tab>
 </nz-tabset>

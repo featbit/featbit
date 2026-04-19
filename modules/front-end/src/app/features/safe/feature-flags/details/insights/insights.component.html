@@ -13,7 +13,7 @@
       <div class="chart-container" style="width:97%">
         <nz-spin [nzSpinning]="isLoading" i18n-nzTip="@@common.loading" nzTip="Loading...">
           @if (!isLoading) {
-            <g2-line-chart [containerId]="filter.featureFlagKey" [defaultChartHeight]="450" containerStyle="width: 95%; margin: 0 auto;" [chartConfig]="chartConfig"></g2-line-chart>
+            <g2-line-chart [defaultChartHeight]="450" containerStyle="width: 95%; margin: 0 auto;" [chartConfig]="chartConfig"></g2-line-chart>
           }
         </nz-spin>
       </div>

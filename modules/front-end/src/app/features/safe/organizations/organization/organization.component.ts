@@ -6,7 +6,7 @@ import { OrganizationService } from '@services/organization.service';
 import { getCurrentLicense, getCurrentOrganization } from "@utils/project-env";
 import { PermissionsService } from "@services/permissions.service";
 import { generalResourceRNPattern, permissionActions } from "@shared/policy";
-import { MessageQueueService } from '@core/services/message-queue.service';
+import { MessageQueueService } from '@services/message-queue.service';
 import { copyToClipboard } from '@utils/index';
 import { IPagedPolicy, PolicyFilter } from "@features/safe/iam/types/policy";
 import { GroupListFilter, IPagedGroup } from "@features/safe/iam/types/group";
