@@ -46,20 +46,26 @@ WHERE id IN (
 UPDATE access_tokens
 SET
     permissions = (
-        SELECT jsonb_agg(
-                       jsonb_set(
-                               elem,
-                               '{actions}',
-                               (
-                                   SELECT jsonb_agg(
-                                                  CASE
-                                                      WHEN action = '"ManageSegment"'::jsonb THEN '"*"'::jsonb
-                                                      ELSE action
-                                                      END
-                                          )
-                                   FROM jsonb_array_elements(elem->'actions') AS action
+        SELECT COALESCE(
+                       jsonb_agg(
+                               jsonb_set(
+                                       elem,
+                                       '{actions}',
+                                       (
+                                           SELECT COALESCE(
+                                                          jsonb_agg(
+                                                                  CASE
+                                                                      WHEN action = '"ManageSegment"'::jsonb THEN '"*"'::jsonb
+                                                                      ELSE action
+                                                                      END
+                                                          ),
+                                                          '[]'::jsonb
+                                                  )
+                                           FROM jsonb_array_elements(elem->'actions') AS action
+                                       )
                                )
-                       )
+                       ),
+                       '[]'::jsonb
                )
         FROM jsonb_array_elements(permissions) AS elem
     )
