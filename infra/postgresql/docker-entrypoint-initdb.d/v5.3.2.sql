@@ -6,20 +6,26 @@
 -- This normalizes existing action names after the segment permission model was broadened.
 UPDATE policies
 SET statements = (
-    SELECT jsonb_agg(
-                   jsonb_set(
-                           elem,
-                           '{actions}',
-                           (
-                               SELECT jsonb_agg(
-                                              CASE
-                                                  WHEN action = '"ManageSegment"'::jsonb THEN '"*"'::jsonb
-                                                  ELSE action
-                                                  END
-                                      )
-                               FROM jsonb_array_elements(elem->'actions') AS action
+    SELECT COALESCE(
+                   jsonb_agg(
+                           jsonb_set(
+                                   elem,
+                                   '{actions}',
+                                   (
+                                       SELECT COALESCE(
+                                                      jsonb_agg(
+                                                              CASE
+                                                                  WHEN action = '"ManageSegment"'::jsonb THEN '"*"'::jsonb
+                                                                  ELSE action
+                                                                  END
+                                                      ),
+                                                      '[]'::jsonb
+                                              )
+                                       FROM jsonb_array_elements(elem->'actions') AS action
+                                   )
                            )
-                   )
+                   ),
+                   '[]'::jsonb
            )
     FROM jsonb_array_elements(statements) AS elem
 )

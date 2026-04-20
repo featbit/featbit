@@ -113,7 +113,6 @@ db.AccessTokens.updateMany(
 // Equivalent of usage_event_stats in PostgreSQL.
 // Documents: { envId, statsDate (date-only, no time), flagEvaluations, customMetrics }
 // Upsert via $inc so concurrent writes accumulate correctly.
-db.createCollection("UsageEventStats")
 db.UsageEventStats.createIndex({ envId: 1, statsDate: 1 }, { unique: true });
 
 // Monthly unique end users per environment.
@@ -125,7 +124,6 @@ db.UsageEventStats.createIndex({ envId: 1, statsDate: 1 }, { unique: true });
 //   MAU / DAU  : db.UsageEndUserStats.countDocuments({ envId: { $in: [...] }, firstSeenAt: { $gte, $lte } })
 //   Daily trend: ... $group by firstSeenAt
 //   Per-env    : ... $group by envId
-db.createCollection("UsageEndUserStats")
 // yearMonth only appears here for per-month upsert deduplication, not for reads.
 db.UsageEndUserStats.createIndex({ envId: 1, yearMonth: 1, userKey: 1 }, { unique: true });
 // All read queries filter on (envId, firstSeenAt); yearMonth is not used in any read path.
