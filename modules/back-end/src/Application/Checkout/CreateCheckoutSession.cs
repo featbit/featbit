@@ -35,7 +35,7 @@ public class CreateCheckoutSessionHandler(ICheckoutService checkoutService)
 {
     public async Task<CheckoutSessionVm> Handle(CreateCheckoutSession request, CancellationToken cancellationToken)
     {
-        var session = await checkoutService.CreateSessionAsync(
+        var session = await checkoutService.CreateCheckoutSessionAsync(
             request.Amount,
             request.Currency,
             cancellationToken

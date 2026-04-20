@@ -2,6 +2,7 @@ using Application.Checkout;
 
 namespace Api.Controllers;
 
+[Route("api/v{version:apiVersion}/checkout")]
 public class CheckoutController : ApiControllerBase
 {
     [HttpPost]

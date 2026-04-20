@@ -4,7 +4,7 @@ namespace Application.Services;
 
 public interface ICheckoutService
 {
-    Task<CheckoutSessionVm?> CreateSessionAsync(
+    Task<CheckoutSessionVm?> CreateCheckoutSessionAsync(
         long amount,
         string currency,
         CancellationToken cancellationToken = default);

@@ -12,7 +12,7 @@ public class CheckoutService(
     ILogger<CheckoutService> logger)
     : ICheckoutService
 {
-    public async Task<CheckoutSessionVm?> CreateSessionAsync(
+    public async Task<CheckoutSessionVm?> CreateCheckoutSessionAsync(
         long amount,
         string currency,
         CancellationToken cancellationToken = default)
