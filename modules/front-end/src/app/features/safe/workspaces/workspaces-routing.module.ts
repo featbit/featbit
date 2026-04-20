@@ -4,6 +4,7 @@ import { WorkspacesComponent } from './workspaces.component';
 import { LicenseComponent } from "@features/safe/workspaces/license/license.component";
 import { UsageComponent } from "@features/safe/workspaces/usage/usage.component";
 import { GlobalUserComponent } from "@features/safe/workspaces/global-user/global-user.component";
+import { BillingComponent } from "@features/safe/workspaces/billing/billing.component";
 
 const routes: Routes = [
   {
@@ -21,6 +22,12 @@ const routes: Routes = [
         component: UsageComponent,
         data: {
           breadcrumb: $localize`:@@workspace.routing.usage:Usage`
+        }
+      },{
+        path: 'billing',
+        component: BillingComponent,
+        data: {
+          breadcrumb: $localize`:@@workspace.routing.billing:Billing`
         }
       },{
         path: 'global-users',

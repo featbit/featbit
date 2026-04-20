@@ -3,6 +3,8 @@ import { LicenseFeatureEnum } from "@shared/types";
 import { getCurrentLicense } from "@utils/project-env";
 import { generalResourceRNPattern, permissionActions } from "@shared/policy";
 import { PermissionsService } from "@services/permissions.service";
+import { environment } from 'src/environments/environment';
+import { HOSTING_MODE } from "@shared/constants";
 
 @Component({
   selector: 'workspaces',
@@ -13,6 +15,8 @@ import { PermissionsService } from "@services/permissions.service";
 export class WorkspacesComponent implements OnInit {
   private permissionsService = inject(PermissionsService);
 
+  // isSaas = environment.hostingMode === HOSTING_MODE.SAAS;
+  isSaas = true;
   canUpdateLicense: boolean = false;
   isGlobalUserGranted: boolean = false;
 

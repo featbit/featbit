@@ -31,6 +31,7 @@ import { LicenseComponent } from './license/license.component';
 import { NzAlertComponent } from "ng-zorro-antd/alert";
 import { GlobalUserComponent } from "@features/safe/workspaces/global-user/global-user.component";
 import { UsageComponent } from "@features/safe/workspaces/usage/usage.component";
+import { BillingComponent } from './billing/billing.component';
 
 @NgModule({
   declarations: [
@@ -38,7 +39,8 @@ import { UsageComponent } from "@features/safe/workspaces/usage/usage.component"
     WorkspaceComponent,
     LicenseComponent,
     GlobalUserComponent,
-    UsageComponent
+    UsageComponent,
+    BillingComponent
   ],
   imports: [
     CommonModule,
