@@ -4,6 +4,8 @@ db = db.getSiblingDB(dbName)
 
 // https://github.com/featbit/featbit/pull/885
 
+// Replace the legacy 'ManageSegment' action with the wildcard '*' in all policy statements.
+// This normalizes existing action names after the segment permission model was broadened.
 db.Policies.updateMany(
     {
         "statements.actions": "ManageSegment"
@@ -42,6 +44,8 @@ db.Policies.updateMany(
     ]
 );
 
+// Append a new 'allow all' statement for the segment resource type to the built-in
+// admin and developer policies so they retain full segment access after the model change.
 db.Policies.updateMany(
     {
         _id: {
@@ -64,6 +68,7 @@ db.Policies.updateMany(
     }
 );
 
+// Mirror the same 'ManageSegment' -> '*' action migration for access token permissions.
 db.AccessTokens.updateMany(
     {
         "permissions.actions": "ManageSegment"

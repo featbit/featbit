@@ -2,6 +2,8 @@
 
 -- https://github.com/featbit/featbit/pull/885
 
+-- Replace the legacy 'ManageSegment' action with the wildcard '*' in all policy statements.
+-- This normalizes existing action names after the segment permission model was broadened.
 UPDATE policies
 SET statements = (
     SELECT jsonb_agg(
@@ -23,6 +25,8 @@ SET statements = (
 )
 WHERE statements IS NOT NULL;
 
+-- Append a new 'allow all' statement for the segment resource type to the built-in
+-- admin and developer policies so they retain full segment access after the model change.
 UPDATE policies
 SET statements = statements || jsonb_build_array(
         jsonb_build_object(
@@ -38,6 +42,7 @@ WHERE id IN (
              '66f3687f-939d-4257-bd3f-c3553d39e1b6' -- developer
     );
 
+-- Mirror the same 'ManageSegment' -> '*' action migration for access token permissions.
 UPDATE access_tokens
 SET
     permissions = (
