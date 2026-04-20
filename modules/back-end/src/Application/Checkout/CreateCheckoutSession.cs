@@ -8,7 +8,7 @@ public class CreateCheckoutSession : IRequest<CheckoutSessionVm>
     /// <summary>
     /// Price in smallest currency unit (e.g. 1399 for 13.99 USD)
     /// </summary>
-    public long Amount { get; set; }
+    public long UnitAmount { get; set; }
 
     public string Currency { get; set; } = "usd";
 }
@@ -17,8 +17,8 @@ public class CreateCheckoutSessionValidator : AbstractValidator<CreateCheckoutSe
 {
     public CreateCheckoutSessionValidator()
     {
-        RuleFor(x => x.Amount)
-            .GreaterThan(0).WithErrorCode(ErrorCodes.Invalid("amount"));
+        RuleFor(x => x.UnitAmount)
+            .GreaterThan(0).WithErrorCode(ErrorCodes.Invalid("unitAmount"));
 
         RuleFor(x => x.Currency)
             .NotEmpty().WithErrorCode(ErrorCodes.Required("currency"));
@@ -36,8 +36,7 @@ public class CreateCheckoutSessionHandler(ICheckoutService checkoutService)
     public async Task<CheckoutSessionVm> Handle(CreateCheckoutSession request, CancellationToken cancellationToken)
     {
         var session = await checkoutService.CreateCheckoutSessionAsync(
-            request.Amount,
-            request.Currency,
+            request.UnitAmount,
             cancellationToken
         );
 

@@ -10,11 +10,10 @@ public class CheckoutService(
     : ICheckoutService
 {
     public async Task<CheckoutSessionVm?> CreateCheckoutSessionAsync(
-        long amount,
-        string currency,
+        long unitAmount,
         CancellationToken cancellationToken = default)
     {
-        var payload = new { amount, currency };
+        var payload = new { unitAmount };
 
         try
         {
@@ -32,7 +31,7 @@ public class CheckoutService(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to create checkout session for amount {Amount} {Currency}.", amount, currency);
+            logger.LogError(ex, "Failed to create checkout session for amount {Amount} {Currency}.", unitAmount);
             return null;
         }
     }
