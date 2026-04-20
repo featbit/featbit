@@ -99,6 +99,11 @@ public static class ServiceCollectionExtensions
             .Bind(section)
             .ValidateDataAnnotations();
         
-        services.AddTransient<ICheckoutService, CheckoutService>();
+        services.AddHttpClient<ICheckoutService, CheckoutService>((sp, client) =>
+        {
+            var cloudOptions = sp.GetRequiredService<IOptions<CloudOptions>>().Value;
+            client.BaseAddress = new Uri(cloudOptions.ServiceUrl);
+            client.DefaultRequestHeaders.Add("X-Api-Key", cloudOptions.ServiceApiKey);
+        });
     }
 }
