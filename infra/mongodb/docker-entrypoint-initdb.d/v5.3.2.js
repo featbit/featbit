@@ -58,7 +58,7 @@ db.Policies.updateMany(
     {
         $push: {
             statements: {
-                id: UUID(),
+                _id: UUID().toString().split('"')[1],
                 effect: "allow",
                 actions: ["*"],
                 resources: ["project/*:env/*:segment/*"],
