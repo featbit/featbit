@@ -1,8 +1,5 @@
-using System.Text.Json;
 using Confluent.Kafka;
-using Domain.EndUsers;
 using Domain.Messages;
-using Domain.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -35,8 +32,10 @@ public partial class KafkaMessageConsumer : BackgroundService
 
     private async Task StartConsumerLoop(CancellationToken cancellationToken)
     {
-        _consumer.Subscribe(Topics.EndUser);
-        _logger.LogInformation("Start consuming {Topic} messages...", Topics.EndUser);
+        var topics = new[] { Topics.EndUser, Topics.Usage };
+
+        _consumer.Subscribe(topics);
+        _logger.LogInformation("Start consuming {Topic} messages...", string.Join(',', topics));
 
         ConsumeResult<Null, string>? consumeResult = null;
         var message = string.Empty;
@@ -55,21 +54,17 @@ public partial class KafkaMessageConsumer : BackgroundService
                 {
                     continue;
                 }
+                
+                using var scope = _serviceProvider.CreateScope();
 
-                var endUserMessage =
-                    JsonSerializer.Deserialize<EndUserMessage>(message, ReusableJsonSerializerOptions.Web);
-                if (endUserMessage == null)
+                var handler = scope.ServiceProvider.GetKeyedService<IMessageHandler>(consumeResult.Topic);
+                if (handler == null)
                 {
+                    Log.NoHandlerForTopic(_logger, consumeResult.Topic);
                     continue;
                 }
 
-                using var scope = _serviceProvider.CreateScope();
-                var endUserService = scope.ServiceProvider.GetRequiredService<IEndUserService>();
-
-                // upsert endUser and it's properties
-                var endUser = endUserMessage.AsEndUser();
-                await endUserService.UpsertAsync(endUser);
-                await endUserService.AddNewPropertiesAsync(endUser);
+                await handler.HandleAsync(message);
             }
             catch (ConsumeException ex)
             {

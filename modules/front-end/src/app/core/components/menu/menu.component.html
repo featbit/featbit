@@ -41,7 +41,7 @@
                       </a>
                     } @else {
                       <ng-container>
-                        <a target="_blank" [href]="menu.target" [nz-tooltip]="menu.title" nzTooltipPlacement="top">
+                        <a target="_blank" [href]="menu.target" [nz-tooltip]="menu.title" nzTooltipPlacement="right">
                           <i nz-icon [nzType]="menu.icon"></i>
                           <span class="menu-item-title">{{ menu.title }}</span>
                         </a>
@@ -50,7 +50,7 @@
                   }
                 } @else {
                   @if (menu.path) {
-                    <a [routerLink]="menu.path" [nz-tooltip]="menu.title" nzTooltipPlacement="top">
+                    <a [routerLink]="menu.path" [nz-tooltip]="menu.title" nzTooltipPlacement="right">
                       <i nz-icon [nzType]="menu.icon"></i>
                       <span class="menu-item-title">{{ menu.title }}</span>
                     </a>
@@ -62,7 +62,7 @@
                       </a>
                     } @else {
                       <ng-container>
-                        <a target="_blank" [href]="menu.target" [nz-tooltip]="menu.title" nzTooltipPlacement="top">
+                        <a target="_blank" [href]="menu.target" [nz-tooltip]="menu.title" nzTooltipPlacement="right">
                           <i nz-icon [nzType]="menu.icon"></i>
                           <span class="menu-item-title">{{ menu.title }}</span>
                         </a>
