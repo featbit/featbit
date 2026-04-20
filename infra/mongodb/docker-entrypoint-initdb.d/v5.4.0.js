@@ -117,9 +117,11 @@ db.UsageEventStats.createIndex({ envId: 1, statsDate: 1 }, { unique: true });
 // firstSeenAt is written once on insert ($setOnInsert) and never overwritten.
 //
 // Queries this enables:
-//   MAU : db.UsageEndUserStats.countDocuments({ envId, yearMonth })
-//   DAU : db.UsageEndUserStats.countDocuments({ envId, yearMonth, firstSeenAt: <date> })
+//   MAU / DAU  : db.UsageEndUserStats.countDocuments({ envId: { $in: [...] }, firstSeenAt: { $gte, $lte } })
+//   Daily trend: ... $group by firstSeenAt
+//   Per-env    : ... $group by envId
 db.createCollection("UsageEndUserStats")
+// yearMonth only appears here for per-month upsert deduplication, not for reads.
 db.UsageEndUserStats.createIndex({ envId: 1, yearMonth: 1, userKey: 1 }, { unique: true });
-// Supports daily-unique-user queries within a given month
-db.UsageEndUserStats.createIndex({ envId: 1, yearMonth: 1, firstSeenAt: 1 });
+// All read queries filter on (envId, firstSeenAt); yearMonth is not used in any read path.
+db.UsageEndUserStats.createIndex({ envId: 1, firstSeenAt: 1 });

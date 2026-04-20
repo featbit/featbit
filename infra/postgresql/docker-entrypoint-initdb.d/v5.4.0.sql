@@ -68,8 +68,9 @@ WHERE permissions IS NOT NULL;
 -- Equivalent of Redis ZADD NX: only the first occurrence in a month is recorded.
 --
 -- Queries this enables:
---   MAU  : SELECT COUNT(*) FROM usage_end_user_stats WHERE env_id = ? AND year_month = ?
---   DAU  : SELECT COUNT(*) FROM usage_end_user_stats WHERE env_id = ? AND year_month = ? AND first_seen_at = ?
+--   MAU / DAU  : SELECT COUNT(*) FROM usage_end_user_stats WHERE env_id = ANY(?) AND first_seen_at BETWEEN ? AND ?
+--   Daily trend: ... GROUP BY first_seen_at
+--   Per-env    : ... GROUP BY env_id
 CREATE TABLE usage_end_user_stats
 (
     env_id        uuid                     NOT NULL,
@@ -79,8 +80,8 @@ CREATE TABLE usage_end_user_stats
     CONSTRAINT pk_usage_end_user_stats PRIMARY KEY (env_id, year_month, user_key)
 );
 
--- Supports efficient daily-unique-user queries within a month
-CREATE INDEX ix_usage_end_user_stats_env_ym_date ON usage_end_user_stats (env_id, year_month, first_seen_at);
+-- All read queries filter on (env_id, first_seen_at); year_month only appears in the PK for upsert deduplication.
+CREATE INDEX ix_usage_end_user_stats_env_date ON usage_end_user_stats (env_id, first_seen_at);
 
 -- Daily aggregated metrics per environment
 -- Tracks total flag_evaluations and custom_metrics per day
