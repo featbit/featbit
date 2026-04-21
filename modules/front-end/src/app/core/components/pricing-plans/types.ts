@@ -47,7 +47,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     mauMax: 300000,
     mauStep: 10000,
     extraMauCost: 20,
-    features: [ '10K MAU included', 'All Free features', 'Priority support' ]
+    features: [ '10K MAU included', 'Priority support' ]
   },
   {
     key: 'growth',
@@ -60,7 +60,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     mauMax: 300000,
     mauStep: 10000,
     extraMauCost: 20,
-    features: [ '40K MAU included', 'Schedule', 'Change request', 'Flag comparison' ]
+    features: [ '40K MAU included', 'Flag Change Approval', 'Flag Change Scheduling', 'Flag comparison' ]
   },
   {
     key: 'enterprise',
@@ -80,11 +80,10 @@ export const PRICING_PLANS: PricingPlan[] = [
       '4-business-hour reply SLA',
       'Dedicated SLA & support',
       'Dedicated onboarding & training',
-      'SSO',
+      'Single Sign-On',
       'Multi-organization',
-      'Global user',
-      'Shareable segment',
-      'Auto agents'
+      'Global users & Shareable segments',
+      'FeatBit Auto agents'
     ]
   }
 ];
