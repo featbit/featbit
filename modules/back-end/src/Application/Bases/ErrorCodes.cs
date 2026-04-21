@@ -40,4 +40,5 @@ public static class ErrorCodes
 
     public static string Required(string parameterName) => $"{parameterName}_is_required";
     public static string Invalid(string parameterName) => $"{parameterName}_is_invalid";
+    public static string Failed(string parameterName) => $"{parameterName}";
 }
