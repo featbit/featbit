@@ -99,7 +99,7 @@ public static class ServiceCollectionExtensions
             .Bind(section)
             .ValidateDataAnnotations();
         
-        services.AddHttpClient<ICheckoutService, CheckoutService>((sp, client) =>
+        services.AddHttpClient<ISubscriptionService, SubscriptionService>((sp, client) =>
         {
             var cloudOptions = sp.GetRequiredService<IOptions<CloudOptions>>().Value;
             client.BaseAddress = new Uri(cloudOptions.ServiceUrl);

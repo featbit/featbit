@@ -11,12 +11,12 @@ export interface CheckoutSession {
   providedIn: 'root'
 })
 export class CheckoutService {
-  private baseUrl = `${environment.url}/api/v1/checkout`;
+  private baseUrl = `${environment.url}/api/v1/subscription`;
 
   constructor(private http: HttpClient) {}
 
   createCheckoutSession(): Observable<CheckoutSession> {
-    return this.http.post<CheckoutSession>(`${this.baseUrl}/session`, {});
+    return this.http.post<CheckoutSession>(`${this.baseUrl}/checkout`, {});
   }
 
   redirectToCheckout(url: string): void {

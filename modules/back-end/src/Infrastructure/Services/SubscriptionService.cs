@@ -1,19 +1,23 @@
 using System.Net.Http.Json;
-using Application.Checkout;
+using Application.Subscription;
 using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Services;
 
-public class CheckoutService(
+public class SubscriptionService(
     HttpClient httpClient,
-    ILogger<CheckoutService> logger)
-    : ICheckoutService
+    ILogger<SubscriptionService> logger)
+    : ISubscriptionService
 {
     public async Task<CheckoutSessionVm?> CreateCheckoutSessionAsync(
-        long unitAmount,
+        string email,
+        Guid workspaceId,
+        string plan,
+        int mau,
+        string[] extraFeatures,
         CancellationToken cancellationToken = default)
     {
-        var payload = new { unitAmount };
+        var payload = new { email, workspaceId, plan, mau, extraFeatures};
 
         try
         {
@@ -31,7 +35,7 @@ public class CheckoutService(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to create checkout session for amount {Amount} {Currency}.", unitAmount);
+            logger.LogError(ex, "Failed to create checkout session for {email} {workspaceId} {plan} {mau} {extraFeatures}.", email, workspaceId, plan, mau, string.Join(',', extraFeatures));
             return null;
         }
     }
