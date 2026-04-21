@@ -74,6 +74,13 @@ export interface IWorkspace {
   sso?: ISso
 }
 
+export interface WorkspacePlan {
+  key: string;
+  order: number;
+  totalMau: number;
+  addons: string[];
+}
+
 export interface IOrganizationPermissions {
   policyIds: string[];
   groupIds: string[];

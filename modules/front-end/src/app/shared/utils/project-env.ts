@@ -1,4 +1,4 @@
-import { IOrganization, IProjectEnv, IWorkspace, License } from "@shared/types";
+import { IOrganization, IProjectEnv, IWorkspace, License, WorkspacePlan } from "@shared/types";
 import { CURRENT_ORGANIZATION, CURRENT_PROJECT, CURRENT_WORKSPACE } from "./localstorage-keys";
 import { ResourceTypeEnum } from "@shared/policy";
 
@@ -41,4 +41,13 @@ export function getCurrentEnvRN() {
 export function getCurrentLicense(): License {
   const workspace = getCurrentWorkspace();
   return workspace ? new License(workspace.license) : undefined;
+}
+
+export function getCurrentPlan(): WorkspacePlan {
+  return {
+    key: 'growth',
+    order: 2,
+    totalMau: 40_000 + 30_000,
+    addons: ['fineGrainedAccessControl']
+  }
 }

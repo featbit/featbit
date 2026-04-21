@@ -24,6 +24,7 @@ import { NzRadioModule } from 'ng-zorro-antd/radio';
 import { NzSegmentedModule } from 'ng-zorro-antd/segmented';
 import { NzSkeletonModule } from "ng-zorro-antd/skeleton";
 import { NzTagModule } from "ng-zorro-antd/tag";
+import { NzSliderModule } from "ng-zorro-antd/slider";
 import { CoreModule } from "@core/core.module";
 import { NzToolTipModule } from "ng-zorro-antd/tooltip";
 import { WorkspaceComponent } from "@features/safe/workspaces/workspace/workspace.component";
@@ -65,6 +66,7 @@ import { BillingComponent } from './billing/billing.component';
     NzSegmentedModule,
     NzSkeletonModule,
     NzTagModule,
+    NzSliderModule,
     ScrollingModule,
     ReactiveFormsModule,
     WorkspacesRoutingModule,

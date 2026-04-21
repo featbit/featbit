@@ -1,1 +1,176 @@
-<p>billing works!</p>
+<!-- ==================== SECTION 1: Current Subscription ==================== -->
+<div class="section-card current-plan-section">
+  <div class="section-header">
+    <h5>Overview</h5>
+    <div class="overview-actions">
+      <button nz-button nzType="default" nzDanger (click)="cancelSubscription()">Cancel Plan</button>
+      <button nz-button nzType="primary" (click)="openPricingDrawer()">Change Plan</button>
+    </div>
+  </div>
+
+  <div class="plan-overview">
+    <div class="plan-overview-left">
+      <div class="plan-badge">
+        <span class="plan-name">{{ currentPlanName }}</span>
+        <span class="plan-cycle">{{ billingCycle === 'monthly' ? 'Monthly' : 'Yearly' }}</span>
+      </div>
+      <div class="plan-cost">
+        <span class="cost-amount">${{ monthlyTotal }}</span>
+        <span class="cost-period">/ month</span>
+      </div>
+    </div>
+    <div class="plan-overview-right">
+      <div class="billing-detail">
+        <span class="detail-label">Current billing period</span>
+        <span class="detail-value">{{ currentBillingPeriod }}</span>
+      </div>
+      <div class="billing-detail">
+        <span class="detail-label">Next charge date</span>
+        <span class="detail-value">{{ nextBillingDate }}</span>
+      </div>
+      <div class="billing-detail">
+        <span class="detail-label">Subscriber since</span>
+        <span class="detail-value">{{ subscriptionStartDate }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAU Usage -->
+  <div class="mau-usage-section">
+    <div class="mau-usage-header">
+      <span class="mau-usage-label">Monthly Active Users (MAU)</span>
+      <span class="mau-usage-numbers">
+        <strong>{{ mauUsed | number }}</strong> / {{ currentMau | number }}
+      </span>
+    </div>
+    <div class="mau-progress-bar">
+      <div class="mau-progress-fill" [style.width.%]="mauUsagePercent" [class.warning]="mauUsagePercent >= 80"
+        [class.danger]="mauUsagePercent >= 95">
+      </div>
+    </div>
+    <div class="mau-progress-footer">
+      <span class="mau-percent">{{ mauUsagePercent }}% used</span>
+      <span class="mau-remaining">{{ currentMau - mauUsed | number }} MAU remaining</span>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SECTION 2: Usage Alert ==================== -->
+@if (showUsageAlert) {
+<nz-alert class="usage-alert" nzType="warning" nzShowIcon [nzMessage]="alertTitle" [nzDescription]="alertDesc">
+  <ng-template #alertTitle>
+    Approaching MAU Limit
+  </ng-template>
+  <ng-template #alertDesc>
+    You've used {{ mauUsagePercent }}% of your monthly active users allowance ({{ mauUsed | number }} of {{ currentMau |
+    number }}). Consider upgrading your plan to avoid service interruptions.
+  </ng-template>
+</nz-alert>
+}
+
+<!-- ==================== SECTION 2: Billing Information ==================== -->
+<div class="section-card">
+  <div class="section-header">
+    <h5>Billing Information</h5>
+    @if (!editingBillingInfo) {
+    <button nz-button nzType="link" (click)="startEditBillingInfo()">
+      <i nz-icon nzType="edit" nzTheme="outline"></i> Edit
+    </button>
+    }
+  </div>
+
+  @if (!editingBillingInfo) {
+  <div class="billing-info-grid">
+    <div class="billing-info-item">
+      <span class="info-label">Company Name</span>
+      <span class="info-value">{{ billingInfo.companyName }}</span>
+    </div>
+    <div class="billing-info-item">
+      <span class="info-label">Contact Email</span>
+      <span class="info-value">{{ billingInfo.contactEmail }}</span>
+    </div>
+    <div class="billing-info-item">
+      <span class="info-label">Billing Address</span>
+      <span class="info-value">{{ billingInfo.address }}</span>
+    </div>
+    <div class="billing-info-item">
+      <span class="info-label">Tax ID</span>
+      <span class="info-value">{{ billingInfo.taxId }}</span>
+    </div>
+  </div>
+  } @else {
+  <div class="billing-info-form">
+    <div class="form-row">
+      <div class="form-group">
+        <label>Company Name</label>
+        <input nz-input [(ngModel)]="billingInfoDraft.companyName" placeholder="Company name" />
+      </div>
+      <div class="form-group">
+        <label>Contact Email</label>
+        <input nz-input [(ngModel)]="billingInfoDraft.contactEmail" placeholder="billing@company.com" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group full-width">
+        <label>Billing Address</label>
+        <input nz-input [(ngModel)]="billingInfoDraft.address" placeholder="Street address, city, state, zip" />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Tax ID</label>
+        <input nz-input [(ngModel)]="billingInfoDraft.taxId" placeholder="Tax identification number" />
+      </div>
+    </div>
+    <div class="form-actions">
+      <button nz-button nzType="default" (click)="cancelEditBillingInfo()">Cancel</button>
+      <button nz-button nzType="primary" (click)="saveBillingInfo()">Save Changes</button>
+    </div>
+  </div>
+  }
+</div>
+
+<!-- ==================== SECTION 3: Invoices ==================== -->
+<div class="section-card">
+  <div class="section-header">
+    <h5>Invoices</h5>
+    <span class="section-subtitle">To download an invoice, please contact FeatBit support</span>
+  </div>
+
+  <nz-table #invoiceTable nzSize="middle" [nzData]="invoices" [nzShowPagination]="false" [nzFrontPagination]="false">
+    <thead>
+      <tr>
+        <th>Invoice</th>
+        <th>Billing Date</th>
+        <th>Status</th>
+        <th>Plan</th>
+        <th nzAlign="right">Amount</th>
+        <th nzAlign="center">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (inv of invoiceTable.data; track inv.id) {
+      <tr>
+        <td><span class="invoice-id">{{ inv.id }}</span></td>
+        <td>{{ inv.date }}</td>
+        <td>
+          <nz-tag [nzColor]="getInvoiceStatusColor(inv.status)">
+            {{ inv.status | titlecase }}
+          </nz-tag>
+        </td>
+        <td>{{ inv.plan }}</td>
+        <td nzAlign="right">
+          <span class="invoice-amount">${{ inv.amount | number: '1.2-2' }}</span>
+        </td>
+        <td nzAlign="center">
+          <a nz-button nzType="link" nzSize="small" (click)="contactSupport()">
+            Request Download
+          </a>
+        </td>
+      </tr>
+      }
+    </tbody>
+  </nz-table>
+</div>
+
+<pricing-plans [visible]="pricingDrawerVisible" (close)="onClosePricingDrawer()"></pricing-plans>

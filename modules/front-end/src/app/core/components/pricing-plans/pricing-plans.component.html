@@ -1,0 +1,188 @@
+<nz-drawer
+  nzClosable="false"
+  [nzExtra]="extra"
+  [nzVisible]="visible"
+  [nzTitle]="title"
+  [nzWidth]="950"
+  (nzOnClose)="onClose()">
+  <ng-template #title>
+    <div class="drawer-title">
+      <span class="drawer-title-main">Pricing Plans</span>
+      <span class="drawer-title-sub">Choose the plan that best fits your needs</span>
+    </div>
+  </ng-template>
+  <ng-container *nzDrawerContent>
+    <!-- Free / Pro / Growth: 3-column grid -->
+    <div class="plans-grid">
+      @for (plan of normalPlans; track plan.key) {
+        <div class="plan-card" [class.current]="plan.key === currentPlan.key">
+          @if (plan.key === currentPlan.key) {
+            <div class="current-badge">Current Plan</div>
+          }
+          <div class="plan-card-header">
+            <h6 class="plan-card-name">{{ plan.name }}</h6>
+            <p class="plan-card-description">{{ plan.description }}</p>
+            @if (plan.key === 'free') {
+              <div class="plan-card-price">
+                <span class="price-amount"><span class="price-currency">$</span>0</span>
+                <span class="price-period">forever</span>
+              </div>
+            } @else {
+              <div class="plan-card-price">
+                <span class="price-amount"><span class="price-currency">$</span>{{ getPlanTotal(plan) | number }}</span>
+                <span class="price-period">/ month</span>
+              </div>
+            }
+          </div>
+
+          <!-- MAU Slider -->
+          @if (plan.mauStep > 0) {
+            <div class="mau-slider-section">
+              <div class="mau-slider-label">
+                <span>Monthly Active Users</span>
+                <strong>{{ getPlanMauLabel(plan) }} MAU</strong>
+              </div>
+              <nz-slider
+                [(ngModel)]="planMauSlider[plan.key]"
+                [nzMin]="plan.mauIncluded"
+                [nzMax]="plan.mauMax"
+                [nzStep]="plan.mauStep"
+                [nzMarks]="getSliderMarks(plan)"
+                [nzTipFormatter]="formatMau">
+              </nz-slider>
+            </div>
+          }
+
+          <!-- Features -->
+          <ul class="plan-features">
+            @for (feature of plan.features; track feature) {
+              <li>
+                <i nz-icon nzType="check" nzTheme="outline"></i>
+                {{ feature }}
+              </li>
+            }
+          </ul>
+
+          <!-- Add-on (Growth) -->
+          @if (plan.key === 'growth') {
+            <div class="addon-section">
+              <label class="addon-item" nz-checkbox [(ngModel)]="fineGrainedAcEnabled[plan.key]">
+                <span class="addon-name">Fine-grained Access Control</span>
+                <span class="addon-price">+${{ fineGrainedAcPrice }}/mo</span>
+              </label>
+            </div>
+          }
+
+          <!-- Action Button -->
+          <div class="plan-card-footer">
+            @if (plan.order > currentPlan.order) {
+              <button nz-button class="btn-upgrade" (click)="selectPlan(plan.key)">
+                Upgrade to {{ plan.name }}
+              </button>
+            } @else if (plan.order < currentPlan.order) {
+              <button nz-button class="btn-downgrade" (click)="selectPlan(plan.key)">
+                Downgrade to {{ plan.name }}
+              </button>
+            } @else if (isCurrentPlanChanged()) {
+              <button nz-button class="btn-update" (click)="updatePlan()">
+                Update Plan
+              </button>
+            } @else {
+              <button nz-button class="btn-current" disabled>
+                Current Plan
+              </button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Enterprise: full-width card, 2-panel layout -->
+    <div class="enterprise-card plan-card" [class.current]="enterprisePlan.key === currentPlan.key">
+      @if (enterprisePlan.key === currentPlan.key) {
+        <div class="current-badge">Current Plan</div>
+      }
+
+      <!-- Left panel: identity, price, add-on, action -->
+      <div class="enterprise-left">
+        <div class="plan-card-header">
+          <h6 class="plan-card-name">{{ enterprisePlan.name }}</h6>
+          <p class="plan-card-description">{{ enterprisePlan.description }}</p>
+          <div class="enterprise-toggle">
+            <nz-segmented
+              [nzOptions]="billingCycleOptions"
+              (nzValueChange)="onEnterpriseCycleChange($event)">
+            </nz-segmented>
+          </div>
+          <div class="plan-card-price">
+            <span class="price-amount"><span class="price-currency">$</span>{{ getPlanTotal(enterprisePlan) | number }}</span>
+            <span class="price-period">{{ enterpriseBillingCycle === 'monthly' ? '/ month' : '/ year' }}</span>
+          </div>
+          <div class="yearly-savings" [class.invisible]="enterpriseBillingCycle === 'monthly'">Save ~16% vs monthly</div>
+        </div>
+        <div class="enterprise-left-footer">
+          <div class="addon-section">
+            <label class="addon-item" nz-checkbox [(ngModel)]="fineGrainedAcEnabled[enterprisePlan.key]">
+              <span class="addon-name">Fine-grained Access Control</span>
+              <span class="addon-price">+${{ fineGrainedAcPrice }}/mo</span>
+            </label>
+          </div>
+          <div class="plan-card-footer">
+            @if (enterprisePlan.order > currentPlan.order) {
+              <button nz-button class="btn-upgrade" (click)="selectPlan(enterprisePlan.key)">
+                Upgrade to {{ enterprisePlan.name }}
+              </button>
+            } @else if (enterprisePlan.order < currentPlan.order) {
+              <button nz-button class="btn-downgrade" (click)="selectPlan(enterprisePlan.key)">
+                Downgrade to {{ enterprisePlan.name }}
+              </button>
+            } @else if (isCurrentPlanChanged()) {
+              <button nz-button class="btn-update" (click)="updatePlan()">
+                Save Changes
+              </button>
+            } @else {
+              <button nz-button class="btn-current" disabled>
+                Current Plan
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Right panel: MAU slider + features -->
+      <div class="enterprise-right">
+        <div class="mau-slider-section">
+          <div class="mau-slider-label">
+            <span>Monthly Active Users</span>
+            <strong>{{ getPlanMauLabel(enterprisePlan) }} MAU</strong>
+          </div>
+          <nz-slider
+            [(ngModel)]="planMauSlider[enterprisePlan.key]"
+            [nzMin]="enterprisePlan.mauIncluded"
+            [nzMax]="enterprisePlan.mauMax"
+            [nzStep]="enterprisePlan.mauStep"
+            [nzMarks]="getSliderMarks(enterprisePlan)"
+            [nzTipFormatter]="formatMau">
+          </nz-slider>
+          @if (planMauSlider[enterprisePlan.key] >= enterprisePlan.mauMax) {
+            <div class="contact-prompt">
+              Need more than 300k MAU? <a (click)="contactSupport()">Contact us</a>
+            </div>
+          }
+        </div>
+        <ul class="plan-features">
+          @for (feature of enterprisePlan.features; track feature) {
+            <li>
+              <i nz-icon nzType="check" nzTheme="outline"></i>
+              {{ feature }}
+            </li>
+          }
+        </ul>
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-template #extra>
+    <i (click)="onClose()" nz-icon nzType="icons:icon-close"></i>
+  </ng-template>
+</nz-drawer>

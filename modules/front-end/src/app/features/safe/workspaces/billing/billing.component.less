@@ -1,0 +1,258 @@
+@import "variables";
+
+// ==================== Shared Section Card ====================
+.section-card {
+  background: @grey5-color;
+  border: 1px solid @grey20-color;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+
+    h5 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: @grey80-color;
+    }
+
+    .section-subtitle {
+      font-size: 13px;
+      color: @grey40-color;
+    }
+  }
+}
+
+// ==================== Section 1: Current Plan ====================
+.current-plan-section {
+  .overview-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .plan-overview {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid @grey20-color;
+
+    .plan-overview-left {
+      .plan-badge {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 8px;
+
+        .plan-name {
+          font-size: 24px;
+          font-weight: 700;
+          color: @grey90-color;
+        }
+
+        .plan-cycle {
+          font-size: 12px;
+          font-weight: 500;
+          color: @green60-color;
+          background: @green10-color;
+          padding: 2px 10px;
+          border-radius: 20px;
+        }
+      }
+
+      .plan-cost {
+        .cost-amount {
+          font-size: 32px;
+          font-weight: 700;
+          color: @grey90-color;
+        }
+
+        .cost-period {
+          font-size: 14px;
+          color: @grey50-color;
+          margin-left: 2px;
+        }
+      }
+    }
+
+    .plan-overview-right {
+      display: flex;
+      gap: 32px;
+
+      .billing-detail {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        .detail-label {
+          font-size: 12px;
+          color: @grey40-color;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .detail-value {
+          font-size: 14px;
+          font-weight: 500;
+          color: @grey70-color;
+        }
+      }
+    }
+  }
+}
+
+// MAU Usage
+.mau-usage-section {
+  .mau-usage-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+
+    .mau-usage-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: @grey60-color;
+    }
+
+    .mau-usage-numbers {
+      font-size: 13px;
+      color: @grey50-color;
+
+      strong {
+        color: @grey80-color;
+      }
+    }
+  }
+
+  .mau-progress-bar {
+    height: 10px;
+    background: @grey10-color;
+    border-radius: 5px;
+    overflow: hidden;
+
+    .mau-progress-fill {
+      height: 100%;
+      border-radius: 5px;
+      background: @primary-color;
+      transition: width 0.5s ease;
+
+      &.warning {
+        background: @yellow55-color;
+      }
+
+      &.danger {
+        background: @red60-color;
+      }
+    }
+  }
+
+  .mau-progress-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+    font-size: 12px;
+
+    .mau-percent {
+      color: @grey50-color;
+    }
+
+    .mau-remaining {
+      color: @grey40-color;
+    }
+  }
+}
+
+// ==================== Section 2: Usage Alert ====================
+.usage-alert {
+  margin-bottom: 24px;
+}
+
+// ==================== Section 3: Billing Information ====================
+.billing-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+
+  .billing-info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .info-label {
+      font-size: 12px;
+      color: @grey40-color;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .info-value {
+      font-size: 14px;
+      color: @grey70-color;
+      font-weight: 500;
+    }
+  }
+}
+
+.billing-info-form {
+  .form-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+
+    .form-group {
+      flex: 1;
+
+      &.full-width {
+        flex: 1;
+      }
+
+      label {
+        display: block;
+        font-size: 13px;
+        color: @grey60-color;
+        margin-bottom: 6px;
+        font-weight: 500;
+      }
+
+      input {
+        border-radius: 8px;
+        height: 38px;
+        border-color: @grey20-color;
+      }
+    }
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 8px;
+
+    button {
+      border-radius: 8px;
+      height: 36px;
+      font-weight: 500;
+      min-width: 120px;
+    }
+  }
+}
+
+// ==================== Section 5: Invoices ====================
+.invoice-id {
+  font-weight: 600;
+  color: @grey80-color;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 13px;
+}
+
+.invoice-amount {
+  font-weight: 600;
+  color: @grey80-color;
+}
