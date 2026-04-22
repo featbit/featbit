@@ -1,4 +1,4 @@
-import { IOrganization, IProjectEnv, IWorkspace, License, WorkspacePlan } from "@shared/types";
+import { IOrganization, IProjectEnv, IWorkspace, License, LicenseFeatureEnum, WorkspacePlan } from "@shared/types";
 import { CURRENT_ORGANIZATION, CURRENT_PROJECT, CURRENT_WORKSPACE } from "./localstorage-keys";
 import { ResourceTypeEnum } from "@shared/policy";
 
@@ -46,8 +46,13 @@ export function getCurrentLicense(): License {
 export function getCurrentPlan(): WorkspacePlan {
   return {
     key: 'growth',
+    name: 'Growth',
     order: 2,
-    totalMau: 40_000 + 30_000,
-    addons: ['fineGrainedAccessControl']
+    includedMau: 40_000,
+    extraMau: 30_000,
+    totalMau: 70_000,
+    fineGrainedAcEnabled: true,
+    price: 149 + 20 * 3, // base price + extra MAU cost
+    billingCycle: "monthly"
   }
 }

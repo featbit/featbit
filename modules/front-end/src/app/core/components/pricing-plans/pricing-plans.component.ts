@@ -1,5 +1,13 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { PRICING_PLANS, PricingPlan } from "@core/components/pricing-plans/types";
+import {
+  BillingCycle,
+  EXTRA_MAU_PER_10K_COST,
+  FINE_GRAINED_AC_PER_MONTH_PRICE,
+  PlanAction, PlanKeys,
+  PRICING_PLANS,
+  PricingPlan,
+  UpdatePlanModalData
+} from "@core/components/pricing-plans/types";
 import { WorkspacePlan } from "@shared/types";
 import { getCurrentPlan } from "@utils/project-env";
 
@@ -28,7 +36,7 @@ export class PricingPlansComponent {
           : p.mauIncluded;
       });
 
-      this.fineGrainedAcEnabled[this.currentPlan.key] = this.currentPlan.addons.includes('fineGrainedAccessControl');
+      this.fineGrainedAcEnabled[this.currentPlan.key] = this.currentPlan.fineGrainedAcEnabled;
     }
   }
 
@@ -42,7 +50,8 @@ export class PricingPlansComponent {
       return true;
     }
 
-    const isFineGrainedAcChanged = this.fineGrainedAcEnabled[this.currentPlan.key] !== this.currentPlan.addons.includes('fineGrainedAccessControl');
+    const isFineGrainedAcChanged =
+      this.fineGrainedAcEnabled[this.currentPlan.key] !== this.currentPlan.fineGrainedAcEnabled;
     if (isFineGrainedAcChanged) {
       return true;
     }
@@ -50,34 +59,40 @@ export class PricingPlansComponent {
     return false;
   }
 
-  // Add-ons
-  fineGrainedAcPrice = 60;
+  // per plan fine-grained access control toggle
   fineGrainedAcEnabled: { [key: string]: boolean } = {};
+  // per plan MAU slider value
+  planMauSlider: { [key: string]: number } = {};
 
   // Enterprise billing toggle
-  enterpriseBillingCycle: 'monthly' | 'yearly' = 'monthly';
+  enterpriseBillingCycle: string = BillingCycle.MONTHLY;
   billingCycleOptions = [
-    { label: 'Monthly', value: 'monthly' },
-    { label: 'Yearly', value: 'yearly' },
+    { label: 'Monthly', value: BillingCycle.MONTHLY },
+    { label: 'Yearly', value: BillingCycle.YEARLY },
   ];
 
   onEnterpriseCycleChange(value: string | number): void {
     this.enterpriseBillingCycle = value as 'monthly' | 'yearly';
   }
 
-  // MAU slider values per plan
-  planMauSlider: { [key: string]: number } = {};
+  getPlanBasePrice(plan: PricingPlan): number {
+    if (plan.key === PlanKeys.ENTERPRISE && this.enterpriseBillingCycle === 'yearly') {
+      return 4490;
+    }
 
-  getPlanTotal(plan: PricingPlan): number {
+    return plan.price;
+  }
+
+  getPlanTotalPrice(plan: PricingPlan): number {
     const selectedMau = this.planMauSlider[plan.key] || plan.mauIncluded;
     const extraMau = Math.max(0, selectedMau - plan.mauIncluded);
-    const extraCost = (extraMau / 10000) * plan.extraMauCost;
-    const addonCost = this.fineGrainedAcEnabled[plan.key] ? this.fineGrainedAcPrice : 0;
+    const extraCost = (extraMau / 10_000) * EXTRA_MAU_PER_10K_COST;
+    const fineGrainedAcCost = this.fineGrainedAcEnabled[plan.key] ? FINE_GRAINED_AC_PER_MONTH_PRICE : 0;
 
     if (plan.key === 'enterprise' && this.enterpriseBillingCycle === 'yearly') {
-      return 4490 + (extraMau / 10000) * 20 + addonCost * 12;
+      return 4490 + (extraMau / 10000) * 20 + fineGrainedAcCost * 12;
     }
-    return plan.price + extraCost + addonCost;
+    return plan.price + extraCost + fineGrainedAcCost;
   }
 
   formatMau(val: number): string {
@@ -96,18 +111,31 @@ export class PricingPlansComponent {
     };
   }
 
-  isDowngrade(plan: PricingPlan): boolean {
-    return plan.order < this.currentPlan.order;
+  // plan modal
+  planModalVisible: boolean = false;
+  planModalData: UpdatePlanModalData;
+  updatePlan(newPlan: PricingPlan, action: PlanAction): void {
+    this.planModalData = {
+      action,
+      currentPlan: { ...this.currentPlan },
+      newPlan: {
+        key: newPlan.key,
+        name: newPlan.name,
+        order: newPlan.order,
+        includedMau: newPlan.mauIncluded,
+        extraMau: Math.max(0, (this.planMauSlider[newPlan.key] || newPlan.mauIncluded) - newPlan.mauIncluded),
+        totalMau: this.planMauSlider[newPlan.key] || newPlan.mauIncluded,
+        fineGrainedAcEnabled: this.fineGrainedAcEnabled[newPlan.key] || false,
+        price: this.getPlanTotalPrice(newPlan),
+        billingCycle: newPlan.key === PlanKeys.ENTERPRISE ? this.enterpriseBillingCycle : BillingCycle.MONTHLY
+      },
+      basePrice: this.getPlanBasePrice(newPlan)
+    };
+    this.planModalVisible = true;
   }
 
-  selectPlan(planKey: string): void {
-    // In real implementation, this would call the API
-    console.log('Selected plan:', planKey);
-  }
-
-  updatePlan(): void {
-    // In real implementation, this would call the API to update MAU/addons
-    console.log('Update current plan:', this.currentPlan.key);
+  onUpdatePlanModalClose(confirmed: boolean) {
+    this.planModalVisible = false;
   }
 
   contactSupport(): void {
@@ -120,4 +148,5 @@ export class PricingPlansComponent {
 
   protected readonly normalPlans = PRICING_PLANS.slice(0, 3);
   protected readonly enterprisePlan = PRICING_PLANS[3];
+  protected readonly fineGrainedAcPrice = FINE_GRAINED_AC_PER_MONTH_PRICE;
 }

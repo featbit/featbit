@@ -1,0 +1,179 @@
+<nz-modal
+  nzClassName="update-pricing-plan-modal"
+  [nzVisible]="visible"
+  [nzTitle]="titleTpl"
+  [nzCentered]="true"
+  [nzWidth]="760"
+  [nzContent]="content"
+  [nzFooter]="footer"
+  (nzOnCancel)="onClose(false)">
+  <ng-template #titleTpl>
+    <div class="modal-title">
+      <span class="modal-title-eyebrow">{{ actionLabel }}</span>
+      <span class="modal-title-main">{{ title }}</span>
+      <span class="modal-title-sub">{{ titleSubtitle }}</span>
+    </div>
+  </ng-template>
+
+  <ng-template #content>
+    <section class="overview-card" [ngClass]="'overview-card--' + action">
+      <div class="overview-header">
+        <div>
+          <span class="overview-kicker">Plan transition</span>
+          <h3 class="overview-headline">{{ transitionHeadline }}</h3>
+          <p class="overview-description">{{ actionDescription }}</p>
+        </div>
+
+        <nz-tag class="overview-billing-tag" [nzColor]="action === 'downgrade' ? 'default' : 'blue'">
+          {{ billingCycleTag }}
+        </nz-tag>
+      </div>
+
+      <div class="overview-metrics">
+        <div class="overview-metric">
+          <span class="overview-metric-label">Current plan</span>
+          <strong class="overview-metric-value">{{ currentPlan.name }}</strong>
+          <span class="overview-metric-meta">${{ currentPlan.price | number }} / {{ currentBillingCycleLabel }}</span>
+        </div>
+
+        <div class="overview-metric">
+          <span class="overview-metric-label">Effective date</span>
+          <strong class="overview-metric-value">{{ effectiveDateTitle }}</strong>
+          <span class="overview-metric-meta">{{ effectiveDateDescription }}</span>
+        </div>
+
+        <div class="overview-metric">
+          <span class="overview-metric-label">Selected capacity</span>
+          <strong class="overview-metric-value">{{ formattedMau }} MAU</strong>
+          <span class="overview-metric-meta">{{ plan.includedMau | number }} included in this tier</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="content-grid">
+      <section class="panel">
+        <div class="section-heading">
+          <span class="section-kicker">What to expect</span>
+          <h4 class="section-title">Notes for your team</h4>
+          <p class="section-description">These notes focus on what changes now, what stays the same, and how billing is handled.</p>
+        </div>
+
+        <div class="notes-list">
+          @for (note of noteItems; track note.title) {
+            <article class="note-card">
+              <div class="note-icon" [ngClass]="'note-icon--' + action">
+                <i nz-icon [nzType]="note.icon"></i>
+              </div>
+
+              <div class="note-copy">
+                <h5>{{ note.title }}</h5>
+                <p>{{ note.description }}</p>
+              </div>
+            </article>
+          }
+        </div>
+      </section>
+
+      <section class="panel panel--summary">
+        <div class="section-heading">
+          <span class="section-kicker">Payment preview</span>
+          <h4 class="section-title">Order summary</h4>
+          <p class="section-description">Review the recurring amount and any immediate billing impact before you confirm.</p>
+        </div>
+
+        <div class="summary-card">
+          <div class="summary-header">
+            <div>
+              <span class="summary-kicker">{{ summaryTotalLabel }}</span>
+              <div class="summary-total">
+                ${{ recurringTotal | number }}
+                <span class="summary-period">/ {{ billingCycleLabel }}</span>
+              </div>
+            </div>
+
+            <div class="summary-plan-pill">{{ plan.name }}</div>
+          </div>
+
+          <div class="summary-breakdown">
+            <div class="summary-row">
+              <span class="summary-label">Base plan</span>
+              <span class="summary-value">
+                ${{ basePrice | number }}<span class="summary-value-period"> / {{ billingCycleLabel }}</span>
+              </span>
+            </div>
+
+            <div class="summary-row">
+              <span class="summary-label">Included MAU</span>
+              <span class="summary-value">{{ plan.includedMau | number }} MAU</span>
+            </div>
+
+            <div class="summary-row">
+              <span class="summary-label">Selected MAU</span>
+              <span class="summary-value">{{ plan.totalMau | number }} MAU</span>
+            </div>
+
+            @if (plan.totalMau > plan.includedMau) {
+              <div class="summary-row">
+                <span class="summary-label">
+                  Additional MAU
+                  <nz-tag nzColor="default">+{{ formattedExtraMau }}</nz-tag>
+                </span>
+                <span class="summary-value">
+                  +${{ extraMauRecurringCost | number }}<span class="summary-value-period"> / {{ billingCycleLabel }}</span>
+                </span>
+              </div>
+            }
+
+            @if (plan.fineGrainedAcEnabled) {
+              <div class="summary-row">
+                <span class="summary-label">
+                  <i nz-icon nzType="safety-certificate"></i>
+                  Fine-grained Access Control
+                </span>
+                <span class="summary-value">
+                  +${{ fineGrainedAcRecurringCost | number }}<span class="summary-value-period"> / {{ billingCycleLabel }}</span>
+                </span>
+              </div>
+            }
+          </div>
+
+          <div class="summary-compare">
+            <div class="summary-compare-row">
+              <span class="summary-compare-label">Current recurring total</span>
+              <span class="summary-compare-value">
+                ${{ currentPlan.price | number }}<span class="summary-value-period"> / {{ currentBillingCycleLabel }}</span>
+              </span>
+            </div>
+            <div class="summary-compare-row summary-compare-row--highlight">
+              <span class="summary-compare-label">{{ summaryTotalLabel }}</span>
+              <span class="summary-compare-value">
+                ${{ recurringTotal | number }}<span class="summary-value-period"> / {{ billingCycleLabel }}</span>
+              </span>
+            </div>
+          </div>
+
+          <div class="summary-callout">
+            <i nz-icon nzType="info-circle" nzTheme="fill"></i>
+            <div>
+              <strong>{{ todayImpactTitle }}</strong>
+              <p>{{ todayImpactDescription }}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </ng-template>
+
+  <ng-template #footer>
+    <div class="actions">
+      <button nz-button nzType="default" (click)="onClose(false)">Maybe Later</button>
+      <button
+        nz-button
+        [nzType]="action === 'downgrade' ? 'default' : 'primary'"
+        [ngClass]="action === 'downgrade' ? 'btn-downgrade-confirm' : ''"
+        (click)="onClose(true)">
+        <span>{{ confirmButtonText }}</span>
+      </button>
+    </div>
+  </ng-template>
+</nz-modal>

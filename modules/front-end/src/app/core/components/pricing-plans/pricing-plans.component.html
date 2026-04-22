@@ -29,7 +29,7 @@
               </div>
             } @else {
               <div class="plan-card-price">
-                <span class="price-amount"><span class="price-currency">$</span>{{ getPlanTotal(plan) | number }}</span>
+                <span class="price-amount"><span class="price-currency">$</span>{{ getPlanTotalPrice(plan) | number }}</span>
                 <span class="price-period">/ month</span>
               </div>
             }
@@ -76,15 +76,15 @@
           <!-- Action Button -->
           <div class="plan-card-footer">
             @if (plan.order > currentPlan.order) {
-              <button nz-button class="btn-upgrade" (click)="selectPlan(plan.key)">
+              <button nz-button class="btn-upgrade" (click)="updatePlan(plan, 'upgrade')">
                 Upgrade to {{ plan.name }}
               </button>
             } @else if (plan.order < currentPlan.order) {
-              <button nz-button class="btn-downgrade" (click)="selectPlan(plan.key)">
+              <button nz-button class="btn-downgrade" (click)="updatePlan(plan, 'downgrade')">
                 Downgrade to {{ plan.name }}
               </button>
             } @else if (isCurrentPlanChanged()) {
-              <button nz-button class="btn-update" (click)="updatePlan()">
+              <button nz-button class="btn-update" (click)="updatePlan(plan, 'update')">
                 Update Plan
               </button>
             } @else {
@@ -115,10 +115,11 @@
             </nz-segmented>
           </div>
           <div class="plan-card-price">
-            <span class="price-amount"><span class="price-currency">$</span>{{ getPlanTotal(enterprisePlan) | number }}</span>
+            <span class="price-amount"><span class="price-currency">$</span>{{ getPlanTotalPrice(enterprisePlan) | number }}</span>
             <span class="price-period">{{ enterpriseBillingCycle === 'monthly' ? '/ month' : '/ year' }}</span>
           </div>
-          <div class="yearly-savings" [class.invisible]="enterpriseBillingCycle === 'monthly'">Save ~16% vs monthly</div>
+          <div class="yearly-savings" [class.invisible]="enterpriseBillingCycle === 'monthly'">Save ~16% vs monthly
+          </div>
         </div>
         <div class="enterprise-left-footer">
           <div class="addon-section">
@@ -129,16 +130,16 @@
           </div>
           <div class="plan-card-footer">
             @if (enterprisePlan.order > currentPlan.order) {
-              <button nz-button class="btn-upgrade" (click)="selectPlan(enterprisePlan.key)">
+              <button nz-button class="btn-upgrade" (click)="updatePlan(enterprisePlan, 'upgrade')">
                 Upgrade to {{ enterprisePlan.name }}
               </button>
             } @else if (enterprisePlan.order < currentPlan.order) {
-              <button nz-button class="btn-downgrade" (click)="selectPlan(enterprisePlan.key)">
+              <button nz-button class="btn-downgrade" (click)="updatePlan(enterprisePlan, 'downgrade')">
                 Downgrade to {{ enterprisePlan.name }}
               </button>
             } @else if (isCurrentPlanChanged()) {
-              <button nz-button class="btn-update" (click)="updatePlan()">
-                Save Changes
+              <button nz-button class="btn-update" (click)="updatePlan(enterprisePlan, 'update')">
+                Update Plan
               </button>
             } @else {
               <button nz-button class="btn-current" disabled>
@@ -186,3 +187,9 @@
     <i (click)="onClose()" nz-icon nzType="icons:icon-close"></i>
   </ng-template>
 </nz-drawer>
+
+<update-pricing-modal
+  [visible]="planModalVisible"
+  [data]="planModalData"
+  (close)="onUpdatePlanModalClose($event)">
+</update-pricing-modal>

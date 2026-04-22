@@ -76,9 +76,14 @@ export interface IWorkspace {
 
 export interface WorkspacePlan {
   key: string;
+  name: string;
   order: number;
+  includedMau: number;
+  extraMau: number;
   totalMau: number;
-  addons: string[];
+  fineGrainedAcEnabled: boolean;
+  price: number;
+  billingCycle: string;
 }
 
 export interface IOrganizationPermissions {
