@@ -18,7 +18,7 @@ import { permissionActions } from "@shared/policy";
 import { getCurrentEnvRN } from "@utils/project-env";
 import { PermissionLicenseService } from "@services/permission-license.service";
 import { PermissionsService } from "@services/permissions.service";
-import { CheckoutService } from "@services/checkout.service";
+import { BillingService } from "@services/billing.service";
 
 @Component({
     selector: 'index',
@@ -35,7 +35,7 @@ export class IndexComponent implements OnInit {
     private msg: NzMessageService,
     private modal: NzModalService,    private permissionsService: PermissionsService,
     private permissionLicenseService: PermissionLicenseService,
-    private checkoutService: CheckoutService,
+    private billingService: BillingService,
   ) { }
 
   featureFlagFilter: IFeatureFlagListFilter = new IFeatureFlagListFilter();
@@ -326,8 +326,8 @@ export class IndexComponent implements OnInit {
 
   checkout() {
     this.isCheckingOut = true;
-    this.checkoutService.createCheckoutSession().subscribe({
-      next: ({ url }) => this.checkoutService.redirectToCheckout(url),
+    this.billingService.createCheckoutSession().subscribe({
+      next: ({ url }) => this.billingService.redirectToCheckout(url),
       error: () => {
         this.msg.error($localize`:@@checkout.session-error:Failed to initiate checkout. Please try again.`);
         this.isCheckingOut = false;
