@@ -81,45 +81,6 @@
     padding: 4px 10px;
     font-weight: 600;
   }
-
-  .overview-metrics {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 12px;
-  }
-
-  .overview-metric {
-    padding: 14px;
-    border-radius: 14px;
-    background: rgba(255, 255, 255, 0.85);
-    border: 1px solid rgba(208, 218, 229, 0.75);
-    backdrop-filter: blur(8px);
-  }
-
-  .overview-metric-label {
-    display: block;
-    margin-bottom: 8px;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: @grey50-color;
-  }
-
-  .overview-metric-value {
-    display: block;
-    font-size: 17px;
-    font-weight: 700;
-    color: @grey90-color;
-  }
-
-  .overview-metric-meta {
-    display: block;
-    margin-top: 4px;
-    font-size: 12px;
-    line-height: 1.5;
-    color: @grey60-color;
-  }
 }
 
 .content-stack {
@@ -209,7 +170,7 @@
 
   &--upgrade,
   &--update {
-    background: @blue5-color;
+    background: @blue10-color;
     color: @blue60-color;
   }
 
@@ -415,58 +376,6 @@
 
     &:hover {
       background: @red5-color;
-    }
-  }
-}
-
-@media (max-width: 760px) {
-  .overview-card {
-    padding: 18px;
-
-    .overview-header {
-      flex-direction: column;
-    }
-
-    .overview-metrics {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  .panel--combined {
-    .combined-section {
-      padding: 18px;
-    }
-  }
-
-  .summary-card {
-    grid-template-columns: 1fr;
-
-    .summary-side {
-      padding-left: 0;
-      border-left: 0;
-      padding-top: 16px;
-      border-top: 1px solid @grey10-color;
-    }
-
-    .summary-header,
-    .summary-row,
-    .summary-compare-row {
-      flex-direction: column;
-      align-items: flex-start;
-    }
-
-    .summary-value,
-    .summary-compare-value {
-      text-align: left;
-      white-space: normal;
-    }
-  }
-
-  .actions {
-    flex-direction: column-reverse;
-
-    button {
-      width: 100%;
     }
   }
 }

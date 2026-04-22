@@ -30,26 +30,6 @@
               {{ billingCycleTag }}
             </nz-tag>
           </div>
-
-          <div class="overview-metrics">
-            <div class="overview-metric">
-              <span class="overview-metric-label">Current plan</span>
-              <strong class="overview-metric-value">{{ currentPlan.name }}</strong>
-              <span class="overview-metric-meta">${{ currentPlan.price | number }} / {{ currentBillingCycleLabel }}</span>
-            </div>
-
-            <div class="overview-metric">
-              <span class="overview-metric-label">Effective date</span>
-              <strong class="overview-metric-value">{{ effectiveDateTitle }}</strong>
-              <span class="overview-metric-meta">{{ effectiveDateDescription }}</span>
-            </div>
-
-            <div class="overview-metric">
-              <span class="overview-metric-label">Selected capacity</span>
-              <strong class="overview-metric-value">{{ formattedMau }} MAU</strong>
-              <span class="overview-metric-meta">{{ plan.includedMau | number }} included in this tier</span>
-            </div>
-          </div>
         </div>
 
         <div class="combined-section">
