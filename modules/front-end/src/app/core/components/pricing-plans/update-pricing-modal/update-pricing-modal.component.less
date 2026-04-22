@@ -3,15 +3,7 @@
 .modal-title {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-
-  .modal-title-eyebrow {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: @primary-color;
-  }
+  gap: 10px;
 
   .modal-title-main {
     font-size: 22px;
@@ -49,16 +41,6 @@
     margin-bottom: 18px;
   }
 
-  .overview-kicker {
-    display: inline-block;
-    margin-bottom: 8px;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: @primary-color;
-  }
-
   .overview-headline {
     margin: 0;
     font-size: 26px;
@@ -87,7 +69,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  margin-top: 16px;
+  margin-top: 12px;
 }
 
 .panel {
@@ -104,10 +86,6 @@
   .overview-card {
     border: 0;
     border-radius: 0;
-  }
-
-  .combined-section {
-    padding: 18px;
   }
 }
 
@@ -139,20 +117,48 @@
   }
 }
 
-.notes-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+.update-pricing-notes {
+  display: flex;
+  flex-direction: column;
   gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.note-card {
-  display: flex;
-  gap: 12px;
-  height: 100%;
-  padding: 14px;
+.note-item {
+  min-width: 0;
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid fade(@white, 60%);
   border-radius: 16px;
-  background: @grey5-color;
-  border: 1px solid @grey10-color;
+  background: fade(@white, 72%);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+  backdrop-filter: blur(10px);
+}
+
+.note-panel-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+}
+
+.note-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.note-panel-title {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: @grey90-color;
 }
 
 .note-icon {
@@ -180,17 +186,11 @@
   }
 }
 
-.note-copy {
-  h5 {
-    margin: 0;
-    font-size: 14px;
-    font-weight: 600;
-    line-height: 1.5;
-    color: @grey90-color;
-  }
+.note-panel-body {
+  min-width: 0;
 
   p {
-    margin: 4px 0 0;
+    margin: 0;
     font-size: 13px;
     line-height: 1.6;
     color: @grey60-color;

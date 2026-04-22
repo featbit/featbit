@@ -3,13 +3,12 @@
   [nzVisible]="visible"
   [nzTitle]="titleTpl"
   [nzCentered]="true"
-  [nzWidth]="850"
+  [nzWidth]="900"
   [nzContent]="content"
   [nzFooter]="footer"
   (nzOnCancel)="onClose(false)">
   <ng-template #titleTpl>
     <div class="modal-title">
-      <span class="modal-title-eyebrow">{{ actionLabel }}</span>
       <span class="modal-title-main">{{ title }}</span>
       <span class="modal-title-sub">{{ titleSubtitle }}</span>
     </div>
@@ -21,7 +20,6 @@
         <div class="overview-card" [ngClass]="'overview-card--' + action">
           <div class="overview-header">
             <div>
-              <span class="overview-kicker">Plan transition</span>
               <h3 class="overview-headline">{{ transitionHeadline }}</h3>
               <p class="overview-description">{{ actionDescription }}</p>
             </div>
@@ -30,29 +28,24 @@
               {{ billingCycleTag }}
             </nz-tag>
           </div>
-        </div>
-
-        <div class="combined-section">
-          <div class="section-heading">
-            <span class="section-kicker">What to expect</span>
-            <h4 class="section-title">Notes for your team</h4>
-            <p class="section-description">These notes focus on what changes now, what stays the same, and how billing is handled.</p>
-          </div>
-
-          <div class="notes-list">
+          <ul class="update-pricing-notes">
             @for (note of noteItems; track note.title) {
-              <article class="note-card">
-                <div class="note-icon" [ngClass]="'note-icon--' + action">
-                  <i nz-icon [nzType]="note.icon"></i>
-                </div>
+              <li class="note-item">
+                <div class="note-panel-header">
+                  <div class="note-icon" [ngClass]="'note-icon--' + action">
+                    <i nz-icon [nzType]="note.icon"></i>
+                  </div>
 
-                <div class="note-copy">
-                  <h5>{{ note.title }}</h5>
-                  <p>{{ note.description }}</p>
+                  <div class="note-copy">
+                    <span class="note-panel-title">{{ note.title }}</span>
+                    <div class="note-panel-body">
+                      <p>{{ note.description }}</p>
+                    </div>
+                  </div>
                 </div>
-              </article>
+              </li>
             }
-          </div>
+          </ul>
         </div>
       </section>
 
