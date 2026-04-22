@@ -16,12 +16,12 @@ public class CreateCheckoutSession : IRequest<CheckoutSession>
 
     public int Mau { get; set; }
 
-    public string[] ExtraFeatures { get; set; }
+    public string[] AddOnFeatures { get; set; }
 
     public override string ToString()
     {
         return
-            $"Email: {Email}, WorkspaceId: {WorkspaceId}, Plan: {Plan}, Billing Cycle: {BillingCycle}, Mau: {Mau}, ExtraFeatures: [{string.Join(", ", ExtraFeatures)}]";
+            $"Email: {Email}, WorkspaceId: {WorkspaceId}, Plan: {Plan}, Billing Cycle: {BillingCycle}, Mau: {Mau}, ExtraFeatures: [{string.Join(", ", AddOnFeatures)}]";
     }
 }
 
@@ -42,9 +42,9 @@ public class CreateCheckoutSessionValidator : AbstractValidator<CreateCheckoutSe
             .Must(BillingCycle.IsDefined)
             .WithErrorCode(ErrorCodes.Invalid("interval"));
 
-        RuleFor(x => x.ExtraFeatures)
+        RuleFor(x => x.AddOnFeatures)
             .Must(features => features.All(LicenseFeatures.IsDefined))
-            .WithErrorCode(ErrorCodes.Invalid("extraFeatures"));
+            .WithErrorCode(ErrorCodes.Invalid("addOnFeatures"));
     }
 }
 
