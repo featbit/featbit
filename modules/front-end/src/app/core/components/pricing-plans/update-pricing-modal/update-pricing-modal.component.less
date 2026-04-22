@@ -122,9 +122,9 @@
   }
 }
 
-.content-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+.content-stack {
+  display: flex;
+  flex-direction: column;
   gap: 16px;
   margin-top: 16px;
 }
@@ -134,6 +134,20 @@
   border: 1px solid @grey20-color;
   border-radius: 18px;
   background: @white;
+}
+
+.panel--combined {
+  padding: 0;
+  overflow: hidden;
+
+  .overview-card {
+    border: 0;
+    border-radius: 0;
+  }
+
+  .combined-section {
+    padding: 18px;
+  }
 }
 
 .section-heading {
@@ -165,14 +179,15 @@
 }
 
 .notes-list {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 12px;
 }
 
 .note-card {
   display: flex;
   gap: 12px;
+  height: 100%;
   padding: 14px;
   border-radius: 16px;
   background: @grey5-color;
@@ -226,6 +241,22 @@
   border-radius: 16px;
   background: linear-gradient(180deg, #ffffff 0%, #fbfcff 100%);
   border: 1px solid @grey20-color;
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
+  gap: 18px;
+
+  .summary-main {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .summary-side {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-left: 18px;
+    border-left: 1px solid @grey10-color;
+  }
 
   .summary-header {
     display: flex;
@@ -325,23 +356,19 @@
 
   .summary-compare {
     gap: 10px;
-    padding-top: 16px;
   }
 
   .summary-compare-row--highlight {
-    padding: 12px 14px;
-    border-radius: 14px;
-    background: @green5-color;
-    border: 1px solid @green10-color;
-
     .summary-compare-label,
     .summary-compare-value {
       color: @grey90-color;
+      font-weight: 600;
     }
   }
 
   .summary-callout {
     display: flex;
+    align-items: flex-start;
     gap: 10px;
     margin-top: 16px;
     padding: 14px;
@@ -379,11 +406,7 @@
 
   button {
     width: unset;
-    min-width: 136px;
-    height: 40px;
-    padding: 0 18px;
-    border-radius: 10px;
-    font-weight: 600;
+    height: unset;
   }
 
   .btn-downgrade-confirm {
@@ -409,11 +432,22 @@
     }
   }
 
-  .content-grid {
-    grid-template-columns: 1fr;
+  .panel--combined {
+    .combined-section {
+      padding: 18px;
+    }
   }
 
   .summary-card {
+    grid-template-columns: 1fr;
+
+    .summary-side {
+      padding-left: 0;
+      border-left: 0;
+      padding-top: 16px;
+      border-top: 1px solid @grey10-color;
+    }
+
     .summary-header,
     .summary-row,
     .summary-compare-row {
