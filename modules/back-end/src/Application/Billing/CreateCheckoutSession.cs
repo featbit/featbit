@@ -8,8 +8,6 @@ public class CreateCheckoutSession : IRequest<CheckoutSession>
 {
     public Guid WorkspaceId { get; set; }
 
-    public string Email { get; set; }
-
     public string Plan { get; set; }
 
     public string BillingCycle { get; set; }
@@ -21,7 +19,7 @@ public class CreateCheckoutSession : IRequest<CheckoutSession>
     public override string ToString()
     {
         return
-            $"Email: {Email}, WorkspaceId: {WorkspaceId}, Plan: {Plan}, Billing Cycle: {BillingCycle}, Mau: {Mau}, ExtraFeatures: [{string.Join(", ", AddOnFeatures)}]";
+            $"WorkspaceId: {WorkspaceId}, Plan: {Plan}, Billing Cycle: {BillingCycle}, Mau: {Mau}, ExtraFeatures: [{string.Join(", ", AddOnFeatures)}]";
     }
 }
 
