@@ -143,6 +143,10 @@ export class PricingPlansComponent {
   }
 
   onClose() {
+    // reset states
+    this.planMauSlider = {};
+    this.fineGrainedAcEnabled = {};
+
     this.close.emit();
   }
 
