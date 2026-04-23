@@ -84,6 +84,9 @@ export interface WorkspacePlan {
   fineGrainedAcEnabled: boolean;
   price: number;
   billingCycle: string;
+  currentPeriodStart?: Date;
+  currentPeriodEnd?: Date;
+  subscriberSince?: Date;
 }
 
 export interface IOrganizationPermissions {

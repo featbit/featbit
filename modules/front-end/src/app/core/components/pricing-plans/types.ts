@@ -31,12 +31,12 @@ export const PlanKeys = {
 }
 
 export const BillingCycle = {
-  MONTHLY: 'monthly',
-  YEARLY: 'yearly'
+  MONTHLY: 'month',
+  YEARLY: 'year'
 }
 
 export const EXTRA_MAU_PER_10K_COST = 20; // $20 per 10K extra MAU
-export const FINE_GRAINED_AC_PER_MONTH_PRICE = 60; // $100 per month for fine-grained access control addon
+export const FINE_GRAINED_AC_PER_MONTH_PRICE = 60; // $60 per month for fine-grained access control addon
 
 export const PRICING_PLANS: PricingPlan[] = [
   {

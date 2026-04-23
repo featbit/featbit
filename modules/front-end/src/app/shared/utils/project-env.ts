@@ -1,6 +1,7 @@
-import { IOrganization, IProjectEnv, IWorkspace, License, LicenseFeatureEnum, WorkspacePlan } from "@shared/types";
+import { IOrganization, IProjectEnv, IWorkspace, License, WorkspacePlan } from "@shared/types";
 import { CURRENT_ORGANIZATION, CURRENT_PROJECT, CURRENT_WORKSPACE } from "./localstorage-keys";
 import { ResourceTypeEnum } from "@shared/policy";
+import { BillingCycle } from "@core/components/pricing-plans/types";
 
 export function getCurrentWorkspace(): IWorkspace {
   const json = localStorage.getItem(CURRENT_WORKSPACE());
@@ -53,6 +54,9 @@ export function getCurrentPlan(): WorkspacePlan {
     totalMau: 70_000,
     fineGrainedAcEnabled: true,
     price: 149 + 20 * 3, // base price + extra MAU cost
-    billingCycle: "monthly"
+    billingCycle: BillingCycle.MONTHLY,
+    currentPeriodStart: new Date('2026-04-22'),
+    currentPeriodEnd: new Date('2026-05-22'),
+    subscriberSince: new Date('2026-01-01'),
   }
 }

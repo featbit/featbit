@@ -1,18 +1,131 @@
 @import "variables";
 
-// ==================== Shared Section Card ====================
+.billing-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-bottom: 20px;
+}
+
+@alert-icon-size: 16px;
+@alert-icon-gap: 8px;
+@alert-indent: (@alert-icon-size + @alert-icon-gap);
+
+.usage-alert-banner {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 20px;
+  border-radius: 10px;
+  border: 1px solid fade(@yellow55-color, 30%);
+  background: fade(@yellow10-color, 45%);
+
+  &.exceeded {
+    border-color: fade(@red40-color, 28%);
+    background: fade(@red10-color, 50%);
+  }
+
+  .usage-alert-title {
+    display: flex;
+    align-items: center;
+    gap: @alert-icon-gap;
+    font-size: 14px;
+    font-weight: 500;
+    color: #7b3306;
+  }
+
+  .usage-alert-icon {
+    font-size: @alert-icon-size;
+    color: @yellow55-color;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+
+  &.exceeded .usage-alert-icon {
+    color: @red50-color;
+  }
+
+  .usage-alert-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 1px 8px;
+    border-radius: 999px;
+    background: fade(@yellow55-color, 14%);
+    border: 1px solid fade(@yellow55-color, 26%);
+    font-size: 11px;
+    font-weight: 700;
+    color: #AD7C00;
+  }
+
+  &.exceeded .usage-alert-badge {
+    background: fade(@red50-color, 10%);
+    border-color: fade(@red40-color, 22%);
+    color: @red50-color;
+  }
+
+  .usage-alert-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .usage-alert-description {
+    padding-left: @alert-indent;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #737373;
+  }
+
+  .usage-alert-actions {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+
+    button {
+      border-radius: 8px;
+    }
+
+    .btn-upgrade {
+      background: @primary-color;
+      color: @white;
+
+      &:hover {
+        background: @green70-color;
+      }
+    }
+
+    .btn-contact {
+      background: fade(@primary-color, 12%);
+      color: @primary-color;
+
+      &:hover {
+        background: fade(@primary-color, 20%);
+        color: @green70-color;
+      }
+    }
+  }
+}
+
 .section-card {
   background: @grey5-color;
   border: 1px solid @grey20-color;
   border-radius: 12px;
   padding: 24px;
-  margin-bottom: 24px;
 
   .section-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 16px;
     margin-bottom: 20px;
+
+    &.compact {
+      margin-bottom: 16px;
+    }
 
     h5 {
       margin: 0;
@@ -22,179 +135,391 @@
     }
 
     .section-subtitle {
+      display: inline-block;
+      margin-top: 4px;
       font-size: 13px;
+      line-height: 1.5;
       color: @grey40-color;
     }
   }
 }
 
-// ==================== Section 1: Current Plan ====================
-.current-plan-section {
-  .overview-actions {
-    display: flex;
-    gap: 8px;
-  }
+.billing-grid.two-up {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(300px, 1fr);
+  gap: 24px;
+}
 
-  .plan-overview {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 24px;
-    padding-bottom: 24px;
-    border-bottom: 1px solid @grey20-color;
+.current-plan-card {
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(circle at top right, fade(@green30-color, 16%), transparent 34%),
+    linear-gradient(180deg, @white 0%, @grey5-color 100%);
+}
 
-    .plan-overview-left {
-      .plan-badge {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 8px;
+.plan-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+}
 
-        .plan-name {
-          font-size: 24px;
-          font-weight: 700;
-          color: @grey90-color;
-        }
+.plan-identity {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
 
-        .plan-cycle {
-          font-size: 12px;
-          font-weight: 500;
-          color: @green60-color;
-          background: @green10-color;
-          padding: 2px 10px;
-          border-radius: 20px;
-        }
-      }
+.plan-name-badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
 
-      .plan-cost {
-        .cost-amount {
-          font-size: 32px;
-          font-weight: 700;
-          color: @grey90-color;
-        }
-
-        .cost-period {
-          font-size: 14px;
-          color: @grey50-color;
-          margin-left: 2px;
-        }
-      }
-    }
-
-    .plan-overview-right {
-      display: flex;
-      gap: 32px;
-
-      .billing-detail {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-
-        .detail-label {
-          font-size: 12px;
-          color: @grey40-color;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-        }
-
-        .detail-value {
-          font-size: 14px;
-          font-weight: 500;
-          color: @grey70-color;
-        }
-      }
-    }
+  .plan-name {
+    margin: 0;
+    font-size: 26px;
+    line-height: 1.1;
+    font-weight: 700;
+    color: @grey90-color;
   }
 }
 
-// MAU Usage
-.mau-usage-section {
-  .mau-usage-header {
+.plan-total-price {
+  .plan-total-row {
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+  }
+
+  .plan-total-amount {
+    font-size: 38px;
+    line-height: 1;
+    font-weight: 700;
+    color: @grey90-color;
+  }
+
+  .plan-total-period {
+    font-size: 15px;
+    color: @grey50-color;
+  }
+}
+
+.plan-period-bar {
+  display: flex;
+  align-items: stretch;
+  padding: 14px 0;
+  margin: 20px 0;
+  border-top: 1px solid @grey20-color;
+  border-bottom: 1px solid @grey20-color;
+
+  .period-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 0 20px;
+
+    &:first-child {
+      padding-left: 0;
+    }
+
+    &:last-child {
+      padding-right: 0;
+    }
+  }
+
+  .period-item-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: @grey40-color;
+  }
+
+  .period-item-value {
+    font-size: 13px;
+    color: @grey70-color;
+    line-height: 1.4;
+
+    strong {
+      color: @grey80-color;
+    }
+  }
+
+  .period-divider {
+    width: 1px;
+    background: @grey20-color;
+    flex-shrink: 0;
+  }
+}
+
+.plan-fee-breakdown {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 16px 18px;
+  background: @white;
+  border: 1px solid @grey20-color;
+  border-radius: 10px;
+
+  .fee-breakdown-title {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: @grey70-color;
+    margin-bottom: 12px;
+  }
+
+  .fee-breakdown-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .fee-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
+    gap: 12px;
 
-    .mau-usage-label {
+    .fee-row-label {
       font-size: 13px;
-      font-weight: 500;
       color: @grey60-color;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
-    .mau-usage-numbers {
-      font-size: 13px;
-      color: @grey50-color;
-
-      strong {
-        color: @grey80-color;
-      }
-    }
-  }
-
-  .mau-progress-bar {
-    height: 10px;
-    background: @grey10-color;
-    border-radius: 5px;
-    overflow: hidden;
-
-    .mau-progress-fill {
-      height: 100%;
-      border-radius: 5px;
-      background: @primary-color;
-      transition: width 0.5s ease;
-
-      &.warning {
-        background: @yellow55-color;
-      }
-
-      &.danger {
-        background: @red60-color;
-      }
-    }
-  }
-
-  .mau-progress-footer {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 6px;
-    font-size: 12px;
-
-    .mau-percent {
-      color: @grey50-color;
-    }
-
-    .mau-remaining {
+    .fee-row-meta {
+      font-size: 11px;
       color: @grey40-color;
     }
+
+    .fee-row-addon {
+      display: inline-flex;
+      align-items: center;
+      padding: 1px 7px;
+      border-radius: 999px;
+      background: fade(@primary-color, 10%);
+      border: 1px solid fade(@primary-color, 20%);
+      font-size: 10px;
+      font-weight: 600;
+      color: @primary-color;
+    }
+
+    .fee-row-value {
+      font-size: 13px;
+      font-weight: 600;
+      color: @grey70-color;
+      white-space: nowrap;
+    }
+  }
+
+  .fee-total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+    padding-top: 10px;
+    border-top: 1px solid @grey20-color;
+
+    .fee-total-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: @grey80-color;
+    }
+
+    .fee-total-value {
+      font-size: 16px;
+      font-weight: 700;
+      color: @grey90-color;
+    }
   }
 }
 
-// ==================== Section 2: Usage Alert ====================
-.usage-alert {
-  margin-bottom: 24px;
+.current-plan-description {
+  margin: 0;
+  max-width: 620px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: @grey60-color;
 }
 
-// ==================== Section 3: Billing Information ====================
-.billing-info-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
+.plan-actions {
+  button {
+    border-radius: 8px;
+  }
+}
 
-  .billing-info-item {
+.billing-info-card {
+  background: linear-gradient(180deg, @white 0%, fade(@grey5-color, 70%) 100%);
+}
+
+.hero-badge {
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: @green10-color;
+  color: @green70-color;
+  font-size: 12px;
+  font-weight: 600;
+
+  &.muted {
+    background: @grey10-color;
+    color: @grey50-color;
+  }
+}
+
+.plan-usage-section {
+  padding: 16px 18px;
+  background: @white;
+  border: 1px solid @grey20-color;
+  border-radius: 10px;
+}
+
+.plan-usage-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 14px;
+
+  .plan-usage-title {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: @grey70-color;
+  }
+
+  .plan-usage-subtitle {
+    display: block;
+    font-size: 12px;
+    color: @grey40-color;
+    margin-top: 2px;
+  }
+}
+
+.usage-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.usage-subtitle {
+  font-size: 13px;
+  color: @grey50-color;
+}
+
+.usage-chip {
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: fade(@primary-color, 12%);
+  color: @green70-color;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+
+  &.warning {
+    background: fade(@yellow55-color, 14%);
+    color: #AD7C00;
+  }
+
+  &.danger {
+    background: fade(@red50-color, 12%);
+    color: @red50-color;
+  }
+}
+
+.mau-progress-bar {
+  height: 12px;
+  background: @grey10-color;
+  border-radius: 999px;
+  overflow: hidden;
+
+  &.large {
+    height: 14px;
+  }
+
+  .mau-progress-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, @green60-color 0%, @primary-color 100%);
+    transition: width 0.6s ease;
+
+    &.warning {
+      background: linear-gradient(90deg, fade(@yellow55-color, 92%) 0%, #F5B000 100%);
+    }
+
+    &.danger {
+      background: linear-gradient(90deg, @red50-color 0%, #FF8A7A 100%);
+    }
+  }
+}
+
+.usage-foot-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 10px;
+  font-size: 12px;
+
+  .usage-foot-label {
+    color: @grey50-color;
+
+    &.emphasis {
+      color: @grey70-color;
+      font-weight: 600;
+    }
+  }
+}
+
+.support-link {
+  color: @primary-color;
+  font-size: 13px;
+  font-weight: 500;
+
+  &:hover {
+    color: @green70-color;
+  }
+}
+
+.billing-info-display {
+  .info-row {
+    display: flex;
+    gap: 24px;
+
+    &:not(:last-child) {
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid @grey10-color;
+    }
+  }
+
+  .info-field {
+    flex: 1;
     display: flex;
     flex-direction: column;
     gap: 4px;
+
+    &.full-width {
+      flex: 1;
+    }
 
     .info-label {
       font-size: 12px;
       color: @grey40-color;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.4px;
     }
 
     .info-value {
-      font-size: 14px;
+      font-size: 13px;
       color: @grey70-color;
+      line-height: 1.4;
       font-weight: 500;
     }
   }
@@ -204,7 +529,7 @@
   .form-row {
     display: flex;
     gap: 16px;
-    margin-bottom: 16px;
+    margin-bottom: 15px;
 
     .form-group {
       flex: 1;
@@ -219,12 +544,21 @@
         color: @grey60-color;
         margin-bottom: 6px;
         font-weight: 500;
+
+        .required {
+          color: @red50-color;
+        }
       }
 
-      input {
+      input,
+      textarea {
         border-radius: 8px;
-        height: 38px;
         border-color: @grey20-color;
+
+        &:focus {
+          border-color: @primary-color;
+          box-shadow: 0 0 0 2px fade(@primary-color, 15%);
+        }
       }
     }
   }
@@ -244,15 +578,153 @@
   }
 }
 
-// ==================== Section 5: Invoices ====================
-.invoice-id {
+// ── Invoice List ──────────────────────────────────────────────
+.invoice-list {
+  &.ant-table-wrapper {
+    border: 1px solid @grey20-color;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .ant-table {
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .ant-table-thead > tr > th {
+    padding: 9px 16px;
+    background: @grey5-color;
+    border-bottom: 1px solid @grey20-color;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: @grey40-color;
+
+    &::before {
+      display: none;
+    }
+  }
+
+  .ant-table-tbody > tr > td {
+    padding: 13px 16px;
+    background: @white;
+    border-bottom: 1px solid @grey10-color;
+    transition: background 0.15s ease;
+  }
+
+  .ant-table-tbody > tr:last-child > td {
+    border-bottom: none;
+  }
+
+  .ant-table-tbody > tr:hover > td {
+    background: fade(@grey5-color, 60%) !important;
+  }
+
+  .ant-pagination {
+    padding: 12px 16px 4px;
+  }
+}
+
+.invoice-plan-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  background: @grey10-color;
+  color: @grey60-color;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
   font-weight: 600;
-  color: @grey80-color;
-  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
-  font-size: 13px;
+
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  &.status-paid {
+    background: fade(@primary-color, 10%);
+    color: @green70-color;
+
+    .status-dot { background: @primary-color; }
+  }
+
+  &.status-pending {
+    background: fade(@yellow55-color, 12%);
+    color: #9A6800;
+
+    .status-dot { background: @yellow55-color; }
+  }
+
+  &.status-overdue {
+    background: fade(@red50-color, 10%);
+    color: @red50-color;
+
+    .status-dot { background: @red50-color; }
+  }
 }
 
 .invoice-amount {
+  font-size: 14px;
   font-weight: 600;
   color: @grey80-color;
+  font-variant-numeric: tabular-nums;
+}
+
+.invoice-download-note {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: @green5-color;
+  border: 1px solid @grey20-color;
+  font-size: 13px;
+  color: @grey50-color;
+
+  i {
+    font-size: 14px;
+    color: @primary-color;
+    flex-shrink: 0;
+  }
+
+  a {
+    color: @primary-color;
+    font-weight: 500;
+    cursor: pointer;
+
+    &:hover {
+      color: @green70-color;
+    }
+  }
+}
+
+.empty-invoices {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  color: @grey40-color;
+
+  i {
+    font-size: 32px;
+    margin-bottom: 12px;
+  }
+
+  p {
+    margin: 0;
+    font-size: 14px;
+  }
 }
