@@ -231,12 +231,11 @@ public class FeatureFlagController : ApiControllerBase
     }
 
     /// <summary>
-    /// Update a feature flag with the JSON patch method
+    /// Update a feature flag with the JSON patch method.
     /// </summary>
     /// <remarks>
     /// Perform a partial update to a feature flag. The request body must be a valid JSON patch.
     /// </remarks>
-    [OpenApi]
     [SwaggerRequestExample(typeof(Operation), typeof(PatchFeatureFlagExamples))]
     [HttpPatch("{key}")]
     public async Task<ApiResponse<bool>> PatchAsync(Guid envId, string key, [FromBody] JsonElement jsonElement)
@@ -304,9 +303,6 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(success);
     }
 
-    /// <summary>
-    /// Delete a flag schedule
-    /// </summary>
     [Authorize(LicenseFeatures.Schedule)]
     [HttpDelete("schedules/{id:guid}")]
     public async Task<ApiResponse<bool>> DeleteScheduleAsync(Guid id)
@@ -377,9 +373,6 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(success);
     }
 
-    /// <summary>
-    /// Delete a flag change request
-    /// </summary>
     [Authorize(LicenseFeatures.ChangeRequest)]
     [HttpDelete("change-requests/{id:guid}")]
     public async Task<ApiResponse<bool>> DeleteChangeRequestAsync(Guid id)
@@ -393,6 +386,7 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(success);
     }
 
+    // TODO: OpenApi and align permissions with frontend
     [HttpPut("{key}/targeting")]
     public async Task<ApiResponse<Guid>> UpdateTargetingAsync(Guid envId, string key, UpdateTargeting request)
     {
@@ -492,6 +486,7 @@ public class FeatureFlagController : ApiControllerBase
     /// </remarks>
     [OpenApi]
     [HttpGet("all-tags")]
+    [Authorize(Permissions.CanAccessEnv)]
     public async Task<ApiResponse<ICollection<string>>> GetAllTagsAsync(Guid envId)
     {
         var request = new GetAllTag
