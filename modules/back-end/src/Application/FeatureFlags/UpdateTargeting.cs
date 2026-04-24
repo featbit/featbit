@@ -16,11 +16,6 @@ public class UpdateTargetingPayload
     public Guid Revision { get; set; }
 
     /// <summary>
-    /// The key of the feature flag
-    /// </summary>
-    public string Key { get; set; }
-
-    /// <summary>
     /// The new flag targeting
     /// </summary>
     public FlagTargeting Targeting { get; set; }
@@ -36,6 +31,8 @@ public class UpdateTargeting : UpdateTargetingPayload, IRequest<Guid>
     public Guid OrgId { get; set; }
 
     public Guid EnvId { get; set; }
+
+    public string Key { get; set; }
 
     public PolicyStatement[] Permissions { get; set; }
 
