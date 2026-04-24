@@ -48,7 +48,7 @@ public class UpdateTargeting : UpdateTargetingPayload, IRequest<bool>
     }
 }
 
-public class UpdateTargetingValidator : AbstractValidator<UpdateTargetingPayload>
+public class UpdateTargetingValidator : AbstractValidator<UpdateTargeting>
 {
     public UpdateTargetingValidator()
     {
