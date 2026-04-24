@@ -1,7 +1,7 @@
 using Api.Authentication;
 using Asp.Versioning.ApiExplorer;
 using Microsoft.Extensions.Options;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using Swashbuckle.AspNetCore.Filters;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using OpenApiConstants = Api.Authentication.OpenApiConstants;
@@ -124,15 +124,9 @@ public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
             Description =
                 "Standard Authorization header using the Bearer scheme (JWT). Example: \"Authorization: Bearer eyJ...\""
         });
-        options.AddSecurityRequirement(new OpenApiSecurityRequirement
+        options.AddSecurityRequirement((document) => new OpenApiSecurityRequirement()
         {
-            {
-                new OpenApiSecurityScheme
-                {
-                    Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "JwtBearer" }
-                },
-                Array.Empty<string>()
-            }
+            [new OpenApiSecuritySchemeReference("JwtBearer", document)] = []
         });
 
         options.AddSecurityDefinition("AccessToken", new OpenApiSecurityScheme
@@ -143,15 +137,9 @@ public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
             Scheme = "AccessToken",
             Description = "Use access token to access this API. Example: \"Authorization: api-MzQ...\""
         });
-        options.AddSecurityRequirement(new OpenApiSecurityRequirement
+        options.AddSecurityRequirement((document) => new OpenApiSecurityRequirement()
         {
-            {
-                new OpenApiSecurityScheme
-                {
-                    Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "AccessToken" }
-                },
-                Array.Empty<string>()
-            }
+            [new OpenApiSecuritySchemeReference("AccessToken", document)] = []
         });
     }
 
