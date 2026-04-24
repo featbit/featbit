@@ -237,6 +237,7 @@ public class FeatureFlagController : ApiControllerBase
     /// <remarks>
     /// Perform a partial update to a feature flag. The request body must be a valid JSON patch.
     /// </remarks>
+    [OpenApi]
     [SwaggerRequestExample(typeof(Operation), typeof(PatchFeatureFlagExamples))]
     [HttpPatch("{key}")]
     public async Task<ApiResponse<bool>> PatchAsync(Guid envId, string key, [FromBody] JsonElement jsonElement)
