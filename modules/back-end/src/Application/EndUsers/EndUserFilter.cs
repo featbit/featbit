@@ -24,6 +24,8 @@ public class EndUserFilter : PagedRequest
         // pagination params
         PageIndex = query.PageIndex;
         PageSize = query.PageSize;
+        
+        Cursor = query.Cursor;
 
         // excluded keyIds
         ExcludedKeyIds = query.ExcludedKeyIds ?? [];
@@ -77,5 +79,8 @@ public class EndUserFilter : PagedRequest
 
             CustomizedProperties.Add(customizedProperty);
         }
+        
+        
     }
 }
+

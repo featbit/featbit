@@ -20,8 +20,7 @@ public class EndUserService(AppDbContext dbContext)
         var baseQuery = userFilter.GlobalUserOnly
             ? table.Where("workspace_id", workspaceId)
             : userFilter.IncludeGlobalUser
-                ? table.Where(
-                    x => x.Where("workspace_id", workspaceId).OrWhere("env_id", envId)
+                ? table.Where(x => x.Where("workspace_id", workspaceId).OrWhere("env_id", envId)
                 )
                 : table.Where("env_id", envId);
 
@@ -38,45 +37,90 @@ public class EndUserService(AppDbContext dbContext)
         var keyId = userFilter.KeyId;
         var customizedProperties = userFilter.CustomizedProperties ?? [];
 
-        baseQuery.Where(
-            group => group
-                .When(!string.IsNullOrWhiteSpace(keyId), q => q.OrWhereContains("key_id", keyId))
-                .When(!string.IsNullOrWhiteSpace(name), q => q.OrWhereContains("name", name))
-                .When(customizedProperties.Count > 0, q =>
+        baseQuery.Where(group => group
+            .When(!string.IsNullOrWhiteSpace(keyId), q => q.OrWhereContains("key_id", keyId))
+            .When(!string.IsNullOrWhiteSpace(name), q => q.OrWhereContains("name", name))
+            .When(customizedProperties.Count > 0, q =>
+            {
+                List<object> parameters = [];
+
+                var wheres = customizedProperties.Select(cp =>
                 {
-                    List<object> parameters = [];
+                    parameters.Add(cp.Name);
+                    parameters.Add($"%{cp.Value}%");
 
-                    var wheres = customizedProperties.Select(cp =>
-                    {
-                        parameters.Add(cp.Name);
-                        parameters.Add($"%{cp.Value}%");
+                    return "(cp->>'name'= ? and cp->>'value' ilike ?)";
+                });
+                var where = string.Join(" or ", wheres);
 
-                        return "(cp->>'name'= ? and cp->>'value' ilike ?)";
-                    });
-                    var where = string.Join(" or ", wheres);
-
-                    return q.OrWhereRaw(
-                        $"exists(select 1 from jsonb_array_elements(customized_properties) as cp where {where})",
-                        parameters.ToArray()
-                    );
-                })
+                return q.OrWhereRaw(
+                    $"exists(select 1 from jsonb_array_elements(customized_properties) as cp where {where})",
+                    parameters.ToArray()
+                );
+            })
         );
 
-        var countSr = pgCompiler.Compile(
-            baseQuery.Clone().AsCount()
-        );
-        var itemsSr = pgCompiler.Compile(
-            baseQuery
-                .Clone()
+        Query ApplyCursor(Query query, PageCursor cursor)
+        {
+            return cursor.Direction == CursorDirection.Forward
+                ? query.WhereRaw("(updated_at, id) < (?, ?)", cursor.UpdatedAt, cursor.Id)
+                : query.WhereRaw("(updated_at, id) > (?, ?)", cursor.UpdatedAt, cursor.Id);
+        }
+
+        var cursor = userFilter.Cursor;
+        var isBackward = cursor?.Direction == CursorDirection.Backward;
+        var pageSize = userFilter.PageSize;
+        var limit = pageSize + 1;
+
+        var itemsQuery = baseQuery.Clone();
+
+        if (cursor != null)
+        {
+            itemsQuery = ApplyCursor(itemsQuery, cursor);
+        }
+
+        itemsQuery = isBackward
+            ? itemsQuery
+                .OrderBy("updated_at")
+                .OrderBy("id")
+                .Take(limit)
+            : itemsQuery
                 .OrderByDesc("updated_at")
-                .Skip(userFilter.PageIndex * userFilter.PageSize)
-                .Take(userFilter.PageSize)
-        );
+                .OrderByDesc("id")
+                .Take(limit);
 
-        var totalCount = await DbConnection.ExecuteScalarAsync<int>(countSr.Sql, countSr.NamedBindings);
-        var items = await DbConnection.QueryAsync<EndUser>(itemsSr.Sql, itemsSr.NamedBindings);
+        var itemsSr = pgCompiler.Compile(itemsQuery);
 
-        return new PagedResult<EndUser>(totalCount, items.AsList());
+        var items = (await DbConnection.QueryAsync<EndUser>(itemsSr.Sql, itemsSr.NamedBindings)).AsList();
+
+        var hasMoreInRequestedDirection = items.Count > pageSize;
+        if (hasMoreInRequestedDirection)
+        {
+            items = items.Take(pageSize).ToList();
+        }
+
+        if (isBackward)
+        {
+            items.Reverse();
+        }
+
+        var hasPrevious = isBackward
+            ? hasMoreInRequestedDirection
+            : cursor != null;
+
+        var hasNext = isBackward
+            ? cursor != null
+            : hasMoreInRequestedDirection;
+
+        var previousCursor = hasPrevious && items.Count > 0
+            ? new PageCursor(items[0].Id, items[0].UpdatedAt, CursorDirection.Backward)
+            : null;
+
+        var nextCursor = hasNext && items.Count > 0
+            ? new PageCursor(items[^1].Id, items[^1].UpdatedAt, CursorDirection.Forward)
+            : null;
+
+        return new PagedResult<EndUser>(items, nextCursor, previousCursor);
     }
 
     public async Task<EndUser> UpsertAsync(EndUser user)

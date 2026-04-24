@@ -58,6 +58,7 @@ export class EnvUserService {
       globalUserOnly: filter.globalUserOnly ?? false,
       pageIndex: filter.pageIndex - 1,
       pageSize: filter.pageSize,
+      cursor: filter.cursor,
     };
 
     return this.http.post<EnvUserPagedResult>(this.baseUrl, query);

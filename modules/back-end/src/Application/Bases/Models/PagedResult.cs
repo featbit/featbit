@@ -1,3 +1,5 @@
+using Application.EndUsers;
+
 namespace Application.Bases.Models;
 
 /// <summary>
@@ -16,6 +18,10 @@ public class PagedResult<TValue>
     /// </summary>
     public IReadOnlyList<TValue> Items { get; set; }
 
+    public PageCursor NextCursor { get; set; }
+    
+    public PageCursor PreviousCursor { get; set; }
+
     /// <summary>
     /// Initializes a new instance of the <see cref="PagedResult{TValue}"/> class.
     /// </summary>
@@ -25,5 +31,18 @@ public class PagedResult<TValue>
     {
         TotalCount = totalCount;
         Items = items;
+    }
+    
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PagedResult{TValue}"/> class.
+    /// </summary>
+    /// <param name="items">The items in the current page.</param>
+    /// <param name="nextCursor">The next cursor for pagination</param>
+    /// <param name="previousCursor">The previous cursor for pagination</param>
+    public PagedResult(IReadOnlyList<TValue> items, PageCursor nextCursor, PageCursor previousCursor)
+    {
+        Items = items;
+        NextCursor = nextCursor;
+        PreviousCursor = previousCursor;
     }
 }
