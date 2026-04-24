@@ -148,7 +148,7 @@ public class SegmentController : ApiControllerBase
 
     /// <summary>
     /// Update a segment with the JSON patch method. Use with caution as this can make arbitrary changes to the
-    /// feature flag, incorrect usage may lead to malformed data.
+    /// segment, incorrect usage may lead to malformed data.
     /// </summary>
     /// <remarks>
     /// Perform a partial update to a segment. The request body must be a valid JSON patch.
