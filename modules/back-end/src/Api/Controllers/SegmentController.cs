@@ -130,23 +130,25 @@ public class SegmentController : ApiControllerBase
     }
 
     /// <summary>
-    /// Update segment targeting rules
+    /// Update the targeting of a segment
     /// </summary>
     /// <remarks>
     /// Update the targeting rules, included and excluded users for a segment.
     /// </remarks>
-    // TODO: OpenApi and align permissions with frontend
+    [OpenApi]
     [HttpPut("{segmentId:guid}/targeting")]
-    public async Task<ApiResponse<bool>> UpdateTargetingAsync(Guid segmentId, UpdateTargeting request)
+    public async Task<ApiResponse<bool>> UpdateTargetingAsync(Guid segmentId, UpdateTargetingPayload payload)
     {
-        request.Id = segmentId;
+        var permissions = await GetRequestPermissionsAsync();
+        var request = new UpdateTargeting(segmentId, payload, permissions);
 
         var success = await Mediator.Send(request);
         return Ok(success);
     }
 
     /// <summary>
-    /// Update a segment with the JSON patch method
+    /// Update a segment with the JSON patch method. Use with caution as this can make arbitrary changes to the
+    /// feature flag, incorrect usage may lead to malformed data.
     /// </summary>
     /// <remarks>
     /// Perform a partial update to a segment. The request body must be a valid JSON patch.

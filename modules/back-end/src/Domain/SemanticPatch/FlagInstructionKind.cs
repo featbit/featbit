@@ -31,7 +31,7 @@ public static class FlagInstructionKind
     public const string UpdateDefaultRuleVariationOrRollouts = nameof(UpdateDefaultRuleVariationOrRollouts);
 
     public const string UpdateDefaultRuleDispatchKey = nameof(UpdateDefaultRuleDispatchKey);
-    
+
     public const string AddTargetUsers = nameof(AddTargetUsers);
 
     public const string RemoveTargetUsers = nameof(RemoveTargetUsers);
@@ -62,8 +62,36 @@ public static class FlagInstructionKind
 
     public const string Noop = nameof(Noop);
 
+    public static readonly string[] UpdateDefaultRuleKinds =
+    [
+        UpdateDefaultRuleVariationOrRollouts,
+        UpdateDefaultRuleDispatchKey
+    ];
+
+    public static readonly string[] UpdateTargetUsersKinds =
+    [
+        AddTargetUsers,
+        RemoveTargetUsers,
+        SetTargetUsers
+    ];
+
+    public static readonly string[] UpdateRuleKinds =
+    [
+        AddRule,
+        RemoveRule,
+        SetRules,
+        UpdateRuleName,
+        UpdateRuleDispatchKey,
+        AddRuleConditions,
+        RemoveRuleConditions,
+        UpdateRuleCondition,
+        AddValuesToRuleCondition,
+        RemoveValuesFromRuleCondition,
+        UpdateRuleVariationOrRollouts
+    ];
+
     public static readonly string[] All =
-    {
+    [
         TurnFlagOn,
         TurnFlagOff,
         UpdateName,
@@ -94,7 +122,7 @@ public static class FlagInstructionKind
         RemoveValuesFromRuleCondition,
         UpdateRuleVariationOrRollouts,
         Noop
-    };
+    ];
 
     public static bool IsDefined(string type)
     {

@@ -231,7 +231,8 @@ public class FeatureFlagController : ApiControllerBase
     }
 
     /// <summary>
-    /// Update a feature flag with the JSON patch method.
+    /// Update a feature flag with the JSON patch method. Use with caution as this can make arbitrary changes to the
+    /// feature flag, incorrect usage may lead to malformed data.
     /// </summary>
     /// <remarks>
     /// Perform a partial update to a feature flag. The request body must be a valid JSON patch.
@@ -386,13 +387,18 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(success);
     }
 
-    // TODO: OpenApi and align permissions with frontend
+    /// <summary>
+    /// Update the targeting of a feature flag
+    /// </summary>
+    /// <remarks>
+    /// Update the targeting users, rules and default rule of a feature flag.
+    /// </remarks>
+    [OpenApi]
     [HttpPut("{key}/targeting")]
-    public async Task<ApiResponse<Guid>> UpdateTargetingAsync(Guid envId, string key, UpdateTargeting request)
+    public async Task<ApiResponse<Guid>> UpdateTargetingAsync(Guid envId, string key, UpdateTargetingPayload payload)
     {
-        request.OrgId = OrgId;
-        request.Key = key;
-        request.EnvId = envId;
+        var permissions = await GetRequestPermissionsAsync();
+        var request = new UpdateTargeting(OrgId, envId, key, payload, permissions);
 
         var revision = await Mediator.Send(request);
         return Ok(revision);
