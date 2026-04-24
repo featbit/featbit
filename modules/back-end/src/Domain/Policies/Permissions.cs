@@ -93,6 +93,9 @@ public static class Permissions
         { UpdateFlagOffVariation, ResourceTypes.FeatureFlag },
         { UpdateFlagVariations, ResourceTypes.FeatureFlag },
         { UpdateFlagTags, ResourceTypes.FeatureFlag },
+        { UpdateFlagDefaultRule, ResourceTypes.FeatureFlag },
+        { UpdateFlagIndividualTargeting, ResourceTypes.FeatureFlag },
+        { UpdateFlagTargetingRules, ResourceTypes.FeatureFlag },
 
         // Segments
         { CreateSegment, ResourceTypes.Segment },
@@ -101,7 +104,9 @@ public static class Permissions
         { DeleteSegment, ResourceTypes.Segment },
         { UpdateSegmentName, ResourceTypes.Segment },
         { UpdateSegmentDescription, ResourceTypes.Segment },
-        { UpdateSegmentTags, ResourceTypes.Segment }
+        { UpdateSegmentTags, ResourceTypes.Segment },
+        { UpdateSegmentTargetingUsers, ResourceTypes.Segment },
+        { UpdateSegmentRules, ResourceTypes.Segment }
     };
 
     public static readonly string[] All = ResourceMap.Keys.ToArray();
