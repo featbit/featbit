@@ -130,22 +130,25 @@ public class SegmentController : ApiControllerBase
     }
 
     /// <summary>
-    /// Update segment targeting rules
+    /// Update the targeting of a segment
     /// </summary>
     /// <remarks>
     /// Update the targeting rules, included and excluded users for a segment.
     /// </remarks>
+    [OpenApi]
     [HttpPut("{segmentId:guid}/targeting")]
-    public async Task<ApiResponse<bool>> UpdateTargetingAsync(Guid segmentId, UpdateTargeting request)
+    public async Task<ApiResponse<bool>> UpdateTargetingAsync(Guid segmentId, UpdateTargetingPayload payload)
     {
-        request.Id = segmentId;
+        var permissions = await GetRequestPermissionsAsync();
+        var request = new UpdateTargeting(segmentId, payload, permissions);
 
         var success = await Mediator.Send(request);
         return Ok(success);
     }
 
     /// <summary>
-    /// Update a segment with the JSON patch method
+    /// Update a segment with the JSON patch method. Use with caution as this can make arbitrary changes to the
+    /// segment, incorrect usage may lead to malformed data.
     /// </summary>
     /// <remarks>
     /// Perform a partial update to a segment. The request body must be a valid JSON patch.
@@ -248,8 +251,9 @@ public class SegmentController : ApiControllerBase
     /// <remarks>
     /// Get the list of feature flags that reference this segment in their targeting rules.
     /// </remarks>
-    [HttpGet]
-    [Route("{segmentId:guid}/flag-references")]
+    [OpenApi]
+    [HttpGet("{segmentId:guid}/flag-references")]
+    [Authorize(Permissions.CanAccessEnv)]
     public async Task<ApiResponse<IEnumerable<FlagReference>>> GetFlagReferencesAsync(Guid envId, Guid segmentId)
     {
         var request = new GetFlagReferences
@@ -270,6 +274,7 @@ public class SegmentController : ApiControllerBase
     /// </remarks>
     [OpenApi]
     [HttpGet("all-tags")]
+    [Authorize(Permissions.CanAccessEnv)]
     public async Task<ApiResponse<ICollection<string>>> GetAllTagsAsync(Guid envId)
     {
         var request = new GetAllTag

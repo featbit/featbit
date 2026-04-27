@@ -545,7 +545,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'UpdateFlagIndividualTargeting',
     resourceType: ResourceTypeEnum.Flag,
     description: $localize`:@@iam.action.update-flag-individual-targeting:Change a flag's individual user targeting rules`,
-    isOpenAPIApplicable: false,
+    isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: true
   },
@@ -554,7 +554,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'UpdateFlagTargetingRules',
     resourceType: ResourceTypeEnum.Flag,
     description: $localize`:@@iam.action.update-flag-rules:Change a flag's custom targeting rules`,
-    isOpenAPIApplicable: false,
+    isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: true
   },
@@ -563,7 +563,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'UpdateFlagDefaultRule',
     resourceType: ResourceTypeEnum.Flag,
     description: $localize`:@@iam.action.update-flag-fallthrough:Change a flag's default rule`,
-    isOpenAPIApplicable: false,
+    isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: true
   },
@@ -655,7 +655,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'UpdateSegmentTargetingUsers',
     resourceType: ResourceTypeEnum.Segment,
     description: $localize`:@@iam.action.update-segment-targeting-users:Change a segment's targeting users`,
-    isOpenAPIApplicable: false,
+    isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: true
   },
@@ -664,7 +664,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'UpdateSegmentRules',
     resourceType: ResourceTypeEnum.Segment,
     description: $localize`:@@iam.action.update-segment-rules:Change a segment's custom targeting rules`,
-    isOpenAPIApplicable: false,
+    isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: true
   },

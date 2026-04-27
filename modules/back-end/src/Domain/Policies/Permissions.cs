@@ -40,6 +40,9 @@ public static class Permissions
     public const string UpdateFlagOffVariation = nameof(UpdateFlagOffVariation);
     public const string UpdateFlagVariations = nameof(UpdateFlagVariations);
     public const string UpdateFlagTags = nameof(UpdateFlagTags);
+    public const string UpdateFlagDefaultRule = nameof(UpdateFlagDefaultRule);
+    public const string UpdateFlagIndividualTargeting = nameof(UpdateFlagIndividualTargeting);
+    public const string UpdateFlagTargetingRules = nameof(UpdateFlagTargetingRules);
 
     // Segments
     public const string CreateSegment = nameof(CreateSegment);
@@ -49,6 +52,8 @@ public static class Permissions
     public const string UpdateSegmentName = nameof(UpdateSegmentName);
     public const string UpdateSegmentDescription = nameof(UpdateSegmentDescription);
     public const string UpdateSegmentTags = nameof(UpdateSegmentTags);
+    public const string UpdateSegmentTargetingUsers = nameof(UpdateSegmentTargetingUsers);
+    public const string UpdateSegmentRules = nameof(UpdateSegmentRules);
 
     public static readonly Dictionary<string, string> ResourceMap = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -88,6 +93,9 @@ public static class Permissions
         { UpdateFlagOffVariation, ResourceTypes.FeatureFlag },
         { UpdateFlagVariations, ResourceTypes.FeatureFlag },
         { UpdateFlagTags, ResourceTypes.FeatureFlag },
+        { UpdateFlagDefaultRule, ResourceTypes.FeatureFlag },
+        { UpdateFlagIndividualTargeting, ResourceTypes.FeatureFlag },
+        { UpdateFlagTargetingRules, ResourceTypes.FeatureFlag },
 
         // Segments
         { CreateSegment, ResourceTypes.Segment },
@@ -96,7 +104,9 @@ public static class Permissions
         { DeleteSegment, ResourceTypes.Segment },
         { UpdateSegmentName, ResourceTypes.Segment },
         { UpdateSegmentDescription, ResourceTypes.Segment },
-        { UpdateSegmentTags, ResourceTypes.Segment }
+        { UpdateSegmentTags, ResourceTypes.Segment },
+        { UpdateSegmentTargetingUsers, ResourceTypes.Segment },
+        { UpdateSegmentRules, ResourceTypes.Segment }
     };
 
     public static readonly string[] All = ResourceMap.Keys.ToArray();
