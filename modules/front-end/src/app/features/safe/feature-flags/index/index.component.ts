@@ -326,7 +326,7 @@ export class IndexComponent implements OnInit {
 
   checkout() {
     this.isCheckingOut = true;
-    this.billingService.createCheckoutSession().subscribe({
+    this.billingService.createSubscription().subscribe({
       next: ({ url }) => this.billingService.redirectToCheckout(url),
       error: () => {
         this.msg.error($localize`:@@checkout.session-error:Failed to initiate checkout. Please try again.`);

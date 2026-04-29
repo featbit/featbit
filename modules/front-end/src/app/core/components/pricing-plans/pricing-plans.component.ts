@@ -8,7 +8,7 @@ import {
   PricingPlan,
   UpdatePlanModalData
 } from "@core/components/pricing-plans/types";
-import { WorkspacePlan } from "@shared/types";
+import { WorkspaceSubscription } from "@shared/types";
 import { getCurrentPlan } from "@utils/project-env";
 
 @Component({
@@ -43,7 +43,7 @@ export class PricingPlansComponent {
   @Output()
   close: EventEmitter<void> = new EventEmitter();
 
-  currentPlan: WorkspacePlan = getCurrentPlan();
+  currentPlan: WorkspaceSubscription = getCurrentPlan();
   isCurrentPlanChanged() {
     const isMauChanged = this.planMauSlider[this.currentPlan.key] !== this.currentPlan.totalMau;
     if (isMauChanged) {
@@ -127,7 +127,8 @@ export class PricingPlansComponent {
         totalMau: this.planMauSlider[newPlan.key] || newPlan.mauIncluded,
         fineGrainedAcEnabled: this.fineGrainedAcEnabled[newPlan.key] || false,
         price: this.getPlanTotalPrice(newPlan),
-        billingCycle: newPlan.key === PlanKeys.ENTERPRISE ? this.enterpriseBillingCycle : BillingCycle.MONTHLY
+        billingCycle: newPlan.key === PlanKeys.ENTERPRISE ? this.enterpriseBillingCycle : BillingCycle.MONTHLY,
+        subscriberSince: this.currentPlan.subscriberSince
       },
       basePrice: this.getPlanBasePrice(newPlan)
     };

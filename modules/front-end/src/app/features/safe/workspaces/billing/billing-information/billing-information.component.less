@@ -1,0 +1,112 @@
+@import "variables";
+@import "../section-card";
+
+.section-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.billing-info-loading {
+  margin-top: 40%;
+}
+
+.billing-info-display {
+  .info-row {
+    display: flex;
+    gap: 24px;
+
+    &:not(:last-child) {
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid @grey10-color;
+    }
+  }
+
+  .info-field {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    &.full-width {
+      flex: 1;
+    }
+
+    .info-label {
+      font-size: 12px;
+      color: @grey40-color;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .info-value {
+      font-size: 13px;
+      color: @grey70-color;
+      line-height: 1.4;
+      font-weight: 500;
+
+      &.empty {
+        color: @grey30-color;
+        font-style: italic;
+        font-weight: 400;
+      }
+    }
+  }
+}
+
+.billing-info-form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+
+  .form-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 15px;
+
+    .form-group {
+      flex: 1;
+
+      &.full-width {
+        flex: 1;
+      }
+
+      label {
+        display: block;
+        font-size: 13px;
+        color: @grey60-color;
+        margin-bottom: 6px;
+        font-weight: 500;
+
+        .required {
+          color: @red50-color;
+        }
+      }
+
+      input {
+        height: 32px;
+        border-radius: 8px;
+        border-color: @grey20-color;
+
+        &:focus {
+          border-color: @primary-color;
+          box-shadow: 0 0 0 2px fade(@primary-color, 15%);
+        }
+      }
+    }
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 8px;
+    margin-top: auto;
+
+    button {
+      border-radius: 8px;
+      font-weight: 500;
+    }
+  }
+}

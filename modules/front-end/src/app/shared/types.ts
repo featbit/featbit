@@ -74,7 +74,7 @@ export interface IWorkspace {
   sso?: ISso
 }
 
-export interface WorkspacePlan {
+export interface WorkspaceSubscription {
   key: string;
   name: string;
   order: number;

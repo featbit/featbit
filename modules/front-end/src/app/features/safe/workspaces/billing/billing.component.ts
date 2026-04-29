@@ -1,5 +1,4 @@
-import { Component } from '@angular/core';
-import { NzModalService } from 'ng-zorro-antd/modal';
+import { Component, inject, OnInit } from '@angular/core';
 import {
   BillingCycle,
   EXTRA_MAU_PER_10K_COST,
@@ -8,39 +7,9 @@ import {
   PRICING_PLANS,
   PricingPlan
 } from '@core/components/pricing-plans/types';
-
-interface Invoice {
-  id: string;
-  date: string;
-  status: 'paid' | 'pending' | 'overdue';
-  amount: number;
-  plan: string;
-  downloadUrl?: string;
-}
-
-interface BillingInfo {
-  companyName: string;
-  contactEmail: string;
-  address: string;
-  addressLine2: string;
-  taxId: string;
-  country: string;
-}
-
-interface BillingWorkspacePlan {
-  key: string;
-  name: string;
-  order: number;
-  billingCycle: string;
-  includedMau: number;
-  extraMau: number;
-  mauUsed: number;
-  fineGrainedAcEnabled: boolean;
-  basePrice: number;
-  nextBillingDate: string;
-  subscriptionStartDate: string;
-  currentBillingPeriod: string;
-}
+import { WorkspaceSubscription } from "@shared/types";
+import { BillingService } from "@services/billing.service";
+import { NzMessageService } from "ng-zorro-antd/message";
 
 @Component({
   selector: 'billing',
@@ -48,29 +17,42 @@ interface BillingWorkspacePlan {
   templateUrl: './billing.component.html',
   styleUrl: './billing.component.less'
 })
-export class BillingComponent {
-  constructor(private modal: NzModalService) {
+export class BillingComponent implements OnInit {
+  private billingService = inject(BillingService);
+  private message = inject(NzMessageService);
+
+  subscription: WorkspaceSubscription;
+  isLoadingCurrentSubscription = true;
+
+  ngOnInit() {
+    this.billingService.getCurrentSubscription().subscribe({
+      next: subscription => {
+        this.isLoadingCurrentSubscription = false;
+        this.subscription = subscription;
+      },
+      error: () => this.message.error('Failed to load current subscription. Please try again later.')
+    })
   }
 
   private readonly freePlanDefinition = PRICING_PLANS.find(plan => plan.key === PlanKeys.FREE) ?? PRICING_PLANS[0];
 
   // Mocked workspace billing state. If this becomes null, the page falls back to the Free plan.
-  private readonly workspacePlan: BillingWorkspacePlan | null = {
+  private readonly workspacePlan: WorkspaceSubscription | null = {
     key: PlanKeys.GROWTH,
     name: 'Growth',
     order: 2,
     billingCycle: BillingCycle.MONTHLY,
     includedMau: 40_000,
     extraMau: 20_000,
-    mauUsed: 54_240,
+    totalMau: 60_000,
+    price: 149 + (20_000 / 10_000) * EXTRA_MAU_PER_10K_COST + FINE_GRAINED_AC_PER_MONTH_PRICE,
     fineGrainedAcEnabled: true,
-    basePrice: 149,
-    nextBillingDate: 'May 20, 2026',
-    subscriptionStartDate: 'Jan 20, 2026',
-    currentBillingPeriod: 'Apr 20, 2026 - May 19, 2026'
+    currentPeriodStart: new Date('2026-04-20'),
+    currentPeriodEnd: new Date('2026-05-19'),
+    subscriberSince: new Date('2026-01-20'),
   };
 
-  get currentPlan(): BillingWorkspacePlan {
+  get currentPlan(): WorkspaceSubscription {
     return this.workspacePlan ?? this.createDefaultFreePlan();
   }
 
@@ -91,7 +73,8 @@ export class BillingComponent {
   }
 
   get basePrice(): number {
-    return this.currentPlan.basePrice;
+    // TODO: use real base price
+    return 149;
   }
 
   get extraMau(): number {
@@ -103,7 +86,8 @@ export class BillingComponent {
   }
 
   get mauUsed(): number {
-    return this.currentPlan.mauUsed;
+    // TODO: call usage API to get real usage data
+    return 54_240;
   }
 
   get fineGrainedAcEnabled(): boolean {
@@ -150,63 +134,25 @@ export class BillingComponent {
     return this.mauUsagePercent >= 100;
   }
 
-  billingInfo: BillingInfo = {
-    companyName: 'Northstar Labs',
-    contactEmail: 'finance@northstarlabs.io',
-    address: '548 Market Street, San Francisco, CA 94104',
-    addressLine2: 'Suite 214',
-    taxId: 'US-TAX-928173645',
-    country: 'United States'
-  };
-  editingBillingInfo = false;
-  billingInfoDraft: BillingInfo = { ...this.billingInfo };
-  invoices: Invoice[] = [
-    { id: 'INV-2026-004', date: 'Apr 20, 2026', status: 'pending', amount: 249, plan: 'Growth' },
-    { id: 'INV-2026-003', date: 'Mar 20, 2026', status: 'paid', amount: 249, plan: 'Growth' },
-    { id: 'INV-2026-002', date: 'Feb 20, 2026', status: 'paid', amount: 209, plan: 'Growth' },
-    { id: 'INV-2026-001', date: 'Jan 20, 2026', status: 'paid', amount: 189, plan: 'Growth' },
-    { id: 'INV-2025-012', date: 'Dec 20, 2025', status: 'paid', amount: 49, plan: 'Pro' },
-  ];
-  // invoices: Invoice[] = [];
-
-  getInvoiceStatusLabel(status: string): string {
-    switch (status) {
-      case 'paid':
-        return 'Paid';
-      case 'pending':
-        return 'Pending';
-      case 'overdue':
-        return 'Overdue';
-      default:
-        return status;
+  get currentBillingPeriod(): string {
+    const start = this.currentPlan.currentPeriodStart;
+    const end = this.currentPlan.currentPeriodEnd;
+    if (!start || !end) {
+      return '';
     }
+
+    const options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric', year: 'numeric' };
+    return `${start.toLocaleDateString(undefined, options)} - ${end.toLocaleDateString(undefined, options)}`;
   }
 
-  startEditBillingInfo(): void {
-    this.billingInfoDraft = { ...this.billingInfo };
-    this.editingBillingInfo = true;
-  }
+  get nextBillingDate(): string {
+    const end = this.currentPlan.currentPeriodEnd;
+    if (!end) {
+      return '';
+    }
 
-  saveBillingInfo(): void {
-    this.billingInfo = { ...this.billingInfoDraft };
-    this.editingBillingInfo = false;
-  }
-
-  cancelEditBillingInfo(): void {
-    this.editingBillingInfo = false;
-  }
-
-  cancelSubscription(): void {
-    this.modal.confirm({
-      nzTitle: 'Cancel Subscription',
-      nzContent: 'Are you sure you want to cancel your subscription? You will lose access to paid features at the end of your current billing period.',
-      nzOkText: 'Yes, Cancel',
-      nzOkDanger: true,
-      nzCancelText: 'Keep Plan',
-      nzOnOk: () => {
-        console.log('Subscription cancelled');
-      }
-    });
+    const options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric', year: 'numeric' };
+    return end.toLocaleDateString(undefined, options);
   }
 
   contactSupport(): void {
@@ -223,7 +169,7 @@ export class BillingComponent {
     this.pricingDrawerVisible = false;
   }
 
-  private createDefaultFreePlan(): BillingWorkspacePlan {
+  private createDefaultFreePlan(): WorkspaceSubscription {
     return {
       key: this.freePlanDefinition.key,
       name: this.freePlanDefinition.name,
@@ -231,12 +177,12 @@ export class BillingComponent {
       billingCycle: BillingCycle.MONTHLY,
       includedMau: this.freePlanDefinition.mauIncluded,
       extraMau: 0,
-      mauUsed: 320,
+      totalMau: 0,
       fineGrainedAcEnabled: false,
-      basePrice: 0,
-      nextBillingDate: 'No upcoming charge',
-      subscriptionStartDate: 'Not subscribed',
-      currentBillingPeriod: 'Current usage cycle'
+      price: this.freePlanDefinition.price,
+      currentPeriodStart: new Date(),
+      currentPeriodEnd: new Date(new Date().setMonth(new Date().getMonth() + 1)),
+      subscriberSince: new Date()
     };
   }
 }

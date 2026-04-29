@@ -9,6 +9,9 @@ namespace Infrastructure;
 
 public static class ConfigurationExtensions
 {
+    public static string GetHostingMode(this IConfiguration configuration)
+        => configuration.GetSection(HostingMode.SectionName).Value ?? HostingMode.SelfHosted;
+
     public static string GetMqProvider(this IConfiguration configuration)
     {
         var provider = configuration.GetValue(MqProvider.SectionName, MqProvider.Redis)!;

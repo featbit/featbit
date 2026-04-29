@@ -1,0 +1,34 @@
+@import "variables";
+
+.section-card {
+  border: 1px solid @grey20-color;
+  border-radius: 12px;
+  padding: 24px;
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+
+    &.compact {
+      margin-bottom: 16px;
+    }
+
+    h5 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: @grey80-color;
+    }
+
+    .section-subtitle {
+      display: inline-block;
+      margin-top: 4px;
+      font-size: 13px;
+      line-height: 1.5;
+      color: @grey40-color;
+    }
+  }
+}

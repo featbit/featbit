@@ -1,4 +1,4 @@
-import { IOrganization, IProjectEnv, IWorkspace, License, WorkspacePlan } from "@shared/types";
+import { IOrganization, IProjectEnv, IWorkspace, License, WorkspaceSubscription } from "@shared/types";
 import { CURRENT_ORGANIZATION, CURRENT_PROJECT, CURRENT_WORKSPACE } from "./localstorage-keys";
 import { ResourceTypeEnum } from "@shared/policy";
 import { BillingCycle } from "@core/components/pricing-plans/types";
@@ -44,7 +44,7 @@ export function getCurrentLicense(): License {
   return workspace ? new License(workspace.license) : undefined;
 }
 
-export function getCurrentPlan(): WorkspacePlan {
+export function getCurrentPlan(): WorkspaceSubscription {
   return {
     key: 'growth',
     name: 'Growth',

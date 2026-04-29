@@ -1,10 +1,9 @@
 using Application.Bases;
-using Application.Bases.Exceptions;
 using Domain.Workspaces;
 
 namespace Application.Billing;
 
-public class CreateCheckoutSession : IRequest<CheckoutSession>
+public class Subscription
 {
     public Guid WorkspaceId { get; set; }
 
@@ -23,9 +22,9 @@ public class CreateCheckoutSession : IRequest<CheckoutSession>
     }
 }
 
-public class CreateCheckoutSessionValidator : AbstractValidator<CreateCheckoutSession>
+public class SubscriptionValidator : AbstractValidator<Subscription>
 {
-    public CreateCheckoutSessionValidator()
+    public SubscriptionValidator()
     {
         RuleFor(x => x.Plan)
             .NotEmpty()
@@ -34,7 +33,7 @@ public class CreateCheckoutSessionValidator : AbstractValidator<CreateCheckoutSe
 
         RuleFor(x => x.Mau)
             .NotEmpty().WithErrorCode(ErrorCodes.Required("mau"))
-            .GreaterThan(1000).WithErrorCode(ErrorCodes.Invalid("mau"));
+            .GreaterThan(1_000).WithErrorCode(ErrorCodes.Invalid("mau"));
 
         RuleFor(x => x.BillingCycle)
             .Must(BillingCycle.IsDefined)
@@ -43,20 +42,5 @@ public class CreateCheckoutSessionValidator : AbstractValidator<CreateCheckoutSe
         RuleFor(x => x.AddOnFeatures)
             .Must(features => features.All(LicenseFeatures.IsDefined))
             .WithErrorCode(ErrorCodes.Invalid("addOnFeatures"));
-    }
-}
-
-public class CreateCheckoutSessionHandler(IBillingService billingService)
-    : IRequestHandler<CreateCheckoutSession, CheckoutSession>
-{
-    public async Task<CheckoutSession> Handle(CreateCheckoutSession request, CancellationToken cancellationToken)
-    {
-        var session = await billingService.CreateCheckoutSessionAsync(request, cancellationToken);
-        if (session == null)
-        {
-            throw new BusinessException(ErrorCodes.Failed("checkout-session"));
-        }
-
-        return session;
     }
 }

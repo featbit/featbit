@@ -1,4 +1,4 @@
-import { WorkspacePlan } from "@shared/types";
+import { WorkspaceSubscription } from "@shared/types";
 
 export interface PricingPlan {
   key: string;
@@ -18,8 +18,8 @@ export type PlanAction = 'upgrade' | 'downgrade' | 'update';
 
 export interface UpdatePlanModalData {
   action: PlanAction;
-  currentPlan: WorkspacePlan;
-  newPlan: WorkspacePlan;
+  currentPlan: WorkspaceSubscription;
+  newPlan: WorkspaceSubscription;
   basePrice: number;
 }
 

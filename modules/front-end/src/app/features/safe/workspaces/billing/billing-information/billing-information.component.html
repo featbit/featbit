@@ -1,0 +1,95 @@
+<div class="section-card">
+  <div class="section-header">
+    <div>
+      <h5>Billing Information</h5>
+      <span class="section-subtitle">These details are used when invoices are generated for the workspace</span>
+    </div>
+    @if (!isEditing && !isLoading) {
+      <button nz-button nzType="link" (click)="startEdit()">
+        <i nz-icon nzType="edit" nzTheme="outline"></i> Edit
+      </button>
+    }
+  </div>
+
+  @if (isLoading) {
+    <div class="billing-info-loading">
+      <nz-spin nzTip="Loading..."></nz-spin>
+    </div>
+  } @else {
+    @if (isEditing) {
+      <div class="billing-info-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Company Name <span class="required">*</span></label>
+            <input nz-input [(ngModel)]="draft.companyName" placeholder="Enter company name"/>
+          </div>
+          <div class="form-group">
+            <label>Contact Email <span class="required">*</span></label>
+            <input nz-input type="email" [(ngModel)]="draft.contactEmail" placeholder="billing@company.com"/>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label>Address (Street, P.O. box) <span class="required">*</span></label>
+            <input nz-input [(ngModel)]="draft.address" placeholder="Street address, P.O. box"/>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label>Address line 2 (Apartment, suite, unit)</label>
+            <input nz-input [(ngModel)]="draft.addressLine2" placeholder="Apartment, suite, unit, etc."/>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tax ID</label>
+            <input nz-input [(ngModel)]="draft.taxId" placeholder="Tax identification number"/>
+          </div>
+          <div class="form-group">
+            <label>Country / Region <span class="required">*</span></label>
+            <input nz-input [(ngModel)]="draft.country" placeholder="Enter country or region"/>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button nz-button nzType="default" (click)="cancel()">Cancel</button>
+          <button nz-button nzType="primary" [nzLoading]="isSaving" (click)="save()">Save Changes</button>
+        </div>
+      </div>
+    } @else {
+      <div class="billing-info-display">
+        <div class="info-row">
+          <div class="info-field">
+            <span class="info-label">Company name</span>
+            <span class="info-value" [class.empty]="!raw.companyName">{{ raw.companyName || 'Not provided' }}</span>
+          </div>
+          <div class="info-field">
+            <span class="info-label">Contact email</span>
+            <span class="info-value" [class.empty]="!raw.contactEmail">{{ raw.contactEmail || 'Not provided' }}</span>
+          </div>
+        </div>
+        <div class="info-row">
+          <div class="info-field full-width">
+            <span class="info-label">Address (Street, P.O. box)</span>
+            <span class="info-value" [class.empty]="!raw.address">{{ raw.address || 'Not provided' }}</span>
+          </div>
+        </div>
+        <div class="info-row">
+          <div class="info-field full-width">
+            <span class="info-label">Address line 2 (Apartment, suite, unit)</span>
+            <span class="info-value" [class.empty]="!raw.addressLine2">{{ raw.addressLine2 || 'Not provided' }}</span>
+          </div>
+        </div>
+        <div class="info-row">
+          <div class="info-field">
+            <span class="info-label">Tax ID</span>
+            <span class="info-value" [class.empty]="!raw.taxId">{{ raw.taxId || 'Not provided' }}</span>
+          </div>
+          <div class="info-field">
+            <span class="info-label">Country / Region</span>
+            <span class="info-value" [class.empty]="!raw.country">{{ raw.country || 'Not provided' }}</span>
+          </div>
+        </div>
+      </div>
+    }
+  }
+</div>

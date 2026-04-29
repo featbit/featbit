@@ -15,28 +15,17 @@ public class CreateWorkspace : IRequest<RegisterResult>
     public string UserOrigin { get; set; }
 }
 
-public class CreateWorkspaceHandler : IRequestHandler<CreateWorkspace, RegisterResult>
+public class CreateWorkspaceHandler(
+    IWorkspaceService workspaceService,
+    IBillingService billingService,
+    IUserService userService,
+    IIdentityService identityService,
+    ISender mediator)
+    : IRequestHandler<CreateWorkspace, RegisterResult>
 {
-    private readonly IWorkspaceService _workspaceService;
-    private readonly IUserService _userService;
-    private readonly IIdentityService _identityService;
-    private readonly ISender _mediator;
-
-    public CreateWorkspaceHandler(
-        IWorkspaceService workspaceService,
-        IUserService userService,
-        IIdentityService identityService,
-        ISender mediator)
-    {
-        _workspaceService = workspaceService;
-        _userService = userService;
-        _identityService = identityService;
-        _mediator = mediator;
-    }
-
     public async Task<RegisterResult> Handle(CreateWorkspace request, CancellationToken cancellationToken)
     {
-        var user = await _userService.FindOneAsync(x => x.Email == request.Email);
+        var user = await userService.FindOneAsync(x => x.Email == request.Email);
         if (user != null)
         {
             throw new BusinessException("A user cannot have more than one workspace.");
@@ -45,14 +34,17 @@ public class CreateWorkspaceHandler : IRequestHandler<CreateWorkspace, RegisterR
         var workspace = new Workspace
         {
             Name = "Default Workspace",
-            Key = GuidHelper.Encode(Guid.NewGuid())
+            Key = GuidHelper.Encode(Guid.NewGuid()),
         };
 
         // add new workspace
-        await _workspaceService.AddOneAsync(workspace);
+        await workspaceService.AddOneAsync(workspace);
+
+        // setup free license
+        await billingService.CreateFreeLicenseAsync(workspace.Id, request.Email);
 
         // register user
-        var registerResult = await _identityService.RegisterByEmailAsync(
+        var registerResult = await identityService.RegisterByEmailAsync(
             workspace.Id,
             request.Email,
             request.Password,
@@ -60,7 +52,7 @@ public class CreateWorkspaceHandler : IRequestHandler<CreateWorkspace, RegisterR
         );
 
         // create default organization
-        await _mediator.Send(new CreateOrganization
+        await mediator.Send(new CreateOrganization
         {
             WorkspaceId = workspace.Id,
             Name = "Default Organization",

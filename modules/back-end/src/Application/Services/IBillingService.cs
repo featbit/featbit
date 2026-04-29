@@ -4,8 +4,19 @@ namespace Application.Services;
 
 public interface IBillingService
 {
-    Task<CheckoutSession> CreateCheckoutSessionAsync(
-        CreateCheckoutSession request,
-        CancellationToken cancellationToken = default
-    );
+    Task<string> GetSubscriptionAsync(Guid workspaceId);
+
+    Task<string> CreateSubscriptionAsync(CreateSubscription request);
+
+    Task<bool> UpgradeSubscriptionAsync(UpgradeSubscription request);
+
+    Task<bool> DowngradeSubscriptionAsync(DowngradeSubscription request);
+
+    Task<bool> CreateFreeLicenseAsync(Guid workspaceId, string email);
+
+    Task<string> GetBillingInformationAsync(Guid workspaceId);
+
+    Task<bool> UpdateBillingInformationAsync(Guid workspaceId, string payload);
+
+    Task<string> GetInvoicesAsync(Guid workspaceId);
 }

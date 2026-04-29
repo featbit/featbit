@@ -5,7 +5,7 @@ import {
   PlanAction,
   UpdatePlanModalData
 } from '@core/components/pricing-plans/types';
-import { WorkspacePlan } from "@shared/types";
+import { WorkspaceSubscription } from "@shared/types";
 
 interface PlanNote {
   icon: string;
@@ -13,7 +13,7 @@ interface PlanNote {
   description: string;
 }
 
-const EMPTY_PLAN: WorkspacePlan = {
+const EMPTY_PLAN: WorkspaceSubscription = {
   key: '',
   name: '',
   order: 0,
@@ -22,7 +22,7 @@ const EMPTY_PLAN: WorkspacePlan = {
   totalMau: 0,
   fineGrainedAcEnabled: false,
   price: 0,
-  billingCycle: 'monthly',
+  billingCycle: 'monthly'
 };
 
 @Component({
@@ -55,8 +55,8 @@ export class UpdatePricingModalComponent {
 
   title: string;
   action: PlanAction = 'upgrade';
-  currentPlan: WorkspacePlan = { ...EMPTY_PLAN };
-  plan: WorkspacePlan = { ...EMPTY_PLAN };
+  currentPlan: WorkspaceSubscription = { ...EMPTY_PLAN };
+  plan: WorkspaceSubscription = { ...EMPTY_PLAN };
   basePrice = 0;
 
   today = new Date();

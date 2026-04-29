@@ -1,0 +1,61 @@
+<div class="section-card">
+  <div class="section-header">
+    <div>
+      <h5>Invoice History</h5>
+      <span class="section-subtitle">Recent invoices for this workspace and the available follow-up actions</span>
+      <span class="invoice-history-note">
+          <i nz-icon nzType="info-circle" nzTheme="outline"></i>
+          <span>
+            <a href="mailto:support@featbit.co" nz-tooltip nzTooltipTitle="Mail to support@featbit.co">Contact the support team</a>
+            if you need to download the invoice or have questions about any charges.
+          </span>
+        </span>
+    </div>
+  </div>
+  @if (invoices.length === 0) {
+    <div class="empty-invoices">
+      <i nz-icon nzType="file-text" nzTheme="outline"></i>
+      <p>No invoices yet</p>
+    </div>
+  } @else {
+    <nz-table
+      #invoiceTable
+      class="invoice-list"
+      nzSize="middle"
+      [nzLoading]="isLoading"
+      [nzData]="invoices"
+      [nzShowPagination]="true"
+      [nzFrontPagination]="true"
+      [nzPageSize]="5">
+      <thead>
+      <tr>
+        <th>Billing Date</th>
+        <th>Plan</th>
+        <th>Status</th>
+        <th>Amount</th>
+      </tr>
+      </thead>
+      <tbody>
+        @for (inv of invoiceTable.data; track inv.id) {
+          <tr>
+            <td>
+              {{ inv.billingDate | date: 'mediumDate' }}
+            </td>
+            <td>
+              <span class="invoice-plan-badge">{{ inv.plan }}</span>
+            </td>
+            <td>
+                <span class="status-badge" [class]="'status-' + inv.status">
+                  <span class="status-dot"></span>
+                  {{ getInvoiceStatusLabel(inv.status) }}
+                </span>
+            </td>
+            <td>
+              <span class="invoice-amount">${{ inv.amountPaid | number: '1.2-2' }}</span>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </nz-table>
+  }
+</div>
