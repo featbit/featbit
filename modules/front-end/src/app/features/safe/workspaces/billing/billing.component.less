@@ -111,7 +111,6 @@
 }
 
 .section-card {
-  background: @grey5-color;
   border: 1px solid @grey20-color;
   border-radius: 12px;
   padding: 24px;
@@ -146,7 +145,7 @@
 
 .billing-grid.two-up {
   display: grid;
-  grid-template-columns: minmax(0, 1.5fr) minmax(300px, 1fr);
+  grid-template-columns: 1fr 1fr;
   gap: 24px;
 }
 
@@ -352,10 +351,6 @@
   button {
     border-radius: 8px;
   }
-}
-
-.billing-info-card {
-  background: linear-gradient(180deg, @white 0%, fade(@grey5-color, 70%) 100%);
 }
 
 .hero-badge {
@@ -644,7 +639,6 @@
   padding: 4px 10px;
   border-radius: 999px;
   font-size: 12px;
-  font-weight: 600;
 
   .status-dot {
     width: 6px;
@@ -682,27 +676,28 @@
   font-variant-numeric: tabular-nums;
 }
 
-.invoice-download-note {
+.invoice-history-note {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 6px;
-  padding: 10px 14px;
-  border-radius: 8px;
-  background: @green5-color;
-  border: 1px solid @grey20-color;
-  font-size: 13px;
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: fade(@primary-color, 6%);
+  border: 1px solid fade(@primary-color, 20%);
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.5;
   color: @grey50-color;
 
   i {
-    font-size: 14px;
-    color: @primary-color;
     flex-shrink: 0;
+    margin-top: 2px;
+    color: @primary-color;
+    font-size: 13px;
   }
 
   a {
     color: @primary-color;
-    font-weight: 500;
-    cursor: pointer;
 
     &:hover {
       color: @green70-color;

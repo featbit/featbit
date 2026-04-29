@@ -3,7 +3,11 @@
     <div class="usage-alert-banner" [class.exceeded]="isMauExceeded">
       <div class="usage-alert-content">
         <div class="usage-alert-title">
-          <i class="usage-alert-icon" nz-icon [nzType]="isMauExceeded ? 'exclamation-circle' : 'warning'" nzTheme="outline"></i>
+          <i class="usage-alert-icon"
+             nz-icon
+             [nzType]="isMauExceeded ? 'exclamation-circle' : 'warning'"
+             nzTheme="outline">
+          </i>
           @if (isMauExceeded) {
             MAU limit exceeded
           } @else {
@@ -22,61 +26,71 @@
       </div>
 
       <div class="usage-alert-actions">
-        <button class="btn-upgrade" nz-button nzType="text" (click)="openPricingDrawer()">
+        <button
+          class="btn-upgrade"
+          nz-button
+          nzType="text"
+          (click)="openPricingDrawer()">
           Upgrade Plan
         </button>
-        <button class="btn-contact" nz-button nzType="link" (click)="contactSupport()">Contact Support</button>
+        <button
+          class="btn-contact"
+          nz-button
+          nzType="link"
+          nz-tooltip
+          nzTooltipTitle="Mail to support@featbit.co"
+          (click)="contactSupport()">
+          Contact Support
+        </button>
       </div>
     </div>
   }
 
-  <div class="billing-grid two-up">
-    <div class="section-card current-plan-card">
-
-      <!-- Plan identity + total price -->
-      <div class="plan-card-top">
-        <div class="plan-identity">
-          <div class="plan-name-badges">
-            <h3 class="plan-name">{{ currentPlan.name }}</h3>
-            @if (isDefaultFreePlan) {
-              <span class="hero-badge muted">Default</span>
-            }
-            <span class="hero-badge">{{ billingCycleLabel }}</span>
-          </div>
-          <div class="plan-total-price">
-            <div class="plan-total-row">
-              <span class="plan-total-amount">${{ planChargeAmount | number: '1.0-0' }}</span>
-              <span class="plan-total-period">{{ billingCycleSuffix }}</span>
-            </div>
-          </div>
-          <p class="current-plan-description">{{ currentPlanDefinition.description }}</p>
+  <div class="section-card current-plan-card">
+    <!-- Plan identity + total price -->
+    <div class="plan-card-top">
+      <div class="plan-identity">
+        <div class="plan-name-badges">
+          <h3 class="plan-name">{{ currentPlan.name }}</h3>
+          @if (isDefaultFreePlan) {
+            <span class="hero-badge muted">Default</span>
+          }
+          <span class="hero-badge">{{ billingCycleLabel }}</span>
         </div>
-
-        <div class="plan-actions">
-          <button nz-button nzType="primary" (click)="openPricingDrawer()">Manage Subscription</button>
+        <div class="plan-total-price">
+          <div class="plan-total-row">
+            <span class="plan-total-amount">${{ planChargeAmount | number: '1.0-0' }}</span>
+            <span class="plan-total-period">{{ billingCycleSuffix }}</span>
+          </div>
         </div>
+        <p class="current-plan-description">{{ currentPlanDefinition.description }}</p>
       </div>
 
-      <!-- Billing period strip -->
-      <div class="plan-period-bar">
-        <div class="period-item">
-          <span class="period-item-label">Billing period</span>
-          <span class="period-item-value">{{ currentPlan.currentBillingPeriod }}</span>
-        </div>
-        <div class="period-divider"></div>
-        <div class="period-item">
-          <span class="period-item-label">Next charge</span>
-          <span class="period-item-value"><strong>{{ currentPlan.nextBillingDate }}</strong></span>
-        </div>
-        <div class="period-divider"></div>
-        <div class="period-item">
-          <span class="period-item-label">Subscriber since</span>
-          <span class="period-item-value">{{ currentPlan.subscriptionStartDate }}</span>
-        </div>
+      <div class="plan-actions">
+        <button nz-button nzType="primary" (click)="openPricingDrawer()">Manage Subscription</button>
       </div>
+    </div>
 
-      <!-- Current Usage + Fee breakdown -->
-      <div style="display: flex; gap: 24px; align-items: stretch;">
+    <!-- Billing period strip -->
+    <div class="plan-period-bar">
+      <div class="period-item">
+        <span class="period-item-label">Billing period</span>
+        <span class="period-item-value">{{ currentPlan.currentBillingPeriod }}</span>
+      </div>
+      <div class="period-divider"></div>
+      <div class="period-item">
+        <span class="period-item-label">Next charge</span>
+        <span class="period-item-value"><strong>{{ currentPlan.nextBillingDate }}</strong></span>
+      </div>
+      <div class="period-divider"></div>
+      <div class="period-item">
+        <span class="period-item-label">Subscriber since</span>
+        <span class="period-item-value">{{ currentPlan.subscriptionStartDate }}</span>
+      </div>
+    </div>
+
+    <!-- Current Usage + Fee breakdown -->
+    <div style="display: flex; gap: 24px; align-items: stretch;">
 
       <!-- Current Usage -->
       <div class="plan-usage-section" style="flex: 1; min-width: 0;">
@@ -142,162 +156,164 @@
         </div>
       </div>
 
-      </div>
-
     </div>
 
-    <!-- Billing Information   -->
-    <div class="section-card billing-info-card">
-        <div class="section-header">
-          <div>
-            <h5>Billing Information</h5>
-            <span class="section-subtitle">These details are used when invoices are generated for the workspace</span>
-          </div>
-          @if (!editingBillingInfo) {
-            <button nz-button nzType="link" (click)="startEditBillingInfo()">
-              <i nz-icon nzType="edit" nzTheme="outline"></i> Edit
-            </button>
-          }
-        </div>
-
-        @if (!editingBillingInfo) {
-          <div class="billing-info-display">
-            <div class="info-row">
-              <div class="info-field">
-                <span class="info-label">Company name</span>
-                <span class="info-value">{{ billingInfo.companyName || '—' }}</span>
-              </div>
-              <div class="info-field">
-                <span class="info-label">Contact email</span>
-                <span class="info-value">{{ billingInfo.contactEmail || '—' }}</span>
-              </div>
-            </div>
-            <div class="info-row">
-              <div class="info-field full-width">
-                <span class="info-label">Address (Street, P.O. box)</span>
-                <span class="info-value">{{ billingInfo.address || '—' }}</span>
-              </div>
-            </div>
-            <div class="info-row">
-              <div class="info-field full-width">
-                <span class="info-label">Address line 2 (Apartment, suite, unit)</span>
-                <span class="info-value">{{ billingInfo.addressLine2 || '—' }}</span>
-              </div>
-            </div>
-            <div class="info-row">
-              <div class="info-field">
-                <span class="info-label">Tax ID</span>
-                <span class="info-value">{{ billingInfo.taxId || '—' }}</span>
-              </div>
-              <div class="info-field">
-                <span class="info-label">Country / Region</span>
-                <span class="info-value">{{ billingInfo.country || '—' }}</span>
-              </div>
-            </div>
-          </div>
-        } @else {
-          <div class="billing-info-form">
-            <div class="form-row">
-              <div class="form-group">
-                <label>Company Name <span class="required">*</span></label>
-                <input nz-input [(ngModel)]="billingInfoDraft.companyName" placeholder="Enter company name" />
-              </div>
-              <div class="form-group">
-                <label>Contact Email <span class="required">*</span></label>
-                <input nz-input type="email" [(ngModel)]="billingInfoDraft.contactEmail" placeholder="billing@company.com" />
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group full-width">
-                <label>Address (Street, P.O. box) <span class="required">*</span></label>
-                <input nz-input [(ngModel)]="billingInfoDraft.address" placeholder="Street address, P.O. box" />
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group full-width">
-                <label>Address line 2 (Apartment, suite, unit)</label>
-                <input nz-input [(ngModel)]="billingInfoDraft.addressLine2" placeholder="Apartment, suite, unit, etc." />
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label>Tax ID</label>
-                <input nz-input [(ngModel)]="billingInfoDraft.taxId" placeholder="Tax identification number" />
-              </div>
-              <div class="form-group">
-                <label>Country / Region <span class="required">*</span></label>
-                <input nz-input [(ngModel)]="billingInfoDraft.country" placeholder="Enter country or region" />
-              </div>
-            </div>
-            <div class="form-actions">
-              <button nz-button nzType="default" (click)="cancelEditBillingInfo()">Cancel</button>
-              <button nz-button nzType="primary" (click)="saveBillingInfo()">Save Changes</button>
-            </div>
-          </div>
-        }
-    </div>
   </div>
 
-  <div class="section-card">
-    <div class="section-header">
-      <div>
-        <h5>Invoice History</h5>
-        <span class="section-subtitle">Recent invoices for this workspace and the available follow-up actions</span>
+  <div class="billing-grid two-up">
+    <!-- Billing Information   -->
+    <div class="section-card">
+      <div class="section-header">
+        <div>
+          <h5>Billing Information</h5>
+          <span class="section-subtitle">These details are used when invoices are generated for the workspace</span>
+        </div>
+        @if (!editingBillingInfo) {
+          <button nz-button nzType="link" (click)="startEditBillingInfo()">
+            <i nz-icon nzType="edit" nzTheme="outline"></i> Edit
+          </button>
+        }
       </div>
-      <div class="invoice-download-note">
-        <i nz-icon nzType="info-circle" nzTheme="outline"></i>
-        Need a PDF copy of an invoice?
-        <a (click)="contactSupport()">Contact our support team</a> and we'll send it over.
-      </div>
+
+      @if (!editingBillingInfo) {
+        <div class="billing-info-display">
+          <div class="info-row">
+            <div class="info-field">
+              <span class="info-label">Company name</span>
+              <span class="info-value">{{ billingInfo.companyName || '—' }}</span>
+            </div>
+            <div class="info-field">
+              <span class="info-label">Contact email</span>
+              <span class="info-value">{{ billingInfo.contactEmail || '—' }}</span>
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-field full-width">
+              <span class="info-label">Address (Street, P.O. box)</span>
+              <span class="info-value">{{ billingInfo.address || '—' }}</span>
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-field full-width">
+              <span class="info-label">Address line 2 (Apartment, suite, unit)</span>
+              <span class="info-value">{{ billingInfo.addressLine2 || '—' }}</span>
+            </div>
+          </div>
+          <div class="info-row">
+            <div class="info-field">
+              <span class="info-label">Tax ID</span>
+              <span class="info-value">{{ billingInfo.taxId || '—' }}</span>
+            </div>
+            <div class="info-field">
+              <span class="info-label">Country / Region</span>
+              <span class="info-value">{{ billingInfo.country || '—' }}</span>
+            </div>
+          </div>
+        </div>
+      } @else {
+        <div class="billing-info-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Company Name <span class="required">*</span></label>
+              <input nz-input [(ngModel)]="billingInfoDraft.companyName" placeholder="Enter company name"/>
+            </div>
+            <div class="form-group">
+              <label>Contact Email <span class="required">*</span></label>
+              <input nz-input type="email" [(ngModel)]="billingInfoDraft.contactEmail"
+                     placeholder="billing@company.com"/>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label>Address (Street, P.O. box) <span class="required">*</span></label>
+              <input nz-input [(ngModel)]="billingInfoDraft.address" placeholder="Street address, P.O. box"/>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label>Address line 2 (Apartment, suite, unit)</label>
+              <input nz-input [(ngModel)]="billingInfoDraft.addressLine2" placeholder="Apartment, suite, unit, etc."/>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Tax ID</label>
+              <input nz-input [(ngModel)]="billingInfoDraft.taxId" placeholder="Tax identification number"/>
+            </div>
+            <div class="form-group">
+              <label>Country / Region <span class="required">*</span></label>
+              <input nz-input [(ngModel)]="billingInfoDraft.country" placeholder="Enter country or region"/>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button nz-button nzType="default" (click)="cancelEditBillingInfo()">Cancel</button>
+            <button nz-button nzType="primary" (click)="saveBillingInfo()">Save Changes</button>
+          </div>
+        </div>
+      }
     </div>
 
-    @if (invoices.length === 0) {
-      <div class="empty-invoices">
-        <i nz-icon nzType="file-text" nzTheme="outline"></i>
-        <p>No invoices yet</p>
+    <div class="section-card">
+      <div class="section-header">
+        <div>
+          <h5>Invoice History</h5>
+          <span class="section-subtitle">Recent invoices for this workspace and the available follow-up actions</span>
+          <span class="invoice-history-note">
+          <i nz-icon nzType="info-circle" nzTheme="outline"></i>
+          <span>
+            <a href="mailto:support@featbit.co" nz-tooltip nzTooltipTitle="Mail to support@featbit.co">Contact the support team</a>
+            if you need to download the invoice or have questions about any charges.
+          </span>
+        </span>
+        </div>
       </div>
-    } @else {
-      <nz-table
-        #invoiceTable
-        class="invoice-list"
-        nzSize="middle"
-        [nzData]="invoices"
-        [nzShowPagination]="true"
-        [nzFrontPagination]="true"
-        [nzPageSize]="10">
-        <thead>
+      @if (invoices.length === 0) {
+        <div class="empty-invoices">
+          <i nz-icon nzType="file-text" nzTheme="outline"></i>
+          <p>No invoices yet</p>
+        </div>
+      } @else {
+        <nz-table
+          #invoiceTable
+          class="invoice-list"
+          nzSize="middle"
+          [nzData]="invoices"
+          [nzShowPagination]="true"
+          [nzFrontPagination]="true"
+          [nzPageSize]="10">
+          <thead>
           <tr>
             <th>Billing Date</th>
             <th>Plan</th>
             <th>Status</th>
             <th>Amount</th>
           </tr>
-        </thead>
-        <tbody>
-          @for (inv of invoiceTable.data; track inv.id) {
-            <tr>
-              <td>
-                {{ inv.date }}
-              </td>
-              <td>
-                <span class="invoice-plan-badge">{{ inv.plan }}</span>
-              </td>
-              <td>
+          </thead>
+          <tbody>
+            @for (inv of invoiceTable.data; track inv.id) {
+              <tr>
+                <td>
+                  {{ inv.date }}
+                </td>
+                <td>
+                  <span class="invoice-plan-badge">{{ inv.plan }}</span>
+                </td>
+                <td>
                 <span class="status-badge" [class]="'status-' + inv.status">
                   <span class="status-dot"></span>
                   {{ getInvoiceStatusLabel(inv.status) }}
                 </span>
-              </td>
-              <td>
-                <span class="invoice-amount">${{ inv.amount | number: '1.2-2' }}</span>
-              </td>
-            </tr>
-          }
-        </tbody>
-      </nz-table>
-    }
+                </td>
+                <td>
+                  <span class="invoice-amount">${{ inv.amount | number: '1.2-2' }}</span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </nz-table>
+      }
+    </div>
   </div>
-
- </div>
+</div>
 
 <pricing-plans [visible]="pricingDrawerVisible" (close)="onClosePricingDrawer()"></pricing-plans>
