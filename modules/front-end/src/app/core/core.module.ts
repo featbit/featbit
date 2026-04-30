@@ -112,7 +112,7 @@ import { ClonePolicyModalComponent } from "@core/components/clone-policy-modal/c
 import { ResourceEditorComponent } from "@core/components/resource-editor/resource-editor.component";
 import { PricingPlansComponent } from './components/pricing-plans/pricing-plans.component';
 import { NzSliderComponent } from "ng-zorro-antd/slider";
-import { UpdatePricingModalComponent } from "@core/components/pricing-plans/update-pricing-modal/update-pricing-modal.component";
+import { UpdateSubscriptionModalComponent } from "./components/pricing-plans/update-subscription-modal/update-subscription-modal.component";
 
 @NgModule({
   declarations: [
@@ -166,7 +166,7 @@ import { UpdatePricingModalComponent } from "@core/components/pricing-plans/upda
     ClonePolicyModalComponent,
     ResourceEditorComponent,
     PricingPlansComponent,
-    UpdatePricingModalComponent
+    UpdateSubscriptionModalComponent
   ],
   imports: [
     CommonModule,

@@ -14,13 +14,28 @@ export interface PricingPlan {
   contactSales?: boolean;
 }
 
-export type PlanAction = 'upgrade' | 'downgrade' | 'update';
+export const EMPTY_SUBSCRIPTION: WorkspaceSubscription = {
+  key: '',
+  name: '',
+  order: 0,
+  includedMau: 0,
+  extraMau: 0,
+  totalMau: 0,
+  fineGrainedAcEnabled: false,
+  price: 0,
+  billingCycle: 'monthly'
+};
 
-export interface UpdatePlanModalData {
-  action: PlanAction;
-  currentPlan: WorkspaceSubscription;
-  newPlan: WorkspaceSubscription;
-  basePrice: number;
+export enum UpdateAction {
+  UPGRADE = 'upgrade',
+  DOWNGRADE = 'downgrade',
+  UPDATE = 'update'
+}
+
+export interface UpdateSubscriptionModalData {
+  action: UpdateAction;
+  currentSubscription: WorkspaceSubscription;
+  newSubscription: WorkspaceSubscription;
 }
 
 export const PlanKeys = {
@@ -35,8 +50,9 @@ export const BillingCycle = {
   YEARLY: 'year'
 }
 
-export const EXTRA_MAU_PER_10K_COST = 20; // $20 per 10K extra MAU
+export const EXTRA_MAU_PER_10K_PER_MONTH_PRICE = 20; // $20 per 10K extra MAU
 export const FINE_GRAINED_AC_PER_MONTH_PRICE = 60; // $60 per month for fine-grained access control addon
+export const ENTERPRISE_YEARLY_PRICE = 4490; // $4490 per year for Enterprise plan with yearly billing
 
 export const PRICING_PLANS: PricingPlan[] = [
   {

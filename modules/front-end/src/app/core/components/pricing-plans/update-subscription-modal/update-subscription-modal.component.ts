@@ -1,52 +1,40 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import {
-  EXTRA_MAU_PER_10K_COST,
-  FINE_GRAINED_AC_PER_MONTH_PRICE,
-  PlanAction,
-  UpdatePlanModalData
+  BillingCycle, EMPTY_SUBSCRIPTION,
+  EXTRA_MAU_PER_10K_PER_MONTH_PRICE,
+  FINE_GRAINED_AC_PER_MONTH_PRICE, PlanKeys, PRICING_PLANS,
+  UpdateAction,
+  UpdateSubscriptionModalData
 } from '@core/components/pricing-plans/types';
 import { WorkspaceSubscription } from "@shared/types";
 
-interface PlanNote {
+interface SubscriptionNote {
   icon: string;
   title: string;
   description: string;
 }
 
-const EMPTY_PLAN: WorkspaceSubscription = {
-  key: '',
-  name: '',
-  order: 0,
-  includedMau: 0,
-  extraMau: 0,
-  totalMau: 0,
-  fineGrainedAcEnabled: false,
-  price: 0,
-  billingCycle: 'monthly'
-};
-
 @Component({
-  selector: 'update-pricing-modal',
+  selector: 'update-subscription-modal',
   standalone: false,
-  templateUrl: './update-pricing-modal.component.html',
-  styleUrl: './update-pricing-modal.component.less'
+  templateUrl: './update-subscription-modal.component.html',
+  styleUrl: './update-subscription-modal.component.less'
 })
-export class UpdatePricingModalComponent {
+export class UpdateSubscriptionModalComponent {
   @Input()
   visible: boolean;
 
   @Input()
-  set data(value: UpdatePlanModalData) {
+  set data(value: UpdateSubscriptionModalData) {
     if (value) {
       this.action = value.action;
-      this.currentPlan = value.currentPlan;
-      this.plan = value.newPlan;
-      this.basePrice = value.basePrice;
-      this.title = this.action === 'upgrade'
-        ? $localize`:@@pricing.upgrade-plan-title:Upgrade Plan`
-        : this.action === 'downgrade'
-          ? $localize`:@@pricing.downgrade-plan-title:Downgrade Plan`
-          : $localize`:@@pricing.update-plan-title:Update Plan`;
+      this.currentSubscription = value.currentSubscription;
+      this.newSubscription = value.newSubscription;
+      this.title = this.action === UpdateAction.UPGRADE
+        ? "Upgrade Subscription"
+        : this.action === UpdateAction.DOWNGRADE
+          ? "Downgrade Subscription"
+          : "Update Subscription";
     }
   }
 
@@ -54,93 +42,60 @@ export class UpdatePricingModalComponent {
   close = new EventEmitter<boolean>();
 
   title: string;
-  action: PlanAction = 'upgrade';
-  currentPlan: WorkspaceSubscription = { ...EMPTY_PLAN };
-  plan: WorkspaceSubscription = { ...EMPTY_PLAN };
-  basePrice = 0;
+  action: UpdateAction = UpdateAction.UPDATE;
+  currentSubscription: WorkspaceSubscription = EMPTY_SUBSCRIPTION;
+  newSubscription: WorkspaceSubscription = EMPTY_SUBSCRIPTION;
 
-  today = new Date();
+  get newBasePrice(): number {
+    const plan = PRICING_PLANS.find(p => p.key === this.newSubscription.key);
+    if (plan.key === PlanKeys.ENTERPRISE && this.newSubscription.billingCycle === BillingCycle.YEARLY) {
+      return 4490;
+    }
 
-  get formattedToday(): string {
-    return new Intl.DateTimeFormat('en-US', {
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric'
-    }).format(this.today);
-  }
-
-  get billingCycleLabel(): string {
-    return this.plan.billingCycle === 'yearly' ? 'year' : 'month';
-  }
-
-  get currentBillingCycleLabel(): string {
-    return this.currentPlan.billingCycle === 'yearly' ? 'year' : 'month';
+    return plan.price;
   }
 
   get billingCycleTag(): string {
-    return this.plan.billingCycle === 'yearly' ? 'Billed annually' : 'Billed monthly';
-  }
-
-  get actionLabel(): string {
-    return this.action === 'upgrade'
-      ? 'Upgrade preview'
-      : this.action === 'downgrade'
-        ? 'Downgrade preview'
-        : 'Plan change preview';
+    return this.newSubscription.billingCycle === BillingCycle.YEARLY ? 'Billed annually' : 'Billed monthly';
   }
 
   get titleSubtitle(): string {
-    return this.action === 'upgrade'
+    return this.action === UpdateAction.UPGRADE
       ? 'Review what unlocks now and what your recurring total will look like.'
-      : this.action === 'downgrade'
+      : this.action === UpdateAction.DOWNGRADE
         ? 'See what stays active until renewal and what changes on your next cycle.'
         : 'Confirm the new configuration before we apply it to your workspace.';
   }
 
   get transitionHeadline(): string {
-    if (!this.currentPlan.name) {
-      return this.plan.name;
+    if (!this.currentSubscription.name) {
+      return this.newSubscription.name;
     }
 
-    return `${this.currentPlan.name} to ${this.plan.name}`;
+    return `${this.currentSubscription.name} to ${this.newSubscription.name}`;
   }
 
   get actionDescription(): string {
-    return this.action === 'upgrade'
+    return this.action === UpdateAction.UPGRADE
       ? 'Your workspace will move to the new plan immediately after confirmation. Any proration is calculated separately at checkout.'
-      : this.action === 'downgrade'
+      : this.action === UpdateAction.DOWNGRADE
         ? 'Your current access remains in place until renewal, then the new recurring total takes over on the next cycle.'
         : 'We will keep the same plan tier and apply the new billing configuration to the rest of the current cycle.';
   }
 
-  get effectiveDateTitle(): string {
-    return this.action === 'downgrade' ? 'At next renewal' : 'Immediately after confirmation';
-  }
-
-  get effectiveDateDescription(): string {
-    return this.action === 'downgrade'
-      ? 'No features are removed before the current billing cycle ends.'
-      : `Starts today, ${this.formattedToday}`;
-  }
-
-  get formattedMau(): string {
-    const totalMau = this.plan.totalMau;
-    return totalMau >= 1000 ? `${totalMau / 1000}K` : `${totalMau}`;
-  }
-
   get formattedExtraMau(): string {
-    const extraMau = this.plan.extraMau;
+    const extraMau = this.newSubscription.extraMau;
     return extraMau >= 1000 ? `${extraMau / 1000}K MAU` : `${extraMau} MAU`;
   }
 
   get extraMauMonthlyCost(): number {
-    return this.plan.totalMau > this.plan.includedMau
-      ? (this.plan.extraMau / 10000) * EXTRA_MAU_PER_10K_COST
+    return this.newSubscription.totalMau > this.newSubscription.includedMau
+      ? (this.newSubscription.extraMau / 10000) * EXTRA_MAU_PER_10K_PER_MONTH_PRICE
       : 0;
   }
 
   get billingMultiplier(): number {
-    return this.plan.billingCycle === 'yearly' ? 12 : 1;
+    return this.newSubscription.billingCycle === BillingCycle.YEARLY ? 12 : 1;
   }
 
   get extraMauRecurringCost(): number {
@@ -148,39 +103,35 @@ export class UpdatePricingModalComponent {
   }
 
   get fineGrainedAcRecurringCost(): number {
-    return this.plan.fineGrainedAcEnabled ? FINE_GRAINED_AC_PER_MONTH_PRICE * this.billingMultiplier : 0;
-  }
-
-  get recurringTotal(): number {
-    return this.plan.price;
+    return this.newSubscription.fineGrainedAcEnabled ? FINE_GRAINED_AC_PER_MONTH_PRICE * this.billingMultiplier : 0;
   }
 
   get summaryTotalLabel(): string {
-    return this.action === 'downgrade' ? 'Next cycle total' : 'New recurring total';
+    return this.action === UpdateAction.DOWNGRADE ? 'Next cycle total' : 'New recurring total';
   }
 
   get todayImpactTitle(): string {
-    return this.action === 'downgrade' ? 'No payment is collected today' : 'Proration is calculated at checkout';
+    return this.action === UpdateAction.DOWNGRADE ? 'No payment is collected today' : 'Proration is calculated at checkout';
   }
 
   get todayImpactDescription(): string {
-    return this.action === 'upgrade'
+    return this.action === UpdateAction.UPGRADE
       ? 'You may see a prorated charge for the remaining time in the current billing cycle.'
-      : this.action === 'downgrade'
+      : this.action === UpdateAction.DOWNGRADE
         ? 'Your current charges stay in place until the next billing cycle begins.'
         : 'Any prorated charge or credit depends on the difference between your current and new configuration.';
   }
 
   get confirmButtonText(): string {
-    return this.action === 'upgrade'
+    return this.action === UpdateAction.UPGRADE
       ? 'Confirm Upgrade'
-      : this.action === 'downgrade'
+      : this.action === UpdateAction.DOWNGRADE
         ? 'Schedule Downgrade'
         : 'Confirm Changes';
   }
 
-  get noteItems(): PlanNote[] {
-    if (this.action === 'upgrade') {
+  get noteItems(): SubscriptionNote[] {
+    if (this.action === UpdateAction.UPGRADE) {
       return [
         {
           icon: 'thunderbolt',
@@ -200,7 +151,7 @@ export class UpdatePricingModalComponent {
       ];
     }
 
-    if (this.action === 'downgrade') {
+    if (this.action === UpdateAction.DOWNGRADE) {
       return [
         {
           icon: 'clock-circle',

@@ -1,7 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import {
   BillingCycle,
-  EXTRA_MAU_PER_10K_COST,
+  EXTRA_MAU_PER_10K_PER_MONTH_PRICE,
   FINE_GRAINED_AC_PER_MONTH_PRICE,
   PlanKeys,
   PRICING_PLANS,
@@ -10,6 +10,7 @@ import {
 import { WorkspaceSubscription } from "@shared/types";
 import { BillingService } from "@services/billing.service";
 import { NzMessageService } from "ng-zorro-antd/message";
+import { formatDate } from "@angular/common";
 
 @Component({
   selector: 'billing',
@@ -53,11 +54,21 @@ export class BillingComponent implements OnInit {
   }
 
   get extraMauCost(): number {
-    return (this.subscription.extraMau / 10_000) * EXTRA_MAU_PER_10K_COST;
+    const isEnterpriseYearly =
+      this.subscription.key === PlanKeys.ENTERPRISE && this.subscription.billingCycle === BillingCycle.YEARLY;
+    const totalMonth = isEnterpriseYearly ? 12 : 1;
+
+    return (this.subscription.extraMau / 10_000) * EXTRA_MAU_PER_10K_PER_MONTH_PRICE * totalMonth;
   }
 
   get fineGrainedAcCost(): number {
-    return this.subscription.fineGrainedAcEnabled ? FINE_GRAINED_AC_PER_MONTH_PRICE : 0;
+    const isEnterpriseYearly =
+      this.subscription.key === PlanKeys.ENTERPRISE && this.subscription.billingCycle === BillingCycle.YEARLY;
+    const totalMonth = isEnterpriseYearly ? 12 : 1;
+
+    return this.subscription.fineGrainedAcEnabled
+      ? FINE_GRAINED_AC_PER_MONTH_PRICE * totalMonth
+      : 0;
   }
 
   get mauUsagePercent(): number {
@@ -91,22 +102,26 @@ export class BillingComponent implements OnInit {
   get currentBillingPeriod(): string {
     const start = this.subscription.currentPeriodStart;
     const end = this.subscription.currentPeriodEnd;
-    if (!start || !end) {
-      return '';
-    }
 
-    const options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric', year: 'numeric' };
-    return `${start.toLocaleDateString(undefined, options)} - ${end.toLocaleDateString(undefined, options)}`;
+    const startString = start ? formatDate(start, 'MMM d, y', 'en-US') : '';
+    const endString =
+      this.subscription.key === PlanKeys.FREE
+        ? 'forever'
+        : end
+          ? formatDate(end, 'MMM d, y', 'en-US')
+          : '';
+
+    return `${startString} - ${endString}`;
   }
 
   get nextBillingDate(): string {
     const end = this.subscription.currentPeriodEnd;
     if (!end) {
-      return '';
+      return 'N/A';
     }
 
-    const options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric', year: 'numeric' };
-    return end.toLocaleDateString(undefined, options);
+    end.setDate(end.getDate() + 1);
+    return formatDate(end, 'MMM d, y', 'en-US');
   }
 
   contactSupport(): void {

@@ -99,7 +99,7 @@
         <div class="period-divider"></div>
         <div class="period-item">
           <span class="period-item-label">Subscriber since</span>
-          <span class="period-item-value">{{ subscription.subscriberSince | date: 'mediumDate' }}</span>
+          <span class="period-item-value">{{ currentBillingPeriod }}</span>
         </div>
       </div>
 
@@ -182,4 +182,8 @@
   </div>
 </div>
 
-<pricing-plans [visible]="pricingDrawerVisible" (close)="onClosePricingDrawer()"></pricing-plans>
+<pricing-plans
+  [subscription]="subscription"
+  [visible]="pricingDrawerVisible"
+  (close)="onClosePricingDrawer()">
+</pricing-plans>

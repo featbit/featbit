@@ -1,15 +1,17 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import {
   BillingCycle,
-  EXTRA_MAU_PER_10K_COST,
+  EXTRA_MAU_PER_10K_PER_MONTH_PRICE,
   FINE_GRAINED_AC_PER_MONTH_PRICE,
-  PlanAction, PlanKeys,
+  UpdateAction,
+  PlanKeys,
   PRICING_PLANS,
   PricingPlan,
-  UpdatePlanModalData
+  UpdateSubscriptionModalData,
+  ENTERPRISE_YEARLY_PRICE,
+  EMPTY_SUBSCRIPTION
 } from "@core/components/pricing-plans/types";
 import { WorkspaceSubscription } from "@shared/types";
-import { getCurrentPlan } from "@utils/project-env";
 
 @Component({
   selector: 'pricing-plans',
@@ -18,40 +20,46 @@ import { getCurrentPlan } from "@utils/project-env";
   styleUrl: './pricing-plans.component.less'
 })
 export class PricingPlansComponent {
-  private _visible: boolean = false;
   @Input()
-  get visible(): boolean {
-    return this._visible;
-  }
+  visible: boolean = false;
 
-  set visible(value: boolean) {
-    this._visible = value;
-
-    if (value) {
-      this.currentPlan = getCurrentPlan();
-
-      PRICING_PLANS.forEach(p => {
-        this.planMauSlider[p.key] = p.key === this.currentPlan.key
-          ? this.currentPlan.totalMau
-          : p.mauIncluded;
-      });
-
-      this.fineGrainedAcEnabled[this.currentPlan.key] = this.currentPlan.fineGrainedAcEnabled;
+  private _subscription: WorkspaceSubscription = EMPTY_SUBSCRIPTION;
+  @Input()
+  set subscription(value: WorkspaceSubscription) {
+    if (!value) {
+      return;
     }
+
+    this._subscription = { ...value };
+    this.initStats();
+  }
+  get subscription(): WorkspaceSubscription {
+    return this._subscription;
   }
 
   @Output()
   close: EventEmitter<void> = new EventEmitter();
 
-  currentPlan: WorkspaceSubscription = getCurrentPlan();
-  isCurrentPlanChanged() {
-    const isMauChanged = this.planMauSlider[this.currentPlan.key] !== this.currentPlan.totalMau;
+  initStats() {
+    const subscription = this._subscription;
+
+    PRICING_PLANS.forEach(p => {
+      this.planMauSlider[p.key] = p.key === subscription.key
+        ? subscription.totalMau
+        : p.mauIncluded;
+    });
+
+    this.fineGrainedAcEnabled[subscription.key] = subscription.fineGrainedAcEnabled;
+  }
+
+  isCurrentSubscriptionChanged() {
+    const isMauChanged = this.planMauSlider[this._subscription.key] !== this._subscription.totalMau;
     if (isMauChanged) {
       return true;
     }
 
     const isFineGrainedAcChanged =
-      this.fineGrainedAcEnabled[this.currentPlan.key] !== this.currentPlan.fineGrainedAcEnabled;
+      this.fineGrainedAcEnabled[this._subscription.key] !== this._subscription.fineGrainedAcEnabled;
     if (isFineGrainedAcChanged) {
       return true;
     }
@@ -72,27 +80,28 @@ export class PricingPlansComponent {
   ];
 
   onEnterpriseCycleChange(value: string | number): void {
-    this.enterpriseBillingCycle = value as 'monthly' | 'yearly';
-  }
-
-  getPlanBasePrice(plan: PricingPlan): number {
-    if (plan.key === PlanKeys.ENTERPRISE && this.enterpriseBillingCycle === 'yearly') {
-      return 4490;
-    }
-
-    return plan.price;
+    this.enterpriseBillingCycle = value as string;
   }
 
   getPlanTotalPrice(plan: PricingPlan): number {
-    const selectedMau = this.planMauSlider[plan.key] || plan.mauIncluded;
-    const extraMau = Math.max(0, selectedMau - plan.mauIncluded);
-    const extraCost = (extraMau / 10_000) * EXTRA_MAU_PER_10K_COST;
-    const fineGrainedAcCost = this.fineGrainedAcEnabled[plan.key] ? FINE_GRAINED_AC_PER_MONTH_PRICE : 0;
+    const isEnterpriseYearly =
+      plan.key === PlanKeys.ENTERPRISE && this.enterpriseBillingCycle === BillingCycle.YEARLY;
 
-    if (plan.key === 'enterprise' && this.enterpriseBillingCycle === 'yearly') {
-      return 4490 + (extraMau / 10000) * 20 + fineGrainedAcCost * 12;
-    }
-    return plan.price + extraCost + fineGrainedAcCost;
+    const totalMonth = isEnterpriseYearly ? 12 : 1;
+
+    const selectedMAU = this.planMauSlider[plan.key] || plan.mauIncluded;
+    const extendedMAU = Math.max(0, selectedMAU - plan.mauIncluded);
+    const extendedMAUCost = (extendedMAU / 10_000) * EXTRA_MAU_PER_10K_PER_MONTH_PRICE * totalMonth;
+
+    const fineGrainedAcCost = this.fineGrainedAcEnabled[plan.key]
+      ? FINE_GRAINED_AC_PER_MONTH_PRICE * totalMonth
+      : 0;
+
+    const basePrice = isEnterpriseYearly
+      ? ENTERPRISE_YEARLY_PRICE
+      : plan.price * totalMonth;
+
+    return basePrice + extendedMAUCost + fineGrainedAcCost;
   }
 
   formatMau(val: number): string {
@@ -111,14 +120,14 @@ export class PricingPlansComponent {
     };
   }
 
-  // plan modal
-  planModalVisible: boolean = false;
-  planModalData: UpdatePlanModalData;
-  updatePlan(newPlan: PricingPlan, action: PlanAction): void {
-    this.planModalData = {
+  // subscription update modal
+  modalVisible: boolean = false;
+  modalData: UpdateSubscriptionModalData;
+  updateSubscription(newPlan: PricingPlan, action: UpdateAction): void {
+    this.modalData = {
       action,
-      currentPlan: { ...this.currentPlan },
-      newPlan: {
+      currentSubscription: { ...this._subscription },
+      newSubscription: {
         key: newPlan.key,
         name: newPlan.name,
         order: newPlan.order,
@@ -128,15 +137,17 @@ export class PricingPlansComponent {
         fineGrainedAcEnabled: this.fineGrainedAcEnabled[newPlan.key] || false,
         price: this.getPlanTotalPrice(newPlan),
         billingCycle: newPlan.key === PlanKeys.ENTERPRISE ? this.enterpriseBillingCycle : BillingCycle.MONTHLY,
-        subscriberSince: this.currentPlan.subscriberSince
-      },
-      basePrice: this.getPlanBasePrice(newPlan)
+        subscriberSince: this._subscription.subscriberSince
+      }
     };
-    this.planModalVisible = true;
+    this.modalVisible = true;
   }
 
   onUpdatePlanModalClose(confirmed: boolean) {
-    this.planModalVisible = false;
+    this.modalVisible = false;
+    if (confirmed) {
+      console.log('Proceed with subscription update:', this.modalData);
+    }
   }
 
   contactSupport(): void {
@@ -145,13 +156,12 @@ export class PricingPlansComponent {
 
   onClose() {
     // reset states
-    this.planMauSlider = {};
-    this.fineGrainedAcEnabled = {};
-
+    this.initStats();
     this.close.emit();
   }
 
   protected readonly normalPlans = PRICING_PLANS.slice(0, 3);
   protected readonly enterprisePlan = PRICING_PLANS[3];
   protected readonly fineGrainedAcPrice = FINE_GRAINED_AC_PER_MONTH_PRICE;
+  protected readonly UpdateAction = UpdateAction;
 }

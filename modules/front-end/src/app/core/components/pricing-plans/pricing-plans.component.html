@@ -15,8 +15,8 @@
     <!-- Free / Pro / Growth: 3-column grid -->
     <div class="plans-grid">
       @for (plan of normalPlans; track plan.key) {
-        <div class="plan-card" [class.current]="plan.key === currentPlan.key">
-          @if (plan.key === currentPlan.key) {
+        <div class="plan-card" [class.current]="plan.key === subscription.key">
+          @if (plan.key === subscription.key) {
             <div class="current-badge">Current Plan</div>
           }
           <div class="plan-card-header">
@@ -75,16 +75,16 @@
 
           <!-- Action Button -->
           <div class="plan-card-footer">
-            @if (plan.order > currentPlan.order) {
-              <button nz-button class="btn-upgrade" (click)="updatePlan(plan, 'upgrade')">
+            @if (plan.order > subscription.order) {
+              <button nz-button class="btn-upgrade" (click)="updateSubscription(plan, UpdateAction.UPGRADE)">
                 Upgrade to {{ plan.name }}
               </button>
-            } @else if (plan.order < currentPlan.order) {
-              <button nz-button class="btn-downgrade" (click)="updatePlan(plan, 'downgrade')">
+            } @else if (plan.order < subscription.order) {
+              <button nz-button class="btn-downgrade" (click)="updateSubscription(plan, UpdateAction.DOWNGRADE)">
                 Downgrade to {{ plan.name }}
               </button>
-            } @else if (isCurrentPlanChanged()) {
-              <button nz-button class="btn-update" (click)="updatePlan(plan, 'update')">
+            } @else if (isCurrentSubscriptionChanged()) {
+              <button nz-button class="btn-update" (click)="updateSubscription(plan, UpdateAction.UPDATE)">
                 Update Plan
               </button>
             } @else {
@@ -98,8 +98,8 @@
     </div>
 
     <!-- Enterprise: full-width card, 2-panel layout -->
-    <div class="enterprise-card plan-card" [class.current]="enterprisePlan.key === currentPlan.key">
-      @if (enterprisePlan.key === currentPlan.key) {
+    <div class="enterprise-card plan-card" [class.current]="enterprisePlan.key === subscription.key">
+      @if (enterprisePlan.key === subscription.key) {
         <div class="current-badge">Current Plan</div>
       }
 
@@ -129,16 +129,16 @@
             </label>
           </div>
           <div class="plan-card-footer">
-            @if (enterprisePlan.order > currentPlan.order) {
-              <button nz-button class="btn-upgrade" (click)="updatePlan(enterprisePlan, 'upgrade')">
+            @if (enterprisePlan.order > subscription.order) {
+              <button nz-button class="btn-upgrade" (click)="updateSubscription(enterprisePlan, UpdateAction.UPGRADE)">
                 Upgrade to {{ enterprisePlan.name }}
               </button>
-            } @else if (enterprisePlan.order < currentPlan.order) {
-              <button nz-button class="btn-downgrade" (click)="updatePlan(enterprisePlan, 'downgrade')">
+            } @else if (enterprisePlan.order < subscription.order) {
+              <button nz-button class="btn-downgrade" (click)="updateSubscription(enterprisePlan, UpdateAction.DOWNGRADE)">
                 Downgrade to {{ enterprisePlan.name }}
               </button>
-            } @else if (isCurrentPlanChanged()) {
-              <button nz-button class="btn-update" (click)="updatePlan(enterprisePlan, 'update')">
+            } @else if (isCurrentSubscriptionChanged()) {
+              <button nz-button class="btn-update" (click)="updateSubscription(enterprisePlan, UpdateAction.UPDATE)">
                 Update Plan
               </button>
             } @else {
@@ -188,8 +188,8 @@
   </ng-template>
 </nz-drawer>
 
-<update-pricing-modal
-  [visible]="planModalVisible"
-  [data]="planModalData"
+<update-subscription-modal
+  [visible]="modalVisible"
+  [data]="modalData"
   (close)="onUpdatePlanModalClose($event)">
-</update-pricing-modal>
+</update-subscription-modal>

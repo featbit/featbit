@@ -1,5 +1,5 @@
 <nz-modal
-  nzClassName="update-pricing-plan-modal"
+  nzClassName="update-subscription-modal"
   [nzVisible]="visible"
   [nzTitle]="titleTpl"
   [nzCentered]="true"
@@ -62,51 +62,50 @@
               <div>
                 <span class="summary-kicker">{{ summaryTotalLabel }}</span>
                 <div class="summary-total">
-                  ${{ recurringTotal | number }}
-                  <span class="summary-period">/ {{ billingCycleLabel }}</span>
+                  ${{ newSubscription.price | number }}
+                  <span class="summary-period">/ {{ newSubscription.billingCycle }}</span>
                 </div>
               </div>
 
-              <div class="summary-plan-pill">{{ plan.name }}</div>
+              <div class="summary-plan-pill">{{ newSubscription.name }}</div>
             </div>
 
             <div class="summary-breakdown">
               <div class="summary-row">
-                <span class="summary-label">Base plan</span>
+                <span class="summary-label">Base Price</span>
                 <span class="summary-value">
-                  ${{ basePrice | number }}<span class="summary-value-period"> / {{ billingCycleLabel }}</span>
+                  ${{ newBasePrice | number }}<span class="summary-value-period"> / {{ newSubscription.billingCycle }}</span>
                 </span>
               </div>
 
               <div class="summary-row">
                 <span class="summary-label">Included MAU</span>
-                <span class="summary-value">{{ plan.includedMau | number }} MAU</span>
+                <span class="summary-value">{{ newSubscription.includedMau | number }} MAU</span>
               </div>
 
-              <div class="summary-row">
-                <span class="summary-label">Selected MAU</span>
-                <span class="summary-value">{{ plan.totalMau | number }} MAU</span>
-              </div>
-
-              @if (plan.totalMau > plan.includedMau) {
+              @if (newSubscription.totalMau > newSubscription.includedMau) {
                 <div class="summary-row">
                   <span class="summary-label">
-                    Additional MAU
+                    Extended MAU
                     <nz-tag nzColor="default">+{{ formattedExtraMau }}</nz-tag>
                   </span>
                   <span class="summary-value">
-                    +${{ extraMauRecurringCost | number }}<span class="summary-value-period"> / {{ billingCycleLabel }}</span>
+                    +${{ extraMauRecurringCost | number }}<span class="summary-value-period"> / {{ newSubscription.billingCycle }}</span>
                   </span>
+                </div>
+                <div class="summary-row">
+                  <span class="summary-label">Total MAU</span>
+                  <span class="summary-value">{{ newSubscription.totalMau | number }} MAU</span>
                 </div>
               }
 
-              @if (plan.fineGrainedAcEnabled) {
+              @if (newSubscription.fineGrainedAcEnabled) {
                 <div class="summary-row">
                   <span class="summary-label">
                     Fine-grained Access Control
                   </span>
                   <span class="summary-value">
-                    +${{ fineGrainedAcRecurringCost | number }}<span class="summary-value-period"> / {{ billingCycleLabel }}</span>
+                    +${{ fineGrainedAcRecurringCost | number }}<span class="summary-value-period"> / {{ newSubscription.billingCycle }}</span>
                   </span>
                 </div>
               }
@@ -118,13 +117,13 @@
               <div class="summary-compare-row">
                 <span class="summary-compare-label">Current recurring total</span>
                 <span class="summary-compare-value">
-                  ${{ currentPlan.price | number }}<span class="summary-value-period"> / {{ currentBillingCycleLabel }}</span>
+                  ${{ currentSubscription.price | number }}<span class="summary-value-period"> / {{ currentSubscription.billingCycle }}</span>
                 </span>
               </div>
               <div class="summary-compare-row summary-compare-row--highlight">
                 <span class="summary-compare-label">{{ summaryTotalLabel }}</span>
                 <span class="summary-compare-value">
-                  ${{ recurringTotal | number }}<span class="summary-value-period"> / {{ billingCycleLabel }}</span>
+                  ${{ newSubscription.price | number }}<span class="summary-value-period"> / {{ newSubscription.billingCycle }}</span>
                 </span>
               </div>
             </div>
