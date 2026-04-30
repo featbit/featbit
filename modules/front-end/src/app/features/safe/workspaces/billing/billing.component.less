@@ -123,6 +123,7 @@
   background:
     radial-gradient(circle at top right, fade(@green30-color, 16%), transparent 34%),
     linear-gradient(180deg, @white 0%, @grey5-color 100%);
+  gap: 16px;
 }
 
 .plan-card-top {
@@ -177,7 +178,6 @@
   display: flex;
   align-items: stretch;
   padding: 14px 0;
-  margin: 20px 0;
   border-top: 1px solid @grey20-color;
   border-bottom: 1px solid @grey20-color;
 
@@ -220,6 +220,12 @@
     background: @grey20-color;
     flex-shrink: 0;
   }
+}
+
+.summary-cards {
+  display: flex;
+  gap: 24px;
+  align-items: stretch;
 }
 
 .plan-fee-breakdown {
@@ -321,7 +327,7 @@
   }
 }
 
-.hero-badge {
+.billing-cycle-badge {
   padding: 4px 12px;
   border-radius: 999px;
   background: @green10-color;

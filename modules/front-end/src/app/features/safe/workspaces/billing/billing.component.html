@@ -69,7 +69,7 @@
         <div class="plan-identity">
           <div class="plan-name-badges">
             <h3 class="plan-name">{{ plan.name }}</h3>
-            <span class="hero-badge">{{ billingCycleLabel }}</span>
+            <span *ngIf="!isFreePlan" class="billing-cycle-badge">{{ billingCycleLabel }}</span>
           </div>
           <div class="plan-total-price">
             <div class="plan-total-row">
@@ -86,7 +86,7 @@
       </div>
 
       <!-- Billing period strip -->
-      <div class="plan-period-bar">
+      <div *ngIf="!isFreePlan" class="plan-period-bar">
         <div class="period-item">
           <span class="period-item-label">Billing period</span>
           <span class="period-item-value">{{ currentBillingPeriod }}</span>
@@ -104,8 +104,7 @@
       </div>
 
       <!-- Current Usage + Fee breakdown -->
-      <div style="display: flex; gap: 24px; align-items: stretch;">
-
+      <div class="summary-cards">
         <!-- Current Usage -->
         <div class="plan-usage-section">
           <div class="plan-usage-header">

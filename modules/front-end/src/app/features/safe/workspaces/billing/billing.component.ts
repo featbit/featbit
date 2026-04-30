@@ -3,6 +3,7 @@ import {
   BillingCycle,
   EXTRA_MAU_PER_10K_COST,
   FINE_GRAINED_AC_PER_MONTH_PRICE,
+  PlanKeys,
   PRICING_PLANS,
   PricingPlan
 } from '@core/components/pricing-plans/types';
@@ -24,12 +25,14 @@ export class BillingComponent implements OnInit {
 
   subscription: WorkspaceSubscription;
   plan: PricingPlan;
+  isFreePlan = true;
 
   ngOnInit() {
     this.billingService.getCurrentSubscription().subscribe({
       next: subscription => {
         this.subscription = subscription;
         this.plan = PRICING_PLANS.find(plan => plan.key === subscription.key) ?? PRICING_PLANS[0];
+        this.isFreePlan = this.subscription.key === PlanKeys.FREE;
         this.isLoading = false;
       },
       error: () => this.message.error('Failed to load current subscription. Please try again later.')
