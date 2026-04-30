@@ -17,21 +17,6 @@ export class InvoicesComponent implements OnInit {
   isLoading: boolean = true;
 
   ngOnInit() {
-    // 10 fake invoices for demonstration
-    // this.isLoading = false;
-    // this.invoices = Array.from({ length: 10 }, (_, i) => ({
-    //   id: `inv_${i + 1}`,
-    //   billingDate: new Date(Date.now() - i * 30 * 24 * 60 * 60 * 1000).toISOString(),
-    //   plan: i % 2 === 0 ? 'Pro' : 'Basic',
-    //   billingCycle: 'Monthly',
-    //   status: i % 3 === 0 ? 'paid' : (i % 3 === 1 ? 'pending' : 'overdue'),
-    //   currency: 'USD',
-    //   amountDue: 100 + i * 10,
-    //   amountPaid: i % 3 === 0 ? 100 + i * 10 : 0,
-    //   amountRemaining: i % 3 === 0 ? 0 : 100 + i * 10,
-    //   amountFlat: 100,
-    //   amountMetered: i * 10,
-    // }));
     this.billingService.getInvoices().subscribe({
       next: (invoices) => {
         this.invoices = invoices;

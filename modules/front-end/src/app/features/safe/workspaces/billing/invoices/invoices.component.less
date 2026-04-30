@@ -3,7 +3,6 @@
 
 .section-card {
   height: 100%;
-  min-height: 550px;
 }
 
 .invoice-list {
@@ -11,45 +10,6 @@
     border: 1px solid @grey20-color;
     border-radius: 10px;
     overflow: hidden;
-  }
-
-  .ant-table {
-    border-radius: 10px;
-    overflow: hidden;
-  }
-
-  .ant-table-thead > tr > th {
-    padding: 9px 16px;
-    background: @grey5-color;
-    border-bottom: 1px solid @grey20-color;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: @grey40-color;
-
-    &::before {
-      display: none;
-    }
-  }
-
-  .ant-table-tbody > tr > td {
-    padding: 13px 16px;
-    background: @white;
-    border-bottom: 1px solid @grey10-color;
-    transition: background 0.15s ease;
-  }
-
-  .ant-table-tbody > tr:last-child > td {
-    border-bottom: none;
-  }
-
-  .ant-table-tbody > tr:hover > td {
-    background: fade(@grey5-color, 60%) !important;
-  }
-
-  .ant-pagination {
-    padding: 12px 16px 4px;
   }
 }
 
@@ -148,8 +108,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 48px 24px;
   color: @grey40-color;
+  height: 285px;
 
   i {
     font-size: 32px;

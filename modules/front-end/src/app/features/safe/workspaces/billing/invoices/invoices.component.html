@@ -12,21 +12,24 @@
         </span>
     </div>
   </div>
-  @if (invoices.length === 0) {
-    <div class="empty-invoices">
-      <i nz-icon nzType="file-text" nzTheme="outline"></i>
-      <p>No invoices yet</p>
-    </div>
+  @if (isLoading) {
+    <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 6 }"></nz-skeleton>
   } @else {
     <nz-table
       #invoiceTable
       class="invoice-list"
       nzSize="middle"
-      [nzLoading]="isLoading"
+      [nzNoResult]="emptyInvoices"
       [nzData]="invoices"
       [nzShowPagination]="true"
       [nzFrontPagination]="true"
       [nzPageSize]="5">
+      <ng-template #emptyInvoices>
+        <div class="empty-invoices">
+          <i nz-icon nzType="file-text" nzTheme="outline"></i>
+          <p>No invoices yet</p>
+        </div>
+      </ng-template>
       <thead>
       <tr>
         <th>Billing Date</th>
@@ -45,10 +48,10 @@
               <span class="invoice-plan-badge">{{ inv.plan }}</span>
             </td>
             <td>
-                <span class="status-badge" [class]="'status-' + inv.status">
-                  <span class="status-dot"></span>
-                  {{ getInvoiceStatusLabel(inv.status) }}
-                </span>
+              <span class="status-badge" [class]="'status-' + inv.status">
+                <span class="status-dot"></span>
+                {{ getInvoiceStatusLabel(inv.status) }}
+              </span>
             </td>
             <td>
               <span class="invoice-amount">${{ inv.amountPaid | number: '1.2-2' }}</span>

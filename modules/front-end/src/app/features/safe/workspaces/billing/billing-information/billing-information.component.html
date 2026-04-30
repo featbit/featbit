@@ -12,9 +12,7 @@
   </div>
 
   @if (isLoading) {
-    <div class="billing-info-loading">
-      <nz-spin nzTip="Loading..."></nz-spin>
-    </div>
+    <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 8 }"></nz-skeleton>
   } @else {
     @if (isEditing) {
       <div class="billing-info-form">

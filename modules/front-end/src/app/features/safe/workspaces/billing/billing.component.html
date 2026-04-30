@@ -1,5 +1,5 @@
 <div class="billing-page">
-  @if (showUsageAlert) {
+  @if (!isLoading && showUsageAlert) {
     <div class="usage-alert-banner" [class.exceeded]="isMauExceeded">
       <div class="usage-alert-content">
         <div class="usage-alert-title">
@@ -18,9 +18,9 @@
 
         <div class="usage-alert-description">
           @if (isMauExceeded) {
-            You are over the current MAU capacity — {{ mauUsed | number }} of {{ currentMau | number }} MAU used. Review add-ons or change plan before this billing cycle closes.
+            You are over the current MAU capacity — {{ mauUsed | number }} of {{ subscription.totalMau | number }} MAU used. Review add-ons or change plan before this billing cycle closes.
           } @else {
-            {{ mauUsed | number }} of {{ currentMau | number }} MAU used, {{ mauRemaining | number }} remaining this cycle. Consider adding capacity before the next invoice is generated.
+            {{ mauUsed | number }} of {{ subscription.totalMau | number }} MAU used, {{ mauRemaining | number }} remaining this cycle. Consider adding capacity before the next invoice is generated.
           }
         </div>
       </div>
@@ -47,117 +47,131 @@
   }
 
   <div class="section-card current-plan-card">
-    <!-- Plan identity + total price -->
-    <div class="plan-card-top">
-      <div class="plan-identity">
-        <div class="plan-name-badges">
-          <h3 class="plan-name">{{ currentPlan.name }}</h3>
-          @if (isDefaultFreePlan) {
-            <span class="hero-badge muted">Default</span>
-          }
-          <span class="hero-badge">{{ billingCycleLabel }}</span>
+    @if (isLoading) {
+      <!-- Plan identity + total price skeleton -->
+      <nz-skeleton [nzActive]="true" [nzTitle]="{ width: '120px' }" [nzParagraph]="{ rows: 2, width: ['240px', '360px'] }"></nz-skeleton>
+
+      <!-- Billing period strip skeleton -->
+      <nz-skeleton [nzActive]="true" [nzTitle]="false" [nzParagraph]="{ rows: 2, width: ['100%', '100%'] }"></nz-skeleton>
+
+      <!-- Current Usage + Fee breakdown skeleton -->
+      <div style="display: flex; gap: 24px; align-items: stretch;">
+        <div class="plan-usage-section">
+          <nz-skeleton [nzActive]="true" [nzTitle]="{ width: '120px' }" [nzParagraph]="{ rows: 3, width: ['100%', '100%', '80%'] }"></nz-skeleton>
         </div>
-        <div class="plan-total-price">
-          <div class="plan-total-row">
-            <span class="plan-total-amount">${{ planChargeAmount | number: '1.0-0' }}</span>
-            <span class="plan-total-period">{{ billingCycleSuffix }}</span>
+        <div class="plan-fee-breakdown">
+          <nz-skeleton [nzActive]="true" [nzTitle]="{ width: '100px' }" [nzParagraph]="{ rows: 3, width: ['100%', '100%', '60%'] }"></nz-skeleton>
+        </div>
+      </div>
+    } @else {
+      <!-- Plan identity + total price -->
+      <div class="plan-card-top">
+        <div class="plan-identity">
+          <div class="plan-name-badges">
+            <h3 class="plan-name">{{ plan.name }}</h3>
+            <span class="hero-badge">{{ billingCycleLabel }}</span>
           </div>
-        </div>
-        <p class="current-plan-description">{{ currentPlanDefinition.description }}</p>
-      </div>
-
-      <div class="plan-actions">
-        <button nz-button nzType="primary" (click)="openPricingDrawer()">Manage Subscription</button>
-      </div>
-    </div>
-
-    <!-- Billing period strip -->
-    <div class="plan-period-bar">
-      <div class="period-item">
-        <span class="period-item-label">Billing period</span>
-        <span class="period-item-value">{{ currentBillingPeriod }}</span>
-      </div>
-      <div class="period-divider"></div>
-      <div class="period-item">
-        <span class="period-item-label">Next charge</span>
-        <span class="period-item-value"><strong>{{ nextBillingDate }}</strong></span>
-      </div>
-      <div class="period-divider"></div>
-      <div class="period-item">
-        <span class="period-item-label">Subscriber since</span>
-        <span class="period-item-value">{{ currentPlan.subscriberSince }}</span>
-      </div>
-    </div>
-
-    <!-- Current Usage + Fee breakdown -->
-    <div style="display: flex; gap: 24px; align-items: stretch;">
-
-      <!-- Current Usage -->
-      <div class="plan-usage-section" style="flex: 1; min-width: 0;">
-        <div class="plan-usage-header">
-          <div>
-            <span class="plan-usage-title">Current Usage</span>
-            <span class="plan-usage-subtitle">{{ currentBillingPeriod }}</span>
-          </div>
-          <span class="usage-chip"
-                [class.warning]="mauUsagePercent >= 80 && !isMauExceeded"
-                [class.danger]="isMauExceeded">{{ mauUsagePercent }}% used</span>
-        </div>
-
-        <div class="usage-header-row">
-          <span class="usage-subtitle">Monthly Active Users</span>
-          <span class="usage-subtitle"><strong>{{ mauUsed | number }}</strong> / {{ currentMau | number }}</span>
-        </div>
-
-        <div class="mau-progress-bar large">
-          <div class="mau-progress-fill"
-               [class.warning]="mauUsagePercent >= 80 && !isMauExceeded"
-               [class.danger]="isMauExceeded"
-               [style.width.%]="mauUsagePercent">
-          </div>
-        </div>
-
-        <div class="usage-foot-row">
-          <span class="usage-foot-label">{{ mauRemaining | number }} remaining</span>
-          <span class="usage-foot-label emphasis">{{ overageRiskLabel }}</span>
-        </div>
-      </div>
-
-      <!-- Fee breakdown -->
-      <div class="plan-fee-breakdown" style="flex: 1; min-width: 0;">
-        <div class="fee-breakdown-title">Fee Breakdown</div>
-        <div class="fee-breakdown-rows">
-          <div class="fee-row">
-            <span class="fee-row-label">{{ currentPlan.name }} plan</span>
-            <span class="fee-row-value">${{ basePrice | number: '1.0-0' }}{{ billingCycleSuffix }}</span>
-          </div>
-          @if (extraMauCost > 0) {
-            <div class="fee-row">
-              <span class="fee-row-label">
-                Extra MAU
-                <span class="fee-row-meta">{{ extraMau | number }} additional users</span>
-              </span>
-              <span class="fee-row-value">+${{ extraMauCost | number: '1.0-0' }}{{ billingCycleSuffix }}</span>
+          <div class="plan-total-price">
+            <div class="plan-total-row">
+              <span class="plan-total-amount">${{ subscription.price | number: '1.0-0' }}</span>
+              <span class="plan-total-period">{{ billingCycleSuffix }}</span>
             </div>
-          }
-          @if (fineGrainedAcEnabled) {
-            <div class="fee-row">
-              <span class="fee-row-label">
-                Fine-grained Access Control
-                <span class="fee-row-addon">Add-on</span>
-              </span>
-              <span class="fee-row-value">+${{ fineGrainedAcCost | number: '1.0-0' }}{{ billingCycleSuffix }}</span>
-            </div>
-          }
+          </div>
+          <p class="current-plan-description">{{ plan.description }}</p>
         </div>
-        <div class="fee-total-row">
-          <span class="fee-total-label">Total charge</span>
-          <span class="fee-total-value">${{ planChargeAmount | number: '1.0-0' }}{{ billingCycleSuffix }}</span>
+
+        <div class="plan-actions">
+          <button nz-button nzType="primary" (click)="openPricingDrawer()">Manage Subscription</button>
         </div>
       </div>
 
-    </div>
+      <!-- Billing period strip -->
+      <div class="plan-period-bar">
+        <div class="period-item">
+          <span class="period-item-label">Billing period</span>
+          <span class="period-item-value">{{ currentBillingPeriod }}</span>
+        </div>
+        <div class="period-divider"></div>
+        <div class="period-item">
+          <span class="period-item-label">Next charge</span>
+          <span class="period-item-value"><strong>{{ nextBillingDate }}</strong></span>
+        </div>
+        <div class="period-divider"></div>
+        <div class="period-item">
+          <span class="period-item-label">Subscriber since</span>
+          <span class="period-item-value">{{ subscription.subscriberSince | date: 'mediumDate' }}</span>
+        </div>
+      </div>
 
+      <!-- Current Usage + Fee breakdown -->
+      <div style="display: flex; gap: 24px; align-items: stretch;">
+
+        <!-- Current Usage -->
+        <div class="plan-usage-section">
+          <div class="plan-usage-header">
+            <div>
+              <span class="plan-usage-title">Current Usage</span>
+              <span class="plan-usage-subtitle">{{ currentBillingPeriod }}</span>
+            </div>
+            <span class="usage-chip"
+                  [class.warning]="mauUsagePercent >= 80 && !isMauExceeded"
+                  [class.danger]="isMauExceeded">{{ mauUsagePercent }}% used</span>
+          </div>
+
+          <div class="usage-header-row">
+            <span class="usage-subtitle">Monthly Active Users</span>
+            <span class="usage-subtitle"><strong>{{ mauUsed | number }}</strong> / {{ subscription.totalMau | number }}</span>
+          </div>
+
+          <div class="mau-progress-bar large">
+            <div class="mau-progress-fill"
+                 [class.warning]="mauUsagePercent >= 80 && !isMauExceeded"
+                 [class.danger]="isMauExceeded"
+                 [style.width.%]="mauUsagePercent">
+            </div>
+          </div>
+
+          <div class="usage-foot-row">
+            <span class="usage-foot-label">{{ mauRemaining | number }} remaining</span>
+            <span class="usage-foot-label emphasis">{{ overageRiskLabel }}</span>
+          </div>
+        </div>
+
+        <!-- Fee breakdown -->
+        <div class="plan-fee-breakdown">
+          <div class="fee-breakdown-title">Fee Breakdown</div>
+          <div class="fee-breakdown-rows">
+            <div class="fee-row">
+              <span class="fee-row-label">{{ plan.name }} plan</span>
+              <span class="fee-row-value">${{ plan.price | number: '1.0-0' }}{{ billingCycleSuffix }}</span>
+            </div>
+            @if (extraMauCost > 0) {
+              <div class="fee-row">
+                <span class="fee-row-label">
+                  Extra MAU
+                  <span class="fee-row-meta">{{ subscription.extraMau | number }} additional users</span>
+                </span>
+                <span class="fee-row-value">+${{ extraMauCost | number: '1.0-0' }}{{ billingCycleSuffix }}</span>
+              </div>
+            }
+            @if (subscription.fineGrainedAcEnabled) {
+              <div class="fee-row">
+                <span class="fee-row-label">
+                  Fine-grained Access Control
+                  <span class="fee-row-addon">Add-on</span>
+                </span>
+                <span class="fee-row-value">+${{ fineGrainedAcCost | number: '1.0-0' }}{{ billingCycleSuffix }}</span>
+              </div>
+            }
+          </div>
+          <div class="fee-total-row">
+            <span class="fee-total-label">Total charge</span>
+            <span class="fee-total-value">${{ subscription.price | number: '1.0-0' }}{{ billingCycleSuffix }}</span>
+          </div>
+        </div>
+
+      </div>
+    }
   </div>
 
   <div class="billing-grid two-up">
