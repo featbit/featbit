@@ -5,6 +5,7 @@ import { map } from 'rxjs/operators';
 import { environment } from "src/environments/environment";
 import { LicenseFeatureEnum, WorkspaceSubscription } from '@shared/types';
 import {
+  BillingCycle,
   BillingInformation,
   CheckoutSession,
   InvoiceItem,
@@ -19,16 +20,6 @@ export class BillingService {
   private baseUrl = `${environment.url}/api/v1/billing`;
 
   constructor(private http: HttpClient) {
-  }
-
-  createSubscription(): Observable<CheckoutSession> {
-    return this.http.post<CheckoutSession>(`${this.baseUrl}/checkout`, {
-      email: "lian.yang.work@gmail.com",
-      plan: "pro",
-      billingCycle: "month",
-      mau: 10_000,
-      extraFeatures: [ LicenseFeatureEnum.FineGrainedAccessControl ]
-    });
   }
 
   getCurrentSubscription(): Observable<WorkspaceSubscription> {
@@ -49,9 +40,26 @@ export class BillingService {
           currentPeriodStart: raw.currentPeriodStart ? new Date(raw.currentPeriodStart) : undefined,
           currentPeriodEnd: raw.currentPeriodEnd ? new Date(raw.currentPeriodEnd) : undefined,
           subscriberSince: raw.createdAt ? new Date(raw.createdAt) : undefined,
+          usage: raw.usage
         } as WorkspaceSubscription;
       })
     );
+  }
+
+  getCurrentBillingCycle(): Observable<BillingCycle> {
+    return this.http.get<string>(`${this.baseUrl}/current-cycle`).pipe(
+      map(billingCycleJsonString => JSON.parse(billingCycleJsonString) as BillingCycle)
+    );
+  }
+
+  createSubscription(): Observable<CheckoutSession> {
+    return this.http.post<CheckoutSession>(`${this.baseUrl}/checkout`, {
+      email: "lian.yang.work@gmail.com",
+      plan: "pro",
+      billingCycle: "month",
+      mau: 10_000,
+      extraFeatures: [ LicenseFeatureEnum.FineGrainedAccessControl ]
+    });
   }
 
   upgradeSubscription(subscription: Subscription): Observable<boolean> {

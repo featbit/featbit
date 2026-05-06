@@ -11,6 +11,7 @@ import { WorkspaceSubscription } from "@shared/types";
 import { BillingService } from "@services/billing.service";
 import { NzMessageService } from "ng-zorro-antd/message";
 import { formatDate } from "@angular/common";
+import { subDays } from "date-fns";
 
 @Component({
   selector: 'billing',
@@ -49,8 +50,19 @@ export class BillingComponent implements OnInit {
   }
 
   get mauUsed(): number {
-    // TODO: call usage API to get real usage data
-    return 800;
+    return this.subscription.usage?.mau || 0;
+  }
+
+  get mauUsagePercent(): number {
+    return Math.round((this.mauUsed / this.subscription.totalMau) * 100);
+  }
+
+  get mauRemaining(): number {
+    return Math.max(0, this.subscription.totalMau - this.mauUsed);
+  }
+
+  get isMauExceeded(): boolean {
+    return this.subscription.totalMau < this.mauUsed;
   }
 
   get extraMauCost(): number {
@@ -71,14 +83,6 @@ export class BillingComponent implements OnInit {
       : 0;
   }
 
-  get mauUsagePercent(): number {
-    return Math.round((this.mauUsed / this.subscription.totalMau) * 100);
-  }
-
-  get mauRemaining(): number {
-    return Math.max(0, this.subscription.totalMau - this.mauUsed);
-  }
-
   get overageRiskLabel(): string {
     if (this.mauUsagePercent >= 95) {
       return 'Critical headroom';
@@ -95,33 +99,23 @@ export class BillingComponent implements OnInit {
     return this.mauUsagePercent >= 90;
   }
 
-  get isMauExceeded(): boolean {
-    return this.subscription.totalMau < this.mauUsed;
-  }
-
   get currentBillingPeriod(): string {
     const start = this.subscription.currentPeriodStart;
-    const end = this.subscription.currentPeriodEnd;
+    const end = subDays(this.subscription.currentPeriodEnd, 1); // Subtract 1 day to show the correct end date
 
     const startString = start ? formatDate(start, 'MMM d, y', 'en-US') : '';
-    const endString =
-      this.subscription.key === PlanKeys.FREE
-        ? 'forever'
-        : end
-          ? formatDate(end, 'MMM d, y', 'en-US')
-          : '';
+    const endString = end ? formatDate(end, 'MMM d, y', 'en-US') : '';
 
     return `${startString} - ${endString}`;
   }
 
   get nextBillingDate(): string {
-    const end = this.subscription.currentPeriodEnd;
-    if (!end) {
+    const nextBillingDate = this.subscription.currentPeriodEnd;
+    if (!nextBillingDate || this.isFreePlan) {
       return 'N/A';
     }
 
-    end.setDate(end.getDate() + 1);
-    return formatDate(end, 'MMM d, y', 'en-US');
+    return formatDate(nextBillingDate, 'MMM d, y', 'en-US');
   }
 
   contactSupport(): void {

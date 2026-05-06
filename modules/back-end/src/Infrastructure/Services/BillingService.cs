@@ -16,6 +16,49 @@ public class BillingService(
     private readonly string _serviceHost = configuration["Billing:ServiceHost"] ?? string.Empty;
     private readonly string _serviceApiKey = configuration["Billing:ApiKey"] ?? string.Empty;
 
+    public async Task<string?> GetSubscriptionAsync(Guid workspaceId)
+    {
+        var httpClient = CreateBillingServiceClient();
+        var route = $"api/subscriptions/{workspaceId}";
+
+        try
+        {
+            var subscription = await httpClient.GetStringAsync(route);
+            return subscription;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(
+                ex,
+                "Exception occurred while retrieving subscription for workspace {WorkspaceId}.",
+                workspaceId
+            );
+
+            return null;
+        }
+    }
+
+    public Task<string> GetCurrentBillingCycleAsync(Guid workspaceId)
+    {
+        var httpClient = CreateBillingServiceClient();
+        var route = $"api/subscriptions/{workspaceId}/current-cycle";
+
+        try
+        {
+            return httpClient.GetStringAsync(route);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(
+                ex,
+                "Exception occurred while retrieving current billing cycle for workspace {WorkspaceId}.",
+                workspaceId
+            );
+
+            return Task.FromResult(string.Empty);
+        }
+    }
+
     public async Task<string?> CreateSubscriptionAsync(CreateSubscription request)
     {
         var httpClient = CreateBillingServiceClient();
@@ -71,28 +114,6 @@ public class BillingService(
             logger.LogError(ex, "Exception occurred while downgrading subscription for {Request}.", request.ToString());
 
             return false;
-        }
-    }
-
-    public async Task<string?> GetSubscriptionAsync(Guid workspaceId)
-    {
-        var httpClient = CreateBillingServiceClient();
-        var route = $"api/subscriptions/{workspaceId}";
-
-        try
-        {
-            var subscription = await httpClient.GetStringAsync(route);
-            return subscription;
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(
-                ex,
-                "Exception occurred while retrieving subscription for workspace {WorkspaceId}.",
-                workspaceId
-            );
-
-            return null;
         }
     }
 
@@ -205,6 +226,7 @@ public class BillingService(
 public class NoopBillingService : IBillingService
 {
     public Task<string> GetSubscriptionAsync(Guid workspaceId) => Task.FromResult(string.Empty);
+    public Task<string> GetCurrentBillingCycleAsync(Guid workspaceId) =>  Task.FromResult(string.Empty);
     public Task<string?> CreateSubscriptionAsync(CreateSubscription request) => Task.FromResult<string?>(null);
     public Task<bool> UpgradeSubscriptionAsync(UpgradeSubscription request) => Task.FromResult(false);
     public Task<bool> DowngradeSubscriptionAsync(DowngradeSubscription request) => Task.FromResult(false);

@@ -87,6 +87,9 @@ export interface WorkspaceSubscription {
   currentPeriodStart?: Date;
   currentPeriodEnd?: Date;
   subscriberSince?: Date;
+  usage?: {
+    mau: number;
+  }
 }
 
 export interface IOrganizationPermissions {

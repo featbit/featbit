@@ -9,6 +9,11 @@ export interface BillingInformation {
   country: string;
 }
 
+export interface BillingCycle {
+  startDate: Date;
+  endDate: Date;
+}
+
 export interface InvoiceItem {
   id: string;
   billingDate: string | null;

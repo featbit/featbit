@@ -18,6 +18,18 @@ public class BillingController : ApiControllerBase
         return Ok(subscription);
     }
 
+    [HttpGet("current-cycle")]
+    public async Task<ApiResponse<string>> GetCurrentCycleAsync()
+    {
+        var request = new GetCurrentCycle
+        {
+            WorkspaceId = WorkspaceId
+        };
+
+        var currentCycle = await Mediator.Send(request);
+        return Ok(currentCycle);
+    }
+
     [HttpPost("subscription")]
     public async Task<ApiResponse<string>> CreateSubscriptionAsync(CreateSubscription request)
     {

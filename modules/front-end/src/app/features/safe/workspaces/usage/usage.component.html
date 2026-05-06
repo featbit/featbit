@@ -3,11 +3,18 @@
   <!-- Header -->
   <div class="usage-header">
     <div class="period-selector">
-      <nz-select [(ngModel)]="selectedPeriod" (ngModelChange)="onPeriodChange()" style="width: 200px;">
-        @for (period of periods; track period.value) {
-          <nz-option [nzValue]="period.value" [nzLabel]="period.label"></nz-option>
-        }
-      </nz-select>
+      @if (isLoadingBillingCycle) {
+        <nz-skeleton-element
+          class="loading-period-selector-skeleton"
+          nzType="input"
+          nzActive="true"/>
+      } @else {
+        <nz-select [(ngModel)]="selectedPeriod" (ngModelChange)="onPeriodChange()">
+          @for (period of periods; track period.value) {
+            <nz-option [nzValue]="period.value" [nzLabel]="period.label"></nz-option>
+          }
+        </nz-select>
+      }
     </div>
     <span class="selected-period-label">{{ selectedPeriodRange }}</span>
   </div>

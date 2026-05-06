@@ -6,6 +6,8 @@ public interface IBillingService
 {
     Task<string> GetSubscriptionAsync(Guid workspaceId);
 
+    Task<string> GetCurrentBillingCycleAsync(Guid workspaceId);
+
     Task<string> CreateSubscriptionAsync(CreateSubscription request);
 
     Task<bool> UpgradeSubscriptionAsync(UpgradeSubscription request);
