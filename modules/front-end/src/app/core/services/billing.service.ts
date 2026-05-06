@@ -26,6 +26,10 @@ export class BillingService {
     return this.http.get<string>(`${this.baseUrl}/subscription`).pipe(
       map(subscriptionJsonString => {
         const raw = JSON.parse(subscriptionJsonString);
+        if (raw === null) {
+          throw new Error('Failed to fetch current subscription');
+        }
+
         const plan = PRICING_PLANS.find(p => p.key === raw.plan);
         return {
           key: plan.key,
@@ -72,7 +76,14 @@ export class BillingService {
 
   getBillingInformation(): Observable<BillingInformation> {
     return this.http.get<string>(`${this.baseUrl}/billing-information`).pipe(
-      map(billingInfoJsonString => JSON.parse(billingInfoJsonString) as BillingInformation)
+      map(billingInfoJsonString => {
+        const raw = JSON.parse(billingInfoJsonString);
+        if (raw === null) {
+          throw new Error('Failed to fetch billing information');
+        }
+
+        return raw;
+      })
     );
   }
 
@@ -82,7 +93,14 @@ export class BillingService {
 
   getInvoices(): Observable<InvoiceItem[]> {
     return this.http.get<string>(`${this.baseUrl}/invoices`).pipe(
-      map(invoicesJsonString => JSON.parse(invoicesJsonString) as InvoiceItem[])
+      map(invoicesJsonString => {
+        const raw = JSON.parse(invoicesJsonString);
+        if (raw === null) {
+          throw new Error('Failed to fetch invoices');
+        }
+
+        return raw;
+      })
     );
   }
 

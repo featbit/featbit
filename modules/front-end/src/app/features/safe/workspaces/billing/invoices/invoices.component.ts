@@ -22,10 +22,7 @@ export class InvoicesComponent implements OnInit {
         this.invoices = invoices;
         this.isLoading = false;
       },
-      error: () => {
-        this.message.error('Failed to load invoices');
-        this.isLoading = false;
-      }
+      error: () => this.message.error('Failed to load invoices. Please try again later.')
     });
   }
 
