@@ -11,7 +11,7 @@ import {
   InvoiceItem,
   Subscription
 } from "@features/safe/workspaces/billing/types";
-import { PRICING_PLANS } from "@core/components/pricing-plans/types";
+import { PRICING_PLANS, ProrationPreview } from "@core/components/pricing-plans/types";
 
 @Injectable({
   providedIn: 'root'
@@ -62,6 +62,19 @@ export class BillingService {
         const raw = JSON.parse(checkoutSessionJsonString);
         if (raw === null) {
           throw new Error('Failed to create subscription');
+        }
+
+        return raw;
+      })
+    );
+  }
+
+  getProrationPreview(subscription: Subscription): Observable<ProrationPreview> {
+    return this.http.post<string>(`${this.baseUrl}/subscription/proration-preview`, subscription).pipe(
+      map(prorationPreviewJsonString => {
+        const raw = JSON.parse(prorationPreviewJsonString);
+        if (raw === null) {
+          throw new Error('Failed to fetch proration preview');
         }
 
         return raw;

@@ -48,6 +48,15 @@ public class BillingController : ApiControllerBase
         return Ok(success);
     }
 
+    [HttpPost("subscription/proration-preview")]
+    public async Task<ApiResponse<string>> GetProrationPreviewAsync(GetProrationPreview request)
+    {
+        request.WorkspaceId = WorkspaceId;
+
+        var preview = await Mediator.Send(request);
+        return Ok(preview);
+    }
+
     [HttpPut("subscription/downgrade")]
     public async Task<ApiResponse<bool>> DowngradeSubscriptionAsync(DowngradeSubscription request)
     {

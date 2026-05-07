@@ -14,6 +14,40 @@ export interface PricingPlan {
   contactSales?: boolean;
 }
 
+export interface ProrationPreview {
+  currency: string;
+  immediateCharge: {
+    amount: number;                          // sum of proration lines (cents)
+    displayLines: Array<{
+      label: 'Unused time credit' | 'Prorated charge for plan change';
+      amount: number;
+      type: 'credit' | 'charge';
+    }>;
+    rawLines: Array<{
+      description: string | null;
+      amount: number;
+      currency: string;
+      period: { start: number; end: number }; // milliseconds
+    }>;
+  };
+  nextRenewal: {
+    amount: number;                          // sum of renewal lines (cents)
+    displayLines: Array<{
+      label: 'Subscription renewal';
+      amount: number;
+      type: 'charge';
+    }>;
+    rawLines: Array<{
+      description: string | null;
+      amount: number;
+      currency: string;
+      period: { start: number; end: number }; // milliseconds
+    }>;
+  };
+
+  nextBillingDate: number | null;            // milliseconds (Unix * 1000), or null
+}
+
 export const EMPTY_SUBSCRIPTION: WorkspaceSubscription = {
   key: '',
   name: '',

@@ -10,6 +10,8 @@ public interface IBillingService
 
     Task<string> CreateSubscriptionAsync(CreateSubscription request);
 
+    Task<string> GetProrationPreviewAsync(GetProrationPreview request);
+
     Task<bool> UpgradeSubscriptionAsync(UpgradeSubscription request);
 
     Task<bool> DowngradeSubscriptionAsync(DowngradeSubscription request);
