@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import {
   BillingCycle,
   EXTRA_MAU_PER_10K_PER_MONTH_PRICE,
@@ -11,7 +11,9 @@ import {
   ENTERPRISE_YEARLY_PRICE,
   EMPTY_SUBSCRIPTION
 } from "@core/components/pricing-plans/types";
-import { WorkspaceSubscription } from "@shared/types";
+import { BillingService } from '@core/services/billing.service';
+import { LicenseFeatureEnum, WorkspaceSubscription } from "@shared/types";
+import { NzMessageService } from "ng-zorro-antd/message";
 
 @Component({
   selector: 'pricing-plans',
@@ -20,6 +22,9 @@ import { WorkspaceSubscription } from "@shared/types";
   styleUrl: './pricing-plans.component.less'
 })
 export class PricingPlansComponent {
+  billingService = inject(BillingService);
+  message = inject(NzMessageService);
+
   @Input()
   visible: boolean = false;
 
@@ -122,29 +127,56 @@ export class PricingPlansComponent {
 
   // subscription update modal
   modalVisible: boolean = false;
-  modalData: UpdateSubscriptionModalData;
+  modalData: UpdateSubscriptionModalData = undefined;
+  pendingSubscriptionKey: string = undefined;
+  isCreatingSubscription: boolean = false;
   updateSubscription(newPlan: PricingPlan, action: UpdateAction): void {
-    this.modalData = {
-      action,
-      currentSubscription: { ...this._subscription },
-      newSubscription: {
-        key: newPlan.key,
-        name: newPlan.name,
-        order: newPlan.order,
-        includedMau: newPlan.mauIncluded,
-        extraMau: Math.max(0, (this.planMauSlider[newPlan.key] || newPlan.mauIncluded) - newPlan.mauIncluded),
-        totalMau: this.planMauSlider[newPlan.key] || newPlan.mauIncluded,
-        fineGrainedAcEnabled: this.fineGrainedAcEnabled[newPlan.key] || false,
-        price: this.getPlanTotalPrice(newPlan),
-        billingCycle: newPlan.key === PlanKeys.ENTERPRISE ? this.enterpriseBillingCycle : BillingCycle.MONTHLY,
-        subscriberSince: this._subscription.subscriberSince
-      }
+    this.pendingSubscriptionKey = newPlan.key;
+    const newSubscription = {
+      plan: newPlan.key,
+      billingCycle: newPlan.key === PlanKeys.ENTERPRISE ? this.enterpriseBillingCycle : BillingCycle.MONTHLY,
+      mau: this.planMauSlider[newPlan.key] || newPlan.mauIncluded,
+      addOnFeatures: this.fineGrainedAcEnabled[newPlan.key] ? [LicenseFeatureEnum.FineGrainedAccessControl] : []
     };
-    this.modalVisible = true;
+
+    // free -> paid, create a new subscription
+    if (this._subscription.key === PlanKeys.FREE) {
+      this.isCreatingSubscription = true;
+      this.billingService.createSubscription(newSubscription).subscribe({
+        next: (session) => {
+          this.isCreatingSubscription = false;
+          window.location.href = session.url;
+        },
+        error: () => this.message.error('Failed to create subscription. If the problem persists, please contact support.')
+      });
+    } else {
+      // paid -> paid, upgrade/downgrade subscription, show update modal
+      this.modalData = {
+        action,
+        currentSubscription: { ...this._subscription },
+        newSubscription: {
+          key: newPlan.key,
+          name: newPlan.name,
+          order: newPlan.order,
+          includedMau: newPlan.mauIncluded,
+          extraMau: Math.max(0, (this.planMauSlider[newPlan.key] || newPlan.mauIncluded) - newPlan.mauIncluded),
+          totalMau: this.planMauSlider[newPlan.key] || newPlan.mauIncluded,
+          fineGrainedAcEnabled: this.fineGrainedAcEnabled[newPlan.key] || false,
+          price: this.getPlanTotalPrice(newPlan),
+          billingCycle: newPlan.key === PlanKeys.ENTERPRISE ? this.enterpriseBillingCycle : BillingCycle.MONTHLY,
+          subscriberSince: this._subscription.subscriberSince
+        }
+      };
+      this.modalVisible = true;
+    }
   }
 
   onUpdatePlanModalClose(confirmed: boolean) {
     this.modalVisible = false;
+    this.modalData = undefined;
+    this.pendingSubscriptionKey = undefined;
+    this.isCreatingSubscription = false;
+
     if (confirmed) {
       console.log('Proceed with subscription update:', this.modalData);
     }

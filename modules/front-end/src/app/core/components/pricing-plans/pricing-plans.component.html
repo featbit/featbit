@@ -76,7 +76,11 @@
           <!-- Action Button -->
           <div class="plan-card-footer">
             @if (plan.order > subscription.order) {
-              <button nz-button class="btn-upgrade" (click)="updateSubscription(plan, UpdateAction.UPGRADE)">
+              <button
+                nz-button
+                class="btn-upgrade"
+                [nzLoading]="isCreatingSubscription && pendingSubscriptionKey === plan.key"
+                (click)="updateSubscription(plan, UpdateAction.UPGRADE)">
                 Upgrade to {{ plan.name }}
               </button>
             } @else if (plan.order < subscription.order) {
@@ -130,7 +134,11 @@
           </div>
           <div class="plan-card-footer">
             @if (enterprisePlan.order > subscription.order) {
-              <button nz-button class="btn-upgrade" (click)="updateSubscription(enterprisePlan, UpdateAction.UPGRADE)">
+              <button
+                nz-button
+                class="btn-upgrade"
+                [nzLoading]="isCreatingSubscription && pendingSubscriptionKey === enterprisePlan.key"
+                (click)="updateSubscription(enterprisePlan, UpdateAction.UPGRADE)">
                 Upgrade to {{ enterprisePlan.name }}
               </button>
             } @else if (enterprisePlan.order < subscription.order) {

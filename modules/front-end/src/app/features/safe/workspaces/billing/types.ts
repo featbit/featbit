@@ -32,7 +32,7 @@ export interface Subscription {
   plan: string,
   billingCycle: string,
   mau: number,
-  extraFeatures: LicenseFeatureEnum[],
+  addOnFeatures: LicenseFeatureEnum[],
 }
 
 export interface CheckoutSession {

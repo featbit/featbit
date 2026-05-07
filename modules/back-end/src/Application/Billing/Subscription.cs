@@ -32,7 +32,6 @@ public class SubscriptionValidator : AbstractValidator<Subscription>
             .WithErrorCode(ErrorCodes.Invalid("plan"));
 
         RuleFor(x => x.Mau)
-            .NotEmpty().WithErrorCode(ErrorCodes.Required("mau"))
             .GreaterThan(1_000).WithErrorCode(ErrorCodes.Invalid("mau"));
 
         RuleFor(x => x.BillingCycle)
@@ -40,7 +39,15 @@ public class SubscriptionValidator : AbstractValidator<Subscription>
             .WithErrorCode(ErrorCodes.Invalid("interval"));
 
         RuleFor(x => x.AddOnFeatures)
-            .Must(features => features.All(LicenseFeatures.IsDefined))
+            .Must(features =>
+            {
+                if (features == null || features.Length == 0)
+                {
+                    return true; // No add-on features is valid
+                }
+
+                return features.All(LicenseFeatures.IsDefined);
+            })
             .WithErrorCode(ErrorCodes.Invalid("addOnFeatures"));
     }
 }

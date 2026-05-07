@@ -19,11 +19,6 @@ public class CreateSubscriptionHandler(IBillingService billingService)
     public async Task<string> Handle(CreateSubscription request, CancellationToken cancellationToken)
     {
         var session = await billingService.CreateSubscriptionAsync(request);
-        if (session == null)
-        {
-            throw new BusinessException(ErrorCodes.Failed("create_subscription"));
-        }
-
         return session;
     }
 }

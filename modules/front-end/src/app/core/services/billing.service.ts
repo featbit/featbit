@@ -56,14 +56,17 @@ export class BillingService {
     );
   }
 
-  createSubscription(): Observable<CheckoutSession> {
-    return this.http.post<CheckoutSession>(`${this.baseUrl}/checkout`, {
-      email: "lian.yang.work@gmail.com",
-      plan: "pro",
-      billingCycle: "month",
-      mau: 10_000,
-      extraFeatures: [ LicenseFeatureEnum.FineGrainedAccessControl ]
-    });
+  createSubscription(subscription: Subscription): Observable<CheckoutSession> {
+    return this.http.post<string>(`${this.baseUrl}/subscription`, subscription).pipe(
+      map(checkoutSessionJsonString => {
+        const raw = JSON.parse(checkoutSessionJsonString);
+        if (raw === null) {
+          throw new Error('Failed to create subscription');
+        }
+
+        return raw;
+      })
+    );
   }
 
   upgradeSubscription(subscription: Subscription): Observable<boolean> {
