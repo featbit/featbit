@@ -15,12 +15,9 @@ const routes: Routes = [
         data: {
           breadcrumb: $localize `:@@get-started:Get Started`
         },
-      },    {
-      path: 'checkout',
-      loadChildren: () => import('./checkout/checkout.module').then(m => m.CheckoutModule)
-    },
-    {
-      path: 'feature-flags',
+      },
+      {
+        path: 'feature-flags',
         loadChildren: () => import("./feature-flags/feature-flags.module").then(m => m.FeatureFlagsModule),
         data: {
           breadcrumb: $localize `:@@feature-flags:Feature Flags`

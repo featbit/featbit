@@ -28,7 +28,7 @@
   </nz-tab>
 
   <nz-tab *ngIf="isSaas">
-    <a *nzTabLink nz-tab-link [routerLink]="['./billing']" i18n="@@workspace.billing.tabtitle">Billing</a>
+    <a *nzTabLink nz-tab-link [routerLink]="['./billing']">Billing</a>
     <ng-template nz-tab>
       <billing></billing>
     </ng-template>

@@ -27,7 +27,7 @@ const routes: Routes = [
         path: 'billing',
         component: BillingComponent,
         data: {
-          breadcrumb: $localize`:@@workspace.routing.billing:Billing`
+          breadcrumb: 'Billing'
         }
       },{
         path: 'global-users',
