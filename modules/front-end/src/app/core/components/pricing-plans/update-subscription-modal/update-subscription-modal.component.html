@@ -79,25 +79,19 @@
               </div>
 
               <div class="summary-row">
-                <span class="summary-label">Included MAU</span>
-                <span class="summary-value">{{ newSubscription.includedMau | number }} MAU</span>
+                <div class="summary-label summary-label--stacked">
+                  <span>MAU</span>
+                  @if (newSubscription.totalMau > newSubscription.includedMau) {
+                    <span class="summary-sub">{{ newSubscription.includedMau | number }} included · +{{ formattedExtraMau }} extended</span>
+                  }
+                </div>
+                <div class="summary-value summary-value--stacked">
+                  <span>{{ newSubscription.totalMau | number }} MAU</span>
+                  @if (newSubscription.totalMau > newSubscription.includedMau) {
+                    <span class="summary-sub">+${{ extraMauRecurringCost | number }}<span class="summary-value-period"> / {{ newSubscription.billingCycle }}</span></span>
+                  }
+                </div>
               </div>
-
-              @if (newSubscription.totalMau > newSubscription.includedMau) {
-                <div class="summary-row">
-                  <span class="summary-label">
-                    Extended MAU
-                    <nz-tag nzColor="default">+{{ formattedExtraMau }}</nz-tag>
-                  </span>
-                  <span class="summary-value">
-                    +${{ extraMauRecurringCost | number }}<span class="summary-value-period"> / {{ newSubscription.billingCycle }}</span>
-                  </span>
-                </div>
-                <div class="summary-row">
-                  <span class="summary-label">Total MAU</span>
-                  <span class="summary-value">{{ newSubscription.totalMau | number }} MAU</span>
-                </div>
-              }
 
               @if (newSubscription.fineGrainedAcEnabled) {
                 <div class="summary-row">
@@ -129,11 +123,39 @@
             </div>
 
             <div class="summary-callout">
-              <i nz-icon nzType="info-circle" nzTheme="fill"></i>
-              <div>
-                <strong>{{ todayImpactTitle }}</strong>
-                <p>{{ todayImpactDescription }}</p>
-              </div>
+              @if (isUpgradeOperation) {
+                @if (isLoadingProration) {
+                  <div class="proration-loading">
+                    <nz-spin nzTip="Calculating your prorated charge..."></nz-spin>
+                  </div>
+                } @else if (prorationLoadError) {
+                  <i nz-icon nzType="warning" nzTheme="fill"></i>
+                  <div>
+                    <strong>Unable to load proration preview</strong>
+                    <p>You will see the exact charge at checkout.</p>
+                  </div>
+                } @else if (prorationPreview) {
+                  <div class="proration-breakdown">
+                    <strong class="proration-title">Prorated Charge</strong>
+                    @for (line of prorationPreview.immediateCharge.displayLines; track line.label) {
+                      <div class="proration-line" [ngClass]="'proration-line--' + line.type">
+                        <span>{{ line.label }}</span>
+                        <span>{{ line.type === 'credit' ? '−' : '' }}${{ (line.amount / 100) | number: '1.2-2' }}</span>
+                      </div>
+                    }
+                    <div class="proration-total">
+                      <span>Total due today</span>
+                      <strong>${{ (prorationPreview.immediateCharge.amount / 100) | number: '1.2-2' }}</strong>
+                    </div>
+                  </div>
+                }
+              } @else {
+                <i nz-icon nzType="info-circle" nzTheme="fill"></i>
+                <div>
+                  <strong>No payment is collected today</strong>
+                  <p>Your current charges stay in place until the next billing cycle begins.</p>
+                </div>
+              }
             </div>
           </div>
         </div>
@@ -146,6 +168,7 @@
       <button nz-button nzType="default" (click)="onClose(false)">Maybe Later</button>
       <button
         nz-button
+        [disabled]="isLoadingProration"
         [nzType]="action === 'downgrade' ? 'default' : 'primary'"
         [ngClass]="action === 'downgrade' ? 'btn-downgrade-confirm' : ''"
         (click)="onClose(true)">

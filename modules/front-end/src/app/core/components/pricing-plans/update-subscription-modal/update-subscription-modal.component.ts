@@ -1,12 +1,18 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import {
-  BillingCycle, EMPTY_SUBSCRIPTION,
+  BillingCycle,
+  EMPTY_SUBSCRIPTION,
   EXTRA_MAU_PER_10K_PER_MONTH_PRICE,
-  FINE_GRAINED_AC_PER_MONTH_PRICE, PlanKeys, PRICING_PLANS,
+  FINE_GRAINED_AC_PER_MONTH_PRICE,
+  PlanKeys,
+  PRICING_PLANS,
+  ProrationPreview,
   UpdateAction,
   UpdateSubscriptionModalData
 } from '@core/components/pricing-plans/types';
-import { WorkspaceSubscription } from "@shared/types";
+import { LicenseFeatureEnum, WorkspaceSubscription } from "@shared/types";
+import { BillingService } from '@core/services/billing.service';
+import { Subscription as BillingSubscriptionPayload } from '@features/safe/workspaces/billing/types';
 
 interface SubscriptionNote {
   icon: string;
@@ -21,20 +27,32 @@ interface SubscriptionNote {
   styleUrl: './update-subscription-modal.component.less'
 })
 export class UpdateSubscriptionModalComponent {
+  billingService = inject(BillingService);
+
   @Input()
   visible: boolean;
 
   @Input()
   set data(value: UpdateSubscriptionModalData) {
     if (value) {
-      this.action = value.action;
-      this.currentSubscription = value.currentSubscription;
-      this.newSubscription = value.newSubscription;
+      const { action, currentSubscription, newSubscription } = value;
+
+      this.action = action;
+      this.currentSubscription = currentSubscription;
+      this.newSubscription = newSubscription;
       this.title = this.action === UpdateAction.UPGRADE
         ? "Upgrade Subscription"
         : this.action === UpdateAction.DOWNGRADE
           ? "Downgrade Subscription"
           : "Update Subscription";
+
+      this.isUpgradeOperation =
+        this.action === UpdateAction.UPGRADE ||
+        (this.action === UpdateAction.UPDATE && newSubscription.price > currentSubscription.price);
+
+      if (this.isUpgradeOperation) {
+        this.loadProrationPreview();
+      }
     }
   }
 
@@ -45,6 +63,36 @@ export class UpdateSubscriptionModalComponent {
   action: UpdateAction = UpdateAction.UPDATE;
   currentSubscription: WorkspaceSubscription = EMPTY_SUBSCRIPTION;
   newSubscription: WorkspaceSubscription = EMPTY_SUBSCRIPTION;
+
+  isUpgradeOperation: boolean = false;
+  prorationPreview: ProrationPreview | null = null;
+  isLoadingProration = false;
+  prorationLoadError = false;
+  loadProrationPreview() {
+    this.isLoadingProration = true;
+    this.prorationPreview = null;
+    this.prorationLoadError = false;
+
+    const { key, billingCycle, totalMau, fineGrainedAcEnabled } = this.newSubscription;
+
+    const payload: BillingSubscriptionPayload = {
+      plan: key,
+      billingCycle: billingCycle,
+      mau: totalMau,
+      addOnFeatures: fineGrainedAcEnabled ? [LicenseFeatureEnum.FineGrainedAccessControl] : []
+    };
+
+    this.billingService.getProrationPreview(payload).subscribe({
+      next: (preview) => {
+        this.prorationPreview = preview;
+        this.isLoadingProration = false;
+      },
+      error: () => {
+        this.isLoadingProration = false;
+        this.prorationLoadError = true;
+      }
+    });
+  }
 
   get newBasePrice(): number {
     const plan = PRICING_PLANS.find(p => p.key === this.newSubscription.key);
@@ -108,18 +156,6 @@ export class UpdateSubscriptionModalComponent {
 
   get summaryTotalLabel(): string {
     return this.action === UpdateAction.DOWNGRADE ? 'Next cycle total' : 'New recurring total';
-  }
-
-  get todayImpactTitle(): string {
-    return this.action === UpdateAction.DOWNGRADE ? 'No payment is collected today' : 'Proration is calculated at checkout';
-  }
-
-  get todayImpactDescription(): string {
-    return this.action === UpdateAction.UPGRADE
-      ? 'You may see a prorated charge for the remaining time in the current billing cycle.'
-      : this.action === UpdateAction.DOWNGRADE
-        ? 'Your current charges stay in place until the next billing cycle begins.'
-        : 'Any prorated charge or credit depends on the difference between your current and new configuration.';
   }
 
   get confirmButtonText(): string {
