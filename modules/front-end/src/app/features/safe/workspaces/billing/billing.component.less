@@ -451,3 +451,28 @@
     color: @green70-color;
   }
 }
+
+.pending-downgrade-notice {
+  display: flex;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: fade(#1677ff, 7%);
+  border: 1px solid fade(#1677ff, 22%);
+  font-size: 13px;
+  color: @grey70-color;
+
+  .pending-downgrade-icon {
+    font-size: 16px;
+    color: #1677ff;
+    flex-shrink: 0;
+  }
+
+  .pending-downgrade-text {
+    line-height: 1.5;
+
+    strong {
+      color: @grey80-color;
+    }
+  }
+}

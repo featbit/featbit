@@ -89,6 +89,14 @@ export interface WorkspaceSubscription {
   subscriberSince?: Date;
   usage?: {
     mau: number;
+  },
+  pendingDowngrade?: {
+    key: string;
+    name: string;
+    totalMau: number;
+    billingCycle: string;
+    addOnFeatures: string[];
+    effectiveDate: Date;
   }
 }
 

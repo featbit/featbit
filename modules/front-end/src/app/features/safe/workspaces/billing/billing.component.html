@@ -85,6 +85,19 @@
         </div>
       </div>
 
+      <!-- Pending downgrade notice -->
+      @if (pendingDowngrade) {
+        <div class="pending-downgrade-notice">
+          <i class="pending-downgrade-icon" nz-icon nzType="info-circle" nzTheme="outline"></i>
+          <div class="pending-downgrade-text">
+            <strong>Scheduled downgrade:</strong> Your plan will downgrade to
+            <strong>{{ pendingDowngrade.name }}</strong>
+            ({{ pendingDowngrade.totalMau | number }} MAU, {{ pendingDowngrade.billingCycle }} billing)
+            on <strong>{{ pendingDowngrade.effectiveDate | date: 'mediumDate' }}</strong>.
+          </div>
+        </div>
+      }
+
       <!-- Billing period strip -->
       <div *ngIf="!isFreePlan" class="plan-period-bar">
         <div class="period-item">
@@ -147,7 +160,7 @@
             @if (extraMauCost > 0) {
               <div class="fee-row">
                 <span class="fee-row-label">
-                  Extra MAU
+                  Extended MAU
                   <span class="fee-row-meta">{{ subscription.extraMau | number }} additional users</span>
                 </span>
                 <span class="fee-row-value">+${{ extraMauCost | number: '1.0-0' }}{{ billingCycleSuffix }}</span>
