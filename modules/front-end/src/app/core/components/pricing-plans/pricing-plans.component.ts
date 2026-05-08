@@ -14,6 +14,7 @@ import {
 import { BillingService } from '@core/services/billing.service';
 import { LicenseFeatureEnum, WorkspaceSubscription } from "@shared/types";
 import { NzMessageService } from "ng-zorro-antd/message";
+import { finalize } from "rxjs/operators";
 
 @Component({
   selector: 'pricing-plans',
@@ -128,8 +129,10 @@ export class PricingPlansComponent {
   // subscription update modal
   modalVisible: boolean = false;
   modalData: UpdateSubscriptionModalData = undefined;
+  newSubscriptionKey: string = '';
   isCreatingSubscription: boolean = false;
   updateSubscription(newPlan: PricingPlan, action: UpdateAction): void {
+    this.newSubscriptionKey = newPlan.key;
     const newSubscription = {
       plan: newPlan.key,
       billingCycle: newPlan.key === PlanKeys.ENTERPRISE ? this.enterpriseBillingCycle : BillingCycle.MONTHLY,
@@ -140,7 +143,9 @@ export class PricingPlansComponent {
     // free -> paid, create a new subscription
     if (this._subscription.key === PlanKeys.FREE) {
       this.isCreatingSubscription = true;
-      this.billingService.createSubscription(newSubscription).subscribe({
+      this.billingService.createSubscription(newSubscription)
+      .pipe(finalize(() => this.isCreatingSubscription = false))
+      .subscribe({
         next: (session) => {
           this.isCreatingSubscription = false;
           window.location.href = session.url;
@@ -171,6 +176,7 @@ export class PricingPlansComponent {
 
   onUpdatePlanModalClose(confirmed: boolean) {
     this.modalVisible = false;
+    this.newSubscriptionKey = '';
     this.modalData = undefined;
     this.isCreatingSubscription = false;
 

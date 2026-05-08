@@ -79,7 +79,7 @@
               <button
                 nz-button
                 class="btn-upgrade"
-                [nzLoading]="isCreatingSubscription && modalData.newSubscription.key === plan.key"
+                [nzLoading]="isCreatingSubscription && newSubscriptionKey === plan.key"
                 (click)="updateSubscription(plan, UpdateAction.UPGRADE)">
                 Upgrade to {{ plan.name }}
               </button>
@@ -137,7 +137,7 @@
               <button
                 nz-button
                 class="btn-upgrade"
-                [nzLoading]="isCreatingSubscription && modalData.newSubscription.key === enterprisePlan.key"
+                [nzLoading]="isCreatingSubscription && newSubscriptionKey === enterprisePlan.key"
                 (click)="updateSubscription(enterprisePlan, UpdateAction.UPGRADE)">
                 Upgrade to {{ enterprisePlan.name }}
               </button>

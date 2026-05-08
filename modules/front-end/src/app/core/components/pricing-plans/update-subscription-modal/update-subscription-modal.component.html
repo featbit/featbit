@@ -120,10 +120,18 @@
                   ${{ newSubscription.price | number }}<span class="summary-value-period"> / {{ newSubscription.billingCycle }}</span>
                 </span>
               </div>
+              @if (action === UpdateAction.DOWNGRADE) {
+                <div class="summary-compare-row summary-compare-row--highlight">
+                  <span class="summary-compare-label">Effective At</span>
+                  <span class="summary-compare-value">
+                    {{ currentSubscription.currentPeriodEnd | date: 'longDate' }}
+                  </span>
+                </div>
+              }
             </div>
 
             <div class="summary-callout">
-              @if (isUpgradeOperation) {
+              @if (action === UpdateAction.UPGRADE) {
                 @if (isLoadingProration) {
                   <div class="proration-loading">
                     <nz-spin nzTip="Calculating your prorated charge..."></nz-spin>

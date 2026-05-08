@@ -42,20 +42,19 @@ export class UpdateSubscriptionModalComponent {
     if (value) {
       const { action, currentSubscription, newSubscription } = value;
 
-      this.action = action;
+      // If the action is explicitly set to UPDATE, we determine whether it's an upgrade or downgrade based on the
+      // price difference between the current and new subscription.
+      this.action = action === UpdateAction.UPDATE ?
+        (newSubscription.price > currentSubscription.price ? UpdateAction.UPGRADE : UpdateAction.DOWNGRADE)
+        : action;
+
       this.currentSubscription = currentSubscription;
       this.newSubscription = newSubscription;
       this.title = this.action === UpdateAction.UPGRADE
         ? "Upgrade Subscription"
-        : this.action === UpdateAction.DOWNGRADE
-          ? "Downgrade Subscription"
-          : "Update Subscription";
+        : "Downgrade Subscription";
 
-      this.isUpgradeOperation =
-        this.action === UpdateAction.UPGRADE ||
-        (this.action === UpdateAction.UPDATE && newSubscription.price > currentSubscription.price);
-
-      if (this.isUpgradeOperation) {
+      if (this.action === UpdateAction.UPGRADE) {
         this.loadProrationPreview();
       }
     }
@@ -65,11 +64,10 @@ export class UpdateSubscriptionModalComponent {
   close = new EventEmitter<boolean>();
 
   title: string;
-  action: UpdateAction = UpdateAction.UPDATE;
+  action: UpdateAction.UPGRADE | UpdateAction.DOWNGRADE = UpdateAction.UPGRADE;
   currentSubscription: WorkspaceSubscription = EMPTY_SUBSCRIPTION;
   newSubscription: WorkspaceSubscription = EMPTY_SUBSCRIPTION;
 
-  isUpgradeOperation: boolean = false;
   prorationPreview: ProrationPreview | null = null;
   isLoadingProration = false;
   prorationLoadError = false;
@@ -116,14 +114,12 @@ export class UpdateSubscriptionModalComponent {
   get titleSubtitle(): string {
     return this.action === UpdateAction.UPGRADE
       ? 'Review what unlocks now and what your recurring total will look like.'
-      : this.action === UpdateAction.DOWNGRADE
-        ? 'See what stays active until renewal and what changes on your next cycle.'
-        : 'Confirm the new configuration before we apply it to your workspace.';
+      : 'See what stays active until renewal and what changes on your next cycle.';
   }
 
   get transitionHeadline(): string {
-    if (!this.currentSubscription.name) {
-      return this.newSubscription.name;
+    if (this.currentSubscription.key === this.newSubscription.key) {
+      return 'Your plan configuration is changing';
     }
 
     return `${this.currentSubscription.name} to ${this.newSubscription.name}`;
@@ -132,9 +128,7 @@ export class UpdateSubscriptionModalComponent {
   get actionDescription(): string {
     return this.action === UpdateAction.UPGRADE
       ? 'Your workspace will move to the new plan immediately after confirmation. Any proration is calculated separately at checkout.'
-      : this.action === UpdateAction.DOWNGRADE
-        ? 'Your current access remains in place until renewal, then the new recurring total takes over on the next cycle.'
-        : 'We will keep the same plan tier and apply the new billing configuration to the rest of the current cycle.';
+      : 'Your current access remains in place until renewal, then the new recurring total takes over on the next cycle.';
   }
 
   get formattedExtraMau(): string {
@@ -165,11 +159,7 @@ export class UpdateSubscriptionModalComponent {
   }
 
   get confirmButtonText(): string {
-    return this.action === UpdateAction.UPGRADE
-      ? 'Confirm Upgrade'
-      : this.action === UpdateAction.DOWNGRADE
-        ? 'Schedule Downgrade'
-        : 'Confirm Changes';
+    return this.action === UpdateAction.UPGRADE ? 'Confirm Upgrade' : 'Schedule Downgrade';
   }
 
   get noteItems(): SubscriptionNote[] {
@@ -213,23 +203,7 @@ export class UpdateSubscriptionModalComponent {
       ];
     }
 
-    return [
-      {
-        icon: 'swap',
-        title: 'Your plan tier stays the same',
-        description: 'Only the selected usage or add-on configuration is changing for the remainder of the cycle.'
-      },
-      {
-        icon: 'credit-card',
-        title: 'A prorated adjustment may appear today',
-        description: 'If the new configuration costs more or less, we apply a prorated charge or credit automatically.'
-      },
-      {
-        icon: 'calendar',
-        title: 'Your recurring total updates after confirmation',
-        description: 'The amount below becomes the ongoing recurring price for future billing cycles.'
-      }
-    ];
+    return [];
   }
 
   isConfirming: boolean = false;
@@ -243,7 +217,7 @@ export class UpdateSubscriptionModalComponent {
       addOnFeatures: this.newSubscription.fineGrainedAcEnabled ? [ LicenseFeatureEnum.FineGrainedAccessControl ] : []
     }
 
-    if (this.isUpgradeOperation) {
+    if (this.action === UpdateAction.UPGRADE) {
       this.billingService.upgradeSubscription(subscriptionPayload)
       .pipe(finalize(() => this.isConfirming = false))
       .subscribe({
@@ -277,4 +251,6 @@ export class UpdateSubscriptionModalComponent {
   onClose(confirmed: boolean = false) {
     this.close.emit(confirmed);
   }
+
+  protected readonly UpdateAction = UpdateAction;
 }
