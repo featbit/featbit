@@ -4,7 +4,7 @@
   [nzVisible]="visible"
   [nzTitle]="title"
   [nzWidth]="950"
-  (nzOnClose)="onClose()">
+  (nzOnClose)="onClose(false)">
   <ng-template #title>
     <div class="drawer-title">
       <span class="drawer-title-main">Pricing Plans</span>
@@ -79,7 +79,7 @@
               <button
                 nz-button
                 class="btn-upgrade"
-                [nzLoading]="isCreatingSubscription && pendingSubscriptionKey === plan.key"
+                [nzLoading]="isCreatingSubscription && modalData.newSubscription.key === plan.key"
                 (click)="updateSubscription(plan, UpdateAction.UPGRADE)">
                 Upgrade to {{ plan.name }}
               </button>
@@ -137,7 +137,7 @@
               <button
                 nz-button
                 class="btn-upgrade"
-                [nzLoading]="isCreatingSubscription && pendingSubscriptionKey === enterprisePlan.key"
+                [nzLoading]="isCreatingSubscription && modalData.newSubscription.key === enterprisePlan.key"
                 (click)="updateSubscription(enterprisePlan, UpdateAction.UPGRADE)">
                 Upgrade to {{ enterprisePlan.name }}
               </button>
@@ -192,7 +192,7 @@
   </ng-container>
 
   <ng-template #extra>
-    <i (click)="onClose()" nz-icon nzType="icons:icon-close"></i>
+    <i (click)="onClose(false)" nz-icon nzType="icons:icon-close"></i>
   </ng-template>
 </nz-drawer>
 

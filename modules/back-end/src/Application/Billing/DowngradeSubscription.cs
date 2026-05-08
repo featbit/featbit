@@ -1,6 +1,6 @@
 namespace Application.Billing;
 
-public class DowngradeSubscription : Subscription, IRequest<bool>;
+public class DowngradeSubscription : Subscription, IRequest<string>;
 
 public class DowngradeSubscriptionValidator : AbstractValidator<DowngradeSubscription>
 {
@@ -11,11 +11,11 @@ public class DowngradeSubscriptionValidator : AbstractValidator<DowngradeSubscri
 }
 
 public class DowngradeSubscriptionHandler(IBillingService billingService)
-    : IRequestHandler<DowngradeSubscription, bool>
+    : IRequestHandler<DowngradeSubscription, string>
 {
-    public async Task<bool> Handle(DowngradeSubscription request, CancellationToken cancellationToken)
+    public async Task<string> Handle(DowngradeSubscription request, CancellationToken cancellationToken)
     {
-        var success = await billingService.DowngradeSubscriptionAsync(request);
-        return success;
+        var response = await billingService.DowngradeSubscriptionAsync(request);
+        return response;
     }
 }

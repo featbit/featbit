@@ -40,12 +40,12 @@ public class BillingController : ApiControllerBase
     }
 
     [HttpPut("subscription/upgrade")]
-    public async Task<ApiResponse<bool>> UpgradeSubscriptionAsync(UpgradeSubscription request)
+    public async Task<ApiResponse<string>> UpgradeSubscriptionAsync(UpgradeSubscription request)
     {
         request.WorkspaceId = WorkspaceId;
 
-        var success = await Mediator.Send(request);
-        return Ok(success);
+        var response = await Mediator.Send(request);
+        return Ok(response);
     }
 
     [HttpPost("subscription/proration-preview")]
@@ -58,12 +58,12 @@ public class BillingController : ApiControllerBase
     }
 
     [HttpPut("subscription/downgrade")]
-    public async Task<ApiResponse<bool>> DowngradeSubscriptionAsync(DowngradeSubscription request)
+    public async Task<ApiResponse<string>> DowngradeSubscriptionAsync(DowngradeSubscription request)
     {
         request.WorkspaceId = WorkspaceId;
 
-        var success = await Mediator.Send(request);
-        return Ok(success);
+        var response = await Mediator.Send(request);
+        return Ok(response);
     }
 
     [HttpGet("billing-information")]

@@ -12,9 +12,9 @@ public interface IBillingService
 
     Task<string> GetProrationPreviewAsync(GetProrationPreview request);
 
-    Task<bool> UpgradeSubscriptionAsync(UpgradeSubscription request);
+    Task<string> UpgradeSubscriptionAsync(UpgradeSubscription request);
 
-    Task<bool> DowngradeSubscriptionAsync(DowngradeSubscription request);
+    Task<string> DowngradeSubscriptionAsync(DowngradeSubscription request);
 
     Task<bool> CreateFreeLicenseAsync(Guid workspaceId, string email);
 

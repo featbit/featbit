@@ -169,9 +169,10 @@
       <button
         nz-button
         [disabled]="isLoadingProration"
+        [nzLoading]="isConfirming"
         [nzType]="action === 'downgrade' ? 'default' : 'primary'"
         [ngClass]="action === 'downgrade' ? 'btn-downgrade-confirm' : ''"
-        (click)="onClose(true)">
+        (click)="confirmAction()">
         <span>{{ confirmButtonText }}</span>
       </button>
     </div>

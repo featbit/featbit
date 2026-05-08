@@ -13,6 +13,9 @@ import {
 import { LicenseFeatureEnum, WorkspaceSubscription } from "@shared/types";
 import { BillingService } from '@core/services/billing.service';
 import { Subscription as BillingSubscriptionPayload } from '@features/safe/workspaces/billing/types';
+import { NzMessageService } from "ng-zorro-antd/message";
+import { finalize } from "rxjs/operators";
+import { NzNotificationService } from 'ng-zorro-antd/notification';
 
 interface SubscriptionNote {
   icon: string;
@@ -28,6 +31,8 @@ interface SubscriptionNote {
 })
 export class UpdateSubscriptionModalComponent {
   billingService = inject(BillingService);
+  message = inject(NzMessageService);
+  notification = inject(NzNotificationService);
 
   @Input()
   visible: boolean;
@@ -68,6 +73,7 @@ export class UpdateSubscriptionModalComponent {
   prorationPreview: ProrationPreview | null = null;
   isLoadingProration = false;
   prorationLoadError = false;
+
   loadProrationPreview() {
     this.isLoadingProration = true;
     this.prorationPreview = null;
@@ -79,7 +85,7 @@ export class UpdateSubscriptionModalComponent {
       plan: key,
       billingCycle: billingCycle,
       mau: totalMau,
-      addOnFeatures: fineGrainedAcEnabled ? [LicenseFeatureEnum.FineGrainedAccessControl] : []
+      addOnFeatures: fineGrainedAcEnabled ? [ LicenseFeatureEnum.FineGrainedAccessControl ] : []
     };
 
     this.billingService.getProrationPreview(payload).subscribe({
@@ -226,7 +232,49 @@ export class UpdateSubscriptionModalComponent {
     ];
   }
 
-  onClose(confirmed: boolean) {
+  isConfirming: boolean = false;
+  confirmAction() {
+    this.isConfirming = true;
+
+    const subscriptionPayload = {
+      plan: this.newSubscription.key,
+      billingCycle: this.newSubscription.billingCycle,
+      mau: this.newSubscription.totalMau,
+      addOnFeatures: this.newSubscription.fineGrainedAcEnabled ? [ LicenseFeatureEnum.FineGrainedAccessControl ] : []
+    }
+
+    if (this.isUpgradeOperation) {
+      this.billingService.upgradeSubscription(subscriptionPayload)
+      .pipe(finalize(() => this.isConfirming = false))
+      .subscribe({
+        next: () => {
+          this.notification.success(
+            'Subscription Upgraded',
+            'Your workspace has been upgrade to the new plan. New limits and features are now available immediately.',
+            { nzDuration: 7_000 }
+          );
+          this.close.emit(true);
+        },
+        error: () => this.message.error('Failed to upgrade subscription. If the problem persists, please contact support.')
+      });
+    } else {
+      this.billingService.downgradeSubscription(subscriptionPayload)
+      .pipe(finalize(() => this.isConfirming = false))
+      .subscribe({
+        next: () => {
+          this.notification.success(
+            'Downgrade Scheduled',
+            'Your current access remains active until renewal. The new configuration will take effect on your next billing cycle.',
+            { nzDuration: 7_000 }
+          );
+          this.close.emit(true);
+        },
+        error: () => this.message.error('Failed to downgrade subscription. If the problem persists, please contact support.'),
+      });
+    }
+  }
+
+  onClose(confirmed: boolean = false) {
     this.close.emit(confirmed);
   }
 }

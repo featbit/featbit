@@ -82,12 +82,30 @@ export class BillingService {
     );
   }
 
-  upgradeSubscription(subscription: Subscription): Observable<boolean> {
-    return this.http.post<boolean>(`${this.baseUrl}/subscription/upgrade`, subscription);
+  upgradeSubscription(subscription: Subscription) {
+    return this.http.post<string>(`${this.baseUrl}/subscription/upgrade`, subscription).pipe(
+      map(responseJsonString => {
+        const raw = JSON.parse(responseJsonString);
+        if (raw === null) {
+          throw new Error('Failed to upgrade subscription');
+        }
+
+        return raw;
+      })
+    );
   }
 
-  downgradeSubscription(subscription: Subscription): Observable<boolean> {
-    return this.http.post<boolean>(`${this.baseUrl}/subscription/downgrade`, subscription);
+  downgradeSubscription(subscription: Subscription) {
+    return this.http.post<string>(`${this.baseUrl}/subscription/downgrade`, subscription).pipe(
+      map(responseJsonString => {
+        const raw = JSON.parse(responseJsonString);
+        if (raw === null) {
+          throw new Error('Failed to downgrade subscription');
+        }
+
+        return raw;
+      })
+    );
   }
 
   getBillingInformation(): Observable<BillingInformation> {

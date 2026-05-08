@@ -98,7 +98,7 @@ public class BillingService(
         }
     }
 
-    public async Task<bool> UpgradeSubscriptionAsync(UpgradeSubscription request)
+    public async Task<string?> UpgradeSubscriptionAsync(UpgradeSubscription request)
     {
         var httpClient = CreateBillingServiceClient();
         const string route = "/api/subscriptions/upgrade";
@@ -108,16 +108,17 @@ public class BillingService(
             var response = await httpClient.PostAsJsonAsync(route, request);
             response.EnsureSuccessStatusCode();
 
-            return true;
+            var content = await response.Content.ReadAsStringAsync();
+            return content;
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Exception occurred while upgrading subscription for {Request}.", request.ToString());
-            return false;
+            return null;
         }
     }
 
-    public async Task<bool> DowngradeSubscriptionAsync(DowngradeSubscription request)
+    public async Task<string?> DowngradeSubscriptionAsync(DowngradeSubscription request)
     {
         var httpClient = CreateBillingServiceClient();
         const string route = "/api/subscriptions/downgrade";
@@ -127,13 +128,14 @@ public class BillingService(
             var response = await httpClient.PostAsJsonAsync(route, request);
             response.EnsureSuccessStatusCode();
 
-            return true;
+            var content = await response.Content.ReadAsStringAsync();
+            return content;
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Exception occurred while downgrading subscription for {Request}.", request.ToString());
 
-            return false;
+            return null;
         }
     }
 
@@ -249,8 +251,8 @@ public class NoopBillingService : IBillingService
     public Task<string?> GetCurrentBillingCycleAsync(Guid workspaceId) => Task.FromResult<string?>(null);
     public Task<string?> CreateSubscriptionAsync(CreateSubscription request) => Task.FromResult<string?>(null);
     public Task<string?> GetProrationPreviewAsync(GetProrationPreview request) => Task.FromResult<string?>(null);
-    public Task<bool> UpgradeSubscriptionAsync(UpgradeSubscription request) => Task.FromResult(false);
-    public Task<bool> DowngradeSubscriptionAsync(DowngradeSubscription request) => Task.FromResult(false);
+    public Task<string?> UpgradeSubscriptionAsync(UpgradeSubscription request) => Task.FromResult<string?>(null);
+    public Task<string?> DowngradeSubscriptionAsync(DowngradeSubscription request) => Task.FromResult<string?>(null);
     public Task<bool> CreateFreeLicenseAsync(Guid workspaceId, string email) => Task.FromResult(false);
     public Task<string?> GetBillingInformationAsync(Guid workspaceId) => Task.FromResult<string?>(null);
     public Task<bool> UpdateBillingInformationAsync(Guid workspaceId, string payload) => Task.FromResult(false);

@@ -31,6 +31,12 @@ export class BillingComponent implements OnInit {
   isFreePlan = true;
 
   ngOnInit() {
+    this.loadCurrentSubscription();
+  }
+
+  loadCurrentSubscription(): void {
+    this.isLoading = true;
+
     this.billingService.getCurrentSubscription().subscribe({
       next: subscription => {
         this.subscription = subscription;
@@ -40,7 +46,7 @@ export class BillingComponent implements OnInit {
         this.isLoading = false;
       },
       error: () => this.message.error('Failed to load current subscription. Please try again later.')
-    })
+    });
   }
 
   get billingCycleLabel(): string {
@@ -128,7 +134,11 @@ export class BillingComponent implements OnInit {
   openPricingDrawer(): void {
     this.pricingDrawerVisible = true;
   }
-  onClosePricingDrawer(): void {
+  onClosePricingDrawer(subscriptionChanged: boolean): void {
     this.pricingDrawerVisible = false;
+
+    if (subscriptionChanged) {
+      this.loadCurrentSubscription();
+    }
   }
 }

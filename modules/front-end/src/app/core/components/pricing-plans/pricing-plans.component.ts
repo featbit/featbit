@@ -43,7 +43,7 @@ export class PricingPlansComponent {
   }
 
   @Output()
-  close: EventEmitter<void> = new EventEmitter();
+  close = new EventEmitter<boolean>();
 
   initStats() {
     const subscription = this._subscription;
@@ -128,10 +128,8 @@ export class PricingPlansComponent {
   // subscription update modal
   modalVisible: boolean = false;
   modalData: UpdateSubscriptionModalData = undefined;
-  pendingSubscriptionKey: string = undefined;
   isCreatingSubscription: boolean = false;
   updateSubscription(newPlan: PricingPlan, action: UpdateAction): void {
-    this.pendingSubscriptionKey = newPlan.key;
     const newSubscription = {
       plan: newPlan.key,
       billingCycle: newPlan.key === PlanKeys.ENTERPRISE ? this.enterpriseBillingCycle : BillingCycle.MONTHLY,
@@ -174,11 +172,10 @@ export class PricingPlansComponent {
   onUpdatePlanModalClose(confirmed: boolean) {
     this.modalVisible = false;
     this.modalData = undefined;
-    this.pendingSubscriptionKey = undefined;
     this.isCreatingSubscription = false;
 
     if (confirmed) {
-      console.log('Proceed with subscription update:', this.modalData);
+      this.close.emit(true);
     }
   }
 
@@ -186,10 +183,10 @@ export class PricingPlansComponent {
     window.open('mailto:support@featbit.co', '_blank');
   }
 
-  onClose() {
+  onClose(subscriptionChanged: boolean = false): void {
     // reset states
     this.initStats();
-    this.close.emit();
+    this.close.emit(subscriptionChanged);
   }
 
   protected readonly normalPlans = PRICING_PLANS.slice(0, 3);
