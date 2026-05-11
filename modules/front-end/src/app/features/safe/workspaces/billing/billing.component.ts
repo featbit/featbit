@@ -31,12 +31,6 @@ export class BillingComponent implements OnInit {
   isFreePlan = true;
 
   ngOnInit() {
-    this.loadCurrentSubscription();
-  }
-
-  loadCurrentSubscription(): void {
-    this.isLoading = true;
-
     this.billingService.getCurrentSubscription().subscribe({
       next: subscription => {
         this.subscription = subscription;
@@ -138,7 +132,8 @@ export class BillingComponent implements OnInit {
     this.pricingDrawerVisible = false;
 
     if (subscriptionChanged) {
-      this.loadCurrentSubscription();
+      // refresh the page to apply the latest subscription and license
+      window.location.reload();
     }
   }
 }
