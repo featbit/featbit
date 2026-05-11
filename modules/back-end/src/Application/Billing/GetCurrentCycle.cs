@@ -9,7 +9,7 @@ public class GetCurrentCycleHandler(IBillingService billingService) : IRequestHa
 {
     public async Task<string> Handle(GetCurrentCycle request, CancellationToken cancellationToken)
     {
-        var currentCycle = await billingService.GetCurrentBillingCycleAsync(request.WorkspaceId);
+        var currentCycle = await billingService.GetCurrentCycleAsync(request.WorkspaceId);
         return currentCycle;
     }
 }

@@ -6,7 +6,7 @@ public interface IBillingService
 {
     Task<string> GetSubscriptionAsync(Guid workspaceId);
 
-    Task<string> GetCurrentBillingCycleAsync(Guid workspaceId);
+    Task<string> GetCurrentCycleAsync(Guid workspaceId);
 
     Task<string> CreateSubscriptionAsync(CreateSubscription request);
 
@@ -15,6 +15,8 @@ public interface IBillingService
     Task<string> UpgradeSubscriptionAsync(UpgradeSubscription request);
 
     Task<string> DowngradeSubscriptionAsync(DowngradeSubscription request);
+
+    Task<string> GetLicenseAsync(Guid workspaceId);
 
     Task<bool> CreateFreeLicenseAsync(Guid workspaceId, string email);
 

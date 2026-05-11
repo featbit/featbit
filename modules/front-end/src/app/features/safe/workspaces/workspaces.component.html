@@ -28,9 +28,16 @@
   </nz-tab>
 
   <nz-tab *ngIf="isSaas">
-    <a *nzTabLink nz-tab-link [routerLink]="['./billing']">Billing</a>
+    <a *nzTabLink nz-tab-link
+       [routerLink]="['./billing']"
+       [queryParams]="paymentStatus ? { 'payment_status': paymentStatus } : {}"
+       queryParamsHandling="merge">Billing</a>
     <ng-template nz-tab>
-      <billing></billing>
+      @if (paymentStatus) {
+        <checkout-return></checkout-return>
+      } @else {
+        <billing></billing>
+      }
     </ng-template>
   </nz-tab>
 
