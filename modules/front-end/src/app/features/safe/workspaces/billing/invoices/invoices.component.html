@@ -54,7 +54,7 @@
               </span>
             </td>
             <td>
-              <span class="invoice-amount">${{ inv.amountPaid | number: '1.2-2' }}</span>
+              <span class="invoice-amount">${{ inv.amountPaid / 100.0 | number: '1.2-2' }}</span>
             </td>
           </tr>
         }
