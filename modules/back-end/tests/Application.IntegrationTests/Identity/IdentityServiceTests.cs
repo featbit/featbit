@@ -1,11 +1,11 @@
 using Application.Services;
-using Domain.Identity;
 using Domain.Users;
+using Infrastructure.Identity;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Options;
+using Moq;
 
-namespace Application.UnitTests.Identity;
+namespace Application.IntegrationTests.Identity;
 
 public class IdentityServiceTests
 {
@@ -19,7 +19,7 @@ public class IdentityServiceTests
             null!,
             _passwordHasherMock.Object,
             _refreshTokenServiceMock.Object,
-            Options.Create(new JwtOptions())
+            new JwtOptions()
         );
     }
 

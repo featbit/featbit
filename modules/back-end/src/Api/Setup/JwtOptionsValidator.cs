@@ -1,0 +1,78 @@
+using Infrastructure.Identity;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+
+namespace Api.Setup;
+
+/// <summary>
+/// Validates <see cref="JwtOptions"/> at application startup via <see cref="IValidateOptions{TOptions}"/>.
+/// </summary>
+internal sealed class JwtOptionsValidator : IValidateOptions<JwtOptions>
+{
+    private const string DefaultHs256Key = "featbit-identity-key-must-longer-than-32-characters";
+
+    public ValidateOptionsResult Validate(string? name, JwtOptions options)
+    {
+        var errors = new List<string>();
+
+        string[] supportedAlgorithms = [SecurityAlgorithms.HmacSha256, SecurityAlgorithms.RsaSha256];
+        if (!supportedAlgorithms.Contains(options.Algorithm))
+        {
+            errors.Add(
+                $"Unsupported Jwt Algorithm: {options.Algorithm}. " +
+                $"Supported algorithms: {string.Join(", ", supportedAlgorithms)}."
+            );
+        }
+
+        switch (options.Algorithm)
+        {
+            case SecurityAlgorithms.HmacSha256:
+                var key = options.Key;
+
+                if (string.IsNullOrWhiteSpace(key))
+                {
+                    errors.Add("Jwt__Key is required when Algorithm is 'HS256'.");
+                }
+                else if (key == DefaultHs256Key)
+                {
+                    errors.Add(
+                        "Jwt__Key is using the default public value, which is not secure. " +
+                        "Please generate a custom key with at least 32 characters to ensure security."
+                    );
+                }
+                else if (key.Length < 32)
+                {
+                    errors.Add("Jwt__Key must be at least 32 characters long for HS256 to ensure security.");
+                }
+
+                break;
+
+            case SecurityAlgorithms.RsaSha256:
+                var privateKeyPath = options.PrivateKeyPath;
+                if (string.IsNullOrWhiteSpace(privateKeyPath))
+                {
+                    errors.Add("Jwt__PrivateKeyPath is required when Algorithm is 'RS256'.");
+                }
+                else if (!File.Exists(privateKeyPath))
+                {
+                    errors.Add($"Jwt__PrivateKeyPath file not found: {privateKeyPath}");
+                }
+
+                var publicKeyPath = options.PublicKeyPath;
+                if (string.IsNullOrWhiteSpace(publicKeyPath))
+                {
+                    errors.Add("Jwt__PublicKeyPath is required when Algorithm is 'RS256'.");
+                }
+                else if (!File.Exists(publicKeyPath))
+                {
+                    errors.Add($"Jwt__PublicKeyPath file not found: {publicKeyPath}");
+                }
+
+                break;
+        }
+
+        return errors.Count > 0
+            ? ValidateOptionsResult.Fail(errors)
+            : ValidateOptionsResult.Success;
+    }
+}

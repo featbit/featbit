@@ -26,6 +26,9 @@ public class TestApp : WebApplicationFactory<Program>
         builder.UseSetting(MqProvider.SectionName, MqProvider.None);
         builder.UseSetting(CacheProvider.SectionName, CacheProvider.None);
 
+        // using a fixed key for testing purposes, in production this should be stored securely and rotated regularly
+        builder.UseSetting("Jwt:Key", "85526b76762cc1a8ebc8aa86ed88133f022244afc4458a15a6ac0959469817db");
+
         builder.ConfigureServices(collection =>
         {
             var passwordHasher = new ServiceDescriptor(

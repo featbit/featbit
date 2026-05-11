@@ -1,12 +1,10 @@
 using System.Security.Claims;
-using System.Text;
 using Application.Bases;
 using Application.Identity;
-using Domain.Identity;
 using Domain.RefreshTokens;
 using Domain.Users;
+using Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 
@@ -23,12 +21,12 @@ public class IdentityService : IIdentityService
         IUserService userService,
         IPasswordHasher<User> passwordHasher,
         IRefreshTokenService refreshTokenService,
-        IOptions<JwtOptions> options)
+        JwtOptions options)
     {
         _userService = userService;
         _passwordHasher = passwordHasher;
         _refreshTokenService = refreshTokenService;
-        _options = options.Value;
+        _options = options;
     }
 
     public async Task<bool> CheckPasswordAsync(User user, string password)
@@ -62,8 +60,7 @@ public class IdentityService : IIdentityService
 
         string IssueAccessToken()
         {
-            var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Key));
-            var credentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
+            var credentials = new SigningCredentials(_options.SigningSecurityKey, _options.Algorithm);
 
             var descriptor = new SecurityTokenDescriptor
             {

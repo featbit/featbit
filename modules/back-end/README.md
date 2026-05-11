@@ -53,21 +53,33 @@ requests, and that it can connect to its dependencies (a database, message queue
 
 JWT (JSON Web Token) configuration for authentication and authorization.
 
-| Name            | Description     | Default Value                                           |
-|-----------------|-----------------|---------------------------------------------------------|
-| `Jwt__Issuer`   | JWT Issuer Name | `"featbit"`                                             |
-| `Jwt__Audience` | JWT Audience    | `"featbit-api"`                                         |
-| `Jwt__Key`      | JWT Private Key | `"featbit-identity-key-must-longer-than-32-characters"` |
+| Name                  | Description                                                                     | Default Value                                           |
+|-----------------------|---------------------------------------------------------------------------------|---------------------------------------------------------|
+| `Jwt__Issuer`         | JWT Issuer Name                                                                 | `"featbit"`                                             |
+| `Jwt__Audience`       | JWT Audience                                                                    | `"featbit-api"`                                         |
+| `Jwt__Algorithm`      | Signing algorithm. Valid values: `HS256` (symmetric) or `RS256` (asymmetric)    | `"HS256"`                                               |
+| `Jwt__Key`            | Symmetric secret key — used when `Jwt__Algorithm = HS256`                       | `"featbit-identity-key-must-longer-than-32-characters"` |
+| `Jwt__PrivateKeyPath` | Path to a PEM-encoded RSA private key file — used when `Jwt__Algorithm = RS256` | `""`                                                    |
+| `Jwt__PublicKeyPath`  | Path to a PEM-encoded RSA public key file — used when `Jwt__Algorithm = RS256`  | `""`                                                    |
 
 > [!IMPORTANT]
-> **Security Notice**: You must change the `Jwt__Key` value to a secure, randomly generated key that is at least 32
-> characters long.
+> **Security Notice**: Configure JWT signing according to your security requirements.
 >
+> **HS256 (default — symmetric)**
+> - You must change `Jwt__Key` to a secure, randomly generated secret.
 > - **Recommended length**: 64 characters (32 characters minimum)
 > - **Generation**: Use a cryptographically secure random generator or tools like [JWT Secrets](https://jwtsecrets.com/)
 > - **Storage**: Keep this key secret and never commit it to version control
+> - This key must remain consistent across all API instances.
 >
-> This key is used for signing JWT tokens and must remain consistent across all API instances.
+> **RS256 (asymmetric — recommended for production)**
+> - Set `Jwt__Algorithm` to `RS256`.
+> - Generate a 2048-bit (or larger) RSA key pair and provide paths to the PEM files via `Jwt__PrivateKeyPath` and
+    `Jwt__PublicKeyPath`.
+> - The private key file must be kept secret; only the public key is needed for token validation.
+> - In Docker/Kubernetes deployments, mount the key files as secrets and set the paths accordingly.
+> - Example key generation:
+    `openssl genrsa -out jwt-private.pem 2048 && openssl rsa -in jwt-private.pem -pubout -out jwt-public.pem`
 
 ### MongoDB
 
