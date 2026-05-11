@@ -32,7 +32,7 @@ public class SubscriptionValidator : AbstractValidator<Subscription>
             .WithErrorCode(ErrorCodes.Invalid("plan"));
 
         RuleFor(x => x.Mau)
-            .GreaterThan(1_000).WithErrorCode(ErrorCodes.Invalid("mau"));
+            .GreaterThanOrEqualTo(1_000).WithErrorCode(ErrorCodes.Invalid("mau"));
 
         RuleFor(x => x.BillingCycle)
             .Must(BillingCycle.IsDefined)

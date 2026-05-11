@@ -39,7 +39,7 @@ public class BillingController : ApiControllerBase
         return Ok(session);
     }
 
-    [HttpPut("subscription/upgrade")]
+    [HttpPost("subscription/upgrade")]
     public async Task<ApiResponse<string>> UpgradeSubscriptionAsync(UpgradeSubscription request)
     {
         request.WorkspaceId = WorkspaceId;
@@ -57,7 +57,7 @@ public class BillingController : ApiControllerBase
         return Ok(preview);
     }
 
-    [HttpPut("subscription/downgrade")]
+    [HttpPost("subscription/downgrade")]
     public async Task<ApiResponse<string>> DowngradeSubscriptionAsync(DowngradeSubscription request)
     {
         request.WorkspaceId = WorkspaceId;

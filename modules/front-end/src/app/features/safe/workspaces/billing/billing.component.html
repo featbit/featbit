@@ -91,9 +91,9 @@
           <i class="pending-downgrade-icon" nz-icon nzType="info-circle" nzTheme="outline"></i>
           <div class="pending-downgrade-text">
             <strong>Scheduled downgrade:</strong> Your plan will downgrade to
-            <strong>{{ pendingDowngrade.name }}</strong>
-            ({{ pendingDowngrade.totalMau | number }} MAU, {{ pendingDowngrade.billingCycle }} billing)
-            on <strong>{{ pendingDowngrade.effectiveDate | date: 'mediumDate' }}</strong>.
+            <strong>{{ pendingDowngrade.plan }}</strong> plan
+            (including {{ pendingDowngrade.mau | number }} MAU, {{ pendingDowngrade.addOnFeatures.join(',') }} on {{ pendingDowngrade.billingCycle }} billing)
+            on <strong>{{ pendingDowngrade.effectiveAt | date: 'mediumDate' }}</strong>.
           </div>
         </div>
       }

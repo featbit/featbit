@@ -44,7 +44,8 @@ export class BillingService {
           currentPeriodStart: raw.currentPeriodStart ? new Date(raw.currentPeriodStart) : undefined,
           currentPeriodEnd: raw.currentPeriodEnd ? new Date(raw.currentPeriodEnd) : undefined,
           subscriberSince: raw.createdAt ? new Date(raw.createdAt) : undefined,
-          usage: raw.usage
+          usage: raw.usage,
+          pendingDowngrade: raw.pendingDowngrade,
         } as WorkspaceSubscription;
       })
     );
