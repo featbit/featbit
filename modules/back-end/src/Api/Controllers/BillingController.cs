@@ -30,6 +30,18 @@ public class BillingController : ApiControllerBase
         return Ok(currentCycle);
     }
 
+    [HttpGet("license")]
+    public async Task<ApiResponse<string>> GetLicenseAsync()
+    {
+        var request = new GetLicense
+        {
+            WorkspaceId = WorkspaceId
+        };
+
+        var license = await Mediator.Send(request);
+        return Ok(license);
+    }
+
     [HttpPost("subscription")]
     public async Task<ApiResponse<string>> CreateSubscriptionAsync(CreateSubscription request)
     {

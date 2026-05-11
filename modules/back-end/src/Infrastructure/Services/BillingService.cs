@@ -38,7 +38,7 @@ public class BillingService(
         }
     }
 
-    public Task<string> GetCurrentBillingCycleAsync(Guid workspaceId)
+    public Task<string> GetCurrentCycleAsync(Guid workspaceId)
     {
         var httpClient = CreateBillingServiceClient();
         var route = $"api/subscriptions/{workspaceId}/current-cycle";
@@ -139,11 +139,33 @@ public class BillingService(
         }
     }
 
+    public async Task<string?> GetLicenseAsync(Guid workspaceId)
+    {
+        var httpClient = CreateBillingServiceClient();
+        var route = $"api/licenses/{workspaceId}/current";
+
+        try
+        {
+            var license = await httpClient.GetStringAsync(route);
+            return license;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(
+                ex,
+                "Exception occurred while retrieving license for workspace {WorkspaceId}.",
+                workspaceId
+            );
+
+            return null;
+        }
+    }
+
     public async Task<bool> CreateFreeLicenseAsync(Guid workspaceId, string email)
     {
         var httpClient = CreateBillingServiceClient();
         var payload = new { email };
-        var route = $"api/subscriptions/{workspaceId}/free-license";
+        var route = $"api/licenses/{workspaceId}/free-license";
 
         try
         {
@@ -248,11 +270,12 @@ public class BillingService(
 public class NoopBillingService : IBillingService
 {
     public Task<string?> GetSubscriptionAsync(Guid workspaceId) => Task.FromResult<string?>(null);
-    public Task<string?> GetCurrentBillingCycleAsync(Guid workspaceId) => Task.FromResult<string?>(null);
+    public Task<string?> GetCurrentCycleAsync(Guid workspaceId) => Task.FromResult<string?>(null);
     public Task<string?> CreateSubscriptionAsync(CreateSubscription request) => Task.FromResult<string?>(null);
     public Task<string?> GetProrationPreviewAsync(GetProrationPreview request) => Task.FromResult<string?>(null);
     public Task<string?> UpgradeSubscriptionAsync(UpgradeSubscription request) => Task.FromResult<string?>(null);
     public Task<string?> DowngradeSubscriptionAsync(DowngradeSubscription request) => Task.FromResult<string?>(null);
+    public Task<string?> GetLicenseAsync(Guid workspaceId)  => Task.FromResult<string?>(null);
     public Task<bool> CreateFreeLicenseAsync(Guid workspaceId, string email) => Task.FromResult(false);
     public Task<string?> GetBillingInformationAsync(Guid workspaceId) => Task.FromResult<string?>(null);
     public Task<bool> UpdateBillingInformationAsync(Guid workspaceId, string payload) => Task.FromResult(false);
