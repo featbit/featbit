@@ -9,6 +9,17 @@ export interface BillingInformation {
   country: string;
 }
 
+export interface BillingLicense {
+  plan: string;
+  billingCycle: string;
+  mau: number;
+  addOnFeatures: string[];
+  status: string;
+  validFrom: Date;
+  validUntil: Date;
+  createdAt: Date;
+}
+
 export interface BillingCycle {
   startDate: Date;
   endDate: Date;

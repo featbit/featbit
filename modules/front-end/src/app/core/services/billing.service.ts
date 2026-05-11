@@ -7,6 +7,7 @@ import { LicenseFeatureEnum, WorkspaceSubscription } from '@shared/types';
 import {
   BillingCycle,
   BillingInformation,
+  BillingLicense,
   CheckoutSession,
   InvoiceItem,
   Subscription
@@ -101,6 +102,19 @@ export class BillingService {
         const raw = JSON.parse(responseJsonString);
         if (raw === null) {
           throw new Error('Failed to downgrade subscription');
+        }
+
+        return raw;
+      })
+    );
+  }
+
+  getLicense(): Observable<BillingLicense> {
+    return this.http.get<string>(`${this.baseUrl}/license`).pipe(
+      map(licenseJsonString => {
+        const raw = JSON.parse(licenseJsonString);
+        if (raw === null) {
+          throw new Error('Failed to fetch license');
         }
 
         return raw;

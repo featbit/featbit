@@ -25,6 +25,7 @@ import { NzSegmentedModule } from 'ng-zorro-antd/segmented';
 import { NzSkeletonModule } from "ng-zorro-antd/skeleton";
 import { NzTagModule } from "ng-zorro-antd/tag";
 import { NzSliderModule } from "ng-zorro-antd/slider";
+import { NzProgressModule } from "ng-zorro-antd/progress";
 import { CoreModule } from "@core/core.module";
 import { NzToolTipModule } from "ng-zorro-antd/tooltip";
 import { WorkspaceComponent } from "@features/safe/workspaces/workspace/workspace.component";
@@ -35,6 +36,7 @@ import { UsageComponent } from "@features/safe/workspaces/usage/usage.component"
 import { BillingComponent } from './billing/billing.component';
 import { BillingInformationComponent } from "./billing/billing-information/billing-information.component";
 import { InvoicesComponent } from './billing/invoices/invoices.component';
+import { CheckoutReturnComponent } from "./billing/checkout-return/checkout-return.component";
 
 @NgModule({
   declarations: [
@@ -45,7 +47,8 @@ import { InvoicesComponent } from './billing/invoices/invoices.component';
     UsageComponent,
     BillingComponent,
     BillingInformationComponent,
-    InvoicesComponent
+    InvoicesComponent,
+    CheckoutReturnComponent
   ],
   imports: [
     CommonModule,
@@ -71,6 +74,7 @@ import { InvoicesComponent } from './billing/invoices/invoices.component';
     NzSkeletonModule,
     NzTagModule,
     NzSliderModule,
+    NzProgressModule,
     ScrollingModule,
     ReactiveFormsModule,
     WorkspacesRoutingModule,
