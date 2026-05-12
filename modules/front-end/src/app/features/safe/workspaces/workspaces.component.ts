@@ -19,9 +19,7 @@ export class WorkspacesComponent implements OnInit {
 
   paymentStatus: string = undefined;
 
-  // TODO: use actual hosting mode
-  // isSaas = environment.hostingMode === HOSTING_MODE.SAAS;
-  isSaas = true;
+  isSaas = environment.hostingMode === HOSTING_MODE.SAAS;
   canUpdateLicense: boolean = false;
   isGlobalUserGranted: boolean = false;
 
