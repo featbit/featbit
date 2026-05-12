@@ -10,6 +10,7 @@ import {
 import { WorkspaceSubscription } from "@shared/types";
 import { BillingService } from "@services/billing.service";
 import { NzMessageService } from "ng-zorro-antd/message";
+import { NzNotificationService } from "ng-zorro-antd/notification";
 import { formatDate } from "@angular/common";
 import { subDays } from "date-fns";
 
@@ -22,6 +23,7 @@ import { subDays } from "date-fns";
 export class BillingComponent implements OnInit {
   private billingService = inject(BillingService);
   private message = inject(NzMessageService);
+  private notification = inject(NzNotificationService);
 
   isLoading = true;
 
@@ -31,6 +33,13 @@ export class BillingComponent implements OnInit {
   isFreePlan = true;
 
   ngOnInit() {
+    const pending = sessionStorage.getItem('billingNotification');
+    if (pending) {
+      sessionStorage.removeItem('billingNotification');
+      const { title, message } = JSON.parse(pending);
+      this.notification.success(title, message, { nzDuration: 7_000 });
+    }
+
     this.billingService.getCurrentSubscription().subscribe({
       next: subscription => {
         this.subscription = subscription;

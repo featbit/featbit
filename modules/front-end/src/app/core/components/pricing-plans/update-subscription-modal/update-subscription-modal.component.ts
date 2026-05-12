@@ -15,7 +15,6 @@ import { BillingService } from '@core/services/billing.service';
 import { Subscription as BillingSubscriptionPayload } from '@features/safe/workspaces/billing/types';
 import { NzMessageService } from "ng-zorro-antd/message";
 import { finalize } from "rxjs/operators";
-import { NzNotificationService } from 'ng-zorro-antd/notification';
 
 interface SubscriptionNote {
   icon: string;
@@ -32,7 +31,6 @@ interface SubscriptionNote {
 export class UpdateSubscriptionModalComponent {
   billingService = inject(BillingService);
   message = inject(NzMessageService);
-  notification = inject(NzNotificationService);
 
   @Input()
   visible: boolean;
@@ -222,11 +220,10 @@ export class UpdateSubscriptionModalComponent {
       .pipe(finalize(() => this.isConfirming = false))
       .subscribe({
         next: () => {
-          this.notification.success(
-            'Subscription Upgraded',
-            'Your workspace has been upgrade to the new plan. New limits and features are now available immediately.',
-            { nzDuration: 7_000 }
-          );
+          sessionStorage.setItem('billingNotification', JSON.stringify({
+            title: 'Subscription Upgraded',
+            message: 'Your workspace has been upgraded to the new plan. New limits and features are now available immediately.'
+          }));
           this.close.emit(true);
         },
         error: () => this.message.error('Failed to upgrade subscription. If the problem persists, please contact support.')
@@ -236,11 +233,10 @@ export class UpdateSubscriptionModalComponent {
       .pipe(finalize(() => this.isConfirming = false))
       .subscribe({
         next: () => {
-          this.notification.success(
-            'Downgrade Scheduled',
-            'Your current access remains active until renewal. The new configuration will take effect on your next billing cycle.',
-            { nzDuration: 7_000 }
-          );
+          sessionStorage.setItem('billingNotification', JSON.stringify({
+            title: 'Downgrade Scheduled',
+            message: 'Your current access remains active until renewal. The new configuration will take effect on your next billing cycle.'
+          }));
           this.close.emit(true);
         },
         error: () => this.message.error('Failed to downgrade subscription. If the problem persists, please contact support.'),
