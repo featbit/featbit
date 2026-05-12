@@ -55,10 +55,10 @@ internal sealed class JwtOptionsValidator : IValidateOptions<JwtOptions>
                 {
                     errors.Add($"Jwt__PrivateKeyPath file not found: {privateKeyPath}");
                 }
-                else if (!TryLoadSecurityKey(options.Algorithm, privateKeyPath, out var errorMessage))
+                else if (!TryLoadSecurityKey(options.Algorithm, privateKeyPath, out var privateKeyError))
                 {
                     errors.Add(
-                        $"Failed to load private key for algorithm '{options.Algorithm}' from: {privateKeyPath}. Error: {errorMessage}"
+                        $"Failed to load private key for algorithm '{options.Algorithm}' from: {privateKeyPath}. Error: {privateKeyError}"
                     );
                 }
 
@@ -71,10 +71,10 @@ internal sealed class JwtOptionsValidator : IValidateOptions<JwtOptions>
                 {
                     errors.Add($"Jwt__PublicKeyPath file not found: {publicKeyPath}");
                 }
-                else if (!TryLoadSecurityKey(options.Algorithm, publicKeyPath, out var errorMessage))
+                else if (!TryLoadSecurityKey(options.Algorithm, publicKeyPath, out var publicKeyError))
                 {
                     errors.Add(
-                        $"Failed to load public key for algorithm '{options.Algorithm}' from: {publicKeyPath}. Error: {errorMessage}"
+                        $"Failed to load public key for algorithm '{options.Algorithm}' from: {publicKeyPath}. Error: {publicKeyError}"
                     );
                 }
 
