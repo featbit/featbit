@@ -91,12 +91,11 @@ export interface WorkspaceSubscription {
     mau: number;
   },
   pendingDowngrade?: {
-    key: string;
-    name: string;
-    totalMau: number;
+    plan: string;
+    mau: number;
     billingCycle: string;
     addOnFeatures: string[];
-    effectiveDate: Date;
+    effectiveAt: Date;
   }
 }
 
