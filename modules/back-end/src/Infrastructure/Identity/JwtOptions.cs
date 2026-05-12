@@ -4,10 +4,11 @@ namespace Infrastructure.Identity;
 
 /// <summary>
 /// Strongly-typed representation of the <c>Jwt</c> configuration section.
-/// Supports two signing algorithms:
+/// Supports three signing algorithms:
 /// <list type="bullet">
 ///   <item><description><b>HS256</b> (default) — HMAC-SHA256 symmetric signing. Requires <see cref="Key"/>.</description></item>
 ///   <item><description><b>RS256</b> — RSA-SHA256 asymmetric signing. Requires <see cref="PrivateKeyPath"/> and <see cref="PublicKeyPath"/>.</description></item>
+///   <item><description><b>ES256</b> — ECDSA-SHA256 asymmetric signing. Requires <see cref="PrivateKeyPath"/> and <see cref="PublicKeyPath"/>.</description></item>
 /// </list>
 /// </summary>
 public record JwtOptions
@@ -34,19 +35,19 @@ public record JwtOptions
 
     /// <summary>
     /// Symmetric shared secret used to sign and verify tokens when <see cref="Algorithm"/> is <c>"HS256"</c>.
-    /// Not used for RS256.
+    /// Not used for RS256 or ES256.
     /// </summary>
     public string Key { get; set; } = string.Empty;
 
     /// <summary>
-    /// Absolute or relative path to the PEM-encoded RSA <b>private</b> key file used to <em>sign</em> tokens
-    /// when <see cref="Algorithm"/> is <c>"RS256"</c>. Not used for HS256.
+    /// Absolute or relative path to the PEM-encoded <b>private</b> key file used to <em>sign</em> tokens
+    /// when <see cref="Algorithm"/> is <c>"RS256"</c> or <c>"ES256"</c>. Not used for HS256.
     /// </summary>
     public string PrivateKeyPath { get; set; } = string.Empty;
 
     /// <summary>
-    /// Absolute or relative path to the PEM-encoded RSA <b>public</b> key file used to <em>verify</em> tokens
-    /// when <see cref="Algorithm"/> is <c>"RS256"</c>. Not used for HS256.
+    /// Absolute or relative path to the PEM-encoded <b>public</b> key file used to <em>verify</em> tokens
+    /// when <see cref="Algorithm"/> is <c>"RS256"</c> or <c>"ES256"</c>. Not used for HS256.
     /// </summary>
     public string PublicKeyPath { get; set; } = string.Empty;
 
