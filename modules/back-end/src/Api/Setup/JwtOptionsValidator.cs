@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using Infrastructure.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -54,6 +55,12 @@ internal sealed class JwtOptionsValidator : IValidateOptions<JwtOptions>
                 {
                     errors.Add($"Jwt__PrivateKeyPath file not found: {privateKeyPath}");
                 }
+                else if (!TryLoadSecurityKey(options.Algorithm, privateKeyPath, out var errorMessage))
+                {
+                    errors.Add(
+                        $"Failed to load private key for algorithm '{options.Algorithm}' from: {privateKeyPath}. Error: {errorMessage}"
+                    );
+                }
 
                 var publicKeyPath = options.PublicKeyPath;
                 if (string.IsNullOrWhiteSpace(publicKeyPath))
@@ -64,6 +71,12 @@ internal sealed class JwtOptionsValidator : IValidateOptions<JwtOptions>
                 {
                     errors.Add($"Jwt__PublicKeyPath file not found: {publicKeyPath}");
                 }
+                else if (!TryLoadSecurityKey(options.Algorithm, publicKeyPath, out var errorMessage))
+                {
+                    errors.Add(
+                        $"Failed to load public key for algorithm '{options.Algorithm}' from: {publicKeyPath}. Error: {errorMessage}"
+                    );
+                }
 
                 break;
         }
@@ -71,5 +84,38 @@ internal sealed class JwtOptionsValidator : IValidateOptions<JwtOptions>
         return errors.Count > 0
             ? ValidateOptionsResult.Fail(errors)
             : ValidateOptionsResult.Success;
+    }
+
+    private static bool TryLoadSecurityKey(string algorithm, string keyPath, out string errorMessage)
+    {
+        try
+        {
+            switch (algorithm)
+            {
+                case SecurityAlgorithms.RsaSha256:
+                {
+                    using var rsa = RSA.Create();
+                    rsa.ImportFromPem(File.ReadAllText(keyPath));
+                    _ = new RsaSecurityKey(rsa);
+                    break;
+                }
+
+                case SecurityAlgorithms.EcdsaSha256:
+                {
+                    using var ecdsa = ECDsa.Create();
+                    ecdsa.ImportFromPem(File.ReadAllText(keyPath));
+                    _ = new ECDsaSecurityKey(ecdsa);
+                    break;
+                }
+            }
+
+            errorMessage = string.Empty;
+            return true;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+            return false;
+        }
     }
 }
