@@ -106,6 +106,8 @@ public static class ServicesRegister
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = jwtOptions.VerificationSecurityKey,
 
+                    ValidAlgorithms = [jwtOptions.Algorithm],
+
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.Zero
                 };
