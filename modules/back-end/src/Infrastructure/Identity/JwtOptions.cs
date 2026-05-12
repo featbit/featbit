@@ -18,7 +18,7 @@ public record JwtOptions
     public const string Jwt = nameof(Jwt);
 
     /// <summary>
-    /// Signing algorithm. Valid values: <c>"HS256"</c> (default) or <c>"RS256"</c>.
+    /// Signing algorithm. Valid values: <c>"HS256"</c> (default), <c>"RS256"</c>, or <c>"ES256"</c>.
     /// </summary>
     public string Algorithm { get; set; } = SecurityAlgorithms.HmacSha256;
 

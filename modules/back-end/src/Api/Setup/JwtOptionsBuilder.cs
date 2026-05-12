@@ -38,6 +38,16 @@ public static class JwtOptionsBuilder
                 publicKey.ImportFromPem(File.ReadAllText(options.PublicKeyPath));
                 options.VerificationSecurityKey = new RsaSecurityKey(publicKey);
                 break;
+
+            case SecurityAlgorithms.EcdsaSha256:
+                var ecPrivateKey = ECDsa.Create();
+                ecPrivateKey.ImportFromPem(File.ReadAllText(options.PrivateKeyPath));
+                options.SigningSecurityKey = new ECDsaSecurityKey(ecPrivateKey);
+
+                var ecPublicKey = ECDsa.Create();
+                ecPublicKey.ImportFromPem(File.ReadAllText(options.PublicKeyPath));
+                options.VerificationSecurityKey = new ECDsaSecurityKey(ecPublicKey);
+                break;
         }
 
         return options;

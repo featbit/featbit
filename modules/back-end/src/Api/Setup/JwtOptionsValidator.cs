@@ -15,7 +15,12 @@ internal sealed class JwtOptionsValidator : IValidateOptions<JwtOptions>
     {
         var errors = new List<string>();
 
-        string[] supportedAlgorithms = [SecurityAlgorithms.HmacSha256, SecurityAlgorithms.RsaSha256];
+        string[] supportedAlgorithms =
+        [
+            SecurityAlgorithms.HmacSha256,
+            SecurityAlgorithms.RsaSha256,
+            SecurityAlgorithms.EcdsaSha256
+        ];
         if (!supportedAlgorithms.Contains(options.Algorithm))
         {
             errors.Add(
@@ -48,10 +53,11 @@ internal sealed class JwtOptionsValidator : IValidateOptions<JwtOptions>
                 break;
 
             case SecurityAlgorithms.RsaSha256:
+            case SecurityAlgorithms.EcdsaSha256:
                 var privateKeyPath = options.PrivateKeyPath;
                 if (string.IsNullOrWhiteSpace(privateKeyPath))
                 {
-                    errors.Add("Jwt__PrivateKeyPath is required when Algorithm is 'RS256'.");
+                    errors.Add($"Jwt__PrivateKeyPath is required when Algorithm is '{options.Algorithm}'.");
                 }
                 else if (!File.Exists(privateKeyPath))
                 {
@@ -61,7 +67,7 @@ internal sealed class JwtOptionsValidator : IValidateOptions<JwtOptions>
                 var publicKeyPath = options.PublicKeyPath;
                 if (string.IsNullOrWhiteSpace(publicKeyPath))
                 {
-                    errors.Add("Jwt__PublicKeyPath is required when Algorithm is 'RS256'.");
+                    errors.Add($"Jwt__PublicKeyPath is required when Algorithm is '{options.Algorithm}'.");
                 }
                 else if (!File.Exists(publicKeyPath))
                 {

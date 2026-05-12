@@ -53,14 +53,14 @@ requests, and that it can connect to its dependencies (a database, message queue
 
 JWT (JSON Web Token) configuration for authentication and authorization.
 
-| Name                  | Description                                                                     | Default Value                                           |
-|-----------------------|---------------------------------------------------------------------------------|---------------------------------------------------------|
-| `Jwt__Issuer`         | JWT Issuer Name                                                                 | `"featbit"`                                             |
-| `Jwt__Audience`       | JWT Audience                                                                    | `"featbit-api"`                                         |
-| `Jwt__Algorithm`      | Signing algorithm. Valid values: `HS256` (symmetric) or `RS256` (asymmetric)    | `"HS256"`                                               |
-| `Jwt__Key`            | Symmetric secret key — used when `Jwt__Algorithm = HS256`                       | `"featbit-identity-key-must-longer-than-32-characters"` |
-| `Jwt__PrivateKeyPath` | Path to a PEM-encoded RSA private key file — used when `Jwt__Algorithm = RS256` | `""`                                                    |
-| `Jwt__PublicKeyPath`  | Path to a PEM-encoded RSA public key file — used when `Jwt__Algorithm = RS256`  | `""`                                                    |
+| Name                  | Description                                                                            | Default Value                                           |
+|-----------------------|----------------------------------------------------------------------------------------|---------------------------------------------------------|
+| `Jwt__Issuer`         | JWT Issuer Name                                                                        | `"featbit"`                                             |
+| `Jwt__Audience`       | JWT Audience                                                                           | `"featbit-api"`                                         |
+| `Jwt__Algorithm`      | Signing algorithm. Valid values: `HS256` (symmetric), `RS256` or `ES256` (asymmetric)  | `"HS256"`                                               |
+| `Jwt__Key`            | Symmetric secret key — used when `Jwt__Algorithm = HS256`                              | `"featbit-identity-key-must-longer-than-32-characters"` |
+| `Jwt__PrivateKeyPath` | Path to a PEM-encoded private key file — used when `Jwt__Algorithm = RS256` or `ES256` | `""`                                                    |
+| `Jwt__PublicKeyPath`  | Path to a PEM-encoded public key file — used when `Jwt__Algorithm = RS256` or `ES256`  | `""`                                                    |
 
 > [!IMPORTANT]
 > **Security Notice**: Configure JWT signing according to your security requirements.
@@ -72,14 +72,14 @@ JWT (JSON Web Token) configuration for authentication and authorization.
 > - **Storage**: Keep this key secret and never commit it to version control
 > - This key must remain consistent across all API instances.
 >
-> **RS256 (asymmetric — recommended for production)**
-> - Set `Jwt__Algorithm` to `RS256`.
-> - Generate a 2048-bit (or larger) RSA key pair and provide paths to the PEM files via `Jwt__PrivateKeyPath` and
-    `Jwt__PublicKeyPath`.
+> **RS256 / ES256 (asymmetric — recommended for production)**
+> - Set `Jwt__Algorithm` to `RS256` or `ES256`.
+> - Generate a key pair and provide paths to the PEM files via `Jwt__PrivateKeyPath` and `Jwt__PublicKeyPath`.
 > - The private key file must be kept secret; only the public key is needed for token validation.
 > - In Docker/Kubernetes deployments, mount the key files as secrets and set the paths accordingly.
 > - Example key generation:
-    `openssl genrsa -out jwt-private.pem 2048 && openssl rsa -in jwt-private.pem -pubout -out jwt-public.pem`
+>   - **RS256**: `openssl genrsa -out jwt-private.pem 2048 && openssl rsa -in jwt-private.pem -pubout -out jwt-public.pem`
+>   - **ES256**: `openssl ecparam -name prime256v1 -genkey -noout -out jwt-private.pem && openssl ec -in jwt-private.pem -pubout -out jwt-public.pem`
 
 ### MongoDB
 
