@@ -78,8 +78,8 @@ JWT (JSON Web Token) configuration for authentication and authorization.
 > - The private key file must be kept secret; only the public key is needed for token validation.
 > - In Docker/Kubernetes deployments, mount the key files as secrets and set the paths accordingly.
 > - Example key generation:
->   - **RS256**: `openssl genrsa -out jwt-private.pem 2048 && openssl rsa -in jwt-private.pem -pubout -out jwt-public.pem`
->   - **ES256**: `openssl ecparam -name prime256v1 -genkey -noout -out jwt-private.pem && openssl ec -in jwt-private.pem -pubout -out jwt-public.pem`
+>   - **RS256**: `openssl genrsa -out jwt-rs-private.pem 2048 && openssl rsa -in jwt-rs-private.pem -pubout -out jwt-rs-public.pem`
+>   - **ES256**: `openssl ecparam -name prime256v1 -genkey -noout -out jwt-es-private.pem && openssl ec -in jwt-es-private.pem -pubout -out jwt-es-public.pem`
 
 ### MongoDB
 
