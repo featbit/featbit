@@ -120,7 +120,7 @@
           </div>
           <div class="plan-card-price">
             <span class="price-amount"><span class="price-currency">$</span>{{ getPlanTotalPrice(enterprisePlan) | number }}</span>
-            <span class="price-period">{{ enterpriseBillingCycle === 'monthly' ? '/ month' : '/ year' }}</span>
+            <span class="price-period">{{ enterpriseBillingCycle === 'month' ? '/ month' : '/ year' }}</span>
           </div>
           <div class="yearly-savings" [class.invisible]="enterpriseBillingCycle === 'monthly'">Save ~16% vs monthly
           </div>
