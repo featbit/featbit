@@ -1,6 +1,3 @@
-using Application.Bases;
-using Application.Bases.Exceptions;
-
 namespace Application.Billing;
 
 public class CreateSubscription : Subscription, IRequest<string>;
