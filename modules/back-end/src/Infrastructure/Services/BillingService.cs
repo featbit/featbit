@@ -38,14 +38,14 @@ public class BillingService(
         }
     }
 
-    public Task<string> GetCurrentCycleAsync(Guid workspaceId)
+    public async Task<string?> GetCurrentCycleAsync(Guid workspaceId)
     {
         var httpClient = CreateBillingServiceClient();
         var route = $"api/subscriptions/{workspaceId}/current-cycle";
 
         try
         {
-            return httpClient.GetStringAsync(route);
+            return await httpClient.GetStringAsync(route);
         }
         catch (Exception ex)
         {
@@ -55,7 +55,7 @@ public class BillingService(
                 workspaceId
             );
 
-            return Task.FromResult(string.Empty);
+            return null;
         }
     }
 
@@ -101,7 +101,7 @@ public class BillingService(
     public async Task<string?> UpgradeSubscriptionAsync(UpgradeSubscription request)
     {
         var httpClient = CreateBillingServiceClient();
-        const string route = "/api/subscriptions/upgrade";
+        const string route = "api/subscriptions/upgrade";
 
         try
         {
@@ -121,7 +121,7 @@ public class BillingService(
     public async Task<string?> DowngradeSubscriptionAsync(DowngradeSubscription request)
     {
         var httpClient = CreateBillingServiceClient();
-        const string route = "/api/subscriptions/downgrade";
+        const string route = "api/subscriptions/downgrade";
 
         try
         {

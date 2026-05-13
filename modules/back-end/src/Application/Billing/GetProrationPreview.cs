@@ -2,6 +2,14 @@ namespace Application.Billing;
 
 public class GetProrationPreview : Subscription, IRequest<string>;
 
+public class GetProrationPreviewValidator : AbstractValidator<GetProrationPreview>
+{
+    public GetProrationPreviewValidator()
+    {
+        Include(new SubscriptionValidator());
+    }
+}
+
 public class UpgradeSubscriptionPreviewHandler(IBillingService billingService)
     : IRequestHandler<GetProrationPreview, string>
 {
