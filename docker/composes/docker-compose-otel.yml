@@ -33,6 +33,8 @@ services:
       - DbProvider=MongoDb
       - MqProvider=Redis
       - CacheProvider=Redis
+      - Jwt__Algorithm=HS256
+      - Jwt__Key=please_change_me_to_a_secure_secret_key
     depends_on:
       - mongodb
       - redis

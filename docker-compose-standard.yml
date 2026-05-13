@@ -23,6 +23,8 @@ services:
       - Postgres__ConnectionString=Host=postgresql;Port=5432;Username=postgres;Password=please_change_me;Database=featbit
       - Redis__ConnectionString=redis:6379
       - OLAP__ServiceHost=http://da-server
+      - Jwt__Algorithm=HS256
+      - Jwt__Key=please_change_me_to_a_secure_secret_key
     depends_on:
       - postgresql
       - redis

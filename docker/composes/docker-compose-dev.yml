@@ -32,6 +32,8 @@ services:
       - CacheProvider=Redis
       - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
       - Redis__ConnectionString=redis:6379
+      - Jwt__Algorithm=HS256
+      - Jwt__Key=please_change_me_to_a_secure_secret_key
     depends_on:
       - mongodb
       - redis
