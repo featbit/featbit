@@ -1,5 +1,6 @@
 using Application.Usages;
 using Domain.Users;
+using Infrastructure;
 using Infrastructure.Caches;
 using Infrastructure.MQ;
 using Infrastructure.Persistence;
@@ -51,6 +52,14 @@ public static class ConfigureServices
         services.AddDbSpecificServices(configuration);
         services.AddTransient<IEnvironmentAppService, AppServices.EnvironmentAppService>();
         services.AddTransient<IFeatureFlagAppService, AppServices.FeatureFlagAppService>();
+        if (configuration.GetHostingMode() == HostingMode.SaaS)
+        {
+            services.AddTransient<IBillingService, Services.BillingService>();
+        }
+        else
+        {
+            services.AddTransient<IBillingService, Services.NoopBillingService>();
+        }
 
         // InsightsWriter must be a singleton service
         services.AddSingleton(typeof(AppServices.InsightsWriter));

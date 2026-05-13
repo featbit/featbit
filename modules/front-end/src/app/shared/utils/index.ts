@@ -149,7 +149,3 @@ export const getTimezoneString = () => {
 
   return encodeURIComponent(`Etc/GMT${offset >= 0 ? '-': '+'}${Math.abs(offset)}`);
 }
-
-export const trimJsonString = (json: string) => {
-  return JSON.stringify(JSON.parse(json));
-}

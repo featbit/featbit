@@ -34,7 +34,7 @@ export class IndexComponent implements OnInit {
     private msg: NzMessageService,
     private modal: NzModalService,
     private permissionsService: PermissionsService,
-    private permissionLicenseService: PermissionLicenseService,
+    private permissionLicenseService: PermissionLicenseService
   ) { }
 
   featureFlagFilter: IFeatureFlagListFilter = new IFeatureFlagListFilter();

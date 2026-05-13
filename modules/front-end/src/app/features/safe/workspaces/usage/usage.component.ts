@@ -7,6 +7,9 @@ import { WorkspaceService } from '@core/services/workspace.service';
 import { EnvironmentUsage, UsageSummary, WorkspaceUsageFilter } from '@features/safe/workspaces/types/workspace';
 import { NzMessageService } from "ng-zorro-antd/message";
 import { finalize } from 'rxjs/operators';
+import { BillingService } from '@core/services/billing.service';
+import { BillingCycle } from '../billing/types';
+import { add, differenceInDays, subDays } from "date-fns";
 
 interface DailyUsage {
   date: string;
@@ -26,9 +29,10 @@ interface Period {
 })
 export class UsageComponent implements OnInit {
   private workspaceService = inject(WorkspaceService);
+  private billingService = inject(BillingService);
   private message = inject(NzMessageService);
 
-  isLoading = false;
+  isLoading = true;
   isFirstLoad = true;
 
   isSaas = environment.hostingMode === HOSTING_MODE.SAAS;
@@ -36,6 +40,9 @@ export class UsageComponent implements OnInit {
 
   periods: Period[] = [];
   selectedPeriod!: string;
+
+  isLoadingBillingCycle: boolean = this.isSaas;
+  currentBillingCycle: BillingCycle | undefined = undefined;
 
   get selectedPeriodRange(): string {
     const now = new Date();
@@ -56,8 +63,11 @@ export class UsageComponent implements OnInit {
         return `${fmt(start)} - ${fmt(end)}`;
       }
       case 'currentBilling':
+        return `${fmt(this.currentBillingCycle!.startDate)} - ${fmt(this.currentBillingCycle!.endDate)}`;
       case 'previousBilling':
-        return $localize`:@@workspace.usage.no-data-for-now:No data for now`;
+        const prevEnd = subDays(this.currentBillingCycle!.startDate, 1);
+        const prevStart = add(prevEnd, { months: -1, days: 1 });
+        return `${fmt(prevStart)} - ${fmt(prevEnd)}`;
       default:
         return '';
     }
@@ -87,11 +97,6 @@ export class UsageComponent implements OnInit {
   private dailyCustomMetrics: DailyUsage[] = [];
 
   ngOnInit(): void {
-    this.initBillingPeriods();
-    this.loadUsageData();
-  }
-
-  initBillingPeriods(): void {
     this.periods = [
       { label: $localize`:@@workspace.usage.this-month:This month`, value: 'thisMonth' },
       { label: $localize`:@@workspace.usage.last-7-days:Last 7 days`, value: 'last7d' },
@@ -99,13 +104,33 @@ export class UsageComponent implements OnInit {
     ];
 
     if (this.isSaas) {
-      this.periods.unshift(
-        { label: $localize`:@@workspace.usage.current-billing-cycle:Current billing cycle`, value: 'currentBilling' },
-        { label: $localize`:@@workspace.usage.previous-billing-cycle:Previous billing cycle`, value: 'previousBilling' },
-      );
-    }
+      this.billingService.getCurrentBillingCycle().subscribe({
+        next: (billingCycle) => {
+          this.currentBillingCycle = {
+            startDate: billingCycle.startDate,
+            // endDate is exclusive, adjust to be inclusive
+            endDate: subDays(billingCycle.endDate, 1)
+          };
 
-    this.selectedPeriod = this.periods[0].value;
+          // Only add billing-cycle period options for monthly cycles.
+          // Yearly (and other long) cycles are not yet supported by the chart's daily-granularity view.
+          const cycleDays = differenceInDays(billingCycle.endDate, billingCycle.startDate);
+          if (cycleDays <= 31) {
+            this.periods.unshift(
+              { label: 'Current billing cycle', value: 'currentBilling' },
+              { label: 'Previous billing cycle', value: 'previousBilling' },
+            );
+          }
+
+          this.selectedPeriod = this.periods[0].value;
+          this.loadUsageData();
+          this.isLoadingBillingCycle = false;
+        }, error: () => this.message.error('Failed to load billing cycle information. Please try again later.')
+      });
+    } else {
+      this.selectedPeriod = this.periods[0].value;
+      this.loadUsageData();
+    }
   }
 
   onPeriodChange(): void {
@@ -132,16 +157,30 @@ export class UsageComponent implements OnInit {
     switch (this.selectedPeriod) {
       case 'last7d': {
         endDate = now;
-        startDate = new Date(now); startDate.setDate(now.getDate() - 6);
-        prevEndDate = new Date(startDate); prevEndDate.setDate(startDate.getDate() - 1);
-        prevStartDate = new Date(prevEndDate); prevStartDate.setDate(prevEndDate.getDate() - 6);
+        startDate = subDays(now, 6);
+        prevEndDate = subDays(startDate, 1);
+        prevStartDate = subDays(prevEndDate, 6);
         break;
       }
       case 'last30d': {
         endDate = now;
-        startDate = new Date(now); startDate.setDate(now.getDate() - 29);
-        prevEndDate = new Date(startDate); prevEndDate.setDate(startDate.getDate() - 1);
-        prevStartDate = new Date(prevEndDate); prevStartDate.setDate(prevEndDate.getDate() - 29);
+        startDate = subDays(now, 29);
+        prevEndDate = subDays(startDate, 1);
+        prevStartDate = subDays(prevEndDate, 29);
+        break;
+      }
+      case 'currentBilling': {
+        startDate = this.currentBillingCycle!.startDate;
+        endDate = this.currentBillingCycle!.endDate;
+        prevEndDate = subDays(startDate, 1);
+        prevStartDate = add(prevEndDate, { months: -1, days: 1 });
+        break;
+      }
+      case 'previousBilling': {
+        endDate = subDays(this.currentBillingCycle!.startDate, 1);
+        startDate = add(endDate, { months: -1, days: 1 });
+        prevEndDate = subDays(startDate, 1);
+        prevStartDate = add(prevEndDate, { months: -1, days: 1 });
         break;
       }
       case 'thisMonth':
