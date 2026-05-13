@@ -2,6 +2,7 @@ import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import {
   BillingCycle,
   EMPTY_SUBSCRIPTION,
+  ENTERPRISE_YEARLY_PRICE,
   EXTRA_MAU_PER_10K_PER_MONTH_PRICE,
   FINE_GRAINED_AC_PER_MONTH_PRICE,
   PlanKeys,
@@ -52,6 +53,9 @@ export class UpdateSubscriptionModalComponent {
         ? "Upgrade Subscription"
         : "Downgrade Subscription";
 
+      this.prorationPreview = null;
+      this.isLoadingProration = false;
+      this.prorationLoadError = false;
       if (this.action === UpdateAction.UPGRADE) {
         this.loadProrationPreview();
       }
@@ -98,8 +102,12 @@ export class UpdateSubscriptionModalComponent {
 
   get newBasePrice(): number {
     const plan = PRICING_PLANS.find(p => p.key === this.newSubscription.key);
+    if (!plan) {
+      return 0;
+    }
+
     if (plan.key === PlanKeys.ENTERPRISE && this.newSubscription.billingCycle === BillingCycle.YEARLY) {
-      return 4490;
+      return ENTERPRISE_YEARLY_PRICE;
     }
 
     return plan.price;

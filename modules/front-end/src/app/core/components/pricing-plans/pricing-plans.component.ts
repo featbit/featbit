@@ -56,6 +56,9 @@ export class PricingPlansComponent {
     });
 
     this.fineGrainedAcEnabled[subscription.key] = subscription.fineGrainedAcEnabled;
+    if (subscription.key === PlanKeys.ENTERPRISE) {
+      this.enterpriseBillingCycle = subscription.billingCycle;
+    }
   }
 
   isCurrentSubscriptionChanged() {

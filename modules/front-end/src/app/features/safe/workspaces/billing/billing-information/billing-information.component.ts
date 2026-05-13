@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from "@angular/core";
-import { BillingService } from "src/app/core/services/billing.service";
+import { BillingService } from "@services/billing.service";
 import { BillingInformation } from "@features/safe/workspaces/billing/types";
 import { NzMessageService } from "ng-zorro-antd/message";
 

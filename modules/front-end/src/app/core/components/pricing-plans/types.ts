@@ -57,7 +57,7 @@ export const EMPTY_SUBSCRIPTION: WorkspaceSubscription = {
   totalMau: 0,
   fineGrainedAcEnabled: false,
   price: 0,
-  billingCycle: 'monthly',
+  billingCycle: 'month',
   currentPeriodStart: new Date(),
   currentPeriodEnd: new Date()
 };
