@@ -54,7 +54,14 @@ export class BillingService {
 
   getCurrentBillingCycle(): Observable<BillingCycle> {
     return this.http.get<string>(`${this.baseUrl}/current-cycle`).pipe(
-      map(billingCycleJsonString => JSON.parse(billingCycleJsonString) as BillingCycle)
+      map(billingCycleJsonString => {
+        const raw = JSON.parse(billingCycleJsonString);
+        if (raw === null) {
+          throw new Error('Failed to fetch current billing cycle');
+        }
+
+        return raw;
+      })
     );
   }
 

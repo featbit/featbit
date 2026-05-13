@@ -139,7 +139,7 @@
             <div class="mau-progress-fill"
                  [class.warning]="mauUsagePercent >= 80 && !isMauExceeded"
                  [class.danger]="isMauExceeded"
-                 [style.width.%]="mauUsagePercent">
+                 [style.width.%]="mauUsagePercent > 100 ? 100 : mauUsagePercent">
             </div>
           </div>
 
