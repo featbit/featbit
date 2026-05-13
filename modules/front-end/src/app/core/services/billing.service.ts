@@ -32,6 +32,10 @@ export class BillingService {
         }
 
         const plan = PRICING_PLANS.find(p => p.key === raw.plan);
+        if (!plan) {
+          throw new Error(`Unknown subscription plan: ${raw.plan}`);
+        }
+
         return {
           key: plan.key,
           name: plan.name,

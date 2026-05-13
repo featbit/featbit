@@ -109,7 +109,7 @@ export class UsageComponent implements OnInit {
           this.currentBillingCycle = {
             startDate: new Date(billingCycle.startDate),
             // endDate is exclusive, adjust to be inclusive
-            endDate: subDays(billingCycle.endDate, 1)
+            endDate: subDays(new Date(billingCycle.endDate), 1)
           };
 
           this.periods.unshift(
