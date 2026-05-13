@@ -34,7 +34,7 @@ public class CreateWorkspaceHandler(
         var workspace = new Workspace
         {
             Name = "Default Workspace",
-            Key = GuidHelper.Encode(Guid.NewGuid()),
+            Key = GuidHelper.Encode(Guid.NewGuid())
         };
 
         // add new workspace
