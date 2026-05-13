@@ -9,7 +9,7 @@ import { NzMessageService } from "ng-zorro-antd/message";
 import { finalize } from 'rxjs/operators';
 import { BillingService } from '@core/services/billing.service';
 import { BillingCycle } from '../billing/types';
-import { add, subDays } from "date-fns";
+import { add, differenceInDays, subDays } from "date-fns";
 
 interface DailyUsage {
   date: string;
@@ -112,10 +112,15 @@ export class UsageComponent implements OnInit {
             endDate: subDays(billingCycle.endDate, 1)
           };
 
-          this.periods.unshift(
-            { label: $localize`:@@workspace.usage.current-billing-cycle:Current billing cycle`, value: 'currentBilling' },
-            { label: $localize`:@@workspace.usage.previous-billing-cycle:Previous billing cycle`, value: 'previousBilling' },
-          );
+          // Only add billing-cycle period options for monthly cycles.
+          // Yearly (and other long) cycles are not yet supported by the chart's daily-granularity view.
+          const cycleDays = differenceInDays(billingCycle.endDate, billingCycle.startDate);
+          if (cycleDays <= 31) {
+            this.periods.unshift(
+              { label: 'Current billing cycle', value: 'currentBilling' },
+              { label: 'Previous billing cycle', value: 'previousBilling' },
+            );
+          }
 
           this.selectedPeriod = this.periods[0].value;
           this.loadUsageData();

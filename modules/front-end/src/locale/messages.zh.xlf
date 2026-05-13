@@ -8862,7 +8862,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.ts</context>
-          <context context-type="linenumber">242</context>
+          <context context-type="linenumber">247</context>
         </context-group>
         <target>加载数据失败</target>
       </trans-unit>
@@ -11491,7 +11491,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.ts</context>
-          <context context-type="linenumber">255</context>
+          <context context-type="linenumber">260</context>
         </context-group>
         <target>开关评估数</target>
       </trans-unit>
@@ -11511,7 +11511,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.ts</context>
-          <context context-type="linenumber">260</context>
+          <context context-type="linenumber">265</context>
         </context-group>
         <target>自定义指标</target>
       </trans-unit>
@@ -11555,7 +11555,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.ts</context>
-          <context context-type="linenumber">265</context>
+          <context context-type="linenumber">270</context>
         </context-group>
         <target>每日新用户</target>
       </trans-unit>
@@ -11583,27 +11583,11 @@
         </context-group>
         <target>过去 30 天</target>
       </trans-unit>
-      <trans-unit id="workspace.usage.current-billing-cycle" datatype="html">
-        <source>Current billing cycle</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.ts</context>
-          <context context-type="linenumber">116</context>
-        </context-group>
-        <target>当前付费周期</target>
-      </trans-unit>
-      <trans-unit id="workspace.usage.previous-billing-cycle" datatype="html">
-        <source>Previous billing cycle</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.ts</context>
-          <context context-type="linenumber">117</context>
-        </context-group>
-        <target>上一付费周期</target>
-      </trans-unit>
       <trans-unit id="workspace.usage.change-vs-prev-7-days" datatype="html">
         <source>vs prev 7 days</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.ts</context>
-          <context context-type="linenumber">319</context>
+          <context context-type="linenumber">324</context>
         </context-group>
         <target>对比过去 7 天</target>
       </trans-unit>
@@ -11611,7 +11595,7 @@
         <source>vs prev 30 days</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.ts</context>
-          <context context-type="linenumber">321</context>
+          <context context-type="linenumber">326</context>
         </context-group>
         <target>对比过去 30 天</target>
       </trans-unit>
@@ -11619,7 +11603,7 @@
         <source>vs prev period</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.ts</context>
-          <context context-type="linenumber">324</context>
+          <context context-type="linenumber">329</context>
         </context-group>
         <target>对比上一周期</target>
       </trans-unit>
@@ -11627,7 +11611,7 @@
         <source>vs last month</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.ts</context>
-          <context context-type="linenumber">327</context>
+          <context context-type="linenumber">332</context>
         </context-group>
         <target>对比上个月</target>
       </trans-unit>
