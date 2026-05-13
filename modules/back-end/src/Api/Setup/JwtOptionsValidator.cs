@@ -10,6 +10,8 @@ namespace Api.Setup;
 /// </summary>
 internal sealed class JwtOptionsValidator : IValidateOptions<JwtOptions>
 {
+    private const string DefaultHs256Key = "featbit-identity-key-must-longer-than-32-characters";
+
     public ValidateOptionsResult Validate(string? name, JwtOptions options)
     {
         var errors = new List<string>();
@@ -36,6 +38,13 @@ internal sealed class JwtOptionsValidator : IValidateOptions<JwtOptions>
                 if (string.IsNullOrWhiteSpace(key))
                 {
                     errors.Add("Jwt__Key is required when Algorithm is 'HS256'.");
+                }
+                else if (key == DefaultHs256Key)
+                {
+                    errors.Add(
+                        "Jwt__Key is using the default public value, which is not secure. " +
+                        "Please generate a custom key with at least 32 characters to ensure security."
+                    );
                 }
                 else if (key.Length < 32)
                 {

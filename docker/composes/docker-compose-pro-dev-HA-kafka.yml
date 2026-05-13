@@ -32,6 +32,8 @@ services:
       - SSOEnabled=false
       - Kafka__Producer__bootstrap.servers=kafka:9092
       - Kafka__Consumer__bootstrap.servers=kafka-consumer:9092
+      - Jwt__Algorithm=HS256
+      - Jwt__Key=please_change_me_to_a_secure_secret_key
     depends_on:
       mongodb:
         condition: service_started
