@@ -10,7 +10,7 @@ public class GetProrationPreviewValidator : AbstractValidator<GetProrationPrevie
     }
 }
 
-public class UpgradeSubscriptionPreviewHandler(IBillingService billingService)
+public class GetProrationPreviewHandler(IBillingService billingService)
     : IRequestHandler<GetProrationPreview, string>
 {
     public async Task<string> Handle(GetProrationPreview request, CancellationToken cancellationToken)

@@ -17,7 +17,7 @@ export class WorkspacesComponent implements OnInit {
   private permissionsService = inject(PermissionsService);
   private route = inject(ActivatedRoute);
 
-  paymentStatus: string = undefined;
+  paymentStatus?: string;
 
   isSaas = environment.hostingMode === HOSTING_MODE.SAAS;
   canUpdateLicense: boolean = false;
