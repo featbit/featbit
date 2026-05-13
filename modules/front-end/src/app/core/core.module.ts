@@ -111,7 +111,7 @@ import { CompareFeatureFlagDrawerComponent } from './components/compare-feature-
 import { ClonePolicyModalComponent } from "@core/components/clone-policy-modal/clone-policy-modal.component";
 import { ResourceEditorComponent } from "@core/components/resource-editor/resource-editor.component";
 import { PricingPlansComponent } from './components/pricing-plans/pricing-plans.component';
-import { NzSliderComponent } from "ng-zorro-antd/slider";
+import { NzSliderModule } from 'ng-zorro-antd/slider';
 import { UpdateSubscriptionModalComponent } from "./components/pricing-plans/update-subscription-modal/update-subscription-modal.component";
 
 @NgModule({
@@ -218,7 +218,7 @@ import { UpdateSubscriptionModalComponent } from "./components/pricing-plans/upd
     NzSkeletonModule,
     NzSegmentedModule,
     NzDescriptionsModule,
-    NzSliderComponent
+    NzSliderModule
   ],
   exports: [
     SlugifyPipe,

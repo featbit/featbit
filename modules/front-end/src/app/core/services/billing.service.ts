@@ -46,9 +46,9 @@ export class BillingService {
           fineGrainedAcEnabled: (raw.addOnFeatures as string[]).includes(LicenseFeatureEnum.FineGrainedAccessControl),
           price: parseFloat(raw.unitAmount) / 100.0,
           billingCycle: raw.billingCycle,
-          currentPeriodStart: raw.currentPeriodStart ? new Date(raw.currentPeriodStart) : undefined,
-          currentPeriodEnd: raw.currentPeriodEnd ? new Date(raw.currentPeriodEnd) : undefined,
-          subscriberSince: raw.createdAt ? new Date(raw.createdAt) : undefined,
+          currentPeriodStart: new Date(raw.currentPeriodStart),
+          currentPeriodEnd: new Date(raw.currentPeriodEnd),
+          subscriberSince: new Date(raw.createdAt),
           usage: raw.usage,
           pendingDowngrade: raw.pendingDowngrade,
         } as WorkspaceSubscription;
@@ -64,7 +64,10 @@ export class BillingService {
           throw new Error('Failed to fetch current billing cycle');
         }
 
-        return raw;
+        return {
+          startDate: new Date(raw.startDate),
+          endDate: new Date(raw.endDate),
+        };
       })
     );
   }

@@ -84,8 +84,8 @@ export interface WorkspaceSubscription {
   fineGrainedAcEnabled: boolean;
   price: number;
   billingCycle: string;
-  currentPeriodStart?: Date;
-  currentPeriodEnd?: Date;
+  currentPeriodStart: Date;
+  currentPeriodEnd: Date;
   subscriberSince?: Date;
   usage?: {
     mau: number;

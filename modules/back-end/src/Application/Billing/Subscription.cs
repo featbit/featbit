@@ -18,7 +18,7 @@ public class Subscription
     public override string ToString()
     {
         return
-            $"WorkspaceId: {WorkspaceId}, Plan: {Plan}, Billing Cycle: {BillingCycle}, Mau: {Mau}, AddOnFeatures: [{string.Join(", ", AddOnFeatures)}]";
+            $"WorkspaceId: {WorkspaceId}, Plan: {Plan}, Billing Cycle: {BillingCycle}, Mau: {Mau}, AddOnFeatures: [{string.Join(", ", AddOnFeatures ?? [])}]";
     }
 }
 

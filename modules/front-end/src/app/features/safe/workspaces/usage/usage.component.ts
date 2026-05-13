@@ -63,7 +63,7 @@ export class UsageComponent implements OnInit {
         return `${fmt(start)} - ${fmt(end)}`;
       }
       case 'currentBilling':
-        return `${fmt(new Date(this.currentBillingCycle!.startDate))} - ${fmt(new Date(this.currentBillingCycle!.endDate))}`;
+        return `${fmt(this.currentBillingCycle!.startDate)} - ${fmt(this.currentBillingCycle!.endDate)}`;
       case 'previousBilling':
         const prevEnd = subDays(this.currentBillingCycle!.startDate, 1);
         const prevStart = add(prevEnd, { months: -1, days: 1 });
@@ -107,9 +107,9 @@ export class UsageComponent implements OnInit {
       this.billingService.getCurrentBillingCycle().subscribe({
         next: (billingCycle) => {
           this.currentBillingCycle = {
-            startDate: new Date(billingCycle.startDate),
+            startDate: billingCycle.startDate,
             // endDate is exclusive, adjust to be inclusive
-            endDate: subDays(new Date(billingCycle.endDate), 1)
+            endDate: subDays(billingCycle.endDate, 1)
           };
 
           this.periods.unshift(

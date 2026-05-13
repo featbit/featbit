@@ -167,6 +167,8 @@ export class PricingPlansComponent {
           fineGrainedAcEnabled: this.fineGrainedAcEnabled[newPlan.key] || false,
           price: this.getPlanTotalPrice(newPlan),
           billingCycle: newPlan.key === PlanKeys.ENTERPRISE ? this.enterpriseBillingCycle : BillingCycle.MONTHLY,
+          currentPeriodStart: this._subscription.currentPeriodStart,
+          currentPeriodEnd: this._subscription.currentPeriodEnd,
           subscriberSince: this._subscription.subscriberSince
         }
       };
