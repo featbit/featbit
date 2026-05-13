@@ -104,7 +104,7 @@ public class BillingController : ApiControllerBase
     }
 
     [HttpGet("invoices")]
-    public async Task<ApiResponse<string>> GetInvoicesAsync(Guid workspaceId)
+    public async Task<ApiResponse<string>> GetInvoicesAsync()
     {
         var request = new GetInvoices
         {
