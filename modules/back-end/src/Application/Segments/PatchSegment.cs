@@ -1,7 +1,8 @@
 using Domain.AuditLogs;
 using Application.Users;
 using Application.Bases.Models;
-using Microsoft.AspNetCore.JsonPatch;
+using Domain.Segments;
+using Microsoft.AspNetCore.JsonPatch.SystemTextJson;
 
 namespace Application.Segments;
 
@@ -9,7 +10,7 @@ public class PatchSegment : IRequest<PatchResult>
 {
     public Guid Id { get; set; }
 
-    public JsonPatchDocument Patch { get; set; }
+    public JsonPatchDocument<Segment> Patch { get; set; }
 }
 
 public class PatchSegmentHandler : IRequestHandler<PatchSegment, PatchResult>

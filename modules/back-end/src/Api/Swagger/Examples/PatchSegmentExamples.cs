@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.JsonPatch.Operations;
+using Microsoft.AspNetCore.JsonPatch.SystemTextJson.Operations;
 using Swashbuckle.AspNetCore.Filters;
 
 namespace Api.Swagger.Examples;

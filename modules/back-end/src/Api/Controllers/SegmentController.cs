@@ -1,13 +1,11 @@
-using System.Text.Json;
 using Api.Authentication;
 using Api.Swagger.Examples;
 using Application.Bases.Models;
 using Application.Segments;
 using Domain.Policies;
 using Domain.Segments;
-using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.AspNetCore.JsonPatch.Operations;
-using Newtonsoft.Json;
+using Microsoft.AspNetCore.JsonPatch.SystemTextJson;
+using Microsoft.AspNetCore.JsonPatch.SystemTextJson.Operations;
 using Swashbuckle.AspNetCore.Filters;
 
 namespace Api.Controllers;
@@ -156,9 +154,8 @@ public class SegmentController : ApiControllerBase
     [OpenApi]
     [SwaggerRequestExample(typeof(Operation), typeof(PatchSegmentExamples))]
     [HttpPatch("{segmentId:guid}")]
-    public async Task<ApiResponse<bool>> PatchAsync(Guid segmentId, [FromBody] JsonElement jsonElement)
+    public async Task<ApiResponse<bool>> PatchAsync(Guid segmentId, [FromBody] JsonPatchDocument<Segment> patch)
     {
-        var patch = JsonConvert.DeserializeObject<JsonPatchDocument>(jsonElement.GetRawText());
         var request = new PatchSegment
         {
             Id = segmentId,

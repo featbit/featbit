@@ -1,5 +1,3 @@
-using Newtonsoft.Json;
-using System.Text.Json;
 using Api.Authentication;
 using Api.Swagger.Examples;
 using Application.Bases.Models;
@@ -7,8 +5,8 @@ using Application.FeatureFlags;
 using Domain.Workspaces;
 using Domain.FeatureFlags;
 using Domain.Policies;
-using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.AspNetCore.JsonPatch.Operations;
+using Microsoft.AspNetCore.JsonPatch.SystemTextJson;
+using Microsoft.AspNetCore.JsonPatch.SystemTextJson.Operations;
 using Swashbuckle.AspNetCore.Filters;
 
 namespace Api.Controllers;
@@ -240,9 +238,8 @@ public class FeatureFlagController : ApiControllerBase
     [OpenApi]
     [SwaggerRequestExample(typeof(Operation), typeof(PatchFeatureFlagExamples))]
     [HttpPatch("{key}")]
-    public async Task<ApiResponse<bool>> PatchAsync(Guid envId, string key, [FromBody] JsonElement jsonElement)
+    public async Task<ApiResponse<bool>> PatchAsync(Guid envId, string key, [FromBody] JsonPatchDocument<FeatureFlag> patch)
     {
-        var patch = JsonConvert.DeserializeObject<JsonPatchDocument>(jsonElement.GetRawText());
         var request = new PatchFeatureFlag
         {
             EnvId = envId,

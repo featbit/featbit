@@ -13,10 +13,14 @@
     </ItemGroup>
 
     <ItemGroup>
+        <!--  Any version prior to AutoMapper v15.0 and MediatR v13.0 remains free under their original open-source licenses.   -->
+        <!--  We will remove these dependencies in the future.  -->
         <PackageReference Include="AutoMapper" Version="14.0.0" />
-        <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.1" />
         <PackageReference Include="MediatR" Version="12.5.0" />
-        <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="10.0.2" />
+
+        <PackageReference Include="FluentValidation" Version="12.1.1" />
+        <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
+        <PackageReference Include="Microsoft.AspNetCore.JsonPatch.SystemTextJson" Version="10.0.8" />
     </ItemGroup>
 
 </Project>

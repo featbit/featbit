@@ -25,7 +25,6 @@ public static class ServicesRegister
         builder.Services.AddSerilog((_, lc) => ConfigureSerilog.Configure(lc, builder.Configuration));
 
         // add services for controllers
-        builder.Services.AddTransient<IConfigureOptions<MvcOptions>, ConfigureMvcOptions>();
         builder.Services.AddControllers();
 
         // make all generated paths URLs are lowercase
