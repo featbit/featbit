@@ -6,6 +6,7 @@ import { SelectOrganizationComponent } from "@features/safe/select-organization/
 import { NzTypographyModule } from 'ng-zorro-antd/typography';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzListModule } from "ng-zorro-antd/list";
+import { NzSpinModule } from 'ng-zorro-antd/spin';
 
 @NgModule({
   declarations: [
@@ -18,6 +19,7 @@ import { NzListModule } from "ng-zorro-antd/list";
     CommonModule,
     SelectOrganizationRoutingModule,
     NzListModule,
+    NzSpinModule
   ],
   providers: [
   ]

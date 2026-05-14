@@ -23,3 +23,8 @@ export const USER_IS_NOT_IN_SEGMENT_USER_PROP: IUserProp = {
   isDigestField: false,
   remark: ''
 };
+
+export const HOSTING_MODE = {
+  SELF_HOSTED: 'self-hosted',
+  SAAS: 'saas'
+};

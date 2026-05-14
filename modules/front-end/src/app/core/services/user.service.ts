@@ -5,6 +5,7 @@ import { IProfile } from "@shared/types";
 import { USER_PROFILE } from "@utils/localstorage-keys";
 import { MessageQueueService } from "@services/message-queue.service";
 import { Observable } from "rxjs";
+import { IPolicy } from "@features/safe/iam/types/policy";
 
 @Injectable({
   providedIn: 'root'
@@ -33,5 +34,13 @@ export class UserService {
   updateLocaleProfile(profile: IProfile) {
     localStorage.setItem(USER_PROFILE, JSON.stringify(profile));
     this.messageQueueService.emit(this.messageQueueService.topics.USER_PROFILE_CHANGED);
+  }
+
+  getPolicies(): Observable<IPolicy[]> {
+    return this.http.get<IPolicy[]>(`${this.baseUrl}/policies`);
+  }
+
+  joinOrganization(): Observable<boolean> {
+    return this.http.post<boolean>(`${this.baseUrl}/join-organization`, {});
   }
 }

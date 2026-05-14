@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { firstValueFrom, Observable, of } from 'rxjs';
 import { environment } from 'src/environments/environment';
@@ -7,6 +7,7 @@ import { ProjectService } from './project.service';
 import { CURRENT_ORGANIZATION } from "@utils/localstorage-keys";
 import { catchError } from "rxjs/operators";
 import { UpdateOrganizationPayload } from "@features/safe/workspaces/types/organization";
+import { IMemberListModel, MemberFilter } from "@features/safe/iam/types/member";
 
 @Injectable({
   providedIn: 'root'
@@ -39,9 +40,15 @@ export class OrganizationService {
     return this.http.put(this.baseUrl, payload);
   }
 
-  addUser(params: any): Observable<any> {
-    const url = `${this.baseUrl}/add-user`;
-    return this.http.post<boolean>(url, params);
+  getMemberList(filter: MemberFilter = new MemberFilter()): Observable<IMemberListModel> {
+    const queryParam = {
+      searchText: filter.searchText ?? '',
+      pageIndex: filter.pageIndex - 1,
+      pageSize: filter.pageSize,
+    };
+
+    const url = `${this.baseUrl}/members`;
+    return this.http.get<IMemberListModel>(url, { params: new HttpParams({ fromObject: queryParam }) });
   }
 
   onboarding(payload: IOnboarding): Observable<any> {

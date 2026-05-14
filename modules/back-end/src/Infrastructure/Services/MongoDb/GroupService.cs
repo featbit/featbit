@@ -47,7 +47,7 @@ public class GroupService(MongoDbClient mongoDb) : MongoDbService<Group>(mongoDb
         var totalCount = await collection.CountDocumentsAsync(filter);
         var itemsQuery = collection
             .Find(filter)
-            .Sort("{_id: -1}")
+            .SortByDescending(x => x.CreatedAt)
             .Skip(groupFilter.PageIndex * groupFilter.PageSize)
             .Limit(groupFilter.PageSize);
 
@@ -78,6 +78,7 @@ public class GroupService(MongoDbClient mongoDb) : MongoDbService<Group>(mongoDb
                 Id = member.Id,
                 Name = member.Name,
                 member.Email,
+                member.CreatedAt,
                 Groups = allGroups,
             };
 
@@ -95,6 +96,7 @@ public class GroupService(MongoDbClient mongoDb) : MongoDbService<Group>(mongoDb
 
         var totalCount = await query.CountAsync();
         var items = await query
+            .OrderByDescending(x => x.CreatedAt)
             .Skip(filter.PageIndex * filter.PageSize)
             .Take(filter.PageSize)
             .ToListAsync();
@@ -130,6 +132,7 @@ public class GroupService(MongoDbClient mongoDb) : MongoDbService<Group>(mongoDb
                 policy.Name,
                 policy.Type,
                 policy.Description,
+                policy.CreatedAt,
                 AllPolicyGroups = allPolicyGroups
             };
 
@@ -147,6 +150,7 @@ public class GroupService(MongoDbClient mongoDb) : MongoDbService<Group>(mongoDb
 
         var totalCount = await query.CountAsync();
         var items = await query
+            .OrderByDescending(x => x.CreatedAt)
             .Skip(filter.PageIndex * filter.PageSize)
             .Take(filter.PageSize)
             .ToListAsync();

@@ -1,0 +1,188 @@
+<nz-modal
+  nzClassName="update-subscription-modal"
+  [nzVisible]="visible"
+  [nzTitle]="titleTpl"
+  [nzCentered]="true"
+  [nzWidth]="900"
+  [nzContent]="content"
+  [nzFooter]="footer"
+  (nzOnCancel)="onClose(false)">
+  <ng-template #titleTpl>
+    <div class="modal-title">
+      <span class="modal-title-main">{{ title }}</span>
+      <span class="modal-title-sub">{{ titleSubtitle }}</span>
+    </div>
+  </ng-template>
+
+  <ng-template #content>
+    <div class="content-stack">
+      <section class="panel panel--combined">
+        <div class="overview-card" [ngClass]="'overview-card--' + action">
+          <div class="overview-header">
+            <div>
+              <h3 class="overview-headline">{{ transitionHeadline }}</h3>
+              <p class="overview-description">{{ actionDescription }}</p>
+            </div>
+
+            <nz-tag class="overview-billing-tag" [nzColor]="action === 'downgrade' ? 'default' : 'blue'">
+              {{ billingCycleTag }}
+            </nz-tag>
+          </div>
+          <ul class="update-pricing-notes">
+            @for (note of noteItems; track note.title) {
+              <li class="note-item">
+                <div class="note-panel-header">
+                  <div class="note-icon" [ngClass]="'note-icon--' + action">
+                    <i nz-icon [nzType]="note.icon"></i>
+                  </div>
+
+                  <div class="note-copy">
+                    <span class="note-panel-title">{{ note.title }}</span>
+                    <div class="note-panel-body">
+                      <p>{{ note.description }}</p>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            }
+          </ul>
+        </div>
+      </section>
+
+      <section class="panel panel--summary">
+        <div class="section-heading">
+          <span class="section-kicker">Payment preview</span>
+          <h4 class="section-title">Order summary</h4>
+          <p class="section-description">Review the recurring amount and any immediate billing impact before you confirm.</p>
+        </div>
+
+        <div class="summary-card">
+          <div class="summary-main">
+            <div class="summary-header">
+              <div>
+                <span class="summary-kicker">{{ summaryTotalLabel }}</span>
+                <div class="summary-total">
+                  ${{ newSubscription.price | number }}
+                  <span class="summary-period">/ {{ newSubscription.billingCycle }}</span>
+                </div>
+              </div>
+
+              <div class="summary-plan-pill">{{ newSubscription.name }}</div>
+            </div>
+
+            <div class="summary-breakdown">
+              <div class="summary-row">
+                <span class="summary-label">Base Price</span>
+                <span class="summary-value">
+                  ${{ newBasePrice | number }}<span class="summary-value-period"> / {{ newSubscription.billingCycle }}</span>
+                </span>
+              </div>
+
+              <div class="summary-row">
+                <div class="summary-label summary-label--stacked">
+                  <span>MAU</span>
+                  @if (newSubscription.totalMau > newSubscription.includedMau) {
+                    <span class="summary-sub">{{ newSubscription.includedMau | number }} included · +{{ formattedExtraMau }} extended</span>
+                  }
+                </div>
+                <div class="summary-value summary-value--stacked">
+                  <span>{{ newSubscription.totalMau | number }} MAU</span>
+                  @if (newSubscription.totalMau > newSubscription.includedMau) {
+                    <span class="summary-sub">+${{ extraMauRecurringCost | number }}<span class="summary-value-period"> / {{ newSubscription.billingCycle }}</span></span>
+                  }
+                </div>
+              </div>
+
+              @if (newSubscription.fineGrainedAcEnabled) {
+                <div class="summary-row">
+                  <span class="summary-label">
+                    Fine-grained Access Control
+                  </span>
+                  <span class="summary-value">
+                    +${{ fineGrainedAcRecurringCost | number }}<span class="summary-value-period"> / {{ newSubscription.billingCycle }}</span>
+                  </span>
+                </div>
+              }
+            </div>
+          </div>
+
+          <div class="summary-side">
+            <div class="summary-compare">
+              <div class="summary-compare-row">
+                <span class="summary-compare-label">Current recurring total</span>
+                <span class="summary-compare-value">
+                  ${{ currentSubscription.price | number }}<span class="summary-value-period"> / {{ currentSubscription.billingCycle }}</span>
+                </span>
+              </div>
+              <div class="summary-compare-row summary-compare-row--highlight">
+                <span class="summary-compare-label">{{ summaryTotalLabel }}</span>
+                <span class="summary-compare-value">
+                  ${{ newSubscription.price | number }}<span class="summary-value-period"> / {{ newSubscription.billingCycle }}</span>
+                </span>
+              </div>
+              @if (action === UpdateAction.DOWNGRADE) {
+                <div class="summary-compare-row summary-compare-row--highlight">
+                  <span class="summary-compare-label">Effective At</span>
+                  <span class="summary-compare-value">
+                    {{ currentSubscription.currentPeriodEnd | date: 'longDate' }}
+                  </span>
+                </div>
+              }
+            </div>
+
+            <div class="summary-callout">
+              @if (action === UpdateAction.UPGRADE) {
+                @if (isLoadingProration) {
+                  <div class="proration-loading">
+                    <nz-spin nzTip="Calculating your prorated charge..."></nz-spin>
+                  </div>
+                } @else if (prorationLoadError) {
+                  <i nz-icon nzType="warning" nzTheme="fill"></i>
+                  <div>
+                    <strong>Unable to load proration preview</strong>
+                    <p>You will see the exact charge at checkout.</p>
+                  </div>
+                } @else if (prorationPreview) {
+                  <div class="proration-breakdown">
+                    <strong class="proration-title">Prorated Charge</strong>
+                    @for (line of prorationPreview.immediateCharge.displayLines; track line.label) {
+                      <div class="proration-line" [ngClass]="'proration-line--' + line.type">
+                        <span>{{ line.label }}</span>
+                        <span>{{ line.type === 'credit' ? '−' : '' }}${{ (line.amount / 100) | number: '1.2-2' }}</span>
+                      </div>
+                    }
+                    <div class="proration-total">
+                      <span>Total due today</span>
+                      <strong>${{ (prorationPreview.immediateCharge.amount / 100) | number: '1.2-2' }}</strong>
+                    </div>
+                  </div>
+                }
+              } @else {
+                <i nz-icon nzType="info-circle" nzTheme="fill"></i>
+                <div>
+                  <strong>No payment is collected today</strong>
+                  <p>Your current charges stay in place until the next billing cycle begins.</p>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </ng-template>
+
+  <ng-template #footer>
+    <div class="actions">
+      <button nz-button nzType="default" (click)="onClose(false)">Maybe Later</button>
+      <button
+        nz-button
+        [disabled]="isLoadingProration"
+        [nzLoading]="isConfirming"
+        [nzType]="action === 'downgrade' ? 'default' : 'primary'"
+        [ngClass]="action === 'downgrade' ? 'btn-downgrade-confirm' : ''"
+        (click)="confirmAction()">
+        <span>{{ confirmButtonText }}</span>
+      </button>
+    </div>
+  </ng-template>
+</nz-modal>

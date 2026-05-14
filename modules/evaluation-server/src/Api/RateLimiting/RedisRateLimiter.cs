@@ -1,0 +1,274 @@
+using System.Threading.RateLimiting;
+using Infrastructure.Caches.Redis;
+using StackExchange.Redis;
+
+namespace Api.RateLimiting;
+
+/// <summary>
+/// A distributed <see cref="RateLimiter"/> backed by Redis using atomic Lua scripts.
+/// Supports <see cref="RateLimiterType.FixedWindow"/>, <see cref="RateLimiterType.SlidingWindow"/>,
+/// and <see cref="RateLimiterType.TokenBucket"/> algorithms.
+/// When Redis is unreachable the limiter fails open (allows the request).
+/// </summary>
+public sealed class RedisRateLimiter : RateLimiter
+{
+    private readonly IRedisClient _redisClient;
+    private readonly string _partitionKey;
+    private readonly RateLimiterType _type;
+    private readonly int _permitLimit;
+    private readonly TimeSpan _window;
+    private readonly int _tokenLimit;
+    private readonly int _tokensPerPeriod;
+    private readonly TimeSpan _replenishmentPeriod;
+    private readonly ILogger _logger;
+    private long _lastActivity = Environment.TickCount64;
+
+    #region Lua scripts – executed atomically on Redis
+
+    /// <summary>
+    /// Fixed-window: increments a counter keyed by the current window slot.
+    /// Uses Redis server time to derive the slot, avoiding client clock skew.
+    /// Returns remaining permits (positive) or negative retry-after seconds.
+    /// </summary>
+    private const string FixedWindowScript = """
+        local keyPrefix = ARGV[1]
+        local limit = tonumber(ARGV[2])
+        local window = tonumber(ARGV[3])
+        local requested = tonumber(ARGV[4])
+        -- Use Redis server time to avoid client clock skew across replicas
+        local t = redis.call('TIME')
+        local nowSec = tonumber(t[1])
+        local slot = math.floor(nowSec / window)
+        local key = keyPrefix .. ":" .. slot
+        local current = redis.call('INCRBY', key, requested)
+        if current == requested then
+            redis.call('EXPIRE', key, window)
+        end
+        if current > limit then
+            local ttl = redis.call('TTL', key)
+            -- -2: key vanished between INCRBY and TTL -> treat as retry-after window
+            if ttl == -2 then
+                return -window
+            end
+            -- -1: no expiry set (e.g. after a PERSIST) -> self-heal and deny
+            if ttl == -1 then
+                redis.call('EXPIRE', key, window)
+                ttl = window
+            end
+            return -ttl
+        end
+        return limit - current
+        """;
+
+    /// <summary>
+    /// Sliding-window: uses a sorted set scored by timestamp.
+    /// Each member is keyed by a unique ID scored at the current ms timestamp.
+    /// Active count is derived via ZCARD — O(1) — since each call acquires exactly one permit.
+    /// Returns remaining permits (positive) or negative retry-after seconds.
+    /// </summary>
+    private const string SlidingWindowScript = """
+        local key = KEYS[1]
+        local limit = tonumber(ARGV[1])
+        local window = tonumber(ARGV[2])
+        local id = ARGV[3]
+        -- Use Redis server time to avoid client clock skew across replicas
+        local t = redis.call('TIME')
+        local now = (tonumber(t[1]) * 1000) + math.floor(tonumber(t[2]) / 1000)
+        local clearBefore = now - window
+        redis.call('ZREMRANGEBYSCORE', key, 0, clearBefore)
+        local count = redis.call('ZCARD', key)
+        if count >= limit then
+            local oldest = redis.call('ZRANGE', key, 0, 0, 'WITHSCORES')
+            if #oldest > 0 then
+                local retryAfterMs = tonumber(oldest[2]) + window - now
+                retryAfterMs = math.max(1000, retryAfterMs)
+                return -math.ceil(retryAfterMs / 1000)
+            end
+            return -math.ceil(window / 1000)
+        end
+        redis.call('ZADD', key, now, id)
+        redis.call('EXPIRE', key, math.ceil(window / 1000) + 1)
+        return limit - count - 1
+        """;
+
+    /// <summary>
+    /// Token-bucket: stores {tokens, last_refill} in a hash.
+    /// Refills tokens based on elapsed time, then attempts to consume one.
+    /// Returns remaining tokens (positive) or negative retry-after seconds.
+    /// </summary>
+    private const string TokenBucketScript = """
+        local key = KEYS[1]
+        local tokenLimit = tonumber(ARGV[1])
+        local tokensPerPeriod = tonumber(ARGV[2])
+        local replenishMs = tonumber(ARGV[3])
+        local requested = tonumber(ARGV[4])
+        -- Use Redis server time to avoid client clock skew across replicas
+        local t = redis.call('TIME')
+        local now = (tonumber(t[1]) * 1000) + math.floor(tonumber(t[2]) / 1000)
+        -- Load state
+        local bucket = redis.call('HMGET', key, 'tokens', 'last_refill')
+        local tokens = tonumber(bucket[1])
+        local lastRefill = tonumber(bucket[2])
+        -- Initialize if either field is missing or corrupt
+        if tokens == nil or lastRefill == nil then
+            tokens = tokenLimit
+            lastRefill = now
+        end
+        -- Guard against bad configuration (prevents divide-by-zero)
+        if tokensPerPeriod <= 0 or replenishMs <= 0 then
+            if tokens >= requested then
+                tokens = tokens - requested
+                redis.call('HMSET', key, 'tokens', tokens, 'last_refill', lastRefill)
+                redis.call('EXPIRE', key, 3600)
+                return tokens
+            end
+            redis.call('HMSET', key, 'tokens', tokens, 'last_refill', lastRefill)
+            redis.call('EXPIRE', key, 3600)
+            return -1
+        end
+        -- Refill based on elapsed time
+        local elapsed = now - lastRefill
+        if elapsed > 0 then
+            local newTokens = math.floor(elapsed * tokensPerPeriod / replenishMs)
+            if newTokens > 0 then
+                tokens = math.min(tokenLimit, tokens + newTokens)
+                lastRefill = lastRefill + math.floor(newTokens * replenishMs / tokensPerPeriod)
+            end
+        end
+        -- TTL: time to go from empty to full, plus padding
+        local ttlSeconds = math.ceil((replenishMs * tokenLimit / tokensPerPeriod) / 1000) + 60
+        if tokens >= requested then
+            tokens = tokens - requested
+            redis.call('HMSET', key, 'tokens', tokens, 'last_refill', lastRefill)
+            redis.call('EXPIRE', key, ttlSeconds)
+            return tokens
+        else
+            redis.call('HMSET', key, 'tokens', tokens, 'last_refill', lastRefill)
+            redis.call('EXPIRE', key, ttlSeconds)
+            local deficit = requested - tokens
+            local retryMs = math.ceil(deficit * replenishMs / tokensPerPeriod)
+            return -math.max(1, math.ceil(retryMs / 1000))
+        end
+        """;
+
+    #endregion
+
+    public RedisRateLimiter(IRedisClient redisClient, string partitionKey, EffectiveOptions options, ILogger logger)
+    {
+        ArgumentNullException.ThrowIfNull(redisClient);
+        ArgumentNullException.ThrowIfNull(logger);
+
+        _redisClient = redisClient;
+        _partitionKey = partitionKey;
+        _type = options.Type;
+        _permitLimit = options.PermitLimit;
+        _window = TimeSpan.FromSeconds(options.WindowSeconds);
+        _tokenLimit = options.TokenLimit;
+        _tokensPerPeriod = options.TokensPerPeriod;
+        _replenishmentPeriod = TimeSpan.FromSeconds(options.ReplenishmentPeriodSeconds);
+        _logger = logger;
+    }
+
+    public override TimeSpan? IdleDuration =>
+        TimeSpan.FromMilliseconds(Environment.TickCount64 - Volatile.Read(ref _lastActivity));
+
+    public override RateLimiterStatistics? GetStatistics() => null;
+
+    protected override RateLimitLease AttemptAcquireCore(int permitCount)
+    {
+        // Distributed limiter requires a network call to Redis, which is inherently async.
+        // Return a failed lease so the ASP.NET Core middleware falls through to AcquireAsync.
+        return new RedisRateLimitLease(false);
+    }
+
+    protected override async ValueTask<RateLimitLease> AcquireAsyncCore(int permitCount, CancellationToken cancellationToken)
+    {
+        Volatile.Write(ref _lastActivity, Environment.TickCount64);
+
+        try
+        {
+            var db = _redisClient.GetDatabase();
+            var result = _type switch
+            {
+                // The `permitCount` will always be 1 in our usage since `RateLimitingMiddleware` always acquires
+                // one permit. That's why we didn't support multi-permit acquisition for SlidingWindow,
+                // which would make the Lua script more complex and less efficient.
+
+                RateLimiterType.FixedWindow => await EvalFixedWindowAsync(db, permitCount),
+                RateLimiterType.SlidingWindow => await EvalSlidingWindowAsync(db),
+                RateLimiterType.TokenBucket => await EvalTokenBucketAsync(db, permitCount),
+                _ => throw new InvalidOperationException($"Unknown rate limiter type: {_type}")
+            };
+
+            // Positive = remaining permits/tokens. Negative = retry-after in seconds.
+            if (result >= 0)
+            {
+                return new RedisRateLimitLease(true);
+            }
+
+            var retryAfter = TimeSpan.FromSeconds(Math.Max(1, Math.Abs(result)));
+            return new RedisRateLimitLease(false, retryAfter);
+        }
+        catch (RedisException ex)
+        {
+            // Fail open – if Redis is unreachable, allow the request through.
+            _logger.LogWarning(ex, "Redis rate-limit evaluation failed for {PartitionKey}; failing open", _partitionKey);
+            return new RedisRateLimitLease(true);
+        }
+        catch (RedisTimeoutException ex)
+        {
+            // Fail open – if Redis times out, allow the request through.
+            _logger.LogWarning(ex, "Redis rate-limit evaluation timed out for {PartitionKey}; failing open", _partitionKey);
+            return new RedisRateLimitLease(true);
+        }
+    }
+
+    private async Task<long> EvalFixedWindowAsync(IDatabase db, int permitCount)
+    {
+        var windowSeconds = (int)_window.TotalSeconds;
+        var key = RedisKeys.RateLimit("fw", _partitionKey).ToString();
+
+        // Key construction and slot derivation happen inside the Lua script
+        // using Redis server time to avoid cross-node clock skew.
+        var result = await db.ScriptEvaluateAsync(
+            FixedWindowScript,
+            keys: [],
+            [key, _permitLimit, windowSeconds, permitCount]
+        );
+
+        return long.Parse(result.ToString()!);
+    }
+
+    private async Task<long> EvalSlidingWindowAsync(IDatabase db)
+    {
+        var key = RedisKeys.RateLimit("sw", _partitionKey);
+        var windowMs = (long)_window.TotalMilliseconds;
+        var uniqueId = Guid.NewGuid().ToString("N");
+
+        var result = await db.ScriptEvaluateAsync(
+            SlidingWindowScript,
+            [key],
+            [_permitLimit, windowMs, uniqueId]
+        );
+
+        return long.Parse(result.ToString());
+    }
+
+    private async Task<long> EvalTokenBucketAsync(IDatabase db, int permitCount)
+    {
+        var key = RedisKeys.RateLimit("tb", _partitionKey);
+        var replenishMs = (long)_replenishmentPeriod.TotalMilliseconds;
+
+        var result = await db.ScriptEvaluateAsync(
+            TokenBucketScript,
+            [key],
+            [_tokenLimit, _tokensPerPeriod, replenishMs, permitCount]
+        );
+
+        return long.Parse(result.ToString());
+    }
+
+    protected override void Dispose(bool disposing) { }
+
+    protected override ValueTask DisposeAsyncCore() => ValueTask.CompletedTask;
+}

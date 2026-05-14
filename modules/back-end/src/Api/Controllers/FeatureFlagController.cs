@@ -1,12 +1,12 @@
 using Newtonsoft.Json;
 using System.Text.Json;
 using Api.Authentication;
-using Api.Authorization;
 using Api.Swagger.Examples;
 using Application.Bases.Models;
 using Application.FeatureFlags;
 using Domain.Workspaces;
 using Domain.FeatureFlags;
+using Domain.Policies;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using Swashbuckle.AspNetCore.Filters;
@@ -24,6 +24,7 @@ public class FeatureFlagController : ApiControllerBase
     /// </remarks>
     [OpenApi]
     [HttpGet]
+    [Authorize(Permissions.CanAccessEnv)]
     public async Task<ApiResponse<PagedResult<FeatureFlagVm>>> GetListAsync(
         Guid envId,
         [FromQuery] FeatureFlagFilter filter)
@@ -46,6 +47,7 @@ public class FeatureFlagController : ApiControllerBase
     /// </remarks>
     [OpenApi]
     [HttpGet("{key}")]
+    [Authorize(Permissions.CanAccessEnv)]
     public async Task<ApiResponse<FeatureFlag>> GetAsync(Guid envId, string key)
     {
         var request = new GetFeatureFlag
@@ -229,7 +231,8 @@ public class FeatureFlagController : ApiControllerBase
     }
 
     /// <summary>
-    /// Update a feature flag with the JSON patch method
+    /// Update a feature flag with the JSON patch method. Use with caution as this can make arbitrary changes to the
+    /// feature flag, incorrect usage may lead to malformed data.
     /// </summary>
     /// <remarks>
     /// Perform a partial update to a feature flag. The request body must be a valid JSON patch.
@@ -302,9 +305,6 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(success);
     }
 
-    /// <summary>
-    /// Delete a flag schedule
-    /// </summary>
     [Authorize(LicenseFeatures.Schedule)]
     [HttpDelete("schedules/{id:guid}")]
     public async Task<ApiResponse<bool>> DeleteScheduleAsync(Guid id)
@@ -375,9 +375,6 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(success);
     }
 
-    /// <summary>
-    /// Delete a flag change request
-    /// </summary>
     [Authorize(LicenseFeatures.ChangeRequest)]
     [HttpDelete("change-requests/{id:guid}")]
     public async Task<ApiResponse<bool>> DeleteChangeRequestAsync(Guid id)
@@ -391,12 +388,18 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(success);
     }
 
+    /// <summary>
+    /// Update the targeting of a feature flag
+    /// </summary>
+    /// <remarks>
+    /// Update the targeting users, rules and default rule of a feature flag.
+    /// </remarks>
+    [OpenApi]
     [HttpPut("{key}/targeting")]
-    public async Task<ApiResponse<Guid>> UpdateTargetingAsync(Guid envId, string key, UpdateTargeting request)
+    public async Task<ApiResponse<Guid>> UpdateTargetingAsync(Guid envId, string key, UpdateTargetingPayload payload)
     {
-        request.OrgId = OrgId;
-        request.Key = key;
-        request.EnvId = envId;
+        var permissions = await GetRequestPermissionsAsync();
+        var request = new UpdateTargeting(OrgId, envId, key, payload, permissions);
 
         var revision = await Mediator.Send(request);
         return Ok(revision);
@@ -490,6 +493,7 @@ public class FeatureFlagController : ApiControllerBase
     /// </remarks>
     [OpenApi]
     [HttpGet("all-tags")]
+    [Authorize(Permissions.CanAccessEnv)]
     public async Task<ApiResponse<ICollection<string>>> GetAllTagsAsync(Guid envId)
     {
         var request = new GetAllTag

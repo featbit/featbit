@@ -1,3 +1,5 @@
+using Api.Cors;
+using Api.RateLimiting;
 using Api.Services;
 using Domain.Workspaces;
 using Infrastructure;
@@ -28,13 +30,7 @@ public static class ServicesRegister
         services.AddHealthChecks().AddReadinessChecks(configuration);
 
         // cors
-        builder.Services.AddCors(options => options.AddDefaultPolicy(policyBuilder =>
-        {
-            policyBuilder
-                .AllowAnyOrigin()
-                .AllowAnyHeader()
-                .AllowAnyMethod();
-        }));
+        builder.AddCustomCors();
 
         // add bounded memory cache
         services.AddSingleton<BoundedMemoryCache>();
@@ -44,6 +40,12 @@ public static class ServicesRegister
             .AddStreamingCore(options => configuration.GetSection(StreamingOptions.Streaming).Bind(options))
             .UseStore(configuration)
             .UseMq(configuration);
+
+        // rate limiting
+        if (configuration.IsRateLimitingEnabled())
+        {
+            builder.AddRateLimiting();
+        }
 
         // application services
         LicenseVerifier.ImportPublicKey(configuration["PublicKey"]);

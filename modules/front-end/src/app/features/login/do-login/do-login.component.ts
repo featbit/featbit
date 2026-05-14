@@ -9,10 +9,17 @@ import { IS_SSO_FIRST_LOGIN } from "@utils/localstorage-keys";
 import { UserService } from "@services/user.service";
 import { SocialService } from "@services/social.service";
 import { OAuthProvider, OAuthProviderEnum } from "@shared/types";
+import { environment } from 'src/environments/environment';
+import { HOSTING_MODE } from "@shared/constants";
 
 enum LoginStep {
   Step1 = 'step1', // email
   Step2 = 'step2' // workspace and (or) password
+}
+
+enum LoginTab {
+  Login = 0,
+  Sso = 1
 }
 
 @Component({
@@ -36,6 +43,8 @@ export class DoLoginComponent implements OnInit {
 
   isSocialEnabled: boolean = false;
   oauthProviders: OAuthProvider[] = [];
+
+  selectedTabIndex = 0;
 
   constructor(
     private fb: FormBuilder,
@@ -64,6 +73,10 @@ export class DoLoginComponent implements OnInit {
     this.isSsoEnabled = preCheck.isEnabled;
     this.oauthProviders = providers;
     this.isSocialEnabled = this.oauthProviders.length > 0;
+    this.selectedTabIndex =
+      environment.hostingMode === HOSTING_MODE.SELF_HOSTED
+        ? this.isSsoEnabled ? LoginTab.Sso : LoginTab.Login
+        : LoginTab.Login;
 
     this.ssoForm = this.fb.group({
       workspaceKey: [

@@ -21,7 +21,8 @@ public partial class RedisMessageConsumer(
         var tasks = new[]
         {
             ConsumeAsync(Topics.EndUser, stoppingToken),
-            ConsumeAsync(Topics.Insights, stoppingToken)
+            ConsumeAsync(Topics.Insights, stoppingToken),
+            ConsumeAsync(Topics.Usage, stoppingToken)
         };
 
         return Task.WhenAll(tasks);

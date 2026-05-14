@@ -72,20 +72,26 @@ public class SsoController : ApiControllerBase
                 );
             }
 
-            LoginToken token;
+            bool isSsoFirstLogin;
             var user = await _userService.FindOneAsync(x => x.Email == email && x.WorkspaceId == workspace.Id);
             if (user == null)
             {
                 var registerResult =
                     await _identityService.RegisterByEmailAsync(workspace.Id, email, string.Empty, UserOrigin.Sso);
-                token = new LoginToken(true, registerResult.Token);
+                
+                isSsoFirstLogin = true;
+                user = registerResult.User;
             }
             else
             {
-                token = new LoginToken(false, _identityService.IssueToken(user));
+                isSsoFirstLogin = false;
             }
 
-            return Ok(token);
+            var (accessToken, refreshToken) = 
+                await _identityService.IssueTokensAsync(user, Request.ClientIpAddress());
+            Response.SetRefreshTokenCookie(refreshToken);
+
+            return Ok(new LoginToken(isSsoFirstLogin, accessToken));
         }
         catch (Exception ex)
         {

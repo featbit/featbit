@@ -10,7 +10,7 @@ import {
   CreateSegment,
   SegmentType,
   UpdateSegmentTargetingPayload
-} from "@features/safe/segments/types/segments-index";
+} from "@features/safe/segments/types/segments";
 import { getCurrentProjectEnv } from "@utils/project-env";
 import { catchError } from "rxjs/operators";
 

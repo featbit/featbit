@@ -1,0 +1,359 @@
+@import "variables";
+
+.invisible {
+  visibility: hidden;
+}
+
+.drawer-title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  .drawer-title-main {
+    font-size: 16px;
+    font-weight: 700;
+    color: @grey90-color;
+    line-height: 1.4;
+  }
+
+  .drawer-title-sub {
+    font-size: 12px;
+    font-weight: 400;
+    color: @grey50-color;
+    line-height: 1.4;
+  }
+}
+
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+
+  @media (max-width: 900px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.plan-card {
+  position: relative;
+  background: @white;
+  border: 1px solid @grey20-color;
+  border-radius: 12px;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.2s, box-shadow 0.2s;
+
+  &:hover {
+    border-color: @grey30-color;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  }
+
+  &.current {
+    border-color: @primary-color;
+    box-shadow: 0 0 0 1px @primary-color;
+  }
+
+  &.highlighted:not(.current) {
+    border-color: @blue50-color;
+
+    .plan-card-name {
+      color: @blue50-color;
+    }
+  }
+
+  .current-badge {
+    position: absolute;
+    top: -1px;
+    right: 16px;
+    background: @primary-color;
+    color: @white;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 12px;
+    border-radius: 0 0 8px 8px;
+  }
+
+  .plan-card-header {
+    margin-bottom: 20px;
+
+    .plan-card-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: @grey80-color;
+      margin: 0 0 4px 0;
+      text-transform: uppercase;
+    }
+
+    .plan-card-description {
+      font-size: 12px;
+      color: @grey50-color;
+      margin: 0 0 10px 0;
+      line-height: 1.5;
+    }
+
+    .enterprise-toggle {
+      margin-bottom: 10px;
+    }
+
+    .plan-card-price {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+
+      .price-amount {
+        font-size: 28px;
+        font-weight: 700;
+        color: @grey90-color;
+
+        .price-currency {
+          margin-right: 2px;
+        }
+      }
+
+      .price-period {
+        font-size: 13px;
+        color: @grey50-color;
+      }
+    }
+
+    .yearly-savings {
+      font-size: 12px;
+      color: @green60-color;
+      font-weight: 500;
+    }
+  }
+
+  // MAU Slider
+  .mau-slider-section {
+    margin-bottom: 16px;
+    padding: 12px 0;
+    border-top: 1px solid @grey10-color;
+    border-bottom: 1px solid @grey10-color;
+
+    .mau-slider-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+      font-size: 12px;
+      color: @grey50-color;
+
+      strong {
+        color: @grey80-color;
+      }
+    }
+
+    .contact-prompt {
+      font-size: 12px;
+      color: @yellow5-color;
+      margin-top: 4px;
+
+      a {
+        color: @primary-color;
+        cursor: pointer;
+        font-weight: 500;
+      }
+    }
+  }
+
+  // Features
+  .plan-features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 16px 0;
+    flex: 1;
+
+    li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: @grey60-color;
+      padding: 5px 0;
+
+      i {
+        color: @primary-color;
+        font-size: 14px;
+        flex-shrink: 0;
+      }
+    }
+  }
+
+  // Add-on
+  .addon-section {
+    border-top: 1px solid @grey10-color;
+    padding-top: 12px;
+    margin-bottom: 16px;
+
+    .addon-item {
+      font-size: 12px;
+
+      .addon-name {
+        color: @grey60-color;
+      }
+
+      .addon-price {
+        color: @grey80-color;
+        font-weight: 600;
+        margin-left: 8px;
+      }
+    }
+  }
+
+  // Footer
+  .plan-card-footer {
+    margin-top: auto;
+
+    button {
+      width: 100%;
+      border-radius: 8px;
+      height: 36px;
+      font-weight: 500;
+    }
+
+    .btn-current {
+      border: 1px solid @grey20-color;
+      background: transparent;
+      color: @grey40-color;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+
+    .btn-update {
+      border: 1px solid @primary-color;
+      background: @green5-color;
+      color: @green70-color;
+      box-shadow: none;
+      transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+
+      &:hover {
+        background: @green10-color;
+        box-shadow: 0 2px 8px rgba(60, 199, 152, 0.25);
+        transform: translateY(-1px);
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+    }
+
+    .btn-downgrade {
+      border: 1px solid @grey30-color;
+      background: transparent;
+      color: @grey60-color;
+      box-shadow: none;
+
+      &:hover {
+        border-color: @grey40-color;
+        color: @grey80-color;
+      }
+    }
+
+    .btn-upgrade {
+      border: none;
+      color: @white;
+      background-size: 200% auto;
+      background-image: linear-gradient(135deg, @green60-color 0%, @green50-color 50%, @green60-color 100%);
+      box-shadow: 0 2px 8px rgba(60, 199, 152, 0.3);
+      transition: background-position 0.4s ease, box-shadow 0.2s ease, transform 0.15s ease;
+
+      &:hover {
+        background-position: right center;
+        box-shadow: 0 4px 14px rgba(60, 199, 152, 0.45);
+        transform: translateY(-1px);
+        color: @white;
+      }
+
+      &:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 6px rgba(60, 199, 152, 0.25);
+      }
+    }
+  }
+}
+
+// Enterprise card: 2-panel layout
+.enterprise-card {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+
+  .enterprise-left {
+    flex: 0 0 350px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 24px 20px;
+    border-right: 1px solid @grey10-color;
+
+    .plan-card-header {
+      margin-bottom: 0;
+    }
+
+    .plan-card-name {
+      font-size: 20px;
+      margin-bottom: 12px;
+    }
+
+    .enterprise-toggle {
+      margin-bottom: 12px;
+    }
+
+    .enterprise-left-footer {
+      margin-top: 12px;
+
+      .addon-section {
+        margin-bottom: 12px;
+      }
+
+      .plan-card-footer {
+        margin-top: 0;
+      }
+    }
+  }
+
+  .enterprise-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 24px 20px;
+    min-width: 0;
+
+    .mau-slider-section {
+      border-top: none;
+      border-bottom: 1px solid @grey10-color;
+      padding: 0 0 16px 0;
+      margin-bottom: 16px;
+    }
+
+    .plan-features {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      column-gap: 16px;
+      margin-bottom: 0;
+    }
+  }
+
+  @media (max-width: 900px) {
+    flex-direction: column;
+
+    .enterprise-left {
+      flex: unset;
+      border-right: none;
+      border-bottom: 1px solid @grey10-color;
+    }
+
+    .enterprise-right .plan-features {
+      grid-template-columns: 1fr;
+    }
+  }
+}

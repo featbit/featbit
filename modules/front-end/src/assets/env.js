@@ -7,4 +7,5 @@
   window["env"]["evaluationUrl"] = "";
   window["env"]["displayApiUrl"] = "";
   window["env"]["displayEvaluationUrl"] = "";
+  window["env"]["hostingMode"] = "";
 })(this);

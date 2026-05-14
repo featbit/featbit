@@ -60,6 +60,11 @@ export class PermissionLicenseService {
       return true;
     }
 
+    // if user has SegmentAllActions permission, allow access to all segment-related actions regardless of license status
+    if (action.resourceType === ResourceTypeEnum.Segment && this.permissionService.isGranted(rn, permissionActions.SegmentAllActions)) {
+      return true;
+    }
+
     return this.license.isGranted(licenseFeature);
   }
 }

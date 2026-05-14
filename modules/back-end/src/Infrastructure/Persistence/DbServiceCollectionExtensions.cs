@@ -57,6 +57,7 @@ public static class DbServiceCollectionExtensions
             services.AddTransient<IFlagChangeRequestService, MongoServices.FlagChangeRequestService>();
             services.AddTransient<IWebhookService, MongoServices.WebhookService>();
             services.AddTransient<IInsightService, MongoServices.InsightService>();
+            services.AddTransient<IRefreshTokenService, MongoServices.RefreshTokenService>();
         }
 
         void AddEntityFrameworkCoreServices()
@@ -95,6 +96,7 @@ public static class DbServiceCollectionExtensions
             services.AddTransient<IFlagChangeRequestService, EntityFrameworkCoreServices.FlagChangeRequestService>();
             services.AddTransient<IWebhookService, EntityFrameworkCoreServices.WebhookService>();
             services.AddTransient<IInsightService, EntityFrameworkCoreServices.InsightService>();
+            services.AddTransient<IRefreshTokenService, EntityFrameworkCoreServices.RefreshTokenService>();
         }
     }
 }

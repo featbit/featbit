@@ -60,6 +60,17 @@ public static class ApiExceptionMiddlewareExtension
             return;
         }
 
+        // Forbidden exception
+        if (ex is ForbiddenException)
+        {
+            httpResponse.StatusCode = StatusCodes.Status403Forbidden;
+
+            var forbiddenError = ApiResponse<object>.Error(ErrorCodes.Forbidden);
+            await httpResponse.WriteAsJsonAsync(forbiddenError);
+
+            return;
+        }
+
         // BusinessException
         if (ex is BusinessException businessException)
         {

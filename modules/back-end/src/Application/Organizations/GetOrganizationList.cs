@@ -9,28 +9,22 @@ public class GetOrganizationList : IRequest<IEnumerable<OrganizationVm>>
     public bool IsSsoFirstLogin { get; set; }
 }
 
-public class GetOrganizationListHandler : IRequestHandler<GetOrganizationList, IEnumerable<OrganizationVm>>
+public class GetOrganizationListHandler(IOrganizationService service, IMapper mapper)
+    : IRequestHandler<GetOrganizationList, IEnumerable<OrganizationVm>>
 {
-    private readonly IOrganizationService _service;
-    private readonly IMapper _mapper;
-
-    public GetOrganizationListHandler(IOrganizationService service, IMapper mapper)
+    public async Task<IEnumerable<OrganizationVm>> Handle(GetOrganizationList request,
+        CancellationToken cancellationToken)
     {
-        _service = service;
-        _mapper = mapper;
-    }
-
-    public async Task<IEnumerable<OrganizationVm>> Handle(GetOrganizationList request, CancellationToken cancellationToken)
-    {
-        var organizations = await _service.GetListAsync(request.UserId);
+        var organizations =
+            await service.GetUserOrganizationsAsync(request.WorkspaceId, request.UserId);
 
         // If the user is logging in for the first time via Single Sign-On (SSO) and they are not part of any organization yet,
         // retrieve and return all organizations within the same workspace.
-        if (!organizations.Any() && request.IsSsoFirstLogin)
+        if (organizations.Count == 0 && request.IsSsoFirstLogin)
         {
-            organizations = await _service.FindManyAsync(x => x.WorkspaceId == request.WorkspaceId);
+            organizations = await service.FindManyAsync(x => x.WorkspaceId == request.WorkspaceId);
         }
 
-        return _mapper.Map<IEnumerable<OrganizationVm>>(organizations);
+        return mapper.Map<IEnumerable<OrganizationVm>>(organizations);
     }
 }

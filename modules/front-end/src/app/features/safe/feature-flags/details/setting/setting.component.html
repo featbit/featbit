@@ -154,7 +154,7 @@
         @if (this.featureFlag.tags.length) {
           <div class="selected">
             @for (tag of this.featureFlag.tags; track tag) {
-              <nz-tag nzMode="closeable" (nzOnClose)="onRemoveTag(tag)">
+              <nz-tag nzMode="closeable" (nzOnClose)="onRemoveTag($event, tag)">
                 {{ tag }}
               </nz-tag>
             }

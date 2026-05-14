@@ -1,5 +1,4 @@
 using Api.Authentication;
-using Api.Authorization;
 using Application.Bases.Models;
 using Application.Policies;
 using Domain.Policies;
@@ -48,7 +47,7 @@ public class PolicyController : ApiControllerBase
         var policies = await Mediator.Send(request);
         return Ok(policies);
     }
-    
+
     /// <summary>
     /// Check if a key is available for creating a new policy
     /// </summary>
