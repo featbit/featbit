@@ -1,0 +1,178 @@
+<div class="payment-page">
+
+  <!-- State A: Canceled -->
+  @if (viewState === 'canceled') {
+    <div class="payment-card payment-card--canceled">
+      <section class="payment-panel payment-panel--primary">
+        <div class="payment-header">
+          <div class="payment-header__top">
+            <span class="payment-eyebrow">
+              <span nz-icon nzType="info-circle" nzTheme="outline" class="payment-eyebrow__icon payment-eyebrow__icon--canceled"></span>
+              Checkout update
+            </span>
+          </div>
+          <h2 class="payment-headline">Payment Cancelled</h2>
+        </div>
+        <p class="payment-subtext">
+          Your subscription has not changed. If you ran into issues during checkout, you can return to billing
+          and try again when ready.
+        </p>
+        <div class="payment-actions">
+          <button nz-button nzType="primary" class="payment-button payment-button--primary" routerLink="/workspace/billing">Return to Billing</button>
+          <button
+            nz-tooltip
+            nzTooltipTitle="Mail to support@featbit.co"
+            nz-button
+            class="payment-button payment-button--secondary"
+            (click)="contactSupport()">
+            Contact Support
+          </button>
+        </div>
+      </section>
+
+      <aside class="payment-panel payment-panel--secondary">
+        <h3 class="payment-section-title">What you can do next</h3>
+        <ul class="payment-list">
+          <li>Return to the billing page to confirm the selected plan and billing cycle.</li>
+          <li>Retry checkout after verifying your payment method or invoice details.</li>
+          <li>Reach out to support if checkout closed unexpectedly or showed an unclear error.</li>
+        </ul>
+        <div class="payment-note">
+          No charges are activated here unless Stripe confirms the payment successfully.
+        </div>
+      </aside>
+    </div>
+  }
+
+  <!-- State B: Verifying -->
+  @if (viewState === 'verifying') {
+    <div class="payment-card payment-card--verifying">
+      <section class="payment-panel payment-panel--primary">
+        <div class="payment-header">
+          <div class="payment-header__top">
+            <span class="payment-eyebrow">
+              <span nz-icon nzType="loading" nzTheme="outline" class="payment-eyebrow__icon payment-eyebrow__icon--processing"></span>
+              Payment in progress
+            </span>
+          </div>
+          <h2 class="payment-headline">Verifying your payment</h2>
+        </div>
+        <p class="payment-subtext">
+          We’re syncing your completed Stripe checkout with your workspace subscription. Most verifications
+          finish in well under 15 seconds.
+        </p>
+        <div class="payment-timer">
+          <div class="payment-timer__row">
+            <span class="payment-timer__label">Verifying your subscription...</span>
+            <span class="payment-timer__countdown">{{ remainingVerificationSeconds | number:'2.0-0' }}s</span>
+          </div>
+          <nz-progress
+            [nzPercent]="(remainingVerificationSeconds / verificationTotalSeconds) * 100"
+            nzType="line"
+            [nzShowInfo]="false"
+            nzStatus="active"
+            class="payment-timer__bar">
+          </nz-progress>
+        </div>
+      </section>
+
+      <aside class="payment-panel payment-panel--secondary">
+        <h3 class="payment-section-title">What’s happening now</h3>
+        <ul class="payment-list payment-list--status">
+          <li>Confirming your latest license state from the billing service.</li>
+          <li>Checking whether the paid plan is active and ready to use.</li>
+          <li>Preparing to return you to billing automatically after verification.</li>
+        </ul>
+        <div class="payment-note payment-note--soft">
+          If this takes longer than expected, you’ll have an option to check again or contact support.
+        </div>
+      </aside>
+    </div>
+  }
+
+  <!-- State C: Success -->
+  @if (viewState === 'success') {
+    <div class="payment-card payment-card--success">
+      <section class="payment-panel payment-panel--primary">
+        <div class="payment-header">
+          <div class="payment-header__top">
+            <span class="payment-eyebrow">
+              <span nz-icon nzType="check-circle" nzTheme="outline" class="payment-eyebrow__icon payment-eyebrow__icon--success"></span>
+              Subscription active
+            </span>
+          </div>
+          <h2 class="payment-headline">Payment Confirmed</h2>
+        </div>
+        <p class="payment-subtext">
+          Your workspace subscription is now active. We’ll return you to billing shortly so you can review the
+          updated plan details.
+        </p>
+        <div class="payment-redirect-hint">
+          <span nz-icon nzType="clock-circle" nzTheme="outline" class="payment-redirect-hint__icon"></span>
+          <span class="payment-redirect-hint__text">Redirecting to billing in <strong class="payment-redirect-hint__count">{{ redirectRemainingSeconds | number:'2.0-0' }}s</strong></span>
+        </div>
+        <div class="payment-actions">
+          <button nz-button nzType="primary" class="payment-button payment-button--primary" (click)="refreshToBilling()">Return to Billing</button>
+        </div>
+      </section>
+
+      <aside class="payment-panel payment-panel--secondary">
+        <h3 class="payment-section-title">What changed</h3>
+        <ul class="payment-list">
+          <li>Your workspace now reflects the successful Stripe payment.</li>
+          <li>Billing should show the active subscription after the redirect completes.</li>
+          <li>You can continue immediately if you prefer not to wait for auto-navigation.</li>
+        </ul>
+        <div class="payment-note payment-note--success">
+          Keep this page open until the redirect finishes if you want the billing screen to refresh automatically.
+        </div>
+      </aside>
+    </div>
+  }
+
+  <!-- State D: Failure -->
+  @if (viewState === 'failure') {
+    <div class="payment-card payment-card--failure">
+      <section class="payment-panel payment-panel--primary">
+        <div class="payment-header">
+          <div class="payment-header__top">
+            <span class="payment-eyebrow">
+              <span nz-icon nzType="warning" nzTheme="outline" class="payment-eyebrow__icon payment-eyebrow__icon--failure"></span>
+              Verification delayed
+            </span>
+          </div>
+          <h2 class="payment-headline">We're having trouble verifying your payment</h2>
+        </div>
+        <p class="payment-subtext">
+          Your payment may still be processing on Stripe's side. This page did not receive a confirmed active
+          subscription within the expected window.
+        </p>
+        <div class="payment-actions">
+          <button nz-button nzType="primary" class="payment-button payment-button--primary" (click)="startVerification()">Check Again</button>
+          <button
+            nz-tooltip
+            nzTooltipTitle="Mail to support@featbit.co"
+            nz-button
+            class="payment-button payment-button--secondary"
+            (click)="contactSupport()">
+            Contact Support
+          </button>
+        </div>
+        <a class="payment-footer-link" routerLink="/workspace/billing">Return to Billing</a>
+      </section>
+
+      <aside class="payment-panel payment-panel--secondary">
+        <h3 class="payment-section-title">Before you leave this page</h3>
+        <ul class="payment-list">
+          <li>Try verification again in case the subscription activation finishes a few seconds later.</li>
+          <li>Return to billing to review whether the workspace plan has already updated.</li>
+          <li>Contact support if the status remains unchanged after another check.</li>
+        </ul>
+        <div class="payment-note payment-note--warning">
+          A delayed verification does not always mean the payment failed. Stripe may still complete processing.
+        </div>
+      </aside>
+    </div>
+  }
+
+</div>

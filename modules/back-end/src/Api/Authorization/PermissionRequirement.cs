@@ -1,3 +1,5 @@
+using Domain.Policies;
+
 namespace Api.Authorization;
 
 public class PermissionRequirement : IAuthorizationRequirement

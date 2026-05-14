@@ -19,7 +19,7 @@ Please read the [doc](../blob/main/Development.md) to set up your development en
 # Deadline
 
 We usually give 2 weeks for a feature request, which means you have 2 weeks to implement the feature starting from the
-day it is assigned to you. If you have any difficulties, please contact us in [Slack](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ).
+day it is assigned to you. If you have any difficulties, please contact us in [Discord](https://discord.gg/h9dVMsQH).
 
 # How to implement
 

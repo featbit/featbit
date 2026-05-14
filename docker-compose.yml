@@ -22,6 +22,8 @@ services:
       - CacheProvider=None
       - Postgres__ConnectionString=Host=postgresql;Port=5432;Username=postgres;Password=please_change_me;Database=featbit
       - OLAP__ServiceHost=http://da-server
+      - Jwt__Algorithm=HS256
+      - Jwt__Key=please_change_me_to_a_secure_secret_key
     depends_on:
       - postgresql
       - da-server

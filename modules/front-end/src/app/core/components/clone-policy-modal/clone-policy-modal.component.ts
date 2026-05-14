@@ -91,8 +91,9 @@ export class ClonePolicyModalComponent {
   isCloning: boolean = false;
   doClone() {
     this.isCloning = true;
-    const payload = this.form.value;
-    this.policyService.clone(this.policy.key, payload as any).subscribe({
+    const { key: originPolicyKey, type: originPolicyType } = this.policy;
+    const { key, name, description } = this.form.value;
+    this.policyService.clone(originPolicyKey, {key, name, description, originPolicyType}).subscribe({
       next: (res) => {
         this.isCloning = false;
         this.messageService.success($localize `:@@common.operation-success:Operation succeeded`);

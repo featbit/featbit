@@ -1,7 +1,7 @@
 import { firstValueFrom } from "rxjs";
 import { SegmentService } from "@services/segment.service";
 import { ICondition, RULE_OPS } from "@shared/rules";
-import { ISegment } from "@features/safe/segments/types/segments-index";
+import { ISegment } from "@features/safe/segments/types/segments";
 import { IInstructionCondition } from "@core/components/change-list/instructions/types";
 import { isSegmentCondition } from "@utils/index";
 import { findIndex } from "@core/components/find-rule/ruleConfig";

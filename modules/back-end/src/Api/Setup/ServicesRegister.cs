@@ -1,4 +1,3 @@
-using System.Text;
 using Api.Authentication;
 using Api.Authentication.OAuth;
 using Api.Authentication.OpenIdConnect;
@@ -6,7 +5,7 @@ using Api.Authorization;
 using Api.Swagger;
 using Application.Services;
 using Domain.Workspaces;
-using Domain.Identity;
+using Domain.Policies;
 using Infrastructure;
 using Infrastructure.Services;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -51,9 +50,10 @@ public static class ServicesRegister
         builder.Services.AddCors(options => options.AddDefaultPolicy(policyBuilder =>
         {
             policyBuilder
-                .AllowAnyOrigin()
+                .SetIsOriginAllowed(_ => true)
                 .AllowAnyHeader()
-                .AllowAnyMethod();
+                .AllowAnyMethod()
+                .AllowCredentials();
         }));
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -69,8 +69,9 @@ public static class ServicesRegister
         builder.Services.AddApplicationServices();
 
         // authentication
-        var jwtOption = builder.Configuration.GetSection(JwtOptions.Jwt);
-        builder.Services.Configure<JwtOptions>(jwtOption);
+        var jwtOptions = JwtOptionsBuilder.Build(builder.Configuration);
+        builder.Services.AddSingleton(jwtOptions);
+
         builder.Services
             .AddAuthentication(options =>
             {
@@ -97,13 +98,18 @@ public static class ServicesRegister
                     AuthenticationType = Schemes.JwtBearer,
 
                     ValidateIssuer = true,
-                    ValidIssuer = jwtOption["Issuer"],
+                    ValidIssuer = jwtOptions.Issuer,
 
                     ValidateAudience = true,
-                    ValidAudience = jwtOption["Audience"],
+                    ValidAudience = jwtOptions.Audience,
 
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOption["Key"]!))
+                    IssuerSigningKey = jwtOptions.VerificationSecurityKey,
+
+                    ValidAlgorithms = [jwtOptions.Algorithm],
+
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero
                 };
             })
             .AddOpenApi(Schemes.OpenApi);
@@ -111,7 +117,8 @@ public static class ServicesRegister
         // authorization
         LicenseVerifier.ImportPublicKey(builder.Configuration["PublicKey"]);
         builder.Services.AddTransient<ILicenseService, LicenseService>();
-        builder.Services.AddSingleton<IPermissionChecker, DefaultPermissionChecker>();
+        builder.Services.AddScoped<IRequestPermissions, RequestPermissions>();
+        builder.Services.AddScoped<IPermissionChecker, DefaultPermissionChecker>();
         builder.Services.AddScoped<IAuthorizationHandler, PermissionRequirementHandler>();
         builder.Services.AddScoped<IAuthorizationHandler, LicenseRequirementHandler>();
         builder.Services.AddAuthorization(options =>

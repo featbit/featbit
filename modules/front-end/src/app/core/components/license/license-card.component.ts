@@ -119,7 +119,7 @@ export class LicenseCardComponent implements OnInit {
   }
 
   loadUsages() {
-    this.workspaceService.getUsages().subscribe({
+    this.workspaceService.getLicenseQuota().subscribe({
       next: (usages) => {
         if (usages) {
           Object.keys(usages).forEach(key => {

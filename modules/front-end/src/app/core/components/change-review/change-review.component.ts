@@ -4,15 +4,15 @@ import { RefTypeEnum } from "@core/components/audit-log/types";
 import { ChangeReviewOutput, ReviewModalKindEnum, ReviewModalMode } from "@core/components/change-review/types";
 import { differenceInCalendarDays, setHours, setMinutes, setSeconds } from 'date-fns';
 import { DisabledTimeFn } from "ng-zorro-antd/date-picker";
-import { environment } from "src/environments/environment";
 import { AuditLogService } from "@services/audit-log.service";
 import { IInstruction } from "@core/components/change-list/instructions/types";
 import { License, LicenseFeatureEnum } from "@shared/types";
 import { getCurrentLicense } from "@utils/project-env";
-import { BehaviorSubject } from "rxjs";
+import { Subject } from "rxjs";
 import { debounceTime } from "rxjs/operators";
-import { TeamService } from "@services/team.service";
 import { getProfile } from "@utils/index";
+import { OrganizationService } from "@services/organization.service";
+import { MemberFilter } from "@features/safe/iam/types/member";
 
 @Component({
   selector: 'change-review',
@@ -41,7 +41,7 @@ export class ChangeReviewComponent implements OnChanges, OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private teamService: TeamService,
+    private organizationService: OrganizationService,
     private auditLogService: AuditLogService
   ) { }
 
@@ -52,7 +52,7 @@ export class ChangeReviewComponent implements OnChanges, OnInit {
     this.memberSearchChange$.pipe(
       debounceTime(500)
     ).subscribe(searchText => {
-      this.teamService.search(searchText).subscribe({
+      this.organizationService.getMemberList(new MemberFilter(searchText)).subscribe({
         next: (result) => {
           this.memberList = result.items.filter(itm => itm.id !== profile.id);
           this.isMemberLoading = false;
@@ -202,7 +202,7 @@ export class ChangeReviewComponent implements OnChanges, OnInit {
     }
   }
 
-  memberSearchChange$ = new BehaviorSubject('');
+  memberSearchChange$ = new Subject<string>();
   isMemberLoading = false;
   memberList: any[];
   onSearchMember(value: string) {
@@ -210,7 +210,6 @@ export class ChangeReviewComponent implements OnChanges, OnInit {
     this.memberSearchChange$.next(value);
   }
 
-  protected readonly environment = environment;
   protected readonly RefTypeEnum = RefTypeEnum;
   protected readonly LicenseFeatureEnum = LicenseFeatureEnum;
   protected readonly ReviewModalMode = ReviewModalMode;

@@ -149,14 +149,14 @@
                         <span class="serving-label" i18n="@@ff.serving-variations">Serving: </span>
                         <div class="serving-value multiple" nz-tooltip [nzTooltipTitle]="variationsList">
                           <div class="dots-group">
-                            @for (_ of flag.serves?.enabledVariations; track _; let key = $index) {
+                            @for (_ of flag.serves?.enabledVariations; track $index; let key = $index) {
                               <span class="variation-tip {{'tip-' + key % 9}}"></span>
                             }
                           </div>
                           <span class="value-text">{{ flag.serves?.enabledVariations?.length }} <ng-container i18n="@@common.num-variations">Variations</ng-container></span>
                           <ng-template #variationsList>
                             <ul>
-                              @for (variation of flag.serves?.enabledVariations; track variation) {
+                              @for (variation of flag.serves?.enabledVariations; track $index) {
                                 <li>{{ variation }}</li>
                               }
                             </ul>

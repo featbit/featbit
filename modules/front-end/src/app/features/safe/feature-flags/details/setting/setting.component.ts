@@ -79,7 +79,15 @@ export class SettingComponent {
     }
   }
 
-  onRemoveTag(tag: string) {
+  onRemoveTag(event: MouseEvent, tag: string) {
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.UpdateFlagTags);
+    if (!isGranted) {
+      this.message.warning(this.permissionsService.genericDenyMessage);
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+
     this.featureFlag.removeTag(tag);
     this.featureFlagService.setTags(this.featureFlag.key, this.featureFlag.tags).subscribe(_ => {
       this.message.success($localize`:@@common.operation-success:Operation succeeded`);
@@ -93,7 +101,9 @@ export class SettingComponent {
       return;
     }
 
-    let actualTag = this.selectedTag.startsWith(this.createTagPrefix)
+    const isNewTag = this.selectedTag.startsWith(this.createTagPrefix);
+
+    const actualTag = isNewTag
       ? this.selectedTag.replace(this.createTagPrefix, '').replace(/'/g, '').trim()
       : this.selectedTag.trim();
 
@@ -102,7 +112,10 @@ export class SettingComponent {
       this.message.success($localize`:@@common.operation-success:Operation succeeded`);
     });
 
-    this.allTags = [...this.allTags, actualTag];
+    if (isNewTag) {
+      this.allTags = [...this.allTags, actualTag];
+    }
+
     this.currentAllTags = this.allTags;
     // clear current selected
     this.tagsSelect.writeValue(null);

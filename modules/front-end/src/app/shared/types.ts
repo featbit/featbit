@@ -74,6 +74,31 @@ export interface IWorkspace {
   sso?: ISso
 }
 
+export interface WorkspaceSubscription {
+  key: string;
+  name: string;
+  order: number;
+  includedMau: number;
+  extraMau: number;
+  totalMau: number;
+  fineGrainedAcEnabled: boolean;
+  price: number;
+  billingCycle: string;
+  currentPeriodStart: Date;
+  currentPeriodEnd: Date;
+  subscriberSince?: Date;
+  usage?: {
+    mau: number;
+  },
+  pendingDowngrade?: {
+    plan: string;
+    mau: number;
+    billingCycle: string;
+    addOnFeatures: string[];
+    effectiveAt: Date;
+  }
+}
+
 export interface IOrganizationPermissions {
   policyIds: string[];
   groupIds: string[];

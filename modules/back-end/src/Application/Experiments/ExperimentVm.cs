@@ -23,4 +23,5 @@ public class ExperimentVm
     public string Status { get; set; }
     public List<ExperimentIteration> Iterations { get; set; }
     public double? Alpha { get; set; }
+    public DateTime CreatedAt { get; set; }
 }

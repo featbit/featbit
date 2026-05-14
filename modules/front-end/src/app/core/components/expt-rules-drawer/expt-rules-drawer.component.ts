@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { ISegment } from '@features/safe/segments/types/segments-index';
+import { ISegment } from '@features/safe/segments/types/segments';
 import { SegmentService } from '@services/segment.service';
 import {
   getPercentageFromDecimal,

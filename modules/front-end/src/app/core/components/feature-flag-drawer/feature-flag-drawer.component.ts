@@ -128,7 +128,7 @@ export class FeatureFlagDrawerComponent implements OnInit {
   onAddTag() {
     const isNewTag = this.selectedTag.startsWith(this.createTagPrefix);
 
-    let actualTag = isNewTag
+    const actualTag = isNewTag
       ? this.selectedTag.replace(this.createTagPrefix, '').replace(/'/g, '').trim()
       : this.selectedTag.trim();
 

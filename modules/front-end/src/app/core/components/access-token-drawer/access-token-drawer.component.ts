@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { debounceTime, first, map, switchMap } from "rxjs/operators";
+import { catchError, debounceTime, first, map, switchMap } from "rxjs/operators";
 import { AccessTokenTypeEnum, IAccessToken, } from "@features/safe/integrations/access-tokens/types/access-token";
 import { AccessTokenService } from "@services/access-token.service";
 import { PermissionsService } from "@services/permissions.service";
@@ -21,13 +21,16 @@ import {
 } from "@shared/policy";
 import { copyToClipboard, uuidv4 } from "@utils/index";
 import {
-  IPermissionStatementGroup,
+  PermissionStatementGroup,
   postProcessPermissions,
-  preProcessPermissions
+  preProcessPermissions,
+  ResourceTypeExtension
 } from "@features/safe/integrations/access-tokens/types/permission-helper";
 import { PolicyTypeEnum } from "@features/safe/iam/types/policy";
 import { PermissionLicenseService } from "@services/permission-license.service";
 import { LicenseFeatureEnum } from "@shared/types";
+import { IResourceEditorOutputModel } from "@core/components/resource-editor/resource-editor.component";
+import { of } from "rxjs";
 
 @Component({
     selector: 'access-token-drawer',
@@ -50,14 +53,52 @@ export class AccessTokenDrawerComponent implements OnInit {
   ];
 
   fineGrainedAccessControlEnabled: boolean = false;
-  authorizedResourceTypes: ResourceType[] = [];
-  permissions: { [key: string]: IPermissionStatementGroup };
+  authorizedResourceTypes: ResourceTypeExtension[] = [];
+  permissions: { [key: string]: PermissionStatementGroup };
 
   @Input()
   set accessToken(accessToken: IAccessToken) {
+    const allPermissionActions = this.loadAllPermissionActions();
+    this.permissions = preProcessPermissions(allPermissionActions);
+
     this.isEditing = accessToken && !!accessToken.id;
     if (this.isEditing) {
-      this.permissions = preProcessPermissions(accessToken.permissions);
+      const savedPermissions = preProcessPermissions(accessToken.permissions);
+      Object.entries(this.permissions).forEach(([resourceType, statementGroup]) => {
+        if (savedPermissions[resourceType]) {
+          const savedStatementGroup = savedPermissions[resourceType];
+          statementGroup.resources = savedStatementGroup.resources;
+          statementGroup.isAllResources = savedStatementGroup.isAllResources;
+
+          const allActions = savedStatementGroup.statements.find(stmt => stmt.action.name === '*');
+
+          if(allActions) {
+            statementGroup.statements.forEach(stmt => {
+              stmt.checked = true;
+              stmt.resources = allActions.resources;
+            });
+          } else {
+            const savedMap = new Map(savedStatementGroup.statements.map(stmt => [stmt.action.id, stmt]));
+
+            // Mark statements as checked if they exist in saved permissions
+            statementGroup.statements.forEach(stmt => {
+              const saved = savedMap.get(stmt.action.id);
+              if (saved) {
+                stmt.checked = true;
+                stmt.resources = saved.resources;
+              } else {
+                stmt.checked = false;
+              }
+            });
+          }
+        } else {
+          // If resource type not in saved permissions, mark all as unchecked
+          statementGroup.statements.forEach(stmt => {
+            stmt.checked = false;
+          });
+        }
+      });
+
       if (this.readonly) {
         this.title = $localize`:@@integrations.access-token.access-token-drawer.view-title:View Access Token`;
       } else {
@@ -65,14 +106,21 @@ export class AccessTokenDrawerComponent implements OnInit {
       }
     } else {
       accessToken = {name: null, type: AccessTokenTypeEnum.Personal};
-      this.setAuthorizedPermissions();
       this.title = $localize`:@@integrations.access-token.access-token-drawer.add-title:Add Access Token`;
     }
+
+    Object.values(this.permissions).forEach((statementGroup) => this.updatePermissionSingleChecked(statementGroup));
 
     this.isServiceAccessToken = accessToken.type === AccessTokenTypeEnum.Service;
     this.initForm(accessToken.name, accessToken.type);
     this._accessToken = accessToken;
-    this.authorizedResourceTypes = this.resourceTypes.filter((rt) => this.permissions[rt.type]?.statements?.length > 0);
+    this.authorizedResourceTypes = this.resourceTypes
+      .filter((rt) => this.permissions[rt.type]?.statements?.length > 0)
+      .map(rt => ({
+        ...rt,
+        isResourceEditorVisible: false,
+        isConfigurable: [ResourceTypeEnum.Flag, ResourceTypeEnum.Segment, ResourceTypeEnum.Project, ResourceTypeEnum.Env].some(x => x === rt.type)
+      }));
   }
 
   @Input() visible: boolean = false;
@@ -92,14 +140,13 @@ export class AccessTokenDrawerComponent implements OnInit {
     private message: NzMessageService,
     private permissionLicenseService: PermissionLicenseService
   ) {
+    this.fineGrainedAccessControlEnabled = this.permissionLicenseService.isGrantedByLicense(LicenseFeatureEnum.FineGrainedAccessControl);
+    this.canTakeActionOnPersonalAccessToken = this.permissionsService.isGranted(generalResourceRNPattern.accessToken, permissionActions.ManagePersonalAccessTokens);
+    this.canTakeActionOnServiceAccessToken = this.permissionsService.isGranted(generalResourceRNPattern.accessToken, permissionActions.ManageServiceAccessTokens);
   }
 
   ngOnInit(): void {
     this.initForm('', AccessTokenTypeEnum.Personal);
-
-    this.fineGrainedAccessControlEnabled = this.permissionLicenseService.isGrantedByLicense(LicenseFeatureEnum.FineGrainedAccessControl);
-    this.canTakeActionOnPersonalAccessToken = this.permissionsService.isGranted(generalResourceRNPattern.accessToken, permissionActions.ManagePersonalAccessTokens);
-    this.canTakeActionOnServiceAccessToken = this.permissionsService.isGranted(generalResourceRNPattern.accessToken, permissionActions.ManageServiceAccessTokens);
   }
 
   private initForm(name: string, type: AccessTokenTypeEnum) {
@@ -113,8 +160,14 @@ export class AccessTokenDrawerComponent implements OnInit {
     });
   }
 
+  isResourceDisabled(statementGroup: PermissionStatementGroup) {
+    const hasEnabledActions = statementGroup.statements.some(s => !this.isActionDisabled(s.action));
+    return !hasEnabledActions;
+  }
+
   isActionDisabled(act: IamPolicyAction): boolean {
-    return act.isFineGrainedAction && !this.fineGrainedAccessControlEnabled;
+    const isActionAuthorized = this.authorizedPermissionActions.some((r) => r.resourceType === act.resourceType && r.actions.includes(act.name));
+    return !isActionAuthorized || (act.isFineGrainedAction && !this.fineGrainedAccessControlEnabled);
   }
 
   isServiceAccessToken: boolean = false
@@ -129,82 +182,122 @@ export class AccessTokenDrawerComponent implements OnInit {
     this.close.emit();
   }
 
-  setAuthorizedPermissions() {
+  private _authorizedPermissionActions;
+
+  get authorizedPermissionActions() {
+    if (this._authorizedPermissionActions) {
+      return this._authorizedPermissionActions;
+    }
+
     const hasOwnerPolicy = this.permissionsService.userPolicies.some((policy) => policy.name === 'Owner' && policy.type === PolicyTypeEnum.SysManaged);
 
     let permissions;
     if (hasOwnerPolicy) {
       permissions = Object.keys(permissionActions)
-        .filter(act => {
-          if (this.fineGrainedAccessControlEnabled) {
-            return act !== 'FlagAllActions'
-          }
+      .filter(act => {
+        if (this.fineGrainedAccessControlEnabled) {
+          return act !== 'FlagAllActions' && act !== 'SegmentAllActions';
+        }
 
-          return !permissionActions[act].isFineGrainedAction;
-        })
-        .map((property) => {
-          const {resourceType, name} = permissionActions[property];
-          return {
-            id: uuidv4(),
-            resourceType,
-            effect: EffectEnum.Allow,
-            actions: [name],
-            resources: [generalResourceRNPattern[resourceType]]
-          }
-        })
+        return !permissionActions[act].isFineGrainedAction;
+      })
+      .map((property) => {
+        const {resourceType, name} = permissionActions[property];
+        return {
+          id: uuidv4(),
+          resourceType,
+          effect: EffectEnum.Allow,
+          actions: [name],
+          resources: [generalResourceRNPattern[resourceType]]
+        }
+      })
     } else {
       permissions = this.permissionsService.userPermissions.map(p => {
-        if (this.fineGrainedAccessControlEnabled && p.resourceType === ResourceTypeEnum.Flag) {
-          if(p.actions.some((action) => action === '*')) {
+        if (this.fineGrainedAccessControlEnabled && (p.resourceType === ResourceTypeEnum.Flag || p.resourceType === ResourceTypeEnum.Segment)) {
+          if (p.actions.some((action) => action === '*')) {
             return {
               ...p,
               actions: Object.values(permissionActions)
-              .filter(act => act.resourceType === ResourceTypeEnum.Flag && act.name !== '*' && act.isFineGrainedAction)
+              .filter(act => act.resourceType === p.resourceType && act.name !== '*' && act.isFineGrainedAction)
               .map(act => act.name),
             };
           }
         }
 
-        return {...p};
+        return { ...p };
       });
     }
 
-    permissions = permissions.filter((permission) => this.resourceTypes.some((rt) => rt.type === permission.resourceType));
-    this.permissions = preProcessPermissions(permissions);
+    this._authorizedPermissionActions = permissions.filter((permission) => this.resourceTypes.some((rt) => rt.type === permission.resourceType));
+    return this._authorizedPermissionActions;
   }
 
-  nameAsyncValidator = (control: FormControl) => control.valueChanges.pipe(
-    debounceTime(300),
-    switchMap(value => this.accessTokenService.isNameUsed(value as string)),
-    map(isNameUsed => {
-      switch (isNameUsed) {
-        case true:
-          return {error: true, duplicated: true};
-        case undefined:
-          return {error: true, unknown: true};
-        default:
-          return null;
-      }
-    }),
-    first()
-  );
+  loadAllPermissionActions() {
+    const permissions = Object.keys(permissionActions)
+      .filter(act => {
+        if (this.fineGrainedAccessControlEnabled) {
+          return act !== 'FlagAllActions' && act !== 'SegmentAllActions';
+        }
 
-  updatePermissionsAllChecked(statementGroup: IPermissionStatementGroup) {
-    statementGroup.indeterminate = false;
-    if (statementGroup.allChecked) {
-      statementGroup.statements = statementGroup.statements.map(item => ({
-        ...item,
-        checked: true
-      }));
-    } else {
-      statementGroup.statements = statementGroup.statements.map(item => ({
-        ...item,
-        checked: false
-      }));
+        return !permissionActions[act].isFineGrainedAction;
+      })
+      .map((property) => {
+        const {resourceType, name} = permissionActions[property];
+        return {
+          id: uuidv4(),
+          resourceType,
+          effect: EffectEnum.Allow,
+          actions: [name],
+          resources: [generalResourceRNPattern[resourceType]]
+        }
+      })
+
+    return permissions.filter((permission) => this.resourceTypes.some((rt) => rt.type === permission.resourceType));
+  }
+
+  nameAsyncValidator = (control: FormControl) => {
+    if (this.isEditing && control.value === this._accessToken.name) {
+      return of(null);
     }
+
+    return control.valueChanges.pipe(
+      debounceTime(300),
+      switchMap(value => this.accessTokenService.isNameUsed(value as string)),
+      map(isUsed => isUsed ? { error: true, duplicated: true } : null),
+      catchError(() => [{ error: true, unknown: true }]),
+      first()
+    );
   }
 
-  updatePermissionSingleChecked(statementGroup: IPermissionStatementGroup) {
+  updatePermissionsAllChecked(statementGroup: PermissionStatementGroup) {
+    if (statementGroup.allChecked) {
+      statementGroup.statements = statementGroup.statements.map(item => {
+        if (this.isActionDisabled(item.action)) {
+          return item;
+        }
+
+        return {
+          ...item,
+          checked: true
+        };
+      });
+    } else {
+      statementGroup.statements = statementGroup.statements.map(item => {
+        if (this.isActionDisabled(item.action)) {
+          return item;
+        }
+
+        return {
+          ...item,
+          checked: false
+        };
+      });
+    }
+
+    this.updatePermissionSingleChecked(statementGroup);
+  }
+
+  updatePermissionSingleChecked(statementGroup: PermissionStatementGroup) {
     if (statementGroup.statements.every(item => !item.checked)) {
       statementGroup.allChecked = false;
       statementGroup.indeterminate = false;
@@ -213,11 +306,11 @@ export class AccessTokenDrawerComponent implements OnInit {
       statementGroup.indeterminate = false;
     } else {
       statementGroup.indeterminate = true;
+      statementGroup.allChecked = false;
     }
   }
 
   isLoading: boolean = false;
-
   tokenName = '';
   tokenValue = '';
   isCreationConfirmModalVisible = false;
@@ -239,13 +332,16 @@ export class AccessTokenDrawerComponent implements OnInit {
       return;
     }
 
+    const permissions = this.isServiceAccessToken ? postProcessPermissions(this.permissions) : [];
+
     this.isLoading = true;
     if (this.isEditing) {
-      this.accessTokenService.update(this.accessToken.id, name).subscribe({
-          next: _ => {
+      this.accessTokenService.update(this.accessToken.id, name, permissions).subscribe({
+          next: ({name, permissions}) => {
             this.isLoading = false;
-            this.close.emit({isEditing: true, id: this.accessToken.id, name: name});
+            this.close.emit({isEditing: true, id: this.accessToken.id, name, permissions });
             this.message.success($localize`:@@common.operation-success:Operation succeeded`);
+            this.form.reset();
           },
           error: _ => {
             this.message.error($localize`:@@common.operation-failed-try-again:Operation failed, please try again`);
@@ -254,9 +350,7 @@ export class AccessTokenDrawerComponent implements OnInit {
         }
       );
     } else {
-      const policies = this.isServiceAccessToken ? postProcessPermissions(this.permissions) : [];
-
-      this.accessTokenService.create(name, type, policies).subscribe({
+      this.accessTokenService.create(name, type, permissions).subscribe({
           next: ({name, token}) => {
             this.isLoading = false;
             this.close.emit({isEditing: false});
@@ -276,15 +370,36 @@ export class AccessTokenDrawerComponent implements OnInit {
       )
     }
   }
-
   copyText(event, text: string) {
     copyToClipboard(text).then(
       () => this.message.success($localize`:@@common.copy-success:Copied`)
     );
   }
 
+  editResource = (resourceType: ResourceTypeExtension, rsc: string, index: number) => {
+    this.permissions[resourceType.type].currentResource = rsc;
+    this.permissions[resourceType.type].currentResourceIndex = index;
+    resourceType.isResourceEditorVisible = true;
+  };
+
+  addResource = (resourceType: ResourceTypeExtension) => {
+    this.permissions[resourceType.type].currentResource = generalResourceRNPattern[resourceType.type];
+    this.permissions[resourceType.type].currentResourceIndex = this.permissions[resourceType.type].resources.length;
+    resourceType.isResourceEditorVisible = true;
+  };
+
+  onResourceAdded = (resourceType: ResourceTypeExtension, rsc: IResourceEditorOutputModel) => {
+    const permissionGroup = this.permissions[resourceType.type];
+    if (!permissionGroup.resources.includes(rsc.val)) {
+      permissionGroup.saveResource(rsc.val);
+    }
+
+    resourceType.isResourceEditorVisible = false;
+  }
+
   tokenTypes = [
-    { label: $localize `:@@integrations.access-token.personal:Personal`, value: AccessTokenTypeEnum.Personal },
-    { label: $localize `:@@integrations.access-token.service:Service`, value: AccessTokenTypeEnum.Service },
+    { label: $localize`:@@integrations.access-token.personal:Personal`, value: AccessTokenTypeEnum.Personal },
+    { label: $localize`:@@integrations.access-token.service:Service`, value: AccessTokenTypeEnum.Service },
   ]
+  protected readonly ResourceTypeEnum = ResourceTypeEnum;
 }

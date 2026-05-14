@@ -357,7 +357,8 @@ public class ExperimentService(AppDbContext dbContext, IOlapService olapService)
                 MetricCustomEventTrackOption = metric.CustomEventTrackOption,
                 MetricCustomEventSuccessCriteria = metric.CustomEventSuccessCriteria,
                 Iterations = experiment.Iterations,
-                Alpha = experiment.Alpha
+                Alpha = experiment.Alpha,
+                CreatedAt = experiment.CreatedAt
             };
 
         var totalCount = await query.CountAsync();
@@ -365,6 +366,7 @@ public class ExperimentService(AppDbContext dbContext, IOlapService olapService)
         var items = filter.PageSize == -1
             ? await query.ToListAsync()
             : await query
+                .OrderByDescending(x => x.CreatedAt)
                 .Skip(filter.PageIndex * filter.PageSize)
                 .Take(filter.PageSize)
                 .ToListAsync();

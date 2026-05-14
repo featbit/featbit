@@ -7,9 +7,9 @@ public class Insight
 {
     public EndUser? User { get; set; }
 
-    public IEnumerable<VariationInsight> Variations { get; set; } = Array.Empty<VariationInsight>();
+    public VariationInsight[] Variations { get; set; } = [];
 
-    public IEnumerable<MetricInsight> Metrics { get; set; } = Array.Empty<MetricInsight>();
+    public MetricInsight[] Metrics { get; set; } = [];
 
     public bool IsValid()
     {

@@ -17,6 +17,12 @@ export interface IMemberGroup {
   isGroupMember: boolean;
 }
 
+export interface AddMemberPayload {
+  email: string;
+  policyIds: string[];
+  groupIds: string[];
+}
+
 export class MemberGroupFilter {
   name?: string;
   getAllGroups: boolean;

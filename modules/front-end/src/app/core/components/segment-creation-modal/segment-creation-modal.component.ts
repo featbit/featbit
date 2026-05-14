@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
 import { debounceTime, first, map, switchMap } from "rxjs/operators";
 import { SegmentService } from "@services/segment.service";
-import { CreateSegment, ISegment, SegmentType } from "@features/safe/segments/types/segments-index";
+import { CreateSegment, ISegment, SegmentType } from "@features/safe/segments/types/segments";
 import { NzMessageService } from "ng-zorro-antd/message";
 import {
   GroupedResource,

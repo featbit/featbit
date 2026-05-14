@@ -1,12 +1,16 @@
+using Api.RateLimiting;
 using Api.Setup;
 using Domain.EndUsers;
 using Domain.Insights;
 using Domain.Messages;
+using Domain.Usages;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace Api.Public;
 
+[EnableRateLimiting(RateLimitingPolicies.Insight)]
 public class InsightController : PublicApiControllerBase
 {
     private readonly IMessageProducer _producer;
@@ -33,7 +37,7 @@ public class InsightController : PublicApiControllerBase
         }
 
         var validInsights = insights.Where(x => x.IsValid()).ToArray();
-        if (!validInsights.Any())
+        if (validInsights.Length == 0)
         {
             return Ok();
         }
@@ -42,6 +46,7 @@ public class InsightController : PublicApiControllerBase
 
         var endUserMessages = new List<EndUserMessage>();
         var insightMessages = new List<InsightMessage>();
+        var usage = new InsightUsage(EnvId);
         foreach (var insight in validInsights)
         {
             var key = $"{envId:N}:{insight.User!.KeyId}";
@@ -49,17 +54,19 @@ public class InsightController : PublicApiControllerBase
             {
                 _cache.Set(key, string.Empty, _cacheEntryOptions);
                 endUserMessages.Add(insight.EndUserMessage(envId));
+                usage.AddUser(insight.User!.KeyId);
             }
 
             insightMessages.AddRange(insight.InsightMessages(envId));
+            usage.AddEvents(insight.Variations.Length, insight.Metrics.Length);
         }
 
-        await Task.WhenAll(
-            endUserMessages.Select(x => _producer.PublishAsync(Topics.EndUser, x))
-        );
-        await Task.WhenAll(
-            insightMessages.Select(x => _producer.PublishAsync(Topics.Insights, x))
-        );
+        var tasks = endUserMessages.Select(x => _producer.PublishAsync(Topics.EndUser, x))
+            .Concat(insightMessages.Select(x => _producer.PublishAsync(Topics.Insights, x)))
+            .Append(_producer.PublishAsync(Topics.Usage, usage))
+            .ToArray();
+
+        await Task.WhenAll(tasks);
 
         return Ok();
     }

@@ -3,9 +3,9 @@ import { Subject } from 'rxjs';
 import { AuditLogListFilter, IAuditLog, IAuditLogListModel, RefTypeEnum } from "@core/components/audit-log/types";
 import { IMember, IMemberListModel, MemberFilter } from "@features/safe/iam/types/member";
 import { AuditLogService } from "@services/audit-log.service";
-import { MemberService } from "@services/member.service";
 import { debounceTime, distinctUntilChanged } from "rxjs/operators";
 import { NzMessageService } from "ng-zorro-antd/message";
+import { OrganizationService } from "@services/organization.service";
 
 @Component({
   selector: 'audit-logs',
@@ -32,7 +32,7 @@ export class AuditLogsComponent implements OnInit {
   refTypeSegment: RefTypeEnum = RefTypeEnum.Segment;
   constructor(
     private auditLogService: AuditLogService,
-    private memberService: MemberService,
+    private organizationService: OrganizationService,
     private msg: NzMessageService,
   ) { }
 
@@ -93,7 +93,7 @@ export class AuditLogsComponent implements OnInit {
 
   loadMemberList(query?: string) {
     this.membersLoading = true;
-    this.memberService.getList(new MemberFilter(query ?? '')).subscribe({
+    this.organizationService.getMemberList(new MemberFilter(query ?? '')).subscribe({
       next: (members) => {
         this.memberListModel = members;
         this.membersLoading = false;

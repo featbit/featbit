@@ -16,7 +16,7 @@ public class AccessToken : AuditedEntity
 
     public Guid CreatorId { get; set; }
 
-    public IEnumerable<PolicyStatement> Permissions { get; set; }
+    public PolicyStatement[] Permissions { get; set; }
 
     public DateTime? LastUsedAt { get; set; }
 
@@ -25,7 +25,7 @@ public class AccessToken : AuditedEntity
         Guid creatorId,
         string name,
         string type,
-        IEnumerable<PolicyStatement> permissions)
+        PolicyStatement[] permissions)
     {
         OrganizationId = organizationId;
         CreatorId = creatorId;
@@ -33,7 +33,7 @@ public class AccessToken : AuditedEntity
 
         Status = AccessTokenStatus.Active;
         Type = type;
-        Permissions = permissions;
+        Permissions = permissions ?? [];
 
         Token = $"api-{TokenHelper.New(Guid.NewGuid())}";
     }
@@ -49,9 +49,14 @@ public class AccessToken : AuditedEntity
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void UpdateName(string name)
+    public void Update(string name, PolicyStatement[] permissions)
     {
         Name = name;
+        if (Type == AccessTokenTypes.Service)
+        {
+            Permissions = permissions ?? [];
+        }
+
         UpdatedAt = DateTime.UtcNow;
     }
 }

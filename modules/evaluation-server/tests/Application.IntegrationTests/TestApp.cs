@@ -24,6 +24,19 @@ public class TestApp : WebApplicationFactory<Program>
         base.ConfigureWebHost(builder);
     }
 
+    public WebApplicationFactory<Program> WithSettings(params (string Key, string Value)[] settings)
+    {
+        var appWithSettings = WithWebHostBuilder(builder =>
+        {
+            foreach (var (key, value) in settings)
+            {
+                builder.UseSetting(key, value);
+            }
+        });
+
+        return appWithSettings;
+    }
+
     public async Task<WebSocket> ConnectAsync(long timestamp = 0, string queryString = "")
     {
         var streamingApp = WithWebHostBuilder(builder =>
