@@ -20,23 +20,25 @@
         </div>
       </nz-form-control>
     </nz-form-item>
-    <nz-form-item>
-      <nz-form-label i18n="@@common.license">License</nz-form-label>
-      <nz-form-control nzErrorTip="License cannot be empty" i18n-nzErrorTip="@@common.license-cannot-be-empty">
-        <div class="form-item">
-          <nz-input-group [nzPrefix]="licenseIcon">
-            <input type="text" nz-input formControlName="license" placeholder="Enter your license here" i18n-placeholder="@@license.enter-your-license-here"/>
-            <ng-template #licenseIcon>
-              <i nz-icon nzType="icons:icon-license"></i>
-            </ng-template>
-          </nz-input-group>
-          <button type="button" nz-button nzType="primary" [nzLoading]="updating" (click)="updateLicense()">
-            <i nz-icon nzType="icons:icon-sync"></i>
-            <ng-container i18n="@@common.updateLicense">Update</ng-container>
-          </button>
-        </div>
-      </nz-form-control>
-    </nz-form-item>
+    @if(!isSaas) {
+      <nz-form-item>
+        <nz-form-label i18n="@@common.license">License</nz-form-label>
+        <nz-form-control nzErrorTip="License cannot be empty" i18n-nzErrorTip="@@common.license-cannot-be-empty">
+          <div class="form-item">
+            <nz-input-group [nzPrefix]="licenseIcon">
+              <input type="text" nz-input formControlName="license" placeholder="Enter your license here" i18n-placeholder="@@license.enter-your-license-here"/>
+              <ng-template #licenseIcon>
+                <i nz-icon nzType="icons:icon-license"></i>
+              </ng-template>
+            </nz-input-group>
+            <button type="button" nz-button nzType="primary" [nzLoading]="updating" (click)="updateLicense()">
+              <i nz-icon nzType="icons:icon-sync"></i>
+              <ng-container i18n="@@common.updateLicense">Update</ng-container>
+            </button>
+          </div>
+        </nz-form-control>
+      </nz-form-item>
+    }
   </form>
   @if (license?.data) {
     <license-card [license]="license"></license-card>

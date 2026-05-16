@@ -1,6 +1,8 @@
 using Application.Bases;
+using Application.Bases.Exceptions;
 using Application.Caches;
 using Domain.Workspaces;
+using Microsoft.Extensions.Configuration;
 
 namespace Application.Workspaces;
 
@@ -32,16 +34,25 @@ public class UpdateLicenseHandler : IRequestHandler<UpdateLicense, WorkspaceVm>
     private readonly IWorkspaceService _service;
     private readonly ICacheService _cacheService;
     private readonly IMapper _mapper;
+    private readonly bool _isSaas;
 
-    public UpdateLicenseHandler(IWorkspaceService service, ICacheService cacheService, IMapper mapper)
+    public UpdateLicenseHandler(IWorkspaceService service, ICacheService cacheService, IMapper mapper, IConfiguration configuration)
     {
         _service = service;
         _cacheService = cacheService;
         _mapper = mapper;
+
+        var hostingMode = configuration.GetSection("HostingMode").Value;
+        _isSaas = hostingMode == "saas";
     }
 
     public async Task<WorkspaceVm> Handle(UpdateLicense request, CancellationToken cancellationToken)
     {
+        if (_isSaas)
+        {
+            throw new BusinessException("Forbidden");
+        }
+
         var workspace = await _service.GetAsync(request.Id);
 
         // save to database
