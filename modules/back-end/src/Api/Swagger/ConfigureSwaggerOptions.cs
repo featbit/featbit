@@ -124,7 +124,7 @@ public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
             Description =
                 "Standard Authorization header using the Bearer scheme (JWT). Example: \"Authorization: Bearer eyJ...\""
         });
-        options.AddSecurityRequirement((document) => new OpenApiSecurityRequirement()
+        options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
         {
             [new OpenApiSecuritySchemeReference("JwtBearer", document)] = []
         });
@@ -137,7 +137,7 @@ public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
             Scheme = "AccessToken",
             Description = "Use access token to access this API. Example: \"Authorization: api-MzQ...\""
         });
-        options.AddSecurityRequirement((document) => new OpenApiSecurityRequirement()
+        options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
         {
             [new OpenApiSecuritySchemeReference("AccessToken", document)] = []
         });

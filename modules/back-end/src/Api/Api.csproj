@@ -10,23 +10,23 @@
 
     <ItemGroup>
         <!-- Api Versioning -->
-        <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.1.1" />
+        <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="10.0.0" />
 
         <!-- Swagger -->
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.0" />
-        <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="10.1.0" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.7" />
+        <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="10.1.7" />
         <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="10.0.1" />
-        <PackageReference Include="Swashbuckle.AspNetCore.ReDoc" Version="10.1.0" />
+        <PackageReference Include="Swashbuckle.AspNetCore.ReDoc" Version="10.1.7" />
 
         <!-- Serilog -->
         <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
-        <PackageReference Include="Serilog.Enrichers.ClientInfo" Version="2.8.0" />
+        <PackageReference Include="Serilog.Enrichers.ClientInfo" Version="2.9.0" />
         <PackageReference Include="Serilog.Sinks.OpenTelemetry" Version="4.2.0" />
 
-        <PackageReference Include="Grpc.Net.Client" Version="2.76.0" />
-        <PackageReference Include="System.Text.Encodings.Web" Version="10.0.2" />
+        <PackageReference Include="Grpc.Net.Client" Version="2.80.0" />
+        <PackageReference Include="System.Text.Encodings.Web" Version="10.0.8" />
 
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.2">
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.8">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
