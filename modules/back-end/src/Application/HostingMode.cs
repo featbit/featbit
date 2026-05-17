@@ -1,4 +1,4 @@
-namespace Infrastructure;
+namespace Application;
 
 public static class HostingMode
 {
