@@ -5,6 +5,8 @@ import { NzMessageService } from "ng-zorro-antd/message";
 import { IWorkspace, License } from "@shared/types";
 import { getCurrentWorkspace } from "@utils/project-env";
 import { copyToClipboard } from "@utils/index";
+import { environment } from "src/environments/environment";
+import { HOSTING_MODE } from "@shared/constants";
 
 
 @Component({
@@ -16,6 +18,8 @@ import { copyToClipboard } from "@utils/index";
 export class LicenseComponent implements OnInit {
   private workspaceService = inject(WorkspaceService);
   private messageService = inject(NzMessageService);
+
+  isSaas = environment.hostingMode === HOSTING_MODE.SAAS;
 
   workspace: IWorkspace;
   license: License;
