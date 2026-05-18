@@ -2029,10 +2029,6 @@
           <context context-type="linenumber">138,139</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
-          <context context-type="linenumber">171,172</context>
-        </context-group>
-        <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/props-drawer/props-drawer.component.html</context>
           <context context-type="linenumber">105,106</context>
         </context-group>
@@ -4756,10 +4752,6 @@
           <context context-type="linenumber">20</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
-          <context context-type="linenumber">155,156</context>
-        </context-group>
-        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
           <context context-type="linenumber">8,9</context>
         </context-group>
@@ -4821,93 +4813,37 @@
         </context-group>
         <target>账户管理</target>
       </trans-unit>
-      <trans-unit id="common.feedback" datatype="html">
-        <source>Feedback</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
-          <context context-type="linenumber">117,118</context>
-        </context-group>
-        <target>反馈</target>
-      </trans-unit>
       <trans-unit id="common.profile" datatype="html">
         <source>Profile</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
-          <context context-type="linenumber">124,125</context>
+          <context context-type="linenumber">118,119</context>
         </context-group>
         <target>个人信息</target>
+      </trans-unit>
+      <trans-unit id="common.support" datatype="html">
+        <source>Support</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
+          <context context-type="linenumber">125,126</context>
+        </context-group>
+        <target>技术支持</target>
+      </trans-unit>
+      <trans-unit id="common.documentation" datatype="html">
+        <source>Documentation</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
+          <context context-type="linenumber">131,132</context>
+        </context-group>
+        <target>文档</target>
       </trans-unit>
       <trans-unit id="common.logout" datatype="html">
         <source>Logout</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
-          <context context-type="linenumber">131,132</context>
+          <context context-type="linenumber">137,138</context>
         </context-group>
         <target>退出</target>
-      </trans-unit>
-      <trans-unit id="common.send-feedback" datatype="html">
-        <source>Send feedback</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
-          <context context-type="linenumber">151,152</context>
-        </context-group>
-        <target>发送反馈</target>
-      </trans-unit>
-      <trans-unit id="common.email-invalid" datatype="html">
-        <source>Invalid Email</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
-          <context context-type="linenumber">156,157</context>
-        </context-group>
-        <target>邮箱地址无效</target>
-      </trans-unit>
-      <trans-unit id="common.message" datatype="html">
-        <source>Message</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
-          <context context-type="linenumber">161,162</context>
-        </context-group>
-        <target>信息</target>
-      </trans-unit>
-      <trans-unit id="common.message-mandatory" datatype="html">
-        <source>Message is mandatory</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
-          <context context-type="linenumber">162</context>
-        </context-group>
-        <target>信息不能为空</target>
-      </trans-unit>
-      <trans-unit id="common.message-placeholder" datatype="html">
-        <source>Have you any feedback for us?</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
-          <context context-type="linenumber">163,165</context>
-        </context-group>
-        <target>反馈信息</target>
-      </trans-unit>
-      <trans-unit id="common.send" datatype="html">
-        <source>Send</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
-          <context context-type="linenumber">172,173</context>
-        </context-group>
-        <target>发送</target>
-      </trans-unit>
-      <trans-unit id="common.feedback-success-message" datatype="html">
-        <source>Thank you for sending us your feedback, we&apos;ll get back to you very soon!</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/menu/menu.component.ts</context>
-          <context context-type="linenumber">71</context>
-        </context-group>
-        <target>感谢您给我们发送反馈，我们会尽快和您联系！</target>
-      </trans-unit>
-      <trans-unit id="common.feedback-failure-message" datatype="html">
-        <source>We were not able to send your feedback, Please try again!</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/menu/menu.component.ts</context>
-          <context context-type="linenumber">74</context>
-        </context-group>
-        <target>反馈发送失败，请稍后重试！</target>
       </trans-unit>
       <trans-unit id="expt.metric.name-cannot-be-empty" datatype="html">
         <source>Metric name cannot be empty</source>
