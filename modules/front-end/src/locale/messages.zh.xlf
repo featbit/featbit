@@ -12249,11 +12249,15 @@
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
           <context context-type="linenumber">736</context>
         </context-group>
+        <target>更新 SSO 设置</target>
+      </trans-unit>
+      <trans-unit id="iam.action.read-ws-sso" datatype="html">
+        <source>Read workspace SSO settings</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
           <context context-type="linenumber">746</context>
         </context-group>
-        <target>更新 SSO 设置</target>
+        <target>读取 SSO 设置</target>
       </trans-unit>
       <trans-unit id="iam.action.update-org-sort-flags-by" datatype="html">
         <source>Update sort flags by</source>

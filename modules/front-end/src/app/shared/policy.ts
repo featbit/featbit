@@ -743,7 +743,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     id: uuidv4(),
     name: 'ReadWorkspaceSSOSettings',
     resourceType: ResourceTypeEnum.workspace,
-    description: $localize`:@@iam.action.update-ws-sso:Update workspace SSO settings`,
+    description: $localize`:@@iam.action.read-ws-sso:Read workspace SSO settings`,
     isIamApplicable: false,
     isOpenAPIApplicable: true,
     isSpecificApplicable: false,
