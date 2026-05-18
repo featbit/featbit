@@ -4827,7 +4827,7 @@
           <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
           <context context-type="linenumber">125,126</context>
         </context-group>
-        <target>Support</target>
+        <target>技术支持</target>
       </trans-unit>
       <trans-unit id="common.documentation" datatype="html">
         <source>Documentation</source>
