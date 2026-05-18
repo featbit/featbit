@@ -50,9 +50,12 @@ export class BillingComponent implements OnInit {
         this.isFreePlan = this.subscription.key === PlanKeys.FREE;
         this.isLoading = false;
 
-        if (this.route.snapshot.queryParamMap.get('open') === 'pricing') {
-          this.openPricingDrawer();
-        }
+        this.route.queryParamMap
+          .subscribe(params => {
+            if (params.get('open') === 'pricing') {
+              this.openPricingDrawer();
+            }
+          });
       },
       error: () => this.message.error('Failed to load current subscription. Please try again later.')
     });

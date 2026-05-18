@@ -115,7 +115,6 @@ export class LicenseCardComponent implements OnInit {
       return;
     }
 
-    console.log(value);
     this.detail = new LicenseDetail(value);
   }
 
