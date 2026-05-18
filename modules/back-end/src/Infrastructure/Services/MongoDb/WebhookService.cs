@@ -47,7 +47,7 @@ public class WebhookService(MongoDbClient mongoDb) : MongoDbService<Webhook>(mon
 
     public async Task<List<Webhook>> GetByEventsAsync(Guid orgId, string[] events)
     {
-        IMongoQueryable<Webhook> query;
+        IQueryable<Webhook> query;
 
         if (events.Length == 1)
         {

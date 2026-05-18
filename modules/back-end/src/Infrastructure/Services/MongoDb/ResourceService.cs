@@ -4,7 +4,6 @@ using Domain.Organizations;
 using Domain.Projects;
 using Domain.Resources;
 using Domain.Segments;
-using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 using Environment = Domain.Environments.Environment;
 
@@ -12,7 +11,7 @@ namespace Infrastructure.Services.MongoDb;
 
 public class ResourceService(MongoDbClient mongoDb) : IResourceService
 {
-    private IMongoQueryable<TEntity> QueryableOf<TEntity>() where TEntity : class => mongoDb.QueryableOf<TEntity>();
+    private IQueryable<TEntity> QueryableOf<TEntity>() where TEntity : class => mongoDb.QueryableOf<TEntity>();
 
     public async Task<IEnumerable<Resource>> GetResourcesAsync(Guid organizationId, ResourceFilter filter)
     {

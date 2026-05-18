@@ -5,9 +5,8 @@ using Application.Bases.Models;
 using Application.Segments;
 using Domain.Policies;
 using Domain.Segments;
-using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.AspNetCore.JsonPatch.Operations;
-using Newtonsoft.Json;
+using Microsoft.AspNetCore.JsonPatch.SystemTextJson;
+using Microsoft.AspNetCore.JsonPatch.SystemTextJson.Operations;
 using Swashbuckle.AspNetCore.Filters;
 
 namespace Api.Controllers;
@@ -147,10 +146,10 @@ public class SegmentController : ApiControllerBase
     }
 
     /// <summary>
-    /// Update a segment with the JSON patch method. Use with caution as this can make arbitrary changes to the
-    /// segment, incorrect usage may lead to malformed data.
+    /// Update a segment with the JSON patch method. 
     /// </summary>
     /// <remarks>
+    /// Use with caution as this can make arbitrary changes to the segment, incorrect usage may lead to malformed data.
     /// Perform a partial update to a segment. The request body must be a valid JSON patch.
     /// </remarks>
     [OpenApi]
@@ -158,7 +157,11 @@ public class SegmentController : ApiControllerBase
     [HttpPatch("{segmentId:guid}")]
     public async Task<ApiResponse<bool>> PatchAsync(Guid segmentId, [FromBody] JsonElement jsonElement)
     {
-        var patch = JsonConvert.DeserializeObject<JsonPatchDocument>(jsonElement.GetRawText());
+        var patch = JsonSerializer.Deserialize<JsonPatchDocument<Segment>>(
+            jsonElement.GetRawText(),
+            JsonSerializerOptions.Web
+        );
+
         var request = new PatchSegment
         {
             Id = segmentId,

@@ -1,4 +1,3 @@
-using Newtonsoft.Json;
 using System.Text.Json;
 using Api.Authentication;
 using Api.Swagger.Examples;
@@ -7,8 +6,8 @@ using Application.FeatureFlags;
 using Domain.Workspaces;
 using Domain.FeatureFlags;
 using Domain.Policies;
-using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.AspNetCore.JsonPatch.Operations;
+using Microsoft.AspNetCore.JsonPatch.SystemTextJson;
+using Microsoft.AspNetCore.JsonPatch.SystemTextJson.Operations;
 using Swashbuckle.AspNetCore.Filters;
 
 namespace Api.Controllers;
@@ -231,10 +230,10 @@ public class FeatureFlagController : ApiControllerBase
     }
 
     /// <summary>
-    /// Update a feature flag with the JSON patch method. Use with caution as this can make arbitrary changes to the
-    /// feature flag, incorrect usage may lead to malformed data.
+    /// Update a feature flag with the JSON patch method. 
     /// </summary>
     /// <remarks>
+    /// Use with caution as this can make arbitrary changes to the feature flag, incorrect usage may lead to malformed data.
     /// Perform a partial update to a feature flag. The request body must be a valid JSON patch.
     /// </remarks>
     [OpenApi]
@@ -242,7 +241,11 @@ public class FeatureFlagController : ApiControllerBase
     [HttpPatch("{key}")]
     public async Task<ApiResponse<bool>> PatchAsync(Guid envId, string key, [FromBody] JsonElement jsonElement)
     {
-        var patch = JsonConvert.DeserializeObject<JsonPatchDocument>(jsonElement.GetRawText());
+        var patch = JsonSerializer.Deserialize<JsonPatchDocument<FeatureFlag>>(
+            jsonElement.GetRawText(),
+            JsonSerializerOptions.Web
+        );
+
         var request = new PatchFeatureFlag
         {
             EnvId = envId,

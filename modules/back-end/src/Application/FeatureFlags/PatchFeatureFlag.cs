@@ -1,7 +1,8 @@
 using Domain.AuditLogs;
 using Application.Users;
 using Application.Bases.Models;
-using Microsoft.AspNetCore.JsonPatch;
+using Domain.FeatureFlags;
+using Microsoft.AspNetCore.JsonPatch.SystemTextJson;
 
 namespace Application.FeatureFlags;
 
@@ -11,7 +12,7 @@ public class PatchFeatureFlag : IRequest<PatchResult>
 
     public string Key { get; set; }
 
-    public JsonPatchDocument Patch { get; set; }
+    public JsonPatchDocument<FeatureFlag> Patch { get; set; }
 }
 
 public class PatchFeatureFlagHandler : IRequestHandler<PatchFeatureFlag, PatchResult>

@@ -12,10 +12,6 @@ public class MongoDbClient : IMongoDbClient
 
     public MongoDbClient(IOptions<MongoDbOptions> options)
     {
-#pragma warning disable 618
-        BsonDefaults.GuidRepresentationMode = GuidRepresentationMode.V3;
-#pragma warning restore
-
         var value = options.Value;
 
         Database = new MongoClient(value.ConnectionString).GetDatabase(value.Database);
