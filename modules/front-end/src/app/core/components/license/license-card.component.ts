@@ -2,9 +2,6 @@ import { Component, inject, Input, OnInit } from '@angular/core';
 import { License, LicenseFeatureEnum } from "@shared/types";
 import { WorkspaceService } from "@services/workspace.service";
 import { NzMessageService } from "ng-zorro-antd/message";
-import { environment } from "ng-zorro-antd/core/environments";
-import { HOSTING_MODE } from "@shared/constants";
-import { PlanKeys } from "@core/components/pricing-plans/types";
 
 class LicenseDetail {
   plan: string;

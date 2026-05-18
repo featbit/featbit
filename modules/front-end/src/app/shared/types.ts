@@ -1,6 +1,6 @@
 import { UserOriginEnum } from "@features/safe/workspaces/types/profiles";
 import { FlagSortedBy } from "@features/safe/workspaces/types/organization";
-import { environment } from "../../environments/environment";
+import { environment } from "src/environments/environment";
 import { HOSTING_MODE } from "@shared/constants";
 
 export interface IResponse {

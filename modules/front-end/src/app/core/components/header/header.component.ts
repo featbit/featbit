@@ -16,7 +16,7 @@ import { copyToClipboard } from '@utils/index';
 import { EnvService } from '@core/services/env.service';
 import { getCurrentLicense, getCurrentOrganization, getCurrentProjectEnv } from "@utils/project-env";
 import { BroadcastService } from "@services/broadcast.service";
-import { environment } from "../../../../environments/environment";
+import { environment } from "src/environments/environment";
 import { HOSTING_MODE } from "@shared/constants";
 import { PlanKeys } from "@core/components/pricing-plans/types";
 
