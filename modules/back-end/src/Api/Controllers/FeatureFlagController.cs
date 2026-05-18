@@ -1,4 +1,4 @@
-using System.Net.Mime;
+using System.Text.Json;
 using Api.Authentication;
 using Api.Swagger.Examples;
 using Application.Bases.Models;
@@ -239,9 +239,13 @@ public class FeatureFlagController : ApiControllerBase
     [OpenApi]
     [SwaggerRequestExample(typeof(Operation), typeof(PatchFeatureFlagExamples))]
     [HttpPatch("{key}")]
-    [Consumes(MediaTypeNames.Application.JsonPatch)]
-    public async Task<ApiResponse<bool>> PatchAsync(Guid envId, string key, [FromBody] JsonPatchDocument<FeatureFlag> patch)
+    public async Task<ApiResponse<bool>> PatchAsync(Guid envId, string key, [FromBody] JsonElement jsonElement)
     {
+        var patch = JsonSerializer.Deserialize<JsonPatchDocument<FeatureFlag>>(
+            jsonElement.GetRawText(),
+            JsonSerializerOptions.Web
+        );
+
         var request = new PatchFeatureFlag
         {
             EnvId = envId,

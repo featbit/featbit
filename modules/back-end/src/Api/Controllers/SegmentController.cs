@@ -1,4 +1,4 @@
-using System.Net.Mime;
+using System.Text.Json;
 using Api.Authentication;
 using Api.Swagger.Examples;
 using Application.Bases.Models;
@@ -155,9 +155,13 @@ public class SegmentController : ApiControllerBase
     [OpenApi]
     [SwaggerRequestExample(typeof(Operation), typeof(PatchSegmentExamples))]
     [HttpPatch("{segmentId:guid}")]
-    [Consumes(MediaTypeNames.Application.JsonPatch)]
-    public async Task<ApiResponse<bool>> PatchAsync(Guid segmentId, [FromBody] JsonPatchDocument<Segment> patch)
+    public async Task<ApiResponse<bool>> PatchAsync(Guid segmentId, [FromBody] JsonElement jsonElement)
     {
+        var patch = JsonSerializer.Deserialize<JsonPatchDocument<Segment>>(
+            jsonElement.GetRawText(),
+            JsonSerializerOptions.Web
+        );
+
         var request = new PatchSegment
         {
             Id = segmentId,
