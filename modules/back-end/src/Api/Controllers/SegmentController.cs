@@ -1,3 +1,4 @@
+using System.Net.Mime;
 using Api.Authentication;
 using Api.Swagger.Examples;
 using Application.Bases.Models;
@@ -145,15 +146,16 @@ public class SegmentController : ApiControllerBase
     }
 
     /// <summary>
-    /// Update a segment with the JSON patch method. Use with caution as this can make arbitrary changes to the
-    /// segment, incorrect usage may lead to malformed data.
+    /// Update a segment with the JSON patch method. 
     /// </summary>
     /// <remarks>
+    /// Use with caution as this can make arbitrary changes to the segment, incorrect usage may lead to malformed data.
     /// Perform a partial update to a segment. The request body must be a valid JSON patch.
     /// </remarks>
     [OpenApi]
     [SwaggerRequestExample(typeof(Operation), typeof(PatchSegmentExamples))]
     [HttpPatch("{segmentId:guid}")]
+    [Consumes(MediaTypeNames.Application.JsonPatch)]
     public async Task<ApiResponse<bool>> PatchAsync(Guid segmentId, [FromBody] JsonPatchDocument<Segment> patch)
     {
         var request = new PatchSegment

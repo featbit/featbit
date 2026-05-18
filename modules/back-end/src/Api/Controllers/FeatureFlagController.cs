@@ -1,3 +1,4 @@
+using System.Net.Mime;
 using Api.Authentication;
 using Api.Swagger.Examples;
 using Application.Bases.Models;
@@ -229,15 +230,16 @@ public class FeatureFlagController : ApiControllerBase
     }
 
     /// <summary>
-    /// Update a feature flag with the JSON patch method. Use with caution as this can make arbitrary changes to the
-    /// feature flag, incorrect usage may lead to malformed data.
+    /// Update a feature flag with the JSON patch method. 
     /// </summary>
     /// <remarks>
+    /// Use with caution as this can make arbitrary changes to the feature flag, incorrect usage may lead to malformed data.
     /// Perform a partial update to a feature flag. The request body must be a valid JSON patch.
     /// </remarks>
     [OpenApi]
     [SwaggerRequestExample(typeof(Operation), typeof(PatchFeatureFlagExamples))]
     [HttpPatch("{key}")]
+    [Consumes(MediaTypeNames.Application.JsonPatch)]
     public async Task<ApiResponse<bool>> PatchAsync(Guid envId, string key, [FromBody] JsonPatchDocument<FeatureFlag> patch)
     {
         var request = new PatchFeatureFlag
