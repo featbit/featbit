@@ -8,6 +8,7 @@ public static class Permissions
     public const string UpdateWorkspaceGeneralSettings = nameof(UpdateWorkspaceGeneralSettings);
     public const string UpdateWorkspaceLicense = nameof(UpdateWorkspaceLicense);
     public const string UpdateWorkspaceSSOSettings = nameof(UpdateWorkspaceSSOSettings);
+    public const string ReadWorkspaceSSOSettings = nameof(ReadWorkspaceSSOSettings);
 
     // IAM
     public const string CanManageIAM = nameof(CanManageIAM);

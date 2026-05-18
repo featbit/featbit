@@ -50,6 +50,7 @@ export interface IamPolicyAction {
   name: string;
   resourceType?: ResourceTypeEnum,
   description: string;
+  isIamApplicable: boolean;
   isOpenAPIApplicable: boolean;
   isSpecificApplicable: boolean; // can it be applied to a specific resource, ex: an environment with name "abc"
   isFineGrainedAction: boolean;
@@ -327,6 +328,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: '*',
     resourceType: ResourceTypeEnum.All,
     description: $localize`:@@iam.action.all:All`,
+    isIamApplicable: true,
     isOpenAPIApplicable: false,
     isSpecificApplicable: false,
     isFineGrainedAction: false
@@ -336,6 +338,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'CanAccessProject',
     resourceType: ResourceTypeEnum.Project,
     description: $localize`:@@iam.action.can-access-project:Can access project`,
+    isIamApplicable: true,
     isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: false
@@ -345,6 +348,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'CreateProject',
     resourceType: ResourceTypeEnum.Project,
     description: $localize`:@@iam.action.create-projects:Create projects`,
+    isIamApplicable: true,
     isOpenAPIApplicable: true,
     isSpecificApplicable: false,
     isFineGrainedAction: false
@@ -354,6 +358,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'DeleteProject',
     resourceType: ResourceTypeEnum.Project,
     description: $localize`:@@iam.action.delete-projects:Delete projects`,
+    isIamApplicable: true,
     isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: false
@@ -363,6 +368,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'UpdateProjectSettings',
     resourceType: ResourceTypeEnum.Project,
     description: $localize`:@@iam.action.update-project-settings:Update project settings`,
+    isIamApplicable: true,
     isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: false
@@ -372,6 +378,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'CreateEnv',
     resourceType: ResourceTypeEnum.Project,
     description: $localize`:@@iam.action.create-env:Create environment`,
+    isIamApplicable: true,
     isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: false
@@ -381,6 +388,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'CanAccessEnv',
     resourceType: ResourceTypeEnum.Env,
     description: $localize`:@@iam.action.can-access-env:Can access environment`,
+    isIamApplicable: true,
     isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: false
@@ -390,6 +398,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'DeleteEnv',
     resourceType: ResourceTypeEnum.Env,
     description: $localize`:@@iam.action.delete-envs:Delete environments`,
+    isIamApplicable: true,
     isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: false
@@ -399,6 +408,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'UpdateEnvSettings',
     resourceType: ResourceTypeEnum.Env,
     description: $localize`:@@iam.action.update-env-settings:Update environment settings`,
+    isIamApplicable: true,
     isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: false
@@ -408,6 +418,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'DeleteEnvSecret',
     resourceType: ResourceTypeEnum.Env,
     description: $localize`:@@iam.action.delete-env-secret:Delete environment secret`,
+    isIamApplicable: true,
     isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: false
@@ -417,6 +428,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'CreateEnvSecret',
     resourceType: ResourceTypeEnum.Env,
     description: $localize`:@@iam.action.create-env-secret:Create environment secret`,
+    isIamApplicable: true,
     isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: false
@@ -426,6 +438,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'UpdateEnvSecret',
     resourceType: ResourceTypeEnum.Env,
     description: $localize`:@@iam.action.update-env-secret:Update environment secret`,
+    isIamApplicable: true,
     isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: false
@@ -437,6 +450,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: '*',
     resourceType: ResourceTypeEnum.Flag,
     description: $localize`:@@iam.action.flag-all-actions:All actions`,
+    isIamApplicable: true,
     isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: false
@@ -446,6 +460,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'CreateFlag',
     resourceType: ResourceTypeEnum.Flag,
     description: $localize`:@@iam.action.create-flag:Create feature flag`,
+    isIamApplicable: true,
     isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: true
@@ -455,6 +470,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'ArchiveFlag',
     resourceType: ResourceTypeEnum.Flag,
     description: $localize`:@@iam.action.archive-flag:Archive feature flag`,
+    isIamApplicable: true,
     isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: true
@@ -464,6 +480,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'RestoreFlag',
     resourceType: ResourceTypeEnum.Flag,
     description: $localize`:@@iam.action.restore-flag:Restore feature flag`,
+    isIamApplicable: true,
     isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: true
@@ -473,6 +490,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'DeleteFlag',
     resourceType: ResourceTypeEnum.Flag,
     description: $localize`:@@iam.action.delete-flag:Delete feature flag`,
+    isIamApplicable: true,
     isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: true
@@ -482,6 +500,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'CloneFlag',
     resourceType: ResourceTypeEnum.Flag,
     description: $localize`:@@iam.action.clone-flag:Clone feature flag`,
+    isIamApplicable: true,
     isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: true
@@ -491,6 +510,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'CopyFlagTo',
     resourceType: ResourceTypeEnum.Flag,
     description: $localize`:@@iam.action.copy-flag-to:Copy feature flag to another environment`,
+    isIamApplicable: true,
     isOpenAPIApplicable: false,
     isSpecificApplicable: true,
     isFineGrainedAction: true
@@ -500,6 +520,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'UpdateFlagName',
     resourceType: ResourceTypeEnum.Flag,
     description: $localize`:@@iam.action.update-flag-name:Rename a feature flag`,
+    isIamApplicable: true,
     isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: true
@@ -509,6 +530,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'ToggleFlag',
     resourceType: ResourceTypeEnum.Flag,
     description: $localize`:@@iam.action.update-flag-on:Toggle a feature on or off`,
+    isIamApplicable: true,
     isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: true
@@ -518,6 +540,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'UpdateFlagDescription',
     resourceType: ResourceTypeEnum.Flag,
     description: $localize`:@@iam.action.update-flag-description:Update the description of a feature flag`,
+    isIamApplicable: true,
     isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: true
@@ -527,6 +550,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'UpdateFlagOffVariation',
     resourceType: ResourceTypeEnum.Flag,
     description: $localize`:@@iam.action.update-flag-off-variation:Change the variation returned when a feature flag is set to off`,
+    isIamApplicable: true,
     isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: true
@@ -536,6 +560,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'UpdateFlagTags',
     resourceType: ResourceTypeEnum.Flag,
     description: $localize`:@@iam.action.update-flag-tags:Change the tags associated with a feature flag`,
+    isIamApplicable: true,
     isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: true
@@ -545,6 +570,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'UpdateFlagIndividualTargeting',
     resourceType: ResourceTypeEnum.Flag,
     description: $localize`:@@iam.action.update-flag-individual-targeting:Change a flag's individual user targeting rules`,
+    isIamApplicable: true,
     isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: true
@@ -554,6 +580,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'UpdateFlagTargetingRules',
     resourceType: ResourceTypeEnum.Flag,
     description: $localize`:@@iam.action.update-flag-rules:Change a flag's custom targeting rules`,
+    isIamApplicable: true,
     isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: true
@@ -563,6 +590,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'UpdateFlagDefaultRule',
     resourceType: ResourceTypeEnum.Flag,
     description: $localize`:@@iam.action.update-flag-fallthrough:Change a flag's default rule`,
+    isIamApplicable: true,
     isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: true
@@ -572,6 +600,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'UpdateFlagVariations',
     resourceType: ResourceTypeEnum.Flag,
     description: $localize`:@@iam.action.update-flag-variations:Change a flag's variations`,
+    isIamApplicable: true,
     isOpenAPIApplicable: false,
     isSpecificApplicable: true,
     isFineGrainedAction: true
@@ -583,6 +612,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: '*',
     resourceType: ResourceTypeEnum.Segment,
     description: $localize`:@@iam.action.segment-all-actions:All actions`,
+    isIamApplicable: true,
     isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: false
@@ -592,6 +622,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'CreateSegment',
     resourceType: ResourceTypeEnum.Segment,
     description: $localize`:@@iam.action.create-segment:Create segment`,
+    isIamApplicable: true,
     isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: true
@@ -601,6 +632,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'ArchiveSegment',
     resourceType: ResourceTypeEnum.Segment,
     description: $localize`:@@iam.action.archive-segment:Archive segment`,
+    isIamApplicable: true,
     isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: true
@@ -610,6 +642,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'RestoreSegment',
     resourceType: ResourceTypeEnum.Segment,
     description: $localize`:@@iam.action.restore-segment:Restore segment`,
+    isIamApplicable: true,
     isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: true
@@ -619,6 +652,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'DeleteSegment',
     resourceType: ResourceTypeEnum.Segment,
     description: $localize`:@@iam.action.delete-segment:Delete segment`,
+    isIamApplicable: true,
     isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: true
@@ -628,6 +662,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'UpdateSegmentName',
     resourceType: ResourceTypeEnum.Segment,
     description: $localize`:@@iam.action.update-segment-name:Rename a segment`,
+    isIamApplicable: true,
     isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: true
@@ -637,6 +672,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'UpdateSegmentDescription',
     resourceType: ResourceTypeEnum.Segment,
     description: $localize`:@@iam.action.update-segment-description:Update the description of a segment`,
+    isIamApplicable: true,
     isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: true
@@ -646,6 +682,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'UpdateSegmentTags',
     resourceType: ResourceTypeEnum.Segment,
     description: $localize`:@@iam.action.update-segment-tags:Change the tags associated with a segment`,
+    isIamApplicable: true,
     isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: true
@@ -655,6 +692,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'UpdateSegmentTargetingUsers',
     resourceType: ResourceTypeEnum.Segment,
     description: $localize`:@@iam.action.update-segment-targeting-users:Change a segment's targeting users`,
+    isIamApplicable: true,
     isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: true
@@ -664,6 +702,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'UpdateSegmentRules',
     resourceType: ResourceTypeEnum.Segment,
     description: $localize`:@@iam.action.update-segment-rules:Change a segment's custom targeting rules`,
+    isIamApplicable: true,
     isOpenAPIApplicable: true,
     isSpecificApplicable: true,
     isFineGrainedAction: true
@@ -675,6 +714,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'UpdateWorkspaceGeneralSettings',
     resourceType: ResourceTypeEnum.workspace,
     description: $localize`:@@iam.action.update-ws-general:Update workspace general settings`,
+    isIamApplicable: true,
     isOpenAPIApplicable: true,
     isSpecificApplicable: false,
     isFineGrainedAction: false
@@ -684,6 +724,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'UpdateWorkspaceLicense',
     resourceType: ResourceTypeEnum.workspace,
     description: $localize`:@@iam.action.update-ws-license:Update workspace license`,
+    isIamApplicable: true,
     isOpenAPIApplicable: true,
     isSpecificApplicable: false,
     isFineGrainedAction: false
@@ -693,6 +734,17 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'UpdateWorkspaceSSOSettings',
     resourceType: ResourceTypeEnum.workspace,
     description: $localize`:@@iam.action.update-ws-sso:Update workspace SSO settings`,
+    isIamApplicable: true,
+    isOpenAPIApplicable: true,
+    isSpecificApplicable: false,
+    isFineGrainedAction: false
+  },
+  ReadWorkspaceSSOSettings: {
+    id: uuidv4(),
+    name: 'ReadWorkspaceSSOSettings',
+    resourceType: ResourceTypeEnum.workspace,
+    description: $localize`:@@iam.action.update-ws-sso:Update workspace SSO settings`,
+    isIamApplicable: false,
     isOpenAPIApplicable: true,
     isSpecificApplicable: false,
     isFineGrainedAction: false
@@ -704,6 +756,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'UpdateOrgSortFlagsBy',
     resourceType: ResourceTypeEnum.organization,
     description: $localize`:@@iam.action.update-org-sort-flags-by:Update sort flags by`,
+    isIamApplicable: true,
     isOpenAPIApplicable: false,
     isSpecificApplicable: false,
     isFineGrainedAction: false
@@ -713,6 +766,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'UpdateOrgName',
     resourceType: ResourceTypeEnum.organization,
     description: $localize`:@@iam.action.update-org-name:Update org name`,
+    isIamApplicable: true,
     isOpenAPIApplicable: false,
     isSpecificApplicable: false,
     isFineGrainedAction: false
@@ -722,6 +776,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'UpdateOrgDefaultUserPermissions',
     resourceType: ResourceTypeEnum.organization,
     description: $localize`:@@iam.action.update-org-default-user-permissions:Update org default user permissions`,
+    isIamApplicable: true,
     isOpenAPIApplicable: false,
     isSpecificApplicable: false,
     isFineGrainedAction: false
@@ -731,6 +786,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'CreateOrg',
     resourceType: ResourceTypeEnum.organization,
     description: $localize`:@@iam.action.create-org:Create organization`,
+    isIamApplicable: true,
     isOpenAPIApplicable: false,
     isSpecificApplicable: false,
     isFineGrainedAction: false
@@ -742,6 +798,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'CanManageIAM',
     resourceType: ResourceTypeEnum.IAM,
     description: $localize`:@@iam.action.iam:IAM`,
+    isIamApplicable: true,
     isOpenAPIApplicable: true,
     isSpecificApplicable: false,
     isFineGrainedAction: false
@@ -753,6 +810,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'ListAccessTokens',
     resourceType: ResourceTypeEnum.AccessToken,
     description: $localize`:@@iam.action.list-access-tokens:List access tokens`,
+    isIamApplicable: true,
     isOpenAPIApplicable: false,
     isSpecificApplicable: false,
     isFineGrainedAction: false
@@ -762,6 +820,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'ManageServiceAccessTokens',
     resourceType: ResourceTypeEnum.AccessToken,
     description: $localize`:@@iam.action.manage-service-access-tokens:Manage service access tokens`,
+    isIamApplicable: true,
     isOpenAPIApplicable: false,
     isSpecificApplicable: false,
     isFineGrainedAction: false
@@ -771,6 +830,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'ManagePersonalAccessTokens',
     resourceType: ResourceTypeEnum.AccessToken,
     description: $localize`:@@iam.action.manage-personal-access-tokens:Manage personal access tokens`,
+    isIamApplicable: true,
     isOpenAPIApplicable: false,
     isSpecificApplicable: false,
     isFineGrainedAction: false
@@ -782,6 +842,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'ListRelayProxies',
     resourceType: ResourceTypeEnum.RelayProxy,
     description: $localize`:@@iam.action.list-relay-proxies:List relay proxies`,
+    isIamApplicable: true,
     isOpenAPIApplicable: false,
     isSpecificApplicable: false,
     isFineGrainedAction: false
@@ -791,6 +852,7 @@ export const permissionActions: { [key: string]: IamPolicyAction } = {
     name: 'ManageRelayProxies',
     resourceType: ResourceTypeEnum.RelayProxy,
     description: $localize`:@@iam.action.manage-relay-proxies:Manage relay proxies`,
+    isIamApplicable: true,
     isOpenAPIApplicable: false,
     isSpecificApplicable: false,
     isFineGrainedAction: false

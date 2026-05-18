@@ -1,4 +1,5 @@
 using System.Net.Mime;
+using Api.Authentication;
 using Api.Authorization;
 using Api.Filters;
 using Application.Users;
@@ -65,6 +66,9 @@ public class ApiControllerBase : ControllerBase
 
         return requestPermissions.GetAsync(HttpContext);
     }
+
+    protected bool IsOpenApiRequest =>
+        HttpContext.User.Identity?.AuthenticationType == Schemes.OpenApi;
 
     protected static ApiResponse<TData> Ok<TData>(TData data) => ApiResponse<TData>.Ok(data);
 
