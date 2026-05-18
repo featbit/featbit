@@ -476,7 +476,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">139,140</context>
+          <context context-type="linenumber">145,146</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/member-drawer/member-drawer.component.html</context>
@@ -997,7 +997,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.ts</context>
-          <context context-type="linenumber">168</context>
+          <context context-type="linenumber">175</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/prism/prism.component.ts</context>
@@ -1790,7 +1790,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.ts</context>
-          <context context-type="linenumber">74</context>
+          <context context-type="linenumber">81</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.title" datatype="html">
@@ -1823,7 +1823,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.ts</context>
-          <context context-type="linenumber">76</context>
+          <context context-type="linenumber">83</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
@@ -1923,7 +1923,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">138,139</context>
+          <context context-type="linenumber">144,145</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/props-drawer/props-drawer.component.html</context>
@@ -3347,7 +3347,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.ts</context>
-          <context context-type="linenumber">130</context>
+          <context context-type="linenumber">137</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/metric-drawer/metric-drawer.component.ts</context>
@@ -4013,46 +4013,53 @@
           <context context-type="linenumber">72,73</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="common.upgrade" datatype="html">
+        <source>Upgrade</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
+          <context context-type="linenumber">14,17</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="common.license-expired" datatype="html">
         <source>License Expired</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">26,27</context>
+          <context context-type="linenumber">32,33</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.license-expiring-soon" datatype="html">
         <source>Expiring in <x id="INTERPOLATION" equiv-text="{{ daysUntilExpiration }}"/> days</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">29,30</context>
+          <context context-type="linenumber">35,36</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.current-plan" datatype="html">
         <source>Current Plan</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">32,33</context>
+          <context context-type="linenumber">38,39</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.upgrade-now" datatype="html">
         <source>Upgrade Now</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">36,37</context>
+          <context context-type="linenumber">42,43</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.get-enterprise" datatype="html">
         <source>Get Enterprise</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">37,40</context>
+          <context context-type="linenumber">43,46</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.organization" datatype="html">
         <source>Organization</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">53,54</context>
+          <context context-type="linenumber">59,60</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
@@ -4063,7 +4070,7 @@
         <source>Project</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">63,64</context>
+          <context context-type="linenumber">69,70</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
@@ -4082,7 +4089,7 @@
         <source>Environment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">79,80</context>
+          <context context-type="linenumber">85,86</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/shared/policy.ts</context>
@@ -4093,7 +4100,7 @@
         <source>server</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">89,90</context>
+          <context context-type="linenumber">95,96</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
@@ -4112,7 +4119,7 @@
         <source>client</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">92,93</context>
+          <context context-type="linenumber">98,99</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
@@ -4131,18 +4138,18 @@
         <source>Change environment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">105,107</context>
+          <context context-type="linenumber">111,113</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.current" datatype="html">
         <source>Current</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">114,116</context>
+          <context context-type="linenumber">120,122</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">127,129</context>
+          <context context-type="linenumber">133,135</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.html</context>
@@ -4157,14 +4164,14 @@
         <source>Projects</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">119,120</context>
+          <context context-type="linenumber">125,126</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.environments" datatype="html">
         <source>Environments</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/header/header.component.html</context>
-          <context context-type="linenumber">132,134</context>
+          <context context-type="linenumber">138,140</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/webhook-drawer/webhook-drawer.component.html</context>
@@ -4252,98 +4259,98 @@
         <source>Expired</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.html</context>
-          <context context-type="linenumber">17,18</context>
+          <context context-type="linenumber">19,20</context>
         </context-group>
       </trans-unit>
       <trans-unit id="license.expiring-soon" datatype="html">
         <source>Expiring Soon</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.html</context>
-          <context context-type="linenumber">20,22</context>
+          <context context-type="linenumber">22,24</context>
         </context-group>
       </trans-unit>
       <trans-unit id="license.active" datatype="html">
         <source>Active</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.html</context>
-          <context context-type="linenumber">23,25</context>
+          <context context-type="linenumber">25,27</context>
         </context-group>
       </trans-unit>
       <trans-unit id="license.subject" datatype="html">
         <source>Issued To</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.html</context>
-          <context context-type="linenumber">33,34</context>
+          <context context-type="linenumber">35,36</context>
         </context-group>
       </trans-unit>
       <trans-unit id="license.iat" datatype="html">
         <source>Issued At</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.html</context>
-          <context context-type="linenumber">41,42</context>
+          <context context-type="linenumber">43,44</context>
         </context-group>
       </trans-unit>
       <trans-unit id="license.exp" datatype="html">
         <source>Expires At</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.html</context>
-          <context context-type="linenumber">49,50</context>
+          <context context-type="linenumber">51,52</context>
         </context-group>
       </trans-unit>
       <trans-unit id="license.days-remaining" datatype="html">
         <source>days remaining</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.html</context>
-          <context context-type="linenumber">54,56</context>
+          <context context-type="linenumber">61,63</context>
         </context-group>
       </trans-unit>
       <trans-unit id="license.features" datatype="html">
         <source>Licensed Features</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.html</context>
-          <context context-type="linenumber">64,65</context>
+          <context context-type="linenumber">72,73</context>
         </context-group>
       </trans-unit>
       <trans-unit id="license.enabled" datatype="html">
         <source>enabled</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.html</context>
-          <context context-type="linenumber">65,67</context>
+          <context context-type="linenumber">73,75</context>
         </context-group>
       </trans-unit>
       <trans-unit id="license.available" datatype="html">
         <source>Available</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.html</context>
-          <context context-type="linenumber">82,83</context>
+          <context context-type="linenumber">90,91</context>
         </context-group>
       </trans-unit>
       <trans-unit id="license.unavailable" datatype="html">
         <source>Unavailable</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.html</context>
-          <context context-type="linenumber">84,86</context>
+          <context context-type="linenumber">92,94</context>
         </context-group>
       </trans-unit>
       <trans-unit id="license.used" datatype="html">
         <source>Used</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.html</context>
-          <context context-type="linenumber">87</context>
+          <context context-type="linenumber">95</context>
         </context-group>
       </trans-unit>
       <trans-unit id="license.quota" datatype="html">
         <source>Quota</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.html</context>
-          <context context-type="linenumber">87</context>
+          <context context-type="linenumber">95</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.sso" datatype="html">
         <source>SSO</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.ts</context>
-          <context context-type="linenumber">72</context>
+          <context context-type="linenumber">79</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
@@ -4354,14 +4361,14 @@
         <source>Multiple Organization</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.ts</context>
-          <context context-type="linenumber">78</context>
+          <context context-type="linenumber">85</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.global-user" datatype="html">
         <source>Global User</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.ts</context>
-          <context context-type="linenumber">80</context>
+          <context context-type="linenumber">87</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/target-user/target-user.component.html</context>
@@ -4376,14 +4383,14 @@
         <source>Shareable Segment</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.ts</context>
-          <context context-type="linenumber">82</context>
+          <context context-type="linenumber">89</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.auto-agents" datatype="html">
         <source>Auto Agents</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.ts</context>
-          <context context-type="linenumber">84</context>
+          <context context-type="linenumber">91</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/relay-proxy-drawer/relay-proxy-drawer.component.html</context>
@@ -4394,21 +4401,21 @@
         <source>Fine-grained Access Control</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.ts</context>
-          <context context-type="linenumber">86</context>
+          <context context-type="linenumber">93</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.flag-comparison" datatype="html">
         <source>Flag Comparison</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.ts</context>
-          <context context-type="linenumber">88</context>
+          <context context-type="linenumber">95</context>
         </context-group>
       </trans-unit>
       <trans-unit id="org.org.load-license-failed" datatype="html">
         <source>Failed to load license usage, please try again later!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/license/license-card.component.ts</context>
-          <context context-type="linenumber">134</context>
+          <context context-type="linenumber">142</context>
         </context-group>
       </trans-unit>
       <trans-unit id="iam.team.member-drawer.title" datatype="html">

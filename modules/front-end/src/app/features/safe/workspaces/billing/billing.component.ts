@@ -1,4 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import {
   BillingCycle,
   EXTRA_MAU_PER_10K_PER_MONTH_PRICE,
@@ -24,6 +25,7 @@ export class BillingComponent implements OnInit {
   private billingService = inject(BillingService);
   private message = inject(NzMessageService);
   private notification = inject(NzNotificationService);
+  private route = inject(ActivatedRoute);
 
   isLoading = true;
 
@@ -47,6 +49,10 @@ export class BillingComponent implements OnInit {
         this.pendingDowngrade = subscription.pendingDowngrade;
         this.isFreePlan = this.subscription.key === PlanKeys.FREE;
         this.isLoading = false;
+
+        if (this.route.snapshot.queryParamMap.get('open') === 'pricing') {
+          this.openPricingDrawer();
+        }
       },
       error: () => this.message.error('Failed to load current subscription. Please try again later.')
     });

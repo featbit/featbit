@@ -192,6 +192,34 @@ i:hover {
   display: flex;
   align-items: center;
 
+  .upgrade-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: #fff;
+    border-radius: 10px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-right: 12px;
+    text-decoration: none;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35);
+
+    i {
+      font-size: 15px;
+      color: #fff;
+    }
+
+    &:hover {
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      box-shadow: 0 4px 16px rgba(99, 102, 241, 0.5);
+      transform: translateY(-1px);
+      color: #fff;
+    }
+  }
+
   .license-badge {
     display: flex;
     align-items: center;

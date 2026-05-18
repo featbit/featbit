@@ -2,14 +2,19 @@ import { Component, inject, Input, OnInit } from '@angular/core';
 import { License, LicenseFeatureEnum } from "@shared/types";
 import { WorkspaceService } from "@services/workspace.service";
 import { NzMessageService } from "ng-zorro-antd/message";
+import { environment } from "ng-zorro-antd/core/environments";
+import { HOSTING_MODE } from "@shared/constants";
+import { PlanKeys } from "@core/components/pricing-plans/types";
 
 class LicenseDetail {
   plan: string;
   sub: string;
   iat: Date;
   exp: Date;
+  wsId: string;
   isExpiringSoon: boolean;
   isExpired: boolean;
+  isForever: boolean;
   daysUntilExpiry: number;
   features: {
     id: LicenseFeatureEnum,
@@ -29,12 +34,14 @@ class LicenseDetail {
 
     this.plan = data.plan;
     this.sub = data.sub;
+    this.wsId = data.wsId;
     this.iat = new Date(data.iat);
     this.exp = new Date(data.exp);
 
     this.isExpiringSoon = license.isExpiringSoon();
     this.isExpired = license.isExpired();
     this.daysUntilExpiry = license.getDaysUntilExpiration();
+    this.isForever = this.daysUntilExpiry > 500;
 
     const allFeatures = [
       LicenseFeatureEnum.Sso,
@@ -111,6 +118,7 @@ export class LicenseCardComponent implements OnInit {
       return;
     }
 
+    console.log(value);
     this.detail = new LicenseDetail(value);
   }
 

@@ -1,5 +1,7 @@
 import { UserOriginEnum } from "@features/safe/workspaces/types/profiles";
 import { FlagSortedBy } from "@features/safe/workspaces/types/organization";
+import { environment } from "../../environments/environment";
+import { HOSTING_MODE } from "@shared/constants";
 
 export interface IResponse {
   success: boolean,
@@ -162,6 +164,10 @@ export class License {
 
   isExpiringSoon(): boolean {
     if (!this.data || !this.data.exp) {
+      return false;
+    }
+
+    if (environment.hostingMode === HOSTING_MODE.SAAS) {
       return false;
     }
 

@@ -16,6 +16,9 @@ import { copyToClipboard } from '@utils/index';
 import { EnvService } from '@core/services/env.service';
 import { getCurrentLicense, getCurrentOrganization, getCurrentProjectEnv } from "@utils/project-env";
 import { BroadcastService } from "@services/broadcast.service";
+import { environment } from "../../../../environments/environment";
+import { HOSTING_MODE } from "@shared/constants";
+import { PlanKeys } from "@core/components/pricing-plans/types";
 
 @Component({
     selector: 'app-header',
@@ -77,6 +80,10 @@ export class HeaderComponent implements OnInit {
     this.messageQueueService.subscribe(this.messageQueueService.topics.CURRENT_ENV_SECRETS_CHANGED, () => {
       this.setCurrentEnv();
     });
+  }
+
+  get isSaasFreePlan(): boolean {
+    return environment.hostingMode === HOSTING_MODE.SAAS && this.license?.data?.plan === PlanKeys.FREE;
   }
 
   isCurrentProject(project: IProject): boolean {

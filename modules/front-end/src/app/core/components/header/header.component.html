@@ -8,6 +8,12 @@
   </nz-breadcrumb>
 
   <div class="header-btns">
+    @if (isSaasFreePlan) {
+      <a class="upgrade-btn" [routerLink]="['/workspace/billing']" [queryParams]="{ open: 'pricing' }">
+        <i nz-icon nzType="rocket" nzTheme="outline"></i>
+        <span i18n="@@common.upgrade">Upgrade</span>
+      </a>
+    }
     <div
       [routerLink]="['/workspace/license']"
       class="license-badge"
