@@ -101,8 +101,9 @@ export class TargetUserComponent implements OnInit {
     const excludedKeyIds = this.selectedUserDetailList
       .filter(x => x.name.includes(value) || x.keyId.includes(value))
       .map(x => x.keyId);
-    
-    const filter = new EnvUserFilter(value, [], excludedKeyIds, false, false, 1, 5);
+
+    // by default, we search for both env & global users
+    const filter = new EnvUserFilter(value, [], excludedKeyIds, true, false, 1, 5);
     this.debouncer.next(filter);
   }
 
