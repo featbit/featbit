@@ -7,7 +7,7 @@ public class WorkspaceHeaderParameter : IOperationFilter
 {
     public void Apply(OpenApiOperation operation, OperationFilterContext context)
     {
-        operation.Parameters.Add(new OpenApiParameter
+        operation.Parameters!.Add(new OpenApiParameter
         {
             Name = ApiConstants.WorkspaceHeaderKey,
             In = ParameterLocation.Header,

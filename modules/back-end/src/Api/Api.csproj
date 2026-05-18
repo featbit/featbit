@@ -24,7 +24,6 @@
         <PackageReference Include="Serilog.Sinks.OpenTelemetry" Version="4.2.0" />
 
         <PackageReference Include="Grpc.Net.Client" Version="2.80.0" />
-        <PackageReference Include="System.Text.Encodings.Web" Version="10.0.8" />
 
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.8">
             <PrivateAssets>all</PrivateAssets>

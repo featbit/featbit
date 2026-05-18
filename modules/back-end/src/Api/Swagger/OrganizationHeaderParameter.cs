@@ -7,7 +7,7 @@ namespace Api.Swagger
     {
         public void Apply(OpenApiOperation operation, OperationFilterContext context)
         {
-            operation.Parameters.Add(new OpenApiParameter
+            operation.Parameters!.Add(new OpenApiParameter
             {
                 Name = ApiConstants.OrgIdHeaderKey,
                 In = ParameterLocation.Header,
