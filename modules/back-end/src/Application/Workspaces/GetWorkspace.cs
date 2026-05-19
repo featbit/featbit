@@ -7,8 +7,6 @@ public class GetWorkspace : IRequest<WorkspaceVm>
 {
     public Guid Id { get; set; }
 
-    public bool IsOpenApiRequest { get; set; }
-
     /// <summary>
     /// Current request permissions
     /// </summary>
