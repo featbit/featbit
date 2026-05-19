@@ -30,8 +30,8 @@ public class GetWorkspaceHandler : IRequestHandler<GetWorkspace, WorkspaceVm>
         
         var workspace = await _service.GetAsync(request.Id);
         
-        var canUpdatesoSettings = PolicyHelper.IsAllowed(permissions, RN.ForWorkspace(), Permissions.UpdateWorkspaceSSOSettings);
-        if (!canUpdatesoSettings)
+        var canUpdateSsoSettings = PolicyHelper.IsAllowed(permissions, RN.ForWorkspace(), Permissions.UpdateWorkspaceSSOSettings);
+        if (!canUpdateSsoSettings)
         {
             workspace.Sso = null;
         }

@@ -1,5 +1,4 @@
 using System.Net.Mime;
-using Api.Authentication;
 using Api.Authorization;
 using Api.Filters;
 using Application.Users;
