@@ -31,16 +31,17 @@ public class GetWorkspaceHandler : IRequestHandler<GetWorkspace, WorkspaceVm>
         var permissions = request.Permissions;
         
         var workspace = await _service.GetAsync(request.Id);
-
-        if (!request.IsOpenApiRequest)
-        {
-            return _mapper.Map<WorkspaceVm>(workspace);
-        }
         
-        var canReadSsoSettings = PolicyHelper.IsAllowed(permissions, RN.ForWorkspace(), Permissions.ReadWorkspaceSSOSettings);
-        if (!canReadSsoSettings)
+        var canUpdatesoSettings = PolicyHelper.IsAllowed(permissions, RN.ForWorkspace(), Permissions.UpdateWorkspaceSSOSettings);
+        if (!canUpdatesoSettings)
         {
             workspace.Sso = null;
+        }
+        
+        var canUpdateLicense = PolicyHelper.IsAllowed(permissions, RN.ForWorkspace(), Permissions.UpdateWorkspaceLicense);
+        if (!canUpdateLicense)
+        {
+            workspace.License = null;
         }
 
         return _mapper.Map<WorkspaceVm>(workspace);

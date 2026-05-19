@@ -22,7 +22,6 @@ public class WorkspaceController : ApiControllerBase
         var request = new GetWorkspace
         {
             Id = WorkspaceId,
-            IsOpenApiRequest = IsOpenApiRequest,
             Permissions = permissions
         };
 

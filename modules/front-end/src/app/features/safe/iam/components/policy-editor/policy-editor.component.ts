@@ -43,7 +43,7 @@ class PolicyStatementViewModel {
 
       // All the resources here are the same type, and if it's general type, resources only contains one element
       const isGeneralResource = isResourceGeneral(this.resourceType?.type, statement.resources[0]);
-      this.availableActions = [...Object.values(permissionActions)].filter((rs) => rs.isIamApplicable && rs.resourceType === this.resourceType?.type && (isGeneralResource || rs.isSpecificApplicable));
+      this.availableActions = [...Object.values(permissionActions)].filter((rs) => rs.resourceType === this.resourceType?.type && (isGeneralResource || rs.isSpecificApplicable));
     } else {
       this.id = uuidv4();
       this.effect = EffectEnum.Allow;
@@ -70,7 +70,7 @@ class PolicyStatementViewModel {
     // All the resources here are the same type, and if it's general type, resources only contains one element
     const isGeneralResource = isResourceGeneral(resources[0]?.type, resources[0]?.rn);
 
-    this.availableActions = [...Object.values(permissionActions)].filter((rs) => rs.isIamApplicable &&  rs.resourceType === this.resourceType?.type && (isGeneralResource || rs.isSpecificApplicable));
+    this.availableActions = [...Object.values(permissionActions)].filter((rs) => rs.resourceType === this.resourceType?.type && (isGeneralResource || rs.isSpecificApplicable));
   }
 
   getOutput(): IPolicyStatement {

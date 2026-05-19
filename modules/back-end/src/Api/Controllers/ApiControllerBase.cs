@@ -67,9 +67,6 @@ public class ApiControllerBase : ControllerBase
         return requestPermissions.GetAsync(HttpContext);
     }
 
-    protected bool IsOpenApiRequest =>
-        HttpContext.User.Identity?.AuthenticationType == Schemes.OpenApi;
-
     protected static ApiResponse<TData> Ok<TData>(TData data) => ApiResponse<TData>.Ok(data);
 
     protected static ApiResponse<TData> Error<TData>(string errorCode) => ApiResponse<TData>.Error(errorCode);
