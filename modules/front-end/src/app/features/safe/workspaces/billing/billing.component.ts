@@ -50,10 +50,11 @@ export class BillingComponent implements OnInit {
         this.isFreePlan = this.subscription.key === PlanKeys.FREE;
         this.isLoading = false;
 
-        this.route.queryParamMap
-          .subscribe(params => {
+        this.route.queryParamMap.subscribe(params => {
             if (params.get('open') === 'pricing') {
               this.openPricingDrawer();
+              // Remove the query param from URL after opening the drawer
+              window.history.replaceState({}, '', window.location.pathname);
             }
           });
       },
