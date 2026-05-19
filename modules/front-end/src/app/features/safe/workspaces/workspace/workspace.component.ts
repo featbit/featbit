@@ -6,6 +6,7 @@ import { WorkspaceService } from "@services/workspace.service";
 import { debounceTime, first, map, switchMap } from "rxjs/operators";
 import { generalResourceRNPattern, permissionActions } from "@shared/policy";
 import { PermissionsService } from "@services/permissions.service";
+import { getCurrentWorkspace } from "@utils/project-env";
 
 @Component({
     selector: 'workspace',
@@ -39,9 +40,8 @@ export class WorkspaceComponent implements OnInit {
 
   async ngOnInit() {
     this.isLoading = true;
-    const workspace = await this.workspaceService.getWorkspace();
-    this.workspace = workspace;
-    this.license = new License(workspace.license);
+    this.workspace = getCurrentWorkspace();
+    this.license = new License(this.workspace.license);
     this.isSsoGranted = this.license.isGranted(LicenseFeatureEnum.Sso);
 
     this.canUpdateGeneralSettings = this.permissionsService.isGranted(generalResourceRNPattern.workspace, permissionActions.UpdateWorkspaceGeneralSettings);

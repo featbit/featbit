@@ -1,3 +1,4 @@
+using Application.Bases.Exceptions;
 using Domain.AccessTokens;
 using Domain.Users;
 using Domain.Workspaces;
@@ -41,5 +42,26 @@ public class UserService(AppDbContext dbContext) : EntityFrameworkCoreService<Us
             select workspace;
 
         return await query.ToListAsync();
+    }
+
+    public async Task<Workspace> GetWorkspaceAsync(Guid userId, Guid workspaceId)
+    {
+        var workspaces = QueryableOf<Workspace>();
+        var users = QueryableOf<User>();
+
+        var query =
+            from workspace in workspaces
+            join user in users
+                on workspace.Id equals user.WorkspaceId
+            where user.Id == userId && workspace.Id == workspaceId
+            select workspace;
+
+        var result = await query.FirstOrDefaultAsync();
+        if (result is null)
+        {
+            throw new EntityNotFoundException(nameof(Workspace), $"{userId}-{workspaceId}");
+        }
+
+        return result;
     }
 }

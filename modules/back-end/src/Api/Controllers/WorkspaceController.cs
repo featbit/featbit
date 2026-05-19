@@ -17,9 +17,12 @@ public class WorkspaceController : ApiControllerBase
     [HttpGet]
     public async Task<ApiResponse<WorkspaceVm>> GetAsync()
     {
+        var permissions = await GetRequestPermissionsAsync();
+
         var request = new GetWorkspace
         {
             Id = WorkspaceId,
+            Permissions = permissions
         };
 
         var workspace = await Mediator.Send(request);

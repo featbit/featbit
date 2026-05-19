@@ -1,5 +1,5 @@
 import { inject } from '@angular/core';
-import { ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/router';
+import { RouterStateSnapshot, Router } from '@angular/router';
 import { getProfile } from '@shared/utils';
 import {
   CURRENT_ORGANIZATION,
@@ -14,13 +14,14 @@ import { IdentityService } from "@services/identity.service";
 import { NzNotificationService } from "ng-zorro-antd/notification";
 import { OrganizationService } from "@services/organization.service";
 import { WorkspaceService } from "@services/workspace.service";
+import { UserService } from "@services/user.service";
 
 export const authGuard = async (
-  route: ActivatedRouteSnapshot,
   state: RouterStateSnapshot,
   router = inject(Router),
   permissionService = inject(PermissionsService),
   projectService = inject(ProjectService),
+  userService = inject(UserService),
   workspaceService = inject(WorkspaceService),
   organizationService = inject(OrganizationService),
   identityService = inject(IdentityService),
@@ -36,7 +37,7 @@ export const authGuard = async (
   }
 
   // if workspaceId is invalid, logout user
-  const workspace = await workspaceService.getWorkspace();
+  const workspace = await userService.getWorkspace();
   if (!workspace) {
     await identityService.doLogoutUser(false);
     return router.parseUrl('/login');

@@ -47,10 +47,15 @@ public class TestUserService : NullServiceBase<User>, IUserService
     {
         var workspaces = new[]
         {
-            TestWorkspace.Instance()
+            TestWorkspace.Instance
         };
 
         return Task.FromResult<ICollection<Workspace>>(workspaces);
+    }
+
+    public Task<Workspace> GetWorkspaceAsync(Guid userId, Guid workspaceId)
+    {
+        return Task.FromResult(TestWorkspace.Instance);
     }
 
     public Task DeleteAsync(Guid id)

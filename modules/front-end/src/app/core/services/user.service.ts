@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from "@angular/common/http";
 import { environment } from "src/environments/environment";
-import { IProfile } from "@shared/types";
+import { IProfile, IWorkspace } from "@shared/types";
 import { USER_PROFILE } from "@utils/localstorage-keys";
 import { MessageQueueService } from "@services/message-queue.service";
-import { Observable } from "rxjs";
+import { firstValueFrom, Observable, of } from "rxjs";
 import { IPolicy } from "@features/safe/iam/types/policy";
+import { catchError } from "rxjs/operators";
 
 @Injectable({
   providedIn: 'root'
@@ -25,6 +26,12 @@ export class UserService {
 
   updateProfile(params: any): Observable<IProfile> {
     return this.http.put<IProfile>(`${this.baseUrl}/profile`, params);
+  }
+
+  getWorkspace(): Promise<IWorkspace | undefined> {
+    return firstValueFrom(
+      this.http.get<IWorkspace>(`${this.baseUrl}/workspace`).pipe(catchError(() => of(undefined)))
+    );
   }
 
   hasMultipleWorkspaces(email: string): Observable<boolean> {
