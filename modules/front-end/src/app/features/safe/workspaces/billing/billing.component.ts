@@ -45,7 +45,7 @@ export class BillingComponent implements OnInit {
     this.billingService.getCurrentSubscription().subscribe({
       next: subscription => {
         this.subscription = subscription;
-        this.plan = PRICING_PLANS.find(plan => plan.key === subscription.key) ?? PRICING_PLANS[0];
+        this.plan = PRICING_PLANS.find(plan => plan.key === subscription.key && plan.billingCycle === this.subscription.billingCycle) ?? PRICING_PLANS[0];
         this.pendingDowngrade = subscription.pendingDowngrade;
         this.isFreePlan = this.subscription.key === PlanKeys.FREE;
         this.isLoading = false;

@@ -158,5 +158,28 @@ export const PRICING_PLANS: PricingPlan[] = [
       'Global users & Shareable segments',
       'FeatBit Auto agents'
     ]
+  },
+  {
+    key: PlanKeys.ENTERPRISE,
+    name: 'Enterprise',
+    description: 'Full-featured platform for large organizations.',
+    order: 4,
+    price: 4490,
+    billingCycle: 'year',
+    mauIncluded: 80_000,
+    mauMax: 300_000,
+    mauStep: 10_000,
+    features: [
+      '80k MAU included',
+      'Private Discord channel',
+      '12-business-hour reply SLA',
+      '4-business-hour reply SLA',
+      'Dedicated SLA & support',
+      'Dedicated onboarding & training',
+      'Single Sign-On',
+      'Multi-organization',
+      'Global users & Shareable segments',
+      'FeatBit Auto agents'
+    ]
   }
 ];
