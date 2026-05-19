@@ -16,6 +16,10 @@ import { copyToClipboard } from '@utils/index';
 import { EnvService } from '@core/services/env.service';
 import { getCurrentLicense, getCurrentOrganization, getCurrentProjectEnv } from "@utils/project-env";
 import { BroadcastService } from "@services/broadcast.service";
+import { environment } from "src/environments/environment";
+import { HOSTING_MODE } from "@shared/constants";
+import { PlanKeys } from "@core/components/pricing-plans/types";
+import { Router } from "@angular/router";
 
 @Component({
     selector: 'app-header',
@@ -30,6 +34,7 @@ export class HeaderComponent implements OnInit {
   currentOrganization: IOrganization;
 
   license: License;
+  isSaasFreePlan: boolean = false;
   isLicenseExpired: boolean = false;
   isLicenseExpiring: boolean = false;
   daysUntilExpiration: number = 0;
@@ -41,18 +46,17 @@ export class HeaderComponent implements OnInit {
 
   breadcrumbs$: Observable<Breadcrumb[]>;
 
-  flags = {};
-
   env: IEnvironment;
 
   constructor(
     private projectService: ProjectService,
     private message: NzMessageService,
-    private breadcrumbService: BreadcrumbService,
+    breadcrumbService: BreadcrumbService,
     private messageQueueService: MessageQueueService,
     private envService: EnvService,
-    private broadcastService: BroadcastService
-  ) {
+    private broadcastService: BroadcastService,
+    private router: Router
+) {
     this.breadcrumbs$ = breadcrumbService.breadcrumbs$;
   }
 
@@ -61,6 +65,7 @@ export class HeaderComponent implements OnInit {
     this.isLicenseExpired = this.license?.isExpired() ?? false;
     this.isLicenseExpiring = this.license?.isExpiringSoon() ?? false;
     this.daysUntilExpiration = this.license?.getDaysUntilExpiration() ?? 0;
+    this.isSaasFreePlan = environment.hostingMode === HOSTING_MODE.SAAS && this.license?.data?.plan === PlanKeys.FREE;
 
     this.setSelectedProjectEnv();
     await this.setAllProjects();
@@ -77,6 +82,16 @@ export class HeaderComponent implements OnInit {
     this.messageQueueService.subscribe(this.messageQueueService.topics.CURRENT_ENV_SECRETS_CHANGED, () => {
       this.setCurrentEnv();
     });
+  }
+
+  onClickLicenseBadge() {
+    if (this.isSaasFreePlan) {
+      this.router.navigate([ '/workspace/billing' ], {
+        queryParams: { open: 'pricing' }
+      });
+    } else {
+      this.router.navigate([ '/workspace/license' ]);
+    }
   }
 
   isCurrentProject(project: IProject): boolean {

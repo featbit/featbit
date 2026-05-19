@@ -105,7 +105,7 @@
     .item-content {
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 4px;
       max-width: 140px;
 
       .item-label {
@@ -256,7 +256,7 @@ i:hover {
     .badge-content {
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 4px;
       min-width: 100px;
 
       .badge-label {
@@ -287,6 +287,26 @@ i:hover {
         font-size: 14px;
         color: @grey50-color;
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+    }
+
+    // SaaS free plan state
+    &.license-saas-free {
+      background: linear-gradient(135deg, @blue5-color 0%, lighten(@blue10-color, 5%) 100%);
+      border-color: @blue40-color;
+      box-shadow: 0 2px 8px rgba(110, 110, 247, 0.15);
+
+      &:hover {
+        box-shadow: 0 4px 16px rgba(110, 110, 247, 0.3);
+        border-color: @blue50-color;
+      }
+
+      .badge-icon {
+        background: linear-gradient(135deg, @blue40-color 0%, @blue50-color 100%);
+      }
+
+      .badge-arrow i {
+        color: @blue50-color;
       }
     }
 

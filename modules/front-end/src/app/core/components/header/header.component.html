@@ -9,19 +9,23 @@
 
   <div class="header-btns">
     <div
-      [routerLink]="['/workspace/license']"
+      (click)="onClickLicenseBadge()"
       class="license-badge"
       [ngClass]="{
+        'license-saas-free': isSaasFreePlan,
         'license-expiring': isLicenseExpiring,
         'license-expired': isLicenseExpired,
-        'license-active': license.data && !isLicenseExpired && !isLicenseExpiring
+        'license-active': license.data && !isLicenseExpired && !isLicenseExpiring && !isSaasFreePlan
       }"
     >
       <div class="badge-icon">
         <i nz-icon nzType="icons:icon-medal"></i>
       </div>
       <div class="badge-content">
-        @if (license.data) {
+        @if (isSaasFreePlan) {
+          <span class="badge-label" i18n="@@common.free-plan">Free Plan</span>
+          <span class="badge-plan" i18n="@@common.upgrade-now">Upgrade Now</span>
+        } @else if (license.data) {
           @if (isLicenseExpired) {
             <span class="badge-label badge-warning" i18n="@@common.license-expired">License Expired</span>
             <span class="badge-plan">{{ license.data?.plan }}</span>

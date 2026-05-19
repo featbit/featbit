@@ -2,6 +2,11 @@ import { Component, inject, Input, OnInit } from '@angular/core';
 import { License, LicenseFeatureEnum } from "@shared/types";
 import { WorkspaceService } from "@services/workspace.service";
 import { NzMessageService } from "ng-zorro-antd/message";
+import { environment } from "src/environments/environment";
+import { HOSTING_MODE } from "@shared/constants";
+import { getCurrentWorkspace } from "@utils/project-env";
+
+const FOREVER_LICENSE_DAYS_THRESHOLD = 366; // more than 1 year is considered as forever license
 
 class LicenseDetail {
   plan: string;
@@ -10,6 +15,7 @@ class LicenseDetail {
   exp: Date;
   isExpiringSoon: boolean;
   isExpired: boolean;
+  isForever: boolean;
   daysUntilExpiry: number;
   features: {
     id: LicenseFeatureEnum,
@@ -35,6 +41,7 @@ class LicenseDetail {
     this.isExpiringSoon = license.isExpiringSoon();
     this.isExpired = license.isExpired();
     this.daysUntilExpiry = license.getDaysUntilExpiration();
+    this.isForever = this.daysUntilExpiry > FOREVER_LICENSE_DAYS_THRESHOLD;
 
     const allFeatures = [
       LicenseFeatureEnum.Sso,
@@ -112,6 +119,9 @@ export class LicenseCardComponent implements OnInit {
     }
 
     this.detail = new LicenseDetail(value);
+    if (environment.hostingMode === HOSTING_MODE.SAAS) {
+      this.detail.sub = getCurrentWorkspace()?.key;
+    }
   }
 
   ngOnInit(): void {
