@@ -6,12 +6,13 @@ import { environment } from "src/environments/environment";
 import { HOSTING_MODE } from "@shared/constants";
 import { getCurrentWorkspace } from "@utils/project-env";
 
+const FOREVER_LICENSE_DAYS_THRESHOLD = 366; // more than 1 year is considered as forever license
+
 class LicenseDetail {
   plan: string;
   sub: string;
   iat: Date;
   exp: Date;
-  wsId: string;
   isExpiringSoon: boolean;
   isExpired: boolean;
   isForever: boolean;
@@ -34,14 +35,13 @@ class LicenseDetail {
 
     this.plan = data.plan;
     this.sub = data.sub;
-    this.wsId = data.wsId;
     this.iat = new Date(data.iat);
     this.exp = new Date(data.exp);
 
     this.isExpiringSoon = license.isExpiringSoon();
     this.isExpired = license.isExpired();
     this.daysUntilExpiry = license.getDaysUntilExpiration();
-    this.isForever = this.daysUntilExpiry > 500;
+    this.isForever = this.daysUntilExpiry > FOREVER_LICENSE_DAYS_THRESHOLD;
 
     const allFeatures = [
       LicenseFeatureEnum.Sso,
