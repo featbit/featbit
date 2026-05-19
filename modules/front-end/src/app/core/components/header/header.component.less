@@ -105,7 +105,7 @@
     .item-content {
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 4px;
       max-width: 140px;
 
       .item-label {
@@ -192,34 +192,6 @@ i:hover {
   display: flex;
   align-items: center;
 
-  .upgrade-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-    color: #fff;
-    border-radius: 10px;
-    padding: 8px 16px;
-    font-size: 13px;
-    font-weight: 600;
-    margin-right: 12px;
-    text-decoration: none;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35);
-
-    i {
-      font-size: 15px;
-      color: #fff;
-    }
-
-    &:hover {
-      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-      box-shadow: 0 4px 16px rgba(99, 102, 241, 0.5);
-      transform: translateY(-1px);
-      color: #fff;
-    }
-  }
-
   .license-badge {
     display: flex;
     align-items: center;
@@ -284,7 +256,7 @@ i:hover {
     .badge-content {
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 4px;
       min-width: 100px;
 
       .badge-label {
@@ -315,6 +287,26 @@ i:hover {
         font-size: 14px;
         color: @grey50-color;
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+    }
+
+    // SaaS free plan state
+    &.license-saas-free {
+      background: linear-gradient(135deg, @blue5-color 0%, lighten(@blue10-color, 5%) 100%);
+      border-color: @blue40-color;
+      box-shadow: 0 2px 8px rgba(110, 110, 247, 0.15);
+
+      &:hover {
+        box-shadow: 0 4px 16px rgba(110, 110, 247, 0.3);
+        border-color: @blue50-color;
+      }
+
+      .badge-icon {
+        background: linear-gradient(135deg, @blue40-color 0%, @blue50-color 100%);
+      }
+
+      .badge-arrow i {
+        color: @blue50-color;
       }
     }
 
