@@ -4,8 +4,9 @@ import { environment } from "src/environments/environment";
 import { IProfile, IWorkspace } from "@shared/types";
 import { USER_PROFILE } from "@utils/localstorage-keys";
 import { MessageQueueService } from "@services/message-queue.service";
-import { firstValueFrom, Observable } from "rxjs";
+import { firstValueFrom, Observable, of } from "rxjs";
 import { IPolicy } from "@features/safe/iam/types/policy";
+import { catchError } from "rxjs/operators";
 
 @Injectable({
   providedIn: 'root'
@@ -29,7 +30,7 @@ export class UserService {
 
   getWorkspace(): Promise<IWorkspace> {
     return firstValueFrom(
-      this.http.get<IWorkspace>(`${this.baseUrl}/workspace`)
+      this.http.get<IWorkspace>(`${this.baseUrl}/workspace`).pipe(catchError(() => of(undefined)))
     );
   }
 

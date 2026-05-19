@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from "@angular/common/http";
 import { environment } from "src/environments/environment";
-import { firstValueFrom, Observable, of } from "rxjs";
+import { Observable, of } from "rxjs";
 import { IOidc, IWorkspace } from "@shared/types";
 import { CURRENT_WORKSPACE } from "@utils/localstorage-keys";
 import { catchError } from "rxjs/operators";
@@ -24,12 +24,6 @@ export class WorkspaceService {
 
   updateOidcSetting(oidc: IOidc): Observable<IWorkspace> {
     return this.http.put<IWorkspace>(`${this.baseUrl}/sso-oidc`, oidc);
-  }
-
-  getWorkspace(): Promise<IWorkspace> {
-    return firstValueFrom(
-      this.http.get<IWorkspace>(this.baseUrl).pipe(catchError(() => of(undefined)))
-    );
   }
 
   getLicenseQuota(): Observable<LicenseQuota | undefined> {
