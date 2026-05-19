@@ -28,7 +28,7 @@ export class UserService {
     return this.http.put<IProfile>(`${this.baseUrl}/profile`, params);
   }
 
-  getWorkspace(): Promise<IWorkspace> {
+  getWorkspace(): Promise<IWorkspace | undefined> {
     return firstValueFrom(
       this.http.get<IWorkspace>(`${this.baseUrl}/workspace`).pipe(catchError(() => of(undefined)))
     );
