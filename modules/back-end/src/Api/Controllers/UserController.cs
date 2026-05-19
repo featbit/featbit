@@ -1,6 +1,7 @@
 using Application.Members;
 using Application.Policies;
 using Application.Users;
+using Application.Workspaces;
 
 namespace Api.Controllers;
 
@@ -52,5 +53,18 @@ public class UserController : ApiControllerBase
 
         var result = await Mediator.Send(request);
         return Ok(result);
+    }
+
+    [HttpGet("workspace")]
+    public async Task<ApiResponse<WorkspaceVm>> GetCurrentWorkspaceAsync()
+    {
+        var request = new GetCurrentWorkspace
+        {
+            UserId = CurrentUser.Id,
+            WorkspaceId = WorkspaceId
+        };
+
+        var workspace = await Mediator.Send(request);
+        return Ok(workspace);
     }
 }

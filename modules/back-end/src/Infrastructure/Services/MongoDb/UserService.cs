@@ -1,7 +1,7 @@
+using Application.Bases.Exceptions;
 using Domain.AccessTokens;
 using Domain.Users;
 using Domain.Workspaces;
-using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
 namespace Infrastructure.Services.MongoDb;
@@ -42,5 +42,26 @@ public class UserService(MongoDbClient mongoDb) : MongoDbService<User>(mongoDb),
             select workspace;
 
         return await query.ToListAsync();
+    }
+
+    public async Task<Workspace> GetWorkspaceAsync(Guid userId, Guid workspaceId)
+    {
+        var workspaces = MongoDb.QueryableOf<Workspace>();
+        var users = MongoDb.QueryableOf<User>();
+
+        var query =
+            from workspace in workspaces
+            join user in users
+                on workspace.Id equals user.WorkspaceId
+            where user.Id == userId && workspace.Id == workspaceId
+            select workspace;
+
+        var result = await query.FirstOrDefaultAsync();
+        if (result is null)
+        {
+            throw new EntityNotFoundException(nameof(Workspace), $"{userId}-{workspaceId}");
+        }
+
+        return result;
     }
 }

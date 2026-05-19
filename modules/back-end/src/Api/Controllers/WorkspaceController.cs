@@ -18,7 +18,7 @@ public class WorkspaceController : ApiControllerBase
     public async Task<ApiResponse<WorkspaceVm>> GetAsync()
     {
         var permissions = await GetRequestPermissionsAsync();
-        
+
         var request = new GetWorkspace
         {
             Id = WorkspaceId,

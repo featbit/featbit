@@ -10,4 +10,6 @@ public interface IUserService : IService<User>
     Task<ICollection<User>> GetListAsync(IEnumerable<Guid> ids);
 
     Task<ICollection<Workspace>> GetWorkspacesAsync(string email);
+
+    Task<Workspace> GetWorkspaceAsync(Guid userId, Guid workspaceId);
 }

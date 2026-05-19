@@ -13,36 +13,27 @@ public class GetWorkspace : IRequest<WorkspaceVm>
     public PolicyStatement[] Permissions { get; set; }
 }
 
-public class GetWorkspaceHandler : IRequestHandler<GetWorkspace, WorkspaceVm>
+public class GetWorkspaceHandler(IWorkspaceService service, IMapper mapper) : IRequestHandler<GetWorkspace, WorkspaceVm>
 {
-    private readonly IWorkspaceService _service;
-    private readonly IMapper _mapper;
-
-    public GetWorkspaceHandler(IWorkspaceService service, IMapper mapper)
-    {
-        _service = service;
-        _mapper = mapper;
-    }
-    
     public async Task<WorkspaceVm> Handle(GetWorkspace request, CancellationToken cancellationToken)
     {
         var permissions = request.Permissions;
-        
-        var workspace = await _service.GetAsync(request.Id);
-        
-        var canUpdateSsoSettings = PolicyHelper.IsAllowed(permissions, RN.ForWorkspace(), Permissions.UpdateWorkspaceSSOSettings);
-        if (!canUpdateSsoSettings)
+        var workspace = await service.GetAsync(request.Id);
+
+        var canUpdateSso =
+            PolicyHelper.IsAllowed(permissions, RN.ForWorkspace(), Permissions.UpdateWorkspaceSSOSettings);
+        if (!canUpdateSso)
         {
             workspace.Sso = null;
         }
-        
-        var canUpdateLicense = PolicyHelper.IsAllowed(permissions, RN.ForWorkspace(), Permissions.UpdateWorkspaceLicense);
+
+        var canUpdateLicense =
+            PolicyHelper.IsAllowed(permissions, RN.ForWorkspace(), Permissions.UpdateWorkspaceLicense);
         if (!canUpdateLicense)
         {
             workspace.License = null;
         }
 
-        return _mapper.Map<WorkspaceVm>(workspace);
+        return mapper.Map<WorkspaceVm>(workspace);
     }
 }
-
