@@ -88,10 +88,6 @@ export class PricingPlansComponent {
     { label: 'Yearly', value: BillingCycle.YEARLY },
   ];
 
-  onEnterpriseCycleChange(value: string | number): void {
-    this.enterpriseBillingCycle = value as string;
-  }
-
   getPlanTotalPrice(plan: PricingPlan): number {
     const isEnterpriseYearly =
       plan.key === PlanKeys.ENTERPRISE && this.enterpriseBillingCycle === BillingCycle.YEARLY;
@@ -170,7 +166,9 @@ export class PricingPlansComponent {
           extraMau: Math.max(0, (this.planMauSlider[newPlan.key] || newPlan.mauIncluded) - newPlan.mauIncluded),
           totalMau: this.planMauSlider[newPlan.key] || newPlan.mauIncluded,
           fineGrainedAcEnabled: this.fineGrainedAcEnabled[newPlan.key] || false,
-          basePrice: billingCycle === BillingCycle.YEARLY ? newPlan.yearlyPrice! : newPlan.price,
+          basePrice: billingCycle === BillingCycle.MONTHLY
+            ? newPlan.price
+            : (newPlan.yearlyPrice ?? newPlan.price * 12),
           price: this.getPlanTotalPrice(newPlan),
           billingCycle: billingCycle,
           currentPeriodStart: this._subscription.currentPeriodStart,

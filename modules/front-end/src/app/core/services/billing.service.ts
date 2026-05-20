@@ -45,7 +45,9 @@ export class BillingService {
           extraMau: raw.mau - raw.baseMau,
           totalMau: raw.mau,
           fineGrainedAcEnabled: (raw.addOnFeatures as string[]).includes(LicenseFeatureEnum.FineGrainedAccessControl),
-          basePrice: raw.billingCycle === 'month' ? plan.price : plan.yearlyPrice!,
+          basePrice: raw.billingCycle === 'month'
+            ? plan.price
+            : (plan.yearlyPrice ?? plan.price * 12),
           price: parseFloat(raw.unitAmount) / 100.0,
           billingCycle: raw.billingCycle,
           currentPeriodStart: new Date(raw.currentPeriodStart),
