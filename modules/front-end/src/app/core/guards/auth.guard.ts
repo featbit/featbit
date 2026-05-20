@@ -1,5 +1,5 @@
 import { inject } from '@angular/core';
-import { RouterStateSnapshot, Router } from '@angular/router';
+import { ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/router';
 import { getProfile } from '@shared/utils';
 import {
   CURRENT_ORGANIZATION,
@@ -17,6 +17,7 @@ import { WorkspaceService } from "@services/workspace.service";
 import { UserService } from "@services/user.service";
 
 export const authGuard = async (
+  route: ActivatedRouteSnapshot,
   state: RouterStateSnapshot,
   router = inject(Router),
   permissionService = inject(PermissionsService),
