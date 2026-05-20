@@ -39,11 +39,13 @@ export class BillingService {
         return {
           key: plan.key,
           name: plan.name,
+          description: plan.description,
           order: plan.order,
           includedMau: raw.baseMau,
           extraMau: raw.mau - raw.baseMau,
           totalMau: raw.mau,
           fineGrainedAcEnabled: (raw.addOnFeatures as string[]).includes(LicenseFeatureEnum.FineGrainedAccessControl),
+          basePrice: raw.billingCycle === 'month' ? plan.price : plan.yearlyPrice!,
           price: parseFloat(raw.unitAmount) / 100.0,
           billingCycle: raw.billingCycle,
           currentPeriodStart: new Date(raw.currentPeriodStart),
@@ -51,7 +53,7 @@ export class BillingService {
           subscriberSince: new Date(raw.createdAt),
           usage: raw.usage,
           pendingDowngrade: raw.pendingDowngrade,
-        } as WorkspaceSubscription;
+        };
       })
     );
   }
