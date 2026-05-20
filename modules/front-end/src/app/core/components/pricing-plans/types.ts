@@ -6,6 +6,7 @@ export interface PricingPlan {
   description: string;
   order: number;
   price: number;
+  yearlyPrice?: number; // Optional yearly price for plans that support annual billing
   billingCycle: 'month' | 'year';
   mauIncluded: number;
   mauMax: number;
@@ -51,11 +52,13 @@ export interface ProrationPreview {
 export const EMPTY_SUBSCRIPTION: WorkspaceSubscription = {
   key: '',
   name: '',
+  description: '',
   order: 0,
   includedMau: 0,
   extraMau: 0,
   totalMau: 0,
   fineGrainedAcEnabled: false,
+  basePrice: 0,
   price: 0,
   billingCycle: 'month',
   currentPeriodStart: new Date(),
@@ -142,6 +145,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     description: 'Full-featured platform for large organizations.',
     order: 3,
     price: 449,
+    yearlyPrice: ENTERPRISE_YEARLY_PRICE,
     billingCycle: 'month',
     mauIncluded: 80_000,
     mauMax: 300_000,

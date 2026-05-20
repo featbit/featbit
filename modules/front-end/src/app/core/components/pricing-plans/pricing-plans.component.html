@@ -114,8 +114,8 @@
           <p class="plan-card-description">{{ enterprisePlan.description }}</p>
           <div class="enterprise-toggle">
             <nz-segmented
-              [nzOptions]="billingCycleOptions"
-              (nzValueChange)="onEnterpriseCycleChange($event)">
+              [(ngModel)]="enterpriseBillingCycle"
+              [nzOptions]="billingCycleOptions">
             </nz-segmented>
           </div>
           <div class="plan-card-price">

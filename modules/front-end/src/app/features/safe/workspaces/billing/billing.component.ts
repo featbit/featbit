@@ -4,9 +4,7 @@ import {
   BillingCycle,
   EXTRA_MAU_PER_10K_PER_MONTH_PRICE,
   FINE_GRAINED_AC_PER_MONTH_PRICE,
-  PlanKeys,
-  PRICING_PLANS,
-  PricingPlan
+  PlanKeys
 } from '@core/components/pricing-plans/types';
 import { WorkspaceSubscription } from "@shared/types";
 import { BillingService } from "@services/billing.service";
@@ -30,7 +28,6 @@ export class BillingComponent implements OnInit {
   isLoading = true;
 
   subscription: WorkspaceSubscription;
-  plan: PricingPlan;
   pendingDowngrade = undefined;
   isFreePlan = true;
 
@@ -45,7 +42,6 @@ export class BillingComponent implements OnInit {
     this.billingService.getCurrentSubscription().subscribe({
       next: subscription => {
         this.subscription = subscription;
-        this.plan = PRICING_PLANS.find(plan => plan.key === subscription.key) ?? PRICING_PLANS[0];
         this.pendingDowngrade = subscription.pendingDowngrade;
         this.isFreePlan = this.subscription.key === PlanKeys.FREE;
         this.isLoading = false;
@@ -67,7 +63,7 @@ export class BillingComponent implements OnInit {
   }
 
   get billingCycleSuffix(): string {
-    return this.subscription.billingCycle === BillingCycle.YEARLY ? '/ year' : '/ month';
+    return this.subscription.billingCycle === BillingCycle.YEARLY ? ' / year' : ' / month';
   }
 
   get mauUsed(): number {

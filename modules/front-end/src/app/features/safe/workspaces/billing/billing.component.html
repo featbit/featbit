@@ -68,7 +68,7 @@
       <div class="plan-card-top">
         <div class="plan-identity">
           <div class="plan-name-badges">
-            <h3 class="plan-name">{{ plan.name }}</h3>
+            <h3 class="plan-name">{{ subscription.name }}</h3>
             <span *ngIf="!isFreePlan" class="billing-cycle-badge">{{ billingCycleLabel }}</span>
           </div>
           <div class="plan-total-price">
@@ -77,7 +77,7 @@
               <span class="plan-total-period">{{ billingCycleSuffix }}</span>
             </div>
           </div>
-          <p class="current-plan-description">{{ plan.description }}</p>
+          <p class="current-plan-description">{{ subscription.description }}</p>
         </div>
 
         <div class="plan-actions">
@@ -154,8 +154,8 @@
           <div class="fee-breakdown-title">Fee Breakdown</div>
           <div class="fee-breakdown-rows">
             <div class="fee-row">
-              <span class="fee-row-label">{{ plan.name }} plan</span>
-              <span class="fee-row-value">${{ plan.price | number: '1.0-0' }}{{ billingCycleSuffix }}</span>
+              <span class="fee-row-label">{{ subscription.name }} plan</span>
+              <span class="fee-row-value">${{ subscription.basePrice | number: '1.0-0' }}{{ billingCycleSuffix }}</span>
             </div>
             @if (extraMauCost > 0) {
               <div class="fee-row">

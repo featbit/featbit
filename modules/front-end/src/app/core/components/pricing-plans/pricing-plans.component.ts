@@ -88,10 +88,6 @@ export class PricingPlansComponent {
     { label: 'Yearly', value: BillingCycle.YEARLY },
   ];
 
-  onEnterpriseCycleChange(value: string | number): void {
-    this.enterpriseBillingCycle = value as string;
-  }
-
   getPlanTotalPrice(plan: PricingPlan): number {
     const isEnterpriseYearly =
       plan.key === PlanKeys.ENTERPRISE && this.enterpriseBillingCycle === BillingCycle.YEARLY;
@@ -156,6 +152,7 @@ export class PricingPlansComponent {
         error: () => this.message.error('Failed to create subscription. If the problem persists, please contact support.')
       });
     } else {
+      const billingCycle = newPlan.key === PlanKeys.ENTERPRISE ? this.enterpriseBillingCycle : BillingCycle.MONTHLY;
       // paid -> paid, upgrade/downgrade subscription, show update modal
       this.modalData = {
         action,
@@ -163,13 +160,17 @@ export class PricingPlansComponent {
         newSubscription: {
           key: newPlan.key,
           name: newPlan.name,
+          description: newPlan.description,
           order: newPlan.order,
           includedMau: newPlan.mauIncluded,
           extraMau: Math.max(0, (this.planMauSlider[newPlan.key] || newPlan.mauIncluded) - newPlan.mauIncluded),
           totalMau: this.planMauSlider[newPlan.key] || newPlan.mauIncluded,
           fineGrainedAcEnabled: this.fineGrainedAcEnabled[newPlan.key] || false,
+          basePrice: billingCycle === BillingCycle.MONTHLY
+            ? newPlan.price
+            : (newPlan.yearlyPrice ?? newPlan.price * 12),
           price: this.getPlanTotalPrice(newPlan),
-          billingCycle: newPlan.key === PlanKeys.ENTERPRISE ? this.enterpriseBillingCycle : BillingCycle.MONTHLY,
+          billingCycle: billingCycle,
           currentPeriodStart: this._subscription.currentPeriodStart,
           currentPeriodEnd: this._subscription.currentPeriodEnd,
           subscriberSince: this._subscription.subscriberSince

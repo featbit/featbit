@@ -77,11 +77,13 @@ export interface IWorkspace {
 export interface WorkspaceSubscription {
   key: string;
   name: string;
+  description: string;
   order: number;
   includedMau: number;
   extraMau: number;
   totalMau: number;
   fineGrainedAcEnabled: boolean;
+  basePrice: number;
   price: number;
   billingCycle: string;
   currentPeriodStart: Date;
