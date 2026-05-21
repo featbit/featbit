@@ -6,7 +6,7 @@ public class UpsertSetting : IRequest<bool>
 {
     public Guid EnvId { get; set; }
 
-    public IEnumerable<Setting> Settings { get; set; } = Array.Empty<Setting>();
+    public IEnumerable<Setting> Settings { get; set; } = [];
 }
 
 public class UpsertSettingHandler : IRequestHandler<UpsertSetting, bool>
