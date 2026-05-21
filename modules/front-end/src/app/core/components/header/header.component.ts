@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import {
   IOrganization,
   IProject,
@@ -29,6 +29,13 @@ import { Router } from "@angular/router";
 })
 export class HeaderComponent implements OnInit {
   protected readonly SecretTypeEnum = SecretTypeEnum;
+
+  isSmallScreen = window.innerWidth <= 1080;
+
+  @HostListener('window:resize')
+  onResize() {
+    this.isSmallScreen = window.innerWidth <= 1080;
+  }
 
   currentProjectEnv: IProjectEnv;
   currentOrganization: IOrganization;
@@ -92,6 +99,29 @@ export class HeaderComponent implements OnInit {
     } else {
       this.router.navigate([ '/workspace/license' ]);
     }
+  }
+
+  get licenseBadgeTooltip(): string {
+    if (this.isSaasFreePlan) {
+      return `${$localize`:@@common.free-plan:Free Plan`} – ${$localize`:@@common.upgrade-now:Upgrade Now`}`;
+    } else if (this.license.data) {
+      if (this.isLicenseExpired) {
+        return `${$localize`:@@common.license-expired:License Expired`} – ${this.license.data.plan}`;
+      } else if (this.isLicenseExpiring) {
+        return `${$localize`:@@common.license-expiring-soon:Expiring in ${this.daysUntilExpiration}:INTERPOLATION: days`} – ${this.license.data.plan}`;
+      } else {
+        return `${$localize`:@@common.current-plan:Current Plan`} – ${this.license.data.plan}`;
+      }
+    }
+    return `${$localize`:@@common.upgrade-now:Upgrade Now`} – ${$localize`:@@common.get-enterprise:Get Enterprise`}`;
+  }
+
+  get orgTooltip(): string {
+    return `${$localize`:@@common.organization:Organization`}: ${this.currentOrganization?.name}`;
+  }
+
+  get projectTooltip(): string {
+    return `${$localize`:@@common.project:Project`}: ${this.currentProjectEnv?.projectName}`;
   }
 
   isCurrentProject(project: IProject): boolean {
