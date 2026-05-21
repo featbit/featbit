@@ -1,10 +1,11 @@
+using Application.AuditLogs;
 using Application.Bases;
 using Application.Users;
 using Domain.AuditLogs;
 
 namespace Application.FeatureFlags;
 
-public class UpdateName : IRequest<Guid>
+public class UpdateName : ResourceChangeRequest, IRequest<Guid>
 {
     /// <summary>
     /// The ID of the environment the feature flag belongs to. Retrieved from the URL path.
@@ -54,7 +55,7 @@ public class UpdateNameHandler(
             Operations.Update,
             dataChange,
             currentUser.Id,
-            comment: "Updated name"
+            comment: request.Comment
         );
         await publisher.Publish(notification, cancellationToken);
 

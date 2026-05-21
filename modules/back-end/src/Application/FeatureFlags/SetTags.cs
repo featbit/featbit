@@ -1,9 +1,10 @@
+using Application.AuditLogs;
 using Application.Users;
 using Domain.AuditLogs;
 
 namespace Application.FeatureFlags;
 
-public class SetTags : IRequest<bool>
+public class SetTags : ResourceChangeRequest, IRequest<bool>
 {
     public Guid EnvId { get; set; }
 
@@ -22,7 +23,8 @@ public class SetTagsHandler(IFeatureFlagService service, ICurrentUser currentUse
         await service.UpdateAsync(flag);
 
         // publish on feature flag change notification
-        var notification = new OnFeatureFlagChanged(flag, Operations.Update, dataChange, currentUser.Id);
+        var notification =
+            new OnFeatureFlagChanged(flag, Operations.Update, dataChange, currentUser.Id, request.Comment);
         await publisher.Publish(notification, cancellationToken);
 
         return true;
