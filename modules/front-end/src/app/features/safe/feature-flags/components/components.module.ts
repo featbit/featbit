@@ -23,6 +23,7 @@ import { NzTabsModule } from "ng-zorro-antd/tabs";
 import { NzSwitchModule } from "ng-zorro-antd/switch";
 import { NzCollapseModule } from "ng-zorro-antd/collapse";
 import { NzSkeletonModule } from "ng-zorro-antd/skeleton";
+import { PipesModule } from '@core/pipes/pipes.module';
 
 @NgModule({
   declarations: [
@@ -30,6 +31,7 @@ import { NzSkeletonModule } from "ng-zorro-antd/skeleton";
   ],
   imports: [
     CommonModule,
+    PipesModule,
     FormsModule,
     NzButtonModule,
     NzIconModule,
