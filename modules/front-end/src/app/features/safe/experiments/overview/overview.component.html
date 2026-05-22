@@ -31,19 +31,22 @@
 
   <div class="table-content-area">
     <div class="table-search-area">
-      <div class="search-inputs">
-        <nz-input-group [nzPrefix]="prefixIconSearch">
-          <input nz-input type="text" placeholder="Filter by feature flag name" i18n-placeholder="@@expt.overview.filter-by-ff-name" [(ngModel)]="filter.featureFlagName" (ngModelChange)="onSearch(true)">
-        </nz-input-group>
-        <ng-template #prefixIconSearch>
-          <i nz-icon nzType="icons:icon-search"></i>
-        </ng-template>
+      <div class="search-toolbar">
+        <div class="left-filters">
+          <nz-input-group [nzPrefix]="prefixIconSearch" class="main-search single">
+            <input nz-input type="text" placeholder="Filter by feature flag name" i18n-placeholder="@@expt.overview.filter-by-ff-name" [(ngModel)]="filter.featureFlagName" (ngModelChange)="onSearch(true)">
+          </nz-input-group>
+          <ng-template #prefixIconSearch>
+            <i nz-icon nzType="icons:icon-search"></i>
+          </ng-template>
+        </div>
+        <div class="right-actions">
+          <button class="btn-primary" nz-button nzType="primary" (click)="onCreateClick()">
+            <i nz-icon nzType="icons:icon-add"></i>
+            <ng-container i18n="@@expt.overview.add-expt">Add</ng-container>
+          </button>
+        </div>
       </div>
-
-      <button nz-button nzType="primary" (click)="onCreateClick()">
-        <i nz-icon nzType="icons:icon-add"></i>
-        <ng-container i18n="@@expt.overview.add-expt">Add</ng-container>
-      </button>
     </div>
     <div class="table-wrapper">
       <nz-table #borderedTable

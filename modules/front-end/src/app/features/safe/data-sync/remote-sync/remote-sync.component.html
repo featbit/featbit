@@ -1,26 +1,35 @@
 <div class="table-content-area">
   <div class="table-search-area">
-    <nz-select
-      class="middle-select"
-      nzShowSearch
-      nzAllowClear
-      nzPlaceHolder="Filter by type"
-      i18n-nzPlaceHolder="@@filter-by-type"
-      [nzOptions]="tags"
-      [(ngModel)]="filterTag"
-      (ngModelChange)="filterRow()">
-    </nz-select>
-
-    <div class="search-inputs">
-      <button class="sync-btn" nz-button nzType="primary" (click)="syncAll()" [nzLoading]="isSyncingAll"
-        i18n-nz-tooltip="@@synchronize-to-all-addresses-in-table" nz-tooltip="Synchronize to all addresses in the table" nzTooltipPlacement="top">
-        <i nz-icon nzType="icons:icon-sync"></i>
-        <ng-container i18n="@@synchronize">Synchronize</ng-container>
-      </button>
-      <button nz-button nzType="primary" (click)="newRow()">
-        <i nz-icon nzType="icons:icon-add" nzTheme="outline"></i>
-        <ng-container i18n="@@add">Add</ng-container>
-      </button>
+    <div class="search-toolbar">
+      <div class="left-filters">
+        <nz-select
+          class="nz-select-36 rounded filter"
+          nzShowSearch
+          nzAllowClear
+          nzPlaceHolder="Filter by type"
+          i18n-nzPlaceHolder="@@filter-by-type"
+          [nzOptions]="tags"
+          [(ngModel)]="filterTag"
+          (ngModelChange)="filterRow()">
+        </nz-select>
+      </div>
+      <div class="right-actions">
+        <button class="btn-primary" nz-button nzType="primary" (click)="newRow()">
+          <i nz-icon nzType="icons:icon-add" nzTheme="outline"></i>
+          <ng-container i18n="@@add">Add</ng-container>
+        </button>
+        <button
+          class="btn-secondary"
+          nz-button
+          (click)="syncAll()"
+          [nzLoading]="isSyncingAll"
+          nz-tooltip="Synchronize to all addresses in the table"
+          i18n-nz-tooltip="@@synchronize-to-all-addresses-in-table"
+          nzTooltipPlacement="top">
+          <i nz-icon nzType="icons:icon-sync"></i>
+          <span i18n="@@synchronize">Synchronize</span>
+        </button>
+      </div>
     </div>
   </div>
   <div class="table-wrapper">

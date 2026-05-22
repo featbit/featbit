@@ -103,13 +103,17 @@
           padding-left: 6px;
           transition: all 0.2s ease;
 
+          &.single {
+            width: 320px;
+          }
+
           i {
             color: @grey40-color;
             font-size: 16px;
           }
 
           &:focus-within {
-            border-color: @primary-color !important;
+            border-color: @primary-color;
             background: @white;
             box-shadow: 0 0 0 2px fade(@primary-color, 12%);
           }
@@ -129,11 +133,6 @@
             border-color: @primary-color;
             border-style: dashed;
           }
-        }
-
-        .filter-select {
-          border-radius: 12px;
-          width: var(--filter-select-width, 150px);
         }
       }
 

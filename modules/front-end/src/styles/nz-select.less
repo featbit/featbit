@@ -41,7 +41,7 @@ nz-select:not(.ant-select-customize-input) {
     }
 
     &.filter {
-      width: 200px;
+      width: 150px;
 
       .ant-select-selector {
         border: 1px solid #d9d9d9;
@@ -67,13 +67,19 @@ nz-select:not(.ant-select-customize-input) {
       }
     }
 
-    &.nz-select-36:not(.target-flex-rule-select) .ant-select-selector {
-      height: 36px;
+    &.nz-select-36:not(.target-flex-rule-select) {
+      &.rounded .ant-select-selector {
+        border-radius: 16px;
+      }
 
-      .ant-select-selection-search-input,
-      .ant-select-selection-placeholder,
-      .ant-select-selection-item {
-        margin-top: 3px;
+      .ant-select-selector {
+        height: 36px;
+
+        .ant-select-selection-search-input,
+        .ant-select-selection-placeholder,
+        .ant-select-selection-item {
+          margin-top: 3px;
+        }
       }
     }
 
