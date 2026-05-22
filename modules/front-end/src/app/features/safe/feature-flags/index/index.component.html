@@ -39,13 +39,13 @@
             i18n="@@ff.idx.show-archived">Show Archived</button>
         </div>
         <div class="right-actions">
-          <button nzType="primary" nz-button class="btn-primary" (click)="openCreationDrawer()">
-            <i nz-icon nzType="icons:icon-add"></i>
-            <span i18n="@@common.add">Add</span>
-          </button>
           <button class="btn-secondary" nz-button [routerLink]="['/feature-flags/compare']">
             <i nz-icon nzType="swap"></i>
             <span i18n="@@common.compare">Compare</span>
+          </button>
+          <button nzType="primary" nz-button class="btn-primary" (click)="openCreationDrawer()">
+            <i nz-icon nzType="icons:icon-add"></i>
+            <span i18n="@@common.add">Add</span>
           </button>
           <button class="btn-more" nz-button nz-dropdown [nzDropdownMenu]="menu">
             <i nz-icon nzType="ellipsis"></i>
