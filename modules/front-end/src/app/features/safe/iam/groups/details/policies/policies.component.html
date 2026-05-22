@@ -3,8 +3,8 @@
     <div class="table-search-area">
       <div class="search-toolbar">
         <div class="left-filters">
-          <nz-input-group [nzPrefix]="prefixIconSearch" style="width: 300px">
-            <input class="search-input" nz-input type="text" placeholder="Filter by policy name" i18n-placeholder="@@iam.groups.details.dp-filter-placeholder" [(ngModel)]="filter.name" (ngModelChange)="doSearch(true)">
+          <nz-input-group [nzPrefix]="prefixIconSearch" class="main-search">
+            <input nz-input type="text" placeholder="Filter by policy name" i18n-placeholder="@@iam.groups.details.dp-filter-placeholder" [(ngModel)]="filter.name" (ngModelChange)="doSearch(true)">
           </nz-input-group>
           <ng-template #prefixIconSearch>
             <i nz-icon nzType="icons:icon-search"></i>
