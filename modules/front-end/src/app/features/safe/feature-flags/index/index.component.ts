@@ -39,9 +39,20 @@ export class IndexComponent implements OnInit {
 
   featureFlagFilter: IFeatureFlagListFilter = new IFeatureFlagListFilter();
 
-  get isArchived() {
-    const value: any = this.featureFlagFilter.isArchived;
-    return value === 'true' || value === true;
+  // status filter
+  readonly statusOptions = [
+    { value: 'true', label: 'ON' },
+    { value: 'false', label: 'OFF' },
+  ];
+
+  onStatusFilterChange(value: string | undefined) {
+    this.featureFlagFilter.isEnabled = value as any;
+    this.onSearch(true);
+  }
+
+  toggleArchiveFilter() {
+    this.featureFlagFilter.isArchived = !this.featureFlagFilter.isArchived;
+    this.onSearch(true);
   }
 
   ngOnInit(): void {
@@ -51,6 +62,8 @@ export class IndexComponent implements OnInit {
           if (params[k].length > 0) {
             this.featureFlagFilter[k] = params[k].split(',');
           }
+        } else if (k === 'isArchived') {
+          this.featureFlagFilter[k] = params[k] === 'true';
         } else {
           this.featureFlagFilter[k] = params[k];
         }
@@ -67,14 +80,22 @@ export class IndexComponent implements OnInit {
 
     // get flag tags
     this.featureFlagService.getAllTags().subscribe(allTags => {
-      this.allTags = allTags;
+      this.tags = allTags.map(tag => ({
+        label: tag,
+        value: tag,
+        selected: (this.featureFlagFilter.tags || []).includes(tag)
+      }));
       this.isLoadingTags = false;
     });
   }
 
   // tags
-  allTags: string[] = [];
+  tags = [];
   isLoadingTags: boolean = true;
+  onTagsChange(selectedTags: string[]) {
+    this.featureFlagFilter.tags = selectedTags;
+    this.onSearch(true);
+  }
 
   // table selection
   allChecked: boolean = false;

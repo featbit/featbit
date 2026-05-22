@@ -1,4 +1,5 @@
 @import "variables";
+@import "standards";
 
 .table-wrapper {
   border-radius: 20px;
@@ -69,5 +70,134 @@
     max-width: 85px;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+}
+
+// table style
+.table-content-area {
+  width: 100%;
+  border-radius: 20px;
+  background-color: @grey5-color;
+
+  .table-search-area {
+    padding: 20px 24px 8px;
+
+    .search-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      // Left side: filters
+      .left-filters {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex: 1;
+        min-width: 0;
+        flex-wrap: wrap;
+
+        .main-search {
+          width: 250px;
+          height: 36px;
+          border-radius: 16px;
+          padding-left: 6px;
+          transition: all 0.2s ease;
+
+          i {
+            color: @grey40-color;
+            font-size: 16px;
+          }
+
+          &:focus-within {
+            border-color: @primary-color !important;
+            background: @white;
+            box-shadow: 0 0 0 2px fade(@primary-color, 12%);
+          }
+
+          @media (max-width: 1280px) {
+            width: 150px;
+          }
+        }
+
+        button {
+          height: 36px;
+          border-radius: 12px;
+
+          &.active {
+            background: fade(@primary-color, 10%);
+            color: @primary-color;
+            border-color: @primary-color;
+            border-style: dashed;
+          }
+        }
+
+        .filter-select {
+          border-radius: 12px;
+          width: var(--filter-select-width, 150px);
+        }
+      }
+
+      // Right side: action buttons
+      .right-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0;
+
+        // Primary action (e.g. Add)
+        .btn-primary {
+          height: 36px;
+          width: 120px;
+          border-radius: 18px;
+          padding: 0 18px;
+          font-weight: 500;
+          gap: 6px;
+        }
+
+        // Secondary action (e.g. Compare)
+        .btn-secondary {
+          height: 36px;
+          width: 120px;
+          border-radius: 18px;
+          padding: 0 16px;
+          font-weight: 500;
+          color: @purple50-color;
+          border-color: fade(@purple50-color, 40%);
+          background: fade(@purple50-color, 6%);
+
+          &:hover {
+            color: @white;
+            background: @purple50-color;
+            border-color: @purple50-color;
+            box-shadow: 0 2px 8px fade(@purple50-color, 30%);
+          }
+        }
+
+        // More actions (ellipsis icon button)
+        .btn-more {
+          width: 36px;
+          height: 36px;
+          padding: 0;
+          border-radius: 50%;
+          border-color: @grey20-color;
+          color: @grey50-color;
+          background: transparent;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.2s ease;
+
+          .anticon {
+            font-size: 18px;
+          }
+
+          &:hover {
+            border-color: @grey30-color;
+            color: @grey80-color;
+            background: @grey10-color;
+          }
+        }
+      }
+    }
   }
 }

@@ -1,39 +1,7 @@
 @import "variables";
 
-.search-inputs {
-  margin-right: 16px;
-
-  nz-select {
-    width: 285px
-  }
-}
-
 nz-divider {
-  margin: 0 12px;
-}
-
-.table-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-
-  button {
-    width: 135px;
-
-    &.compare-btn {
-      background-color: @purple50-color;
-    }
-  }
-
-  .more-action {
-    border-color: transparent;
-    background-color: @grey50-color !important;
-    width: 40px !important;
-    height: 40px;
-    color: white;
-    border-radius: 32px;
-    cursor: pointer;
-  }
+  margin: 0 8px;
 }
 
 // Name column styles
@@ -231,9 +199,16 @@ nz-divider {
 
 // Actions column styles
 .actions-cell {
-  white-space: nowrap;
+  .actions-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    row-gap: 4px;
+  }
 
   .action-link {
+    white-space: nowrap;
+
     &.primary {
       color: @green70-color;
     }
@@ -244,6 +219,19 @@ nz-divider {
 
     &.danger {
       color: @red50-color;
+    }
+  }
+}
+
+@media (max-width: 1280px) {
+  .tags-header,
+  .tags-cell {
+    display: none;
+  }
+
+  .actions-cell {
+    nz-divider {
+      margin: 0 4px;
     }
   }
 }
