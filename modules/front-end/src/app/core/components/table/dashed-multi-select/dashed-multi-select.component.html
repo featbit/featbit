@@ -3,44 +3,44 @@
   nz-button
   nz-dropdown
   nzClickHide="false"
-  nzOverlayClassName="select-tags-dropdown"
+  nzOverlayClassName="dashed-multi-select-dropdown"
   (nzVisibleChange)="onVisibleChange($event)"
-  [nzDropdownMenu]="tagsMenu">
-  <span i18n="@@common.tags">Tags</span>:&nbsp;{{ getSelectedOptionsLabel() }}
+  [nzDropdownMenu]="optionsMenu">
+  <span>{{ label }}</span>:&nbsp;{{ getSelectedOptionsLabel() }}
   @if (hasValue) {
     <i nz-icon nzType="close-circle" (click)="clearOptions($event)"></i>
   } @else {
     <i nz-icon nzType="down"></i>
   }
 </button>
-<nz-dropdown-menu #tagsMenu>
-  <div class="tags-filter-input">
-    <nz-input-group [nzPrefix]="tagSearchIcon" nzSize="small">
+<nz-dropdown-menu #optionsMenu>
+  <div class="filter-input">
+    <nz-input-group [nzPrefix]="searchIcon" nzSize="small">
       <input
         type="text"
         nz-input
         [(ngModel)]="optionSearchText"
-        placeholder="Search tags..."
-        i18n-placeholder="@@ff.compare.search-tags"
+        placeholder="Search options..."
+        i18n-placeholder="@@table.select.search-options"
       />
-      <ng-template #tagSearchIcon>
+      <ng-template #searchIcon>
         <i nz-icon nzType="search"></i>
       </ng-template>
     </nz-input-group>
   </div>
   @if (isLoading) {
-    <div class="tags-loading">
+    <div class="loading-container">
       <nz-spin i18n-nzTip="@@common.loading" nzTip="Loading..." [nzSize]="'small'"></nz-spin>
     </div>
   } @else {
-    <ul nz-menu class="tags-menu-list">
+    <ul nz-menu class="menu-list">
       @if (filteredOptions.length === 0) {
-        <li class="no-tags-found" i18n="@@ff.no-tags-found">No tags found</li>
+        <li class="no-options-found" i18n="@@table.select.no-options-found">No options found</li>
       }
-      @for (tag of filteredOptions; track tag) {
-        <li nz-menu-item (click)="tag.selected = !tag.selected">
-          <label nz-checkbox [(ngModel)]="tag.selected"></label>
-          {{ tag.label }}
+      @for (option of filteredOptions; track option) {
+        <li nz-menu-item (click)="option.selected = !option.selected">
+          <label nz-checkbox [(ngModel)]="option.selected"></label>
+          {{ option.label }}
         </li>
       }
     </ul>

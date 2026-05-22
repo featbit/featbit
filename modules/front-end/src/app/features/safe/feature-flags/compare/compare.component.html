@@ -62,6 +62,8 @@
             <i nz-icon nzType="icons:icon-search"></i>
           </ng-template>
           <dashed-multi-select
+            label="Tags"
+            i18n-label="@@common.tags"
             [options]="tags"
             [isLoading]="isLoadingTags"
             (optionsChange)="onTagsChange($event)">

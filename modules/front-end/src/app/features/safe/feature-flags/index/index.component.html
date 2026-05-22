@@ -16,14 +16,16 @@
           </ng-template>
 
           <dashed-multi-select
+            label="Tags"
+            i18n-label="@@common.tags"
             [options]="tags"
             [isLoading]="isLoadingTags"
             (optionsChange)="onTagsChange($event)">
           </dashed-multi-select>
 
           <dashed-single-select
-            i18n-label="@@common.status"
             label="Status"
+            i18n-label="@@common.status"
             [options]="statusOptions"
             [value]="featureFlagFilter.isEnabled"
             (valueChange)="onStatusFilterChange($event)">

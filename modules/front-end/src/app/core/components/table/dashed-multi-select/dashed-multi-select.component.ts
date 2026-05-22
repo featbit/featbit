@@ -34,6 +34,9 @@ type SelectableOptions = {
 })
 export class DashedMultiSelectComponent {
   @Input()
+  label: string = '';
+
+  @Input()
   options: SelectableOptions[] = [];
 
   @Input()
