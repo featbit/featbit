@@ -13,30 +13,36 @@ import { NzDrawerModule } from 'ng-zorro-antd/drawer';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzGridModule } from "ng-zorro-antd/grid";
-import {NzSelectModule} from "ng-zorro-antd/select";
-import {NzPopoverModule} from "ng-zorro-antd/popover";
-import {NzToolTipModule} from "ng-zorro-antd/tooltip";
+import { NzSelectModule } from "ng-zorro-antd/select";
+import { NzPopoverModule } from "ng-zorro-antd/popover";
+import { NzToolTipModule } from "ng-zorro-antd/tooltip";
 import { NzDividerModule } from "ng-zorro-antd/divider";
-import {CoreModule} from "@core/core.module";
+import { NzDropDownModule } from "ng-zorro-antd/dropdown";
+import { NzCheckboxModule } from "ng-zorro-antd/checkbox";
+import { CoreModule } from "@core/core.module";
+import { DashedMultiSelectComponent } from "@core/components/table/dashed-multi-select/dashed-multi-select.component";
 
 @NgModule({
-  declarations: [EndUsersComponent, DetailsComponent, IndexComponent],
-    imports: [
-      CommonModule,
-      FormsModule,
-      CoreModule,
-      NzTableModule,
-      NzInputModule,
-      NzDrawerModule,
-      NzButtonModule,
-      NzSpinModule,
-      EndUsersRoutingModule,
-      NzIconModule,
-      NzGridModule,
-      NzSelectModule,
-      NzPopoverModule,
-      NzToolTipModule,
-      NzDividerModule
-    ]
+  declarations: [ EndUsersComponent, DetailsComponent, IndexComponent ],
+  imports: [
+    CommonModule,
+    FormsModule,
+    CoreModule,
+    NzTableModule,
+    NzInputModule,
+    NzDrawerModule,
+    NzButtonModule,
+    NzSpinModule,
+    EndUsersRoutingModule,
+    NzIconModule,
+    NzGridModule,
+    NzSelectModule,
+    NzPopoverModule,
+    NzToolTipModule,
+    NzDividerModule,
+    NzDropDownModule,
+    NzCheckboxModule,
+    DashedMultiSelectComponent
+  ]
 })
 export class EndUsersModule { }

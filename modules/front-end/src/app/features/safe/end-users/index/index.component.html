@@ -1,104 +1,43 @@
 <section class="body-container">
   <div class="table-content-area">
     <div class="table-search-area">
-      <div class="search-inputs">
-        <nz-input-group class="query" [nzPrefix]="prefixIconSearch">
-          <input nz-input type="text" placeholder="Filter by property" i18n-placeholder="@@users.idx.filter-by-property" [(ngModel)]="filter.searchText" (ngModelChange)="onSearch(true)">
-        </nz-input-group>
-        <ng-template #prefixIconSearch>
-          <i nz-icon nzType="icons:icon-search"></i>
-        </ng-template>
-        <nz-select class="filter-multi-select nz-select-40 rounded filter"
-                   nzMode="multiple"
-                   i18n-nzPlaceHolder="@@users.idx.select-properties-to-search"
-                   nzPlaceHolder="Select properties to search"
-                   [nzMaxTagCount]="1"
-                   [nzMaxTagPlaceholder]="omittedPlaceHolderFilter"
-                   [nzCustomTemplate]="multipleTemplate"
-                   [(ngModel)]="filter.properties"
-                   (ngModelChange)="storeFilterAndAttribute(true)"
-                   (nzOnSearch)="onSearchUserProperties($event)">
-          @if (isUserPropsLoading) {
-            <nz-option nzDisabled nzCustomContent>
-              <i nz-icon nzType="loading" class="loading-icon"></i>
-              <ng-container i18n="@@common.loading">Loading...</ng-container>
-            </nz-option>
-          } @else {
-            @for (item of filteredProps; track item) {
-              <nz-option [nzValue]="item" [nzLabel]="item">{{item}}</nz-option>
-            }
-          }
-
-          <ng-template #omittedPlaceHolderFilter>
-            <div class="ant-select-selection-item-content" i18n-nz-popover="@@users.idx.all-selected-items"
-                 nz-popover="All" [nzPopoverContent]="allSelectedItems" nzPopoverOverlayClassName="selected-items-popover">
-            <span class="more-select-selection-item">
-              <ng-container i18n="@@users.idx.etc">+</ng-container> {{ filter.properties.length - 1}} <ng-container i18n="@@users.idx.entries">more</ng-container>
-              <i nz-icon nzType="expand"></i>
-            </span>
-              <ng-template #allSelectedItems>
-                <div class="more-select-items">
-                  <span class="more-select-item-content" *ngFor="let prop of filter.properties">
-                    <span class="more-select-item-content-text" [nz-tooltip]="prop">{{ prop }}</span>
-                    <i (click)="onRemoveFilterItem(prop)" nz-icon nzType="close"></i>
-                  </span>
-                </div>
-              </ng-template>
-            </div>
+      <div class="search-toolbar">
+        <div class="left-filters">
+          <nz-input-group [nzPrefix]="prefixIconSearch" class="main-search">
+            <input
+              nz-input type="text"
+              placeholder="Filter by property"
+              i18n-placeholder="@@users.idx.filter-by-property"
+              [(ngModel)]="filter.searchText"
+              (ngModelChange)="onSearch(true)">
+          </nz-input-group>
+          <ng-template #prefixIconSearch>
+            <i nz-icon nzType="icons:icon-search"></i>
           </ng-template>
-        </nz-select>
-        <nz-select
-          class="attribute-multi-select nz-select-40 rounded filter"
-          nzMode="multiple"
-          i18n-nzPlaceHolder="@@users.idx.select-columns-to-add"
-          nzPlaceHolder="Add columns"
-          [nzMaxTagCount]="1"
-          [nzMaxTagPlaceholder]="omittedPlaceHolderAttribute"
-          [nzCustomTemplate]="multipleTemplate"
-          [(ngModel)]="extraColumns"
-          (ngModelChange)="storeFilterAndAttribute()"
-          (nzOnSearch)="onSearchExtraColumns($event)">
-          @if (isUserPropsLoading) {
-            <nz-option nzDisabled nzCustomContent>
-              <i nz-icon nzType="loading" class="loading-icon"></i>
-              <ng-container i18n="@@common.loading">Loading...</ng-container>
-            </nz-option>
-          } @else {
-            @for (item of filteredExtraColumns; track item) {
-              <nz-option [nzValue]="item" [nzLabel]="item">{{ item }}</nz-option>
-            }
-          }
-
-          <ng-template #omittedPlaceHolderAttribute>
-            <div class="ant-select-selection-item-content" i18n-nz-popover="@@users.idx.all-selected-items"
-                 nz-popover="All" [nzPopoverContent]="allSelectedItems" nzPopoverOverlayClassName="selected-items-popover">
-            <span class="more-select-selection-item">
-              <ng-container i18n="@@users.idx.etc">+</ng-container> {{ extraColumns.length - 1}} <ng-container i18n="@@users.idx.entries">more</ng-container>
-              <i nz-icon nzType="expand"></i>
-            </span>
-              <ng-template #allSelectedItems>
-                <div class="more-select-items">
-                  <span class="more-select-item-content" *ngFor="let prop of extraColumns">
-                    <span class="more-select-item-content-text" [nz-tooltip]="prop">{{ prop }}</span>
-                    <i (click)="onRemoveAttributeItem(prop)" nz-icon nzType="close"></i>
-                  </span>
-                </div>
-              </ng-template>
-            </div>
-          </ng-template>
-        </nz-select>
-
-        <ng-template #multipleTemplate let-selected>
-          <div class="ant-select-selection-item-content">
-            {{ selected.nzLabel }}
-          </div>
-        </ng-template>
-
+          <dashed-multi-select
+            [options]="filterOptions"
+            [isLoading]="isUserPropsLoading"
+            label="Properties"
+            (optionsChange)="onFilterPropertiesChange($event)">
+          </dashed-multi-select>
+          <dashed-multi-select
+            [options]="extraColumnOptions"
+            [isLoading]="isUserPropsLoading"
+            [labelTemplate]="columnSettingLabel"
+            (optionsChange)="onExtraColumnsChange($event)">
+            <ng-template #columnSettingLabel>
+              <i nz-icon nzType="icons:icon-column-setting"></i>
+              <span i18n="@@users.idx.display">Display</span>
+            </ng-template>
+          </dashed-multi-select>
+        </div>
+        <div class="right-actions">
+          <button class="btn-primary" nz-button nzType="primary" (click)="onPropsSettingClick()">
+            <i nz-icon nzType="icons:icon-setting"></i>
+            <ng-container i18n="@@users.idx.manage-properties">Properties</ng-container>
+          </button>
+        </div>
       </div>
-      <button nz-button nzType="primary" (click)="onPropsSettingClick()">
-        <i nz-icon nzType="icons:icon-setting"></i>
-        <ng-container i18n="@@users.idx.manage-properties">Properties</ng-container>
-      </button>
     </div>
     <div class="table-wrapper">
       <nz-table #basicTable nzSize="small"
@@ -116,22 +55,22 @@
             <tr>
               <th>name</th>
               <th>keyId</th>
-              <th *ngFor="let prop of extraColumns">{{prop}}</th>
+              <th *ngFor="let prop of selectedExtraColumns">{{prop}}</th>
               <th i18n="@@common.actions">Actions</th>
             </tr>
         </thead>
         <tbody style="width: calc(100% - 200px);">
           <ng-container *ngFor="let user of basicTable.data">
             <tr>
-              <td (click)="navigateToUserDetail(user)">
+              <td [routerLink]="[user.id]">
                 <span>{{ user.name }}</span>
               </td>
               <td>{{ user.keyId }}</td>
-              <td *ngFor="let prop of extraColumns">{{getCustomizePropertyValue(user, prop)}}</td>
+              <td *ngFor="let prop of selectedExtraColumns">{{getCustomizePropertyValue(user, prop)}}</td>
               <td>
-                <a class="primary-link-btn" (click)="onSegmentsAndFlagsClick(user)" i18n="@@users.idx.ff-segments">Evaluate on flags and segments</a>
+                <a class="primary-link-btn" (click)="onSegmentsAndFlagsClick(user)" i18n="@@users.idx.evaluate">Evaluate</a>
                 <nz-divider nzType="vertical"></nz-divider>
-                <a class="primary-link-btn" nz-button nzType="link" (click)="navigateToUserDetail(user)" i18n="@@common.details">Details</a>
+                <a class="primary-link-btn" nz-button nzType="link" [routerLink]="[user.id]" i18n="@@common.details">Details</a>
               </td>
             </tr>
           </ng-container>

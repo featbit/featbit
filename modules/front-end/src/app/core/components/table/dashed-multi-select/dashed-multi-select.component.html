@@ -3,46 +3,54 @@
   nz-button
   nz-dropdown
   nzClickHide="false"
-  nzOverlayClassName="dashed-multi-select-dropdown"
+  nzOverlayClassName="multi-select-dropdown"
   (nzVisibleChange)="onVisibleChange($event)"
   [nzDropdownMenu]="optionsMenu">
-  <span>{{ label }}</span>:&nbsp;{{ getSelectedOptionsLabel() }}
-  @if (hasValue) {
-    <i nz-icon nzType="close-circle" (click)="clearOptions($event)"></i>
+  @if (labelTemplate) {
+    <ng-container *ngTemplateOutlet="labelTemplate"></ng-container>
   } @else {
-    <i nz-icon nzType="down"></i>
+    <span>{{ label }}</span>:&nbsp;{{ getSelectedOptionsLabel() }}
+    @if (hasValue) {
+      <i nz-icon nzType="close-circle" (click)="clearOptions($event)"></i>
+    } @else {
+      <i nz-icon nzType="down"></i>
+    }
   }
 </button>
 <nz-dropdown-menu #optionsMenu>
-  <div class="filter-input">
-    <nz-input-group [nzPrefix]="searchIcon" nzSize="small">
-      <input
-        type="text"
-        nz-input
-        [(ngModel)]="optionSearchText"
-        placeholder="Search options..."
-        i18n-placeholder="@@table.select.search-options"
-      />
-      <ng-template #searchIcon>
-        <i nz-icon nzType="search"></i>
-      </ng-template>
-    </nz-input-group>
-  </div>
   @if (isLoading) {
     <div class="loading-container">
       <nz-spin i18n-nzTip="@@common.loading" nzTip="Loading..." [nzSize]="'small'"></nz-spin>
     </div>
   } @else {
-    <ul nz-menu class="menu-list">
-      @if (filteredOptions.length === 0) {
-        <li class="no-options-found" i18n="@@table.select.no-options-found">No options found</li>
-      }
-      @for (option of filteredOptions; track option) {
-        <li nz-menu-item (click)="option.selected = !option.selected">
-          <label nz-checkbox [(ngModel)]="option.selected"></label>
-          {{ option.label }}
-        </li>
-      }
-    </ul>
+    <div class="content-container">
+      <div class="filter">
+        <nz-input-group [nzPrefix]="searchIcon">
+          <input
+            nz-input
+            [(ngModel)]="searchText"
+            placeholder="Search options..."
+            i18n-placeholder="@@table.select.search-options"
+          />
+          <ng-template #searchIcon>
+            <i nz-icon nzType="search"></i>
+          </ng-template>
+        </nz-input-group>
+      </div>
+      <div class="options">
+        @if (filteredOptions.length === 0) {
+          <div class="no-options-found" i18n="@@table.select.no-options-found">No options found</div>
+        } @else {
+          @for (option of filteredOptions; track option) {
+            <div class="option-item" [class.selected]="option.selected" (click)="option.selected = !option.selected">
+              {{ option.label }}
+              @if (option.selected) {
+                <i nz-icon nzType="check"></i>
+              }
+            </div>
+          }
+        }
+      </div>
+    </div>
   }
 </nz-dropdown-menu>

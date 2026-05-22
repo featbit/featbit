@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { SelectableOptions } from '@core/components/table/dashed-multi-select/dashed-multi-select.component';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { EnvUserPropService } from "@services/env-user-prop.service";
@@ -8,7 +8,6 @@ import { EnvUserFilter } from "@features/safe/end-users/types/featureflag-user";
 import { CURRENT_USER_FILTER_ATTRIBUTE } from "@utils/localstorage-keys";
 import { EnvUserService } from "@services/env-user.service";
 import { getCurrentProjectEnv } from "@utils/project-env";
-
 
 @Component({
     selector: 'app-user-index',
@@ -32,8 +31,7 @@ export class IndexComponent implements OnInit {
 
   constructor(
     private envUserService: EnvUserService,
-    private envUserPropService: EnvUserPropService,
-    private router: Router
+    private envUserPropService: EnvUserPropService
   ) { }
 
   getCustomizePropertyValue(user: IUserType, propName: string): string {
@@ -54,26 +52,22 @@ export class IndexComponent implements OnInit {
 
     const config = {
       properties: this.filter.properties,
-      attributes: this.extraColumns
+      attributes: this.selectedExtraColumns
     };
 
     localStorage.setItem(CURRENT_USER_FILTER_ATTRIBUTE(this.currentEnvId), JSON.stringify(config));
   }
 
-  onSearchUserProperties(value: string = ''){
-    const regex = new RegExp(value || '', 'ig');
-    this.filteredProps = this.props.filter(p => regex.test(p.name)).map(p => p.name);
-  }
-
-  onSearchExtraColumns(value: string = ''){
-    const regex = new RegExp(value || '', 'ig');
-    this.filteredExtraColumns = this.props.filter(p => !p.isBuiltIn && regex.test(p.name)).map(p => p.name);
+  onFilterPropertiesChange(properties: string[]) {
+    this.filter.properties = properties;
+    this.filterOptions.forEach(opt => opt.selected = properties.includes(opt.value));
+    this.storeFilterAndAttribute(true);
   }
 
   props: IUserProp[];
-  filteredProps: string[];
-  extraColumns: string[];
-  filteredExtraColumns: string[];
+  filterOptions: SelectableOptions[] = [];
+  selectedExtraColumns: string[];
+  extraColumnOptions: SelectableOptions[] = [];
 
   isUserPropsLoading: boolean = true;
   ngOnInit(): void {
@@ -81,14 +75,22 @@ export class IndexComponent implements OnInit {
 
     const filterAndAttributeConfig: any = JSON.parse(localStorage.getItem(CURRENT_USER_FILTER_ATTRIBUTE(this.currentEnvId)) || '{}');
     this.filter.properties = filterAndAttributeConfig?.properties || [];
-    this.extraColumns = filterAndAttributeConfig?.attributes || [];
+    this.selectedExtraColumns = filterAndAttributeConfig?.attributes || [];
 
     this.envUserPropService.get().subscribe(props => {
       this.props = [...props];
-      this.filteredProps = this.props.map(p => p.name);
-      this.filteredExtraColumns = this.props.filter(p => !p.isBuiltIn).map(p => p.name);
+      this.filterOptions = this.props.map(p => ({
+        label: p.name,
+        value: p.name,
+        selected: this.filter.properties.includes(p.name)
+      }));
+      this.extraColumnOptions = this.props.filter(p => !p.isBuiltIn).map(col => ({
+        label: col.name,
+        value: col.name,
+        selected: this.selectedExtraColumns.includes(col.name)
+      }));
       this.isUserPropsLoading = false;
-    })
+    });
 
     this.$search.pipe(
       debounceTime(400)
@@ -99,12 +101,10 @@ export class IndexComponent implements OnInit {
     this.$search.next();
   }
 
-  onRemoveFilterItem(prop: string) {
-    this.filter.properties = this.filter.properties.filter(p => p !== prop);
-  }
-
-  onRemoveAttributeItem(prop: string) {
-    this.extraColumns = this.extraColumns.filter(p => p !== prop);
+  onExtraColumnsChange(columns: string[]) {
+    this.selectedExtraColumns = columns;
+    this.extraColumnOptions.forEach(opt => opt.selected = columns.includes(opt.value));
+    this.storeFilterAndAttribute();
   }
 
   onSearch(resetPage?: boolean) {
@@ -126,10 +126,6 @@ export class IndexComponent implements OnInit {
         this.isLoading = false;
       }
     );
-  }
-
-  navigateToUserDetail(user: IUserType) {
-    this.router.navigateByUrl(`/users/${encodeURIComponent(user.id)}`);
   }
 
   onPropsSettingClick() {

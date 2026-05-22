@@ -1,14 +1,13 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, TemplateRef } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { NzDropDownDirective, NzDropdownMenuComponent } from "ng-zorro-antd/dropdown";
 import { NzInputDirective, NzInputGroupComponent } from "ng-zorro-antd/input";
 import { NzSpinComponent } from "ng-zorro-antd/spin";
 import { NzButtonComponent } from "ng-zorro-antd/button";
 import { NzIconDirective } from "ng-zorro-antd/icon";
-import { NzMenuDirective, NzMenuItemComponent } from "ng-zorro-antd/menu";
 import { FormsModule } from "@angular/forms";
-import { NzCheckboxComponent } from "ng-zorro-antd/checkbox";
 
-type SelectableOptions = {
+export type SelectableOptions = {
   label: string;
   value: string;
   selected: boolean;
@@ -26,10 +25,8 @@ type SelectableOptions = {
     NzButtonComponent,
     NzIconDirective,
     NzInputDirective,
-    NzMenuDirective,
-    NzMenuItemComponent,
     FormsModule,
-    NzCheckboxComponent
+    NgTemplateOutlet
   ]
 })
 export class DashedMultiSelectComponent {
@@ -42,17 +39,20 @@ export class DashedMultiSelectComponent {
   @Input()
   isLoading: boolean = false;
 
+  @Input()
+  labelTemplate: TemplateRef<void> | null = null;
+
   @Output()
   optionsChange = new EventEmitter<string[]>();
 
-  optionSearchText: string = '';
+  searchText: string = '';
 
   get filteredOptions(): SelectableOptions[] {
-    if (!this.optionSearchText) {
+    if (!this.searchText) {
       return this.options;
     }
 
-    const searchLower = this.optionSearchText.toLowerCase();
+    const searchLower = this.searchText.toLowerCase();
     return this.options.filter(tag => tag.label.toLowerCase().includes(searchLower));
   }
 
@@ -84,6 +84,8 @@ export class DashedMultiSelectComponent {
   private optionsSnapshot: string[] = [];
 
   onVisibleChange(visible: boolean) {
+    this.searchText = '';
+
     if (visible) {
       this.optionsSnapshot = this.options.filter(t => t.selected).map(t => t.value);
     } else {
