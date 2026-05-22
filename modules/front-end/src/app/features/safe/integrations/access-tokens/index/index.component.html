@@ -1,48 +1,51 @@
 <div class="table-content-area">
   <div class="table-search-area">
-    <div class="search-inputs">
-      <nz-input-group [nzPrefix]="prefixIconSearch">
-        <input nz-input type="text" placeholder="Filter by name" [(ngModel)]="filter.name" (ngModelChange)="doSearch(true)" i18n-placeholder="@@common.filter-by-name">
-      </nz-input-group>
-      <ng-template #prefixIconSearch>
-        <i nz-icon nzType="icons:icon-search"></i>
-      </ng-template>
-      <nz-select
-        class="nz-select-40 rounded filter"
-        i18n-nzPlaceHolder="@@integrations.access-tokens.filter-by-creator"
-        nzPlaceHolder="Select creator"
-        nzAllowClear
-        nzShowSearch
-        nzServerSearch
-        (ngModelChange)="doSearch(true)"
-        [(ngModel)]="filter.creatorId"
-        (nzOnSearch)="onSearchCreators($event)">
-        @if (isCreatorsLoading) {
-          <nz-option nzDisabled nzCustomContent>
-            <i nz-icon nzType="loading" class="loading-icon"></i>
-            <ng-container i18n="@@common.loading">Loading...</ng-container>
-          </nz-option>
-        } @else {
-          @for (o of creatorList; track o.id) {
-            <nz-option
-              [nzValue]="o.id"
-              [nzLabel]="o.name || o.email">
+    <div class="search-toolbar">
+      <div class="left-filters">
+        <nz-input-group [nzPrefix]="prefixIconSearch" class="main-search">
+          <input nz-input type="text" placeholder="Filter by name" [(ngModel)]="filter.name" (ngModelChange)="doSearch(true)" i18n-placeholder="@@common.filter-by-name">
+        </nz-input-group>
+        <ng-template #prefixIconSearch>
+          <i nz-icon nzType="icons:icon-search"></i>
+        </ng-template>
+        <nz-select
+          class="nz-select-36 rounded filter"
+          i18n-nzPlaceHolder="@@integrations.access-tokens.filter-by-creator"
+          nzPlaceHolder="Select creator"
+          nzAllowClear
+          nzShowSearch
+          nzServerSearch
+          (ngModelChange)="doSearch(true)"
+          [(ngModel)]="filter.creatorId"
+          (nzOnSearch)="onSearchCreators($event)">
+          @if (isCreatorsLoading) {
+            <nz-option nzDisabled nzCustomContent>
+              <i nz-icon nzType="loading" class="loading-icon"></i>
+              <ng-container i18n="@@common.loading">Loading...</ng-container>
             </nz-option>
+          } @else {
+            @for (o of creatorList; track o.id) {
+              <nz-option
+                [nzValue]="o.id"
+                [nzLabel]="o.name || o.email">
+              </nz-option>
+            }
           }
+        </nz-select>
+        <nz-select class="nz-select-36 rounded filter" nzAllowClear [(ngModel)]="filter.type" (ngModelChange)="doSearch(true)" i18n-nzPlaceHolder="@@integrations.access-tokens.filter-by-type" nzPlaceHolder="Filter by type">
+          <nz-option [nzValue]="AccessTokenTypePersonal" [nzLabel]="AccessTokenTypePersonal | accessTokenType"></nz-option>
+          <nz-option [nzValue]="AccessTokenTypeService" [nzLabel]="AccessTokenTypeService | accessTokenType"></nz-option>
+        </nz-select>
+      </div>
+      <div class="right-actions">
+        @if (canTakeActionOnPersonalAccessToken || canTakeActionOnServiceAccessToken) {
+          <button class="btn-primary" nz-button nzType="primary" (click)="showDetailDrawer()">
+            <i nz-icon nzType="icons:icon-add"></i>
+            <ng-container i18n="@@common.add">Add</ng-container>
+          </button>
         }
-      </nz-select>
-      <nz-select class="nz-select-40 rounded filter" nzAllowClear [(ngModel)]="filter.type" (ngModelChange)="doSearch(true)" i18n-nzPlaceHolder="@@integrations.access-tokens.filter-by-type" nzPlaceHolder="Filter by type">
-        <nz-option [nzValue]="AccessTokenTypePersonal" [nzLabel]="AccessTokenTypePersonal | accessTokenType"></nz-option>
-        <nz-option [nzValue]="AccessTokenTypeService" [nzLabel]="AccessTokenTypeService | accessTokenType"></nz-option>
-      </nz-select>
+      </div>
     </div>
-
-    @if (canTakeActionOnPersonalAccessToken || canTakeActionOnServiceAccessToken) {
-      <button nz-button nzType="primary" (click)="showDetailDrawer()">
-        <i nz-icon nzType="icons:icon-add"></i>
-        <ng-container i18n="@@common.add">Add</ng-container>
-      </button>
-    }
   </div>
   <div class="table-wrapper">
     <nz-table #table nzSize="small"

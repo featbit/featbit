@@ -11,6 +11,8 @@
     <div
       (click)="onClickLicenseBadge()"
       class="license-badge"
+      [nz-tooltip]="isSmallScreen ? licenseBadgeTooltip : null"
+      nzTooltipPlacement="bottomRight"
       [ngClass]="{
         'license-saas-free': isSaasFreePlan,
         'license-expiring': isLicenseExpiring,
@@ -49,7 +51,9 @@
     <div class="org-btns">
       <div class="workspace-selector">
         <div class="selector-items">
-          <div class="selector-item" [routerLink]="['/organization']">
+          <div class="selector-item" [routerLink]="['/organization']"
+               [nz-tooltip]="isSmallScreen ? orgTooltip : null"
+               nzTooltipPlacement="bottom">
             <div class="item-icon org-icon">
               <i nz-icon nzType="icons:icon-org"></i>
             </div>
@@ -59,7 +63,9 @@
             </div>
           </div>
           <div class="selector-divider"></div>
-          <div class="selector-item" [routerLink]="['/organization/projects']">
+          <div class="selector-item" [routerLink]="['/organization/projects']"
+               [nz-tooltip]="isSmallScreen ? projectTooltip : null"
+               nzTooltipPlacement="bottom">
             <div class="item-icon proj-icon">
               <i nz-icon nzType="icons:icon-proj"></i>
             </div>

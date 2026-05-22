@@ -1,18 +1,20 @@
 <section class="body-container">
   <div class="table-content-area">
     <div class="table-search-area">
-      <div class="search-inputs">
-        <nz-input-group [nzPrefix]="prefixIconSearch" style="width: 300px">
-          <input class="search-input" nz-input type="text" placeholder="Filter by policy name" i18n-placeholder="@@iam.team.details.dp-filter-placeholder" [(ngModel)]="filter.name" (ngModelChange)="doSearch(true)">
-        </nz-input-group>
-        <ng-template #prefixIconSearch>
-          <i nz-icon nzType="icons:icon-search"></i>
-        </ng-template>
+      <div class="search-toolbar">
+        <div class="left-filters">
+          <nz-input-group [nzPrefix]="prefixIconSearch" class="main-search">
+            <input class="search-input" nz-input type="text" placeholder="Filter by policy name" i18n-placeholder="@@iam.team.details.dp-filter-placeholder" [(ngModel)]="filter.name" (ngModelChange)="doSearch(true)">
+          </nz-input-group>
+          <ng-template #prefixIconSearch>
+            <i nz-icon nzType="icons:icon-search"></i>
+          </ng-template>
+          <nz-select class="policy-filter nz-select-36 rounded filter" [(ngModel)]="filter.getAllPolicies" (ngModelChange)="doSearch(true)">
+            <nz-option [nzValue]="true" nzLabel="All" i18n-nzLabel="@@iam.team.details.all-policies"></nz-option>
+            <nz-option [nzValue]="false" nzLabel="Affected to current member" i18n-nzLabel="@@iam.team.details.current-policies"></nz-option>
+          </nz-select>
+        </div>
       </div>
-      <nz-select class="policy-filter nz-select-40 rounded filter" [(ngModel)]="filter.getAllPolicies" (ngModelChange)="doSearch(true)">
-        <nz-option [nzValue]="true" nzLabel="All" i18n-nzLabel="@@iam.team.details.all-policies"></nz-option>
-        <nz-option [nzValue]="false" nzLabel="Affected to current member" i18n-nzLabel="@@iam.team.details.current-policies"></nz-option>
-      </nz-select>
     </div>
     <div class="table-wrapper">
       <nz-table #table nzSize="small"

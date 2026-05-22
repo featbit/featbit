@@ -13,13 +13,15 @@
       <nz-tab i18n-nzTitle="@@common.feature-flag" nzTitle="Feature Flag">
         <div class="table-content-area">
           <div class="table-search-area">
-            <div class="search-inputs">
-              <nz-input-group [nzPrefix]="prefixIconSearch">
-                <input nz-input type="text" placeholder="Filter by name or keyName" i18n-placeholder="@@users.idx.filter-by-name-or-keyname" [(ngModel)]="flagFilter.searchText" (ngModelChange)="doSearchFlags(true)">
-              </nz-input-group>
-              <ng-template #prefixIconSearch>
-                <i nz-icon nzType="icons:icon-search"></i>
-              </ng-template>
+            <div class="search-toolbar">
+              <div class="left-filters">
+                <nz-input-group [nzPrefix]="prefixIconSearch" class="main-search">
+                  <input nz-input type="text" placeholder="Filter by name or key" i18n-placeholder="@@users.idx.filter-by-name-or-key" [(ngModel)]="flagFilter.searchText" (ngModelChange)="doSearchFlags(true)">
+                </nz-input-group>
+                <ng-template #prefixIconSearch>
+                  <i nz-icon nzType="icons:icon-search"></i>
+                </ng-template>
+              </div>
             </div>
           </div>
           <div class="table-wrapper">
@@ -69,13 +71,15 @@
       <nz-tab i18n-nzTitle="@@common.segments" nzTitle="Segments">
         <div class="table-content-area">
           <div class="table-search-area">
-            <div class="search-inputs">
-              <nz-input-group [nzPrefix]="prefixIconSearch">
-                <input nz-input type="text" placeholder="Filter by name" i18n-placeholder="@@common.filter-by-name" [(ngModel)]="segmentFilter" (ngModelChange)="filterSegments()">
-              </nz-input-group>
-              <ng-template #prefixIconSearch>
-                <i nz-icon nzType="icons:icon-search"></i>
-              </ng-template>
+            <div class="search-toolbar">
+              <div class="left-filters">
+                <nz-input-group [nzPrefix]="prefixIconSearch" class="main-search">
+                  <input nz-input type="text" placeholder="Filter by name" i18n-placeholder="@@common.filter-by-name" [(ngModel)]="segmentFilter" (ngModelChange)="filterSegments()">
+                </nz-input-group>
+                <ng-template #prefixIconSearch>
+                  <i nz-icon nzType="icons:icon-search"></i>
+                </ng-template>
+              </div>
             </div>
           </div>
           <div class="table-wrapper">

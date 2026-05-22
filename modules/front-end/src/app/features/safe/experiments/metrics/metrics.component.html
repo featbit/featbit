@@ -1,23 +1,26 @@
 <div class="body-container">
   <div class="table-content-area">
     <div class="table-search-area">
-      <div class="search-inputs">
-        <nz-input-group [nzPrefix]="prefixIconSearch">
-          <input nz-input type="text" placeholder="Filter by name" i18n-placeholder="@@common.filter-by-name" [(ngModel)]="filter.metricName" (ngModelChange)="onSearch()">
-        </nz-input-group>
-        <ng-template #prefixIconSearch>
-          <i nz-icon nzType="icons:icon-search"></i>
-        </ng-template>
-        <nz-select class="nz-select-40 rounded filter" [(ngModel)]="filter.eventType" (ngModelChange)="onSearch()">
-          <nz-option [nzValue]="EventType.All" i18n-nzLabel="@@common.all" nzLabel="All"></nz-option>
-          <nz-option [nzValue]="customEventType" i18n-nzLabel="@@expt.metric.custom-event-metric" nzLabel="Custom event"></nz-option>
-        </nz-select>
+      <div class="search-toolbar">
+        <div class="left-filters">
+          <nz-input-group [nzPrefix]="prefixIconSearch" class="main-search">
+            <input nz-input type="text" placeholder="Filter by name" i18n-placeholder="@@common.filter-by-name" [(ngModel)]="filter.metricName" (ngModelChange)="onSearch()">
+          </nz-input-group>
+          <ng-template #prefixIconSearch>
+            <i nz-icon nzType="icons:icon-search"></i>
+          </ng-template>
+          <nz-select class="nz-select-36 rounded filter" [(ngModel)]="filter.eventType" (ngModelChange)="onSearch()">
+            <nz-option [nzValue]="EventType.All" i18n-nzLabel="@@common.all" nzLabel="All"></nz-option>
+            <nz-option [nzValue]="customEventType" i18n-nzLabel="@@expt.metric.custom-event-metric" nzLabel="Custom event"></nz-option>
+          </nz-select>
+        </div>
+        <div class="right-actions">
+          <button class="btn-primary" nz-button nzType="primary" (click)="onCreateOrEditClick()">
+            <i nz-icon nzType="icons:icon-add"></i>
+            <ng-container i18n="@@expt.metric.add-metric">Add Metric</ng-container>
+          </button>
+        </div>
       </div>
-
-      <button nz-button nzType="primary" (click)="onCreateOrEditClick()">
-        <i nz-icon nzType="icons:icon-add"></i>
-        <ng-container i18n="@@expt.metric.add-metric">Add Metric</ng-container>
-      </button>
     </div>
 
     <div class="table-wrapper">

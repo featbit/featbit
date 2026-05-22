@@ -1,50 +1,55 @@
 <div class="table-content-area">
   <div class="table-search-area">
-    <div class="search-inputs">
-      <nz-input-group [nzPrefix]="prefixIconSearch">
-        <input nz-input [(ngModel)]="filter.name" (ngModelChange)="doSearch()" type="text" placeholder="Filter by name" i18n-placeholder="@@common.filter-by-name">
-      </nz-input-group>
-      <ng-template #prefixIconSearch>
-        <i nz-icon nzType="icons:icon-search"></i>
-      </ng-template>
-      <nz-select
-        class="nz-select-40 rounded filter"
-        nzShowSearch
-        nzAllowClear
-        [(ngModel)]="filter.projectId"
-        (ngModelChange)="onSelectProject($event)"
-        i18n-nzPlaceHolder="@@common.filter-by-project"
-        nzPlaceHolder="Filter by project">
-        @if (isProjectsLoading) {
-          <nz-option nzDisabled nzCustomContent>
-            <i nz-icon nzType="loading" class="loading-icon"></i>
-            <ng-container i18n="@@common.loading">Loading...</ng-container>
-          </nz-option>
-        } @else {
-          @for (project of projects; track project.id) {
-            <nz-option [nzValue]="project.id" [nzLabel]="project.name"></nz-option>
-          }
-        }
-      </nz-select>
-      @if (filter.projectId) {
+    <div class="search-toolbar">
+      <div class="left-filters">
+        <nz-input-group [nzPrefix]="prefixIconSearch" class="main-search">
+          <input nz-input [(ngModel)]="filter.name" (ngModelChange)="doSearch()" type="text" placeholder="Filter by name" i18n-placeholder="@@common.filter-by-name">
+        </nz-input-group>
+        <ng-template #prefixIconSearch>
+          <i nz-icon nzType="icons:icon-search"></i>
+        </ng-template>
         <nz-select
-          class="nz-select-40 rounded filter"
+          class="nz-select-36 rounded filter"
           nzShowSearch
           nzAllowClear
-          [(ngModel)]="filter.envId"
-          (ngModelChange)="doSearch()"
-          i18n-nzPlaceHolder="@@common.filter-by-enviroment"
-          nzPlaceHolder="Filter by environment">
-          @for (env of projectEnvs; track env.id) {
-            <nz-option [nzValue]="env.id" [nzLabel]="env.name"></nz-option>
+          [(ngModel)]="filter.projectId"
+          (ngModelChange)="onSelectProject($event)"
+          i18n-nzPlaceHolder="@@common.filter-by-project"
+          nzPlaceHolder="Filter by project">
+          @if (isProjectsLoading) {
+            <nz-option nzDisabled nzCustomContent>
+              <i nz-icon nzType="loading" class="loading-icon"></i>
+              <ng-container i18n="@@common.loading">Loading...</ng-container>
+            </nz-option>
+          } @else {
+            @for (project of projects; track project.id) {
+              <nz-option [nzValue]="project.id" [nzLabel]="project.name"></nz-option>
+            }
           }
         </nz-select>
-      }
+        @if (filter.projectId) {
+          <nz-select
+            class="nz-select-36 rounded filter"
+            style="width: 200px"
+            nzShowSearch
+            nzAllowClear
+            [(ngModel)]="filter.envId"
+            (ngModelChange)="doSearch()"
+            i18n-nzPlaceHolder="@@common.filter-by-enviroment"
+            nzPlaceHolder="Filter by environment">
+            @for (env of projectEnvs; track env.id) {
+              <nz-option [nzValue]="env.id" [nzLabel]="env.name"></nz-option>
+            }
+          </nz-select>
+        }
+      </div>
+      <div class="right-actions">
+        <button class="btn-primary" nz-button nzType="primary" (click)="openDrawer(undefined)">
+          <i nz-icon nzType="icons:icon-add"></i>
+          <ng-container i18n="@@common.add">Add</ng-container>
+        </button>
+      </div>
     </div>
-    <button nz-button nzType="primary" (click)="openDrawer(undefined)">
-      <i nz-icon nzType="icons:icon-add"></i>
-      <ng-container i18n="@@common.add">Add</ng-container>
-    </button>
   </div>
 
   <div class="table-wrapper">

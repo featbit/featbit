@@ -32,6 +32,7 @@ import { WorkspaceComponent } from "@features/safe/workspaces/workspace/workspac
 import { LicenseComponent } from './license/license.component';
 import { NzAlertComponent } from "ng-zorro-antd/alert";
 import { GlobalUserComponent } from "@features/safe/workspaces/global-user/global-user.component";
+import { DashedMultiSelectComponent } from "@core/components/table/dashed-multi-select/dashed-multi-select.component";
 import { UsageComponent } from "@features/safe/workspaces/usage/usage.component";
 import { BillingComponent } from './billing/billing.component';
 import { BillingInformationComponent } from "./billing/billing-information/billing-information.component";
@@ -79,7 +80,8 @@ import { CheckoutReturnComponent } from "./billing/checkout-return/checkout-retu
     ReactiveFormsModule,
     WorkspacesRoutingModule,
     NzToolTipModule,
-    NzAlertComponent
+    NzAlertComponent,
+    DashedMultiSelectComponent
   ]
 })
 export class WorkspacesModule { }

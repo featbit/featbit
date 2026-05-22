@@ -134,6 +134,11 @@ export class IndexComponent implements OnInit {
 
   segmentFilter: SegmentListFilter = new SegmentListFilter();
 
+  toggleArchiveFilter() {
+    this.segmentFilter.isArchived = !this.segmentFilter.isArchived;
+    this.onSearch(true);
+  }
+
   $search: Subject<void> = new Subject();
 
   onSearch(resetPage?: boolean) {

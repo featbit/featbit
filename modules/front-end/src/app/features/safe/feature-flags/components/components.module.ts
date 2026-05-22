@@ -23,42 +23,40 @@ import { NzTabsModule } from "ng-zorro-antd/tabs";
 import { NzSwitchModule } from "ng-zorro-antd/switch";
 import { NzCollapseModule } from "ng-zorro-antd/collapse";
 import { NzSkeletonModule } from "ng-zorro-antd/skeleton";
-import {CoreModule} from "@core/core.module";
-
+import { PipesModule } from '@core/pipes/pipes.module';
 
 @NgModule({
   declarations: [
-    FlagTriggersComponent,
+    FlagTriggersComponent
   ],
-    imports: [
-        CommonModule,
-        FormsModule,
-        NzButtonModule,
-        NzIconModule,
-        NzInputModule,
-        NzSelectModule,
-        NzSliderModule,
-        NzPaginationModule,
-        NzPopconfirmModule,
-        NzCardModule,
-        NzDropDownModule,
-        NzAvatarModule,
-        NzTagModule,
-        NzModalModule,
-        NzTypographyModule,
-        NzDividerModule,
-        NzSpinModule,
-        NzToolTipModule,
-        NzTabsModule,
-        NzSwitchModule,
-        NzTableModule,
-        NzCollapseModule,
-        NzSkeletonModule,
-        CoreModule
-    ],
-  exports: [
+  imports: [
     CommonModule,
-    FlagTriggersComponent,
+    PipesModule,
+    FormsModule,
+    NzButtonModule,
+    NzIconModule,
+    NzInputModule,
+    NzSelectModule,
+    NzSliderModule,
+    NzPaginationModule,
+    NzPopconfirmModule,
+    NzCardModule,
+    NzDropDownModule,
+    NzAvatarModule,
+    NzTagModule,
+    NzModalModule,
+    NzTypographyModule,
+    NzDividerModule,
+    NzSpinModule,
+    NzToolTipModule,
+    NzTabsModule,
+    NzSwitchModule,
+    NzTableModule,
+    NzCollapseModule,
+    NzSkeletonModule
+  ],
+  exports: [
+    FlagTriggersComponent
   ]
 })
 export class ComponentsModule { }

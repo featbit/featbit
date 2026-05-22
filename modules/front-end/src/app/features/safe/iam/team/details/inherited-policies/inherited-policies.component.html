@@ -1,12 +1,16 @@
 <section class="body-container">
   <div class="table-content-area">
     <div class="table-search-area">
-      <nz-input-group [nzPrefix]="prefixIconSearch" style="width: 300px">
-        <input class="search-input" nz-input type="text" placeholder="Filter by policy name" i18n-placeholder="@@iam.team.details.ip-filter-placeholder" [(ngModel)]="filter.name" (ngModelChange)="doSearch(false,true)">
-      </nz-input-group>
-      <ng-template #prefixIconSearch>
-        <i nz-icon nzType="icons:icon-search"></i>
-      </ng-template>
+      <div class="search-toolbar">
+        <div class="left-filters">
+          <nz-input-group [nzPrefix]="prefixIconSearch" class="main-search single">
+            <input nz-input type="text" placeholder="Filter by policy name" i18n-placeholder="@@iam.team.details.ip-filter-placeholder" [(ngModel)]="filter.name" (ngModelChange)="doSearch(false,true)">
+          </nz-input-group>
+          <ng-template #prefixIconSearch>
+            <i nz-icon nzType="icons:icon-search"></i>
+          </ng-template>
+        </div>
+      </div>
     </div>
     <div class="table-wrapper">
       <nz-table #table2 nzSize="small"

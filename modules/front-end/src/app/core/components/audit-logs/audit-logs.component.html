@@ -1,47 +1,50 @@
 <section class="body-container" [ngStyle]="{'padding-left': isEmbedded === true ? '24px' : '0'}">
   <div class="table-content-area">
     <div class="table-search-area">
-      <div class="search-inputs">
-        <nz-input-group [nzPrefix]="prefixIconSearch">
-          <input nz-input type="text" placeholder="Filter by name, comment" i18n-placeholder="@@ff.history.filter-by" [(ngModel)]="auditLogFilter.query" (ngModelChange)="onSearch(true)">
-        </nz-input-group>
-        <ng-template #prefixIconSearch>
-          <i nz-icon nzType="icons:icon-search"></i>
-        </ng-template>
-        <nz-select
-          class="nz-select-40 rounded filter"
-          nzShowSearch
-          nzServerSearch
-          nzAllowClear
-          [(ngModel)]="auditLogFilter.creatorId"
-          (nzOnSearch)="onMemberSearch($event)"
-          (ngModelChange)="onSearch(true)"
-          i18n-nzPlaceHolder="@@auditlogs.idx.filter-by-team-member"
-          nzPlaceHolder="Filter by team member">
-          @if (membersLoading) {
-            <nz-option nzDisabled nzCustomContent>
-              <i nz-icon nzType="loading" class="loading-icon"></i>
-              <ng-container i18n="@@common.loading">Loading...</ng-container>
-            </nz-option>
-          } @else {
-            @for (member of memberListModel.items; track member.id) {
-              <nz-option [nzValue]="member.id" [nzLabel]="getMemberLabel(member)"></nz-option>
-            }
-          }
-        </nz-select>
-        @if (!auditLogFilter?.refId) {
+      <div class="search-toolbar">
+        <div class="left-filters">
+          <nz-input-group [nzPrefix]="prefixIconSearch" class="main-search">
+            <input nz-input type="text" placeholder="Filter by name, comment" i18n-placeholder="@@ff.history.filter-by" [(ngModel)]="auditLogFilter.query" (ngModelChange)="onSearch(true)">
+          </nz-input-group>
+          <ng-template #prefixIconSearch>
+            <i nz-icon nzType="icons:icon-search"></i>
+          </ng-template>
           <nz-select
-            class="nz-select-40 rounded filter"
+            class="nz-select-36 rounded filter"
+            style="width: 200px"
+            nzShowSearch
+            nzServerSearch
             nzAllowClear
-            [(ngModel)]="auditLogFilter.refType"
+            [(ngModel)]="auditLogFilter.creatorId"
+            (nzOnSearch)="onMemberSearch($event)"
             (ngModelChange)="onSearch(true)"
-            i18n-nzPlaceHolder="@@ff.idx.filter-by-type"
-            nzPlaceHolder="Filter by type">
-            <nz-option [nzValue]="refTypeFlag" i18n-nzLabel="@@auditlogs.idx.ref-type-flag" nzLabel="Feature flag"></nz-option>
-            <nz-option [nzValue]="refTypeSegment" i18n-nzLabel="@@auditlogs.idx.ref-type-segment" nzLabel="Segment"></nz-option>
+            i18n-nzPlaceHolder="@@auditlogs.idx.filter-by-team-member"
+            nzPlaceHolder="Filter by team member">
+            @if (membersLoading) {
+              <nz-option nzDisabled nzCustomContent>
+                <i nz-icon nzType="loading" class="loading-icon"></i>
+                <ng-container i18n="@@common.loading">Loading...</ng-container>
+              </nz-option>
+            } @else {
+              @for (member of memberListModel.items; track member.id) {
+                <nz-option [nzValue]="member.id" [nzLabel]="getMemberLabel(member)"></nz-option>
+              }
+            }
           </nz-select>
-        }
-        <nz-range-picker [(ngModel)]="auditLogFilter.range" (ngModelChange)="onDateRangeChange()"></nz-range-picker>
+          @if (!auditLogFilter?.refId) {
+            <nz-select
+              class="nz-select-36 rounded filter"
+              nzAllowClear
+              [(ngModel)]="auditLogFilter.refType"
+              (ngModelChange)="onSearch(true)"
+              i18n-nzPlaceHolder="@@ff.idx.filter-by-type"
+              nzPlaceHolder="Filter by type">
+              <nz-option [nzValue]="refTypeFlag" i18n-nzLabel="@@auditlogs.idx.ref-type-flag" nzLabel="Feature flag"></nz-option>
+              <nz-option [nzValue]="refTypeSegment" i18n-nzLabel="@@auditlogs.idx.ref-type-segment" nzLabel="Segment"></nz-option>
+            </nz-select>
+          }
+          <nz-range-picker [(ngModel)]="auditLogFilter.range" (ngModelChange)="onDateRangeChange()"></nz-range-picker>
+        </div>
       </div>
     </div>
 
