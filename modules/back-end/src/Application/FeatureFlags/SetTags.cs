@@ -6,10 +6,19 @@ namespace Application.FeatureFlags;
 
 public class SetTags : ResourceChangeRequest, IRequest<bool>
 {
+    /// <summary>
+    /// The ID of the environment the feature flag belongs to. Retrieved from the URL path.
+    /// </summary>
     public Guid EnvId { get; set; }
 
+    /// <summary>
+    /// The unique key of the feature flag. Retrieved from the URL path.
+    /// </summary>
     public string Key { get; set; }
 
+    /// <summary>
+    /// The collection of tags to set for the feature flag. Tags are used for categorization and filtering of feature flags.
+    /// </summary>
     public string[] Tags { get; set; }
 }
 

@@ -5,8 +5,14 @@ namespace Application.Segments;
 
 public class SetTags : IRequest<bool>
 {
+    /// <summary>
+    /// The ID of the segment to set tags for. Retrieved from the URL path.
+    /// </summary>
     public Guid Id { get; set; }
 
+    /// <summary>
+    /// The collection of tags to set for the segment. Tags are used for categorization and filtering of segments.
+    /// </summary>
     public string[] Tags { get; set; }
 }
 
