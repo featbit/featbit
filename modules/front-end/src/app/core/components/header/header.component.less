@@ -385,3 +385,40 @@ i:hover {
     align-items: center;
   }
 }
+
+@media (max-width: 1080px) {
+  .header-btns {
+    .license-badge {
+      padding: 6px 8px;
+      gap: 0;
+      margin-right: 8px;
+
+      .badge-content,
+      .badge-arrow {
+        display: none;
+      }
+    }
+  }
+
+  .workspace-selector {
+    padding: 4px 6px;
+    gap: 4px;
+
+    .selector-items {
+      gap: 4px;
+    }
+
+    .selector-divider {
+      display: none;
+    }
+
+    .selector-item {
+      padding: 6px;
+      gap: 0;
+
+      .item-content {
+        display: none;
+      }
+    }
+  }
+}

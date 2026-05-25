@@ -47,58 +47,29 @@
 } @else {
   <div class="table-content-area">
     <div class="table-search-area">
-      <nz-input-group [nzPrefix]="prefixIconSearch">
-        <input
-          type="text"
-          nz-input
-          [(ngModel)]="filter.name"
-          (ngModelChange)="doSearch()"
-          placeholder="Filter flags by name or key"
-          i18n-placeholder="@@ff.filter-by-name-and-key"
-        />
-        <ng-template #prefixIconSearch>
-          <i nz-icon nzType="search"></i>
-        </ng-template>
-      </nz-input-group>
-      <button
-        nzType="text"
-        nz-button
-        nzTrigger="click"
-        nz-dropdown
-        nzClickHide="false"
-        nzOverlayClassName="select-tags-dropdown"
-        (nzVisibleChange)="onSelectTags($event)"
-        [nzDropdownMenu]="tags">
-        <span i18n="@@common.tags">Tags</span>:&nbsp;{{ getSelectedTagsLabel() }}
-        <nz-icon nzType="down" />
-      </button>
-      <nz-dropdown-menu #tags>
-        <div class="tags-filter-input">
-          <nz-input-group [nzPrefix]="tagSearchIcon" nzSize="small">
+      <div class="search-toolbar">
+        <div class="left-filters">
+          <nz-input-group [nzPrefix]="prefixIconSearch" class="main-search">
             <input
               type="text"
               nz-input
-              [(ngModel)]="tagSearchText"
-              placeholder="Search tags..."
-              i18n-placeholder="@@ff.compare.search-tags"
-            />
-            <ng-template #tagSearchIcon>
-              <i nz-icon nzType="search"></i>
-            </ng-template>
+              placeholder="Filter flags by name or key"
+              i18n-placeholder="@@ff.filter-by-name-and-key"
+              [(ngModel)]="filter.name"
+              (ngModelChange)="doSearch()">
           </nz-input-group>
+          <ng-template #prefixIconSearch>
+            <i nz-icon nzType="icons:icon-search"></i>
+          </ng-template>
+          <dashed-multi-select
+            label="Tags"
+            i18n-label="@@common.tags"
+            [options]="tags"
+            [isLoading]="isLoadingTags"
+            (optionsChange)="onTagsChange($event)">
+          </dashed-multi-select>
         </div>
-        <ul nz-menu class="tags-menu-list">
-          @if (filteredTags.length === 0) {
-            <li class="no-tags-found">No tags found</li>
-          }
-          @for (tag of filteredTags; track tag) {
-            <li nz-menu-item (click)="tag.selected = !tag.selected">
-              <label nz-checkbox [(ngModel)]="tag.selected"></label>
-              {{ tag.name }}
-            </li>
-          }
-        </ul>
-      </nz-dropdown-menu>
+      </div>
     </div>
     <div class="table-wrapper">
         <nz-table

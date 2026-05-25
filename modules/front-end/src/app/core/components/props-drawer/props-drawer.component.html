@@ -2,8 +2,8 @@
   nzClosable="false"
   [nzExtra]="extra"
   nzPlacement="right"
-  i18n-nzTitle="@@users.idx.customized-user-properties"
-  nzTitle="End user properties"
+  i18n-nzTitle="@@users.idx.user-properties"
+  nzTitle="User Properties"
   [nzBodyStyle]="{'padding-top': '12px'}"
   [nzWidth]="850"
   [nzVisible]="visible"
@@ -11,19 +11,28 @@
   <ng-container *nzDrawerContent>
     <div class="table-content-area">
       <div class="table-search-area">
-        <div class="search-inputs">
-          <nz-input-group [nzPrefix]="prefixIconSearch">
-            <input nz-input type="text" placeholder="Filter by name" i18n-placeholder="@@common.filter-by-name" [(ngModel)]="propSearchText" (ngModelChange)="searchProp()">
-          </nz-input-group>
-          <ng-template #prefixIconSearch>
-            <i nz-icon nzType="icons:icon-search"></i>
-          </ng-template>
+        <div class="search-toolbar">
+          <div class="left-filters">
+            <nz-input-group [nzPrefix]="prefixIconSearch" class="main-search">
+              <input
+                nz-input
+                type="text"
+                placeholder="Filter by name"
+                i18n-placeholder="@@common.filter-by-name"
+                [(ngModel)]="propSearchText"
+                (ngModelChange)="searchProp()">
+            </nz-input-group>
+            <ng-template #prefixIconSearch>
+              <i nz-icon nzType="icons:icon-search"></i>
+            </ng-template>
+          </div>
+          <div class="right-actions">
+            <button class="btn-primary" nz-button nzType="primary" (click)="newProp()">
+              <i nz-icon nzType="icons:icon-add"></i>
+              <ng-container i18n="@@common.add">Add</ng-container>
+            </button>
+          </div>
         </div>
-
-        <button class="standard-btn" nz-button nzType="primary" (click)="newProp()">
-          <i nz-icon nzType="icons:icon-add"></i>
-          <ng-container i18n="@@common.add">Add</ng-container>
-        </button>
       </div>
       <div class="table-wrapper">
         <nz-table #propTable

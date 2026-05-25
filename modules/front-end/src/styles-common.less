@@ -23,6 +23,7 @@
 @import "styles/nz-dropdown.less";
 @import "styles/nz-table.less";
 @import "styles/nz-skeleton.less";
+@import "styles/nz-popover.less";
 
 @import "variables";
 
@@ -74,7 +75,7 @@ app-root {
 /* width */
 ::-webkit-scrollbar {
   width: 14px;
-  height: 8px;
+  height: 14px;
 }
 
 /* Track */
@@ -155,48 +156,6 @@ app-root {
 // multiple select placeholder
 .ant-select-multiple .ant-select-selection-placeholder {
   top: 40%;
-}
-
-// table style
-.table-content-area {
-  width: 100%;
-  border-radius: 20px;
-  background-color: @grey5-color;
-
-  .table-search-area {
-    margin-bottom: 26px;
-    padding: 44px 24px 0 24px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 40px;
-    border-radius: 20px;
-
-    .search-inputs {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      gap: 16px;
-    }
-
-    // input group
-    nz-input-group {
-      width: 200px;
-      height: 40px;
-      border-radius: 32px;
-      padding-left: 15px;
-
-      i {
-        font-size: 20px;
-        color: @grey40-color;
-      }
-    }
-
-    // primary button
-    .ant-btn-primary {
-      .standard-btn;
-    }
-  }
 }
 
 // login tab style
@@ -367,133 +326,6 @@ app-root {
 // custom radio
 .ant-radio-inner {
   border-width: 2px;
-}
-
-// custom popover
-.ant-popover-inner {
-  border-radius: 10px;
-  box-shadow: 0 4px 12px 0 rgba(217, 217, 217, 0.5);
-
-  .ant-popover-buttons .ant-btn-sm {
-    border-radius: 20px;
-    padding: 0 12px;
-  }
-}
-
-// more selected items popover, for [nzMaxTagPlaceholder]
-.selected-items-popover {
-  padding-bottom: 12px;
-
-  .ant-popover-title {
-    font-size: 14px;
-    line-height: 150%;
-    color: @grey90-color;
-    border: none;
-    padding: 8px 16px;
-  }
-
-  .ant-popover-inner-content {
-    max-height: 120px;
-    padding: 4px 16px 8px 16px;
-    overflow-y: auto;
-
-    .more-select-items {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      width: 306px;
-
-      .more-select-item-content {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        background: #f5f5f5;
-        border: 1px solid @grey0-color;
-        border-radius: 2px;
-        padding: 0 4px;
-
-        width: 98px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-
-        .more-select-item-content-text {
-          width: 80px;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-
-        i {
-          background-color: rgba(0, 0, 0, 0);
-          font-size: 10px;
-          cursor: pointer;
-          color: @grey40-color;
-        }
-      }
-    }
-  }
-
-  .ant-popover-arrow {
-    width: 10px;
-    height: 10px;
-  }
-
-  .ant-popover-arrow-content {
-    width: 10px;
-    height: 10px;
-    transform: translateY(-6px) rotate(45deg);
-  }
-}
-
-// env secrets popover style
-.env-secret-popover, .license-data-popover {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 300px;
-  background-color: transparent;
-
-  .ant-popover-title {
-    min-width: 177px;
-    min-height: 40px;
-    margin: 0;
-    padding: 10px 16px 4px;
-    color: rgba(0, 0, 0, 0.85);
-    font-weight: 600;
-    border-bottom: 1px solid @grey0-color;
-  }
-
-  .ant-popover-content {
-    border-radius: 24px;
-    padding-right: 10px;
-
-    .ant-popover-inner {
-      border-radius: 10px;
-      border: 2px solid #bfd0e321;
-      box-shadow: 0 4px 12px 0 rgb(217 217 217 / 0%);
-
-      .ant-popover-inner-content {
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-      }
-    }
-
-    .env-secret-popover-content {
-      cursor: pointer;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-
-      .copy-icon {
-        font-size: 14px;
-      }
-    }
-
-    .env-secret-popover-content:hover {
-      color: @green70-color;
-    }
-  }
 }
 
 // custom notification

@@ -1,12 +1,14 @@
 <div class="table-content-area">
   <div class="table-search-area">
-    <div class="search-inputs">
-      <nz-input-group style="width: 300px" [nzPrefix]="prefixIconSearch">
-        <input  nz-input type="text" i18n-placeholder="@@users.details.filter-by-property-name-or-value" placeholder="Filter by property name or value" [(ngModel)]="searchValue" (ngModelChange)="onSearch()">
-      </nz-input-group>
-      <ng-template #prefixIconSearch>
-        <i nz-icon nzType="icons:icon-search"></i>
-      </ng-template>
+    <div class="search-toolbar">
+      <div class="left-filters">
+        <nz-input-group [nzPrefix]="prefixIconSearch" class="main-search">
+          <input  nz-input type="text" i18n-placeholder="@@users.details.filter-by-property-name-or-value" placeholder="Filter by property name or value" [(ngModel)]="searchValue" (ngModelChange)="onSearch()">
+        </nz-input-group>
+        <ng-template #prefixIconSearch>
+          <i nz-icon nzType="icons:icon-search"></i>
+        </ng-template>
+      </div>
     </div>
   </div>
   <div class="table-wrapper">

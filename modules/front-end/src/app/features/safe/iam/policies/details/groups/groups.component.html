@@ -1,16 +1,20 @@
 <section class="body-container">
   <div class="table-content-area">
     <div class="table-search-area">
-      <nz-input-group [nzPrefix]="prefixIconSearch" style="width: 300px">
-        <input class="search-input" nz-input type="text" placeholder="Filter by group name" i18n-placeholder="@@iam.policies.details.group-filter-placeholder" [(ngModel)]="filter.name" (ngModelChange)="doSearch(true)">
-      </nz-input-group>
-      <ng-template #prefixIconSearch>
-        <i nz-icon nzType="icons:icon-search"></i>
-      </ng-template>
-      <nz-select class="group-filter nz-select-40 rounded filter" [(ngModel)]="filter.getAllGroups" (ngModelChange)="doSearch(true)">
-        <nz-option [nzValue]="true" nzLabel="All" i18n-nzLabel="@@iam.policies.details.all-groups"></nz-option>
-        <nz-option [nzValue]="false" nzLabel="Groups with current policy" i18n-nzLabel="@@iam.policies.details.current-groups"></nz-option>
-      </nz-select>
+      <div class="search-toolbar">
+        <div class="left-filters">
+          <nz-input-group [nzPrefix]="prefixIconSearch" class="main-search">
+            <input nz-input type="text" placeholder="Filter by group name" i18n-placeholder="@@iam.policies.details.group-filter-placeholder" [(ngModel)]="filter.name" (ngModelChange)="doSearch(true)">
+          </nz-input-group>
+          <ng-template #prefixIconSearch>
+            <i nz-icon nzType="icons:icon-search"></i>
+          </ng-template>
+          <nz-select class="group-filter nz-select-36 rounded filter" [(ngModel)]="filter.getAllGroups" (ngModelChange)="doSearch(true)">
+            <nz-option [nzValue]="true" nzLabel="All" i18n-nzLabel="@@iam.policies.details.all-groups"></nz-option>
+            <nz-option [nzValue]="false" nzLabel="Groups with current policy" i18n-nzLabel="@@iam.policies.details.current-groups"></nz-option>
+          </nz-select>
+        </div>
+      </div>
     </div>
     <div class="table-wrapper">
       <nz-table #table nzSize="small"

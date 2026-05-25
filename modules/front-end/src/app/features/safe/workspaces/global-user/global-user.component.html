@@ -1,89 +1,83 @@
 <div class="table-content-area">
   <div class="table-search-area">
-    <div class="search-inputs">
-      <nz-input-group class="query" [nzPrefix]="prefixIconSearch">
-        <input
-          nz-input
-          placeholder="Search by name"
-          i18n-placeholder="@@common.search-by-name"
-          [(ngModel)]="filter.name"
-          (ngModelChange)="onSearch(true)">
+    <div class="search-toolbar">
+      <div class="left-filters">
+        <nz-input-group [nzPrefix]="prefixIconSearch" class="main-search">
+          <input
+            nz-input
+            placeholder="Search by name"
+            i18n-placeholder="@@common.search-by-name"
+            [(ngModel)]="filter.name"
+            (ngModelChange)="onSearch(true)">
         </nz-input-group>
         <ng-template #prefixIconSearch>
           <i nz-icon nzType="icons:icon-search"></i>
         </ng-template>
-        <nz-select
-          class="nz-select-40 rounded filter"
-          nzMode="multiple"
-          i18n-nzPlaceHolder="@@users.idx.select-columns-to-add"
-          nzPlaceHolder="Add columns"
-          [nzShowArrow]="true"
-          [(ngModel)]="extraShowedColumns"
-          [nzMaxTagCount]="1"
-          [nzMaxTagPlaceholder]="morePlaceholder"
-          >
-          @for (item of allExtraColumns; track item) {
-            <nz-option
-              [nzLabel]="item"
-              [nzValue]="item"
-            ></nz-option>
-          }
-          <ng-template #morePlaceholder>
-            and {{ extraShowedColumns.length - 1 }} more
+        <dashed-multi-select
+          [options]="extraColumnOptions"
+          [isLoading]="isLoading"
+          [labelTemplate]="columnSettingLabel"
+          (optionsChange)="onExtraColumnsChange($event)">
+          <ng-template #columnSettingLabel>
+            <i nz-icon nzType="icons:icon-column-setting"></i>
+            <span i18n="@@common.display">Display</span>
           </ng-template>
-        </nz-select>
+        </dashed-multi-select>
       </div>
-      <button class="import-btn" nz-button nzType="primary" nzSize="large" (click)="openImportModal()">
-        <span nz-icon nzType="user-add" nzTheme="outline"></span>
-        <span i18n="@@common.import">Import</span>
-      </button>
-    </div>
-    <div class="table-wrapper">
-      <nz-table
-        #basicTable
-        nzSize="small"
-        nzShowSizeChanger
-        [nzData]="users"
-        [nzFrontPagination]="false"
-        [nzLoading]="isLoading"
-        [nzTotal]="totalCount"
-        [(nzPageSize)]="filter.pageSize"
-        (nzPageSizeChange)="onSearch()"
-        [nzPageSizeOptions]="[10,20,30]"
-        (nzPageIndexChange)="onSearch()"
-        [(nzPageIndex)]="filter.pageIndex">
-        <thead>
-          <tr>
-            <th>keyId</th>
-            <th i18n="@@common.name">Name</th>
-            @for (prop of extraShowedColumns; track prop) {
-              <th>{{prop}}</th>
-            }
-            <th i18n="@@common.actions">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (user of basicTable.data; track user) {
-            <tr>
-              <td>{{ user.keyId }}</td>
-              <td>
-                <span>{{ user.name }}</span>
-              </td>
-              @for (prop of extraShowedColumns; track prop) {
-                <td>{{getCustomizePropertyValue(user, prop)}}</td>
-              }
-              <td>
-                <a class="primary-link-btn" i18n="@@users.idx.ff-segments" (click)="openEvaluationDrawer(user)">Evaluate on flags and segments</a>
-                <nz-divider nzType="vertical"></nz-divider>
-                <a class="primary-link-btn" nz-button nzType="link" i18n="@@common.details" (click)="openEndUserDrawer(user)">Details</a>
-              </td>
-            </tr>
-          }
-        </tbody>
-      </nz-table>
+      <div class="right-actions">
+        <button class="btn-primary" nz-button nzType="primary" (click)="openImportModal()">
+          <span nz-icon nzType="user-add" nzTheme="outline"></span>
+          <span i18n="@@common.import">Import</span>
+        </button>
+      </div>
     </div>
   </div>
+  <div class="table-wrapper">
+    <nz-table
+      #basicTable
+      nzSize="small"
+      nzShowSizeChanger
+      [nzData]="users"
+      [nzFrontPagination]="false"
+      [nzLoading]="isLoading"
+      [nzTotal]="totalCount"
+      [(nzPageSize)]="filter.pageSize"
+      (nzPageSizeChange)="onSearch()"
+      [nzPageSizeOptions]="[10,20,30]"
+      (nzPageIndexChange)="onSearch()"
+      [(nzPageIndex)]="filter.pageIndex">
+      <thead>
+        <tr>
+          <th>keyId</th>
+          <th i18n="@@common.name">Name</th>
+          @for (prop of selectedExtraColumns; track prop) {
+            <th>{{prop}}</th>
+          }
+          <th i18n="@@common.actions">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (user of basicTable.data; track user) {
+          <tr>
+            <td>{{ user.keyId }}</td>
+            <td>
+              <span>{{ user.name }}</span>
+            </td>
+            @for (prop of selectedExtraColumns; track prop) {
+              <td>{{getCustomizePropertyValue(user, prop)}}</td>
+            }
+            <td>
+              <a class="primary-link-btn" i18n="@@users.idx.ff-segments" (click)="openEvaluationDrawer(user)">Evaluate on flags and segments</a>
+              <nz-divider nzType="vertical"></nz-divider>
+              <a class="primary-link-btn" nz-button nzType="link" i18n="@@common.details" (click)="openEndUserDrawer(user)">Details</a>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </nz-table>
+  </div>
+</div>
 
-  <import-user [isVisible]="importModalVisible" (close)="closeImportModal($event)"></import-user>
-  <user-segments-flags-drawer [visible]="evaluationDrawerVisible" [user]="selectedUser" (close)="closeEvaluationDrawer()"></user-segments-flags-drawer>
-  <end-user-drawer [isVisible]="endUserDrawerVisible" (close)="closeEndUserDrawer()" [user]="selectedUser"></end-user-drawer>
+<import-user [isVisible]="importModalVisible" (close)="closeImportModal($event)"></import-user>
+<user-segments-flags-drawer [visible]="evaluationDrawerVisible" [user]="selectedUser" (close)="closeEvaluationDrawer()"></user-segments-flags-drawer>
+<end-user-drawer [isVisible]="endUserDrawerVisible" (close)="closeEndUserDrawer()" [user]="selectedUser"></end-user-drawer>

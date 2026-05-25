@@ -22,15 +22,11 @@ import { ProjectService } from "@services/project.service";
 import { getCurrentLicense, getCurrentProjectEnv } from "@utils/project-env";
 import { CompareFlagOverview, CompareFlagOverviews } from "@features/safe/feature-flags/types/compare-flag";
 import { NzAlertComponent } from "ng-zorro-antd/alert";
+import { DashedMultiSelectComponent } from "@core/components/table/dashed-multi-select/dashed-multi-select.component";
 
 type EnvSelectOption = {
   label: string,
   value: string
-}
-
-type SelectableTag = {
-  name: string,
-  selected: boolean
 }
 
 @Component({
@@ -50,7 +46,8 @@ type SelectableTag = {
     NzDropDownModule,
     NzCheckboxModule,
     CoreModule,
-    NzAlertComponent
+    NzAlertComponent,
+    DashedMultiSelectComponent
   ],
   templateUrl: './compare.component.html',
   styleUrl: './compare.component.less'
@@ -102,14 +99,23 @@ export class CompareComponent implements OnInit {
   }
 
   isLoadingTags: boolean = true;
-  availableTags: SelectableTag[] = [];
-  tagSearchText: string = '';
+  tags = [];
   loadTags() {
     this.isLoadingTags = true;
-    this.flagService.getAllTags().subscribe(allTags => {
-      this.availableTags = allTags.map(tagName => ({ name: tagName, selected: false }));
+    this.flagService.getAllTags().subscribe(tags => {
+      this.tags = tags.map(tag => ({
+          label: tag,
+          value: tag,
+          selected: false
+        })
+      );
       this.isLoadingTags = false;
     });
+  }
+
+  onTagsChange(selectedTags: string[]) {
+    this.filter.tags = selectedTags;
+    this.doSearch();
   }
 
   isLoadingEnvs: boolean = true;
@@ -155,30 +161,7 @@ export class CompareComponent implements OnInit {
 
   doSearch() {
     this.filter.pageIndex = 1;
-    this.filter.tags = this.availableTags.filter(x => x.selected).map(x => x.name);
     this.search$.next();
-  }
-
-  get filteredTags(): SelectableTag[] {
-    if (!this.tagSearchText) {
-      return this.availableTags;
-    }
-    const searchLower = this.tagSearchText.toLowerCase();
-    return this.availableTags.filter(tag =>
-      tag.name.toLowerCase().includes(searchLower)
-    );
-  }
-
-  getSelectedTagsLabel(): string {
-    const selectedTags = this.availableTags.filter(tag => tag.selected);
-    if (selectedTags.length === 0) {
-      return $localize`:@@common.any:Any`;
-    }
-
-    if (selectedTags.length === 1) {
-      return selectedTags[0].name;
-    }
-    return `${selectedTags.length} ` + $localize`:@@common.selected:Selected`;
   }
 
   truncateText(text: string, maxLength: number = 80): string {
@@ -215,12 +198,6 @@ export class CompareComponent implements OnInit {
     return count == 1 ?
       `1 ` + $localize`:common.difference:difference` :
       `${count} ` + $localize`:common.differences:differences`;
-  }
-
-  onSelectTags(visible: boolean) {
-    if (visible === false) {
-      this.doSearch();
-    }
   }
 
   compareFlag: {name: string, key: string};

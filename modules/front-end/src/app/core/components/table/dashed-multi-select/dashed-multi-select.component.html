@@ -1,0 +1,56 @@
+<button
+  nzType="dashed"
+  nz-button
+  nz-dropdown
+  nzClickHide="false"
+  nzOverlayClassName="multi-select-dropdown"
+  (nzVisibleChange)="onVisibleChange($event)"
+  [nzDropdownMenu]="optionsMenu">
+  @if (labelTemplate) {
+    <ng-container *ngTemplateOutlet="labelTemplate"></ng-container>
+  } @else {
+    <span>{{ label }}</span>:&nbsp;{{ getSelectedOptionsLabel() }}
+    @if (hasValue) {
+      <i nz-icon nzType="close-circle" (click)="clearOptions($event)"></i>
+    } @else {
+      <i nz-icon nzType="down"></i>
+    }
+  }
+</button>
+<nz-dropdown-menu #optionsMenu>
+  @if (isLoading) {
+    <div class="loading-container">
+      <nz-spin i18n-nzTip="@@common.loading" nzTip="Loading..." [nzSize]="'small'"></nz-spin>
+    </div>
+  } @else {
+    <div class="content-container">
+      <div class="filter">
+        <nz-input-group [nzPrefix]="searchIcon">
+          <input
+            nz-input
+            [(ngModel)]="searchText"
+            placeholder="Search options..."
+            i18n-placeholder="@@table.select.search-options"
+          />
+          <ng-template #searchIcon>
+            <i nz-icon nzType="search"></i>
+          </ng-template>
+        </nz-input-group>
+      </div>
+      <div class="options">
+        @if (filteredOptions.length === 0) {
+          <div class="no-options-found" i18n="@@table.select.no-options-found">No options found</div>
+        } @else {
+          @for (option of filteredOptions; track option) {
+            <div class="option-item" [class.selected]="option.selected" (click)="option.selected = !option.selected">
+              {{ option.label }}
+              @if (option.selected) {
+                <i nz-icon nzType="check"></i>
+              }
+            </div>
+          }
+        }
+      </div>
+    </div>
+  }
+</nz-dropdown-menu>

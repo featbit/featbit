@@ -26,6 +26,10 @@ import { NzAlertModule } from "ng-zorro-antd/alert";
 import { NzCheckboxModule } from "ng-zorro-antd/checkbox";
 import { CoreModule } from "@core/core.module";
 import { NzDividerModule } from "ng-zorro-antd/divider";
+import {
+  DashedSingleSelectComponent
+} from "@core/components/table/dashed-single-select/dashed-single-select.component";
+import { DashedMultiSelectComponent } from "@core/components/table/dashed-multi-select/dashed-multi-select.component";
 
 
 @NgModule({
@@ -56,7 +60,9 @@ import { NzDividerModule } from "ng-zorro-antd/divider";
     NzListModule,
     NzAlertModule,
     NzCheckboxModule,
-    NzDividerModule
+    NzDividerModule,
+    DashedSingleSelectComponent,
+    DashedMultiSelectComponent
   ]
 })
 export class IndexModule { }
