@@ -538,7 +538,7 @@ public class FeatureFlagController : ApiControllerBase
     public async Task<ApiResponse<bool>> SetTagsAsync(
         Guid envId,
         string key,
-        [FromRoute] string[] tags,
+        [FromQuery] string[] tags,
         [FromBody] ResourceChangeRequest? changeRequest = null)
     {
         var request = new SetTags
