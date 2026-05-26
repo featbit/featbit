@@ -9,7 +9,7 @@ public class DownloadEndUsers : IRequest<ImportUserData>
     public Guid EnvId { get; set; }
 }
 
-public class DownloadSyncDataHandler(IEndUserService service) : IRequestHandler<DownloadEndUsers, ImportUserData>
+public class DownloadEndUsersHandler(IEndUserService service) : IRequestHandler<DownloadEndUsers, ImportUserData>
 {
     public async Task<ImportUserData> Handle(DownloadEndUsers request, CancellationToken cancellationToken)
     {
