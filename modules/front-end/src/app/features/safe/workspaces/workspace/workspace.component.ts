@@ -3,7 +3,8 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { IWorkspace, License, LicenseFeatureEnum } from '@shared/types';
 import { WorkspaceService } from "@services/workspace.service";
-import { debounceTime, distinctUntilChanged, first, map, startWith, switchMap } from "rxjs/operators";
+import { map } from "rxjs/operators";
+import { of } from "rxjs";
 import { generalResourceRNPattern, permissionActions } from "@shared/policy";
 import { PermissionsService } from "@services/permissions.service";
 import { getCurrentWorkspace } from "@utils/project-env";
@@ -51,23 +52,24 @@ export class WorkspaceComponent implements OnInit {
     this.isLoading = false;
   }
 
-  keyAsyncValidator = (control: FormControl) => control.valueChanges.pipe(
-    startWith(control.value),
-    debounceTime(300),
-    distinctUntilChanged(),
-    switchMap(value => this.workspaceService.isKeyUsed(value as string)),
-    map(isKeyUsed => {
-      switch (isKeyUsed) {
-        case true:
-          return { error: true, duplicated: true };
-        case undefined:
-          return { error: true, unknown: true };
-        default:
-          return null;
-      }
-    }),
-    first()
-  );
+  keyAsyncValidator = (control: FormControl) => {
+    const value = control.value as string;
+    if (!this.workspace || value === this.workspace.key) {
+      return of(null);
+    }
+    return this.workspaceService.isKeyUsed(value).pipe(
+      map(isKeyUsed => {
+        switch (isKeyUsed) {
+          case true:
+            return { error: true, duplicated: true };
+          case undefined:
+            return { error: true, unknown: true };
+          default:
+            return null;
+        }
+      })
+    );
+  };
 
   initForm() {
     this.nameKeyForm = new FormGroup({
