@@ -19,10 +19,8 @@ import { NzToolTipModule } from "ng-zorro-antd/tooltip";
 import { NzDividerModule } from "ng-zorro-antd/divider";
 import { NzDropDownModule } from "ng-zorro-antd/dropdown";
 import { NzCheckboxModule } from "ng-zorro-antd/checkbox";
-import { NzModalModule } from "ng-zorro-antd/modal";
 import { CoreModule } from "@core/core.module";
 import { DashedMultiSelectComponent } from "@core/components/table/dashed-multi-select/dashed-multi-select.component";
-import { NzAlertComponent } from "ng-zorro-antd/alert";
 import { DownloadConfirmModal } from "@features/safe/end-users/index/download-confirm-modal/download-confirm-modal";
 
 @NgModule({
@@ -45,8 +43,6 @@ import { DownloadConfirmModal } from "@features/safe/end-users/index/download-co
     NzDividerModule,
     NzDropDownModule,
     NzCheckboxModule,
-    NzModalModule,
-    NzAlertComponent,
     DashedMultiSelectComponent,
     DownloadConfirmModal
   ]
