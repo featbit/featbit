@@ -12,9 +12,9 @@ public class Environment : AuditedEntity
 
     public ICollection<Secret> Secrets { get; set; }
 
-    public ICollection<EnvironmentSetting> Settings { get; set; }
+    public EnvironmentSettings Settings { get; set; }
 
-    public Environment(Guid projectId, string name, string key, string description = "")
+    public Environment(Guid projectId, string name, string key, string description = "", EnvironmentSettings settings = null)
     {
         Id = Guid.NewGuid();
 
@@ -27,13 +27,18 @@ public class Environment : AuditedEntity
             new(Id, "Server Key", SecretTypes.Server),
             new(Id, "Client Key", SecretTypes.Client)
         };
-        Settings = [];
+
+        Settings = settings ?? new EnvironmentSettings();
     }
 
-    public void Update(string name, string description)
+    public void Update(string name, string description, EnvironmentSettings settings = null)
     {
         Name = name;
         Description = description;
+        if (settings != null)
+        {
+            Settings = settings;
+        }
 
         UpdatedAt = DateTime.UtcNow;
     }

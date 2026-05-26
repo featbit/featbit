@@ -209,7 +209,7 @@ export interface IProjectEnv {
   envKey: string,
   envName: string,
   envSecrets: ISecret[],
-  envSettings: {key: string, value: string}[]
+  envSettings: EnvironmentSetting
 }
 
 export interface IProject {
@@ -226,7 +226,11 @@ export interface IEnvironment {
   key: string,
   description: string,
   secrets: ISecret[],
-  settings: {key: string, value: string}[]
+  settings: EnvironmentSetting
+}
+
+export interface EnvironmentSetting {
+  requireChangeComment: boolean;
 }
 
 export interface ISecret {
