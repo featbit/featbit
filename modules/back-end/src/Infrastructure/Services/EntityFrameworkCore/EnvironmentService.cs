@@ -213,13 +213,6 @@ public class EnvironmentService(AppDbContext dbContext, ILogger<EnvironmentServi
         await DbConnection.ExecuteAsync("DELETE FROM events WHERE env_id = ANY(@ids)", new { ids = stringIds });
     }
 
-    public async Task<IEnumerable<Setting>> GetSettingsAsync(Guid envId, string type)
-    {
-        var environment = await GetAsync(envId);
-
-        return environment.Settings.Where(x => x.Type == type);
-    }
-
     public async Task<bool> HasKeyBeenUsedAsync(Guid projectId, string key)
     {
         return await AnyAsync(environment =>

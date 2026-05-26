@@ -21,8 +21,6 @@ public interface IEnvironmentService : IService<Environment>
 
     Task DeleteManyAsync(ICollection<Guid> ids);
 
-    Task<IEnumerable<Setting>> GetSettingsAsync(Guid envId, string type);
-
     Task<bool> HasKeyBeenUsedAsync(Guid projectId, string key);
 
     Task<string> GetProjectEnvAsync(Guid envId);
