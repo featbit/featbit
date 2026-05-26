@@ -33,7 +33,7 @@
           </dashed-multi-select>
         </div>
         <div class="right-actions">
-          <button class="btn-secondary" nz-button nzType="default" (click)="uploadDrawerVisible = true">
+          <button class="btn-secondary" nz-button nzType="default" (click)="uploadDialogVisible = true">
             <i nz-icon nzType="icons:icon-upload"></i>
             <ng-container i18n="@@users.idx.upload">Upload</ng-container>
           </button>
@@ -93,7 +93,12 @@
   </div>
 </section>
 
-<upload-drawer [visible]="uploadDrawerVisible" (close)="uploadDrawerVisible = false"></upload-drawer>
+<import-end-user
+  [visible]="uploadDialogVisible"
+  [uploadUrl]="uploadUrl"
+  templateUrl="assets/upload-end-users.json"
+  (close)="uploadDialogVisible = false">
+</import-end-user>
 <props-drawer [visible]="propsDrawerVisible" [envId]="currentEnvId" (close)="propsDrawerVisible = false"></props-drawer>
 <user-segments-flags-drawer
   [visible]="segmentsFlagsDrawerVisible"

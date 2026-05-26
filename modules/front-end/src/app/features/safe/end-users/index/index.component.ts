@@ -126,7 +126,8 @@ export class IndexComponent implements OnInit {
     );
   }
 
-  uploadDrawerVisible: boolean = false;
+  uploadDialogVisible: boolean = false;
+  uploadUrl = this.envUserService.uploadUrl();
   propsDrawerVisible: boolean = false;
 
   segmentsFlagsDrawerVisible: boolean = false;

@@ -19,10 +19,7 @@ export class EndUserDrawerComponent {
     if (value) {
       this.builtInProps.push({name: 'keyId', value: value.keyId});
       this.builtInProps.push({name: 'name', value: value.name});
-
-      value.customizedProperties.forEach((prop) => {
-        this.customizedProperties.push(prop);
-      });
+      this.customizedProperties = [...value.customizedProperties];
     }
   }
 

@@ -25,7 +25,7 @@
         </dashed-multi-select>
       </div>
       <div class="right-actions">
-        <button class="btn-primary" nz-button nzType="primary" (click)="openImportModal()">
+        <button class="btn-primary" nz-button nzType="primary" (click)="uploadModalVisible = true">
           <span nz-icon nzType="user-add" nzTheme="outline"></span>
           <span i18n="@@common.import">Import</span>
         </button>
@@ -67,7 +67,7 @@
               <td>{{getCustomizePropertyValue(user, prop)}}</td>
             }
             <td>
-              <a class="primary-link-btn" i18n="@@users.idx.ff-segments" (click)="openEvaluationDrawer(user)">Evaluate on flags and segments</a>
+              <a class="primary-link-btn" i18n="@@users.idx.evaluate" (click)="openEvaluationDrawer(user)">Evaluate</a>
               <nz-divider nzType="vertical"></nz-divider>
               <a class="primary-link-btn" nz-button nzType="link" i18n="@@common.details" (click)="openEndUserDrawer(user)">Details</a>
             </td>
@@ -78,6 +78,11 @@
   </div>
 </div>
 
-<import-user [isVisible]="importModalVisible" (close)="closeImportModal($event)"></import-user>
+<import-end-user
+  [visible]="uploadModalVisible"
+  [uploadUrl]="uploadUrl"
+  templateUrl="assets/upload-global-users.json"
+  (close)="closeImportModal($event)">
+</import-end-user>
 <user-segments-flags-drawer [visible]="evaluationDrawerVisible" [user]="selectedUser" (close)="closeEvaluationDrawer()"></user-segments-flags-drawer>
 <end-user-drawer [isVisible]="endUserDrawerVisible" (close)="closeEndUserDrawer()" [user]="selectedUser"></end-user-drawer>
