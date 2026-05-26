@@ -5605,7 +5605,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
-          <context context-type="linenumber">64,66</context>
+          <context context-type="linenumber">60,62</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/metrics/metrics.component.html</context>
@@ -6650,7 +6650,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
-          <context context-type="linenumber">78,80</context>
+          <context context-type="linenumber">74,76</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
@@ -7418,19 +7418,11 @@
         </context-group>
         <target>显示</target>
       </trans-unit>
-      <trans-unit id="users.idx.upload" datatype="html">
-        <source>Upload</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
-          <context context-type="linenumber">38,39</context>
-        </context-group>
-        <target>上传</target>
-      </trans-unit>
       <trans-unit id="users.idx.manage-properties" datatype="html">
         <source>Properties</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
-          <context context-type="linenumber">42,44</context>
+          <context context-type="linenumber">38,40</context>
         </context-group>
         <target>属性管理</target>
       </trans-unit>
@@ -7438,7 +7430,7 @@
         <source>Evaluate</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
-          <context context-type="linenumber">76,77</context>
+          <context context-type="linenumber">72,73</context>
         </context-group>
         <target>评估</target>
       </trans-unit>
