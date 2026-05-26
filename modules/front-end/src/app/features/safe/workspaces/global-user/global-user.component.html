@@ -82,7 +82,7 @@
   [visible]="uploadModalVisible"
   [uploadUrl]="uploadUrl"
   templateUrl="assets/upload-global-users.json"
-  (close)="closeImportModal($event)">
+  (close)="closeUploadModal($event)">
 </import-end-user>
 <user-segments-flags-drawer [visible]="evaluationDrawerVisible" [user]="selectedUser" (close)="closeEvaluationDrawer()"></user-segments-flags-drawer>
 <end-user-drawer [isVisible]="endUserDrawerVisible" (close)="closeEndUserDrawer()" [user]="selectedUser"></end-user-drawer>

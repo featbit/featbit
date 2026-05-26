@@ -18,10 +18,7 @@ public class DownloadEndUsersHandler(IEndUserService service) : IRequestHandler<
         var total = await service.CountAsync(x => x.EnvId == envId);
         if (total > 50_000)
         {
-            throw new BusinessException(
-                ErrorCodes.BusinessRuleViolated,
-                "Download is not supported for environments with more than 50,000 end-users."
-            );
+            throw new BusinessException(ErrorCodes.BusinessRuleViolated);
         }
 
         var users = await service.FindManyAsync(x => x.EnvId == envId);

@@ -126,10 +126,16 @@ export class IndexComponent implements OnInit {
     );
   }
 
-  uploadDialogVisible: boolean = false;
+  uploadModalVisible: boolean = false;
   uploadUrl = this.envUserService.uploadUrl();
-  propsDrawerVisible: boolean = false;
+  closeUploadModal(success: boolean) {
+    this.uploadModalVisible = false;
+    if (success) {
+      this.$search.next();
+    }
+  }
 
+  propsDrawerVisible: boolean = false;
   segmentsFlagsDrawerVisible: boolean = false;
   currentUser: IUserType = null;
   openSegmentsFlagsDrawer(user: IUserType) {

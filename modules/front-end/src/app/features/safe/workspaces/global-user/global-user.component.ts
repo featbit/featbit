@@ -71,7 +71,7 @@ export class GlobalUserComponent implements OnInit {
 
   uploadModalVisible = false;
   uploadUrl = this.service.uploadUrl();
-  closeImportModal(success: boolean) {
+  closeUploadModal(success: boolean) {
     this.uploadModalVisible = false;
     if (success) {
       this.search$.next();

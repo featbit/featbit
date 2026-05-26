@@ -1,4 +1,5 @@
 import { Component, EventEmitter, inject, Input, Output } from "@angular/core";
+import { Subscription } from "rxjs";
 import { NzAlertComponent } from "ng-zorro-antd/alert";
 import { NzButtonComponent } from "ng-zorro-antd/button";
 import { NzModalComponent, NzModalContentDirective, NzModalFooterDirective } from "ng-zorro-antd/modal";
@@ -31,9 +32,11 @@ export class DownloadConfirmModal {
   close: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   isDownloading: boolean = false;
+  private downloadSub?: Subscription;
+
   confirmDownload() {
     this.isDownloading = true;
-    this.endUserService.download().subscribe({
+    this.downloadSub = this.endUserService.download().subscribe({
       next: (data) => {
         this.isDownloading = false;
         const json = JSON.stringify(data);
@@ -58,6 +61,9 @@ export class DownloadConfirmModal {
   }
 
   onClose(confirmed: boolean = false) {
+    this.downloadSub?.unsubscribe();
+    this.downloadSub = undefined;
+    this.isDownloading = false;
     this.close.emit(confirmed);
   }
 }
