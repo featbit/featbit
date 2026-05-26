@@ -3,10 +3,11 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { IWorkspace, License, LicenseFeatureEnum } from '@shared/types';
 import { WorkspaceService } from "@services/workspace.service";
-import { debounceTime, distinctUntilChanged, first, map, startWith, switchMap } from "rxjs/operators";
+import { debounceTime, first, map, switchMap } from "rxjs/operators";
 import { generalResourceRNPattern, permissionActions } from "@shared/policy";
 import { PermissionsService } from "@services/permissions.service";
 import { getCurrentWorkspace } from "@utils/project-env";
+import { of } from "rxjs";
 
 @Component({
     selector: 'workspace',
@@ -51,23 +52,28 @@ export class WorkspaceComponent implements OnInit {
     this.isLoading = false;
   }
 
-  keyAsyncValidator = (control: FormControl) => control.valueChanges.pipe(
-    startWith(control.value),
-    debounceTime(300),
-    distinctUntilChanged(),
-    switchMap(value => this.workspaceService.isKeyUsed(value as string)),
-    map(isKeyUsed => {
-      switch (isKeyUsed) {
-        case true:
-          return { error: true, duplicated: true };
-        case undefined:
-          return { error: true, unknown: true };
-        default:
-          return null;
-      }
-    }),
-    first()
-  );
+  keyAsyncValidator = (control: FormControl) => {
+    const value = control.value as string;
+    if (!this.workspace || value === this.workspace.key) {
+      return of(null);
+    }
+
+    return control.valueChanges.pipe(
+      debounceTime(300),
+      switchMap(value => this.workspaceService.isKeyUsed(value as string)),
+      map(isKeyUsed => {
+        switch (isKeyUsed) {
+          case true:
+            return { error: true, duplicated: true };
+          case undefined:
+            return { error: true, unknown: true };
+          default:
+            return null;
+        }
+      }),
+      first()
+    );
+  }
 
   initForm() {
     this.nameKeyForm = new FormGroup({
