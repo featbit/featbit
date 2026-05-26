@@ -56,11 +56,6 @@ export class SafeComponent implements OnInit {
         path: '/experiments'
       },
       {
-        title: $localize `:@@menu.data-sync:Data Sync`,
-        icon: 'icons:icon-data-sync',
-        path: '/data-sync'
-      },
-      {
         title: $localize `:@@auditlogs.audit-logs:Audit Logs`,
         icon: 'audit',
         path: '/audit-logs'

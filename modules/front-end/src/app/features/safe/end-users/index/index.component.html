@@ -33,7 +33,11 @@
           </dashed-multi-select>
         </div>
         <div class="right-actions">
-          <button class="btn-primary" nz-button nzType="primary" (click)="onPropsSettingClick()">
+          <button class="btn-secondary" nz-button nzType="default" (click)="uploadDrawerVisible = true">
+            <i nz-icon nzType="icons:icon-upload"></i>
+            <ng-container i18n="@@users.idx.upload">Upload</ng-container>
+          </button>
+          <button class="btn-primary" nz-button nzType="primary" (click)="propsDrawerVisible = true">
             <i nz-icon nzType="icons:icon-setting"></i>
             <ng-container i18n="@@users.idx.manage-properties">Properties</ng-container>
           </button>
@@ -80,5 +84,7 @@
     </div>
   </div>
 </section>
-<app-props-drawer [visible]="attributeManagevisible" [envId]="currentEnvId" (close)="onPropsSettingClose()"></app-props-drawer>
-<user-segments-flags-drawer [visible]="segmentsAndFlagsVisible" [user]="currentUser" (close)="onSegmentsAndFlagsClose()"></user-segments-flags-drawer>
+
+<upload-drawer [visible]="uploadDrawerVisible" (close)="uploadDrawerVisible = false"></upload-drawer>
+<props-drawer [visible]="propsDrawerVisible" [envId]="currentEnvId" (close)="propsDrawerVisible = false"></props-drawer>
+<user-segments-flags-drawer [visible]="segmentAndFlagsDrawerVisible" [user]="currentUser" (close)="onSegmentsAndFlagsClose()"></user-segments-flags-drawer>
