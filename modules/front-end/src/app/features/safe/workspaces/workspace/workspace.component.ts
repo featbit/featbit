@@ -3,7 +3,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { IWorkspace, License, LicenseFeatureEnum } from '@shared/types';
 import { WorkspaceService } from "@services/workspace.service";
-import { debounceTime, first, map, switchMap } from "rxjs/operators";
+import { debounceTime, distinctUntilChanged, first, map, startWith, switchMap } from "rxjs/operators";
 import { generalResourceRNPattern, permissionActions } from "@shared/policy";
 import { PermissionsService } from "@services/permissions.service";
 import { getCurrentWorkspace } from "@utils/project-env";
@@ -52,7 +52,9 @@ export class WorkspaceComponent implements OnInit {
   }
 
   keyAsyncValidator = (control: FormControl) => control.valueChanges.pipe(
+    startWith(control.value),
     debounceTime(300),
+    distinctUntilChanged(),
     switchMap(value => this.workspaceService.isKeyUsed(value as string)),
     map(isKeyUsed => {
       switch (isKeyUsed) {
