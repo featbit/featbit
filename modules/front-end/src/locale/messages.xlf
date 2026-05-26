@@ -4210,81 +4210,88 @@
           <context context-type="linenumber">58,59</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="users.import.choose-file" datatype="html">
+      <trans-unit id="import-end-user.title" datatype="html">
+        <source>Import Users</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/import-end-user/import-end-user.component.html</context>
+          <context context-type="linenumber">5,7</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="import-end-user.choose-file" datatype="html">
         <source>Choose the data file you want to import.</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.html</context>
-          <context context-type="linenumber">13,14</context>
+          <context context-type="sourcefile">src/app/core/components/import-end-user/import-end-user.component.html</context>
+          <context context-type="linenumber">14,15</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="users.import.view-template" datatype="html">
+      <trans-unit id="import-end-user.view-template" datatype="html">
         <source>Click to view the template</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.html</context>
-          <context context-type="linenumber">14,17</context>
+          <context context-type="sourcefile">src/app/core/components/import-end-user/import-end-user.component.html</context>
+          <context context-type="linenumber">15,19</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="users.import.users-note" datatype="html">
+      <trans-unit id="import-end-user.users-note" datatype="html">
         <source>We will either create new user records or update existing ones based on the keyId.</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.html</context>
-          <context context-type="linenumber">19,22</context>
+          <context context-type="sourcefile">src/app/core/components/import-end-user/import-end-user.component.html</context>
+          <context context-type="linenumber">20,23</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="users.import.user-properties-note" datatype="html">
-        <source>Any new user properties in the file will be added, but existing properties will not be changed.</source>
+      <trans-unit id="import-end-user.user-properties-note" datatype="html">
+        <source>Any new user properties in the file will be added and existing ones remains unchanged.</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.html</context>
-          <context context-type="linenumber">23,26</context>
+          <context context-type="sourcefile">src/app/core/components/import-end-user/import-end-user.component.html</context>
+          <context context-type="linenumber">24,28</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="users.import.upload-text" datatype="html">
+      <trans-unit id="import-end-user.upload-text" datatype="html">
         <source>Click or drag file to this area to upload</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.html</context>
+          <context context-type="sourcefile">src/app/core/components/import-end-user/import-end-user.component.html</context>
           <context context-type="linenumber">40,42</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="users.import.supported-format" datatype="html">
+      <trans-unit id="import-end-user.supported-format" datatype="html">
         <source>Supported format: JSON</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.html</context>
+          <context context-type="sourcefile">src/app/core/components/import-end-user/import-end-user.component.html</context>
           <context context-type="linenumber">43,44</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="users.import.maximum-file-size" datatype="html">
+      <trans-unit id="import-end-user.maximum-file-size" datatype="html">
         <source>Maximum file size: 500MB</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.html</context>
+          <context context-type="sourcefile">src/app/core/components/import-end-user/import-end-user.component.html</context>
           <context context-type="linenumber">44,47</context>
         </context-group>
       </trans-unit>
       <trans-unit id="users.import.file-format-error" datatype="html">
         <source>Invalid file format. Only JSON files are allowed.</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.ts</context>
-          <context context-type="linenumber">33</context>
+          <context context-type="sourcefile">src/app/core/components/import-end-user/import-end-user.component.ts</context>
+          <context context-type="linenumber">34</context>
         </context-group>
       </trans-unit>
       <trans-unit id="users.import.file-size-error" datatype="html">
         <source>The uploaded file exceeds the size limit of 500MB. Please upload a smaller file.</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.ts</context>
-          <context context-type="linenumber">40</context>
+          <context context-type="sourcefile">src/app/core/components/import-end-user/import-end-user.component.ts</context>
+          <context context-type="linenumber">41</context>
         </context-group>
       </trans-unit>
       <trans-unit id="users.import.import-success" datatype="html">
         <source>User data has been successfully imported.</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.ts</context>
-          <context context-type="linenumber">59</context>
+          <context context-type="sourcefile">src/app/core/components/import-end-user/import-end-user.component.ts</context>
+          <context context-type="linenumber">61</context>
         </context-group>
       </trans-unit>
       <trans-unit id="users.import.import-failed" datatype="html">
         <source>Failed to import user data. Please check the file and try again.</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.ts</context>
-          <context context-type="linenumber">62</context>
+          <context context-type="sourcefile">src/app/core/components/import-end-user/import-end-user.component.ts</context>
+          <context context-type="linenumber">64</context>
         </context-group>
       </trans-unit>
       <trans-unit id="license.expired" datatype="html">
@@ -6086,62 +6093,6 @@
           <context context-type="linenumber">21,24</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="upload" datatype="html">
-        <source>Upload</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/upload-drawer/upload-drawer.component.html</context>
-          <context context-type="linenumber">5</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="Uploading" datatype="html">
-        <source>Uploading...</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/upload-drawer/upload-drawer.component.html</context>
-          <context context-type="linenumber">11,12</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="data-upload-warning" datatype="html">
-        <source>For users, only insert/update operations will be executed; For user properties, only insert operation will be executed.</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/upload-drawer/upload-drawer.component.html</context>
-          <context context-type="linenumber">17,18</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="select-file-to-upload" datatype="html">
-        <source>Please select the file to upload (only support JSON file).</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/upload-drawer/upload-drawer.component.html</context>
-          <context context-type="linenumber">22,23</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="check-template" datatype="html">
-        <source>Click to view the template</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/upload-drawer/upload-drawer.component.html</context>
-          <context context-type="linenumber">23,25</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="select-upload-file" datatype="html">
-        <source>Select and upload file</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/upload-drawer/upload-drawer.component.html</context>
-          <context context-type="linenumber">32,33</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="upload-failed" datatype="html">
-        <source>upload failed</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/upload-drawer/upload-drawer.component.ts</context>
-          <context context-type="linenumber">42</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="upload-success" datatype="html">
-        <source>upload success</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/upload-drawer/upload-drawer.component.ts</context>
-          <context context-type="linenumber">47</context>
-        </context-group>
-      </trans-unit>
       <trans-unit id="common.feature-flag" datatype="html">
         <source>Feature Flag</source>
         <context-group purpose="location">
@@ -6949,6 +6900,10 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
           <context context-type="linenumber">84,85</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/global-user/global-user.component.html</context>
+          <context context-type="linenumber">70,71</context>
         </context-group>
       </trans-unit>
       <trans-unit id="expt.expt" datatype="html">
@@ -10186,13 +10141,6 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/global-user/global-user.component.html</context>
           <context context-type="linenumber">30,32</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="users.idx.ff-segments" datatype="html">
-        <source>Evaluate on flags and segments</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/workspaces/global-user/global-user.component.html</context>
-          <context context-type="linenumber">70,71</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.workspace-id" datatype="html">
