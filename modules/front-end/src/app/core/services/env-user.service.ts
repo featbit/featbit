@@ -99,4 +99,9 @@ export class EnvUserService {
 
     return this.http.get<IFeatureFlagEndUserPagedResult>(url, {params: new HttpParams({fromObject: queryParam})});
   }
+
+  download(): Observable<any> {
+    const url = `${this.baseUrl}/download`;
+    return this.http.get<any>(url);
+  }
 }

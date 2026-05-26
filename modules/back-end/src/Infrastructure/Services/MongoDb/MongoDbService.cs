@@ -42,6 +42,11 @@ public class MongoDbService<TEntity> : IService<TEntity> where TEntity : Entity
         return await Queryable.Where(predicate).ToListAsync();
     }
 
+    public Task<long> CountAsync(Expression<Func<TEntity, bool>> predicate)
+    {
+        return Queryable.LongCountAsync(predicate);
+    }
+
     public async Task<bool> AnyAsync(Expression<Func<TEntity, bool>> predicate)
     {
         // for improved compatibility with CosmosDB, use CountAsync instead of AnyAsync.

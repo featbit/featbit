@@ -33,10 +33,22 @@
           </dashed-multi-select>
         </div>
         <div class="right-actions">
+          <button class="btn-secondary" nz-button nzType="default" (click)="uploadDrawerVisible = true">
+            <i nz-icon nzType="icons:icon-upload"></i>
+            <ng-container i18n="@@users.idx.upload">Upload</ng-container>
+          </button>
           <button class="btn-primary" nz-button nzType="primary" (click)="propsDrawerVisible = true">
             <i nz-icon nzType="icons:icon-setting"></i>
             <ng-container i18n="@@users.idx.manage-properties">Properties</ng-container>
           </button>
+          <button class="btn-more" nz-button nz-dropdown [nzDropdownMenu]="moreMenu">
+            <i nz-icon nzType="ellipsis"></i>
+          </button>
+          <nz-dropdown-menu #moreMenu="nzDropdownMenu">
+            <ul nz-menu>
+              <li nz-menu-item (click)="downloadConfirmVisible = true" i18n="@@users.idx.download">Download</li>
+            </ul>
+          </nz-dropdown-menu>
         </div>
       </div>
     </div>
@@ -69,7 +81,7 @@
               <td>{{ user.keyId }}</td>
               <td *ngFor="let prop of selectedExtraColumns">{{getCustomizePropertyValue(user, prop)}}</td>
               <td>
-                <a class="primary-link-btn" (click)="onSegmentsAndFlagsClick(user)" i18n="@@users.idx.evaluate">Evaluate</a>
+                <a class="primary-link-btn" (click)="openSegmentsFlagsDrawer(user)" i18n="@@users.idx.evaluate">Evaluate</a>
                 <nz-divider nzType="vertical"></nz-divider>
                 <a class="primary-link-btn" nz-button nzType="link" [routerLink]="[user.id]" i18n="@@common.details">Details</a>
               </td>
@@ -83,4 +95,13 @@
 
 <upload-drawer [visible]="uploadDrawerVisible" (close)="uploadDrawerVisible = false"></upload-drawer>
 <props-drawer [visible]="propsDrawerVisible" [envId]="currentEnvId" (close)="propsDrawerVisible = false"></props-drawer>
-<user-segments-flags-drawer [visible]="segmentsAndFlagsDrawerVisible" [user]="currentUser" (close)="onSegmentsAndFlagsClose()"></user-segments-flags-drawer>
+<user-segments-flags-drawer
+  [visible]="segmentsFlagsDrawerVisible"
+  [user]="currentUser"
+  (close)="closeSegmentsFlagsDrawer()">
+</user-segments-flags-drawer>
+<download-confirm-modal
+  [totalCount]="totalCount"
+  [visible]="downloadConfirmVisible"
+  (close)="downloadConfirmVisible = false">
+</download-confirm-modal>

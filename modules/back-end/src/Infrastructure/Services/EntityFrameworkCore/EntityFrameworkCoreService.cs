@@ -55,6 +55,11 @@ public class EntityFrameworkCoreService<TEntity>(AppDbContext dbContext) : IServ
         return await Queryable.Where(predicate).ToListAsync();
     }
 
+    public Task<long> CountAsync(Expression<Func<TEntity, bool>> predicate)
+    {
+        return Queryable.LongCountAsync(predicate);
+    }
+
     public async Task<bool> AnyAsync(Expression<Func<TEntity, bool>> predicate)
     {
         return await Queryable.CountAsync(predicate) > 0;
