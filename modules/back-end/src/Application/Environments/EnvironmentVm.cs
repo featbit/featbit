@@ -11,4 +11,6 @@ public class EnvironmentVm
     public string Description { get; set; }
 
     public ICollection<Secret> Secrets { get; set; }
+
+    public EnvironmentSettings Settings { get; set; }
 }

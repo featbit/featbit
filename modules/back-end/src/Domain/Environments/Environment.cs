@@ -12,9 +12,9 @@ public class Environment : AuditedEntity
 
     public ICollection<Secret> Secrets { get; set; }
 
-    public ICollection<Setting> Settings { get; set; }
+    public EnvironmentSettings Settings { get; set; }
 
-    public Environment(Guid projectId, string name, string key, string description = "")
+    public Environment(Guid projectId, string name, string key, string description = "", EnvironmentSettings settings = null)
     {
         Id = Guid.NewGuid();
 
@@ -27,44 +27,20 @@ public class Environment : AuditedEntity
             new(Id, "Server Key", SecretTypes.Server),
             new(Id, "Client Key", SecretTypes.Client)
         };
-        Settings = Array.Empty<Setting>();
+
+        Settings = settings ?? new EnvironmentSettings();
     }
 
-    public void Update(string name, string description)
+    public void Update(string name, string description, EnvironmentSettings settings = null)
     {
         Name = name;
         Description = description;
-
-        UpdatedAt = DateTime.UtcNow;
-    }
-
-    public void UpsertSettings(IEnumerable<Setting> settings)
-    {
-        foreach (var setting in settings)
+        if (settings != null)
         {
-            var existing = Settings.FirstOrDefault(x => x.Id == setting.Id);
-            if (existing != null)
-            {
-                existing.Update(setting);
-            }
-            else
-            {
-                Settings.Add(setting);
-            }
+            Settings = settings;
         }
 
         UpdatedAt = DateTime.UtcNow;
-    }
-
-    public void DeleteSetting(string id)
-    {
-        var setting = Settings.FirstOrDefault(x => x.Id == id);
-        if (setting == null)
-        {
-            return;
-        }
-
-        Settings.Remove(setting);
     }
 
     public Secret RemoveSecret(string secretId)

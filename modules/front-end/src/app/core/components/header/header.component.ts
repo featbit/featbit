@@ -157,7 +157,8 @@ export class HeaderComponent implements OnInit {
       envId: this.selectedEnv.id,
       envKey: this.selectedEnv.key,
       envName: this.selectedEnv.name,
-      envSecrets: this.selectedEnv.secrets
+      envSecrets: this.selectedEnv.secrets,
+      envSettings: this.selectedEnv.settings
     };
 
     this.projectService.upsertCurrentProjectEnvLocally(projectEnv);
