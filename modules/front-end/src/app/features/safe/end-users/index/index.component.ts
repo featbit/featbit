@@ -129,15 +129,15 @@ export class IndexComponent implements OnInit {
   uploadDrawerVisible: boolean = false;
   propsDrawerVisible: boolean = false;
 
-  segmentAndFlagsDrawerVisible: boolean = false;
+  segmentsAndFlagsDrawerVisible: boolean = false;
   currentUser: IUserType = null;
   onSegmentsAndFlagsClick(user: IUserType) {
     this.currentUser = {...user};
-    this.segmentAndFlagsDrawerVisible = true;
+    this.segmentsAndFlagsDrawerVisible = true;
   }
 
   onSegmentsAndFlagsClose() {
     this.currentUser = null;
-    this.segmentAndFlagsDrawerVisible = false;
+    this.segmentsAndFlagsDrawerVisible = false;
   }
 }
