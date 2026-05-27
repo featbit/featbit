@@ -51,22 +51,20 @@
 
       <!-- Description -->
       <nz-form-item>
-        <nz-form-label i18n="@@org.project.envDescription">Description</nz-form-label>
+        <nz-form-label i18n="@@common.description">Description</nz-form-label>
         <nz-form-control>
-          <input type="text" nz-input formControlName="description" placeholder="Description" i18n="@@org.project.envDescriptionPlaceholder"/>
+          <input type="text" nz-input formControlName="description" placeholder="Description" i18n="@@common.description"/>
         </nz-form-control>
       </nz-form-item>
 
       <!-- Settings -->
       <nz-form-item formGroupName="settings">
-        <nz-form-label class="settings-section-title" i18n="@@common.environment-settings">Settings</nz-form-label>
+        <nz-form-label class="settings-section-title" i18n="@@common.settings">Settings</nz-form-label>
         <div class="settings-item">
           <label nz-checkbox formControlName="requireChangeComment">
-            <span class="settings-item-label" i18n="@@org.project.requireChangeComment">Require change comment</span>
+            <span class="settings-item-label" i18n="@@env.settings.require-change-comment">Require change comment</span>
           </label>
-          <p class="settings-item-description" i18n="@@org.project.requireChangeCommentExtra">
-            In this environment, require the user to confirm every flag change
-          </p>
+          <p class="settings-item-description" i18n="@@env.settings.require-change-comment-description">When enabled, users must provide a comment before saving any flag or segment change in this environment</p>
         </div>
       </nz-form-item>
     </form>
