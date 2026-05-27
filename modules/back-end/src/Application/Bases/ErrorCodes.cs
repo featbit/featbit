@@ -12,7 +12,9 @@ public static class ErrorCodes
     public const string Conflict = nameof(Conflict);
     public const string NameHasBeenUsed = nameof(NameHasBeenUsed);
     public const string KeyHasBeenUsed = nameof(KeyHasBeenUsed);
-    public const string BusinessRuleViolated = nameof(BusinessRuleViolated);
+
+    // end user
+    public const string EndUserLimitExceeded = nameof(EndUserLimitExceeded);
 
     // identity error codes
     public const string EmailPasswordMismatch = nameof(EmailPasswordMismatch);

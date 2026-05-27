@@ -104,18 +104,31 @@ public class EndUserService(MongoDbClient mongoDb) : MongoDbService<EndUser>(mon
         return user;
     }
 
-    public async Task<ImportUserResult> UpsertAsync(Guid? workspaceId, Guid? envId, IEnumerable<EndUser> endUsers)
+    public async Task<ImportUserResult> UpsertAsync(Guid? workspaceId, Guid? envId, EndUser[] endUsers)
     {
-        var total = await Queryable.Where(x => x.WorkspaceId == workspaceId && x.EnvId == envId).LongCountAsync();
-        if (total > 5 * 10000)
-        {
-            throw new BusinessException("The number of end users exceeds the limit.");
-        }
+        List<EndUser> existUsers;
 
-        // load all end users into memory
-        var existUsers = await Queryable
-            .Where(x => x.WorkspaceId == workspaceId && x.EnvId == envId)
-            .ToListAsync();
+        var keyIds = endUsers.Select(x => x.KeyId).Distinct().ToArray();
+        if (keyIds.Length < 1_000)
+        {
+            // for small batch, only load the users with the same keyIds to reduce memory usage
+            existUsers = await Queryable
+                .Where(x => x.WorkspaceId == workspaceId && x.EnvId == envId && keyIds.Contains(x.KeyId))
+                .ToListAsync();
+        }
+        else
+        {
+            // for large batch, load all users to avoid the performance issue of "where in" with too many keyIds
+            var total = await Queryable.Where(x => x.WorkspaceId == workspaceId && x.EnvId == envId).LongCountAsync();
+            if (total > EndUserConstants.EndUserLoadLimit)
+            {
+                throw new BusinessException(ErrorCodes.EndUserLimitExceeded);
+            }
+
+            existUsers = await Queryable
+                .Where(x => x.WorkspaceId == workspaceId && x.EnvId == envId)
+                .ToListAsync();
+        }
 
         // https://www.mongodb.com/docs/manual/reference/method/db.collection.bulkWrite/
         var writeModels = new List<WriteModel<EndUser>>();

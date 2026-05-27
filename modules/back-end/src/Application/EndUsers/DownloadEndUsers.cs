@@ -16,9 +16,9 @@ public class DownloadEndUsersHandler(IEndUserService service) : IRequestHandler<
         var envId = request.EnvId;
 
         var total = await service.CountAsync(x => x.EnvId == envId);
-        if (total > 50_000)
+        if (total > EndUserConstants.EndUserDownloadLimit)
         {
-            throw new BusinessException(ErrorCodes.BusinessRuleViolated);
+            throw new BusinessException(ErrorCodes.EndUserLimitExceeded);
         }
 
         var users = await service.FindManyAsync(x => x.EnvId == envId);
