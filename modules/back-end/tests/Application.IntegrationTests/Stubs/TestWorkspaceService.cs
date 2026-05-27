@@ -41,12 +41,12 @@ public class TestWorkspaceService : NullServiceBase<Workspace>, IWorkspaceServic
         return Task.FromResult(usage);
     }
 
-    public Task<bool> ContainsUserAsync(Guid workspaceId, Guid userId)
+    public Task AddUserAsync(WorkspaceUser workspaceUser)
     {
-        return Task.FromResult(true);
+        return Task.CompletedTask;
     }
 
-    public Task AddUserAsync(WorkspaceUser workspaceUser)
+    public Task RemoveUserAsync(Guid workspaceId, Guid userId)
     {
         return Task.CompletedTask;
     }

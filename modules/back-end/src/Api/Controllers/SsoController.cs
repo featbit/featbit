@@ -73,11 +73,11 @@ public class SsoController : ApiControllerBase
             }
 
             bool isSsoFirstLogin;
-            var user = await _userService.GetUserByEmailAsync(workspace.Id, email);
+            var user = await _userService.FindOneAsync(x => x.Email == email);
             if (user == null)
             {
                 var registerResult =
-                    await _identityService.RegisterByEmailAsync(workspace.Id, email, string.Empty, UserOrigin.Sso);
+                    await _identityService.RegisterByEmailAsync(email, string.Empty, UserOrigin.Sso);
                 
                 isSsoFirstLogin = true;
                 user = registerResult.User;
@@ -86,7 +86,11 @@ public class SsoController : ApiControllerBase
             {
                 isSsoFirstLogin = false;
             }
-
+            
+            var workspaceUser = new WorkspaceUser(workspace.Id, user.Id);
+            // Nothing will happen if user already in the workspace
+            await _workspaceService.AddUserAsync(workspaceUser);
+            
             var (accessToken, refreshToken) = 
                 await _identityService.IssueTokensAsync(user, Request.ClientIpAddress());
             Response.SetRefreshTokenCookie(refreshToken);

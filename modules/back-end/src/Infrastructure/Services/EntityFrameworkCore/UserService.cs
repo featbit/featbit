@@ -28,24 +28,6 @@ public class UserService(AppDbContext dbContext) : EntityFrameworkCoreService<Us
 
     public async Task<ICollection<User>> GetListAsync(IEnumerable<Guid> ids)
         => await FindManyAsync(x => ids.Contains(x.Id));
-
-    public async Task<ICollection<Workspace>> GetWorkspacesAsync(string email)
-    {
-        var workspaces = QueryableOf<Workspace>();
-        var workspaceUsers = QueryableOf<WorkspaceUser>();
-        var users = QueryableOf<User>();
-
-        var query =
-            from workspace in workspaces
-            join wu in workspaceUsers
-                on workspace.Id equals wu.WorkspaceId
-            join user in users
-                on wu.UserId equals user.Id
-            where user.Email == email
-            select workspace;
-
-        return await query.ToListAsync();
-    }
     
     public async Task<ICollection<Workspace>> GetWorkspacesAsync(Guid userId)
     {
@@ -61,50 +43,5 @@ public class UserService(AppDbContext dbContext) : EntityFrameworkCoreService<Us
             select workspace;
 
         return await query.ToListAsync();
-    }
-
-    public async Task<Workspace> GetWorkspaceAsync(Guid userId, Guid workspaceId)
-    {
-        var workspaces = QueryableOf<Workspace>();
-        var workspaceUsers = QueryableOf<WorkspaceUser>();
-        var users = QueryableOf<User>();
-
-        var query =
-            from workspace in workspaces
-            join wu in workspaceUsers
-                on workspace.Id equals wu.WorkspaceId
-            join user in users
-                on wu.UserId equals user.Id
-            where user.Id == userId && workspace.Id == workspaceId
-            select workspace;
-
-        var result = await query.FirstOrDefaultAsync();
-        if (result is null)
-        {
-            throw new EntityNotFoundException(nameof(Workspace), $"{userId}-{workspaceId}");
-        }
-
-        return result;
-    }
-    
-    public async Task<User> GetUserByEmailAsync(Guid workspaceId, string email)
-    {
-        var workspaceUsers = QueryableOf<WorkspaceUser>();
-        var users = QueryableOf<User>();
-
-        var query =
-            from wu in workspaceUsers
-            join user in users
-                on wu.UserId equals user.Id
-            where wu.WorkspaceId == workspaceId && user.Email == email
-            select user;
-
-        var result = await query.FirstOrDefaultAsync();
-        if (result is null)
-        {
-            throw new EntityNotFoundException(nameof(Workspace), $"{email}-{workspaceId}");
-        }
-
-        return result;
     }
 }

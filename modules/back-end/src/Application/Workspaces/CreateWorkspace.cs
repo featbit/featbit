@@ -1,6 +1,7 @@
 using Application.Bases.Exceptions;
 using Application.Identity;
 using Application.Organizations;
+using Domain.Users;
 using Domain.Utils;
 using Domain.Workspaces;
 
@@ -45,11 +46,14 @@ public class CreateWorkspaceHandler(
 
         // register user
         var registerResult = await identityService.RegisterByEmailAsync(
-            workspace.Id,
             request.Email,
             request.Password,
             request.UserOrigin
         );
+        
+        var workspaceUser = new WorkspaceUser(workspace.Id, user.Id);
+        // Nothing will happen if user already in the workspace
+        await workspaceService.AddUserAsync(workspaceUser);
 
         // create default organization
         await mediator.Send(new CreateOrganization

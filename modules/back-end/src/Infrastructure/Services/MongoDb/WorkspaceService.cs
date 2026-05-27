@@ -441,4 +441,10 @@ public class WorkspaceService(MongoDbClient mongoDb) : MongoDbService<Workspace>
         // add workspace user
         await MongoDb.CollectionOf<WorkspaceUser>().InsertOneAsync(workspaceUser);
     }
+    
+    public async Task RemoveUserAsync(Guid workspaceId, Guid userId)
+    {
+        await MongoDb.CollectionOf<WorkspaceUser>()
+            .DeleteManyAsync(x => x.WorkspaceId == workspaceId && x.UserId == userId);
+    }
 }

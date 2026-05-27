@@ -8,6 +8,7 @@ public class RemoveFromWorkspace : IRequest<bool>
 }
 
 public class RemoveFromWorkspaceHandler(
+    IWorkspaceService workspaceService,
     IUserService userService,
     IOrganizationService organizationService,
     IMemberService memberService)
@@ -22,9 +23,16 @@ public class RemoveFromWorkspaceHandler(
         {
             await memberService.DeleteAsync(organization.Id, request.MemberId);
         }
+        
+        // remove member from the workspace
+        await workspaceService.RemoveUserAsync(request.WorkspaceId, request.MemberId);
 
         // remove member from workspace
-        await userService.DeleteOneAsync(request.MemberId);
+        var workspaces = await userService.GetWorkspacesAsync(request.MemberId);
+        if (workspaces.Count == 0)
+        {
+            await userService.DeleteOneAsync(request.MemberId);
+        }
 
         return true;
     }

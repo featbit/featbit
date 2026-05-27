@@ -16,8 +16,8 @@ public interface IWorkspaceService : IService<Workspace>
     Task SaveRecordsAsync(AggregatedUsageRecords records);
 
     Task<WorkspaceUsageVm> GetUsageAsync(Guid workspaceId, WorkspaceUsageFilter filter);
-    
-    Task<bool> ContainsUserAsync(Guid workspaceId, Guid userId);
 
     Task AddUserAsync(WorkspaceUser workspaceUser);
+
+    Task RemoveUserAsync(Guid workspaceId, Guid userId);
 }

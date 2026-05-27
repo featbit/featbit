@@ -44,6 +44,7 @@ public class AddMemberValidator : AbstractValidator<AddMember>
 }
 
 public class AddMemberHandler(
+    IWorkspaceService workspaceService,
     IOrganizationService organizationService,
     IUserService userService,
     IIdentityService identityService,
@@ -63,7 +64,7 @@ public class AddMemberHandler(
         {
             initialPwd = PasswordGenerator.New(email);
             var registerResult =
-                await identityService.RegisterByEmailAsync(request.WorkspaceId, email, initialPwd, UserOrigin.Local);
+                await identityService.RegisterByEmailAsync(email, initialPwd, UserOrigin.Local, true);
             userId = registerResult.User.Id;
         }
         else
@@ -71,6 +72,10 @@ public class AddMemberHandler(
             initialPwd = string.Empty;
             userId = user.Id;
         }
+        
+        var workspaceUser = new WorkspaceUser(request.WorkspaceId, userId);
+        // Nothing will happen if user already in the workspace
+        await workspaceService.AddUserAsync(workspaceUser);
 
         // if no policies or groups are specified, use the organization's default permissions
         if (request.PolicyIds.Count == 0 && request.GroupIds.Count == 0)
@@ -80,7 +85,7 @@ public class AddMemberHandler(
             request.GroupIds = organization.DefaultPermissions.GroupIds;
         }
 
-        var organizationUser = new OrganizationUser(request.OrganizationId, userId, currentUser.Id, initialPwd);
+        var organizationUser = new OrganizationUser(request.OrganizationId, userId, currentUser.Id);
         await organizationService.AddUserAsync(
             organizationUser,
             request.PolicyIds,

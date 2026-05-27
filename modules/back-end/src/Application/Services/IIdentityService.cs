@@ -14,5 +14,5 @@ public interface IIdentityService
 
     Task<LoginResult> LoginByEmailAsync(string email, string password, string ipAddress);
 
-    Task<RegisterResult> RegisterByEmailAsync(Guid workspaceId, string email, string password, string origin);
+    Task<RegisterResult> RegisterByEmailAsync(string email, string password, string origin, bool storePassword = false);
 }

@@ -85,6 +85,22 @@ ORDER BY email, created_at ASC, id ASC
 -- 5. Drop the now-redundant workspace_id column
 ALTER TABLE users DROP COLUMN workspace_id;
 
+ALTER TABLE users ADD COLUMN initial_password text;
+
+-- Copy initial_password from organization_users to users
+-- Uses the most recent record per user if multiple org memberships exist
+UPDATE users u
+SET initial_password = ou.initial_password
+  FROM (
+    SELECT DISTINCT ON (user_id) user_id, initial_password
+    FROM organization_users
+    WHERE initial_password IS NOT NULL
+    ORDER BY user_id, created_at ASC
+) ou
+WHERE u.id = ou.user_id;
+
+ALTER TABLE organization_users DROP COLUMN initial_password;
+
 COMMIT;
 
 ```

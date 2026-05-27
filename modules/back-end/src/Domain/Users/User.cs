@@ -11,6 +11,8 @@ public class User : AuditedEntity
     public string Password { get; set; }
 
     public string Origin { get; set; }
+    
+    public string InitialPassword { get; set; }
 
     /// <summary>
     /// for test project use only
@@ -54,6 +56,13 @@ public class User : AuditedEntity
         Email = email;
         Name = name;
 
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void UpdatePassword(string password)
+    {
+        Password = password;
+        InitialPassword = null;
         UpdatedAt = DateTime.UtcNow;
     }
 }

@@ -32,7 +32,7 @@ public class MemberService(AppDbContext dbContext) : IMemberService
                 Name = user.Name,
                 CreatedAt = user.CreatedAt,
                 InvitorId = organizationUser.InvitorId,
-                InitialPassword = organizationUser.InitialPassword
+                InitialPassword = user.InitialPassword
             };
 
         var member = await query.FirstOrDefaultAsync();
@@ -82,7 +82,7 @@ public class MemberService(AppDbContext dbContext) : IMemberService
                 Name = user.Name,
                 CreatedAt = user.CreatedAt,
                 InvitorId = organizationUser.InvitorId,
-                InitialPassword = organizationUser.InitialPassword
+                InitialPassword = user.InitialPassword
             };
 
         // email/name filter

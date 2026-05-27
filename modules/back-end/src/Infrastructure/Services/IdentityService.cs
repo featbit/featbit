@@ -11,7 +11,6 @@ using Microsoft.IdentityModel.Tokens;
 namespace Infrastructure.Services;
 
 public class IdentityService(
-    IWorkspaceService workspaceService, 
     IUserService userService, 
     IPasswordHasher<User> passwordHasher, 
     IRefreshTokenService refreshTokenService, 
@@ -32,7 +31,7 @@ public class IdentityService(
     public async Task<IdentityResult> ResetPasswordAsync(User user, string newPassword)
     {
         var newPasswordHash = passwordHasher.HashPassword(user, newPassword);
-        user.Password = newPasswordHash;
+        user.UpdatePassword(newPasswordHash);
 
         await userService.UpdateAsync(user);
 
@@ -92,17 +91,19 @@ public class IdentityService(
         return LoginResult.Ok(tokens);
     }
 
-    public async Task<RegisterResult> RegisterByEmailAsync(Guid workspaceId, string email, string password, string origin)
+    public async Task<RegisterResult> RegisterByEmailAsync(string email, string password, string origin, bool storePassword = false)
     {
         var hashedPwd = string.IsNullOrWhiteSpace(password)
             ? string.Empty
             : passwordHasher.HashPassword(null!, password);
 
-        var user = new User(workspaceId, email, hashedPwd, origin: origin);
+        var user = new User(email, hashedPwd, origin: origin);
+        if (storePassword)
+        {
+            user.InitialPassword = password;
+        }
+
         await userService.AddOneAsync(user);
-        
-        var workspaceUser = new WorkspaceUser(workspaceId, user.Id);
-        await workspaceService.AddUserAsync(workspaceUser);
 
         return RegisterResult.Ok(user);
     }

@@ -1,9 +1,6 @@
 using Application.Usages;
 using Application.Workspaces;
 using Dapper;
-using Domain.Groups;
-using Domain.Members;
-using Domain.Organizations;
 using Domain.Users;
 using Domain.Workspaces;
 using Microsoft.EntityFrameworkCore;
@@ -344,5 +341,12 @@ public class WorkspaceService(AppDbContext dbContext)
         SetOf<WorkspaceUser>().Add(workspaceUser);
 
         await SaveChangesAsync();
+    }
+
+    public async Task RemoveUserAsync(Guid workspaceId, Guid userId)
+    {
+        await QueryableOf<WorkspaceUser>()
+            .Where(x => x.WorkspaceId == workspaceId && x.UserId == userId)
+            .ExecuteDeleteAsync();
     }
 }
