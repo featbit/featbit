@@ -2037,6 +2037,10 @@
           <context context-type="linenumber">20,21</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/end-users/index/download-confirm-modal/download-confirm-modal.html</context>
+          <context context-type="linenumber">28,30</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
           <context context-type="linenumber">221,222</context>
         </context-group>
@@ -2656,6 +2660,10 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/segment-creation-modal/segment-creation-modal.component.ts</context>
           <context context-type="linenumber">186</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/end-users/index/download-confirm-modal/download-confirm-modal.ts</context>
+          <context context-type="linenumber">62</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
@@ -4481,58 +4489,66 @@
         </context-group>
         <target>环境</target>
       </trans-unit>
-      <trans-unit id="users.import.choose-file" datatype="html">
+      <trans-unit id="import-end-user.title" datatype="html">
+        <source>Import Users</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/import-end-user/import-end-user.component.html</context>
+          <context context-type="linenumber">5,7</context>
+        </context-group>
+        <target>导入目标用户</target>
+      </trans-unit>
+      <trans-unit id="import-end-user.choose-file" datatype="html">
         <source>Choose the data file you want to import.</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.html</context>
-          <context context-type="linenumber">13,14</context>
+          <context context-type="sourcefile">src/app/core/components/import-end-user/import-end-user.component.html</context>
+          <context context-type="linenumber">14,15</context>
         </context-group>
         <target>请选择你想要上传的文件</target>
       </trans-unit>
-      <trans-unit id="users.import.view-template" datatype="html">
+      <trans-unit id="import-end-user.view-template" datatype="html">
         <source>Click to view the template</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.html</context>
-          <context context-type="linenumber">14,17</context>
+          <context context-type="sourcefile">src/app/core/components/import-end-user/import-end-user.component.html</context>
+          <context context-type="linenumber">15,19</context>
         </context-group>
         <target>点击查看模板</target>
       </trans-unit>
-      <trans-unit id="users.import.users-note" datatype="html">
+      <trans-unit id="import-end-user.users-note" datatype="html">
         <source>We will either create new user records or update existing ones based on the keyId.</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.html</context>
-          <context context-type="linenumber">19,22</context>
+          <context context-type="sourcefile">src/app/core/components/import-end-user/import-end-user.component.html</context>
+          <context context-type="linenumber">20,23</context>
         </context-group>
         <target>根据 keyId 来决定创建新用户或更新已有用户。</target>
       </trans-unit>
-      <trans-unit id="users.import.user-properties-note" datatype="html">
-        <source>Any new user properties in the file will be added, but existing properties will not be changed.</source>
+      <trans-unit id="import-end-user.user-properties-note" datatype="html">
+        <source>Any new user properties in the file will be added and existing ones remain unchanged.</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.html</context>
-          <context context-type="linenumber">23,26</context>
+          <context context-type="sourcefile">src/app/core/components/import-end-user/import-end-user.component.html</context>
+          <context context-type="linenumber">24,28</context>
         </context-group>
-        <target>任何新的用户属性会被添加，已存在的用户属性不会受到任何影响。</target>
+        <target>文件中的任何新用户属性都会被添加，现有属性保持不变。</target>
       </trans-unit>
-      <trans-unit id="users.import.upload-text" datatype="html">
+      <trans-unit id="import-end-user.upload-text" datatype="html">
         <source>Click or drag file to this area to upload</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.html</context>
+          <context context-type="sourcefile">src/app/core/components/import-end-user/import-end-user.component.html</context>
           <context context-type="linenumber">40,42</context>
         </context-group>
         <target>点击或拖动文件到此区域</target>
       </trans-unit>
-      <trans-unit id="users.import.supported-format" datatype="html">
+      <trans-unit id="import-end-user.supported-format" datatype="html">
         <source>Supported format: JSON</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.html</context>
+          <context context-type="sourcefile">src/app/core/components/import-end-user/import-end-user.component.html</context>
           <context context-type="linenumber">43,44</context>
         </context-group>
         <target>支持的文件格式：JSON</target>
       </trans-unit>
-      <trans-unit id="users.import.maximum-file-size" datatype="html">
+      <trans-unit id="import-end-user.maximum-file-size" datatype="html">
         <source>Maximum file size: 500MB</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.html</context>
+          <context context-type="sourcefile">src/app/core/components/import-end-user/import-end-user.component.html</context>
           <context context-type="linenumber">44,47</context>
         </context-group>
         <target>最大文件大小：500MB</target>
@@ -4540,32 +4556,32 @@
       <trans-unit id="users.import.file-format-error" datatype="html">
         <source>Invalid file format. Only JSON files are allowed.</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.ts</context>
-          <context context-type="linenumber">33</context>
+          <context context-type="sourcefile">src/app/core/components/import-end-user/import-end-user.component.ts</context>
+          <context context-type="linenumber">34</context>
         </context-group>
         <target>非法的文件类型，仅支持 JSON 文件</target>
       </trans-unit>
       <trans-unit id="users.import.file-size-error" datatype="html">
         <source>The uploaded file exceeds the size limit of 500MB. Please upload a smaller file.</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.ts</context>
-          <context context-type="linenumber">40</context>
+          <context context-type="sourcefile">src/app/core/components/import-end-user/import-end-user.component.ts</context>
+          <context context-type="linenumber">41</context>
         </context-group>
         <target>上传的文件超过 500MB，请上传更小的文件</target>
       </trans-unit>
       <trans-unit id="users.import.import-success" datatype="html">
         <source>User data has been successfully imported.</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.ts</context>
-          <context context-type="linenumber">59</context>
+          <context context-type="sourcefile">src/app/core/components/import-end-user/import-end-user.component.ts</context>
+          <context context-type="linenumber">61</context>
         </context-group>
         <target>成功导入用户信息</target>
       </trans-unit>
       <trans-unit id="users.import.import-failed" datatype="html">
         <source>Failed to import user data. Please check the file and try again.</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/import-user/import-user.component.ts</context>
-          <context context-type="linenumber">62</context>
+          <context context-type="sourcefile">src/app/core/components/import-end-user/import-end-user.component.ts</context>
+          <context context-type="linenumber">64</context>
         </context-group>
         <target>导入用户信息失败，请检查文件内容之后再试</target>
       </trans-unit>
@@ -5605,7 +5621,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
-          <context context-type="linenumber">60,62</context>
+          <context context-type="linenumber">72,74</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/metrics/metrics.component.html</context>
@@ -6542,70 +6558,6 @@
         </context-group>
         <target>发送测试时间</target>
       </trans-unit>
-      <trans-unit id="upload" datatype="html">
-        <source>Upload</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/upload-drawer/upload-drawer.component.html</context>
-          <context context-type="linenumber">5</context>
-        </context-group>
-        <target>上传</target>
-      </trans-unit>
-      <trans-unit id="Uploading" datatype="html">
-        <source>Uploading...</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/upload-drawer/upload-drawer.component.html</context>
-          <context context-type="linenumber">11,12</context>
-        </context-group>
-        <target>上传中...</target>
-      </trans-unit>
-      <trans-unit id="data-upload-warning" datatype="html">
-        <source>For users, only insert/update operations will be executed; For user properties, only insert operation will be executed.</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/upload-drawer/upload-drawer.component.html</context>
-          <context context-type="linenumber">17,18</context>
-        </context-group>
-        <target>在数据同步时，对于开关用户数据，仅执行新增/更新操作；对于开关用户属性，仅执行新增操作。</target>
-      </trans-unit>
-      <trans-unit id="select-file-to-upload" datatype="html">
-        <source>Please select the file to upload (only support JSON file).</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/upload-drawer/upload-drawer.component.html</context>
-          <context context-type="linenumber">22,23</context>
-        </context-group>
-        <target>请选择要上传的文件（仅支持 JSON 文件）</target>
-      </trans-unit>
-      <trans-unit id="check-template" datatype="html">
-        <source>Click to view the template</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/upload-drawer/upload-drawer.component.html</context>
-          <context context-type="linenumber">23,25</context>
-        </context-group>
-        <target>点击查看模板</target>
-      </trans-unit>
-      <trans-unit id="select-upload-file" datatype="html">
-        <source>Select and upload file</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/upload-drawer/upload-drawer.component.html</context>
-          <context context-type="linenumber">32,33</context>
-        </context-group>
-        <target>选择并上传文件</target>
-      </trans-unit>
-      <trans-unit id="upload-failed" datatype="html">
-        <source>upload failed</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/upload-drawer/upload-drawer.component.ts</context>
-          <context context-type="linenumber">42</context>
-        </context-group>
-        <target>上传失败</target>
-      </trans-unit>
-      <trans-unit id="upload-success" datatype="html">
-        <source>upload success</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/core/components/upload-drawer/upload-drawer.component.ts</context>
-          <context context-type="linenumber">47</context>
-        </context-group>
-        <target>上传成功</target>
-      </trans-unit>
       <trans-unit id="common.feature-flag" datatype="html">
         <source>Feature Flag</source>
         <context-group purpose="location">
@@ -6650,7 +6602,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
-          <context context-type="linenumber">74,76</context>
+          <context context-type="linenumber">86,88</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
@@ -7304,6 +7256,10 @@
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
           <context context-type="linenumber">84,86</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/end-users/index/download-confirm-modal/download-confirm-modal.html</context>
+          <context context-type="linenumber">35,37</context>
+        </context-group>
         <target>继续</target>
       </trans-unit>
       <trans-unit id="common.social-login-hint" datatype="html">
@@ -7398,6 +7354,54 @@
         </context-group>
         <target>属性值</target>
       </trans-unit>
+      <trans-unit id="users.idx.download-end-users" datatype="html">
+        <source>Download End-Users</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/end-users/index/download-confirm-modal/download-confirm-modal.html</context>
+          <context context-type="linenumber">8,10</context>
+        </context-group>
+        <target>下载目标用户</target>
+      </trans-unit>
+      <trans-unit id="users.idx.download-confirm" datatype="html">
+        <source>You are about to download <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>the end-users matching your current filters<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> in the current environment. Are you sure you want to continue?</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/end-users/index/download-confirm-modal/download-confirm-modal.html</context>
+          <context context-type="linenumber">10,11</context>
+        </context-group>
+        <target>您将要下载当前环境中符合您当前筛选条件的目标用户，您确定要继续吗？</target>
+      </trans-unit>
+      <trans-unit id="users.idx.download-limit-exceeded-title" datatype="html">
+        <source>The current filter matches more than 50,000 results</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/end-users/index/download-confirm-modal/download-confirm-modal.html</context>
+          <context context-type="linenumber">15,16</context>
+        </context-group>
+        <target>当前筛选匹配超过 50,000 个结果</target>
+      </trans-unit>
+      <trans-unit id="users.idx.download-limit-exceeded-desc" datatype="html">
+        <source>Download is not supported when the result exceeds this limit. Narrow your filters and try again.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/end-users/index/download-confirm-modal/download-confirm-modal.html</context>
+          <context context-type="linenumber">17,18</context>
+        </context-group>
+        <target>当筛选结果超过此限制时，不支持下载。请缩小筛选范围并重试。</target>
+      </trans-unit>
+      <trans-unit id="common.total" datatype="html">
+        <source>Total</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/end-users/index/download-confirm-modal/download-confirm-modal.html</context>
+          <context context-type="linenumber">25,26</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/insights/insights.component.ts</context>
+          <context context-type="linenumber">199</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/relay-proxies/index/index.component.html</context>
+          <context context-type="linenumber">77</context>
+        </context-group>
+        <target>总共</target>
+      </trans-unit>
       <trans-unit id="users.idx.filter-by-property" datatype="html">
         <source>Filter by property</source>
         <context-group purpose="location">
@@ -7418,19 +7422,39 @@
         </context-group>
         <target>显示</target>
       </trans-unit>
+      <trans-unit id="users.idx.upload" datatype="html">
+        <source>Upload</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
+          <context context-type="linenumber">38,39</context>
+        </context-group>
+        <target>上传</target>
+      </trans-unit>
       <trans-unit id="users.idx.manage-properties" datatype="html">
         <source>Properties</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
-          <context context-type="linenumber">38,40</context>
+          <context context-type="linenumber">42,44</context>
         </context-group>
         <target>属性管理</target>
+      </trans-unit>
+      <trans-unit id="users.idx.download" datatype="html">
+        <source>Download</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
+          <context context-type="linenumber">49,51</context>
+        </context-group>
+        <target>下载</target>
       </trans-unit>
       <trans-unit id="users.idx.evaluate" datatype="html">
         <source>Evaluate</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
-          <context context-type="linenumber">72,73</context>
+          <context context-type="linenumber">84,85</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/global-user/global-user.component.html</context>
+          <context context-type="linenumber">70,71</context>
         </context-group>
         <target>评估</target>
       </trans-unit>
@@ -8365,18 +8389,6 @@
           <context context-type="linenumber">177</context>
         </context-group>
         <target>过去12个月</target>
-      </trans-unit>
-      <trans-unit id="common.total" datatype="html">
-        <source>Total</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/insights/insights.component.ts</context>
-          <context context-type="linenumber">199</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/relay-proxies/index/index.component.html</context>
-          <context context-type="linenumber">77</context>
-        </context-group>
-        <target>总共</target>
       </trans-unit>
       <trans-unit id="ff.ff-archived" datatype="html">
         <source>Archived</source>
@@ -11074,14 +11086,6 @@
           <context context-type="linenumber">30,32</context>
         </context-group>
         <target>导入</target>
-      </trans-unit>
-      <trans-unit id="users.idx.ff-segments" datatype="html">
-        <source>Evaluate on flags and segments</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/workspaces/global-user/global-user.component.html</context>
-          <context context-type="linenumber">70,71</context>
-        </context-group>
-        <target>评估开关和用户组</target>
       </trans-unit>
       <trans-unit id="common.workspace-id" datatype="html">
         <source>Workspace Id</source>
