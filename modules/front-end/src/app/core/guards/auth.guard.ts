@@ -8,8 +8,8 @@ import {
 } from "@shared/utils/localstorage-keys";
 import { PermissionsService } from "@services/permissions.service";
 import { ProjectService } from "@services/project.service";
-import { getCurrentProjectEnv } from "@utils/project-env";
-import { IEnvironment, IOrganization, IProject, IProjectEnv } from "@shared/types";
+import { getCurrentProjectEnv, getCurrentWorkspace } from "@utils/project-env";
+import { IEnvironment, IOrganization, IProject, IProjectEnv, IWorkspace } from "@shared/types";
 import { IdentityService } from "@services/identity.service";
 import { NzNotificationService } from "ng-zorro-antd/notification";
 import { OrganizationService } from "@services/organization.service";
@@ -45,26 +45,42 @@ export const authGuard = async (
     return router.parseUrl('/login');
   }
 
-  if (workspaces.length > 1) {
-    if (url.startsWith("/select-organization")) {
-      return true;
-    }
-
-    return router.parseUrl('/select-organization');
+  // For multi-workspace: let the selection page handle itself without any further checks
+  if (workspaces.length > 1 && url.startsWith("/select-workspace")) {
+    return true;
   }
 
-  workspaceService.setWorkspace(workspaces[0]);
+  // Determine which workspace to use
+  let effectiveWorkspace: IWorkspace;
+  if (workspaces.length > 1) {
+    const storedWorkspace = getCurrentWorkspace();
+    const found = storedWorkspace
+      ? workspaces.find(w => w.id === storedWorkspace.id)
+      : undefined;
+
+    if (!found) {
+      // No valid workspace selected yet — send user to selection page
+      localStorage.setItem(LOGIN_REDIRECT_URL, url);
+      return router.parseUrl('/select-workspace');
+    }
+    effectiveWorkspace = found;
+  } else {
+    effectiveWorkspace = workspaces[0];
+  }
+
+  workspaceService.setWorkspace(effectiveWorkspace);
+
   const isSsoFirstLogin = localStorage.getItem(IS_SSO_FIRST_LOGIN) === 'true';
   const organizations = await organizationService.getListAsync(isSsoFirstLogin);
   organizationService.organizations = organizations;
 
-  if (url.startsWith("/select-organization")) {
+  if (url.startsWith("/select-workspace")) {
     return true;
   }
 
   // if no available organization, redirect to select org page
   if (organizations.length === 0) {
-    return router.parseUrl('/select-organization');
+    return router.parseUrl('/select-workspace');
   }
 
   // if no current org, redirect to select org page
@@ -72,7 +88,7 @@ export const authGuard = async (
   let organization: IOrganization = orgStr ? JSON.parse(orgStr) : null;
   if (!orgStr) {
     localStorage.setItem(LOGIN_REDIRECT_URL, url);
-    return router.parseUrl('/select-organization');
+    return router.parseUrl('/select-workspace');
   }
 
   organization = organizations.find(org => org.id === organization.id) || organizations[0];

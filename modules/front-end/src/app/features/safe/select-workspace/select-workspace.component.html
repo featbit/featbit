@@ -1,0 +1,100 @@
+<div class="main-container" [class]="{'menu-extended': menuExtended}">
+  <div class="menu-container">
+    <app-menu [menus]="[{}]" [menuExtended]="menuExtended" [isInitialized]="false" (toggleMenu)="toggleMenu($event)" (logout)="logout()"></app-menu>
+  </div>
+  <section class="right-container main-body">
+    @if (isLoading) {
+      <div class="page-loading">
+        <nz-spin nzTip="Loading..." i18n-nzTip="@@common.loading" nzSize="large"></nz-spin>
+      </div>
+    } @else {
+      <div class="selection-card">
+
+        <!-- Step indicator (only shown when user has multiple workspaces) -->
+        @if (workspaces.length > 1) {
+          <div class="steps-indicator">
+            <div class="step" [class.step-active]="currentStep === 'workspace'" [class.step-done]="currentStep === 'organization'">
+              <span class="step-dot">
+                @if (currentStep === 'organization') {
+                  <span nz-icon nzType="check"></span>
+                } @else {
+                  1
+                }
+              </span>
+              <span class="step-label" i18n="@@select-workspace-organization.workspace">Workspace</span>
+            </div>
+            <div class="step-connector"></div>
+            <div class="step" [class.step-active]="currentStep === 'organization'">
+              <span class="step-dot">2</span>
+              <span class="step-label" i18n="@@select-workspace-organization.organization">Organization</span>
+            </div>
+          </div>
+        }
+
+        <!-- Step 1: Workspace selection -->
+        @if (currentStep === 'workspace') {
+          <div class="step-content">
+            <h2 class="step-title" i18n="@@select-workspace-organization.select-workspace">Select a workspace</h2>
+            <p class="step-subtitle">
+              <span i18n="@@select-workspace-organization.workspaces-for">Workspaces for</span>&nbsp;<strong class="user-email">{{ profile?.email }}</strong>
+            </p>
+            <ul class="selection-list">
+              @for (workspace of workspaces; track workspace.id) {
+                <li class="selection-item" (click)="selectWorkspace(workspace)">
+                  <span class="item-icon" nz-icon nzType="appstore" nzTheme="outline"></span>
+                  <span class="item-name">{{ workspace.name }}</span>
+                  <span class="item-chevron" nz-icon nzType="right" nzTheme="outline"></span>
+                </li>
+              }
+            </ul>
+          </div>
+        }
+
+        <!-- Step 2: Organization selection -->
+        @if (currentStep === 'organization') {
+          <div class="step-content">
+            @if (isLoadingOrgs) {
+              <div class="orgs-loading">
+                <nz-spin nzTip="Loading organizations..." i18n-nzTip="@@select-workspace-organization.loading-orgs" nzSize="large"></nz-spin>
+              </div>
+            } @else if (organizations.length === 0) {
+              <div class="zero-org">
+                <span class="zero-org-icon" nz-icon nzType="warning" nzTheme="fill"></span>
+                <h3 class="zero-org-title" i18n="@@select-workspace-organization.no-organizations">No organizations found</h3>
+                <p class="zero-org-message" i18n="@@common.zero-org-info">You don't have any organization yet. Please contact your admin to add you to an organization.</p>
+              </div>
+            } @else {
+              <h2 class="step-title" i18n="@@common.select-an-organization">Select an organization</h2>
+              <p class="step-subtitle">
+                <span i18n="@@common.organizations-for">Organizations for</span>&nbsp;<strong class="user-email">{{ profile?.email }}</strong>
+                @if (workspaces.length > 1 && selectedWorkspace) {
+                  &nbsp;<span class="workspace-badge">{{ selectedWorkspace.name }}</span>
+                }
+              </p>
+              <ul class="selection-list">
+                @for (org of organizations; track org.id) {
+                  <li class="selection-item" (click)="setOrganization(org)">
+                    <span class="item-icon" nz-icon nzType="team" nzTheme="outline"></span>
+                    <span class="item-name">{{ org.name }}</span>
+                    <span class="item-chevron" nz-icon nzType="right" nzTheme="outline"></span>
+                  </li>
+                }
+              </ul>
+            }
+
+            @if (workspaces.length > 1) {
+              <button class="back-btn" (click)="backToWorkspaceSelection()">
+                <span nz-icon nzType="left" nzTheme="outline"></span>
+                <span i18n="@@select-workspace-organization.back-to-workspaces">Back to workspaces</span>
+              </button>
+            }
+          </div>
+        }
+
+        <div class="card-footer">
+          <a (click)="logout()" i18n="@@common.sign-in-with-another-email">Sign in with another email</a>
+        </div>
+      </div>
+    }
+  </section>
+</div>

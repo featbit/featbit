@@ -48,7 +48,6 @@ export interface IProfile {
   id: string;
   email: string;
   name: string;
-  workspaceId: string;
   origin: UserOriginEnum;
 }
 
