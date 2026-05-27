@@ -24,8 +24,6 @@ export class IndexComponent implements OnInit {
   totalCount: number;
 
   isLoading: boolean = true;
-  attributeManagevisible: boolean = false;
-  segmentsAndFlagsVisible: boolean = false;
 
   filter: EnvUserFilter = new EnvUserFilter();
 
@@ -128,22 +126,18 @@ export class IndexComponent implements OnInit {
     );
   }
 
-  onPropsSettingClick() {
-    this.attributeManagevisible = true;
-  }
+  uploadDrawerVisible: boolean = false;
+  propsDrawerVisible: boolean = false;
 
-  onPropsSettingClose() {
-    this.attributeManagevisible = false;
-  }
-
+  segmentsAndFlagsDrawerVisible: boolean = false;
   currentUser: IUserType = null;
   onSegmentsAndFlagsClick(user: IUserType) {
     this.currentUser = {...user};
-    this.segmentsAndFlagsVisible = true;
+    this.segmentsAndFlagsDrawerVisible = true;
   }
 
   onSegmentsAndFlagsClose() {
     this.currentUser = null;
-    this.segmentsAndFlagsVisible = false;
+    this.segmentsAndFlagsDrawerVisible = false;
   }
 }

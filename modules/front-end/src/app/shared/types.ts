@@ -208,7 +208,8 @@ export interface IProjectEnv {
   envId: string,
   envKey: string,
   envName: string,
-  envSecrets: ISecret[]
+  envSecrets: ISecret[],
+  envSettings: EnvironmentSetting
 }
 
 export interface IProject {
@@ -224,7 +225,12 @@ export interface IEnvironment {
   name: string,
   key: string,
   description: string,
-  secrets: ISecret[]
+  secrets: ISecret[],
+  settings: EnvironmentSetting
+}
+
+export interface EnvironmentSetting {
+  requireChangeComment: boolean;
 }
 
 export interface ISecret {
@@ -237,19 +243,6 @@ export interface ISecret {
 export enum SecretTypeEnum {
   Client = 'client',
   Server = 'server'
-}
-
-export interface EnvironmentSetting {
-  id: string;
-  type: string;
-  key: string;
-  value: string;
-  tag?: string;
-  remark?: string;
-}
-
-export const EnvironmentSettingTypes = {
-  SyncUrls: 'sync-urls',
 }
 
 export enum OAuthProviderEnum {
