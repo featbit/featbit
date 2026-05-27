@@ -535,19 +535,10 @@ public class FeatureFlagController : ApiControllerBase
     [OpenApi]
     [HttpPut("{key}/tags")]
     [Authorize(Permissions.UpdateFlagTags)]
-    public async Task<ApiResponse<bool>> SetTagsAsync(
-        Guid envId,
-        string key,
-        [FromQuery] string[] tags,
-        [FromBody] ResourceChangeRequest? changeRequest = null)
+    public async Task<ApiResponse<bool>> SetTagsAsync(Guid envId, string key, SetTags request)
     {
-        var request = new SetTags
-        {
-            EnvId = envId,
-            Key = key,
-            Tags = tags,
-            Comment = changeRequest?.Comment ?? string.Empty
-        };
+        request.EnvId = envId;
+        request.Key = key;
 
         var success = await Mediator.Send(request);
         return Ok(success);

@@ -298,13 +298,9 @@ public class SegmentController : ApiControllerBase
     [OpenApi]
     [HttpPut("{segmentId:guid}/tags")]
     [Authorize(Permissions.UpdateSegmentTags)]
-    public async Task<ApiResponse<bool>> SetTagsAsync(Guid segmentId, string[] tags)
+    public async Task<ApiResponse<bool>> SetTagsAsync(Guid segmentId, SetTags request)
     {
-        var request = new SetTags
-        {
-            Id = segmentId,
-            Tags = tags
-        };
+        request.Id = segmentId;
 
         var success = await Mediator.Send(request);
         return Ok(success);

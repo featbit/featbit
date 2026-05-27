@@ -227,7 +227,7 @@ export class FeatureFlagService {
 
   setTags(flagKey: string, tags: string[]): Observable<boolean> {
     const url = `${this.baseUrl}/${flagKey}/tags`;
-    return this.http.put<boolean>(url, tags);
+    return this.http.put<boolean>(url, { tags });
   }
 
   getInsights(filter: IInsightsFilter): Observable<IInsights[]> {

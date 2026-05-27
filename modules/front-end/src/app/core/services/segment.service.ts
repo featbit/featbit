@@ -105,6 +105,6 @@ export class SegmentService {
 
   setTags(id: string, tags: string[]): Observable<boolean> {
     const url = `${this.baseUrl}/${id}/tags`;
-    return this.http.put<boolean>(url, tags);
+    return this.http.put<boolean>(url, { tags });
   }
 }
