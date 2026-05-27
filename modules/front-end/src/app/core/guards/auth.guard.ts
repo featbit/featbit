@@ -106,7 +106,8 @@ const setProjectEnv = (projectService: ProjectService, project: IProject, env: I
     envId: env.id,
     envKey: env.key,
     envName: env.name,
-    envSecrets: env.secrets
+    envSecrets: env.secrets,
+    envSettings: env.settings
   };
 
   projectService.upsertCurrentProjectEnvLocally(projectEnv);
