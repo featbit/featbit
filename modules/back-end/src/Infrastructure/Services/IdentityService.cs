@@ -74,13 +74,8 @@ public class IdentityService(
         }
     }
 
-    public async Task<LoginResult> LoginByEmailAsync(Guid? workspaceId, string email, string password, string ipAddress)
+    public async Task<LoginResult> LoginByEmailAsync(string email, string password, string ipAddress)
     {
-        if (workspaceId is null)
-        {
-            return LoginResult.Failed(ErrorCodes.EmailPasswordMismatch);
-        }
-        
         var user = await userService.FindOneAsync(x => x.Email == email);
         if (user == null)
         {

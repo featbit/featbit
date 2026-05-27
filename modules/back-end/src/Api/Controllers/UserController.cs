@@ -24,15 +24,6 @@ public class UserController : ApiControllerBase
         return Ok(profile);
     }
 
-    // TODO remove
-    [AllowAnonymous]
-    [HttpPost("has-multiple-workspaces")]
-    public async Task<ApiResponse<bool>> HasMultipleWorkspacesAsync(HasMultipleWorkspaces request)
-    {
-        var hasMultipleWorkspaces = await Mediator.Send(request);
-        return Ok(hasMultipleWorkspaces);
-    }
-
     [HttpGet("policies")]
     public async Task<ApiResponse<IEnumerable<PolicyVm>>> GetPoliciesAsync()
     {

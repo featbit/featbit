@@ -1,21 +1,15 @@
 import { Component, OnInit } from '@angular/core';
-import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { phoneNumberOrEmailValidator } from "@utils/form-validators";
 import { IdentityService } from "@services/identity.service";
 import { SsoService } from "@services/sso.service";
 import { ActivatedRoute } from "@angular/router";
 import { IS_SSO_FIRST_LOGIN } from "@utils/localstorage-keys";
-import { UserService } from "@services/user.service";
 import { SocialService } from "@services/social.service";
 import { OAuthProvider, OAuthProviderEnum } from "@shared/types";
 import { environment } from 'src/environments/environment';
 import { HOSTING_MODE } from "@shared/constants";
-
-enum LoginStep {
-  Step1 = 'step1', // email
-  Step2 = 'step2' // workspace and (or) password
-}
 
 enum LoginTab {
   Login = 0,
@@ -31,8 +25,6 @@ enum LoginTab {
 export class DoLoginComponent implements OnInit {
 
   isSSO: boolean = false;
-  step: LoginStep = LoginStep.Step1;
-  displayWorkspaceKey: boolean = false;
   pwdLoginForm: FormGroup;
   ssoForm: FormGroup;
   passwordVisible: boolean = false;
@@ -52,15 +44,13 @@ export class DoLoginComponent implements OnInit {
     private identityService: IdentityService,
     private ssoService: SsoService,
     private socialService: SocialService,
-    private message: NzMessageService,
-    private userService: UserService
+    private message: NzMessageService
   ) { }
 
   async ngOnInit() {
     this.pwdLoginForm = this.fb.group({
       identity: ['', [Validators.required, phoneNumberOrEmailValidator]],
-      password: ['', [this.requiredWhenLoginVerifiedValidator(LoginStep.Step2)]],
-      workspaceKey: ['', [this.requiredWhenLoginVerifiedValidator(LoginStep.Step2)]]
+      password: ['', [Validators.required]]
     });
 
     const [ providers, preCheck ] = await Promise.all(
@@ -86,32 +76,6 @@ export class DoLoginComponent implements OnInit {
     });
 
     this.subscribeExternalLogin();
-  }
-
-  requiredWhenLoginVerifiedValidator = (step: LoginStep): ValidatorFn => {
-    return (control: AbstractControl) => {
-
-      if (step === this.step && (!control.value || control.value.length === 0)) {
-        const error = { required: true };
-        control.setErrors(error);
-        return error;
-      } else {
-        control.setErrors(null);
-      }
-
-      return null;
-    };
-  }
-
-  hasMultipleWorkspaces(identity: string) {
-    this.userService.hasMultipleWorkspaces(identity).subscribe({
-      next: response => {
-        this.displayWorkspaceKey = response;
-        this.step = LoginStep.Step2;
-        this.isLoading = false;
-      },
-      error: error => this.handleError(error)
-    });
   }
 
   ssoLogin() {
@@ -147,21 +111,12 @@ export class DoLoginComponent implements OnInit {
       return;
     }
 
-    const { identity, password, workspaceKey } = this.pwdLoginForm.value;
-
-    switch (this.step) {
-      case LoginStep.Step1:
-        this.isLoading = true;
-        this.hasMultipleWorkspaces(identity);
-        break;
-      case LoginStep.Step2:
-        this.isLoading = true;
-        this.identityService.loginByEmail(identity, password, workspaceKey).subscribe({
-          next: response => this.handleResponse(response),
-          error: error => this.handleError(error)
-        });
-        break;
-    }
+    const { identity, password } = this.pwdLoginForm.value;
+    this.isLoading = true;
+    this.identityService.loginByEmail(identity, password).subscribe({
+      next: response => this.handleResponse(response),
+      error: error => this.handleError(error)
+    });
   }
 
   async handleResponse(response) {
@@ -225,6 +180,5 @@ export class DoLoginComponent implements OnInit {
     this.message.success($localize`:@@common.login-success:Login with success`);
   }
 
-  protected readonly LoginStep = LoginStep;
   protected readonly OAuthProviderEnum = OAuthProviderEnum;
 }

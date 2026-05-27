@@ -27,8 +27,7 @@ public class IdentityControllerTests
         var request = new LoginByEmail
         {
             Email = TestUser.Email,
-            Password = TestUser.RealPassword,
-            WorkspaceKey = TestWorkspace.Key
+            Password = TestUser.RealPassword
         };
         var response = await _app.PostAsync("/api/v1/identity/login-by-email", request, false);
 
