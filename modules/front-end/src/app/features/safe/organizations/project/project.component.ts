@@ -100,7 +100,7 @@ export class ProjectComponent implements OnInit {
       return;
     }
 
-    this.envService.removeEnv(project.id, env.id).subscribe(() => {
+    this.envService.removeEnv(env.id).subscribe(() => {
       project.environments = project.environments.filter(e => e.id !== env.id);
       this.messageService.success($localize`:@@org.project.env-remove-success:Environment successfully removed`);
       // emit project list change event
@@ -173,6 +173,7 @@ export class ProjectComponent implements OnInit {
     // if it is editing current env
     if (data.isEditing && this.currentProjectEnv.envId == this.env.id) {
       this.currentProjectEnv.envName = data.env.name;
+      this.currentProjectEnv.envSettings = data.env.settings;
       this.projectService.upsertCurrentProjectEnvLocally(this.currentProjectEnv);
     }
 

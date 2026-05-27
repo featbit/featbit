@@ -41,7 +41,7 @@ export class ConnectAnSdkComponent implements OnChanges {
     private envService: EnvService
   ) {
     const projectEnv = getCurrentProjectEnv();
-    this.envService.getEnv(projectEnv.projectId, projectEnv.envId).subscribe({
+    this.envService.getEnv(projectEnv.envId).subscribe({
       next: env => {
         this.env = env;
         this.selectedSecret = env.secrets[0];

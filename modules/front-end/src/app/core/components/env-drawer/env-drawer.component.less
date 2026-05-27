@@ -1,3 +1,30 @@
+@import "variables";
+
 nz-alert {
   margin-bottom: 12px;
+}
+
+.settings-section-title {
+  width: 100%;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.settings-item {
+  padding: 12px 0;
+
+  & + .settings-item {
+    border-top: 1px solid #f5f5f5;
+  }
+
+  .settings-item-label {
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.85);
+  }
+
+  .settings-item-description {
+    margin: 4px 0 0 24px;
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.45);
+    line-height: 1.5;
+  }
 }
