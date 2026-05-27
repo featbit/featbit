@@ -29,8 +29,7 @@
 
     <!-- Segment Form -->
     @if (selectedType === SegmentType.EnvironmentSpecific || (selectedType == SegmentType.Shared && isShareableSegmentGranted)) {
-      <form
-        nz-form [formGroup]="form" nzLayout="vertical">
+      <form nz-form [formGroup]="form" nzLayout="vertical">
         <!-- Name  -->
         <nz-form-item>
           <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>

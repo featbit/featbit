@@ -18,6 +18,8 @@ import { permissionActions } from "@shared/policy";
 import { getCurrentEnvRN } from "@utils/project-env";
 import { PermissionLicenseService } from "@services/permission-license.service";
 import { PermissionsService } from "@services/permissions.service";
+import { ChangeCommentService } from "@services/change-comment.service";
+import { ChangeOperation } from "@core/components/change-comment/types";
 
 @Component({
     selector: 'index',
@@ -34,7 +36,8 @@ export class IndexComponent implements OnInit {
     private msg: NzMessageService,
     private modal: NzModalService,
     private permissionsService: PermissionsService,
-    private permissionLicenseService: PermissionLicenseService
+    private permissionLicenseService: PermissionLicenseService,
+    private changeCommentService: ChangeCommentService
   ) { }
 
   featureFlagFilter: IFeatureFlagListFilter = new IFeatureFlagListFilter();
@@ -265,27 +268,31 @@ export class IndexComponent implements OnInit {
       return;
     }
 
-    data.isToggling = true;
+    this.changeCommentService.promptFlag(data.key, ChangeOperation.ChangeStatus).subscribe(comment => {
+      if (comment === null) return;
 
-    let msg: string = data.isEnabled
-      ? $localize`:@@ff.idx.flag-turned-off:The status of feature flag <b>${data.name}</b> is changed to OFF`
-      : $localize`:@@ff.idx.flag-turned-on:The status of feature flag <b>${data.name}</b> is changed to ON`;
+      data.isToggling = true;
 
-    this.featureFlagService.toggleStatus(data.key, !data.isEnabled).subscribe({
-      next: _ => {
-        this.msg.success(msg);
-        data.isEnabled = !data.isEnabled;
-        data.lastChange = {
-          operator: getProfile(),
-          happenedAt: new Date(),
-          comment: ''
-        };
-        data.isToggling = false;
-      },
-      error: _ => {
-        this.msg.error($localize`:@@ff.idx.status-change-failed:Failed to change feature flag status`);
-        data.isToggling = false;
-      }
+      let msg: string = data.isEnabled
+        ? $localize`:@@ff.idx.flag-turned-off:The status of feature flag <b>${data.name}</b> is changed to OFF`
+        : $localize`:@@ff.idx.flag-turned-on:The status of feature flag <b>${data.name}</b> is changed to ON`;
+
+      this.featureFlagService.toggleStatus(data.key, !data.isEnabled, comment).subscribe({
+        next: _ => {
+          this.msg.success(msg);
+          data.isEnabled = !data.isEnabled;
+          data.lastChange = {
+            operator: getProfile(),
+            happenedAt: new Date(),
+            comment: ''
+          };
+          data.isToggling = false;
+        },
+        error: _ => {
+          this.msg.error($localize`:@@ff.idx.status-change-failed:Failed to change feature flag status`);
+          data.isToggling = false;
+        }
+      });
     });
   }
 
@@ -307,35 +314,44 @@ export class IndexComponent implements OnInit {
       nzOkText: $localize`:@@common.archive:Archive`,
       nzWidth: '550px',
       nzOnOk: () => {
-        this.featureFlagService.archive(flag.key).subscribe({
-            next: () => {
-              this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
-              this.onSearch();
-            },
-            error: () => this.msg.error($localize`:@@common.operation-failed-try-again:Operation failed, please try again`)
-          }
-        );
+        this.changeCommentService.promptFlag(flag.key, ChangeOperation.Archive).subscribe(comment => {
+          if (comment === null) return;
+          this.featureFlagService.archive(flag.key, comment).subscribe({
+              next: () => {
+                this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
+                this.onSearch();
+              },
+              error: () => this.msg.error($localize`:@@common.operation-failed-try-again:Operation failed, please try again`)
+            }
+          );
+        });
       }
     });
   }
 
   restore(flag: IFeatureFlagListItem) {
-    this.featureFlagService.restore(flag.key).subscribe({
-      next: () => {
-        this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
-        this.onSearch();
-      },
-      error: () => this.msg.error($localize`:@@common.operation-failed:Operation failed`)
+    this.changeCommentService.promptFlag(flag.key, ChangeOperation.Restore).subscribe(comment => {
+      if (comment === null) return;
+      this.featureFlagService.restore(flag.key, comment).subscribe({
+        next: () => {
+          this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
+          this.onSearch();
+        },
+        error: () => this.msg.error($localize`:@@common.operation-failed:Operation failed`)
+      });
     });
   }
 
   delete(flag: IFeatureFlagListItem) {
-    this.featureFlagService.delete(flag.key).subscribe({
-      next: () => {
-        this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
-        this.onSearch();
-      },
-      error: () => this.msg.error($localize`:@@common.operation-failed:Operation failed`)
+    this.changeCommentService.promptFlag(flag.key, ChangeOperation.Delete).subscribe(comment => {
+      if (comment === null) return;
+      this.featureFlagService.delete(flag.key, comment).subscribe({
+        next: () => {
+          this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
+          this.onSearch();
+        },
+        error: () => this.msg.error($localize`:@@common.operation-failed:Operation failed`)
+      });
     });
   }
 
