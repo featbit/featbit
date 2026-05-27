@@ -57,7 +57,7 @@ public class AddMemberHandler(
         string initialPwd;
         Guid userId;
 
-        var user = await userService.FindOneAsync(x => x.Email == email && x.WorkspaceId == request.WorkspaceId);
+        var user = await userService.FindOneAsync(x => x.Email == email);
         // automatically register users if they do not exist
         if (user == null)
         {

@@ -1,5 +1,6 @@
 using Application.Usages;
 using Application.Workspaces;
+using Domain.Users;
 using Domain.Workspaces;
 
 namespace Application.Services;
@@ -15,4 +16,8 @@ public interface IWorkspaceService : IService<Workspace>
     Task SaveRecordsAsync(AggregatedUsageRecords records);
 
     Task<WorkspaceUsageVm> GetUsageAsync(Guid workspaceId, WorkspaceUsageFilter filter);
+    
+    Task<bool> ContainsUserAsync(Guid workspaceId, Guid userId);
+
+    Task AddUserAsync(WorkspaceUser workspaceUser);
 }

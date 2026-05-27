@@ -1,6 +1,7 @@
 ﻿using Application.Services;
 using Application.Usages;
 using Application.Workspaces;
+using Domain.Users;
 using Domain.Workspaces;
 
 namespace Application.IntegrationTests.Stubs;
@@ -38,5 +39,15 @@ public class TestWorkspaceService : NullServiceBase<Workspace>, IWorkspaceServic
         );
 
         return Task.FromResult(usage);
+    }
+
+    public Task<bool> ContainsUserAsync(Guid workspaceId, Guid userId)
+    {
+        return Task.FromResult(true);
+    }
+
+    public Task AddUserAsync(WorkspaceUser workspaceUser)
+    {
+        return Task.CompletedTask;
     }
 }

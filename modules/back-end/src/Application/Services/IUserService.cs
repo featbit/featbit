@@ -12,4 +12,6 @@ public interface IUserService : IService<User>
     Task<ICollection<Workspace>> GetWorkspacesAsync(string email);
 
     Task<Workspace> GetWorkspaceAsync(Guid userId, Guid workspaceId);
+
+    Task<User> GetUserByEmailAsync(Guid workspaceId, string email);
 }

@@ -47,7 +47,32 @@ FROM users u
 --    JOIN canonical c ON c.email = u.email AND c.canonical_id <> u.id
 --    WHERE st.user_id = u.id;
 --
---    (skip this block if no other tables reference users.id)
+
+WITH canonical AS (
+    SELECT DISTINCT ON (email)
+        id    AS canonical_id,
+        email
+    FROM users
+    ORDER BY email, created_at ASC, id ASC
+)
+UPDATE organization_users ou
+SET user_id = c.canonical_id
+FROM users u
+JOIN canonical c ON c.email = u.email AND c.canonical_id <> u.id
+WHERE ou.user_id = u.id;
+
+WITH canonical AS (
+    SELECT DISTINCT ON (email)
+        id    AS canonical_id,
+        email
+    FROM users
+    ORDER BY email, created_at ASC, id ASC
+)
+UPDATE refresh_tokens r
+SET user_id = c.canonical_id
+FROM users u
+JOIN canonical c ON c.email = u.email AND c.canonical_id <> u.id
+WHERE r.user_id = u.id;
 
 -- 4. Delete duplicate (non-canonical) user rows
 DELETE FROM users

@@ -9,6 +9,7 @@ namespace Application.IntegrationTests.Identity;
 
 public class IdentityServiceTests
 {
+    private readonly Mock<IWorkspaceService> _workspaceServiceMock = new();
     private readonly Mock<IPasswordHasher<User>> _passwordHasherMock = new();
     private readonly Mock<IRefreshTokenService> _refreshTokenServiceMock = new();
     private readonly IdentityService _identityService;
@@ -16,6 +17,7 @@ public class IdentityServiceTests
     public IdentityServiceTests()
     {
         _identityService = new IdentityService(
+            _workspaceServiceMock.Object,
             null!,
             _passwordHasherMock.Object,
             _refreshTokenServiceMock.Object,

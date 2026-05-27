@@ -1,6 +1,10 @@
 using Application.Usages;
 using Application.Workspaces;
 using Dapper;
+using Domain.Groups;
+using Domain.Members;
+using Domain.Organizations;
+using Domain.Users;
 using Domain.Workspaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -313,5 +317,32 @@ public class WorkspaceService(AppDbContext dbContext)
 
             return results.ToArray();
         }
+    }
+    
+    public async Task<bool> ContainsUserAsync(Guid workspaceId, Guid userId)
+    {
+        var exists = await QueryableOf<WorkspaceUser>().AnyAsync(
+            x => x.WorkspaceId == workspaceId && x.UserId == userId
+        );
+
+        return exists;
+    }
+    
+    public async Task AddUserAsync(WorkspaceUser workspaceUser)
+    {
+        var workspaceId = workspaceUser.WorkspaceId;
+        var userId = workspaceUser.UserId;
+
+        // if user is already in workspace, do nothing
+        var exists = await ContainsUserAsync(workspaceId, userId);
+        if (exists)
+        {
+            return;
+        }
+
+        // add workspace user
+        SetOf<WorkspaceUser>().Add(workspaceUser);
+
+        await SaveChangesAsync();
     }
 }

@@ -73,7 +73,7 @@ public class SsoController : ApiControllerBase
             }
 
             bool isSsoFirstLogin;
-            var user = await _userService.FindOneAsync(x => x.Email == email && x.WorkspaceId == workspace.Id);
+            var user = await _userService.GetUserByEmailAsync(workspace.Id, email);
             if (user == null)
             {
                 var registerResult =

@@ -58,6 +58,13 @@ public class TestUserService : NullServiceBase<User>, IUserService
         return Task.FromResult(TestWorkspace.Instance);
     }
 
+    public Task<User> GetUserByEmailAsync(Guid workspaceId, string email)
+    {
+        var user = TestUser.Instance();
+        
+        return Task.FromResult(user);
+    }
+
     public Task DeleteAsync(Guid id)
     {
         return Task.CompletedTask;
