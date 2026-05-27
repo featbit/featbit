@@ -134,12 +134,16 @@ public class EndUserController : ApiControllerBase
         return Ok(success);
     }
 
-    [HttpGet("download")]
-    public async Task<ApiResponse<ImportUserData>> DownloadAsync(Guid envId)
+    [HttpPost("download")]
+    public async Task<ApiResponse<ImportUserData>> DownloadAsync(Guid envId, SearchEndUser query)
     {
+        var filter = new EndUserFilter(query);
+        
         var request = new DownloadEndUsers
         {
-            EnvId = envId
+            WorkspaceId = WorkspaceId,
+            EnvId = envId,
+            Filter = filter
         };
 
         var data = await Mediator.Send(request);

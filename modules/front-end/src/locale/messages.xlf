@@ -2541,7 +2541,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/download-confirm-modal/download-confirm-modal.ts</context>
-          <context context-type="linenumber">58</context>
+          <context context-type="linenumber">62</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
@@ -6821,21 +6821,21 @@
         </context-group>
       </trans-unit>
       <trans-unit id="users.idx.download-confirm" datatype="html">
-        <source>You are about to download <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>all end-users<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> in the current environment. Are you sure you want to continue?</source>
+        <source>You are about to download <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/>the end-users matching your current filters<x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> in the current environment. Are you sure you want to continue?</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/download-confirm-modal/download-confirm-modal.html</context>
           <context context-type="linenumber">10,11</context>
         </context-group>
       </trans-unit>
       <trans-unit id="users.idx.download-limit-exceeded-title" datatype="html">
-        <source>This environment has more than 50,000 end-users</source>
+        <source>The current filter matches more than 50,000 results</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/download-confirm-modal/download-confirm-modal.html</context>
           <context context-type="linenumber">15,16</context>
         </context-group>
       </trans-unit>
       <trans-unit id="users.idx.download-limit-exceeded-desc" datatype="html">
-        <source>Download is not supported for environments exceeding this limit.</source>
+        <source>Download is not supported when the result exceeds this limit. Narrow your filters and try again.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/download-confirm-modal/download-confirm-modal.html</context>
           <context context-type="linenumber">17,18</context>

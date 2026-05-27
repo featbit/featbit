@@ -1,28 +1,22 @@
-using Application.Bases;
-using Application.Bases.Exceptions;
 using Domain.EndUsers;
 
 namespace Application.EndUsers;
 
 public class DownloadEndUsers : IRequest<ImportUserData>
 {
+    public Guid WorkspaceId { get; set; }
+
     public Guid EnvId { get; set; }
+
+    public EndUserFilter Filter { get; set; }
 }
 
 public class DownloadEndUsersHandler(IEndUserService service) : IRequestHandler<DownloadEndUsers, ImportUserData>
 {
     public async Task<ImportUserData> Handle(DownloadEndUsers request, CancellationToken cancellationToken)
     {
-        var envId = request.EnvId;
-
-        var total = await service.CountAsync(x => x.EnvId == envId);
-        if (total > EndUserConstants.EndUserDownloadLimit)
-        {
-            throw new BusinessException(ErrorCodes.EndUserLimitExceeded);
-        }
-
-        var users = await service.FindManyAsync(x => x.EnvId == envId);
-        var properties = await service.GetPropertiesAsync(envId);
+        var users = await service.LoadEndUsersAsync(request.WorkspaceId, request.EnvId, request.Filter);
+        var properties = await service.GetPropertiesAsync(request.EnvId);
 
         var data = new ImportUserData
         {

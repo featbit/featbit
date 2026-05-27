@@ -15,57 +15,14 @@ public class EndUserService(AppDbContext dbContext)
 {
     public async Task<PagedResult<EndUser>> GetListAsync(Guid workspaceId, Guid envId, EndUserFilter userFilter)
     {
-        var table = new Query("end_users");
-
-        var baseQuery = userFilter.GlobalUserOnly
-            ? table.Where("workspace_id", workspaceId)
-            : userFilter.IncludeGlobalUser
-                ? table.Where(
-                    x => x.Where("workspace_id", workspaceId).OrWhere("env_id", envId)
-                )
-                : table.Where("env_id", envId);
-
         var pgCompiler = new PostgresCompiler();
+        var baseQuery = TranslateFilter(workspaceId, envId, userFilter);
 
-        // excluded keyIds
-        var excludedKeyIds = userFilter.ExcludedKeyIds ?? [];
-        if (excludedKeyIds.Length != 0)
-        {
-            baseQuery.WhereNotIn("key_id", excludedKeyIds);
-        }
-
-        var name = userFilter.Name;
-        var keyId = userFilter.KeyId;
-        var customizedProperties = userFilter.CustomizedProperties ?? [];
-
-        baseQuery.Where(
-            group => group
-                .When(!string.IsNullOrWhiteSpace(keyId), q => q.OrWhereContains("key_id", keyId))
-                .When(!string.IsNullOrWhiteSpace(name), q => q.OrWhereContains("name", name))
-                .When(customizedProperties.Count > 0, q =>
-                {
-                    List<object> parameters = [];
-
-                    var wheres = customizedProperties.Select(cp =>
-                    {
-                        parameters.Add(cp.Name);
-                        parameters.Add($"%{cp.Value}%");
-
-                        return "(cp->>'name'= ? and cp->>'value' ilike ?)";
-                    });
-                    var where = string.Join(" or ", wheres);
-
-                    return q.OrWhereRaw(
-                        $"exists(select 1 from jsonb_array_elements(customized_properties) as cp where {where})",
-                        parameters.ToArray()
-                    );
-                })
-        );
-
-        var countSr = pgCompiler.Compile(
+        var countSqlResult = pgCompiler.Compile(
             baseQuery.Clone().AsCount()
         );
-        var itemsSr = pgCompiler.Compile(
+
+        var usersSqlResult = pgCompiler.Compile(
             baseQuery
                 .Clone()
                 .OrderByDesc("updated_at")
@@ -73,10 +30,30 @@ public class EndUserService(AppDbContext dbContext)
                 .Take(userFilter.PageSize)
         );
 
-        var totalCount = await DbConnection.ExecuteScalarAsync<int>(countSr.Sql, countSr.NamedBindings);
-        var items = await DbConnection.QueryAsync<EndUser>(itemsSr.Sql, itemsSr.NamedBindings);
+        var total = await DbConnection.ExecuteScalarAsync<int>(countSqlResult.Sql, countSqlResult.NamedBindings);
+        var items = await DbConnection.QueryAsync<EndUser>(usersSqlResult.Sql, usersSqlResult.NamedBindings);
 
-        return new PagedResult<EndUser>(totalCount, items.AsList());
+        return new PagedResult<EndUser>(total, items.AsList());
+    }
+
+    public async Task<ICollection<EndUser>> LoadEndUsersAsync(Guid workspaceId, Guid envId, EndUserFilter userFilter)
+    {
+        var pgCompiler = new PostgresCompiler();
+        var baseQuery = TranslateFilter(workspaceId, envId, userFilter);
+
+        var countSr = pgCompiler.Compile(
+            baseQuery.Clone().AsCount()
+        );
+
+        var total = await DbConnection.ExecuteScalarAsync<int>(countSr.Sql, countSr.NamedBindings);
+        if (total > EndUserConstants.EndUserLoadLimit)
+        {
+            throw new BusinessException(ErrorCodes.EndUserLimitExceeded);
+        }
+
+        var sqlResult = pgCompiler.Compile(baseQuery.Clone());
+        var users = await DbConnection.QueryAsync<EndUser>(sqlResult.Sql, sqlResult.NamedBindings);
+        return users.AsList();
     }
 
     public async Task<EndUser> UpsertAsync(EndUser user)
@@ -259,5 +236,55 @@ public class EndUserService(AppDbContext dbContext)
         }
 
         await properties.Where(x => x.Id == propertyId).ExecuteDeleteAsync();
+    }
+
+    private static Query TranslateFilter(Guid workspaceId, Guid envId, EndUserFilter userFilter)
+    {
+        var table = new Query("end_users");
+
+        var baseQuery = userFilter.GlobalUserOnly
+            ? table.Where("workspace_id", workspaceId)
+            : userFilter.IncludeGlobalUser
+                ? table.Where(
+                    x => x.Where("workspace_id", workspaceId).OrWhere("env_id", envId)
+                )
+                : table.Where("env_id", envId);
+
+        // excluded keyIds
+        var excludedKeyIds = userFilter.ExcludedKeyIds ?? [];
+        if (excludedKeyIds.Length != 0)
+        {
+            baseQuery.WhereNotIn("key_id", excludedKeyIds);
+        }
+
+        var name = userFilter.Name;
+        var keyId = userFilter.KeyId;
+        var customizedProperties = userFilter.CustomizedProperties ?? [];
+
+        baseQuery.Where(
+            group => group
+                .When(!string.IsNullOrWhiteSpace(keyId), q => q.OrWhereContains("key_id", keyId))
+                .When(!string.IsNullOrWhiteSpace(name), q => q.OrWhereContains("name", name))
+                .When(customizedProperties.Count > 0, q =>
+                {
+                    List<object> parameters = [];
+
+                    var wheres = customizedProperties.Select(cp =>
+                    {
+                        parameters.Add(cp.Name);
+                        parameters.Add($"%{cp.Value}%");
+
+                        return "(cp->>'name'= ? and cp->>'value' ilike ?)";
+                    });
+                    var where = string.Join(" or ", wheres);
+
+                    return q.OrWhereRaw(
+                        $"exists(select 1 from jsonb_array_elements(customized_properties) as cp where {where})",
+                        parameters.ToArray()
+                    );
+                })
+        );
+
+        return baseQuery;
     }
 }

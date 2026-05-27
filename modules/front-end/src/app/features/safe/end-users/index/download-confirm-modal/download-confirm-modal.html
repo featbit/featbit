@@ -7,14 +7,14 @@
   i18n-nzTitle="@@users.idx.download-end-users"
   nzTitle="Download End-Users">
   <ng-container *nzModalContent>
-    <p class="download-tip" i18n="@@users.idx.download-confirm">You are about to download <strong>all end-users</strong> in the current environment. Are you sure you want to continue?</p>
+    <p class="download-tip" i18n="@@users.idx.download-confirm">You are about to download <strong>the end-users matching your current filters</strong> in the current environment. Are you sure you want to continue?</p>
     @if (totalCount > 50000) {
       <nz-alert
         nzType="error"
         nzShowIcon
-        nzMessage="This environment has more than 50,000 end-users"
+        nzMessage="The current filter matches more than 50,000 results"
         i18n-nzMessage="@@users.idx.download-limit-exceeded-title"
-        nzDescription="Download is not supported for environments exceeding this limit."
+        nzDescription="Download is not supported when the result exceeds this limit. Narrow your filters and try again."
         i18n-nzDescription="@@users.idx.download-limit-exceeded-desc">
       </nz-alert>
     }

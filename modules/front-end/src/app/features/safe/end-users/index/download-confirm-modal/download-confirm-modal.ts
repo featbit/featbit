@@ -5,6 +5,7 @@ import { NzButtonComponent } from "ng-zorro-antd/button";
 import { NzModalComponent, NzModalContentDirective, NzModalFooterDirective } from "ng-zorro-antd/modal";
 import { EnvUserService } from "@services/env-user.service";
 import { NzMessageService } from "ng-zorro-antd/message";
+import { EnvUserFilter } from "@features/safe/end-users/types/featureflag-user";
 
 @Component({
   selector: 'download-confirm-modal',
@@ -28,6 +29,9 @@ export class DownloadConfirmModal {
   @Input()
   totalCount: number = 0;
 
+  @Input()
+  filter: EnvUserFilter = new EnvUserFilter();
+
   @Output()
   close: EventEmitter<boolean> = new EventEmitter<boolean>();
 
@@ -36,7 +40,7 @@ export class DownloadConfirmModal {
 
   confirmDownload() {
     this.isDownloading = true;
-    this.downloadSub = this.endUserService.download().subscribe({
+    this.downloadSub = this.endUserService.download(this.filter).subscribe({
       next: (data) => {
         this.isDownloading = false;
         const json = JSON.stringify(data);
