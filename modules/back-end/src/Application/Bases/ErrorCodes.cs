@@ -13,6 +13,9 @@ public static class ErrorCodes
     public const string NameHasBeenUsed = nameof(NameHasBeenUsed);
     public const string KeyHasBeenUsed = nameof(KeyHasBeenUsed);
 
+    // end user
+    public const string EndUserLimitExceeded = nameof(EndUserLimitExceeded);
+
     // identity error codes
     public const string EmailPasswordMismatch = nameof(EmailPasswordMismatch);
     public const string ExternalUserCannotChangePassword = nameof(ExternalUserCannotChangePassword);

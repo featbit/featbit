@@ -69,12 +69,10 @@ export class GlobalUserComponent implements OnInit {
     this.search$.next();
   }
 
-  importModalVisible = false;
-  openImportModal() {
-    this.importModalVisible = true;
-  }
-  closeImportModal(success: boolean) {
-    this.importModalVisible = false;
+  uploadModalVisible = false;
+  uploadUrl = this.service.uploadUrl();
+  closeUploadModal(success: boolean) {
+    this.uploadModalVisible = false;
     if (success) {
       this.search$.next();
     }

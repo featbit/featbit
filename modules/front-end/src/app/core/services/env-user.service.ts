@@ -99,4 +99,18 @@ export class EnvUserService {
 
     return this.http.get<IFeatureFlagEndUserPagedResult>(url, {params: new HttpParams({fromObject: queryParam})});
   }
+
+  download(filter: EnvUserFilter = new EnvUserFilter()): Observable<any> {
+    const url = `${this.baseUrl}/download`;
+
+    const query = {
+      searchText: filter.searchText ?? '',
+      properties: filter.properties || [],
+      excludedKeyIds: filter.excludedKeyIds || [],
+      includeGlobalUser: filter.includeGlobalUser ?? false,
+      globalUserOnly: filter.globalUserOnly ?? false,
+    };
+
+    return this.http.post<any>(url, query);
+  }
 }

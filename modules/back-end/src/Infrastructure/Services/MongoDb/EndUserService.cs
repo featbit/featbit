@@ -12,70 +12,7 @@ public class EndUserService(MongoDbClient mongoDb) : MongoDbService<EndUser>(mon
 {
     public async Task<PagedResult<EndUser>> GetListAsync(Guid workspaceId, Guid envId, EndUserFilter userFilter)
     {
-        var filterBuilder = Builders<EndUser>.Filter;
-
-        var globalUserFilter = filterBuilder.Eq(x => x.WorkspaceId, workspaceId);
-        var envUserFilter = filterBuilder.Eq(x => x.EnvId, envId);
-
-        var baseFilter = userFilter.GlobalUserOnly
-            ? globalUserFilter
-            : userFilter.IncludeGlobalUser
-                ? globalUserFilter | envUserFilter
-                : envUserFilter;
-
-        var mustFilters = new List<FilterDefinition<EndUser>>
-        {
-            baseFilter
-        };
-
-        // excluded keyIds
-        var excludedKeyIds = userFilter.ExcludedKeyIds ?? [];
-        if (excludedKeyIds.Length != 0)
-        {
-            var excludedKeyIdsFilter = filterBuilder.Nin(x => x.KeyId, excludedKeyIds);
-            mustFilters.Add(excludedKeyIdsFilter);
-        }
-
-        var orFilters = new List<FilterDefinition<EndUser>>();
-
-        // built-in properties
-
-        // mongodb not support ordinal comparisons yet, use StringComparison.CurrentCultureIgnoreCase
-        // https://jira.mongodb.org/browse/CSHARP-4090#:~:text=until%20the%20database%20supports%20ordinal%20comparisons.
-
-        var keyId = userFilter.KeyId;
-        if (!string.IsNullOrWhiteSpace(keyId))
-        {
-            var keyIdFilter =
-                filterBuilder.Where(x => x.KeyId.Contains(keyId, StringComparison.CurrentCultureIgnoreCase));
-            orFilters.Add(keyIdFilter);
-        }
-
-        var name = userFilter.Name;
-        if (!string.IsNullOrWhiteSpace(name))
-        {
-            var nameFilter = filterBuilder.Where(x => x.Name.Contains(name, StringComparison.CurrentCultureIgnoreCase));
-            orFilters.Add(nameFilter);
-        }
-
-        // custom properties
-        var customizedProperties = userFilter.CustomizedProperties ?? new List<EndUserCustomizedProperty>();
-        foreach (var customizedProperty in customizedProperties)
-        {
-            var customizedPropertyFilter = filterBuilder.ElemMatch(
-                x => x.CustomizedProperties,
-                y => y.Name == customizedProperty.Name &&
-                     y.Value.Contains(customizedProperty.Value, StringComparison.CurrentCultureIgnoreCase)
-            );
-
-            orFilters.Add(customizedPropertyFilter);
-        }
-
-        var filter = filterBuilder.And(mustFilters);
-        if (orFilters.Count != 0)
-        {
-            filter &= filterBuilder.Or(orFilters);
-        }
+        var filter = TranslateFilter(workspaceId, envId, userFilter);
 
         var totalCount = await Collection.CountDocumentsAsync(filter);
         var itemsQuery = Collection
@@ -86,6 +23,20 @@ public class EndUserService(MongoDbClient mongoDb) : MongoDbService<EndUser>(mon
         var items = await itemsQuery.ToListAsync();
 
         return new PagedResult<EndUser>(totalCount, items);
+    }
+
+    public async Task<ICollection<EndUser>> LoadEndUsersAsync(Guid workspaceId, Guid envId, EndUserFilter userFilter)
+    {
+        var filter = TranslateFilter(workspaceId, envId, userFilter);
+
+        var total = await Collection.CountDocumentsAsync(filter);
+        if (total > EndUserConstants.EndUserLoadLimit)
+        {
+            throw new BusinessException(ErrorCodes.EndUserLimitExceeded);
+        }
+
+        var users = await Collection.Find(filter).ToListAsync();
+        return users;
     }
 
     public async Task<EndUser> UpsertAsync(EndUser user)
@@ -104,18 +55,31 @@ public class EndUserService(MongoDbClient mongoDb) : MongoDbService<EndUser>(mon
         return user;
     }
 
-    public async Task<ImportUserResult> UpsertAsync(Guid? workspaceId, Guid? envId, IEnumerable<EndUser> endUsers)
+    public async Task<ImportUserResult> UpsertAsync(Guid? workspaceId, Guid? envId, EndUser[] endUsers)
     {
-        var total = await Queryable.Where(x => x.WorkspaceId == workspaceId && x.EnvId == envId).LongCountAsync();
-        if (total > 5 * 10000)
-        {
-            throw new BusinessException("The number of end users exceeds the limit.");
-        }
+        List<EndUser> existUsers;
 
-        // load all end users into memory
-        var existUsers = await Queryable
-            .Where(x => x.WorkspaceId == workspaceId && x.EnvId == envId)
-            .ToListAsync();
+        var keyIds = endUsers.Select(x => x.KeyId).Distinct().ToArray();
+        if (keyIds.Length < 1_000)
+        {
+            // for small batch, only load the users with the same keyIds to reduce memory usage
+            existUsers = await Queryable
+                .Where(x => x.WorkspaceId == workspaceId && x.EnvId == envId && keyIds.Contains(x.KeyId))
+                .ToListAsync();
+        }
+        else
+        {
+            // for large batch, load all users to avoid the performance issue of "where in" with too many keyIds
+            var total = await Queryable.Where(x => x.WorkspaceId == workspaceId && x.EnvId == envId).LongCountAsync();
+            if (total > EndUserConstants.EndUserLoadLimit)
+            {
+                throw new BusinessException(ErrorCodes.EndUserLimitExceeded);
+            }
+
+            existUsers = await Queryable
+                .Where(x => x.WorkspaceId == workspaceId && x.EnvId == envId)
+                .ToListAsync();
+        }
 
         // https://www.mongodb.com/docs/manual/reference/method/db.collection.bulkWrite/
         var writeModels = new List<WriteModel<EndUser>>();
@@ -258,5 +222,75 @@ public class EndUserService(MongoDbClient mongoDb) : MongoDbService<EndUser>(mon
         }
 
         await MongoDb.CollectionOf<EndUserProperty>().DeleteOneAsync(x => x.Id == propertyId);
+    }
+
+    private static FilterDefinition<EndUser> TranslateFilter(Guid workspaceId, Guid envId, EndUserFilter userFilter)
+    {
+        var filterBuilder = Builders<EndUser>.Filter;
+
+        var globalUserFilter = filterBuilder.Eq(x => x.WorkspaceId, workspaceId);
+        var envUserFilter = filterBuilder.Eq(x => x.EnvId, envId);
+
+        var baseFilter = userFilter.GlobalUserOnly
+            ? globalUserFilter
+            : userFilter.IncludeGlobalUser
+                ? globalUserFilter | envUserFilter
+                : envUserFilter;
+
+        var mustFilters = new List<FilterDefinition<EndUser>>
+        {
+            baseFilter
+        };
+
+        // excluded keyIds
+        var excludedKeyIds = userFilter.ExcludedKeyIds ?? [];
+        if (excludedKeyIds.Length != 0)
+        {
+            var excludedKeyIdsFilter = filterBuilder.Nin(x => x.KeyId, excludedKeyIds);
+            mustFilters.Add(excludedKeyIdsFilter);
+        }
+
+        var orFilters = new List<FilterDefinition<EndUser>>();
+
+        // built-in properties
+
+        // mongodb not support ordinal comparisons yet, use StringComparison.CurrentCultureIgnoreCase
+        // https://jira.mongodb.org/browse/CSHARP-4090#:~:text=until%20the%20database%20supports%20ordinal%20comparisons.
+
+        var keyId = userFilter.KeyId;
+        if (!string.IsNullOrWhiteSpace(keyId))
+        {
+            var keyIdFilter =
+                filterBuilder.Where(x => x.KeyId.Contains(keyId, StringComparison.CurrentCultureIgnoreCase));
+            orFilters.Add(keyIdFilter);
+        }
+
+        var name = userFilter.Name;
+        if (!string.IsNullOrWhiteSpace(name))
+        {
+            var nameFilter = filterBuilder.Where(x => x.Name.Contains(name, StringComparison.CurrentCultureIgnoreCase));
+            orFilters.Add(nameFilter);
+        }
+
+        // custom properties
+        var customizedProperties = userFilter.CustomizedProperties ?? new List<EndUserCustomizedProperty>();
+        foreach (var customizedProperty in customizedProperties)
+        {
+            var customizedPropertyFilter = filterBuilder.ElemMatch(
+                x => x.CustomizedProperties,
+                y => y.Name == customizedProperty.Name &&
+                     y.Value.Contains(customizedProperty.Value, StringComparison.CurrentCultureIgnoreCase)
+            );
+
+            orFilters.Add(customizedPropertyFilter);
+        }
+
+        var filter = filterBuilder.And(mustFilters);
+        if (orFilters.Count != 0)
+        {
+            filter &= filterBuilder.Or(orFilters);
+        }
+
+        return filter;
     }
 }
