@@ -32,19 +32,28 @@ export const authGuard = async (
   const url = state.url;
 
   // if no auth token or workspaceId, redirect to login page
-  if (!profile || !profile.workspaceId) {
+  if (!profile) {
     localStorage.setItem(LOGIN_REDIRECT_URL, url);
     return router.parseUrl('/login');
   }
 
   // if workspaceId is invalid, logout user
-  const workspace = await userService.getWorkspace();
-  if (!workspace) {
+  const workspaces = await userService.getWorkspaces();
+  userService.workspaces = workspaces;
+  if (!workspaces || workspaces.length === 0) {
     await identityService.doLogoutUser(false);
     return router.parseUrl('/login');
   }
 
-  workspaceService.setWorkspace(workspace);
+  if (workspaces.length > 1) {
+    if (url.startsWith("/select-organization")) {
+      return true;
+    }
+
+    return router.parseUrl('/select-organization');
+  }
+
+  workspaceService.setWorkspace(workspaces[0]);
   const isSsoFirstLogin = localStorage.getItem(IS_SSO_FIRST_LOGIN) === 'true';
   const organizations = await organizationService.getListAsync(isSsoFirstLogin);
   organizationService.organizations = organizations;

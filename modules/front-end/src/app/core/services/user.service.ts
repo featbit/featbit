@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from "@angular/common/http";
 import { environment } from "src/environments/environment";
-import { IProfile, IWorkspace } from "@shared/types";
+import { IOrganization, IProfile, IWorkspace } from "@shared/types";
 import { USER_PROFILE } from "@utils/localstorage-keys";
 import { MessageQueueService } from "@services/message-queue.service";
 import { firstValueFrom, Observable, of } from "rxjs";
@@ -12,8 +12,8 @@ import { catchError } from "rxjs/operators";
   providedIn: 'root'
 })
 export class UserService {
-
   baseUrl: string = `${environment.url}/api/v1/user`
+  workspaces: IWorkspace[] = [];
 
   constructor(
     private http: HttpClient,
@@ -31,6 +31,12 @@ export class UserService {
   getWorkspace(): Promise<IWorkspace | undefined> {
     return firstValueFrom(
       this.http.get<IWorkspace>(`${this.baseUrl}/workspace`).pipe(catchError(() => of(undefined)))
+    );
+  }
+
+  getWorkspaces(): Promise<IWorkspace[] | undefined> {
+    return firstValueFrom(
+      this.http.get<IWorkspace[]>(`${this.baseUrl}/workspaces`).pipe(catchError(() => of(undefined)))
     );
   }
 

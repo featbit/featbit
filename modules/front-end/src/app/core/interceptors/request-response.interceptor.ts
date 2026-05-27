@@ -32,7 +32,7 @@ export class RequestResponseInterceptor implements HttpInterceptor {
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     const token = localStorage.getItem(IDENTITY_TOKEN);
     const currentOrgId = getCurrentOrganization()?.id ?? '';
-    const currentWorkspaceId = getProfile()?.workspaceId ?? '';
+    const currentWorkspaceId = 'cd4ae548-0f56-4afc-ab45-e77343cd0dc1' //getProfile()?.workspaceId ?? '';
 
     const authedReq = request.clone({
       headers: request.headers

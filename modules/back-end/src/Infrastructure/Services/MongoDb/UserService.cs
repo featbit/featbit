@@ -46,6 +46,22 @@ public class UserService(MongoDbClient mongoDb) : MongoDbService<User>(mongoDb),
 
         return await query.ToListAsync();
     }
+    
+    public async Task<ICollection<Workspace>> GetWorkspacesAsync(Guid userId)
+    {
+        var workspaces = MongoDb.QueryableOf<Workspace>();
+        var workspaceUsers = MongoDb.QueryableOf<WorkspaceUser>();
+        var users = MongoDb.QueryableOf<User>();
+
+        var query =
+            from workspace in workspaces
+            join wu in workspaceUsers
+                on workspace.Id equals wu.WorkspaceId
+            where wu.UserId == userId
+            select workspace;
+
+        return await query.ToListAsync();
+    }
 
     public async Task<Workspace> GetWorkspaceAsync(Guid userId, Guid workspaceId)
     {

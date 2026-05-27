@@ -46,6 +46,22 @@ public class UserService(AppDbContext dbContext) : EntityFrameworkCoreService<Us
 
         return await query.ToListAsync();
     }
+    
+    public async Task<ICollection<Workspace>> GetWorkspacesAsync(Guid userId)
+    {
+        var workspaces = QueryableOf<Workspace>();
+        var workspaceUsers = QueryableOf<WorkspaceUser>();
+        var users = QueryableOf<User>();
+
+        var query =
+            from workspace in workspaces
+            join wu in workspaceUsers
+                on workspace.Id equals wu.WorkspaceId
+            where wu.UserId == userId
+            select workspace;
+
+        return await query.ToListAsync();
+    }
 
     public async Task<Workspace> GetWorkspaceAsync(Guid userId, Guid workspaceId)
     {

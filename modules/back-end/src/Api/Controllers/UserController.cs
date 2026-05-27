@@ -24,6 +24,7 @@ public class UserController : ApiControllerBase
         return Ok(profile);
     }
 
+    // TODO remove
     [AllowAnonymous]
     [HttpPost("has-multiple-workspaces")]
     public async Task<ApiResponse<bool>> HasMultipleWorkspacesAsync(HasMultipleWorkspaces request)
@@ -55,6 +56,7 @@ public class UserController : ApiControllerBase
         return Ok(result);
     }
 
+    // TODO remove
     [HttpGet("workspace")]
     public async Task<ApiResponse<WorkspaceVm>> GetCurrentWorkspaceAsync()
     {
@@ -66,5 +68,17 @@ public class UserController : ApiControllerBase
 
         var workspace = await Mediator.Send(request);
         return Ok(workspace);
+    }
+    
+    [HttpGet("workspaces")]
+    public async Task<ApiResponse<IEnumerable<WorkspaceVm>>> GetWorkspaces()
+    {
+        var request = new GetWorkspaces
+        {
+            UserId = CurrentUser.Id
+        };
+        
+        var workspaces = await Mediator.Send(request);
+        return Ok(workspaces);
     }
 }

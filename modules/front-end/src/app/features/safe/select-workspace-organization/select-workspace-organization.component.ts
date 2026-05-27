@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { IdentityService } from "@services/identity.service";
-import { IProfile, IOrganization } from "@shared/types";
+import { IProfile, IOrganization, IWorkspace } from "@shared/types";
 import { OrganizationService } from "@services/organization.service";
 import { Router } from "@angular/router";
 import { IS_SSO_FIRST_LOGIN, LOGIN_REDIRECT_URL } from "@utils/localstorage-keys";
@@ -10,13 +10,14 @@ import { UserService } from "@services/user.service";
 
 @Component({
     selector: 'select-organization',
-    templateUrl: './select-organization.component.html',
-    styleUrls: ['./select-organization.component.less'],
+    templateUrl: './select-workspace-organization.component.html',
+    styleUrls: ['./select-workspace-organization.component.less'],
     standalone: false
 })
-export class SelectOrganizationComponent {
+export class SelectWorkspaceOrganizationComponent {
 
   menuExtended: boolean = false;
+  workspaces: IWorkspace[] = [];
   organizations: IOrganization[] = [];
   profile: IProfile = null;
   isLoading: boolean = false;
@@ -27,7 +28,8 @@ export class SelectOrganizationComponent {
     private organizationService: OrganizationService,
     private identityService: IdentityService,
     private userService: UserService) {
-    this.organizations = organizationService.organizations;
+    this.workspaces = userService.workspaces;
+    //this.organizations = organizationService.organizations;
     this.profile = getProfile();
 
     if (this.organizations.length === 1) {

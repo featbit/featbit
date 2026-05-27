@@ -9,6 +9,11 @@
       </div>
     } @else {
       <div class="content-wrapper">
+        @if (workspaces.length >= 1) {
+          <div class="workspaces-wrapper">
+          </div>
+        }
+
         @if (organizations.length === 0) {
           <div class="zero-org-info">
             <span nz-icon nzType="info-circle" nzTheme="outline"></span>

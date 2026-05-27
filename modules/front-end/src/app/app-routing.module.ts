@@ -15,7 +15,7 @@ const routes: Routes = [
   {
     path: 'select-organization',
     canActivate: [authGuard],
-    loadChildren: () => import("./features/safe/select-organization/select-organization.module").then(m => m.SelectOrganizationModule),
+    loadChildren: () => import("@features/safe/select-workspace-organization/select-workspace-organization.module").then(m => m.SelectWorkspaceOrganizationModule),
   },
   {
     path: '',
