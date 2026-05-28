@@ -126,18 +126,27 @@ export class IndexComponent implements OnInit {
     );
   }
 
-  uploadDrawerVisible: boolean = false;
+  uploadModalVisible: boolean = false;
+  uploadUrl = this.envUserService.uploadUrl();
+  closeUploadModal(success: boolean) {
+    this.uploadModalVisible = false;
+    if (success) {
+      this.$search.next();
+    }
+  }
+
   propsDrawerVisible: boolean = false;
-
-  segmentsAndFlagsDrawerVisible: boolean = false;
+  segmentsFlagsDrawerVisible: boolean = false;
   currentUser: IUserType = null;
-  onSegmentsAndFlagsClick(user: IUserType) {
+  openSegmentsFlagsDrawer(user: IUserType) {
     this.currentUser = {...user};
-    this.segmentsAndFlagsDrawerVisible = true;
+    this.segmentsFlagsDrawerVisible = true;
   }
 
-  onSegmentsAndFlagsClose() {
+  closeSegmentsFlagsDrawer() {
     this.currentUser = null;
-    this.segmentsAndFlagsDrawerVisible = false;
+    this.segmentsFlagsDrawerVisible = false;
   }
+
+  downloadConfirmVisible: boolean = false;
 }
