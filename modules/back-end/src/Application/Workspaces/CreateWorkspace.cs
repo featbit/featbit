@@ -26,11 +26,11 @@ public class CreateWorkspaceHandler(
 {
     public async Task<RegisterResult> Handle(CreateWorkspace request, CancellationToken cancellationToken)
     {
-        var user = await userService.FindOneAsync(x => x.Email == request.Email);
-        if (user != null)
-        {
-            throw new BusinessException("A user cannot have more than one workspace.");
-        }
+        var registerResult = await identityService.RegisterByEmailAsync(
+            request.Email,
+            request.Password,
+            request.UserOrigin
+        );
 
         var workspace = new Workspace
         {
@@ -40,18 +40,8 @@ public class CreateWorkspaceHandler(
 
         // add new workspace
         await workspaceService.AddOneAsync(workspace);
-
-        // setup free license
-        await billingService.CreateFreeLicenseAsync(workspace.Id, request.Email);
-
-        // register user
-        var registerResult = await identityService.RegisterByEmailAsync(
-            request.Email,
-            request.Password,
-            request.UserOrigin
-        );
         
-        var workspaceUser = new WorkspaceUser(workspace.Id, user.Id);
+        var workspaceUser = new WorkspaceUser(workspace.Id, registerResult.User.Id);
         // Nothing will happen if user already in the workspace
         await workspaceService.AddUserAsync(workspaceUser);
 
@@ -64,6 +54,9 @@ public class CreateWorkspaceHandler(
             CurrentUserId = registerResult.User.Id
         }, cancellationToken);
 
+        // setup free license
+        await billingService.CreateFreeLicenseAsync(workspace.Id, request.Email);
+        
         return registerResult;
     }
 }
