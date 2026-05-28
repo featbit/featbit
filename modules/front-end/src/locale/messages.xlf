@@ -6697,10 +6697,6 @@
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
           <context context-type="linenumber">27,29</context>
         </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/end-users/index/download-confirm-modal/download-confirm-modal.html</context>
-          <context context-type="linenumber">35,37</context>
-        </context-group>
       </trans-unit>
       <trans-unit id="common.social-login-hint" datatype="html">
         <source>Sign In / Sign Up with</source>
@@ -6742,6 +6738,10 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
           <context context-type="linenumber">66,68</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/end-users/index/download-confirm-modal/download-confirm-modal.html</context>
+          <context context-type="linenumber">35,37</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.incorrect-email-or-password" datatype="html">

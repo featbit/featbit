@@ -1305,8 +1305,12 @@
           <context context-type="linenumber">87,88</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/select-organization/select-organization.component.html</context>
+          <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
           <context context-type="linenumber">8</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
+          <context context-type="linenumber">58</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.html</context>
@@ -4705,7 +4709,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">69,70</context>
+          <context context-type="linenumber">51,52</context>
         </context-group>
         <target>SSO</target>
       </trans-unit>
@@ -7094,7 +7098,7 @@
         <source>Permission Denied</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/guards/auth.guard.ts</context>
-          <context context-type="linenumber">117</context>
+          <context context-type="linenumber">142</context>
         </context-group>
         <target>无权访问</target>
       </trans-unit>
@@ -7102,7 +7106,7 @@
         <source>You don&apos;t have permissions to access to the current environment or you don&apos;t have access to any projects and environments, please contact the admin to grant you the necessary permissions</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/guards/auth.guard.ts</context>
-          <context context-type="linenumber">118</context>
+          <context context-type="linenumber">143</context>
         </context-group>
         <target>您没有访问当前项目和环境或者任何项目和环境的权限，请联系管理员授予您所需的权限。</target>
       </trans-unit>
@@ -7186,7 +7190,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">55,56</context>
+          <context context-type="linenumber">38,40</context>
         </context-group>
         <target>登录</target>
       </trans-unit>
@@ -7206,35 +7210,11 @@
         </context-group>
         <target>邮箱名无效</target>
       </trans-unit>
-      <trans-unit id="common.workspace-key" datatype="html">
-        <source>Workspace key</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">23,24</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">74,75</context>
-        </context-group>
-        <target>Workspace key</target>
-      </trans-unit>
-      <trans-unit id="common.workspace-key-cannot-be-empty" datatype="html">
-        <source>Workspace key is mandatory</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">29,31</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">80,82</context>
-        </context-group>
-        <target>Workspace key 不可为空</target>
-      </trans-unit>
       <trans-unit id="common.password-mandatory" datatype="html">
         <source>password is mandatory</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">34,35</context>
+          <context context-type="linenumber">20,21</context>
         </context-group>
         <target>密码不能为空</target>
       </trans-unit>
@@ -7242,31 +7222,15 @@
         <source>password</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">41,43</context>
+          <context context-type="linenumber">27,29</context>
         </context-group>
         <target>密码</target>
-      </trans-unit>
-      <trans-unit id="common.continue" datatype="html">
-        <source>Continue</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">54,55</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">84,86</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/end-users/index/download-confirm-modal/download-confirm-modal.html</context>
-          <context context-type="linenumber">35,37</context>
-        </context-group>
-        <target>继续</target>
       </trans-unit>
       <trans-unit id="common.social-login-hint" datatype="html">
         <source>Sign In / Sign Up with</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">59,60</context>
+          <context context-type="linenumber">41,42</context>
         </context-group>
         <target>第三方账号登录</target>
       </trans-unit>
@@ -7274,7 +7238,7 @@
         <source>Continue with Google</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">63,64</context>
+          <context context-type="linenumber">45,46</context>
         </context-group>
         <target>使用 Google 登录</target>
       </trans-unit>
@@ -7282,15 +7246,43 @@
         <source>Continue with GitHub</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">64,66</context>
+          <context context-type="linenumber">46,48</context>
         </context-group>
         <target>使用 GitHub 登录</target>
+      </trans-unit>
+      <trans-unit id="common.workspace-key" datatype="html">
+        <source>Workspace key</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
+          <context context-type="linenumber">56,57</context>
+        </context-group>
+        <target>Workspace key</target>
+      </trans-unit>
+      <trans-unit id="common.workspace-key-cannot-be-empty" datatype="html">
+        <source>Workspace key is mandatory</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
+          <context context-type="linenumber">62,64</context>
+        </context-group>
+        <target>Workspace key 不可为空</target>
+      </trans-unit>
+      <trans-unit id="common.continue" datatype="html">
+        <source>Continue</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
+          <context context-type="linenumber">66,68</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/end-users/index/download-confirm-modal/download-confirm-modal.html</context>
+          <context context-type="linenumber">35,37</context>
+        </context-group>
+        <target>继续</target>
       </trans-unit>
       <trans-unit id="common.incorrect-email-or-password" datatype="html">
         <source>Email and/or password incorrect</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.ts</context>
-          <context context-type="linenumber">171</context>
+          <context context-type="linenumber">126</context>
         </context-group>
         <target>邮箱或密码错误</target>
       </trans-unit>
@@ -7298,11 +7290,11 @@
         <source>Login with success</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.ts</context>
-          <context context-type="linenumber">176</context>
+          <context context-type="linenumber">131</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.ts</context>
-          <context context-type="linenumber">225</context>
+          <context context-type="linenumber">180</context>
         </context-group>
         <target>登录成功</target>
       </trans-unit>
@@ -7310,7 +7302,7 @@
         <source>Error occurred, please contact the support.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.ts</context>
-          <context context-type="linenumber">183</context>
+          <context context-type="linenumber">138</context>
         </context-group>
         <target>服务错误，请联系运营人员。</target>
       </trans-unit>
@@ -7318,7 +7310,7 @@
         <source>Failed to login.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.ts</context>
-          <context context-type="linenumber">217</context>
+          <context context-type="linenumber">172</context>
         </context-group>
         <target>登录失败</target>
       </trans-unit>
@@ -11023,53 +11015,85 @@
         </context-group>
         <target>该用户组正在被 <x id="INTERPOLATION" equiv-text="{{currentDeletingArchivingSegmentFlagReferences.length}}"/> 个开关所引用，在操作之前需要先移除这些引用！</target>
       </trans-unit>
+      <trans-unit id="select-workspace-organization.workspace" datatype="html">
+        <source>Workspace</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
+          <context context-type="linenumber">24,26</context>
+        </context-group>
+        <target>工作区</target>
+      </trans-unit>
+      <trans-unit id="select-workspace-organization.organization" datatype="html">
+        <source>Organization</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
+          <context context-type="linenumber">29,32</context>
+        </context-group>
+        <target>组织机构</target>
+      </trans-unit>
+      <trans-unit id="select-workspace-organization.select-workspace" datatype="html">
+        <source>Select a workspace</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
+          <context context-type="linenumber">37,39</context>
+        </context-group>
+        <target>选择工作区</target>
+      </trans-unit>
+      <trans-unit id="select-workspace-organization.workspaces-for" datatype="html">
+        <source>Workspaces for</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
+          <context context-type="linenumber">39</context>
+        </context-group>
+        <target>以下工作区属于用户</target>
+      </trans-unit>
+      <trans-unit id="select-workspace-organization.no-organizations" datatype="html">
+        <source>No organizations found</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
+          <context context-type="linenumber">63,64</context>
+        </context-group>
+        <target>未找到相关机构</target>
+      </trans-unit>
       <trans-unit id="common.zero-org-info" datatype="html">
         <source>You don&apos;t have any organization yet. Please contact your admin to add you to an organization.</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/select-organization/select-organization.component.html</context>
-          <context context-type="linenumber">15,17</context>
+          <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
+          <context context-type="linenumber">64,66</context>
         </context-group>
         <target>您当前没有任何机构，请联系管理员将您添加到相关机构中.</target>
       </trans-unit>
       <trans-unit id="common.select-an-organization" datatype="html">
         <source>Select an organization</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/select-organization/select-organization.component.html</context>
-          <context context-type="linenumber">20,21</context>
+          <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
+          <context context-type="linenumber">67,68</context>
         </context-group>
         <target>选择机构</target>
       </trans-unit>
       <trans-unit id="common.organizations-for" datatype="html">
         <source>Organizations for</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/select-organization/select-organization.component.html</context>
-          <context context-type="linenumber">22</context>
+          <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
+          <context context-type="linenumber">69</context>
         </context-group>
         <target>以下机构属于用户</target>
       </trans-unit>
-      <trans-unit id="common.select" datatype="html">
-        <source>Select</source>
+      <trans-unit id="select-workspace-organization.back-to-workspaces" datatype="html">
+        <source>Back to workspaces</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/select-organization/select-organization.component.html</context>
-          <context context-type="linenumber">27,28</context>
+          <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
+          <context context-type="linenumber">88,91</context>
         </context-group>
-        <target>选择</target>
+        <target>返回选择工作区</target>
       </trans-unit>
       <trans-unit id="common.sign-in-with-another-email" datatype="html">
-        <source>Sign in with another Email</source>
+        <source>Sign in with another email</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/select-organization/select-organization.component.html</context>
-          <context context-type="linenumber">33,35</context>
+          <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
+          <context context-type="linenumber">95,99</context>
         </context-group>
         <target>使用其它邮箱登录</target>
-      </trans-unit>
-      <trans-unit id="common.error-happened-please-relogin" datatype="html">
-        <source>Error happened, please login again!</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/select-organization/select-organization.component.ts</context>
-          <context context-type="linenumber">53</context>
-        </context-group>
-        <target>未知错误发生，请重新登录！</target>
       </trans-unit>
       <trans-unit id="common.search-by-name" datatype="html">
         <source>Search by name</source>
