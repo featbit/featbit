@@ -40,7 +40,7 @@
             </p>
             <ul class="selection-list">
               @for (workspace of workspaces; track workspace.id) {
-                <li class="selection-item" (click)="selectWorkspace(workspace)">
+                <li class="selection-item" (click)="setWorkspace(workspace)">
                   <span class="item-icon" nz-icon nzType="appstore" nzTheme="outline"></span>
                   <span class="item-name">{{ workspace.name }}</span>
                   <span class="item-chevron" nz-icon nzType="right" nzTheme="outline"></span>

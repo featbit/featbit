@@ -7,6 +7,7 @@ import { Router } from "@angular/router";
 import { IS_SSO_FIRST_LOGIN, LOGIN_REDIRECT_URL } from "@utils/localstorage-keys";
 import { getProfile } from "@utils/index";
 import { UserService } from "@services/user.service";
+import { NzMessageService } from "ng-zorro-antd/message";
 
 @Component({
     selector: 'select-workspace',
@@ -27,6 +28,7 @@ export class SelectWorkspaceComponent {
 
   constructor(
     private router: Router,
+    private message: NzMessageService,
     private organizationService: OrganizationService,
     private workspaceService: WorkspaceService,
     private identityService: IdentityService,
@@ -35,18 +37,11 @@ export class SelectWorkspaceComponent {
     this.profile = getProfile();
 
     if (this.workspaces.length === 1) {
-      // Workspace already set by auth guard — load orgs that were fetched by the guard
-      this.selectedWorkspace = this.workspaces[0];
-      this.organizations = organizationService.organizations;
-      this.currentStep = 'organization';
-      if (this.organizations.length === 1) {
-        this.setOrganization(this.organizations[0]);
-      }
+      this.setWorkspace(this.workspaces[0]).then();
     }
-    // If workspaces.length > 1, currentStep stays on 'workspace' for user to choose
   }
 
-  async selectWorkspace(workspace: IWorkspace) {
+  async setWorkspace(workspace: IWorkspace) {
     this.selectedWorkspace = workspace;
     this.isLoadingOrgs = true;
     this.currentStep = 'organization';
@@ -77,14 +72,22 @@ export class SelectWorkspaceComponent {
   setOrganization(organization: IOrganization) {
     this.isLoading = true;
     this.organizationService.switchOrganization(organization);
-    localStorage.removeItem(IS_SSO_FIRST_LOGIN);
-    const redirectUrl = localStorage.getItem(LOGIN_REDIRECT_URL);
-    if (redirectUrl) {
-      localStorage.removeItem(LOGIN_REDIRECT_URL);
-      this.router.navigateByUrl(redirectUrl).then(() => this.isLoading = false);
-    } else {
-      this.router.navigateByUrl(`/`).then(() => this.isLoading = false);
-    }
+    this.userService.joinOrganization().subscribe({
+      next: () => {
+        localStorage.removeItem(IS_SSO_FIRST_LOGIN);
+        const redirectUrl = localStorage.getItem(LOGIN_REDIRECT_URL);
+        if (redirectUrl) {
+          localStorage.removeItem(LOGIN_REDIRECT_URL);
+          this.router.navigateByUrl(redirectUrl).then(() => this.isLoading = false);
+        } else {
+          this.router.navigateByUrl(`/`).then(() => this.isLoading = false);
+        }
+      },
+      error: _ => {
+        this.message.error($localize`:@@common.error-happened-please-relogin:Error happened, please login again!`);
+        this.isLoading = false;
+      }
+    });
   }
 
   toggleMenu(extended: boolean) {

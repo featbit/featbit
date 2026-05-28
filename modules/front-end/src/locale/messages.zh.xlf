@@ -11095,6 +11095,14 @@
         </context-group>
         <target>使用其它邮箱登录</target>
       </trans-unit>
+      <trans-unit id="common.error-happened-please-relogin" datatype="html">
+        <source>Error happened, please login again!</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.ts</context>
+          <context context-type="linenumber">87</context>
+        </context-group>
+        <target>未知错误发生，请重新登录！</target>
+      </trans-unit>
       <trans-unit id="common.search-by-name" datatype="html">
         <source>Search by name</source>
         <context-group purpose="location">
