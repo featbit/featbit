@@ -56,7 +56,7 @@
               <input type="text" nz-input formControlName="workspaceKey" i18n-placeholder="@@common.workspace-key" placeholder="Workspace key"/>
             </nz-input-group>
             <ng-template #workspacePrefix>
-              <i nz-icon nzType="bank"></i>
+              <i nz-icon nzType="icons:icon-workspace"></i>
             </ng-template>
             <ng-template #invalidWorkspaceKey let-control>
               <ng-container *ngIf="control.hasError('required')" i18n="@@common.workspace-key-cannot-be-empty">Workspace key is mandatory</ng-container>
