@@ -47,6 +47,8 @@ public class MongoDbClient
         { typeof(RefreshToken), "RefreshTokens" },
 
         { typeof(Workspace), "Workspaces" },
+        
+        { typeof(WorkspaceUser), "WorkspaceUsers" },
 
         { typeof(Organization), "Organizations" },
         { typeof(OrganizationUser), "OrganizationUsers" },
