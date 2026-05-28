@@ -1270,8 +1270,12 @@
           <context context-type="linenumber">87,88</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/select-organization/select-organization.component.html</context>
+          <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
           <context context-type="linenumber">8</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
+          <context context-type="linenumber">58</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.html</context>
@@ -4385,7 +4389,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">69,70</context>
+          <context context-type="linenumber">51,52</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.multi-org" datatype="html">
@@ -6623,14 +6627,14 @@
         <source>Permission Denied</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/guards/auth.guard.ts</context>
-          <context context-type="linenumber">117</context>
+          <context context-type="linenumber">142</context>
         </context-group>
       </trans-unit>
       <trans-unit id="permissions.need-permissions-to-access-env" datatype="html">
         <source>You don&apos;t have permissions to access to the current environment or you don&apos;t have access to any projects and environments, please contact the admin to grant you the necessary permissions</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/guards/auth.guard.ts</context>
-          <context context-type="linenumber">118</context>
+          <context context-type="linenumber">143</context>
         </context-group>
       </trans-unit>
       <trans-unit id="permissions.no-permissions-to-visit-iam-page" datatype="html">
@@ -6704,7 +6708,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">55,56</context>
+          <context context-type="linenumber">38,40</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.email-cannot-be-empty" datatype="html">
@@ -6721,104 +6725,92 @@
           <context context-type="linenumber">15,16</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="common.workspace-key" datatype="html">
-        <source>Workspace key</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">23,24</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">74,75</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="common.workspace-key-cannot-be-empty" datatype="html">
-        <source>Workspace key is mandatory</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">29,31</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">80,82</context>
-        </context-group>
-      </trans-unit>
       <trans-unit id="common.password-mandatory" datatype="html">
         <source>password is mandatory</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">34,35</context>
+          <context context-type="linenumber">20,21</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.password" datatype="html">
         <source>password</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">41,43</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="common.continue" datatype="html">
-        <source>Continue</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">54,55</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">84,86</context>
+          <context context-type="linenumber">27,29</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.social-login-hint" datatype="html">
         <source>Sign In / Sign Up with</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">59,60</context>
+          <context context-type="linenumber">41,42</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.continue-with-google" datatype="html">
         <source>Continue with Google</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">63,64</context>
+          <context context-type="linenumber">45,46</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.continue-with-github" datatype="html">
         <source>Continue with GitHub</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
-          <context context-type="linenumber">64,66</context>
+          <context context-type="linenumber">46,48</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.workspace-key" datatype="html">
+        <source>Workspace key</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
+          <context context-type="linenumber">56,57</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.workspace-key-cannot-be-empty" datatype="html">
+        <source>Workspace key is mandatory</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
+          <context context-type="linenumber">62,64</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="common.continue" datatype="html">
+        <source>Continue</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.html</context>
+          <context context-type="linenumber">66,68</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.incorrect-email-or-password" datatype="html">
         <source>Email and/or password incorrect</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.ts</context>
-          <context context-type="linenumber">171</context>
+          <context context-type="linenumber">126</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.login-success" datatype="html">
         <source>Login with success</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.ts</context>
-          <context context-type="linenumber">176</context>
+          <context context-type="linenumber">131</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.ts</context>
-          <context context-type="linenumber">225</context>
+          <context context-type="linenumber">180</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.login-error" datatype="html">
         <source>Error occurred, please contact the support.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.ts</context>
-          <context context-type="linenumber">183</context>
+          <context context-type="linenumber">138</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.cannot-login-by-code" datatype="html">
         <source>Failed to login.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/login/do-login/do-login.component.ts</context>
-          <context context-type="linenumber">217</context>
+          <context context-type="linenumber">172</context>
         </context-group>
       </trans-unit>
       <trans-unit id="auditlogs.audit-logs" datatype="html">
@@ -10074,46 +10066,74 @@
           <context context-type="linenumber">174,175</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="select-workspace-organization.workspace" datatype="html">
+        <source>Workspace</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
+          <context context-type="linenumber">24,26</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="select-workspace-organization.organization" datatype="html">
+        <source>Organization</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
+          <context context-type="linenumber">29,32</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="select-workspace-organization.select-workspace" datatype="html">
+        <source>Select a workspace</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
+          <context context-type="linenumber">37,39</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="select-workspace-organization.workspaces-for" datatype="html">
+        <source>Workspaces for</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
+          <context context-type="linenumber">39</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="select-workspace-organization.no-organizations" datatype="html">
+        <source>No organizations found</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
+          <context context-type="linenumber">63,64</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="common.zero-org-info" datatype="html">
         <source>You don&apos;t have any organization yet. Please contact your admin to add you to an organization.</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/select-organization/select-organization.component.html</context>
-          <context context-type="linenumber">15,17</context>
+          <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
+          <context context-type="linenumber">64,66</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.select-an-organization" datatype="html">
         <source>Select an organization</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/select-organization/select-organization.component.html</context>
-          <context context-type="linenumber">20,21</context>
+          <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
+          <context context-type="linenumber">67,68</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.organizations-for" datatype="html">
         <source>Organizations for</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/select-organization/select-organization.component.html</context>
-          <context context-type="linenumber">22</context>
+          <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
+          <context context-type="linenumber">69</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="common.select" datatype="html">
-        <source>Select</source>
+      <trans-unit id="select-workspace-organization.back-to-workspaces" datatype="html">
+        <source>Back to workspaces</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/select-organization/select-organization.component.html</context>
-          <context context-type="linenumber">27,28</context>
+          <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
+          <context context-type="linenumber">88,91</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.sign-in-with-another-email" datatype="html">
-        <source>Sign in with another Email</source>
+        <source>Sign in with another email</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/select-organization/select-organization.component.html</context>
-          <context context-type="linenumber">33,35</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="common.error-happened-please-relogin" datatype="html">
-        <source>Error happened, please login again!</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/select-organization/select-organization.component.ts</context>
-          <context context-type="linenumber">53</context>
+          <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
+          <context context-type="linenumber">95,99</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.search-by-name" datatype="html">

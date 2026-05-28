@@ -55,7 +55,7 @@
           <div class="step-content">
             @if (isLoadingOrgs) {
               <div class="orgs-loading">
-                <nz-spin nzTip="Loading organizations..." i18n-nzTip="@@select-workspace-organization.loading-orgs" nzSize="large"></nz-spin>
+                <nz-spin nzTip="Loading..." i18n-nzTip="@@common.loading" nzSize="large"></nz-spin>
               </div>
             } @else if (organizations.length === 0) {
               <div class="zero-org">
