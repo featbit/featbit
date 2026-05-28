@@ -27,7 +27,7 @@ public class RemoveFromWorkspaceHandler(
         // remove member from the workspace
         await workspaceService.RemoveUserAsync(request.WorkspaceId, request.MemberId);
 
-        // remove member from workspace
+        // remove member if he does not belong to any workspace 
         var workspaces = await userService.GetWorkspacesAsync(request.MemberId);
         if (workspaces.Count == 0)
         {
