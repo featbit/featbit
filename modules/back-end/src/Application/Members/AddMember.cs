@@ -69,7 +69,6 @@ public class AddMemberHandler(
         }
         else
         {
-            initialPwd = string.Empty;
             userId = user.Id;
         }
         

@@ -62,7 +62,7 @@ public class User : AuditedEntity
     public void UpdatePassword(string password)
     {
         Password = password;
-        InitialPassword = null;
+        InitialPassword = string.Empty;
         UpdatedAt = DateTime.UtcNow;
     }
 }
