@@ -1,8 +1,6 @@
 // ================================================================
 // Migration: extract workspace membership out of Users collection
 // ================================================================
-// Run with: mongosh <connection-string> migration.mongodb.js
-// ================================================================
 
 // Step 1. Create the new WorkspaceUsers collection and index.
 db.createCollection("WorkspaceUsers");

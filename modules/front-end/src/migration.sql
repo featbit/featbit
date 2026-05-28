@@ -1,6 +1,3 @@
-```sql
-BEGIN;
-
 -- ================================================================
 -- Migration: extract workspace membership out of users table
 -- ================================================================
@@ -100,7 +97,3 @@ SET initial_password = ou.initial_password
 WHERE u.id = ou.user_id;
 
 ALTER TABLE organization_users DROP COLUMN initial_password;
-
-COMMIT;
-
-```
