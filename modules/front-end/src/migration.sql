@@ -13,7 +13,7 @@ CREATE TABLE workspace_users
   CONSTRAINT pk_workspace_users PRIMARY KEY (id)
 );
 
-CREATE INDEX ix_workspace_users_workspace_id_user_id
+CREATE UNIQUE INDEX ix_workspace_users_workspace_id_user_id
   ON workspace_users (workspace_id, user_id);
 
 -- 2. Resolve canonical user per email (earliest created_at wins)
@@ -92,7 +92,7 @@ SET initial_password = ou.initial_password
     SELECT DISTINCT ON (user_id) user_id, initial_password
     FROM organization_users
     WHERE initial_password IS NOT NULL
-    ORDER BY user_id, created_at ASC
+    ORDER BY user_id, created_at DESC
 ) ou
 WHERE u.id = ou.user_id;
 

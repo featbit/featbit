@@ -33,7 +33,6 @@ public class UserService(MongoDbClient mongoDb) : MongoDbService<User>(mongoDb),
     {
         var workspaces = MongoDb.QueryableOf<Workspace>();
         var workspaceUsers = MongoDb.QueryableOf<WorkspaceUser>();
-        var users = MongoDb.QueryableOf<User>();
 
         var query =
             from workspace in workspaces

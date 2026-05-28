@@ -26,12 +26,22 @@ public class CreateWorkspaceHandler(
 {
     public async Task<RegisterResult> Handle(CreateWorkspace request, CancellationToken cancellationToken)
     {
-        var registerResult = await identityService.RegisterByEmailAsync(
-            request.Email,
-            request.Password,
-            request.UserOrigin
-        );
-
+        var user = await userService.FindOneAsync(x => x.Email == request.Email);
+        
+        RegisterResult registerResult = null;
+        if (user == null)
+        {
+            registerResult = await identityService.RegisterByEmailAsync(
+                request.Email,
+                request.Password,
+                request.UserOrigin
+            );
+        }
+        else
+        {
+            registerResult = RegisterResult.Ok(user);
+        }
+        
         var workspace = new Workspace
         {
             Name = "Default Workspace",

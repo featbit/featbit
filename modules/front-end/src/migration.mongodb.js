@@ -4,7 +4,7 @@
 
 // Step 1. Create the new WorkspaceUsers collection and index.
 db.createCollection("WorkspaceUsers");
-db.WorkspaceUsers.createIndex({ workspaceId: 1, userId: 1 });
+db.WorkspaceUsers.createIndex({ workspaceId: 1, userId: 1 }, { unique: true });
 
 // Step 2. Resolve canonical user per email (earliest createdAt wins,
 //         then earliest _id as tiebreaker) and insert one WorkspaceUsers
@@ -49,10 +49,10 @@ db.Users.deleteMany({ _id: { $nin: canonicalIds } });
 db.Users.updateMany({}, { $unset: { workspaceId: "" } });
 
 // Step 6. Add initialPassword to Users, copied from OrganizationUsers.
-//         Uses the earliest record per user if multiple org memberships exist.
+//         Uses the most recent record per user if multiple org memberships exist.
 db.OrganizationUsers.aggregate([
     { $match: { initialPassword: { $exists: true, $ne: null } } },
-    { $sort: { createdAt: 1 } },
+    { $sort: { createdAt: -1 } },
     { $group: { _id: "$userId", initialPassword: { $first: "$initialPassword" } } }
 ]).forEach(doc => {
     db.Users.updateOne(

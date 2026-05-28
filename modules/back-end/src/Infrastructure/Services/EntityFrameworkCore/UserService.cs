@@ -33,7 +33,6 @@ public class UserService(AppDbContext dbContext) : EntityFrameworkCoreService<Us
     {
         var workspaces = QueryableOf<Workspace>();
         var workspaceUsers = QueryableOf<WorkspaceUser>();
-        var users = QueryableOf<User>();
 
         var query =
             from workspace in workspaces
