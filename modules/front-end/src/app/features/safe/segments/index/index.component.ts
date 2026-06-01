@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Subject } from 'rxjs';
-import { copyToClipboard, encodeURIComponentFfc, getPathPrefix } from '@shared/utils';
+import { copyToClipboard, encodeURIComponentFfc } from '@shared/utils';
 import {
   SegmentListFilter,
   ISegment,
@@ -13,10 +13,14 @@ import {
 } from "../types/segments";
 import { SegmentService } from "@services/segment.service";
 import { debounceTime } from 'rxjs/operators';
-import { getCurrentEnvRN } from "@utils/project-env";
+import { getCurrentEnvRN, getCurrentProjectEnv } from "@utils/project-env";
+import { EnvironmentSetting } from "@shared/types";
 import { permissionActions } from "@shared/policy";
 import { PermissionLicenseService } from "@services/permission-license.service";
 import { PermissionsService } from "@services/permissions.service";
+import { NzModalService } from "ng-zorro-antd/modal";
+import { ChangeCommentService } from "@services/change-comment.service";
+import { ChangeOperation } from "@core/components/change-comment/types";
 
 @Component({
     selector: 'segments-index',
@@ -25,37 +29,78 @@ import { PermissionsService } from "@services/permissions.service";
     standalone: false
 })
 export class IndexComponent implements OnInit {
-
-  isDelete: boolean = false; // to differencing delete and archive
-  deleteArchiveModalVisible: boolean = false;
-
-  currentDeletingArchivingSegment: ISegment;
-  currentDeletingArchivingSegmentFlagReferences: ISegmentFlagReference[] = [];
-
   constructor(
     private router: Router,
     private segmentService: SegmentService,
     private msg: NzMessageService,
     private permissionsService: PermissionsService,
     private permissionLicenseService: PermissionLicenseService,
+    private changeCommentService: ChangeCommentService,
+    private modal: NzModalService
   ) { }
 
-  deleteArchiveValidation(segment: ISegment, isDelete: boolean) {
-    const action = isDelete ? permissionActions.DeleteSegment : permissionActions.ArchiveSegment;
+  envSettings: EnvironmentSetting;
+
+  ngOnInit(): void {
+    this.envSettings = getCurrentProjectEnv()!.envSettings;
+    this.subscribeSearch();
+    this.$search.next();
+  }
+
+  flagReferences: ISegmentFlagReference[] = [];
+  flagReferencesModalVisible: boolean = false;
+  loadingFlagReferenceFor: string = '';
+  archive(segment: ISegment) {
     const rn = getSegmentRN(segment.key, segment.tags || []);
 
-    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(rn, action);
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(rn, permissionActions.ArchiveSegment);
     if (!isGranted) {
       this.msg.warning(this.permissionsService.genericDenyMessage);
       return;
     }
 
-    this.isDelete = isDelete;
-    this.currentDeletingArchivingSegment = segment;
-    this.currentDeletingArchivingSegmentFlagReferences = [];
-    this.segmentService.getFeatureFlagReferences(segment.id).subscribe((flags: ISegmentFlagReference[]) => {
-      this.currentDeletingArchivingSegmentFlagReferences = [...flags];
-      this.deleteArchiveModalVisible = true;
+    const doArchive = (comment: string = '') => {
+      this.segmentService.archive(segment.id, comment || undefined).subscribe({
+        next: () => {
+          this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
+          this.onSearch();
+        },
+        error: () => this.msg.error($localize`:@@common.operation-failed:Operation failed`)
+      });
+    }
+
+    this.loadingFlagReferenceFor = segment.id;
+    this.segmentService.getFeatureFlagReferences(segment.id).subscribe({
+      next: (references: ISegmentFlagReference[]) => {
+        this.flagReferences = references;
+
+        if (references.length > 0) {
+          this.flagReferencesModalVisible = true;
+        } else {
+          if (this.envSettings.requireChangeComment) {
+            this.changeCommentService.promptSegment(segment.key, ChangeOperation.ArchiveSegment).subscribe(comment => {
+              if (comment === null) return;
+              doArchive(comment);
+            });
+          } else {
+            this.modal.confirm({
+              nzTitle: $localize`:@@segments.archive-confirm-message:Are you sure to archive segment`,
+              nzContent: $localize`:@@segments.archive-confirm-subtitle:This segment is not referenced by any feature flag, you can safely archive it.`,
+              nzOnOk: doArchive,
+              nzCentered: true,
+              nzClassName: 'warning-modal-dialog',
+              nzOkText: $localize`:@@common.archive:Archive`,
+              nzWidth: '550px'
+            });
+          }
+        }
+
+        this.loadingFlagReferenceFor = '';
+      },
+      error: () => {
+        this.msg.error($localize`:@@segments.load-flag-references-failed:Failed to load flag references, please try again`);
+        this.loadingFlagReferenceFor = '';
+      }
     });
   }
 
@@ -67,52 +112,37 @@ export class IndexComponent implements OnInit {
       return;
     }
 
-    this.segmentService.restore(segment.id).subscribe({
-      next: () => {
-        this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
-        this.onSearch();
-      },
-      error: () => this.msg.error($localize`:@@common.operation-failed:Operation failed`)
+    this.changeCommentService.promptSegment(segment.key, ChangeOperation.Restore).subscribe(comment => {
+      if (comment === null) return;
+      this.segmentService.restore(segment.id, comment).subscribe({
+        next: () => {
+          this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
+          this.onSearch();
+        },
+        error: () => this.msg.error($localize`:@@common.operation-failed:Operation failed`)
+      });
     });
   }
 
-  closeDeleteArchiveModal() {
-    this.deleteArchiveModalVisible = false;
-  }
+  delete(segment: ISegment) {
+    const rn = getSegmentRN(segment.key, segment.tags || []);
 
-  deletingOrArchiving: boolean = false;
-  deleteArchive(id: string) {
-    this.deletingOrArchiving = true;
-
-    if (this.isDelete) {
-      this.segmentService.delete(id).subscribe({
-        next: () => {
-          this.segmentListModel.items = this.segmentListModel.items.filter(it => it.id !== id);
-          this.segmentListModel.totalCount--;
-          this.deletingOrArchiving = false;
-          this.closeDeleteArchiveModal();
-          this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
-        },
-        error: () => {
-          this.deletingOrArchiving = false;
-          this.closeDeleteArchiveModal();
-        }
-      });
-    } else { // archiving
-      this.segmentService.archive(id).subscribe({
-        next: () => {
-          this.deletingOrArchiving = false;
-          this.onSearch();
-          this.closeDeleteArchiveModal();
-          this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
-        },
-        error: () => {
-          this.msg.error($localize`:@@common.operation-failed-try-again:Operation failed, please try again`);
-          this.deletingOrArchiving = false;
-          this.closeDeleteArchiveModal();
-        }
-      });
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(rn, permissionActions.DeleteSegment);
+    if (!isGranted) {
+      this.msg.warning(this.permissionsService.genericDenyMessage);
+      return;
     }
+
+    this.changeCommentService.promptSegment(segment.key, ChangeOperation.Delete).subscribe(comment => {
+      if (comment === null) return;
+      this.segmentService.delete(segment.id, comment).subscribe({
+        next: () => {
+          this.onSearch();
+          this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
+        },
+        error: () => this.msg.error($localize`:@@common.operation-failed:Operation failed`)
+      });
+    });
   }
 
   segmentListModel: ISegmentListModel = {
@@ -162,22 +192,8 @@ export class IndexComponent implements OnInit {
     });
   }
 
-  //#endregion
-  ngOnInit(): void {
-    this.subscribeSearch();
-    this.$search.next();
-  }
-
   private toRouter(id: string) {
-    this.router.navigateByUrl(`/segments/${encodeURIComponentFfc(id)}/targeting`);
-  }
-
-  openFlagPage(flagKey: string) {
-    const url = this.router.serializeUrl(
-      this.router.createUrlTree([`/${getPathPrefix()}feature-flags/${flagKey}/targeting`])
-    );
-
-    window.open(url, '_blank');
+    this.router.navigateByUrl(`/segments/${encodeURIComponentFfc(id)}/targeting`).then();
   }
 
   creationModalVisible: boolean = false;

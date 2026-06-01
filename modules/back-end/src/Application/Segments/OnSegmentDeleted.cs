@@ -12,11 +12,14 @@ public class OnSegmentDeleted : INotification
 
     public DataChange DataChange { get; set; }
 
-    public OnSegmentDeleted(Segment segment, Guid operatorId)
+    public string Comment { get; set; }
+
+    public OnSegmentDeleted(Segment segment, Guid operatorId, string comment = "")
     {
         Segment = segment;
         OperatorId = operatorId;
         DataChange = new DataChange(segment).To(null);
+        Comment = comment;
     }
 
     public AuditLog GetAuditLog()

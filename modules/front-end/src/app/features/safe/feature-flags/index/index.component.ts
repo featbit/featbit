@@ -316,7 +316,7 @@ export class IndexComponent implements OnInit {
     };
 
     if (this.envSettings.requireChangeComment) {
-      this.changeCommentService.promptFlag(flag.key, ChangeOperation.Archive).subscribe(comment => {
+      this.changeCommentService.promptFlag(flag.key, ChangeOperation.ArchiveFlag).subscribe(comment => {
         if (comment === null) return;
         doArchive(comment);
       });
@@ -326,7 +326,7 @@ export class IndexComponent implements OnInit {
 
       this.modal.confirm({
         nzContent: message,
-        nzTitle: $localize`:@@ff.are-you-sure-to-archive-ff:Are you sure to archive flag "${flag.name}"`,
+        nzTitle: $localize`:@@ff.are-you-sure-to-archive-ff:Are you sure to archive flag`,
         nzCentered: true,
         nzClassName: 'warning-modal-dialog',
         nzOkText: $localize`:@@common.archive:Archive`,

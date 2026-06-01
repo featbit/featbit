@@ -35,4 +35,8 @@ export class ChangeCommentService {
   promptFlag(flagKey: string, operation: ChangeOperation): Observable<string | null> {
     return this.prompt({ resourceType: 'flag', resourceKey: flagKey, operation });
   }
+
+  promptSegment(segmentKey: string, operation: ChangeOperation): Observable<string | null> {
+    return this.prompt({ resourceType: 'segment', resourceKey: segmentKey, operation });
+  }
 }

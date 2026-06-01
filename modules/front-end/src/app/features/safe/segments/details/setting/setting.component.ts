@@ -9,6 +9,9 @@ import { permissionActions } from "@shared/policy";
 import { PermissionsService } from "@services/permissions.service";
 import { PermissionLicenseService } from "@services/permission-license.service";
 import { finalize } from "rxjs/operators";
+import { ChangeCommentService } from "@services/change-comment.service";
+import { ChangeOperation } from "@core/components/change-comment/types";
+import { Observable } from "rxjs";
 
 @Component({
     selector: 'segment-setting',
@@ -31,6 +34,7 @@ export class SettingComponent implements OnInit {
     private segmentService: SegmentService,
     private permissionsService: PermissionsService,
     private permissionLicenseService: PermissionLicenseService,
+    private changeCommentService: ChangeCommentService,
   ) {
     this.segmentService.getAllTags().subscribe(allTags => {
       this.allTags = allTags;
@@ -56,6 +60,7 @@ export class SettingComponent implements OnInit {
     .subscribe({
       next: (result: ISegment) => {
         this.segmentDetail = new Segment(result);
+        this.pendingTags = [...this.segmentDetail.tags];
       },
       error: () => this.msg.error($localize`:@@common.failed-to-load-data:Failed to load data`)
     });
@@ -63,23 +68,29 @@ export class SettingComponent implements OnInit {
 
   saveTitle() {
     const { id, name } = this.segmentDetail;
-    this.segmentService.updateName(id, name).subscribe({
-      next: () => {
-        this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
-        this.isEditingTitle = false;
-      },
-      error: () => this.msg.error($localize `:@@common.operation-failed:Operation failed`)
+    this.promptChangeComment(ChangeOperation.ChangeName).subscribe(comment => {
+      if (comment === null) return;
+      this.segmentService.updateName(id, name, comment).subscribe({
+        next: () => {
+          this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
+          this.isEditingTitle = false;
+        },
+        error: () => this.msg.error($localize `:@@common.operation-failed:Operation failed`)
+      });
     });
   }
 
   saveDescription() {
     const { id, description } = this.segmentDetail;
-    this.segmentService.updateDescription(id, description).subscribe({
-      next: () => {
-        this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
-        this.isEditingDescription = false;
-      },
-      error: () => this.msg.error($localize `:@@common.operation-failed:Operation failed`)
+    this.promptChangeComment(ChangeOperation.ChangeDescription).subscribe(comment => {
+      if (comment === null) return;
+      this.segmentService.updateDescription(id, description, comment).subscribe({
+        next: () => {
+          this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
+          this.isEditingDescription = false;
+        },
+        error: () => this.msg.error($localize `:@@common.operation-failed:Operation failed`)
+      });
     });
   }
 
@@ -88,6 +99,11 @@ export class SettingComponent implements OnInit {
     if (!isGranted) {
       this.msg.warning(this.permissionsService.genericDenyMessage);
       return;
+    }
+
+    if (this.isEditingTitle) {
+      // Cancel editing, reset name to original value
+      this.segmentDetail.name = this.segmentDetail.originalData.name;
     }
 
     this.isEditingTitle = !this.isEditingTitle;
@@ -100,6 +116,11 @@ export class SettingComponent implements OnInit {
       return;
     }
 
+    if (this.isEditingDescription) {
+      // Cancel editing, reset description to original value
+      this.segmentDetail.description = this.segmentDetail.originalData.description;
+    }
+
     this.isEditingDescription = !this.isEditingDescription;
   }
 
@@ -107,12 +128,21 @@ export class SettingComponent implements OnInit {
   currentAllTags: string[] = [];
   selectedTag: string = '';
   isLoadingTags: boolean = true;
+  pendingTags: string[] = [];
+
+  get hasPendingTagChanges(): boolean {
+    const saved = this.segmentDetail.tags ?? [];
+    if (this.pendingTags.length !== saved.length) return true;
+    const sorted1 = [...this.pendingTags].sort();
+    const sorted2 = [...saved].sort();
+    return sorted1.some((t, i) => t !== sorted2[i]);
+  }
 
   @ViewChild('tags') tagsSelect: NzSelectComponent;
   createTagPrefix = $localize`:@@common.create-tag:Create Tag`;
 
   isTagSelected(tag: string): boolean {
-    return this.segmentDetail.tags.includes(tag);
+    return this.pendingTags.includes(tag);
   }
 
   onSearchTag(value: string) {
@@ -136,10 +166,7 @@ export class SettingComponent implements OnInit {
       return;
     }
 
-    this.segmentDetail.removeTag(tag);
-    this.segmentService.setTags(this.segmentDetail.id, this.segmentDetail.tags).subscribe(_ => {
-      this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
-    });
+    this.pendingTags = this.pendingTags.filter(t => t !== tag);
   }
 
   onAddTag() {
@@ -149,23 +176,41 @@ export class SettingComponent implements OnInit {
       return;
     }
 
-    const isNewTag = this.selectedTag.startsWith(this.createTagPrefix);
+    if (!this.selectedTag) return;
 
+    const isNewTag = this.selectedTag.startsWith(this.createTagPrefix);
     const actualTag = isNewTag
       ? this.selectedTag.replace(this.createTagPrefix, '').replace(/'/g, '').trim()
       : this.selectedTag.trim();
 
-    this.segmentDetail.addTag(actualTag);
-    this.segmentService.setTags(this.segmentDetail.id, this.segmentDetail.tags).subscribe(_ => {
-      this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
-    });
+    if (!this.pendingTags.includes(actualTag)) {
+      this.pendingTags = [...this.pendingTags, actualTag];
+    }
 
     if (isNewTag) {
       this.allTags = [...this.allTags, actualTag];
     }
 
     this.currentAllTags = this.allTags;
-    // clear current selected
+    this.tagsSelect.writeValue(null);
+  }
+
+  onSaveTags() {
+    this.promptChangeComment(ChangeOperation.UpdateTags).subscribe(comment => {
+      if (comment === null) return;
+      this.segmentService.setTags(this.segmentDetail.id, this.pendingTags, comment).subscribe({
+        next: () => {
+          this.segmentDetail.tags = [...this.pendingTags];
+          this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
+        },
+        error: () => this.msg.error($localize `:@@common.operation-failed:Operation failed`)
+      });
+    });
+  }
+
+  onCancelSaveTags() {
+    this.pendingTags = [...(this.segmentDetail.tags ?? [])];
+    this.currentAllTags = this.allTags;
     this.tagsSelect.writeValue(null);
   }
 
@@ -173,6 +218,10 @@ export class SettingComponent implements OnInit {
     copyToClipboard(text).then(
       () => this.msg.success($localize `:@@common.copy-success:Copied`)
     );
+  }
+
+  private promptChangeComment(operation: ChangeOperation): Observable<string | null> {
+    return this.changeCommentService.promptSegment(this.segmentDetail.key, operation);
   }
 
   protected readonly SegmentType = SegmentType;

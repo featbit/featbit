@@ -1,9 +1,10 @@
+using Application.AuditLogs;
 using Application.Users;
 using Domain.AuditLogs;
 
 namespace Application.Segments;
 
-public class SetTags : IRequest<bool>
+public class SetTags : ResourceChangeRequest, IRequest<bool>
 {
     /// <summary>
     /// The ID of the segment to set tags for. Retrieved from the URL path.
@@ -26,7 +27,14 @@ public class SetTagsHandler(ISegmentService service, ICurrentUser currentUser, I
         await service.UpdateAsync(segment);
 
         // publish on segment change notification
-        var notification = new OnSegmentChange(segment, Operations.Update, dataChange, currentUser.Id);
+        var notification = new OnSegmentChange(
+            segment,
+            Operations.Update,
+            dataChange,
+            currentUser.Id,
+            comment: request.Comment,
+            isTargetingChange: false
+        );
         await publisher.Publish(notification, cancellationToken);
 
         return true;

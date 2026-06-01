@@ -223,6 +223,11 @@ export class SettingComponent {
       return;
     }
 
+    if (this.isEditingTitle) {
+      // Cancel editing, reset name to original value
+      this.featureFlag.name = this.featureFlag.originalData.name;
+    }
+
     this.isEditingTitle = !this.isEditingTitle;
   }
 
@@ -231,6 +236,11 @@ export class SettingComponent {
     if (!isGranted) {
       this.message.warning(this.permissionsService.genericDenyMessage);
       return;
+    }
+
+    if (this.isEditingDescription) {
+      // Cancel editing, reset description to original value
+      this.featureFlag.description = this.featureFlag.originalData.description;
     }
 
     this.isEditingDescription = !this.isEditingDescription;
@@ -446,6 +456,7 @@ export class SettingComponent {
     });
   }
 
+  @ViewChild('offVariationSelect') offVariationSelect: NzSelectComponent;
   onSaveOffVariation(newOffVariationId: string) {
     const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.UpdateFlagOffVariation);
     if (!isGranted) {
@@ -455,10 +466,8 @@ export class SettingComponent {
 
     this.promptChangeComment(ChangeOperation.ChangeOffVariation).subscribe(comment => {
       if (comment === null) {
-        // Force nz-select to revert: set to null first, then restore original in the next tick
-        const originalId = this.featureFlag.disabledVariationId;
-        this.featureFlag.disabledVariationId = null;
-        setTimeout(() => this.featureFlag.disabledVariationId = originalId);
+        // revert to original off variation if user cancels the change comment prompt
+        this.offVariationSelect.writeValue(this.featureFlag.disabledVariationId);
         return;
       }
 

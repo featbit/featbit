@@ -6,10 +6,10 @@ export enum ChangeOperation {
   ChangeVariations = 'ChangeVariations',
   ChangeOffVariation = 'ChangeOffVariation',
   UpdateTags = 'UpdateTags',
-  Archive = 'Archive',
+  ArchiveFlag = 'ArchiveFlag',
+  ArchiveSegment = 'ArchiveSegment',
   Restore = 'Restore',
-  Delete = 'Delete',
-  ChangeTargeting = 'ChangeTargeting',
+  Delete = 'Delete'
 }
 
 export interface ChangeCommentData {
@@ -26,8 +26,8 @@ export const OperationDescriptions: Record<ChangeOperation, string> = {
   [ChangeOperation.ChangeVariations]: "You're going to change the variations of the {type}.",
   [ChangeOperation.ChangeOffVariation]: "You're going to change the off variation of the {type}.",
   [ChangeOperation.UpdateTags]: "You're going to update the tags of the {type}.",
-  [ChangeOperation.Archive]: "Are you sure to archive this {type}? After archiving, the fallback value defined in your code will be returned for all users.",
+  [ChangeOperation.ArchiveFlag]: "Are you sure to archive this {type}? After archiving, the fallback value defined in your code will be returned for all users.",
+  [ChangeOperation.ArchiveSegment]: "Are you sure to archive this {type}?",
   [ChangeOperation.Restore]: "You're going to restore the {type}.",
-  [ChangeOperation.Delete]: "You're going to permanently delete the {type}.",
-  [ChangeOperation.ChangeTargeting]: "You're going to change the targeting rules of the {type}.",
+  [ChangeOperation.Delete]: "You're going to permanently delete the {type}."
 };

@@ -20,17 +20,17 @@
 
     <nz-form-item>
       <nz-form-label>
-        Type
+        <span i18n="@@change-comment.resource-key.type">Type</span>
         <span
           class="resource-key-hint"
           nz-tooltip
           nzTooltipTitle="Click to fill the confirm key"
           i18n-nzTooltipTitle="@@change-comment.confirm-key-tip"
           (click)="fillConfirmKey()">
-          <span>{{ data.resourceKey }}</span>
+          <span class="text">{{ data.resourceKey }}</span>
           <i nz-icon nzType="icons:icon-fill-in" nzTheme="outline"></i>
         </span>
-        to confirm changes to this {{ data.resourceType }}
+        <span i18n="@@change-comment.resource-key.to-confirm-changes">to confirm changes</span>
       </nz-form-label>
       <nz-form-control nzErrorTip="Please type the exact key to confirm">
         <input

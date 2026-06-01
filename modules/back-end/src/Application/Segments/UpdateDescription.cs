@@ -1,9 +1,10 @@
+using Application.AuditLogs;
 using Application.Users;
 using Domain.AuditLogs;
 
 namespace Application.Segments;
 
-public class UpdateDescription : IRequest<bool>
+public class UpdateDescription : ResourceChangeRequest, IRequest<bool>
 {
     /// <summary>
     /// The ID of the segment to update. Retrieved from the URL path.
@@ -34,7 +35,7 @@ public class UpdateDescriptionHandler(
             Operations.Update,
             dataChange,
             currentUser.Id,
-            comment: "Updated description",
+            comment: request.Comment,
             isTargetingChange: false
         );
         await publisher.Publish(notification, cancellationToken);

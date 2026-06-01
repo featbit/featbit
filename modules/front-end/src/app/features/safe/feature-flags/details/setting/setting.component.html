@@ -108,6 +108,7 @@
         <div class="disabled-variation">
           <span class="label" i18n="@@ff.if-off-return">If OFF, serve</span>
           <nz-select
+            #offVariationSelect
             class="nz-select-36"
             [ngModel]="featureFlag.disabledVariationId"
             (ngModelChange)="onSaveOffVariation($event)"
