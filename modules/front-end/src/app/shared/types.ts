@@ -98,7 +98,8 @@ export interface WorkspaceSubscription {
     billingCycle: string;
     addOnFeatures: string[];
     effectiveAt: Date;
-  }
+  };
+  isLocal: boolean;
 }
 
 export interface IOrganizationPermissions {
