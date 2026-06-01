@@ -35,25 +35,6 @@ import { EnvironmentSetting } from "@shared/types";
     standalone: false
 })
 export class SettingComponent {
-
-  trackById(_, v: IVariation) {
-    return v.id;
-  }
-
-  compareWith(o1: string, o2: string): boolean {
-    if (!o1 || !o2) {
-      return false;
-    }
-
-    return o1 === o2;
-  }
-
-  copyText(text: string) {
-    copyToClipboard(text).then(
-      () => this.message.success($localize `:@@common.copy-success:Copied`)
-    );
-  }
-
   envSettings: EnvironmentSetting;
 
   revision: string = '';
@@ -449,20 +430,26 @@ export class SettingComponent {
     });
   }
 
-  onSaveOffVariation() {
+  onSaveOffVariation(newOffVariationId: string) {
     const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.UpdateFlagOffVariation);
     if (!isGranted) {
       this.message.warning(this.permissionsService.genericDenyMessage);
       return;
     }
 
-    const { disabledVariationId } = this.featureFlag;
-
     this.promptChangeComment(ChangeOperation.ChangeOffVariation).subscribe(comment => {
-      if (comment === null) return;
-      this.featureFlagService.updateOffVariation(this.key, disabledVariationId, this.revision, comment).subscribe({
+      if (comment === null) {
+        // Force nz-select to revert: set to null first, then restore original in the next tick
+        const originalId = this.featureFlag.disabledVariationId;
+        this.featureFlag.disabledVariationId = null;
+        setTimeout(() => this.featureFlag.disabledVariationId = originalId);
+        return;
+      }
+
+      this.featureFlagService.updateOffVariation(this.key, newOffVariationId, this.revision, comment).subscribe({
         next: (revision) => {
           this.isEditingTitle = false;
+          this.featureFlag.disabledVariationId = newOffVariationId;
           this.onSettingUpdated(revision);
         },
         error: (err) => handleUpdateError(err, this.message, this.modal)
@@ -505,6 +492,12 @@ export class SettingComponent {
         }
       });
     });
+  }
+
+  copyText(text: string) {
+    copyToClipboard(text).then(
+      () => this.message.success($localize `:@@common.copy-success:Copied`)
+    );
   }
 
   private promptChangeComment(operation: ChangeOperation): Observable<string | null> {

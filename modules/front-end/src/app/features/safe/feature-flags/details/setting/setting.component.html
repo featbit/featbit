@@ -109,9 +109,8 @@
           <span class="label" i18n="@@ff.if-off-return">If OFF, serve</span>
           <nz-select
             class="nz-select-36"
-            [compareWith]="compareWith"
-            [(ngModel)]="featureFlag.disabledVariationId"
-            (ngModelChange)="onSaveOffVariation()"
+            [ngModel]="featureFlag.disabledVariationId"
+            (ngModelChange)="onSaveOffVariation($event)"
             i18n-nzPlaceHolder="@@ff.select-variation"
             nzPlaceHolder="Select variation">
             @for (variation of featureFlag.variations; track variation.id) {
@@ -139,7 +138,7 @@
         <span class="value">{{ featureFlag.variationType }}</span>
       </div>
       <div class="options">
-        @for (variation of featureFlag.variations; track trackById(key, variation); let key = $index) {
+        @for (variation of featureFlag.variations; track variation.id; let key = $index) {
           <div class="option-item">
             <div class="name" nz-tooltip="{{variation.name}}">
               <span class="variation-tip {{'tip-' + key % 9}}"></span>
