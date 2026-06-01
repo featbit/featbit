@@ -247,6 +247,8 @@
 
 <!-- Edit Variations Modal -->
 <nz-modal
+  nzClassName="edit-variations-modal"
+  nzCentered
   [(nzVisible)]="editVariationModalVisible"
   (nzOnCancel)="editVariationModalVisible = false"
   (nzOnOk)="saveVariations()">
@@ -339,7 +341,7 @@
     </form>
   </div>
 
-  <div *nzModalFooter>
+  <div class="actions" *nzModalFooter>
     <button nz-button nzType="default" (click)="editVariationModalVisible = false">Cancel</button>
     <button nz-button nzType="primary" (click)="saveVariations()" [disabled]="!variationForm.valid">Save</button>
   </div>
