@@ -15,7 +15,8 @@ import { FeatureFlagService } from "@services/feature-flag.service";
 import { NzModalService } from "ng-zorro-antd/modal";
 import { copyToClipboard } from '@utils/index';
 import { permissionActions } from "@shared/policy";
-import { getCurrentEnvRN } from "@utils/project-env";
+import { getCurrentEnvRN, getCurrentProjectEnv } from "@utils/project-env";
+import { EnvironmentSetting } from "@shared/types";
 import { PermissionLicenseService } from "@services/permission-license.service";
 import { PermissionsService } from "@services/permissions.service";
 import { ChangeCommentService } from "@services/change-comment.service";
@@ -58,7 +59,11 @@ export class IndexComponent implements OnInit {
     this.onSearch(true);
   }
 
+  envSettings: EnvironmentSetting;
+
   ngOnInit(): void {
+    this.envSettings = getCurrentProjectEnv()!.envSettings;
+
     this.route.queryParams.subscribe((params) => {
       Object.keys(params).forEach((k) => {
         if (k === 'tags') {
@@ -268,7 +273,8 @@ export class IndexComponent implements OnInit {
       return;
     }
 
-    this.changeCommentService.promptFlag(data.key, ChangeOperation.ChangeStatus).subscribe(comment => {
+    const operation = data.isEnabled ? ChangeOperation.ToggleOff : ChangeOperation.ToggleOn;
+    this.changeCommentService.promptFlag(data.key, operation).subscribe(comment => {
       if (comment === null) return;
 
       data.isToggling = true;

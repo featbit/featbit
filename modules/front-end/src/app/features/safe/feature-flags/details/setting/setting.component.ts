@@ -25,6 +25,8 @@ import { handleUpdateError } from "@features/safe/feature-flags/types/feature-fl
 import { ChangeCommentService } from "@services/change-comment.service";
 import { ChangeOperation } from "@core/components/change-comment/types";
 import { Observable } from "rxjs";
+import { getCurrentProjectEnv } from "@utils/project-env";
+import { EnvironmentSetting } from "@shared/types";
 
 @Component({
     selector: 'ff-setting',
@@ -51,6 +53,8 @@ export class SettingComponent {
       () => this.message.success($localize `:@@common.copy-success:Copied`)
     );
   }
+
+  envSettings: EnvironmentSetting;
 
   revision: string = '';
   featureFlag: FeatureFlag = {} as FeatureFlag;
@@ -143,6 +147,8 @@ export class SettingComponent {
     private modal: NzModalService,
     private changeCommentService: ChangeCommentService
   ) {
+    this.envSettings = getCurrentProjectEnv()!.envSettings;
+
     this.route.paramMap.subscribe( paramMap => {
       this.key = decodeURIComponent(paramMap.get('key'));
       this.messageQueueService.subscribe(
@@ -196,7 +202,8 @@ export class SettingComponent {
       return;
     }
 
-    this.promptChangeComment(ChangeOperation.ChangeStatus).subscribe(comment => {
+    const operation = this.featureFlag.isEnabled ? ChangeOperation.ToggleOff : ChangeOperation.ToggleOn;
+    this.promptChangeComment(operation).subscribe(comment => {
       if (comment === null) return;
       const { isEnabled } = this.featureFlag;
       this.isToggling = true;
