@@ -48,11 +48,20 @@ export class SettingComponent {
   currentAllTags: string[] = [];
   selectedTag: string = '';
   isLoadingTags: boolean = true;
+  pendingTags: string[] = [];
   @ViewChild('tags') tagsSelect: NzSelectComponent;
   createTagPrefix = $localize`:@@common.create-tag:Create Tag`;
 
+  get hasPendingTagChanges(): boolean {
+    const saved = this.featureFlag.tags ?? [];
+    if (this.pendingTags.length !== saved.length) return true;
+    const sorted1 = [...this.pendingTags].sort();
+    const sorted2 = [...saved].sort();
+    return sorted1.some((t, i) => t !== sorted2[i]);
+  }
+
   isTagSelected(tag: string): boolean {
-    return this.featureFlag.tags.includes(tag);
+    return this.pendingTags.includes(tag);
   }
 
   onSearchTag(value: string) {
@@ -76,13 +85,7 @@ export class SettingComponent {
       return;
     }
 
-    this.promptChangeComment(ChangeOperation.RemoveTag).subscribe(comment => {
-      if (comment === null) return;
-      this.featureFlag.removeTag(tag);
-      this.featureFlagService.setTags(this.featureFlag.key, this.featureFlag.tags, comment).subscribe(_ => {
-        this.message.success($localize`:@@common.operation-success:Operation succeeded`);
-      });
-    });
+    this.pendingTags = this.pendingTags.filter(t => t !== tag);
   }
 
   onAddTag() {
@@ -92,27 +95,39 @@ export class SettingComponent {
       return;
     }
 
-    const isNewTag = this.selectedTag.startsWith(this.createTagPrefix);
+    if (!this.selectedTag) return;
 
+    const isNewTag = this.selectedTag.startsWith(this.createTagPrefix);
     const actualTag = isNewTag
       ? this.selectedTag.replace(this.createTagPrefix, '').replace(/'/g, '').trim()
       : this.selectedTag.trim();
 
-    this.promptChangeComment(ChangeOperation.AddTag).subscribe(comment => {
+    if (!this.pendingTags.includes(actualTag)) {
+      this.pendingTags = [...this.pendingTags, actualTag];
+    }
+
+    if (isNewTag) {
+      this.allTags = [...this.allTags, actualTag];
+    }
+
+    this.currentAllTags = this.allTags;
+    this.tagsSelect.writeValue(null);
+  }
+
+  onSaveTags() {
+    this.promptChangeComment(ChangeOperation.UpdateTags).subscribe(comment => {
       if (comment === null) return;
-      this.featureFlag.addTag(actualTag);
-      this.featureFlagService.setTags(this.featureFlag.key, this.featureFlag.tags, comment).subscribe(_ => {
+      this.featureFlagService.setTags(this.featureFlag.key, this.pendingTags, comment).subscribe(_ => {
+        this.featureFlag.tags = [...this.pendingTags];
         this.message.success($localize`:@@common.operation-success:Operation succeeded`);
       });
-
-      if (isNewTag) {
-        this.allTags = [...this.allTags, actualTag];
-      }
-
-      this.currentAllTags = this.allTags;
-      // clear current selected
-      this.tagsSelect.writeValue(null);
     });
+  }
+
+  onCancelSaveTags() {
+    this.pendingTags = [...(this.featureFlag.tags ?? [])];
+    this.currentAllTags = this.allTags;
+    this.tagsSelect.writeValue(null);
   }
 
   constructor(
@@ -169,6 +184,7 @@ export class SettingComponent {
     .subscribe({
       next: (result: IFeatureFlag) => {
         this.featureFlag = new FeatureFlag(result);
+        this.pendingTags = [...this.featureFlag.tags];
         this.revision = result.revision;
       },
       error: () => this.message.error($localize`:@@common.failed-to-load-data:Failed to load data`)
