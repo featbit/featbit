@@ -1,18 +1,24 @@
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from "@angular/core";
+import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
 import { AbstractControl, FormBuilder, FormGroup, ValidatorFn } from "@angular/forms";
 import { RefTypeEnum } from "@core/components/audit-log/types";
-import { ChangeReviewOutput, ReviewModalKindEnum, ReviewModalMode } from "@core/components/change-review/types";
+import {
+  ChangeReviewModalData,
+  ChangeReviewOutput,
+  ReviewModalKindEnum,
+  ReviewModalMode
+} from "@core/components/change-review/types";
 import { differenceInCalendarDays, setHours, setMinutes, setSeconds } from 'date-fns';
 import { DisabledTimeFn } from "ng-zorro-antd/date-picker";
 import { AuditLogService } from "@services/audit-log.service";
 import { IInstruction } from "@core/components/change-list/instructions/types";
-import { License, LicenseFeatureEnum } from "@shared/types";
-import { getCurrentLicense } from "@utils/project-env";
+import { EnvironmentSetting, License, LicenseFeatureEnum } from "@shared/types";
+import { getCurrentLicense, getCurrentProjectEnv } from "@utils/project-env";
 import { Subject } from "rxjs";
 import { debounceTime } from "rxjs/operators";
 import { getProfile } from "@utils/index";
 import { OrganizationService } from "@services/organization.service";
 import { MemberFilter } from "@features/safe/iam/types/member";
+import { NzMessageService } from "ng-zorro-antd/message";
 
 @Component({
   selector: 'change-review',
@@ -20,21 +26,12 @@ import { MemberFilter } from "@features/safe/iam/types/member";
   styleUrls: [ './change-review.component.less' ],
   standalone: false
 })
-export class ChangeReviewComponent implements OnChanges, OnInit {
-  @Input() visible = false;
-  @Input() refName: string = '';
-  @Input() kind: ReviewModalKindEnum = ReviewModalKindEnum.Save;
-  @Output() kindChange= new EventEmitter<ReviewModalKindEnum>();
-  @Input() previous: string = '{}';
-  @Input() current: string = '{}';
-  @Input() refType: RefTypeEnum;
-  @Output() onSave = new EventEmitter<any>();
-  @Output() onCancel = new EventEmitter<any>();
-
+export class ChangeReviewComponent implements OnInit {
+  kind: ReviewModalKindEnum = ReviewModalKindEnum.Save;
+  envSettings: EnvironmentSetting;
   title: string;
   instructions: IInstruction[] = [];
   form: FormGroup;
-
   license: License;
   today = new Date();
   timeDefaultValue = setSeconds(setMinutes(setHours(new Date(), this.today.getHours()), this.today.getMinutes()), 0);
@@ -42,11 +39,48 @@ export class ChangeReviewComponent implements OnChanges, OnInit {
   constructor(
     private fb: FormBuilder,
     private organizationService: OrganizationService,
-    private auditLogService: AuditLogService
+    private auditLogService: AuditLogService,
+    private message: NzMessageService
   ) { }
+
+  private _visible = false;
+  @Input()
+  set visible(value: boolean) {
+    this._visible = value;
+    if (value) {
+      this.form = this.fb.group({
+        comment: ['', [this.commentValidator]],
+        scheduleTitle: ['', [this.scheduleValidator]],
+        scheduledTime: [null, [this.scheduleValidator]],
+        changeRequestReason: ['', [this.changeRequestValidator]],
+        reviewers: [[], [this.changeRequestValidator]],
+      });
+    }
+  }
+  get visible() {
+    return this._visible;
+  }
+
+  private _data: ChangeReviewModalData;
+  @Input()
+  set data(value: ChangeReviewModalData) {
+    this._data = value;
+    if (value) {
+      this.kind = value.kind;
+      this.setTitle();
+      this.loadChanges();
+    }
+  }
+  get data() {
+    return this._data;
+  }
+
+  @Output() onSave = new EventEmitter<any>();
+  @Output() onCancel = new EventEmitter<any>();
 
   ngOnInit(): void {
     this.license = getCurrentLicense();
+    this.envSettings = getCurrentProjectEnv()!.envSettings;
 
     const profile = getProfile();
     this.memberSearchChange$.pipe(
@@ -61,6 +95,24 @@ export class ChangeReviewComponent implements OnChanges, OnInit {
           this.isMemberLoading = false;
         }
       });
+    });
+  }
+
+  changes: number = 0;
+  isLoadingChanges: boolean = false;
+  loadChanges() {
+    this.isLoadingChanges = true;
+    const { refType, previous, current } = this._data;
+    this.auditLogService.compare(refType, previous, current).subscribe({
+      next: (instructions) => {
+        this.instructions = instructions;
+        this.changes = new Set(instructions.map(i => i.kind)).size;
+        this.isLoadingChanges = false;
+      },
+      error: _ => {
+        this.isLoadingChanges = false;
+        this.message.error($localize `:@@common.load-changes-failed:Failed to load changes`);
+      }
     });
   }
 
@@ -88,7 +140,22 @@ export class ChangeReviewComponent implements OnChanges, OnInit {
     return null;
   }
 
-  setTitle(kind: ReviewModalKindEnum) {
+  commentValidator: ValidatorFn = (control: AbstractControl) => {
+    const isNormalMode = !ReviewModalMode.isScheduleEnabled(this.kind) && !ReviewModalMode.isChangeRequestEnabled(this.kind);
+    if (this.envSettings?.requireChangeComment && isNormalMode && !control.value?.trim()) {
+      const error = { required: true };
+      control.setErrors(error);
+      return error;
+    } else {
+      control.setErrors(null);
+    }
+
+    return null;
+  }
+
+  setTitle() {
+    const kind = this.kind;
+
     if (!ReviewModalMode.isScheduleEnabled(kind) && !ReviewModalMode.isChangeRequestEnabled(kind)) {
       this.title = $localize `:@@common.review-and-save:Review and save`;
       return;
@@ -103,38 +170,7 @@ export class ChangeReviewComponent implements OnChanges, OnInit {
     }
   }
 
-  async ngOnChanges() {
-    if (this.visible) {
-      this.setTitle(this.kind);
-
-      this.form = this.fb.group({
-        comment: ['', []],
-        scheduleTitle: ['', [this.scheduleValidator]],
-        scheduledTime: [null, [this.scheduleValidator]],
-        changeRequestReason: ['', [this.changeRequestValidator]],
-        reviewers: [[], [this.changeRequestValidator]],
-      });
-
-      try {
-        this.instructions = await this.auditLogService.compare(this.refType, this.previous, this.current);
-      } catch(e) {}
-    }
-  }
-
-  onValidate() {
-    if (this.form.invalid) {
-      Object.values(this.form.controls).forEach(control => {
-        if (control.invalid) {
-          control.markAsDirty();
-          control.updateValueAndValidity({ onlySelf: true });
-        }
-      });
-
-      if (this.form.invalid) {
-        return;
-      }
-    }
-
+  doSubmit() {
     const { comment, scheduleTitle, scheduledTime, changeRequestReason, reviewers } = this.form.value;
 
     const output: ChangeReviewOutput = {
@@ -149,7 +185,6 @@ export class ChangeReviewComponent implements OnChanges, OnInit {
       } : undefined,
     };
 
-    this.kindChange.emit(this.kind);
     this.onSave.emit(output);
   }
 
@@ -191,6 +226,15 @@ export class ChangeReviewComponent implements OnChanges, OnInit {
       this.kind = ReviewModalMode.disableSchedule(this.kind);
     } else {
       this.kind = ReviewModalMode.enableSchedule(this.kind);
+    }
+  }
+
+  setNormalMode() {
+    if (ReviewModalMode.isScheduleEnabled(this.kind)) {
+      this.kind = ReviewModalMode.disableSchedule(this.kind);
+    }
+    if (ReviewModalMode.isChangeRequestEnabled(this.kind)) {
+      this.kind = ReviewModalMode.disableChangeRequest(this.kind);
     }
   }
 

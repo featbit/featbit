@@ -13,7 +13,12 @@ import { ICondition, IRule, IRuleVariation } from "@shared/rules";
 import { FeatureFlagService } from "@services/feature-flag.service";
 import { isSegmentCondition, isSingleOperator, uuidv4 } from "@utils/index";
 import { RefTypeEnum } from "@core/components/audit-log/types";
-import { ChangeReviewOutput, ReviewModalKindEnum, ReviewModalMode } from "@core/components/change-review/types";
+import {
+  ChangeReviewModalData,
+  ChangeReviewOutput,
+  ReviewModalKindEnum,
+  ReviewModalMode
+} from "@core/components/change-review/types";
 import { IPendingChanges } from "@core/components/pending-changes-drawer/types";
 import { environment } from "src/environments/environment";
 import { getCurrentLicense } from "@utils/project-env";
@@ -75,11 +80,8 @@ export class TargetingComponent implements OnInit {
   }
 
   reviewModalKind: ReviewModalKindEnum;
-  originalData: string = '{}';
-  currentData: string = '{}';
-  refType: RefTypeEnum = RefTypeEnum.Flag;
   reviewModalVisible: boolean = false;
-
+  reviewModalData: ChangeReviewModalData;
 
   onScheduleClick(validationErrortpl: TemplateRef<void>) {
     if (!this.license.isGranted(LicenseFeatureEnum.Schedule)) {
@@ -113,9 +115,14 @@ export class TargetingComponent implements OnInit {
     this.reviewModalKind = modalKind;
 
     this.featureFlag.targetUsers = Object.keys(this.targetingUsersByVariation).map(variationId => ({variationId, keyIds: this.targetingUsersByVariation[variationId].map(tu => tu.keyId)}));
-    this.originalData = JSON.stringify(this.featureFlag.originalData);
-    this.currentData = JSON.stringify(this.featureFlag);
 
+    this.reviewModalData = {
+      previous: JSON.stringify(this.featureFlag.originalData),
+      current: JSON.stringify(this.featureFlag),
+      refType: RefTypeEnum.Flag,
+      refName: this.featureFlag.name,
+      kind: this.reviewModalKind
+    };
     this.reviewModalVisible = true
   }
 
