@@ -11,10 +11,13 @@
         <a class="restore"
            i18n-nz-popconfirm="@@ff.are-you-sure-to-restore-ff"
            nz-popconfirm="Are you sure to restore this feature flag?"
+           [nzCondition]="envSettings.requireChangeComment"
            (nzOnConfirm)="restoreFlag()"><ng-container i18n="@@common.restore">Restore</ng-container></a>&nbsp;
         <ng-container i18n="@@common.or">or</ng-container>&nbsp;
         <a class="delete" i18n-nz-popconfirm="@@common.remove-confirm"
-           nz-popconfirm="This operation cannot be reverted, are you sure to remove it?" (nzOnConfirm)="deleteFlag()">
+           nz-popconfirm="This operation cannot be reverted, are you sure to remove it?"
+           [nzCondition]="envSettings.requireChangeComment"
+           (nzOnConfirm)="deleteFlag()">
           <ng-container i18n="@@common.remove">Remove</ng-container>
         </a>&nbsp;
         <ng-container i18n="@@ff.the-ff">the feature flag</ng-container>

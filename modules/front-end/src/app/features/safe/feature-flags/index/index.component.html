@@ -227,6 +227,7 @@
                     <a class="action-link secondary"
                       i18n-nz-popconfirm="@@ff.are-you-sure-to-restore-ff"
                       nz-popconfirm="Are you sure to restore this feature flag?"
+                      [nzCondition]="envSettings.requireChangeComment"
                       (nzOnConfirm)="restore(flag)">
                       <ng-container i18n="@@common.restore">Restore</ng-container>
                     </a>
@@ -234,6 +235,7 @@
                     <a class="action-link danger"
                       i18n-nz-popconfirm="@@common.remove-confirm"
                       nz-popconfirm="This operation cannot be reverted, are you sure to remove it?"
+                      [nzCondition]="envSettings.requireChangeComment"
                       (nzOnConfirm)="delete(flag)">
                       <ng-container i18n="@@common.remove">Remove</ng-container>
                     </a>

@@ -28,7 +28,7 @@ export const OperationDescriptions: Record<ChangeOperation, string> = {
   [ChangeOperation.ChangeOffVariation]: "You're going to change the off variation of the {type}.",
   [ChangeOperation.AddTag]: "You're going to add a tag to the {type}.",
   [ChangeOperation.RemoveTag]: "You're going to remove a tag from the {type}.",
-  [ChangeOperation.Archive]: "You're going to archive the {type}.",
+  [ChangeOperation.Archive]: "Are you sure to archive this {type}? After archiving, the fallback value defined in your code will be returned for all users.",
   [ChangeOperation.Restore]: "You're going to restore the {type}.",
   [ChangeOperation.Delete]: "You're going to permanently delete the {type}.",
   [ChangeOperation.ChangeTargeting]: "You're going to change the targeting rules of the {type}.",

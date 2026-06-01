@@ -278,14 +278,9 @@ export class IndexComponent implements OnInit {
       if (comment === null) return;
 
       data.isToggling = true;
-
-      let msg: string = data.isEnabled
-        ? $localize`:@@ff.idx.flag-turned-off:The status of feature flag <b>${data.name}</b> is changed to OFF`
-        : $localize`:@@ff.idx.flag-turned-on:The status of feature flag <b>${data.name}</b> is changed to ON`;
-
       this.featureFlagService.toggleStatus(data.key, !data.isEnabled, comment).subscribe({
         next: _ => {
-          this.msg.success(msg);
+          this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
           data.isEnabled = !data.isEnabled;
           data.lastChange = {
             operator: getProfile(),
@@ -295,7 +290,7 @@ export class IndexComponent implements OnInit {
           data.isToggling = false;
         },
         error: _ => {
-          this.msg.error($localize`:@@ff.idx.status-change-failed:Failed to change feature flag status`);
+          this.msg.error($localize`:@@common.operation-failed:Operation failed`)
           data.isToggling = false;
         }
       });
@@ -310,29 +305,35 @@ export class IndexComponent implements OnInit {
       return;
     }
 
-    let msg = $localize`:@@ff.archive-flag-warning:After archiving, the fallback value defined in your code will be returned for all your users. Be sure to remove code references to <strong>${flag.key}</strong> from your application before archiving.`;
+    const doArchive = (comment: string = '') => {
+      this.featureFlagService.archive(flag.key, comment).subscribe({
+        next: () => {
+          this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
+          this.onSearch();
+        },
+        error: () => this.msg.error($localize`:@@common.operation-failed-try-again:Operation failed, please try again`)
+      });
+    };
 
-    this.modal.confirm({
-      nzContent: msg,
-      nzTitle: $localize`:@@ff.are-you-sure-to-archive-ff:Are you sure to archive flag "${flag.name}"`,
-      nzCentered: true,
-      nzClassName: 'warning-modal-dialog',
-      nzOkText: $localize`:@@common.archive:Archive`,
-      nzWidth: '550px',
-      nzOnOk: () => {
-        this.changeCommentService.promptFlag(flag.key, ChangeOperation.Archive).subscribe(comment => {
-          if (comment === null) return;
-          this.featureFlagService.archive(flag.key, comment).subscribe({
-              next: () => {
-                this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
-                this.onSearch();
-              },
-              error: () => this.msg.error($localize`:@@common.operation-failed-try-again:Operation failed, please try again`)
-            }
-          );
-        });
-      }
-    });
+    if (this.envSettings.requireChangeComment) {
+      this.changeCommentService.promptFlag(flag.key, ChangeOperation.Archive).subscribe(comment => {
+        if (comment === null) return;
+        doArchive(comment);
+      });
+    } else {
+      const message =
+        $localize`:@@ff.archive-flag-warning:After archiving, the fallback value defined in your code will be returned for all your users. Be sure to remove code references to <strong>${flag.key}</strong> from your application before archiving.`;
+
+      this.modal.confirm({
+        nzContent: message,
+        nzTitle: $localize`:@@ff.are-you-sure-to-archive-ff:Are you sure to archive flag "${flag.name}"`,
+        nzCentered: true,
+        nzClassName: 'warning-modal-dialog',
+        nzOkText: $localize`:@@common.archive:Archive`,
+        nzWidth: '550px',
+        nzOnOk: doArchive
+      });
+    }
   }
 
   restore(flag: IFeatureFlagListItem) {
