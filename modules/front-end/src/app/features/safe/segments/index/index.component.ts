@@ -90,7 +90,7 @@ export class IndexComponent implements OnInit {
               nzCentered: true,
               nzClassName: 'warning-modal-dialog',
               nzOkText: $localize`:@@common.archive:Archive`,
-              nzWidth: '550px'
+              nzWidth: '420px'
             });
           }
         }
