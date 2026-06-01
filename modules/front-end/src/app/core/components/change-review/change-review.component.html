@@ -109,19 +109,22 @@
           </nz-form-item>
         }
 
-        @if (ReviewModalMode.isChangeRequestEnabled(kind)) {
+        @if (ReviewModalMode.isScheduleEnabled(kind) || ReviewModalMode.isChangeRequestEnabled(kind)) {
           <nz-form-item>
             <nz-form-label nzRequired i18n="@@common.reason">Reason</nz-form-label>
             <nz-form-control i18n-nzErrorTip="@@common.reason-cannot-be-empty" nzErrorTip="Reason cannot be empty">
               <textarea
                 rows="3"
                 nz-input
-                formControlName="changeRequestReason"
+                formControlName="reason"
                 placeholder="Describe why this change is needed"
                 i18n-placeholder="@@common.change-request-reason">
               </textarea>
             </nz-form-control>
           </nz-form-item>
+        }
+
+        @if (ReviewModalMode.isChangeRequestEnabled(kind)) {
           <nz-form-item>
             <nz-form-label nzRequired i18n="@@common.reviewers">Reviewers</nz-form-label>
             <nz-form-control

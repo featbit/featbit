@@ -43,6 +43,7 @@ export const ReviewModalMode = {
 export interface FlagSchedule {
   scheduledTime: Date,
   title: string,
+  reason: string;
 }
 
 export interface FlagChangeRequest {
@@ -51,6 +52,7 @@ export interface FlagChangeRequest {
 }
 
 export interface ChangeReviewOutput {
+  mode: ReviewModalKindEnum,
   comment?: string,
   schedule?: FlagSchedule,
   changeRequest?: FlagChangeRequest

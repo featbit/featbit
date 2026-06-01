@@ -34,7 +34,7 @@ export class ChangeReviewComponent implements OnInit {
   form: FormGroup;
   license: License;
   today = new Date();
-  timeDefaultValue = setSeconds(setMinutes(setHours(new Date(), this.today.getHours()), this.today.getMinutes()), 0);
+  timeDefaultValue = setSeconds(setMinutes(setHours(new Date(), 0), 0), 0);
 
   constructor(
     private fb: FormBuilder,
@@ -52,8 +52,8 @@ export class ChangeReviewComponent implements OnInit {
         comment: ['', [this.commentValidator]],
         scheduleTitle: ['', [this.scheduleValidator]],
         scheduledTime: [null, [this.scheduleValidator]],
-        changeRequestReason: ['', [this.changeRequestValidator]],
-        reviewers: [[], [this.changeRequestValidator]],
+        reason: ['', [this.reasonValidator]],
+        reviewers: [[], [this.reviewersValidator]],
       });
     }
   }
@@ -117,40 +117,54 @@ export class ChangeReviewComponent implements OnInit {
   }
 
   scheduleValidator: ValidatorFn = (control: AbstractControl) => {
-    if (this.license.isGranted(LicenseFeatureEnum.Schedule) && ReviewModalMode.isScheduleEnabled(this.kind) && !control.value) {
+    const isSchedule = ReviewModalMode.isScheduleEnabled(this.kind);
+    if (isSchedule && !control.value) {
       const error = { required: true };
       control.setErrors(error);
       return error;
     } else {
       control.setErrors(null);
+      return null;
     }
-
-    return null;
   }
 
-  changeRequestValidator: ValidatorFn = (control: AbstractControl) => {
-    if (this.license.isGranted(LicenseFeatureEnum.ChangeRequest) && ReviewModalMode.isChangeRequestEnabled(this.kind) && (!control.value || control.value.length === 0)) {
+  reasonValidator: ValidatorFn = (control: AbstractControl) => {
+    const needsReason =
+      ReviewModalMode.isChangeRequestEnabled(this.kind) || ReviewModalMode.isScheduleEnabled(this.kind);
+    if (needsReason && !control.value?.trim()) {
       const error = { required: true };
       control.setErrors(error);
       return error;
     } else {
       control.setErrors(null);
+      return null;
     }
+  }
 
-    return null;
+  reviewersValidator: ValidatorFn = (control: AbstractControl) => {
+    const isChangeRequest = ReviewModalMode.isChangeRequestEnabled(this.kind);
+    if (isChangeRequest && (!control.value || control.value.length === 0)) {
+      const error = { required: true };
+      control.setErrors(error);
+      return error;
+    } else {
+      control.setErrors(null);
+      return null;
+    }
   }
 
   commentValidator: ValidatorFn = (control: AbstractControl) => {
-    const isNormalMode = !ReviewModalMode.isScheduleEnabled(this.kind) && !ReviewModalMode.isChangeRequestEnabled(this.kind);
-    if (this.envSettings?.requireChangeComment && isNormalMode && !control.value?.trim()) {
+    const isNormalMode =
+      !ReviewModalMode.isScheduleEnabled(this.kind) && !ReviewModalMode.isChangeRequestEnabled(this.kind);
+
+    if (isNormalMode && this.envSettings?.requireChangeComment && !control.value?.trim()) {
       const error = { required: true };
       control.setErrors(error);
       return error;
     } else {
       control.setErrors(null);
+      return null;
     }
-
-    return null;
   }
 
   setTitle() {
@@ -171,16 +185,18 @@ export class ChangeReviewComponent implements OnInit {
   }
 
   doSubmit() {
-    const { comment, scheduleTitle, scheduledTime, changeRequestReason, reviewers } = this.form.value;
+    const { comment, scheduleTitle, scheduledTime, reason, reviewers } = this.form.value;
 
     const output: ChangeReviewOutput = {
+      mode: this.kind,
       comment: comment,
       schedule: this.license.isGranted(LicenseFeatureEnum.Schedule) && ReviewModalMode.isScheduleEnabled(this.kind) ? {
         title: scheduleTitle,
         scheduledTime: scheduledTime,
+        reason
       } : undefined,
       changeRequest: this.license.isGranted(LicenseFeatureEnum.ChangeRequest) && ReviewModalMode.isChangeRequestEnabled(this.kind) ? {
-        reason: changeRequestReason,
+        reason,
         reviewers: reviewers,
       } : undefined,
     };
@@ -200,7 +216,7 @@ export class ChangeReviewComponent implements OnInit {
     return result;
   }
 
-  // Can not select days before today and today
+  // Can not select days before today
   disabledDate = (current: Date): boolean => differenceInCalendarDays(current, this.today) < 0;
 
   disabledDateTime: DisabledTimeFn = (current: Date) => ({
@@ -227,6 +243,8 @@ export class ChangeReviewComponent implements OnInit {
     } else {
       this.kind = ReviewModalMode.enableSchedule(this.kind);
     }
+
+    this.revalidateForm();
   }
 
   setNormalMode() {
@@ -236,6 +254,8 @@ export class ChangeReviewComponent implements OnInit {
     if (ReviewModalMode.isChangeRequestEnabled(this.kind)) {
       this.kind = ReviewModalMode.disableChangeRequest(this.kind);
     }
+
+    this.revalidateForm();
   }
 
   toggleChangeRequest() {
@@ -244,6 +264,12 @@ export class ChangeReviewComponent implements OnInit {
     } else {
       this.kind = ReviewModalMode.enableChangeRequest(this.kind);
     }
+
+    this.revalidateForm();
+  }
+
+  revalidateForm() {
+    Object.values(this.form.controls).forEach(control => control.updateValueAndValidity());
   }
 
   memberSearchChange$ = new Subject<string>();
