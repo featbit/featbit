@@ -150,11 +150,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">283,284</context>
+          <context context-type="linenumber">284,285</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">288</context>
+          <context context-type="linenumber">289</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
@@ -516,7 +516,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">242,244</context>
+          <context context-type="linenumber">241,243</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.html</context>
@@ -716,23 +716,23 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">102</context>
+          <context context-type="linenumber">83</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">124</context>
+          <context context-type="linenumber">105</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">484</context>
+          <context context-type="linenumber">471</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">501</context>
+          <context context-type="linenumber">488</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">515</context>
+          <context context-type="linenumber">508</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
@@ -967,7 +967,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">326</context>
+          <context context-type="linenumber">307</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
@@ -1029,7 +1029,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">53</context>
+          <context context-type="linenumber">499</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
@@ -1259,7 +1259,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">191,192</context>
+          <context context-type="linenumber">190,191</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
@@ -1452,7 +1452,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">238,239</context>
+          <context context-type="linenumber">237,238</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
@@ -1546,7 +1546,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">134,135</context>
+          <context context-type="linenumber">133,134</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.add-conditions" datatype="html">
@@ -1598,7 +1598,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">336,338</context>
+          <context context-type="linenumber">337,339</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.remove-variation" datatype="html">
@@ -2094,7 +2094,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">286,287</context>
+          <context context-type="linenumber">287,288</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
@@ -2609,15 +2609,15 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">217</context>
+          <context context-type="linenumber">198</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">447</context>
+          <context context-type="linenumber">428</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">504</context>
+          <context context-type="linenumber">491</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.ts</context>
@@ -3368,7 +3368,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">386,387</context>
+          <context context-type="linenumber">387,388</context>
         </context-group>
       </trans-unit>
       <trans-unit id="expt.overview.select-baseline-variation" datatype="html">
@@ -3581,7 +3581,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">263,264</context>
+          <context context-type="linenumber">264,265</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
@@ -3600,11 +3600,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">265,266</context>
+          <context context-type="linenumber">266,267</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">270,271</context>
+          <context context-type="linenumber">271,272</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
@@ -3635,15 +3635,15 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">292,293</context>
+          <context context-type="linenumber">293,294</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">300</context>
+          <context context-type="linenumber">301</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">315</context>
+          <context context-type="linenumber">316</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.value-cannot-be-empty" datatype="html">
@@ -3654,7 +3654,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">319,321</context>
+          <context context-type="linenumber">320,322</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.invalid-value" datatype="html">
@@ -3665,7 +3665,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">322,323</context>
+          <context context-type="linenumber">323,324</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.default-serve-tooltip" datatype="html">
@@ -3731,7 +3731,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">232,234</context>
+          <context context-type="linenumber">231,233</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.create-tag" datatype="html">
@@ -3742,7 +3742,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">71</context>
+          <context context-type="linenumber">52</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.ts</context>
@@ -5318,7 +5318,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">388,390</context>
+          <context context-type="linenumber">389,391</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
@@ -6280,11 +6280,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">236,237</context>
+          <context context-type="linenumber">235,236</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">425,426</context>
+          <context context-type="linenumber">426,427</context>
         </context-group>
       </trans-unit>
       <trans-unit id="integrations.webhooks.webhook-deliveries" datatype="html">
@@ -7085,7 +7085,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">385,386</context>
+          <context context-type="linenumber">386,387</context>
         </context-group>
       </trans-unit>
       <trans-unit id="expt.overview.event-name" datatype="html">
@@ -7103,7 +7103,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">387,388</context>
+          <context context-type="linenumber">388,389</context>
         </context-group>
       </trans-unit>
       <trans-unit id="3162275402417178873" datatype="html">
@@ -7114,7 +7114,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">414,415</context>
+          <context context-type="linenumber">415,416</context>
         </context-group>
         <note priority="1" from="description">expt.overview.check-experiment</note>
       </trans-unit>
@@ -7929,42 +7929,42 @@
         <source>Select variation</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">116,117</context>
+          <context context-type="linenumber">115,116</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.data-type" datatype="html">
         <source>Data type</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">138,139</context>
+          <context context-type="linenumber">137,138</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.edit-variations" datatype="html">
         <source>Edit Variations</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">255,258</context>
+          <context context-type="linenumber">256,259</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.removing-variation" datatype="html">
         <source>Removing variation</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">358,359</context>
+          <context context-type="linenumber">359,360</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.variation-used-by-experiments" datatype="html">
         <source>This variation is used by <x id="INTERPOLATION" equiv-text="{{ variationExptReferences.length }}"/> experiment(s), remove all references before the variation can be safely removed! </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
-          <context context-type="linenumber">367,370</context>
+          <context context-type="linenumber">368,371</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.failed-to-load-data" datatype="html">
         <source>Failed to load data</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">193</context>
+          <context context-type="linenumber">174</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
@@ -7995,28 +7995,28 @@
         <source>This variation is used by targeting users, remove the reference before it can be safely removed</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">298</context>
+          <context context-type="linenumber">279</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.variation-used-by-rules" datatype="html">
         <source>This variation is used by rules, remove the reference before it can be safely removed</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">303</context>
+          <context context-type="linenumber">284</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.variation-used-by-default-rule" datatype="html">
         <source>This variation is used by default rule, remove the reference before it can be safely removed</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">308</context>
+          <context context-type="linenumber">289</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.variation-used-by-off" datatype="html">
         <source>This variation is used by the value returned when the feature flag is OFF, remove the reference before it can be safely removed</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">313</context>
+          <context context-type="linenumber">294</context>
         </context-group>
       </trans-unit>
       <trans-unit id="ff.components.details.targeting.settings-ineffective-warning" datatype="html">
