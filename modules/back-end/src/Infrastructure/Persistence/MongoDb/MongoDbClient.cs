@@ -48,6 +48,8 @@ public class MongoDbClient
 
         { typeof(Workspace), "Workspaces" },
 
+        { typeof(WorkspaceUser), "WorkspaceUsers" },
+
         { typeof(Organization), "Organizations" },
         { typeof(OrganizationUser), "OrganizationUsers" },
         { typeof(Project), "Projects" },

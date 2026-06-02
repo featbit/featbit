@@ -1,11 +1,11 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { SelectOrganizationComponent } from "@features/safe/select-organization/select-organization.component";
+import { SelectWorkspaceComponent } from "@features/safe/select-workspace/select-workspace.component";
 
 const routes: Routes = [
   {
     path: '',
-    component: SelectOrganizationComponent
+    component: SelectWorkspaceComponent
   }
 ];
 
@@ -15,4 +15,4 @@ const routes: Routes = [
   providers: [
   ]
 })
-export class SelectOrganizationRoutingModule { }
+export class SelectWorkspaceRoutingModule { }

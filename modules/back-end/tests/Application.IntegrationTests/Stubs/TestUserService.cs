@@ -43,7 +43,7 @@ public class TestUserService : NullServiceBase<User>, IUserService
         return Task.FromResult<ICollection<User>>(users);
     }
 
-    public Task<ICollection<Workspace>> GetWorkspacesAsync(string email)
+    public Task<ICollection<Workspace>> GetWorkspacesAsync(Guid userId)
     {
         var workspaces = new[]
         {
@@ -51,11 +51,6 @@ public class TestUserService : NullServiceBase<User>, IUserService
         };
 
         return Task.FromResult<ICollection<Workspace>>(workspaces);
-    }
-
-    public Task<Workspace> GetWorkspaceAsync(Guid userId, Guid workspaceId)
-    {
-        return Task.FromResult(TestWorkspace.Instance);
     }
 
     public Task DeleteAsync(Guid id)

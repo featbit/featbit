@@ -1,6 +1,7 @@
 using Application.Usages;
 using Application.Workspaces;
 using Dapper;
+using Domain.Users;
 using Domain.Workspaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -313,5 +314,25 @@ public class WorkspaceService(AppDbContext dbContext)
 
             return results.ToArray();
         }
+    }
+
+    public async Task AddUserIfNotExistsAsync(Guid workspaceId, Guid userId)
+    {
+        var exists = await QueryableOf<WorkspaceUser>().AnyAsync(x => x.WorkspaceId == workspaceId && x.UserId == userId);
+        if (exists)
+        {
+            return;
+        }
+
+        var workspaceUser = new WorkspaceUser(workspaceId, userId);
+        SetOf<WorkspaceUser>().Add(workspaceUser);
+        await SaveChangesAsync();
+    }
+
+    public async Task RemoveUserAsync(Guid workspaceId, Guid userId)
+    {
+        await QueryableOf<WorkspaceUser>()
+            .Where(x => x.WorkspaceId == workspaceId && x.UserId == userId)
+            .ExecuteDeleteAsync();
     }
 }

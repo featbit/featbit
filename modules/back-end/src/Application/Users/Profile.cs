@@ -10,8 +10,6 @@ public class Profile
 
     public string Name { get; set; }
 
-    public Guid WorkspaceId { get; set; }
-
     public string Origin { get; set; }
 
     public Profile(User user)
@@ -20,6 +18,5 @@ public class Profile
         Email = user.Email;
         Name = user.Name;
         Origin = user.Origin ?? UserOrigin.Local;
-        WorkspaceId = user.WorkspaceId;
     }
 }

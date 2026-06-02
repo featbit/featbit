@@ -64,6 +64,7 @@ public class MemberController : ApiControllerBase
     {
         var request = new RemoveFromOrganization
         {
+            WorkspaceId = WorkspaceId,
             OrganizationId = OrgId,
             MemberId = memberId
         };
