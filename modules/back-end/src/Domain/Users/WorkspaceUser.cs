@@ -6,9 +6,7 @@ public class WorkspaceUser : AuditedEntity
 
     public Guid UserId { get; set; }
 
-    public WorkspaceUser(
-        Guid workspaceId,
-        Guid userId)
+    public WorkspaceUser(Guid workspaceId, Guid userId)
     {
         WorkspaceId = workspaceId;
         UserId = userId;

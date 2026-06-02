@@ -1,4 +1,3 @@
-using Application.Bases.Exceptions;
 using Domain.AccessTokens;
 using Domain.Users;
 using Domain.Workspaces;
@@ -28,17 +27,16 @@ public class UserService(AppDbContext dbContext) : EntityFrameworkCoreService<Us
 
     public async Task<ICollection<User>> GetListAsync(IEnumerable<Guid> ids)
         => await FindManyAsync(x => ids.Contains(x.Id));
-    
+
     public async Task<ICollection<Workspace>> GetWorkspacesAsync(Guid userId)
     {
         var workspaces = QueryableOf<Workspace>();
-        var workspaceUsers = QueryableOf<WorkspaceUser>();
+        var users = QueryableOf<WorkspaceUser>();
 
         var query =
             from workspace in workspaces
-            join wu in workspaceUsers
-                on workspace.Id equals wu.WorkspaceId
-            where wu.UserId == userId
+            join user in users on workspace.Id equals user.WorkspaceId
+            where user.UserId == userId
             select workspace;
 
         return await query.ToListAsync();

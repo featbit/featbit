@@ -1,5 +1,4 @@
 using Application.Bases;
-using Microsoft.Extensions.Logging;
 
 namespace Application.Identity;
 
@@ -25,13 +24,8 @@ public class LoginByEmailValidator : AbstractValidator<LoginByEmail>
     }
 }
 
-public class LoginByEmailHandler (
-    IIdentityService identityService,
-    ILogger<LoginByEmailHandler> logger) : IRequestHandler<LoginByEmail, LoginResult>
+public class LoginByEmailHandler(IIdentityService identityService) : IRequestHandler<LoginByEmail, LoginResult>
 {
-    public async Task<LoginResult> Handle(LoginByEmail request, CancellationToken cancellationToken)
-    {
-        logger.LogInformation("user {Identity} login in by password", request.Email);
-        return await identityService.LoginByEmailAsync(request.Email, request.Password, request.IpAddress);
-    }
+    public async Task<LoginResult> Handle(LoginByEmail request, CancellationToken cancellationToken) =>
+        await identityService.LoginByEmailAsync(request.Email, request.Password, request.IpAddress);
 }

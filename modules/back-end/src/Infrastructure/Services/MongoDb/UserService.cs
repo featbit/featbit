@@ -1,4 +1,3 @@
-using Application.Bases.Exceptions;
 using Domain.AccessTokens;
 using Domain.Users;
 using Domain.Workspaces;
@@ -28,40 +27,18 @@ public class UserService(MongoDbClient mongoDb) : MongoDbService<User>(mongoDb),
 
     public async Task<ICollection<User>> GetListAsync(IEnumerable<Guid> ids)
         => await FindManyAsync(x => ids.Contains(x.Id));
-    
+
     public async Task<ICollection<Workspace>> GetWorkspacesAsync(Guid userId)
     {
         var workspaces = MongoDb.QueryableOf<Workspace>();
-        var workspaceUsers = MongoDb.QueryableOf<WorkspaceUser>();
+        var users = MongoDb.QueryableOf<WorkspaceUser>();
 
         var query =
             from workspace in workspaces
-            join wu in workspaceUsers
-                on workspace.Id equals wu.WorkspaceId
-            where wu.UserId == userId
+            join user in users on workspace.Id equals user.WorkspaceId
+            where user.UserId == userId
             select workspace;
 
         return await query.ToListAsync();
-    }
-
-    public async Task<User> GetUserByEmailAsync(Guid workspaceId, string email)
-    {
-        var workspaceUsers = MongoDb.QueryableOf<WorkspaceUser>();
-        var users = MongoDb.QueryableOf<User>();
-
-        var query =
-            from wu in workspaceUsers
-            join user in users
-                on wu.UserId equals user.Id
-            where wu.WorkspaceId == workspaceId && user.Email == email
-            select user;
-
-        var result = await query.FirstOrDefaultAsync();
-        if (result is null)
-        {
-            throw new EntityNotFoundException(nameof(Workspace), $"{email}-{workspaceId}");
-        }
-
-        return result;
     }
 }

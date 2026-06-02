@@ -10,6 +10,6 @@ public class WorkspaceUserConfiguration : IEntityTypeConfiguration<WorkspaceUser
     {
         builder.ToTable("workspace_users");
 
-        builder.HasIndex(x => new { x.WorkspaceId, x.UserId }).IsUnique();;
+        builder.HasIndex(x => new { x.WorkspaceId, x.UserId }).IsUnique();
     }
 }

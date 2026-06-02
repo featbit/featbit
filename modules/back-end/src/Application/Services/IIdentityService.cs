@@ -14,5 +14,5 @@ public interface IIdentityService
 
     Task<LoginResult> LoginByEmailAsync(string email, string password, string ipAddress);
 
-    Task<RegisterResult> RegisterByEmailAsync(string email, string password, string origin, bool storePassword = false);
+    Task<RegisterResult> RegisterByEmailAsync(string email, string password, string origin, string initialPassword = "");
 }

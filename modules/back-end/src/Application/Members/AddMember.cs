@@ -55,26 +55,24 @@ public class AddMemberHandler(
     {
         var email = request.Email;
 
-        string initialPwd;
         Guid userId;
 
         var user = await userService.FindOneAsync(x => x.Email == email);
         // automatically register users if they do not exist
         if (user == null)
         {
-            initialPwd = PasswordGenerator.New(email);
+            var initialPwd = PasswordGenerator.New(email);
             var registerResult =
-                await identityService.RegisterByEmailAsync(email, initialPwd, UserOrigin.Local, true);
+                await identityService.RegisterByEmailAsync(email, initialPwd, UserOrigin.Local, initialPwd);
             userId = registerResult.User.Id;
         }
         else
         {
             userId = user.Id;
         }
-        
-        var workspaceUser = new WorkspaceUser(request.WorkspaceId, userId);
-        // Nothing will happen if user already in the workspace
-        await workspaceService.AddUserAsync(workspaceUser);
+
+        // ensure user is in workspace
+        await workspaceService.AddUserIfNotExistsAsync(request.WorkspaceId, userId);
 
         // if no policies or groups are specified, use the organization's default permissions
         if (request.PolicyIds.Count == 0 && request.GroupIds.Count == 0)

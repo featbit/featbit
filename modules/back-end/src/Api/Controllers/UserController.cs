@@ -46,15 +46,15 @@ public class UserController : ApiControllerBase
         var result = await Mediator.Send(request);
         return Ok(result);
     }
-    
+
     [HttpGet("workspaces")]
-    public async Task<ApiResponse<IEnumerable<WorkspaceVm>>> GetWorkspaces()
+    public async Task<ApiResponse<ICollection<WorkspaceVm>>> GetWorkspaces()
     {
         var request = new GetWorkspaces
         {
             UserId = CurrentUser.Id
         };
-        
+
         var workspaces = await Mediator.Send(request);
         return Ok(workspaces);
     }

@@ -17,7 +17,7 @@ public interface IWorkspaceService : IService<Workspace>
 
     Task<WorkspaceUsageVm> GetUsageAsync(Guid workspaceId, WorkspaceUsageFilter filter);
 
-    Task AddUserAsync(WorkspaceUser workspaceUser);
+    Task AddUserIfNotExistsAsync(Guid workspaceId, Guid userId);
 
     Task RemoveUserAsync(Guid workspaceId, Guid userId);
 }

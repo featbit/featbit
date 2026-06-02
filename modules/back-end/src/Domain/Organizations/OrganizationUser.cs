@@ -8,10 +8,7 @@ public class OrganizationUser : AuditedEntity
 
     public Guid? InvitorId { get; set; }
 
-    public OrganizationUser(
-        Guid organizationId,
-        Guid userId,
-        Guid? invitorId = null)
+    public OrganizationUser(Guid organizationId, Guid userId, Guid? invitorId = null)
     {
         OrganizationId = organizationId;
         UserId = userId;

@@ -315,31 +315,17 @@ public class WorkspaceService(AppDbContext dbContext)
             return results.ToArray();
         }
     }
-    
-    public async Task<bool> ContainsUserAsync(Guid workspaceId, Guid userId)
-    {
-        var exists = await QueryableOf<WorkspaceUser>().AnyAsync(
-            x => x.WorkspaceId == workspaceId && x.UserId == userId
-        );
 
-        return exists;
-    }
-    
-    public async Task AddUserAsync(WorkspaceUser workspaceUser)
+    public async Task AddUserIfNotExistsAsync(Guid workspaceId, Guid userId)
     {
-        var workspaceId = workspaceUser.WorkspaceId;
-        var userId = workspaceUser.UserId;
-
-        // if user is already in workspace, do nothing
-        var exists = await ContainsUserAsync(workspaceId, userId);
+        var exists = await QueryableOf<WorkspaceUser>().AnyAsync(x => x.WorkspaceId == workspaceId && x.UserId == userId);
         if (exists)
         {
             return;
         }
 
-        // add workspace user
+        var workspaceUser = new WorkspaceUser(workspaceId, userId);
         SetOf<WorkspaceUser>().Add(workspaceUser);
-
         await SaveChangesAsync();
     }
 

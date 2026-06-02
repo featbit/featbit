@@ -91,17 +91,17 @@ public class IdentityService(
         return LoginResult.Ok(tokens);
     }
 
-    public async Task<RegisterResult> RegisterByEmailAsync(string email, string password, string origin, bool storePassword = false)
+    public async Task<RegisterResult> RegisterByEmailAsync(
+        string email,
+        string password,
+        string origin,
+        string initialPassword = "")
     {
         var hashedPwd = string.IsNullOrWhiteSpace(password)
             ? string.Empty
             : passwordHasher.HashPassword(null!, password);
 
-        var user = new User(email, hashedPwd, origin: origin);
-        if (storePassword)
-        {
-            user.InitialPassword = password;
-        }
+        var user = new User(email, hashedPwd, origin: origin, initialPassword: initialPassword);
 
         await userService.AddOneAsync(user);
 
