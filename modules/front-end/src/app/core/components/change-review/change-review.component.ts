@@ -74,7 +74,6 @@ export class ChangeReviewComponent implements OnInit {
       }
     }
   }
-  }
   get data() {
     return this._data;
   }

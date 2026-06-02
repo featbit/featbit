@@ -76,7 +76,7 @@ export class EnvDrawerComponent {
 
   keyAsyncValidator = (control: FormControl) => control.valueChanges.pipe(
     debounceTime(300),
-    switchMap(value => this.envService.isKeyUsed(value as string)),
+    switchMap(value => this.envService.isKeyUsed(this._env.projectId, value as string)),
     map(isKeyUsed => {
       switch (isKeyUsed) {
         case true:
@@ -98,7 +98,7 @@ export class EnvDrawerComponent {
     this.isLoading = true;
 
     if (this.isEditing) {
-      this.envService.updateEnv(this._env.id, this.form.value).subscribe({
+      this.envService.updateEnv(this._env.projectId, this._env.id, this.form.value).subscribe({
         next: (updatedEnv) => {
           this.isLoading = false;
           this.close.emit({ isEditing: true, env: updatedEnv });
@@ -110,7 +110,7 @@ export class EnvDrawerComponent {
         }
       });
     } else {
-      this.envService.createEnv(this.form.value).subscribe({
+      this.envService.createEnv(this._env.projectId, this.form.value).subscribe({
         next: (newEnv) => {
           this.isLoading = false;
           this.close.emit({ isEditing: false, env: newEnv });

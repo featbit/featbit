@@ -11,7 +11,7 @@
       <message [type]="'warning'" [content]="permissionDenyMsg"></message>
     }
 
-    <form nz-form [formGroup]="form" (ngSubmit)="doSubmit()" nzLayout="vertical">
+    <form nz-form [formGroup]="form" nzLayout="vertical">
       <!-- Name -->
       <nz-form-item>
         <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>
@@ -53,7 +53,7 @@
       <nz-form-item>
         <nz-form-label i18n="@@common.description">Description</nz-form-label>
         <nz-form-control>
-          <input type="text" nz-input formControlName="description" placeholder="Description" i18n="@@common.description"/>
+          <input type="text" nz-input formControlName="description" placeholder="Description" i18n-placeholder="@@common.description"/>
         </nz-form-control>
       </nz-form-item>
 

@@ -168,7 +168,7 @@ export class HeaderComponent implements OnInit {
   }
 
   private setCurrentEnv() {
-    this.envService.getEnv(this.currentProjectEnv.envId).subscribe({
+    this.envService.getEnv(this.currentProjectEnv.projectId, this.currentProjectEnv.envId).subscribe({
       next: env => {
         this.env = env;
       },

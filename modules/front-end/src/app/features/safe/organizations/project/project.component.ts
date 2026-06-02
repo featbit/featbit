@@ -100,7 +100,7 @@ export class ProjectComponent implements OnInit {
       return;
     }
 
-    this.envService.removeEnv(env.id).subscribe(() => {
+    this.envService.removeEnv(project.id, env.id).subscribe(() => {
       project.environments = project.environments.filter(e => e.id !== env.id);
       this.messageService.success($localize`:@@org.project.env-remove-success:Environment successfully removed`);
       // emit project list change event
