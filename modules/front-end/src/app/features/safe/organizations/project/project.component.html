@@ -79,25 +79,25 @@
                     </div>
                   </div>
                   <div class="env-operations">
-                    <a permission-check [rn]="getEnvRN(project, env)" [action]="permissionActions.UpdateEnvSettings" (actionIfAllow)="onEditEnvClick(project, env)">
-                      <span style="color: #23AD7F;" i18n="@@org.project.edit">Edit</span>
-                    </a>
+                    <button class="edit" nz-button nzType="link" permission-check [rn]="getEnvRN(project, env)" [action]="permissionActions.UpdateEnvSettings" (actionIfAllow)="onEditEnvClick(project, env)">
+                      <span i18n="@@org.project.edit">Edit</span>
+                    </button>
                     @if (!isCurrentEnv(env)) {
                       <nz-divider nzType="vertical"></nz-divider>
-                      <a i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it?"
+                      <button class="remove" nz-button nzType="link" i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it?"
                         nzPopconfirmPlacement="bottomRight"
                         (nzOnConfirm)="onDeleteEnvClick(project, env)" [nzIcon]="iconTplEnv">
-                        <span style="color: #717D8A" i18n="@@common.remove">Remove</span>
-                      </a>
+                        <span i18n="@@common.remove">Remove</span>
+                      </button>
                     }
                     <ng-template #iconTplEnv>
                       <i nz-icon nzType="question-circle" nzTheme="fill" style="color: #FAAD14;"></i>
                     </ng-template>
                     <nz-divider nzType="vertical"></nz-divider>
-                    <a (click)="copyText(env.id)" class="copy-id">
-                      <span style="color: #717D8A;" i18n="@@org.project.copy-id">Copy Id</span>
-                      <i style="color: #717D8A;" nz-icon i18n-nz-tooltip="@@org.project.env-id-copy-description" nz-tooltip="Copy ID of the environment, the ID may be needed when calling FeatBit REST API" nzType="icons:icon-info-outline"></i>
-                    </a>
+                    <button class="copy-id" nz-button nzType="link" (click)="copyText(env.id)">
+                      <span i18n="@@org.project.copy-id">Copy Id</span>
+                      <i nz-icon i18n-nz-tooltip="@@org.project.env-id-copy-description" nz-tooltip="Copy ID of the environment, the ID may be needed when calling FeatBit REST API" nzType="icons:icon-info-outline"></i>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -179,4 +179,4 @@
   </nz-modal>
 
   <app-project-drawer [visible]="creatEditProjectFormVisible" (close)="projectClosed($event)" [project]="project"></app-project-drawer>
-  <app-env-drawer [visible]="creatEditEnvFormVisible" [rn]="getEnvRN(project, env)" (close)="envClosed($event)" [env]="env"></app-env-drawer>
+  <env-drawer [visible]="creatEditEnvFormVisible" [rn]="getEnvRN(project, env)" (close)="envClosed($event)" [env]="env"></env-drawer>

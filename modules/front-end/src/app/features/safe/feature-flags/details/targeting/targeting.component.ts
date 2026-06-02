@@ -13,7 +13,12 @@ import { ICondition, IRule, IRuleVariation } from "@shared/rules";
 import { FeatureFlagService } from "@services/feature-flag.service";
 import { isSegmentCondition, isSingleOperator, uuidv4 } from "@utils/index";
 import { RefTypeEnum } from "@core/components/audit-log/types";
-import { ChangeReviewOutput, ReviewModalKindEnum, ReviewModalMode } from "@core/components/change-review/types";
+import {
+  ChangeReviewModalData,
+  ChangeReviewOutput,
+  ReviewModalKindEnum,
+  ReviewModalMode
+} from "@core/components/change-review/types";
 import { IPendingChanges } from "@core/components/pending-changes-drawer/types";
 import { environment } from "src/environments/environment";
 import { getCurrentLicense } from "@utils/project-env";
@@ -74,12 +79,8 @@ export class TargetingComponent implements OnInit {
     this.exptRulesVisible = false;
   }
 
-  reviewModalKind: ReviewModalKindEnum;
-  originalData: string = '{}';
-  currentData: string = '{}';
-  refType: RefTypeEnum = RefTypeEnum.Flag;
   reviewModalVisible: boolean = false;
-
+  reviewModalData: ChangeReviewModalData;
 
   onScheduleClick(validationErrortpl: TemplateRef<void>) {
     if (!this.license.isGranted(LicenseFeatureEnum.Schedule)) {
@@ -110,12 +111,15 @@ export class TargetingComponent implements OnInit {
       return false;
     }
 
-    this.reviewModalKind = modalKind;
-
     this.featureFlag.targetUsers = Object.keys(this.targetingUsersByVariation).map(variationId => ({variationId, keyIds: this.targetingUsersByVariation[variationId].map(tu => tu.keyId)}));
-    this.originalData = JSON.stringify(this.featureFlag.originalData);
-    this.currentData = JSON.stringify(this.featureFlag);
 
+    this.reviewModalData = {
+      previous: JSON.stringify(this.featureFlag.originalData),
+      current: JSON.stringify(this.featureFlag),
+      refType: RefTypeEnum.Flag,
+      refName: this.featureFlag.name,
+      kind: modalKind
+    };
     this.reviewModalVisible = true
   }
 
@@ -341,26 +345,26 @@ export class TargetingComponent implements OnInit {
       error: (err) => handleUpdateError(err, this.message, this.modal)
     };
 
-    if (!ReviewModalMode.isScheduleEnabled(this.reviewModalKind) && !ReviewModalMode.isChangeRequestEnabled(this.reviewModalKind)) {
+    if (!ReviewModalMode.isScheduleEnabled(data.mode) && !ReviewModalMode.isChangeRequestEnabled(data.mode)) {
       const payload = {
         targeting,
         revision,
         comment: data.comment
       };
       this.featureFlagService.updateTargeting(key, payload).subscribe(observer);
-    } else if (ReviewModalMode.isScheduleEnabled(this.reviewModalKind)) { // schedule (with or without change request)
+    } else if (ReviewModalMode.isScheduleEnabled(data.mode)) { // schedule (with or without change request)
       const payload = {
         targeting,
         revision,
         scheduledTime: data.schedule.scheduledTime,
         title: data.schedule.title,
         reviewers: data.changeRequest?.reviewers || [],
-        reason: data.changeRequest?.reason || '',
-        withChangeRequest: ReviewModalMode.isChangeRequestEnabled(this.reviewModalKind)
+        reason: data.schedule.reason || '',
+        withChangeRequest: ReviewModalMode.isChangeRequestEnabled(data.mode)
       };
 
       this.featureFlagService.createSchedule(key, payload).subscribe(observer);
-    } else if (ReviewModalMode.isChangeRequestEnabled(this.reviewModalKind)){ // change request only
+    } else if (ReviewModalMode.isChangeRequestEnabled(data.mode)){ // change request only
       const payload = {
         targeting,
         revision,

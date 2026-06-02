@@ -11,10 +11,13 @@
         <a class="restore"
            i18n-nz-popconfirm="@@ff.are-you-sure-to-restore-ff"
            nz-popconfirm="Are you sure to restore this feature flag?"
+           [nzCondition]="envSettings.requireChangeComment"
            (nzOnConfirm)="restoreFlag()"><ng-container i18n="@@common.restore">Restore</ng-container></a>&nbsp;
         <ng-container i18n="@@common.or">or</ng-container>&nbsp;
         <a class="delete" i18n-nz-popconfirm="@@common.remove-confirm"
-           nz-popconfirm="This operation cannot be reverted, are you sure to remove it?" (nzOnConfirm)="deleteFlag()">
+           nz-popconfirm="This operation cannot be reverted, are you sure to remove it?"
+           [nzCondition]="envSettings.requireChangeComment"
+           (nzOnConfirm)="deleteFlag()">
           <ng-container i18n="@@common.remove">Remove</ng-container>
         </a>&nbsp;
         <ng-container i18n="@@ff.the-ff">the feature flag</ng-container>
@@ -67,17 +70,31 @@
       <div class="status-switcher">
         <div class="switcher">
           @if (featureFlag.isEnabled) {
-            <nz-switch i18n-nz-popconfirm="@@ff.are-you-sure-to-turn-ff-off"
-                       nz-popconfirm="Are you sure to turn it off? The flag will return the variation that you specified for its off state."
-                       nzPopconfirmPlacement="bottomRight" [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
-                       (nzOnConfirm)="onChangeStatus()" [ngModel]="featureFlag.isEnabled" [nzControl]="true" [nzLoading]="isToggling"
-                       nzCheckedChildren="ON" nzUnCheckedChildren="OFF"></nz-switch>
+            <nz-switch
+              i18n-nz-popconfirm="@@ff.turn-off-confirm"
+              nz-popconfirm="Are you sure to turn it off? After turned off, the flag will return the variation that you specified for its off state."
+              [nzPopconfirmOverlayStyle]="{maxWidth: '350px'}"
+              [nzCondition]="envSettings.requireChangeComment"
+              (nzOnConfirm)="onChangeStatus()"
+              [ngModel]="featureFlag.isEnabled"
+              [nzControl]="true"
+              [nzLoading]="isToggling"
+              nzCheckedChildren="ON"
+              nzUnCheckedChildren="OFF">
+            </nz-switch>
           } @else {
-            <nz-switch i18n-nz-popconfirm="@@ff.are-you-sure-to-turn-ff-on"
-                       nz-popconfirm="Are you sure to turn it on? The flag will return the matching targeting users' or rules' serving variation."
-                       nzPopconfirmPlacement="bottomRight" [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
-                       (nzOnConfirm)="onChangeStatus()" [ngModel]="featureFlag.isEnabled" [nzControl]="true" [nzLoading]="isToggling"
-                       nzCheckedChildren="ON" nzUnCheckedChildren="OFF"></nz-switch>
+            <nz-switch
+              i18n-nz-popconfirm="@@ff.turn-on-confirm"
+              nz-popconfirm="Are you sure to turn it on? After turned on, the flag will return the serving variation that matches the targeted users or rules."
+              [nzPopconfirmOverlayStyle]="{maxWidth: '350px'}"
+              [nzCondition]="envSettings.requireChangeComment"
+              (nzOnConfirm)="onChangeStatus()"
+              [ngModel]="featureFlag.isEnabled"
+              [nzControl]="true"
+              [nzLoading]="isToggling"
+              nzCheckedChildren="ON"
+              nzUnCheckedChildren="OFF">
+            </nz-switch>
           }
           <span>
               <span i18n="@@ff.ff-is">The feature flag is</span>&nbsp;
@@ -91,10 +108,10 @@
         <div class="disabled-variation">
           <span class="label" i18n="@@ff.if-off-return">If OFF, serve</span>
           <nz-select
+            #offVariationSelect
             class="nz-select-36"
-            [compareWith]="compareWith"
-            [(ngModel)]="featureFlag.disabledVariationId"
-            (ngModelChange)="onSaveOffVariation()"
+            [ngModel]="featureFlag.disabledVariationId"
+            (ngModelChange)="onSaveOffVariation($event)"
             i18n-nzPlaceHolder="@@ff.select-variation"
             nzPlaceHolder="Select variation">
             @for (variation of featureFlag.variations; track variation.id) {
@@ -122,7 +139,7 @@
         <span class="value">{{ featureFlag.variationType }}</span>
       </div>
       <div class="options">
-        @for (variation of featureFlag.variations; track trackById(key, variation); let key = $index) {
+        @for (variation of featureFlag.variations; track variation.id; let key = $index) {
           <div class="option-item">
             <div class="name" nz-tooltip="{{variation.name}}">
               <span class="variation-tip {{'tip-' + key % 9}}"></span>
@@ -151,9 +168,9 @@
     <div class="block standard-div">
       <div class="title">Tags</div>
       <div class="tags">
-        @if (this.featureFlag.tags.length) {
+        @if (pendingTags.length) {
           <div class="selected">
-            @for (tag of this.featureFlag.tags; track tag) {
+            @for (tag of pendingTags; track tag) {
               <nz-tag nzMode="closeable" (nzOnClose)="onRemoveTag($event, tag)">
                 {{ tag }}
               </nz-tag>
@@ -179,6 +196,16 @@
             }
           }
         </nz-select>
+        @if (hasPendingTagChanges) {
+          <div class="tag-actions">
+            <button nz-button nzType="default" (click)="onCancelSaveTags()">
+              <ng-container i18n="@@common.cancel">Cancel</ng-container>
+            </button>
+            <button nz-button nzType="primary" (click)="onSaveTags()">
+              <ng-container i18n="@@common.save">Save</ng-container>
+            </button>
+          </div>
+        }
       </div>
     </div>
   } @else {
@@ -231,6 +258,8 @@
 
 <!-- Edit Variations Modal -->
 <nz-modal
+  nzClassName="edit-variations-modal"
+  nzCentered
   [(nzVisible)]="editVariationModalVisible"
   (nzOnCancel)="editVariationModalVisible = false"
   (nzOnOk)="saveVariations()">
@@ -323,7 +352,7 @@
     </form>
   </div>
 
-  <div *nzModalFooter>
+  <div class="actions" *nzModalFooter>
     <button nz-button nzType="default" (click)="editVariationModalVisible = false">Cancel</button>
     <button nz-button nzType="primary" (click)="saveVariations()" [disabled]="!variationForm.valid">Save</button>
   </div>

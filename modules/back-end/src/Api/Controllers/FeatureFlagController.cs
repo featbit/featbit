@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Api.Authentication;
 using Api.Swagger.Examples;
+using Application.AuditLogs;
 using Application.Bases.Models;
 using Application.FeatureFlags;
 using Domain.Workspaces;
@@ -99,12 +100,16 @@ public class FeatureFlagController : ApiControllerBase
     [OpenApi]
     [HttpPut("{key}/archive")]
     [Authorize(Permissions.ArchiveFlag)]
-    public async Task<ApiResponse<bool>> ArchiveAsync(Guid envId, string key)
+    public async Task<ApiResponse<bool>> ArchiveAsync(
+        Guid envId, 
+        string key, 
+        [FromBody] ResourceChangeRequest? changeRequest = null)
     {
         var request = new ArchiveFeatureFlag
         {
             EnvId = envId,
-            Key = key
+            Key = key,
+            Comment = changeRequest?.Comment ?? string.Empty
         };
 
         var success = await Mediator.Send(request);
@@ -120,12 +125,16 @@ public class FeatureFlagController : ApiControllerBase
     [OpenApi]
     [HttpPut("{key}/restore")]
     [Authorize(Permissions.RestoreFlag)]
-    public async Task<ApiResponse<bool>> RestoreAsync(Guid envId, string key)
+    public async Task<ApiResponse<bool>> RestoreAsync(
+        Guid envId, 
+        string key, 
+        [FromBody] ResourceChangeRequest? changeRequest = null)
     {
         var request = new RestoreFeatureFlag
         {
             EnvId = envId,
-            Key = key
+            Key = key,
+            Comment = changeRequest?.Comment ?? string.Empty
         };
 
         var success = await Mediator.Send(request);
@@ -141,12 +150,16 @@ public class FeatureFlagController : ApiControllerBase
     [OpenApi]
     [HttpDelete("{key}")]
     [Authorize(Permissions.DeleteFlag)]
-    public async Task<ApiResponse<bool>> DeleteAsync(Guid envId, string key)
+    public async Task<ApiResponse<bool>> DeleteAsync(
+        Guid envId, 
+        string key, 
+        [FromBody] ResourceChangeRequest? changeRequest = null)
     {
         var request = new DeleteFeatureFlag
         {
             EnvId = envId,
-            Key = key
+            Key = key,
+            Comment = changeRequest?.Comment ?? string.Empty
         };
 
         var success = await Mediator.Send(request);
@@ -162,13 +175,18 @@ public class FeatureFlagController : ApiControllerBase
     [OpenApi]
     [HttpPut("{key}/toggle/{status}")]
     [Authorize(Permissions.ToggleFlag)]
-    public async Task<ApiResponse<Guid>> ToggleAsync(Guid envId, string key, bool status)
+    public async Task<ApiResponse<Guid>> ToggleAsync(
+        Guid envId, 
+        string key, 
+        bool status, 
+        [FromBody] ResourceChangeRequest? changeRequest = null)
     {
         var request = new ToggleFeatureFlag
         {
             EnvId = envId,
             Key = key,
-            Status = status
+            Status = status,
+            Comment = changeRequest?.Comment ?? string.Empty
         };
 
         var revision = await Mediator.Send(request);
@@ -517,14 +535,10 @@ public class FeatureFlagController : ApiControllerBase
     [OpenApi]
     [HttpPut("{key}/tags")]
     [Authorize(Permissions.UpdateFlagTags)]
-    public async Task<ApiResponse<bool>> SetTagsAsync(Guid envId, string key, string[] tags)
+    public async Task<ApiResponse<bool>> SetTagsAsync(Guid envId, string key, SetTags request)
     {
-        var request = new SetTags
-        {
-            EnvId = envId,
-            Key = key,
-            Tags = tags
-        };
+        request.EnvId = envId;
+        request.Key = key;
 
         var success = await Mediator.Send(request);
         return Ok(success);

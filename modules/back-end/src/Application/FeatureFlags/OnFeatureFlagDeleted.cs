@@ -12,16 +12,19 @@ public class OnFeatureFlagDeleted : INotification
 
     public DataChange DataChange { get; set; }
 
-    public OnFeatureFlagDeleted(FeatureFlag flag, Guid operatorId)
+    public string Comment { get; set; }
+
+    public OnFeatureFlagDeleted(FeatureFlag flag, Guid operatorId, string comment = "")
     {
         Flag = flag;
         OperatorId = operatorId;
+        Comment = comment;
         DataChange = new DataChange(flag).To(null);
     }
 
     public AuditLog GetAuditLog()
     {
-        var auditLog = AuditLog.For(Flag, Operations.Remove, DataChange, string.Empty, OperatorId);
+        var auditLog = AuditLog.For(Flag, Operations.Remove, DataChange, Comment, OperatorId);
         return auditLog;
     }
 }

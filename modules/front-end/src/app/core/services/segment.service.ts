@@ -62,20 +62,20 @@ export class SegmentService {
     return this.http.post<ISegment>(this.baseUrl, payload);
   }
 
-  delete(id: string): Observable<boolean> {
+  delete(id: string, comment?: string): Observable<boolean> {
     const url = `${this.baseUrl}/${id}`;
 
-    return this.http.delete<boolean>(url);
+    return this.http.delete<boolean>(url, { body: { comment } });
   }
 
-  updateName(id: string, name: string): Observable<boolean> {
+  updateName(id: string, name: string, comment?: string): Observable<boolean> {
     const url = `${this.baseUrl}/${id}/name`;
-    return this.http.put<boolean>(url, { name });
+    return this.http.put<boolean>(url, { name, comment });
   }
 
-  updateDescription(id: string, description: string): Observable<boolean> {
+  updateDescription(id: string, description: string, comment?: string): Observable<boolean> {
     const url = `${this.baseUrl}/${id}/description`;
-    return this.http.put<boolean>(url, { description });
+    return this.http.put<boolean>(url, { description, comment });
   }
 
   updateTargeting(id: string, payload: UpdateSegmentTargetingPayload): Observable<boolean> {
@@ -83,13 +83,13 @@ export class SegmentService {
     return this.http.put<boolean>(url, payload);
   }
 
-  archive(id: string): Observable<any> {
-    return this.http.put(`${this.baseUrl}/${id}/archive`, {});
+  archive(id: string, comment?: string): Observable<any> {
+    return this.http.put(`${this.baseUrl}/${id}/archive`, { comment });
   }
 
-  restore(id: string): Observable<any> {
+  restore(id: string, comment?: string): Observable<any> {
     const url = `${this.baseUrl}/${id}/restore`;
-    return this.http.put(url, {});
+    return this.http.put(url, { comment });
   }
 
   getFeatureFlagReferences(id: string): Observable<ISegmentFlagReference[]> {
@@ -103,8 +103,8 @@ export class SegmentService {
     return this.http.get<string[]>(url);
   }
 
-  setTags(id: string, tags: string[]): Observable<boolean> {
+  setTags(id: string, tags: string[], comment?: string): Observable<boolean> {
     const url = `${this.baseUrl}/${id}/tags`;
-    return this.http.put<boolean>(url, tags);
+    return this.http.put<boolean>(url, { tags, comment });
   }
 }

@@ -1,9 +1,10 @@
+using Application.AuditLogs;
 using Application.Users;
 using Domain.AuditLogs;
 
 namespace Application.FeatureFlags;
 
-public class UpdateDescription : IRequest<Guid>
+public class UpdateDescription : ResourceChangeRequest, IRequest<Guid>
 {
     /// <summary>
     /// The ID of the environment the feature flag belongs to. Retrieved from the URL path.
@@ -44,7 +45,7 @@ public class UpdateDescriptionHandler(
             Operations.Update,
             dataChange,
             currentUser.Id,
-            comment: "Updated description"
+            comment: request.Comment
         );
         await publisher.Publish(notification, cancellationToken);
 

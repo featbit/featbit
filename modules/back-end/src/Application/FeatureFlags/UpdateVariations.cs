@@ -1,3 +1,4 @@
+using Application.AuditLogs;
 using Application.Bases;
 using Application.Bases.Exceptions;
 using Application.Users;
@@ -6,7 +7,7 @@ using Domain.FeatureFlags;
 
 namespace Application.FeatureFlags;
 
-public class UpdateVariations : IRequest<Guid>
+public class UpdateVariations : ResourceChangeRequest, IRequest<Guid>
 {
     /// <summary>
     /// The ID of the environment the feature flag belongs to. Retrieved from the URL path.
@@ -63,7 +64,7 @@ public class UpdateVariationsHandler(
             Operations.Update,
             dataChange,
             currentUser.Id,
-            comment: "Updated variations"
+            comment: request.Comment
         );
         await publisher.Publish(notification, cancellationToken);
 

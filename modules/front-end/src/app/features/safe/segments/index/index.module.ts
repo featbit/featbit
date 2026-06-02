@@ -22,6 +22,7 @@ import { NzDividerModule } from "ng-zorro-antd/divider";
 import {CoreModule} from "@core/core.module";
 import {NzPopconfirmModule} from "ng-zorro-antd/popconfirm";
 import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
+import { FlagReferencesModalComponent } from "@features/safe/segments/index/flag-references-modal";
 
 @NgModule({
   declarations: [IndexComponent],
@@ -48,7 +49,8 @@ import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
     CoreModule,
     NzDividerModule,
     NzPopconfirmModule,
-    NzCheckboxModule
+    NzCheckboxModule,
+    FlagReferencesModalComponent
   ]
 })
 export class IndexModule { }

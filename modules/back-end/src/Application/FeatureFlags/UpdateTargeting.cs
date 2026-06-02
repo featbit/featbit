@@ -1,3 +1,4 @@
+using Application.AuditLogs;
 using Application.Bases.Exceptions;
 using Application.Users;
 using Domain.AuditLogs;
@@ -7,7 +8,7 @@ using Domain.SemanticPatch;
 
 namespace Application.FeatureFlags;
 
-public class UpdateTargetingPayload
+public class UpdateTargetingPayload : ResourceChangeRequest
 {
     /// <summary>
     /// Current revision of the feature flag, used for optimistic concurrency control.
@@ -19,11 +20,6 @@ public class UpdateTargetingPayload
     /// The new flag targeting
     /// </summary>
     public FlagTargeting Targeting { get; set; }
-
-    /// <summary>
-    /// Optional comment describing the targeting change
-    /// </summary>
-    public string Comment { get; set; }
 }
 
 public class UpdateTargeting : UpdateTargetingPayload, IRequest<Guid>
