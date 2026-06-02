@@ -285,7 +285,7 @@ export class IndexComponent implements OnInit {
           data.lastChange = {
             operator: getProfile(),
             happenedAt: new Date(),
-            comment: ''
+            comment
           };
           data.isToggling = false;
         },
