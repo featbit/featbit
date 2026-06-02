@@ -31,19 +31,19 @@ export const authGuard = async (
   const profile = getProfile();
   const url = state.url;
 
-  // if no auth token or workspaceId, redirect to login page
+  // if no profile, redirect to login page
   if (!profile) {
     localStorage.setItem(LOGIN_REDIRECT_URL, url);
     return router.parseUrl('/login');
   }
 
-  // if workspaceId is invalid, logout user
+  //if no available workspace, logout and redirect to login page
   const workspaces = await userService.getWorkspaces();
-  userService.workspaces = workspaces;
   if (!workspaces || workspaces.length === 0) {
     await identityService.doLogoutUser(false);
     return router.parseUrl('/login');
   }
+  userService.workspaces = workspaces;
 
   // For multi-workspace: let the selection page handle itself without any further checks
   if (workspaces.length > 1 && url.startsWith("/select-workspace")) {
