@@ -143,7 +143,7 @@ export class PricingPlansComponent {
       addOnFeatures: this.fineGrainedAcEnabled[newPlan.key] ? [LicenseFeatureEnum.FineGrainedAccessControl] : []
     };
 
-    // free -> paid, create a new subscription
+    // Local subscription (e.g., created manually) -> create a new subscription
     if (this._subscription.isLocal) {
       this.isCreatingSubscription = true;
       this.billingService.createSubscription(newSubscription)
