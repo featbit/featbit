@@ -8,88 +8,16 @@ section.main-body {
   justify-content: center;
 
   .page-loading {
-    display: flex;
-    align-items: center;
-    justify-content: center;
     width: 100%;
-
-    nz-spin {
-      width: 100%;
-      font-size: 24px;
-    }
   }
 
   .selection-card {
-    width: 800px;
+    width: 600px;
     background-color: @white;
     border: 1px solid @grey20-color;
     border-radius: 16px;
     padding: 40px;
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
-
-    // ── Steps indicator ──────────────────────────────────────
-    .steps-indicator {
-      display: flex;
-      align-items: center;
-      margin-bottom: 32px;
-
-      .step {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-
-        .step-dot {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 28px;
-          height: 28px;
-          border-radius: 50%;
-          font-size: 12px;
-          font-weight: 600;
-          background-color: @grey20-color;
-          color: @grey50-color;
-          transition: background-color 0.2s, color 0.2s;
-        }
-
-        .step-label {
-          font-size: 13px;
-          color: @grey50-color;
-          font-weight: 500;
-          transition: color 0.2s;
-        }
-
-        &.step-active {
-          .step-dot {
-            background-color: @primary-color;
-            color: @white;
-          }
-
-          .step-label {
-            color: @grey80-color;
-            font-weight: 600;
-          }
-        }
-
-        &.step-done {
-          .step-dot {
-            background-color: @green10-color;
-            color: @primary-color;
-          }
-
-          .step-label {
-            color: @grey50-color;
-          }
-        }
-      }
-
-      .step-connector {
-        flex: 1;
-        height: 2px;
-        background-color: @grey20-color;
-        margin: 0 12px;
-      }
-    }
 
     // ── Step content ─────────────────────────────────────────
     .step-content {
@@ -158,11 +86,23 @@ section.main-body {
             flex-shrink: 0;
           }
 
-          .item-name {
+          .item-info {
             flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0;
+          }
+
+          .item-name {
             font-size: 14px;
             font-weight: 500;
             color: @grey80-color;
+          }
+
+          .item-key {
+            font-size: 12px;
+            color: @grey40-color;
           }
 
           .item-chevron {
@@ -170,19 +110,17 @@ section.main-body {
             color: @grey40-color;
             transition: color 0.15s, transform 0.15s;
           }
-        }
-      }
 
-      // ── Orgs loading ────────────────────────────────────
-      .orgs-loading {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 48px 0;
+          &.item-loading {
+            cursor: default;
+            background-color: @grey5-color;
+          }
 
-        nz-spin {
-          width: 100%;
-          font-size: 24px;
+          &.item-disabled {
+            cursor: default;
+            opacity: 0.45;
+            pointer-events: none;
+          }
         }
       }
 
@@ -201,8 +139,8 @@ section.main-body {
         }
 
         .zero-org-title {
-          font-size: 16px;
-          font-weight: 700;
+          font-size: 18px;
+          font-weight: 500;
           color: @grey80-color;
           margin: 0 0 8px;
         }
@@ -210,7 +148,6 @@ section.main-body {
         .zero-org-message {
           font-size: 13px;
           color: @grey50-color;
-          margin: 0;
           line-height: 1.6;
         }
       }
@@ -238,12 +175,10 @@ section.main-body {
     // ── Card footer ───────────────────────────────────────
     .card-footer {
       margin-top: 28px;
-      padding-top: 20px;
-      border-top: 1px solid @grey20-color;
       text-align: center;
 
       a {
-        font-size: 13px;
+        font-size: 14px;
         color: @grey50-color;
         cursor: pointer;
         transition: color 0.15s;

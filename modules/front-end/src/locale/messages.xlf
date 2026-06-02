@@ -1302,10 +1302,6 @@
           <context context-type="linenumber">8</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
-          <context context-type="linenumber">58</context>
-        </context-group>
-        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.html</context>
           <context context-type="linenumber">40,41</context>
         </context-group>
@@ -10218,81 +10214,67 @@
           <context context-type="linenumber">101</context>
         </context-group>
       </trans-unit>
-      <trans-unit id="select-workspace-organization.workspace" datatype="html">
-        <source>Workspace</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
-          <context context-type="linenumber">24,26</context>
-        </context-group>
-      </trans-unit>
-      <trans-unit id="select-workspace-organization.organization" datatype="html">
-        <source>Organization</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
-          <context context-type="linenumber">29,32</context>
-        </context-group>
-      </trans-unit>
       <trans-unit id="select-workspace-organization.select-workspace" datatype="html">
         <source>Select a workspace</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
-          <context context-type="linenumber">37,39</context>
+          <context context-type="linenumber">15,17</context>
         </context-group>
       </trans-unit>
       <trans-unit id="select-workspace-organization.workspaces-for" datatype="html">
         <source>Workspaces for</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
-          <context context-type="linenumber">39</context>
+          <context context-type="linenumber">17</context>
         </context-group>
       </trans-unit>
       <trans-unit id="select-workspace-organization.no-organizations" datatype="html">
         <source>No organizations found</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
-          <context context-type="linenumber">63,64</context>
+          <context context-type="linenumber">47,48</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.zero-org-info" datatype="html">
         <source>You don&apos;t have any organization yet. Please contact your admin to add you to an organization.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
-          <context context-type="linenumber">64,66</context>
+          <context context-type="linenumber">48,50</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.select-an-organization" datatype="html">
         <source>Select an organization</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
-          <context context-type="linenumber">67,68</context>
+          <context context-type="linenumber">51,52</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.organizations-for" datatype="html">
         <source>Organizations for</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
-          <context context-type="linenumber">69</context>
+          <context context-type="linenumber">53</context>
         </context-group>
       </trans-unit>
       <trans-unit id="select-workspace-organization.back-to-workspaces" datatype="html">
         <source>Back to workspaces</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
-          <context context-type="linenumber">88,91</context>
+          <context context-type="linenumber">75,78</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.sign-in-with-another-email" datatype="html">
         <source>Sign in with another email</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
-          <context context-type="linenumber">95,99</context>
+          <context context-type="linenumber">82,86</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.error-happened-please-relogin" datatype="html">
         <source>Error happened, please login again!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.ts</context>
-          <context context-type="linenumber">87</context>
+          <context context-type="linenumber">90</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.search-by-name" datatype="html">

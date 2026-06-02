@@ -1337,10 +1337,6 @@
           <context context-type="linenumber">8</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
-          <context context-type="linenumber">58</context>
-        </context-group>
-        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.html</context>
           <context context-type="linenumber">40,41</context>
         </context-group>
@@ -11167,27 +11163,11 @@
         </context-group>
         <target>加载开关引用失败，请重试</target>
       </trans-unit>
-      <trans-unit id="select-workspace-organization.workspace" datatype="html">
-        <source>Workspace</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
-          <context context-type="linenumber">24,26</context>
-        </context-group>
-        <target>工作区</target>
-      </trans-unit>
-      <trans-unit id="select-workspace-organization.organization" datatype="html">
-        <source>Organization</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
-          <context context-type="linenumber">29,32</context>
-        </context-group>
-        <target>组织机构</target>
-      </trans-unit>
       <trans-unit id="select-workspace-organization.select-workspace" datatype="html">
         <source>Select a workspace</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
-          <context context-type="linenumber">37,39</context>
+          <context context-type="linenumber">15,17</context>
         </context-group>
         <target>选择工作区</target>
       </trans-unit>
@@ -11195,7 +11175,7 @@
         <source>Workspaces for</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
-          <context context-type="linenumber">39</context>
+          <context context-type="linenumber">17</context>
         </context-group>
         <target>以下工作区属于用户</target>
       </trans-unit>
@@ -11203,7 +11183,7 @@
         <source>No organizations found</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
-          <context context-type="linenumber">63,64</context>
+          <context context-type="linenumber">47,48</context>
         </context-group>
         <target>未找到相关机构</target>
       </trans-unit>
@@ -11211,7 +11191,7 @@
         <source>You don&apos;t have any organization yet. Please contact your admin to add you to an organization.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
-          <context context-type="linenumber">64,66</context>
+          <context context-type="linenumber">48,50</context>
         </context-group>
         <target>您当前没有任何机构，请联系管理员将您添加到相关机构中.</target>
       </trans-unit>
@@ -11219,7 +11199,7 @@
         <source>Select an organization</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
-          <context context-type="linenumber">67,68</context>
+          <context context-type="linenumber">51,52</context>
         </context-group>
         <target>选择机构</target>
       </trans-unit>
@@ -11227,7 +11207,7 @@
         <source>Organizations for</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
-          <context context-type="linenumber">69</context>
+          <context context-type="linenumber">53</context>
         </context-group>
         <target>以下机构属于用户</target>
       </trans-unit>
@@ -11235,7 +11215,7 @@
         <source>Back to workspaces</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
-          <context context-type="linenumber">88,91</context>
+          <context context-type="linenumber">75,78</context>
         </context-group>
         <target>返回选择工作区</target>
       </trans-unit>
@@ -11243,7 +11223,7 @@
         <source>Sign in with another email</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.html</context>
-          <context context-type="linenumber">95,99</context>
+          <context context-type="linenumber">82,86</context>
         </context-group>
         <target>使用其它邮箱登录</target>
       </trans-unit>
@@ -11251,7 +11231,7 @@
         <source>Error happened, please login again!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/select-workspace/select-workspace.component.ts</context>
-          <context context-type="linenumber">87</context>
+          <context context-type="linenumber">90</context>
         </context-group>
         <target>未知错误发生，请重新登录！</target>
       </trans-unit>

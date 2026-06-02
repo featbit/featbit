@@ -9,28 +9,6 @@
       </div>
     } @else {
       <div class="selection-card">
-
-        <!-- Step indicator (only shown when user has multiple workspaces) -->
-        @if (workspaces.length > 1) {
-          <div class="steps-indicator">
-            <div class="step" [class.step-active]="currentStep === 'workspace'" [class.step-done]="currentStep === 'organization'">
-              <span class="step-dot">
-                @if (currentStep === 'organization') {
-                  <span nz-icon nzType="check"></span>
-                } @else {
-                  1
-                }
-              </span>
-              <span class="step-label" i18n="@@select-workspace-organization.workspace">Workspace</span>
-            </div>
-            <div class="step-connector"></div>
-            <div class="step" [class.step-active]="currentStep === 'organization'">
-              <span class="step-dot">2</span>
-              <span class="step-label" i18n="@@select-workspace-organization.organization">Organization</span>
-            </div>
-          </div>
-        }
-
         <!-- Step 1: Workspace selection -->
         @if (currentStep === 'workspace') {
           <div class="step-content">
@@ -40,10 +18,20 @@
             </p>
             <ul class="selection-list">
               @for (workspace of workspaces; track workspace.id) {
-                <li class="selection-item" (click)="setWorkspace(workspace)">
+                <li class="selection-item"
+                  [class.item-loading]="isLoadingOrgs && selectedWorkspace?.id === workspace.id"
+                  [class.item-disabled]="isLoadingOrgs && selectedWorkspace?.id !== workspace.id"
+                  (click)="setWorkspace(workspace)">
                   <span class="item-icon" nz-icon nzType="appstore" nzTheme="outline"></span>
-                  <span class="item-name">{{ workspace.name }}</span>
-                  <span class="item-chevron" nz-icon nzType="right" nzTheme="outline"></span>
+                  <span class="item-info">
+                    <span class="item-name">{{ workspace.name }}</span>
+                    <span class="item-key">{{ workspace.key }}</span>
+                  </span>
+                  @if (isLoadingOrgs && selectedWorkspace?.id === workspace.id) {
+                    <nz-spin nzSimple nzSize="small"></nz-spin>
+                  } @else {
+                    <span class="item-chevron" nz-icon nzType="right" nzTheme="outline"></span>
+                  }
                 </li>
               }
             </ul>
@@ -53,11 +41,7 @@
         <!-- Step 2: Organization selection -->
         @if (currentStep === 'organization') {
           <div class="step-content">
-            @if (isLoadingOrgs) {
-              <div class="orgs-loading">
-                <nz-spin nzTip="Loading..." i18n-nzTip="@@common.loading" nzSize="large"></nz-spin>
-              </div>
-            } @else if (organizations.length === 0) {
+            @if (organizations.length === 0) {
               <div class="zero-org">
                 <span class="zero-org-icon" nz-icon nzType="warning" nzTheme="fill"></span>
                 <h3 class="zero-org-title" i18n="@@select-workspace-organization.no-organizations">No organizations found</h3>
@@ -75,7 +59,10 @@
                 @for (org of organizations; track org.id) {
                   <li class="selection-item" (click)="setOrganization(org)">
                     <span class="item-icon" nz-icon nzType="team" nzTheme="outline"></span>
-                    <span class="item-name">{{ org.name }}</span>
+                    <span class="item-info">
+                      <span class="item-name">{{ org.name }}</span>
+                      <span class="item-key">{{ org.key }}</span>
+                    </span>
                     <span class="item-chevron" nz-icon nzType="right" nzTheme="outline"></span>
                   </li>
                 }

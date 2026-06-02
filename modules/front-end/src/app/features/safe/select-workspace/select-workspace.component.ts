@@ -42,9 +42,9 @@ export class SelectWorkspaceComponent {
   }
 
   async setWorkspace(workspace: IWorkspace) {
+    if (this.isLoadingOrgs) return;
     this.selectedWorkspace = workspace;
     this.isLoadingOrgs = true;
-    this.currentStep = 'organization';
     this.workspaceService.setWorkspace(workspace);
 
     try {
@@ -53,11 +53,14 @@ export class SelectWorkspaceComponent {
       this.organizations = orgs || [];
       this.organizationService.organizations = this.organizations;
 
+      this.currentStep = 'organization';
+
       if (this.organizations.length === 1) {
         this.setOrganization(this.organizations[0]);
       }
     } catch {
       this.organizations = [];
+      this.currentStep = 'organization';
     } finally {
       this.isLoadingOrgs = false;
     }
