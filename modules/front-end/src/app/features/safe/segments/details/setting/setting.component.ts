@@ -34,7 +34,7 @@ export class SettingComponent implements OnInit {
     private segmentService: SegmentService,
     private permissionsService: PermissionsService,
     private permissionLicenseService: PermissionLicenseService,
-    private changeCommentService: ChangeCommentService,
+    private changeCommentService: ChangeCommentService
   ) {
     this.segmentService.getAllTags().subscribe(allTags => {
       this.allTags = allTags;

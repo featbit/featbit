@@ -1,6 +1,6 @@
 <nz-modal
   nzClassName="change-review-modal"
-  nzWidth="620px"
+  nzWidth="600px"
   nzCentered="true"
   nzMaskClosable="false"
   nzClosable="true"
@@ -34,7 +34,7 @@
       } @else {
         <div class="empty">
           <span nz-icon nzType="file-text" nzTheme="outline"></span>
-          <span i18n="@@common.no-pending-changes">No pending changes</span>
+          <span i18n="@@change-review.no-pending-changes">No pending changes</span>
         </div>
       }
     </section>
@@ -43,7 +43,7 @@
     @if (data?.refType === RefTypeEnum.Flag && (license?.isGranted(LicenseFeatureEnum.Schedule) || license?.isGranted(LicenseFeatureEnum.ChangeRequest))) {
       <section class="section section--mode">
         <div class="section__head">
-          <span class="section__label" i18n="@@common.save-mode">Save Mode</span>
+          <span class="section__label" i18n="@@change-review.save-mode">Save Mode</span>
         </div>
         <div class="mode-tabs">
           <button
@@ -61,7 +61,7 @@
               [class.mode-tab--active]="ReviewModalMode.isScheduleEnabled(kind)"
               (click)="toggleSchedule()">
               <span nz-icon nzType="calendar" nzTheme="outline"></span>
-              <span i18n="@@common.schedule">Schedule</span>
+              <span i18n="@@change-review.schedule">Schedule</span>
             </button>
           }
           @if (license?.isGranted(LicenseFeatureEnum.ChangeRequest)) {
@@ -71,7 +71,7 @@
               [class.mode-tab--active]="ReviewModalMode.isChangeRequestEnabled(kind)"
               (click)="toggleChangeRequest()">
               <span nz-icon nzType="team" nzTheme="outline"></span>
-              <span i18n="@@common.change-request">Change Request</span>
+              <span i18n="@@change-review.change-request">Change Request</span>
             </button>
           }
         </div>
@@ -84,18 +84,18 @@
         @if (ReviewModalMode.isScheduleEnabled(kind)) {
           <nz-form-item>
             <nz-form-label nzRequired i18n="@@common.title">Title</nz-form-label>
-            <nz-form-control>
+            <nz-form-control i18n-nzErrorTip="@@common.title-cannot-be-empty" nzErrorTip="Title cannot be empty">
               <input
                 type="text"
                 nz-input
                 formControlName="scheduleTitle"
                 placeholder="Give this schedule a name"
-                i18n-placeholder="@@common.schedule-title-placeholder"/>
+                i18n-placeholder="@@change-review.schedule-title-placeholder"/>
             </nz-form-control>
           </nz-form-item>
           <nz-form-item>
-            <nz-form-label nzRequired i18n="@@common.scheduled-time">Scheduled time</nz-form-label>
-            <nz-form-control>
+            <nz-form-label nzRequired i18n="@@change-review.scheduled-time">Scheduled time</nz-form-label>
+            <nz-form-control i18n-nzErrorTip="@@common.time-cannot-be-empty" nzErrorTip="Time cannot be empty">
               <nz-date-picker
                 nzShowTime
                 [nzShowNow]="false"
@@ -126,14 +126,14 @@
 
         @if (ReviewModalMode.isChangeRequestEnabled(kind)) {
           <nz-form-item>
-            <nz-form-label nzRequired i18n="@@common.reviewers">Reviewers</nz-form-label>
+            <nz-form-label nzRequired i18n="@@change-review.reviewers">Reviewers</nz-form-label>
             <nz-form-control
-              i18n-nzErrorTip="@@common.reviewers-cannot-be-empty"
+              i18n-nzErrorTip="@@change-review.reviewers-cannot-be-empty"
               nzErrorTip="Reviewers cannot be empty">
               <nz-select
                 class="nz-select-40"
                 nzMode="multiple"
-                i18n-nzPlaceHolder="@@common.select-reviewers"
+                i18n-nzPlaceHolder="@@change-review.select-reviewers"
                 nzPlaceHolder="Select reviewers to approve"
                 nzAllowClear
                 nzShowSearch
@@ -169,7 +169,7 @@
               <textarea
                 rows="3"
                 nz-input
-                i18n-placeholder="@@common.comment-placeholder"
+                i18n-placeholder="@@change-review.comment-placeholder"
                 placeholder="Please describe your changes for auditing and change tracking purposes..."
                 formControlName="comment">
               </textarea>
