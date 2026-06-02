@@ -41,9 +41,9 @@ export class FeatureFlagService {
   constructor(private http: HttpClient) {
   }
 
-  toggleStatus(key: string, status: boolean): Observable<string> {
+  toggleStatus(key: string, status: boolean, comment?: string): Observable<string> {
     const url = `${this.baseUrl}/${key}/toggle/${status}`;
-    return this.http.put<string>(url, {})
+    return this.http.put<string>(url, { comment })
   }
 
   getByKey(key: string): Observable<IFeatureFlag> {
@@ -132,34 +132,34 @@ export class FeatureFlagService {
     return this.http.put<boolean>(url, {});
   }
 
-  updateName(key: string, name: string): Observable<string> {
+  updateName(key: string, name: string, comment?: string): Observable<string> {
     const url = `${this.baseUrl}/${key}/name`;
 
-    return this.http.put<string>(url, {name});
+    return this.http.put<string>(url, { name, comment });
   }
 
-  updateDescription(key: string, description: string): Observable<string> {
+  updateDescription(key: string, description: string, comment?: string): Observable<string> {
     const url = `${this.baseUrl}/${key}/description`;
 
-    return this.http.put<string>(url, {description});
+    return this.http.put<string>(url, { description, comment });
   }
 
-  updateOffVariation(key: string, offVariationId: string, revision: string): Observable<string> {
+  updateOffVariation(key: string, offVariationId: string, revision: string, comment?: string): Observable<string> {
     const url = `${this.baseUrl}/${key}/off-variation`;
 
-    return this.http.put<string>(url, {offVariationId, revision});
+    return this.http.put<string>(url, { offVariationId, revision, comment });
   }
 
-  updateVariations(key: string, variations: IVariation[], revision: string): Observable<string> {
+  updateVariations(key: string, variations: IVariation[], revision: string, comment?: string): Observable<string> {
     const url = `${this.baseUrl}/${key}/variations`;
 
-    return this.http.put<string>(url, { variations, revision });
+    return this.http.put<string>(url, { variations, revision, comment });
   }
 
-  delete(key: string): Observable<boolean> {
+  delete(key: string, comment?: string): Observable<boolean> {
     const url = `${this.baseUrl}/${key}`;
 
-    return this.http.delete<boolean>(url);
+    return this.http.delete<boolean>(url, { body: { comment } });
   }
 
   isKeyUsed(key: string): Observable<boolean> {
@@ -192,14 +192,14 @@ export class FeatureFlagService {
     return this.http.post(url, payload);
   }
 
-  archive(key: string): Observable<boolean> {
+  archive(key: string, comment?: string): Observable<boolean> {
     const url = `${this.baseUrl}/${key}/archive`;
-    return this.http.put<boolean>(url, {});
+    return this.http.put<boolean>(url, { comment });
   }
 
-  restore(key: string): Observable<boolean> {
+  restore(key: string, comment?: string): Observable<boolean> {
     const url = `${this.baseUrl}/${key}/restore`;
-    return this.http.put<boolean>(url, {});
+    return this.http.put<boolean>(url, { comment });
   }
 
   updateTargeting(key: string,  payload: UpdateFlagTargetingPayload): Observable<string> {
@@ -225,9 +225,9 @@ export class FeatureFlagService {
     return this.http.get<string[]>(url);
   }
 
-  setTags(flagKey: string, tags: string[]): Observable<boolean> {
+  setTags(flagKey: string, tags: string[], comment?: string): Observable<boolean> {
     const url = `${this.baseUrl}/${flagKey}/tags`;
-    return this.http.put<boolean>(url, tags);
+    return this.http.put<boolean>(url, { tags, comment });
   }
 
   getInsights(filter: IInsightsFilter): Observable<IInsights[]> {

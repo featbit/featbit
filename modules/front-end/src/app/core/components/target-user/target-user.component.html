@@ -15,7 +15,7 @@
               i18n-nz-tooltip="@@common.click-to-edit"
               nz-tooltip="Click to edit"
               (click)="openEditModal(user)">
-              {{ user?.name }}
+              {{ user?.name || user?.keyId }}
             </div>
           }
           @if (user.envId === null) {
@@ -24,7 +24,7 @@
               i18n-nz-tooltip="@@common.click-to-view"
               nz-tooltip="Click to view"
               (click)="openEditModal(user)">
-              {{ user?.name }}
+              {{ user?.name || user?.keyId }}
             </div>
           }
           <button nz-button nzType="default" [nzSize]="'large'" (click)="removeUser(user)"><i nz-icon nzType="close"></i></button>
@@ -54,13 +54,13 @@
         <nz-option
           nzCustomContent
           [nzValue]="item"
-          [nzLabel]="item.name"
+          [nzLabel]="item.name || item.keyId"
           [nzHide]="isSelected(item)">
           <div class="user-selection-item" [class]="{'creation-selection-item': item.isNew}">
             <div class="title">
               @if (item.isNew) {
                 <ng-container i18n="@@common.create-with-comma">Create:</ng-container>
-              } {{ item.name }}
+              } {{ item.name || item.keyId }}
               @if (item.envId === null) {
                 <nz-tag i18n="@@common.global-user">Global User</nz-tag>
               }

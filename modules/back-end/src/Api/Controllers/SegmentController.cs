@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Api.Authentication;
 using Api.Swagger.Examples;
+using Application.AuditLogs;
 using Application.Bases.Models;
 using Application.Segments;
 using Domain.Policies;
@@ -181,12 +182,16 @@ public class SegmentController : ApiControllerBase
     [OpenApi]
     [HttpPut("{segmentId:guid}/archive")]
     [Authorize(Permissions.ArchiveSegment)]
-    public async Task<ApiResponse<bool>> ArchiveAsync(Guid envId, Guid segmentId)
+    public async Task<ApiResponse<bool>> ArchiveAsync(
+        Guid envId,
+        Guid segmentId,
+        [FromBody] ResourceChangeRequest? changeRequest = null)
     {
         var request = new ArchiveSegment
         {
             EnvId = envId,
-            Id = segmentId
+            Id = segmentId,
+            Comment = changeRequest?.Comment ?? string.Empty
         };
 
         var success = await Mediator.Send(request);
@@ -202,11 +207,14 @@ public class SegmentController : ApiControllerBase
     [OpenApi]
     [HttpPut("{segmentId:guid}/restore")]
     [Authorize(Permissions.RestoreSegment)]
-    public async Task<ApiResponse<bool>> RestoreAsync(Guid segmentId)
+    public async Task<ApiResponse<bool>> RestoreAsync(
+        Guid segmentId, 
+        [FromBody] ResourceChangeRequest? changeRequest = null)
     {
         var request = new RestoreSegment
         {
-            Id = segmentId
+            Id = segmentId,
+            Comment = changeRequest?.Comment ?? string.Empty
         };
 
         var success = await Mediator.Send(request);
@@ -222,11 +230,14 @@ public class SegmentController : ApiControllerBase
     [OpenApi]
     [HttpDelete("{segmentId:guid}")]
     [Authorize(Permissions.DeleteSegment)]
-    public async Task<ApiResponse<bool>> DeleteAsync(Guid segmentId)
+    public async Task<ApiResponse<bool>> DeleteAsync(
+        Guid segmentId, 
+        [FromBody] ResourceChangeRequest? changeRequest = null)
     {
         var request = new DeleteSegment
         {
-            Id = segmentId
+            Id = segmentId,
+            Comment = changeRequest?.Comment ?? string.Empty
         };
 
         var success = await Mediator.Send(request);
@@ -298,13 +309,9 @@ public class SegmentController : ApiControllerBase
     [OpenApi]
     [HttpPut("{segmentId:guid}/tags")]
     [Authorize(Permissions.UpdateSegmentTags)]
-    public async Task<ApiResponse<bool>> SetTagsAsync(Guid segmentId, string[] tags)
+    public async Task<ApiResponse<bool>> SetTagsAsync(Guid segmentId, SetTags request)
     {
-        var request = new SetTags
-        {
-            Id = segmentId,
-            Tags = tags
-        };
+        request.Id = segmentId;
 
         var success = await Mediator.Send(request);
         return Ok(success);

@@ -15,9 +15,12 @@ import { FeatureFlagService } from "@services/feature-flag.service";
 import { NzModalService } from "ng-zorro-antd/modal";
 import { copyToClipboard } from '@utils/index';
 import { permissionActions } from "@shared/policy";
-import { getCurrentEnvRN } from "@utils/project-env";
+import { getCurrentEnvRN, getCurrentProjectEnv } from "@utils/project-env";
+import { EnvironmentSetting } from "@shared/types";
 import { PermissionLicenseService } from "@services/permission-license.service";
 import { PermissionsService } from "@services/permissions.service";
+import { ChangeCommentService } from "@services/change-comment.service";
+import { ChangeOperation } from "@core/components/change-comment/types";
 
 @Component({
     selector: 'index',
@@ -34,7 +37,8 @@ export class IndexComponent implements OnInit {
     private msg: NzMessageService,
     private modal: NzModalService,
     private permissionsService: PermissionsService,
-    private permissionLicenseService: PermissionLicenseService
+    private permissionLicenseService: PermissionLicenseService,
+    private changeCommentService: ChangeCommentService
   ) { }
 
   featureFlagFilter: IFeatureFlagListFilter = new IFeatureFlagListFilter();
@@ -55,7 +59,11 @@ export class IndexComponent implements OnInit {
     this.onSearch(true);
   }
 
+  envSettings: EnvironmentSetting;
+
   ngOnInit(): void {
+    this.envSettings = getCurrentProjectEnv()!.envSettings;
+
     this.route.queryParams.subscribe((params) => {
       Object.keys(params).forEach((k) => {
         if (k === 'tags') {
@@ -265,27 +273,27 @@ export class IndexComponent implements OnInit {
       return;
     }
 
-    data.isToggling = true;
+    const operation = data.isEnabled ? ChangeOperation.ToggleOff : ChangeOperation.ToggleOn;
+    this.changeCommentService.promptFlag(data.key, operation).subscribe(comment => {
+      if (comment === null) return;
 
-    let msg: string = data.isEnabled
-      ? $localize`:@@ff.idx.flag-turned-off:The status of feature flag <b>${data.name}</b> is changed to OFF`
-      : $localize`:@@ff.idx.flag-turned-on:The status of feature flag <b>${data.name}</b> is changed to ON`;
-
-    this.featureFlagService.toggleStatus(data.key, !data.isEnabled).subscribe({
-      next: _ => {
-        this.msg.success(msg);
-        data.isEnabled = !data.isEnabled;
-        data.lastChange = {
-          operator: getProfile(),
-          happenedAt: new Date(),
-          comment: ''
-        };
-        data.isToggling = false;
-      },
-      error: _ => {
-        this.msg.error($localize`:@@ff.idx.status-change-failed:Failed to change feature flag status`);
-        data.isToggling = false;
-      }
+      data.isToggling = true;
+      this.featureFlagService.toggleStatus(data.key, !data.isEnabled, comment).subscribe({
+        next: _ => {
+          this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
+          data.isEnabled = !data.isEnabled;
+          data.lastChange = {
+            operator: getProfile(),
+            happenedAt: new Date(),
+            comment
+          };
+          data.isToggling = false;
+        },
+        error: _ => {
+          this.msg.error($localize`:@@common.operation-failed:Operation failed`)
+          data.isToggling = false;
+        }
+      });
     });
   }
 
@@ -297,45 +305,60 @@ export class IndexComponent implements OnInit {
       return;
     }
 
-    let msg = $localize`:@@ff.archive-flag-warning:After archiving, the fallback value defined in your code will be returned for all your users. Be sure to remove code references to <strong>${flag.key}</strong> from your application before archiving.`;
+    const doArchive = (comment: string = '') => {
+      this.featureFlagService.archive(flag.key, comment).subscribe({
+        next: () => {
+          this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
+          this.onSearch();
+        },
+        error: () => this.msg.error($localize`:@@common.operation-failed-try-again:Operation failed, please try again`)
+      });
+    };
 
-    this.modal.confirm({
-      nzContent: msg,
-      nzTitle: $localize`:@@ff.are-you-sure-to-archive-ff:Are you sure to archive flag "${flag.name}"`,
-      nzCentered: true,
-      nzClassName: 'warning-modal-dialog',
-      nzOkText: $localize`:@@common.archive:Archive`,
-      nzWidth: '550px',
-      nzOnOk: () => {
-        this.featureFlagService.archive(flag.key).subscribe({
-            next: () => {
-              this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
-              this.onSearch();
-            },
-            error: () => this.msg.error($localize`:@@common.operation-failed-try-again:Operation failed, please try again`)
-          }
-        );
-      }
-    });
+    if (this.envSettings.requireChangeComment) {
+      this.changeCommentService.promptFlag(flag.key, ChangeOperation.ArchiveFlag).subscribe(comment => {
+        if (comment === null) return;
+        doArchive(comment);
+      });
+    } else {
+      const message =
+        $localize`:@@ff.archive-flag-warning:After archiving, the fallback value defined in your code will be returned for all your users. Be sure to remove code references to <strong>${flag.key}</strong> from your application before archiving.`;
+
+      this.modal.confirm({
+        nzContent: message,
+        nzTitle: $localize`:@@ff.are-you-sure-to-archive-ff:Are you sure to archive flag`,
+        nzCentered: true,
+        nzClassName: 'warning-modal-dialog',
+        nzOkText: $localize`:@@common.archive:Archive`,
+        nzWidth: '550px',
+        nzOnOk: doArchive
+      });
+    }
   }
 
   restore(flag: IFeatureFlagListItem) {
-    this.featureFlagService.restore(flag.key).subscribe({
-      next: () => {
-        this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
-        this.onSearch();
-      },
-      error: () => this.msg.error($localize`:@@common.operation-failed:Operation failed`)
+    this.changeCommentService.promptFlag(flag.key, ChangeOperation.Restore).subscribe(comment => {
+      if (comment === null) return;
+      this.featureFlagService.restore(flag.key, comment).subscribe({
+        next: () => {
+          this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
+          this.onSearch();
+        },
+        error: () => this.msg.error($localize`:@@common.operation-failed:Operation failed`)
+      });
     });
   }
 
   delete(flag: IFeatureFlagListItem) {
-    this.featureFlagService.delete(flag.key).subscribe({
-      next: () => {
-        this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
-        this.onSearch();
-      },
-      error: () => this.msg.error($localize`:@@common.operation-failed:Operation failed`)
+    this.changeCommentService.promptFlag(flag.key, ChangeOperation.Delete).subscribe(comment => {
+      if (comment === null) return;
+      this.featureFlagService.delete(flag.key, comment).subscribe({
+        next: () => {
+          this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
+          this.onSearch();
+        },
+        error: () => this.msg.error($localize`:@@common.operation-failed:Operation failed`)
+      });
     });
   }
 

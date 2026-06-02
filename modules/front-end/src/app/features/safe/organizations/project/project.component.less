@@ -121,13 +121,33 @@
           justify-content: flex-end;
           margin-left: auto;
 
+          .edit {
+            color: @green60-color;
+
+            &:hover {
+              color: @green80-color;
+            }
+          }
+
+          .remove, .copy-id {
+            color: @grey50-color;
+
+            &:hover {
+              color: @grey70-color;
+            }
+          }
+
+          button {
+            padding: 0;
+          }
+
           nz-divider {
             top: 4px;
+            margin: 0 12px;
           }
 
           .copy-id {
             display: flex;
-            gap: 4px;
             justify-content: flex-start;
             align-items: center;
           }
