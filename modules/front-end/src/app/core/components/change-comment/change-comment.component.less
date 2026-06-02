@@ -1,0 +1,67 @@
+@import "variables";
+
+.operation-description {
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+  padding: 8px 16px;
+  background-color: @green5-color;
+  border: 1px solid @green30-color;
+  border-radius: 8px;
+  margin-bottom: 16px;
+
+  .info-icon {
+    color: @green60-color;
+    font-size: 15px;
+    margin-top: 3px;
+  }
+
+  p {
+    margin: 0;
+    color: @grey70-color;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+}
+
+.resource-key-hint {
+  color: #23AD7F;
+  font-family: monospace;
+  padding: 2px 4px;
+  border-radius: 4px;
+  border: 1px solid @grey20-color;
+  cursor: pointer;
+  margin: 0 6px;
+  transition: background-color 0.2s, border-color 0.2s;
+  display: flex;
+
+  .text {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  i {
+    font-size: 16px;
+    margin-left: 6px;
+  }
+
+  &:hover {
+    background-color: @green10-color;
+    border-color: @green30-color;
+  }
+}
+
+.confirm-key-input {
+  font-family: monospace;
+}
+
+.footer {
+  padding: 0 0 8px 0;
+
+  button {
+    width: unset;
+    height: unset;
+  }
+}

@@ -25,7 +25,7 @@
           nzPlaceHolder="Select secret"
           (ngModelChange)="buildSnippets()"
           [nzCustomTemplate]="secretTemplate"
-          nzOptionHeightPx="36"
+          [nzOptionHeightPx]="36"
           >
           @for (secret of env?.secrets; track secret) {
             <nz-option nzCustomContent [nzValue]="secret">

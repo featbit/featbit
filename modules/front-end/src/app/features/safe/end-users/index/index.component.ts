@@ -24,8 +24,6 @@ export class IndexComponent implements OnInit {
   totalCount: number;
 
   isLoading: boolean = true;
-  attributeManagevisible: boolean = false;
-  segmentsAndFlagsVisible: boolean = false;
 
   filter: EnvUserFilter = new EnvUserFilter();
 
@@ -128,22 +126,27 @@ export class IndexComponent implements OnInit {
     );
   }
 
-  onPropsSettingClick() {
-    this.attributeManagevisible = true;
+  uploadModalVisible: boolean = false;
+  uploadUrl = this.envUserService.uploadUrl();
+  closeUploadModal(success: boolean) {
+    this.uploadModalVisible = false;
+    if (success) {
+      this.$search.next();
+    }
   }
 
-  onPropsSettingClose() {
-    this.attributeManagevisible = false;
-  }
-
+  propsDrawerVisible: boolean = false;
+  segmentsFlagsDrawerVisible: boolean = false;
   currentUser: IUserType = null;
-  onSegmentsAndFlagsClick(user: IUserType) {
+  openSegmentsFlagsDrawer(user: IUserType) {
     this.currentUser = {...user};
-    this.segmentsAndFlagsVisible = true;
+    this.segmentsFlagsDrawerVisible = true;
   }
 
-  onSegmentsAndFlagsClose() {
+  closeSegmentsFlagsDrawer() {
     this.currentUser = null;
-    this.segmentsAndFlagsVisible = false;
+    this.segmentsFlagsDrawerVisible = false;
   }
+
+  downloadConfirmVisible: boolean = false;
 }

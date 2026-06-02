@@ -1,9 +1,10 @@
+using Application.AuditLogs;
 using Application.Users;
 using Domain.AuditLogs;
 
 namespace Application.Segments;
 
-public class RestoreSegment : IRequest<bool>
+public class RestoreSegment : ResourceChangeRequest, IRequest<bool>
 {
     public Guid Id { get; set; }
 }
@@ -31,7 +32,14 @@ public class RestoreSegmentHandler : IRequestHandler<RestoreSegment, bool>
         await _service.UpdateAsync(segment);
 
         // publish on segment change notification
-        var notification = new OnSegmentChange(segment, Operations.Restore, dataChange, _currentUser.Id);
+        var notification = new OnSegmentChange(
+            segment,
+            Operations.Restore,
+            dataChange,
+            _currentUser.Id,
+            comment: request.Comment,
+            isTargetingChange: false
+        );
         await _publisher.Publish(notification, cancellationToken);
 
         return true;

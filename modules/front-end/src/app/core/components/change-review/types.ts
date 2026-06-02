@@ -1,7 +1,17 @@
+import { RefTypeEnum } from "@core/components/audit-log/types";
+
 export enum ReviewModalKindEnum {
   Save = 1,
   Schedule = 2,
   ChangeRequest = 4
+}
+
+export interface ChangeReviewModalData {
+  previous: string;
+  current: string;
+  refType: RefTypeEnum;
+  refName: string;
+  kind: ReviewModalKindEnum;
 }
 
 export const ReviewModalMode = {
@@ -33,6 +43,7 @@ export const ReviewModalMode = {
 export interface FlagSchedule {
   scheduledTime: Date,
   title: string,
+  reason: string;
 }
 
 export interface FlagChangeRequest {
@@ -41,6 +52,7 @@ export interface FlagChangeRequest {
 }
 
 export interface ChangeReviewOutput {
+  mode: ReviewModalKindEnum,
   comment?: string,
   schedule?: FlagSchedule,
   changeRequest?: FlagChangeRequest

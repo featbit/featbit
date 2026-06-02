@@ -70,7 +70,7 @@ public class CreateFlagScheduleHandler : IRequestHandler<CreateFlagSchedule, boo
         var dataChange = flag.UpdateTargeting(request.Targeting, _currentUser.Id);
 
         // create draft
-        var flagDraft = new FlagDraft(request.EnvId, flag.Id, dataChange, _currentUser.Id);
+        var flagDraft = new FlagDraft(request.EnvId, flag.Id, dataChange, _currentUser.Id, comment: request.Reason);
         await _flagDraftService.AddOneAsync(flagDraft);
 
         // create change request if needed

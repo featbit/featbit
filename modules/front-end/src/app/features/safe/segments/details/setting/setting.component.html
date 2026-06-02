@@ -63,9 +63,9 @@
     <div class="block standard-div">
       <div class="title" i18n="@@common.tags">Tags</div>
       <div class="tags">
-        @if (this.segmentDetail.tags?.length) {
+        @if (pendingTags.length) {
           <div class="selected">
-            @for (tag of this.segmentDetail.tags; track tag) {
+            @for (tag of pendingTags; track tag) {
               <nz-tag nzMode="closeable" (nzOnClose)="onRemoveTag($event, tag)">
                 {{ tag }}
               </nz-tag>
@@ -92,6 +92,16 @@
             }
           }
         </nz-select>
+        @if (hasPendingTagChanges) {
+          <div class="tag-actions">
+            <button nz-button nzType="default" (click)="onCancelSaveTags()">
+              <ng-container i18n="@@common.cancel">Cancel</ng-container>
+            </button>
+            <button nz-button nzType="primary" (click)="onSaveTags()">
+              <ng-container i18n="@@common.save">Save</ng-container>
+            </button>
+          </div>
+        }
       </div>
     </div>
   } @else {

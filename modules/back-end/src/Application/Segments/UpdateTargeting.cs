@@ -1,3 +1,4 @@
+using Application.AuditLogs;
 using Application.Bases;
 using Application.Bases.Exceptions;
 using Application.Users;
@@ -8,7 +9,7 @@ using Domain.Targeting;
 
 namespace Application.Segments;
 
-public class UpdateTargetingPayload
+public class UpdateTargetingPayload : ResourceChangeRequest
 {
     /// <summary>
     /// The list of user keys explicitly included in the segment
@@ -24,11 +25,6 @@ public class UpdateTargetingPayload
     /// The collection of match rules for targeting users in the segment
     /// </summary>
     public ICollection<MatchRule> Rules { get; set; } = [];
-
-    /// <summary>
-    /// Optional comment describing the targeting change
-    /// </summary>
-    public string Comment { get; set; }
 }
 
 public class UpdateTargeting : UpdateTargetingPayload, IRequest<bool>

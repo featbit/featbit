@@ -50,7 +50,7 @@ import { ProjectDrawerComponent } from "@core/components/project-drawer/project-
 import { MenuComponent } from "@core/components/menu/menu.component";
 import { HeaderComponent } from "@core/components/header/header.component";
 import { PropsDrawerComponent } from "@core/components/props-drawer/props-drawer.component";
-import { UploadDrawerComponent } from "@core/components/upload-drawer/upload-drawer.component";
+import { ImportEndUserComponent } from './components/import-end-user/import-end-user.component';
 import { MetricDrawerComponent } from "@core/components/metric-drawer/metric-drawer.component";
 import { ExperimentDrawerComponent } from "@core/components/experiment-drawer/experiment-drawer.component";
 import { G2LineChartComponent } from "@core/components/g2-chart/g2-line-chart/g2-line-chart.component";
@@ -97,7 +97,6 @@ import { NzSkeletonModule } from "ng-zorro-antd/skeleton";
 import { WebhookDeliveriesComponent } from './components/webhook-deliveries/webhook-deliveries.component';
 import { NzSegmentedModule } from "ng-zorro-antd/segmented";
 import { ResourceFinderComponent } from './components/resource-finder/resource-finder.component';
-import { ImportUserComponent } from './components/import-user/import-user.component';
 import { EndUserDrawerComponent } from './components/end-user-drawer/end-user-drawer.component';
 import { NzDescriptionsModule } from "ng-zorro-antd/descriptions";
 import { SegmentCreationModalComponent } from './components/segment-creation-modal/segment-creation-modal.component';
@@ -113,6 +112,8 @@ import { ResourceEditorComponent } from "@core/components/resource-editor/resour
 import { PricingPlansComponent } from './components/pricing-plans/pricing-plans.component';
 import { NzSliderModule } from 'ng-zorro-antd/slider';
 import { UpdateSubscriptionModalComponent } from "./components/pricing-plans/update-subscription-modal/update-subscription-modal.component";
+import { ChangeCommentComponent } from '@core/components/change-comment/change-comment.component';
+import { ChangeCommentService } from '@core/services/change-comment.service';
 
 @NgModule({
   declarations: [
@@ -130,7 +131,7 @@ import { UpdateSubscriptionModalComponent } from "./components/pricing-plans/upd
     MenuComponent,
     HeaderComponent,
     PropsDrawerComponent,
-    UploadDrawerComponent,
+    ImportEndUserComponent,
     MetricDrawerComponent,
     ExperimentDrawerComponent,
     FeatureFlagDrawerComponent,
@@ -154,7 +155,6 @@ import { UpdateSubscriptionModalComponent } from "./components/pricing-plans/upd
     WebhookDeliveryComponent,
     WebhookDeliveriesComponent,
     ResourceFinderComponent,
-    ImportUserComponent,
     EndUserDrawerComponent,
     SegmentCreationModalComponent,
     CopyFeatureFlagModalComponent,
@@ -166,7 +166,8 @@ import { UpdateSubscriptionModalComponent } from "./components/pricing-plans/upd
     ClonePolicyModalComponent,
     ResourceEditorComponent,
     PricingPlansComponent,
-    UpdateSubscriptionModalComponent
+    UpdateSubscriptionModalComponent,
+    ChangeCommentComponent
   ],
   imports: [
     CommonModule,
@@ -246,7 +247,7 @@ import { UpdateSubscriptionModalComponent } from "./components/pricing-plans/upd
     MenuComponent,
     HeaderComponent,
     PropsDrawerComponent,
-    UploadDrawerComponent,
+    ImportEndUserComponent,
     MetricDrawerComponent,
     ExperimentDrawerComponent,
     G2LineChartComponent,
@@ -269,7 +270,6 @@ import { UpdateSubscriptionModalComponent } from "./components/pricing-plans/upd
     WebhookDeliveryComponent,
     WebhookDeliveriesComponent,
     ResourceFinderComponent,
-    ImportUserComponent,
     EndUserDrawerComponent,
     SegmentCreationModalComponent,
     CopyFeatureFlagModalComponent,
@@ -280,7 +280,11 @@ import { UpdateSubscriptionModalComponent } from "./components/pricing-plans/upd
     CompareFeatureFlagDrawerComponent,
     ClonePolicyModalComponent,
     ResourceEditorComponent,
-    PricingPlansComponent
+    PricingPlansComponent,
+    ChangeCommentComponent
+  ],
+  providers: [
+    ChangeCommentService
   ]
 })
 export class CoreModule {
