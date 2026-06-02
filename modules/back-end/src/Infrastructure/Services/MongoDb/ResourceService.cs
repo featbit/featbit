@@ -80,21 +80,34 @@ public class ResourceService(MongoDbClient mongoDb) : IResourceService
 
     public async Task<string?> GetSegmentRnAsync(Guid envId, Guid id)
     {
-        var query =
+        // We cannot use a single query here because shared segments can be used across multiple envs
+
+        var projectEnvQuery =
             from project in QueryableOf<Project>()
             join env in QueryableOf<Environment>() on project.Id equals env.ProjectId
-            join segment in QueryableOf<Segment>() on env.Id equals segment.EnvId
-            where segment.EnvId == envId && segment.Id == id
+            where env.Id == envId
             select new
             {
                 projectKey = project.Key,
-                envKey = env.Key,
-                segmentKey = segment.Key,
-                segmentTags = segment.Tags
+                envKey = env.Key
             };
 
-        var data = await query.FirstOrDefaultAsync();
-        return data == null ? null : RN.ForSegment(data.projectKey, data.envKey, data.segmentKey, data.segmentTags);
+        var projectEnv = await projectEnvQuery.FirstOrDefaultAsync();
+        var segment = await QueryableOf<Segment>()
+            .Where(x => x.Id == id)
+            .Select(x => new
+            {
+                x.Key,
+                x.Tags
+            })
+            .FirstOrDefaultAsync();
+
+        if (projectEnv == null || segment == null)
+        {
+            return null;
+        }
+
+        return RN.ForSegment(projectEnv.projectKey, projectEnv.envKey, segment.Key, segment.Tags);
     }
 
     private async Task<IEnumerable<Resource>> GetProjectsAsync(Guid organizationId, string name)
