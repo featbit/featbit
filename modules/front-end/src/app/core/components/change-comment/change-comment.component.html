@@ -1,0 +1,49 @@
+<div class="change-comment">
+  <div class="operation-description">
+    <span nz-icon nzType="info-circle" nzTheme="fill" class="info-icon"></span>
+    <p>{{ description }}</p>
+  </div>
+
+  <form nz-form [formGroup]="form" nzLayout="vertical">
+    <nz-form-item>
+      <nz-form-label nzRequired i18n="@@common.comment">Comment</nz-form-label>
+      <nz-form-control i18n-nzErrorTip="@@change-comment.comment.required-message" nzErrorTip="Comment is required">
+        <textarea
+          rows="3"
+          nz-input
+          i18n-placeholder="@@change-comment.comment.placeholder"
+          placeholder="Provide a comment for audit and change tracking..."
+          formControlName="comment">
+        </textarea>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label>
+        <span i18n="@@change-comment.resource-key.type">Type</span>
+        <span
+          class="resource-key-hint"
+          nz-tooltip
+          nzTooltipTitle="Click to fill the confirm key"
+          i18n-nzTooltipTitle="@@change-comment.confirm-key-tip"
+          (click)="fillConfirmKey()">
+          <span class="text">{{ data.resourceKey }}</span>
+          <i nz-icon nzType="icons:icon-fill-in" nzTheme="outline"></i>
+        </span>
+        <span i18n="@@change-comment.resource-key.to-confirm-changes">to confirm changes</span>
+      </nz-form-label>
+      <nz-form-control nzErrorTip="Please type the exact key to confirm">
+        <input
+          nz-input
+          class="confirm-key-input"
+          [placeholder]="data.resourceKey"
+          formControlName="confirmKey"/>
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+
+  <div class="ant-modal-footer footer">
+    <button nz-button nzType="default" (click)="cancel()" i18n="@@common.cancel">Cancel</button>
+    <button nz-button nzType="primary" (click)="confirm()" [disabled]="!form.valid" i18n="@@common.confirm">Confirm</button>
+  </div>
+</div>

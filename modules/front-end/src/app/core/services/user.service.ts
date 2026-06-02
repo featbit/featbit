@@ -12,8 +12,8 @@ import { catchError } from "rxjs/operators";
   providedIn: 'root'
 })
 export class UserService {
-
   baseUrl: string = `${environment.url}/api/v1/user`
+  workspaces: IWorkspace[] = [];
 
   constructor(
     private http: HttpClient,
@@ -28,9 +28,9 @@ export class UserService {
     return this.http.put<IProfile>(`${this.baseUrl}/profile`, params);
   }
 
-  getWorkspace(): Promise<IWorkspace | undefined> {
+  getWorkspaces(): Promise<IWorkspace[] | undefined> {
     return firstValueFrom(
-      this.http.get<IWorkspace>(`${this.baseUrl}/workspace`).pipe(catchError(() => of(undefined)))
+      this.http.get<IWorkspace[]>(`${this.baseUrl}/workspaces`).pipe(catchError(() => of(undefined)))
     );
   }
 

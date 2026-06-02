@@ -187,14 +187,9 @@
 @if (!isLoading) {
   <change-review
     [visible]="reviewModalVisible"
-    [refName]="featureFlag.name"
-    [(kind)]="reviewModalKind"
-    [previous]="originalData"
-    [current]="currentData"
-    [refType]="refType"
+    [data]="reviewModalData"
     (onSave)="onSave($event)"
-    (onCancel)="onCloseReviewModal()"
-    >
+    (onCancel)="onCloseReviewModal()">
   </change-review>
 }
 

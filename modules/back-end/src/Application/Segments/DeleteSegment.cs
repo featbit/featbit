@@ -1,10 +1,11 @@
+using Application.AuditLogs;
 using Application.Bases;
 using Application.Bases.Exceptions;
 using Application.Users;
 
 namespace Application.Segments;
 
-public class DeleteSegment : IRequest<bool>
+public class DeleteSegment : ResourceChangeRequest, IRequest<bool>
 {
     public Guid Id { get; set; }
 }
@@ -33,7 +34,7 @@ public class DeleteSegmentHandler : IRequestHandler<DeleteSegment, bool>
         await _service.DeleteOneAsync(request.Id);
 
         // publish on segment change notification
-        var notification = new OnSegmentDeleted(segment, _currentUser.Id);
+        var notification = new OnSegmentDeleted(segment, _currentUser.Id, comment: request.Comment);
         await _publisher.Publish(notification, cancellationToken);
 
         return true;

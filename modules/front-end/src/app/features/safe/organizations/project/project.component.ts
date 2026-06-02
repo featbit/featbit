@@ -173,6 +173,7 @@ export class ProjectComponent implements OnInit {
     // if it is editing current env
     if (data.isEditing && this.currentProjectEnv.envId == this.env.id) {
       this.currentProjectEnv.envName = data.env.name;
+      this.currentProjectEnv.envSettings = data.env.settings;
       this.projectService.upsertCurrentProjectEnvLocally(this.currentProjectEnv);
     }
 

@@ -32,8 +32,8 @@ export class IdentityService {
     private broadcastService: BroadcastService
   ) { }
 
-  loginByEmail(email: string, password: string, workspaceKey: string) {
-    return this.http.post(`${this.baseUrl}/login-by-email`, { email, password, workspaceKey }, { withCredentials: true });
+  loginByEmail(email: string, password: string) {
+    return this.http.post(`${this.baseUrl}/login-by-email`, { email, password }, { withCredentials: true });
   }
 
   resetPassword(currentPassword: string, newPassword: string): Observable<IResetPasswordResult> {

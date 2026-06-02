@@ -5,7 +5,7 @@
   },
   Content: {
     Headers: {
-      Content-Length: 186,
+      Content-Length: 133,
       Content-Type: application/json; charset=utf-8
     },
     Value: {
@@ -13,8 +13,7 @@
         email: test@email.com,
         id: Guid_1,
         name: ,
-        origin: Local,
-        workspaceId: Guid_2
+        origin: Local
       },
       errors: [],
       success: true

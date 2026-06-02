@@ -1,5 +1,6 @@
 using Application.Usages;
 using Application.Workspaces;
+using Domain.Users;
 using Domain.Workspaces;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -414,5 +415,23 @@ public class WorkspaceService(MongoDbClient mongoDb) : MongoDbService<Workspace>
                 row["envName"].AsString
             )).ToArray();
         }
+    }
+
+    public async Task AddUserIfNotExistsAsync(Guid workspaceId, Guid userId)
+    {
+        var exists = await MongoDb.QueryableOf<WorkspaceUser>().AnyAsync(x => x.WorkspaceId == workspaceId && x.UserId == userId);
+        if (exists)
+        {
+            return;
+        }
+
+        var workspaceUser = new WorkspaceUser(workspaceId, userId);
+        await MongoDb.CollectionOf<WorkspaceUser>().InsertOneAsync(workspaceUser);
+    }
+
+    public async Task RemoveUserAsync(Guid workspaceId, Guid userId)
+    {
+        await MongoDb.CollectionOf<WorkspaceUser>()
+            .DeleteManyAsync(x => x.WorkspaceId == workspaceId && x.UserId == userId);
     }
 }

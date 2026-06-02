@@ -4,6 +4,7 @@ import { Observable, of } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { IEnvironment } from '@shared/types';
 import { catchError } from "rxjs/operators";
+import { CreateEnvPayload, UpdateEnvPayload } from "@core/components/env-drawer/types";
 
 @Injectable({
   providedIn: 'root'
@@ -13,29 +14,28 @@ export class EnvService {
 
   constructor(private http: HttpClient) { }
 
-  public getEnv(projectId: string, envId: string): Observable<IEnvironment> {
+  getEnv(projectId: string, envId: string): Observable<IEnvironment> {
     const url = this.baseUrl.replace(/#projectId/ig, `${projectId}`) + `/${envId}`;
     return this.http.get<IEnvironment>(url);
   }
 
-  postCreateEnv(projectId: string, params): Observable<any> {
+  createEnv(projectId: string, payload: CreateEnvPayload): Observable<IEnvironment> {
     const url = this.baseUrl.replace(/#projectId/ig, `${projectId}`);
-    return this.http.post(url, params);
+    return this.http.post<IEnvironment>(url, payload);
   }
 
-  putUpdateEnv(projectId: string, params): Observable<any> {
-    const url = `${this.baseUrl.replace(/#projectId/ig, `${projectId}`)}/${params.id}`;
-    return this.http.put(url, params);
+  updateEnv(projectId: string, envId: string, payload: UpdateEnvPayload): Observable<IEnvironment> {
+    const url = `${this.baseUrl.replace(/#projectId/ig, `${projectId}`)}/${envId}`;
+    return this.http.put<IEnvironment>(url, payload);
   }
 
-  removeEnv(projectId: string, envId: string): Observable<any> {
+  removeEnv(projectId: string, envId: string): Observable<boolean> {
     const url = this.baseUrl.replace(/#projectId/ig, `${projectId}`) + `/${envId}`;
-    return this.http.delete(url);
+    return this.http.delete<boolean>(url);
   }
 
   isKeyUsed(projectId: string, key: string): Observable<boolean> {
     const url = this.baseUrl.replace(/#projectId/ig, `${projectId}`) + `/is-key-used?key=${key}`;
-
     return this.http.get<boolean>(url).pipe(catchError(() => of(undefined)));
   }
 }

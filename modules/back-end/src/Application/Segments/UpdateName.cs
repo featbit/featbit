@@ -1,10 +1,11 @@
+using Application.AuditLogs;
 using Application.Bases;
 using Application.Users;
 using Domain.AuditLogs;
 
 namespace Application.Segments;
 
-public class UpdateName : IRequest<bool>
+public class UpdateName : ResourceChangeRequest, IRequest<bool>
 {
     /// <summary>
     /// The ID of the segment to update. Retrieved from the URL path.
@@ -43,7 +44,7 @@ public class UpdateNameHandler(
             Operations.Update,
             dataChange,
             currentUser.Id,
-            comment: "Updated name",
+            comment: request.Comment,
             isTargetingChange: false
         );
         await publisher.Publish(notification, cancellationToken);

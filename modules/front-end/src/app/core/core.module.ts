@@ -112,6 +112,8 @@ import { ResourceEditorComponent } from "@core/components/resource-editor/resour
 import { PricingPlansComponent } from './components/pricing-plans/pricing-plans.component';
 import { NzSliderModule } from 'ng-zorro-antd/slider';
 import { UpdateSubscriptionModalComponent } from "./components/pricing-plans/update-subscription-modal/update-subscription-modal.component";
+import { ChangeCommentComponent } from '@core/components/change-comment/change-comment.component';
+import { ChangeCommentService } from '@core/services/change-comment.service';
 
 @NgModule({
   declarations: [
@@ -164,7 +166,8 @@ import { UpdateSubscriptionModalComponent } from "./components/pricing-plans/upd
     ClonePolicyModalComponent,
     ResourceEditorComponent,
     PricingPlansComponent,
-    UpdateSubscriptionModalComponent
+    UpdateSubscriptionModalComponent,
+    ChangeCommentComponent
   ],
   imports: [
     CommonModule,
@@ -277,7 +280,11 @@ import { UpdateSubscriptionModalComponent } from "./components/pricing-plans/upd
     CompareFeatureFlagDrawerComponent,
     ClonePolicyModalComponent,
     ResourceEditorComponent,
-    PricingPlansComponent
+    PricingPlansComponent,
+    ChangeCommentComponent
+  ],
+  providers: [
+    ChangeCommentService
   ]
 })
 export class CoreModule {

@@ -1,41 +1,78 @@
 import { Component } from '@angular/core';
 import { IdentityService } from "@services/identity.service";
-import { IProfile, IOrganization } from "@shared/types";
+import { IProfile, IOrganization, IWorkspace } from "@shared/types";
 import { OrganizationService } from "@services/organization.service";
+import { WorkspaceService } from "@services/workspace.service";
 import { Router } from "@angular/router";
 import { IS_SSO_FIRST_LOGIN, LOGIN_REDIRECT_URL } from "@utils/localstorage-keys";
 import { getProfile } from "@utils/index";
-import { NzMessageService } from "ng-zorro-antd/message";
 import { UserService } from "@services/user.service";
+import { NzMessageService } from "ng-zorro-antd/message";
 
 @Component({
-    selector: 'select-organization',
-    templateUrl: './select-organization.component.html',
-    styleUrls: ['./select-organization.component.less'],
+    selector: 'select-workspace',
+    templateUrl: './select-workspace.component.html',
+    styleUrls: ['./select-workspace.component.less'],
     standalone: false
 })
-export class SelectOrganizationComponent {
+export class SelectWorkspaceComponent {
 
   menuExtended: boolean = false;
+  workspaces: IWorkspace[] = [];
   organizations: IOrganization[] = [];
+  selectedWorkspace: IWorkspace | null = null;
   profile: IProfile = null;
   isLoading: boolean = false;
+  isLoadingOrgs: boolean = false;
+  currentStep: 'workspace' | 'organization' = 'workspace';
 
   constructor(
     private router: Router,
     private message: NzMessageService,
     private organizationService: OrganizationService,
+    private workspaceService: WorkspaceService,
     private identityService: IdentityService,
     private userService: UserService) {
-    this.organizations = organizationService.organizations;
+    this.workspaces = userService.workspaces;
     this.profile = getProfile();
 
-    if (this.organizations.length === 1) {
-      this.setOrganization(this.organizations[0]);
+    if (this.workspaces.length === 1) {
+      this.setWorkspace(this.workspaces[0]).then();
     }
   }
 
-  setOrganization(organization: any) {
+  async setWorkspace(workspace: IWorkspace) {
+    if (this.isLoadingOrgs) return;
+    this.selectedWorkspace = workspace;
+    this.isLoadingOrgs = true;
+    this.workspaceService.setWorkspace(workspace);
+
+    try {
+      const isSsoFirstLogin = localStorage.getItem(IS_SSO_FIRST_LOGIN) === 'true';
+      const orgs = await this.organizationService.getListAsync(isSsoFirstLogin);
+      this.organizations = orgs || [];
+      this.organizationService.organizations = this.organizations;
+
+      this.currentStep = 'organization';
+
+      if (this.organizations.length === 1) {
+        this.setOrganization(this.organizations[0]);
+      }
+    } catch {
+      this.organizations = [];
+      this.currentStep = 'organization';
+    } finally {
+      this.isLoadingOrgs = false;
+    }
+  }
+
+  backToWorkspaceSelection() {
+    this.currentStep = 'workspace';
+    this.organizations = [];
+    this.selectedWorkspace = null;
+  }
+
+  setOrganization(organization: IOrganization) {
     this.isLoading = true;
     this.organizationService.switchOrganization(organization);
     this.userService.joinOrganization().subscribe({

@@ -39,4 +39,14 @@ public class TestWorkspaceService : NullServiceBase<Workspace>, IWorkspaceServic
 
         return Task.FromResult(usage);
     }
+
+    public Task AddUserIfNotExistsAsync(Guid workspaceId, Guid userId)
+    {
+        return Task.CompletedTask;
+    }
+
+    public Task RemoveUserAsync(Guid workspaceId, Guid userId)
+    {
+        return Task.CompletedTask;
+    }
 }

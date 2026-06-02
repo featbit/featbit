@@ -27,9 +27,9 @@
             }
           </ul>
         </nz-dropdown-menu>
-        <button class="save-btn" nz-button nzType="primary" (click)="onReviewChanges()">
+        <button nz-button nzType="primary" (click)="onReviewChanges()">
           <i nz-icon nzType="icons:icon-save"></i>
-          <ng-container i18n="@@common.review-and-save">Review and save</ng-container>
+          <ng-container i18n="@@common.save">Save</ng-container>
         </button>
       </div>
     } @else {
@@ -127,10 +127,7 @@
 @if (!isLoading) {
   <change-review
     [visible]="reviewModalVisible"
-    [refName]="segmentDetail.name"
-    [previous]="originalData"
-    [current]="currentData"
-    [refType]="refType"
+    [data]="reviewModalData"
     (onSave)="onSave($event)"
     (onCancel)="onCloseReviewModal()"
     >

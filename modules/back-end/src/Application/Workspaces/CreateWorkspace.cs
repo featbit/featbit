@@ -1,4 +1,3 @@
-using Application.Bases.Exceptions;
 using Application.Identity;
 using Application.Organizations;
 using Domain.Utils;
@@ -26,9 +25,19 @@ public class CreateWorkspaceHandler(
     public async Task<RegisterResult> Handle(CreateWorkspace request, CancellationToken cancellationToken)
     {
         var user = await userService.FindOneAsync(x => x.Email == request.Email);
-        if (user != null)
+
+        RegisterResult registerResult;
+        if (user == null)
         {
-            throw new BusinessException("A user cannot have more than one workspace.");
+            registerResult = await identityService.RegisterByEmailAsync(
+                request.Email,
+                request.Password,
+                request.UserOrigin
+            );
+        }
+        else
+        {
+            registerResult = RegisterResult.Ok(user);
         }
 
         var workspace = new Workspace
@@ -40,16 +49,8 @@ public class CreateWorkspaceHandler(
         // add new workspace
         await workspaceService.AddOneAsync(workspace);
 
-        // setup free license
-        await billingService.CreateFreeLicenseAsync(workspace.Id, request.Email);
-
-        // register user
-        var registerResult = await identityService.RegisterByEmailAsync(
-            workspace.Id,
-            request.Email,
-            request.Password,
-            request.UserOrigin
-        );
+        // add user to workspace
+        await workspaceService.AddUserIfNotExistsAsync(workspace.Id, registerResult.User.Id);
 
         // create default organization
         await mediator.Send(new CreateOrganization
@@ -59,6 +60,9 @@ public class CreateWorkspaceHandler(
             Key = "default-organization",
             CurrentUserId = registerResult.User.Id
         }, cancellationToken);
+
+        // setup free license
+        await billingService.CreateFreeLicenseAsync(workspace.Id, request.Email);
 
         return registerResult;
     }
