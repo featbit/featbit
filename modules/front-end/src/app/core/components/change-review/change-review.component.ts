@@ -69,7 +69,11 @@ export class ChangeReviewComponent implements OnInit {
       this.kind = value.kind;
       this.setTitle();
       this.loadChanges();
+      if (this.form) {
+        this.revalidateForm();
+      }
     }
+  }
   }
   get data() {
     return this._data;
