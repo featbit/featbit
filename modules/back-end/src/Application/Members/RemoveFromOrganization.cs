@@ -3,23 +3,24 @@ namespace Application.Members;
 public class RemoveFromOrganization : IRequest<bool>
 {
     public Guid WorkspaceId { get; set; }
-    
+
     public Guid OrganizationId { get; set; }
 
     public Guid MemberId { get; set; }
 }
 
 public class RemoveFromOrganizationHandler(
-    IOrganizationService organizationService, 
-    IMemberService service, 
+    IOrganizationService organizationService,
+    IMemberService memberService,
     ISender mediator) : IRequestHandler<RemoveFromOrganization, bool>
 {
     public async Task<bool> Handle(RemoveFromOrganization request, CancellationToken cancellationToken)
     {
-        await service.DeleteAsync(request.OrganizationId, request.MemberId);
+        await memberService.DeleteAsync(request.OrganizationId, request.MemberId);
 
-        var orgs = await organizationService.GetUserOrganizationsAsync(request.WorkspaceId, request.MemberId);
-        if (orgs.Count == 0)
+        var organizations = 
+            await organizationService.GetUserOrganizationsAsync(request.WorkspaceId, request.MemberId);
+        if (organizations.Count == 0)
         {
             await mediator.Send(new RemoveFromWorkspace
             {

@@ -49,7 +49,7 @@ public class TestUserService : NullServiceBase<User>, IUserService
         {
             TestWorkspace.Instance
         };
-        
+
         return Task.FromResult<ICollection<Workspace>>(workspaces);
     }
 

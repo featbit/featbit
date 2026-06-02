@@ -17,17 +17,17 @@ public class RemoveFromWorkspaceHandler(
     public async Task<bool> Handle(RemoveFromWorkspace request, CancellationToken cancellationToken)
     {
         // remove member from all organizations within the workspace
-        var organizations = 
+        var organizations =
             await organizationService.GetUserOrganizationsAsync(request.WorkspaceId, request.MemberId);
         foreach (var organization in organizations)
         {
             await memberService.DeleteAsync(organization.Id, request.MemberId);
         }
-        
+
         // remove member from the workspace
         await workspaceService.RemoveUserAsync(request.WorkspaceId, request.MemberId);
 
-        // remove member if he does not belong to any workspace 
+        // remove user if he does not belong to any workspace 
         var workspaces = await userService.GetWorkspacesAsync(request.MemberId);
         if (workspaces.Count == 0)
         {
