@@ -107,8 +107,7 @@ export class WorkspaceComponent implements OnInit {
     const { id } = this.workspace;
 
     this.isNameKeyLoading = true;
-    this.workspaceService.update(id, name, key)
-    .subscribe({
+    this.workspaceService.update(id, name, key).subscribe({
       next: (workspace) => {
         this.workspace = workspace;
         this.isNameKeyLoading = false;
@@ -134,8 +133,7 @@ export class WorkspaceComponent implements OnInit {
     };
 
     this.isSsoLoading = true;
-    this.workspaceService.updateOidcSetting(payload)
-    .subscribe({
+    this.workspaceService.updateOidcSetting(payload).subscribe({
       next: (workspace) => {
         this.workspace = workspace;
         this.isSsoLoading = false;
