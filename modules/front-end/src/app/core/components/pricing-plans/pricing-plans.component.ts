@@ -61,7 +61,7 @@ export class PricingPlansComponent {
     }
   }
 
-  isCurrentSubscriptionChanged() {
+  canUpdateCurrentSubscription() {
     const isMauChanged = this.planMauSlider[this._subscription.key] !== this._subscription.totalMau;
     if (isMauChanged) {
       return true;
@@ -70,6 +70,10 @@ export class PricingPlansComponent {
     const isFineGrainedAcChanged =
       this.fineGrainedAcEnabled[this._subscription.key] !== this._subscription.fineGrainedAcEnabled;
     if (isFineGrainedAcChanged) {
+      return true;
+    }
+
+    if (this._subscription.key !== PlanKeys.FREE && this._subscription.isLocal) {
       return true;
     }
 
@@ -139,8 +143,8 @@ export class PricingPlansComponent {
       addOnFeatures: this.fineGrainedAcEnabled[newPlan.key] ? [LicenseFeatureEnum.FineGrainedAccessControl] : []
     };
 
-    // free -> paid, create a new subscription
-    if (this._subscription.key === PlanKeys.FREE) {
+    // Local subscription (e.g., free plan or manually created), create a new subscription
+    if (this._subscription.isLocal) {
       this.isCreatingSubscription = true;
       this.billingService.createSubscription(newSubscription)
       .pipe(finalize(() => this.isCreatingSubscription = false))
@@ -173,7 +177,8 @@ export class PricingPlansComponent {
           billingCycle: billingCycle,
           currentPeriodStart: this._subscription.currentPeriodStart,
           currentPeriodEnd: this._subscription.currentPeriodEnd,
-          subscriberSince: this._subscription.subscriberSince
+          subscriberSince: this._subscription.subscriberSince,
+          isLocal: false
         }
       };
       this.modalVisible = true;

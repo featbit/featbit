@@ -87,7 +87,7 @@
               <button nz-button class="btn-downgrade" (click)="updateSubscription(plan, UpdateAction.DOWNGRADE)">
                 Downgrade to {{ plan.name }}
               </button>
-            } @else if (isCurrentSubscriptionChanged()) {
+            } @else if (canUpdateCurrentSubscription()) {
               <button nz-button class="btn-update" (click)="updateSubscription(plan, UpdateAction.UPDATE)">
                 Update Plan
               </button>
@@ -145,7 +145,7 @@
               <button nz-button class="btn-downgrade" (click)="updateSubscription(enterprisePlan, UpdateAction.DOWNGRADE)">
                 Downgrade to {{ enterprisePlan.name }}
               </button>
-            } @else if (isCurrentSubscriptionChanged()) {
+            } @else if (canUpdateCurrentSubscription()) {
               <button nz-button class="btn-update" (click)="updateSubscription(enterprisePlan, UpdateAction.UPDATE)">
                 Update Plan
               </button>

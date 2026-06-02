@@ -55,6 +55,7 @@ export class BillingService {
           subscriberSince: new Date(raw.createdAt),
           usage: raw.usage,
           pendingDowngrade: raw.pendingDowngrade,
+          isLocal: raw.isLocal,
         };
       })
     );
