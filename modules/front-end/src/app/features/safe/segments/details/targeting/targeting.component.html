@@ -2,31 +2,20 @@
   <div class="detail-body">
     @if (!isLoading) {
       <div class="banner">
-        @if (flagReferences.length === 0) {
-          <div class="references" i18n="@@segment.details.segment-not-used">This segment is not used by any feature flag</div>
-        }
         @if (flagReferences.length > 0) {
-          <div class="references" nz-dropdown [nzDropdownMenu]="menu">
-            <a>
-              <ng-container i18n="@@segment.details.this-segment">This segment is used by</ng-container>
-              <span class="reference-count"> {{flagReferences.length}} </span>
-              <ng-container i18n="@@segment.details.num-ff">feature flag(s)</ng-container>
-              <i nz-icon nzType="down"></i>
-            </a>
-          </div>
+          <span
+            class="flag-references-tip"
+            nz-tooltip
+            nzTooltipTitle="Click to view details"
+            i18n-nzTooltipTitle="@@segment.details.flag-references-tooltip"
+            (click)="flagReferencesModalVisible = true">
+            <span i18n="@@segment.details.referenced-by">Referenced by</span>
+            <span>{{ flagReferences.length }}</span>
+            <span i18n="@@segment.details.num-ff">feature flag(s)</span>
+          </span>
+        } @else {
+          <span class="flag-references-tip no-reference" i18n="@@segment.details.no-flag-references">No flag references</span>
         }
-        <nz-dropdown-menu #menu="nzDropdownMenu">
-          <ul nz-menu>
-            @for (flag of flagReferences; track flag.id) {
-              <li [nzDisabled]="flag.envId !== currentEnvId" nz-menu-item (click)="openFlagPage(flag)">
-                {{ flag.name }}
-                @if (flag.envId !== currentEnvId) {
-                  <span i18n="@@segment.details.in-other-environment">(in other environment)</span>
-                }
-              </li>
-            }
-          </ul>
-        </nz-dropdown-menu>
         <button nz-button nzType="primary" (click)="onReviewChanges()">
           <i nz-icon nzType="icons:icon-save"></i>
           <ng-container i18n="@@common.save">Save</ng-container>
@@ -132,6 +121,16 @@
     (onCancel)="onCloseReviewModal()"
     >
   </change-review>
+
+  <flag-references-modal
+    [visible]="flagReferencesModalVisible"
+    [references]="flagReferences"
+    title="Feature flag references"
+    i18n-title="@@segment.details.flag-references-modal-title"
+    description="This segment is referenced by the following feature flags."
+    i18n-description="@@segment.details.flag-references-modal-description"
+    (onClose)="flagReferencesModalVisible = false">
+  </flag-references-modal>
 }
 
 

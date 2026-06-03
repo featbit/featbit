@@ -155,5 +155,9 @@
 <flag-references-modal
   [visible]="flagReferencesModalVisible"
   [references]="flagReferences"
+  title="Can't archive segment"
+  i18n-title="@@segment.index.flag-references-modal-title"
+  description="We cannot archive this segment because it is being referenced by the following feature flags."
+  i18n-description="@@segment.index.flag-references-modal-description"
   (onClose)="flagReferencesModalVisible = false">
 </flag-references-modal>
