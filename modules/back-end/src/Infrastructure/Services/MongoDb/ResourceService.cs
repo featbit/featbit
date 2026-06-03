@@ -97,7 +97,6 @@ public class ResourceService(MongoDbClient mongoDb) : IResourceService
                     select new
                     {
                         ProjectKey = project.Key,
-                        EnvId = env.Id,
                         EnvKey = env.Key
                     };
 
