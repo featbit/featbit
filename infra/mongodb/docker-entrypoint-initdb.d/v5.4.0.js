@@ -43,7 +43,7 @@ db.Users.find({}).forEach(u => {
     );
 });
 
-// Step 3. Re-point OrganizationUsers and RefreshTokens to the canonical user.
+// Step 3. Re-point dependent collections to the canonical user.
 db.Users.find({}).forEach(u => {
     const canonicalId = canonicalByEmail[u.email];
     if (canonicalId.toString() !== u._id.toString()) {
@@ -51,9 +51,78 @@ db.Users.find({}).forEach(u => {
             { userId: u._id },
             { $set: { userId: canonicalId } }
         );
+        db.OrganizationUsers.updateMany(
+            { invitorId: u._id },
+            { $set: { invitorId: canonicalId } }
+        );
         db.RefreshTokens.updateMany(
             { userId: u._id },
             { $set: { userId: canonicalId } }
+        );
+        db.AccessTokens.updateMany(
+            { creatorId: u._id },
+            { $set: { creatorId: canonicalId } }
+        );
+        db.AuditLogs.updateMany(
+            { creatorId: u._id },
+            { $set: { creatorId: canonicalId } }
+        );
+        db.ExperimentMetrics.updateMany(
+            { maintainerUserId: u._id },
+            { $set: { maintainerUserId: canonicalId } }
+        );
+        db.FeatureFlags.updateMany(
+            { creatorId: u._id },
+            { $set: { creatorId: canonicalId } }
+        );
+        db.FeatureFlags.updateMany(
+            { updatorId: u._id },
+            { $set: { updatorId: canonicalId } }
+        );
+        db.FlagChangeRequests.updateMany(
+            { creatorId: u._id },
+            { $set: { creatorId: canonicalId } }
+        );
+        db.FlagChangeRequests.updateMany(
+            { updatorId: u._id },
+            { $set: { updatorId: canonicalId } }
+        );
+        db.FlagChangeRequests.updateMany(
+            { "reviewers.memberId": u._id },
+            { $set: { "reviewers.$[elem].memberId": canonicalId } },
+            { arrayFilters: [{ "elem.memberId": u._id }] }
+        );
+        db.FlagDrafts.updateMany(
+            { creatorId: u._id },
+            { $set: { creatorId: canonicalId } }
+        );
+        db.FlagDrafts.updateMany(
+            { updatorId: u._id },
+            { $set: { updatorId: canonicalId } }
+        );
+        db.FlagSchedules.updateMany(
+            { creatorId: u._id },
+            { $set: { creatorId: canonicalId } }
+        );
+        db.FlagSchedules.updateMany(
+            { updatorId: u._id },
+            { $set: { updatorId: canonicalId } }
+        );
+        db.GroupMembers.updateMany(
+            { memberId: u._id },
+            { $set: { memberId: canonicalId } }
+        );
+        db.MemberPolicies.updateMany(
+            { memberId: u._id },
+            { $set: { memberId: canonicalId } }
+        );
+        db.Webhooks.updateMany(
+            { creatorId: u._id },
+            { $set: { creatorId: canonicalId } }
+        );
+        db.Webhooks.updateMany(
+            { updatorId: u._id },
+            { $set: { updatorId: canonicalId } }
         );
     }
 });
