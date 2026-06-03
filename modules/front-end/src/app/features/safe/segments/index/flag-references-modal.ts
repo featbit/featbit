@@ -143,9 +143,9 @@ export class FlagReferencesModalComponent implements OnInit {
   @Output()
   onClose = new EventEmitter<void>();
 
-  currentEnvId: string;
+  currentEnvId: string = '';
   ngOnInit(): void {
-    this.currentEnvId = getCurrentProjectEnv().envId;
+    this.currentEnvId = getCurrentProjectEnv()?.envId ?? '';
   }
 
   close() {
