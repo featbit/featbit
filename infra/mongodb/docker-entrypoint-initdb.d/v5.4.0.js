@@ -13,8 +13,7 @@ db.Environments.updateMany(
 // Migration: extract workspace membership out of Users collection
 // ================================================================
 
-// Step 1. Create the new WorkspaceUsers collection and index.
-db.createCollection("WorkspaceUsers");
+// Step 1. Create the new WorkspaceUsers index (the collection will be created automatically if needed).
 db.WorkspaceUsers.createIndex({ workspaceId: 1, userId: 1 }, { unique: true });
 
 // Step 2. Resolve canonical user per email (earliest createdAt wins,
