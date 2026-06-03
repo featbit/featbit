@@ -1,0 +1,124 @@
+generator client {
+  provider      = "prisma-client-js"
+  output        = "../src/generated/prisma"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Activity {
+  id           String     @id @default(uuid())
+  type         String
+  title        String
+  detail       String?
+  createdAt    DateTime   @default(now()) @map("created_at")
+  experimentId String     @map("experiment_id")
+  experiment   Experiment @relation(fields: [experimentId], references: [id], onDelete: Cascade)
+
+  @@map("activity")
+}
+
+model Experiment {
+  id                 String          @id @default(uuid())
+  createdAt          DateTime        @default(now()) @map("created_at")
+  updatedAt          DateTime        @updatedAt @map("updated_at")
+  hypothesis         String?
+  accessToken        String?         @map("access_token")
+  change             String?
+  constraints        String?
+  description        String?
+  envSecret          String?         @map("env_secret")
+  flagKey            String?         @map("flag_key")
+  flagServerUrl      String?         @map("flag_server_url")
+  goal               String?
+  guardrails         String?
+  intent             String?
+  lastAction         String?         @map("last_action")
+  lastLearning       String?         @map("last_learning")
+  name               String
+  openQuestions      String?         @map("open_questions")
+  primaryMetric      String?         @map("primary_metric")
+  sandboxId          String?         @map("sandbox_id")
+  sandboxStatus      String?         @default("idle") @map("sandbox_status")
+  stage              String          @default("hypothesis")
+  variants           String?
+  featbitProjectKey  String?         @map("featbit_project_key")
+  featbitEnvId       String?         @map("featbit_env_id")
+  conflictAnalysis   String?         @map("conflict_analysis")
+  entryMode          String?         @map("entry_mode")
+  activities         Activity[]
+  experimentRuns     ExperimentRun[]
+  messages           Message[]
+
+  @@map("experiment")
+}
+
+model ExperimentRun {
+  id                    String     @id @default(uuid())
+  experimentId          String     @map("experiment_id")
+  slug                  String
+  status                String     @default("draft")
+  createdAt             DateTime   @default(now()) @map("created_at")
+  updatedAt             DateTime   @updatedAt @map("updated_at")
+  hypothesis            String?
+  method                String?
+  methodReason          String?    @map("method_reason")
+  primaryMetricEvent    String?    @map("primary_metric_event")
+  metricDescription     String?    @map("metric_description")
+  guardrailEvents       String?    @map("guardrail_events")
+  guardrailDescriptions String?    @map("guardrail_descriptions")
+  controlVariant        String?    @map("control_variant")
+  treatmentVariant      String?    @map("treatment_variant")
+  trafficAllocation     String?    @map("traffic_allocation")
+  minimumSample         Int?       @map("minimum_sample")
+  observationStart      DateTime?  @map("observation_start")
+  observationEnd        DateTime?  @map("observation_end")
+  priorProper           Boolean    @default(false) @map("prior_proper")
+  priorMean             Float?     @map("prior_mean")
+  priorStddev           Float?     @map("prior_stddev")
+  inputData             String?    @map("input_data")
+  analysisResult        String?    @map("analysis_result")
+  decision              String?
+  decisionSummary       String?    @map("decision_summary")
+  decisionReason        String?    @map("decision_reason")
+  whatChanged           String?    @map("what_changed")
+  whatHappened          String?    @map("what_happened")
+  confirmedOrRefuted    String?    @map("confirmed_or_refuted")
+  whyItHappened         String?    @map("why_it_happened")
+  nextHypothesis        String?    @map("next_hypothesis")
+  runId                 String?    @map("run_id")
+  primaryMetricAgg      String?    @default("once") @map("primary_metric_agg")
+  primaryMetricType     String?    @default("binary") @map("primary_metric_type")
+  trafficPercent        Float?     @default(100) @map("traffic_percent")
+  layerId               String?    @map("layer_id")
+  audienceFilters       String?    @map("audience_filters")
+  trafficOffset         Int?       @default(0) @map("traffic_offset")
+  // Data source for metric stats. Branches the analyse route between
+  // FeatBit-managed track-service and a Customer Managed Data Endpoint.
+  // Values: "featbit-managed" | "customer-single" | "customer-per-metric" | "manual" | "external-text"
+  dataSourceMode         String?    @default("featbit-managed") @map("data_source_mode")
+  // JSON-encoded endpoint routing. Shape varies by dataSourceMode:
+  //   customer-single:     { "providerId": "...", "path": "/...", "staticParams": {...} }
+  //   customer-per-metric: { "<metric_event>": { "providerId": "...", "path": "/...", "staticParams": {...} }, ... }
+  customerEndpointConfig String?    @map("customer_endpoint_config")
+  experiment            Experiment @relation(fields: [experimentId], references: [id], onDelete: Cascade)
+
+  @@unique([experimentId, slug])
+  @@map("experiment_run")
+}
+
+model Message {
+  id           String     @id @default(uuid())
+  role         String
+  content      String
+  metadata     String?
+  createdAt    DateTime   @default(now()) @map("created_at")
+  experimentId String     @map("experiment_id")
+  experiment   Experiment @relation(fields: [experimentId], references: [id], onDelete: Cascade)
+
+  @@map("message")
+}
+

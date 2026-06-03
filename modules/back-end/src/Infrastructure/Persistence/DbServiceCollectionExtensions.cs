@@ -47,6 +47,8 @@ public static class DbServiceCollectionExtensions
             services.AddTransient<IFeatureFlagService, MongoServices.FeatureFlagService>();
             services.AddTransient<ITriggerService, MongoServices.TriggerService>();
             services.AddTransient<IExperimentService, MongoServices.ExperimentService>();
+            services.AddTransient<IExperimentStatsService, MongoServices.ExperimentStatsService>();
+            services.AddTransient<IReleaseDecisionExperimentService, MongoServices.ReleaseDecisionExperimentService>();
             services.AddTransient<IExperimentMetricService, MongoServices.ExperimentMetricService>();
             services.AddTransient<IAuditLogService, MongoServices.AuditLogService>();
             services.AddTransient<IAccessTokenService, MongoServices.AccessTokenService>();
@@ -86,6 +88,8 @@ public static class DbServiceCollectionExtensions
             services.AddTransient<IFeatureFlagService, EntityFrameworkCoreServices.FeatureFlagService>();
             services.AddTransient<ITriggerService, EntityFrameworkCoreServices.TriggerService>();
             services.AddTransient<IExperimentService, EntityFrameworkCoreServices.ExperimentService>();
+            services.AddTransient<IExperimentStatsService, EntityFrameworkCoreServices.ExperimentStatsService>();
+            services.AddTransient<IReleaseDecisionExperimentService, EntityFrameworkCoreServices.ReleaseDecisionExperimentService>();
             services.AddTransient<IExperimentMetricService, EntityFrameworkCoreServices.ExperimentMetricService>();
             services.AddTransient<IAuditLogService, EntityFrameworkCoreServices.AuditLogService>();
             services.AddTransient<IAccessTokenService, EntityFrameworkCoreServices.AccessTokenService>();

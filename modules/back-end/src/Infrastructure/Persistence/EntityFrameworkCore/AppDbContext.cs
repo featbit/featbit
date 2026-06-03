@@ -36,6 +36,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
         modelBuilder.ApplyConfiguration(new ExperimentConfiguration());
         modelBuilder.ApplyConfiguration(new ExperimentMetricConfiguration());
+        modelBuilder.ApplyConfiguration(new ReleaseDecisionExperimentConfiguration());
+        modelBuilder.ApplyConfiguration(new ReleaseDecisionExperimentRunConfiguration());
+        modelBuilder.ApplyConfiguration(new ReleaseDecisionActivityConfiguration());
+        modelBuilder.ApplyConfiguration(new ReleaseDecisionMessageConfiguration());
         modelBuilder.ApplyConfiguration(new AccessTokenConfiguration());
         modelBuilder.ApplyConfiguration(new RelayProxyConfiguration());
         modelBuilder.ApplyConfiguration(new WebhookConfiguration());

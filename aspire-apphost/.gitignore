@@ -1,0 +1,6 @@
+node_modules/
+dist/
+.aspire/
+bin/
+obj/
+certs/*.pem
