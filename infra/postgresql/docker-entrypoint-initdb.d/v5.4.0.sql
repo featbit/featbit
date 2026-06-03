@@ -181,7 +181,36 @@ FROM users u
          JOIN canonical c ON c.email = u.email AND c.canonical_id <> u.id
 WHERE t.updator_id = u.id;
 
- -- TODO reviewers
+WITH canonical AS (
+    SELECT DISTINCT ON (email)
+        id    AS canonical_id,
+        email
+    FROM users
+    ORDER BY email, created_at ASC, id ASC
+),
+id_map AS (
+    SELECT u.id AS old_id, c.canonical_id AS new_id
+    FROM users u
+             JOIN canonical c ON c.email = u.email AND c.canonical_id <> u.id
+)
+UPDATE flag_change_requests fcr
+SET reviewers = (
+    SELECT jsonb_agg(
+               CASE
+                   WHEN im.new_id IS NOT NULL
+                       THEN elem || jsonb_build_object('memberId', im.new_id::text)
+                   ELSE elem
+                   END
+           )
+    FROM jsonb_array_elements(fcr.reviewers) AS elem
+             LEFT JOIN id_map im ON im.old_id = (elem ->> 'memberId')::uuid
+)
+WHERE fcr.reviewers IS NOT NULL
+  AND EXISTS (
+    SELECT 1
+    FROM jsonb_array_elements(fcr.reviewers) AS elem
+             JOIN id_map im ON im.old_id = (elem ->> 'memberId')::uuid
+);
 
 WITH canonical AS (
     SELECT DISTINCT ON (email)
