@@ -27,13 +27,20 @@ db.Users.find({}).sort({ createdAt: 1, _id: 1 }).forEach(u => {
 });
 
 db.Users.find({}).forEach(u => {
-    db.WorkspaceUsers.insertOne({
-        _id: UUID(),
-        workspaceId: u.workspaceId,
-        userId: canonicalByEmail[u.email],
-        createdAt: u.createdAt,
-        updatedAt: u.updatedAt
-    });
+    const canonicalId = canonicalByEmail[u.email];
+    db.WorkspaceUsers.updateOne(
+        { workspaceId: u.workspaceId, userId: canonicalId },
+        {
+            $setOnInsert: {
+                _id: UUID(),
+                workspaceId: u.workspaceId,
+                userId: canonicalId,
+                createdAt: u.createdAt,
+                updatedAt: u.updatedAt
+            }
+        },
+        { upsert: true }
+    );
 });
 
 // Step 3. Re-point OrganizationUsers and RefreshTokens to the canonical user.
