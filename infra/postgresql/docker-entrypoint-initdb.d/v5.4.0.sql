@@ -88,8 +88,10 @@ WHERE id NOT IN (
 -- 5. Drop the now-redundant workspace_id column
 ALTER TABLE users DROP COLUMN workspace_id;
 
-ALTER TABLE users ADD COLUMN initial_password text;
+-- Enforce global uniqueness of user email after workspace_id removal
+CREATE UNIQUE INDEX ix_users_email ON users (email);
 
+ALTER TABLE users ADD COLUMN initial_password text;
 -- Copy initial_password from organization_users to users
 -- Uses the most recent record per user if multiple org memberships exist
 UPDATE users u
