@@ -71,11 +71,221 @@ WITH canonical AS (
     FROM users
     ORDER BY email, created_at ASC, id ASC
 )
+UPDATE organization_users ou
+SET invitor_id = c.canonical_id
+FROM users u
+         JOIN canonical c ON c.email = u.email AND c.canonical_id <> u.id
+WHERE ou.invitor_id = u.id;
+
+WITH canonical AS (
+    SELECT DISTINCT ON (email)
+        id    AS canonical_id,
+        email
+    FROM users
+    ORDER BY email, created_at ASC, id ASC
+)
 UPDATE refresh_tokens r
 SET user_id = c.canonical_id
 FROM users u
          JOIN canonical c ON c.email = u.email AND c.canonical_id <> u.id
 WHERE r.user_id = u.id;
+
+WITH canonical AS (
+    SELECT DISTINCT ON (email)
+        id    AS canonical_id,
+        email
+    FROM users
+    ORDER BY email, created_at ASC, id ASC
+)
+UPDATE access_tokens t
+SET creator_id = c.canonical_id
+FROM users u
+         JOIN canonical c ON c.email = u.email AND c.canonical_id <> u.id
+WHERE t.creator_id = u.id;
+
+WITH canonical AS (
+    SELECT DISTINCT ON (email)
+        id    AS canonical_id,
+        email
+    FROM users
+    ORDER BY email, created_at ASC, id ASC
+)
+UPDATE audit_logs t
+SET creator_id = c.canonical_id
+FROM users u
+         JOIN canonical c ON c.email = u.email AND c.canonical_id <> u.id
+WHERE t.creator_id = u.id;
+
+WITH canonical AS (
+    SELECT DISTINCT ON (email)
+        id    AS canonical_id,
+        email
+    FROM users
+    ORDER BY email, created_at ASC, id ASC
+)
+UPDATE experiment_metrics t
+SET maintainer_user_id = c.canonical_id
+FROM users u
+         JOIN canonical c ON c.email = u.email AND c.canonical_id <> u.id
+WHERE t.maintainer_user_id = u.id;
+
+WITH canonical AS (
+    SELECT DISTINCT ON (email)
+        id    AS canonical_id,
+        email
+    FROM users
+    ORDER BY email, created_at ASC, id ASC
+)
+UPDATE feature_flags t
+SET creator_id = c.canonical_id
+FROM users u
+         JOIN canonical c ON c.email = u.email AND c.canonical_id <> u.id
+WHERE t.creator_id = u.id;
+
+WITH canonical AS (
+    SELECT DISTINCT ON (email)
+        id    AS canonical_id,
+        email
+    FROM users
+    ORDER BY email, created_at ASC, id ASC
+)
+UPDATE feature_flags t
+SET updator_id = c.canonical_id
+FROM users u
+         JOIN canonical c ON c.email = u.email AND c.canonical_id <> u.id
+WHERE t.updator_id = u.id;
+
+WITH canonical AS (
+    SELECT DISTINCT ON (email)
+        id    AS canonical_id,
+        email
+    FROM users
+    ORDER BY email, created_at ASC, id ASC
+)
+UPDATE flag_change_requests t
+SET creator_id = c.canonical_id
+FROM users u
+         JOIN canonical c ON c.email = u.email AND c.canonical_id <> u.id
+WHERE t.creator_id = u.id;
+
+WITH canonical AS (
+    SELECT DISTINCT ON (email)
+        id    AS canonical_id,
+        email
+    FROM users
+    ORDER BY email, created_at ASC, id ASC
+)
+UPDATE flag_change_requests t
+SET updator_id = c.canonical_id
+FROM users u
+         JOIN canonical c ON c.email = u.email AND c.canonical_id <> u.id
+WHERE t.updator_id = u.id;
+
+ -- TODO reviewers
+
+WITH canonical AS (
+    SELECT DISTINCT ON (email)
+        id    AS canonical_id,
+        email
+    FROM users
+    ORDER BY email, created_at ASC, id ASC
+)
+UPDATE flag_drafts t
+SET creator_id = c.canonical_id
+FROM users u
+         JOIN canonical c ON c.email = u.email AND c.canonical_id <> u.id
+WHERE t.creator_id = u.id;
+
+WITH canonical AS (
+    SELECT DISTINCT ON (email)
+        id    AS canonical_id,
+        email
+    FROM users
+    ORDER BY email, created_at ASC, id ASC
+)
+UPDATE flag_drafts t
+SET updator_id = c.canonical_id
+FROM users u
+         JOIN canonical c ON c.email = u.email AND c.canonical_id <> u.id
+WHERE t.updator_id = u.id;
+
+WITH canonical AS (
+    SELECT DISTINCT ON (email)
+        id    AS canonical_id,
+        email
+    FROM users
+    ORDER BY email, created_at ASC, id ASC
+)
+UPDATE flag_schedules t
+SET creator_id = c.canonical_id
+FROM users u
+         JOIN canonical c ON c.email = u.email AND c.canonical_id <> u.id
+WHERE t.creator_id = u.id;
+
+WITH canonical AS (
+    SELECT DISTINCT ON (email)
+        id    AS canonical_id,
+        email
+    FROM users
+    ORDER BY email, created_at ASC, id ASC
+)
+UPDATE flag_schedules t
+SET updator_id = c.canonical_id
+FROM users u
+         JOIN canonical c ON c.email = u.email AND c.canonical_id <> u.id
+WHERE t.updator_id = u.id;
+
+WITH canonical AS (
+    SELECT DISTINCT ON (email)
+        id    AS canonical_id,
+        email
+    FROM users
+    ORDER BY email, created_at ASC, id ASC
+)
+UPDATE group_members t
+SET member_id = c.canonical_id
+FROM users u
+         JOIN canonical c ON c.email = u.email AND c.canonical_id <> u.id
+WHERE t.member_id = u.id;
+
+WITH canonical AS (
+    SELECT DISTINCT ON (email)
+        id    AS canonical_id,
+        email
+    FROM users
+    ORDER BY email, created_at ASC, id ASC
+)
+UPDATE member_policies t
+SET member_id = c.canonical_id
+FROM users u
+         JOIN canonical c ON c.email = u.email AND c.canonical_id <> u.id
+WHERE t.member_id = u.id;
+
+WITH canonical AS (
+    SELECT DISTINCT ON (email)
+        id    AS canonical_id,
+        email
+    FROM users
+    ORDER BY email, created_at ASC, id ASC
+)
+UPDATE webhooks t
+SET creator_id = c.canonical_id
+FROM users u
+         JOIN canonical c ON c.email = u.email AND c.canonical_id <> u.id
+WHERE t.creator_id = u.id;
+
+WITH canonical AS (
+    SELECT DISTINCT ON (email)
+        id    AS canonical_id,
+        email
+    FROM users
+    ORDER BY email, created_at ASC, id ASC
+)
+UPDATE webhooks t
+SET updator_id = c.canonical_id
+FROM users u
+         JOIN canonical c ON c.email = u.email AND c.canonical_id <> u.id
+WHERE t.updator_id = u.id;
 
 -- 4. Delete duplicate (non-canonical) user rows
 DELETE FROM users
