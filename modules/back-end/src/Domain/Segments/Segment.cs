@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using Domain.AuditLogs;
 using Domain.EndUsers;
+using Domain.Resources;
 using Domain.Targeting;
 
 namespace Domain.Segments;
@@ -146,6 +147,19 @@ public class Segment : AuditedEntity
         return Rules.Any(
             rule => rule.Conditions.All(condition => condition.IsMatch(user))
         );
+    }
+
+    public bool IsApplicableToEnv(Guid envId, string envRn)
+    {
+        switch (Type)
+        {
+            case SegmentType.EnvironmentSpecific when EnvId == envId:
+            case SegmentType.Shared when Scopes.Any(scope => RN.IsInScope(envRn, scope)):
+                return true;
+
+            default:
+                return false;
+        }
     }
 
     public JsonObject SerializeAsEnvironmentSpecific(Guid? envId = null)

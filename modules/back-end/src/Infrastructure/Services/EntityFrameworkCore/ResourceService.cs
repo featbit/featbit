@@ -81,33 +81,29 @@ public class ResourceService(AppDbContext dbContext) : IResourceService
     public async Task<string?> GetSegmentRnAsync(Guid envId, Guid id)
     {
         // We cannot use a single query here because shared segments can be used across multiple envs
-
         var projectEnvQuery =
             from project in QueryableOf<Project>()
             join env in QueryableOf<Environment>() on project.Id equals env.ProjectId
             where env.Id == envId
             select new
             {
-                projectKey = project.Key,
-                envKey = env.Key
+                ProjectKey = project.Key,
+                EnvId = env.Id,
+                EnvKey = env.Key
             };
 
         var projectEnv = await projectEnvQuery.FirstOrDefaultAsync();
-        var segment = await QueryableOf<Segment>()
-            .Where(x => x.Id == id)
-            .Select(x => new
-            {
-                x.Key,
-                x.Tags
-            })
-            .FirstOrDefaultAsync();
+        var segment = await QueryableOf<Segment>().FirstOrDefaultAsync(x => x.Id == id);
 
         if (projectEnv == null || segment == null)
         {
             return null;
         }
 
-        return RN.ForSegment(projectEnv.projectKey, projectEnv.envKey, segment.Key, segment.Tags);
+        var envRN = RN.ForEnv(projectEnv.ProjectKey, projectEnv.EnvKey);
+        return segment.IsApplicableToEnv(projectEnv.EnvId, envRN)
+            ? RN.ForSegment(projectEnv.ProjectKey, projectEnv.EnvKey, segment.Key, segment.Tags)
+            : null;
     }
 
     private async Task<IEnumerable<Resource>> GetProjectsAsync(Guid organizationId, string name)
