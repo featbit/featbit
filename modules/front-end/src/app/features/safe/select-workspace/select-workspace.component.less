@@ -1,0 +1,192 @@
+@import "src/app/features/safe/safe.component.less";
+@import "variables";
+
+section.main-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  .page-loading {
+    width: 100%;
+  }
+
+  .selection-card {
+    width: 600px;
+    background-color: @white;
+    border: 1px solid @grey20-color;
+    border-radius: 16px;
+    padding: 40px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+
+    // ── Step content ─────────────────────────────────────────
+    .step-content {
+      .step-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: @grey90-color;
+        margin: 0 0 8px;
+      }
+
+      .step-subtitle {
+        font-size: 13px;
+        color: @grey50-color;
+        margin: 0 0 24px;
+
+        .user-email {
+          color: @grey80-color;
+          font-weight: 600;
+        }
+
+        .workspace-badge {
+          display: inline-block;
+          padding: 1px 8px;
+          background-color: @green5-color;
+          color: @primary-color;
+          border-radius: 10px;
+          font-size: 12px;
+          font-weight: 600;
+        }
+      }
+
+      // ── Selection list ──────────────────────────────────
+      .selection-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        border: 1px solid @grey20-color;
+        border-radius: 10px;
+        overflow: hidden;
+
+        .selection-item {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 14px 16px;
+          cursor: pointer;
+          transition: background-color 0.15s;
+          border-bottom: 1px solid @grey20-color;
+
+          &:last-child {
+            border-bottom: none;
+          }
+
+          &:hover {
+            background-color: @grey5-color;
+
+            .item-chevron {
+              color: @primary-color;
+              transform: translateX(3px);
+            }
+          }
+
+          .item-icon {
+            font-size: 18px;
+            color: @grey40-color;
+            flex-shrink: 0;
+          }
+
+          .item-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0;
+          }
+
+          .item-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: @grey80-color;
+          }
+
+          .item-key {
+            font-size: 12px;
+            color: @grey40-color;
+          }
+
+          .item-chevron {
+            font-size: 12px;
+            color: @grey40-color;
+            transition: color 0.15s, transform 0.15s;
+          }
+
+          &.item-loading {
+            cursor: default;
+            background-color: @grey5-color;
+          }
+
+          &.item-disabled {
+            cursor: default;
+            opacity: 0.45;
+            pointer-events: none;
+          }
+        }
+      }
+
+      // ── Zero organizations ──────────────────────────────
+      .zero-org {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 32px 16px;
+
+        .zero-org-icon {
+          font-size: 40px;
+          color: @yellow55-color;
+          margin-bottom: 16px;
+        }
+
+        .zero-org-title {
+          font-size: 18px;
+          font-weight: 500;
+          color: @grey80-color;
+          margin: 0 0 8px;
+        }
+
+        .zero-org-message {
+          font-size: 13px;
+          color: @grey50-color;
+          line-height: 1.6;
+        }
+      }
+
+      // ── Back button ─────────────────────────────────────
+      .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 20px;
+        padding: 0;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 13px;
+        color: @grey50-color;
+        transition: color 0.15s;
+
+        &:hover {
+          color: @primary-color;
+        }
+      }
+    }
+
+    // ── Card footer ───────────────────────────────────────
+    .card-footer {
+      margin-top: 28px;
+      text-align: center;
+
+      a {
+        font-size: 14px;
+        color: @grey50-color;
+        cursor: pointer;
+        transition: color 0.15s;
+
+        &:hover {
+          color: @primary-color;
+        }
+      }
+    }
+  }
+}

@@ -48,7 +48,6 @@ export interface IProfile {
   id: string;
   email: string;
   name: string;
-  workspaceId: string;
   origin: UserOriginEnum;
 }
 
@@ -98,7 +97,8 @@ export interface WorkspaceSubscription {
     billingCycle: string;
     addOnFeatures: string[];
     effectiveAt: Date;
-  }
+  };
+  isLocal: boolean;
 }
 
 export interface IOrganizationPermissions {

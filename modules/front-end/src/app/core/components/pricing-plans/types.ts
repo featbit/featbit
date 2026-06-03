@@ -62,7 +62,8 @@ export const EMPTY_SUBSCRIPTION: WorkspaceSubscription = {
   price: 0,
   billingCycle: 'month',
   currentPeriodStart: new Date(),
-  currentPeriodEnd: new Date()
+  currentPeriodEnd: new Date(),
+  isLocal: true
 };
 
 export enum UpdateAction {
