@@ -585,7 +585,7 @@
           <context context-type="linenumber">86,87</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/index/flag-references-modal.ts</context>
+          <context context-type="sourcefile">src/app/features/safe/segments/flag-references-modal.ts</context>
           <context context-type="linenumber">44,45</context>
         </context-group>
         <target>确认</target>
@@ -11118,7 +11118,7 @@
       <trans-unit id="segment.details.not-in-this-environment" datatype="html">
         <source>(not in this environment)</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/index/flag-references-modal.ts</context>
+          <context context-type="sourcefile">src/app/features/safe/segments/flag-references-modal.ts</context>
           <context context-type="linenumber">32,35</context>
         </context-group>
         <target>（不在当前环境）</target>
@@ -11126,7 +11126,7 @@
       <trans-unit id="segment.index.flag-references-modal-empty" datatype="html">
         <source>No feature flags are referencing this segment.</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/index/flag-references-modal.ts</context>
+          <context context-type="sourcefile">src/app/features/safe/segments/flag-references-modal.ts</context>
           <context context-type="linenumber">38,42</context>
         </context-group>
         <target>没有开关引用此用户组。</target>
