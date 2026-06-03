@@ -26,28 +26,26 @@
       flex-direction: row;
       justify-content: space-between;
       align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
       margin-bottom: 16px;
 
-      .references {
-        height: 35px;
-        padding: 0 24px;
-        text-align: center;
-        border: 1px solid @grey20-color;
-        line-height: 35px;
-        border-radius: 18px;
+      .flag-references-tip {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        border: 1px solid #EAECEE;
+        border-radius: 8px;
+        color: @grey50-color;
+        font-size: 13px;
+        padding: 5px 10px;
+        cursor: pointer;
+        transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
 
-        a {
-          color: @grey50-color;
-
-          .reference-count {
-            font-weight: 800;
-            display: inline-block;
-            margin: 0 3px;
-          }
-
-          .anticon-down {
-            margin-left: 4px;
-          }
+        &:hover {
+          border-color: @grey30-color;
+          background: @grey10-color;
+          color: @grey70-color;
         }
       }
 
