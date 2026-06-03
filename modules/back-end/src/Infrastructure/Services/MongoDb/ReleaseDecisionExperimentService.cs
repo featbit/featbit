@@ -50,6 +50,25 @@ public class ReleaseDecisionExperimentService(MongoDbClient mongoDb) : IReleaseD
         return ToDetailVm(doc);
     }
 
+    public async Task DeleteAsync(Guid envId, Guid id)
+    {
+        var filter = Builders<BsonDocument>.Filter.And(
+            Builders<BsonDocument>.Filter.Eq("_id", id),
+            Builders<BsonDocument>.Filter.Eq("featBitEnvId", envId));
+
+        var result = await mongoDb.CollectionOf("ReleaseDecisionExperiments")
+            .DeleteOneAsync(filter);
+
+        if (result.DeletedCount == 0)
+        {
+            throw new EntityNotFoundException(nameof(ReleaseDecisionExperiment), $"{envId}-{id}");
+        }
+
+        var experimentFilter = Builders<BsonDocument>.Filter.Eq("experimentId", id);
+        await mongoDb.CollectionOf("ReleaseDecisionActivities").DeleteManyAsync(experimentFilter);
+        await mongoDb.CollectionOf("ReleaseDecisionMessages").DeleteManyAsync(experimentFilter);
+    }
+
     public async Task<ReleaseDecisionExperimentDetailVm> UpdateAsync(
         Guid envId,
         Guid id,

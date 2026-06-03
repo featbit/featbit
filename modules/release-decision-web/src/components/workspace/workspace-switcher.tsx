@@ -203,9 +203,11 @@ export function WorkspaceSwitcher({
   const {
     organization,
     organizations,
+    workspace,
     projects,
     currentProject,
     currentEnvironment,
+    sessionStatus,
     selectOrganization,
     selectProjectEnv,
   } = useAuth();
@@ -213,10 +215,18 @@ export function WorkspaceSwitcher({
   const [isPending, setPending] = useState(false);
 
   if (organizations.length === 0) {
+    const isLoading =
+      sessionStatus === "checking" || sessionStatus === "unknown";
+    const label = isLoading
+      ? "Loading workspace..."
+      : workspace?.name
+        ? `${workspace.name} / No project context`
+        : "Workspace unavailable";
+
     return (
       <div className={cn("flex items-center gap-1 text-xs text-muted-foreground", className)}>
         <Building2 className="size-3.5" />
-        <span>Loading workspace…</span>
+        <span>{label}</span>
       </div>
     );
   }

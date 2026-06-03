@@ -55,8 +55,10 @@ function contextHeaders(): Record<string, string> {
   const out: Record<string, string> = {};
   const org = authStorage.getOrganization();
   if (org?.id) out["Organization"] = org.id;
+  const workspace = authStorage.getWorkspace();
+  if (workspace?.id) out["Workspace"] = workspace.id;
   const profile = authStorage.getProfile();
-  if (profile?.workspaceId) out["Workspace"] = profile.workspaceId;
+  if (!out["Workspace"] && profile?.workspaceId) out["Workspace"] = profile.workspaceId;
   return out;
 }
 

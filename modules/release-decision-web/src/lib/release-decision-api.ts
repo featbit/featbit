@@ -232,6 +232,13 @@ export async function apiUpdateExperiment(
   );
 }
 
+export async function apiDeleteExperiment(envId: string, id: string) {
+  return apiRequest<boolean>(
+    releaseDecisionExperimentsPath(envId, `/${id}`),
+    { method: "DELETE" },
+  );
+}
+
 export async function apiUpdateExperimentStage(
   envId: string,
   id: string,

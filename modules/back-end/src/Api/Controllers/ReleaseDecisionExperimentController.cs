@@ -46,6 +46,18 @@ public class ReleaseDecisionExperimentController : ApiControllerBase
         return Ok(experiment);
     }
 
+    [HttpDelete("{id:guid}")]
+    public async Task<ApiResponse<bool>> DeleteAsync(Guid envId, Guid id)
+    {
+        await Mediator.Send(new DeleteReleaseDecisionExperiment
+        {
+            EnvId = envId,
+            Id = id
+        });
+
+        return Ok(true);
+    }
+
     [HttpPut("{id:guid}")]
     public async Task<ApiResponse<ReleaseDecisionExperimentDetailVm>> UpdateAsync(
         Guid envId,

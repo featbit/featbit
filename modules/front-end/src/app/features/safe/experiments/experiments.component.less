@@ -1,1 +1,28 @@
 
+.experiment-version-description {
+  margin: 0;
+  color: rgba(0, 0, 0, 0.65);
+  line-height: 1.6;
+}
+
+.experiment-version-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px;
+
+  button {
+    min-width: 184px;
+    height: 40px;
+    padding: 0 20px;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 560px) {
+  .experiment-version-footer {
+    button {
+      width: 100%;
+    }
+  }
+}

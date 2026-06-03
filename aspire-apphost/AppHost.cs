@@ -72,6 +72,7 @@ ConfigureFeatBitOpenTelemetry(evaluationServer, "featbit-els");
 builder
     .AddExecutable("ui", "npm", "../modules/front-end", "run", "start")
     .WithHttpEndpoint(port: 4200, targetPort: 4200, isProxied: false)
+    .WithEnvironment("EXPERIMENT_PAGE_MODE", "allow-switch")
     .WaitFor(apiServer)
     .WaitFor(evaluationServer);
 

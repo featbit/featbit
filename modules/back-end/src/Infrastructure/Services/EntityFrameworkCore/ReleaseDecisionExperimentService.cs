@@ -44,6 +44,21 @@ public class ReleaseDecisionExperimentService(
         return ToDetailVm(experiment);
     }
 
+    public async Task DeleteAsync(Guid envId, Guid id)
+    {
+        var experiment = await dbContext.Set<ReleaseDecisionExperiment>()
+            .AsTracking()
+            .FirstOrDefaultAsync(x => x.Id == id && x.FeatBitEnvId == envId);
+
+        if (experiment == null)
+        {
+            throw new EntityNotFoundException(nameof(ReleaseDecisionExperiment), $"{envId}-{id}");
+        }
+
+        dbContext.Set<ReleaseDecisionExperiment>().Remove(experiment);
+        await dbContext.SaveChangesAsync();
+    }
+
     public async Task<ReleaseDecisionExperimentDetailVm> UpdateAsync(
         Guid envId,
         Guid id,

@@ -191,6 +191,20 @@ export async function updateExperimentStage(id: string, stage: string) {
   return detail;
 }
 
+export async function deleteExperiment(id: string) {
+  const envId = requireEnvId();
+  await apiRequest<boolean>(path(envId, `/${id}`), {
+    method: "DELETE",
+  });
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(
+      new CustomEvent(EXPERIMENT_UPDATED_EVENT, {
+        detail: null,
+      }),
+    );
+  }
+}
+
 export async function createExperimentRun(experimentId: string) {
   const envId = requireEnvId();
   const experiment = await apiRequest<ReleaseDecisionExperimentDetail>(

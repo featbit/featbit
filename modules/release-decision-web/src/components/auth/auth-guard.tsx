@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { useAuth } from "@/lib/featbit-auth/auth-context";
 import { appPath } from "@/lib/app-path";
+import { authStorage } from "@/lib/featbit-auth/storage";
 
 function ConnectingSplash({ message }: { message: string }) {
   return (
@@ -23,13 +23,16 @@ function ConnectingSplash({ message }: { message: string }) {
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const { isReady, isAuthenticated, sessionStatus } = useAuth();
-  const router = useRouter();
 
   const shouldRedirect = isReady && sessionStatus === "invalid" && !isAuthenticated;
 
   useEffect(() => {
-    if (shouldRedirect) router.replace("/login");
-  }, [shouldRedirect, router]);
+    if (!shouldRedirect) return;
+
+    const next = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+    authStorage.setLoginRedirectUrl(next);
+    window.location.replace("/login");
+  }, [shouldRedirect]);
 
   if (!isReady || sessionStatus === "checking" || sessionStatus === "unknown") {
     return <ConnectingSplash message="Loading…" />;

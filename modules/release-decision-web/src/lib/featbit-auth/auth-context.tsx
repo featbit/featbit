@@ -45,12 +45,6 @@ interface AuthContextValue {
   selectProjectEnv: (projectId: string, envId: string) => void;
 }
 
-interface MeResponse {
-  profile: Profile | null;
-  organizationId?: string | null;
-  workspaceId?: string | null;
-}
-
 function toProjectEnv(project: Project, env: Environment): ProjectEnv {
   return {
     projectId: project.id,
@@ -75,6 +69,18 @@ function pickProjectEnv(
   const first = projects[0];
   const firstEnv = first.environments?.[0];
   return firstEnv ? toProjectEnv(first, firstEnv) : null;
+}
+
+function pickWorkspace(
+  workspaces: Workspace[],
+  stored: Workspace | null,
+): Workspace | null {
+  if (workspaces.length === 0) return null;
+  if (stored) {
+    const match = workspaces.find((w) => w.id === stored.id);
+    if (match) return match;
+  }
+  return workspaces[0];
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -135,14 +141,25 @@ export function AuthProvider({
       // they don't trigger effect-body render cascades.
       authStorage.setProfile(nextProfile);
 
+      let nextWorkspace: Workspace | null = null;
       try {
-        const ws = await userService.getWorkspace();
-        if (ws) {
-          authStorage.setWorkspace(ws);
-          setWorkspace(ws);
-        }
+        const workspaces = await userService.getWorkspaces();
+        nextWorkspace = pickWorkspace(workspaces, authStorage.getWorkspace());
+        authStorage.setWorkspace(nextWorkspace);
+        setWorkspace(nextWorkspace);
       } catch {
-        /* optional */
+        authStorage.setWorkspace(null);
+        setWorkspace(null);
+      }
+
+      if (!nextWorkspace) {
+        setOrganization(null);
+        setOrganizations([]);
+        setProjects([]);
+        setProjectEnvState(null);
+        authStorage.setProjectEnv(null);
+        setSessionStatus("valid");
+        return;
       }
 
       try {
@@ -181,14 +198,14 @@ export function AuthProvider({
 
     const token = window.localStorage.getItem("token");
     if (!token) {
-      setSessionStatus("invalid");
+      queueMicrotask(() => setSessionStatus("invalid"));
       return;
     }
 
     let cancelled = false;
-    setSessionStatus("checking");
 
     const run = async () => {
+      setSessionStatus("checking");
       const profile = await userService.getProfile();
       if (cancelled) return;
       if (!profile) {

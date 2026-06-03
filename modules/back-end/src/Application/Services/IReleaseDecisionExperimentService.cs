@@ -10,6 +10,8 @@ public interface IReleaseDecisionExperimentService
 
     Task<ReleaseDecisionExperimentDetailVm> GetAsync(Guid envId, Guid id);
 
+    Task DeleteAsync(Guid envId, Guid id);
+
     Task<ReleaseDecisionExperimentDetailVm> UpdateAsync(
         Guid envId,
         Guid id,

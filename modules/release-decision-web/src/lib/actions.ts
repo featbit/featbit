@@ -2,6 +2,7 @@ import {
   createExperiment,
   addMessage,
   createExperimentRun as createExperimentRunAndReturnExperiment,
+  deleteExperiment,
   deleteExperimentRun,
   getExperiment,
   updateExperiment,
@@ -12,10 +13,6 @@ import {
 import {
   type ReleaseDecisionExperimentRunUpdate,
 } from "@/lib/release-decision-api";
-
-async function deleteExperiment(id: string) {
-  throw new Error(`Deleting release-decision experiment ${id} is not supported by FeatBit API yet`);
-}
 
 async function addActivity(
   _experimentId: string,

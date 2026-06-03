@@ -69,7 +69,10 @@ export function ExperimentDetailLayout({
     if (!onExperimentUpdated) return;
 
     const id = setInterval(() => {
-      void onExperimentUpdated();
+      void onExperimentUpdated().catch(() => {
+        // The detail route may become stale after the experiment is deleted.
+        // The owner component handles navigation for that case.
+      });
     }, 15_000);
     return () => clearInterval(id);
   }, [onExperimentUpdated]);

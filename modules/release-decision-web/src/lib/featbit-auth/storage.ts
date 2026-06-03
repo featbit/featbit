@@ -87,7 +87,7 @@ export const authStorage = {
   getWorkspace(): Workspace | null {
     return read<Workspace>(scopedKey(SCOPED_KEY_BASE.workspace, currentUserId()));
   },
-  setWorkspace(workspace: Workspace) {
+  setWorkspace(workspace: Workspace | null) {
     write(scopedKey(SCOPED_KEY_BASE.workspace, currentUserId()), workspace);
   },
 

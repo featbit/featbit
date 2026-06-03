@@ -19,6 +19,7 @@ import { NzSpaceModule } from 'ng-zorro-antd/space';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 import { NzDividerModule } from "ng-zorro-antd/divider";
 import {CoreModule} from "@core/core.module";
+import { NzModalModule } from "ng-zorro-antd/modal";
 
 @NgModule({
   declarations: [
@@ -43,7 +44,8 @@ import {CoreModule} from "@core/core.module";
     NzPopconfirmModule,
     CoreModule,
     ExperimentsRoutingModule,
-    NzDividerModule
+    NzDividerModule,
+    NzModalModule
   ],
   providers: [
   ]

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { ExperimentDetailLayout } from "@/components/experiment/experiment-detail-layout";
 import {
@@ -9,18 +10,36 @@ import {
   type ExperimentDetail,
 } from "@/lib/release-decision-client-data";
 import { useAuth } from "@/lib/featbit-auth/auth-context";
+import { FeatBitApiError } from "@/lib/featbit-auth/http";
+
+function isResourceNotFound(err: unknown) {
+  return (
+    (err instanceof FeatBitApiError && err.status === 404) ||
+    (err instanceof Error && err.message === "ResourceNotFound")
+  );
+}
 
 export function ExperimentDetailClient({ id }: { id: string }) {
+  const router = useRouter();
   const { isAuthenticated, projectEnv, sessionStatus } = useAuth();
   const [experiment, setExperiment] = useState<ExperimentDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const refreshExperiment = useCallback(async () => {
-    const next = await getExperiment(id);
-    setExperiment(next);
-    return next;
-  }, [id]);
+    try {
+      const next = await getExperiment(id);
+      setExperiment(next);
+      return next;
+    } catch (err) {
+      if (isResourceNotFound(err)) {
+        router.replace("/experiments");
+        return null as never;
+      }
+
+      throw err;
+    }
+  }, [id, router]);
 
   useEffect(() => {
     if (!isAuthenticated || !projectEnv) {
@@ -38,6 +57,7 @@ export function ExperimentDetailClient({ id }: { id: string }) {
       })
       .catch((err) => {
         if (!cancelled) {
+          if (isResourceNotFound(err)) return;
           setError(err instanceof Error ? err.message : "Failed to load experiment.");
         }
       })
@@ -52,7 +72,12 @@ export function ExperimentDetailClient({ id }: { id: string }) {
 
   useEffect(() => {
     const handler = (event: Event) => {
-      const next = (event as CustomEvent<ExperimentDetail>).detail;
+      const next = (event as CustomEvent<ExperimentDetail | null>).detail;
+      if (next === null) {
+        router.replace("/experiments");
+        return;
+      }
+
       if (next?.id === id) {
         setExperiment(next);
       }
@@ -60,7 +85,7 @@ export function ExperimentDetailClient({ id }: { id: string }) {
 
     window.addEventListener(EXPERIMENT_UPDATED_EVENT, handler);
     return () => window.removeEventListener(EXPERIMENT_UPDATED_EVENT, handler);
-  }, [id]);
+  }, [id, router]);
 
   if (loading) {
     return (

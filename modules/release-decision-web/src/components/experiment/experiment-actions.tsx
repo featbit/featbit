@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { deleteExperimentAction } from "@/lib/actions";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,7 +23,9 @@ export function ExperimentActions({
   experimentId: string;
   experimentName: string;
 }) {
+  const router = useRouter();
   const [deleting, setDeleting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   return (
     <Dialog>
@@ -38,6 +41,11 @@ export function ExperimentActions({
             will permanently remove the experiment, all experiment runs, and activity
             history. This action cannot be undone.
           </DialogDescription>
+          {error ? (
+            <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+              {error}
+            </p>
+          ) : null}
         </DialogHeader>
         <DialogFooter>
           <DialogClose render={<Button variant="outline" />}>
@@ -48,7 +56,18 @@ export function ExperimentActions({
             disabled={deleting}
             onClick={async () => {
               setDeleting(true);
-              await deleteExperimentAction(experimentId);
+              setError(null);
+
+              try {
+                await deleteExperimentAction(experimentId);
+                router.replace("/experiments");
+                router.refresh();
+              } catch (err) {
+                setError(
+                  err instanceof Error ? err.message : "Failed to delete experiment.",
+                );
+                setDeleting(false);
+              }
             }}
           >
             {deleting ? "Deleting..." : "Delete Experiment"}

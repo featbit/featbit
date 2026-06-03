@@ -12,6 +12,9 @@ export const userService = {
       skipAuth: true,
     });
   },
+  getWorkspaces() {
+    return apiRequest<Workspace[]>("/user/workspaces", { method: "GET" });
+  },
   getWorkspace() {
     return apiRequest<Workspace>("/workspaces", { method: "GET" });
   },

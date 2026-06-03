@@ -206,6 +206,13 @@ public class GetReleaseDecisionExperiment : IRequest<ReleaseDecisionExperimentDe
     public Guid Id { get; set; }
 }
 
+public class DeleteReleaseDecisionExperiment : IRequest<bool>
+{
+    public Guid EnvId { get; set; }
+
+    public Guid Id { get; set; }
+}
+
 public class QueryReleaseDecisionExperimentsHandler(
     IReleaseDecisionExperimentService service)
     : IRequestHandler<QueryReleaseDecisionExperiments, PagedResult<ReleaseDecisionExperimentVm>>
@@ -227,5 +234,18 @@ public class GetReleaseDecisionExperimentHandler(
         CancellationToken cancellationToken)
     {
         return await service.GetAsync(request.EnvId, request.Id);
+    }
+}
+
+public class DeleteReleaseDecisionExperimentHandler(
+    IReleaseDecisionExperimentService service)
+    : IRequestHandler<DeleteReleaseDecisionExperiment, bool>
+{
+    public async Task<bool> Handle(
+        DeleteReleaseDecisionExperiment request,
+        CancellationToken cancellationToken)
+    {
+        await service.DeleteAsync(request.EnvId, request.Id);
+        return true;
     }
 }

@@ -3,6 +3,7 @@ import {
   apiAddMessage,
   apiCreateExperiment,
   apiCreateExperimentRun,
+  apiDeleteExperiment,
   apiDeleteExperimentRun,
   apiGetExperiment,
   apiListExperiments,
@@ -179,9 +180,8 @@ export async function updateExperiment(
 }
 
 export async function deleteExperiment(id: string) {
-  // FeatBit API does not expose experiment deletion yet. Keep the call site
-  // explicit so we do not silently delete from a legacy Prisma table.
-  throw new Error(`Deleting release-decision experiment ${id} is not supported by FeatBit API yet`);
+  const envId = await requireEnvId();
+  await apiDeleteExperiment(envId, id);
 }
 
 export async function updateExperimentStage(id: string, stage: string) {

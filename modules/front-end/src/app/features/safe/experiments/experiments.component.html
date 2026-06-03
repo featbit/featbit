@@ -12,3 +12,28 @@
     </ng-template>
   </nz-tab>
 </nz-tabset>
+
+<nz-modal
+  nzCentered
+  nzTitle="Choose experiment experience"
+  [nzVisible]="showVersionChoice"
+  [nzFooter]="versionChoiceFooter"
+  [nzClosable]="false"
+  [nzMaskClosable]="false">
+  <ng-container *nzModalContent>
+    <p class="experiment-version-description">
+      This environment can use the existing experiment page or the new release decision workspace.
+    </p>
+  </ng-container>
+</nz-modal>
+
+<ng-template #versionChoiceFooter>
+  <div class="experiment-version-footer">
+    <button nz-button nzType="default" (click)="keepOldVersion()">
+      Keep in Old version
+    </button>
+    <button nz-button nzType="primary" (click)="openNewVersion()">
+      Switch to New version
+    </button>
+  </div>
+</ng-template>
