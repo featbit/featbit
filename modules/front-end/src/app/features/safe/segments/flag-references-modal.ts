@@ -1,5 +1,5 @@
 import { Component, EventEmitter, inject, Input, OnInit, Output } from "@angular/core";
-import { ISegmentFlagReference } from "../types/segments";
+import { ISegmentFlagReference } from "./types/segments";
 import { NzModalComponent, NzModalContentDirective, NzModalFooterDirective } from "ng-zorro-antd/modal";
 import { NzButtonComponent } from "ng-zorro-antd/button";
 import { getPathPrefix } from "@utils/index";

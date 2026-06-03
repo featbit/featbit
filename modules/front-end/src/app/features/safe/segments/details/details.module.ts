@@ -28,7 +28,7 @@ import { SettingComponent } from './setting/setting.component';
 import {CoreModule} from "@core/core.module";
 import {AuditLogsComponent} from "@features/safe/segments/details/audit-logs/audit-logs.component";
 import {NzFormModule} from "ng-zorro-antd/form";
-import { FlagReferencesModalComponent } from "@features/safe/segments/index/flag-references-modal";
+import { FlagReferencesModalComponent } from "../flag-references-modal";
 
 @NgModule({
   declarations: [
