@@ -151,15 +151,12 @@ public class Segment : AuditedEntity
 
     public bool IsApplicableToEnv(Guid envId, string envRn)
     {
-        switch (Type)
+        return Type switch
         {
-            case SegmentType.EnvironmentSpecific when EnvId == envId:
-            case SegmentType.Shared when Scopes.Any(scope => RN.IsInScope(envRn, scope)):
-                return true;
-
-            default:
-                return false;
-        }
+            SegmentType.EnvironmentSpecific when EnvId == envId => true,
+            SegmentType.Shared when Scopes.Any(scope => RN.IsInScope(envRn, scope)) => true,
+            _ => false
+        };
     }
 
     public JsonObject SerializeAsEnvironmentSpecific(Guid? envId = null)
