@@ -1,3 +1,8 @@
+\connect featbit
+
+-- https://github.com/featbit/featbit/pull/906
+update environments set settings = '{}'::jsonb where true;
+
 -- https://github.com/featbit/featbit/pull/910
 -- ================================================================
 -- Migration: extract workspace membership out of users table

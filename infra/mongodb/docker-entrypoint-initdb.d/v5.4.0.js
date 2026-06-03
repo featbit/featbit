@@ -1,3 +1,13 @@
+const dbName = "featbit";
+print('use', dbName, 'database')
+db = db.getSiblingDB(dbName)
+
+// https://github.com/featbit/featbit/pull/906
+db.Environments.updateMany(
+    { settings: { $type: "array" } },
+    { $set: { settings: {} } }
+)
+
 // https://github.com/featbit/featbit/pull/910
 // ================================================================
 // Migration: extract workspace membership out of Users collection
