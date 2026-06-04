@@ -279,15 +279,15 @@ function SummaryTab({
 
   return (
     <div className="px-4 pb-6 space-y-4">
-      {/* Chat-first decision helper */}
+      {/* Codex-first decision helper */}
       {onAnalyze && (
         <div className="flex items-center justify-between gap-3 rounded-md border border-dashed px-3 py-2.5 bg-muted/20">
           <div className="flex items-start gap-2 min-w-0">
             <MessageCircle className="size-3.5 mt-0.5 shrink-0 text-muted-foreground" />
             <p className="text-sm text-muted-foreground leading-relaxed">
               {hasDecision
-                ? "A decision is already on file. Click to have chat revisit it against the current analysis and suggest follow-ups."
-                : "Click to have chat read the current analysis and produce an actionable decision recommendation (continue / pause / rollback candidate / inconclusive)."}
+                ? "A decision is already on file. Open a Codex prompt to revisit it against the current analysis and suggest follow-ups."
+                : "Open a Codex prompt to read the current analysis and produce an actionable decision recommendation (continue / pause / rollback candidate / inconclusive)."}
             </p>
           </div>
           <Button
@@ -297,7 +297,7 @@ function SummaryTab({
             onClick={onAnalyze}
           >
             <Bot className="size-3" />
-            Analyze & Decision in Chat
+            Open Codex Prompt
           </Button>
         </div>
       )}
@@ -597,7 +597,7 @@ function AnalysisTab({
           Set up {missingFields.join(", ")} before running analysis.
         </p>
         <p className="text-xs text-muted-foreground/70">
-          Ask the agent in the chat panel to configure these, or edit the
+          Ask Codex to configure these through FeatBit MCP, or edit the
           experiment in the <code>Exposing</code> stage.
         </p>
       </div>

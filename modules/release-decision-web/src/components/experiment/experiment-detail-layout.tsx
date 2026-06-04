@@ -45,7 +45,7 @@ export function ExperimentDetailLayout({
   // toggle on the Settings button can take us back.
   const [prevTab, setPrevTab] = useState<string | null>(null);
   const [rightCollapsed, setRightCollapsed] = useState(false);
-  const [pendingChatMessage, setPendingChatMessage] = useState<string | null>(null);
+  const [suggestedCodexPrompt, setSuggestedCodexPrompt] = useState<string | null>(null);
   const [expertEditOpen, setExpertEditOpen] = useState(false);
   const [switchOpen, setSwitchOpen] = useState(false);
 
@@ -78,7 +78,7 @@ export function ExperimentDetailLayout({
   }, [onExperimentUpdated]);
 
   function triggerChat(message: string) {
-    setPendingChatMessage(message);
+    setSuggestedCodexPrompt(message);
     setRightCollapsed(false);
   }
 
@@ -166,7 +166,7 @@ export function ExperimentDetailLayout({
   );
 
   function handleExpertSaved(summary: string) {
-    setPendingChatMessage(summary);
+    setSuggestedCodexPrompt(summary);
     setActiveTab("measuring");
   }
 
@@ -184,7 +184,7 @@ export function ExperimentDetailLayout({
     );
   }
 
-  // ── Guided and expert modes both render the stage UI + AI chat panel.
+  // ── Guided and expert modes both render the stage UI + Codex MCP guide.
   // The only surface-level difference is the header "Edit setup" button
   // (which opens the expert wizard) rendered above. Data is shared. ──
   return (
@@ -212,10 +212,8 @@ export function ExperimentDetailLayout({
         }
         right={
           <ChatPanel
-            experimentId={experiment.id}
-            messages={experiment.messages}
-            triggerMessage={pendingChatMessage}
-            onTriggerConsumed={() => setPendingChatMessage(null)}
+            experiment={experiment}
+            suggestedPrompt={suggestedCodexPrompt}
           />
         }
       />

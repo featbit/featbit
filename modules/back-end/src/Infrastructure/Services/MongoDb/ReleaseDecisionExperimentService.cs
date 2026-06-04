@@ -50,6 +50,22 @@ public class ReleaseDecisionExperimentService(MongoDbClient mongoDb) : IReleaseD
         return ToDetailVm(doc);
     }
 
+    public async Task<Guid> GetEnvIdAsync(Guid id)
+    {
+        var doc = await mongoDb.CollectionOf("ReleaseDecisionExperiments")
+            .Find(Builders<BsonDocument>.Filter.Eq("_id", id))
+            .Project(Builders<BsonDocument>.Projection.Include("featBitEnvId"))
+            .FirstOrDefaultAsync();
+
+        var envId = doc == null ? null : GetNullableGuid(doc, "featBitEnvId");
+        if (!envId.HasValue)
+        {
+            throw new EntityNotFoundException(nameof(ReleaseDecisionExperiment), id.ToString());
+        }
+
+        return envId.Value;
+    }
+
     public async Task DeleteAsync(Guid envId, Guid id)
     {
         var filter = Builders<BsonDocument>.Filter.And(

@@ -194,7 +194,7 @@ function SettingsContent({
         </div>
         <div className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-3 space-y-3">
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Deleting an experiment permanently removes its runs, activity, and chat history. This cannot be undone.
+            Deleting an experiment permanently removes its runs, activity, and message history. This cannot be undone.
           </p>
           <ExperimentActions experimentId={experiment.id} experimentName={experiment.name} />
         </div>
@@ -314,7 +314,7 @@ function FlagAndExperimentSection({
   const experimentRuns = experiment.experimentRuns;
   const { sorted } = sortAndDetectSequential(experimentRuns);
 
-  // Full-screen edit panels replace stage content so the right-side chat agent
+  // Full-screen edit panels replace stage content so the right-side Codex guide
   // stays visible (vs a Sheet overlay that would cover it).
   const [flagPanelOpen, setFlagPanelOpen] = useState(false);
   const [metricsPanelOpen, setMetricsPanelOpen] = useState(false);

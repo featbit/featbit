@@ -24,17 +24,17 @@ const STAGE_FIELDS: Record<
   intent: {
     fields: ["goal", "intent"],
     icon: <Target className="size-4" />,
-    hint: "The sandbox agent will use intent-shaping (CF-01) to help you extract a clear, measurable business goal from your idea.",
+    hint: "Codex can use intent-shaping (CF-01) through FeatBit MCP to help you extract a clear, measurable business goal from your idea.",
   },
   hypothesis: {
     fields: ["goal", "intent", "hypothesis", "change"],
     icon: <Lightbulb className="size-4" />,
-    hint: 'The sandbox agent will use hypothesis-design (CF-02) to form a falsifiable claim: "We believe [change] will [move metric] for [audience], because [reason]."',
+    hint: 'Codex can use hypothesis-design (CF-02) through FeatBit MCP to form a falsifiable claim: "We believe [change] will [move metric] for [audience], because [reason]."',
   },
   implementing: {
     fields: ["goal", "hypothesis", "change", "primaryMetric"],
     icon: <FlaskConical className="size-4" />,
-    hint: "The sandbox agent will use reversible-exposure-control (CF-03/04) to create a feature flag, set rollout %, define targeting rules, and manage traffic exposure.",
+    hint: "Codex can use reversible-exposure-control (CF-03/04) through FeatBit MCP to create a feature flag, set rollout %, define targeting rules, and manage traffic exposure.",
   },
   measuring: {
     fields: [
@@ -44,12 +44,12 @@ const STAGE_FIELDS: Record<
       "guardrails",
     ],
     icon: <BarChart3 className="size-4" />,
-    hint: "The sandbox agent will use measurement-design (CF-05) + experiment-workspace to collect data, run Bayesian analysis, and frame a decision: CONTINUE, PAUSE, ROLLBACK, or INCONCLUSIVE.",
+    hint: "Codex can use measurement-design (CF-05) + experiment-workspace through FeatBit MCP to collect data, run Bayesian analysis, and frame a decision: CONTINUE, PAUSE, ROLLBACK, or INCONCLUSIVE.",
   },
   learning: {
     fields: ["goal", "hypothesis", "primaryMetric"],
     icon: <Lightbulb className="size-4" />,
-    hint: "The sandbox agent will use learning-capture (CF-08) to produce a 5-part structured learning and seed the next cycle.",
+    hint: "Codex can use learning-capture (CF-08) through FeatBit MCP to produce a 5-part structured learning and seed the next cycle.",
   },
 };
 

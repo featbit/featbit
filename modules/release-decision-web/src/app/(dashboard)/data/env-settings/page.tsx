@@ -2,7 +2,6 @@
 
 import { useAuth } from "@/lib/featbit-auth/auth-context";
 import { EnvSecretCard } from "@/components/env-settings/env-secret-card";
-import { ConnectorUrlCard } from "@/components/env-settings/connector-url-card";
 import {
   Card,
   CardContent,
@@ -76,29 +75,6 @@ export default function EnvSettingsPage() {
           </CardHeader>
           <CardContent>
             <EnvSecretCard bare />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Local Claude Code connector URL</CardTitle>
-            <CardDescription>
-              Where the chat panel reaches{" "}
-              <code>npx @featbit/experimentation-claude-code-connector</code>{" "}
-              when you use the <strong>Local Claude Code</strong> agent mode.
-              Default is <code>http://127.0.0.1:3100</code>; override if you
-              start the connector on a different port (e.g. when 3100 is
-              already taken on your machine).
-              <br />
-              <span className="text-amber-700 dark:text-amber-500 font-medium">
-                Stored in this browser&apos;s localStorage only — not synced
-                to the server, not tied to project / environment / workspace,
-                not shared with other users or other browsers on your machine.
-              </span>
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ConnectorUrlCard />
           </CardContent>
         </Card>
       </div>

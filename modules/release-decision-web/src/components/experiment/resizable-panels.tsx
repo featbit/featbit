@@ -15,8 +15,10 @@ const SPLITTER_WIDTH = 32;
 interface ResizablePanelsProps {
   left: ReactNode;
   right: ReactNode;
-  /** Initial width of the left panel in pixels (default 600) */
+  /** Initial width of the left panel in pixels. If omitted, defaultLeftRatio is used. */
   defaultLeftWidth?: number;
+  /** Initial left-panel share of the available width (default 5:3 left:right). */
+  defaultLeftRatio?: number;
   /** Minimum width for each panel in pixels */
   minWidth?: number;
   /** Controlled right-panel collapse state (optional) */
@@ -27,13 +29,14 @@ interface ResizablePanelsProps {
 export function ResizablePanels({
   left,
   right,
-  defaultLeftWidth = 600,
+  defaultLeftWidth,
+  defaultLeftRatio = 5 / 8,
   minWidth = 280,
   rightCollapsed: rightCollapsedProp,
   onRightCollapsedChange,
 }: ResizablePanelsProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [leftWidth, setLeftWidth] = useState(defaultLeftWidth);
+  const [leftWidth, setLeftWidth] = useState(defaultLeftWidth ?? 960);
   const [isDragging, setIsDragging] = useState(false);
   const [leftCollapsed, setLeftCollapsed] = useState(false);
   const [_rightCollapsed, _setRightCollapsed] = useState(false);
@@ -49,7 +52,28 @@ export function ResizablePanels({
   }
 
   // Store width before collapse so we can restore it
-  const savedLeftWidth = useRef(defaultLeftWidth);
+  const savedLeftWidth = useRef(defaultLeftWidth ?? 960);
+  const measuredDefault = useRef(Boolean(defaultLeftWidth));
+
+  useEffect(() => {
+    if (measuredDefault.current) return;
+
+    const container = containerRef.current;
+    if (!container) return;
+
+    const rect = container.getBoundingClientRect();
+    if (rect.width <= 0) return;
+
+    const available = rect.width - SPLITTER_WIDTH;
+    const nextWidth = Math.max(
+      minWidth,
+      Math.min(available * defaultLeftRatio, available - minWidth),
+    );
+
+    setLeftWidth(nextWidth);
+    savedLeftWidth.current = nextWidth;
+    measuredDefault.current = true;
+  }, [defaultLeftRatio, minWidth]);
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
@@ -154,7 +178,7 @@ export function ResizablePanels({
               onClick={toggleRight}
               onMouseDown={(e) => e.stopPropagation()}
               className="flex size-6 items-center justify-center border-t border-border/70 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground cursor-pointer"
-              title="Collapse chat"
+              title="Collapse Codex guide"
             >
               <PanelRightClose className="size-3.5" />
             </button>
@@ -168,14 +192,14 @@ export function ResizablePanels({
           <button
             onClick={toggleRight}
             className="p-1.5 rounded hover:bg-muted text-muted-foreground cursor-pointer"
-            title="Show chat"
+            title="Show Codex guide"
           >
             <PanelRightOpen className="size-4" />
           </button>
         </div>
       )}
 
-      {/* ── Right panel: keep mounted while collapsed so agent session state survives. ── */}
+      {/* ── Right panel: keep mounted while collapsed so guide state survives. ── */}
       <div
         aria-hidden={rightCollapsed}
         className={cn(

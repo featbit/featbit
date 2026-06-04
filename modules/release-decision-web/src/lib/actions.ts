@@ -1,6 +1,5 @@
 import {
   createExperiment,
-  addMessage,
   createExperimentRun as createExperimentRunAndReturnExperiment,
   deleteExperiment,
   deleteExperimentRun,
@@ -24,13 +23,6 @@ async function addActivity(
 async function createExperimentRun(experimentId: string) {
   const experiment = await createExperimentRunAndReturnExperiment(experimentId);
   return experiment.experimentRuns[0] ?? null;
-}
-
-async function getMessagesAfter(experimentId: string, after: Date | null) {
-  const experiment = await getExperiment(experimentId);
-  return after
-    ? experiment.messages.filter((message) => message.createdAt.getTime() > after.getTime())
-    : experiment.messages;
 }
 
 function normalizeMetricType(value: unknown): "binary" | "continuous" {
@@ -257,112 +249,6 @@ export async function advanceStageAction(experimentId: string, stage: string) {
   return;
 }
 
-export async function activateSandboxAction(experimentId: string) {
-  // TODO: integrate with real sandbox API
-  await updateExperiment(experimentId, {
-    sandboxStatus: "running",
-    sandboxId: `sandbox-${Date.now()}`,
-  });
-
-  await addActivity(experimentId, {
-    type: "sandbox_event",
-    title: "Sandbox activated",
-    detail: "Remote Claude Code sandbox started for this experiment",
-  });
-
-  return;
-}
-
-export async function sendMessageAction(experimentId: string, content: string) {
-  if (!content || content.trim().length === 0) return;
-
-  await addMessage(experimentId, {
-    role: "user",
-    content: content.trim(),
-  });
-
-  const experiment = await getExperiment(experimentId);
-
-  await addMessage(experimentId, {
-    role: "assistant",
-    content: `I received your message. The experiment is currently in the **${experiment?.stage ?? "hypothesis"}** stage. Agent integration is coming soon — I will be able to help you shape intent, design hypotheses, set up experiment runs, and analyze results.`,
-  });
-
-  await addActivity(experimentId, {
-    type: "note",
-    title: "Conversation message",
-    detail: content.trim().slice(0, 120),
-  });
-
-  return;
-}
-
-/**
- * Persist a user+assistant message pair from an SSE stream to the database.
- * Called by ChatPanel after each sandbox stream completes.
- * Best-effort — silently skips if experiment no longer exists.
- *
- * Returns the ISO timestamp of the latest persisted row so the caller can
- * advance its local sync cursor without an extra round-trip.
- */
-export async function persistMessagesAction(
-  experimentId: string,
-  userContent: string,
-  assistantContent: string,
-): Promise<{ latestCreatedAt: string | null }> {
-  try {
-    const experiment = await getExperiment(experimentId);
-    if (!experiment) return { latestCreatedAt: null };
-
-    let latest: Date | null = null;
-    if (userContent) {
-      const row = await addMessage(experimentId, { role: "user", content: userContent });
-      latest = row.createdAt;
-    }
-    if (assistantContent) {
-      const row = await addMessage(experimentId, {
-        role: "assistant",
-        content: assistantContent,
-      });
-      latest = row.createdAt;
-    }
-    return { latestCreatedAt: latest ? latest.toISOString() : null };
-  } catch {
-    // Persistence is best-effort — SSE chat works regardless
-    console.warn(`[persistMessages] Failed for experiment ${experimentId}`);
-    return { latestCreatedAt: null };
-  }
-}
-
-/**
- * Fetch messages persisted after the given cursor. Used by the local-agent
- * chat hook to compute the "delta" that must be prepended to the next prompt
- * so the local Claude Code session stays in sync with anything other users
- * (or earlier sessions on this account) wrote to the DB.
- *
- * `afterIso` is the createdAt of the most recent message the caller has
- * already shown the agent — pass `null` to get the full history.
- */
-export async function fetchMessagesAfterAction(
-  experimentId: string,
-  afterIso: string | null,
-): Promise<{
-  messages: Array<{ id: string; role: string; content: string; createdAt: string }>;
-  latestCreatedAt: string | null;
-}> {
-  const after = afterIso ? new Date(afterIso) : null;
-  const rows = await getMessagesAfter(experimentId, after);
-  return {
-    messages: rows.map((m) => ({
-      id: m.id,
-      role: m.role,
-      content: m.content,
-      createdAt: m.createdAt.toISOString(),
-    })),
-    latestCreatedAt: rows.length > 0 ? rows[rows.length - 1].createdAt.toISOString() : null,
-  };
-}
-
 export async function updateExperimentRunAudienceAction(formData: FormData) {
   const experimentRunId = formData.get("experimentRunId") as string;
   const experimentId = formData.get("experimentId") as string;
@@ -452,7 +338,7 @@ export async function updateExperimentRunObservationWindowAction(
 }
 
 /**
- * Pick "guided" (AI-chat) or "expert" (self-configured) entry mode for a new
+ * Pick "guided" (Codex-assisted) or "expert" (self-configured) entry mode for a new
  * experiment. Called from the entry-mode picker; expert mode records the
  * selection only after the wizard is submitted via saveExpertSetupAction.
  */
@@ -466,7 +352,7 @@ export async function selectEntryModeAction(
   await updateExperiment(experimentId, { entryMode: mode });
   await addActivity(experimentId, {
     type: "stage_change",
-    title: mode === "guided" ? "Started guided (AI chat) setup" : "Started expert setup",
+    title: mode === "guided" ? "Started guided Codex setup" : "Started expert setup",
   });
   return;
 }

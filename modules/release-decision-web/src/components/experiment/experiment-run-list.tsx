@@ -50,15 +50,15 @@ export function ExperimentRunList({
         <div className="flex items-center justify-between">
           <CardTitle className="text-base">Experiment Runs</CardTitle>
           <span className="text-xs text-muted-foreground">
-            Created by sandbox agent
+            Managed through FeatBit MCP
           </span>
         </div>
       </CardHeader>
       <CardContent>
         {experimentRuns.length === 0 ? (
           <p className="text-sm text-muted-foreground py-4 text-center">
-            No experiment runs yet. The sandbox agent will create experiment runs when
-            the experiment reaches the measuring stage.
+            No experiment runs yet. Codex can create experiment runs through
+            FeatBit MCP when the experiment reaches the measuring stage.
           </p>
         ) : (
           <div className="space-y-3">

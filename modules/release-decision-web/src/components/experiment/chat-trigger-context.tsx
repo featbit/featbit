@@ -3,8 +3,8 @@
 import { createContext, useContext } from "react";
 
 /**
- * Provides a callback that triggers the right-panel ChatPanel to send a
- * pre-built message. Usage:
+ * Provides a callback that opens the right-panel Codex guide with a pre-built
+ * prompt. Usage:
  *
  *   const triggerChat = useChatTrigger();
  *   triggerChat("Analyze experiment X and give a deciding conclusion.");

@@ -446,7 +446,7 @@ export function MetricEditDialog({ experiment }: { experiment: Experiment }) {
 /**
  * Inline panel version — replaces stage content while editing metrics. Parent
  * controls open/close state; close button returns user to the summary view.
- * Mirrors the FlagIntegrationPanel UX so Measure / chat panel on the right
+ * Mirrors the FlagIntegrationPanel UX so Measure / Codex guide on the right
  * stays visible.
  */
 export function MetricEditPanel({

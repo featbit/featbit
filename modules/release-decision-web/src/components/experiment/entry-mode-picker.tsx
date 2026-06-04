@@ -17,7 +17,7 @@ type Mode = "guided" | "expert";
 
 /**
  * Choice screen rendered when an experiment has no entryMode yet.
- * Mode 1 (guided) → AI-chat walks user through the full decision framework.
+ * Mode 1 (guided) → Codex-assisted workflow walks user through the full decision framework.
  * Mode 2 (expert) → user fills algorithm / metrics / priors directly.
  */
 export function EntryModePicker({
@@ -144,8 +144,8 @@ function ModeCards({
       <div className="grid gap-4 md:grid-cols-2">
         <ModeCard
           title="Guide me with AI"
-          subtitle="Chat-driven setup"
-          description="Reopen the agent chat to shape intent, design a hypothesis, or adjust metrics step by step."
+          subtitle="Codex-assisted setup"
+          description="Use the Codex guide to shape intent, design a hypothesis, or adjust metrics step by step."
           icon={<Bot className="size-5" />}
           cta={currentMode === "guided" ? "Currently active" : "Use guided mode"}
           active={currentMode === "guided"}

@@ -2,6 +2,7 @@ using Api.Authentication;
 using Api.Authentication.OAuth;
 using Api.Authentication.OpenIdConnect;
 using Api.Authorization;
+using Api.Mcp;
 using Api.Swagger;
 using Application.Services;
 using Domain.Workspaces;
@@ -26,6 +27,12 @@ public static class ServicesRegister
 
         // add services for controllers
         builder.Services.AddControllers();
+        builder.Services.AddHttpContextAccessor();
+        builder.Services.AddSingleton<McpDeviceAuthorizationStore>();
+        builder.Services
+            .AddMcpServer()
+            .WithHttpTransport(options => options.Stateless = true)
+            .WithToolsFromAssembly();
 
         // make all generated paths URLs are lowercase
         builder.Services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
