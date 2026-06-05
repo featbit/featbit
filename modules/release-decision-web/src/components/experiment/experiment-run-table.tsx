@@ -75,6 +75,45 @@ const DECISION_COLORS: Record<string, string> = {
     "bg-gray-100 text-gray-700 dark:bg-gray-800/40 dark:text-gray-300",
 };
 
+const DECISION_DETAILS: Record<
+  string,
+  {
+    title: string;
+    action: string;
+    note: string;
+    icon: React.ReactNode;
+  }
+> = {
+  CONTINUE: {
+    title: "Continue: ship the treatment",
+    action:
+      "Move the feature flag toward the treatment variant. If no rollout constraints remain, set treatment to 100%; otherwise expand in monitored steps such as 50% -> 80% -> 100%.",
+    note: "Use when the primary metric is clearly positive and guardrails are acceptable.",
+    icon: <Flag className="size-4" />,
+  },
+  PAUSE: {
+    title: "Pause: hold the rollout",
+    action:
+      "Do not increase traffic yet. Keep the current split, or reduce exposure if needed, while investigating the metric, guardrail, SRM, or instrumentation issue.",
+    note: "Use when there is a signal, but it is not clean enough to expand.",
+    icon: <Info className="size-4" />,
+  },
+  ROLLBACK: {
+    title: "Rollback: stop the candidate",
+    action:
+      "Route users back to the control/default variant, or disable the candidate flag path, then investigate before exposing it again.",
+    note: "Use when the candidate appears harmful or a protected metric regressed.",
+    icon: <X className="size-4" />,
+  },
+  INCONCLUSIVE: {
+    title: "Inconclusive: keep observing",
+    action:
+      "Do not change rollout because of this run. Extend the observation window, collect the required sample, or fix instrumentation before deciding.",
+    note: "Use when the evidence is not strong or clean enough for a rollout decision.",
+    icon: <RefreshCw className="size-4" />,
+  },
+};
+
 /* ── Shared primitive components ── */
 
 function SectionLabel({
@@ -133,6 +172,81 @@ function DecisionBadge({ decision }: { decision: string | null }) {
   const color = DECISION_COLORS[decision] ?? "";
   return (
     <Badge className={`text-[10px] px-1.5 py-0 ${color}`}>{decision}</Badge>
+  );
+}
+
+function DecisionCallout({ run }: { run: ExperimentRun }) {
+  if (!run.decisionSummary) {
+    return null;
+  }
+
+  const decision = run.decision ?? "";
+  const detail = DECISION_DETAILS[decision];
+  const bg = DECISION_BG[decision] ?? "bg-muted/30 border-border";
+
+  return (
+    <div className={cn("rounded-md border px-3 py-3", bg)}>
+      {detail && (
+        <div className="mb-2.5 flex items-start gap-2">
+          <div className="mt-0.5 text-foreground/80">{detail.icon}</div>
+          <div className="min-w-0 space-y-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="text-sm font-semibold leading-snug text-foreground">
+                {detail.title}
+              </p>
+              <DecisionBadge decision={decision} />
+            </div>
+            <p className="text-sm leading-relaxed text-foreground">
+              {detail.action}
+            </p>
+            <p className="text-xs leading-relaxed text-muted-foreground">
+              {detail.note}
+            </p>
+          </div>
+        </div>
+      )}
+      <div className={detail ? "border-t border-current/10 pt-2" : undefined}>
+        <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+          Evidence Summary
+        </p>
+        <p className="text-sm font-medium leading-relaxed text-foreground">
+          {run.decisionSummary}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function CollapsibleRationale({ children }: { children: string }) {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <div className="space-y-1">
+      <p
+        className="text-sm leading-relaxed text-muted-foreground"
+        style={
+          expanded
+            ? undefined
+            : {
+                display: "-webkit-box",
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
+              }
+        }
+      >
+        {children}
+      </p>
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        className="h-6 px-0 text-xs text-muted-foreground hover:bg-transparent hover:text-foreground"
+        onClick={() => setExpanded((value) => !value)}
+      >
+        {expanded ? "Show less" : "Show more"}
+      </Button>
+    </div>
   );
 }
 
@@ -312,15 +426,7 @@ function SummaryTab({
       )}
 
       {/* Decision callout */}
-      {exp.decisionSummary && (
-        <div
-          className={`rounded-md border px-3 py-2.5 ${DECISION_BG[exp.decision ?? ""] ?? "bg-muted/30 border-border"}`}
-        >
-          <p className="text-sm font-medium leading-relaxed">
-            {exp.decisionSummary}
-          </p>
-        </div>
-      )}
+      <DecisionCallout run={exp} />
 
       {/* Technical rationale */}
       {exp.decisionReason && (
@@ -329,9 +435,7 @@ function SummaryTab({
             icon={<Target className="size-3" />}
             label="Technical Rationale"
           />
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            {exp.decisionReason}
-          </p>
+          <CollapsibleRationale>{exp.decisionReason}</CollapsibleRationale>
         </div>
       )}
 
@@ -796,12 +900,12 @@ function buildDecisionPrompt({
     "2. Inspect the selected run, current analysisResult, observation window, primary metric, guardrails, minimum sample, SRM result, and risk values.",
     "3. If analysis is missing or clearly unusable, call featbit_release_decision_analyze_run for this run with forceFresh=true, then read the refreshed experiment. If the refreshed analysisResult is only a stats_ready/raw-stats summary, do not make a rollout decision; report the analyzer mismatch.",
     "4. Apply evidence-analysis. Pick exactly one API decision value: CONTINUE, PAUSE, ROLLBACK, or INCONCLUSIVE. If the skill frames it as ROLLBACK CANDIDATE, persist ROLLBACK.",
-    "5. Call featbit_release_decision_update_run for this run and write decision, decisionSummary, decisionReason, and status=\"decided\".",
+    "5. Call featbit_release_decision_update_run for this run and write decision, decisionSummary, decisionReason, and status=\"decided\". decisionSummary must start with a plain-language feature-flag action: for CONTINUE say whether to move treatment to 100% or expand gradually; for PAUSE say hold the current rollout; for ROLLBACK say route users back to control/default; for INCONCLUSIVE say keep observing or fix measurement before changing rollout.",
     "6. Call featbit_release_decision_update_experiment with lastAction=\"Decision: <category>\". Do not move the stage to learning unless learning-capture is explicitly requested.",
     "7. Optionally call featbit_release_decision_add_message with a short assistant summary of what was decided and why.",
     "",
     decisionMode,
-    "Tie the decision back to the hypothesis, quote concrete metric numbers from the analysis, call out guardrail or instrumentation risks, and finish with the next action the product team should take.",
+    "Tie the decision back to the hypothesis, quote concrete metric numbers from the analysis, call out guardrail or instrumentation risks, and finish with the exact next feature-flag action the product team should take.",
     "After writing through MCP, tell me what fields you updated so the UI can refresh and show the result.",
   ].join("\n");
 }
