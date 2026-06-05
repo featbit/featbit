@@ -12,6 +12,9 @@ import {
   Beaker,
   Bot,
   Calendar,
+  Check,
+  ClipboardList,
+  Copy,
   Filter,
   Flag,
   Info,
@@ -28,13 +31,19 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { appPath } from "@/lib/app-path";
 import { authStorage } from "@/lib/featbit-auth/storage";
 import { AnalysisView } from "./analysis-markdown";
 import { ExperimentRunTrafficConfig } from "./experiment-run-traffic-config";
-import { useChatTrigger } from "./chat-trigger-context";
 import {
   createNewExperimentRunAction,
   deleteExperimentRunAction,
@@ -268,36 +277,36 @@ function ObservationWindowInline({
 
 function SummaryTab({
   exp,
-  onAnalyze,
+  onOpenAgentPrompt,
   analysisPanel,
 }: {
   exp: ExperimentRun;
-  onAnalyze?: () => void;
+  onOpenAgentPrompt?: () => void;
   analysisPanel?: React.ReactNode;
 }) {
   const hasDecision = Boolean(exp.decision);
 
   return (
     <div className="px-4 pb-6 space-y-4">
-      {/* Codex-first decision helper */}
-      {onAnalyze && (
+      {/* Coding-agent decision helper */}
+      {onOpenAgentPrompt && (
         <div className="flex items-center justify-between gap-3 rounded-md border border-dashed px-3 py-2.5 bg-muted/20">
           <div className="flex items-start gap-2 min-w-0">
             <MessageCircle className="size-3.5 mt-0.5 shrink-0 text-muted-foreground" />
             <p className="text-sm text-muted-foreground leading-relaxed">
               {hasDecision
-                ? "A decision is already on file. Open a Codex prompt to revisit it against the current analysis and suggest follow-ups."
-                : "Open a Codex prompt to read the current analysis and produce an actionable decision recommendation (continue / pause / rollback candidate / inconclusive)."}
+                ? "A decision is already on file. Ask a coding agent to revisit it against the latest analysis, update this run, and suggest follow-ups."
+                : "Ask a coding agent to refresh the latest data, evaluate the evidence, and write an actionable decision back to this run."}
             </p>
           </div>
           <Button
             variant="outline"
             size="sm"
             className="h-7 text-[11px] px-2.5 shrink-0 gap-1"
-            onClick={onAnalyze}
+            onClick={onOpenAgentPrompt}
           >
             <Bot className="size-3" />
-            Open Codex Prompt
+            Agent Decision Prompt
           </Button>
         </div>
       )}
@@ -714,6 +723,192 @@ function TrafficTab({
   );
 }
 
+type AgentId = "codex" | "claude" | "opencode" | "copilot" | "generic";
+
+const AGENT_OPTIONS: { id: AgentId; label: string; help: string }[] = [
+  {
+    id: "codex",
+    label: "Codex",
+    help: "Copy prompt text into your current Codex conversation.",
+  },
+  {
+    id: "claude",
+    label: "Claude Code",
+    help: "Copy prompt text for Claude Code.",
+  },
+  {
+    id: "opencode",
+    label: "OpenCode",
+    help: "Copy prompt text for OpenCode.",
+  },
+  {
+    id: "copilot",
+    label: "Copilot CLI",
+    help: "Copy prompt text for Copilot CLI.",
+  },
+  {
+    id: "generic",
+    label: "Generic MCP",
+    help: "Copy prompt text for any MCP-capable coding agent.",
+  },
+];
+
+function buildDecisionPrompt({
+  agent,
+  experimentId,
+  run,
+}: {
+  agent: AgentId;
+  experimentId: string;
+  run: ExperimentRun;
+}) {
+  const agentLead =
+    agent === "codex"
+      ? "Use the local agent skills and FeatBit MCP server for this task."
+      : agent === "claude"
+        ? "In Claude Code, load the release-decision skills and use the configured FeatBit MCP server for this task."
+        : agent === "opencode"
+          ? "In OpenCode, use the release-decision skills and configured FeatBit MCP server for this task."
+          : agent === "copilot"
+            ? "In Copilot CLI, use the release-decision skill guidance and configured FeatBit MCP server for this task."
+            : "Use the release-decision skill guidance and configured FeatBit MCP server for this task.";
+
+  const decisionMode = run.decision
+    ? `Revisit the existing ${run.decision} decision for run "${run.slug}" against the latest analysis.`
+    : `Produce the first decision for run "${run.slug}".`;
+
+  return [
+    agentLead,
+    "This prompt assumes the FeatBit MCP tools are already visible in this agent session. If featbit_release_decision_* tools are not available, stop and tell me to register MCP, then restart or resume the agent with the setup command from this page; do not try to use MCP resources/templates as a substitute.",
+    "If a FeatBit MCP tool is visible but fails with an expired or revoked token error, stop and tell me to create a new MCP token on this page, then restart or resume the agent with the newly generated command. Retrying with the same token will not fix it.",
+    "",
+    `Experiment id: ${experimentId}`,
+    `Run id: ${run.id}`,
+    `Run slug: ${run.slug}`,
+    "",
+    "Use the $featbit-release-decision skill as the router, then use $evidence-analysis for CF-06 evidence sufficiency and CF-07 decision framing.",
+    "Only use $experiment-workspace to refresh analysis when the selected run has no usable Bayesian/Bandit analysisResult. A usable Bayesian analysisResult includes srm, sample_check, primary_metric rows with p_win and risk values, and any guardrail sections.",
+    "Do not overwrite an existing usable Bayesian/Bandit analysisResult with a stats_ready summary. If featbit_release_decision_analyze_run returns analysisResult without p_win/risk/SRM, stop and report that the API analyzer is returning raw stats instead of the full release-decision analysis schema.",
+    "Guardrail direction mapping: increase_bad means inverse=true because lower is better; decrease_bad means inverse=false because higher is better. Do not report decrease_bad plus inverse=false as a mismatch.",
+    "",
+    "Use FeatBit MCP tools, not the old project-sync scripts:",
+    "1. Call featbit_release_decision_get_experiment with the experiment id.",
+    "2. Inspect the selected run, current analysisResult, observation window, primary metric, guardrails, minimum sample, SRM result, and risk values.",
+    "3. If analysis is missing or clearly unusable, call featbit_release_decision_analyze_run for this run with forceFresh=true, then read the refreshed experiment. If the refreshed analysisResult is only a stats_ready/raw-stats summary, do not make a rollout decision; report the analyzer mismatch.",
+    "4. Apply evidence-analysis. Pick exactly one API decision value: CONTINUE, PAUSE, ROLLBACK, or INCONCLUSIVE. If the skill frames it as ROLLBACK CANDIDATE, persist ROLLBACK.",
+    "5. Call featbit_release_decision_update_run for this run and write decision, decisionSummary, decisionReason, and status=\"decided\".",
+    "6. Call featbit_release_decision_update_experiment with lastAction=\"Decision: <category>\". Do not move the stage to learning unless learning-capture is explicitly requested.",
+    "7. Optionally call featbit_release_decision_add_message with a short assistant summary of what was decided and why.",
+    "",
+    decisionMode,
+    "Tie the decision back to the hypothesis, quote concrete metric numbers from the analysis, call out guardrail or instrumentation risks, and finish with the next action the product team should take.",
+    "After writing through MCP, tell me what fields you updated so the UI can refresh and show the result.",
+  ].join("\n");
+}
+
+function AgentDecisionPromptDialog({
+  open,
+  onOpenChange,
+  experimentId,
+  run,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  experimentId: string;
+  run: ExperimentRun | null;
+}) {
+  const [agent, setAgent] = useState<AgentId>("codex");
+  const [copied, setCopied] = useState(false);
+  const selectedAgent =
+    AGENT_OPTIONS.find((option) => option.id === agent) ?? AGENT_OPTIONS[0];
+  const prompt = run ? buildDecisionPrompt({ agent, experimentId, run }) : "";
+  const value = prompt;
+
+  function copyPrompt() {
+    navigator.clipboard?.writeText(value).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1400);
+    });
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-2xl max-h-[86vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-sm">
+            <ClipboardList className="size-4 text-primary" />
+            Coding agent decision prompt
+          </DialogTitle>
+          <DialogDescription className="text-xs">
+            Copy this into your coding agent. It tells the agent which
+            release-decision skills to use, how to refresh the current run data,
+            and how to write the decision back through FeatBit MCP.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3">
+          <div
+            role="tablist"
+            aria-label="Coding agent"
+            className="flex flex-wrap gap-1 rounded-md border border-border/80 bg-background/65 p-1"
+          >
+            {AGENT_OPTIONS.map((option) => {
+              const selected = option.id === agent;
+
+              return (
+                <button
+                  key={option.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={selected}
+                  title={option.help}
+                  onClick={() => {
+                    setAgent(option.id);
+                    setCopied(false);
+                  }}
+                  className={cn(
+                    "min-h-7 rounded px-2.5 text-xs font-medium transition-colors",
+                    selected
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                  )}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="rounded-md border border-border/80 bg-muted/20 p-2.5">
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <p className="text-xs text-muted-foreground">
+                {selectedAgent.help}
+              </p>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="h-7 shrink-0 text-[11px]"
+                onClick={copyPrompt}
+              >
+                {copied ? (
+                  <Check className="size-3" />
+                ) : (
+                  <Copy className="size-3" />
+                )}
+                {copied ? "Copied" : "Copy"}
+              </Button>
+            </div>
+            <code className="block max-h-80 overflow-auto whitespace-pre-wrap break-words rounded border bg-background/75 p-3 font-mono text-[11px] leading-relaxed text-foreground">
+              {value}
+            </code>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 /* ── Main export: inline run selector + merged content ──────────────────── */
 
 export function ExperimentRunTable({
@@ -729,8 +924,6 @@ export function ExperimentRunTable({
   featbitEnvId: string | null;
   isSequential: boolean;
 }) {
-  const triggerChat = useChatTrigger();
-
   // Tab order = **creation order** (Phase 1 = first created). The parent's
   // sort-by-observationStart is load-bearing for sequential-design detection
   // but misleads the UI when runs haven't set an observation window yet.
@@ -749,6 +942,7 @@ export function ExperimentRunTable({
   const [creating, startCreate] = useTransition();
   const [deleting, startDelete] = useTransition();
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [promptRun, setPromptRun] = useState<ExperimentRun | null>(null);
 
   // Track previous run count so we can auto-focus the newly-created run when
   // it appears in the list, rather than sticking to the old selection.
@@ -772,12 +966,6 @@ export function ExperimentRunTable({
   const selectedIndex = selected
     ? ordered.findIndex((e) => e.id === selected.id)
     : -1;
-
-  function handleAnalyze(exp: ExperimentRun) {
-    if (!triggerChat) return;
-    const message = `Based on the current analysis for experiment run "${exp.slug}", give a deciding verdict (CONTINUE / PAUSE / ROLLBACK / INCONCLUSIVE) and cover: 1) primary-metric signal 2) guardrail risk 3) next action.`;
-    triggerChat(message);
-  }
 
   function createRun() {
     const fd = new FormData();
@@ -896,9 +1084,7 @@ export function ExperimentRunTable({
           {/* Merged content: Analyze & Decision, then Audience & Traffic */}
           <SummaryTab
             exp={selected}
-            onAnalyze={
-              triggerChat ? () => handleAnalyze(selected) : undefined
-            }
+            onOpenAgentPrompt={() => setPromptRun(selected)}
             analysisPanel={
               <AnalysisTab
                 exp={selected}
@@ -921,6 +1107,14 @@ export function ExperimentRunTable({
           </p>
         </div>
       )}
+      <AgentDecisionPromptDialog
+        open={Boolean(promptRun)}
+        onOpenChange={(open) => {
+          if (!open) setPromptRun(null);
+        }}
+        experimentId={experimentId}
+        run={promptRun}
+      />
     </div>
   );
 }

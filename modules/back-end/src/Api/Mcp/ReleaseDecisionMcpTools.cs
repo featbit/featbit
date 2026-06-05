@@ -3,7 +3,6 @@ using Api.Authorization;
 using Application.ReleaseDecisions;
 using Application.Services;
 using Domain.Policies;
-using Microsoft.IdentityModel.JsonWebTokens;
 using ModelContextProtocol.Server;
 
 namespace Api.Mcp;
@@ -13,7 +12,6 @@ public class ReleaseDecisionMcpTools(
     ISender mediator,
     IReleaseDecisionExperimentService experimentService,
     IHttpContextAccessor httpContextAccessor,
-    McpDeviceAuthorizationStore mcpAuthorizationStore,
     IPermissionChecker permissionChecker)
 {
     [McpServerTool(Name = "featbit_release_decision_get_experiment")]
@@ -171,35 +169,9 @@ public class ReleaseDecisionMcpTools(
 
     private async Task<Guid> ResolveAuthorizedEnvIdAsync(Guid experimentId)
     {
-        EnsureMcpAccessTokenIsActive();
-
         var envId = await experimentService.GetEnvIdAsync(experimentId);
         await EnsureCanAccessEnvPermissionAsync(envId);
         return envId;
-    }
-
-    private void EnsureMcpAccessTokenIsActive()
-    {
-        var httpContext = httpContextAccessor.HttpContext
-                          ?? throw new InvalidOperationException("MCP request context is unavailable.");
-
-        var tokenType = httpContext.User.Claims
-            .FirstOrDefault(x => x.Type == McpClaimTypes.TokenType)
-            ?.Value;
-
-        if (tokenType != McpClaimTypes.McpTokenType)
-        {
-            return;
-        }
-
-        var tokenId = httpContext.User.Claims
-            .FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Jti || x.Type == "jti")
-            ?.Value;
-
-        if (string.IsNullOrWhiteSpace(tokenId) || !mcpAuthorizationStore.IsAccessTokenActive(tokenId))
-        {
-            throw new UnauthorizedAccessException("MCP token is expired or revoked.");
-        }
     }
 
     private async Task EnsureCanAccessEnvPermissionAsync(Guid envId)

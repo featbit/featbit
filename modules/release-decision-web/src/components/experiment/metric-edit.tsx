@@ -83,8 +83,8 @@ function parseGuardrailsToRows(value: string | null | undefined): GuardrailRow[]
               : g.metricAgg === "average"
                 ? "average"
                 : "once",
-        // `inverse:true` from older data → decrease_bad (higher is worse
-        // means we actually want lower, so increase is bad). Keep simple.
+        // `inverse:true` from older data means lower is better, so an increase
+        // is the bad guardrail direction. Keep simple.
         direction:
           g.direction === "decrease_bad" || g.inverse === false
             ? "decrease_bad"

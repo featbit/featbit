@@ -95,7 +95,7 @@ export function ChatPanel({
 
   const basePrompt = useMemo(() => {
     return [
-      `Use the featbit-release-decision skill for experiment ${experimentId}.`,
+      `Use the $featbit-release-decision skill for experiment ${experimentId}.`,
       "Use FeatBit MCP tools with this experimentId; the API resolves the FeatBit environment from the experiment before checking permissions.",
       "Read the experiment through the FeatBit experimentation MCP server, inspect the current stage and latest run, then recommend the next release decision.",
     ].join("\n");
@@ -124,10 +124,11 @@ export function ChatPanel({
     }
   }
 }`;
-  const codexCommand = `codex ${JSON.stringify(prompt)}`;
   const tokenLifetimeLabel = token ? formatDuration(token.expires_in) : null;
   const skillInstallCommand = "npx skills add featbit/featbit-release-decision-skills";
   const skillUpdateCommand = "npx skills update featbit/featbit-release-decision-skills";
+  const codexStartCommand = `$env:FEATBIT_MCP_TOKEN="${powerShellToken}"; codex`;
+  const codexResumeCommand = `$env:FEATBIT_MCP_TOKEN="${powerShellToken}"; codex resume <conversation-id>`;
   const tokenExpired = token ? new Date(token.expires_at).getTime() <= Date.now() : false;
   const shellOptions: ShellOption[] = [
     {
@@ -155,9 +156,9 @@ export function ChatPanel({
     {
       id: "codex",
       label: "Codex",
-      description: "Use the Codex CLI.",
-      commandTitle: "Codex MCP registration",
-      commandHelp: "Run once in the terminal where Codex is configured.",
+      description: "Use your current Codex conversation.",
+      commandTitle: "Codex MCP registration (one-time)",
+      commandHelp: "Run once. Codex stores the server URL and the token environment-variable name; the token itself is pasted in the start/resume command below.",
       commandValue: addServerCommand,
       commandMaxLines: 3,
     },
@@ -200,7 +201,7 @@ export function ChatPanel({
   ];
   const selectedAgentOption =
     agentOptions.find((option) => option.id === selectedAgent) ?? agentOptions[0];
-  const agentStartValue = selectedAgent === "codex" ? codexCommand : prompt;
+  const agentStartValue = prompt;
 
   async function createScopedToken() {
     if (!envId) {
@@ -354,6 +355,10 @@ export function ChatPanel({
                   ? "It is expired; create a new one before using MCP."
                   : `It expires ${formatDate(token.expires_at)} (${tokenLifetimeLabel}).`}
               </p>
+              <p className="rounded-md border border-border/80 bg-muted/20 px-2 py-1.5 text-xs">
+                If an agent reports an authentication or token error, create a
+                new MCP token and copy the new Codex start/resume command.
+              </p>
               <CodeBlock value={token.access_token} maxLines={3} />
             </div>
           )}
@@ -361,34 +366,69 @@ export function ChatPanel({
 
         <GuideSection
           icon={<Terminal className="size-4" />}
-          title="2. Save the token for your shell"
+          title="2. Prepare the agent token"
         >
-          <p>
-            Pick the shell where your coding agent runs, then copy the token
-            command before starting the agent.
-          </p>
-          <div className="mt-3 space-y-3">
-            <SegmentedTabs
-              ariaLabel="Shell"
-              options={shellOptions.map(({ id, label }) => ({
-                id,
-                label,
-              }))}
-              value={selectedShell}
-              onChange={setSelectedShell}
-            />
-            <div className="rounded-md border border-border/80 bg-muted/20 p-2.5">
-              <p className="text-xs text-muted-foreground">
-                {selectedShellOption.description}
+          {selectedAgent === "codex" ? (
+            <>
+              <p>
+                For Codex, run the one-time MCP registration in step 3 first,
+                then copy one of these commands. The token is pasted directly
+                into the command and is only used by the Codex process it
+                starts.
               </p>
-              <div className="mt-2">
-                <CodeBlock
-                  value={selectedShellOption.command}
-                  maxLines={selectedShellOption.maxLines}
-                />
+              <p className="mt-2 rounded-md border border-border/80 bg-muted/20 px-2 py-1.5">
+                The Codex MCP registration still refers to
+                <code> FEATBIT_MCP_TOKEN</code> internally because the Codex CLI
+                does not accept a direct bearer-token argument for
+                <code> mcp add</code>.
+              </p>
+              <div className="mt-3 space-y-3">
+                <div className="rounded-md border border-border/80 bg-muted/20 p-2.5">
+                  <CommandGroup title="Start fresh Codex with this token">
+                    <CodeBlock value={codexStartCommand} maxLines={3} />
+                  </CommandGroup>
+                </div>
+                <div className="rounded-md border border-border/80 bg-muted/20 p-2.5">
+                  <CommandGroup title="Resume Codex with this token">
+                    <p className="mb-2">
+                      Replace <code>&lt;conversation-id&gt;</code> with the
+                      resume id printed by Codex.
+                    </p>
+                    <CodeBlock value={codexResumeCommand} maxLines={3} />
+                  </CommandGroup>
+                </div>
               </div>
-            </div>
-          </div>
+            </>
+          ) : (
+            <>
+              <p>
+                Pick the shell where your coding agent runs, then copy the token
+                command before starting the agent.
+              </p>
+              <div className="mt-3 space-y-3">
+                <SegmentedTabs
+                  ariaLabel="Shell"
+                  options={shellOptions.map(({ id, label }) => ({
+                    id,
+                    label,
+                  }))}
+                  value={selectedShell}
+                  onChange={setSelectedShell}
+                />
+                <div className="rounded-md border border-border/80 bg-muted/20 p-2.5">
+                  <p className="text-xs text-muted-foreground">
+                    {selectedShellOption.description}
+                  </p>
+                  <div className="mt-2">
+                    <CodeBlock
+                      value={selectedShellOption.command}
+                      maxLines={selectedShellOption.maxLines}
+                    />
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
         </GuideSection>
 
         <GuideSection
@@ -399,6 +439,15 @@ export function ChatPanel({
             Pick your coding agent and copy the matching MCP registration or
             server config.
           </p>
+          {selectedAgent === "codex" && (
+            <p className="mt-2 rounded-md border border-amber-200 bg-amber-50 px-2 py-1.5 text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200">
+              Codex loads MCP servers when a conversation starts, and this
+              registration stores only the environment-variable name. Paste the
+              token through the Codex start/resume command in step 2, then open
+              or resume Codex; the already-running conversation will not see new
+              MCP tools.
+            </p>
+          )}
           <div className="mt-3 space-y-3">
             <SegmentedTabs
               ariaLabel="Coding agent"
@@ -441,6 +490,12 @@ export function ChatPanel({
             it to inspect the current experiment, analyze evidence, update the
             experiment record, or recommend the next decision.
           </p>
+          {selectedAgent === "codex" && (
+            <p className="mt-2 rounded-md border border-border/80 bg-muted/20 px-2 py-1.5">
+              Paste this into a Codex conversation that was started or resumed
+              after the FeatBit MCP server was registered.
+            </p>
+          )}
           <div className="mt-3 space-y-2">
             <CodeBlock value={agentStartValue} maxLines={5} />
           </div>
