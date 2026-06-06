@@ -545,7 +545,7 @@ export async function saveExpertSetupAction(formData: FormData) {
       ? Math.max(0, parseInt(minimumSampleRaw, 10))
       : null;
 
-  // ── Observed data → inputData JSON in the shape runAnalysis() expects ────
+  // Observed data -> inputData JSON in the shape the .NET API analyzer expects.
   //   metrics[event] = { [variant]: {n,k} | {n,sum,sum_squares}, inverse? }
   type DataRowIn = { variant?: string; n?: string; s?: string; ss?: string };
   function buildVariantMap(

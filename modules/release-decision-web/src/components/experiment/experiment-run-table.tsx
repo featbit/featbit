@@ -641,7 +641,7 @@ function AnalysisTab({
     return () => clearInterval(id);
   }, [loading, isFreshRefresh]);
 
-  const runAnalysis = useCallback(async (forceFresh = false) => {
+  const refreshAnalysis = useCallback(async (forceFresh = false) => {
     setLoading(true);
     setIsFreshRefresh(forceFresh);
     setError(null);
@@ -699,8 +699,8 @@ function AnalysisTab({
     if (exp.analysisResult) return;
     if (missingFields.length > 0) return;
     hasAutoTriggered.current = true;
-    runAnalysis(true);
-  }, [runAnalysis, exp.analysisResult, missingFields.length]);
+    refreshAnalysis(true);
+  }, [refreshAnalysis, exp.analysisResult, missingFields.length]);
 
   if (missingFields.length > 0 && !analysisResult) {
     return (
@@ -743,7 +743,7 @@ function AnalysisTab({
         <p className="text-sm text-destructive">{error}</p>
         <button
           className="text-xs text-blue-600 dark:text-blue-400 underline"
-          onClick={() => runAnalysis(true)}
+          onClick={() => refreshAnalysis(true)}
         >
           Retry
         </button>
@@ -763,7 +763,7 @@ function AnalysisTab({
         </p>
         <button
           className="text-xs text-blue-600 dark:text-blue-400 underline"
-          onClick={() => runAnalysis(true)}
+          onClick={() => refreshAnalysis(true)}
         >
           Check again
         </button>
@@ -774,7 +774,7 @@ function AnalysisTab({
   if (!analysisResult) {
     return (
       <div className={cn("pb-6 pt-2 space-y-2", embedded ? "" : "px-4")}>
-        <RefreshAnalysisButton loading={loading} onConfirm={() => runAnalysis(true)} />
+        <RefreshAnalysisButton loading={loading} onConfirm={() => refreshAnalysis(true)} />
         <p className="text-sm text-muted-foreground/60">No analysis available yet.</p>
       </div>
     );
@@ -783,7 +783,7 @@ function AnalysisTab({
   return (
     <div className={cn("pb-6 overflow-x-auto", embedded ? "" : "px-4")}>
       <div className="mb-2">
-        <RefreshAnalysisButton loading={loading} onConfirm={() => runAnalysis(true)} />
+        <RefreshAnalysisButton loading={loading} onConfirm={() => refreshAnalysis(true)} />
       </div>
       {warning && (
         <p className="mb-2 text-sm text-amber-600 dark:text-amber-400">{warning}</p>

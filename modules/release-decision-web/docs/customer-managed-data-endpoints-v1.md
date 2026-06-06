@@ -149,7 +149,7 @@ Field rules:
   (§4.2).
 - `metrics[].agg` ∈ `"once" | "count" | "sum" | "average"`. Tells the customer
   *how* to aggregate per user before summing across the variant. Mirrors
-  FeatBit's internal contract (`MetricSpec` in `track-client.ts`).
+  FeatBit's server-side release-decision analyzer contract.
 - `metrics[].inverse` defaults to `false`. When `true`, lower is better (latency,
   error rate). FeatBit applies the inversion in analysis; customer just returns
   the raw stat.
@@ -159,8 +159,8 @@ Field rules:
 ### 3.3 What changes between A/B/N and bandit experiments
 
 "A/B" in this spec is shorthand for **A/B/N Bayesian** — control + 1..N
-treatments — since the Bayesian pipeline (`analyze.ts: runAnalysis()`) already
-loops over `treatments: string[]`. The body and response shapes (§4) are
+treatments — since the server-side .NET API analyzer loops over
+`treatments: string[]`. The body and response shapes (§4) are
 **identical** between A/B/N and bandit — same `{n, k}` for binary, same
 `{n, mean, stddev}` (recommended) or `{n, sum, sum_squares}` for continuous.
 The differences are in semantics, not shape:

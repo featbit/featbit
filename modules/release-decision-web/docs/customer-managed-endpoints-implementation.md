@@ -17,8 +17,8 @@
 | 1   | Prisma: `CustomerEndpointProvider` model + `ExperimentRun` data-source fields       | —          | **applied to prod** (Azure PG `featbit-ai`, 2026-05-02) |
 | 2   | API: `/api/projects/[projectKey]/customer-endpoints` CRUD                            | 1          | done (Test endpoint deferred to PR 4) |
 | 3   | Data Warehouse page UI: third top-level card + provider list / add / edit / rotate / delete | 1, 2       | done (test button still deferred to PR 4) |
-| 4   | `lib/stats/customer-endpoint-client.ts` + Test endpoint API + Test button UI         | 1          | done        |
-| 5   | Wire `analyze/route.ts` to customer-endpoint-client by `dataSourceMode` (+ fetcher)  | 1, 4       | done        |
+| 4   | Customer endpoint client + Test endpoint API + Test button UI                       | 1          | legacy      |
+| 5   | Wire analyze route to customer-endpoint data source                                 | 1, 4       | legacy      |
 | 6   | Expert experiment setup: new "Data source" step + Mode A provider picker             | 1, 2       | done (Mode B deferred) |
 | 7   | `/data-warehouse/customer-endpoints/schema` doc page (renders the spec markdown)    | —          | done        |
 
@@ -31,7 +31,7 @@
 Lay the foundation: a project-scoped `CustomerEndpointProvider` table, plus
 two columns on `ExperimentRun` to record which data source the run uses and
 how to reach it. No behaviour wired up — every existing read path still goes
-through `track-client.ts`.
+through the server-side .NET API analyzer.
 
 ### Decisions taken
 
@@ -437,7 +437,7 @@ analyse route is still PR 5.
 
 ### Files changed
 
-- `src/lib/stats/customer-endpoint-client.ts` (new) — public API:
+- Customer endpoint client (legacy design) — public API:
   `signRequest`, `checkPrivateAddress`, `normaliseResponse`,
   `callCustomerEndpoint`, `pingCustomerEndpoint`.
 - `src/app/api/projects/[projectKey]/customer-endpoints/[id]/test/route.ts`
@@ -489,14 +489,14 @@ be available.
 
 Make the existing `POST /api/experiments/[id]/analyze` route choose between
 the FeatBit-managed track-service path (legacy default) and the Customer
-Managed Data Endpoint path based on `ExperimentRun.dataSourceMode`. Same
-analyser downstream — both paths produce the same `MetricsDict` shape
-that `runAnalysis()` / `runBanditAnalysis()` already consume.
+Managed Data Endpoint path based on `ExperimentRun.dataSourceMode`. Current
+release-decision analysis is centralized in the FeatBit .NET API; the Next.js
+route no longer runs local TypeScript Bayesian/Bandit analyzers.
 
 ### Decisions taken
 
 1. **Translator layer in a separate module.** New
-   `lib/stats/customer-endpoint-fetcher.ts` sits between the route and
+   the customer-endpoint fetcher sits between the route and
    the raw HTTP client. The route knows about runs and experiments; the
    client knows about HTTP / HMAC. The fetcher translates the run row
    into one or more endpoint calls (Mode A or Mode B), loads providers
@@ -535,7 +535,7 @@ that `runAnalysis()` / `runBanditAnalysis()` already consume.
 
 ### Files changed
 
-- `src/lib/stats/customer-endpoint-fetcher.ts` (new) — orchestrator.
+- Customer endpoint fetcher (legacy design) — orchestrator.
   `fetchFromCustomerEndpoint(dataSourceMode, customerEndpointConfig, ctx)`
   → `MetricsDict | error`. Handles both modes, parallel fan-out,
   merging.
