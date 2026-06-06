@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { getStage } from "@/lib/stages";
+import { StageAgentGuide } from "./chat-panel";
 import { EditDecisionStateDialog } from "./decision-state-edit";
 import { MetricEditDialog } from "./metric-edit";
 import { Badge } from "@/components/ui/badge";
@@ -95,9 +96,11 @@ const STAGE_CONFIG: Record<
 export function StageContentPanel({
   experiment,
   activeTab,
+  onStageChange,
 }: {
   experiment: ExperimentWithRelations;
   activeTab: string;
+  onStageChange?: (stageKey: string) => void;
 }) {
   if (activeTab === "settings") {
     return <SettingsContent experiment={experiment} />;
@@ -117,6 +120,12 @@ export function StageContentPanel({
           {stage.description}
         </p>
       </div>
+
+      <StageAgentGuide
+        experiment={experiment}
+        activeStage={activeTab}
+        onStageChange={onStageChange}
+      />
 
       {/* Stage-specific content */}
       {activeTab === "measuring" ? (

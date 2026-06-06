@@ -114,19 +114,22 @@ function parseGuardrailsToRows(value: string | null | undefined): GuardrailRow[]
 function NativeSelect({
   id,
   name,
-  defaultValue,
+  value,
+  onChange,
   children,
 }: {
   id: string;
   name: string;
-  defaultValue: string;
+  value: string;
+  onChange: (value: string) => void;
   children: React.ReactNode;
 }) {
   return (
     <select
       id={id}
       name={name}
-      defaultValue={defaultValue}
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
       className={cn(
         "h-8 w-full rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm",
         "transition-colors outline-none",
@@ -305,8 +308,17 @@ function MetricEditForm({
   onDone: () => void;
   onCancel: () => void;
 }) {
-  const metric = parsePrimaryMetric(experiment.primaryMetric);
+  const [metric, setMetric] = useState(() =>
+    parsePrimaryMetric(experiment.primaryMetric),
+  );
   const guardrailRows = parseGuardrailsToRows(experiment.guardrails);
+
+  function updateMetric<K extends keyof typeof metric>(
+    field: K,
+    value: (typeof metric)[K],
+  ) {
+    setMetric((prev) => ({ ...prev, [field]: value }));
+  }
 
   return (
     <form
@@ -329,7 +341,8 @@ function MetricEditForm({
           <Input
             id="metricName"
             name="metricName"
-            defaultValue={metric.name}
+            value={metric.name}
+            onChange={(event) => updateMetric("name", event.target.value)}
             placeholder="e.g. Checkout completion rate"
             className="text-sm"
           />
@@ -340,7 +353,8 @@ function MetricEditForm({
           <Input
             id="metricEvent"
             name="metricEvent"
-            defaultValue={metric.event}
+            value={metric.event}
+            onChange={(event) => updateMetric("event", event.target.value)}
             placeholder="e.g. purchase_completed"
             className="text-sm font-mono"
           />
@@ -352,14 +366,38 @@ function MetricEditForm({
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1">
             <Label htmlFor="metricType" className="text-xs">Metric Type</Label>
-            <NativeSelect id="metricType" name="metricType" defaultValue={metric.metricType}>
+            <NativeSelect
+              id="metricType"
+              name="metricType"
+              value={metric.metricType}
+              onChange={(value) =>
+                updateMetric(
+                  "metricType",
+                  value === "continuous" ? "continuous" : "binary",
+                )
+              }
+            >
               <option value="binary">Binary (conversion)</option>
               <option value="continuous">Numeric (value)</option>
             </NativeSelect>
           </div>
           <div className="space-y-1">
             <Label htmlFor="metricAgg" className="text-xs">Aggregation</Label>
-            <NativeSelect id="metricAgg" name="metricAgg" defaultValue={metric.metricAgg}>
+            <NativeSelect
+              id="metricAgg"
+              name="metricAgg"
+              value={metric.metricAgg}
+              onChange={(value) =>
+                updateMetric(
+                  "metricAgg",
+                  value === "count" ||
+                    value === "sum" ||
+                    value === "average"
+                    ? value
+                    : "once",
+                )
+              }
+            >
               <option value="once">Once per user</option>
               <option value="count">Count all</option>
               <option value="sum">Sum values</option>
@@ -376,7 +414,8 @@ function MetricEditForm({
           <Textarea
             id="metricDescription"
             name="metricDescription"
-            defaultValue={metric.description}
+            value={metric.description}
+            onChange={(event) => updateMetric("description", event.target.value)}
             placeholder="What does this metric measure and why does it matter?"
             rows={2}
             className="text-xs resize-none"

@@ -24,6 +24,7 @@ interface ResizablePanelsProps {
   /** Controlled right-panel collapse state (optional) */
   rightCollapsed?: boolean;
   onRightCollapsedChange?: (collapsed: boolean) => void;
+  showRightCollapsedRail?: boolean;
 }
 
 export function ResizablePanels({
@@ -34,6 +35,7 @@ export function ResizablePanels({
   minWidth = 280,
   rightCollapsed: rightCollapsedProp,
   onRightCollapsedChange,
+  showRightCollapsedRail = true,
 }: ResizablePanelsProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [leftWidth, setLeftWidth] = useState(defaultLeftWidth ?? 960);
@@ -187,7 +189,7 @@ export function ResizablePanels({
       )}
 
       {/* ── Right collapsed rail ── */}
-      {rightCollapsed && (
+      {rightCollapsed && showRightCollapsedRail && (
         <div className="shrink-0 flex items-start pt-2 px-1 border-l">
           <button
             onClick={toggleRight}
