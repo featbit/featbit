@@ -45,6 +45,8 @@ public static class DbServiceCollectionExtensions
             services.AddTransient<IGlobalUserService, MongoServices.GlobalUserService>();
             services.AddTransient<ISegmentService, MongoServices.SegmentService>();
             services.AddTransient<IFeatureFlagService, MongoServices.FeatureFlagService>();
+            services.AddTransient<IFeatureFlagInsightsService, MongoServices.FeatureFlagInsightsService>();
+            services.AddTransient<IFeatureFlagEndUserStatsService, MongoServices.FeatureFlagEndUserStatsService>();
             services.AddTransient<ITriggerService, MongoServices.TriggerService>();
             services.AddTransient<IExperimentService, MongoServices.ExperimentService>();
             services.AddTransient<IExperimentStatsService, MongoServices.ExperimentStatsService>();
@@ -86,6 +88,8 @@ public static class DbServiceCollectionExtensions
             services.AddTransient<IGlobalUserService, EntityFrameworkCoreServices.GlobalUserService>();
             services.AddTransient<ISegmentService, EntityFrameworkCoreServices.SegmentService>();
             services.AddTransient<IFeatureFlagService, EntityFrameworkCoreServices.FeatureFlagService>();
+            services.AddTransient<IFeatureFlagInsightsService, EntityFrameworkCoreServices.FeatureFlagInsightsService>();
+            services.AddTransient<IFeatureFlagEndUserStatsService, EntityFrameworkCoreServices.FeatureFlagEndUserStatsService>();
             services.AddTransient<ITriggerService, EntityFrameworkCoreServices.TriggerService>();
             services.AddTransient<IExperimentService, EntityFrameworkCoreServices.ExperimentService>();
             services.AddTransient<IExperimentStatsService, EntityFrameworkCoreServices.ExperimentStatsService>();

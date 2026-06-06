@@ -601,15 +601,10 @@ function AnalysisTab({
 }) {
   // Pre-check what the backend requires. Rendering a config gap here beats
   // auto-firing a POST that always 400s before the experiment is set up.
-  // If inputData was already pasted in expert setup, we can analyze without
-  // live flag wiring — only the metric event is strictly needed.
-  const hasStoredInputData = !!exp.inputData;
   const missingFields: string[] = [];
   if (!exp.primaryMetricEvent) missingFields.push("primary metric event");
-  if (!hasStoredInputData) {
-    if (!flagKey) missingFields.push("flag key");
-    if (!featbitEnvId) missingFields.push("FeatBit env ID");
-  }
+  if (!flagKey) missingFields.push("flag key");
+  if (!featbitEnvId) missingFields.push("FeatBit env ID");
 
   const [analysisResult, setAnalysisResult] = useState<string | null>(
     exp.analysisResult ?? null
@@ -711,7 +706,8 @@ function AnalysisTab({
         </p>
         <p className="text-xs text-muted-foreground/70">
           Ask Codex to configure these through FeatBit MCP, or edit the
-          experiment in the <code>Exposing</code> stage.
+          experiment in the <code>Exposure</code> stage. Manual per-variant data
+          paste is no longer supported.
         </p>
       </div>
     );

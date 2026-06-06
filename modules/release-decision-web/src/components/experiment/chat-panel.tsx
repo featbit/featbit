@@ -68,9 +68,11 @@ type AgentOption = TabOption<AgentId> & {
 
 export function ChatPanel({
   experiment,
+  activeStage,
   suggestedPrompt,
 }: {
   experiment: Experiment;
+  activeStage: string;
   suggestedPrompt?: string | null;
 }) {
   const envId = experiment.featbitEnvId;
@@ -100,6 +102,9 @@ export function ChatPanel({
       "Read the experiment through the FeatBit experimentation MCP server, inspect the current stage and latest run, then recommend the next release decision.",
     ].join("\n");
   }, [experimentId]);
+  const stagePrompt = useMemo(() => {
+    return buildStagePrompt(activeStage, experimentId);
+  }, [activeStage, experimentId]);
 
   const prompt = suggestedPrompt
     ? `${basePrompt}\n\nSpecific task from the web page:\n${suggestedPrompt}`
@@ -307,6 +312,20 @@ export function ChatPanel({
       </div>
 
       <div className="flex-1 space-y-4 overflow-y-auto p-4">
+        <GuideSection
+          icon={<MessageSquareText className="size-4" />}
+          title="Recommended prompt for this step"
+        >
+          <p>
+            Each stage follows the release-decision skill flow. The agent should
+            skip any step that is already satisfied and move to the next
+            applicable skill.
+          </p>
+          <div className="mt-3">
+            <CodeBlock value={stagePrompt} maxLines={8} />
+          </div>
+        </GuideSection>
+
         <GuideSection
           icon={<ShieldCheck className="size-4" />}
           title="1. Create or revoke your MCP token"
@@ -516,6 +535,46 @@ export function ChatPanel({
       </div>
     </aside>
   );
+}
+
+function buildStagePrompt(activeStage: string, experimentId: string) {
+  const prefix = [
+    `Use the $featbit-release-decision skill for experiment ${experimentId}.`,
+    "Read the experiment through FeatBit MCP before changing anything.",
+    "If the current step is already satisfied, say what evidence shows that and skip to the next applicable release-decision skill.",
+  ];
+
+  switch (activeStage) {
+    case "hypothesis":
+      return [
+        ...prefix,
+        "Run intent-shaping and hypothesis-design. Clarify the business outcome, intent, change, audience, and falsifiable hypothesis.",
+        "Persist the updated goal, intent, hypothesis, change, constraints, and stage through FeatBit MCP.",
+      ].join("\n");
+    case "implementing":
+      return [
+        ...prefix,
+        "Run reversible-exposure-control. Configure or verify the FeatBit managed feature flag, rollout/audience strategy, and variant mapping from the actual flag.",
+        "Do not ask me to manually type variants or observed data. Use FeatBit flag configuration and metric events as the source of truth.",
+      ].join("\n");
+    case "measuring":
+      return [
+        ...prefix,
+        "Run measurement-design, then experiment-workspace or evidence-analysis as appropriate.",
+        "Use FeatBit managed flag evaluation and metric event data through FeatBit API. Do not ask me to paste per-variant data. Third-party API evidence is not supported yet; note the gap instead of inventing a fetch path.",
+      ].join("\n");
+    case "learning":
+      return [
+        ...prefix,
+        "Run learning-capture. Summarize what changed, what happened, whether the hypothesis was confirmed or refuted, why it likely happened, and the next hypothesis.",
+        "Persist the learning through FeatBit MCP.",
+      ].join("\n");
+    default:
+      return [
+        ...prefix,
+        "Inspect the current experiment state and recommend the next smallest release-decision step.",
+      ].join("\n");
+  }
 }
 
 function GuideSection({

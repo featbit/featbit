@@ -1,6 +1,7 @@
 using Application.Bases;
 using Application.Bases.Models;
 using Domain.FeatureFlags;
+using Microsoft.Extensions.Configuration;
 
 namespace Application.EndUsers;
 
@@ -30,13 +31,24 @@ public class
     GetFeatureFlagEndUserListHandler : IRequestHandler<GetFeatureFlagEndUserList,
     PagedResult<FeatureFlagEndUserStatsVm>>
 {
+    private const string FeatureFlagInsightsProviderApi = "featbit-api";
+    private const string FeatureFlagInsightsProviderDas = "featbit-das";
+
     private readonly IFeatureFlagService _featureFlagService;
     private readonly IOlapService _olapService;
+    private readonly IFeatureFlagEndUserStatsService _endUserStatsService;
+    private readonly IConfiguration _configuration;
 
-    public GetFeatureFlagEndUserListHandler(IFeatureFlagService featureFlagService, IOlapService olapService)
+    public GetFeatureFlagEndUserListHandler(
+        IFeatureFlagService featureFlagService,
+        IOlapService olapService,
+        IFeatureFlagEndUserStatsService endUserStatsService,
+        IConfiguration configuration)
     {
         _featureFlagService = featureFlagService;
         _olapService = olapService;
+        _endUserStatsService = endUserStatsService;
+        _configuration = configuration;
     }
 
     public async Task<PagedResult<FeatureFlagEndUserStatsVm>> Handle(GetFeatureFlagEndUserList request,
@@ -56,7 +68,9 @@ public class
             PageIndex = request.Filter.PageIndex
         };
 
-        var stats = await _olapService.GetFeatureFlagEndUserStats(param);
+        var stats = UseApiInsights()
+            ? await _endUserStatsService.GetFeatureFlagEndUserStatsAsync(param)
+            : await _olapService.GetFeatureFlagEndUserStats(param);
 
         var items = stats.Items
             .Select(it => new FeatureFlagEndUserStatsVm
@@ -68,5 +82,26 @@ public class
             }).ToList();
 
         return new PagedResult<FeatureFlagEndUserStatsVm>(stats.TotalCount, items);
+    }
+
+    private bool UseApiInsights()
+    {
+        var provider =
+            Environment.GetEnvironmentVariable("FEATURE_FLAG_INSIGHTS_PROVIDER") ??
+            _configuration["FeatureFlagInsights:Provider"] ??
+            FeatureFlagInsightsProviderDas;
+
+        if (string.Equals(provider, FeatureFlagInsightsProviderApi, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        if (string.Equals(provider, FeatureFlagInsightsProviderDas, StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        throw new InvalidOperationException(
+            "Invalid feature flag insights provider. Use 'featbit-api' or 'featbit-das'.");
     }
 }

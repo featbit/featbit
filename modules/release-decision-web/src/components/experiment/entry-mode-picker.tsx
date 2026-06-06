@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Bot, FlaskConical, ArrowRight, Check } from "lucide-react";
+import { Bot, ArrowRight, Check } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -9,24 +9,22 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { updateExperiment } from "@/lib/release-decision-client-data";
-import { ExpertSetupDialog } from "./expert-setup-dialog";
 import { cn } from "@/lib/utils";
 import type { Experiment, ExperimentRun } from "@/generated/prisma";
 
-type Mode = "guided" | "expert";
+type Mode = "guided";
 
 /**
- * Choice screen rendered when an experiment has no entryMode yet.
- * Mode 1 (guided) → Codex-assisted workflow walks user through the full decision framework.
- * Mode 2 (expert) → user fills algorithm / metrics / priors directly.
+ * Start screen rendered when an experiment has no entryMode yet.
+ * The old expert/manual-data entry path has been folded into the guided
+ * release-decision workflow; setup fields are handled by the stage panels and
+ * coding-agent prompts.
  */
 export function EntryModePicker({
   experiment,
-  onExpertSaved,
   onExperimentUpdated,
 }: {
   experiment: Experiment & { experimentRuns: ExperimentRun[] };
-  onExpertSaved?: (chatSummary: string) => void;
   onExperimentUpdated?: () => Promise<unknown>;
 }) {
   return (
@@ -43,13 +41,13 @@ export function EntryModePicker({
         <ModeCards
           experiment={experiment}
           currentMode={null}
-          onExpertSaved={onExpertSaved}
           onExperimentUpdated={onExperimentUpdated}
         />
 
         <p className="text-xs text-muted-foreground">
-          Expert setup can be edited later — the same underlying fields power
-          both modes, so nothing you enter is thrown away.
+          The workflow uses FeatBit managed feature-flag evaluations and metric
+          events for analysis. Third-party API evidence can be planned, but is
+          not supported for live analysis yet.
         </p>
       </div>
     </div>
@@ -65,31 +63,28 @@ export function ModeSwitchDialog({
   currentMode,
   open,
   onOpenChange,
-  onExpertSaved,
   onExperimentUpdated,
 }: {
   experiment: Experiment & { experimentRuns: ExperimentRun[] };
   currentMode: Mode;
   open: boolean;
   onOpenChange: (v: boolean) => void;
-  onExpertSaved?: (chatSummary: string) => void;
   onExperimentUpdated?: () => Promise<unknown>;
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle className="text-sm">Switch setup mode</DialogTitle>
+          <DialogTitle className="text-sm">Guided workflow</DialogTitle>
           <p className="text-[11px] text-muted-foreground">
-            Your data is preserved either way — algorithm, metrics, guardrails,
-            priors, and any observed data move across modes.
+            Release-decision setup now follows one guided workflow. Analysis
+            uses FeatBit managed flag and metric data.
           </p>
         </DialogHeader>
         <ModeCards
           experiment={experiment}
           currentMode={currentMode}
           onAfterSelect={() => onOpenChange(false)}
-          onExpertSaved={onExpertSaved}
           onExperimentUpdated={onExperimentUpdated}
         />
       </DialogContent>
@@ -102,16 +97,13 @@ function ModeCards({
   experiment,
   currentMode,
   onAfterSelect,
-  onExpertSaved,
   onExperimentUpdated,
 }: {
   experiment: Experiment & { experimentRuns: ExperimentRun[] };
   currentMode: Mode | null;
   onAfterSelect?: () => void;
-  onExpertSaved?: (chatSummary: string) => void;
   onExperimentUpdated?: () => Promise<unknown>;
 }) {
-  const [expertOpen, setExpertOpen] = useState(false);
   const [selecting, setSelecting] = useState<Mode | null>(null);
 
   async function pickGuided() {
@@ -129,53 +121,20 @@ function ModeCards({
     }
   }
 
-  function pickExpert() {
-    if (currentMode === "expert") {
-      // Already in expert mode — just reopen the wizard to edit.
-      setExpertOpen(true);
-      return;
-    }
-    // Opening the wizard; it flips entryMode on save (see saveExpertSetupAction).
-    setExpertOpen(true);
-  }
-
   return (
-    <>
-      <div className="grid gap-4 md:grid-cols-2">
-        <ModeCard
-          title="Guide me with AI"
-          subtitle="Codex-assisted setup"
-          description="Use the Codex guide to shape intent, design a hypothesis, or adjust metrics step by step."
-          icon={<Bot className="size-5" />}
-          cta={currentMode === "guided" ? "Currently active" : "Use guided mode"}
-          active={currentMode === "guided"}
-          disabled={selecting !== null}
-          loading={selecting === "guided"}
-          onClick={pickGuided}
-        />
-        <ModeCard
-          title="I know what I want"
-          subtitle="Expert setup form"
-          description="Pick the algorithm, configure the primary metric, guardrails, prior, and minimum sample directly. Paste observed data now or later."
-          icon={<FlaskConical className="size-5" />}
-          cta={currentMode === "expert" ? "Edit expert setup" : "Use expert mode"}
-          active={currentMode === "expert"}
-          disabled={selecting !== null}
-          onClick={pickExpert}
-        />
-      </div>
-
-      <ExpertSetupDialog
-        experiment={experiment}
-        open={expertOpen}
-        onOpenChange={(v) => {
-          setExpertOpen(v);
-          if (!v) onAfterSelect?.();
-        }}
-        onSaved={onExpertSaved}
-        onExperimentUpdated={onExperimentUpdated}
+    <div className="grid gap-4">
+      <ModeCard
+        title="Start guided workflow"
+        subtitle="FeatBit release-decision flow"
+        description="Use the coding-agent guide to shape intent, define a hypothesis, configure exposure, select metrics, analyze FeatBit managed evidence, and capture learning."
+        icon={<Bot className="size-5" />}
+        cta={currentMode === "guided" ? "Currently active" : "Start workflow"}
+        active={currentMode === "guided"}
+        disabled={selecting !== null}
+        loading={selecting === "guided"}
+        onClick={pickGuided}
       />
-    </>
+    </div>
   );
 }
 

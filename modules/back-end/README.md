@@ -124,6 +124,13 @@ and [consumer configs](https://kafka.apache.org/documentation/#consumerconfigs) 
 |---------------------|-----------------------------------|----------------------|
 | `OLAP__ServiceHost` | URI for the data analytics server | `"http://da-server"` |
 
+### Feature Flag Insights
+
+| Name                             | Description                                                                                   | Default Value  |
+|----------------------------------|-----------------------------------------------------------------------------------------------|----------------|
+| `FEATURE_FLAG_INSIGHTS_PROVIDER` | Selects the feature flag usage insights provider. Use `featbit-das` for DA or `featbit-api`. | `"featbit-das"` |
+| `FeatureFlagInsights__Provider`  | Configuration-section equivalent of `FEATURE_FLAG_INSIGHTS_PROVIDER`.                         | `"featbit-das"` |
+
 ### UsageTracking
 
 | Name                             | Description                                            | Default Value |

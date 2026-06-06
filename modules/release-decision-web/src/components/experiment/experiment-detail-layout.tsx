@@ -9,10 +9,8 @@ import { ChatPanel } from "@/components/experiment/chat-panel";
 import { ResizablePanels } from "@/components/experiment/resizable-panels";
 import { ActivityPopover } from "@/components/experiment/activity-popover";
 import { ChatTriggerContext } from "@/components/experiment/chat-trigger-context";
-import { EntryModePicker, ModeSwitchDialog } from "@/components/experiment/entry-mode-picker";
-import { ExpertSetupDialog } from "@/components/experiment/expert-setup-dialog";
-import { Button } from "@/components/ui/button";
-import { Pencil, Shuffle, Settings } from "lucide-react";
+import { EntryModePicker } from "@/components/experiment/entry-mode-picker";
+import { Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { WorkspaceSwitcher } from "@/components/workspace/workspace-switcher";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
@@ -46,8 +44,6 @@ export function ExperimentDetailLayout({
   const [prevTab, setPrevTab] = useState<string | null>(null);
   const [rightCollapsed, setRightCollapsed] = useState(false);
   const [suggestedCodexPrompt, setSuggestedCodexPrompt] = useState<string | null>(null);
-  const [expertEditOpen, setExpertEditOpen] = useState(false);
-  const [switchOpen, setSwitchOpen] = useState(false);
 
   // Experiments created before this feature have entryMode=null and existing
   // content (messages, runs, stage != initial) — treat those as "guided" so we
@@ -57,9 +53,9 @@ export function ExperimentDetailLayout({
     experiment.experimentRuns.length > 0 ||
     !!experiment.hypothesis ||
     !!experiment.intent;
-  const entryMode: "guided" | "expert" | null =
+  const entryMode: "guided" | null =
     experiment.entryMode === "guided" || experiment.entryMode === "expert"
-      ? experiment.entryMode
+      ? "guided"
       : hasPriorWork
         ? "guided"
         : null;
@@ -121,40 +117,6 @@ export function ExperimentDetailLayout({
             <span>Settings</span>
           </button>
           <ActivityPopover activities={experiment.activities} />
-          {entryMode !== null && (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setSwitchOpen(true)}
-              className="h-7 text-xs"
-              title="Switch between guided and expert setup"
-            >
-              <Shuffle className="size-3" />
-              Switch mode
-            </Button>
-          )}
-          {entryMode === "expert" && (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setExpertEditOpen(true)}
-              className="h-7 text-xs"
-            >
-              <Pencil className="size-3" />
-              Edit setup
-            </Button>
-          )}
-          {entryMode === "guided" && (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setExpertEditOpen(true)}
-              className="h-7 text-xs"
-            >
-              <Pencil className="size-3" />
-              Expert setup
-            </Button>
-          )}
         </div>
 
         <div className="ml-auto flex items-center gap-2">
@@ -165,11 +127,6 @@ export function ExperimentDetailLayout({
     </header>
   );
 
-  function handleExpertSaved(summary: string) {
-    setSuggestedCodexPrompt(summary);
-    setActiveTab("measuring");
-  }
-
   // ── Entry mode not yet selected: show the picker full-width ──
   if (entryMode === null) {
     return (
@@ -177,7 +134,6 @@ export function ExperimentDetailLayout({
         {header}
         <EntryModePicker
           experiment={experiment}
-          onExpertSaved={handleExpertSaved}
           onExperimentUpdated={onExperimentUpdated}
         />
       </>
@@ -213,24 +169,10 @@ export function ExperimentDetailLayout({
         right={
           <ChatPanel
             experiment={experiment}
+            activeStage={activeTab}
             suggestedPrompt={suggestedCodexPrompt}
           />
         }
-      />
-      <ExpertSetupDialog
-        experiment={experiment}
-        open={expertEditOpen}
-        onOpenChange={setExpertEditOpen}
-        onSaved={handleExpertSaved}
-        onExperimentUpdated={onExperimentUpdated}
-      />
-      <ModeSwitchDialog
-        experiment={experiment}
-        currentMode={entryMode}
-        open={switchOpen}
-        onOpenChange={setSwitchOpen}
-        onExpertSaved={handleExpertSaved}
-        onExperimentUpdated={onExperimentUpdated}
       />
     </ChatTriggerContext.Provider>
   );
