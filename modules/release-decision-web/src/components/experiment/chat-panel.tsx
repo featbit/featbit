@@ -868,20 +868,21 @@ function buildAgentPrompt({
   stateChecks: StateCheck[];
   suggestedPrompt?: string | null;
 }) {
-  const stateSnapshot = stateChecks
-    .map((check) => `- ${check.label}: ${check.value}`)
-    .join("\n");
   const completionCriteria = step.completionCriteria.join("; ");
+  const unresolvedChecks = stateChecks
+    .filter((check) => check.status !== "satisfied")
+    .map((check) => check.label);
   const prompt = step.agentPromptTemplate
     .replaceAll("{experimentId}", experiment.id)
+    .replaceAll("{userGoal}", step.userGoal)
     .replaceAll("{completionCriteria}", completionCriteria);
 
   return [
     prompt,
-    "",
-    `Current MCP state snapshot:\n${stateSnapshot}`,
-    `Relevant satellite skills: ${step.skills.join(", ")}`,
-    `Skip semantics: ${step.skipReasonTemplate}`,
+    unresolvedChecks.length > 0
+      ? `\nPrivate UI hint: the web page currently considers these items unresolved: ${unresolvedChecks.join(", ")}. Use this only to choose your next question; do not recite it to the user.`
+      : "\nPrivate UI hint: the web page currently considers this step ready. Verify through MCP before advancing.",
+    `Relevant skills: featbit-release-decision, ${step.skills.join(", ")}`,
     suggestedPrompt ? `\nSpecific task from the web page:\n${suggestedPrompt}` : null,
   ]
     .filter(Boolean)

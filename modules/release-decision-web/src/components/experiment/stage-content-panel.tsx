@@ -213,17 +213,22 @@ function SettingsContent({
 }
 
 /* ── Shared multi-line metric renderer ── */
+type ParsedMetricLines =
+  | { kind: "empty" }
+  | { kind: "guardrails"; items: { name?: string; event?: string; description?: string }[] }
+  | { kind: "structured"; item: { name?: string; event?: string; metricType?: string; metricAgg?: string; description?: string } }
+  | { kind: "plain"; lines: string[] };
+
 function MetricLines({ value }: { value: string | null | undefined }) {
-  if (!value) return <p className="text-sm italic text-muted-foreground/50">Not set</p>;
+  const parsed = parseMetricLinesValue(value);
 
-  try {
-    const parsed = JSON.parse(value);
-
-    // JSON array → guardrails list [{name, description}]
-    if (Array.isArray(parsed) && parsed.length > 0) {
+  switch (parsed.kind) {
+    case "empty":
+      return <p className="text-sm italic text-muted-foreground/50">Not set</p>;
+    case "guardrails":
       return (
         <ul className="space-y-1">
-          {parsed.map((g: { name?: string; event?: string; description?: string }, i: number) => (
+          {parsed.items.map((g, i) => (
             <li key={i} className="text-sm">
               <span className="font-mono font-medium">{g.name ?? g.event ?? ""}</span>
               {g.description && (
@@ -233,38 +238,59 @@ function MetricLines({ value }: { value: string | null | undefined }) {
           ))}
         </ul>
       );
-    }
-
-    // JSON object → primary metric {name, event, metricType, metricAgg, description}
-    if (parsed && typeof parsed === "object" && (parsed.event || parsed.name)) {
+    case "structured": {
+      const item = parsed.item;
       const technicalLine = [
-        parsed.event,
-        parsed.metricType,
-        parsed.metricAgg ? `counted ${parsed.metricAgg}` : null,
+        item.event,
+        item.metricType,
+        item.metricAgg ? `counted ${item.metricAgg}` : null,
       ].filter(Boolean).join(" · ");
+
       return (
         <div className="space-y-0.5">
-          {parsed.name && <p className="text-sm leading-relaxed font-medium">{parsed.name}</p>}
-          {parsed.event && (
+          {item.name && <p className="text-sm leading-relaxed font-medium">{item.name}</p>}
+          {item.event && (
             <p className="text-xs font-mono text-muted-foreground">{technicalLine}</p>
           )}
-          {parsed.description && (
-            <p className="text-xs text-muted-foreground/70 leading-relaxed">{parsed.description}</p>
+          {item.description && (
+            <p className="text-xs text-muted-foreground/70 leading-relaxed">{item.description}</p>
           )}
         </div>
       );
     }
-  } catch { /* plain text — fall through */ }
+    case "plain":
+      if (parsed.lines.length === 1) {
+        return <p className="text-sm leading-relaxed">{parsed.lines[0]}</p>;
+      }
 
-  const lines = value.split("\n").filter(Boolean);
-  if (lines.length === 1) return <p className="text-sm leading-relaxed">{lines[0]}</p>;
-  return (
-    <ul className="space-y-0.5">
-      {lines.map((line, i) => (
-        <li key={i} className="text-sm leading-relaxed">{line}</li>
-      ))}
-    </ul>
-  );
+      return (
+        <ul className="space-y-0.5">
+          {parsed.lines.map((line, i) => (
+            <li key={i} className="text-sm leading-relaxed">{line}</li>
+          ))}
+        </ul>
+      );
+  }
+}
+
+function parseMetricLinesValue(value: string | null | undefined): ParsedMetricLines {
+  if (!value) return { kind: "empty" };
+
+  try {
+    const parsed = JSON.parse(value);
+
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      return { kind: "guardrails", items: parsed };
+    }
+
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed) && (parsed.event || parsed.name)) {
+      return { kind: "structured", item: parsed };
+    }
+  } catch {
+    // Plain text metrics are still supported for older MCP/user-entered data.
+  }
+
+  return { kind: "plain", lines: value.split("\n").filter(Boolean) };
 }
 
 /* ── Generic fields renderer ── */
@@ -458,6 +484,7 @@ function MetricsIntegrationSection({
 }) {
   const primary = parsePrimary(experiment.primaryMetric);
   const guardrails = parseGuardrails(experiment.guardrails);
+  const primaryNeedsEventMapping = !!primary && !primary.event;
 
   return (
     <section className="space-y-2.5">
@@ -484,65 +511,74 @@ function MetricsIntegrationSection({
           <Pencil className="size-3" />
         </button>
       ) : (
-        <div className="rounded-md border overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b bg-muted/40">
-                <th className="px-3 py-1.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider w-20">Role</th>
-                <th className="px-3 py-1.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Name</th>
-                <th className="px-3 py-1.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Event</th>
-                <th className="px-3 py-1.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider w-20">Type</th>
-                <th className="px-3 py-1.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider w-28">Agg</th>
-                <th className="px-3 py-1.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider w-20">Alarm</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {primary && (
-                <tr className="bg-blue-50/40 dark:bg-blue-950/20">
-                  <td className="px-3 py-2">
-                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-blue-700 dark:text-blue-300">
-                      <Target className="size-3 shrink-0" />
-                      Primary
-                    </span>
-                  </td>
-                  <td className="px-3 py-2 font-semibold">{primary.name || <span className="italic text-muted-foreground/50">—</span>}</td>
-                  <td className="px-3 py-2">
-                    {primary.event
-                      ? <code className="rounded bg-muted px-1.5 py-0.5 text-xs font-mono">{primary.event}</code>
-                      : <span className="italic text-muted-foreground/50">—</span>}
-                  </td>
-                  <td className="px-3 py-2 text-muted-foreground">{primary.metricType ?? "—"}</td>
-                  <td className="px-3 py-2 text-muted-foreground">{formatAgg(primary.metricAgg)}</td>
-                  <td className="px-3 py-2 text-muted-foreground">—</td>
+        <div className="space-y-2">
+          {primaryNeedsEventMapping && (
+            <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200">
+              This is a success metric concept from the decision-framing step.
+              It still needs a FeatBit metric event, type, and aggregation before
+              analysis can run.
+            </div>
+          )}
+          <div className="rounded-md border overflow-hidden">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b bg-muted/40">
+                  <th className="px-3 py-1.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider w-20">Role</th>
+                  <th className="px-3 py-1.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Name</th>
+                  <th className="px-3 py-1.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Event</th>
+                  <th className="px-3 py-1.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider w-20">Type</th>
+                  <th className="px-3 py-1.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider w-28">Agg</th>
+                  <th className="px-3 py-1.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider w-20">Alarm</th>
                 </tr>
-              )}
-              {guardrails.map((g, i) => (
-                <tr key={i}>
-                  <td className="px-3 py-2">
-                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-amber-700 dark:text-amber-400">
-                      <ShieldCheck className="size-3 shrink-0" />
-                      Guard
-                    </span>
-                  </td>
-                  <td className="px-3 py-2 font-medium">{g.name || <span className="italic text-muted-foreground/50">—</span>}</td>
-                  <td className="px-3 py-2">
-                    {g.event
-                      ? <code className="rounded bg-muted px-1.5 py-0.5 text-xs font-mono">{g.event}</code>
-                      : <span className="italic text-muted-foreground/50">—</span>}
-                  </td>
-                  <td className="px-3 py-2 text-muted-foreground">{g.metricType ?? "—"}</td>
-                  <td className="px-3 py-2 text-muted-foreground">{formatAgg(g.metricAgg)}</td>
-                  <td className="px-3 py-2">
-                    {g.direction === "increase_bad"
-                      ? <span className="text-rose-600 dark:text-rose-400 font-mono">↑ bad</span>
-                      : g.direction === "decrease_bad"
-                      ? <span className="text-rose-600 dark:text-rose-400 font-mono">↓ bad</span>
-                      : <span className="text-muted-foreground">—</span>}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y">
+                {primary && (
+                  <tr className="bg-blue-50/40 dark:bg-blue-950/20">
+                    <td className="px-3 py-2">
+                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-blue-700 dark:text-blue-300">
+                        <Target className="size-3 shrink-0" />
+                        Primary
+                      </span>
+                    </td>
+                    <td className="px-3 py-2 font-semibold">{primary.name || <span className="italic text-muted-foreground/50">—</span>}</td>
+                    <td className="px-3 py-2">
+                      {primary.event
+                        ? <code className="rounded bg-muted px-1.5 py-0.5 text-xs font-mono">{primary.event}</code>
+                        : <span className="text-amber-700 dark:text-amber-300">Needs event mapping</span>}
+                    </td>
+                    <td className="px-3 py-2 text-muted-foreground">{primary.metricType ?? (primary.event ? "—" : "pending")}</td>
+                    <td className="px-3 py-2 text-muted-foreground">{primary.metricAgg ? formatAgg(primary.metricAgg) : primary.event ? "—" : "pending"}</td>
+                    <td className="px-3 py-2 text-muted-foreground">—</td>
+                  </tr>
+                )}
+                {guardrails.map((g, i) => (
+                  <tr key={i}>
+                    <td className="px-3 py-2">
+                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-amber-700 dark:text-amber-400">
+                        <ShieldCheck className="size-3 shrink-0" />
+                        Guard
+                      </span>
+                    </td>
+                    <td className="px-3 py-2 font-medium">{g.name || <span className="italic text-muted-foreground/50">—</span>}</td>
+                    <td className="px-3 py-2">
+                      {g.event
+                        ? <code className="rounded bg-muted px-1.5 py-0.5 text-xs font-mono">{g.event}</code>
+                        : <span className="text-amber-700 dark:text-amber-300">Needs event mapping</span>}
+                    </td>
+                    <td className="px-3 py-2 text-muted-foreground">{g.metricType ?? (g.event ? "—" : "pending")}</td>
+                    <td className="px-3 py-2 text-muted-foreground">{g.metricAgg ? formatAgg(g.metricAgg) : g.event ? "—" : "pending"}</td>
+                    <td className="px-3 py-2">
+                      {g.direction === "increase_bad"
+                        ? <span className="text-rose-600 dark:text-rose-400 font-mono">↑ bad</span>
+                        : g.direction === "decrease_bad"
+                        ? <span className="text-rose-600 dark:text-rose-400 font-mono">↓ bad</span>
+                        : <span className="text-muted-foreground">—</span>}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
@@ -680,6 +716,7 @@ function MeasuringContent({
           experimentId={experiment.id}
           flagKey={experiment.flagKey}
           featbitEnvId={experiment.featbitEnvId}
+          variants={experiment.variants}
           isSequential={isSequential}
         />
       </section>

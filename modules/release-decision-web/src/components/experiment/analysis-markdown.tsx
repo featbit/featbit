@@ -106,6 +106,7 @@ interface BanditAnalysis {
 }
 
 type AnalysisData = BayesianAnalysis | BanditAnalysis;
+type VariantLabelMap = Record<string, { name: string; value?: string }>;
 
 /* ── Helpers ── */
 
@@ -131,6 +132,65 @@ function harmColor(p: number | undefined, threshold = 0.5): string {
   if (p < threshold * 0.5) return "text-green-700 dark:text-green-400";
   if (p < threshold) return "text-yellow-700 dark:text-yellow-400";
   return "text-red-700 dark:text-red-400 font-semibold";
+}
+
+function guardrailHarmColor(p: number | undefined): string {
+  if (p === undefined) return "";
+  if (p <= 0.01) return "text-green-700 dark:text-green-400 font-semibold";
+  if (p >= 0.95) return "text-red-700 dark:text-red-400 font-semibold";
+  if (p >= 0.8) return "text-yellow-700 dark:text-yellow-400 font-medium";
+  return "text-muted-foreground";
+}
+
+function parseVariantLabels(variants: string | null | undefined): VariantLabelMap {
+  if (!variants?.trim()) return {};
+  const raw = variants.trim();
+  if (!raw.startsWith("[")) return {};
+
+  try {
+    const parsed = JSON.parse(raw) as Array<{
+      key?: string;
+      id?: string;
+      name?: string;
+      value?: string;
+      description?: string;
+    }>;
+
+    const labels: VariantLabelMap = {};
+    for (const variant of parsed) {
+      const key = variant.key ?? variant.id;
+      if (!key) continue;
+      labels[key] = {
+        name: variant.name || variant.description || key,
+        value: variant.value,
+      };
+    }
+    return labels;
+  } catch {
+    return {};
+  }
+}
+
+function variantName(token: string, labels: VariantLabelMap): string {
+  return labels[token]?.name || token;
+}
+
+function variantTitle(token: string, labels: VariantLabelMap): string | undefined {
+  const label = labels[token];
+  if (!label) return undefined;
+  return label.value ? `${label.name} = ${label.value} (${token})` : `${label.name} (${token})`;
+}
+
+function displayVerdict(section: MetricSection, label: string): string {
+  if (label !== "Guardrail") return section.verdict;
+
+  const harms = section.rows
+    .filter((row) => !row.is_control && row.p_harm !== undefined)
+    .map((row) => row.p_harm!);
+  if (harms.length === 0) return section.verdict;
+  if (harms.some((p) => p >= 0.95)) return "guardrail ALARM - likely regression";
+  if (harms.every((p) => p <= 0.01)) return "guardrail clear";
+  return "guardrail inconclusive - monitor";
 }
 
 /* ── Posterior distribution chart (SVG) ── */
@@ -248,7 +308,7 @@ function PosteriorChart({ section }: { section: MetricSection | null }) {
 }
 
 /* ── SRM badge ── */
-function SrmBadge({ srm }: { srm: SrmCheck }) {
+function SrmBadge({ srm, variantLabels }: { srm: SrmCheck; variantLabels: VariantLabelMap }) {
   const ok = srm.ok;
   const entries = Object.entries(srm.observed);
   return (
@@ -261,7 +321,7 @@ function SrmBadge({ srm }: { srm: SrmCheck }) {
         </span>
       </span>
       <span className="text-muted-foreground">
-        ({entries.map(([v, n]) => `${v}=${n}`).join(", ")})
+        ({entries.map(([v, n]) => `${variantName(v, variantLabels)}=${n}`).join(", ")})
       </span>
     </div>
   );
@@ -339,7 +399,15 @@ function describeValueColumn(section: MetricSection): {
 }
 
 /* ── Metric table (Bayesian) ── */
-function MetricTable({ section, label }: { section: MetricSection | null; label: string }) {
+function MetricTable({
+  section,
+  label,
+  variantLabels,
+}: {
+  section: MetricSection | null;
+  label: string;
+  variantLabels: VariantLabelMap;
+}) {
   if (!section) return null;
   const isProp = section.metric_type === "proportion";
   const typeLabel = section.metric_type + (section.inverse ? " · inverse" : "") + (section.unit ? ` (${section.unit})` : "");
@@ -389,10 +457,21 @@ function MetricTable({ section, label }: { section: MetricSection | null; label:
             {section.rows.map((row) => {
               const signal = row.p_win ?? row.p_harm ?? row.p_increase ?? row.p_decrease_gt5pct;
               const signalLabel = row.p_win !== undefined ? "P(win)" : row.p_harm !== undefined ? "P(harm)" : row.p_increase !== undefined ? "P(increase)" : row.p_decrease_gt5pct !== undefined ? "P(↓>5%)" : "";
-              const isGood = row.p_win !== undefined;
+              const signalClass = row.is_control
+                ? ""
+                : row.p_win !== undefined
+                  ? pColor(signal, 0.95)
+                  : row.p_harm !== undefined
+                    ? guardrailHarmColor(row.p_harm)
+                    : harmColor(signal);
               return (
                 <tr key={row.variant} className="hover:bg-muted/30">
-                  <td className="px-2 py-1 border-b border-border/50 font-semibold">{row.variant}</td>
+                  <td
+                    className="px-2 py-1 border-b border-border/50 font-semibold"
+                    title={variantTitle(row.variant, variantLabels)}
+                  >
+                    {variantName(row.variant, variantLabels)}
+                  </td>
                   <td className="px-2 py-1 border-b border-border/50 tabular-nums text-right">{row.n.toLocaleString()}</td>
                   {isProp && <td className="px-2 py-1 border-b border-border/50 tabular-nums text-right">{row.conversions?.toLocaleString() ?? "—"}</td>}
                   <td className="px-2 py-1 border-b border-border/50 tabular-nums text-right">
@@ -404,7 +483,7 @@ function MetricTable({ section, label }: { section: MetricSection | null; label:
                   <td className="px-2 py-1 border-b border-border/50 tabular-nums text-right">
                     {row.is_control ? "—" : `[${pct(row.ci_lower)}, ${pct(row.ci_upper)}]`}
                   </td>
-                  <td className={`px-2 py-1 border-b border-border/50 tabular-nums text-right ${row.is_control ? "" : isGood ? pColor(signal, 0.95) : harmColor(signal)}`}>
+                  <td className={`px-2 py-1 border-b border-border/50 tabular-nums text-right ${signalClass}`}>
                     {row.is_control ? "—" : signal !== undefined ? `${signalLabel} ${pctPlain(signal)}` : "—"}
                   </td>
                 </tr>
@@ -413,13 +492,13 @@ function MetricTable({ section, label }: { section: MetricSection | null; label:
           </tbody>
         </table>
       </div>
-      <p className="text-xs text-muted-foreground italic">{section.verdict}</p>
+      <p className="text-xs text-muted-foreground italic">{displayVerdict(section, label)}</p>
     </div>
   );
 }
 
 /* ── Bayesian view ── */
-function BayesianView({ data }: { data: BayesianAnalysis }) {
+function BayesianView({ data, variantLabels }: { data: BayesianAnalysis; variantLabels: VariantLabelMap }) {
   return (
     <TooltipProvider delay={150}>
     <div className="space-y-3 text-sm">
@@ -437,12 +516,12 @@ function BayesianView({ data }: { data: BayesianAnalysis }) {
         </div>
       ))}
 
-      <SrmBadge srm={data.srm} />
-      <MetricTable section={data.primary_metric} label="Primary Metric" />
+      <SrmBadge srm={data.srm} variantLabels={variantLabels} />
+      <MetricTable section={data.primary_metric} label="Primary Metric" variantLabels={variantLabels} />
       <PosteriorChart section={data.primary_metric} />
 
       {(data.guardrails ?? []).map((g) => (
-        <MetricTable key={g.event} section={g} label="Guardrail" />
+        <MetricTable key={g.event} section={g} label="Guardrail" variantLabels={variantLabels} />
       ))}
 
       <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs">
@@ -452,7 +531,7 @@ function BayesianView({ data }: { data: BayesianAnalysis }) {
         </span>
         <span className="text-muted-foreground">
           (min {data.sample_check.minimum_per_variant}/variant —{" "}
-          {Object.entries(data.sample_check.variants).map(([v, n]) => `${v}=${n}`).join(", ")})
+          {Object.entries(data.sample_check.variants).map(([v, n]) => `${variantName(v, variantLabels)}=${n}`).join(", ")})
         </span>
       </div>
     </div>
@@ -461,7 +540,7 @@ function BayesianView({ data }: { data: BayesianAnalysis }) {
 }
 
 /* ── Bandit view ── */
-function BanditView({ data }: { data: BanditAnalysis }) {
+function BanditView({ data, variantLabels }: { data: BanditAnalysis; variantLabels: VariantLabelMap }) {
   return (
     <div className="space-y-3 text-sm">
       <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-muted-foreground">
@@ -472,7 +551,7 @@ function BanditView({ data }: { data: BanditAnalysis }) {
         )}
       </div>
 
-      <SrmBadge srm={data.srm} />
+      <SrmBadge srm={data.srm} variantLabels={variantLabels} />
 
       {/* Arm performance */}
       <div className="space-y-1">
@@ -490,7 +569,12 @@ function BanditView({ data }: { data: BanditAnalysis }) {
             <tbody>
               {data.arms.map((arm) => (
                 <tr key={arm.arm} className="hover:bg-muted/30">
-                  <td className={`px-2 py-1 border-b border-border/50 ${arm.arm === data.stopping.best_arm ? "font-semibold" : ""}`}>{arm.arm}</td>
+                  <td
+                    className={`px-2 py-1 border-b border-border/50 ${arm.arm === data.stopping.best_arm ? "font-semibold" : ""}`}
+                    title={variantTitle(arm.arm, variantLabels)}
+                  >
+                    {variantName(arm.arm, variantLabels)}
+                  </td>
                   <td className="px-2 py-1 border-b border-border/50 tabular-nums text-right">{arm.n.toLocaleString()}</td>
                   <td className="px-2 py-1 border-b border-border/50 tabular-nums text-right">{arm.conversions.toLocaleString()}</td>
                   <td className="px-2 py-1 border-b border-border/50 tabular-nums text-right">{pctPlain(arm.rate)}</td>
@@ -516,7 +600,12 @@ function BanditView({ data }: { data: BanditAnalysis }) {
             <tbody>
               {data.thompson_sampling.results.map((r) => (
                 <tr key={r.arm} className="hover:bg-muted/30">
-                  <td className={`px-2 py-1 border-b border-border/50 ${r.arm === data.stopping.best_arm ? "font-semibold" : ""}`}>{r.arm}</td>
+                  <td
+                    className={`px-2 py-1 border-b border-border/50 ${r.arm === data.stopping.best_arm ? "font-semibold" : ""}`}
+                    title={variantTitle(r.arm, variantLabels)}
+                  >
+                    {variantName(r.arm, variantLabels)}
+                  </td>
                   <td className={`px-2 py-1 border-b border-border/50 tabular-nums text-right ${pColor(r.p_best, 0.95)}`}>
                     {r.p_best.toFixed(4)}
                   </td>
@@ -579,7 +668,13 @@ function FlatJsonFallback({ data }: { data: Record<string, unknown> }) {
 }
 
 /* ── Public component ── */
-export function AnalysisView({ content }: { content: string }) {
+export function AnalysisView({
+  content,
+  variants,
+}: {
+  content: string;
+  variants?: string | null;
+}) {
   let data: AnalysisData;
   try {
     data = JSON.parse(content);
@@ -588,8 +683,14 @@ export function AnalysisView({ content }: { content: string }) {
     return <pre className="text-xs whitespace-pre-wrap text-muted-foreground">{content}</pre>;
   }
 
-  if (data.type === "bayesian") return <BayesianView data={data as BayesianAnalysis} />;
-  if (data.type === "bandit") return <BanditView data={data as BanditAnalysis} />;
+  const variantLabels = parseVariantLabels(variants);
+
+  if (data.type === "bayesian") {
+    return <BayesianView data={data as BayesianAnalysis} variantLabels={variantLabels} />;
+  }
+  if (data.type === "bandit") {
+    return <BanditView data={data as BanditAnalysis} variantLabels={variantLabels} />;
+  }
 
   // Fallback: render unknown JSON as a readable key-value table
   return <FlatJsonFallback data={data} />;

@@ -202,6 +202,7 @@ function GuardrailsEditor({ initialRows }: { initialRows: GuardrailRow[] }) {
                   onChange={(e) => update(i, "event", e.target.value)}
                   placeholder="e.g. checkout_abandoned"
                   className="text-xs font-mono h-7"
+                  required
                 />
                 <p className="text-[10px] text-muted-foreground/70">
                   The event key tracked in your application.
@@ -222,6 +223,7 @@ function GuardrailsEditor({ initialRows }: { initialRows: GuardrailRow[] }) {
                       "h-7 w-full rounded-md border border-input bg-transparent px-2 text-xs",
                       "focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50",
                     )}
+                    required
                   >
                     <option value="binary">Binary</option>
                     <option value="continuous">Numeric</option>
@@ -240,6 +242,7 @@ function GuardrailsEditor({ initialRows }: { initialRows: GuardrailRow[] }) {
                       "h-7 w-full rounded-md border border-input bg-transparent px-2 text-xs",
                       "focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50",
                     )}
+                    required
                   >
                     <option value="once">Once per user</option>
                     <option value="count">Count all</option>
@@ -261,6 +264,7 @@ function GuardrailsEditor({ initialRows }: { initialRows: GuardrailRow[] }) {
                       "focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50",
                     )}
                     title="Which direction counts as a regression"
+                    required
                   >
                     <option value="increase_bad">↑ Increases</option>
                     <option value="decrease_bad">↓ Decreases</option>
@@ -357,6 +361,7 @@ function MetricEditForm({
             onChange={(event) => updateMetric("event", event.target.value)}
             placeholder="e.g. purchase_completed"
             className="text-sm font-mono"
+            required
           />
           <p className="text-[10px] text-muted-foreground">
             The event key tracked in your application

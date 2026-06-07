@@ -9,7 +9,6 @@ export type GuidedExperimentStep = {
   completionCriteria: string[];
   mcpStateChecks: string[];
   agentPromptTemplate: string;
-  skipReasonTemplate: string;
 };
 
 export const GUIDED_EXPERIMENT_STEPS: GuidedExperimentStep[] = [
@@ -34,16 +33,16 @@ export const GUIDED_EXPERIMENT_STEPS: GuidedExperimentStep[] = [
       "Use the featbit-release-decision skill as the entry point for experiment {experimentId}.",
       "Read the experiment through FeatBit MCP first.",
       "",
-      "Current UI step: Frame the decision.",
-      "Apply CF-01 and CF-02. If goal or hypothesis is already sufficient, explain why and skip to the next applicable skill.",
-      "Otherwise run intent-shaping and hypothesis-design.",
+      "User-facing task: {userGoal}",
+      "Apply CF-01 and CF-02 through intent-shaping and hypothesis-design.",
       "",
-      "Completion criteria: {completionCriteria}",
-      "Persist updates with featbit_release_decision_update_experiment and advance stage through MCP.",
-      "Do not ask the user to manually enter variants or observed data.",
+      "Act like a release-decision coach, not a batch job. If the experiment is blank or missing key decision fields, do not recap empty fields and do not persist placeholder text. Ask one short direct question to help the user clarify the experiment.",
+      "For a blank experiment, start with exactly this question: What are you trying to improve or learn?",
+      "As the user answers, extract the measurable business goal, original intent, specific reversible change, falsifiable hypothesis, audience, expected metric direction, causal reason, and open constraints. Ask only one question at a time.",
+      "Suggest a concise draft when enough information exists, then confirm it before writing it back through MCP.",
+      "Only call featbit_release_decision_update_experiment with concrete user-grounded fields. Only advance stage through MCP when all completion criteria are satisfied: {completionCriteria}",
+      "Do not ask the user for variants, rollout percentages, metric event keys, or observed data in this step.",
     ].join("\n"),
-    skipReasonTemplate:
-      "Goal and hypothesis are already present in MCP state. The agent should verify falsifiability and skip shaping work that is already satisfied.",
   },
   {
     key: "exposure",
@@ -72,16 +71,15 @@ export const GUIDED_EXPERIMENT_STEPS: GuidedExperimentStep[] = [
       "Use the featbit-release-decision skill as the entry point for experiment {experimentId}.",
       "Read the experiment through FeatBit MCP first.",
       "",
-      "Current UI step: Control exposure.",
-      "Apply CF-03 and CF-04. If the FeatBit flag is already bound and variation mapping comes from the actual flag, explain why and skip flag setup.",
-      "Otherwise run reversible-exposure-control.",
+      "User-facing task: {userGoal}",
+      "Apply CF-03 and CF-04 through reversible-exposure-control.",
       "",
-      "Completion criteria: {completionCriteria}",
-      "Persist updates with featbit_release_decision_update_experiment, update run exposure fields through MCP, and advance stage through MCP.",
-      "Do not ask the user to manually enter variants or observed data.",
+      "Act like a release-decision coach. Help the user make the change reversible and decide who should see it first.",
+      "Use MCP to inspect available FeatBit flags and real flag variations where possible. Do not ask the user to manually type variant values that MCP can read.",
+      "If a flag is missing, ask which existing flag or new gated change should represent the experiment. If rollout or rollback logic is missing, ask one short question at a time.",
+      "Persist only concrete flag, audience, rollout, and rollback decisions through MCP. Only advance stage when all completion criteria are satisfied: {completionCriteria}",
+      "Do not ask the user for metric event keys or observed data in this step.",
     ].join("\n"),
-    skipReasonTemplate:
-      "The experiment already has a FeatBit flag and stored variations from the flag configuration. The agent should verify rollout and rollback conditions before moving on.",
   },
   {
     key: "measure",
@@ -110,16 +108,16 @@ export const GUIDED_EXPERIMENT_STEPS: GuidedExperimentStep[] = [
       "Use the featbit-release-decision skill as the entry point for experiment {experimentId}.",
       "Read the experiment through FeatBit MCP first.",
       "",
-      "Current UI step: Measure and run.",
-      "Apply CF-05 and CF-06. If primary metric, guardrails, event instrumentation, and run setup are already sufficient, explain why and skip to evidence sufficiency.",
-      "Otherwise run measurement-design and experiment-workspace.",
+      "User-facing task: {userGoal}",
+      "Apply CF-05 and CF-06 through measurement-design and experiment-workspace.",
       "",
-      "Completion criteria: {completionCriteria}",
-      "Use FeatBit managed flag evaluation data and FeatBit metric event data. Third-party API evidence is only planned and must not be used for actual analysis yet.",
-      "Persist metric and run updates through MCP. Do not ask the user to manually enter variants or observed data.",
+      "Act like a release-decision coach. Help the user define one deciding metric, a small set of guardrails, the event instrumentation, and the run window.",
+      "Ask one short question at a time when the metric contract is missing or ambiguous. Prefer event names that already exist in FeatBit when MCP can discover them.",
+      "Use FeatBit managed flag evaluation data and FeatBit metric event data as the evidence source. Third-party API evidence is only planned and must not be used for actual analysis yet.",
+      "When the primary metric event, type, aggregation, or guardrails are confirmed, write them with featbit_release_decision_update_metrics. Do not store the technical metric contract only as free text in featbit_release_decision_update_experiment.",
+      "Persist metric and run updates through MCP only when the user has provided or confirmed concrete values. Only advance stage when all completion criteria are satisfied: {completionCriteria}",
+      "Do not ask the user to manually enter variants or observed data.",
     ].join("\n"),
-    skipReasonTemplate:
-      "Metric and run state already exist. The agent should check evidence sufficiency before recommending a decision.",
   },
   {
     key: "decide",
@@ -148,16 +146,15 @@ export const GUIDED_EXPERIMENT_STEPS: GuidedExperimentStep[] = [
       "Use the featbit-release-decision skill as the entry point for experiment {experimentId}.",
       "Read the experiment through FeatBit MCP first.",
       "",
-      "Current UI step: Decide and learn.",
-      "Apply CF-06, CF-07, and CF-08. If evidence is insufficient, stop at evidence sufficiency and do not fabricate a decision.",
-      "If a decision already exists, run learning-capture; otherwise run evidence-analysis first.",
+      "User-facing task: {userGoal}",
+      "Apply CF-06, CF-07, and CF-08 through evidence-analysis and learning-capture.",
       "",
-      "Completion criteria: {completionCriteria}",
-      "Persist analysis, decision fields, and learning with FeatBit MCP tools.",
+      "Act like a release-decision coach. Help the user decide whether the evidence supports CONTINUE, PAUSE, ROLLBACK CANDIDATE, or INCONCLUSIVE.",
+      "If evidence is missing or insufficient, explain the smallest next evidence action instead of forcing a decision.",
+      "If a decision exists, guide the user to capture what changed, what happened, why, and what should be tried next.",
+      "Persist analysis, decision fields, and learning through MCP only when grounded in available evidence or explicit user confirmation. Only treat the step as complete when all completion criteria are satisfied: {completionCriteria}",
       "Do not ask the user to manually enter variants or observed data.",
     ].join("\n"),
-    skipReasonTemplate:
-      "A decision exists before learning capture. The agent should capture durable learning and seed the next intent.",
   },
 ];
 

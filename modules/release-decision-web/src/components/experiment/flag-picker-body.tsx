@@ -18,7 +18,12 @@ import { Search, Loader2, AlertCircle } from "lucide-react";
 
 function variationsToVariantsJson(variations: IVariation[]) {
   return JSON.stringify(
-    variations.map((v) => ({ key: v.name, description: v.value })),
+    variations.map((v) => ({
+      key: v.id,
+      name: v.name,
+      value: v.value,
+      description: v.value ? `${v.name} (${v.value})` : v.name,
+    })),
   );
 }
 

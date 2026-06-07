@@ -44,10 +44,54 @@ function emitSessionExpired() {
   window.dispatchEvent(new CustomEvent(SESSION_EXPIRED_EVENT));
 }
 
-// Kept for source compatibility with components that imported it. Angular owns
-// the real refresh flow for the shared token.
+let refreshPromise: Promise<boolean> | null = null;
+
 export async function refreshAccessToken(): Promise<boolean> {
+  if (refreshPromise) return refreshPromise;
+  refreshPromise = doRefreshAccessToken().finally(() => {
+    refreshPromise = null;
+  });
+  return refreshPromise;
+}
+
+async function doRefreshAccessToken(): Promise<boolean> {
+  if (typeof window === "undefined") return false;
+
+  const response = await fetch(buildUrl("/identity/refresh-token"), {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: "{}",
+  });
+
+  if (!response.ok) return false;
+
+  const text = await response.text();
+  let parsed: unknown;
+  try {
+    parsed = text ? JSON.parse(text) : undefined;
+  } catch {
+    return false;
+  }
+
+  const token = extractToken(parsed);
+  if (!token) return false;
+
+  window.localStorage.setItem("token", token);
   return true;
+}
+
+function extractToken(parsed: unknown): string | null {
+  if (!parsed || typeof parsed !== "object") return null;
+  const obj = parsed as Record<string, unknown>;
+  if ("success" in obj && obj.success && obj.data && typeof obj.data === "object") {
+    const data = obj.data as Record<string, unknown>;
+    return typeof data.token === "string" ? data.token : null;
+  }
+  return typeof obj.token === "string" ? obj.token : null;
 }
 
 function contextHeaders(): Record<string, string> {
@@ -68,6 +112,16 @@ function authHeaders(skipAuth?: boolean): Record<string, string> {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
+function shouldRefresh(path: string, skipAuth?: boolean): boolean {
+  if (skipAuth) return false;
+  return ![
+    "/identity/refresh-token",
+    "/identity/login-by-email",
+    "/oidc/login",
+    "/social/login",
+  ].some((x) => path.includes(x));
+}
+
 export async function apiRequest<T = unknown>(
   path: string,
   options: RequestOptions = {},
@@ -75,22 +129,32 @@ export async function apiRequest<T = unknown>(
   const { body, query, raw, headers, skipAuth, ...rest } = options;
   const url = buildUrl(path, query);
 
-  const init: RequestInit = {
-    ...rest,
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      ...authHeaders(skipAuth),
-      ...contextHeaders(),
-      ...(headers || {}),
-    },
+  const buildInit = (): RequestInit => {
+    const init: RequestInit = {
+      ...rest,
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        ...authHeaders(skipAuth),
+        ...contextHeaders(),
+        ...(headers || {}),
+      },
+    };
+    if (body !== undefined) {
+      init.body = typeof body === "string" ? body : JSON.stringify(body);
+    }
+    return init;
   };
-  if (body !== undefined) {
-    init.body = typeof body === "string" ? body : JSON.stringify(body);
-  }
 
-  const response = await fetch(url, init);
+  let response = await fetch(url, buildInit());
+
+  if (response.status === 401 && shouldRefresh(path, skipAuth)) {
+    const refreshed = await refreshAccessToken();
+    if (refreshed) {
+      response = await fetch(url, buildInit());
+    }
+  }
 
   if (response.status === 401) {
     emitSessionExpired();

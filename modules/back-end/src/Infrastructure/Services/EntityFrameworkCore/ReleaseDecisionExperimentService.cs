@@ -2,6 +2,8 @@ using Application.Bases.Models;
 using Application.Bases.Exceptions;
 using Application.ExperimentStats;
 using Application.ReleaseDecisions;
+using Application.Services;
+using Domain.FeatureFlags;
 using Domain.ReleaseDecisions;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
@@ -10,9 +12,13 @@ namespace Infrastructure.Services.EntityFrameworkCore;
 
 public class ReleaseDecisionExperimentService(
     AppDbContext dbContext,
-    IExperimentStatsService statsService)
+    IExperimentStatsService statsService,
+    IFeatureFlagService featureFlagService)
     : IReleaseDecisionExperimentService
 {
+    private const double GuardrailHealthyHarmProbability = 0.01;
+    private const double GuardrailAlarmHarmProbability = 0.95;
+
     public async Task<ReleaseDecisionExperimentVm> CreateAsync(ReleaseDecisionExperiment experiment)
     {
         await dbContext.Set<ReleaseDecisionExperiment>().AddAsync(experiment);
@@ -41,6 +47,7 @@ public class ReleaseDecisionExperimentService(
             throw new EntityNotFoundException(nameof(ReleaseDecisionExperiment), $"{envId}-{id}");
         }
 
+        await AlignRunsForReadAsync(envId, experiment);
         return ToDetailVm(experiment);
     }
 
@@ -180,7 +187,7 @@ public class ReleaseDecisionExperimentService(
 
     public async Task<ReleaseDecisionExperimentDetailVm> CreateRunAsync(Guid envId, Guid id)
     {
-        await EnsureExperimentExistsAsync(envId, id);
+        var experiment = await GetTrackedExperimentAsync(envId, id);
 
         var existingRuns = await dbContext.Set<ReleaseDecisionExperimentRun>()
             .Where(x => x.ExperimentId == id)
@@ -225,6 +232,8 @@ public class ReleaseDecisionExperimentService(
             CreatedAt = now,
             UpdatedAt = now
         };
+        HydrateRunMetricConfig(run, experiment);
+        await AlignRunVariantsAsync(envId, experiment, run, inferMissing: true);
 
         await dbContext.Set<ReleaseDecisionExperimentRun>().AddAsync(run);
         await AddActivityAsync(
@@ -264,10 +273,11 @@ public class ReleaseDecisionExperimentService(
         ReleaseDecisionExperimentRunUpdate update)
     {
         update ??= new ReleaseDecisionExperimentRunUpdate();
-        await EnsureExperimentExistsAsync(envId, id);
+        var experiment = await GetTrackedExperimentAsync(envId, id);
 
         var run = await GetTrackedRunAsync(id, runId);
         ApplyRunUpdate(run, update);
+        await AlignRunVariantsAsync(envId, experiment, run, inferMissing: false);
         run.UpdatedAt = DateTime.UtcNow;
 
         await AddActivityAsync(id, "note", $"Experiment run updated: {run.Slug}", null, run.UpdatedAt);
@@ -335,6 +345,8 @@ public class ReleaseDecisionExperimentService(
         request ??= new ReleaseDecisionExperimentRunAnalyzeRequest();
         var experiment = await GetTrackedExperimentAsync(envId, id);
         var run = await GetTrackedRunAsync(id, runId);
+        HydrateRunMetricConfig(run, experiment);
+        await AlignRunVariantsAsync(envId, experiment, run, inferMissing: true);
         var primaryMetricEvent = Normalize(run.PrimaryMetricEvent);
 
         if (string.IsNullOrWhiteSpace(experiment.FlagKey))
@@ -536,6 +548,185 @@ public class ReleaseDecisionExperimentService(
             .Include(x => x.Messages);
     }
 
+    private async Task AlignRunsForReadAsync(Guid envId, ReleaseDecisionExperiment experiment)
+    {
+        var flag = await TryGetBoundFeatureFlagAsync(envId, experiment);
+        if (flag == null)
+        {
+            return;
+        }
+
+        experiment.Variants = BuildFeatureFlagVariantsJson(flag);
+        foreach (var run in experiment.ExperimentRuns)
+        {
+            AlignRunVariants(run, flag, inferMissing: false);
+        }
+    }
+
+    private async Task AlignRunVariantsAsync(
+        Guid envId,
+        ReleaseDecisionExperiment experiment,
+        ReleaseDecisionExperimentRun run,
+        bool inferMissing)
+    {
+        var flag = await TryGetBoundFeatureFlagAsync(envId, experiment);
+        if (flag == null)
+        {
+            return;
+        }
+
+        experiment.Variants = BuildFeatureFlagVariantsJson(flag);
+        AlignRunVariants(run, flag, inferMissing);
+    }
+
+    private async Task<FeatureFlag?> TryGetBoundFeatureFlagAsync(
+        Guid envId,
+        ReleaseDecisionExperiment experiment)
+    {
+        var flagKey = Normalize(experiment.FlagKey);
+        if (string.IsNullOrWhiteSpace(flagKey))
+        {
+            return null;
+        }
+
+        try
+        {
+            return await featureFlagService.GetAsync(envId, flagKey);
+        }
+        catch (EntityNotFoundException)
+        {
+            return null;
+        }
+    }
+
+    private static void AlignRunVariants(
+        ReleaseDecisionExperimentRun run,
+        FeatureFlag flag,
+        bool inferMissing)
+    {
+        var variations = flag.Variations?
+            .Where(x => !string.IsNullOrWhiteSpace(x.Id))
+            .ToArray() ?? [];
+        if (variations.Length == 0)
+        {
+            return;
+        }
+
+        if (inferMissing &&
+            TryResolveNamedControlAndTreatments(variations, out var namedControl, out var namedTreatments))
+        {
+            run.ControlVariant = namedControl;
+            run.TreatmentVariant = string.Join("|", namedTreatments);
+            return;
+        }
+
+        var control = ResolveVariantId(run.ControlVariant, variations);
+        if (string.IsNullOrWhiteSpace(control) && inferMissing)
+        {
+            control = PickControlVariationId(flag, variations);
+        }
+
+        var treatments = SplitTreatments(run.TreatmentVariant)
+            .Select(x => ResolveVariantId(x, variations))
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Where(x => string.IsNullOrWhiteSpace(control) || !VariantTokenEquals(x, control))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        if (treatments.Length == 0 && inferMissing && !string.IsNullOrWhiteSpace(control))
+        {
+            treatments = variations
+                .Where(x => !VariantTokenEquals(x.Id, control))
+                .OrderBy(x => IsTreatmentVariation(x) ? 0 : 1)
+                .Select(x => x.Id)
+                .ToArray();
+        }
+
+        if (!string.IsNullOrWhiteSpace(control))
+        {
+            run.ControlVariant = control;
+        }
+
+        if (treatments.Length > 0)
+        {
+            run.TreatmentVariant = string.Join("|", treatments);
+        }
+    }
+
+    private static bool TryResolveNamedControlAndTreatments(
+        IReadOnlyCollection<Variation> variations,
+        out string control,
+        out string[] treatments)
+    {
+        control = variations.FirstOrDefault(IsControlVariation)?.Id ?? string.Empty;
+        treatments = variations
+            .Where(IsTreatmentVariation)
+            .Select(x => x.Id)
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .ToArray();
+
+        return !string.IsNullOrWhiteSpace(control) && treatments.Length > 0;
+    }
+
+    private static string? ResolveVariantId(
+        string? token,
+        IReadOnlyCollection<Variation> variations)
+    {
+        var normalized = Normalize(token);
+        if (string.IsNullOrWhiteSpace(normalized))
+        {
+            return null;
+        }
+
+        var matched = variations.FirstOrDefault(x =>
+            VariantTokenEquals(x.Id, normalized) ||
+            VariantTokenEquals(x.Name, normalized) ||
+            VariantTokenEquals(x.Value, normalized));
+
+        return matched?.Id ?? normalized;
+    }
+
+    private static string? PickControlVariationId(
+        FeatureFlag flag,
+        IReadOnlyCollection<Variation> variations)
+    {
+        return variations.FirstOrDefault(IsControlVariation)?.Id
+            ?? variations.FirstOrDefault(x => VariantTokenEquals(x.Id, flag.DisabledVariationId))?.Id
+            ?? variations.First().Id;
+    }
+
+    private static bool IsControlVariation(Variation variation)
+    {
+        return VariantTokenEquals(variation.Name, "control");
+    }
+
+    private static bool IsTreatmentVariation(Variation variation)
+    {
+        return VariantTokenEquals(variation.Name, "treatment");
+    }
+
+    private static bool VariantTokenEquals(string? left, string? right)
+    {
+        return string.Equals(Normalize(left), Normalize(right), StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string BuildFeatureFlagVariantsJson(FeatureFlag flag)
+    {
+        var rows = (flag.Variations ?? [])
+            .Where(x => !string.IsNullOrWhiteSpace(x.Id))
+            .Select(x => new
+            {
+                key = x.Id,
+                name = x.Name,
+                value = x.Value,
+                description = string.IsNullOrWhiteSpace(x.Value)
+                    ? x.Name
+                    : $"{x.Name} ({x.Value})"
+            });
+
+        return JsonSerializer.Serialize(rows);
+    }
+
     private static ReleaseDecisionExperimentDetailVm ToDetailVm(ReleaseDecisionExperiment experiment)
     {
         var vm = new ReleaseDecisionExperimentDetailVm
@@ -569,7 +760,7 @@ public class ReleaseDecisionExperimentService(
             UpdatedAt = experiment.UpdatedAt,
             ExperimentRuns = experiment.ExperimentRuns
                 .OrderByDescending(x => x.CreatedAt)
-                .Select(ToRunVm)
+                .Select(x => ToRunVm(x, experiment))
                 .ToArray(),
             Activities = experiment.Activities
                 .OrderByDescending(x => x.CreatedAt)
@@ -585,8 +776,15 @@ public class ReleaseDecisionExperimentService(
         return vm;
     }
 
-    private static ReleaseDecisionExperimentRunVm ToRunVm(ReleaseDecisionExperimentRun run)
+    private static ReleaseDecisionExperimentRunVm ToRunVm(
+        ReleaseDecisionExperimentRun run,
+        ReleaseDecisionExperiment? experiment = null)
     {
+        if (experiment != null)
+        {
+            HydrateRunMetricConfig(run, experiment);
+        }
+
         return new ReleaseDecisionExperimentRunVm
         {
             Id = run.Id,
@@ -722,6 +920,64 @@ public class ReleaseDecisionExperimentService(
         if (update.PriorStddev.HasValue) run.PriorStddev = update.PriorStddev;
         if (update.TrafficPercent.HasValue) run.TrafficPercent = Math.Clamp(update.TrafficPercent.Value, 1, 100);
         if (update.TrafficOffset.HasValue) run.TrafficOffset = Math.Clamp(update.TrafficOffset.Value, 0, 99);
+    }
+
+    private static void HydrateRunMetricConfig(
+        ReleaseDecisionExperimentRun run,
+        ReleaseDecisionExperiment experiment)
+    {
+        if (string.IsNullOrWhiteSpace(run.PrimaryMetricEvent) &&
+            TryReadPrimaryMetric(experiment.PrimaryMetric, out var primary))
+        {
+            run.PrimaryMetricEvent = primary.Event;
+            run.MetricDescription = Normalize(run.MetricDescription, primary.Description ?? primary.Name);
+            run.PrimaryMetricType = NormalizeMetricType(primary.MetricType ?? run.PrimaryMetricType);
+            run.PrimaryMetricAgg = NormalizeMetricAgg(primary.MetricAgg ?? run.PrimaryMetricAgg);
+        }
+
+        if (string.IsNullOrWhiteSpace(run.GuardrailEvents))
+        {
+            run.GuardrailEvents = BuildGuardrailEventsJson(experiment.Guardrails);
+        }
+    }
+
+    private static bool TryReadPrimaryMetric(
+        string? raw,
+        out (string Event, string? Name, string? Description, string? MetricType, string? MetricAgg) primary)
+    {
+        primary = default;
+        if (string.IsNullOrWhiteSpace(raw))
+        {
+            return false;
+        }
+
+        try
+        {
+            using var document = JsonDocument.Parse(raw);
+            var root = document.RootElement;
+            if (root.ValueKind != JsonValueKind.Object)
+            {
+                return false;
+            }
+
+            var eventName = GetJsonString(root, "event");
+            if (string.IsNullOrWhiteSpace(eventName))
+            {
+                return false;
+            }
+
+            primary = (
+                eventName,
+                GetJsonString(root, "name"),
+                GetJsonString(root, "description"),
+                GetJsonString(root, "metricType"),
+                GetJsonString(root, "metricAgg"));
+            return true;
+        }
+        catch (JsonException)
+        {
+            return false;
+        }
     }
 
     private static string? Normalize(string? value, string? fallback = null)
@@ -1143,11 +1399,11 @@ public class ReleaseDecisionExperimentService(
                 if (isGuardrail)
                 {
                     var pHarm = 1 - bay.ChanceToWin;
-                    verdicts.Add(pHarm < 0.1
-                        ? $"{prefix}guardrail healthy"
-                        : pHarm < 0.3
-                            ? $"{prefix}guardrail borderline - monitor"
-                            : $"{prefix}guardrail ALARM - possible regression");
+                    verdicts.Add(pHarm <= GuardrailHealthyHarmProbability
+                        ? $"{prefix}guardrail clear"
+                        : pHarm >= GuardrailAlarmHarmProbability
+                            ? $"{prefix}guardrail ALARM - likely regression"
+                            : $"{prefix}guardrail inconclusive - monitor");
                 }
                 else
                 {

@@ -7,7 +7,6 @@ import {
   Copy,
   KeyRound,
   LockKeyhole,
-  Terminal,
   Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -109,8 +108,6 @@ export function CodingAgentSetupDialogContent({
 }`;
   const skillInstallCommand = "npx skills add featbit/featbit-release-decision-skills";
   const skillUpdateCommand = "npx skills update featbit/featbit-release-decision-skills";
-  const codexStartCommand = `$env:FEATBIT_MCP_TOKEN="${powerShellToken}"; codex`;
-  const codexResumeCommand = `$env:FEATBIT_MCP_TOKEN="${powerShellToken}"; codex resume <conversation-id>`;
   const tokenLifetimeLabel = token ? formatDuration(token.expires_in) : null;
   const tokenExpired = token ? new Date(token.expires_at).getTime() <= Date.now() : false;
 
@@ -118,19 +115,22 @@ export function CodingAgentSetupDialogContent({
     {
       id: "powershell",
       label: "PowerShell",
-      description: "Use this before starting the agent from PowerShell.",
+      description:
+        "FEATBIT_MCP_TOKEN is the environment variable that stores the token created above.",
       command: `$env:FEATBIT_MCP_TOKEN="${powerShellToken}"`,
     },
     {
       id: "bash",
       label: "bash",
-      description: "Use this before starting the agent from bash.",
+      description:
+        "FEATBIT_MCP_TOKEN is the environment variable that stores the token created above.",
       command: `export FEATBIT_MCP_TOKEN='${shellToken}'`,
     },
     {
       id: "zsh",
       label: "zsh",
-      description: "Use this before starting the agent from zsh.",
+      description:
+        "FEATBIT_MCP_TOKEN is the environment variable that stores the token created above.",
       command: `export FEATBIT_MCP_TOKEN='${shellToken}'`,
     },
   ];
@@ -144,7 +144,7 @@ export function CodingAgentSetupDialogContent({
       description: "Use your current Codex conversation.",
       commandTitle: "Codex MCP registration",
       commandHelp:
-        "Run once. Codex stores the server URL and token environment-variable name.",
+        "Run once. Codex stores the MCP URL and reads the bearer token from FEATBIT_MCP_TOKEN.",
       commandValue: addServerCommand,
       commandMaxLines: 3,
     },
@@ -279,12 +279,49 @@ export function CodingAgentSetupDialogContent({
 
   return (
     <div className="space-y-4">
+      <div className="rounded-md border border-primary/25 bg-primary/[0.035] px-3 py-2.5 text-xs leading-relaxed text-muted-foreground">
+        <div className="font-semibold text-foreground">Before you start</div>
+        <ul className="mt-1.5 space-y-1">
+          <li className="flex gap-2">
+            <Check className="mt-0.5 size-3.5 shrink-0 text-primary" />
+            Use Codex, Claude Code, Copilot CLI, OpenCode, or another
+            MCP-capable coding agent.
+          </li>
+          <li className="flex gap-2">
+            <Check className="mt-0.5 size-3.5 shrink-0 text-primary" />
+            Install the FeatBit release-decision skill at the user or project
+            level.
+          </li>
+          <li className="flex gap-2">
+            <Check className="mt-0.5 size-3.5 shrink-0 text-primary" />
+            Connect the FeatBit MCP server. It runs on the same port as the API:
+            <code className="font-mono text-foreground">http://localhost:5000/mcp</code>.
+          </li>
+        </ul>
+      </div>
+
       <SetupSection
-        icon={<KeyRound className="size-4" />}
-        title="1. Create MCP token"
+        icon={<ClipboardList className="size-4" />}
+        title="1. Install release-decision skills"
       >
         <p>
-          The token uses your FeatBit user permissions for this environment.
+          Install once at the user or project level, then update when the skill
+          package changes.
+        </p>
+        <div className="mt-3 space-y-2">
+          <CodeBlock value={skillInstallCommand} />
+          <CodeBlock value={skillUpdateCommand} />
+        </div>
+      </SetupSection>
+
+      <SetupSection
+        icon={<LockKeyhole className="size-4" />}
+        title="2. Connect FeatBit MCP"
+      >
+        <p>
+          Create a scoped token, then register the MCP server in your coding
+          agent. <code>FEATBIT_MCP_TOKEN</code> is the shell variable that holds
+          the token created here.
         </p>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <Button
@@ -330,74 +367,34 @@ export function CodingAgentSetupDialogContent({
             <CodeBlock value={token.access_token} maxLines={3} />
           </div>
         )}
-      </SetupSection>
 
-      <SetupSection
-        icon={<LockKeyhole className="size-4" />}
-        title="2. Register FeatBit MCP"
-      >
-        <SegmentedTabs
-          ariaLabel="Coding agent"
-          options={agentOptions}
-          value={selectedAgent}
-          onChange={setSelectedAgent}
-        />
-        <CommandGroup title={selectedAgentOption.commandTitle}>
-          <p className="mb-2">{selectedAgentOption.commandHelp}</p>
-          <CodeBlock
-            value={selectedAgentOption.commandValue}
-            maxLines={selectedAgentOption.commandMaxLines}
-          />
-        </CommandGroup>
-      </SetupSection>
-
-      <SetupSection
-        icon={<Terminal className="size-4" />}
-        title="3. Start or resume the agent"
-      >
-        {selectedAgent === "codex" ? (
-          <div className="space-y-3">
-            <CommandGroup title="Start fresh Codex with this token">
-              <CodeBlock value={codexStartCommand} maxLines={3} />
-            </CommandGroup>
-            <CommandGroup title="Resume Codex with this token">
-              <p className="mb-2">
-                Replace <code>&lt;conversation-id&gt;</code> with the resume id
-                printed by Codex.
-              </p>
-              <CodeBlock value={codexResumeCommand} maxLines={3} />
-            </CommandGroup>
-          </div>
-        ) : (
-          <div className="space-y-3">
+        <div className="mt-4 space-y-3">
+          <CommandGroup title="Set the MCP token environment variable">
             <SegmentedTabs
               ariaLabel="Shell"
               options={shellOptions.map(({ id, label }) => ({ id, label }))}
               value={selectedShell}
               onChange={setSelectedShell}
             />
-            <CommandGroup title={selectedShellOption.label}>
-              <p className="mb-2">{selectedShellOption.description}</p>
-              <CodeBlock
-                value={selectedShellOption.command}
-                maxLines={selectedShellOption.maxLines}
-              />
-            </CommandGroup>
-          </div>
-        )}
-      </SetupSection>
-
-      <SetupSection
-        icon={<ClipboardList className="size-4" />}
-        title="4. Install or update release-decision skills"
-      >
-        <p>
-          Skills define the release-decision reasoning loop. MCP owns FeatBit
-          reads and writes.
-        </p>
-        <div className="mt-3 space-y-2">
-          <CodeBlock value={skillInstallCommand} />
-          <CodeBlock value={skillUpdateCommand} />
+            <p className="mb-2 mt-2">{selectedShellOption.description}</p>
+            <CodeBlock
+              value={selectedShellOption.command}
+              maxLines={selectedShellOption.maxLines}
+            />
+          </CommandGroup>
+          <SegmentedTabs
+            ariaLabel="Coding agent"
+            options={agentOptions}
+            value={selectedAgent}
+            onChange={setSelectedAgent}
+          />
+          <CommandGroup title={selectedAgentOption.commandTitle}>
+            <p className="mb-2">{selectedAgentOption.commandHelp}</p>
+            <CodeBlock
+              value={selectedAgentOption.commandValue}
+              maxLines={selectedAgentOption.commandMaxLines}
+            />
+          </CommandGroup>
         </div>
       </SetupSection>
     </div>

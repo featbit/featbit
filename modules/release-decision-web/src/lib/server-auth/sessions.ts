@@ -82,7 +82,7 @@ function unseal(value: string): ServerSession | null {
   }
 
   const expiresAt = new Date(payload.expiresAt);
-  if (Number.isNaN(expiresAt.getTime()) || expiresAt.getTime() <= Date.now()) return null;
+  if (Number.isNaN(expiresAt.getTime())) return null;
 
   const refreshedAt = new Date(payload.refreshedAt);
   return {

@@ -399,6 +399,7 @@ function SummaryTab({
   analysisPanel?: React.ReactNode;
 }) {
   const hasDecision = Boolean(exp.decision);
+  const decisionReason = sanitizeDecisionReason(exp.decisionReason);
 
   return (
     <div className="px-4 pb-6 space-y-4">
@@ -429,13 +430,13 @@ function SummaryTab({
       <DecisionCallout run={exp} />
 
       {/* Technical rationale */}
-      {exp.decisionReason && (
+      {decisionReason && (
         <div>
           <SectionLabel
             icon={<Target className="size-3" />}
-            label="Technical Rationale"
+            label="Evidence Rationale"
           />
-          <CollapsibleRationale>{exp.decisionReason}</CollapsibleRationale>
+          <CollapsibleRationale>{decisionReason}</CollapsibleRationale>
         </div>
       )}
 
@@ -591,12 +592,14 @@ function AnalysisTab({
   experimentId,
   flagKey,
   featbitEnvId,
+  variants,
   embedded = false,
 }: {
   exp: ExperimentRun;
   experimentId: string;
   flagKey: string | null;
   featbitEnvId: string | null;
+  variants: string | null;
   embedded?: boolean;
 }) {
   // Pre-check what the backend requires. Rendering a config gap here beats
@@ -785,10 +788,33 @@ function AnalysisTab({
         <p className="mb-2 text-sm text-amber-600 dark:text-amber-400">{warning}</p>
       )}
       <div className="rounded border bg-muted/20 px-3 py-2.5">
-        <AnalysisView content={analysisResult} />
+        <AnalysisView content={analysisResult} variants={variants} />
       </div>
     </div>
   );
+}
+
+function sanitizeDecisionReason(value: string | null | undefined): string | null {
+  if (!value?.trim()) return null;
+
+  const blocked = [
+    "analyze_run",
+    "usable Bayesian schema",
+    "analysisResult",
+    "sample_check",
+    "primary_metric",
+    "guardrail sections",
+    "featbit_release_decision_",
+    "MCP tool",
+  ];
+
+  const paragraphs = value
+    .split(/\n{2,}/)
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .filter((part) => !blocked.some((token) => part.toLowerCase().includes(token.toLowerCase())));
+
+  return paragraphs.join("\n\n") || null;
 }
 
 function TrafficTab({
@@ -896,7 +922,7 @@ function buildDecisionPrompt({
     "2. Inspect the selected run, current analysisResult, observation window, primary metric, guardrails, minimum sample, SRM result, and risk values.",
     "3. If analysis is missing or clearly unusable, call featbit_release_decision_analyze_run for this run with forceFresh=true, then read the refreshed experiment. If the refreshed analysisResult is only a stats_ready/raw-stats summary, do not make a rollout decision; report the analyzer mismatch.",
     "4. Apply evidence-analysis. Pick exactly one API decision value: CONTINUE, PAUSE, ROLLBACK, or INCONCLUSIVE. If the skill frames it as ROLLBACK CANDIDATE, persist ROLLBACK.",
-    "5. Call featbit_release_decision_update_run for this run and write decision, decisionSummary, decisionReason, and status=\"decided\". decisionSummary must start with a plain-language feature-flag action: for CONTINUE say whether to move treatment to 100% or expand gradually; for PAUSE say hold the current rollout; for ROLLBACK say route users back to control/default; for INCONCLUSIVE say keep observing or fix measurement before changing rollout.",
+    "5. Call featbit_release_decision_update_run for this run and write decision, decisionSummary, decisionReason, and status=\"decided\". decisionSummary must start with a plain-language feature-flag action: for CONTINUE say whether to move treatment to 100% or expand gradually; for PAUSE say hold the current rollout; for ROLLBACK say route users back to control/default; for INCONCLUSIVE say keep observing or fix measurement before changing rollout. decisionReason must be an evidence rationale for product/release readers: cite the primary metric, guardrail interpretation, SRM/sample health, and rollout risk. Do not mention tool calls, MCP, analyze_run, schemas, JSON field names, or whether you reused an existing analysisResult.",
     "6. Call featbit_release_decision_update_experiment with lastAction=\"Decision: <category>\". Do not move the stage to learning unless learning-capture is explicitly requested.",
     "7. Optionally call featbit_release_decision_add_message with a short assistant summary of what was decided and why.",
     "",
@@ -1016,12 +1042,14 @@ export function ExperimentRunTable({
   experimentId,
   flagKey,
   featbitEnvId,
+  variants,
   isSequential,
 }: {
   experimentRuns: ExperimentRun[];
   experimentId: string;
   flagKey: string | null;
   featbitEnvId: string | null;
+  variants: string | null;
   isSequential: boolean;
 }) {
   // Tab order = **creation order** (Phase 1 = first created). The parent's
@@ -1191,6 +1219,7 @@ export function ExperimentRunTable({
                 experimentId={experimentId}
                 flagKey={flagKey}
                 featbitEnvId={featbitEnvId}
+                variants={variants}
                 embedded
               />
             }

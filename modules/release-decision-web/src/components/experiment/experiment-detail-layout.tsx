@@ -190,9 +190,9 @@ export function ExperimentDetailLayout({
               Optional coding-agent setup
             </DialogTitle>
             <DialogDescription className="text-xs">
-              Connect Codex or another MCP-capable agent when you want it to
-              read and update this experiment. You can keep using the workflow
-              manually and skip this step.
+              Prepare a coding agent, install the release-decision skill, then
+              connect FeatBit MCP when you want the agent to read and update
+              this experiment.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 text-sm">
@@ -244,8 +244,8 @@ export function ExperimentDetailLayout({
               Coding-agent setup
             </DialogTitle>
             <DialogDescription className="text-xs">
-              Register MCP, create a scoped token, and start your coding agent
-              for this experiment.
+              Prepare the coding agent, install the release-decision skill, and
+              connect FeatBit MCP for this experiment.
             </DialogDescription>
           </DialogHeader>
           <CodingAgentSetupDialogContent experiment={experiment} />
