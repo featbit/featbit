@@ -201,11 +201,49 @@ function gaussPdf(x: number, mu: number, sigma: number): number {
   return Math.exp(-0.5 * z * z) / (sigma * Math.sqrt(2 * Math.PI));
 }
 
-function PosteriorChart({ section }: { section: MetricSection | null }) {
+function PosteriorChart({
+  section,
+  variantLabels,
+}: {
+  section: MetricSection | null;
+  variantLabels: VariantLabelMap;
+}) {
   if (!section) return null;
-  const treatment = section.rows.find((r) => !r.is_control);
+  const treatments = section.rows.filter((r) =>
+    !r.is_control &&
+    r.rel_delta !== undefined &&
+    r.ci_lower !== undefined &&
+    r.ci_upper !== undefined
+  );
+
+  if (treatments.length === 0) return null;
+
+  return (
+    <div className="space-y-2">
+      <span className="text-xs font-medium text-muted-foreground">
+        Posterior Distribution of Relative Effect (&delta;)
+      </span>
+      <div className="grid gap-3 md:grid-cols-2">
+        {treatments.map((treatment) => (
+          <PosteriorChartItem
+            key={treatment.variant}
+            treatment={treatment}
+            variantLabels={variantLabels}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function PosteriorChartItem({
+  treatment,
+  variantLabels,
+}: {
+  treatment: MetricRow;
+  variantLabels: VariantLabelMap;
+}) {
   if (
-    !treatment ||
     treatment.rel_delta === undefined ||
     treatment.ci_lower === undefined ||
     treatment.ci_upper === undefined
@@ -261,8 +299,11 @@ function PosteriorChart({ section }: { section: MetricSection | null }) {
 
   return (
     <div className="space-y-1">
-      <span className="text-xs font-medium text-muted-foreground">
-        Posterior Distribution of Relative Effect (δ)
+      <span
+        className="text-xs font-medium text-muted-foreground"
+        title={variantTitle(treatment.variant, variantLabels)}
+      >
+        {variantName(treatment.variant, variantLabels)} vs control
       </span>
       <svg
         viewBox={`0 0 ${W} ${H}`}
@@ -518,7 +559,7 @@ function BayesianView({ data, variantLabels }: { data: BayesianAnalysis; variant
 
       <SrmBadge srm={data.srm} variantLabels={variantLabels} />
       <MetricTable section={data.primary_metric} label="Primary Metric" variantLabels={variantLabels} />
-      <PosteriorChart section={data.primary_metric} />
+      <PosteriorChart section={data.primary_metric} variantLabels={variantLabels} />
 
       {(data.guardrails ?? []).map((g) => (
         <MetricTable key={g.event} section={g} label="Guardrail" variantLabels={variantLabels} />
