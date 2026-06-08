@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { getStage } from "@/lib/stages";
-import { StageAgentGuide } from "./chat-panel";
 import { EditDecisionStateDialog } from "./decision-state-edit";
 import { MetricEditDialog } from "./metric-edit";
 import { Badge } from "@/components/ui/badge";
@@ -120,12 +119,6 @@ export function StageContentPanel({
           {stage.description}
         </p>
       </div>
-
-      <StageAgentGuide
-        experiment={experiment}
-        activeStage={activeTab}
-        onStageChange={onStageChange}
-      />
 
       {/* Stage-specific content */}
       {activeTab === "measuring" ? (

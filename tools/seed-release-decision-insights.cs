@@ -1,3 +1,8 @@
+#:package FeatBit.ServerSdk@1.2.10
+
+using FeatBit.Sdk.Server;
+using FeatBit.Sdk.Server.Model;
+using FeatBit.Sdk.Server.Options;
 using System.Globalization;
 using System.Net.Http.Json;
 using System.Text.Json.Serialization;
@@ -13,7 +18,11 @@ var endpoint = new Uri(new Uri(options.EvaluationUrl.TrimEnd('/') + "/"), "api/p
 var insights = BuildInsights(options).ToArray();
 var metricEvents = insights.Sum(x => x.Metrics.Length);
 
-if (!options.DryRun)
+if (options.SendMode == SendMode.Sdk)
+{
+    await SeedWithSdkAsync(options, insights);
+}
+else if (!options.DryRun)
 {
     using var http = new HttpClient();
     http.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", options.EnvSecret);
@@ -44,9 +53,89 @@ else
 Console.WriteLine($"Env: {options.EnvId ?? "(from env secret)"}");
 Console.WriteLine($"Flag: {options.FlagKey}");
 Console.WriteLine($"Window: {options.StartDate:yyyy-MM-dd} -> {options.EndDate:yyyy-MM-dd}");
+Console.WriteLine($"Send mode: {options.SendMode.ToString().ToLowerInvariant()}");
 Console.WriteLine($"Variants: {string.Join(", ", options.Variants.Select(x => $"{x.Name}={x.Users} (insight id {x.InsightId})"))}");
 Console.WriteLine($"Metrics: {string.Join(", ", options.Metrics.Select(x => x.ToSummary()))}");
 Console.WriteLine($"Metric events: {metricEvents}");
+
+static async Task SeedWithSdkAsync(SeedOptions options, Insight[] insights)
+{
+    if (options.DryRun)
+    {
+        Console.WriteLine($"Dry run: built {insights.Length} users for FeatBit.ServerSdk");
+        return;
+    }
+
+    var today = DateOnly.FromDateTime(DateTimeOffset.UtcNow.UtcDateTime);
+    if (options.StartDate > today || options.EndDate < today)
+    {
+        throw new ArgumentException(
+            "--send-mode sdk can only create live events with the SDK's current timestamp. " +
+            "Use --send-mode direct when the observation window does not include today.");
+    }
+
+    var sdkOptions = new FbOptionsBuilder(options.EnvSecret)
+        .Streaming(ToStreamingUri(options.EvaluationUrl))
+        .Event(new Uri(options.EvaluationUrl))
+        .StartWaitTime(TimeSpan.FromSeconds(options.SdkStartWaitSeconds))
+        .Build();
+
+    var client = new FbClient(sdkOptions);
+    try
+    {
+        if (!client.Initialized)
+        {
+            throw new InvalidOperationException(
+                "FbClient failed to initialize. Check --env-secret, --evaluation-url, and that the evaluation server is running.");
+        }
+
+        var sentMetrics = 0;
+        foreach (var insight in insights)
+        {
+            var expectedVariation = insight.Variations.Single().Variation;
+            var expectedVariant = options.Variants.SingleOrDefault(x => x.InsightId == expectedVariation.Id)
+                ?? throw new InvalidOperationException($"No variant plan maps to variation id '{expectedVariation.Id}'.");
+
+            var user = FbUser.Builder(insight.User.KeyId)
+                .Name(insight.User.Name)
+                .Custom("seedVariant", expectedVariant.Name)
+                .Custom("seed", options.Seed.ToString(CultureInfo.InvariantCulture))
+                .Build();
+
+            var detail = client.StringVariationDetail(options.FlagKey, user, defaultValue: string.Empty);
+            if (!string.Equals(detail.ValueId, expectedVariation.Id, StringComparison.Ordinal))
+            {
+                throw new InvalidOperationException(
+                    $"SDK evaluated user '{user.Key}' to variation id '{detail.ValueId}', but the seed plan expected '{expectedVariation.Id}'. " +
+                    "Target generated users by the custom attribute seedVariant or use --send-mode direct for synthetic historical data.");
+            }
+
+            foreach (var metric in insight.Metrics)
+            {
+                client.Track(user, metric.EventName, metric.NumericValue);
+                sentMetrics++;
+            }
+        }
+
+        if (!client.FlushAndWait(TimeSpan.FromSeconds(options.SdkFlushWaitSeconds)))
+        {
+            throw new TimeoutException("Timed out while flushing FeatBit SDK insight events.");
+        }
+
+        Console.WriteLine($"Seeded {insights.Length} users and {sentMetrics} metric events with FeatBit.ServerSdk");
+    }
+    finally
+    {
+        await client.CloseAsync();
+    }
+}
+
+static Uri ToStreamingUri(string evaluationUrl)
+{
+    var builder = new UriBuilder(evaluationUrl);
+    builder.Scheme = builder.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase) ? "wss" : "ws";
+    return builder.Uri;
+}
 
 static IEnumerable<Insight> BuildInsights(SeedOptions options)
 {
@@ -186,6 +275,9 @@ sealed record SeedOptions(
     DateOnly EndDate,
     int Seed,
     int BatchSize,
+    SendMode SendMode,
+    int SdkStartWaitSeconds,
+    int SdkFlushWaitSeconds,
     string UserPrefix,
     bool DryRun)
 {
@@ -224,6 +316,9 @@ sealed record SeedOptions(
             endDate,
             GetInt(values, "seed", 20260604),
             GetInt(values, "batch-size", 50),
+            ParseSendMode(Get(values, "send-mode", "direct")),
+            GetInt(values, "sdk-start-wait-seconds", 5),
+            GetInt(values, "sdk-flush-wait-seconds", 30),
             Get(values, "user-prefix", "rd-seed"),
             dryRun);
     }
@@ -237,12 +332,18 @@ sealed record SeedOptions(
           dotnet run tools/seed-release-decision-insights.cs -- \
             --env-secret <server-sdk-secret> \
             --env-id a30da40d-1f8a-4f4f-86a8-323ac65326d6 \
-            --flag-key game-runner \
-            --variant True=1200 --variant False=1180 \
-            --variation-id True=<actual-true-variation-id> \
-            --variation-id False=<actual-false-variation-id> \
-            --metric mn1:binary:once:True=132,False=165 \
-            --guardrail afa:binary:once:True=36,False=41 \
+            --flag-key <flag-key> \
+            --variant <string-value-1>=1200 \
+            --variation-id <string-value-1>=<variation-id-1> \
+            --variation-value <string-value-1>=<string-value-1> \
+            --variant <string-value-2>=1180 \
+            --variation-id <string-value-2>=<variation-id-2> \
+            --variation-value <string-value-2>=<string-value-2> \
+            --variant <string-value-3>=1160 \
+            --variation-id <string-value-3>=<variation-id-3> \
+            --variation-value <string-value-3>=<string-value-3> \
+            --metric mn1:binary:once:<string-value-1>=132,<string-value-2>=165,<string-value-3>=140 \
+            --guardrail afa:binary:once:<string-value-1>=36,<string-value-2>=41,<string-value-3>=38 \
             --start-date 2026-06-01 --end-date 2026-06-06
 
         Metric format:
@@ -251,8 +352,8 @@ sealed record SeedOptions(
 
         Native FeatBit Insights:
           For the FeatBit flag Insights page, --variation-id must map each variant alias
-          to the real feature flag variation id. Release-decision metric targets still use
-          the readable aliases from --variant.
+          to the real feature flag variation id. For string flags, use the actual string
+          variation values as aliases when they are short and shell-safe.
 
         Target semantics:
           binary/once: target <= 1 is a rate, target > 1 is converted-user count.
@@ -260,11 +361,21 @@ sealed record SeedOptions(
           continuous/sum: target is total numeric sum for that variant.
           continuous/average: target is per-user average value for that variant.
 
-        Compatibility:
-          Old control/treatment options still work:
-          --control-variant control --treatment-variant treatment --users-per-variant 120
-          --metric-event signup --control-rate 0.20 --treatment-rate 0.36
+        Send modes:
+          --send-mode sdk uses FeatBit.ServerSdk: evaluate the flag, then Track each metric.
+          --send-mode direct posts generated insight payloads and is required for backdated timestamps.
+          In SDK mode, generated users include custom attributes seedVariant and seed for targeting rules.
         """);
+    }
+
+    private static SendMode ParseSendMode(string value)
+    {
+        return value.ToLowerInvariant() switch
+        {
+            "direct" => SendMode.Direct,
+            "sdk" => SendMode.Sdk,
+            _ => throw new ArgumentException($"Unsupported send mode: {value}")
+        };
     }
 
     private static VariantPlan[] ParseVariants(ArgBag values)
@@ -452,6 +563,12 @@ sealed record SeedOptions(
             ? parsed
             : throw new ArgumentException(message);
     }
+}
+
+enum SendMode
+{
+    Direct,
+    Sdk
 }
 
 sealed record VariantPlan(string Name, int Users)

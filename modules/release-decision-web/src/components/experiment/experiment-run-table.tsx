@@ -35,10 +35,12 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { appPath } from "@/lib/app-path";
 import { authStorage } from "@/lib/featbit-auth/storage";
@@ -74,6 +76,96 @@ const DECISION_COLORS: Record<string, string> = {
   INCONCLUSIVE:
     "bg-gray-100 text-gray-700 dark:bg-gray-800/40 dark:text-gray-300",
 };
+
+type ExperimentMethod = "bayesian_ab" | "bandit";
+type VariantChoice = {
+  key: string;
+  description: string;
+};
+
+const METHOD_OPTIONS: Array<{
+  value: ExperimentMethod;
+  title: string;
+  eyebrow: string;
+  description: string;
+}> = [
+  {
+    value: "bayesian_ab",
+    title: "Bayesian A/B",
+    eyebrow: "Fixed split",
+    description:
+      "Use balanced traffic for control versus treatment and compare posterior win probability and risk.",
+  },
+  {
+    value: "bandit",
+    title: "Bandit",
+    eyebrow: "Dynamic allocation",
+    description:
+      "Use multiple arms and reweight traffic toward stronger variants as reward evidence changes.",
+  },
+];
+
+function parseRunVariantChoices(variants: string | null | undefined): VariantChoice[] {
+  if (!variants) return [];
+  const raw = variants.trim();
+  if (!raw) return [];
+
+  if (raw.startsWith("[")) {
+    try {
+      const parsed = JSON.parse(raw) as Array<{
+        key?: string;
+        name?: string;
+        description?: string;
+      }>;
+      return parsed
+        .map((variant) => ({
+          key: variant.key ?? variant.name ?? "",
+          description: variant.description ?? "",
+        }))
+        .filter((variant) => variant.key);
+    } catch {
+      return [];
+    }
+  }
+
+  return raw
+    .split("|")
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .map((item) => {
+      const match = item.match(/^(.+?)\s*\((.+)\)\s*$/);
+      return match
+        ? { key: match[1].trim(), description: match[2].trim() }
+        : { key: item, description: "" };
+    });
+}
+
+function normalizeRunVariantSelection(
+  method: ExperimentMethod,
+  control: string,
+  treatments: string[],
+  choices: VariantChoice[],
+) {
+  const keys = new Set(choices.map((choice) => choice.key));
+  const nextControl = keys.has(control) ? control : choices[0]?.key ?? "";
+  const availableTreatments = choices
+    .map((choice) => choice.key)
+    .filter((key) => key !== nextControl);
+  const selectedTreatments = treatments.filter(
+    (key, index, arr) =>
+      key !== nextControl && keys.has(key) && arr.indexOf(key) === index,
+  );
+
+  return {
+    control: nextControl,
+    treatments:
+      method === "bandit"
+        ? selectedTreatments.length > 0
+          ? selectedTreatments
+          : availableTreatments
+        : [selectedTreatments[0] ?? availableTreatments[0]].filter(Boolean),
+  };
+}
 
 const DECISION_DETAILS: Record<
   string,
@@ -172,6 +264,57 @@ function DecisionBadge({ decision }: { decision: string | null }) {
   const color = DECISION_COLORS[decision] ?? "";
   return (
     <Badge className={`text-[10px] px-1.5 py-0 ${color}`}>{decision}</Badge>
+  );
+}
+
+function MethodChoiceCards({
+  value,
+  onChange,
+}: {
+  value: ExperimentMethod;
+  onChange: (value: ExperimentMethod) => void;
+}) {
+  return (
+    <div className="grid gap-2 sm:grid-cols-2">
+      {METHOD_OPTIONS.map((option) => {
+        const selected = value === option.value;
+
+        return (
+          <button
+            key={option.value}
+            type="button"
+            onClick={() => onChange(option.value)}
+            className={cn(
+              "rounded-md border px-3 py-3 text-left transition-colors",
+              selected
+                ? "border-primary bg-primary/5 ring-1 ring-primary/20"
+                : "border-border bg-background hover:border-primary/40 hover:bg-muted/30",
+            )}
+          >
+            <span className="flex items-center justify-between gap-2">
+              <span className="flex items-center gap-2 text-sm font-semibold">
+                <Beaker className="size-4 text-primary" />
+                {option.title}
+              </span>
+              <span
+                className={cn(
+                  "size-3.5 rounded-full border",
+                  selected
+                    ? "border-primary bg-primary ring-2 ring-background ring-inset"
+                    : "border-muted-foreground/40",
+                )}
+              />
+            </span>
+            <span className="mt-2 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              {option.eyebrow}
+            </span>
+            <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">
+              {option.description}
+            </span>
+          </button>
+        );
+      })}
+    </div>
   );
 }
 
@@ -820,18 +963,24 @@ function sanitizeDecisionReason(value: string | null | undefined): string | null
 function TrafficTab({
   exp,
   experimentId,
+  variants,
 }: {
   exp: ExperimentRun;
   experimentId: string;
+  variants: string | null;
 }) {
   return (
     <div className="px-4 pb-6 space-y-4">
       <div>
         <SectionLabel
           icon={<Filter className="size-3" />}
-          label="Audience & Traffic"
+          label="Analysis Method & Traffic"
         />
-        <ExperimentRunTrafficConfig experimentRun={exp} experimentId={experimentId} />
+        <ExperimentRunTrafficConfig
+          experimentRun={exp}
+          experimentId={experimentId}
+          variants={variants}
+        />
       </div>
 
       {exp.trafficAllocation && (
@@ -846,6 +995,170 @@ function TrafficTab({
         </div>
       )}
     </div>
+  );
+}
+
+function NewExperimentRunDialog({
+  open,
+  onOpenChange,
+  method,
+  onMethodChange,
+  variantChoices,
+  controlVariant,
+  treatmentVariants,
+  onControlChange,
+  onTreatmentChange,
+  onArmToggle,
+  creating,
+  onCreate,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  method: ExperimentMethod;
+  onMethodChange: (method: ExperimentMethod) => void;
+  variantChoices: VariantChoice[];
+  controlVariant: string;
+  treatmentVariants: string[];
+  onControlChange: (control: string) => void;
+  onTreatmentChange: (treatment: string) => void;
+  onArmToggle: (arm: string, checked: boolean) => void;
+  creating: boolean;
+  onCreate: () => void;
+}) {
+  const selected = METHOD_OPTIONS.find((option) => option.value === method);
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-xl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-sm">
+            <Plus className="size-4 text-primary" />
+            New experiment run
+          </DialogTitle>
+          <DialogDescription className="text-xs">
+            Choose the analysis method before creating the run. You can change
+            it later from Analysis Method &amp; Traffic.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3">
+          <div>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Analysis Method
+            </p>
+            <MethodChoiceCards value={method} onChange={onMethodChange} />
+          </div>
+          <div>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              {method === "bandit" ? "Baseline & Arms" : "Control & Treatment"}
+            </p>
+            {variantChoices.length < 2 ? (
+              <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200">
+                Bind a FeatBit flag with at least two variations before assigning
+                control and treatment variants.
+              </div>
+            ) : (
+              <div className="grid gap-2 sm:grid-cols-2">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    {method === "bandit" ? "Baseline / control" : "Control"}
+                  </label>
+                  <select
+                    value={controlVariant}
+                    onChange={(event) => onControlChange(event.target.value)}
+                    className="h-9 w-full rounded-md border border-input bg-background px-2 text-xs font-mono"
+                  >
+                    {variantChoices.map((choice) => (
+                      <option key={choice.key} value={choice.key}>
+                        {choice.key}
+                        {choice.description ? ` (${choice.description})` : ""}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {method === "bandit" ? (
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                      Additional arms
+                    </label>
+                    <div className="max-h-28 space-y-1 overflow-y-auto rounded-md border bg-background/70 p-1.5">
+                      {variantChoices
+                        .filter((choice) => choice.key !== controlVariant)
+                        .map((choice) => (
+                          <label
+                            key={choice.key}
+                            className="flex cursor-pointer items-center gap-2 rounded px-1.5 py-1 text-xs hover:bg-muted"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={treatmentVariants.includes(choice.key)}
+                              onChange={(event) =>
+                                onArmToggle(choice.key, event.target.checked)
+                              }
+                              className="size-3.5"
+                            />
+                            <span className="font-mono">{choice.key}</span>
+                            {choice.description && (
+                              <span className="text-muted-foreground">
+                                ({choice.description})
+                              </span>
+                            )}
+                          </label>
+                        ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                      Treatment
+                    </label>
+                    <select
+                      value={treatmentVariants[0] ?? ""}
+                      onChange={(event) => onTreatmentChange(event.target.value)}
+                      className="h-9 w-full rounded-md border border-input bg-background px-2 text-xs font-mono"
+                    >
+                      {variantChoices
+                        .filter((choice) => choice.key !== controlVariant)
+                        .map((choice) => (
+                          <option key={choice.key} value={choice.key}>
+                            {choice.key}
+                            {choice.description ? ` (${choice.description})` : ""}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+          {selected && (
+            <div className="rounded-md border bg-muted/25 px-3 py-2 text-xs leading-relaxed text-muted-foreground">
+              New run will start as <span className="font-semibold text-foreground">{selected.title}</span>.
+            </div>
+          )}
+        </div>
+
+        <DialogFooter className="gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={creating}
+          >
+            Cancel
+          </Button>
+          <Button type="button" onClick={onCreate} disabled={creating}>
+            {creating ? (
+              <Loader2 className="size-3.5 animate-spin" />
+            ) : (
+              <Plus className="size-3.5" />
+            )}
+            {creating ? "Creating..." : "Create run"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -1071,6 +1384,16 @@ export function ExperimentRunTable({
   const [deleting, startDelete] = useTransition();
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [promptRun, setPromptRun] = useState<ExperimentRun | null>(null);
+  const [newRunOpen, setNewRunOpen] = useState(false);
+  const [newRunMethod, setNewRunMethod] =
+    useState<ExperimentMethod>("bayesian_ab");
+  const [newRunControlVariant, setNewRunControlVariant] = useState("");
+  const [newRunTreatmentVariants, setNewRunTreatmentVariants] = useState<string[]>([]);
+  const router = useRouter();
+  const variantChoices = useMemo(
+    () => parseRunVariantChoices(variants),
+    [variants],
+  );
 
   // Track previous run count so we can auto-focus the newly-created run when
   // it appears in the list, rather than sticking to the old selection.
@@ -1098,9 +1421,81 @@ export function ExperimentRunTable({
   function createRun() {
     const fd = new FormData();
     fd.append("experimentId", experimentId);
+    fd.append("method", newRunMethod);
+    fd.append("controlVariant", newRunControlVariant);
+    fd.append("treatmentVariant", newRunTreatmentVariants.join("|"));
     startCreate(async () => {
       await createNewExperimentRunAction(fd);
+      setNewRunOpen(false);
+      setNewRunMethod("bayesian_ab");
+      resetNewRunVariants("bayesian_ab");
+      router.refresh();
     });
+  }
+
+  function resetNewRunVariants(method: ExperimentMethod) {
+    const normalized = normalizeRunVariantSelection(
+      method,
+      "",
+      [],
+      variantChoices,
+    );
+    setNewRunControlVariant(normalized.control);
+    setNewRunTreatmentVariants(normalized.treatments);
+  }
+
+  function openNewRunDialog() {
+    const method: ExperimentMethod = "bayesian_ab";
+    setNewRunMethod(method);
+    resetNewRunVariants(method);
+    setNewRunOpen(true);
+  }
+
+  function changeNewRunMethod(method: ExperimentMethod) {
+    const normalized = normalizeRunVariantSelection(
+      method,
+      newRunControlVariant,
+      newRunTreatmentVariants,
+      variantChoices,
+    );
+    setNewRunMethod(method);
+    setNewRunControlVariant(normalized.control);
+    setNewRunTreatmentVariants(normalized.treatments);
+  }
+
+  function changeNewRunControl(control: string) {
+    const normalized = normalizeRunVariantSelection(
+      newRunMethod,
+      control,
+      newRunTreatmentVariants,
+      variantChoices,
+    );
+    setNewRunControlVariant(normalized.control);
+    setNewRunTreatmentVariants(normalized.treatments);
+  }
+
+  function changeNewRunTreatment(treatment: string) {
+    const normalized = normalizeRunVariantSelection(
+      newRunMethod,
+      newRunControlVariant,
+      [treatment],
+      variantChoices,
+    );
+    setNewRunControlVariant(normalized.control);
+    setNewRunTreatmentVariants(normalized.treatments);
+  }
+
+  function toggleNewRunArm(arm: string, checked: boolean) {
+    const normalized = normalizeRunVariantSelection(
+      newRunMethod,
+      newRunControlVariant,
+      checked
+        ? [...newRunTreatmentVariants, arm]
+        : newRunTreatmentVariants.filter((item) => item !== arm),
+      variantChoices,
+    );
+    setNewRunControlVariant(normalized.control);
+    setNewRunTreatmentVariants(normalized.treatments);
   }
 
   function deleteRun(runId: string) {
@@ -1178,7 +1573,7 @@ export function ExperimentRunTable({
         <Button
           variant="ghost"
           size="sm"
-          onClick={createRun}
+          onClick={openNewRunDialog}
           disabled={creating}
           className="h-8 text-xs gap-1 ml-1 text-muted-foreground"
         >
@@ -1224,7 +1619,11 @@ export function ExperimentRunTable({
               />
             }
           />
-          <TrafficTab exp={selected} experimentId={experimentId} />
+          <TrafficTab
+            exp={selected}
+            experimentId={experimentId}
+            variants={variants}
+          />
         </div>
       ) : (
         <div className="rounded-md border border-dashed p-6 text-center">
@@ -1243,6 +1642,20 @@ export function ExperimentRunTable({
         }}
         experimentId={experimentId}
         run={promptRun}
+      />
+      <NewExperimentRunDialog
+        open={newRunOpen}
+        onOpenChange={setNewRunOpen}
+        method={newRunMethod}
+        onMethodChange={changeNewRunMethod}
+        variantChoices={variantChoices}
+        controlVariant={newRunControlVariant}
+        treatmentVariants={newRunTreatmentVariants}
+        onControlChange={changeNewRunControl}
+        onTreatmentChange={changeNewRunTreatment}
+        onArmToggle={toggleNewRunArm}
+        creating={creating}
+        onCreate={createRun}
       />
     </div>
   );

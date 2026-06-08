@@ -22,7 +22,9 @@ async function addActivity(
 
 async function createExperimentRun(experimentId: string) {
   const experiment = await createExperimentRunAndReturnExperiment(experimentId);
-  return experiment.experimentRuns[0] ?? null;
+  return [...experiment.experimentRuns].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  )[0] ?? null;
 }
 
 function normalizeMetricType(value: unknown): "binary" | "continuous" {
@@ -257,6 +259,8 @@ export async function updateExperimentRunAudienceAction(formData: FormData) {
   const layerId = formData.get("layerId") as string | null;
   const audienceFilters = formData.get("audienceFilters") as string | null;
   const methodRaw = formData.get("method") as string | null;
+  const controlVariant = formData.get("controlVariant") as string | null;
+  const treatmentVariant = formData.get("treatmentVariant") as string | null;
 
   const trafficPercent = parseFloat(trafficPercentRaw);
   const trafficOffset = parseInt(trafficOffsetRaw, 10);
@@ -268,6 +272,8 @@ export async function updateExperimentRunAudienceAction(formData: FormData) {
     layerId: layerId?.trim() || null,
     audienceFilters: audienceFilters?.trim() || null,
     method,
+    controlVariant: controlVariant?.trim() || null,
+    treatmentVariant: treatmentVariant?.trim() || null,
   });
 
   await addActivity(experimentId, {
@@ -298,12 +304,23 @@ export async function deleteExperimentRunAction(formData: FormData) {
 
 export async function createNewExperimentRunAction(formData: FormData) {
   const experimentId = formData.get("experimentId") as string;
+  const methodRaw = formData.get("method") as string | null;
+  const controlVariant = formData.get("controlVariant") as string | null;
+  const treatmentVariant = formData.get("treatmentVariant") as string | null;
   if (!experimentId) throw new Error("experimentId is required");
 
   const newRun = await createExperimentRun(experimentId);
+  const method = methodRaw === "bandit" ? "bandit" : "bayesian_ab";
 
-  return;
-  return { runId: newRun?.id, slug: newRun?.slug };
+  if (newRun?.id) {
+    await updateExperimentRun(experimentId, newRun.id, {
+      method,
+      controlVariant: controlVariant?.trim() || null,
+      treatmentVariant: treatmentVariant?.trim() || null,
+    });
+  }
+
+  return { runId: newRun?.id, slug: newRun?.slug, method };
 }
 
 export async function updateExperimentRunObservationWindowAction(

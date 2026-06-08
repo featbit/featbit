@@ -5,8 +5,12 @@ import Link from "next/link";
 import { ArrowLeft, Settings, Terminal } from "lucide-react";
 import { StageStepper } from "@/components/experiment/stage-bar";
 import { StageContentPanel } from "@/components/experiment/stage-content-panel";
-import { CODING_AGENT_SETUP_DISMISSED_KEY } from "@/components/experiment/chat-panel";
+import {
+  ChatPanel,
+  CODING_AGENT_SETUP_DISMISSED_KEY,
+} from "@/components/experiment/chat-panel";
 import { CodingAgentSetupDialogContent } from "@/components/experiment/coding-agent-setup";
+import { ResizablePanels } from "@/components/experiment/resizable-panels";
 import { ActivityPopover } from "@/components/experiment/activity-popover";
 import { ChatTriggerContext } from "@/components/experiment/chat-trigger-context";
 import { cn } from "@/lib/utils";
@@ -175,11 +179,32 @@ export function ExperimentDetailLayout({
           />
         )}
         <div className="min-h-0 flex-1">
-          <StageContentPanel
-            experiment={experiment}
-            activeTab={activeTab}
-            onStageChange={setActiveTab}
-          />
+          {activeTab === "settings" ? (
+            <StageContentPanel
+              experiment={experiment}
+              activeTab={activeTab}
+              onStageChange={setActiveTab}
+            />
+          ) : (
+            <ResizablePanels
+              defaultLeftRatio={2 / 3}
+              minWidth={0}
+              left={
+                <StageContentPanel
+                  experiment={experiment}
+                  activeTab={activeTab}
+                  onStageChange={setActiveTab}
+                />
+              }
+              right={
+                <ChatPanel
+                  experiment={experiment}
+                  activeStage={activeTab}
+                  onStageChange={setActiveTab}
+                />
+              }
+            />
+          )}
         </div>
       </main>
       <Dialog open={setupPromptOpen} onOpenChange={setSetupPromptOpen}>

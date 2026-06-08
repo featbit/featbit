@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Pencil, Filter, Percent, Plus, Trash2, Beaker } from "lucide-react";
+import { Beaker, Filter, GitBranch, Pencil, Percent, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,6 +27,11 @@ type FilterEntry = {
   op: Op;
   value: string;
   values: string; // comma-separated string for in/nin ops
+};
+
+type VariantRow = {
+  key: string;
+  description: string;
 };
 
 /* ── Helpers ── */
@@ -66,37 +71,129 @@ function serializeFilters(rows: FilterEntry[]): string {
   return JSON.stringify(entries);
 }
 
+function parseVariantsToRows(variants: string | null | undefined): VariantRow[] {
+  if (!variants) return [];
+  const raw = variants.trim();
+  if (!raw) return [];
+
+  if (raw.startsWith("[")) {
+    try {
+      const parsed = JSON.parse(raw) as Array<{
+        key?: string;
+        name?: string;
+        description?: string;
+      }>;
+      return parsed
+        .map((variant) => ({
+          key: variant.key ?? variant.name ?? "",
+          description: variant.description ?? "",
+        }))
+        .filter((variant) => variant.key);
+    } catch {
+      return [];
+    }
+  }
+
+  return raw
+    .split("|")
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .map((item) => {
+      const match = item.match(/^(.+?)\s*\((.+)\)\s*$/);
+      return match
+        ? { key: match[1].trim(), description: match[2].trim() }
+        : { key: item, description: "" };
+    });
+}
+
+function splitVariants(value: string | null | undefined) {
+  return (value ?? "")
+    .split("|")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function normalizeVariantSelection(
+  nextMethod: string,
+  nextControl: string,
+  nextTreatments: string[],
+  variantRows: VariantRow[],
+) {
+  const validKeys = new Set(variantRows.map((variant) => variant.key));
+  const fallbackControl = nextControl || variantRows[0]?.key || "";
+  const control = validKeys.has(fallbackControl)
+    ? fallbackControl
+    : variantRows[0]?.key || "";
+  const nonControl = variantRows
+    .map((variant) => variant.key)
+    .filter((key) => key !== control);
+  const selected = nextTreatments.filter(
+    (key, index, arr) =>
+      key !== control && validKeys.has(key) && arr.indexOf(key) === index,
+  );
+
+  if (nextMethod === "bandit") {
+    return {
+      control,
+      treatments: selected.length > 0 ? selected : nonControl,
+    };
+  }
+
+  return {
+    control,
+    treatments: [selected[0] ?? nonControl[0]].filter(Boolean),
+  };
+}
+
 /* ── Component ── */
 
 export function ExperimentRunTrafficConfig({
   experimentRun,
   experimentId,
+  variants,
 }: {
   experimentRun: ExperimentRun;
   experimentId: string;
+  variants?: string | null;
 }) {
   const [open, setOpen] = useState(false);
   const [filters, setFilters] = useState<FilterEntry[]>([]);
   const [method, setMethod] = useState(experimentRun.method ?? "bayesian_ab");
+  const [controlVariant, setControlVariant] = useState("");
+  const [treatmentVariants, setTreatmentVariants] = useState<string[]>([]);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
+  const variantRows = parseVariantsToRows(variants);
   const pct = experimentRun.trafficPercent ?? 100;
   const offset = experimentRun.trafficOffset ?? 0;
   const currentMethod = experimentRun.method ?? "bayesian_ab";
   const parsedFilters = parseFilters(experimentRun.audienceFilters as string | null);
   const isBandit = currentMethod !== "bayesian_ab";
   const hasCustomTraffic = pct < 100 || offset > 0 || experimentRun.layerId || parsedFilters.length > 0;
+  const runTreatments = splitVariants(experimentRun.treatmentVariant);
 
   function handleOpen() {
+    const nextMethod = experimentRun.method ?? "bayesian_ab";
+    const normalized = normalizeVariantSelection(
+      nextMethod,
+      experimentRun.controlVariant ?? variantRows[0]?.key ?? "",
+      splitVariants(experimentRun.treatmentVariant),
+      variantRows,
+    );
+
     setFilters(parseFilters(experimentRun.audienceFilters as string | null));
-    setMethod(experimentRun.method ?? "bayesian_ab");
+    setMethod(nextMethod);
+    setControlVariant(normalized.control);
+    setTreatmentVariants(normalized.treatments);
     setOpen(true);
   }
 
   function handleSubmit(formData: FormData) {
     const serialized = serializeFilters(filters);
     formData.set("audienceFilters", serialized);
+    formData.set("controlVariant", controlVariant);
+    formData.set("treatmentVariant", treatmentVariants.join("|"));
     startTransition(async () => {
       await updateExperimentRunAudienceAction(formData);
       router.refresh();
@@ -114,6 +211,57 @@ export function ExperimentRunTrafficConfig({
 
   function updateRow(i: number, patch: Partial<FilterEntry>) {
     setFilters((prev) => prev.map((r, j) => (j === i ? { ...r, ...patch } : r)));
+  }
+
+  function changeMethod(nextMethod: string) {
+    const normalized = normalizeVariantSelection(
+      nextMethod,
+      controlVariant,
+      treatmentVariants,
+      variantRows,
+    );
+
+    setMethod(nextMethod);
+    setControlVariant(normalized.control);
+    setTreatmentVariants(normalized.treatments);
+  }
+
+  function changeControl(nextControl: string) {
+    const normalized = normalizeVariantSelection(
+      method,
+      nextControl,
+      treatmentVariants,
+      variantRows,
+    );
+
+    setControlVariant(normalized.control);
+    setTreatmentVariants(normalized.treatments);
+  }
+
+  function setSingleTreatment(nextTreatment: string) {
+    const normalized = normalizeVariantSelection(
+      method,
+      controlVariant,
+      [nextTreatment],
+      variantRows,
+    );
+
+    setControlVariant(normalized.control);
+    setTreatmentVariants(normalized.treatments);
+  }
+
+  function toggleBanditArm(key: string, checked: boolean) {
+    const normalized = normalizeVariantSelection(
+      method,
+      controlVariant,
+      checked
+        ? [...treatmentVariants, key]
+        : treatmentVariants.filter((item) => item !== key),
+      variantRows,
+    );
+
+    setControlVariant(normalized.control);
+    setTreatmentVariants(normalized.treatments);
   }
 
   return (
@@ -141,6 +289,36 @@ export function ExperimentRunTrafficConfig({
               <span>
                 <span className="font-medium">Even split (50 / 50)</span>
                 <span className="text-muted-foreground"> — equal traffic per variant</span>
+              </span>
+            )}
+          </div>
+
+          <div className="flex items-start gap-1.5 text-[11px]">
+            <GitBranch className="size-3 text-muted-foreground shrink-0 mt-0.5" />
+            {experimentRun.controlVariant || runTreatments.length > 0 ? (
+              isBandit ? (
+                <span>
+                  <span className="font-medium">Baseline:</span>{" "}
+                  <span className="font-mono">{experimentRun.controlVariant ?? "not set"}</span>
+                  <span className="text-muted-foreground"> · Arms: </span>
+                  <span className="font-mono">
+                    {[experimentRun.controlVariant, ...runTreatments]
+                      .filter(Boolean)
+                      .join(", ")}
+                  </span>
+                </span>
+              ) : (
+                <span>
+                  <span className="font-medium">Control:</span>{" "}
+                  <span className="font-mono">{experimentRun.controlVariant ?? "not set"}</span>
+                  <span className="text-muted-foreground"> · Treatment: </span>
+                  <span className="font-mono">{runTreatments[0] ?? "not set"}</span>
+                </span>
+              )
+            ) : (
+              <span>
+                <span className="font-medium">Variants not assigned</span>
+                <span className="text-muted-foreground"> — choose control and treatment/arms</span>
               </span>
             )}
           </div>
@@ -191,24 +369,29 @@ export function ExperimentRunTrafficConfig({
           </p>
         </div>
 
-        {!["decided", "archived"].includes(experimentRun.status) && <button
-          type="button"
-          onClick={handleOpen}
-          className="text-muted-foreground hover:text-foreground shrink-0 mt-0.5"
-          aria-label="Edit audience & traffic"
-        >
-          <Pencil className="size-3" />
-        </button>}
+        {!["decided", "archived"].includes(experimentRun.status) && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleOpen}
+            className="h-7 shrink-0 gap-1 px-2 text-[11px]"
+            aria-label="Configure analysis method and traffic"
+          >
+            <Pencil className="size-3" />
+            Configure
+          </Button>
+        )}
       </div>
 
       {/* ── Edit dialog ── */}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Audience &amp; Traffic</DialogTitle>
+            <DialogTitle>Analysis Method &amp; Traffic</DialogTitle>
             <DialogDescription>
-              Configure who sees <span className="font-mono">{experimentRun.slug}</span> and how much
-              traffic is included.
+              Configure how <span className="font-mono">{experimentRun.slug}</span> is analyzed,
+              who sees it, and how much traffic is included.
             </DialogDescription>
           </DialogHeader>
 
@@ -227,7 +410,7 @@ export function ExperimentRunTrafficConfig({
                     name="_method"
                     value="bayesian_ab"
                     checked={method === "bayesian_ab"}
-                    onChange={() => setMethod("bayesian_ab")}
+                    onChange={() => changeMethod("bayesian_ab")}
                     className="size-3.5"
                   />
                   <span className="text-xs">Bayesian A/B</span>
@@ -238,7 +421,7 @@ export function ExperimentRunTrafficConfig({
                     name="_method"
                     value="bandit"
                     checked={method === "bandit"}
-                    onChange={() => setMethod("bandit")}
+                    onChange={() => changeMethod("bandit")}
                     className="size-3.5"
                   />
                   <span className="text-xs">Bandit</span>
@@ -249,6 +432,98 @@ export function ExperimentRunTrafficConfig({
                   ? "Dynamic traffic reweighting — asymmetric allocation intentional"
                   : "Fixed split — balanced sampling ensures equal N per variant"}
               </p>
+            </div>
+
+            <div className="space-y-2 rounded-md border bg-muted/15 px-3 py-2.5">
+              <div className="space-y-0.5">
+                <Label className="text-xs">
+                  {method === "bandit" ? "Baseline & Arms" : "Control & Treatment"}
+                </Label>
+                <p className="text-[10px] text-muted-foreground">
+                  {method === "bandit"
+                    ? "Pick one baseline/control variation and one or more additional arms."
+                    : "Pick exactly one control variation and one treatment variation."}
+                </p>
+              </div>
+
+              {variantRows.length < 2 ? (
+                <p className="rounded-md border border-amber-200 bg-amber-50 px-2 py-1.5 text-xs text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200">
+                  Bind a FeatBit flag with at least two variations before assigning variants.
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  <div className="space-y-1">
+                    <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                      {method === "bandit" ? "Baseline / control" : "Control"}
+                    </Label>
+                    <select
+                      value={controlVariant}
+                      onChange={(event) => changeControl(event.target.value)}
+                      className="h-8 w-full rounded-md border border-input bg-background px-2 text-xs font-mono"
+                    >
+                      {variantRows.map((variant) => (
+                        <option key={variant.key} value={variant.key}>
+                          {variant.key}
+                          {variant.description ? ` (${variant.description})` : ""}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {method === "bandit" ? (
+                    <div className="space-y-1">
+                      <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                        Additional arms
+                      </Label>
+                      <div className="grid gap-1.5">
+                        {variantRows
+                          .filter((variant) => variant.key !== controlVariant)
+                          .map((variant) => (
+                            <label
+                              key={variant.key}
+                              className="flex cursor-pointer items-center gap-2 rounded border bg-background/70 px-2 py-1.5 text-xs"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={treatmentVariants.includes(variant.key)}
+                                onChange={(event) =>
+                                  toggleBanditArm(variant.key, event.target.checked)
+                                }
+                                className="size-3.5"
+                              />
+                              <span className="font-mono">{variant.key}</span>
+                              {variant.description && (
+                                <span className="text-muted-foreground">
+                                  ({variant.description})
+                                </span>
+                              )}
+                            </label>
+                          ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-1">
+                      <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                        Treatment
+                      </Label>
+                      <select
+                        value={treatmentVariants[0] ?? ""}
+                        onChange={(event) => setSingleTreatment(event.target.value)}
+                        className="h-8 w-full rounded-md border border-input bg-background px-2 text-xs font-mono"
+                      >
+                        {variantRows
+                          .filter((variant) => variant.key !== controlVariant)
+                          .map((variant) => (
+                            <option key={variant.key} value={variant.key}>
+                              {variant.key}
+                              {variant.description ? ` (${variant.description})` : ""}
+                            </option>
+                          ))}
+                      </select>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-3 gap-3">

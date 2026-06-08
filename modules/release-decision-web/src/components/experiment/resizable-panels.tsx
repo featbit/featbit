@@ -128,7 +128,7 @@ export function ResizablePanels({
     <div
       ref={containerRef}
       className={cn(
-        "flex flex-1 min-h-0 relative",
+        "flex h-full w-full min-h-0 relative",
         isDragging && "select-none"
       )}
     >
@@ -136,7 +136,7 @@ export function ResizablePanels({
       {!leftCollapsed ? (
         <div
           className={cn(
-            "flex flex-col min-h-0 overflow-hidden",
+            "flex h-full flex-col min-h-0 overflow-hidden",
             rightCollapsed ? "flex-1" : "shrink-0"
           )}
           style={rightCollapsed ? undefined : { width: leftWidth }}
@@ -205,7 +205,7 @@ export function ResizablePanels({
       <div
         aria-hidden={rightCollapsed}
         className={cn(
-          "min-w-0 flex flex-col min-h-0 overflow-hidden",
+          "h-full min-w-0 flex flex-col min-h-0 overflow-hidden",
           rightCollapsed
             ? "w-0 shrink-0 pointer-events-none opacity-0"
             : "flex-1"
