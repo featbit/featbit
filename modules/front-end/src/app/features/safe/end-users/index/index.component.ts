@@ -20,6 +20,19 @@ export class IndexComponent implements OnInit {
 
   currentEnvId: string;
 
+  // cursor based pagination
+  hasPreviousPage: boolean = false;
+  hasNextPage: boolean = true;
+  lastClickedPage: 'previous' | 'next' | null = null;
+
+  goPreviousPage() {
+    this.lastClickedPage = 'previous';
+  }
+
+  goNextPage() {
+    this.lastClickedPage = 'next';
+  }
+
   list = [];
   totalCount: number;
 

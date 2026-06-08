@@ -1,0 +1,44 @@
+@import "variables";
+
+.cursor-pagination {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 0 4px;
+
+  button {
+    height: 32px;
+    padding: 0 12px;
+    border-radius: 16px;
+    border: 1px solid @grey20-color;
+    color: @grey60-color;
+    background: transparent;
+    display: inline-flex;
+    align-items: center;
+    transition: all 0.2s ease;
+
+    .anticon {
+      font-size: 13px;
+    }
+
+    &[disabled] {
+      opacity: 0.35;
+      cursor: not-allowed;
+      pointer-events: none;
+      border: none;
+    }
+
+    &:hover:not([disabled]) {
+      border-color: @grey30-color;
+      color: @grey80-color;
+      background: @grey10-color;
+    }
+
+    &.active:not([disabled]) {
+      border-color: @primary-color;
+      color: @primary-color;
+      background: fade(@primary-color, 8%);
+    }
+  }
+}
