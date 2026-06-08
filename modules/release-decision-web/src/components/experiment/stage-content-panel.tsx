@@ -642,8 +642,14 @@ function ExperimentRunCard({
           {run.treatmentVariant && (
             <span className="flex items-center gap-1">
               <span className="inline-block size-2 rounded-full bg-violet-500" />
-              <span className="text-muted-foreground">Treatment:</span>{" "}
-              <span className="font-mono font-medium">{run.treatmentVariant}</span>
+              <span className="text-muted-foreground">Treatments:</span>{" "}
+              <span className="font-mono font-medium">
+                {run.treatmentVariant
+                  .split("|")
+                  .map((item) => item.trim())
+                  .filter(Boolean)
+                  .join(", ")}
+              </span>
             </span>
           )}
         </div>
@@ -870,7 +876,7 @@ function SectionLabel({ icon, label }: { icon: React.ReactNode; label: string })
 }
 
 function MethodBadge({ method }: { method: string }) {
-  const label = method === "bandit" ? "Bandit" : "Bayesian A/B";
+  const label = method === "bandit" ? "Bandit" : "Bayesian A/B/n";
   const color =
     method === "bandit"
       ? "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300"

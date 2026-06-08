@@ -626,8 +626,7 @@ public class ReleaseDecisionExperimentService(
             control = PickControlVariationId(flag, variations);
         }
 
-        var treatments = SplitTreatments(run.TreatmentVariant)
-            .Select(x => ResolveVariantId(x, variations))
+        var treatments = ResolveTreatmentVariantIds(run.TreatmentVariant, variations)
             .Where(x => !string.IsNullOrWhiteSpace(x))
             .Where(x => string.IsNullOrWhiteSpace(control) || !VariantTokenEquals(x, control))
             .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -678,12 +677,44 @@ public class ReleaseDecisionExperimentService(
             return null;
         }
 
-        var matched = variations.FirstOrDefault(x =>
-            VariantTokenEquals(x.Id, normalized) ||
-            VariantTokenEquals(x.Name, normalized) ||
-            VariantTokenEquals(x.Value, normalized));
+        return TryResolveExistingVariantId(normalized, variations) ?? normalized;
+    }
 
-        return matched?.Id ?? normalized;
+    private static string? TryResolveExistingVariantId(
+        string? token,
+        IReadOnlyCollection<Variation> variations)
+    {
+        var normalized = Normalize(token);
+        if (string.IsNullOrWhiteSpace(normalized))
+        {
+            return null;
+        }
+
+        var matched = variations.FirstOrDefault(x => VariantTokenEquals(x.Id, normalized));
+
+        return matched?.Id;
+    }
+
+    private static string[] ResolveTreatmentVariantIds(
+        string? value,
+        IReadOnlyCollection<Variation> variations)
+    {
+        var normalized = Normalize(value);
+        if (string.IsNullOrWhiteSpace(normalized))
+        {
+            return [];
+        }
+
+        var exact = TryResolveExistingVariantId(normalized, variations);
+        if (!string.IsNullOrWhiteSpace(exact))
+        {
+            return [exact];
+        }
+
+        return SplitTreatments(normalized)
+            .Select(x => ResolveVariantId(x, variations))
+            .OfType<string>()
+            .ToArray();
     }
 
     private static string? PickControlVariationId(
@@ -1452,7 +1483,7 @@ public class ReleaseDecisionExperimentService(
         }
 
         return normalized
-            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Split(['|', ','], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .DefaultIfEmpty("treatment")
             .ToArray();
     }

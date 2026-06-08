@@ -80,6 +80,8 @@ const DECISION_COLORS: Record<string, string> = {
 type ExperimentMethod = "bayesian_ab" | "bandit";
 type VariantChoice = {
   key: string;
+  name: string;
+  value: string;
   description: string;
 };
 
@@ -91,10 +93,10 @@ const METHOD_OPTIONS: Array<{
 }> = [
   {
     value: "bayesian_ab",
-    title: "Bayesian A/B",
-    eyebrow: "Fixed split",
+    title: "Bayesian A/B/n",
+    eyebrow: "Fixed allocation",
     description:
-      "Use balanced traffic for control versus treatment and compare posterior win probability and risk.",
+      "Use fixed traffic allocation to compare one control against multiple treatment variants.",
   },
   {
     value: "bandit",
@@ -114,12 +116,16 @@ function parseRunVariantChoices(variants: string | null | undefined): VariantCho
     try {
       const parsed = JSON.parse(raw) as Array<{
         key?: string;
+        id?: string;
         name?: string;
+        value?: string;
         description?: string;
       }>;
       return parsed
         .map((variant) => ({
-          key: variant.key ?? variant.name ?? "",
+          key: variant.key ?? variant.id ?? variant.value ?? variant.name ?? "",
+          name: variant.name ?? "",
+          value: variant.value ?? "",
           description: variant.description ?? "",
         }))
         .filter((variant) => variant.key);
@@ -135,8 +141,8 @@ function parseRunVariantChoices(variants: string | null | undefined): VariantCho
     .map((item) => {
       const match = item.match(/^(.+?)\s*\((.+)\)\s*$/);
       return match
-        ? { key: match[1].trim(), description: match[2].trim() }
-        : { key: item, description: "" };
+        ? { key: match[1].trim(), name: "", value: "", description: match[2].trim() }
+        : { key: item, name: "", value: "", description: "" };
     });
 }
 
@@ -163,8 +169,50 @@ function normalizeRunVariantSelection(
         ? selectedTreatments.length > 0
           ? selectedTreatments
           : availableTreatments
-        : [selectedTreatments[0] ?? availableTreatments[0]].filter(Boolean),
+        : selectedTreatments.length > 0
+          ? selectedTreatments
+          : availableTreatments,
   };
+}
+
+function variantDisplayLabel(choice: VariantChoice) {
+  return choice.name || choice.description || choice.value || choice.key;
+}
+
+function shortVariantId(id: string) {
+  return id.length > 18 ? `${id.slice(0, 8)}...${id.slice(-6)}` : id;
+}
+
+function VariantIdCopyButton({ id }: { id: string }) {
+  return (
+    <button
+      type="button"
+      onClick={(event) => {
+        event.stopPropagation();
+        void navigator.clipboard?.writeText(id);
+      }}
+      className="inline-flex size-6 shrink-0 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground"
+      title={`Copy variation id: ${id}`}
+      aria-label="Copy variation id"
+    >
+      <Copy className="size-3" />
+    </button>
+  );
+}
+
+function VariantChoiceIdentity({ choice }: { choice: VariantChoice }) {
+  return (
+    <span className="min-w-0 flex-1 truncate">
+      <span className="font-medium">{variantDisplayLabel(choice)}</span>
+      {choice.value && (
+        <span className="text-muted-foreground"> · {choice.value}</span>
+      )}
+      <span className="font-mono text-muted-foreground" title={choice.key}>
+        {" "}
+        · {shortVariantId(choice.key)}
+      </span>
+    </span>
+  );
 }
 
 const DECISION_DETAILS: Record<
@@ -224,7 +272,7 @@ function SectionLabel({
 }
 
 function MethodBadge({ method }: { method: string }) {
-  const label = method === "bandit" ? "Bandit" : "Bayesian A/B";
+  const label = method === "bandit" ? "Bandit" : "Bayesian A/B/n";
   const color =
     method === "bandit"
       ? "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300"
@@ -634,8 +682,14 @@ function SummaryTab({
           )}
           {exp.treatmentVariant && (
             <span>
-              <span className="text-muted-foreground">Treatment:</span>{" "}
-              <span className="font-mono">{exp.treatmentVariant}</span>
+              <span className="text-muted-foreground">Treatments:</span>{" "}
+              <span className="font-mono">
+                {exp.treatmentVariant
+                  .split("|")
+                  .map((item) => item.trim())
+                  .filter(Boolean)
+                  .join(", ")}
+              </span>
             </span>
           )}
         </div>
@@ -1007,7 +1061,6 @@ function NewExperimentRunDialog({
   controlVariant,
   treatmentVariants,
   onControlChange,
-  onTreatmentChange,
   onArmToggle,
   creating,
   onCreate,
@@ -1020,7 +1073,6 @@ function NewExperimentRunDialog({
   controlVariant: string;
   treatmentVariants: string[];
   onControlChange: (control: string) => void;
-  onTreatmentChange: (treatment: string) => void;
   onArmToggle: (arm: string, checked: boolean) => void;
   creating: boolean;
   onCreate: () => void;
@@ -1050,7 +1102,7 @@ function NewExperimentRunDialog({
           </div>
           <div>
             <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              {method === "bandit" ? "Baseline & Arms" : "Control & Treatment"}
+              {method === "bandit" ? "Baseline & Arms" : "Control & Treatments"}
             </p>
             {variantChoices.length < 2 ? (
               <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200">
@@ -1063,18 +1115,36 @@ function NewExperimentRunDialog({
                   <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                     {method === "bandit" ? "Baseline / control" : "Control"}
                   </label>
-                  <select
-                    value={controlVariant}
-                    onChange={(event) => onControlChange(event.target.value)}
-                    className="h-9 w-full rounded-md border border-input bg-background px-2 text-xs font-mono"
-                  >
+                  <div className="max-h-28 space-y-1 overflow-y-auto rounded-md border bg-background/70 p-1.5">
                     {variantChoices.map((choice) => (
-                      <option key={choice.key} value={choice.key}>
-                        {choice.key}
-                        {choice.description ? ` (${choice.description})` : ""}
-                      </option>
+                      <div
+                        key={choice.key}
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => onControlChange(choice.key)}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter" || event.key === " ") {
+                            event.preventDefault();
+                            onControlChange(choice.key);
+                          }
+                        }}
+                        className={cn(
+                          "flex cursor-pointer items-center gap-2 rounded px-1.5 py-1 text-xs hover:bg-muted",
+                          controlVariant === choice.key && "bg-primary/10",
+                        )}
+                      >
+                        <input
+                          type="radio"
+                          checked={controlVariant === choice.key}
+                          onChange={() => onControlChange(choice.key)}
+                          onClick={(event) => event.stopPropagation()}
+                          className="size-3.5"
+                        />
+                        <VariantChoiceIdentity choice={choice} />
+                        <VariantIdCopyButton id={choice.key} />
+                      </div>
                     ))}
-                  </select>
+                  </div>
                 </div>
 
                 {method === "bandit" ? (
@@ -1086,8 +1156,22 @@ function NewExperimentRunDialog({
                       {variantChoices
                         .filter((choice) => choice.key !== controlVariant)
                         .map((choice) => (
-                          <label
+                          <div
                             key={choice.key}
+                            role="button"
+                            tabIndex={0}
+                            onClick={() =>
+                              onArmToggle(choice.key, !treatmentVariants.includes(choice.key))
+                            }
+                            onKeyDown={(event) => {
+                              if (event.key === "Enter" || event.key === " ") {
+                                event.preventDefault();
+                                onArmToggle(
+                                  choice.key,
+                                  !treatmentVariants.includes(choice.key),
+                                );
+                              }
+                            }}
                             className="flex cursor-pointer items-center gap-2 rounded px-1.5 py-1 text-xs hover:bg-muted"
                           >
                             <input
@@ -1096,37 +1180,56 @@ function NewExperimentRunDialog({
                               onChange={(event) =>
                                 onArmToggle(choice.key, event.target.checked)
                               }
+                              onClick={(event) => event.stopPropagation()}
                               className="size-3.5"
                             />
-                            <span className="font-mono">{choice.key}</span>
-                            {choice.description && (
-                              <span className="text-muted-foreground">
-                                ({choice.description})
-                              </span>
-                            )}
-                          </label>
+                            <VariantChoiceIdentity choice={choice} />
+                            <VariantIdCopyButton id={choice.key} />
+                          </div>
                         ))}
                     </div>
                   </div>
                 ) : (
                   <div className="space-y-1">
                     <label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                      Treatment
+                      Treatments
                     </label>
-                    <select
-                      value={treatmentVariants[0] ?? ""}
-                      onChange={(event) => onTreatmentChange(event.target.value)}
-                      className="h-9 w-full rounded-md border border-input bg-background px-2 text-xs font-mono"
-                    >
+                    <div className="max-h-28 space-y-1 overflow-y-auto rounded-md border bg-background/70 p-1.5">
                       {variantChoices
                         .filter((choice) => choice.key !== controlVariant)
                         .map((choice) => (
-                          <option key={choice.key} value={choice.key}>
-                            {choice.key}
-                            {choice.description ? ` (${choice.description})` : ""}
-                          </option>
+                          <div
+                            key={choice.key}
+                            role="button"
+                            tabIndex={0}
+                            onClick={() =>
+                              onArmToggle(choice.key, !treatmentVariants.includes(choice.key))
+                            }
+                            onKeyDown={(event) => {
+                              if (event.key === "Enter" || event.key === " ") {
+                                event.preventDefault();
+                                onArmToggle(
+                                  choice.key,
+                                  !treatmentVariants.includes(choice.key),
+                                );
+                              }
+                            }}
+                            className="flex cursor-pointer items-center gap-2 rounded px-1.5 py-1 text-xs hover:bg-muted"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={treatmentVariants.includes(choice.key)}
+                              onChange={(event) =>
+                                onArmToggle(choice.key, event.target.checked)
+                              }
+                              onClick={(event) => event.stopPropagation()}
+                              className="size-3.5"
+                            />
+                            <VariantChoiceIdentity choice={choice} />
+                            <VariantIdCopyButton id={choice.key} />
+                          </div>
                         ))}
-                    </select>
+                    </div>
                   </div>
                 )}
               </div>
@@ -1474,17 +1577,6 @@ export function ExperimentRunTable({
     setNewRunTreatmentVariants(normalized.treatments);
   }
 
-  function changeNewRunTreatment(treatment: string) {
-    const normalized = normalizeRunVariantSelection(
-      newRunMethod,
-      newRunControlVariant,
-      [treatment],
-      variantChoices,
-    );
-    setNewRunControlVariant(normalized.control);
-    setNewRunTreatmentVariants(normalized.treatments);
-  }
-
   function toggleNewRunArm(arm: string, checked: boolean) {
     const normalized = normalizeRunVariantSelection(
       newRunMethod,
@@ -1652,7 +1744,6 @@ export function ExperimentRunTable({
         controlVariant={newRunControlVariant}
         treatmentVariants={newRunTreatmentVariants}
         onControlChange={changeNewRunControl}
-        onTreatmentChange={changeNewRunTreatment}
         onArmToggle={toggleNewRunArm}
         creating={creating}
         onCreate={createRun}

@@ -1,6 +1,6 @@
 /* ── Typed analysis renderer ──────────────────────────────────
    Renders structured JSON stored in Experiment.analysisResult.
-   Supports both Bayesian A/B and Bandit experiment types.
+   Supports both Bayesian A/B/n and Bandit experiment types.
    ─────────────────────────────────────────────────────────── */
 
 "use client";

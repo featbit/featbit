@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Beaker, Filter, GitBranch, Pencil, Percent, Plus, Trash2 } from "lucide-react";
+import { Beaker, Copy, Filter, GitBranch, Pencil, Percent, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,6 +31,8 @@ type FilterEntry = {
 
 type VariantRow = {
   key: string;
+  name: string;
+  value: string;
   description: string;
 };
 
@@ -80,12 +82,16 @@ function parseVariantsToRows(variants: string | null | undefined): VariantRow[] 
     try {
       const parsed = JSON.parse(raw) as Array<{
         key?: string;
+        id?: string;
         name?: string;
+        value?: string;
         description?: string;
       }>;
       return parsed
         .map((variant) => ({
-          key: variant.key ?? variant.name ?? "",
+          key: variant.key ?? variant.id ?? variant.value ?? variant.name ?? "",
+          name: variant.name ?? "",
+          value: variant.value ?? "",
           description: variant.description ?? "",
         }))
         .filter((variant) => variant.key);
@@ -101,8 +107,8 @@ function parseVariantsToRows(variants: string | null | undefined): VariantRow[] 
     .map((item) => {
       const match = item.match(/^(.+?)\s*\((.+)\)\s*$/);
       return match
-        ? { key: match[1].trim(), description: match[2].trim() }
-        : { key: item, description: "" };
+        ? { key: match[1].trim(), name: "", value: "", description: match[2].trim() }
+        : { key: item, name: "", value: "", description: "" };
     });
 }
 
@@ -141,8 +147,61 @@ function normalizeVariantSelection(
 
   return {
     control,
-    treatments: [selected[0] ?? nonControl[0]].filter(Boolean),
+    treatments: selected.length > 0 ? selected : nonControl,
   };
+}
+
+function variantDisplayLabel(variant: VariantRow) {
+  return variant.name || variant.description || variant.value || variant.key;
+}
+
+function shortVariantId(id: string) {
+  return id.length > 18 ? `${id.slice(0, 8)}...${id.slice(-6)}` : id;
+}
+
+function formatVariantOption(variant: VariantRow) {
+  const label = variantDisplayLabel(variant);
+  return [label, variant.value, shortVariantId(variant.key)]
+    .filter(Boolean)
+    .join(" · ");
+}
+
+function formatVariantToken(token: string | null | undefined, variants: VariantRow[]) {
+  if (!token) return "not set";
+  const variant = variants.find((item) => item.key === token);
+  return variant ? formatVariantOption(variant) : shortVariantId(token);
+}
+
+function VariantIdCopyButton({ id }: { id: string }) {
+  return (
+    <button
+      type="button"
+      onClick={(event) => {
+        event.stopPropagation();
+        void navigator.clipboard?.writeText(id);
+      }}
+      className="inline-flex size-6 shrink-0 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground"
+      title={`Copy variation id: ${id}`}
+      aria-label="Copy variation id"
+    >
+      <Copy className="size-3" />
+    </button>
+  );
+}
+
+function VariantRowIdentity({ variant }: { variant: VariantRow }) {
+  return (
+    <span className="min-w-0 flex-1 truncate">
+      <span className="font-medium">{variantDisplayLabel(variant)}</span>
+      {variant.value && (
+        <span className="text-muted-foreground"> · {variant.value}</span>
+      )}
+      <span className="font-mono text-muted-foreground" title={variant.key}>
+        {" "}
+        · {shortVariantId(variant.key)}
+      </span>
+    </span>
+  );
 }
 
 /* ── Component ── */
@@ -238,19 +297,7 @@ export function ExperimentRunTrafficConfig({
     setTreatmentVariants(normalized.treatments);
   }
 
-  function setSingleTreatment(nextTreatment: string) {
-    const normalized = normalizeVariantSelection(
-      method,
-      controlVariant,
-      [nextTreatment],
-      variantRows,
-    );
-
-    setControlVariant(normalized.control);
-    setTreatmentVariants(normalized.treatments);
-  }
-
-  function toggleBanditArm(key: string, checked: boolean) {
+  function toggleTreatmentVariant(key: string, checked: boolean) {
     const normalized = normalizeVariantSelection(
       method,
       controlVariant,
@@ -287,8 +334,8 @@ export function ExperimentRunTrafficConfig({
               </span>
             ) : (
               <span>
-                <span className="font-medium">Even split (50 / 50)</span>
-                <span className="text-muted-foreground"> — equal traffic per variant</span>
+                <span className="font-medium">Fixed allocation</span>
+                <span className="text-muted-foreground"> — compare control against selected treatment variants</span>
               </span>
             )}
           </div>
@@ -299,20 +346,27 @@ export function ExperimentRunTrafficConfig({
               isBandit ? (
                 <span>
                   <span className="font-medium">Baseline:</span>{" "}
-                  <span className="font-mono">{experimentRun.controlVariant ?? "not set"}</span>
+                  <span>{formatVariantToken(experimentRun.controlVariant, variantRows)}</span>
                   <span className="text-muted-foreground"> · Arms: </span>
-                  <span className="font-mono">
+                  <span>
                     {[experimentRun.controlVariant, ...runTreatments]
                       .filter(Boolean)
+                      .map((variant) => formatVariantToken(variant, variantRows))
                       .join(", ")}
                   </span>
                 </span>
               ) : (
                 <span>
                   <span className="font-medium">Control:</span>{" "}
-                  <span className="font-mono">{experimentRun.controlVariant ?? "not set"}</span>
-                  <span className="text-muted-foreground"> · Treatment: </span>
-                  <span className="font-mono">{runTreatments[0] ?? "not set"}</span>
+                  <span>{formatVariantToken(experimentRun.controlVariant, variantRows)}</span>
+                  <span className="text-muted-foreground"> · Treatments: </span>
+                  <span>
+                    {runTreatments.length > 0
+                      ? runTreatments
+                          .map((variant) => formatVariantToken(variant, variantRows))
+                          .join(", ")
+                      : "not set"}
+                  </span>
                 </span>
               )
             ) : (
@@ -413,7 +467,7 @@ export function ExperimentRunTrafficConfig({
                     onChange={() => changeMethod("bayesian_ab")}
                     className="size-3.5"
                   />
-                  <span className="text-xs">Bayesian A/B</span>
+                  <span className="text-xs">Bayesian A/B/n</span>
                 </label>
                 <label className="flex items-center gap-1.5 cursor-pointer">
                   <input
@@ -430,19 +484,19 @@ export function ExperimentRunTrafficConfig({
               <p className="text-[10px] text-muted-foreground">
                 {method === "bandit"
                   ? "Dynamic traffic reweighting — asymmetric allocation intentional"
-                  : "Fixed split — balanced sampling ensures equal N per variant"}
+                  : "Fixed allocation — compare one control against multiple treatment variants"}
               </p>
             </div>
 
             <div className="space-y-2 rounded-md border bg-muted/15 px-3 py-2.5">
               <div className="space-y-0.5">
                 <Label className="text-xs">
-                  {method === "bandit" ? "Baseline & Arms" : "Control & Treatment"}
+                  {method === "bandit" ? "Baseline & Arms" : "Control & Treatments"}
                 </Label>
                 <p className="text-[10px] text-muted-foreground">
                   {method === "bandit"
                     ? "Pick one baseline/control variation and one or more additional arms."
-                    : "Pick exactly one control variation and one treatment variation."}
+                    : "Pick one control variation and one or more treatment variants."}
                 </p>
               </div>
 
@@ -456,18 +510,33 @@ export function ExperimentRunTrafficConfig({
                     <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
                       {method === "bandit" ? "Baseline / control" : "Control"}
                     </Label>
-                    <select
-                      value={controlVariant}
-                      onChange={(event) => changeControl(event.target.value)}
-                      className="h-8 w-full rounded-md border border-input bg-background px-2 text-xs font-mono"
-                    >
+                    <div className="grid gap-1.5">
                       {variantRows.map((variant) => (
-                        <option key={variant.key} value={variant.key}>
-                          {variant.key}
-                          {variant.description ? ` (${variant.description})` : ""}
-                        </option>
+                        <div
+                          key={variant.key}
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => changeControl(variant.key)}
+                          onKeyDown={(event) => {
+                            if (event.key === "Enter" || event.key === " ") {
+                              event.preventDefault();
+                              changeControl(variant.key);
+                            }
+                          }}
+                          className="flex cursor-pointer items-center gap-2 rounded border bg-background/70 px-2 py-1.5 text-xs"
+                        >
+                          <input
+                            type="radio"
+                            checked={controlVariant === variant.key}
+                            onChange={() => changeControl(variant.key)}
+                            onClick={(event) => event.stopPropagation()}
+                            className="size-3.5"
+                          />
+                          <VariantRowIdentity variant={variant} />
+                          <VariantIdCopyButton id={variant.key} />
+                        </div>
                       ))}
-                    </select>
+                    </div>
                   </div>
 
                   {method === "bandit" ? (
@@ -479,47 +548,86 @@ export function ExperimentRunTrafficConfig({
                         {variantRows
                           .filter((variant) => variant.key !== controlVariant)
                           .map((variant) => (
-                            <label
+                            <div
                               key={variant.key}
+                              role="button"
+                              tabIndex={0}
+                              onClick={() =>
+                                toggleTreatmentVariant(
+                                  variant.key,
+                                  !treatmentVariants.includes(variant.key),
+                                )
+                              }
+                              onKeyDown={(event) => {
+                                if (event.key === "Enter" || event.key === " ") {
+                                  event.preventDefault();
+                                  toggleTreatmentVariant(
+                                    variant.key,
+                                    !treatmentVariants.includes(variant.key),
+                                  );
+                                }
+                              }}
                               className="flex cursor-pointer items-center gap-2 rounded border bg-background/70 px-2 py-1.5 text-xs"
                             >
                               <input
                                 type="checkbox"
                                 checked={treatmentVariants.includes(variant.key)}
                                 onChange={(event) =>
-                                  toggleBanditArm(variant.key, event.target.checked)
+                                  toggleTreatmentVariant(variant.key, event.target.checked)
                                 }
+                                onClick={(event) => event.stopPropagation()}
                                 className="size-3.5"
                               />
-                              <span className="font-mono">{variant.key}</span>
-                              {variant.description && (
-                                <span className="text-muted-foreground">
-                                  ({variant.description})
-                                </span>
-                              )}
-                            </label>
+                              <VariantRowIdentity variant={variant} />
+                              <VariantIdCopyButton id={variant.key} />
+                            </div>
                           ))}
                       </div>
                     </div>
                   ) : (
                     <div className="space-y-1">
                       <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                        Treatment
+                        Treatments
                       </Label>
-                      <select
-                        value={treatmentVariants[0] ?? ""}
-                        onChange={(event) => setSingleTreatment(event.target.value)}
-                        className="h-8 w-full rounded-md border border-input bg-background px-2 text-xs font-mono"
-                      >
+                      <div className="grid gap-1.5">
                         {variantRows
                           .filter((variant) => variant.key !== controlVariant)
                           .map((variant) => (
-                            <option key={variant.key} value={variant.key}>
-                              {variant.key}
-                              {variant.description ? ` (${variant.description})` : ""}
-                            </option>
+                            <div
+                              key={variant.key}
+                              role="button"
+                              tabIndex={0}
+                              onClick={() =>
+                                toggleTreatmentVariant(
+                                  variant.key,
+                                  !treatmentVariants.includes(variant.key),
+                                )
+                              }
+                              onKeyDown={(event) => {
+                                if (event.key === "Enter" || event.key === " ") {
+                                  event.preventDefault();
+                                  toggleTreatmentVariant(
+                                    variant.key,
+                                    !treatmentVariants.includes(variant.key),
+                                  );
+                                }
+                              }}
+                              className="flex cursor-pointer items-center gap-2 rounded border bg-background/70 px-2 py-1.5 text-xs"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={treatmentVariants.includes(variant.key)}
+                                onChange={(event) =>
+                                  toggleTreatmentVariant(variant.key, event.target.checked)
+                                }
+                                onClick={(event) => event.stopPropagation()}
+                                className="size-3.5"
+                              />
+                              <VariantRowIdentity variant={variant} />
+                              <VariantIdCopyButton id={variant.key} />
+                            </div>
                           ))}
-                      </select>
+                      </div>
                     </div>
                   )}
                 </div>
