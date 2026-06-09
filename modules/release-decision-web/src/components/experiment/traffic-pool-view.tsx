@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import type { ExperimentRun } from "@/generated/prisma";
 
 /* ── Palette ── */
@@ -185,12 +185,13 @@ function BucketBar({ experimentRuns }: { experimentRuns: ExpWithColor[] }) {
 
 /* ── Timeline / Gantt ── */
 function Timeline({ experimentRuns, isSequential }: { experimentRuns: ExpWithColor[]; isSequential?: boolean }) {
+  const [now] = useState(() => Date.now());
   const withDates = experimentRuns.filter(e => e.observationStart);
   if (withDates.length === 0) return null;
 
   const starts = withDates.map(e => new Date(e.observationStart!).getTime());
   const ends = withDates.map(e =>
-    e.observationEnd ? new Date(e.observationEnd).getTime() : Date.now()
+    e.observationEnd ? new Date(e.observationEnd).getTime() : now
   );
   const minTime = Math.min(...starts);
   const maxTime = Math.max(...ends);
@@ -210,7 +211,7 @@ function Timeline({ experimentRuns, isSequential }: { experimentRuns: ExpWithCol
         const start = new Date(exp.observationStart!).getTime();
         const end = exp.observationEnd
           ? new Date(exp.observationEnd).getTime()
-          : Date.now();
+          : now;
         const leftPct = ((start - minTime) / totalMs) * 100;
         const widthPct = ((end - start) / totalMs) * 100;
         const isOngoing = !exp.observationEnd;

@@ -5,7 +5,6 @@ import {
   AlertCircle,
   Check,
   CheckCircle2,
-  ClipboardCheck,
   ClipboardList,
   Copy,
   Database,
@@ -13,7 +12,6 @@ import {
   Loader2,
   LockKeyhole,
   MessageSquareText,
-  ShieldCheck,
   Terminal,
   Trash2,
   Workflow,
@@ -64,8 +62,6 @@ type StoredMcpToken = McpTokenResponse & {
 type ShellId = "powershell" | "bash" | "zsh";
 type AgentId = "codex" | "claude" | "opencode" | "copilot" | "generic";
 type CheckStatus = "satisfied" | "missing" | "warning";
-type StepKey = GuidedExperimentStep["key"];
-
 type ExperimentWithRuns = Experiment & {
   experimentRuns: ExperimentRun[];
 };
@@ -138,8 +134,6 @@ export function ChatPanel({
       }),
     [experiment, stateChecks, step, suggestedPrompt],
   );
-  const manualAction = getManualAction(step.key, readiness);
-
   const [token, setToken] = useState<StoredMcpToken | null>(null);
   const [loadingToken, setLoadingToken] = useState(false);
   const [revokingToken, setRevokingToken] = useState(false);
@@ -375,70 +369,46 @@ export function ChatPanel({
           <Workflow className="size-4 text-primary" />
           <h2 className="text-sm font-semibold">Experiment coach</h2>
         </div>
-        <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-          Follow a professional release-decision loop. A coding agent can help,
-          but the stage panel remains fully usable without one.
+        <p className="mt-1 truncate text-xs text-muted-foreground">
+          Use a coding agent, or edit the stage directly.
         </p>
       </div>
 
       <div className="flex-1 space-y-4 overflow-y-auto p-4">
-        <GuideSection
-          icon={<ClipboardCheck className="size-4" />}
-          title={step.title}
-        >
-          <p>{step.userGoal}</p>
-          <div className="mt-2 flex flex-wrap gap-1.5">
-            {step.cfTriggers.map((trigger) => (
-              <span
-                key={trigger}
-                className="rounded border border-border/80 bg-muted/35 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground"
-              >
-                {trigger}
-              </span>
-            ))}
+        <section className="rounded-lg border border-primary/25 bg-primary/[0.035] p-3 shadow-sm shadow-foreground/5">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2 text-sm font-semibold">
+              <Terminal className="size-4 text-primary" />
+              <h3>Agent prompt</h3>
+            </div>
+            <div className="flex flex-wrap items-center gap-1.5">
+              {step.cfTriggers.map((trigger) => (
+                <span
+                  key={trigger}
+                  className="rounded border border-border/80 bg-background/70 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground"
+                >
+                  {trigger}
+                </span>
+              ))}
+              <StepSatisfiedBadge ready={readiness.canMarkSatisfied} />
+            </div>
           </div>
-        </GuideSection>
-
-        <GuideSection
-          icon={<ShieldCheck className="size-4" />}
-          title="Professional checklist"
-        >
-          <ul className="space-y-1.5">
-            {step.completionCriteria.map((criterion) => (
-              <li key={criterion} className="flex gap-2">
-                <CheckCircle2 className="mt-0.5 size-3.5 shrink-0 text-muted-foreground/60" />
-                <span>{criterion}</span>
-              </li>
-            ))}
-          </ul>
-        </GuideSection>
-
-        <GuideSection
-          icon={<Database className="size-4" />}
-          title="Current state from MCP"
-        >
-          <div className="space-y-2">
-            {stateChecks.map((check) => (
-              <StateCheckRow key={check.label} check={check} />
-            ))}
-          </div>
-        </GuideSection>
-
-        <GuideSection
-          icon={<MessageSquareText className="size-4" />}
-          title="Recommended action"
-        >
-          <p>{manualAction}</p>
+          <p className="text-xs leading-relaxed text-muted-foreground">
+            Copy this prompt into your coding agent to start this step.
+          </p>
           {readiness.blocker && (
             <p className="mt-2 rounded-md border border-amber-200 bg-amber-50 px-2 py-1.5 text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200">
               {readiness.blocker}
             </p>
           )}
+          <div className="mt-3">
+            <CodeBlock value={prompt} maxLines={14} />
+          </div>
           {step.nextStageKey ? (
             <div className="mt-3">
               <Button
                 size="sm"
-                variant="outline"
+                variant={readiness.canMarkSatisfied ? "default" : "outline"}
                 onClick={markStepSatisfied}
                 disabled={!readiness.canMarkSatisfied || advancing}
                 className="h-8 gap-1.5"
@@ -448,7 +418,7 @@ export function ChatPanel({
                 ) : (
                   <Check className="size-3.5" />
                 )}
-                Mark as already satisfied
+                Satisfied
               </Button>
             </div>
           ) : (
@@ -461,13 +431,7 @@ export function ChatPanel({
               {advanceError}
             </p>
           )}
-          <div className="mt-3 space-y-2">
-            <p className="text-xs font-semibold text-foreground">
-              Coding agent prompt
-            </p>
-            <CodeBlock value={prompt} maxLines={10} />
-          </div>
-        </GuideSection>
+        </section>
 
         <details
           open={setupExpanded}
@@ -735,10 +699,14 @@ export function StageAgentGuide({
         {step.nextStageKey && (
           <Button
             size="sm"
-            variant="outline"
+            variant={readiness.canMarkSatisfied ? "default" : "outline"}
             onClick={markStepSatisfied}
             disabled={!readiness.canMarkSatisfied || advancing}
-            className="h-8 shrink-0 gap-1.5"
+            className={cn(
+              "h-8 shrink-0 gap-1.5",
+              readiness.canMarkSatisfied &&
+                "bg-emerald-600 text-white hover:bg-emerald-700",
+            )}
           >
             {advancing ? (
               <Loader2 className="size-3.5 animate-spin" />
@@ -854,6 +822,26 @@ function MissingForSatisfied({
         </li>
       ))}
     </ul>
+  );
+}
+
+function StepSatisfiedBadge({ ready }: { ready: boolean }) {
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
+        ready
+          ? "border-emerald-300 bg-emerald-100 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
+          : "border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-900/70 dark:bg-amber-950/30 dark:text-amber-300",
+      )}
+    >
+      {ready ? (
+        <CheckCircle2 className="size-3" />
+      ) : (
+        <AlertCircle className="size-3" />
+      )}
+      {ready ? "Satisfied" : "Needs input"}
+    </span>
   );
 }
 
@@ -1087,45 +1075,6 @@ function buildStepReadiness(
       };
     }
   }
-}
-
-function getManualAction(stepKey: StepKey, readiness: StepReadiness) {
-  if (readiness.canMarkSatisfied) {
-    return readiness.summary;
-  }
-
-  switch (stepKey) {
-    case "frame":
-      return "Use the left stage panel to fill in the goal, intent, change, and hypothesis. The experiment can continue without a coding agent.";
-    case "exposure":
-      return "Connect a FeatBit feature flag from the Exposure stage. Variations must come from the flag picker, not from manual entry.";
-    case "measure":
-      return "Configure one primary metric, guardrails, and a run. Then analyze FeatBit evaluation and metric event data from the run table.";
-    case "decide":
-      return "Review the run analysis. If evidence is insufficient, keep collecting data instead of forcing a decision; if a decision exists, capture learning.";
-  }
-}
-
-function StateCheckRow({ check }: { check: StateCheck }) {
-  const statusClass =
-    check.status === "satisfied"
-      ? "text-emerald-600 dark:text-emerald-400"
-      : check.status === "warning"
-        ? "text-amber-600 dark:text-amber-400"
-        : "text-destructive";
-  const Icon = check.status === "satisfied" ? CheckCircle2 : AlertCircle;
-
-  return (
-    <div className="rounded-md border border-border/70 bg-muted/15 px-2 py-1.5">
-      <div className="flex items-start gap-2">
-        <Icon className={cn("mt-0.5 size-3.5 shrink-0", statusClass)} />
-        <div className="min-w-0 flex-1">
-          <div className="text-xs font-semibold text-foreground">{check.label}</div>
-          <div className="break-words text-xs text-muted-foreground">{check.value}</div>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 function GuideSection({

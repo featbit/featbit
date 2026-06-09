@@ -71,7 +71,7 @@ export function NewExperimentForm() {
         </div>
         <input type="hidden" name="featbitProjectKey" value={projectKey} />
         <p className="text-xs text-muted-foreground">
-          Determined by the workspace you're currently in. Switch workspace from the top bar to change.
+          Determined by the workspace you&apos;re currently in. Switch workspace from the top bar to change.
         </p>
       </div>
       <div className="space-y-2">

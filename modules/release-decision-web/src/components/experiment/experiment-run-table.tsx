@@ -24,7 +24,6 @@ import {
   Plus,
   RefreshCw,
   Trash2,
-  ShieldCheck,
   Target,
   Users,
   X,
@@ -444,16 +443,6 @@ function CollapsibleRationale({ children }: { children: string }) {
 /* ── Simple inline tab bar ── */
 
 /* ── Helpers ── */
-
-function parseGuardrailEvents(raw: string | null | undefined): string[] {
-  if (!raw) return [];
-  try {
-    const v = JSON.parse(raw);
-    return Array.isArray(v) ? v : [raw];
-  } catch {
-    return [raw];
-  }
-}
 
 function fmtDate(d: Date | string): string {
   const date = typeof d === "string" ? new Date(d) : d;
@@ -1321,24 +1310,24 @@ function buildDecisionPrompt({
 
   return [
     agentLead,
-    "This prompt assumes the FeatBit MCP tools are already visible in this agent session. If featbit_release_decision_* tools are not available, stop and tell me to register MCP, then restart or resume the agent with the setup command from this page; do not try to use MCP resources/templates as a substitute.",
-    "If a FeatBit MCP tool is visible but fails with an expired or revoked token error, stop and tell me to create a new MCP token on this page, then restart or resume the agent with the newly generated command. Retrying with the same token will not fix it.",
+    "Requires FeatBit MCP tools named featbit_release_decision_*. If they are missing, ask me to register MCP from this page before continuing.",
+    "If a FeatBit MCP tool fails with an expired or revoked token, ask me to create a new MCP token and restart or resume the agent with the new setup command.",
     "",
     `Experiment id: ${experimentId}`,
     `Run id: ${run.id}`,
     `Run slug: ${run.slug}`,
     "",
-    "Use the $featbit-release-decision skill as the router, then use $evidence-analysis for CF-06 evidence sufficiency and CF-07 decision framing.",
-    "Only use $experiment-workspace to refresh analysis when the selected run has no usable Bayesian/Bandit analysisResult. A usable Bayesian analysisResult includes srm, sample_check, primary_metric rows with p_win and risk values, and any guardrail sections.",
-    "Do not overwrite an existing usable Bayesian/Bandit analysisResult with a stats_ready summary. If featbit_release_decision_analyze_run returns analysisResult without p_win/risk/SRM, stop and report that the API analyzer is returning raw stats instead of the full release-decision analysis schema.",
-    "Guardrail direction mapping: increase_bad means inverse=true because lower is better; decrease_bad means inverse=false because higher is better. Do not report decrease_bad plus inverse=false as a mismatch.",
+    "Use $featbit-release-decision as the router and $evidence-analysis for CF-06 evidence sufficiency and CF-07 decision framing.",
+    "Refresh analysis with $experiment-workspace only when this run has no usable Bayesian/Bandit analysisResult. Usable Bayesian analysis includes SRM, sample_check, primary_metric rows with p_win/risk, and guardrails.",
+    "Do not replace a usable Bayesian/Bandit analysisResult with stats_ready/raw stats. If analyze_run returns only raw stats, stop and report the analyzer mismatch.",
+    "Guardrail inverse mapping: increase_bad => inverse=true; decrease_bad => inverse=false.",
     "",
-    "Use FeatBit MCP tools, not the old project-sync scripts:",
+    "Use FeatBit MCP tools:",
     "1. Call featbit_release_decision_get_experiment with the experiment id.",
     "2. Inspect the selected run, current analysisResult, observation window, primary metric, guardrails, minimum sample, SRM result, and risk values.",
     "3. If analysis is missing or clearly unusable, call featbit_release_decision_analyze_run for this run with forceFresh=true, then read the refreshed experiment. If the refreshed analysisResult is only a stats_ready/raw-stats summary, do not make a rollout decision; report the analyzer mismatch.",
     "4. Apply evidence-analysis. Pick exactly one API decision value: CONTINUE, PAUSE, ROLLBACK, or INCONCLUSIVE. If the skill frames it as ROLLBACK CANDIDATE, persist ROLLBACK.",
-    "5. Call featbit_release_decision_update_run for this run and write decision, decisionSummary, decisionReason, and status=\"decided\". decisionSummary must start with a plain-language feature-flag action: for CONTINUE say whether to move treatment to 100% or expand gradually; for PAUSE say hold the current rollout; for ROLLBACK say route users back to control/default; for INCONCLUSIVE say keep observing or fix measurement before changing rollout. decisionReason must be an evidence rationale for product/release readers: cite the primary metric, guardrail interpretation, SRM/sample health, and rollout risk. Do not mention tool calls, MCP, analyze_run, schemas, JSON field names, or whether you reused an existing analysisResult.",
+    "5. Call featbit_release_decision_update_run for this run and write decision, decisionSummary, decisionReason, and status=\"decided\". decisionSummary must start with the concrete feature-flag action: CONTINUE = move treatment to 100% or expand gradually; PAUSE = hold the current rollout; ROLLBACK = route users back to control/default; INCONCLUSIVE = keep observing or fix measurement. decisionReason must cite the primary metric, guardrails, SRM/sample health, and rollout risk. Do not mention tools, MCP, analyze_run, schemas, JSON fields, or whether existing analysis was reused.",
     "6. Call featbit_release_decision_update_experiment with lastAction=\"Decision: <category>\". Do not move the stage to learning unless learning-capture is explicitly requested.",
     "7. Optionally call featbit_release_decision_add_message with a short assistant summary of what was decided and why.",
     "",
@@ -1503,6 +1492,7 @@ export function ExperimentRunTable({
   const prevRunCountRef = useRef(ordered.length);
   useEffect(() => {
     if (ordered.length > prevRunCountRef.current) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedId(ordered.at(-1)?.id ?? null);
     }
     prevRunCountRef.current = ordered.length;
@@ -1511,6 +1501,7 @@ export function ExperimentRunTable({
   // If selected run disappears (e.g., deleted), fall back to the last run.
   useEffect(() => {
     if (selectedId && ordered.some((r) => r.id === selectedId)) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSelectedId(ordered.at(-1)?.id ?? null);
   }, [selectedId, ordered]);
 

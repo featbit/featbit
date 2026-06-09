@@ -22,6 +22,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const stored = localStorage.getItem("featbit-rda-theme");
     const nextTheme = stored === "dark" ? "dark" : "light";
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setTheme(nextTheme);
     applyTheme(nextTheme);
   }, []);

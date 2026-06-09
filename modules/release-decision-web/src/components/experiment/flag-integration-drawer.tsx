@@ -291,6 +291,7 @@ export function FlagIntegrationPanel({
   const [mode, setMode] = useState<Mode>(initialMode);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMode(experiment.flagKey ? "config" : "picker");
   }, [experiment.flagKey, experiment.id]);
 

@@ -5,7 +5,6 @@
 
 "use client";
 
-import { useMemo } from "react";
 import { HelpCircle } from "lucide-react";
 import {
   Tooltip,
@@ -260,19 +259,15 @@ function PosteriorChartItem({
   const PAD_TOP = 4;
   const PAD_BOT = 18;
 
-  const data = useMemo(() => {
-    const lo = mu - 3.5 * sigma;
-    const hi = mu + 3.5 * sigma;
-    const N = 80;
-    const pts: { x: number; y: number }[] = [];
-    for (let i = 0; i <= N; i++) {
-      const xVal = lo + (hi - lo) * (i / N);
-      pts.push({ x: xVal, y: gaussPdf(xVal, mu, sigma) });
-    }
-    return { lo, hi, pts, yMax: gaussPdf(mu, mu, sigma) };
-  }, [mu, sigma]);
-
-  const { lo, hi, pts, yMax } = data;
+  const lo = mu - 3.5 * sigma;
+  const hi = mu + 3.5 * sigma;
+  const N = 80;
+  const pts: { x: number; y: number }[] = [];
+  for (let i = 0; i <= N; i++) {
+    const xVal = lo + (hi - lo) * (i / N);
+    pts.push({ x: xVal, y: gaussPdf(xVal, mu, sigma) });
+  }
+  const yMax = gaussPdf(mu, mu, sigma);
 
   const sx = (v: number) => PAD_X + ((v - lo) / (hi - lo)) * (W - 2 * PAD_X);
   const sy = (v: number) => PAD_TOP + (1 - v / yMax) * (H - PAD_TOP - PAD_BOT);

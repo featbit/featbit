@@ -28,6 +28,7 @@ export function EnvSecretCard({ className, bare }: EnvSecretCardProps) {
 
   useEffect(() => {
     if (!envId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setState({ status: "idle" });
       return;
     }
@@ -151,6 +152,7 @@ export function useCurrentEnvSecret() {
 
   useEffect(() => {
     if (!envId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setResult({ envSecret: null, hasSigningKey: false, envId: null });
       return;
     }

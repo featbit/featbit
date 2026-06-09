@@ -43,6 +43,7 @@ export function ExperimentDetailClient({ id }: { id: string }) {
 
   useEffect(() => {
     if (!isAuthenticated || !projectEnv) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoading(sessionStatus === "checking" || sessionStatus === "unknown");
       return;
     }
