@@ -57,18 +57,6 @@ const ALL_FIELDS: {
     placeholder: "Any constraints or limitations to keep in mind?",
     rows: 2,
   },
-  {
-    key: "primaryMetric",
-    label: "Primary Metric",
-    placeholder: "e.g. onboarding completion rate",
-    rows: 2,
-  },
-  {
-    key: "guardrails",
-    label: "Guardrails",
-    placeholder: "Metrics that must not regress, one per line",
-    rows: 2,
-  },
 ];
 
 /**

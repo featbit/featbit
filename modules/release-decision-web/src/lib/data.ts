@@ -8,12 +8,14 @@ import {
   apiGetExperiment,
   apiListExperiments,
   apiUpdateExperiment,
+  apiUpdateExperimentMetrics,
   apiUpdateExperimentRun,
   apiUpdateExperimentStage,
   type ReleaseDecisionActivity,
   type ReleaseDecisionExperimentDetail,
   type ReleaseDecisionExperimentRun,
   type ReleaseDecisionExperimentRunUpdate,
+  type ReleaseDecisionMetricsUpdate,
 } from "@/lib/release-decision-api";
 
 const ENV_COOKIE_NAME = "fb_env_id";
@@ -166,17 +168,23 @@ export async function updateExperiment(
     envSecret: current.envSecret,
     flagServerUrl: current.flagServerUrl,
     goal: current.goal,
-    guardrails: current.guardrails,
     intent: current.intent,
     lastAction: current.lastAction,
     lastLearning: current.lastLearning,
     openQuestions: current.openQuestions,
-    primaryMetric: current.primaryMetric,
     variants: current.variants,
     conflictAnalysis: current.conflictAnalysis,
     entryMode: current.entryMode,
     ...data,
   }));
+}
+
+export async function updateExperimentMetrics(
+  id: string,
+  data: ReleaseDecisionMetricsUpdate,
+) {
+  const envId = await requireEnvId();
+  return mapDetail(await apiUpdateExperimentMetrics(envId, id, data));
 }
 
 export async function deleteExperiment(id: string) {
@@ -257,78 +265,3 @@ export async function getRunningExperimentRuns() {
   );
 }
 
-// ─── Metric vocabulary normalisation ────────────────────────────────────────
-function normalizeMetricType(value: unknown): "binary" | "continuous" {
-  return value === "continuous" || value === "numeric" ? "continuous" : "binary";
-}
-
-function normalizeMetricAgg(value: unknown): "once" | "count" | "sum" | "average" {
-  return value === "count" || value === "sum" || value === "average" ? value : "once";
-}
-
-export async function propagateMetricsToLatestRun(
-  experimentId: string,
-  fields: { primaryMetric?: string | null; guardrails?: string | null },
-) {
-  const experiment = await getExperiment(experimentId);
-  const run = experiment.experimentRuns[0];
-  if (!run) return null;
-
-  const update: ReleaseDecisionExperimentRunUpdate = {};
-
-  if (fields.primaryMetric !== undefined) {
-    try {
-      const parsed = fields.primaryMetric ? JSON.parse(fields.primaryMetric) : null;
-      if (parsed && typeof parsed === "object" && parsed.event) {
-        update.primaryMetricEvent = parsed.event;
-        update.primaryMetricType = normalizeMetricType(parsed.metricType);
-        update.primaryMetricAgg = normalizeMetricAgg(parsed.metricAgg);
-        if (parsed.description) update.metricDescription = parsed.description;
-      }
-    } catch {
-      // ignore
-    }
-  }
-
-  if (fields.guardrails !== undefined) {
-    try {
-      const defs = parseGuardrailDefs(fields.guardrails);
-      update.guardrailEvents = defs.length > 0 ? JSON.stringify(defs) : null;
-    } catch {
-      // ignore
-    }
-  }
-
-  if (Object.keys(update).length === 0) return run;
-  return updateExperimentRun(experimentId, run.id, update);
-}
-
-export interface GuardrailDef {
-  event: string;
-  metricType: string;
-  metricAgg: string;
-  inverse: boolean;
-}
-
-export function parseGuardrailDefs(raw: string | null | undefined): GuardrailDef[] {
-  if (!raw) return [];
-  try {
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed.map((item: string | (Partial<GuardrailDef> & { direction?: string })) => {
-      if (typeof item === "string") {
-        return { event: item, metricType: "binary", metricAgg: "once", inverse: false };
-      }
-      const metricType = item.metricType === "numeric" ? "continuous" : (item.metricType ?? "binary");
-      const inverse = item.inverse ?? item.direction === "increase_bad";
-      return {
-        event: item.event ?? "",
-        metricType,
-        metricAgg: item.metricAgg ?? "once",
-        inverse,
-      };
-    }).filter((g: GuardrailDef) => g.event);
-  } catch {
-    return [];
-  }
-}

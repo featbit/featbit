@@ -124,12 +124,10 @@ export type ReleaseDecisionExperimentUpdate = Partial<
     | "envSecret"
     | "flagServerUrl"
     | "goal"
-    | "guardrails"
     | "intent"
     | "lastAction"
     | "lastLearning"
     | "openQuestions"
-    | "primaryMetric"
     | "sandboxId"
     | "variants"
     | "conflictAnalysis"
@@ -138,6 +136,15 @@ export type ReleaseDecisionExperimentUpdate = Partial<
 > & {
   featbitProjectKey?: string | null;
   featBitProjectKey?: string | null;
+};
+
+export type ReleaseDecisionMetricsUpdate = {
+  metricName?: string | null;
+  metricEvent?: string | null;
+  metricType?: string | null;
+  metricAgg?: string | null;
+  metricDescription?: string | null;
+  guardrails?: string | null;
 };
 
 export type ReleaseDecisionExperimentRunUpdate =
@@ -228,6 +235,17 @@ export async function apiUpdateExperiment(
 ) {
   return apiRequest<ReleaseDecisionExperimentDetail>(
     releaseDecisionExperimentsPath(envId, `/${id}`),
+    { method: "PUT", body },
+  );
+}
+
+export async function apiUpdateExperimentMetrics(
+  envId: string,
+  id: string,
+  body: ReleaseDecisionMetricsUpdate,
+) {
+  return apiRequest<ReleaseDecisionExperimentDetail>(
+    releaseDecisionExperimentsPath(envId, `/${id}/metrics`),
     { method: "PUT", body },
   );
 }

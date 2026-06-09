@@ -3,15 +3,11 @@ import {
   createExperimentRun as createExperimentRunAndReturnExperiment,
   deleteExperiment,
   deleteExperimentRun,
-  getExperiment,
   updateExperiment,
+  updateExperimentMetrics,
   updateExperimentRun,
   updateExperimentStage,
-  type ExperimentDetail,
 } from "@/lib/release-decision-client-data";
-import {
-  type ReleaseDecisionExperimentRunUpdate,
-} from "@/lib/release-decision-api";
 
 async function addActivity(
   _experimentId: string,
@@ -25,72 +21,6 @@ async function createExperimentRun(experimentId: string) {
   return [...experiment.experimentRuns].sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
   )[0] ?? null;
-}
-
-function normalizeMetricType(value: unknown): "binary" | "continuous" {
-  return value === "continuous" || value === "numeric" ? "continuous" : "binary";
-}
-
-function normalizeMetricAgg(value: unknown): "once" | "count" | "sum" | "average" {
-  return value === "count" || value === "sum" || value === "average" ? value : "once";
-}
-
-function parseGuardrailDefs(raw: string | null | undefined) {
-  if (!raw) return [];
-  try {
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed
-      .map((item) => {
-        if (typeof item === "string") {
-          return { event: item, metricType: "binary", metricAgg: "once", inverse: false };
-        }
-        const metricType = item.metricType === "numeric" ? "continuous" : (item.metricType ?? "binary");
-        return {
-          event: item.event ?? "",
-          metricType,
-          metricAgg: item.metricAgg ?? "once",
-          inverse: item.inverse ?? item.direction === "increase_bad",
-        };
-      })
-      .filter((g) => g.event);
-  } catch {
-    return [];
-  }
-}
-
-async function propagateMetricsToLatestRun(
-  experimentId: string,
-  fields: { primaryMetric?: string | null; guardrails?: string | null },
-) {
-  const experiment: ExperimentDetail = await getExperiment(experimentId);
-  const run = experiment.experimentRuns[0];
-  if (!run) return null;
-
-  const update: ReleaseDecisionExperimentRunUpdate = {};
-
-  if (fields.primaryMetric !== undefined) {
-    try {
-      const parsed = fields.primaryMetric ? JSON.parse(fields.primaryMetric) : null;
-      if (parsed && typeof parsed === "object" && parsed.event) {
-        update.primaryMetricEvent = parsed.event;
-        update.primaryMetricType = normalizeMetricType(parsed.metricType);
-        update.primaryMetricAgg = normalizeMetricAgg(parsed.metricAgg);
-        if (parsed.description) update.metricDescription = parsed.description;
-      }
-    } catch {
-      // ignore malformed legacy JSON
-    }
-  }
-
-  if (fields.guardrails !== undefined) {
-    const defs = parseGuardrailDefs(fields.guardrails);
-    update.guardrailEvents = defs.length > 0 ? JSON.stringify(defs) : null;
-  }
-
-  if (Object.keys(update).length === 0) return run;
-  const next = await updateExperimentRun(experimentId, run.id, update);
-  return next.experimentRuns.find((item) => item.id === run.id) ?? null;
 }
 
 export async function createExperimentAction(formData: FormData) {
@@ -181,29 +111,14 @@ export async function updateMetricsAction(formData: FormData) {
   // guardrails arrives as a JSON string serialised by the client
   const guardrails = formData.get("guardrails") as string | null;
 
-  const primaryMetric =
-    metricName || metricEvent
-      ? JSON.stringify({
-          ...(metricName && { name: metricName }),
-          ...(metricEvent && { event: metricEvent }),
-          metricType,
-          metricAgg,
-          ...(metricDescription && { description: metricDescription }),
-        })
-      : null;
-
   const guardrailsJson = guardrails?.trim() || null;
 
-  await updateExperiment(experimentId, {
-    primaryMetric,
-    guardrails: guardrailsJson,
-  });
-
-  // The analysis API reads metric type/agg from the ExperimentRun row, not
-  // the Experiment row — so editing metrics here MUST also update the run.
-  // Otherwise the next analyze call uses stale or empty type/agg fields.
-  await propagateMetricsToLatestRun(experimentId, {
-    primaryMetric,
+  await updateExperimentMetrics(experimentId, {
+    metricName,
+    metricEvent,
+    metricType,
+    metricAgg,
+    metricDescription,
     guardrails: guardrailsJson,
   });
 
@@ -223,8 +138,6 @@ export async function updateDecisionStateAction(formData: FormData) {
   const hypothesis = formData.get("hypothesis") as string | null;
   const change = formData.get("change") as string | null;
   const constraints = formData.get("constraints") as string | null;
-  const primaryMetric = formData.get("primaryMetric") as string | null;
-  const guardrails = formData.get("guardrails") as string | null;
 
   const data: Record<string, string | null> = {};
   if (formData.has("description")) data.description = description?.trim() || null;
@@ -233,8 +146,6 @@ export async function updateDecisionStateAction(formData: FormData) {
   if (formData.has("hypothesis")) data.hypothesis = hypothesis?.trim() || null;
   if (formData.has("change")) data.change = change?.trim() || null;
   if (formData.has("constraints")) data.constraints = constraints?.trim() || null;
-  if (formData.has("primaryMetric")) data.primaryMetric = primaryMetric?.trim() || null;
-  if (formData.has("guardrails")) data.guardrails = guardrails?.trim() || null;
 
   await updateExperiment(experimentId, data);
 

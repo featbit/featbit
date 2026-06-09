@@ -32,22 +32,17 @@ const STAGE_FIELDS: Record<
     hint: 'Codex can use hypothesis-design (CF-02) through FeatBit MCP to form a falsifiable claim: "We believe [change] will [move metric] for [audience], because [reason]."',
   },
   implementing: {
-    fields: ["goal", "hypothesis", "change", "primaryMetric"],
+    fields: ["goal", "hypothesis", "change"],
     icon: <FlaskConical className="size-4" />,
     hint: "Codex can use reversible-exposure-control (CF-03/04) through FeatBit MCP to create a feature flag, set rollout %, define targeting rules, and manage traffic exposure.",
   },
   measuring: {
-    fields: [
-      "goal",
-      "hypothesis",
-      "primaryMetric",
-      "guardrails",
-    ],
+    fields: ["goal", "hypothesis"],
     icon: <BarChart3 className="size-4" />,
     hint: "Codex can use measurement-design (CF-05) + experiment-workspace through FeatBit MCP to collect data, run Bayesian analysis, and frame a decision: CONTINUE, PAUSE, ROLLBACK, or INCONCLUSIVE.",
   },
   learning: {
-    fields: ["goal", "hypothesis", "primaryMetric"],
+    fields: ["goal", "hypothesis"],
     icon: <Lightbulb className="size-4" />,
     hint: "Codex can use learning-capture (CF-08) through FeatBit MCP to produce a 5-part structured learning and seed the next cycle.",
   },
@@ -71,14 +66,6 @@ const FIELD_META: Record<
   change: {
     label: "Change",
     placeholder: "What is being built, gated, or measured?",
-  },
-  primaryMetric: {
-    label: "Primary Metric",
-    placeholder: "Single metric to decide with",
-  },
-  guardrails: {
-    label: "Guardrails",
-    placeholder: "Metrics that must not degrade (comma-separated)",
   },
 };
 

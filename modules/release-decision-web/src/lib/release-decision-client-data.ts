@@ -6,6 +6,7 @@ import type {
   ReleaseDecisionExperimentDetail,
   ReleaseDecisionExperimentRun,
   ReleaseDecisionExperimentRunUpdate,
+  ReleaseDecisionMetricsUpdate,
   ReleaseDecisionMessage,
   PagedResult,
 } from "@/lib/release-decision-api";
@@ -184,6 +185,21 @@ export async function updateExperimentStage(id: string, stage: string) {
   const experiment = await apiRequest<ReleaseDecisionExperimentDetail>(
     path(envId, `/${id}/stage`),
     { method: "PUT", body: { stage } },
+  );
+
+  const detail = mapDetail(experiment);
+  publishExperimentUpdated(detail);
+  return detail;
+}
+
+export async function updateExperimentMetrics(
+  id: string,
+  data: ReleaseDecisionMetricsUpdate,
+) {
+  const envId = requireEnvId();
+  const experiment = await apiRequest<ReleaseDecisionExperimentDetail>(
+    path(envId, `/${id}/metrics`),
+    { method: "PUT", body: data },
   );
 
   const detail = mapDetail(experiment);

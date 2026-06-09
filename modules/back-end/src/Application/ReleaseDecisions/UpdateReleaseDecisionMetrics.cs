@@ -39,9 +39,28 @@ public class UpdateReleaseDecisionMetricsValidator : AbstractValidator<UpdateRel
 
         When(x => x.Update != null, () =>
         {
+            RuleFor(x => x.Update.MetricName)
+                .Must(value => !string.IsNullOrWhiteSpace(value))
+                .WithErrorCode(ErrorCodes.Required("metricName"));
+
+            RuleFor(x => x.Update.MetricName)
+                .MaximumLength(80)
+                .WithErrorCode(ErrorCodes.Invalid("metricName"))
+                .WithMessage("Metric name must be 80 characters or fewer.");
+
             RuleFor(x => x.Update.MetricEvent)
                 .Must(value => !string.IsNullOrWhiteSpace(value))
                 .WithErrorCode(ErrorCodes.Required("metricEvent"));
+
+            RuleFor(x => x.Update.MetricEvent)
+                .MaximumLength(128)
+                .WithErrorCode(ErrorCodes.Invalid("metricEvent"))
+                .WithMessage("Metric event key must be 128 characters or fewer.");
+
+            RuleFor(x => x.Update.MetricEvent)
+                .Matches("^[A-Za-z0-9][A-Za-z0-9_.:-]*$")
+                .WithErrorCode(ErrorCodes.Invalid("metricEvent"))
+                .WithMessage("Metric event key must not contain spaces.");
 
             RuleFor(x => x.Update.MetricType)
                 .Must(value => MetricTypes.Contains(value))

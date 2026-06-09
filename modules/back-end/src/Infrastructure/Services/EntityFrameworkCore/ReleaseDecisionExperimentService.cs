@@ -899,12 +899,10 @@ public class ReleaseDecisionExperimentService(
         experiment.EnvSecret = Normalize(update.EnvSecret, experiment.EnvSecret);
         experiment.FlagServerUrl = Normalize(update.FlagServerUrl, experiment.FlagServerUrl);
         experiment.Goal = Normalize(update.Goal, experiment.Goal);
-        experiment.Guardrails = Normalize(update.Guardrails, experiment.Guardrails);
         experiment.Intent = Normalize(update.Intent, experiment.Intent);
         experiment.LastAction = Normalize(update.LastAction, experiment.LastAction);
         experiment.LastLearning = Normalize(update.LastLearning, experiment.LastLearning);
         experiment.OpenQuestions = Normalize(update.OpenQuestions, experiment.OpenQuestions);
-        experiment.PrimaryMetric = Normalize(update.PrimaryMetric, experiment.PrimaryMetric);
         experiment.SandboxId = Normalize(update.SandboxId, experiment.SandboxId);
         experiment.Variants = Normalize(update.Variants, experiment.Variants);
         experiment.ConflictAnalysis = Normalize(update.ConflictAnalysis, experiment.ConflictAnalysis);

@@ -1,3 +1,5 @@
+using Application.Bases;
+
 namespace Application.ReleaseDecisions;
 
 public class ReleaseDecisionExperimentUpdate
@@ -52,6 +54,30 @@ public class UpdateReleaseDecisionExperiment : IRequest<ReleaseDecisionExperimen
     public Guid Id { get; set; }
 
     public ReleaseDecisionExperimentUpdate Update { get; set; }
+}
+
+public class UpdateReleaseDecisionExperimentValidator : AbstractValidator<UpdateReleaseDecisionExperiment>
+{
+    public UpdateReleaseDecisionExperimentValidator()
+    {
+        RuleFor(x => x.Update)
+            .NotNull().WithErrorCode(ErrorCodes.Required("update"));
+
+        When(x => x.Update != null, () =>
+        {
+            RuleFor(x => x.Update.PrimaryMetric)
+                .Must(string.IsNullOrWhiteSpace)
+                .WithErrorCode(ErrorCodes.Invalid("primaryMetric"))
+                .WithMessage(
+                    "Do not write primaryMetric through update_experiment. Use update_metrics with metricName, metricEvent, metricType, and metricAgg.");
+
+            RuleFor(x => x.Update.Guardrails)
+                .Must(string.IsNullOrWhiteSpace)
+                .WithErrorCode(ErrorCodes.Invalid("guardrails"))
+                .WithMessage(
+                    "Do not write guardrails through update_experiment. Use update_metrics with structured guardrail definitions.");
+        });
+    }
 }
 
 public class UpdateReleaseDecisionExperimentHandler(
