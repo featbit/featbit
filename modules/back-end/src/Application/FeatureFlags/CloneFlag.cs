@@ -2,6 +2,7 @@ using Application.Bases;
 using Application.Bases.Exceptions;
 using Application.Users;
 using Domain.AuditLogs;
+using Domain.FeatureFlags;
 
 namespace Application.FeatureFlags;
 
@@ -36,6 +37,21 @@ public class CloneFlag : IRequest<bool>
     /// The tags to assign to the cloned feature flag
     /// </summary>
     public string[] Tags { get; set; }
+}
+
+public class CloneFlagValidator : AbstractValidator<CloneFlag>
+{
+    public CloneFlagValidator()
+    {
+        RuleFor(x => x.Name)
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("name"))
+            .MaximumLength(128).WithErrorCode(ErrorCodes.Invalid("name"));
+
+        RuleFor(x => x.Key)
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("key"))
+            .MaximumLength(128).WithErrorCode(ErrorCodes.Invalid("key"))
+            .Matches(FeatureFlag.KeyPattern).WithErrorCode(ErrorCodes.Invalid("key"));
+    }
 }
 
 public class CloneFlagHandler(
