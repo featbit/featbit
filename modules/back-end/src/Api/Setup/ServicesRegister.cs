@@ -29,6 +29,7 @@ public static class ServicesRegister
         builder.Services.AddControllers();
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddSingleton<McpDeviceAuthorizationStore>();
+        builder.Services.AddScoped<McpJwtBearerEvents>();
         builder.Services
             .AddMcpServer()
             .WithHttpTransport(options => options.Stateless = true)
@@ -117,6 +118,7 @@ public static class ServicesRegister
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.Zero
                 };
+                options.EventsType = typeof(McpJwtBearerEvents);
             })
             .AddOpenApi(Schemes.OpenApi);
 
