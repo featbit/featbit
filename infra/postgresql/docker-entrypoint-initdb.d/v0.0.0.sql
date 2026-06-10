@@ -28,7 +28,7 @@ CREATE TABLE audit_logs
     env_id      uuid                     NOT NULL,
     ref_id      text                     NOT NULL,
     ref_type    character varying(64)    NOT NULL,
-    keyword     character varying(512)   NOT NULL,
+    keyword     character varying(128)   NOT NULL,
     operation   character varying(64)    NOT NULL,
     data_change jsonb,
     comment     character varying(512),
