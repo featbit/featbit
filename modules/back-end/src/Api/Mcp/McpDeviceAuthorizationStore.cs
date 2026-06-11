@@ -99,6 +99,13 @@ public class McpDeviceAuthorizationStore
                authorization.ExpiresAt > DateTime.UtcNow;
     }
 
+    public bool IsAccessTokenRevoked(string tokenId)
+    {
+        CleanupExpired();
+        return _accessTokens.TryGetValue(tokenId, out var authorization) &&
+               authorization.RevokedAt != null;
+    }
+
     public bool RevokeAccessToken(string tokenId)
     {
         CleanupExpired();
@@ -150,7 +157,7 @@ public class McpDeviceAuthorizationStore
         }
 
         foreach (var tokenId in _accessTokens
-                     .Where(x => x.Value.ExpiresAt <= now || x.Value.RevokedAt != null)
+                     .Where(x => x.Value.ExpiresAt <= now)
                      .Select(x => x.Key))
         {
             _accessTokens.TryRemove(tokenId, out _);

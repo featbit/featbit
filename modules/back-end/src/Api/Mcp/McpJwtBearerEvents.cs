@@ -27,9 +27,9 @@ public class McpJwtBearerEvents(McpDeviceAuthorizationStore store) : JwtBearerEv
             return Task.CompletedTask;
         }
 
-        if (!store.IsAccessTokenActive(tokenId))
+        if (store.IsAccessTokenRevoked(tokenId))
         {
-            context.Fail("MCP token has expired or been revoked.");
+            context.Fail("MCP token has been revoked.");
         }
 
         return Task.CompletedTask;
