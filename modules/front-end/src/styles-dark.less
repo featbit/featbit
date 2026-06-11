@@ -967,3 +967,20 @@ html[data-theme="dark"] .nz-select-36.ant-select-multiple .ant-select-selection-
 html[data-theme="dark"] .nz-select-40.ant-select-multiple .ant-select-selection-search-input {
   margin-top: 0 !important;
 }
+
+// ---- Change environment modal: lift Projects/Environments lists ------
+// The two `nz-list`s sit on the modal body which is already #333. Give
+// each list its own tier-2 surface + rounded corners so they read as
+// raised panels inside the modal.
+html[data-theme="dark"] .project-envs nz-list,
+html[data-theme="dark"] .project-envs nz-list .ant-list,
+html[data-theme="dark"] .project-envs nz-list .ant-list-header {
+  background-color: @dk-tier-2 !important;
+}
+html[data-theme="dark"] .project-envs nz-list {
+  border-radius: 12px !important;
+  overflow: hidden !important;
+}
+html[data-theme="dark"] .project-envs nz-list .ant-list-header {
+  border-bottom-color: @dk-border-bright !important;
+}
