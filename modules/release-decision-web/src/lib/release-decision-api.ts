@@ -143,6 +143,7 @@ export type ReleaseDecisionMetricsUpdate = {
   metricEvent?: string | null;
   metricType?: string | null;
   metricAgg?: string | null;
+  expectedDirection?: "increase_good" | "decrease_good" | null;
   metricDescription?: string | null;
   guardrails?: string | null;
 };

@@ -3,6 +3,7 @@ import {
   createExperimentRun as createExperimentRunAndReturnExperiment,
   deleteExperiment,
   deleteExperimentRun,
+  getExperiment,
   updateExperiment,
   updateExperimentMetrics,
   updateExperimentRun,
@@ -107,6 +108,9 @@ export async function updateMetricsAction(formData: FormData) {
   const metricEvent = (formData.get("metricEvent") as string | null)?.trim() || null;
   const metricType = (formData.get("metricType") as string | null)?.trim() || "binary";
   const metricAgg = (formData.get("metricAgg") as string | null)?.trim() || "once";
+  const expectedDirectionValue = (formData.get("expectedDirection") as string | null)?.trim();
+  const expectedDirection =
+    expectedDirectionValue === "decrease_good" ? "decrease_good" : "increase_good";
   const metricDescription = (formData.get("metricDescription") as string | null)?.trim() || null;
   // guardrails arrives as a JSON string serialised by the client
   const guardrails = formData.get("guardrails") as string | null;
@@ -118,6 +122,7 @@ export async function updateMetricsAction(formData: FormData) {
     metricEvent,
     metricType,
     metricAgg,
+    expectedDirection,
     metricDescription,
     guardrails: guardrailsJson,
   });

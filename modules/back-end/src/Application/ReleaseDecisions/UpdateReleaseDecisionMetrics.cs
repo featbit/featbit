@@ -13,6 +13,8 @@ public class ReleaseDecisionMetricsUpdate
 
     public string MetricAgg { get; set; } = "once";
 
+    public string ExpectedDirection { get; set; }
+
     public string MetricDescription { get; set; }
 
     public string Guardrails { get; set; }
@@ -31,6 +33,7 @@ public class UpdateReleaseDecisionMetricsValidator : AbstractValidator<UpdateRel
 {
     private static readonly string[] MetricTypes = ["binary", "continuous", "numeric"];
     private static readonly string[] MetricAggs = ["once", "count", "sum", "average"];
+    private static readonly string[] ExpectedDirections = ["increase_good", "decrease_good"];
 
     public UpdateReleaseDecisionMetricsValidator()
     {
@@ -69,6 +72,17 @@ public class UpdateReleaseDecisionMetricsValidator : AbstractValidator<UpdateRel
             RuleFor(x => x.Update.MetricAgg)
                 .Must(value => MetricAggs.Contains(value))
                 .WithErrorCode(ErrorCodes.Invalid("metricAgg"));
+
+            RuleFor(x => x.Update.ExpectedDirection)
+                .Cascade(CascadeMode.Stop)
+                .Must(value => !string.IsNullOrWhiteSpace(value))
+                .WithErrorCode(ErrorCodes.Required("expectedDirection"));
+
+            RuleFor(x => x.Update.ExpectedDirection)
+                .Must(value => ExpectedDirections.Contains(value))
+                .WithErrorCode(ErrorCodes.Invalid("expectedDirection"))
+                .WithMessage("Expected direction must be either increase_good or decrease_good.")
+                .When(x => !string.IsNullOrWhiteSpace(x.Update.ExpectedDirection));
 
             RuleFor(x => x.Update.Guardrails)
                 .Must(BeValidGuardrails)

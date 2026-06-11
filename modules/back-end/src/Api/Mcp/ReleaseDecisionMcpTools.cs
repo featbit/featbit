@@ -66,7 +66,7 @@ public class ReleaseDecisionMcpTools(
     }
 
     [McpServerTool(Name = "featbit_release_decision_update_metrics")]
-    [Description("Update the complete primary metric contract and guardrail metric configuration for a release-decision experiment. Primary metric requires metricName, metricEvent, metricType, and metricAgg.")]
+    [Description("Update the complete primary metric contract and guardrail metric configuration for a release-decision experiment. Primary metric requires metricName, metricEvent, metricType, metricAgg, and expectedDirection (increase_good or decrease_good).")]
     public async Task<ReleaseDecisionExperimentDetailVm> UpdateMetrics(
         [Description("Release-decision experiment id.")]
         Guid experimentId,

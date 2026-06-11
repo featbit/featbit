@@ -379,9 +379,16 @@ public class ReleaseDecisionExperimentService(
         });
 
         var variants = stats.Variants?.ToArray() ?? [];
+        var primaryMetricData = BuildMetricData(metricType, variants);
+        if (TryReadPrimaryMetric(experiment.PrimaryMetric, out var primary) &&
+            IsDecreaseGood(primary.ExpectedDirection))
+        {
+            primaryMetricData["inverse"] = true;
+        }
+
         var metrics = new Dictionary<string, Dictionary<string, object>>
         {
-            [primaryMetricEvent] = BuildMetricData(metricType, variants)
+            [primaryMetricEvent] = primaryMetricData
         };
 
         var guardrails = ParseGuardrailDefinitions(run.GuardrailEvents);
@@ -972,7 +979,7 @@ public class ReleaseDecisionExperimentService(
 
     private static bool TryReadPrimaryMetric(
         string? raw,
-        out (string Event, string? Name, string? Description, string? MetricType, string? MetricAgg) primary)
+        out (string Event, string? Name, string? Description, string? MetricType, string? MetricAgg, string? ExpectedDirection) primary)
     {
         primary = default;
         if (string.IsNullOrWhiteSpace(raw))
@@ -1000,7 +1007,8 @@ public class ReleaseDecisionExperimentService(
                 GetJsonString(root, "name"),
                 GetJsonString(root, "description"),
                 GetJsonString(root, "metricType"),
-                GetJsonString(root, "metricAgg"));
+                GetJsonString(root, "metricAgg"),
+                GetJsonString(root, "expectedDirection"));
             return true;
         }
         catch (JsonException)
@@ -1081,7 +1089,8 @@ public class ReleaseDecisionExperimentService(
         var payload = new Dictionary<string, object>
         {
             ["metricType"] = NormalizeMetricType(update.MetricType),
-            ["metricAgg"] = NormalizeMetricAgg(update.MetricAgg)
+            ["metricAgg"] = NormalizeMetricAgg(update.MetricAgg),
+            ["expectedDirection"] = NormalizeExpectedDirection(update.ExpectedDirection)
         };
 
         if (!string.IsNullOrWhiteSpace(update.MetricName))
@@ -2251,5 +2260,15 @@ public class ReleaseDecisionExperimentService(
     private static string NormalizeMetricAgg(string? value)
     {
         return value is "count" or "sum" or "average" ? value : "once";
+    }
+
+    private static string NormalizeExpectedDirection(string? value)
+    {
+        return IsDecreaseGood(value) ? "decrease_good" : "increase_good";
+    }
+
+    private static bool IsDecreaseGood(string? value)
+    {
+        return value == "decrease_good";
     }
 }

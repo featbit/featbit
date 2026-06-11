@@ -39,7 +39,14 @@ const NEW_GUARDRAIL: GuardrailRow = {
 /* ── Parse primaryMetric from JSON or plain text ── */
 function parsePrimaryMetric(value: string | null | undefined) {
   if (!value) {
-    return { name: "", event: "", metricType: "binary", metricAgg: "once", description: "" };
+    return {
+      name: "",
+      event: "",
+      metricType: "binary",
+      metricAgg: "once",
+      expectedDirection: "increase_good",
+      description: "",
+    };
   }
   try {
     const p = JSON.parse(value);
@@ -54,11 +61,20 @@ function parsePrimaryMetric(value: string | null | undefined) {
         event: p.event ?? "",
         metricType,
         metricAgg: p.metricAgg ?? "once",
+        expectedDirection:
+          p.expectedDirection === "decrease_good" ? "decrease_good" : "increase_good",
         description: p.description ?? "",
       };
     }
   } catch { /* plain text */ }
-  return { name: value, event: "", metricType: "binary", metricAgg: "once", description: "" };
+  return {
+    name: value,
+    event: "",
+    metricType: "binary",
+    metricAgg: "once",
+    expectedDirection: "increase_good",
+    description: "",
+  };
 }
 
 /* ── Parse guardrails from JSON array or legacy free text ── */
@@ -409,6 +425,24 @@ function MetricEditForm({
               <option value="average">Average values</option>
             </NativeSelect>
           </div>
+        </div>
+
+        <div className="space-y-1">
+          <Label htmlFor="expectedDirection" className="text-xs">Better Direction</Label>
+          <NativeSelect
+            id="expectedDirection"
+            name="expectedDirection"
+            value={metric.expectedDirection}
+            onChange={(value) =>
+              updateMetric(
+                "expectedDirection",
+                value === "decrease_good" ? "decrease_good" : "increase_good",
+              )
+            }
+          >
+            <option value="increase_good">Higher is better</option>
+            <option value="decrease_good">Lower is better</option>
+          </NativeSelect>
         </div>
 
         <div className="space-y-1">

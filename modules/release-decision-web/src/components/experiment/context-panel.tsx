@@ -52,7 +52,16 @@ function renderFieldText(field: string, value: string): string {
         if (parsed.name) parts.push(parsed.name);
         if (parsed.event) {
           parts.push(
-            [parsed.event, parsed.metricType, parsed.metricAgg ? `counted ${parsed.metricAgg}` : null]
+            [
+              parsed.event,
+              parsed.metricType,
+              parsed.metricAgg ? `counted ${parsed.metricAgg}` : null,
+              parsed.expectedDirection === "decrease_good"
+                ? "lower is better"
+                : parsed.expectedDirection === "increase_good"
+                  ? "higher is better"
+                  : null,
+            ]
               .filter(Boolean)
               .join(" · ")
           );

@@ -152,6 +152,7 @@ public class ReleaseDecisionExperimentService(MongoDbClient mongoDb) : IReleaseD
                 ["event"] = update.MetricEvent?.Trim() ?? string.Empty,
                 ["metricType"] = update.MetricType == "continuous" || update.MetricType == "numeric" ? "continuous" : "binary",
                 ["metricAgg"] = update.MetricAgg is "count" or "sum" or "average" ? update.MetricAgg : "once",
+                ["expectedDirection"] = update.ExpectedDirection == "decrease_good" ? "decrease_good" : "increase_good",
                 ["description"] = update.MetricDescription?.Trim() ?? string.Empty
             });
 

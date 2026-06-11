@@ -69,7 +69,7 @@ public class UpdateReleaseDecisionExperimentValidator : AbstractValidator<Update
                 .Must(string.IsNullOrWhiteSpace)
                 .WithErrorCode(ErrorCodes.Invalid("primaryMetric"))
                 .WithMessage(
-                    "Do not write primaryMetric through update_experiment. Use update_metrics with metricName, metricEvent, metricType, and metricAgg.");
+                    "Do not write primaryMetric through update_experiment. Use update_metrics with metricName, metricEvent, metricType, metricAgg, and expectedDirection.");
 
             RuleFor(x => x.Update.Guardrails)
                 .Must(string.IsNullOrWhiteSpace)

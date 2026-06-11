@@ -209,7 +209,7 @@ function SettingsContent({
 type ParsedMetricLines =
   | { kind: "empty" }
   | { kind: "guardrails"; items: { name?: string; event?: string; description?: string }[] }
-  | { kind: "structured"; item: { name?: string; event?: string; metricType?: string; metricAgg?: string; description?: string } }
+  | { kind: "structured"; item: { name?: string; event?: string; metricType?: string; metricAgg?: string; expectedDirection?: string; description?: string } }
   | { kind: "plain"; lines: string[] };
 
 function MetricLines({ value }: { value: string | null | undefined }) {
@@ -237,6 +237,11 @@ function MetricLines({ value }: { value: string | null | undefined }) {
         item.event,
         item.metricType,
         item.metricAgg ? `counted ${item.metricAgg}` : null,
+        item.expectedDirection === "decrease_good"
+          ? "lower is better"
+          : item.expectedDirection === "increase_good"
+            ? "higher is better"
+            : null,
       ].filter(Boolean).join(" · ");
 
       return (
@@ -425,6 +430,7 @@ type PrimaryMetric = {
   event?: string;
   metricType?: "binary" | "continuous";
   metricAgg?: "once" | "count" | "sum" | "average";
+  expectedDirection?: "increase_good" | "decrease_good";
   description?: string;
 };
 
@@ -521,7 +527,7 @@ function MetricsIntegrationSection({
                   <th className="px-3 py-1.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Event</th>
                   <th className="px-3 py-1.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider w-20">Type</th>
                   <th className="px-3 py-1.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider w-28">Agg</th>
-                  <th className="px-3 py-1.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider w-20">Alarm</th>
+                  <th className="px-3 py-1.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider w-24">Direction</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -541,7 +547,11 @@ function MetricsIntegrationSection({
                     </td>
                     <td className="px-3 py-2 text-muted-foreground">{primary.metricType ?? (primary.event ? "—" : "pending")}</td>
                     <td className="px-3 py-2 text-muted-foreground">{primary.metricAgg ? formatAgg(primary.metricAgg) : primary.event ? "—" : "pending"}</td>
-                    <td className="px-3 py-2 text-muted-foreground">—</td>
+                    <td className="px-3 py-2">
+                      {primary.expectedDirection === "decrease_good"
+                        ? <span className="text-blue-700 dark:text-blue-300 font-mono">↓ good</span>
+                        : <span className="text-blue-700 dark:text-blue-300 font-mono">↑ good</span>}
+                    </td>
                   </tr>
                 )}
                 {guardrails.map((g, i) => (

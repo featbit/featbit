@@ -942,9 +942,17 @@ function buildStateChecks(
         {
           label: "Primary metric",
           value: primaryMetric
-            ? [primaryMetric.name, primaryMetric.event].filter(Boolean).join(" / ")
+            ? [
+                primaryMetric.name,
+                primaryMetric.event,
+                primaryMetric.expectedDirection === "decrease_good"
+                  ? "lower is better"
+                  : primaryMetric.expectedDirection === "increase_good"
+                    ? "higher is better"
+                    : null,
+              ].filter(Boolean).join(" / ")
             : "No primary metric configured",
-          status: primaryMetric ? "satisfied" : "missing",
+          status: primaryMetric?.expectedDirection ? "satisfied" : "missing",
         },
         {
           label: "Guardrails",
@@ -1265,6 +1273,7 @@ type MetricSummary = {
   event?: string;
   metricType?: string;
   metricAgg?: string;
+  expectedDirection?: "increase_good" | "decrease_good";
 };
 
 function parsePrimaryMetric(raw: string | null | undefined): MetricSummary | null {
