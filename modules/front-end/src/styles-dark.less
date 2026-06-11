@@ -827,6 +827,58 @@ html[data-theme="dark"] .login-layout .form-content-wrapper {
   background: #262626 !important;
 }
 
+// Re-pin the login form input dimensions in dark mode.
+//
+// `styles-common.less` declares `.login-wrapper nz-input-group { width:
+// 380px; height: 45px }` (specificity 0,1,1) which is what anchors the
+// natural width of `.form-content-wrapper` (no explicit width) and, by
+// extension, the form-control / submit button widths. In dark mode the
+// vendor stylesheet emits `html[data-theme="dark"] .ant-input-affix-
+// wrapper { width: 100% }` at higher specificity (0,2,1) — it wins and
+// collapses the input groups to flex min-content, which cascades up and
+// makes the entire form card render ~120px narrower than light mode.
+// Re-assert the original width/height with matching specificity.
+html[data-theme="dark"] .login-wrapper nz-input-group {
+  width: 380px !important;
+  height: 45px !important;
+}
+
+// When the SSO `workspaceKey` field is locked (the workspace key arrived
+// via URL pre-check), the form control is constructed with `disabled:
+// true`. ng-zorro tags the `nz-input-group` host with the
+// `.ant-input-affix-wrapper-disabled` class. The auto-generator's plain
+// `.login-wrapper nz-input-group { background: #262626 !important }`
+// override outranks vendor dark's disabled treatment and erases the
+// "greyed-out" affordance — the field looks fully active. Restore a
+// disabled treatment that reads as *recessed* against the form card:
+// vendor dark's lifted `rgba(255,255,255,.08)` reads as a lit-up pill on
+// `#262626`, the opposite of what disabled should signal. Use a slightly
+// darker bg + near-invisible border so the field appears inset, plus the
+// not-allowed cursor and dimmed text/icon.
+html[data-theme="dark"] .login-wrapper nz-input-group.ant-input-affix-wrapper-disabled {
+  background: #1f1f1f !important;
+  border-color: #2e2e2e !important;
+  cursor: not-allowed;
+
+  // The inner `<input>` carries its own `background-color` from vendor
+  // dark CSS, which paints a `#262626` (or similar) pill inside the
+  // disabled wrapper and produces a visible two-tone seam between the
+  // prefix slot and the typing area. Force it transparent so the whole
+  // field reads as one uniform recessed colour.
+  input.ant-input {
+    background: transparent !important;
+  }
+
+  input,
+  input::placeholder {
+    color: rgba(255, 255, 255, 0.3) !important;
+  }
+
+  i {
+    color: rgba(255, 255, 255, 0.3) !important;
+  }
+}
+
 // ---- Segments > Targeting: rule cards need contrast vs parent --------
 // Each `.rule` (drop-box wrapper) sits inside `.standard-div`, which the
 // auto-generator paints `#333`. The `nz-card` host inside it lands at
