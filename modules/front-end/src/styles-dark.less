@@ -807,6 +807,26 @@ html[data-theme="dark"] img[src$="assets/logo/featbit-logo-text.svg"] {
   content: url('assets/logo/featbit-logo-text-dark.svg');
 }
 
+// ---- Login page outer background -------------------------------------
+// `.login-layout` uses a bitmap `background: url(login-bg.png)` which the
+// auto-generator can't recolor (it only rewrites grayscale color/bg tokens,
+// not background-image URLs). Swap to a dark-mode bitmap that matches the
+// dark form card sitting on top of it.
+html[data-theme="dark"] .login-layout {
+  background: url("src/assets/login-bg-dark.png") !important;
+}
+
+// The auto-generator emits a global `.form-content { background: #333 }`
+// rule (driven by another component that declares `.form-content` with a
+// light bg). That selector also matches the login page's `.form-content`
+// wrapper around the logo + wordmark, leaving the imgs sitting on a
+// `#333` band inside an otherwise `#262626` form card. Re-paint it to
+// match `.login-wrapper` so the logos blend into the form.
+html[data-theme="dark"] .login-layout .form-content,
+html[data-theme="dark"] .login-layout .form-content-wrapper {
+  background: #262626 !important;
+}
+
 // ---- Segments > Targeting: rule cards need contrast vs parent --------
 // Each `.rule` (drop-box wrapper) sits inside `.standard-div`, which the
 // auto-generator paints `#333`. The `nz-card` host inside it lands at
