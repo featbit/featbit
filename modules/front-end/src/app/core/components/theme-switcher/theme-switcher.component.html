@@ -5,9 +5,9 @@
         [attr.aria-pressed]="preference === 'light'"
         (click)="setPreference('light')"
         aria-label="Light theme"
-        i18n-aria-label="@@theme.switcher.light"
+        i18n-aria-label="@@theme.switcher.light.aria"
         title="Light"
-        i18n-title="@@theme.switcher.light">
+        i18n-title="@@theme.switcher.light.title">
     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
          stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <circle cx="12" cy="12" r="4"></circle>
@@ -20,9 +20,9 @@
         [attr.aria-pressed]="preference === 'dark'"
         (click)="setPreference('dark')"
         aria-label="Dark theme"
-        i18n-aria-label="@@theme.switcher.dark"
+        i18n-aria-label="@@theme.switcher.dark.aria"
         title="Dark"
-        i18n-title="@@theme.switcher.dark">
+        i18n-title="@@theme.switcher.dark.title">
     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
          stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
@@ -34,9 +34,9 @@
         [attr.aria-pressed]="preference === 'system'"
         (click)="setPreference('system')"
         aria-label="Follow system theme"
-        i18n-aria-label="@@theme.switcher.system"
+        i18n-aria-label="@@theme.switcher.system.aria"
         title="System"
-        i18n-title="@@theme.switcher.system">
+        i18n-title="@@theme.switcher.system.title">
     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor"
          stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
