@@ -234,7 +234,7 @@
       class="editor"
       (nzEditorInitialized)="formatCode($event)"
       [(ngModel)]="currentEditingVariation.value"
-      [nzEditorOption]="{ language: variationForm ? variationType : featureFlag.variationType, theme: 'vs', minimap: { enabled: false } }">
+      [nzEditorOption]="{ language: variationForm ? variationType : featureFlag.variationType, minimap: { enabled: false } }">
     </nz-code-editor>
   </ng-template>
   <ng-template #modalFooter>
