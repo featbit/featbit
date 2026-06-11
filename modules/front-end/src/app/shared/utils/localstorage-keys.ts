@@ -25,7 +25,10 @@ export function CURRENT_LANGUAGE(): string {
   return getLocalStorageKey('current-lang', true);
 }
 
-export const THEME = 'theme';
+// Theme is intentionally NOT scoped via getLocalStorageKey: the preference is
+// per-user-per-origin (the OS preference, the user's eyes), not per-workspace.
+// The `featbit:` prefix avoids clashing with any other app on the same origin.
+export const THEME = 'featbit:theme';
 
 export function GET_STARTED(): string {
   return getLocalStorageKey('get-started', false);

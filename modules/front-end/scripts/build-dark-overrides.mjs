@@ -197,6 +197,14 @@ function prefixSelector(sel) {
 // ---------------------------------------------------------------------------
 // Process a single .less file
 
+// Files that legitimately cannot be compiled standalone (e.g. they rely on
+// mixins or context that LESS can't resolve outside their normal aggregator).
+// Failures for any file NOT in this allowlist are treated as fatal so that a
+// silently broken dark-mode theme can never sneak into a release.
+const LESS_COMPILE_ALLOWLIST = new Set([
+  // Add `relative(SRC, file).replace(/\\\\/g, '/')` paths here as needed.
+]);
+
 async function processFile(file) {
   let lessSrc = readFileSync(file, 'utf8');
   // For src/styles-common.less (and any aggregator file), strip imports of
@@ -223,8 +231,18 @@ async function processFile(file) {
     });
     css = result.css;
   } catch (e) {
-    console.warn(`  skip (less error): ${relative(SRC, file)}: ${e.message.split('\n')[0]}`);
-    return [];
+    const rel = relative(SRC, file).replace(/\\/g, '/');
+    const message = e.message.split('\n')[0];
+    if (LESS_COMPILE_ALLOWLIST.has(rel)) {
+      console.warn(`  skip (allowlisted less error): ${rel}: ${message}`);
+      return [];
+    }
+    // Surface the failure to the caller so the build fails loudly. Silent
+    // skips are how dark-mode regressions ship.
+    const err = new Error(`LESS compile failed for ${rel}: ${message}`);
+    err.cause = e;
+    err.relativePath = rel;
+    throw err;
   }
 
   const ast = postcss.parse(css);
@@ -313,13 +331,27 @@ const files = [...componentFiles, ...partialFiles, ...rootLess]
 console.log(`Scanning ${files.length} .less files…`);
 
 const allOverrides = [];
+const failures = [];
 let processed = 0;
 for (const f of files) {
-  const out = await processFile(f);
-  if (out.length) {
-    allOverrides.push({ file: relative(SRC, f), rules: out });
+  try {
+    const out = await processFile(f);
+    if (out.length) {
+      allOverrides.push({ file: relative(SRC, f), rules: out });
+    }
+  } catch (e) {
+    failures.push({ file: relative(SRC, f), message: e.message });
   }
   processed++;
+}
+
+if (failures.length) {
+  console.error(`\nFAILED to compile ${failures.length} LESS file(s):`);
+  for (const { file, message } of failures) {
+    console.error(`  - ${file}: ${message}`);
+  }
+  console.error(`\nFix the LESS errors above, or add the affected paths to LESS_COMPILE_ALLOWLIST in scripts/build-dark-overrides.mjs.`);
+  process.exit(1);
 }
 
 // Render output
