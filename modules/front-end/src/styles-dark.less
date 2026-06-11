@@ -14,40 +14,80 @@
 // Run `npm run build:dark-css` after editing component .less files or
 // upgrading ng-zorro-antd to regenerate (1) and (2).
 //
-// Palette (dark gray, intentionally not black — and page < container so
-// containers visually float above the page, mirroring light mode):
-//   #262626  page / app shell (deepest)
-//   #333333  panels / cards / surfaces (one step up from page)
-//   #3d3d3d  hover / divider tinted bg
-//   #404040  borders (subtle)
-//   #4d4d4d  borders (medium)
-//   #5a5a5a  borders (high contrast)
-//   #383838  active hover row
+// Dark palette — change here, propagate everywhere. The palette mirrors
+// light mode's "page < container < raised" tiers so cards visually float.
+//
+//   @dk-page              page / app shell (deepest)
+//   @dk-page-soft         get-started page bg (slightly lighter than page)
+//   @dk-surface           panels / cards / surfaces
+//   @dk-surface-raised    nz-card content on get-started
+//   @dk-tier-2            project card (one tier above .standard-div)
+//   @dk-tier-3            env entry inside project card
+//   @dk-tier-4            secret-value pill inside env entry
+//   @dk-hover             hover / divider tinted bg
+//   @dk-row-hover         active table row + menu hover (slightly tinted)
+//   @dk-menu-hover        side-menu item hover (very subtle)
+//   @dk-submenu           side-menu submenu items when parent open
+//   @dk-submenu-active    side-menu submenu hover / selected
+//   @dk-border-subtle     subtle border (e.g. side-menu rule)
+//   @dk-border-medium     medium border (inputs, modal/drawer chrome)
+//   @dk-border-strong     high-contrast border (.flag-description, tags)
+//   @dk-border-bright     visible-only-on-hover or unselected outlines
+//   @dk-text-primary      primary text — body copy, labels
+//   @dk-text-secondary    secondary text — descriptions, captions
+//   @dk-text-muted        muted text — placeholders, helper text
+//   @dk-text-disabled     disabled control text
+//
+// Brand greens (kept as literals because variables.less is the source of
+// truth for light mode):
+//   #3CC798 primary  #5CE6B8 hover/light accent  #23AD7F pressed/dark
+
+@dk-page:              #262626;
+@dk-page-soft:         #2b2b2b;
+@dk-surface:           #333333;
+@dk-surface-raised:    #3a3a3a;
+@dk-tier-2:            #3d3d3d;
+@dk-tier-3:            #474747;
+@dk-tier-4:            #525252;
+@dk-hover:             #3d3d3d;
+@dk-row-hover:         #383838;
+@dk-menu-hover:        #2d2d2d;
+@dk-submenu:           #2f2f2f;
+@dk-submenu-active:    #3a3a3a;
+@dk-border-subtle:     #363636;
+@dk-border-medium:     #404040;
+@dk-border-strong:     #4d4d4d;
+@dk-border-bright:     #5a5a5a;
+@dk-border-radio:      #8a8a8a;
+@dk-text-primary:      rgba(255, 255, 255, 0.85);
+@dk-text-secondary:    rgba(255, 255, 255, 0.65);
+@dk-text-muted:        rgba(255, 255, 255, 0.40);
+@dk-text-disabled:     rgba(255, 255, 255, 0.30);
 
 @import (less) "styles-dark-vendor.css";
 @import (less) "styles-dark-overrides.css";
 
 html[data-theme="dark"] {
-  background-color: #262626;
-  color: rgba(255, 255, 255, 0.85);
+  background-color: @dk-page;
+  color: @dk-text-primary;
 }
 
 html[data-theme="dark"] body {
-  background-color: #262626;
-  color: rgba(255, 255, 255, 0.85);
+  background-color: @dk-page;
+  color: @dk-text-primary;
 }
 
 // Custom scrollbar (light values live in styles-common.less).
 html[data-theme="dark"] ::-webkit-scrollbar-track {
-  box-shadow: inset 0 0 12px 12px #333333;
+  box-shadow: inset 0 0 12px 12px @dk-surface;
 }
 html[data-theme="dark"] ::-webkit-scrollbar-thumb {
-  box-shadow: inset 0 0 12px 12px #5a5a5a;
+  box-shadow: inset 0 0 12px 12px @dk-border-bright;
 }
 
 // Header bar (header.component.less hard-codes #fff).
 html[data-theme="dark"] .header-body {
-  background-color: #262626 !important;
+  background-color: @dk-page !important;
 }
 
 // Custom workspace-selector pill in the header.
@@ -612,16 +652,13 @@ html[data-theme="dark"] .ant-tag {
   border-radius: 8px !important;
 }
 
-// ---- Audit log On/Off pills: restore saturated green/red --------------
-// `change-list/instructions/turn-flag-on` styles `nz-tag { bg: @green50 }`
-// at component scope (specificity 0,1,1). Vendor's prefixed
-// `.ant-tag { background: ... }` matches at 0,2,1 and wins, washing the
-// pill out. Re-assert the saturated colors with a higher-specificity rule.
-// ---- ON / OFF pills (universal) ---------------------------------------
+// ---- Audit log On/Off pills + universal ON / OFF pills ----------------
 // `nz-tag.on` / `nz-tag.off` are used in setting page, experiment drawer,
-// flag list, etc. Light mode paints them as pastel green/red with a
-// matching border. Auto-gen flattened them to #333333. Restore the
-// pastel look in dark with a slightly darker, saturated tone.
+// flag list, etc. `turn-flag-on` / `turn-flag-off` / `update-off-variation`
+// are change-list instruction components. Light mode paints all of these
+// as pastel green/red with a matching border. Vendor's prefixed `.ant-tag`
+// rule plus the auto-generator's `.body-container .ant-tag { background:
+// #333 }` flatten them in dark; restore the pastel look here.
 html[data-theme="dark"] nz-tag.on,
 html[data-theme="dark"] nz-tag.on.ant-tag,
 html[data-theme="dark"] nz-tag.status.on,
@@ -768,6 +805,36 @@ html[data-theme="dark"] img[src$="assets/logo/logo.svg"] {
 html[data-theme="dark"] img.brand[src$="assets/logo/featbit-logo-text.svg"],
 html[data-theme="dark"] img[src$="assets/logo/featbit-logo-text.svg"] {
   content: url('assets/logo/featbit-logo-text-dark.svg');
+}
+
+// ---- Segments > Targeting: rule cards need contrast vs parent --------
+// Each `.rule` (drop-box wrapper) sits inside `.standard-div`, which the
+// auto-generator paints `#333`. The `nz-card` host inside it lands at
+// vendor's `#141414`, so painting just `.ant-card` would create a hole
+// instead of a raised tier. Paint the drop-box AND the card at tier-2,
+// re-assert the inline 20px radius (vendor dark CSS clobbers it back to
+// 8px, and the drop-box has no radius of its own — its squared corners
+// poke out around the rounded card), and drop the rule-name input back
+// to page color so it stays visible against the now-lighter card head.
+// `.tip` (the "If" / "and" labels) gets a global `background: #333` from
+// the auto-generator, so re-set it transparent inside the card.
+html[data-theme="dark"] .rule,
+html[data-theme="dark"] .rule .ant-card {
+  background-color: @dk-tier-2 !important;
+  border-radius: 20px !important;
+}
+html[data-theme="dark"] .rule .ant-card {
+  overflow: hidden !important;
+}
+html[data-theme="dark"] .rule .ant-card-head {
+  border-bottom-color: @dk-border-medium !important;
+}
+html[data-theme="dark"] .rule .ant-card-head input.standard-bordered-input,
+html[data-theme="dark"] .rule .ant-card-head .ant-input {
+  background-color: @dk-page !important;
+}
+html[data-theme="dark"] .rule .tip {
+  background-color: transparent !important;
 }
 
 // ---- Timeline tail line: brighten so dots feel connected --------------
