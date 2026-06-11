@@ -8,8 +8,8 @@
     "start:zh": "ng serve --configuration=development,zh --port=4201",
     "start:base-href": "ng serve --serve-path /abc/def/ --configuration=development --port=4200",
     "build:dark-css": "node scripts/build-dark-vendor-css.mjs && node scripts/build-dark-overrides.mjs",
-    "build:dev": "ng build --localize --configuration development",
-    "build:prod": "ng build --localize --configuration production",
+    "build:dev": "npm run build:dark-css && ng build --localize --configuration development",
+    "build:prod": "npm run build:dark-css && ng build --localize --configuration production",
     "i18n": "ng extract-i18n --output-path src/locale && locales-generator --l zh --bp ./src/locale && bash ./change_validations.sh",
     "test": "ng test",
     "test-coverage": "ng test --code-coverage"
