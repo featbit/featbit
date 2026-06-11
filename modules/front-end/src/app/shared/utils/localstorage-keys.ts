@@ -25,6 +25,8 @@ export function CURRENT_LANGUAGE(): string {
   return getLocalStorageKey('current-lang', true);
 }
 
+export const THEME = 'theme';
+
 export function GET_STARTED(): string {
   return getLocalStorageKey('get-started', false);
 }

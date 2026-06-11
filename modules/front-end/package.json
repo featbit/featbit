@@ -3,9 +3,11 @@
   "version": "2.0.0",
   "scripts": {
     "start": "npm run start:en",
+    "postinstall": "node scripts/build-dark-vendor-css.mjs && node scripts/build-dark-overrides.mjs",
     "start:en": "ng serve --configuration=development --port=4200",
     "start:zh": "ng serve --configuration=development,zh --port=4201",
     "start:base-href": "ng serve --serve-path /abc/def/ --configuration=development --port=4200",
+    "build:dark-css": "node scripts/build-dark-vendor-css.mjs && node scripts/build-dark-overrides.mjs",
     "build:dev": "ng build --localize --configuration development",
     "build:prod": "ng build --localize --configuration production",
     "i18n": "ng extract-i18n --output-path src/locale && locales-generator --l zh --bp ./src/locale && bash ./change_validations.sh",

@@ -1,0 +1,36 @@
+@import "variables";
+
+.theme-switcher {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+
+  .theme-option {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: @grey50-color;
+    transition: color 0.2s ease, background-color 0.2s ease;
+    user-select: none;
+
+    svg {
+      display: block;
+    }
+
+    &:hover {
+      color: @green70-color;
+      background-color: @grey5-color;
+    }
+
+    &.active {
+      color: @green70-color;
+      background-color: @grey10-color;
+    }
+  }
+}
+
