@@ -170,6 +170,115 @@ chain (e.g. include `.body-container`) to bump your specificity.
 
 ---
 
+## Worked example: adding a new component
+
+Say you're adding an `AuditFilterCardComponent` — a card with a title, a
+filter dropdown, a help link, and a status pill.
+
+### 1. Generate
+
+```bash
+ng generate component features/safe/audit-logs/audit-filter-card
+```
+
+### 2. Author the HTML — no theme awareness needed
+
+```html
+<div class="filter-card">
+  <h3 class="filter-card-title">Filter audit events</h3>
+  <nz-select class="nz-select-36" [(ngModel)]="selectedType">
+    <nz-option nzValue="all" nzLabel="All events"></nz-option>
+    <nz-option nzValue="flag" nzLabel="Flag changes"></nz-option>
+  </nz-select>
+  <a class="help-link" routerLink="/help/audit">Learn more</a>
+  <nz-tag class="status" [class.on]="enabled" [class.off]="!enabled">
+    {{ enabled ? 'On' : 'Off' }}
+  </nz-tag>
+</div>
+```
+
+No `[ngStyle]`, no `[class.dark]`, no theme-service injection. Just normal
+Angular.
+
+### 3. Author the LESS — use the palette variables
+
+```less
+@import "variables";
+
+.filter-card {
+  background: #ffffff;                // page-relative surface → #262626 in dark
+  border: 1px solid @grey10-color;    // #EAECEE → #3d3d3d in dark
+  border-radius: 8px;
+  padding: 16px;
+
+  .filter-card-title {
+    color: @grey80-color;             // dark slate → rgba(255,255,255,0.85)
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  .help-link {
+    color: @primary-color;            // brand green — passes through untouched
+    &:hover { color: @green70-color; }
+  }
+
+  nz-select { width: 100%; margin-bottom: 8px; }
+}
+```
+
+Note: **prefer scoped, specific class names** (`.filter-card-title`,
+not just `.title`) so the auto-generator's emitted rule stays scoped to
+your component and doesn't bleed across the app.
+
+### 4. Regenerate the dark stylesheet
+
+```bash
+npm run build:dark-css
+```
+
+(`build:prod` and `build:dev` chain this automatically, so a normal
+build covers you.)
+
+### 5. Test both themes
+
+Start the dev server, open the page in light mode, then click the theme
+switcher in the user menu. You should see:
+
+- Card surface flips white → `#262626`.
+- Border flips to a subtle dark border.
+- Title flips dark slate → light text at 85% white.
+- The brand-green help link and the `nz-tag.on/off` pill look identical
+  in both modes (covered by globals in `styles-dark.less`).
+
+### 6. The 5% case where you'd crack open `styles-dark.less`
+
+You'd only hand-tune if:
+
+- **A vendor / auto-gen rule wins over you.** Inspect in DevTools, find
+  the winning rule, then add a more specific override:
+  ```less
+  html[data-theme="dark"] .filter-card .ant-select-selector {
+    background-color: @dk-page !important;
+  }
+  ```
+- **You picked a non-grayscale color that doesn't read well on dark.**
+  (e.g. a chart accent against `#262626`.)
+- **You introduced a new nesting tier** the generator can't reason
+  about (your card sits inside another card and they collapse to the
+  same `#333`).
+- **You used a generic class name** with a hardcoded bg — the
+  generator emits an unscoped rule that bleeds. Either rename the
+  class, scope the original rule, or add a transparent override.
+
+### Mental model
+
+> Write the component in light mode using palette variables. Run the
+> dark-css build. Verify in dark mode. **95% of the time you're done;
+> 5% of the time you add one block to `styles-dark.less`.**
+
+---
+
 ## Workflow for adding a new component
 
 1. **Write the component using palette variables.** No raw hex unless
