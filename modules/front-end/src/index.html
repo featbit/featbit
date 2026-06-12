@@ -8,6 +8,28 @@
   <meta name="description" content="FeatBit feature flags feature toggle progressive experiment AB testing">
   <link rel="icon" type="image/x-icon" href="assets/logo/logo.svg">
   <script src="assets/env.js"></script>
+  <!--
+    Apply the persisted theme preference synchronously, before Angular boots,
+    so users with a 'dark' preference don't see a flash of the light theme on
+    first paint. Mirrors logic in ThemeService.readStoredPreference + resolveTheme.
+    Storage key kept in sync with src/app/shared/utils/localstorage-keys.ts.
+  -->
+  <script>
+    (function () {
+      try {
+        var pref = localStorage.getItem('featbit:theme');
+        if (pref !== 'light' && pref !== 'dark' && pref !== 'system') pref = 'system';
+        var resolved = pref;
+        if (pref === 'system') {
+          resolved = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+            ? 'dark' : 'light';
+        }
+        if (resolved === 'dark') {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      } catch (e) { /* localStorage may be unavailable; default to light */ }
+    })();
+  </script>
 </head>
 <body>
   <app-root></app-root>

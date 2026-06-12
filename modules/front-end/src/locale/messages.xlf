@@ -137,6 +137,10 @@
           <context context-type="linenumber">18,19</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
+          <context context-type="linenumber">69,70</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.html</context>
           <context context-type="linenumber">92,93</context>
         </context-group>
@@ -4708,35 +4712,35 @@
         <source>Account</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
-          <context context-type="linenumber">103,105</context>
+          <context context-type="linenumber">105,107</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.profile" datatype="html">
         <source>Profile</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
-          <context context-type="linenumber">118,119</context>
+          <context context-type="linenumber">120,121</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.support" datatype="html">
         <source>Support</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
-          <context context-type="linenumber">125,126</context>
+          <context context-type="linenumber">127,128</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.documentation" datatype="html">
         <source>Documentation</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
-          <context context-type="linenumber">131,132</context>
+          <context context-type="linenumber">133,134</context>
         </context-group>
       </trans-unit>
       <trans-unit id="common.logout" datatype="html">
         <source>Logout</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
-          <context context-type="linenumber">137,138</context>
+          <context context-type="linenumber">139,140</context>
         </context-group>
       </trans-unit>
       <trans-unit id="expt.metric.name-cannot-be-empty" datatype="html">
@@ -6257,6 +6261,55 @@
           <context context-type="linenumber">21,24</context>
         </context-group>
       </trans-unit>
+      <trans-unit id="theme.switcher.group" datatype="html">
+        <source>Theme preference</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/theme-switcher/theme-switcher.component.html</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="theme.switcher.light.aria" datatype="html">
+        <source>Light theme</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/theme-switcher/theme-switcher.component.html</context>
+          <context context-type="linenumber">7,8</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="theme.switcher.light.title" datatype="html">
+        <source>Light</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/theme-switcher/theme-switcher.component.html</context>
+          <context context-type="linenumber">10</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="theme.switcher.dark.aria" datatype="html">
+        <source>Dark theme</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/theme-switcher/theme-switcher.component.html</context>
+          <context context-type="linenumber">22,23</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="theme.switcher.dark.title" datatype="html">
+        <source>Dark</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/theme-switcher/theme-switcher.component.html</context>
+          <context context-type="linenumber">25</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="theme.switcher.system.aria" datatype="html">
+        <source>Follow system theme</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/theme-switcher/theme-switcher.component.html</context>
+          <context context-type="linenumber">36,37</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="theme.switcher.system.title" datatype="html">
+        <source>System</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/theme-switcher/theme-switcher.component.html</context>
+          <context context-type="linenumber">39</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="common.feature-flag" datatype="html">
         <source>Feature Flag</source>
         <context-group purpose="location">
@@ -7030,6 +7083,13 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
           <context context-type="linenumber">43,45</context>
+        </context-group>
+      </trans-unit>
+      <trans-unit id="users.idx.key-id" datatype="html">
+        <source>Key ID</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
+          <context context-type="linenumber">70,71</context>
         </context-group>
       </trans-unit>
       <trans-unit id="users.idx.evaluate" datatype="html">

@@ -1,0 +1,62 @@
+@import "variables";
+
+.theme-switcher {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+
+  .theme-option {
+    // Reset native <button> chrome so the icon button looks identical to the
+    // previous <span> rendering. Border is intentionally transparent (not
+    // `none`) so the active-state border doesn't shift layout by 1px.
+    appearance: none;
+    background: transparent;
+    border: 1px solid transparent;
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    line-height: 0;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: @grey50-color;
+    transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+    user-select: none;
+
+    svg {
+      display: block;
+    }
+
+    &:hover {
+      color: @green70-color;
+      background-color: @grey5-color;
+    }
+
+    &:focus {
+      outline: none;
+    }
+
+    &:focus-visible {
+      outline: 2px solid @green70-color;
+      outline-offset: 2px;
+    }
+
+    &.active {
+      color: @green70-color;
+      background-color: @grey10-color;
+      border-color: @green70-color;
+    }
+
+    &[disabled] {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+  }
+}
+
