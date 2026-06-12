@@ -58,10 +58,12 @@ public class CreateSegmentValidator : AbstractValidator<CreateSegment>
             .Must(SegmentType.IsDefined).WithErrorCode(ErrorCodes.Invalid("type"));
 
         RuleFor(x => x.Name)
-            .NotEmpty().WithErrorCode(ErrorCodes.Invalid("name"));
+            .NotEmpty().WithErrorCode(ErrorCodes.Invalid("name"))
+            .MaximumLength(128).WithErrorCode(ErrorCodes.Invalid("name"));
 
         RuleFor(x => x.Key)
             .NotEmpty().WithErrorCode(ErrorCodes.Required("key"))
+            .MaximumLength(128).WithErrorCode(ErrorCodes.Invalid("key"))
             .Matches(Segment.KeyPattern).WithErrorCode(ErrorCodes.Invalid("key"));
 
         RuleFor(x => x.Scopes)
