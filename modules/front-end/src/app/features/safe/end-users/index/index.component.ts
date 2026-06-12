@@ -131,6 +131,7 @@ export class IndexComponent implements OnInit {
   resetCursorPagination() {
     this.nextCursor = undefined;
     this.previousCursor = undefined;
+    this.lastClickedPage = null;
   }
 
   fetchUserList(cursor?: PageCursor) {
