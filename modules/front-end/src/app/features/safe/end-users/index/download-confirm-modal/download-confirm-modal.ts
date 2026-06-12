@@ -27,9 +27,6 @@ export class DownloadConfirmModal {
   visible: boolean = false;
 
   @Input()
-  totalCount: number = 0;
-
-  @Input()
   filter: EnvUserFilter = new EnvUserFilter();
 
   @Output()
