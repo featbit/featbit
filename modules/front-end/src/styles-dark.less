@@ -309,8 +309,9 @@ html[data-theme="dark"] .ant-card-body {
 }
 
 // Tables sometimes inherit a hardcoded white from component styles.
+// (Header bg is handled separately below — let it stay transparent so
+// it inherits the container surface, matching light mode.)
 html[data-theme="dark"] .ant-table,
-html[data-theme="dark"] .ant-table-thead > tr > th,
 html[data-theme="dark"] .ant-table-tbody > tr > td,
 html[data-theme="dark"] .ant-table-summary {
   background-color: #262626 !important;
@@ -879,7 +880,77 @@ html[data-theme="dark"] .login-wrapper nz-input-group.ant-input-affix-wrapper-di
   }
 }
 
-// ---- Segments > Targeting: rule cards need contrast vs parent --------
+// ---- End-users page: cursor pagination (Prev / Next) -----------------
+// The cursor-pagination buttons (introduced with the rel/5.4.1
+// cursor-based pagination feature) declare a transparent fill with a
+// `@grey20-color` border and `@grey60-color` text. The auto-generator
+// rewrites those to a `#363636` border which is nearly invisible on the
+// `#262626` page surface — when the .active class sticks to the
+// last-clicked button (green), the *other* button reads as missing.
+// Lift the default state to a clearly visible tier-3 border + subtle
+// fill so both buttons remain legible regardless of which was last
+// clicked. Hover bumps to tier-4 to keep the affordance.
+// Cursor pagination: in dark mode, the auto-gen-rewritten default
+// border (`#363636`) is invisible against the page surface. Give the
+// non-active enabled button a visible neutral fill so it still reads as
+// a button, and reserve the brand-green outline + tinted fill for the
+// `.active` (last-clicked) button — matches the light-mode behaviour
+// where only one button is highlighted at a time. Disabled buttons keep
+// the component LESS opacity:0.35 fade.
+html[data-theme="dark"] .cursor-pagination button:not([disabled]) {
+  border-color: @dk-tier-4 !important;        // #525252
+  background: @dk-tier-2 !important;           // #3d3d3d
+  color: rgba(255, 255, 255, 0.92) !important;
+}
+html[data-theme="dark"] .cursor-pagination button:hover:not([disabled]) {
+  border-color: #6b6b6b !important;
+  background: @dk-tier-3 !important;           // #474747
+  color: #ffffff !important;
+}
+// `.active` is the last-clicked button. Re-assert the brand-green
+// treatment at higher specificity than the default-state override
+// above (selector chain: html[data-theme] .cursor-pagination
+// button.active:not([disabled]) — 0,3,1 — outranks the :not above).
+html[data-theme="dark"] .cursor-pagination button.active:not([disabled]) {
+  border-color: #3CC798 !important;
+  color: #3CC798 !important;
+  background: rgba(60, 199, 152, 0.12) !important;
+}
+html[data-theme="dark"] .cursor-pagination button.active:hover:not([disabled]) {
+  border-color: #3CC798 !important;
+  color: #3CC798 !important;
+  background: rgba(60, 199, 152, 0.18) !important;
+}
+
+// ---- Tables: restore the inter-row gap in dark mode ------------------
+// `styles/nz-table.less` sets `border-spacing: 0 4px` on `.table-wrapper
+// .ant-table table` to produce a 4px gap between rows. Vendor dark CSS
+// `html[data-theme="dark"] .ant-table table { border-spacing: 0 }`
+// (0,3,1) silently outranks the component selector (0,3,0) and
+// collapses the gap to zero. Just re-assert the spacing — the auto-gen
+// row/table colours already provide enough contrast (`#262626` rows on
+// `#333` table) for the gap to read as a thin divider.
+html[data-theme="dark"] .table-wrapper .ant-table table {
+  border-spacing: 0 4px !important;
+}
+// Match header bg to the table container so the header stops reading
+// as a separate dark band — matches light mode where the header blends
+// in. Apply globally to every `ant-table` (not just `.table-wrapper`)
+// so bare `<nz-table>` instances (e.g., Workspace > Usage > Per
+// Environment) are covered too. Bumped specificity (extra
+// `html[data-theme="dark"]`) so we beat vendor's `thead>tr>th
+// { background:#1f1f1f }` on initial render and avoid the navigation
+// flash.
+html[data-theme="dark"] body .ant-table thead > tr > th,
+html[data-theme="dark"] body .ant-table-thead > tr > th {
+  background-color: transparent !important;
+  // Vendor sets `transition: background .3s ease` which causes a
+  // 300ms fade from `#1d1d1d` to transparent on every nav — kill it
+  // so the header is transparent on first paint.
+  transition: none !important;
+}
+
+
 // Each `.rule` (drop-box wrapper) sits inside `.standard-div`, which the
 // auto-generator paints `#333`. The `nz-card` host inside it lands at
 // vendor's `#141414`, so painting just `.ant-card` would create a hole
