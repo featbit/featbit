@@ -1514,7 +1514,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/download-confirm-modal/download-confirm-modal.html</context>
-          <context context-type="linenumber">28,30</context>
+          <context context-type="linenumber">25,27</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
@@ -2827,7 +2827,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/download-confirm-modal/download-confirm-modal.ts</context>
-          <context context-type="linenumber">62</context>
+          <context context-type="linenumber">65</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
@@ -7450,7 +7450,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/download-confirm-modal/download-confirm-modal.html</context>
-          <context context-type="linenumber">35,37</context>
+          <context context-type="linenumber">32,34</context>
         </context-group>
         <target>继续</target>
       </trans-unit>
@@ -7554,22 +7554,6 @@
         </context-group>
         <target>当筛选结果超过此限制时，不支持下载。请缩小筛选范围并重试。</target>
       </trans-unit>
-      <trans-unit id="common.total" datatype="html">
-        <source>Total</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/end-users/index/download-confirm-modal/download-confirm-modal.html</context>
-          <context context-type="linenumber">25,26</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/insights/insights.component.ts</context>
-          <context context-type="linenumber">199</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/relay-proxies/index/index.component.html</context>
-          <context context-type="linenumber">77</context>
-        </context-group>
-        <target>总共</target>
-      </trans-unit>
       <trans-unit id="users.idx.search-by-name-or-keyid" datatype="html">
         <source>Search by name or keyId</source>
         <context-group purpose="location">
@@ -7662,7 +7646,7 @@
         <source>Failed to load data</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.ts</context>
-          <context context-type="linenumber">154</context>
+          <context context-type="linenumber">152</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
@@ -8625,6 +8609,18 @@
           <context context-type="linenumber">177</context>
         </context-group>
         <target>过去12个月</target>
+      </trans-unit>
+      <trans-unit id="common.total" datatype="html">
+        <source>Total</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/insights/insights.component.ts</context>
+          <context context-type="linenumber">199</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/relay-proxies/index/index.component.html</context>
+          <context context-type="linenumber">77</context>
+        </context-group>
+        <target>总共</target>
       </trans-unit>
       <trans-unit id="ff.ff-archived" datatype="html">
         <source>Archived</source>
