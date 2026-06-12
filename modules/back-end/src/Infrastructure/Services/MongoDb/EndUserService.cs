@@ -10,24 +10,143 @@ namespace Infrastructure.Services.MongoDb;
 
 public class EndUserService(MongoDbClient mongoDb) : MongoDbService<EndUser>(mongoDb), IEndUserService
 {
-    public async Task<PagedResult<EndUser>> GetListAsync(Guid workspaceId, Guid envId, EndUserFilter userFilter)
+    public async Task<CursorPagedResult<EndUser>> GetListAsync(Guid envId, EndUserFilter userFilter)
     {
-        var filter = TranslateFilter(workspaceId, envId, userFilter);
+        var filter = TranslateFilter(envId, userFilter);
 
-        var totalCount = await Collection.CountDocumentsAsync(filter);
-        var itemsQuery = Collection
-            .Find(filter)
-            .SortByDescending(x => x.UpdatedAt)
-            .Skip(userFilter.PageIndex * userFilter.PageSize)
-            .Limit(userFilter.PageSize);
+        var cursor = userFilter.Cursor;
+        var isBackward = cursor?.Direction == PageCursorDirection.Backward;
+        var pageSize = userFilter.PageSize;
+        var limit = pageSize + 1;
+
+        var cursorFilter = cursor != null
+            ? BuildCursorFilter()
+            : Builders<EndUser>.Filter.Empty;
+
+        var itemsQuery = isBackward
+            ? Collection.Find(filter & cursorFilter)
+                .SortBy(x => x.UpdatedAt)
+                .ThenBy(x => x.Id)
+                .Limit(limit)
+            : Collection.Find(filter & cursorFilter)
+                .SortByDescending(x => x.UpdatedAt)
+                .ThenByDescending(x => x.Id)
+                .Limit(limit);
+
         var items = await itemsQuery.ToListAsync();
 
-        return new PagedResult<EndUser>(totalCount, items);
+        var hasMoreInRequestedDirection = items.Count > pageSize;
+        if (hasMoreInRequestedDirection)
+        {
+            items = items.Take(pageSize).ToList();
+        }
+
+        if (isBackward)
+        {
+            items.Reverse();
+        }
+
+        var hasPrevious = isBackward
+            ? hasMoreInRequestedDirection
+            : cursor != null;
+
+        var hasNext = isBackward
+            ? cursor != null
+            : hasMoreInRequestedDirection;
+
+        var previousCursor = hasPrevious && items.Count > 0
+            ? new PageCursor(items[0].Id, items[0].UpdatedAt, PageCursorDirection.Backward)
+            : null;
+
+        var nextCursor = hasNext && items.Count > 0
+            ? new PageCursor(items[^1].Id, items[^1].UpdatedAt, PageCursorDirection.Forward)
+            : null;
+
+        return new CursorPagedResult<EndUser>(items, previousCursor, nextCursor);
+
+        FilterDefinition<EndUser> BuildCursorFilter()
+        {
+            var builder = Builders<EndUser>.Filter;
+
+            return cursor.Direction == PageCursorDirection.Forward
+                ? builder.Or(
+                    builder.Lt(x => x.UpdatedAt, cursor.UpdatedAt),
+                    builder.And(
+                        builder.Eq(x => x.UpdatedAt, cursor.UpdatedAt),
+                        builder.Lt(x => x.Id, cursor.Id)
+                    )
+                )
+                : builder.Or(
+                    builder.Gt(x => x.UpdatedAt, cursor.UpdatedAt),
+                    builder.And(
+                        builder.Eq(x => x.UpdatedAt, cursor.UpdatedAt),
+                        builder.Gt(x => x.Id, cursor.Id)
+                    )
+                );
+        }
     }
 
-    public async Task<ICollection<EndUser>> LoadEndUsersAsync(Guid workspaceId, Guid envId, EndUserFilter userFilter)
+    public async Task<ICollection<EndUser>> SearchAsync(Guid workspaceId, Guid envId, EndUserSearchFilter filter)
     {
-        var filter = TranslateFilter(workspaceId, envId, userFilter);
+        var limit = Math.Clamp(filter.Limit, 5, 50);
+
+        var builder = Builders<EndUser>.Filter;
+
+        var extraFilters = BuildExtraFilters();
+        var globalFilter = builder.And(builder.Eq(x => x.WorkspaceId, workspaceId), extraFilters);
+
+        if (filter.GlobalUserOnly)
+        {
+            var globalUsers = await Collection.Find(globalFilter)
+                .SortByDescending(x => x.UpdatedAt)
+                .ThenByDescending(x => x.Id)
+                .Limit(limit)
+                .ToListAsync();
+
+            return globalUsers;
+        }
+
+        // Use $unionWith so each branch hits its own index (workspaceId or envId),
+        // then sort + limit the merged result set — mirrors the PostgreSQL UNION ALL approach.
+        var envFilter = builder.And(builder.Eq(x => x.EnvId, envId), extraFilters);
+        var envPipeline = new EmptyPipelineDefinition<EndUser>().Match(envFilter);
+
+        var users = await Collection.Aggregate()
+            .Match(globalFilter)
+            .UnionWith(Collection, envPipeline)
+            .SortByDescending(x => x.UpdatedAt)
+            .ThenByDescending(x => x.Id)
+            .Limit(limit)
+            .ToListAsync();
+
+        return users;
+
+        FilterDefinition<EndUser> BuildExtraFilters()
+        {
+            var extra = new List<FilterDefinition<EndUser>>();
+
+            var text = filter.SearchText;
+            if (!string.IsNullOrEmpty(text))
+            {
+                extra.Add(builder.Or(
+                    builder.Where(x => x.KeyId.Contains(text, StringComparison.CurrentCultureIgnoreCase)),
+                    builder.Where(x => x.Name.Contains(text, StringComparison.CurrentCultureIgnoreCase))
+                ));
+            }
+
+            var excludedKeyIds = filter.ExcludedKeyIds ?? [];
+            if (excludedKeyIds.Length != 0)
+            {
+                extra.Add(builder.Nin(x => x.KeyId, excludedKeyIds));
+            }
+
+            return extra.Count > 0 ? builder.And(extra) : builder.Empty;
+        }
+    }
+
+    public async Task<ICollection<EndUser>> LoadEndUsersAsync(Guid envId, EndUserFilter userFilter)
+    {
+        var filter = TranslateFilter(envId, userFilter);
 
         var total = await Collection.CountDocumentsAsync(filter);
         if (total > EndUserConstants.EndUserLoadLimit)
@@ -224,31 +343,16 @@ public class EndUserService(MongoDbClient mongoDb) : MongoDbService<EndUser>(mon
         await MongoDb.CollectionOf<EndUserProperty>().DeleteOneAsync(x => x.Id == propertyId);
     }
 
-    private static FilterDefinition<EndUser> TranslateFilter(Guid workspaceId, Guid envId, EndUserFilter userFilter)
+    private static FilterDefinition<EndUser> TranslateFilter(Guid envId, EndUserFilter userFilter)
     {
         var filterBuilder = Builders<EndUser>.Filter;
 
-        var globalUserFilter = filterBuilder.Eq(x => x.WorkspaceId, workspaceId);
-        var envUserFilter = filterBuilder.Eq(x => x.EnvId, envId);
-
-        var baseFilter = userFilter.GlobalUserOnly
-            ? globalUserFilter
-            : userFilter.IncludeGlobalUser
-                ? globalUserFilter | envUserFilter
-                : envUserFilter;
+        var baseFilter = filterBuilder.Eq(x => x.EnvId, envId);
 
         var mustFilters = new List<FilterDefinition<EndUser>>
         {
             baseFilter
         };
-
-        // excluded keyIds
-        var excludedKeyIds = userFilter.ExcludedKeyIds ?? [];
-        if (excludedKeyIds.Length != 0)
-        {
-            var excludedKeyIdsFilter = filterBuilder.Nin(x => x.KeyId, excludedKeyIds);
-            mustFilters.Add(excludedKeyIdsFilter);
-        }
 
         var orFilters = new List<FilterDefinition<EndUser>>();
 
@@ -257,32 +361,16 @@ public class EndUserService(MongoDbClient mongoDb) : MongoDbService<EndUser>(mon
         // mongodb not support ordinal comparisons yet, use StringComparison.CurrentCultureIgnoreCase
         // https://jira.mongodb.org/browse/CSHARP-4090#:~:text=until%20the%20database%20supports%20ordinal%20comparisons.
 
-        var keyId = userFilter.KeyId;
-        if (!string.IsNullOrWhiteSpace(keyId))
+        var searchText = userFilter.SearchText;
+        if (!string.IsNullOrWhiteSpace(searchText))
         {
             var keyIdFilter =
-                filterBuilder.Where(x => x.KeyId.Contains(keyId, StringComparison.CurrentCultureIgnoreCase));
+                filterBuilder.Where(x => x.KeyId.Contains(searchText, StringComparison.CurrentCultureIgnoreCase));
             orFilters.Add(keyIdFilter);
-        }
 
-        var name = userFilter.Name;
-        if (!string.IsNullOrWhiteSpace(name))
-        {
-            var nameFilter = filterBuilder.Where(x => x.Name.Contains(name, StringComparison.CurrentCultureIgnoreCase));
+            var nameFilter =
+                filterBuilder.Where(x => x.Name.Contains(searchText, StringComparison.CurrentCultureIgnoreCase));
             orFilters.Add(nameFilter);
-        }
-
-        // custom properties
-        var customizedProperties = userFilter.CustomizedProperties ?? new List<EndUserCustomizedProperty>();
-        foreach (var customizedProperty in customizedProperties)
-        {
-            var customizedPropertyFilter = filterBuilder.ElemMatch(
-                x => x.CustomizedProperties,
-                y => y.Name == customizedProperty.Name &&
-                     y.Value.Contains(customizedProperty.Value, StringComparison.CurrentCultureIgnoreCase)
-            );
-
-            orFilters.Add(customizedPropertyFilter);
         }
 
         var filter = filterBuilder.And(mustFilters);

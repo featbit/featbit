@@ -27,14 +27,12 @@ export class DownloadConfirmModal {
   visible: boolean = false;
 
   @Input()
-  totalCount: number = 0;
-
-  @Input()
   filter: EnvUserFilter = new EnvUserFilter();
 
   @Output()
   close: EventEmitter<boolean> = new EventEmitter<boolean>();
 
+  exceedsLimit: boolean = false;
   isDownloading: boolean = false;
   private downloadSub?: Subscription;
 
@@ -48,7 +46,7 @@ export class DownloadConfirmModal {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `end-users-${this.totalCount}.json`;
+        a.download = `end-users.json`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -57,9 +55,14 @@ export class DownloadConfirmModal {
           this.close.emit(true);
         }, 100);
       },
-      error: () => {
+      error: (response) => {
+        if (response.status === 422 && response.error?.errors && response.error.errors[0] === 'EndUserLimitExceeded') {
+          this.exceedsLimit = true;
+        } else {
+          this.messageService.error($localize`:@@common.operation-failed:Operation failed`);
+        }
+
         this.isDownloading = false;
-        this.messageService.error($localize`:@@common.operation-failed:Operation failed`);
       }
     });
   }
@@ -67,6 +70,7 @@ export class DownloadConfirmModal {
   onClose(confirmed: boolean = false) {
     this.downloadSub?.unsubscribe();
     this.downloadSub = undefined;
+    this.exceedsLimit = false;
     this.isDownloading = false;
     this.close.emit(confirmed);
   }

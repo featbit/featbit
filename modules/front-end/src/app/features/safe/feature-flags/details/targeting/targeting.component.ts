@@ -7,7 +7,7 @@ import { EnvUserService } from '@services/env-user.service';
 import { MessageQueueService } from '@services/message-queue.service';
 import { EnvUserPropService } from "@services/env-user-prop.service";
 import { USER_IS_IN_SEGMENT_USER_PROP, USER_IS_NOT_IN_SEGMENT_USER_PROP } from "@shared/constants";
-import { EnvUserFilter } from "@features/safe/end-users/types/featureflag-user";
+import { EnvUserSearchFilter } from "@features/safe/end-users/types/featureflag-user";
 import { FeatureFlag, IFeatureFlag } from "@features/safe/feature-flags/types/details";
 import { ICondition, IRule, IRuleVariation } from "@shared/rules";
 import { FeatureFlagService } from "@services/feature-flag.service";
@@ -249,9 +249,9 @@ export class TargetingComponent implements OnInit {
     });
   }
 
-  onSearchUser(filter: EnvUserFilter = new EnvUserFilter()) {
-    this.envUserService.search(filter).subscribe(pagedResult => {
-      this.userList = [...pagedResult.items];
+  onSearchUser(filter: EnvUserSearchFilter = new EnvUserSearchFilter()) {
+    this.envUserService.search(filter).subscribe(users => {
+      this.userList = users;
     })
   }
 

@@ -13,34 +13,127 @@ namespace Infrastructure.Services.EntityFrameworkCore;
 public class EndUserService(AppDbContext dbContext)
     : EntityFrameworkCoreService<EndUser>(dbContext), IEndUserService
 {
-    public async Task<PagedResult<EndUser>> GetListAsync(Guid workspaceId, Guid envId, EndUserFilter userFilter)
+    public async Task<CursorPagedResult<EndUser>> GetListAsync(Guid envId, EndUserFilter userFilter)
     {
-        var pgCompiler = new PostgresCompiler();
-        var baseQuery = TranslateFilter(workspaceId, envId, userFilter);
+        var filterQuery = TranslateFilter(envId, userFilter);
 
-        var countSqlResult = pgCompiler.Compile(
-            baseQuery.Clone().AsCount()
-        );
+        var cursor = userFilter.Cursor;
+        var isBackward = cursor?.Direction == PageCursorDirection.Backward;
+        var pageSize = userFilter.PageSize;
+        var takeCount = pageSize + 1;
 
-        var usersSqlResult = pgCompiler.Compile(
-            baseQuery
-                .Clone()
+        var usersQuery = filterQuery.Clone();
+
+        if (cursor != null)
+        {
+            usersQuery = cursor.Direction == PageCursorDirection.Forward
+                ? usersQuery.WhereRaw("(updated_at, id) < (?, ?)", cursor.UpdatedAt, cursor.Id)
+                : usersQuery.WhereRaw("(updated_at, id) > (?, ?)", cursor.UpdatedAt, cursor.Id);
+        }
+
+        usersQuery = isBackward
+            ? usersQuery
+                .OrderBy("updated_at")
+                .OrderBy("id")
+                .Take(takeCount)
+            : usersQuery
                 .OrderByDesc("updated_at")
-                .Skip(userFilter.PageIndex * userFilter.PageSize)
-                .Take(userFilter.PageSize)
-        );
+                .OrderByDesc("id")
+                .Take(takeCount);
 
-        var total = await DbConnection.ExecuteScalarAsync<int>(countSqlResult.Sql, countSqlResult.NamedBindings);
-        var items = await DbConnection.QueryAsync<EndUser>(usersSqlResult.Sql, usersSqlResult.NamedBindings);
+        var pgCompiler = new PostgresCompiler();
+        var usersSr = pgCompiler.Compile(usersQuery);
+        var users =
+            (await DbConnection.QueryAsync<EndUser>(usersSr.Sql, usersSr.NamedBindings)).AsList();
 
-        return new PagedResult<EndUser>(total, items.AsList());
+        var hasMoreInRequestedDirection = users.Count > pageSize;
+        if (hasMoreInRequestedDirection)
+        {
+            users = users.Take(pageSize).ToList();
+        }
+
+        if (isBackward)
+        {
+            users.Reverse();
+        }
+
+        var hasPrevious = isBackward
+            ? hasMoreInRequestedDirection
+            : cursor != null;
+
+        var hasNext = isBackward
+            ? cursor != null
+            : hasMoreInRequestedDirection;
+
+        var previousCursor = hasPrevious && users.Count > 0
+            ? new PageCursor(users[0].Id, users[0].UpdatedAt, PageCursorDirection.Backward)
+            : null;
+
+        var nextCursor = hasNext && users.Count > 0
+            ? new PageCursor(users[^1].Id, users[^1].UpdatedAt, PageCursorDirection.Forward)
+            : null;
+
+        return new CursorPagedResult<EndUser>(users, previousCursor, nextCursor);
     }
 
-    public async Task<ICollection<EndUser>> LoadEndUsersAsync(Guid workspaceId, Guid envId, EndUserFilter userFilter)
+    public async Task<ICollection<EndUser>> SearchAsync(Guid workspaceId, Guid envId, EndUserSearchFilter filter)
     {
-        var pgCompiler = new PostgresCompiler();
-        var baseQuery = TranslateFilter(workspaceId, envId, userFilter);
+        var limit = Math.Clamp(filter.Limit, 5, 50);
 
+        Query query;
+        if (filter.GlobalUserOnly)
+        {
+            query = ApplyFilters(new Query("end_users").Where("workspace_id", workspaceId));
+        }
+        else
+        {
+            // Do not use "where (workspace_id = ? OR env_id = ?)" here because it can't utilize the index efficiently
+            // when the table grows large.
+            // Use UNION ALL so each branch hits its own index (workspace_id or env_id),
+            // and then let PostgreSQL sort the combined result set in a single query.
+            var globalQuery = ApplyFilters(new Query("end_users").Where("workspace_id", workspaceId));
+            var envQuery = ApplyFilters(new Query("end_users").Where("env_id", envId));
+
+            query = new Query().From(globalQuery.UnionAll(envQuery).As("combined"));
+        }
+
+        query = query
+            .OrderByDesc("updated_at")
+            .OrderByDesc("id")
+            .Take(limit);
+
+        var pgCompiler = new PostgresCompiler();
+        var sqlResult = pgCompiler.Compile(query);
+
+        var users =
+            (await DbConnection.QueryAsync<EndUser>(sqlResult.Sql, sqlResult.NamedBindings)).AsList();
+        return users;
+
+        Query ApplyFilters(Query baseQuery)
+        {
+            var text = filter.SearchText;
+            if (!string.IsNullOrEmpty(text))
+            {
+                baseQuery = baseQuery.Where(
+                    x => x.OrWhereContains("key_id", text).OrWhereContains("name", text)
+                );
+            }
+
+            var excludedKeyIds = filter.ExcludedKeyIds ?? [];
+            if (excludedKeyIds.Length != 0)
+            {
+                baseQuery = baseQuery.WhereNotIn("key_id", excludedKeyIds);
+            }
+
+            return baseQuery;
+        }
+    }
+
+    public async Task<ICollection<EndUser>> LoadEndUsersAsync(Guid envId, EndUserFilter userFilter)
+    {
+        var baseQuery = TranslateFilter(envId, userFilter);
+
+        var pgCompiler = new PostgresCompiler();
         var countSr = pgCompiler.Compile(
             baseQuery.Clone().AsCount()
         );
@@ -238,53 +331,18 @@ public class EndUserService(AppDbContext dbContext)
         await properties.Where(x => x.Id == propertyId).ExecuteDeleteAsync();
     }
 
-    private static Query TranslateFilter(Guid workspaceId, Guid envId, EndUserFilter userFilter)
+    private static Query TranslateFilter(Guid envId, EndUserFilter userFilter)
     {
-        var table = new Query("end_users");
+        var query = new Query("end_users").Where("env_id", envId);
 
-        var baseQuery = userFilter.GlobalUserOnly
-            ? table.Where("workspace_id", workspaceId)
-            : userFilter.IncludeGlobalUser
-                ? table.Where(
-                    x => x.Where("workspace_id", workspaceId).OrWhere("env_id", envId)
-                )
-                : table.Where("env_id", envId);
-
-        // excluded keyIds
-        var excludedKeyIds = userFilter.ExcludedKeyIds ?? [];
-        if (excludedKeyIds.Length != 0)
+        var text = userFilter.SearchText;
+        if (!string.IsNullOrEmpty(text))
         {
-            baseQuery.WhereNotIn("key_id", excludedKeyIds);
+            query = query.Where(
+                x => x.OrWhereContains("key_id", text).OrWhereContains("name", text)
+            );
         }
 
-        var name = userFilter.Name;
-        var keyId = userFilter.KeyId;
-        var customizedProperties = userFilter.CustomizedProperties ?? [];
-
-        baseQuery.Where(
-            group => group
-                .When(!string.IsNullOrWhiteSpace(keyId), q => q.OrWhereContains("key_id", keyId))
-                .When(!string.IsNullOrWhiteSpace(name), q => q.OrWhereContains("name", name))
-                .When(customizedProperties.Count > 0, q =>
-                {
-                    List<object> parameters = [];
-
-                    var wheres = customizedProperties.Select(cp =>
-                    {
-                        parameters.Add(cp.Name);
-                        parameters.Add($"%{cp.Value}%");
-
-                        return "(cp->>'name'= ? and cp->>'value' ilike ?)";
-                    });
-                    var where = string.Join(" or ", wheres);
-
-                    return q.OrWhereRaw(
-                        $"exists(select 1 from jsonb_array_elements(customized_properties) as cp where {where})",
-                        parameters.ToArray()
-                    );
-                })
-        );
-
-        return baseQuery;
+        return query;
     }
 }
