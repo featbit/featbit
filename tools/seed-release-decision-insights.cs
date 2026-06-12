@@ -1,10 +1,8 @@
-#:package FeatBit.ServerSdk@1.2.10
-
-using FeatBit.Sdk.Server;
-using FeatBit.Sdk.Server.Model;
-using FeatBit.Sdk.Server.Options;
 using System.Globalization;
 using System.Net.Http.Json;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 if (args.Any(x => x is "--help" or "-h"))
@@ -14,208 +12,178 @@ if (args.Any(x => x is "--help" or "-h"))
 }
 
 var options = SeedOptions.Parse(args);
-var endpoint = new Uri(new Uri(options.EvaluationUrl.TrimEnd('/') + "/"), "api/public/insight/track");
-var insights = BuildInsights(options).ToArray();
-var metricEvents = insights.Sum(x => x.Metrics.Length);
+var users = BuildUsers(options).ToArray();
 
-if (options.SendMode == SendMode.Sdk)
+using var http = new HttpClient();
+http.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", options.EnvSecret);
+
+var evaluatedUsers = await EvaluateUsersAsync(http, options, users);
+var metricEvents = BuildMetricEvents(options, evaluatedUsers).ToArray();
+var insights = BuildInsights(options, evaluatedUsers, metricEvents).ToArray();
+
+if (!options.DryRun)
 {
-    await SeedWithSdkAsync(options, insights);
+    await SendInsightsAsync(http, options, insights);
 }
-else if (!options.DryRun)
-{
-    using var http = new HttpClient();
-    http.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", options.EnvSecret);
 
-    var sent = 0;
-    foreach (var batch in insights.Chunk(options.BatchSize))
+Console.WriteLine(options.DryRun
+    ? $"Dry run: evaluated {evaluatedUsers.Length} users and built {metricEvents.Length} metric events."
+    : $"Seeded {evaluatedUsers.Length} evaluated users and {metricEvents.Length} metric events.");
+
+Console.WriteLine($"Flag: {options.FlagKey}");
+Console.WriteLine($"Evaluation URL: {options.EvaluationUrl}");
+Console.WriteLine($"Users: {options.Users}");
+Console.WriteLine($"Seed: {options.Seed}");
+Console.WriteLine("Actual variation split:");
+foreach (var group in evaluatedUsers
+             .GroupBy(x => x.Variation.MatchKey)
+             .OrderByDescending(x => x.Count())
+             .ThenBy(x => x.Key, StringComparer.Ordinal))
+{
+    var sample = group.First().Variation;
+    Console.WriteLine(
+        $"  {sample.Label}: {group.Count()} users ({group.Count() * 100.0 / evaluatedUsers.Length:0.##}%, sendToExperiment={sample.SendToExperiment.ToString().ToLowerInvariant()})");
+}
+
+Console.WriteLine($"Metrics: {string.Join(", ", options.Metrics.Select(x => x.ToSummary()))}");
+
+static IEnumerable<SeedUser> BuildUsers(SeedOptions options)
+{
+    for (var index = 0; index < options.Users; index++)
     {
-        var response = await http.PostAsync(
-            endpoint,
-            JsonContent.Create(batch, SeedJsonContext.Default.InsightArray));
+        var key = StableUserKey(options.UserPrefix, options.Seed, index);
+        yield return new SeedUser(key);
+    }
+}
+
+static async Task<EvaluatedUser[]> EvaluateUsersAsync(HttpClient http, SeedOptions options, SeedUser[] users)
+{
+    var evaluated = new List<EvaluatedUser>(users.Length);
+    var endpoint = new Uri(
+        new Uri(options.EvaluationUrl.TrimEnd('/') + "/"),
+        "api/public/sdk/client/latest-all?timestamp=0");
+
+    foreach (var user in users)
+    {
+        using var content = new StringContent(
+            $$"""{"keyId":"{{JsonEncodedText.Encode(user.Key).ToString()}}","name":"{{JsonEncodedText.Encode(user.Key).ToString()}}"}""",
+            Encoding.UTF8,
+            "application/json");
+
+        var response = await http.PostAsync(endpoint, content);
+        var body = await response.Content.ReadAsStringAsync();
+
         if (!response.IsSuccessStatusCode)
         {
-            var body = await response.Content.ReadAsStringAsync();
             throw new InvalidOperationException(
-                $"Track request failed: {(int)response.StatusCode} {response.ReasonPhrase}. {body}");
+                $"Client SDK evaluation failed for user '{user.Key}': {(int)response.StatusCode} {response.ReasonPhrase}. {body}");
         }
 
-        sent += batch.Length;
+        evaluated.Add(new EvaluatedUser(user, ReadVariation(options.FlagKey, user.Key, body)));
     }
 
-    Console.WriteLine($"Seeded {sent} users to {endpoint}");
-}
-else
-{
-    Console.WriteLine($"Dry run: built {insights.Length} users for {endpoint}");
+    return evaluated.ToArray();
 }
 
-Console.WriteLine($"Env: {options.EnvId ?? "(from env secret)"}");
-Console.WriteLine($"Flag: {options.FlagKey}");
-Console.WriteLine($"Window: {options.StartDate:yyyy-MM-dd} -> {options.EndDate:yyyy-MM-dd}");
-Console.WriteLine($"Send mode: {options.SendMode.ToString().ToLowerInvariant()}");
-Console.WriteLine($"Variants: {string.Join(", ", options.Variants.Select(x => $"{x.Name}={x.Users} (insight id {x.InsightId})"))}");
-Console.WriteLine($"Metrics: {string.Join(", ", options.Metrics.Select(x => x.ToSummary()))}");
-Console.WriteLine($"Metric events: {metricEvents}");
-
-static async Task SeedWithSdkAsync(SeedOptions options, Insight[] insights)
+static EvaluatedVariation ReadVariation(string flagKey, string userKey, string body)
 {
-    if (options.DryRun)
-    {
-        Console.WriteLine($"Dry run: built {insights.Length} users for FeatBit.ServerSdk");
-        return;
-    }
+    using var doc = JsonDocument.Parse(body);
+    var flags = doc.RootElement
+        .GetProperty("data")
+        .GetProperty("featureFlags")
+        .EnumerateArray();
 
-    var today = DateOnly.FromDateTime(DateTimeOffset.UtcNow.UtcDateTime);
-    if (options.StartDate > today || options.EndDate < today)
+    foreach (var flag in flags)
     {
-        throw new ArgumentException(
-            "--send-mode sdk can only create live events with the SDK's current timestamp. " +
-            "Use --send-mode direct when the observation window does not include today.");
-    }
+        if (GetJsonString(flag, "id") != flagKey)
+        {
+            continue;
+        }
 
-    var sdkOptions = new FbOptionsBuilder(options.EnvSecret)
-        .Streaming(ToStreamingUri(options.EvaluationUrl))
-        .Event(new Uri(options.EvaluationUrl))
-        .StartWaitTime(TimeSpan.FromSeconds(options.SdkStartWaitSeconds))
-        .Build();
-
-    var client = new FbClient(sdkOptions);
-    try
-    {
-        if (!client.Initialized)
+        var variationId = GetJsonString(flag, "variationId");
+        if (string.IsNullOrWhiteSpace(variationId))
         {
             throw new InvalidOperationException(
-                "FbClient failed to initialize. Check --env-secret, --evaluation-url, and that the evaluation server is running.");
+                $"Flag '{flagKey}' evaluated user '{userKey}' without a variation id.");
         }
 
-        var sentMetrics = 0;
-        foreach (var insight in insights)
+        return new EvaluatedVariation(
+            variationId,
+            GetJsonString(flag, "variation") ?? string.Empty,
+            GetJsonBool(flag, "sendToExperiment") ?? false);
+    }
+
+    throw new InvalidOperationException(
+        $"Flag '{flagKey}' was not returned for user '{userKey}'. Check --flag-key and the target environment.");
+}
+
+static string? GetJsonString(JsonElement element, string property)
+{
+    return element.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.String
+        ? value.GetString()
+        : null;
+}
+
+static bool? GetJsonBool(JsonElement element, string property)
+{
+    return element.TryGetProperty(property, out var value) && value.ValueKind is JsonValueKind.True or JsonValueKind.False
+        ? value.GetBoolean()
+        : null;
+}
+
+static string StableUserKey(string prefix, int seed, int index)
+{
+    var input = Encoding.UTF8.GetBytes($"{prefix}:{seed}:{index}");
+    var hash = SHA256.HashData(input);
+    var token = Convert.ToBase64String(hash[..12])
+        .TrimEnd('=')
+        .Replace('+', '-')
+        .Replace('/', '_');
+
+    return $"{prefix}-{seed}-{index:000000}-{token}";
+}
+
+static IEnumerable<MetricEmission> BuildMetricEvents(SeedOptions options, EvaluatedUser[] evaluatedUsers)
+{
+    foreach (var group in evaluatedUsers
+                 .GroupBy(x => x.Variation.MatchKey)
+                 .OrderBy(x => x.Key, StringComparer.Ordinal))
+    {
+        var users = group.OrderBy(x => x.User.Key, StringComparer.Ordinal).ToArray();
+        var variation = users[0].Variation;
+
+        foreach (var metric in options.Metrics)
         {
-            var expectedVariation = insight.Variations.Single().Variation;
-            var expectedVariant = options.Variants.SingleOrDefault(x => x.InsightId == expectedVariation.Id)
-                ?? throw new InvalidOperationException($"No variant plan maps to variation id '{expectedVariation.Id}'.");
-
-            var user = FbUser.Builder(insight.User.KeyId)
-                .Name(insight.User.Name)
-                .Custom("seedVariant", expectedVariant.Name)
-                .Custom("seed", options.Seed.ToString(CultureInfo.InvariantCulture))
-                .Build();
-
-            var detail = client.StringVariationDetail(options.FlagKey, user, defaultValue: string.Empty);
-            if (!string.Equals(detail.ValueId, expectedVariation.Id, StringComparison.Ordinal))
+            if (!TryGetTarget(metric, variation, out var target) || target <= 0 || users.Length == 0)
             {
-                throw new InvalidOperationException(
-                    $"SDK evaluated user '{user.Key}' to variation id '{detail.ValueId}', but the seed plan expected '{expectedVariation.Id}'. " +
-                    "Target generated users by the custom attribute seedVariant or use --send-mode direct for synthetic historical data.");
+                continue;
             }
 
-            foreach (var metric in insight.Metrics)
+            foreach (var emission in BuildMetricEventsForVariation(metric, users, target))
             {
-                client.Track(user, metric.EventName, metric.NumericValue);
-                sentMetrics++;
+                yield return emission;
             }
         }
-
-        if (!client.FlushAndWait(TimeSpan.FromSeconds(options.SdkFlushWaitSeconds)))
-        {
-            throw new TimeoutException("Timed out while flushing FeatBit SDK insight events.");
-        }
-
-        Console.WriteLine($"Seeded {insights.Length} users and {sentMetrics} metric events with FeatBit.ServerSdk");
-    }
-    finally
-    {
-        await client.CloseAsync();
     }
 }
 
-static Uri ToStreamingUri(string evaluationUrl)
+static bool TryGetTarget(MetricPlan metric, EvaluatedVariation variation, out double target)
 {
-    var builder = new UriBuilder(evaluationUrl);
-    builder.Scheme = builder.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase) ? "wss" : "ws";
-    return builder.Uri;
+    return metric.Targets.TryGetValue(variation.Value, out target) ||
+           metric.Targets.TryGetValue(variation.Id, out target);
 }
 
-static IEnumerable<Insight> BuildInsights(SeedOptions options)
+static IEnumerable<MetricEmission> BuildMetricEventsForVariation(
+    MetricPlan metric,
+    EvaluatedUser[] users,
+    double target)
 {
-    var totalUsers = Math.Max(1, options.Variants.Sum(x => x.Users));
-    var windowStart = ToUtcOffset(options.StartDate);
-    var windowEndExclusive = ToUtcOffset(options.EndDate.AddDays(1));
-    var usableSeconds = Math.Max(60, (windowEndExclusive - windowStart).TotalSeconds - 120);
-    var globalIndex = 0;
-
-    foreach (var variant in options.Variants)
-    {
-        for (var userIndex = 0; userIndex < variant.Users; userIndex++, globalIndex++)
-        {
-            var userKey = $"{options.UserPrefix}-{Slug(variant.Name)}-{options.Seed}-{userIndex:000000}";
-            var exposureOffset = usableSeconds * (globalIndex + 1) / (totalUsers + 1);
-            var exposureTime = windowStart.AddSeconds(exposureOffset);
-            var metrics = BuildMetricInsights(options, variant, userIndex, exposureTime, windowEndExclusive).ToArray();
-
-            yield return new Insight
-            {
-                User = new EndUser(userKey, userKey),
-                Variations =
-                [
-                    new VariationInsight(
-                        options.FlagKey,
-                        new Variation(variant.InsightId, variant.InsightValue),
-                        true,
-                        exposureTime.ToUnixTimeMilliseconds())
-                ],
-                Metrics = metrics
-            };
-        }
-    }
-}
-
-static IEnumerable<MetricInsight> BuildMetricInsights(
-    SeedOptions options,
-    VariantPlan variant,
-    int userIndex,
-    DateTimeOffset exposureTime,
-    DateTimeOffset windowEndExclusive)
-{
-    var metricOrdinal = 0;
-
-    foreach (var metric in options.Metrics)
-    {
-        foreach (var value in MetricValues(metric, variant, userIndex))
-        {
-            var timestamp = exposureTime.AddSeconds(30 + (metricOrdinal * 5));
-            if (timestamp >= windowEndExclusive)
-            {
-                timestamp = windowEndExclusive.AddMilliseconds(-1);
-            }
-
-            metricOrdinal++;
-
-            yield return new MetricInsight(
-                "/api/public/insight/track",
-                "CustomEvent",
-                metric.Event,
-                (float)value,
-                "server",
-                timestamp.ToUnixTimeMilliseconds());
-        }
-    }
-}
-
-static IEnumerable<double> MetricValues(MetricPlan metric, VariantPlan variant, int userIndex)
-{
-    if (!metric.Targets.TryGetValue(variant.Name, out var target) || target <= 0 || variant.Users <= 0)
-    {
-        yield break;
-    }
-
     if (metric.Type == "binary" || metric.Agg == "once")
     {
-        var convertedUsers = TargetAsUserCount(target, variant.Users);
-        if (userIndex < convertedUsers)
+        var convertedUsers = TargetAsUserCount(target, users.Length);
+        for (var index = 0; index < convertedUsers; index++)
         {
-            yield return 1;
+            yield return new MetricEmission(users[index].User, metric.Event, 1);
         }
 
         yield break;
@@ -225,22 +193,86 @@ static IEnumerable<double> MetricValues(MetricPlan metric, VariantPlan variant, 
     {
         case "count":
             var eventCount = (int)Math.Round(target, MidpointRounding.AwayFromZero);
-            for (var slot = userIndex; slot < eventCount; slot += variant.Users)
+            for (var slot = 0; slot < eventCount; slot++)
             {
-                yield return 1;
+                yield return new MetricEmission(users[slot % users.Length].User, metric.Event, 1);
             }
             break;
 
         case "sum":
-            yield return target / variant.Users;
+            foreach (var user in users)
+            {
+                yield return new MetricEmission(user.User, metric.Event, (float)(target / users.Length));
+            }
             break;
 
         case "average":
-            yield return target;
+            foreach (var user in users)
+            {
+                yield return new MetricEmission(user.User, metric.Event, (float)target);
+            }
             break;
 
         default:
             throw new ArgumentException($"Unsupported metric aggregation: {metric.Agg}");
+    }
+}
+
+static IEnumerable<Insight> BuildInsights(
+    SeedOptions options,
+    EvaluatedUser[] evaluatedUsers,
+    MetricEmission[] metricEvents)
+{
+    var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+    var metricsByUser = metricEvents
+        .GroupBy(x => x.User.Key)
+        .ToDictionary(x => x.Key, x => x.ToArray(), StringComparer.Ordinal);
+
+    foreach (var evaluatedUser in evaluatedUsers)
+    {
+        var user = evaluatedUser.User;
+        var metrics = metricsByUser.GetValueOrDefault(user.Key) ?? [];
+
+        yield return new Insight
+        {
+            User = new EndUser(user.Key, user.Key),
+            Variations =
+            [
+                new VariationInsight(
+                    options.FlagKey,
+                    new Variation(evaluatedUser.Variation.Id, evaluatedUser.Variation.Value),
+                    evaluatedUser.Variation.SendToExperiment,
+                    now)
+            ],
+            Metrics = metrics
+                .Select(x => new MetricInsight(
+                    "/api/public/insight/track",
+                    "CustomEvent",
+                    x.EventName,
+                    x.NumericValue,
+                    "server",
+                    now))
+                .ToArray()
+        };
+    }
+}
+
+static async Task SendInsightsAsync(HttpClient http, SeedOptions options, Insight[] insights)
+{
+    var endpoint = new Uri(new Uri(options.EvaluationUrl.TrimEnd('/') + "/"), "api/public/insight/track");
+
+    foreach (var batch in insights.Chunk(options.BatchSize))
+    {
+        var response = await http.PostAsync(
+            endpoint,
+            JsonContent.Create(batch, SeedJsonContext.Default.InsightArray));
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var body = await response.Content.ReadAsStringAsync();
+            throw new InvalidOperationException(
+                $"Track request failed: {(int)response.StatusCode} {response.ReasonPhrase}. {body}");
+        }
     }
 }
 
@@ -253,31 +285,14 @@ static int TargetAsUserCount(double target, int users)
     return Math.Clamp(count, 0, users);
 }
 
-static DateTimeOffset ToUtcOffset(DateOnly date)
-{
-    return new DateTimeOffset(date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc));
-}
-
-static string Slug(string value)
-{
-    var chars = value.Select(ch => char.IsLetterOrDigit(ch) ? char.ToLowerInvariant(ch) : '-').ToArray();
-    return new string(chars).Trim('-');
-}
-
 sealed record SeedOptions(
     string EvaluationUrl,
     string EnvSecret,
-    string? EnvId,
     string FlagKey,
-    VariantPlan[] Variants,
+    int Users,
     MetricPlan[] Metrics,
-    DateOnly StartDate,
-    DateOnly EndDate,
     int Seed,
     int BatchSize,
-    SendMode SendMode,
-    int SdkStartWaitSeconds,
-    int SdkFlushWaitSeconds,
     string UserPrefix,
     bool DryRun)
 {
@@ -285,40 +300,27 @@ sealed record SeedOptions(
     {
         var values = ArgBag.Parse(args);
         var dryRun = values.Has("dry-run");
-        var today = DateOnly.FromDateTime(DateTimeOffset.UtcNow.UtcDateTime);
-        var startDate = GetDate(values, "start-date")
-            ?? GetStartUtcDate(values)
-            ?? today.AddDays(-6);
-        var endDate = GetDate(values, "end-date") ?? today;
-
-        if (endDate < startDate)
-        {
-            throw new ArgumentException("--end-date must be on or after --start-date");
-        }
-
-        var variants = ParseVariants(values);
-        var metrics = ParseMetrics(values, variants);
         var envSecret = Get(values, "env-secret", "");
 
-        if (!dryRun && string.IsNullOrWhiteSpace(envSecret))
+        if (string.IsNullOrWhiteSpace(envSecret))
         {
-            throw new ArgumentException("--env-secret is required unless --dry-run is set");
+            throw new ArgumentException("--env-secret is required.");
+        }
+
+        var metrics = ParseMetrics(values);
+        if (metrics.Length == 0)
+        {
+            throw new ArgumentException("At least one --metric or --guardrail is required.");
         }
 
         return new SeedOptions(
             Get(values, "evaluation-url", "http://localhost:5100"),
             envSecret,
-            GetOptional(values, "env-id"),
-            Get(values, "flag-key", "abtest-trial001"),
-            variants,
+            Get(values, "flag-key", "pricing-self-host-value-prop"),
+            GetInt(values, "users", 3000, min: 1),
             metrics,
-            startDate,
-            endDate,
             GetInt(values, "seed", 20260604),
-            GetInt(values, "batch-size", 50),
-            ParseSendMode(Get(values, "send-mode", "direct")),
-            GetInt(values, "sdk-start-wait-seconds", 5),
-            GetInt(values, "sdk-flush-wait-seconds", 30),
+            GetInt(values, "batch-size", 50, min: 1),
             Get(values, "user-prefix", "rd-seed"),
             dryRun);
     }
@@ -326,137 +328,45 @@ sealed record SeedOptions(
     public static void PrintUsage()
     {
         Console.WriteLine("""
-        Seeds real FeatBit insight events for release-decision analysis.
+        Seeds FeatBit insights by using the real feature flag split.
+
+        The tool only generates stable synthetic user keyIds. It calls FeatBit
+        evaluation endpoint for each user, lets the live feature flag targeting
+        and rollout choose the variation, then emits insight events using the
+        same user keyId.
 
         Example:
           dotnet run tools/seed-release-decision-insights.cs -- \
             --env-secret <server-sdk-secret> \
-            --env-id a30da40d-1f8a-4f4f-86a8-323ac65326d6 \
-            --flag-key <flag-key> \
-            --variant <string-value-1>=1200 \
-            --variation-id <string-value-1>=<variation-id-1> \
-            --variation-value <string-value-1>=<string-value-1> \
-            --variant <string-value-2>=1180 \
-            --variation-id <string-value-2>=<variation-id-2> \
-            --variation-value <string-value-2>=<string-value-2> \
-            --variant <string-value-3>=1160 \
-            --variation-id <string-value-3>=<variation-id-3> \
-            --variation-value <string-value-3>=<string-value-3> \
-            --metric mn1:binary:once:<string-value-1>=132,<string-value-2>=165,<string-value-3>=140 \
-            --guardrail afa:binary:once:<string-value-1>=36,<string-value-2>=41,<string-value-3>=38 \
-            --start-date 2026-06-01 --end-date 2026-06-06
+            --evaluation-url http://localhost:5100 \
+            --flag-key pricing-self-host-value-prop \
+            --users 3000 \
+            --metric self_host_high_intent_cta_clicked:binary:once:control=0.04,cost_savings=0.055,security_private=0.05
 
         Metric format:
-          --metric <event>:<binary|continuous>:<once|count|sum|average>:<variant=target,...>
+          --metric <event>:<binary|continuous>:<once|count|sum|average>:<variation=target,...>
           --guardrail uses the same format.
 
-        Native FeatBit Insights:
-          For the FeatBit flag Insights page, --variation-id must map each variant alias
-          to the real feature flag variation id. For string flags, use the actual string
-          variation values as aliases when they are short and shell-safe.
+        Variation target keys:
+          Use either the real variation string value or the real variation id.
+          The script does not accept --variant, --variation-id, or any manual
+          split configuration. Actual user counts come from FeatBit evaluation.
 
         Target semantics:
-          binary/once: target <= 1 is a rate, target > 1 is converted-user count.
-          continuous/count: target is total event count for that variant.
-          continuous/sum: target is total numeric sum for that variant.
-          continuous/average: target is per-user average value for that variant.
-
-        Send modes:
-          --send-mode sdk uses FeatBit.ServerSdk: evaluate the flag, then Track each metric.
-          --send-mode direct posts generated insight payloads and is required for backdated timestamps.
-          In SDK mode, generated users include custom attributes seedVariant and seed for targeting rules.
+          binary/once: target <= 1 is a rate over the users actually evaluated
+                       into that variation; target > 1 is converted-user count.
+          continuous/count: target is total event count for that variation.
+          continuous/sum: target is total numeric sum for that variation.
+          continuous/average: target is per-user average value for that variation.
         """);
     }
 
-    private static SendMode ParseSendMode(string value)
+    private static MetricPlan[] ParseMetrics(ArgBag values)
     {
-        return value.ToLowerInvariant() switch
-        {
-            "direct" => SendMode.Direct,
-            "sdk" => SendMode.Sdk,
-            _ => throw new ArgumentException($"Unsupported send mode: {value}")
-        };
-    }
-
-    private static VariantPlan[] ParseVariants(ArgBag values)
-    {
-        var variationIds = ParseStringMap(values.All("variation-id"));
-        var variationValues = ParseStringMap(values.All("variation-value"));
-        var explicitVariants = values.All("variant")
-            .Select(ParseVariant)
-            .Select(x => WithInsightMapping(x, variationIds, variationValues))
-            .ToArray();
-
-        if (explicitVariants.Length > 0)
-        {
-            return explicitVariants;
-        }
-
-        var usersPerVariant = GetInt(values, "users-per-variant", 120);
-        return
-        [
-            WithInsightMapping(new VariantPlan(Get(values, "control-variant", "control"), usersPerVariant), variationIds, variationValues),
-            WithInsightMapping(new VariantPlan(Get(values, "treatment-variant", "treatment"), usersPerVariant), variationIds, variationValues)
-        ];
-    }
-
-    private static MetricPlan[] ParseMetrics(ArgBag values, VariantPlan[] variants)
-    {
-        var plans = values.All("metric")
+        return values.All("metric")
             .Select(x => ParseMetric(x, false))
             .Concat(values.All("guardrail").Select(x => ParseMetric(x, true)))
             .ToArray();
-
-        if (plans.Length > 0)
-        {
-            return plans;
-        }
-
-        var metricEvent = GetOptional(values, "metric-event");
-        if (string.IsNullOrWhiteSpace(metricEvent))
-        {
-            return [];
-        }
-
-        var control = Get(values, "control-variant", variants[0].Name);
-        var treatment = Get(values, "treatment-variant", variants.Length > 1 ? variants[1].Name : variants[0].Name);
-        var targets = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase)
-        {
-            [control] = GetDouble(values, "control-rate", 0.20),
-            [treatment] = GetDouble(values, "treatment-rate", 0.36)
-        };
-
-        return [new MetricPlan(metricEvent, "binary", "once", targets, false)];
-    }
-
-    private static VariantPlan ParseVariant(string value)
-    {
-        var parts = SplitPair(value, "variant");
-        if (!int.TryParse(parts.Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var users) || users < 0)
-        {
-            throw new ArgumentException($"Invalid variant user count: {value}");
-        }
-
-        return new VariantPlan(parts.Key, users);
-    }
-
-    private static VariantPlan WithInsightMapping(
-        VariantPlan variant,
-        IReadOnlyDictionary<string, string> variationIds,
-        IReadOnlyDictionary<string, string> variationValues)
-    {
-        return variant with
-        {
-            InsightId = variationIds.GetValueOrDefault(variant.Name, variant.Name),
-            InsightValue = variationValues.GetValueOrDefault(variant.Name, variant.Name)
-        };
-    }
-
-    private static IReadOnlyDictionary<string, string> ParseStringMap(IEnumerable<string> values)
-    {
-        return values
-            .Select(x => SplitPair(x, "variation mapping"))
-            .ToDictionary(x => x.Key, x => x.Value, StringComparer.OrdinalIgnoreCase);
     }
 
     private static MetricPlan ParseMetric(string value, bool isGuardrail)
@@ -517,44 +427,24 @@ sealed record SeedOptions(
         };
     }
 
-    private static DateOnly? GetDate(ArgBag values, string key)
-    {
-        var value = GetOptional(values, key);
-        return string.IsNullOrWhiteSpace(value)
-            ? null
-            : DateOnly.ParseExact(value, "yyyy-MM-dd", CultureInfo.InvariantCulture);
-    }
-
-    private static DateOnly? GetStartUtcDate(ArgBag values)
-    {
-        var value = GetOptional(values, "start-utc");
-        return string.IsNullOrWhiteSpace(value)
-            ? null
-            : DateOnly.FromDateTime(DateTimeOffset.Parse(
-                value,
-                CultureInfo.InvariantCulture,
-                DateTimeStyles.AssumeUniversal).UtcDateTime);
-    }
-
     private static string Get(ArgBag values, string key, string fallback) =>
         GetOptional(values, key) is { Length: > 0 } value ? value : fallback;
 
     private static string? GetOptional(ArgBag values, string key) => values.Last(key);
 
-    private static int GetInt(ArgBag values, string key, int fallback)
+    private static int GetInt(ArgBag values, string key, int fallback, int? min = null)
     {
         var value = GetOptional(values, key);
-        return int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed)
-            ? parsed
+        var parsed = int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var number)
+            ? number
             : fallback;
-    }
 
-    private static double GetDouble(ArgBag values, string key, double fallback)
-    {
-        var value = GetOptional(values, key);
-        return double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed)
-            ? parsed
-            : fallback;
+        if (min.HasValue && parsed < min.Value)
+        {
+            throw new ArgumentException($"--{key} must be greater than or equal to {min.Value}.");
+        }
+
+        return parsed;
     }
 
     private static double ParseDouble(string value, string message)
@@ -565,17 +455,54 @@ sealed record SeedOptions(
     }
 }
 
-enum SendMode
+sealed record SeedUser(string Key);
+
+sealed record EvaluatedUser(SeedUser User, EvaluatedVariation Variation);
+
+sealed record EvaluatedVariation(string Id, string Value, bool SendToExperiment)
 {
-    Direct,
-    Sdk
+    public string MatchKey => string.IsNullOrWhiteSpace(Value) ? Id : Value;
+
+    public string Label => string.IsNullOrWhiteSpace(Value)
+        ? Id
+        : $"{Value} ({Id})";
 }
 
-sealed record VariantPlan(string Name, int Users)
+sealed record MetricEmission(SeedUser User, string EventName, float NumericValue);
+
+sealed record Insight
 {
-    public string InsightId { get; init; } = Name;
-    public string InsightValue { get; init; } = Name;
+    [JsonPropertyName("user")]
+    public required EndUser User { get; init; }
+
+    [JsonPropertyName("variations")]
+    public required VariationInsight[] Variations { get; init; }
+
+    [JsonPropertyName("metrics")]
+    public required MetricInsight[] Metrics { get; init; }
 }
+
+sealed record EndUser(
+    [property: JsonPropertyName("keyId")] string KeyId,
+    [property: JsonPropertyName("name")] string Name);
+
+sealed record VariationInsight(
+    [property: JsonPropertyName("featureFlagKey")] string FeatureFlagKey,
+    [property: JsonPropertyName("variation")] Variation Variation,
+    [property: JsonPropertyName("sendToExperiment")] bool SendToExperiment,
+    [property: JsonPropertyName("timestamp")] long Timestamp);
+
+sealed record Variation(
+    [property: JsonPropertyName("id")] string Id,
+    [property: JsonPropertyName("value")] string Value);
+
+sealed record MetricInsight(
+    [property: JsonPropertyName("route")] string Route,
+    [property: JsonPropertyName("type")] string Type,
+    [property: JsonPropertyName("eventName")] string EventName,
+    [property: JsonPropertyName("numericValue")] float NumericValue,
+    [property: JsonPropertyName("appType")] string AppType,
+    [property: JsonPropertyName("timestamp")] long Timestamp);
 
 sealed record MetricPlan(
     string Event,
@@ -647,40 +574,6 @@ sealed class ArgBag
         values.Add(value);
     }
 }
-
-sealed record Insight
-{
-    [JsonPropertyName("user")]
-    public required EndUser User { get; init; }
-
-    [JsonPropertyName("variations")]
-    public required VariationInsight[] Variations { get; init; }
-
-    [JsonPropertyName("metrics")]
-    public required MetricInsight[] Metrics { get; init; }
-}
-
-sealed record EndUser(
-    [property: JsonPropertyName("keyId")] string KeyId,
-    [property: JsonPropertyName("name")] string Name);
-
-sealed record VariationInsight(
-    [property: JsonPropertyName("featureFlagKey")] string FeatureFlagKey,
-    [property: JsonPropertyName("variation")] Variation Variation,
-    [property: JsonPropertyName("sendToExperiment")] bool SendToExperiment,
-    [property: JsonPropertyName("timestamp")] long Timestamp);
-
-sealed record Variation(
-    [property: JsonPropertyName("id")] string Id,
-    [property: JsonPropertyName("value")] string Value);
-
-sealed record MetricInsight(
-    [property: JsonPropertyName("route")] string Route,
-    [property: JsonPropertyName("type")] string Type,
-    [property: JsonPropertyName("eventName")] string EventName,
-    [property: JsonPropertyName("numericValue")] float NumericValue,
-    [property: JsonPropertyName("appType")] string AppType,
-    [property: JsonPropertyName("timestamp")] long Timestamp);
 
 [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
 [JsonSerializable(typeof(Insight[]))]
