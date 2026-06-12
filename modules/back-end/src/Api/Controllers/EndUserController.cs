@@ -24,14 +24,25 @@ public class EndUserController : ApiControllerBase
         return Ok(user);
     }
 
-    [HttpPost]
-    public async Task<ApiResponse<PagedResult<EndUser>>> GetListAsync(Guid envId, SearchEndUser query)
+    [HttpPost("search")]
+    public async Task<ApiResponse<ICollection<EndUser>>> SearchAsync(Guid envId, EndUserSearchFilter filter)
     {
-        var filter = new EndUserFilter(query);
-
-        var request = new GetEndUserList
+        var request = new SearchEndUser
         {
             WorkspaceId = WorkspaceId,
+            EnvId = envId,
+            Filter = filter
+        };
+
+        var users = await Mediator.Send(request);
+        return Ok(users);
+    }
+
+    [HttpPost("list")]
+    public async Task<ApiResponse<CursorPagedResult<EndUser>>> GetListAsync(Guid envId, EndUserFilter filter)
+    {
+        var request = new GetEndUserList
+        {
             EnvId = envId,
             Filter = filter
         };
@@ -135,13 +146,10 @@ public class EndUserController : ApiControllerBase
     }
 
     [HttpPost("download")]
-    public async Task<ApiResponse<ImportUserData>> DownloadAsync(Guid envId, SearchEndUser query)
+    public async Task<ApiResponse<ImportUserData>> DownloadAsync(Guid envId, EndUserFilter filter)
     {
-        var filter = new EndUserFilter(query);
-        
         var request = new DownloadEndUsers
         {
-            WorkspaceId = WorkspaceId,
             EnvId = envId,
             Filter = filter
         };

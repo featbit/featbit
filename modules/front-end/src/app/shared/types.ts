@@ -262,3 +262,9 @@ export interface SsoPreCheck {
 }
 
 export const ResourceKeyPattern: RegExp = /^[a-zA-Z0-9._-]+$/;
+
+export interface PageCursor {
+  id: string,
+  updatedAt: string,
+  direction: string
+}

@@ -7,20 +7,14 @@
             <input
               nz-input
               type="text"
-              placeholder="Filter by property"
-              i18n-placeholder="@@users.idx.filter-by-property"
+              placeholder="Search by name or keyId"
+              i18n-placeholder="@@users.idx.search-by-name-or-keyid"
               [(ngModel)]="filter.searchText"
-              (ngModelChange)="onSearch(true)">
+              (ngModelChange)="onSearch()">
           </nz-input-group>
           <ng-template #prefixIconSearch>
             <i nz-icon nzType="icons:icon-search"></i>
           </ng-template>
-          <dashed-multi-select
-            [options]="filterOptions"
-            [isLoading]="isUserPropsLoading"
-            label="Properties"
-            (optionsChange)="onFilterPropertiesChange($event)">
-          </dashed-multi-select>
           <dashed-multi-select
             [options]="extraColumnOptions"
             [isLoading]="isUserPropsLoading"
@@ -57,6 +51,7 @@
         #basicTable
         nzSize="small"
         [nzData]="list"
+        [nzPageSize]="filter.pageSize"
         nzShowPagination="false"
         [nzLoading]="isLoading">
         <thead>
@@ -89,7 +84,7 @@
           nz-button
           nzType="default"
           [class.active]="lastClickedPage === 'previous'"
-          [disabled]="!hasPreviousPage"
+          [disabled]="isLoading || !previousCursor"
           (click)="goPreviousPage()">
           <i nz-icon nzType="left"></i>
           <span i18n="@@common.prev">Prev</span>
@@ -98,11 +93,19 @@
           nz-button
           nzType="default"
           [class.active]="lastClickedPage === 'next'"
-          [disabled]="!hasNextPage"
+          [disabled]="isLoading || !nextCursor"
           (click)="goNextPage()">
           <span i18n="@@common.next">Next</span>
           <i nz-icon nzType="right"></i>
         </button>
+        <nz-select
+          class="ant-pagination-options-size-changer"
+          nzSize="small"
+          [ngModel]="filter.pageSize"
+          (ngModelChange)="onPageSizeChange($event)"
+          [nzOptions]="pageSizeOptions"
+          [nzDisabled]="isLoading">
+        </nz-select>
       </div>
     </div>
   </div>
