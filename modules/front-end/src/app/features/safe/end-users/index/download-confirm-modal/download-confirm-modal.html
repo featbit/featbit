@@ -8,7 +8,7 @@
   nzTitle="Download End-Users">
   <ng-container *nzModalContent>
     <p class="download-tip" i18n="@@users.idx.download-confirm">You are about to download <strong>the end-users matching your current filters</strong> in the current environment. Are you sure you want to continue?</p>
-    @if (totalCount > 50000) {
+    @if (exceedsLimit) {
       <nz-alert
         nzType="error"
         nzShowIcon
@@ -21,16 +21,13 @@
   </ng-container>
   <ng-container *nzModalFooter>
     <div class="footer">
-      <span class="footnote">
-        <span i18n="@@common.total">Total</span>: {{ totalCount }}
-      </span>
       <div class="actions">
         <button nz-button nzType="default" (click)="onClose()" i18n="@@common.cancel">Cancel</button>
         <button
           nz-button
           nzType="primary"
           [nzLoading]="isDownloading"
-          [disabled]="totalCount > 50000"
+          [disabled]="exceedsLimit"
           (click)="confirmDownload()"
           i18n="@@common.continue">Continue</button>
       </div>

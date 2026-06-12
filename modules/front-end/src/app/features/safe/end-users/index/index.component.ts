@@ -47,8 +47,6 @@ export class IndexComponent implements OnInit {
   }
 
   list = [];
-  totalCount: number;
-
   isLoading: boolean = true;
 
   filter: EnvUserFilter = new EnvUserFilter('', undefined, 10);
