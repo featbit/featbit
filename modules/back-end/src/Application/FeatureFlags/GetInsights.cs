@@ -30,9 +30,6 @@ public class GetInsightsValidator : AbstractValidator<GetInsights>
 
 public class GetInsightsHandler : IRequestHandler<GetInsights, IEnumerable<InsightsVm>>
 {
-    private const string FeatureFlagInsightsProviderApi = "featbit-api";
-    private const string FeatureFlagInsightsProviderDas = "featbit-das";
-
     private readonly IFeatureFlagService _service;
     private readonly IOlapService _olapService;
     private readonly IFeatureFlagInsightsService _insightsService;
@@ -78,22 +75,6 @@ public class GetInsightsHandler : IRequestHandler<GetInsights, IEnumerable<Insig
 
     private bool UseApiInsights()
     {
-        var provider =
-            Environment.GetEnvironmentVariable("FEATURE_FLAG_INSIGHTS_PROVIDER") ??
-            _configuration["FeatureFlagInsights:Provider"] ??
-            FeatureFlagInsightsProviderDas;
-
-        if (string.Equals(provider, FeatureFlagInsightsProviderApi, StringComparison.OrdinalIgnoreCase))
-        {
-            return true;
-        }
-
-        if (string.Equals(provider, FeatureFlagInsightsProviderDas, StringComparison.OrdinalIgnoreCase))
-        {
-            return false;
-        }
-
-        throw new InvalidOperationException(
-            "Invalid feature flag insights provider. Use 'featbit-api' or 'featbit-das'.");
+        return FeatureFlagInsightsProvider.UseApi(_configuration);
     }
 }

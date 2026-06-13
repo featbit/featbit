@@ -54,6 +54,9 @@ CREATE INDEX IF NOT EXISTS ix_release_decision_experiments_project_key
 CREATE INDEX IF NOT EXISTS ix_release_decision_experiments_flag_key
     ON release_decision_experiments (flag_key);
 
+CREATE INDEX IF NOT EXISTS ix_release_decision_experiments_env_flag_key
+    ON release_decision_experiments (featbit_env_id, flag_key);
+
 CREATE TABLE IF NOT EXISTS release_decision_activities
 (
     id             uuid primary key                  default gen_random_uuid(),
@@ -139,3 +142,70 @@ CREATE TABLE IF NOT EXISTS release_decision_messages
 
 CREATE INDEX IF NOT EXISTS ix_release_decision_messages_experiment_created_at
     ON release_decision_messages (experiment_id, created_at);
+
+-- Release-decision evidence is intentionally stored separately from both the
+-- legacy events table and the release-decision experiment/run tables. These
+-- tables are shared raw events; analysis joins them to a run by flag, metric,
+-- and observation window instead of binding events to a run at ingestion time.
+CREATE TABLE IF NOT EXISTS release_decision_exposure_events
+(
+    id              uuid primary key                  default gen_random_uuid(),
+    env_id          uuid                     not null,
+    flag_key        varchar(256)             not null,
+    user_key        varchar(512)             not null,
+    variation_id    varchar(256)             not null,
+    variation_value varchar(512)             null,
+    exposed_at      timestamp with time zone not null,
+    properties      jsonb                    null,
+    created_at      timestamp with time zone not null default now()
+);
+
+CREATE INDEX IF NOT EXISTS ix_release_decision_exposures_env_flag_time
+    ON release_decision_exposure_events (env_id, flag_key, exposed_at);
+
+CREATE INDEX IF NOT EXISTS ix_release_decision_exposures_env_user_time
+    ON release_decision_exposure_events (env_id, user_key, exposed_at);
+
+CREATE TABLE IF NOT EXISTS release_decision_metric_events
+(
+    id            uuid primary key                  default gen_random_uuid(),
+    env_id        uuid                     not null,
+    user_key      varchar(512)             not null,
+    event_name    varchar(256)             not null,
+    event_type    varchar(64)              not null default 'CustomEvent',
+    numeric_value double precision         not null default 1,
+    occurred_at   timestamp with time zone not null,
+    properties    jsonb                    null,
+    created_at    timestamp with time zone not null default now()
+);
+
+CREATE INDEX IF NOT EXISTS ix_release_decision_metrics_env_event_time
+    ON release_decision_metric_events (env_id, event_name, occurred_at);
+
+CREATE INDEX IF NOT EXISTS ix_release_decision_metrics_env_event_user_time
+    ON release_decision_metric_events (env_id, event_name, user_key, occurred_at);
+
+-- Optional rollup cache for heavy dashboards, bandit reweighting jobs, or
+-- repeated analyses. It is not the source of truth.
+CREATE TABLE IF NOT EXISTS release_decision_run_variant_stats
+(
+    id            uuid primary key                  default gen_random_uuid(),
+    env_id        uuid                     not null,
+    experiment_id uuid                     null,
+    run_id        uuid                     not null,
+    metric_event  varchar(256)             not null,
+    metric_type   varchar(64)              not null,
+    metric_agg    varchar(64)              not null,
+    variation     varchar(512)             not null,
+    users         bigint                   not null,
+    conversions   bigint                   not null,
+    sum_value     double precision         not null,
+    sum_squares   double precision         not null,
+    window_start  timestamp with time zone not null,
+    window_end    timestamp with time zone not null,
+    computed_at   timestamp with time zone not null default now()
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS ux_release_decision_run_variant_stats_window
+    ON release_decision_run_variant_stats
+       (run_id, metric_event, metric_type, metric_agg, variation, window_start, window_end);

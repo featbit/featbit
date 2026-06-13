@@ -3,6 +3,10 @@
 public class FeatureFlagEndUserParam
 {
     public Guid EnvId { get; set; }
+
+    // Used by API-owned release-decision insights; legacy DAS still uses FlagExptId.
+    public string FeatureFlagKey { get; set; }
+
     public string FlagExptId { get; set; }
     public string VariationId { get; set; }
     public string Query { get; set; }

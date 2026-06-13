@@ -9,10 +9,12 @@ public class InsightMessageHandler(IInsightService insightService, InsightsWrite
 
     public Task HandleAsync(string message)
     {
-        if (insightService.TryParse(message, out var insight))
+        if (!insightService.TryParse(message, out var insight))
         {
-            insightsWriter.Record(insight);
+            throw new InvalidOperationException("Failed to parse insight message.");
         }
+
+        insightsWriter.Record(insight!);
 
         return Task.CompletedTask;
     }

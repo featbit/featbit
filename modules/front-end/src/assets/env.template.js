@@ -8,5 +8,5 @@
   window["env"]["displayApiUrl"] = "${DISPLAY_API_URL}";
   window["env"]["displayEvaluationUrl"] = "${DISPLAY_EVALUATION_URL}";
   window["env"]["hostingMode"] = "${HOSTING_MODE}";
-  window["env"]["experimentPageMode"] = "${EXPERIMENT_PAGE_MODE}";
+  window["env"]["featureFlagInsightsProvider"] = "${FEATURE_FLAG_INSIGHTS_PROVIDER}";
 })(this);

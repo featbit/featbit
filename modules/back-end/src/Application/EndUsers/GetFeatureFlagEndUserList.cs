@@ -31,9 +31,6 @@ public class
     GetFeatureFlagEndUserListHandler : IRequestHandler<GetFeatureFlagEndUserList,
     PagedResult<FeatureFlagEndUserStatsVm>>
 {
-    private const string FeatureFlagInsightsProviderApi = "featbit-api";
-    private const string FeatureFlagInsightsProviderDas = "featbit-das";
-
     private readonly IFeatureFlagService _featureFlagService;
     private readonly IOlapService _olapService;
     private readonly IFeatureFlagEndUserStatsService _endUserStatsService;
@@ -60,6 +57,8 @@ public class
         {
             Query = request.Filter.Query,
             EnvId = request.EnvId,
+            // Release-decision insight queries use the plain flag key; legacy DAS queries still use FlagExptId.
+            FeatureFlagKey = request.Filter.FeatureFlagKey,
             FlagExptId = $"{request.EnvId}-{request.Filter.FeatureFlagKey}",
             VariationId = request.Filter.VariationId,
             StartTime = request.Filter.From,
@@ -86,22 +85,6 @@ public class
 
     private bool UseApiInsights()
     {
-        var provider =
-            Environment.GetEnvironmentVariable("FEATURE_FLAG_INSIGHTS_PROVIDER") ??
-            _configuration["FeatureFlagInsights:Provider"] ??
-            FeatureFlagInsightsProviderDas;
-
-        if (string.Equals(provider, FeatureFlagInsightsProviderApi, StringComparison.OrdinalIgnoreCase))
-        {
-            return true;
-        }
-
-        if (string.Equals(provider, FeatureFlagInsightsProviderDas, StringComparison.OrdinalIgnoreCase))
-        {
-            return false;
-        }
-
-        throw new InvalidOperationException(
-            "Invalid feature flag insights provider. Use 'featbit-api' or 'featbit-das'.");
+        return FeatureFlagInsightsProvider.UseApi(_configuration);
     }
 }

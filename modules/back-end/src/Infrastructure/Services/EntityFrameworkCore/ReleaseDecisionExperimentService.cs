@@ -420,9 +420,14 @@ public class ReleaseDecisionExperimentService(
         var inputData = BuildInputDataJson(metrics);
         var control = Normalize(run.ControlVariant) ?? "control";
         var treatments = SplitTreatments(run.TreatmentVariant);
+        var (analysisControl, analysisTreatments) = ResolveAnalysisVariantKeys(
+            experiment.Variants,
+            primaryMetricData,
+            control,
+            treatments);
         var analysisResult = run.Method == "bandit"
-            ? BuildBanditAnalysisJson(run, primaryMetricEvent, metrics, control, treatments)
-            : BuildBayesianAnalysisJson(run, experiment.Name ?? id.ToString(), primaryMetricEvent, metricAgg, metrics, guardrails, control, treatments);
+            ? BuildBanditAnalysisJson(run, primaryMetricEvent, metrics, analysisControl, analysisTreatments)
+            : BuildBayesianAnalysisJson(run, experiment.Name ?? id.ToString(), primaryMetricEvent, metricAgg, metrics, guardrails, analysisControl, analysisTreatments);
 
         run.InputData = inputData;
         run.AnalysisResult = analysisResult;
@@ -1147,6 +1152,104 @@ public class ReleaseDecisionExperimentService(
         }
 
         return metricData;
+    }
+
+    private static (string Control, string[] Treatments) ResolveAnalysisVariantKeys(
+        string? variantsJson,
+        Dictionary<string, object> metricData,
+        string control,
+        string[] treatments)
+    {
+        var candidatesByToken = BuildVariantAnalysisKeyCandidates(variantsJson);
+        var resolvedControl = ResolveAnalysisVariantKey(control, metricData, candidatesByToken);
+        var resolvedTreatments = treatments
+            .Select(x => ResolveAnalysisVariantKey(x, metricData, candidatesByToken))
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Where(x => !VariantTokenEquals(x, resolvedControl))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        return (resolvedControl, resolvedTreatments);
+    }
+
+    private static string ResolveAnalysisVariantKey(
+        string token,
+        Dictionary<string, object> metricData,
+        IReadOnlyDictionary<string, string[]> candidatesByToken)
+    {
+        var existing = FindExistingMetricKey(metricData, token);
+        if (!string.IsNullOrWhiteSpace(existing))
+        {
+            return existing;
+        }
+
+        if (candidatesByToken.TryGetValue(token, out var candidates))
+        {
+            foreach (var candidate in candidates)
+            {
+                existing = FindExistingMetricKey(metricData, candidate);
+                if (!string.IsNullOrWhiteSpace(existing))
+                {
+                    return existing;
+                }
+            }
+
+            return candidates.FirstOrDefault() ?? token;
+        }
+
+        return token;
+    }
+
+    private static string? FindExistingMetricKey(Dictionary<string, object> metricData, string? token)
+    {
+        var normalized = Normalize(token);
+        if (string.IsNullOrWhiteSpace(normalized))
+        {
+            return null;
+        }
+
+        return metricData.Keys.FirstOrDefault(key => VariantTokenEquals(key, normalized));
+    }
+
+    private static Dictionary<string, string[]> BuildVariantAnalysisKeyCandidates(string? variantsJson)
+    {
+        var map = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase);
+        if (string.IsNullOrWhiteSpace(variantsJson))
+        {
+            return map;
+        }
+
+        try
+        {
+            using var document = JsonDocument.Parse(variantsJson);
+            if (document.RootElement.ValueKind != JsonValueKind.Array)
+            {
+                return map;
+            }
+
+            foreach (var item in document.RootElement.EnumerateArray())
+            {
+                var key = GetJsonString(item, "key");
+                var name = GetJsonString(item, "name");
+                var value = GetJsonString(item, "value");
+                var candidates = new[] { value, name, key }
+                    .OfType<string>()
+                    .Where(x => !string.IsNullOrWhiteSpace(x))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToArray();
+
+                foreach (var token in candidates)
+                {
+                    map[token] = candidates;
+                }
+            }
+        }
+        catch (JsonException)
+        {
+            // If stored variant metadata is invalid, fall back to the run tokens.
+        }
+
+        return map;
     }
 
     private static string BuildBayesianAnalysisJson(

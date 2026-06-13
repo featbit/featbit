@@ -16,6 +16,7 @@ import {
   ExperimentStatus
 } from "@features/safe/experiments/types";
 import { getCurrentProjectEnv } from "@utils/project-env";
+import { environment } from "src/environments/environment";
 
 @Component({
     selector: 'ff-experimentations',
@@ -60,6 +61,10 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
     private experimentService: ExperimentService
   ) {
     const featureFlagKey: string = decodeURIComponent(this.route.snapshot.params['key']);
+    if (this.useReleaseDecisionWeb()) {
+      this.openReleaseDecision(featureFlagKey);
+      return;
+    }
 
     this.featureFlagService.getByKey(featureFlagKey).subscribe((result: IFeatureFlag) => {
       this.featureFlag = new FeatureFlag(result);
@@ -84,6 +89,10 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
 
   exptId: string;
   ngOnInit(): void {
+    if (this.useReleaseDecisionWeb()) {
+      return;
+    }
+
     this.route.fragment.subscribe((exptId: string) => {
       this.exptId = exptId;
     })
@@ -140,6 +149,14 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
         });
       }
     }, this.refreshInterval);
+  }
+
+  private useReleaseDecisionWeb(): boolean {
+    return environment.featureFlagInsightsProvider === 'featbit-api';
+  }
+
+  private openReleaseDecision(featureFlagKey: string) {
+    window.location.assign(`/release-decision/experiments?flagKey=${encodeURIComponent(featureFlagKey)}`);
   }
 
   experimentList: IExpt[] = [];

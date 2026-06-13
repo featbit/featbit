@@ -17,7 +17,7 @@ Seeds FeatBit insight events through the real evaluation path:
 
 The tool does not accept manual split arguments such as `--variant`, `--variation-id`, `--send-mode`, `--start-date`, or `--end-date`. Events use current timestamps.
 
-If the target flag is disabled or returns `sendToExperiment=false`, the generated exposure events will reflect that. Release-decision stats only include exposure rows where `sendToExperiment=true`, so enable the flag rollout before seeding experiment data.
+When the backend uses `FeatureFlagInsights:Provider=featbit-api`, release-decision exposure and metric evidence is written into the dedicated tables. The tool does not send experiment or run ids; the backend attributes events to the active collecting run for the evaluated flag, user, metric event, and observation window.
 
 Common options:
 
@@ -26,7 +26,13 @@ Common options:
 - `--flag-key`: feature flag key, default `pricing-self-host-value-prop`.
 - `--users`: total generated users, default `3000`.
 - `--seed`: deterministic seed for generated user keys.
-- `--dry-run`: evaluate and print planned counts without sending metric events.
+- `--batch-size`: track request batch size, default `5`.
+- `--dry-run`: evaluate and print planned counts without sending any insight events.
+
+Backend insight storage follows `FeatureFlagInsights:Provider`:
+
+- `featbit-api`: write and analyze release-decision evidence tables.
+- `featbit-das`: write and analyze legacy `events` / `Events`.
 
 Metric format:
 
@@ -39,7 +45,7 @@ Variation target keys can be either the real variation string value or the real 
 
 ### Case 1: Binary Once
 
-Use this for conversion-style metrics such as CTA click once per visitor. Target `0.06` means 6% of users actually evaluated into that variation emit the metric.
+Use this for conversion-style metrics such as CTA click once per visitor. Target `0.06` means 6% of experiment users actually evaluated into that variation emit the metric.
 
 ```powershell
 dotnet run tools\seed-release-decision-insights.cs -- `

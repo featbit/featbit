@@ -2,6 +2,9 @@
   "name": "featbit",
   "version": "2.0.0",
   "scripts": {
+    "write-env": "node scripts/write-env-js.mjs",
+    "prestart:en": "npm run write-env",
+    "prestart:zh": "npm run write-env",
     "start": "npm run start:en",
     "start:en": "ng serve --configuration=development --port=4200 --proxy-config proxy.conf.json",
     "start:zh": "ng serve --configuration=development,zh --port=4201 --proxy-config proxy.conf.json",

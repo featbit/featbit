@@ -8,5 +8,5 @@
   window["env"]["displayApiUrl"] = "";
   window["env"]["displayEvaluationUrl"] = "";
   window["env"]["hostingMode"] = "";
-  window["env"]["experimentPageMode"] = "";
+  window["env"]["featureFlagInsightsProvider"] = "featbit-api";
 })(this);

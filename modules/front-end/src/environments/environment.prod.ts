@@ -8,5 +8,5 @@ export const environment = {
   displayApiUrl: window['env']['displayApiUrl'],
   displayEvaluationUrl: window['env']['displayEvaluationUrl'],
   hostingMode: window['env']['hostingMode'] || HOSTING_MODE.SELF_HOSTED,
-  experimentPageMode: window['env']['experimentPageMode'] || 'old'
+  featureFlagInsightsProvider: window['env']['featureFlagInsightsProvider'] || 'featbit-api'
 };

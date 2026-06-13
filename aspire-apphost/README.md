@@ -23,19 +23,32 @@ Open the Aspire Dashboard URL printed by `aspire run`, or use:
 - Evaluation server: http://localhost:5100 and https://localhost:5101
 - Data analytics server: http://localhost:8200, only when `FEATURE_FLAG_INSIGHTS_PROVIDER=featbit-das`
 
-Aspire defaults feature flag usage insights to the API path:
+Aspire defaults feature flag usage insights to the API path (`featbit-api`), so a normal
+local debug run starts the release-decision web app and does not start DAS:
+
+```powershell
+aspire run
+```
+
+To explicitly set the same default:
 
 ```powershell
 $env:FEATURE_FLAG_INSIGHTS_PROVIDER = "featbit-api"
 aspire run
 ```
 
-To run the legacy Python data analytics path instead:
+To override the default and run the legacy Python data analytics path instead:
 
 ```powershell
 $env:FEATURE_FLAG_INSIGHTS_PROVIDER = "featbit-das"
 aspire run
 ```
+
+The same provider controls the local experiment UI and insight event dataset. `featbit-api`
+uses the release-decision web app and API-owned evidence tables. `featbit-das` keeps the
+legacy Angular experiment page and DAS-backed event dataset.
+
+The release-decision web app runs only when `FEATURE_FLAG_INSIGHTS_PROVIDER=featbit-api`.
 
 If another local PostgreSQL instance already uses port `5432`, stop it first or change the Postgres port in `AppHost.cs` and the `postgresConnectionString` value together.
 

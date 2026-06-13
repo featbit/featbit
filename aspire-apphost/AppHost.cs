@@ -91,19 +91,22 @@ ConfigureFeatBitOpenTelemetry(evaluationServer, "featbit-els");
 builder
     .AddExecutable("ui", "npm", "../modules/front-end", "run", "start")
     .WithHttpEndpoint(port: 4200, targetPort: 4200, isProxied: false)
-    .WithEnvironment("EXPERIMENT_PAGE_MODE", "allow-switch")
+    .WithEnvironment("FEATURE_FLAG_INSIGHTS_PROVIDER", featureFlagInsightsProvider)
     .WaitFor(apiServer)
     .WaitFor(evaluationServer);
 
-builder
-    .AddExecutable("release-decision-web", "npm", "../modules/release-decision-web", "run", "dev")
-    .WithHttpEndpoint(port: 3000, targetPort: 3000, isProxied: false)
-    .WithEnvironment("PORT", "3000")
-    .WithEnvironment("FEATBIT_API_URL", "http://localhost:5000")
-    .WithEnvironment("NEXT_PUBLIC_FEATBIT_API_URL", "http://localhost:5000")
-    .WithEnvironment("NEXT_PUBLIC_BASE_PATH", "/release-decision")
-    .WithEnvironment("RELEASE_DECISION_SESSION_SECRET", "please_change_me_to_a_secure_release_decision_session_secret")
-    .WaitFor(apiServer);
+if (featureFlagInsightsProvider == "featbit-api")
+{
+    builder
+        .AddExecutable("release-decision-web", "npm", "../modules/release-decision-web", "run", "dev")
+        .WithHttpEndpoint(port: 3000, targetPort: 3000, isProxied: false)
+        .WithEnvironment("PORT", "3000")
+        .WithEnvironment("FEATBIT_API_URL", "http://localhost:5000")
+        .WithEnvironment("NEXT_PUBLIC_FEATBIT_API_URL", "http://localhost:5000")
+        .WithEnvironment("NEXT_PUBLIC_BASE_PATH", "/release-decision")
+        .WithEnvironment("RELEASE_DECISION_SESSION_SECRET", "please_change_me_to_a_secure_release_decision_session_secret")
+        .WaitFor(apiServer);
+}
 
 builder.Build().Run();
 

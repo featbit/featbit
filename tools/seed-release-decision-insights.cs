@@ -36,13 +36,13 @@ Console.WriteLine($"Users: {options.Users}");
 Console.WriteLine($"Seed: {options.Seed}");
 Console.WriteLine("Actual variation split:");
 foreach (var group in evaluatedUsers
-             .GroupBy(x => x.Variation.MatchKey)
+             .GroupBy(x => x.Variation.Id)
              .OrderByDescending(x => x.Count())
              .ThenBy(x => x.Key, StringComparer.Ordinal))
 {
     var sample = group.First().Variation;
     Console.WriteLine(
-        $"  {sample.Label}: {group.Count()} users ({group.Count() * 100.0 / evaluatedUsers.Length:0.##}%, sendToExperiment={sample.SendToExperiment.ToString().ToLowerInvariant()})");
+        $"  {sample.Label}: {group.Count()} users ({group.Count() * 100.0 / evaluatedUsers.Length:0.##}%)");
 }
 
 Console.WriteLine($"Metrics: {string.Join(", ", options.Metrics.Select(x => x.ToSummary()))}");
@@ -109,8 +109,7 @@ static EvaluatedVariation ReadVariation(string flagKey, string userKey, string b
 
         return new EvaluatedVariation(
             variationId,
-            GetJsonString(flag, "variation") ?? string.Empty,
-            GetJsonBool(flag, "sendToExperiment") ?? false);
+            GetJsonString(flag, "variation") ?? string.Empty);
     }
 
     throw new InvalidOperationException(
@@ -121,13 +120,6 @@ static string? GetJsonString(JsonElement element, string property)
 {
     return element.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.String
         ? value.GetString()
-        : null;
-}
-
-static bool? GetJsonBool(JsonElement element, string property)
-{
-    return element.TryGetProperty(property, out var value) && value.ValueKind is JsonValueKind.True or JsonValueKind.False
-        ? value.GetBoolean()
         : null;
 }
 
@@ -146,7 +138,7 @@ static string StableUserKey(string prefix, int seed, int index)
 static IEnumerable<MetricEmission> BuildMetricEvents(SeedOptions options, EvaluatedUser[] evaluatedUsers)
 {
     foreach (var group in evaluatedUsers
-                 .GroupBy(x => x.Variation.MatchKey)
+                 .GroupBy(x => x.Variation.Id)
                  .OrderBy(x => x.Key, StringComparer.Ordinal))
     {
         var users = group.OrderBy(x => x.User.Key, StringComparer.Ordinal).ToArray();
@@ -241,7 +233,8 @@ static IEnumerable<Insight> BuildInsights(
                 new VariationInsight(
                     options.FlagKey,
                     new Variation(evaluatedUser.Variation.Id, evaluatedUser.Variation.Value),
-                    evaluatedUser.Variation.SendToExperiment,
+                    // Existing track DTO field; release-decision attribution is inferred by active run and user exposure.
+                    true,
                     now)
             ],
             Metrics = metrics
@@ -320,7 +313,7 @@ sealed record SeedOptions(
             GetInt(values, "users", 3000, min: 1),
             metrics,
             GetInt(values, "seed", 20260604),
-            GetInt(values, "batch-size", 50, min: 1),
+            GetInt(values, "batch-size", 5, min: 1),
             Get(values, "user-prefix", "rd-seed"),
             dryRun);
     }
@@ -328,7 +321,7 @@ sealed record SeedOptions(
     public static void PrintUsage()
     {
         Console.WriteLine("""
-        Seeds FeatBit insights by using the real feature flag split.
+        Seeds FeatBit release-decision insights by using the real feature flag split.
 
         The tool only generates stable synthetic user keyIds. It calls FeatBit
         evaluation endpoint for each user, lets the live feature flag targeting
@@ -351,6 +344,12 @@ sealed record SeedOptions(
           Use either the real variation string value or the real variation id.
           The script does not accept --variant, --variation-id, or any manual
           split configuration. Actual user counts come from FeatBit evaluation.
+
+        Release-decision evidence:
+          The tool does not send experiment or run ids. The featbit-api provider
+          attributes events to the active collecting release-decision run for
+          the evaluated flag, user, event name, and observation window.
+
 
         Target semantics:
           binary/once: target <= 1 is a rate over the users actually evaluated
@@ -459,10 +458,8 @@ sealed record SeedUser(string Key);
 
 sealed record EvaluatedUser(SeedUser User, EvaluatedVariation Variation);
 
-sealed record EvaluatedVariation(string Id, string Value, bool SendToExperiment)
+sealed record EvaluatedVariation(string Id, string Value)
 {
-    public string MatchKey => string.IsNullOrWhiteSpace(Value) ? Id : Value;
-
     public string Label => string.IsNullOrWhiteSpace(Value)
         ? Id
         : $"{Value} ({Id})";

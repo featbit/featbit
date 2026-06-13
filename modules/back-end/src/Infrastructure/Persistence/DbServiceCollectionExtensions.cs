@@ -27,6 +27,7 @@ public static class DbServiceCollectionExtensions
         void AddMongoDbServices()
         {
             services.TryAddMongoDb(configuration);
+            var useReleaseDecisionInsights = FeatureFlagInsightsProvider.UseApi(configuration);
 
             services.AddTransient<IWebhookHandler, Services.WebhookHandler>();
 
@@ -45,11 +46,22 @@ public static class DbServiceCollectionExtensions
             services.AddTransient<IGlobalUserService, MongoServices.GlobalUserService>();
             services.AddTransient<ISegmentService, MongoServices.SegmentService>();
             services.AddTransient<IFeatureFlagService, MongoServices.FeatureFlagService>();
-            services.AddTransient<IFeatureFlagInsightsService, MongoServices.FeatureFlagInsightsService>();
-            services.AddTransient<IFeatureFlagEndUserStatsService, MongoServices.FeatureFlagEndUserStatsService>();
+            if (useReleaseDecisionInsights)
+            {
+                services.AddTransient<IFeatureFlagInsightsService, MongoServices.ReleaseDecisionFeatureFlagInsightsService>();
+                services.AddTransient<IFeatureFlagEndUserStatsService, MongoServices.ReleaseDecisionFeatureFlagEndUserStatsService>();
+                services.AddTransient<IExperimentStatsService, MongoServices.ReleaseDecisionExperimentStatsService>();
+                services.AddTransient<IInsightService, MongoServices.ReleaseDecisionInsightService>();
+            }
+            else
+            {
+                services.AddTransient<IFeatureFlagInsightsService, MongoServices.FeatureFlagInsightsService>();
+                services.AddTransient<IFeatureFlagEndUserStatsService, MongoServices.FeatureFlagEndUserStatsService>();
+                services.AddTransient<IExperimentStatsService, MongoServices.ExperimentStatsService>();
+                services.AddTransient<IInsightService, MongoServices.InsightService>();
+            }
             services.AddTransient<ITriggerService, MongoServices.TriggerService>();
             services.AddTransient<IExperimentService, MongoServices.ExperimentService>();
-            services.AddTransient<IExperimentStatsService, MongoServices.ExperimentStatsService>();
             services.AddTransient<IReleaseDecisionExperimentService, MongoServices.ReleaseDecisionExperimentService>();
             services.AddTransient<IExperimentMetricService, MongoServices.ExperimentMetricService>();
             services.AddTransient<IAuditLogService, MongoServices.AuditLogService>();
@@ -60,7 +72,6 @@ public static class DbServiceCollectionExtensions
             services.AddTransient<IFlagRevisionService, MongoServices.FlagRevisionService>();
             services.AddTransient<IFlagChangeRequestService, MongoServices.FlagChangeRequestService>();
             services.AddTransient<IWebhookService, MongoServices.WebhookService>();
-            services.AddTransient<IInsightService, MongoServices.InsightService>();
             services.AddTransient<IRefreshTokenService, MongoServices.RefreshTokenService>();
         }
 
@@ -68,6 +79,7 @@ public static class DbServiceCollectionExtensions
         {
             services.TryAddPostgres(configuration);
             services.ConfigureDapper();
+            var useReleaseDecisionInsights = FeatureFlagInsightsProvider.UseApi(configuration);
 
             services.AddTransient<IGeneralWebhookHandler, Services.WebhookHandler>();
             services.AddTransient<IScopedWebhookHandler, Services.ScopedWebhookHandler>();
@@ -88,11 +100,22 @@ public static class DbServiceCollectionExtensions
             services.AddTransient<IGlobalUserService, EntityFrameworkCoreServices.GlobalUserService>();
             services.AddTransient<ISegmentService, EntityFrameworkCoreServices.SegmentService>();
             services.AddTransient<IFeatureFlagService, EntityFrameworkCoreServices.FeatureFlagService>();
-            services.AddTransient<IFeatureFlagInsightsService, EntityFrameworkCoreServices.FeatureFlagInsightsService>();
-            services.AddTransient<IFeatureFlagEndUserStatsService, EntityFrameworkCoreServices.FeatureFlagEndUserStatsService>();
+            if (useReleaseDecisionInsights)
+            {
+                services.AddTransient<IFeatureFlagInsightsService, EntityFrameworkCoreServices.ReleaseDecisionFeatureFlagInsightsService>();
+                services.AddTransient<IFeatureFlagEndUserStatsService, EntityFrameworkCoreServices.ReleaseDecisionFeatureFlagEndUserStatsService>();
+                services.AddTransient<IExperimentStatsService, EntityFrameworkCoreServices.ReleaseDecisionExperimentStatsService>();
+                services.AddTransient<IInsightService, EntityFrameworkCoreServices.ReleaseDecisionInsightService>();
+            }
+            else
+            {
+                services.AddTransient<IFeatureFlagInsightsService, EntityFrameworkCoreServices.FeatureFlagInsightsService>();
+                services.AddTransient<IFeatureFlagEndUserStatsService, EntityFrameworkCoreServices.FeatureFlagEndUserStatsService>();
+                services.AddTransient<IExperimentStatsService, EntityFrameworkCoreServices.ExperimentStatsService>();
+                services.AddTransient<IInsightService, EntityFrameworkCoreServices.InsightService>();
+            }
             services.AddTransient<ITriggerService, EntityFrameworkCoreServices.TriggerService>();
             services.AddTransient<IExperimentService, EntityFrameworkCoreServices.ExperimentService>();
-            services.AddTransient<IExperimentStatsService, EntityFrameworkCoreServices.ExperimentStatsService>();
             services.AddTransient<IReleaseDecisionExperimentService, EntityFrameworkCoreServices.ReleaseDecisionExperimentService>();
             services.AddTransient<IExperimentMetricService, EntityFrameworkCoreServices.ExperimentMetricService>();
             services.AddTransient<IAuditLogService, EntityFrameworkCoreServices.AuditLogService>();
@@ -103,7 +126,6 @@ public static class DbServiceCollectionExtensions
             services.AddTransient<IFlagRevisionService, EntityFrameworkCoreServices.FlagRevisionService>();
             services.AddTransient<IFlagChangeRequestService, EntityFrameworkCoreServices.FlagChangeRequestService>();
             services.AddTransient<IWebhookService, EntityFrameworkCoreServices.WebhookService>();
-            services.AddTransient<IInsightService, EntityFrameworkCoreServices.InsightService>();
             services.AddTransient<IRefreshTokenService, EntityFrameworkCoreServices.RefreshTokenService>();
         }
     }
