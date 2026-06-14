@@ -46,6 +46,13 @@ import { authStorage } from "@/lib/featbit-auth/storage";
 import { AnalysisView } from "./analysis-markdown";
 import { ExperimentRunTrafficConfig } from "./experiment-run-traffic-config";
 import {
+  parseVariantIdentities,
+  splitVariantTokens,
+  VariantIdCopyButton,
+  VariantIdentityInline,
+  type VariantIdentity,
+} from "./variant-identity";
+import {
   createNewExperimentRunAction,
   deleteExperimentRunAction,
   updateExperimentRunObservationWindowAction,
@@ -77,12 +84,7 @@ const DECISION_COLORS: Record<string, string> = {
 };
 
 type ExperimentMethod = "bayesian_ab" | "bandit";
-type VariantChoice = {
-  key: string;
-  name: string;
-  value: string;
-  description: string;
-};
+type VariantChoice = VariantIdentity;
 
 const METHOD_OPTIONS: Array<{
   value: ExperimentMethod;
@@ -105,45 +107,6 @@ const METHOD_OPTIONS: Array<{
       "Use multiple arms and reweight traffic toward stronger variants as reward evidence changes.",
   },
 ];
-
-function parseRunVariantChoices(variants: string | null | undefined): VariantChoice[] {
-  if (!variants) return [];
-  const raw = variants.trim();
-  if (!raw) return [];
-
-  if (raw.startsWith("[")) {
-    try {
-      const parsed = JSON.parse(raw) as Array<{
-        key?: string;
-        id?: string;
-        name?: string;
-        value?: string;
-        description?: string;
-      }>;
-      return parsed
-        .map((variant) => ({
-          key: variant.key ?? variant.id ?? variant.value ?? variant.name ?? "",
-          name: variant.name ?? "",
-          value: variant.value ?? "",
-          description: variant.description ?? "",
-        }))
-        .filter((variant) => variant.key);
-    } catch {
-      return [];
-    }
-  }
-
-  return raw
-    .split("|")
-    .map((item) => item.trim())
-    .filter(Boolean)
-    .map((item) => {
-      const match = item.match(/^(.+?)\s*\((.+)\)\s*$/);
-      return match
-        ? { key: match[1].trim(), name: "", value: "", description: match[2].trim() }
-        : { key: item, name: "", value: "", description: "" };
-    });
-}
 
 function normalizeRunVariantSelection(
   method: ExperimentMethod,
@@ -174,43 +137,14 @@ function normalizeRunVariantSelection(
   };
 }
 
-function variantDisplayLabel(choice: VariantChoice) {
-  return choice.name || choice.description || choice.value || choice.key;
-}
-
-function shortVariantId(id: string) {
-  return id.length > 18 ? `${id.slice(0, 8)}...${id.slice(-6)}` : id;
-}
-
-function VariantIdCopyButton({ id }: { id: string }) {
-  return (
-    <button
-      type="button"
-      onClick={(event) => {
-        event.stopPropagation();
-        void navigator.clipboard?.writeText(id);
-      }}
-      className="inline-flex size-6 shrink-0 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground"
-      title={`Copy variation id: ${id}`}
-      aria-label="Copy variation id"
-    >
-      <Copy className="size-3" />
-    </button>
-  );
-}
-
 function VariantChoiceIdentity({ choice }: { choice: VariantChoice }) {
   return (
-    <span className="min-w-0 flex-1 truncate">
-      <span className="font-medium">{variantDisplayLabel(choice)}</span>
-      {choice.value && (
-        <span className="text-muted-foreground"> · {choice.value}</span>
-      )}
-      <span className="font-mono text-muted-foreground" title={choice.key}>
-        {" "}
-        · {shortVariantId(choice.key)}
-      </span>
-    </span>
+    <VariantIdentityInline
+      token={choice.key}
+      variants={[choice]}
+      className="min-w-0 flex-1"
+      showCopy={false}
+    />
   );
 }
 
@@ -571,15 +505,21 @@ function ObservationWindowInline({
 
 function SummaryTab({
   exp,
+  variantChoices,
   onOpenAgentPrompt,
   analysisPanel,
 }: {
   exp: ExperimentRun;
+  variantChoices: VariantChoice[];
   onOpenAgentPrompt?: () => void;
   analysisPanel?: React.ReactNode;
 }) {
   const hasDecision = Boolean(exp.decision);
   const decisionReason = sanitizeDecisionReason(exp.decisionReason);
+  const treatmentVariants = splitVariantTokens(exp.treatmentVariant);
+  const arms = [exp.controlVariant, ...treatmentVariants].filter(
+    (variant): variant is string => Boolean(variant),
+  );
 
   return (
     <div className="px-4 pb-6 space-y-4">
@@ -637,50 +577,44 @@ function SummaryTab({
       {exp.method === "bandit" ? (
         <div>
           <SectionLabel icon={<Users className="size-3" />} label="Arms" />
-          <div className="flex flex-wrap gap-1.5 mt-0.5">
-            {[
-              exp.controlVariant,
-              ...(exp.treatmentVariant
-                ?.split("|")
-                .map((s: string) => s.trim()) ?? []),
-            ]
-              .filter(Boolean)
-              .map((arm) => (
-                <span
-                  key={arm}
-                  className="inline-flex items-center rounded border px-1.5 py-0.5 text-sm font-mono bg-muted/40"
-                >
-                  {arm}
-                  {arm === exp.controlVariant && (
-                    <span className="ml-1 text-xs text-muted-foreground">
-                      (baseline)
-                    </span>
-                  )}
-                </span>
-              ))}
+          <div className="mt-1 grid gap-1 text-sm">
+            {arms.map((arm, index) => (
+              <div
+                key={`${arm}-${index}`}
+                className="flex min-w-0 items-center rounded border bg-muted/30 px-2 py-1"
+              >
+                <VariantIdentityInline
+                  token={arm}
+                  variants={variantChoices}
+                  role={arm === exp.controlVariant ? "Baseline" : "Arm"}
+                  className="w-full"
+                />
+              </div>
+            ))}
           </div>
         </div>
       ) : (
-        <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+        <div className="grid gap-1 text-sm">
           {exp.controlVariant && (
-            <span>
+            <div className="flex min-w-0 items-center">
               <Users className="inline size-3 mr-0.5" />
-              <span className="text-muted-foreground">Control:</span>{" "}
-              <span className="font-mono">{exp.controlVariant}</span>
-            </span>
+              <VariantIdentityInline
+                token={exp.controlVariant}
+                variants={variantChoices}
+                role="Control"
+                className="min-w-0"
+              />
+            </div>
           )}
-          {exp.treatmentVariant && (
-            <span>
-              <span className="text-muted-foreground">Treatments:</span>{" "}
-              <span className="font-mono">
-                {exp.treatmentVariant
-                  .split("|")
-                  .map((item) => item.trim())
-                  .filter(Boolean)
-                  .join(", ")}
-              </span>
-            </span>
-          )}
+          {treatmentVariants.map((variant, index) => (
+            <VariantIdentityInline
+              key={`${variant}-${index}`}
+              token={variant}
+              variants={variantChoices}
+              role={treatmentVariants.length > 1 ? `Treatment ${index + 1}` : "Treatment"}
+              className="min-w-0"
+            />
+          ))}
         </div>
       )}
 
@@ -1483,7 +1417,7 @@ export function ExperimentRunTable({
   const [newRunTreatmentVariants, setNewRunTreatmentVariants] = useState<string[]>([]);
   const router = useRouter();
   const variantChoices = useMemo(
-    () => parseRunVariantChoices(variants),
+    () => parseVariantIdentities(variants),
     [variants],
   );
 
@@ -1690,6 +1624,7 @@ export function ExperimentRunTable({
           {/* Merged content: Analyze & Decision, then Audience & Traffic */}
           <SummaryTab
             exp={selected}
+            variantChoices={variantChoices}
             onOpenAgentPrompt={() => setPromptRun(selected)}
             analysisPanel={
               <AnalysisTab

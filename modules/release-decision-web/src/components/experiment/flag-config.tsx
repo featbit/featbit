@@ -13,7 +13,6 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   Flag,
   Pencil,
@@ -37,6 +36,10 @@ import {
   SecretType,
   type EnvSecret,
 } from "@/lib/featbit-auth";
+import {
+  parseVariantIdentities,
+  VariantIdentityInline,
+} from "./variant-identity";
 
 /* ── Types ── */
 type VariantRow = { key: string; description: string };
@@ -526,7 +529,7 @@ export function FlagIntegrationHeader({
   const isConfigured = Boolean(experiment.flagKey);
   const featbitUrl = buildFeatBitUrl(experiment);
 
-  const allVariants = parseVariantsToRows(experiment.variants);
+  const allVariants = parseVariantIdentities(experiment.variants);
 
   // Variants used in any run (for colour-coding)
   const usedInRuns = new Set<string>();
@@ -573,16 +576,15 @@ export function FlagIntegrationHeader({
               <span className="text-muted-foreground/30 select-none shrink-0">·</span>
             )}
 
-            {/* Variations inline */}
-            <div className="flex flex-wrap gap-1 flex-1">
-              {allVariants.map(({ key, description }) => {
+            {/* Variations */}
+            <div className="grid min-w-0 flex-1 gap-1">
+              {allVariants.map(({ key, description, name }) => {
                 const isControl = description?.toLowerCase().includes("control");
                 const isUsed = usedInRuns.has(key);
                 return (
-                  <Badge
+                  <div
                     key={key}
-                    variant="outline"
-                    className={`font-mono text-xs px-2 py-0 ${
+                    className={`inline-flex min-w-0 items-center gap-1.5 rounded border px-2 py-1 text-xs ${
                       isControl
                         ? "border-emerald-300 text-emerald-700 dark:border-emerald-700 dark:text-emerald-300"
                         : isUsed
@@ -591,13 +593,13 @@ export function FlagIntegrationHeader({
                     }`}
                   >
                     <GitBranch className="size-3 mr-1" />
-                    {key}
-                    {description && (
-                      <span className="ml-1 text-[10px] text-muted-foreground font-normal">
-                        ({description})
-                      </span>
-                    )}
-                  </Badge>
+                    <VariantIdentityInline
+                      token={key}
+                      variants={allVariants}
+                      role={name || description ? undefined : "Variant"}
+                      className="min-w-0"
+                    />
+                  </div>
                 );
               })}
             </div>

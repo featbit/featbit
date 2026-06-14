@@ -12,6 +12,12 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  formatVariantPlain,
+  parseVariantIdentities,
+  VariantIdentityInline,
+  type VariantIdentity,
+} from "./variant-identity";
 
 /* ── JSON type definitions ── */
 
@@ -105,7 +111,7 @@ interface BanditAnalysis {
 }
 
 type AnalysisData = BayesianAnalysis | BanditAnalysis;
-type VariantLabelMap = Record<string, { name: string; value?: string }>;
+type VariantLabelMap = VariantIdentity[];
 
 /* ── Helpers ── */
 
@@ -152,42 +158,15 @@ function guardrailHarmColor(p: number | undefined): string {
 }
 
 function parseVariantLabels(variants: string | null | undefined): VariantLabelMap {
-  if (!variants?.trim()) return {};
-  const raw = variants.trim();
-  if (!raw.startsWith("[")) return {};
-
-  try {
-    const parsed = JSON.parse(raw) as Array<{
-      key?: string;
-      id?: string;
-      name?: string;
-      value?: string;
-      description?: string;
-    }>;
-
-    const labels: VariantLabelMap = {};
-    for (const variant of parsed) {
-      const key = variant.key ?? variant.id;
-      if (!key) continue;
-      labels[key] = {
-        name: variant.name || variant.description || key,
-        value: variant.value,
-      };
-    }
-    return labels;
-  } catch {
-    return {};
-  }
+  return parseVariantIdentities(variants);
 }
 
 function variantName(token: string, labels: VariantLabelMap): string {
-  return labels[token]?.name || token;
+  return formatVariantPlain(token, labels);
 }
 
 function variantTitle(token: string, labels: VariantLabelMap): string | undefined {
-  const label = labels[token];
-  if (!label) return undefined;
-  return label.value ? `${label.name} = ${label.value} (${token})` : `${label.name} (${token})`;
+  return formatVariantPlain(token, labels);
 }
 
 function displayVerdict(section: MetricSection, label: string): string {
@@ -516,7 +495,11 @@ function MetricTable({
                     className="px-2 py-1 border-b border-border/50 font-semibold"
                     title={variantTitle(row.variant, variantLabels)}
                   >
-                    {variantName(row.variant, variantLabels)}
+                    <VariantIdentityInline
+                      token={row.variant}
+                      variants={variantLabels}
+                      className="min-w-0"
+                    />
                   </td>
                   <td className="px-2 py-1 border-b border-border/50 tabular-nums text-right">{row.n.toLocaleString()}</td>
                   {isProp && <td className="px-2 py-1 border-b border-border/50 tabular-nums text-right">{row.conversions?.toLocaleString() ?? "—"}</td>}
@@ -619,7 +602,11 @@ function BanditView({ data, variantLabels }: { data: BanditAnalysis; variantLabe
                     className={`px-2 py-1 border-b border-border/50 ${arm.arm === data.stopping.best_arm ? "font-semibold" : ""}`}
                     title={variantTitle(arm.arm, variantLabels)}
                   >
-                    {variantName(arm.arm, variantLabels)}
+                    <VariantIdentityInline
+                      token={arm.arm}
+                      variants={variantLabels}
+                      className="min-w-0"
+                    />
                   </td>
                   <td className="px-2 py-1 border-b border-border/50 tabular-nums text-right">{arm.n.toLocaleString()}</td>
                   <td className="px-2 py-1 border-b border-border/50 tabular-nums text-right">{arm.conversions.toLocaleString()}</td>
@@ -650,7 +637,11 @@ function BanditView({ data, variantLabels }: { data: BanditAnalysis; variantLabe
                     className={`px-2 py-1 border-b border-border/50 ${r.arm === data.stopping.best_arm ? "font-semibold" : ""}`}
                     title={variantTitle(r.arm, variantLabels)}
                   >
-                    {variantName(r.arm, variantLabels)}
+                    <VariantIdentityInline
+                      token={r.arm}
+                      variants={variantLabels}
+                      className="min-w-0"
+                    />
                   </td>
                   <td className={`px-2 py-1 border-b border-border/50 tabular-nums text-right ${pColor(r.p_best, 0.95)}`}>
                     {r.p_best.toFixed(4)}

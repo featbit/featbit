@@ -37,6 +37,11 @@ import { MetricEditPanel } from "./metric-edit";
 import { ExperimentRunTrafficConfig } from "./experiment-run-traffic-config";
 import { ExperimentRunTable } from "./experiment-run-table";
 import { TrafficPoolView } from "./traffic-pool-view";
+import {
+  parseVariantIdentities,
+  splitVariantTokens,
+  VariantIdentityInline,
+} from "./variant-identity";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 
 type ExperimentWithRelations = Experiment & {
@@ -612,13 +617,18 @@ function ExperimentRunCard({
   isSequential,
   experimentId,
   flagKey,
+  variants,
 }: {
   run: ExperimentRun;
   idx: number;
   isSequential: boolean;
   experimentId: string;
   flagKey: string | null;
+  variants?: string | null;
 }) {
+  const variantRows = parseVariantIdentities(variants);
+  const treatmentVariants = splitVariantTokens(run.treatmentVariant);
+
   return (
     <div className="rounded-md border space-y-0">
       {/* Header */}
@@ -641,33 +651,35 @@ function ExperimentRunCard({
 
       <div className="px-3 py-2 space-y-3">
         {/* Variants */}
-        <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+        <div className="grid gap-1 text-sm">
           {run.controlVariant && (
-            <span className="flex items-center gap-1">
+            <div className="flex min-w-0 items-center gap-1">
               <span className="inline-block size-2 rounded-full bg-emerald-500" />
-              <span className="text-muted-foreground">Control:</span>{" "}
-              <span className="font-mono font-medium">{run.controlVariant}</span>
-            </span>
+              <VariantIdentityInline
+                token={run.controlVariant}
+                variants={variantRows}
+                role="Control"
+                className="min-w-0"
+              />
+            </div>
           )}
-          {run.treatmentVariant && (
-            <span className="flex items-center gap-1">
+          {treatmentVariants.map((variant, index) => (
+            <div key={`${variant}-${index}`} className="flex min-w-0 items-center gap-1">
               <span className="inline-block size-2 rounded-full bg-violet-500" />
-              <span className="text-muted-foreground">Treatments:</span>{" "}
-              <span className="font-mono font-medium">
-                {run.treatmentVariant
-                  .split("|")
-                  .map((item) => item.trim())
-                  .filter(Boolean)
-                  .join(", ")}
-              </span>
-            </span>
-          )}
+              <VariantIdentityInline
+                token={variant}
+                variants={variantRows}
+                role={treatmentVariants.length > 1 ? `Treatment ${index + 1}` : "Treatment"}
+                className="min-w-0"
+              />
+            </div>
+          ))}
         </div>
 
         {/* Audience & Traffic — merged with traffic allocation */}
         <div>
           <SectionLabel icon={<Filter className="size-3" />} label="Audience &amp; Traffic" />
-          <ExperimentRunTrafficConfig experimentRun={run} experimentId={experimentId} />
+          <ExperimentRunTrafficConfig experimentRun={run} experimentId={experimentId} variants={variants} />
         </div>
 
         {/* Schedule: Observation window + min sample */}

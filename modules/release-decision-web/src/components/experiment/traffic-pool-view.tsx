@@ -2,6 +2,11 @@
 
 import { useMemo, useState } from "react";
 import type { ExperimentRun } from "@/generated/prisma";
+import {
+  parseVariantIdentities,
+  splitVariantTokens,
+  VariantIdentityInline,
+} from "./variant-identity";
 
 /* ── Palette ── */
 const PALETTE = [
@@ -25,7 +30,16 @@ function fmtDate(d: Date | string | null | undefined): string {
 type ExpWithColor = ExperimentRun & { colorIdx: number };
 
 /* ── Top-level component ── */
-export function TrafficPoolView({ experimentRuns, isSequential }: { experimentRuns: ExperimentRun[]; isSequential?: boolean }) {
+export function TrafficPoolView({
+  experimentRuns,
+  isSequential,
+  variants,
+}: {
+  experimentRuns: ExperimentRun[];
+  isSequential?: boolean;
+  variants?: string | null;
+}) {
+  const variantRows = parseVariantIdentities(variants);
   const { layers, colorMap } = useMemo(() => {
     const colorMap = new Map<string, number>();
     experimentRuns.forEach((e, i) => colorMap.set(e.id, i));
@@ -74,7 +88,7 @@ export function TrafficPoolView({ experimentRuns, isSequential }: { experimentRu
             </div>
           ))}
           {/* Legend */}
-          <ExpLegend experimentRuns={experimentRuns.map(e => ({ ...e, colorIdx: colorMap.get(e.id)! }))} />
+          <ExpLegend experimentRuns={experimentRuns.map(e => ({ ...e, colorIdx: colorMap.get(e.id)! }))} variants={variantRows} />
         </div>
       )}
 
@@ -91,7 +105,7 @@ export function TrafficPoolView({ experimentRuns, isSequential }: { experimentRu
       {/* If all default and no dates: show a plain note */}
       {isAllDefault && withDates.length === 0 && (
         <div className="px-3 py-2.5">
-          <ExpLegend experimentRuns={experimentRuns.map(e => ({ ...e, colorIdx: colorMap.get(e.id)! }))} />
+          <ExpLegend experimentRuns={experimentRuns.map(e => ({ ...e, colorIdx: colorMap.get(e.id)! }))} variants={variantRows} />
           <p className="text-[10px] text-muted-foreground/50 italic mt-1.5">
             All experiment runs use the full traffic pool — set observation windows to visualize the timeline.
           </p>
@@ -100,7 +114,7 @@ export function TrafficPoolView({ experimentRuns, isSequential }: { experimentRu
 
       {isAllDefault && withDates.length > 0 && (
         <div className="px-3 py-2.5">
-          <ExpLegend experimentRuns={experimentRuns.map(e => ({ ...e, colorIdx: colorMap.get(e.id)! }))} />
+          <ExpLegend experimentRuns={experimentRuns.map(e => ({ ...e, colorIdx: colorMap.get(e.id)! }))} variants={variantRows} />
         </div>
       )}
     </div>
@@ -257,22 +271,45 @@ function Timeline({ experimentRuns, isSequential }: { experimentRuns: ExpWithCol
 }
 
 /* ── Experiment legend ── */
-function ExpLegend({ experimentRuns }: { experimentRuns: ExpWithColor[] }) {
+function ExpLegend({
+  experimentRuns,
+  variants,
+}: {
+  experimentRuns: ExpWithColor[];
+  variants: ReturnType<typeof parseVariantIdentities>;
+}) {
   return (
-    <div className="flex flex-wrap gap-x-4 gap-y-1">
+    <div className="grid gap-1">
       {experimentRuns.map(exp => {
         const c = palette(exp.colorIdx);
+        const treatments = splitVariantTokens(exp.treatmentVariant);
         return (
-          <div key={exp.id} className="flex items-center gap-1.5 text-[10px]">
-            <div className={`size-2 rounded-sm shrink-0 ${c.dot}`} />
-            <span className="font-mono font-medium">{exp.slug}</span>
-            {(exp.controlVariant || exp.treatmentVariant) && (
-              <span className="text-muted-foreground">
-                {exp.controlVariant ?? "—"} / {exp.treatmentVariant ?? "—"}
-              </span>
-            )}
-            {exp.method === "bandit" && (
-              <span className="text-amber-600 dark:text-amber-400">(bandit)</span>
+          <div key={exp.id} className="grid gap-0.5 text-[10px]">
+            <div className="flex items-center gap-1.5">
+              <div className={`size-2 rounded-sm shrink-0 ${c.dot}`} />
+              <span className="font-mono font-medium">{exp.slug}</span>
+              {exp.method === "bandit" && (
+                <span className="text-amber-600 dark:text-amber-400">(bandit)</span>
+              )}
+            </div>
+            {(exp.controlVariant || treatments.length > 0) && (
+              <div className="ml-3 grid gap-0.5">
+                <VariantIdentityInline
+                  token={exp.controlVariant}
+                  variants={variants}
+                  role={exp.method === "bandit" ? "Baseline" : "Control"}
+                  className="min-w-0"
+                />
+                {treatments.map((variant, index) => (
+                  <VariantIdentityInline
+                    key={`${variant}-${index}`}
+                    token={variant}
+                    variants={variants}
+                    role={exp.method === "bandit" ? "Arm" : "Treatment"}
+                    className="min-w-0"
+                  />
+                ))}
+              </div>
             )}
           </div>
         );

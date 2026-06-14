@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Beaker, Copy, Filter, GitBranch, Pencil, Percent, Plus, Trash2 } from "lucide-react";
+import { Beaker, Filter, GitBranch, Pencil, Percent, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,6 +17,13 @@ import {
 } from "@/components/ui/dialog";
 import { updateExperimentRunAudienceAction } from "@/lib/actions";
 import type { ExperimentRun } from "@/generated/prisma";
+import {
+  parseVariantIdentities,
+  splitVariantTokens,
+  VariantIdCopyButton,
+  VariantIdentityInline,
+  type VariantIdentity,
+} from "./variant-identity";
 
 /* ── Types ── */
 
@@ -29,12 +36,7 @@ type FilterEntry = {
   values: string; // comma-separated string for in/nin ops
 };
 
-type VariantRow = {
-  key: string;
-  name: string;
-  value: string;
-  description: string;
-};
+type VariantRow = VariantIdentity;
 
 /* ── Helpers ── */
 
@@ -73,52 +75,6 @@ function serializeFilters(rows: FilterEntry[]): string {
   return JSON.stringify(entries);
 }
 
-function parseVariantsToRows(variants: string | null | undefined): VariantRow[] {
-  if (!variants) return [];
-  const raw = variants.trim();
-  if (!raw) return [];
-
-  if (raw.startsWith("[")) {
-    try {
-      const parsed = JSON.parse(raw) as Array<{
-        key?: string;
-        id?: string;
-        name?: string;
-        value?: string;
-        description?: string;
-      }>;
-      return parsed
-        .map((variant) => ({
-          key: variant.key ?? variant.id ?? variant.value ?? variant.name ?? "",
-          name: variant.name ?? "",
-          value: variant.value ?? "",
-          description: variant.description ?? "",
-        }))
-        .filter((variant) => variant.key);
-    } catch {
-      return [];
-    }
-  }
-
-  return raw
-    .split("|")
-    .map((item) => item.trim())
-    .filter(Boolean)
-    .map((item) => {
-      const match = item.match(/^(.+?)\s*\((.+)\)\s*$/);
-      return match
-        ? { key: match[1].trim(), name: "", value: "", description: match[2].trim() }
-        : { key: item, name: "", value: "", description: "" };
-    });
-}
-
-function splitVariants(value: string | null | undefined) {
-  return (value ?? "")
-    .split("|")
-    .map((item) => item.trim())
-    .filter(Boolean);
-}
-
 function normalizeVariantSelection(
   nextMethod: string,
   nextControl: string,
@@ -151,56 +107,14 @@ function normalizeVariantSelection(
   };
 }
 
-function variantDisplayLabel(variant: VariantRow) {
-  return variant.name || variant.description || variant.value || variant.key;
-}
-
-function shortVariantId(id: string) {
-  return id.length > 18 ? `${id.slice(0, 8)}...${id.slice(-6)}` : id;
-}
-
-function formatVariantOption(variant: VariantRow) {
-  const label = variantDisplayLabel(variant);
-  return [label, variant.value, shortVariantId(variant.key)]
-    .filter(Boolean)
-    .join(" · ");
-}
-
-function formatVariantToken(token: string | null | undefined, variants: VariantRow[]) {
-  if (!token) return "not set";
-  const variant = variants.find((item) => item.key === token);
-  return variant ? formatVariantOption(variant) : shortVariantId(token);
-}
-
-function VariantIdCopyButton({ id }: { id: string }) {
-  return (
-    <button
-      type="button"
-      onClick={(event) => {
-        event.stopPropagation();
-        void navigator.clipboard?.writeText(id);
-      }}
-      className="inline-flex size-6 shrink-0 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground"
-      title={`Copy variation id: ${id}`}
-      aria-label="Copy variation id"
-    >
-      <Copy className="size-3" />
-    </button>
-  );
-}
-
 function VariantRowIdentity({ variant }: { variant: VariantRow }) {
   return (
-    <span className="min-w-0 flex-1 truncate">
-      <span className="font-medium">{variantDisplayLabel(variant)}</span>
-      {variant.value && (
-        <span className="text-muted-foreground"> · {variant.value}</span>
-      )}
-      <span className="font-mono text-muted-foreground" title={variant.key}>
-        {" "}
-        · {shortVariantId(variant.key)}
-      </span>
-    </span>
+    <VariantIdentityInline
+      token={variant.key}
+      variants={[variant]}
+      className="min-w-0 flex-1"
+      showCopy={false}
+    />
   );
 }
 
@@ -223,21 +137,21 @@ export function ExperimentRunTrafficConfig({
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
-  const variantRows = parseVariantsToRows(variants);
+  const variantRows = parseVariantIdentities(variants);
   const pct = experimentRun.trafficPercent ?? 100;
   const offset = experimentRun.trafficOffset ?? 0;
   const currentMethod = experimentRun.method ?? "bayesian_ab";
   const parsedFilters = parseFilters(experimentRun.audienceFilters as string | null);
   const isBandit = currentMethod !== "bayesian_ab";
   const hasCustomTraffic = pct < 100 || offset > 0 || experimentRun.layerId || parsedFilters.length > 0;
-  const runTreatments = splitVariants(experimentRun.treatmentVariant);
+  const runTreatments = splitVariantTokens(experimentRun.treatmentVariant);
 
   function handleOpen() {
     const nextMethod = experimentRun.method ?? "bayesian_ab";
     const normalized = normalizeVariantSelection(
       nextMethod,
       experimentRun.controlVariant ?? variantRows[0]?.key ?? "",
-      splitVariants(experimentRun.treatmentVariant),
+      splitVariantTokens(experimentRun.treatmentVariant),
       variantRows,
     );
 
@@ -344,30 +258,41 @@ export function ExperimentRunTrafficConfig({
             <GitBranch className="size-3 text-muted-foreground shrink-0 mt-0.5" />
             {experimentRun.controlVariant || runTreatments.length > 0 ? (
               isBandit ? (
-                <span>
-                  <span className="font-medium">Baseline:</span>{" "}
-                  <span>{formatVariantToken(experimentRun.controlVariant, variantRows)}</span>
-                  <span className="text-muted-foreground"> · Arms: </span>
-                  <span>
-                    {[experimentRun.controlVariant, ...runTreatments]
-                      .filter(Boolean)
-                      .map((variant) => formatVariantToken(variant, variantRows))
-                      .join(", ")}
-                  </span>
-                </span>
+                <div className="grid min-w-0 gap-1">
+                  {[experimentRun.controlVariant, ...runTreatments]
+                    .filter((variant): variant is string => Boolean(variant))
+                    .map((variant, index) => (
+                      <VariantIdentityInline
+                        key={`${variant}-${index}`}
+                        token={variant}
+                        variants={variantRows}
+                        role={variant === experimentRun.controlVariant ? "Baseline" : "Arm"}
+                        className="min-w-0"
+                      />
+                    ))}
+                </div>
               ) : (
-                <span>
-                  <span className="font-medium">Control:</span>{" "}
-                  <span>{formatVariantToken(experimentRun.controlVariant, variantRows)}</span>
-                  <span className="text-muted-foreground"> · Treatments: </span>
-                  <span>
-                    {runTreatments.length > 0
-                      ? runTreatments
-                          .map((variant) => formatVariantToken(variant, variantRows))
-                          .join(", ")
-                      : "not set"}
-                  </span>
-                </span>
+                <div className="grid min-w-0 gap-1">
+                  <VariantIdentityInline
+                    token={experimentRun.controlVariant}
+                    variants={variantRows}
+                    role="Control"
+                    className="min-w-0"
+                  />
+                  {runTreatments.length > 0 ? (
+                    runTreatments.map((variant, index) => (
+                      <VariantIdentityInline
+                        key={`${variant}-${index}`}
+                        token={variant}
+                        variants={variantRows}
+                        role={runTreatments.length > 1 ? `Treatment ${index + 1}` : "Treatment"}
+                        className="min-w-0"
+                      />
+                    ))
+                  ) : (
+                    <span className="text-muted-foreground">Treatment: not set</span>
+                  )}
+                </div>
               )
             ) : (
               <span>
