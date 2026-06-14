@@ -119,6 +119,16 @@ function pctPlain(v: number | undefined): string {
   return `${(v * 100).toFixed(1)}%`;
 }
 
+function metricValue(row: MetricRow, section: MetricSection): string {
+  if (row.mean === undefined) return "—";
+
+  if (section.metric_agg === "count" && Math.abs(row.mean) < 1) {
+    return row.mean.toFixed(3);
+  }
+
+  return row.mean.toFixed(1);
+}
+
 function pColor(p: number | undefined, goodAbove: number): string {
   if (p === undefined) return "";
   if (p >= goodAbove) return "text-green-700 dark:text-green-400 font-semibold";
@@ -511,7 +521,7 @@ function MetricTable({
                   <td className="px-2 py-1 border-b border-border/50 tabular-nums text-right">{row.n.toLocaleString()}</td>
                   {isProp && <td className="px-2 py-1 border-b border-border/50 tabular-nums text-right">{row.conversions?.toLocaleString() ?? "—"}</td>}
                   <td className="px-2 py-1 border-b border-border/50 tabular-nums text-right">
-                    {isProp ? pctPlain(row.rate) : row.mean?.toFixed(1) ?? "—"}
+                    {isProp ? pctPlain(row.rate) : metricValue(row, section)}
                   </td>
                   <td className="px-2 py-1 border-b border-border/50 tabular-nums text-right">
                     {row.is_control ? "—" : pct(row.rel_delta)}

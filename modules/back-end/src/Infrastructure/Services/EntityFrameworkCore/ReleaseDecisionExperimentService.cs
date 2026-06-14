@@ -1763,14 +1763,14 @@ public class ReleaseDecisionExperimentService(
             return BayesianComparison.Failed("control mean is zero - cannot compute relative effect");
         }
 
+        var muRel = (meanB - meanA) / meanA;
+        var muAbs = meanB - meanA;
         var seRel = DeltaMethodSe(meanA, varA, nA, meanB, varB, nB, true);
         if (seRel == 0)
         {
-            return BayesianComparison.Failed("zero standard error (no variance in data)");
+            return DeterministicComparison(muRel, muAbs, inverse);
         }
 
-        var muRel = (meanB - meanA) / meanA;
-        var muAbs = meanB - meanA;
         var priorApplied = false;
         if (prior is { Proper: true })
         {
@@ -1805,6 +1805,39 @@ public class ReleaseDecisionExperimentService(
             riskCtrl,
             riskTrt,
             priorApplied);
+    }
+
+    private static BayesianComparison DeterministicComparison(double muRel, double muAbs, bool inverse)
+    {
+        var chanceToWin = muRel switch
+        {
+            > 0 => 1,
+            < 0 => 0,
+            _ => 0.5
+        };
+
+        if (inverse)
+        {
+            chanceToWin = 1 - chanceToWin;
+        }
+
+        var riskCtrl = muRel > 0 ? muRel : 0;
+        var riskTrt = muRel < 0 ? -muRel : 0;
+        if (inverse)
+        {
+            (riskCtrl, riskTrt) = (riskTrt, riskCtrl);
+        }
+
+        return new BayesianComparison(
+            null,
+            chanceToWin,
+            muRel,
+            muAbs,
+            muRel,
+            muRel,
+            riskCtrl,
+            riskTrt,
+            false);
     }
 
     private static double DeltaMethodSe(
