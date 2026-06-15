@@ -26,3 +26,6 @@ benchmark/k6-scripts/test-results/
 /customer-success/
 /tools/README.md
 /tools/seed-release-decision-insights.cs
+
+# AGENTS skills
+/agents/skills/
