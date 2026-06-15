@@ -1,5 +1,5 @@
 using Application.ExperimentStats;
-using MongoDB.Bson;
+using Domain.ReleaseDecisions;
 using MongoDB.Driver;
 
 namespace Infrastructure.Services.MongoDb;
@@ -10,23 +10,18 @@ public class ReleaseDecisionExperimentStatsService(MongoDbClient mongoDb) : IExp
     {
         var start = DateOnly.ParseExact(request.StartDate, "yyyy-MM-dd").ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
         var end = DateOnly.ParseExact(request.EndDate, "yyyy-MM-dd").AddDays(1).ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
-        var envId = request.EnvId.ToString();
 
-        var exposures = mongoDb.CollectionOf("ReleaseDecisionExposureEvents");
-        var exposureFilter = Builders<BsonDocument>.Filter.And(
-            Builders<BsonDocument>.Filter.Eq("envId", envId),
-            Builders<BsonDocument>.Filter.Eq("flagKey", request.FlagKey),
-            Builders<BsonDocument>.Filter.Gte("exposedAt", start),
-            Builders<BsonDocument>.Filter.Lt("exposedAt", end)
-        );
-
-        var exposureDocs = await exposures.Find(exposureFilter)
-            .Sort(Builders<BsonDocument>.Sort.Ascending("exposedAt"))
+        var exposureDocs = await mongoDb.CollectionOf<ReleaseDecisionExposureEvent>()
+            .Find(x =>
+                x.EnvId == request.EnvId &&
+                x.FlagKey == request.FlagKey &&
+                x.ExposedAt >= start &&
+                x.ExposedAt < end)
+            .SortBy(x => x.ExposedAt)
             .ToListAsync();
 
         var firstEvaluations = exposureDocs
-            .Select(ToReleaseDecisionExposure)
-            .Where(x => !string.IsNullOrWhiteSpace(x.UserKey) && !string.IsNullOrWhiteSpace(x.Variant))
+            .Where(x => !string.IsNullOrWhiteSpace(x.UserKey) && !string.IsNullOrWhiteSpace(x.VariationId))
             .GroupBy(x => x.UserKey)
             .Select(x => x.First())
             .ToDictionary(x => x.UserKey);
@@ -36,19 +31,17 @@ public class ReleaseDecisionExperimentStatsService(MongoDbClient mongoDb) : IExp
             return BuildResponse(request, []);
         }
 
-        var metrics = mongoDb.CollectionOf("ReleaseDecisionMetricEvents");
-        var metricFilter = Builders<BsonDocument>.Filter.And(
-            Builders<BsonDocument>.Filter.Eq("envId", envId),
-            Builders<BsonDocument>.Filter.Eq("eventName", request.MetricEvent),
-            Builders<BsonDocument>.Filter.Gte("occurredAt", start),
-            Builders<BsonDocument>.Filter.Lt("occurredAt", end),
-            Builders<BsonDocument>.Filter.In("userKey", firstEvaluations.Keys)
-        );
+        var metricDocs = await mongoDb.CollectionOf<ReleaseDecisionMetricEvent>()
+            .Find(x =>
+                x.EnvId == request.EnvId &&
+                x.EventName == request.MetricEvent &&
+                x.OccurredAt >= start &&
+                x.OccurredAt < end &&
+                firstEvaluations.Keys.Contains(x.UserKey))
+            .ToListAsync();
 
-        var metricDocs = await metrics.Find(metricFilter).ToListAsync();
         var userTotals = metricDocs
-            .Select(ToReleaseDecisionMetric)
-            .Where(x => firstEvaluations.TryGetValue(x.UserKey, out var fe) && x.Timestamp >= fe.Timestamp)
+            .Where(x => firstEvaluations.TryGetValue(x.UserKey, out var fe) && x.OccurredAt >= fe.ExposedAt)
             .GroupBy(x => x.UserKey)
             .ToDictionary(
                 x => x.Key,
@@ -61,7 +54,7 @@ public class ReleaseDecisionExperimentStatsService(MongoDbClient mongoDb) : IExp
             );
 
         var rows = firstEvaluations.Values
-            .GroupBy(x => x.Variant)
+            .GroupBy(x => x.VariationId)
             .Select(group =>
             {
                 var contributions = group.Select(fe => GetContribution(
@@ -120,42 +113,6 @@ public class ReleaseDecisionExperimentStatsService(MongoDbClient mongoDb) : IExp
             "average" => total.Average,
             _ => throw new ArgumentException($"Unsupported metric aggregation: {metricAgg}", nameof(metricAgg))
         };
-    }
-
-    private static FlagEvaluation ToReleaseDecisionExposure(BsonDocument doc)
-    {
-        var variationId = doc.GetValue("variationId", string.Empty);
-
-        return new FlagEvaluation
-        {
-            UserKey = doc.GetValue("userKey", string.Empty).AsString,
-            Variant = variationId.AsString,
-            Timestamp = doc.GetValue("exposedAt").ToUniversalTime()
-        };
-    }
-
-    private static MetricEvent ToReleaseDecisionMetric(BsonDocument doc)
-    {
-        return new MetricEvent
-        {
-            UserKey = doc.GetValue("userKey", string.Empty).AsString,
-            NumericValue = doc.GetValue("numericValue", 0).ToDouble(),
-            Timestamp = doc.GetValue("occurredAt").ToUniversalTime()
-        };
-    }
-
-    private sealed record FlagEvaluation
-    {
-        public string UserKey { get; init; } = string.Empty;
-        public string Variant { get; init; } = string.Empty;
-        public DateTime Timestamp { get; init; }
-    }
-
-    private sealed record MetricEvent
-    {
-        public string UserKey { get; init; } = string.Empty;
-        public double NumericValue { get; init; }
-        public DateTime Timestamp { get; init; }
     }
 
     private sealed record UserTotal

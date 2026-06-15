@@ -1,4 +1,5 @@
 using System.Globalization;
+using Domain.ReleaseDecisions;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
@@ -17,31 +18,32 @@ internal static class ReleaseDecisionInsightWriter
         var exposures = documents
             .Select(TryBuildExposure)
             .Where(x => x != null)
-            .Cast<BsonDocument>()
+            .Cast<ReleaseDecisionExposureEvent>()
             .ToArray();
 
         if (exposures.Length > 0)
         {
-            await mongoDb.CollectionOf("ReleaseDecisionExposureEvents")
+            await mongoDb.CollectionOf<ReleaseDecisionExposureEvent>()
                 .InsertManyAsync(exposures, InsertOptions);
         }
 
         var metrics = documents
             .Select(TryBuildMetric)
             .Where(x => x != null)
-            .Cast<BsonDocument>()
+            .Cast<ReleaseDecisionMetricEvent>()
             .ToArray();
 
         if (metrics.Length > 0)
         {
-            await mongoDb.CollectionOf("ReleaseDecisionMetricEvents")
+            await mongoDb.CollectionOf<ReleaseDecisionMetricEvent>()
                 .InsertManyAsync(metrics, InsertOptions);
         }
     }
 
-    private static BsonDocument? TryBuildExposure(BsonDocument doc)
+    private static ReleaseDecisionExposureEvent? TryBuildExposure(BsonDocument doc)
     {
-        if (doc.GetValue("event", string.Empty).AsString != "FlagValue")
+        if (doc.GetValue("event", string.Empty).AsString != "FlagValue" ||
+            !Guid.TryParse(doc.GetValue("env_id", string.Empty).AsString, out var envId))
         {
             return null;
         }
@@ -58,24 +60,25 @@ internal static class ReleaseDecisionInsightWriter
             return null;
         }
 
-        return new BsonDocument
+        return new ReleaseDecisionExposureEvent
         {
-            ["_id"] = doc.GetValue("_id"),
-            ["envId"] = doc.GetValue("env_id", string.Empty).AsString,
-            ["flagKey"] = flagKey,
-            ["userKey"] = userKey,
-            ["variationId"] = variationId,
-            ["variationValue"] = ToBsonValueOrNull(GetString(properties, "variationValue")),
-            ["exposedAt"] = doc.GetValue("timestamp").ToUniversalTime(),
-            ["properties"] = properties,
-            ["createdAt"] = DateTime.UtcNow
+            Id = GetId(doc),
+            EnvId = envId,
+            FlagKey = flagKey,
+            UserKey = userKey,
+            VariationId = variationId,
+            VariationValue = GetString(properties, "variationValue"),
+            ExposedAt = doc.GetValue("timestamp").ToUniversalTime(),
+            Properties = properties.ToJson(),
+            CreatedAt = DateTime.UtcNow
         };
     }
 
-    private static BsonDocument? TryBuildMetric(BsonDocument doc)
+    private static ReleaseDecisionMetricEvent? TryBuildMetric(BsonDocument doc)
     {
         var eventType = doc.GetValue("event", string.Empty).AsString;
-        if (eventType == "FlagValue")
+        if (eventType == "FlagValue" ||
+            !Guid.TryParse(doc.GetValue("env_id", string.Empty).AsString, out var envId))
         {
             return null;
         }
@@ -89,17 +92,28 @@ internal static class ReleaseDecisionInsightWriter
             return null;
         }
 
-        return new BsonDocument
+        return new ReleaseDecisionMetricEvent
         {
-            ["_id"] = doc.GetValue("_id"),
-            ["envId"] = doc.GetValue("env_id", string.Empty).AsString,
-            ["userKey"] = userKey,
-            ["eventName"] = eventName,
-            ["eventType"] = eventType,
-            ["numericValue"] = GetNumericValue(properties),
-            ["occurredAt"] = doc.GetValue("timestamp").ToUniversalTime(),
-            ["properties"] = properties,
-            ["createdAt"] = DateTime.UtcNow
+            Id = GetId(doc),
+            EnvId = envId,
+            UserKey = userKey,
+            EventName = eventName,
+            EventType = eventType,
+            NumericValue = GetNumericValue(properties),
+            OccurredAt = doc.GetValue("timestamp").ToUniversalTime(),
+            Properties = properties.ToJson(),
+            CreatedAt = DateTime.UtcNow
+        };
+    }
+
+    private static Guid GetId(BsonDocument doc)
+    {
+        var value = doc.GetValue("_id", BsonNull.Value);
+        return value.BsonType switch
+        {
+            BsonType.Binary => value.AsBsonBinaryData.ToGuid(),
+            BsonType.String when Guid.TryParse(value.AsString, out var id) => id,
+            _ => Guid.NewGuid()
         };
     }
 
@@ -111,11 +125,6 @@ internal static class ReleaseDecisionInsightWriter
         }
 
         return value.IsString ? value.AsString : value.ToString();
-    }
-
-    private static BsonValue ToBsonValueOrNull(string? value)
-    {
-        return string.IsNullOrWhiteSpace(value) ? BsonNull.Value : value;
     }
 
     private static double GetNumericValue(BsonDocument properties)

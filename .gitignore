@@ -28,4 +28,5 @@ benchmark/k6-scripts/test-results/
 /tools/seed-release-decision-insights.cs
 
 # AGENTS skills
+.agent/skills/
 .agents/skills/

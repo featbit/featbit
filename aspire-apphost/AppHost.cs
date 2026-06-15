@@ -4,16 +4,6 @@ var builder = DistributedApplication.CreateBuilder(args);
 
 var postgresUser = builder.AddParameter("postgres-user", "postgres");
 var postgresPassword = builder.AddParameter("postgres-password", "please_change_me", secret: true);
-var featureFlagInsightsProvider =
-    Environment.GetEnvironmentVariable("FEATURE_FLAG_INSIGHTS_PROVIDER") ??
-    builder.Configuration["FeatureFlagInsights:Provider"] ??
-    "featbit-api";
-
-if (featureFlagInsightsProvider is not ("featbit-api" or "featbit-das"))
-{
-    throw new InvalidOperationException(
-        "Invalid feature flag insights provider. Use 'featbit-api' or 'featbit-das'.");
-}
 
 const string postgresConnectionString =
     "Host=localhost;Port=5432;Username=postgres;Password=please_change_me;Database=featbit";
@@ -22,35 +12,6 @@ var postgres = builder
     .AddPostgres("postgresql", postgresUser, postgresPassword, port: 5432)
     .WithBindMount("../infra/postgresql/docker-entrypoint-initdb.d", "/docker-entrypoint-initdb.d", isReadOnly: true)
     .WithDataVolume("featbit-aspire-postgres");
-
-IResourceBuilder<ContainerResource>? daServer = null;
-if (featureFlagInsightsProvider == "featbit-das")
-{
-    daServer = builder
-        .AddContainer("da-server", "featbit/featbit-data-analytics-server:latest")
-        .WithHttpEndpoint(port: 8200, targetPort: 80)
-        .WithBindMount("./certs/aspire-dashboard.pem", "/etc/ssl/certs/aspire-dashboard.pem", isReadOnly: true)
-        .WithEnvironment("DB_PROVIDER", "Postgres")
-        .WithEnvironment("POSTGRES_USER", "postgres")
-        .WithEnvironment("POSTGRES_PASSWORD", postgresPassword)
-        .WithEnvironment("POSTGRES_HOST", "postgresql")
-        .WithEnvironment("POSTGRES_PORT", "5432")
-        .WithEnvironment("POSTGRES_DATABASE", "featbit")
-        .WithEnvironment("ENABLE_OPENTELEMETRY", "true")
-        .WithEnvironment("OTEL_TRACES_EXPORTER", "otlp")
-        .WithEnvironment("OTEL_METRICS_EXPORTER", "otlp")
-        .WithEnvironment("OTEL_LOGS_EXPORTER", "otlp")
-        .WithOtlpExporter(OtlpProtocol.Grpc)
-        .WithEnvironment("OTEL_SERVICE_NAME", "featbit-das")
-        .WithEnvironment("OTEL_EXPORTER_OTLP_INSECURE", "false")
-        .WithEnvironment("OTEL_EXPORTER_OTLP_CERTIFICATE", "/etc/ssl/certs/aspire-dashboard.pem")
-        .WithEnvironment("OTEL_EXPORTER_OTLP_TRACES_CERTIFICATE", "/etc/ssl/certs/aspire-dashboard.pem")
-        .WithEnvironment("OTEL_EXPORTER_OTLP_METRICS_CERTIFICATE", "/etc/ssl/certs/aspire-dashboard.pem")
-        .WithEnvironment("OTEL_EXPORTER_OTLP_LOGS_CERTIFICATE", "/etc/ssl/certs/aspire-dashboard.pem")
-        .WithEnvironment("GRPC_DEFAULT_SSL_ROOTS_FILE_PATH", "/etc/ssl/certs/aspire-dashboard.pem")
-        .WithEnvironment("CHECK_DB_LIVNESS", "true")
-        .WaitFor(postgres);
-}
 
 var apiServer = builder
     .AddProject<BackendApiProject>("api-server")
@@ -62,16 +23,9 @@ var apiServer = builder
     .WithEnvironment("MqProvider", "Postgres")
     .WithEnvironment("CacheProvider", "None")
     .WithEnvironment("Postgres__ConnectionString", postgresConnectionString)
-    .WithEnvironment("OLAP__ServiceHost", "http://localhost:8200")
-    .WithEnvironment("FEATURE_FLAG_INSIGHTS_PROVIDER", featureFlagInsightsProvider)
     .WithEnvironment("Jwt__Algorithm", "HS256")
     .WithEnvironment("Jwt__Key", "please_change_me_to_a_secure_secret_key")
     .WaitFor(postgres);
-
-if (daServer is not null)
-{
-    apiServer.WaitFor(daServer);
-}
 
 var evaluationServer = builder
     .AddProject<EvaluationApiProject>("evaluation-server")
@@ -91,21 +45,17 @@ ConfigureFeatBitOpenTelemetry(evaluationServer, "featbit-els");
 builder
     .AddExecutable("ui", "npm", "../modules/front-end", "run", "start")
     .WithHttpEndpoint(port: 4200, targetPort: 4200, isProxied: false)
-    .WithEnvironment("FEATURE_FLAG_INSIGHTS_PROVIDER", featureFlagInsightsProvider)
     .WaitFor(apiServer)
     .WaitFor(evaluationServer);
 
-if (featureFlagInsightsProvider == "featbit-api")
-{
-    builder
-        .AddExecutable("release-decision-web", "npm", "../modules/release-decision-web", "run", "dev")
-        .WithHttpEndpoint(port: 3000, targetPort: 3000, isProxied: false)
-        .WithEnvironment("PORT", "3000")
-        .WithEnvironment("VITE_FEATBIT_APP_URL", "http://localhost:4200")
-        .WithEnvironment("VITE_FEATBIT_API_URL", "http://localhost:5000")
-        .WithEnvironment("VITE_BASE_PATH", "/release-decision")
-        .WaitFor(apiServer);
-}
+builder
+    .AddExecutable("release-decision-web", "npm", "../modules/release-decision-web", "run", "dev")
+    .WithHttpEndpoint(port: 3000, targetPort: 3000, isProxied: false)
+    .WithEnvironment("PORT", "3000")
+    .WithEnvironment("VITE_FEATBIT_APP_URL", "http://localhost:4200")
+    .WithEnvironment("VITE_FEATBIT_API_URL", "http://localhost:5000")
+    .WithEnvironment("VITE_BASE_PATH", "/release-decision")
+    .WaitFor(apiServer);
 
 builder.Build().Run();
 

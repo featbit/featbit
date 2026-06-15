@@ -1,6 +1,6 @@
 using Application.FeatureFlags;
 using Domain.FeatureFlags;
-using MongoDB.Bson;
+using Domain.ReleaseDecisions;
 using MongoDB.Driver;
 
 namespace Infrastructure.Services.MongoDb;
@@ -12,21 +12,20 @@ public class ReleaseDecisionFeatureFlagInsightsService(MongoDbClient mongoDb) : 
         var start = DateTimeOffset.FromUnixTimeMilliseconds(filter.From).UtcDateTime;
         var end = DateTimeOffset.FromUnixTimeMilliseconds(filter.To).UtcDateTime;
 
-        var query = Builders<BsonDocument>.Filter.And(
-            Builders<BsonDocument>.Filter.Eq("envId", envId.ToString()),
-            Builders<BsonDocument>.Filter.Eq("flagKey", filter.FeatureFlagKey),
-            Builders<BsonDocument>.Filter.Gte("exposedAt", start),
-            Builders<BsonDocument>.Filter.Lte("exposedAt", end),
-            Builders<BsonDocument>.Filter.Exists("variationId", true)
-        );
-
-        var docs = await mongoDb.CollectionOf("ReleaseDecisionExposureEvents").Find(query).ToListAsync();
+        var docs = await mongoDb.CollectionOf<ReleaseDecisionExposureEvent>()
+            .Find(x =>
+                x.EnvId == envId &&
+                x.FlagKey == filter.FeatureFlagKey &&
+                x.ExposedAt >= start &&
+                x.ExposedAt <= end &&
+                x.VariationId != null)
+            .ToListAsync();
 
         return docs
             .Select(doc => new
             {
-                Bucket = Truncate(doc.GetValue("exposedAt").ToUniversalTime(), filter.IntervalType),
-                VariationId = doc.GetValue("variationId", string.Empty).AsString
+                Bucket = Truncate(doc.ExposedAt, filter.IntervalType),
+                doc.VariationId
             })
             .Where(x => !string.IsNullOrWhiteSpace(x.VariationId))
             .GroupBy(x => x.Bucket)

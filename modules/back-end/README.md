@@ -118,19 +118,6 @@ and [consumer configs](https://kafka.apache.org/documentation/#consumerconfigs) 
 | `Kafka__Consumer__auto.commit.interval.ms`  | The frequency in ms that the consumer offsets are auto-committed to Kafka           | `"5000"`        |
 | `Kafka__Consumer__enable.auto.offset.store` | Whether to automatically store the offset of the last message prior to calling poll | `false`         |
 
-### OLAP
-
-| Name                | Description                       | Default Value        |
-|---------------------|-----------------------------------|----------------------|
-| `OLAP__ServiceHost` | URI for the data analytics server | `"http://da-server"` |
-
-### Feature Flag Insights
-
-| Name                             | Description                                                                                   | Default Value  |
-|----------------------------------|-----------------------------------------------------------------------------------------------|----------------|
-| `FEATURE_FLAG_INSIGHTS_PROVIDER` | Selects the feature flag usage insights provider. Use `featbit-das` for DA or `featbit-api`. | `"featbit-das"` |
-| `FeatureFlagInsights__Provider`  | Configuration-section equivalent of `FEATURE_FLAG_INSIGHTS_PROVIDER`.                         | `"featbit-das"` |
-
 ### UsageTracking
 
 | Name                             | Description                                            | Default Value |

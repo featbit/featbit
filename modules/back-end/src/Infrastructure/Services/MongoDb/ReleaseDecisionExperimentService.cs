@@ -1,5 +1,5 @@
-using Application.Bases.Models;
 using Application.Bases.Exceptions;
+using Application.Bases.Models;
 using Application.ReleaseDecisions;
 using Domain.ReleaseDecisions;
 using MongoDB.Bson;
@@ -11,53 +11,44 @@ public class ReleaseDecisionExperimentService(MongoDbClient mongoDb) : IReleaseD
 {
     public async Task<ReleaseDecisionExperimentVm> CreateAsync(ReleaseDecisionExperiment experiment)
     {
-        var doc = new BsonDocument
-        {
-            ["_id"] = new BsonBinaryData(experiment.Id, GuidRepresentation.Standard),
-            ["name"] = experiment.Name,
-            ["description"] = experiment.Description ?? string.Empty,
-            ["stage"] = experiment.Stage,
-            ["flagKey"] = experiment.FlagKey ?? string.Empty,
-            ["featBitProjectKey"] = experiment.FeatBitProjectKey ?? string.Empty,
-            ["createdAt"] = experiment.CreatedAt,
-            ["updatedAt"] = experiment.UpdatedAt
-        };
-
-        if (experiment.FeatBitEnvId.HasValue)
-        {
-            doc["featBitEnvId"] = new BsonBinaryData(experiment.FeatBitEnvId.Value, GuidRepresentation.Standard);
-        }
-
-        await mongoDb.CollectionOf("ReleaseDecisionExperiments").InsertOneAsync(doc);
-
-        return ToVm(doc);
+        await mongoDb.CollectionOf<ReleaseDecisionExperiment>().InsertOneAsync(experiment);
+        return ToVm(experiment);
     }
 
     public async Task<ReleaseDecisionExperimentDetailVm> GetAsync(Guid envId, Guid id)
     {
-        var collection = mongoDb.CollectionOf("ReleaseDecisionExperiments");
-        var doc = await collection
-            .Find(Builders<BsonDocument>.Filter.And(
-                Builders<BsonDocument>.Filter.Eq("_id", id),
-                Builders<BsonDocument>.Filter.Eq("featBitEnvId", envId)))
+        var experiment = await mongoDb.CollectionOf<ReleaseDecisionExperiment>()
+            .Find(x => x.Id == id && x.FeatBitEnvId == envId)
             .FirstOrDefaultAsync();
 
-        if (doc == null)
+        if (experiment == null)
         {
             throw new EntityNotFoundException(nameof(ReleaseDecisionExperiment), $"{envId}-{id}");
         }
 
-        return ToDetailVm(doc);
+        experiment.ExperimentRuns = await mongoDb.CollectionOf<ReleaseDecisionExperimentRun>()
+            .Find(x => x.ExperimentId == id)
+            .SortBy(x => x.CreatedAt)
+            .ToListAsync();
+        experiment.Activities = await mongoDb.CollectionOf<ReleaseDecisionActivity>()
+            .Find(x => x.ExperimentId == id)
+            .SortByDescending(x => x.CreatedAt)
+            .ToListAsync();
+        experiment.Messages = await mongoDb.CollectionOf<ReleaseDecisionMessage>()
+            .Find(x => x.ExperimentId == id)
+            .SortBy(x => x.CreatedAt)
+            .ToListAsync();
+
+        return ToDetailVm(experiment);
     }
 
     public async Task<Guid> GetEnvIdAsync(Guid id)
     {
-        var doc = await mongoDb.CollectionOf("ReleaseDecisionExperiments")
-            .Find(Builders<BsonDocument>.Filter.Eq("_id", id))
-            .Project(Builders<BsonDocument>.Projection.Include("featBitEnvId"))
+        var envId = await mongoDb.CollectionOf<ReleaseDecisionExperiment>()
+            .Find(x => x.Id == id)
+            .Project(x => x.FeatBitEnvId)
             .FirstOrDefaultAsync();
 
-        var envId = doc == null ? null : GetNullableGuid(doc, "featBitEnvId");
         if (!envId.HasValue)
         {
             throw new EntityNotFoundException(nameof(ReleaseDecisionExperiment), id.ToString());
@@ -68,21 +59,17 @@ public class ReleaseDecisionExperimentService(MongoDbClient mongoDb) : IReleaseD
 
     public async Task DeleteAsync(Guid envId, Guid id)
     {
-        var filter = Builders<BsonDocument>.Filter.And(
-            Builders<BsonDocument>.Filter.Eq("_id", id),
-            Builders<BsonDocument>.Filter.Eq("featBitEnvId", envId));
-
-        var result = await mongoDb.CollectionOf("ReleaseDecisionExperiments")
-            .DeleteOneAsync(filter);
+        var result = await mongoDb.CollectionOf<ReleaseDecisionExperiment>()
+            .DeleteOneAsync(x => x.Id == id && x.FeatBitEnvId == envId);
 
         if (result.DeletedCount == 0)
         {
             throw new EntityNotFoundException(nameof(ReleaseDecisionExperiment), $"{envId}-{id}");
         }
 
-        var experimentFilter = Builders<BsonDocument>.Filter.Eq("experimentId", id);
-        await mongoDb.CollectionOf("ReleaseDecisionActivities").DeleteManyAsync(experimentFilter);
-        await mongoDb.CollectionOf("ReleaseDecisionMessages").DeleteManyAsync(experimentFilter);
+        await mongoDb.CollectionOf<ReleaseDecisionExperimentRun>().DeleteManyAsync(x => x.ExperimentId == id);
+        await mongoDb.CollectionOf<ReleaseDecisionActivity>().DeleteManyAsync(x => x.ExperimentId == id);
+        await mongoDb.CollectionOf<ReleaseDecisionMessage>().DeleteManyAsync(x => x.ExperimentId == id);
     }
 
     public async Task<ReleaseDecisionExperimentDetailVm> UpdateAsync(
@@ -92,39 +79,36 @@ public class ReleaseDecisionExperimentService(MongoDbClient mongoDb) : IReleaseD
     {
         update ??= new ReleaseDecisionExperimentUpdate();
 
-        var updates = new List<UpdateDefinition<BsonDocument>>
+        var updates = new List<UpdateDefinition<ReleaseDecisionExperiment>>
         {
-            Builders<BsonDocument>.Update.Set("updatedAt", DateTime.UtcNow)
+            Builders<ReleaseDecisionExperiment>.Update.Set(x => x.UpdatedAt, DateTime.UtcNow)
         };
 
-        SetIfNotNull(updates, "name", update.Name);
-        SetIfNotNull(updates, "description", update.Description);
-        SetIfNotNull(updates, "stage", update.Stage);
-        SetIfNotNull(updates, "flagKey", update.FlagKey);
-        SetIfNotNull(updates, "hypothesis", update.Hypothesis);
-        SetIfNotNull(updates, "accessToken", update.AccessToken);
-        SetIfNotNull(updates, "change", update.Change);
-        SetIfNotNull(updates, "constraints", update.Constraints);
-        SetIfNotNull(updates, "envSecret", update.EnvSecret);
-        SetIfNotNull(updates, "flagServerUrl", update.FlagServerUrl);
-        SetIfNotNull(updates, "goal", update.Goal);
-        SetIfNotNull(updates, "guardrails", update.Guardrails);
-        SetIfNotNull(updates, "intent", update.Intent);
-        SetIfNotNull(updates, "lastAction", update.LastAction);
-        SetIfNotNull(updates, "lastLearning", update.LastLearning);
-        SetIfNotNull(updates, "openQuestions", update.OpenQuestions);
-        SetIfNotNull(updates, "primaryMetric", update.PrimaryMetric);
-        SetIfNotNull(updates, "sandboxId", update.SandboxId);
-        SetIfNotNull(updates, "variants", update.Variants);
-        SetIfNotNull(updates, "conflictAnalysis", update.ConflictAnalysis);
-        SetIfNotNull(updates, "entryMode", update.EntryMode);
+        SetIfNotNull(updates, x => x.Name, update.Name);
+        SetIfNotNull(updates, x => x.Description, update.Description);
+        SetIfNotNull(updates, x => x.Stage, update.Stage);
+        SetIfNotNull(updates, x => x.FlagKey, update.FlagKey);
+        SetIfNotNull(updates, x => x.Hypothesis, update.Hypothesis);
+        SetIfNotNull(updates, x => x.AccessToken, update.AccessToken);
+        SetIfNotNull(updates, x => x.Change, update.Change);
+        SetIfNotNull(updates, x => x.Constraints, update.Constraints);
+        SetIfNotNull(updates, x => x.EnvSecret, update.EnvSecret);
+        SetIfNotNull(updates, x => x.FlagServerUrl, update.FlagServerUrl);
+        SetIfNotNull(updates, x => x.Goal, update.Goal);
+        SetIfNotNull(updates, x => x.Guardrails, update.Guardrails);
+        SetIfNotNull(updates, x => x.Intent, update.Intent);
+        SetIfNotNull(updates, x => x.LastAction, update.LastAction);
+        SetIfNotNull(updates, x => x.LastLearning, update.LastLearning);
+        SetIfNotNull(updates, x => x.OpenQuestions, update.OpenQuestions);
+        SetIfNotNull(updates, x => x.PrimaryMetric, update.PrimaryMetric);
+        SetIfNotNull(updates, x => x.SandboxId, update.SandboxId);
+        SetIfNotNull(updates, x => x.Variants, update.Variants);
+        SetIfNotNull(updates, x => x.ConflictAnalysis, update.ConflictAnalysis);
+        SetIfNotNull(updates, x => x.EntryMode, update.EntryMode);
 
-        var collection = mongoDb.CollectionOf("ReleaseDecisionExperiments");
-        await collection.UpdateOneAsync(
-            Builders<BsonDocument>.Filter.And(
-                Builders<BsonDocument>.Filter.Eq("_id", id),
-                Builders<BsonDocument>.Filter.Eq("featBitEnvId", envId)),
-            Builders<BsonDocument>.Update.Combine(updates));
+        await mongoDb.CollectionOf<ReleaseDecisionExperiment>().UpdateOneAsync(
+            x => x.Id == id && x.FeatBitEnvId == envId,
+            Builders<ReleaseDecisionExperiment>.Update.Combine(updates));
 
         return await GetAsync(envId, id);
     }
@@ -171,6 +155,7 @@ public class ReleaseDecisionExperimentService(MongoDbClient mongoDb) : IReleaseD
 
     public async Task<ReleaseDecisionExperimentDetailVm> DeleteRunAsync(Guid envId, Guid id, Guid runId)
     {
+        await mongoDb.CollectionOf<ReleaseDecisionExperimentRun>().DeleteOneAsync(x => x.Id == runId && x.ExperimentId == id);
         await AddActivityAsync(id, "Experiment run deleted");
         return await GetAsync(envId, id);
     }
@@ -227,14 +212,14 @@ public class ReleaseDecisionExperimentService(MongoDbClient mongoDb) : IReleaseD
         }
 
         var role = creation.Role == "assistant" ? "assistant" : "user";
-        await mongoDb.CollectionOf("ReleaseDecisionMessages").InsertOneAsync(new BsonDocument
+        await mongoDb.CollectionOf<ReleaseDecisionMessage>().InsertOneAsync(new ReleaseDecisionMessage
         {
-            ["_id"] = new BsonBinaryData(Guid.NewGuid(), GuidRepresentation.Standard),
-            ["experimentId"] = new BsonBinaryData(id, GuidRepresentation.Standard),
-            ["role"] = role,
-            ["content"] = creation.Content.Trim(),
-            ["metadata"] = creation.Metadata?.Trim() ?? string.Empty,
-            ["createdAt"] = DateTime.UtcNow
+            Id = Guid.NewGuid(),
+            ExperimentId = id,
+            Role = role,
+            Content = creation.Content.Trim(),
+            Metadata = creation.Metadata?.Trim() ?? string.Empty,
+            CreatedAt = DateTime.UtcNow
         });
 
         await AddActivityAsync(
@@ -249,147 +234,191 @@ public class ReleaseDecisionExperimentService(MongoDbClient mongoDb) : IReleaseD
     {
         filter ??= new ReleaseDecisionExperimentFilter();
 
-        var collection = mongoDb.CollectionOf("ReleaseDecisionExperiments");
-        var builder = Builders<BsonDocument>.Filter;
-        var filters = new List<FilterDefinition<BsonDocument>>
+        var builder = Builders<ReleaseDecisionExperiment>.Filter;
+        var filters = new List<FilterDefinition<ReleaseDecisionExperiment>>
         {
-            builder.Eq("featBitEnvId", envId)
+            builder.Eq(x => x.FeatBitEnvId, envId)
         };
 
         if (!string.IsNullOrWhiteSpace(filter.Name))
         {
-            filters.Add(builder.Regex("name", new BsonRegularExpression(filter.Name, "i")));
+            filters.Add(builder.Regex(x => x.Name, new BsonRegularExpression(filter.Name, "i")));
         }
 
         if (!string.IsNullOrWhiteSpace(filter.Stage))
         {
-            filters.Add(builder.Eq("stage", filter.Stage));
+            filters.Add(builder.Eq(x => x.Stage, filter.Stage));
         }
 
         if (!string.IsNullOrWhiteSpace(filter.FlagKey))
         {
-            filters.Add(builder.Regex("flagKey", new BsonRegularExpression(filter.FlagKey, "i")));
+            filters.Add(builder.Regex(x => x.FlagKey, new BsonRegularExpression(filter.FlagKey, "i")));
         }
 
         var queryFilter = builder.And(filters);
+        var collection = mongoDb.CollectionOf<ReleaseDecisionExperiment>();
         var totalCount = await collection.CountDocumentsAsync(queryFilter);
         var pageSize = filter.PageSize <= 0 ? 10 : filter.PageSize;
         var pageIndex = Math.Max(filter.PageIndex, 0);
 
-        var docs = await collection
+        var experiments = await collection
             .Find(queryFilter)
-            .Sort(Builders<BsonDocument>.Sort.Descending("updatedAt").Descending("createdAt"))
+            .SortByDescending(x => x.UpdatedAt)
+            .ThenByDescending(x => x.CreatedAt)
             .Skip(pageIndex * pageSize)
             .Limit(pageSize)
             .ToListAsync();
 
         return new PagedResult<ReleaseDecisionExperimentVm>(
             totalCount,
-            docs.Select(ToVm).ToArray());
+            experiments.Select(ToVm).ToArray());
     }
 
-    private static ReleaseDecisionExperimentVm ToVm(BsonDocument doc)
+    private static ReleaseDecisionExperimentVm ToVm(ReleaseDecisionExperiment experiment)
     {
         return new ReleaseDecisionExperimentVm
         {
-            Id = GetGuid(doc, "_id"),
-            Name = GetString(doc, "name"),
-            Description = GetString(doc, "description"),
-            Stage = GetString(doc, "stage"),
-            FlagKey = GetString(doc, "flagKey"),
-            FeatBitProjectKey = GetString(doc, "featBitProjectKey"),
-            FeatBitEnvId = GetNullableGuid(doc, "featBitEnvId"),
-            CreatedAt = GetDateTime(doc, "createdAt"),
-            UpdatedAt = GetDateTime(doc, "updatedAt")
+            Id = experiment.Id,
+            Name = experiment.Name,
+            Description = experiment.Description,
+            Stage = experiment.Stage,
+            FlagKey = experiment.FlagKey,
+            FeatBitProjectKey = experiment.FeatBitProjectKey,
+            FeatBitEnvId = experiment.FeatBitEnvId,
+            CreatedAt = experiment.CreatedAt,
+            UpdatedAt = experiment.UpdatedAt
         };
     }
 
-    private static ReleaseDecisionExperimentDetailVm ToDetailVm(BsonDocument doc)
+    private static ReleaseDecisionExperimentDetailVm ToDetailVm(ReleaseDecisionExperiment experiment)
     {
-        var vm = new ReleaseDecisionExperimentDetailVm
+        return new ReleaseDecisionExperimentDetailVm
         {
-            Id = GetGuid(doc, "_id"),
-            Name = GetString(doc, "name"),
-            Description = GetString(doc, "description"),
-            Stage = GetString(doc, "stage"),
-            FlagKey = GetString(doc, "flagKey"),
-            FeatBitProjectKey = GetString(doc, "featBitProjectKey"),
-            FeatBitEnvId = GetNullableGuid(doc, "featBitEnvId"),
-            Hypothesis = GetString(doc, "hypothesis"),
-            AccessToken = GetString(doc, "accessToken"),
-            Change = GetString(doc, "change"),
-            Constraints = GetString(doc, "constraints"),
-            EnvSecret = GetString(doc, "envSecret"),
-            FlagServerUrl = GetString(doc, "flagServerUrl"),
-            Goal = GetString(doc, "goal"),
-            Guardrails = GetString(doc, "guardrails"),
-            Intent = GetString(doc, "intent"),
-            LastAction = GetString(doc, "lastAction"),
-            LastLearning = GetString(doc, "lastLearning"),
-            OpenQuestions = GetString(doc, "openQuestions"),
-            PrimaryMetric = GetString(doc, "primaryMetric"),
-            SandboxId = GetString(doc, "sandboxId"),
-            SandboxStatus = GetString(doc, "sandboxStatus"),
-            Variants = GetString(doc, "variants"),
-            ConflictAnalysis = GetString(doc, "conflictAnalysis"),
-            EntryMode = GetString(doc, "entryMode"),
-            CreatedAt = GetDateTime(doc, "createdAt"),
-            UpdatedAt = GetDateTime(doc, "updatedAt")
+            Id = experiment.Id,
+            Name = experiment.Name,
+            Description = experiment.Description,
+            Stage = experiment.Stage,
+            FlagKey = experiment.FlagKey,
+            FeatBitProjectKey = experiment.FeatBitProjectKey,
+            FeatBitEnvId = experiment.FeatBitEnvId,
+            Hypothesis = experiment.Hypothesis,
+            AccessToken = experiment.AccessToken,
+            Change = experiment.Change,
+            Constraints = experiment.Constraints,
+            EnvSecret = experiment.EnvSecret,
+            FlagServerUrl = experiment.FlagServerUrl,
+            Goal = experiment.Goal,
+            Guardrails = experiment.Guardrails,
+            Intent = experiment.Intent,
+            LastAction = experiment.LastAction,
+            LastLearning = experiment.LastLearning,
+            OpenQuestions = experiment.OpenQuestions,
+            PrimaryMetric = experiment.PrimaryMetric,
+            SandboxId = experiment.SandboxId,
+            SandboxStatus = experiment.SandboxStatus,
+            Variants = experiment.Variants,
+            ConflictAnalysis = experiment.ConflictAnalysis,
+            EntryMode = experiment.EntryMode,
+            CreatedAt = experiment.CreatedAt,
+            UpdatedAt = experiment.UpdatedAt,
+            ExperimentRuns = experiment.ExperimentRuns.Select(ToRunVm).ToArray(),
+            Activities = experiment.Activities.Select(ToActivityVm).ToArray(),
+            Messages = experiment.Messages.Select(ToMessageVm).ToArray()
         };
-
-        return vm;
     }
 
-    private static void SetIfNotNull(List<UpdateDefinition<BsonDocument>> updates, string name, string value)
+    private static ReleaseDecisionExperimentRunVm ToRunVm(ReleaseDecisionExperimentRun run)
+    {
+        return new ReleaseDecisionExperimentRunVm
+        {
+            Id = run.Id,
+            ExperimentId = run.ExperimentId,
+            Slug = run.Slug,
+            Status = run.Status,
+            Hypothesis = run.Hypothesis,
+            Method = run.Method,
+            MethodReason = run.MethodReason,
+            PrimaryMetricEvent = run.PrimaryMetricEvent,
+            MetricDescription = run.MetricDescription,
+            GuardrailEvents = run.GuardrailEvents,
+            GuardrailDescriptions = run.GuardrailDescriptions,
+            ControlVariant = run.ControlVariant,
+            TreatmentVariant = run.TreatmentVariant,
+            TrafficAllocation = run.TrafficAllocation,
+            MinimumSample = run.MinimumSample,
+            ObservationStart = run.ObservationStart,
+            ObservationEnd = run.ObservationEnd,
+            PriorProper = run.PriorProper,
+            PriorMean = run.PriorMean,
+            PriorStddev = run.PriorStddev,
+            InputData = run.InputData,
+            AnalysisResult = run.AnalysisResult,
+            Decision = run.Decision,
+            DecisionSummary = run.DecisionSummary,
+            DecisionReason = run.DecisionReason,
+            WhatChanged = run.WhatChanged,
+            WhatHappened = run.WhatHappened,
+            ConfirmedOrRefuted = run.ConfirmedOrRefuted,
+            WhyItHappened = run.WhyItHappened,
+            NextHypothesis = run.NextHypothesis,
+            RunId = run.RunId,
+            PrimaryMetricAgg = run.PrimaryMetricAgg,
+            PrimaryMetricType = run.PrimaryMetricType,
+            TrafficPercent = run.TrafficPercent,
+            LayerId = run.LayerId,
+            AudienceFilters = run.AudienceFilters,
+            TrafficOffset = run.TrafficOffset,
+            DataSourceMode = run.DataSourceMode,
+            CustomerEndpointConfig = run.CustomerEndpointConfig,
+            CreatedAt = run.CreatedAt,
+            UpdatedAt = run.UpdatedAt
+        };
+    }
+
+    private static ReleaseDecisionActivityVm ToActivityVm(ReleaseDecisionActivity activity)
+    {
+        return new ReleaseDecisionActivityVm
+        {
+            Id = activity.Id,
+            Type = activity.Type,
+            Title = activity.Title,
+            Detail = activity.Detail,
+            CreatedAt = activity.CreatedAt
+        };
+    }
+
+    private static ReleaseDecisionMessageVm ToMessageVm(ReleaseDecisionMessage message)
+    {
+        return new ReleaseDecisionMessageVm
+        {
+            Id = message.Id,
+            Role = message.Role,
+            Content = message.Content,
+            Metadata = message.Metadata,
+            CreatedAt = message.CreatedAt
+        };
+    }
+
+    private static void SetIfNotNull(
+        List<UpdateDefinition<ReleaseDecisionExperiment>> updates,
+        System.Linq.Expressions.Expression<Func<ReleaseDecisionExperiment, string>> field,
+        string value)
     {
         if (value != null)
         {
-            updates.Add(Builders<BsonDocument>.Update.Set(name, value.Trim()));
+            updates.Add(Builders<ReleaseDecisionExperiment>.Update.Set(field, value.Trim()));
         }
     }
 
     private async Task AddActivityAsync(Guid experimentId, string title)
     {
-        await mongoDb.CollectionOf("ReleaseDecisionActivities").InsertOneAsync(new BsonDocument
+        await mongoDb.CollectionOf<ReleaseDecisionActivity>().InsertOneAsync(new ReleaseDecisionActivity
         {
-            ["_id"] = new BsonBinaryData(Guid.NewGuid(), GuidRepresentation.Standard),
-            ["experimentId"] = new BsonBinaryData(experimentId, GuidRepresentation.Standard),
-            ["type"] = "note",
-            ["title"] = title,
-            ["createdAt"] = DateTime.UtcNow
+            Id = Guid.NewGuid(),
+            ExperimentId = experimentId,
+            Type = "note",
+            Title = title,
+            CreatedAt = DateTime.UtcNow
         });
-    }
-
-    private static string GetString(BsonDocument doc, string name)
-    {
-        return doc.TryGetValue(name, out var value) && value.IsString ? value.AsString : string.Empty;
-    }
-
-    private static Guid GetGuid(BsonDocument doc, string name)
-    {
-        if (!doc.TryGetValue(name, out var value))
-        {
-            return Guid.Empty;
-        }
-
-        return value.BsonType switch
-        {
-            BsonType.Binary => value.AsBsonBinaryData.ToGuid(),
-            BsonType.String when Guid.TryParse(value.AsString, out var id) => id,
-            _ => Guid.Empty
-        };
-    }
-
-    private static Guid? GetNullableGuid(BsonDocument doc, string name)
-    {
-        var value = GetGuid(doc, name);
-        return value == Guid.Empty ? null : value;
-    }
-
-    private static DateTime GetDateTime(BsonDocument doc, string name)
-    {
-        return doc.TryGetValue(name, out var value) && value.IsValidDateTime
-            ? value.ToUniversalTime()
-            : DateTime.MinValue;
     }
 }

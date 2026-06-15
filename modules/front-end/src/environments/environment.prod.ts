@@ -7,6 +7,5 @@ export const environment = {
   evaluationUrl: window['env']['evaluationUrl'] || location.origin.replace(/\/$/, ''),
   displayApiUrl: window['env']['displayApiUrl'],
   displayEvaluationUrl: window['env']['displayEvaluationUrl'],
-  hostingMode: window['env']['hostingMode'] || HOSTING_MODE.SELF_HOSTED,
-  featureFlagInsightsProvider: window['env']['featureFlagInsightsProvider'] || 'featbit-api'
+  hostingMode: window['env']['hostingMode'] || HOSTING_MODE.SELF_HOSTED
 };

@@ -9,8 +9,7 @@ const entries = {
   evaluationUrl: env.EVALUATION_URL ?? '',
   displayApiUrl: env.DISPLAY_API_URL ?? '',
   displayEvaluationUrl: env.DISPLAY_EVALUATION_URL ?? '',
-  hostingMode: env.HOSTING_MODE ?? '',
-  featureFlagInsightsProvider: env.FEATURE_FLAG_INSIGHTS_PROVIDER ?? ''
+  hostingMode: env.HOSTING_MODE ?? ''
 };
 
 const lines = [
