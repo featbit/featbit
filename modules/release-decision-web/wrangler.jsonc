@@ -1,5 +1,5 @@
 {
-  // Cloudflare Workers Containers configuration for agent/web (Next.js)
+  // Cloudflare Workers Containers configuration for release-decision-web (React + Vite)
   // Deploy: npx wrangler deploy  (Docker must be running locally)
   // Secret:  npx wrangler secret put DATABASE_URL
   "$schema": "./node_modules/wrangler/config-schema.json",
@@ -8,7 +8,7 @@
   "compatibility_date": "2026-04-13",
   "tsconfig": "tsconfig.worker.json",
 
-  // Container definition — Next.js server runs inside Docker on Cloudflare
+  // Container definition — static Vite assets are served by nginx in Docker
   "containers": [
     {
       "class_name": "WebContainer",

@@ -66,7 +66,7 @@ export function ExperimentsClient() {
             Each experiment tracks one feature flag through the full experiment loop.
           </p>
         </div>
-        <Button nativeButton={false} render={<Link href="/experiments/new" />}>
+        <Button nativeButton={false} render={<Link href="/new" />}>
           <Plus className="size-4" data-icon="inline-start" />
           New Experiment
         </Button>
@@ -95,7 +95,7 @@ export function ExperimentsClient() {
             <p className="text-muted-foreground text-sm mt-1 mb-4">
               Create your first release decision experiment to get started.
             </p>
-            <Button nativeButton={false} render={<Link href="/experiments/new" />}>
+            <Button nativeButton={false} render={<Link href="/new" />}>
               <Plus className="size-4" data-icon="inline-start" />
               Create Experiment
             </Button>
@@ -106,7 +106,7 @@ export function ExperimentsClient() {
           {experiments.map((experiment) => {
             const stage = getStage(experiment.stage);
             return (
-              <Link key={experiment.id} href={`/experiments/${experiment.id}`}>
+              <Link key={experiment.id} href={`/${experiment.id}`}>
                 <Card className="surface-panel h-full transition-all hover:-translate-y-0.5 hover:bg-card hover:shadow-xl hover:shadow-slate-950/10 dark:hover:shadow-black/20">
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between gap-2">

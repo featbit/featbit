@@ -52,6 +52,8 @@
 }
 
 :root {
+  --font-manrope: Manrope, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+  --font-jetbrains-mono: "JetBrains Mono", Consolas, Monaco, monospace;
   --brand: #3cc798;
   --brand-foreground: #ffffff;
   --brand-muted: #e6fff7;

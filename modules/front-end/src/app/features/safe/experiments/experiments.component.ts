@@ -14,6 +14,6 @@ export class ExperimentsComponent implements OnInit {
   }
 
   openNewVersion() {
-    window.location.assign('/release-decision/experiments');
+    window.location.assign('/release-decision/');
   }
 }

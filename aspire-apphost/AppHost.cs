@@ -101,10 +101,9 @@ if (featureFlagInsightsProvider == "featbit-api")
         .AddExecutable("release-decision-web", "npm", "../modules/release-decision-web", "run", "dev")
         .WithHttpEndpoint(port: 3000, targetPort: 3000, isProxied: false)
         .WithEnvironment("PORT", "3000")
-        .WithEnvironment("FEATBIT_API_URL", "http://localhost:5000")
-        .WithEnvironment("NEXT_PUBLIC_FEATBIT_API_URL", "http://localhost:5000")
-        .WithEnvironment("NEXT_PUBLIC_BASE_PATH", "/release-decision")
-        .WithEnvironment("RELEASE_DECISION_SESSION_SECRET", "please_change_me_to_a_secure_release_decision_session_secret")
+        .WithEnvironment("VITE_FEATBIT_APP_URL", "http://localhost:4200")
+        .WithEnvironment("VITE_FEATBIT_API_URL", "http://localhost:5000")
+        .WithEnvironment("VITE_BASE_PATH", "/release-decision")
         .WaitFor(apiServer);
 }
 

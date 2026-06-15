@@ -41,8 +41,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { appPath } from "@/lib/app-path";
-import { authStorage } from "@/lib/featbit-auth/storage";
+import { analyzeExperimentRun } from "@/lib/release-decision-client-data";
 import { AnalysisView } from "./analysis-markdown";
 import { ExperimentRunTrafficConfig } from "./experiment-run-traffic-config";
 import {
@@ -766,41 +765,22 @@ function AnalysisTab({
     setWarning(null);
     setNoData(false);
     try {
-      const token = window.localStorage.getItem("token");
-      const org = authStorage.getOrganization();
-      const profile = authStorage.getProfile();
-      const projectEnv = authStorage.getProjectEnv();
-      const resp = await fetch(appPath(`/api/experiments/${experimentId}/analyze`), {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          ...(org?.id ? { Organization: org.id } : {}),
-          ...(profile?.workspaceId ? { Workspace: profile.workspaceId } : {}),
-        },
-        body: JSON.stringify({
-          envId: projectEnv?.envId,
-          runId: exp.id,
-          forceFresh,
-        }),
-      });
-      const data = await resp.json();
-      if (!resp.ok) {
-        setError(data.error ?? "Analysis failed");
+      const experiment = await analyzeExperimentRun(experimentId, exp.id, forceFresh);
+      const run = experiment.experimentRuns.find((item) => item.id === exp.id);
+      if (!run) {
+        setError("Analysis completed, but the experiment run was not returned.");
         return;
       }
-      // "no_data" is an expected empty state, not an error.
-      if (data.status === "no_data") {
+
+      if (!run.analysisResult && run.status === "collecting") {
         setNoData(true);
         return;
       }
-      if (data.analysisResult) {
-        setAnalysisResult(data.analysisResult);
-        if (typeof data.warning === "string" && data.warning.length > 0) {
-          setWarning(data.warning);
-        }
-      } else if (data.error) {
-        setError(data.error);
+
+      if (run.analysisResult) {
+        setAnalysisResult(run.analysisResult);
+      } else {
+        setError("Analysis completed, but no analysis result was returned.");
       }
     } catch (err) {
       setError(`Request failed: ${(err as Error).message}`);

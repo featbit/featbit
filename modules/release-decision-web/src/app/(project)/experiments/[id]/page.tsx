@@ -1,10 +1,9 @@
 import { ExperimentDetailClient } from "./experiment-detail-client";
 
-export default async function ExperimentPage({
+export default function ExperimentPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }) {
-  const { id } = await params;
-  return <ExperimentDetailClient id={id} />;
+  return <ExperimentDetailClient id={params.id} />;
 }

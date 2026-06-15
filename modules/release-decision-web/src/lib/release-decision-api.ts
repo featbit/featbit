@@ -1,11 +1,4 @@
-import { getSession } from "@/lib/server-auth/require";
-import { bridgeFetch } from "@/lib/server-auth/featbit-bridge";
-
-interface ApiEnvelope<T> {
-  success: boolean;
-  errors?: string[];
-  data?: T;
-}
+import { apiRequest as browserApiRequest } from "@/lib/featbit-auth/http";
 
 export interface PagedResult<T> {
   totalCount: number;
@@ -162,35 +155,11 @@ async function apiRequest<T>(
     query?: Record<string, string | number | boolean | undefined | null>;
   } = {},
 ): Promise<T> {
-  const session = await getSession();
-  if (!session) {
-    throw new Error("Unauthorized");
-  }
-
-  const res = await bridgeFetch(path, {
+  return browserApiRequest<T>(path, {
     method: init.method ?? "GET",
-    token: session.token,
-    cookies: session.cookies,
-    organizationId: session.organizationId,
-    workspaceId: session.workspaceId,
     query: init.query,
-    headers: init.body ? { "Content-Type": "application/json" } : undefined,
-    body: init.body ? JSON.stringify(init.body) : undefined,
+    body: init.body,
   });
-
-  let parsed: ApiEnvelope<T> | null = null;
-  try {
-    parsed = JSON.parse(res.bodyText) as ApiEnvelope<T>;
-  } catch {
-    // handled below
-  }
-
-  if (!res.ok || !parsed?.success) {
-    const message = parsed?.errors?.join(", ") || `FeatBit API request failed: ${res.status}`;
-    throw new Error(message);
-  }
-
-  return parsed.data as T;
 }
 
 export function releaseDecisionExperimentsPath(envId: string, suffix = "") {

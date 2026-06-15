@@ -3,19 +3,21 @@
 import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { authStorage } from "@/lib/featbit-auth/storage";
+import { appPath } from "@/lib/app-path";
+import { featbitAppPath } from "@/lib/featbit-auth/config";
 
 export default function LoginPage() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const fallbackRedirect = "/release-decision";
+    const fallbackRedirect = appPath("/");
     const redirect =
       new URLSearchParams(window.location.search).get("redirect") ||
       authStorage.getLoginRedirectUrl() ||
       fallbackRedirect;
 
     authStorage.setLoginRedirectUrl(redirect);
-    window.location.replace("/login");
+    window.location.replace(featbitAppPath("/login"));
   }, []);
 
   return (

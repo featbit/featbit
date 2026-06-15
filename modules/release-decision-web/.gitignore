@@ -4,7 +4,8 @@ node_modules
 .env
 .env.*
 
-# Next.js / deployment outputs
+# Vite / legacy deployment outputs
+dist
 .next
 .open-next
 .wrangler

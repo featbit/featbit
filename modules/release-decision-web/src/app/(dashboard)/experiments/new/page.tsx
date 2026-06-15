@@ -8,7 +8,7 @@ export default function NewExperimentPage() {
   return (
     <div className="p-6 max-w-2xl mx-auto space-y-6">
       <div>
-        <Button nativeButton={false} variant="ghost" size="sm" render={<Link href="/experiments" />}>
+        <Button nativeButton={false} variant="ghost" size="sm" render={<Link href="/" />}>
           <ArrowLeft className="size-4" data-icon="inline-start" />
           Back to Experiments
         </Button>

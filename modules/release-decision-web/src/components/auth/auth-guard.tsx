@@ -5,6 +5,7 @@ import { Loader2 } from "lucide-react";
 import { useAuth } from "@/lib/featbit-auth/auth-context";
 import { appPath } from "@/lib/app-path";
 import { authStorage } from "@/lib/featbit-auth/storage";
+import { featbitAppPath } from "@/lib/featbit-auth/config";
 
 function ConnectingSplash({ message }: { message: string }) {
   return (
@@ -31,7 +32,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
 
     const next = `${window.location.pathname}${window.location.search}${window.location.hash}`;
     authStorage.setLoginRedirectUrl(next);
-    window.location.replace("/login");
+    window.location.replace(featbitAppPath("/login"));
   }, [shouldRedirect]);
 
   if (!isReady || sessionStatus === "checking" || sessionStatus === "unknown") {

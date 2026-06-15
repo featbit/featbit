@@ -261,6 +261,22 @@ export async function deleteExperimentRun(experimentId: string, runId: string) {
   return detail;
 }
 
+export async function analyzeExperimentRun(
+  experimentId: string,
+  runId: string,
+  forceFresh?: boolean,
+) {
+  const envId = requireEnvId();
+  const experiment = await apiRequest<ReleaseDecisionExperimentDetail>(
+    path(envId, `/${experimentId}/runs/${runId}/analyze`),
+    { method: "POST", body: { forceFresh: Boolean(forceFresh) } },
+  );
+
+  const detail = mapDetail(experiment);
+  publishExperimentUpdated(detail);
+  return detail;
+}
+
 export async function addMessage(
   experimentId: string,
   data: { role: string; content: string; metadata?: string | null },

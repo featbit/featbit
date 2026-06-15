@@ -1,4 +1,5 @@
-const RAW_BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+const RAW_BASE_PATH =
+  import.meta.env.VITE_BASE_PATH || import.meta.env.BASE_URL || "";
 
 export const APP_BASE_PATH = RAW_BASE_PATH.replace(/\/+$/, "");
 

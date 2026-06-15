@@ -1,12 +1,12 @@
 # Release Decision Web
 
-This is the standalone Next.js frontend for release-decision experiments.
+This is the standalone React + Vite frontend for release-decision experiments.
 
 ## Local Aspire
 
 Aspire starts this app as `release-decision-web` on port `3000`.
 
-The app talks to the FeatBit API server through `FEATBIT_API_URL`, which is set by `aspire-apphost/AppHost.cs` to `http://localhost:5000` for local debug.
+The app talks to the FeatBit API server through `VITE_FEATBIT_API_URL`, which is set by `aspire-apphost/AppHost.cs` to `http://localhost:5000` for local debug.
 
 ## Database Ownership
 
@@ -27,4 +27,4 @@ release_decision_activities
 release_decision_messages
 ```
 
-The next migration step is to replace the remaining Prisma-backed Next.js API/data access with FeatBit API endpoints, then remove the obsolete Prisma experiment routes and migrations.
+The frontend is browser-only. Experiment reads, writes, and analysis go through the FeatBit API endpoints; do not reintroduce Prisma or frontend-owned API routes for runtime experiment data.

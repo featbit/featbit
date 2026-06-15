@@ -33,7 +33,7 @@ export function ExperimentDetailClient({ id }: { id: string }) {
       return next;
     } catch (err) {
       if (isResourceNotFound(err)) {
-        router.replace("/experiments");
+        router.replace("/");
         return null as never;
       }
 
@@ -75,7 +75,7 @@ export function ExperimentDetailClient({ id }: { id: string }) {
     const handler = (event: Event) => {
       const next = (event as CustomEvent<ExperimentDetail | null>).detail;
       if (next === null) {
-        router.replace("/experiments");
+        router.replace("/");
         return;
       }
 

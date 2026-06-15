@@ -60,7 +60,7 @@ export function ExperimentActions({
 
               try {
                 await deleteExperimentAction(experimentId);
-                router.replace("/experiments");
+                router.replace("/");
                 router.refresh();
               } catch (err) {
                 setError(

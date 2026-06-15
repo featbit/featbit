@@ -40,7 +40,7 @@ export function NewExperimentForm() {
         description: description || null,
         featbitProjectKey: projectKey || null,
       });
-      router.push(`/experiments/${experiment.id}`);
+      router.push(`/${experiment.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create experiment.");
       setSaving(false);
@@ -87,7 +87,7 @@ export function NewExperimentForm() {
         <Button type="submit" disabled={!projectKey || saving}>
           {saving ? "Creating..." : "Create Experiment"}
         </Button>
-        <Button nativeButton={false} variant="outline" render={<Link href="/experiments" />}>
+        <Button nativeButton={false} variant="outline" render={<Link href="/" />}>
           Cancel
         </Button>
       </div>

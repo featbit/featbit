@@ -156,7 +156,7 @@ export class ExperimentationComponent implements OnInit, OnDestroy {
   }
 
   private openReleaseDecision(featureFlagKey: string) {
-    window.location.assign(`/release-decision/experiments?flagKey=${encodeURIComponent(featureFlagKey)}`);
+    window.location.assign(`/release-decision/?flagKey=${encodeURIComponent(featureFlagKey)}`);
   }
 
   experimentList: IExpt[] = [];

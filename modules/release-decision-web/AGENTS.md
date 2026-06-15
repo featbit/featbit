@@ -1,14 +1,8 @@
-<!-- BEGIN:nextjs-agent-rules -->
-# This is NOT the Next.js you know
-
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
-<!-- END:nextjs-agent-rules -->
-
 # FeatBit Release Decision Agent — Web UI
 
 ## Project Overview
 
-This is a Next.js application that provides an interactive web UI for the **FeatBit Release Decision Agent**. It enables product managers, engineers, and data analysts to run data-driven experiments end-to-end — from defining intent to making release decisions — without needing a statistics background.
+This is a React + Vite application that provides an interactive web UI for the **FeatBit Release Decision Agent**. It enables product managers, engineers, and data analysts to run data-driven experiments end-to-end — from defining intent to making release decisions — without needing a statistics background.
 
 ## Purpose
 
@@ -20,19 +14,19 @@ This is a Next.js application that provides an interactive web UI for the **Feat
 
 ## Tech Stack
 
-- **Framework**: Next.js 16 (App Router, React Server Components)
+- **Framework**: React 19 + Vite
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS v4 + shadcn/ui (base-nova style)
 - **Runtime**: React 19
 
 ## Architecture Conventions
 
-- Use the App Router (`src/app/`) with file-based routing.
-- Server Components by default; add `"use client"` only when the component requires browser APIs, state, or event handlers.
+- This is a browser-only SPA. Do not add Next.js APIs, Server Components, server actions, or Prisma-backed frontend data access.
+- The Vite entry point is `src/main.tsx`; top-level routing lives in `src/App.tsx`.
 - Place reusable UI components in `src/components/`. shadcn/ui components live in `src/components/ui/`.
 - Shared utilities go in `src/lib/`.
 - Custom hooks go in `src/hooks/`.
-- API routes go in `src/app/api/`.
+- Runtime experiment data must go through the FeatBit API. If a missing capability requires server behavior, add it to `modules/back-end` and consume it from the SPA.
 - Use `@/*` import alias for all project imports.
 
 ## Key Directories
@@ -48,8 +42,7 @@ src/
 
 ## Coding Standards
 
-- Follow the `vercel-react-best-practices` skill conventions.
-- Prefer Server Components and server-side data fetching.
+- Prefer browser components and client-side FeatBit API calls through the existing auth/API helpers.
 - Use shadcn/ui components for all UI primitives — do not create custom equivalents.
 - Keep components small and focused; extract logic into hooks or utilities.
 - Use TypeScript strict mode; avoid `any`.

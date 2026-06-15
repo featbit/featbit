@@ -40,8 +40,8 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
   {
     label: "Experiments",
     items: [
-      { href: "/experiments", label: "All Experiments", icon: FolderKanban },
-      { href: "/experiments/new", label: "New Experiment", icon: Plus },
+      { href: "/", label: "All Experiments", icon: FolderKanban },
+      { href: "/new", label: "New Experiment", icon: Plus },
     ],
   },
   {
@@ -65,7 +65,7 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarHeader>
         <Link
-          href="/experiments"
+          href="/"
           className="group flex items-center gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-sidebar-accent"
         >
           <img

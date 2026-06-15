@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { ArrowLeft, Settings, Terminal } from "lucide-react";
+import { useDashboardHeader } from "@/app/(dashboard)/layout";
 import { StageStepper } from "@/components/experiment/stage-bar";
 import { StageContentPanel } from "@/components/experiment/stage-content-panel";
 import {
@@ -14,8 +15,6 @@ import { ResizablePanels } from "@/components/experiment/resizable-panels";
 import { ActivityPopover } from "@/components/experiment/activity-popover";
 import { ChatTriggerContext } from "@/components/experiment/chat-trigger-context";
 import { cn } from "@/lib/utils";
-import { WorkspaceSwitcher } from "@/components/workspace/workspace-switcher";
-import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -106,22 +105,22 @@ export function ExperimentDetailLayout({
     }
   }
 
-  const header = (
-    <header className="shrink-0 border-b border-border/70 bg-background/78 shadow-sm shadow-foreground/5 backdrop-blur-xl">
-      <div className="flex items-center gap-3 px-4 py-2.5">
+  const dashboardHeader = useMemo(
+    () => (
+      <>
         <Link
-          href="/experiments"
-          className="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+          href="/"
+          className="flex h-7 shrink-0 items-center gap-1 rounded-md px-2 text-xs font-semibold text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
         >
           <ArrowLeft className="size-3.5" />
           Experiments
         </Link>
-        <span className="h-5 w-px bg-border" />
-        <h1 className="text-sm font-bold tracking-tight truncate">{experiment.name}</h1>
+        <span className="h-5 w-px shrink-0 bg-border" />
+        <h1 className="min-w-0 truncate text-sm font-bold tracking-tight">
+          {experiment.name}
+        </h1>
 
-        {/* Experiment-scoped actions — grouped next to the name so they stay
-            out of the workspace-switcher territory on the right. */}
-        <div className="flex items-center gap-2 ml-2 pl-3 border-l border-border/60">
+        <div className="ml-2 flex shrink-0 items-center gap-2 border-l border-border/60 pl-3">
           <button
             type="button"
             onClick={() => setSetupDialogOpen(true)}
@@ -153,24 +152,26 @@ export function ExperimentDetailLayout({
             <Settings className="size-3" />
             <span>Settings</span>
           </button>
-          <ActivityPopover activities={experiment.activities} />
+            <ActivityPopover activities={experiment.activities} />
         </div>
-
-        <div className="ml-auto flex items-center gap-2">
-          <ThemeToggle />
-          <WorkspaceSwitcher readOnly />
-        </div>
-      </div>
-    </header>
+      </>
+    ),
+    [
+      activeTab,
+      defaultTab,
+      experiment.activities,
+      experiment.name,
+      prevTab,
+    ],
   );
+  useDashboardHeader(dashboardHeader);
 
   // All experiments render the guided release-decision stages directly. The
   // old guided/expert entry choice was removed; each stage now carries its own
   // coding-agent prompt and can be skipped when already satisfied.
   return (
     <ChatTriggerContext.Provider value={triggerChat}>
-      {header}
-      <main className="flex min-h-0 flex-1 flex-col overflow-hidden">
+      <main className="flex h-full min-h-0 flex-1 flex-col overflow-hidden">
         {activeTab !== "settings" && (
           <StageStepper
             experiment={experiment}

@@ -8,7 +8,7 @@ export default function ExperimentNotFound() {
         The experiment you are looking for does not exist or has been deleted.
       </p>
       <Link
-        href="/experiments"
+        href="/"
         className="inline-flex h-8 items-center justify-center rounded-lg bg-primary px-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/80"
       >
         Back to Experiments
