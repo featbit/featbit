@@ -15,7 +15,6 @@ import Image from "next/image";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { WorkspaceSwitcher } from "@/components/workspace/workspace-switcher";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
-import { UserMenu } from "@/components/auth/user-menu";
 import { appPath } from "@/lib/app-path";
 import { cn } from "@/lib/utils";
 import { ArrowLeft } from "lucide-react";
@@ -55,22 +54,22 @@ export default function DashboardLayout({
   return (
     <AuthShell>
       <DashboardHeaderContext.Provider value={headerContextValue}>
-      <main className="flex h-full w-full flex-col overflow-hidden">
-        <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-3 border-b border-border/70 bg-background/78 px-4 backdrop-blur-xl">
+      <main className="fb-dashboard-shell">
+        <header className="fb-dashboard-topbar">
           <Link
             href="/"
-            className="flex items-center gap-2 rounded-md px-1 py-1 transition-colors hover:bg-accent"
+            className="fb-dashboard-brand"
           >
             <Image
               src={appPath("/logo.svg")}
               alt="FeatBit"
-              width={32}
-              height={32}
-              className="size-8 shrink-0 rounded-md bg-white shadow-sm ring-1 ring-border"
+              width={40}
+              height={40}
+              className="fb-dashboard-logo"
             />
-            <div className="hidden min-w-0 leading-tight sm:flex sm:flex-col">
-              <span className="truncate text-sm font-bold tracking-tight">FeatBit</span>
-              <span className="truncate text-[11px] font-medium text-muted-foreground">
+            <div className="fb-dashboard-brand-copy">
+              <span className="fb-dashboard-brand-name">FeatBit</span>
+              <span className="fb-dashboard-brand-subtitle">
                 Release Decision
               </span>
             </div>
@@ -79,7 +78,7 @@ export default function DashboardLayout({
           {!hideBackToFeatBit && (
             <a
               href={FEATBIT_MAIN_PATH}
-              className="inline-flex h-7 shrink-0 items-center justify-center gap-2 rounded-lg border border-transparent bg-clip-padding px-2.5 text-[0.8rem] font-medium whitespace-nowrap transition-all outline-none select-none hover:bg-muted hover:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 active:translate-y-px"
+              className="fb-topbar-back"
             >
               <ArrowLeft className="size-4" />
               <span className="hidden sm:inline">Back to FeatBit</span>
@@ -87,15 +86,16 @@ export default function DashboardLayout({
           )}
 
           {headerContent && (
-            <div className="flex min-w-0 flex-1 items-center gap-2">
+            <div className="fb-topbar-content">
               {headerContent}
             </div>
           )}
 
-          <div className="ml-auto flex min-w-0 items-center gap-2">
-            <WorkspaceSwitcher readOnly className="hidden max-w-[52vw] md:flex" />
+          <div className="fb-topbar-actions">
             <ThemeToggle compact />
-            <UserMenu compact />
+            <div className="fb-topbar-workspace">
+              <WorkspaceSwitcher readOnly />
+            </div>
           </div>
         </header>
         <div

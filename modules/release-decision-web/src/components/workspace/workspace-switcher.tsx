@@ -42,6 +42,26 @@ function TriadSegment({ icon, label, value, muted }: TriadButtonProps) {
   );
 }
 
+function ReadonlySegment({
+  icon,
+  iconClassName,
+  label,
+  value,
+  muted,
+}: TriadButtonProps & { iconClassName: string }) {
+  return (
+    <div className="fb-selector-item">
+      <span className={cn("fb-selector-icon", iconClassName)}>{icon}</span>
+      <span className="fb-selector-content">
+        <span className="fb-selector-label">{label}</span>
+        <span className={cn("fb-selector-value", muted && "muted")}>
+          {value}
+        </span>
+      </span>
+    </div>
+  );
+}
+
 function OrganizationSelector({
   organizations,
   current,
@@ -235,28 +255,31 @@ export function WorkspaceSwitcher({
     return (
       <div
         className={cn(
-          "flex items-center gap-1.5 rounded-md border border-border bg-background px-2 py-1 text-xs",
+          "fb-workspace-selector",
           className,
         )}
         title="Switch workspace from the Experiments dashboard"
       >
-        <TriadSegment
-          icon={<Building2 className="size-3.5" />}
-          label="Org"
+        <ReadonlySegment
+          icon={<Building2 className="size-4" />}
+          iconClassName="org"
+          label="Organization"
           value={organization?.name ?? "—"}
           muted={!organization}
         />
-        <span className="text-muted-foreground/40 select-none">/</span>
-        <TriadSegment
-          icon={<FolderClosed className="size-3.5" />}
+        <span className="fb-selector-divider" />
+        <ReadonlySegment
+          icon={<FolderClosed className="size-4" />}
+          iconClassName="project"
           label="Project"
           value={currentProject?.name ?? "—"}
           muted={!currentProject}
         />
-        <span className="text-muted-foreground/40 select-none">:</span>
-        <TriadSegment
-          icon={<Layers className="size-3.5" />}
-          label="Env"
+        <span className="fb-selector-divider" />
+        <ReadonlySegment
+          icon={<Layers className="size-4" />}
+          iconClassName="env"
+          label="Environment"
           value={currentEnvironment?.name ?? "—"}
           muted={!currentEnvironment}
         />

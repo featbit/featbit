@@ -131,11 +131,24 @@ function mapDetail(experiment: ReleaseDecisionExperimentDetail): ExperimentDetai
   } as ExperimentDetail;
 }
 
-export async function listExperiments() {
+export async function listExperiments(filter: {
+  name?: string;
+  stage?: string;
+  flagKey?: string;
+} = {}) {
   const envId = requireEnvId();
   const page = await apiRequest<PagedResult<ReleaseDecisionExperiment>>(
     path(envId),
-    { method: "GET", query: { pageIndex: 0, pageSize: 200 } },
+    {
+      method: "GET",
+      query: {
+        pageIndex: 0,
+        pageSize: 200,
+        name: filter.name?.trim() || undefined,
+        stage: filter.stage?.trim() || undefined,
+        flagKey: filter.flagKey?.trim() || undefined,
+      },
+    },
   );
 
   return (page.items ?? []).map(mapExperiment);
