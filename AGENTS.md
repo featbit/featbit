@@ -1,233 +1,98 @@
 # AGENTS.md
 
-This file is the first local operating guide for agents working in this repository.
+This file is the first local operating guide for agents working in this repository. Keep it simple: understand the project boundaries before changing code.
 
-## Repository Shape
+## Project Structure
 
-FeatBit is a multi-service application. For local debugging in this branch, prefer the .NET Aspire AppHost instead of ad-hoc Docker Compose or independently chosen ports.
+- `modules/`: contains the concrete application implementations. For feature work, bug fixes, UI changes, and API changes, start here.
+- `infra/`: infrastructure configuration and initialization scripts, including PostgreSQL, MongoDB, Redis, Kafka, ClickHouse, and OpenTelemetry. Database initialization and migration SQL lives under `infra/postgresql/docker-entrypoint-initdb.d/`.
+- `docker/`: Docker runtime and packaging configuration, including compose fragments, HTTPS setup, local experiment environment files, and UI/API bundle assets.
+- `aspire-apphost/`: the .NET Aspire AppHost for local integration debugging. This is the preferred ai-native local debug entry point for starting PostgreSQL, the API server, the evaluation server, the front-end, and release-decision-web together.
+- Other directories are not the default focus for agents. Ignore them unless the task explicitly requires them.
 
-Main modules:
+## Modules
 
-- `aspire-apphost`: .NET Aspire AppHost for local pg-only standalone debugging.
-- `modules/back-end`: FeatBit API server.
-- `modules/evaluation-server`: FeatBit evaluation/streaming server.
-- `modules/front-end`: FeatBit Angular UI.
-- `modules/data-analytics`: FeatBit data analytics server code; the Aspire AppHost currently runs the published Docker image.
-- `modules/release-decision-web`: standalone Next.js release-decision frontend copied from the release-decision-agent project.
-- `infra/postgresql/docker-entrypoint-initdb.d`: PostgreSQL initialization and migration SQL scripts.
+When writing code under `modules/`, respect the existing code style, modular boundaries, and design patterns of the specific project you are touching. Do not introduce ad-hoc structures, tangled dependencies, or low-quality shortcuts when the repository already has established patterns to follow.
 
-## Tech Stack And Versions
+### `modules/back-end`
 
-Use versions from project files, not memory.
+FeatBit API server.
 
-- Aspire AppHost:
-  - `net10.0`
-  - `Aspire.AppHost.Sdk/13.4.0`
-  - `Aspire.Hosting.PostgreSQL 13.4.0`
-- Back-end API:
-  - ASP.NET Core on `net10.0`
-  - EF Core packages around `10.0.x`
-  - Npgsql EF provider `10.0.1`
-  - API versioning `10.0.0`
-  - Serilog `10.0.0`, OpenTelemetry sink `4.2.0`
-- Evaluation server:
-  - ASP.NET Core on `net10.0`
-  - Serilog `10.0.0`, OpenTelemetry sink `4.2.0`
-- Angular UI:
-  - Angular `19.2.x`
-  - Angular CLI `19.2.15`
-  - TypeScript `5.5.4`
-  - ng-zorro-antd `19.3.1`
-  - RxJS `7.8.x`
-- Release-decision web:
-  - Next.js `16.2.x`
-  - React `19.2.4`
-  - TypeScript `5.x`
-  - Tailwind CSS `4.x`
-  - Prisma `5.22.0` is still present only as a transitional type-generation dependency. Runtime data access must go through FeatBit API.
-- Data analytics:
-  - Python service with Flask `2.1.2`, Werkzeug `2.2.3`, Gunicorn `20.1.0`
-  - Uses Postgres, ClickHouse, Kafka-related libraries, and OpenTelemetry packages.
+- Tech stack: ASP.NET Core / .NET `net10.0`, MediatR-style application requests, EF Core `10.x`, Npgsql, Serilog, and OpenTelemetry.
+- Responsibility: core business APIs, data access, management capabilities, and release-decision/experimentation backend endpoints.
+- Constraint: follow the existing controller -> application request/service -> infrastructure structure. Do not casually change existing public API semantics.
 
-## Aspire Local Debugging
+### `modules/evaluation-server`
 
-Use Aspire as the preferred local debug topology:
+FeatBit evaluation / streaming server.
+
+- Tech stack: ASP.NET Core / .NET `net10.0`, Serilog, OpenTelemetry, and gRPC client dependencies.
+- Responsibility: feature flag evaluation, streaming, and SDK-facing runtime behavior.
+- Constraint: this service focuses on flag evaluation and realtime delivery. It should not own release-decision product experimentation orchestration.
+
+### `modules/front-end`
+
+FeatBit Angular UI.
+
+- Tech stack: Angular `19.2.x`, Angular CLI `19.2.x`, TypeScript `5.5.x`, RxJS `7.8.x`, and ng-zorro-antd `19.3.x`.
+- Responsibility: the main FeatBit product UI.
+- Release-decision direction: `release-decision-web` will be integrated as the experimentation module for `front-end`. In local development, the Angular dev server proxies `/release-decision` to the Next.js app.
+
+### `modules/release-decision-web`
+
+FeatBit experimentation / release decision frontend.
+
+- Tech stack: Next.js `16.2.x`, React `19.2.x`, TypeScript `5.x`, and Tailwind CSS `4.x`.
+- Responsibility: the experimentation module for `front-end`, covering experiment creation, runs, analysis, and release decisions.
+- Data direction: core experiment data must be read and written through the FeatBit API. Do not treat the old Prisma experiment tables as runtime data truth.
+
+### `modules/data-analytics`
+
+Data analytics server.
+
+- Tech stack: Python `3.9` Docker image, Flask `2.1.x`, Werkzeug `2.2.x`, Gunicorn `20.1.x`, and ClickHouse/Kafka/PostgreSQL/MongoDB-related libraries.
+- Status: starting in `5.5.0`, this is legacy and mainly exists for backward compatibility.
+- Constraint: this is not required for new experimentation capabilities. Unless the task explicitly asks for compatibility with old DAS behavior, do not put new release-decision / experimentation business logic here.
+
+## Local Integration Debugging
+
+Use Aspire AppHost as the preferred local integration topology:
 
 ```powershell
 cd C:\Code\featbit\featbit
 aspire run
 ```
 
-The AppHost is `aspire-apphost/FeatBit.AppHost.csproj`.
-
-Current Aspire resources and fixed ports:
-
-- `postgresql`: PostgreSQL exposed at `localhost:5432`
-- `da-server`: `featbit/featbit-data-analytics-server:latest` exposed at `http://localhost:8200`
-- `api-server`: `modules/back-end/src/Api/Api.csproj` exposed at `http://localhost:5000` and `https://localhost:5001`
-- `evaluation-server`: `modules/evaluation-server/src/Api/Api.csproj` exposed at `http://localhost:5100` and `https://localhost:5101`
-- `ui`: Angular UI via `npm run start` in `modules/front-end`, exposed at `http://localhost:4200`
-- `release-decision-web`: Next.js app via `npm run dev` in `modules/release-decision-web`, exposed at `http://localhost:3000` and proxied by Angular at `http://localhost:4200/release-decision`
-
-Do not increment ports after failures. This AppHost intentionally uses fixed ports. If a port is busy, clean up the stale process or container.
-
-Use:
-
-```powershell
-cd C:\Code\featbit\featbit\aspire-apphost
-.\Stop-FeatBitAspire.ps1
-```
-
-If Aspire-created PostgreSQL or data analytics containers are also stale:
-
-```powershell
-.\Stop-FeatBitAspire.ps1 -IncludeDocker
-```
-
-## Aspire PostgreSQL Rules
-
-The Aspire AppHost exposes PostgreSQL directly on `localhost:5432` with:
+The AppHost project is:
 
 ```text
-database: featbit
-username: postgres
-password: please_change_me
+aspire-apphost/FeatBit.AppHost.csproj
 ```
 
-The AppHost bind-mounts:
+Do not solve port conflicts by incrementing ports. This local topology intentionally uses fixed ports. If a port is busy, clean up the stale process or container first.
 
-```text
-infra/postgresql/docker-entrypoint-initdb.d -> /docker-entrypoint-initdb.d
-```
+## Release Decision / Experimentation Rules
 
-It also uses the named Aspire data volume:
+When a task involves release-decision, meaning FeatBit experimentation, especially any of the following areas, first align with `featbit/featbit-release-decision-skills`:
 
-```text
-featbit-aspire-postgres
-```
+- A/B test algorithms
+- Experiment statistics definitions
+- Experiment business workflows
+- Exposure, metrics, guardrails, and decision rules
+- Experiment analysis, conclusion generation, rollout decisions, and rollback decisions
 
-Important:
+Alignment sources:
 
-- Init scripts run only when the PostgreSQL data volume is first initialized.
-- Editing `infra/postgresql/docker-entrypoint-initdb.d/*.sql` does not automatically update an existing Aspire PostgreSQL volume.
-- To apply a new SQL script to an existing Aspire database, connect through the exposed `localhost:5432` port.
-- Do not assume a Docker Compose container name. This is an Aspire-managed PostgreSQL resource, not the Compose topology.
-- If `psql` is unavailable, inspect the Aspire resource/container identity first. Do not guess a `docker exec` target.
+- Local: `~/featbit/featbit-release-decision-skills`
+- GitHub: `github.com/featbit/featbit-release-decision-skills`
+- Priority references: best practices and theory in `tutorials/`, plus experiment workflow guidance in `skills/`.
 
-Example with local `psql`:
+If the local material is unavailable, state the gap and continue with the GitHub version or the current repository context. Do not invent new experimentation algorithms or business workflows without aligning with these materials.
 
-```powershell
-psql "postgresql://postgres:please_change_me@localhost:5432/featbit" -f infra/postgresql/docker-entrypoint-initdb.d/v5.5.0.sql
-```
+## Change Principles
 
-## Release Decision Data Ownership
-
-The canonical release-decision experiment tables live in FeatBit API/PostgreSQL:
-
-```text
-release_decision_experiments
-release_decision_experiment_runs
-release_decision_activities
-release_decision_messages
-```
-
-They are defined in:
-
-```text
-infra/postgresql/docker-entrypoint-initdb.d/v5.5.0.sql
-```
-
-The standalone `modules/release-decision-web` app must query and mutate core experiment data through FeatBit API endpoints, not through old Prisma experiment tables.
-
-Current FeatBit API release-decision endpoint family:
-
-```text
-/api/v1/envs/{envId}/release-decision/experiments
-/api/v1/envs/{envId}/release-decision/experiments/{id}
-/api/v1/envs/{envId}/release-decision/experiments/{id}/runs
-/api/v1/envs/{envId}/release-decision/experiments/{id}/runs/{runId}
-/api/v1/envs/{envId}/release-decision/experiments/{id}/runs/{runId}/analyze
-/api/v1/envs/{envId}/release-decision/experiments/{id}/messages
-```
-
-Experiment stats query endpoint:
-
-```text
-/api/v1/envs/{envId}/experiment-stats/query
-```
-
-`modules/release-decision-web/prisma/schema.prisma` is transitional. Do not apply its old experiment migrations as database truth. Runtime auth/session state is stored in a signed HttpOnly cookie, not in `auth_session`.
-
-## Angular Release Decision Status
-
-The Angular `/release-decision` migration was intentionally backed out in this branch. Do not recreate Angular release-decision UI changes unless explicitly requested.
-
-The release-decision frontend direction is:
-
-1. Keep `modules/release-decision-web` as the standalone frontend for now.
-2. Move server/data logic into FeatBit API.
-3. Serve it under the Angular dev-server origin at `/release-decision`.
-4. Replace Next.js API routes with FeatBit API calls.
-5. `/data/ai-memory`, `/data/apis-sdks`, `/data-warehouse`, marketing/blog pages, memory APIs, agent token APIs, customer endpoint APIs, sandbox0 APIs, and their Prisma models are intentionally removed.
-6. A/B testing analysis routes may remain in Next temporarily, but they must call FeatBit API for experiment data and stats.
-
-## Build And Verification Commands
-
-Back-end API:
-
-```powershell
-dotnet build modules\back-end\src\Api\Api.csproj -p:OutDir=C:\tmp\featbit-api-build\
-```
-
-Evaluation server:
-
-```powershell
-dotnet build modules\evaluation-server\src\Api\Api.csproj -p:OutDir=C:\tmp\featbit-evaluation-build\
-```
-
-Angular UI:
-
-```powershell
-cd modules\front-end
-npm run build:dev
-```
-
-Release-decision web:
-
-```powershell
-cd modules\release-decision-web
-npm ci
-npm run build
-```
-
-When testing the Aspire path, open Angular at `http://localhost:4200` and navigate to `/release-decision`. The Angular proxy forwards that subpath to the Next dev server.
-
-## OpenTelemetry In Aspire
-
-The AppHost configures OpenTelemetry for:
-
-- `api-server`
-- `evaluation-server`
-- `da-server`
-
-The .NET projects export OTLP logs with existing FeatBit configuration. Traces and metrics require .NET automatic instrumentation when running source projects locally.
-
-The AppHost searches for .NET auto-instrumentation at:
-
-```text
-%USERPROFILE%\.otel-dotnet-auto
-%USERPROFILE%\.opentelemetry-dotnet-auto
-C:\Program Files\OpenTelemetry .NET AutoInstrumentation
-C:\ProgramData\OpenTelemetry .NET AutoInstrumentation
-```
-
-If it is not found, do not modify API/evaluation project code just to make Aspire traces appear. Fix the local auto-instrumentation setup instead.
-
-## Coding Boundaries
-
-- Follow existing ASP.NET Core architecture: controllers call MediatR request models; application services define contracts; infrastructure services implement storage.
-- Do not alter existing public API endpoints when adding release-decision support; add new endpoints where needed.
-- Keep SQL changes in the versioned files under `infra/postgresql/docker-entrypoint-initdb.d`.
-- Do not revive DAS as the future experimentation query layer. Release-decision experiment stats should move through FeatBit API and current FeatBit data stores.
-- Do not use ad-hoc port changes as a workaround. Clean up the stale process.
-- Do not revert user changes. Check `git status` before broad edits.
+- Inspect existing project files and code patterns before editing.
+- Do not revert user changes.
+- Put SQL changes in versioned scripts under `infra/postgresql/docker-entrypoint-initdb.d/`.
+- Core release-decision experiment data belongs to the FeatBit API/PostgreSQL. Frontends consume it through APIs.
+- Unless the task explicitly requires it, ignore directories not named in this file.
