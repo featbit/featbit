@@ -23,7 +23,7 @@ public sealed class NullUserVariation : UserVariation
 
     public override bool SendToExperiment => false;
 
-    public NullUserVariation()
+    private NullUserVariation()
         : base(null, "flag archived")
     {
     }
