@@ -7,7 +7,7 @@ This file is the first local operating guide for agents working in this reposito
 - `modules/`: contains the concrete application implementations. For feature work, bug fixes, UI changes, and API changes, start here.
 - `infra/`: infrastructure configuration and initialization scripts, including PostgreSQL, MongoDB, Redis, Kafka, ClickHouse, and OpenTelemetry. Database initialization and migration SQL lives under `infra/postgresql/docker-entrypoint-initdb.d/`.
 - `docker/`: Docker runtime and packaging configuration, including compose fragments, HTTPS setup, local experiment environment files, and UI/API bundle assets.
-- `.aspire/`: the .NET Aspire AppHost for local integration debugging. This is the preferred ai-native local debug entry point for starting PostgreSQL, the API server, the evaluation server, the front-end, and release-decision-web together.
+- `.aspire/`: the Microsoft Aspire AppHost for local integration debugging. This is the preferred ai-native local debug entry point for starting PostgreSQL, the API server, the evaluation server, the front-end, and release-decision-web together.
 - Other directories are not the default focus for agents. Ignore them unless the task explicitly requires them.
 
 ## Modules
