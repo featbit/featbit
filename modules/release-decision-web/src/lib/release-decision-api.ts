@@ -15,6 +15,8 @@ export interface ReleaseDecisionExperiment {
   featbitProjectKey: string | null;
   featBitEnvId?: string | null;
   featbitEnvId: string | null;
+  runCount: number;
+  runMethodSummary: string | null;
   createdAt: string;
   updatedAt: string;
 }

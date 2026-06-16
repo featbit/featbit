@@ -31,6 +31,10 @@ public class ReleaseDecisionExperimentVm
 
     public Guid? FeatBitEnvId { get; set; }
 
+    public int RunCount { get; set; }
+
+    public string RunMethodSummary { get; set; }
+
     public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }

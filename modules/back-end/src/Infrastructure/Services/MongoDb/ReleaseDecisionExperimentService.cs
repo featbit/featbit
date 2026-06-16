@@ -269,13 +269,36 @@ public class ReleaseDecisionExperimentService(MongoDbClient mongoDb) : IReleaseD
             .Limit(pageSize)
             .ToListAsync();
 
+        var runLookup = await BuildRunLookupAsync(experiments.Select(x => x.Id).ToArray());
+
         return new PagedResult<ReleaseDecisionExperimentVm>(
             totalCount,
-            experiments.Select(ToVm).ToArray());
+            experiments.Select(experiment => ToVm(experiment, runLookup)).ToArray());
     }
 
-    private static ReleaseDecisionExperimentVm ToVm(ReleaseDecisionExperiment experiment)
+    private async Task<Dictionary<Guid, string[]>> BuildRunLookupAsync(Guid[] experimentIds)
     {
+        if (experimentIds.Length == 0)
+        {
+            return new Dictionary<Guid, string[]>();
+        }
+
+        return (await mongoDb.CollectionOf<ReleaseDecisionExperimentRun>()
+                .Find(x => experimentIds.Contains(x.ExperimentId))
+                .Project(x => new { x.ExperimentId, x.Method })
+                .ToListAsync())
+            .GroupBy(x => x.ExperimentId)
+            .ToDictionary(x => x.Key, x => x.Select(run => run.Method).ToArray());
+    }
+
+    private static ReleaseDecisionExperimentVm ToVm(
+        ReleaseDecisionExperiment experiment,
+        IReadOnlyDictionary<Guid, string[]>? runLookup = null)
+    {
+        var methods = runLookup != null && runLookup.TryGetValue(experiment.Id, out var lookupMethods)
+            ? lookupMethods
+            : experiment.ExperimentRuns.Select(x => x.Method).ToArray();
+
         return new ReleaseDecisionExperimentVm
         {
             Id = experiment.Id,
@@ -285,8 +308,29 @@ public class ReleaseDecisionExperimentService(MongoDbClient mongoDb) : IReleaseD
             FlagKey = experiment.FlagKey,
             FeatBitProjectKey = experiment.FeatBitProjectKey,
             FeatBitEnvId = experiment.FeatBitEnvId,
+            RunCount = methods.Length,
+            RunMethodSummary = BuildRunMethodSummary(methods),
             CreatedAt = experiment.CreatedAt,
             UpdatedAt = experiment.UpdatedAt
+        };
+    }
+
+    private static string BuildRunMethodSummary(IEnumerable<string> methods)
+    {
+        var normalized = methods.ToArray();
+        if (normalized.Length == 0)
+        {
+            return "No runs";
+        }
+
+        var hasBandit = normalized.Any(method => method == "bandit");
+        var hasBayesian = normalized.Any(method => method != "bandit");
+
+        return (hasBayesian, hasBandit) switch
+        {
+            (true, true) => "Bayesian + Bandit arms",
+            (false, true) => "Bandit arms",
+            _ => "Bayesian"
         };
     }
 

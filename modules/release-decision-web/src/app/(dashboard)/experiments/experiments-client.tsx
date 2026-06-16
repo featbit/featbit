@@ -10,6 +10,11 @@ import { Input } from "@/components/ui/input";
 import { Plus, Loader2, Search, X } from "lucide-react";
 import type { Experiment } from "@/generated/prisma";
 
+type ExperimentListItem = Experiment & {
+  runCount?: number | null;
+  runMethodSummary?: string | null;
+};
+
 const STAGE_OPTIONS = [
   { value: "", label: "All stages" },
   { value: "hypothesis", label: "Intent & Hypothesis" },
@@ -61,7 +66,7 @@ function formatDate(value: Date) {
 
 export function ExperimentsClient() {
   const { isAuthenticated, sessionStatus, projectEnv } = useAuth();
-  const [experiments, setExperiments] = useState<Experiment[]>([]);
+  const [experiments, setExperiments] = useState<ExperimentListItem[]>([]);
   const [filters, setFilters] = useState(readInitialFilters);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -197,6 +202,7 @@ export function ExperimentsClient() {
                 <tr>
                   <th>Name</th>
                   <th>Feature flag</th>
+                  <th>Runs</th>
                   <th>Stage</th>
                   <th>Last change</th>
                   <th>Actions</th>
@@ -231,6 +237,21 @@ export function ExperimentsClient() {
                           </button>
                         ) : (
                           <span className="fb-muted-text">Not bound</span>
+                        )}
+                      </td>
+                      <td className="fb-runs-cell">
+                        {(experiment.runCount ?? 0) > 0 ? (
+                          <>
+                            <div className="fb-run-count">
+                              {experiment.runCount}{" "}
+                              {experiment.runCount === 1 ? "run" : "runs"}
+                            </div>
+                            <div className="fb-item-meta">
+                              {experiment.runMethodSummary ?? "Bayesian"}
+                            </div>
+                          </>
+                        ) : (
+                          <span className="fb-muted-text">No runs</span>
                         )}
                       </td>
                       <td>

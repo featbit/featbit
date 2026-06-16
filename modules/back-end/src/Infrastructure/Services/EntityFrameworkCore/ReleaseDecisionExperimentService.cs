@@ -514,30 +514,43 @@ public class ReleaseDecisionExperimentService(
         var pageSize = filter.PageSize <= 0 ? 10 : filter.PageSize;
         var pageIndex = Math.Max(filter.PageIndex, 0);
 
-        var items = await query
+        var experiments = await query
             .OrderByDescending(x => x.UpdatedAt)
             .ThenByDescending(x => x.CreatedAt)
             .Skip(pageIndex * pageSize)
             .Take(pageSize)
-            .Select(x => new ReleaseDecisionExperimentVm
-            {
-                Id = x.Id,
-                Name = x.Name,
-                Description = x.Description,
-                Stage = x.Stage,
-                FlagKey = x.FlagKey,
-                FeatBitProjectKey = x.FeatBitProjectKey,
-                FeatBitEnvId = x.FeatBitEnvId,
-                CreatedAt = x.CreatedAt,
-                UpdatedAt = x.UpdatedAt
-            })
             .ToListAsync();
+
+        var runLookup = await BuildRunLookupAsync(experiments.Select(x => x.Id).ToArray());
+        var items = experiments.Select(experiment => ToVm(experiment, runLookup)).ToArray();
 
         return new PagedResult<ReleaseDecisionExperimentVm>(totalCount, items);
     }
 
-    private static ReleaseDecisionExperimentVm ToVm(ReleaseDecisionExperiment experiment)
+    private async Task<Dictionary<Guid, string[]>> BuildRunLookupAsync(Guid[] experimentIds)
     {
+        if (experimentIds.Length == 0)
+        {
+            return new Dictionary<Guid, string[]>();
+        }
+
+        return (await dbContext.Set<ReleaseDecisionExperimentRun>()
+                .AsNoTracking()
+                .Where(x => experimentIds.Contains(x.ExperimentId))
+                .Select(x => new { x.ExperimentId, x.Method })
+                .ToListAsync())
+            .GroupBy(x => x.ExperimentId)
+            .ToDictionary(x => x.Key, x => x.Select(run => run.Method).ToArray());
+    }
+
+    private static ReleaseDecisionExperimentVm ToVm(
+        ReleaseDecisionExperiment experiment,
+        IReadOnlyDictionary<Guid, string[]>? runLookup = null)
+    {
+        var methods = runLookup != null && runLookup.TryGetValue(experiment.Id, out var lookupMethods)
+            ? lookupMethods
+            : experiment.ExperimentRuns.Select(x => x.Method).ToArray();
+
         return new ReleaseDecisionExperimentVm
         {
             Id = experiment.Id,
@@ -547,8 +560,29 @@ public class ReleaseDecisionExperimentService(
             FlagKey = experiment.FlagKey,
             FeatBitProjectKey = experiment.FeatBitProjectKey,
             FeatBitEnvId = experiment.FeatBitEnvId,
+            RunCount = methods.Length,
+            RunMethodSummary = BuildRunMethodSummary(methods),
             CreatedAt = experiment.CreatedAt,
             UpdatedAt = experiment.UpdatedAt
+        };
+    }
+
+    private static string BuildRunMethodSummary(IEnumerable<string> methods)
+    {
+        var normalized = methods.ToArray();
+        if (normalized.Length == 0)
+        {
+            return "No runs";
+        }
+
+        var hasBandit = normalized.Any(method => method == "bandit");
+        var hasBayesian = normalized.Any(method => method != "bandit");
+
+        return (hasBayesian, hasBandit) switch
+        {
+            (true, true) => "Bayesian + Bandit arms",
+            (false, true) => "Bandit arms",
+            _ => "Bayesian"
         };
     }
 

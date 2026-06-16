@@ -4,6 +4,7 @@ import DashboardLayout from "@/app/(dashboard)/layout";
 import AuthLayout from "@/app/(auth)/layout";
 import LoginPage from "@/app/(auth)/login/page";
 import ExperimentsPage from "@/app/(dashboard)/experiments/page";
+import MetricsPage from "@/app/(dashboard)/metrics/page";
 import NewExperimentPage from "@/app/(dashboard)/experiments/new/page";
 import EnvSettingsPage from "@/app/(dashboard)/data/env-settings/page";
 import { ExperimentDetailClient } from "@/app/(project)/experiments/[id]/experiment-detail-client";
@@ -40,6 +41,8 @@ function Routes() {
   let isExperimentDetailPage = false;
   if (routePath === "/") {
     page = <ExperimentsPage />;
+  } else if (routePath === "/metrics") {
+    page = <MetricsPage />;
   } else if (routePath === "/new") {
     page = <NewExperimentPage />;
   } else if (routePath === "/data/env-settings") {

@@ -65,7 +65,7 @@ function mapExperiment(experiment: ReleaseDecisionExperiment): Experiment {
       experiment.featbitEnvId ?? experiment.featBitEnvId ?? null,
     createdAt: toDate(experiment.createdAt),
     updatedAt: toDate(experiment.updatedAt),
-  } as Experiment;
+  } as unknown as Experiment;
 }
 
 function mapRun(run: ReleaseDecisionExperimentRun): ExperimentRun {

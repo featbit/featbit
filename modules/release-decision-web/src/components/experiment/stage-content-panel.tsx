@@ -176,7 +176,7 @@ function SettingsContent({
           </div>
           <div>
             <span className="text-xs font-medium text-muted-foreground uppercase">Description</span>
-            <p className="leading-relaxed whitespace-pre-line">
+            <p className="fb-wrap-text leading-relaxed whitespace-pre-line">
               {experiment.description || (
                 <span className="italic text-muted-foreground/50">Not set (edit in Hypothesis stage)</span>
               )}
@@ -227,7 +227,7 @@ function MetricLines({ value }: { value: string | null | undefined }) {
       return (
         <ul className="space-y-1">
           {parsed.items.map((g, i) => (
-            <li key={i} className="text-sm">
+            <li key={i} className="fb-wrap-text text-sm">
               <span className="font-mono font-medium">{g.name ?? g.event ?? ""}</span>
               {g.description && (
                 <span className="text-muted-foreground"> — {g.description}</span>
@@ -251,25 +251,25 @@ function MetricLines({ value }: { value: string | null | undefined }) {
 
       return (
         <div className="space-y-0.5">
-          {item.name && <p className="text-sm leading-relaxed font-medium">{item.name}</p>}
+          {item.name && <p className="fb-wrap-text text-sm leading-relaxed font-medium">{item.name}</p>}
           {item.event && (
-            <p className="text-xs font-mono text-muted-foreground">{technicalLine}</p>
+            <p className="fb-wrap-text text-xs font-mono text-muted-foreground">{technicalLine}</p>
           )}
           {item.description && (
-            <p className="text-xs text-muted-foreground/70 leading-relaxed">{item.description}</p>
+            <p className="fb-wrap-text text-xs text-muted-foreground/70 leading-relaxed">{item.description}</p>
           )}
         </div>
       );
     }
     case "plain":
       if (parsed.lines.length === 1) {
-        return <p className="text-sm leading-relaxed">{parsed.lines[0]}</p>;
+        return <p className="fb-wrap-text text-sm leading-relaxed">{parsed.lines[0]}</p>;
       }
 
       return (
         <ul className="space-y-0.5">
           {parsed.lines.map((line, i) => (
-            <li key={i} className="text-sm leading-relaxed">{line}</li>
+            <li key={i} className="fb-wrap-text text-sm leading-relaxed">{line}</li>
           ))}
         </ul>
       );
@@ -327,7 +327,7 @@ function FieldsSection({
               {key === "guardrails" ? (
                 <MetricLines value={value} />
               ) : (
-                <p className="text-sm leading-relaxed whitespace-pre-line">
+                <p className="fb-wrap-text text-sm leading-relaxed whitespace-pre-line">
                   {value || (
                     <span className="italic text-muted-foreground/50">
                       Not set
@@ -707,7 +707,7 @@ function ExperimentRunCard({
               Why This Method
             </CollapsibleTrigger>
             <CollapsibleContent className="mt-1">
-              <p className="text-sm leading-relaxed text-muted-foreground pl-5">
+              <p className="fb-wrap-text text-sm leading-relaxed text-muted-foreground pl-5">
                 {run.methodReason}
               </p>
             </CollapsibleContent>
@@ -798,7 +798,7 @@ function LearningSection({
                   <span className="text-xs font-medium text-muted-foreground uppercase">
                     What Changed
                   </span>
-                  <p className="text-sm leading-relaxed">{exp.whatChanged}</p>
+                  <p className="fb-wrap-text text-sm leading-relaxed">{exp.whatChanged}</p>
                 </div>
               )}
               {exp.whatHappened && (
@@ -806,7 +806,7 @@ function LearningSection({
                   <span className="text-xs font-medium text-muted-foreground uppercase">
                     What Happened
                   </span>
-                  <p className="text-sm leading-relaxed">{exp.whatHappened}</p>
+                  <p className="fb-wrap-text text-sm leading-relaxed">{exp.whatHappened}</p>
                 </div>
               )}
               {exp.confirmedOrRefuted && (
@@ -814,7 +814,7 @@ function LearningSection({
                   <span className="text-xs font-medium text-muted-foreground uppercase">
                     Confirmed or Refuted
                   </span>
-                  <p className="text-sm leading-relaxed">
+                  <p className="fb-wrap-text text-sm leading-relaxed">
                     {exp.confirmedOrRefuted}
                   </p>
                 </div>
@@ -824,7 +824,7 @@ function LearningSection({
                   <span className="text-xs font-medium text-muted-foreground uppercase">
                     Why It Happened
                   </span>
-                  <p className="text-sm leading-relaxed">
+                  <p className="fb-wrap-text text-sm leading-relaxed">
                     {exp.whyItHappened}
                   </p>
                 </div>
@@ -834,7 +834,7 @@ function LearningSection({
                   <span className="text-xs font-medium text-muted-foreground uppercase">
                     Next Hypothesis
                   </span>
-                  <p className="text-sm leading-relaxed">
+                  <p className="fb-wrap-text text-sm leading-relaxed">
                     {exp.nextHypothesis}
                   </p>
                 </div>
@@ -872,7 +872,7 @@ function ConflictAnalysisSection({
         <span>Experiment Conflict Check</span>
       </div>
       <div
-        className={`rounded-md border px-3 py-3 text-sm leading-relaxed whitespace-pre-line ${
+        className={`fb-wrap-text rounded-md border px-3 py-3 text-sm leading-relaxed whitespace-pre-line ${
           hasConflict
             ? "border-amber-200 bg-amber-50/50 dark:border-amber-800 dark:bg-amber-950/20"
             : "border-emerald-200 bg-emerald-50/50 dark:border-emerald-800 dark:bg-emerald-950/20"

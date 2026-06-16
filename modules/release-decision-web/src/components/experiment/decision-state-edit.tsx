@@ -89,8 +89,8 @@ export function EditDecisionStateDialog({
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
+        <DialogContent className="max-h-[90vh] overflow-hidden p-0 sm:max-w-lg">
+          <DialogHeader className="px-4 pt-4 pr-10">
             <DialogTitle className="text-sm">Edit Decision State</DialogTitle>
           </DialogHeader>
 
@@ -99,29 +99,31 @@ export function EditDecisionStateDialog({
               await updateDecisionStateAction(formData);
               setOpen(false);
             }}
-            className="space-y-3 pt-1"
+            className="flex min-h-0 flex-col"
           >
             <input type="hidden" name="experimentId" value={experiment.id} />
 
-            {visibleFields.map(({ key, label, placeholder, rows }) => (
-              <div key={key} className="space-y-1">
-                <Label htmlFor={`ds-${key}`} className="text-xs">
-                  {label}
-                </Label>
-                <Textarea
-                  id={`ds-${key}`}
-                  name={key}
-                  defaultValue={
-                    (experiment[key] as string | null | undefined) ?? ""
-                  }
-                  placeholder={placeholder}
-                  rows={rows}
-                  className="text-xs resize-y"
-                />
-              </div>
-            ))}
+            <div className="max-h-[calc(90vh-8rem)] min-w-0 space-y-3 overflow-y-auto overflow-x-hidden px-4 pb-4">
+              {visibleFields.map(({ key, label, placeholder, rows }) => (
+                <div key={key} className="min-w-0 space-y-1">
+                  <Label htmlFor={`ds-${key}`} className="text-xs">
+                    {label}
+                  </Label>
+                  <Textarea
+                    id={`ds-${key}`}
+                    name={key}
+                    defaultValue={
+                      (experiment[key] as string | null | undefined) ?? ""
+                    }
+                    placeholder={placeholder}
+                    rows={rows}
+                    className="max-h-40 resize-y text-xs"
+                  />
+                </div>
+              ))}
+            </div>
 
-            <DialogFooter className="gap-2 pt-1">
+            <DialogFooter className="mx-0 mb-0 shrink-0 gap-2 rounded-b-xl px-4 py-3">
               <Button
                 type="button"
                 variant="outline"
