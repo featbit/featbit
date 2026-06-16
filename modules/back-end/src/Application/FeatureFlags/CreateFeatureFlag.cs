@@ -83,10 +83,12 @@ public class CreateFeatureFlagValidator : AbstractValidator<CreateFeatureFlag>
     public CreateFeatureFlagValidator()
     {
         RuleFor(x => x.Name)
-            .NotEmpty().WithErrorCode(ErrorCodes.Required("name"));
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("name"))
+            .MaximumLength(128).WithErrorCode(ErrorCodes.Invalid("name"));
 
         RuleFor(x => x.Key)
             .NotEmpty().WithErrorCode(ErrorCodes.Required("key"))
+            .MaximumLength(128).WithErrorCode(ErrorCodes.Invalid("key"))
             .Matches(FeatureFlag.KeyPattern).WithErrorCode(ErrorCodes.Invalid("key"));
 
         RuleFor(x => x.VariationType)

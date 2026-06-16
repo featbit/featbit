@@ -546,7 +546,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">32,33</context>
+          <context context-type="linenumber">21,22</context>
         </context-group>
         <target>保存</target>
       </trans-unit>
@@ -585,8 +585,8 @@
           <context context-type="linenumber">86,87</context>
         </context-group>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/index/flag-references-modal.ts</context>
-          <context context-type="linenumber">36,37</context>
+          <context context-type="sourcefile">src/app/features/safe/segments/flag-references-modal.ts</context>
+          <context context-type="linenumber">44,45</context>
         </context-group>
         <target>确认</target>
       </trans-unit>
@@ -630,7 +630,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">124,127</context>
+          <context context-type="linenumber">113,116</context>
         </context-group>
         <target>您未被授权进行该操作, 请联系账户管理员添加相关权限</target>
       </trans-unit>
@@ -906,7 +906,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">183</context>
+          <context context-type="linenumber">170</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.ts</context>
@@ -1514,7 +1514,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/download-confirm-modal/download-confirm-modal.html</context>
-          <context context-type="linenumber">28,30</context>
+          <context context-type="linenumber">25,27</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.html</context>
@@ -1614,7 +1614,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">93,94</context>
+          <context context-type="linenumber">82,83</context>
         </context-group>
         <target>规则</target>
       </trans-unit>
@@ -1890,7 +1890,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">73,74</context>
+          <context context-type="linenumber">62,63</context>
         </context-group>
         <target>不包含用户</target>
       </trans-unit>
@@ -1902,7 +1902,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">61,62</context>
+          <context context-type="linenumber">50,51</context>
         </context-group>
         <target>包含用户</target>
       </trans-unit>
@@ -2979,7 +2979,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">185</context>
+          <context context-type="linenumber">172</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.ts</context>
@@ -5797,7 +5797,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
-          <context context-type="linenumber">72,74</context>
+          <context context-type="linenumber">62,64</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/experiments/metrics/metrics.component.html</context>
@@ -6782,7 +6782,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
-          <context context-type="linenumber">86,88</context>
+          <context context-type="linenumber">76,78</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/index/index.component.html</context>
@@ -7450,7 +7450,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/download-confirm-modal/download-confirm-modal.html</context>
-          <context context-type="linenumber">35,37</context>
+          <context context-type="linenumber">32,34</context>
         </context-group>
         <target>继续</target>
       </trans-unit>
@@ -7554,35 +7554,19 @@
         </context-group>
         <target>当筛选结果超过此限制时，不支持下载。请缩小筛选范围并重试。</target>
       </trans-unit>
-      <trans-unit id="common.total" datatype="html">
-        <source>Total</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/end-users/index/download-confirm-modal/download-confirm-modal.html</context>
-          <context context-type="linenumber">25,26</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/insights/insights.component.ts</context>
-          <context context-type="linenumber">199</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/relay-proxies/index/index.component.html</context>
-          <context context-type="linenumber">77</context>
-        </context-group>
-        <target>总共</target>
-      </trans-unit>
-      <trans-unit id="users.idx.filter-by-property" datatype="html">
-        <source>Filter by property</source>
+      <trans-unit id="users.idx.search-by-name-or-keyid" datatype="html">
+        <source>Search by name or keyId</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
           <context context-type="linenumber">10,11</context>
         </context-group>
-        <target>按属性查找</target>
+        <target>按名字或者 keyId 查找</target>
       </trans-unit>
       <trans-unit id="common.display" datatype="html">
         <source>Display</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
-          <context context-type="linenumber">31,32</context>
+          <context context-type="linenumber">25,26</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/global-user/global-user.component.html</context>
@@ -7594,7 +7578,7 @@
         <source>Upload</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
-          <context context-type="linenumber">38,39</context>
+          <context context-type="linenumber">32,33</context>
         </context-group>
         <target>上传</target>
       </trans-unit>
@@ -7602,7 +7586,7 @@
         <source>Properties</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
-          <context context-type="linenumber">42,44</context>
+          <context context-type="linenumber">36,38</context>
         </context-group>
         <target>属性管理</target>
       </trans-unit>
@@ -7610,7 +7594,7 @@
         <source>Download</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
-          <context context-type="linenumber">49,51</context>
+          <context context-type="linenumber">43,45</context>
         </context-group>
         <target>下载</target>
       </trans-unit>
@@ -7618,13 +7602,81 @@
         <source>Evaluate</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
-          <context context-type="linenumber">84,85</context>
+          <context context-type="linenumber">74,75</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/workspaces/global-user/global-user.component.html</context>
           <context context-type="linenumber">70,71</context>
         </context-group>
         <target>评估</target>
+      </trans-unit>
+      <trans-unit id="common.prev" datatype="html">
+        <source>Prev</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
+          <context context-type="linenumber">90,91</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">155,157</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/test-app/test-app.component.html</context>
+          <context context-type="linenumber">45,46</context>
+        </context-group>
+        <target>上一步</target>
+      </trans-unit>
+      <trans-unit id="common.next" datatype="html">
+        <source>Next</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
+          <context context-type="linenumber">98,99</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
+          <context context-type="linenumber">158,159</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
+          <context context-type="linenumber">128,129</context>
+        </context-group>
+        <target>下一步</target>
+      </trans-unit>
+      <trans-unit id="common.failed-to-load-data" datatype="html">
+        <source>Failed to load data</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.ts</context>
+          <context context-type="linenumber">152</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
+          <context context-type="linenumber">190</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
+          <context context-type="linenumber">165</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
+          <context context-type="linenumber">183</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
+          <context context-type="linenumber">245</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.ts</context>
+          <context context-type="linenumber">65</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/global-user/global-user.component.ts</context>
+          <context context-type="linenumber">58</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.ts</context>
+          <context context-type="linenumber">247</context>
+        </context-group>
+        <target>加载数据失败</target>
       </trans-unit>
       <trans-unit id="expt.expt" datatype="html">
         <source>Experiments</source>
@@ -8558,6 +8610,18 @@
         </context-group>
         <target>过去12个月</target>
       </trans-unit>
+      <trans-unit id="common.total" datatype="html">
+        <source>Total</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/insights/insights.component.ts</context>
+          <context context-type="linenumber">199</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/relay-proxies/index/index.component.html</context>
+          <context context-type="linenumber">77</context>
+        </context-group>
+        <target>总共</target>
+      </trans-unit>
       <trans-unit id="ff.ff-archived" datatype="html">
         <source>Archived</source>
         <context-group purpose="location">
@@ -8737,38 +8801,6 @@
           <context context-type="linenumber">379,382</context>
         </context-group>
         <target>该返回值正在被 <x id="INTERPOLATION" equiv-text="{{variationExptReferences.length}}"/> 个实验所引用，在删除该返回值之前需要先移除这些引用！</target>
-      </trans-unit>
-      <trans-unit id="common.failed-to-load-data" datatype="html">
-        <source>Failed to load data</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">190</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">165</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">183</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/feature-flags/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">245</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/details/setting/setting.component.ts</context>
-          <context context-type="linenumber">65</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/workspaces/global-user/global-user.component.ts</context>
-          <context context-type="linenumber">58</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/workspaces/usage/usage.component.ts</context>
-          <context context-type="linenumber">247</context>
-        </context-group>
-        <target>加载数据失败</target>
       </trans-unit>
       <trans-unit id="ff.variation-used-by-targeting-users" datatype="html">
         <source>This variation is used by targeting users, remove the reference before it can be safely removed</source>
@@ -9393,30 +9425,6 @@
           <context context-type="linenumber">100,102</context>
         </context-group>
         <target>打开项目的 pom.xml 文件并添加以下依赖项。</target>
-      </trans-unit>
-      <trans-unit id="common.prev" datatype="html">
-        <source>Prev</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
-          <context context-type="linenumber">155,157</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/get-started/steps/test-app/test-app.component.html</context>
-          <context context-type="linenumber">45,46</context>
-        </context-group>
-        <target>上一步</target>
-      </trans-unit>
-      <trans-unit id="common.next" datatype="html">
-        <source>Next</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/get-started/steps/connect-an-sdk/connect-an-sdk.component.html</context>
-          <context context-type="linenumber">158,159</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/get-started/steps/create-feature-flag/create-feature-flag.component.html</context>
-          <context context-type="linenumber">128,129</context>
-        </context-group>
-        <target>下一步</target>
       </trans-unit>
       <trans-unit id="get-started.create-flag-title" datatype="html">
         <source>Create a Feature Flag</source>
@@ -11051,75 +11059,83 @@
         </context-group>
         <target>共享范围</target>
       </trans-unit>
-      <trans-unit id="segment.details.segment-not-used" datatype="html">
-        <source>This segment is not used by any feature flag</source>
+      <trans-unit id="segment.details.flag-references-tooltip" datatype="html">
+        <source>Click to view details</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">6,8</context>
+          <context context-type="linenumber">9,10</context>
         </context-group>
-        <target>该用户组没有被任何开关引用</target>
+        <target>点击查看详情</target>
       </trans-unit>
-      <trans-unit id="segment.details.this-segment" datatype="html">
-        <source>This segment is used by</source>
+      <trans-unit id="segment.details.referenced-by" datatype="html">
+        <source>Referenced by</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">11,12</context>
+          <context context-type="linenumber">12,13</context>
         </context-group>
-        <target>该用户组在</target>
+        <target>被</target>
       </trans-unit>
       <trans-unit id="segment.details.num-ff" datatype="html">
         <source>feature flag(s)</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">13,14</context>
+          <context context-type="linenumber">14,16</context>
         </context-group>
-        <target>个开关中被引用</target>
+        <target>个开关引用</target>
       </trans-unit>
-      <trans-unit id="segment.details.in-other-environment" datatype="html">
-        <source>(in other environment)</source>
+      <trans-unit id="segment.details.no-flag-references" datatype="html">
+        <source>No flag references</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">24,27</context>
+          <context context-type="linenumber">17,19</context>
         </context-group>
-        <target>(在其他环境中)</target>
+        <target>没有开关引用</target>
       </trans-unit>
       <trans-unit id="common.targeting-users" datatype="html">
         <source>Targeting users</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.html</context>
-          <context context-type="linenumber">45,46</context>
+          <context context-type="linenumber">34,35</context>
         </context-group>
         <target>目标用户</target>
+      </trans-unit>
+      <trans-unit id="segment.details.flag-references-modal-title" datatype="html">
+        <source>Feature flag references</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.html</context>
+          <context context-type="linenumber">128,129</context>
+        </context-group>
+        <target>开关引用</target>
+      </trans-unit>
+      <trans-unit id="segment.details.flag-references-modal-description" datatype="html">
+        <source>This segment is referenced by the following feature flags.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.html</context>
+          <context context-type="linenumber">130,131</context>
+        </context-group>
+        <target>此用户组正在被以下开关引用</target>
       </trans-unit>
       <trans-unit id="common.load-data-failed" datatype="html">
         <source>Failed to load data, please refresh the page.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/segments/details/targeting/targeting.component.ts</context>
-          <context context-type="linenumber">113</context>
+          <context context-type="linenumber">112</context>
         </context-group>
         <target>加载数据失败，请刷新页面重试。</target>
       </trans-unit>
-      <trans-unit id="segment.index.flag-references-modal-title" datatype="html">
-        <source>Can&apos;t archive segment</source>
+      <trans-unit id="segment.details.not-in-this-environment" datatype="html">
+        <source>(not in this environment)</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/index/flag-references-modal.ts</context>
-          <context context-type="linenumber">16,17</context>
+          <context context-type="sourcefile">src/app/features/safe/segments/flag-references-modal.ts</context>
+          <context context-type="linenumber">32,35</context>
         </context-group>
-        <target>无法存档用户组</target>
-      </trans-unit>
-      <trans-unit id="segment.index.flag-references-modal-description" datatype="html">
-        <source>We cannot archive this segment because it is being referenced by the following feature flags.</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/index/flag-references-modal.ts</context>
-          <context context-type="linenumber">21,23</context>
-        </context-group>
-        <target>我们无法存档该用户组，因为它正在被以下开关引用。</target>
+        <target>（不在当前环境）</target>
       </trans-unit>
       <trans-unit id="segment.index.flag-references-modal-empty" datatype="html">
         <source>No feature flags are referencing this segment.</source>
         <context-group purpose="location">
-          <context context-type="sourcefile">src/app/features/safe/segments/index/flag-references-modal.ts</context>
-          <context context-type="linenumber">31,34</context>
+          <context context-type="sourcefile">src/app/features/safe/segments/flag-references-modal.ts</context>
+          <context context-type="linenumber">38,42</context>
         </context-group>
         <target>没有开关引用此用户组。</target>
       </trans-unit>
@@ -11138,6 +11154,22 @@
           <context context-type="linenumber">119,120</context>
         </context-group>
         <target>确定要恢复该用户组吗？</target>
+      </trans-unit>
+      <trans-unit id="segment.index.flag-references-modal-title" datatype="html">
+        <source>Can&apos;t archive segment</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
+          <context context-type="linenumber">158,159</context>
+        </context-group>
+        <target>无法存档用户组</target>
+      </trans-unit>
+      <trans-unit id="segment.index.flag-references-modal-description" datatype="html">
+        <source>We cannot archive this segment because it is being referenced by the following feature flags.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/segments/index/index.component.html</context>
+          <context context-type="linenumber">160,161</context>
+        </context-group>
+        <target>我们无法存档该用户组，因为它正在被以下开关引用。</target>
       </trans-unit>
       <trans-unit id="segments.archive-confirm-message" datatype="html">
         <source>Are you sure to archive segment</source>

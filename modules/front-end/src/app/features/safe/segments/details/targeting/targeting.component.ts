@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { EnvUserService } from '@services/env-user.service';
 import { SegmentService } from '@services/segment.service';
@@ -8,9 +8,8 @@ import { IUserProp, IUserType } from '@shared/types';
 import { ISegment, ISegmentFlagReference, Segment } from '../../types/segments';
 import { CdkDragDrop, moveItemInArray } from "@angular/cdk/drag-drop";
 import { EnvUserPropService } from "@services/env-user-prop.service";
-import { EnvUserFilter } from "@features/safe/end-users/types/featureflag-user";
+import { EnvUserSearchFilter } from "@features/safe/end-users/types/featureflag-user";
 import { ICondition, IRule } from "@shared/rules";
-import { getPathPrefix } from "@utils/index";
 import { RefTypeEnum } from "@core/components/audit-log/types";
 import { getCurrentProjectEnv } from "@utils/project-env";
 import { finalize } from 'rxjs';
@@ -33,6 +32,7 @@ export class TargetingComponent implements OnInit {
   public id: string;
   public targetUsersActive = true;
   public flagReferences: ISegmentFlagReference[] = [];
+  flagReferencesModalVisible: boolean = false;
 
   reviewModalVisible: boolean = false;
   reviewModalData: ChangeReviewModalData;
@@ -64,7 +64,6 @@ export class TargetingComponent implements OnInit {
   currentEnvId: string = '';
 
   constructor(
-    private router: Router,
     private route: ActivatedRoute,
     private segmentService: SegmentService,
     private envUserService: EnvUserService,
@@ -115,18 +114,6 @@ export class TargetingComponent implements OnInit {
     });
   }
 
-  public openFlagPage(flag: ISegmentFlagReference) {
-    if (flag.envId !== this.currentEnvId) {
-      return;
-    }
-
-    const url = this.router.serializeUrl(
-      this.router.createUrlTree([`/${getPathPrefix()}feature-flags/${flag.key}/targeting`])
-    );
-
-    window.open(url, '_blank');
-  }
-
   private loadSegment(segment: ISegment) {
     this.segmentDetail = new Segment(segment);
     // load users
@@ -147,12 +134,12 @@ export class TargetingComponent implements OnInit {
     return { id: '', keyId, name: keyId, envId: null };
   }
 
-  public onSearchUser(filter: EnvUserFilter = new EnvUserFilter()) {
+  public onSearchUser(filter: EnvUserSearchFilter = new EnvUserSearchFilter()) {
     // shared segment can only reference global users
     filter.globalUserOnly = this.segmentDetail.isShared;
 
-    this.envUserService.search(filter).subscribe(pagedResult => {
-      this.userList = [...pagedResult.items];
+    this.envUserService.search(filter).subscribe(users => {
+      this.userList = users;
     })
   }
 
