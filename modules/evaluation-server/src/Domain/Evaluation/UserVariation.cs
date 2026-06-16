@@ -6,14 +6,26 @@ public abstract class UserVariation
 {
     public abstract bool SendToExperiment { get; }
 
-    public Variation Variation { get; set; }
+    public Variation? Variation { get; set; }
 
     public string MatchReason { get; set; }
 
-    protected UserVariation(Variation variation, string matchReason)
+    protected UserVariation(Variation? variation, string matchReason)
     {
         Variation = variation;
         MatchReason = matchReason;
+    }
+}
+
+public sealed class NullUserVariation : UserVariation
+{
+    public static readonly NullUserVariation Instance = new();
+
+    public override bool SendToExperiment => false;
+
+    public NullUserVariation()
+        : base(null, "flag archived")
+    {
     }
 }
 
