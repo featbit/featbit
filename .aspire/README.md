@@ -11,7 +11,7 @@ This .NET Aspire AppHost runs a local pg-only FeatBit standalone debug topology:
 ## Run
 
 ```powershell
-cd aspire-apphost
+cd .aspire
 dotnet restore
 aspire run
 ```

@@ -6,7 +6,7 @@ This is the standalone React + Vite frontend for release-decision experiments.
 
 Aspire starts this app as `release-decision-web` on port `3000`.
 
-The app talks to the FeatBit API server through `VITE_FEATBIT_API_URL`, which is set by `aspire-apphost/AppHost.cs` to `http://localhost:5000` for local debug.
+The app talks to the FeatBit API server through `VITE_FEATBIT_API_URL`, which is set by `.aspire/AppHost.cs` to `http://localhost:5000` for local debug.
 
 ## Database Ownership
 
