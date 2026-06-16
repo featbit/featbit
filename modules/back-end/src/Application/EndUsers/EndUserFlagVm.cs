@@ -22,7 +22,7 @@ public class EndUserFlagVm
         Key = flag.Key;
         Variations = flag.Variations;
         VariationType = flag.VariationType;
-        MatchVariation = userVariation.Variation.Value;
+        MatchVariation = userVariation.Variation?.Value;
         MatchReason = userVariation.MatchReason;
     }
 }
