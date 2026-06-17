@@ -64,11 +64,7 @@ CREATE TABLE IF NOT EXISTS release_decision_activities
     title          varchar(512)             not null,
     detail         text                     null,
     experiment_id  uuid                     not null,
-    created_at     timestamp with time zone not null default now(),
-    constraint fk_release_decision_activities_experiment
-        foreign key (experiment_id)
-        references release_decision_experiments (id)
-        on delete cascade
+    created_at     timestamp with time zone not null default now()
 );
 
 CREATE INDEX IF NOT EXISTS ix_release_decision_activities_experiment_created_at
@@ -116,11 +112,7 @@ CREATE TABLE IF NOT EXISTS release_decision_experiment_runs
     data_source_mode         varchar(64)              null default 'featbit-managed',
     customer_endpoint_config text                     null,
     created_at               timestamp with time zone not null default now(),
-    updated_at               timestamp with time zone not null default now(),
-    constraint fk_release_decision_experiment_runs_experiment
-        foreign key (experiment_id)
-        references release_decision_experiments (id)
-        on delete cascade
+    updated_at               timestamp with time zone not null default now()
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS ux_release_decision_experiment_runs_experiment_slug
@@ -133,11 +125,7 @@ CREATE TABLE IF NOT EXISTS release_decision_messages
     content        text                     not null,
     metadata       text                     null,
     experiment_id  uuid                     not null,
-    created_at     timestamp with time zone not null default now(),
-    constraint fk_release_decision_messages_experiment
-        foreign key (experiment_id)
-        references release_decision_experiments (id)
-        on delete cascade
+    created_at     timestamp with time zone not null default now()
 );
 
 CREATE INDEX IF NOT EXISTS ix_release_decision_messages_experiment_created_at

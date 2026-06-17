@@ -16,9 +16,6 @@ public class ReleaseDecisionActivityConfiguration : IEntityTypeConfiguration<Rel
         builder.Property(x => x.Title).HasMaxLength(512).IsRequired();
         builder.Property(x => x.ExperimentId).HasColumnName("experiment_id");
 
-        builder.HasOne(x => x.Experiment)
-            .WithMany(x => x.Activities)
-            .HasForeignKey(x => x.ExperimentId)
-            .OnDelete(DeleteBehavior.Cascade);
+        builder.Ignore(x => x.Experiment);
     }
 }

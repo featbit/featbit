@@ -21,5 +21,9 @@ public class ReleaseDecisionExperimentConfiguration : IEntityTypeConfiguration<R
         builder.Property(x => x.FeatBitEnvId).HasColumnName("featbit_env_id");
         builder.Property(x => x.SandboxStatus).HasMaxLength(64);
         builder.Property(x => x.EntryMode).HasMaxLength(64);
+
+        builder.Ignore(x => x.ExperimentRuns);
+        builder.Ignore(x => x.Activities);
+        builder.Ignore(x => x.Messages);
     }
 }

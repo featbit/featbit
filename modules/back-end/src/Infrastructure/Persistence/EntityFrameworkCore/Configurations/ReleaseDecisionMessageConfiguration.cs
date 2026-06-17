@@ -16,9 +16,6 @@ public class ReleaseDecisionMessageConfiguration : IEntityTypeConfiguration<Rele
         builder.Property(x => x.Content).IsRequired();
         builder.Property(x => x.ExperimentId).HasColumnName("experiment_id");
 
-        builder.HasOne(x => x.Experiment)
-            .WithMany(x => x.Messages)
-            .HasForeignKey(x => x.ExperimentId)
-            .OnDelete(DeleteBehavior.Cascade);
+        builder.Ignore(x => x.Experiment);
     }
 }

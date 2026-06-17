@@ -38,7 +38,7 @@ public class ReleaseDecisionExperimentService(
 
     public async Task<ReleaseDecisionExperimentDetailVm> GetAsync(Guid envId, Guid id)
     {
-        var experiment = await QueryDetail()
+        var experiment = await dbContext.Set<ReleaseDecisionExperiment>()
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == id && x.FeatBitEnvId == envId);
 
@@ -47,6 +47,7 @@ public class ReleaseDecisionExperimentService(
             throw new EntityNotFoundException(nameof(ReleaseDecisionExperiment), $"{envId}-{id}");
         }
 
+        await LoadExperimentChildrenAsync(experiment);
         await AlignRunsForReadAsync(envId, experiment);
         return ToDetailVm(experiment);
     }
@@ -77,6 +78,16 @@ public class ReleaseDecisionExperimentService(
         {
             throw new EntityNotFoundException(nameof(ReleaseDecisionExperiment), $"{envId}-{id}");
         }
+
+        await dbContext.Set<ReleaseDecisionExperimentRun>()
+            .Where(x => x.ExperimentId == id)
+            .ExecuteDeleteAsync();
+        await dbContext.Set<ReleaseDecisionActivity>()
+            .Where(x => x.ExperimentId == id)
+            .ExecuteDeleteAsync();
+        await dbContext.Set<ReleaseDecisionMessage>()
+            .Where(x => x.ExperimentId == id)
+            .ExecuteDeleteAsync();
 
         dbContext.Set<ReleaseDecisionExperiment>().Remove(experiment);
         await dbContext.SaveChangesAsync();
@@ -586,12 +597,20 @@ public class ReleaseDecisionExperimentService(
         };
     }
 
-    private IQueryable<ReleaseDecisionExperiment> QueryDetail()
+    private async Task LoadExperimentChildrenAsync(ReleaseDecisionExperiment experiment)
     {
-        return dbContext.Set<ReleaseDecisionExperiment>()
-            .Include(x => x.ExperimentRuns)
-            .Include(x => x.Activities)
-            .Include(x => x.Messages);
+        experiment.ExperimentRuns = await dbContext.Set<ReleaseDecisionExperimentRun>()
+            .AsNoTracking()
+            .Where(x => x.ExperimentId == experiment.Id)
+            .ToListAsync();
+        experiment.Activities = await dbContext.Set<ReleaseDecisionActivity>()
+            .AsNoTracking()
+            .Where(x => x.ExperimentId == experiment.Id)
+            .ToListAsync();
+        experiment.Messages = await dbContext.Set<ReleaseDecisionMessage>()
+            .AsNoTracking()
+            .Where(x => x.ExperimentId == experiment.Id)
+            .ToListAsync();
     }
 
     private async Task AlignRunsForReadAsync(Guid envId, ReleaseDecisionExperiment experiment)

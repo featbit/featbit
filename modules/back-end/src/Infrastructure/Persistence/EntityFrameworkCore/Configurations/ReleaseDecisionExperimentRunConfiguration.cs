@@ -49,9 +49,6 @@ public class ReleaseDecisionExperimentRunConfiguration : IEntityTypeConfiguratio
         builder.Property(x => x.DataSourceMode).HasColumnName("data_source_mode").HasMaxLength(64);
         builder.Property(x => x.CustomerEndpointConfig).HasColumnName("customer_endpoint_config");
 
-        builder.HasOne(x => x.Experiment)
-            .WithMany(x => x.ExperimentRuns)
-            .HasForeignKey(x => x.ExperimentId)
-            .OnDelete(DeleteBehavior.Cascade);
+        builder.Ignore(x => x.Experiment);
     }
 }
