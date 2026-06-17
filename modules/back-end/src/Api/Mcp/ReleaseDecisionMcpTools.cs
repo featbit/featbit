@@ -15,7 +15,7 @@ public class ReleaseDecisionMcpTools(
     IPermissionChecker permissionChecker)
 {
     [McpServerTool(Name = "featbit_release_decision_get_experiment")]
-    [Description("Read a release-decision experiment by id, including runs, activities, and messages. The API resolves the FeatBit environment from the experiment.")]
+    [Description("Read a release-decision experiment by id, including runs and activities. The API resolves the FeatBit environment from the experiment.")]
     public async Task<ReleaseDecisionExperimentDetailVm> GetExperiment(
         [Description("Release-decision experiment id.")]
         Guid experimentId)
@@ -137,33 +137,6 @@ public class ReleaseDecisionMcpTools(
             Id = experimentId,
             RunId = runId,
             Request = new ReleaseDecisionExperimentRunAnalyzeRequest { ForceFresh = forceFresh }
-        });
-    }
-
-    [McpServerTool(Name = "featbit_release_decision_add_message")]
-    [Description("Append an assistant/user/system message to a release-decision experiment conversation history.")]
-    public async Task<ReleaseDecisionExperimentDetailVm> AddMessage(
-        [Description("Release-decision experiment id.")]
-        Guid experimentId,
-        [Description("Message role, for example user, assistant, or system.")]
-        string role,
-        [Description("Message content.")]
-        string content,
-        [Description("Optional JSON metadata.")]
-        string? metadata = null)
-    {
-        var envId = await ResolveAuthorizedEnvIdAsync(experimentId);
-
-        return await mediator.Send(new CreateReleaseDecisionExperimentMessage
-        {
-            EnvId = envId,
-            Id = experimentId,
-            Message = new ReleaseDecisionExperimentMessageCreation
-            {
-                Role = role,
-                Content = content,
-                Metadata = metadata
-            }
         });
     }
 

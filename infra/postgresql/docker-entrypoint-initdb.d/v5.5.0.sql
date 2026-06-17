@@ -9,6 +9,7 @@ DROP TABLE IF EXISTS auth_session;
 DROP TABLE IF EXISTS customer_endpoint_provider;
 DROP TABLE IF EXISTS managed_agent;
 DROP TABLE IF EXISTS vault;
+DROP TABLE IF EXISTS release_decision_messages;
 
 -- Release decision experiment workspace.
 -- This table intentionally does not reuse the existing experiments table:
@@ -117,19 +118,6 @@ CREATE TABLE IF NOT EXISTS release_decision_experiment_runs
 
 CREATE UNIQUE INDEX IF NOT EXISTS ux_release_decision_experiment_runs_experiment_slug
     ON release_decision_experiment_runs (experiment_id, slug);
-
-CREATE TABLE IF NOT EXISTS release_decision_messages
-(
-    id             uuid primary key                  default gen_random_uuid(),
-    role           varchar(64)              not null,
-    content        text                     not null,
-    metadata       text                     null,
-    experiment_id  uuid                     not null,
-    created_at     timestamp with time zone not null default now()
-);
-
-CREATE INDEX IF NOT EXISTS ix_release_decision_messages_experiment_created_at
-    ON release_decision_messages (experiment_id, created_at);
 
 -- Release-decision evidence is intentionally stored separately from both the
 -- legacy events table and the release-decision experiment/run tables. These

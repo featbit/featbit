@@ -34,11 +34,6 @@ public class ReleaseDecisionExperimentService(MongoDbClient mongoDb) : IReleaseD
             .Find(x => x.ExperimentId == id)
             .SortByDescending(x => x.CreatedAt)
             .ToListAsync();
-        experiment.Messages = await mongoDb.CollectionOf<ReleaseDecisionMessage>()
-            .Find(x => x.ExperimentId == id)
-            .SortBy(x => x.CreatedAt)
-            .ToListAsync();
-
         return ToDetailVm(experiment);
     }
 
@@ -69,7 +64,6 @@ public class ReleaseDecisionExperimentService(MongoDbClient mongoDb) : IReleaseD
 
         await mongoDb.CollectionOf<ReleaseDecisionExperimentRun>().DeleteManyAsync(x => x.ExperimentId == id);
         await mongoDb.CollectionOf<ReleaseDecisionActivity>().DeleteManyAsync(x => x.ExperimentId == id);
-        await mongoDb.CollectionOf<ReleaseDecisionMessage>().DeleteManyAsync(x => x.ExperimentId == id);
     }
 
     public async Task<ReleaseDecisionExperimentDetailVm> UpdateAsync(
@@ -197,34 +191,6 @@ public class ReleaseDecisionExperimentService(MongoDbClient mongoDb) : IReleaseD
         ReleaseDecisionExperimentRunAnalyzeRequest request)
     {
         await AddActivityAsync(id, "Experiment run analyze requested");
-        return await GetAsync(envId, id);
-    }
-
-    public async Task<ReleaseDecisionExperimentDetailVm> AddMessageAsync(
-        Guid envId,
-        Guid id,
-        ReleaseDecisionExperimentMessageCreation creation)
-    {
-        creation ??= new ReleaseDecisionExperimentMessageCreation();
-        if (string.IsNullOrWhiteSpace(creation.Content))
-        {
-            return await GetAsync(envId, id);
-        }
-
-        var role = creation.Role == "assistant" ? "assistant" : "user";
-        await mongoDb.CollectionOf<ReleaseDecisionMessage>().InsertOneAsync(new ReleaseDecisionMessage
-        {
-            Id = Guid.NewGuid(),
-            ExperimentId = id,
-            Role = role,
-            Content = creation.Content.Trim(),
-            Metadata = creation.Metadata?.Trim() ?? string.Empty,
-            CreatedAt = DateTime.UtcNow
-        });
-
-        await AddActivityAsync(
-            id,
-            role == "assistant" ? "Local Claude Code response recorded" : "Local Claude Code prompt recorded");
         return await GetAsync(envId, id);
     }
 
@@ -366,8 +332,7 @@ public class ReleaseDecisionExperimentService(MongoDbClient mongoDb) : IReleaseD
             CreatedAt = experiment.CreatedAt,
             UpdatedAt = experiment.UpdatedAt,
             ExperimentRuns = experiment.ExperimentRuns.Select(ToRunVm).ToArray(),
-            Activities = experiment.Activities.Select(ToActivityVm).ToArray(),
-            Messages = experiment.Messages.Select(ToMessageVm).ToArray()
+            Activities = experiment.Activities.Select(ToActivityVm).ToArray()
         };
     }
 
@@ -428,18 +393,6 @@ public class ReleaseDecisionExperimentService(MongoDbClient mongoDb) : IReleaseD
             Title = activity.Title,
             Detail = activity.Detail,
             CreatedAt = activity.CreatedAt
-        };
-    }
-
-    private static ReleaseDecisionMessageVm ToMessageVm(ReleaseDecisionMessage message)
-    {
-        return new ReleaseDecisionMessageVm
-        {
-            Id = message.Id,
-            Role = message.Role,
-            Content = message.Content,
-            Metadata = message.Metadata,
-            CreatedAt = message.CreatedAt
         };
     }
 

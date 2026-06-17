@@ -53,6 +53,4 @@ public class ReleaseDecisionExperiment : AuditedEntity
     public ICollection<ReleaseDecisionExperimentRun> ExperimentRuns { get; set; } = [];
 
     public ICollection<ReleaseDecisionActivity> Activities { get; set; } = [];
-
-    public ICollection<ReleaseDecisionMessage> Messages { get; set; } = [];
 }

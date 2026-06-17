@@ -200,19 +200,4 @@ public class ReleaseDecisionExperimentController : ApiControllerBase
         return Ok(experiment);
     }
 
-    [HttpPost("{id:guid}/messages")]
-    public async Task<ApiResponse<ReleaseDecisionExperimentDetailVm>> AddMessageAsync(
-        Guid envId,
-        Guid id,
-        ReleaseDecisionExperimentMessageCreation message)
-    {
-        var experiment = await Mediator.Send(new CreateReleaseDecisionExperimentMessage
-        {
-            EnvId = envId,
-            Id = id,
-            Message = message
-        });
-
-        return Ok(experiment);
-    }
 }

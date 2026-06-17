@@ -24,7 +24,6 @@ Do not apply the old Prisma migrations from this app for experiment data. The ca
 release_decision_experiments
 release_decision_experiment_runs
 release_decision_activities
-release_decision_messages
 ```
 
 The frontend is browser-only. Experiment reads, writes, and analysis go through the FeatBit API endpoints; do not reintroduce Prisma or frontend-owned API routes for runtime experiment data.

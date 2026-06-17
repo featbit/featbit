@@ -74,7 +74,6 @@ public class MongoDbClient
         { typeof(ReleaseDecisionExperiment), "ReleaseDecisionExperiments" },
         { typeof(ReleaseDecisionExperimentRun), "ReleaseDecisionExperimentRuns" },
         { typeof(ReleaseDecisionActivity), "ReleaseDecisionActivities" },
-        { typeof(ReleaseDecisionMessage), "ReleaseDecisionMessages" },
         { typeof(ReleaseDecisionExposureEvent), "ReleaseDecisionExposureEvents" },
         { typeof(ReleaseDecisionMetricEvent), "ReleaseDecisionMetricEvents" },
 

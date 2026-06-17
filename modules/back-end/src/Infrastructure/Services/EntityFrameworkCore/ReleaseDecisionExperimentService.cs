@@ -85,9 +85,6 @@ public class ReleaseDecisionExperimentService(
         await dbContext.Set<ReleaseDecisionActivity>()
             .Where(x => x.ExperimentId == id)
             .ExecuteDeleteAsync();
-        await dbContext.Set<ReleaseDecisionMessage>()
-            .Where(x => x.ExperimentId == id)
-            .ExecuteDeleteAsync();
 
         dbContext.Set<ReleaseDecisionExperiment>().Remove(experiment);
         await dbContext.SaveChangesAsync();
@@ -458,44 +455,6 @@ public class ReleaseDecisionExperimentService(
         return await GetAsync(envId, id);
     }
 
-    public async Task<ReleaseDecisionExperimentDetailVm> AddMessageAsync(
-        Guid envId,
-        Guid id,
-        ReleaseDecisionExperimentMessageCreation creation)
-    {
-        creation ??= new ReleaseDecisionExperimentMessageCreation();
-        await EnsureExperimentExistsAsync(envId, id);
-
-        var content = Normalize(creation.Content);
-        if (string.IsNullOrWhiteSpace(content))
-        {
-            return await GetAsync(envId, id);
-        }
-
-        var role = creation.Role == "assistant" ? "assistant" : "user";
-        var now = DateTime.UtcNow;
-
-        await dbContext.Set<ReleaseDecisionMessage>().AddAsync(new ReleaseDecisionMessage
-        {
-            Id = Guid.NewGuid(),
-            ExperimentId = id,
-            Role = role,
-            Content = content,
-            Metadata = Normalize(creation.Metadata),
-            CreatedAt = now
-        });
-
-        await AddActivityAsync(
-            id,
-            "note",
-            role == "assistant" ? "Local Claude Code response recorded" : "Local Claude Code prompt recorded",
-            content.Length > 120 ? content[..120] : content,
-            now);
-
-        await dbContext.SaveChangesAsync();
-        return await GetAsync(envId, id);
-    }
-
     public async Task<PagedResult<ReleaseDecisionExperimentVm>> GetListAsync(
         Guid envId,
         ReleaseDecisionExperimentFilter filter)
@@ -604,10 +563,6 @@ public class ReleaseDecisionExperimentService(
             .Where(x => x.ExperimentId == experiment.Id)
             .ToListAsync();
         experiment.Activities = await dbContext.Set<ReleaseDecisionActivity>()
-            .AsNoTracking()
-            .Where(x => x.ExperimentId == experiment.Id)
-            .ToListAsync();
-        experiment.Messages = await dbContext.Set<ReleaseDecisionMessage>()
             .AsNoTracking()
             .Where(x => x.ExperimentId == experiment.Id)
             .ToListAsync();
@@ -862,10 +817,6 @@ public class ReleaseDecisionExperimentService(
                 .OrderByDescending(x => x.CreatedAt)
                 .Take(20)
                 .Select(ToActivityVm)
-                .ToArray(),
-            Messages = experiment.Messages
-                .OrderBy(x => x.CreatedAt)
-                .Select(ToMessageVm)
                 .ToArray()
         };
 
@@ -936,18 +887,6 @@ public class ReleaseDecisionExperimentService(
             Title = activity.Title,
             Detail = activity.Detail,
             CreatedAt = activity.CreatedAt
-        };
-    }
-
-    private static ReleaseDecisionMessageVm ToMessageVm(ReleaseDecisionMessage message)
-    {
-        return new ReleaseDecisionMessageVm
-        {
-            Id = message.Id,
-            Role = message.Role,
-            Content = message.Content,
-            Metadata = message.Metadata,
-            CreatedAt = message.CreatedAt
         };
     }
 

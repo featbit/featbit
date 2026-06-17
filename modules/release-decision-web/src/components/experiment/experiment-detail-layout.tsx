@@ -29,13 +29,11 @@ import type {
   Experiment,
   ExperimentRun,
   Activity,
-  Message,
 } from "@/generated/prisma";
 
 type ExperimentWithRelations = Experiment & {
   experimentRuns: ExperimentRun[];
   activities: Activity[];
-  messages: Message[];
 };
 
 interface ExperimentDetailLayoutProps {

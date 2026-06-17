@@ -7,20 +7,13 @@ import type {
   ReleaseDecisionExperimentRun,
   ReleaseDecisionExperimentRunUpdate,
   ReleaseDecisionMetricsUpdate,
-  ReleaseDecisionMessage,
   PagedResult,
 } from "@/lib/release-decision-api";
-import type {
-  Activity,
-  Experiment,
-  ExperimentRun,
-  Message,
-} from "@/generated/prisma";
+import type { Activity, Experiment, ExperimentRun } from "@/generated/prisma";
 
 export type ExperimentDetail = Experiment & {
   experimentRuns: ExperimentRun[];
   activities: Activity[];
-  messages: Message[];
 };
 
 export const EXPERIMENT_UPDATED_EVENT = "release-decision:experiment-updated";
@@ -89,17 +82,6 @@ function mapActivity(
   } as Activity;
 }
 
-function mapMessage(
-  message: ReleaseDecisionMessage,
-  experimentId: string,
-): Message {
-  return {
-    ...message,
-    experimentId,
-    createdAt: toDate(message.createdAt),
-  } as Message;
-}
-
 function mapDetail(experiment: ReleaseDecisionExperimentDetail): ExperimentDetail {
   return {
     ...mapExperiment(experiment),
@@ -124,9 +106,6 @@ function mapDetail(experiment: ReleaseDecisionExperimentDetail): ExperimentDetai
     experimentRuns: (experiment.experimentRuns ?? []).map(mapRun),
     activities: (experiment.activities ?? []).map((activity) =>
       mapActivity(activity, experiment.id),
-    ),
-    messages: (experiment.messages ?? []).map((message) =>
-      mapMessage(message, experiment.id),
     ),
   } as ExperimentDetail;
 }
@@ -290,17 +269,3 @@ export async function analyzeExperimentRun(
   return detail;
 }
 
-export async function addMessage(
-  experimentId: string,
-  data: { role: string; content: string; metadata?: string | null },
-) {
-  const envId = requireEnvId();
-  const experiment = await apiRequest<ReleaseDecisionExperimentDetail>(
-    path(envId, `/${experimentId}/messages`),
-    { method: "POST", body: data },
-  );
-
-  const detail = mapDetail(experiment);
-  publishExperimentUpdated(detail);
-  return detail;
-}

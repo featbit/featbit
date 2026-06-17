@@ -1243,7 +1243,6 @@ function buildDecisionPrompt({
     "4. Apply evidence-analysis. Pick exactly one API decision value: CONTINUE, PAUSE, ROLLBACK, or INCONCLUSIVE. If the skill frames it as ROLLBACK CANDIDATE, persist ROLLBACK.",
     "5. Call featbit_release_decision_update_run for this run and write decision, decisionSummary, decisionReason, and status=\"decided\". decisionSummary must start with the concrete feature-flag action: CONTINUE = move treatment to 100% or expand gradually; PAUSE = hold the current rollout; ROLLBACK = route users back to control/default; INCONCLUSIVE = keep observing or fix measurement. decisionReason must cite the primary metric, guardrails, SRM/sample health, and rollout risk. Do not mention tools, MCP, analyze_run, schemas, JSON fields, or whether existing analysis was reused.",
     "6. Call featbit_release_decision_update_experiment with lastAction=\"Decision: <category>\". Do not move the stage to learning unless learning-capture is explicitly requested.",
-    "7. Optionally call featbit_release_decision_add_message with a short assistant summary of what was decided and why.",
     "",
     decisionMode,
     "Tie the decision back to the hypothesis, quote concrete metric numbers from the analysis, call out guardrail or instrumentation risks, and finish with the exact next feature-flag action the product team should take.",

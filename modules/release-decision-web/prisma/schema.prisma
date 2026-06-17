@@ -51,7 +51,6 @@ model Experiment {
   entryMode          String?         @map("entry_mode")
   activities         Activity[]
   experimentRuns     ExperimentRun[]
-  messages           Message[]
 
   @@map("experiment")
 }
@@ -108,17 +107,5 @@ model ExperimentRun {
 
   @@unique([experimentId, slug])
   @@map("experiment_run")
-}
-
-model Message {
-  id           String     @id @default(uuid())
-  role         String
-  content      String
-  metadata     String?
-  createdAt    DateTime   @default(now()) @map("created_at")
-  experimentId String     @map("experiment_id")
-  experiment   Experiment @relation(fields: [experimentId], references: [id], onDelete: Cascade)
-
-  @@map("message")
 }
 

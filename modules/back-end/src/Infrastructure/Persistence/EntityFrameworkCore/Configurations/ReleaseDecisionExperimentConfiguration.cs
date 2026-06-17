@@ -24,6 +24,5 @@ public class ReleaseDecisionExperimentConfiguration : IEntityTypeConfiguration<R
 
         builder.Ignore(x => x.ExperimentRuns);
         builder.Ignore(x => x.Activities);
-        builder.Ignore(x => x.Messages);
     }
 }

@@ -40,7 +40,6 @@ export interface ReleaseDecisionExperimentDetail extends ReleaseDecisionExperime
   entryMode: string | null;
   experimentRuns: ReleaseDecisionExperimentRun[];
   activities: ReleaseDecisionActivity[];
-  messages: ReleaseDecisionMessage[];
   accessToken: string | null;
   sandboxId: string | null;
 }
@@ -94,14 +93,6 @@ export interface ReleaseDecisionActivity {
   type: string;
   title: string;
   detail: string | null;
-  createdAt: string;
-}
-
-export interface ReleaseDecisionMessage {
-  id: string;
-  role: string;
-  content: string;
-  metadata: string | null;
   createdAt: string;
 }
 
@@ -278,13 +269,3 @@ export async function apiAnalyzeExperimentRun(
   );
 }
 
-export async function apiAddMessage(
-  envId: string,
-  id: string,
-  body: { role: string; content: string; metadata?: string | null },
-) {
-  return apiRequest<ReleaseDecisionExperimentDetail>(
-    releaseDecisionExperimentsPath(envId, `/${id}/messages`),
-    { method: "POST", body },
-  );
-}

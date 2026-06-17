@@ -81,8 +81,6 @@ public class ReleaseDecisionExperimentDetailVm : ReleaseDecisionExperimentVm
     public ICollection<ReleaseDecisionExperimentRunVm> ExperimentRuns { get; set; } = [];
 
     public ICollection<ReleaseDecisionActivityVm> Activities { get; set; } = [];
-
-    public ICollection<ReleaseDecisionMessageVm> Messages { get; set; } = [];
 }
 
 public class ReleaseDecisionExperimentRunVm
@@ -179,19 +177,6 @@ public class ReleaseDecisionActivityVm
     public string Title { get; set; }
 
     public string Detail { get; set; }
-
-    public DateTime CreatedAt { get; set; }
-}
-
-public class ReleaseDecisionMessageVm
-{
-    public Guid Id { get; set; }
-
-    public string Role { get; set; }
-
-    public string Content { get; set; }
-
-    public string Metadata { get; set; }
 
     public DateTime CreatedAt { get; set; }
 }

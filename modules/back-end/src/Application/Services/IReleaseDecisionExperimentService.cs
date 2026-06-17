@@ -57,11 +57,6 @@ public interface IReleaseDecisionExperimentService
         Guid runId,
         ReleaseDecisionExperimentRunAnalyzeRequest request);
 
-    Task<ReleaseDecisionExperimentDetailVm> AddMessageAsync(
-        Guid envId,
-        Guid id,
-        ReleaseDecisionExperimentMessageCreation creation);
-
     Task<PagedResult<ReleaseDecisionExperimentVm>> GetListAsync(
         Guid envId,
         ReleaseDecisionExperimentFilter filter);
