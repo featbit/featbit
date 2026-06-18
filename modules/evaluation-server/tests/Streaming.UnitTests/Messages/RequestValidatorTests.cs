@@ -141,6 +141,25 @@ public class RequestValidatorTests
         Assert.Contains("Test exception", validationResult.Reason);
     }
 
+    [Fact]
+    public async Task TokenParsingExceptionReturnsFailed_NotUnavailable()
+    {
+        // A throwing ITokenValidator simulates a parsing-stage failure.
+        // It must produce Failed (permanent rejection / WS 4003), never Unavailable (transient / WS 1011).
+        var throwingValidator = new Mock<ITokenValidator>();
+        throwingValidator
+            .Setup(x => x.ValidateAsync(It.IsAny<string?>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new FormatException("Simulated parse error"));
+
+        var context = SetupTestContext();
+        var validator = SetupValidator(tokenValidator: throwingValidator.Object);
+
+        var validationResult = await validator.ValidateAsync(context);
+
+        Assert.Equal(ValidationResultStatus.Invalid, validationResult.Status);
+        Assert.Empty(validationResult.Secrets);
+    }
+
     private static async Task EnsureInvalidAsync(
         string expectedReason,
         string? type = null,

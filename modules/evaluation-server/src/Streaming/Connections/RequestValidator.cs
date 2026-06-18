@@ -32,8 +32,9 @@ public sealed class RequestValidator(
             var query = httpContext.Request.QueryString.Value ?? string.Empty;
             logger.ErrorValidateRequest(query, ex);
 
-            // Unhandled exception → store unavailable → return Unavailable for transient retry
-            return ValidationResult.Unavailable($"Validation error: {ex.Message}");
+            // Unexpected exception that escaped inner catches — treat as permanent rejection
+            // (store/relay unavailability is already caught and returned as Unavailable by inner handlers)
+            return ValidationResult.Failed($"Malformed request: {ex.Message}");
         }
     }
 
@@ -79,22 +80,33 @@ public sealed class RequestValidator(
 
         async Task<ValidationResult> ValidateSecretTokenAsync()
         {
-            // Validate token envelope first (timestamp + encoded secret payload)
-            var token = new Token(tokenString.AsSpan());
-            var current = systemClock.UtcNow.ToUnixTimeMilliseconds();
-
-            if (!token.IsValid)
+            Token token;
+            TokenValidationResult structuralValidation;
+            try
             {
+                // Validate token envelope first (timestamp + encoded secret payload)
+                token = new Token(tokenString.AsSpan());
+
+                if (!token.IsValid)
+                {
+                    return ValidationResult.Failed($"Invalid token: {tokenString}");
+                }
+
+                // v1: structural-only validation of the parsed secret string
+                structuralValidation = await tokenValidator.ValidateAsync(token.SecretString);
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning("Token parsing failed for '{Token}': {Error}", tokenString, ex.Message);
                 return ValidationResult.Failed($"Invalid token: {tokenString}");
             }
 
-            // v1: structural-only validation of the parsed secret string
-            var structuralValidation = await tokenValidator.ValidateAsync(token.SecretString);
             if (structuralValidation.Status == TokenValidationStatus.Invalid)
             {
                 return ValidationResult.Failed($"Invalid token: {structuralValidation.Reason}");
             }
 
+            var current = systemClock.UtcNow.ToUnixTimeMilliseconds();
             if (Math.Abs(current - token.Timestamp) > options.TokenExpirySeconds * 1000)
             {
                 return ValidationResult.Failed($"Token is expired: {tokenString}");
