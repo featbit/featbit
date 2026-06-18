@@ -1,6 +1,6 @@
 {
   "name": "featbit",
-  "version": "2.0.0",
+  "version": "dev",
   "scripts": {
     "start": "npm run start:en",
     "start:en": "ng serve --configuration=development --port=4200",
