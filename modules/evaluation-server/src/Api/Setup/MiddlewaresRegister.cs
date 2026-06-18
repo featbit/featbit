@@ -35,12 +35,14 @@ public static class MiddlewaresRegister
         // are validated by streaming middleware rather than fallback auth policy
         app.UseStreaming();
 
+        // cors must run before authentication/authorization so that browser OPTIONS
+        // preflight requests (which carry no Authorization header) receive CORS headers
+        // before hitting the auth middleware and getting a 401.
+        app.UseCustomCors();
+
         // authentication and authorization
         app.UseAuthentication();
         app.UseAuthorization();
-
-        // cors
-        app.UseCustomCors();
 
         app.MapControllers();
 
