@@ -3,7 +3,7 @@
     <div class="brand-content">
       <a class="brand-logo" [routerLink]="['/']">
         <img alt="logo" class="logo" src="assets/logo/logo.svg">
-        <img alt="brand" class="brand" src="assets/logo/featbit-logo-text.svg" >
+        <img alt="brand" class="brand" src="assets/logo/featbit-logo-text.svg">
       </a>
       <a class="icon-fold" (click)="toggleMenuMode()">
         <i nz-icon nzType="icons:icon-fold"></i>
@@ -142,6 +142,12 @@
         </li>
         <li class="centered">
           <app-locale-switcher></app-locale-switcher>
+        </li>
+        <li class="dropdown-footer">
+          <span class="footer-version">v{{ appVersion }}</span>
+          <div class="footer-actions">
+            <!-- PR #919: place <app-theme-switcher></app-theme-switcher> here instead of a separate <li class="centered"> -->
+          </div>
         </li>
       </ul>
     </nz-dropdown-menu>

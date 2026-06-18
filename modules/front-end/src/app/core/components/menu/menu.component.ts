@@ -3,6 +3,7 @@ import { IMenuItem } from './menu';
 import { getProfile } from "@utils/index";
 import { IProfile } from "@shared/types";
 import { MessageQueueService } from "@services/message-queue.service";
+import { environment } from 'src/environments/environment';
 
 @Component({
     selector: 'app-menu',
@@ -18,6 +19,7 @@ export class MenuComponent implements OnInit {
   @Input() menuExtended: boolean = true;
 
   profile: IProfile;
+  appVersion: string = environment.version;
   constructor(
     private messageQueueService: MessageQueueService
   ) {

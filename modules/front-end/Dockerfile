@@ -1,6 +1,8 @@
 # Stage 0, "build-stage", based on Node.js, to build and compile Angular
 FROM node:22.19 AS build-stage
 
+ARG VERSION=dev
+
 WORKDIR /app
 COPY package*.json /app/
 RUN npm install
@@ -17,7 +19,8 @@ ENV API_URL \
     BASE_HREF \
     DISPLAY_API_URL \
     DISPLAY_EVALUATION_URL \
-    HOSTING_MODE
+    HOSTING_MODE \
+    VERSION
 
 RUN apt-get update -y && apt-get install --no-install-recommends -y gettext-base && rm -rf /var/lib/apt/lists/*
 

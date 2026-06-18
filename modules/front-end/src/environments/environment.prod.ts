@@ -1,4 +1,5 @@
 import { HOSTING_MODE } from "@shared/constants";
+import { version } from '../../package.json';
 
 export const environment = {
   production: true,
@@ -7,5 +8,6 @@ export const environment = {
   evaluationUrl: window['env']['evaluationUrl'] || location.origin.replace(/\/$/, ''),
   displayApiUrl: window['env']['displayApiUrl'],
   displayEvaluationUrl: window['env']['displayEvaluationUrl'],
-  hostingMode: window['env']['hostingMode'] || HOSTING_MODE.SELF_HOSTED
+  hostingMode: window['env']['hostingMode'] || HOSTING_MODE.SELF_HOSTED,
+  version: window['env']['version'] || version
 };
