@@ -1,8 +1,6 @@
 # Stage 0, "build-stage", based on Node.js, to build and compile Angular
 FROM node:22.19 AS build-stage
 
-ARG VERSION=dev
-
 WORKDIR /app
 COPY package*.json /app/
 RUN npm install

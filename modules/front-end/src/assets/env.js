@@ -8,4 +8,5 @@
   window["env"]["displayApiUrl"] = "";
   window["env"]["displayEvaluationUrl"] = "";
   window["env"]["hostingMode"] = "";
+  window["env"]["version"] = "";
 })(this);
