@@ -15,11 +15,6 @@ public class FeatureFlagController(IFeatureFlagService flagService, IEvaluator e
     [HttpPost("evaluate")]
     public async Task<IActionResult> EvaluateAsync(EvaluateFlagRequest request)
     {
-        if (!Authenticated)
-        {
-            return Unauthorized();
-        }
-
         if (!request.TryValidate(out var validationError))
         {
             return BadRequest(validationError);

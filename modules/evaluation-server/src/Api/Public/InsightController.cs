@@ -31,11 +31,6 @@ public class InsightController : PublicApiControllerBase
     [HttpPost("track")]
     public async Task<IActionResult> TrackAsync(ICollection<Insight> insights)
     {
-        if (!Authenticated)
-        {
-            return Unauthorized();
-        }
-
         var validInsights = insights.Where(x => x.IsValid()).ToArray();
         if (validInsights.Length == 0)
         {
