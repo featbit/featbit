@@ -1,4 +1,3 @@
-using System.Globalization;
 using Domain.ReleaseDecisions;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -50,8 +49,8 @@ internal static class ReleaseDecisionInsightWriter
 
         var properties = doc.GetValue("properties", new BsonDocument()).AsBsonDocument;
         var flagKey = GetString(properties, "featureFlagKey");
-        var userKey = GetString(properties, "tag_0");
-        var variationId = GetString(properties, "tag_1");
+        var userKey = GetString(properties, "userKeyId");
+        var variationId = GetString(properties, "variationId");
 
         if (string.IsNullOrWhiteSpace(flagKey) ||
             string.IsNullOrWhiteSpace(userKey) ||
@@ -84,7 +83,7 @@ internal static class ReleaseDecisionInsightWriter
         }
 
         var properties = doc.GetValue("properties", new BsonDocument()).AsBsonDocument;
-        var userKey = GetString(properties, "tag_0");
+        var userKey = GetString(properties, "userKeyId") ?? GetNestedString(properties, "user", "keyId");
         var eventName = GetString(properties, "eventName") ?? doc.GetValue("distinct_id", string.Empty).AsString;
 
         if (string.IsNullOrWhiteSpace(userKey) || string.IsNullOrWhiteSpace(eventName))
@@ -127,6 +126,13 @@ internal static class ReleaseDecisionInsightWriter
         return value.IsString ? value.AsString : value.ToString();
     }
 
+    private static string? GetNestedString(BsonDocument doc, string objectKey, string key)
+    {
+        return doc.TryGetValue(objectKey, out var nested) && nested.IsBsonDocument
+            ? GetString(nested.AsBsonDocument, key)
+            : null;
+    }
+
     private static double GetNumericValue(BsonDocument properties)
     {
         if (properties.TryGetValue("numericValue", out var numericValue) && numericValue.IsNumeric)
@@ -134,9 +140,6 @@ internal static class ReleaseDecisionInsightWriter
             return numericValue.ToDouble();
         }
 
-        return properties.TryGetValue("tag_1", out var tagValue) &&
-               double.TryParse(tagValue.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out var parsed)
-            ? parsed
-            : 0;
+        return 0;
     }
 }

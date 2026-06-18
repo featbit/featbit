@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Text.Json;
 using Domain.ReleaseDecisions;
 
@@ -70,8 +69,8 @@ public class ReleaseDecisionInsightService(AppDbContext dbContext) : IInsightSer
         using var document = JsonDocument.Parse(properties);
         var root = document.RootElement;
         var flagKey = GetString(root, "featureFlagKey");
-        var userKey = GetString(root, "tag_0");
-        var variationId = GetString(root, "tag_1");
+        var userKey = GetString(root, "userKeyId");
+        var variationId = GetString(root, "variationId");
 
         if (string.IsNullOrWhiteSpace(flagKey) ||
             string.IsNullOrWhiteSpace(userKey) ||
@@ -111,7 +110,7 @@ public class ReleaseDecisionInsightService(AppDbContext dbContext) : IInsightSer
 
         using var document = JsonDocument.Parse(properties);
         var root = document.RootElement;
-        var userKey = GetString(root, "tag_0");
+        var userKey = GetString(root, "userKeyId") ?? GetNestedString(root, "user", "keyId");
         var eventName = GetString(root, "eventName") ?? distinctId;
 
         if (string.IsNullOrWhiteSpace(userKey) ||
@@ -141,6 +140,13 @@ public class ReleaseDecisionInsightService(AppDbContext dbContext) : IInsightSer
             : null;
     }
 
+    private static string? GetNestedString(JsonElement element, string objectProperty, string property)
+    {
+        return element.TryGetProperty(objectProperty, out var nested) && nested.ValueKind == JsonValueKind.Object
+            ? GetString(nested, property)
+            : null;
+    }
+
     private static double GetNumericValue(JsonElement properties)
     {
         if (properties.TryGetProperty("numericValue", out var numericValue) &&
@@ -150,8 +156,6 @@ public class ReleaseDecisionInsightService(AppDbContext dbContext) : IInsightSer
             return parsed;
         }
 
-        return double.TryParse(GetString(properties, "tag_1"), NumberStyles.Float, CultureInfo.InvariantCulture, out var tagValue)
-            ? tagValue
-            : 0;
+        return 0;
     }
 }
