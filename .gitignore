@@ -18,3 +18,15 @@ benchmark/k6-scripts/test-results/
 
 #Ignore IntelliJ IDEA files
 .idea/
+
+#Ignore codex runs
+.codex-runs/
+
+# Ignore local customer success drafts
+/customer-success/
+/tools/README.md
+/tools/seed-release-decision-insights.cs
+
+# AGENTS skills
+.agent/skills/
+.agents/skills/

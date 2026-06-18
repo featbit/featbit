@@ -31,12 +31,14 @@ public class
     PagedResult<FeatureFlagEndUserStatsVm>>
 {
     private readonly IFeatureFlagService _featureFlagService;
-    private readonly IOlapService _olapService;
+    private readonly IFeatureFlagEndUserStatsService _endUserStatsService;
 
-    public GetFeatureFlagEndUserListHandler(IFeatureFlagService featureFlagService, IOlapService olapService)
+    public GetFeatureFlagEndUserListHandler(
+        IFeatureFlagService featureFlagService,
+        IFeatureFlagEndUserStatsService endUserStatsService)
     {
         _featureFlagService = featureFlagService;
-        _olapService = olapService;
+        _endUserStatsService = endUserStatsService;
     }
 
     public async Task<PagedResult<FeatureFlagEndUserStatsVm>> Handle(GetFeatureFlagEndUserList request,
@@ -48,7 +50,7 @@ public class
         {
             Query = request.Filter.Query,
             EnvId = request.EnvId,
-            FlagExptId = $"{request.EnvId}-{request.Filter.FeatureFlagKey}",
+            FeatureFlagKey = request.Filter.FeatureFlagKey,
             VariationId = request.Filter.VariationId,
             StartTime = request.Filter.From,
             EndTime = request.Filter.To,
@@ -56,7 +58,7 @@ public class
             PageIndex = request.Filter.PageIndex
         };
 
-        var stats = await _olapService.GetFeatureFlagEndUserStats(param);
+        var stats = await _endUserStatsService.GetFeatureFlagEndUserStatsAsync(param);
 
         var items = stats.Items
             .Select(it => new FeatureFlagEndUserStatsVm

@@ -30,28 +30,21 @@ public class GetInsightsValidator : AbstractValidator<GetInsights>
 public class GetInsightsHandler : IRequestHandler<GetInsights, IEnumerable<InsightsVm>>
 {
     private readonly IFeatureFlagService _service;
-    private readonly IOlapService _olapService;
+    private readonly IFeatureFlagInsightsService _insightsService;
 
-    public GetInsightsHandler(IFeatureFlagService service, IOlapService olapService)
+    public GetInsightsHandler(
+        IFeatureFlagService service,
+        IFeatureFlagInsightsService insightsService)
     {
         _service = service;
-        _olapService = olapService;
+        _insightsService = insightsService;
     }
 
     public async Task<IEnumerable<InsightsVm>> Handle(GetInsights request, CancellationToken cancellationToken)
     {
         var featureFlag = await _service.GetAsync(request.EnvId, request.Filter.FeatureFlagKey);
 
-        var param = new InsightsParam
-        {
-            EnvId = request.EnvId,
-            FlagExptId = $"{request.EnvId}-{request.Filter.FeatureFlagKey}",
-            IntervalType = request.Filter.IntervalType,
-            StartTime = request.Filter.From,
-            EndTime = request.Filter.To
-        };
-
-        var stats = await _olapService.GetFeatureFlagInsights(param);
+        var stats = await _insightsService.GetFeatureFlagInsightsAsync(request.EnvId, request.Filter);
 
         return stats.Select(s => new InsightsVm
         {

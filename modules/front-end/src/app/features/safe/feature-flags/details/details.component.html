@@ -16,10 +16,7 @@
       </ng-template>
     </nz-tab>
     <nz-tab>
-      <a *nzTabLink nz-tab-link [routerLink]="['./experimentations']" i18n="@@ff.routing.details.experimentation">Experimentation</a>
-      <ng-template nz-tab>
-        <ff-experimentations></ff-experimentations>
-      </ng-template>
+      <a *nzTabLink nz-tab-link [href]="releaseDecisionUrl" i18n="@@ff.routing.details.experimentation">Experimentation</a>
     </nz-tab>
     <nz-tab>
       <a *nzTabLink nz-tab-link [routerLink]="['./insights']" i18n="@@ff.routing.details.insights">Insights</a>

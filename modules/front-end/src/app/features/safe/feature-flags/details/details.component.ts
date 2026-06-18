@@ -9,6 +9,7 @@ import { ActivatedRoute } from '@angular/router';
 })
 export class DetailsComponent {
   public id: string;
+  public releaseDecisionUrl = '/release-decision/';
   // decide which tutorial will be shown
   tutorial: string = '';
 
@@ -16,13 +17,19 @@ export class DetailsComponent {
     private route:ActivatedRoute,
   ) {
     this.route.paramMap.subscribe( paramMap => {
-      this.id = decodeURIComponent(paramMap.get('id'));
+      this.id = decodeURIComponent(paramMap.get('id') ?? paramMap.get('key') ?? '');
+      this.releaseDecisionUrl = this.id
+        ? `/release-decision/?flagKey=${encodeURIComponent(this.id)}`
+        : '/release-decision/';
     })
   }
 
   ngOnInit(): void {
     this.route.paramMap.subscribe( paramMap => {
-      this.id = decodeURIComponent(paramMap.get('id'));
+      this.id = decodeURIComponent(paramMap.get('id') ?? paramMap.get('key') ?? '');
+      this.releaseDecisionUrl = this.id
+        ? `/release-decision/?flagKey=${encodeURIComponent(this.id)}`
+        : '/release-decision/';
     })
 
     this.route.queryParamMap.subscribe(queryMap => {

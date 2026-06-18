@@ -1,0 +1,19 @@
+node_modules
+
+# Keep environment variables out of version control
+.env
+.env.*
+
+# Vite / legacy deployment outputs
+dist
+.next
+.open-next
+.wrangler
+
+# Local data and generated files
+dev.db
+*.tsbuildinfo
+/src/generated/prisma
+
+# Local agent/editor settings
+.claude/settings.local.json

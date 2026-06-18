@@ -17,7 +17,8 @@ ENV API_URL \
     BASE_HREF \
     DISPLAY_API_URL \
     DISPLAY_EVALUATION_URL \
-    HOSTING_MODE
+    HOSTING_MODE \
+    EXPERIMENT_PAGE_MODE
 
 RUN apt-get update -y && apt-get install --no-install-recommends -y gettext-base && rm -rf /var/lib/apt/lists/*
 

@@ -2,8 +2,6 @@ using Domain.AccessTokens;
 using Domain.Workspaces;
 using Domain.AuditLogs;
 using Domain.EndUsers;
-using Domain.ExperimentMetrics;
-using Domain.Experiments;
 using Domain.FeatureFlags;
 using Domain.FlagChangeRequests;
 using Domain.FlagDrafts;
@@ -16,6 +14,7 @@ using Domain.Policies;
 using Domain.Projects;
 using Domain.RefreshTokens;
 using Domain.RelayProxies;
+using Domain.ReleaseDecisions;
 using Domain.Segments;
 using Domain.Triggers;
 using Domain.Users;
@@ -72,8 +71,11 @@ public class MongoDbClient
         { typeof(GroupPolicy), "GroupPolicies" },
         { typeof(MemberPolicy), "MemberPolicies" },
 
-        { typeof(Experiment), "Experiments" },
-        { typeof(ExperimentMetric), "ExperimentMetrics" },
+        { typeof(ReleaseDecisionExperiment), "ReleaseDecisionExperiments" },
+        { typeof(ReleaseDecisionExperimentRun), "ReleaseDecisionExperimentRuns" },
+        { typeof(ReleaseDecisionActivity), "ReleaseDecisionActivities" },
+        { typeof(ReleaseDecisionExposureEvent), "ReleaseDecisionExposureEvents" },
+        { typeof(ReleaseDecisionMetricEvent), "ReleaseDecisionMetricEvents" },
 
         { typeof(AccessToken), "AccessTokens" },
         { typeof(RelayProxy), "RelayProxies" },

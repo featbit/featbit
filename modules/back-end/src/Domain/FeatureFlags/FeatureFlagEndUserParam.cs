@@ -3,7 +3,9 @@
 public class FeatureFlagEndUserParam
 {
     public Guid EnvId { get; set; }
-    public string FlagExptId { get; set; }
+
+    public string FeatureFlagKey { get; set; }
+
     public string VariationId { get; set; }
     public string Query { get; set; }
     public long StartTime { get; set; }
@@ -11,13 +13,6 @@ public class FeatureFlagEndUserParam
     public long EndTime { get; set; }
     public int PageIndex { get; set; }
     public int PageSize { get; set; }
-}
-
-public class FeatureFlagEndUserStatsResponse
-{
-    public int Code { get; set; }
-    public FeatureFlagEndUserStats Data { get; set; }
-    public string Error { get; set; }
 }
 
 public class FeatureFlagEndUserStats

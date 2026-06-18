@@ -41,10 +41,6 @@ public static class ConfigureServices
         services.AddScoped<IIdentityService, Services.IdentityService>();
 
         // http clients
-        services.AddHttpClient<IOlapService, Services.OlapService>(httpClient =>
-        {
-            httpClient.BaseAddress = new Uri(configuration["OLAP:ServiceHost"]!);
-        });
         services.AddHttpClient<IAgentService, Services.AgentService>();
         services.AddHttpClient<IWebhookSender, Services.WebhookSender>();
 

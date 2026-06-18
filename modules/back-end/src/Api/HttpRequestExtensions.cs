@@ -1,3 +1,5 @@
+using Api.Mcp;
+
 namespace Api;
 
 public static class HttpRequestExtensions
@@ -6,7 +8,13 @@ public static class HttpRequestExtensions
     {
         var orgIdHeaderValue = request.Headers[ApiConstants.OrgIdHeaderKey];
 
-        return Guid.TryParse(orgIdHeaderValue, out var orgId)
+        if (Guid.TryParse(orgIdHeaderValue, out var orgId))
+        {
+            return orgId;
+        }
+
+        var orgIdClaim = request.HttpContext.User.Claims.FirstOrDefault(x => x.Type == McpClaimTypes.OrgId)?.Value;
+        return Guid.TryParse(orgIdClaim, out orgId)
             ? orgId
             : Guid.Empty;
     }
@@ -15,7 +23,13 @@ public static class HttpRequestExtensions
     {
         var workspaceIdHeaderValue = request.Headers[ApiConstants.WorkspaceHeaderKey];
 
-        return Guid.TryParse(workspaceIdHeaderValue, out var workspaceId)
+        if (Guid.TryParse(workspaceIdHeaderValue, out var workspaceId))
+        {
+            return workspaceId;
+        }
+
+        var workspaceIdClaim = request.HttpContext.User.Claims.FirstOrDefault(x => x.Type == McpClaimTypes.WorkspaceId)?.Value;
+        return Guid.TryParse(workspaceIdClaim, out workspaceId)
             ? workspaceId
             : Guid.Empty;
     }

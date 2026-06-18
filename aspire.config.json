@@ -1,0 +1,5 @@
+{
+  "appHost": {
+    "path": ".aspire/FeatBit.AppHost.csproj"
+  }
+}

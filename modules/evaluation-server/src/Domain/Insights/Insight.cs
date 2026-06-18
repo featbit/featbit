@@ -47,6 +47,8 @@ public class Insight
                 userKeyId = User!.KeyId,
                 userName = User!.Name,
                 variationId = variation.Variation.Id,
+                // Release-decision evidence stores the evaluated value without changing the legacy event contract.
+                variationValue = variation.Variation.Value,
                 tag_0 = User!.KeyId,
                 tag_1 = variation.Variation.Id,
                 tag_2 = variation.SendToExperiment ? "true" : "false",

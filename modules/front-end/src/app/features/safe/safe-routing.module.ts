@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { SafeComponent } from './safe.component';
 import { iAMGuard } from "@core/guards/iam.guard";
 import { relayProxiesGuard } from "@core/guards/relayProxies.guard";
+import { ReleaseDecisionRedirectComponent } from './release-decision-redirect.component';
 
 const routes: Routes = [
   {
@@ -39,7 +40,7 @@ const routes: Routes = [
       },
       {
         path: 'experiments',
-        loadChildren: () => import("./experiments/experiments.module").then(m => m.ExperimentsModule),
+        component: ReleaseDecisionRedirectComponent,
         data: {
           breadcrumb: $localize `:@@experiments:Experiments`
         },
