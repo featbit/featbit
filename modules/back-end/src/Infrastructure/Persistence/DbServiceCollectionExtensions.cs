@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Infrastructure.OLAP;
 using MongoServices = Infrastructure.Services.MongoDb;
 using EntityFrameworkCoreServices = Infrastructure.Services.EntityFrameworkCore;
 
@@ -21,6 +22,8 @@ public static class DbServiceCollectionExtensions
                 AddEntityFrameworkCoreServices();
                 break;
         }
+
+        services.AddOLAPSpecificServices(configuration, dbProvider.Name);
 
         return;
 
