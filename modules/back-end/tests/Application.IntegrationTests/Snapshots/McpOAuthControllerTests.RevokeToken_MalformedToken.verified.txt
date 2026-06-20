@@ -1,0 +1,16 @@
+﻿{
+  Status: 400 Bad Request,
+  Headers: {
+    api-supported-versions: 1.0
+  },
+  Content: {
+    Headers: {
+      Content-Length: 78,
+      Content-Type: application/json; charset=utf-8
+    },
+    Value: {
+      error: invalid_token,
+      error_description: The access token is malformed.
+    }
+  }
+}

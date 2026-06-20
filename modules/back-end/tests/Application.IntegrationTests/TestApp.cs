@@ -2,6 +2,8 @@ using System.Net.Http.Headers;
 using System.Net.Mime;
 using System.Text;
 using System.Text.Json;
+using Api;
+using Api.Authorization;
 using Application.Identity;
 using Application.Services;
 using Application.Users;
@@ -41,6 +43,9 @@ public class TestApp : WebApplicationFactory<Program>
             collection.Replace(ServiceDescriptor.Transient<IWorkspaceService, TestWorkspaceService>());
             collection.Replace(ServiceDescriptor.Transient<IUserService, TestUserService>());
             collection.Replace(ServiceDescriptor.Transient<IRefreshTokenService, TestRefreshTokenService>());
+            collection.Replace(ServiceDescriptor.Transient<IPermissionChecker, TestPermissionChecker>());
+            collection.Replace(ServiceDescriptor.Transient<IReleaseDecisionExperimentService, TestReleaseDecisionExperimentService>());
+            collection.Replace(ServiceDescriptor.Transient<IExperimentStatsService, TestExperimentStatsService>());
 
             var hostedServices = collection.Where(x =>
                 x.ServiceType.IsAssignableTo(typeof(IHostedService)) &&
@@ -64,7 +69,7 @@ public class TestApp : WebApplicationFactory<Program>
         var client = CreateClient();
         if (authenticated)
         {
-            await AddAuthorizationHeader(client);
+            await AddAuthorizationHeader(client, includeWorkspaceContext: false);
         }
 
         return await client.GetAsync(uri);
@@ -73,18 +78,37 @@ public class TestApp : WebApplicationFactory<Program>
     public async Task<HttpResponseMessage> PostAsync(
         string uri,
         object payload,
-        bool authenticated = true)
+        bool authenticated = true,
+        bool includeWorkspaceContext = false)
     {
         var client = CreateClient();
         if (authenticated)
         {
-            await AddAuthorizationHeader(client);
+            await AddAuthorizationHeader(client, includeWorkspaceContext);
         }
 
         var body = JsonSerializer.Serialize(payload);
         var content = new StringContent(body, Encoding.UTF8, MediaTypeNames.Application.Json);
 
         return await client.PostAsync(uri, content);
+    }
+
+    public async Task<HttpResponseMessage> PutAsync(
+        string uri,
+        object payload,
+        bool authenticated = true,
+        bool includeWorkspaceContext = false)
+    {
+        var client = CreateClient();
+        if (authenticated)
+        {
+            await AddAuthorizationHeader(client, includeWorkspaceContext);
+        }
+
+        var body = JsonSerializer.Serialize(payload);
+        var content = new StringContent(body, Encoding.UTF8, MediaTypeNames.Application.Json);
+
+        return await client.PutAsync(uri, content);
     }
 
     public async Task<AuthTokens> GetTokenAsync(User user)
@@ -97,11 +121,17 @@ public class TestApp : WebApplicationFactory<Program>
         return tokens;
     }
 
-    private async Task AddAuthorizationHeader(HttpClient client)
+    private async Task AddAuthorizationHeader(HttpClient client, bool includeWorkspaceContext)
     {
         var authTokens = await GetTokenAsync(TestUser.Instance());
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
             JwtBearerDefaults.AuthenticationScheme, authTokens.AccessToken
         );
+
+        if (includeWorkspaceContext)
+        {
+            client.DefaultRequestHeaders.Add(ApiConstants.OrgIdHeaderKey, TestWorkspace.OrganizationId.ToString());
+            client.DefaultRequestHeaders.Add(ApiConstants.WorkspaceHeaderKey, TestWorkspace.Id.ToString());
+        }
     }
 }

@@ -17,7 +17,7 @@ public class McpOAuthController(
     : ApiControllerBase
 {
     private const int PollIntervalSeconds = 5;
-    private const int AccessTokenLifetimeDays = 7;
+    private const int TokenLifetimeDays = 30;
 
     [HttpPost("device/code")]
     [AllowAnonymous]
@@ -79,7 +79,7 @@ public class McpOAuthController(
             return BadRequest(new McpOAuthError("invalid_client", "clientId does not match the device code."));
         }
 
-        var expiresAt = DateTime.UtcNow.AddDays(AccessTokenLifetimeDays);
+        var expiresAt = DateTime.UtcNow.AddDays(TokenLifetimeDays);
         var tokenId = store.CreateAccessTokenSession(authorization, expiresAt);
         var accessToken = IssueMcpAccessToken(authorization, tokenId, expiresAt);
         var refreshToken = store.CreateRefreshToken(authorization);
@@ -89,7 +89,7 @@ public class McpOAuthController(
             accessToken,
             refreshToken,
             "Bearer",
-            AccessTokenLifetimeDays * 24 * 60 * 60,
+            TokenLifetimeDays * 24 * 60 * 60,
             "experiment:read experiment:write experiment:analyze");
     }
 
@@ -160,7 +160,7 @@ public class McpOAuthController(
         }
 
         var (refreshToken, authorization) = rotated.Value;
-        var expiresAt = DateTime.UtcNow.AddDays(AccessTokenLifetimeDays);
+        var expiresAt = DateTime.UtcNow.AddDays(TokenLifetimeDays);
         var tokenId = store.CreateAccessTokenSession(authorization, expiresAt);
         var accessToken = IssueMcpAccessToken(authorization, tokenId, expiresAt);
 
@@ -168,7 +168,7 @@ public class McpOAuthController(
             accessToken,
             refreshToken,
             "Bearer",
-            AccessTokenLifetimeDays * 24 * 60 * 60,
+            TokenLifetimeDays * 24 * 60 * 60,
             "experiment:read experiment:write experiment:analyze");
     }
 

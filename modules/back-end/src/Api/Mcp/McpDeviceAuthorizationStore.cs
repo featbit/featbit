@@ -5,6 +5,8 @@ namespace Api.Mcp;
 
 public class McpDeviceAuthorizationStore
 {
+    private const int TokenLifetimeDays = 30;
+
     private readonly ConcurrentDictionary<string, McpDeviceAuthorization> _byDeviceCode = new();
     private readonly ConcurrentDictionary<string, string> _deviceCodeByUserCode = new(StringComparer.OrdinalIgnoreCase);
     private readonly ConcurrentDictionary<string, McpRefreshAuthorization> _refreshTokens = new();
@@ -65,7 +67,7 @@ public class McpDeviceAuthorizationStore
             WorkspaceId = authorization.ApprovedWorkspaceId!.Value,
             EnvId = authorization.EnvId,
             ExperimentId = authorization.ExperimentId,
-            ExpiresAt = DateTime.UtcNow.AddDays(7)
+            ExpiresAt = DateTime.UtcNow.AddDays(TokenLifetimeDays)
         };
 
         return refreshToken;
@@ -137,7 +139,7 @@ public class McpDeviceAuthorizationStore
         var nextRefreshToken = NewToken(32);
         _refreshTokens[nextRefreshToken] = authorization with
         {
-            ExpiresAt = DateTime.UtcNow.AddDays(7)
+            ExpiresAt = DateTime.UtcNow.AddDays(TokenLifetimeDays)
         };
 
         return (nextRefreshToken, authorization);
