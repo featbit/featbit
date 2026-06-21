@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>net10.0</TargetFramework>
@@ -10,7 +10,9 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.5.1" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.1" />
+        <PackageReference Include="Testcontainers.ClickHouse" Version="4.8.0" />
+        <PackageReference Include="Testcontainers.MongoDb" Version="4.8.0" />
+        <PackageReference Include="Testcontainers.PostgreSql" Version="4.8.0" />
     </ItemGroup>
 
     <ItemGroup>

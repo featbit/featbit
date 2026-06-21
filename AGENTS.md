@@ -51,7 +51,7 @@ FeatBit experimentation / release decision frontend.
 Data analytics server.
 
 - Tech stack: Python `3.9` Docker image, Flask `2.1.x`, Werkzeug `2.2.x`, Gunicorn `20.1.x`, and ClickHouse/Kafka/PostgreSQL/MongoDB-related libraries.
-- Status: starting in `5.5.0`, this is legacy and mainly exists for backward compatibility.
+- Status: starting in `6.0.0`, this is legacy and mainly exists for backward compatibility.
 - Constraint: this is not required for new experimentation capabilities. Unless the task explicitly asks for compatibility with old DAS behavior, do not put new release-decision / experimentation business logic here.
 
 ## Local Integration Debugging

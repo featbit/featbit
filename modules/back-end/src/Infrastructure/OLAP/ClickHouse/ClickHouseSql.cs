@@ -21,13 +21,13 @@ internal static class ClickHouseSql
 
     public static string DateTime64(DateTimeOffset value)
     {
-        return $"toDateTime64('{value.UtcDateTime:yyyy-MM-dd HH:mm:ss.fff}', 3, 'UTC')";
+        return $"toDateTime64('{value.UtcDateTime:yyyy-MM-dd HH:mm:ss.ffffff}', 6, 'UTC')";
     }
 
     public static string DateTime64(DateTime value)
     {
         var utc = value.Kind == DateTimeKind.Utc ? value : DateTime.SpecifyKind(value, DateTimeKind.Utc);
-        return $"toDateTime64('{utc:yyyy-MM-dd HH:mm:ss.fff}', 3, 'UTC')";
+        return $"toDateTime64('{utc:yyyy-MM-dd HH:mm:ss.ffffff}', 6, 'UTC')";
     }
 
     public static string Int(int value)

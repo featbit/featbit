@@ -15,7 +15,7 @@ The release-decision experiment schema is owned by the FeatBit API project.
 For PostgreSQL local setup, use:
 
 ```text
-infra/postgresql/docker-entrypoint-initdb.d/v5.5.0.sql
+infra/postgresql/docker-entrypoint-initdb.d/v6.0.0.sql
 ```
 
 Do not apply the old Prisma migrations from this app for experiment data. The canonical tables are:
