@@ -39,12 +39,18 @@ export class TargetUserComponent implements OnInit {
   @Input("userList")
   set list(data: IUserType[]) {
     this.isLoadingUsers = false;
-    if (!this.disableCreation && this.selectNode['searchValue'] && data.length === 0) {
-      this.userList = [{
-        keyId: this.selectNode['searchValue'],
-        name: this.selectNode['searchValue'],
-        isNew: true
-      } as IUserType];
+    const searchValue = this.selectNode['searchValue'];
+    if (!this.disableCreation && searchValue) {
+      const hasExactMatch = data.some(u => u.keyId === searchValue);
+      if (!hasExactMatch) {
+        this.userList = [{
+          keyId: searchValue,
+          name: searchValue,
+          isNew: true
+        } as IUserType, ...data];
+      } else {
+        this.userList = [...data];
+      }
     } else {
       this.userList = [...data];
     }
