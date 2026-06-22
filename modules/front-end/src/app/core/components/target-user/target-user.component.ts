@@ -6,7 +6,7 @@ import { debounceTime, distinctUntilChanged, finalize } from 'rxjs/operators';
 import { EnvUserService } from '@services/env-user.service';
 import { IUserProp, IUserType } from '@shared/types';
 import { EnvUserPropService } from "@services/env-user-prop.service";
-import { EnvUserFilter } from "@features/safe/end-users/types/featureflag-user";
+import { EnvUserSearchFilter } from "@features/safe/end-users/types/featureflag-user";
 import { PermissionsService } from "@services/permissions.service";
 
 @Component({
@@ -59,8 +59,8 @@ export class TargetUserComponent implements OnInit {
     });
   }
 
-  debouncer = new Subject<EnvUserFilter>();
-  @Output() search = new EventEmitter<EnvUserFilter>();
+  debouncer = new Subject<EnvUserSearchFilter>();
+  @Output() search = new EventEmitter<EnvUserSearchFilter>();
   @Output() onSelectedUserListChange = new EventEmitter<IUserType[]>();
 
   selectModel: IUserType;
@@ -103,7 +103,7 @@ export class TargetUserComponent implements OnInit {
       .map(x => x.keyId);
 
     // by default, we search for both env & global users
-    const filter = new EnvUserFilter(value, [], excludedKeyIds, true, false, 1, 5);
+    const filter = new EnvUserSearchFilter(value, excludedKeyIds);
     this.debouncer.next(filter);
   }
 

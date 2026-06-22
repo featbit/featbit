@@ -14,6 +14,13 @@ public class Evaluator : IEvaluator
         var flag = scope.Flag;
         var user = scope.User;
 
+        // if flag is archived
+        var isArchived = flag.GetProperty("isArchived").GetBoolean();
+        if (isArchived)
+        {
+            return NullUserVariation.Instance;
+        }
+
         // if flag is disabled
         var isEnabled = flag.GetProperty("isEnabled").GetBoolean();
         if (!isEnabled)

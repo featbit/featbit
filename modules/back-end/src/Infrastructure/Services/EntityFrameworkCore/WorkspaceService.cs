@@ -246,14 +246,14 @@ public class WorkspaceService(AppDbContext dbContext)
         // 5. Daily new users
         var dailyNewUsers = (await multi.ReadAsync())
             .ToDictionary(
-                x => DateOnly.FromDateTime((DateTime)x.date),
+                x => (DateOnly)x.date,
                 x => (int)x.new_users
             );
 
         // 6. Daily events
         var dailyEvents = (await multi.ReadAsync())
             .ToDictionary(
-                x => DateOnly.FromDateTime((DateTime)x.date),
+                x => (DateOnly)x.date,
                 x => ((long)x.flag_evaluations, (long)x.custom_metrics)
             );
 

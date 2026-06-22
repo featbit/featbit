@@ -22,7 +22,9 @@ public class UpdateNameValidator : AbstractValidator<UpdateName>
 {
     public UpdateNameValidator()
     {
-        RuleFor(x => x.Name).NotEmpty().WithErrorCode(ErrorCodes.Required("name"));
+        RuleFor(x => x.Name)
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("name"))
+            .MaximumLength(128).WithErrorCode(ErrorCodes.Invalid("name"));
     }
 }
 

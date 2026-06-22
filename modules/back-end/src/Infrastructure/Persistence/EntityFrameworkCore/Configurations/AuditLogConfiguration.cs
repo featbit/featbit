@@ -14,7 +14,7 @@ public class AuditLogConfiguration : IEntityTypeConfiguration<AuditLog>
 
         builder.Property(x => x.RefId).IsRequired();
         builder.Property(x => x.RefType).HasMaxLength(64).IsRequired();
-        builder.Property(x => x.Keyword).HasMaxLength(128).IsRequired();
+        builder.Property(x => x.Keyword).HasMaxLength(512).IsRequired();
         builder.Property(x => x.Operation).HasMaxLength(64).IsRequired();
         builder.Property(x => x.Comment).HasMaxLength(512);
         builder.Property(x => x.CreatedAt).IsRequired();

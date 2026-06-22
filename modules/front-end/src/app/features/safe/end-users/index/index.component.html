@@ -7,20 +7,14 @@
             <input
               nz-input
               type="text"
-              placeholder="Filter by property"
-              i18n-placeholder="@@users.idx.filter-by-property"
+              placeholder="Search by name or keyId"
+              i18n-placeholder="@@users.idx.search-by-name-or-keyid"
               [(ngModel)]="filter.searchText"
-              (ngModelChange)="onSearch(true)">
+              (ngModelChange)="onSearch()">
           </nz-input-group>
           <ng-template #prefixIconSearch>
             <i nz-icon nzType="icons:icon-search"></i>
           </ng-template>
-          <dashed-multi-select
-            [options]="filterOptions"
-            [isLoading]="isUserPropsLoading"
-            label="Properties"
-            (optionsChange)="onFilterPropertiesChange($event)">
-          </dashed-multi-select>
           <dashed-multi-select
             [options]="extraColumnOptions"
             [isLoading]="isUserPropsLoading"
@@ -53,17 +47,13 @@
       </div>
     </div>
     <div class="table-wrapper">
-      <nz-table #basicTable nzSize="small"
-        nzShowSizeChanger
+      <nz-table
+        #basicTable
+        nzSize="small"
         [nzData]="list"
-        [nzFrontPagination]="false"
-        [nzLoading]="isLoading"
-        [nzTotal]="totalCount"
-        [(nzPageSize)]="filter.pageSize"
-        (nzPageSizeChange)="onSearch()"
-        [nzPageSizeOptions]="[10,20,30]"
-        (nzPageIndexChange)="onSearch()"
-        [(nzPageIndex)]="filter.pageIndex">
+        [nzPageSize]="filter.pageSize"
+        nzShowPagination="false"
+        [nzLoading]="isLoading">
         <thead>
             <tr>
               <th i18n="@@common.name">Name</th>
@@ -72,8 +62,8 @@
               <th i18n="@@common.actions">Actions</th>
             </tr>
         </thead>
-        <tbody style="width: calc(100% - 200px);">
-          <ng-container *ngFor="let user of basicTable.data">
+        <tbody>
+          @for (user of basicTable.data; track user.id) {
             <tr>
               <td [routerLink]="[user.id]">
                 <span>{{ user.name }}</span>
@@ -86,9 +76,37 @@
                 <a class="primary-link-btn" nz-button nzType="link" [routerLink]="[user.id]" i18n="@@common.details">Details</a>
               </td>
             </tr>
-          </ng-container>
+          }
         </tbody>
       </nz-table>
+      <div class="cursor-pagination">
+        <button
+          nz-button
+          nzType="default"
+          [class.active]="lastClickedPage === 'previous'"
+          [disabled]="isLoading || !previousCursor"
+          (click)="goPreviousPage()">
+          <i nz-icon nzType="left"></i>
+          <span i18n="@@common.prev">Prev</span>
+        </button>
+        <button
+          nz-button
+          nzType="default"
+          [class.active]="lastClickedPage === 'next'"
+          [disabled]="isLoading || !nextCursor"
+          (click)="goNextPage()">
+          <span i18n="@@common.next">Next</span>
+          <i nz-icon nzType="right"></i>
+        </button>
+        <nz-select
+          class="ant-pagination-options-size-changer"
+          nzSize="small"
+          [ngModel]="filter.pageSize"
+          (ngModelChange)="onPageSizeChange($event)"
+          [nzOptions]="pageSizeOptions"
+          [nzDisabled]="isLoading">
+        </nz-select>
+      </div>
     </div>
   </div>
 </section>
@@ -106,7 +124,6 @@
   (close)="closeSegmentsFlagsDrawer()">
 </user-segments-flags-drawer>
 <download-confirm-modal
-  [totalCount]="totalCount"
   [filter]="filter"
   [visible]="downloadConfirmVisible"
   (close)="downloadConfirmVisible = false">

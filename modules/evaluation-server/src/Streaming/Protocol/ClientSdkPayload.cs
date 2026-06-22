@@ -31,11 +31,11 @@ public class ClientSdkFlag
 {
     public string Id { get; set; }
 
-    public string Variation { get; set; }
+    public string? Variation { get; set; }
 
     public string VariationType { get; set; }
 
-    public string VariationId { get; set; }
+    public string? VariationId { get; set; }
 
     public string MatchReason { get; set; }
 
@@ -48,12 +48,13 @@ public class ClientSdkFlag
     public ClientSdkFlag(JsonElement flag, UserVariation userVariation, Variation[] allVariations)
     {
         Id = flag.GetProperty("key").GetString()!;
-        Variation = userVariation.Variation.Value;
-        VariationId = userVariation.Variation.Id;
         VariationType = flag.GetProperty("variationType").GetString() ?? "string";
-        MatchReason = userVariation.MatchReason;
         VariationOptions = allVariations;
-        SendToExperiment = userVariation.SendToExperiment;
         Timestamp = flag.GetProperty("updatedAt").GetDateTimeOffset().ToUnixTimeMilliseconds();
+
+        Variation = userVariation.Variation?.Value;
+        VariationId = userVariation.Variation?.Id;
+        MatchReason = userVariation.MatchReason;
+        SendToExperiment = userVariation.SendToExperiment;
     }
 }
