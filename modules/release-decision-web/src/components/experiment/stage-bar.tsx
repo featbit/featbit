@@ -2,7 +2,7 @@
 
 import { STAGES } from "@/lib/stages";
 import { cn } from "@/lib/utils";
-import type { Experiment, ExperimentRun } from "@/generated/prisma";
+import type { Experiment, ExperimentRun } from "@/lib/release-decision-types";
 
 type ExperimentLike = Experiment & { experimentRuns: ExperimentRun[] };
 

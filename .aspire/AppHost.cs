@@ -37,6 +37,7 @@ if (IsProvider(dbProvider, "Postgres"))
         .AddContainer("postgresql", "postgres", "15.10")
         .WithEnvironment("POSTGRES_USER", "postgres")
         .WithEnvironment("POSTGRES_PASSWORD", "please_change_me")
+        .WithEnvironment("PGDATA", "/var/lib/postgresql/data/pgdata")
         .WithBindMount("../infra/postgresql/docker-entrypoint-initdb.d", "/docker-entrypoint-initdb.d", isReadOnly: true)
         .WithEndpoint(port: 5432, targetPort: 5432, name: "tcp", isProxied: false)
         .WithVolume("featbit-aspire-postgres", "/var/lib/postgresql/data");

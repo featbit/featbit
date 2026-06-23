@@ -8,7 +8,7 @@ import {
   Flag,
   ScrollText,
 } from "lucide-react";
-import type { Experiment, ExperimentRun, Activity } from "@/generated/prisma";
+import type { Experiment, ExperimentRun, Activity } from "@/lib/release-decision-types";
 import { EditDecisionStateDialog } from "./decision-state-edit";
 
 /* ── Field metadata per stage ── */

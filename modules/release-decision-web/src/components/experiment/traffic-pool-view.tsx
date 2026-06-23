@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { ExperimentRun } from "@/generated/prisma";
+import type { ExperimentRun } from "@/lib/release-decision-types";
 import {
   parseVariantIdentities,
   splitVariantTokens,

@@ -30,7 +30,7 @@ import {
   AlertCircle,
   RefreshCw,
 } from "lucide-react";
-import type { Experiment, ExperimentRun } from "@/generated/prisma";
+import type { Experiment, ExperimentRun } from "@/lib/release-decision-types";
 import {
   projectService,
   SecretType,

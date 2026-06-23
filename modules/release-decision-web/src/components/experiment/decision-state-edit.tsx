@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Pencil } from "lucide-react";
-import type { Experiment } from "@/generated/prisma";
+import type { Experiment } from "@/lib/release-decision-types";
 
 const ALL_FIELDS: {
   key: keyof Experiment;

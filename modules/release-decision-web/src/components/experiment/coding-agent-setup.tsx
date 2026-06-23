@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { apiRequest, FeatBitApiError } from "@/lib/featbit-auth/http";
 import { cn } from "@/lib/utils";
-import type { Experiment, ExperimentRun } from "@/generated/prisma";
+import type { Experiment, ExperimentRun } from "@/lib/release-decision-types";
 
 const MCP_TOKEN_STORAGE_KEY = "featbit:mcp-token:last";
 

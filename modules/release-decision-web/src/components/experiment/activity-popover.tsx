@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { ScrollText } from "lucide-react";
-import type { Activity } from "@/generated/prisma";
+import type { Activity } from "@/lib/release-decision-types";
 
 export function ActivityPopover({ activities }: { activities: Activity[] }) {
   const [open, setOpen] = useState(false);

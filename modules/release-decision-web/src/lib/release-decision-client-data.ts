@@ -9,7 +9,7 @@ import type {
   ReleaseDecisionMetricsUpdate,
   PagedResult,
 } from "@/lib/release-decision-api";
-import type { Activity, Experiment, ExperimentRun } from "@/generated/prisma";
+import type { Activity, Experiment, ExperimentRun } from "@/lib/release-decision-types";
 
 export type ExperimentDetail = Experiment & {
   experimentRuns: ExperimentRun[];

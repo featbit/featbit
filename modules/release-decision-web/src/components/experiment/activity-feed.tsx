@@ -4,7 +4,7 @@ import {
   CardTitle,
   CardContent,
 } from "@/components/ui/card";
-import type { Activity } from "@/generated/prisma";
+import type { Activity } from "@/lib/release-decision-types";
 
 const TYPE_ICON: Record<string, string> = {
   stage_change: "🔄",

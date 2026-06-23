@@ -8,7 +8,7 @@ import { useAuth } from "@/lib/featbit-auth/auth-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Loader2, Search, X } from "lucide-react";
-import type { Experiment } from "@/generated/prisma";
+import type { Experiment } from "@/lib/release-decision-types";
 
 type ExperimentListItem = Experiment & {
   runCount?: number | null;

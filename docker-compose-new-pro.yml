@@ -1,0 +1,222 @@
+name: featbit-new-pro
+
+x-api-build: &api-build
+  context: ./modules/back-end
+  dockerfile: deploy/Dockerfile
+
+x-evaluation-build: &evaluation-build
+  context: ./modules/evaluation-server
+  dockerfile: deploy/Dockerfile
+
+x-ui-build: &ui-build
+  context: .
+  dockerfile: docker/ui-combined/Dockerfile
+  args:
+    VITE_FEATBIT_APP_URL: http://localhost:8081
+    VITE_FEATBIT_API_URL: http://localhost:5000
+    VITE_BASE_PATH: /release-decision/
+
+x-api-environment: &api-environment
+  ASPNETCORE_ENVIRONMENT: Production
+  ASPNETCORE_URLS: http://*:5000
+  DbProvider: Postgres
+  MqProvider: Kafka
+  CacheProvider: Redis
+  OLAPProvider: ClickHouse
+  Postgres__ConnectionString: Host=postgresql;Port=5432;Username=postgres;Password=please_change_me;Database=featbit
+  Redis__ConnectionString: redis:6379
+  Kafka__Producer__bootstrap.servers: kafka:9092
+  Kafka__Consumer__bootstrap.servers: kafka:9092
+  ClickHouse__HttpEndpoint: http://clickhouse-server:8123
+  ClickHouse__Database: featbit
+  ClickHouse__User: default
+  ClickHouse__Password: ""
+  Jwt__Algorithm: HS256
+  Jwt__Key: please_change_me_to_a_secure_secret_key
+  ENABLE_OPENTELEMETRY: "${ENABLE_OPENTELEMETRY:-false}"
+  OTEL_SERVICE_NAME: featbit-api
+  OTEL_TRACES_EXPORTER: otlp
+  OTEL_METRICS_EXPORTER: otlp
+  OTEL_LOGS_EXPORTER: otlp
+  OTEL_EXPORTER_OTLP_ENDPOINT: "${OTEL_EXPORTER_OTLP_ENDPOINT:-http://otel-collector:4317}"
+  OTEL_EXPORTER_OTLP_PROTOCOL: grpc
+  OTEL_EXPORTER_OTLP_INSECURE: "true"
+
+x-evaluation-environment: &evaluation-environment
+  ASPNETCORE_ENVIRONMENT: Production
+  ASPNETCORE_URLS: http://*:5100
+  DbProvider: Postgres
+  MqProvider: Kafka
+  CacheProvider: Redis
+  Postgres__ConnectionString: Host=postgresql;Port=5432;Username=postgres;Password=please_change_me;Database=featbit
+  Redis__ConnectionString: redis:6379
+  Kafka__Producer__bootstrap.servers: kafka:9092
+  Kafka__Consumer__bootstrap.servers: kafka:9092
+  ENABLE_OPENTELEMETRY: "${ENABLE_OPENTELEMETRY:-false}"
+  OTEL_SERVICE_NAME: featbit-els
+  OTEL_TRACES_EXPORTER: otlp
+  OTEL_METRICS_EXPORTER: otlp
+  OTEL_LOGS_EXPORTER: otlp
+  OTEL_EXPORTER_OTLP_ENDPOINT: "${OTEL_EXPORTER_OTLP_ENDPOINT:-http://otel-collector:4317}"
+  OTEL_EXPORTER_OTLP_PROTOCOL: grpc
+  OTEL_EXPORTER_OTLP_INSECURE: "true"
+
+x-ui-environment: &ui-environment
+  API_URL: http://localhost:5000
+  DEMO_URL: https://featbit-samples.vercel.app
+  EVALUATION_URL: http://localhost:5100
+  DISPLAY_API_URL: http://localhost:5000
+  DISPLAY_EVALUATION_URL: http://localhost:5100
+  BASE_HREF: /
+  HOSTING_MODE: self-hosted
+  EXPERIMENT_PAGE_MODE: integrated
+
+services:
+  ui:
+    image: featbit/featbit-ui:local
+    build: *ui-build
+    restart: on-failure
+    environment: *ui-environment
+    depends_on:
+      api-server:
+        condition: service_started
+      evaluation-server:
+        condition: service_started
+    ports:
+      - "8081:80"
+    networks:
+      - featbit-network
+
+  api-server:
+    image: featbit/featbit-api-server:local
+    build: *api-build
+    restart: on-failure
+    environment: *api-environment
+    depends_on:
+      postgresql:
+        condition: service_started
+      redis:
+        condition: service_started
+      init-kafka-topics:
+        condition: service_completed_successfully
+      clickhouse-server:
+        condition: service_started
+    ports:
+      - "5000:5000"
+    networks:
+      - featbit-network
+
+  evaluation-server:
+    image: featbit/featbit-evaluation-server:local
+    build: *evaluation-build
+    restart: on-failure
+    environment: *evaluation-environment
+    depends_on:
+      postgresql:
+        condition: service_started
+      redis:
+        condition: service_started
+      init-kafka-topics:
+        condition: service_completed_successfully
+    ports:
+      - "5100:5100"
+    networks:
+      - featbit-network
+
+  postgresql:
+    image: postgres:15.10
+    restart: on-failure
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: please_change_me
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./infra/postgresql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
+      - postgres:/var/lib/postgresql/data
+    networks:
+      - featbit-network
+
+  redis:
+    image: bitnamilegacy/redis:6.2.10
+    restart: on-failure
+    environment:
+      ALLOW_EMPTY_PASSWORD: "yes"
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis:/bitnami/redis/data
+    networks:
+      - featbit-network
+
+  kafka:
+    image: bitnamilegacy/kafka:3.5
+    restart: on-failure
+    environment:
+      KAFKA_CFG_NODE_ID: "0"
+      KAFKA_CFG_PROCESS_ROLES: controller,broker
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 0@kafka:9093
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,PLAINTEXT_HOST://:29092,CONTROLLER://:9093
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
+      ALLOW_PLAINTEXT_LISTENER: "true"
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    volumes:
+      - kafka:/bitnami/kafka
+    networks:
+      - featbit-network
+
+  init-kafka-topics:
+    image: bitnamilegacy/kafka:3.5
+    restart: "no"
+    depends_on:
+      kafka:
+        condition: service_started
+    entrypoint:
+      - bash
+      - -c
+      - |
+        echo "Waiting for Kafka to be ready..."
+        until /opt/bitnami/kafka/bin/kafka-topics.sh --list --bootstrap-server kafka:9092 >/dev/null 2>&1; do sleep 5; done
+        echo "Kafka is ready. Creating FeatBit topics if needed."
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-feature-flag-change
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-segment-change
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-endusers
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-insights
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-usage
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic healthchecks-topic
+        echo "Kafka topic initialization finished."
+    networks:
+      - featbit-network
+
+  clickhouse-server:
+    image: clickhouse/clickhouse-server:23.7
+    restart: on-failure
+    depends_on:
+      init-kafka-topics:
+        condition: service_completed_successfully
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    volumes:
+      - ./infra/clickhouse/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
+      - ./infra/clickhouse/single_node/config.xml:/etc/clickhouse-server/config.xml:ro
+      - ./infra/clickhouse/users.xml:/etc/clickhouse-server/users.xml:ro
+      - clickhouse-server:/var/lib/clickhouse
+    networks:
+      - featbit-network
+
+networks:
+  featbit-network:
+    driver: bridge
+
+volumes:
+  postgres:
+  redis:
+  kafka:
+  clickhouse-server:

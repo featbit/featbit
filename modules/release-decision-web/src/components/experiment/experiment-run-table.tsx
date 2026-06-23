@@ -56,7 +56,7 @@ import {
   deleteExperimentRunAction,
   updateExperimentRunObservationWindowAction,
 } from "@/lib/actions";
-import type { ExperimentRun } from "@/generated/prisma";
+import type { ExperimentRun } from "@/lib/release-decision-types";
 
 /* ── Colour maps ── */
 

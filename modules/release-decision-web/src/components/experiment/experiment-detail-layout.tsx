@@ -29,7 +29,7 @@ import type {
   Experiment,
   ExperimentRun,
   Activity,
-} from "@/generated/prisma";
+} from "@/lib/release-decision-types";
 
 type ExperimentWithRelations = Experiment & {
   experimentRuns: ExperimentRun[];

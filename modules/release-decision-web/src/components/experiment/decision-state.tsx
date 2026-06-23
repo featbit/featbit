@@ -15,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Target, Lightbulb, FlaskConical, BarChart3 } from "lucide-react";
-import type { Experiment } from "@/generated/prisma";
+import type { Experiment } from "@/lib/release-decision-types";
 
 const STAGE_FIELDS: Record<
   string,

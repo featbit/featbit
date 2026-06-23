@@ -37,7 +37,7 @@ import {
   type IVariationUser,
   type UpdateFlagTargetingPayload,
 } from "@/lib/featbit-auth";
-import type { Experiment, ExperimentRun } from "@/generated/prisma";
+import type { Experiment, ExperimentRun } from "@/lib/release-decision-types";
 import { FlagPickerBody } from "./flag-picker-body";
 
 // ── Bandit import helpers ───────────────────────────────────────────────────

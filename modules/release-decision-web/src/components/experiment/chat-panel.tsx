@@ -31,7 +31,7 @@ import {
   type GuidedExperimentStep,
 } from "@/lib/guided-experiment-steps";
 import { cn } from "@/lib/utils";
-import type { Experiment, ExperimentRun } from "@/generated/prisma";
+import type { Experiment, ExperimentRun } from "@/lib/release-decision-types";
 
 const MCP_TOKEN_STORAGE_KEY = "featbit:mcp-token:last";
 export const CODING_AGENT_SETUP_DISMISSED_KEY =

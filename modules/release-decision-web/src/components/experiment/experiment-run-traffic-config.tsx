@@ -16,7 +16,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { updateExperimentRunAudienceAction } from "@/lib/actions";
-import type { ExperimentRun } from "@/generated/prisma";
+import type { ExperimentRun } from "@/lib/release-decision-types";
 import {
   parseVariantIdentities,
   splitVariantTokens,

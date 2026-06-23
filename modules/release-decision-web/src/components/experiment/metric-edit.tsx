@@ -15,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Pencil, Plus, X, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { Experiment } from "@/generated/prisma";
+import type { Experiment } from "@/lib/release-decision-types";
 
 /* ── Types ── */
 type GuardrailRow = {
