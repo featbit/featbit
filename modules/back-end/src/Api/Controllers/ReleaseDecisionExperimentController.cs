@@ -1,5 +1,6 @@
 using Application.Bases.Models;
 using Application.ReleaseDecisions;
+using Api.Authentication;
 using Domain.Policies;
 
 namespace Api.Controllers;
@@ -8,6 +9,7 @@ namespace Api.Controllers;
 [Route("api/v{version:apiVersion}/envs/{envId:guid}/release-decision/experiments")]
 public class ReleaseDecisionExperimentController : ApiControllerBase
 {
+    [OpenApi]
     [HttpPost]
     public async Task<ApiResponse<ReleaseDecisionExperimentVm>> CreateAsync(
         Guid envId,
@@ -19,6 +21,7 @@ public class ReleaseDecisionExperimentController : ApiControllerBase
         return Ok(experiment);
     }
 
+    [OpenApi]
     [HttpGet]
     public async Task<ApiResponse<PagedResult<ReleaseDecisionExperimentVm>>> GetListAsync(
         Guid envId,
@@ -34,6 +37,7 @@ public class ReleaseDecisionExperimentController : ApiControllerBase
         return Ok(experiments);
     }
 
+    [OpenApi]
     [HttpGet("{id:guid}")]
     public async Task<ApiResponse<ReleaseDecisionExperimentDetailVm>> GetAsync(Guid envId, Guid id)
     {
@@ -46,6 +50,7 @@ public class ReleaseDecisionExperimentController : ApiControllerBase
         return Ok(experiment);
     }
 
+    [OpenApi]
     [HttpDelete("{id:guid}")]
     public async Task<ApiResponse<bool>> DeleteAsync(Guid envId, Guid id)
     {
@@ -58,6 +63,7 @@ public class ReleaseDecisionExperimentController : ApiControllerBase
         return Ok(true);
     }
 
+    [OpenApi]
     [HttpPut("{id:guid}")]
     public async Task<ApiResponse<ReleaseDecisionExperimentDetailVm>> UpdateAsync(
         Guid envId,
@@ -74,6 +80,7 @@ public class ReleaseDecisionExperimentController : ApiControllerBase
         return Ok(experiment);
     }
 
+    [OpenApi]
     [HttpPut("{id:guid}/stage")]
     public async Task<ApiResponse<ReleaseDecisionExperimentDetailVm>> UpdateStageAsync(
         Guid envId,
@@ -87,6 +94,7 @@ public class ReleaseDecisionExperimentController : ApiControllerBase
         return Ok(experiment);
     }
 
+    [OpenApi]
     [HttpPut("{id:guid}/metrics")]
     public async Task<ApiResponse<ReleaseDecisionExperimentDetailVm>> UpdateMetricsAsync(
         Guid envId,
@@ -103,6 +111,7 @@ public class ReleaseDecisionExperimentController : ApiControllerBase
         return Ok(experiment);
     }
 
+    [OpenApi]
     [HttpPost("{id:guid}/runs")]
     public async Task<ApiResponse<ReleaseDecisionExperimentDetailVm>> CreateRunAsync(Guid envId, Guid id)
     {
@@ -115,6 +124,7 @@ public class ReleaseDecisionExperimentController : ApiControllerBase
         return Ok(experiment);
     }
 
+    [OpenApi]
     [HttpDelete("{id:guid}/runs/{runId:guid}")]
     public async Task<ApiResponse<ReleaseDecisionExperimentDetailVm>> DeleteRunAsync(Guid envId, Guid id, Guid runId)
     {
@@ -128,6 +138,7 @@ public class ReleaseDecisionExperimentController : ApiControllerBase
         return Ok(experiment);
     }
 
+    [OpenApi]
     [HttpPut("{id:guid}/runs/{runId:guid}")]
     public async Task<ApiResponse<ReleaseDecisionExperimentDetailVm>> UpdateRunAsync(
         Guid envId,
@@ -146,6 +157,7 @@ public class ReleaseDecisionExperimentController : ApiControllerBase
         return Ok(experiment);
     }
 
+    [OpenApi]
     [HttpPut("{id:guid}/runs/{runId:guid}/audience")]
     public async Task<ApiResponse<ReleaseDecisionExperimentDetailVm>> UpdateRunAudienceAsync(
         Guid envId,
@@ -164,6 +176,7 @@ public class ReleaseDecisionExperimentController : ApiControllerBase
         return Ok(experiment);
     }
 
+    [OpenApi]
     [HttpPut("{id:guid}/runs/{runId:guid}/observation-window")]
     public async Task<ApiResponse<ReleaseDecisionExperimentDetailVm>> UpdateRunObservationWindowAsync(
         Guid envId,
@@ -182,6 +195,7 @@ public class ReleaseDecisionExperimentController : ApiControllerBase
         return Ok(experiment);
     }
 
+    [OpenApi]
     [HttpPost("{id:guid}/runs/{runId:guid}/analyze")]
     public async Task<ApiResponse<ReleaseDecisionExperimentDetailVm>> AnalyzeRunAsync(
         Guid envId,

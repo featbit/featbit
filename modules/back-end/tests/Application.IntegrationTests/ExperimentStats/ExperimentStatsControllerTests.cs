@@ -4,6 +4,7 @@ namespace Application.IntegrationTests.ExperimentStats;
 public class ExperimentStatsControllerTests
 {
     private readonly TestApp _app;
+    private static readonly string QueryPath = $"/api/v1/envs/{TestWorkspace.Id}/experiment-stats/query";
 
     public ExperimentStatsControllerTests(TestApp app)
     {
@@ -14,7 +15,7 @@ public class ExperimentStatsControllerTests
     public async Task Query_RequestValidation()
     {
         var response = await _app.PostAsync(
-            $"/api/v1/envs/{TestWorkspace.Id}/experiment-stats/query",
+            QueryPath,
             new
             {
                 flagKey = "",
@@ -32,7 +33,7 @@ public class ExperimentStatsControllerTests
     public async Task Query()
     {
         var response = await _app.PostAsync(
-            $"/api/v1/envs/{TestWorkspace.Id}/experiment-stats/query",
+            QueryPath,
             new
             {
                 flagKey = "checkout-onboarding",
@@ -44,5 +45,25 @@ public class ExperimentStatsControllerTests
             });
 
         await Verify(response);
+    }
+
+    [Fact]
+    public async Task OpenApiAccessToken_CanQueryExperimentStats()
+    {
+        var response = await _app.PostWithAccessTokenAsync(
+            QueryPath,
+            new
+            {
+                flagKey = "checkout-onboarding",
+                metricEvent = "checkout_activated",
+                startDate = "2026-06-01",
+                endDate = "2026-06-10",
+                metricType = "binary",
+                metricAgg = "once"
+            });
+
+        Assert.True(
+            response.IsSuccessStatusCode,
+            $"Expected success but got {(int)response.StatusCode} {response.ReasonPhrase}.");
     }
 }
