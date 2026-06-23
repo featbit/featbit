@@ -20,7 +20,6 @@ export class ThemeService {
   private readonly preferenceSubject = new BehaviorSubject<ThemePreference>(
     this.readStoredPreference()
   );
-  private readonly resolvedSubject = new BehaviorSubject<ResolvedTheme>('light');
   private readonly mediaQuery: MediaQueryList | null;
   private readonly mediaQueryListener: ((e: MediaQueryListEvent) => void) | null;
   // Single live poll handle for Monaco theme application. Toggling the theme
@@ -101,9 +100,7 @@ export class ThemeService {
         root.removeAttribute(THEME_ATTRIBUTE);
       }
     }
-    if (resolved !== this.resolvedSubject.value) {
-      this.resolvedSubject.next(resolved);
-    }
+
     this.applyMonacoTheme(resolved);
   }
 
