@@ -100,6 +100,50 @@ public class ReleaseDecisionAnalysisAlgorithmTests
     }
 
     [Fact]
+    public async Task Bayesian_analysis_keeps_canonical_variant_ids_when_a_configured_arm_has_no_observations()
+    {
+        var stats = new FixedExperimentStatsService(new ExperimentStatsVm
+        {
+            EnvId = EnvId,
+            FlagKey = "checkout-flow",
+            MetricEvent = "purchase",
+            Window = new ExperimentStatsWindowVm { Start = "2026-01-01", End = "2026-01-02" },
+            Variants =
+            [
+                Variant("treatment-id", users: 1, conversions: 0, sumValue: 0, sumSquares: 0)
+            ]
+        });
+        await using var db = CreateDbContext();
+        await SeedExperimentAsync(
+            db,
+            method: "bayesian_ab",
+            metricType: "binary",
+            metricAgg: "once",
+            controlVariant: "control-id",
+            treatmentVariant: "treatment-id");
+
+        var result = await CreateService(db, stats).AnalyzeRunAsync(
+            EnvId,
+            ExperimentId,
+            RunId,
+            new ReleaseDecisionExperimentRunAnalyzeRequest());
+
+        using var document = JsonDocument.Parse(result.ExperimentRuns.Single().AnalysisResult);
+        var root = document.RootElement;
+        var observed = root.GetProperty("srm").GetProperty("observed");
+        var rows = root.GetProperty("primary_metric").GetProperty("rows").EnumerateArray().ToArray();
+        var control = rows.Single(x => x.GetProperty("variant").GetString() == "control-id");
+        var treatment = rows.Single(x => x.GetProperty("variant").GetString() == "treatment-id");
+
+        Assert.Equal("control-id", root.GetProperty("control").GetString());
+        Assert.Equal(0, observed.GetProperty("control-id").GetInt64());
+        Assert.Equal(1, observed.GetProperty("treatment-id").GetInt64());
+        Assert.Equal(0, control.GetProperty("n").GetInt64());
+        Assert.Equal(1, treatment.GetProperty("n").GetInt64());
+        Assert.False(root.TryGetProperty("warnings", out _));
+    }
+
+    [Fact]
     public async Task Bandit_analysis_keeps_burn_in_when_an_arm_has_too_few_users()
     {
         var stats = new FixedExperimentStatsService(new ExperimentStatsVm
@@ -195,7 +239,9 @@ public class ReleaseDecisionAnalysisAlgorithmTests
         string method,
         string metricType,
         string metricAgg,
-        string metricEvent = "purchase")
+        string metricEvent = "purchase",
+        string controlVariant = "control",
+        string treatmentVariant = "treatment")
     {
         var experiment = new ReleaseDecisionExperiment
         {
@@ -220,8 +266,8 @@ public class ReleaseDecisionAnalysisAlgorithmTests
             PrimaryMetricEvent = metricEvent,
             PrimaryMetricType = metricType,
             PrimaryMetricAgg = metricAgg,
-            ControlVariant = "control",
-            TreatmentVariant = "treatment",
+            ControlVariant = controlVariant,
+            TreatmentVariant = treatmentVariant,
             ObservationStart = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
             ObservationEnd = new DateTime(2026, 1, 2, 0, 0, 0, DateTimeKind.Utc),
             CreatedAt = DateTime.UtcNow,
@@ -311,11 +357,11 @@ public class ReleaseDecisionAnalysisAlgorithmTests
                 Key = key,
                 Name = "Checkout flow",
                 VariationType = "string",
-                DisabledVariationId = "control",
+                DisabledVariationId = "control-id",
                 Variations =
                 [
-                    new Variation { Id = "control", Name = "control", Value = "control" },
-                    new Variation { Id = "treatment", Name = "treatment", Value = "treatment" }
+                    new Variation { Id = "control-id", Name = "control", Value = "true" },
+                    new Variation { Id = "treatment-id", Name = "treatment", Value = "false" }
                 ],
                 Tags = []
             });

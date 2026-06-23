@@ -10,7 +10,7 @@ import {
   IFeatureFlagListItem,
   IFeatureFlagListModel,
 } from "../types/feature-flag";
-import { debounceTime } from 'rxjs/operators';
+import { debounceTime, finalize } from 'rxjs/operators';
 import { FeatureFlagService } from "@services/feature-flag.service";
 import { NzModalService } from "ng-zorro-antd/modal";
 import { copyToClipboard } from '@utils/index';
@@ -87,14 +87,18 @@ export class IndexComponent implements OnInit {
     this.$search.next();
 
     // get flag tags
-    this.featureFlagService.getAllTags().subscribe(allTags => {
-      this.tags = allTags.map(tag => ({
-        label: tag,
-        value: tag,
-        selected: (this.featureFlagFilter.tags || []).includes(tag)
-      }));
-      this.isLoadingTags = false;
-    });
+    this.featureFlagService.getAllTags()
+      .pipe(finalize(() => this.isLoadingTags = false))
+      .subscribe({
+        next: allTags => {
+          this.tags = allTags.map(tag => ({
+            label: tag,
+            value: tag,
+            selected: (this.featureFlagFilter.tags || []).includes(tag)
+          }));
+        },
+        error: () => this.msg.error($localize`:@@common.loading-failed-try-again:Loading failed, please try again`)
+      });
   }
 
   // tags
@@ -221,9 +225,12 @@ export class IndexComponent implements OnInit {
     this.loading = true;
     this.featureFlagService
       .getList(this.featureFlagFilter)
-      .subscribe((featureFlags: IFeatureFlagListModel) => {
-        this.featureFlagListModel = featureFlags;
-        this.loading = false;
+      .pipe(finalize(() => this.loading = false))
+      .subscribe({
+        next: (featureFlags: IFeatureFlagListModel) => {
+          this.featureFlagListModel = featureFlags;
+        },
+        error: () => this.msg.error($localize`:@@common.loading-failed-try-again:Loading failed, please try again`)
       });
   }
 

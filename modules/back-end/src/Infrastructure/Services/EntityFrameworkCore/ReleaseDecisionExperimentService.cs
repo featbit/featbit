@@ -1224,7 +1224,7 @@ public class ReleaseDecisionExperimentService(
                 var key = GetJsonString(item, "key");
                 var name = GetJsonString(item, "name");
                 var value = GetJsonString(item, "value");
-                var candidates = new[] { value, name, key }
+                var candidates = new[] { key, name, value }
                     .OfType<string>()
                     .Where(x => !string.IsNullOrWhiteSpace(x))
                     .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -1283,14 +1283,16 @@ public class ReleaseDecisionExperimentService(
                 .Where(x => x.Value is Dictionary<string, object>)
                 .Select(x => x.Key)
                 .ToArray();
-            var missing = new[] { control }.Concat(treatments)
-                .Where(x => !availableKeys.Contains(x))
+            var expectedKeys = new[] { control }.Concat(treatments)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+            var unexpected = availableKeys
+                .Where(x => !expectedKeys.Contains(x))
                 .ToArray();
 
-            if (missing.Length > 0)
+            if (unexpected.Length > 0)
             {
                 warnings.Add(
-                    $"Variant key mismatch: expected [{string.Join(", ", new[] { control }.Concat(treatments))}] but metric data has [{string.Join(", ", availableKeys)}]. Update the run's control/treatment variant settings to match the actual variation values.");
+                    $"Unexpected variant data: expected [{string.Join(", ", expectedKeys)}] but metric data also has [{string.Join(", ", unexpected)}]. Update the run's control/treatment variant settings if these values should be included.");
             }
         }
 
@@ -1455,14 +1457,9 @@ public class ReleaseDecisionExperimentService(
         string? metricAgg)
     {
         var inverse = TryGetBool(metricData, "inverse");
-        var ctrlRaw = GetVariantData(metricData, control);
-        if (ctrlRaw == null)
-        {
-            return null;
-        }
-
+        var isProp = IsBinaryMetricData(metricData);
+        var ctrlRaw = GetVariantData(metricData, control) ?? EmptyVariantData(isProp);
         var (meanA, varA, nA) = MetricMoments(ctrlRaw);
-        var isProp = ctrlRaw.ContainsKey("k");
         var rows = new List<Dictionary<string, object?>>();
         var ctrlRow = new Dictionary<string, object?>
         {
@@ -1485,12 +1482,7 @@ public class ReleaseDecisionExperimentService(
         var verdicts = new List<string>();
         foreach (var treatment in treatments)
         {
-            var trtRaw = GetVariantData(metricData, treatment);
-            if (trtRaw == null)
-            {
-                continue;
-            }
-
+            var trtRaw = GetVariantData(metricData, treatment) ?? EmptyVariantData(isProp);
             var (meanB, varB, nB) = MetricMoments(trtRaw);
             var bay = BayesianResult(meanA, varA, nA, meanB, varB, nB, inverse, prior);
             var trtRow = new Dictionary<string, object?>
@@ -1576,6 +1568,37 @@ public class ReleaseDecisionExperimentService(
         return section;
     }
 
+    private static bool IsBinaryMetricData(Dictionary<string, object> metricData)
+    {
+        return metricData.Values
+            .Select(value => value switch
+            {
+                Dictionary<string, object> data => data,
+                JsonElement element when element.ValueKind == JsonValueKind.Object => GetVariantData(
+                    new Dictionary<string, object> { ["_"] = element },
+                    "_"),
+                _ => null
+            })
+            .OfType<Dictionary<string, object>>()
+            .Any(data => data.ContainsKey("k"));
+    }
+
+    private static Dictionary<string, object> EmptyVariantData(bool isBinary)
+    {
+        return isBinary
+            ? new Dictionary<string, object>
+            {
+                ["n"] = 0L,
+                ["k"] = 0L
+            }
+            : new Dictionary<string, object>
+            {
+                ["n"] = 0L,
+                ["sum"] = 0D,
+                ["sum_squares"] = 0D
+            };
+    }
+
     private static string[] SplitTreatments(string? value)
     {
         var normalized = Normalize(value);
@@ -1658,12 +1681,7 @@ public class ReleaseDecisionExperimentService(
         foreach (var variant in new[] { control }.Concat(treatments))
         {
             var data = GetVariantData(metricData, variant);
-            if (data == null)
-            {
-                continue;
-            }
-
-            observed[variant] = (long)Math.Floor(GetDouble(data, "n"));
+            observed[variant] = data == null ? 0 : (long)Math.Floor(GetDouble(data, "n"));
         }
 
         return observed;
