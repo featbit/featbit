@@ -96,13 +96,13 @@ export class IdentityService {
       const storageToKeep = {
         [CURRENT_LANGUAGE()]: localStorage.getItem(CURRENT_LANGUAGE()),
         [GET_STARTED()]: localStorage.getItem(GET_STARTED()),
+        [THEME]: localStorage.getItem(THEME)
       };
 
       if (keepOrgProject) {
         // restore org and project, so when user login, he would always see the same project & env
         storageToKeep[CURRENT_ORGANIZATION()] = localStorage.getItem(CURRENT_ORGANIZATION());
         storageToKeep[CURRENT_PROJECT()] = localStorage.getItem(CURRENT_PROJECT());
-        storageToKeep[THEME] = localStorage.getItem(THEME);
       }
 
       localStorage.clear();
