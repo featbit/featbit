@@ -7,7 +7,8 @@ import {
   IDENTITY_TOKEN,
   LOGIN_REDIRECT_URL,
   USER_PROFILE,
-  GET_STARTED
+  GET_STARTED,
+  THEME
 } from "@utils/localstorage-keys";
 import { Router } from "@angular/router";
 import { UserService } from "@services/user.service";
@@ -101,6 +102,7 @@ export class IdentityService {
         // restore org and project, so when user login, he would always see the same project & env
         storageToKeep[CURRENT_ORGANIZATION()] = localStorage.getItem(CURRENT_ORGANIZATION());
         storageToKeep[CURRENT_PROJECT()] = localStorage.getItem(CURRENT_PROJECT());
+        storageToKeep[THEME] = localStorage.getItem(THEME);
       }
 
       localStorage.clear();
