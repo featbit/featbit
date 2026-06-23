@@ -1,0 +1,83 @@
+# FeatBit React Front-End Migration Plan
+
+## Summary
+
+Create a standalone React front-end in `D:\Workspace\FeatBit\featbit\modules\front-end-react` and develop it in parallel with the existing Angular `front-end`. The React version will use **Vite SPA + React Router front-end mode**, build to static files, and be served by Nginx. The deployment entry point should only be switched after the existing management console functionality has been fully migrated.
+
+## Key Changes
+
+- Foundation: Vite + React + TypeScript + React Router SPA. Do not use SSR, React Router full-stack mode, Next.js, or Remix.
+- UI stack: Use shadcn/ui + Radix primitives + Tailwind CSS. Buttons, text colors, spacing, border radius, focus rings, and other base visuals should follow shadcn/Tailwind default tokens as much as possible instead of copying Angular/ng-zorro styles. Prefer `lucide-react` for icons. Use TanStack Table for tables, React Hook Form + Zod for forms, TanStack Query for server state, Recharts for charts, and Shiki for code highlighting. For simple cases, wrap snippets in a lightweight `CodeBlock`.
+- i18n: Use `react-i18next`, while preserving the `/en/*` and `/zh/*` URL structure, browser-language default redirect, and language switching.
+- API layer: Implement a typed API client that preserves the existing backend contract, automatically unwraps `IResponse.data`, supports the 401 refresh-token queue, shows error toasts, clears local state on session expiration, and redirects to `/login`.
+- Runtime configuration: Preserve the `assets/env.template.js` / `assets/env.js` mechanism and continue supporting `API_URL`, `DEMO_URL`, `EVALUATION_URL`, `DISPLAY_API_URL`, `DISPLAY_EVALUATION_URL`, and `HOSTING_MODE`.
+- Static assets: Do not copy the Angular assets wholesale. For generic icons/fonts, prefer shadcn/Tailwind/lucide capabilities. Only copy FeatBit brand assets, business-specific assets, sample data, and required runtime assets.
+- Deployment: Add the React Dockerfile, entrypoint, and Nginx templates, matching the existing `/health`, `BASE_HREF`, `/en`, and `/zh` fallback behavior.
+
+## Implementation Plan
+
+1. Scaffold the `front-end-react` project with Vite, TypeScript aliases, Tailwind, shadcn/ui, React Router, TanStack Query, react-i18next, and lint/test/build scripts. See [implementation detail 01](implementation-details/01-scaffold-front-end-react.md).
+2. Build core infrastructure: env loader, API client, auth/session store, workspace/org/project/env store, permission/license helpers, and base toast/dialog/drawer/table/form components. See [implementation detail 02](implementation-details/02-core-infrastructure.md).
+3. Migrate the shell: login, auth guard, secure-area layout, side menu, header, locale switcher, and workspace/org/project/env switching. See [implementation detail 03](implementation-details/03-shell-and-navigation.md).
+4. Migrate feature domains page by page: feature flags, users, segments, experiments, audit logs, workspace, organization, relay proxies, IAM, and integrations. See [implementation detail 04](implementation-details/04-feature-domain-pages.md).
+5. Migrate complex capabilities: feature flag targeting/rules, change review/pending changes, policy editor, resource editor/finder, Monaco JSON editor, Shiki/lightweight CodeBlock, and Recharts charting. See [implementation detail 05](implementation-details/05-complex-capabilities.md).
+6. Migrate i18n copy: extract English/Chinese resources from Angular templates and `messages.zh.xlf`, then organize them as react-i18next JSON namespaces. See [implementation detail 06](implementation-details/06-i18n-migration.md).
+7. Align deployment and documentation: README, local development commands, production build, Docker/Nginx, environment variables, and future cutover steps. See [implementation detail 07](implementation-details/07-deployment-and-documentation.md).
+
+## Asset Policy
+
+- Use `lucide-react` to replace generic action icons such as add/edit/delete/search/save/download/arrow/settings/user/lock.
+- Use the Tailwind/system font stack. Do not copy the existing Noto fonts by default.
+- Copy only necessary assets: FeatBit logo, brand SVGs, upload sample JSON, `env.template.js`, required Monaco assets, and irreplaceable business-specific icons. Do not copy the old Angular login background.
+- Do not migrate legacy assets that only existed to support ng-zorro/Angular styling.
+
+## UI/UX Direction
+
+The React version should not be a 1:1 clone of the Angular UI. It should be redesigned as a more modern FeatBit Console that better fits feature management workflows. The overall style should emphasize clear context, low-noise density, visible risk/status, and a rule editor that feels like a focused workbench.
+
+- Visual language: Use a light theme, a low-saturation gray page background, and white work surfaces. Keep FeatBit green for primary actions and healthy states, but avoid large areas of solid brand color.
+- Status system: Use green for on/healthy, amber for draft/pending, slate for off/archived, red for danger/expired, and blue or violet for experiment/insight.
+- Layout: Use a left product navigation, a top global context bar, a page title area, a toolbar, and the main workspace. Organization, Project, Environment, Plan, and User context should remain visible at the top.
+- Navigation grouping: Release contains Feature Flags, Segments, and End Users. Experimentation contains Experiments and Metrics. Governance contains Audit Logs and future Change Requests. Admin contains Workspace, Organization, IAM, Relay Proxies, and Integrations. IAM, Relay Proxies, and Integrations should not be placed under a group named Workspace because they are closer to admin/governance areas than plain workspace settings.
+- Base styling: Prefer shadcn/ui default variants for buttons, forms, menus, popovers, dialogs, tooltips, and badges. Only extend tokens for FeatBit brand color, status colors, and business information hierarchy; avoid reproducing Angular text colors and control styles one by one.
+- Get Started: Do not keep it as the first long-term primary navigation item. Migrate it into a dashboard/onboarding checklist that can be hidden or de-emphasized after completion.
+- Feature Flags list: Provide page summary, environment status, search, and Status/Tags/Type/Archived filters. Display flag keys as copyable code pills in the table, collapse row operations into an action menu, and show a bulk action bar when rows are selected.
+- Feature Flag detail: Use a sticky flag header that always shows flag on/off, key, tags, pending changes, Save, Review/Schedule/Change Request. Use clear tabs for Targeting, Triggers, Experimentation, Insights, History, and Settings.
+- Targeting editor: Present rules as a builder and make the IF/AND/SERVE structure explicit. Support drag sorting, inline validation, left-side status rails, and pending-change markers.
+- Header/context switcher: Use a compact breadcrumb-like context bar, for example FeatBit / Organization / Project / Environment. Use colored dots for dev/staging/prod environments and provide a Secrets tab inside the environment menu.
+- Login page: Fully redesign it. Do not reuse the old background or old illustration card. Use the current concept and rationale in [login-page-design.md](design/login-page-design.md): a structured split layout with the Angular FeatBit logo style, a left feature rollout abstraction, a right authentication column, Google/GitHub OAuth, and a separate Enterprise SSO section. Do not use console previews, AI messaging, or footer dividers.
+- Workspace/Organization selection: Use searchable lists or cards. When there are many workspaces/organizations, search and keyboard-friendly selection are required.
+- Base components: Build `PageShell`, `PageHeader`, `ContextBar`, `SidebarNav`, `DataToolbar`, `DataTable`, `StatusBadge`, `CopyableCode`, `EnvironmentBadge`, `ConfirmAction`, `EntityDrawer`, `EmptyState`, `PendingChangesDrawer`, `RuleBuilder`, and `ResourceSelector`.
+- Data visualization: Use Recharts + shadcn/chart-style wrappers such as `ChartContainer`, `ChartTooltip`, and `ChartLegend`. Do not migrate the G2 dependency. Experiments, insights, and trend pages should primarily use clean line/bar/area/composed charts that align with shadcn tokens and light/dark variables.
+- Code display: Do not migrate Prism. SDK examples, JSON snippets, curl commands, and similar content should use a unified `CodeBlock` component with copy, language label, line wrap, and light/dark tokens. Use Shiki for multi-language or complex highlighting; simple short snippets can use a lightweight custom tokenizer/styles.
+- Interaction principles: Avoid placing every operation directly in tables. Show high-frequency primary actions directly, and move low-frequency or dangerous actions into more menus or confirmation flows. Risky actions such as save, approval, and scheduling must remain visible and have clear state.
+
+## Integration Testing With Testcontainers
+
+Use Testcontainers for real-environment integration coverage. The current FeatBit backend integration tests mostly use `WebApplicationFactory`, fake providers, and stubs. The `featbit-react-native-sdk` reference project uses `testcontainers` to start a real FeatBit stack and seed data through the management API. For this React front-end, keep the real Postgres + api-server approach, omit evaluation-server from the default integration stack, and connect it to Playwright browser E2E instead of Jest-only SDK tests.
+
+- Add `testcontainers` to the React front-end test tooling for real-stack E2E tests, and keep it behind an explicit command such as `npm run test:e2e:containers` so normal unit/component tests never require Docker.
+- Use Playwright for browser E2E against the Vite SPA. A Testcontainers global setup should start `postgres:15.10` and `featbit/featbit-api-server` on an isolated Docker network.
+- Seed data through the real management API: login, discover workspace/org, run onboarding if needed, create project/environment, and create feature flags, users, segments, IAM, webhook, and access-token fixtures as required by each scenario.
+- Generate the React test runtime config from mapped container ports: `API_URL` and `DISPLAY_API_URL` should point to the mapped api-server host URL. Keep `EVALUATION_URL` and `DISPLAY_EVALUATION_URL` as static placeholder values unless a specific future test explicitly needs evaluation-server behavior.
+- Do not sparse-clone migration SQL from GitHub at test runtime. Use local repo assets or pinned container images so tests are deterministic and can run without network access after dependencies/images are available.
+- Do not rely on `latest` images by default. Use pinned image tags or environment-overridable image names such as `FEATBIT_API_IMAGE` and `FEATBIT_POSTGRES_IMAGE`.
+- Reuse the reference project's useful helper shape, such as a `FeatBitStack` class with start/seed/close methods, but split seeding into focused helpers like `seedWorkspace`, `seedFeatureFlag`, `seedSegment`, and `seedIamFixtures`.
+- Keep one-shot token refresh handling in the seeding helper because real management API tokens may expire during longer E2E runs.
+
+## Test Plan
+
+- Unit tests: API client unwrapping/error handling, concurrent 401 refresh, localStorage key compatibility, permission checks, validators, and feature flag rule utilities.
+- Component tests: login, header switchers, menu permission visibility, and core drawer/modal/form/table behavior.
+- E2E tests: use a fast mocked/API-contract mode for PR feedback and a Testcontainers real-stack mode for full management-console integration coverage. Scenarios include login, workspace selection, feature flag creation, targeting changes, segment creation, user filtering, IAM policy editing, webhook/access token management, and language switching.
+- Build checks: `npm run build`, Docker build, Nginx `/health`, `/en/*`, `/zh/*`, and `BASE_HREF` fallback.
+- Visual parity: Compare the key Angular pages where parity matters: login, feature flag detail, targeting, segments, experiments, IAM, and workspace settings.
+
+## Assumptions
+
+- The React directory is fixed as `front-end-react`.
+- The migration strategy is a complete parallel implementation, with no Angular/React hybrid mounting.
+- React Router will only be used in front-end SPA mode.
+- `react-i18next` is the default i18n solution.
+- Playwright is the default browser E2E runner, and Testcontainers is used only for real-stack integration tests, not as a replacement for unit/component coverage.
+- The current Angular project is a read-only reference during the migration and will not be modified.
