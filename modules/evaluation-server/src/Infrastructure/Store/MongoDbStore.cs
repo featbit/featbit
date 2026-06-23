@@ -7,6 +7,9 @@ namespace Infrastructure.Store;
 
 public class MongoDbStore : IDbStore
 {
+    private const string EnvironmentSpecificSegmentType = "environment-specific";
+    private const string SharedSegmentType = "shared";
+
     public string Name => Stores.MongoDb;
 
     private readonly IMongoDbClient _mongoDbClient;
@@ -58,7 +61,11 @@ public class MongoDbStore : IDbStore
         var query = _mongodb.GetCollection<BsonDocument>("Segments")
             .Find(x => x["updatedAt"] > DateTime.UnixEpoch.AddMilliseconds(timestamp) &&
                        x["workspaceId"].AsGuid == wsId &&
-                       ((BsonArray)x["scopes"]).Any(y => $"{envRN}:".StartsWith(string.Concat(y, ":"))));
+                       (
+                           (x["type"].AsString == EnvironmentSpecificSegmentType && x["envId"].AsGuid == envId) ||
+                           (x["type"].AsString == SharedSegmentType &&
+                            ((BsonArray)x["scopes"]).Any(y => $"{envRN}:".StartsWith(string.Concat(y, ":"))))
+                       ));
 
         // replace envId for shared segments
         var segments = await query.ToListAsync();

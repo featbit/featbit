@@ -1,0 +1,406 @@
+{
+  "name": "featbit-rest-api-e2e",
+  "description": "Fixed end-to-end test manifest for FeatBit REST API, FeatBit .NET SDK evaluation/tracking, and release-decision analysis.",
+  "defaultEndpoints": {
+    "apiUrl": "https://app-api.featbit.co",
+    "eventUrl": "https://app-eval.featbit.co",
+    "streamingUrl": "wss://app-eval.featbit.co",
+    "swaggerUrl": "https://app-api.featbit.co/swagger/OpenApi/swagger.json"
+  },
+  "keyTemplates": {
+    "suffix": "yyyyMMddHHmmss-randomhex",
+    "metricSuffix": "{suffix} with hyphens replaced by underscores",
+    "projectKey": "e2e-api-{suffix}",
+    "environmentKey": "e2e-env-{suffix}",
+    "segmentKey": "e2e-segment-{suffix}"
+  },
+  "featureFlags": [
+    {
+      "keyTemplate": "rd-checkout-treatment-{suffix}",
+      "type": "boolean",
+      "purpose": "Release-decision experiment flag with control/treatment variants"
+    },
+    {
+      "keyTemplate": "rd-banner-copy-{suffix}",
+      "type": "string",
+      "purpose": "Banner copy experiment-style flag"
+    },
+    {
+      "keyTemplate": "rd-price-multiplier-{suffix}",
+      "type": "number",
+      "purpose": "Numeric parameter flag"
+    },
+    {
+      "keyTemplate": "rd-checkout-config-{suffix}",
+      "type": "json",
+      "purpose": "JSON configuration flag"
+    },
+    {
+      "keyTemplate": "rd-onboarding-flow-{suffix}",
+      "type": "string",
+      "purpose": "Flow selection flag"
+    },
+    {
+      "keyTemplate": "rd-risk-threshold-{suffix}",
+      "type": "number",
+      "purpose": "Risk threshold flag"
+    },
+    {
+      "keyTemplate": "rd-ai-assistant-route-{suffix}",
+      "type": "string",
+      "purpose": "AI routing flag"
+    },
+    {
+      "keyTemplate": "rd-notification-style-{suffix}",
+      "type": "string",
+      "purpose": "Notification style flag"
+    },
+    {
+      "keyTemplate": "rd-search-ranking-{suffix}",
+      "type": "string",
+      "purpose": "Search ranking flag"
+    },
+    {
+      "keyTemplate": "rd-kill-switch-{suffix}",
+      "type": "boolean",
+      "purpose": "Kill switch flag"
+    }
+  ],
+  "metrics": {
+    "primary": {
+      "keyTemplate": "e2e_checkout_activated_{metricSuffix}",
+      "type": "binary",
+      "aggregation": "once",
+      "expectedDirection": "increase_good"
+    },
+    "guardrails": [
+      {
+        "keyTemplate": "e2e_checkout_error_{metricSuffix}",
+        "type": "binary",
+        "aggregation": "once",
+        "alarmDirection": "increase_bad"
+      },
+      {
+        "keyTemplate": "e2e_checkout_latency_ms_{metricSuffix}",
+        "type": "continuous",
+        "aggregation": "average",
+        "alarmDirection": "increase_bad"
+      }
+    ]
+  },
+  "expectedFinalState": {
+    "segment": {
+      "includedUserCount": 2,
+      "excludedUserCount": 0,
+      "ruleCount": 0
+    },
+    "targeting": {
+      "experimentFlag": {
+        "condition": "User is in segment IsOneOf [segmentId]",
+        "ruleTraffic": "100% treatment",
+        "fallthroughTraffic": "50% control, 50% treatment",
+        "includedInExpt": true,
+        "exptIncludeAllTargets": true
+      },
+      "nonExperimentFlags": {
+        "condition": "plan Equal enterprise",
+        "ruleTraffic": "100% first variation",
+        "fallthroughTraffic": "100% first variation",
+        "includedInExpt": true,
+        "exptIncludeAllTargets": true
+      }
+    },
+    "flags": [
+      {
+        "keyTemplate": "rd-checkout-treatment-{suffix}",
+        "type": "boolean",
+        "finalEnabled": true,
+        "finalVariants": [
+          "control=false",
+          "treatment=true"
+        ],
+        "experimentation": "bound"
+      },
+      {
+        "keyTemplate": "rd-banner-copy-{suffix}",
+        "type": "string",
+        "finalEnabled": false,
+        "finalVariants": [
+          "control-updated=control",
+          "candidate-1-updated=short",
+          "candidate-2-updated=direct",
+          "candidate-updated=candidate"
+        ],
+        "experimentation": "not-bound"
+      },
+      {
+        "keyTemplate": "rd-price-multiplier-{suffix}",
+        "type": "number",
+        "finalEnabled": true,
+        "finalVariants": [
+          "control-updated=1.0",
+          "candidate-1-updated=1.1",
+          "candidate-2-updated=1.2",
+          "candidate-updated=2.5"
+        ],
+        "experimentation": "not-bound"
+      },
+      {
+        "keyTemplate": "rd-checkout-config-{suffix}",
+        "type": "json",
+        "finalEnabled": false,
+        "finalVariants": [
+          "control-updated={\"mode\":\"control\",\"limit\":5}",
+          "candidate-1-updated={\"mode\":\"treatment\",\"limit\":10}",
+          "candidate-updated={\"mode\":\"candidate\",\"limit\":15}"
+        ],
+        "experimentation": "not-bound"
+      },
+      {
+        "keyTemplate": "rd-onboarding-flow-{suffix}",
+        "type": "string",
+        "finalEnabled": true,
+        "finalVariants": [
+          "control-updated=classic",
+          "candidate-1-updated=guided",
+          "candidate-2-updated=compact",
+          "candidate-updated=candidate"
+        ],
+        "experimentation": "not-bound"
+      },
+      {
+        "keyTemplate": "rd-risk-threshold-{suffix}",
+        "type": "number",
+        "finalEnabled": false,
+        "finalVariants": [
+          "control-updated=10",
+          "candidate-1-updated=25",
+          "candidate-2-updated=50",
+          "candidate-updated=2.5"
+        ],
+        "experimentation": "not-bound"
+      },
+      {
+        "keyTemplate": "rd-ai-assistant-route-{suffix}",
+        "type": "string",
+        "finalEnabled": true,
+        "finalVariants": [
+          "control-updated=off",
+          "candidate-1-updated=gpt-4.1-mini",
+          "candidate-2-updated=gpt-4.1",
+          "candidate-updated=candidate"
+        ],
+        "experimentation": "not-bound"
+      },
+      {
+        "keyTemplate": "rd-notification-style-{suffix}",
+        "type": "string",
+        "finalEnabled": false,
+        "finalVariants": [
+          "control-updated=quiet",
+          "candidate-1-updated=badge",
+          "candidate-2-updated=toast",
+          "candidate-updated=candidate"
+        ],
+        "experimentation": "not-bound"
+      },
+      {
+        "keyTemplate": "rd-search-ranking-{suffix}",
+        "type": "string",
+        "finalEnabled": true,
+        "finalVariants": [
+          "control-updated=baseline",
+          "candidate-1-updated=semantic",
+          "candidate-2-updated=hybrid",
+          "candidate-updated=candidate"
+        ],
+        "experimentation": "not-bound"
+      },
+      {
+        "keyTemplate": "rd-kill-switch-{suffix}",
+        "type": "boolean",
+        "finalEnabled": false,
+        "finalVariants": [
+          "control-updated=false",
+          "treatment-updated=true"
+        ],
+        "experimentation": "not-bound"
+      }
+    ],
+    "insightsAndStats": {
+      "ingestEndpoint": "POST /api/public/insight/track",
+      "primaryMetric": "use report exact users/conversions; each variant meets configured min users per variant; control rate near 30%; treatment rate near 45%; treatment > control",
+      "errorGuardrail": "use report exact users/errors; each variant meets configured min users per variant; control error rate near 1.8%; treatment error rate near 2.0%; both below 5.00%",
+      "latencyGuardrail": "use report exact users/sums/averages; each variant meets configured min users per variant; control average near 340ms; treatment average near 320ms; treatment <= control"
+    },
+    "analyze": {
+      "runStatus": "analyzing",
+      "inputData": "non-empty JSON with primary and guardrail metrics",
+      "analysisResult": "non-empty JSON"
+    }
+  },
+  "steps": [
+    {
+      "id": "0",
+      "name": "Create project and environment",
+      "endpoints": [
+        "POST /api/v1/projects",
+        "POST /api/v1/projects/{projectId}/envs",
+        "GET /api/v1/projects/{projectId}"
+      ],
+      "assertions": [
+        "project id/key are recorded",
+        "environment id/key are recorded",
+        "server SDK secret exists and is masked in reports"
+      ]
+    },
+    {
+      "id": "1",
+      "name": "Create 10 feature flags",
+      "endpoints": [
+        "POST /api/v1/envs/{envId}/feature-flags",
+        "GET /api/v1/envs/{envId}/feature-flags/{key}"
+      ],
+      "assertions": [
+        "all 10 keys exist",
+        "all expected flag types exist",
+        "every flag has at least two variations"
+      ]
+    },
+    {
+      "id": "2",
+      "name": "Mutate segment and feature flags",
+      "endpoints": [
+        "POST /api/v1/envs/{envId}/segments",
+        "PUT /api/v1/envs/{envId}/segments/{segmentId}/targeting",
+        "PUT /api/v1/envs/{envId}/feature-flags/{key}/description",
+        "PUT /api/v1/envs/{envId}/feature-flags/{key}/tags",
+        "PUT /api/v1/envs/{envId}/feature-flags/{key}/toggle/{status}",
+        "PUT /api/v1/envs/{envId}/feature-flags/{key}/variations",
+        "PUT /api/v1/envs/{envId}/feature-flags/{key}/targeting"
+      ],
+      "assertions": [
+        "segment includes the two deterministic users, has no excluded users, and has no rules",
+        "description and full tag set are persisted",
+        "toggle state is persisted",
+        "non-experiment variation changes are persisted",
+        "experiment flag control/treatment variations are preserved for analysis binding",
+        "targeting rules are persisted"
+      ]
+    },
+    {
+      "id": "3",
+      "name": "Verify feature flag and segment mutations",
+      "endpoints": [
+        "GET /api/v1/envs/{envId}/feature-flags/{key}",
+        "GET /api/v1/envs/{envId}/segments/{segmentId}/flag-references"
+      ],
+      "assertions": [
+        "server-side flag state matches expected mutations",
+        "segment references include the experiment flag"
+      ]
+    },
+    {
+      "id": "4",
+      "name": "Evaluate flags and track metrics through FeatBit .NET SDK",
+      "sdkCalls": [
+        "BoolVariationDetail",
+        "StringVariationDetail",
+        "DoubleVariationDetail",
+        "Track",
+        "FlushAndWait"
+      ],
+      "eventEndpoint": "POST /api/public/insight/track",
+      "assertions": [
+        "SDK initializes with generated server key",
+        "all 10 flags are evaluated",
+        "the two segment users evaluate the experiment flag to treatment=true",
+        "an enterprise synthetic user evaluates each non-experiment flag to the expected first variation",
+        "SDK evaluation events are flushed to the evaluation insight endpoint"
+      ]
+    },
+    {
+      "id": "5",
+      "name": "Create and update release-decision experiment",
+      "endpoints": [
+        "POST /api/v1/envs/{envId}/release-decision/experiments",
+        "PUT /api/v1/envs/{envId}/release-decision/experiments/{id}",
+        "GET /api/v1/envs/{envId}/release-decision/experiments/{id}"
+      ],
+      "assertions": [
+        "experiment id is recorded",
+        "experiment is bound to the checkout treatment flag",
+        "intent and hypothesis are persisted"
+      ]
+    },
+    {
+      "id": "6",
+      "name": "Configure primary and guardrail metrics",
+      "endpoints": [
+        "PUT /api/v1/envs/{envId}/release-decision/experiments/{id}/metrics"
+      ],
+      "assertions": [
+        "primary metric is binary/once",
+        "guardrails include binary/once and continuous/average metrics"
+      ]
+    },
+    {
+      "id": "7",
+      "name": "Create run and seed evidence",
+      "endpoints": [
+        "POST /api/v1/envs/{envId}/release-decision/experiments/{id}/runs",
+        "PUT /api/v1/envs/{envId}/release-decision/experiments/{id}/runs/{runId}",
+        "PUT /api/v1/envs/{envId}/release-decision/experiments/{id}/runs/{runId}/audience",
+        "PUT /api/v1/envs/{envId}/release-decision/experiments/{id}/runs/{runId}/observation-window",
+        "POST /api/v1/envs/{envId}/experiment-stats/query"
+      ],
+      "assertions": [
+        "run id is recorded",
+        "stats query observes users",
+        "treatment conversion rate is higher than control",
+        "binary guardrail stats observe users",
+        "continuous guardrail stats observe users and values"
+      ]
+    },
+    {
+      "id": "8",
+      "name": "Analyze experiment run",
+      "endpoints": [
+        "POST /api/v1/envs/{envId}/release-decision/experiments/{id}/runs/{runId}/analyze"
+      ],
+      "assertions": [
+        "analysis input data is generated",
+        "analysis result is generated"
+      ]
+    },
+    {
+      "id": "9",
+      "name": "Final verification",
+      "endpoints": [
+        "GET /api/v1/envs/{envId}/release-decision/experiments/{id}",
+        "POST /api/v1/envs/{envId}/experiment-stats/query",
+        "GET /api/v1/envs/{envId}/feature-flags/{key}"
+      ],
+      "assertions": [
+        "all created resources are recorded",
+        "all flags still exist",
+        "all 10 flags match expected final enabled state",
+        "all 10 flags match expected final variants",
+        "all 10 flags match expected final rule condition",
+        "all 10 flags match expected rule traffic, fallthrough traffic, includedInExpt, and exptIncludeAllTargets",
+        "experiment binding is correct",
+        "seeded result direction is correct",
+        "primary metric and guardrail stats contain observed data",
+        "analyze status, inputData, and analysisResult match expected final state",
+        "secrets are masked in reports"
+      ]
+    }
+  ],
+  "reporting": {
+    "liveOnly": true,
+    "directory": "reports",
+    "markdownPattern": "featbit-rest-api-e2e-<timestamp>.md",
+    "jsonPattern": "featbit-rest-api-e2e-<timestamp>.json",
+    "offlineModesWriteReports": false
+  }
+}

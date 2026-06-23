@@ -1,0 +1,561 @@
+# FeatBit REST API E2E Test Script
+
+This document is the human-readable fixed test script for testers and developers. It explains what is being tested, why each step exists, which API endpoints are used, and what assertions must pass.
+
+The executable implementation is [featbit-rest-api-e2e.cs](./featbit-rest-api-e2e.cs). The recommended entry point is [run-featbit-rest-api-e2e.ps1](./run-featbit-rest-api-e2e.ps1).
+
+The machine-readable checklist for this script is [test-manifest.json](./test-manifest.json).
+
+## Test Objective
+
+Verify that FeatBit REST APIs, feature flag mutation workflows, FeatBit .NET Server SDK evaluation/tracking, and the release-decision experiment analysis flow work together end to end in one environment.
+
+After a successful live run, the test should produce:
+
+- A created project `id` and `key`
+- A created environment `id`, `key`, and Server SDK secret
+- Creation, mutation, and verification records for 10 feature flags
+- A release-decision experiment bound to a feature flag
+- Primary metric and guardrail metric configuration records
+- SDK evaluation, metric tracking, stats query, and analyze verification results
+- A real Markdown report and JSON report generated from the live run
+
+## Prerequisites
+
+- A valid FeatBit OpenAPI access token
+- The token has permission to create project/env/flag/segment/release-decision resources in the target workspace
+- The target API, evaluation/event, and streaming services are reachable
+- The local machine has .NET SDK installed and can restore `FeatBit.ServerSdk`
+- For the Codex-agent topology cycle, a tester logs in to the freshly started
+  local UI and creates the project, environment, and global access token before
+  the agent runs this script with `-ProjectKey` and `-EnvId`
+
+Default SaaS endpoints:
+
+| Purpose | URL |
+| --- | --- |
+| API | `https://app-api.featbit.co` |
+| SDK event/evaluation | `https://app-eval.featbit.co` |
+| SDK streaming | `wss://app-eval.featbit.co` |
+
+## Execution Command
+
+Optional Swagger preflight:
+
+```powershell
+.\integration-tests\featbit-rest-api-e2e\run-featbit-rest-api-e2e.ps1 -OpenApiPreflight
+```
+
+The preflight fetches the target OpenAPI document and verifies that the project, environment, feature flag, and segment management endpoints used by this script are advertised. It is console-only and does not create a report. Release-decision and experiment-stats endpoints may be absent from the public SaaS Swagger; those endpoint contracts are verified through backend integration tests.
+
+Live execution:
+
+```powershell
+.\integration-tests\featbit-rest-api-e2e\run-featbit-rest-api-e2e.ps1 `
+  -AccessToken "<access-token>"
+```
+
+Local fixed-port service execution:
+
+```powershell
+.\integration-tests\featbit-rest-api-e2e\run-featbit-rest-api-e2e.ps1 `
+  -AccessToken "<access-token>" `
+  -ApiUrl http://localhost:5000 `
+  -EventUrl http://localhost:5100 `
+  -StreamingUrl ws://localhost:5100 `
+  -Users 1500 `
+  -MinUsersPerVariant 500
+```
+
+Existing project/environment execution used by the Codex-agent skill:
+
+```powershell
+.\integration-tests\featbit-rest-api-e2e\run-featbit-rest-api-e2e.ps1 `
+  -AccessToken "<access-token>" `
+  -ProjectKey "<project-key>" `
+  -EnvId "<environment-id>" `
+  -ApiUrl http://localhost:5000 `
+  -EventUrl http://localhost:5100 `
+  -StreamingUrl ws://localhost:5100 `
+  -Users 1500 `
+  -MinUsersPerVariant 500
+```
+
+By default, the generated project is kept for inspection. Add `-Cleanup` only when the created project does not need to be retained:
+
+```powershell
+-Cleanup
+```
+
+## Test Data Naming
+
+Each run generates a suffix to avoid key collisions. This document uses `{suffix}` to represent the generated suffix used by project, environment, segment, and feature flag keys.
+
+Metric event keys use `{metricSuffix}`. It is the same generated suffix with hyphens replaced by underscores because metric events are easier to query and read with underscore separators.
+
+Project:
+
+| Field | Value |
+| --- | --- |
+| name | `E2E API Project {suffix}` |
+| key | `e2e-api-{suffix}` |
+
+Environment:
+
+| Field | Value |
+| --- | --- |
+| name | `E2E Environment {suffix}` |
+| key | `e2e-env-{suffix}` |
+
+Segment:
+
+| Field | Value |
+| --- | --- |
+| name | `E2E Segment {suffix}` |
+| key | `e2e-segment-{suffix}` |
+| type | `environment-specific` |
+
+## Feature Flag Catalog
+
+| No. | Key | Type | Purpose |
+| --- | --- | --- | --- |
+| 1 | `rd-checkout-treatment-{suffix}` | `boolean` | Release-decision experiment flag with control/treatment variants |
+| 2 | `rd-banner-copy-{suffix}` | `string` | Banner copy experiment-style flag |
+| 3 | `rd-price-multiplier-{suffix}` | `number` | Numeric parameter flag |
+| 4 | `rd-checkout-config-{suffix}` | `json` | JSON configuration flag |
+| 5 | `rd-onboarding-flow-{suffix}` | `string` | Flow selection flag |
+| 6 | `rd-risk-threshold-{suffix}` | `number` | Risk threshold flag |
+| 7 | `rd-ai-assistant-route-{suffix}` | `string` | AI routing flag |
+| 8 | `rd-notification-style-{suffix}` | `string` | Notification style flag |
+| 9 | `rd-search-ranking-{suffix}` | `string` | Search ranking flag |
+| 10 | `rd-kill-switch-{suffix}` | `boolean` | Kill switch flag |
+
+## Expected Final State
+
+This section defines the expected state after all mutations, SDK seeding, stats queries, and analysis complete.
+
+### Segment Final State
+
+| Field | Expected value |
+| --- | --- |
+| key | `e2e-segment-{suffix}` |
+| included users | `StableUserKey({suffix}, 0)` and `StableUserKey({suffix}, 1)` |
+| excluded users | empty |
+| rules | empty |
+
+### Feature Flag Final State
+
+Dynamic variation IDs are generated at runtime. The table below names variations by final name and value.
+
+| No. | Key | Type | Final enabled | Final variants | Final rule | Final traffic / fallthrough | Experimentation |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | `rd-checkout-treatment-{suffix}` | `boolean` | `true` | `control=false`; `treatment=true` | `User is in segment IsOneOf [segmentId]` serves `treatment` at 100% | fallthrough `control` 50%, `treatment` 50%; `includedInExpt=true`; `exptIncludeAllTargets=true` | Bound to the release-decision experiment |
+| 2 | `rd-banner-copy-{suffix}` | `string` | `false` | `control-updated=control`; `candidate-1-updated=short`; `candidate-2-updated=direct`; `candidate-updated=candidate` | `plan Equal enterprise` serves first variation at 100% | fallthrough first variation 100%; `includedInExpt=true`; `exptIncludeAllTargets=true` | Not bound to release-decision |
+| 3 | `rd-price-multiplier-{suffix}` | `number` | `true` | `control-updated=1.0`; `candidate-1-updated=1.1`; `candidate-2-updated=1.2`; `candidate-updated=2.5` | `plan Equal enterprise` serves first variation at 100% | fallthrough first variation 100%; `includedInExpt=true`; `exptIncludeAllTargets=true` | Not bound to release-decision |
+| 4 | `rd-checkout-config-{suffix}` | `json` | `false` | `control-updated={"mode":"control","limit":5}`; `candidate-1-updated={"mode":"treatment","limit":10}`; `candidate-updated={"mode":"candidate","limit":15}` | `plan Equal enterprise` serves first variation at 100% | fallthrough first variation 100%; `includedInExpt=true`; `exptIncludeAllTargets=true` | Not bound to release-decision |
+| 5 | `rd-onboarding-flow-{suffix}` | `string` | `true` | `control-updated=classic`; `candidate-1-updated=guided`; `candidate-2-updated=compact`; `candidate-updated=candidate` | `plan Equal enterprise` serves first variation at 100% | fallthrough first variation 100%; `includedInExpt=true`; `exptIncludeAllTargets=true` | Not bound to release-decision |
+| 6 | `rd-risk-threshold-{suffix}` | `number` | `false` | `control-updated=10`; `candidate-1-updated=25`; `candidate-2-updated=50`; `candidate-updated=2.5` | `plan Equal enterprise` serves first variation at 100% | fallthrough first variation 100%; `includedInExpt=true`; `exptIncludeAllTargets=true` | Not bound to release-decision |
+| 7 | `rd-ai-assistant-route-{suffix}` | `string` | `true` | `control-updated=off`; `candidate-1-updated=gpt-4.1-mini`; `candidate-2-updated=gpt-4.1`; `candidate-updated=candidate` | `plan Equal enterprise` serves first variation at 100% | fallthrough first variation 100%; `includedInExpt=true`; `exptIncludeAllTargets=true` | Not bound to release-decision |
+| 8 | `rd-notification-style-{suffix}` | `string` | `false` | `control-updated=quiet`; `candidate-1-updated=badge`; `candidate-2-updated=toast`; `candidate-updated=candidate` | `plan Equal enterprise` serves first variation at 100% | fallthrough first variation 100%; `includedInExpt=true`; `exptIncludeAllTargets=true` | Not bound to release-decision |
+| 9 | `rd-search-ranking-{suffix}` | `string` | `true` | `control-updated=baseline`; `candidate-1-updated=semantic`; `candidate-2-updated=hybrid`; `candidate-updated=candidate` | `plan Equal enterprise` serves first variation at 100% | fallthrough first variation 100%; `includedInExpt=true`; `exptIncludeAllTargets=true` | Not bound to release-decision |
+| 10 | `rd-kill-switch-{suffix}` | `boolean` | `false` | `control-updated=false`; `treatment-updated=true` | `plan Equal enterprise` serves first variation at 100% | fallthrough first variation 100%; `includedInExpt=true`; `exptIncludeAllTargets=true` | Not bound to release-decision |
+
+### Detailed Rule And Traffic Contracts
+
+Dynamic variation IDs are discovered during the live run. The contract below defines which generated ID must be used in each rule and rollout.
+
+| Scope | Expected rule contract | Expected rule traffic | Expected fallthrough traffic | Experiment targeting flags |
+| --- | --- | --- | --- | --- |
+| Experiment flag `rd-checkout-treatment-{suffix}` | `rules[0].conditions[0].property = "User is in segment"`; `op = "IsOneOf"`; `value` contains `[segmentId]` | `rules[0].includedInExpt = true`; `rules[0].variations[0].id = treatmentVariationId`; `rollout = [0, 1]`; `exptRollout = 1` | `fallthrough.includedInExpt = true`; `fallthrough.variations[0].id = controlVariationId`; `rollout = [0, 0.5]`; `exptRollout = 0.5`; `fallthrough.variations[1].id = treatmentVariationId`; `rollout = [0.5, 1]`; `exptRollout = 0.5` | `exptIncludeAllTargets = true`; release-decision experiment `flagKey` equals this flag |
+| Every non-experiment flag | `rules[0].conditions[0].property = "plan"`; `op = "Equal"`; `value = "enterprise"` | `rules[0].includedInExpt = true`; `rules[0].variations[0].id = firstVariationId`; `rollout = [0, 1]`; `exptRollout = 1` | `fallthrough.includedInExpt = true`; one fallthrough variation using `firstVariationId`; `rollout = [0, 1]`; `exptRollout = 1` | `exptIncludeAllTargets = true`; not bound to the release-decision experiment |
+
+### Detailed SDK, Insight, And Metric Data Contract
+
+Live runs use the configured `--users` synthetic-user seed budget and the configured `--min-users-per-variant` sample floor. The wrapper defaults are documented in README options, but this test script does not treat either value as an expected exact variant size. User keys are generated by `StableUserKey({suffix}, index)`. Synthetic user attributes are deterministic: `plan = "enterprise"` when `index % 3 == 0`, otherwise `plan = "free"`; `country = "US"` for even indexes and `"FR"` for odd indexes.
+
+| Phase | Expected data |
+| --- | --- |
+| Pre-experiment SDK verification | Evaluate all 10 flags for users `StableUserKey({suffix}, 0)` and `StableUserKey({suffix}, 1)`, then evaluate all 9 non-experiment flags for `StableUserKey({suffix}, 3)`. Expected evaluation count is at least `29`. Segment users 0 and 1 must evaluate `rd-checkout-treatment-{suffix}` to `treatment=true`. User 3 must evaluate every non-experiment flag to the current first variation because `plan=enterprise`. |
+| Experiment evidence SDK seeding | Evaluate all 10 flags for every synthetic user. Expected logical evaluations are `configured --users * 10`. The SDK flushes evaluation and metric events to `POST /api/public/insight/track`. |
+| Exposure data | Experiment stats for `rd-checkout-treatment-{suffix}` must include rows for both `controlVariationId` and `treatmentVariationId`. FeatBit rollout hashing decides the exact split, and both variants must meet the configured `--min-users-per-variant` floor. |
+| Primary metric data | Binary `once` metric. The runner seeds control conversions at a `30%` target and treatment conversions at a `45%` target based on the exact users assigned by FeatBit. Manual acceptance: both variant user counts meet the configured sample floor, and treatment conversion rate is greater than control. |
+| Error guardrail data | Binary `once` metric. The runner seeds control errors at a `1.8%` target and treatment errors at a `2.0%` target based on the exact users assigned by FeatBit. Manual acceptance: both variant user counts meet the configured sample floor, and both error rates are below `5.00%`. |
+| Latency guardrail data | Continuous `average` metric. The runner seeds one latency value per assigned user: control target `340ms`, treatment target `320ms`. Manual acceptance: both variant user counts meet the configured sample floor, and treatment average latency is no higher than control. |
+
+### Expected Insight And Stats Data
+
+| Data | Expected result |
+| --- | --- |
+| SDK evaluation | All 10 flags are evaluated for every synthetic user. |
+| Insight ingest | The .NET SDK flushes exposure and metric events to `POST /api/public/insight/track`. |
+| Experiment exposure stats | `POST /api/v1/envs/{envId}/experiment-stats/query` returns users for both `control` and `treatment` variation IDs of `rd-checkout-treatment-{suffix}`. Each variant must meet the configured sample floor shown in the report. |
+| Primary metric | `e2e_checkout_activated_{metricSuffix}` is binary/once. Expected result: use the exact control/treatment users and conversions from the report; control rate should be near `30%`, treatment rate should be near `45%`, and treatment rate must be greater than control. |
+| Error guardrail | `e2e_checkout_error_{metricSuffix}` is binary/once. Expected result: use the exact control/treatment users and error counts from the report; control rate should be near `1.8%`, treatment rate should be near `2.0%`, and both must stay below the `5.00%` threshold. |
+| Latency guardrail | `e2e_checkout_latency_ms_{metricSuffix}` is continuous/average. Expected result: use the exact control/treatment users, sums, and averages from the report; control average should be near `340ms`, treatment average should be near `320ms`, and treatment must be faster. |
+
+### Expected Analyze Result
+
+| Field | Expected result |
+| --- | --- |
+| run status | `analyzing` after `POST /api/v1/envs/{envId}/release-decision/experiments/{id}/runs/{runId}/analyze` when samples are present |
+| `inputData` | non-empty JSON. It must contain a top-level `metrics` object with entries for `e2e_checkout_activated_{metricSuffix}`, `e2e_checkout_error_{metricSuffix}`, and `e2e_checkout_latency_ms_{metricSuffix}`. Each metric entry must contain non-empty variant data keyed by the generated control/treatment variation ids or equivalent variant keys produced by the stats service. |
+| `analysisResult` | non-empty JSON generated by the release-decision analyzer. The script does not hardcode a specific statistical posterior value, but it requires the analyzer to return structured output rather than an empty string/null. |
+| final experiment binding | experiment `flagKey` remains `rd-checkout-treatment-{suffix}` |
+| final flag verification | all 10 generated flags still exist and match the expected final enabled state, variants, rule condition, rule traffic, fallthrough traffic, `includedInExpt`, `exptIncludeAllTargets`, and variation type from the Feature Flag Final State table |
+
+## Test Steps
+
+### 0. Create Project And Environment
+
+Purpose: create an isolated test area and record the project/environment identifiers used by all later steps.
+
+API:
+
+| Action | Endpoint |
+| --- | --- |
+| Create project | `POST /api/v1/projects` |
+| Create environment | `POST /api/v1/projects/{projectId}/envs` |
+| Read project | `GET /api/v1/projects/{projectId}` |
+
+Assertions:
+
+- Project creation succeeds and returns a non-empty `projectId`
+- Environment creation succeeds and returns a non-empty `envId`
+- The environment has a Server SDK secret
+- Reading the project shows the newly created environment
+
+Records:
+
+- `projectId`
+- `projectKey`
+- `envId`
+- `envKey`
+- Masked Server SDK secret
+
+### 1. Create 10 Feature Flags
+
+Purpose: cover boolean, string, number, and json variation types, and create the objects used by later mutation and experiment-analysis steps.
+
+API:
+
+| Action | Endpoint |
+| --- | --- |
+| Create flag | `POST /api/v1/envs/{envId}/feature-flags` |
+| Read flag | `GET /api/v1/envs/{envId}/feature-flags/{key}` |
+
+Assertions:
+
+- All 10 flags are created successfully
+- Every flag `key` matches the catalog in this script
+- Every flag `variationType` matches the catalog in this script
+- Every flag has at least two variations: control and treatment/candidate
+
+### 2. Create Segment And Mutate Flags
+
+Purpose: verify common management operations, including segment creation, rules/targeting changes, enable/disable toggles, description updates, tags, and variant changes.
+
+API:
+
+| Action | Endpoint |
+| --- | --- |
+| Create segment | `POST /api/v1/envs/{envId}/segments` |
+| Update segment targeting | `PUT /api/v1/envs/{envId}/segments/{segmentId}/targeting` |
+| Read segment | `GET /api/v1/envs/{envId}/segments/{segmentId}` |
+| Update flag description | `PUT /api/v1/envs/{envId}/feature-flags/{key}/description` |
+| Update flag tags | `PUT /api/v1/envs/{envId}/feature-flags/{key}/tags` |
+| Toggle flag | `PUT /api/v1/envs/{envId}/feature-flags/{key}/toggle/{status}` |
+| Update variations | `PUT /api/v1/envs/{envId}/feature-flags/{key}/variations` |
+| Update targeting/rules | `PUT /api/v1/envs/{envId}/feature-flags/{key}/targeting` |
+| Read flag | `GET /api/v1/envs/{envId}/feature-flags/{key}` |
+| Query segment references | `GET /api/v1/envs/{envId}/segments/{segmentId}/flag-references` |
+
+Assertions:
+
+- Segment creation succeeds and returns a non-empty `segmentId`
+- Segment included users match the two deterministic users exactly, excluded users are empty, and segment rules are empty
+- Every flag description is changed and verified by a read-after-write API call
+- Every flag contains the tags `e2e`, `release-decision`, and its own variation type
+- Every flag enabled/disabled state matches the test runner expectation
+- Non-experiment flag variation updates are meaningfully changed and remain valid for their variation type
+- The experiment flag keeps its `control` and `treatment` variation names/values so release-decision analysis can bind the expected variants
+- Every flag targeting contains the expected rule
+- Segment flag references include flags that use the segment
+
+### 3. Batch Verification
+
+Purpose: after each mutation batch, read the server-side model through API calls to verify the persisted state, instead of only trusting write API responses.
+
+API:
+
+| Action | Endpoint |
+| --- | --- |
+| Read flag | `GET /api/v1/envs/{envId}/feature-flags/{key}` |
+| Query segment references | `GET /api/v1/envs/{envId}/segments/{segmentId}/flag-references` |
+
+Assertions:
+
+- Flag key/type/status/tags/variations/targeting match the expected state
+- Segment references match the targeting changes
+
+### 4. Evaluate And Track Through FeatBit .NET SDK
+
+Purpose: verify that flag configuration written by management APIs can be fetched and evaluated by the SDK, and that exposure/metric events can be sent through the SDK.
+
+SDK:
+
+| Type | SDK Call |
+| --- | --- |
+| boolean | `BoolVariationDetail` |
+| string/json | `StringVariationDetail` |
+| number | `DoubleVariationDetail` |
+| binary metric | `Track(user, eventName)` |
+| continuous metric | `Track(user, eventName, numericValue)` |
+| flush | `FlushAndWait` |
+
+Event ingest endpoint used by the SDK:
+
+| Action | Endpoint |
+| --- | --- |
+| Flush SDK insights | `POST /api/public/insight/track` |
+
+Assertions:
+
+- SDK client initializes successfully
+- SDK evaluation completes for all 10 flags
+- Evaluation detail contains variation information
+- The two segment users evaluate the experiment flag to the `treatment=true` variation
+- An enterprise synthetic user evaluates each non-experiment flag to the expected first variation
+- SDK evaluation events are flushed
+- Metric tracking happens later in Step 7 after the experiment run and metrics are configured
+
+### 5. Create Release-Decision Experiment
+
+Purpose: verify that release-decision APIs can create an experiment and bind it to the boolean treatment flag created earlier.
+
+API:
+
+| Action | Endpoint |
+| --- | --- |
+| Create experiment | `POST /api/v1/envs/{envId}/release-decision/experiments` |
+| Update experiment details | `PUT /api/v1/envs/{envId}/release-decision/experiments/{id}` |
+| Read experiment | `GET /api/v1/envs/{envId}/release-decision/experiments/{id}` |
+
+Fields:
+
+- intent
+- hypothesis
+- change
+- constraints
+- environment secret
+- flag server URL
+- bound feature flag key
+- control/treatment variation
+
+Assertions:
+
+- Experiment creation succeeds and returns a non-empty `experimentId`
+- intent/hypothesis/change/constraints can be read back
+- The experiment is bound to `rd-checkout-treatment-{suffix}`
+- Control/treatment variations are preserved
+
+### 6. Configure Primary And Guardrail Metrics
+
+Purpose: verify release-decision metric configuration and cover multiple metric types.
+
+API:
+
+| Action | Endpoint |
+| --- | --- |
+| Update metrics | `PUT /api/v1/envs/{envId}/release-decision/experiments/{id}/metrics` |
+| Read experiment | `GET /api/v1/envs/{envId}/release-decision/experiments/{id}` |
+
+Metrics:
+
+| Role | Key | Type | Aggregation |
+| --- | --- | --- | --- |
+| Primary | `e2e_checkout_activated_{metricSuffix}` | binary | conversion / once |
+| Guardrail | `e2e_checkout_error_{metricSuffix}` | binary | conversion / once |
+| Guardrail | `e2e_checkout_latency_ms_{metricSuffix}` | continuous | average |
+
+Assertions:
+
+- Primary metric exists and has the expected key/type
+- At least two guardrail metrics exist
+- Guardrails cover both binary and continuous metrics
+
+### 7. Create Run And Seed Evaluation/Metric Data
+
+Purpose: create an experiment run and automatically generate exposure and metric evidence through the SDK.
+
+API:
+
+| Action | Endpoint |
+| --- | --- |
+| Create run | `POST /api/v1/envs/{envId}/release-decision/experiments/{id}/runs` |
+| Update run | `PUT /api/v1/envs/{envId}/release-decision/experiments/{id}/runs/{runId}` |
+| Update audience | `PUT /api/v1/envs/{envId}/release-decision/experiments/{id}/runs/{runId}/audience` |
+| Update observation window | `PUT /api/v1/envs/{envId}/release-decision/experiments/{id}/runs/{runId}/observation-window` |
+| Query stats | `POST /api/v1/envs/{envId}/experiment-stats/query` |
+
+Data setup:
+
+- Generate the configured number of synthetic users
+- Require each control/treatment variant to meet the configured sample floor
+- Treatment primary metric success rate is intentionally higher than control
+- Binary guardrail failure rate remains controlled
+- Continuous guardrail latency should not show severe regression
+
+Assertions:
+
+- Run creation succeeds and returns a non-empty `runId`
+- Primary stats query returns samples after SDK evaluation/tracking
+- Treatment primary conversion rate is higher than control
+- Binary guardrail stats query returns samples
+- Continuous guardrail stats query returns samples and numeric values
+
+### 8. Call Analyze
+
+Purpose: verify that the release-decision analysis endpoint can generate an analysis result from collected data.
+
+API:
+
+| Action | Endpoint |
+| --- | --- |
+| Analyze run | `POST /api/v1/envs/{envId}/release-decision/experiments/{id}/runs/{runId}/analyze` |
+| Read experiment | `GET /api/v1/envs/{envId}/release-decision/experiments/{id}` |
+
+Assertions:
+
+- Analyze API returns success
+- The run has generated or updated `inputData`
+- The run has generated or updated `analysisResult`
+
+### 9. Final Verification
+
+Purpose: confirm that the final state matches the expected test design.
+
+API:
+
+| Action | Endpoint |
+| --- | --- |
+| Read experiment | `GET /api/v1/envs/{envId}/release-decision/experiments/{id}` |
+| Query stats | `POST /api/v1/envs/{envId}/experiment-stats/query` |
+| Read flag | `GET /api/v1/envs/{envId}/feature-flags/{key}` |
+
+Assertions:
+
+- Project/environment ids and keys are written to the report
+- All 10 flags still exist
+- All 10 flags have the expected final enabled state
+- All 10 flags have the expected final variants
+- All 10 flags have the expected final rule condition
+- All 10 flags have the expected rule traffic, fallthrough traffic, `includedInExpt`, and `exptIncludeAllTargets`
+- The release-decision experiment is bound to the expected flag
+- Primary metric direction matches the preset: treatment performs better than control
+- Binary and continuous guardrail metrics contain data
+- Analyze run status is `analyzing`
+- Analyze `inputData` contains the primary metric, binary guardrail, and continuous guardrail event keys
+- Analyze result exists
+- The report does not print the access token or Server SDK secret in plain text
+
+### 9.1 Manual Final Inspection Checklist
+
+Use this checklist after a live run. The Markdown report is the primary artifact to inspect first; the API/UI can be used to cross-check any row that looks wrong.
+
+#### Resource Identity
+
+| Check | Where to look | Expected value |
+| --- | --- | --- |
+| Project identity | Live report `Resources` section, or `GET /api/v1/projects/{projectId}` | `projectId` is non-empty; `projectKey = e2e-api-{suffix}` |
+| Environment identity | Live report `Resources` section, or project detail API response | `envId` is non-empty; `envKey = e2e-env-{suffix}` |
+| Segment identity | Live report `Resources` section, or `GET /api/v1/envs/{envId}/segments/{segmentId}` | `segmentId` is non-empty; `segmentKey = e2e-segment-{suffix}` |
+| Experiment identity | Live report `Resources` section, or `GET /api/v1/envs/{envId}/release-decision/experiments/{id}` | `experimentId` is non-empty; experiment is bound to `rd-checkout-treatment-{suffix}` |
+| Run identity | Live report `Resources` section, or experiment detail API response | `runId` is non-empty and belongs to the created experiment |
+| Secret handling | Live report body | Access token and Server SDK secret are masked; full raw secrets are not printed |
+
+#### Segment Targeting
+
+| Check | Where to look | Expected value |
+| --- | --- | --- |
+| Included users | Live report `Expected Final State` / `Observed Final State`, or segment API response | Exactly `StableUserKey({suffix}, 0)` and `StableUserKey({suffix}, 1)` |
+| Excluded users | Segment API response | Empty |
+| Segment rules | Segment API response | Empty |
+| Segment references | `GET /api/v1/envs/{envId}/segments/{segmentId}/flag-references` | Includes the experiment flag that targets this segment |
+
+#### Feature Flag Terminal State
+
+| No. | Key | Human check |
+| --- | --- | --- |
+| 1 | `rd-checkout-treatment-{suffix}` | Enabled is `true`; variants are exactly `control=false` and `treatment=true`; rule condition is `User is in segment IsOneOf [segmentId]`; rule serves `treatment` 100%; fallthrough splits `control` 50% and `treatment` 50%; `includedInExpt=true`; `exptIncludeAllTargets=true`; this is the only flag bound to release-decision. |
+| 2 | `rd-banner-copy-{suffix}` | Enabled is `false`; variants are `control-updated=control`, `candidate-1-updated=short`, `candidate-2-updated=direct`, `candidate-updated=candidate`; rule is `plan Equal enterprise`; rule and fallthrough serve the first variation 100%; experiment targeting flags are true; not bound to release-decision. |
+| 3 | `rd-price-multiplier-{suffix}` | Enabled is `true`; variants are `control-updated=1.0`, `candidate-1-updated=1.1`, `candidate-2-updated=1.2`, `candidate-updated=2.5`; rule is `plan Equal enterprise`; rule and fallthrough serve the first variation 100%; experiment targeting flags are true; not bound to release-decision. |
+| 4 | `rd-checkout-config-{suffix}` | Enabled is `false`; variants are `control-updated={"mode":"control","limit":5}`, `candidate-1-updated={"mode":"treatment","limit":10}`, `candidate-updated={"mode":"candidate","limit":15}`; rule is `plan Equal enterprise`; rule and fallthrough serve the first variation 100%; experiment targeting flags are true; not bound to release-decision. |
+| 5 | `rd-onboarding-flow-{suffix}` | Enabled is `true`; variants are `control-updated=classic`, `candidate-1-updated=guided`, `candidate-2-updated=compact`, `candidate-updated=candidate`; rule is `plan Equal enterprise`; rule and fallthrough serve the first variation 100%; experiment targeting flags are true; not bound to release-decision. |
+| 6 | `rd-risk-threshold-{suffix}` | Enabled is `false`; variants are `control-updated=10`, `candidate-1-updated=25`, `candidate-2-updated=50`, `candidate-updated=2.5`; rule is `plan Equal enterprise`; rule and fallthrough serve the first variation 100%; experiment targeting flags are true; not bound to release-decision. |
+| 7 | `rd-ai-assistant-route-{suffix}` | Enabled is `true`; variants are `control-updated=off`, `candidate-1-updated=gpt-4.1-mini`, `candidate-2-updated=gpt-4.1`, `candidate-updated=candidate`; rule is `plan Equal enterprise`; rule and fallthrough serve the first variation 100%; experiment targeting flags are true; not bound to release-decision. |
+| 8 | `rd-notification-style-{suffix}` | Enabled is `false`; variants are `control-updated=quiet`, `candidate-1-updated=badge`, `candidate-2-updated=toast`, `candidate-updated=candidate`; rule is `plan Equal enterprise`; rule and fallthrough serve the first variation 100%; experiment targeting flags are true; not bound to release-decision. |
+| 9 | `rd-search-ranking-{suffix}` | Enabled is `true`; variants are `control-updated=baseline`, `candidate-1-updated=semantic`, `candidate-2-updated=hybrid`, `candidate-updated=candidate`; rule is `plan Equal enterprise`; rule and fallthrough serve the first variation 100%; experiment targeting flags are true; not bound to release-decision. |
+| 10 | `rd-kill-switch-{suffix}` | Enabled is `false`; variants are `control-updated=false` and `treatment-updated=true`; rule is `plan Equal enterprise`; rule and fallthrough serve the first variation 100%; experiment targeting flags are true; not bound to release-decision. |
+
+#### SDK Evaluation And Insight Evidence
+
+| Check | Where to look | Expected value |
+| --- | --- | --- |
+| Pre-experiment evaluation count | Live report SDK section | At least `29` detail evaluations: 10 flags for user 0, 10 flags for user 1, and 9 non-experiment flags for user 3 |
+| Segment treatment hits | Live report SDK section | `StableUserKey({suffix}, 0)` and `StableUserKey({suffix}, 1)` both evaluate `rd-checkout-treatment-{suffix}` to `treatment=true` |
+| Enterprise rule hits | Live report SDK section | User `StableUserKey({suffix}, 3)` evaluates every non-experiment flag to the first variation because `plan=enterprise` |
+| Seeded SDK evaluations | Live report insight/stats section | Logical evaluations are `configured --users * 10` |
+| Insight ingest | Live report step results, SDK event service logs, or network traces | SDK events are flushed to `POST /api/public/insight/track` without an error |
+| Exposure stats | Live report stats section, or `POST /api/v1/envs/{envId}/experiment-stats/query` | Both generated control and treatment variation IDs have observed users. Compare the exact control/treatment counts shown in the report against the configured sample floor. |
+
+#### Metric Evidence
+
+| Metric | Where to look | Expected data and manual interpretation |
+| --- | --- | --- |
+| Primary: `e2e_checkout_activated_{metricSuffix}` | Live report stats/analyze section, or experiment stats query | Binary `once` metric. Expected data: exact users and conversions come from the report; each variant meets the configured sample floor; control rate is near `30%`; treatment rate is near `45%`; treatment conversion rate must be greater than control. |
+| Guardrail: `e2e_checkout_error_{metricSuffix}` | Live report stats/analyze section, or experiment stats query | Binary `once` metric. Expected data: exact users and error counts come from the report; each variant meets the configured sample floor; control error rate is near `1.8%`; treatment error rate is near `2.0%`; both rates must be below the `5.00%` threshold. |
+| Guardrail: `e2e_checkout_latency_ms_{metricSuffix}` | Live report stats/analyze section, or experiment stats query | Continuous `average` metric. Expected data: exact users, sums, and averages come from the report; each variant meets the configured sample floor; control average is near `340ms`; treatment average is near `320ms`; treatment average must be no higher than control. |
+
+#### Experiment And Analyze Result
+
+| Check | Where to look | Expected value |
+| --- | --- | --- |
+| Experiment mode | Experiment detail in report or API response | `entryMode = expert` |
+| Intent | Experiment detail | States that the test validates checkout activation and release-decision analysis through FeatBit APIs and SDK evidence |
+| Hypothesis | Experiment detail | States that treatment should improve checkout activation without unacceptable error or latency regression |
+| Bound flag | Experiment detail | `flagKey = rd-checkout-treatment-{suffix}` |
+| Control/treatment variants | Experiment detail and flag detail | Control maps to the generated `control` variation ID/value `false`; treatment maps to the generated `treatment` variation ID/value `true` |
+| Primary metric config | Experiment detail | Event key is `e2e_checkout_activated_{metricSuffix}`; metric type is binary; aggregation is once/conversion; direction is treatment higher than control |
+| Guardrail metric config | Experiment detail | Contains `e2e_checkout_error_{metricSuffix}` as binary/once and `e2e_checkout_latency_ms_{metricSuffix}` as continuous/average |
+| Analyze status | Experiment run detail after analyze | Run status is `analyzing` after the analyze call |
+| Analyze `inputData` | Experiment run detail after analyze | Non-empty JSON with top-level `metrics`; contains entries for the primary metric and both guardrails; each metric has non-empty control/treatment variant data |
+| Analyze `analysisResult` | Experiment run detail after analyze | Non-empty structured JSON. Do not manually expect one exact posterior value; this test checks that analysis runs and returns structured output from the seeded data. |
+| Final decision shape | Human interpretation of metric direction | Expected synthetic result is favorable or directionally favorable to treatment: primary improves, error guardrail remains under threshold, latency does not regress. If the analyzer returns an inconclusive probability because of sample size, that is acceptable only if the raw seeded metric directions above are still correct. |
+
+## Report Requirements
+
+After a live run, the runner writes the following files under `reports/`:
+
+| File | Purpose |
+| --- | --- |
+| `featbit-rest-api-e2e-<timestamp>.md` | Human-readable live test report |
+| `featbit-rest-api-e2e-<timestamp>.json` | Machine-readable structured live test report |
+
+The report must include:
+
+- Execution time
+- API URL, event URL, and streaming URL
+- Run suffix and metric suffix
+- Project/env/segment/experiment/run ids and keys
+- 10 flag keys and types
+- Primary and guardrail metric event keys
+- Pre-experiment SDK evaluation counts and targeting verification counts
+- Expected final feature flag state
+- Observed final feature flag state
+- Expected vs observed primary metric, guardrail, and analyze results
+- Observed users and variant row counts for primary and guardrail stats queries
+- Pass/fail result for every step
+- Error details for failures
+- Masked secrets
+
+Important: without an access token, only offline self-check or plan output can be printed to the console. Offline modes do not write files under `reports/` and must not be treated as a real E2E test report.
