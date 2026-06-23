@@ -55,18 +55,6 @@ export class ThemeService {
     return this.preferenceSubject.asObservable();
   }
 
-  resolved$(): Observable<ResolvedTheme> {
-    return this.resolvedSubject.asObservable();
-  }
-
-  getPreference(): ThemePreference {
-    return this.preferenceSubject.value;
-  }
-
-  getResolvedTheme(): ResolvedTheme {
-    return this.resolvedSubject.value;
-  }
-
   setPreference(preference: ThemePreference): void {
     if (preference === this.preferenceSubject.value) {
       return;
