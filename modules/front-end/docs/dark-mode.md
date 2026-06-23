@@ -93,6 +93,13 @@ immediately.
 - **Use `nzColor` on `<nz-tag>`** when you want a semantic accent (the
   vendor handles both themes). Custom tag classes need explicit
   hand-tuning in `styles-dark.less`.
+- **Never write colors in Angular inline styles**
+  The auto-generator only reads `*.component.less` files. Any color
+  literal in an inline `styles` block is completely invisible to it —
+  dark mode will be broken with no warning. Always use a `.less` file.
+  If a component already uses inline styles and you can't refactor it,
+  add hand-tuned overrides in `styles-dark.less` scoped to the
+  component's element selector (see reason 6 below).
 
 ---
 
@@ -158,6 +165,23 @@ Common reasons you'll need a hand-tuned rule:
 5. **You're swapping non-CSS assets** (e.g. logos with dark fills).
    Use `content: url('assets/...-dark.svg')` on the `<img>` so the
    markup doesn't need to change.
+6. **A component uses Angular inline `styles: \`...\``.**
+   The auto-generator never processes inline styles — only
+   `*.component.less` files. Every color in an inline `styles` block
+   stays light in dark mode. The fix is to add hand-tuned overrides in
+   `styles-dark.less`, using the component's element selector as a
+   scope anchor:
+   ```less
+   // html[data-theme="dark"] wins over the inline rule (no !important
+   // in the inline block) because our !important beats a normal rule.
+   html[data-theme="dark"] my-component {
+     .some-class { color: @dk-text-primary !important; }
+     .surface    { background-color: @dk-surface !important; }
+   }
+   ```
+   For nz-modal components, use the `nzClassName` value as the scope
+   instead of the host element selector (see the `flag-references-modal`
+   section in `styles-dark.less` for a worked example).
 
 ### Specificity gotcha
 
@@ -345,6 +369,7 @@ You'd only hand-tune if:
 | Logo/SVG looks black on dark | Asset has dark fills baked in | Add a `-dark.svg` variant; swap via `content: url(...)` in `styles-dark.less`. |
 | Generic class name (e.g. `.tip`, `.title`, `.label`) gets a wrong dark bg in places that didn't define one in light | The auto-generator scopes its output by what was written in the source LESS. A bare `.tip { background: #f1f1f1 }` in one component generates an unscoped `.tip { background: #333 !important }` that bleeds into every `.tip` on the site | Two options: (1) scope the original light rule (e.g. `section.foo .tip { … }`) so the generator emits a scoped dark rule; or (2) override with `transparent` in `styles-dark.less` for the affected ancestors. |
 | Specificity battle between auto-gen and your hand-tuned override | Auto-gen rule includes the full ancestor chain from the source LESS; your one-class override doesn't match its specificity | Match the ancestor chain in `styles-dark.less` (e.g. include `.body-container` if the auto-gen rule does). |
+| Component looks completely un-themed in dark (all colors stay light) | Styles are written as inline `styles: \`...\`` in `@Component` — the generator never reads them | Add hand-tuned overrides in `styles-dark.less` scoped to the component's element selector: `html[data-theme="dark"] my-component { … }`. Prefer moving the styles to a `.less` file so the generator can handle future edits automatically. |
 
 ---
 
