@@ -7,9 +7,6 @@ export type ThemePreference = 'light' | 'dark' | 'system';
 export type ResolvedTheme = 'light' | 'dark';
 
 const THEME_ATTRIBUTE = 'data-theme';
-// Legacy unprefixed key used before the move to 'featbit:theme'. Read once for
-// migration so existing users keep their preference.
-const LEGACY_THEME_KEY = 'theme';
 // Cap Monaco polling at 10s; Monaco normally finishes loading well under 1s.
 const MONACO_POLL_TIMEOUT_MS = 10_000;
 const MONACO_POLL_INTERVAL_MS = 500;
@@ -50,7 +47,6 @@ export class ThemeService {
   }
 
   init(): void {
-    this.migrateLegacyStorageKey();
     this.preferenceSubject.next(this.readStoredPreference());
     this.applyResolvedTheme();
   }
@@ -90,7 +86,7 @@ export class ThemeService {
   private readStoredPreference(): ThemePreference {
     try {
       if (typeof localStorage === 'undefined') return 'system';
-      const value = localStorage.getItem(THEME) ?? localStorage.getItem(LEGACY_THEME_KEY);
+      const value = localStorage.getItem(THEME);
       if (value === 'light' || value === 'dark' || value === 'system') {
         return value;
       }
@@ -98,21 +94,6 @@ export class ThemeService {
       // ignore
     }
     return 'system';
-  }
-
-  private migrateLegacyStorageKey(): void {
-    try {
-      if (typeof localStorage === 'undefined') return;
-      const legacy = localStorage.getItem(LEGACY_THEME_KEY);
-      if (legacy && !localStorage.getItem(THEME)) {
-        localStorage.setItem(THEME, legacy);
-      }
-      if (legacy !== null) {
-        localStorage.removeItem(LEGACY_THEME_KEY);
-      }
-    } catch {
-      // ignore
-    }
   }
 
   private resolveTheme(preference: ThemePreference): ResolvedTheme {
