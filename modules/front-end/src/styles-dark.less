@@ -1132,3 +1132,100 @@ html[data-theme="dark"] .project-envs nz-list {
 html[data-theme="dark"] .project-envs nz-list .ant-list-header {
   border-bottom-color: @dk-border-bright !important;
 }
+
+// ---- Components that use inline styles can't be auto-generated, so we have to target them directly ----
+html[data-theme="dark"] render-default-rule {
+  .serve-content {
+    color: @dk-text-primary !important;
+  }
+}
+html[data-theme="dark"] render-individual-targeting {
+  .empty-state-text {
+    color: @dk-text-secondary !important;
+  }
+
+  .variation-badge {
+    color: @dk-text-secondary !important;
+  }
+
+  .user-badge {
+    background-color: @dk-surface !important;
+    border-color: @dk-border-medium !important;
+    color: @dk-text-secondary !important;
+
+    &:hover {
+      background-color: @dk-hover !important;
+      border-color: @dk-border-bright !important;
+    }
+  }
+}
+html[data-theme="dark"] render-targeting-rules {
+  .empty-state-text {
+    color: @dk-text-secondary !important;
+  }
+
+  .targeting-rule-entry {
+    background-color: @dk-surface !important;
+  }
+
+  .rule-name {
+    color: @dk-text-secondary !important;
+  }
+
+  .condition-keyword {
+    &.if-keyword {
+      background-color: rgba(24, 144, 255, 0.15) !important;
+      color: #69c0ff !important;
+    }
+
+    &.and-keyword {
+      background-color: rgba(47, 84, 235, 0.15) !important;
+      color: #85a5ff !important;
+    }
+  }
+
+  .condition-content {
+    color: @dk-text-primary !important;
+  }
+
+  .serve-section {
+    border-top-color: @dk-border-medium !important;
+  }
+
+  .serve-keyword {
+    background-color: rgba(60, 199, 152, 0.15) !important;
+    color: #3CC798 !important;
+  }
+
+  .serve-content {
+    color: @dk-text-primary !important;
+  }
+}
+html[data-theme="dark"] .flag-references-modal {
+  .description,
+  .reference-env {
+    color: @dk-text-secondary !important;
+  }
+
+  .reference-item {
+    border-color: @dk-border-medium !important;
+
+    &:hover {
+      background-color: @dk-hover !important;
+    }
+  }
+
+  .reference-item-disabled:hover {
+    background-color: transparent !important;
+  }
+
+  .reference-name {
+    color: @dk-text-primary !important;
+  }
+
+  .reference-key {
+    color: @dk-text-secondary !important;
+    background-color: @dk-tier-2 !important;
+    border-color: @dk-border-strong !important;
+  }
+}
