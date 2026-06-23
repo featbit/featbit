@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { NzConfigService } from 'ng-zorro-antd/core/config';
 import { THEME } from '@utils/localstorage-keys';
@@ -12,7 +12,7 @@ const MONACO_POLL_TIMEOUT_MS = 10_000;
 const MONACO_POLL_INTERVAL_MS = 500;
 
 @Injectable({ providedIn: 'root' })
-export class ThemeService {
+export class ThemeService implements OnDestroy {
   // Initialise from storage in the field initialiser so the resolved theme is
   // correct even if a consumer reads it before init() runs. The inline script
   // in index.html applies data-theme synchronously to avoid FOUC, but this
@@ -81,6 +81,13 @@ export class ThemeService {
       // ignore
     }
     return 'system';
+  }
+
+  ngOnDestroy(): void {
+    this.clearMonacoPoll();
+    if (this.mediaQuery && this.mediaQueryListener) {
+      this.mediaQuery.removeEventListener('change', this.mediaQueryListener);
+    }
   }
 
   private resolveTheme(preference: ThemePreference): ResolvedTheme {
