@@ -5085,6 +5085,14 @@
         </context-group>
         <target>退出</target>
       </trans-unit>
+      <trans-unit id="common.version" datatype="html">
+        <source>Version</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
+          <context context-type="linenumber">153,154</context>
+        </context-group>
+        <target>版本</target>
+      </trans-unit>
       <trans-unit id="expt.metric.name-cannot-be-empty" datatype="html">
         <source>Metric name cannot be empty</source>
         <context-group purpose="location">

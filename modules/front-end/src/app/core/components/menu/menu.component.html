@@ -145,12 +145,13 @@
         <li class="centered">
           <app-locale-switcher></app-locale-switcher>
         </li>
-        <li class="centered">
-          <app-theme-switcher></app-theme-switcher>
-        </li>
         <li class="dropdown-footer">
-          <span class="footer-version">v{{ appVersion }}</span>
-          <div class="footer-actions"></div>
+          <app-theme-switcher></app-theme-switcher>
+          <a
+            [href]="appVersion === 'dev' ? 'https://github.com/featbit/featbit' : 'https://github.com/featbit/featbit/releases/tag/' + appVersion"
+            target="_blank">
+            <span i18n="@@common.version">Version</span>: {{ appVersion }}
+          </a>
         </li>
       </ul>
     </nz-dropdown-menu>

@@ -311,25 +311,19 @@ ul.user-item {
   .dropdown-footer {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    height: auto !important;
-    padding: 4px 0 2px;
-    cursor: default;
+    justify-content: center;
+    gap: 8px;
+    padding: 4px 0;
 
-    &:hover {
-      background: transparent !important;
-    }
-
-    .footer-version {
+    a {
       font-size: 12px;
-      color: @grey40-color;
-      user-select: none;
-    }
+      color: @grey50-color;
+      text-decoration: none;
 
-    .footer-actions {
-      display: flex;
-      align-items: center;
-      gap: 4px;
+      &:hover {
+        color: @primary-color;
+        text-decoration: underline;
+      }
     }
   }
 }
