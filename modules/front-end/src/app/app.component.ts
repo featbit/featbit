@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import packageInfo from '../../package.json';
 import { environment } from '../environments/environment';
+import { ThemeService } from '@core/services/theme.service';
 
 interface Locale {
   localeCode: string;
@@ -19,7 +20,8 @@ export class AppComponent {
     { localeCode: 'zh', label: '中文' },
   ];
 
-  constructor() {
+  constructor(themeService: ThemeService) {
+    themeService.init();
     console.log(`Env: ${environment.production ? 'Prod' : 'dev' }; Version: ${packageInfo.version}`);
   }
 }

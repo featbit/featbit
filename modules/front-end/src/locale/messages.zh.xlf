@@ -137,6 +137,10 @@
           <context context-type="linenumber">18,19</context>
         </context-group>
         <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
+          <context context-type="linenumber">59,60</context>
+        </context-group>
+        <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/compare/compare.component.html</context>
           <context context-type="linenumber">92,93</context>
         </context-group>
@@ -5045,7 +5049,7 @@
         <source>Account</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
-          <context context-type="linenumber">103,105</context>
+          <context context-type="linenumber">105,107</context>
         </context-group>
         <target>账户管理</target>
       </trans-unit>
@@ -5053,7 +5057,7 @@
         <source>Profile</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
-          <context context-type="linenumber">118,119</context>
+          <context context-type="linenumber">120,121</context>
         </context-group>
         <target>个人信息</target>
       </trans-unit>
@@ -5061,7 +5065,7 @@
         <source>Support</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
-          <context context-type="linenumber">125,126</context>
+          <context context-type="linenumber">127,128</context>
         </context-group>
         <target>技术支持</target>
       </trans-unit>
@@ -5069,7 +5073,7 @@
         <source>Documentation</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
-          <context context-type="linenumber">131,132</context>
+          <context context-type="linenumber">133,134</context>
         </context-group>
         <target>文档</target>
       </trans-unit>
@@ -5077,7 +5081,7 @@
         <source>Logout</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
-          <context context-type="linenumber">137,138</context>
+          <context context-type="linenumber">139,140</context>
         </context-group>
         <target>退出</target>
       </trans-unit>
@@ -6738,6 +6742,62 @@
         </context-group>
         <target>发送测试时间</target>
       </trans-unit>
+      <trans-unit id="theme.switcher.group" datatype="html">
+        <source>Theme preference</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/theme-switcher/theme-switcher.component.html</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+        <target>主题偏好</target>
+      </trans-unit>
+      <trans-unit id="theme.switcher.light.aria" datatype="html">
+        <source>Light theme</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/theme-switcher/theme-switcher.component.html</context>
+          <context context-type="linenumber">7,8</context>
+        </context-group>
+        <target>浅色主题</target>
+      </trans-unit>
+      <trans-unit id="theme.switcher.light.title" datatype="html">
+        <source>Light</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/theme-switcher/theme-switcher.component.html</context>
+          <context context-type="linenumber">10</context>
+        </context-group>
+        <target>浅色</target>
+      </trans-unit>
+      <trans-unit id="theme.switcher.dark.aria" datatype="html">
+        <source>Dark theme</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/theme-switcher/theme-switcher.component.html</context>
+          <context context-type="linenumber">22,23</context>
+        </context-group>
+        <target>深色主题</target>
+      </trans-unit>
+      <trans-unit id="theme.switcher.dark.title" datatype="html">
+        <source>Dark</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/theme-switcher/theme-switcher.component.html</context>
+          <context context-type="linenumber">25</context>
+        </context-group>
+        <target>深色</target>
+      </trans-unit>
+      <trans-unit id="theme.switcher.system.aria" datatype="html">
+        <source>Follow system theme</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/theme-switcher/theme-switcher.component.html</context>
+          <context context-type="linenumber">36,37</context>
+        </context-group>
+        <target>跟随系统主题</target>
+      </trans-unit>
+      <trans-unit id="theme.switcher.system.title" datatype="html">
+        <source>System</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/core/components/theme-switcher/theme-switcher.component.html</context>
+          <context context-type="linenumber">39</context>
+        </context-group>
+        <target>系统</target>
+      </trans-unit>
       <trans-unit id="common.feature-flag" datatype="html">
         <source>Feature Flag</source>
         <context-group purpose="location">
@@ -7598,6 +7658,14 @@
         </context-group>
         <target>下载</target>
       </trans-unit>
+      <trans-unit id="users.idx.key-id" datatype="html">
+        <source>Key ID</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.html</context>
+          <context context-type="linenumber">60,61</context>
+        </context-group>
+        <target>Key ID</target>
+      </trans-unit>
       <trans-unit id="users.idx.evaluate" datatype="html">
         <source>Evaluate</source>
         <context-group purpose="location">
@@ -7646,7 +7714,7 @@
         <source>Failed to load data</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/end-users/index/index.component.ts</context>
-          <context context-type="linenumber">152</context>
+          <context context-type="linenumber">153</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/features/safe/feature-flags/details/setting/setting.component.ts</context>

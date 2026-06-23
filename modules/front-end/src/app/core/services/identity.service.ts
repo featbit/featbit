@@ -7,7 +7,8 @@ import {
   IDENTITY_TOKEN,
   LOGIN_REDIRECT_URL,
   USER_PROFILE,
-  GET_STARTED
+  GET_STARTED,
+  THEME
 } from "@utils/localstorage-keys";
 import { Router } from "@angular/router";
 import { UserService } from "@services/user.service";
@@ -95,6 +96,7 @@ export class IdentityService {
       const storageToKeep = {
         [CURRENT_LANGUAGE()]: localStorage.getItem(CURRENT_LANGUAGE()),
         [GET_STARTED()]: localStorage.getItem(GET_STARTED()),
+        [THEME]: localStorage.getItem(THEME)
       };
 
       if (keepOrgProject) {
