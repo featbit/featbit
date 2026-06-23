@@ -3,7 +3,7 @@
   "version": "2.0.0",
   "scripts": {
     "start": "npm run start:en",
-    "postinstall": "node scripts/build-dark-vendor-css.mjs && node scripts/build-dark-overrides.mjs",
+    "postinstall": "npm run build:dark-css",
     "start:en": "ng serve --configuration=development --port=4200",
     "start:zh": "ng serve --configuration=development,zh --port=4201",
     "start:base-href": "ng serve --serve-path /abc/def/ --configuration=development --port=4200",
