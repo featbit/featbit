@@ -3,7 +3,10 @@ FROM node:22.19 AS build-stage
 
 WORKDIR /app
 COPY package*.json /app/
-RUN npm install
+# Skip postinstall here: scripts/ isn't copied yet, and the dark-CSS step is
+# instead executed deterministically as part of `npm run build:prod` below
+# (which chains `npm run build:dark-css`). Mirrors wss.Dockerfile.
+RUN npm install --ignore-scripts
 COPY ./ /app/
 
 RUN npm run build:prod

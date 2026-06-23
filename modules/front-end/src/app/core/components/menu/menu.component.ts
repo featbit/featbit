@@ -43,4 +43,37 @@ export class MenuComponent implements OnInit {
   openDoc() {
     window.open('https://docs.featbit.co', '_blank');
   }
+
+  onSubmenuOpenChange(opened: IMenuItem, isOpen: boolean) {
+    opened.open = isOpen;
+    if (isOpen) {
+      this.closeOtherSubmenus(this.menus, opened);
+    }
+  }
+
+  onLeafItemClick() {
+    this.closeAllSubmenus(this.menus);
+  }
+
+  private closeAllSubmenus(items: IMenuItem[]) {
+    if (!items) return;
+    for (const item of items) {
+      if (item.children) {
+        item.open = false;
+        this.closeAllSubmenus(item.children);
+      }
+    }
+  }
+
+  private closeOtherSubmenus(items: IMenuItem[], keep: IMenuItem) {
+    if (!items) return;
+    for (const item of items) {
+      if (item.children) {
+        if (item !== keep) {
+          item.open = false;
+        }
+        this.closeOtherSubmenus(item.children, keep);
+      }
+    }
+  }
 }

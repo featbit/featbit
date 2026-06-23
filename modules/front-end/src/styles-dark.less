@@ -1,0 +1,1231 @@
+// Dark theme stylesheet.
+//
+// Composition order (low → high priority):
+//   1. styles-dark-vendor.css   — ng-zorro-antd dark theme, prefixed with
+//                                  `html[data-theme="dark"]` by
+//                                  scripts/build-dark-vendor-css.mjs.
+//   2. styles-dark-overrides.css — auto-generated dark equivalents for
+//                                  hardcoded grayscale light colors found
+//                                  in component .less files
+//                                  (scripts/build-dark-overrides.mjs).
+//   3. Hand-tuned overrides below — final tweaks for app chrome and any
+//                                   component the script can't handle.
+//
+// Run `npm run build:dark-css` after editing component .less files or
+// upgrading ng-zorro-antd to regenerate (1) and (2).
+//
+// Dark palette — change here, propagate everywhere. The palette mirrors
+// light mode's "page < container < raised" tiers so cards visually float.
+//
+//   @dk-page              page / app shell (deepest)
+//   @dk-page-soft         get-started page bg (slightly lighter than page)
+//   @dk-surface           panels / cards / surfaces
+//   @dk-surface-raised    nz-card content on get-started
+//   @dk-tier-2            project card (one tier above .standard-div)
+//   @dk-tier-3            env entry inside project card
+//   @dk-tier-4            secret-value pill inside env entry
+//   @dk-hover             hover / divider tinted bg
+//   @dk-row-hover         active table row + menu hover (slightly tinted)
+//   @dk-menu-hover        side-menu item hover (very subtle)
+//   @dk-submenu           side-menu submenu items when parent open
+//   @dk-submenu-active    side-menu submenu hover / selected
+//   @dk-border-subtle     subtle border (e.g. side-menu rule)
+//   @dk-border-medium     medium border (inputs, modal/drawer chrome)
+//   @dk-border-strong     high-contrast border (.flag-description, tags)
+//   @dk-border-bright     visible-only-on-hover or unselected outlines
+//   @dk-text-primary      primary text — body copy, labels
+//   @dk-text-secondary    secondary text — descriptions, captions
+//   @dk-text-muted        muted text — placeholders, helper text
+//   @dk-text-disabled     disabled control text
+//
+// Brand greens (kept as literals because variables.less is the source of
+// truth for light mode):
+//   #3CC798 primary  #5CE6B8 hover/light accent  #23AD7F pressed/dark
+
+@dk-page:              #262626;
+@dk-page-soft:         #2b2b2b;
+@dk-surface:           #333333;
+@dk-surface-raised:    #3a3a3a;
+@dk-tier-2:            #3d3d3d;
+@dk-tier-3:            #474747;
+@dk-tier-4:            #525252;
+@dk-hover:             #3d3d3d;
+@dk-row-hover:         #383838;
+@dk-menu-hover:        #2d2d2d;
+@dk-submenu:           #2f2f2f;
+@dk-submenu-active:    #3a3a3a;
+@dk-border-subtle:     #363636;
+@dk-border-medium:     #404040;
+@dk-border-strong:     #4d4d4d;
+@dk-border-bright:     #5a5a5a;
+@dk-border-radio:      #8a8a8a;
+@dk-text-primary:      rgba(255, 255, 255, 0.85);
+@dk-text-secondary:    rgba(255, 255, 255, 0.65);
+@dk-text-muted:        rgba(255, 255, 255, 0.40);
+@dk-text-disabled:     rgba(255, 255, 255, 0.30);
+
+@import (less) "styles-dark-vendor.css";
+@import (less) "styles-dark-overrides.css";
+
+html[data-theme="dark"] {
+  background-color: @dk-page;
+  color: @dk-text-primary;
+}
+
+html[data-theme="dark"] body {
+  background-color: @dk-page;
+  color: @dk-text-primary;
+}
+
+// Custom scrollbar (light values live in styles-common.less).
+html[data-theme="dark"] ::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 12px 12px @dk-surface;
+}
+html[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  box-shadow: inset 0 0 12px 12px @dk-border-bright;
+}
+
+// Header bar (header.component.less hard-codes #fff).
+html[data-theme="dark"] .header-body {
+  background-color: @dk-page !important;
+}
+
+// Custom workspace-selector pill in the header.
+html[data-theme="dark"] .workspace-selector {
+  background: #333333 !important;
+  border-color: #404040 !important;
+}
+html[data-theme="dark"] .workspace-selector:hover {
+  border-color: #4d4d4d !important;
+}
+html[data-theme="dark"] .workspace-selector .selector-item:hover {
+  background: #383838 !important;
+}
+html[data-theme="dark"] .workspace-selector .selector-item:hover .item-content .item-value {
+  color: rgba(255, 255, 255, 0.95) !important;
+}
+html[data-theme="dark"] .workspace-selector .item-content .item-label {
+  color: rgba(255, 255, 255, 0.55) !important;
+}
+html[data-theme="dark"] .workspace-selector .item-content .item-value {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+html[data-theme="dark"] .workspace-selector .selector-divider {
+  background: #404040 !important;
+}
+
+// Custom license badge in the header.
+html[data-theme="dark"] .header-btns .license-badge {
+  background: linear-gradient(135deg, #333333 0%, #383838 100%) !important;
+  border-color: #4d4d4d !important;
+}
+html[data-theme="dark"] .header-btns .license-badge:hover {
+  border-color: #5a5a5a !important;
+}
+html[data-theme="dark"] .header-btns .license-badge .badge-content .badge-label {
+  color: rgba(255, 255, 255, 0.55) !important;
+}
+html[data-theme="dark"] .header-btns .license-badge .badge-content .badge-plan {
+  color: rgba(255, 255, 255, 0.95) !important;
+}
+html[data-theme="dark"] .header-btns .license-badge .badge-arrow i {
+  color: rgba(255, 255, 255, 0.65) !important;
+}
+
+// Side menu (menu.component.less).
+html[data-theme="dark"] section.menu-body {
+  border-right-color: #404040 !important;
+}
+// Vendor dark CSS sets `.ant-menu { background: #141414 }` which paints
+// the inner menu list darker than the surrounding sidebar (#262626),
+// making the items look like they sit on a darker strip. Flatten it.
+html[data-theme="dark"] section.menu-body .ant-menu,
+html[data-theme="dark"] section.menu-body .ant-menu-inline,
+html[data-theme="dark"] section.menu-body .ant-menu-vertical,
+html[data-theme="dark"] section.menu-body .ant-menu-sub,
+html[data-theme="dark"] section.menu-body .ant-menu-submenu > .ant-menu {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+html[data-theme="dark"] section.menu-body .menu-item-line .line {
+  background-color: #404040 !important;
+}
+
+// Menu items: in light mode the selected state is `white` on a white menu
+// (no visible bg) and hover is a very subtle grey5. Mirror that in dark
+// mode: selected blends with the menu bg, hover is a faint tint only.
+html[data-theme="dark"] .ant-menu-item.ant-menu-item-selected,
+html[data-theme="dark"] .ant-menu-inline .ant-menu-item-selected,
+html[data-theme="dark"] .ant-menu-vertical .ant-menu-item-selected,
+html[data-theme="dark"] .ant-menu-submenu .ant-menu-item-selected,
+html[data-theme="dark"] section.menu-body .menu-list .ant-menu-item.ant-menu-item-selected {
+  background-color: transparent !important;
+}
+html[data-theme="dark"] .menu-list li:hover,
+html[data-theme="dark"] .ant-menu-item:hover,
+html[data-theme="dark"] section.menu-body button:hover,
+html[data-theme="dark"] section.menu-body .menu-list .ant-menu-item:hover {
+  background-color: #2d2d2d !important;
+}
+
+// ---- Submenu items in left menu: lighter shade when parent open -------
+// Light mode shades inline submenu items darker than the white menu so
+// they read as a nested group. Mirror that in dark by tinting submenu
+// items LIGHTER than the menu shell.
+html[data-theme="dark"] section.menu-body .ant-menu-submenu-open > .ant-menu-sub,
+html[data-theme="dark"] section.menu-body .ant-menu-submenu-open > .ant-menu-sub .ant-menu-item {
+  background-color: #2f2f2f !important;
+}
+html[data-theme="dark"] section.menu-body .ant-menu-submenu-open > .ant-menu-sub .ant-menu-item:hover,
+html[data-theme="dark"] section.menu-body .ant-menu-submenu-open > .ant-menu-sub .ant-menu-item.ant-menu-item-selected {
+  background-color: #3a3a3a !important;
+}
+
+// ---- Get Started: shade inner card vs the standard-div page ----------
+// Light mode: page is `.standard-div` (grey #f1f1f1) and inner nz-card
+// is white — clear separation. In dark, both collapse to #333333. Bump
+// the inner nz-card up so it floats above the page.
+html[data-theme="dark"] .get-started.standard-div {
+  background-color: #2b2b2b !important;
+}
+html[data-theme="dark"] .get-started.standard-div nz-card,
+html[data-theme="dark"] .get-started.standard-div .ant-card,
+html[data-theme="dark"] .get-started.standard-div .ant-card-body {
+  background-color: #3a3a3a !important;
+}
+html[data-theme="dark"] .get-started.standard-div nz-card,
+html[data-theme="dark"] .get-started.standard-div .ant-card,
+html[data-theme="dark"] .get-started.standard-div > section nz-card,
+html[data-theme="dark"] .get-started.standard-div > section .ant-card {
+  border-radius: 12px !important;
+  overflow: hidden !important;
+}
+
+// Unified text color across top-level items, submenu items, popout panels,
+// and dropdowns so the side menu reads consistently. Matches the muted
+// foreground we use elsewhere in dark mode.
+html[data-theme="dark"] section.menu-body,
+html[data-theme="dark"] section.menu-body .ant-menu,
+html[data-theme="dark"] section.menu-body .ant-menu-item,
+html[data-theme="dark"] section.menu-body .ant-menu-item a,
+html[data-theme="dark"] section.menu-body .ant-menu-item a span,
+html[data-theme="dark"] section.menu-body .ant-menu-item span,
+html[data-theme="dark"] section.menu-body .ant-menu-submenu-title,
+html[data-theme="dark"] section.menu-body .ant-menu-submenu-title span,
+html[data-theme="dark"] section.menu-body .menu-list li a,
+html[data-theme="dark"] section.menu-body .menu-list li a span,
+html[data-theme="dark"] section.menu-body .organization-management .icon-text-btn span,
+html[data-theme="dark"] .ant-menu-submenu-popup .ant-menu-item,
+html[data-theme="dark"] .ant-menu-submenu-popup .ant-menu-item a,
+html[data-theme="dark"] .ant-menu-submenu-popup .ant-menu-item a span,
+html[data-theme="dark"] .ant-menu-submenu-popup .ant-menu-item span,
+html[data-theme="dark"] .ant-menu-submenu-popup .ant-menu-submenu-title,
+html[data-theme="dark"] .ant-menu-submenu-popup .ant-menu-submenu-title span {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+// Icons inside the side menu — keep them dimmer than text so the labels lead.
+// ng-zorro icons are <i nz-icon> → <i class="anticon"><svg>…</svg></i>, so we
+// must target `.anticon` (and the inner SVG `fill`) to beat ng-zorro's vendor
+// rules.
+html[data-theme="dark"] section.menu-body .ant-menu-item i,
+html[data-theme="dark"] section.menu-body .ant-menu-item .anticon,
+html[data-theme="dark"] section.menu-body .ant-menu-item .anticon svg,
+html[data-theme="dark"] section.menu-body .menu-list li a i,
+html[data-theme="dark"] section.menu-body .menu-list li a .anticon,
+html[data-theme="dark"] section.menu-body .menu-list li a .anticon svg,
+html[data-theme="dark"] section.menu-body .organization-management .icon-text-btn i,
+html[data-theme="dark"] section.menu-body .organization-management .icon-text-btn .anticon,
+html[data-theme="dark"] section.menu-body .organization-management .icon-text-btn .anticon svg,
+html[data-theme="dark"] section.menu-body .ant-menu-submenu-title i,
+html[data-theme="dark"] section.menu-body .ant-menu-submenu-title .anticon,
+html[data-theme="dark"] section.menu-body .ant-menu-submenu-title .anticon svg,
+html[data-theme="dark"] .ant-menu-submenu-popup .ant-menu-item i,
+html[data-theme="dark"] .ant-menu-submenu-popup .ant-menu-item .anticon,
+html[data-theme="dark"] .ant-menu-submenu-popup .ant-menu-item .anticon svg,
+html[data-theme="dark"] .ant-menu-submenu-popup .ant-menu-submenu-title i,
+html[data-theme="dark"] .ant-menu-submenu-popup .ant-menu-submenu-title .anticon,
+html[data-theme="dark"] .ant-menu-submenu-popup .ant-menu-submenu-title .anticon svg {
+  color: rgba(255, 255, 255, 0.65) !important;
+  fill: currentColor !important;
+}
+
+// Hover + selected use the brand green to match light mode.
+html[data-theme="dark"] section.menu-body .ant-menu-item:hover,
+html[data-theme="dark"] section.menu-body .ant-menu-item:hover a,
+html[data-theme="dark"] section.menu-body .ant-menu-item:hover a span,
+html[data-theme="dark"] section.menu-body .ant-menu-submenu-title:hover,
+html[data-theme="dark"] section.menu-body .ant-menu-submenu-title:hover span,
+html[data-theme="dark"] section.menu-body .ant-menu-item-selected,
+html[data-theme="dark"] section.menu-body .ant-menu-item-selected a,
+html[data-theme="dark"] section.menu-body .ant-menu-item-selected a span,
+html[data-theme="dark"] .ant-menu-submenu-popup .ant-menu-item:hover,
+html[data-theme="dark"] .ant-menu-submenu-popup .ant-menu-item-selected {
+  color: #3CC798 !important;
+}
+
+// Brand area at the top of the side menu.
+html[data-theme="dark"] section.menu-body .brand .brand-content,
+html[data-theme="dark"] section.menu-body .brand .brand-content .icon-fold {
+  background-color: #262626 !important;
+}
+
+// User dropdown menu in the menu (.dropdown-menu).
+// Padding + radius are restated here because dark ng-zorro's
+// `.ant-dropdown-menu` rule (specificity 0,2,1) outweighs the component's
+// `.dropdown-menu` rule (0,1,0) and would otherwise flatten the layout.
+html[data-theme="dark"] .dropdown-menu {
+  background-color: #333333 !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
+  padding: 12px 24px !important;
+  border-radius: 12px !important;
+}
+
+// Custom tooltip (styles-common.less hard-codes a light grey).
+html[data-theme="dark"] .ant-tooltip-inner {
+  background: #4d4d4d !important;
+}
+
+// Misc list / divider tweaks.
+html[data-theme="dark"] .ant-list-header {
+  border-bottom-color: #404040 !important;
+}
+html[data-theme="dark"] .ant-divider-vertical,
+html[data-theme="dark"] .ant-divider-horizontal {
+  border-color: #404040 !important;
+}
+
+// ng-zorro layout / cards / page surfaces — many app pages use these directly.
+html[data-theme="dark"] .ant-layout,
+html[data-theme="dark"] .ant-layout-content,
+html[data-theme="dark"] .ant-layout-header,
+html[data-theme="dark"] .ant-layout-sider,
+html[data-theme="dark"] .ant-layout-footer {
+  background-color: #262626 !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+html[data-theme="dark"] .ant-card,
+html[data-theme="dark"] .ant-card-head,
+html[data-theme="dark"] .ant-card-body {
+  background-color: #333333 !important;
+  border-color: #404040 !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+// Tables sometimes inherit a hardcoded white from component styles.
+// (Header bg is handled separately below — let it stay transparent so
+// it inherits the container surface, matching light mode.)
+html[data-theme="dark"] .ant-table,
+html[data-theme="dark"] .ant-table-tbody > tr > td,
+html[data-theme="dark"] .ant-table-summary {
+  background-color: #262626 !important;
+  border-color: #404040 !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+html[data-theme="dark"] .ant-table-tbody > tr:hover > td,
+html[data-theme="dark"] .ant-table-tbody > tr.ant-table-row-hover > td {
+  background-color: #383838 !important;
+}
+
+// Primary buttons: app's `.standard-btn` mixin sets `border-radius: 32px`,
+// but the vendor dark CSS for `.ant-btn` (also prefixed with our scope) gets
+// equal specificity and overrides it via cascade order. Re-assert the rounded
+// pill shape and the brand green here.
+html[data-theme="dark"] .ant-btn-primary,
+html[data-theme="dark"] button.btn-primary,
+html[data-theme="dark"] button[nzType="primary"] {
+  background: #3CC798 !important;
+  border-color: #3CC798 !important;
+  color: #fff !important;
+  border-radius: 32px !important;
+}
+html[data-theme="dark"] .ant-btn-primary:hover,
+html[data-theme="dark"] .ant-btn-primary:focus,
+html[data-theme="dark"] button.btn-primary:hover,
+html[data-theme="dark"] button.btn-primary:focus,
+html[data-theme="dark"] button[nzType="primary"]:hover,
+html[data-theme="dark"] button[nzType="primary"]:focus {
+  background: #5CE6B8 !important;
+  border-color: #5CE6B8 !important;
+  color: #fff !important;
+}
+html[data-theme="dark"] .ant-btn-primary:active,
+html[data-theme="dark"] button.btn-primary:active,
+html[data-theme="dark"] button[nzType="primary"]:active {
+  background: #23AD7F !important;
+  border-color: #23AD7F !important;
+  color: #fff !important;
+}
+html[data-theme="dark"] .ant-btn-primary[disabled],
+html[data-theme="dark"] .ant-btn-primary[disabled]:hover,
+html[data-theme="dark"] .ant-btn-primary.ant-btn-loading[disabled] {
+  background: #2d4a3f !important;
+  border-color: #2d4a3f !important;
+  color: rgba(255, 255, 255, 0.4) !important;
+}
+
+// Modal close button: app overrides the ng-zorro X with a custom SVG via
+// `::before` and hides the original `.ant-modal-close-icon`. The vendor dark
+// CSS re-asserts display on that icon, producing two X's. Re-hide it.
+html[data-theme="dark"] .ant-modal-close-x i,
+html[data-theme="dark"] .ant-modal-close-x .ant-modal-close-icon,
+html[data-theme="dark"] .ant-modal-close-x .anticon-close {
+  display: none !important;
+}
+
+// Select dropdown arrow: app hides the default `.ant-select-arrow` and draws
+// its own SVG via `.ant-select::after`. Vendor dark CSS re-asserts the
+// default arrow, so we get two arrows. Re-hide the default.
+html[data-theme="dark"] .ant-select-arrow {
+  display: none !important;
+}
+
+// Tags / labels: vendor dark CSS adds `border: 1px solid #434343` to
+// `.ant-tag`, which the light theme leaves invisible. The colored variants
+// (`.ant-tag-green` etc.) keep their own border via cascade order. Strip
+// the default border on uncolored tags so they read as flat pills.
+html[data-theme="dark"] .ant-tag {
+  border-color: transparent !important;
+}
+html[data-theme="dark"] .ant-tag.ant-tag-has-color,
+html[data-theme="dark"] .ant-tag-blue,
+html[data-theme="dark"] .ant-tag-green,
+html[data-theme="dark"] .ant-tag-red,
+html[data-theme="dark"] .ant-tag-orange,
+html[data-theme="dark"] .ant-tag-yellow,
+html[data-theme="dark"] .ant-tag-cyan,
+html[data-theme="dark"] .ant-tag-purple,
+html[data-theme="dark"] .ant-tag-pink,
+html[data-theme="dark"] .ant-tag-magenta,
+html[data-theme="dark"] .ant-tag-volcano,
+html[data-theme="dark"] .ant-tag-gold,
+html[data-theme="dark"] .ant-tag-lime,
+html[data-theme="dark"] .ant-tag-geekblue {
+  border-color: transparent !important;
+}
+
+// Modals, drawers, popovers — keep them on a panel surface.
+html[data-theme="dark"] .ant-modal-content,
+html[data-theme="dark"] .ant-modal-header,
+html[data-theme="dark"] .ant-modal-body,
+html[data-theme="dark"] .ant-modal-footer,
+html[data-theme="dark"] .ant-drawer-content,
+html[data-theme="dark"] .ant-drawer-header,
+html[data-theme="dark"] .ant-drawer-body,
+html[data-theme="dark"] .ant-drawer-footer,
+html[data-theme="dark"] .ant-popover-inner,
+html[data-theme="dark"] .ant-popover-inner-content,
+html[data-theme="dark"] .ant-dropdown-menu {
+  background-color: #333333 !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+  border-color: #404040 !important;
+}
+
+// Inputs / form controls.
+html[data-theme="dark"] .ant-input,
+html[data-theme="dark"] .ant-input-affix-wrapper,
+html[data-theme="dark"] .ant-input-number,
+html[data-theme="dark"] .ant-input-number-input,
+html[data-theme="dark"] .ant-select-selector,
+html[data-theme="dark"] .ant-picker,
+html[data-theme="dark"] textarea.ant-input {
+  background-color: #262626 !important;
+  border-color: #4d4d4d !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+html[data-theme="dark"] .ant-input::placeholder,
+html[data-theme="dark"] textarea.ant-input::placeholder {
+  color: rgba(255, 255, 255, 0.40) !important;
+}
+
+// Tabs.
+html[data-theme="dark"] .ant-tabs-tab {
+  color: rgba(255, 255, 255, 0.65) !important;
+}
+html[data-theme="dark"] .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #3CC798 !important;
+}
+html[data-theme="dark"] .ant-tabs-ink-bar {
+  background: #3CC798 !important;
+}
+html[data-theme="dark"] .ant-tabs-top > .ant-tabs-nav::before,
+html[data-theme="dark"] .ant-tabs-bottom > .ant-tabs-nav::before {
+  border-color: #404040 !important;
+}
+
+// ---- Selected / active / current state colors --------------------------
+// In light mode many components use `@green70-color` for the selected item
+// (e.g. .item-selected in the change-environment modal, project list, etc.).
+// The auto-generated overrides above don't touch green (it isn't near-gray)
+// but the broader "all list items" overrides include selected ones, so we
+// re-assert the brand green here at higher specificity.
+html[data-theme="dark"] .item-selected,
+html[data-theme="dark"] .item-selected *,
+html[data-theme="dark"] nz-list-item.item-selected,
+html[data-theme="dark"] nz-list-item.item-selected *,
+html[data-theme="dark"] .ant-list-item.item-selected,
+html[data-theme="dark"] .ant-list-item.item-selected *,
+html[data-theme="dark"] .env-item.current,
+html[data-theme="dark"] .env-item.current *,
+html[data-theme="dark"] .env-current,
+html[data-theme="dark"] .env-current *,
+html[data-theme="dark"] .ant-table-row.active > td,
+html[data-theme="dark"] .ant-table-row.active > td * {
+  color: #3CC798 !important;
+}
+
+// Match light-mode weight on selected items (vendor dark CSS sometimes
+// applies a heavier weight to selected list items / table rows).
+html[data-theme="dark"] .item-selected,
+html[data-theme="dark"] .item-selected *,
+html[data-theme="dark"] nz-list-item.item-selected,
+html[data-theme="dark"] nz-list-item.item-selected *,
+html[data-theme="dark"] .ant-list-item.item-selected,
+html[data-theme="dark"] .ant-list-item.item-selected *,
+html[data-theme="dark"] .ant-table-row.active > td,
+html[data-theme="dark"] .ant-table-row.active > td * {
+  font-weight: normal !important;
+}
+
+// Generic body text fallback for any component scoping issues.
+html[data-theme="dark"] section.right-container,
+html[data-theme="dark"] div.router-container {
+  background-color: #262626 !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+
+
+
+// ---- Feature-flag setting block ---------------------------------------
+// `.key` collides between relay-proxy-key-modal (which has a border in
+// light mode) and the feature-flag setting page (which doesn't). The
+// auto-generator emits a global border rule. Suppress it on the setting
+// page's `.block .key` and emphasize the `.flag-description` border so
+// it's visibly framed in dark mode.
+html[data-theme="dark"] .block .key {
+  border: none !important;
+  background: transparent !important;
+}
+html[data-theme="dark"] .block .flag-description,
+html[data-theme="dark"] .block .description {
+  border: 1px solid #5a5a5a !important;
+}
+html[data-theme="dark"] .block .flag-description.editing,
+html[data-theme="dark"] .block .description.editing {
+  border: none !important;
+}
+
+// ---- Description / flag-description: visible border (any page) -------
+// Light mode draws a 1px @grey20-color border around `.flag-description`
+// (feature-flag setting) and `.description` (segment setting). Make sure
+// those frame fields are clearly visible in dark mode regardless of the
+// parent container.
+html[data-theme="dark"] .flag-description,
+html[data-theme="dark"] .description {
+  border: 1px solid #5a5a5a !important;
+}
+html[data-theme="dark"] .flag-description.editing,
+html[data-theme="dark"] .description.editing {
+  border: none !important;
+}
+
+// ---- Date pickers: borderless to match Featbit light mode -------------
+// Vendor dark CSS adds a 1px border to .ant-picker. Featbit's light mode
+// is borderless. Suppress in dark.
+html[data-theme="dark"] .ant-picker,
+html[data-theme="dark"] .ant-picker-range,
+html[data-theme="dark"] nz-date-picker,
+html[data-theme="dark"] nz-range-picker {
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+html[data-theme="dark"] .ant-picker:hover,
+html[data-theme="dark"] .ant-picker-focused {
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+// ---- Checkboxes: green when checked, white check mark -----------------
+// The auto-generated overrides recolor .ant-checkbox-inner's bg and the
+// ::after check-mark border to dark grays, hiding the checked state.
+// Re-assert FeatBit green bg + white tick for checked / indeterminate.
+html[data-theme="dark"] .ant-checkbox-checked .ant-checkbox-inner {
+  background-color: #3CC798 !important;
+  border-color: #3CC798 !important;
+}
+html[data-theme="dark"] .ant-checkbox-checked .ant-checkbox-inner::after {
+  border-color: #ffffff !important;
+  border-top: 0 !important;
+  border-left: 0 !important;
+}
+html[data-theme="dark"] .ant-checkbox-indeterminate .ant-checkbox-inner::after {
+  background-color: #3CC798 !important;
+  border: 0 !important;
+}
+html[data-theme="dark"] .ant-checkbox-checked::after {
+  border-color: #3CC798 !important;
+}
+html[data-theme="dark"] .ant-checkbox-wrapper:hover .ant-checkbox-inner,
+html[data-theme="dark"] .ant-checkbox:hover .ant-checkbox-inner,
+html[data-theme="dark"] .ant-checkbox-input:focus + .ant-checkbox-inner {
+  border-color: #3CC798 !important;
+}
+
+// ---- Link / Text buttons: transparent bg, green text ------------------
+// The auto-generated `.ant-btn { background: #262626; border-color: ... }`
+// rule (synthesized from a Featbit `.ant-btn` declaration) forces every
+// button — including `nzType="link"` / `nzType="text"` — to look like an
+// outlined button. Re-assert the link/text variant here so they appear as
+// inline text-only buttons (e.g. "Choose Environments" in the relay-proxy
+// drawer), matching light mode.
+html[data-theme="dark"] .ant-btn-link,
+html[data-theme="dark"] .ant-btn-text,
+html[data-theme="dark"] button[nzType="link"],
+html[data-theme="dark"] button[nzType="text"],
+html[data-theme="dark"] .ant-btn-link:hover,
+html[data-theme="dark"] .ant-btn-link:focus,
+html[data-theme="dark"] .ant-btn-link:active,
+html[data-theme="dark"] .ant-btn-text:hover,
+html[data-theme="dark"] .ant-btn-text:focus,
+html[data-theme="dark"] .ant-btn-text:active,
+html[data-theme="dark"] button[nzType="link"]:hover,
+html[data-theme="dark"] button[nzType="link"]:focus,
+html[data-theme="dark"] button[nzType="link"]:active,
+html[data-theme="dark"] button[nzType="text"]:hover,
+html[data-theme="dark"] button[nzType="text"]:focus,
+html[data-theme="dark"] button[nzType="text"]:active {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+html[data-theme="dark"] .ant-btn-link,
+html[data-theme="dark"] button[nzType="link"] {
+  color: #3CC798 !important;
+}
+html[data-theme="dark"] .ant-btn-link:hover,
+html[data-theme="dark"] .ant-btn-link:focus,
+html[data-theme="dark"] button[nzType="link"]:hover,
+html[data-theme="dark"] button[nzType="link"]:focus {
+  color: #5CE6B8 !important;
+}
+html[data-theme="dark"] .ant-btn-link:active,
+html[data-theme="dark"] button[nzType="link"]:active {
+  color: #23AD7F !important;
+}
+html[data-theme="dark"] .ant-btn-text,
+html[data-theme="dark"] button[nzType="text"] {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+html[data-theme="dark"] .ant-btn-text:hover,
+html[data-theme="dark"] button[nzType="text"]:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+html[data-theme="dark"] .ant-btn-link[disabled],
+html[data-theme="dark"] .ant-btn-text[disabled],
+html[data-theme="dark"] .ant-btn-link[disabled]:hover,
+html[data-theme="dark"] .ant-btn-text[disabled]:hover {
+  background: transparent !important;
+  border-color: transparent !important;
+  color: rgba(255, 255, 255, 0.3) !important;
+}
+// Dangerous link/text buttons stay red.
+html[data-theme="dark"] .ant-btn-dangerous.ant-btn-link,
+html[data-theme="dark"] .ant-btn-dangerous.ant-btn-text {
+  background: transparent !important;
+  border-color: transparent !important;
+  color: #ff7875 !important;
+}
+html[data-theme="dark"] .ant-btn-dangerous.ant-btn-link:hover,
+html[data-theme="dark"] .ant-btn-dangerous.ant-btn-text:hover {
+  color: #ffa39e !important;
+}
+
+// ---- Tabs: only the notch is green, not the full ink bar -------------
+// Featbit's light mode sets `.ant-tabs-ink-bar { background: transparent }`
+// and uses `::after` to draw a centered green notch. Vendor dark CSS
+// re-paints the full ink-bar background green, producing both the notch
+// and a full-width line under the active tab. Re-assert transparent.
+html[data-theme="dark"] .ant-tabs-ink-bar {
+  background: transparent !important;
+}
+
+// ---- Tag radius: re-assert Featbit's 8px ------------------------------
+// Vendor's prefixed `.ant-tag { border-radius: 2px }` beats Featbit's
+// `.ant-tag { border-radius: 8px }` from styles-common.less in dark mode.
+html[data-theme="dark"] .ant-tag {
+  border-radius: 8px !important;
+}
+
+// ---- Audit log On/Off pills + universal ON / OFF pills ----------------
+// `nz-tag.on` / `nz-tag.off` are used in setting page, experiment drawer,
+// flag list, etc. `turn-flag-on` / `turn-flag-off` / `update-off-variation`
+// are change-list instruction components. Light mode paints all of these
+// as pastel green/red with a matching border. Vendor's prefixed `.ant-tag`
+// rule plus the auto-generator's `.body-container .ant-tag { background:
+// #333 }` flatten them in dark; restore the pastel look here.
+html[data-theme="dark"] nz-tag.on,
+html[data-theme="dark"] nz-tag.on.ant-tag,
+html[data-theme="dark"] nz-tag.status.on,
+html[data-theme="dark"] turn-flag-on nz-tag,
+html[data-theme="dark"] turn-flag-on .ant-tag,
+html[data-theme="dark"] .body-container nz-tag.on,
+html[data-theme="dark"] .body-container turn-flag-on nz-tag,
+html[data-theme="dark"] .body-container turn-flag-on .ant-tag {
+  background: rgba(92, 230, 184, 0.18) !important;
+  background-color: rgba(92, 230, 184, 0.18) !important;
+  border: 1px solid #5CE6B8 !important;
+  color: #5CE6B8 !important;
+}
+html[data-theme="dark"] nz-tag.off,
+html[data-theme="dark"] nz-tag.off.ant-tag,
+html[data-theme="dark"] nz-tag.status.off,
+html[data-theme="dark"] turn-flag-off nz-tag,
+html[data-theme="dark"] turn-flag-off .ant-tag,
+html[data-theme="dark"] update-off-variation nz-tag,
+html[data-theme="dark"] update-off-variation .ant-tag,
+html[data-theme="dark"] .body-container nz-tag.off,
+html[data-theme="dark"] .body-container turn-flag-off nz-tag,
+html[data-theme="dark"] .body-container turn-flag-off .ant-tag,
+html[data-theme="dark"] .body-container update-off-variation nz-tag,
+html[data-theme="dark"] .body-container update-off-variation .ant-tag {
+  background: rgba(255, 81, 58, 0.18) !important;
+  background-color: rgba(255, 81, 58, 0.18) !important;
+  border: 1px solid #FF513A !important;
+  color: #FF513A !important;
+}
+
+// ---- Default tag border (true/false variation pills, etc.) ------------
+// Vendor dark uses `border: 1px solid #434343` for `.ant-tag` but my
+// auto-gen / other rules can knock it out. Re-assert a visible border
+// for plain (non-color, non-on/off) tags so true/false pills outline.
+html[data-theme="dark"] nz-tag.ant-tag:not(.on):not(.off):not(.ant-tag-has-color):not([class*="ant-tag-"]),
+html[data-theme="dark"] .ant-tag.ant-tag-default {
+  border: 1px solid #5a5a5a !important;
+}
+
+// ---- Dashed buttons (e.g. Show Archived) ------------------------------
+// Vendor dark sets `.ant-btn-dashed` border to a dim gray that disappears
+// on the page bg. Brighten it so the dashed outline reads.
+html[data-theme="dark"] .ant-btn-dashed {
+  border: 1px dashed #8a8a8a !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+  background: transparent !important;
+}
+html[data-theme="dark"] .ant-btn-dashed:hover,
+html[data-theme="dark"] .ant-btn-dashed:focus {
+  border-color: #3CC798 !important;
+  color: #3CC798 !important;
+}
+html[data-theme="dark"] .ant-btn-dashed.active,
+html[data-theme="dark"] .ant-btn-dashed.ant-btn-dashed-active {
+  border-color: #3CC798 !important;
+  color: #3CC798 !important;
+  background: rgba(60, 199, 152, 0.12) !important;
+}
+
+// ---- Secondary (purple) buttons: lighten for dark bg ------------------
+// `.btn-secondary` (Compare on flag list, upload on End Users) is purple
+// on a 6% purple background. The dark `#6751D6` text is unreadable on a
+// dark page. Brighten the text and beef up the background so the pill
+// stands out.
+html[data-theme="dark"] .btn-secondary,
+html[data-theme="dark"] button.btn-secondary,
+html[data-theme="dark"] .btn-secondary.ant-btn {
+  color: #B5A6FF !important;
+  background: rgba(103, 81, 214, 0.18) !important;
+  border: 1px solid rgba(181, 166, 255, 0.55) !important;
+}
+html[data-theme="dark"] .btn-secondary:hover,
+html[data-theme="dark"] .btn-secondary:focus,
+html[data-theme="dark"] button.btn-secondary:hover,
+html[data-theme="dark"] .btn-secondary.ant-btn:hover {
+  color: #D4CCFF !important;
+  background: rgba(103, 81, 214, 0.28) !important;
+  border-color: #B5A6FF !important;
+}
+
+// ---- Theme switcher: surface the "active" option in dark mode ---------
+// Light mode shows a subtle grey10 swatch + currentColor border to mark
+// the selected icon. In dark, that grey10 maps to ~#333 which blends
+// with the sidebar. Use a clearly visible surface + green border.
+html[data-theme="dark"] .theme-switcher .theme-option.active {
+  background-color: #4d4d4d !important;
+  color: #5CE6B8 !important;
+  border: 1px solid #3CC798 !important;
+}
+html[data-theme="dark"] .theme-switcher .theme-option:hover {
+  background-color: #3d3d3d !important;
+  color: #5CE6B8 !important;
+}
+
+// ---- Table row radius: match the outer table corners ------------------
+// Light mode: each `<tr>` visually inherits the table's rounded corners
+// because the table fades into the bg. In dark mode the row has its own
+// fill, so the square row corners stick out of the rounded table. Apply
+// matching radii to first/last rows (header + body).
+html[data-theme="dark"] .ant-table-thead > tr:first-child > th:first-child,
+html[data-theme="dark"] .ant-table-thead > tr:first-child > .ant-table-cell:first-child {
+  border-top-left-radius: 8px !important;
+}
+html[data-theme="dark"] .ant-table-thead > tr:first-child > th:last-child,
+html[data-theme="dark"] .ant-table-thead > tr:first-child > .ant-table-cell:last-child {
+  border-top-right-radius: 8px !important;
+}
+html[data-theme="dark"] .ant-table-tbody > tr:last-child > td:first-child,
+html[data-theme="dark"] .ant-table-tbody > tr:last-child > .ant-table-cell:first-child {
+  border-bottom-left-radius: 8px !important;
+}
+html[data-theme="dark"] .ant-table-tbody > tr:last-child > td:last-child,
+html[data-theme="dark"] .ant-table-tbody > tr:last-child > .ant-table-cell:last-child {
+  border-bottom-right-radius: 8px !important;
+}
+html[data-theme="dark"] .ant-table {
+  border-radius: 8px !important;
+  overflow: hidden !important;
+}
+
+// ---- Radio buttons: brighten unselected outline ----------------------
+// Vendor dark sets `.ant-radio-inner` border to a dim gray that's almost
+// invisible on the dark page bg. Brighten the unselected ring while
+// leaving the checked state untouched.
+html[data-theme="dark"] .ant-radio:not(.ant-radio-checked) .ant-radio-inner,
+html[data-theme="dark"] .ant-radio-wrapper:not(.ant-radio-wrapper-checked) .ant-radio-inner {
+  border: 1px solid #8a8a8a !important;
+  background-color: transparent !important;
+}
+html[data-theme="dark"] .ant-radio:not(.ant-radio-checked):hover .ant-radio-inner,
+html[data-theme="dark"] .ant-radio-wrapper:not(.ant-radio-wrapper-checked):hover .ant-radio-inner {
+  border-color: #3CC798 !important;
+}
+
+// ---- Logo swap for dark mode ------------------------------------------
+// Original SVGs ship dark fills that disappear on a dark background.
+// Use `content: url(...)` to swap each <img> to a light-fill variant
+// without changing markup.
+html[data-theme="dark"] img.logo[src$="assets/logo/logo.svg"],
+html[data-theme="dark"] img[src$="assets/logo/logo.svg"] {
+  content: url('assets/logo/logo-dark.svg');
+}
+html[data-theme="dark"] img.brand[src$="assets/logo/featbit-logo-text.svg"],
+html[data-theme="dark"] img[src$="assets/logo/featbit-logo-text.svg"] {
+  content: url('assets/logo/featbit-logo-text-dark.svg');
+}
+
+// ---- Login page outer background -------------------------------------
+// `.login-layout` uses a bitmap `background: url(login-bg.png)` which the
+// auto-generator can't recolor (it only rewrites grayscale color/bg tokens,
+// not background-image URLs). Swap to a dark-mode bitmap that matches the
+// dark form card sitting on top of it.
+html[data-theme="dark"] .login-layout {
+  background: url("src/assets/login-bg-dark.png") !important;
+}
+
+// The auto-generator emits a global `.form-content { background: #333 }`
+// rule (driven by another component that declares `.form-content` with a
+// light bg). That selector also matches the login page's `.form-content`
+// wrapper around the logo + wordmark, leaving the imgs sitting on a
+// `#333` band inside an otherwise `#262626` form card. Re-paint it to
+// match `.login-wrapper` so the logos blend into the form.
+html[data-theme="dark"] .login-layout .form-content,
+html[data-theme="dark"] .login-layout .form-content-wrapper {
+  background: #262626 !important;
+}
+
+// Re-pin the login form input dimensions in dark mode.
+//
+// `styles-common.less` declares `.login-wrapper nz-input-group { width:
+// 380px; height: 45px }` (specificity 0,1,1) which is what anchors the
+// natural width of `.form-content-wrapper` (no explicit width) and, by
+// extension, the form-control / submit button widths. In dark mode the
+// vendor stylesheet emits `html[data-theme="dark"] .ant-input-affix-
+// wrapper { width: 100% }` at higher specificity (0,2,1) — it wins and
+// collapses the input groups to flex min-content, which cascades up and
+// makes the entire form card render ~120px narrower than light mode.
+// Re-assert the original width/height with matching specificity.
+html[data-theme="dark"] .login-wrapper nz-input-group {
+  width: 380px !important;
+  height: 45px !important;
+}
+
+// When the SSO `workspaceKey` field is locked (the workspace key arrived
+// via URL pre-check), the form control is constructed with `disabled:
+// true`. ng-zorro tags the `nz-input-group` host with the
+// `.ant-input-affix-wrapper-disabled` class. The auto-generator's plain
+// `.login-wrapper nz-input-group { background: #262626 !important }`
+// override outranks vendor dark's disabled treatment and erases the
+// "greyed-out" affordance — the field looks fully active. Restore a
+// disabled treatment that reads as *recessed* against the form card:
+// vendor dark's lifted `rgba(255,255,255,.08)` reads as a lit-up pill on
+// `#262626`, the opposite of what disabled should signal. Use a slightly
+// darker bg + near-invisible border so the field appears inset, plus the
+// not-allowed cursor and dimmed text/icon.
+html[data-theme="dark"] .login-wrapper nz-input-group.ant-input-affix-wrapper-disabled {
+  background: #1f1f1f !important;
+  border-color: #2e2e2e !important;
+  cursor: not-allowed;
+
+  // The inner `<input>` carries its own `background-color` from vendor
+  // dark CSS, which paints a `#262626` (or similar) pill inside the
+  // disabled wrapper and produces a visible two-tone seam between the
+  // prefix slot and the typing area. Force it transparent so the whole
+  // field reads as one uniform recessed colour.
+  input.ant-input {
+    background: transparent !important;
+  }
+
+  input,
+  input::placeholder {
+    color: rgba(255, 255, 255, 0.3) !important;
+  }
+
+  i {
+    color: rgba(255, 255, 255, 0.3) !important;
+  }
+}
+
+// ---- End-users page: cursor pagination (Prev / Next) -----------------
+// The cursor-pagination buttons (introduced with the rel/5.4.1
+// cursor-based pagination feature) declare a transparent fill with a
+// `@grey20-color` border and `@grey60-color` text. The auto-generator
+// rewrites those to a `#363636` border which is nearly invisible on the
+// `#262626` page surface — when the .active class sticks to the
+// last-clicked button (green), the *other* button reads as missing.
+// Lift the default state to a clearly visible tier-3 border + subtle
+// fill so both buttons remain legible regardless of which was last
+// clicked. Hover bumps to tier-4 to keep the affordance.
+// Cursor pagination: in dark mode, the auto-gen-rewritten default
+// border (`#363636`) is invisible against the page surface. Give the
+// non-active enabled button a visible neutral fill so it still reads as
+// a button, and reserve the brand-green outline + tinted fill for the
+// `.active` (last-clicked) button — matches the light-mode behaviour
+// where only one button is highlighted at a time. Disabled buttons keep
+// the component LESS opacity:0.35 fade.
+html[data-theme="dark"] .cursor-pagination button:not([disabled]) {
+  border-color: @dk-tier-4 !important;        // #525252
+  background: @dk-tier-2 !important;           // #3d3d3d
+  color: rgba(255, 255, 255, 0.92) !important;
+}
+html[data-theme="dark"] .cursor-pagination button:hover:not([disabled]) {
+  border-color: #6b6b6b !important;
+  background: @dk-tier-3 !important;           // #474747
+  color: #ffffff !important;
+}
+// `.active` is the last-clicked button. Re-assert the brand-green
+// treatment at higher specificity than the default-state override
+// above (selector chain: html[data-theme] .cursor-pagination
+// button.active:not([disabled]) — 0,3,1 — outranks the :not above).
+html[data-theme="dark"] .cursor-pagination button.active:not([disabled]) {
+  border-color: #3CC798 !important;
+  color: #3CC798 !important;
+  background: rgba(60, 199, 152, 0.12) !important;
+}
+html[data-theme="dark"] .cursor-pagination button.active:hover:not([disabled]) {
+  border-color: #3CC798 !important;
+  color: #3CC798 !important;
+  background: rgba(60, 199, 152, 0.18) !important;
+}
+
+// ---- Tables: restore the inter-row gap in dark mode ------------------
+// `styles/nz-table.less` sets `border-spacing: 0 4px` on `.table-wrapper
+// .ant-table table` to produce a 4px gap between rows. Vendor dark CSS
+// `html[data-theme="dark"] .ant-table table { border-spacing: 0 }`
+// (0,3,1) silently outranks the component selector (0,3,0) and
+// collapses the gap to zero. Just re-assert the spacing — the auto-gen
+// row/table colours already provide enough contrast (`#262626` rows on
+// `#333` table) for the gap to read as a thin divider.
+html[data-theme="dark"] .table-wrapper .ant-table table {
+  border-spacing: 0 4px !important;
+}
+// Match header bg to the table container so the header stops reading
+// as a separate dark band — matches light mode where the header blends
+// in. Apply globally to every `ant-table` (not just `.table-wrapper`)
+// so bare `<nz-table>` instances (e.g., Workspace > Usage > Per
+// Environment) are covered too. Bumped specificity (extra
+// `html[data-theme="dark"]`) so we beat vendor's `thead>tr>th
+// { background:#1f1f1f }` on initial render and avoid the navigation
+// flash.
+html[data-theme="dark"] body .ant-table thead > tr > th,
+html[data-theme="dark"] body .ant-table-thead > tr > th {
+  background-color: transparent !important;
+  // Vendor sets `transition: background .3s ease` which causes a
+  // 300ms fade from `#1d1d1d` to transparent on every nav — kill it
+  // so the header is transparent on first paint.
+  transition: none !important;
+}
+
+
+// Each `.rule` (drop-box wrapper) sits inside `.standard-div`, which the
+// auto-generator paints `#333`. The `nz-card` host inside it lands at
+// vendor's `#141414`, so painting just `.ant-card` would create a hole
+// instead of a raised tier. Paint the drop-box AND the card at tier-2,
+// re-assert the inline 20px radius (vendor dark CSS clobbers it back to
+// 8px, and the drop-box has no radius of its own — its squared corners
+// poke out around the rounded card), and drop the rule-name input back
+// to page color so it stays visible against the now-lighter card head.
+// `.tip` (the "If" / "and" labels) gets a global `background: #333` from
+// the auto-generator, so re-set it transparent inside the card.
+html[data-theme="dark"] .rule,
+html[data-theme="dark"] .rule .ant-card {
+  background-color: @dk-tier-2 !important;
+  border-radius: 20px !important;
+}
+html[data-theme="dark"] .rule .ant-card {
+  overflow: hidden !important;
+}
+html[data-theme="dark"] .rule .ant-card-head {
+  border-bottom-color: @dk-border-medium !important;
+}
+html[data-theme="dark"] .rule .ant-card-head input.standard-bordered-input,
+html[data-theme="dark"] .rule .ant-card-head .ant-input {
+  background-color: @dk-page !important;
+}
+html[data-theme="dark"] .rule .tip {
+  background-color: transparent !important;
+}
+
+// ---- Timeline tail line: brighten so dots feel connected --------------
+// Vendor dark sets the tail to a very dim gray that disappears on the
+// page bg. Bump to match our medium border tone.
+html[data-theme="dark"] .ant-timeline-item-tail {
+  border-left-color: #5a5a5a !important;
+}
+
+// ---- Nested container surfaces: nudge lighter for separation ---------
+// In light mode, `.standard-div` (#f1f1f1) holds white nz-cards, and
+// each card holds @grey5 env entries — three visible nesting tiers.
+// The auto generator collapses tiers 2 and 3 to #333333. Re-tier them
+// in dark so projects + env entries each get their own surface.
+html[data-theme="dark"] .project-list .project .ant-card,
+html[data-theme="dark"] .project-list .project .ant-card-body {
+  background-color: #3d3d3d !important;
+}
+html[data-theme="dark"] .project-list .project .ant-card {
+  border-radius: 20px !important;
+  overflow: hidden !important;
+}
+html[data-theme="dark"] .project-list .project .env-list .env {
+  background: #474747 !important;
+}
+html[data-theme="dark"] .project-list .project .env-list .env .env-secret .secret .secret-value {
+  background-color: #525252 !important;
+}
+
+// ---- Universal select fixes -----------------------------------------
+// Featbit's light mode applies `border-radius: 8px` to every
+// `.ant-select-selector`. Vendor dark CSS resets it to 2px and wins on
+// specificity. Re-assert the radius globally for every nz-select. The
+// per-size centering rules (.nz-select-40 / .nz-select-36) above keep
+// vertical text alignment.
+html[data-theme="dark"] nz-select .ant-select-selector,
+html[data-theme="dark"] .ant-select-single .ant-select-selector,
+html[data-theme="dark"] .ant-select-multiple .ant-select-selector {
+  border-radius: 8px !important;
+}
+// Default-height (no `.nz-select-40/36`) selects: text is closer to the
+// bottom because vendor's `line-height: 30px` is overridden by my generated
+// rules emitting different line-heights. Re-assert the standard 30px line
+// height for centering inside the default 32px selector.
+html[data-theme="dark"] .ant-select-single:not(.nz-select-40):not(.nz-select-36):not(.ant-select-lg):not(.ant-select-sm) .ant-select-selection-item,
+html[data-theme="dark"] .ant-select-single:not(.nz-select-40):not(.nz-select-36):not(.ant-select-lg):not(.ant-select-sm) .ant-select-selection-placeholder,
+html[data-theme="dark"] .ant-select-single:not(.nz-select-40):not(.nz-select-36):not(.ant-select-lg):not(.ant-select-sm) .ant-select-selection-search-input {
+  line-height: 30px !important;
+}
+
+
+// ---- Inputs: kill vendor borders (Featbit light mode is borderless) ----
+// Featbit's nz-input-group / .ant-input is borderless in light mode. Once
+// the vendor dark CSS is prefixed with html[data-theme="dark"], its
+// .ant-input { border: 1px solid #434343 } wins over Featbit's app rules
+// (which lack !important). Re-assert borderless here.
+html[data-theme="dark"] .ant-input,
+html[data-theme="dark"] .ant-input-affix-wrapper,
+html[data-theme="dark"] .ant-input-group-wrapper,
+html[data-theme="dark"] .ant-input-group-addon,
+html[data-theme="dark"] nz-input-group {
+  border-color: transparent !important;
+  box-shadow: none !important;
+  border-radius: 8px !important;
+}
+html[data-theme="dark"] .ant-input-affix-wrapper:hover,
+html[data-theme="dark"] .ant-input-affix-wrapper:focus,
+html[data-theme="dark"] .ant-input-affix-wrapper-focused,
+html[data-theme="dark"] .ant-input:hover,
+html[data-theme="dark"] .ant-input:focus {
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+// ---- Select: re-center the selection text ------------------------------
+// Featbit overrides .ant-select-selector { height: 40px } and uses
+// margin-top: 5px on .ant-select-selection-item to vertically center the
+// text. Vendor dark CSS's prefixed rules win on selection-item line-height
+// and pull the text toward the bottom. Re-assert featbit's vertical
+// centering at higher specificity (and matching for the 36px variant).
+html[data-theme="dark"] .nz-select-40 .ant-select-selector {
+  height: 40px !important;
+  border-radius: 8px !important;
+}
+html[data-theme="dark"] .nz-select-40.rounded .ant-select-selector {
+  border-radius: 32px !important;
+}
+html[data-theme="dark"] .nz-select-40 .ant-select-selection-item,
+html[data-theme="dark"] .nz-select-40 .ant-select-selection-placeholder {
+  margin-top: 5px !important;
+}
+html[data-theme="dark"] .nz-select-40 .ant-select-selection-search-input {
+  margin-top: 3px !important;
+}
+html[data-theme="dark"] .nz-select-36 .ant-select-selector {
+  height: 36px !important;
+  border-radius: 8px !important;
+}
+html[data-theme="dark"] .nz-select-36.rounded .ant-select-selector {
+  border-radius: 16px !important;
+}
+html[data-theme="dark"] .nz-select-36 .ant-select-selection-item,
+html[data-theme="dark"] .nz-select-36 .ant-select-selection-search-input,
+html[data-theme="dark"] .nz-select-36 .ant-select-selection-placeholder {
+  margin-top: 3px !important;
+}
+
+// Multi-mode (nzMode="tags") selectors: vendor wraps content in a
+// `.ant-select-selection-overflow` flex row whose default top padding
+// pushes the placeholder/input above center. Re-center by zeroing the
+// margin-top on those elements in multi-mode and aligning the overflow.
+html[data-theme="dark"] .nz-select-36.ant-select-multiple .ant-select-selector,
+html[data-theme="dark"] .nz-select-40.ant-select-multiple .ant-select-selector {
+  display: flex !important;
+  align-items: center !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+html[data-theme="dark"] .nz-select-36.ant-select-multiple .ant-select-selection-overflow,
+html[data-theme="dark"] .nz-select-40.ant-select-multiple .ant-select-selection-overflow {
+  align-items: center !important;
+}
+html[data-theme="dark"] .nz-select-36.ant-select-multiple .ant-select-selection-placeholder,
+html[data-theme="dark"] .nz-select-40.ant-select-multiple .ant-select-selection-placeholder {
+  margin-top: 0 !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+}
+html[data-theme="dark"] .nz-select-36.ant-select-multiple .ant-select-selection-search-input,
+html[data-theme="dark"] .nz-select-40.ant-select-multiple .ant-select-selection-search-input {
+  margin-top: 0 !important;
+}
+
+// ---- Change environment modal: lift Projects/Environments lists ------
+// The two `nz-list`s sit on the modal body which is already #333. Give
+// each list its own tier-2 surface + rounded corners so they read as
+// raised panels inside the modal.
+html[data-theme="dark"] .project-envs nz-list,
+html[data-theme="dark"] .project-envs nz-list .ant-list,
+html[data-theme="dark"] .project-envs nz-list .ant-list-header {
+  background-color: @dk-tier-2 !important;
+}
+html[data-theme="dark"] .project-envs nz-list {
+  border-radius: 12px !important;
+  overflow: hidden !important;
+}
+html[data-theme="dark"] .project-envs nz-list .ant-list-header {
+  border-bottom-color: @dk-border-bright !important;
+}
+
+// ---- Components that use inline styles can't be auto-generated, so we have to target them directly ----
+html[data-theme="dark"] render-default-rule {
+  .serve-content {
+    color: @dk-text-primary !important;
+  }
+}
+html[data-theme="dark"] render-individual-targeting {
+  .empty-state-text {
+    color: @dk-text-secondary !important;
+  }
+
+  .variation-badge {
+    color: @dk-text-secondary !important;
+  }
+
+  .user-badge {
+    background-color: @dk-surface !important;
+    border-color: @dk-border-medium !important;
+    color: @dk-text-secondary !important;
+
+    &:hover {
+      background-color: @dk-hover !important;
+      border-color: @dk-border-bright !important;
+    }
+  }
+}
+html[data-theme="dark"] render-targeting-rules {
+  .empty-state-text {
+    color: @dk-text-secondary !important;
+  }
+
+  .targeting-rule-entry {
+    background-color: @dk-surface !important;
+  }
+
+  .rule-name {
+    color: @dk-text-secondary !important;
+  }
+
+  .condition-keyword {
+    &.if-keyword {
+      background-color: rgba(24, 144, 255, 0.15) !important;
+      color: #69c0ff !important;
+    }
+
+    &.and-keyword {
+      background-color: rgba(47, 84, 235, 0.15) !important;
+      color: #85a5ff !important;
+    }
+  }
+
+  .condition-content {
+    color: @dk-text-primary !important;
+  }
+
+  .serve-section {
+    border-top-color: @dk-border-medium !important;
+  }
+
+  .serve-keyword {
+    background-color: rgba(60, 199, 152, 0.15) !important;
+    color: #3CC798 !important;
+  }
+
+  .serve-content {
+    color: @dk-text-primary !important;
+  }
+}
+html[data-theme="dark"] .flag-references-modal {
+  .description,
+  .reference-env {
+    color: @dk-text-secondary !important;
+  }
+
+  .reference-item {
+    border-color: @dk-border-medium !important;
+
+    &:hover {
+      background-color: @dk-hover !important;
+    }
+  }
+
+  .reference-item-disabled:hover {
+    background-color: transparent !important;
+  }
+
+  .reference-name {
+    color: @dk-text-primary !important;
+  }
+
+  .reference-key {
+    color: @dk-text-secondary !important;
+    background-color: @dk-tier-2 !important;
+    border-color: @dk-border-strong !important;
+  }
+}

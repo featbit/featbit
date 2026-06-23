@@ -114,6 +114,7 @@ import { NzSliderModule } from 'ng-zorro-antd/slider';
 import { UpdateSubscriptionModalComponent } from "./components/pricing-plans/update-subscription-modal/update-subscription-modal.component";
 import { ChangeCommentComponent } from '@core/components/change-comment/change-comment.component';
 import { ChangeCommentService } from '@core/services/change-comment.service';
+import { ThemeSwitcherComponent } from '@core/components/theme-switcher/theme-switcher.component';
 
 @NgModule({
   declarations: [
@@ -167,7 +168,8 @@ import { ChangeCommentService } from '@core/services/change-comment.service';
     ResourceEditorComponent,
     PricingPlansComponent,
     UpdateSubscriptionModalComponent,
-    ChangeCommentComponent
+    ChangeCommentComponent,
+    ThemeSwitcherComponent
   ],
   imports: [
     CommonModule,
@@ -281,7 +283,8 @@ import { ChangeCommentService } from '@core/services/change-comment.service';
     ClonePolicyModalComponent,
     ResourceEditorComponent,
     PricingPlansComponent,
-    ChangeCommentComponent
+    ChangeCommentComponent,
+    ThemeSwitcherComponent
   ],
   providers: [
     ChangeCommentService
