@@ -2,7 +2,7 @@
 
 ## Goal
 
-Migrate the application shell: login, auth guard, secure layout, side navigation, top header, locale switcher, and workspace/org/project/env switching.
+Migrate the application shell: login, auth guard, secure layout, side navigation, top header, account menu with current version display, theme switcher, locale switcher, and workspace/org/project/env switching.
 
 ## Routes
 
@@ -34,6 +34,8 @@ Migrate the application shell: login, auth guard, secure layout, side navigation
 
 - Use a left navigation plus top context bar layout.
 - Keep Organization, Project, Environment, Plan, and User context visible at the top.
+- Add a compact theme switcher for `Light`, `Dark`, and `System`. The control should use the shadcn-style `ThemeProvider` / `useTheme` pattern, persist user preference, and update the document theme without requiring a route refresh.
+- Show the current app version in the account/about menu. Follow the local `feat/show-current-version` branch: read the value from runtime env `window.env.version`, default to `dev`, display it as `Version: <version>`, and optionally link the row to `https://github.com/featbit/featbit`.
 - Implement auth guard behavior:
   - unauthenticated users go to login.
   - users without selected workspace go to select-workspace.
@@ -82,5 +84,7 @@ Integrations sub-items:
 
 - Users can login, select workspace, complete onboarding, and reach the secure shell.
 - Menu visibility respects permissions.
+- The account menu displays the current version from runtime env and falls back to `dev` when unset.
+- Theme switching works in login and authenticated shell routes, persists across reloads, and does not break language-prefixed routes.
 - Language switching preserves the equivalent path when possible.
 - `/en/*` and `/zh/*` deep links survive browser refresh.

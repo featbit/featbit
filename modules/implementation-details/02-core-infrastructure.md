@@ -9,6 +9,7 @@ Build the shared runtime layer used by every migrated page: env loading, typed A
 - Load runtime config from `window.env`, preserving the existing `assets/env.template.js` and `assets/env.js` semantics.
 - Provide a typed `getRuntimeEnv()` helper with normalized URL values and clear defaults for local development.
 - Keep the env keys compatible with the Angular deployment model.
+- Include `VERSION` / `window.env.version` in the typed runtime env. Default it to `dev` when not provided, matching the local `feat/show-current-version` branch behavior.
 
 ## API Client
 

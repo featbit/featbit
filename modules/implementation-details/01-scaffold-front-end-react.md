@@ -9,6 +9,7 @@ Create the standalone React application foundation in `front-end-react` without 
 - Use Vite + React + TypeScript as a static SPA.
 - Use React Router in front-end SPA mode only.
 - Use shadcn/ui + Radix primitives + Tailwind CSS as the UI foundation.
+- Support light/dark/system theme modes from the first scaffold using shadcn's native dark-mode pattern for Vite.
 - Use TanStack Query for server state, TanStack Table for tables, React Hook Form + Zod for forms, Recharts for charts, CodeMirror 6 for embedded structured editing, and Shiki for code highlighting.
 - Use `react-i18next` for i18n.
 - Use Playwright as the browser E2E runner.
@@ -16,6 +17,9 @@ Create the standalone React application foundation in `front-end-react` without 
 ## Required Setup
 
 - Create `front-end-react` as an independent package with its own `package.json`, `tsconfig`, Vite config, Tailwind config, ESLint config, test config, and README.
+- Configure Tailwind dark mode using shadcn's `darkMode: ["class"]` strategy and the standard shadcn CSS variables for background, foreground, card, popover, border, muted, primary, destructive, ring, and chart colors.
+- Add the shadcn-style `ThemeProvider` and `useTheme` helper for Vite. It should support `light`, `dark`, and `system`, persist the selected preference in local storage, and apply the theme class before app paint where possible to avoid theme flash.
+- Keep shadcn's default color variables as the baseline. Extend CSS variables only when a product-specific semantic need cannot be expressed with shadcn defaults, and do not use the Angular color scheme as the React palette. Do not introduce a separate custom theme framework.
 - Configure path aliases, at minimum:
   - `@/app`
   - `@/assets`
@@ -43,6 +47,7 @@ Create the standalone React application foundation in `front-end-react` without 
   - `DISPLAY_API_URL`
   - `DISPLAY_EVALUATION_URL`
   - `HOSTING_MODE`
+  - `VERSION`
 
 ## Directory Structure
 
@@ -66,6 +71,7 @@ front-end-react/
       env/
       i18n/
       permissions/
+      theme/
       test/
     routes/
     stores/
@@ -79,4 +85,6 @@ front-end-react/
 - `npm run build` produces static assets.
 - The app can render placeholder `/en/login`, `/zh/login`, and authenticated layout routes.
 - Tailwind and shadcn/ui components render correctly.
+- Light, dark, and system theme modes can be selected and persist across reloads.
+- Runtime env typing includes `VERSION`, and the app can read `window.env.version` with a `dev` fallback.
 - No files in Angular `front-end` are modified.

@@ -12,6 +12,7 @@ Prepare the React front-end for local development, production build, Docker/Ngin
 - Preserve `/en/*` and `/zh/*` SPA fallback behavior.
 - Preserve `BASE_HREF` handling if the current deployment still needs it.
 - Preserve runtime `env.template.js` to `env.js` generation behavior.
+- Follow the local `feat/show-current-version` branch for version injection: Docker should accept `ARG VERSION=dev`, expose it as `ENV VERSION`, and write it into runtime `env.js` as `window.env.version`.
 
 ## Runtime Env
 
@@ -22,8 +23,10 @@ Prepare the React front-end for local development, production build, Docker/Ngin
   - `DISPLAY_API_URL`
   - `DISPLAY_EVALUATION_URL`
   - `HOSTING_MODE`
+  - `VERSION`
 - Provide local development examples and production examples.
 - Explain which values are used by management API calls and which are displayed to users.
+- Document that `VERSION` is shown in the authenticated account/about menu and defaults to `dev` when unset.
 
 ## Scripts
 
@@ -59,5 +62,5 @@ Prepare the React front-end for local development, production build, Docker/Ngin
 
 - A developer can run the React app locally from README instructions.
 - Production Docker image can be built and served with Nginx.
-- `/health`, `/en/*`, `/zh/*`, and runtime env generation work in the built image.
+- `/health`, `/en/*`, `/zh/*`, and runtime env generation including `VERSION` work in the built image.
 - Documentation clearly states what is still parallel-only and what is ready for cutover.
