@@ -9,7 +9,7 @@ Create the standalone React application foundation in `front-end-react` without 
 - Use Vite + React + TypeScript as a static SPA.
 - Use React Router in front-end SPA mode only.
 - Use shadcn/ui + Radix primitives + Tailwind CSS as the UI foundation.
-- Use TanStack Query for server state, TanStack Table for tables, React Hook Form + Zod for forms, Recharts for charts, and Shiki for code highlighting.
+- Use TanStack Query for server state, TanStack Table for tables, React Hook Form + Zod for forms, Recharts for charts, CodeMirror 6 for embedded structured editing, and Shiki for code highlighting.
 - Use `react-i18next` for i18n.
 - Use Playwright as the browser E2E runner.
 

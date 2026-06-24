@@ -7,11 +7,11 @@ Create a standalone React front-end in `D:\Workspace\FeatBit\featbit\modules\fro
 ## Key Changes
 
 - Foundation: Vite + React + TypeScript + React Router SPA. Do not use SSR, React Router full-stack mode, Next.js, or Remix.
-- UI stack: Use shadcn/ui + Radix primitives + Tailwind CSS. Buttons, text colors, spacing, border radius, focus rings, and other base visuals should follow shadcn/Tailwind default tokens as much as possible instead of copying Angular/ng-zorro styles. Prefer `lucide-react` for icons. Use TanStack Table for tables, React Hook Form + Zod for forms, TanStack Query for server state, Recharts for charts, and Shiki for code highlighting. For simple cases, wrap snippets in a lightweight `CodeBlock`.
+- UI stack: Use shadcn/ui + Radix primitives + Tailwind CSS. Buttons, text colors, spacing, border radius, focus rings, and other base visuals should follow shadcn/Tailwind default tokens as much as possible instead of copying Angular/ng-zorro styles. Prefer `lucide-react` for icons. Use TanStack Table for tables, React Hook Form + Zod for forms, TanStack Query for server state, Recharts for charts, CodeMirror 6 for lightweight structured editing, and Shiki for code highlighting. For simple cases, wrap snippets in a lightweight `CodeBlock`.
 - i18n: Use `react-i18next`, while preserving the `/en/*` and `/zh/*` URL structure, browser-language default redirect, and language switching.
 - API layer: Implement a typed API client that preserves the existing backend contract, automatically unwraps `IResponse.data`, supports the 401 refresh-token queue, shows error toasts, clears local state on session expiration, and redirects to `/login`.
 - Runtime configuration: Preserve the `assets/env.template.js` / `assets/env.js` mechanism and continue supporting `API_URL`, `DEMO_URL`, `EVALUATION_URL`, `DISPLAY_API_URL`, `DISPLAY_EVALUATION_URL`, and `HOSTING_MODE`.
-- Static assets: Do not copy the Angular assets wholesale. For generic icons/fonts, prefer shadcn/Tailwind/lucide capabilities. Only copy FeatBit brand assets, business-specific assets, sample data, and required runtime assets.
+- Static assets: Do not copy the Angular assets wholesale. For generic icons/fonts, prefer shadcn/Tailwind/lucide capabilities. Only copy FeatBit brand assets, business-specific assets, sample data, and required runtime assets. Do not copy Monaco assets.
 - Deployment: Add the React Dockerfile, entrypoint, and Nginx templates, matching the existing `/health`, `BASE_HREF`, `/en`, and `/zh` fallback behavior.
 
 ## Implementation Plan
@@ -20,7 +20,7 @@ Create a standalone React front-end in `D:\Workspace\FeatBit\featbit\modules\fro
 2. Build core infrastructure: env loader, API client, auth/session store, workspace/org/project/env store, permission/license helpers, and base toast/dialog/drawer/table/form components. See [implementation detail 02](implementation-details/02-core-infrastructure.md).
 3. Migrate the shell: login, auth guard, secure-area layout, side menu, header, locale switcher, and workspace/org/project/env switching. See [implementation detail 03](implementation-details/03-shell-and-navigation.md).
 4. Migrate feature domains page by page: feature flags, users, segments, experiments, audit logs, workspace, organization, relay proxies, IAM, and integrations. See [implementation detail 04](implementation-details/04-feature-domain-pages.md).
-5. Migrate complex capabilities: feature flag targeting/rules, change review/pending changes, policy editor, resource editor/finder, Monaco JSON editor, Shiki/lightweight CodeBlock, and Recharts charting. See [implementation detail 05](implementation-details/05-complex-capabilities.md).
+5. Migrate complex capabilities: feature flag targeting/rules, change review/pending changes, policy editor, resource editor/finder, lightweight JSON editor, Shiki/lightweight CodeBlock, and Recharts charting. See [implementation detail 05](implementation-details/05-complex-capabilities.md).
 6. Migrate i18n copy: extract English/Chinese resources from Angular templates and `messages.zh.xlf`, then organize them as react-i18next JSON namespaces. See [implementation detail 06](implementation-details/06-i18n-migration.md).
 7. Align deployment and documentation: README, local development commands, production build, Docker/Nginx, environment variables, and future cutover steps. See [implementation detail 07](implementation-details/07-deployment-and-documentation.md).
 
@@ -28,7 +28,7 @@ Create a standalone React front-end in `D:\Workspace\FeatBit\featbit\modules\fro
 
 - Use `lucide-react` to replace generic action icons such as add/edit/delete/search/save/download/arrow/settings/user/lock.
 - Use the Tailwind/system font stack. Do not copy the existing Noto fonts by default.
-- Copy only necessary assets: FeatBit logo, brand SVGs, upload sample JSON, `env.template.js`, required Monaco assets, and irreplaceable business-specific icons. Do not copy the old Angular login background.
+- Copy only necessary assets: FeatBit logo, brand SVGs, upload sample JSON, `env.template.js`, and irreplaceable business-specific icons. Do not copy Monaco assets. Do not copy the old Angular login background.
 - Do not migrate legacy assets that only existed to support ng-zorro/Angular styling.
 
 ## UI/UX Direction
@@ -50,6 +50,7 @@ The React version should not be a 1:1 clone of the Angular UI. It should be rede
 - Base components: Build `PageShell`, `PageHeader`, `ContextBar`, `SidebarNav`, `DataToolbar`, `DataTable`, `StatusBadge`, `CopyableCode`, `EnvironmentBadge`, `ConfirmAction`, `EntityDrawer`, `EmptyState`, `PendingChangesDrawer`, `RuleBuilder`, and `ResourceSelector`.
 - Data visualization: Use Recharts + shadcn/chart-style wrappers such as `ChartContainer`, `ChartTooltip`, and `ChartLegend`. Do not migrate the G2 dependency. Experiments, insights, and trend pages should primarily use clean line/bar/area/composed charts that align with shadcn tokens and light/dark variables.
 - Code display: Do not migrate Prism. SDK examples, JSON snippets, curl commands, and similar content should use a unified `CodeBlock` component with copy, language label, line wrap, and light/dark tokens. Use Shiki for multi-language or complex highlighting; simple short snippets can use a lightweight custom tokenizer/styles.
+- Structured editing: Use CodeMirror 6 as the only embedded editor. Do not include Monaco Editor in the React implementation. Existing Angular Monaco use cases are limited to feature flag variation editing/viewing, webhook payload template editing, formatting, read-only mode, JSON/template validation, and simple `@@flag.name` / `@@flag.description` completions; these should be implemented with CodeMirror extensions plus project-side formatters and validators.
 - Interaction principles: Avoid placing every operation directly in tables. Show high-frequency primary actions directly, and move low-frequency or dangerous actions into more menus or confirmation flows. Risky actions such as save, approval, and scheduling must remain visible and have clear state.
 
 ## Integration Testing With Testcontainers

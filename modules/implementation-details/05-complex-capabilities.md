@@ -21,18 +21,23 @@ Migrate complex shared product capabilities that cut across multiple feature dom
 
 - Build a structured IAM policy editor instead of free-form JSON only.
 - Include resource finder, action picker, effect selection, validation, and preview.
-- Keep JSON view/export if the current product needs it, using Monaco or `CodeBlock` as appropriate.
+- Keep JSON view/export if the current product needs it, using the shared CodeMirror 6 structured editor for editing and `CodeBlock` for read-only snippets.
 
 ## Resource Editor And Finder
 
 - Implement reusable `ResourceSelector` and resource finder components for IAM, audit logs, and policy editing.
 - Support search, type filtering, keyboard navigation, and copyable resource identifiers.
 
-## Monaco JSON Editor
+## Structured Editor
 
-- Use Monaco only where actual structured JSON editing is required.
-- Lazy-load Monaco so it does not increase the initial bundle unnecessarily.
-- Provide validation, formatting, copy, reset, and read-only modes.
+- Use CodeMirror 6 as the only embedded editor in the React implementation.
+- Do not include Monaco Editor, `@monaco-editor/react`, Monaco workers, or copied Monaco assets.
+- Cover the current Angular Monaco use cases with CodeMirror extensions:
+  - feature flag JSON/string variation editing and read-only viewing
+  - webhook JSON Handlebars payload template editing
+  - formatting, copy, reset, read-only mode, validation, and accessible keyboard behavior
+  - `@@flag.name` and `@@flag.description` completions in webhook payload templates
+- Keep validation and formatting project-owned where possible, using JSON parsing, Handlebars test payload rendering, Zod schemas, or lightweight helper functions rather than depending on Monaco language services.
 
 ## Code Blocks
 
