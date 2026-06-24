@@ -1,5 +1,6 @@
 using Application.ExperimentStats;
 using Domain.ReleaseDecisions;
+using Domain.Targeting;
 using MongoDB.Driver;
 
 namespace Infrastructure.Services.MongoDb;
@@ -20,7 +21,9 @@ public class ReleaseDecisionExperimentStatsService(MongoDbClient mongoDb) : IExp
             .SortBy(x => x.ExposedAt)
             .ToListAsync();
 
-        var firstEvaluations = exposureDocs
+        var scopedExposureDocs = ApplyTrafficScope(request, exposureDocs);
+
+        var firstEvaluations = scopedExposureDocs
             .Where(x => !string.IsNullOrWhiteSpace(x.UserKey) && !string.IsNullOrWhiteSpace(x.VariationId))
             .GroupBy(x => x.UserKey)
             .Select(x => x.First())
@@ -98,6 +101,35 @@ public class ReleaseDecisionExperimentStatsService(MongoDbClient mongoDb) : IExp
             },
             Variants = variants
         };
+    }
+
+    private static IEnumerable<ReleaseDecisionExposureEvent> ApplyTrafficScope(
+        QueryExperimentStats request,
+        IEnumerable<ReleaseDecisionExposureEvent> exposures)
+    {
+        var (enabled, start, end, scopeKey) = GetTrafficScope(request);
+        if (!enabled)
+        {
+            return exposures;
+        }
+
+        return exposures.Where(x =>
+        {
+            var rollout = DispatchAlgorithm.RolloutOfKey($"{scopeKey}:{x.UserKey}");
+            return rollout >= start && rollout < end;
+        });
+    }
+
+    private static (bool Enabled, double Start, double End, string ScopeKey) GetTrafficScope(QueryExperimentStats request)
+    {
+        var percent = Math.Clamp(request.TrafficPercent ?? 100, 1, 100);
+        var offset = Math.Clamp(request.TrafficOffset ?? 0, 0, 99);
+        var start = offset / 100d;
+        var end = Math.Min(100, offset + percent) / 100d;
+        var enabled = offset > 0 || percent < 100;
+        var scopeKey = string.IsNullOrWhiteSpace(request.LayerId) ? request.FlagKey : request.LayerId.Trim();
+
+        return (enabled, start, end, scopeKey);
     }
 
     private static double GetContribution(string metricType, string metricAgg, UserTotal? userTotal)

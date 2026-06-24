@@ -11,14 +11,16 @@ public class ReleaseDecisionExperimentStatsService(AppDbContext dbContext) : IEx
         var start = ToUnspecifiedUtcDateTime(DateOnly.ParseExact(request.StartDate, "yyyy-MM-dd"));
         var end = ToUnspecifiedUtcDateTime(DateOnly.ParseExact(request.EndDate, "yyyy-MM-dd").AddDays(1));
         var contribution = GetUserContributionExpression(request.MetricType, request.MetricAgg);
+        var trafficScope = GetTrafficScope(request);
 
         var sql = $"""
-            WITH first_eval AS MATERIALIZED
+            WITH exposure_source AS MATERIALIZED
             (
-                SELECT DISTINCT ON (user_key)
+                SELECT
                     user_key,
-                    variation_id AS variant,
-                    exposed_at AS exposure_ts
+                    variation_id,
+                    exposed_at,
+                    decode(md5(@TrafficScopeKey || ':' || user_key), 'hex') AS traffic_hash
                 FROM release_decision_exposure_events
                 WHERE env_id = @EnvId
                   AND flag_key = @FlagKey
@@ -26,6 +28,39 @@ public class ReleaseDecisionExperimentStatsService(AppDbContext dbContext) : IEx
                   AND exposed_at < @EndTime
                   AND user_key IS NOT NULL
                   AND variation_id IS NOT NULL
+            ),
+            scoped_exposure AS MATERIALIZED
+            (
+                SELECT
+                    user_key,
+                    variation_id,
+                    exposed_at
+                FROM exposure_source
+                WHERE @ApplyTrafficScope = false
+                   OR (
+                        abs((
+                            get_byte(traffic_hash, 0)::bigint +
+                            get_byte(traffic_hash, 1)::bigint * 256 +
+                            get_byte(traffic_hash, 2)::bigint * 65536 +
+                            get_byte(traffic_hash, 3)::bigint * 16777216 -
+                            CASE WHEN get_byte(traffic_hash, 3) >= 128 THEN 4294967296 ELSE 0 END
+                        )::double precision / -2147483648.0) >= @TrafficBucketStart
+                    AND abs((
+                            get_byte(traffic_hash, 0)::bigint +
+                            get_byte(traffic_hash, 1)::bigint * 256 +
+                            get_byte(traffic_hash, 2)::bigint * 65536 +
+                            get_byte(traffic_hash, 3)::bigint * 16777216 -
+                            CASE WHEN get_byte(traffic_hash, 3) >= 128 THEN 4294967296 ELSE 0 END
+                        )::double precision / -2147483648.0) < @TrafficBucketEnd
+                   )
+            ),
+            first_eval AS MATERIALIZED
+            (
+                SELECT DISTINCT ON (user_key)
+                    user_key,
+                    variation_id AS variant,
+                    exposed_at AS exposure_ts
+                FROM scoped_exposure
                 ORDER BY user_key, exposed_at
             ),
             metric_source AS MATERIALIZED
@@ -81,7 +116,11 @@ public class ReleaseDecisionExperimentStatsService(AppDbContext dbContext) : IEx
                 request.FlagKey,
                 request.MetricEvent,
                 StartTime = start,
-                EndTime = end
+                EndTime = end,
+                trafficScope.ApplyTrafficScope,
+                trafficScope.TrafficScopeKey,
+                trafficScope.TrafficBucketStart,
+                trafficScope.TrafficBucketEnd
             })).ToArray();
 
         foreach (var row in rows)
@@ -118,8 +157,25 @@ public class ReleaseDecisionExperimentStatsService(AppDbContext dbContext) : IEx
         };
     }
 
+    private static TrafficScope GetTrafficScope(QueryExperimentStats request)
+    {
+        var percent = Math.Clamp(request.TrafficPercent ?? 100, 1, 100);
+        var offset = Math.Clamp(request.TrafficOffset ?? 0, 0, 99);
+        var start = offset / 100d;
+        var end = Math.Min(100, offset + percent) / 100d;
+        var scopeKey = string.IsNullOrWhiteSpace(request.LayerId) ? request.FlagKey : request.LayerId.Trim();
+
+        return new TrafficScope(offset > 0 || percent < 100, scopeKey, start, end);
+    }
+
     private static DateTime ToUnspecifiedUtcDateTime(DateOnly date)
     {
         return DateTime.SpecifyKind(date.ToDateTime(TimeOnly.MinValue), DateTimeKind.Unspecified);
     }
+
+    private sealed record TrafficScope(
+        bool ApplyTrafficScope,
+        string TrafficScopeKey,
+        double TrafficBucketStart,
+        double TrafficBucketEnd);
 }

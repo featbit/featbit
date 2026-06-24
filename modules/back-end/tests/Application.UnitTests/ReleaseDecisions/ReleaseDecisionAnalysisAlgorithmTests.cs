@@ -213,6 +213,43 @@ public class ReleaseDecisionAnalysisAlgorithmTests
         Assert.True(treatment.GetProperty("recommended_weight").GetDouble() > 0.49);
     }
 
+    [Fact]
+    public async Task AnalyzeRun_passes_run_traffic_scope_to_stats_query()
+    {
+        var stats = new FixedExperimentStatsService(new ExperimentStatsVm
+        {
+            EnvId = EnvId,
+            FlagKey = "checkout-flow",
+            MetricEvent = "purchase",
+            Window = new ExperimentStatsWindowVm { Start = "2026-01-01", End = "2026-01-02" },
+            Variants =
+            [
+                Variant("control", users: 20, conversions: 8, sumValue: 8, sumSquares: 8),
+                Variant("treatment", users: 20, conversions: 10, sumValue: 10, sumSquares: 10)
+            ]
+        });
+        await using var db = CreateDbContext();
+        await SeedExperimentAsync(
+            db,
+            method: "bayesian_ab",
+            metricType: "binary",
+            metricAgg: "once",
+            trafficPercent: 20,
+            trafficOffset: 10,
+            layerId: "checkout-layer");
+
+        await CreateService(db, stats).AnalyzeRunAsync(
+            EnvId,
+            ExperimentId,
+            RunId,
+            new ReleaseDecisionExperimentRunAnalyzeRequest());
+
+        var request = Assert.Single(stats.Requests);
+        Assert.Equal(20, request.TrafficPercent);
+        Assert.Equal(10, request.TrafficOffset);
+        Assert.Equal("checkout-layer", request.LayerId);
+    }
+
     private static ReleaseDecisionExperimentService CreateService(
         AppDbContext db,
         IExperimentStatsService stats)
@@ -241,7 +278,10 @@ public class ReleaseDecisionAnalysisAlgorithmTests
         string metricAgg,
         string metricEvent = "purchase",
         string controlVariant = "control",
-        string treatmentVariant = "treatment")
+        string treatmentVariant = "treatment",
+        double? trafficPercent = null,
+        int? trafficOffset = null,
+        string? layerId = null)
     {
         var experiment = new ReleaseDecisionExperiment
         {
@@ -268,6 +308,9 @@ public class ReleaseDecisionAnalysisAlgorithmTests
             PrimaryMetricAgg = metricAgg,
             ControlVariant = controlVariant,
             TreatmentVariant = treatmentVariant,
+            TrafficPercent = trafficPercent,
+            TrafficOffset = trafficOffset,
+            LayerId = layerId,
             ObservationStart = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
             ObservationEnd = new DateTime(2026, 1, 2, 0, 0, 0, DateTimeKind.Utc),
             CreatedAt = DateTime.UtcNow,
@@ -300,8 +343,11 @@ public class ReleaseDecisionAnalysisAlgorithmTests
 
     private sealed class FixedExperimentStatsService(ExperimentStatsVm stats) : IExperimentStatsService
     {
+        public List<QueryExperimentStats> Requests { get; } = [];
+
         public Task<ExperimentStatsVm> QueryAsync(QueryExperimentStats request)
         {
+            Requests.Add(request);
             return Task.FromResult(new ExperimentStatsVm
             {
                 EnvId = request.EnvId,

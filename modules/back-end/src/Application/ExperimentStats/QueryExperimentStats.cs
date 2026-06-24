@@ -11,6 +11,9 @@ public class QueryExperimentStats : IRequest<ExperimentStatsVm>
     public string EndDate { get; set; }
     public string MetricType { get; set; }
     public string MetricAgg { get; set; }
+    public double? TrafficPercent { get; set; }
+    public int? TrafficOffset { get; set; }
+    public string LayerId { get; set; }
 }
 
 public class QueryExperimentStatsValidator : AbstractValidator<QueryExperimentStats>
@@ -46,6 +49,14 @@ public class QueryExperimentStatsValidator : AbstractValidator<QueryExperimentSt
         RuleFor(x => x.MetricAgg)
             .NotEmpty().WithErrorCode(ErrorCodes.Required("metricAgg"))
             .Must(x => MetricAggs.Contains(x)).WithErrorCode(ErrorCodes.Invalid("metricAgg"));
+
+        RuleFor(x => x.TrafficPercent)
+            .InclusiveBetween(1, 100).WithErrorCode(ErrorCodes.Invalid("trafficPercent"))
+            .When(x => x.TrafficPercent.HasValue);
+
+        RuleFor(x => x.TrafficOffset)
+            .InclusiveBetween(0, 99).WithErrorCode(ErrorCodes.Invalid("trafficOffset"))
+            .When(x => x.TrafficOffset.HasValue);
     }
 
     private static bool BeDateOnly(string value)

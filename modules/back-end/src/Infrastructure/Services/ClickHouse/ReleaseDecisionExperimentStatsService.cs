@@ -10,6 +10,13 @@ public class ReleaseDecisionExperimentStatsService(ClickHouseClient clickHouse) 
         var start = DateOnly.ParseExact(request.StartDate, "yyyy-MM-dd").ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
         var end = DateOnly.ParseExact(request.EndDate, "yyyy-MM-dd").AddDays(1).ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
         var contribution = GetUserContributionExpression(request.MetricType, request.MetricAgg);
+        var trafficScope = GetTrafficScope(request);
+        var trafficFilter = trafficScope.ApplyTrafficScope
+            ? $"""
+                  AND abs(toFloat64(reinterpretAsInt32(substring(MD5(concat({ClickHouseSql.String(trafficScope.TrafficScopeKey)}, ':', user_key)), 1, 4))) / -2147483648.0) >= {trafficScope.TrafficBucketStart.ToString(System.Globalization.CultureInfo.InvariantCulture)}
+                  AND abs(toFloat64(reinterpretAsInt32(substring(MD5(concat({ClickHouseSql.String(trafficScope.TrafficScopeKey)}, ':', user_key)), 1, 4))) / -2147483648.0) < {trafficScope.TrafficBucketEnd.ToString(System.Globalization.CultureInfo.InvariantCulture)}
+              """
+            : string.Empty;
 
         var sql = $"""
             WITH first_eval AS
@@ -25,6 +32,7 @@ public class ReleaseDecisionExperimentStatsService(ClickHouseClient clickHouse) 
                   AND exposed_at < {ClickHouseSql.DateTime64(end)}
                   AND notEmpty(user_key)
                   AND notEmpty(variation_id)
+                  {trafficFilter}
                 GROUP BY user_key
             ),
             metric_source AS
@@ -107,4 +115,21 @@ public class ReleaseDecisionExperimentStatsService(ClickHouseClient clickHouse) 
             _ => throw new ArgumentException($"Unsupported metric aggregation: {metricAgg}", nameof(metricAgg))
         };
     }
+
+    private static TrafficScope GetTrafficScope(QueryExperimentStats request)
+    {
+        var percent = Math.Clamp(request.TrafficPercent ?? 100, 1, 100);
+        var offset = Math.Clamp(request.TrafficOffset ?? 0, 0, 99);
+        var start = offset / 100d;
+        var end = Math.Min(100, offset + percent) / 100d;
+        var scopeKey = string.IsNullOrWhiteSpace(request.LayerId) ? request.FlagKey : request.LayerId.Trim();
+
+        return new TrafficScope(offset > 0 || percent < 100, scopeKey, start, end);
+    }
+
+    private sealed record TrafficScope(
+        bool ApplyTrafficScope,
+        string TrafficScopeKey,
+        double TrafficBucketStart,
+        double TrafficBucketEnd);
 }

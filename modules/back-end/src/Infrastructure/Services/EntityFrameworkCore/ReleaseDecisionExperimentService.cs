@@ -383,7 +383,10 @@ public class ReleaseDecisionExperimentService(
             StartDate = startDate,
             EndDate = endDate,
             MetricType = metricType,
-            MetricAgg = metricAgg
+            MetricAgg = metricAgg,
+            TrafficPercent = run.TrafficPercent,
+            TrafficOffset = run.TrafficOffset,
+            LayerId = run.LayerId
         });
 
         var variants = stats.Variants?.ToArray() ?? [];
@@ -410,7 +413,10 @@ public class ReleaseDecisionExperimentService(
                 StartDate = startDate,
                 EndDate = endDate,
                 MetricType = guardrail.MetricType,
-                MetricAgg = guardrail.MetricAgg
+                MetricAgg = guardrail.MetricAgg,
+                TrafficPercent = run.TrafficPercent,
+                TrafficOffset = run.TrafficOffset,
+                LayerId = run.LayerId
             });
 
             var guardrailData = BuildMetricData(

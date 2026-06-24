@@ -42,6 +42,41 @@ public sealed class ReleaseDecisionProviderParityTests(ReleaseDecisionProviderPa
     }
 
     [Fact]
+    public async Task Experiment_stats_apply_traffic_scope_consistently_across_providers()
+    {
+        await fixture.SeedScenarioAsync();
+
+        var request = new QueryExperimentStats
+        {
+            EnvId = ReleaseDecisionProviderParityFixture.EnvId,
+            FlagKey = ReleaseDecisionProviderParityFixture.FlagKey,
+            MetricEvent = ReleaseDecisionProviderParityFixture.MetricEvent,
+            StartDate = "2026-01-01",
+            EndDate = "2026-01-02",
+            MetricType = "binary",
+            MetricAgg = "once",
+            TrafficPercent = 20,
+            TrafficOffset = 0,
+            LayerId = "checkout-layer"
+        };
+
+        var results = new List<(string Provider, ExperimentStatsVm Stats)>();
+        foreach (var (provider, service) in fixture.CreateExperimentStatsServices())
+        {
+            results.Add((provider, await service.QueryAsync(request)));
+        }
+
+        var expected = Normalize(results[0].Stats);
+        var scopedUsers = expected.Variants.Sum(x => x.Users);
+        Assert.InRange(scopedUsers, 1, 1_499);
+
+        foreach (var result in results.Skip(1))
+        {
+            AssertStatsEqual(results[0].Provider, expected, result.Provider, Normalize(result.Stats));
+        }
+    }
+
+    [Fact]
     public async Task Feature_flag_insight_buckets_are_consistent_across_providers()
     {
         await fixture.SeedScenarioAsync();
