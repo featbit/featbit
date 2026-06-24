@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Application.Caches;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Caches.Redis;
 
@@ -10,6 +11,7 @@ public class RedisPopulatingService(
     IFeatureFlagService flagService,
     ISegmentService segmentService,
     IEnvironmentService envService,
+    IOptions<RedisOptions> redisOptions,
     ILogger<RedisPopulatingService> logger)
     : ICachePopulatingService
 {
@@ -20,36 +22,82 @@ public class RedisPopulatingService(
     {
         var redis = redisClient.GetDatabase();
 
-        var isPopulated = await redis.StringGetAsync(IsPopulatedKey) == "true";
-        if (isPopulated)
-        {
-            logger.LogInformation("Redis has been populated before, ignore run again");
-            return;
-        }
+        var lockTtl = TimeSpan.FromSeconds(redisOptions.Value.PopulateLockTtlSeconds);
+        var pollInterval = TimeSpan.FromSeconds(2);
+        var maxWait = TimeSpan.FromSeconds(redisOptions.Value.PopulateMaxWaitSeconds);
+        var waitStopwatch = Stopwatch.StartNew();
 
-        var lockValue = Guid.NewGuid().ToString();
-        if (await redis.LockTakeAsync(PopulateLockKey, lockValue, TimeSpan.FromSeconds(5)))
+        while (true)
         {
-            logger.LogInformation("Start to populate redis.");
-            var stopWatch = Stopwatch.StartNew();
-            try
+            // Cheap path: marker already set by a prior instance, nothing to do.
+            if (await redis.StringGetAsync(IsPopulatedKey) == "true")
             {
-                await PopulateFlagsAsync();
-                await PopulateSegmentAsync();
-                await PopulateSecretsAsync();
+                logger.LogInformation("Redis has been populated before, ignore run again");
+                return;
+            }
 
-                // mark redis as populated
-                await redis.StringSetAsync(IsPopulatedKey, "true");
-            }
-            catch (Exception ex)
+            var lockValue = Guid.NewGuid().ToString();
+            if (await redis.LockTakeAsync(PopulateLockKey, lockValue, lockTtl))
             {
-                logger.LogError(ex, "Exception occurred while populating redis");
+                try
+                {
+                    // Re-check the marker inside the lock. Closes the race where another
+                    // instance finished writing the marker between our StringGet above and our
+                    // LockTake. Without this we'd run a redundant populate immediately after
+                    // the previous instance just completed one.
+                    if (await redis.StringGetAsync(IsPopulatedKey) == "true")
+                    {
+                        logger.LogInformation(
+                            "Redis populated by another instance while we waited for the lock");
+                        return;
+                    }
+
+                    logger.LogInformation(
+                        "Start to populate redis. Lock TTL: {LockTtlSeconds}s.",
+                        lockTtl.TotalSeconds);
+                    var populateStopwatch = Stopwatch.StartNew();
+                    try
+                    {
+                        await PopulateFlagsAsync();
+                        await PopulateSegmentAsync();
+                        await PopulateSecretsAsync();
+
+                        // mark redis as populated
+                        await redis.StringSetAsync(IsPopulatedKey, "true");
+                    }
+                    finally
+                    {
+                        logger.LogInformation(
+                            "Populate redis finished in {Elapsed} ms.",
+                            populateStopwatch.ElapsedMilliseconds);
+                    }
+                }
+                finally
+                {
+                    await redis.LockReleaseAsync(PopulateLockKey, lockValue);
+                }
+
+                return;
             }
-            finally
+
+            // Another instance holds the lock. Wait and retry both the marker and the lock
+            // take. Instances that arrive while a populate is in progress used to silently
+            // no-op here and start serving against a partially-populated Redis. Looping
+            // prevents that.
+            if (waitStopwatch.Elapsed > maxWait)
             {
-                logger.LogInformation("Populate redis finished in {Elapsed} ms.", stopWatch.ElapsedMilliseconds);
-                await redis.LockReleaseAsync(PopulateLockKey, lockValue);
+                throw new InvalidOperationException(
+                    $"Timed out waiting for another instance to finish populating Redis " +
+                    $"after {maxWait.TotalSeconds} seconds. This instance will not start. " +
+                    $"Investigate whether the populating instance is stuck or crashed.");
             }
+
+            logger.LogInformation(
+                "Another instance is populating Redis. Waiting {PollIntervalSeconds}s before " +
+                "re-checking (elapsed: {ElapsedSeconds:F0}s).",
+                pollInterval.TotalSeconds, waitStopwatch.Elapsed.TotalSeconds);
+
+            await Task.Delay(pollInterval);
         }
     }
 

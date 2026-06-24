@@ -27,7 +27,12 @@ public class CachePopulatingHostedService : IHostedService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Exception occurred when populating cache.");
+            // Re-throw so the host fails to start. Previously we logged-and-swallowed, which
+            // let the API serve traffic against an empty or partially populated cache.
+            // Failing fast surfaces the problem and lets the orchestrator (Kubernetes,
+            // systemd, Docker, etc.) drive recovery via its restart policy.
+            _logger.LogCritical(ex, "Exception occurred when populating cache. Host will not start.");
+            throw;
         }
     }
 
