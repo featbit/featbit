@@ -24,8 +24,7 @@ benchmark/k6-scripts/test-results/
 
 # Ignore local customer success drafts
 /customer-success/
-/tools/README.md
-/tools/seed-release-decision-insights.cs
+/tools/
 
 # AGENTS skills
 .agent/skills/
