@@ -7,7 +7,7 @@ Create a standalone React front-end in `D:\Workspace\FeatBit\featbit\modules\fro
 ## Key Changes
 
 - Foundation: Vite + React + TypeScript + React Router SPA. Do not use SSR, React Router full-stack mode, Next.js, or Remix.
-- UI stack: Use shadcn/ui + Radix primitives + Tailwind CSS. Buttons, text colors, spacing, border radius, focus rings, and other base visuals should follow shadcn/Tailwind default tokens as much as possible instead of copying Angular/ng-zorro styles. Prefer `lucide-react` for icons. Use TanStack Table for tables, React Hook Form + Zod for forms, TanStack Query for server state, Recharts for charts, CodeMirror 6 for lightweight structured editing, and Shiki for code highlighting. For simple cases, wrap snippets in a lightweight `CodeBlock`.
+- UI stack: Use shadcn/ui + Radix primitives + Tailwind CSS. Buttons, text colors, spacing, border radius, focus rings, and other base visuals should follow shadcn/Tailwind default tokens as much as possible instead of copying Angular/ng-zorro styles. Prefer `lucide-react` for icons. Use TanStack Table for tables, React Hook Form + Zod for forms, TanStack Query for server state, Recharts for charts, CodeMirror 6 for lightweight structured editing, and Shiki for code highlighting. For simple cases, wrap snippets in a lightweight `CodeBlock`. Support both light and dark themes from the start using shadcn's native dark-mode pattern.
 - i18n: Use `react-i18next`, while preserving the `/en/*` and `/zh/*` URL structure, browser-language default redirect, and language switching.
 - API layer: Implement a typed API client that preserves the existing backend contract, automatically unwraps `IResponse.data`, supports the 401 refresh-token queue, shows error toasts, clears local state on session expiration, and redirects to `/login`.
 - Runtime configuration: Preserve the `assets/env.template.js` / `assets/env.js` mechanism and continue supporting `API_URL`, `DEMO_URL`, `EVALUATION_URL`, `DISPLAY_API_URL`, `DISPLAY_EVALUATION_URL`, and `HOSTING_MODE`.
@@ -16,9 +16,9 @@ Create a standalone React front-end in `D:\Workspace\FeatBit\featbit\modules\fro
 
 ## Implementation Plan
 
-1. Scaffold the `front-end-react` project with Vite, TypeScript aliases, Tailwind, shadcn/ui, React Router, TanStack Query, react-i18next, and lint/test/build scripts. See [implementation detail 01](implementation-details/01-scaffold-front-end-react.md).
+1. Scaffold the `front-end-react` project with Vite, TypeScript aliases, Tailwind, shadcn/ui, React Router, TanStack Query, react-i18next, theme provider, and lint/test/build scripts. See [implementation detail 01](implementation-details/01-scaffold-front-end-react.md).
 2. Build core infrastructure: env loader, API client, auth/session store, workspace/org/project/env store, permission/license helpers, and base toast/dialog/drawer/table/form components. See [implementation detail 02](implementation-details/02-core-infrastructure.md).
-3. Migrate the shell: login, auth guard, secure-area layout, side menu, header, locale switcher, and workspace/org/project/env switching. See [implementation detail 03](implementation-details/03-shell-and-navigation.md).
+3. Migrate the shell: login, auth guard, secure-area layout, side menu, header, theme switcher, locale switcher, and workspace/org/project/env switching. See [implementation detail 03](implementation-details/03-shell-and-navigation.md).
 4. Migrate feature domains page by page: feature flags, users, segments, experiments, audit logs, workspace, organization, relay proxies, IAM, and integrations. See [implementation detail 04](implementation-details/04-feature-domain-pages.md).
 5. Migrate complex capabilities: feature flag targeting/rules, change review/pending changes, policy editor, resource editor/finder, lightweight JSON editor, Shiki/lightweight CodeBlock, and Recharts charting. See [implementation detail 05](implementation-details/05-complex-capabilities.md).
 6. Migrate i18n copy: extract English/Chinese resources from Angular templates and `messages.zh.xlf`, then organize them as react-i18next JSON namespaces. See [implementation detail 06](implementation-details/06-i18n-migration.md).
@@ -33,13 +33,15 @@ Create a standalone React front-end in `D:\Workspace\FeatBit\featbit\modules\fro
 
 ## UI/UX Direction
 
-The React version should not be a 1:1 clone of the Angular UI. It should be redesigned as a more modern FeatBit Console that better fits feature management workflows. The overall style should emphasize clear context, low-noise density, visible risk/status, and a rule editor that feels like a focused workbench.
+The React version should not be a 1:1 clone of the Angular UI or reuse the Angular color scheme. It should be redesigned as a more modern FeatBit Console that better fits feature management workflows. The overall style should emphasize clear context, low-noise density, visible risk/status, a rule editor that feels like a focused workbench, and first-class light/dark theme support.
 
-- Visual language: Use a light theme, a low-saturation gray page background, and white work surfaces. Keep FeatBit green for primary actions and healthy states, but avoid large areas of solid brand color.
-- Status system: Use green for on/healthy, amber for draft/pending, slate for off/archived, red for danger/expired, and blue or violet for experiment/insight.
+- Visual language: Support light and dark themes with the same information hierarchy. Prefer shadcn's default neutral palette and semantic variables for the overall product surface so future palette changes are easy. Do not carry over Angular-era greens, grays, or ng-zorro-inspired colors as the React default. FeatBit brand color should appear mainly in the logo and rare brand accents, not as the default primary/action system.
+- Theme system: Use shadcn's native dark-mode setup for Vite: Tailwind `darkMode: ["class"]`, shadcn CSS variables, the standard `ThemeProvider` / `useTheme` pattern, and shadcn component tokens such as `bg-background`, `text-foreground`, `border-border`, `bg-card`, `text-muted-foreground`, `bg-popover`, `text-primary`, `text-destructive`, and `ring-ring`. Do not build a parallel theme system.
+- Theme behavior: Provide the shadcn-style `ThemeProvider` with `light`, `dark`, and `system` modes, persist the user's preference in local storage, and default to `system` for new users. Add a compact theme switcher to the authenticated shell and keep the login page theme-aware.
+- Status system: Start with shadcn-compatible semantic variants and neutral styling instead of hard-coding a custom color taxonomy. Use `default`, `secondary`, `outline`, and `destructive` badge/button patterns where possible. Add small, documented status tokens only when the product meaning cannot be expressed clearly with shadcn defaults.
 - Layout: Use a left product navigation, a top global context bar, a page title area, a toolbar, and the main workspace. Organization, Project, Environment, Plan, and User context should remain visible at the top.
 - Navigation grouping: Release contains Feature Flags, Segments, and End Users. Experimentation contains Experiments and Metrics. Governance contains Audit Logs and future Change Requests. Admin contains Workspace, Organization, IAM, Relay Proxies, and Integrations. IAM, Relay Proxies, and Integrations should not be placed under a group named Workspace because they are closer to admin/governance areas than plain workspace settings.
-- Base styling: Prefer shadcn/ui default variants for buttons, forms, menus, popovers, dialogs, tooltips, and badges. Only extend tokens for FeatBit brand color, status colors, and business information hierarchy; avoid reproducing Angular text colors and control styles one by one.
+- Base styling: Prefer shadcn/ui default variants for buttons, forms, menus, popovers, dialogs, tooltips, badges, tables, and cards. Extend shadcn CSS variables sparingly and only when a product-specific semantic need is proven. Avoid reproducing Angular text colors, primary colors, status colors, and control styles one by one.
 - Get Started: Do not keep it as the first long-term primary navigation item. Migrate it into a dashboard/onboarding checklist that can be hidden or de-emphasized after completion.
 - Feature Flags list: Provide page summary, environment status, search, and Status/Tags/Type/Archived filters. Display flag keys as copyable code pills in the table, collapse row operations into an action menu, and show a bulk action bar when rows are selected.
 - Feature Flag detail: Use a sticky flag header that always shows flag on/off, key, tags, pending changes, Save, Review/Schedule/Change Request. Use clear tabs for Targeting, Triggers, Experimentation, Insights, History, and Settings.
@@ -69,10 +71,10 @@ Use Testcontainers for real-environment integration coverage. The current FeatBi
 ## Test Plan
 
 - Unit tests: API client unwrapping/error handling, concurrent 401 refresh, localStorage key compatibility, permission checks, validators, and feature flag rule utilities.
-- Component tests: login, header switchers, menu permission visibility, and core drawer/modal/form/table behavior.
-- E2E tests: use a fast mocked/API-contract mode for PR feedback and a Testcontainers real-stack mode for full management-console integration coverage. Scenarios include login, workspace selection, feature flag creation, targeting changes, segment creation, user filtering, IAM policy editing, webhook/access token management, and language switching.
+- Component tests: login, header switchers, theme switcher, menu permission visibility, and core drawer/modal/form/table behavior in both light and dark mode where visual state matters.
+- E2E tests: use a fast mocked/API-contract mode for PR feedback and a Testcontainers real-stack mode for full management-console integration coverage. Scenarios include login, workspace selection, feature flag creation, targeting changes, segment creation, user filtering, IAM policy editing, webhook/access token management, language switching, and theme switching/persistence.
 - Build checks: `npm run build`, Docker build, Nginx `/health`, `/en/*`, `/zh/*`, and `BASE_HREF` fallback.
-- Visual parity: Compare the key Angular pages where parity matters: login, feature flag detail, targeting, segments, experiments, IAM, and workspace settings.
+- Visual checks: Capture key React pages in both light and dark mode: login, feature flag detail, targeting, segments, experiments, IAM, and workspace settings. Use Angular only as a functional reference, not a visual constraint.
 
 ## Assumptions
 
