@@ -158,7 +158,9 @@ Use `-AuthMode bearer` if the target API expects a JWT-style bearer token:
 If the target deployment requires explicit workspace context, pass
 `-Organization <organization-id>` and `-Workspace <workspace-id>`. Access-token
 authentication usually derives these values automatically, but the runner can
-send them as headers when needed.
+send them as headers when needed. Segment creation also needs the organization
+resource key for UI-compatible scopes; pass `-OrganizationKey <organization-key>`
+when it is not the local default `playground`.
 
 The wrapper passes arguments to the single-file C# runner without printing the
 access token. For CI or lower-level debugging, the runner can still be invoked
@@ -178,12 +180,14 @@ dotnet run integration-tests\featbit-rest-api-e2e\featbit-rest-api-e2e.cs -- --h
 | `--streaming-url` | `FEATBIT_STREAMING_URL` | derived from `--event-url` | FeatBit SDK streaming URL. |
 | `--auth-mode` | `FEATBIT_AUTH_MODE` | `raw` | Use `raw` for OpenAPI token header or `bearer` for JWT bearer auth. |
 | `--organization` | `FEATBIT_ORGANIZATION` | empty | Optional `Organization` header. |
+| `--organization-key` | `FEATBIT_ORGANIZATION_KEY` | `playground` | Organization resource key used in generated segment scopes. |
 | `--workspace` | `FEATBIT_WORKSPACE` | empty | Optional `Workspace` header. |
 | `--project-key` | `FEATBIT_PROJECT_KEY` | empty | Use an existing tester-created project instead of creating one. Must be passed with `--env-id`. |
 | `--env-id` | `FEATBIT_ENV_ID` | empty | Use an existing tester-created environment. Must be passed with `--project-key`. |
 | `--users` | | `1500` | Synthetic users evaluated through the SDK. |
 | `--min-users-per-variant` | | `500` | Minimum observed users required for each experiment variant in primary and guardrail stats. |
-| `--batch-size` | | `100` | SDK event flush batch size. |
+| `--batch-size` | | `10` | SDK event flush batch size. |
+| `--seed-batch-delay-ms` | | `100` | Delay between release-decision seed batches after each SDK flush. |
 | `--post-sdk-wait-seconds` | | `8` | Wait after SDK flush before querying stats. |
 | `--cleanup` | | `false` | Delete the generated project at the end. Default keeps ids/keys for reuse. |
 | `--report-dir` | `FEATBIT_REPORT_DIR` | `integration-tests/featbit-rest-api-e2e/reports` | Markdown/JSON report output directory. |
@@ -199,14 +203,14 @@ dotnet run integration-tests\featbit-rest-api-e2e\featbit-rest-api-e2e.cs -- --h
 | --- | --- | --- |
 | 0 | Create project and env, record ids/keys/secrets | `POST /api/v1/projects`, `POST /api/v1/projects/{projectId}/envs`, `GET /api/v1/projects/{projectId}` |
 | 1 | Create 10 feature flags | `POST /api/v1/envs/{envId}/feature-flags`, `GET /api/v1/envs/{envId}/feature-flags/{key}` |
-| 2 | Mutate flags | `PUT /api/v1/envs/{envId}/feature-flags/{key}/toggle/{status}`, `/description`, `/tags`, `/variations`, `/targeting` |
-| 3 | Verify mutations | `GET /api/v1/envs/{envId}/feature-flags/{key}`, `GET /api/v1/envs/{envId}/segments/{segmentId}/flag-references` |
+| 2 | Create segment and mutate flags | `POST /api/v1/envs/{envId}/segments`, `PUT /api/v1/envs/{envId}/segments/{segmentId}/targeting`, `GET /api/v1/envs/{envId}/segments/{segmentId}`, `PUT /api/v1/envs/{envId}/feature-flags/{key}/toggle/{status}`, `/description`, `/tags`, `/variations`, `/targeting` |
+| 3 | Verify mutations and segment references | `GET /api/v1/envs/{envId}/feature-flags/{key}`, `GET /api/v1/envs/{envId}/segments/{segmentId}/flag-references` |
 | 4 | SDK evaluation and metric tracking | FeatBit.ServerSdk `BoolVariationDetail`, `StringVariationDetail`, `DoubleVariationDetail`, `Track`, `FlushAndWait`; SDK flushes events to `POST /api/public/insight/track` |
 | 5 | Create release-decision experiment | `POST /api/v1/envs/{envId}/release-decision/experiments`, `PUT /api/v1/envs/{envId}/release-decision/experiments/{id}` |
 | 6 | Configure primary/guardrail metrics | `PUT /api/v1/envs/{envId}/release-decision/experiments/{id}/metrics` |
 | 7 | Start run and seed evidence | `POST /api/v1/envs/{envId}/release-decision/experiments/{id}/runs`, SDK evaluation/Track, `POST /api/v1/envs/{envId}/experiment-stats/query`; verifies primary and guardrail evidence |
 | 8 | Analyze | `POST /api/v1/envs/{envId}/release-decision/experiments/{id}/runs/{runId}/analyze` |
-| 9 | Final verification | `GET /api/v1/envs/{envId}/release-decision/experiments/{id}`, `GET /api/v1/envs/{envId}/feature-flags/{key}`, `POST /api/v1/envs/{envId}/experiment-stats/query`; verifies the seeded treatment conversion rate is higher than control and all 10 flags retain their expected final enabled state, variants, rule condition, traffic/fallthrough split, experimentation targeting flags, and type |
+| 9 | Final verification | `GET /api/v1/envs/{envId}/release-decision/experiments/{id}`, `GET /api/v1/envs/{envId}/feature-flags/{key}`, `POST /api/v1/envs/{envId}/experiment-stats/query`; verifies the seeded treatment conversion rate is higher than control and all 10 flags retain their expected final enabled state, variants, rule state, traffic/fallthrough split, experimentation targeting flags, and type |
 
 The public SaaS OpenAPI schema currently lists project/env/flag/segment
 management endpoints. The release-decision endpoints are taken from this

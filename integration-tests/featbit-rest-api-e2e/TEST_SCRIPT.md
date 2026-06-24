@@ -114,6 +114,8 @@ Segment:
 | name | `E2E Segment {suffix}` |
 | key | `e2e-segment-{suffix}` |
 | type | `environment-specific` |
+| scope | `organization/{organizationKey}:project/{projectKey}:env/{envKey}` |
+| included users | `StableUserKey({suffix}, 0)`, `StableUserKey({suffix}, 1)`, and `StableUserKey({suffix}, 3)` |
 
 ## Feature Flag Catalog
 
@@ -139,9 +141,11 @@ This section defines the expected state after all mutations, SDK seeding, stats 
 | Field | Expected value |
 | --- | --- |
 | key | `e2e-segment-{suffix}` |
-| included users | `StableUserKey({suffix}, 0)` and `StableUserKey({suffix}, 1)` |
+| scope | `organization/{organizationKey}:project/{projectKey}:env/{envKey}` |
+| included users | `StableUserKey({suffix}, 0)`, `StableUserKey({suffix}, 1)`, and `StableUserKey({suffix}, 3)` |
 | excluded users | empty |
 | rules | empty |
+| references | All 9 non-experiment flags reference this segment; the release-decision experiment flag does not reference this segment |
 
 ### Feature Flag Final State
 
@@ -149,16 +153,16 @@ Dynamic variation IDs are generated at runtime. The table below names variations
 
 | No. | Key | Type | Final enabled | Final variants | Final rule | Final traffic / fallthrough | Experimentation |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | `rd-checkout-treatment-{suffix}` | `boolean` | `true` | `control=false`; `treatment=true` | `User is in segment IsOneOf [segmentId]` serves `treatment` at 100% | fallthrough `control` 50%, `treatment` 50%; `includedInExpt=true`; `exptIncludeAllTargets=true` | Bound to the release-decision experiment |
-| 2 | `rd-banner-copy-{suffix}` | `string` | `false` | `control-updated=control`; `candidate-1-updated=short`; `candidate-2-updated=direct`; `candidate-updated=candidate` | `plan Equal enterprise` serves first variation at 100% | fallthrough first variation 100%; `includedInExpt=true`; `exptIncludeAllTargets=true` | Not bound to release-decision |
-| 3 | `rd-price-multiplier-{suffix}` | `number` | `true` | `control-updated=1.0`; `candidate-1-updated=1.1`; `candidate-2-updated=1.2`; `candidate-updated=2.5` | `plan Equal enterprise` serves first variation at 100% | fallthrough first variation 100%; `includedInExpt=true`; `exptIncludeAllTargets=true` | Not bound to release-decision |
-| 4 | `rd-checkout-config-{suffix}` | `json` | `false` | `control-updated={"mode":"control","limit":5}`; `candidate-1-updated={"mode":"treatment","limit":10}`; `candidate-updated={"mode":"candidate","limit":15}` | `plan Equal enterprise` serves first variation at 100% | fallthrough first variation 100%; `includedInExpt=true`; `exptIncludeAllTargets=true` | Not bound to release-decision |
-| 5 | `rd-onboarding-flow-{suffix}` | `string` | `true` | `control-updated=classic`; `candidate-1-updated=guided`; `candidate-2-updated=compact`; `candidate-updated=candidate` | `plan Equal enterprise` serves first variation at 100% | fallthrough first variation 100%; `includedInExpt=true`; `exptIncludeAllTargets=true` | Not bound to release-decision |
-| 6 | `rd-risk-threshold-{suffix}` | `number` | `false` | `control-updated=10`; `candidate-1-updated=25`; `candidate-2-updated=50`; `candidate-updated=2.5` | `plan Equal enterprise` serves first variation at 100% | fallthrough first variation 100%; `includedInExpt=true`; `exptIncludeAllTargets=true` | Not bound to release-decision |
-| 7 | `rd-ai-assistant-route-{suffix}` | `string` | `true` | `control-updated=off`; `candidate-1-updated=gpt-4.1-mini`; `candidate-2-updated=gpt-4.1`; `candidate-updated=candidate` | `plan Equal enterprise` serves first variation at 100% | fallthrough first variation 100%; `includedInExpt=true`; `exptIncludeAllTargets=true` | Not bound to release-decision |
-| 8 | `rd-notification-style-{suffix}` | `string` | `false` | `control-updated=quiet`; `candidate-1-updated=badge`; `candidate-2-updated=toast`; `candidate-updated=candidate` | `plan Equal enterprise` serves first variation at 100% | fallthrough first variation 100%; `includedInExpt=true`; `exptIncludeAllTargets=true` | Not bound to release-decision |
-| 9 | `rd-search-ranking-{suffix}` | `string` | `true` | `control-updated=baseline`; `candidate-1-updated=semantic`; `candidate-2-updated=hybrid`; `candidate-updated=candidate` | `plan Equal enterprise` serves first variation at 100% | fallthrough first variation 100%; `includedInExpt=true`; `exptIncludeAllTargets=true` | Not bound to release-decision |
-| 10 | `rd-kill-switch-{suffix}` | `boolean` | `false` | `control-updated=false`; `treatment-updated=true` | `plan Equal enterprise` serves first variation at 100% | fallthrough first variation 100%; `includedInExpt=true`; `exptIncludeAllTargets=true` | Not bound to release-decision |
+| 1 | `rd-checkout-treatment-{suffix}` | `boolean` | `true` | `control=false`; `treatment=true` | No targeting rule | fallthrough `control` 50%, `treatment` 50%; `includedInExpt=true`; `exptIncludeAllTargets=true` | Bound to the release-decision experiment |
+| 2 | `rd-banner-copy-{suffix}` | `string` | `false` | `control-updated=control`; `candidate-1-updated=short`; `candidate-2-updated=direct`; `candidate-updated=candidate` | `User is in segment IsOneOf [segmentId]` serves first variation at 100% | fallthrough first variation 100%; `includedInExpt=true`; `exptIncludeAllTargets=true` | Not bound to release-decision |
+| 3 | `rd-price-multiplier-{suffix}` | `number` | `true` | `control-updated=1.0`; `candidate-1-updated=1.1`; `candidate-2-updated=1.2`; `candidate-updated=2.5` | `User is in segment IsOneOf [segmentId]` serves first variation at 100% | fallthrough first variation 100%; `includedInExpt=true`; `exptIncludeAllTargets=true` | Not bound to release-decision |
+| 4 | `rd-checkout-config-{suffix}` | `json` | `false` | `control-updated={"mode":"control","limit":5}`; `candidate-1-updated={"mode":"treatment","limit":10}`; `candidate-updated={"mode":"candidate","limit":15}` | `User is in segment IsOneOf [segmentId]` serves first variation at 100% | fallthrough first variation 100%; `includedInExpt=true`; `exptIncludeAllTargets=true` | Not bound to release-decision |
+| 5 | `rd-onboarding-flow-{suffix}` | `string` | `true` | `control-updated=classic`; `candidate-1-updated=guided`; `candidate-2-updated=compact`; `candidate-updated=candidate` | `User is in segment IsOneOf [segmentId]` serves first variation at 100% | fallthrough first variation 100%; `includedInExpt=true`; `exptIncludeAllTargets=true` | Not bound to release-decision |
+| 6 | `rd-risk-threshold-{suffix}` | `number` | `false` | `control-updated=10`; `candidate-1-updated=25`; `candidate-2-updated=50`; `candidate-updated=2.5` | `User is in segment IsOneOf [segmentId]` serves first variation at 100% | fallthrough first variation 100%; `includedInExpt=true`; `exptIncludeAllTargets=true` | Not bound to release-decision |
+| 7 | `rd-ai-assistant-route-{suffix}` | `string` | `true` | `control-updated=off`; `candidate-1-updated=gpt-4.1-mini`; `candidate-2-updated=gpt-4.1`; `candidate-updated=candidate` | `User is in segment IsOneOf [segmentId]` serves first variation at 100% | fallthrough first variation 100%; `includedInExpt=true`; `exptIncludeAllTargets=true` | Not bound to release-decision |
+| 8 | `rd-notification-style-{suffix}` | `string` | `false` | `control-updated=quiet`; `candidate-1-updated=badge`; `candidate-2-updated=toast`; `candidate-updated=candidate` | `User is in segment IsOneOf [segmentId]` serves first variation at 100% | fallthrough first variation 100%; `includedInExpt=true`; `exptIncludeAllTargets=true` | Not bound to release-decision |
+| 9 | `rd-search-ranking-{suffix}` | `string` | `true` | `control-updated=baseline`; `candidate-1-updated=semantic`; `candidate-2-updated=hybrid`; `candidate-updated=candidate` | `User is in segment IsOneOf [segmentId]` serves first variation at 100% | fallthrough first variation 100%; `includedInExpt=true`; `exptIncludeAllTargets=true` | Not bound to release-decision |
+| 10 | `rd-kill-switch-{suffix}` | `boolean` | `false` | `control-updated=false`; `treatment-updated=true` | `User is in segment IsOneOf [segmentId]` serves first variation at 100% | fallthrough first variation 100%; `includedInExpt=true`; `exptIncludeAllTargets=true` | Not bound to release-decision |
 
 ### Detailed Rule And Traffic Contracts
 
@@ -166,17 +170,17 @@ Dynamic variation IDs are discovered during the live run. The contract below def
 
 | Scope | Expected rule contract | Expected rule traffic | Expected fallthrough traffic | Experiment targeting flags |
 | --- | --- | --- | --- | --- |
-| Experiment flag `rd-checkout-treatment-{suffix}` | `rules[0].conditions[0].property = "User is in segment"`; `op = "IsOneOf"`; `value` contains `[segmentId]` | `rules[0].includedInExpt = true`; `rules[0].variations[0].id = treatmentVariationId`; `rollout = [0, 1]`; `exptRollout = 1` | `fallthrough.includedInExpt = true`; `fallthrough.variations[0].id = controlVariationId`; `rollout = [0, 0.5]`; `exptRollout = 0.5`; `fallthrough.variations[1].id = treatmentVariationId`; `rollout = [0.5, 1]`; `exptRollout = 0.5` | `exptIncludeAllTargets = true`; release-decision experiment `flagKey` equals this flag |
-| Every non-experiment flag | `rules[0].conditions[0].property = "plan"`; `op = "Equal"`; `value = "enterprise"` | `rules[0].includedInExpt = true`; `rules[0].variations[0].id = firstVariationId`; `rollout = [0, 1]`; `exptRollout = 1` | `fallthrough.includedInExpt = true`; one fallthrough variation using `firstVariationId`; `rollout = [0, 1]`; `exptRollout = 1` | `exptIncludeAllTargets = true`; not bound to the release-decision experiment |
+| Experiment flag `rd-checkout-treatment-{suffix}` | `rules = []` | No targeting-rule traffic; experiment assignment comes only from fallthrough | `fallthrough.includedInExpt = true`; `fallthrough.variations[0].id = controlVariationId`; `rollout = [0, 0.5]`; `exptRollout = 0.5`; `fallthrough.variations[1].id = treatmentVariationId`; `rollout = [0.5, 1]`; `exptRollout = 0.5` | `exptIncludeAllTargets = true`; release-decision experiment `flagKey` equals this flag |
+| Every non-experiment flag | `rules[0].conditions[0].property = "User is in segment"`; `op = "IsOneOf"`; `value` contains the real generated `[segmentId]` | `rules[0].includedInExpt = true`; `rules[0].variations[0].id = firstVariationId`; `rollout = [0, 1]`; `exptRollout = 1` | `fallthrough.includedInExpt = true`; one fallthrough variation using `firstVariationId`; `rollout = [0, 1]`; `exptRollout = 1` | `exptIncludeAllTargets = true`; not bound to the release-decision experiment |
 
 ### Detailed SDK, Insight, And Metric Data Contract
 
-Live runs use the configured `--users` synthetic-user seed budget and the configured `--min-users-per-variant` sample floor. The wrapper defaults are documented in README options, but this test script does not treat either value as an expected exact variant size. User keys are generated by `StableUserKey({suffix}, index)`. Synthetic user attributes are deterministic: `plan = "enterprise"` when `index % 3 == 0`, otherwise `plan = "free"`; `country = "US"` for even indexes and `"FR"` for odd indexes.
+Live runs use the configured `--users` synthetic-user seed budget and the configured `--min-users-per-variant` sample floor. The wrapper defaults are documented in README options, but this test script does not treat either value as an expected exact variant size. User keys are generated by `StableUserKey({suffix}, index)`. Synthetic user attributes are deterministic: `plan = "enterprise"` when `index % 3 == 0`, otherwise `plan = "free"`; `country = "US"` for even indexes and `"FR"` for odd indexes. Segment rule coverage uses the real generated segment, not the `plan` attribute.
 
 | Phase | Expected data |
 | --- | --- |
-| Pre-experiment SDK verification | Evaluate all 10 flags for users `StableUserKey({suffix}, 0)` and `StableUserKey({suffix}, 1)`, then evaluate all 9 non-experiment flags for `StableUserKey({suffix}, 3)`. Expected evaluation count is at least `29`. Segment users 0 and 1 must evaluate `rd-checkout-treatment-{suffix}` to `treatment=true`. User 3 must evaluate every non-experiment flag to the current first variation because `plan=enterprise`. |
-| Experiment evidence SDK seeding | Evaluate all 10 flags for every synthetic user. Expected logical evaluations are `configured --users * 10`. The SDK flushes evaluation and metric events to `POST /api/public/insight/track`. |
+| Pre-experiment SDK verification | Evaluate all 10 flags for users `StableUserKey({suffix}, 0)` and `StableUserKey({suffix}, 1)`, then evaluate all 9 non-experiment flags for `StableUserKey({suffix}, 3)`. Expected evaluation count is at least `29`. User 3 is included in the generated segment and must evaluate every non-experiment flag to the current first variation through the segment rule. |
+| Experiment evidence SDK seeding | Evaluate only the experiment flag for every synthetic user. Expected logical evaluations are `configured --users`. The runner tracks primary, error guardrail, and latency guardrail metrics for those same users, flushing in `--batch-size` chunks with `--seed-batch-delay-ms` between chunks. |
 | Exposure data | Experiment stats for `rd-checkout-treatment-{suffix}` must include rows for both `controlVariationId` and `treatmentVariationId`. FeatBit rollout hashing decides the exact split, and both variants must meet the configured `--min-users-per-variant` floor. |
 | Primary metric data | Binary `once` metric. The runner seeds control conversions at a `30%` target and treatment conversions at a `45%` target based on the exact users assigned by FeatBit. Manual acceptance: both variant user counts meet the configured sample floor, and treatment conversion rate is greater than control. |
 | Error guardrail data | Binary `once` metric. The runner seeds control errors at a `1.8%` target and treatment errors at a `2.0%` target based on the exact users assigned by FeatBit. Manual acceptance: both variant user counts meet the configured sample floor, and both error rates are below `5.00%`. |
@@ -186,7 +190,7 @@ Live runs use the configured `--users` synthetic-user seed budget and the config
 
 | Data | Expected result |
 | --- | --- |
-| SDK evaluation | All 10 flags are evaluated for every synthetic user. |
+| SDK evaluation | Pre-experiment verification evaluates all 10 flags for representative users; experiment evidence seeding evaluates only the experiment flag for every synthetic user. |
 | Insight ingest | The .NET SDK flushes exposure and metric events to `POST /api/public/insight/track`. |
 | Experiment exposure stats | `POST /api/v1/envs/{envId}/experiment-stats/query` returns users for both `control` and `treatment` variation IDs of `rd-checkout-treatment-{suffix}`. Each variant must meet the configured sample floor shown in the report. |
 | Primary metric | `e2e_checkout_activated_{metricSuffix}` is binary/once. Expected result: use the exact control/treatment users and conversions from the report; control rate should be near `30%`, treatment rate should be near `45%`, and treatment rate must be greater than control. |
@@ -201,7 +205,7 @@ Live runs use the configured `--users` synthetic-user seed budget and the config
 | `inputData` | non-empty JSON. It must contain a top-level `metrics` object with entries for `e2e_checkout_activated_{metricSuffix}`, `e2e_checkout_error_{metricSuffix}`, and `e2e_checkout_latency_ms_{metricSuffix}`. Each metric entry must contain non-empty variant data keyed by the generated control/treatment variation ids or equivalent variant keys produced by the stats service. |
 | `analysisResult` | non-empty JSON generated by the release-decision analyzer. The script does not hardcode a specific statistical posterior value, but it requires the analyzer to return structured output rather than an empty string/null. |
 | final experiment binding | experiment `flagKey` remains `rd-checkout-treatment-{suffix}` |
-| final flag verification | all 10 generated flags still exist and match the expected final enabled state, variants, rule condition, rule traffic, fallthrough traffic, `includedInExpt`, `exptIncludeAllTargets`, and variation type from the Feature Flag Final State table |
+| final flag verification | all 10 generated flags still exist and match the expected final enabled state, variants, rule state, rule traffic, fallthrough traffic, `includedInExpt`, `exptIncludeAllTargets`, and variation type from the Feature Flag Final State table |
 
 ## Test Steps
 
@@ -252,7 +256,7 @@ Assertions:
 
 ### 2. Create Segment And Mutate Flags
 
-Purpose: verify common management operations, including segment creation, rules/targeting changes, enable/disable toggles, description updates, tags, and variant changes.
+Purpose: verify common management operations, including real segment creation, segment references from feature flag rules, enable/disable toggles, description updates, tags, and variant changes.
 
 API:
 
@@ -268,18 +272,21 @@ API:
 | Update targeting/rules | `PUT /api/v1/envs/{envId}/feature-flags/{key}/targeting` |
 | Read flag | `GET /api/v1/envs/{envId}/feature-flags/{key}` |
 | Query segment references | `GET /api/v1/envs/{envId}/segments/{segmentId}/flag-references` |
+| Query segment list | `GET /api/v1/envs/{envId}/segments?name=&isArchived=false&pageIndex=0&pageSize=100` |
 
 Assertions:
 
 - Segment creation succeeds and returns a non-empty `segmentId`
-- Segment included users match the two deterministic users exactly, excluded users are empty, and segment rules are empty
+- Segment included users match the three deterministic users exactly, excluded users are empty, and segment rules are empty
+- Segment scope matches the UI-compatible resource scope and the segment list endpoint returns the generated segment
 - Every flag description is changed and verified by a read-after-write API call
 - Every flag contains the tags `e2e`, `release-decision`, and its own variation type
 - Every flag enabled/disabled state matches the test runner expectation
 - Non-experiment flag variation updates are meaningfully changed and remain valid for their variation type
 - The experiment flag keeps its `control` and `treatment` variation names/values so release-decision analysis can bind the expected variants
-- Every flag targeting contains the expected rule
-- Segment flag references include flags that use the segment
+- The experiment flag has no targeting rules and uses 50/50 fallthrough traffic
+- Every non-experiment flag targeting contains a `User is in segment IsOneOf [segmentId]` rule whose `segmentId` is the real generated segment
+- Segment flag references include all 9 non-experiment flags and do not include the release-decision experiment flag
 
 ### 3. Batch Verification
 
@@ -295,7 +302,9 @@ API:
 Assertions:
 
 - Flag key/type/status/tags/variations/targeting match the expected state
-- Segment references match the targeting changes
+- Experiment flag fallthrough traffic is 50/50 and has no targeting rules
+- Non-experiment targeting rules reference the real segment
+- Segment references match the non-experiment targeting changes
 
 ### 4. Evaluate And Track Through FeatBit .NET SDK
 
@@ -323,8 +332,7 @@ Assertions:
 - SDK client initializes successfully
 - SDK evaluation completes for all 10 flags
 - Evaluation detail contains variation information
-- The two segment users evaluate the experiment flag to the `treatment=true` variation
-- An enterprise synthetic user evaluates each non-experiment flag to the expected first variation
+- A synthetic user included in the generated segment evaluates each non-experiment flag to the expected first variation
 - SDK evaluation events are flushed
 - Metric tracking happens later in Step 7 after the experiment run and metrics are configured
 
@@ -448,7 +456,8 @@ Assertions:
 - All 10 flags still exist
 - All 10 flags have the expected final enabled state
 - All 10 flags have the expected final variants
-- All 10 flags have the expected final rule condition
+- The experiment flag has no targeting rules
+- The 9 non-experiment flags have the expected final rule condition
 - All 10 flags have the expected rule traffic, fallthrough traffic, `includedInExpt`, and `exptIncludeAllTargets`
 - The release-decision experiment is bound to the expected flag
 - Primary metric direction matches the preset: treatment performs better than control
@@ -469,6 +478,7 @@ Use this checklist after a live run. The Markdown report is the primary artifact
 | Project identity | Live report `Resources` section, or `GET /api/v1/projects/{projectId}` | `projectId` is non-empty; `projectKey = e2e-api-{suffix}` |
 | Environment identity | Live report `Resources` section, or project detail API response | `envId` is non-empty; `envKey = e2e-env-{suffix}` |
 | Segment identity | Live report `Resources` section, or `GET /api/v1/envs/{envId}/segments/{segmentId}` | `segmentId` is non-empty; `segmentKey = e2e-segment-{suffix}` |
+| Segment list visibility | `GET /api/v1/envs/{envId}/segments?name=&isArchived=false&pageIndex=0&pageSize=100` | List contains `segmentKey = e2e-segment-{suffix}` |
 | Experiment identity | Live report `Resources` section, or `GET /api/v1/envs/{envId}/release-decision/experiments/{id}` | `experimentId` is non-empty; experiment is bound to `rd-checkout-treatment-{suffix}` |
 | Run identity | Live report `Resources` section, or experiment detail API response | `runId` is non-empty and belongs to the created experiment |
 | Secret handling | Live report body | Access token and Server SDK secret are masked; full raw secrets are not printed |
@@ -477,34 +487,34 @@ Use this checklist after a live run. The Markdown report is the primary artifact
 
 | Check | Where to look | Expected value |
 | --- | --- | --- |
-| Included users | Live report `Expected Final State` / `Observed Final State`, or segment API response | Exactly `StableUserKey({suffix}, 0)` and `StableUserKey({suffix}, 1)` |
+| Included users | Live report `Resources` / step details, or segment API response | Exactly `StableUserKey({suffix}, 0)`, `StableUserKey({suffix}, 1)`, and `StableUserKey({suffix}, 3)` |
+| Scope | Live report `Resources` / step details, or segment API response | `organization/{organizationKey}:project/{projectKey}:env/{envKey}` |
 | Excluded users | Segment API response | Empty |
 | Segment rules | Segment API response | Empty |
-| Segment references | `GET /api/v1/envs/{envId}/segments/{segmentId}/flag-references` | Includes the experiment flag that targets this segment |
+| Segment references | `GET /api/v1/envs/{envId}/segments/{segmentId}/flag-references` | Includes all 9 non-experiment flags; does not include `rd-checkout-treatment-{suffix}` |
 
 #### Feature Flag Terminal State
 
 | No. | Key | Human check |
 | --- | --- | --- |
-| 1 | `rd-checkout-treatment-{suffix}` | Enabled is `true`; variants are exactly `control=false` and `treatment=true`; rule condition is `User is in segment IsOneOf [segmentId]`; rule serves `treatment` 100%; fallthrough splits `control` 50% and `treatment` 50%; `includedInExpt=true`; `exptIncludeAllTargets=true`; this is the only flag bound to release-decision. |
-| 2 | `rd-banner-copy-{suffix}` | Enabled is `false`; variants are `control-updated=control`, `candidate-1-updated=short`, `candidate-2-updated=direct`, `candidate-updated=candidate`; rule is `plan Equal enterprise`; rule and fallthrough serve the first variation 100%; experiment targeting flags are true; not bound to release-decision. |
-| 3 | `rd-price-multiplier-{suffix}` | Enabled is `true`; variants are `control-updated=1.0`, `candidate-1-updated=1.1`, `candidate-2-updated=1.2`, `candidate-updated=2.5`; rule is `plan Equal enterprise`; rule and fallthrough serve the first variation 100%; experiment targeting flags are true; not bound to release-decision. |
-| 4 | `rd-checkout-config-{suffix}` | Enabled is `false`; variants are `control-updated={"mode":"control","limit":5}`, `candidate-1-updated={"mode":"treatment","limit":10}`, `candidate-updated={"mode":"candidate","limit":15}`; rule is `plan Equal enterprise`; rule and fallthrough serve the first variation 100%; experiment targeting flags are true; not bound to release-decision. |
-| 5 | `rd-onboarding-flow-{suffix}` | Enabled is `true`; variants are `control-updated=classic`, `candidate-1-updated=guided`, `candidate-2-updated=compact`, `candidate-updated=candidate`; rule is `plan Equal enterprise`; rule and fallthrough serve the first variation 100%; experiment targeting flags are true; not bound to release-decision. |
-| 6 | `rd-risk-threshold-{suffix}` | Enabled is `false`; variants are `control-updated=10`, `candidate-1-updated=25`, `candidate-2-updated=50`, `candidate-updated=2.5`; rule is `plan Equal enterprise`; rule and fallthrough serve the first variation 100%; experiment targeting flags are true; not bound to release-decision. |
-| 7 | `rd-ai-assistant-route-{suffix}` | Enabled is `true`; variants are `control-updated=off`, `candidate-1-updated=gpt-4.1-mini`, `candidate-2-updated=gpt-4.1`, `candidate-updated=candidate`; rule is `plan Equal enterprise`; rule and fallthrough serve the first variation 100%; experiment targeting flags are true; not bound to release-decision. |
-| 8 | `rd-notification-style-{suffix}` | Enabled is `false`; variants are `control-updated=quiet`, `candidate-1-updated=badge`, `candidate-2-updated=toast`, `candidate-updated=candidate`; rule is `plan Equal enterprise`; rule and fallthrough serve the first variation 100%; experiment targeting flags are true; not bound to release-decision. |
-| 9 | `rd-search-ranking-{suffix}` | Enabled is `true`; variants are `control-updated=baseline`, `candidate-1-updated=semantic`, `candidate-2-updated=hybrid`, `candidate-updated=candidate`; rule is `plan Equal enterprise`; rule and fallthrough serve the first variation 100%; experiment targeting flags are true; not bound to release-decision. |
-| 10 | `rd-kill-switch-{suffix}` | Enabled is `false`; variants are `control-updated=false` and `treatment-updated=true`; rule is `plan Equal enterprise`; rule and fallthrough serve the first variation 100%; experiment targeting flags are true; not bound to release-decision. |
+| 1 | `rd-checkout-treatment-{suffix}` | Enabled is `true`; variants are exactly `control=false` and `treatment=true`; there are no targeting rules; fallthrough splits `control` 50% and `treatment` 50%; `includedInExpt=true`; `exptIncludeAllTargets=true`; this is the only flag bound to release-decision. |
+| 2 | `rd-banner-copy-{suffix}` | Enabled is `false`; variants are `control-updated=control`, `candidate-1-updated=short`, `candidate-2-updated=direct`, `candidate-updated=candidate`; rule is `User is in segment IsOneOf [segmentId]`; rule and fallthrough serve the first variation 100%; experiment targeting flags are true; not bound to release-decision. |
+| 3 | `rd-price-multiplier-{suffix}` | Enabled is `true`; variants are `control-updated=1.0`, `candidate-1-updated=1.1`, `candidate-2-updated=1.2`, `candidate-updated=2.5`; rule is `User is in segment IsOneOf [segmentId]`; rule and fallthrough serve the first variation 100%; experiment targeting flags are true; not bound to release-decision. |
+| 4 | `rd-checkout-config-{suffix}` | Enabled is `false`; variants are `control-updated={"mode":"control","limit":5}`, `candidate-1-updated={"mode":"treatment","limit":10}`, `candidate-updated={"mode":"candidate","limit":15}`; rule is `User is in segment IsOneOf [segmentId]`; rule and fallthrough serve the first variation 100%; experiment targeting flags are true; not bound to release-decision. |
+| 5 | `rd-onboarding-flow-{suffix}` | Enabled is `true`; variants are `control-updated=classic`, `candidate-1-updated=guided`, `candidate-2-updated=compact`, `candidate-updated=candidate`; rule is `User is in segment IsOneOf [segmentId]`; rule and fallthrough serve the first variation 100%; experiment targeting flags are true; not bound to release-decision. |
+| 6 | `rd-risk-threshold-{suffix}` | Enabled is `false`; variants are `control-updated=10`, `candidate-1-updated=25`, `candidate-2-updated=50`, `candidate-updated=2.5`; rule is `User is in segment IsOneOf [segmentId]`; rule and fallthrough serve the first variation 100%; experiment targeting flags are true; not bound to release-decision. |
+| 7 | `rd-ai-assistant-route-{suffix}` | Enabled is `true`; variants are `control-updated=off`, `candidate-1-updated=gpt-4.1-mini`, `candidate-2-updated=gpt-4.1`, `candidate-updated=candidate`; rule is `User is in segment IsOneOf [segmentId]`; rule and fallthrough serve the first variation 100%; experiment targeting flags are true; not bound to release-decision. |
+| 8 | `rd-notification-style-{suffix}` | Enabled is `false`; variants are `control-updated=quiet`, `candidate-1-updated=badge`, `candidate-2-updated=toast`, `candidate-updated=candidate`; rule is `User is in segment IsOneOf [segmentId]`; rule and fallthrough serve the first variation 100%; experiment targeting flags are true; not bound to release-decision. |
+| 9 | `rd-search-ranking-{suffix}` | Enabled is `true`; variants are `control-updated=baseline`, `candidate-1-updated=semantic`, `candidate-2-updated=hybrid`, `candidate-updated=candidate`; rule is `User is in segment IsOneOf [segmentId]`; rule and fallthrough serve the first variation 100%; experiment targeting flags are true; not bound to release-decision. |
+| 10 | `rd-kill-switch-{suffix}` | Enabled is `false`; variants are `control-updated=false` and `treatment-updated=true`; rule is `User is in segment IsOneOf [segmentId]`; rule and fallthrough serve the first variation 100%; experiment targeting flags are true; not bound to release-decision. |
 
 #### SDK Evaluation And Insight Evidence
 
 | Check | Where to look | Expected value |
 | --- | --- | --- |
 | Pre-experiment evaluation count | Live report SDK section | At least `29` detail evaluations: 10 flags for user 0, 10 flags for user 1, and 9 non-experiment flags for user 3 |
-| Segment treatment hits | Live report SDK section | `StableUserKey({suffix}, 0)` and `StableUserKey({suffix}, 1)` both evaluate `rd-checkout-treatment-{suffix}` to `treatment=true` |
-| Enterprise rule hits | Live report SDK section | User `StableUserKey({suffix}, 3)` evaluates every non-experiment flag to the first variation because `plan=enterprise` |
-| Seeded SDK evaluations | Live report insight/stats section | Logical evaluations are `configured --users * 10` |
+| Segment rule hits | Live report SDK section | User `StableUserKey({suffix}, 3)` evaluates every non-experiment flag to the first variation because that user is included in the generated segment |
+| Seeded SDK evaluations | Live report insight/stats section | Logical evaluations are `configured --users` for the experiment flag |
 | Insight ingest | Live report step results, SDK event service logs, or network traces | SDK events are flushed to `POST /api/public/insight/track` without an error |
 | Exposure stats | Live report stats section, or `POST /api/v1/envs/{envId}/experiment-stats/query` | Both generated control and treatment variation IDs have observed users. Compare the exact control/treatment counts shown in the report against the configured sample floor. |
 

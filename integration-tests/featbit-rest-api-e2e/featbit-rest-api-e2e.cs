@@ -136,25 +136,26 @@ static async Task ExecuteAsync(FeatBitApiClient api, TestReport report, E2ERun r
             name = $"E2E Segment {run.Suffix}",
             key = run.SegmentKey,
             type = "environment-specific",
-            scopes = new[] { $"project/{run.ProjectKey}:env/{run.EnvKey}" },
-            description = "Users included by the E2E runner"
+            scopes = new[] { run.SegmentScope },
+            description = "Users included by the E2E runner for non-experiment flag rule verification"
         },
         "2.1 Create segment",
-        "Create a segment that will be referenced by the experiment feature flag.");
+        "Create a real segment that will be referenced by non-experiment feature flag rules.");
     run.SegmentId = RequiredString(segment, "id");
 
+    var expectedIncludedUsers = new[] { StableUserKey(run.Suffix, 0), StableUserKey(run.Suffix, 1), StableUserKey(run.Suffix, 3) };
     await api.SendAsync(
         HttpMethod.Put,
         $"/api/v1/envs/{run.EnvId}/segments/{run.SegmentId}/targeting",
         new
         {
-            included = new[] { StableUserKey(run.Suffix, 0), StableUserKey(run.Suffix, 1) },
+            included = expectedIncludedUsers,
             excluded = Array.Empty<string>(),
             rules = Array.Empty<object>(),
-            comment = "E2E include two stable users"
+            comment = "E2E include stable users for segment-rule verification"
         },
         "2.2 Update segment targeting",
-        "Add deterministic users to the segment for targeting verification.");
+        "Add deterministic users to the real segment.");
 
     var segmentRead = await api.SendAsync(
         HttpMethod.Get,
@@ -162,13 +163,25 @@ static async Task ExecuteAsync(FeatBitApiClient api, TestReport report, E2ERun r
         null,
         "2.3 Verify segment targeting",
         "Read the segment back and verify included users.");
-    var expectedIncludedUsers = new[] { StableUserKey(run.Suffix, 0), StableUserKey(run.Suffix, 1) };
     report.Assert(
         HasAllStrings(segmentRead?["included"]?.AsArray(), expectedIncludedUsers) &&
         (segmentRead?["excluded"]?.AsArray().Count ?? 0) == 0 &&
-        (segmentRead?["rules"]?.AsArray().Count ?? 0) == 0,
+        (segmentRead?["rules"]?.AsArray().Count ?? 0) == 0 &&
+        HasAllStrings(segmentRead?["scopes"]?.AsArray(), [run.SegmentScope]),
         "2.3 Segment targeting verified",
-        $"segmentId={run.SegmentId}, included={string.Join(", ", expectedIncludedUsers)}");
+        $"segmentId={run.SegmentId}, segmentKey={run.SegmentKey}, scope={run.SegmentScope}, included={string.Join(", ", expectedIncludedUsers)}");
+
+    var segmentList = await api.SendAsync(
+        HttpMethod.Get,
+        $"/api/v1/envs/{run.EnvId}/segments?name=&isArchived=false&pageIndex=0&pageSize=100",
+        null,
+        "2.4 Verify segment list visibility",
+        "Verify the generated segment is visible through the same list endpoint used by the UI segments page.");
+    var segmentListed = FindObjectByProperty(segmentList?["items"], "key", run.SegmentKey) != null;
+    report.Assert(
+        segmentListed,
+        "2.4 Segment list visibility verified",
+        $"segmentKey={run.SegmentKey}, scope={run.SegmentScope}, totalCount={NodeString(segmentList, "totalCount")}");
 
     for (var index = 0; index < flagSpecs.Length; index++)
     {
@@ -270,26 +283,28 @@ static async Task ExecuteAsync(FeatBitApiClient api, TestReport report, E2ERun r
                 "Non-experiment flag variation names or candidates changed.");
         }
 
-        var targeting = BuildTargetingPayload(afterVariation!, spec, index == 0 ? run.SegmentId : null);
+        var isExperimentFlag = index == 0;
+        var targeting = BuildTargetingPayload(afterVariation!, spec, isExperimentFlag, run.SegmentId);
         await api.SendAsync(
             HttpMethod.Put,
             $"/api/v1/envs/{run.EnvId}/feature-flags/{spec.Key}/targeting",
             targeting,
             $"2 Mutate targeting {spec.Key}",
-            index == 0
-                ? "Add a segment-based rule and 50/50 default rollout for the experiment flag."
-                : "Add a property-based targeting rule for the flag.");
+            isExperimentFlag
+                ? "Configure the experiment flag with no targeting rules and 50/50 fallthrough rollout."
+                : "Add a real segment-based targeting rule for the flag.");
 
         var afterTargeting = await api.SendAsync(
             HttpMethod.Get,
             $"/api/v1/envs/{run.EnvId}/feature-flags/{spec.Key}",
             null,
             $"3 Verify targeting {spec.Key}",
-            "Verify at least one targeting rule exists.");
+            "Verify targeting rules and fallthrough traffic.");
+        var ruleCount = afterTargeting?["rules"]?.AsArray().Count ?? 0;
         report.Assert(
-            afterTargeting?["rules"]?.AsArray().Count >= 1,
+            isExperimentFlag ? ruleCount == 0 : ruleCount >= 1,
             $"3 Targeting rules verified {spec.Key}",
-            $"ruleCount={afterTargeting?["rules"]?.AsArray().Count ?? 0}");
+            $"ruleCount={ruleCount}");
 
         if (index == 0)
         {
@@ -308,28 +323,29 @@ static async Task ExecuteAsync(FeatBitApiClient api, TestReport report, E2ERun r
         $"/api/v1/envs/{run.EnvId}/segments/{run.SegmentId}/flag-references",
         null,
         "3 Verify segment flag references",
-        "Read feature flags that reference the generated segment.");
+        "Read feature flags that reference the generated real segment.");
+    var referencedKeys = references?.AsArray()
+        .Select(x => NodeString(x, "key"))
+        .Where(x => !string.IsNullOrWhiteSpace(x))
+        .ToHashSet(StringComparer.OrdinalIgnoreCase) ?? [];
+    var expectedSegmentRuleFlagKeys = flagSpecs.Skip(1).Select(x => x.Key).ToArray();
     report.Assert(
-        references?.AsArray().Any(x => string.Equals(NodeString(x, "key"), flagSpecs[0].Key, StringComparison.OrdinalIgnoreCase)) == true,
-        "3 Segment reference verified",
-        $"segmentId={run.SegmentId}, flagKey={flagSpecs[0].Key}");
+        expectedSegmentRuleFlagKeys.All(referencedKeys.Contains) &&
+        !referencedKeys.Contains(flagSpecs[0].Key),
+        "3 Segment references verified",
+        $"segmentId={run.SegmentId}, referenced={string.Join(", ", referencedKeys.OrderBy(x => x, StringComparer.OrdinalIgnoreCase))}");
 
     var experimentFlag = flagSpecs[0];
     var sdkValidation = await VerifySdkEvaluationAsync(run, flagSpecs, options);
     run.PreExperimentSdkEvaluations = sdkValidation.TotalEvaluations;
-    run.PreExperimentSegmentTreatmentHits = sdkValidation.SegmentTreatmentHits;
     run.PreExperimentNonExperimentRuleHits = sdkValidation.NonExperimentRuleHits;
     report.Assert(
         sdkValidation.TotalEvaluations >= flagSpecs.Length,
         "4.1 SDK evaluated generated flags",
         sdkValidation.ToString());
     report.Assert(
-        sdkValidation.SegmentTreatmentHits == 2,
-        "4.2 SDK segment targeting verified",
-        $"segmentUsersInTreatment={sdkValidation.SegmentTreatmentHits}, expected=2");
-    report.Assert(
         sdkValidation.NonExperimentRuleHits == flagSpecs.Length - 1,
-        "4.3 SDK non-experiment rule targeting verified",
+        "4.2 SDK non-experiment rule targeting verified",
         $"nonExperimentRuleHits={sdkValidation.NonExperimentRuleHits}, expected={flagSpecs.Length - 1}");
 
     var experiment = await api.SendAsync(
@@ -644,31 +660,38 @@ static async Task ExecuteAsync(FeatBitApiClient api, TestReport report, E2ERun r
             $"9 Final flag variants verified {flag.Key}",
             $"expected={expectedFinalFlag.FinalVariations}");
 
-        var finalCondition = finalFlag?["rules"]?.AsArray()
+        var isExperimentFlag = string.Equals(flag.Key, experimentFlag.Key, StringComparison.OrdinalIgnoreCase);
+        var finalRules = finalFlag?["rules"]?.AsArray() ?? [];
+        var finalCondition = finalRules
             .FirstOrDefault()?["conditions"]?.AsArray()
             .FirstOrDefault();
         report.Assert(
-            NodeString(finalCondition, "property") == expectedFinalFlag.RuleProperty &&
-            NodeString(finalCondition, "value").Contains(
-                expectedFinalFlag.RuleValueTemplate.Replace("{segmentId}", run.SegmentId, StringComparison.Ordinal),
-                StringComparison.Ordinal),
+            isExperimentFlag
+                ? finalRules.Count == 0
+                : NodeString(finalCondition, "property") == expectedFinalFlag.RuleProperty &&
+                  NodeString(finalCondition, "value").Contains(
+                      expectedFinalFlag.RuleValueTemplate.Replace("{segmentId}", run.SegmentId, StringComparison.Ordinal),
+                      StringComparison.Ordinal),
             $"9 Final flag rule verified {flag.Key}",
-            $"property={NodeString(finalCondition, "property")}, value={NodeString(finalCondition, "value")}");
+            isExperimentFlag
+                ? $"ruleCount={finalRules.Count}"
+                : $"property={NodeString(finalCondition, "property")}, value={NodeString(finalCondition, "value")}");
 
-        var isExperimentFlag = string.Equals(flag.Key, experimentFlag.Key, StringComparison.OrdinalIgnoreCase);
-        var finalRule = finalFlag?["rules"]?.AsArray().FirstOrDefault();
+        var finalRule = finalRules.FirstOrDefault();
         var finalRuleVariation = finalRule?["variations"]?.AsArray().FirstOrDefault();
-        var expectedRuleVariationId = isExperimentFlag
-            ? run.TreatmentVariationId
-            : NodeString(finalFlag?["variations"]?.AsArray().FirstOrDefault(), "id");
+        var expectedRuleVariationId = NodeString(finalFlag?["variations"]?.AsArray().FirstOrDefault(), "id");
         var finalRuleTrafficMatches =
-            NodeBool(finalRule, "includedInExpt") &&
-            NodeString(finalRuleVariation, "id") == expectedRuleVariationId &&
-            RolloutMatches(finalRuleVariation, 0, 1, 1);
+            isExperimentFlag
+                ? finalRules.Count == 0
+                : NodeBool(finalRule, "includedInExpt") &&
+                  NodeString(finalRuleVariation, "id") == expectedRuleVariationId &&
+                  RolloutMatches(finalRuleVariation, 0, 1, 1);
         report.Assert(
             finalRuleTrafficMatches,
             $"9 Final flag rule traffic verified {flag.Key}",
-            $"ruleVariation={NodeString(finalRuleVariation, "id")}, expected={expectedRuleVariationId}");
+            isExperimentFlag
+                ? "expected=no targeting rules"
+                : $"ruleVariation={NodeString(finalRuleVariation, "id")}, expected={expectedRuleVariationId}");
 
         var finalFallthroughTrafficMatches =
             NodeBool(finalFlag?["fallthrough"], "includedInExpt") &&
@@ -840,21 +863,14 @@ static async Task<SdkValidationSummary> VerifySdkEvaluationAsync(
         }
 
         var summary = new SdkValidationSummary();
-        var segmentUsers = new[] { BuildSyntheticUser(run.Suffix, 0), BuildSyntheticUser(run.Suffix, 1) };
-        foreach (var user in segmentUsers)
+        var representativeUsers = new[] { BuildSyntheticUser(run.Suffix, 0), BuildSyntheticUser(run.Suffix, 1) };
+        foreach (var user in representativeUsers)
         {
             foreach (var flag in flags)
             {
                 var detail = Evaluate(client, flag, user);
                 summary.TotalEvaluations++;
                 summary.Count(flag.Key, detail.ValueId, detail.ValueText);
-
-                if (flag.Key == flags[0].Key &&
-                    string.Equals(detail.ValueId, run.TreatmentVariationId, StringComparison.OrdinalIgnoreCase) &&
-                    string.Equals(detail.ValueText, "true", StringComparison.OrdinalIgnoreCase))
-                {
-                    summary.SegmentTreatmentHits++;
-                }
             }
         }
 
@@ -912,6 +928,7 @@ static async Task RunSelfCheckAsync(string[] args)
         "self-check-token",
         "raw",
         "",
+        "playground",
         "",
         "",
         "",
@@ -921,6 +938,7 @@ static async Task RunSelfCheckAsync(string[] args)
         100,
         1,
         1,
+        0,
         0,
         false);
     var report = new TestReport(options);
@@ -950,9 +968,11 @@ static async Task RunSelfCheckAsync(string[] args)
     report.Assert(
         run.ProjectKey == $"e2e-api-{run.Suffix}" &&
         run.EnvKey == $"e2e-env-{run.Suffix}" &&
+        run.OrganizationKey == "playground" &&
+        run.SegmentScope == $"organization/playground:project/{run.ProjectKey}:env/{run.EnvKey}" &&
         run.SegmentKey == $"e2e-segment-{run.Suffix}",
         "Self-check generated resource keys",
-        $"projectKey={run.ProjectKey}, envKey={run.EnvKey}, segmentKey={run.SegmentKey}");
+        $"organizationKey={run.OrganizationKey}, projectKey={run.ProjectKey}, envKey={run.EnvKey}, segmentKey={run.SegmentKey}");
     report.Assert(
         run.MetricSuffix == run.Suffix.Replace('-', '_') &&
         run.PrimaryMetric == $"e2e_checkout_activated_{run.MetricSuffix}" &&
@@ -1018,19 +1038,28 @@ static async Task RunSelfCheckAsync(string[] args)
         "Self-check non-experiment variation mutation",
         "Non-experiment flags receive a meaningful variation mutation.");
 
-    var targeting = JsonSerializer.SerializeToNode(BuildTargetingPayload(fakeFlag, experimentFlag, run.SegmentId))!;
-    var condition = targeting["targeting"]?["rules"]?.AsArray().FirstOrDefault()?["conditions"]?.AsArray().FirstOrDefault();
+    var targeting = JsonSerializer.SerializeToNode(BuildTargetingPayload(fakeFlag, experimentFlag, isExperimentFlag: true))!;
+    var rules = targeting["targeting"]?["rules"]?.AsArray();
     report.Assert(
-        NodeString(condition, "property") == "User is in segment" &&
-        NodeString(condition, "value").Contains(run.SegmentId, StringComparison.Ordinal),
-        "Self-check segment targeting payload",
-        "The experiment flag targeting payload references the generated segment.");
+        rules is { Count: 0 },
+        "Self-check experiment targeting payload",
+        "The experiment flag targeting payload has no targeting rules.");
     var experimentTargetingFlag = JsonSerializer.SerializeToNode(targeting["targeting"]!)!;
     experimentTargetingFlag["variations"] = fakeFlag["variations"]!.DeepClone();
     report.Assert(
         FallthroughTrafficMatches(experimentTargetingFlag, isExperimentFlag: true, experimentFlag.Variations[0].Id, experimentFlag.Variations[1].Id),
         "Self-check experiment fallthrough traffic",
         "The experiment flag final traffic is 50% control and 50% treatment.");
+
+    var segmentTargeting = JsonSerializer.SerializeToNode(
+        BuildTargetingPayload(fakeNonExperimentFlag, nonExperimentBool, isExperimentFlag: false, run.SegmentId))!;
+    var segmentCondition = segmentTargeting["targeting"]?["rules"]?.AsArray().FirstOrDefault()?["conditions"]?.AsArray().FirstOrDefault();
+    report.Assert(
+        NodeString(segmentCondition, "property") == "User is in segment" &&
+        NodeString(segmentCondition, "op") == "IsOneOf" &&
+        NodeString(segmentCondition, "value").Contains(run.SegmentId, StringComparison.Ordinal),
+        "Self-check real segment targeting payload",
+        "Non-experiment flag targeting references the generated real segment id.");
 
     run.ControlVariationId = experimentFlag.Variations[0].Id;
     run.TreatmentVariationId = experimentFlag.Variations[1].Id;
@@ -1164,6 +1193,7 @@ static OpenApiOperation[] RequiredSwaggerEndpoints() =>
     new("PUT", "/api/v1/envs/{envId}/feature-flags/{key}/variations"),
     new("PUT", "/api/v1/envs/{envId}/feature-flags/{key}/targeting"),
     new("PUT", "/api/v1/envs/{envId}/feature-flags/{key}/tags"),
+    new("GET", "/api/v1/envs/{envId}/segments"),
     new("POST", "/api/v1/envs/{envId}/segments"),
     new("GET", "/api/v1/envs/{envId}/segments/{segmentId}"),
     new("PUT", "/api/v1/envs/{envId}/segments/{segmentId}/targeting"),
@@ -1222,8 +1252,8 @@ static string BuildPlanMarkdown(string suffix, FlagSpec[] flags)
         var isExperimentFlag = index == 0;
         var finalEnabled = index % 2 == 0;
         var rule = isExperimentFlag
-            ? "User is in segment IsOneOf [segmentId] -> treatment 100%"
-            : "plan Equal enterprise -> first variation 100%";
+            ? "no targeting rules"
+            : "User is in segment IsOneOf [segmentId] -> first variation 100%";
         var traffic = isExperimentFlag
             ? "fallthrough control 50%, treatment 50%"
             : "fallthrough first variation 100%";
@@ -1238,7 +1268,7 @@ static string BuildPlanMarkdown(string suffix, FlagSpec[] flags)
     sb.AppendLine();
     sb.AppendLine("## Expected Insight, Stats, And Analyze State");
     sb.AppendLine();
-    sb.AppendLine("- SDK evaluates all 10 flags for every synthetic user and flushes exposure/metric events to `POST /api/public/insight/track`.");
+    sb.AppendLine("- SDK pre-verifies all 10 flags for representative users, then seeds experiment evidence by evaluating only the experiment flag for every synthetic user.");
     sb.AppendLine("- Experiment evidence uses the configured `--users` seed budget and requires each control/treatment variant to meet the configured `--min-users-per-variant` sample floor.");
     sb.AppendLine("- Primary metric `e2e_checkout_activated_{metricSuffix}` evidence target: control rate near `30%`, treatment rate near `45%`, treatment conversion > control conversion.");
     sb.AppendLine("- Error guardrail `e2e_checkout_error_{metricSuffix}` evidence target: control rate near `1.8%`, treatment rate near `2.0%`, both below `5.00%`.");
@@ -1253,11 +1283,12 @@ static string BuildPlanMarkdown(string suffix, FlagSpec[] flags)
     AppendPlanStep(sb, "0.3", "Verify project/env", "GET /api/v1/projects/{projectId}", "Ensure the created env belongs to the project.");
     AppendPlanStep(sb, "1", "Create 10 flags", "POST /api/v1/envs/{envId}/feature-flags", "Create boolean, string, number, and json flags.");
     AppendPlanStep(sb, "1 verify", "Verify every flag", "GET /api/v1/envs/{envId}/feature-flags/{key}", "Check key/type/variation count.");
-    AppendPlanStep(sb, "2.1", "Create segment", "POST /api/v1/envs/{envId}/segments", "Create environment-specific segment.");
+    AppendPlanStep(sb, "2.1", "Create segment", "POST /api/v1/envs/{envId}/segments", "Create a real segment for non-experiment rule verification.");
     AppendPlanStep(sb, "2.2", "Update segment targeting", "PUT /api/v1/envs/{envId}/segments/{segmentId}/targeting", "Include deterministic synthetic users.");
     AppendPlanStep(sb, "2 batch", "Mutate every flag", "PUT /description, /tags, /toggle/{status}, /variations, /targeting", "Change description, tags, status, variants, and targeting rules.");
-    AppendPlanStep(sb, "3 batch", "Verify every mutation", "GET /api/v1/envs/{envId}/feature-flags/{key}", "Check toggles, tags, variation count, rules, and segment reference.");
-    AppendPlanStep(sb, "4", "SDK evaluation", "FeatBit.ServerSdk variation detail APIs + POST /api/public/insight/track", "Evaluate all 10 flags for synthetic users; SDK events feed the insight endpoint.");
+    AppendPlanStep(sb, "3 batch", "Verify every mutation", "GET /api/v1/envs/{envId}/feature-flags/{key}", "Check toggles, tags, variation count, rules, segment references, and fallthrough traffic.");
+    AppendPlanStep(sb, "3 segment refs", "Verify segment references", "GET /api/v1/envs/{envId}/segments/{segmentId}/flag-references", "Confirm the real segment is referenced by all 9 non-experiment flags and not by the experiment flag.");
+    AppendPlanStep(sb, "4", "SDK evaluation", "FeatBit.ServerSdk variation detail APIs + POST /api/public/insight/track", "Pre-verify all 10 flags for representative users; SDK events feed the insight endpoint.");
     AppendPlanStep(sb, "5", "Create experiment", "POST /api/v1/envs/{envId}/release-decision/experiments", "Bind release-decision experiment to the first boolean flag.");
     AppendPlanStep(sb, "5 update", "Fill intent/hypothesis", "PUT /api/v1/envs/{envId}/release-decision/experiments/{id}", "Persist intent, hypothesis, change, constraints, env secret, and SDK URL.");
     AppendPlanStep(sb, "6", "Configure metrics", "PUT /api/v1/envs/{envId}/release-decision/experiments/{id}/metrics", "Primary binary metric plus binary and continuous guardrails.");
@@ -1468,21 +1499,21 @@ static bool InputDataContainsMetrics(string inputData, params string[] metricEve
     }
 }
 
-static object BuildTargetingPayload(JsonNode flag, FlagSpec spec, string? segmentId)
+static object BuildTargetingPayload(JsonNode flag, FlagSpec spec, bool isExperimentFlag, string? segmentId = null)
 {
     var variations = flag["variations"]!.AsArray();
     var firstVariationId = NodeString(variations[0], "id");
     var secondVariationId = NodeString(variations[Math.Min(1, variations.Count - 1)], "id");
-    var ruleVariationId = segmentId == null ? firstVariationId : secondVariationId;
-    var condition = segmentId == null
-        ? new
+
+    object[] rules = [];
+    if (!isExperimentFlag)
+    {
+        if (string.IsNullOrWhiteSpace(segmentId))
         {
-            id = Guid.NewGuid().ToString("D"),
-            property = "plan",
-            op = "Equal",
-            value = "enterprise"
+            throw new ArgumentException("Non-experiment flag targeting requires a real segment id.", nameof(segmentId));
         }
-        : new
+
+        var condition = new
         {
             id = Guid.NewGuid().ToString("D"),
             property = "User is in segment",
@@ -1490,33 +1521,37 @@ static object BuildTargetingPayload(JsonNode flag, FlagSpec spec, string? segmen
             value = JsonSerializer.Serialize(new[] { segmentId })
         };
 
-    var rule = new
-    {
-        id = Guid.NewGuid().ToString("D"),
-        name = segmentId == null ? "E2E enterprise rule" : "E2E generated segment rule",
-        dispatchKey = "",
-        includedInExpt = true,
-        conditions = new[] { condition },
-        variations = new[]
-        {
+        rules =
+        [
             new
             {
-                id = ruleVariationId,
-                rollout = new double[] { 0, 1 },
-                exptRollout = 1
+                id = Guid.NewGuid().ToString("D"),
+                name = "E2E real segment rule",
+                dispatchKey = "",
+                includedInExpt = true,
+                conditions = new[] { condition },
+                variations = new[]
+                {
+                    new
+                    {
+                        id = firstVariationId,
+                        rollout = new double[] { 0, 1 },
+                        exptRollout = 1
+                    }
+                }
             }
-        }
-    };
+        ];
+    }
 
-    object[] fallthroughVariations = segmentId == null
+    object[] fallthroughVariations = isExperimentFlag
         ? new object[]
-        {
-            new { id = firstVariationId, rollout = new double[] { 0, 1 }, exptRollout = 1 }
-        }
-        : new object[]
         {
             new { id = firstVariationId, rollout = new double[] { 0, 0.5 }, exptRollout = 0.5 },
             new { id = secondVariationId, rollout = new double[] { 0.5, 1 }, exptRollout = 0.5 }
+        }
+        : new object[]
+        {
+            new { id = firstVariationId, rollout = new double[] { 0, 1 }, exptRollout = 1 }
         };
 
     return new
@@ -1525,7 +1560,7 @@ static object BuildTargetingPayload(JsonNode flag, FlagSpec spec, string? segmen
         targeting = new
         {
             targetUsers = flag["targetUsers"]?.DeepClone() ?? new JsonArray(),
-            rules = new object[] { rule },
+            rules,
             fallthrough = new
             {
                 dispatchKey = "",
@@ -1562,44 +1597,47 @@ static async Task<SdkSeedSummary> SeedWithSdkAsync(
 
         var summary = new SdkSeedSummary();
         var experimentFlag = flags[0];
-        var evaluated = new List<(FbUser User, string VariationId, string Value)>();
+        var usersByVariation = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
 
-        for (var index = 0; index < options.Users; index++)
+        for (var batchStart = 0; batchStart < options.Users; batchStart += options.BatchSize)
         {
-            var user = BuildSyntheticUser(run.Suffix, index);
+            var batchEnd = Math.Min(batchStart + options.BatchSize, options.Users);
 
-            foreach (var flag in flags)
+            for (var index = batchStart; index < batchEnd; index++)
             {
-                var detail = Evaluate(client, flag, user);
+                var user = BuildSyntheticUser(run.Suffix, index);
+                var detail = Evaluate(client, experimentFlag, user);
                 summary.TotalEvaluations++;
-                summary.Count(flag.Key, detail.ValueId, detail.ValueText);
+                summary.Count(experimentFlag.Key, detail.ValueId, detail.ValueText);
 
-                if (flag.Key == experimentFlag.Key)
+                var currentVariationUsers = usersByVariation.GetValueOrDefault(detail.ValueId);
+                usersByVariation[detail.ValueId] = currentVariationUsers + 1;
+
+                var isTreatment = string.Equals(detail.ValueText, "true", StringComparison.OrdinalIgnoreCase);
+                if (ShouldEmitMetric(currentVariationUsers, isTreatment ? 0.45 : 0.30))
                 {
-                    evaluated.Add((user, detail.ValueId, detail.ValueText));
+                    client.Track(user, run.PrimaryMetric);
                 }
-            }
-        }
 
-        foreach (var group in evaluated.GroupBy(x => x.VariationId).OrderBy(x => x.Key, StringComparer.Ordinal))
-        {
-            var users = group.OrderBy(x => x.User.Key, StringComparer.Ordinal).ToArray();
-            var isTreatment = users.Any(x => string.Equals(x.Value, "true", StringComparison.OrdinalIgnoreCase));
-            var primaryRate = isTreatment ? 0.45 : 0.30;
-            var errorRate = isTreatment ? 0.020 : 0.018;
-            var latency = isTreatment ? 320.0 : 340.0;
+                if (ShouldEmitMetric(currentVariationUsers, isTreatment ? 0.020 : 0.018))
+                {
+                    client.Track(user, run.ErrorMetric);
+                }
 
-            EmitBinaryMetric(client, users.Select(x => x.User).ToArray(), run.PrimaryMetric, primaryRate);
-            EmitBinaryMetric(client, users.Select(x => x.User).ToArray(), run.ErrorMetric, errorRate);
-            foreach (var user in users.Select(x => x.User))
-            {
+                var latency = isTreatment ? 320.0 : 340.0;
                 client.Track(user, run.LatencyMetric, latency);
             }
-        }
 
-        if (!client.FlushAndWait(TimeSpan.FromSeconds(options.FlushTimeoutSeconds)))
-        {
-            throw new TimeoutException($"Timed out after {options.FlushTimeoutSeconds} seconds while flushing SDK events.");
+            if (!client.FlushAndWait(TimeSpan.FromSeconds(options.FlushTimeoutSeconds)))
+            {
+                throw new TimeoutException(
+                    $"Timed out after {options.FlushTimeoutSeconds} seconds while flushing SDK events for users {batchStart}-{batchEnd - 1}.");
+            }
+
+            if (options.SeedBatchDelayMs > 0 && batchEnd < options.Users)
+            {
+                await Task.Delay(TimeSpan.FromMilliseconds(options.SeedBatchDelayMs));
+            }
         }
 
         return summary;
@@ -1620,14 +1658,8 @@ static FbUser BuildSyntheticUser(string suffix, int index)
         .Build();
 }
 
-static void EmitBinaryMetric(FbClient client, FbUser[] users, string eventName, double rate)
-{
-    var count = (int)Math.Round(users.Length * rate, MidpointRounding.AwayFromZero);
-    for (var index = 0; index < Math.Clamp(count, 0, users.Length); index++)
-    {
-        client.Track(users[index], eventName);
-    }
-}
+static bool ShouldEmitMetric(int zeroBasedVariationIndex, double rate) =>
+    zeroBasedVariationIndex % 1000 < (int)Math.Round(rate * 1000, MidpointRounding.AwayFromZero);
 
 static EvalResult Evaluate(FbClient client, FlagSpec flag, FbUser user)
 {
@@ -1914,6 +1946,7 @@ sealed record E2EOptions(
     string AccessToken,
     string AuthMode,
     string Organization,
+    string OrganizationKey,
     string Workspace,
     string ProjectKey,
     string EnvId,
@@ -1924,6 +1957,7 @@ sealed record E2EOptions(
     int SdkStartWaitSeconds,
     int FlushTimeoutSeconds,
     int PostSdkWaitSeconds,
+    int SeedBatchDelayMs,
     bool Cleanup)
 {
     public static E2EOptions Parse(string[] args)
@@ -1960,16 +1994,18 @@ sealed record E2EOptions(
             token,
             Get(bag, "auth-mode", Env("FEATBIT_AUTH_MODE", "raw")).ToLowerInvariant(),
             Get(bag, "organization", Env("FEATBIT_ORGANIZATION", "")),
+            Get(bag, "organization-key", Env("FEATBIT_ORGANIZATION_KEY", "playground")),
             Get(bag, "workspace", Env("FEATBIT_WORKSPACE", "")),
             projectKey,
             envId,
             Get(bag, "report-dir", Env("FEATBIT_REPORT_DIR", "integration-tests/featbit-rest-api-e2e/reports")),
             users,
             minUsersPerVariant,
-            GetInt(bag, "batch-size", 100, min: 1),
+            GetInt(bag, "batch-size", 10, min: 1),
             GetInt(bag, "sdk-start-wait-seconds", 10, min: 1),
             GetInt(bag, "flush-timeout-seconds", 30, min: 1),
             GetInt(bag, "post-sdk-wait-seconds", 8, min: 0),
+            GetInt(bag, "seed-batch-delay-ms", 100, min: 0),
             GetBool(bag, "cleanup", false));
     }
 
@@ -1987,12 +2023,14 @@ sealed record E2EOptions(
           --streaming-url wss://app-eval.featbit.co
           --auth-mode raw|bearer
           --organization <organization-id>
+          --organization-key <organization-key>
           --workspace <workspace-id>
           --project-key <project-key>   Use an existing user-created project instead of creating one.
           --env-id <environment-id>     Required with --project-key; use an existing environment.
           --users 1500
           --min-users-per-variant 500
-          --batch-size 100
+          --batch-size 10
+          --seed-batch-delay-ms 100
           --post-sdk-wait-seconds 8
           --cleanup true|false
           --report-dir integration-tests/featbit-rest-api-e2e/reports
@@ -2069,6 +2107,7 @@ sealed class E2ERun
         ProjectKey = string.IsNullOrWhiteSpace(options.ProjectKey) ? $"e2e-api-{Suffix}" : options.ProjectKey;
         EnvKey = $"e2e-env-{Suffix}";
         EnvId = options.EnvId;
+        OrganizationKey = options.OrganizationKey;
         SegmentKey = $"e2e-segment-{Suffix}";
         PrimaryMetric = $"e2e_checkout_activated_{MetricSuffix}";
         ErrorMetric = $"e2e_checkout_error_{MetricSuffix}";
@@ -2079,7 +2118,9 @@ sealed class E2ERun
     public string MetricSuffix { get; }
     public string ProjectKey { get; }
     public string EnvKey { get; set; }
+    public string OrganizationKey { get; }
     public string SegmentKey { get; }
+    public string SegmentScope => $"organization/{OrganizationKey}:project/{ProjectKey}:env/{EnvKey}";
     public string PrimaryMetric { get; }
     public string ErrorMetric { get; }
     public string LatencyMetric { get; }
@@ -2098,7 +2139,6 @@ sealed class E2ERun
     public double ControlLatencyMs { get; set; }
     public double TreatmentLatencyMs { get; set; }
     public long PreExperimentSdkEvaluations { get; set; }
-    public int PreExperimentSegmentTreatmentHits { get; set; }
     public int PreExperimentNonExperimentRuleHits { get; set; }
     public long PrimaryMetricUsersObserved { get; set; }
     public int PrimaryMetricVariantRows { get; set; }
@@ -2167,11 +2207,11 @@ sealed record ExpectedFinalFlagState(
                 flag.VariationType,
                 FinalEnabled: index % 2 == 0,
                 FinalVariations: ExpectedVariationPairs(flag, isExperimentFlag),
-                RuleProperty: isExperimentFlag ? "User is in segment" : "plan",
-                RuleValueTemplate: isExperimentFlag ? "{segmentId}" : "enterprise",
-                RuleTraffic: isExperimentFlag ? "100% treatment" : "100% first variation",
+                RuleProperty: isExperimentFlag ? "" : "User is in segment",
+                RuleValueTemplate: isExperimentFlag ? "" : "{segmentId}",
+                RuleTraffic: isExperimentFlag ? "no targeting rules" : "100% first variation from real segment rule",
                 FallthroughTraffic: isExperimentFlag ? "50% control, 50% treatment" : "100% first variation",
-                IncludedInExperiment: true,
+                IncludedInExperiment: !isExperimentFlag,
                 ExperimentIncludeAllTargets: true,
                 Experimentation: isExperimentFlag ? "bound" : "not-bound");
         }).ToArray();
@@ -2353,8 +2393,6 @@ sealed class SdkValidationSummary
 
     public long TotalEvaluations { get; set; }
 
-    public int SegmentTreatmentHits { get; set; }
-
     public int NonExperimentRuleHits { get; set; }
 
     public void Count(string flagKey, string variationId, string value)
@@ -2374,7 +2412,6 @@ sealed class SdkValidationSummary
         var lines = new List<string>
         {
             $"totalEvaluations={TotalEvaluations}",
-            $"segmentTreatmentHits={SegmentTreatmentHits}",
             $"nonExperimentRuleHits={NonExperimentRuleHits}"
         };
         foreach (var (flag, variations) in _byFlag.OrderBy(x => x.Key, StringComparer.OrdinalIgnoreCase))
@@ -2464,6 +2501,7 @@ sealed class TestReport
                 EnvServerSecret = Mask(run.EnvServerSecret),
                 run.SegmentId,
                 run.SegmentKey,
+                run.SegmentScope,
                 run.ExperimentId,
                 run.RunId,
                 run.ControlVariationId,
@@ -2492,7 +2530,6 @@ sealed class TestReport
                 preExperimentSdk = new
                 {
                     evaluations = run.PreExperimentSdkEvaluations,
-                    segmentTreatmentHits = run.PreExperimentSegmentTreatmentHits,
                     nonExperimentRuleHits = run.PreExperimentNonExperimentRuleHits
                 },
                 primaryMetricObserved = new
@@ -2551,6 +2588,7 @@ sealed class TestReport
         sb.AppendLine($"- Environment: `{run.EnvKey}` / `{run.EnvId}`");
         sb.AppendLine($"- Environment Server Key: `{Mask(run.EnvServerSecret)}`");
         sb.AppendLine($"- Segment: `{run.SegmentKey}` / `{run.SegmentId}`");
+        sb.AppendLine($"- Segment Scope: `{run.SegmentScope}`");
         sb.AppendLine($"- Experiment: `{run.ExperimentId}`");
         sb.AppendLine($"- Run: `{run.RunId}`");
         sb.AppendLine();
@@ -2563,7 +2601,7 @@ sealed class TestReport
         sb.AppendLine();
         sb.AppendLine("| Check | Expected | Observed |");
         sb.AppendLine("| --- | --- | --- |");
-        sb.AppendLine($"| Pre-experiment SDK evaluation | all flags evaluate, 2 segment users get treatment, 9 non-experiment rule hits | evaluations `{run.PreExperimentSdkEvaluations}`, segment treatment hits `{run.PreExperimentSegmentTreatmentHits}`, non-experiment rule hits `{run.PreExperimentNonExperimentRuleHits}` |");
+        sb.AppendLine($"| Pre-experiment SDK evaluation | all flags evaluate for representative users, 9 non-experiment rule hits | evaluations `{run.PreExperimentSdkEvaluations}`, non-experiment rule hits `{run.PreExperimentNonExperimentRuleHits}` |");
         sb.AppendLine($"| Primary metric | each variant meets configured sample floor `{_options.MinUsersPerVariant}`; treatment conversion > control conversion | total users `{run.PrimaryMetricUsersObserved}`, variants `{run.PrimaryMetricVariantRows}`, control `{run.ControlPrimaryConversionsObserved}/{run.ControlPrimaryUsersObserved}` rate `{run.ControlPrimaryRate:0.####}`, treatment `{run.TreatmentPrimaryConversionsObserved}/{run.TreatmentPrimaryUsersObserved}` rate `{run.TreatmentPrimaryRate:0.####}` |");
         sb.AppendLine($"| Error guardrail | each variant meets configured sample floor `{_options.MinUsersPerVariant}`; control and treatment error rates < `0.05` | total users `{run.ErrorMetricUsersObserved}`, variants `{run.ErrorMetricVariantRows}`, control `{run.ControlErrorConversionsObserved}/{run.ControlErrorUsersObserved}` rate `{run.ControlErrorRate:0.####}`, treatment `{run.TreatmentErrorConversionsObserved}/{run.TreatmentErrorUsersObserved}` rate `{run.TreatmentErrorRate:0.####}` |");
         sb.AppendLine($"| Latency guardrail | each variant meets configured sample floor `{_options.MinUsersPerVariant}`; treatment average latency <= control average latency | total users `{run.LatencyMetricUsersObserved}`, variants `{run.LatencyMetricVariantRows}`, control users `{run.ControlLatencyUsersObserved}` sum `{run.ControlLatencySumObserved:0.####}ms` avg `{run.ControlLatencyMs:0.####}ms`, treatment users `{run.TreatmentLatencyUsersObserved}` sum `{run.TreatmentLatencySumObserved:0.####}ms` avg `{run.TreatmentLatencyMs:0.####}ms` |");
@@ -2579,11 +2617,14 @@ sealed class TestReport
         sb.AppendLine();
         sb.AppendLine("## Expected Final Feature Flags");
         sb.AppendLine();
-        sb.AppendLine("| Key | Type | Final enabled | Final variants | Rule traffic | Fallthrough traffic | Experimentation |");
-        sb.AppendLine("| --- | --- | --- | --- | --- | --- | --- |");
+        sb.AppendLine("| Key | Type | Final enabled | Final variants | Rule | Rule traffic | Fallthrough traffic | Experimentation |");
+        sb.AppendLine("| --- | --- | --- | --- | --- | --- | --- | --- |");
         foreach (var flag in run.ExpectedFinalFlags)
         {
-            sb.AppendLine($"| `{flag.Key}` | `{flag.Type}` | `{flag.FinalEnabled.ToString().ToLowerInvariant()}` | {flag.FinalVariations} | {flag.RuleTraffic} | {flag.FallthroughTraffic} | `{flag.Experimentation}` |");
+            var rule = string.IsNullOrWhiteSpace(flag.RuleProperty)
+                ? "none"
+                : $"{flag.RuleProperty} `{flag.RuleValueTemplate.Replace("{segmentId}", run.SegmentId, StringComparison.Ordinal)}`";
+            sb.AppendLine($"| `{flag.Key}` | `{flag.Type}` | `{flag.FinalEnabled.ToString().ToLowerInvariant()}` | {flag.FinalVariations} | {rule} | {flag.RuleTraffic} | {flag.FallthroughTraffic} | `{flag.Experimentation}` |");
         }
 
         if (run.ObservedFinalFlags.Count > 0)
@@ -2595,7 +2636,8 @@ sealed class TestReport
             sb.AppendLine("| --- | --- | --- | --- | --- | --- | --- | --- |");
             foreach (var flag in run.ObservedFinalFlags)
             {
-                sb.AppendLine($"| `{flag.Key}` | `{flag.Type}` | `{flag.FinalEnabled.ToString().ToLowerInvariant()}` | {flag.FinalVariations} | {flag.RuleProperty} `{flag.RuleValue}` | {flag.RuleTraffic} | {flag.FallthroughTraffic}; rule included `{flag.RuleIncludedInExperiment}`; fallthrough included `{flag.FallthroughIncludedInExperiment}`; all targets `{flag.ExperimentIncludeAllTargets}` | `{flag.Experimentation}` |");
+                var rule = string.IsNullOrWhiteSpace(flag.RuleProperty) ? "none" : $"{flag.RuleProperty} `{flag.RuleValue}`";
+                sb.AppendLine($"| `{flag.Key}` | `{flag.Type}` | `{flag.FinalEnabled.ToString().ToLowerInvariant()}` | {flag.FinalVariations} | {rule} | {flag.RuleTraffic} | {flag.FallthroughTraffic}; rule included `{flag.RuleIncludedInExperiment}`; fallthrough included `{flag.FallthroughIncludedInExperiment}`; all targets `{flag.ExperimentIncludeAllTargets}` | `{flag.Experimentation}` |");
             }
         }
 
