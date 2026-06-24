@@ -182,7 +182,7 @@ if ($manifestJson.reporting.offlineModesWriteReports -ne $false) {
 
 $auditText = Get-Content -Raw -LiteralPath $Audit
 foreach ($requiredAuditText in @(
-    "Full completion requires a live run with a real FeatBit access token",
+    "Full completion requires a live run with either a real FeatBit access token or",
     "Live evidence required",
     "offline modes intentionally write no reports"
 )) {
@@ -254,4 +254,4 @@ if ($newReports.Count -gt 0) {
 }
 
 Write-Host "==> Verification complete"
-Write-Host "No-token E2E assets are ready. Live E2E still requires a real FeatBit access token."
+Write-Host "No-token E2E assets are ready. Live E2E still requires either an access token or login credentials."

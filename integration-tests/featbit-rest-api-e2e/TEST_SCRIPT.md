@@ -22,13 +22,13 @@ After a successful live run, the test should produce:
 
 ## Prerequisites
 
-- A valid FeatBit OpenAPI access token
-- The token has permission to create project/env/flag/segment/release-decision resources in the target workspace
+- Either a valid FeatBit OpenAPI access token, or local login credentials for `/api/v1/identity/login-by-email`
+- The authenticated user/token has permission to create project/env/flag/segment/release-decision resources in the target workspace
 - The target API, evaluation/event, and streaming services are reachable
 - The local machine has .NET SDK installed and can restore `FeatBit.ServerSdk`
-- For the Codex-agent topology cycle, a tester logs in to the freshly started
-  local UI and creates the project, environment, and global access token before
-  the agent runs this script with `-ProjectKey` and `-EnvId`
+- For the Codex-agent topology cycle, the runner logs in as the seeded local
+  test user and creates the project/environment through APIs. The tester only
+  performs the final UI/report review.
 
 Default SaaS endpoints:
 
@@ -59,7 +59,8 @@ Local fixed-port service execution:
 
 ```powershell
 .\integration-tests\featbit-rest-api-e2e\run-featbit-rest-api-e2e.ps1 `
-  -AccessToken "<access-token>" `
+  -LoginEmail test@featbit.com `
+  -LoginPassword 123456 `
   -ApiUrl http://localhost:5000 `
   -EventUrl http://localhost:5100 `
   -StreamingUrl ws://localhost:5100 `

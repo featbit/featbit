@@ -43,6 +43,7 @@ if (args.Any(x => x is "--openapi-preflight"))
 }
 
 var options = E2EOptions.Parse(args);
+options = await ResolveAccessTokenAsync(options);
 Directory.CreateDirectory(options.ReportDir);
 
 var report = new TestReport(options);
@@ -945,6 +946,8 @@ static async Task RunSelfCheckAsync(string[] args)
         "http://self-check.invalid",
         "ws://self-check.invalid",
         "self-check-token",
+        "",
+        "",
         "raw",
         "",
         "playground",
@@ -1237,6 +1240,122 @@ static string Env(string key, string fallback) =>
     Environment.GetEnvironmentVariable(key) is { Length: > 0 } value ? value : fallback;
 
 static string NormalizeBaseUrl(string value) => new Uri(value).ToString().TrimEnd('/');
+
+static async Task<E2EOptions> ResolveAccessTokenAsync(E2EOptions options)
+{
+    if (!string.IsNullOrWhiteSpace(options.AccessToken))
+    {
+        return options;
+    }
+
+    if (string.IsNullOrWhiteSpace(options.LoginEmail) || string.IsNullOrWhiteSpace(options.LoginPassword))
+    {
+        throw new ArgumentException("Access token is required unless --login-email and --login-password are provided.");
+    }
+
+    using var http = new HttpClient
+    {
+        BaseAddress = new Uri(options.ApiUrl)
+    };
+
+    var response = await http.PostAsJsonAsync(
+        "/api/v1/identity/login-by-email",
+        new
+        {
+            email = options.LoginEmail,
+            password = options.LoginPassword
+        });
+    var body = await response.Content.ReadAsStringAsync();
+    if (!response.IsSuccessStatusCode)
+    {
+        throw new HttpRequestException($"POST /api/v1/identity/login-by-email failed with {(int)response.StatusCode} {response.ReasonPhrase}: {body}");
+    }
+
+    var root = string.IsNullOrWhiteSpace(body) ? null : JsonNode.Parse(body);
+    if (root is JsonObject obj &&
+        obj.TryGetPropertyValue("success", out var successNode) &&
+        successNode?.GetValueKind() is JsonValueKind.False)
+    {
+        var errors = obj["errors"]?.ToJsonString() ?? body;
+        throw new InvalidOperationException($"POST /api/v1/identity/login-by-email returned success=false: {errors}");
+    }
+
+    var token = NodeString(root?["data"], "token");
+    if (string.IsNullOrWhiteSpace(token))
+    {
+        token = NodeString(root, "token");
+    }
+
+    if (string.IsNullOrWhiteSpace(token))
+    {
+        throw new InvalidOperationException("POST /api/v1/identity/login-by-email did not return data.token.");
+    }
+
+    var workspace = string.IsNullOrWhiteSpace(options.Workspace)
+        ? await ResolveWorkspaceIdAsync(http, token)
+        : options.Workspace;
+    var (organization, organizationKey) = string.IsNullOrWhiteSpace(options.Organization)
+        ? await ResolveOrganizationAsync(http, token, workspace)
+        : (options.Organization, options.OrganizationKey);
+
+    return options with
+    {
+        AccessToken = token,
+        AuthMode = "bearer",
+        Workspace = workspace,
+        Organization = organization,
+        OrganizationKey = string.IsNullOrWhiteSpace(organizationKey) ? options.OrganizationKey : organizationKey
+    };
+}
+
+static async Task<string> ResolveWorkspaceIdAsync(HttpClient http, string token)
+{
+    var workspaces = await SendAuthenticatedAsync(http, token, null, "/api/v1/user/workspaces");
+    var workspace = workspaces as JsonArray ?? throw new InvalidOperationException("GET /api/v1/user/workspaces did not return an array.");
+    var id = workspace.Select(x => NodeString(x, "id")).FirstOrDefault(x => !string.IsNullOrWhiteSpace(x));
+    return string.IsNullOrWhiteSpace(id)
+        ? throw new InvalidOperationException("GET /api/v1/user/workspaces did not return a workspace id.")
+        : id;
+}
+
+static async Task<(string Id, string Key)> ResolveOrganizationAsync(HttpClient http, string token, string workspaceId)
+{
+    var organizations = await SendAuthenticatedAsync(http, token, workspaceId, "/api/v1/organizations?isSsoFirstLogin=false");
+    var organization = organizations as JsonArray ?? throw new InvalidOperationException("GET /api/v1/organizations did not return an array.");
+    var first = organization.FirstOrDefault(x => !string.IsNullOrWhiteSpace(NodeString(x, "id")))
+        ?? throw new InvalidOperationException("GET /api/v1/organizations did not return an organization id.");
+    return (NodeString(first, "id"), NodeString(first, "key"));
+}
+
+static async Task<JsonNode?> SendAuthenticatedAsync(HttpClient http, string token, string? workspaceId, string path)
+{
+    using var request = new HttpRequestMessage(HttpMethod.Get, path);
+    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+    if (!string.IsNullOrWhiteSpace(workspaceId))
+    {
+        request.Headers.TryAddWithoutValidation("Workspace", workspaceId);
+    }
+
+    var response = await http.SendAsync(request);
+    var body = await response.Content.ReadAsStringAsync();
+    if (!response.IsSuccessStatusCode)
+    {
+        throw new HttpRequestException($"GET {path} failed with {(int)response.StatusCode} {response.ReasonPhrase}: {body}");
+    }
+
+    var root = string.IsNullOrWhiteSpace(body) ? null : JsonNode.Parse(body);
+    if (root is JsonObject obj &&
+        obj.TryGetPropertyValue("success", out var successNode) &&
+        successNode?.GetValueKind() is JsonValueKind.False)
+    {
+        var errors = obj["errors"]?.ToJsonString() ?? body;
+        throw new InvalidOperationException($"GET {path} returned success=false: {errors}");
+    }
+
+    return root is JsonObject wrapper && wrapper.TryGetPropertyValue("data", out var data)
+        ? data
+        : root;
+}
 
 static string NormalizeOpenApiPath(string path) =>
     Regex.Replace(path, "\\{[^}/]+\\}", "{}", RegexOptions.CultureInvariant);
@@ -2018,6 +2137,8 @@ sealed record E2EOptions(
     string EventUrl,
     string StreamingUrl,
     string AccessToken,
+    string LoginEmail,
+    string LoginPassword,
     string AuthMode,
     string Organization,
     string OrganizationKey,
@@ -2041,11 +2162,8 @@ sealed record E2EOptions(
         var eventUrl = NormalizeBaseUrl(Get(bag, "event-url", Env("FEATBIT_EVENT_URL", "https://app-eval.featbit.co")));
         var streamingUrl = NormalizeBaseUrl(Get(bag, "streaming-url", Env("FEATBIT_STREAMING_URL", ToStreamingUrl(eventUrl))));
         var token = Get(bag, "access-token", Env("FEATBIT_ACCESS_TOKEN", ""));
-
-        if (string.IsNullOrWhiteSpace(token))
-        {
-            throw new ArgumentException("Access token is required. Set FEATBIT_ACCESS_TOKEN or pass --access-token.");
-        }
+        var loginEmail = Get(bag, "login-email", Env("FEATBIT_LOGIN_EMAIL", ""));
+        var loginPassword = Get(bag, "login-password", Env("FEATBIT_LOGIN_PASSWORD", ""));
 
         var projectKey = Get(bag, "project-key", Env("FEATBIT_PROJECT_KEY", ""));
         var envId = Get(bag, "env-id", Env("FEATBIT_ENV_ID", ""));
@@ -2066,6 +2184,8 @@ sealed record E2EOptions(
             eventUrl,
             streamingUrl,
             token,
+            loginEmail,
+            loginPassword,
             Get(bag, "auth-mode", Env("FEATBIT_AUTH_MODE", "raw")).ToLowerInvariant(),
             Get(bag, "organization", Env("FEATBIT_ORGANIZATION", "")),
             Get(bag, "organization-key", Env("FEATBIT_ORGANIZATION_KEY", "playground")),
@@ -2090,11 +2210,14 @@ sealed record E2EOptions(
 
         Required:
           --access-token <token> or FEATBIT_ACCESS_TOKEN
+          OR --login-email <email> and --login-password <password>
 
         Common options:
           --api-url https://app-api.featbit.co
           --event-url https://app-eval.featbit.co
           --streaming-url wss://app-eval.featbit.co
+          --login-email test@featbit.com
+          --login-password 123456
           --auth-mode raw|bearer
           --organization <organization-id>
           --organization-key <organization-key>
@@ -2118,7 +2241,9 @@ sealed record E2EOptions(
           dotnet run integration-tests/featbit-rest-api-e2e/featbit-rest-api-e2e.cs -- \
             --api-url http://localhost:5000 \
             --event-url http://localhost:5100 \
-            --streaming-url ws://localhost:5100
+            --streaming-url ws://localhost:5100 \
+            --login-email test@featbit.com \
+            --login-password 123456
 
         Offline self-check:
           dotnet run integration-tests/featbit-rest-api-e2e/featbit-rest-api-e2e.cs -- --self-check

@@ -18,10 +18,10 @@ a Markdown and JSON report.
 
 For the Codex-agent topology cycle, use the repository skill at
 [.agents/skills/featbit-e2e-test-cycle/SKILL.md](../../.agents/skills/featbit-e2e-test-cycle/SKILL.md).
-That workflow starts each local topology, waits for a tester to create the
-project/environment/global access token in the UI, runs this E2E script against
-that existing environment, waits for manual report approval, then destroys the
-topology before moving to the next one. It explicitly does not use `aspire run`.
+That workflow starts each local topology, logs in with the seeded local test
+user, creates the project/environment through APIs, waits for manual report
+approval, then destroys the topology before moving to the next one. It
+explicitly does not use `aspire run`.
 
 ## Run
 
@@ -36,7 +36,8 @@ For local fixed-port services:
 
 ```powershell
 .\integration-tests\featbit-rest-api-e2e\run-featbit-rest-api-e2e.ps1 `
-  -AccessToken "<access-token>" `
+  -LoginEmail test@featbit.com `
+  -LoginPassword 123456 `
   -ApiUrl http://localhost:5000 `
   -EventUrl http://localhost:5100 `
   -StreamingUrl ws://localhost:5100 `
@@ -44,8 +45,8 @@ For local fixed-port services:
   -MinUsersPerVariant 500
 ```
 
-For the Codex-agent skill flow, where the tester creates project/environment in
-the UI first:
+To run against an existing project/environment instead of letting the runner
+create them:
 
 ```powershell
 .\integration-tests\featbit-rest-api-e2e\run-featbit-rest-api-e2e.ps1 `
@@ -100,8 +101,8 @@ the end.
 
 `reports/` is intentionally ignored by git except for `.gitignore`.
 
-A report is meaningful only after live execution with a real access token. The
-runner then writes:
+A report is meaningful only after live execution with an access token or local
+login credentials. The runner then writes:
 
 | File | Meaning |
 | --- | --- |
@@ -121,13 +122,13 @@ validating the runner and reviewing the plan. They do not write files under
 
 ## Manual Final Inspection
 
-After a live run with a real access token, open the generated Markdown report
-and compare it against [TEST_SCRIPT.md](./TEST_SCRIPT.md#91-manual-final-inspection-checklist).
+After a live run, open the generated Markdown report and compare it against
+[TEST_SCRIPT.md](./TEST_SCRIPT.md#91-manual-final-inspection-checklist).
 That checklist is the human-readable acceptance script for the final state.
 
 ## Verification
 
-Without a live access token, use these checks to validate the local runner and
+Without live API credentials, use these checks to validate the local runner and
 the backend API contract it targets:
 
 ```powershell
@@ -174,7 +175,9 @@ dotnet run integration-tests\featbit-rest-api-e2e\featbit-rest-api-e2e.cs -- --h
 
 | Option | Environment variable | Default | Meaning |
 | --- | --- | --- | --- |
-| `--access-token` | `FEATBIT_ACCESS_TOKEN` | required | FeatBit OpenAPI access token or JWT. |
+| `--access-token` | `FEATBIT_ACCESS_TOKEN` | empty | FeatBit OpenAPI access token or JWT. Required unless login credentials are provided. |
+| `--login-email` | `FEATBIT_LOGIN_EMAIL` | empty | Login email used to call `/api/v1/identity/login-by-email` and obtain a JWT automatically. |
+| `--login-password` | `FEATBIT_LOGIN_PASSWORD` | empty | Login password used with `--login-email`. |
 | `--api-url` | `FEATBIT_API_URL` | `https://app-api.featbit.co` | FeatBit API base URL. |
 | `--event-url` | `FEATBIT_EVENT_URL` | `https://app-eval.featbit.co` | FeatBit SDK event/evaluation base URL. |
 | `--streaming-url` | `FEATBIT_STREAMING_URL` | derived from `--event-url` | FeatBit SDK streaming URL. |

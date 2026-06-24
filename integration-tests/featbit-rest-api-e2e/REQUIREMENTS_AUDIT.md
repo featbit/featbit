@@ -1,8 +1,8 @@
 # FeatBit REST API E2E Requirements Audit
 
 This audit maps the original E2E request to the concrete assets in this folder.
-It separates what is implemented and locally verified from what still requires a
-real FeatBit access token and live API execution.
+It separates what is implemented and locally verified from what still requires
+live API execution with an access token or local login credentials.
 
 ## Status Legend
 
@@ -10,13 +10,13 @@ real FeatBit access token and live API execution.
 | --- | --- |
 | Implemented | The executable runner contains the required behavior. |
 | Offline verified | The no-token verifier proves the local asset, syntax, manifest, and backend contract coverage. |
-| Live evidence required | The behavior can only be proven by running against FeatBit with a real access token. |
+| Live evidence required | The behavior can only be proven by running against FeatBit with an access token or local login credentials. |
 
 ## Requirement Mapping
 
 | Request | Runner coverage | Script/manifest coverage | Verification evidence | Status |
 | --- | --- | --- | --- | --- |
-| Use FeatBit REST API with a user-provided access token | `featbit-rest-api-e2e.cs` requires `--access-token` or `FEATBIT_ACCESS_TOKEN`, supports raw OpenAPI token and bearer modes, and sends optional organization/workspace headers. | `README.md` documents token usage and auth modes. | `verify-featbit-rest-api-e2e.ps1` validates runner help and refuses to treat offline output as a live report. | Implemented; live evidence required |
+| Use FeatBit REST API with a token or local login | `featbit-rest-api-e2e.cs` accepts `--access-token`/`FEATBIT_ACCESS_TOKEN`, or calls `/api/v1/identity/login-by-email` when `--login-email` and `--login-password` are provided. It supports raw OpenAPI token and bearer JWT modes, and sends optional organization/workspace headers. | `README.md` documents token usage, login credentials, and auth modes. | `verify-featbit-rest-api-e2e.ps1` validates runner help and refuses to treat offline output as a live report. | Implemented; live evidence required |
 | 0. Create a project and env; record ids/keys | Step 0 creates project/env, reads project, records project/env ids and keys, extracts the Server SDK secret, and masks secrets in reports. | `TEST_SCRIPT.md` Step 0 and `test-manifest.json` Step 0. | Offline verifier checks manifest and runner self-check. Live report will contain the created resource ids/keys. | Implemented; live evidence required |
 | 1. Create 10 feature flags and write key/type content | Step 1 creates exactly 10 flags covering `boolean`, `string`, `number`, and `json`, then reads each flag back. | `TEST_SCRIPT.md` and `test-manifest.json` list all 10 fixed keys and types for the `fixed-v1` data set. `--print-plan` prints the same concrete keys/types used by live E2E. | Offline verifier checks flag count, type coverage, unique keys, and printed plan output. | Implemented; offline verified |
 | 2. Mutate the 10 flags: rules, segment, toggles, variants | Step 2 creates a segment, updates exact segment targeting, changes each flag description/tags/toggle/variants/targeting. Experiment flag keeps control/treatment; non-experiment flags receive meaningful variant changes. | `TEST_SCRIPT.md` Step 2 and expected final-state tables; `test-manifest.json` Step 2 and `expectedFinalState`. | Offline verifier checks mutation assertions exist. Live runner read-after-write assertions verify the persisted state. | Implemented; live evidence required |
@@ -30,15 +30,17 @@ real FeatBit access token and live API execution.
 | Analyze project, REST API, features, and tests | Runner uses current FeatBit API endpoints, backend release-decision/experiment-stats contract tests, public Swagger preflight for management endpoints, and project-local docs. | README explains Swagger limitations and backend contract-test coverage for advisory release-decision endpoints. | `verify-featbit-rest-api-e2e.ps1` runs OpenAPI preflight and backend contract tests. | Implemented; offline verified |
 | Write fixed human-readable test script with steps, meaning, endpoints | `TEST_SCRIPT.md` is the fixed human-readable script. | `test-manifest.json` is the machine-readable inventory. | Verifier checks English-only docs and key manifest invariants. | Implemented; offline verified |
 | Make an executable test program | `featbit-rest-api-e2e.cs` is the executable single-file C# runner; `run-featbit-rest-api-e2e.ps1` is the wrapper. | README documents live and offline commands. | Verifier runs help, self-check, plan print, OpenAPI preflight, and backend contract tests. | Implemented; offline verified |
-| Produce a test report | Live mode writes Markdown and JSON reports under `reports/`; offline modes intentionally write no reports. | README and TEST_SCRIPT define report contents. | Verifier fails if offline modes create report files. A real access token is required for meaningful report generation. | Implemented; live evidence required |
+| Produce a test report | Live mode writes Markdown and JSON reports under `reports/`; offline modes intentionally write no reports. | README and TEST_SCRIPT define report contents. | Verifier fails if offline modes create report files. Live API credentials are required for meaningful report generation. | Implemented; live evidence required |
 
 ## Live Completion Gate
 
-Full completion requires a live run with a real FeatBit access token:
+Full completion requires a live run with either a real FeatBit access token or
+local login credentials:
 
 ```powershell
 .\integration-tests\featbit-rest-api-e2e\run-featbit-rest-api-e2e.ps1 `
-  -AccessToken "<access-token>"
+  -LoginEmail test@featbit.com `
+  -LoginPassword 123456
 ```
 
 The run is complete only when:

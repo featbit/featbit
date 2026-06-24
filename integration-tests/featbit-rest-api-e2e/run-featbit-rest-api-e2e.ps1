@@ -1,6 +1,8 @@
 [CmdletBinding()]
 param(
     [string]$AccessToken = $env:FEATBIT_ACCESS_TOKEN,
+    [string]$LoginEmail = $env:FEATBIT_LOGIN_EMAIL,
+    [string]$LoginPassword = $env:FEATBIT_LOGIN_PASSWORD,
     [string]$ApiUrl = $env:FEATBIT_API_URL,
     [string]$EventUrl = $env:FEATBIT_EVENT_URL,
     [string]$StreamingUrl = $env:FEATBIT_STREAMING_URL,
@@ -86,12 +88,12 @@ if ($OpenApiPreflight) {
     return
 }
 
-if ([string]::IsNullOrWhiteSpace($AccessToken)) {
-    throw "AccessToken is required for live E2E execution. Pass -AccessToken or set FEATBIT_ACCESS_TOKEN."
+if ([string]::IsNullOrWhiteSpace($AccessToken) -and
+    ([string]::IsNullOrWhiteSpace($LoginEmail) -or [string]::IsNullOrWhiteSpace($LoginPassword))) {
+    throw "AccessToken is required unless LoginEmail and LoginPassword are provided."
 }
 
 $LiveRunnerArgs = @(
-    "--access-token", $AccessToken,
     "--api-url", $ApiUrl,
     "--event-url", $EventUrl,
     "--streaming-url", $StreamingUrl,
@@ -105,6 +107,18 @@ $LiveRunnerArgs = @(
     "--cleanup", $(if ($Cleanup) { "true" } else { "false" }),
     "--report-dir", $ReportDir
 )
+
+if (-not [string]::IsNullOrWhiteSpace($AccessToken)) {
+    $LiveRunnerArgs += @("--access-token", $AccessToken)
+}
+
+if (-not [string]::IsNullOrWhiteSpace($LoginEmail) -or -not [string]::IsNullOrWhiteSpace($LoginPassword)) {
+    if ([string]::IsNullOrWhiteSpace($LoginEmail) -or [string]::IsNullOrWhiteSpace($LoginPassword)) {
+        throw "LoginEmail and LoginPassword must be provided together."
+    }
+
+    $LiveRunnerArgs += @("--login-email", $LoginEmail, "--login-password", $LoginPassword)
+}
 
 if (-not [string]::IsNullOrWhiteSpace($Organization)) {
     $LiveRunnerArgs += @("--organization", $Organization)
