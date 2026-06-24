@@ -1,11 +1,12 @@
 using System.Text;
 using Domain.Shared;
 using Infrastructure.Caches.Redis;
+using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 
 namespace Infrastructure.Store;
 
-public class RedisStore(IRedisClient redisClient) : IDbStore
+public class RedisStore(IRedisClient redisClient, ILogger<RedisStore> logger) : IDbStore
 {
     public string Name => Stores.Redis;
 
@@ -18,23 +19,23 @@ public class RedisStore(IRedisClient redisClient) : IDbStore
         // get flag keys
         var index = RedisKeys.FlagIndex(envId);
         var ids = await Redis.SortedSetRangeByScoreAsync(index, timestamp, exclude: Exclude.Start);
-        var keys = ids.Select(id => RedisKeys.Flag(id!));
+        var keys = ids.Select(id => RedisKeys.Flag(id!)).ToArray();
 
         // get flags
         var tasks = keys.Select(key => Redis.StringGetAsync(key));
         var values = await Task.WhenAll(tasks);
-        var jsonBytes = values.Select(x => (byte[])x!);
 
-        return jsonBytes;
+        return FilterOrphans(values, keys, envId, "flag");
     }
 
     public async Task<IEnumerable<byte[]>> GetFlagsAsync(IEnumerable<string> ids)
     {
-        var keys = ids.Select(RedisKeys.Flag);
+        var keys = ids.Select(RedisKeys.Flag).ToArray();
 
         var tasks = keys.Select(key => Redis.StringGetAsync(key));
         var values = await Task.WhenAll(tasks);
-        return values.Select(x => (byte[])x!);
+
+        return FilterOrphans(values, keys, envId: null, "flag");
     }
 
     public async Task<byte[]> GetSegmentAsync(string id)
@@ -50,7 +51,7 @@ public class RedisStore(IRedisClient redisClient) : IDbStore
         // get segment keys
         var index = RedisKeys.SegmentIndex(envId);
         var ids = await Redis.SortedSetRangeByScoreAsync(index, timestamp, exclude: Exclude.Start);
-        var keys = ids.Select(id => RedisKeys.Segment(id!));
+        var keys = ids.Select(id => RedisKeys.Segment(id!)).ToArray();
 
         // get segments
         var tasks = keys.Select(key => Redis.StringGetAsync(key));
@@ -59,10 +60,23 @@ public class RedisStore(IRedisClient redisClient) : IDbStore
         // for shared segments, replace empty envId with actual envId
         const string emptyEnvId = "\"envId\":\"\",";
 
-        List<byte[]> jsonBytes = [];
-        foreach (var value in values)
+        var orphans = new List<string>();
+        var jsonBytes = new List<byte[]>(values.Length);
+        for (var i = 0; i < values.Length; i++)
         {
-            var strValue = (string)value!;
+            // RedisValue.HasValue is false when the backing key is missing — i.e., the env's
+            // segment-index references a value that no longer exists. Skip the orphan so the
+            // downstream JSON parser doesn't blow up on a null byte[] / null string and abort
+            // the entire env's data-sync for one bad index entry.
+            // Likely causes: segment scope shrink (see bug #10) or a clear-then-repopulate
+            // window leaving the index ahead of the value writes.
+            if (!values[i].HasValue)
+            {
+                orphans.Add(keys[i]);
+                continue;
+            }
+
+            var strValue = (string)values[i]!;
             if (strValue.Contains(emptyEnvId))
             {
                 var newStrValue = strValue.Replace(emptyEnvId, $"\"envId\":\"{envId}\",");
@@ -70,9 +84,11 @@ public class RedisStore(IRedisClient redisClient) : IDbStore
             }
             else
             {
-                jsonBytes.Add((byte[])value!);
+                jsonBytes.Add((byte[])values[i]!);
             }
         }
+
+        LogOrphans(orphans, values.Length, envId, "segment");
 
         return jsonBytes;
     }
@@ -92,5 +108,55 @@ public class RedisStore(IRedisClient redisClient) : IDbStore
             Guid.Parse(entries[2].ToString()),
             entries[3].ToString()
         );
+    }
+
+    // Filters out RedisValues whose backing key was missing (HasValue == false) and logs the
+    // orphan keys so operators can spot accumulating drift between an env's index and its values.
+    // Without this filter, a single orphan index member produces a null byte[] that crashes
+    // JsonDocument.Parse downstream and aborts the entire env's data-sync (bug #4).
+    private IEnumerable<byte[]> FilterOrphans(
+        RedisValue[] values,
+        RedisKey[] keys,
+        Guid? envId,
+        string entityName)
+    {
+        var orphans = new List<string>();
+        var jsonBytes = new List<byte[]>(values.Length);
+        for (var i = 0; i < values.Length; i++)
+        {
+            if (values[i].HasValue)
+            {
+                jsonBytes.Add((byte[])values[i]!);
+            }
+            else
+            {
+                orphans.Add(keys[i].ToString());
+            }
+        }
+
+        LogOrphans(orphans, values.Length, envId, entityName);
+
+        return jsonBytes;
+    }
+
+    private void LogOrphans(List<string> orphans, int totalCount, Guid? envId, string entityName)
+    {
+        if (orphans.Count == 0)
+        {
+            return;
+        }
+
+        if (envId.HasValue)
+        {
+            logger.LogWarning(
+                "Orphan {EntityName} index members in env {EnvId}: {OrphanCount} of {TotalCount}. Missing keys: {MissingKeys}",
+                entityName, envId.Value, orphans.Count, totalCount, string.Join(", ", orphans));
+        }
+        else
+        {
+            logger.LogWarning(
+                "Orphan {EntityName} ids requested: {OrphanCount} of {TotalCount}. Missing keys: {MissingKeys}",
+                entityName, orphans.Count, totalCount, string.Join(", ", orphans));
+        }
     }
 }
