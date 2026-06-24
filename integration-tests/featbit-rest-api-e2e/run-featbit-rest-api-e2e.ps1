@@ -21,7 +21,7 @@ param(
     [switch]$PrintPlan,
     [switch]$OpenApiPreflight,
     [string]$SwaggerUrl = "",
-    [string]$PlanSuffix = "preview"
+    [string]$PlanSuffix = "fixed-v1"
 )
 
 Set-StrictMode -Version Latest

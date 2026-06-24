@@ -81,12 +81,12 @@ if ($manifestJson.featureFlags.Count -ne 10) {
     throw "Manifest must define exactly 10 feature flags."
 }
 
-if ($manifestJson.keyTemplates.projectKey -ne "e2e-api-{suffix}") {
-    throw "Manifest project key template does not match the runner."
+if ($manifestJson.fixedDataSet.id -ne "fixed-v1" -or $manifestJson.fixedDataSet.projectKey -ne "e2e-api-fixed-v1") {
+    throw "Manifest fixed data set does not match the runner."
 }
 
-if ($manifestJson.keyTemplates.metricSuffix -notmatch "hyphens replaced by underscores") {
-    throw "Manifest must document metricSuffix normalization."
+if ($manifestJson.fixedDataSet.metricSuffix -ne "fixed_v1") {
+    throw "Manifest must document the fixed metric suffix."
 }
 
 $types = @($manifestJson.featureFlags | ForEach-Object { $_.type } | Sort-Object -Unique)
@@ -96,14 +96,14 @@ foreach ($requiredType in @("boolean", "string", "number", "json")) {
     }
 }
 
-if ($manifestJson.metrics.primary.keyTemplate -ne "e2e_checkout_activated_{metricSuffix}") {
-    throw "Manifest primary metric template does not match the runner."
+if ($manifestJson.metrics.primary.key -ne "e2e_checkout_activated_fixed_v1") {
+    throw "Manifest primary metric key does not match the runner."
 }
 
-$guardrailTemplates = @($manifestJson.metrics.guardrails | ForEach-Object { $_.keyTemplate })
-foreach ($requiredTemplate in @("e2e_checkout_error_{metricSuffix}", "e2e_checkout_latency_ms_{metricSuffix}")) {
-    if ($guardrailTemplates -notcontains $requiredTemplate) {
-        throw "Manifest guardrail metric template '$requiredTemplate' is missing."
+$guardrailKeys = @($manifestJson.metrics.guardrails | ForEach-Object { $_.key })
+foreach ($requiredKey in @("e2e_checkout_error_fixed_v1", "e2e_checkout_latency_ms_fixed_v1")) {
+    if ($guardrailKeys -notcontains $requiredKey) {
+        throw "Manifest guardrail metric key '$requiredKey' is missing."
     }
 }
 
@@ -143,7 +143,7 @@ foreach ($requiredType in @("boolean", "string", "number", "json")) {
 }
 
 $boundFlags = @($manifestJson.expectedFinalState.flags | Where-Object { $_.experimentation -eq "bound" })
-if ($boundFlags.Count -ne 1 -or $boundFlags[0].keyTemplate -ne "rd-checkout-treatment-{suffix}") {
+if ($boundFlags.Count -ne 1 -or $boundFlags[0].key -ne "rd-checkout-treatment-fixed-v1") {
     throw "Manifest must define only the checkout treatment flag as bound to release-decision."
 }
 
@@ -217,7 +217,7 @@ try {
     }
 
     $planOutput = Invoke-CheckedOutput "Runner plan print" {
-        powershell -NoProfile -ExecutionPolicy Bypass -File $Wrapper -PrintPlan -PlanSuffix preview
+        powershell -NoProfile -ExecutionPolicy Bypass -File $Wrapper -PrintPlan -PlanSuffix fixed-v1
     }
     foreach ($requiredPlanText in @(
         '## Expected Final Feature Flag State',

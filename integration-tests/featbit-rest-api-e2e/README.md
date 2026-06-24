@@ -73,7 +73,7 @@ To print the full fixed execution plan and the 10 generated feature flag
 keys/types without a token:
 
 ```powershell
-.\integration-tests\featbit-rest-api-e2e\run-featbit-rest-api-e2e.ps1 -PrintPlan -PlanSuffix preview
+.\integration-tests\featbit-rest-api-e2e\run-featbit-rest-api-e2e.ps1 -PrintPlan -PlanSuffix fixed-v1
 ```
 
 The plan is printed to the console only. It does not write report files and is
@@ -195,7 +195,7 @@ dotnet run integration-tests\featbit-rest-api-e2e\featbit-rest-api-e2e.cs -- --h
 | `--print-plan` | | off | Print the fixed execution plan, no API calls and no report files. |
 | `--openapi-preflight` | | off | Fetch Swagger and verify advertised management endpoints, no API mutations and no report files. |
 | `--swagger-url` | | derived from `--api-url` | Optional OpenAPI JSON URL for preflight mode. |
-| `--plan-suffix` | | `plan` | Suffix used by `--print-plan` for deterministic preview keys. |
+| `--plan-suffix` | | `fixed-v1` | Suffix used by `--print-plan`; live E2E uses the fixed `fixed-v1` data set for flag and metric keys. |
 
 ## Endpoints Covered
 

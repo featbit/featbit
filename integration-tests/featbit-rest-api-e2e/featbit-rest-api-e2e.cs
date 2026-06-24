@@ -95,7 +95,7 @@ static async Task ExecuteAsync(FeatBitApiClient api, TestReport report, E2ERun r
         await CreateProjectAndEnvironmentAsync(api, report, run);
     }
 
-    var flagSpecs = FlagCatalog.Build(run.Suffix);
+    var flagSpecs = FlagCatalog.Build(run.DataSetId);
     var expectedFinalFlags = ExpectedFinalFlagState.Build(flagSpecs);
     var expectedFinalFlagByKey = expectedFinalFlags.ToDictionary(x => x.Key, StringComparer.OrdinalIgnoreCase);
     run.Flags.AddRange(flagSpecs.Select(x => new FlagRecord(x.Key, x.VariationType)));
@@ -143,7 +143,7 @@ static async Task ExecuteAsync(FeatBitApiClient api, TestReport report, E2ERun r
         "Create a real segment that will be referenced by non-experiment feature flag rules.");
     run.SegmentId = RequiredString(segment, "id");
 
-    var expectedIncludedUsers = new[] { StableUserKey(run.Suffix, 0), StableUserKey(run.Suffix, 1), StableUserKey(run.Suffix, 3) };
+    var expectedIncludedUsers = new[] { StableUserKey(0), StableUserKey(1), StableUserKey(3) };
     await api.SendAsync(
         HttpMethod.Put,
         $"/api/v1/envs/{run.EnvId}/segments/{run.SegmentId}/targeting",
@@ -525,6 +525,13 @@ static async Task ExecuteAsync(FeatBitApiClient api, TestReport report, E2ERun r
     run.TreatmentPrimaryConversionsObserved = FindConversions(variantRows, run.TreatmentVariationId);
     run.ControlPrimaryRate = controlRate;
     run.TreatmentPrimaryRate = treatmentRate;
+    var expectedControlPrimaryConversions = TargetCount(run.ControlPrimaryUsersObserved, 0.30);
+    var expectedTreatmentPrimaryConversions = TargetCount(run.TreatmentPrimaryUsersObserved, 0.45);
+    report.Assert(
+        run.ControlPrimaryConversionsObserved == expectedControlPrimaryConversions &&
+        run.TreatmentPrimaryConversionsObserved == expectedTreatmentPrimaryConversions,
+        "7.6 Deterministic primary metric counts verified",
+        $"control={run.ControlPrimaryConversionsObserved}/{run.ControlPrimaryUsersObserved}, expected={expectedControlPrimaryConversions}; treatment={run.TreatmentPrimaryConversionsObserved}/{run.TreatmentPrimaryUsersObserved}, expected={expectedTreatmentPrimaryConversions}");
     report.Assert(
         treatmentRate > controlRate,
         "7.6 Seeded primary metric direction verified",
@@ -554,6 +561,13 @@ static async Task ExecuteAsync(FeatBitApiClient api, TestReport report, E2ERun r
     var treatmentErrorRate = FindConversionRate(errorRows, run.TreatmentVariationId);
     run.ControlErrorRate = controlErrorRate;
     run.TreatmentErrorRate = treatmentErrorRate;
+    var expectedControlErrors = TargetCount(run.ControlErrorUsersObserved, 0.018);
+    var expectedTreatmentErrors = TargetCount(run.TreatmentErrorUsersObserved, 0.020);
+    report.Assert(
+        run.ControlErrorConversionsObserved == expectedControlErrors &&
+        run.TreatmentErrorConversionsObserved == expectedTreatmentErrors,
+        "7.7 Deterministic binary guardrail counts verified",
+        $"control={run.ControlErrorConversionsObserved}/{run.ControlErrorUsersObserved}, expected={expectedControlErrors}; treatment={run.TreatmentErrorConversionsObserved}/{run.TreatmentErrorUsersObserved}, expected={expectedTreatmentErrors}");
     report.Assert(
         controlErrorRate < 0.05 && treatmentErrorRate < 0.05,
         "7.7 Binary guardrail rates within threshold",
@@ -587,6 +601,11 @@ static async Task ExecuteAsync(FeatBitApiClient api, TestReport report, E2ERun r
     var treatmentLatency = FindAverageValue(latencyRows, run.TreatmentVariationId);
     run.ControlLatencyMs = controlLatency;
     run.TreatmentLatencyMs = treatmentLatency;
+    report.Assert(
+        Math.Abs(controlLatency - 340.0) < 0.0001 &&
+        Math.Abs(treatmentLatency - 320.0) < 0.0001,
+        "7.8 Deterministic continuous guardrail values verified",
+        $"controlLatency={controlLatency:0.####}, treatmentLatency={treatmentLatency:0.####}");
     report.Assert(
         treatmentLatency <= controlLatency,
         "7.8 Continuous guardrail direction verified",
@@ -863,7 +882,7 @@ static async Task<SdkValidationSummary> VerifySdkEvaluationAsync(
         }
 
         var summary = new SdkValidationSummary();
-        var representativeUsers = new[] { BuildSyntheticUser(run.Suffix, 0), BuildSyntheticUser(run.Suffix, 1) };
+        var representativeUsers = new[] { BuildSyntheticUser(0), BuildSyntheticUser(1) };
         foreach (var user in representativeUsers)
         {
             foreach (var flag in flags)
@@ -874,7 +893,7 @@ static async Task<SdkValidationSummary> VerifySdkEvaluationAsync(
             }
         }
 
-        var enterpriseUser = BuildSyntheticUser(run.Suffix, 3);
+        var enterpriseUser = BuildSyntheticUser(3);
         foreach (var flag in flags.Skip(1))
         {
             var detail = Evaluate(client, flag, enterpriseUser);
@@ -1109,10 +1128,10 @@ static async Task RunSelfCheckAsync(string[] args)
 static void PrintPlan(string[] args)
 {
     var bag = ArgBag.Parse(args);
-    var suffix = bag.Last("plan-suffix") ?? "plan";
-    var flags = FlagCatalog.Build(suffix);
+    var dataSetId = bag.Last("plan-suffix") ?? E2ERun.FixedDataSetId;
+    var flags = FlagCatalog.Build(dataSetId);
 
-    var markdown = BuildPlanMarkdown(suffix, flags);
+    var markdown = BuildPlanMarkdown(dataSetId, flags);
 
     Console.WriteLine(markdown);
     Console.WriteLine("Plan printed only. No report files were written because this was not a live E2E run.");
@@ -1222,12 +1241,13 @@ static string NormalizeBaseUrl(string value) => new Uri(value).ToString().TrimEn
 static string NormalizeOpenApiPath(string path) =>
     Regex.Replace(path, "\\{[^}/]+\\}", "{}", RegexOptions.CultureInvariant);
 
-static string BuildPlanMarkdown(string suffix, FlagSpec[] flags)
+static string BuildPlanMarkdown(string dataSetId, FlagSpec[] flags)
 {
     var sb = new StringBuilder();
     sb.AppendLine("# FeatBit REST API E2E Execution Plan");
     sb.AppendLine();
-    sb.AppendLine($"Plan suffix: `{suffix}`");
+    sb.AppendLine($"Fixed data set: `{dataSetId}`");
+    sb.AppendLine($"Metric suffix: `{dataSetId.Replace('-', '_')}`");
     sb.AppendLine();
     sb.AppendLine("## Feature Flags");
     sb.AppendLine();
@@ -1268,11 +1288,11 @@ static string BuildPlanMarkdown(string suffix, FlagSpec[] flags)
     sb.AppendLine();
     sb.AppendLine("## Expected Insight, Stats, And Analyze State");
     sb.AppendLine();
-    sb.AppendLine("- SDK pre-verifies all 10 flags for representative users, then seeds experiment evidence by evaluating only the experiment flag for every synthetic user.");
-    sb.AppendLine("- Experiment evidence uses the configured `--users` seed budget and requires each control/treatment variant to meet the configured `--min-users-per-variant` sample floor.");
-    sb.AppendLine("- Primary metric `e2e_checkout_activated_{metricSuffix}` evidence target: control rate near `30%`, treatment rate near `45%`, treatment conversion > control conversion.");
-    sb.AppendLine("- Error guardrail `e2e_checkout_error_{metricSuffix}` evidence target: control rate near `1.8%`, treatment rate near `2.0%`, both below `5.00%`.");
-    sb.AppendLine("- Latency guardrail `e2e_checkout_latency_ms_{metricSuffix}` evidence target: control average near `340ms`, treatment average near `320ms`, treatment <= control.");
+    sb.AppendLine("- SDK pre-verifies all 10 flags for representative users, then evaluates only the experiment flag for every synthetic user and records the exact SDK control/treatment assignment.");
+    sb.AppendLine("- Experiment evidence uses the configured `--users` seed budget, requires each control/treatment variant to meet the configured `--min-users-per-variant` sample floor, and deterministically selects metric users inside each assigned variant.");
+    sb.AppendLine("- Primary metric `e2e_checkout_activated_fixed_v1` evidence target: control conversions equal `Round(controlUsers * 0.30)`, treatment conversions equal `Round(treatmentUsers * 0.45)`, treatment conversion > control conversion.");
+    sb.AppendLine("- Error guardrail `e2e_checkout_error_fixed_v1` evidence target: control errors equal `Round(controlUsers * 0.018)`, treatment errors equal `Round(treatmentUsers * 0.020)`, both below `5.00%`.");
+    sb.AppendLine("- Latency guardrail `e2e_checkout_latency_ms_fixed_v1` evidence target: control average `340ms`, treatment average `320ms`, treatment <= control.");
     sb.AppendLine("- Analyze should set run status to `analyzing`, write non-empty `inputData` containing all three metric events, and write non-empty `analysisResult`.");
 
     sb.AppendLine();
@@ -1412,6 +1432,9 @@ static long FindConversions(JsonArray variantRows, string variationId)
 
     return row["conversions"]?.GetValue<long>() ?? 0;
 }
+
+static long TargetCount(long users, double rate) =>
+    (long)Math.Round(users * rate, MidpointRounding.AwayFromZero);
 
 static double FindAverageValue(JsonArray variantRows, string variationId)
 {
@@ -1597,7 +1620,7 @@ static async Task<SdkSeedSummary> SeedWithSdkAsync(
 
         var summary = new SdkSeedSummary();
         var experimentFlag = flags[0];
-        var usersByVariation = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        var assignments = new List<SeededExperimentUser>(options.Users);
 
         for (var batchStart = 0; batchStart < options.Users; batchStart += options.BatchSize)
         {
@@ -1605,27 +1628,17 @@ static async Task<SdkSeedSummary> SeedWithSdkAsync(
 
             for (var index = batchStart; index < batchEnd; index++)
             {
-                var user = BuildSyntheticUser(run.Suffix, index);
+                var user = BuildSyntheticUser(index);
                 var detail = Evaluate(client, experimentFlag, user);
                 summary.TotalEvaluations++;
                 summary.Count(experimentFlag.Key, detail.ValueId, detail.ValueText);
 
-                var currentVariationUsers = usersByVariation.GetValueOrDefault(detail.ValueId);
-                usersByVariation[detail.ValueId] = currentVariationUsers + 1;
-
-                var isTreatment = string.Equals(detail.ValueText, "true", StringComparison.OrdinalIgnoreCase);
-                if (ShouldEmitMetric(currentVariationUsers, isTreatment ? 0.45 : 0.30))
-                {
-                    client.Track(user, run.PrimaryMetric);
-                }
-
-                if (ShouldEmitMetric(currentVariationUsers, isTreatment ? 0.020 : 0.018))
-                {
-                    client.Track(user, run.ErrorMetric);
-                }
-
-                var latency = isTreatment ? 320.0 : 340.0;
-                client.Track(user, run.LatencyMetric, latency);
+                assignments.Add(new SeededExperimentUser(
+                    index,
+                    user.Key,
+                    user,
+                    detail.ValueId,
+                    detail.ValueText));
             }
 
             if (!client.FlushAndWait(TimeSpan.FromSeconds(options.FlushTimeoutSeconds)))
@@ -1640,6 +1653,56 @@ static async Task<SdkSeedSummary> SeedWithSdkAsync(
             }
         }
 
+        var primaryUserKeys = SelectMetricUserKeys(
+            assignments,
+            run.ControlVariationId,
+            rate: 0.30,
+            salt: run.PrimaryMetric)
+            .Concat(SelectMetricUserKeys(assignments, run.TreatmentVariationId, rate: 0.45, salt: run.PrimaryMetric))
+            .ToHashSet(StringComparer.Ordinal);
+
+        var errorUserKeys = SelectMetricUserKeys(
+            assignments,
+            run.ControlVariationId,
+            rate: 0.018,
+            salt: run.ErrorMetric)
+            .Concat(SelectMetricUserKeys(assignments, run.TreatmentVariationId, rate: 0.020, salt: run.ErrorMetric))
+            .ToHashSet(StringComparer.Ordinal);
+
+        for (var batchStart = 0; batchStart < assignments.Count; batchStart += options.BatchSize)
+        {
+            var batch = assignments.Skip(batchStart).Take(options.BatchSize).ToArray();
+
+            foreach (var assignment in batch)
+            {
+                if (primaryUserKeys.Contains(assignment.UserKey))
+                {
+                    client.Track(assignment.User, run.PrimaryMetric);
+                }
+
+                if (errorUserKeys.Contains(assignment.UserKey))
+                {
+                    client.Track(assignment.User, run.ErrorMetric);
+                }
+
+                var isTreatment = string.Equals(assignment.VariationValue, "true", StringComparison.OrdinalIgnoreCase);
+                var latency = isTreatment ? 320.0 : 340.0;
+                client.Track(assignment.User, run.LatencyMetric, latency);
+            }
+
+            if (!client.FlushAndWait(TimeSpan.FromSeconds(options.FlushTimeoutSeconds)))
+            {
+                var batchEnd = Math.Min(batchStart + options.BatchSize, assignments.Count);
+                throw new TimeoutException(
+                    $"Timed out after {options.FlushTimeoutSeconds} seconds while flushing SDK metric events for assigned users {batchStart}-{batchEnd - 1}.");
+            }
+
+            if (options.SeedBatchDelayMs > 0 && batchStart + options.BatchSize < assignments.Count)
+            {
+                await Task.Delay(TimeSpan.FromMilliseconds(options.SeedBatchDelayMs));
+            }
+        }
+
         return summary;
     }
     finally
@@ -1648,9 +1711,9 @@ static async Task<SdkSeedSummary> SeedWithSdkAsync(
     }
 }
 
-static FbUser BuildSyntheticUser(string suffix, int index)
+static FbUser BuildSyntheticUser(int index)
 {
-    var key = StableUserKey(suffix, index);
+    var key = StableUserKey(index);
     return FbUser.Builder(key)
         .Name(key)
         .Custom("plan", index % 3 == 0 ? "enterprise" : "free")
@@ -1658,8 +1721,29 @@ static FbUser BuildSyntheticUser(string suffix, int index)
         .Build();
 }
 
-static bool ShouldEmitMetric(int zeroBasedVariationIndex, double rate) =>
-    zeroBasedVariationIndex % 1000 < (int)Math.Round(rate * 1000, MidpointRounding.AwayFromZero);
+static IEnumerable<string> SelectMetricUserKeys(
+    IEnumerable<SeededExperimentUser> assignments,
+    string variationId,
+    double rate,
+    string salt)
+{
+    var variationAssignments = assignments
+        .Where(x => string.Equals(x.VariationId, variationId, StringComparison.OrdinalIgnoreCase))
+        .ToArray();
+    var target = (int)Math.Round(variationAssignments.Length * rate, MidpointRounding.AwayFromZero);
+
+    return variationAssignments
+        .OrderBy(x => StableSelectionKey(salt, x.UserKey), StringComparer.Ordinal)
+        .ThenBy(x => x.Index)
+        .Take(target)
+        .Select(x => x.UserKey);
+}
+
+static string StableSelectionKey(string salt, string userKey)
+{
+    var input = Encoding.UTF8.GetBytes($"{salt}:{userKey}");
+    return Convert.ToHexString(SHA256.HashData(input));
+}
 
 static EvalResult Evaluate(FbClient client, FlagSpec flag, FbUser user)
 {
@@ -1677,17 +1761,7 @@ static EvalResult FromDetail<T>(EvalDetail<T> detail, Func<T, string> valueForma
     return new EvalResult(detail.ValueId ?? "", valueFormatter(detail.Value));
 }
 
-static string StableUserKey(string suffix, int index)
-{
-    var input = Encoding.UTF8.GetBytes($"{suffix}:{index}");
-    var hash = SHA256.HashData(input);
-    var token = Convert.ToBase64String(hash[..8])
-        .TrimEnd('=')
-        .Replace('+', '-')
-        .Replace('/', '_');
-
-    return $"e2e-{suffix}-{index:0000}-{token}";
-}
+static string StableUserKey(int index) => $"e2e-user-{index:0000}";
 
 static string RequiredString(JsonNode? node, string property)
 {
@@ -2038,7 +2112,7 @@ sealed record E2EOptions(
           --print-plan
           --openapi-preflight
           --swagger-url https://app-api.featbit.co/swagger/OpenApi/swagger.json
-          --plan-suffix preview
+          --plan-suffix fixed-v1
 
         Local service example:
           dotnet run integration-tests/featbit-rest-api-e2e/featbit-rest-api-e2e.cs -- \
@@ -2050,7 +2124,7 @@ sealed record E2EOptions(
           dotnet run integration-tests/featbit-rest-api-e2e/featbit-rest-api-e2e.cs -- --self-check
 
         Offline execution plan:
-          dotnet run integration-tests/featbit-rest-api-e2e/featbit-rest-api-e2e.cs -- --print-plan --plan-suffix preview
+          dotnet run integration-tests/featbit-rest-api-e2e/featbit-rest-api-e2e.cs -- --print-plan --plan-suffix fixed-v1
 
         OpenAPI preflight:
           dotnet run integration-tests/featbit-rest-api-e2e/featbit-rest-api-e2e.cs -- --openapi-preflight
@@ -2099,22 +2173,24 @@ sealed record E2EOptions(
 
 sealed class E2ERun
 {
+    public const string FixedDataSetId = "fixed-v1";
+
     public E2ERun(E2EOptions options)
     {
-        Suffix = DateTimeOffset.UtcNow.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture) + "-" +
-                 RandomNumberGenerator.GetHexString(4).ToLowerInvariant();
-        MetricSuffix = Suffix.Replace('-', '_');
-        ProjectKey = string.IsNullOrWhiteSpace(options.ProjectKey) ? $"e2e-api-{Suffix}" : options.ProjectKey;
-        EnvKey = $"e2e-env-{Suffix}";
+        DataSetId = FixedDataSetId;
+        MetricSuffix = DataSetId.Replace('-', '_');
+        ProjectKey = string.IsNullOrWhiteSpace(options.ProjectKey) ? $"e2e-api-{DataSetId}" : options.ProjectKey;
+        EnvKey = $"e2e-env-{DataSetId}";
         EnvId = options.EnvId;
         OrganizationKey = options.OrganizationKey;
-        SegmentKey = $"e2e-segment-{Suffix}";
+        SegmentKey = $"e2e-segment-{DataSetId}";
         PrimaryMetric = $"e2e_checkout_activated_{MetricSuffix}";
         ErrorMetric = $"e2e_checkout_error_{MetricSuffix}";
         LatencyMetric = $"e2e_checkout_latency_ms_{MetricSuffix}";
     }
 
-    public string Suffix { get; }
+    public string DataSetId { get; }
+    public string Suffix => DataSetId;
     public string MetricSuffix { get; }
     public string ProjectKey { get; }
     public string EnvKey { get; set; }
@@ -2309,20 +2385,20 @@ sealed record FlagSpec(
 
 static class FlagCatalog
 {
-    public static FlagSpec[] Build(string suffix)
+    public static FlagSpec[] Build(string dataSetId)
     {
         return
         [
-            Bool("Checkout treatment", $"rd-checkout-treatment-{suffix}", enabled: true),
-            StringFlag("Banner copy", $"rd-banner-copy-{suffix}", ["control", "short", "direct"]),
-            NumberFlag("Price multiplier", $"rd-price-multiplier-{suffix}", ["1.0", "1.1", "1.2"]),
-            JsonFlag("Checkout config", $"rd-checkout-config-{suffix}"),
-            StringFlag("Onboarding flow", $"rd-onboarding-flow-{suffix}", ["classic", "guided", "compact"]),
-            NumberFlag("Risk threshold", $"rd-risk-threshold-{suffix}", ["10", "25", "50"]),
-            StringFlag("AI assistant route", $"rd-ai-assistant-route-{suffix}", ["off", "gpt-4.1-mini", "gpt-4.1"]),
-            StringFlag("Notification style", $"rd-notification-style-{suffix}", ["quiet", "badge", "toast"]),
-            StringFlag("Search ranking", $"rd-search-ranking-{suffix}", ["baseline", "semantic", "hybrid"]),
-            Bool("Emergency kill switch", $"rd-kill-switch-{suffix}", enabled: false)
+            Bool("Checkout treatment", $"rd-checkout-treatment-{dataSetId}", enabled: true),
+            StringFlag("Banner copy", $"rd-banner-copy-{dataSetId}", ["control", "short", "direct"]),
+            NumberFlag("Price multiplier", $"rd-price-multiplier-{dataSetId}", ["1.0", "1.1", "1.2"]),
+            JsonFlag("Checkout config", $"rd-checkout-config-{dataSetId}"),
+            StringFlag("Onboarding flow", $"rd-onboarding-flow-{dataSetId}", ["classic", "guided", "compact"]),
+            NumberFlag("Risk threshold", $"rd-risk-threshold-{dataSetId}", ["10", "25", "50"]),
+            StringFlag("AI assistant route", $"rd-ai-assistant-route-{dataSetId}", ["off", "gpt-4.1-mini", "gpt-4.1"]),
+            StringFlag("Notification style", $"rd-notification-style-{dataSetId}", ["quiet", "badge", "toast"]),
+            StringFlag("Search ranking", $"rd-search-ranking-{dataSetId}", ["baseline", "semantic", "hybrid"]),
+            Bool("Emergency kill switch", $"rd-kill-switch-{dataSetId}", enabled: false)
         ];
     }
 
@@ -2386,6 +2462,13 @@ sealed class SdkSeedSummary
 }
 
 sealed record EvalResult(string ValueId, string ValueText);
+
+sealed record SeededExperimentUser(
+    int Index,
+    string UserKey,
+    FbUser User,
+    string VariationId,
+    string VariationValue);
 
 sealed class SdkValidationSummary
 {
@@ -2582,7 +2665,7 @@ sealed class TestReport
         sb.AppendLine();
         sb.AppendLine("## Created Resources");
         sb.AppendLine();
-        sb.AppendLine($"- Run suffix: `{run.Suffix}`");
+        sb.AppendLine($"- Fixed data set: `{run.DataSetId}`");
         sb.AppendLine($"- Metric suffix: `{run.MetricSuffix}`");
         sb.AppendLine($"- Project: `{run.ProjectKey}` / `{run.ProjectId}`");
         sb.AppendLine($"- Environment: `{run.EnvKey}` / `{run.EnvId}`");

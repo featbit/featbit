@@ -7,81 +7,82 @@
     "streamingUrl": "wss://app-eval.featbit.co",
     "swaggerUrl": "https://app-api.featbit.co/swagger/OpenApi/swagger.json"
   },
-  "keyTemplates": {
-    "suffix": "yyyyMMddHHmmss-randomhex",
-    "metricSuffix": "{suffix} with hyphens replaced by underscores",
-    "projectKey": "e2e-api-{suffix}",
-    "environmentKey": "e2e-env-{suffix}",
-    "segmentKey": "e2e-segment-{suffix}"
+  "fixedDataSet": {
+    "id": "fixed-v1",
+    "metricSuffix": "fixed_v1",
+    "projectKey": "e2e-api-fixed-v1",
+    "environmentKey": "e2e-env-fixed-v1",
+    "segmentKey": "e2e-segment-fixed-v1",
+    "userKeyPattern": "e2e-user-0000 through e2e-user-1499 for the default 1500-user run"
   },
   "featureFlags": [
     {
-      "keyTemplate": "rd-checkout-treatment-{suffix}",
+      "key": "rd-checkout-treatment-fixed-v1",
       "type": "boolean",
       "purpose": "Release-decision experiment flag with control/treatment variants"
     },
     {
-      "keyTemplate": "rd-banner-copy-{suffix}",
+      "key": "rd-banner-copy-fixed-v1",
       "type": "string",
       "purpose": "Banner copy experiment-style flag"
     },
     {
-      "keyTemplate": "rd-price-multiplier-{suffix}",
+      "key": "rd-price-multiplier-fixed-v1",
       "type": "number",
       "purpose": "Numeric parameter flag"
     },
     {
-      "keyTemplate": "rd-checkout-config-{suffix}",
+      "key": "rd-checkout-config-fixed-v1",
       "type": "json",
       "purpose": "JSON configuration flag"
     },
     {
-      "keyTemplate": "rd-onboarding-flow-{suffix}",
+      "key": "rd-onboarding-flow-fixed-v1",
       "type": "string",
       "purpose": "Flow selection flag"
     },
     {
-      "keyTemplate": "rd-risk-threshold-{suffix}",
+      "key": "rd-risk-threshold-fixed-v1",
       "type": "number",
       "purpose": "Risk threshold flag"
     },
     {
-      "keyTemplate": "rd-ai-assistant-route-{suffix}",
+      "key": "rd-ai-assistant-route-fixed-v1",
       "type": "string",
       "purpose": "AI routing flag"
     },
     {
-      "keyTemplate": "rd-notification-style-{suffix}",
+      "key": "rd-notification-style-fixed-v1",
       "type": "string",
       "purpose": "Notification style flag"
     },
     {
-      "keyTemplate": "rd-search-ranking-{suffix}",
+      "key": "rd-search-ranking-fixed-v1",
       "type": "string",
       "purpose": "Search ranking flag"
     },
     {
-      "keyTemplate": "rd-kill-switch-{suffix}",
+      "key": "rd-kill-switch-fixed-v1",
       "type": "boolean",
       "purpose": "Kill switch flag"
     }
   ],
   "metrics": {
     "primary": {
-      "keyTemplate": "e2e_checkout_activated_{metricSuffix}",
+      "key": "e2e_checkout_activated_fixed_v1",
       "type": "binary",
       "aggregation": "once",
       "expectedDirection": "increase_good"
     },
     "guardrails": [
       {
-        "keyTemplate": "e2e_checkout_error_{metricSuffix}",
+        "key": "e2e_checkout_error_fixed_v1",
         "type": "binary",
         "aggregation": "once",
         "alarmDirection": "increase_bad"
       },
       {
-        "keyTemplate": "e2e_checkout_latency_ms_{metricSuffix}",
+        "key": "e2e_checkout_latency_ms_fixed_v1",
         "type": "continuous",
         "aggregation": "average",
         "alarmDirection": "increase_bad"
@@ -90,7 +91,7 @@
   },
   "expectedFinalState": {
     "segment": {
-      "includedUserCount": 2,
+      "includedUserCount": 3,
       "excludedUserCount": 0,
       "ruleCount": 0
     },
@@ -112,7 +113,7 @@
     },
     "flags": [
       {
-        "keyTemplate": "rd-checkout-treatment-{suffix}",
+        "key": "rd-checkout-treatment-fixed-v1",
         "type": "boolean",
         "finalEnabled": true,
         "finalVariants": [
@@ -122,7 +123,7 @@
         "experimentation": "bound"
       },
       {
-        "keyTemplate": "rd-banner-copy-{suffix}",
+        "key": "rd-banner-copy-fixed-v1",
         "type": "string",
         "finalEnabled": false,
         "finalVariants": [
@@ -134,7 +135,7 @@
         "experimentation": "not-bound"
       },
       {
-        "keyTemplate": "rd-price-multiplier-{suffix}",
+        "key": "rd-price-multiplier-fixed-v1",
         "type": "number",
         "finalEnabled": true,
         "finalVariants": [
@@ -146,7 +147,7 @@
         "experimentation": "not-bound"
       },
       {
-        "keyTemplate": "rd-checkout-config-{suffix}",
+        "key": "rd-checkout-config-fixed-v1",
         "type": "json",
         "finalEnabled": false,
         "finalVariants": [
@@ -157,7 +158,7 @@
         "experimentation": "not-bound"
       },
       {
-        "keyTemplate": "rd-onboarding-flow-{suffix}",
+        "key": "rd-onboarding-flow-fixed-v1",
         "type": "string",
         "finalEnabled": true,
         "finalVariants": [
@@ -169,7 +170,7 @@
         "experimentation": "not-bound"
       },
       {
-        "keyTemplate": "rd-risk-threshold-{suffix}",
+        "key": "rd-risk-threshold-fixed-v1",
         "type": "number",
         "finalEnabled": false,
         "finalVariants": [
@@ -181,7 +182,7 @@
         "experimentation": "not-bound"
       },
       {
-        "keyTemplate": "rd-ai-assistant-route-{suffix}",
+        "key": "rd-ai-assistant-route-fixed-v1",
         "type": "string",
         "finalEnabled": true,
         "finalVariants": [
@@ -193,7 +194,7 @@
         "experimentation": "not-bound"
       },
       {
-        "keyTemplate": "rd-notification-style-{suffix}",
+        "key": "rd-notification-style-fixed-v1",
         "type": "string",
         "finalEnabled": false,
         "finalVariants": [
@@ -205,7 +206,7 @@
         "experimentation": "not-bound"
       },
       {
-        "keyTemplate": "rd-search-ranking-{suffix}",
+        "key": "rd-search-ranking-fixed-v1",
         "type": "string",
         "finalEnabled": true,
         "finalVariants": [
@@ -217,7 +218,7 @@
         "experimentation": "not-bound"
       },
       {
-        "keyTemplate": "rd-kill-switch-{suffix}",
+        "key": "rd-kill-switch-fixed-v1",
         "type": "boolean",
         "finalEnabled": false,
         "finalVariants": [
@@ -229,9 +230,9 @@
     ],
     "insightsAndStats": {
       "ingestEndpoint": "POST /api/public/insight/track",
-      "primaryMetric": "use report exact users/conversions; each variant meets configured min users per variant; control rate near 30%; treatment rate near 45%; treatment > control",
-      "errorGuardrail": "use report exact users/errors; each variant meets configured min users per variant; control error rate near 1.8%; treatment error rate near 2.0%; both below 5.00%",
-      "latencyGuardrail": "use report exact users/sums/averages; each variant meets configured min users per variant; control average near 340ms; treatment average near 320ms; treatment <= control"
+      "primaryMetric": "use report exact users/conversions; each variant meets configured min users per variant; control conversions equal Round(controlUsers * 0.30); treatment conversions equal Round(treatmentUsers * 0.45); treatment > control",
+      "errorGuardrail": "use report exact users/errors; each variant meets configured min users per variant; control errors equal Round(controlUsers * 0.018); treatment errors equal Round(treatmentUsers * 0.020); both below 5.00%",
+      "latencyGuardrail": "use report exact users/sums/averages; each variant meets configured min users per variant; control average equals 340ms; treatment average equals 320ms; treatment <= control"
     },
     "analyze": {
       "runStatus": "analyzing",
