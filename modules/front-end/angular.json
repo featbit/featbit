@@ -52,7 +52,8 @@
               }
             ],
             "styles": [
-              "src/styles.less"
+              "src/styles.less",
+              "src/styles-dark.less"
             ],
             "stylePreprocessorOptions": {
               "includePaths": [
@@ -67,7 +68,7 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "2mb",
+                  "maximumWarning": "3mb",
                   "maximumError": "5mb"
                 },
                 {
@@ -98,7 +99,8 @@
               "namedChunks": true,
               "localize": ["zh"],
               "styles": [
-                "src/styles-zh.less"
+                "src/styles-zh.less",
+                "src/styles-dark.less"
               ]
             }
           },
@@ -138,7 +140,8 @@
               "src/assets"
             ],
             "styles": [
-              "src/styles.less"
+              "src/styles.less",
+              "src/styles-dark.less"
             ],
             "stylePreprocessorOptions": {
               "includePaths": [

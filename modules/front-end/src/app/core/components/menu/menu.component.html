@@ -26,7 +26,8 @@
                 nzMatchRouter
                 [nzPaddingLeft]="32"
                 [nzDisabled]="menu.disabled"
-                [nzSelected]="menu.selected">
+                [nzSelected]="menu.selected"
+                (click)="onLeafItemClick()">
                 @if (menuExtended) {
                   @if (menu.path) {
                     <a class="menu-item" [routerLink]="menu.path">
@@ -77,6 +78,7 @@
                 nz-submenu
                 [nzPaddingLeft]="32"
                 [nzOpen]="menu.open"
+                (nzOpenChange)="onSubmenuOpenChange(menu, $event)"
                 [nzTitle]="menu.title"
                 [nzIcon]="menu.icon"
                 [nzDisabled]="menu.disabled">
@@ -142,6 +144,9 @@
         </li>
         <li class="centered">
           <app-locale-switcher></app-locale-switcher>
+        </li>
+        <li class="centered">
+          <app-theme-switcher></app-theme-switcher>
         </li>
       </ul>
     </nz-dropdown-menu>
