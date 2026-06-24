@@ -226,111 +226,147 @@ section.menu-body {
     flex-direction: column;
     justify-content: center;
     height: 64.5px;
-    padding: 0 16px;
+    padding: 6px 12px;
 
-    .icon-text-btn {
+    .account-header {
       display: flex;
       align-items: center;
+      gap: 12px;
 
-      i {
-        color: @grey50-color;
+      .account-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: @primary-color;
+        color: #fff;
+        font-size: 16px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
       }
 
-      span {
-        color: @grey60-color;
+      .account-info {
+        overflow: hidden;
+        flex: 1;
+
+        .account-name {
+          margin: 0;
+          font-size: 14px;
+          font-weight: 600;
+          color: @grey60-color;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .account-email {
+          margin: 2px 0 0;
+          font-size: 12px;
+          color: @grey40-color;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .account-version {
+          display: inline-block;
+          font-size: 11px;
+          color: @grey40-color;
+          background: @grey5-color;
+          padding: 1px 6px;
+          border-radius: 8px;
+        }
       }
     }
   }
 }
 
-ul.user-item {
-  margin-left: 2px;
-  width: 210px;
+.account-dropdown {
+  background: #fff;
   border-radius: 12px;
-}
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.10);
+  padding: 6px 8px;
+  margin-left: 4px;
+  width: 220px;
 
-.dropdown-menu {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  background-color: white;
-  align-items: center;
-  padding: 12px 24px;
-  box-shadow: 0 4px 12px rgba(217, 217, 217, 0.5);
-  border-radius: 12px;
-  width: 218px;
-  height: 260px;
-  color: @grey60-color;
-
-  .centered {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  .dropdown-divider {
+    height: 1px;
+    background-color: @grey20-color;
+    margin: 4px 0;
   }
 
-  li {
-    width: 100%;
-    height: 52px;
-    color: @grey60-color;
-    font-size: 14px;
-    line-height: 150%;
-
-    .menu-item {
+  .dropdown-nav {
+    .nav-item {
       display: flex;
-      flex-direction: row;
       align-items: center;
-      gap: 16px;
+      gap: 12px;
+      padding: 10px 16px;
+      cursor: pointer;
+      font-size: 14px;
+      color: @grey60-color;
+      transition: background 0.15s, color 0.15s;
+      border-radius: 12px;
 
       i {
-        font-size: 20px;
+        font-size: 16px;
         color: @grey40-color;
+        flex-shrink: 0;
+        transition: color 0.15s;
       }
-    }
 
-    &:hover {
-      border-radius: 8px;
+      &:hover {
+        background: @grey5-color;
+        color: @primary-color;
+
+        i {
+          color: @primary-color;
+        }
+      }
+      &.nav-item-danger {
+        color: #ff4d4f;
+
+        i {
+          color: #ff4d4f;
+        }
+
+        &:hover {
+          background: #fff1f0;
+          color: #d9363e;
+
+          i {
+            color: #d9363e;
+          }
+        }
+      }
     }
   }
 
-  .line-container {
-    height: 12px;
-    width: 95%;
+  .dropdown-info {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 4px 10px;
+    gap: 4px;
 
-    &.bottom {
-      margin-top: 8px;
-    }
+    .dropdown-version {
+      font-size: 12px;
+      color: @grey40-color;
+      text-decoration: none;
+      transition: color 0.15s;
 
-    .line {
-      display: block;
-      height: 1px;
-      border-radius: 2px;
-      background-color: @grey20-color;
+      &:hover {
+        color: @primary-color;
+      }
     }
   }
 
   .dropdown-footer {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 4px 0;
-
-    a {
-      font-size: 12px;
-      color: @grey50-color;
-      text-decoration: none;
-
-      &:hover {
-        color: @primary-color;
-        text-decoration: underline;
-      }
-    }
-  }
-}
-
-.ant-dropdown-menu-item {
-  &:hover {
-    background-color: @grey5-color;
+    justify-content: space-between;
+    padding: 4px 8px;
   }
 }
 

@@ -19,16 +19,21 @@ export class MenuComponent implements OnInit {
   @Input() menuExtended: boolean = true;
 
   profile: IProfile;
+  userInitial: string = 'A';
   appVersion: string = environment.version;
-  constructor(
-    private messageQueueService: MessageQueueService
-  ) {
+
+  setProfile() {
     this.profile = getProfile();
+    this.userInitial = ((this.profile?.name || this.profile?.email) ?? '?').charAt(0).toUpperCase();
+  }
+
+  constructor(private messageQueueService: MessageQueueService) {
+    this.setProfile();
   }
 
   ngOnInit(): void {
     this.messageQueueService.subscribe(this.messageQueueService.topics.USER_PROFILE_CHANGED, () => {
-      this.profile = getProfile();
+      this.setProfile();
     });
   }
   toggleMenuMode() {
