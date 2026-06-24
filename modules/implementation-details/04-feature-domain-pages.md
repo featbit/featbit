@@ -47,7 +47,8 @@ Migrate the main product domains page by page while preserving backend API contr
 
 ## Workspace And Organization
 
-- Migrate settings, members/global users, projects, environments, secrets, license/plan-related views, and organization profile features.
+- Workspace: migrate settings, members/global users, projects, environments, secrets, and detailed billing/subscription/license/plan-related views.
+- Organization: migrate organization profile and organization-level settings that are not billing/subscription.
 - Keep destructive actions behind confirmation flows.
 
 ## Relay Proxies
