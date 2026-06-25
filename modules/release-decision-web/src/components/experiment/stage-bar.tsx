@@ -1,5 +1,3 @@
-"use client";
-
 import { STAGES } from "@/lib/stages";
 import { cn } from "@/lib/utils";
 import type { Experiment, ExperimentRun } from "@/lib/release-decision-types";

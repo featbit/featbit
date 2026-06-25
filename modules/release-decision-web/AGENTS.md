@@ -21,7 +21,7 @@ This is a React + Vite application that provides an interactive web UI for the *
 
 ## Architecture Conventions
 
-- This is a browser-only SPA. Do not add Next.js APIs, Server Components, server actions, or Prisma-backed frontend data access.
+- This is a browser-only SPA. Do not add frontend API routes, server-rendered components, server actions, or Prisma-backed frontend data access.
 - The Vite entry point is `src/main.tsx`; top-level routing lives in `src/App.tsx`.
 - Place reusable UI components in `src/components/`. shadcn/ui components live in `src/components/ui/`.
 - Shared utilities go in `src/lib/`.
@@ -33,7 +33,7 @@ This is a React + Vite application that provides an interactive web UI for the *
 
 ```
 src/
-  app/                 ← pages, layouts, API routes
+  app/                 ← route-shaped pages and layouts consumed by src/App.tsx
   components/
     ui/                ← shadcn/ui primitives (button, card, dialog…)
   hooks/               ← custom React hooks

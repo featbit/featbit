@@ -1,5 +1,3 @@
-"use client";
-
 import {
   useCallback,
   useEffect,
@@ -39,7 +37,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/lib/router";
 import { cn } from "@/lib/utils";
 import { analyzeExperimentRun } from "@/lib/release-decision-client-data";
 import { AnalysisView } from "./analysis-markdown";

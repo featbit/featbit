@@ -4,10 +4,8 @@ node_modules
 .env
 .env.*
 
-# Vite / legacy deployment outputs
+# Vite / deployment outputs
 dist
-.next
-.open-next
 .wrangler
 
 # Local data and generated files

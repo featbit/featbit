@@ -1,7 +1,5 @@
-"use client";
-
 import { useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/lib/router";
 import { useAuth } from "@/lib/featbit-auth/auth-context";
 import { Button } from "@/components/ui/button";
 import { LogOut, Loader2 } from "lucide-react";

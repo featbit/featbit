@@ -1,14 +1,12 @@
-"use client";
-
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/lib/router";
 import { useAuth } from "@/lib/featbit-auth/auth-context";
 import { createExperiment } from "@/lib/release-decision-client-data";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import Link from "next/link";
+import { Link } from "@/lib/router";
 
 export function NewExperimentForm() {
   const { currentProject, currentEnvironment } = useAuth();

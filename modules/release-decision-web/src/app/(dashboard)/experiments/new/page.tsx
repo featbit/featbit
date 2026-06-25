@@ -1,6 +1,6 @@
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { Link } from "@/lib/router";
 import { ArrowLeft } from "lucide-react";
 import { NewExperimentForm } from "./new-experiment-form";
 

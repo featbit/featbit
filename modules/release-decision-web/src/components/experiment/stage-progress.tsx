@@ -1,5 +1,3 @@
-"use client";
-
 import { STAGES } from "@/lib/stages";
 import { cn } from "@/lib/utils";
 import { advanceStageAction } from "@/lib/actions";

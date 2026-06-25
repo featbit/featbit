@@ -1,5 +1,3 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
 import { LogIn } from "lucide-react";
 import type { OAuthProvider } from "@/lib/featbit-auth/types";

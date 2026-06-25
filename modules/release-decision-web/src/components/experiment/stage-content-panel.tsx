@@ -1,7 +1,5 @@
-"use client";
-
 import { useState } from "react";
-import Link from "next/link";
+import { Link } from "@/lib/router";
 import { getStage } from "@/lib/stages";
 import { EditDecisionStateDialog } from "./decision-state-edit";
 import { MetricEditDialog } from "./metric-edit";

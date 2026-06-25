@@ -369,10 +369,7 @@ deferred to PR 7 (no live page to link to yet).
 ### Verification
 
 - `npx tsc --noEmit` clean.
-- `next dev` compiles all new files without warnings or errors
-  (verified via `.next/dev/logs/next-development.log` after a request
-  triggered build of the data-warehouse route — no entries beyond the
-  unrelated middleware-deprecation warning).
+- `npm run build` compiles the React + Vite app without warnings or errors.
 - `GET /data-warehouse` returns 307 → `/login?redirect=/data-warehouse`
   (auth middleware behaving normally, no SSR crash).
 
@@ -490,8 +487,8 @@ be available.
 Make the existing `POST /api/experiments/[id]/analyze` route choose between
 the FeatBit-managed track-service path (legacy default) and the Customer
 Managed Data Endpoint path based on `ExperimentRun.dataSourceMode`. Current
-release-decision analysis is centralized in the FeatBit .NET API; the Next.js
-route no longer runs local TypeScript Bayesian/Bandit analyzers.
+release-decision analysis is centralized in the FeatBit .NET API; the browser
+SPA no longer runs local TypeScript Bayesian/Bandit analyzers.
 
 ### Decisions taken
 
@@ -700,10 +697,10 @@ view of it.
    The chat panel uses them with chat-bubble typography; this page uses
    them with docs typography. Two component bodies, one library.
 
-4. **Dockerfile copies `docs/` into the runner image.** Standalone
-   Next.js output doesn't include arbitrary source files outside `.next/`,
-   so without this the runtime `readFileSync` would 500. Tiny cost
-   (handful of KB), no other consequences.
+4. **Dockerfile copies `docs/` into the static image.** Vite only emits files
+   that are part of the built client bundle or copied public assets, so docs
+   needed at runtime must be copied explicitly. Tiny cost (handful of KB), no
+   other consequences.
 
 5. **Link from the chooser dialog only.** The right moment to read the
    spec is when the user is about to set up a customer endpoint — i.e.
@@ -713,9 +710,9 @@ view of it.
 ### Files changed
 
 - `src/app/(dashboard)/data-warehouse/customer-endpoints/schema/page.tsx`
-  (new) — server component. Reads the markdown via `fs.readFileSync` and
-  hands it to the client renderer. Header strip with "Back to Data
-  Warehouse" + "Raw on GitHub" links.
+  (new) — route-shaped browser page. Renders the schema markdown in the
+  client bundle. Header strip with "Back to Data Warehouse" + "Raw on
+  GitHub" links.
 - `src/app/(dashboard)/data-warehouse/customer-endpoints/schema/schema-markdown.tsx`
   (new) — client `SchemaMarkdown` component using react-markdown +
   remark-gfm with docs typography (bigger headings, table widths,

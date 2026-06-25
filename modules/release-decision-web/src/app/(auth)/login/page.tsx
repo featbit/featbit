@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { authStorage } from "@/lib/featbit-auth/storage";

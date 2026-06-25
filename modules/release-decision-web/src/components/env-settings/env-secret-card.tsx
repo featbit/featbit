@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import { Copy, Check, KeyRound } from "lucide-react";
 import { useAuth } from "@/lib/featbit-auth/auth-context";

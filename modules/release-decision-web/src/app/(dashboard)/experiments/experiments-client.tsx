@@ -1,6 +1,4 @@
-"use client";
-
-import Link from "next/link";
+import { Link } from "@/lib/router";
 import { useEffect, useMemo, useState } from "react";
 import { getStage } from "@/lib/stages";
 import { listExperiments } from "@/lib/release-decision-client-data";

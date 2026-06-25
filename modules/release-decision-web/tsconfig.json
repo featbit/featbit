@@ -14,10 +14,7 @@
     "jsx": "react-jsx",
     "types": ["vite/client"],
     "paths": {
-      "@/*": ["./src/*"],
-      "next/image": ["./src/compat/next-image.tsx"],
-      "next/link": ["./src/compat/next-link.tsx"],
-      "next/navigation": ["./src/compat/next-navigation.ts"]
+      "@/*": ["./src/*"]
     }
   },
   "include": [

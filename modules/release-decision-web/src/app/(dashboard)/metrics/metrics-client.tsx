@@ -1,6 +1,4 @@
-"use client";
-
-import Link from "next/link";
+import { Link } from "@/lib/router";
 import { useEffect, useMemo, useState } from "react";
 import { apiGetExperiment, apiListExperiments } from "@/lib/release-decision-api";
 import { useAuth } from "@/lib/featbit-auth/auth-context";

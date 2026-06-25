@@ -2,7 +2,7 @@ using Aspire.Hosting.ApplicationModel;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-var topology = LocalTopology.ProPostgres;
+var topology = LocalTopology.Standalone;
 
 var (dbProvider, mqProvider, cacheProvider, olapProvider) = topology switch
 {

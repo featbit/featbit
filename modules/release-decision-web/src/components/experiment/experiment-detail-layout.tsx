@@ -1,7 +1,5 @@
-"use client";
-
 import { useState, useEffect, useMemo } from "react";
-import Link from "next/link";
+import { Link } from "@/lib/router";
 import { ArrowLeft, Settings, Terminal } from "lucide-react";
 import { useDashboardHeader } from "@/app/(dashboard)/layout";
 import { StageStepper } from "@/components/experiment/stage-bar";

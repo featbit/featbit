@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useState, type ReactNode } from "react";
 import {
   Check,
@@ -42,7 +40,6 @@ type StoredMcpToken = McpTokenResponse & {
   env_id: string;
 };
 
-type ShellId = "powershell" | "bash" | "zsh";
 type AgentId = "codex" | "claude" | "opencode" | "copilot" | "generic";
 
 type TabOption<T extends string> = {
@@ -51,19 +48,19 @@ type TabOption<T extends string> = {
   description?: string;
 };
 
-type ShellOption = {
-  id: ShellId;
-  label: string;
-  description: string;
-  command: string;
-  maxLines?: number;
-};
-
 type AgentOption = TabOption<AgentId> & {
   commandTitle: string;
   commandHelp: string;
   commandValue: string;
+  secondaryCommandTitle?: string;
+  secondaryCommandHelp?: string;
+  secondaryCommandValue?: string;
+  tertiaryCommandTitle?: string;
+  tertiaryCommandHelp?: string;
+  tertiaryCommandValue?: string;
   commandMaxLines?: number;
+  secondaryCommandMaxLines?: number;
+  tertiaryCommandMaxLines?: number;
 };
 
 export function CodingAgentSetupDialogContent({
@@ -76,7 +73,6 @@ export function CodingAgentSetupDialogContent({
   const [loadingToken, setLoadingToken] = useState(false);
   const [revokingToken, setRevokingToken] = useState(false);
   const [tokenError, setTokenError] = useState<string | null>(null);
-  const [selectedShell, setSelectedShell] = useState<ShellId>("powershell");
   const [selectedAgent, setSelectedAgent] = useState<AgentId>("codex");
 
   useEffect(() => {
@@ -91,51 +87,35 @@ export function CodingAgentSetupDialogContent({
   }, []);
 
   const tokenValue = token?.access_token ?? "<create-token-first>";
-  const powerShellToken = quotePowerShell(tokenValue);
-  const shellToken = quotePosixShell(tokenValue);
-  const addServerCommand =
-    "codex mcp add featbit-experimentation --url http://localhost:5000/mcp --bearer-token-env-var FEATBIT_MCP_TOKEN";
+  const codexCliCommand =
+    "codex mcp add featbit-experimentation --url http://localhost:5000/mcp";
+  const codexMcpConfig = `[mcp_servers.featbit-experimentation]
+url = "http://localhost:5000/mcp"
+http_headers = { "Authorization" = "Bearer ${quoteTomlString(tokenValue)}" }`;
+  const codexOpenConfigCommand = `# Windows PowerShell
+New-Item -ItemType Directory -Force "$env:USERPROFILE\\.codex" | Out-Null
+notepad "$env:USERPROFILE\\.codex\\config.toml"
+
+# macOS / Linux
+mkdir -p ~/.codex && ${"$"}{EDITOR:-vi} ~/.codex/config.toml`;
   const genericMcpConfig = `{
   "mcpServers": {
     "featbit-experimentation": {
       "type": "http",
       "url": "http://localhost:5000/mcp",
       "headers": {
-        "Authorization": "Bearer \${FEATBIT_MCP_TOKEN}"
+        "Authorization": "Bearer ${quoteJsonStringContent(tokenValue)}"
       }
     }
   }
 }`;
-  const skillInstallCommand = "npx skills add featbit/featbit-release-decision-skills";
-  const skillUpdateCommand = "npx skills update featbit/featbit-release-decision-skills";
+  const skillInstallCommand =
+    "npx skills add featbit/featbit-release-decision-skills --skill featbit-experimentation";
+  const startUsingPrompt = `@featbit-experimentation-skills ${experiment.id}
+
+Use the FeatBit experimentation MCP tools to inspect this experiment, continue the current release-decision workflow, and suggest the next evidence-backed action.`;
   const tokenLifetimeLabel = token ? formatDuration(token.expires_in) : null;
   const tokenExpired = token ? new Date(token.expires_at).getTime() <= Date.now() : false;
-
-  const shellOptions: ShellOption[] = [
-    {
-      id: "powershell",
-      label: "PowerShell",
-      description:
-        "FEATBIT_MCP_TOKEN is the environment variable that stores the token created above.",
-      command: `$env:FEATBIT_MCP_TOKEN="${powerShellToken}"`,
-    },
-    {
-      id: "bash",
-      label: "bash",
-      description:
-        "FEATBIT_MCP_TOKEN is the environment variable that stores the token created above.",
-      command: `export FEATBIT_MCP_TOKEN='${shellToken}'`,
-    },
-    {
-      id: "zsh",
-      label: "zsh",
-      description:
-        "FEATBIT_MCP_TOKEN is the environment variable that stores the token created above.",
-      command: `export FEATBIT_MCP_TOKEN='${shellToken}'`,
-    },
-  ];
-  const selectedShellOption =
-    shellOptions.find((option) => option.id === selectedShell) ?? shellOptions[0];
 
   const agentOptions: AgentOption[] = [
     {
@@ -144,9 +124,18 @@ export function CodingAgentSetupDialogContent({
       description: "Use your current Codex conversation.",
       commandTitle: "Codex MCP registration",
       commandHelp:
-        "Run once. Codex stores the MCP URL and reads the bearer token from FEATBIT_MCP_TOKEN.",
-      commandValue: addServerCommand,
-      commandMaxLines: 3,
+        "Configure the MCP server with the Codex CLI.",
+      commandValue: codexCliCommand,
+      commandMaxLines: 4,
+      secondaryCommandTitle: "Codex token config",
+      secondaryCommandHelp:
+        "After running the CLI command, add this static Authorization header to your Codex config. Default path: ~/.codex/config.toml on macOS/Linux, or %USERPROFILE%\\.codex\\config.toml on Windows. You can also use .codex/config.toml in this trusted project.",
+      secondaryCommandValue: codexMcpConfig,
+      secondaryCommandMaxLines: 4,
+      tertiaryCommandTitle: "Open Codex config",
+      tertiaryCommandHelp: "Use one of these commands to open or create the global Codex config file.",
+      tertiaryCommandValue: codexOpenConfigCommand,
+      tertiaryCommandMaxLines: 8,
     },
     {
       id: "claude",
@@ -180,7 +169,7 @@ export function CodingAgentSetupDialogContent({
       label: "Generic MCP",
       description: "Any HTTP MCP-capable agent.",
       commandTitle: "HTTP MCP server config",
-      commandHelp: "Use environment-variable or secret expansion for the bearer token.",
+      commandHelp: "Use this HTTP MCP server config in any compatible agent.",
       commandValue: genericMcpConfig,
       commandMaxLines: 8,
     },
@@ -287,16 +276,6 @@ export function CodingAgentSetupDialogContent({
             Use Codex, Claude Code, Copilot CLI, OpenCode, or another
             MCP-capable coding agent.
           </li>
-          <li className="flex gap-2">
-            <Check className="mt-0.5 size-3.5 shrink-0 text-primary" />
-            Install the FeatBit release-decision skill at the user or project
-            level.
-          </li>
-          <li className="flex gap-2">
-            <Check className="mt-0.5 size-3.5 shrink-0 text-primary" />
-            Connect the FeatBit MCP server. It runs on the same port as the API:
-            <code className="font-mono text-foreground">http://localhost:5000/mcp</code>.
-          </li>
         </ul>
       </div>
 
@@ -305,12 +284,11 @@ export function CodingAgentSetupDialogContent({
         title="1. Install release-decision skills"
       >
         <p>
-          Install once at the user or project level, then update when the skill
-          package changes.
+          Install the FeatBit experimentation skill once at the user or project
+          level.
         </p>
         <div className="mt-3 space-y-2">
           <CodeBlock value={skillInstallCommand} />
-          <CodeBlock value={skillUpdateCommand} />
         </div>
       </SetupSection>
 
@@ -320,8 +298,7 @@ export function CodingAgentSetupDialogContent({
       >
         <p>
           Create a scoped token, then register the MCP server in your coding
-          agent. <code>FEATBIT_MCP_TOKEN</code> is the shell variable that holds
-          the token created here.
+          agent. The registration snippets below include the token created here.
         </p>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <Button
@@ -364,24 +341,10 @@ export function CodingAgentSetupDialogContent({
                 ? "It is expired; create a new one before using MCP."
                 : `It expires ${formatDate(token.expires_at)} (${tokenLifetimeLabel}).`}
             </p>
-            <CodeBlock value={token.access_token} maxLines={3} />
           </div>
         )}
 
         <div className="mt-4 space-y-3">
-          <CommandGroup title="Set the MCP token environment variable">
-            <SegmentedTabs
-              ariaLabel="Shell"
-              options={shellOptions.map(({ id, label }) => ({ id, label }))}
-              value={selectedShell}
-              onChange={setSelectedShell}
-            />
-            <p className="mb-2 mt-2">{selectedShellOption.description}</p>
-            <CodeBlock
-              value={selectedShellOption.command}
-              maxLines={selectedShellOption.maxLines}
-            />
-          </CommandGroup>
           <SegmentedTabs
             ariaLabel="Coding agent"
             options={agentOptions}
@@ -395,6 +358,41 @@ export function CodingAgentSetupDialogContent({
               maxLines={selectedAgentOption.commandMaxLines}
             />
           </CommandGroup>
+          {selectedAgentOption.secondaryCommandValue && (
+            <CommandGroup title={selectedAgentOption.secondaryCommandTitle ?? "Additional config"}>
+              {selectedAgentOption.secondaryCommandHelp && (
+                <p className="mb-2">{selectedAgentOption.secondaryCommandHelp}</p>
+              )}
+              <CodeBlock
+                value={selectedAgentOption.secondaryCommandValue}
+                maxLines={selectedAgentOption.secondaryCommandMaxLines}
+              />
+            </CommandGroup>
+          )}
+          {selectedAgentOption.tertiaryCommandValue && (
+            <CommandGroup title={selectedAgentOption.tertiaryCommandTitle ?? "Open config"}>
+              {selectedAgentOption.tertiaryCommandHelp && (
+                <p className="mb-2">{selectedAgentOption.tertiaryCommandHelp}</p>
+              )}
+              <CodeBlock
+                value={selectedAgentOption.tertiaryCommandValue}
+                maxLines={selectedAgentOption.tertiaryCommandMaxLines}
+              />
+            </CommandGroup>
+          )}
+        </div>
+      </SetupSection>
+
+      <SetupSection
+        icon={<Check className="size-4" />}
+        title="3. Start using it"
+      >
+        <p>
+          After the skill and MCP server are configured, paste this into your
+          coding agent to start working with this experiment.
+        </p>
+        <div className="mt-3">
+          <CodeBlock value={startUsingPrompt} maxLines={5} />
         </div>
       </SetupSection>
     </div>
@@ -526,12 +524,12 @@ function CodeBlock({
   );
 }
 
-function quotePowerShell(value: string) {
-  return value.replace(/`/g, "``").replace(/"/g, '`"');
+function quoteJsonStringContent(value: string) {
+  return JSON.stringify(value).slice(1, -1);
 }
 
-function quotePosixShell(value: string) {
-  return value.replace(/'/g, "'\"'\"'");
+function quoteTomlString(value: string) {
+  return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
 }
 
 function formatDate(value: string) {

@@ -1,5 +1,3 @@
-"use client";
-
 import {
   createContext,
   useContext,
@@ -10,8 +8,7 @@ import {
   type ReactNode,
   type SetStateAction,
 } from "react";
-import Link from "next/link";
-import Image from "next/image";
+import { Link } from "@/lib/router";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { WorkspaceSwitcher } from "@/components/workspace/workspace-switcher";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
@@ -60,7 +57,7 @@ export default function DashboardLayout({
             href="/"
             className="fb-dashboard-brand"
           >
-            <Image
+            <img
               src={appPath("/logo.svg")}
               alt="FeatBit"
               width={40}

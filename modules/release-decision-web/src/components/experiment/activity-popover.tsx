@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useRef, useEffect } from "react";
 import { ScrollText } from "lucide-react";
 import type { Activity } from "@/lib/release-decision-types";

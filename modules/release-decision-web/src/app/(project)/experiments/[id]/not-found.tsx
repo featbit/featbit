@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/lib/router";
 
 export default function ExperimentNotFound() {
   return (

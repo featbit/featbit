@@ -1,5 +1,3 @@
-"use client";
-
 import { useMemo, useState } from "react";
 import type { ExperimentRun } from "@/lib/release-decision-types";
 import {

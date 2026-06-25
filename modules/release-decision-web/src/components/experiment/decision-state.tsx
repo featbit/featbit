@@ -1,5 +1,3 @@
-"use client";
-
 import { updateDecisionStateAction } from "@/lib/actions";
 import { getStage } from "@/lib/stages";
 import {

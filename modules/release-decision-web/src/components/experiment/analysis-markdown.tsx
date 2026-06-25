@@ -3,8 +3,6 @@
    Supports both Bayesian A/B/n and Bandit experiment types.
    ─────────────────────────────────────────────────────────── */
 
-"use client";
-
 import { HelpCircle } from "lucide-react";
 import {
   Tooltip,

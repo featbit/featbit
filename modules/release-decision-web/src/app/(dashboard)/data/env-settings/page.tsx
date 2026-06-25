@@ -1,5 +1,3 @@
-"use client";
-
 import { useAuth } from "@/lib/featbit-auth/auth-context";
 import { EnvSecretCard } from "@/components/env-settings/env-secret-card";
 import {
