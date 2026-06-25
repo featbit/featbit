@@ -28,9 +28,12 @@ npm run build
 npm run lint
 npm run test
 npm run test:e2e
+npm run test:e2e:containers
 ```
 
 If `node_modules` was created by a failed install, remove it manually before reinstalling dependencies. This repository's agent instructions prohibit automated bulk deletion.
+
+`npm run test:e2e:containers` starts a Testcontainers stack with Postgres and the FeatBit API server before running Playwright. Override the pinned defaults with `FEATBIT_E2E_POSTGRES_IMAGE` and `FEATBIT_E2E_API_IMAGE` when needed.
 
 ## Runtime Configuration
 

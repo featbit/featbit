@@ -10,8 +10,8 @@
     "lint": "eslint .",
     "test": "vitest run",
     "test:component": "vitest run --config vitest.config.ts",
-    "test:e2e": "playwright test",
-    "test:e2e:containers": "playwright test --config playwright.containers.config.ts",
+    "test:e2e": "node ./scripts/run-e2e.mjs",
+    "test:e2e:containers": "node ./scripts/run-e2e-containers.mjs --config playwright.containers.config.ts",
     "typecheck": "tsc -b"
   },
   "dependencies": {
