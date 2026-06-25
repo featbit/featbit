@@ -1,5 +1,5 @@
 import { ArrowLeft, Building2, Eye, GitBranch, Globe2, Lock, Mail, Moon, Sun, TrendingUp, Users } from "lucide-react";
-import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ChangeEvent, type ReactNode } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -337,8 +337,7 @@ function LoginForm({
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  async function onSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function handleLogin() {
     setErrorKey(null);
     setSuccess("");
     setIsLoading(true);
@@ -372,7 +371,7 @@ function LoginForm({
         <p className="mt-3 text-base text-muted-foreground">{t("auth.login.subtitle")}</p>
       </div>
 
-      <form className="mt-7 space-y-6" onSubmit={onSubmit}>
+      <form className="mt-7 space-y-6" onSubmit={(e) => { e.preventDefault(); void handleLogin(); }}>
         <Field
           label={t("auth.email")}
           type="email"
@@ -457,8 +456,7 @@ function SsoForm({ lang, preCheck }: { lang: Lang; preCheck: SsoPreCheck | null 
   const [workspaceKey, setWorkspaceKey] = useState(preCheck?.workspaceKey ?? "");
   const [error, setError] = useState("");
 
-  function onSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  function handleSsoSubmit() {
     setError("");
 
     const trimmedWorkspaceKey = workspaceKey.trim();
@@ -484,7 +482,7 @@ function SsoForm({ lang, preCheck }: { lang: Lang; preCheck: SsoPreCheck | null 
         <p className="mt-3 text-base text-muted-foreground">{t("auth.sso.subtitle")}</p>
       </div>
 
-      <form className="mt-14 space-y-8" onSubmit={onSubmit}>
+      <form className="mt-14 space-y-8" onSubmit={(e) => { e.preventDefault(); handleSsoSubmit(); }}>
         <Field
           label={t("auth.workspaceKey")}
           placeholder="acme-prod"
