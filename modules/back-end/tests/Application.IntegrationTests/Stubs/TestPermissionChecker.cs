@@ -9,6 +9,7 @@ namespace Application.IntegrationTests.Stubs;
 /// <c>IResourceService.GetEnvRnAsync</c>/<c>GetFlagRnAsync</c> etc. which open EF Core
 /// connections to Postgres; in CI there is no Postgres, so unauthenticated requests to
 /// <c>[Authorize(Permissions.X)]</c> routes would otherwise time out on EF retries.
+/// Per-test consumers can toggle <see cref="Grant"/> before each test to drive policy outcome.
 /// </summary>
 public class TestPermissionChecker : IPermissionChecker
 {

@@ -14,6 +14,12 @@ public sealed class PostgresCollection : ICollectionFixture<PostgresFixture>
     public const string Name = "Postgres";
 }
 
+[CollectionDefinition(FeatBitPostgresCollection.Name)]
+public sealed class FeatBitPostgresCollection : ICollectionFixture<FeatBitPostgresFixture>
+{
+    public const string Name = "FeatBitPostgres";
+}
+
 [CollectionDefinition(RedisCollection.Name)]
 public sealed class RedisCollection : ICollectionFixture<RedisFixture>
 {
