@@ -185,3 +185,73 @@ CREATE TABLE IF NOT EXISTS release_decision_run_variant_stats
 CREATE UNIQUE INDEX IF NOT EXISTS ux_release_decision_run_variant_stats_window
     ON release_decision_run_variant_stats
        (run_id, metric_event, metric_type, metric_agg, variation, window_start, window_end);
+
+CREATE TABLE IF NOT EXISTS mcp_device_authorizations
+(
+    id                       uuid primary key,
+    client_id                varchar(256) not null,
+    device_code_hash         varchar(64)  not null,
+    user_code                varchar(16)  not null,
+    env_id                   uuid         not null,
+    experiment_id            uuid         null,
+    expires_at               timestamp with time zone not null,
+    is_approved              boolean      not null default false,
+    approved_user_id         uuid         null,
+    approved_organization_id uuid         null,
+    approved_workspace_id    uuid         null,
+    created_at               timestamp with time zone not null default now(),
+    updated_at               timestamp with time zone not null default now()
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS ix_mcp_device_authorizations_device_code_hash
+    ON mcp_device_authorizations (device_code_hash);
+
+CREATE UNIQUE INDEX IF NOT EXISTS ix_mcp_device_authorizations_user_code
+    ON mcp_device_authorizations (user_code);
+
+CREATE INDEX IF NOT EXISTS ix_mcp_device_authorizations_expires_at
+    ON mcp_device_authorizations (expires_at);
+
+CREATE TABLE IF NOT EXISTS mcp_refresh_authorizations
+(
+    id              uuid primary key,
+    token_hash      varchar(64)  not null,
+    client_id       varchar(256) not null,
+    user_id         uuid         not null,
+    organization_id uuid         not null,
+    workspace_id    uuid         not null,
+    env_id          uuid         not null,
+    experiment_id   uuid         null,
+    expires_at      timestamp with time zone not null,
+    created_at      timestamp with time zone not null default now(),
+    updated_at      timestamp with time zone not null default now()
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS ix_mcp_refresh_authorizations_token_hash
+    ON mcp_refresh_authorizations (token_hash);
+
+CREATE INDEX IF NOT EXISTS ix_mcp_refresh_authorizations_expires_at
+    ON mcp_refresh_authorizations (expires_at);
+
+CREATE TABLE IF NOT EXISTS mcp_access_token_sessions
+(
+    id              uuid primary key,
+    token_id        varchar(128) not null,
+    client_id       varchar(256) not null,
+    user_id         uuid         not null,
+    organization_id uuid         not null,
+    workspace_id    uuid         not null,
+    expires_at      timestamp with time zone not null,
+    revoked_at      timestamp with time zone null,
+    created_at      timestamp with time zone not null default now(),
+    updated_at      timestamp with time zone not null default now()
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS ix_mcp_access_token_sessions_token_id
+    ON mcp_access_token_sessions (token_id);
+
+CREATE INDEX IF NOT EXISTS ix_mcp_access_token_sessions_expires_at
+    ON mcp_access_token_sessions (expires_at);
+
+CREATE INDEX IF NOT EXISTS ix_mcp_access_token_sessions_revoked_at
+    ON mcp_access_token_sessions (revoked_at);

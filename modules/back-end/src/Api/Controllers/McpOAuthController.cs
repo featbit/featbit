@@ -1,7 +1,9 @@
 using System.Security.Claims;
 using System.Text.Json.Serialization;
 using Application.Bases.Models;
+using Application.Services;
 using Api.Mcp;
+using Domain.Mcp;
 using Domain.Policies;
 using Domain.Users;
 using Infrastructure.Identity;
@@ -12,16 +14,19 @@ namespace Api.Controllers;
 
 [Route("api/v{version:apiVersion}/mcp/oauth")]
 public class McpOAuthController(
-    McpDeviceAuthorizationStore store,
+    IMcpAuthorizationStore store,
+    IEnvironmentService environmentService,
+    IOrganizationService organizationService,
     JwtOptions jwtOptions)
     : ApiControllerBase
 {
     private const int PollIntervalSeconds = 5;
     private const int TokenLifetimeDays = 30;
+    private const string McpScope = "experiment:read experiment:write experiment:analyze";
 
     [HttpPost("device/code")]
     [AllowAnonymous]
-    public ActionResult<McpDeviceCodeResponse> CreateDeviceCode(McpDeviceCodeRequest request)
+    public async Task<ActionResult<McpDeviceCodeResponse>> CreateDeviceCode(McpDeviceCodeRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.ClientId))
         {
@@ -33,11 +38,14 @@ public class McpOAuthController(
             return BadRequest(new McpOAuthError("invalid_request", "envId is required."));
         }
 
-        var authorization = store.Create(request.ClientId, request.EnvId, request.ExperimentId);
+        var (authorization, deviceCode) = await store.CreateDeviceAuthorizationAsync(
+            request.ClientId,
+            request.EnvId,
+            request.ExperimentId);
         var verificationUri = $"{Request.Scheme}://{Request.Host}/mcp/oauth/device";
 
         return new McpDeviceCodeResponse(
-            authorization.DeviceCode,
+            deviceCode,
             authorization.UserCode,
             verificationUri,
             (int)(authorization.ExpiresAt - DateTime.UtcNow).TotalSeconds,
@@ -46,11 +54,11 @@ public class McpOAuthController(
 
     [HttpPost("token")]
     [AllowAnonymous]
-    public ActionResult<McpTokenResponse> ExchangeToken(McpTokenRequest request)
+    public async Task<ActionResult<McpTokenResponse>> ExchangeToken(McpTokenRequest request)
     {
         if (request.GrantType == "refresh_token")
         {
-            return RefreshAccessToken(request);
+            return await RefreshAccessToken(request);
         }
 
         if (request.GrantType != "urn:ietf:params:oauth:grant-type:device_code")
@@ -63,7 +71,7 @@ public class McpOAuthController(
             return BadRequest(new McpOAuthError("invalid_request", "device_code and client_id are required."));
         }
 
-        var authorization = store.FindByDeviceCode(request.DeviceCode);
+        var authorization = await store.FindDeviceAuthorizationByDeviceCodeAsync(request.DeviceCode);
         if (authorization == null)
         {
             return BadRequest(new McpOAuthError("expired_token", "The device code is expired or invalid."));
@@ -80,27 +88,63 @@ public class McpOAuthController(
         }
 
         var expiresAt = DateTime.UtcNow.AddDays(TokenLifetimeDays);
-        var tokenId = store.CreateAccessTokenSession(authorization, expiresAt);
+        var tokenId = await store.CreateAccessTokenSessionAsync(authorization, expiresAt);
         var accessToken = IssueMcpAccessToken(authorization, tokenId, expiresAt);
-        var refreshToken = store.CreateRefreshToken(authorization);
-        store.Remove(authorization);
+        var refreshToken = await store.CreateRefreshTokenAsync(authorization);
+        await store.RemoveDeviceAuthorizationAsync(authorization);
 
         return new McpTokenResponse(
             accessToken,
             refreshToken,
             "Bearer",
             TokenLifetimeDays * 24 * 60 * 60,
-            "experiment:read experiment:write experiment:analyze");
+            McpScope);
     }
 
-    [HttpPost("device/authorize")]
     [Authorize(Permissions.CanAccessEnv)]
-    [Route("~/api/v{version:apiVersion}/envs/{envId:guid}/release-decision/mcp/oauth/device/authorize")]
-    public ActionResult<ApiResponse<McpDeviceAuthorizeResponse>> AuthorizeDeviceCode(
+    [HttpPost("~/api/v{version:apiVersion}/envs/{envId:guid}/release-decision/mcp/oauth/token")]
+    public async Task<ActionResult<McpTokenResponse>> CreateScopedToken(
+        Guid envId,
+        McpScopedTokenRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.ClientId))
+        {
+            return BadRequest(new McpOAuthError("invalid_request", "client_id is required."));
+        }
+
+        var (organizationId, workspaceId) = await ResolveMcpTokenScopeAsync(envId);
+        if (organizationId == Guid.Empty || workspaceId == Guid.Empty)
+        {
+            return BadRequest(ApiResponse<McpTokenResponse>.Error("missing-workspace-context"));
+        }
+
+        var authorization = McpDeviceAuthorization.Create(
+            request.ClientId,
+            envId,
+            request.ExperimentId,
+            DateTime.UtcNow.AddMinutes(PollIntervalSeconds)).Authorization;
+        authorization.Approve(CurrentUser.Id, organizationId, workspaceId);
+
+        var expiresAt = DateTime.UtcNow.AddDays(TokenLifetimeDays);
+        var tokenId = await store.CreateAccessTokenSessionAsync(authorization, expiresAt);
+        var accessToken = IssueMcpAccessToken(authorization, tokenId, expiresAt);
+        var refreshToken = await store.CreateRefreshTokenAsync(authorization);
+
+        return new McpTokenResponse(
+            accessToken,
+            refreshToken,
+            "Bearer",
+            TokenLifetimeDays * 24 * 60 * 60,
+            McpScope);
+    }
+
+    [Authorize(Permissions.CanAccessEnv)]
+    [HttpPost("~/api/v{version:apiVersion}/envs/{envId:guid}/release-decision/mcp/oauth/device/authorize")]
+    public async Task<ActionResult<ApiResponse<McpDeviceAuthorizeResponse>>> AuthorizeDeviceCode(
         Guid envId,
         McpDeviceAuthorizeRequest request)
     {
-        var authorization = store.FindByUserCode(request.UserCode);
+        var authorization = await store.FindDeviceAuthorizationByUserCodeAsync(request.UserCode);
         if (authorization == null)
         {
             return BadRequest(ApiResponse<McpDeviceAuthorizeResponse>.Error("invalid-device-code"));
@@ -111,14 +155,13 @@ public class McpOAuthController(
             return Forbid();
         }
 
-        var organizationId = Request.OrganizationId();
-        var workspaceId = Request.WorkspaceId();
+        var (organizationId, workspaceId) = await ResolveMcpTokenScopeAsync(envId);
         if (organizationId == Guid.Empty || workspaceId == Guid.Empty)
         {
             return BadRequest(ApiResponse<McpDeviceAuthorizeResponse>.Error("missing-workspace-context"));
         }
 
-        authorization.Approve(CurrentUser.Id, organizationId, workspaceId);
+        await store.ApproveDeviceAuthorizationAsync(authorization, CurrentUser.Id, organizationId, workspaceId);
 
         return Ok(new McpDeviceAuthorizeResponse(
             authorization.ClientId,
@@ -129,7 +172,7 @@ public class McpOAuthController(
 
     [HttpPost("revoke")]
     [AllowAnonymous]
-    public ActionResult<McpOAuthError?> RevokeToken(McpTokenRevokeRequest request)
+    public async Task<ActionResult<McpOAuthError?>> RevokeToken(McpTokenRevokeRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.AccessToken))
         {
@@ -142,18 +185,18 @@ public class McpOAuthController(
             return BadRequest(new McpOAuthError("invalid_token", "The access token is malformed."));
         }
 
-        store.RevokeAccessToken(tokenId);
+        await store.RevokeAccessTokenAsync(tokenId);
         return Ok();
     }
 
-    private ActionResult<McpTokenResponse> RefreshAccessToken(McpTokenRequest request)
+    private async Task<ActionResult<McpTokenResponse>> RefreshAccessToken(McpTokenRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.RefreshToken) || string.IsNullOrWhiteSpace(request.ClientId))
         {
             return BadRequest(new McpOAuthError("invalid_request", "refresh_token and client_id are required."));
         }
 
-        var rotated = store.RotateRefreshToken(request.RefreshToken, request.ClientId);
+        var rotated = await store.RotateRefreshTokenAsync(request.RefreshToken, request.ClientId);
         if (rotated == null)
         {
             return BadRequest(new McpOAuthError("invalid_grant", "The refresh token is expired or invalid."));
@@ -161,7 +204,7 @@ public class McpOAuthController(
 
         var (refreshToken, authorization) = rotated.Value;
         var expiresAt = DateTime.UtcNow.AddDays(TokenLifetimeDays);
-        var tokenId = store.CreateAccessTokenSession(authorization, expiresAt);
+        var tokenId = await store.CreateAccessTokenSessionAsync(authorization, expiresAt);
         var accessToken = IssueMcpAccessToken(authorization, tokenId, expiresAt);
 
         return new McpTokenResponse(
@@ -169,7 +212,7 @@ public class McpOAuthController(
             refreshToken,
             "Bearer",
             TokenLifetimeDays * 24 * 60 * 60,
-            "experiment:read experiment:write experiment:analyze");
+            McpScope);
     }
 
     private string IssueMcpAccessToken(McpDeviceAuthorization authorization, string tokenId, DateTime expiresAt)
@@ -188,6 +231,27 @@ public class McpOAuthController(
             tokenId,
             expiresAt);
 
+    private async Task<(Guid OrganizationId, Guid WorkspaceId)> ResolveMcpTokenScopeAsync(Guid envId)
+    {
+        var organizationId = Request.OrganizationId();
+        var workspaceId = Request.WorkspaceId();
+        if (organizationId != Guid.Empty && workspaceId != Guid.Empty)
+        {
+            return (organizationId, workspaceId);
+        }
+
+        var descriptor = await environmentService.GetResourceDescriptorAsync(envId);
+        if (descriptor == null)
+        {
+            return (Guid.Empty, Guid.Empty);
+        }
+
+        var organization = await organizationService.GetAsync(descriptor.Organization.Id);
+        return (
+            organization.Id,
+            organization.WorkspaceId);
+    }
+
     private string IssueMcpAccessToken(
         Guid userId,
         Guid organizationId,
@@ -204,7 +268,7 @@ public class McpOAuthController(
             new(McpClaimTypes.TokenType, McpClaimTypes.McpTokenType),
             new(McpClaimTypes.OrgId, organizationId.ToString()),
             new(McpClaimTypes.WorkspaceId, workspaceId.ToString()),
-            new(McpClaimTypes.Scope, "experiment:read experiment:write experiment:analyze")
+            new(McpClaimTypes.Scope, McpScope)
         };
 
         var descriptor = new SecurityTokenDescriptor
@@ -263,6 +327,12 @@ public record McpTokenRequest(
     string? ClientId,
     [property: JsonPropertyName("refresh_token")]
     string? RefreshToken);
+
+public record McpScopedTokenRequest(
+    [property: JsonPropertyName("client_id")]
+    string ClientId,
+    [property: JsonPropertyName("experiment_id")]
+    Guid? ExperimentId);
 
 public record McpTokenRevokeRequest(
     [property: JsonPropertyName("access_token")]

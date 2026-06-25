@@ -40,6 +40,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.ApplyConfiguration(new ReleaseDecisionExposureEventConfiguration());
         modelBuilder.ApplyConfiguration(new ReleaseDecisionMetricEventConfiguration());
         modelBuilder.ApplyConfiguration(new AccessTokenConfiguration());
+        modelBuilder.ApplyConfiguration(new McpDeviceAuthorizationConfiguration());
+        modelBuilder.ApplyConfiguration(new McpRefreshAuthorizationConfiguration());
+        modelBuilder.ApplyConfiguration(new McpAccessTokenSessionConfiguration());
         modelBuilder.ApplyConfiguration(new RelayProxyConfiguration());
         modelBuilder.ApplyConfiguration(new WebhookConfiguration());
         modelBuilder.ApplyConfiguration(new WebhookDeliveryConfiguration());

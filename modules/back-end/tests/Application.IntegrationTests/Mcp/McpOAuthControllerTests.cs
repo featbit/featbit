@@ -85,6 +85,20 @@ public class McpOAuthControllerTests
     }
 
     [Fact]
+    public async Task CreateScopedToken_UsesEnvironmentScopeWhenWorkspaceHeadersAreMissing()
+    {
+        var response = await _app.PostAsync(
+            $"/api/v1/envs/{TestWorkspace.Id}/release-decision/mcp/oauth/token",
+            new
+            {
+                client_id = "featbit-coding-agent",
+                experiment_id = TestReleaseDecisionExperimentService.ExperimentId
+            });
+
+        await Verify(await NormalizeTokenResponseAsync(response));
+    }
+
+    [Fact]
     public async Task AuthorizeDeviceCode_EnvMismatch()
     {
         var createResponse = await _app.PostAsync("/api/v1/mcp/oauth/device/code", new

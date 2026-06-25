@@ -25,3 +25,14 @@ db.ReleaseDecisionRunVariantStats.createIndex(
     },
     { unique: true }
 );
+
+db.McpDeviceAuthorizations.createIndex({ deviceCodeHash: 1 }, { unique: true });
+db.McpDeviceAuthorizations.createIndex({ userCode: 1 }, { unique: true });
+db.McpDeviceAuthorizations.createIndex({ expiresAt: 1 });
+
+db.McpRefreshAuthorizations.createIndex({ tokenHash: 1 }, { unique: true });
+db.McpRefreshAuthorizations.createIndex({ expiresAt: 1 });
+
+db.McpAccessTokenSessions.createIndex({ tokenId: 1 }, { unique: true });
+db.McpAccessTokenSessions.createIndex({ expiresAt: 1 });
+db.McpAccessTokenSessions.createIndex({ revokedAt: 1 });

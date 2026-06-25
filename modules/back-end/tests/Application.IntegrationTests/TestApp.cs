@@ -43,9 +43,11 @@ public class TestApp : WebApplicationFactory<Program>
             collection.Replace(ServiceDescriptor.Transient<IWorkspaceService, TestWorkspaceService>());
             collection.Replace(ServiceDescriptor.Transient<IOrganizationService, TestOrganizationService>());
             collection.Replace(ServiceDescriptor.Transient<IUserService, TestUserService>());
+            collection.Replace(ServiceDescriptor.Transient<IEnvironmentService, TestEnvironmentService>());
             collection.Replace(ServiceDescriptor.Transient<IRefreshTokenService, TestRefreshTokenService>());
             collection.Replace(ServiceDescriptor.Transient<IPermissionChecker, TestPermissionChecker>());
             collection.Replace(ServiceDescriptor.Transient<IAccessTokenService, TestAccessTokenService>());
+            collection.Replace(ServiceDescriptor.Singleton<IMcpAuthorizationStore, TestMcpAuthorizationStore>());
             collection.Replace(ServiceDescriptor.Transient<IReleaseDecisionExperimentService, TestReleaseDecisionExperimentService>());
             collection.Replace(ServiceDescriptor.Transient<IExperimentStatsService, TestExperimentStatsService>());
 

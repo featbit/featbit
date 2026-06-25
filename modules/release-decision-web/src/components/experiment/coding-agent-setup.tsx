@@ -187,33 +187,13 @@ Use the FeatBit experimentation MCP tools to inspect this experiment, continue t
     setTokenError(null);
 
     try {
-      const device = await apiRequest<McpDeviceCodeResponse>(
-        "/mcp/oauth/device/code",
+      const nextToken = await apiRequest<McpTokenResponse>(
+        `/envs/${envId}/release-decision/mcp/oauth/token`,
         {
-          method: "POST",
-          skipAuth: true,
-          body: {
-            client_id: "featbit-coding-agent",
-            env_id: envId,
-          },
-        },
-      );
-
-      await apiRequest(
-        `/envs/${envId}/release-decision/mcp/oauth/device/authorize`,
-        {
-          method: "POST",
-          body: { user_code: device.user_code },
-        },
-      );
-
-      const nextToken = await apiRequest<McpTokenResponse>("/mcp/oauth/token", {
         method: "POST",
-        skipAuth: true,
         body: {
-          grant_type: "urn:ietf:params:oauth:grant-type:device_code",
-          device_code: device.device_code,
           client_id: "featbit-coding-agent",
+          experiment_id: experiment.id,
         },
       });
 

@@ -9,6 +9,7 @@ using Domain.FlagRevisions;
 using Domain.FlagSchedules;
 using Domain.Groups;
 using Domain.Members;
+using Domain.Mcp;
 using Domain.Organizations;
 using Domain.Policies;
 using Domain.Projects;
@@ -78,6 +79,9 @@ public class MongoDbClient
         { typeof(ReleaseDecisionMetricEvent), "ReleaseDecisionMetricEvents" },
 
         { typeof(AccessToken), "AccessTokens" },
+        { typeof(McpDeviceAuthorization), "McpDeviceAuthorizations" },
+        { typeof(McpRefreshAuthorization), "McpRefreshAuthorizations" },
+        { typeof(McpAccessTokenSession), "McpAccessTokenSessions" },
         { typeof(RelayProxy), "RelayProxies" },
         { typeof(Webhook), "Webhooks" },
         { typeof(WebhookDelivery), "WebhookDeliveries" }

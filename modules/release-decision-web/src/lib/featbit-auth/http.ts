@@ -14,6 +14,14 @@ export class FeatBitApiError extends Error {
   }
 }
 
+type ProblemDetails = {
+  title?: string;
+  detail?: string;
+  error?: string;
+  error_description?: string;
+  errors?: string[] | Record<string, string[]>;
+};
+
 interface RequestOptions extends Omit<RequestInit, "body"> {
   body?: unknown;
   query?: Record<string, string | number | boolean | undefined | null>;
@@ -171,9 +179,7 @@ export async function apiRequest<T = unknown>(
   }
 
   if (!response.ok) {
-    const errors =
-      (parsed as ApiEnvelope<unknown>)?.errors ??
-      (typeof parsed === "string" ? [parsed] : []);
+    const errors = extractErrors(parsed);
     const message =
       errors?.[0] || `${response.status} ${response.statusText || "Error"}`;
     throw new FeatBitApiError(message, response.status, errors);
@@ -194,4 +200,26 @@ export async function apiRequest<T = unknown>(
   }
 
   return parsed as T;
+}
+
+function extractErrors(parsed: unknown): string[] {
+  if (!parsed) return [];
+  if (typeof parsed === "string") return [parsed];
+  if (typeof parsed !== "object") return [];
+
+  const body = parsed as ProblemDetails & ApiEnvelope<unknown>;
+  if (Array.isArray(body.errors)) return body.errors;
+
+  if (body.errors && typeof body.errors === "object") {
+    return Object.values(body.errors)
+      .flat()
+      .filter((error): error is string => typeof error === "string");
+  }
+
+  if (body.error_description) return [body.error_description];
+  if (body.detail) return [body.detail];
+  if (body.title) return [body.title];
+  if (body.error) return [body.error];
+
+  return [];
 }
