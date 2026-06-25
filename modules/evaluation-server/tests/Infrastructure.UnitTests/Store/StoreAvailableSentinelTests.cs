@@ -8,6 +8,7 @@ using Xunit;
 
 namespace Infrastructure.UnitTests.Store;
 
+[Collection(StoreSingletonCollection.Name)]
 public class StoreAvailableSentinelTests
 {
     private readonly IServiceProvider _serviceProvider;
