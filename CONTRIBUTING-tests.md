@@ -149,34 +149,34 @@ If a test needs any of those, it belongs in `Application.IntegrationTests/` (in-
 
 ### Baseline (captured 2026-06-25)
 
-These are the starting coverage numbers as of the introduction of this standard. Use them as the "before" point when evaluating whether subsequent work moves the needle.
+Test counts at the introduction of this standard. Use these as the "before" point when evaluating whether subsequent work moves the needle.
 
-**Evaluation server** — 132 tests, **41% line / 40% block** overall:
+**Back-end — 864 tests total**
 
-| Module | Lines covered | Coverage |
-|---|---|---|
-| Domain | 360/570 | 63% |
-| Streaming | 724/1,174 | 62% |
-| Infrastructure | 131/1,214 | 11% |
+| Project | Tests |
+|---|---|
+| Domain.UnitTests | 443 |
+| Application.UnitTests | 193 |
+| Infrastructure.UnitTests | 7 |
+| Api.UnitTests | 48 |
+| Application.IntegrationTests | 54 |
+| Infrastructure.IntegrationTests | 119 (local-only, `Category=Integration`) |
 
-**Back-end** — 171 tests, **~9% line / ~5% block** overall:
+**Evaluation-server — 261 tests total**
 
-| Module | Lines covered | Coverage |
-|---|---|---|
-| Api | 539/2,728 | 20% |
-| Domain | 464/3,120 | 15% |
-| Infrastructure | 334/6,836 | 5% |
-| Application | 100/3,494 | 3% |
+| Project | Tests |
+|---|---|
+| Domain.UnitTests | 38 |
+| Streaming.UnitTests | 70 |
+| Infrastructure.UnitTests | 62 |
+| Application.IntegrationTests | 65 |
+| Infrastructure.IntegrationTests | 26 (local-only, `Category=Integration`) |
+
+Coverage reports are uploaded as CI artifacts (`coverage-back-end`, `coverage-evaluation-server`); no threshold gate yet — report only, until baselines stabilize.
 
 ## 11. Required cleanups (tracked separately)
 
-These items violate the rules above and will be migrated as work touches them:
-
-- **eval-server:** move `tests/Streaming.UnitTests/Shared/*` → `tests/Domain.UnitTests/Shared/` (tests target `Domain.Shared` types).
-- **eval-server:** rename `tests/Domain.UnitTests/Evaluation/DispatchAlgorithmTest.cs` → `DispatchAlgorithmTests.cs`.
-- **back-end:** move `tests/Application.IntegrationTests/Identity/IdentityServiceTests.cs` → `tests/Application.UnitTests/Identity/IdentityServiceTests.cs` (no integration host used).
-- **back-end:** rename `tests/Application.UnitTests/HandlebarTemplate/` to match the actual source path.
-- **back-end:** fix `Assert.Equal(actual, expected)` argument order in `StringHelperTests.cs`.
+These items violate the rules above and will be migrated as work touches them. _(None currently outstanding — the initial cleanup list was completed in the PR that introduced this document.)_
 
 ## 12. Backend-integration tests (Testcontainers)
 
