@@ -18,13 +18,15 @@ modules/<module>/
     TestBase/                       # module-agnostic shared helpers
     Domain.UnitTests/
     Application.UnitTests/          (back-end only)
-    Infrastructure.UnitTests/       (evaluation-server only)
+    Infrastructure.UnitTests/
     Streaming.UnitTests/            (evaluation-server only)
     Application.IntegrationTests/   # WebApplicationFactory-based
+    Infrastructure.IntegrationTests/ # Testcontainers, local-only (Category=Integration)
 ```
 
 - **`TestBase`** holds module-agnostic helpers only (loggers, generic builders, primitive fixtures). Stubs, mocks, or anything that references Domain/Application types do **not** belong here.
-- **Integration tests** (anything that boots `WebApplicationFactory<Program>`, hits the network/FS/DB, or shares an expensive fixture) live in `Application.IntegrationTests/`.
+- **`Infrastructure.UnitTests`** exists in *both* modules (back-end and evaluation-server) — every project that ships under `src/` has a matching `<Project>.UnitTests` peer.
+- **Integration tests** (anything that boots `WebApplicationFactory<Program>`, hits the network/FS/DB, or shares an expensive fixture) live in `Application.IntegrationTests/` (in-process host) or `Infrastructure.IntegrationTests/` (real backing stores via Testcontainers). See §8 and §12.
 - All other tests are **unit tests** and live in `<Project>.UnitTests/`.
 
 ## 2. Folder mirroring
@@ -129,7 +131,7 @@ Unit tests must **not**:
 - Read from or write to the filesystem (other than reading embedded test fixtures).
 - Use `Thread.Sleep` or bare `Task.Delay`.
 
-If a test needs any of those, it belongs in `Application.IntegrationTests/`.
+If a test needs any of those, it belongs in `Application.IntegrationTests/` (in-process host) or `Infrastructure.IntegrationTests/` (real Mongo/Postgres/Redis/Kafka via Testcontainers — see §12).
 
 ## 9. Time and timing
 
@@ -141,6 +143,7 @@ If a test needs any of those, it belongs in `Application.IntegrationTests/`.
 ## 10. CI and coverage
 
 - Both modules build and run their full test suite on every PR (`build-and-test-api.yml`, `build-and-test-els.yml`).
+- CI runs with `--filter "Category!=Integration"`, which **builds** `Infrastructure.IntegrationTests` (proving it compiles) but **skips** every test inside it. Testcontainers-backed tests are local-only — see §12.
 - Coverage is collected via `dotnet test --collect:"XPlat Code Coverage"` and published as a workflow artifact (`coverage-back-end`, `coverage-evaluation-server`). **No threshold gate yet** — report only, until baselines stabilize.
 - The `coverlet.collector` package must be referenced directly by each test project (not transitively through `TestBase` with `PrivateAssets="all"`, which would silently break `dotnet test --collect:"XPlat Code Coverage"`).
 
@@ -176,3 +179,44 @@ These items violate the rules above and will be migrated as work touches them:
 - **back-end:** rename `tests/Application.UnitTests/HandlebarTemplate/` to match the actual source path.
 - **back-end:** fix `Assert.Equal(actual, expected)` argument order in `StringHelperTests.cs`.
 - **both modules:** add `coverlet.collector` PackageReference directly to each test csproj.
+
+## 12. Backend-integration tests (Testcontainers)
+
+The `Infrastructure.IntegrationTests` project in each module covers code paths that hit a **real** Mongo / Postgres / Redis / Kafka instance. We use [Testcontainers for .NET](https://dotnet.testcontainers.org/) so every contributor gets a deterministic, throw-away backing store with no manual setup beyond `docker` being installed.
+
+### Local-only — never in CI
+
+- Every test in these projects is tagged `[Trait("Category", "Integration")]` (via the `IntegrationTestBase` base class).
+- Both module workflows run `dotnet test --filter "Category!=Integration"`, so the project still **builds** in CI (catching compile breaks) but no container is ever started by a GitHub-hosted runner.
+- Running locally: `dotnet test tests/Infrastructure.IntegrationTests/Infrastructure.IntegrationTests.csproj` from the module root. If Docker isn't running, each test resolves to **Skipped** with the reason `Docker is not available...` rather than failing — courtesy of the `[DockerFact]` / `[DockerTheory]` attributes.
+
+### Project layout
+
+```
+tests/Infrastructure.IntegrationTests/
+  Fixtures/
+    MongoDbFixture.cs        # IAsyncLifetime, owns one MongoDbContainer per assembly
+    PostgresFixture.cs
+    RedisFixture.cs
+    KafkaFixture.cs
+    Collections.cs           # [CollectionDefinition] per backend — share one container
+  Support/
+    DockerAvailability.cs    # cached `docker info` probe
+    DockerFactAttribute.cs   # [DockerFact] / [DockerTheory] — skip when Docker is down
+    IntegrationTestBase.cs   # [Trait("Category", "Integration")] applied here
+  Smoke/                     # one trivial test per fixture, proves the plumbing works
+```
+
+### Authoring rules
+
+1. **Every test class derives from `IntegrationTestBase`** so the `Category=Integration` trait is applied automatically. Do **not** add `[Trait]` per-method.
+2. **Every test method uses `[DockerFact]` or `[DockerTheory]`** — never plain `[Fact]` in this project. This is what makes the suite skip cleanly on a Docker-less machine instead of failing.
+3. **Share containers via the per-backend collection.** Add `[Collection(MongoCollection.Name)]` (or `PostgresCollection` / `RedisCollection` / `KafkaCollection`) to the class and inject the fixture through the constructor. Don't `new` a container inside a test.
+4. **Reset state between tests yourself.** Collection fixtures live for the whole assembly run; each test must drop/recreate its own collections, schemas, keys, or topics. Don't rely on container restart for isolation.
+5. **Folder mirroring still applies.** A test for `src/Infrastructure/Persistence/Mongo/FlagRepository.cs` lives at `tests/Infrastructure.IntegrationTests/Persistence/Mongo/FlagRepositoryTests.cs`. The `Smoke/` and `Fixtures/` folders are the only allowed exceptions.
+6. **No mocks here.** This project exists specifically because mocks aren't faithful to the real driver behaviour. If a scenario can be expressed with mocks, it belongs in `Infrastructure.UnitTests`.
+
+### Why a separate project per module (instead of one shared)?
+
+The back-end and evaluation-server `Infrastructure` assemblies are independent — different `IOptions` shapes, different DI extensions, different driver wrappers. Sharing a single integration project would force a cross-module reference graph that doesn't exist in production. The per-module fixtures are intentionally near-identical so they're easy to keep in sync, but they own their own `IServiceCollection` wiring.
+
