@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { completeLogin, getIdentityToken } from "@/features/auth/auth-api";
+import { completeLogin, getIdentityToken, getRememberedEmail } from "@/features/auth/auth-api";
 
 describe("auth persistence", () => {
   beforeEach(() => {
@@ -15,25 +15,39 @@ describe("auth persistence", () => {
     );
   });
 
-  it("stores login state in sessionStorage when remember me is off", async () => {
+  it("stores auth token in localStorage and forgets email when remember me is off", async () => {
     const navigate = vi.fn();
 
-    await completeLogin({ success: true, data: { token: "session-token" } }, navigate, "/en/app", false);
+    localStorage.setItem("remembered-email", "old@example.com");
 
-    expect(sessionStorage.getItem("token")).toBe("session-token");
-    expect(localStorage.getItem("token")).toBeNull();
-    expect(getIdentityToken()).toBe("session-token");
+    await completeLogin(
+      { success: true, data: { token: "auth-token" } },
+      navigate,
+      "/en/app",
+      { email: "user@example.com", rememberMe: false }
+    );
+
+    expect(localStorage.getItem("token")).toBe("auth-token");
+    expect(sessionStorage.getItem("token")).toBeNull();
+    expect(getIdentityToken()).toBe("auth-token");
+    expect(getRememberedEmail()).toBe("");
     expect(navigate).toHaveBeenCalledWith("/en/app");
   });
 
-  it("stores login state in localStorage when remember me is on", async () => {
+  it("stores auth token and remembered email when remember me is on", async () => {
     const navigate = vi.fn();
 
-    await completeLogin({ success: true, data: { token: "remembered-token" } }, navigate, "/en/app", true);
+    await completeLogin(
+      { success: true, data: { token: "auth-token" } },
+      navigate,
+      "/en/app",
+      { email: "user@example.com", rememberMe: true }
+    );
 
-    expect(localStorage.getItem("token")).toBe("remembered-token");
+    expect(localStorage.getItem("token")).toBe("auth-token");
     expect(sessionStorage.getItem("token")).toBeNull();
-    expect(getIdentityToken()).toBe("remembered-token");
+    expect(getIdentityToken()).toBe("auth-token");
+    expect(getRememberedEmail()).toBe("user@example.com");
     expect(navigate).toHaveBeenCalledWith("/en/app");
   });
 });

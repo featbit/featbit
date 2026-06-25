@@ -4,6 +4,7 @@ const IDENTITY_TOKEN = "token";
 const USER_PROFILE = "auth";
 const IS_SSO_FIRST_LOGIN = "is-sso-first-login";
 const LOGIN_REDIRECT_URL = "login-redirect-url";
+const REMEMBERED_EMAIL = "remembered-email";
 
 type ApiEnvelope<T> = {
   success?: boolean;
@@ -26,10 +27,6 @@ export type SsoPreCheck = {
   workspaceKey?: string;
 };
 
-function persistentStorage(rememberMe: boolean) {
-  return rememberMe ? localStorage : sessionStorage;
-}
-
 function clearAuthStorage() {
   localStorage.removeItem(IDENTITY_TOKEN);
   localStorage.removeItem(USER_PROFILE);
@@ -38,7 +35,20 @@ function clearAuthStorage() {
 }
 
 export function getIdentityToken() {
-  return localStorage.getItem(IDENTITY_TOKEN) ?? sessionStorage.getItem(IDENTITY_TOKEN);
+  return localStorage.getItem(IDENTITY_TOKEN);
+}
+
+export function getRememberedEmail() {
+  return localStorage.getItem(REMEMBERED_EMAIL) ?? "";
+}
+
+function saveRememberedEmail(email: string, rememberMe: boolean) {
+  if (rememberMe) {
+    localStorage.setItem(REMEMBERED_EMAIL, email);
+    return;
+  }
+
+  localStorage.removeItem(REMEMBERED_EMAIL);
 }
 
 function apiOrigin() {
@@ -118,7 +128,10 @@ export async function completeLogin(
   envelope: ApiEnvelope<LoginData>,
   navigate: (path: string) => void,
   fallbackPath: string,
-  rememberMe: boolean
+  options?: {
+    email?: string;
+    rememberMe?: boolean;
+  }
 ) {
   if (!envelope.success) {
     throw new Error(envelope.errors?.[0] || "Email and/or password incorrect");
@@ -129,12 +142,15 @@ export async function completeLogin(
     throw new Error("Login response did not include a token");
   }
 
-  const storage = persistentStorage(rememberMe);
   clearAuthStorage();
-  storage.setItem(IDENTITY_TOKEN, token);
+  localStorage.setItem(IDENTITY_TOKEN, token);
 
   const profile = await getProfile(token);
-  storage.setItem(USER_PROFILE, JSON.stringify(profile));
+  localStorage.setItem(USER_PROFILE, JSON.stringify(profile));
+
+  if (options?.email !== undefined) {
+    saveRememberedEmail(options.email, Boolean(options.rememberMe));
+  }
 
   if (envelope.data?.isSsoFirstLogin !== undefined) {
     localStorage.setItem(IS_SSO_FIRST_LOGIN, String(envelope.data.isSsoFirstLogin));

@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { useTheme } from "@/lib/theme/theme-provider";
 import {
   completeLogin,
+  getRememberedEmail,
   getSocialProviders,
   getSsoAuthorizeUrl,
   getSsoPreCheck,
@@ -19,6 +20,7 @@ import {
 
 type AuthMode = "login" | "sso";
 type Lang = "en" | "zh";
+type LoginErrorKey = "incorrectEmailOrPassword" | "loginError";
 
 function resolveLang(value: string | undefined): Lang {
   return value === "zh" ? "zh" : "en";
@@ -321,25 +323,34 @@ function LoginForm({
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(() => getRememberedEmail());
   const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
-  const [error, setError] = useState("");
+  const [rememberMe, setRememberMe] = useState(() => Boolean(getRememberedEmail()));
+  const [errorKey, setErrorKey] = useState<LoginErrorKey | null>(null);
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setError("");
+    setErrorKey(null);
     setSuccess("");
     setIsLoading(true);
 
     try {
       const response = await loginByEmail(email.trim(), password);
-      await completeLogin(response, navigate, `/${lang}/app`, rememberMe);
+
+      if (!response.success) {
+        setErrorKey("incorrectEmailOrPassword");
+        return;
+      }
+
+      await completeLogin(response, navigate, `/${lang}/app`, {
+        email: email.trim(),
+        rememberMe
+      });
       setSuccess("Login with success");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Error occurred, please contact the support.");
+    } catch {
+      setErrorKey("loginError");
     } finally {
       setIsLoading(false);
     }
@@ -391,7 +402,7 @@ function LoginForm({
           </label>
         </div>
 
-        {error ? <p className="text-sm font-medium text-red-600">{error}</p> : null}
+        {errorKey ? <p className="text-sm font-medium text-red-600">{t(`auth.errors.${errorKey}`)}</p> : null}
         {success ? <p className="text-sm font-medium text-emerald-600">{success}</p> : null}
 
         <Button className="h-12 w-full bg-blue-600 text-base text-white shadow-sm hover:bg-blue-700" type="submit" disabled={isLoading}>
@@ -563,7 +574,7 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
     const request = isSsoLogin ? loginBySsoCode(code, state) : loginBySocialCode(code, state);
 
     request
-      .then((response) => completeLogin(response, navigate, `/${lang}/app`, true))
+      .then((response) => completeLogin(response, navigate, `/${lang}/app`))
       .catch((err) => {
         if (isMounted) {
           setExternalLoginError(err instanceof Error ? err.message : "Failed to login.");

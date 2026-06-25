@@ -29,7 +29,11 @@ i18n.use(initReactI18next).init({
           ssoButton: "Sign in with SSO",
           backToSignIn: "Back to sign in",
           workspaceKey: "Workspace key",
-          continueSso: "Continue with SSO"
+          continueSso: "Continue with SSO",
+          errors: {
+            incorrectEmailOrPassword: "Email and/or password incorrect",
+            loginError: "Error occurred, please contact the support."
+          }
         }
       }
     },
@@ -59,7 +63,11 @@ i18n.use(initReactI18next).init({
           ssoButton: "使用 SSO 登录",
           backToSignIn: "返回登录",
           workspaceKey: "工作区 key",
-          continueSso: "继续使用 SSO"
+          continueSso: "继续使用 SSO",
+          errors: {
+            incorrectEmailOrPassword: "邮箱或密码错误",
+            loginError: "发生错误，请联系支持人员。"
+          }
         }
       }
     }
