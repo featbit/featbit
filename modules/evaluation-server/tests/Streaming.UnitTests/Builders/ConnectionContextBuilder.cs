@@ -3,7 +3,7 @@ using Domain.Shared;
 using Moq;
 using Streaming.Connections;
 
-namespace Streaming.UnitTests.Connections;
+namespace Streaming.UnitTests.Builders;
 
 public class ConnectionContextBuilder
 {

@@ -1,21 +1,20 @@
-﻿using Domain.Shared;
+using Domain.Shared;
 
-namespace Streaming.UnitTests.Shared;
+namespace Domain.UnitTests.Shared;
 
 public class TokenTests
 {
     [Theory]
     [ClassData(typeof(ValidTokens))]
-    public void GetValidToken(string tokenString, Token expected)
+    public void Constructor_ValidTokenString_ParsesAllFieldsAndIsValid(string tokenString, Token expected)
     {
         var token = new Token(tokenString);
 
-        Assert.Equal(token.Position, expected.Position);
-        Assert.Equal(token.ContentLength, expected.ContentLength);
-        Assert.Equal(token.Timestamp, expected.Timestamp);
-        Assert.Equal(token.SecretString, expected.SecretString);
+        Assert.Equal(expected.Position, token.Position);
+        Assert.Equal(expected.ContentLength, token.ContentLength);
+        Assert.Equal(expected.Timestamp, token.Timestamp);
+        Assert.Equal(expected.SecretString, token.SecretString);
         Assert.True(Secret.TryParse(token.SecretString, out _));
-
         Assert.True(expected.IsValid);
     }
 
@@ -27,7 +26,7 @@ public class TokenTests
     [InlineData("5chars")]
     [InlineData("QDUBHYWVkLWNiZT")]
     [InlineData("QQQQS123")]
-    public void GetInvalidToken(string? tokenString)
+    public void Constructor_InvalidTokenString_IsValidReturnsFalse(string? tokenString)
     {
         var token = new Token(tokenString);
 

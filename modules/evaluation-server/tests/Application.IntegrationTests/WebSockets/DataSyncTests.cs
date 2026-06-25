@@ -16,7 +16,7 @@ public class DataSyncTests(TestApp app)
     [Theory]
     [InlineData(DataSyncEventTypes.Full)]
     [InlineData(DataSyncEventTypes.Patch)]
-    public async Task DoServerDataSyncAsync(string type)
+    public async Task DataSync_ServerConnection_ReturnsExpectedPayload(string type)
     {
         var timestamp = type == DataSyncEventTypes.Full ? 0 : PatchTs;
 
@@ -39,7 +39,7 @@ public class DataSyncTests(TestApp app)
     [Theory]
     [InlineData(DataSyncEventTypes.Full)]
     [InlineData(DataSyncEventTypes.Patch)]
-    public async Task DoClientDataSyncAsync(string type)
+    public async Task DataSync_ClientConnection_ReturnsExpectedPayload(string type)
     {
         var timestamp = type == DataSyncEventTypes.Full ? 0 : PatchTs;
 
@@ -85,7 +85,7 @@ public class DataSyncTests(TestApp app)
     [Theory]
     [InlineData(DataSyncEventTypes.Full)]
     [InlineData(DataSyncEventTypes.Patch)]
-    public async Task DoRelayProxyDataSyncAsync(string type)
+    public async Task DataSync_RelayProxyConnection_ReturnsExpectedPayload(string type)
     {
         var timestamp = type == DataSyncEventTypes.Full ? 0 : PatchTs;
 

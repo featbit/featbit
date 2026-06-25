@@ -15,7 +15,7 @@ public class PingTests
     }
 
     [Fact]
-    public async Task PingAsync()
+    public async Task PingMessage_ValidConnection_ServerRepliesWithPong()
     {
         var ws = await _app.ConnectWithTokenAsync();
 

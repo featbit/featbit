@@ -1,6 +1,3 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using Domain.Shared;
 using Infrastructure.Store;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,7 +6,7 @@ using Microsoft.Extensions.Logging.Testing;
 using Moq;
 using Xunit;
 
-namespace Infrastructure.UnitTests;
+namespace Infrastructure.UnitTests.Store;
 
 public class StoreAvailableSentinelTests
 {
@@ -40,25 +37,24 @@ public class StoreAvailableSentinelTests
 
     [Theory]
     [ClassData(typeof(StoreAvailabilityData))]
-    public async Task TestSetAvailableStore(bool isDbStore1Healthy, bool isDbStore2Healthy, string expectedStore)
+    public async Task SetAvailableStoreAsync_StoreHealthCombination_SelectsExpectedStore(
+        bool isDbStore1Healthy,
+        bool isDbStore2Healthy,
+        string expectedStore)
     {
         var sentinel = new StoreAvailableSentinel(_serviceProvider, _dbStores, _logger);
-
         _dbStore1.Setup(x => x.IsAvailableAsync()).ReturnsAsync(isDbStore1Healthy);
         _dbStore2.Setup(x => x.IsAvailableAsync()).ReturnsAsync(isDbStore2Healthy);
 
-        var cts = new CancellationTokenSource();
-        await sentinel.SetAvailableStoreAsync(TimeSpan.FromMilliseconds(100), cts.Token);
+        await sentinel.SetAvailableStoreAsync(TimeSpan.FromMilliseconds(100), CancellationToken.None);
 
         _dbStore1.Verify(x => x.IsAvailableAsync(), Times.Once);
         _dbStore2.Verify(x => x.IsAvailableAsync(), isDbStore1Healthy ? Times.Never : Times.Once);
-
         Assert.Equal(expectedStore, StoreAvailabilityListener.Instance.AvailableStore);
 
         if (!isDbStore1Healthy && !isDbStore2Healthy)
         {
             var latestRecord = _logger.LatestRecord;
-
             Assert.Equal(LogLevel.Error, latestRecord.Level);
             Assert.Equal("No available store can be used.", latestRecord.Message);
             Assert.Null(latestRecord.Exception);
@@ -66,25 +62,20 @@ public class StoreAvailableSentinelTests
     }
 
     [Fact]
-    public async Task TestCheckStoreAvailabilityTimeout()
+    public async Task SetAvailableStoreAsync_FirstStoreNeverResponds_TimesOutAndFallsBackToSecondStore()
     {
         var sentinel = new StoreAvailableSentinel(_serviceProvider, _dbStores, _logger);
-
-        _dbStore1.Setup(x => x.IsAvailableAsync())
-            .Returns(() => Task.Delay(TimeSpan.FromSeconds(1)).ContinueWith(_ => true));
+        var firstStoreNeverCompletes = new TaskCompletionSource<bool>();
+        _dbStore1.Setup(x => x.IsAvailableAsync()).Returns(firstStoreNeverCompletes.Task);
         _dbStore2.Setup(x => x.IsAvailableAsync()).ReturnsAsync(true);
 
-        var cts = new CancellationTokenSource();
-        var timeout = TimeSpan.FromMilliseconds(100);
-        await sentinel.SetAvailableStoreAsync(timeout, cts.Token);
+        await sentinel.SetAvailableStoreAsync(TimeSpan.FromMilliseconds(100), CancellationToken.None);
 
         _dbStore1.Verify(x => x.IsAvailableAsync(), Times.Once);
         _dbStore2.Verify(x => x.IsAvailableAsync(), Times.Once);
-
         Assert.Equal(DbStore2Name, StoreAvailabilityListener.Instance.AvailableStore);
 
         var latestRecord = _logger.LatestRecord;
-
         Assert.Equal(LogLevel.Debug, latestRecord.Level);
         Assert.Equal($"Store availability check timed out for {DbStore1Name}.", latestRecord.Message);
         Assert.Null(latestRecord.Exception);
@@ -96,10 +87,8 @@ internal class StoreAvailabilityData : TheoryData<bool, bool, string>
     public StoreAvailabilityData()
     {
         Add(true, true, "0_dbStore");
-
         Add(false, true, "1_dbStore");
         Add(true, false, "0_dbStore");
-
         Add(false, false, "0_dbStore");
     }
 }

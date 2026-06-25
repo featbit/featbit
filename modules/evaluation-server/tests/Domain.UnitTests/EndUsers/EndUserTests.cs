@@ -7,7 +7,7 @@ namespace Domain.UnitTests.EndUsers;
 public class EndUserTests
 {
     [Fact]
-    public void DeserializeFromJson()
+    public void Deserialize_FromJsonWithCustomizedProperties_PopulatesAllFields()
     {
         var json =
             "{'name':'rick','keyId':'97f202d6-db9e-4da2-a465-1b35f8621858','customizedProperties':[{'name':'role','value':'bad-guy'},{'name':'中文名','value':'瑞克'}]}"

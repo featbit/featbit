@@ -16,7 +16,7 @@ public class EchoTests
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
-    public async Task DoEchoAsync(bool multiFragment)
+    public async Task EchoMessage_SingleOrMultipleFragments_ServerReturnsIdenticalPayload(bool multiFragment)
     {
         var ws = await _app.ConnectWithTokenAsync();
 

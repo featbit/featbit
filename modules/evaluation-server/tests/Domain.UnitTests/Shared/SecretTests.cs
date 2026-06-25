@@ -1,12 +1,12 @@
-﻿using Domain.Shared;
+using Domain.Shared;
 
-namespace Streaming.UnitTests.Shared;
+namespace Domain.UnitTests.Shared;
 
 public class SecretTests
 {
     [Theory]
     [ClassData(typeof(ValidSecrets))]
-    public void ParseValidSecret(string secretString, Guid expected)
+    public void TryParse_ValidSecretString_ReturnsTrueAndPopulatesEnvId(string secretString, Guid expected)
     {
         var isValid = Secret.TryParse(secretString, out var actual);
 
@@ -21,7 +21,7 @@ public class SecretTests
     [InlineData("random-string")]
     [InlineData("ZGY1LTUxYTQtNCUyMDIyMDkwNTAwNTQxOV9fNDZfXzkzX18tMV9fZGVmYXVsdF82MjdhMg==")]
     [InlineData("aGVsbG8gd29ybGQ=")]
-    public void ParseInvalidSecret(string? secretString)
+    public void TryParse_InvalidSecretString_ReturnsFalseAndEmptyGuid(string? secretString)
     {
         var isValid = Secret.TryParse(secretString, out var actual);
 

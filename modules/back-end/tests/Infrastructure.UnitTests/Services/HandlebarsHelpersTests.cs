@@ -3,11 +3,11 @@ using Domain.Utils;
 using HandlebarsDotNet;
 using Infrastructure.Services;
 
-namespace Application.UnitTests.HandlebarTemplate;
+namespace Infrastructure.UnitTests.Services;
 
-public class HandlebarsTests
+public class HandlebarsHelpersTests
 {
-    public HandlebarsTests()
+    public HandlebarsHelpersTests()
     {
         HandlebarsHelpers.RegisterHelpers();
     }
@@ -16,7 +16,7 @@ public class HandlebarsTests
     [InlineData("{{#eq Int 1}}true{{else}}false{{/eq}}", "true")]
     [InlineData("{{#eq String \"1\"}}true{{else}}false{{/eq}}", "true")]
     [InlineData("{{#eq String 1}}true{{else}}false{{/eq}}", "false")]
-    public void EqHelper(string template, string expected)
+    public void EqHelper_TwoOperands_RendersBranchBasedOnEquality(string template, string expected)
     {
         var data = new
         {
@@ -25,11 +25,12 @@ public class HandlebarsTests
         };
 
         var result = Handlebars.Compile(template).Invoke(data);
+
         Assert.Equal(expected, result);
     }
 
     [Fact]
-    public void JsonHelper()
+    public void JsonHelper_AnyObject_RendersJsonSerialization()
     {
         var data = new
         {
@@ -49,9 +50,10 @@ public class HandlebarsTests
                 }
             }
         };
-
         const string template = "{{json this}}";
+
         var actual = Handlebars.Compile(template).Invoke(data);
+
         var expected = JsonSerializer.Serialize(data, ReusableJsonSerializerOptions.Web);
         Assert.Equal(expected, actual);
     }

@@ -1,6 +1,6 @@
-﻿using Domain.Shared;
+using Domain.Shared;
 
-namespace Streaming.UnitTests.Shared;
+namespace Domain.UnitTests.Shared;
 
 public class TokenNumberTests
 {
@@ -9,7 +9,7 @@ public class TokenNumberTests
     [InlineData("QWS", 23)]
     [InlineData("BWZ", 128)]
     [InlineData("WHH", 255)]
-    public void Should_Decode_Byte(string encoded, byte expected)
+    public void TryDecodeByte_ValidEncodedByte_ReturnsTrueAndExpectedValue(string encoded, byte expected)
     {
         var parseResult = TokenNumber.TryDecodeByte(encoded, out var actual);
 
@@ -20,7 +20,7 @@ public class TokenNumberTests
     [Theory]
     [InlineData("BDDBXZPZPXSDQ", 1661784847360)]
     [InlineData("BWSPHDXZUQ", 1234567890)]
-    public void Should_Decode_Long(string encoded, long expected)
+    public void TryDecodeLong_ValidEncodedLong_ReturnsTrueAndExpectedValue(string encoded, long expected)
     {
         var parseResult = TokenNumber.TryDecodeLong(encoded, out var actual);
 
@@ -32,7 +32,7 @@ public class TokenNumberTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData(" ")]
-    public void Should_Decode_Null_Or_WhiteSpace_As_Zero(string? encoded)
+    public void TryDecode_NullOrWhitespaceInput_ReturnsTrueWithZeroValue(string? encoded)
     {
         var byteParseResult = TokenNumber.TryDecodeByte(encoded, out var byteActual);
         var longParseResult = TokenNumber.TryDecodeLong(encoded, out var longActual);
@@ -47,7 +47,7 @@ public class TokenNumberTests
     [Theory]
     [InlineData("QBabcd")]
     [InlineData("1234QB")]
-    public void Should_Return_False_When_Decode_Unknown_Character(string encoded)
+    public void TryDecode_UnknownCharacter_ReturnsFalse(string encoded)
     {
         Assert.False(TokenNumber.TryDecodeByte(encoded, out _));
         Assert.False(TokenNumber.TryDecodeLong(encoded, out _));

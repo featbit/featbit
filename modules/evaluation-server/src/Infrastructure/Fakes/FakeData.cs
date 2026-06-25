@@ -84,7 +84,7 @@ public static class FakeData
     {
         return secretString switch
         {
-            TestData.RelayProxyTokenString => RpSecrets,
+            FakeSeedData.RelayProxyTokenString => RpSecrets,
             _ => []
         };
     }

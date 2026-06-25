@@ -17,7 +17,7 @@ public class RateLimitingTests
     }
 
     [Fact]
-    public async Task DisabledRateLimiting_DoesNotReturn429()
+    public async Task SdkEndpoint_RateLimitingDisabled_DoesNotReturn429()
     {
         var client = CreateClientWithRateLimitingSettings(
             ("RateLimiting:Enabled", "false"),
@@ -41,7 +41,7 @@ public class RateLimitingTests
     }
 
     [Fact]
-    public async Task ControllerPolicies_AreAppliedPerEndpoint()
+    public async Task PublicEndpoints_PerControllerPolicies_ApplyIndependentLimits()
     {
         var client = CreateClientWithRateLimitingSettings(
             ("RateLimiting:Enabled", "true"),
@@ -98,7 +98,7 @@ public class RateLimitingTests
     }
 
     [Fact]
-    public async Task PartitionedByEnvId_OneEnvDoesNotThrottleAnother()
+    public async Task SdkEndpoint_RequestsFromDifferentEnvironments_PartitionedIndependently()
     {
         var client = CreateClientWithRateLimitingSettings(
             ("RateLimiting:Enabled", "true"),
@@ -124,7 +124,7 @@ public class RateLimitingTests
     }
 
     [Fact]
-    public async Task RejectedRequest_ReturnsRetryAfterAndErrorBody()
+    public async Task RejectedSdkRequest_ReturnsRetryAfterHeaderAndErrorBody()
     {
         var client = CreateClientWithRateLimitingSettings(
             ("RateLimiting:Enabled", "true"),
@@ -152,7 +152,7 @@ public class RateLimitingTests
     }
 
     [Fact]
-    public async Task StreamingHandshake_IsRateLimited()
+    public async Task StreamingHandshake_BeyondPermitLimit_Returns429()
     {
         var app = _app.WithSettings(
             ("RateLimiting:Enabled", "true"),
@@ -175,7 +175,7 @@ public class RateLimitingTests
     }
 
     [Fact]
-    public async Task DistributedEnabledButNoRedis_FallsBackToInMemoryLimiter()
+    public async Task DistributedEnabled_WithoutRedis_FallsBackToInMemoryLimiter()
     {
         // TestApp defaults to CacheProvider.None; this validates fallback behavior
         // when Distributed=true but Redis is not enabled.
@@ -198,7 +198,7 @@ public class RateLimitingTests
     }
 
     [Fact]
-    public async Task EndpointOverrides_ApplyOverGlobalDefaults()
+    public async Task EndpointSpecificLimit_AppliedInsteadOfGlobalLimit()
     {
         var client = CreateClientWithRateLimitingSettings(
             ("RateLimiting:Enabled", "true"),
@@ -239,7 +239,7 @@ public class RateLimitingTests
     }
 
     [Fact]
-    public async Task InvalidWindowSeconds_FailsAtStartup()
+    public async Task Startup_WindowSecondsZero_ThrowsValidationException()
     {
         // WindowSeconds=0 should be rejected by data annotation validation on startup
         Assert.ThrowsAny<Exception>(() =>

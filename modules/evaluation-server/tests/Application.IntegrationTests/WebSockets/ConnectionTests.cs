@@ -13,14 +13,14 @@ public class ConnectionTests
     }
 
     [Fact]
-    public async Task ConnectToServer()
+    public async Task ConnectAsync_ValidHandshake_ReturnsOpenSocket()
     {
         var ws = await _app.ConnectAsync();
         Assert.Equal(WebSocketState.Open, ws.State);
     }
 
     [Fact]
-    public async Task CloseInvalidConnection()
+    public async Task ConnectAsync_InvalidRequest_ClosedByServerWithCode4003()
     {
         var ws = await _app.ConnectAsync();
 

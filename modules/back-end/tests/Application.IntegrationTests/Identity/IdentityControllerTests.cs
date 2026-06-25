@@ -13,7 +13,7 @@ public class IdentityControllerTests
     }
 
     [Fact]
-    public async Task LoginByEmail_RequestValidation()
+    public async Task LoginByEmail_MissingEmailAndPassword_ReturnsBadRequestWithValidationErrors()
     {
         var request = new LoginByEmail();
         var response = await _app.PostAsync("/api/v1/identity/login-by-email", request, false);
@@ -22,7 +22,7 @@ public class IdentityControllerTests
     }
 
     [Fact]
-    public async Task LoginByEmail_Success()
+    public async Task LoginByEmail_ValidCredentials_ReturnsTokenAndUserData()
     {
         var request = new LoginByEmail
         {
