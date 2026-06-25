@@ -112,13 +112,15 @@ function DotGrid({ className }: { className?: string }) {
 function RolloutVisual() {
   return (
     <div className="relative left-1/2 mt-10 h-[450px] w-[820px] max-w-[calc(100vw-2rem)] origin-top -translate-x-1/2 overflow-visible [@media(min-height:1100px)]:h-[540px] [@media(min-height:1100px)]:scale-[1.2] [@media(max-height:800px)]:h-[386px] [@media(max-height:800px)]:scale-[0.86]">
-      <DotGrid className="absolute left-0 top-10" />
+      <DotGrid className="absolute left-0 top-15" />
       <DotGrid className="absolute left-[58%] top-[-10px]" />
+      <span className="absolute left-[15%] top-[100px] h-2.5 w-2.5 rounded-full bg-orange-500" />
       <span className="absolute left-[18%] top-[250px] h-2.5 w-2.5 rounded-full bg-blue-500" />
       <span className="absolute bottom-24 left-[30%] h-3 w-3 rounded-full border-4 border-blue-300 dark:border-blue-500" />
-      <span className="absolute bottom-36 left-0 h-2.5 w-2.5 rounded-full bg-emerald-300" />
+      <span className="absolute bottom-36 left-0 top-[440px] h-2.5 w-2.5 rounded-full bg-red-300" />
+      <span className="absolute bottom-36 left-[40%] top-[450px] h-2.5 w-2.5 rounded-full bg-green-300" />
 
-      <div className="absolute left-0 top-[128px] flex h-20 w-48 flex-col justify-center rounded-lg border border-border bg-background/60 px-4 shadow-sm backdrop-blur-sm dark:bg-background/40">
+      <div className="absolute left-0 top-[168px] flex h-20 w-48 flex-col justify-center rounded-lg border border-border bg-background/60 px-4 shadow-sm backdrop-blur-sm dark:bg-background/40">
         <div className="flex items-center gap-3 text-sm font-medium">
           <GitBranch className="h-5 w-5 fill-current" />
           <span>New checkout flow</span>
@@ -129,7 +131,7 @@ function RolloutVisual() {
         </p>
       </div>
 
-      <div className="absolute left-2 top-[300px] rounded-lg border border-border bg-background/60 p-4 shadow-sm backdrop-blur-sm dark:bg-background/40">
+      <div className="absolute left-0 top-[300px] rounded-lg border border-border bg-background/60 p-4 shadow-sm backdrop-blur-sm dark:bg-background/40">
         <p className="text-sm">
           <span className="mr-3 inline-block h-2.5 w-2.5 rounded-full bg-emerald-500" />
           Rollout status
