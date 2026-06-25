@@ -147,18 +147,18 @@ function RolloutVisual() {
         <Users className="h-4 w-4" />
         Beta users
       </div>
-      <span className="absolute left-[505px] top-[68px] h-2.5 w-2.5 rounded-full bg-emerald-700" aria-hidden="true" />
+      <span className="absolute left-[505px] top-[65px] h-2.5 w-2.5 rounded-full bg-emerald-700" aria-hidden="true" />
       <div className="absolute left-[280px] top-[186px] flex items-center gap-3 rounded-lg border border-orange-200 bg-orange-50 px-4 py-3 text-sm shadow-sm dark:border-orange-500/50 dark:bg-orange-950">
         <TrendingUp className="h-4 w-4" />
         Gradual rollout
       </div>
-      <span className="absolute left-[505px] top-[206px] h-2.5 w-2.5 rounded-full bg-orange-500" aria-hidden="true" />
-      <span className="absolute left-[505px] top-[286px] h-2.5 w-2.5 rounded-full bg-slate-500" aria-hidden="true" />
+      <span className="absolute left-[505px] top-[205px] h-2.5 w-2.5 rounded-full bg-orange-500" aria-hidden="true" />
+      <span className="absolute left-[505px] top-[285px] h-2.5 w-2.5 rounded-full bg-slate-500" aria-hidden="true" />
       <div className="absolute left-[280px] top-[374px] flex items-center gap-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm shadow-sm dark:border-blue-500/50 dark:bg-blue-950">
         <Globe2 className="h-4 w-4" />
         Internal team
       </div>
-      <span className="absolute left-[505px] top-[394px] h-2.5 w-2.5 rounded-full bg-blue-500" aria-hidden="true" />
+      <span className="absolute left-[505px] top-[393px] h-2.5 w-2.5 rounded-full bg-blue-500" aria-hidden="true" />
 
       <RolloutCard className="left-[525px] top-[30px]" percent="50%" label="Users in group A" status="Ready" tone="green" />
       <RolloutCard className="left-[525px] top-[156px]" percent="30%" label="Users in group B" status="Monitoring" tone="orange" />
