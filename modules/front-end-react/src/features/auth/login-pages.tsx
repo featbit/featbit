@@ -108,11 +108,9 @@ function DotGrid({ className }: { className?: string }) {
 
 function RolloutVisual() {
   return (
-    <div className="relative left-1/2 mt-10 -ml-7 h-[450px] w-[820px] max-w-[calc(100vw-2rem)] -translate-x-1/2 overflow-hidden">
+    <div className="relative left-1/2 mt-10 h-[450px] w-[820px] max-w-[calc(100vw-2rem)] origin-top -translate-x-1/2 overflow-visible [@media(max-height:800px)]:h-[386px] [@media(max-height:800px)]:scale-[0.86]">
       <DotGrid className="absolute left-0 top-10" />
       <DotGrid className="absolute left-[58%] top-[-10px]" />
-      <div className="absolute bottom-[-220px] left-[18%] h-[430px] w-[430px] rounded-full border border-slate-200/70 dark:border-slate-700/50" />
-      <div className="absolute bottom-[-200px] left-[20%] h-[390px] w-[390px] rounded-full border border-slate-200/70 dark:border-slate-700/50" />
       <span className="absolute left-[18%] top-[250px] h-2.5 w-2.5 rounded-full bg-blue-500" />
       <span className="absolute bottom-24 left-[30%] h-3 w-3 rounded-full border-4 border-blue-300 dark:border-blue-500" />
       <span className="absolute bottom-36 left-0 h-2.5 w-2.5 rounded-full bg-emerald-300" />
@@ -136,32 +134,36 @@ function RolloutVisual() {
         <p className="mt-2 pl-7 text-base font-medium text-emerald-600">Healthy</p>
       </div>
 
-      <svg className="absolute left-[176px] top-[70px] h-[310px] w-[500px] overflow-visible" aria-hidden="true">
-        <path d="M50 140 C112 140 80 0 175 0 L360 0" fill="none" stroke="#16a34a" strokeWidth="1.4" />
-        <path d="M50 140 C112 140 98 140 175 140 L360 140" fill="none" stroke="#f59e0b" strokeDasharray="7 6" strokeWidth="1.4" />
-        <path d="M50 140 C112 140 98 250 175 250 L360 250" fill="none" stroke="#2563eb" strokeWidth="1.4" />
-        <path d="M50 140 C112 140 104 220 175 220 L360 220" fill="none" stroke="#94a3b8" strokeWidth="1.2" />
+      <svg className="absolute left-[180px] top-[70px] h-[340px] w-[380px] overflow-visible" aria-hidden="true">
+        <path d="M30 140 C88 140 50 0 118 0 L330 0" fill="none" stroke="#16a34a" strokeWidth="1.4" />
+        <path d="M30 140 L330 140" fill="none" stroke="#f59e0b" strokeDasharray="7 6" strokeWidth="1.4" />
+        <path d="M30 140 C92 140 82 220 132 220 L330 220" fill="none" stroke="#94a3b8" strokeWidth="1.2" />
+        <path d="M30 140 C66 140 50 328 126 328 L330 328" fill="none" stroke="#2563eb" strokeWidth="1.4" />
       </svg>
 
-      <span className="absolute left-[240px] top-[158px] h-6 w-6 rounded-full border-[6px] border-emerald-700 bg-background dark:bg-slate-950" />
+      <span className="absolute left-[198px] top-[198px] h-6 w-6 rounded-full border-[6px] border-emerald-700 bg-background dark:bg-slate-950" />
 
-      <div className="absolute left-[372px] top-[16px] flex items-center gap-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm shadow-sm dark:border-emerald-600/50 dark:bg-emerald-950/40">
+      <div className="absolute left-[280px] top-[47px] flex items-center gap-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm shadow-sm dark:border-emerald-600/50 dark:bg-emerald-950">
         <Users className="h-4 w-4" />
         Beta users
       </div>
-      <div className="absolute left-[372px] top-[154px] flex items-center gap-3 rounded-lg border border-orange-200 bg-orange-50 px-4 py-3 text-sm shadow-sm dark:border-orange-500/50 dark:bg-orange-950/30">
+      <span className="absolute left-[505px] top-[68px] h-2.5 w-2.5 rounded-full bg-emerald-700" aria-hidden="true" />
+      <div className="absolute left-[280px] top-[186px] flex items-center gap-3 rounded-lg border border-orange-200 bg-orange-50 px-4 py-3 text-sm shadow-sm dark:border-orange-500/50 dark:bg-orange-950">
         <TrendingUp className="h-4 w-4" />
         Gradual rollout
       </div>
-      <div className="absolute left-[370px] top-[374px] flex items-center gap-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm shadow-sm dark:border-blue-500/50 dark:bg-blue-950/30">
+      <span className="absolute left-[505px] top-[206px] h-2.5 w-2.5 rounded-full bg-orange-500" aria-hidden="true" />
+      <span className="absolute left-[505px] top-[286px] h-2.5 w-2.5 rounded-full bg-slate-500" aria-hidden="true" />
+      <div className="absolute left-[280px] top-[374px] flex items-center gap-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm shadow-sm dark:border-blue-500/50 dark:bg-blue-950">
         <Globe2 className="h-4 w-4" />
         Internal team
       </div>
+      <span className="absolute left-[505px] top-[394px] h-2.5 w-2.5 rounded-full bg-blue-500" aria-hidden="true" />
 
-      <RolloutCard className="left-[576px] top-[2px]" percent="50%" label="Users in group A" status="Ready" tone="green" />
-      <RolloutCard className="left-[576px] top-[124px]" percent="30%" label="Users in group B" status="Monitoring" tone="orange" />
-      <RolloutCard className="left-[576px] top-[246px]" percent="20%" label="Everyone else" status="Off" tone="slate" />
-      <RolloutCard className="left-[576px] top-[366px]" percent="100%" label="Team only" status="Stable" tone="blue" />
+      <RolloutCard className="left-[525px] top-[30px]" percent="50%" label="Users in group A" status="Ready" tone="green" />
+      <RolloutCard className="left-[525px] top-[156px]" percent="30%" label="Users in group B" status="Monitoring" tone="orange" />
+      <RolloutCard className="left-[525px] top-[246px]" percent="20%" label="Everyone else" status="Off" tone="slate" />
+      <RolloutCard className="left-[525px] top-[366px]" percent="100%" label="Team only" status="Stable" tone="blue" />
     </div>
   );
 }
@@ -207,7 +209,7 @@ function LeftPanel() {
   const { t } = useTranslation();
 
   return (
-    <section className="relative hidden min-h-[calc(100vh-6rem)] min-w-0 flex-col justify-start pb-8 pl-16 pr-4 pt-[clamp(4rem,8vh,7rem)] lg:flex xl:pl-20 xl:pr-6">
+    <section className="relative hidden min-h-[calc(100vh-6rem)] min-w-0 flex-col justify-start pb-8 pl-16 pr-4 pt-[clamp(2rem,6vh,7rem)] lg:flex xl:pl-20 xl:pr-6">
       <div>
         <h1 className="max-w-none whitespace-nowrap text-5xl font-semibold leading-tight tracking-tight text-foreground">
           {t("auth.hero.title")}
@@ -359,7 +361,7 @@ function LoginForm({
   const visibleProviders = socialProviders.filter((provider) => ["Google", "GitHub"].includes(provider.name));
 
   return (
-    <div className="mx-auto flex min-h-full w-full max-w-[560px] flex-col justify-start px-8 pb-8 pt-[clamp(4rem,8vh,7rem)] sm:px-12 lg:px-0">
+    <div className="mx-auto flex w-full max-w-[560px] flex-col justify-start px-8 pb-8 pt-[clamp(2rem,6vh,7rem)] sm:px-12 lg:px-0">
       <div>
         <h2 className="text-3xl font-semibold tracking-tight">{t("auth.login.title")}</h2>
         <p className="mt-3 text-base text-muted-foreground">{t("auth.login.subtitle")}</p>
@@ -450,10 +452,6 @@ function SsoForm({ lang, preCheck }: { lang: Lang; preCheck: SsoPreCheck | null 
   const [workspaceKey, setWorkspaceKey] = useState(preCheck?.workspaceKey ?? "");
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    setWorkspaceKey(preCheck?.workspaceKey ?? "");
-  }, [preCheck?.workspaceKey]);
-
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
@@ -468,7 +466,7 @@ function SsoForm({ lang, preCheck }: { lang: Lang; preCheck: SsoPreCheck | null 
   }
 
   return (
-    <div className="mx-auto flex min-h-full w-full max-w-[560px] flex-col justify-start px-8 pb-8 pt-[clamp(4rem,8vh,7rem)] sm:px-12 lg:px-0">
+    <div className="mx-auto flex w-full max-w-[560px] flex-col justify-start px-8 pb-8 pt-[clamp(2rem,6vh,7rem)] sm:px-12 lg:px-0">
       <Button asChild variant="link" className="mb-14 h-auto justify-start gap-3 p-0 text-base text-blue-600">
         <Link to={`/${lang}/login`}>
           <ArrowLeft className="h-5 w-5" />
@@ -569,7 +567,11 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
     }
 
     let isMounted = true;
-    setExternalLoginError("");
+    queueMicrotask(() => {
+      if (isMounted) {
+        setExternalLoginError("");
+      }
+    });
 
     const request = isSsoLogin ? loginBySsoCode(code, state) : loginBySocialCode(code, state);
 
@@ -584,7 +586,7 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
     return () => {
       isMounted = false;
     };
-  }, [navigate, searchParams]);
+  }, [lang, navigate, searchParams]);
 
   const content = useMemo(() => {
     if (mode === "login") {
@@ -599,13 +601,13 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
       );
     }
 
-    return <SsoForm lang={lang} preCheck={ssoPreCheck} />;
+    return <SsoForm key={ssoPreCheck?.workspaceKey ?? "manual-sso"} lang={lang} preCheck={ssoPreCheck} />;
   }, [lang, mode, socialProviders, ssoPreCheck]);
 
   return (
     <main className="min-h-screen bg-background text-foreground">
       <AuthHeader lang={lang} />
-      <div className="grid min-h-[calc(100vh-6rem)] lg:grid-cols-[1.3fr_1fr]">
+      <div className="grid min-h-[calc(100vh-6rem)] lg:grid-cols-[1.45fr_1fr]">
         <LeftPanel />
         <section className="grid min-h-[calc(100vh-6rem)] grid-rows-[1fr_auto] border-border lg:border-l">
           {externalLoginError ? (
