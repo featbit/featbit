@@ -4,6 +4,15 @@
 
 Migrate the application shell: login, auth guard, secure layout, side navigation, top header, top-right subscription/license badge, left-bottom account menu with current version display, theme and locale controls, and workspace/org/project/env switching.
 
+## Step Scope
+
+This document currently backs two independently executable migration steps:
+
+- Step 2, login page: implement only the public login and SSO pages, including public theme/language controls and session submission wiring where the project foundation already supports it.
+- Step 3, console shell frame: implement only the authenticated console frame, including header/context bar and left sidebar navigation. Leave the main content area intentionally empty or as a minimal neutral placeholder until later feature-page steps are added.
+
+When the user asks for one of these steps by number, keep the implementation inside that boundary and do not continue into the other shell work unless it is a small prerequisite needed to compile or route correctly.
+
 ## Routes
 
 - Preserve language-prefixed routes with `/en/*` and `/zh/*`.
@@ -18,12 +27,15 @@ Migrate the application shell: login, auth guard, secure layout, side navigation
 
 - Fully redesign the login page.
 - Do not copy the old Angular login background or old illustration card.
-- Use [the saved login concept and design rationale](../design/login-page-design.md) as the reference direction.
-- Use [the saved SSO login concept and design rationale](../design/sso-login-page-design.md) for the `Sign in with SSO` flow.
+- Implement [the saved login design contract](../design/login-page-design.md) strictly for the email/password login flow.
+- Implement [the saved SSO login design contract](../design/sso-login-page-design.md) strictly for the `Sign in with SSO` flow.
+- Treat the saved light/dark login images as required implementation baselines, not loose references.
 - Use a restrained split layout:
-  - header with current Angular FeatBit logo style, language switcher, and header-bottom divider.
-  - left area with feature rollout / traffic split abstraction, not a console preview and not AI messaging.
+  - header with current Angular FeatBit logo style, top-right theme toggle, language switcher, and header-bottom divider.
+  - left area with feature rollout / traffic split abstraction, not a console screenshot and not AI messaging.
   - right authentication column with email/password login, Google/GitHub OAuth, and a separate Enterprise SSO section.
+- Preserve the saved login page elements and hierarchy, but style colors, backgrounds, borders, controls, shadows, and light/dark theme tokens to match the authenticated React console.
+- The public login theme toggle should sit immediately before the language switcher and use a moon icon in light theme and a sun icon in dark theme.
 - Keep a vertical divider between the left visual area and right login column.
 - Do not add a footer divider line.
 - Do not place checkmark, success, verified, or tick icons in the right login area.
@@ -34,6 +46,7 @@ Migrate the application shell: login, auth guard, secure layout, side navigation
 
 - Implement the authenticated shell according to [react-console-design.md](../design/react-console-design.md), with [react-console-light.png](../design/react-console-light.png) and [react-console-dark.png](../design/react-console-dark.png) as required visual baselines. These assets govern shell layout only; the Feature Flags content shown inside the shell is a placeholder and not final page design.
 - Use a left navigation plus top context bar layout.
+- For migration step 3, the main workspace area must remain blank or contain only a minimal neutral placeholder shell container. Do not implement Feature Flags, dashboards, settings pages, or other domain content in this step.
 - Implement sidebar collapse/expand:
   - expanded sidebar shows the FeatBit mark + wordmark.
   - expanded sidebar shows a `PanelLeftClose` icon button near the sidebar/content divider.
@@ -101,6 +114,23 @@ Integrations sub-items:
 - Context changes must invalidate relevant TanStack Query caches for `projectId` and `envId`, and navigate safely when the current route depends on unavailable context.
 
 ## Acceptance Criteria
+
+Step 2 acceptance:
+
+- `/en/login` and `/zh/login` render the redesigned email/password login page.
+- The SSO login route renders the dedicated SSO flow from the saved design contract.
+- Public theme switching works before authentication and persists across reloads.
+- Login and SSO pages do not copy the old Angular login background or old illustration card.
+
+Step 3 acceptance:
+
+- Authenticated routes render the console shell frame with header/context bar and left sidebar navigation.
+- The main content area is empty or uses only a minimal placeholder container, with no migrated domain page content.
+- Sidebar collapse/expand works, persists across reloads, and provides tooltips for collapsed navigation items.
+- The authenticated top-right header does not show a user avatar, theme switcher, or language switcher.
+- The account menu displays identity/preferences/version entry points according to the shell design.
+
+Full shell acceptance for later completion:
 
 - Users can login, select workspace, complete onboarding, and reach the secure shell.
 - The authenticated shell matches the saved React console design contract for layout, spacing density, typography scale, sidebar behavior, context bar, subscription/license badge, account menu, and light/dark styling.

@@ -14,6 +14,19 @@ Create the standalone React application foundation in `front-end-react` without 
 - Use `react-i18next` for i18n.
 - Use Playwright as the browser E2E runner.
 
+## Step Scope
+
+This document defines migration step 1: project initialization. When the user asks to execute only step 1, scaffold and verify the React project foundation only. Do not build the final login page, authenticated console shell, or feature pages as part of this step.
+
+## Dependency Version Policy
+
+- Use the latest stable LTS-compatible versions available at implementation time for runtime and tooling dependencies.
+- For platforms with an LTS concept, such as Node.js, use the latest active or maintenance LTS line rather than a current experimental line.
+- For packages without an LTS concept, use the latest stable release that is compatible with the selected LTS runtime and the rest of the stack.
+- Do not use prerelease channels or versions marked `rc`, `alpha`, `beta`, `next`, `canary`, or `experimental`.
+- Prefer exact or lockfile-pinned resolved versions after installation so repeat installs are deterministic.
+- If the latest stable version conflicts with another required package, choose the newest mutually compatible stable version and document the reason in `front-end-react/README.md`.
+
 ## Required Setup
 
 - Create `front-end-react` as an independent package with its own `package.json`, `tsconfig`, Vite config, Tailwind config, ESLint config, test config, and README.

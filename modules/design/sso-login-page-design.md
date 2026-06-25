@@ -1,16 +1,20 @@
-# SSO Login Page Design Direction
+# SSO Login Page Design Contract
 
-## Current Concept
+## Required Designs
 
-Reference image: [sso-login-page-concept.png](sso-login-page-concept.png)
+Implementation must strictly follow these design images:
 
-This concept shows the page after clicking `Sign in with SSO` from the main login page. It should use the same visual system as the main login page and should feel like the same authentication flow.
+- Light theme: [sso-login-page-concept.png](sso-login-page-concept.png)
+- Dark theme: [sso-login-page-console-dark.png](sso-login-page-console-dark.png)
+
+These images are the required implementation contract for the SSO login page after clicking `Sign in with SSO` from the main login page. They are not optional references. Layout, hierarchy, spacing rhythm, color treatment, control styling, borders, and light/dark behavior should match the saved designs as closely as practical in the browser. Any intentional visual deviation must update this document and the saved design assets first.
 
 Related design: [login-page-design.md](login-page-design.md)
 
-## Design Intent
+## Design Requirements
 
 - Keep the same structured split layout as the main login page.
+- Keep all SSO page elements from the current concept while aligning the visual treatment with the authenticated React console.
 - Make the SSO flow focused and minimal.
 - Ask for `Workspace key`, not workspace domain.
 - Keep `Back to sign in` as the only way back to the normal login flow.
@@ -20,6 +24,7 @@ Related design: [login-page-design.md](login-page-design.md)
 
 - Use the same header as the main login page:
   - Angular-style FeatBit logo on the left.
+  - theme toggle icon button in the top-right header, immediately before the language switcher.
   - language switcher on the right.
   - subtle horizontal divider below the header.
 - Use the same main split:
@@ -53,14 +58,20 @@ Related design: [login-page-design.md](login-page-design.md)
 
 ## Visual Style
 
-- Reuse the main login page palette: warm ivory background, deep ink text, muted evergreen accent, pale mint surfaces, graphite dividers, sparse amber highlights.
+- Reuse the main login page visual system and keep it aligned with [react-console-design.md](react-console-design.md).
+- The theme toggle should use a shadcn-style square outline icon button: moon icon in light theme, sun icon in dark theme.
+- Light theme should use console-like white and very light slate surfaces, crisp slate text, thin light borders, and blue primary actions.
+- Dark theme should use neutral dark slate surfaces, light foreground text, muted slate secondary text, thin dark borders, and the same blue primary action language.
+- Use small green, orange, and blue status accents only where they support the rollout visual.
 - Use shadcn/ui and Tailwind defaults for input and button styling.
 - Keep dividers subtle but visible.
-- Avoid floating cards, heavy shadows, decorative blobs, bokeh, stock illustration, and old Angular/ng-zorro styling.
+- Avoid warm ivory/evergreen login-specific palettes, floating cards, heavy shadows, decorative blobs, bokeh, stock illustration, and old Angular/ng-zorro styling.
 
 ## Implementation Notes
 
+- The final implementation should be validated against the saved light and dark design images. Treat meaningful differences in layout, visual hierarchy, colors, borders, shadows, controls, and responsive behavior as implementation defects unless this document and the saved assets are updated first.
 - The SSO page should be a dedicated route or state under the login flow, for example `/en/login/sso` and `/zh/login/sso`, or an equivalent route chosen during implementation.
 - The `Workspace key` field should be validated as required before continuing.
 - Keep all text translatable through `react-i18next`.
+- Theme switching must be available before authentication and should share the same persisted `light` / `dark` / `system` theme behavior as the React console.
 - On smaller screens, collapse to a single-column SSO-first layout and hide or simplify the left visual.
