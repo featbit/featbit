@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
+    "target": "ES2023",
+    "lib": ["ES2023"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "types": ["node"]
+  },
+  "include": [
+    "eslint.config.js",
+    "playwright.config.ts",
+    "playwright.containers.config.ts",
+    "tailwind.config.ts",
+    "vite.config.ts",
+    "vitest.config.ts"
+  ]
+}

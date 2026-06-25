@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "allowJs": false,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "ignoreDeprecations": "6.0",
+    "forceConsistentCasingInFileNames": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@/app/*": ["src/app/*"],
+      "@/assets/*": ["src/assets/*"],
+      "@/components/*": ["src/components/*"],
+      "@/features/*": ["src/features/*"],
+      "@/lib/*": ["src/lib/*"],
+      "@/routes/*": ["src/routes/*"],
+      "@/stores/*": ["src/stores/*"],
+      "@/test/*": ["src/test/*"]
+    }
+  },
+  "include": ["src"]
+}
