@@ -136,13 +136,16 @@ function localizedPath(lang: Lang, href: string) {
 }
 
 function FeatBitBrand({ collapsed }: { collapsed: boolean }) {
+  const { resolvedTheme } = useTheme();
+  const logoSrc = resolvedTheme === "dark" ? "/assets/featbit-logo-dark.svg" : "/assets/featbit-logo.svg";
+
   return (
     <Link
       to="/"
       className={cn("flex h-12 items-center gap-3 rounded-md px-2 text-foreground", collapsed && "justify-center px-0")}
       aria-label="FeatBit"
     >
-      <img className="h-9 w-10 shrink-0" src="/assets/featbit-logo.svg" alt="" />
+      <img className="h-9 w-10 shrink-0" src={logoSrc} alt="" />
       {!collapsed ? <span className="text-xl font-semibold tracking-tight">FeatBit</span> : null}
     </Link>
   );
