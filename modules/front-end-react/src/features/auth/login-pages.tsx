@@ -139,7 +139,7 @@ function RolloutVisual() {
 
       <svg className="absolute left-[180px] top-[70px] h-[340px] w-[380px] overflow-visible" aria-hidden="true">
         <path d="M30 140 C88 140 50 0 118 0 L330 0" fill="none" stroke="#16a34a" strokeWidth="1.4" />
-        <path d="M30 140 L330 140" fill="none" stroke="#f59e0b" strokeDasharray="7 6" strokeWidth="1.4" />
+        <path d="M30 140 L330 140" fill="none" stroke="#f59e0b" strokeWidth="1.4" />
         <path d="M30 140 C92 140 82 220 132 220 L330 220" fill="none" stroke="#94a3b8" strokeWidth="1.2" />
         <path d="M30 140 C66 140 50 328 126 328 L330 328" fill="none" stroke="#2563eb" strokeWidth="1.4" />
       </svg>
