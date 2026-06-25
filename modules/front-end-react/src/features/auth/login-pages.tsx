@@ -1,5 +1,6 @@
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Building2, Eye, GitBranch, Globe2, Lock, Mail, Moon, Sun, TrendingUp, Users } from "lucide-react";
-import { useEffect, useMemo, useState, type ChangeEvent, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ChangeEvent, type ReactNode } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -335,31 +336,36 @@ function LoginForm({
   const [rememberMe, setRememberMe] = useState(() => Boolean(getRememberedEmail()));
   const [errorKey, setErrorKey] = useState<LoginErrorKey | null>(null);
   const [success, setSuccess] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const loginMutation = useMutation({
+    mutationFn: async (credentials: { email: string; password: string; rememberMe: boolean }) => {
+      const response = await loginByEmail(credentials.email, credentials.password);
 
-  async function handleLogin() {
-    setErrorKey(null);
-    setSuccess("");
-    setIsLoading(true);
+      if (response.success) {
+        await completeLogin(response, navigate, `/${lang}/app`, {
+          email: credentials.email,
+          rememberMe: credentials.rememberMe
+        });
+      }
 
-    try {
-      const response = await loginByEmail(email.trim(), password);
-
+      return response;
+    },
+    onSuccess: (response) => {
       if (!response.success) {
         setErrorKey("incorrectEmailOrPassword");
         return;
       }
 
-      await completeLogin(response, navigate, `/${lang}/app`, {
-        email: email.trim(),
-        rememberMe
-      });
       setSuccess("Login with success");
-    } catch {
+    },
+    onError: () => {
       setErrorKey("loginError");
-    } finally {
-      setIsLoading(false);
     }
+  });
+
+  async function handleLogin() {
+    setErrorKey(null);
+    setSuccess("");
+    loginMutation.mutate({ email: email.trim(), password, rememberMe });
   }
 
   const visibleProviders = socialProviders.filter((provider) => ["Google", "GitHub"].includes(provider.name));
@@ -411,8 +417,8 @@ function LoginForm({
         {errorKey ? <p className="text-sm font-medium text-red-600">{t(`auth.errors.${errorKey}`)}</p> : null}
         {success ? <p className="text-sm font-medium text-emerald-600">{success}</p> : null}
 
-        <Button className="h-12 w-full bg-blue-600 text-base text-white shadow-sm hover:bg-blue-700" type="submit" disabled={isLoading}>
-          {isLoading ? "Signing in..." : t("auth.signIn")}
+        <Button className="h-12 w-full bg-blue-600 text-base text-white shadow-sm hover:bg-blue-700" type="submit" disabled={loginMutation.isPending}>
+          {loginMutation.isPending ? "Signing in..." : t("auth.signIn")}
         </Button>
       </form>
 
@@ -524,35 +530,31 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
   const { i18n } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [socialProviders, setSocialProviders] = useState<OAuthProvider[]>([]);
-  const [ssoPreCheck, setSsoPreCheck] = useState<SsoPreCheck | null>(null);
-  const [externalLoginError, setExternalLoginError] = useState("");
+  const handledExternalLoginKey = useRef("");
+  const socialProvidersQuery = useQuery({
+    queryKey: ["auth", "social-providers"],
+    queryFn: getSocialProviders,
+    staleTime: 5 * 60 * 1000
+  });
+  const ssoPreCheckQuery = useQuery({
+    queryKey: ["auth", "sso-pre-check"],
+    queryFn: getSsoPreCheck,
+    staleTime: 5 * 60 * 1000
+  });
+  const externalLoginMutation = useMutation({
+    mutationFn: async (callback: { code: string; state: string; type: "sso" | "social" }) => {
+      const response =
+        callback.type === "sso"
+          ? await loginBySsoCode(callback.code, callback.state)
+          : await loginBySocialCode(callback.code, callback.state);
+
+      await completeLogin(response, navigate, `/${lang}/app`);
+    }
+  });
 
   useEffect(() => {
     void i18n.changeLanguage(lang);
   }, [i18n, lang]);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    Promise.allSettled([getSocialProviders(), getSsoPreCheck()]).then(([providersResult, preCheckResult]) => {
-      if (!isMounted) {
-        return;
-      }
-
-      if (providersResult.status === "fulfilled") {
-        setSocialProviders(providersResult.value);
-      }
-
-      if (preCheckResult.status === "fulfilled") {
-        setSsoPreCheck(preCheckResult.value);
-      }
-    });
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
 
   useEffect(() => {
     const code = searchParams.get("code");
@@ -569,27 +571,24 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
       return;
     }
 
-    let isMounted = true;
-    queueMicrotask(() => {
-      if (isMounted) {
-        setExternalLoginError("");
-      }
-    });
+    const callbackType = isSsoLogin ? "sso" : "social";
+    const callbackKey = `${callbackType}:${code}:${state}`;
+    if (handledExternalLoginKey.current === callbackKey) {
+      return;
+    }
 
-    const request = isSsoLogin ? loginBySsoCode(code, state) : loginBySocialCode(code, state);
+    handledExternalLoginKey.current = callbackKey;
+    externalLoginMutation.reset();
+    externalLoginMutation.mutate({ code, state, type: callbackType });
+  }, [externalLoginMutation, searchParams]);
 
-    request
-      .then((response) => completeLogin(response, navigate, `/${lang}/app`))
-      .catch((err) => {
-        if (isMounted) {
-          setExternalLoginError(err instanceof Error ? err.message : "Failed to login.");
-        }
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [lang, navigate, searchParams]);
+  const socialProviders = useMemo(() => socialProvidersQuery.data ?? [], [socialProvidersQuery.data]);
+  const ssoPreCheck = ssoPreCheckQuery.data ?? null;
+  const externalLoginError = externalLoginMutation.error
+    ? externalLoginMutation.error instanceof Error
+      ? externalLoginMutation.error.message
+      : "Failed to login."
+    : "";
 
   const content = useMemo(() => {
     if (mode === "login") {
