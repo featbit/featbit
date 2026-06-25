@@ -200,6 +200,7 @@ export function ExperimentDetailLayout({
                   experiment={experiment}
                   activeStage={activeTab}
                   onStageChange={setActiveTab}
+                  onOpenSetup={() => setSetupDialogOpen(true)}
                 />
               }
             />

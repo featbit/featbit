@@ -4,8 +4,12 @@ services:
     image: featbit/ui:dev
     container_name: ui
     build:
-      context: ./modules/front-end
-      dockerfile: ./Dockerfile
+      context: .
+      dockerfile: ./docker/ui-combined/Dockerfile
+      args:
+        VITE_FEATBIT_APP_URL: http://localhost:8081
+        VITE_FEATBIT_API_URL: http://localhost:5000
+        VITE_BASE_PATH: /release-decision/
     environment:
       - API_URL=http://localhost:5000
       - DEMO_URL=http://localhost:5173
