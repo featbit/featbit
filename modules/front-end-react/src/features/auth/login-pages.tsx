@@ -1,10 +1,21 @@
 import { ArrowLeft, Building2, Eye, GitBranch, Globe2, Lock, Mail, Moon, Sun, TrendingUp, Users } from "lucide-react";
-import { useEffect, type ReactNode } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent, type ReactNode } from "react";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/lib/theme/theme-provider";
+import {
+  completeLogin,
+  getSocialProviders,
+  getSsoAuthorizeUrl,
+  getSsoPreCheck,
+  loginByEmail,
+  loginBySocialCode,
+  loginBySsoCode,
+  type OAuthProvider,
+  type SsoPreCheck
+} from "@/features/auth/auth-api";
 
 type AuthMode = "login" | "sso";
 type Lang = "en" | "zh";
@@ -211,13 +222,25 @@ function Field({
   type = "text",
   placeholder,
   icon,
-  trailing
+  trailing,
+  value,
+  disabled,
+  autoComplete,
+  name,
+  required,
+  onChange
 }: {
   label: string;
   type?: string;
   placeholder: string;
   icon: ReactNode;
   trailing?: ReactNode;
+  value: string;
+  disabled?: boolean;
+  autoComplete?: string;
+  name: string;
+  required?: boolean;
+  onChange: (event: ChangeEvent<HTMLInputElement>) => void;
 }) {
   return (
     <label className="block">
@@ -228,6 +251,12 @@ function Field({
           className="min-w-0 flex-1 bg-transparent text-base text-foreground outline-none placeholder:text-muted-foreground"
           type={type}
           placeholder={placeholder}
+          value={value}
+          disabled={disabled}
+          autoComplete={autoComplete}
+          name={name}
+          required={required}
+          onChange={onChange}
         />
         {trailing}
       </span>
@@ -281,8 +310,42 @@ function GitHubIcon() {
   );
 }
 
-function LoginForm({ lang }: { lang: Lang }) {
+function LoginForm({
+  lang,
+  socialProviders,
+  onSocialLogin
+}: {
+  lang: Lang;
+  socialProviders: OAuthProvider[];
+  onSocialLogin: (provider: OAuthProvider) => void;
+}) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError("");
+    setSuccess("");
+    setIsLoading(true);
+
+    try {
+      const response = await loginByEmail(email.trim(), password);
+      await completeLogin(response, navigate, `/${lang}/app`, rememberMe);
+      setSuccess("Login with success");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error occurred, please contact the support.");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  const visibleProviders = socialProviders.filter((provider) => ["Google", "GitHub"].includes(provider.name));
 
   return (
     <div className="mx-auto flex min-h-full w-full max-w-[560px] flex-col justify-start px-8 pb-8 pt-[clamp(4rem,8vh,7rem)] sm:px-12 lg:px-0">
@@ -291,58 +354,107 @@ function LoginForm({ lang }: { lang: Lang }) {
         <p className="mt-3 text-base text-muted-foreground">{t("auth.login.subtitle")}</p>
       </div>
 
-      <form className="mt-7 space-y-6">
-        <Field label={t("auth.email")} type="email" placeholder="name@company.com" icon={<Mail className="h-5 w-5" />} />
+      <form className="mt-7 space-y-6" onSubmit={onSubmit}>
+        <Field
+          label={t("auth.email")}
+          type="email"
+          placeholder="name@company.com"
+          icon={<Mail className="h-5 w-5" />}
+          value={email}
+          autoComplete="username"
+          name="email"
+          required
+          onChange={(event) => setEmail(event.target.value)}
+        />
         <Field
           label={t("auth.password")}
           type="password"
           placeholder={t("auth.passwordPlaceholder")}
           icon={<Lock className="h-5 w-5" />}
           trailing={<Eye className="h-5 w-5" />}
+          value={password}
+          autoComplete="current-password"
+          name="password"
+          required
+          onChange={(event) => setPassword(event.target.value)}
         />
 
-        <div className="flex items-center justify-between text-base">
+        <div className="flex items-center text-base">
           <label className="flex items-center gap-3">
-            <input className="h-5 w-5 rounded border-input bg-background" type="checkbox" />
+            <input
+              className="h-5 w-5 rounded border-input bg-background"
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(event) => setRememberMe(event.target.checked)}
+            />
             {t("auth.remember")}
           </label>
-          <a className="text-blue-600 hover:underline" href="#forgot-password">
-            {t("auth.forgot")}
-          </a>
         </div>
 
-        <Button className="h-12 w-full bg-blue-600 text-base text-white shadow-sm hover:bg-blue-700" type="button">
-          {t("auth.signIn")}
+        {error ? <p className="text-sm font-medium text-red-600">{error}</p> : null}
+        {success ? <p className="text-sm font-medium text-emerald-600">{success}</p> : null}
+
+        <Button className="h-12 w-full bg-blue-600 text-base text-white shadow-sm hover:bg-blue-700" type="submit" disabled={isLoading}>
+          {isLoading ? "Signing in..." : t("auth.signIn")}
         </Button>
       </form>
 
       <div className="mt-8 space-y-6">
-        <DividerLabel>{t("auth.continueWith")}</DividerLabel>
-        <div className="grid grid-cols-2 gap-5">
-          <Button type="button" variant="outline" className="h-12 gap-3 bg-transparent text-base shadow-none">
-            <GoogleIcon />
-            Google
-          </Button>
-          <Button type="button" variant="outline" className="h-12 gap-3 bg-transparent text-base shadow-none">
-            <GitHubIcon />
-            GitHub
+        {visibleProviders.length > 0 ? (
+          <>
+            <DividerLabel>{t("auth.continueWith")}</DividerLabel>
+            <div className="grid grid-cols-2 gap-5">
+              {visibleProviders.map((provider) => (
+                <Button
+                  key={provider.name}
+                  type="button"
+                  variant="outline"
+                  className="h-12 gap-3 bg-transparent text-base shadow-none"
+                  onClick={() => onSocialLogin(provider)}
+                >
+                  {provider.name === "Google" ? <GoogleIcon /> : <GitHubIcon />}
+                  {provider.name}
+                </Button>
+              ))}
+            </div>
+          </>
+        ) : null}
+
+        <div className="space-y-6">
+          <DividerLabel>{t("auth.enterprise")}</DividerLabel>
+          <Button asChild type="button" variant="outline" className="h-12 w-full gap-3 bg-transparent text-base shadow-none">
+            <Link to={`/${lang}/login/sso`}>
+              <Building2 className="h-6 w-6" />
+              {t("auth.ssoButton")}
+            </Link>
           </Button>
         </div>
-
-        <DividerLabel>{t("auth.enterprise")}</DividerLabel>
-        <Button asChild type="button" variant="outline" className="h-12 w-full gap-3 bg-transparent text-base shadow-none">
-          <Link to={`/${lang}/login/sso`}>
-            <Building2 className="h-6 w-6" />
-            {t("auth.ssoButton")}
-          </Link>
-        </Button>
       </div>
     </div>
   );
 }
 
-function SsoForm({ lang }: { lang: Lang }) {
+function SsoForm({ lang, preCheck }: { lang: Lang; preCheck: SsoPreCheck | null }) {
   const { t } = useTranslation();
+  const [workspaceKey, setWorkspaceKey] = useState(preCheck?.workspaceKey ?? "");
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    setWorkspaceKey(preCheck?.workspaceKey ?? "");
+  }, [preCheck?.workspaceKey]);
+
+  function onSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError("");
+
+    const trimmedWorkspaceKey = workspaceKey.trim();
+    if (!trimmedWorkspaceKey) {
+      setError("Workspace key is required");
+      return;
+    }
+
+    window.location.href = getSsoAuthorizeUrl(trimmedWorkspaceKey);
+  }
 
   return (
     <div className="mx-auto flex min-h-full w-full max-w-[560px] flex-col justify-start px-8 pb-8 pt-[clamp(4rem,8vh,7rem)] sm:px-12 lg:px-0">
@@ -358,13 +470,20 @@ function SsoForm({ lang }: { lang: Lang }) {
         <p className="mt-3 text-base text-muted-foreground">{t("auth.sso.subtitle")}</p>
       </div>
 
-      <form className="mt-14 space-y-8">
+      <form className="mt-14 space-y-8" onSubmit={onSubmit}>
         <Field
           label={t("auth.workspaceKey")}
           placeholder="acme-prod"
           icon={<Building2 className="h-6 w-6" />}
+          value={workspaceKey}
+          disabled={Boolean(preCheck?.workspaceKey)}
+          autoComplete="organization"
+          name="workspaceKey"
+          required
+          onChange={(event) => setWorkspaceKey(event.target.value)}
         />
-        <Button className="h-14 w-full gap-3 bg-blue-600 text-lg text-white shadow-sm hover:bg-blue-700" type="button">
+        {error ? <p className="text-sm font-medium text-red-600">{error}</p> : null}
+        <Button className="h-14 w-full gap-3 bg-blue-600 text-lg text-white shadow-sm hover:bg-blue-700" type="submit">
           <Building2 className="h-6 w-6" />
           {t("auth.continueSso")}
         </Button>
@@ -391,10 +510,86 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
   const params = useParams();
   const lang = resolveLang(params.lang);
   const { i18n } = useTranslation();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [socialProviders, setSocialProviders] = useState<OAuthProvider[]>([]);
+  const [ssoPreCheck, setSsoPreCheck] = useState<SsoPreCheck | null>(null);
+  const [externalLoginError, setExternalLoginError] = useState("");
 
   useEffect(() => {
     void i18n.changeLanguage(lang);
   }, [i18n, lang]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    Promise.allSettled([getSocialProviders(), getSsoPreCheck()]).then(([providersResult, preCheckResult]) => {
+      if (!isMounted) {
+        return;
+      }
+
+      if (providersResult.status === "fulfilled") {
+        setSocialProviders(providersResult.value);
+      }
+
+      if (preCheckResult.status === "fulfilled") {
+        setSsoPreCheck(preCheckResult.value);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const code = searchParams.get("code");
+    const state = searchParams.get("state");
+
+    if (!code || !state) {
+      return;
+    }
+
+    const isSsoLogin = searchParams.has("sso-logged-in");
+    const isSocialLogin = searchParams.has("social-logged-in");
+
+    if (!isSsoLogin && !isSocialLogin) {
+      return;
+    }
+
+    let isMounted = true;
+    setExternalLoginError("");
+
+    const request = isSsoLogin ? loginBySsoCode(code, state) : loginBySocialCode(code, state);
+
+    request
+      .then((response) => completeLogin(response, navigate, `/${lang}/app`, true))
+      .catch((err) => {
+        if (isMounted) {
+          setExternalLoginError(err instanceof Error ? err.message : "Failed to login.");
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [navigate, searchParams]);
+
+  const content = useMemo(() => {
+    if (mode === "login") {
+      return (
+        <LoginForm
+          lang={lang}
+          socialProviders={socialProviders}
+          onSocialLogin={(provider) => {
+            window.location.href = provider.authorizeUrl;
+          }}
+        />
+      );
+    }
+
+    return <SsoForm lang={lang} preCheck={ssoPreCheck} />;
+  }, [lang, mode, socialProviders, ssoPreCheck]);
 
   return (
     <main className="min-h-screen bg-background text-foreground">
@@ -402,7 +597,12 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
       <div className="grid min-h-[calc(100vh-6rem)] lg:grid-cols-[1.3fr_1fr]">
         <LeftPanel />
         <section className="grid min-h-[calc(100vh-6rem)] grid-rows-[1fr_auto] border-border lg:border-l">
-          {mode === "login" ? <LoginForm lang={lang} /> : <SsoForm lang={lang} />}
+          {externalLoginError ? (
+            <div className="mx-auto mt-8 w-full max-w-[560px] px-8 text-sm font-medium text-red-600 sm:px-12 lg:px-0">
+              {externalLoginError}
+            </div>
+          ) : null}
+          {content}
           <AuthFooter />
         </section>
       </div>
