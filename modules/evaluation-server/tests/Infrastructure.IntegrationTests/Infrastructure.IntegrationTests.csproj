@@ -36,4 +36,16 @@
         <ProjectReference Include="..\TestBase\TestBase.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+        <!--
+            The Postgres integration fixture applies the repo's production
+            init scripts so store-layer tests run against the real schema.
+            Files are embedded so the relative path from this project doesn't
+            need to resolve at runtime.
+        -->
+        <EmbeddedResource Include="..\..\..\..\infra\postgresql\docker-entrypoint-initdb.d\*.sql">
+            <LogicalName>FeatBitPostgresInitDb.%(Filename)%(Extension)</LogicalName>
+        </EmbeddedResource>
+    </ItemGroup>
+
 </Project>
