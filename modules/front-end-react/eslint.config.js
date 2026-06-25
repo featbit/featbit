@@ -31,5 +31,16 @@ export default tseslint.config(
         window: "readonly"
       }
     }
+  },
+  {
+    files: ["scripts/*.mjs"],
+    languageOptions: {
+      globals: {
+        console: "readonly",
+        fetch: "readonly",
+        process: "readonly",
+        setTimeout: "readonly"
+      }
+    }
   }
 );

@@ -1,44 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
-
-async function mockAuthEndpoints(
-  page: Page,
-  options: {
-    loginResponse?: unknown;
-    profileResponse?: unknown;
-    ssoPreCheck?: unknown;
-    socialProviders?: unknown;
-  } = {}
-) {
-  const {
-    loginResponse = { success: false },
-    profileResponse = { success: true, data: { email: "test@featbit.com", name: "Test User" } },
-    ssoPreCheck = { success: true, data: { isEnabled: true } },
-    socialProviders = {
-      success: true,
-      data: [
-        { name: "Google", authorizeUrl: "https://accounts.example.test/google" },
-        { name: "GitHub", authorizeUrl: "https://accounts.example.test/github" },
-        { name: "Okta", authorizeUrl: "https://accounts.example.test/okta" }
-      ]
-    }
-  } = options;
-
-  await page.route("**/api/v1/social/providers**", async (route) => {
-    await route.fulfill({ json: socialProviders });
-  });
-
-  await page.route("**/api/v1/sso/pre-check", async (route) => {
-    await route.fulfill({ json: ssoPreCheck });
-  });
-
-  await page.route("**/api/v1/identity/login-by-email", async (route) => {
-    await route.fulfill({ json: loginResponse });
-  });
-
-  await page.route("**/api/v1/user/profile", async (route) => {
-    await route.fulfill({ json: profileResponse });
-  });
-}
+import { expect, test } from "@playwright/test";
+import { mockAuthEndpoints } from "./helpers";
 
 test.describe("login page", () => {
   test("renders the email login form and social sign-in options", async ({ page }) => {
@@ -93,7 +54,9 @@ test.describe("login page", () => {
     await page.getByRole("button", { name: "Sign in" }).click();
 
     await expect(page).toHaveURL(/\/en\/app$/);
-    await expect(page.getByRole("heading", { name: "Authenticated layout placeholder" })).toBeVisible();
+    await expect(page.getByText("Console content will be added in the next migration steps.")).toBeVisible();
+    await expect(page.getByText("Acme Corp")).toBeVisible();
+    await expect(page.getByLabel("Free Plan, Upgrade Now")).toBeVisible();
     await expect(page.evaluate(() => localStorage.getItem("token"))).resolves.toBe("e2e-token");
     await expect(page.evaluate(() => localStorage.getItem("remembered-email"))).resolves.toBe("test@featbit.com");
   });

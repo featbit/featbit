@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Navigate, Route, Routes, useParams } from "react-router-dom";
 import { AuthPage } from "@/features/auth/login-pages";
 import { getIdentityToken } from "@/features/auth/auth-api";
+import { ConsoleShell, ConsoleShellPlaceholder } from "@/features/shell/console-shell";
 
 type SupportedLanguage = "en" | "zh";
 
@@ -40,24 +41,6 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
   return children;
 }
 
-function AuthenticatedLayoutPlaceholder() {
-  const { lang = "en" } = useParams();
-
-  return (
-    <main className="min-h-screen bg-background p-6 text-foreground">
-      <section className="rounded-lg border border-border bg-card p-6">
-        <p className="text-sm text-muted-foreground">FeatBit React scaffold</p>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight">
-          Authenticated layout placeholder
-        </h1>
-        <p className="mt-3 text-sm text-muted-foreground">
-          Route: /{lang}/app. The console shell frame is migration step 3.
-        </p>
-      </section>
-    </main>
-  );
-}
-
 export function AppRoutes() {
   return (
     <Routes>
@@ -65,13 +48,16 @@ export function AppRoutes() {
       <Route path="/:lang/login" element={<AuthRoute mode="login" />} />
       <Route path="/:lang/login/sso" element={<AuthRoute mode="sso" />} />
       <Route
-        path="/:lang/app"
+        path="/:lang/app/*"
         element={
           <ProtectedRoute>
-            <AuthenticatedLayoutPlaceholder />
+            <ConsoleShell />
           </ProtectedRoute>
         }
-      />
+      >
+        <Route index element={<ConsoleShellPlaceholder />} />
+        <Route path="*" element={<ConsoleShellPlaceholder />} />
+      </Route>
       <Route path="/:lang/*" element={<Navigate to="../app" replace />} />
       <Route path="*" element={<LanguageRedirect />} />
     </Routes>

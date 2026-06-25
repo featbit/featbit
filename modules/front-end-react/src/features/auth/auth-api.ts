@@ -34,6 +34,30 @@ function clearAuthStorage() {
   sessionStorage.removeItem(USER_PROFILE);
 }
 
+export function signOut() {
+  clearAuthStorage();
+}
+
+export type StoredUserProfile = {
+  name?: string;
+  email?: string;
+};
+
+export function getStoredUserProfile(): StoredUserProfile {
+  const rawProfile = localStorage.getItem(USER_PROFILE) ?? sessionStorage.getItem(USER_PROFILE);
+
+  if (!rawProfile) {
+    return {};
+  }
+
+  try {
+    const parsedProfile = JSON.parse(rawProfile) as StoredUserProfile;
+    return parsedProfile && typeof parsedProfile === "object" ? parsedProfile : {};
+  } catch {
+    return {};
+  }
+}
+
 export function getIdentityToken() {
   return localStorage.getItem(IDENTITY_TOKEN);
 }
