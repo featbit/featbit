@@ -54,6 +54,7 @@ public class FeatureFlagMcpToolsTests
 
         var result = await tools.CreateFeatureFlag(experimentId, new FeatureFlagMcpCreateRequest
         {
+            ConfirmedByUser = true,
             Name = "Checkout redesign",
             Key = "checkout-redesign"
         });
@@ -67,6 +68,42 @@ public class FeatureFlagMcpToolsTests
         permissionChecker.Verify(
             x => x.IsGrantedAsync(httpContext, It.Is<PermissionRequirement>(r => r.PermissionName == Permissions.CreateFlag)),
             Times.Once);
+    }
+
+    [Fact]
+    public async Task CreateFeatureFlagRequiresUserConfirmation()
+    {
+        var experimentId = Guid.NewGuid();
+        var envId = Guid.NewGuid();
+        var httpContext = new DefaultHttpContext();
+        var sender = new Mock<ISender>();
+        var experimentService = new Mock<IReleaseDecisionExperimentService>();
+        var permissionChecker = new Mock<IPermissionChecker>();
+        var tools = new FeatureFlagMcpTools(
+            sender.Object,
+            experimentService.Object,
+            new HttpContextAccessor { HttpContext = httpContext },
+            permissionChecker.Object,
+            Mock.Of<ILicenseService>(),
+            Mock.Of<IRequestPermissions>());
+
+        experimentService
+            .Setup(x => x.GetEnvIdAsync(experimentId))
+            .ReturnsAsync(envId);
+        permissionChecker
+            .Setup(x => x.IsGrantedAsync(httpContext, It.IsAny<PermissionRequirement>()))
+            .ReturnsAsync(true);
+
+        var ex = await Assert.ThrowsAsync<BusinessException>(() => tools.CreateFeatureFlag(
+            experimentId,
+            new FeatureFlagMcpCreateRequest
+            {
+                Name = "Checkout redesign",
+                Key = "checkout-redesign"
+            }));
+
+        Assert.Equal(ErrorCodes.Required("confirmedByUser"), ex.Message);
+        sender.Verify(x => x.Send(It.IsAny<CreateFeatureFlag>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Fact]
@@ -131,6 +168,7 @@ public class FeatureFlagMcpToolsTests
             {
                 Revision = revision,
                 Targeting = targeting,
+                ConfirmedByUser = true,
                 Comment = "Apply 10% treatment rollout"
             });
 
@@ -141,6 +179,127 @@ public class FeatureFlagMcpToolsTests
         licenseService.Verify(
             x => x.IsFeatureGrantedAsync(It.IsAny<Guid>(), It.IsAny<string>()),
             Times.Never);
+    }
+
+    [Fact]
+    public async Task UpdateFeatureFlagTargetingRequiresUserConfirmation()
+    {
+        var tools = new FeatureFlagMcpTools(
+            Mock.Of<ISender>(),
+            Mock.Of<IReleaseDecisionExperimentService>(),
+            new HttpContextAccessor { HttpContext = new DefaultHttpContext() },
+            Mock.Of<IPermissionChecker>(),
+            Mock.Of<ILicenseService>(),
+            Mock.Of<IRequestPermissions>());
+
+        var ex = await Assert.ThrowsAsync<BusinessException>(() => tools.UpdateFeatureFlagTargeting(
+            Guid.NewGuid(),
+            "checkout-redesign",
+            new FeatureFlagTargetingUpdateRequest
+            {
+                Revision = Guid.NewGuid(),
+                Targeting = new FlagTargeting()
+            }));
+
+        Assert.Equal(ErrorCodes.Required("confirmedByUser"), ex.Message);
+    }
+
+    [Fact]
+    public async Task ToggleFeatureFlagChecksPermissionAndUsesExistingCommand()
+    {
+        var experimentId = Guid.NewGuid();
+        var envId = Guid.NewGuid();
+        var revision = Guid.NewGuid();
+        const string key = "checkout-redesign";
+
+        var httpContext = new DefaultHttpContext();
+        var sender = new Mock<ISender>();
+        var experimentService = new Mock<IReleaseDecisionExperimentService>();
+        var permissionChecker = new Mock<IPermissionChecker>();
+        var licenseService = new Mock<ILicenseService>();
+        var requestPermissions = new Mock<IRequestPermissions>();
+        var httpContextAccessor = new HttpContextAccessor { HttpContext = httpContext };
+
+        experimentService
+            .Setup(x => x.GetEnvIdAsync(experimentId))
+            .ReturnsAsync(envId);
+        permissionChecker
+            .Setup(x => x.IsGrantedAsync(httpContext, It.IsAny<PermissionRequirement>()))
+            .ReturnsAsync(true);
+        sender
+            .Setup(x => x.Send(It.Is<ToggleFeatureFlag>(request =>
+                request.EnvId == envId &&
+                request.Key == key &&
+                request.Status &&
+                request.Comment == "Enable for experiment traffic"), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(revision);
+        var tools = new FeatureFlagMcpTools(
+            sender.Object,
+            experimentService.Object,
+            httpContextAccessor,
+            permissionChecker.Object,
+            licenseService.Object,
+            requestPermissions.Object);
+
+        var result = await tools.ToggleFeatureFlag(
+            experimentId,
+            key,
+            new FeatureFlagToggleRequest
+            {
+                ConfirmedByUser = true,
+                IsEnabled = true,
+                Comment = "Enable for experiment traffic"
+            });
+
+        Assert.True(result.IsEnabled);
+        Assert.Equal(revision, result.Revision);
+        Assert.Equal(envId.ToString(), httpContext.Request.RouteValues["envId"]);
+        Assert.Equal(key, httpContext.Request.RouteValues["key"]);
+        permissionChecker.Verify(
+            x => x.IsGrantedAsync(httpContext, It.Is<PermissionRequirement>(r => r.PermissionName == Permissions.CanAccessEnv)),
+            Times.Once);
+        permissionChecker.Verify(
+            x => x.IsGrantedAsync(httpContext, It.Is<PermissionRequirement>(r => r.PermissionName == Permissions.ToggleFlag)),
+            Times.Once);
+        sender.Verify(x => x.Send(It.IsAny<ToggleFeatureFlag>(), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task ToggleFeatureFlagRequiresUserConfirmation()
+    {
+        var tools = new FeatureFlagMcpTools(
+            Mock.Of<ISender>(),
+            Mock.Of<IReleaseDecisionExperimentService>(),
+            new HttpContextAccessor { HttpContext = new DefaultHttpContext() },
+            Mock.Of<IPermissionChecker>(),
+            Mock.Of<ILicenseService>(),
+            Mock.Of<IRequestPermissions>());
+
+        var ex = await Assert.ThrowsAsync<BusinessException>(() => tools.ToggleFeatureFlag(
+            Guid.NewGuid(),
+            "checkout-redesign",
+            new FeatureFlagToggleRequest { IsEnabled = true }));
+
+        Assert.Equal(ErrorCodes.Required("confirmedByUser"), ex.Message);
+    }
+
+    [Fact]
+    public async Task ToggleFeatureFlagRequiresEnabledStatus()
+    {
+        var tools = new FeatureFlagMcpTools(
+            Mock.Of<ISender>(),
+            Mock.Of<IReleaseDecisionExperimentService>(),
+            new HttpContextAccessor { HttpContext = new DefaultHttpContext() },
+            Mock.Of<IPermissionChecker>(),
+            Mock.Of<ILicenseService>(),
+            Mock.Of<IRequestPermissions>());
+
+        var ex = await Assert.ThrowsAsync<BusinessException>(() => tools.ToggleFeatureFlag(
+            Guid.NewGuid(),
+            "checkout-redesign",
+            new FeatureFlagToggleRequest { ConfirmedByUser = true }));
+
+        Assert.Equal(ErrorCodes.Required("isEnabled"), ex.Message);
     }
 
     [Fact]
@@ -213,6 +372,7 @@ public class FeatureFlagMcpToolsTests
             {
                 Revision = revision,
                 Targeting = targeting,
+                ConfirmedByUser = true,
                 Reason = "Start 10% treatment rollout",
                 Reviewers = [reviewerId]
             });
@@ -273,7 +433,8 @@ public class FeatureFlagMcpToolsTests
             new FeatureFlagTargetingUpdateRequest
             {
                 Revision = revision,
-                Targeting = targeting
+                Targeting = targeting,
+                ConfirmedByUser = true
             }));
 
         Assert.Equal(ErrorCodes.Invalid("fallthrough.variations.rollout"), ex.Message);

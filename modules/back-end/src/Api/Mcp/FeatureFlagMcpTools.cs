@@ -43,7 +43,7 @@ public class FeatureFlagMcpTools(
     }
 
     [McpServerTool(Name = "featbit_release_decision_create_feature_flag")]
-    [Description("Create a FeatBit feature flag in the environment attached to a release-decision experiment. If variations are omitted for a boolean flag, standard false/true variations are generated.")]
+    [Description("Create a FeatBit feature flag in the environment attached to a release-decision experiment. Requires request.confirmedByUser=true after explicit user approval. If variations are omitted for a boolean flag, standard false/true variations are generated.")]
     public async Task<FeatureFlag> CreateFeatureFlag(
         [Description("Release-decision experiment id used to resolve the FeatBit environment.")]
         Guid experimentId,
@@ -56,8 +56,38 @@ public class FeatureFlagMcpTools(
         return await mediator.Send(request.ToCreateFeatureFlag(envId));
     }
 
+    [McpServerTool(Name = "featbit_release_decision_toggle_feature_flag")]
+    [Description("Enable or disable a FeatBit feature flag in the environment attached to a release-decision experiment. Requires request.confirmedByUser=true after explicit user approval.")]
+    public async Task<FeatureFlagToggleResult> ToggleFeatureFlag(
+        [Description("Release-decision experiment id used to resolve the FeatBit environment.")]
+        Guid experimentId,
+        [Description("Feature flag key.")]
+        string key,
+        [Description("Toggle payload.")]
+        FeatureFlagToggleRequest request)
+    {
+        ValidateToggleRequest(request);
+
+        var envId = await ResolveAuthorizedEnvIdAsync(experimentId);
+        await EnsurePermissionAsync(envId, Permissions.ToggleFlag, key);
+
+        var revision = await mediator.Send(new ToggleFeatureFlag
+        {
+            EnvId = envId,
+            Key = key,
+            Status = request.IsEnabled!.Value,
+            Comment = request.Comment ?? string.Empty
+        });
+
+        return new FeatureFlagToggleResult
+        {
+            Revision = revision,
+            IsEnabled = request.IsEnabled.Value
+        };
+    }
+
     [McpServerTool(Name = "featbit_release_decision_update_feature_flag_targeting")]
-    [Description("Update feature flag targeting in the experiment environment. By default this applies directly; set useChangeRequest or provide reviewers to create a change request instead.")]
+    [Description("Update feature flag targeting in the experiment environment. Requires request.confirmedByUser=true after explicit user approval. By default this applies directly; set useChangeRequest or provide reviewers to create a change request instead.")]
     public async Task<FeatureFlagTargetingUpdateResult> UpdateFeatureFlagTargeting(
         [Description("Release-decision experiment id used to resolve the FeatBit environment.")]
         Guid experimentId,
@@ -218,6 +248,8 @@ public class FeatureFlagMcpTools(
             throw new BusinessException(ErrorCodes.Required("request"));
         }
 
+        EnsureUserConfirmed(request.ConfirmedByUser);
+
         if (request.Revision == Guid.Empty)
         {
             throw new BusinessException(ErrorCodes.Required("revision"));
@@ -229,6 +261,29 @@ public class FeatureFlagMcpTools(
         }
 
         request.Reviewers ??= [];
+    }
+
+    private static void ValidateToggleRequest(FeatureFlagToggleRequest request)
+    {
+        if (request == null)
+        {
+            throw new BusinessException(ErrorCodes.Required("request"));
+        }
+
+        EnsureUserConfirmed(request.ConfirmedByUser);
+
+        if (!request.IsEnabled.HasValue)
+        {
+            throw new BusinessException(ErrorCodes.Required("isEnabled"));
+        }
+    }
+
+    private static void EnsureUserConfirmed(bool confirmedByUser)
+    {
+        if (!confirmedByUser)
+        {
+            throw new BusinessException(ErrorCodes.Required("confirmedByUser"));
+        }
     }
 
     private static void ValidateTargeting(FlagTargeting targeting, FeatureFlag flag)
@@ -329,6 +384,9 @@ public class FeatureFlagMcpTools(
 
 public class FeatureFlagMcpCreateRequest
 {
+    [Description("Must be true only after the user explicitly approves creating this feature flag.")]
+    public bool ConfirmedByUser { get; set; }
+
     [Description("Feature flag name.")]
     public string Name { get; set; } = string.Empty;
 
@@ -387,6 +445,11 @@ public class FeatureFlagMcpCreateRequest
 
     private void Validate()
     {
+        if (!ConfirmedByUser)
+        {
+            throw new BusinessException(ErrorCodes.Required("confirmedByUser"));
+        }
+
         if (string.IsNullOrWhiteSpace(Name))
         {
             throw new BusinessException(ErrorCodes.Required("name"));
@@ -438,6 +501,9 @@ public class FeatureFlagMcpCreateRequest
 
 public class FeatureFlagTargetingUpdateRequest
 {
+    [Description("Must be true only after the user explicitly approves this targeting update or change request.")]
+    public bool ConfirmedByUser { get; set; }
+
     [Description("Current feature flag revision for optimistic concurrency.")]
     public Guid Revision { get; set; }
 
@@ -455,6 +521,25 @@ public class FeatureFlagTargetingUpdateRequest
 
     [Description("Member ids who must review this change request. Providing reviewers also selects change-request mode.")]
     public ICollection<Guid> Reviewers { get; set; } = [];
+}
+
+public class FeatureFlagToggleRequest
+{
+    [Description("Must be true only after the user explicitly approves enabling or disabling this feature flag.")]
+    public bool ConfirmedByUser { get; set; }
+
+    [Description("True to enable the feature flag, false to disable it.")]
+    public bool? IsEnabled { get; set; }
+
+    [Description("Audit comment for the direct toggle operation.")]
+    public string Comment { get; set; } = string.Empty;
+}
+
+public class FeatureFlagToggleResult
+{
+    public Guid Revision { get; set; }
+
+    public bool IsEnabled { get; set; }
 }
 
 public class FeatureFlagTargetingUpdateResult
