@@ -27,9 +27,12 @@ function resolveLang(value: string | undefined): Lang {
 }
 
 function FeatBitLogo() {
+  const { resolvedTheme } = useTheme();
+  const logoSrc = resolvedTheme === "dark" ? "/assets/featbit-logo-dark.svg" : "/assets/featbit-logo.svg";
+
   return (
     <Link to="/" className="flex items-center gap-3 text-foreground" aria-label="FeatBit">
-      <img className="h-9 w-10 shrink-0" src="/assets/featbit-logo.svg" alt="" />
+      <img className="h-9 w-10 shrink-0" src={logoSrc} alt="" />
       <span className="text-3xl font-semibold tracking-tight">FeatBit</span>
     </Link>
   );
