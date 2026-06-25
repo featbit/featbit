@@ -108,7 +108,7 @@ function DotGrid({ className }: { className?: string }) {
 
 function RolloutVisual() {
   return (
-    <div className="relative left-1/2 mt-10 h-[450px] w-[820px] max-w-[calc(100vw-2rem)] origin-top -translate-x-1/2 overflow-visible [@media(max-height:800px)]:h-[386px] [@media(max-height:800px)]:scale-[0.86]">
+    <div className="relative left-1/2 mt-10 h-[450px] w-[820px] max-w-[calc(100vw-2rem)] origin-top -translate-x-1/2 overflow-visible [@media(min-height:1100px)]:h-[540px] [@media(min-height:1100px)]:scale-[1.2] [@media(max-height:800px)]:h-[386px] [@media(max-height:800px)]:scale-[0.86]">
       <DotGrid className="absolute left-0 top-10" />
       <DotGrid className="absolute left-[58%] top-[-10px]" />
       <span className="absolute left-[18%] top-[250px] h-2.5 w-2.5 rounded-full bg-blue-500" />
@@ -209,7 +209,7 @@ function LeftPanel() {
   const { t } = useTranslation();
 
   return (
-    <section className="relative hidden min-h-[calc(100vh-6rem)] min-w-0 flex-col justify-start pb-8 pl-16 pr-4 pt-[clamp(2rem,6vh,7rem)] lg:flex xl:pl-20 xl:pr-6">
+    <section className="relative hidden min-h-[calc(100vh-6rem)] min-w-0 flex-col justify-start overflow-hidden pb-8 pl-16 pr-4 pt-[clamp(2rem,6vh,7rem)] lg:flex xl:pl-20 xl:pr-6">
       <div>
         <h1 className="max-w-none whitespace-nowrap text-5xl font-semibold leading-tight tracking-tight text-foreground">
           {t("auth.hero.title")}
@@ -361,7 +361,7 @@ function LoginForm({
   const visibleProviders = socialProviders.filter((provider) => ["Google", "GitHub"].includes(provider.name));
 
   return (
-    <div className="mx-auto flex w-full max-w-[560px] flex-col justify-start px-8 pb-8 pt-[clamp(2rem,6vh,7rem)] sm:px-12 lg:px-0">
+    <div className="mx-auto flex w-full max-w-[560px] flex-col justify-start px-8 pb-8 sm:px-12 lg:px-0">
       <div>
         <h2 className="text-3xl font-semibold tracking-tight">{t("auth.login.title")}</h2>
         <p className="mt-3 text-base text-muted-foreground">{t("auth.login.subtitle")}</p>
@@ -466,7 +466,7 @@ function SsoForm({ lang, preCheck }: { lang: Lang; preCheck: SsoPreCheck | null 
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-[560px] flex-col justify-start px-8 pb-8 pt-[clamp(2rem,6vh,7rem)] sm:px-12 lg:px-0">
+    <div className="mx-auto flex w-full max-w-[560px] flex-col justify-start px-8 pb-8 sm:px-12 lg:px-0">
       <Button asChild variant="link" className="mb-14 h-auto justify-start gap-3 p-0 text-base text-blue-600">
         <Link to={`/${lang}/login`}>
           <ArrowLeft className="h-5 w-5" />
@@ -609,7 +609,7 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
       <AuthHeader lang={lang} />
       <div className="grid min-h-[calc(100vh-6rem)] lg:grid-cols-[1.45fr_1fr]">
         <LeftPanel />
-        <section className="grid min-h-[calc(100vh-6rem)] grid-rows-[1fr_auto] border-border lg:border-l">
+        <section className="grid min-h-[calc(100vh-6rem)] grid-rows-[1fr_auto] border-border pt-[clamp(2rem,6vh,7rem)] lg:border-l">
           {externalLoginError ? (
             <div className="mx-auto mt-8 w-full max-w-[560px] px-8 text-sm font-medium text-red-600 sm:px-12 lg:px-0">
               {externalLoginError}
