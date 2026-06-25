@@ -1,7 +1,8 @@
-﻿using System.Net;
+using System.Net;
 
 namespace Application.IntegrationTests;
 
+[Trait("Category", "Host")]
 [Collection(nameof(TestApp))]
 public class SmokeTests
 {

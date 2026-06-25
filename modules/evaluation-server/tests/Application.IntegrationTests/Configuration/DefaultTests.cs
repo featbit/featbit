@@ -5,6 +5,7 @@ using Streaming.Connections;
 
 namespace Application.IntegrationTests.Configuration;
 
+[Trait("Category", "Host")]
 [Collection(nameof(TestApp))]
 public class DefaultTests
 {

@@ -61,7 +61,7 @@ public class RelayProxyValidatorTests
             Agents = new[] { ValidAgent() }
         };
 
-        var result = new WebhookBaseValidator().Validate(proxy);
+        var result = new RelayProxyBaseValidator().Validate(proxy);
 
         Assert.True(result.IsValid);
     }
@@ -76,7 +76,7 @@ public class RelayProxyValidatorTests
             Agents = new[] { ValidAgent() }
         };
 
-        var result = new WebhookBaseValidator().Validate(proxy);
+        var result = new RelayProxyBaseValidator().Validate(proxy);
 
         Assert.Contains(result.Errors, e => e.ErrorCode == ErrorCodes.Required("name"));
     }
@@ -92,7 +92,7 @@ public class RelayProxyValidatorTests
             Agents = new[] { ValidAgent() }
         };
 
-        var result = new WebhookBaseValidator().Validate(proxy);
+        var result = new RelayProxyBaseValidator().Validate(proxy);
 
         Assert.Contains(result.Errors, e => e.ErrorCode == ErrorCodes.Invalid("scopes"));
     }
@@ -108,7 +108,7 @@ public class RelayProxyValidatorTests
             Agents = new[] { ValidAgent() }
         };
 
-        var result = new WebhookBaseValidator().Validate(proxy);
+        var result = new RelayProxyBaseValidator().Validate(proxy);
 
         Assert.Contains(result.Errors, e => e.ErrorCode == ErrorCodes.Invalid("scopes"));
     }
@@ -123,7 +123,7 @@ public class RelayProxyValidatorTests
             Agents = new[] { new Agent { Id = "", Name = "", Host = "" } }
         };
 
-        var result = new WebhookBaseValidator().Validate(proxy);
+        var result = new RelayProxyBaseValidator().Validate(proxy);
 
         Assert.Contains(result.Errors, e => e.ErrorCode == ErrorCodes.Invalid("agents"));
     }

@@ -2,6 +2,7 @@ using Application.Identity;
 
 namespace Application.IntegrationTests.Identity;
 
+[Trait("Category", "Host")]
 [Collection(nameof(TestApp))]
 public class IdentityControllerTests
 {

@@ -16,7 +16,7 @@ public class CreateRelayProxyValidator : AbstractValidator<CreateRelayProxy>
 {
     public CreateRelayProxyValidator()
     {
-        Include(new WebhookBaseValidator());
+        Include(new RelayProxyBaseValidator());
     }
 }
 

@@ -7,6 +7,7 @@ namespace Application.IntegrationTests.Controllers;
 /// unauthenticated requests. Catches regressions where a class-level [Authorize] is
 /// dropped or a route is exposed by accident.
 /// </summary>
+[Trait("Category", "Host")]
 [Collection(nameof(TestApp))]
 public class AuthorizationSmokeTests
 {

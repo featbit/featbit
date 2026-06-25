@@ -1,7 +1,8 @@
-﻿using Api.Cors;
+using Api.Cors;
 
 namespace Application.IntegrationTests.Cors;
 
+[Trait("Category", "Host")]
 public class OptionsValidationTests
 {
     private readonly CorsOptionsValidator _validator = new();

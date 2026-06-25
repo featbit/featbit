@@ -1,7 +1,8 @@
-﻿using System.Net.WebSockets;
+using System.Net.WebSockets;
 
 namespace Application.IntegrationTests.WebSockets;
 
+[Trait("Category", "Host")]
 [Collection(nameof(TestApp))]
 public class ConnectionTests
 {

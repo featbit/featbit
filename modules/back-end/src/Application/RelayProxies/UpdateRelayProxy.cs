@@ -13,7 +13,7 @@ public class UpdateRelayProxyValidator : AbstractValidator<UpdateRelayProxy>
 {
     public UpdateRelayProxyValidator()
     {
-        Include(new WebhookBaseValidator());
+        Include(new RelayProxyBaseValidator());
     }
 }
 

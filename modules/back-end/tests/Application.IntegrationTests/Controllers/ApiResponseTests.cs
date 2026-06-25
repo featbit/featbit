@@ -2,6 +2,7 @@ using Api.Controllers;
 
 namespace Application.IntegrationTests.Controllers;
 
+[Trait("Category", "Host")]
 public class ApiResponseTests
 {
     [Fact]

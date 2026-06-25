@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 
 namespace Application.IntegrationTests.Sso;
 
+[Trait("Category", "Host")]
 [Collection(nameof(TestApp))]
 public class SsoControllerTests
 {

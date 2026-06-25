@@ -172,17 +172,27 @@ These are the starting coverage numbers as of the introduction of this standard.
 
 These items violate the rules above and will be migrated as work touches them:
 
-- **eval-server:** move `src/Domain/Shared/TestData.cs` → `tests/TestBase/TestData.cs`.
 - **eval-server:** move `tests/Streaming.UnitTests/Shared/*` → `tests/Domain.UnitTests/Shared/` (tests target `Domain.Shared` types).
 - **eval-server:** rename `tests/Domain.UnitTests/Evaluation/DispatchAlgorithmTest.cs` → `DispatchAlgorithmTests.cs`.
 - **back-end:** move `tests/Application.IntegrationTests/Identity/IdentityServiceTests.cs` → `tests/Application.UnitTests/Identity/IdentityServiceTests.cs` (no integration host used).
 - **back-end:** rename `tests/Application.UnitTests/HandlebarTemplate/` to match the actual source path.
 - **back-end:** fix `Assert.Equal(actual, expected)` argument order in `StringHelperTests.cs`.
-- **both modules:** add `coverlet.collector` PackageReference directly to each test csproj.
 
 ## 12. Backend-integration tests (Testcontainers)
 
 The `Infrastructure.IntegrationTests` project in each module covers code paths that hit a **real** Mongo / Postgres / Redis / Kafka instance. We use [Testcontainers for .NET](https://dotnet.testcontainers.org/) so every contributor gets a deterministic, throw-away backing store with no manual setup beyond `docker` being installed.
+
+### Test categories at a glance
+
+Every test outside the plain `*.UnitTests` projects carries a `Category` trait so CI and local runs can filter precisely:
+
+| Trait | Where it lives | What it means | CI behaviour |
+|---|---|---|---|
+| _(no trait)_ | `*.UnitTests` projects | Pure unit tests, no external deps. | Always run. |
+| `Category=Host` | `Application.IntegrationTests` projects in both modules | Boot the in-process host (`WebApplicationFactory<Program>`), exercise routing/middleware/options. No external containers — Redis/Mongo/Postgres/Kafka are stubbed or in-memory. | Always run. |
+| `Category=Integration` | `Infrastructure.IntegrationTests` projects | Real backing store via Testcontainers — Docker required. | **Skipped** via `--filter "Category!=Integration"` so the projects still **build** in CI but no container starts on a GitHub runner. |
+
+Add the trait at the class level (`[Trait("Category", "Host")]` for Application.IntegrationTests classes; `IntegrationTestBase` applies `Category=Integration` automatically). Do **not** sprinkle per-method traits.
 
 ### Local-only — never in CI
 

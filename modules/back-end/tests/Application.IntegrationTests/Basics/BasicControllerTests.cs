@@ -2,6 +2,7 @@ using Api.Controllers;
 
 namespace Application.IntegrationTests.Basics;
 
+[Trait("Category", "Host")]
 [Collection(nameof(TestApp))]
 public class BasicControllerTests
 {

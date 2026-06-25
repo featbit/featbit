@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace Application.IntegrationTests.RateLimiting;
 
+[Trait("Category", "Host")]
 [Collection(nameof(TestApp))]
 public class RateLimitingTests
 {

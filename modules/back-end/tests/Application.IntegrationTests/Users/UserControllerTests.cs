@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Application.IntegrationTests.Users;
 
+[Trait("Category", "Host")]
 [Collection(nameof(TestApp))]
 public class UserControllerTests
 {

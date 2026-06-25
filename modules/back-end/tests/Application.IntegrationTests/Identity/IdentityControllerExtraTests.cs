@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 
 namespace Application.IntegrationTests.Identity;
 
+[Trait("Category", "Host")]
 [Collection(nameof(TestApp))]
 public class IdentityControllerExtraTests
 {

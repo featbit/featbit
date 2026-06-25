@@ -7,6 +7,7 @@ using Streaming.Protocol;
 
 namespace Application.IntegrationTests.WebSockets;
 
+[Trait("Category", "Host")]
 [Collection(nameof(TestApp))]
 public class DataSyncTests(TestApp app)
 {

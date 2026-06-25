@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Application.IntegrationTests.Configuration;
 
+[Trait("Category", "Host")]
 [Collection(nameof(TestApp))]
 public class KafkaConfigTests
 {

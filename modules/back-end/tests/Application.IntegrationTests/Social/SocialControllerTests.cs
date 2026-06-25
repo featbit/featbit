@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 
 namespace Application.IntegrationTests.Social;
 
+[Trait("Category", "Host")]
 [Collection(nameof(TestApp))]
 public class SocialControllerTests
 {
