@@ -19,6 +19,9 @@ This design document covers only the Workspace page content area inside the auth
 - License tab dark theme concept: [workspace-page-license-dark.png](workspace-page-license-dark.png)
 - License tab SaaS light theme concept: [workspace-page-license-saas-light-v3.png](workspace-page-license-saas-light-v3.png)
 - License tab SaaS dark theme concept: [workspace-page-license-saas-dark.png](workspace-page-license-saas-dark.png)
+- Usage tab light theme concept: [workspace-usage-light.png](workspace-usage-light.png)
+- Usage tab dark theme concept: [workspace-usage-dark.png](workspace-usage-dark.png)
+- Usage tab detailed design: [workspace-usage-page-design.md](workspace-usage-page-design.md)
 
 ## Angular Functional Reference
 
@@ -162,12 +165,17 @@ License detail:
 
 ## Usage Tab
 
+Follow the detailed design contract in [workspace-usage-page-design.md](workspace-usage-page-design.md). The saved visual targets are [workspace-usage-light.png](workspace-usage-light.png) and [workspace-usage-dark.png](workspace-usage-dark.png).
+
+The Usage visual targets are full-page mockups for context. They must not be used to change the authenticated layout, sidebar, top context bar, Workspace page header, account menu, subscription/license badge, or Workspace tabs.
+
 The Usage tab should feel like an operational analytics page, not a decorative dashboard.
 
 Toolbar:
 
-- Left: period selector with options matching Angular behavior, such as current month, last 7 days, and last 30 days.
-- Right or inline: selected date range as muted text.
+- Do not repeat an inner `Usage` title or descriptive subtitle inside the tab body.
+- Right: period selector with options matching Angular behavior, such as current month, last 7 days, and last 30 days.
+- Inline with the selector: selected date range as muted text.
 
 Summary metrics:
 
