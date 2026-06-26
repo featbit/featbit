@@ -456,16 +456,6 @@ export function PlanBadge({ lang, workspace }: { lang: Lang; workspace: Workspac
   );
 }
 
-function EnvironmentDot({ type }: { type: Environment["type"] }) {
-  const className = {
-    prod: "bg-emerald-500",
-    staging: "bg-amber-500",
-    dev: "bg-sky-500"
-  }[type];
-
-  return <span className={cn("h-2 w-2 rounded-full", className)} />;
-}
-
 export function ContextBar({
   organization,
   currentProjectEnv,
@@ -511,10 +501,9 @@ export function ContextBar({
       <span className="text-muted-foreground">/</span>
       <span className="truncate font-medium">{currentProjectEnv.projectName}</span>
       <span className="text-muted-foreground">/</span>
-      <DropdownMenu>
+        <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button type="button" variant="ghost" className="h-8 gap-2 px-2">
-            <EnvironmentDot type={inferEnvironmentType({ name: currentProjectEnv.envName, key: currentProjectEnv.envKey })} />
             {currentProjectEnv.envName}
             <ChevronsUpDown className="h-3.5 w-3.5 text-muted-foreground" />
           </Button>
@@ -540,8 +529,7 @@ export function ContextBar({
                     className="cursor-pointer justify-between"
                     onSelect={() => selectEnvironment(project, environment)}
                   >
-                    <span className="flex min-w-0 items-center gap-2">
-                      <EnvironmentDot type={environment.type} />
+                    <span className="flex min-w-0 items-center">
                       <span className="truncate">{environment.name}</span>
                     </span>
                     {environment.id === currentProjectEnv.envId && project.id === currentProjectEnv.projectId ? (
