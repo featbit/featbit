@@ -856,7 +856,7 @@ function ContextBar({
                 {project.environments.map((environment) => (
                   <DropdownMenuItem
                     key={`${project.id}:${environment.id}`}
-                    className="justify-between"
+                    className="cursor-pointer justify-between"
                     onSelect={() => selectEnvironment(project, environment)}
                   >
                     <span className="flex min-w-0 items-center gap-2">
@@ -872,7 +872,7 @@ function ContextBar({
             ))}
           </div>
           <DropdownMenuSeparator />
-          <DropdownMenuItem asChild>
+          <DropdownMenuItem asChild className="cursor-pointer">
             <Link to="#manage-environments" className="text-muted-foreground">
               {t("layout.context.manageEnvironments")}
             </Link>
@@ -971,17 +971,17 @@ function AccountMenu({ lang, collapsed }: { lang: Lang; collapsed: boolean }) {
           </div>
           <DropdownMenuSeparator className="mx-3 my-0" />
           <div className="p-2">
-            <DropdownMenuItem className="h-8 gap-3 rounded-md px-2 text-sm font-medium">
+            <DropdownMenuItem className="h-8 cursor-pointer gap-3 rounded-md px-2 text-sm font-medium">
               <User className="h-4 w-4 text-muted-foreground" />
               {t("layout.account.profile")}
             </DropdownMenuItem>
-            <DropdownMenuItem asChild className="h-8 gap-3 rounded-md px-2 text-sm font-medium">
+            <DropdownMenuItem asChild className="h-8 cursor-pointer gap-3 rounded-md px-2 text-sm font-medium">
               <a href="https://support.featbit.ai" target="_blank" rel="noreferrer">
                 <LifeBuoy className="h-4 w-4 text-muted-foreground" />
                 {t("layout.account.support")}
               </a>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild className="h-8 gap-3 rounded-md px-2 text-sm font-medium">
+            <DropdownMenuItem asChild className="h-8 cursor-pointer gap-3 rounded-md px-2 text-sm font-medium">
               <a href="https://docs.featbit.co" target="_blank" rel="noreferrer">
                 <BookOpen className="h-4 w-4 text-muted-foreground" />
                 {t("layout.account.documentation")}
@@ -991,20 +991,20 @@ function AccountMenu({ lang, collapsed }: { lang: Lang; collapsed: boolean }) {
           <DropdownMenuSeparator className="mx-3 my-0" />
           <div className="p-2">
             <DropdownMenuSub>
-              <DropdownMenuSubTrigger className="h-8 gap-3 rounded-md px-2 text-sm font-medium">
+              <DropdownMenuSubTrigger className="h-8 cursor-pointer gap-3 rounded-md px-2 text-sm font-medium">
                 <Globe2 className="h-4 w-4 text-muted-foreground" />
                 <span>{t("layout.account.language")}</span>
                 <span className="ml-auto text-xs font-medium text-muted-foreground">{languageLabel}</span>
               </DropdownMenuSubTrigger>
               <DropdownMenuSubContent className="w-36 rounded-lg">
                 <DropdownMenuRadioGroup value={lang} onValueChange={(value) => changeLanguage(resolveLang(value))}>
-                  <DropdownMenuRadioItem value="en">{t("layout.account.english")}</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="zh">{t("layout.account.chinese")}</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="en" className="cursor-pointer">{t("layout.account.english")}</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="zh" className="cursor-pointer">{t("layout.account.chinese")}</DropdownMenuRadioItem>
                 </DropdownMenuRadioGroup>
               </DropdownMenuSubContent>
             </DropdownMenuSub>
             <DropdownMenuSub>
-              <DropdownMenuSubTrigger className="h-8 gap-3 rounded-md px-2 text-sm font-medium">
+              <DropdownMenuSubTrigger className="h-8 cursor-pointer gap-3 rounded-md px-2 text-sm font-medium">
                 {resolvedTheme === "dark" ? (
                   <Moon className="h-4 w-4 text-muted-foreground" />
                 ) : (
@@ -1015,16 +1015,16 @@ function AccountMenu({ lang, collapsed }: { lang: Lang; collapsed: boolean }) {
               </DropdownMenuSubTrigger>
               <DropdownMenuSubContent className="w-36 rounded-lg">
                 <DropdownMenuRadioGroup value={theme} onValueChange={(value) => setTheme(value as "light" | "dark" | "system")}>
-                  <DropdownMenuRadioItem value="light">{t("layout.account.theme.light")}</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="dark">{t("layout.account.theme.dark")}</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="system">{t("layout.account.theme.system")}</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="light" className="cursor-pointer">{t("layout.account.theme.light")}</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="dark" className="cursor-pointer">{t("layout.account.theme.dark")}</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="system" className="cursor-pointer">{t("layout.account.theme.system")}</DropdownMenuRadioItem>
                 </DropdownMenuRadioGroup>
               </DropdownMenuSubContent>
             </DropdownMenuSub>
           </div>
           <DropdownMenuSeparator className="mx-3 my-0" />
           <div className="p-2">
-            <DropdownMenuItem asChild className="h-8 justify-between rounded-md px-2 text-sm font-medium">
+            <DropdownMenuItem asChild className="h-8 cursor-pointer justify-between rounded-md px-2 text-sm font-medium">
               <a href="https://github.com/featbit/featbit" target="_blank" rel="noreferrer">
                 <span className="flex items-center gap-3">
                   <Info className="h-4 w-4 text-muted-foreground" />
@@ -1036,7 +1036,7 @@ function AccountMenu({ lang, collapsed }: { lang: Lang; collapsed: boolean }) {
           </div>
           <DropdownMenuSeparator className="mx-3 my-0" />
           <div className="p-2">
-            <DropdownMenuItem className="h-8 gap-3 rounded-md px-2 text-sm font-semibold text-destructive focus:text-destructive" onSelect={handleSignOut}>
+            <DropdownMenuItem className="h-8 cursor-pointer gap-3 rounded-md px-2 text-sm font-semibold text-destructive focus:text-destructive" onSelect={handleSignOut}>
               <LogOut className="h-4 w-4" />
               {t("layout.account.signOut")}
             </DropdownMenuItem>
