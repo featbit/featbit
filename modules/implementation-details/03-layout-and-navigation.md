@@ -1,17 +1,17 @@
-# 03 - Shell, Login, And Navigation
+# 03 - Layout, Login, And Navigation
 
 ## Goal
 
-Migrate the application shell: login, auth guard, secure layout, side navigation, top header, top-right subscription/license badge, left-bottom account menu with current version display, theme and locale controls, and workspace/org/project/env switching.
+Migrate the application layout: login, auth guard, secure layout, side navigation, top header, top-right subscription/license badge, left-bottom account menu with current version display, theme and locale controls, and workspace/org/project/env switching.
 
 ## Step Scope
 
 This document currently backs two independently executable migration steps:
 
 - Step 2, login page: implement only the public login and SSO pages, including public theme/language controls and session submission wiring where the project foundation already supports it.
-- Step 3, console shell frame: implement only the authenticated console frame, including header/context bar and left sidebar navigation. Leave the main content area intentionally empty or as a minimal neutral placeholder until later feature-page steps are added.
+- Step 3, authenticated layout frame: implement only the authenticated layout frame, including header/context bar and left sidebar navigation. Leave the main content area intentionally empty or as a minimal neutral placeholder until later feature-page steps are added.
 
-When the user asks for one of these steps by number, keep the implementation inside that boundary and do not continue into the other shell work unless it is a small prerequisite needed to compile or route correctly.
+When the user asks for one of these steps by number, keep the implementation inside that boundary and do not continue into the other layout work unless it is a small prerequisite needed to compile or route correctly.
 
 ## Routes
 
@@ -21,7 +21,7 @@ When the user asks for one of these steps by number, keep the implementation ins
   - `/:lang/login`
   - `/:lang/onboarding`
   - `/:lang/select-workspace`
-- Authenticated routes live under the secure shell and keep the same functional destinations as Angular.
+- Authenticated routes live under the secure layout and keep the same functional destinations as Angular.
 
 ## Login
 
@@ -32,9 +32,9 @@ When the user asks for one of these steps by number, keep the implementation ins
 - Treat the saved light/dark login images as required implementation baselines, not loose references.
 - Use a restrained split layout:
   - header with current Angular FeatBit logo style, top-right theme toggle, language switcher, and header-bottom divider.
-  - left area with feature rollout / traffic split abstraction, not a console screenshot and not AI messaging.
+  - left area with feature rollout / traffic split abstraction, not a layout screenshot and not AI messaging.
   - right authentication column with email/password login, Google/GitHub OAuth, and a separate Enterprise SSO section.
-- Preserve the saved login page elements and hierarchy, but style colors, backgrounds, borders, controls, shadows, and light/dark theme tokens to match the authenticated React console.
+- Preserve the saved login page elements and hierarchy, but style colors, backgrounds, borders, controls, shadows, and light/dark theme tokens to match the authenticated React layout.
 - The public login theme toggle should sit immediately before the language switcher and use a moon icon in light theme and a sun icon in dark theme.
 - Keep a vertical divider between the left visual area and right login column.
 - Do not add a footer divider line.
@@ -42,11 +42,11 @@ When the user asks for one of these steps by number, keep the implementation ins
 - The SSO page should ask for `Workspace key`, use a placeholder such as `acme-prod`, and include only `Back to sign in` plus `Continue with SSO`; do not include Google/GitHub, email/password fields, `Use email and password instead`, or SAML/OIDC helper text.
 - Preserve existing backend login behavior and session persistence.
 
-## Secure Shell
+## Secure Layout
 
-- Implement the authenticated shell according to [react-console-design.md](../design/react-console-design.md), with [react-console-light.png](../design/react-console-light.png) and [react-console-dark.png](../design/react-console-dark.png) as required visual baselines. These assets govern shell layout only; the Feature Flags content shown inside the shell is a placeholder and not final page design.
+- Implement the authenticated layout according to [react-layout-design.md](../design/react-layout-design.md), with [react-layout-light.png](../design/react-layout-light.png) and [react-layout-dark.png](../design/react-layout-dark.png) as required visual baselines. These assets govern layout only; the Feature Flags content shown inside the layout is a placeholder and not final page design.
 - Use a left navigation plus top context bar layout.
-- For migration step 3, the main workspace area must remain blank or contain only a minimal neutral placeholder shell container. Do not implement Feature Flags, dashboards, settings pages, or other domain content in this step.
+- For migration step 3, the main workspace area must remain blank or contain only a minimal neutral placeholder layout container. Do not implement Feature Flags, dashboards, settings pages, or other domain content in this step.
 - Implement sidebar collapse/expand:
   - expanded sidebar shows the FeatBit mark + wordmark.
   - expanded sidebar shows a `PanelLeftClose` icon button near the sidebar/content divider.
@@ -124,22 +124,22 @@ Step 2 acceptance:
 
 Step 3 acceptance:
 
-- Authenticated routes render the console shell frame with header/context bar and left sidebar navigation.
+- Authenticated routes render the authenticated layout frame with header/context bar and left sidebar navigation.
 - The main content area is empty or uses only a minimal placeholder container, with no migrated domain page content.
 - Sidebar collapse/expand works, persists across reloads, and provides tooltips for collapsed navigation items.
 - The authenticated top-right header does not show a user avatar, theme switcher, or language switcher.
-- The account menu displays identity/preferences/version entry points according to the shell design.
+- The account menu displays identity/preferences/version entry points according to the layout design.
 
-Full shell acceptance for later completion:
+Full layout acceptance for later completion:
 
-- Users can login, select workspace, complete onboarding, and reach the secure shell.
-- The authenticated shell matches the saved React console design contract for layout, spacing density, typography scale, sidebar behavior, context bar, subscription/license badge, account menu, and light/dark styling.
+- Users can login, select workspace, complete onboarding, and reach the secure layout.
+- The authenticated layout matches the saved React layout design contract for layout, spacing density, typography scale, sidebar behavior, context bar, subscription/license badge, account menu, and light/dark styling.
 - Menu visibility respects permissions.
 - Sidebar collapse/expand works, persists across reloads, and provides tooltips for collapsed navigation items.
 - The authenticated top-right header does not show a user avatar, theme switcher, or language switcher.
 - The top-right subscription/license badge displays Free, active, expiring, expired, and missing-license states correctly.
 - The left-bottom Account menu is the single account/preference entry and does not duplicate subscription/plan information.
 - The account menu displays the current version from runtime env and falls back to `dev` when unset.
-- Theme switching works in login and authenticated shell routes, persists across reloads, and does not break language-prefixed routes.
+- Theme switching works in login and authenticated layout routes, persists across reloads, and does not break language-prefixed routes.
 - Language switching preserves the equivalent path when possible.
 - `/en/*` and `/zh/*` deep links survive browser refresh.

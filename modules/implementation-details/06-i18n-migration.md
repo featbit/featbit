@@ -55,6 +55,6 @@ src/lib/i18n/locales/
 
 ## Acceptance Criteria
 
-- Login, shell, navigation, and migrated domain pages render in English and Chinese.
+- Login, layout, navigation, and migrated domain pages render in English and Chinese.
 - Language switching works without losing the current workspace/project/environment context.
 - Missing translation keys are visible in development and covered by a validation script or test.

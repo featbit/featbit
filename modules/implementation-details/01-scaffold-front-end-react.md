@@ -16,7 +16,7 @@ Create the standalone React application foundation in `front-end-react` without 
 
 ## Step Scope
 
-This document defines migration step 1: project initialization. When the user asks to execute only step 1, scaffold and verify the React project foundation only. Do not build the final login page, authenticated console shell, or feature pages as part of this step.
+This document defines migration step 1: project initialization. When the user asks to execute only step 1, scaffold and verify the React project foundation only. Do not build the final login page, authenticated layout, or feature pages as part of this step.
 
 ## Dependency Version Policy
 

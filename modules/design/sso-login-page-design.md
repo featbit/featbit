@@ -5,7 +5,7 @@
 Implementation must strictly follow these design images:
 
 - Light theme: [sso-login-page-concept.png](sso-login-page-concept.png)
-- Dark theme: [sso-login-page-console-dark.png](sso-login-page-console-dark.png)
+- Dark theme: [sso-login-page-layout-dark.png](sso-login-page-layout-dark.png)
 
 These images are the required implementation contract for the SSO login page after clicking `Sign in with SSO` from the main login page. They are not optional references. Layout, hierarchy, spacing rhythm, color treatment, control styling, borders, and light/dark behavior should match the saved designs as closely as practical in the browser. Any intentional visual deviation must update this document and the saved design assets first.
 
@@ -14,7 +14,7 @@ Related design: [login-page-design.md](login-page-design.md)
 ## Design Requirements
 
 - Keep the same structured split layout as the main login page.
-- Keep all SSO page elements from the current concept while aligning the visual treatment with the authenticated React console.
+- Keep all SSO page elements from the current concept while aligning the visual treatment with the authenticated React layout.
 - Make the SSO flow focused and minimal.
 - Ask for `Workspace key`, not workspace domain.
 - Keep `Back to sign in` as the only way back to the normal login flow.
@@ -38,7 +38,7 @@ Related design: [login-page-design.md](login-page-design.md)
 - Match the main login page's feature rollout abstraction.
 - Keep rollout nodes, route cards, and status labels such as Beta users, Gradual rollout, Stable, and Monitoring.
 - Do not add AI content.
-- Do not add console previews, dashboard tables, charts, or sidebars.
+- Do not add layout previews, dashboard tables, charts, or sidebars.
 - Do not reintroduce the bottom `Rules / Traffic / Ready` legend strip.
 
 ## Right SSO Column
@@ -58,9 +58,9 @@ Related design: [login-page-design.md](login-page-design.md)
 
 ## Visual Style
 
-- Reuse the main login page visual system and keep it aligned with [react-console-design.md](react-console-design.md).
+- Reuse the main login page visual system and keep it aligned with [react-layout-design.md](react-layout-design.md).
 - The theme toggle should use a shadcn-style square outline icon button: moon icon in light theme, sun icon in dark theme.
-- Light theme should use console-like white and very light slate surfaces, crisp slate text, thin light borders, and blue primary actions.
+- Light theme should use layout-like white and very light slate surfaces, crisp slate text, thin light borders, and blue primary actions.
 - Dark theme should use neutral dark slate surfaces, light foreground text, muted slate secondary text, thin dark borders, and the same blue primary action language.
 - Use small green, orange, and blue status accents only where they support the rollout visual.
 - Use shadcn/ui and Tailwind defaults for input and button styling.
@@ -73,5 +73,5 @@ Related design: [login-page-design.md](login-page-design.md)
 - The SSO page should be a dedicated route or state under the login flow, for example `/en/login/sso` and `/zh/login/sso`, or an equivalent route chosen during implementation.
 - The `Workspace key` field should be validated as required before continuing.
 - Keep all text translatable through `react-i18next`.
-- Theme switching must be available before authentication and should share the same persisted `light` / `dark` / `system` theme behavior as the React console.
+- Theme switching must be available before authentication and should share the same persisted `light` / `dark` / `system` theme behavior as the React layout.
 - On smaller screens, collapse to a single-column SSO-first layout and hide or simplify the left visual.

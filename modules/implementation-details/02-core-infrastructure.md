@@ -47,9 +47,9 @@ Build the shared runtime layer used by every migrated page: env loading, typed A
 
 Implement reusable base components before page migration:
 
-Shell-related components must follow the authenticated console shell design contract in [react-console-design.md](../design/react-console-design.md), using [react-console-light.png](../design/react-console-light.png) and [react-console-dark.png](../design/react-console-dark.png) as the visual baselines for header/context bar, sidebar, account menu, subscription/license badge, spacing density, border treatment, typography scale, and light/dark shell behavior. Page-specific content components such as Feature Flags tables and editors still need separate product-page designs.
+Layout-related components must follow the authenticated layout design contract in [react-layout-design.md](../design/react-layout-design.md), using [react-layout-light.png](../design/react-layout-light.png) and [react-layout-dark.png](../design/react-layout-dark.png) as the visual baselines for header/context bar, sidebar, account menu, subscription/license badge, spacing density, border treatment, typography scale, and light/dark layout behavior. Page-specific content components such as Feature Flags tables and editors still need separate product-page designs.
 
-- `PageShell`
+- `PageLayout`
 - `PageHeader`
 - `ContextBar`
 - `SidebarNav`
@@ -71,4 +71,4 @@ Shell-related components must follow the authenticated console shell design cont
 - Stores can restore current context from localStorage and update it without reloading the app.
 - Permission helpers are usable from routes, menus, and action buttons.
 - Base components use shadcn/ui defaults and do not copy Angular/ng-zorro styling.
-- Base shell components visually align with the saved React console shell design assets in both light and dark mode.
+- Base layout components visually align with the saved React layout design assets in both light and dark mode.

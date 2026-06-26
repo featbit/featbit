@@ -5,7 +5,7 @@
 Implementation must strictly follow these design images:
 
 - Light theme: [login-page-concept.png](login-page-concept.png)
-- Dark theme: [login-page-console-dark.png](login-page-console-dark.png)
+- Dark theme: [login-page-layout-dark.png](login-page-layout-dark.png)
 
 These images are the required implementation contract for the React login page. They are not optional references. Layout, hierarchy, spacing rhythm, color treatment, control styling, borders, and light/dark behavior should match the saved designs as closely as practical in the browser. Any intentional visual deviation must update this document and the saved design assets first.
 
@@ -14,11 +14,11 @@ Related SSO page design: [sso-login-page-design.md](sso-login-page-design.md)
 ## Design Requirements
 
 - Create a fully redesigned login page rather than copying the Angular login screen.
-- Keep all authentication page elements from the current login concept while aligning the visual treatment with the authenticated React console.
+- Keep all authentication page elements from the current login concept while aligning the visual treatment with the authenticated React layout.
 - Keep the page modern, structured, and quiet, with less card-like composition.
 - Preserve the current Angular FeatBit brand logo style: dark charcoal symbol plus FeatBit wordmark.
 - Make authentication the primary task while using the left side to express FeatBit's product category through feature release and rollout visuals.
-- Avoid marketing-page composition, console screenshots, dashboard previews, AI messaging, and decorative illustrations.
+- Avoid marketing-page composition, layout screenshots, dashboard previews, AI messaging, and decorative illustrations.
 
 ## Layout
 
@@ -57,9 +57,9 @@ Related SSO page design: [sso-login-page-design.md](sso-login-page-design.md)
 ## Visual Style
 
 - Use shadcn/ui and Tailwind defaults for controls as much as possible.
-- Match the authenticated React console visual language described in [react-console-design.md](react-console-design.md).
+- Match the authenticated React layout visual language described in [react-layout-design.md](react-layout-design.md).
 - The theme toggle should use a shadcn-style square outline icon button: moon icon in light theme, sun icon in dark theme.
-- Light theme should use console-like white and very light slate surfaces, crisp slate text, thin light borders, and blue primary actions.
+- Light theme should use layout-like white and very light slate surfaces, crisp slate text, thin light borders, and blue primary actions.
 - Dark theme should use neutral dark slate surfaces, light foreground text, muted slate secondary text, thin dark borders, and the same blue primary action language.
 - Use small green, orange, and blue status accents only where they support the rollout visual.
 - Avoid bright Angular green dominance, warm ivory/evergreen login-specific palettes, purple/blue gradient dominance, decorative blobs, bokeh, stock illustrations, and heavy shadows.
@@ -71,5 +71,5 @@ Related SSO page design: [sso-login-page-design.md](sso-login-page-design.md)
 - Prefer CSS/SVG for the left abstract release-path graphic so it can be responsive and maintainable.
 - Keep all text translatable through `react-i18next`.
 - Ensure the layout works for both `/en/login` and `/zh/login`.
-- Theme switching must be available before authentication and should share the same persisted `light` / `dark` / `system` theme behavior as the React console.
+- Theme switching must be available before authentication and should share the same persisted `light` / `dark` / `system` theme behavior as the React layout.
 - On smaller screens, collapse to a single-column login-first layout and hide or simplify the left visual.

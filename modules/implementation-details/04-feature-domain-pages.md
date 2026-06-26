@@ -47,7 +47,7 @@ Migrate the main product domains page by page while preserving backend API contr
 
 ## Workspace And Organization
 
-- Workspace: migrate settings, members/global users, projects, environments, secrets, and detailed billing/subscription/license/plan-related views.
+- Workspace: migrate settings, members/global users, projects, environments, secrets, and detailed billing/subscription/license/plan-related views. Follow the React design contract in [workspace-page-design.md](../design/workspace-page-design.md) for the Workspace admin page.
 - Organization: migrate organization profile and organization-level settings that are not billing/subscription.
 - Keep destructive actions behind confirmation flows.
 

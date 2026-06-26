@@ -1,21 +1,21 @@
-# FeatBit React Console Design
+# FeatBit React Layout Design
 
-This document is the implementation design contract for the authenticated React console shell. The current saved design governs the header/context bar, sidebar, sidebar collapse behavior, account menu, subscription/license badge, density, typography scale, and light/dark shell language. The Feature Flags content shown in the images is only a placeholder/example and still needs a separate product-page design pass before it becomes an implementation target. Pixel-perfect reproduction is not required, but meaningful shell deviations should update this document and the saved design assets first.
+This document is the implementation design contract for the authenticated React layout. The current saved design governs the header/context bar, sidebar, sidebar collapse behavior, account menu, subscription/license badge, density, typography scale, and light/dark layout language. The Feature Flags content shown in the images is only a placeholder/example and still needs a separate product-page design pass before it becomes an implementation target. Pixel-perfect reproduction is not required, but meaningful layout deviations should update this document and the saved design assets first.
 
 ## Design Assets
 
-- Light theme concept: [react-console-light.png](react-console-light.png)
-- Dark theme concept: [react-console-dark.png](react-console-dark.png)
+- Light theme concept: [react-layout-light.png](react-layout-light.png)
+- Dark theme concept: [react-layout-dark.png](react-layout-dark.png)
 
 ## Overall Direction
 
-- Build a modern FeatBit console with shadcn/ui, Radix primitives, Tailwind CSS, and lucide-react.
+- Build a modern FeatBit layout with shadcn/ui, Radix primitives, Tailwind CSS, and lucide-react.
 - Do not copy Angular/ng-zorro styling or the old Angular color palette.
 - Prefer shadcn default neutral tokens, semantic colors, subtle borders, restrained shadows, compact density, and 6-8px radius controls.
 - Support light and dark mode as first-class themes using shadcn native dark-mode patterns.
 - Use the current FeatBit logo style: mark + wordmark when the sidebar is expanded, mark only when collapsed.
 
-## Shell Layout
+## Layout
 
 - Left sidebar: product navigation, FeatBit brand, collapse control, and left-bottom account entry.
 - Top context bar: only shows `Organization / Project / Environment`.
@@ -101,11 +101,11 @@ Visual constraints:
 
 ## Feature Flags Placeholder
 
-The Feature Flags area in the saved images is not yet the final Feature Flags page design. It exists to provide a realistic content frame while evaluating the shell layout.
+The Feature Flags area in the saved images is not yet the final Feature Flags page design. It exists to provide a realistic content frame while evaluating the layout.
 
 - Do not treat the Feature Flags table, toolbar, row density, filters, or list content in these images as final implementation requirements.
 - The actual Feature Flags list/detail/targeting views need a separate design pass.
-- Until that pass is complete, use the saved images only for shell alignment around the content area.
+- Until that pass is complete, use the saved images only for layout alignment around the content area.
 
 ## Theme Notes
 
@@ -117,7 +117,7 @@ The Feature Flags area in the saved images is not yet the final Feature Flags pa
 
 ## Future Modification Guidelines
 
-- Preserve the current compact SaaS console density.
+- Preserve the current compact SaaS layout density.
 - Avoid adding extra top-right controls beyond the subscription/license badge.
 - Keep environment switching in the context bar, not the sidebar.
 - Keep account/preferences/version in the left-bottom Account menu.

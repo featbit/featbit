@@ -1,6 +1,6 @@
 # FeatBit React Front-End
 
-Standalone React implementation for the FeatBit management console.
+Standalone React implementation for the FeatBit management layout.
 
 ## Stack
 
