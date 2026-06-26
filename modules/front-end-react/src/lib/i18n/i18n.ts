@@ -34,6 +34,72 @@ i18n.use(initReactI18next).init({
             incorrectEmailOrPassword: "Email and/or password incorrect",
             loginError: "Error occurred, please contact the support."
           }
+        },
+        shell: {
+          nav: {
+            groups: {
+              getStarted: "Get Started",
+              release: "Release",
+              governance: "Governance",
+              experimentation: "Experimentation",
+              integrations: "Integrations",
+              admin: "Admin"
+            },
+            items: {
+              getStarted: "Get Started",
+              featureFlags: "Feature Flags",
+              segments: "Segments",
+              endUsers: "End Users",
+              auditLogs: "Audit Logs",
+              changeRequests: "Change Requests",
+              experiments: "Experiments",
+              metrics: "Metrics",
+              relayProxies: "Relay Proxies",
+              webhooks: "WebHooks",
+              accessTokens: "Access Tokens",
+              workspace: "Workspace",
+              organization: "Organization",
+              iam: "IAM",
+              teams: "Teams",
+              groups: "Groups",
+              policies: "Policies"
+            }
+          },
+          sidebar: {
+            collapse: "Collapse sidebar",
+            expand: "Expand sidebar"
+          },
+          plan: {
+            current: "Current Plan",
+            aria: "Current Plan, {{plan}}"
+          },
+          context: {
+            searchEnvironments: "Search environments",
+            manageEnvironments: "Manage environments"
+          },
+          environment: {
+            production: "Production",
+            staging: "Staging",
+            development: "Development"
+          },
+          account: {
+            account: "Account",
+            profile: "Profile",
+            support: "Support",
+            documentation: "Documentation",
+            language: "Language",
+            english: "English",
+            chinese: "中文",
+            theme: {
+              label: "Theme",
+              light: "Light",
+              dark: "Dark",
+              system: "System"
+            },
+            version: "Version: {{version}}",
+            signOut: "Sign out"
+          },
+          placeholder: "Console content will be added in the next migration steps."
         }
       }
     },
@@ -41,7 +107,7 @@ i18n.use(initReactI18next).init({
       common: {
         auth: {
           hero: {
-            title: "安心发布",
+            title: "放心发布",
             subtitle: "更安全、更规模化地交付更好的功能。"
           },
           login: {
@@ -50,7 +116,7 @@ i18n.use(initReactI18next).init({
           },
           sso: {
             title: "使用 SSO 登录",
-            subtitle: "输入你的工作区 key 以继续"
+            subtitle: "输入你的 Workspace key 以继续"
           },
           email: "邮箱",
           password: "密码",
@@ -62,12 +128,78 @@ i18n.use(initReactI18next).init({
           enterprise: "企业登录",
           ssoButton: "使用 SSO 登录",
           backToSignIn: "返回登录",
-          workspaceKey: "工作区 key",
+          workspaceKey: "Workspace key",
           continueSso: "继续使用 SSO",
           errors: {
             incorrectEmailOrPassword: "邮箱或密码错误",
-            loginError: "发生错误，请联系支持人员。"
+            loginError: "发生错误，请联系技术支持。"
           }
+        },
+        shell: {
+          nav: {
+            groups: {
+              getStarted: "开始使用",
+              release: "发布",
+              governance: "治理",
+              experimentation: "实验",
+              integrations: "集成",
+              admin: "管理"
+            },
+            items: {
+              getStarted: "开始使用",
+              featureFlags: "开关管理",
+              segments: "用户组",
+              endUsers: "目标用户",
+              auditLogs: "审计日志",
+              changeRequests: "变更请求",
+              experiments: "数据实验",
+              metrics: "指标",
+              relayProxies: "中继代理",
+              webhooks: "WebHooks",
+              accessTokens: "访问密钥",
+              workspace: "工作区",
+              organization: "组织机构",
+              iam: "IAM",
+              teams: "团队",
+              groups: "组",
+              policies: "策略"
+            }
+          },
+          sidebar: {
+            collapse: "收起侧边栏",
+            expand: "展开侧边栏"
+          },
+          plan: {
+            current: "当前订阅",
+            aria: "当前订阅，{{plan}}"
+          },
+          context: {
+            searchEnvironments: "搜索项目或环境",
+            manageEnvironments: "管理环境"
+          },
+          environment: {
+            production: "生产环境",
+            staging: "预发布环境",
+            development: "开发环境"
+          },
+          account: {
+            account: "账号",
+            profile: "个人信息",
+            support: "技术支持",
+            documentation: "文档",
+            language: "语言",
+            english: "English",
+            chinese: "中文",
+            theme: {
+              label: "主题",
+              light: "浅色",
+              dark: "深色",
+              system: "跟随系统"
+            },
+            version: "版本：{{version}}",
+            signOut: "退出登录"
+          },
+          placeholder: "控制台内容将在后续迁移步骤中添加。"
         }
       }
     }
