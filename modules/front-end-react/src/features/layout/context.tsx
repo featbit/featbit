@@ -436,7 +436,7 @@ export function PlanBadge({ lang, workspace }: { lang: Lang; workspace: Workspac
   return (
     <Link
       to={badge.href}
-      className="flex h-[50px] min-w-[11.5rem] items-center gap-3 rounded-md border border-border bg-card px-3 text-left shadow-sm transition-colors hover:bg-accent"
+      className="flex h-[46px] min-w-[11.5rem] items-center gap-3 rounded-md border border-border bg-card px-3 text-left shadow-sm transition-colors hover:bg-accent"
       aria-label={t("layout.plan.aria", { label, plan })}
     >
       <Award className={cn("h-5 w-5", badge.warning ? "text-amber-600" : "text-blue-600")} />
