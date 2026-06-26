@@ -5057,7 +5057,7 @@
         <source>Support</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
-          <context context-type="linenumber">122,124</context>
+          <context context-type="linenumber">122,123</context>
         </context-group>
         <target>技术支持</target>
       </trans-unit>
@@ -5065,7 +5065,7 @@
         <source>Documentation</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
-          <context context-type="linenumber">126,128</context>
+          <context context-type="linenumber">126,127</context>
         </context-group>
         <target>文档</target>
       </trans-unit>
@@ -5073,7 +5073,7 @@
         <source>Sign out</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
-          <context context-type="linenumber">130,132</context>
+          <context context-type="linenumber">130,131</context>
         </context-group>
         <target>登出</target>
       </trans-unit>
@@ -5081,7 +5081,7 @@
         <source>Version</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/app/core/components/menu/menu.component.html</context>
-          <context context-type="linenumber">138</context>
+          <context context-type="linenumber">139</context>
         </context-group>
         <target>版本</target>
       </trans-unit>

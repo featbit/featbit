@@ -114,20 +114,20 @@
           @if (isInitialized) {
             <span class="nav-item" routerLink="/organization/profile">
               <i nz-icon nzType="icons:icon-user"></i>
-              <span i18n="@@common.profile">Profile</span>
+              <ng-container i18n="@@common.profile">Profile</ng-container>
             </span>
           }
           <span class="nav-item" (click)="openSupport()">
             <i nz-icon nzType="question-circle" nzTheme="outline"></i>
-            <span i18n="@@common.support">Support</span>
+            <ng-container i18n="@@common.support">Support</ng-container>
           </span>
           <span class="nav-item" (click)="openDoc()">
             <i nz-icon nzType="file-text" nzTheme="outline"></i>
-            <span i18n="@@common.documentation">Documentation</span>
+            <ng-container i18n="@@common.documentation">Documentation</ng-container>
           </span>
           <span class="nav-item nav-item-danger" (click)="logout.emit()">
             <i nz-icon nzType="icons:icon-logout"></i>
-            <span i18n="@@common.sign-out">Sign out</span>
+            <ng-container i18n="@@common.sign-out">Sign out</ng-container>
           </span>
         </div>
 
@@ -135,6 +135,7 @@
 
         <div class="dropdown-info">
           <a href="https://github.com/featbit/featbit" target="_blank" rel="noopener" class="dropdown-version">
+            <i nz-icon nzType="github" nzTheme="outline"></i>
             <ng-container i18n="@@common.version">Version</ng-container>: {{ appVersion }}
           </a>
         </div>
