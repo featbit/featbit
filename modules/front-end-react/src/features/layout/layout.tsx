@@ -1,4 +1,4 @@
-import {
+﻿import {
   BarChart3,
   BookOpen,
   Boxes,
@@ -90,68 +90,68 @@ const PROJECT_STORAGE_KEY = "featbit:current-project-id";
 const ENVIRONMENT_STORAGE_KEY = "featbit:current-environment-id";
 
 const environments: Environment[] = [
-  { id: "prod", projectId: "growth", projectName: "Growth Platform", name: "Production", i18nKey: "shell.environment.production", type: "prod" },
-  { id: "staging", projectId: "growth", projectName: "Growth Platform", name: "Staging", i18nKey: "shell.environment.staging", type: "staging" },
-  { id: "dev", projectId: "growth", projectName: "Growth Platform", name: "Development", i18nKey: "shell.environment.development", type: "dev" },
-  { id: "commerce-prod", projectId: "commerce", projectName: "Commerce Apps", name: "Production", i18nKey: "shell.environment.production", type: "prod" },
-  { id: "commerce-dev", projectId: "commerce", projectName: "Commerce Apps", name: "Development", i18nKey: "shell.environment.development", type: "dev" }
+  { id: "prod", projectId: "growth", projectName: "Growth Platform", name: "Production", i18nKey: "layout.environment.production", type: "prod" },
+  { id: "staging", projectId: "growth", projectName: "Growth Platform", name: "Staging", i18nKey: "layout.environment.staging", type: "staging" },
+  { id: "dev", projectId: "growth", projectName: "Growth Platform", name: "Development", i18nKey: "layout.environment.development", type: "dev" },
+  { id: "commerce-prod", projectId: "commerce", projectName: "Commerce Apps", name: "Production", i18nKey: "layout.environment.production", type: "prod" },
+  { id: "commerce-dev", projectId: "commerce", projectName: "Commerce Apps", name: "Development", i18nKey: "layout.environment.development", type: "dev" }
 ];
 
 const navigationGroups: NavGroup[] = [
   {
     label: "Get Started",
-    i18nKey: "shell.nav.groups.getStarted",
-    items: [{ label: "Get Started", i18nKey: "shell.nav.items.getStarted", href: "/app", icon: Rocket, active: true }]
+    i18nKey: "layout.nav.groups.getStarted",
+    items: [{ label: "Get Started", i18nKey: "layout.nav.items.getStarted", href: "/app", icon: Rocket, active: true }]
   },
   {
     label: "Release",
-    i18nKey: "shell.nav.groups.release",
+    i18nKey: "layout.nav.groups.release",
     items: [
-      { label: "Feature Flags", i18nKey: "shell.nav.items.featureFlags", href: "/app/feature-flags", icon: Flag },
-      { label: "Segments", i18nKey: "shell.nav.items.segments", href: "/app/segments", icon: Layers3 },
-      { label: "End Users", i18nKey: "shell.nav.items.endUsers", href: "/app/end-users", icon: UsersRound }
+      { label: "Feature Flags", i18nKey: "layout.nav.items.featureFlags", href: "/app/feature-flags", icon: Flag },
+      { label: "Segments", i18nKey: "layout.nav.items.segments", href: "/app/segments", icon: Layers3 },
+      { label: "End Users", i18nKey: "layout.nav.items.endUsers", href: "/app/end-users", icon: UsersRound }
     ]
   },
   {
     label: "Governance",
-    i18nKey: "shell.nav.groups.governance",
+    i18nKey: "layout.nav.groups.governance",
     items: [
-      { label: "Audit Logs", i18nKey: "shell.nav.items.auditLogs", href: "/app/audit-logs", icon: Logs },
-      { label: "Change Requests", i18nKey: "shell.nav.items.changeRequests", href: "/app/change-requests", icon: GitPullRequest }
+      { label: "Audit Logs", i18nKey: "layout.nav.items.auditLogs", href: "/app/audit-logs", icon: Logs },
+      { label: "Change Requests", i18nKey: "layout.nav.items.changeRequests", href: "/app/change-requests", icon: GitPullRequest }
     ]
   },
   {
     label: "Experimentation",
-    i18nKey: "shell.nav.groups.experimentation",
+    i18nKey: "layout.nav.groups.experimentation",
     items: [
-      { label: "Experiments", i18nKey: "shell.nav.items.experiments", href: "/app/experiments", icon: FlaskConical },
-      { label: "Metrics", i18nKey: "shell.nav.items.metrics", href: "/app/metrics", icon: BarChart3 }
+      { label: "Experiments", i18nKey: "layout.nav.items.experiments", href: "/app/experiments", icon: FlaskConical },
+      { label: "Metrics", i18nKey: "layout.nav.items.metrics", href: "/app/metrics", icon: BarChart3 }
     ]
   },
   {
     label: "Integrations",
-    i18nKey: "shell.nav.groups.integrations",
+    i18nKey: "layout.nav.groups.integrations",
     items: [
-      { label: "Relay Proxies", i18nKey: "shell.nav.items.relayProxies", href: "/app/relay-proxies", icon: Waypoints },
-      { label: "WebHooks", i18nKey: "shell.nav.items.webhooks", href: "/app/webhooks", icon: Webhook },
-      { label: "Access Tokens", i18nKey: "shell.nav.items.accessTokens", href: "/app/access-tokens", icon: KeyRound }
+      { label: "Relay Proxies", i18nKey: "layout.nav.items.relayProxies", href: "/app/relay-proxies", icon: Waypoints },
+      { label: "WebHooks", i18nKey: "layout.nav.items.webhooks", href: "/app/webhooks", icon: Webhook },
+      { label: "Access Tokens", i18nKey: "layout.nav.items.accessTokens", href: "/app/access-tokens", icon: KeyRound }
     ]
   },
   {
     label: "Admin",
-    i18nKey: "shell.nav.groups.admin",
+    i18nKey: "layout.nav.groups.admin",
     items: [
-      { label: "Workspace", i18nKey: "shell.nav.items.workspace", href: "/app/workspace", icon: Building2 },
-      { label: "Organization", i18nKey: "shell.nav.items.organization", href: "/app/organization", icon: Boxes },
+      { label: "Workspace", i18nKey: "layout.nav.items.workspace", href: "/app/workspace", icon: Building2 },
+      { label: "Organization", i18nKey: "layout.nav.items.organization", href: "/app/organization", icon: Boxes },
       {
         label: "IAM",
-        i18nKey: "shell.nav.items.iam",
+        i18nKey: "layout.nav.items.iam",
         href: "/app/iam",
         icon: ShieldCheck,
         children: [
-          { label: "Teams", i18nKey: "shell.nav.items.teams", href: "/app/iam/teams", icon: UserRound },
-          { label: "Groups", i18nKey: "shell.nav.items.groups", href: "/app/iam/groups", icon: UsersRound },
-          { label: "Policies", i18nKey: "shell.nav.items.policies", href: "/app/iam/policies", icon: UserRoundKey }
+          { label: "Teams", i18nKey: "layout.nav.items.teams", href: "/app/iam/teams", icon: UserRound },
+          { label: "Groups", i18nKey: "layout.nav.items.groups", href: "/app/iam/groups", icon: UsersRound },
+          { label: "Policies", i18nKey: "layout.nav.items.policies", href: "/app/iam/policies", icon: UserRoundKey }
         ]
       }
     ]
@@ -329,7 +329,7 @@ function Sidebar({
             variant="ghost"
             size="icon"
             className="h-8 w-8"
-            aria-label={t("shell.sidebar.collapse")}
+            aria-label={t("layout.sidebar.collapse")}
             onClick={() => setCollapsed(true)}
           >
             <PanelLeftClose className="h-4 w-4" />
@@ -344,7 +344,7 @@ function Sidebar({
             variant="ghost"
             size="icon"
             className="h-8 w-8"
-            aria-label={t("shell.sidebar.expand")}
+            aria-label={t("layout.sidebar.expand")}
             onClick={() => setCollapsed(false)}
           >
             <PanelLeftOpen className="h-4 w-4" />
@@ -389,11 +389,11 @@ function PlanBadge() {
     <Link
       to="#billing"
       className="flex h-11 items-center gap-3 rounded-md border border-border bg-card px-3 text-left shadow-sm transition-colors hover:bg-accent"
-      aria-label={t("shell.plan.aria", { plan: "Pro" })}
+      aria-label={t("layout.plan.aria", { plan: "Pro" })}
     >
       <Award className="h-5 w-5 text-blue-600" />
       <span className="leading-tight">
-        <span className="block text-xs font-medium text-foreground">{t("shell.plan.current")}</span>
+        <span className="block text-xs font-medium text-foreground">{t("layout.plan.current")}</span>
         <span className="block text-[0.68rem] font-semibold text-foreground">Pro</span>
       </span>
       <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
@@ -463,7 +463,7 @@ function ContextBar({ selectedEnvironment, setSelectedEnvironment }: {
             <input
               className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
               value={search}
-              placeholder={t("shell.context.searchEnvironments")}
+              placeholder={t("layout.context.searchEnvironments")}
               onChange={(event) => setSearch(event.target.value)}
             />
           </div>
@@ -492,7 +492,7 @@ function ContextBar({ selectedEnvironment, setSelectedEnvironment }: {
           <DropdownMenuSeparator />
           <DropdownMenuItem asChild>
             <Link to="#manage-environments" className="text-muted-foreground">
-              {t("shell.context.manageEnvironments")}
+              {t("layout.context.manageEnvironments")}
             </Link>
           </DropdownMenuItem>
         </DropdownMenuContent>
@@ -517,7 +517,7 @@ function AccountMenu({ lang, collapsed }: { lang: Lang; collapsed: boolean }) {
     .join("") || "U";
   const version = getRuntimeEnv().version;
   const languageLabel = lang === "zh" ? "ZH" : "EN";
-  const themeLabel = resolvedTheme === "dark" ? t("shell.account.theme.dark") : t("shell.account.theme.light");
+  const themeLabel = resolvedTheme === "dark" ? t("layout.account.theme.dark") : t("layout.account.theme.light");
 
   function changeLanguage(nextLang: Lang) {
     const nextPath = window.location.pathname.replace(/^\/(en|zh)/, `/${nextLang}`);
@@ -536,7 +536,7 @@ function AccountMenu({ lang, collapsed }: { lang: Lang; collapsed: boolean }) {
         "flex w-full cursor-pointer items-center gap-3 rounded-md p-2 text-left transition-colors hover:bg-accent",
         collapsed && "justify-center"
       )}
-      aria-label={t("shell.account.account")}
+      aria-label={t("layout.account.account")}
     >
       <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary text-sm font-medium">
         {initials}
@@ -565,7 +565,7 @@ function AccountMenu({ lang, collapsed }: { lang: Lang; collapsed: boolean }) {
             <TooltipTrigger asChild>
               <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
             </TooltipTrigger>
-            <TooltipContent side="right">{t("shell.account.account")}</TooltipContent>
+            <TooltipContent side="right">{t("layout.account.account")}</TooltipContent>
           </Tooltip>
         ) : (
           <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
@@ -591,18 +591,18 @@ function AccountMenu({ lang, collapsed }: { lang: Lang; collapsed: boolean }) {
           <div className="p-2">
             <DropdownMenuItem className="h-8 gap-3 rounded-md px-2 text-sm font-medium">
               <User className="h-4 w-4 text-muted-foreground" />
-              {t("shell.account.profile")}
+              {t("layout.account.profile")}
             </DropdownMenuItem>
             <DropdownMenuItem asChild className="h-8 gap-3 rounded-md px-2 text-sm font-medium">
               <a href="https://support.featbit.ai" target="_blank" rel="noreferrer">
                 <LifeBuoy className="h-4 w-4 text-muted-foreground" />
-                {t("shell.account.support")}
+                {t("layout.account.support")}
               </a>
             </DropdownMenuItem>
             <DropdownMenuItem asChild className="h-8 gap-3 rounded-md px-2 text-sm font-medium">
               <a href="https://docs.featbit.co" target="_blank" rel="noreferrer">
                 <BookOpen className="h-4 w-4 text-muted-foreground" />
-                {t("shell.account.documentation")}
+                {t("layout.account.documentation")}
               </a>
             </DropdownMenuItem>
           </div>
@@ -611,13 +611,13 @@ function AccountMenu({ lang, collapsed }: { lang: Lang; collapsed: boolean }) {
             <DropdownMenuSub>
               <DropdownMenuSubTrigger className="h-8 gap-3 rounded-md px-2 text-sm font-medium">
                 <Globe2 className="h-4 w-4 text-muted-foreground" />
-                <span>{t("shell.account.language")}</span>
+                <span>{t("layout.account.language")}</span>
                 <span className="ml-auto text-xs font-medium text-muted-foreground">{languageLabel}</span>
               </DropdownMenuSubTrigger>
               <DropdownMenuSubContent className="w-36 rounded-lg">
                 <DropdownMenuRadioGroup value={lang} onValueChange={(value) => changeLanguage(resolveLang(value))}>
-                  <DropdownMenuRadioItem value="en">{t("shell.account.english")}</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="zh">{t("shell.account.chinese")}</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="en">{t("layout.account.english")}</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="zh">{t("layout.account.chinese")}</DropdownMenuRadioItem>
                 </DropdownMenuRadioGroup>
               </DropdownMenuSubContent>
             </DropdownMenuSub>
@@ -628,14 +628,14 @@ function AccountMenu({ lang, collapsed }: { lang: Lang; collapsed: boolean }) {
                 ) : (
                   <Sun className="h-4 w-4 text-muted-foreground" />
                 )}
-                <span>{t("shell.account.theme.label")}</span>
+                <span>{t("layout.account.theme.label")}</span>
                 <span className="ml-auto text-xs font-medium text-muted-foreground">{themeLabel}</span>
               </DropdownMenuSubTrigger>
               <DropdownMenuSubContent className="w-36 rounded-lg">
                 <DropdownMenuRadioGroup value={theme} onValueChange={(value) => setTheme(value as "light" | "dark" | "system")}>
-                  <DropdownMenuRadioItem value="light">{t("shell.account.theme.light")}</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="dark">{t("shell.account.theme.dark")}</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="system">{t("shell.account.theme.system")}</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="light">{t("layout.account.theme.light")}</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="dark">{t("layout.account.theme.dark")}</DropdownMenuRadioItem>
+                  <DropdownMenuRadioItem value="system">{t("layout.account.theme.system")}</DropdownMenuRadioItem>
                 </DropdownMenuRadioGroup>
               </DropdownMenuSubContent>
             </DropdownMenuSub>
@@ -646,7 +646,7 @@ function AccountMenu({ lang, collapsed }: { lang: Lang; collapsed: boolean }) {
               <a href="https://github.com/featbit/featbit" target="_blank" rel="noreferrer">
                 <span className="flex items-center gap-3">
                   <Info className="h-4 w-4 text-muted-foreground" />
-                  {t("shell.account.version", { version })}
+                  {t("layout.account.version", { version })}
                 </span>
                 <ExternalLink className="h-4 w-4 text-muted-foreground" />
               </a>
@@ -656,7 +656,7 @@ function AccountMenu({ lang, collapsed }: { lang: Lang; collapsed: boolean }) {
           <div className="p-2">
             <DropdownMenuItem className="h-8 gap-3 rounded-md px-2 text-sm font-semibold text-destructive focus:text-destructive" onSelect={handleSignOut}>
               <LogOut className="h-4 w-4" />
-              {t("shell.account.signOut")}
+              {t("layout.account.signOut")}
             </DropdownMenuItem>
           </div>
         </DropdownMenuContent>
@@ -671,13 +671,13 @@ function EmptyWorkspace() {
   return (
     <section className="h-full rounded-md border border-dashed border-border bg-card/50 p-6">
       <div className="flex h-full min-h-[24rem] items-center justify-center text-sm text-muted-foreground">
-        {t("shell.placeholder")}
+        {t("layout.placeholder")}
       </div>
     </section>
   );
 }
 
-export function ConsoleShell() {
+export function Layout() {
   const params = useParams();
   const lang = resolveLang(params.lang);
   const { i18n } = useTranslation();
@@ -718,6 +718,8 @@ export function ConsoleShell() {
   );
 }
 
-export function ConsoleShellPlaceholder() {
+export function LayoutPlaceholder() {
   return <EmptyWorkspace />;
 }
+
+

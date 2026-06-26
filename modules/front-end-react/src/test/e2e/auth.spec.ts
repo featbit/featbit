@@ -54,7 +54,7 @@ test.describe("login page", () => {
     await page.getByRole("button", { name: "Sign in" }).click();
 
     await expect(page).toHaveURL(/\/en\/app$/);
-    await expect(page.getByText("Console content will be added in the next migration steps.")).toBeVisible();
+    await expect(page.getByText("Content will be added in the next migration steps.")).toBeVisible();
     await expect(page.getByText("Acme Corp")).toBeVisible();
     await expect(page.getByLabel("Current Plan, Pro")).toBeVisible();
     await expect(page.evaluate(() => localStorage.getItem("token"))).resolves.toBe("e2e-token");

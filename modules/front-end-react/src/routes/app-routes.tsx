@@ -1,8 +1,8 @@
-import type { ReactNode } from "react";
+﻿import type { ReactNode } from "react";
 import { Navigate, Route, Routes, useParams } from "react-router-dom";
 import { AuthPage } from "@/features/auth/login-pages";
 import { getIdentityToken } from "@/features/auth/auth-api";
-import { ConsoleShell, ConsoleShellPlaceholder } from "@/features/shell/console-shell";
+import { Layout, LayoutPlaceholder } from "@/features/layout/layout";
 
 type SupportedLanguage = "en" | "zh";
 
@@ -51,15 +51,17 @@ export function AppRoutes() {
         path="/:lang/app/*"
         element={
           <ProtectedRoute>
-            <ConsoleShell />
+            <Layout />
           </ProtectedRoute>
         }
       >
-        <Route index element={<ConsoleShellPlaceholder />} />
-        <Route path="*" element={<ConsoleShellPlaceholder />} />
+        <Route index element={<LayoutPlaceholder />} />
+        <Route path="*" element={<LayoutPlaceholder />} />
       </Route>
       <Route path="/:lang/*" element={<Navigate to="../app" replace />} />
       <Route path="*" element={<LanguageRedirect />} />
     </Routes>
   );
 }
+
+

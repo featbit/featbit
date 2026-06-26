@@ -1,4 +1,4 @@
-import i18n from "i18next";
+﻿import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 
 i18n.use(initReactI18next).init({
@@ -35,7 +35,7 @@ i18n.use(initReactI18next).init({
             loginError: "Error occurred, please contact the support."
           }
         },
-        shell: {
+        layout: {
           nav: {
             groups: {
               getStarted: "Get Started",
@@ -99,7 +99,7 @@ i18n.use(initReactI18next).init({
             version: "Version: {{version}}",
             signOut: "Sign out"
           },
-          placeholder: "Console content will be added in the next migration steps."
+          placeholder: "Content will be added in the next migration steps."
         }
       }
     },
@@ -135,7 +135,7 @@ i18n.use(initReactI18next).init({
             loginError: "发生错误，请联系技术支持。"
           }
         },
-        shell: {
+        layout: {
           nav: {
             groups: {
               getStarted: "开始使用",
@@ -199,7 +199,7 @@ i18n.use(initReactI18next).init({
             version: "版本：{{version}}",
             signOut: "退出登录"
           },
-          placeholder: "控制台内容将在后续迁移步骤中添加。"
+          placeholder: "内容将在后续迁移步骤中添加。"
         }
       }
     }
@@ -213,3 +213,5 @@ i18n.use(initReactI18next).init({
 });
 
 export { i18n };
+
+

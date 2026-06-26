@@ -1,4 +1,4 @@
-import type { Page } from "@playwright/test";
+﻿import type { Page } from "@playwright/test";
 
 export async function mockAuthEndpoints(
   page: Page,
@@ -61,7 +61,7 @@ export async function setAuthenticatedUser(
     name?: string;
   } = {}
 ) {
-  const { token = "e2e-token", email = "shell@featbit.com", name = "Shell User" } = user;
+  const { token = "e2e-token", email = "layout@featbit.com", name = "Layout User" } = user;
 
   await page.addInitScript(
     ({ token, email, name }) => {
@@ -71,3 +71,5 @@ export async function setAuthenticatedUser(
     { token, email, name }
   );
 }
+
+

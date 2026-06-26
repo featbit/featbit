@@ -1,14 +1,14 @@
-import { expect, test } from "@playwright/test";
+﻿import { expect, test } from "@playwright/test";
 import { mockRuntimeEnv, setAuthenticatedUser } from "./helpers";
 
-test.describe("console shell", () => {
+test.describe("layout", () => {
   test("persists sidebar collapse and exposes account preferences", async ({ page }) => {
     await mockRuntimeEnv(page, { VERSION: "2026.06.25" });
     await setAuthenticatedUser(page);
 
     await page.goto("/en/app");
 
-    await expect(page.getByText("Shell User")).toBeVisible();
+    await expect(page.getByText("Layout User")).toBeVisible();
     await expect(page.getByRole("link", { name: "Teams" })).toHaveCount(0);
     await page.getByRole("button", { name: "IAM" }).click();
     await expect(page.getByRole("link", { name: "Teams" })).toBeVisible();
@@ -37,13 +37,15 @@ test.describe("console shell", () => {
     await expect(page.getByText("System")).toBeVisible();
   });
 
-  test("renders shell labels in Chinese for zh routes", async ({ page }) => {
+  test("renders layout labels in Chinese for zh routes", async ({ page }) => {
     await setAuthenticatedUser(page);
 
     await page.goto("/zh/app");
 
     await expect(page.getByText("开关管理")).toBeVisible();
     await expect(page.getByText("当前订阅")).toBeVisible();
-    await expect(page.getByText("控制台内容将在后续迁移步骤中添加。")).toBeVisible();
+    await expect(page.getByText("内容将在后续迁移步骤中添加。")).toBeVisible();
   });
 });
+
+
