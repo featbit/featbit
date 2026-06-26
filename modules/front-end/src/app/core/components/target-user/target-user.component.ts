@@ -44,11 +44,12 @@ export class TargetUserComponent implements OnInit {
       return;
     }
 
-    const searchValue = this.selectNode?.searchValue;
+    const searchValue = this.selectNode?.['searchValue'];
     if (!searchValue) {
       this.userList = [...data];
       return;
     }
+
     const hasExactMatch = data.some(u => u.keyId === searchValue) || this.selectedUserDetailList?.some(u => u.keyId === searchValue);
     if (!hasExactMatch) {
       this.userList = [{
