@@ -12,7 +12,7 @@ import {
   CircleDollarSign,
   ExternalLink,
   Flag,
-  Gauge,
+  FlaskConical,
   GitPullRequest,
   Globe2,
   Info,
@@ -20,15 +20,18 @@ import {
   Layers3,
   LifeBuoy,
   LogOut,
+  Logs,
   Moon,
   PanelLeftClose,
   PanelLeftOpen,
   Puzzle,
+  Rocket,
   Search,
   ShieldCheck,
   Sun,
   User,
-  UsersRound
+  UsersRound,
+  Waypoints
 } from "lucide-react";
 import { useMemo, useState, type ComponentType, type SVGProps } from "react";
 import { Link, Outlet, useNavigate, useParams } from "react-router-dom";
@@ -91,7 +94,7 @@ const environments: Environment[] = [
 const navigationGroups: NavGroup[] = [
   {
     label: "Get Started",
-    items: [{ label: "Overview", href: "/app", icon: Gauge, active: true }]
+    items: [{ label: "Get Started", href: "/app", icon: Rocket, active: true }]
   },
   {
     label: "Release",
@@ -104,14 +107,14 @@ const navigationGroups: NavGroup[] = [
   {
     label: "Experimentation",
     items: [
-      { label: "Experiments", href: "/app/experiments", icon: Activity },
+      { label: "Experiments", href: "/app/experiments", icon: FlaskConical },
       { label: "Metrics", href: "/app/metrics", icon: BarChart3 }
     ]
   },
   {
     label: "Governance",
     items: [
-      { label: "Audit Logs", href: "/app/audit-logs", icon: ShieldCheck },
+      { label: "Audit Logs", href: "/app/audit-logs", icon: Logs },
       { label: "Change Requests", href: "/app/change-requests", icon: GitPullRequest }
     ]
   },
@@ -120,8 +123,8 @@ const navigationGroups: NavGroup[] = [
     items: [
       { label: "Workspace", href: "/app/workspace", icon: Building2 },
       { label: "Organization", href: "/app/organization", icon: Boxes },
-      { label: "IAM", href: "/app/iam", icon: KeyRound },
-      { label: "Relay Proxies", href: "/app/relay-proxies", icon: BellRing },
+      { label: "IAM", href: "/app/iam", icon: ShieldCheck },
+      { label: "Relay Proxies", href: "/app/relay-proxies", icon: Waypoints },
       { label: "Integrations", href: "/app/integrations", icon: Puzzle }
     ]
   }
@@ -457,7 +460,7 @@ function AccountMenu({ lang, collapsed }: { lang: Lang; collapsed: boolean }) {
               Profile
             </DropdownMenuItem>
             <DropdownMenuItem asChild className="h-8 gap-3 rounded-md px-2 text-sm font-medium">
-              <a href="https://github.com/featbit/featbit/issues" target="_blank" rel="noreferrer">
+              <a href="https://support.featbit.ai" target="_blank" rel="noreferrer">
                 <LifeBuoy className="h-4 w-4 text-muted-foreground" />
                 Support
               </a>
