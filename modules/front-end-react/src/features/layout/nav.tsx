@@ -403,7 +403,7 @@ function AccountMenu({ lang, collapsed }: { lang: Lang; collapsed: boolean }) {
   );
 
   return (
-    <div className="border-t border-border p-3">
+    <div className="border-t border-border p-1">
       <DropdownMenu open={accountMenuOpen} onOpenChange={setAccountMenuOpen}>
         {collapsed ? (
           <Tooltip>
