@@ -222,7 +222,7 @@ function planBadgeState(workspace: Workspace, lang: Lang): PlanBadgeState {
       labelKey: "layout.plan.free",
       plan: "layout.plan.upgradeNow",
       warning: false,
-      href: localizedPath(lang, "/app/workspace/billing")
+      href: localizedPath(lang, "/workspace/billing")
     };
   }
 
@@ -232,7 +232,7 @@ function planBadgeState(workspace: Workspace, lang: Lang): PlanBadgeState {
         labelKey: "layout.plan.expired",
         plan: displayPlan(plan),
         warning: true,
-        href: localizedPath(lang, "/app/workspace/license")
+        href: localizedPath(lang, "/workspace/license")
       };
     }
 
@@ -241,7 +241,7 @@ function planBadgeState(workspace: Workspace, lang: Lang): PlanBadgeState {
         labelKey: "layout.plan.expiringSoon",
         plan: displayPlan(plan),
         warning: true,
-        href: localizedPath(lang, "/app/workspace/license")
+        href: localizedPath(lang, "/workspace/license")
       };
     }
 
@@ -249,7 +249,7 @@ function planBadgeState(workspace: Workspace, lang: Lang): PlanBadgeState {
       labelKey: "layout.plan.current",
       plan: displayPlan(plan),
       warning: false,
-      href: localizedPath(lang, "/app/workspace/license")
+      href: localizedPath(lang, "/workspace/license")
     };
   }
 
@@ -257,7 +257,7 @@ function planBadgeState(workspace: Workspace, lang: Lang): PlanBadgeState {
     labelKey: "layout.plan.upgradeNow",
     plan: "layout.plan.getEnterprise",
     warning: false,
-    href: localizedPath(lang, "/app/workspace/license")
+    href: localizedPath(lang, "/workspace/license")
   };
 }
 

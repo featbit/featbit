@@ -16,16 +16,16 @@ function getPreferredLanguage(): SupportedLanguage {
 
 function LanguageRedirect() {
   const lang = getPreferredLanguage();
-  const target = getIdentityToken() ? "app" : "login";
+  const target = getIdentityToken() ? "" : "login";
 
-  return <Navigate to={`/${lang}/${target}`} replace />;
+  return <Navigate to={target ? `/${lang}/${target}` : `/${lang}`} replace />;
 }
 
 function AuthRoute({ mode }: { mode: "login" | "sso" }) {
   const { lang = getPreferredLanguage() } = useParams();
 
   if (getIdentityToken()) {
-    return <Navigate to={`/${lang}/app`} replace />;
+    return <Navigate to={`/${lang}`} replace />;
   }
 
   return <AuthPage mode={mode} />;
@@ -48,7 +48,7 @@ export function AppRoutes() {
       <Route path="/:lang/login" element={<AuthRoute mode="login" />} />
       <Route path="/:lang/login/sso" element={<AuthRoute mode="sso" />} />
       <Route
-        path="/:lang/app/*"
+        path="/:lang/*"
         element={
           <ProtectedRoute>
             <Layout />
@@ -58,7 +58,6 @@ export function AppRoutes() {
         <Route index element={<LayoutPlaceholder />} />
         <Route path="*" element={<LayoutPlaceholder />} />
       </Route>
-      <Route path="/:lang/*" element={<Navigate to="../app" replace />} />
       <Route path="*" element={<LanguageRedirect />} />
     </Routes>
   );

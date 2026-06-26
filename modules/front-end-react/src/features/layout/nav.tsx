@@ -73,57 +73,57 @@ const navigationGroups: NavGroup[] = [
   {
     label: "Get Started",
     i18nKey: "layout.nav.groups.getStarted",
-    items: [{ label: "Get Started", i18nKey: "layout.nav.items.getStarted", href: "/app", icon: Rocket, active: true }]
+    items: [{ label: "Get Started", i18nKey: "layout.nav.items.getStarted", href: "/", icon: Rocket, active: true }]
   },
   {
     label: "Release",
     i18nKey: "layout.nav.groups.release",
     items: [
-      { label: "Feature Flags", i18nKey: "layout.nav.items.featureFlags", href: "/app/feature-flags", icon: Flag },
-      { label: "Segments", i18nKey: "layout.nav.items.segments", href: "/app/segments", icon: Layers3 },
-      { label: "End Users", i18nKey: "layout.nav.items.endUsers", href: "/app/end-users", icon: UsersRound }
+      { label: "Feature Flags", i18nKey: "layout.nav.items.featureFlags", href: "/feature-flags", icon: Flag },
+      { label: "Segments", i18nKey: "layout.nav.items.segments", href: "/segments", icon: Layers3 },
+      { label: "End Users", i18nKey: "layout.nav.items.endUsers", href: "/end-users", icon: UsersRound }
     ]
   },
   {
     label: "Governance",
     i18nKey: "layout.nav.groups.governance",
     items: [
-      { label: "Audit Logs", i18nKey: "layout.nav.items.auditLogs", href: "/app/audit-logs", icon: Logs },
-      { label: "Change Requests", i18nKey: "layout.nav.items.changeRequests", href: "/app/change-requests", icon: GitPullRequest }
+      { label: "Audit Logs", i18nKey: "layout.nav.items.auditLogs", href: "/audit-logs", icon: Logs },
+      { label: "Change Requests", i18nKey: "layout.nav.items.changeRequests", href: "/change-requests", icon: GitPullRequest }
     ]
   },
   {
     label: "Experimentation",
     i18nKey: "layout.nav.groups.experimentation",
     items: [
-      { label: "Experiments", i18nKey: "layout.nav.items.experiments", href: "/app/experiments", icon: FlaskConical },
-      { label: "Metrics", i18nKey: "layout.nav.items.metrics", href: "/app/metrics", icon: BarChart3 }
+      { label: "Experiments", i18nKey: "layout.nav.items.experiments", href: "/experiments", icon: FlaskConical },
+      { label: "Metrics", i18nKey: "layout.nav.items.metrics", href: "/metrics", icon: BarChart3 }
     ]
   },
   {
     label: "Integrations",
     i18nKey: "layout.nav.groups.integrations",
     items: [
-      { label: "Relay Proxies", i18nKey: "layout.nav.items.relayProxies", href: "/app/relay-proxies", icon: Waypoints },
-      { label: "WebHooks", i18nKey: "layout.nav.items.webhooks", href: "/app/webhooks", icon: Webhook },
-      { label: "Access Tokens", i18nKey: "layout.nav.items.accessTokens", href: "/app/access-tokens", icon: KeyRound }
+      { label: "Relay Proxies", i18nKey: "layout.nav.items.relayProxies", href: "/relay-proxies", icon: Waypoints },
+      { label: "WebHooks", i18nKey: "layout.nav.items.webhooks", href: "/webhooks", icon: Webhook },
+      { label: "Access Tokens", i18nKey: "layout.nav.items.accessTokens", href: "/access-tokens", icon: KeyRound }
     ]
   },
   {
     label: "Admin",
     i18nKey: "layout.nav.groups.admin",
     items: [
-      { label: "Workspace", i18nKey: "layout.nav.items.workspace", href: "/app/workspace", icon: Building2 },
-      { label: "Organization", i18nKey: "layout.nav.items.organization", href: "/app/organization", icon: Boxes },
+      { label: "Workspace", i18nKey: "layout.nav.items.workspace", href: "/workspace", icon: Building2 },
+      { label: "Organization", i18nKey: "layout.nav.items.organization", href: "/organization", icon: Boxes },
       {
         label: "IAM",
         i18nKey: "layout.nav.items.iam",
-        href: "/app/iam",
+        href: "/iam",
         icon: ShieldCheck,
         children: [
-          { label: "Teams", i18nKey: "layout.nav.items.teams", href: "/app/iam/teams", icon: UserRound },
-          { label: "Groups", i18nKey: "layout.nav.items.groups", href: "/app/iam/groups", icon: UsersRound },
-          { label: "Policies", i18nKey: "layout.nav.items.policies", href: "/app/iam/policies", icon: UserRoundKey }
+          { label: "Teams", i18nKey: "layout.nav.items.teams", href: "/iam/teams", icon: UserRound },
+          { label: "Groups", i18nKey: "layout.nav.items.groups", href: "/iam/groups", icon: UsersRound },
+          { label: "Policies", i18nKey: "layout.nav.items.policies", href: "/iam/policies", icon: UserRoundKey }
         ]
       }
     ]
