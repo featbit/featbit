@@ -522,11 +522,13 @@ export function ContextBar({
           <div className="mt-2 max-h-72 overflow-y-auto">
             {groupedEnvironments.map((project) => (
               <div key={project.id} className="py-1">
-                <DropdownMenuLabel>{project.name}</DropdownMenuLabel>
+                <DropdownMenuLabel className="flex items-center gap-1.5 px-2 text-[0.7rem] uppercase tracking-wide text-muted-foreground">
+                  {project.name}
+                </DropdownMenuLabel>
                 {project.environments.map((environment) => (
                   <DropdownMenuItem
                     key={`${project.id}:${environment.id}`}
-                    className="cursor-pointer justify-between"
+                    className="cursor-pointer justify-between pl-5"
                     onSelect={() => selectEnvironment(project, environment)}
                   >
                     <span className="flex min-w-0 items-center">
