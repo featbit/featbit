@@ -41,7 +41,7 @@ export class TargetUserComponent implements OnInit {
     this.isLoadingUsers = false;
     const searchValue = this.selectNode['searchValue'];
     if (!this.disableCreation && searchValue) {
-      const hasExactMatch = data.some(u => u.keyId === searchValue);
+      const hasExactMatch = data.some(u => u.keyId === searchValue) || this.selectedUserDetailList?.some(u => u.keyId === searchValue);
       if (!hasExactMatch) {
         this.userList = [{
           keyId: searchValue,
