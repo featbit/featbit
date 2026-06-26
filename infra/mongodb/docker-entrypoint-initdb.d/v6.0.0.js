@@ -26,6 +26,17 @@ db.ReleaseDecisionRunVariantStats.createIndex(
     { unique: true }
 );
 
+db.ReleaseDecisionRunAssignments.createIndex(
+    { runId: 1, allocationKey: 1 },
+    { unique: true }
+);
+db.ReleaseDecisionRunAssignments.createIndex(
+    { runId: 1, assignmentUnit: 1 },
+    { unique: true }
+);
+db.ReleaseDecisionRunAssignments.createIndex({ runId: 1, role: 1 });
+db.ReleaseDecisionRunAssignments.createIndex({ runId: 1, analysisRole: 1 });
+
 db.McpDeviceAuthorizations.createIndex({ deviceCodeHash: 1 }, { unique: true });
 db.McpDeviceAuthorizations.createIndex({ userCode: 1 }, { unique: true });
 db.McpDeviceAuthorizations.createIndex({ expiresAt: 1 });

@@ -110,6 +110,14 @@ CREATE TABLE IF NOT EXISTS release_decision_experiment_runs
     layer_id                 varchar(128)             null,
     audience_filters         text                     null,
     traffic_offset           integer                  null default 0,
+    layer_key                varchar(128)             null,
+    allocation_key_selector  varchar(256)             null default 'user.keyId',
+    slice_start              double precision         null default 0,
+    slice_end                double precision         null default 100,
+    allocation_plan          text                     null,
+    assignment_unit_selector varchar(256)             null default 'user.keyId',
+    layer_traffic_percent    double precision         null default 100,
+    analysis_sampling_plan   text                     null,
     data_source_mode         varchar(64)              null default 'featbit-managed',
     customer_endpoint_config text                     null,
     created_at               timestamp with time zone not null default now(),
@@ -118,6 +126,68 @@ CREATE TABLE IF NOT EXISTS release_decision_experiment_runs
 
 CREATE UNIQUE INDEX IF NOT EXISTS ux_release_decision_experiment_runs_experiment_slug
     ON release_decision_experiment_runs (experiment_id, slug);
+
+ALTER TABLE release_decision_experiment_runs
+    ADD COLUMN IF NOT EXISTS layer_key varchar(128) null,
+    ADD COLUMN IF NOT EXISTS allocation_key_selector varchar(256) null default 'user.keyId',
+    ADD COLUMN IF NOT EXISTS slice_start double precision null default 0,
+    ADD COLUMN IF NOT EXISTS slice_end double precision null default 100,
+    ADD COLUMN IF NOT EXISTS allocation_plan text null,
+    ADD COLUMN IF NOT EXISTS assignment_unit_selector varchar(256) null default 'user.keyId',
+    ADD COLUMN IF NOT EXISTS layer_traffic_percent double precision null default 100,
+    ADD COLUMN IF NOT EXISTS analysis_sampling_plan text null;
+
+CREATE TABLE IF NOT EXISTS release_decision_run_assignments
+(
+    id                    uuid primary key                  default gen_random_uuid(),
+    run_id                uuid                     not null,
+    env_id                uuid                     not null,
+    flag_key              varchar(256)             not null,
+    allocation_key        varchar(512)             not null,
+    assignment_unit       varchar(512)             not null,
+    user_key              varchar(512)             not null,
+    expected_variation_id varchar(256)             null,
+    actual_variation_id   varchar(256)             null,
+    role                  varchar(64)              not null,
+    analysis_role         varchar(64)              not null default 'treatment',
+    bucket                double precision         not null,
+    layer_bucket          double precision         null,
+    sampling_bucket       double precision         null,
+    included_by_sampling  boolean                  not null default true,
+    exclusion_reason      varchar(64)              null,
+    assigned_at           timestamp with time zone not null,
+    first_exposed_at      timestamp with time zone not null,
+    created_at            timestamp with time zone not null default now(),
+    updated_at            timestamp with time zone not null default now()
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS ux_release_decision_run_assignments_run_allocation
+    ON release_decision_run_assignments (run_id, allocation_key);
+
+CREATE INDEX IF NOT EXISTS ix_release_decision_run_assignments_run_role
+    ON release_decision_run_assignments (run_id, role);
+
+ALTER TABLE release_decision_run_assignments
+    ADD COLUMN IF NOT EXISTS assignment_unit varchar(512) null,
+    ADD COLUMN IF NOT EXISTS analysis_role varchar(64) null default 'treatment',
+    ADD COLUMN IF NOT EXISTS layer_bucket double precision null,
+    ADD COLUMN IF NOT EXISTS sampling_bucket double precision null,
+    ADD COLUMN IF NOT EXISTS included_by_sampling boolean not null default true,
+    ADD COLUMN IF NOT EXISTS exclusion_reason varchar(64) null;
+
+UPDATE release_decision_run_assignments
+SET assignment_unit = allocation_key
+WHERE assignment_unit IS NULL;
+
+UPDATE release_decision_run_assignments
+SET analysis_role = role
+WHERE analysis_role IS NULL;
+
+CREATE UNIQUE INDEX IF NOT EXISTS ux_release_decision_run_assignments_run_assignment_unit
+    ON release_decision_run_assignments (run_id, assignment_unit);
+
+CREATE INDEX IF NOT EXISTS ix_release_decision_run_assignments_run_analysis_role
+    ON release_decision_run_assignments (run_id, analysis_role);
 
 -- Release-decision evidence is intentionally stored separately from both the
 -- legacy events table and the release-decision experiment/run tables. These

@@ -159,6 +159,22 @@ public class ReleaseDecisionExperimentRunVm
 
     public int? TrafficOffset { get; set; }
 
+    public string LayerKey { get; set; }
+
+    public string AllocationKeySelector { get; set; }
+
+    public double? SliceStart { get; set; }
+
+    public double? SliceEnd { get; set; }
+
+    public string AllocationPlan { get; set; }
+
+    public string AssignmentUnitSelector { get; set; }
+
+    public double? LayerTrafficPercent { get; set; }
+
+    public string AnalysisSamplingPlan { get; set; }
+
     public string DataSourceMode { get; set; }
 
     public string CustomerEndpointConfig { get; set; }

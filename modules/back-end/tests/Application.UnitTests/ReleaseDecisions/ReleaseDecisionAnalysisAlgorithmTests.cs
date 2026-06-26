@@ -214,7 +214,7 @@ public class ReleaseDecisionAnalysisAlgorithmTests
     }
 
     [Fact]
-    public async Task AnalyzeRun_passes_run_traffic_scope_to_stats_query()
+    public async Task AnalyzeRun_passes_run_sampling_scope_to_stats_query()
     {
         var stats = new FixedExperimentStatsService(new ExperimentStatsVm
         {
@@ -236,7 +236,10 @@ public class ReleaseDecisionAnalysisAlgorithmTests
             metricAgg: "once",
             trafficPercent: 20,
             trafficOffset: 10,
-            layerId: "checkout-layer");
+            layerId: "checkout-layer",
+            assignmentUnitSelector: "accountId",
+            layerTrafficPercent: 30,
+            analysisSamplingPlan: """[{"variation":"control-id","role":"control","includeRate":25},{"variation":"treatment-id","role":"treatment","includeRate":100}]""");
 
         await CreateService(db, stats).AnalyzeRunAsync(
             EnvId,
@@ -248,6 +251,11 @@ public class ReleaseDecisionAnalysisAlgorithmTests
         Assert.Equal(20, request.TrafficPercent);
         Assert.Equal(10, request.TrafficOffset);
         Assert.Equal("checkout-layer", request.LayerId);
+        Assert.Equal("accountId", request.AssignmentUnitSelector);
+        Assert.Equal(30, request.LayerTrafficPercent);
+        Assert.Equal("""[{"variation":"control-id","role":"control","includeRate":25},{"variation":"treatment-id","role":"treatment","includeRate":100}]""", request.AnalysisSamplingPlan);
+        Assert.Equal("control-id", request.ControlVariant);
+        Assert.Equal("treatment-id", request.TreatmentVariants);
     }
 
     private static ReleaseDecisionExperimentService CreateService(
@@ -281,7 +289,10 @@ public class ReleaseDecisionAnalysisAlgorithmTests
         string treatmentVariant = "treatment",
         double? trafficPercent = null,
         int? trafficOffset = null,
-        string? layerId = null)
+        string? layerId = null,
+        string? assignmentUnitSelector = null,
+        double? layerTrafficPercent = null,
+        string? analysisSamplingPlan = null)
     {
         var experiment = new ReleaseDecisionExperiment
         {
@@ -311,6 +322,9 @@ public class ReleaseDecisionAnalysisAlgorithmTests
             TrafficPercent = trafficPercent,
             TrafficOffset = trafficOffset,
             LayerId = layerId,
+            AssignmentUnitSelector = assignmentUnitSelector,
+            LayerTrafficPercent = layerTrafficPercent,
+            AnalysisSamplingPlan = analysisSamplingPlan,
             ObservationStart = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc),
             ObservationEnd = new DateTime(2026, 1, 2, 0, 0, 0, DateTimeKind.Utc),
             CreatedAt = DateTime.UtcNow,

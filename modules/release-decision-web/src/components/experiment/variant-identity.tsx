@@ -190,13 +190,13 @@ export function VariantIdentityInline({
       {role && <span className="shrink-0 text-muted-foreground">{role}:</span>}
       <span className="min-w-0 truncate font-medium">{name}</span>
       {showValue && (
-        <span className="shrink-0 rounded bg-muted/70 px-1 py-0.5 font-mono text-[0.85em] text-muted-foreground">
+        <span className="min-w-0 max-w-[45%] shrink truncate rounded bg-muted/70 px-1 py-0.5 font-mono text-[0.85em] text-muted-foreground">
           {value}
         </span>
       )}
       {showId && (
-        <span className="inline-flex min-w-0 shrink-0 items-center gap-0.5">
-          <span className="font-mono text-[0.9em] text-muted-foreground">
+        <span className="inline-flex min-w-0 shrink items-center gap-0.5">
+          <span className="min-w-0 truncate font-mono text-[0.9em] text-muted-foreground">
             {shortVariantId(variant.key)}
           </span>
           {showCopy && <VariantIdCopyButton id={variant.key} className="size-5" />}

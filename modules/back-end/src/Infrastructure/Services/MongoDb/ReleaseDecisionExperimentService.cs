@@ -205,6 +205,14 @@ public class ReleaseDecisionExperimentService(
             TrafficPercent = previous?.TrafficPercent ?? 100,
             TrafficOffset = previous?.TrafficOffset ?? 0,
             LayerId = previous?.LayerId,
+            LayerKey = previous?.LayerKey ?? previous?.LayerId,
+            AllocationKeySelector = previous?.AllocationKeySelector ?? "user.keyId",
+            SliceStart = previous?.SliceStart ?? previous?.TrafficOffset ?? 0,
+            SliceEnd = previous?.SliceEnd ?? Math.Min(100, (previous?.TrafficOffset ?? 0) + (previous?.TrafficPercent ?? 100)),
+            AllocationPlan = previous?.AllocationPlan,
+            AssignmentUnitSelector = previous?.AssignmentUnitSelector ?? previous?.AllocationKeySelector ?? "user.keyId",
+            LayerTrafficPercent = previous?.LayerTrafficPercent ?? 100,
+            AnalysisSamplingPlan = previous?.AnalysisSamplingPlan,
             AudienceFilters = previous?.AudienceFilters,
             MinimumSample = previous?.MinimumSample,
             PriorProper = previous?.PriorProper ?? false,
@@ -281,6 +289,16 @@ public class ReleaseDecisionExperimentService(
         run.TrafficPercent = Math.Clamp(update.TrafficPercent ?? 100, 1, 100);
         run.TrafficOffset = Math.Clamp(update.TrafficOffset ?? 0, 0, 99);
         run.LayerId = Normalize(update.LayerId);
+        run.LayerKey = Normalize(update.LayerKey, Normalize(update.LayerId, run.LayerKey));
+        run.AllocationKeySelector = Normalize(update.AllocationKeySelector, run.AllocationKeySelector) ?? "user.keyId";
+        run.SliceStart = Math.Clamp(update.SliceStart ?? run.TrafficOffset ?? 0, 0, 100);
+        run.SliceEnd = Math.Clamp(update.SliceEnd ?? Math.Min(100, (run.TrafficOffset ?? 0) + (run.TrafficPercent ?? 100)), 0, 100);
+        run.AllocationPlan = Normalize(update.AllocationPlan);
+        run.AssignmentUnitSelector = Normalize(update.AssignmentUnitSelector, run.AssignmentUnitSelector) ??
+                                     run.AllocationKeySelector ??
+                                     "user.keyId";
+        run.LayerTrafficPercent = Math.Clamp(update.LayerTrafficPercent ?? run.LayerTrafficPercent ?? 100, 0.000001d, 100d);
+        run.AnalysisSamplingPlan = Normalize(update.AnalysisSamplingPlan);
         run.AudienceFilters = Normalize(update.AudienceFilters);
         run.Method = update.Method == "bandit" ? "bandit" : "bayesian_ab";
         run.UpdatedAt = DateTime.UtcNow;
@@ -353,16 +371,29 @@ public class ReleaseDecisionExperimentService(
 
         var stats = await statsService.QueryAsync(new QueryExperimentStats
         {
+            RunId = run.Id,
             EnvId = envId,
             FlagKey = experiment.FlagKey,
             MetricEvent = primaryMetricEvent,
             StartDate = startDate,
             EndDate = endDate,
+            StartTime = start,
+            EndTime = end,
             MetricType = metricType,
             MetricAgg = metricAgg,
             TrafficPercent = run.TrafficPercent,
             TrafficOffset = run.TrafficOffset,
-            LayerId = run.LayerId
+            LayerId = run.LayerId,
+            ControlVariant = run.ControlVariant,
+            TreatmentVariants = run.TreatmentVariant,
+            LayerKey = run.LayerKey,
+            AllocationKeySelector = run.AllocationKeySelector,
+            SliceStart = run.SliceStart,
+            SliceEnd = run.SliceEnd,
+            AllocationPlan = run.AllocationPlan,
+            AssignmentUnitSelector = run.AssignmentUnitSelector,
+            LayerTrafficPercent = run.LayerTrafficPercent,
+            AnalysisSamplingPlan = run.AnalysisSamplingPlan
         });
 
         var variants = stats.Variants?.ToArray() ?? [];
@@ -383,16 +414,29 @@ public class ReleaseDecisionExperimentService(
         {
             var guardrailStats = await statsService.QueryAsync(new QueryExperimentStats
             {
+                RunId = run.Id,
                 EnvId = envId,
                 FlagKey = experiment.FlagKey,
                 MetricEvent = guardrail.Event,
                 StartDate = startDate,
                 EndDate = endDate,
+                StartTime = start,
+                EndTime = end,
                 MetricType = guardrail.MetricType,
                 MetricAgg = guardrail.MetricAgg,
                 TrafficPercent = run.TrafficPercent,
                 TrafficOffset = run.TrafficOffset,
-                LayerId = run.LayerId
+                LayerId = run.LayerId,
+                ControlVariant = run.ControlVariant,
+                TreatmentVariants = run.TreatmentVariant,
+                LayerKey = run.LayerKey,
+                AllocationKeySelector = run.AllocationKeySelector,
+                SliceStart = run.SliceStart,
+                SliceEnd = run.SliceEnd,
+                AllocationPlan = run.AllocationPlan,
+                AssignmentUnitSelector = run.AssignmentUnitSelector,
+                LayerTrafficPercent = run.LayerTrafficPercent,
+                AnalysisSamplingPlan = run.AnalysisSamplingPlan
             });
 
             var guardrailData = BuildMetricData(
@@ -637,6 +681,14 @@ public class ReleaseDecisionExperimentService(
             LayerId = run.LayerId,
             AudienceFilters = run.AudienceFilters,
             TrafficOffset = run.TrafficOffset,
+            LayerKey = run.LayerKey,
+            AllocationKeySelector = run.AllocationKeySelector,
+            SliceStart = run.SliceStart,
+            SliceEnd = run.SliceEnd,
+            AllocationPlan = run.AllocationPlan,
+            AssignmentUnitSelector = run.AssignmentUnitSelector,
+            LayerTrafficPercent = run.LayerTrafficPercent,
+            AnalysisSamplingPlan = run.AnalysisSamplingPlan,
             DataSourceMode = run.DataSourceMode,
             CustomerEndpointConfig = run.CustomerEndpointConfig,
             CreatedAt = run.CreatedAt,
@@ -893,6 +945,11 @@ public class ReleaseDecisionExperimentService(
         run.PrimaryMetricAgg = NormalizeMetricAgg(update.PrimaryMetricAgg ?? run.PrimaryMetricAgg);
         run.PrimaryMetricType = NormalizeMetricType(update.PrimaryMetricType ?? run.PrimaryMetricType);
         run.LayerId = Normalize(update.LayerId, run.LayerId);
+        run.LayerKey = Normalize(update.LayerKey, run.LayerKey);
+        run.AllocationKeySelector = Normalize(update.AllocationKeySelector, run.AllocationKeySelector);
+        run.AllocationPlan = Normalize(update.AllocationPlan, run.AllocationPlan);
+        run.AssignmentUnitSelector = Normalize(update.AssignmentUnitSelector, run.AssignmentUnitSelector);
+        run.AnalysisSamplingPlan = Normalize(update.AnalysisSamplingPlan, run.AnalysisSamplingPlan);
         run.AudienceFilters = Normalize(update.AudienceFilters, run.AudienceFilters);
         run.DataSourceMode = Normalize(update.DataSourceMode, run.DataSourceMode);
         run.CustomerEndpointConfig = Normalize(update.CustomerEndpointConfig, run.CustomerEndpointConfig);
@@ -905,6 +962,9 @@ public class ReleaseDecisionExperimentService(
         if (update.PriorStddev.HasValue) run.PriorStddev = update.PriorStddev;
         if (update.TrafficPercent.HasValue) run.TrafficPercent = Math.Clamp(update.TrafficPercent.Value, 1, 100);
         if (update.TrafficOffset.HasValue) run.TrafficOffset = Math.Clamp(update.TrafficOffset.Value, 0, 99);
+        if (update.SliceStart.HasValue) run.SliceStart = Math.Clamp(update.SliceStart.Value, 0, 100);
+        if (update.SliceEnd.HasValue) run.SliceEnd = Math.Clamp(update.SliceEnd.Value, 0, 100);
+        if (update.LayerTrafficPercent.HasValue) run.LayerTrafficPercent = Math.Clamp(update.LayerTrafficPercent.Value, 0.000001d, 100d);
     }
 
     private static void HydrateRunMetricConfig(

@@ -77,6 +77,7 @@ public class MongoDbClient
         { typeof(ReleaseDecisionActivity), "ReleaseDecisionActivities" },
         { typeof(ReleaseDecisionExposureEvent), "ReleaseDecisionExposureEvents" },
         { typeof(ReleaseDecisionMetricEvent), "ReleaseDecisionMetricEvents" },
+        { typeof(ReleaseDecisionRunAssignment), "ReleaseDecisionRunAssignments" },
 
         { typeof(AccessToken), "AccessTokens" },
         { typeof(McpDeviceAuthorization), "McpDeviceAuthorizations" },

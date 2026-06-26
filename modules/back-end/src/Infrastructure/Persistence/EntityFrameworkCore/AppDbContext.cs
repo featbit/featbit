@@ -39,6 +39,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.ApplyConfiguration(new ReleaseDecisionActivityConfiguration());
         modelBuilder.ApplyConfiguration(new ReleaseDecisionExposureEventConfiguration());
         modelBuilder.ApplyConfiguration(new ReleaseDecisionMetricEventConfiguration());
+        modelBuilder.ApplyConfiguration(new ReleaseDecisionRunAssignmentConfiguration());
         modelBuilder.ApplyConfiguration(new AccessTokenConfiguration());
         modelBuilder.ApplyConfiguration(new McpDeviceAuthorizationConfiguration());
         modelBuilder.ApplyConfiguration(new McpRefreshAuthorizationConfiguration());

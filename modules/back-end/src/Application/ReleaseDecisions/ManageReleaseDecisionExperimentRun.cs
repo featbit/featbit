@@ -11,6 +11,22 @@ public class ReleaseDecisionExperimentRunAudienceUpdate
     public string AudienceFilters { get; set; }
 
     public string Method { get; set; }
+
+    public string LayerKey { get; set; }
+
+    public string AllocationKeySelector { get; set; }
+
+    public double? SliceStart { get; set; }
+
+    public double? SliceEnd { get; set; }
+
+    public string AllocationPlan { get; set; }
+
+    public string AssignmentUnitSelector { get; set; }
+
+    public double? LayerTrafficPercent { get; set; }
+
+    public string AnalysisSamplingPlan { get; set; }
 }
 
 public class ReleaseDecisionExperimentRunObservationWindowUpdate
@@ -91,6 +107,22 @@ public class ReleaseDecisionExperimentRunUpdate
     public string AudienceFilters { get; set; }
 
     public int? TrafficOffset { get; set; }
+
+    public string LayerKey { get; set; }
+
+    public string AllocationKeySelector { get; set; }
+
+    public double? SliceStart { get; set; }
+
+    public double? SliceEnd { get; set; }
+
+    public string AllocationPlan { get; set; }
+
+    public string AssignmentUnitSelector { get; set; }
+
+    public double? LayerTrafficPercent { get; set; }
+
+    public string AnalysisSamplingPlan { get; set; }
 
     public string DataSourceMode { get; set; }
 

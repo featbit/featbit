@@ -929,7 +929,7 @@ function TrafficTab({
       <div>
         <SectionLabel
           icon={<Filter className="size-3" />}
-          label="Analysis Method & Traffic"
+          label="Run Analysis & Traffic"
         />
         <ExperimentRunTrafficConfig
           experimentRun={exp}
@@ -990,7 +990,7 @@ function NewExperimentRunDialog({
           </DialogTitle>
           <DialogDescription className="text-xs">
             Choose the analysis method before creating the run. You can change
-            it later from Analysis Method &amp; Traffic.
+            it later from Run Analysis &amp; Traffic.
           </DialogDescription>
         </DialogHeader>
 

@@ -46,6 +46,14 @@ public class ReleaseDecisionExperimentRunConfiguration : IEntityTypeConfiguratio
         builder.Property(x => x.LayerId).HasColumnName("layer_id").HasMaxLength(128);
         builder.Property(x => x.AudienceFilters).HasColumnName("audience_filters");
         builder.Property(x => x.TrafficOffset).HasColumnName("traffic_offset");
+        builder.Property(x => x.LayerKey).HasColumnName("layer_key").HasMaxLength(128);
+        builder.Property(x => x.AllocationKeySelector).HasColumnName("allocation_key_selector").HasMaxLength(256);
+        builder.Property(x => x.SliceStart).HasColumnName("slice_start");
+        builder.Property(x => x.SliceEnd).HasColumnName("slice_end");
+        builder.Property(x => x.AllocationPlan).HasColumnName("allocation_plan");
+        builder.Property(x => x.AssignmentUnitSelector).HasColumnName("assignment_unit_selector").HasMaxLength(256);
+        builder.Property(x => x.LayerTrafficPercent).HasColumnName("layer_traffic_percent");
+        builder.Property(x => x.AnalysisSamplingPlan).HasColumnName("analysis_sampling_plan");
         builder.Property(x => x.DataSourceMode).HasColumnName("data_source_mode").HasMaxLength(64);
         builder.Property(x => x.CustomerEndpointConfig).HasColumnName("customer_endpoint_config");
 

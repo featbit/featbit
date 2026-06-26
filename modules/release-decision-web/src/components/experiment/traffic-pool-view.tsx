@@ -6,14 +6,16 @@ import {
   VariantIdentityInline,
 } from "./variant-identity";
 
-/* ── Palette ── */
 const PALETTE = [
-  { bar: "bg-blue-500",   light: "bg-blue-50 dark:bg-blue-950/40",    text: "text-blue-700 dark:text-blue-300",    dot: "bg-blue-500"   },
+  { bar: "bg-blue-500", light: "bg-blue-50 dark:bg-blue-950/40", text: "text-blue-700 dark:text-blue-300", dot: "bg-blue-500" },
   { bar: "bg-violet-500", light: "bg-violet-50 dark:bg-violet-950/40", text: "text-violet-700 dark:text-violet-300", dot: "bg-violet-500" },
-  { bar: "bg-emerald-500",light: "bg-emerald-50 dark:bg-emerald-950/40",text:"text-emerald-700 dark:text-emerald-300",dot:"bg-emerald-500"},
-  { bar: "bg-amber-500",  light: "bg-amber-50 dark:bg-amber-950/40",   text: "text-amber-700 dark:text-amber-300",   dot: "bg-amber-500"  },
-  { bar: "bg-rose-500",   light: "bg-rose-50 dark:bg-rose-950/40",     text: "text-rose-700 dark:text-rose-300",     dot: "bg-rose-500"   },
+  { bar: "bg-emerald-500", light: "bg-emerald-50 dark:bg-emerald-950/40", text: "text-emerald-700 dark:text-emerald-300", dot: "bg-emerald-500" },
+  { bar: "bg-amber-500", light: "bg-amber-50 dark:bg-amber-950/40", text: "text-amber-700 dark:text-amber-300", dot: "bg-amber-500" },
+  { bar: "bg-rose-500", light: "bg-rose-50 dark:bg-rose-950/40", text: "text-rose-700 dark:text-rose-300", dot: "bg-rose-500" },
 ] as const;
+
+type ExpWithColor = ExperimentRun & { colorIdx: number };
+type SamplingEntry = { variation: string; role: string; includeRate: number };
 
 function palette(idx: number) {
   return PALETTE[idx % PALETTE.length];
@@ -25,9 +27,28 @@ function fmtDate(d: Date | string | null | undefined): string {
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
-type ExpWithColor = ExperimentRun & { colorIdx: number };
+function fmtPercent(value: number | null | undefined) {
+  if (value == null || Number.isNaN(value)) return "100%";
+  return `${Number.isInteger(value) ? value : value.toFixed(2)}%`;
+}
 
-/* ── Top-level component ── */
+function parseSamplingPlan(plan: string | null | undefined): SamplingEntry[] {
+  if (!plan) return [];
+  try {
+    const parsed = JSON.parse(plan) as Partial<SamplingEntry>[];
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter(entry => entry.variation)
+      .map(entry => ({
+        variation: entry.variation ?? "",
+        role: entry.role ?? "treatment",
+        includeRate: Number(entry.includeRate ?? 100),
+      }));
+  } catch {
+    return [];
+  }
+}
+
 export function TrafficPoolView({
   experimentRuns,
   isSequential,
@@ -38,172 +59,152 @@ export function TrafficPoolView({
   variants?: string | null;
 }) {
   const variantRows = parseVariantIdentities(variants);
-  const { layers, colorMap } = useMemo(() => {
-    const colorMap = new Map<string, number>();
-    experimentRuns.forEach((e, i) => colorMap.set(e.id, i));
-
-    // Group by layerId (null = "default")
-    const layerMap = new Map<string, ExperimentRun[]>();
-    for (const exp of experimentRuns) {
-      const key = (exp.layerId as string | null) ?? "__default__";
-      if (!layerMap.has(key)) layerMap.set(key, []);
-      layerMap.get(key)!.push(exp);
-    }
-
-    const layers = Array.from(layerMap.entries()).map(([layerId, exps]) => ({
-      layerId: layerId === "__default__" ? null : layerId,
-      experimentRuns: exps.map(e => ({ ...e, colorIdx: colorMap.get(e.id)! })),
-    }));
-
-    return { layers, colorMap };
-  }, [experimentRuns]);
-
-  // Detect sequential: all experiment runs use the full bucket [0, 100)
-  const isAllDefault = experimentRuns.every(
-    e => (e.trafficOffset ?? 0) === 0 && (e.trafficPercent ?? 100) >= 100
+  const experimentRunsWithColor = useMemo(
+    () => experimentRuns.map((run, index) => ({ ...run, colorIdx: index })),
+    [experimentRuns],
   );
-
-  const withDates = experimentRuns.filter(e => e.observationStart);
+  const withDates = experimentRunsWithColor.filter(run => run.observationStart);
 
   if (experimentRuns.length === 0) return null;
 
   return (
-    <div className="rounded-md border divide-y">
-      {/* Bucket section */}
-      {!isAllDefault && (
-        <div className="px-3 py-2.5 space-y-2.5">
-          <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
-            Hash-space Allocation
-          </div>
-          {layers.map((layer, i) => (
-            <div key={i} className="space-y-1">
-              {layers.length > 1 && (
-                <div className="text-[10px] text-muted-foreground">
-                  Layer: <span className="font-mono">{layer.layerId ?? "default"}</span>
-                </div>
-              )}
-              <BucketBar experimentRuns={layer.experimentRuns} />
-            </div>
-          ))}
-          {/* Legend */}
-          <ExpLegend experimentRuns={experimentRuns.map(e => ({ ...e, colorIdx: colorMap.get(e.id)! }))} variants={variantRows} />
+    <div className="divide-y rounded-md border">
+      <div className="space-y-2.5 px-3 py-2.5">
+        <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+          Layer & Sampling
         </div>
-      )}
+        <LayerSamplingSummary experimentRuns={experimentRunsWithColor} variants={variantRows} />
+      </div>
 
-      {/* Timeline section */}
       {withDates.length > 0 && (
-        <div className="px-3 py-2.5 space-y-2">
-          <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+        <div className="space-y-2 px-3 py-2.5">
+          <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
             Observation Windows
           </div>
-          <Timeline experimentRuns={experimentRuns.map(e => ({ ...e, colorIdx: colorMap.get(e.id)! }))} isSequential={isSequential} />
+          <Timeline experimentRuns={experimentRunsWithColor} isSequential={isSequential} />
         </div>
       )}
 
-      {/* If all default and no dates: show a plain note */}
-      {isAllDefault && withDates.length === 0 && (
+      {withDates.length === 0 && (
         <div className="px-3 py-2.5">
-          <ExpLegend experimentRuns={experimentRuns.map(e => ({ ...e, colorIdx: colorMap.get(e.id)! }))} variants={variantRows} />
-          <p className="text-[10px] text-muted-foreground/50 italic mt-1.5">
-            All experiment runs use the full traffic pool — set observation windows to visualize the timeline.
+          <p className="text-[10px] italic text-muted-foreground/50">
+            No observation windows.
           </p>
         </div>
       )}
+    </div>
+  );
+}
 
-      {isAllDefault && withDates.length > 0 && (
-        <div className="px-3 py-2.5">
-          <ExpLegend experimentRuns={experimentRuns.map(e => ({ ...e, colorIdx: colorMap.get(e.id)! }))} variants={variantRows} />
+function LayerSamplingSummary({
+  experimentRuns,
+  variants,
+}: {
+  experimentRuns: ExpWithColor[];
+  variants: ReturnType<typeof parseVariantIdentities>;
+}) {
+  const layers = useMemo(() => {
+    const map = new Map<string, ExpWithColor[]>();
+    for (const run of experimentRuns) {
+      const key = run.layerKey?.trim() || run.layerId?.trim() || "default";
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(run);
+    }
+    return Array.from(map.entries());
+  }, [experimentRuns]);
+
+  return (
+    <div className="grid gap-2">
+      {layers.map(([layerKey, runs]) => (
+        <div key={layerKey} className="rounded border bg-background/70 p-2">
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <div className="min-w-0">
+              <div className="truncate font-mono text-[10px] font-semibold">
+                {layerKey}
+              </div>
+            </div>
+            <span className="shrink-0 rounded border px-1.5 py-0.5 text-[10px] text-muted-foreground">
+              {runs.length} run{runs.length === 1 ? "" : "s"}
+            </span>
+          </div>
+          <div className="grid gap-1">
+            {runs.map(run => (
+              <RunSamplingRow key={run.id} run={run} variants={variants} />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function RunSamplingRow({
+  run,
+  variants,
+}: {
+  run: ExpWithColor;
+  variants: ReturnType<typeof parseVariantIdentities>;
+}) {
+  const color = palette(run.colorIdx);
+  const samplingPlan = parseSamplingPlan(run.analysisSamplingPlan);
+  const treatments = splitVariantTokens(run.treatmentVariant);
+
+  return (
+    <div className={`${color.light} rounded border px-2 py-1.5`}>
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+        <div className={`size-2 rounded-sm ${color.dot}`} />
+        <span className={`font-mono text-[10px] font-semibold ${color.text}`}>{run.slug}</span>
+        <span className="text-[10px] text-muted-foreground">
+          layer {fmtPercent(run.layerTrafficPercent)}
+        </span>
+        <span className="text-[10px] text-muted-foreground">
+          unit <span className="font-mono">{run.assignmentUnitSelector || "user.keyId"}</span>
+        </span>
+        {run.method === "bandit" && (
+          <span className="text-[10px] text-amber-600 dark:text-amber-400">bandit</span>
+        )}
+      </div>
+      <div className="mt-1 grid gap-0.5 pl-4 text-[10px]">
+        <VariantIdentityInline
+          token={run.controlVariant}
+          variants={variants}
+          role={run.method === "bandit" ? "Baseline" : "Control"}
+          className="min-w-0"
+        />
+        {treatments.map((variant, index) => (
+          <VariantIdentityInline
+            key={`${variant}-${index}`}
+            token={variant}
+            variants={variants}
+            role={run.method === "bandit" ? "Arm" : "Treatment"}
+            className="min-w-0"
+          />
+        ))}
+      </div>
+      {samplingPlan.length > 0 && (
+        <div className="mt-1 flex flex-wrap gap-1 pl-4">
+          {samplingPlan.map(entry => (
+            <span
+              key={`${entry.variation}-${entry.role}`}
+              className="rounded border bg-background/70 px-1.5 py-0.5 font-mono text-[9px] text-muted-foreground"
+            >
+              {entry.role}: {entry.variation} {fmtPercent(entry.includeRate)}
+            </span>
+          ))}
         </div>
       )}
     </div>
   );
 }
 
-/* ── Bucket bar ── */
-type Segment =
-  | { type: "exp"; exp: ExpWithColor; start: number; end: number }
-  | { type: "gap"; start: number; end: number };
-
-function BucketBar({ experimentRuns }: { experimentRuns: ExpWithColor[] }) {
-  const sorted = [...experimentRuns].sort(
-    (a, b) => (a.trafficOffset ?? 0) - (b.trafficOffset ?? 0)
-  );
-
-  const segments: Segment[] = [];
-  let cursor = 0;
-  for (const exp of sorted) {
-    const start = exp.trafficOffset ?? 0;
-    const end = Math.min(start + (exp.trafficPercent ?? 100), 100);
-    if (start > cursor) segments.push({ type: "gap", start: cursor, end: start });
-    segments.push({ type: "exp", exp, start, end });
-    cursor = end;
-  }
-  if (cursor < 100) segments.push({ type: "gap", start: cursor, end: 100 });
-
-  return (
-    <div>
-      {/* Bar */}
-      <div className="relative h-9 w-full flex rounded overflow-hidden border bg-muted/30">
-        {segments.map((seg, i) => {
-          const w = seg.end - seg.start;
-          if (seg.type === "gap") {
-            return (
-              <div
-                key={i}
-                style={{ width: `${w}%` }}
-                className="flex items-center justify-center border-r border-dashed border-muted-foreground/20 last:border-r-0"
-              >
-                {w >= 8 && (
-                  <span className="text-[9px] text-muted-foreground/30">unallocated</span>
-                )}
-              </div>
-            );
-          }
-          const c = palette(seg.exp.colorIdx);
-          const isBandit = seg.exp.method === "bandit";
-          return (
-            <div
-              key={i}
-              style={{ width: `${w}%` }}
-              className={`${c.light} border-r last:border-r-0 border-muted-foreground/20 relative flex flex-col items-center justify-center overflow-hidden min-w-0`}
-            >
-              {/* 50/50 divider (A/B) or dynamic indicator (bandit) */}
-              {isBandit ? (
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full h-px border-t border-dashed border-muted-foreground/30" />
-                </div>
-              ) : (
-                <div className="absolute inset-y-0 left-1/2 w-px bg-muted-foreground/20" />
-              )}
-              <span className={`text-[9px] font-mono font-semibold ${c.text} relative z-10 truncate px-0.5`}>
-                {w >= 12 ? seg.exp.slug : ""}
-              </span>
-              <span className={`text-[8px] ${c.text} opacity-60 relative z-10`}>
-                [{seg.start}, {seg.end})
-              </span>
-            </div>
-          );
-        })}
-      </div>
-      {/* Tick labels */}
-      <div className="flex justify-between text-[9px] text-muted-foreground/40 mt-0.5 select-none">
-        <span>0</span>
-        <span>50</span>
-        <span>100</span>
-      </div>
-    </div>
-  );
-}
-
-/* ── Timeline / Gantt ── */
 function Timeline({ experimentRuns, isSequential }: { experimentRuns: ExpWithColor[]; isSequential?: boolean }) {
   const [now] = useState(() => Date.now());
-  const withDates = experimentRuns.filter(e => e.observationStart);
+  const withDates = experimentRuns.filter(run => run.observationStart);
   if (withDates.length === 0) return null;
 
-  const starts = withDates.map(e => new Date(e.observationStart!).getTime());
-  const ends = withDates.map(e =>
-    e.observationEnd ? new Date(e.observationEnd).getTime() : now
+  const starts = withDates.map(run => new Date(run.observationStart!).getTime());
+  const ends = withDates.map(run =>
+    run.observationEnd ? new Date(run.observationEnd).getTime() : now,
   );
   const minTime = Math.min(...starts);
   const maxTime = Math.max(...ends);
@@ -211,104 +212,51 @@ function Timeline({ experimentRuns, isSequential }: { experimentRuns: ExpWithCol
 
   return (
     <div className="space-y-1">
-      {/* X-axis */}
-      <div className="flex pl-24 pr-0">
-        <div className="flex-1 flex justify-between text-[9px] text-muted-foreground/40 select-none">
+      <div className="flex pl-24">
+        <div className="flex flex-1 justify-between text-[9px] text-muted-foreground/40">
           <span>{fmtDate(new Date(minTime))}</span>
           <span>{fmtDate(new Date(maxTime))}</span>
         </div>
       </div>
-      {/* Bars */}
-      {withDates.map((exp, i) => {
-        const start = new Date(exp.observationStart!).getTime();
-        const end = exp.observationEnd
-          ? new Date(exp.observationEnd).getTime()
-          : now;
+      {withDates.map((run, index) => {
+        const start = new Date(run.observationStart!).getTime();
+        const end = run.observationEnd ? new Date(run.observationEnd).getTime() : now;
         const leftPct = ((start - minTime) / totalMs) * 100;
         const widthPct = ((end - start) / totalMs) * 100;
-        const isOngoing = !exp.observationEnd;
-        const c = palette(exp.colorIdx);
-        const phaseLabel = isSequential ? `Phase ${i + 1}` : `#${i + 1}`;
+        const isOngoing = !run.observationEnd;
+        const color = palette(run.colorIdx);
+        const phaseLabel = isSequential ? `Phase ${index + 1}` : `#${index + 1}`;
 
         return (
-          <div key={exp.id} className="flex items-center gap-2">
-            <div className="w-28 shrink-0 min-w-0">
+          <div key={run.id} className="flex items-center gap-2">
+            <div className="w-28 min-w-0 shrink-0">
               <div className="flex items-center gap-1.5">
-                <span className="text-[9px] font-medium text-muted-foreground/60 shrink-0">{phaseLabel}</span>
-                <span className="text-[10px] font-mono text-muted-foreground truncate">
-                  {exp.slug}
+                <span className="shrink-0 text-[9px] font-medium text-muted-foreground/60">{phaseLabel}</span>
+                <span className="truncate font-mono text-[10px] text-muted-foreground">
+                  {run.slug}
                 </span>
               </div>
             </div>
-            <div className="relative flex-1 h-5">
-              <div className="absolute inset-0 bg-muted/20 rounded" />
+            <div className="relative h-5 flex-1">
+              <div className="absolute inset-0 rounded bg-muted/20" />
               <div
-                className={`absolute inset-y-0 ${c.bar} rounded opacity-75 ${isOngoing ? "rounded-r-none" : ""}`}
+                className={`absolute inset-y-0 rounded ${color.bar} opacity-75 ${isOngoing ? "rounded-r-none" : ""}`}
                 style={{ left: `${leftPct}%`, width: `${widthPct}%` }}
               >
-                <span className="absolute inset-0 flex items-center justify-center text-[8px] font-medium text-white/90 truncate px-1">
-                  {widthPct > 15 ? `${fmtDate(exp.observationStart)} → ${isOngoing ? "ongoing" : fmtDate(exp.observationEnd)}` : ""}
+                <span className="absolute inset-0 flex items-center justify-center truncate px-1 text-[8px] font-medium text-white/90">
+                  {widthPct > 15 ? `${fmtDate(run.observationStart)} -> ${isOngoing ? "ongoing" : fmtDate(run.observationEnd)}` : ""}
                 </span>
               </div>
               {isOngoing && (
                 <div
-                  className={`absolute inset-y-0 w-1.5 ${c.bar} opacity-40`}
+                  className={`absolute inset-y-0 w-1.5 ${color.bar} opacity-40`}
                   style={{ left: `calc(${leftPct + widthPct}% - 2px)` }}
                 />
               )}
             </div>
-            <span className="text-[9px] text-muted-foreground shrink-0 tabular-nums">
-              {fmtDate(exp.observationStart)} →{" "}
-              {isOngoing ? "ongoing" : fmtDate(exp.observationEnd)}
+            <span className="shrink-0 text-[9px] tabular-nums text-muted-foreground">
+              {fmtDate(run.observationStart)} {"->"} {isOngoing ? "ongoing" : fmtDate(run.observationEnd)}
             </span>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-/* ── Experiment legend ── */
-function ExpLegend({
-  experimentRuns,
-  variants,
-}: {
-  experimentRuns: ExpWithColor[];
-  variants: ReturnType<typeof parseVariantIdentities>;
-}) {
-  return (
-    <div className="grid gap-1">
-      {experimentRuns.map(exp => {
-        const c = palette(exp.colorIdx);
-        const treatments = splitVariantTokens(exp.treatmentVariant);
-        return (
-          <div key={exp.id} className="grid gap-0.5 text-[10px]">
-            <div className="flex items-center gap-1.5">
-              <div className={`size-2 rounded-sm shrink-0 ${c.dot}`} />
-              <span className="font-mono font-medium">{exp.slug}</span>
-              {exp.method === "bandit" && (
-                <span className="text-amber-600 dark:text-amber-400">(bandit)</span>
-              )}
-            </div>
-            {(exp.controlVariant || treatments.length > 0) && (
-              <div className="ml-3 grid gap-0.5">
-                <VariantIdentityInline
-                  token={exp.controlVariant}
-                  variants={variants}
-                  role={exp.method === "bandit" ? "Baseline" : "Control"}
-                  className="min-w-0"
-                />
-                {treatments.map((variant, index) => (
-                  <VariantIdentityInline
-                    key={`${variant}-${index}`}
-                    token={variant}
-                    variants={variants}
-                    role={exp.method === "bandit" ? "Arm" : "Treatment"}
-                    className="min-w-0"
-                  />
-                ))}
-              </div>
-            )}
           </div>
         );
       })}

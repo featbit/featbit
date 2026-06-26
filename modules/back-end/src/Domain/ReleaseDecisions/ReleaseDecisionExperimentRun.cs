@@ -74,6 +74,22 @@ public class ReleaseDecisionExperimentRun : AuditedEntity
 
     public int? TrafficOffset { get; set; } = 0;
 
+    public string LayerKey { get; set; }
+
+    public string AllocationKeySelector { get; set; } = "user.keyId";
+
+    public double? SliceStart { get; set; } = 0;
+
+    public double? SliceEnd { get; set; } = 100;
+
+    public string AllocationPlan { get; set; }
+
+    public string AssignmentUnitSelector { get; set; } = "user.keyId";
+
+    public double? LayerTrafficPercent { get; set; } = 100;
+
+    public string AnalysisSamplingPlan { get; set; }
+
     public string DataSourceMode { get; set; } = "featbit-managed";
 
     public string CustomerEndpointConfig { get; set; }

@@ -80,6 +80,14 @@ export interface ReleaseDecisionExperimentRun {
   primaryMetricType: string | null;
   trafficPercent: number | null;
   layerId: string | null;
+  layerKey: string | null;
+  allocationKeySelector: string | null;
+  sliceStart: number | null;
+  sliceEnd: number | null;
+  allocationPlan: string | null;
+  assignmentUnitSelector: string | null;
+  layerTrafficPercent: number | null;
+  analysisSamplingPlan: string | null;
   audienceFilters: string | null;
   trafficOffset: number | null;
   dataSourceMode: string | null;

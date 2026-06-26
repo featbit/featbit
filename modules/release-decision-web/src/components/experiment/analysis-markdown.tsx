@@ -123,6 +123,18 @@ function pctPlain(v: number | undefined): string {
   return `${(v * 100).toFixed(1)}%`;
 }
 
+function probabilityPct(v: number | undefined): string {
+  if (v === undefined) return "—";
+  if (v <= 0) return "<0.1%";
+  if (v >= 1) return ">99.9%";
+
+  const percent = v * 100;
+  if (percent < 0.1) return "<0.1%";
+  if (percent > 99.9) return ">99.9%";
+
+  return `${percent.toFixed(1)}%`;
+}
+
 function metricValue(row: MetricRow, section: MetricSection): string {
   if (row.mean === undefined) return "—";
 
@@ -511,7 +523,7 @@ function MetricTable({
                     {row.is_control ? "—" : `[${pct(row.ci_lower)}, ${pct(row.ci_upper)}]`}
                   </td>
                   <td className={`px-2 py-1 border-b border-border/50 tabular-nums text-right ${signalClass}`}>
-                    {row.is_control ? "—" : signal !== undefined ? `${signalLabel} ${pctPlain(signal)}` : "—"}
+                    {row.is_control ? "—" : signal !== undefined ? `${signalLabel} ${probabilityPct(signal)}` : "—"}
                   </td>
                 </tr>
               );

@@ -77,6 +77,88 @@ public sealed class ReleaseDecisionProviderParityTests(ReleaseDecisionProviderPa
     }
 
     [Fact]
+    public async Task Experiment_stats_match_variant_cohorts_for_run_traffic_scope()
+    {
+        await fixture.SeedUnbalancedVariantScenarioAsync();
+
+        var request = new QueryExperimentStats
+        {
+            EnvId = ReleaseDecisionProviderParityFixture.EnvId,
+            FlagKey = ReleaseDecisionProviderParityFixture.FlagKey,
+            MetricEvent = ReleaseDecisionProviderParityFixture.MetricEvent,
+            StartDate = "2026-01-01",
+            EndDate = "2026-01-02",
+            MetricType = "binary",
+            MetricAgg = "once",
+            TrafficPercent = 20,
+            TrafficOffset = 0,
+            ControlVariant = "control",
+            TreatmentVariants = "treatment"
+        };
+
+        var results = new List<(string Provider, ExperimentStatsVm Stats)>();
+        foreach (var (provider, service) in fixture.CreateExperimentStatsServices())
+        {
+            results.Add((provider, await service.QueryAsync(request)));
+        }
+
+        var expected = Normalize(results[0].Stats);
+        Assert.Equal(
+            [("control", 100L), ("treatment", 100L)],
+            expected.Variants.Select(x => (x.Variant, x.Users)).ToArray());
+
+        foreach (var result in results.Skip(1))
+        {
+            AssertStatsEqual(results[0].Provider, expected, result.Provider, Normalize(result.Stats));
+        }
+    }
+
+    [Fact]
+    public async Task Experiment_stats_use_run_sampling_plan_analysis_arms()
+    {
+        var runId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+        await fixture.SeedSamplingPlanScenarioAsync(runId);
+
+        const string samplingPlan = """
+            [
+              { "variation": "control", "role": "control", "includeRate": 11.111111 },
+              { "variation": "treatment", "role": "treatment", "includeRate": 100 }
+            ]
+            """;
+
+        var request = new QueryExperimentStats
+        {
+            RunId = runId,
+            EnvId = ReleaseDecisionProviderParityFixture.EnvId,
+            FlagKey = ReleaseDecisionProviderParityFixture.FlagKey,
+            MetricEvent = ReleaseDecisionProviderParityFixture.MetricEvent,
+            StartDate = "2026-01-01",
+            EndDate = "2026-01-02",
+            MetricType = "binary",
+            MetricAgg = "once",
+            AssignmentUnitSelector = "user.keyId",
+            LayerTrafficPercent = 100,
+            AnalysisSamplingPlan = samplingPlan
+        };
+
+        var results = new List<(string Provider, ExperimentStatsVm Stats)>();
+        foreach (var (provider, service) in fixture.CreateExperimentStatsServices())
+        {
+            results.Add((provider, await service.QueryAsync(request)));
+        }
+
+        var expected = Normalize(results[0].Stats);
+        Assert.Equal(
+            [("control", 80L), ("treatment", 80L)],
+            expected.Variants.Select(x => (x.Variant, x.Users)).ToArray());
+
+        foreach (var result in results.Skip(1))
+        {
+            AssertStatsEqual(results[0].Provider, expected, result.Provider, Normalize(result.Stats));
+        }
+    }
+
+    [Fact]
     public async Task Feature_flag_insight_buckets_are_consistent_across_providers()
     {
         await fixture.SeedScenarioAsync();

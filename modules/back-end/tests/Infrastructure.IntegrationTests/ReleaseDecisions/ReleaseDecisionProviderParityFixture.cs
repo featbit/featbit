@@ -5,6 +5,7 @@ using Dapper;
 using Domain.EndUsers;
 using Domain.FeatureFlags;
 using Domain.ReleaseDecisions;
+using Domain.Targeting;
 using Infrastructure.OLAP.ClickHouse;
 using Infrastructure.Persistence.EntityFrameworkCore;
 using Infrastructure.Persistence.MongoDb;
@@ -80,7 +81,159 @@ public sealed class ReleaseDecisionProviderParityFixture : IAsyncLifetime
         await SeedPostgresAsync(exposures, metrics, users);
         await SeedMongoAsync(exposures, metrics, users);
         await SeedClickHouseAsync(exposures, metrics, users);
-        await ValidateClickHouseSeedAsync(exposures.Length, metrics.Length);
+        await ValidateClickHouseSeedAsync(
+            exposures.Length,
+            metrics.Length,
+            exposures.Count(x => x.FlagKey == FlagKey));
+    }
+
+    public async Task SeedUnbalancedVariantScenarioAsync()
+    {
+        await ClearAsync();
+
+        var createdAt = DateTimeOffset.Parse("2026-01-01T00:00:00Z");
+        var exposures = new List<ScenarioExposure>();
+        var metrics = new List<ScenarioMetric>();
+        var users = new List<ScenarioUser>();
+        var sequence = 1;
+        var metricSequence = 1;
+
+        AddUsers("control", "control", count: 900);
+        AddUsers("treatment", "treatment", count: 100);
+
+        await SeedPostgresAsync(exposures, metrics, users);
+        await SeedMongoAsync(exposures, metrics, users);
+        await SeedClickHouseAsync(exposures, metrics, users);
+        await ValidateClickHouseSeedAsync(exposures.Count, metrics.Count, exposures.Count);
+        return;
+
+        void AddUsers(string prefix, string variationId, int count)
+        {
+            for (var i = 1; i <= count; i++)
+            {
+                var userKey = $"{prefix}-{i:000}";
+                var exposedAt = DateTimeOffset.Parse("2026-01-01T01:00:00Z").AddSeconds(sequence);
+                users.Add(new ScenarioUser(EnvId, userKey, userKey));
+                exposures.Add(new ScenarioExposure(
+                    GuidFromSequence(sequence++),
+                    EnvId,
+                    FlagKey,
+                    userKey,
+                    variationId,
+                    variationId,
+                    exposedAt,
+                    createdAt));
+                metrics.Add(new ScenarioMetric(
+                    MetricGuidFromSequence(metricSequence++),
+                    EnvId,
+                    userKey,
+                    MetricEvent,
+                    "CustomEvent",
+                    1,
+                    exposedAt.AddMinutes(1),
+                    createdAt));
+            }
+        }
+    }
+
+    public async Task SeedSamplingPlanScenarioAsync(Guid runId)
+    {
+        await ClearAsync();
+
+        var createdAt = DateTimeOffset.Parse("2026-01-01T00:00:00Z");
+        var exposures = new List<ScenarioExposure>();
+        var metrics = new List<ScenarioMetric>();
+        var users = new List<ScenarioUser>();
+        var sequence = 1;
+        var metricSequence = 1;
+        var sampledControl = 0;
+        var sampledTreatment = 0;
+        var excludedControl = 0;
+        var candidate = 1;
+        var samplingScope = runId.ToString("N") + ":";
+
+        while (sampledControl < 80 || sampledTreatment < 80 || excludedControl < 100)
+        {
+            var userKey = $"sampling-{candidate++:000000}";
+            var controlBucket = DispatchAlgorithm.RolloutOfKey($"{samplingScope}control:{userKey}") * 100;
+
+            if (controlBucket < 11.111111 && sampledControl < 80)
+            {
+                AddUser(userKey, "control", duplicateExposure: sampledControl < 5);
+                sampledControl++;
+            }
+            else if (sampledTreatment < 80)
+            {
+                AddUser(userKey, "treatment", duplicateExposure: sampledTreatment < 5);
+                sampledTreatment++;
+            }
+            else if (controlBucket >= 11.111111 && excludedControl < 100)
+            {
+                AddUser(userKey, "control");
+                excludedControl++;
+            }
+        }
+
+        await SeedPostgresAsync(exposures, metrics, users);
+        await SeedMongoAsync(exposures, metrics, users);
+        await SeedClickHouseAsync(exposures, metrics, users);
+        await ValidateClickHouseSeedAsync(exposures.Count, metrics.Count, exposures.Count);
+        return;
+
+        void AddUser(string userKey, string variationId, bool duplicateExposure = false)
+        {
+            var exposedAt = DateTimeOffset.Parse("2026-01-01T01:00:00Z").AddSeconds(sequence);
+            users.Add(new ScenarioUser(EnvId, userKey, userKey));
+
+            exposures.Add(new ScenarioExposure(
+                GuidFromSequence(sequence++),
+                EnvId,
+                FlagKey,
+                userKey,
+                variationId,
+                variationId,
+                exposedAt,
+                createdAt));
+            if (duplicateExposure)
+            {
+                exposures.Add(new ScenarioExposure(
+                    GuidFromSequence(sequence++),
+                    EnvId,
+                    FlagKey,
+                    userKey,
+                    variationId,
+                    variationId,
+                    exposedAt.AddMilliseconds(1),
+                    createdAt));
+            }
+            metrics.Add(new ScenarioMetric(
+                MetricGuidFromSequence(metricSequence++),
+                EnvId,
+                userKey,
+                MetricEvent,
+                "CustomEvent",
+                1,
+                exposedAt.AddMinutes(-1),
+                createdAt));
+            metrics.Add(new ScenarioMetric(
+                MetricGuidFromSequence(metricSequence++),
+                EnvId,
+                userKey,
+                MetricEvent,
+                "CustomEvent",
+                1,
+                exposedAt.AddMinutes(1),
+                createdAt));
+            metrics.Add(new ScenarioMetric(
+                MetricGuidFromSequence(metricSequence++),
+                EnvId,
+                userKey,
+                MetricEvent,
+                "CustomEvent",
+                1,
+                exposedAt.AddMinutes(2),
+                createdAt));
+        }
     }
 
     public (string Name, IExperimentStatsService Service)[] CreateExperimentStatsServices()
@@ -158,7 +311,7 @@ public sealed class ReleaseDecisionProviderParityFixture : IAsyncLifetime
         await connection.ExecuteAsync("""
             CREATE TABLE IF NOT EXISTS release_decision_exposure_events
             (
-                id uuid primary key,
+                id uuid primary key default gen_random_uuid(),
                 env_id uuid not null,
                 flag_key varchar(256) not null,
                 user_key varchar(512) not null,
@@ -188,6 +341,36 @@ public sealed class ReleaseDecisionProviderParityFixture : IAsyncLifetime
                 key_id varchar(512) not null,
                 name varchar(256) not null
             );
+
+            CREATE TABLE IF NOT EXISTS release_decision_run_assignments
+            (
+                id uuid primary key,
+                run_id uuid not null,
+                env_id uuid not null,
+                flag_key varchar(256) not null,
+                allocation_key varchar(512) not null,
+                assignment_unit varchar(512) not null,
+                user_key varchar(512) not null,
+                expected_variation_id varchar(256) not null,
+                actual_variation_id varchar(256) not null,
+                role varchar(64) not null,
+                analysis_role varchar(64) not null,
+                bucket double precision not null,
+                layer_bucket double precision null,
+                sampling_bucket double precision null,
+                included_by_sampling boolean not null default true,
+                exclusion_reason varchar(64) null,
+                assigned_at timestamp with time zone not null,
+                first_exposed_at timestamp with time zone null,
+                created_at timestamp with time zone not null,
+                updated_at timestamp with time zone not null
+            );
+
+            CREATE UNIQUE INDEX IF NOT EXISTS ix_release_decision_run_assignments_run_allocation
+                ON release_decision_run_assignments (run_id, allocation_key);
+
+            CREATE UNIQUE INDEX IF NOT EXISTS ix_release_decision_run_assignments_run_assignment_unit
+                ON release_decision_run_assignments (run_id, assignment_unit);
             """);
     }
 
@@ -246,6 +429,7 @@ public sealed class ReleaseDecisionProviderParityFixture : IAsyncLifetime
                 TRUNCATE TABLE release_decision_exposure_events;
                 TRUNCATE TABLE release_decision_metric_events;
                 TRUNCATE TABLE end_users;
+                TRUNCATE TABLE release_decision_run_assignments;
                 """);
         }
 
@@ -270,14 +454,14 @@ public sealed class ReleaseDecisionProviderParityFixture : IAsyncLifetime
             INSERT INTO release_decision_exposure_events
                 (id, env_id, flag_key, user_key, variation_id, variation_value, exposed_at, properties, created_at)
             VALUES
-                (@Id, @EnvId, @FlagKey, @UserKey, @VariationId, @VariationValue, @ExposedAt, '{}'::jsonb, @CreatedAt)
+                (@Id, @EnvId, @FlagKey, @UserKey, @VariationId, @VariationValue, @ExposedAt, @Properties::jsonb, @CreatedAt)
             """, exposures);
 
         await connection.ExecuteAsync("""
             INSERT INTO release_decision_metric_events
                 (id, env_id, user_key, event_name, event_type, numeric_value, occurred_at, properties, created_at)
             VALUES
-                (@Id, @EnvId, @UserKey, @EventName, @EventType, @NumericValue, @OccurredAt, '{}'::jsonb, @CreatedAt)
+                (@Id, @EnvId, @UserKey, @EventName, @EventType, @NumericValue, @OccurredAt, @Properties::jsonb, @CreatedAt)
             """, metrics);
 
         await connection.ExecuteAsync("""
@@ -303,7 +487,7 @@ public sealed class ReleaseDecisionProviderParityFixture : IAsyncLifetime
                 VariationId = x.VariationId,
                 VariationValue = x.VariationValue,
                 ExposedAt = x.ExposedAt.UtcDateTime,
-                Properties = "{}",
+                Properties = x.Properties,
                 CreatedAt = x.CreatedAt.UtcDateTime
             }));
 
@@ -317,7 +501,7 @@ public sealed class ReleaseDecisionProviderParityFixture : IAsyncLifetime
                 EventType = x.EventType,
                 NumericValue = x.NumericValue,
                 OccurredAt = x.OccurredAt.UtcDateTime,
-                Properties = "{}",
+                Properties = x.Properties,
                 CreatedAt = x.CreatedAt.UtcDateTime
             }));
 
@@ -350,7 +534,7 @@ public sealed class ReleaseDecisionProviderParityFixture : IAsyncLifetime
                      {ChString(exposure.VariationId)},
                      {ChString(exposure.VariationValue)},
                      {ChDateTime64(exposure.ExposedAt)},
-                     {ChString("{}")},
+                     {ChString(exposure.Properties)},
                      {ChDateTime64(exposure.CreatedAt)})
                     """;
             });
@@ -377,7 +561,7 @@ public sealed class ReleaseDecisionProviderParityFixture : IAsyncLifetime
                      {ChString(metric.EventType)},
                      {metric.NumericValue.ToString(System.Globalization.CultureInfo.InvariantCulture)},
                      {ChDateTime64(metric.OccurredAt)},
-                     {ChString("{}")},
+                     {ChString(metric.Properties)},
                      {ChDateTime64(metric.CreatedAt)})
                     """;
             });
@@ -391,7 +575,10 @@ public sealed class ReleaseDecisionProviderParityFixture : IAsyncLifetime
         }
     }
 
-    private async Task ValidateClickHouseSeedAsync(int expectedExposures, int expectedMetrics)
+    private async Task ValidateClickHouseSeedAsync(
+        int expectedExposures,
+        int expectedMetrics,
+        int expectedFlagExposures)
     {
         var clickHouse = CreateClickHouseClient();
         var exposureCount = await clickHouse.QueryAsync<CountRow>(
@@ -420,7 +607,7 @@ public sealed class ReleaseDecisionProviderParityFixture : IAsyncLifetime
                 $"actual {exposureCount.Single().Count} exposures and {metricCount.Single().Count} metrics.");
         }
 
-        if (filteredExposureCount.Single().Count != Scenario.Exposures.Count(x => x.FlagKey == FlagKey))
+        if (filteredExposureCount.Single().Count != expectedFlagExposures)
         {
             var sample = await clickHouse.QueryAsync<ExposureSampleRow>("""
                 SELECT
@@ -432,13 +619,19 @@ public sealed class ReleaseDecisionProviderParityFixture : IAsyncLifetime
                 LIMIT 1
                 """);
             throw new InvalidOperationException(
-                $"ClickHouse filtered seed check failed. Expected {Scenario.Exposures.Count(x => x.FlagKey == FlagKey)} " +
+                $"ClickHouse filtered seed check failed. Expected {expectedFlagExposures} " +
                 $"matching exposures, actual {filteredExposureCount.Single().Count}. " +
                 $"Env/flag count {envFlagExposureCount.Single().Count}. " +
                 $"Sample: {sample.SingleOrDefault()?.EnvId}, {sample.SingleOrDefault()?.FlagKey}, " +
                 $"{sample.SingleOrDefault()?.ExposedAt}, {sample.SingleOrDefault()?.ExposedAtMs}.");
         }
     }
+
+    private static Guid GuidFromSequence(int sequence) =>
+        Guid.Parse($"00000000-0000-0000-0000-{sequence:000000000000}");
+
+    private static Guid MetricGuidFromSequence(int sequence) =>
+        Guid.Parse($"10000000-0000-0000-0000-{sequence:000000000000}");
 
     private static string ChString(string value)
     {
@@ -624,7 +817,8 @@ public sealed record ScenarioExposure(
     string VariationId,
     string VariationValue,
     DateTimeOffset ExposedAt,
-    DateTimeOffset CreatedAt);
+    DateTimeOffset CreatedAt,
+    string Properties = "{}");
 
 public sealed record ScenarioMetric(
     Guid Id,
@@ -634,4 +828,5 @@ public sealed record ScenarioMetric(
     string EventType,
     double NumericValue,
     DateTimeOffset OccurredAt,
-    DateTimeOffset CreatedAt);
+    DateTimeOffset CreatedAt,
+    string Properties = "{}");

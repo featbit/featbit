@@ -4,16 +4,29 @@ namespace Application.ExperimentStats;
 
 public class QueryExperimentStats : IRequest<ExperimentStatsVm>
 {
+    public Guid? RunId { get; set; }
     public Guid EnvId { get; set; }
     public string FlagKey { get; set; }
     public string MetricEvent { get; set; }
     public string StartDate { get; set; }
     public string EndDate { get; set; }
+    public DateTime? StartTime { get; set; }
+    public DateTime? EndTime { get; set; }
     public string MetricType { get; set; }
     public string MetricAgg { get; set; }
     public double? TrafficPercent { get; set; }
     public int? TrafficOffset { get; set; }
     public string LayerId { get; set; }
+    public string ControlVariant { get; set; }
+    public string TreatmentVariants { get; set; }
+    public string LayerKey { get; set; }
+    public string AllocationKeySelector { get; set; }
+    public double? SliceStart { get; set; }
+    public double? SliceEnd { get; set; }
+    public string AllocationPlan { get; set; }
+    public string AssignmentUnitSelector { get; set; }
+    public double? LayerTrafficPercent { get; set; }
+    public string AnalysisSamplingPlan { get; set; }
 }
 
 public class QueryExperimentStatsValidator : AbstractValidator<QueryExperimentStats>
@@ -57,6 +70,22 @@ public class QueryExperimentStatsValidator : AbstractValidator<QueryExperimentSt
         RuleFor(x => x.TrafficOffset)
             .InclusiveBetween(0, 99).WithErrorCode(ErrorCodes.Invalid("trafficOffset"))
             .When(x => x.TrafficOffset.HasValue);
+
+        RuleFor(x => x.SliceStart)
+            .InclusiveBetween(0, 100).WithErrorCode(ErrorCodes.Invalid("sliceStart"))
+            .When(x => x.SliceStart.HasValue);
+
+        RuleFor(x => x.SliceEnd)
+            .InclusiveBetween(0, 100).WithErrorCode(ErrorCodes.Invalid("sliceEnd"))
+            .When(x => x.SliceEnd.HasValue);
+
+        RuleFor(x => x)
+            .Must(x => !x.SliceStart.HasValue || !x.SliceEnd.HasValue || x.SliceEnd > x.SliceStart)
+            .WithErrorCode(ErrorCodes.Invalid("sliceEnd"));
+
+        RuleFor(x => x.LayerTrafficPercent)
+            .InclusiveBetween(0.000001d, 100d).WithErrorCode(ErrorCodes.Invalid("layerTrafficPercent"))
+            .When(x => x.LayerTrafficPercent.HasValue);
     }
 
     private static bool BeDateOnly(string value)

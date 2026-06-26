@@ -173,6 +173,14 @@ export async function updateExperimentRunAudienceAction(formData: FormData) {
   const trafficPercentRaw = formData.get("trafficPercent") as string;
   const trafficOffsetRaw = formData.get("trafficOffset") as string;
   const layerId = formData.get("layerId") as string | null;
+  const layerKey = formData.get("layerKey") as string | null;
+  const allocationKeySelector = formData.get("allocationKeySelector") as string | null;
+  const assignmentUnitSelector = formData.get("assignmentUnitSelector") as string | null;
+  const layerTrafficPercentRaw = formData.get("layerTrafficPercent") as string | null;
+  const analysisSamplingPlan = formData.get("analysisSamplingPlan") as string | null;
+  const sliceStartRaw = formData.get("sliceStart") as string | null;
+  const sliceEndRaw = formData.get("sliceEnd") as string | null;
+  const allocationPlan = formData.get("allocationPlan") as string | null;
   const audienceFilters = formData.get("audienceFilters") as string | null;
   const methodRaw = formData.get("method") as string | null;
   const controlVariant = formData.get("controlVariant") as string | null;
@@ -180,17 +188,41 @@ export async function updateExperimentRunAudienceAction(formData: FormData) {
 
   const trafficPercent = parseFloat(trafficPercentRaw);
   const trafficOffset = parseInt(trafficOffsetRaw, 10);
+  const sliceStart = parseFloat(sliceStartRaw ?? "");
+  const sliceEnd = parseFloat(sliceEndRaw ?? "");
+  const layerTrafficPercent = parseFloat(layerTrafficPercentRaw ?? "");
   const method = methodRaw === "bandit" ? "bandit" : "bayesian_ab";
-
-  await updateExperimentRun(experimentId, experimentRunId, {
-    trafficPercent: isNaN(trafficPercent) ? 100 : Math.min(100, Math.max(1, trafficPercent)),
-    trafficOffset: isNaN(trafficOffset) ? 0 : Math.min(99, Math.max(0, trafficOffset)),
+  const update: Record<string, unknown> = {
     layerId: layerId?.trim() || null,
+    layerKey: layerKey?.trim() || layerId?.trim() || null,
+    allocationKeySelector: allocationKeySelector?.trim() || "user.keyId",
+    assignmentUnitSelector:
+      assignmentUnitSelector?.trim() || allocationKeySelector?.trim() || "user.keyId",
+    layerTrafficPercent: isNaN(layerTrafficPercent)
+      ? 100
+      : Math.min(100, Math.max(0.000001, layerTrafficPercent)),
+    allocationPlan: allocationPlan?.trim() || null,
+    analysisSamplingPlan: analysisSamplingPlan?.trim() || null,
     audienceFilters: audienceFilters?.trim() || null,
     method,
     controlVariant: controlVariant?.trim() || null,
     treatmentVariant: treatmentVariant?.trim() || null,
-  });
+  };
+
+  if (formData.has("trafficPercent")) {
+    update.trafficPercent = isNaN(trafficPercent) ? 100 : Math.min(100, Math.max(1, trafficPercent));
+  }
+  if (formData.has("trafficOffset")) {
+    update.trafficOffset = isNaN(trafficOffset) ? 0 : Math.min(99, Math.max(0, trafficOffset));
+  }
+  if (formData.has("sliceStart")) {
+    update.sliceStart = isNaN(sliceStart) ? 0 : Math.min(100, Math.max(0, sliceStart));
+  }
+  if (formData.has("sliceEnd")) {
+    update.sliceEnd = isNaN(sliceEnd) ? 100 : Math.min(100, Math.max(0, sliceEnd));
+  }
+
+  await updateExperimentRun(experimentId, experimentRunId, update);
 
   await addActivity(experimentId, {
     type: "note",
