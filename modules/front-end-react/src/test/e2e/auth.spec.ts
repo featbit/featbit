@@ -56,7 +56,7 @@ test.describe("login page", () => {
     await expect(page).toHaveURL(/\/en\/app$/);
     await expect(page.getByText("Console content will be added in the next migration steps.")).toBeVisible();
     await expect(page.getByText("Acme Corp")).toBeVisible();
-    await expect(page.getByLabel("Free Plan, Upgrade Now")).toBeVisible();
+    await expect(page.getByLabel("Current Plan, Pro")).toBeVisible();
     await expect(page.evaluate(() => localStorage.getItem("token"))).resolves.toBe("e2e-token");
     await expect(page.evaluate(() => localStorage.getItem("remembered-email"))).resolves.toBe("test@featbit.com");
   });

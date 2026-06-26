@@ -1,15 +1,14 @@
 import {
-  Activity,
   BarChart3,
-  BellRing,
   BookOpen,
   Boxes,
   Building2,
   Check,
   ChevronDown,
+  ChevronRight,
   ChevronUp,
   ChevronsUpDown,
-  CircleDollarSign,
+  Award,
   ExternalLink,
   Flag,
   FlaskConical,
@@ -24,14 +23,16 @@ import {
   Moon,
   PanelLeftClose,
   PanelLeftOpen,
-  Puzzle,
   Rocket,
   Search,
   ShieldCheck,
   Sun,
   User,
+  UserRound,
+  UserRoundKey,
   UsersRound,
-  Waypoints
+  Waypoints,
+  Webhook
 } from "lucide-react";
 import { useMemo, useState, type ComponentType, type SVGProps } from "react";
 import { Link, Outlet, useNavigate, useParams } from "react-router-dom";
@@ -64,6 +65,7 @@ type NavItem = {
   href: string;
   icon: Icon;
   active?: boolean;
+  children?: NavItem[];
 };
 
 type NavGroup = {
@@ -105,13 +107,6 @@ const navigationGroups: NavGroup[] = [
     ]
   },
   {
-    label: "Experimentation",
-    items: [
-      { label: "Experiments", href: "/app/experiments", icon: FlaskConical },
-      { label: "Metrics", href: "/app/metrics", icon: BarChart3 }
-    ]
-  },
-  {
     label: "Governance",
     items: [
       { label: "Audit Logs", href: "/app/audit-logs", icon: Logs },
@@ -119,13 +114,35 @@ const navigationGroups: NavGroup[] = [
     ]
   },
   {
+    label: "Experimentation",
+    items: [
+      { label: "Experiments", href: "/app/experiments", icon: FlaskConical },
+      { label: "Metrics", href: "/app/metrics", icon: BarChart3 }
+    ]
+  },
+  {
+    label: "Integrations",
+    items: [
+      { label: "Relay Proxies", href: "/app/relay-proxies", icon: Waypoints },
+      { label: "WebHooks", href: "/app/webhooks", icon: Webhook },
+      { label: "Access Tokens", href: "/app/access-tokens", icon: KeyRound }
+    ]
+  },
+  {
     label: "Admin",
     items: [
       { label: "Workspace", href: "/app/workspace", icon: Building2 },
       { label: "Organization", href: "/app/organization", icon: Boxes },
-      { label: "IAM", href: "/app/iam", icon: ShieldCheck },
-      { label: "Relay Proxies", href: "/app/relay-proxies", icon: Waypoints },
-      { label: "Integrations", href: "/app/integrations", icon: Puzzle }
+      {
+        label: "IAM",
+        href: "/app/iam",
+        icon: ShieldCheck,
+        children: [
+          { label: "Teams", href: "/app/iam/teams", icon: UserRound },
+          { label: "Groups", href: "/app/iam/groups", icon: UsersRound },
+          { label: "Policies", href: "/app/iam/policies", icon: UserRoundKey }
+        ]
+      }
     ]
   }
 ];
@@ -154,13 +171,24 @@ function FeatBitBrand({ collapsed }: { collapsed: boolean }) {
   );
 }
 
-function SidebarNavItem({ item, lang, collapsed }: { item: NavItem; lang: Lang; collapsed: boolean }) {
+function SidebarNavLink({
+  item,
+  lang,
+  collapsed,
+  secondary = false
+}: {
+  item: NavItem;
+  lang: Lang;
+  collapsed: boolean;
+  secondary?: boolean;
+}) {
   const Icon = item.icon;
   const content = (
     <Link
       to={localizedPath(lang, item.href)}
       className={cn(
         "flex h-9 items-center gap-3 rounded-md px-3 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground",
+        secondary && "h-8 pl-9 text-xs",
         item.active && "bg-accent text-foreground",
         collapsed && "justify-center px-0"
       )}
@@ -183,6 +211,71 @@ function SidebarNavItem({ item, lang, collapsed }: { item: NavItem; lang: Lang; 
   );
 }
 
+function SidebarNavItem({
+  item,
+  lang,
+  collapsed,
+  expanded,
+  onToggle
+}: {
+  item: NavItem;
+  lang: Lang;
+  collapsed: boolean;
+  expanded: boolean;
+  onToggle: () => void;
+}) {
+  const Icon = item.icon;
+
+  if (!item.children?.length) {
+    return <SidebarNavLink item={item} lang={lang} collapsed={collapsed} />;
+  }
+
+  const parentButton = (
+    <button
+      type="button"
+      className={cn(
+        "flex h-9 w-full cursor-pointer items-center gap-3 rounded-md px-3 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground",
+        collapsed && "justify-center px-0"
+      )}
+      aria-expanded={expanded}
+      aria-label={collapsed ? item.label : undefined}
+      onClick={onToggle}
+    >
+      <Icon className="h-4 w-4 shrink-0" />
+      {!collapsed ? <span className="min-w-0 flex-1 truncate text-left">{item.label}</span> : null}
+      {!collapsed ? (
+        expanded ? (
+          <ChevronUp className="h-3.5 w-3.5 shrink-0" />
+        ) : (
+          <ChevronDown className="h-3.5 w-3.5 shrink-0" />
+        )
+      ) : null}
+    </button>
+  );
+
+  if (collapsed) {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>{parentButton}</TooltipTrigger>
+        <TooltipContent side="right">{item.label}</TooltipContent>
+      </Tooltip>
+    );
+  }
+
+  return (
+    <div className="space-y-1">
+      {parentButton}
+      {expanded ? (
+        <div className="space-y-1">
+          {item.children.map((child) => (
+            <SidebarNavLink key={child.label} item={child} lang={lang} collapsed={false} secondary />
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 function Sidebar({
   lang,
   collapsed,
@@ -192,6 +285,17 @@ function Sidebar({
   collapsed: boolean;
   setCollapsed: (collapsed: boolean) => void;
 }) {
+  const [expandedNav, setExpandedNav] = useState<Record<string, boolean>>({
+    Integrations: true
+  });
+
+  function toggleNavItem(label: string) {
+    setExpandedNav((current) => ({
+      ...current,
+      [label]: !current[label]
+    }));
+  }
+
   return (
     <aside
       className={cn(
@@ -240,7 +344,14 @@ function Sidebar({
                 </h2>
               ) : null}
               {group.items.map((item) => (
-                <SidebarNavItem key={item.label} item={item} lang={lang} collapsed={collapsed} />
+                <SidebarNavItem
+                  key={item.label}
+                  item={item}
+                  lang={lang}
+                  collapsed={collapsed}
+                  expanded={Boolean(expandedNav[item.label])}
+                  onToggle={() => toggleNavItem(item.label)}
+                />
               ))}
             </section>
           ))}
@@ -257,14 +368,14 @@ function PlanBadge() {
     <Link
       to="#billing"
       className="flex h-11 items-center gap-3 rounded-md border border-border bg-card px-3 text-left shadow-sm transition-colors hover:bg-accent"
-      aria-label="Free Plan, Upgrade Now"
+      aria-label="Current Plan, Pro"
     >
-      <CircleDollarSign className="h-4 w-4 text-muted-foreground" />
+      <Award className="h-5 w-5 text-blue-600" />
       <span className="leading-tight">
-        <span className="block text-xs font-medium text-foreground">Free Plan</span>
-        <span className="block text-[0.68rem] text-muted-foreground">Upgrade Now</span>
+        <span className="block text-xs font-medium text-foreground">Current Plan</span>
+        <span className="block text-[0.68rem] font-semibold text-foreground">Pro</span>
       </span>
-      <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+      <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
     </Link>
   );
 }
@@ -399,13 +510,13 @@ function AccountMenu({ lang, collapsed }: { lang: Lang; collapsed: boolean }) {
     <button
       type="button"
       className={cn(
-        "flex w-full items-center gap-3 rounded-md p-2 text-left transition-colors hover:bg-accent",
+        "flex w-full cursor-pointer items-center gap-3 rounded-md p-2 text-left transition-colors hover:bg-accent",
         collapsed && "justify-center"
       )}
       aria-label="Account"
     >
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-secondary text-sm font-medium">
-        {collapsed ? initials : <User className="h-4 w-4" />}
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary text-sm font-medium">
+        {initials}
       </span>
       {!collapsed ? (
         <span className="min-w-0 flex-1">

@@ -31,7 +31,7 @@ describe("App scaffold", () => {
 
     render(<App />);
 
-    expect(await screen.findByLabelText("Free Plan, Upgrade Now")).toBeInTheDocument();
+    expect(await screen.findByLabelText("Current Plan, Pro")).toBeInTheDocument();
     expect(screen.getByText("Acme Corp")).toBeInTheDocument();
     expect(screen.getByText("Feature Flags")).toBeInTheDocument();
     expect(screen.getByText("Console content will be added in the next migration steps.")).toBeInTheDocument();

@@ -9,9 +9,19 @@ test.describe("console shell", () => {
     await page.goto("/en/app");
 
     await expect(page.getByText("Shell User")).toBeVisible();
+    await expect(page.getByRole("link", { name: "Teams" })).toHaveCount(0);
+    await page.getByRole("button", { name: "IAM" }).click();
+    await expect(page.getByRole("link", { name: "Teams" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Groups" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Policies" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "WebHooks" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Access Tokens" })).toBeVisible();
+
     await page.getByRole("button", { name: "Collapse sidebar" }).click();
 
     await expect(page.getByText("Feature Flags")).toHaveCount(0);
+    await expect(page.getByText("Teams")).toHaveCount(0);
+    await expect(page.getByText("WebHooks")).toHaveCount(0);
     await expect(page.evaluate(() => localStorage.getItem("featbit:sidebar-collapsed"))).resolves.toBe("true");
 
     await page.reload();
