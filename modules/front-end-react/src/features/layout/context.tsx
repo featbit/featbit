@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { Award, Building2, Check, ChevronRight, ChevronsUpDown, Search } from "lucide-react";
+import { Award, Check, ChevronRight, ChevronsUpDown, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
@@ -507,7 +507,6 @@ export function ContextBar({
 
   return (
     <div className="flex min-w-0 flex-1 items-center gap-2 text-sm">
-      <Building2 className="h-4 w-4 shrink-0 text-muted-foreground" />
       <span className="truncate font-medium">{organization.name}</span>
       <span className="text-muted-foreground">/</span>
       <span className="truncate font-medium">{currentProjectEnv.projectName}</span>
