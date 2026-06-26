@@ -10,7 +10,7 @@ try
         .WriteTo.Console()
         .CreateBootstrapLogger();
 
-    Log.Information("Starting Evaluation Server");
+    Log.Information("Starting Evaluation Server (version: {Version})", Environment.GetEnvironmentVariable("VERSION") ?? "dev");
 
     WebApplication.CreateBuilder(args)
         .RegisterServices()
