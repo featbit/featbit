@@ -1,14 +1,25 @@
 ﻿import { expect, test } from "@playwright/test";
-import { mockRuntimeEnv, setAuthenticatedUser } from "./helpers";
+import {
+  mockContextEndpoints,
+  mockContextEndpointsWithExpiredAccessToken,
+  mockRuntimeEnv,
+  setAuthenticatedUser,
+  setCurrentContext
+} from "./helpers";
 
 test.describe("layout", () => {
   test("persists sidebar collapse and exposes account preferences", async ({ page }) => {
     await mockRuntimeEnv(page, { VERSION: "2026.06.25" });
+    await mockContextEndpoints(page);
     await setAuthenticatedUser(page);
+    await setCurrentContext(page);
 
     await page.goto("/en/app");
 
     await expect(page.getByText("Layout User")).toBeVisible();
+    await expect(page.getByText("Acme Corp")).toBeVisible();
+    await expect(page.getByText("Commerce Apps")).toBeVisible();
+    await expect(page.getByRole("button", { name: /生产环境/ })).toBeVisible();
     await expect(page.getByRole("link", { name: "Teams" })).toHaveCount(0);
     await page.getByRole("button", { name: "IAM" }).click();
     await expect(page.getByRole("link", { name: "Teams" })).toBeVisible();
@@ -37,8 +48,58 @@ test.describe("layout", () => {
     await expect(page.getByText("System")).toBeVisible();
   });
 
-  test("renders layout labels in Chinese for zh routes", async ({ page }) => {
+  test("switches project and environment using real project data", async ({ page }) => {
+    await mockContextEndpoints(page);
     await setAuthenticatedUser(page);
+    await setCurrentContext(page);
+
+    await page.goto("/en/app");
+
+    await page.getByRole("button", { name: /生产环境/ }).click();
+    await expect(page.getByText("Growth Platform")).toBeVisible();
+    await page.getByRole("menuitem", { name: "预发布环境" }).click();
+
+    await expect(page.getByText("Growth Platform")).toBeVisible();
+    await expect(page.getByRole("button", { name: /预发布环境/ })).toBeVisible();
+    await expect(page.evaluate(() => JSON.parse(localStorage.getItem("current-project_test-user-id") ?? "{}"))).resolves.toMatchObject({
+      projectId: "project-growth",
+      projectName: "Growth Platform",
+      envId: "env-staging-growth",
+      envName: "预发布环境"
+    });
+  });
+
+  test("keeps focus in the project and environment search field while typing", async ({ page }) => {
+    await mockContextEndpoints(page);
+    await setAuthenticatedUser(page);
+    await setCurrentContext(page);
+
+    await page.goto("/en/app");
+
+    await page.getByRole("button", { name: /生产环境/ }).click();
+    const searchInput = page.getByPlaceholder("Search environments");
+    await searchInput.fill("P");
+
+    await expect(searchInput).toBeFocused();
+    await expect(searchInput).toHaveValue("P");
+  });
+
+  test("refreshes an expired access token before loading context data", async ({ page }) => {
+    await mockContextEndpointsWithExpiredAccessToken(page);
+    await setAuthenticatedUser(page, { token: "expired-token" });
+    await setCurrentContext(page);
+
+    await page.goto("/en/app");
+
+    await expect(page.getByText("Acme Corp")).toBeVisible();
+    await expect(page.getByText("Commerce Apps")).toBeVisible();
+    await expect(page.evaluate(() => localStorage.getItem("token"))).resolves.toBe("refreshed-token");
+  });
+
+  test("renders layout labels in Chinese for zh routes", async ({ page }) => {
+    await mockContextEndpoints(page);
+    await setAuthenticatedUser(page);
+    await setCurrentContext(page);
 
     await page.goto("/zh/app");
 
@@ -47,5 +108,4 @@ test.describe("layout", () => {
     await expect(page.getByText("内容将在后续迁移步骤中添加。")).toBeVisible();
   });
 });
-
 

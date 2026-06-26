@@ -53,7 +53,7 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { getStoredUserProfile, signOut } from "@/features/auth/auth-api";
+import { getIdentityToken, getStoredUserProfile, signOut } from "@/features/auth/auth-api";
 import { getRuntimeEnv } from "@/lib/env/runtime-env";
 import { useTheme } from "@/lib/theme/theme-provider";
 import { cn } from "@/lib/utils";
@@ -79,22 +79,85 @@ type NavGroup = {
 type Environment = {
   id: string;
   projectId: string;
-  projectName: string;
   name: string;
-  i18nKey: string;
+  key?: string;
+  secrets?: Secret[];
+  settings?: EnvironmentSetting;
   type: "prod" | "staging" | "dev";
 };
 
-const SIDEBAR_STORAGE_KEY = "featbit:sidebar-collapsed";
-const PROJECT_STORAGE_KEY = "featbit:current-project-id";
-const ENVIRONMENT_STORAGE_KEY = "featbit:current-environment-id";
+type Secret = {
+  id?: string;
+  name: string;
+  type: string;
+  value: string;
+};
 
-const environments: Environment[] = [
-  { id: "prod", projectId: "growth", projectName: "Growth Platform", name: "Production", i18nKey: "layout.environment.production", type: "prod" },
-  { id: "staging", projectId: "growth", projectName: "Growth Platform", name: "Staging", i18nKey: "layout.environment.staging", type: "staging" },
-  { id: "dev", projectId: "growth", projectName: "Growth Platform", name: "Development", i18nKey: "layout.environment.development", type: "dev" },
-  { id: "commerce-prod", projectId: "commerce", projectName: "Commerce Apps", name: "Production", i18nKey: "layout.environment.production", type: "prod" },
-  { id: "commerce-dev", projectId: "commerce", projectName: "Commerce Apps", name: "Development", i18nKey: "layout.environment.development", type: "dev" }
+type EnvironmentSetting = {
+  requireChangeComment?: boolean;
+};
+
+type Project = {
+  id: string;
+  name: string;
+  key: string;
+  environments: Environment[];
+};
+
+type ProjectEnv = {
+  projectId: string;
+  projectName: string;
+  projectKey: string;
+  envId: string;
+  envKey: string;
+  envName: string;
+  envSecrets?: Secret[];
+  envSettings?: EnvironmentSetting;
+};
+
+type Workspace = {
+  id: string;
+  name: string;
+  key: string;
+  license?: string;
+};
+
+type Organization = {
+  id: string;
+  name: string;
+  key: string;
+};
+
+type ApiEnvelope<T> = {
+  success?: boolean;
+  data?: T;
+  errors?: string[];
+};
+
+const SIDEBAR_STORAGE_KEY = "featbit:sidebar-collapsed";
+const IDENTITY_TOKEN_STORAGE_KEY = "token";
+
+const fallbackOrganization: Organization = { id: "fallback-org", name: "Acme Corp", key: "acme" };
+const fallbackWorkspace: Workspace = { id: "fallback-workspace", name: "Acme Workspace", key: "acme" };
+const fallbackProjectEnv: ProjectEnv = {
+  projectId: "growth",
+  projectName: "Growth Platform",
+  projectKey: "growth",
+  envId: "prod",
+  envKey: "prod",
+  envName: "Production"
+};
+const fallbackProjects: Project[] = [
+  {
+    id: "growth",
+    name: "Growth Platform",
+    key: "growth",
+    environments: [
+      { id: "prod", projectId: "growth", name: "Production", key: "prod", type: "prod" },
+      { id: "staging", projectId: "growth", name: "Staging", key: "staging", type: "staging" },
+      { id: "dev", projectId: "growth", name: "Development", key: "dev", type: "dev" }
+    ]
+  }
 ];
 
 const navigationGroups: NavGroup[] = [
@@ -164,6 +227,196 @@ function resolveLang(value: string | undefined): Lang {
 
 function localizedPath(lang: Lang, href: string) {
   return `/${lang}${href}`;
+}
+
+function scopedStorageKey(key: string) {
+  const profile = getStoredUserProfile();
+  return profile.id ? `${key}_${profile.id}` : key;
+}
+
+function readStorageObject<T>(key: string): T | null {
+  const rawValue = localStorage.getItem(key);
+  if (!rawValue) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(rawValue) as T;
+  } catch {
+    return null;
+  }
+}
+
+function getCurrentWorkspace() {
+  return readStorageObject<Workspace>(scopedStorageKey("current-workspace")) ?? fallbackWorkspace;
+}
+
+function getCurrentOrganization() {
+  return readStorageObject<Organization>(scopedStorageKey("current-organization")) ?? fallbackOrganization;
+}
+
+function getCurrentProjectEnv() {
+  return readStorageObject<ProjectEnv>(scopedStorageKey("current-project")) ?? fallbackProjectEnv;
+}
+
+function saveCurrentProjectEnv(projectEnv: ProjectEnv) {
+  localStorage.setItem(scopedStorageKey("current-project"), JSON.stringify(projectEnv));
+}
+
+function apiOrigin() {
+  return getRuntimeEnv().apiUrl || "http://localhost:5000";
+}
+
+let refreshTokenPromise: Promise<string> | null = null;
+
+function unwrapApiResponse<T>(body: T | ApiEnvelope<T>): T {
+  if (body && typeof body === "object" && "data" in body) {
+    const envelope = body as ApiEnvelope<T>;
+    if (envelope.success === false) {
+      throw new Error(envelope.errors?.[0] || "Request failed");
+    }
+
+    return envelope.data as T;
+  }
+
+  return body as T;
+}
+
+function authHeaders(token: string | null) {
+  const currentWorkspace = getCurrentWorkspace();
+  const currentOrganization = getCurrentOrganization();
+
+  return {
+    Authorization: `Bearer ${token ?? ""}`,
+    Organization: currentOrganization.id ?? "",
+    Workspace: currentWorkspace.id ?? ""
+  };
+}
+
+async function refreshIdentityToken() {
+  const response = await fetch(`${apiOrigin()}/api/v1/identity/refresh-token`, {
+    method: "POST",
+    credentials: "include"
+  });
+
+  if (!response.ok) {
+    throw new Error(response.statusText || "Failed to refresh token");
+  }
+
+  const body = (await response.json()) as ApiEnvelope<{ token?: string }>;
+  const data = unwrapApiResponse(body);
+  const token = data.token;
+
+  if (!token) {
+    throw new Error("Refresh response did not include a token");
+  }
+
+  localStorage.setItem(IDENTITY_TOKEN_STORAGE_KEY, token);
+  return token;
+}
+
+async function getRefreshedToken() {
+  refreshTokenPromise ??= refreshIdentityToken().finally(() => {
+    refreshTokenPromise = null;
+  });
+
+  return refreshTokenPromise;
+}
+
+async function fetchApi<T>(path: string, token = getIdentityToken(), retryOnUnauthorized = true): Promise<T> {
+  const response = await fetch(`${apiOrigin()}${path}`, {
+    credentials: "include",
+    headers: authHeaders(token)
+  });
+
+  if (response.status === 401 && retryOnUnauthorized) {
+    const refreshedToken = await getRefreshedToken();
+    return fetchApi<T>(path, refreshedToken, false);
+  }
+
+  if (!response.ok) {
+    throw new Error(response.statusText || "Request failed");
+  }
+
+  const body = (await response.json()) as T | ApiEnvelope<T>;
+  return unwrapApiResponse<T>(body);
+}
+
+async function fetchWorkspaces() {
+  return fetchApi<Workspace[]>("/api/v1/user/workspaces");
+}
+
+async function fetchOrganizations() {
+  return fetchApi<Organization[]>("/api/v1/organizations?isSsoFirstLogin=false");
+}
+
+async function fetchProjects() {
+  const projects = await fetchApi<Project[]>("/api/v1/projects");
+  return projects.sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function inferEnvironmentType(environment: Pick<Environment, "name" | "key">): Environment["type"] {
+  const value = `${environment.name} ${environment.key ?? ""}`.toLowerCase();
+  if (value.includes("prod") || value.includes("生产")) {
+    return "prod";
+  }
+
+  if (value.includes("stag") || value.includes("qa") || value.includes("预发")) {
+    return "staging";
+  }
+
+  return "dev";
+}
+
+function normalizeProjects(projects: Project[]) {
+  return projects.map((project) => ({
+    ...project,
+    environments: project.environments.map((environment) => ({
+      ...environment,
+      type: environment.type ?? inferEnvironmentType(environment)
+    }))
+  }));
+}
+
+function projectEnvFromSelection(project: Project, environment: Environment): ProjectEnv {
+  return {
+    projectId: project.id,
+    projectName: project.name,
+    projectKey: project.key,
+    envId: environment.id,
+    envKey: environment.key ?? "",
+    envName: environment.name,
+    envSecrets: environment.secrets ?? [],
+    envSettings: environment.settings ?? {}
+  };
+}
+
+function chooseWorkspace(workspaces: Workspace[]) {
+  const currentWorkspace = getCurrentWorkspace();
+  return workspaces.find((workspace) => workspace.id === currentWorkspace.id) ?? workspaces[0] ?? currentWorkspace;
+}
+
+function chooseOrganization(organizations: Organization[]) {
+  const currentOrganization = getCurrentOrganization();
+  return organizations.find((organization) => organization.id === currentOrganization.id) ?? organizations[0] ?? currentOrganization;
+}
+
+function chooseProjectEnv(projects: Project[]) {
+  const currentProjectEnv = getCurrentProjectEnv();
+  const currentProject = projects.find((project) => project.id === currentProjectEnv.projectId);
+  const currentEnvironment = currentProject?.environments.find((environment) => environment.id === currentProjectEnv.envId);
+
+  if (currentProject && currentEnvironment) {
+    return projectEnvFromSelection(currentProject, currentEnvironment);
+  }
+
+  const firstProject = projects[0];
+  const firstEnvironment = firstProject?.environments[0];
+  if (firstProject && firstEnvironment) {
+    return projectEnvFromSelection(firstProject, firstEnvironment);
+  }
+
+  return currentProjectEnv;
 }
 
 function FeatBitBrand({ collapsed }: { collapsed: boolean }) {
@@ -411,9 +664,17 @@ function EnvironmentDot({ type }: { type: Environment["type"] }) {
   return <span className={cn("h-2 w-2 rounded-full", className)} />;
 }
 
-function ContextBar({ selectedEnvironment, setSelectedEnvironment }: {
-  selectedEnvironment: Environment;
-  setSelectedEnvironment: (environment: Environment) => void;
+function ContextBar({
+  organization,
+  currentProjectEnv,
+  projects,
+  setCurrentProjectEnv
+}: {
+  workspace: Workspace;
+  organization: Organization;
+  currentProjectEnv: ProjectEnv;
+  projects: Project[];
+  setCurrentProjectEnv: (projectEnv: ProjectEnv) => void;
 }) {
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
@@ -421,39 +682,39 @@ function ContextBar({ selectedEnvironment, setSelectedEnvironment }: {
 
   const groupedEnvironments = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
-    const filtered = environments.filter((environment) => {
-      const haystack = `${environment.projectName} ${environment.name}`.toLowerCase();
-      return haystack.includes(normalizedSearch);
-    });
+    return projects
+      .map((project) => ({
+        ...project,
+        environments: project.environments.filter((environment) => {
+          const haystack = `${project.name} ${project.key} ${environment.name} ${environment.key ?? ""}`.toLowerCase();
+          return haystack.includes(normalizedSearch);
+        })
+      }))
+      .filter((project) => project.environments.length > 0);
+  }, [projects, search]);
 
-    return filtered.reduce<Record<string, Environment[]>>((groups, environment) => {
-      groups[environment.projectName] = [...(groups[environment.projectName] ?? []), environment];
-      return groups;
-    }, {});
-  }, [search]);
-
-  function selectEnvironment(environment: Environment) {
-    localStorage.setItem(PROJECT_STORAGE_KEY, environment.projectId);
-    localStorage.setItem(ENVIRONMENT_STORAGE_KEY, environment.id);
-    setSelectedEnvironment(environment);
+  function selectEnvironment(project: Project, environment: Environment) {
+    const projectEnv = projectEnvFromSelection(project, environment);
+    saveCurrentProjectEnv(projectEnv);
+    setCurrentProjectEnv(projectEnv);
     void queryClient.invalidateQueries({ predicate: (query) => {
       const key = JSON.stringify(query.queryKey);
-      return key.includes("projectId") || key.includes("envId") || key.includes(environment.projectId) || key.includes(environment.id);
+      return key.includes("projectId") || key.includes("envId") || key.includes(project.id) || key.includes(environment.id);
     } });
   }
 
   return (
     <div className="flex min-w-0 flex-1 items-center gap-2 text-sm">
       <Building2 className="h-4 w-4 shrink-0 text-muted-foreground" />
-      <span className="truncate font-medium">Acme Corp</span>
+      <span className="truncate font-medium">{organization.name}</span>
       <span className="text-muted-foreground">/</span>
-      <span className="truncate font-medium">{selectedEnvironment.projectName}</span>
+      <span className="truncate font-medium">{currentProjectEnv.projectName}</span>
       <span className="text-muted-foreground">/</span>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button type="button" variant="ghost" className="h-8 gap-2 px-2">
-            <EnvironmentDot type={selectedEnvironment.type} />
-            {t(selectedEnvironment.i18nKey)}
+            <EnvironmentDot type={inferEnvironmentType({ name: currentProjectEnv.envName, key: currentProjectEnv.envKey })} />
+            {currentProjectEnv.envName}
             <ChevronsUpDown className="h-3.5 w-3.5 text-muted-foreground" />
           </Button>
         </DropdownMenuTrigger>
@@ -464,24 +725,25 @@ function ContextBar({ selectedEnvironment, setSelectedEnvironment }: {
               className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
               value={search}
               placeholder={t("layout.context.searchEnvironments")}
+              onKeyDown={(event) => event.stopPropagation()}
               onChange={(event) => setSearch(event.target.value)}
             />
           </div>
           <div className="mt-2 max-h-72 overflow-y-auto">
-            {Object.entries(groupedEnvironments).map(([projectName, projectEnvironments]) => (
-              <div key={projectName} className="py-1">
-                <DropdownMenuLabel>{projectName}</DropdownMenuLabel>
-                {projectEnvironments.map((environment) => (
+            {groupedEnvironments.map((project) => (
+              <div key={project.id} className="py-1">
+                <DropdownMenuLabel>{project.name}</DropdownMenuLabel>
+                {project.environments.map((environment) => (
                   <DropdownMenuItem
-                    key={`${environment.projectId}:${environment.id}`}
+                    key={`${project.id}:${environment.id}`}
                     className="justify-between"
-                    onSelect={() => selectEnvironment(environment)}
+                    onSelect={() => selectEnvironment(project, environment)}
                   >
                     <span className="flex min-w-0 items-center gap-2">
                       <EnvironmentDot type={environment.type} />
-                      <span className="truncate">{t(environment.i18nKey)}</span>
+                      <span className="truncate">{environment.name}</span>
                     </span>
-                    {environment.id === selectedEnvironment.id && environment.projectId === selectedEnvironment.projectId ? (
+                    {environment.id === currentProjectEnv.envId && project.id === currentProjectEnv.projectId ? (
                       <Check className="h-4 w-4" />
                     ) : null}
                   </DropdownMenuItem>
@@ -682,14 +944,10 @@ export function Layout() {
   const lang = resolveLang(params.lang);
   const { i18n } = useTranslation();
   const [collapsed, setCollapsedState] = useState(() => localStorage.getItem(SIDEBAR_STORAGE_KEY) === "true");
-  const [selectedEnvironment, setSelectedEnvironment] = useState(() => {
-    const projectId = localStorage.getItem(PROJECT_STORAGE_KEY);
-    const environmentId = localStorage.getItem(ENVIRONMENT_STORAGE_KEY);
-    return (
-      environments.find((environment) => environment.projectId === projectId && environment.id === environmentId) ??
-      environments[0]
-    );
-  });
+  const [workspace, setWorkspace] = useState(() => getCurrentWorkspace());
+  const [organization, setOrganization] = useState(() => getCurrentOrganization());
+  const [currentProjectEnv, setCurrentProjectEnv] = useState(() => getCurrentProjectEnv());
+  const [projects, setProjects] = useState<Project[]>(() => normalizeProjects(fallbackProjects));
 
   function setCollapsed(nextCollapsed: boolean) {
     localStorage.setItem(SIDEBAR_STORAGE_KEY, String(nextCollapsed));
@@ -700,13 +958,72 @@ export function Layout() {
     void i18n.changeLanguage(lang);
   }, [i18n, lang]);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadContext() {
+      try {
+        const loadedWorkspaces = await fetchWorkspaces();
+        if (cancelled) {
+          return;
+        }
+
+        if (loadedWorkspaces.length > 0) {
+          const nextWorkspace = chooseWorkspace(loadedWorkspaces);
+          localStorage.setItem(scopedStorageKey("current-workspace"), JSON.stringify(nextWorkspace));
+          setWorkspace(nextWorkspace);
+        }
+
+        const loadedOrganizations = await fetchOrganizations();
+        if (cancelled) {
+          return;
+        }
+
+        if (loadedOrganizations.length > 0) {
+          const nextOrganization = chooseOrganization(loadedOrganizations);
+          localStorage.setItem(scopedStorageKey("current-organization"), JSON.stringify(nextOrganization));
+          setOrganization(nextOrganization);
+        }
+
+        const loadedProjects = await fetchProjects();
+        if (cancelled) {
+          return;
+        }
+
+        if (loadedProjects.length > 0) {
+          const normalizedProjects = normalizeProjects(loadedProjects);
+          const nextProjectEnv = chooseProjectEnv(normalizedProjects);
+          saveCurrentProjectEnv(nextProjectEnv);
+          setProjects(normalizedProjects);
+          setCurrentProjectEnv(nextProjectEnv);
+        }
+      } catch {
+        if (!cancelled) {
+          setProjects(normalizeProjects(fallbackProjects));
+        }
+      }
+    }
+
+    void loadContext();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <TooltipProvider delayDuration={150}>
       <div className="flex min-h-screen bg-background text-foreground">
         <Sidebar lang={lang} collapsed={collapsed} setCollapsed={setCollapsed} />
         <div className="flex min-w-0 flex-1 flex-col">
           <header className="flex h-16 shrink-0 items-center gap-4 border-b border-border bg-background px-5">
-            <ContextBar selectedEnvironment={selectedEnvironment} setSelectedEnvironment={setSelectedEnvironment} />
+            <ContextBar
+              workspace={workspace}
+              organization={organization}
+              currentProjectEnv={currentProjectEnv}
+              projects={projects}
+              setCurrentProjectEnv={setCurrentProjectEnv}
+            />
             <PlanBadge />
           </header>
           <main className="min-h-0 flex-1 bg-muted/30 p-5">

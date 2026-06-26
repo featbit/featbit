@@ -39,6 +39,7 @@ export function signOut() {
 }
 
 export type StoredUserProfile = {
+  id?: string;
   name?: string;
   email?: string;
 };
