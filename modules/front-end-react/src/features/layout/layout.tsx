@@ -134,8 +134,23 @@ type ApiEnvelope<T> = {
   errors?: string[];
 };
 
+type LicenseData = {
+  plan?: string;
+  exp?: number;
+};
+
+type PlanBadgeState = {
+  labelKey: string;
+  plan: string;
+  warning: boolean;
+  href: string;
+};
+
 const SIDEBAR_STORAGE_KEY = "featbit:sidebar-collapsed";
 const IDENTITY_TOKEN_STORAGE_KEY = "token";
+const LICENSE_EXPIRING_DAYS_THRESHOLD = 30;
+const HOSTING_MODE_SAAS = "saas";
+const PLAN_FREE = "free";
 
 const fallbackOrganization: Organization = { id: "fallback-org", name: "Acme Corp", key: "acme" };
 const fallbackWorkspace: Workspace = { id: "fallback-workspace", name: "Acme Workspace", key: "acme" };
@@ -261,6 +276,99 @@ function getCurrentProjectEnv() {
 
 function saveCurrentProjectEnv(projectEnv: ProjectEnv) {
   localStorage.setItem(scopedStorageKey("current-project"), JSON.stringify(projectEnv));
+}
+
+function decodeBase64UrlJson<T>(value: string): T | null {
+  try {
+    const base64 = value.replace(/-/g, "+").replace(/_/g, "/");
+    const paddedBase64 = base64.padEnd(Math.ceil(base64.length / 4) * 4, "=");
+    return JSON.parse(atob(paddedBase64)) as T;
+  } catch {
+    return null;
+  }
+}
+
+function parseLicense(license: string | undefined) {
+  const payload = license?.split(".")[1];
+  if (!payload) {
+    return null;
+  }
+
+  return decodeBase64UrlJson<LicenseData>(payload);
+}
+
+function isExpired(license: LicenseData | null) {
+  return Boolean(license?.exp && license.exp < Date.now());
+}
+
+function daysUntilExpiration(license: LicenseData | null) {
+  if (!license?.exp) {
+    return -1;
+  }
+
+  return Math.ceil((license.exp - Date.now()) / (1000 * 60 * 60 * 24));
+}
+
+function isExpiringSoon(license: LicenseData | null) {
+  const remainingDays = daysUntilExpiration(license);
+  return remainingDays > 0 && remainingDays <= LICENSE_EXPIRING_DAYS_THRESHOLD;
+}
+
+function displayPlan(plan: string | undefined) {
+  if (!plan) {
+    return "";
+  }
+
+  return plan.charAt(0).toUpperCase() + plan.slice(1);
+}
+
+function planBadgeState(workspace: Workspace, lang: Lang): PlanBadgeState {
+  const license = parseLicense(workspace.license);
+  const plan = license?.plan;
+  const isSaasFreePlan = getRuntimeEnv().hostingMode === HOSTING_MODE_SAAS && plan === PLAN_FREE;
+
+  if (isSaasFreePlan) {
+    return {
+      labelKey: "layout.plan.free",
+      plan: "layout.plan.upgradeNow",
+      warning: false,
+      href: localizedPath(lang, "/app/workspace/billing")
+    };
+  }
+
+  if (license && plan) {
+    if (isExpired(license)) {
+      return {
+        labelKey: "layout.plan.expired",
+        plan: displayPlan(plan),
+        warning: true,
+        href: localizedPath(lang, "/app/workspace/license")
+      };
+    }
+
+    if (isExpiringSoon(license)) {
+      return {
+        labelKey: "layout.plan.expiringSoon",
+        plan: displayPlan(plan),
+        warning: true,
+        href: localizedPath(lang, "/app/workspace/license")
+      };
+    }
+
+    return {
+      labelKey: "layout.plan.current",
+      plan: displayPlan(plan),
+      warning: false,
+      href: localizedPath(lang, "/app/workspace/license")
+    };
+  }
+
+  return {
+    labelKey: "layout.plan.upgradeNow",
+    plan: "layout.plan.getEnterprise",
+    warning: false,
+    href: localizedPath(lang, "/app/workspace/license")
+  };
 }
 
 function apiOrigin() {
@@ -635,19 +743,31 @@ function Sidebar({
   );
 }
 
-function PlanBadge() {
+function PlanBadge({ lang, workspace }: { lang: Lang; workspace: Workspace }) {
   const { t } = useTranslation();
+  const badge = planBadgeState(workspace, lang);
+  const plan = badge.plan.startsWith("layout.") ? t(badge.plan) : badge.plan;
+  const label = badge.labelKey === "layout.plan.expiringSoon"
+    ? t(badge.labelKey, { days: daysUntilExpiration(parseLicense(workspace.license)) })
+    : t(badge.labelKey);
 
   return (
     <Link
-      to="#billing"
-      className="flex h-11 items-center gap-3 rounded-md border border-border bg-card px-3 text-left shadow-sm transition-colors hover:bg-accent"
-      aria-label={t("layout.plan.aria", { plan: "Pro" })}
+      to={badge.href}
+      className="flex h-[50px] min-w-[11.5rem] items-center gap-3 rounded-md border border-border bg-card px-3 text-left shadow-sm transition-colors hover:bg-accent"
+      aria-label={t("layout.plan.aria", { label, plan })}
     >
-      <Award className="h-5 w-5 text-blue-600" />
-      <span className="leading-tight">
-        <span className="block text-xs font-medium text-foreground">{t("layout.plan.current")}</span>
-        <span className="block text-[0.68rem] font-semibold text-foreground">Pro</span>
+      <Award className={cn("h-5 w-5", badge.warning ? "text-amber-600" : "text-blue-600")} />
+      <span className="min-w-0 flex-1 space-y-0.5 leading-tight">
+        <span
+          className={cn(
+            "block text-[0.625rem] font-medium uppercase tracking-normal text-muted-foreground",
+            badge.warning && "text-amber-700 dark:text-amber-400"
+          )}
+        >
+          {label}
+        </span>
+        <span className="block text-[0.8125rem] font-bold leading-snug text-foreground">{plan}</span>
       </span>
       <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
     </Link>
@@ -1024,7 +1144,7 @@ export function Layout() {
               projects={projects}
               setCurrentProjectEnv={setCurrentProjectEnv}
             />
-            <PlanBadge />
+            <PlanBadge lang={lang} workspace={workspace} />
           </header>
           <main className="min-h-0 flex-1 bg-muted/30 p-5">
             <Outlet />
@@ -1038,5 +1158,3 @@ export function Layout() {
 export function LayoutPlaceholder() {
   return <EmptyWorkspace />;
 }
-
-

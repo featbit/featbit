@@ -1,5 +1,6 @@
 ﻿import { expect, test } from "@playwright/test";
 import {
+  createLicense,
   mockContextEndpoints,
   mockContextEndpointsWithExpiredAccessToken,
   mockRuntimeEnv,
@@ -20,6 +21,7 @@ test.describe("layout", () => {
     await expect(page.getByText("Acme Corp")).toBeVisible();
     await expect(page.getByText("Commerce Apps")).toBeVisible();
     await expect(page.getByRole("button", { name: /生产环境/ })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Current Plan, Growth" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Teams" })).toHaveCount(0);
     await page.getByRole("button", { name: "IAM" }).click();
     await expect(page.getByRole("link", { name: "Teams" })).toBeVisible();
@@ -105,7 +107,44 @@ test.describe("layout", () => {
 
     await expect(page.getByText("开关管理")).toBeVisible();
     await expect(page.getByText("当前订阅")).toBeVisible();
+    await expect(page.getByRole("link", { name: "当前订阅，Growth" })).toBeVisible();
     await expect(page.getByText("内容将在后续迁移步骤中添加。")).toBeVisible();
+  });
+
+  test("renders SaaS free plan state from the workspace license", async ({ page }) => {
+    await mockRuntimeEnv(page, { HOSTING_MODE: "saas" });
+    await setAuthenticatedUser(page);
+    await setCurrentContext(page);
+
+    await page.route("**/api/v1/user/workspaces", async (route) => {
+      await route.fulfill({
+        json: { success: true, data: [{ id: "ws-1", key: "acme-workspace", name: "Acme Workspace", license: createLicense("free") }] }
+      });
+    });
+    await page.route("**/api/v1/organizations**", async (route) => {
+      await route.fulfill({
+        json: { success: true, data: [{ id: "org-1", key: "acme-org", name: "Acme Corp", initialized: true }] }
+      });
+    });
+    await page.route("**/api/v1/projects", async (route) => {
+      await route.fulfill({
+        json: {
+          success: true,
+          data: [
+            {
+              id: "project-commerce",
+              name: "Commerce Apps",
+              key: "commerce",
+              environments: [{ id: "env-prod-cn", projectId: "project-commerce", name: "生产环境", key: "prod-cn", secrets: [], settings: {} }]
+            }
+          ]
+        }
+      });
+    });
+
+    await page.goto("/en/app");
+
+    await expect(page.getByRole("link", { name: "Free Plan, Upgrade Now" })).toBeVisible();
   });
 });
 

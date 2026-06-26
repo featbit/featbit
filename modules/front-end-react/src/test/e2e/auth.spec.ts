@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { mockAuthEndpoints } from "./helpers";
+import { mockAuthEndpoints, mockContextEndpoints } from "./helpers";
 
 test.describe("login page", () => {
   test("renders the email login form and social sign-in options", async ({ page }) => {
@@ -46,6 +46,7 @@ test.describe("login page", () => {
     await mockAuthEndpoints(page, {
       loginResponse: { success: true, data: { token: "e2e-token" } }
     });
+    await mockContextEndpoints(page);
 
     await page.goto("/en/login");
     await page.getByLabel("Email").fill("test@featbit.com");
@@ -56,7 +57,7 @@ test.describe("login page", () => {
     await expect(page).toHaveURL(/\/en\/app$/);
     await expect(page.getByText("Content will be added in the next migration steps.")).toBeVisible();
     await expect(page.getByText("Acme Corp")).toBeVisible();
-    await expect(page.getByLabel("Current Plan, Pro")).toBeVisible();
+    await expect(page.getByLabel("Current Plan, Growth")).toBeVisible();
     await expect(page.evaluate(() => localStorage.getItem("token"))).resolves.toBe("e2e-token");
     await expect(page.evaluate(() => localStorage.getItem("remembered-email"))).resolves.toBe("test@featbit.com");
   });

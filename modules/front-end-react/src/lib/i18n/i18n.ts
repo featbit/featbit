@@ -71,7 +71,12 @@ i18n.use(initReactI18next).init({
           },
           plan: {
             current: "Current Plan",
-            aria: "Current Plan, {{plan}}"
+            free: "Free Plan",
+            upgradeNow: "Upgrade Now",
+            expired: "License Expired",
+            expiringSoon: "Expiring in {{days}} days",
+            getEnterprise: "Get Enterprise",
+            aria: "{{label}}, {{plan}}"
           },
           context: {
             searchEnvironments: "Search environments",
@@ -171,7 +176,12 @@ i18n.use(initReactI18next).init({
           },
           plan: {
             current: "当前订阅",
-            aria: "当前订阅，{{plan}}"
+            free: "免费订阅",
+            upgradeNow: "立即升级",
+            expired: "许可证已过期",
+            expiringSoon: "{{days}} 天后过期",
+            getEnterprise: "获取企业版",
+            aria: "{{label}}，{{plan}}"
           },
           context: {
             searchEnvironments: "搜索项目或环境",

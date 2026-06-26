@@ -1,5 +1,24 @@
 ﻿import type { Page } from "@playwright/test";
 
+export function createLicense(plan: string, expiresAt = 4102444800000) {
+  const payload = btoa(
+    JSON.stringify({
+      plan,
+      sub: "e2e",
+      wsId: "ws-1",
+      iat: Date.now(),
+      exp: expiresAt,
+      issuer: "e2e",
+      features: ["*"]
+    })
+  )
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+
+  return `e2e.${payload}.signature`;
+}
+
 export async function mockAuthEndpoints(
   page: Page,
   options: {
@@ -74,11 +93,13 @@ export async function setAuthenticatedUser(
 }
 
 export async function setCurrentContext(page: Page) {
-  await page.addInitScript(() => {
+  const license = createLicense("Growth");
+
+  await page.addInitScript((license) => {
     const userId = "test-user-id";
     localStorage.setItem(
       `current-workspace_${userId}`,
-      JSON.stringify({ id: "ws-1", key: "acme-workspace", name: "Acme Workspace" })
+      JSON.stringify({ id: "ws-1", key: "acme-workspace", name: "Acme Workspace", license })
     );
     localStorage.setItem(
       `current-organization_${userId}`,
@@ -97,7 +118,7 @@ export async function setCurrentContext(page: Page) {
         envSettings: {}
       })
     );
-  });
+  }, license);
 }
 
 export async function mockContextEndpoints(page: Page) {
@@ -115,7 +136,7 @@ export async function mockContextEndpointsWithExpiredAccessToken(page: Page) {
     }
 
     await route.fulfill({
-      json: { success: true, data: [{ id: "ws-1", key: "acme-workspace", name: "Acme Workspace" }] }
+      json: { success: true, data: [{ id: "ws-1", key: "acme-workspace", name: "Acme Workspace", license: createLicense("Growth") }] }
     });
   });
 
@@ -131,7 +152,7 @@ export async function mockContextEndpointsWithExpiredAccessToken(page: Page) {
 async function mockContextEndpointResponses(page: Page) {
   await page.route("**/api/v1/user/workspaces", async (route) => {
     await route.fulfill({
-      json: { success: true, data: [{ id: "ws-1", key: "acme-workspace", name: "Acme Workspace" }] }
+      json: { success: true, data: [{ id: "ws-1", key: "acme-workspace", name: "Acme Workspace", license: createLicense("Growth") }] }
     });
   });
 
