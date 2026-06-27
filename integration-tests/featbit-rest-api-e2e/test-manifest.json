@@ -357,6 +357,7 @@
       ],
       "assertions": [
         "run id is recorded",
+        "run traffic assignment accepts actual-variation roles and analysis sampling plan",
         "stats query observes users",
         "treatment conversion rate is higher than control",
         "binary guardrail stats observe users",
@@ -376,6 +377,28 @@
     },
     {
       "id": "9",
+      "name": "Traffic-assignment scenario runs",
+      "endpoints": [
+        "PUT /api/v1/envs/{envId}/feature-flags/{key}/targeting",
+        "POST /api/v1/envs/{envId}/release-decision/experiments",
+        "POST /api/v1/envs/{envId}/release-decision/experiments/{id}/runs",
+        "PUT /api/v1/envs/{envId}/release-decision/experiments/{id}/runs/{runId}/audience",
+        "PUT /api/v1/envs/{envId}/release-decision/experiments/{id}/runs/{runId}/observation-window",
+        "POST /api/v1/envs/{envId}/experiment-stats/query",
+        "POST /api/v1/envs/{envId}/release-decision/experiments/{id}/runs/{runId}/analyze"
+      ],
+      "assertions": [
+        "balanced 50/50 use-all scenario creates an independent experiment and run",
+        "skewed 90/10 sampled-to-10/10 scenario samples control instead of using the full raw control rollout",
+        "skewed 80/20 sampled-to-20/20 scenario produces roughly balanced analyzed evidence",
+        "layer 30% plus 50/50 scenario analyzes only layer-eligible assignments",
+        "each scenario uses a unique metric event and observation window",
+        "scenario conversion counts match deterministic Round(users * configuredRate) targets",
+        "scenario analyze output contains inputData and analysisResult"
+      ]
+    },
+    {
+      "id": "10",
       "name": "Final verification",
       "endpoints": [
         "GET /api/v1/envs/{envId}/release-decision/experiments/{id}",

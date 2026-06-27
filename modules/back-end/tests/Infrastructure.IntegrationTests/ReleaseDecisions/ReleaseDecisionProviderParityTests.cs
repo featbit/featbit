@@ -203,6 +203,44 @@ public sealed class ReleaseDecisionProviderParityTests(ReleaseDecisionProviderPa
     }
 
     [Fact]
+    public async Task Experiment_stats_apply_layer_eligibility_before_run_sampling()
+    {
+        var runId = Guid.Parse("dddddddd-dddd-dddd-dddd-dddddddddddd");
+        await fixture.SeedSamplingPlanScenarioAsync(runId);
+
+        var request = new QueryExperimentStats
+        {
+            RunId = runId,
+            EnvId = ReleaseDecisionProviderParityFixture.EnvId,
+            FlagKey = ReleaseDecisionProviderParityFixture.FlagKey,
+            MetricEvent = ReleaseDecisionProviderParityFixture.MetricEvent,
+            StartDate = "2026-01-01",
+            EndDate = "2026-01-02",
+            MetricType = "binary",
+            MetricAgg = "once",
+            AssignmentUnitSelector = "user.keyId",
+            LayerKey = "checkout-mutual-exclusion-layer",
+            LayerTrafficPercent = 40,
+            AnalysisSamplingPlan = TenTenSamplingPlan
+        };
+
+        var results = new List<(string Provider, ExperimentStatsVm Stats)>();
+        foreach (var (provider, service) in fixture.CreateExperimentStatsServices())
+        {
+            results.Add((provider, await service.QueryAsync(request)));
+        }
+
+        var expected = Normalize(results[0].Stats);
+        var totalUsers = expected.Variants.Sum(x => x.Users);
+        Assert.InRange(totalUsers, 1, 159);
+
+        foreach (var result in results.Skip(1))
+        {
+            AssertStatsEqual(results[0].Provider, expected, result.Provider, Normalize(result.Stats));
+        }
+    }
+
+    [Fact]
     public async Task Experiment_stats_exclude_run_sampling_events_when_custom_assignment_selector_is_missing()
     {
         var runId = Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc");

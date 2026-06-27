@@ -160,7 +160,7 @@ If the target deployment requires explicit workspace context, pass
 `-Organization <organization-id>` and `-Workspace <workspace-id>`. Access-token
 authentication usually derives these values automatically, but the runner can
 send them as headers when needed. Segment creation also needs the organization
-resource key for UI-compatible scopes; pass `-OrganizationKey <organization-key>`
+resource key for product-compatible scopes; pass `-OrganizationKey <organization-key>`
 when it is not the local default `playground`.
 
 The wrapper passes arguments to the single-file C# runner without printing the
@@ -211,9 +211,10 @@ dotnet run integration-tests\featbit-rest-api-e2e\featbit-rest-api-e2e.cs -- --h
 | 4 | SDK evaluation and metric tracking | FeatBit.ServerSdk `BoolVariationDetail`, `StringVariationDetail`, `DoubleVariationDetail`, `Track`, `FlushAndWait`; SDK flushes events to `POST /api/public/insight/track` |
 | 5 | Create release-decision experiment | `POST /api/v1/envs/{envId}/release-decision/experiments`, `PUT /api/v1/envs/{envId}/release-decision/experiments/{id}` |
 | 6 | Configure primary/guardrail metrics | `PUT /api/v1/envs/{envId}/release-decision/experiments/{id}/metrics` |
-| 7 | Start run and seed evidence | `POST /api/v1/envs/{envId}/release-decision/experiments/{id}/runs`, SDK evaluation/Track, `POST /api/v1/envs/{envId}/experiment-stats/query`; verifies primary and guardrail evidence |
+| 7 | Start run and seed evidence | `POST /api/v1/envs/{envId}/release-decision/experiments/{id}/runs`, `PUT /runs/{runId}/audience` with v6.0.0 experiment traffic assignment fields, SDK evaluation/Track, `POST /api/v1/envs/{envId}/experiment-stats/query`; verifies primary and guardrail evidence |
 | 8 | Analyze | `POST /api/v1/envs/{envId}/release-decision/experiments/{id}/runs/{runId}/analyze` |
-| 9 | Final verification | `GET /api/v1/envs/{envId}/release-decision/experiments/{id}`, `GET /api/v1/envs/{envId}/feature-flags/{key}`, `POST /api/v1/envs/{envId}/experiment-stats/query`; verifies the seeded treatment conversion rate is higher than control and all 10 flags retain their expected final enabled state, variants, rule state, traffic/fallthrough split, experimentation targeting flags, and type |
+| 9 | Traffic-assignment scenarios | Create one independent release-decision experiment/run/metric per scenario; verifies balanced `50/50`, skewed `90/10 -> 10/10`, skewed `80/20 -> 20/20`, and layer `30% + 50/50` traffic assignment |
+| 10 | Final verification | `GET /api/v1/envs/{envId}/release-decision/experiments/{id}`, `GET /api/v1/envs/{envId}/feature-flags/{key}`, `POST /api/v1/envs/{envId}/experiment-stats/query`; verifies the seeded treatment conversion rate is higher than control and all 10 flags retain their expected final enabled state, variants, rule state, traffic/fallthrough split, experimentation targeting flags, and type |
 
 The public SaaS OpenAPI schema currently lists project/env/flag/segment
 management endpoints. The release-decision endpoints are taken from this
