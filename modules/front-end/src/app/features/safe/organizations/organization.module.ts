@@ -30,7 +30,7 @@ import { OrganizationComponent } from '@features/safe/organizations/organization
 import { ProjectComponent } from '@features/safe/organizations/project/project.component';
 import { ProfileComponent } from '@features/safe/organizations/profile/profile.component';
 import { OrganizationsComponent } from "@features/safe/organizations/organizations.component";
-import { NzEmptyComponent } from "ng-zorro-antd/empty";
+import { NzEmptyModule } from 'ng-zorro-antd/empty';
 
 @NgModule({
   declarations: [
