@@ -28,7 +28,6 @@ import { CoreModule } from '@core/core.module';
 import { OrganizationRoutingModule } from './organization-routing.module';
 import { OrganizationComponent } from '@features/safe/organizations/organization/organization.component';
 import { ProjectComponent } from '@features/safe/organizations/project/project.component';
-import { ProjectFilterPipe } from '@features/safe/organizations/project/project-filter.pipe';
 import { ProfileComponent } from '@features/safe/organizations/profile/profile.component';
 import { OrganizationsComponent } from "@features/safe/organizations/organizations.component";
 
@@ -37,7 +36,6 @@ import { OrganizationsComponent } from "@features/safe/organizations/organizatio
     OrganizationsComponent,
     OrganizationComponent,
     ProjectComponent,
-    ProjectFilterPipe,
     ProfileComponent
   ],
   imports: [

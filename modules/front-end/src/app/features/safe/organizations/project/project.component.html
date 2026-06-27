@@ -11,9 +11,8 @@
       <ng-container i18n="@@common.add">Add</ng-container>
     </button>
   </div>
-  <div class="project-list">
-    @for (project of projects | projectFilter: searchValue; track project.id) {
-      <div class="project">
+  <cdk-virtual-scroll-viewport itemSize="750" minBufferPx="1500" maxBufferPx="2250" class="project-list">
+    <div *cdkVirtualFor="let project of filteredProjects; trackBy: trackProjectById" class="project">
         <nz-card [nzBordered]="false">
           <nz-descriptions [nzTitle]="titleTemplate" [nzExtra]="extraTemplate"></nz-descriptions>
           <div class="env-list">
@@ -24,7 +23,7 @@
                     <div>
                       <div class="desc-name">
                         <span i18n="@@commoname">Name</span>
-                        @if (isCurrentEnv(env)) {
+                        @if (env.id === currentProjectEnv?.envId) {
                           <nz-tag nzColor="green" i18n="@@common.current">Current</nz-tag>
                         }
                       </div>
@@ -82,7 +81,7 @@
                     <button class="edit" nz-button nzType="link" permission-check [rn]="getEnvRN(project, env)" [action]="permissionActions.UpdateEnvSettings" (actionIfAllow)="onEditEnvClick(project, env)">
                       <span i18n="@@org.project.edit">Edit</span>
                     </button>
-                    @if (!isCurrentEnv(env)) {
+                    @if (env.id !== currentProjectEnv?.envId) {
                       <nz-divider nzType="vertical"></nz-divider>
                       <button class="remove" nz-button nzType="link" i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it?"
                         nzPopconfirmPlacement="bottomRight"
@@ -108,7 +107,7 @@
           <div class="project-header">
             <span>{{project.name}}</span>
             <nz-tag nzColor="blue">Key: {{project.key}}</nz-tag>
-            @if (isCurrentProject(project)) {
+            @if (project.id === currentProjectEnv?.projectId) {
               <nz-tag nzColor="green" i18n="@@common.current">Current</nz-tag>
             }
           </div>
@@ -140,8 +139,7 @@
           </button>
         </ng-template>
       </div>
-    }
-  </div>
+  </cdk-virtual-scroll-viewport>
 </div>
 <nz-modal
   [(nzVisible)]="isSecretModalVisible"

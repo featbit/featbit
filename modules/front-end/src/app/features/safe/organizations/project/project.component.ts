@@ -29,12 +29,18 @@ export class ProjectComponent implements OnInit {
   project: IProject;
   env: IEnvironment;
 
-  searchValue: string;
+  private _searchValue = '';
+  get searchValue(): string { return this._searchValue; }
+  set searchValue(v: string) {
+    this._searchValue = v;
+    this.updateFilteredProjects();
+  }
 
   // current project env
   currentProjectEnv: IProjectEnv;
 
   projects: IProject[] = [];
+  filteredProjects: IProject[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -50,6 +56,7 @@ export class ProjectComponent implements OnInit {
     this.currentProjectEnv = getCurrentProjectEnv();
     this.projects = await this.projectService.getListAsync();
     this.sortProjects();
+    this.updateFilteredProjects();
   }
 
   private sortProjects() {
@@ -62,12 +69,15 @@ export class ProjectComponent implements OnInit {
     }
   }
 
-  isCurrentProject(project: IProject): boolean {
-    return this.currentProjectEnv?.projectId === project.id;
+  private updateFilteredProjects(): void {
+    const q = this._searchValue?.toLowerCase();
+    this.filteredProjects = q
+      ? this.projects.filter(p => p.name.toLowerCase().includes(q))
+      : [...this.projects];
   }
 
-  isCurrentEnv(env: IEnvironment): boolean {
-    return this.currentProjectEnv?.envId === env.id;
+  trackProjectById(_: number, project: IProject): string {
+    return project.id;
   }
 
   onCreateProjectClick() {
@@ -118,6 +128,7 @@ export class ProjectComponent implements OnInit {
     this.projectService.delete(project.id).subscribe(() => {
       // remove the deleted project from list
       this.projects = this.projects.filter(item => item.id !== project.id);
+      this.updateFilteredProjects();
       this.messageService.success($localize`:@@org.project.project-remove-success:Project successfully removed`);
       // emit project list change event
       this.messageQueueService.emit(this.messageQueueService.topics.PROJECT_LIST_CHANGED);
@@ -150,6 +161,7 @@ export class ProjectComponent implements OnInit {
     else if (data.project) {
       // insert the newly created project at the second position
       this.projects = [this.projects[0], data.project, ...this.projects.slice(1)];
+      this.updateFilteredProjects();
     }
 
     // emit project list change event
@@ -339,7 +351,7 @@ export class ProjectComponent implements OnInit {
   }
 
   private envSecretsChanged(env: IEnvironment) {
-    if (this.isCurrentEnv(env)) {
+    if (env.id === this.currentProjectEnv?.envId) {
       this.messageQueueService.emit(this.messageQueueService.topics.CURRENT_ENV_SECRETS_CHANGED);
     }
   }
