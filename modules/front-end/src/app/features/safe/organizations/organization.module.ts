@@ -66,7 +66,7 @@ import { NzEmptyModule } from 'ng-zorro-antd/empty';
     NzAlertComponent,
     ScrollingModule,
     OrganizationRoutingModule,
-    NzEmptyComponent
+    NzEmptyModule
   ]
 })
 export class OrganizationModule { }
