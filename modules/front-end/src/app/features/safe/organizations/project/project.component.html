@@ -11,7 +11,11 @@
       <ng-container i18n="@@common.add">Add</ng-container>
     </button>
   </div>
-  @if (filteredProjects.length === 0) {
+  @if (isLoading) {
+    <div class="loading-container">
+      <nz-spin nzTip="Loading..." i18n-nzTip="@@common.loading"></nz-spin>
+    </div>
+  } @else if (filteredProjects.length === 0) {
     <div class="no-projects">
       <nz-empty />
     </div>

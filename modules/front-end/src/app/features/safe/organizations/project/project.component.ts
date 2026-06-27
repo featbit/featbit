@@ -39,6 +39,8 @@ export class ProjectComponent implements OnInit {
   // current project env
   currentProjectEnv: IProjectEnv;
 
+  isLoading: boolean = false;
+
   projects: IProject[] = [];
   filteredProjects: IProject[] = [];
 
@@ -69,9 +71,14 @@ export class ProjectComponent implements OnInit {
 
   async ngOnInit() {
     this.currentProjectEnv = getCurrentProjectEnv();
-    this.projects = await this.projectService.getListAsync();
-    this.sortProjects();
-    this.updateFilteredProjects();
+    this.isLoading = true;
+    try {
+      this.projects = await this.projectService.getListAsync();
+      this.sortProjects();
+      this.updateFilteredProjects();
+    } finally {
+      this.isLoading = false;
+    }
   }
 
   private sortProjects() {
