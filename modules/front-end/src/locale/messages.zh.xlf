@@ -10860,7 +10860,7 @@
           <context context-type="sourcefile">src/app/features/safe/organizations/project/project.component.ts</context>
           <context context-type="linenumber">128</context>
         </context-group>
-        <target>环境创建成功</target>
+        <target>环境删除成功</target>
       </trans-unit>
       <trans-unit id="org.project.project-remove-success" datatype="html">
         <source>Project successfully removed</source>
