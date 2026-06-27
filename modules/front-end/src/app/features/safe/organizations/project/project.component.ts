@@ -174,9 +174,9 @@ export class ProjectComponent implements OnInit {
     else if (data.project) {
       // insert the newly created project at the second position
       this.projects = [this.projects[0], data.project, ...this.projects.slice(1)];
-      this.updateFilteredProjects();
     }
 
+    this.updateFilteredProjects();
     // emit project list change event
     this.messageQueueService.emit(this.messageQueueService.topics.PROJECT_LIST_CHANGED);
   }
