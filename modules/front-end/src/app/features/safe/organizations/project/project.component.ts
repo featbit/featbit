@@ -88,7 +88,7 @@ export class ProjectComponent implements OnInit {
     const query = this._searchValue?.toLowerCase();
     this.filteredProjects = query
       ? this.projects.filter(p => p.name.toLowerCase().includes(query))
-      : [...this.projects];
+      : this.projects;
 
     this.visibleCount = this.pageSize;
   }
