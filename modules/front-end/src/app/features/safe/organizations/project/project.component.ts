@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { IProject, IEnvironment, IProjectEnv, ISecret, SecretTypeEnum } from '@shared/types';
 import { ProjectService } from '@services/project.service';
 import { EnvService } from '@services/env.service';
@@ -15,8 +15,7 @@ import { getCurrentProjectEnv } from "@utils/project-env";
     selector: 'app-project',
     templateUrl: './project.component.html',
     styleUrls: ['./project.component.less'],
-    standalone: false,
-    changeDetection: ChangeDetectionStrategy.OnPush
+    standalone: false
 })
 export class ProjectComponent implements OnInit {
 
@@ -37,13 +36,8 @@ export class ProjectComponent implements OnInit {
 
   projects: IProject[] = [];
 
-  // Pre-computed RN maps to avoid per-cycle function calls in the template
-  projectRNs = new Map<string, string>();
-  envRNs = new Map<string, string>();
-
   constructor(
     private fb: FormBuilder,
-    private cdr: ChangeDetectorRef,
     private messageQueueService: MessageQueueService,
     private projectService: ProjectService,
     private envService: EnvService,
@@ -56,8 +50,6 @@ export class ProjectComponent implements OnInit {
     this.currentProjectEnv = getCurrentProjectEnv();
     this.projects = await this.projectService.getListAsync();
     this.sortProjects();
-    this.buildRNMaps();
-    this.cdr.markForCheck();
   }
 
   private sortProjects() {
@@ -67,17 +59,6 @@ export class ProjectComponent implements OnInit {
 
     if (currentProject) {
       this.projects = [currentProject, ...otherProjects];
-    }
-  }
-
-  private buildRNMaps(): void {
-    this.projectRNs.clear();
-    this.envRNs.clear();
-    for (const project of this.projects) {
-      this.projectRNs.set(project.id, this.permissionsService.getProjectRN(project));
-      for (const env of project.environments) {
-        this.envRNs.set(env.id, this.permissionsService.getEnvRN(project, env));
-      }
     }
   }
 
@@ -124,8 +105,6 @@ export class ProjectComponent implements OnInit {
       this.messageService.success($localize`:@@org.project.env-remove-success:Environment successfully removed`);
       // emit project list change event
       this.messageQueueService.emit(this.messageQueueService.topics.PROJECT_LIST_CHANGED);
-      this.envRNs.delete(env.id);
-      this.cdr.markForCheck();
     })
   }
 
@@ -142,9 +121,6 @@ export class ProjectComponent implements OnInit {
       this.messageService.success($localize`:@@org.project.project-remove-success:Project successfully removed`);
       // emit project list change event
       this.messageQueueService.emit(this.messageQueueService.topics.PROJECT_LIST_CHANGED);
-      this.projectRNs.delete(project.id);
-      project.environments.forEach(e => this.envRNs.delete(e.id));
-      this.cdr.markForCheck();
     });
   }
 
@@ -174,10 +150,6 @@ export class ProjectComponent implements OnInit {
     else if (data.project) {
       // insert the newly created project at the second position
       this.projects = [this.projects[0], data.project, ...this.projects.slice(1)];
-      this.projectRNs.set(data.project.id, this.permissionsService.getProjectRN(data.project));
-      data.project.environments.forEach(env => {
-        this.envRNs.set(env.id, this.permissionsService.getEnvRN(data.project, env));
-      });
     }
 
     // emit project list change event
@@ -196,7 +168,6 @@ export class ProjectComponent implements OnInit {
       this.env = {...this.env, ...data.env};
     } else {
       this.project.environments.push(data.env);
-      this.envRNs.set(data.env.id, this.permissionsService.getEnvRN(this.project, data.env));
     }
 
     // if it is editing current env
@@ -285,7 +256,6 @@ export class ProjectComponent implements OnInit {
       next: () => {
         env.secrets = env.secrets.filter((secret) => secret.id !== secretId);
         this.envSecretsChanged(env);
-        this.cdr.markForCheck();
       },
       error: () => {
         this.messageService.error($localize`:@@common.operation-failed-try-again:Operation failed, please try again`);
@@ -329,7 +299,6 @@ export class ProjectComponent implements OnInit {
         });
         this.envSecretsChanged(this.env);
         this.isSecretModalVisible = false;
-        this.cdr.markForCheck();
       },
       error: () => {
         this.messageService.error($localize`:@@common.operation-failed-try-again:Operation failed, please try again`);
@@ -350,7 +319,6 @@ export class ProjectComponent implements OnInit {
         this.env.secrets = [...this.env.secrets, secret];
         this.envSecretsChanged(this.env);
         this.isSecretModalVisible = false;
-        this.cdr.markForCheck();
       },
       error: () => {
         this.messageService.error($localize`:@@common.operation-failed-try-again:Operation failed, please try again`);
