@@ -29,12 +29,35 @@ export class ProjectComponent implements OnInit {
   project: IProject;
   env: IEnvironment;
 
-  searchValue: string;
+  private _searchValue = '';
+  get searchValue(): string { return this._searchValue; }
+  set searchValue(v: string) {
+    this._searchValue = v;
+    this.updateFilteredProjects();
+  }
 
   // current project env
   currentProjectEnv: IProjectEnv;
 
+  isLoading: boolean = false;
+
   projects: IProject[] = [];
+  filteredProjects: IProject[] = [];
+
+  private readonly pageSize = 3;
+  visibleCount = this.pageSize;
+
+  get visibleProjects(): IProject[] {
+    return this.filteredProjects.slice(0, this.visibleCount);
+  }
+
+  get hasMore(): boolean {
+    return this.visibleCount < this.filteredProjects.length;
+  }
+
+  loadMore(): void {
+    this.visibleCount += this.pageSize;
+  }
 
   constructor(
     private fb: FormBuilder,
@@ -48,8 +71,14 @@ export class ProjectComponent implements OnInit {
 
   async ngOnInit() {
     this.currentProjectEnv = getCurrentProjectEnv();
-    this.projects = await this.projectService.getListAsync();
-    this.sortProjects();
+    this.isLoading = true;
+    try {
+      this.projects = await this.projectService.getListAsync();
+      this.sortProjects();
+      this.updateFilteredProjects();
+    } finally {
+      this.isLoading = false;
+    }
   }
 
   private sortProjects() {
@@ -62,12 +91,13 @@ export class ProjectComponent implements OnInit {
     }
   }
 
-  isCurrentProject(project: IProject): boolean {
-    return this.currentProjectEnv?.projectId === project.id;
-  }
+  private updateFilteredProjects(): void {
+    const query = this._searchValue?.toLowerCase();
+    this.filteredProjects = query
+      ? this.projects.filter(p => p.name.toLowerCase().includes(query))
+      : this.projects;
 
-  isCurrentEnv(env: IEnvironment): boolean {
-    return this.currentProjectEnv?.envId === env.id;
+    this.visibleCount = this.pageSize;
   }
 
   onCreateProjectClick() {
@@ -118,6 +148,7 @@ export class ProjectComponent implements OnInit {
     this.projectService.delete(project.id).subscribe(() => {
       // remove the deleted project from list
       this.projects = this.projects.filter(item => item.id !== project.id);
+      this.updateFilteredProjects();
       this.messageService.success($localize`:@@org.project.project-remove-success:Project successfully removed`);
       // emit project list change event
       this.messageQueueService.emit(this.messageQueueService.topics.PROJECT_LIST_CHANGED);
@@ -152,6 +183,7 @@ export class ProjectComponent implements OnInit {
       this.projects = [this.projects[0], data.project, ...this.projects.slice(1)];
     }
 
+    this.updateFilteredProjects();
     // emit project list change event
     this.messageQueueService.emit(this.messageQueueService.topics.PROJECT_LIST_CHANGED);
   }
@@ -339,7 +371,7 @@ export class ProjectComponent implements OnInit {
   }
 
   private envSecretsChanged(env: IEnvironment) {
-    if (this.isCurrentEnv(env)) {
+    if (env.id === this.currentProjectEnv?.envId) {
       this.messageQueueService.emit(this.messageQueueService.topics.CURRENT_ENV_SECRETS_CHANGED);
     }
   }

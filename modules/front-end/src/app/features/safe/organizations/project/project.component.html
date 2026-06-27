@@ -11,8 +11,17 @@
       <ng-container i18n="@@common.add">Add</ng-container>
     </button>
   </div>
+  @if (isLoading) {
+    <div class="loading-container">
+      <nz-spin nzTip="Loading..." i18n-nzTip="@@common.loading"></nz-spin>
+    </div>
+  } @else if (filteredProjects.length === 0) {
+    <div class="no-projects">
+      <nz-empty />
+    </div>
+  } @else {
   <div class="project-list">
-    @for (project of projects | projectFilter: searchValue; track project.id) {
+    @for (project of visibleProjects; track project.id) {
       <div class="project">
         <nz-card [nzBordered]="false">
           <nz-descriptions [nzTitle]="titleTemplate" [nzExtra]="extraTemplate"></nz-descriptions>
@@ -23,8 +32,8 @@
                   <div class="env-basis">
                     <div>
                       <div class="desc-name">
-                        <span i18n="@@commoname">Name</span>
-                        @if (isCurrentEnv(env)) {
+                        <span i18n="@@common.name">Name</span>
+                        @if (env.id === currentProjectEnv?.envId) {
                           <nz-tag nzColor="green" i18n="@@common.current">Current</nz-tag>
                         }
                       </div>
@@ -82,7 +91,7 @@
                     <button class="edit" nz-button nzType="link" permission-check [rn]="getEnvRN(project, env)" [action]="permissionActions.UpdateEnvSettings" (actionIfAllow)="onEditEnvClick(project, env)">
                       <span i18n="@@org.project.edit">Edit</span>
                     </button>
-                    @if (!isCurrentEnv(env)) {
+                    @if (env.id !== currentProjectEnv?.envId) {
                       <nz-divider nzType="vertical"></nz-divider>
                       <button class="remove" nz-button nzType="link" i18n-nz-popconfirm="@@common.remove-confirm" nz-popconfirm="This operation cannot be reverted, are you sure to remove it?"
                         nzPopconfirmPlacement="bottomRight"
@@ -108,7 +117,7 @@
           <div class="project-header">
             <span>{{project.name}}</span>
             <nz-tag nzColor="blue">Key: {{project.key}}</nz-tag>
-            @if (isCurrentProject(project)) {
+            @if (project.id === currentProjectEnv?.projectId) {
               <nz-tag nzColor="green" i18n="@@common.current">Current</nz-tag>
             }
           </div>
@@ -141,7 +150,11 @@
         </ng-template>
       </div>
     }
+    <div *ngIf="hasMore" class="load-more">
+      <button nz-button nzType="primary" (click)="loadMore()" i18n="@@common.load-more">Load More</button>
+    </div>
   </div>
+  }
 </div>
 <nz-modal
   [(nzVisible)]="isSecretModalVisible"
