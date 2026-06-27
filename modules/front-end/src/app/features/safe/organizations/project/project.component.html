@@ -33,15 +33,15 @@
                           <nz-tag nzColor="green" i18n="@@common.current">Current</nz-tag>
                         }
                       </div>
-                      <div class="desc-content">{{ env.name }}</div>
+                      <div class="desc-content">{{env.name}}</div>
                     </div>
                     <div>
                       <div class="desc-name"><span>Key</span><i nz-icon i18n-nz-tooltip="@@common.key-input-description" nz-tooltip="We use the key to give you friendly URLs & RNs. Keys should only contain letters, numbers, ., _ or -." nzType="icons:icon-info-outline"></i></div>
-                      <div class="desc-content">{{ env.key }}</div>
+                      <div class="desc-content">{{env.key}}</div>
                     </div>
                     <div>
                       <div class="desc-name" i18n="@@common.description">Description</div>
-                      <div class="desc-content">{{ env.description }}</div>
+                      <div class="desc-content">{{env.description}}</div>
                     </div>
                   </div>
                   <div class="env-secret">
@@ -53,30 +53,30 @@
                       <div class="desc-content">
                         @for (secret of env.secrets; track secret) {
                           <div class="secret">
-                            <span class="secret-name" nz-tooltip [nzTooltipTitle]="secret.name">{{ secret.name }}</span>
+                            <span class="secret-name" nz-tooltip [nzTooltipTitle]="secret.name">{{secret.name}}</span>
                             @if (secret.type == SecretTypeEnum.Server) {
                               <nz-tag nzColor="geekblue" i18n="@@common.server">server</nz-tag>
                             }
                             @if (secret.type == SecretTypeEnum.Client) {
                               <nz-tag nzColor="cyan" i18n="@@common.client">client</nz-tag>
                             }
-                            <span class="secret-value" nz-tooltip nzTooltipTitle="Click to copy" i18n-nzTooltipTitle="@@common.click-to-copy" nzTooltipPlacement="top" (click)="copyText(secret.value)">{{ secret.value }}</span>
+                            <span class="secret-value" nz-tooltip nzTooltipTitle="Click to copy" i18n-nzTooltipTitle="@@common.click-to-copy" nzTooltipPlacement="top" (click)="copyText(secret.value)">{{secret.value}}</span>
                             <span>
-                            <button nz-button nzSize="small" nzType="link" (click)="editSecret(project, env, secret)">
-                              <i nz-icon nzType="edit" nzTheme="outline"></i>
-                            </button>
-                            <button
-                              i18n-nz-popconfirm="@@org.project.remove-secret-confirm"
-                              nz-popconfirm="This operation cannot be reverted, make sure this secret is removed from all SDKs before removing."
-                              nzPopconfirmPlacement="bottomRight"
-                              [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
-                              nz-button
-                              nzSize="small"
-                              nzType="link"
-                              nzDanger
-                              (nzOnConfirm)="deleteSecret(project, env, secret.id)">
-                              <i nz-icon nzType="delete" nzTheme="outline"></i>
-                            </button>
+                              <button nz-button nzSize="small" nzType="link" (click)="editSecret(project, env, secret)">
+                                <i nz-icon nzType="edit" nzTheme="outline"></i>
+                              </button>
+                              <button
+                                i18n-nz-popconfirm="@@org.project.remove-secret-confirm"
+                                nz-popconfirm="This operation cannot be reverted, make sure this secret is removed from all SDKs before removing."
+                                nzPopconfirmPlacement="bottomRight"
+                                [nzPopconfirmOverlayStyle]="{minWidth: '240px'}"
+                                nz-button
+                                nzSize="small"
+                                nzType="link"
+                                nzDanger
+                                (nzOnConfirm)="deleteSecret(project, env, secret.id)">
+                                <i nz-icon nzType="delete" nzTheme="outline"></i>
+                              </button>
                           </span>
                           </div>
                         }
@@ -111,8 +111,8 @@
         </nz-card>
         <ng-template #titleTemplate>
           <div class="project-header">
-            <span>{{ project.name }}</span>
-            <nz-tag nzColor="blue">Key: {{ project.key }}</nz-tag>
+            <span>{{project.name}}</span>
+            <nz-tag nzColor="blue">Key: {{project.key}}</nz-tag>
             @if (project.id === currentProjectEnv?.projectId) {
               <nz-tag nzColor="green" i18n="@@common.current">Current</nz-tag>
             }
