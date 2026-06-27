@@ -15,8 +15,15 @@ import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { appPath } from "@/lib/app-path";
 import { cn } from "@/lib/utils";
 import { ArrowLeft } from "lucide-react";
+import { usePathname } from "@/lib/router";
 
 const FEATBIT_MAIN_PATH = "/";
+
+const NAV_ITEMS = [
+  { href: "/", label: "Experiments" },
+  { href: "/release-decision-metrics", label: "Metrics" },
+  { href: "/release-decision-layers", label: "Layers" },
+];
 
 const DashboardHeaderContext = createContext<{
   setHeaderContent: Dispatch<SetStateAction<ReactNode>>;
@@ -43,6 +50,7 @@ export default function DashboardLayout({
   hideBackToFeatBit?: boolean;
 }) {
   const [headerContent, setHeaderContent] = useState<ReactNode>(null);
+  const pathname = usePathname();
   const headerContextValue = useMemo(
     () => ({ setHeaderContent }),
     [setHeaderContent],
@@ -71,6 +79,30 @@ export default function DashboardLayout({
               </span>
             </div>
           </Link>
+
+          {!headerContent && (
+            <nav className="hidden items-center gap-1 rounded-md border border-border/70 bg-background/70 p-1 md:flex">
+              {NAV_ITEMS.map((item) => {
+                const active =
+                  item.href === "/"
+                    ? pathname === "/"
+                    : pathname === item.href || pathname.startsWith(`${item.href}/`);
+
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={cn(
+                      "rounded px-2.5 py-1 text-xs font-semibold text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground",
+                      active && "bg-foreground text-background hover:bg-foreground hover:text-background",
+                    )}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </nav>
+          )}
 
           {!hideBackToFeatBit && (
             <a

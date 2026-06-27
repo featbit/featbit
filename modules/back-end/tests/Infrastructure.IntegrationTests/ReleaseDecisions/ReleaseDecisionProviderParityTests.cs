@@ -7,6 +7,13 @@ namespace Infrastructure.IntegrationTests.ReleaseDecisions;
 [Collection(nameof(ReleaseDecisionProviderParityCollection))]
 public sealed class ReleaseDecisionProviderParityTests(ReleaseDecisionProviderParityFixture fixture)
 {
+    private const string TenTenSamplingPlan = """
+        [
+          { "variation": "control", "role": "control", "includeRate": 11.111111 },
+          { "variation": "treatment", "role": "treatment", "includeRate": 100 }
+        ]
+        """;
+
     [Theory]
     [InlineData("binary", "once")]
     [InlineData("continuous", "count")]
@@ -119,13 +126,6 @@ public sealed class ReleaseDecisionProviderParityTests(ReleaseDecisionProviderPa
         var runId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
         await fixture.SeedSamplingPlanScenarioAsync(runId);
 
-        const string samplingPlan = """
-            [
-              { "variation": "control", "role": "control", "includeRate": 11.111111 },
-              { "variation": "treatment", "role": "treatment", "includeRate": 100 }
-            ]
-            """;
-
         var request = new QueryExperimentStats
         {
             RunId = runId,
@@ -138,7 +138,7 @@ public sealed class ReleaseDecisionProviderParityTests(ReleaseDecisionProviderPa
             MetricAgg = "once",
             AssignmentUnitSelector = "user.keyId",
             LayerTrafficPercent = 100,
-            AnalysisSamplingPlan = samplingPlan
+            AnalysisSamplingPlan = TenTenSamplingPlan
         };
 
         var results = new List<(string Provider, ExperimentStatsVm Stats)>();
@@ -151,6 +151,86 @@ public sealed class ReleaseDecisionProviderParityTests(ReleaseDecisionProviderPa
         Assert.Equal(
             [("control", 80L), ("treatment", 80L)],
             expected.Variants.Select(x => (x.Variant, x.Users)).ToArray());
+        Assert.Equal(
+            [("control", 80L), ("treatment", 80L)],
+            expected.Variants.Select(x => (x.Variant, x.Conversions)).ToArray());
+
+        foreach (var result in results.Skip(1))
+        {
+            AssertStatsEqual(results[0].Provider, expected, result.Provider, Normalize(result.Stats));
+        }
+    }
+
+    [Fact]
+    public async Task Experiment_stats_use_run_sampling_plan_for_guardrail_events()
+    {
+        var runId = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
+        await fixture.SeedSamplingPlanScenarioAsync(runId);
+
+        var request = new QueryExperimentStats
+        {
+            RunId = runId,
+            EnvId = ReleaseDecisionProviderParityFixture.EnvId,
+            FlagKey = ReleaseDecisionProviderParityFixture.FlagKey,
+            MetricEvent = ReleaseDecisionProviderParityFixture.GuardrailEvent,
+            StartDate = "2026-01-01",
+            EndDate = "2026-01-02",
+            MetricType = "binary",
+            MetricAgg = "once",
+            AssignmentUnitSelector = "user.keyId",
+            LayerTrafficPercent = 100,
+            AnalysisSamplingPlan = TenTenSamplingPlan
+        };
+
+        var results = new List<(string Provider, ExperimentStatsVm Stats)>();
+        foreach (var (provider, service) in fixture.CreateExperimentStatsServices())
+        {
+            results.Add((provider, await service.QueryAsync(request)));
+        }
+
+        var expected = Normalize(results[0].Stats);
+        Assert.Equal(
+            [("control", 80L), ("treatment", 80L)],
+            expected.Variants.Select(x => (x.Variant, x.Users)).ToArray());
+        Assert.Equal(
+            [("control", 80L), ("treatment", 80L)],
+            expected.Variants.Select(x => (x.Variant, x.Conversions)).ToArray());
+
+        foreach (var result in results.Skip(1))
+        {
+            AssertStatsEqual(results[0].Provider, expected, result.Provider, Normalize(result.Stats));
+        }
+    }
+
+    [Fact]
+    public async Task Experiment_stats_exclude_run_sampling_events_when_custom_assignment_selector_is_missing()
+    {
+        var runId = Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc");
+        await fixture.SeedSamplingPlanScenarioAsync(runId);
+
+        var request = new QueryExperimentStats
+        {
+            RunId = runId,
+            EnvId = ReleaseDecisionProviderParityFixture.EnvId,
+            FlagKey = ReleaseDecisionProviderParityFixture.FlagKey,
+            MetricEvent = ReleaseDecisionProviderParityFixture.MetricEvent,
+            StartDate = "2026-01-01",
+            EndDate = "2026-01-02",
+            MetricType = "binary",
+            MetricAgg = "once",
+            AssignmentUnitSelector = "accountId",
+            LayerTrafficPercent = 100,
+            AnalysisSamplingPlan = TenTenSamplingPlan
+        };
+
+        var results = new List<(string Provider, ExperimentStatsVm Stats)>();
+        foreach (var (provider, service) in fixture.CreateExperimentStatsServices())
+        {
+            results.Add((provider, await service.QueryAsync(request)));
+        }
+
+        var expected = Normalize(results[0].Stats);
+        Assert.Empty(expected.Variants);
 
         foreach (var result in results.Skip(1))
         {

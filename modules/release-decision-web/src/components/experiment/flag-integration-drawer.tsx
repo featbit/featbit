@@ -1539,9 +1539,9 @@ function RolloutEditor({
     <div className="space-y-3">
       {/* Stacked bar */}
       <div className="space-y-1">
-        <div className="flex justify-between text-[10px] text-muted-foreground uppercase tracking-wider">
-          <span>Rollout</span>
-          <span className={sumValid ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400"}>
+        <div className="flex justify-between">
+          <h4 className="rd-heading-field">Rollout</h4>
+          <span className={`text-[10px] uppercase tracking-wider ${sumValid ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400"}`}>
             Sum: {outerSum}% {sumValid ? "✓" : "(should be 100%)"}
           </span>
         </div>
@@ -1564,12 +1564,12 @@ function RolloutEditor({
 
       {/* Per-variation editor — just variation + percentage */}
       <div className="grid grid-cols-[1fr_10rem] gap-x-3 gap-y-1.5 items-center text-xs">
-        <div className="text-[10px] font-medium text-muted-foreground uppercase">
+        <h4 className="rd-heading-field">
           Variation
-        </div>
-        <div className="text-[10px] font-medium text-muted-foreground uppercase">
+        </h4>
+        <h4 className="rd-heading-field">
           Rollout %
-        </div>
+        </h4>
 
         {variations.map((v, idx) => {
           const colors = PALETTE[idx % PALETTE.length];

@@ -19,7 +19,7 @@ import {
   Flag,
   ExternalLink,
   FolderOpen,
-  KeyRound,
+  Layers3,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { UserMenu } from "@/components/auth/user-menu";
@@ -40,18 +40,13 @@ const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
     items: [
       { href: "/", label: "All Experiments", icon: FolderKanban },
       { href: "/new", label: "New Experiment", icon: Plus },
+      { href: "/release-decision-layers", label: "Layers", icon: Layers3 },
     ],
   },
   {
     label: "Control",
     items: [
       { href: "https://app.featbit.co", label: "Feature Flags", icon: Flag, external: true },
-    ],
-  },
-  {
-    label: "Data",
-    items: [
-      { href: "/data/env-settings", label: "Env Settings", icon: KeyRound },
     ],
   },
 ];

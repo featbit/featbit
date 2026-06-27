@@ -3,6 +3,10 @@ export interface Activity {
   type: string;
   title: string;
   detail: string | null;
+  actorId: string | null;
+  actorName: string | null;
+  actorEmail: string | null;
+  actorType: string | null;
   createdAt: Date;
   experimentId: string;
 }

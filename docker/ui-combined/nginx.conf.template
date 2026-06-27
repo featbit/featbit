@@ -38,6 +38,18 @@ server {
     add_header Cache-Control 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0';
   }
 
+  location = /release-decision-metrics {
+    root /usr/share/nginx;
+    try_files /release-decision/index.html =404;
+    add_header Cache-Control 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0';
+  }
+
+  location = /release-decision-layers {
+    root /usr/share/nginx;
+    try_files /release-decision/index.html =404;
+    add_header Cache-Control 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0';
+  }
+
   # Media: images, icons, video, audio, HTC
   location ~* \.(?:jpg|jpeg|gif|png|ico|cur|gz|svg|svgz|mp4|ogg|ogv|webm|htc)$ {
     try_files $uri =404;

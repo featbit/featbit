@@ -451,8 +451,8 @@ function MetricTable({
   return (
     <div className="space-y-1">
       <div className="flex items-center gap-2">
-        <span className="text-sm font-semibold">{label}: {section.event}</span>
-        <span className="text-xs italic text-muted-foreground">{typeLabel}</span>
+        <h4 className="rd-heading-subsection">{label}: {section.event}</h4>
+        <h5 className="rd-heading-subtitle italic">{typeLabel}</h5>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full border-collapse text-xs leading-relaxed">
@@ -594,7 +594,7 @@ function BanditView({ data, variantLabels }: { data: BanditAnalysis; variantLabe
 
       {/* Arm performance */}
       <div className="space-y-1">
-        <span className="text-sm font-semibold">Arm Performance</span>
+        <h4 className="rd-heading-subsection">Arm Performance</h4>
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-xs leading-relaxed">
             <thead>
@@ -630,7 +630,7 @@ function BanditView({ data, variantLabels }: { data: BanditAnalysis; variantLabe
 
       {/* Thompson sampling */}
       <div className="space-y-1">
-        <span className="text-sm font-semibold">Thompson Sampling</span>
+        <h4 className="rd-heading-subsection">Thompson Sampling</h4>
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-xs leading-relaxed">
             <thead>

@@ -5,9 +5,11 @@ using Application.ExperimentStats;
 using Application.FeatureFlags;
 using Application.ReleaseDecisions;
 using Application.Services;
+using Application.Users;
 using Domain.FeatureFlags;
 using Domain.ReleaseDecisions;
 using Domain.Segments;
+using Domain.Users;
 using Infrastructure.Persistence.EntityFrameworkCore;
 using Infrastructure.Services.EntityFrameworkCore;
 using Microsoft.Data.Sqlite;
@@ -20,6 +22,7 @@ public class ReleaseDecisionAnalysisAlgorithmTests
     private static readonly Guid EnvId = Guid.Parse("11111111-1111-1111-1111-111111111111");
     private static readonly Guid ExperimentId = Guid.Parse("22222222-2222-2222-2222-222222222222");
     private static readonly Guid RunId = Guid.Parse("33333333-3333-3333-3333-333333333333");
+    private static readonly Guid UserId = Guid.Parse("55555555-5555-5555-5555-555555555555");
 
     [Fact]
     public async Task Bayesian_binary_analysis_reports_conversion_rate_and_win_probability()
@@ -262,7 +265,12 @@ public class ReleaseDecisionAnalysisAlgorithmTests
         AppDbContext db,
         IExperimentStatsService stats)
     {
-        return new ReleaseDecisionExperimentService(db, stats, new TestFeatureFlagService());
+        return new ReleaseDecisionExperimentService(
+            db,
+            stats,
+            new TestFeatureFlagService(),
+            new TestCurrentUser(UserId),
+            new TestUserService());
     }
 
     private static AppDbContext CreateDbContext()
@@ -441,5 +449,45 @@ public class ReleaseDecisionAnalysisAlgorithmTests
         public Task<ICollection<string>> GetAllTagsAsync(Guid envId) => throw new NotImplementedException();
         public Task<ICollection<Segment>> GetRelatedSegmentsAsync(ICollection<FeatureFlag> flags) => throw new NotImplementedException();
         public Task MarkAsUpdatedAsync(ICollection<Guid> flagIds, Guid operatorId) => throw new NotImplementedException();
+    }
+
+    private sealed class TestCurrentUser(Guid id) : ICurrentUser
+    {
+        public Guid Id { get; } = id;
+    }
+
+    private sealed class TestUserService : IUserService
+    {
+        private static readonly User User = new(UserId, "release-decision@example.com", "hashed", "Release Decision Tester");
+
+        public Task<string> GetOperatorAsync(Guid operatorId) =>
+            Task.FromResult(operatorId == User.Id ? User.Name : string.Empty);
+
+        public Task<ICollection<User>> GetListAsync(IEnumerable<Guid> ids) =>
+            Task.FromResult<ICollection<User>>(ids.Contains(User.Id) ? [User] : []);
+
+        public Task<ICollection<Domain.Workspaces.Workspace>> GetWorkspacesAsync(Guid userId) =>
+            Task.FromResult<ICollection<Domain.Workspaces.Workspace>>([]);
+
+        public Task<User> GetAsync(Guid id) =>
+            id == User.Id ? Task.FromResult(User) : throw new NotImplementedException();
+
+        public Task AddOneAsync(User segment) => throw new NotImplementedException();
+        public Task AddManyAsync(IEnumerable<User> entities) => throw new NotImplementedException();
+
+        public Task<User?> FindOneAsync(Expression<Func<User, bool>> predicate) =>
+            Task.FromResult(predicate.Compile()(User) ? User : null);
+
+        public Task<ICollection<User>> FindManyAsync(Expression<Func<User, bool>> predicate) =>
+            Task.FromResult<ICollection<User>>(predicate.Compile()(User) ? [User] : []);
+
+        public Task<long> CountAsync(Expression<Func<User, bool>> predicate) =>
+            Task.FromResult(predicate.Compile()(User) ? 1L : 0L);
+
+        public Task<bool> AnyAsync(Expression<Func<User, bool>> predicate) =>
+            Task.FromResult(predicate.Compile()(User));
+
+        public Task UpdateAsync(User segment) => throw new NotImplementedException();
+        public Task DeleteOneAsync(Guid id) => throw new NotImplementedException();
     }
 }

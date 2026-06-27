@@ -8,6 +8,14 @@ public class ReleaseDecisionActivity : Entity
 
     public string Detail { get; set; }
 
+    public Guid? ActorId { get; set; }
+
+    public string ActorName { get; set; }
+
+    public string ActorEmail { get; set; }
+
+    public string ActorType { get; set; }
+
     public DateTime CreatedAt { get; set; }
 
     public Guid ExperimentId { get; set; }

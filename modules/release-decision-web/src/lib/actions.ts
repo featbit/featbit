@@ -200,7 +200,7 @@ export async function updateExperimentRunAudienceAction(formData: FormData) {
       assignmentUnitSelector?.trim() || allocationKeySelector?.trim() || "user.keyId",
     layerTrafficPercent: isNaN(layerTrafficPercent)
       ? 100
-      : Math.min(100, Math.max(0.000001, layerTrafficPercent)),
+      : Math.min(100, Math.max(0, layerTrafficPercent)),
     allocationPlan: allocationPlan?.trim() || null,
     analysisSamplingPlan: analysisSamplingPlan?.trim() || null,
     audienceFilters: audienceFilters?.trim() || null,

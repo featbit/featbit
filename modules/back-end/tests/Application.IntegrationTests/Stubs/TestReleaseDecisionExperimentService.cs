@@ -101,8 +101,14 @@ public class TestReleaseDecisionExperimentService : IReleaseDecisionExperimentSe
         vm.ExperimentRuns.First().TrafficPercent = update.TrafficPercent;
         vm.ExperimentRuns.First().TrafficOffset = update.TrafficOffset;
         vm.ExperimentRuns.First().LayerId = update.LayerId;
+        vm.ExperimentRuns.First().LayerKey = update.LayerKey;
+        vm.ExperimentRuns.First().AssignmentUnitSelector = update.AssignmentUnitSelector;
+        vm.ExperimentRuns.First().LayerTrafficPercent = update.LayerTrafficPercent;
+        vm.ExperimentRuns.First().AnalysisSamplingPlan = update.AnalysisSamplingPlan;
         vm.ExperimentRuns.First().AudienceFilters = update.AudienceFilters;
         vm.ExperimentRuns.First().Method = update.Method;
+        vm.ExperimentRuns.First().ControlVariant = update.ControlVariant;
+        vm.ExperimentRuns.First().TreatmentVariant = update.TreatmentVariant;
 
         return Task.FromResult(vm);
     }
@@ -200,6 +206,10 @@ public class TestReleaseDecisionExperimentService : IReleaseDecisionExperimentSe
                     TreatmentVariant = "treatment",
                     TrafficPercent = 100,
                     TrafficOffset = 0,
+                    LayerKey = null,
+                    AssignmentUnitSelector = "user.keyId",
+                    LayerTrafficPercent = 100,
+                    AnalysisSamplingPlan = """[{"variation":"control","role":"control","includeRate":100},{"variation":"treatment","role":"treatment","includeRate":100}]""",
                     DataSourceMode = "featbit-managed",
                     CreatedAt = CreatedAt,
                     UpdatedAt = UpdatedAt
@@ -213,6 +223,10 @@ public class TestReleaseDecisionExperimentService : IReleaseDecisionExperimentSe
                     Type = "updated",
                     Title = "Experiment updated",
                     Detail = "Test activity",
+                    ActorId = new Guid("10000000-0000-0000-0000-000000000001"),
+                    ActorName = "Test User",
+                    ActorEmail = "test@example.com",
+                    ActorType = "user",
                     CreatedAt = UpdatedAt
                 }
             ]

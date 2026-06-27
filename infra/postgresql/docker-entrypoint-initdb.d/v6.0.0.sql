@@ -64,12 +64,22 @@ CREATE TABLE IF NOT EXISTS release_decision_activities
     type           varchar(128)             not null,
     title          varchar(512)             not null,
     detail         text                     null,
+    actor_id       uuid                     null,
+    actor_name     varchar(256)             null,
+    actor_email    varchar(512)             null,
+    actor_type     varchar(64)              null,
     experiment_id  uuid                     not null,
     created_at     timestamp with time zone not null default now()
 );
 
 CREATE INDEX IF NOT EXISTS ix_release_decision_activities_experiment_created_at
     ON release_decision_activities (experiment_id, created_at);
+
+ALTER TABLE release_decision_activities
+    ADD COLUMN IF NOT EXISTS actor_id uuid null,
+    ADD COLUMN IF NOT EXISTS actor_name varchar(256) null,
+    ADD COLUMN IF NOT EXISTS actor_email varchar(512) null,
+    ADD COLUMN IF NOT EXISTS actor_type varchar(64) null;
 
 CREATE TABLE IF NOT EXISTS release_decision_experiment_runs
 (

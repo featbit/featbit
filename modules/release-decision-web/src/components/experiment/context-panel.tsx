@@ -88,9 +88,9 @@ export function ContextPanel({
     <div className="h-full overflow-y-auto p-4 space-y-5 text-sm">
       {/* ── Decision State ── */}
       <section className="space-y-2">
-        <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+        <div className="flex items-center gap-1.5">
           {config.icon}
-          <span>Decision State</span>
+          <h3 className="rd-heading-label">Decision State</h3>
           <Badge variant="secondary" className={`ml-auto text-[10px] ${stage.color}`}>
             {stage.cf}
           </Badge>
@@ -102,9 +102,9 @@ export function ContextPanel({
             const value = renderFieldText(field, raw);
             return (
               <div key={field}>
-                <span className="text-[10px] font-medium text-muted-foreground uppercase">
+                <h4 className="rd-heading-field">
                   {FIELD_LABELS[field] ?? field}
-                </span>
+                </h4>
                 <p className="text-xs leading-relaxed">
                   {value || (
                     <span className="italic text-muted-foreground/50">
@@ -120,9 +120,9 @@ export function ContextPanel({
 
       {/* ── Feature Flag ── */}
       <section className="space-y-2">
-        <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+        <div className="flex items-center gap-1.5">
           <Flag className="size-3.5" />
-          <span>Feature Flag</span>
+          <h3 className="rd-heading-label">Feature Flag</h3>
           <Badge
             variant={isConfigured ? "secondary" : "outline"}
             className="ml-auto text-[10px]"
@@ -133,16 +133,16 @@ export function ContextPanel({
         {isConfigured ? (
           <div className="space-y-1">
             <div>
-              <span className="text-[10px] font-medium text-muted-foreground uppercase">
+              <h4 className="rd-heading-field">
                 Key
-              </span>
+              </h4>
               <p className="text-xs font-mono">{experiment.flagKey}</p>
             </div>
             {experiment.flagServerUrl && (
               <div>
-                <span className="text-[10px] font-medium text-muted-foreground uppercase">
+                <h4 className="rd-heading-field">
                   Server
-                </span>
+                </h4>
                 <p className="text-xs font-mono truncate">
                   {experiment.flagServerUrl}
                 </p>
@@ -159,9 +159,9 @@ export function ContextPanel({
       {/* ── Experiment Runs ── */}
       {experiment.experimentRuns.length > 0 && (
         <section className="space-y-2">
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+          <div className="flex items-center gap-1.5">
             <FlaskConical className="size-3.5" />
-            <span>Experiment Runs</span>
+            <h3 className="rd-heading-label">Experiment Runs</h3>
             <span className="ml-auto text-[10px] tabular-nums">
               {experiment.experimentRuns.length}
             </span>
@@ -191,9 +191,9 @@ export function ContextPanel({
 
       {/* ── Recent Activity ── */}
       <section className="space-y-2">
-        <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+        <div className="flex items-center gap-1.5">
           <ScrollText className="size-3.5" />
-          <span>Activity</span>
+          <h3 className="rd-heading-label">Activity</h3>
         </div>
         {experiment.activities.length === 0 ? (
           <p className="text-xs text-muted-foreground/50 italic">

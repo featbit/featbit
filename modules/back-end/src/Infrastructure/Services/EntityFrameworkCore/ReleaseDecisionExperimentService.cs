@@ -3,8 +3,10 @@ using Application.Bases.Exceptions;
 using Application.ExperimentStats;
 using Application.ReleaseDecisions;
 using Application.Services;
+using Application.Users;
 using Domain.FeatureFlags;
 using Domain.ReleaseDecisions;
+using Domain.Users;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 
@@ -13,7 +15,9 @@ namespace Infrastructure.Services.EntityFrameworkCore;
 public class ReleaseDecisionExperimentService(
     AppDbContext dbContext,
     IExperimentStatsService statsService,
-    IFeatureFlagService featureFlagService)
+    IFeatureFlagService featureFlagService,
+    ICurrentUser currentUser,
+    IUserService userService)
     : IReleaseDecisionExperimentService
 {
     private const double GuardrailHealthyHarmProbability = 0.01;
@@ -22,15 +26,12 @@ public class ReleaseDecisionExperimentService(
     public async Task<ReleaseDecisionExperimentVm> CreateAsync(ReleaseDecisionExperiment experiment)
     {
         await dbContext.Set<ReleaseDecisionExperiment>().AddAsync(experiment);
-        await dbContext.Set<ReleaseDecisionActivity>().AddAsync(new ReleaseDecisionActivity
-        {
-            Id = Guid.NewGuid(),
-            ExperimentId = experiment.Id,
-            Type = "stage_change",
-            Title = "Experiment created",
-            Detail = $"Release decision experiment \"{experiment.Name}\" created. Stage: hypothesis",
-            CreatedAt = experiment.CreatedAt
-        });
+        await AddActivityAsync(
+            experiment.Id,
+            "stage_change",
+            "Experiment created",
+            $"Release decision experiment \"{experiment.Name}\" created. Stage: hypothesis",
+            experiment.CreatedAt);
         await dbContext.SaveChangesAsync();
 
         return ToVm(experiment);
@@ -111,16 +112,14 @@ public class ReleaseDecisionExperimentService(
         ApplyUpdate(experiment, update);
         experiment.UpdatedAt = DateTime.UtcNow;
 
-        await dbContext.Set<ReleaseDecisionActivity>().AddAsync(new ReleaseDecisionActivity
-        {
-            Id = Guid.NewGuid(),
-            ExperimentId = experiment.Id,
-            Type = originalStage == experiment.Stage ? "state_update" : "stage_change",
-            Title = originalStage == experiment.Stage
+        await AddActivityAsync(
+            experiment.Id,
+            originalStage == experiment.Stage ? "state_update" : "stage_change",
+            originalStage == experiment.Stage
                 ? "Decision state updated"
                 : $"Stage changed to {experiment.Stage}",
-            CreatedAt = experiment.UpdatedAt
-        });
+            null,
+            experiment.UpdatedAt);
 
         await dbContext.SaveChangesAsync();
         return await GetAsync(envId, id);
@@ -143,14 +142,12 @@ public class ReleaseDecisionExperimentService(
         experiment.Stage = Normalize(stage, experiment.Stage);
         experiment.UpdatedAt = DateTime.UtcNow;
 
-        await dbContext.Set<ReleaseDecisionActivity>().AddAsync(new ReleaseDecisionActivity
-        {
-            Id = Guid.NewGuid(),
-            ExperimentId = experiment.Id,
-            Type = "stage_change",
-            Title = $"Stage changed to {experiment.Stage}",
-            CreatedAt = experiment.UpdatedAt
-        });
+        await AddActivityAsync(
+            experiment.Id,
+            "stage_change",
+            $"Stage changed to {experiment.Stage}",
+            null,
+            experiment.UpdatedAt);
 
         await dbContext.SaveChangesAsync();
         return await GetAsync(envId, id);
@@ -320,10 +317,12 @@ public class ReleaseDecisionExperimentService(
         run.SliceStart = Math.Clamp(update.SliceStart ?? run.TrafficOffset ?? 0, 0, 100);
         run.SliceEnd = Math.Clamp(update.SliceEnd ?? Math.Min(100, (run.TrafficOffset ?? 0) + (run.TrafficPercent ?? 100)), 0, 100);
         run.AllocationPlan = Normalize(update.AllocationPlan);
+        run.ControlVariant = Normalize(update.ControlVariant, run.ControlVariant);
+        run.TreatmentVariant = Normalize(update.TreatmentVariant, run.TreatmentVariant);
         run.AssignmentUnitSelector = Normalize(update.AssignmentUnitSelector, run.AssignmentUnitSelector) ??
                                      run.AllocationKeySelector ??
                                      "user.keyId";
-        run.LayerTrafficPercent = Math.Clamp(update.LayerTrafficPercent ?? run.LayerTrafficPercent ?? 100, 0.000001d, 100d);
+        run.LayerTrafficPercent = Math.Clamp(update.LayerTrafficPercent ?? run.LayerTrafficPercent ?? 100, 0d, 100d);
         run.AnalysisSamplingPlan = Normalize(update.AnalysisSamplingPlan);
         run.AudienceFilters = Normalize(update.AudienceFilters);
         run.Method = update.Method == "bandit" ? "bandit" : "bayesian_ab";
@@ -944,6 +943,10 @@ public class ReleaseDecisionExperimentService(
             Type = activity.Type,
             Title = activity.Title,
             Detail = activity.Detail,
+            ActorId = activity.ActorId,
+            ActorName = activity.ActorName,
+            ActorEmail = activity.ActorEmail,
+            ActorType = activity.ActorType,
             CreatedAt = activity.CreatedAt
         };
     }
@@ -1018,7 +1021,7 @@ public class ReleaseDecisionExperimentService(
         if (update.TrafficOffset.HasValue) run.TrafficOffset = Math.Clamp(update.TrafficOffset.Value, 0, 99);
         if (update.SliceStart.HasValue) run.SliceStart = Math.Clamp(update.SliceStart.Value, 0, 100);
         if (update.SliceEnd.HasValue) run.SliceEnd = Math.Clamp(update.SliceEnd.Value, 0, 100);
-        if (update.LayerTrafficPercent.HasValue) run.LayerTrafficPercent = Math.Clamp(update.LayerTrafficPercent.Value, 0.000001d, 100d);
+        if (update.LayerTrafficPercent.HasValue) run.LayerTrafficPercent = Math.Clamp(update.LayerTrafficPercent.Value, 0d, 100d);
     }
 
     private static void HydrateRunMetricConfig(
@@ -1131,6 +1134,7 @@ public class ReleaseDecisionExperimentService(
         string? detail = null,
         DateTime? createdAt = null)
     {
+        var actor = await ResolveActivityActorAsync();
         await dbContext.Set<ReleaseDecisionActivity>().AddAsync(new ReleaseDecisionActivity
         {
             Id = Guid.NewGuid(),
@@ -1138,8 +1142,39 @@ public class ReleaseDecisionExperimentService(
             Type = type,
             Title = title,
             Detail = detail,
+            ActorId = actor.Id,
+            ActorName = actor.Name,
+            ActorEmail = actor.Email,
+            ActorType = actor.Type,
             CreatedAt = createdAt ?? DateTime.UtcNow
         });
+    }
+
+    private async Task<(Guid? Id, string? Name, string? Email, string Type)> ResolveActivityActorAsync()
+    {
+        var actorId = currentUser.Id;
+        if (actorId == Guid.Empty || actorId == SystemUser.Id)
+        {
+            return (SystemUser.Id, "System", null, "system");
+        }
+
+        var user = await userService.FindOneAsync(x => x.Id == actorId);
+        if (user != null)
+        {
+            return (
+                user.Id,
+                string.IsNullOrWhiteSpace(user.Name) ? user.Email : user.Name,
+                user.Email,
+                "user");
+        }
+
+        var operatorName = await userService.GetOperatorAsync(actorId);
+        if (!string.IsNullOrWhiteSpace(operatorName))
+        {
+            return (actorId, operatorName, null, "access_token");
+        }
+
+        return (actorId, "Unknown actor", null, "unknown");
     }
 
     private static string? BuildPrimaryMetricJson(ReleaseDecisionMetricsUpdate update)

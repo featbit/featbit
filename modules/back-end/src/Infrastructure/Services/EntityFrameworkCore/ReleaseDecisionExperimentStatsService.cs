@@ -216,8 +216,8 @@ public class ReleaseDecisionExperimentStatsService(AppDbContext dbContext) : IEx
         var contribution = GetUserContributionExpression(request.MetricType, request.MetricAgg);
         var assignmentUnitSelector = NormalizeAssignmentUnitSelector(request);
         var layerKey = NormalizeLayerKey(request);
-        var applyLayer = !string.IsNullOrWhiteSpace(layerKey) && Math.Clamp(request.LayerTrafficPercent ?? 100, 0.000001d, 100d) < 100;
-        var layerTrafficPercent = Math.Clamp(request.LayerTrafficPercent ?? 100, 0.000001d, 100d);
+        var applyLayer = !string.IsNullOrWhiteSpace(layerKey) && Math.Clamp(request.LayerTrafficPercent ?? 100, 0d, 100d) < 100;
+        var layerTrafficPercent = Math.Clamp(request.LayerTrafficPercent ?? 100, 0d, 100d);
         var samplingScopeKey = (request.RunId?.ToString("N") ?? request.FlagKey) + ":";
 
         var sql = $"""
@@ -303,6 +303,13 @@ public class ReleaseDecisionExperimentStatsService(AppDbContext dbContext) : IEx
                 FROM included_exposure
                 ORDER BY assignment_unit, exposed_at
             ),
+            delete_existing_assignments AS
+            (
+                DELETE FROM release_decision_run_assignments
+                WHERE @RunId IS NOT NULL
+                  AND run_id = @RunId
+                RETURNING 1
+            ),
             upsert_assignments AS
             (
                 INSERT INTO release_decision_run_assignments
@@ -331,6 +338,7 @@ public class ReleaseDecisionExperimentStatsService(AppDbContext dbContext) : IEx
                     @Now,
                     @Now
                 FROM first_eval
+                CROSS JOIN (SELECT count(*) FROM delete_existing_assignments) deleted
                 WHERE @RunId IS NOT NULL
                 ON CONFLICT (run_id, assignment_unit)
                 DO UPDATE SET
@@ -536,6 +544,13 @@ public class ReleaseDecisionExperimentStatsService(AppDbContext dbContext) : IEx
                 WHERE role <> 'mismatch'
                 ORDER BY allocation_key, exposed_at
             ),
+            delete_existing_assignments AS
+            (
+                DELETE FROM release_decision_run_assignments
+                WHERE @RunId IS NOT NULL
+                  AND run_id = @RunId
+                RETURNING 1
+            ),
             upsert_assignments AS
             (
                 INSERT INTO release_decision_run_assignments
@@ -562,6 +577,7 @@ public class ReleaseDecisionExperimentStatsService(AppDbContext dbContext) : IEx
                     @Now,
                     @Now
                 FROM computed_assignments
+                CROSS JOIN (SELECT count(*) FROM delete_existing_assignments) deleted
                 WHERE @RunId IS NOT NULL
                 ON CONFLICT (run_id, allocation_key)
                 DO UPDATE SET

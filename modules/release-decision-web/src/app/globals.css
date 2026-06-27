@@ -129,6 +129,11 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
   html {
     @apply font-sans;
     font-family: var(--font-manrope), "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
@@ -148,6 +153,7 @@
     font-size: inherit;
     line-height: inherit;
     min-width: 320px;
+    overflow: hidden;
   }
   .dark body {
     background:
@@ -714,6 +720,82 @@
     max-width: 100%;
     overflow-wrap: anywhere;
     word-break: break-word;
+  }
+
+  .rd-heading-page {
+    margin: 0;
+    overflow: hidden;
+    color: var(--foreground);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: 0;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .rd-heading-section {
+    margin: 0;
+    color: var(--foreground);
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: 0;
+  }
+
+  .rd-heading-subsection {
+    margin: 0;
+    color: var(--foreground);
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: 0;
+  }
+
+  .rd-heading-label {
+    margin: 0;
+    color: var(--muted-foreground);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .rd-heading-field {
+    margin: 0;
+    color: var(--muted-foreground);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.25;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .rd-heading-subtitle {
+    margin: 0;
+    color: var(--muted-foreground);
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.45;
+    letter-spacing: 0;
+  }
+
+  .rd-stepper-title {
+    margin: 0;
+    color: inherit;
+    font-size: 14px;
+    font-weight: 650;
+    line-height: 1.15;
+    letter-spacing: 0;
+  }
+
+  .rd-stepper-subtitle {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.2;
+    letter-spacing: 0;
   }
 
   .dark .fb-dashboard-topbar,

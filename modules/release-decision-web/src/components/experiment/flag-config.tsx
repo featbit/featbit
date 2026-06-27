@@ -136,8 +136,8 @@ function VariationsEditor({ initialRows }: { initialRows: VariantRow[] }) {
       <input type="hidden" name="variants" value={JSON.stringify(rows)} />
 
       <div className="grid grid-cols-[1fr_1.5fr_auto] gap-x-2 gap-y-1.5 items-center">
-        <span className="text-[10px] font-medium text-muted-foreground uppercase">Key</span>
-        <span className="text-[10px] font-medium text-muted-foreground uppercase">Description</span>
+        <h4 className="rd-heading-field">Key</h4>
+        <h4 className="rd-heading-field">Description</h4>
         <span />
         {rows.map((row, i) => (
           <>
@@ -296,9 +296,9 @@ function ReadOnlyRow({
 }) {
   return (
     <div className="flex items-baseline gap-2">
-      <span className="text-[10px] font-medium text-muted-foreground uppercase w-28 shrink-0">
+      <h4 className="rd-heading-field w-28 shrink-0">
         {label}
-      </span>
+      </h4>
       <span className={`text-xs ${mono ? "font-mono" : ""} ${value ? "" : "italic text-muted-foreground/50"}`}>
         {value || "Not set"}
       </span>
@@ -538,9 +538,9 @@ export function FlagIntegrationHeader({
 
   return (
     <section className="space-y-2">
-      <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+      <div className="flex items-center gap-1.5">
         <Code className="size-3.5" />
-        <span>Flag Integration & Rollout</span>
+        <h3 className="rd-heading-label">Flag Integration & Rollout</h3>
         <button
           type="button"
           onClick={onEdit}

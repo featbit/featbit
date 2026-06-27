@@ -70,17 +70,17 @@ export function TrafficPoolView({
   return (
     <div className="divide-y rounded-md border">
       <div className="space-y-2.5 px-3 py-2.5">
-        <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+        <h3 className="rd-heading-label">
           Layer & Sampling
-        </div>
+        </h3>
         <LayerSamplingSummary experimentRuns={experimentRunsWithColor} variants={variantRows} />
       </div>
 
       {withDates.length > 0 && (
         <div className="space-y-2 px-3 py-2.5">
-          <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+          <h3 className="rd-heading-label">
             Observation Windows
-          </div>
+          </h3>
           <Timeline experimentRuns={experimentRunsWithColor} isSequential={isSequential} />
         </div>
       )}
@@ -119,9 +119,9 @@ function LayerSamplingSummary({
         <div key={layerKey} className="rounded border bg-background/70 p-2">
           <div className="mb-2 flex items-center justify-between gap-2">
             <div className="min-w-0">
-              <div className="truncate font-mono text-[10px] font-semibold">
+              <h4 className="rd-heading-subsection truncate font-mono">
                 {layerKey}
-              </div>
+              </h4>
             </div>
             <span className="shrink-0 rounded border px-1.5 py-0.5 text-[10px] text-muted-foreground">
               {runs.length} run{runs.length === 1 ? "" : "s"}

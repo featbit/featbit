@@ -194,10 +194,10 @@ function SectionLabel({
   label: string;
 }) {
   return (
-    <div className="flex items-center gap-1 text-xs font-medium text-muted-foreground uppercase tracking-wider mb-0.5">
+    <h4 className="rd-heading-label mb-0.5 flex items-center gap-1">
       {icon}
       <span>{label}</span>
-    </div>
+    </h4>
   );
 }
 
@@ -270,10 +270,10 @@ function MethodChoiceCards({
             )}
           >
             <span className="flex items-center justify-between gap-2">
-              <span className="flex items-center gap-2 text-sm font-semibold">
+              <h4 className="rd-heading-subsection flex items-center gap-2">
                 <Beaker className="size-4 text-primary" />
                 {option.title}
-              </span>
+              </h4>
               <span
                 className={cn(
                   "size-3.5 rounded-full border",
@@ -283,12 +283,12 @@ function MethodChoiceCards({
                 )}
               />
             </span>
-            <span className="mt-2 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            <h5 className="rd-heading-field mt-2">
               {option.eyebrow}
-            </span>
-            <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">
+            </h5>
+            <h5 className="rd-heading-subtitle mt-1">
               {option.description}
-            </span>
+            </h5>
           </button>
         );
       })}
@@ -312,9 +312,9 @@ function DecisionCallout({ run }: { run: ExperimentRun }) {
           <div className="mt-0.5 text-foreground/80">{detail.icon}</div>
           <div className="min-w-0 space-y-1">
             <div className="flex flex-wrap items-center gap-2">
-              <p className="text-sm font-semibold leading-snug text-foreground">
+              <h4 className="rd-heading-subsection">
                 {detail.title}
-              </p>
+              </h4>
               <DecisionBadge decision={decision} />
             </div>
             <p className="text-sm leading-relaxed text-foreground">
@@ -327,9 +327,9 @@ function DecisionCallout({ run }: { run: ExperimentRun }) {
         </div>
       )}
       <div className={detail ? "border-t border-current/10 pt-2" : undefined}>
-        <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+        <h5 className="rd-heading-field">
           Evidence Summary
-        </p>
+        </h5>
         <p className="text-sm font-medium leading-relaxed text-foreground">
           {run.decisionSummary}
         </p>
@@ -378,6 +378,16 @@ function CollapsibleRationale({ children }: { children: string }) {
 function fmtDate(d: Date | string): string {
   const date = typeof d === "string" ? new Date(d) : d;
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+function fmtDateTime(d: Date | string): string {
+  const date = typeof d === "string" ? new Date(d) : d;
+  return date.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 /** <input type="datetime-local"> expects "YYYY-MM-DDTHH:mm" in local time. */
@@ -478,9 +488,9 @@ function ObservationWindowInline({
       <Calendar className="size-3" />
       {run.observationStart ? (
         <span>
-          {fmtDate(run.observationStart)} →{" "}
+          {fmtDateTime(run.observationStart)} →{" "}
           {run.observationEnd ? (
-            fmtDate(run.observationEnd)
+            fmtDateTime(run.observationEnd)
           ) : (
             <span className="italic text-muted-foreground">ongoing</span>
           )}
@@ -488,7 +498,7 @@ function ObservationWindowInline({
       ) : run.observationEnd ? (
         <span>
           <span className="italic text-muted-foreground">— </span>
-          → {fmtDate(run.observationEnd)}
+          → {fmtDateTime(run.observationEnd)}
         </span>
       ) : (
         <span className="italic">Set observation window</span>
@@ -615,21 +625,6 @@ function SummaryTab({
         </div>
       )}
 
-      {/* Observation window — prominent block, drives analysis query range */}
-      <div className="rounded-md border bg-muted/20 px-3 py-2 space-y-1">
-        <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-          <Calendar className="size-3" />
-          <span>Observation Window</span>
-          <span className="text-[9px] font-normal italic text-muted-foreground/70 normal-case tracking-normal">
-            analysis pulls data inside this range
-          </span>
-        </div>
-        <ObservationWindowInline
-          run={exp}
-          experimentId={exp.experimentId}
-        />
-      </div>
-
       {/* Min sample */}
       {exp.minimumSample && (
         <div className="text-sm text-muted-foreground">
@@ -665,10 +660,10 @@ function RefreshAnalysisButton({
   if (confirming) {
     return (
       <div className="rounded-md border border-dashed px-3 py-2.5 space-y-2 bg-muted/20">
-        <p className="text-sm font-medium">Analyze Latest Data?</p>
-        <p className="text-sm text-muted-foreground">
+        <h4 className="rd-heading-subsection">Analyze Latest Data?</h4>
+        <h5 className="rd-heading-subtitle">
           This will pull fresh metrics and recompute the latest analysis.
-        </p>
+        </h5>
         <div className="flex gap-2 pt-1">
           <Button
             size="sm"
@@ -801,10 +796,10 @@ function AnalysisTab({
   if (missingFields.length > 0 && !analysisResult) {
     return (
       <div className={cn("pb-6 pt-4 space-y-2", embedded ? "" : "px-4")}>
-        <p className="text-sm font-medium">Analysis not ready</p>
-        <p className="text-sm text-muted-foreground">
+        <h4 className="rd-heading-subsection">Analysis not ready</h4>
+        <h5 className="rd-heading-subtitle">
           Set up {missingFields.join(", ")} before running analysis.
-        </p>
+        </h5>
         <p className="text-xs text-muted-foreground/70">
           Ask Codex to configure these through FeatBit MCP, or edit the
           experiment in the <code>Exposure</code> stage. Manual per-variant data
@@ -851,13 +846,13 @@ function AnalysisTab({
   if (noData) {
     return (
       <div className={cn("pb-6 pt-4 space-y-2", embedded ? "" : "px-4")}>
-        <p className="text-sm font-medium">Waiting for data</p>
-        <p className="text-sm text-muted-foreground">
+        <h4 className="rd-heading-subsection">Waiting for data</h4>
+        <h5 className="rd-heading-subtitle">
           No events have arrived yet for this experiment. Once your instrumentation
           starts sending <code>flag_evaluation</code> and metric events for
           <code> env={featbitEnvId ?? "…"}</code> / <code>flag={flagKey ?? "…"}</code>,
           results will show up here automatically.
-        </p>
+        </h5>
         <button
           className="text-xs text-blue-600 dark:text-blue-400 underline"
           onClick={() => refreshAnalysis(true)}
@@ -919,22 +914,25 @@ function TrafficTab({
   exp,
   experimentId,
   variants,
+  existingLayerKeys,
 }: {
   exp: ExperimentRun;
   experimentId: string;
   variants: string | null;
+  existingLayerKeys: string[];
 }) {
   return (
     <div className="px-4 pb-6 space-y-4">
       <div>
         <SectionLabel
           icon={<Filter className="size-3" />}
-          label="Run Analysis & Traffic"
+          label="Experiment Traffic Assignment"
         />
         <ExperimentRunTrafficConfig
           experimentRun={exp}
           experimentId={experimentId}
           variants={variants}
+          existingLayerKeys={existingLayerKeys}
         />
       </div>
 
@@ -949,6 +947,132 @@ function TrafficTab({
           </p>
         </div>
       )}
+    </div>
+  );
+}
+
+function MeasuringRunWorkspace({
+  exp,
+  experimentId,
+  flagKey,
+  featbitEnvId,
+  variants,
+  existingLayerKeys,
+  onOpenAgentPrompt,
+}: {
+  exp: ExperimentRun;
+  experimentId: string;
+  flagKey: string | null;
+  featbitEnvId: string | null;
+  variants: string | null;
+  existingLayerKeys: string[];
+  onOpenAgentPrompt?: () => void;
+}) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [leftPercent, setLeftPercent] = useState(61.54);
+  const hasDecision = Boolean(exp.decision);
+
+  function startResize(event: React.PointerEvent<HTMLDivElement>) {
+    event.preventDefault();
+    const pointerId = event.pointerId;
+    event.currentTarget.setPointerCapture(pointerId);
+
+    function resize(moveEvent: PointerEvent) {
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      const next = ((moveEvent.clientX - rect.left) / rect.width) * 100;
+      setLeftPercent(Math.min(78, Math.max(48, next)));
+    }
+
+    function stopResize() {
+      window.removeEventListener("pointermove", resize);
+      window.removeEventListener("pointerup", stopResize);
+    }
+
+    window.addEventListener("pointermove", resize);
+    window.addEventListener("pointerup", stopResize);
+  }
+
+  return (
+    <div ref={containerRef} className="flex min-w-0 items-start px-4 pb-6">
+      <section
+        className="min-w-0 space-y-4 pr-4"
+        style={{ width: `${leftPercent}%` }}
+      >
+        {onOpenAgentPrompt && (
+          <div className="flex items-center justify-between gap-3 rounded-md border border-dashed px-3 py-2.5 bg-muted/20">
+            <div className="flex items-start gap-2 min-w-0">
+              <MessageCircle className="size-3.5 mt-0.5 shrink-0 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {hasDecision
+                  ? "Ask a coding agent to revisit this run decision against the latest analysis and update the next action."
+                  : "Ask a coding agent to evaluate the latest evidence and write an actionable decision for this run."}
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7 text-[11px] px-2.5 shrink-0 gap-1"
+              onClick={onOpenAgentPrompt}
+            >
+              <Bot className="size-3" />
+              Agent Decision Prompt
+            </Button>
+          </div>
+        )}
+
+        {exp.methodReason && (
+          <div>
+            <SectionLabel
+              icon={<Info className="size-3" />}
+              label="Why This Method"
+            />
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              {exp.methodReason}
+            </p>
+          </div>
+        )}
+
+        <div>
+          <SectionLabel icon={<Beaker className="size-3" />} label="Full Analysis" />
+          <AnalysisTab
+            exp={exp}
+            experimentId={experimentId}
+            flagKey={flagKey}
+            featbitEnvId={featbitEnvId}
+            variants={variants}
+            embedded
+          />
+        </div>
+      </section>
+
+      <div
+        role="separator"
+        aria-orientation="vertical"
+        aria-label="Resize run analysis layout"
+        tabIndex={0}
+        onPointerDown={startResize}
+        className="group flex h-[calc(100vh-15rem)] w-4 shrink-0 cursor-col-resize items-stretch justify-center rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        <div className="w-px bg-border transition-colors group-hover:bg-primary/60" />
+      </div>
+
+      <aside
+        className="min-w-0 space-y-2 pl-4"
+        style={{ width: `${100 - leftPercent}%` }}
+      >
+        <SectionLabel
+          icon={<Filter className="size-3" />}
+          label="Experiment Traffic Assignment"
+        />
+        <ExperimentRunTrafficConfig
+          experimentRun={exp}
+          experimentId={experimentId}
+          variants={variants}
+          existingLayerKeys={existingLayerKeys}
+          mode="inline"
+        />
+      </aside>
     </div>
   );
 }
@@ -996,15 +1120,15 @@ function NewExperimentRunDialog({
 
         <div className="space-y-3">
           <div>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            <h4 className="rd-heading-label mb-2">
               Analysis Method
-            </p>
+            </h4>
             <MethodChoiceCards value={method} onChange={onMethodChange} />
           </div>
           <div>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            <h4 className="rd-heading-label mb-2">
               {method === "bandit" ? "Baseline & Arms" : "Control & Treatments"}
-            </p>
+            </h4>
             {variantChoices.length < 2 ? (
               <div className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200">
                 Bind a FeatBit flag with at least two variations before assigning
@@ -1397,6 +1521,17 @@ export function ExperimentRunTable({
     () => parseVariantIdentities(variants),
     [variants],
   );
+  const existingLayerKeys = useMemo(
+    () =>
+      [
+        ...new Set(
+          experimentRuns
+            .map((run) => run.layerKey?.trim() || run.layerId?.trim() || "")
+            .filter(Boolean),
+        ),
+      ].sort(),
+    [experimentRuns],
+  );
 
   // Track previous run count so we can auto-focus the newly-created run when
   // it appears in the list, rather than sticking to the old selection.
@@ -1590,34 +1725,28 @@ export function ExperimentRunTable({
                 Phase {selectedIndex + 1}
               </Badge>
             )}
-            <span className="font-mono text-sm font-medium">{selected.slug}</span>
+            <h3 className="rd-heading-subsection font-mono">{selected.slug}</h3>
+            <span className="inline-flex items-center gap-1.5 rounded border bg-muted/20 px-2 py-1 text-xs text-muted-foreground">
+              <span className="font-medium text-foreground">Window</span>
+              <ObservationWindowInline
+                run={selected}
+                experimentId={experimentId}
+              />
+            </span>
             <div className="flex items-center gap-1.5 ml-auto flex-wrap">
-              {selected.method && <MethodBadge method={selected.method} />}
               <StatusBadge status={selected.status} />
               {selected.decision && <DecisionBadge decision={selected.decision} />}
             </div>
           </div>
 
-          {/* Merged content: Analyze & Decision, then Audience & Traffic */}
-          <SummaryTab
-            exp={selected}
-            variantChoices={variantChoices}
-            onOpenAgentPrompt={() => setPromptRun(selected)}
-            analysisPanel={
-              <AnalysisTab
-                exp={selected}
-                experimentId={experimentId}
-                flagKey={flagKey}
-                featbitEnvId={featbitEnvId}
-                variants={variants}
-                embedded
-              />
-            }
-          />
-          <TrafficTab
+          <MeasuringRunWorkspace
             exp={selected}
             experimentId={experimentId}
+            flagKey={flagKey}
+            featbitEnvId={featbitEnvId}
             variants={variants}
+            existingLayerKeys={existingLayerKeys}
+            onOpenAgentPrompt={() => setPromptRun(selected)}
           />
         </div>
       ) : (

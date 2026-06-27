@@ -5,7 +5,7 @@
   },
   Content: {
     Headers: {
-      Content-Length: 2110,
+      Content-Length: 2568,
       Content-Type: application/json; charset=utf-8
     },
     Value: {
@@ -13,9 +13,13 @@
         accessToken: null,
         activities: [
           {
+            actorEmail: test@example.com,
+            actorId: Guid_1,
+            actorName: Test User,
+            actorType: user,
             createdAt: DateTimeOffset_1,
             detail: Test activity,
-            id: Guid_1,
+            id: Guid_2,
             title: Experiment updated,
             type: updated
           }
@@ -29,7 +33,11 @@
         envSecret: null,
         experimentRuns: [
           {
+            allocationKeySelector: null,
+            allocationPlan: null,
             analysisResult: {"forceFresh":true},
+            analysisSamplingPlan: [{"variation":"control","role":"control","includeRate":100},{"variation":"treatment","role":"treatment","includeRate":100}],
+            assignmentUnitSelector: user.keyId,
             audienceFilters: null,
             confirmedOrRefuted: null,
             controlVariant: control,
@@ -39,13 +47,15 @@
             decision: null,
             decisionReason: null,
             decisionSummary: null,
-            experimentId: Guid_2,
+            experimentId: Guid_1,
             guardrailDescriptions: null,
             guardrailEvents: null,
             hypothesis: null,
             id: Guid_3,
             inputData: null,
             layerId: null,
+            layerKey: null,
+            layerTrafficPercent: 100,
             method: bayesian,
             methodReason: null,
             metricDescription: null,
@@ -60,6 +70,8 @@
             priorProper: false,
             priorStddev: null,
             runId: null,
+            sliceEnd: null,
+            sliceStart: null,
             slug: run-1,
             status: analyzed,
             trafficAllocation: null,
@@ -79,7 +91,7 @@
         goal: Increase activated checkout users,
         guardrails: [],
         hypothesis: Guided onboarding increases checkout activation,
-        id: Guid_2,
+        id: Guid_1,
         intent: Learn whether guided onboarding improves activation,
         lastAction: null,
         lastLearning: null,

@@ -4,15 +4,17 @@ import DashboardLayout from "@/app/(dashboard)/layout";
 import AuthLayout from "@/app/(auth)/layout";
 import LoginPage from "@/app/(auth)/login/page";
 import ExperimentsPage from "@/app/(dashboard)/experiments/page";
-import MetricsPage from "@/app/(dashboard)/metrics/page";
+import MetricsPage from "@/app/release-decision-metrics/page";
+import LayersPage from "@/app/release-decision-layers/page";
 import NewExperimentPage from "@/app/(dashboard)/experiments/new/page";
-import EnvSettingsPage from "@/app/(dashboard)/data/env-settings/page";
 import { ExperimentDetailClient } from "@/app/(project)/experiments/[id]/experiment-detail-client";
 import { RouterProvider, usePathname, useRouter } from "@/lib/router";
 
 function normalizeLegacyExperimentsPath(pathname: string) {
   if (pathname === "/experiments") return "/";
   if (pathname === "/experiments/new") return "/new";
+  if (pathname === "/metrics") return "/release-decision-metrics";
+  if (pathname === "/layers") return "/release-decision-layers";
 
   const match = pathname.match(/^\/experiments\/([^/]+)$/);
   return match ? `/${match[1]}` : pathname;
@@ -41,12 +43,12 @@ function Routes() {
   let isExperimentDetailPage = false;
   if (routePath === "/") {
     page = <ExperimentsPage />;
-  } else if (routePath === "/metrics") {
+  } else if (routePath === "/release-decision-metrics") {
     page = <MetricsPage />;
+  } else if (routePath === "/release-decision-layers") {
+    page = <LayersPage />;
   } else if (routePath === "/new") {
     page = <NewExperimentPage />;
-  } else if (routePath === "/data/env-settings") {
-    page = <EnvSettingsPage />;
   } else {
     const match = routePath.match(/^\/([^/]+)$/);
     if (match) {

@@ -20,6 +20,14 @@ export default defineConfig(({ mode }) => {
               res.end();
               return;
             }
+            if (
+              req.url === "/release-decision-metrics" ||
+              req.url?.startsWith("/release-decision-metrics?") ||
+              req.url === "/release-decision-layers" ||
+              req.url?.startsWith("/release-decision-layers?")
+            ) {
+              req.url = `${normalizedBasePath}/`;
+            }
             next();
           });
         },

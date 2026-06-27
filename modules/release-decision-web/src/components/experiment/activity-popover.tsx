@@ -1,8 +1,15 @@
 import { useState, useRef, useEffect } from "react";
 import { ScrollText } from "lucide-react";
 import type { Activity } from "@/lib/release-decision-types";
+import { cn } from "@/lib/utils";
 
-export function ActivityPopover({ activities }: { activities: Activity[] }) {
+export function ActivityPopover({
+  activities,
+  buttonClassName,
+}: {
+  activities: Activity[];
+  buttonClassName?: string;
+}) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -21,7 +28,10 @@ export function ActivityPopover({ activities }: { activities: Activity[] }) {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-1.5 h-7 rounded-md border border-border bg-background px-2 text-xs text-muted-foreground cursor-pointer hover:text-foreground hover:bg-muted transition-colors"
+        className={cn(
+          "flex items-center gap-1.5 h-7 rounded-md border border-border bg-background px-2 text-xs text-muted-foreground cursor-pointer hover:text-foreground hover:bg-muted transition-colors",
+          buttonClassName,
+        )}
         title="Recent activity"
       >
         <ScrollText className="size-3" />
@@ -35,9 +45,9 @@ export function ActivityPopover({ activities }: { activities: Activity[] }) {
 
       {open && (
         <div className="absolute right-0 top-full mt-1 w-72 max-h-80 overflow-y-auto rounded-lg border bg-background shadow-lg z-50 p-3 space-y-2">
-          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+          <h3 className="rd-heading-label">
             Recent Activity
-          </p>
+          </h3>
           {activities.length === 0 ? (
             <p className="text-xs text-muted-foreground/50 italic">
               No activity yet

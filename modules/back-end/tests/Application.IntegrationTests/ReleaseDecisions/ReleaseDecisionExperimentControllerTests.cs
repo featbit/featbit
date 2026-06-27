@@ -106,9 +106,13 @@ public class ReleaseDecisionExperimentControllerTests
             }),
             await _app.PutWithAccessTokenAsync($"{runPath}/audience", new
             {
-                trafficPercent = 10,
-                trafficOffset = 0,
-                method = "bayesian_ab"
+                method = "bayesian_ab",
+                controlVariant = "control",
+                treatmentVariant = "treatment",
+                assignmentUnitSelector = "user.keyId",
+                layerKey = "checkout",
+                layerTrafficPercent = 30,
+                analysisSamplingPlan = "[{\"variation\":\"control\",\"role\":\"control\",\"includeRate\":11.111111},{\"variation\":\"treatment\",\"role\":\"treatment\",\"includeRate\":100}]"
             }),
             await _app.PutWithAccessTokenAsync($"{runPath}/observation-window", new
             {

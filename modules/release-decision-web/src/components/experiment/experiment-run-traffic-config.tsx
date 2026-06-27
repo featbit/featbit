@@ -1,6 +1,6 @@
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "@/lib/router";
-import { Beaker, Filter, GitBranch, Layers3, Pencil, Plus, SlidersHorizontal, Trash2 } from "lucide-react";
+import { AlertCircle, Beaker, CheckCircle2, Filter, GitBranch, Layers3, Pencil, Plus, SlidersHorizontal, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,6 +14,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { updateExperimentRunAudienceAction } from "@/lib/actions";
+import { cn } from "@/lib/utils";
 import type { ExperimentRun } from "@/lib/release-decision-types";
 import {
   parseVariantIdentities,
@@ -181,10 +182,14 @@ export function ExperimentRunTrafficConfig({
   experimentRun,
   experimentId,
   variants,
+  existingLayerKeys = [],
+  mode = "compact",
 }: {
   experimentRun: ExperimentRun;
   experimentId: string;
   variants?: string | null;
+  existingLayerKeys?: string[];
+  mode?: "compact" | "inline";
 }) {
   const [open, setOpen] = useState(false);
   const [filters, setFilters] = useState<FilterEntry[]>([]);
@@ -195,6 +200,10 @@ export function ExperimentRunTrafficConfig({
   const [assignmentUnitSelectorValue, setAssignmentUnitSelectorValue] = useState("user.keyId");
   const [layerTrafficPercentValue, setLayerTrafficPercentValue] = useState("100");
   const [includeRates, setIncludeRates] = useState<Record<string, string>>({});
+  const [saveStatus, setSaveStatus] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
@@ -221,7 +230,7 @@ export function ExperimentRunTrafficConfig({
     parsedFilters.length > 0;
   const selectedKeys = selectedVariantKeys(controlVariant, treatmentVariants);
 
-  function handleOpen() {
+  function resetDraftFromRun() {
     const nextMethod = experimentRun.method ?? "bayesian_ab";
     const normalized = normalizeVariantSelection(
       nextMethod,
@@ -244,6 +253,31 @@ export function ExperimentRunTrafficConfig({
     setAssignmentUnitSelectorValue(assignmentUnitSelector);
     setLayerTrafficPercentValue(formatPercent(layerTrafficPercent));
     setIncludeRates(includeRatesFromPlan(plan, selectedVariantKeys(normalized.control, normalized.treatments)));
+  }
+
+  useEffect(() => {
+    if (mode !== "inline") return;
+    resetDraftFromRun();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    mode,
+    experimentRun.id,
+    experimentRun.method,
+    experimentRun.controlVariant,
+    experimentRun.treatmentVariant,
+    experimentRun.layerKey,
+    experimentRun.layerId,
+    experimentRun.assignmentUnitSelector,
+    experimentRun.allocationKeySelector,
+    experimentRun.layerTrafficPercent,
+    experimentRun.trafficPercent,
+    experimentRun.audienceFilters,
+    experimentRun.analysisSamplingPlan,
+    variants,
+  ]);
+
+  function handleOpen() {
+    resetDraftFromRun();
     setOpen(true);
   }
 
@@ -257,13 +291,27 @@ export function ExperimentRunTrafficConfig({
     formData.set("layerId", layerKeyValue.trim());
     formData.set("assignmentUnitSelector", assignmentUnitSelectorValue.trim() || "user.keyId");
     formData.set("allocationKeySelector", assignmentUnitSelectorValue.trim() || "user.keyId");
-                  formData.set("layerTrafficPercent", String(clampPercent(Number(layerTrafficPercentValue), 0, 100)));
+    formData.set("layerTrafficPercent", String(clampPercent(Number(layerTrafficPercentValue), 0, 100)));
     formData.set("analysisSamplingPlan", JSON.stringify(samplingPlan));
     formData.set("allocationPlan", "");
+    setSaveStatus(null);
     startTransition(async () => {
-      await updateExperimentRunAudienceAction(formData);
-      router.refresh();
-      setOpen(false);
+      try {
+        await updateExperimentRunAudienceAction(formData);
+        setSaveStatus({
+          type: "success",
+          message: `Saved ${new Date().toLocaleTimeString()}`,
+        });
+        if (mode !== "inline") {
+          router.refresh();
+          setOpen(false);
+        }
+      } catch (error) {
+        setSaveStatus({
+          type: "error",
+          message: error instanceof Error ? error.message : "Save failed",
+        });
+      }
     });
   }
 
@@ -315,12 +363,344 @@ export function ExperimentRunTrafficConfig({
     setIncludeRates(Object.fromEntries(selectedKeys.map((key) => [key, "100"])));
   }
 
-  function applyNinetyTenPreset() {
-    if (!controlVariant || treatmentVariants.length !== 1) return;
-    setIncludeRates({
-      [controlVariant]: "11.111",
-      [treatmentVariants[0]]: "100",
-    });
+  const configForm = (
+    <form action={handleSubmit} className={cn("min-w-0", mode === "inline" ? "space-y-4" : "space-y-5")}>
+      <input type="hidden" name="experimentId" value={experimentId} />
+      <input type="hidden" name="experimentRunId" value={experimentRun.id} />
+      <input type="hidden" name="method" value={method} />
+
+      {mode !== "inline" && (
+        <section className="space-y-2">
+          <div className="space-y-0.5">
+            <h4 className="rd-heading-subsection">Analysis Method</h4>
+            <div className="flex items-center gap-4">
+              <label className="flex cursor-pointer items-center gap-1.5">
+                <input
+                  type="radio"
+                  name="_method"
+                  value="bayesian_ab"
+                  checked={method === "bayesian_ab"}
+                  onChange={() => changeMethod("bayesian_ab")}
+                  className="size-3.5"
+                />
+                <span className="text-xs">Bayesian A/B/n</span>
+              </label>
+              <label className="flex cursor-pointer items-center gap-1.5">
+                <input
+                  type="radio"
+                  name="_method"
+                  value="bandit"
+                  checked={method === "bandit"}
+                  onChange={() => changeMethod("bandit")}
+                  className="size-3.5"
+                />
+                <span className="text-xs">Bandit</span>
+              </label>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {mode !== "inline" && (
+        <section className="space-y-2 rounded-md border bg-muted/15 px-3 py-2.5">
+          <div className="space-y-0.5">
+            <h4 className="rd-heading-subsection">Feature Flag State</h4>
+            <h5 className="rd-heading-subtitle">
+              Actual flag evaluation decides the served variation. This run only decides which exposure is eligible and sampled for analysis.
+            </h5>
+          </div>
+          <div className="grid min-w-0 gap-1.5">
+            {variantRows.map((variant) => (
+              <div key={variant.key} className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 rounded border bg-background/70 px-2 py-1.5 text-xs">
+                <VariantRowIdentity variant={variant} />
+                <VariantIdCopyButton id={variant.key} />
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <section className="space-y-2 rounded-md border bg-muted/15 px-3 py-2.5">
+        <div className="space-y-0.5">
+          <h4 className="rd-heading-subsection">{method === "bandit" ? "Baseline & Arms" : "Control & Treatments"}</h4>
+          <h5 className="rd-heading-subtitle">
+            These roles label actual variations for analysis; they do not change FeatBit flag targeting.
+          </h5>
+        </div>
+
+        <div className="grid min-w-0 gap-2">
+          <div className="space-y-1">
+            <h5 className="rd-heading-field">
+              {method === "bandit" ? "Baseline / control" : "Control"}
+            </h5>
+            {variantRows.map((variant) => (
+              <div
+                key={variant.key}
+                role="button"
+                tabIndex={0}
+                onClick={() => changeControl(variant.key)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    changeControl(variant.key);
+                  }
+                }}
+                className="grid min-w-0 cursor-pointer grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 rounded border bg-background/70 px-2 py-1.5 text-xs"
+              >
+                <input
+                  type="radio"
+                  checked={controlVariant === variant.key}
+                  onChange={() => changeControl(variant.key)}
+                  onClick={(event) => event.stopPropagation()}
+                  className="size-3.5"
+                />
+                <VariantRowIdentity variant={variant} />
+                <VariantIdCopyButton id={variant.key} />
+              </div>
+            ))}
+          </div>
+
+          <div className="space-y-1">
+            <h5 className="rd-heading-field">
+              {method === "bandit" ? "Additional arms" : "Treatments"}
+            </h5>
+            {variantRows
+              .filter((variant) => variant.key !== controlVariant)
+              .map((variant) => (
+                <div
+                  key={variant.key}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => toggleTreatmentVariant(variant.key, !treatmentVariants.includes(variant.key))}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        toggleTreatmentVariant(variant.key, !treatmentVariants.includes(variant.key));
+                      }
+                    }}
+                  className="grid min-w-0 cursor-pointer grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 rounded border bg-background/70 px-2 py-1.5 text-xs"
+                >
+                  <input
+                    type="checkbox"
+                    checked={treatmentVariants.includes(variant.key)}
+                    onChange={(event) => toggleTreatmentVariant(variant.key, event.target.checked)}
+                    onClick={(event) => event.stopPropagation()}
+                    className="size-3.5"
+                  />
+                  <VariantRowIdentity variant={variant} />
+                  <VariantIdCopyButton id={variant.key} />
+                </div>
+              ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="space-y-3 rounded-md border px-3 py-2.5">
+        <div className="space-y-0.5">
+          <h4 className="rd-heading-subsection flex items-center gap-1.5">
+            <Layers3 className="size-3.5" />
+            Layer Eligibility
+          </h4>
+          <h5 className="rd-heading-subtitle">
+            Layer limits which exposure is eligible for this run. It does not decide the served variation.
+          </h5>
+        </div>
+
+        <div className="grid min-w-0 grid-cols-1 gap-3 xl:grid-cols-3">
+          <div className="space-y-1.5">
+            <Label htmlFor={`lk-${experimentRun.id}`} className="text-xs">Layer key</Label>
+            <Input
+              id={`lk-${experimentRun.id}`}
+              list={`layer-keys-${experimentRun.id}`}
+              value={layerKeyValue}
+              onChange={(event) => setLayerKeyValue(event.target.value)}
+              placeholder="e.g. homepage"
+              className="h-8 font-mono text-xs"
+            />
+            {existingLayerKeys.length > 0 && (
+              <datalist id={`layer-keys-${experimentRun.id}`}>
+                {existingLayerKeys.map((key) => (
+                  <option key={key} value={key} />
+                ))}
+              </datalist>
+            )}
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor={`au-${experimentRun.id}`} className="text-xs">Assignment unit</Label>
+            <Input
+              id={`au-${experimentRun.id}`}
+              value={assignmentUnitSelectorValue}
+              onChange={(event) => setAssignmentUnitSelectorValue(event.target.value)}
+              placeholder="user.keyId"
+              className="h-8 font-mono text-xs"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor={`lt-${experimentRun.id}`} className="text-xs">Layer traffic %</Label>
+            <Input
+              id={`lt-${experimentRun.id}`}
+              type="number"
+              min="0"
+              max="100"
+              step="any"
+              value={layerTrafficPercentValue}
+              onChange={(event) => setLayerTrafficPercentValue(event.target.value)}
+              className="h-8 text-xs"
+            />
+          </div>
+        </div>
+      </section>
+
+      <section className="space-y-3 rounded-md border px-3 py-2.5">
+        <div className="flex items-start justify-between gap-3">
+          <div className="space-y-0.5">
+            <h4 className="rd-heading-subsection flex items-center gap-1.5">
+              <SlidersHorizontal className="size-3.5" />
+              Analysis Sampling
+            </h4>
+            <h5 className="rd-heading-subtitle">
+              Include rate is inside each actual served variation. Use these fields to intentionally sample less than 100% of a variation for this run.
+            </h5>
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            <Button type="button" variant="secondary" size="sm" className="h-7 px-2 text-xs" onClick={applyAllExposurePreset}>
+              Set all to 100%
+            </Button>
+          </div>
+        </div>
+
+        <div className="grid gap-1.5">
+          {selectedKeys.map((key) => (
+            <div key={key} className="grid min-w-0 grid-cols-[minmax(0,1fr)_8rem] items-center gap-2 rounded border bg-background/70 px-2 py-1.5 text-xs">
+              <VariantIdentityInline
+                token={key}
+                variants={variantRows}
+                role={key === controlVariant ? "Control" : "Treatment"}
+                className="min-w-0"
+              />
+              <div className="flex items-center gap-1">
+                <Input
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="any"
+                  value={includeRates[key] ?? "100"}
+                  onChange={(event) =>
+                    setIncludeRates((prev) => ({
+                      ...prev,
+                      [key]: event.target.value,
+                    }))
+                  }
+                  className="h-7 text-xs"
+                  aria-label={`Include rate for ${key}`}
+                />
+                <span className="whitespace-nowrap text-[10px] text-muted-foreground">% of variation</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="space-y-2">
+        <div className="flex items-center justify-between">
+          <h4 className="rd-heading-subsection">Audience Filters</h4>
+          <Button type="button" variant="ghost" size="sm" className="h-6 px-2 text-xs" onClick={addRow}>
+            <Plus className="mr-1 size-3" />
+            Add
+          </Button>
+        </div>
+
+        {filters.length === 0 && (
+          <p className="text-xs italic text-muted-foreground/50">No filters — all users eligible</p>
+        )}
+
+        {filters.map((f, i) => (
+          <div key={i} className="grid min-w-0 grid-cols-[minmax(0,1fr)_3.5rem_minmax(0,1fr)_auto] items-center gap-1.5">
+            <Input
+              value={f.property}
+              onChange={(e) => updateRow(i, { property: e.target.value })}
+              placeholder="property"
+              className="h-7 min-w-0 font-mono text-xs"
+            />
+            <select
+              value={f.op}
+              onChange={(e) => updateRow(i, { op: e.target.value as Op })}
+              className="h-7 rounded-md border border-input bg-background px-1.5 text-xs"
+            >
+              <option value="eq">eq</option>
+              <option value="neq">neq</option>
+              <option value="in">in</option>
+              <option value="nin">nin</option>
+            </select>
+            {f.op === "in" || f.op === "nin" ? (
+              <Input
+                value={f.values}
+                onChange={(e) => updateRow(i, { values: e.target.value })}
+                placeholder="a, b, c"
+                className="h-7 min-w-0 text-xs"
+              />
+            ) : (
+              <Input
+                value={f.value}
+                onChange={(e) => updateRow(i, { value: e.target.value })}
+                placeholder="value"
+                className="h-7 min-w-0 text-xs"
+              />
+            )}
+            <button
+              type="button"
+              onClick={() => removeRow(i)}
+              className="shrink-0 text-muted-foreground hover:text-destructive"
+              aria-label="Remove filter"
+            >
+              <Trash2 className="size-3.5" />
+            </button>
+          </div>
+        ))}
+      </section>
+
+      {mode === "inline" ? (
+        <div className="flex items-center justify-between gap-3 border-t pt-3">
+          <div aria-live="polite" className="min-h-5 flex-1">
+            {isPending && (
+              <p className="text-xs text-muted-foreground">Saving experiment traffic assignment...</p>
+            )}
+            {!isPending && saveStatus?.type === "success" && (
+              <p className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-300">
+                <CheckCircle2 className="size-3.5" />
+                {saveStatus.message}
+              </p>
+            )}
+            {!isPending && saveStatus?.type === "error" && (
+              <p className="inline-flex items-center gap-1.5 text-xs font-medium text-destructive">
+                <AlertCircle className="size-3.5" />
+                {saveStatus.message}
+              </p>
+            )}
+          </div>
+          <Button type="submit" size="sm" disabled={isPending}>
+            {isPending ? "Saving..." : "Save"}
+          </Button>
+        </div>
+      ) : (
+        <DialogFooter>
+          <Button type="button" variant="outline" size="sm" onClick={() => setOpen(false)} disabled={isPending}>
+            Cancel
+          </Button>
+          <Button type="submit" size="sm" disabled={isPending}>
+            {isPending ? "Saving..." : "Save"}
+          </Button>
+        </DialogFooter>
+      )}
+    </form>
+  );
+
+  if (mode === "inline") {
+    return (
+      <div className="rounded-md border bg-background/70 p-3">
+        {configForm}
+      </div>
+    );
   }
 
   return (
@@ -403,316 +783,20 @@ export function ExperimentRunTrafficConfig({
 
         <Button type="button" variant="ghost" size="icon" className="size-6 shrink-0" onClick={handleOpen}>
           <Pencil className="size-3.5" />
-          <span className="sr-only">Configure run analysis traffic</span>
+          <span className="sr-only">Configure experiment traffic assignment</span>
         </Button>
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="min-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Run Analysis Method & Traffic</DialogTitle>
+            <DialogTitle>Experiment Traffic Assignment</DialogTitle>
             <DialogDescription>
               Configure how this run reads actual exposure, layer eligibility, and analysis sampling.
             </DialogDescription>
           </DialogHeader>
 
-          <form action={handleSubmit} className="space-y-5">
-            <input type="hidden" name="experimentId" value={experimentId} />
-            <input type="hidden" name="experimentRunId" value={experimentRun.id} />
-            <input type="hidden" name="method" value={method} />
-
-            <section className="space-y-2">
-              <div className="space-y-0.5">
-                <Label className="text-xs">Analysis Method</Label>
-                <div className="flex items-center gap-4">
-                  <label className="flex cursor-pointer items-center gap-1.5">
-                    <input
-                      type="radio"
-                      name="_method"
-                      value="bayesian_ab"
-                      checked={method === "bayesian_ab"}
-                      onChange={() => changeMethod("bayesian_ab")}
-                      className="size-3.5"
-                    />
-                    <span className="text-xs">Bayesian A/B/n</span>
-                  </label>
-                  <label className="flex cursor-pointer items-center gap-1.5">
-                    <input
-                      type="radio"
-                      name="_method"
-                      value="bandit"
-                      checked={method === "bandit"}
-                      onChange={() => changeMethod("bandit")}
-                      className="size-3.5"
-                    />
-                    <span className="text-xs">Bandit</span>
-                  </label>
-                </div>
-              </div>
-            </section>
-
-            <section className="space-y-2 rounded-md border bg-muted/15 px-3 py-2.5">
-              <div className="space-y-0.5">
-                <Label className="text-xs">Feature Flag State</Label>
-                <p className="text-[10px] text-muted-foreground">
-                  Actual flag evaluation decides the served variation. This run only decides which exposure is eligible and sampled for analysis.
-                </p>
-              </div>
-              <div className="grid min-w-0 gap-1.5">
-                {variantRows.map((variant) => (
-                  <div key={variant.key} className="flex min-w-0 items-center gap-2 rounded border bg-background/70 px-2 py-1.5 text-xs">
-                    <VariantRowIdentity variant={variant} />
-                    <VariantIdCopyButton id={variant.key} />
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            <section className="space-y-2 rounded-md border bg-muted/15 px-3 py-2.5">
-              <div className="space-y-0.5">
-                <Label className="text-xs">{method === "bandit" ? "Baseline & Arms" : "Control & Treatments"}</Label>
-                <p className="text-[10px] text-muted-foreground">
-                  These roles label actual variations for analysis; they do not change FeatBit flag targeting.
-                </p>
-              </div>
-
-              <div className="grid min-w-0 gap-2">
-                <div className="space-y-1">
-                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                    {method === "bandit" ? "Baseline / control" : "Control"}
-                  </Label>
-                  {variantRows.map((variant) => (
-                    <div
-                      key={variant.key}
-                      role="button"
-                      tabIndex={0}
-                      onClick={() => changeControl(variant.key)}
-                      onKeyDown={(event) => {
-                        if (event.key === "Enter" || event.key === " ") {
-                          event.preventDefault();
-                          changeControl(variant.key);
-                        }
-                      }}
-                      className="flex min-w-0 cursor-pointer items-center gap-2 rounded border bg-background/70 px-2 py-1.5 text-xs"
-                    >
-                      <input
-                        type="radio"
-                        checked={controlVariant === variant.key}
-                        onChange={() => changeControl(variant.key)}
-                        onClick={(event) => event.stopPropagation()}
-                        className="size-3.5"
-                      />
-                      <VariantRowIdentity variant={variant} />
-                      <VariantIdCopyButton id={variant.key} />
-                    </div>
-                  ))}
-                </div>
-
-                <div className="space-y-1">
-                  <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                    {method === "bandit" ? "Additional arms" : "Treatments"}
-                  </Label>
-                  {variantRows
-                    .filter((variant) => variant.key !== controlVariant)
-                    .map((variant) => (
-                      <div
-                        key={variant.key}
-                        role="button"
-                        tabIndex={0}
-                        onClick={() => toggleTreatmentVariant(variant.key, !treatmentVariants.includes(variant.key))}
-                        onKeyDown={(event) => {
-                          if (event.key === "Enter" || event.key === " ") {
-                            event.preventDefault();
-                            toggleTreatmentVariant(variant.key, !treatmentVariants.includes(variant.key));
-                          }
-                        }}
-                        className="flex min-w-0 cursor-pointer items-center gap-2 rounded border bg-background/70 px-2 py-1.5 text-xs"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={treatmentVariants.includes(variant.key)}
-                          onChange={(event) => toggleTreatmentVariant(variant.key, event.target.checked)}
-                          onClick={(event) => event.stopPropagation()}
-                          className="size-3.5"
-                        />
-                        <VariantRowIdentity variant={variant} />
-                        <VariantIdCopyButton id={variant.key} />
-                      </div>
-                    ))}
-                </div>
-              </div>
-            </section>
-
-            <section className="space-y-3 rounded-md border px-3 py-2.5">
-              <div className="space-y-0.5">
-                <Label className="flex items-center gap-1.5 text-xs">
-                  <Layers3 className="size-3.5" />
-                  Layer Eligibility
-                </Label>
-                <p className="text-[10px] text-muted-foreground">
-                  Layer limits which exposure is eligible for this run. It does not decide the served variation.
-                </p>
-              </div>
-
-              <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-3">
-                <div className="space-y-1.5">
-                  <Label htmlFor={`lk-${experimentRun.id}`} className="text-xs">Layer key</Label>
-                  <Input
-                    id={`lk-${experimentRun.id}`}
-                    value={layerKeyValue}
-                    onChange={(event) => setLayerKeyValue(event.target.value)}
-                    placeholder="e.g. homepage"
-                    className="font-mono text-sm"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor={`au-${experimentRun.id}`} className="text-xs">Assignment unit</Label>
-                  <Input
-                    id={`au-${experimentRun.id}`}
-                    value={assignmentUnitSelectorValue}
-                    onChange={(event) => setAssignmentUnitSelectorValue(event.target.value)}
-                    placeholder="user.keyId"
-                    className="font-mono text-sm"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor={`lt-${experimentRun.id}`} className="text-xs">Layer traffic %</Label>
-                  <Input
-                    id={`lt-${experimentRun.id}`}
-                    type="number"
-                    min="0"
-                    max="100"
-                    step="any"
-                    value={layerTrafficPercentValue}
-                    onChange={(event) => setLayerTrafficPercentValue(event.target.value)}
-                    className="text-sm"
-                  />
-                </div>
-              </div>
-            </section>
-
-            <section className="space-y-3 rounded-md border px-3 py-2.5">
-              <div className="flex items-start justify-between gap-3">
-                <div className="space-y-0.5">
-                  <Label className="flex items-center gap-1.5 text-xs">
-                    <SlidersHorizontal className="size-3.5" />
-                    Analysis Sampling
-                  </Label>
-                  <p className="text-[10px] text-muted-foreground">
-                    Include rate is inside the actual served variation. For a 90/10 flag split analyzed as 10/10, sample control at 11.111% and treatment at 100%.
-                  </p>
-                </div>
-                <div className="flex shrink-0 items-center gap-2">
-                  <Button type="button" variant="outline" size="sm" className="h-7 px-2 text-[11px]" onClick={applyAllExposurePreset}>
-                    Use all
-                  </Button>
-                  {selectedKeys.length === 2 && method !== "bandit" && (
-                    <Button type="button" variant="outline" size="sm" className="h-7 px-2 text-[11px]" onClick={applyNinetyTenPreset}>
-                      90/10 → 10/10
-                    </Button>
-                  )}
-                </div>
-              </div>
-
-              <div className="grid gap-1.5">
-                {selectedKeys.map((key) => (
-                  <div key={key} className="grid min-w-0 grid-cols-[minmax(0,1fr)_8rem] items-center gap-2 rounded border bg-background/70 px-2 py-1.5">
-                    <VariantIdentityInline
-                      token={key}
-                      variants={variantRows}
-                      role={key === controlVariant ? "Control" : "Treatment"}
-                      className="min-w-0"
-                    />
-                    <div className="flex items-center gap-1">
-                      <Input
-                        type="number"
-                        min="0"
-                        max="100"
-                        step="any"
-                        value={includeRates[key] ?? "100"}
-                        onChange={(event) =>
-                          setIncludeRates((prev) => ({
-                            ...prev,
-                            [key]: event.target.value,
-                          }))
-                        }
-                        className="h-7 text-xs"
-                        aria-label={`Include rate for ${key}`}
-                      />
-                      <span className="whitespace-nowrap text-[10px] text-muted-foreground">% of variation</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            <section className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label className="text-xs">Audience Filters</Label>
-                <Button type="button" variant="ghost" size="sm" className="h-6 px-2 text-xs" onClick={addRow}>
-                  <Plus className="mr-1 size-3" />
-                  Add
-                </Button>
-              </div>
-
-              {filters.length === 0 && (
-                <p className="text-xs italic text-muted-foreground/50">No filters — all users eligible</p>
-              )}
-
-              {filters.map((f, i) => (
-                <div key={i} className="grid min-w-0 grid-cols-[minmax(0,1fr)_3.5rem_minmax(0,1fr)_auto] items-center gap-1.5">
-                  <Input
-                    value={f.property}
-                    onChange={(e) => updateRow(i, { property: e.target.value })}
-                    placeholder="property"
-                    className="h-7 min-w-0 font-mono text-xs"
-                  />
-                  <select
-                    value={f.op}
-                    onChange={(e) => updateRow(i, { op: e.target.value as Op })}
-                    className="h-7 rounded-md border border-input bg-background px-1.5 text-xs"
-                  >
-                    <option value="eq">eq</option>
-                    <option value="neq">neq</option>
-                    <option value="in">in</option>
-                    <option value="nin">nin</option>
-                  </select>
-                  {f.op === "in" || f.op === "nin" ? (
-                    <Input
-                      value={f.values}
-                      onChange={(e) => updateRow(i, { values: e.target.value })}
-                      placeholder="a, b, c"
-                      className="h-7 min-w-0 text-xs"
-                    />
-                  ) : (
-                    <Input
-                      value={f.value}
-                      onChange={(e) => updateRow(i, { value: e.target.value })}
-                      placeholder="value"
-                      className="h-7 min-w-0 text-xs"
-                    />
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => removeRow(i)}
-                    className="shrink-0 text-muted-foreground hover:text-destructive"
-                    aria-label="Remove filter"
-                  >
-                    <Trash2 className="size-3.5" />
-                  </button>
-                </div>
-              ))}
-            </section>
-
-            <DialogFooter>
-              <Button type="button" variant="outline" size="sm" onClick={() => setOpen(false)} disabled={isPending}>
-                Cancel
-              </Button>
-              <Button type="submit" size="sm" disabled={isPending}>
-                {isPending ? "Saving..." : "Save"}
-              </Button>
-            </DialogFooter>
-          </form>
+          {configForm}
         </DialogContent>
       </Dialog>
     </>

@@ -126,7 +126,7 @@ public class ReleaseDecisionExperimentStatsService(MongoDbClient mongoDb) : IExp
             .ToDictionary(x => x.Variation, StringComparer.Ordinal);
         var assignmentUnitSelector = NormalizeAssignmentUnitSelector(request);
         var layerKey = NormalizeLayerKey(request);
-        var layerTrafficPercent = Math.Clamp(request.LayerTrafficPercent ?? 100, 0.000001d, 100d);
+        var layerTrafficPercent = Math.Clamp(request.LayerTrafficPercent ?? 100, 0d, 100d);
         var applyLayer = !string.IsNullOrWhiteSpace(layerKey) && layerTrafficPercent < 100;
         var samplingScopeKey = (request.RunId?.ToString("N") ?? request.FlagKey) + ":";
 

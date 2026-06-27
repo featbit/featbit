@@ -7,6 +7,9 @@ db = db.getSiblingDB(dbName)
 // records; analysis joins them to a run by flag, metric, and observation window.
 db.ReleaseDecisionExperiments.createIndex({ featBitEnvId: 1, flagKey: 1, updatedAt: -1 });
 
+db.ReleaseDecisionActivities.createIndex({ experimentId: 1, createdAt: -1 });
+db.ReleaseDecisionActivities.createIndex({ experimentId: 1, actorId: 1 });
+
 db.ReleaseDecisionExposureEvents.createIndex({ envId: 1, flagKey: 1, exposedAt: 1 });
 db.ReleaseDecisionExposureEvents.createIndex({ envId: 1, userKey: 1, exposedAt: 1 });
 

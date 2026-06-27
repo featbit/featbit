@@ -55,7 +55,7 @@ export function StageStepper({
   onStageSelect,
 }: StageStepperProps) {
   return (
-    <nav className="flex items-stretch gap-0.5 border-b border-border/70 bg-background/55 px-2 py-1.5 backdrop-blur-xl shrink-0">
+    <nav className="flex items-stretch gap-0.5 border-b border-border/70 bg-background/55 px-2 py-2 backdrop-blur-xl shrink-0">
       {STAGES.map((stage, i) => {
         const isSelected = stage.key === activeTab;
         const hasContent = stageHasContent(experiment, stage.key);
@@ -70,18 +70,18 @@ export function StageStepper({
             onClick={() => onStageSelect(stage.key)}
             style={{ clipPath }}
             className={cn(
-              "flex-1 flex flex-col justify-center py-1.5 text-left transition-all cursor-pointer min-w-0 leading-tight",
-              isFirst ? "pl-3" : "pl-5",
-              isLast ? "pr-3" : "pr-5",
+              "flex-1 flex flex-col justify-center py-2 text-left transition-all cursor-pointer min-w-0 leading-tight",
+              isFirst ? "pl-4" : "pl-6",
+              isLast ? "pr-4" : "pr-6",
               isSelected
                 ? "bg-primary text-primary-foreground shadow-sm shadow-primary/20 -translate-y-px"
                 : "bg-card/70 text-muted-foreground hover:bg-accent/70 hover:text-accent-foreground"
             )}
           >
-            <span className="flex items-center gap-1.5 text-[11px] font-bold w-full min-w-0">
+            <h2 className="rd-stepper-title flex items-center gap-2 w-full min-w-0">
               <span
                 className={cn(
-                  "size-1 rounded-full shrink-0",
+                  "size-1.5 rounded-full shrink-0",
                   hasContent
                     ? isSelected
                       ? "bg-background"
@@ -92,17 +92,17 @@ export function StageStepper({
                 )}
               />
               <span className="truncate">{stage.label}</span>
-            </span>
-            <span
+            </h2>
+            <h3
               className={cn(
-                "text-[9px] font-normal pl-2.5 truncate w-full",
+                "rd-stepper-subtitle mt-0.5 pl-3.5 truncate w-full",
                 isSelected
-                  ? "text-background/60"
-                  : "text-muted-foreground/60"
+                  ? "text-background/70"
+                  : "text-muted-foreground/75"
               )}
             >
-              {stage.cf}
-            </span>
+              {stage.cf} · {stage.description}
+            </h3>
           </button>
         );
       })}

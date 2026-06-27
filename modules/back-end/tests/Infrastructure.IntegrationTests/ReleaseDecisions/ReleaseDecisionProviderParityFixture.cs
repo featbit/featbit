@@ -23,6 +23,7 @@ public sealed class ReleaseDecisionProviderParityFixture : IAsyncLifetime
     public static readonly Guid EnvId = Guid.Parse("11111111-1111-1111-1111-111111111111");
     public const string FlagKey = "checkout-flow";
     public const string MetricEvent = "purchase";
+    public const string GuardrailEvent = "checkout_error";
 
     private readonly IContainer _postgres = new ContainerBuilder()
         .WithImage("postgres:15.10")
@@ -232,6 +233,15 @@ public sealed class ReleaseDecisionProviderParityFixture : IAsyncLifetime
                 "CustomEvent",
                 1,
                 exposedAt.AddMinutes(2),
+                createdAt));
+            metrics.Add(new ScenarioMetric(
+                MetricGuidFromSequence(metricSequence++),
+                EnvId,
+                userKey,
+                GuardrailEvent,
+                "CustomEvent",
+                1,
+                exposedAt.AddMinutes(3),
                 createdAt));
         }
     }

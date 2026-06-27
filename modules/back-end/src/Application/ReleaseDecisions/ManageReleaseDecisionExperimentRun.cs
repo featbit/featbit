@@ -12,6 +12,10 @@ public class ReleaseDecisionExperimentRunAudienceUpdate
 
     public string Method { get; set; }
 
+    public string ControlVariant { get; set; }
+
+    public string TreatmentVariant { get; set; }
+
     public string LayerKey { get; set; }
 
     public string AllocationKeySelector { get; set; }

@@ -84,7 +84,7 @@ public class QueryExperimentStatsValidator : AbstractValidator<QueryExperimentSt
             .WithErrorCode(ErrorCodes.Invalid("sliceEnd"));
 
         RuleFor(x => x.LayerTrafficPercent)
-            .InclusiveBetween(0.000001d, 100d).WithErrorCode(ErrorCodes.Invalid("layerTrafficPercent"))
+            .InclusiveBetween(0d, 100d).WithErrorCode(ErrorCodes.Invalid("layerTrafficPercent"))
             .When(x => x.LayerTrafficPercent.HasValue);
     }
 

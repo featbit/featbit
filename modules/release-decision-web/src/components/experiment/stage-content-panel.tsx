@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Link } from "@/lib/router";
 import { getStage } from "@/lib/stages";
 import { EditDecisionStateDialog } from "./decision-state-edit";
 import { MetricEditDialog } from "./metric-edit";
@@ -18,7 +17,6 @@ import {
   Code,
   Pencil,
   Activity,
-  ExternalLink,
   ShieldAlert,
   ShieldCheck,
   Target,
@@ -108,21 +106,8 @@ export function StageContentPanel({
     return <SettingsContent experiment={experiment} />;
   }
 
-  const stage = getStage(activeTab);
-
   return (
     <div className="h-full overflow-y-auto p-5 space-y-5">
-      {/* Stage header */}
-      <div className="space-y-1">
-        <div className="flex items-center gap-2">
-          <Badge className={`text-[10px] ${stage.color}`}>{stage.cf}</Badge>
-          <span className="text-sm font-semibold">{stage.label}</span>
-        </div>
-        <p className="text-sm text-muted-foreground">
-          {stage.description}
-        </p>
-      </div>
-
       {/* Stage-specific content */}
       {activeTab === "measuring" ? (
         <MeasuringContent experiment={experiment} />
@@ -156,24 +141,24 @@ function SettingsContent({
       <div className="space-y-1">
         <div className="flex items-center gap-2">
           <SettingsIcon className="size-4" />
-          <span className="text-sm font-semibold">Settings</span>
+          <h2 className="rd-heading-section">Settings</h2>
         </div>
-        <p className="text-sm text-muted-foreground">
+        <h3 className="rd-heading-subtitle">
           Administrative actions for this experiment.
-        </p>
+        </h3>
       </div>
 
       <section className="space-y-2">
-        <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+        <h3 className="rd-heading-label">
           Metadata
-        </div>
+        </h3>
         <div className="rounded-md border bg-muted/10 px-3 py-3 space-y-2 text-sm">
           <div>
-            <span className="text-xs font-medium text-muted-foreground uppercase">Name</span>
+            <h4 className="rd-heading-field">Name</h4>
             <p className="leading-relaxed">{experiment.name}</p>
           </div>
           <div>
-            <span className="text-xs font-medium text-muted-foreground uppercase">Description</span>
+            <h4 className="rd-heading-field">Description</h4>
             <p className="fb-wrap-text leading-relaxed whitespace-pre-line">
               {experiment.description || (
                 <span className="italic text-muted-foreground/50">Not set (edit in Hypothesis stage)</span>
@@ -181,12 +166,12 @@ function SettingsContent({
             </p>
           </div>
           <div>
-            <span className="text-xs font-medium text-muted-foreground uppercase">Experiment ID</span>
+            <h4 className="rd-heading-field">Experiment ID</h4>
             <p className="font-mono text-xs text-muted-foreground">{experiment.id}</p>
           </div>
           {experiment.featbitEnvId && (
             <div>
-              <span className="text-xs font-medium text-muted-foreground uppercase">FeatBit Env ID</span>
+              <h4 className="rd-heading-field">FeatBit Env ID</h4>
               <p className="font-mono text-xs text-muted-foreground">{experiment.featbitEnvId}</p>
             </div>
           )}
@@ -194,9 +179,9 @@ function SettingsContent({
       </section>
 
       <section className="space-y-2">
-        <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+        <h3 className="rd-heading-label">
           Danger zone
-        </div>
+        </h3>
         <div className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-3 space-y-3">
           <p className="text-sm text-muted-foreground leading-relaxed">
             Deleting an experiment permanently removes its runs, activity, and message history. This cannot be undone.
@@ -309,9 +294,9 @@ function FieldsSection({
 
   return (
     <section className="space-y-2">
-      <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+      <div className="flex items-center gap-1.5">
         {config.icon}
-        <span>Details</span>
+        <h3 className="rd-heading-label">Details</h3>
         <EditDecisionStateDialog experiment={experiment} fields={editableKeys} />
       </div>
       <div className="space-y-2">
@@ -319,9 +304,9 @@ function FieldsSection({
           const value = (experiment[key] as string) ?? "";
           return (
             <div key={key}>
-              <span className="text-xs font-medium text-muted-foreground uppercase">
+              <h4 className="rd-heading-field">
                 {label}
-              </span>
+              </h4>
               {key === "guardrails" ? (
                 <MetricLines value={value} />
               ) : (
@@ -350,8 +335,8 @@ function FlagAndExperimentSection({
   const experimentRuns = experiment.experimentRuns;
   const { sorted } = sortAndDetectSequential(experimentRuns);
 
-  // Full-screen edit panels replace stage content so the right-side Codex guide
-  // stays visible (vs a Sheet overlay that would cover it).
+  // Full-screen edit panels replace stage content instead of using a Sheet
+  // overlay, keeping the stage workflow in one stable workspace.
   const [flagPanelOpen, setFlagPanelOpen] = useState(false);
   const [metricsPanelOpen, setMetricsPanelOpen] = useState(false);
   const [sdkCredsOpen, setSdkCredsOpen] = useState(false);
@@ -387,26 +372,6 @@ function FlagAndExperimentSection({
 
   return (
     <>
-      {/* ─── Integration docs pointer ─── */}
-      <Link
-        href="/data/env-settings"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="group flex items-start gap-3 rounded-lg border border-border bg-muted/30 p-3 mb-4 hover:bg-muted/60 transition-colors"
-      >
-        <BookOpen className="size-4 mt-0.5 shrink-0 text-muted-foreground" />
-        <div className="flex-1 min-w-0 text-sm">
-          <div className="font-medium flex items-center gap-1.5">
-            How to instrument your app for this experiment
-            <ExternalLink className="size-3 text-muted-foreground group-hover:text-foreground transition-colors" />
-          </div>
-          <div className="text-sm text-muted-foreground mt-0.5">
-            Environment settings — use the current FeatBit environment
-            credentials when wiring flag evaluations and metric events.
-          </div>
-        </div>
-      </Link>
-
       {/* ─── Section 1: Flag Integration & Rollout (summary) ─── */}
       <FlagIntegrationHeader
         experiment={experiment}
@@ -490,9 +455,9 @@ function MetricsIntegrationSection({
 
   return (
     <section className="space-y-2.5">
-      <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+      <div className="flex items-center gap-1.5">
         <Activity className="size-3.5" />
-        <span>Metrics Integration</span>
+        <h3 className="rd-heading-label">Metrics Integration</h3>
         <button
           type="button"
           onClick={onEdit}
@@ -616,6 +581,7 @@ function ExperimentRunCard({
   experimentId,
   flagKey,
   variants,
+  existingLayerKeys = [],
 }: {
   run: ExperimentRun;
   idx: number;
@@ -623,6 +589,7 @@ function ExperimentRunCard({
   experimentId: string;
   flagKey: string | null;
   variants?: string | null;
+  existingLayerKeys?: string[];
 }) {
   const variantRows = parseVariantIdentities(variants);
   const treatmentVariants = splitVariantTokens(run.treatmentVariant);
@@ -640,7 +607,7 @@ function ExperimentRunCard({
             #{idx + 1}
           </span>
         )}
-        <span className="text-sm font-mono font-medium">{run.slug}</span>
+        <h3 className="rd-heading-subsection font-mono">{run.slug}</h3>
         <div className="ml-auto flex items-center gap-1.5">
           {run.method && <MethodBadge method={run.method} />}
           <StatusBadge status={run.status} />
@@ -677,7 +644,12 @@ function ExperimentRunCard({
         {/* Audience & Traffic — merged with traffic allocation */}
         <div>
           <SectionLabel icon={<Filter className="size-3" />} label="Audience &amp; Traffic" />
-          <ExperimentRunTrafficConfig experimentRun={run} experimentId={experimentId} variants={variants} />
+          <ExperimentRunTrafficConfig
+            experimentRun={run}
+            experimentId={experimentId}
+            variants={variants}
+            existingLayerKeys={existingLayerKeys}
+          />
         </div>
 
         {/* Schedule: Observation window + min sample */}
@@ -760,9 +732,9 @@ function LearningSection({
 
   return (
     <section className="space-y-2">
-      <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+      <div className="flex items-center gap-1.5">
         <BookOpen className="size-3.5" />
-        <span>Experiment Run Learnings</span>
+        <h3 className="rd-heading-label">Experiment Run Learnings</h3>
       </div>
       {withLearnings.length === 0 ? (
         <div className="rounded-md border border-dashed p-3 text-center">
@@ -789,29 +761,29 @@ function LearningSection({
                     #{phaseIdx + 1}
                   </span>
                 )}
-                <span className="text-sm font-mono font-medium">{exp.slug}</span>
+                <h4 className="rd-heading-subsection font-mono">{exp.slug}</h4>
               </div>
               {exp.whatChanged && (
                 <div>
-                  <span className="text-xs font-medium text-muted-foreground uppercase">
+                  <h4 className="rd-heading-field">
                     What Changed
-                  </span>
+                  </h4>
                   <p className="fb-wrap-text text-sm leading-relaxed">{exp.whatChanged}</p>
                 </div>
               )}
               {exp.whatHappened && (
                 <div>
-                  <span className="text-xs font-medium text-muted-foreground uppercase">
+                  <h4 className="rd-heading-field">
                     What Happened
-                  </span>
+                  </h4>
                   <p className="fb-wrap-text text-sm leading-relaxed">{exp.whatHappened}</p>
                 </div>
               )}
               {exp.confirmedOrRefuted && (
                 <div>
-                  <span className="text-xs font-medium text-muted-foreground uppercase">
+                  <h4 className="rd-heading-field">
                     Confirmed or Refuted
-                  </span>
+                  </h4>
                   <p className="fb-wrap-text text-sm leading-relaxed">
                     {exp.confirmedOrRefuted}
                   </p>
@@ -819,9 +791,9 @@ function LearningSection({
               )}
               {exp.whyItHappened && (
                 <div>
-                  <span className="text-xs font-medium text-muted-foreground uppercase">
+                  <h4 className="rd-heading-field">
                     Why It Happened
-                  </span>
+                  </h4>
                   <p className="fb-wrap-text text-sm leading-relaxed">
                     {exp.whyItHappened}
                   </p>
@@ -829,9 +801,9 @@ function LearningSection({
               )}
               {exp.nextHypothesis && (
                 <div>
-                  <span className="text-xs font-medium text-muted-foreground uppercase">
+                  <h4 className="rd-heading-field">
                     Next Hypothesis
-                  </span>
+                  </h4>
                   <p className="fb-wrap-text text-sm leading-relaxed">
                     {exp.nextHypothesis}
                   </p>
@@ -861,13 +833,13 @@ function ConflictAnalysisSection({
 
   return (
     <section className="space-y-2">
-      <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+      <div className="flex items-center gap-1.5">
         {hasConflict ? (
           <ShieldAlert className="size-3.5 text-amber-500" />
         ) : (
           <ShieldCheck className="size-3.5 text-emerald-500" />
         )}
-        <span>Experiment Conflict Check</span>
+        <h3 className="rd-heading-label">Experiment Conflict Check</h3>
       </div>
       <div
         className={`fb-wrap-text rounded-md border px-3 py-3 text-sm leading-relaxed whitespace-pre-line ${
@@ -888,10 +860,10 @@ function ConflictAnalysisSection({
 
 function SectionLabel({ icon, label }: { icon: React.ReactNode; label: string }) {
   return (
-    <div className="flex items-center gap-1 text-xs font-medium text-muted-foreground uppercase tracking-wider mb-0.5">
+    <h4 className="rd-heading-label mb-0.5 flex items-center gap-1">
       {icon}
       <span>{label}</span>
-    </div>
+    </h4>
   );
 }
 

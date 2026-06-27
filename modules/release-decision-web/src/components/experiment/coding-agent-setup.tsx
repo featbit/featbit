@@ -249,7 +249,7 @@ Use the FeatBit experimentation MCP tools to inspect this experiment, continue t
   return (
     <div className="space-y-4">
       <div className="rounded-md border border-primary/25 bg-primary/[0.035] px-3 py-2.5 text-xs leading-relaxed text-muted-foreground">
-        <div className="font-semibold text-foreground">Before you start</div>
+        <h3 className="rd-heading-subsection">Before you start</h3>
         <ul className="mt-1.5 space-y-1">
           <li className="flex gap-2">
             <Check className="mt-0.5 size-3.5 shrink-0 text-primary" />
@@ -390,9 +390,9 @@ function SetupSection({
 }) {
   return (
     <section className="rounded-md border border-border/80 bg-background/75 p-3">
-      <div className="mb-2 flex items-center gap-2 text-sm font-semibold">
+      <div className="mb-2 flex items-center gap-2">
         <span className="text-primary">{icon}</span>
-        <h3>{title}</h3>
+        <h3 className="rd-heading-section">{title}</h3>
       </div>
       <div className="text-xs leading-relaxed text-muted-foreground">
         {children}
@@ -410,7 +410,7 @@ function CommandGroup({
 }) {
   return (
     <div className="mt-3 space-y-2 rounded-md border border-border/80 bg-muted/20 p-2.5">
-      <h4 className="text-xs font-semibold text-foreground">{title}</h4>
+      <h4 className="rd-heading-subsection">{title}</h4>
       {children}
     </div>
   );
