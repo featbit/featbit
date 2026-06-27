@@ -42,6 +42,21 @@ export class ProjectComponent implements OnInit {
   projects: IProject[] = [];
   filteredProjects: IProject[] = [];
 
+  private readonly pageSize = 3;
+  visibleCount = this.pageSize;
+
+  get visibleProjects(): IProject[] {
+    return this.filteredProjects.slice(0, this.visibleCount);
+  }
+
+  get hasMore(): boolean {
+    return this.visibleCount < this.filteredProjects.length;
+  }
+
+  loadMore(): void {
+    this.visibleCount += this.pageSize;
+  }
+
   constructor(
     private fb: FormBuilder,
     private messageQueueService: MessageQueueService,
@@ -70,10 +85,12 @@ export class ProjectComponent implements OnInit {
   }
 
   private updateFilteredProjects(): void {
-    const q = this._searchValue?.toLowerCase();
-    this.filteredProjects = q
-      ? this.projects.filter(p => p.name.toLowerCase().includes(q))
+    const query = this._searchValue?.toLowerCase();
+    this.filteredProjects = query
+      ? this.projects.filter(p => p.name.toLowerCase().includes(query))
       : [...this.projects];
+
+    this.visibleCount = this.pageSize;
   }
 
   trackProjectById(_: number, project: IProject): string {
