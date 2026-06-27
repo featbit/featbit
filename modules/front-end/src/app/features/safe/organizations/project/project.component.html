@@ -36,7 +36,7 @@
                       <div class="desc-content">{{env.name}}</div>
                     </div>
                     <div>
-                      <div class="desc-name"><span>Key</span><i nz-icon i18n-nz-tooltip="@@common.key-input-description" nz-tooltip="We use the key to give you friendly URLs & RNs. Keys should only contain letters, numbers, ., _ or -." nzType="icons:icon-info-outline"></i></div>
+                      <div class="desc-name"><span>Key</span> <i nz-icon i18n-nz-tooltip="@@common.key-input-description" nz-tooltip="We use the key to give you friendly URLs & RNs. Keys should only contain letters, numbers, ., _ or -." nzType="icons:icon-info-outline"></i></div>
                       <div class="desc-content">{{env.key}}</div>
                     </div>
                     <div>
@@ -77,7 +77,7 @@
                                 (nzOnConfirm)="deleteSecret(project, env, secret.id)">
                                 <i nz-icon nzType="delete" nzTheme="outline"></i>
                               </button>
-                          </span>
+                            </span>
                           </div>
                         }
                       </div>
@@ -134,8 +134,8 @@
             </button>
           }
           <button class="action-btn" nz-button nzType="default" nzSize="small"
-           permission-check [rn]="permissionsService.getProjectRN(project)" [action]="permissionActions.CreateEnv" (actionIfAllow)="onCreateEnvClick(project)"
-          >
+            permission-check [rn]="permissionsService.getProjectRN(project)" [action]="permissionActions.CreateEnv" (actionIfAllow)="onCreateEnvClick(project)"
+              >
             <i style="color: #3CC798" nz-icon nzType="icons:icon-plus"></i>
             <ng-container i18n="@@org.project.addEnv">Add environment</ng-container>
           </button>
