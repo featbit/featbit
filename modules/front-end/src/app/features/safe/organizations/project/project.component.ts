@@ -93,10 +93,6 @@ export class ProjectComponent implements OnInit {
     this.visibleCount = this.pageSize;
   }
 
-  trackProjectById(_: number, project: IProject): string {
-    return project.id;
-  }
-
   onCreateProjectClick() {
     this.project = {} as IProject;
     this.creatEditProjectFormVisible = true;
