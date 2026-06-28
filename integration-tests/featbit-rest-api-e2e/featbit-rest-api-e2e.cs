@@ -977,7 +977,10 @@ static async Task RunTrafficScenarioAsync(
     var controlArm = arms.Single(x => x.Role == "control");
     var treatmentArms = arms.Where(x => x.Role == "treatment").ToArray();
     var treatmentVariant = string.Join("|", treatmentArms.Select(x => x.VariationId));
-    var layerKey = scenario.HasLayer ? $"e2e-{scenario.Id}-{run.Suffix}" : null;
+    var layerKey = scenario.HasLayer ? ScenarioLayerKey(scenario, run) : null;
+    var layerId = scenario.HasLayer
+        ? await EnsureScenarioLayerAsync(api, run, layerKey!, scenario, report)
+        : null;
 
     await UpdateScenarioFlagTrafficAsync(api, run, scenarioFlag, arms, $"10.{scenario.Order}.1");
     await Task.Delay(TimeSpan.FromSeconds(Math.Max(1, options.PostSdkWaitSeconds)));
@@ -1054,9 +1057,40 @@ static async Task RunTrafficScenarioAsync(
     await api.SendAsync(
         HttpMethod.Put,
         $"/api/v1/envs/{run.EnvId}/release-decision/experiments/{experimentId}/runs/{runId}/audience",
-        BuildScenarioAudiencePayload(controlArm, treatmentVariant, layerKey, scenario, samplingPlan),
+        BuildScenarioAudiencePayload(controlArm, treatmentVariant, layerId, layerKey, scenario, samplingPlan),
         $"10.{scenario.Order}.6 Configure scenario traffic {scenario.Id}",
         "Configure actual-variation roles, optional layer eligibility, and per-variation sampling.");
+
+    if (scenario.ConflictProbeSliceStart.HasValue && scenario.ConflictProbeSliceEnd.HasValue)
+    {
+        var conflictPayload = BuildScenarioAudiencePayload(controlArm, treatmentVariant, layerId, layerKey, scenario, samplingPlan);
+        conflictPayload["sliceStart"] = scenario.ConflictProbeSliceStart.Value;
+        conflictPayload["sliceEnd"] = scenario.ConflictProbeSliceEnd.Value;
+        conflictPayload["layerTrafficPercent"] = scenario.ConflictProbeSliceEnd.Value - scenario.ConflictProbeSliceStart.Value;
+
+        var conflict = await api.SendAsync(
+            HttpMethod.Put,
+            $"/api/v1/envs/{run.EnvId}/release-decision/experiments/{experimentId}/runs/{runId}/audience",
+            conflictPayload,
+            $"10.{scenario.Order}.6 Overlap probe rejected {scenario.Id}",
+            "Verify the backend rejects an overlapping slice in the same layer.",
+            expectSuccess: false);
+        var conflictText = conflict?.ToJsonString() ?? string.Empty;
+        var rejected = conflict?["statusCode"]?.GetValue<int>() == 422 ||
+                       conflictText.Contains("Conflict", StringComparison.OrdinalIgnoreCase) ||
+                       conflictText.Contains("overlap", StringComparison.OrdinalIgnoreCase);
+        report.Assert(
+            rejected,
+            $"10.{scenario.Order}.6 Layer overlap rejected {scenario.Id}",
+            $"probe={scenario.ConflictProbeSliceStart:0.######}-{scenario.ConflictProbeSliceEnd:0.######}, response={JsonSerializer.Serialize(conflict)}");
+
+        await api.SendAsync(
+            HttpMethod.Put,
+            $"/api/v1/envs/{run.EnvId}/release-decision/experiments/{experimentId}/runs/{runId}/audience",
+            BuildScenarioAudiencePayload(controlArm, treatmentVariant, layerId, layerKey, scenario, samplingPlan),
+            $"10.{scenario.Order}.6 Configure non-overlap traffic {scenario.Id}",
+            "Configure the valid non-overlapping layer slice after the rejection probe.");
+    }
 
     var seed = await SeedTrafficScenarioWithPresetInsightsAsync(
         run,
@@ -1064,9 +1098,21 @@ static async Task RunTrafficScenarioAsync(
         options,
         scenario,
         arms,
-        runId,
+        scenarioFlag.Key,
         layerKey,
         metricEvent);
+
+    if (!string.IsNullOrWhiteSpace(scenario.ExclusiveAgainstScenarioId) &&
+        run.TrafficScenarioAnalyzedUsers.TryGetValue(scenario.ExclusiveAgainstScenarioId, out var previousUsers))
+    {
+        var overlap = seed.AnalyzedUserKeys.Intersect(previousUsers, StringComparer.Ordinal).ToArray();
+        report.Assert(
+            overlap.Length == 0,
+            $"10.{scenario.Order}.7 Layer exclusive users {scenario.Id}",
+            $"against={scenario.ExclusiveAgainstScenarioId}, currentAnalyzed={seed.AnalyzedUserKeys.Length}, previousAnalyzed={previousUsers.Count}, overlap={overlap.Length}");
+    }
+
+    run.TrafficScenarioAnalyzedUsers[scenario.Id] = seed.AnalyzedUserKeys.ToHashSet(StringComparer.Ordinal);
 
     await api.SendAsync(
         HttpMethod.Put,
@@ -1181,8 +1227,51 @@ static async Task RunTrafficScenarioAsync(
         experimentId,
         runId,
         metricEvent,
-        scenario.LayerTrafficPercent,
+        scenario.LayerSliceStart,
+        scenario.LayerSliceEnd,
         armResults));
+}
+
+static string ScenarioLayerKey(TrafficScenarioSpec scenario, E2ERun run)
+{
+    var layerId = string.IsNullOrWhiteSpace(scenario.LayerKeyScenarioId)
+        ? scenario.Id
+        : scenario.LayerKeyScenarioId;
+    return $"e2e-{layerId}-{run.Suffix}";
+}
+
+static async Task<string> EnsureScenarioLayerAsync(
+    FeatBitApiClient api,
+    E2ERun run,
+    string layerKey,
+    TrafficScenarioSpec scenario,
+    TestReport report)
+{
+    if (run.TrafficScenarioLayerIds.TryGetValue(layerKey, out var existingLayerId))
+    {
+        return existingLayerId;
+    }
+
+    var layer = await api.SendAsync(
+        HttpMethod.Post,
+        $"/api/v1/envs/{run.EnvId}/release-decision/layers",
+        new
+        {
+            name = $"E2E {scenario.Name} layer",
+            key = layerKey,
+            description = $"Layer for E2E traffic scenario {scenario.Id}",
+            assignmentUnitSelector = "user.keyId",
+            status = "active"
+        },
+        $"10.{scenario.Order}.0 Create scenario layer {scenario.Id}",
+        "Create the registered layer that owns assignment-unit hashing for this scenario.");
+
+    var layerId = RequiredString(layer, "id");
+    run.TrafficScenarioLayerIds[layerKey] = layerId;
+    report.Pass(
+        $"10.{scenario.Order}.0 Scenario layer ready {scenario.Id}",
+        $"layerId={layerId}, layerKey={layerKey}, assignmentUnit=user.keyId, slice={scenario.LayerSliceStart!.Value:0.######}-{scenario.LayerSliceEnd!.Value:0.######}");
+    return layerId;
 }
 
 static async Task<JsonNode?> QueryScenarioStatsUntilReadyAsync(
@@ -1239,6 +1328,7 @@ static async Task<JsonNode?> QueryScenarioStatsUntilReadyAsync(
 static JsonObject BuildScenarioAudiencePayload(
     TrafficScenarioArmRuntime controlArm,
     string treatmentVariant,
+    string? layerId,
     string? layerKey,
     TrafficScenarioSpec scenario,
     string samplingPlan)
@@ -1255,7 +1345,10 @@ static JsonObject BuildScenarioAudiencePayload(
 
     if (scenario.HasLayer)
     {
+        payload["layerId"] = layerId;
         payload["layerKey"] = layerKey;
+        payload["sliceStart"] = scenario.LayerSliceStart;
+        payload["sliceEnd"] = scenario.LayerSliceEnd;
         payload["layerTrafficPercent"] = scenario.LayerTrafficPercent;
     }
 
@@ -1278,6 +1371,8 @@ static JsonObject BuildScenarioStatsPayload(
     if (scenario.HasLayer)
     {
         payload["layerKey"] = layerKey;
+        payload["sliceStart"] = scenario.LayerSliceStart;
+        payload["sliceEnd"] = scenario.LayerSliceEnd;
         payload["layerTrafficPercent"] = scenario.LayerTrafficPercent;
     }
 
@@ -1348,14 +1443,15 @@ static async Task<TrafficScenarioSeedSummary> SeedTrafficScenarioWithPresetInsig
     E2EOptions options,
     TrafficScenarioSpec scenario,
     TrafficScenarioArmRuntime[] arms,
-    string runId,
+    string samplingScope,
     string? layerKey,
     string metricEvent)
 {
     var assignments = new List<SeededExperimentUser>(options.Users);
     for (var index = 0; index < options.Users; index++)
     {
-        var user = BuildSyntheticUser(index, $"e2e-{scenario.Id}");
+        var userPrefix = $"e2e-{scenario.UserKeyScenarioId ?? scenario.Id}";
+        var user = BuildSyntheticUser(index, userPrefix);
         var detail = EvaluateByTraffic(scenarioFlag, user.Key, arms.Select(x => (x.VariationId, x.FlagTrafficShare)).ToArray());
         assignments.Add(new SeededExperimentUser(index, user.Key, user, detail.ValueId, detail.ValueText));
     }
@@ -1364,15 +1460,41 @@ static async Task<TrafficScenarioSeedSummary> SeedTrafficScenarioWithPresetInsig
         .OrderBy(x => x.Index)
         .ToArray();
     var analyzedAssignments = exposureAssignments
-        .Where(assignment => IsIncludedInScenarioAnalysis(assignment, arms, runId, layerKey, scenario))
+        .Where(assignment => IsIncludedInScenarioAnalysis(assignment, arms, samplingScope, layerKey, scenario))
         .ToArray();
-    var primaryUserKeys = arms
-        .SelectMany(arm => SelectMetricUserKeys(
-            analyzedAssignments,
-            arm.VariationId,
-            rate: arm.ConversionRate,
-            salt: metricEvent))
+    var analyzedUserKeys = analyzedAssignments
+        .Select(x => x.UserKey)
         .ToHashSet(StringComparer.Ordinal);
+    var primaryUserKeys = new HashSet<string>(StringComparer.Ordinal);
+    foreach (var arm in arms)
+    {
+        var analyzedConversions = SelectMetricUserKeys(
+                analyzedAssignments,
+                arm.VariationId,
+                rate: arm.ConversionRate,
+                salt: $"{metricEvent}:analyzed")
+            .ToArray();
+        foreach (var userKey in analyzedConversions)
+        {
+            primaryUserKeys.Add(userKey);
+        }
+
+        var rawArmAssignments = exposureAssignments
+            .Where(x => string.Equals(x.VariationId, arm.VariationId, StringComparison.OrdinalIgnoreCase))
+            .ToArray();
+        var rawTarget = TargetCount(rawArmAssignments.Length, arm.ConversionRate);
+        var outsideTarget = (int)Math.Min(int.MaxValue, Math.Max(0, rawTarget - analyzedConversions.Length));
+        var outsideConversions = rawArmAssignments
+            .Where(x => !analyzedUserKeys.Contains(x.UserKey))
+            .OrderBy(x => StableSelectionKey($"{metricEvent}:outside:{arm.VariationId}", x.UserKey), StringComparer.Ordinal)
+            .ThenBy(x => x.Index)
+            .Take(outsideTarget)
+            .Select(x => x.UserKey);
+        foreach (var userKey in outsideConversions)
+        {
+            primaryUserKeys.Add(userKey);
+        }
+    }
 
     await PostPresetInsightEventsAsync(
         run,
@@ -1384,10 +1506,19 @@ static async Task<TrafficScenarioSeedSummary> SeedTrafficScenarioWithPresetInsig
             ? [new SeedMetric(metricEvent, 1.0, MetricOffset: TimeSpan.FromMinutes(10))]
             : []);
 
-    return new TrafficScenarioSeedSummary(string.Join(
-        ", ",
-        arms.Select(arm =>
-            $"{arm.Label} raw={assignments.Count(x => string.Equals(x.VariationId, arm.VariationId, StringComparison.OrdinalIgnoreCase))} seeded={exposureAssignments.Count(x => string.Equals(x.VariationId, arm.VariationId, StringComparison.OrdinalIgnoreCase))} analyzed={analyzedAssignments.Count(x => string.Equals(x.VariationId, arm.VariationId, StringComparison.OrdinalIgnoreCase))}")));
+    return new TrafficScenarioSeedSummary(
+        string.Join(
+            ", ",
+            arms.Select(arm =>
+            {
+                var raw = exposureAssignments.Count(x => string.Equals(x.VariationId, arm.VariationId, StringComparison.OrdinalIgnoreCase));
+                var analyzed = analyzedAssignments.Count(x => string.Equals(x.VariationId, arm.VariationId, StringComparison.OrdinalIgnoreCase));
+                var rawConversions = exposureAssignments.Count(x =>
+                    string.Equals(x.VariationId, arm.VariationId, StringComparison.OrdinalIgnoreCase) &&
+                    primaryUserKeys.Contains(x.UserKey));
+                return $"{arm.Label} raw={raw} rawConv={rawConversions} analyzed={analyzed}";
+            })),
+        analyzedAssignments.Select(x => x.UserKey).Distinct(StringComparer.Ordinal).OrderBy(x => x, StringComparer.Ordinal).ToArray());
 }
 
 static async Task PostPresetInsightEventsAsync(
@@ -1712,14 +1843,14 @@ static async Task RunSelfCheckAsync(string[] args)
     var scenarios = TrafficScenarioSpec.DefaultScenarios(options, E2ERun.FixedDataSetId);
     var scenarioFlags = FlagCatalog.BuildTrafficScenarioFlags(E2ERun.FixedDataSetId);
     report.Assert(
-        scenarios.Length == 4 &&
-        scenarios.Select(x => x.Id).Distinct(StringComparer.OrdinalIgnoreCase).Count() == 4 &&
-        scenarios.Select(x => x.FlagKey).Distinct(StringComparer.OrdinalIgnoreCase).Count() == 4,
+        scenarios.Length == 5 &&
+        scenarios.Select(x => x.Id).Distinct(StringComparer.OrdinalIgnoreCase).Count() == 5 &&
+        scenarios.Select(x => x.FlagKey).Distinct(StringComparer.OrdinalIgnoreCase).Count() == 5,
         "Self-check traffic scenario catalog",
         string.Join(", ", scenarios.Select(x =>
-            $"{x.Id}:flag={x.FlagKey},split={x.FlagSplitDescription},sample={string.Join("/", x.Arms.Select(a => $"{a.Label}:{a.IncludeRate:0.######}%"))},layer={(x.HasLayer ? $"{x.LayerTrafficPercent:0.######}%" : "none")}")));
+            $"{x.Id}:flag={x.FlagKey},split={x.FlagSplitDescription},sample={string.Join("/", x.Arms.Select(a => $"{a.Label}:{a.IncludeRate:0.######}%"))},layer={(x.HasLayer ? $"{x.LayerSliceStart!.Value:0.######}-{x.LayerSliceEnd!.Value:0.######}" : "none")}")));
     report.Assert(
-        scenarioFlags.Length == 4 &&
+        scenarioFlags.Length == 5 &&
         scenarioFlags.Select(x => x.Key).OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
             .SequenceEqual(scenarios.Select(x => x.FlagKey).OrderBy(x => x, StringComparer.OrdinalIgnoreCase), StringComparer.OrdinalIgnoreCase) &&
         scenarioFlags.All(x => flags.All(flag => !string.Equals(flag.Key, x.Key, StringComparison.OrdinalIgnoreCase))),
@@ -1729,9 +1860,10 @@ static async Task RunSelfCheckAsync(string[] args)
         scenarios.Any(x => x.Id == "balanced-50-50-use-all" && !x.HasLayer) &&
         scenarios.Any(x => x.Id == "skewed-90-10-to-10-10" && !x.HasLayer && x.ExpectBalancedAnalysis) &&
         scenarios.Any(x => x.Id == "layer-30-three-arm-34-33-33" && x.HasLayer && Math.Abs(x.LayerTrafficPercent!.Value - 30) < 0.000001 && x.Arms.Length == 3) &&
-        scenarios.Any(x => x.Id == "layer-30-skewed-80-20-to-20-20" && x.HasLayer && x.ExpectBalancedAnalysis && x.Arms.Any(a => a.Role == "control" && Math.Abs(a.IncludeRate - 22.222222) < 0.000001)),
+        scenarios.Any(x => x.Id == "layer-30-skewed-80-20-to-20-20" && x.HasLayer && x.ExpectBalancedAnalysis && x.Arms.Any(a => a.Role == "control" && Math.Abs(a.IncludeRate - 22.222222) < 0.000001)) &&
+        scenarios.Any(x => x.Id == "layer-exclusive-companion-30-60" && x.HasLayer && x.LayerKeyScenarioId == "layer-30-three-arm-34-33-33" && x.UserKeyScenarioId == "layer-30-three-arm-34-33-33" && x.ExclusiveAgainstScenarioId == "layer-30-three-arm-34-33-33"),
         "Self-check traffic scenario semantics",
-        "The runner includes no-layer, sampled-to-balanced, three-arm layer, and layer-sampled scenarios.");
+        "The runner includes no-layer, sampled-to-balanced, three-arm layer, layer-sampled, and same-layer exclusive companion scenarios.");
 
     report.Pass("Self-check completed", "Offline deterministic script checks passed.");
     Console.WriteLine("Self-check completed. No report files were written because this was not a live E2E run.");
@@ -2024,7 +2156,7 @@ static string BuildPlanMarkdown(string dataSetId, FlagSpec[] flags)
     sb.AppendLine("- Error guardrail `e2e_checkout_error_fixed_v1` evidence target: control errors equal `Round(controlUsers * 0.018)`, treatment errors equal `Round(treatmentUsers * 0.020)`, both below `5.00%`.");
     sb.AppendLine("- Latency guardrail `e2e_checkout_latency_ms_fixed_v1` evidence target: control average `340ms`, treatment average `320ms`, treatment <= control.");
     sb.AppendLine("- Analyze should set run status to `analyzing`, write non-empty `inputData` containing all three metric events, and write non-empty `analysisResult`.");
-    sb.AppendLine("- Additional traffic-assignment scenarios each create an independent experiment, run, metric event, and observation window. The covered scenarios are no-layer `50/50 -> use all`, no-layer `90/10 -> 10/10`, layer `30% + 34/33/33`, and layer `30% + 80/20 -> 20/20`.");
+    sb.AppendLine("- Additional traffic-assignment scenarios each create an independent experiment, run, metric event, and observation window. The covered scenarios are no-layer `50/50 -> use all`, no-layer `90/10 -> 10/10`, layer `[0,30) + 34/33/33`, layer `[0,30) + 80/20 -> 20/20`, and same-layer exclusive companion `[30,60)`.");
 
     sb.AppendLine();
     sb.AppendLine("## Steps And Endpoints");
@@ -2474,7 +2606,7 @@ static IEnumerable<string> SelectMetricUserKeys(
 static bool IsIncludedInScenarioAnalysis(
     SeededExperimentUser assignment,
     TrafficScenarioArmRuntime[] arms,
-    string runId,
+    string samplingScope,
     string? layerKey,
     TrafficScenarioSpec scenario)
 {
@@ -2487,14 +2619,19 @@ static bool IsIncludedInScenarioAnalysis(
 
     if (scenario.HasLayer)
     {
-        if (string.IsNullOrWhiteSpace(layerKey) ||
-            RolloutPercent($"{layerKey}{assignment.UserKey}") >= scenario.LayerTrafficPercent)
+        if (string.IsNullOrWhiteSpace(layerKey))
+        {
+            return false;
+        }
+
+        var layerBucket = RolloutPercent($"{layerKey}{assignment.UserKey}");
+        if (layerBucket < scenario.LayerSliceStart!.Value || layerBucket >= scenario.LayerSliceEnd!.Value)
         {
             return false;
         }
     }
 
-    var samplingScopeKey = Guid.Parse(runId).ToString("N") + ":";
+    var samplingScopeKey = samplingScope + ":";
     return RolloutPercent($"{samplingScopeKey}{assignment.VariationId}:{assignment.UserKey}") < arm.IncludeRate;
 }
 
@@ -2837,7 +2974,8 @@ sealed class FeatBitApiClient
         string path,
         object? payload,
         string name,
-        string meaning)
+        string meaning,
+        bool expectSuccess = true)
     {
         using var request = new HttpRequestMessage(method, path);
         if (payload != null)
@@ -2851,8 +2989,26 @@ sealed class FeatBitApiClient
 
         if (!response.IsSuccessStatusCode)
         {
+            if (!expectSuccess)
+            {
+                _report.Record(name, meaning, endpoint, "PASS", $"HTTP {(int)response.StatusCode} {response.ReasonPhrase}: {Truncate(body, 1200)}");
+                var errorRoot = string.IsNullOrWhiteSpace(body) ? new JsonObject() : JsonNode.Parse(body);
+                if (errorRoot is JsonObject errorObj)
+                {
+                    errorObj["statusCode"] = (int)response.StatusCode;
+                }
+
+                return errorRoot;
+            }
+
             _report.Record(name, meaning, endpoint, "FAIL", $"HTTP {(int)response.StatusCode} {response.ReasonPhrase}: {Truncate(body, 1200)}");
             throw new HttpRequestException($"{endpoint} failed with {(int)response.StatusCode} {response.ReasonPhrase}: {body}");
+        }
+
+        if (!expectSuccess)
+        {
+            _report.Record(name, meaning, endpoint, "FAIL", $"Expected failure but got HTTP {(int)response.StatusCode}: {Truncate(body, 1200)}");
+            throw new InvalidOperationException($"{endpoint} unexpectedly succeeded: {body}");
         }
 
         var root = string.IsNullOrWhiteSpace(body) ? null : JsonNode.Parse(body);
@@ -3111,6 +3267,8 @@ sealed class E2ERun
     public List<ExpectedFinalFlagState> ExpectedFinalFlags { get; } = [];
     public List<ObservedFinalFlagState> ObservedFinalFlags { get; } = [];
     public List<TrafficScenarioResult> TrafficScenarioResults { get; } = [];
+    public Dictionary<string, string> TrafficScenarioLayerIds { get; } = new(StringComparer.Ordinal);
+    public Dictionary<string, HashSet<string>> TrafficScenarioAnalyzedUsers { get; } = new(StringComparer.Ordinal);
 }
 
 sealed record FlagRecord(string Key, string Type);
@@ -3122,11 +3280,21 @@ sealed record TrafficScenarioSpec(
     string Description,
     string FlagKey,
     TrafficScenarioArmSpec[] Arms,
-    double? LayerTrafficPercent,
+    double? LayerSliceStart,
+    double? LayerSliceEnd,
     int MinExpectedUsersPerVariant,
-    bool ExpectBalancedAnalysis)
+    bool ExpectBalancedAnalysis,
+    string? LayerKeyScenarioId = null,
+    string? UserKeyScenarioId = null,
+    string? ExclusiveAgainstScenarioId = null,
+    double? ConflictProbeSliceStart = null,
+    double? ConflictProbeSliceEnd = null)
 {
-    public bool HasLayer => LayerTrafficPercent.HasValue;
+    public bool HasLayer => LayerSliceStart.HasValue && LayerSliceEnd.HasValue;
+
+    public double? LayerTrafficPercent => HasLayer
+        ? Math.Max(0, LayerSliceEnd!.Value - LayerSliceStart!.Value)
+        : null;
 
     public string FlagSplitDescription =>
         string.Join("/", Arms.Select(x => $"{x.Label} {x.FlagTrafficShare:P1}"));
@@ -3161,33 +3329,35 @@ sealed record TrafficScenarioSpec(
             new(
                 1,
                 "balanced-50-50-use-all",
-                "Balanced 50/50 use all",
+                "S1 No layer 50/50 use all",
                 "No layer: flag serves control and treatment evenly, and the run includes all served users for both variants.",
                 FlagCatalog.TrafficScenarioFlagKey(dataSetId, "balanced-50-50-use-all"),
                 [
                     new("control", "control", 0, 0.50, 100, 0.30),
                     new("treatment", "treatment", 1, 0.50, 100, 0.45)
                 ],
-                LayerTrafficPercent: null,
+                LayerSliceStart: null,
+                LayerSliceEnd: null,
                 MinExpectedUsersPerVariant: options.MinUsersPerVariant,
                 ExpectBalancedAnalysis: false),
             new(
                 2,
                 "skewed-90-10-to-10-10",
-                "Skewed 90/10 sampled to 10/10",
+                "S2 No layer 90/10 sampled to 10/10",
                 "No layer: flag serves mostly control; run analysis samples 11.111111% of control and all treatment users so analyzed evidence is balanced.",
                 FlagCatalog.TrafficScenarioFlagKey(dataSetId, "skewed-90-10-to-10-10"),
                 [
                     new("control", "control", 0, 0.90, 11.111111, 0.30),
                     new("treatment", "treatment", 1, 0.10, 100, 0.45)
                 ],
-                LayerTrafficPercent: null,
+                LayerSliceStart: null,
+                LayerSliceEnd: null,
                 MinExpectedUsersPerVariant: ScenarioFloor(options, 20),
                 ExpectBalancedAnalysis: true),
             new(
                 3,
                 "layer-30-three-arm-34-33-33",
-                "Layer 30% with 34/33/33 variants",
+                "S3 Layer [0,30) 34/33/33",
                 "Layer eligibility limits the run to 30% of assignment units while a three-arm flag serves control, treatment1, and treatment2.",
                 FlagCatalog.TrafficScenarioFlagKey(dataSetId, "layer-30-three-arm-34-33-33"),
                 [
@@ -3195,22 +3365,43 @@ sealed record TrafficScenarioSpec(
                     new("treatment", "treatment1", 1, 0.33, 100, 0.45),
                     new("treatment", "treatment2", 2, 0.33, 100, 0.45)
                 ],
-                LayerTrafficPercent: 30,
+                LayerSliceStart: 0,
+                LayerSliceEnd: 30,
                 MinExpectedUsersPerVariant: ScenarioFloor(options, 20),
                 ExpectBalancedAnalysis: false),
             new(
                 4,
                 "layer-30-skewed-80-20-to-20-20",
-                "Layer 30% skewed 80/20 sampled to 20/20",
+                "S4 Layer [0,30) 80/20 sampled to 20/20",
                 "Layer eligibility limits the run to 30%; inside that slice the flag serves 80/20 and analysis samples 22.222222% of control plus all treatment users.",
                 FlagCatalog.TrafficScenarioFlagKey(dataSetId, "layer-30-skewed-80-20-to-20-20"),
                 [
                     new("control", "control", 0, 0.80, 22.222222, 0.30),
                     new("treatment", "treatment", 1, 0.20, 100, 0.45)
                 ],
-                LayerTrafficPercent: 30,
+                LayerSliceStart: 0,
+                LayerSliceEnd: 30,
                 MinExpectedUsersPerVariant: ScenarioFloor(options, 30),
-                ExpectBalancedAnalysis: true)
+                ExpectBalancedAnalysis: true),
+            new(
+                5,
+                "layer-exclusive-companion-30-60",
+                "S5 Same layer [30,60) companion",
+                "Second experiment in the same registered layer uses the adjacent 30%-60% slice; an overlapping 20%-50% update must be rejected and analyzed users must not overlap the first layer experiment.",
+                FlagCatalog.TrafficScenarioFlagKey(dataSetId, "layer-exclusive-companion-30-60"),
+                [
+                    new("control", "control", 0, 0.50, 100, 0.30),
+                    new("treatment", "treatment", 1, 0.50, 100, 0.45)
+                ],
+                LayerSliceStart: 30,
+                LayerSliceEnd: 60,
+                MinExpectedUsersPerVariant: ScenarioFloor(options, 20),
+                ExpectBalancedAnalysis: false,
+                LayerKeyScenarioId: "layer-30-three-arm-34-33-33",
+                UserKeyScenarioId: "layer-30-three-arm-34-33-33",
+                ExclusiveAgainstScenarioId: "layer-30-three-arm-34-33-33",
+                ConflictProbeSliceStart: 20,
+                ConflictProbeSliceEnd: 50)
         ];
     }
 }
@@ -3238,7 +3429,8 @@ sealed record TrafficScenarioResult(
     string ExperimentId,
     string RunId,
     string MetricEvent,
-    double? LayerTrafficPercent,
+    double? LayerSliceStart,
+    double? LayerSliceEnd,
     TrafficScenarioArmResult[] Arms);
 
 sealed record TrafficScenarioArmResult(
@@ -3251,7 +3443,7 @@ sealed record TrafficScenarioArmResult(
     long Conversions,
     long ExpectedConversions);
 
-sealed record TrafficScenarioSeedSummary(string Details)
+sealed record TrafficScenarioSeedSummary(string Details, string[] AnalyzedUserKeys)
 {
     public override string ToString() => Details;
 }
@@ -3439,7 +3631,8 @@ static class FlagCatalog
                     ("treatment1", "treatment1"),
                     ("treatment2", "treatment2")
                 ]),
-            Bool("E2E Scenario Layer 30 Skewed 80/20", TrafficScenarioFlagKey(dataSetId, "layer-30-skewed-80-20-to-20-20"), enabled: true)
+            Bool("E2E Scenario Layer 30 Skewed 80/20", TrafficScenarioFlagKey(dataSetId, "layer-30-skewed-80-20-to-20-20"), enabled: true),
+            Bool("E2E Scenario Layer Exclusive Companion", TrafficScenarioFlagKey(dataSetId, "layer-exclusive-companion-30-60"), enabled: true)
         ];
     }
 
@@ -3757,11 +3950,11 @@ sealed class TestReport
             sb.AppendLine("| --- | --- | --- | --- | --- | --- |");
             foreach (var scenario in run.TrafficScenarioResults)
             {
-                var layer = scenario.LayerTrafficPercent.HasValue
-                    ? $"{scenario.LayerTrafficPercent.Value:0.######}%"
+                var layer = scenario.LayerSliceStart.HasValue && scenario.LayerSliceEnd.HasValue
+                    ? $"{scenario.LayerSliceStart.Value:0.######}-{scenario.LayerSliceEnd.Value:0.######}"
                     : "none";
                 var arms = string.Join("<br>", scenario.Arms.Select(arm =>
-                    $"{Escape(arm.Label)} `{arm.Role}` split `{arm.FlagTrafficShare:P1}`, sample `{arm.IncludeRate:0.######}%`, observed `{arm.Conversions}/{arm.Users}`"));
+                    $"{Escape(arm.Label)} `{arm.Role}` split `{arm.FlagTrafficShare:P1}`, sample `{arm.IncludeRate:0.######}%`, observed `{arm.Conversions}/{arm.Users}`, expected conv `{arm.ExpectedConversions}`"));
                 sb.AppendLine(
                     $"| {Escape(scenario.Name)} (`{scenario.Id}`) | `{scenario.FlagKey}` | `{scenario.ExperimentId}` | `{scenario.RunId}` | {layer} | {arms} |");
             }

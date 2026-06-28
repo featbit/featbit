@@ -126,9 +126,21 @@ public class ReleaseDecisionExperimentStatsService(MongoDbClient mongoDb) : IExp
             .ToDictionary(x => x.Variation, StringComparer.Ordinal);
         var assignmentUnitSelector = NormalizeAssignmentUnitSelector(request);
         var layerKey = NormalizeLayerKey(request);
-        var layerTrafficPercent = Math.Clamp(request.LayerTrafficPercent ?? 100, 0d, 100d);
-        var applyLayer = !string.IsNullOrWhiteSpace(layerKey) && layerTrafficPercent < 100;
-        var samplingScopeKey = (request.RunId?.ToString("N") ?? request.FlagKey) + ":";
+        var layerTrafficPercent = Math.Clamp(request.LayerTrafficPercent ?? 100d, 0d, 100d);
+        var sliceStart = Math.Clamp(request.SliceStart ?? 0d, 0d, 100d);
+        var legacyPrefixLayer = layerTrafficPercent < 100d &&
+                                sliceStart == 0d &&
+                                (!request.SliceEnd.HasValue || Math.Clamp(request.SliceEnd.Value, 0d, 100d) == 100d);
+        var sliceEnd = legacyPrefixLayer
+            ? layerTrafficPercent
+            : Math.Clamp(request.SliceEnd ?? (sliceStart + layerTrafficPercent), 0d, 100d);
+        if (sliceEnd <= sliceStart)
+        {
+            sliceStart = 0d;
+            sliceEnd = layerTrafficPercent;
+        }
+        var applyLayer = !string.IsNullOrWhiteSpace(layerKey) && (sliceStart > 0d || sliceEnd < 100d);
+        var samplingScopeKey = request.FlagKey + ":";
 
         if (plan.Count == 0)
         {
@@ -164,7 +176,7 @@ public class ReleaseDecisionExperimentStatsService(MongoDbClient mongoDb) : IExp
                 if (applyLayer)
                 {
                     layerBucket = DispatchAlgorithm.RolloutOfKey($"{layerKey}{assignmentUnit}") * 100;
-                    if (layerBucket >= layerTrafficPercent)
+                    if (layerBucket < sliceStart || layerBucket >= sliceEnd)
                     {
                         return null;
                     }

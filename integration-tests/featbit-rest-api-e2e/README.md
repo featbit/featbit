@@ -214,7 +214,7 @@ dotnet run integration-tests\featbit-rest-api-e2e\featbit-rest-api-e2e.cs -- --h
 | 6 | Configure primary/guardrail metrics | `PUT /api/v1/envs/{envId}/release-decision/experiments/{id}/metrics` |
 | 7 | Start run and seed evidence | `POST /api/v1/envs/{envId}/release-decision/experiments/{id}/runs`, `PUT /runs/{runId}/audience` with v6.0.0 experiment traffic assignment fields, preset-timestamp `POST /api/public/insight/track`, `POST /api/v1/envs/{envId}/experiment-stats/query`; verifies primary and guardrail evidence |
 | 8 | Analyze | `POST /api/v1/envs/{envId}/release-decision/experiments/{id}/runs/{runId}/analyze` |
-| 9 | Traffic-assignment scenarios | Create one dedicated feature flag plus one independent release-decision experiment/run/metric/default window per scenario; verifies no-layer `50/50 -> use all`, no-layer `90/10 -> 10/10`, layer `30% + 34/33/33`, and layer `30% + 80/20 -> 20/20` traffic assignment |
+| 9 | Traffic-assignment scenarios | Create one dedicated feature flag plus one independent release-decision experiment/run/metric/default window per scenario; verifies no-layer `50/50 -> use all`, no-layer `90/10 -> 10/10`, layer `0-30 + 34/33/33`, layer `0-30 + 80/20 -> 20/20`, and same-layer `[30,60)` companion mutual-exclusion traffic assignment |
 | 10 | Final verification | `GET /api/v1/envs/{envId}/release-decision/experiments/{id}`, `GET /api/v1/envs/{envId}/feature-flags/{key}`, `POST /api/v1/envs/{envId}/experiment-stats/query`; verifies the seeded treatment conversion rate is higher than control and all 10 flags retain their expected final enabled state, variants, rule state, traffic/fallthrough split, experimentation targeting flags, and type |
 
 The public SaaS OpenAPI schema currently lists project/env/flag/segment

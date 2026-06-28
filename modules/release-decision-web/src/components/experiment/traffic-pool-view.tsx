@@ -155,7 +155,7 @@ function RunSamplingRow({
         <div className={`size-2 rounded-sm ${color.dot}`} />
         <span className={`font-mono text-[10px] font-semibold ${color.text}`}>{run.slug}</span>
         <span className="text-[10px] text-muted-foreground">
-          layer {fmtPercent(run.layerTrafficPercent)}
+          bucket {fmtPercent(run.sliceStart ?? 0)}-{fmtPercent(run.sliceEnd ?? run.layerTrafficPercent ?? 100)}
         </span>
         <span className="text-[10px] text-muted-foreground">
           unit <span className="font-mono">{run.assignmentUnitSelector || "user.keyId"}</span>

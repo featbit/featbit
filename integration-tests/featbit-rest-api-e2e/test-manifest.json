@@ -374,6 +374,7 @@
       "name": "Traffic-assignment scenario runs",
       "endpoints": [
         "PUT /api/v1/envs/{envId}/feature-flags/{key}/targeting",
+        "POST /api/v1/envs/{envId}/release-decision/layers",
         "POST /api/v1/envs/{envId}/release-decision/experiments",
         "POST /api/v1/envs/{envId}/release-decision/experiments/{id}/runs",
         "PUT /api/v1/envs/{envId}/release-decision/experiments/{id}/runs/{runId}/audience",
@@ -384,8 +385,9 @@
       "assertions": [
         "no-layer 50/50 use-all scenario creates an independent experiment and run without layer fields",
         "no-layer 90/10 sampled-to-10/10 scenario seeds the full raw rollout while analysis samples control",
-        "layer 30% plus 34/33/33 scenario analyzes only layer-eligible assignments across three arms",
-        "layer 30% plus 80/20 sampled-to-20/20 scenario seeds the full raw rollout while analysis samples 22.222222% of control and all treatment inside the layer",
+        "layer [0,30) plus 34/33/33 scenario analyzes only layer-eligible assignments across three arms",
+        "layer [0,30) plus 80/20 sampled-to-20/20 scenario seeds the full raw rollout while analysis samples 22.222222% of control and all treatment inside the layer",
+        "same registered layer companion scenario rejects an overlapping slice and proves analyzed users do not overlap across adjacent slices",
         "each scenario uses a dedicated feature flag plus a unique metric event and preset observation window",
         "scenario conversion counts match deterministic Round(users * configuredRate) targets",
         "scenario analyze output contains inputData and analysisResult"

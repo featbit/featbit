@@ -182,7 +182,7 @@ Live runs use the configured `--users` synthetic-user seed budget and the config
 | --- | --- |
 | Pre-seed public evaluation verification | Evaluate all 10 flags for users `e2e-user-0000` and `e2e-user-0001`, then evaluate all 9 non-experiment flags for `e2e-user-0003` through `POST /api/public/featureflag/evaluate`. Expected evaluation count is at least `29`. User 3 is included in the generated segment and must evaluate every non-experiment flag to the current first variation through the segment rule. These calls must not create release-decision insight events. |
 | Experiment traffic assignment | The main run uses the current v6.0.0 run traffic payload: `controlVariant`, `treatmentVariant`, `assignmentUnitSelector = user.keyId`, `layerTrafficPercent = 100`, and an `analysisSamplingPlan` that includes both actual served variations at `100%`. Additional traffic-assignment scenarios each create their own feature flag, release-decision experiment, run, metric event, and observation window. Every run window defaults to `2026-06-15T00:00:00Z` through `2026-06-28T23:59:59Z`. |
-| Preset insight seeding | The runner computes deterministic served assignments from the fixed flag key plus fixed user keys. It writes every raw exposure assignment through `POST /api/public/insight/track` with explicit timestamps inside the default run window. Metric events are generated only for the deterministic users that the configured run layer and sampling plan will include in analysis. Events are spread across five days starting `2026-06-16T00:00:00Z`, with metric events offset from their exposure event. |
+| Preset insight seeding | The runner computes deterministic served assignments from the fixed flag key plus fixed user keys. It writes every raw exposure assignment through `POST /api/public/insight/track` with explicit timestamps inside the default run window. Metric events are predesigned for the full raw population, not clipped at seed time; for the analysis-included subset, conversions are still exact `Round(analyzedUsers * configuredRate)` targets. Events are spread across five days starting `2026-06-16T00:00:00Z`, with metric events offset from their exposure event. |
 | Exposure data | Experiment stats for `rd-checkout-treatment-fixed-v1` must include rows for both `controlVariationId` and `treatmentVariationId`. FeatBit rollout hashing decides the exact split from the fixed flag key plus fixed user keys, and both variants must meet the configured `--min-users-per-variant` floor. |
 | Primary metric data | Binary `once` metric. Based on the exact users assigned by FeatBit, the runner seeds `Round(controlUsers * 0.30)` control conversions and `Round(treatmentUsers * 0.45)` treatment conversions. Manual acceptance: both variant user counts meet the configured sample floor, observed conversion counts equal those deterministic targets, and treatment conversion rate is greater than control. |
 | Error guardrail data | Binary `once` metric. Based on the exact users assigned by FeatBit, the runner seeds `Round(controlUsers * 0.018)` control errors and `Round(treatmentUsers * 0.020)` treatment errors. Manual acceptance: both variant user counts meet the configured sample floor, observed error counts equal those deterministic targets, and both error rates are below `5.00%`. |
@@ -190,18 +190,19 @@ Live runs use the configured `--users` synthetic-user seed budget and the config
 
 ### Traffic-Assignment Scenario Contract
 
-After the main experiment run is analyzed, the runner creates independent release-decision experiments for the scenarios below. Each scenario gets its own feature flag, experiment id, run id, primary metric event, synthetic user key prefix, and the default preset observation window. No-layer scenarios intentionally omit `layerKey` and `layerTrafficPercent` from the run payload.
+After the main experiment run is analyzed, the runner creates independent release-decision experiments for the scenarios below. Each scenario gets its own feature flag, experiment id, run id, primary metric event, and the default preset observation window. No-layer scenarios intentionally omit `layerKey`, `layerId`, `sliceStart`, and `sliceEnd` from the run payload.
 
 Scenario seed data is ingested through `POST /api/public/insight/track` with explicit timestamps inside the preset window. Dedicated scenario flags determine actual served variations through the same fixed rollout hashing used by FeatBit fallthrough rollout, and persisted release-decision exposure and metric timestamps are fixed so manual UI analysis uses the same window every run.
 
-For the default `--users 1500` run, exact raw assignment counts are determined by FeatBit rollout hashing. Sampled-control scenarios still seed the full raw exposure population; the runner precomputes the deterministic subset that is eligible under the run's layer and sampling hash so repeated E2E runs produce the same analyzed metric counts.
+For the default `--users 1500` run, exact raw assignment counts are determined by FeatBit rollout hashing. Sampled-control scenarios seed the full raw exposure population and use a stable sampling hash based on `flagKey`, served variation id, and user key, so repeated E2E runs produce the same analyzed metric counts.
 
-| Scenario | Flag serving split | Run sampling | Layer eligibility | Default expected analyzed users | Conversion expectation |
-| --- | --- | --- | --- | --- | --- |
-| No layer `50/50 -> use all` | control 50%, treatment 50% | control 100%, treatment 100% | none | roughly 750 control and 750 treatment; each must meet `--min-users-per-variant` | control conversions = `Round(controlUsers * 0.30)`; treatment conversions = `Round(treatmentUsers * 0.45)` |
-| No layer `90/10 -> 10/10` | control 90%, treatment 10% | control 11.111111%, treatment 100% | none | roughly 150 sampled control users and roughly 150 treatment users; control/treatment ratio must be between 0.5 and 2.0 | control conversions = `Round(controlUsers * 0.30)`; treatment conversions = `Round(treatmentUsers * 0.45)` |
-| Layer `30% + 34/33/33` | control 34%, treatment1 33%, treatment2 33% | all variants 100% | 30% | roughly 150 users per arm from the eligible layer slice | control conversions = `Round(controlUsers * 0.30)`; treatment conversions = `Round(treatmentUsers * 0.45)` for each treatment arm |
-| Layer `30% + 80/20 -> 20/20` | control 80%, treatment 20% | control 22.222222%, treatment 100% | 30% | roughly 90 sampled control users and roughly 90 treatment users; ratio must be between 0.5 and 2.0 | control conversions = `Round(controlUsers * 0.30)`; treatment conversions = `Round(treatmentUsers * 0.45)` |
+| UI experiment name | Scenario id | Flag serving split | Run sampling | Layer eligibility | User key universe | Default final preset result |
+| --- | --- | --- | --- | --- | --- | --- |
+| `E2E S1 No layer 50/50 use all fixed-v1` | `balanced-50-50-use-all` | control 50%, treatment 50% | control 100%, treatment 100% | none | `e2e-balanced-50-50-use-all-*` | control raw `761`, analyzed `761`, conv `228`; treatment raw `739`, analyzed `739`, conv `333` |
+| `E2E S2 No layer 90/10 sampled to 10/10 fixed-v1` | `skewed-90-10-to-10-10` | control 90%, treatment 10% | control 11.111111%, treatment 100% | none | `e2e-skewed-90-10-to-10-10-*` | control raw `1348`, analyzed `124`, conv `37`; treatment raw `152`, analyzed `152`, conv `68` |
+| `E2E S3 Layer [0,30) 34/33/33 fixed-v1` | `layer-30-three-arm-34-33-33` | control 34%, treatment1 33%, treatment2 33% | all variants 100% | layer key `e2e-layer-30-three-arm-34-33-33-fixed-v1`, slice `[0,30)` | `e2e-layer-30-three-arm-34-33-33-*` | control raw `507`, analyzed `171`, conv `51`; treatment1 raw `485`, analyzed `146`, conv `66`; treatment2 raw `508`, analyzed `164`, conv `74` |
+| `E2E S4 Layer [0,30) 80/20 sampled to 20/20 fixed-v1` | `layer-30-skewed-80-20-to-20-20` | control 80%, treatment 20% | control 22.222222%, treatment 100% | layer key `e2e-layer-30-skewed-80-20-to-20-20-fixed-v1`, slice `[0,30)` | `e2e-layer-30-skewed-80-20-to-20-20-*` | control raw `1213`, analyzed `75`, conv `23`; treatment raw `287`, analyzed `86`, conv `39` |
+| `E2E S5 Same layer [30,60) companion fixed-v1` | `layer-exclusive-companion-30-60` | control 50%, treatment 50% | control 100%, treatment 100% | same layer key as `S3`, slice `[30,60)` | same user keys as `S3` | control raw `772`, analyzed `240`, conv `72`; treatment raw `728`, analyzed `183`, conv `82`; analyzed user overlap with `S3` must be `0` |
 
 Manual acceptance for every scenario:
 
@@ -211,13 +212,14 @@ Manual acceptance for every scenario:
 - `POST /api/v1/envs/{envId}/experiment-stats/query` returns the configured control and treatment variation ids for that scenario.
 - Observed conversion counts exactly match the deterministic formulas in the table above.
 - The analyze API writes non-empty `inputData` containing the scenario metric event and non-empty `analysisResult`.
+- The same-layer companion first probes an overlapping `[20,50)` slice and expects the backend to reject it, then saves the valid `[30,60)` slice and verifies zero analyzed-user overlap with the `[0,30)` scenario.
 
 ### Expected Insight And Stats Data
 
 | Data | Expected result |
 | --- | --- |
 | Public evaluation | Pre-experiment verification evaluates all 10 flags for representative users without writing insight events. |
-| Insight ingest | The runner posts preset-timestamp raw exposure events for every synthetic assignment and metric events for the deterministic analysis-included users to `POST /api/public/insight/track`. |
+| Insight ingest | The runner posts preset-timestamp raw exposure events for every synthetic assignment and metric events for the full predesigned raw population to `POST /api/public/insight/track`. |
 | Experiment exposure stats | `POST /api/v1/envs/{envId}/experiment-stats/query` returns users for both `control` and `treatment` variation IDs of `rd-checkout-treatment-fixed-v1`. Each variant must meet the configured sample floor shown in the report. |
 | Primary metric | `e2e_checkout_activated_fixed_v1` is binary/once. Expected result: use the exact control/treatment users and conversions from the report; control conversions equal `Round(controlUsers * 0.30)`, treatment conversions equal `Round(treatmentUsers * 0.45)`, and treatment rate must be greater than control. |
 | Error guardrail | `e2e_checkout_error_fixed_v1` is binary/once. Expected result: use the exact control/treatment users and error counts from the report; control errors equal `Round(controlUsers * 0.018)`, treatment errors equal `Round(treatmentUsers * 0.020)`, and both rates must stay below the `5.00%` threshold. |
@@ -478,8 +480,8 @@ For each scenario listed in the Traffic-Assignment Scenario Contract:
 - Create a new release-decision experiment bound to that scenario flag.
 - Configure a scenario-specific primary metric event.
 - Create a new run and set its observation window to the scenario's preset seed window.
-- Configure `controlVariant`, `treatmentVariant`, optional layer fields, and `analysisSamplingPlan`.
-- Evaluate scenario-specific synthetic users through the SDK, then ingest scenario-specific exposure and metric events with timestamps inside the preset window.
+- Configure `controlVariant`, `treatmentVariant`, optional registered `layerId` plus `[sliceStart, sliceEnd)` fields, and `analysisSamplingPlan`.
+- Evaluate scenario-specific synthetic users through the SDK, then ingest scenario-specific raw exposure and metric events with timestamps inside the preset window.
 - Query experiment stats, retrying briefly for asynchronous insight persistence, then assert the expected sampled users and deterministic conversions.
 - Analyze the run and assert non-empty `inputData` and `analysisResult`.
 
@@ -487,8 +489,9 @@ Assertions:
 
 - No-layer `50/50 -> use all` returns both variants with enough users and deterministic conversions.
 - No-layer `90/10 -> 10/10` does not analyze the full raw 90% control population; sampled control and treatment counts must be in the same order of magnitude.
-- Layer `30% + 34/33/33` analyzes only the eligible layer slice and keeps both treatment arms as separate observed variants.
-- Layer `30% + 80/20 -> 20/20` samples 22.222222% of control and 100% of treatment inside the eligible layer slice, producing roughly balanced analysis evidence.
+- Layer `0-30 + 34/33/33` analyzes only the eligible layer slice and keeps both treatment arms as separate observed variants.
+- Layer `0-30 + 80/20 -> 20/20` samples 22.222222% of control and 100% of treatment inside the eligible layer slice, producing roughly balanced analysis evidence.
+- Same-layer companion `[30,60)` reuses the same registered layer and same user key universe as the first layer scenario, rejects an overlapping `[20,50)` update, and has zero analyzed-user overlap with the `[0,30)` scenario.
 
 Remaining future scenarios not covered by this script:
 

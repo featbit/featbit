@@ -108,6 +108,27 @@ export interface ReleaseDecisionActivity {
   createdAt: string;
 }
 
+export interface ReleaseDecisionLayer {
+  id: string;
+  featBitEnvId?: string;
+  featbitEnvId?: string;
+  name: string;
+  key: string;
+  description: string | null;
+  assignmentUnitSelector: string | null;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type ReleaseDecisionLayerUpdate = {
+  name: string;
+  key: string;
+  description?: string | null;
+  assignmentUnitSelector?: string | null;
+  status?: string | null;
+};
+
 export type ReleaseDecisionExperimentUpdate = Partial<
   Pick<
     ReleaseDecisionExperimentDetail,
@@ -169,6 +190,44 @@ async function apiRequest<T>(
 
 export function releaseDecisionExperimentsPath(envId: string, suffix = "") {
   return `/envs/${envId}/release-decision/experiments${suffix}`;
+}
+
+export function releaseDecisionLayersPath(envId: string, suffix = "") {
+  return `/envs/${envId}/release-decision/layers${suffix}`;
+}
+
+export async function apiListLayers(
+  envId: string,
+  filter: Record<string, string | number | undefined> = {},
+) {
+  return apiRequest<PagedResult<ReleaseDecisionLayer>>(
+    releaseDecisionLayersPath(envId),
+    { query: filter },
+  );
+}
+
+export async function apiCreateLayer(envId: string, body: ReleaseDecisionLayerUpdate) {
+  return apiRequest<ReleaseDecisionLayer>(releaseDecisionLayersPath(envId), {
+    method: "POST",
+    body,
+  });
+}
+
+export async function apiUpdateLayer(
+  envId: string,
+  id: string,
+  body: ReleaseDecisionLayerUpdate,
+) {
+  return apiRequest<ReleaseDecisionLayer>(
+    releaseDecisionLayersPath(envId, `/${id}`),
+    { method: "PUT", body },
+  );
+}
+
+export async function apiArchiveLayer(envId: string, id: string) {
+  return apiRequest<boolean>(releaseDecisionLayersPath(envId, `/${id}`), {
+    method: "DELETE",
+  });
 }
 
 export async function apiListExperiments(

@@ -5,10 +5,18 @@ db = db.getSiblingDB(dbName)
 // Release-decision evidence collections are shared raw event datasets. They
 // stay separate from legacy Events and from release-decision experiment/run
 // records; analysis joins them to a run by flag, metric, and observation window.
+db.ReleaseDecisionExperiments.createIndex({ featBitEnvId: 1, updatedAt: -1 });
+db.ReleaseDecisionExperiments.createIndex({ featBitProjectKey: 1 });
+db.ReleaseDecisionExperiments.createIndex({ flagKey: 1 });
 db.ReleaseDecisionExperiments.createIndex({ featBitEnvId: 1, flagKey: 1, updatedAt: -1 });
+
+db.ReleaseDecisionLayers.createIndex({ featBitEnvId: 1, key: 1 }, { unique: true });
+db.ReleaseDecisionLayers.createIndex({ featBitEnvId: 1, status: 1 });
 
 db.ReleaseDecisionActivities.createIndex({ experimentId: 1, createdAt: -1 });
 db.ReleaseDecisionActivities.createIndex({ experimentId: 1, actorId: 1 });
+
+db.ReleaseDecisionExperimentRuns.createIndex({ experimentId: 1, slug: 1 }, { unique: true });
 
 db.ReleaseDecisionExposureEvents.createIndex({ envId: 1, flagKey: 1, exposedAt: 1 });
 db.ReleaseDecisionExposureEvents.createIndex({ envId: 1, userKey: 1, exposedAt: 1 });

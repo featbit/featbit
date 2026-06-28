@@ -58,6 +58,25 @@ CREATE INDEX IF NOT EXISTS ix_release_decision_experiments_flag_key
 CREATE INDEX IF NOT EXISTS ix_release_decision_experiments_env_flag_key
     ON release_decision_experiments (featbit_env_id, flag_key);
 
+CREATE TABLE IF NOT EXISTS release_decision_layers
+(
+    id                       uuid primary key                  default gen_random_uuid(),
+    featbit_env_id           uuid                     not null,
+    name                     varchar(256)             not null,
+    key                      varchar(128)             not null,
+    description              text                     null,
+    assignment_unit_selector varchar(256)             null default 'user.keyId',
+    status                   varchar(64)              not null default 'active',
+    created_at               timestamp with time zone not null default now(),
+    updated_at               timestamp with time zone not null default now()
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS ux_release_decision_layers_env_key
+    ON release_decision_layers (featbit_env_id, key);
+
+CREATE INDEX IF NOT EXISTS ix_release_decision_layers_env_status
+    ON release_decision_layers (featbit_env_id, status);
+
 CREATE TABLE IF NOT EXISTS release_decision_activities
 (
     id             uuid primary key                  default gen_random_uuid(),

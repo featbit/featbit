@@ -11,6 +11,18 @@ export interface Activity {
   experimentId: string;
 }
 
+export interface Layer {
+  id: string;
+  featbitEnvId: string | null;
+  name: string;
+  key: string;
+  description: string | null;
+  assignmentUnitSelector: string | null;
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface Experiment {
   id: string;
   createdAt: Date;

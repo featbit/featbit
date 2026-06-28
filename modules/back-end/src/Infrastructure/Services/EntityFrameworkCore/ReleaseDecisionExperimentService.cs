@@ -1,3 +1,4 @@
+using Application.Bases;
 using Application.Bases.Models;
 using Application.Bases.Exceptions;
 using Application.ExperimentStats;
@@ -22,6 +23,12 @@ public class ReleaseDecisionExperimentService(
 {
     private const double GuardrailHealthyHarmProbability = 0.01;
     private const double GuardrailAlarmHarmProbability = 0.95;
+    private static readonly HashSet<string> ActiveRunStatuses = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "draft",
+        "collecting",
+        "analyzing"
+    };
 
     public async Task<ReleaseDecisionExperimentVm> CreateAsync(ReleaseDecisionExperiment experiment)
     {
@@ -290,6 +297,7 @@ public class ReleaseDecisionExperimentService(
 
         var run = await GetTrackedRunAsync(id, runId);
         ApplyRunUpdate(run, update);
+        await NormalizeAndValidateLayerAssignmentAsync(envId, run);
         await AlignRunVariantsAsync(envId, experiment, run, inferMissing: false);
         run.UpdatedAt = DateTime.UtcNow;
 
@@ -309,23 +317,36 @@ public class ReleaseDecisionExperimentService(
         await EnsureExperimentExistsAsync(envId, id);
 
         var run = await GetTrackedRunAsync(id, runId);
-        run.TrafficPercent = Math.Clamp(update.TrafficPercent ?? 100, 1, 100);
-        run.TrafficOffset = Math.Clamp(update.TrafficOffset ?? 0, 0, 99);
+        var sliceStart = Math.Clamp(update.SliceStart ?? update.TrafficOffset ?? 0, 0, 100);
+        var sliceEnd = Math.Clamp(
+            update.SliceEnd ?? Math.Min(
+                100,
+                sliceStart + (update.TrafficPercent ?? update.LayerTrafficPercent ?? run.LayerTrafficPercent ?? 100)),
+            0,
+            100);
+        if (sliceEnd <= sliceStart)
+        {
+            sliceEnd = Math.Min(100, sliceStart + 1);
+        }
+
+        run.TrafficPercent = Math.Clamp(update.TrafficPercent ?? sliceEnd - sliceStart, 1, 100);
+        run.TrafficOffset = (int)Math.Clamp(update.TrafficOffset ?? Math.Floor(sliceStart), 0, 99);
         run.LayerId = Normalize(update.LayerId);
         run.LayerKey = Normalize(update.LayerKey, Normalize(update.LayerId, run.LayerKey));
         run.AllocationKeySelector = Normalize(update.AllocationKeySelector, run.AllocationKeySelector) ?? "user.keyId";
-        run.SliceStart = Math.Clamp(update.SliceStart ?? run.TrafficOffset ?? 0, 0, 100);
-        run.SliceEnd = Math.Clamp(update.SliceEnd ?? Math.Min(100, (run.TrafficOffset ?? 0) + (run.TrafficPercent ?? 100)), 0, 100);
+        run.SliceStart = sliceStart;
+        run.SliceEnd = sliceEnd;
         run.AllocationPlan = Normalize(update.AllocationPlan);
         run.ControlVariant = Normalize(update.ControlVariant, run.ControlVariant);
         run.TreatmentVariant = Normalize(update.TreatmentVariant, run.TreatmentVariant);
         run.AssignmentUnitSelector = Normalize(update.AssignmentUnitSelector, run.AssignmentUnitSelector) ??
                                      run.AllocationKeySelector ??
                                      "user.keyId";
-        run.LayerTrafficPercent = Math.Clamp(update.LayerTrafficPercent ?? run.LayerTrafficPercent ?? 100, 0d, 100d);
+        run.LayerTrafficPercent = Math.Clamp(sliceEnd - sliceStart, 0d, 100d);
         run.AnalysisSamplingPlan = Normalize(update.AnalysisSamplingPlan);
         run.AudienceFilters = Normalize(update.AudienceFilters);
         run.Method = update.Method == "bandit" ? "bandit" : "bayesian_ab";
+        await NormalizeAndValidateLayerAssignmentAsync(envId, run);
         run.UpdatedAt = DateTime.UtcNow;
 
         await AddActivityAsync(id, "note", "Experiment run audience & traffic updated", null, run.UpdatedAt);
@@ -1022,6 +1043,10 @@ public class ReleaseDecisionExperimentService(
         if (update.SliceStart.HasValue) run.SliceStart = Math.Clamp(update.SliceStart.Value, 0, 100);
         if (update.SliceEnd.HasValue) run.SliceEnd = Math.Clamp(update.SliceEnd.Value, 0, 100);
         if (update.LayerTrafficPercent.HasValue) run.LayerTrafficPercent = Math.Clamp(update.LayerTrafficPercent.Value, 0d, 100d);
+        if (update.SliceStart.HasValue || update.SliceEnd.HasValue)
+        {
+            run.LayerTrafficPercent = Math.Clamp((run.SliceEnd ?? 100) - (run.SliceStart ?? 0), 0d, 100d);
+        }
     }
 
     private static void HydrateRunMetricConfig(
@@ -1087,6 +1112,126 @@ public class ReleaseDecisionExperimentService(
     {
         return string.IsNullOrWhiteSpace(value) ? fallback : value.Trim();
     }
+
+    private async Task NormalizeAndValidateLayerAssignmentAsync(Guid envId, ReleaseDecisionExperimentRun run)
+    {
+        var layerToken = Normalize(run.LayerId, run.LayerKey);
+        var layerKey = Normalize(run.LayerKey, run.LayerId);
+        if (string.IsNullOrWhiteSpace(layerToken) && string.IsNullOrWhiteSpace(layerKey))
+        {
+            run.AssignmentUnitSelector = Normalize(run.AssignmentUnitSelector, run.AllocationKeySelector) ?? "user.keyId";
+            run.AllocationKeySelector = Normalize(run.AllocationKeySelector, run.AssignmentUnitSelector) ?? "user.keyId";
+            NormalizeRunSlice(run);
+            return;
+        }
+
+        var layer = await FindActiveLayerAsync(envId, layerToken, layerKey);
+        if (layer != null)
+        {
+            run.LayerId = layer.Id.ToString("D");
+            run.LayerKey = layer.Key;
+            run.AssignmentUnitSelector = Normalize(layer.AssignmentUnitSelector) ?? "user.keyId";
+            run.AllocationKeySelector = run.AssignmentUnitSelector;
+        }
+        else
+        {
+            run.LayerKey = layerKey;
+            run.AssignmentUnitSelector = Normalize(run.AssignmentUnitSelector, run.AllocationKeySelector) ?? "user.keyId";
+            run.AllocationKeySelector = Normalize(run.AllocationKeySelector, run.AssignmentUnitSelector) ?? "user.keyId";
+        }
+
+        NormalizeRunSlice(run);
+
+        if (!IsActiveRunStatus(run.Status) || string.IsNullOrWhiteSpace(run.LayerKey))
+        {
+            return;
+        }
+
+        var layerAssignmentUnit = Normalize(run.AssignmentUnitSelector, run.AllocationKeySelector) ?? "user.keyId";
+        var (sliceStart, sliceEnd) = GetRunSlice(run);
+        var activeRuns = await (
+            from candidate in dbContext.Set<ReleaseDecisionExperimentRun>()
+            join experiment in dbContext.Set<ReleaseDecisionExperiment>()
+                on candidate.ExperimentId equals experiment.Id
+            where experiment.FeatBitEnvId == envId &&
+                  candidate.Id != run.Id &&
+                  candidate.ExperimentId != run.ExperimentId &&
+                  candidate.LayerKey == run.LayerKey &&
+                  ActiveRunStatuses.Contains(candidate.Status)
+            select candidate).ToListAsync();
+
+        foreach (var candidate in activeRuns)
+        {
+            var candidateAssignmentUnit = Normalize(candidate.AssignmentUnitSelector, candidate.AllocationKeySelector) ?? "user.keyId";
+            if (!string.Equals(candidateAssignmentUnit, layerAssignmentUnit, StringComparison.Ordinal))
+            {
+                throw new BusinessException(ErrorCodes.Conflict);
+            }
+
+            var (candidateStart, candidateEnd) = GetRunSlice(candidate);
+            if (candidateStart < sliceEnd && sliceStart < candidateEnd)
+            {
+                throw new BusinessException(ErrorCodes.Conflict);
+            }
+        }
+    }
+
+    private async Task<ReleaseDecisionLayer?> FindActiveLayerAsync(Guid envId, string? layerToken, string? layerKey)
+    {
+        if (Guid.TryParse(layerToken, out var layerId))
+        {
+            var byId = await dbContext.Set<ReleaseDecisionLayer>()
+                .FirstOrDefaultAsync(x => x.Id == layerId && x.FeatBitEnvId == envId && x.Status == "active");
+            if (byId != null)
+            {
+                return byId;
+            }
+        }
+
+        if (string.IsNullOrWhiteSpace(layerKey))
+        {
+            return null;
+        }
+
+        return await dbContext.Set<ReleaseDecisionLayer>()
+            .FirstOrDefaultAsync(x => x.FeatBitEnvId == envId && x.Key == layerKey && x.Status == "active");
+    }
+
+    private static void NormalizeRunSlice(ReleaseDecisionExperimentRun run)
+    {
+        var (sliceStart, sliceEnd) = GetRunSlice(run);
+        run.SliceStart = sliceStart;
+        run.SliceEnd = sliceEnd;
+        run.TrafficOffset = (int)Math.Clamp(Math.Floor(sliceStart), 0, 99);
+        run.LayerTrafficPercent = Math.Clamp(sliceEnd - sliceStart, 0d, 100d);
+        run.TrafficPercent = Math.Clamp(run.TrafficPercent ?? run.LayerTrafficPercent ?? 100d, 1d, 100d);
+    }
+
+    private static (double Start, double End) GetRunSlice(ReleaseDecisionExperimentRun run)
+    {
+        var start = Math.Clamp(run.SliceStart ?? run.TrafficOffset ?? 0, 0d, 100d);
+        var end = Math.Clamp(
+            run.SliceEnd ?? Math.Min(100d, start + (run.LayerTrafficPercent ?? run.TrafficPercent ?? 100d)),
+            0d,
+            100d);
+        if (end <= start)
+        {
+            if (start >= 100d)
+            {
+                start = 99d;
+                end = 100d;
+            }
+            else
+            {
+                end = Math.Min(100d, start + 1d);
+            }
+        }
+
+        return (start, end);
+    }
+
+    private static bool IsActiveRunStatus(string? status) =>
+        !string.IsNullOrWhiteSpace(status) && ActiveRunStatuses.Contains(status);
 
     private async Task<ReleaseDecisionExperiment> GetTrackedExperimentAsync(Guid envId, Guid id)
     {

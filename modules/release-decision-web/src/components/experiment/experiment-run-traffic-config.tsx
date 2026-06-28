@@ -14,8 +14,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { updateExperimentRunAudienceAction } from "@/lib/actions";
+import { listLayers } from "@/lib/release-decision-client-data";
 import { cn } from "@/lib/utils";
-import type { ExperimentRun } from "@/lib/release-decision-types";
+import type { ExperimentRun, Layer } from "@/lib/release-decision-types";
 import {
   parseVariantIdentities,
   splitVariantTokens,
@@ -198,7 +199,9 @@ export function ExperimentRunTrafficConfig({
   const [treatmentVariants, setTreatmentVariants] = useState<string[]>([]);
   const [layerKeyValue, setLayerKeyValue] = useState("");
   const [assignmentUnitSelectorValue, setAssignmentUnitSelectorValue] = useState("user.keyId");
-  const [layerTrafficPercentValue, setLayerTrafficPercentValue] = useState("100");
+  const [sliceStartValue, setSliceStartValue] = useState("0");
+  const [sliceEndValue, setSliceEndValue] = useState("100");
+  const [registeredLayers, setRegisteredLayers] = useState<Layer[]>([]);
   const [includeRates, setIncludeRates] = useState<Record<string, string>>({});
   const [saveStatus, setSaveStatus] = useState<{
     type: "success" | "error";
@@ -214,7 +217,13 @@ export function ExperimentRunTrafficConfig({
   const layerKey = experimentRun.layerKey ?? experimentRun.layerId;
   const assignmentUnitSelector =
     experimentRun.assignmentUnitSelector ?? experimentRun.allocationKeySelector ?? "user.keyId";
-  const layerTrafficPercent = experimentRun.layerTrafficPercent ?? experimentRun.trafficPercent ?? 100;
+  const sliceStart = clampPercent(experimentRun.sliceStart ?? experimentRun.trafficOffset ?? 0, 0, 100);
+  const sliceEnd = clampPercent(
+    experimentRun.sliceEnd ?? sliceStart + (experimentRun.layerTrafficPercent ?? experimentRun.trafficPercent ?? 100),
+    0,
+    100,
+  );
+  const layerTrafficPercent = Math.max(0, sliceEnd - sliceStart);
   const parsedFilters = parseFilters(experimentRun.audienceFilters as string | null);
   const parsedSamplingPlan = parseSamplingPlan(
     experimentRun.analysisSamplingPlan,
@@ -229,6 +238,9 @@ export function ExperimentRunTrafficConfig({
     parsedSamplingPlan.some((entry) => entry.includeRate < 100) ||
     parsedFilters.length > 0;
   const selectedKeys = selectedVariantKeys(controlVariant, treatmentVariants);
+  const selectedRegisteredLayer = registeredLayers.find((layer) => layer.key === layerKeyValue);
+  const hasUnregisteredLayer =
+    Boolean(layerKeyValue.trim()) && registeredLayers.length > 0 && !selectedRegisteredLayer;
 
   function resetDraftFromRun() {
     const nextMethod = experimentRun.method ?? "bayesian_ab";
@@ -251,9 +263,27 @@ export function ExperimentRunTrafficConfig({
     setTreatmentVariants(normalized.treatments);
     setLayerKeyValue(layerKey ?? "");
     setAssignmentUnitSelectorValue(assignmentUnitSelector);
-    setLayerTrafficPercentValue(formatPercent(layerTrafficPercent));
+    setSliceStartValue(formatPercent(sliceStart));
+    setSliceEndValue(formatPercent(sliceEnd));
     setIncludeRates(includeRatesFromPlan(plan, selectedVariantKeys(normalized.control, normalized.treatments)));
   }
+
+  useEffect(() => {
+    if (mode !== "inline") return;
+
+    let cancelled = false;
+    void listLayers({ status: "active" })
+      .then((layers) => {
+        if (!cancelled) setRegisteredLayers(layers);
+      })
+      .catch(() => {
+        if (!cancelled) setRegisteredLayers([]);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [mode]);
 
   useEffect(() => {
     if (mode !== "inline") return;
@@ -269,6 +299,8 @@ export function ExperimentRunTrafficConfig({
     experimentRun.layerId,
     experimentRun.assignmentUnitSelector,
     experimentRun.allocationKeySelector,
+    experimentRun.sliceStart,
+    experimentRun.sliceEnd,
     experimentRun.layerTrafficPercent,
     experimentRun.trafficPercent,
     experimentRun.audienceFilters,
@@ -278,20 +310,28 @@ export function ExperimentRunTrafficConfig({
 
   function handleOpen() {
     resetDraftFromRun();
+    void listLayers({ status: "active" })
+      .then(setRegisteredLayers)
+      .catch(() => setRegisteredLayers([]));
     setOpen(true);
   }
 
   function handleSubmit(formData: FormData) {
     const samplingPlan = buildSamplingPlan(controlVariant, treatmentVariants, variantRows, includeRates);
+    const nextSliceStart = clampPercent(Number(sliceStartValue), 0, 100);
+    const nextSliceEnd = clampPercent(Number(sliceEndValue), nextSliceStart, 100);
+    const nextLayerTrafficPercent = Math.max(0, nextSliceEnd - nextSliceStart);
 
     formData.set("audienceFilters", serializeFilters(filters));
     formData.set("controlVariant", controlVariant);
     formData.set("treatmentVariant", treatmentVariants.join("|"));
     formData.set("layerKey", layerKeyValue.trim());
     formData.set("layerId", layerKeyValue.trim());
-    formData.set("assignmentUnitSelector", assignmentUnitSelectorValue.trim() || "user.keyId");
-    formData.set("allocationKeySelector", assignmentUnitSelectorValue.trim() || "user.keyId");
-    formData.set("layerTrafficPercent", String(clampPercent(Number(layerTrafficPercentValue), 0, 100)));
+    formData.set("assignmentUnitSelector", "user.keyId");
+    formData.set("allocationKeySelector", "user.keyId");
+    formData.set("sliceStart", String(nextSliceStart));
+    formData.set("sliceEnd", String(nextSliceEnd));
+    formData.set("layerTrafficPercent", String(nextLayerTrafficPercent));
     formData.set("analysisSamplingPlan", JSON.stringify(samplingPlan));
     formData.set("allocationPlan", "");
     setSaveStatus(null);
@@ -313,6 +353,18 @@ export function ExperimentRunTrafficConfig({
         });
       }
     });
+  }
+
+  function selectRegisteredLayer(key: string) {
+    if (!key) {
+      setLayerKeyValue("");
+      setAssignmentUnitSelectorValue("user.keyId");
+      return;
+    }
+
+    const layer = registeredLayers.find((item) => item.key === key);
+    setLayerKeyValue(key);
+    setAssignmentUnitSelectorValue(layer?.assignmentUnitSelector || "user.keyId");
   }
 
   function addRow() {
@@ -506,48 +558,91 @@ export function ExperimentRunTrafficConfig({
           </h5>
         </div>
 
-        <div className="grid min-w-0 grid-cols-1 gap-3 xl:grid-cols-3">
+        <div className="grid min-w-0 grid-cols-1 gap-3 xl:grid-cols-4">
+          <div className="space-y-1.5">
+            <Label htmlFor={`lk-select-${experimentRun.id}`} className="text-xs">Layer</Label>
+            <select
+              id={`lk-select-${experimentRun.id}`}
+              value={hasUnregisteredLayer ? "__unregistered" : selectedRegisteredLayer?.key ?? ""}
+              onChange={(event) => selectRegisteredLayer(event.target.value)}
+              className="h-8 w-full rounded-md border border-input bg-background px-2 text-xs"
+            >
+              <option value="">No registered layer</option>
+              {hasUnregisteredLayer && (
+                <option value="__unregistered" disabled>
+                  Unregistered: {layerKeyValue}
+                </option>
+              )}
+              {registeredLayers.map((layer) => (
+                <option key={layer.id} value={layer.key}>
+                  {layer.name} ({layer.key})
+                </option>
+              ))}
+            </select>
+          </div>
           <div className="space-y-1.5">
             <Label htmlFor={`lk-${experimentRun.id}`} className="text-xs">Layer key</Label>
             <Input
               id={`lk-${experimentRun.id}`}
-              list={`layer-keys-${experimentRun.id}`}
               value={layerKeyValue}
-              onChange={(event) => setLayerKeyValue(event.target.value)}
-              placeholder="e.g. homepage"
-              className="h-8 font-mono text-xs"
+              readOnly
+              placeholder="Select a registered layer"
+              className="h-8 bg-muted/40 font-mono text-xs"
             />
-            {existingLayerKeys.length > 0 && (
-              <datalist id={`layer-keys-${experimentRun.id}`}>
-                {existingLayerKeys.map((key) => (
-                  <option key={key} value={key} />
-                ))}
-              </datalist>
-            )}
           </div>
           <div className="space-y-1.5">
             <Label htmlFor={`au-${experimentRun.id}`} className="text-xs">Assignment unit</Label>
             <Input
               id={`au-${experimentRun.id}`}
-              value={assignmentUnitSelectorValue}
-              onChange={(event) => setAssignmentUnitSelectorValue(event.target.value)}
-              placeholder="user.keyId"
-              className="h-8 font-mono text-xs"
+              value="user.keyId"
+              readOnly
+              className="h-8 bg-muted/40 font-mono text-xs"
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor={`lt-${experimentRun.id}`} className="text-xs">Layer traffic %</Label>
+            <Label htmlFor={`ls-${experimentRun.id}`} className="text-xs">Bucket start</Label>
             <Input
-              id={`lt-${experimentRun.id}`}
+              id={`ls-${experimentRun.id}`}
               type="number"
               min="0"
               max="100"
               step="any"
-              value={layerTrafficPercentValue}
-              onChange={(event) => setLayerTrafficPercentValue(event.target.value)}
+              value={sliceStartValue}
+              onChange={(event) => setSliceStartValue(event.target.value)}
               className="h-8 text-xs"
             />
           </div>
+          <div className="space-y-1.5">
+            <Label htmlFor={`le-${experimentRun.id}`} className="text-xs">Bucket end</Label>
+            <Input
+              id={`le-${experimentRun.id}`}
+              type="number"
+              min="0"
+              max="100"
+              step="any"
+              value={sliceEndValue}
+              onChange={(event) => setSliceEndValue(event.target.value)}
+              className="h-8 text-xs"
+            />
+          </div>
+        </div>
+        <div className="rounded-md border bg-muted/30 px-2 py-1.5 text-xs text-muted-foreground">
+          Active range{" "}
+          <span className="font-mono font-medium text-foreground">
+            {formatPercent(clampPercent(Number(sliceStartValue), 0, 100))}-
+            {formatPercent(clampPercent(Number(sliceEndValue), clampPercent(Number(sliceStartValue), 0, 100), 100))}
+          </span>
+          , width{" "}
+          <span className="font-mono font-medium text-foreground">
+            {formatPercent(
+              Math.max(
+                0,
+                clampPercent(Number(sliceEndValue), clampPercent(Number(sliceStartValue), 0, 100), 100) -
+                  clampPercent(Number(sliceStartValue), 0, 100),
+              ),
+            )}
+            %
+          </span>
         </div>
       </section>
 
@@ -754,7 +849,10 @@ export function ExperimentRunTrafficConfig({
                 )}
                 {layerTrafficPercent < 100 && (
                   <span className="text-muted-foreground">
-                    Eligible <span className="font-mono font-medium text-foreground">{formatPercent(layerTrafficPercent)}%</span>
+                    Bucket{" "}
+                    <span className="font-mono font-medium text-foreground">
+                      {formatPercent(sliceStart)}-{formatPercent(sliceEnd)}
+                    </span>
                   </span>
                 )}
                 {assignmentUnitSelector !== "user.keyId" && (

@@ -151,7 +151,7 @@ public sealed class ReleaseDecisionProviderParityFixture : IAsyncLifetime
         var sampledTreatment = 0;
         var excludedControl = 0;
         var candidate = 1;
-        var samplingScope = runId.ToString("N") + ":";
+        var samplingScope = FlagKey + ":";
 
         while (sampledControl < 80 || sampledTreatment < 80 || excludedControl < 100)
         {

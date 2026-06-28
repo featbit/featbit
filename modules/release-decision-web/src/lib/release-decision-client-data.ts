@@ -6,10 +6,12 @@ import type {
   ReleaseDecisionExperimentDetail,
   ReleaseDecisionExperimentRun,
   ReleaseDecisionExperimentRunUpdate,
+  ReleaseDecisionLayer,
+  ReleaseDecisionLayerUpdate,
   ReleaseDecisionMetricsUpdate,
   PagedResult,
 } from "@/lib/release-decision-api";
-import type { Activity, Experiment, ExperimentRun } from "@/lib/release-decision-types";
+import type { Activity, Experiment, ExperimentRun, Layer } from "@/lib/release-decision-types";
 
 export type ExperimentDetail = Experiment & {
   experimentRuns: ExperimentRun[];
@@ -37,6 +39,10 @@ function requireEnvId(): string {
 
 function path(envId: string, suffix = "") {
   return `/envs/${envId}/release-decision/experiments${suffix}`;
+}
+
+function layerPath(envId: string, suffix = "") {
+  return `/envs/${envId}/release-decision/layers${suffix}`;
 }
 
 function toDate(value: string | Date | null | undefined): Date {
@@ -69,6 +75,17 @@ function mapRun(run: ReleaseDecisionExperimentRun): ExperimentRun {
     observationStart: optionalDate(run.observationStart),
     observationEnd: optionalDate(run.observationEnd),
   } as ExperimentRun;
+}
+
+function mapLayer(layer: ReleaseDecisionLayer): Layer {
+  return {
+    ...layer,
+    featbitEnvId: layer.featbitEnvId ?? layer.featBitEnvId ?? null,
+    description: layer.description ?? null,
+    assignmentUnitSelector: layer.assignmentUnitSelector ?? "user.keyId",
+    createdAt: toDate(layer.createdAt),
+    updatedAt: toDate(layer.updatedAt),
+  };
 }
 
 function mapActivity(
@@ -131,6 +148,54 @@ export async function listExperiments(filter: {
   );
 
   return (page.items ?? []).map(mapExperiment);
+}
+
+export async function listLayers(filter: {
+  name?: string;
+  key?: string;
+  status?: string;
+} = {}) {
+  const envId = requireEnvId();
+  const page = await apiRequest<PagedResult<ReleaseDecisionLayer>>(
+    layerPath(envId),
+    {
+      method: "GET",
+      query: {
+        pageIndex: 0,
+        pageSize: 200,
+        name: filter.name?.trim() || undefined,
+        key: filter.key?.trim() || undefined,
+        status: filter.status?.trim() || undefined,
+      },
+    },
+  );
+
+  return (page.items ?? []).map(mapLayer);
+}
+
+export async function createLayer(data: ReleaseDecisionLayerUpdate) {
+  const envId = requireEnvId();
+  const layer = await apiRequest<ReleaseDecisionLayer>(layerPath(envId), {
+    method: "POST",
+    body: data,
+  });
+
+  return mapLayer(layer);
+}
+
+export async function updateLayer(id: string, data: ReleaseDecisionLayerUpdate) {
+  const envId = requireEnvId();
+  const layer = await apiRequest<ReleaseDecisionLayer>(layerPath(envId, `/${id}`), {
+    method: "PUT",
+    body: data,
+  });
+
+  return mapLayer(layer);
+}
+
+export async function archiveLayer(id: string) {
+  const envId = requireEnvId();
+  await apiRequest<boolean>(layerPath(envId, `/${id}`), { method: "DELETE" });
 }
 
 export async function getExperiment(id: string) {

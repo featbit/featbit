@@ -216,9 +216,21 @@ public class ReleaseDecisionExperimentStatsService(AppDbContext dbContext) : IEx
         var contribution = GetUserContributionExpression(request.MetricType, request.MetricAgg);
         var assignmentUnitSelector = NormalizeAssignmentUnitSelector(request);
         var layerKey = NormalizeLayerKey(request);
-        var applyLayer = !string.IsNullOrWhiteSpace(layerKey) && Math.Clamp(request.LayerTrafficPercent ?? 100, 0d, 100d) < 100;
-        var layerTrafficPercent = Math.Clamp(request.LayerTrafficPercent ?? 100, 0d, 100d);
-        var samplingScopeKey = (request.RunId?.ToString("N") ?? request.FlagKey) + ":";
+        var layerTrafficPercent = Math.Clamp(request.LayerTrafficPercent ?? 100d, 0d, 100d);
+        var sliceStart = Math.Clamp(request.SliceStart ?? 0d, 0d, 100d);
+        var legacyPrefixLayer = layerTrafficPercent < 100d &&
+                                sliceStart == 0d &&
+                                (!request.SliceEnd.HasValue || Math.Clamp(request.SliceEnd.Value, 0d, 100d) == 100d);
+        var sliceEnd = legacyPrefixLayer
+            ? layerTrafficPercent
+            : Math.Clamp(request.SliceEnd ?? (sliceStart + layerTrafficPercent), 0d, 100d);
+        if (sliceEnd <= sliceStart)
+        {
+            sliceStart = 0d;
+            sliceEnd = layerTrafficPercent;
+        }
+        var applyLayer = !string.IsNullOrWhiteSpace(layerKey) && (sliceStart > 0d || sliceEnd < 100d);
+        var samplingScopeKey = request.FlagKey + ":";
 
         var sql = $"""
             WITH plan AS MATERIALIZED
@@ -287,7 +299,7 @@ public class ReleaseDecisionExperimentStatsService(AppDbContext dbContext) : IEx
                 SELECT *
                 FROM exposure_source
                 WHERE analysis_role IN ('control', 'treatment')
-                  AND (@ApplyLayer = false OR layer_bucket < @LayerTrafficPercent)
+                  AND (@ApplyLayer = false OR (layer_bucket >= @SliceStart AND layer_bucket < @SliceEnd))
                   AND sampling_bucket < include_rate
             ),
             first_eval AS MATERIALIZED
@@ -420,7 +432,8 @@ public class ReleaseDecisionExperimentStatsService(AppDbContext dbContext) : IEx
                 AssignmentUnitSelector = assignmentUnitSelector,
                 ApplyLayer = applyLayer,
                 LayerKey = layerKey ?? string.Empty,
-                LayerTrafficPercent = layerTrafficPercent,
+                SliceStart = sliceStart,
+                SliceEnd = sliceEnd,
                 SamplingScopeKey = samplingScopeKey,
                 request.AnalysisSamplingPlan,
                 Now = DateTime.UtcNow

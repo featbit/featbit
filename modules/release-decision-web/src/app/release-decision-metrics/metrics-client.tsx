@@ -288,53 +288,49 @@ export function MetricsClient() {
                 : "No metrics recorded yet."}
             </div>
           ) : (
-            <table className="fb-table">
-              <thead>
-                <tr>
-                  <th>Metric</th>
-                  <th>Role</th>
-                  <th>Type</th>
-                  <th>Aggregation</th>
-                  <th>Direction</th>
-                  <th>Used by</th>
-                  <th>Runs</th>
-                </tr>
-              </thead>
-              <tbody>
+            <div className="fb-metrics-grid" role="table" aria-label="Metrics">
+              <div className="fb-metrics-header" role="row">
+                <div role="columnheader">Metric</div>
+                <div role="columnheader">Role</div>
+                <div role="columnheader">Type</div>
+                <div role="columnheader">Aggregation</div>
+                <div role="columnheader">Direction</div>
+                <div role="columnheader">Used by</div>
+                <div role="columnheader">Runs</div>
+              </div>
+              <div className="fb-metrics-body" role="rowgroup">
                 {filtered.map((metric) => (
-                  <tr key={metric.key}>
-                    <td className="fb-name-cell">
-                      <div className="fb-item-name">{metric.name || metric.event}</div>
-                      <div className="fb-code-pill">{metric.event}</div>
+                  <div className="fb-metrics-row" role="row" key={metric.key}>
+                    <div className="fb-metrics-metric" role="cell">
+                      <div className="fb-metrics-title-line">
+                        <span className="fb-item-name">{metric.name || metric.event}</span>
+                        <span className="fb-code-pill">{metric.event}</span>
+                      </div>
                       {metric.description && (
                         <div className="fb-item-meta fb-description">
                           {metric.description}
                         </div>
                       )}
-                    </td>
-                    <td>
+                    </div>
+                    <div role="cell">
                       <span className={`fb-stage-badge ${roleClass(metric.role)}`}>
                         {metric.role}
                       </span>
-                    </td>
-                    <td>
-                      {metric.metricType ? (
-                        <span className="fb-muted-text">{metric.metricType}</span>
-                      ) : (
-                        <span className="fb-muted-text">Not set</span>
-                      )}
-                    </td>
-                    <td>
-                      {metric.metricAgg ? (
-                        <span className="fb-muted-text">{metric.metricAgg}</span>
-                      ) : (
-                        <span className="fb-muted-text">Not set</span>
-                      )}
-                    </td>
-                    <td className="fb-last-change">
+                    </div>
+                    <div role="cell">
+                      <span className="fb-muted-text">
+                        {metric.metricType || "Not set"}
+                      </span>
+                    </div>
+                    <div role="cell">
+                      <span className="fb-muted-text">
+                        {metric.metricAgg || "Not set"}
+                      </span>
+                    </div>
+                    <div className="fb-last-change" role="cell">
                       <span>{formatDirection(metric.direction)}</span>
-                    </td>
-                    <td className="fb-metric-used-by">
+                    </div>
+                    <div className="fb-metrics-used-by" role="cell">
                       {metric.experiments.slice(0, 3).map((experiment) => (
                         <Link
                           key={experiment.id}
@@ -349,8 +345,8 @@ export function MetricsClient() {
                           +{metric.experiments.length - 3} more
                         </span>
                       )}
-                    </td>
-                    <td className="fb-runs-cell">
+                    </div>
+                    <div className="fb-runs-cell" role="cell">
                       {metric.runs.size > 0 ? (
                         <span className="fb-run-count">
                           {metric.runs.size} {metric.runs.size === 1 ? "run" : "runs"}
@@ -358,11 +354,11 @@ export function MetricsClient() {
                       ) : (
                         <span className="fb-muted-text">No runs</span>
                       )}
-                    </td>
-                  </tr>
+                    </div>
+                  </div>
                 ))}
-              </tbody>
-            </table>
+              </div>
+            </div>
           )}
         </div>
       </div>
