@@ -1,7 +1,7 @@
 # FeatBit REST API E2E Test
 
-This folder contains an executable end-to-end test runner for FeatBit REST API
-and FeatBit .NET Server SDK flows.
+This folder contains an executable end-to-end test runner for FeatBit REST API,
+public evaluation, release-decision insight ingest, and analysis flows.
 
 Read [TEST_SCRIPT.md](./TEST_SCRIPT.md) first for the human-readable test
 script: scenario, test data, endpoints, assertions, and report requirements.
@@ -12,9 +12,10 @@ request to runner behavior, offline evidence, and the live-token evidence still
 required.
 
 The runner creates a project and environment, creates 10 feature flags, mutates
-the flags, verifies every mutation through API reads, evaluates flags through
-the .NET SDK, seeds release-decision metric evidence, calls analyze, and writes
-a Markdown and JSON report.
+the flags, verifies every mutation through API reads, checks public evaluation
+without writing insight events, seeds preset-timestamp release-decision raw
+exposure and metric evidence, calls analyze, and writes a Markdown and JSON
+report.
 
 For the Codex-agent topology cycle, use the repository skill at
 [.agents/skills/featbit-e2e-test-cycle/SKILL.md](../../.agents/skills/featbit-e2e-test-cycle/SKILL.md).
@@ -110,10 +111,10 @@ login credentials. The runner then writes:
 | `featbit-rest-api-e2e-<timestamp>.json` | Structured live test report. |
 
 Each live report includes created resource ids/keys, metric event keys,
-pre-experiment SDK targeting verification counts, expected final feature flag
+pre-seed public-evaluation targeting verification counts, expected final feature flag
 state, observed final feature flag state, expected vs observed
 primary/guardrail/analyze results, observed users and variant-row counts from
-stats queries, pass/fail status for every API or SDK step, and masked secrets.
+stats queries, pass/fail status for every API step, and masked secrets.
 
 Offline `-SelfCheck` and `-PrintPlan` outputs are console-only helpers for
 validating the runner and reviewing the plan. They do not write files under
@@ -179,19 +180,19 @@ dotnet run integration-tests\featbit-rest-api-e2e\featbit-rest-api-e2e.cs -- --h
 | `--login-email` | `FEATBIT_LOGIN_EMAIL` | empty | Login email used to call `/api/v1/identity/login-by-email` and obtain a JWT automatically. |
 | `--login-password` | `FEATBIT_LOGIN_PASSWORD` | empty | Login password used with `--login-email`. |
 | `--api-url` | `FEATBIT_API_URL` | `https://app-api.featbit.co` | FeatBit API base URL. |
-| `--event-url` | `FEATBIT_EVENT_URL` | `https://app-eval.featbit.co` | FeatBit SDK event/evaluation base URL. |
-| `--streaming-url` | `FEATBIT_STREAMING_URL` | derived from `--event-url` | FeatBit SDK streaming URL. |
+| `--event-url` | `FEATBIT_EVENT_URL` | `https://app-eval.featbit.co` | FeatBit public evaluation and insight base URL. |
+| `--streaming-url` | `FEATBIT_STREAMING_URL` | derived from `--event-url` | Legacy-compatible streaming URL option. |
 | `--auth-mode` | `FEATBIT_AUTH_MODE` | `raw` | Use `raw` for OpenAPI token header or `bearer` for JWT bearer auth. |
 | `--organization` | `FEATBIT_ORGANIZATION` | empty | Optional `Organization` header. |
 | `--organization-key` | `FEATBIT_ORGANIZATION_KEY` | `playground` | Organization resource key used in generated segment scopes. |
 | `--workspace` | `FEATBIT_WORKSPACE` | empty | Optional `Workspace` header. |
 | `--project-key` | `FEATBIT_PROJECT_KEY` | empty | Use an existing tester-created project instead of creating one. Must be passed with `--env-id`. |
 | `--env-id` | `FEATBIT_ENV_ID` | empty | Use an existing tester-created environment. Must be passed with `--project-key`. |
-| `--users` | | `1500` | Synthetic users evaluated through the SDK. |
+| `--users` | | `1500` | Synthetic users seeded into release-decision evidence. |
 | `--min-users-per-variant` | | `500` | Minimum observed users required for each experiment variant in primary and guardrail stats. |
-| `--batch-size` | | `10` | SDK event flush batch size. |
-| `--seed-batch-delay-ms` | | `100` | Delay between release-decision seed batches after each SDK flush. |
-| `--post-sdk-wait-seconds` | | `8` | Wait after SDK flush before querying stats. |
+| `--batch-size` | | `10` | Preset insight ingest batch size. |
+| `--seed-batch-delay-ms` | | `100` | Delay between release-decision seed batches. |
+| `--post-sdk-wait-seconds` | | `8` | Legacy option name; wait after insight ingest before querying stats. |
 | `--cleanup` | | `false` | Delete the generated project at the end. Default keeps ids/keys for reuse. |
 | `--report-dir` | `FEATBIT_REPORT_DIR` | `integration-tests/featbit-rest-api-e2e/reports` | Markdown/JSON report output directory. |
 | `--self-check` | | off | Offline script self-check, no API calls and no report files. |
@@ -208,12 +209,12 @@ dotnet run integration-tests\featbit-rest-api-e2e\featbit-rest-api-e2e.cs -- --h
 | 1 | Create 10 feature flags | `POST /api/v1/envs/{envId}/feature-flags`, `GET /api/v1/envs/{envId}/feature-flags/{key}` |
 | 2 | Create segment and mutate flags | `POST /api/v1/envs/{envId}/segments`, `PUT /api/v1/envs/{envId}/segments/{segmentId}/targeting`, `GET /api/v1/envs/{envId}/segments/{segmentId}`, `PUT /api/v1/envs/{envId}/feature-flags/{key}/toggle/{status}`, `/description`, `/tags`, `/variations`, `/targeting` |
 | 3 | Verify mutations and segment references | `GET /api/v1/envs/{envId}/feature-flags/{key}`, `GET /api/v1/envs/{envId}/segments/{segmentId}/flag-references` |
-| 4 | SDK evaluation and metric tracking | FeatBit.ServerSdk `BoolVariationDetail`, `StringVariationDetail`, `DoubleVariationDetail`, `Track`, `FlushAndWait`; SDK flushes events to `POST /api/public/insight/track` |
+| 4 | Public evaluation verification | `POST /api/public/featureflag/evaluate`; verifies configured flags without writing insight events |
 | 5 | Create release-decision experiment | `POST /api/v1/envs/{envId}/release-decision/experiments`, `PUT /api/v1/envs/{envId}/release-decision/experiments/{id}` |
 | 6 | Configure primary/guardrail metrics | `PUT /api/v1/envs/{envId}/release-decision/experiments/{id}/metrics` |
-| 7 | Start run and seed evidence | `POST /api/v1/envs/{envId}/release-decision/experiments/{id}/runs`, `PUT /runs/{runId}/audience` with v6.0.0 experiment traffic assignment fields, SDK evaluation/Track, `POST /api/v1/envs/{envId}/experiment-stats/query`; verifies primary and guardrail evidence |
+| 7 | Start run and seed evidence | `POST /api/v1/envs/{envId}/release-decision/experiments/{id}/runs`, `PUT /runs/{runId}/audience` with v6.0.0 experiment traffic assignment fields, preset-timestamp `POST /api/public/insight/track`, `POST /api/v1/envs/{envId}/experiment-stats/query`; verifies primary and guardrail evidence |
 | 8 | Analyze | `POST /api/v1/envs/{envId}/release-decision/experiments/{id}/runs/{runId}/analyze` |
-| 9 | Traffic-assignment scenarios | Create one independent release-decision experiment/run/metric per scenario; verifies balanced `50/50`, skewed `90/10 -> 10/10`, skewed `80/20 -> 20/20`, and layer `30% + 50/50` traffic assignment |
+| 9 | Traffic-assignment scenarios | Create one dedicated feature flag plus one independent release-decision experiment/run/metric/default window per scenario; verifies no-layer `50/50 -> use all`, no-layer `90/10 -> 10/10`, layer `30% + 34/33/33`, and layer `30% + 80/20 -> 20/20` traffic assignment |
 | 10 | Final verification | `GET /api/v1/envs/{envId}/release-decision/experiments/{id}`, `GET /api/v1/envs/{envId}/feature-flags/{key}`, `POST /api/v1/envs/{envId}/experiment-stats/query`; verifies the seeded treatment conversion rate is higher than control and all 10 flags retain their expected final enabled state, variants, rule state, traffic/fallthrough split, experimentation targeting flags, and type |
 
 The public SaaS OpenAPI schema currently lists project/env/flag/segment

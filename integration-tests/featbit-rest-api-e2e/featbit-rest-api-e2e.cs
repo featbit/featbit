@@ -11,10 +11,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
-using FeatBit.Sdk.Server;
-using FeatBit.Sdk.Server.Evaluation;
 using FeatBit.Sdk.Server.Model;
-using FeatBit.Sdk.Server.Options;
 
 AppContext.SetSwitch("System.Text.Json.JsonSerializer.IsReflectionEnabledByDefault", true);
 
@@ -337,17 +334,17 @@ static async Task ExecuteAsync(FeatBitApiClient api, TestReport report, E2ERun r
         $"segmentId={run.SegmentId}, referenced={string.Join(", ", referencedKeys.OrderBy(x => x, StringComparer.OrdinalIgnoreCase))}");
 
     var experimentFlag = flagSpecs[0];
-    var sdkValidation = await VerifySdkEvaluationAsync(run, flagSpecs, options);
-    run.PreExperimentSdkEvaluations = sdkValidation.TotalEvaluations;
-    run.PreExperimentNonExperimentRuleHits = sdkValidation.NonExperimentRuleHits;
+    var preSeedValidation = await VerifyPublicEvaluationAsync(run, flagSpecs, options);
+    run.PreExperimentEvaluations = preSeedValidation.TotalEvaluations;
+    run.PreExperimentNonExperimentRuleHits = preSeedValidation.NonExperimentRuleHits;
     report.Assert(
-        sdkValidation.TotalEvaluations >= flagSpecs.Length,
-        "4.1 SDK evaluated generated flags",
-        sdkValidation.ToString());
+        preSeedValidation.TotalEvaluations >= flagSpecs.Length,
+        "4.1 Public evaluation checked generated flags",
+        preSeedValidation.ToString());
     report.Assert(
-        sdkValidation.NonExperimentRuleHits == flagSpecs.Length - 1,
-        "4.2 SDK non-experiment rule targeting verified",
-        $"nonExperimentRuleHits={sdkValidation.NonExperimentRuleHits}, expected={flagSpecs.Length - 1}");
+        preSeedValidation.NonExperimentRuleHits == flagSpecs.Length - 1,
+        "4.2 Public evaluation non-experiment rule targeting verified",
+        $"nonExperimentRuleHits={preSeedValidation.NonExperimentRuleHits}, expected={flagSpecs.Length - 1}");
 
     var experiment = await api.SendAsync(
         HttpMethod.Post,
@@ -371,7 +368,7 @@ static async Task ExecuteAsync(FeatBitApiClient api, TestReport report, E2ERun r
         new
         {
             goal = "Increase checkout activation in the generated E2E environment",
-            intent = "Validate that REST API, SDK evaluation, metric collection, and release-decision analysis agree end to end.",
+            intent = "Validate that REST API, public evaluation, preset insight ingestion, and release-decision analysis agree end to end.",
             hypothesis,
             change = $"Feature flag {experimentFlag.Key} controls control/treatment routing.",
             variants = "",
@@ -440,12 +437,12 @@ static async Task ExecuteAsync(FeatBitApiClient api, TestReport report, E2ERun r
         $"/api/v1/envs/{run.EnvId}/release-decision/experiments/{run.ExperimentId}/runs",
         new { },
         "7.1 Create experiment run",
-        "Create a run that will collect and analyze the SDK-seeded evidence.");
+        "Create a run that will collect and analyze preset-timestamp evidence.");
     run.RunId = RequiredString(withRun?["experimentRuns"]?.AsArray().FirstOrDefault(), "id");
     report.Assert(!string.IsNullOrWhiteSpace(run.RunId), "7.1 Run created", $"runId={run.RunId}");
 
-    var observationStart = DateTime.UtcNow.AddHours(-1);
-    var observationEnd = DateTime.UtcNow.AddDays(7);
+    var observationStart = DefaultObservationStartUtc();
+    var observationEnd = DefaultObservationEndUtc();
     await api.SendAsync(
         HttpMethod.Put,
         $"/api/v1/envs/{run.EnvId}/release-decision/experiments/{run.ExperimentId}/runs/{run.RunId}/audience",
@@ -479,17 +476,6 @@ static async Task ExecuteAsync(FeatBitApiClient api, TestReport report, E2ERun r
 
     await api.SendAsync(
         HttpMethod.Put,
-        $"/api/v1/envs/{run.EnvId}/release-decision/experiments/{run.ExperimentId}/runs/{run.RunId}/observation-window",
-        new
-        {
-            observationStart,
-            observationEnd
-        },
-        "7.3 Configure run observation window",
-        "Set an observation window that contains the SDK events generated in this run.");
-
-    await api.SendAsync(
-        HttpMethod.Put,
         $"/api/v1/envs/{run.EnvId}/release-decision/experiments/{run.ExperimentId}/runs/{run.RunId}",
         new
         {
@@ -505,10 +491,21 @@ static async Task ExecuteAsync(FeatBitApiClient api, TestReport report, E2ERun r
             dataSourceMode = "featbit-api"
         },
         "7.4 Mark run collecting",
-        "Put the run into collecting mode before SDK seeding.");
+        "Put the run into collecting mode before preset insight seeding.");
 
-    var sdkSummary = await SeedWithSdkAsync(run, flagSpecs, options, report);
-    report.Assert(sdkSummary.TotalEvaluations > 0, "7.5 SDK evaluation generated evidence", sdkSummary.ToString());
+    var seedSummary = await SeedWithPresetInsightsAsync(run, experimentFlag, options);
+    report.Assert(seedSummary.TotalEvaluations > 0, "7.5 Preset-timestamp evaluation evidence generated", seedSummary.ToString());
+
+    await api.SendAsync(
+        HttpMethod.Put,
+        $"/api/v1/envs/{run.EnvId}/release-decision/experiments/{run.ExperimentId}/runs/{run.RunId}/observation-window",
+        new
+        {
+            observationStart,
+            observationEnd
+        },
+        "7.5b Configure run observation window",
+        "Set the default E2E observation window that contains all preset-timestamp seed events.");
 
     if (options.PostSdkWaitSeconds > 0)
     {
@@ -527,7 +524,7 @@ static async Task ExecuteAsync(FeatBitApiClient api, TestReport report, E2ERun r
         "binary",
         "once",
         "7.6 Query primary metric stats",
-        "Verify SDK exposure and primary metric evidence is observable through experiment-stats.");
+        "Verify preset-timestamp exposure and primary metric evidence is observable through experiment-stats.");
 
     var variantRows = stats?["variants"]?.AsArray() ?? [];
     var usersObserved = variantRows.Sum(x => (long?)x?["users"] ?? 0);
@@ -565,7 +562,7 @@ static async Task ExecuteAsync(FeatBitApiClient api, TestReport report, E2ERun r
         "binary",
         "once",
         "7.7 Query binary guardrail stats",
-        "Verify SDK-seeded checkout error guardrail data is observable.");
+        "Verify preset-timestamp checkout error guardrail data is observable.");
     AssertStatsObservedUsers(report, errorStats, "7.7 Binary guardrail users observed");
     var errorRows = errorStats?["variants"]?.AsArray() ?? [];
     AssertVariantMinimumUsers(report, errorRows, run, options, "7.7 Binary guardrail per-variant sample minimum");
@@ -601,7 +598,7 @@ static async Task ExecuteAsync(FeatBitApiClient api, TestReport report, E2ERun r
         "continuous",
         "average",
         "7.8 Query continuous guardrail stats",
-        "Verify SDK-seeded checkout latency guardrail data is observable.");
+        "Verify preset-timestamp checkout latency guardrail data is observable.");
     AssertStatsObservedUsers(report, latencyStats, "7.8 Continuous guardrail users observed");
     var latencyRows = latencyStats?["variants"]?.AsArray() ?? [];
     AssertVariantMinimumUsers(report, latencyRows, run, options, "7.8 Continuous guardrail per-variant sample minimum");
@@ -659,9 +656,18 @@ static async Task ExecuteAsync(FeatBitApiClient api, TestReport report, E2ERun r
         "8 Analysis inputData contains configured metrics",
         $"metrics={run.PrimaryMetric}, {run.ErrorMetric}, {run.LatencyMetric}");
 
-    foreach (var scenario in TrafficScenarioSpec.DefaultScenarios(options))
+    var scenarioSpecs = TrafficScenarioSpec.DefaultScenarios(options, run.DataSetId);
+    var scenarioFlagSpecs = FlagCatalog.BuildTrafficScenarioFlags(run.DataSetId);
+    await CreateTrafficScenarioFlagsAsync(api, report, run, scenarioFlagSpecs);
+    var scenarioFlagSpecByKey = scenarioFlagSpecs.ToDictionary(x => x.Key, StringComparer.OrdinalIgnoreCase);
+    foreach (var scenario in scenarioSpecs)
     {
-        await RunTrafficScenarioAsync(api, run, experimentFlag, scenario, options, report);
+        if (!scenarioFlagSpecByKey.TryGetValue(scenario.FlagKey, out var scenarioFlag))
+        {
+            throw new InvalidOperationException($"Traffic scenario '{scenario.Id}' references unknown flag '{scenario.FlagKey}'.");
+        }
+
+        await RunTrafficScenarioAsync(api, run, scenarioFlag, scenario, options, report);
     }
 
     await UpdateExperimentFlagTrafficAsync(api, run, experimentFlag, controlTrafficShare: 0.5, "11.0");
@@ -923,15 +929,57 @@ static Task<JsonNode?> QueryExperimentStatsWithRunAsync(
         meaning);
 }
 
+static async Task CreateTrafficScenarioFlagsAsync(
+    FeatBitApiClient api,
+    TestReport report,
+    E2ERun run,
+    FlagSpec[] scenarioFlags)
+{
+    run.Flags.AddRange(scenarioFlags.Select(x => new FlagRecord(x.Key, x.VariationType)));
+    report.Pass(
+        "10.0 Planned traffic scenario feature flags",
+        string.Join(Environment.NewLine, scenarioFlags.Select(x => $"{x.Key} => {x.VariationType}")));
+
+    foreach (var spec in scenarioFlags)
+    {
+        var created = await api.SendAsync(
+            HttpMethod.Post,
+            $"/api/v1/envs/{run.EnvId}/feature-flags",
+            spec.ToCreatePayload(),
+            $"10.0 Create scenario feature flag {spec.Key}",
+            "Create a scenario-dedicated feature flag so traffic-assignment experiments cannot share exposure windows.");
+
+        var read = await api.SendAsync(
+            HttpMethod.Get,
+            $"/api/v1/envs/{run.EnvId}/feature-flags/{spec.Key}",
+            null,
+            $"10.0 Verify scenario feature flag {spec.Key}",
+            "Read the scenario feature flag back and verify key/type/variation count.");
+
+        report.Assert(
+            NodeString(read, "key") == spec.Key &&
+            NodeString(read, "variationType") == spec.VariationType &&
+            read?["variations"]?.AsArray().Count == spec.Variations.Length,
+            $"10.0 Scenario feature flag contract {spec.Key}",
+            $"created={NodeString(created, "key")}, type={NodeString(read, "variationType")}, variations={read?["variations"]?.AsArray().Count ?? 0}");
+    }
+}
+
 static async Task RunTrafficScenarioAsync(
     FeatBitApiClient api,
     E2ERun run,
-    FlagSpec experimentFlag,
+    FlagSpec scenarioFlag,
     TrafficScenarioSpec scenario,
     E2EOptions options,
     TestReport report)
 {
-    await UpdateExperimentFlagTrafficAsync(api, run, experimentFlag, scenario.ControlTrafficShare, $"10.{scenario.Order}.1");
+    var arms = scenario.ResolveArms(scenarioFlag);
+    var controlArm = arms.Single(x => x.Role == "control");
+    var treatmentArms = arms.Where(x => x.Role == "treatment").ToArray();
+    var treatmentVariant = string.Join("|", treatmentArms.Select(x => x.VariationId));
+    var layerKey = scenario.HasLayer ? $"e2e-{scenario.Id}-{run.Suffix}" : null;
+
+    await UpdateScenarioFlagTrafficAsync(api, run, scenarioFlag, arms, $"10.{scenario.Order}.1");
     await Task.Delay(TimeSpan.FromSeconds(Math.Max(1, options.PostSdkWaitSeconds)));
 
     var metricEvent = $"e2e_{scenario.Id.Replace('-', '_')}_activated_{run.MetricSuffix}";
@@ -942,7 +990,7 @@ static async Task RunTrafficScenarioAsync(
         {
             name = $"E2E {scenario.Name} {run.Suffix}",
             description = $"Generated traffic-assignment scenario {scenario.Id}",
-            flagKey = experimentFlag.Key,
+            flagKey = scenarioFlag.Key,
             featBitProjectKey = run.ProjectKey
         },
         $"10.{scenario.Order}.2 Create scenario experiment {scenario.Id}",
@@ -958,7 +1006,7 @@ static async Task RunTrafficScenarioAsync(
             goal = "Validate release-decision traffic assignment semantics",
             intent = scenario.Name,
             hypothesis,
-            change = $"Feature flag {experimentFlag.Key} is set to {scenario.ControlTrafficShare:P0}/{1 - scenario.ControlTrafficShare:P0} for this scenario.",
+            change = $"Feature flag {scenarioFlag.Key} is set to {scenario.FlagSplitDescription} for this scenario.",
             envSecret = run.EnvServerSecret,
             flagServerUrl = options.EventUrl,
             constraints = "Synthetic users only; scenario-specific metric event and observation window.",
@@ -994,42 +1042,31 @@ static async Task RunTrafficScenarioAsync(
         "Create an independent run for this traffic-assignment scenario.");
     var runId = RequiredString(withRun?["experimentRuns"]?.AsArray().FirstOrDefault(), "id");
 
-    var samplingPlan = JsonSerializer.Serialize(new[]
+    var samplingPlan = JsonSerializer.Serialize(arms.Select(arm => new
     {
-        new
-        {
-            variation = run.ControlVariationId,
-            role = "control",
-            includeRate = scenario.ControlIncludeRate
-        },
-        new
-        {
-            variation = run.TreatmentVariationId,
-            role = "treatment",
-            includeRate = scenario.TreatmentIncludeRate
-        }
-    });
+        variation = arm.VariationId,
+        role = arm.Role,
+        includeRate = arm.IncludeRate
+    }).ToArray());
 
-    var observationStart = DateTime.UtcNow.AddSeconds(-1);
+    var observationStart = DefaultObservationStartUtc();
+    var observationEnd = DefaultObservationEndUtc();
     await api.SendAsync(
         HttpMethod.Put,
         $"/api/v1/envs/{run.EnvId}/release-decision/experiments/{experimentId}/runs/{runId}/audience",
-        new
-        {
-            method = "bayesian_ab",
-            controlVariant = run.ControlVariationId,
-            treatmentVariant = run.TreatmentVariationId,
-            assignmentUnitSelector = "user.keyId",
-            layerKey = $"e2e-{scenario.Id}-{run.Suffix}",
-            layerTrafficPercent = scenario.LayerTrafficPercent,
-            analysisSamplingPlan = samplingPlan,
-            audienceFilters = $"synthetic E2E users for {scenario.Id}"
-        },
+        BuildScenarioAudiencePayload(controlArm, treatmentVariant, layerKey, scenario, samplingPlan),
         $"10.{scenario.Order}.6 Configure scenario traffic {scenario.Id}",
         "Configure actual-variation roles, optional layer eligibility, and per-variation sampling.");
 
-    var seed = await SeedTrafficScenarioWithSdkAsync(run, experimentFlag, options, scenario, metricEvent);
-    var observationEnd = DateTime.UtcNow.AddSeconds(10);
+    var seed = await SeedTrafficScenarioWithPresetInsightsAsync(
+        run,
+        scenarioFlag,
+        options,
+        scenario,
+        arms,
+        runId,
+        layerKey,
+        metricEvent);
 
     await api.SendAsync(
         HttpMethod.Put,
@@ -1040,7 +1077,7 @@ static async Task RunTrafficScenarioAsync(
             observationEnd
         },
         $"10.{scenario.Order}.7 Configure scenario window {scenario.Id}",
-        "Use a scenario-specific observation window around the SDK evidence.");
+        "Use the default E2E observation window around preset-timestamp evidence.");
 
     await api.SendAsync(
         HttpMethod.Put,
@@ -1055,53 +1092,67 @@ static async Task RunTrafficScenarioAsync(
             primaryMetricType = "binary",
             primaryMetricAgg = "once",
             guardrailEvents = "[]",
+            controlVariant = controlArm.VariationId,
+            treatmentVariant,
+            assignmentUnitSelector = "user.keyId",
+            analysisSamplingPlan = samplingPlan,
             minimumSample = options.MinUsersPerVariant,
             dataSourceMode = "featbit-api"
         },
         $"10.{scenario.Order}.8 Mark scenario collecting {scenario.Id}",
         "Move the scenario run into collecting mode before analysis.");
 
-    var stats = await QueryExperimentStatsWithRunAsync(
+    if (options.PostSdkWaitSeconds > 0)
+    {
+        await Task.Delay(TimeSpan.FromSeconds(options.PostSdkWaitSeconds));
+    }
+
+    var stats = await QueryScenarioStatsUntilReadyAsync(
         api,
+        run,
         run.EnvId,
-        experimentFlag.Key,
+        scenarioFlag.Key,
         metricEvent,
         observationStart,
         observationEnd,
         "binary",
         "once",
-        new
-        {
-            runId,
-            assignmentUnitSelector = "user.keyId",
-            layerKey = $"e2e-{scenario.Id}-{run.Suffix}",
-            layerTrafficPercent = scenario.LayerTrafficPercent,
-            analysisSamplingPlan = samplingPlan
-        },
-        $"10.{scenario.Order}.9 Query scenario stats {scenario.Id}",
-        "Verify scenario stats use run traffic assignment instead of raw flag split.");
+        runId,
+        layerKey,
+        samplingPlan,
+        arms,
+        scenario,
+        options);
 
     var rows = stats?["variants"]?.AsArray() ?? [];
-    var controlUsers = FindUsers(rows, run.ControlVariationId);
-    var treatmentUsers = FindUsers(rows, run.TreatmentVariationId);
-    var controlConversions = FindConversions(rows, run.ControlVariationId);
-    var treatmentConversions = FindConversions(rows, run.TreatmentVariationId);
-    var expectedControlConversions = TargetCount(controlUsers, scenario.ControlConversionRate);
-    var expectedTreatmentConversions = TargetCount(treatmentUsers, scenario.TreatmentConversionRate);
+    var armResults = arms.Select(arm =>
+    {
+        var users = CountUsersOrZero(rows, arm.VariationId);
+        var conversions = CountConversionsOrZero(rows, arm.VariationId);
+        return new TrafficScenarioArmResult(
+            arm.Role,
+            arm.Label,
+            arm.VariationId,
+            arm.FlagTrafficShare,
+            arm.IncludeRate,
+            users,
+            conversions,
+            TargetCount(users, arm.ConversionRate));
+    }).ToArray();
 
     report.Assert(
-        controlUsers >= scenario.MinExpectedUsersPerVariant &&
-        treatmentUsers >= scenario.MinExpectedUsersPerVariant,
+        armResults.All(x => x.Users >= scenario.MinExpectedUsersPerVariant),
         $"10.{scenario.Order}.9 Scenario sample floor {scenario.Id}",
-        $"controlUsers={controlUsers}, treatmentUsers={treatmentUsers}, min={scenario.MinExpectedUsersPerVariant}, seed={seed}");
+        $"{string.Join("; ", armResults.Select(x => $"{x.Label}Users={x.Users}"))}, min={scenario.MinExpectedUsersPerVariant}, seed={seed}");
     report.Assert(
-        controlConversions == expectedControlConversions &&
-        treatmentConversions == expectedTreatmentConversions,
+        armResults.All(x => x.Conversions == x.ExpectedConversions),
         $"10.{scenario.Order}.9 Scenario deterministic conversions {scenario.Id}",
-        $"control={controlConversions}/{controlUsers}, expected={expectedControlConversions}; treatment={treatmentConversions}/{treatmentUsers}, expected={expectedTreatmentConversions}");
+        string.Join("; ", armResults.Select(x => $"{x.Label}={x.Conversions}/{x.Users}, expected={x.ExpectedConversions}")));
 
     if (scenario.ExpectBalancedAnalysis)
     {
+        var controlUsers = armResults.Single(x => x.Role == "control").Users;
+        var treatmentUsers = armResults.Where(x => x.Role == "treatment").Sum(x => x.Users);
         var ratio = controlUsers == 0 ? double.PositiveInfinity : (double)treatmentUsers / controlUsers;
         report.Assert(
             ratio is >= 0.5 and <= 2.0,
@@ -1126,17 +1177,147 @@ static async Task RunTrafficScenarioAsync(
     run.TrafficScenarioResults.Add(new TrafficScenarioResult(
         scenario.Id,
         scenario.Name,
+        scenarioFlag.Key,
         experimentId,
         runId,
         metricEvent,
-        scenario.ControlTrafficShare,
-        scenario.ControlIncludeRate,
-        scenario.TreatmentIncludeRate,
         scenario.LayerTrafficPercent,
-        controlUsers,
-        treatmentUsers,
-        controlConversions,
-        treatmentConversions));
+        armResults));
+}
+
+static async Task<JsonNode?> QueryScenarioStatsUntilReadyAsync(
+    FeatBitApiClient api,
+    E2ERun run,
+    string envId,
+    string flagKey,
+    string metricEvent,
+    DateTime observationStart,
+    DateTime observationEnd,
+    string metricType,
+    string metricAgg,
+    string runId,
+    string? layerKey,
+    string samplingPlan,
+    TrafficScenarioArmRuntime[] arms,
+    TrafficScenarioSpec scenario,
+    E2EOptions options)
+{
+    const int maxAttempts = 8;
+    var delaySeconds = Math.Clamp(options.PostSdkWaitSeconds <= 0 ? 3 : options.PostSdkWaitSeconds / 2, 3, 8);
+    JsonNode? latest = null;
+
+    for (var attempt = 1; attempt <= maxAttempts; attempt++)
+    {
+        latest = await QueryExperimentStatsWithRunAsync(
+            api,
+            envId,
+            flagKey,
+            metricEvent,
+            observationStart,
+            observationEnd,
+            metricType,
+            metricAgg,
+            BuildScenarioStatsPayload(runId, layerKey, scenario, samplingPlan),
+            $"10.{scenario.Order}.9 Query scenario stats {scenario.Id} attempt {attempt}",
+            "Verify scenario stats use run traffic assignment instead of raw flag split.");
+
+        var rows = latest?["variants"]?.AsArray() ?? [];
+        if (arms.All(arm => CountUsersOrZero(rows, arm.VariationId) >= scenario.MinExpectedUsersPerVariant))
+        {
+            return latest;
+        }
+
+        if (attempt < maxAttempts)
+        {
+            await Task.Delay(TimeSpan.FromSeconds(delaySeconds));
+        }
+    }
+
+    return latest;
+}
+
+static JsonObject BuildScenarioAudiencePayload(
+    TrafficScenarioArmRuntime controlArm,
+    string treatmentVariant,
+    string? layerKey,
+    TrafficScenarioSpec scenario,
+    string samplingPlan)
+{
+    var payload = new JsonObject
+    {
+        ["method"] = "bayesian_ab",
+        ["controlVariant"] = controlArm.VariationId,
+        ["treatmentVariant"] = treatmentVariant,
+        ["assignmentUnitSelector"] = "user.keyId",
+        ["analysisSamplingPlan"] = samplingPlan,
+        ["audienceFilters"] = $"synthetic E2E users for {scenario.Id}"
+    };
+
+    if (scenario.HasLayer)
+    {
+        payload["layerKey"] = layerKey;
+        payload["layerTrafficPercent"] = scenario.LayerTrafficPercent;
+    }
+
+    return payload;
+}
+
+static JsonObject BuildScenarioStatsPayload(
+    string runId,
+    string? layerKey,
+    TrafficScenarioSpec scenario,
+    string samplingPlan)
+{
+    var payload = new JsonObject
+    {
+        ["runId"] = runId,
+        ["assignmentUnitSelector"] = "user.keyId",
+        ["analysisSamplingPlan"] = samplingPlan
+    };
+
+    if (scenario.HasLayer)
+    {
+        payload["layerKey"] = layerKey;
+        payload["layerTrafficPercent"] = scenario.LayerTrafficPercent;
+    }
+
+    return payload;
+}
+
+static async Task UpdateScenarioFlagTrafficAsync(
+    FeatBitApiClient api,
+    E2ERun run,
+    FlagSpec experimentFlag,
+    TrafficScenarioArmRuntime[] arms,
+    string stepPrefix)
+{
+    var current = await api.SendAsync(
+        HttpMethod.Get,
+        $"/api/v1/envs/{run.EnvId}/feature-flags/{experimentFlag.Key}",
+        null,
+        $"{stepPrefix} Read experiment flag",
+        "Read current flag revision before updating experiment fallthrough traffic.");
+
+    await api.SendAsync(
+        HttpMethod.Put,
+        $"/api/v1/envs/{run.EnvId}/feature-flags/{experimentFlag.Key}/targeting",
+        BuildTargetingPayload(
+            current!,
+            experimentFlag,
+            isExperimentFlag: true,
+            experimentTraffic: arms.Select(x => (x.VariationId, x.FlagTrafficShare)).ToArray()),
+        $"{stepPrefix} Update experiment flag traffic",
+        $"Set experiment flag fallthrough traffic to {string.Join(", ", arms.Select(x => $"{x.Label} {x.FlagTrafficShare:P1}"))}.");
+
+    if (!NodeBool(current, "isEnabled"))
+    {
+        await api.SendAsync(
+            HttpMethod.Put,
+            $"/api/v1/envs/{run.EnvId}/feature-flags/{experimentFlag.Key}/toggle/true",
+            null,
+            $"{stepPrefix} Enable scenario flag",
+            "Temporarily enable the scenario flag so fallthrough rollout can serve the configured variations.");
+    }
 }
 
 static async Task UpdateExperimentFlagTrafficAsync(
@@ -1161,140 +1342,168 @@ static async Task UpdateExperimentFlagTrafficAsync(
         $"Set experiment flag fallthrough traffic to control {controlTrafficShare:P0}, treatment {1 - controlTrafficShare:P0}.");
 }
 
-static async Task<TrafficScenarioSeedSummary> SeedTrafficScenarioWithSdkAsync(
+static async Task<TrafficScenarioSeedSummary> SeedTrafficScenarioWithPresetInsightsAsync(
     E2ERun run,
-    FlagSpec experimentFlag,
+    FlagSpec scenarioFlag,
     E2EOptions options,
     TrafficScenarioSpec scenario,
+    TrafficScenarioArmRuntime[] arms,
+    string runId,
+    string? layerKey,
     string metricEvent)
 {
-    var sdkOptions = new FbOptionsBuilder(run.EnvServerSecret)
-        .Event(new Uri(options.EventUrl))
-        .Streaming(new Uri(options.StreamingUrl))
-        .StartWaitTime(TimeSpan.FromSeconds(options.SdkStartWaitSeconds))
-        .MaxEventPerRequest(options.BatchSize)
-        .Build();
-
-    var client = new FbClient(sdkOptions);
-    try
+    var assignments = new List<SeededExperimentUser>(options.Users);
+    for (var index = 0; index < options.Users; index++)
     {
-        if (!client.Initialized)
-        {
-            throw new InvalidOperationException(
-                $"FeatBit SDK did not initialize. Status: {client.Status}. Check event-url, streaming-url, and generated env server secret.");
-        }
-
-        var assignments = new List<SeededExperimentUser>(options.Users);
-        for (var batchStart = 0; batchStart < options.Users; batchStart += options.BatchSize)
-        {
-            var batchEnd = Math.Min(batchStart + options.BatchSize, options.Users);
-            for (var index = batchStart; index < batchEnd; index++)
-            {
-                var user = BuildSyntheticUser(index, $"e2e-{scenario.Id}");
-                var detail = Evaluate(client, experimentFlag, user);
-                assignments.Add(new SeededExperimentUser(index, user.Key, user, detail.ValueId, detail.ValueText));
-            }
-
-            if (!client.FlushAndWait(TimeSpan.FromSeconds(options.FlushTimeoutSeconds)))
-            {
-                throw new TimeoutException(
-                    $"Timed out after {options.FlushTimeoutSeconds} seconds while flushing SDK exposure events for scenario {scenario.Id} users {batchStart}-{batchEnd - 1}.");
-            }
-        }
-
-        var primaryUserKeys = SelectMetricUserKeys(
-            assignments,
-            run.ControlVariationId,
-            rate: scenario.ControlConversionRate,
-            salt: metricEvent)
-            .Concat(SelectMetricUserKeys(assignments, run.TreatmentVariationId, rate: scenario.TreatmentConversionRate, salt: metricEvent))
-            .ToHashSet(StringComparer.Ordinal);
-
-        for (var batchStart = 0; batchStart < assignments.Count; batchStart += options.BatchSize)
-        {
-            var batch = assignments.Skip(batchStart).Take(options.BatchSize).ToArray();
-            foreach (var assignment in batch)
-            {
-                if (primaryUserKeys.Contains(assignment.UserKey))
-                {
-                    client.Track(assignment.User, metricEvent);
-                }
-            }
-
-            if (!client.FlushAndWait(TimeSpan.FromSeconds(options.FlushTimeoutSeconds)))
-            {
-                var batchEnd = Math.Min(batchStart + options.BatchSize, assignments.Count);
-                throw new TimeoutException(
-                    $"Timed out after {options.FlushTimeoutSeconds} seconds while flushing SDK metric events for scenario {scenario.Id} users {batchStart}-{batchEnd - 1}.");
-            }
-        }
-
-        return new TrafficScenarioSeedSummary(
-            assignments.Count(x => string.Equals(x.VariationId, run.ControlVariationId, StringComparison.OrdinalIgnoreCase)),
-            assignments.Count(x => string.Equals(x.VariationId, run.TreatmentVariationId, StringComparison.OrdinalIgnoreCase)));
+        var user = BuildSyntheticUser(index, $"e2e-{scenario.Id}");
+        var detail = EvaluateByTraffic(scenarioFlag, user.Key, arms.Select(x => (x.VariationId, x.FlagTrafficShare)).ToArray());
+        assignments.Add(new SeededExperimentUser(index, user.Key, user, detail.ValueId, detail.ValueText));
     }
-    finally
+
+    var exposureAssignments = assignments
+        .OrderBy(x => x.Index)
+        .ToArray();
+    var analyzedAssignments = exposureAssignments
+        .Where(assignment => IsIncludedInScenarioAnalysis(assignment, arms, runId, layerKey, scenario))
+        .ToArray();
+    var primaryUserKeys = arms
+        .SelectMany(arm => SelectMetricUserKeys(
+            analyzedAssignments,
+            arm.VariationId,
+            rate: arm.ConversionRate,
+            salt: metricEvent))
+        .ToHashSet(StringComparer.Ordinal);
+
+    await PostPresetInsightEventsAsync(
+        run,
+        options,
+        scenarioFlag,
+        exposureAssignments,
+        scenario.Order,
+        assignment => primaryUserKeys.Contains(assignment.UserKey)
+            ? [new SeedMetric(metricEvent, 1.0, MetricOffset: TimeSpan.FromMinutes(10))]
+            : []);
+
+    return new TrafficScenarioSeedSummary(string.Join(
+        ", ",
+        arms.Select(arm =>
+            $"{arm.Label} raw={assignments.Count(x => string.Equals(x.VariationId, arm.VariationId, StringComparison.OrdinalIgnoreCase))} seeded={exposureAssignments.Count(x => string.Equals(x.VariationId, arm.VariationId, StringComparison.OrdinalIgnoreCase))} analyzed={analyzedAssignments.Count(x => string.Equals(x.VariationId, arm.VariationId, StringComparison.OrdinalIgnoreCase))}")));
+}
+
+static async Task PostPresetInsightEventsAsync(
+    E2ERun run,
+    E2EOptions options,
+    FlagSpec flag,
+    IReadOnlyList<SeededExperimentUser> assignments,
+    int flowOrder,
+    Func<SeededExperimentUser, IReadOnlyList<SeedMetric>> metricsForAssignment)
+{
+    using var http = new HttpClient { BaseAddress = new Uri(options.EventUrl.TrimEnd('/') + "/") };
+    http.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", run.EnvServerSecret);
+
+    for (var batchStart = 0; batchStart < assignments.Count; batchStart += options.BatchSize)
     {
-        await client.CloseAsync();
+        var batch = assignments
+            .Skip(batchStart)
+            .Take(options.BatchSize)
+            .Select(assignment =>
+            {
+                var exposureTime = DistributedSeedTime(assignment.Index, options.Users, flowOrder);
+                return BuildPresetInsightPayload(
+                flag,
+                assignment,
+                ToUnixMilliseconds(exposureTime),
+                metricsForAssignment(assignment).Select(metric =>
+                    metric with { Timestamp = ToUnixMilliseconds(exposureTime + metric.MetricOffset) }).ToArray());
+            })
+            .ToArray();
+
+        using var response = await http.PostAsJsonAsync("api/public/insight/track", batch);
+        if (!response.IsSuccessStatusCode)
+        {
+            var body = await response.Content.ReadAsStringAsync();
+            throw new HttpRequestException(
+                $"Scenario insight ingestion failed with {(int)response.StatusCode} {response.ReasonPhrase}: {body}");
+        }
+
+        if (options.SeedBatchDelayMs > 0 && batchStart + options.BatchSize < assignments.Count)
+        {
+            await Task.Delay(TimeSpan.FromMilliseconds(options.SeedBatchDelayMs));
+        }
     }
 }
 
-static async Task<SdkValidationSummary> VerifySdkEvaluationAsync(
+static object BuildPresetInsightPayload(
+    FlagSpec flag,
+    SeededExperimentUser assignment,
+    long exposureTimestamp,
+    IReadOnlyList<SeedMetric> metrics)
+{
+    return new
+    {
+        user = new
+        {
+            keyId = assignment.UserKey,
+            name = assignment.UserKey
+        },
+        variations = new[]
+        {
+            new
+            {
+                featureFlagKey = flag.Key,
+                variation = new
+                {
+                    id = assignment.VariationId,
+                    value = assignment.VariationValue
+                },
+                sendToExperiment = true,
+                timestamp = exposureTimestamp
+            }
+        },
+        metrics = metrics.Select(metric => new
+        {
+            route = "/api/public/insight/track",
+            type = "Track",
+            eventName = metric.EventName,
+            numericValue = metric.NumericValue,
+            appType = "Server",
+            timestamp = metric.Timestamp
+        }).ToArray()
+    };
+}
+
+static async Task<PreSeedEvaluationSummary> VerifyPublicEvaluationAsync(
     E2ERun run,
     FlagSpec[] flags,
     E2EOptions options)
 {
-    var sdkOptions = new FbOptionsBuilder(run.EnvServerSecret)
-        .Event(new Uri(options.EventUrl))
-        .Streaming(new Uri(options.StreamingUrl))
-        .StartWaitTime(TimeSpan.FromSeconds(options.SdkStartWaitSeconds))
-        .MaxEventPerRequest(options.BatchSize)
-        .Build();
-
-    var client = new FbClient(sdkOptions);
-    try
+    var summary = new PreSeedEvaluationSummary();
+    var representativeUsers = new[] { 0, 1 };
+    foreach (var userIndex in representativeUsers)
     {
-        if (!client.Initialized)
+        var results = await EvaluateFlagsWithoutInsightAsync(run, options, BuildSyntheticUser(userIndex), flags);
+        foreach (var flag in flags)
         {
-            throw new InvalidOperationException(
-                $"FeatBit SDK did not initialize. Status: {client.Status}. Check event-url, streaming-url, and generated env server secret.");
-        }
-
-        var summary = new SdkValidationSummary();
-        var representativeUsers = new[] { BuildSyntheticUser(0), BuildSyntheticUser(1) };
-        foreach (var user in representativeUsers)
-        {
-            foreach (var flag in flags)
-            {
-                var detail = Evaluate(client, flag, user);
-                summary.TotalEvaluations++;
-                summary.Count(flag.Key, detail.ValueId, detail.ValueText);
-            }
-        }
-
-        var enterpriseUser = BuildSyntheticUser(3);
-        foreach (var flag in flags.Skip(1))
-        {
-            var detail = Evaluate(client, flag, enterpriseUser);
+            var detail = results[flag.Key];
             summary.TotalEvaluations++;
             summary.Count(flag.Key, detail.ValueId, detail.ValueText);
-            if (string.Equals(detail.ValueId, flag.Variations[0].Id, StringComparison.OrdinalIgnoreCase))
-            {
-                summary.NonExperimentRuleHits++;
-            }
         }
-
-        if (!client.FlushAndWait(TimeSpan.FromSeconds(options.FlushTimeoutSeconds)))
-        {
-            throw new TimeoutException($"Timed out after {options.FlushTimeoutSeconds} seconds while flushing pre-experiment SDK evaluation events.");
-        }
-
-        return summary;
     }
-    finally
+
+    var enterpriseUser = BuildSyntheticUser(3);
+    var enterpriseResults = await EvaluateFlagsWithoutInsightAsync(run, options, enterpriseUser, flags.Skip(1).ToArray());
+    foreach (var flag in flags.Skip(1))
     {
-        await client.CloseAsync();
+        var detail = enterpriseResults[flag.Key];
+        summary.TotalEvaluations++;
+        summary.Count(flag.Key, detail.ValueId, detail.ValueText);
+        if (string.Equals(detail.ValueId, flag.Variations[0].Id, StringComparison.OrdinalIgnoreCase))
+        {
+            summary.NonExperimentRuleHits++;
+        }
     }
+
+    return summary;
 }
 
 static void AssertStatsObservedUsers(TestReport report, JsonNode? stats, string name)
@@ -1500,17 +1709,29 @@ static async Task RunSelfCheckAsync(string[] args)
             "e2e_checkout_latency_ms_selfcheck"),
         "Self-check analysis inputData metric parser",
         "The runner verifies that analyze inputData contains primary and guardrail metrics.");
-    var scenarios = TrafficScenarioSpec.DefaultScenarios(options);
+    var scenarios = TrafficScenarioSpec.DefaultScenarios(options, E2ERun.FixedDataSetId);
+    var scenarioFlags = FlagCatalog.BuildTrafficScenarioFlags(E2ERun.FixedDataSetId);
     report.Assert(
         scenarios.Length == 4 &&
-        scenarios.Select(x => x.Id).Distinct(StringComparer.OrdinalIgnoreCase).Count() == 4,
+        scenarios.Select(x => x.Id).Distinct(StringComparer.OrdinalIgnoreCase).Count() == 4 &&
+        scenarios.Select(x => x.FlagKey).Distinct(StringComparer.OrdinalIgnoreCase).Count() == 4,
         "Self-check traffic scenario catalog",
-        string.Join(", ", scenarios.Select(x => $"{x.Id}:flagControl={x.ControlTrafficShare:0.######},sample={x.ControlIncludeRate:0.######}/{x.TreatmentIncludeRate:0.######},layer={x.LayerTrafficPercent:0.######}")));
+        string.Join(", ", scenarios.Select(x =>
+            $"{x.Id}:flag={x.FlagKey},split={x.FlagSplitDescription},sample={string.Join("/", x.Arms.Select(a => $"{a.Label}:{a.IncludeRate:0.######}%"))},layer={(x.HasLayer ? $"{x.LayerTrafficPercent:0.######}%" : "none")}")));
     report.Assert(
-        scenarios.Any(x => x.Id == "skewed-90-10-to-10-10" && x.ExpectBalancedAnalysis) &&
-        scenarios.Any(x => x.Id == "layer-30-50-50" && Math.Abs(x.LayerTrafficPercent - 30) < 0.000001),
+        scenarioFlags.Length == 4 &&
+        scenarioFlags.Select(x => x.Key).OrderBy(x => x, StringComparer.OrdinalIgnoreCase)
+            .SequenceEqual(scenarios.Select(x => x.FlagKey).OrderBy(x => x, StringComparer.OrdinalIgnoreCase), StringComparer.OrdinalIgnoreCase) &&
+        scenarioFlags.All(x => flags.All(flag => !string.Equals(flag.Key, x.Key, StringComparison.OrdinalIgnoreCase))),
+        "Self-check traffic scenario flags",
+        "Each traffic scenario has a dedicated feature flag outside the base 10-flag mutation set.");
+    report.Assert(
+        scenarios.Any(x => x.Id == "balanced-50-50-use-all" && !x.HasLayer) &&
+        scenarios.Any(x => x.Id == "skewed-90-10-to-10-10" && !x.HasLayer && x.ExpectBalancedAnalysis) &&
+        scenarios.Any(x => x.Id == "layer-30-three-arm-34-33-33" && x.HasLayer && Math.Abs(x.LayerTrafficPercent!.Value - 30) < 0.000001 && x.Arms.Length == 3) &&
+        scenarios.Any(x => x.Id == "layer-30-skewed-80-20-to-20-20" && x.HasLayer && x.ExpectBalancedAnalysis && x.Arms.Any(a => a.Role == "control" && Math.Abs(a.IncludeRate - 22.222222) < 0.000001)),
         "Self-check traffic scenario semantics",
-        "The runner includes skewed sampled-to-balanced and layer-eligibility scenarios.");
+        "The runner includes no-layer, sampled-to-balanced, three-arm layer, and layer-sampled scenarios.");
 
     report.Pass("Self-check completed", "Offline deterministic script checks passed.");
     Console.WriteLine("Self-check completed. No report files were written because this was not a live E2E run.");
@@ -1796,13 +2017,14 @@ static string BuildPlanMarkdown(string dataSetId, FlagSpec[] flags)
     sb.AppendLine();
     sb.AppendLine("## Expected Insight, Stats, And Analyze State");
     sb.AppendLine();
-    sb.AppendLine("- SDK pre-verifies all 10 flags for representative users, then evaluates only the experiment flag for every synthetic user and records the exact SDK control/treatment assignment.");
+    sb.AppendLine("- Public evaluation pre-verifies all 10 flags for representative users without writing insight events; preset insight seed data records deterministic control/treatment assignments.");
+    sb.AppendLine("- Run observation windows are fixed at `2026-06-15T00:00:00Z` to `2026-06-28T23:59:59Z`; exposure and metric events are deterministically spread across five days starting `2026-06-16T00:00:00Z`.");
     sb.AppendLine("- Experiment evidence uses the configured `--users` seed budget, requires each control/treatment variant to meet the configured `--min-users-per-variant` sample floor, and deterministically selects metric users inside each assigned variant.");
     sb.AppendLine("- Primary metric `e2e_checkout_activated_fixed_v1` evidence target: control conversions equal `Round(controlUsers * 0.30)`, treatment conversions equal `Round(treatmentUsers * 0.45)`, treatment conversion > control conversion.");
     sb.AppendLine("- Error guardrail `e2e_checkout_error_fixed_v1` evidence target: control errors equal `Round(controlUsers * 0.018)`, treatment errors equal `Round(treatmentUsers * 0.020)`, both below `5.00%`.");
     sb.AppendLine("- Latency guardrail `e2e_checkout_latency_ms_fixed_v1` evidence target: control average `340ms`, treatment average `320ms`, treatment <= control.");
     sb.AppendLine("- Analyze should set run status to `analyzing`, write non-empty `inputData` containing all three metric events, and write non-empty `analysisResult`.");
-    sb.AppendLine("- Additional traffic-assignment scenarios each create an independent experiment, run, metric event, and observation window. The covered scenarios are balanced `50/50 -> use all`, skewed `90/10 -> 10/10`, skewed `80/20 -> 20/20`, and layer `30% + 50/50`.");
+    sb.AppendLine("- Additional traffic-assignment scenarios each create an independent experiment, run, metric event, and observation window. The covered scenarios are no-layer `50/50 -> use all`, no-layer `90/10 -> 10/10`, layer `30% + 34/33/33`, and layer `30% + 80/20 -> 20/20`.");
 
     sb.AppendLine();
     sb.AppendLine("## Steps And Endpoints");
@@ -1817,12 +2039,12 @@ static string BuildPlanMarkdown(string dataSetId, FlagSpec[] flags)
     AppendPlanStep(sb, "2 batch", "Mutate every flag", "PUT /description, /tags, /toggle/{status}, /variations, /targeting", "Change description, tags, status, variants, and targeting rules.");
     AppendPlanStep(sb, "3 batch", "Verify every mutation", "GET /api/v1/envs/{envId}/feature-flags/{key}", "Check toggles, tags, variation count, rules, segment references, and fallthrough traffic.");
     AppendPlanStep(sb, "3 segment refs", "Verify segment references", "GET /api/v1/envs/{envId}/segments/{segmentId}/flag-references", "Confirm the real segment is referenced by all 9 non-experiment flags and not by the experiment flag.");
-    AppendPlanStep(sb, "4", "SDK evaluation", "FeatBit.ServerSdk variation detail APIs + POST /api/public/insight/track", "Pre-verify all 10 flags for representative users; SDK events feed the insight endpoint.");
+    AppendPlanStep(sb, "4", "Public evaluation", "POST /api/public/featureflag/evaluate", "Pre-verify all 10 flags for representative users without creating insight events.");
     AppendPlanStep(sb, "5", "Create experiment", "POST /api/v1/envs/{envId}/release-decision/experiments", "Bind release-decision experiment to the first boolean flag.");
-    AppendPlanStep(sb, "5 update", "Fill intent/hypothesis", "PUT /api/v1/envs/{envId}/release-decision/experiments/{id}", "Persist intent, hypothesis, change, constraints, env secret, and SDK URL.");
+    AppendPlanStep(sb, "5 update", "Fill intent/hypothesis", "PUT /api/v1/envs/{envId}/release-decision/experiments/{id}", "Persist intent, hypothesis, change, constraints, env secret, and event URL.");
     AppendPlanStep(sb, "6", "Configure metrics", "PUT /api/v1/envs/{envId}/release-decision/experiments/{id}/metrics", "Primary binary metric plus binary and continuous guardrails.");
     AppendPlanStep(sb, "7", "Create and configure run", "POST /runs; PUT /runs/{runId}; PUT /audience; PUT /observation-window", "Configure experiment traffic assignment and move run into collecting mode.");
-    AppendPlanStep(sb, "7 seed", "Seed evaluation and metric data", "FeatBit.ServerSdk Bool/String/DoubleVariationDetail + Track", "Generate exposure, primary metric, and guardrail evidence.");
+    AppendPlanStep(sb, "7 seed", "Seed exposure and metric data", "POST /api/public/insight/track", "Generate preset-timestamp exposure, primary metric, and guardrail evidence.");
     AppendPlanStep(sb, "7 verify", "Query experiment stats", "POST /api/v1/envs/{envId}/experiment-stats/query", "Verify users, treatment conversion rate > control, and guardrail data.");
     AppendPlanStep(sb, "8", "Analyze", "POST /api/v1/envs/{envId}/release-decision/experiments/{id}/runs/{runId}/analyze", "Generate inputData and analysisResult.");
     AppendPlanStep(sb, "10", "Traffic-assignment scenarios", "POST /release-decision/experiments; POST /runs; PUT /audience; POST /experiment-stats/query; POST /analyze", "Create one independent experiment per traffic scenario and verify stats reflect run traffic assignment.");
@@ -1931,6 +2153,14 @@ static long FindUsers(JsonArray variantRows, string variationId)
     return row["users"]?.GetValue<long>() ?? 0;
 }
 
+static long CountUsersOrZero(JsonArray variantRows, string variationId)
+{
+    var row = variantRows.FirstOrDefault(x =>
+        string.Equals(NodeString(x, "variant"), variationId, StringComparison.OrdinalIgnoreCase));
+
+    return row?["users"]?.GetValue<long>() ?? 0;
+}
+
 static long FindConversions(JsonArray variantRows, string variationId)
 {
     var row = variantRows.FirstOrDefault(x =>
@@ -1941,6 +2171,14 @@ static long FindConversions(JsonArray variantRows, string variationId)
     }
 
     return row["conversions"]?.GetValue<long>() ?? 0;
+}
+
+static long CountConversionsOrZero(JsonArray variantRows, string variationId)
+{
+    var row = variantRows.FirstOrDefault(x =>
+        string.Equals(NodeString(x, "variant"), variationId, StringComparison.OrdinalIgnoreCase));
+
+    return row?["conversions"]?.GetValue<long>() ?? 0;
 }
 
 static long TargetCount(long users, double rate) =>
@@ -2037,7 +2275,8 @@ static object BuildTargetingPayload(
     FlagSpec spec,
     bool isExperimentFlag,
     string? segmentId = null,
-    double experimentControlTraffic = 0.5)
+    double experimentControlTraffic = 0.5,
+    IReadOnlyList<(string VariationId, double Share)>? experimentTraffic = null)
 {
     var variations = flag["variations"]!.AsArray();
     var firstVariationId = NodeString(variations[0], "id");
@@ -2083,11 +2322,12 @@ static object BuildTargetingPayload(
     }
 
     object[] fallthroughVariations = isExperimentFlag
-        ? new object[]
-        {
-            new { id = firstVariationId, rollout = new double[] { 0, experimentControlTraffic }, exptRollout = experimentControlTraffic },
-            new { id = secondVariationId, rollout = new double[] { experimentControlTraffic, 1 }, exptRollout = 1 - experimentControlTraffic }
-        }
+        ? BuildExperimentFallthroughVariations(
+            experimentTraffic ??
+            [
+                (firstVariationId, experimentControlTraffic),
+                (secondVariationId, 1 - experimentControlTraffic)
+            ])
         : new object[]
         {
             new { id = firstVariationId, rollout = new double[] { 0, 1 }, exptRollout = 1 }
@@ -2112,119 +2352,95 @@ static object BuildTargetingPayload(
     };
 }
 
-static async Task<SdkSeedSummary> SeedWithSdkAsync(
-    E2ERun run,
-    FlagSpec[] flags,
-    E2EOptions options,
-    TestReport report)
+static object[] BuildExperimentFallthroughVariations(IReadOnlyList<(string VariationId, double Share)> traffic)
 {
-    var sdkOptions = new FbOptionsBuilder(run.EnvServerSecret)
-        .Event(new Uri(options.EventUrl))
-        .Streaming(new Uri(options.StreamingUrl))
-        .StartWaitTime(TimeSpan.FromSeconds(options.SdkStartWaitSeconds))
-        .MaxEventPerRequest(options.BatchSize)
-        .Build();
-
-    var client = new FbClient(sdkOptions);
-    try
+    var total = traffic.Sum(x => Math.Max(0, x.Share));
+    if (total <= 0)
     {
-        if (!client.Initialized)
-        {
-            throw new InvalidOperationException(
-                $"FeatBit SDK did not initialize. Status: {client.Status}. Check event-url, streaming-url, and generated env server secret.");
-        }
-
-        var summary = new SdkSeedSummary();
-        var experimentFlag = flags[0];
-        var assignments = new List<SeededExperimentUser>(options.Users);
-
-        for (var batchStart = 0; batchStart < options.Users; batchStart += options.BatchSize)
-        {
-            var batchEnd = Math.Min(batchStart + options.BatchSize, options.Users);
-
-            for (var index = batchStart; index < batchEnd; index++)
-            {
-                var user = BuildSyntheticUser(index);
-                var detail = Evaluate(client, experimentFlag, user);
-                summary.TotalEvaluations++;
-                summary.Count(experimentFlag.Key, detail.ValueId, detail.ValueText);
-
-                assignments.Add(new SeededExperimentUser(
-                    index,
-                    user.Key,
-                    user,
-                    detail.ValueId,
-                    detail.ValueText));
-            }
-
-            if (!client.FlushAndWait(TimeSpan.FromSeconds(options.FlushTimeoutSeconds)))
-            {
-                throw new TimeoutException(
-                    $"Timed out after {options.FlushTimeoutSeconds} seconds while flushing SDK events for users {batchStart}-{batchEnd - 1}.");
-            }
-
-            if (options.SeedBatchDelayMs > 0 && batchEnd < options.Users)
-            {
-                await Task.Delay(TimeSpan.FromMilliseconds(options.SeedBatchDelayMs));
-            }
-        }
-
-        var primaryUserKeys = SelectMetricUserKeys(
-            assignments,
-            run.ControlVariationId,
-            rate: 0.30,
-            salt: run.PrimaryMetric)
-            .Concat(SelectMetricUserKeys(assignments, run.TreatmentVariationId, rate: 0.45, salt: run.PrimaryMetric))
-            .ToHashSet(StringComparer.Ordinal);
-
-        var errorUserKeys = SelectMetricUserKeys(
-            assignments,
-            run.ControlVariationId,
-            rate: 0.018,
-            salt: run.ErrorMetric)
-            .Concat(SelectMetricUserKeys(assignments, run.TreatmentVariationId, rate: 0.020, salt: run.ErrorMetric))
-            .ToHashSet(StringComparer.Ordinal);
-
-        for (var batchStart = 0; batchStart < assignments.Count; batchStart += options.BatchSize)
-        {
-            var batch = assignments.Skip(batchStart).Take(options.BatchSize).ToArray();
-
-            foreach (var assignment in batch)
-            {
-                if (primaryUserKeys.Contains(assignment.UserKey))
-                {
-                    client.Track(assignment.User, run.PrimaryMetric);
-                }
-
-                if (errorUserKeys.Contains(assignment.UserKey))
-                {
-                    client.Track(assignment.User, run.ErrorMetric);
-                }
-
-                var isTreatment = string.Equals(assignment.VariationValue, "true", StringComparison.OrdinalIgnoreCase);
-                var latency = isTreatment ? 320.0 : 340.0;
-                client.Track(assignment.User, run.LatencyMetric, latency);
-            }
-
-            if (!client.FlushAndWait(TimeSpan.FromSeconds(options.FlushTimeoutSeconds)))
-            {
-                var batchEnd = Math.Min(batchStart + options.BatchSize, assignments.Count);
-                throw new TimeoutException(
-                    $"Timed out after {options.FlushTimeoutSeconds} seconds while flushing SDK metric events for assigned users {batchStart}-{batchEnd - 1}.");
-            }
-
-            if (options.SeedBatchDelayMs > 0 && batchStart + options.BatchSize < assignments.Count)
-            {
-                await Task.Delay(TimeSpan.FromMilliseconds(options.SeedBatchDelayMs));
-            }
-        }
-
-        return summary;
+        throw new ArgumentException("Experiment traffic must include at least one positive share.", nameof(traffic));
     }
-    finally
+
+    var start = 0d;
+    var result = new List<object>(traffic.Count);
+    for (var index = 0; index < traffic.Count; index++)
     {
-        await client.CloseAsync();
+        var share = Math.Max(0, traffic[index].Share) / total;
+        var end = index == traffic.Count - 1 ? 1d : start + share;
+        result.Add(new
+        {
+            id = traffic[index].VariationId,
+            rollout = new[] { start, end },
+            exptRollout = share
+        });
+        start = end;
     }
+
+    return result.ToArray();
+}
+
+static async Task<PresetInsightSeedSummary> SeedWithPresetInsightsAsync(
+    E2ERun run,
+    FlagSpec experimentFlag,
+    E2EOptions options)
+{
+    var summary = new PresetInsightSeedSummary();
+    var assignments = new List<SeededExperimentUser>(options.Users);
+    for (var index = 0; index < options.Users; index++)
+    {
+        var user = BuildSyntheticUser(index);
+        var detail = EvaluateByTraffic(
+            experimentFlag,
+            user.Key,
+            [
+                (run.ControlVariationId, 0.5),
+                (run.TreatmentVariationId, 0.5)
+            ]);
+        summary.TotalEvaluations++;
+        summary.Count(experimentFlag.Key, detail.ValueId, detail.ValueText);
+        assignments.Add(new SeededExperimentUser(index, user.Key, user, detail.ValueId, detail.ValueText));
+    }
+
+    var primaryUserKeys = SelectMetricUserKeys(
+        assignments,
+        run.ControlVariationId,
+        rate: 0.30,
+        salt: run.PrimaryMetric)
+        .Concat(SelectMetricUserKeys(assignments, run.TreatmentVariationId, rate: 0.45, salt: run.PrimaryMetric))
+        .ToHashSet(StringComparer.Ordinal);
+
+    var errorUserKeys = SelectMetricUserKeys(
+        assignments,
+        run.ControlVariationId,
+        rate: 0.018,
+        salt: run.ErrorMetric)
+        .Concat(SelectMetricUserKeys(assignments, run.TreatmentVariationId, rate: 0.020, salt: run.ErrorMetric))
+        .ToHashSet(StringComparer.Ordinal);
+
+    await PostPresetInsightEventsAsync(
+        run,
+        options,
+        experimentFlag,
+        assignments,
+        flowOrder: 0,
+        assignment =>
+        {
+            var metrics = new List<SeedMetric>();
+            if (primaryUserKeys.Contains(assignment.UserKey))
+            {
+                metrics.Add(new SeedMetric(run.PrimaryMetric, 1.0, MetricOffset: TimeSpan.FromMinutes(10)));
+            }
+
+            if (errorUserKeys.Contains(assignment.UserKey))
+            {
+                metrics.Add(new SeedMetric(run.ErrorMetric, 1.0, MetricOffset: TimeSpan.FromMinutes(15)));
+            }
+
+            var isTreatment = string.Equals(assignment.VariationValue, "true", StringComparison.OrdinalIgnoreCase);
+            metrics.Add(new SeedMetric(run.LatencyMetric, isTreatment ? 320.0 : 340.0, MetricOffset: TimeSpan.FromMinutes(20)));
+            return metrics;
+        });
+
+    return summary;
 }
 
 static FbUser BuildSyntheticUser(int index, string prefix = "e2e-user")
@@ -2255,26 +2471,156 @@ static IEnumerable<string> SelectMetricUserKeys(
         .Select(x => x.UserKey);
 }
 
+static bool IsIncludedInScenarioAnalysis(
+    SeededExperimentUser assignment,
+    TrafficScenarioArmRuntime[] arms,
+    string runId,
+    string? layerKey,
+    TrafficScenarioSpec scenario)
+{
+    var arm = arms.FirstOrDefault(x =>
+        string.Equals(x.VariationId, assignment.VariationId, StringComparison.OrdinalIgnoreCase));
+    if (arm == null)
+    {
+        return false;
+    }
+
+    if (scenario.HasLayer)
+    {
+        if (string.IsNullOrWhiteSpace(layerKey) ||
+            RolloutPercent($"{layerKey}{assignment.UserKey}") >= scenario.LayerTrafficPercent)
+        {
+            return false;
+        }
+    }
+
+    var samplingScopeKey = Guid.Parse(runId).ToString("N") + ":";
+    return RolloutPercent($"{samplingScopeKey}{assignment.VariationId}:{assignment.UserKey}") < arm.IncludeRate;
+}
+
+static double RolloutPercent(string key)
+{
+    var hashedKey = MD5.HashData(Encoding.UTF8.GetBytes(key));
+    var magicNumber = BitConverter.ToInt32(hashedKey, 0);
+    return Math.Abs((double)magicNumber / int.MinValue) * 100;
+}
+
+static DateTime DefaultObservationStartUtc() =>
+    new(2026, 06, 15, 00, 00, 00, DateTimeKind.Utc);
+
+static DateTime DefaultObservationEndUtc() =>
+    new(2026, 06, 28, 23, 59, 59, DateTimeKind.Utc);
+
+static DateTime DistributedSeedTime(int index, int totalUsers, int flowOrder)
+{
+    var start = new DateTime(2026, 06, 16, 00, 00, 00, DateTimeKind.Utc)
+                + TimeSpan.FromHours(flowOrder * 2);
+    var durationTicks = (TimeSpan.FromDays(5) - TimeSpan.FromHours(8) - TimeSpan.FromMinutes(20)).Ticks;
+    var offsetTicks = durationTicks * Math.Clamp(index, 0, Math.Max(0, totalUsers - 1)) / Math.Max(1, totalUsers);
+    return start + TimeSpan.FromTicks(offsetTicks);
+}
+
+static long ToUnixMilliseconds(DateTime utc)
+{
+    var normalized = utc.Kind == DateTimeKind.Utc
+        ? utc
+        : DateTime.SpecifyKind(utc, DateTimeKind.Utc);
+    return new DateTimeOffset(normalized).ToUnixTimeMilliseconds();
+}
+
 static string StableSelectionKey(string salt, string userKey)
 {
     var input = Encoding.UTF8.GetBytes($"{salt}:{userKey}");
     return Convert.ToHexString(SHA256.HashData(input));
 }
 
-static EvalResult Evaluate(FbClient client, FlagSpec flag, FbUser user)
+static EvalResult EvaluateByTraffic(
+    FlagSpec flag,
+    string userKey,
+    IReadOnlyList<(string VariationId, double Share)> traffic)
 {
-    return flag.VariationType switch
+    var total = traffic.Sum(x => Math.Max(0, x.Share));
+    if (total <= 0)
     {
-        "boolean" => FromDetail(client.BoolVariationDetail(flag.Key, user, defaultValue: false), x => x ? "true" : "false"),
-        "number" => FromDetail(client.DoubleVariationDetail(flag.Key, user, defaultValue: 0), x => x.ToString(CultureInfo.InvariantCulture)),
-        "json" => FromDetail(client.StringVariationDetail(flag.Key, user, defaultValue: "{}"), x => x),
-        _ => FromDetail(client.StringVariationDetail(flag.Key, user, defaultValue: ""), x => x)
-    };
+        throw new ArgumentException("Traffic must include at least one positive share.", nameof(traffic));
+    }
+
+    var bucket = RolloutPercent($"{flag.Key}{userKey}") / 100.0;
+    var start = 0d;
+    for (var index = 0; index < traffic.Count; index++)
+    {
+        var share = Math.Max(0, traffic[index].Share) / total;
+        var end = index == traffic.Count - 1 ? 1d : start + share;
+        if (bucket >= start && bucket <= end)
+        {
+            return new EvalResult(traffic[index].VariationId, VariationValue(flag, traffic[index].VariationId));
+        }
+
+        start = end;
+    }
+
+    var fallback = traffic[^1].VariationId;
+    return new EvalResult(fallback, VariationValue(flag, fallback));
 }
 
-static EvalResult FromDetail<T>(EvalDetail<T> detail, Func<T, string> valueFormatter)
+static string VariationValue(FlagSpec flag, string variationId) =>
+    flag.Variations.FirstOrDefault(x => string.Equals(x.Id, variationId, StringComparison.OrdinalIgnoreCase))?.Value ?? "";
+
+static async Task<Dictionary<string, EvalResult>> EvaluateFlagsWithoutInsightAsync(
+    E2ERun run,
+    E2EOptions options,
+    FbUser user,
+    FlagSpec[] flags)
 {
-    return new EvalResult(detail.ValueId ?? "", valueFormatter(detail.Value));
+    using var http = new HttpClient { BaseAddress = new Uri(options.EventUrl.TrimEnd('/') + "/") };
+    http.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", run.EnvServerSecret);
+
+    using var response = await http.PostAsJsonAsync(
+        "api/public/featureflag/evaluate",
+        new
+        {
+            user = BuildEvaluationUserPayload(user.Key),
+            filter = new
+            {
+                keys = flags.Select(x => x.Key).ToArray(),
+                tagFilterMode = "and",
+                tags = Array.Empty<string>()
+            }
+        });
+    response.EnsureSuccessStatusCode();
+
+    var json = await response.Content.ReadFromJsonAsync<JsonArray>();
+    var results = new Dictionary<string, EvalResult>(StringComparer.OrdinalIgnoreCase);
+    foreach (var item in json ?? [])
+    {
+        var key = NodeString(item, "key");
+        var variation = item?["variation"];
+        if (!string.IsNullOrWhiteSpace(key))
+        {
+            results[key] = new EvalResult(NodeString(variation, "id"), NodeString(variation, "value"));
+        }
+    }
+
+    return results;
+}
+
+static object BuildEvaluationUserPayload(string userKey)
+{
+    var suffix = userKey.Length >= 4 ? userKey[^4..] : "0";
+    var index = int.TryParse(suffix, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed)
+        ? parsed
+        : 0;
+
+    return new
+    {
+        keyId = userKey,
+        name = userKey,
+        customizedProperties = new[]
+        {
+            new { name = "plan", value = index % 3 == 0 ? "enterprise" : "free" },
+            new { name = "country", value = index % 2 == 0 ? "US" : "FR" }
+        }
+    };
 }
 
 static string StableUserKey(int index, string prefix = "e2e-user") => $"{prefix}-{index:0000}";
@@ -2736,7 +3082,7 @@ sealed class E2ERun
     public double TreatmentErrorRate { get; set; }
     public double ControlLatencyMs { get; set; }
     public double TreatmentLatencyMs { get; set; }
-    public long PreExperimentSdkEvaluations { get; set; }
+    public long PreExperimentEvaluations { get; set; }
     public int PreExperimentNonExperimentRuleHits { get; set; }
     public long PrimaryMetricUsersObserved { get; set; }
     public int PrimaryMetricVariantRows { get; set; }
@@ -2774,16 +3120,38 @@ sealed record TrafficScenarioSpec(
     string Id,
     string Name,
     string Description,
-    double ControlTrafficShare,
-    double ControlIncludeRate,
-    double TreatmentIncludeRate,
-    double LayerTrafficPercent,
-    double ControlConversionRate,
-    double TreatmentConversionRate,
+    string FlagKey,
+    TrafficScenarioArmSpec[] Arms,
+    double? LayerTrafficPercent,
     int MinExpectedUsersPerVariant,
     bool ExpectBalancedAnalysis)
 {
-    public static TrafficScenarioSpec[] DefaultScenarios(E2EOptions options)
+    public bool HasLayer => LayerTrafficPercent.HasValue;
+
+    public string FlagSplitDescription =>
+        string.Join("/", Arms.Select(x => $"{x.Label} {x.FlagTrafficShare:P1}"));
+
+    public TrafficScenarioArmRuntime[] ResolveArms(FlagSpec flag)
+    {
+        return Arms.Select(arm =>
+        {
+            if (arm.VariationIndex < 0 || arm.VariationIndex >= flag.Variations.Length)
+            {
+                throw new InvalidOperationException(
+                    $"Traffic scenario '{Id}' references variation index {arm.VariationIndex} on flag '{flag.Key}', but the flag has {flag.Variations.Length} variations.");
+            }
+
+            return new TrafficScenarioArmRuntime(
+                arm.Role,
+                arm.Label,
+                flag.Variations[arm.VariationIndex].Id,
+                arm.FlagTrafficShare,
+                arm.IncludeRate,
+                arm.ConversionRate);
+        }).ToArray();
+    }
+
+    public static TrafficScenarioSpec[] DefaultScenarios(E2EOptions options, string dataSetId)
     {
         static int ScenarioFloor(E2EOptions options, int divisor) =>
             Math.Min(options.MinUsersPerVariant, Math.Max(1, options.Users / divisor));
@@ -2794,77 +3162,98 @@ sealed record TrafficScenarioSpec(
                 1,
                 "balanced-50-50-use-all",
                 "Balanced 50/50 use all",
-                "Baseline: flag serves control and treatment evenly, and the run includes all served users for both variants.",
-                ControlTrafficShare: 0.5,
-                ControlIncludeRate: 100,
-                TreatmentIncludeRate: 100,
-                LayerTrafficPercent: 100,
-                ControlConversionRate: 0.30,
-                TreatmentConversionRate: 0.45,
+                "No layer: flag serves control and treatment evenly, and the run includes all served users for both variants.",
+                FlagCatalog.TrafficScenarioFlagKey(dataSetId, "balanced-50-50-use-all"),
+                [
+                    new("control", "control", 0, 0.50, 100, 0.30),
+                    new("treatment", "treatment", 1, 0.50, 100, 0.45)
+                ],
+                LayerTrafficPercent: null,
                 MinExpectedUsersPerVariant: options.MinUsersPerVariant,
                 ExpectBalancedAnalysis: false),
             new(
                 2,
                 "skewed-90-10-to-10-10",
                 "Skewed 90/10 sampled to 10/10",
-                "Production flag serves mostly control; run analysis samples a control subset and all treatment users so analyzed evidence is balanced.",
-                ControlTrafficShare: 0.9,
-                ControlIncludeRate: 11.111111,
-                TreatmentIncludeRate: 100,
-                LayerTrafficPercent: 100,
-                ControlConversionRate: 0.30,
-                TreatmentConversionRate: 0.45,
+                "No layer: flag serves mostly control; run analysis samples 11.111111% of control and all treatment users so analyzed evidence is balanced.",
+                FlagCatalog.TrafficScenarioFlagKey(dataSetId, "skewed-90-10-to-10-10"),
+                [
+                    new("control", "control", 0, 0.90, 11.111111, 0.30),
+                    new("treatment", "treatment", 1, 0.10, 100, 0.45)
+                ],
+                LayerTrafficPercent: null,
                 MinExpectedUsersPerVariant: ScenarioFloor(options, 20),
                 ExpectBalancedAnalysis: true),
             new(
                 3,
-                "skewed-80-20-to-20-20",
-                "Skewed 80/20 sampled to 20/20",
-                "Production flag serves 80/20; run analysis samples 25% of control and all treatment users so analyzed evidence is approximately balanced.",
-                ControlTrafficShare: 0.8,
-                ControlIncludeRate: 25,
-                TreatmentIncludeRate: 100,
-                LayerTrafficPercent: 100,
-                ControlConversionRate: 0.30,
-                TreatmentConversionRate: 0.45,
-                MinExpectedUsersPerVariant: ScenarioFloor(options, 10),
-                ExpectBalancedAnalysis: true),
+                "layer-30-three-arm-34-33-33",
+                "Layer 30% with 34/33/33 variants",
+                "Layer eligibility limits the run to 30% of assignment units while a three-arm flag serves control, treatment1, and treatment2.",
+                FlagCatalog.TrafficScenarioFlagKey(dataSetId, "layer-30-three-arm-34-33-33"),
+                [
+                    new("control", "control", 0, 0.34, 100, 0.30),
+                    new("treatment", "treatment1", 1, 0.33, 100, 0.45),
+                    new("treatment", "treatment2", 2, 0.33, 100, 0.45)
+                ],
+                LayerTrafficPercent: 30,
+                MinExpectedUsersPerVariant: ScenarioFloor(options, 20),
+                ExpectBalancedAnalysis: false),
             new(
                 4,
-                "layer-30-50-50",
-                "Layer 30% with 50/50 variants",
-                "Layer eligibility limits the run to 30% of assignment units while actual served variation remains the source of control/treatment truth.",
-                ControlTrafficShare: 0.5,
-                ControlIncludeRate: 100,
-                TreatmentIncludeRate: 100,
+                "layer-30-skewed-80-20-to-20-20",
+                "Layer 30% skewed 80/20 sampled to 20/20",
+                "Layer eligibility limits the run to 30%; inside that slice the flag serves 80/20 and analysis samples 22.222222% of control plus all treatment users.",
+                FlagCatalog.TrafficScenarioFlagKey(dataSetId, "layer-30-skewed-80-20-to-20-20"),
+                [
+                    new("control", "control", 0, 0.80, 22.222222, 0.30),
+                    new("treatment", "treatment", 1, 0.20, 100, 0.45)
+                ],
                 LayerTrafficPercent: 30,
-                ControlConversionRate: 0.30,
-                TreatmentConversionRate: 0.45,
-                MinExpectedUsersPerVariant: ScenarioFloor(options, 15),
-                ExpectBalancedAnalysis: false)
+                MinExpectedUsersPerVariant: ScenarioFloor(options, 30),
+                ExpectBalancedAnalysis: true)
         ];
     }
 }
 
+sealed record TrafficScenarioArmSpec(
+    string Role,
+    string Label,
+    int VariationIndex,
+    double FlagTrafficShare,
+    double IncludeRate,
+    double ConversionRate);
+
+sealed record TrafficScenarioArmRuntime(
+    string Role,
+    string Label,
+    string VariationId,
+    double FlagTrafficShare,
+    double IncludeRate,
+    double ConversionRate);
+
 sealed record TrafficScenarioResult(
     string Id,
     string Name,
+    string FlagKey,
     string ExperimentId,
     string RunId,
     string MetricEvent,
-    double ControlTrafficShare,
-    double ControlIncludeRate,
-    double TreatmentIncludeRate,
-    double LayerTrafficPercent,
-    long ControlUsers,
-    long TreatmentUsers,
-    long ControlConversions,
-    long TreatmentConversions);
+    double? LayerTrafficPercent,
+    TrafficScenarioArmResult[] Arms);
 
-sealed record TrafficScenarioSeedSummary(long ControlAssignments, long TreatmentAssignments)
+sealed record TrafficScenarioArmResult(
+    string Role,
+    string Label,
+    string VariationId,
+    double FlagTrafficShare,
+    double IncludeRate,
+    long Users,
+    long Conversions,
+    long ExpectedConversions);
+
+sealed record TrafficScenarioSeedSummary(string Details)
 {
-    public override string ToString() =>
-        $"rawAssignments control={ControlAssignments}, treatment={TreatmentAssignments}";
+    public override string ToString() => Details;
 }
 
 sealed record ObservedFinalFlagState(
@@ -2979,7 +3368,7 @@ sealed record FlagSpec(
         {
             current.Add(new JsonObject
             {
-                ["id"] = Guid.NewGuid().ToString("D"),
+                ["id"] = StableIds.Guid($"{Key}:candidate-updated"),
                 ["name"] = "candidate-updated",
                 ["value"] = VariationType switch
                 {
@@ -3004,8 +3393,21 @@ sealed record FlagSpec(
     }
 }
 
+static class StableIds
+{
+    public static string Guid(string input)
+    {
+        var bytes = MD5.HashData(Encoding.UTF8.GetBytes(input));
+        bytes[6] = (byte)((bytes[6] & 0x0F) | 0x30);
+        bytes[8] = (byte)((bytes[8] & 0x3F) | 0x80);
+        return new Guid(bytes).ToString("D");
+    }
+}
+
 static class FlagCatalog
 {
+    private const string TrafficScenarioPrefix = "rd-e2e-scenario";
+
     public static FlagSpec[] Build(string dataSetId)
     {
         return
@@ -3023,36 +3425,64 @@ static class FlagCatalog
         ];
     }
 
+    public static FlagSpec[] BuildTrafficScenarioFlags(string dataSetId)
+    {
+        return
+        [
+            Bool("E2E Scenario Balanced 50/50", TrafficScenarioFlagKey(dataSetId, "balanced-50-50-use-all"), enabled: true),
+            Bool("E2E Scenario Skewed 90/10", TrafficScenarioFlagKey(dataSetId, "skewed-90-10-to-10-10"), enabled: true),
+            NamedStringFlag(
+                "E2E Scenario Layer 30 Three Arm",
+                TrafficScenarioFlagKey(dataSetId, "layer-30-three-arm-34-33-33"),
+                [
+                    ("control", "control"),
+                    ("treatment1", "treatment1"),
+                    ("treatment2", "treatment2")
+                ]),
+            Bool("E2E Scenario Layer 30 Skewed 80/20", TrafficScenarioFlagKey(dataSetId, "layer-30-skewed-80-20-to-20-20"), enabled: true)
+        ];
+    }
+
+    public static string TrafficScenarioFlagKey(string dataSetId, string scenarioId) =>
+        $"{TrafficScenarioPrefix}-{scenarioId}-{dataSetId}";
+
     private static FlagSpec Bool(string name, string key, bool enabled)
     {
-        var control = new VariationSpec(Guid.NewGuid().ToString("D"), "control", "false");
-        var treatment = new VariationSpec(Guid.NewGuid().ToString("D"), "treatment", "true");
+        var control = new VariationSpec(StableIds.Guid($"{key}:control:false"), "control", "false");
+        var treatment = new VariationSpec(StableIds.Guid($"{key}:treatment:true"), "treatment", "true");
         return new FlagSpec(name, key, "boolean", enabled, [control, treatment], treatment.Id, control.Id);
     }
 
     private static FlagSpec StringFlag(string name, string key, string[] values)
     {
         var variations = values.Select((value, index) =>
-            new VariationSpec(Guid.NewGuid().ToString("D"), index == 0 ? "control" : $"candidate-{index}", value)).ToArray();
+            new VariationSpec(StableIds.Guid($"{key}:{index}:{value}"), index == 0 ? "control" : $"candidate-{index}", value)).ToArray();
         return new FlagSpec(name, key, "string", true, variations, variations[1].Id, variations[0].Id);
+    }
+
+    private static FlagSpec NamedStringFlag(string name, string key, (string Name, string Value)[] values)
+    {
+        var variations = values.Select((value, index) =>
+            new VariationSpec(StableIds.Guid($"{key}:{index}:{value.Name}:{value.Value}"), value.Name, value.Value)).ToArray();
+        return new FlagSpec(name, key, "string", true, variations, variations[Math.Min(1, variations.Length - 1)].Id, variations[0].Id);
     }
 
     private static FlagSpec NumberFlag(string name, string key, string[] values)
     {
         var variations = values.Select((value, index) =>
-            new VariationSpec(Guid.NewGuid().ToString("D"), index == 0 ? "control" : $"candidate-{index}", value)).ToArray();
+            new VariationSpec(StableIds.Guid($"{key}:{index}:{value}"), index == 0 ? "control" : $"candidate-{index}", value)).ToArray();
         return new FlagSpec(name, key, "number", true, variations, variations[1].Id, variations[0].Id);
     }
 
     private static FlagSpec JsonFlag(string name, string key)
     {
-        var control = new VariationSpec(Guid.NewGuid().ToString("D"), "control", "{\"mode\":\"control\",\"limit\":5}");
-        var treatment = new VariationSpec(Guid.NewGuid().ToString("D"), "candidate-1", "{\"mode\":\"treatment\",\"limit\":10}");
+        var control = new VariationSpec(StableIds.Guid($"{key}:control:json"), "control", "{\"mode\":\"control\",\"limit\":5}");
+        var treatment = new VariationSpec(StableIds.Guid($"{key}:candidate-1:json"), "candidate-1", "{\"mode\":\"treatment\",\"limit\":10}");
         return new FlagSpec(name, key, "json", true, [control, treatment], treatment.Id, control.Id);
     }
 }
 
-sealed class SdkSeedSummary
+sealed class PresetInsightSeedSummary
 {
     private readonly Dictionary<string, Dictionary<string, long>> _byFlag = new(StringComparer.OrdinalIgnoreCase);
 
@@ -3084,6 +3514,12 @@ sealed class SdkSeedSummary
 
 sealed record EvalResult(string ValueId, string ValueText);
 
+sealed record SeedMetric(
+    string EventName,
+    double NumericValue,
+    TimeSpan MetricOffset,
+    long Timestamp = 0);
+
 sealed record SeededExperimentUser(
     int Index,
     string UserKey,
@@ -3091,7 +3527,7 @@ sealed record SeededExperimentUser(
     string VariationId,
     string VariationValue);
 
-sealed class SdkValidationSummary
+sealed class PreSeedEvaluationSummary
 {
     private readonly Dictionary<string, Dictionary<string, long>> _byFlag = new(StringComparer.OrdinalIgnoreCase);
 
@@ -3232,9 +3668,9 @@ sealed class TestReport
                 run.TreatmentErrorRate,
                 run.ControlLatencyMs,
                 run.TreatmentLatencyMs,
-                preExperimentSdk = new
+                preSeedEvaluation = new
                 {
-                    evaluations = run.PreExperimentSdkEvaluations,
+                    evaluations = run.PreExperimentEvaluations,
                     nonExperimentRuleHits = run.PreExperimentNonExperimentRuleHits
                 },
                 primaryMetricObserved = new
@@ -3307,7 +3743,7 @@ sealed class TestReport
         sb.AppendLine();
         sb.AppendLine("| Check | Expected | Observed |");
         sb.AppendLine("| --- | --- | --- |");
-        sb.AppendLine($"| Pre-experiment SDK evaluation | all flags evaluate for representative users, 9 non-experiment rule hits | evaluations `{run.PreExperimentSdkEvaluations}`, non-experiment rule hits `{run.PreExperimentNonExperimentRuleHits}` |");
+        sb.AppendLine($"| Pre-seed public evaluation | all flags evaluate for representative users, 9 non-experiment rule hits | evaluations `{run.PreExperimentEvaluations}`, non-experiment rule hits `{run.PreExperimentNonExperimentRuleHits}` |");
         sb.AppendLine($"| Primary metric | each variant meets configured sample floor `{_options.MinUsersPerVariant}`; treatment conversion > control conversion | total users `{run.PrimaryMetricUsersObserved}`, variants `{run.PrimaryMetricVariantRows}`, control `{run.ControlPrimaryConversionsObserved}/{run.ControlPrimaryUsersObserved}` rate `{run.ControlPrimaryRate:0.####}`, treatment `{run.TreatmentPrimaryConversionsObserved}/{run.TreatmentPrimaryUsersObserved}` rate `{run.TreatmentPrimaryRate:0.####}` |");
         sb.AppendLine($"| Error guardrail | each variant meets configured sample floor `{_options.MinUsersPerVariant}`; control and treatment error rates < `0.05` | total users `{run.ErrorMetricUsersObserved}`, variants `{run.ErrorMetricVariantRows}`, control `{run.ControlErrorConversionsObserved}/{run.ControlErrorUsersObserved}` rate `{run.ControlErrorRate:0.####}`, treatment `{run.TreatmentErrorConversionsObserved}/{run.TreatmentErrorUsersObserved}` rate `{run.TreatmentErrorRate:0.####}` |");
         sb.AppendLine($"| Latency guardrail | each variant meets configured sample floor `{_options.MinUsersPerVariant}`; treatment average latency <= control average latency | total users `{run.LatencyMetricUsersObserved}`, variants `{run.LatencyMetricVariantRows}`, control users `{run.ControlLatencyUsersObserved}` sum `{run.ControlLatencySumObserved:0.####}ms` avg `{run.ControlLatencyMs:0.####}ms`, treatment users `{run.TreatmentLatencyUsersObserved}` sum `{run.TreatmentLatencySumObserved:0.####}ms` avg `{run.TreatmentLatencyMs:0.####}ms` |");
@@ -3317,12 +3753,17 @@ sealed class TestReport
         {
             sb.AppendLine("## Traffic Assignment Scenarios");
             sb.AppendLine();
-            sb.AppendLine("| Scenario | Experiment | Run | Flag split | Sampling | Layer | Observed control | Observed treatment |");
-            sb.AppendLine("| --- | --- | --- | --- | --- | --- | ---: | ---: |");
+            sb.AppendLine("| Scenario | Flag | Experiment | Run | Layer | Arms |");
+            sb.AppendLine("| --- | --- | --- | --- | --- | --- |");
             foreach (var scenario in run.TrafficScenarioResults)
             {
+                var layer = scenario.LayerTrafficPercent.HasValue
+                    ? $"{scenario.LayerTrafficPercent.Value:0.######}%"
+                    : "none";
+                var arms = string.Join("<br>", scenario.Arms.Select(arm =>
+                    $"{Escape(arm.Label)} `{arm.Role}` split `{arm.FlagTrafficShare:P1}`, sample `{arm.IncludeRate:0.######}%`, observed `{arm.Conversions}/{arm.Users}`"));
                 sb.AppendLine(
-                    $"| {Escape(scenario.Name)} (`{scenario.Id}`) | `{scenario.ExperimentId}` | `{scenario.RunId}` | control `{scenario.ControlTrafficShare:P1}`, treatment `{1 - scenario.ControlTrafficShare:P1}` | control `{scenario.ControlIncludeRate:0.######}%`, treatment `{scenario.TreatmentIncludeRate:0.######}%` | `{scenario.LayerTrafficPercent:0.######}%` | `{scenario.ControlConversions}/{scenario.ControlUsers}` | `{scenario.TreatmentConversions}/{scenario.TreatmentUsers}` |");
+                    $"| {Escape(scenario.Name)} (`{scenario.Id}`) | `{scenario.FlagKey}` | `{scenario.ExperimentId}` | `{scenario.RunId}` | {layer} | {arms} |");
             }
 
             sb.AppendLine();

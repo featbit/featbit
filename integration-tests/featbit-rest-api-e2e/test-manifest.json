@@ -1,6 +1,6 @@
 {
   "name": "featbit-rest-api-e2e",
-  "description": "Fixed end-to-end test manifest for FeatBit REST API, FeatBit .NET SDK evaluation/tracking, and release-decision analysis.",
+  "description": "Fixed end-to-end test manifest for FeatBit REST API, public evaluation verification, preset insight ingest, and release-decision analysis.",
   "defaultEndpoints": {
     "apiUrl": "https://app-api.featbit.co",
     "eventUrl": "https://app-eval.featbit.co",
@@ -303,21 +303,15 @@
     },
     {
       "id": "4",
-      "name": "Evaluate flags and track metrics through FeatBit .NET SDK",
-      "sdkCalls": [
-        "BoolVariationDetail",
-        "StringVariationDetail",
-        "DoubleVariationDetail",
-        "Track",
-        "FlushAndWait"
+      "name": "Verify flags through public evaluation without insight side effects",
+      "endpoints": [
+        "POST /api/public/featureflag/evaluate"
       ],
-      "eventEndpoint": "POST /api/public/insight/track",
       "assertions": [
-        "SDK initializes with generated server key",
         "all 10 flags are evaluated",
         "the two segment users evaluate the experiment flag to treatment=true",
         "an enterprise synthetic user evaluates each non-experiment flag to the expected first variation",
-        "SDK evaluation events are flushed to the evaluation insight endpoint"
+        "pre-seed evaluation does not create release-decision insight events"
       ]
     },
     {
@@ -388,11 +382,11 @@
         "POST /api/v1/envs/{envId}/release-decision/experiments/{id}/runs/{runId}/analyze"
       ],
       "assertions": [
-        "balanced 50/50 use-all scenario creates an independent experiment and run",
-        "skewed 90/10 sampled-to-10/10 scenario samples control instead of using the full raw control rollout",
-        "skewed 80/20 sampled-to-20/20 scenario produces roughly balanced analyzed evidence",
-        "layer 30% plus 50/50 scenario analyzes only layer-eligible assignments",
-        "each scenario uses a unique metric event and observation window",
+        "no-layer 50/50 use-all scenario creates an independent experiment and run without layer fields",
+        "no-layer 90/10 sampled-to-10/10 scenario seeds the full raw rollout while analysis samples control",
+        "layer 30% plus 34/33/33 scenario analyzes only layer-eligible assignments across three arms",
+        "layer 30% plus 80/20 sampled-to-20/20 scenario seeds the full raw rollout while analysis samples 22.222222% of control and all treatment inside the layer",
+        "each scenario uses a dedicated feature flag plus a unique metric event and preset observation window",
         "scenario conversion counts match deterministic Round(users * configuredRate) targets",
         "scenario analyze output contains inputData and analysisResult"
       ]
