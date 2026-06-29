@@ -1,5 +1,6 @@
-using Domain.Shared;
+using Api.Authentication;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Api.Public;
 
@@ -11,10 +12,8 @@ public class PublicApiControllerBase : ControllerBase
     {
         get
         {
-            string? secretString = Request.Headers.Authorization;
-            return Secret.TryParse(secretString, out var envId) ? envId : Guid.Empty;
+            var value = User.FindFirstValue(FeatBitClaims.EnvId);
+            return Guid.TryParse(value, out var envId) ? envId : Guid.Empty;
         }
     }
-
-    protected bool Authenticated => EnvId != Guid.Empty;
 }
