@@ -34,7 +34,7 @@ public sealed class RequestValidator(
 
             // Unexpected exception that escaped inner catches — treat as permanent rejection
             // (store/relay unavailability is already caught and returned as Unavailable by inner handlers)
-            return ValidationResult.Failed($"Malformed request: {ex.Message}");
+            return ValidationResult.Invalid($"Malformed request: {ex.Message}");
         }
     }
 
@@ -48,18 +48,18 @@ public sealed class RequestValidator(
         // connection type
         if (!options.SupportedTypes.Contains(type))
         {
-            return ValidationResult.Failed($"Invalid type: {type}");
+            return ValidationResult.Invalid($"Invalid type: {type}");
         }
 
         // connection version
         if (!options.SupportedVersions.Contains(version))
         {
-            return ValidationResult.Failed($"Invalid version: {version}");
+            return ValidationResult.Invalid($"Invalid version: {version}");
         }
 
         if (string.IsNullOrWhiteSpace(tokenString))
         {
-            return ValidationResult.Failed("Missing token");
+            return ValidationResult.Invalid("Missing token");
         }
 
         return type == ConnectionType.RelayProxy
@@ -72,8 +72,8 @@ public sealed class RequestValidator(
             {
                 var serverSecrets = await rpService.GetServerSecretsAsync(tokenString);
                 return serverSecrets.Length == 0
-                    ? ValidationResult.Failed($"Invalid relay proxy token: {tokenString}")
-                    : ValidationResult.Ok(serverSecrets);
+                    ? ValidationResult.Invalid($"Invalid relay proxy token: {tokenString}")
+                    : ValidationResult.Valid(serverSecrets);
             }
             catch (Exception ex)
             {
@@ -95,7 +95,7 @@ public sealed class RequestValidator(
 
                 if (!token.IsValid)
                 {
-                    return ValidationResult.Failed($"Invalid token: {tokenString}");
+                    return ValidationResult.Invalid($"Invalid token: {tokenString}");
                 }
 
                 // v1: structural-only validation of the parsed secret string
@@ -104,18 +104,18 @@ public sealed class RequestValidator(
             catch (Exception ex)
             {
                 logger.LogWarning("Token parsing failed for '{Token}': {Error}", tokenString, ex.Message);
-                return ValidationResult.Failed($"Invalid token: {tokenString}");
+                return ValidationResult.Invalid($"Invalid token: {tokenString}");
             }
 
             if (structuralValidation.Status == TokenValidationStatus.Invalid)
             {
-                return ValidationResult.Failed($"Invalid token: {structuralValidation.Reason}");
+                return ValidationResult.Invalid($"Invalid token: {structuralValidation.Reason}");
             }
 
             var current = systemClock.UtcNow.ToUnixTimeMilliseconds();
             if (Math.Abs(current - token.Timestamp) > options.TokenExpirySeconds * 1000)
             {
-                return ValidationResult.Failed($"Token is expired: {tokenString}");
+                return ValidationResult.Invalid($"Token is expired: {tokenString}");
             }
 
             // Store lookup with fallback handling (wrap in try/catch)
@@ -124,15 +124,15 @@ public sealed class RequestValidator(
                 var secret = await store.GetSecretAsync(token.SecretString);
                 if (secret is null)
                 {
-                    return ValidationResult.Failed($"Secret is not found: {token.SecretString}");
+                    return ValidationResult.Invalid($"Secret is not found: {token.SecretString}");
                 }
 
                 if (secret.Type != type)
                 {
-                    return ValidationResult.Failed($"Inconsistent secret used: {secret.Type}. Request type: {type}");
+                    return ValidationResult.Invalid($"Inconsistent secret used: {secret.Type}. Request type: {type}");
                 }
 
-                return ValidationResult.Ok([secret]);
+                return ValidationResult.Valid([secret]);
             }
             catch (Exception ex)
             {

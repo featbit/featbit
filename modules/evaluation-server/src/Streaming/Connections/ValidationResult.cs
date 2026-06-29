@@ -16,7 +16,7 @@ public sealed class ValidationResult
 
     public Secret[] Secrets { get; set; } = [];
 
-    public static ValidationResult Ok(Secret[] secrets)
+    public static ValidationResult Valid(Secret[] secrets)
     {
         return new ValidationResult
         {
@@ -26,7 +26,7 @@ public sealed class ValidationResult
         };
     }
 
-    public static ValidationResult Failed(string reason)
+    public static ValidationResult Invalid(string reason)
     {
         return new ValidationResult
         {

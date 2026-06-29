@@ -125,7 +125,7 @@ public class RequestValidatorTests
     }
 
     [Fact]
-    public async Task ValidationErrorThrowsAndLogged()
+    public async Task LookupSecretThrows()
     {
         var errorStoreMock = new Mock<IStore>();
         errorStoreMock.Setup(x => x.GetSecretAsync(It.IsAny<string>()))
@@ -137,12 +137,11 @@ public class RequestValidatorTests
         var validationResult = await validator.ValidateAsync(context);
 
         Assert.Equal(ValidationResultStatus.Unavailable, validationResult.Status);
-        Assert.Contains("Secret lookup unavailable", validationResult.Reason);
-        Assert.Contains("Test exception", validationResult.Reason);
+        Assert.Equal("Secret lookup unavailable: Test exception", validationResult.Reason);
     }
 
     [Fact]
-    public async Task TokenParsingExceptionReturnsFailed_NotUnavailable()
+    public async Task ParseTokenThrows()
     {
         // A throwing ITokenValidator simulates a parsing-stage failure.
         // It must produce Failed (permanent rejection / WS 4003), never Unavailable (transient / WS 1011).
