@@ -8,7 +8,7 @@ describe("auth persistence", () => {
     vi.restoreAllMocks();
 
     vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      new Response(JSON.stringify({ success: true, data: { email: "user@example.com" } }), {
+      new Response(JSON.stringify({ success: true, data: { id: "user-1", email: "user@example.com" } }), {
         status: 200,
         headers: { "Content-Type": "application/json" }
       })
@@ -49,5 +49,29 @@ describe("auth persistence", () => {
     expect(getIdentityToken()).toBe("auth-token");
     expect(getRememberedEmail()).toBe("user@example.com");
     expect(navigate).toHaveBeenCalledWith("/en/app");
+  });
+
+  it("keeps previous workspace, organization, and project selections after login", async () => {
+    const navigate = vi.fn();
+
+    localStorage.setItem("current-workspace", JSON.stringify({ id: "old-ws" }));
+    localStorage.setItem("current-organization", JSON.stringify({ id: "old-org" }));
+    localStorage.setItem("current-project", JSON.stringify({ id: "old-project" }));
+    localStorage.setItem("current-workspace_user-1", JSON.stringify({ id: "old-scoped-ws" }));
+    localStorage.setItem("current-organization_user-1", JSON.stringify({ id: "old-scoped-org" }));
+    localStorage.setItem("current-project_user-1", JSON.stringify({ id: "old-scoped-project" }));
+
+    await completeLogin(
+      { success: true, data: { token: "auth-token" } },
+      navigate,
+      "/en"
+    );
+
+    expect(localStorage.getItem("current-workspace")).toBe(JSON.stringify({ id: "old-ws" }));
+    expect(localStorage.getItem("current-organization")).toBe(JSON.stringify({ id: "old-org" }));
+    expect(localStorage.getItem("current-project")).toBe(JSON.stringify({ id: "old-project" }));
+    expect(localStorage.getItem("current-workspace_user-1")).toBe(JSON.stringify({ id: "old-scoped-ws" }));
+    expect(localStorage.getItem("current-organization_user-1")).toBe(JSON.stringify({ id: "old-scoped-org" }));
+    expect(localStorage.getItem("current-project_user-1")).toBe(JSON.stringify({ id: "old-scoped-project" }));
   });
 });

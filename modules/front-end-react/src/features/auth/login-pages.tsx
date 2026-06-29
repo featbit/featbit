@@ -40,7 +40,7 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
           ? await loginBySsoCode(callback.code, callback.state)
           : await loginBySocialCode(callback.code, callback.state);
 
-      await completeLogin(response, navigate, `/${lang}/app`);
+      await completeLogin(response, navigate, `/${lang}`);
     }
   });
 

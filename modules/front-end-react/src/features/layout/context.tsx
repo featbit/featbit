@@ -69,6 +69,7 @@ export type Organization = {
   id: string;
   name: string;
   key: string;
+  initialized?: boolean;
 };
 
 type ApiEnvelope<T> = {
@@ -157,8 +158,34 @@ export function getCurrentProjectEnv() {
   return readStorageObject<ProjectEnv>(scopedStorageKey("current-project")) ?? fallbackProjectEnv;
 }
 
+export function getStoredWorkspace() {
+  return readStorageObject<Workspace>(scopedStorageKey("current-workspace"));
+}
+
+export function getStoredOrganization() {
+  return readStorageObject<Organization>(scopedStorageKey("current-organization"));
+}
+
+export function getStoredProjectEnv() {
+  return readStorageObject<ProjectEnv>(scopedStorageKey("current-project"));
+}
+
 export function saveCurrentProjectEnv(projectEnv: ProjectEnv) {
   localStorage.setItem(scopedStorageKey("current-project"), JSON.stringify(projectEnv));
+}
+
+export function clearCurrentProjectEnv() {
+  localStorage.removeItem(scopedStorageKey("current-project"));
+}
+
+export function clearCurrentOrganization() {
+  localStorage.removeItem(scopedStorageKey("current-organization"));
+}
+
+export function clearCurrentContext() {
+  localStorage.removeItem(scopedStorageKey("current-workspace"));
+  clearCurrentOrganization();
+  clearCurrentProjectEnv();
 }
 
 function saveCurrentWorkspace(workspace: Workspace) {

@@ -3,21 +3,14 @@ import { Outlet, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import {
-  chooseOrganization,
   chooseProjectEnv,
-  chooseWorkspace,
   ContextBar,
   fallbackProjects,
-  fetchOrganizations,
   fetchProjects,
-  fetchWorkspaces,
   getCurrentOrganization,
   getCurrentProjectEnv,
   getCurrentWorkspace,
-  joinCurrentOrganizationIfSsoFirstLogin,
   normalizeProjects,
-  persistCurrentOrganization,
-  persistCurrentWorkspace,
   PlanBadge,
   resolveLang,
   saveCurrentProjectEnv,
@@ -63,33 +56,13 @@ export function Layout() {
 
     async function loadContext() {
       try {
-        const loadedWorkspaces = await fetchWorkspaces();
-        if (cancelled) {
-          return;
-        }
-
-        if (loadedWorkspaces.length > 0) {
-          const nextWorkspace = chooseWorkspace(loadedWorkspaces);
-          persistCurrentWorkspace(nextWorkspace);
-          setWorkspace(nextWorkspace);
-        }
-
-        const loadedOrganizations = await fetchOrganizations();
-        if (cancelled) {
-          return;
-        }
-
-        if (loadedOrganizations.length > 0) {
-          const nextOrganization = chooseOrganization(loadedOrganizations);
-          persistCurrentOrganization(nextOrganization);
-          setOrganization(nextOrganization);
-          await joinCurrentOrganizationIfSsoFirstLogin();
-        }
-
         const loadedProjects = await fetchProjects();
         if (cancelled) {
           return;
         }
+
+        setWorkspace(getCurrentWorkspace());
+        setOrganization(getCurrentOrganization());
 
         if (loadedProjects.length > 0) {
           const normalizedProjects = normalizeProjects(loadedProjects);

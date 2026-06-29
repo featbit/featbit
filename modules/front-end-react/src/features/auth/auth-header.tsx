@@ -37,7 +37,8 @@ function ThemeToggle() {
 
 function LanguageSwitcher({ lang }: { lang: Lang }) {
   const nextPath = (nextLang: Lang) => {
-    const suffix = window.location.pathname.endsWith("/sso") ? "/login/sso" : "/login";
+    const [, currentLang, ...rest] = window.location.pathname.split("/");
+    const suffix = currentLang === "en" || currentLang === "zh" ? `/${rest.join("/")}` : "/login";
     return `/${nextLang}${suffix}`;
   };
 

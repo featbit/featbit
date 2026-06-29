@@ -106,6 +106,29 @@ i18n.use(initReactI18next).init({
           },
           placeholder: "Content will be added in the next migration steps."
         },
+        selectWorkspace: {
+          workspace: {
+            title: "Select a workspace",
+            subtitle: "Workspaces for {{email}}",
+            search: "Search workspaces",
+            empty: "No workspaces match your search."
+          },
+          organization: {
+            title: "Select an organization",
+            subtitle: "Organizations for {{email}}",
+            search: "Search organizations",
+            empty: "No organizations match your search.",
+            noneTitle: "No organizations found",
+            noneDescription: "You don't have any organization yet. Please contact your admin to add you to an organization."
+          },
+          backToWorkspaces: "Back to workspaces",
+          signInWithAnotherEmail: "Sign in with another email",
+          errors: {
+            loadWorkspaces: "Failed to load workspaces. Please try again.",
+            loadOrganizations: "Failed to load organizations. Please try again.",
+            joinOrganization: "Error happened, please login again."
+          }
+        },
         workspace: {
           title: "Workspace",
           operationSucceeded: "Operation succeeded",
@@ -257,6 +280,29 @@ i18n.use(initReactI18next).init({
             signOut: "退出登录"
           },
           placeholder: "内容将在后续迁移步骤中添加。"
+        },
+        selectWorkspace: {
+          workspace: {
+            title: "选择工作区",
+            subtitle: "{{email}} 的工作区",
+            search: "搜索工作区",
+            empty: "没有匹配的工作区。"
+          },
+          organization: {
+            title: "选择组织机构",
+            subtitle: "{{email}} 的组织机构",
+            search: "搜索组织机构",
+            empty: "没有匹配的组织机构。",
+            noneTitle: "未找到组织机构",
+            noneDescription: "你还没有任何组织机构。请联系管理员将你加入组织机构。"
+          },
+          backToWorkspaces: "返回工作区",
+          signInWithAnotherEmail: "使用其他邮箱登录",
+          errors: {
+            loadWorkspaces: "加载工作区失败，请重试。",
+            loadOrganizations: "加载组织机构失败，请重试。",
+            joinOrganization: "发生错误，请重新登录。"
+          }
         },
         workspace: {
           title: "工作区",

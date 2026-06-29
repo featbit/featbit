@@ -1,8 +1,11 @@
 ﻿import type { ReactNode } from "react";
 import { Navigate, Route, Routes, useParams } from "react-router-dom";
+import { AuthGuard } from "@/features/auth/auth-guard";
+import { AuthenticatedEntry } from "@/features/auth/authenticated-entry";
 import { AuthPage } from "@/features/auth/login-pages";
 import { getIdentityToken } from "@/features/auth/auth-api";
 import { Layout, LayoutPlaceholder } from "@/features/layout/layout";
+import { SelectWorkspacePage } from "@/features/workspace-selection/select-workspace-page";
 import { WorkspacePage } from "@/features/workspace/workspace-page";
 
 type SupportedLanguage = "en" | "zh";
@@ -49,10 +52,30 @@ export function AppRoutes() {
       <Route path="/:lang/login" element={<AuthRoute mode="login" />} />
       <Route path="/:lang/login/sso" element={<AuthRoute mode="sso" />} />
       <Route
+        path="/:lang/select-workspace"
+        element={
+          <AuthGuard>
+            <SelectWorkspacePage />
+          </AuthGuard>
+        }
+      />
+      <Route
+        path="/:lang/onboarding"
+        element={
+          <AuthGuard>
+            <LayoutPlaceholder />
+          </AuthGuard>
+        }
+      />
+      <Route
         path="/:lang/*"
         element={
           <ProtectedRoute>
-            <Layout />
+            <AuthGuard>
+              <AuthenticatedEntry>
+                <Layout />
+              </AuthenticatedEntry>
+            </AuthGuard>
           </ProtectedRoute>
         }
       >
