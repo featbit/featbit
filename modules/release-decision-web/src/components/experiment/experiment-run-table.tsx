@@ -297,12 +297,14 @@ function MethodChoiceCards({
 }
 
 function DecisionCallout({ run }: { run: ExperimentRun }) {
-  if (!run.decisionSummary) {
+  const decision = run.decision?.trim() ?? "";
+  const summary = run.decisionSummary?.trim();
+
+  if (!decision && !summary) {
     return null;
   }
 
-  const decision = run.decision ?? "";
-  const detail = DECISION_DETAILS[decision];
+  const detail = decision ? DECISION_DETAILS[decision] : undefined;
   const bg = DECISION_BG[decision] ?? "bg-muted/30 border-border";
 
   return (
@@ -326,14 +328,16 @@ function DecisionCallout({ run }: { run: ExperimentRun }) {
           </div>
         </div>
       )}
-      <div className={detail ? "border-t border-current/10 pt-2" : undefined}>
-        <h5 className="rd-heading-field">
-          Evidence Summary
-        </h5>
-        <p className="text-sm font-medium leading-relaxed text-foreground">
-          {run.decisionSummary}
-        </p>
-      </div>
+      {summary && (
+        <div className={detail ? "border-t border-current/10 pt-2" : undefined}>
+          <h5 className="rd-heading-field">
+            Evidence Summary
+          </h5>
+          <p className="text-sm font-medium leading-relaxed text-foreground">
+            {summary}
+          </p>
+        </div>
+      )}
     </div>
   );
 }
@@ -971,6 +975,7 @@ function MeasuringRunWorkspace({
   const containerRef = useRef<HTMLDivElement>(null);
   const [leftPercent, setLeftPercent] = useState(61.54);
   const hasDecision = Boolean(exp.decision);
+  const decisionReason = sanitizeDecisionReason(exp.decisionReason);
 
   function startResize(event: React.PointerEvent<HTMLDivElement>) {
     event.preventDefault();
@@ -1018,6 +1023,18 @@ function MeasuringRunWorkspace({
               <Bot className="size-3" />
               Agent Decision Prompt
             </Button>
+          </div>
+        )}
+
+        <DecisionCallout run={exp} />
+
+        {decisionReason && (
+          <div>
+            <SectionLabel
+              icon={<Target className="size-3" />}
+              label="Evidence Rationale"
+            />
+            <CollapsibleRationale>{decisionReason}</CollapsibleRationale>
           </div>
         )}
 
