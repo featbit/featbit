@@ -37,31 +37,34 @@ public class StreamingMiddleware(
 
         // Validate request PRE-accept (before accepting WebSocket)
         var validationResult = await requestValidator.ValidateAsync(httpContext);
-
         if (validationResult.Status == ValidationResultStatus.Invalid)
         {
+            logger.RequestRejected(httpContext.Request.QueryString.Value, validationResult.Reason);
+
             // Protocol requirement: accept first, then close with 4003 so SDKs stop reconnecting.
             using var invalidWebSocket = await httpContext.WebSockets.AcceptWebSocketAsync();
-            logger.RequestRejected(httpContext.Request.QueryString.Value, validationResult.Reason);
             await invalidWebSocket.CloseOutputAsync(
                 (WebSocketCloseStatus)4003,
                 "invalid request, close by server",
                 CancellationToken.None
             );
+
             return;
         }
 
         if (validationResult.Status == ValidationResultStatus.Unavailable)
         {
+            logger.RequestValidationUnavailable(httpContext.Request.QueryString.Value, validationResult.Reason);
+            
             // Transient server error (e.g. store unavailable). Protocol requirement: accept first, then
             // close with a non-4003 status so SDKs treat it as transient and reconnect.
             using var unavailableWebSocket = await httpContext.WebSockets.AcceptWebSocketAsync();
-            logger.LogWarning("Streaming validation unavailable: {Reason}", validationResult.Reason);
             await unavailableWebSocket.CloseOutputAsync(
                 WebSocketCloseStatus.InternalServerError,
                 "service unavailable, close by server",
                 CancellationToken.None
             );
+
             return;
         }
 

@@ -40,12 +40,11 @@ public static class ServicesRegister
         services.AddAuthentication(FeatBitAuthScheme.Name)
             .AddScheme<AuthenticationSchemeOptions, FeatBitAuthHandler>(FeatBitAuthScheme.Name, _ => { });
 
-        services.AddAuthorization(options =>
-        {
-            options.FallbackPolicy = new AuthorizationPolicyBuilder()
-                .RequireAuthenticatedUser()
-                .Build();
-        });
+        var requireAuthPolicy = new AuthorizationPolicyBuilder()
+            .RequireAuthenticatedUser()
+            .Build();
+        services.AddAuthorizationBuilder()
+            .SetFallbackPolicy(requireAuthPolicy);
 
         // token validator (v1 structural validation only; store lookup added in PR 2)
         services.AddSingleton<ITokenValidator, TokenValidator>();

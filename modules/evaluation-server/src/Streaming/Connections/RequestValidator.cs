@@ -72,7 +72,8 @@ public sealed class RequestValidator(
             }
             catch (Exception ex)
             {
-                logger.LogError("RelayProxy secret lookup failed: {Error}", ex.Message);
+                logger.ErrorLookupRelayProxyToken(tokenString, ex);
+
                 // Store unavailable → return Unavailable for transient retry
                 return ValidationResult.Unavailable($"RelayProxy validation unavailable: {ex.Message}");
             }
@@ -130,7 +131,8 @@ public sealed class RequestValidator(
             }
             catch (Exception ex)
             {
-                logger.LogError("Secret store lookup failed: {Error}", ex.Message);
+                logger.ErrorLookupSecretToken(token.SecretString, ex);
+
                 // Store unavailable → return Unavailable for transient retry
                 return ValidationResult.Unavailable($"Secret lookup unavailable: {ex.Message}");
             }
