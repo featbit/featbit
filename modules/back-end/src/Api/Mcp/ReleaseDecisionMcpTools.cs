@@ -121,13 +121,13 @@ public class ReleaseDecisionMcpTools(
     }
 
     [McpServerTool(Name = "featbit_release_decision_update_run_traffic")]
-    [Description("Configure analysis traffic for a release-decision run. Feature flag evaluation decides the served variation; layer only gates eligibility; analysis sampling happens inside each actual served variation. Choose includeRate from the actual exposure distribution in the run window: includeRate = desired analyzed users for that variation / observed served users for that variation * 100, capped at 100. If the run is already collecting, analyzing, or decided, set confirmedByUser true only after the user explicitly approves changing evidence scope.")]
+    [Description("Configure experiment traffic assignment for a release-decision run. Feature flag evaluation decides the served variation; layer only gates eligibility; analysis sampling happens inside each actual served variation. Supports layer id/key, assignment unit, bucket slice start/end, traffic offset, allocation plan, audience filters, and analysis sampling plan. Choose includeRate from the actual exposure distribution in the run window: includeRate = desired analyzed users for that variation / observed served users for that variation * 100, capped at 100. If the run is already collecting, analyzing, or decided, set confirmedByUser true only after the user explicitly approves changing evidence scope.")]
     public async Task<ReleaseDecisionExperimentDetailVm> UpdateRunTraffic(
         [Description("Release-decision experiment id.")]
         Guid experimentId,
         [Description("Release-decision experiment run id.")]
         Guid runId,
-        [Description("Run traffic/sampling update. Requires controlVariant, treatmentVariant, assignmentUnitSelector, layerTrafficPercent, and analysisSamplingPlan.")]
+        [Description("Run traffic/sampling update. Requires controlVariant, treatmentVariant, assignmentUnitSelector, layerTrafficPercent, and analysisSamplingPlan. Use sliceStart/sliceEnd for explicit layer bucket ranges such as 30-60.")]
         ReleaseDecisionMcpRunTrafficRequest request)
     {
         var envId = await ResolveAuthorizedEnvIdAsync(experimentId);
@@ -147,13 +147,18 @@ public class ReleaseDecisionMcpTools(
                 Method = request.Method,
                 ControlVariant = request.ControlVariant,
                 TreatmentVariant = request.TreatmentVariant,
-                LayerId = request.LayerKey,
-                LayerKey = request.LayerKey,
+                TrafficPercent = request.TrafficPercent,
+                TrafficOffset = request.TrafficOffset,
+                LayerId = request.LayerId ?? request.LayerKey,
+                LayerKey = request.LayerKey ?? request.LayerId,
+                AllocationKeySelector = request.AllocationKeySelector,
+                SliceStart = request.SliceStart,
+                SliceEnd = request.SliceEnd,
                 AssignmentUnitSelector = request.AssignmentUnitSelector,
                 LayerTrafficPercent = request.LayerTrafficPercent,
+                AllocationPlan = request.AllocationPlan,
                 AnalysisSamplingPlan = request.AnalysisSamplingPlan,
                 AudienceFilters = request.AudienceFilters,
-                AllocationPlan = null
             }
         });
     }
@@ -219,6 +224,31 @@ public class ReleaseDecisionMcpTools(
         if (request.LayerTrafficPercent is < 0 or > 100)
         {
             throw new ArgumentException("layerTrafficPercent must be between 0 and 100.");
+        }
+
+        if (request.TrafficPercent is < 1 or > 100)
+        {
+            throw new ArgumentException("trafficPercent must be between 1 and 100.");
+        }
+
+        if (request.TrafficOffset is < 0 or > 99)
+        {
+            throw new ArgumentException("trafficOffset must be between 0 and 99.");
+        }
+
+        if (request.SliceStart is < 0 or > 100)
+        {
+            throw new ArgumentException("sliceStart must be between 0 and 100.");
+        }
+
+        if (request.SliceEnd is < 0 or > 100)
+        {
+            throw new ArgumentException("sliceEnd must be between 0 and 100.");
+        }
+
+        if (request.SliceStart.HasValue && request.SliceEnd.HasValue && request.SliceEnd <= request.SliceStart)
+        {
+            throw new ArgumentException("sliceEnd must be greater than sliceStart.");
         }
 
         var planEntries = ParseSamplingPlan(request.AnalysisSamplingPlan);
@@ -310,12 +340,12 @@ public class ReleaseDecisionMcpTools(
             .ToArray();
     }
 
-    private static string Normalize(string value)
+    private static string? Normalize(string? value)
     {
         return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
     }
 
-    private static string GetJsonString(JsonElement element, string propertyName)
+    private static string? GetJsonString(JsonElement element, string propertyName)
     {
         return element.TryGetProperty(propertyName, out var property) && property.ValueKind == JsonValueKind.String
             ? property.GetString()
@@ -356,28 +386,49 @@ public class ReleaseDecisionMcpTools(
 public class ReleaseDecisionMcpRunTrafficRequest
 {
     [Description("Run method. Use bayesian_ab for fixed control/treatment analysis or bandit for adaptive arms.")]
-    public string Method { get; set; }
+    public string Method { get; set; } = string.Empty;
 
     [Description("Control or baseline variation value exactly as served by FeatBit exposure events.")]
-    public string ControlVariant { get; set; }
+    public string ControlVariant { get; set; } = string.Empty;
 
     [Description("One or more treatment variation values exactly as served by FeatBit exposure events. Separate multiple values with commas.")]
-    public string TreatmentVariant { get; set; }
+    public string TreatmentVariant { get; set; } = string.Empty;
 
     [Description("Optional mutual-exclusion layer key. The layer gates eligibility only and does not decide the served variation.")]
-    public string LayerKey { get; set; }
+    public string LayerKey { get; set; } = string.Empty;
+
+    [Description("Optional mutual-exclusion layer id. Prefer layerKey when the user is selecting by registered layer key.")]
+    public string LayerId { get; set; } = string.Empty;
+
+    [Description("Legacy analysis traffic percentage, from 1 to 100. Prefer sliceStart/sliceEnd plus layerTrafficPercent for layer bucket assignments.")]
+    public double? TrafficPercent { get; set; }
+
+    [Description("Legacy analysis traffic offset bucket, from 0 to 99. Prefer sliceStart/sliceEnd for explicit bucket assignments.")]
+    public int? TrafficOffset { get; set; }
+
+    [Description("Optional allocation key selector retained for backward compatibility. Prefer assignmentUnitSelector.")]
+    public string AllocationKeySelector { get; set; } = string.Empty;
+
+    [Description("Inclusive bucket start for the layer eligibility slice, from 0 to 100.")]
+    public double? SliceStart { get; set; }
+
+    [Description("Exclusive bucket end for the layer eligibility slice, from 0 to 100 and greater than sliceStart.")]
+    public double? SliceEnd { get; set; }
 
     [Description("Assignment unit selector. Use user.keyId for event user_key, or a custom event property name that exists on exposure and metric events.")]
-    public string AssignmentUnitSelector { get; set; }
+    public string AssignmentUnitSelector { get; set; } = string.Empty;
 
     [Description("Percentage of assignment units eligible for this run inside the layer, from 0 to 100.")]
     public double? LayerTrafficPercent { get; set; }
 
     [Description("JSON array of { variation, role, includeRate, label? }. Sampling is applied inside each actual served variation.")]
-    public string AnalysisSamplingPlan { get; set; }
+    public string AnalysisSamplingPlan { get; set; } = string.Empty;
+
+    [Description("Optional legacy JSON allocation plan. Prefer analysisSamplingPlan unless intentionally reproducing allocation-plan behavior.")]
+    public string AllocationPlan { get; set; } = string.Empty;
 
     [Description("Optional audience filters stored on the run for operator visibility.")]
-    public string AudienceFilters { get; set; }
+    public string AudienceFilters { get; set; } = string.Empty;
 
     [Description("Set true only after the user explicitly approves changing traffic/sampling for a collecting, analyzing, or decided run.")]
     public bool? ConfirmedByUser { get; set; }
