@@ -22,6 +22,8 @@ This design document covers only the Workspace page content area inside the auth
 - Usage tab light theme concept: [workspace-usage-light.png](workspace-usage-light.png)
 - Usage tab dark theme concept: [workspace-usage-dark.png](workspace-usage-dark.png)
 - Usage tab detailed design: [workspace-usage-page-design.md](workspace-usage-page-design.md)
+- Billing tab light theme concept: [workspace-billing-light.png](workspace-billing-light.png)
+- Billing tab detailed design: [workspace-billing-page-design.md](workspace-billing-page-design.md)
 
 ## Angular Functional Reference
 
@@ -203,21 +205,9 @@ Per environment table:
 
 ## Billing Tab
 
-Billing appears only in SaaS mode.
+Follow the detailed design contract in [workspace-billing-page-design.md](workspace-billing-page-design.md). The saved visual target is [workspace-billing-light.png](workspace-billing-light.png).
 
-Expected areas:
-
-- Subscription overview with current plan, renewal/cancellation status, and next billing date.
-- Pricing/change-plan entry point.
-- Billing information.
-- Invoice list with follow-up actions.
-- Checkout return state when `payment_status` is present in the query string.
-
-Design constraints:
-
-- Keep billing action hierarchy clear: primary for upgrade/change plan, secondary for billing information or invoice actions.
-- Use alerts for payment verification, success, cancellation, or failure states.
-- Do not duplicate the layout subscription/license badge inside the tab; summarize details only.
+Billing appears only in SaaS mode. The visual target is a full-page mockup for context and must not be used to change the authenticated layout, sidebar, top context bar, Workspace page header, subscription/license badge, account menu, or Workspace tabs.
 
 ## Global Users Tab
 
