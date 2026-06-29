@@ -3,6 +3,7 @@ import { Navigate, Route, Routes, useParams } from "react-router-dom";
 import { AuthPage } from "@/features/auth/login-pages";
 import { getIdentityToken } from "@/features/auth/auth-api";
 import { Layout, LayoutPlaceholder } from "@/features/layout/layout";
+import { WorkspacePage } from "@/features/workspace/workspace-page";
 
 type SupportedLanguage = "en" | "zh";
 
@@ -56,6 +57,11 @@ export function AppRoutes() {
         }
       >
         <Route index element={<LayoutPlaceholder />} />
+        <Route path="workspace" element={<WorkspacePage />} />
+        <Route path="workspace/license" element={<WorkspacePage activeTab="license" />} />
+        <Route path="workspace/usage" element={<WorkspacePage activeTab="usage" />} />
+        <Route path="workspace/billing" element={<WorkspacePage activeTab="billing" />} />
+        <Route path="workspace/global-users" element={<WorkspacePage activeTab="global-users" />} />
         <Route path="*" element={<LayoutPlaceholder />} />
       </Route>
       <Route path="*" element={<LanguageRedirect />} />

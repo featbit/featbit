@@ -14,6 +14,7 @@ import {
   getCurrentOrganization,
   getCurrentProjectEnv,
   getCurrentWorkspace,
+  joinCurrentOrganizationIfSsoFirstLogin,
   normalizeProjects,
   persistCurrentOrganization,
   persistCurrentWorkspace,
@@ -82,6 +83,7 @@ export function Layout() {
           const nextOrganization = chooseOrganization(loadedOrganizations);
           persistCurrentOrganization(nextOrganization);
           setOrganization(nextOrganization);
+          await joinCurrentOrganizationIfSsoFirstLogin();
         }
 
         const loadedProjects = await fetchProjects();

@@ -90,6 +90,7 @@ type PlanBadgeState = {
 };
 
 const IDENTITY_TOKEN_STORAGE_KEY = "token";
+const IS_SSO_FIRST_LOGIN_STORAGE_KEY = "is-sso-first-login";
 const LICENSE_EXPIRING_DAYS_THRESHOLD = 30;
 const HOSTING_MODE_SAAS = "saas";
 const PLAN_FREE = "free";
@@ -321,15 +322,21 @@ async function getRefreshedToken() {
   return refreshTokenPromise;
 }
 
-async function fetchApi<T>(path: string, token = getIdentityToken(), retryOnUnauthorized = true): Promise<T> {
+async function fetchApi<T>(
+  path: string,
+  token = getIdentityToken(),
+  retryOnUnauthorized = true,
+  init?: RequestInit
+): Promise<T> {
   const response = await fetch(`${apiOrigin()}${path}`, {
     credentials: "include",
+    ...init,
     headers: authHeaders(token)
   });
 
   if (response.status === 401 && retryOnUnauthorized) {
     const refreshedToken = await getRefreshedToken();
-    return fetchApi<T>(path, refreshedToken, false);
+    return fetchApi<T>(path, refreshedToken, false, init);
   }
 
   if (!response.ok) {
@@ -345,12 +352,24 @@ export async function fetchWorkspaces() {
 }
 
 export async function fetchOrganizations() {
-  return fetchApi<Organization[]>("/api/v1/organizations?isSsoFirstLogin=false");
+  const isSsoFirstLogin = localStorage.getItem(IS_SSO_FIRST_LOGIN_STORAGE_KEY) === "true";
+  return fetchApi<Organization[]>(`/api/v1/organizations?isSsoFirstLogin=${isSsoFirstLogin}`);
 }
 
 export async function fetchProjects() {
   const projects = await fetchApi<Project[]>("/api/v1/projects");
   return projects.sort((a, b) => a.name.localeCompare(b.name));
+}
+
+export async function joinCurrentOrganizationIfSsoFirstLogin() {
+  if (localStorage.getItem(IS_SSO_FIRST_LOGIN_STORAGE_KEY) !== "true") {
+    return;
+  }
+
+  await fetchApi<boolean>("/api/v1/user/join-organization", getIdentityToken(), true, {
+    method: "POST"
+  });
+  localStorage.removeItem(IS_SSO_FIRST_LOGIN_STORAGE_KEY);
 }
 
 export function inferEnvironmentType(environment: Pick<Environment, "name" | "key">): Environment["type"] {
