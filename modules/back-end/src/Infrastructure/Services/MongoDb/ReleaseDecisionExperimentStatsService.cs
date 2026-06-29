@@ -208,32 +208,30 @@ public class ReleaseDecisionExperimentStatsService(MongoDbClient mongoDb) : IExp
         {
             var now = DateTime.UtcNow;
             var writes = assignments.Select(item =>
-                new ReplaceOneModel<ReleaseDecisionRunAssignment>(
+                new UpdateOneModel<ReleaseDecisionRunAssignment>(
                     Builders<ReleaseDecisionRunAssignment>.Filter.And(
                         Builders<ReleaseDecisionRunAssignment>.Filter.Eq(x => x.RunId, request.RunId.Value),
                         Builders<ReleaseDecisionRunAssignment>.Filter.Eq(x => x.AssignmentUnit, item.AllocationKey)),
-                    new ReleaseDecisionRunAssignment
-                    {
-                        Id = Guid.NewGuid(),
-                        RunId = request.RunId.Value,
-                        EnvId = request.EnvId,
-                        FlagKey = request.FlagKey,
-                        AllocationKey = item.AllocationKey,
-                        AssignmentUnit = item.AllocationKey,
-                        UserKey = item.UserKey,
-                        ExpectedVariationId = item.ExpectedVariationId,
-                        ActualVariationId = item.ActualVariationId,
-                        Role = item.Role,
-                        AnalysisRole = item.Role,
-                        Bucket = item.Bucket,
-                        LayerBucket = item.LayerBucket,
-                        SamplingBucket = item.SamplingBucket,
-                        IncludedBySampling = true,
-                        AssignedAt = now,
-                        FirstExposedAt = item.FirstExposedAt,
-                        CreatedAt = now,
-                        UpdatedAt = now
-                    })
+                    Builders<ReleaseDecisionRunAssignment>.Update
+                        .SetOnInsert(x => x.Id, Guid.NewGuid())
+                        .SetOnInsert(x => x.CreatedAt, now)
+                        .Set(x => x.RunId, request.RunId.Value)
+                        .Set(x => x.EnvId, request.EnvId)
+                        .Set(x => x.FlagKey, request.FlagKey)
+                        .Set(x => x.AllocationKey, item.AllocationKey)
+                        .Set(x => x.AssignmentUnit, item.AllocationKey)
+                        .Set(x => x.UserKey, item.UserKey)
+                        .Set(x => x.ExpectedVariationId, item.ExpectedVariationId)
+                        .Set(x => x.ActualVariationId, item.ActualVariationId)
+                        .Set(x => x.Role, item.Role)
+                        .Set(x => x.AnalysisRole, item.Role)
+                        .Set(x => x.Bucket, item.Bucket)
+                        .Set(x => x.LayerBucket, item.LayerBucket)
+                        .Set(x => x.SamplingBucket, item.SamplingBucket)
+                        .Set(x => x.IncludedBySampling, true)
+                        .Set(x => x.AssignedAt, now)
+                        .Set(x => x.FirstExposedAt, item.FirstExposedAt)
+                        .Set(x => x.UpdatedAt, now))
                 {
                     IsUpsert = true
                 }).Cast<WriteModel<ReleaseDecisionRunAssignment>>().ToArray();
@@ -378,31 +376,29 @@ public class ReleaseDecisionExperimentStatsService(MongoDbClient mongoDb) : IExp
         {
             var now = DateTime.UtcNow;
             var writes = assignments.Select(item =>
-                new ReplaceOneModel<ReleaseDecisionRunAssignment>(
+                new UpdateOneModel<ReleaseDecisionRunAssignment>(
                     Builders<ReleaseDecisionRunAssignment>.Filter.And(
                         Builders<ReleaseDecisionRunAssignment>.Filter.Eq(x => x.RunId, request.RunId.Value),
                         Builders<ReleaseDecisionRunAssignment>.Filter.Eq(x => x.AllocationKey, item.AllocationKey)),
-                    new ReleaseDecisionRunAssignment
-                    {
-                        Id = Guid.NewGuid(),
-                        RunId = request.RunId.Value,
-                        EnvId = request.EnvId,
-                        FlagKey = request.FlagKey,
-                        AllocationKey = item.AllocationKey,
-                        AssignmentUnit = item.AllocationKey,
-                        UserKey = item.UserKey,
-                        ExpectedVariationId = item.ExpectedVariationId,
-                        ActualVariationId = item.ActualVariationId,
-                        Role = item.Role,
-                        AnalysisRole = item.Role,
-                        Bucket = item.Bucket,
-                        SamplingBucket = item.SamplingBucket,
-                        IncludedBySampling = true,
-                        AssignedAt = now,
-                        FirstExposedAt = item.FirstExposedAt,
-                        CreatedAt = now,
-                        UpdatedAt = now
-                    })
+                    Builders<ReleaseDecisionRunAssignment>.Update
+                        .SetOnInsert(x => x.Id, Guid.NewGuid())
+                        .SetOnInsert(x => x.CreatedAt, now)
+                        .Set(x => x.RunId, request.RunId.Value)
+                        .Set(x => x.EnvId, request.EnvId)
+                        .Set(x => x.FlagKey, request.FlagKey)
+                        .Set(x => x.AllocationKey, item.AllocationKey)
+                        .Set(x => x.AssignmentUnit, item.AllocationKey)
+                        .Set(x => x.UserKey, item.UserKey)
+                        .Set(x => x.ExpectedVariationId, item.ExpectedVariationId)
+                        .Set(x => x.ActualVariationId, item.ActualVariationId)
+                        .Set(x => x.Role, item.Role)
+                        .Set(x => x.AnalysisRole, item.Role)
+                        .Set(x => x.Bucket, item.Bucket)
+                        .Set(x => x.SamplingBucket, item.SamplingBucket)
+                        .Set(x => x.IncludedBySampling, true)
+                        .Set(x => x.AssignedAt, now)
+                        .Set(x => x.FirstExposedAt, item.FirstExposedAt)
+                        .Set(x => x.UpdatedAt, now))
                 {
                     IsUpsert = true
                 }).Cast<WriteModel<ReleaseDecisionRunAssignment>>().ToArray();
