@@ -121,10 +121,8 @@ public class HttpAuthenticationTests
         var client = _app.CreateClient();
         client.DefaultRequestHeaders.Add("Authorization", TestData.ServerSecretString);
 
-        var insights = new object[] { };
-
         // Act
-        var response = await client.PostAsJsonAsync("/api/public/insight/track", insights);
+        var response = await client.PostAsJsonAsync("/api/public/insight/track", Array.Empty<object>());
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -136,10 +134,8 @@ public class HttpAuthenticationTests
         // Arrange
         var client = _app.CreateClient();
 
-        var insights = new object[] { };
-
         // Act
-        var response = await client.PostAsJsonAsync("/api/public/insight/track", insights);
+        var response = await client.PostAsJsonAsync("/api/public/insight/track", Array.Empty<object>());
 
         // Assert
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);

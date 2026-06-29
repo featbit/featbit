@@ -22,51 +22,21 @@ public class TokenValidatorTests
         Assert.Empty(result.Reason);
     }
 
-    [Fact]
-    public async Task ValidateAsync_WithMalformedSecret_ReturnsInvalid()
+    [Theory]
+    [InlineData("invalid-secret-string")]
+    [InlineData("")]
+    [InlineData(null)]
+    [InlineData("   ")]
+    public async Task ValidateAsync_WithInvalidSecret_ReturnsInvalid(string? secret)
     {
-        // Arrange
-        var malformed = "invalid-secret-string";
-
         // Act
-        var result = await _validator.ValidateAsync(malformed);
+        var result = await _validator.ValidateAsync(secret);
 
         // Assert
         Assert.Equal(TokenValidationStatus.Invalid, result.Status);
         Assert.Equal(Guid.Empty, result.EnvId);
+
         Assert.NotEmpty(result.Reason);
-    }
-
-    [Fact]
-    public async Task ValidateAsync_WithEmptyCredential_ReturnsInvalid()
-    {
-        // Act
-        var result = await _validator.ValidateAsync(string.Empty);
-
-        // Assert
-        Assert.Equal(TokenValidationStatus.Invalid, result.Status);
-        Assert.NotEmpty(result.Reason);
-    }
-
-    [Fact]
-    public async Task ValidateAsync_WithNullCredential_ReturnsInvalid()
-    {
-        // Act
-        var result = await _validator.ValidateAsync(null);
-
-        // Assert
-        Assert.Equal(TokenValidationStatus.Invalid, result.Status);
-        Assert.NotEmpty(result.Reason);
-    }
-
-    [Fact]
-    public async Task ValidateAsync_WithWhitespaceCredential_ReturnsInvalid()
-    {
-        // Act
-        var result = await _validator.ValidateAsync("   ");
-
-        // Assert
-        Assert.Equal(TokenValidationStatus.Invalid, result.Status);
     }
 
     [Fact]

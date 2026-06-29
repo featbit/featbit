@@ -57,6 +57,11 @@ public sealed class RequestValidator(
             return ValidationResult.Failed($"Invalid version: {version}");
         }
 
+        if (string.IsNullOrWhiteSpace(tokenString))
+        {
+            return ValidationResult.Failed("Missing token");
+        }
+
         return type == ConnectionType.RelayProxy
             ? await ValidateRelayProxyAsync()
             : await ValidateSecretTokenAsync();

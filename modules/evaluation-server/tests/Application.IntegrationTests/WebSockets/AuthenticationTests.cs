@@ -10,54 +10,33 @@ using Moq;
 namespace Application.IntegrationTests.WebSockets;
 
 [Collection(nameof(TestApp))]
-public class StreamingAuthenticationTests
+public class AuthenticationTests
 {
     private readonly TestApp _app;
 
-    public StreamingAuthenticationTests(TestApp app)
+    public AuthenticationTests(TestApp app)
     {
         _app = app;
     }
 
-    [Fact]
-    public async Task ConnectWithValidToken_Succeeds()
+    [Theory]
+    [InlineData(ConnectionType.Client)]
+    [InlineData(ConnectionType.Server)]
+    public async Task ConnectWithToken_Succeeds(string type)
     {
         // Arrange & Act
-        var ws = await _app.ConnectWithTokenAsync(ConnectionType.Client);
+        var ws = await _app.ConnectWithTokenAsync(type);
 
         // Assert
         Assert.NotNull(ws);
-        Assert.Equal(System.Net.WebSockets.WebSocketState.Open, ws.State);
+        Assert.Equal(WebSocketState.Open, ws.State);
     }
 
     [Fact]
-    public async Task ConnectWithValidServerToken_Succeeds()
+    public async Task ConnectWithoutToken_ClosesWith4003()
     {
         // Act
-        var ws = await _app.ConnectWithTokenAsync(ConnectionType.Server);
-
-        // Assert
-        Assert.NotNull(ws);
-        Assert.Equal(System.Net.WebSockets.WebSocketState.Open, ws.State);
-    }
-
-    [Fact]
-    public async Task ConnectWithMissingToken_ClosesWith4003()
-    {
-        // Arrange
-        var app = _app.WithWebHostBuilder(builder =>
-        {
-            builder.ConfigureTestServices(collection =>
-            {
-                collection.Replace(ServiceDescriptor.Singleton<ISystemClock>(new TestClock(TestData.ClientToken.Timestamp)));
-            });
-        });
-
-        var client = app.Server.CreateWebSocketClient();
-        var streamingUri = new Uri("http://localhost/streaming?type=client&version=2"); // Missing token
-
-        // Act
-        var ws = await client.ConnectAsync(streamingUri, CancellationToken.None);
+        var ws = await _app.ConnectAsync(TestData.ClientToken.Timestamp, "?type=client&version=2");
         var close = await ws.ReceiveAsync(new byte[100], CancellationToken.None);
 
         // Assert
@@ -68,20 +47,8 @@ public class StreamingAuthenticationTests
     [Fact]
     public async Task ConnectWithMalformedToken_ClosesWith4003()
     {
-        // Arrange
-        var app = _app.WithWebHostBuilder(builder =>
-        {
-            builder.ConfigureTestServices(collection =>
-            {
-                collection.Replace(ServiceDescriptor.Singleton<ISystemClock>(new TestClock(TestData.ClientToken.Timestamp)));
-            });
-        });
-
-        var client = app.Server.CreateWebSocketClient();
-        var streamingUri = new Uri("http://localhost/streaming?type=client&version=2&token=malformed-token");
-
         // Act
-        var ws = await client.ConnectAsync(streamingUri, CancellationToken.None);
+        var ws = await _app.ConnectAsync(TestData.ClientToken.Timestamp, "?type=client&version=2&token=malformed-token");
         var close = await ws.ReceiveAsync(new byte[100], CancellationToken.None);
 
         // Assert
@@ -119,22 +86,10 @@ public class StreamingAuthenticationTests
     }
 
     [Fact]
-    public async Task ConnectWithInvalidType_ClosesWith4003()
+    public async Task ConnectWithInconsistentType_ClosesWith4003()
     {
-        // Arrange
-        var app = _app.WithWebHostBuilder(builder =>
-        {
-            builder.ConfigureTestServices(collection =>
-            {
-                collection.Replace(ServiceDescriptor.Singleton<ISystemClock>(new TestClock(TestData.ClientToken.Timestamp)));
-            });
-        });
-
-        var client = app.Server.CreateWebSocketClient();
-        var streamingUri = new Uri($"http://localhost/streaming?type=invalid&version=2&token={TestData.ClientTokenString}");
-
         // Act
-        var ws = await client.ConnectAsync(streamingUri, CancellationToken.None);
+        var ws = await _app.ConnectAsync(TestData.ClientToken.Timestamp, $"?type=server&version=2&token={TestData.ClientTokenString}");
         var close = await ws.ReceiveAsync(new byte[100], CancellationToken.None);
 
         // Assert
@@ -145,20 +100,8 @@ public class StreamingAuthenticationTests
     [Fact]
     public async Task ConnectWithInvalidVersion_ClosesWith4003()
     {
-        // Arrange
-        var app = _app.WithWebHostBuilder(builder =>
-        {
-            builder.ConfigureTestServices(collection =>
-            {
-                collection.Replace(ServiceDescriptor.Singleton<ISystemClock>(new TestClock(TestData.ClientToken.Timestamp)));
-            });
-        });
-
-        var client = app.Server.CreateWebSocketClient();
-        var streamingUri = new Uri($"http://localhost/streaming?type=client&version=999&token={TestData.ClientTokenString}");
-
         // Act
-        var ws = await client.ConnectAsync(streamingUri, CancellationToken.None);
+        var ws = await _app.ConnectAsync(TestData.ClientToken.Timestamp, $"?type=client&version=999&token={TestData.ClientTokenString}");
         var close = await ws.ReceiveAsync(new byte[100], CancellationToken.None);
 
         // Assert
@@ -169,20 +112,8 @@ public class StreamingAuthenticationTests
     [Fact]
     public async Task InvalidToken_AcceptsThenClosesWith4003()
     {
-        // Arrange
-        var app = _app.WithWebHostBuilder(builder =>
-        {
-            builder.ConfigureTestServices(collection =>
-            {
-                collection.Replace(ServiceDescriptor.Singleton<ISystemClock>(new TestClock(TestData.ClientToken.Timestamp)));
-            });
-        });
-
-        var client = app.Server.CreateWebSocketClient();
-        var streamingUri = new Uri("http://localhost/streaming?type=client&version=2&token=XXX"); // Invalid token
-
         // Act
-        var ws = await client.ConnectAsync(streamingUri, CancellationToken.None);
+        var ws = await _app.ConnectAsync(TestData.ClientToken.Timestamp, "?type=client&version=2&token=XXX");
         var close = await ws.ReceiveAsync(new byte[100], CancellationToken.None);
 
         // Assert

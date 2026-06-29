@@ -77,7 +77,7 @@ public class RequestValidatorTests
     public async Task InvalidToken()
     {
         await EnsureInvalidAsync(
-            expectedReason: "Invalid token: ",
+            expectedReason: "Missing token",
             token: string.Empty
         );
 
@@ -209,12 +209,18 @@ public class RequestValidatorTests
         string? version = null,
         string? token = null)
     {
-        var httpContext = new DefaultHttpContext();
-        httpContext.Request.QueryString = QueryString.Create([
-            new KeyValuePair<string, string?>("type", type ?? ConnectionType.Client),
-            new KeyValuePair<string, string?>("version", version ?? ConnectionVersion.V2),
-            new KeyValuePair<string, string?>("token", token ?? TestData.ClientTokenString)
-        ]);
+        var httpContext = new DefaultHttpContext
+        {
+            Request =
+            {
+                QueryString = QueryString.Create([
+                    new KeyValuePair<string, string?>("type", type ?? ConnectionType.Client),
+                    new KeyValuePair<string, string?>("version", version ?? ConnectionVersion.V2),
+                    new KeyValuePair<string, string?>("token", token ?? TestData.ClientTokenString)
+                ])
+            }
+        };
+
         return httpContext;
     }
 }
