@@ -1,4 +1,5 @@
 import type { ChangeEvent, ReactNode } from "react";
+import { useId } from "react";
 
 export function Field({
   label,
@@ -25,12 +26,17 @@ export function Field({
   required?: boolean;
   onChange: (event: ChangeEvent<HTMLInputElement>) => void;
 }) {
+  const inputId = useId();
+
   return (
-    <label className="block">
-      <span className="text-base font-medium text-foreground">{label}</span>
+    <div className="block">
+      <label className="text-base font-medium text-foreground" htmlFor={inputId}>
+        {label}
+      </label>
       <span className="mt-2 flex h-12 items-center gap-4 rounded-md border border-input bg-background px-4 text-muted-foreground shadow-sm transition-colors focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 dark:bg-transparent">
         {icon}
         <input
+          id={inputId}
           className="min-w-0 flex-1 bg-transparent text-base text-foreground outline-none placeholder:text-muted-foreground"
           type={type}
           placeholder={placeholder}
@@ -43,7 +49,7 @@ export function Field({
         />
         {trailing}
       </span>
-    </label>
+    </div>
   );
 }
 

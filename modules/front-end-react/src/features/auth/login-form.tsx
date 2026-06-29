@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { Building2, Eye, Lock, Mail } from "lucide-react";
+import { Building2, Eye, EyeOff, Lock, Mail } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
@@ -27,6 +27,7 @@ export function LoginForm({
   const navigate = useNavigate();
   const [email, setEmail] = useState(() => getRememberedEmail());
   const [password, setPassword] = useState("");
+  const [passwordVisible, setPasswordVisible] = useState(false);
   const [rememberMe, setRememberMe] = useState(() => Boolean(getRememberedEmail()));
   const [errorKey, setErrorKey] = useState<LoginErrorKey | null>(null);
   const [success, setSuccess] = useState("");
@@ -91,10 +92,19 @@ export function LoginForm({
         />
         <Field
           label={t("auth.password")}
-          type="password"
+          type={passwordVisible ? "text" : "password"}
           placeholder={t("auth.passwordPlaceholder")}
           icon={<Lock className="h-5 w-5" />}
-          trailing={<Eye className="h-5 w-5" />}
+          trailing={
+            <button
+              type="button"
+              className="cursor-pointer text-muted-foreground transition-colors hover:text-foreground"
+              aria-label={passwordVisible ? "Hide password" : "Show password"}
+              onClick={() => setPasswordVisible((visible) => !visible)}
+            >
+              {passwordVisible ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+            </button>
+          }
           value={password}
           autoComplete="current-password"
           name="password"
@@ -103,9 +113,9 @@ export function LoginForm({
         />
 
         <div className="flex items-center text-base">
-          <label className="flex items-center gap-3">
+          <label className="flex cursor-pointer items-center gap-3">
             <input
-              className="h-5 w-5 rounded border-input bg-background"
+              className="h-5 w-5 cursor-pointer rounded border-input bg-background"
               type="checkbox"
               checked={rememberMe}
               onChange={(event) => setRememberMe(event.target.checked)}

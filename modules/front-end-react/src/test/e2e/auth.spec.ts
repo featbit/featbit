@@ -8,7 +8,7 @@ test.describe("login page", () => {
 
     await expect(page.getByRole("heading", { name: "Sign in to your workspace" })).toBeVisible();
     await expect(page.getByLabel("Email")).toBeVisible();
-    await expect(page.getByLabel("Password")).toBeVisible();
+    await expect(page.getByLabel("Password", { exact: true })).toBeVisible();
     await expect(page.getByRole("checkbox", { name: "Remember me" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Sign in" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Google" })).toBeVisible();
@@ -28,6 +28,19 @@ test.describe("login page", () => {
     await expect(page.getByRole("checkbox", { name: "Remember me" })).toBeChecked();
   });
 
+  test("toggles password visibility", async ({ page }) => {
+    await mockAuthEndpoints(page);
+
+    await page.goto("/en/login");
+    const passwordInput = page.getByLabel("Password", { exact: true });
+
+    await expect(passwordInput).toHaveAttribute("type", "password");
+    await page.getByRole("button", { name: "Show password" }).click();
+    await expect(passwordInput).toHaveAttribute("type", "text");
+    await page.getByRole("button", { name: "Hide password" }).click();
+    await expect(passwordInput).toHaveAttribute("type", "password");
+  });
+
   test("shows an inline error when email login is rejected", async ({ page }) => {
     await mockAuthEndpoints(page, {
       loginResponse: { success: false, errors: ["Email and/or password incorrect"] }
@@ -35,7 +48,7 @@ test.describe("login page", () => {
 
     await page.goto("/en/login");
     await page.getByLabel("Email").fill("wrong@example.com");
-    await page.getByLabel("Password").fill("bad-password");
+    await page.getByLabel("Password", { exact: true }).fill("bad-password");
     await page.getByRole("button", { name: "Sign in" }).click();
 
     await expect(page.getByText("Email and/or password incorrect")).toBeVisible();
@@ -50,7 +63,7 @@ test.describe("login page", () => {
 
     await page.goto("/en/login");
     await page.getByLabel("Email").fill("test@featbit.com");
-    await page.getByLabel("Password").fill("123456");
+    await page.getByLabel("Password", { exact: true }).fill("123456");
     await page.getByRole("checkbox", { name: "Remember me" }).check();
     await page.getByRole("button", { name: "Sign in" }).click();
 
