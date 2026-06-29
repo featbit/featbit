@@ -10,5 +10,5 @@ public interface ITokenValidator
     /// Validates the credential (HTTP Authorization header or streaming token secret string).
     /// v1: performs structural check only (Secret.TryParse). No I/O, no store lookup.
     /// </summary>
-    Task<TokenValidationResult> ValidateAsync(string? credential, CancellationToken ct = default);
+    Task<TokenValidationResult> ValidateAsync(string? token, CancellationToken cancellationToken = default);
 }

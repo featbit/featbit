@@ -6,18 +6,18 @@ namespace Domain.Shared.Authentication;
 /// </summary>
 public class TokenValidator : ITokenValidator
 {
-    public Task<TokenValidationResult> ValidateAsync(string? credential, CancellationToken ct = default)
+    public Task<TokenValidationResult> ValidateAsync(string? token, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(credential))
+        if (string.IsNullOrWhiteSpace(token))
         {
-            return Task.FromResult(TokenValidationResult.Invalid("Missing or empty credential"));
+            return Task.FromResult(TokenValidationResult.Invalid("Missing or empty token"));
         }
 
-        if (Secret.TryParse(credential, out var envId))
+        if (Secret.TryParse(token, out var envId))
         {
             return Task.FromResult(TokenValidationResult.Valid(envId));
         }
 
-        return Task.FromResult(TokenValidationResult.Invalid("Invalid credential format"));
+        return Task.FromResult(TokenValidationResult.Invalid("Invalid token format"));
     }
 }

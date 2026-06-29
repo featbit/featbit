@@ -27,4 +27,8 @@ internal static partial class StreamingLoggingExtensions
     [LoggerMessage(6, LogLevel.Warning, "Streaming request validation unavailable: {Request}. Reason: {Reason}.",
         EventName = "RequestValidationUnavailable")]
     public static partial void RequestValidationUnavailable(this ILogger logger, string? request, string reason);
+
+    [LoggerMessage(7, LogLevel.Error, "Failed to parse token: {Token}.",
+        EventName = "FailedToParseToken")]
+    public static partial void FailedToParseToken(this ILogger logger, string? token, Exception ex);
 }

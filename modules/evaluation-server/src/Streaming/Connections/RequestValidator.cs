@@ -103,7 +103,8 @@ public sealed class RequestValidator(
             }
             catch (Exception ex)
             {
-                logger.LogWarning("Token parsing failed for '{Token}': {Error}", tokenString, ex.Message);
+                logger.FailedToParseToken(tokenString, ex);
+
                 return ValidationResult.Invalid($"Invalid token: {tokenString}");
             }
 
