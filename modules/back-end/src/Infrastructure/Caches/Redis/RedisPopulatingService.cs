@@ -52,7 +52,17 @@ public class RedisPopulatingService(
                         return;
                     }
 
-                    await PopulateCoreAsync();
+                    logger.LogInformation("Start to populate redis. Lock TTL: {LockTtl}s.", lockTtl.TotalSeconds);
+
+                    var stopwatch = Stopwatch.StartNew();
+                    await PopulateFlagsAsync();
+                    await PopulateSegmentAsync();
+                    await PopulateSecretsAsync();
+
+                    // mark redis as populated
+                    await redis.StringSetAsync(IsPopulatedKey, "true");
+
+                    logger.LogInformation("Populate redis finished in {Elapsed} ms.", stopwatch.ElapsedMilliseconds);
                 }
                 finally
                 {
@@ -83,31 +93,6 @@ public class RedisPopulatingService(
             );
 
             await Task.Delay(pollInterval, stoppingToken);
-        }
-
-        return;
-
-        async Task PopulateCoreAsync()
-        {
-            logger.LogInformation("Start to populate redis. Lock TTL: {LockTtlSeconds}s.", lockTtl.TotalSeconds);
-
-            var stopwatch = Stopwatch.StartNew();
-            try
-            {
-                await PopulateFlagsAsync();
-                await PopulateSegmentAsync();
-                await PopulateSecretsAsync();
-
-                // mark redis as populated
-                await redis.StringSetAsync(IsPopulatedKey, "true");
-
-                logger.LogInformation("Populate redis finished in {Elapsed} ms.", stopwatch.ElapsedMilliseconds);
-            }
-            catch
-            {
-                logger.LogError("Populate redis failed after {Elapsed} ms.", stopwatch.ElapsedMilliseconds);
-                throw;
-            }
         }
     }
 
