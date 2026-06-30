@@ -89,7 +89,7 @@ public class RedisPopulatingService(
 
         async Task PopulateCoreAsync()
         {
-            logger.LogWarning("Start to populate redis. Lock TTL: {LockTtlSeconds}s.", lockTtl.TotalSeconds);
+            logger.LogInformation("Start to populate redis. Lock TTL: {LockTtlSeconds}s.", lockTtl.TotalSeconds);
 
             var stopwatch = Stopwatch.StartNew();
             try
