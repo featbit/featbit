@@ -70,10 +70,19 @@ public class RedisStore(IRedisClient redisClient, ILogger<RedisStore> logger) : 
         // get segment keys
         var index = RedisKeys.SegmentIndex(envId);
         var ids = await Redis.SortedSetRangeByScoreAsync(index, timestamp, exclude: Exclude.Start);
-        var keys = ids.Select(id => RedisKeys.Segment(id!)).ToArray();
+        var keys = new RedisKey[ids.Length];
+        for (var i = 0; i < ids.Length; i++)
+        {
+            keys[i] = RedisKeys.Segment(ids[i]!);
+        }
 
         // get segments
-        var tasks = keys.Select(key => Redis.StringGetAsync(key));
+        var tasks = new Task<RedisValue>[keys.Length];
+        for (var i = 0; i < keys.Length; i++)
+        {
+            tasks[i] = Redis.StringGetAsync(keys[i]);
+        }
+
         var values = await Task.WhenAll(tasks);
 
         // for shared segments, replace empty envId with actual envId

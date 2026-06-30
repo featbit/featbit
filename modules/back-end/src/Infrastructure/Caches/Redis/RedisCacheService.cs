@@ -24,7 +24,7 @@ public class RedisCacheService(IRedisClient redis) : ICacheService
 
     public async Task DeleteFlagAsync(Guid envId, Guid flagId)
     {
-        // delete index first so no reader can observe a reference to a missing value
+        // delete index first
         var index = RedisKeys.FlagIndex(envId);
         await Redis.SortedSetRemoveAsync(index, flagId.ToString());
 
@@ -49,7 +49,7 @@ public class RedisCacheService(IRedisClient redis) : ICacheService
 
     public async Task DeleteSegmentAsync(ICollection<Guid> envIds, Guid segmentId)
     {
-        // delete index entries first so no reader can observe a reference to a missing value
+        // delete index first
         foreach (var envId in envIds)
         {
             var index = RedisKeys.SegmentIndex(envId);
