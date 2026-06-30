@@ -223,9 +223,9 @@ function SummaryRow({
   return (
     <div className="grid overflow-hidden rounded-md border border-border bg-card shadow-sm sm:grid-cols-2 lg:grid-cols-4">
       {items.map((item, index) => (
-        <div key={item.label} className={cn("px-7 py-5", index > 0 && "border-t border-border sm:border-l sm:border-t-0")}>
-          <div className="text-sm font-medium text-muted-foreground">{item.label}</div>
-          <div className="mt-3 min-h-7 text-xl font-semibold text-foreground">{item.value}</div>
+        <div key={item.label} className={cn("px-6 py-4", index > 0 && "border-t border-border sm:border-l sm:border-t-0")}>
+          <div className="text-xs font-medium text-muted-foreground">{item.label}</div>
+          <div className="mt-2 min-h-6 text-lg font-semibold text-foreground">{item.value}</div>
         </div>
       ))}
     </div>
@@ -564,9 +564,6 @@ export function LicensePage({ lang }: { lang: "en" | "zh" }) {
                 <div className="mt-3">
                   <SummaryRow isSaas={isSaas} license={license} status={status} lang={lang} />
                 </div>
-                <p className="mt-3 text-sm text-muted-foreground">
-                  {isSaas ? t("workspace.license.saasSyncDescription") : t("workspace.license.syncDescription")}
-                </p>
               </>
             ) : (
               <EmptyLicenseNotice />
