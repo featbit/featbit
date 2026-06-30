@@ -1,0 +1,26 @@
+{
+  "users": [
+    {
+      "keyId": "global-user-id",
+      "name": "global-user",
+      "customizedProperties": [
+        {
+          "name": "department",
+          "value": "Sales"
+        },
+        {
+          "name": "title",
+          "value": "Sales Manager"
+        },
+        {
+          "name": "location",
+          "value": "San Francisco"
+        },
+        {
+          "name": "phone",
+          "value": "415-555-1212"
+        }
+      ]
+    }
+  ]
+}

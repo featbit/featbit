@@ -309,6 +309,66 @@ i18n.use(initReactI18next).init({
                 description: "Compare flags across environments"
               }
             }
+          },
+          globalUsers: {
+            searchByName: "Search by name",
+            display: "Display",
+            searchColumns: "Search columns",
+            noColumnsFound: "No columns found",
+            clearAll: "Clear all",
+            importAction: "Import",
+            importUsers: "Import users",
+            name: "Name",
+            actions: "Actions",
+            evaluateAction: "Evaluate",
+            detailsAction: "Details",
+            unnamedUser: "Unnamed user",
+            failedToLoad: "Failed to load data",
+            retry: "Retry",
+            loading: "Loading",
+            empty: "No global users yet",
+            emptySearch: "No users match your search",
+            clearSearch: "Clear search",
+            copied: "Copied",
+            pagination: {
+              summary: "Showing {{first}} to {{last}} of {{total}} users",
+              pageSize: "{{size}} / page"
+            },
+            gated: {
+              title: "Global Users is not enabled",
+              body: "Enable the Global Users feature in your license to manage workspace-level users.",
+              action: "Open License",
+              tooltip: "Global Users is not enabled by your license."
+            },
+            import: {
+              title: "Import users",
+              intro: "Choose a JSON data file to create or update global users.",
+              viewTemplate: "View template",
+              noteKey: "Users are created or updated by keyId.",
+              noteProperties: "New user properties are added without removing existing properties.",
+              drop: "Drop JSON file here or click to browse",
+              constraints: "Supported format: JSON. Maximum file size: 500 MB.",
+              invalidType: "Only JSON files can be imported.",
+              tooLarge: "File size must be 500 MB or less.",
+              success: "User data has been successfully imported.",
+              error: "Failed to import user data. Please check the file and try again.",
+              cancel: "Cancel"
+            },
+            evaluate: {
+              flags: "Feature Flags",
+              segments: "Segments",
+              filterFlags: "Filter by name or key",
+              filterSegments: "Filter by name",
+              variation: "Variation",
+              type: "Type",
+              lastUpdated: "Last updated"
+            },
+            details: {
+              title: "User profile",
+              builtIn: "Built-in properties",
+              custom: "Custom properties",
+              noCustomProperties: "No custom properties"
+            }
           }
         }
       }
@@ -618,6 +678,66 @@ i18n.use(initReactI18next).init({
                 title: "开关对比",
                 description: "跨环境对比功能开关"
               }
+            }
+          },
+          globalUsers: {
+            searchByName: "按名称搜索",
+            display: "显示列",
+            searchColumns: "搜索列",
+            noColumnsFound: "未找到列",
+            clearAll: "全部清除",
+            importAction: "导入",
+            importUsers: "导入用户",
+            name: "名称",
+            actions: "操作",
+            evaluateAction: "评估",
+            detailsAction: "详情",
+            unnamedUser: "未命名用户",
+            failedToLoad: "加载数据失败",
+            retry: "重试",
+            loading: "加载中",
+            empty: "暂无全局用户",
+            emptySearch: "没有匹配的用户",
+            clearSearch: "清除搜索",
+            copied: "已复制",
+            pagination: {
+              summary: "显示第 {{first}} 到 {{last}} 条，共 {{total}} 个用户",
+              pageSize: "{{size}} / 页"
+            },
+            gated: {
+              title: "全局用户未启用",
+              body: "请在许可证中启用全局用户功能，以管理工作区级用户。",
+              action: "打开许可证",
+              tooltip: "当前许可证未启用全局用户。"
+            },
+            import: {
+              title: "导入用户",
+              intro: "选择 JSON 数据文件来创建或更新全局用户。",
+              viewTemplate: "查看模板",
+              noteKey: "用户会根据 keyId 创建或更新。",
+              noteProperties: "新的用户属性会被添加，不会删除已有属性。",
+              drop: "拖拽 JSON 文件到此处，或点击选择",
+              constraints: "支持格式：JSON。最大文件大小：500 MB。",
+              invalidType: "只能导入 JSON 文件。",
+              tooLarge: "文件大小不能超过 500 MB。",
+              success: "用户数据已成功导入。",
+              error: "导入用户数据失败，请检查文件后重试。",
+              cancel: "取消"
+            },
+            evaluate: {
+              flags: "功能开关",
+              segments: "用户分组",
+              filterFlags: "按名称或 Key 过滤",
+              filterSegments: "按名称过滤",
+              variation: "返回值",
+              type: "类型",
+              lastUpdated: "最后更新"
+            },
+            details: {
+              title: "用户资料",
+              builtIn: "内置属性",
+              custom: "自定义属性",
+              noCustomProperties: "暂无自定义属性"
             }
           }
         }
