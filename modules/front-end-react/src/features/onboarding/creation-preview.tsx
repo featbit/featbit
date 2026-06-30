@@ -1,4 +1,4 @@
-import { Building2, CircleDot, FolderKanban, SquareCode } from "lucide-react";
+import { Building2, CircleDot, Folder, SquareCode } from "lucide-react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
@@ -25,7 +25,7 @@ export function CreationPreview({ organizationName, projectName, projectKey }: C
         />
         <VerticalLine height="4.5rem" />
         <PreviewNode
-          icon={<FolderKanban className="h-11 w-11" />}
+          icon={<Folder className="h-11 w-11" />}
           label={projectName}
           meta={t("onboarding.project.section")}
           badge={projectKey}

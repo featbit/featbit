@@ -103,13 +103,15 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
       <AuthHeader lang={lang} />
       <div className="grid min-h-[calc(100vh-4rem)] lg:grid-cols-[1.45fr_1fr]">
         <LeftPanel />
-        <section className="grid min-h-[calc(100vh-4rem)] grid-rows-[1fr_auto] border-border pt-[clamp(2rem,6vh,7rem)] lg:border-l">
-          {externalLoginError ? (
-            <div className="mx-auto mt-8 w-full max-w-[560px] px-8 text-sm font-medium text-red-600 sm:px-12 lg:px-0">
-              {externalLoginError}
-            </div>
-          ) : null}
-          {content}
+        <section className="grid min-h-[calc(100vh-4rem)] grid-rows-[minmax(0,1fr)_auto] border-border lg:border-l">
+          <div className="flex min-h-0 w-full flex-col justify-center py-8">
+            {externalLoginError ? (
+              <div className="mx-auto mb-6 w-full max-w-[560px] px-8 text-sm font-medium text-red-600 sm:px-12 lg:px-0">
+                {externalLoginError}
+              </div>
+            ) : null}
+            {content}
+          </div>
           <AuthFooter />
         </section>
       </div>

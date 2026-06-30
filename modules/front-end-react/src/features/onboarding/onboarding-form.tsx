@@ -112,9 +112,9 @@ export function OnboardingForm({
             {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
             {t("onboarding.complete")}
           </Button>
-          <Button type="button" variant="link" className="h-auto p-0 text-base text-blue-600" onClick={onSignOut}>
+          <Button type="button" variant="ghost" onClick={onSignOut}>
             <LogOut className="h-4 w-4" />
-            {t("onboarding.signOut")}
+            {t("selectWorkspace.signInWithAnotherEmail")}
           </Button>
         </div>
       </div>
