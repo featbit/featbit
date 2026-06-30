@@ -1,11 +1,12 @@
 using System.Text;
 using Domain.Shared;
 using Infrastructure.Caches.Redis;
+using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 
 namespace Infrastructure.Store;
 
-public class RedisStore(IRedisClient redisClient) : IDbStore
+public class RedisStore(IRedisClient redisClient, ILogger<RedisStore> logger) : IDbStore
 {
     public string Name => Stores.Redis;
 
@@ -18,23 +19,42 @@ public class RedisStore(IRedisClient redisClient) : IDbStore
         // get flag keys
         var index = RedisKeys.FlagIndex(envId);
         var ids = await Redis.SortedSetRangeByScoreAsync(index, timestamp, exclude: Exclude.Start);
-        var keys = ids.Select(id => RedisKeys.Flag(id!));
+
+        var keys = new RedisKey[ids.Length];
+        for (var i = 0; i < ids.Length; i++)
+        {
+            keys[i] = RedisKeys.Flag(ids[i]!);
+        }
 
         // get flags
-        var tasks = keys.Select(key => Redis.StringGetAsync(key));
-        var values = await Task.WhenAll(tasks);
-        var jsonBytes = values.Select(x => (byte[])x!);
+        var tasks = new Task<RedisValue>[keys.Length];
+        for (var i = 0; i < keys.Length; i++)
+        {
+            tasks[i] = Redis.StringGetAsync(keys[i]);
+        }
 
-        return jsonBytes;
+        var values = await Task.WhenAll(tasks);
+
+        return FilterOrphans(values, keys, envId, "flag");
     }
 
-    public async Task<IEnumerable<byte[]>> GetFlagsAsync(IEnumerable<string> ids)
+    public async Task<IEnumerable<byte[]>> GetFlagsAsync(string[] ids)
     {
-        var keys = ids.Select(RedisKeys.Flag);
+        var keys = new RedisKey[ids.Length];
+        for (var i = 0; i < ids.Length; i++)
+        {
+            keys[i] = RedisKeys.Flag(ids[i]);
+        }
 
-        var tasks = keys.Select(key => Redis.StringGetAsync(key));
+        var tasks = new Task<RedisValue>[keys.Length];
+        for (var i = 0; i < keys.Length; i++)
+        {
+            tasks[i] = Redis.StringGetAsync(keys[i]);
+        }
+
         var values = await Task.WhenAll(tasks);
-        return values.Select(x => (byte[])x!);
+
+        return FilterOrphans(values, keys, envId: null, "flag");
     }
 
     public async Task<byte[]> GetSegmentAsync(string id)
@@ -50,19 +70,36 @@ public class RedisStore(IRedisClient redisClient) : IDbStore
         // get segment keys
         var index = RedisKeys.SegmentIndex(envId);
         var ids = await Redis.SortedSetRangeByScoreAsync(index, timestamp, exclude: Exclude.Start);
-        var keys = ids.Select(id => RedisKeys.Segment(id!));
+        var keys = new RedisKey[ids.Length];
+        for (var i = 0; i < ids.Length; i++)
+        {
+            keys[i] = RedisKeys.Segment(ids[i]!);
+        }
 
         // get segments
-        var tasks = keys.Select(key => Redis.StringGetAsync(key));
+        var tasks = new Task<RedisValue>[keys.Length];
+        for (var i = 0; i < keys.Length; i++)
+        {
+            tasks[i] = Redis.StringGetAsync(keys[i]);
+        }
+
         var values = await Task.WhenAll(tasks);
 
         // for shared segments, replace empty envId with actual envId
         const string emptyEnvId = "\"envId\":\"\",";
 
-        List<byte[]> jsonBytes = [];
-        foreach (var value in values)
+        var orphans = new List<string>();
+        var jsonBytes = new List<byte[]>(values.Length);
+        for (var i = 0; i < values.Length; i++)
         {
-            var strValue = (string)value!;
+            // skip orphan values
+            if (!values[i].HasValue)
+            {
+                orphans.Add(keys[i].ToString());
+                continue;
+            }
+
+            var strValue = (string)values[i]!;
             if (strValue.Contains(emptyEnvId))
             {
                 var newStrValue = strValue.Replace(emptyEnvId, $"\"envId\":\"{envId}\",");
@@ -70,9 +107,11 @@ public class RedisStore(IRedisClient redisClient) : IDbStore
             }
             else
             {
-                jsonBytes.Add((byte[])value!);
+                jsonBytes.Add((byte[])values[i]!);
             }
         }
+
+        LogOrphans(orphans, values.Length, envId, "segment");
 
         return jsonBytes;
     }
@@ -92,5 +131,57 @@ public class RedisStore(IRedisClient redisClient) : IDbStore
             Guid.Parse(entries[2].ToString()),
             entries[3].ToString()
         );
+    }
+
+    // Filters out RedisValues whose backing key was missing (HasValue == false) and logs the
+    // orphan keys so operators can spot accumulating drift between an env's index and its values.
+    // Without this filter, a single orphan index member produces a null byte[] that crashes
+    // JsonDocument.Parse downstream and aborts the entire env's data-sync.
+    private IEnumerable<byte[]> FilterOrphans(
+        RedisValue[] values,
+        RedisKey[] keys,
+        Guid? envId,
+        string entityName)
+    {
+        var orphans = new List<string>();
+        var jsonBytes = new List<byte[]>(values.Length);
+        for (var i = 0; i < values.Length; i++)
+        {
+            if (values[i].HasValue)
+            {
+                jsonBytes.Add((byte[])values[i]!);
+            }
+            else
+            {
+                orphans.Add(keys[i].ToString());
+            }
+        }
+
+        LogOrphans(orphans, values.Length, envId, entityName);
+
+        return jsonBytes;
+    }
+
+    private void LogOrphans(List<string> orphans, int totalCount, Guid? envId, string entityName)
+    {
+        if (orphans.Count == 0)
+        {
+            return;
+        }
+
+        if (envId.HasValue)
+        {
+            logger.LogWarning(
+                "Orphan {EntityName} index members in env {EnvId}: {OrphanCount} of {TotalCount}. Missing keys: {MissingKeys}",
+                entityName, envId.Value, orphans.Count, totalCount, string.Join(", ", orphans)
+            );
+        }
+        else
+        {
+            logger.LogWarning(
+                "Orphan {EntityName} ids requested: {OrphanCount} of {TotalCount}. Missing keys: {MissingKeys}",
+                entityName, orphans.Count, totalCount, string.Join(", ", orphans)
+            );
+        }
     }
 }

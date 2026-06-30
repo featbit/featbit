@@ -24,13 +24,13 @@ public class RedisCacheService(IRedisClient redis) : ICacheService
 
     public async Task DeleteFlagAsync(Guid envId, Guid flagId)
     {
+        // delete index first
+        var index = RedisKeys.FlagIndex(envId);
+        await Redis.SortedSetRemoveAsync(index, flagId.ToString());
+
         // delete cache
         var cacheKey = RedisKeys.Flag(flagId);
         await Redis.KeyDeleteAsync(cacheKey);
-
-        // delete index
-        var index = RedisKeys.FlagIndex(envId);
-        await Redis.SortedSetRemoveAsync(index, flagId.ToString());
     }
 
     public async Task UpsertSegmentAsync(ICollection<Guid> envIds, Segment segment)
@@ -49,16 +49,16 @@ public class RedisCacheService(IRedisClient redis) : ICacheService
 
     public async Task DeleteSegmentAsync(ICollection<Guid> envIds, Guid segmentId)
     {
-        // delete cache
-        var cacheKey = RedisKeys.Segment(segmentId);
-        await Redis.KeyDeleteAsync(cacheKey);
-
-        // delete index
+        // delete index first
         foreach (var envId in envIds)
         {
             var index = RedisKeys.SegmentIndex(envId);
             await Redis.SortedSetRemoveAsync(index, segmentId.ToString());
         }
+
+        // delete cache
+        var cacheKey = RedisKeys.Segment(segmentId);
+        await Redis.KeyDeleteAsync(cacheKey);
     }
 
     public async Task UpsertLicenseAsync(Workspace workspace)
