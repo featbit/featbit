@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { signOut } from "@/features/auth/auth-api";
+import { AuthHeader } from "@/features/auth/auth-header";
 import { getCurrentOrganization, localizedPath, persistCurrentOrganization, resolveLang } from "@/features/layout/context";
 import { completeOnboarding } from "./onboarding-api";
 import { OnboardingForm } from "./onboarding-form";
@@ -79,28 +80,33 @@ export function OnboardingPage() {
   }
 
   return (
-    <section className="mx-auto w-full max-w-[95rem] px-6 py-8 lg:px-10">
-      <div className="grid items-stretch gap-12 xl:grid-cols-[minmax(38rem,45rem)_minmax(30rem,36rem)]">
-        <OnboardingForm
-          organizationName={organizationName}
-          projectName={projectName}
-          projectKey={projectKey}
-          isSubmitting={isSubmitting}
-          error={error}
-          canSubmit={canSubmit}
-          setOrganizationName={setOrganizationName}
-          updateProjectName={updateProjectName}
-          updateProjectKey={(value) => setProjectKey(slugify(value))}
-          onSubmit={() => void submit()}
-          onSignOut={handleSignOut}
-        />
+    <main className="flex h-screen flex-col bg-background text-foreground">
+      <AuthHeader lang={lang} />
+      <section className="flex min-h-0 flex-1 items-center justify-center bg-muted/30 px-4 py-3">
+        <div className="w-full max-w-[90rem] rounded-md border border-border bg-card py-6 px-9 shadow-sm">
+          <div className="grid items-stretch gap-16 xl:grid-cols-[minmax(38rem,45rem)_minmax(30rem,36rem)]">
+            <OnboardingForm
+              organizationName={organizationName}
+              projectName={projectName}
+              projectKey={projectKey}
+              isSubmitting={isSubmitting}
+              error={error}
+              canSubmit={canSubmit}
+              setOrganizationName={setOrganizationName}
+              updateProjectName={updateProjectName}
+              updateProjectKey={(value) => setProjectKey(slugify(value))}
+              onSubmit={() => void submit()}
+              onSignOut={handleSignOut}
+            />
 
-        <CreationPreview
-          organizationName={organizationName || t("onboarding.preview.organizationFallback")}
-          projectName={projectName || t("onboarding.preview.projectFallback")}
-          projectKey={projectKey || "example-project"}
-        />
-      </div>
-    </section>
+            <CreationPreview
+              organizationName={organizationName || t("onboarding.preview.organizationFallback")}
+              projectName={projectName || t("onboarding.preview.projectFallback")}
+              projectKey={projectKey || "example-project"}
+            />
+          </div>
+        </div>
+      </section>
+    </main>
   );
 }

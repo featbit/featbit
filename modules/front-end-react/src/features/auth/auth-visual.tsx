@@ -117,7 +117,7 @@ export function LeftPanel() {
   const { t } = useTranslation();
 
   return (
-    <section className="relative hidden min-h-[calc(100vh-6rem)] min-w-0 flex-col justify-start overflow-hidden pb-8 pl-16 pr-4 pt-[clamp(2rem,6vh,7rem)] lg:flex xl:pl-20 xl:pr-6">
+    <section className="relative hidden min-h-[calc(100vh-4rem)] min-w-0 flex-col justify-start overflow-hidden pb-8 pl-16 pr-4 pt-[clamp(2rem,6vh,7rem)] lg:flex xl:pl-20 xl:pr-6">
       <div>
         <h1 className="max-w-none whitespace-nowrap text-5xl font-semibold leading-tight tracking-tight text-foreground">
           {t("auth.hero.title")}

@@ -101,9 +101,9 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
   return (
     <main className="min-h-screen bg-background text-foreground">
       <AuthHeader lang={lang} />
-      <div className="grid min-h-[calc(100vh-6rem)] lg:grid-cols-[1.45fr_1fr]">
+      <div className="grid min-h-[calc(100vh-4rem)] lg:grid-cols-[1.45fr_1fr]">
         <LeftPanel />
-        <section className="grid min-h-[calc(100vh-6rem)] grid-rows-[1fr_auto] border-border pt-[clamp(2rem,6vh,7rem)] lg:border-l">
+        <section className="grid min-h-[calc(100vh-4rem)] grid-rows-[1fr_auto] border-border pt-[clamp(2rem,6vh,7rem)] lg:border-l">
           {externalLoginError ? (
             <div className="mx-auto mt-8 w-full max-w-[560px] px-8 text-sm font-medium text-red-600 sm:px-12 lg:px-0">
               {externalLoginError}

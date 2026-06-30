@@ -13,17 +13,17 @@ export function CreationPreview({ organizationName, projectName, projectKey }: C
   const { t } = useTranslation();
 
   return (
-    <aside className="flex h-full flex-col rounded-md border border-slate-300 bg-white p-7 shadow-sm dark:border-slate-800 dark:bg-slate-950">
+    <aside className="flex h-full flex-col rounded-md border border-slate-300 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950">
       <h2 className="text-xl font-semibold text-slate-950 dark:text-slate-50">{t("onboarding.preview.title")}</h2>
 
-      <div className="mt-8 flex flex-1 flex-col items-center">
+      <div className="mt-6 flex flex-1 flex-col items-center">
         <PreviewNode
           icon={<Building2 className="h-10 w-10" />}
           label={organizationName}
           meta={t("onboarding.organization.section")}
           iconClassName="border-slate-300 bg-slate-50 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
         />
-        <VerticalLine height="5.75rem" />
+        <VerticalLine height="4.5rem" />
         <PreviewNode
           icon={<FolderKanban className="h-11 w-11" />}
           label={projectName}
@@ -32,7 +32,7 @@ export function CreationPreview({ organizationName, projectName, projectKey }: C
           iconClassName="border-slate-300 bg-slate-50 text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
         />
 
-        <div className="relative mt-32 h-60 w-full max-w-[26rem]">
+        <div className="relative mt-24 h-52 w-full max-w-[26rem]">
           <BranchLines />
           <EnvironmentPreview name="Dev" tone="green" className="absolute left-[5%] top-1 -translate-x-1/2" />
           <EnvironmentPreview name="Prod" tone="blue" className="absolute left-[75%] top-1 -translate-x-1/2" />
@@ -98,13 +98,13 @@ function VerticalLine({ height }: { height: string }) {
 function BranchLines() {
   return (
     <svg
-      className="pointer-events-none absolute -top-32 left-0 h-32 w-full overflow-visible text-slate-200 dark:text-slate-800"
-      viewBox="0 0 100 128"
+      className="pointer-events-none absolute -top-24 left-0 h-24 w-full overflow-visible text-slate-200 dark:text-slate-800"
+      viewBox="0 0 100 96"
       preserveAspectRatio="none"
       aria-hidden="true"
     >
       <path
-        d="M23.08 0 V66 M5 66 H75 M75 66 V128"
+        d="M23.08 0 V48 M5 48 H75 M75 48 V96"
         fill="none"
         stroke="currentColor"
         strokeLinecap="round"
@@ -112,7 +112,7 @@ function BranchLines() {
         vectorEffect="non-scaling-stroke"
       />
       <path
-        d="M5 66 V128"
+        d="M5 48 V96"
         fill="none"
         stroke="currentColor"
         strokeLinecap="round"

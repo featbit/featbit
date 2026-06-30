@@ -52,7 +52,7 @@ export function OnboardingForm({
         <p className="mt-3 text-base text-slate-500 dark:text-slate-400">{t("onboarding.subtitle")}</p>
       </header>
 
-      <div className="mt-10 space-y-8">
+      <div className="mt-8 space-y-6">
         <SetupSection icon={<Building2 className="h-6 w-6" />} title={t("onboarding.organization.section")}>
           <TextField
             id="onboardingOrganizationName"
@@ -102,7 +102,7 @@ export function OnboardingForm({
           </div>
         ) : null}
 
-        <div className="flex items-center gap-6 pt-4">
+        <div className="flex items-center gap-6 pt-2">
           <Button
             type="button"
             className="h-12 rounded-md bg-blue-600 px-6 text-base text-white shadow-sm hover:bg-blue-700"
@@ -125,7 +125,7 @@ export function OnboardingForm({
 function SetupSection({ icon, title, children }: { icon: ReactNode; title: string; children: ReactNode }) {
   return (
     <section>
-      <div className="mb-5 flex items-center gap-4">
+      <div className="mb-4 flex items-center gap-4">
         <span className="text-slate-900 dark:text-slate-100">{icon}</span>
         <h2 className="text-2xl font-semibold tracking-normal text-slate-950 dark:text-slate-50">{title}</h2>
       </div>

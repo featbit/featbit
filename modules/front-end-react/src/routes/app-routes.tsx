@@ -64,12 +64,10 @@ export function AppRoutes() {
         path="/:lang/onboarding"
         element={
           <AuthGuard>
-            <Layout />
+            <OnboardingPage />
           </AuthGuard>
         }
-      >
-        <Route index element={<OnboardingPage />} />
-      </Route>
+      />
       <Route
         path="/:lang/*"
         element={

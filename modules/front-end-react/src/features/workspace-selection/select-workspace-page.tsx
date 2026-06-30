@@ -181,7 +181,7 @@ export function SelectWorkspacePage() {
   return (
     <main className="min-h-screen bg-background text-foreground">
       <AuthHeader lang={lang} />
-      <section className="flex min-h-[calc(100vh-6rem)] items-center justify-center bg-muted/30 px-4 py-10">
+      <section className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-muted/30 px-4 py-10">
         <div className="w-full max-w-[640px] rounded-md border border-border bg-card p-8 shadow-sm">
           {loadingWorkspaces ? (
             <SelectionLoading />

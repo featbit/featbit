@@ -69,7 +69,7 @@ function LanguageSwitcher({ lang }: { lang: Lang }) {
 
 export function AuthHeader({ lang }: { lang: Lang }) {
   return (
-    <header className="flex h-24 shrink-0 items-center justify-between border-b border-border px-8 sm:px-10">
+    <header className="flex h-16 shrink-0 items-center justify-between border-b border-border px-8 sm:px-10">
       <FeatBitLogo />
       <div className="flex items-center gap-7">
         <ThemeToggle />
