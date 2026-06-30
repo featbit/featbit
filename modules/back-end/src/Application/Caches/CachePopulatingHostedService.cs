@@ -23,13 +23,16 @@ public class CachePopulatingHostedService : IHostedService
         {
             using var scope = _serviceProvider.CreateScope();
             var populatingService = scope.ServiceProvider.GetRequiredService<ICachePopulatingService>();
-            await populatingService.PopulateAsync();
+            await populatingService.PopulateAsync(cancellationToken);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            // The host is shutting down
+            throw;
         }
         catch (Exception ex)
         {
-            // Re-throw so the host fails to start. Previously we logged-and-swallowed, which
-            // let the API serve traffic against an empty or partially populated cache.
-            // Failing fast surfaces the problem and lets the orchestrator (Kubernetes,
+            // Re-throw so the host fails to start and let the orchestrator (Kubernetes,
             // systemd, Docker, etc.) drive recovery via its restart policy.
             _logger.LogCritical(ex, "Exception occurred when populating cache. Host will not start.");
             throw;
