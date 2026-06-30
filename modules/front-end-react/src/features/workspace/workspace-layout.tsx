@@ -33,11 +33,11 @@ export function WorkspaceLayout({
   const { t } = useTranslation();
 
   return (
-    <div className="-m-5 min-h-[calc(100vh-4rem)] bg-background px-8 py-8">
+    <div className="-m-5 min-h-[calc(100vh-4rem)] bg-background px-8 py-6">
       <StatusToast message={statusMessage ?? null} />
-      <header className="mb-8 space-y-2">
-        <h1 className="text-3xl font-semibold tracking-normal text-foreground">{t("workspace.title")}</h1>
-        <p className="text-base text-muted-foreground">
+      <header className="mb-5 space-y-1">
+        <h1 className="text-2xl font-semibold tracking-normal text-foreground">{t("workspace.title")}</h1>
+        <p className="text-sm text-muted-foreground">
           {workspace.name} - {workspace.key}
         </p>
       </header>

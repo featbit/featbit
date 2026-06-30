@@ -91,6 +91,15 @@ export async function updateWorkspaceOidcSettings(payload: WorkspaceOidcSettings
   return workspace;
 }
 
+export async function updateWorkspaceLicense(license: string) {
+  const workspace = await workspaceRequest<WorkspaceDetails>("/api/v1/workspaces/license", {
+    method: "PUT",
+    body: JSON.stringify({ license })
+  });
+  persistCurrentWorkspace(workspace);
+  return workspace;
+}
+
 export async function isWorkspaceKeyUsed(key: string) {
   return workspaceRequest<boolean>(`/api/v1/workspaces/is-key-used?key=${encodeURIComponent(key)}`);
 }

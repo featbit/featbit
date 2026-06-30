@@ -230,6 +230,82 @@ i18n.use(initReactI18next).init({
               restrictedBadge: "Restricted",
               restrictedDescription: "You do not have permission to view or edit SSO settings."
             }
+          },
+          license: {
+            workspaceId: "Workspace ID",
+            workspaceIdHelper: "Required when generating a self-hosted license.",
+            copy: "Copy",
+            copyWorkspaceId: "Copy workspace ID",
+            copied: "Copied",
+            licenseKey: "License key",
+            licenseKeyHelper: "Paste your new license key for self-hosted update.",
+            licensePlaceholder: "Enter your license here",
+            permissionNote: "Only workspace administrators can update license keys.",
+            update: "Update license",
+            updating: "Updating",
+            updateSucceeded: "License updated!",
+            invalidLicense: "Invalid license, please contact FeatBit team to get a license!",
+            licenseStatus: "License status",
+            currentPlan: "Current plan",
+            source: "License source",
+            saasSource: "SaaS",
+            statusLabel: "Status",
+            issuedAt: "Issued at",
+            expires: "Expires",
+            forever: "Forever",
+            daysRemaining: "({{days}} days remaining)",
+            syncDescription: "License details are synchronized with this workspace.",
+            saasSyncDescription: "License details are synchronized with your subscription.",
+            licensedFeatures: "Licensed features",
+            granted: "Granted",
+            notGranted: "Not granted",
+            notIncluded: "Not included",
+            noLicense: "No License Available",
+            noLicenseDescription: "Please contact FeatBit team to get a license or generate a trial license from",
+            status: {
+              active: "Active",
+              expired: "Expired",
+              expiring: "Expiring soon",
+              missing: "Unavailable"
+            },
+            features: {
+              sso: {
+                title: "Single sign-on",
+                description: "Enable SSO via OIDC/SAML"
+              },
+              schedule: {
+                title: "Schedule changes",
+                description: "Schedule feature flag changes"
+              },
+              changeRequest: {
+                title: "Change requests",
+                description: "Review and approve flag changes"
+              },
+              multiOrganization: {
+                title: "Multiple organizations",
+                description: "Manage more than one organization"
+              },
+              globalUsers: {
+                title: "Global users",
+                description: "Manage users across the organization"
+              },
+              shareableSegment: {
+                title: "Shareable segments",
+                description: "Reuse segments across environments"
+              },
+              autoAgents: {
+                title: "Auto agents",
+                description: "Automate agent-driven operations"
+              },
+              fineGrainedAccessControl: {
+                title: "Fine-grained access control",
+                description: "Control access with detailed policies"
+              },
+              flagComparison: {
+                title: "Flag comparison",
+                description: "Compare flags across environments"
+              }
+            }
           }
         }
       }
@@ -460,6 +536,82 @@ i18n.use(initReactI18next).init({
               permissionNote: "只有工作区管理员可以更新 SSO 设置。",
               restrictedBadge: "受限",
               restrictedDescription: "你没有权限查看或编辑 SSO 设置。"
+            }
+          },
+          license: {
+            workspaceId: "Workspace ID",
+            workspaceIdHelper: "生成自托管许可证时需要提供此 ID。",
+            copy: "复制",
+            copyWorkspaceId: "复制 Workspace ID",
+            copied: "已复制",
+            licenseKey: "许可证 Key",
+            licenseKeyHelper: "粘贴新的许可证 Key 以更新自托管授权。",
+            licensePlaceholder: "在此输入许可证",
+            permissionNote: "只有工作区管理员可以更新许可证 Key。",
+            update: "更新许可证",
+            updating: "更新中",
+            updateSucceeded: "许可证已更新！",
+            invalidLicense: "许可证无效，请联系 FeatBit 团队获取许可证！",
+            licenseStatus: "许可证状态",
+            currentPlan: "当前套餐",
+            source: "许可证来源",
+            saasSource: "SaaS",
+            statusLabel: "状态",
+            issuedAt: "签发时间",
+            expires: "过期时间",
+            forever: "永久",
+            daysRemaining: "（剩余 {{days}} 天）",
+            syncDescription: "许可证详情已同步到此工作区。",
+            saasSyncDescription: "许可证详情已与你的订阅同步。",
+            licensedFeatures: "授权功能",
+            granted: "已授权",
+            notGranted: "未授权",
+            notIncluded: "未包含",
+            noLicense: "暂无可用许可证",
+            noLicenseDescription: "请联系 FeatBit 团队获取许可证，或从这里生成试用许可证：",
+            status: {
+              active: "有效",
+              expired: "已过期",
+              expiring: "即将过期",
+              missing: "不可用"
+            },
+            features: {
+              sso: {
+                title: "单点登录",
+                description: "通过 OIDC/SAML 启用 SSO"
+              },
+              schedule: {
+                title: "定时变更",
+                description: "定时执行功能开关变更"
+              },
+              changeRequest: {
+                title: "变更请求",
+                description: "审核并批准开关变更"
+              },
+              multiOrganization: {
+                title: "多组织",
+                description: "管理多个组织机构"
+              },
+              globalUsers: {
+                title: "全局用户",
+                description: "跨组织管理用户"
+              },
+              shareableSegment: {
+                title: "共享用户分组",
+                description: "跨环境复用用户分组"
+              },
+              autoAgents: {
+                title: "自动代理",
+                description: "自动化代理相关操作"
+              },
+              fineGrainedAccessControl: {
+                title: "细粒度访问控制",
+                description: "通过细粒度策略控制访问"
+              },
+              flagComparison: {
+                title: "开关对比",
+                description: "跨环境对比功能开关"
+              }
             }
           }
         }
