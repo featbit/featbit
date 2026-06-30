@@ -268,39 +268,81 @@ function LicenseKeySection({
   setValue,
   canUpdate,
   isUpdating,
-  onSubmit
+  onSubmit,
+  currentLicense
 }: {
   value: string;
   setValue: (value: string) => void;
   canUpdate: boolean;
   isUpdating: boolean;
   onSubmit: () => void;
+  currentLicense?: string;
 }) {
   const { t } = useTranslation();
+  const [editing, setEditing] = useState(!currentLicense);
+  const hasCurrentLicense = Boolean(currentLicense);
+
+  function maskLicense(license: string) {
+    if (license.length <= 18) {
+      return license;
+    }
+
+    return `${license.slice(0, 10)}...${license.slice(-8)}`;
+  }
+
+  function startEditing() {
+    setValue("");
+    setEditing(true);
+  }
+
+  function cancelEditing() {
+    setValue(currentLicense ?? "");
+    setEditing(false);
+  }
 
   return (
     <section className="pt-6">
       <h2 className="text-lg font-semibold text-foreground">{t("workspace.license.licenseKey")}</h2>
-      <p className="mt-1 text-sm text-muted-foreground">{t("workspace.license.licenseKeyHelper")}</p>
-      <textarea
-        className="mt-2 min-h-20 w-full resize-y rounded-md border border-input bg-background px-4 py-3 font-mono text-sm text-foreground shadow-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60"
-        value={value}
-        disabled={!canUpdate || isUpdating}
-        placeholder={t("workspace.license.licensePlaceholder")}
-        onChange={(event) => setValue(event.target.value)}
-      />
-      <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-muted-foreground">{t("workspace.license.permissionNote")}</p>
-        <Button
-          type="button"
-          className="self-start gap-2 bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 sm:self-auto"
-          disabled={!canUpdate || isUpdating || !value.trim()}
-          onClick={onSubmit}
-        >
-          <Upload className="h-4 w-4" />
-          {isUpdating ? t("workspace.license.updating") : t("workspace.license.update")}
-        </Button>
-      </div>
+      {hasCurrentLicense && !editing ? (
+        <div className="mt-2 flex min-h-12 items-center gap-3 rounded-md border border-input bg-muted/40 px-4 py-2 dark:bg-muted/20">
+          <LockKeyhole className="h-4 w-4 shrink-0 text-muted-foreground" />
+          <div className="min-w-0 flex-1">
+            <code className="block truncate text-sm font-semibold text-foreground">{maskLicense(currentLicense ?? "")}</code>
+          </div>
+          <Button type="button" variant="outline" size="sm" className="shrink-0 bg-background" disabled={!canUpdate || isUpdating} onClick={startEditing}>
+            {t("workspace.license.replace")}
+          </Button>
+        </div>
+      ) : (
+        <>
+          <p className="mt-1 text-sm text-muted-foreground">{t("workspace.license.licenseKeyHelper")}</p>
+          <textarea
+            className="mt-2 min-h-16 w-full resize-y rounded-md border border-input bg-background px-4 py-3 font-mono text-sm text-foreground shadow-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60"
+            value={value}
+            disabled={!canUpdate || isUpdating}
+            placeholder={t("workspace.license.licensePlaceholder")}
+            onChange={(event) => setValue(event.target.value)}
+          />
+          <div className="mt-3 flex justify-end">
+            <div className="flex gap-2">
+              {hasCurrentLicense ? (
+                <Button type="button" variant="outline" disabled={isUpdating} onClick={cancelEditing}>
+                  {t("workspace.license.cancel")}
+                </Button>
+              ) : null}
+              <Button
+                type="button"
+                className="gap-2 bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500"
+                disabled={!canUpdate || isUpdating || !value.trim()}
+                onClick={onSubmit}
+              >
+                <Upload className="h-4 w-4" />
+                {isUpdating ? t("workspace.license.updating") : t("workspace.license.update")}
+              </Button>
+            </div>
+          </div>
+        </>
+      )}
     </section>
   );
 }
@@ -464,7 +506,14 @@ export function LicensePage({ lang }: { lang: "en" | "zh" }) {
           {!isSaas ? (
             <>
               <WorkspaceIdSection workspace={workspace} onCopied={() => setToastMessage(t("workspace.license.copied"))} />
-              <LicenseKeySection value={licenseValue} setValue={setLicenseValue} canUpdate={canUpdateLicense} isUpdating={isUpdating} onSubmit={onUpdateLicense} />
+              <LicenseKeySection
+                value={licenseValue}
+                setValue={setLicenseValue}
+                canUpdate={canUpdateLicense}
+                isUpdating={isUpdating}
+                onSubmit={onUpdateLicense}
+                currentLicense={workspace.license}
+              />
             </>
           ) : null}
 
