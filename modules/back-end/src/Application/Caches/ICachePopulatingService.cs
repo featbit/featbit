@@ -2,5 +2,5 @@ namespace Application.Caches;
 
 public interface ICachePopulatingService
 {
-    Task PopulateAsync();
+    Task PopulateAsync(CancellationToken stoppingToken);
 }
