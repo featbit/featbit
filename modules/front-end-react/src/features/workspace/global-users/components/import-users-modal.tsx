@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { globalUsersTemplateUrl } from "../global-users-api";
 import { DrawerHeader } from "./shared";
+import { useAnimatedPresence } from "./use-animated-presence";
 
 const MAX_IMPORT_SIZE = 500 * 1024 * 1024;
 
@@ -23,8 +24,9 @@ export function ImportUsersModal({
 }) {
   const { t } = useTranslation();
   const [localError, setLocalError] = useState<string | null>(null);
+  const { presentValue, isClosing } = useAnimatedPresence(open);
 
-  if (!open) {
+  if (!presentValue) {
     return null;
   }
 
@@ -49,8 +51,8 @@ export function ImportUsersModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/35 px-4">
-      <div className="w-full max-w-[560px] rounded-md border border-border bg-popover text-popover-foreground shadow-xl">
+    <div className={cn("fixed inset-0 z-50 flex items-center justify-center bg-black/35 px-4", isClosing ? "fb-overlay-exit" : "fb-overlay-enter")}>
+      <div className={cn("w-full max-w-[560px] rounded-md border border-border bg-popover text-popover-foreground shadow-xl", isClosing ? "fb-modal-exit" : "fb-modal-enter")}>
         <DrawerHeader
           title={t("workspace.globalUsers.import.title")}
           subtitle={t("workspace.globalUsers.import.intro")}
@@ -88,11 +90,6 @@ export function ImportUsersModal({
             />
           </label>
           {localError || error ? <p className="text-sm text-destructive">{localError ?? error}</p> : null}
-        </div>
-        <div className="flex justify-end gap-2 border-t border-border px-6 py-4">
-          <Button variant="outline" disabled={uploading} onClick={onClose}>
-            {t("workspace.globalUsers.import.cancel")}
-          </Button>
         </div>
       </div>
     </div>

@@ -1,29 +1,33 @@
 import { Copy } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import type { GlobalUser } from "../global-users-api";
 import { DrawerHeader } from "./shared";
+import { useAnimatedPresence } from "./use-animated-presence";
 
 export function DetailsDrawer({ user, onClose, onCopied }: { user: GlobalUser | null; onClose: () => void; onCopied: () => void }) {
   const { t } = useTranslation();
-  if (!user) {
+  const { presentValue, isClosing } = useAnimatedPresence(user);
+
+  if (!presentValue) {
     return null;
   }
 
   const rows = [
-    { name: "keyId", value: user.keyId },
-    { name: "name", value: user.name || t("workspace.globalUsers.unnamedUser") }
+    { name: "keyId", value: presentValue.keyId },
+    { name: "name", value: presentValue.name || t("workspace.globalUsers.unnamedUser") }
   ];
 
   return (
-    <div className="fixed inset-0 z-40 bg-black/10" onClick={onClose}>
-      <aside className="ml-auto h-full w-full max-w-[540px] border-l border-border bg-background shadow-xl" onClick={(event) => event.stopPropagation()}>
+    <div className={cn("fixed inset-0 z-40 bg-black/10", isClosing ? "fb-overlay-exit" : "fb-overlay-enter")} onClick={onClose}>
+      <aside className={cn("ml-auto h-full w-full max-w-[540px] border-l border-border bg-background shadow-xl", isClosing ? "fb-drawer-exit" : "fb-drawer-enter")} onClick={(event) => event.stopPropagation()}>
         <DrawerHeader title={t("workspace.globalUsers.details.title")} onClose={onClose} />
         <div className="space-y-7 overflow-y-auto px-6 py-5">
           <PropertySection title={t("workspace.globalUsers.details.builtIn")} rows={rows} onCopied={onCopied} />
           <PropertySection
             title={t("workspace.globalUsers.details.custom")}
-            rows={user.customizedProperties}
+            rows={presentValue.customizedProperties}
             empty={t("workspace.globalUsers.details.noCustomProperties")}
             alwaysShowCopy
             onCopied={onCopied}

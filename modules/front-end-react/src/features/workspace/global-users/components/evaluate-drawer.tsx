@@ -13,6 +13,7 @@ import {
 } from "../global-users-api";
 import { Pagination } from "./pagination";
 import { ActionLink, DrawerHeader, SearchBox, SimpleTable } from "./shared";
+import { useAnimatedPresence } from "./use-animated-presence";
 
 export function EvaluateDrawer({
   user,
@@ -26,6 +27,7 @@ export function EvaluateDrawer({
   onCopied: () => void;
 }) {
   const { t } = useTranslation();
+  const { presentValue, isClosing } = useAnimatedPresence(user);
   const [tab, setTab] = useState<"flags" | "segments">("flags");
   const [flagSearch, setFlagSearch] = useState("");
   const [debouncedFlagSearch, setDebouncedFlagSearch] = useState("");
@@ -33,8 +35,8 @@ export function EvaluateDrawer({
   const [flags, setFlags] = useState<PagedResult<EndUserFlag>>({ totalCount: 0, items: [] });
   const [segments, setSegments] = useState<EndUserSegment[]>([]);
   const [segmentSearch, setSegmentSearch] = useState("");
-  const flagsRequestKey = user ? `${user.id}:${debouncedFlagSearch}:${flagPage}` : "";
-  const segmentsRequestKey = user?.id ?? "";
+  const flagsRequestKey = presentValue ? `${presentValue.id}:${debouncedFlagSearch}:${flagPage}` : "";
+  const segmentsRequestKey = presentValue?.id ?? "";
   const [loadedFlagsRequestKey, setLoadedFlagsRequestKey] = useState("");
   const [loadedSegmentsRequestKey, setLoadedSegmentsRequestKey] = useState("");
   const isFlagsLoading = Boolean(user && flagsRequestKey !== loadedFlagsRequestKey);
@@ -49,11 +51,11 @@ export function EvaluateDrawer({
   }, [flagSearch]);
 
   useEffect(() => {
-    if (!user) {
+    if (!presentValue) {
       return;
     }
     let cancelled = false;
-    fetchEndUserFlags(user.id, { searchText: debouncedFlagSearch, pageIndex: flagPage - 1, pageSize: 10 })
+    fetchEndUserFlags(presentValue.id, { searchText: debouncedFlagSearch, pageIndex: flagPage - 1, pageSize: 10 })
       .then((result) => {
         if (!cancelled) {
           setFlags(result);
@@ -68,14 +70,14 @@ export function EvaluateDrawer({
     return () => {
       cancelled = true;
     };
-  }, [debouncedFlagSearch, flagPage, flagsRequestKey, user]);
+  }, [debouncedFlagSearch, flagPage, flagsRequestKey, presentValue]);
 
   useEffect(() => {
-    if (!user) {
+    if (!presentValue) {
       return;
     }
     let cancelled = false;
-    fetchEndUserSegments(user.id)
+    fetchEndUserSegments(presentValue.id)
       .then((result) => {
         if (!cancelled) {
           setSegments(result);
@@ -90,28 +92,28 @@ export function EvaluateDrawer({
     return () => {
       cancelled = true;
     };
-  }, [segmentsRequestKey, user]);
+  }, [segmentsRequestKey, presentValue]);
 
-  if (!user) {
+  if (!presentValue) {
     return null;
   }
 
   const filteredSegments = segments.filter((segment) => segment.name.toLowerCase().includes(segmentSearch.trim().toLowerCase()));
 
   return (
-    <div className="fixed inset-0 z-40 bg-black/10" onClick={onClose}>
-      <aside className="ml-auto h-full w-full max-w-[960px] border-l border-border bg-background shadow-xl" onClick={(event) => event.stopPropagation()}>
+    <div className={cn("fixed inset-0 z-40 bg-black/10", isClosing ? "fb-overlay-exit" : "fb-overlay-enter")} onClick={onClose}>
+      <aside className={cn("ml-auto h-full w-full max-w-[960px] border-l border-border bg-background shadow-xl", isClosing ? "fb-drawer-exit" : "fb-drawer-enter")} onClick={(event) => event.stopPropagation()}>
         <DrawerHeader
-          title={user.name || t("workspace.globalUsers.unnamedUser")}
+          title={presentValue.name || t("workspace.globalUsers.unnamedUser")}
           subtitle={
             <span className="inline-flex min-w-0 items-center gap-2">
-              <span className="truncate font-mono">{user.keyId}</span>
+              <span className="truncate font-mono">{presentValue.keyId}</span>
               <Button
                 variant="ghost"
                 size="icon"
                 className="h-6 w-6"
                 onClick={() => {
-                  void navigator.clipboard.writeText(user.keyId);
+                  void navigator.clipboard.writeText(presentValue.keyId);
                   onCopied();
                 }}
               >
