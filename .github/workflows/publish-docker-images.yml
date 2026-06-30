@@ -74,6 +74,8 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.app }}:${{ env.VERSION_TAG }}
+          build-args: |
+            VERSION=${{ env.VERSION_TAG }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -86,5 +88,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/${{ matrix.app }}:${{ env.LATEST_TAG }}
+          build-args: |
+            VERSION=${{ env.VERSION_TAG }}
           cache-from: type=gha
           cache-to: type=gha,mode=max

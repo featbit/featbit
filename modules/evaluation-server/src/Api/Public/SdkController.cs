@@ -19,11 +19,6 @@ public class SdkController : PublicApiControllerBase
     [HttpGet("server/latest-all")]
     public async Task<IActionResult> GetServerSideSdkPayloadAsync([FromQuery] long timestamp = 0)
     {
-        if (!Authenticated)
-        {
-            return Unauthorized();
-        }
-
         var payload = await _dataSyncService.GetServerSdkPayloadAsync(EnvId, timestamp);
         if (payload.IsEmpty())
         {
@@ -42,11 +37,6 @@ public class SdkController : PublicApiControllerBase
     [HttpPost("client/latest-all")]
     public async Task<IActionResult> GetClientSdkPayloadAsync(EndUser endUser, [FromQuery] long timestamp = 0)
     {
-        if (!Authenticated)
-        {
-            return Unauthorized();
-        }
-
         if (!endUser.IsValid())
         {
             return BadRequest("invalid end user");

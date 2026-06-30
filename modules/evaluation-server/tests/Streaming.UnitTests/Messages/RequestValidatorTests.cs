@@ -1,13 +1,12 @@
-﻿using System.Net.WebSockets;
-using Domain.Shared;
+﻿using Domain.Shared;
+using Domain.Shared.Authentication;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Extensions.Logging.Testing;
 using Moq;
 using Streaming.Connections;
 using Streaming.Services;
-using Streaming.UnitTests.Builders;
 
 namespace Streaming.UnitTests.Messages;
 
@@ -21,7 +20,7 @@ public class RequestValidatorTests
 
         var validationResult = await validator.ValidateAsync(context);
 
-        Assert.True(validationResult.IsValid);
+        Assert.Equal(ValidationResultStatus.Valid, validationResult.Status);
         Assert.Empty(validationResult.Reason);
 
         Assert.Single(validationResult.Secrets);
@@ -45,7 +44,7 @@ public class RequestValidatorTests
         var validator = SetupValidator(rpService: rpService.Object);
 
         var validationResult = await validator.ValidateAsync(context);
-        Assert.True(validationResult.IsValid);
+        Assert.Equal(ValidationResultStatus.Valid, validationResult.Status);
         Assert.Empty(validationResult.Reason);
 
         Assert.Equal(2, validationResult.Secrets.Length);
@@ -75,22 +74,10 @@ public class RequestValidatorTests
     }
 
     [Fact]
-    public async Task ValidateAsync_WebSocketNotOpen_FailsWithInvalidWebSocketState()
-    {
-        var abortedWebsocketMock = new Mock<WebSocket>();
-        abortedWebsocketMock.Setup(x => x.State).Returns(WebSocketState.Aborted);
-
-        await EnsureInvalidAsync(
-            expectedReason: "Invalid websocket state: Aborted",
-            webSocket: abortedWebsocketMock.Object
-        );
-    }
-
-    [Fact]
     public async Task ValidateAsync_EmptyToken_FailsWithInvalidToken()
     {
         await EnsureInvalidAsync(
-            expectedReason: "Invalid token: ",
+            expectedReason: "Missing token",
             token: string.Empty
         );
     }
@@ -159,29 +146,42 @@ public class RequestValidatorTests
     }
 
     [Fact]
-    public async Task ValidateAsync_StoreThrowsException_LogsErrorAndRethrows()
+    public async Task ValidateAsync_StoreThrowsException_ReturnsUnavailable()
     {
         var errorStoreMock = new Mock<IStore>();
         errorStoreMock.Setup(x => x.GetSecretAsync(It.IsAny<string>()))
             .Throws(new Exception("Test exception"));
 
-        var logger = new FakeLogger<RequestValidator>();
+        var context = SetupTestContext();
+        var validator = SetupValidator(store: errorStoreMock.Object);
+
+        var validationResult = await validator.ValidateAsync(context);
+
+        Assert.Equal(ValidationResultStatus.Unavailable, validationResult.Status);
+        Assert.Equal("Secret lookup unavailable: Test exception", validationResult.Reason);
+    }
+
+    [Fact]
+    public async Task ParseTokenThrows()
+    {
+        // A throwing ITokenValidator simulates a parsing-stage failure.
+        // It must produce Failed (permanent rejection / WS 4003), never Unavailable (transient / WS 1011).
+        var throwingValidator = new Mock<ITokenValidator>();
+        throwingValidator
+            .Setup(x => x.ValidateAsync(It.IsAny<string?>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new FormatException("Simulated parse error"));
 
         var context = SetupTestContext();
-        var validator = SetupValidator(store: errorStoreMock.Object, logger: logger);
+        var validator = SetupValidator(tokenValidator: throwingValidator.Object);
 
-        await Assert.ThrowsAsync<Exception>(() => validator.ValidateAsync(context));
+        var validationResult = await validator.ValidateAsync(context);
 
-        // assert exception is logged
-        var latestLog = logger.LatestRecord;
-        Assert.Equal(LogLevel.Error, latestLog.Level);
-        Assert.Equal($"Exception occurred while validating request: {context.RawQuery}.", latestLog.Message);
-        Assert.NotNull(latestLog.Exception);
+        Assert.Equal(ValidationResultStatus.Invalid, validationResult.Status);
+        Assert.Empty(validationResult.Secrets);
     }
 
     private static async Task EnsureInvalidAsync(
         string expectedReason,
-        WebSocket? webSocket = null,
         string? type = null,
         string? version = null,
         string? token = null,
@@ -190,12 +190,12 @@ public class RequestValidatorTests
         StreamingOptions? streamingOptions = null,
         IRelayProxyService? rpService = null)
     {
-        var context = SetupTestContext(webSocket, type, version, token);
+        var context = SetupTestContext(type, version, token);
         var validator = SetupValidator(current, store, streamingOptions, rpService);
 
         var validationResult = await validator.ValidateAsync(context);
 
-        Assert.False(validationResult.IsValid);
+        Assert.Equal(ValidationResultStatus.Invalid, validationResult.Status);
         Assert.Equal(expectedReason, validationResult.Reason);
         Assert.Empty(validationResult.Secrets);
     }
@@ -205,6 +205,7 @@ public class RequestValidatorTests
         IStore? store = null,
         StreamingOptions? streamingOptions = null,
         IRelayProxyService? rpService = null,
+        ITokenValidator? tokenValidator = null,
         ILogger<RequestValidator>? logger = null)
     {
         var mockedStore = Mock.Of<IStore>(x =>
@@ -215,30 +216,32 @@ public class RequestValidatorTests
             new TestSystemClock(current ?? TestData.ClientToken.Timestamp),
             store ?? mockedStore,
             streamingOptions ?? new StreamingOptions(),
-            rpService ?? null!,
+            rpService ?? Mock.Of<IRelayProxyService>(),
+            tokenValidator ?? new TokenValidator(),
             logger ?? NullLogger<RequestValidator>.Instance
         );
 
         return validator;
     }
 
-    private static ConnectionContext SetupTestContext(
-        WebSocket? webSocket = null,
+    private static HttpContext SetupTestContext(
         string? type = null,
         string? version = null,
         string? token = null)
     {
-        var openedWebsocketMock = new Mock<WebSocket>();
-        openedWebsocketMock.Setup(x => x.State).Returns(WebSocketState.Open);
+        var httpContext = new DefaultHttpContext
+        {
+            Request =
+            {
+                QueryString = QueryString.Create([
+                    new KeyValuePair<string, string?>("type", type ?? ConnectionType.Client),
+                    new KeyValuePair<string, string?>("version", version ?? ConnectionVersion.V2),
+                    new KeyValuePair<string, string?>("token", token ?? TestData.ClientTokenString)
+                ])
+            }
+        };
 
-        var ctx = new ConnectionContextBuilder()
-            .WithWebSocket(webSocket ?? openedWebsocketMock.Object)
-            .WithType(type ?? ConnectionType.Client)
-            .WithVersion(version ?? ConnectionVersion.V2)
-            .WithToken(token ?? TestData.ClientTokenString)
-            .Build();
-
-        return ctx;
+        return httpContext;
     }
 }
 

@@ -10,7 +10,7 @@ try
         .WriteTo.Console()
         .CreateBootstrapLogger();
 
-    Log.Information("Starting Api service");
+    Log.Information("Starting Api service (version: {Version})", Environment.GetEnvironmentVariable("VERSION") ?? "dev");
 
     WebApplication.CreateBuilder(args)
         .RegisterServices()

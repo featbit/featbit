@@ -4,5 +4,5 @@ namespace Infrastructure.Caches.None;
 
 public class NonePopulatingService : ICachePopulatingService
 {
-    public Task PopulateAsync() => Task.CompletedTask;
+    public Task PopulateAsync(CancellationToken stoppingToken) => Task.CompletedTask;
 }

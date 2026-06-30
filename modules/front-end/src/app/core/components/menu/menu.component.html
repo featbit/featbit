@@ -100,55 +100,51 @@
   </div>
   <div class="organization-management">
     <button nzType="text" nz-button nz-dropdown [nzDropdownMenu]="menu" nzPlacement="topCenter">
-      <span class="icon-text-btn">
-        <i nz-icon nzType="icons:icon-setting"></i>
-        <span class="menu-item-title" i18n="@@common.account">Account</span>
-      </span>
+      <div class="account-header">
+          <div class="account-avatar">{{ userInitial }}</div>
+          <div class="account-info">
+            <p class="account-name">{{ profile?.name }}</p>
+            <p class="account-email">{{ profile?.email }}</p>
+          </div>
+        </div>
     </button>
     <nz-dropdown-menu #menu="nzDropdownMenu">
-      <ul nz-menu class="dropdown-menu">
-        <li class="centered">
-          {{ profile.email }}
-        </li>
-        <li class="line-container">
-          <span class="line"></span>
-        </li>
-        @if (isInitialized) {
-          <li nz-menu-item [routerLink]="['/organization/profile']">
-            <span class="menu-item">
+      <div class="account-dropdown">
+        <div class="dropdown-nav">
+          @if (isInitialized) {
+            <span class="nav-item" routerLink="/organization/profile">
               <i nz-icon nzType="icons:icon-user"></i>
               <ng-container i18n="@@common.profile">Profile</ng-container>
             </span>
-          </li>
-        }
-        <li nz-menu-item (click)="openSupport()">
-          <span class="menu-item">
+          }
+          <span class="nav-item" (click)="openSupport()">
             <i nz-icon nzType="question-circle" nzTheme="outline"></i>
             <ng-container i18n="@@common.support">Support</ng-container>
           </span>
-        </li>
-        <li nz-menu-item (click)="openDoc()">
-          <span class="menu-item">
+          <span class="nav-item" (click)="openDoc()">
             <i nz-icon nzType="file-text" nzTheme="outline"></i>
             <ng-container i18n="@@common.documentation">Documentation</ng-container>
           </span>
-        </li>
-        <li nz-menu-item (click)="logout.emit()">
-          <span class="menu-item">
+          <span class="nav-item nav-item-danger" (click)="logout.emit()">
             <i nz-icon nzType="icons:icon-logout"></i>
-            <ng-container i18n="@@common.logout">Logout</ng-container>
+            <ng-container i18n="@@common.sign-out">Sign out</ng-container>
           </span>
-        </li>
-        <li class="line-container bottom">
-          <span class="line"></span>
-        </li>
-        <li class="centered">
+        </div>
+
+        <div class="dropdown-divider"></div>
+
+        <div class="dropdown-info">
+          <a href="https://github.com/featbit/featbit" target="_blank" rel="noopener" class="dropdown-version">
+            <i nz-icon nzType="github" nzTheme="outline"></i>
+            <ng-container i18n="@@common.version">Version</ng-container>: {{ appVersion }}
+          </a>
+        </div>
+
+        <div class="dropdown-footer">
           <app-locale-switcher></app-locale-switcher>
-        </li>
-        <li class="centered">
           <app-theme-switcher></app-theme-switcher>
-        </li>
-      </ul>
+        </div>
+      </div>
     </nz-dropdown-menu>
   </div>
 </section>
