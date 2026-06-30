@@ -1,7 +1,7 @@
 using Domain.Shared;
 using Domain.Shared.Authentication;
 
-namespace Domain.UnitTests.Authentication;
+namespace Domain.UnitTests.Shared.Authentication;
 
 public class TokenValidatorTests
 {
@@ -10,13 +10,10 @@ public class TokenValidatorTests
     [Fact]
     public async Task ValidateAsync_WithValidSecret_ReturnsValid()
     {
-        // Arrange
         var secret = TestData.ServerSecretString;
 
-        // Act
         var result = await _validator.ValidateAsync(secret);
 
-        // Assert
         Assert.Equal(TokenValidationStatus.Valid, result.Status);
         Assert.Equal(TestData.ServerEnvId, result.EnvId);
         Assert.Empty(result.Reason);
@@ -29,10 +26,8 @@ public class TokenValidatorTests
     [InlineData("   ")]
     public async Task ValidateAsync_WithInvalidSecret_ReturnsInvalid(string? secret)
     {
-        // Act
         var result = await _validator.ValidateAsync(secret);
 
-        // Assert
         Assert.Equal(TokenValidationStatus.Invalid, result.Status);
         Assert.Equal(Guid.Empty, result.EnvId);
 
@@ -40,12 +35,10 @@ public class TokenValidatorTests
     }
 
     [Fact]
-    public async Task ValidateAsync_ExtractsCorrectEnvIdForClientSecret()
+    public async Task ValidateAsync_ClientSecret_ExtractsCorrectEnvId()
     {
-        // Act
         var result = await _validator.ValidateAsync(TestData.ClientSecretString);
 
-        // Assert
         Assert.Equal(TokenValidationStatus.Valid, result.Status);
         Assert.Equal(TestData.ClientEnvId, result.EnvId);
     }
