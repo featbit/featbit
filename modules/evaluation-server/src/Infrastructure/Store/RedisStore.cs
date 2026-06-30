@@ -19,20 +19,39 @@ public class RedisStore(IRedisClient redisClient, ILogger<RedisStore> logger) : 
         // get flag keys
         var index = RedisKeys.FlagIndex(envId);
         var ids = await Redis.SortedSetRangeByScoreAsync(index, timestamp, exclude: Exclude.Start);
-        var keys = ids.Select(id => RedisKeys.Flag(id!)).ToArray();
+
+        var keys = new RedisKey[ids.Length];
+        for (var i = 0; i < ids.Length; i++)
+        {
+            keys[i] = RedisKeys.Flag(ids[i]!);
+        }
 
         // get flags
-        var tasks = keys.Select(key => Redis.StringGetAsync(key));
+        var tasks = new Task<RedisValue>[keys.Length];
+        for (var i = 0; i < keys.Length; i++)
+        {
+            tasks[i] = Redis.StringGetAsync(keys[i]);
+        }
+
         var values = await Task.WhenAll(tasks);
 
         return FilterOrphans(values, keys, envId, "flag");
     }
 
-    public async Task<IEnumerable<byte[]>> GetFlagsAsync(IEnumerable<string> ids)
+    public async Task<IEnumerable<byte[]>> GetFlagsAsync(string[] ids)
     {
-        var keys = ids.Select(RedisKeys.Flag).ToArray();
+        var keys = new RedisKey[ids.Length];
+        for (var i = 0; i < ids.Length; i++)
+        {
+            keys[i] = RedisKeys.Flag(ids[i]);
+        }
 
-        var tasks = keys.Select(key => Redis.StringGetAsync(key));
+        var tasks = new Task<RedisValue>[keys.Length];
+        for (var i = 0; i < keys.Length; i++)
+        {
+            tasks[i] = Redis.StringGetAsync(keys[i]);
+        }
+
         var values = await Task.WhenAll(tasks);
 
         return FilterOrphans(values, keys, envId: null, "flag");
@@ -64,15 +83,10 @@ public class RedisStore(IRedisClient redisClient, ILogger<RedisStore> logger) : 
         var jsonBytes = new List<byte[]>(values.Length);
         for (var i = 0; i < values.Length; i++)
         {
-            // RedisValue.HasValue is false when the backing key is missing — i.e., the env's
-            // segment-index references a value that no longer exists. Skip the orphan so the
-            // downstream JSON parser doesn't blow up on a null byte[] / null string and abort
-            // the entire env's data-sync for one bad index entry.
-            // Likely causes: segment scope shrink (see bug #10) or a clear-then-repopulate
-            // window leaving the index ahead of the value writes.
+            // skip orphan values
             if (!values[i].HasValue)
             {
-                orphans.Add(keys[i]);
+                orphans.Add(keys[i].ToString());
                 continue;
             }
 
@@ -113,7 +127,7 @@ public class RedisStore(IRedisClient redisClient, ILogger<RedisStore> logger) : 
     // Filters out RedisValues whose backing key was missing (HasValue == false) and logs the
     // orphan keys so operators can spot accumulating drift between an env's index and its values.
     // Without this filter, a single orphan index member produces a null byte[] that crashes
-    // JsonDocument.Parse downstream and aborts the entire env's data-sync (bug #4).
+    // JsonDocument.Parse downstream and aborts the entire env's data-sync.
     private IEnumerable<byte[]> FilterOrphans(
         RedisValue[] values,
         RedisKey[] keys,
@@ -150,13 +164,15 @@ public class RedisStore(IRedisClient redisClient, ILogger<RedisStore> logger) : 
         {
             logger.LogWarning(
                 "Orphan {EntityName} index members in env {EnvId}: {OrphanCount} of {TotalCount}. Missing keys: {MissingKeys}",
-                entityName, envId.Value, orphans.Count, totalCount, string.Join(", ", orphans));
+                entityName, envId.Value, orphans.Count, totalCount, string.Join(", ", orphans)
+            );
         }
         else
         {
             logger.LogWarning(
                 "Orphan {EntityName} ids requested: {OrphanCount} of {TotalCount}. Missing keys: {MissingKeys}",
-                entityName, orphans.Count, totalCount, string.Join(", ", orphans));
+                entityName, orphans.Count, totalCount, string.Join(", ", orphans)
+            );
         }
     }
 }

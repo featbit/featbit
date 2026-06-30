@@ -15,7 +15,7 @@ public class FakeStore : IDbStore
         return Task.FromResult(flags);
     }
 
-    public Task<IEnumerable<byte[]>> GetFlagsAsync(IEnumerable<string> ids)
+    public Task<IEnumerable<byte[]>> GetFlagsAsync(string[] ids)
     {
         var flags = FakeData.FlagsMap.Where(x => ids.Contains(x.Key)).Select(x => x.Value);
         return Task.FromResult(flags);
