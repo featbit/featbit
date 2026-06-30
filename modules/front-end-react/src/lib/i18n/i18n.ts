@@ -261,6 +261,8 @@ i18n.use(initReactI18next).init({
             notIncluded: "Not included",
             noLicense: "No License Available",
             noLicenseDescription: "Please contact FeatBit team to get a license or generate a trial license from",
+            noLicenseSaasDescription: "Subscribe from the Billing page to activate license features for this workspace.",
+            openBilling: "Open Billing",
             status: {
               active: "Active",
               expired: "Expired",
@@ -567,6 +569,8 @@ i18n.use(initReactI18next).init({
             notIncluded: "未包含",
             noLicense: "暂无可用许可证",
             noLicenseDescription: "请联系 FeatBit 团队获取许可证，或从这里生成试用许可证：",
+            noLicenseSaasDescription: "请在账单页面订阅，以为当前工作区启用授权功能。",
+            openBilling: "打开账单",
             status: {
               active: "有效",
               expired: "已过期",

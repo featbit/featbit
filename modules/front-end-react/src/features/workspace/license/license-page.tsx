@@ -111,7 +111,7 @@ export function LicensePage({ lang }: { lang: "en" | "zh" }) {
                 <SummaryRow isSaas={isSaas} license={license} status={status} lang={lang} />
               </div>
             ) : (
-              <EmptyLicenseNotice />
+              <EmptyLicenseNotice isSaas={isSaas} lang={lang} />
             )}
           </section>
 

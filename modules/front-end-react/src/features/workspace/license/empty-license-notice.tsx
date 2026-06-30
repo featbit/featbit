@@ -1,7 +1,9 @@
 import { Info } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
+import { localizedPath, type Lang } from "@/features/layout/context";
 
-export function EmptyLicenseNotice() {
+export function EmptyLicenseNotice({ isSaas, lang }: { isSaas: boolean; lang: Lang }) {
   const { t } = useTranslation();
 
   return (
@@ -10,10 +12,21 @@ export function EmptyLicenseNotice() {
       <div>
         <div className="font-semibold">{t("workspace.license.noLicense")}</div>
         <p className="mt-1 text-blue-900/80 dark:text-blue-100/80">
-          {t("workspace.license.noLicenseDescription")}{" "}
-          <a className="font-medium underline underline-offset-4" href="https://dashboard.featbit.co/account" target="_blank" rel="noreferrer">
-            https://www.featbit.co/pricing
-          </a>
+          {isSaas ? (
+            <>
+              {t("workspace.license.noLicenseSaasDescription")}{" "}
+              <Link className="font-medium underline underline-offset-4" to={localizedPath(lang, "/workspace/billing")}>
+                {t("workspace.license.openBilling")}
+              </Link>
+            </>
+          ) : (
+            <>
+              {t("workspace.license.noLicenseDescription")}{" "}
+              <a className="font-medium underline underline-offset-4" href="https://www.featbit.co/pricing" target="_blank" rel="noreferrer">
+                https://www.featbit.co/pricing
+              </a>
+            </>
+          )}
         </p>
       </div>
     </div>
