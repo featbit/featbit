@@ -36,7 +36,7 @@ export function LoginForm({
       const response = await loginByEmail(credentials.email, credentials.password);
 
       if (response.success) {
-        await completeLogin(response, navigate, `/${lang}`, {
+        await completeLogin(response, navigate, `/${lang}/app`, {
           email: credentials.email,
           rememberMe: credentials.rememberMe
         });

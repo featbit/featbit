@@ -40,7 +40,7 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
           ? await loginBySsoCode(callback.code, callback.state)
           : await loginBySocialCode(callback.code, callback.state);
 
-      await completeLogin(response, navigate, `/${lang}`);
+      await completeLogin(response, navigate, `/${lang}/app`);
     }
   });
 
@@ -108,6 +108,11 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
             {externalLoginError ? (
               <div className="mx-auto mb-6 w-full max-w-[560px] px-8 text-sm font-medium text-red-600 sm:px-12 lg:px-0">
                 {externalLoginError}
+              </div>
+            ) : null}
+            {externalLoginMutation.isPending ? (
+              <div className="mx-auto mb-6 w-full max-w-[560px] px-8 text-sm font-medium text-muted-foreground sm:px-12 lg:px-0">
+                Signing in...
               </div>
             ) : null}
             {content}

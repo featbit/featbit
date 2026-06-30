@@ -75,6 +75,21 @@ test.describe("login page", () => {
     await expect(page.evaluate(() => localStorage.getItem("remembered-email"))).resolves.toBe("test@featbit.com");
   });
 
+  test("handles a social login callback that returns to a non-localized path", async ({ page }) => {
+    await mockAuthEndpoints(page);
+    await mockContextEndpoints(page);
+    await page.route("**/api/v1/social/login", async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      await route.fulfill({ json: { success: true, data: { token: "social-token" } } });
+    });
+
+    await page.goto("/login?social-logged-in=true&code=google-code&state=Google");
+
+    await expect(page.getByText("Signing in...")).toBeVisible();
+    await expect(page).toHaveURL(/\/en\/app$/);
+    await expect(page.evaluate(() => localStorage.getItem("token"))).resolves.toBe("social-token");
+  });
+
   test("navigates to SSO and back to email login", async ({ page }) => {
     await mockAuthEndpoints(page);
 

@@ -1,5 +1,5 @@
 ﻿import type { ReactNode } from "react";
-import { Navigate, Route, Routes, useParams } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation, useParams } from "react-router-dom";
 import { AuthGuard } from "@/features/auth/auth-guard";
 import { AuthenticatedEntry } from "@/features/auth/authenticated-entry";
 import { AuthPage } from "@/features/auth/login-pages";
@@ -19,18 +19,52 @@ function getPreferredLanguage(): SupportedLanguage {
   return "en";
 }
 
+function getExternalLoginRedirect(search: string) {
+  const params = new URLSearchParams(search);
+  const hasCallbackPayload = params.has("code") && params.has("state");
+
+  if (!hasCallbackPayload) {
+    return "";
+  }
+
+  if (params.has("sso-logged-in")) {
+    return `/login/sso${search}`;
+  }
+
+  if (params.has("social-logged-in")) {
+    return `/login${search}`;
+  }
+
+  return "";
+}
+
 function LanguageRedirect() {
   const lang = getPreferredLanguage();
-  const target = getIdentityToken() ? "" : "login";
+  const location = useLocation();
+  const externalLoginRedirect = getExternalLoginRedirect(location.search);
 
-  return <Navigate to={target ? `/${lang}/${target}` : `/${lang}`} replace />;
+  if (externalLoginRedirect) {
+    return <Navigate to={`/${lang}${externalLoginRedirect}`} replace />;
+  }
+
+  const target = getIdentityToken() ? "app" : "login";
+
+  return <Navigate to={`/${lang}/${target}`} replace />;
+}
+
+function LocalizedAuthRedirect({ mode }: { mode: "login" | "sso" }) {
+  const lang = getPreferredLanguage();
+  const location = useLocation();
+  const path = mode === "sso" ? "login/sso" : "login";
+
+  return <Navigate to={`/${lang}/${path}${location.search}`} replace />;
 }
 
 function AuthRoute({ mode }: { mode: "login" | "sso" }) {
   const { lang = getPreferredLanguage() } = useParams();
 
   if (getIdentityToken()) {
-    return <Navigate to={`/${lang}`} replace />;
+    return <Navigate to={`/${lang}/app`} replace />;
   }
 
   return <AuthPage mode={mode} />;
@@ -50,6 +84,8 @@ export function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<LanguageRedirect />} />
+      <Route path="/login" element={<LocalizedAuthRedirect mode="login" />} />
+      <Route path="/login/sso" element={<LocalizedAuthRedirect mode="sso" />} />
       <Route path="/:lang/login" element={<AuthRoute mode="login" />} />
       <Route path="/:lang/login/sso" element={<AuthRoute mode="sso" />} />
       <Route
