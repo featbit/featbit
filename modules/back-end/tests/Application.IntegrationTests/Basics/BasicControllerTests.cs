@@ -2,6 +2,7 @@ using Api.Controllers;
 
 namespace Application.IntegrationTests.Basics;
 
+[Trait("Category", "Host")]
 [Collection(nameof(TestApp))]
 public class BasicControllerTests
 {
@@ -13,7 +14,7 @@ public class BasicControllerTests
     }
 
     [Fact]
-    public async Task NeedAuthentication()
+    public async Task AuthorizedEndpoint_UnauthenticatedRequest_Returns401()
     {
         var response = await _app.GetAsync("api/v1/basic/authorized", authenticated: false);
 
@@ -21,7 +22,7 @@ public class BasicControllerTests
     }
 
     [Fact]
-    public async Task AllowAnonymous()
+    public async Task AllowAnonymousEndpoint_UnauthenticatedRequest_Returns200()
     {
         var response = await _app.GetAsync("api/v1/basic/allow-anonymous", authenticated: false);
 
@@ -29,7 +30,7 @@ public class BasicControllerTests
     }
 
     [Fact]
-    public async Task Authorized()
+    public async Task AuthorizedEndpoint_AuthenticatedRequest_Returns200()
     {
         var response = await _app.GetAsync("api/v1/basic/authorized", authenticated: true);
 
@@ -37,7 +38,7 @@ public class BasicControllerTests
     }
 
     [Fact]
-    public async Task ApiVersioning()
+    public async Task BasicEndpoint_ApiV1AndV2_RoutedToCorrectVersionAction()
     {
         var v1 = await _app.GetAsync("api/v1/basic/string");
         var v2 = await _app.GetAsync("api/v2/basic/string");
@@ -46,7 +47,7 @@ public class BasicControllerTests
     }
 
     [Fact]
-    public async Task HandleException()
+    public async Task ExceptionEndpoint_ActionThrows_ReturnsErrorResponse()
     {
         var response = await _app.GetAsync("api/v1/basic/exception");
 
@@ -54,7 +55,7 @@ public class BasicControllerTests
     }
 
     [Fact]
-    public async Task ModelBinding()
+    public async Task BarEndpoint_PostRequestWithJsonBody_BindsModelAndEchoes()
     {
         var response = await _app.PostAsync("api/v2/basic/bar", new Bar("1", "bar"));
 
@@ -62,7 +63,7 @@ public class BasicControllerTests
     }
 
     [Fact]
-    public async Task NeedLicense()
+    public async Task LicenseFeatureEndpoint_NoLicense_ReturnsForbidden()
     {
         var response = await _app.GetAsync("api/v1/basic/license-feature-check");
 

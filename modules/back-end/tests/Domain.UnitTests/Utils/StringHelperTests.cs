@@ -11,9 +11,9 @@ public class StringHelperTests
     [InlineData("hello*world", @"hello\*world")]
     [InlineData(@"\\\\\\\\", @"\\\\\\\\\\\\\\\\")]
     [InlineData(@"!..{?***?/\\?*^+=:$$}", @"\!\.\.\{\?\*\*\*\?\/\\\\\?\*\^\+\=\:\$\$\}")]
-    public void TestEscapeRegex(string input, string expected)
+    public void EscapeRegex_StringWithSpecialChars_EscapesEachSpecialChar(string input, string expected)
     {
         string actual = StringHelper.EscapeRegex(input);
-        Assert.Equal(actual, expected);
+        Assert.Equal(expected, actual);
     }
 }

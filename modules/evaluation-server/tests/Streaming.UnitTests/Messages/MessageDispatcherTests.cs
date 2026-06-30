@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging.Testing;
 using Moq;
 using Streaming.Connections;
 using Streaming.Messages;
-using Streaming.UnitTests.Connections;
+using Streaming.UnitTests.Builders;
 
 namespace Streaming.UnitTests.Messages;
 
@@ -39,7 +39,7 @@ public class MessageDispatcherTests
     }
 
     [Fact]
-    public async Task EchoSingleFragmentMessage()
+    public async Task DispatchAsync_SingleFragmentEchoMessage_InvokesHandlerAndEchoes()
     {
         SetupReceive([_echoMessage]);
 
@@ -49,7 +49,7 @@ public class MessageDispatcherTests
     }
 
     [Fact]
-    public async Task EchoMultiFragmentMessage()
+    public async Task DispatchAsync_MultiFragmentEchoMessage_ReassemblesAndEchoes()
     {
         var firstHalf = _echoMessage.Take(_echoMessage.Length / 2).ToArray();
         var secondHalf = _echoMessage.Skip(_echoMessage.Length / 2).ToArray();
@@ -62,7 +62,7 @@ public class MessageDispatcherTests
     }
 
     [Fact]
-    public async Task CloseMessage()
+    public async Task DispatchAsync_CloseMessage_LogsAndDoesNotInvokeHandler()
     {
         _wsMock
             .Setup(ws => ws.ReceiveAsync(It.IsAny<Memory<byte>>(), It.IsAny<CancellationToken>()))
@@ -76,7 +76,7 @@ public class MessageDispatcherTests
     }
 
     [Fact]
-    public async Task EmptyMessage()
+    public async Task DispatchAsync_EmptyMessage_LogsAndDoesNotInvokeHandler()
     {
         _wsMock
             .Setup(ws => ws.ReceiveAsync(It.IsAny<Memory<byte>>(), It.IsAny<CancellationToken>()))
@@ -90,7 +90,7 @@ public class MessageDispatcherTests
     }
 
     [Fact]
-    public async Task TooManyFragments()
+    public async Task DispatchAsync_MessageWithMoreThanFourFragments_LogsAndDoesNotInvokeHandler()
     {
         _wsMock.SetupSequence(ws => ws.State)
             .Returns(WebSocketState.Open)
@@ -107,7 +107,7 @@ public class MessageDispatcherTests
     }
 
     [Fact]
-    public async Task NoHandler()
+    public async Task DispatchAsync_UnknownMessageType_LogsNoHandlerWarning()
     {
         var message = "{\"messageType\":\"unknown\",\"data\":{\"value\":\"test\"}}"u8.ToArray();
 
@@ -124,7 +124,7 @@ public class MessageDispatcherTests
     [InlineData("")]
     [InlineData("hello world")]
     [InlineData("{\"messageType\":\"echo\",\"data\":{\"value\":\"test\"")]
-    public async Task InvalidMessage(string message)
+    public async Task DispatchAsync_MalformedJsonMessage_LogsInvalidMessage(string message)
     {
         var bytes = Encoding.UTF8.GetBytes(message);
 

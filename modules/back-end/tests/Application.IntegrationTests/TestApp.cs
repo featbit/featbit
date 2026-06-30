@@ -5,6 +5,7 @@ using System.Text.Json;
 using Application.Identity;
 using Application.Services;
 using Application.Users;
+using Api.Authorization;
 using Domain.Users;
 using Infrastructure.Caches;
 using Infrastructure.MQ;
@@ -41,6 +42,13 @@ public class TestApp : WebApplicationFactory<Program>
             collection.Replace(ServiceDescriptor.Transient<IWorkspaceService, TestWorkspaceService>());
             collection.Replace(ServiceDescriptor.Transient<IUserService, TestUserService>());
             collection.Replace(ServiceDescriptor.Transient<IRefreshTokenService, TestRefreshTokenService>());
+
+            // Replace IPermissionChecker so [Authorize(Permissions.X)] routes don't
+            // hit Postgres via DefaultPermissionChecker.GetRnAsync during auth pipeline
+            // evaluation. With Grant=true the policy succeeds; AuthorizationMiddleware
+            // still issues 401 for unauthenticated requests because the combined policy
+            // also includes DenyAnonymousAuthorizationRequirement.
+            collection.Replace(ServiceDescriptor.Singleton<IPermissionChecker>(new TestPermissionChecker { Grant = true }));
 
             var hostedServices = collection.Where(x =>
                 x.ServiceType.IsAssignableTo(typeof(IHostedService)) &&

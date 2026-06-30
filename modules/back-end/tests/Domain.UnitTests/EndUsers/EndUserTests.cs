@@ -6,7 +6,7 @@ public class EndUserTests
 {
     [Theory]
     [ClassData(typeof(EndUsersToString))]
-    public void EndUserToString(EndUser user, string expected)
+    public void ToString_EndUserVariations_FormatsExpectedString(EndUser user, string expected)
     {
         Assert.Equal(expected, user.ToString());
     }

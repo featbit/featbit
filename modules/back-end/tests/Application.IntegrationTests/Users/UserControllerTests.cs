@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Application.IntegrationTests.Users;
 
+[Trait("Category", "Host")]
 [Collection(nameof(TestApp))]
 public class UserControllerTests
 {
@@ -18,7 +19,7 @@ public class UserControllerTests
     }
 
     [Fact]
-    public async Task GetUserProfile()
+    public async Task GetUserProfile_AuthenticatedExistingUser_ReturnsProfile()
     {
         var response = await _app.GetAsync("/api/v1/user/profile");
 
@@ -26,7 +27,7 @@ public class UserControllerTests
     }
 
     [Fact]
-    public async Task GetUserProfile_NotExist()
+    public async Task GetUserProfile_UserNotInStore_ReturnsNotFound()
     {
         var userNotExist = new User(Guid.NewGuid(), "email", "pwd");
         var authTokens = await _app.GetTokenAsync(userNotExist);

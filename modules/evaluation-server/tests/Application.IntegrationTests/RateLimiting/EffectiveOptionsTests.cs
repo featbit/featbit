@@ -1,7 +1,8 @@
-﻿using Api.RateLimiting;
+using Api.RateLimiting;
 
 namespace Application.IntegrationTests.RateLimiting;
 
+[Trait("Category", "Host")]
 public class EffectiveOptionsTests
 {
     [Theory]
@@ -9,7 +10,7 @@ public class EffectiveOptionsTests
     [InlineData(RateLimiterType.FixedWindow, -1)]
     [InlineData(RateLimiterType.SlidingWindow, 0)]
     [InlineData(RateLimiterType.SlidingWindow, -5)]
-    public void WindowLimiters_Throw_WhenWindowSecondsIsLessThanOne(RateLimiterType limiterType, int windowSeconds)
+    public void Constructor_WindowLimiterWithNonPositiveWindowSeconds_ThrowsArgumentOutOfRange(RateLimiterType limiterType, int windowSeconds)
     {
         Assert.Throws<ArgumentOutOfRangeException>(() =>
             new EffectiveOptions("Sdk", new RateLimitingOptions
@@ -22,7 +23,7 @@ public class EffectiveOptionsTests
     [Theory]
     [InlineData(0)]
     [InlineData(-1)]
-    public void TokenBucket_Throws_WhenReplenishmentPeriodSecondsIsLessThanOne(int replenishmentPeriodSeconds)
+    public void Constructor_TokenBucketWithNonPositiveReplenishmentPeriod_ThrowsArgumentOutOfRange(int replenishmentPeriodSeconds)
     {
         Assert.Throws<ArgumentOutOfRangeException>(() =>
             new EffectiveOptions("Sdk", new RateLimitingOptions
@@ -35,7 +36,7 @@ public class EffectiveOptionsTests
     [Theory]
     [InlineData(RateLimiterType.FixedWindow)]
     [InlineData(RateLimiterType.SlidingWindow)]
-    public void WindowLimiters_Throw_WhenEndpointOverride_SetsWindowSecondsToInvalidValue(RateLimiterType limiterType)
+    public void Constructor_EndpointOverrideReducesWindowSecondsToZero_ThrowsArgumentOutOfRange(RateLimiterType limiterType)
     {
         // The global WindowSeconds is valid, but the endpoint override reduces it to an invalid value.
         var global = new RateLimitingOptions
@@ -49,7 +50,7 @@ public class EffectiveOptionsTests
     }
 
     [Fact]
-    public void Constructor_ReflectsAllGlobalDefaults_WhenNoPolicyEndpointExists()
+    public void Constructor_PolicyHasNoEndpointEntry_ReflectsGlobalDefaults()
     {
         var global = new RateLimitingOptions
         {
@@ -76,7 +77,7 @@ public class EffectiveOptionsTests
     }
 
     [Fact]
-    public void EndpointOverride_OverridesAllFields_WhenAllAreSpecified()
+    public void Constructor_EndpointOverrideWithAllFields_OverridesEveryGlobalValue()
     {
         var global = new RateLimitingOptions
         {
@@ -117,7 +118,7 @@ public class EffectiveOptionsTests
     }
 
     [Fact]
-    public void EndpointOverride_PreservesGlobalDefaults_ForUnspecifiedFields()
+    public void Constructor_EndpointOverrideWithPartialFields_InheritsRemainingFromGlobal()
     {
         var global = new RateLimitingOptions
         {
@@ -136,7 +137,7 @@ public class EffectiveOptionsTests
     }
 
     [Fact]
-    public void EndpointOverride_IsMatchedCaseInsensitively()
+    public void Constructor_PolicyNameDifferentCase_MatchesEndpointOverride()
     {
         // Key stored in upper-case, policy name looked up in lower-case.
         var global = new RateLimitingOptions
@@ -153,7 +154,7 @@ public class EffectiveOptionsTests
     }
 
     [Fact]
-    public void EndpointOverride_ForDifferentPolicy_DoesNotAffectCurrentPolicy()
+    public void Constructor_OverrideForOtherPolicy_DoesNotAffectCurrentPolicy()
     {
         var global = new RateLimitingOptions
         {

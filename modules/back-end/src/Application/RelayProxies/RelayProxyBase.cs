@@ -16,9 +16,9 @@ public class RelayProxyBase
     public Agent[] Agents { get; set; }
 }
 
-public class WebhookBaseValidator : AbstractValidator<RelayProxyBase>
+public class RelayProxyBaseValidator : AbstractValidator<RelayProxyBase>
 {
-    public WebhookBaseValidator()
+    public RelayProxyBaseValidator()
     {
         RuleFor(x => x.Name)
             .NotEmpty().WithErrorCode(ErrorCodes.Required("name"));
