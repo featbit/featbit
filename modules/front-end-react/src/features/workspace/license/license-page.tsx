@@ -241,10 +241,14 @@ function WorkspaceIdSection({ workspace, onCopied }: { workspace: WorkspaceDetai
   }
 
   return (
-    <section className="pt-7">
-      <h2 className="text-lg font-semibold text-foreground">{t("workspace.license.workspaceId")}</h2>
-      <p className="mt-1 text-sm text-muted-foreground">{t("workspace.license.workspaceIdHelper")}</p>
-      <div className="mt-2 flex min-h-12 items-center gap-3 rounded-md border border-input bg-muted/50 px-4 py-2 dark:bg-muted/30">
+    <div className="rounded-md border border-border bg-card p-4 shadow-sm">
+      <div className="mb-3 flex items-baseline justify-between gap-3">
+        <div>
+          <h2 className="text-base font-semibold text-foreground">{t("workspace.license.workspaceId")}</h2>
+          <p className="mt-1 text-xs text-muted-foreground">{t("workspace.license.workspaceIdHelper")}</p>
+        </div>
+      </div>
+      <div className="flex min-h-10 items-center gap-3 rounded-md border border-input bg-muted/50 px-3 py-2 dark:bg-muted/30">
         <LockKeyhole className="h-4 w-4 shrink-0 text-muted-foreground" />
         <code className="min-w-0 flex-1 truncate text-sm font-semibold text-foreground">{workspace.id}</code>
         <TooltipProvider>
@@ -259,7 +263,7 @@ function WorkspaceIdSection({ workspace, onCopied }: { workspace: WorkspaceDetai
           </Tooltip>
         </TooltipProvider>
       </div>
-    </section>
+    </div>
   );
 }
 
@@ -301,10 +305,17 @@ function LicenseKeySection({
   }
 
   return (
-    <section className="pt-6">
-      <h2 className="text-lg font-semibold text-foreground">{t("workspace.license.licenseKey")}</h2>
+    <div className="rounded-md border border-border bg-card p-4 shadow-sm">
+      <div className="mb-3 flex min-h-10 items-start justify-between gap-3">
+        <div>
+          <h2 className="text-base font-semibold text-foreground">{t("workspace.license.licenseKey")}</h2>
+          {hasCurrentLicense && !editing ? null : (
+            <p className="mt-1 text-xs text-muted-foreground">{t("workspace.license.licenseKeyHelper")}</p>
+          )}
+        </div>
+      </div>
       {hasCurrentLicense && !editing ? (
-        <div className="mt-2 flex min-h-12 items-center gap-3 rounded-md border border-input bg-muted/40 px-4 py-2 dark:bg-muted/20">
+        <div className="flex min-h-10 items-center gap-3 rounded-md border border-input bg-muted/40 px-3 py-2 dark:bg-muted/20">
           <LockKeyhole className="h-4 w-4 shrink-0 text-muted-foreground" />
           <div className="min-w-0 flex-1">
             <code className="block truncate text-sm font-semibold text-foreground">{maskLicense(currentLicense ?? "")}</code>
@@ -315,9 +326,8 @@ function LicenseKeySection({
         </div>
       ) : (
         <>
-          <p className="mt-1 text-sm text-muted-foreground">{t("workspace.license.licenseKeyHelper")}</p>
           <textarea
-            className="mt-2 min-h-16 w-full resize-y rounded-md border border-input bg-background px-4 py-3 font-mono text-sm text-foreground shadow-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60"
+            className="min-h-16 w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-mono text-sm text-foreground shadow-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60"
             value={value}
             disabled={!canUpdate || isUpdating}
             placeholder={t("workspace.license.licensePlaceholder")}
@@ -343,6 +353,38 @@ function LicenseKeySection({
           </div>
         </>
       )}
+    </div>
+  );
+}
+
+function LicenseAccessSection({
+  workspace,
+  licenseValue,
+  setLicenseValue,
+  canUpdateLicense,
+  isUpdating,
+  onCopied,
+  onUpdateLicense
+}: {
+  workspace: WorkspaceDetails;
+  licenseValue: string;
+  setLicenseValue: (value: string) => void;
+  canUpdateLicense: boolean;
+  isUpdating: boolean;
+  onCopied: () => void;
+  onUpdateLicense: () => void;
+}) {
+  return (
+    <section className="grid gap-4 pt-6 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
+      <WorkspaceIdSection workspace={workspace} onCopied={onCopied} />
+      <LicenseKeySection
+        value={licenseValue}
+        setValue={setLicenseValue}
+        canUpdate={canUpdateLicense}
+        isUpdating={isUpdating}
+        onSubmit={onUpdateLicense}
+        currentLicense={workspace.license}
+      />
     </section>
   );
 }
@@ -504,17 +546,15 @@ export function LicensePage({ lang }: { lang: "en" | "zh" }) {
       ) : (
         <div className="pb-8">
           {!isSaas ? (
-            <>
-              <WorkspaceIdSection workspace={workspace} onCopied={() => setToastMessage(t("workspace.license.copied"))} />
-              <LicenseKeySection
-                value={licenseValue}
-                setValue={setLicenseValue}
-                canUpdate={canUpdateLicense}
-                isUpdating={isUpdating}
-                onSubmit={onUpdateLicense}
-                currentLicense={workspace.license}
-              />
-            </>
+            <LicenseAccessSection
+              workspace={workspace}
+              licenseValue={licenseValue}
+              setLicenseValue={setLicenseValue}
+              canUpdateLicense={canUpdateLicense}
+              isUpdating={isUpdating}
+              onCopied={() => setToastMessage(t("workspace.license.copied"))}
+              onUpdateLicense={onUpdateLicense}
+            />
           ) : null}
 
           <section className={cn(isSaas ? "pt-7" : "pt-7")}>
