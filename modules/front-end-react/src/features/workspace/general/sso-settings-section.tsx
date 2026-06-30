@@ -1,4 +1,4 @@
-import { Eye, EyeOff, Loader2, LockKeyhole, Save, ShieldCheck } from "lucide-react";
+import { Eye, EyeOff, KeyRound, Loader2, LockKeyhole, Save, ShieldCheck } from "lucide-react";
 import type { FieldErrors, UseFormRegister, UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -87,8 +87,30 @@ function RestrictedSsoSettings() {
   );
 }
 
+function UnlicensedSsoSettings() {
+  const { t } = useTranslation();
+
+  return (
+    <div className="flex flex-col gap-4 rounded-md border border-border bg-muted/30 p-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex min-w-0 gap-3">
+        <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border bg-background text-muted-foreground">
+          <KeyRound className="h-4 w-4" />
+        </span>
+        <div className="min-w-0 space-y-1">
+          <h3 className="text-sm font-semibold text-foreground">{t("workspace.general.sso.title")}</h3>
+          <p className="text-sm text-muted-foreground">{t("workspace.general.sso.unlicensedDescription")}</p>
+        </div>
+      </div>
+      <span className="inline-flex w-fit shrink-0 items-center rounded-md border border-border bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground">
+        {t("workspace.general.sso.unlicensedBadge")}
+      </span>
+    </div>
+  );
+}
+
 export function SsoSettingsSection({
   form,
+  isLicensed,
   canUpdate,
   isSaving,
   secretVisible,
@@ -96,6 +118,7 @@ export function SsoSettingsSection({
   onSubmit
 }: {
   form: UseFormReturn<SsoFormValues>;
+  isLicensed: boolean;
   canUpdate: boolean;
   isSaving: boolean;
   secretVisible: boolean;
@@ -106,7 +129,9 @@ export function SsoSettingsSection({
 
   return (
     <Section title={t("workspace.general.accessConfiguration")} className="pb-2">
-      {canUpdate ? (
+      {!isLicensed ? (
+        <UnlicensedSsoSettings />
+      ) : canUpdate ? (
         <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
           <div className="flex items-center gap-3">
             <h3 className="text-base font-semibold text-foreground">{t("workspace.general.sso.title")}</h3>

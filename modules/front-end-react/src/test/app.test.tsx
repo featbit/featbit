@@ -200,6 +200,35 @@ describe("App scaffold", () => {
     expect(screen.queryByRole("button", { name: "Save SSO settings" })).not.toBeInTheDocument();
   });
 
+  it("shows single sign-on as a paid feature when the workspace has no license", async () => {
+    mockSignedInContext({
+      workspace: { license: undefined },
+      workspaceDetails: {
+        license: undefined,
+        sso: { oidc: {} }
+      }
+    });
+    localStorage.setItem("token", "component-token");
+    localStorage.setItem("auth", JSON.stringify({ email: "test@featbit.com", name: "Test User" }));
+    localStorage.setItem(
+      "current-workspace",
+      JSON.stringify({ id: "ws-1", key: "acme", name: "Acme Workspace" })
+    );
+    window.history.pushState({}, "", "/en/workspace");
+
+    render(<App />);
+
+    await screen.findByRole("heading", { name: "Workspace" });
+    await waitFor(() => {
+      expect(screen.getByRole("heading", { name: "Access configuration" })).toBeInTheDocument();
+    });
+    expect(screen.getByRole("heading", { name: "Single sign-on" })).toBeInTheDocument();
+    expect(screen.getByText("License required")).toBeInTheDocument();
+    expect(screen.getByText("Single sign-on is a paid feature. Add a license that includes SSO to enable it for this workspace.")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Client ID")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Save SSO settings" })).not.toBeInTheDocument();
+  });
+
   it("joins the selected organization after a first SSO login", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
       const url = String(input);

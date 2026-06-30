@@ -175,16 +175,15 @@ export function GeneralPage({ lang }: { lang: "en" | "zh" }) {
             onSubmit={onSaveIdentity}
           />
 
-          {ssoLicensed ? (
-            <SsoSettingsSection
-              form={ssoForm}
-              canUpdate={canUpdateSsoSettings}
-              isSaving={ssoSaving}
-              secretVisible={secretVisible}
-              setSecretVisible={setSecretVisible}
-              onSubmit={onSaveSso}
-            />
-          ) : null}
+          <SsoSettingsSection
+            form={ssoForm}
+            isLicensed={ssoLicensed}
+            canUpdate={canUpdateSsoSettings}
+            isSaving={ssoSaving}
+            secretVisible={secretVisible}
+            setSecretVisible={setSecretVisible}
+            onSubmit={onSaveSso}
+          />
         </div>
       )}
     </WorkspaceLayout>

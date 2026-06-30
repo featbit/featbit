@@ -228,7 +228,9 @@ i18n.use(initReactI18next).init({
               hideSecret: "Hide client secret",
               permissionNote: "Only workspace administrators can update SSO settings.",
               restrictedBadge: "Restricted",
-              restrictedDescription: "You do not have permission to view or edit SSO settings."
+              restrictedDescription: "You do not have permission to view or edit SSO settings.",
+              unlicensedBadge: "License required",
+              unlicensedDescription: "Single sign-on is a paid feature. Add a license that includes SSO to enable it for this workspace."
             }
           },
           license: {
@@ -536,7 +538,9 @@ i18n.use(initReactI18next).init({
               hideSecret: "隐藏 client secret",
               permissionNote: "只有工作区管理员可以更新 SSO 设置。",
               restrictedBadge: "受限",
-              restrictedDescription: "你没有权限查看或编辑 SSO 设置。"
+              restrictedDescription: "你没有权限查看或编辑 SSO 设置。",
+              unlicensedBadge: "需要许可证",
+              unlicensedDescription: "单点登录是付费功能。请添加包含 SSO 的许可证以为此工作区启用该功能。"
             }
           },
           license: {
