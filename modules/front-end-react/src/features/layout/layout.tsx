@@ -103,9 +103,9 @@ export function Layout() {
 
   return (
     <TooltipProvider delayDuration={150}>
-      <div className="flex min-h-screen bg-background text-foreground">
+      <div className="flex h-screen overflow-hidden bg-background text-foreground">
         <Sidebar lang={lang} collapsed={collapsed} setCollapsed={setCollapsed} />
-        <div className="flex min-w-0 flex-1 flex-col">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           <header className="flex h-16 shrink-0 items-center gap-4 border-b border-border bg-background px-5">
             <ContextBar
               workspace={workspace}
@@ -116,7 +116,7 @@ export function Layout() {
             />
             <PlanBadge lang={lang} workspace={workspace} />
           </header>
-          <main className="min-h-0 flex-1 bg-muted/30 p-5">
+          <main className="min-h-0 flex-1 overflow-y-auto bg-muted/30 p-5">
             <Outlet />
           </main>
         </div>

@@ -281,7 +281,7 @@ export function Sidebar({
   return (
     <aside
       className={cn(
-        "flex h-screen shrink-0 flex-col border-r border-border bg-card transition-[width] duration-200",
+        "flex h-screen shrink-0 flex-col overflow-hidden border-r border-border bg-card transition-[width] duration-200",
         collapsed ? "w-[4.5rem]" : "w-64"
       )}
     >
@@ -403,7 +403,7 @@ function AccountMenu({ lang, collapsed }: { lang: Lang; collapsed: boolean }) {
   );
 
   return (
-    <div className="border-t border-border p-1">
+    <div className="shrink-0 border-t border-border p-1">
       <DropdownMenu open={accountMenuOpen} onOpenChange={setAccountMenuOpen}>
         {collapsed ? (
           <Tooltip>
