@@ -5,6 +5,7 @@ import { AuthenticatedEntry } from "@/features/auth/authenticated-entry";
 import { AuthPage } from "@/features/auth/login-pages";
 import { getIdentityToken } from "@/features/auth/auth-api";
 import { Layout, LayoutPlaceholder } from "@/features/layout/layout";
+import { OnboardingPage } from "@/features/onboarding/onboarding-page";
 import { SelectWorkspacePage } from "@/features/workspace-selection/select-workspace-page";
 import { WorkspacePage } from "@/features/workspace/workspace-page";
 
@@ -63,10 +64,12 @@ export function AppRoutes() {
         path="/:lang/onboarding"
         element={
           <AuthGuard>
-            <LayoutPlaceholder />
+            <Layout />
           </AuthGuard>
         }
-      />
+      >
+        <Route index element={<OnboardingPage />} />
+      </Route>
       <Route
         path="/:lang/*"
         element={

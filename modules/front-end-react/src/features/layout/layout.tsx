@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Outlet, useParams } from "react-router-dom";
+import { Outlet, useLocation, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import {
@@ -14,11 +14,20 @@ import {
   PlanBadge,
   resolveLang,
   saveCurrentProjectEnv,
-  type Project
+  type Project,
+  type ProjectEnv
 } from "./context";
 import { Sidebar } from "./nav";
 
 const SIDEBAR_STORAGE_KEY = "featbit:sidebar-collapsed";
+const onboardingProjectEnv: ProjectEnv = {
+  projectId: "setup",
+  projectName: "Setup project",
+  projectKey: "setup-project",
+  envId: "prod",
+  envKey: "prod",
+  envName: "Production"
+};
 
 function EmptyWorkspace() {
   const { t } = useTranslation();
@@ -34,12 +43,14 @@ function EmptyWorkspace() {
 
 export function Layout() {
   const params = useParams();
+  const location = useLocation();
   const lang = resolveLang(params.lang);
+  const isOnboarding = location.pathname.endsWith("/onboarding");
   const { i18n } = useTranslation();
   const [collapsed, setCollapsedState] = useState(() => localStorage.getItem(SIDEBAR_STORAGE_KEY) === "true");
   const [workspace, setWorkspace] = useState(() => getCurrentWorkspace());
   const [organization, setOrganization] = useState(() => getCurrentOrganization());
-  const [currentProjectEnv, setCurrentProjectEnv] = useState(() => getCurrentProjectEnv());
+  const [currentProjectEnv, setCurrentProjectEnv] = useState(() => isOnboarding ? onboardingProjectEnv : getCurrentProjectEnv());
   const [projects, setProjects] = useState<Project[]>(() => normalizeProjects(fallbackProjects));
 
   function setCollapsed(nextCollapsed: boolean) {
@@ -56,13 +67,18 @@ export function Layout() {
 
     async function loadContext() {
       try {
+        setWorkspace(getCurrentWorkspace());
+        setOrganization(getCurrentOrganization());
+
+        if (isOnboarding) {
+          setCurrentProjectEnv(onboardingProjectEnv);
+          return;
+        }
+
         const loadedProjects = await fetchProjects();
         if (cancelled) {
           return;
         }
-
-        setWorkspace(getCurrentWorkspace());
-        setOrganization(getCurrentOrganization());
 
         if (loadedProjects.length > 0) {
           const normalizedProjects = normalizeProjects(loadedProjects);
@@ -83,7 +99,7 @@ export function Layout() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [isOnboarding]);
 
   return (
     <TooltipProvider delayDuration={150}>

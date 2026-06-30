@@ -129,6 +129,62 @@ i18n.use(initReactI18next).init({
             joinOrganization: "Error happened, please login again."
           }
         },
+        onboarding: {
+          eyebrow: "Workspace onboarding",
+          title: "Set up your organization",
+          subtitle: "Create your first project and environments so your team can start shipping flags.",
+          formTitle: "Configure launch context",
+          formDescription: "These values become the top-level organization, the first project, and the default environment pair.",
+          complete: "Complete setup",
+          signOut: "Sign out",
+          stats: {
+            organization: "Organization",
+            project: "Project key",
+            environments: "Environments"
+          },
+          organization: {
+            section: "Organization",
+            sectionDescription: "Name the organization that owns projects, members, and workspace-level governance.",
+            name: "Organization name",
+            key: "Organization key",
+            placeholder: "Default Organization",
+            helper: "You can rename this later in Organization settings."
+          },
+          project: {
+            section: "Project",
+            sectionDescription: "Create the first product surface where feature flags and segments will live.",
+            name: "Project name",
+            key: "Project key",
+            namePlaceholder: "Example project",
+            keyPlaceholder: "example-project",
+            helper: "Project key is generated from the project name and can be edited before setup."
+          },
+          environments: {
+            section: "Default environments",
+            sectionDescription: "FeatBit starts every project with a safe test environment and a production target.",
+            helper: "Each environment gets its own SDK secret. Test in Dev before rolling out to Prod.",
+            devDescription: "Use Dev for local integration, SDK checks, and safe internal testing.",
+            prodDescription: "Use Prod for live rollout, targeting rules, and production traffic."
+          },
+          preview: {
+            title: "What will be created",
+            description: "FeatBit creates a project with Dev and Prod environments using separate SDK secrets.",
+            organizationFallback: "Default Organization",
+            projectFallback: "Example project",
+            sdkSecret: "SDK secret",
+            environments: "Environments",
+            secrets: "SDK secrets"
+          },
+          checklist: {
+            title: "After setup",
+            organization: "Organization settings are available under Admin.",
+            project: "Project and environments appear in the top context bar.",
+            secrets: "SDK secrets are generated for Dev and Prod."
+          },
+          errors: {
+            submit: "Operation failed, please try again"
+          }
+        },
         workspace: {
           title: "Workspace",
           operationSucceeded: "Operation succeeded",
@@ -302,6 +358,62 @@ i18n.use(initReactI18next).init({
             loadWorkspaces: "加载工作区失败，请重试。",
             loadOrganizations: "加载组织机构失败，请重试。",
             joinOrganization: "发生错误，请重新登录。"
+          }
+        },
+        onboarding: {
+          eyebrow: "工作区初始化",
+          title: "设置你的组织机构",
+          subtitle: "创建第一个项目和环境，让团队开始使用功能开关发布。",
+          formTitle: "配置发布上下文",
+          formDescription: "这些值会成为顶层组织机构、第一个项目以及默认环境组合。",
+          complete: "完成设置",
+          signOut: "退出登录",
+          stats: {
+            organization: "组织机构",
+            project: "项目 Key",
+            environments: "环境"
+          },
+          organization: {
+            section: "组织机构",
+            sectionDescription: "命名用于管理项目、成员和治理配置的组织机构。",
+            name: "组织机构名称",
+            key: "组织机构 Key",
+            placeholder: "Default Organization",
+            helper: "之后可以在组织机构设置中重命名。"
+          },
+          project: {
+            section: "项目",
+            sectionDescription: "创建第一个承载功能开关和用户分组的产品项目。",
+            name: "项目名称",
+            key: "项目 Key",
+            namePlaceholder: "Example project",
+            keyPlaceholder: "example-project",
+            helper: "项目 Key 会根据项目名称自动生成，完成设置前仍可编辑。"
+          },
+          environments: {
+            section: "默认环境",
+            sectionDescription: "FeatBit 会为每个项目创建测试环境和生产环境。",
+            helper: "每个环境都有独立的 SDK secret。先在 Dev 中测试，再发布到 Prod。",
+            devDescription: "Dev 用于本地集成、SDK 检查和安全的内部测试。",
+            prodDescription: "Prod 用于线上发布、定向规则和生产流量。"
+          },
+          preview: {
+            title: "将要创建",
+            description: "FeatBit 会创建一个包含 Dev 和 Prod 环境的项目，并为每个环境生成独立 SDK secret。",
+            organizationFallback: "Default Organization",
+            projectFallback: "Example project",
+            sdkSecret: "SDK secret",
+            environments: "环境",
+            secrets: "SDK secrets"
+          },
+          checklist: {
+            title: "完成设置后",
+            organization: "可以在管理区域中调整组织机构设置。",
+            project: "项目和环境会出现在顶部上下文栏。",
+            secrets: "系统会为 Dev 和 Prod 生成 SDK secret。"
+          },
+          errors: {
+            submit: "操作失败，请重试"
           }
         },
         workspace: {

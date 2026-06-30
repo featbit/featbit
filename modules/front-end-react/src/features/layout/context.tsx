@@ -349,7 +349,7 @@ async function getRefreshedToken() {
   return refreshTokenPromise;
 }
 
-async function fetchApi<T>(
+export async function fetchApi<T>(
   path: string,
   token = getIdentityToken(),
   retryOnUnauthorized = true,
@@ -358,7 +358,10 @@ async function fetchApi<T>(
   const response = await fetch(`${apiOrigin()}${path}`, {
     credentials: "include",
     ...init,
-    headers: authHeaders(token)
+    headers: {
+      ...authHeaders(token),
+      ...init?.headers
+    }
   });
 
   if (response.status === 401 && retryOnUnauthorized) {
