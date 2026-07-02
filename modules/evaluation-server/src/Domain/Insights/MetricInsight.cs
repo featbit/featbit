@@ -6,8 +6,8 @@ namespace Domain.Insights;
 
 public partial class MetricInsight
 {
-    [GeneratedRegex("^([a-zA-Z0-9-]+)$")]
-    private static partial Regex AlphaNumericRegex();
+    [GeneratedRegex("^([a-zA-Z0-9_-]+)$")]
+    private static partial Regex EventNameRegex();
 
     public string Route { get; set; }
 
@@ -23,7 +23,8 @@ public partial class MetricInsight
 
     public bool IsValid()
     {
-        if (string.IsNullOrWhiteSpace(EventName) || !AlphaNumericRegex().IsMatch(EventName))
+        // event name must be non-empty, less than 40 characters, and contain only alphanumeric characters, underscores, or hyphens
+        if (string.IsNullOrWhiteSpace(EventName) || EventName.Length > 40 || !EventNameRegex().IsMatch(EventName))
         {
             return false;
         }

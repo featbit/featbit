@@ -5,13 +5,13 @@ namespace Domain.Insights;
 
 public class Insight
 {
-    public virtual EndUser? User { get; set; }
+    public EndUser? User { get; set; }
 
     public VariationInsight[] Variations { get; set; } = [];
 
     public MetricInsight[] Metrics { get; set; } = [];
 
-    public virtual bool IsValid()
+    public bool IsValid()
     {
         if (User == null || !User.IsValid())
         {
@@ -31,12 +31,12 @@ public class Insight
         return true;
     }
 
-    public virtual EndUserMessage EndUserMessage(Guid envId)
+    public EndUserMessage EndUserMessage(Guid envId)
     {
         return new EndUserMessage(envId, User!);
     }
 
-    public virtual ICollection<InsightMessage> InsightMessages(Guid envId)
+    public ICollection<InsightMessage> InsightMessages(Guid envId)
     {
         var messages = new List<InsightMessage>();
         var envIdString = $"{envId}";
