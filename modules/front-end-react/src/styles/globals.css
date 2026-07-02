@@ -2,6 +2,62 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@keyframes enter {
+  from {
+    opacity: var(--tw-enter-opacity, 1);
+    transform: translate3d(var(--tw-enter-translate-x, 0), var(--tw-enter-translate-y, 0), 0) scale3d(var(--tw-enter-scale, 1), var(--tw-enter-scale, 1), var(--tw-enter-scale, 1));
+  }
+}
+
+@keyframes exit {
+  to {
+    opacity: var(--tw-exit-opacity, 1);
+    transform: translate3d(var(--tw-exit-translate-x, 0), var(--tw-exit-translate-y, 0), 0) scale3d(var(--tw-exit-scale, 1), var(--tw-exit-scale, 1), var(--tw-exit-scale, 1));
+  }
+}
+
+@utility animate-in {
+  animation-duration: 150ms;
+  animation-name: enter;
+  --tw-enter-opacity: 1;
+  --tw-enter-scale: 1;
+  --tw-enter-translate-x: 0;
+  --tw-enter-translate-y: 0;
+}
+
+@utility animate-out {
+  animation-duration: 150ms;
+  animation-name: exit;
+  --tw-exit-opacity: 1;
+  --tw-exit-scale: 1;
+  --tw-exit-translate-x: 0;
+  --tw-exit-translate-y: 0;
+}
+
+@utility fade-in-0 {
+  --tw-enter-opacity: 0;
+}
+
+@utility fade-out-0 {
+  --tw-exit-opacity: 0;
+}
+
+@utility zoom-in-95 {
+  --tw-enter-scale: 0.95;
+}
+
+@utility zoom-out-95 {
+  --tw-exit-scale: 0.95;
+}
+
+@utility slide-in-from-right {
+  --tw-enter-translate-x: 100%;
+}
+
+@utility slide-out-to-right {
+  --tw-exit-translate-x: 100%;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
