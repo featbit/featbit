@@ -49,7 +49,7 @@ export function IdentitySettingsSection({
             <p className="text-sm text-muted-foreground">{t("workspace.general.identity.helper")}</p>
             <PermissionNote show={!canUpdate} text={t("workspace.general.identity.permissionNote")} />
           </div>
-          <Button type="submit" disabled={!canUpdate || isSaving} className="bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500">
+          <Button type="submit" disabled={!canUpdate || isSaving}>
             {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             {isSaving ? t("workspace.saving") : t("workspace.general.identity.save")}
           </Button>

@@ -1,6 +1,7 @@
 import { Eye, EyeOff, KeyRound, Loader2, LockKeyhole, Save, ShieldCheck } from "lucide-react";
 import type { FieldErrors, UseFormRegister, UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { InputField, TextInput } from "./form-fields";
 import { Section } from "./workspace-shell";
@@ -36,15 +37,17 @@ function SsoFields({
             className="pr-10"
             {...register("clientSecret")}
           />
-          <button
+          <Button
             type="button"
-            className="absolute inset-y-0 right-2 inline-flex w-8 cursor-pointer items-center justify-center rounded-md text-muted-foreground hover:text-foreground disabled:cursor-default disabled:opacity-50"
+            variant="ghost"
+            size="icon"
+            className="absolute inset-y-1 right-2 h-auto w-8 text-muted-foreground hover:text-foreground"
             aria-label={secretVisible ? t("workspace.general.sso.hideSecret") : t("workspace.general.sso.showSecret")}
             disabled={disabled}
             onClick={() => setSecretVisible(!secretVisible)}
           >
             {secretVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-          </button>
+          </Button>
         </div>
       </InputField>
       <InputField id="tokenEndpoint" label={t("workspace.general.sso.tokenEndpoint")} error={errors.tokenEndpoint?.message}>
@@ -80,9 +83,9 @@ function RestrictedSsoSettings() {
           <p className="text-sm text-muted-foreground">{t("workspace.general.sso.restrictedDescription")}</p>
         </div>
       </div>
-      <span className="inline-flex w-fit shrink-0 items-center rounded-md border border-border bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground">
+      <Badge variant="outline" className="w-fit shrink-0 bg-background py-1 font-medium text-muted-foreground">
         {t("workspace.general.sso.restrictedBadge")}
-      </span>
+      </Badge>
     </div>
   );
 }
@@ -101,9 +104,9 @@ function UnlicensedSsoSettings() {
           <p className="text-sm text-muted-foreground">{t("workspace.general.sso.unlicensedDescription")}</p>
         </div>
       </div>
-      <span className="inline-flex w-fit shrink-0 items-center rounded-md border border-border bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground">
+      <Badge variant="outline" className="w-fit shrink-0 bg-background py-1 font-medium text-muted-foreground">
         {t("workspace.general.sso.unlicensedBadge")}
-      </span>
+      </Badge>
     </div>
   );
 }
@@ -146,7 +149,7 @@ export function SsoSettingsSection({
           />
           <div className="flex flex-col gap-4 pt-1 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-muted-foreground">{t("workspace.general.sso.helper")}</p>
-            <Button type="submit" disabled={isSaving} className="bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500">
+            <Button type="submit" disabled={isSaving}>
               {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
               {isSaving ? t("workspace.saving") : t("workspace.general.sso.save")}
             </Button>

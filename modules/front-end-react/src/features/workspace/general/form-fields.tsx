@@ -1,4 +1,6 @@
 import type React from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
 export function InputField({
@@ -16,9 +18,9 @@ export function InputField({
 }) {
   return (
     <div className={cn("space-y-2", className)}>
-      <label htmlFor={id} className="block text-sm font-medium text-foreground">
+      <Label htmlFor={id} className="block text-sm font-medium text-foreground">
         {label}
-      </label>
+      </Label>
       {children}
       {error ? <p className="text-xs font-medium text-destructive">{error}</p> : null}
     </div>
@@ -33,12 +35,12 @@ export function TextInput({
   ...props
 }: React.InputHTMLAttributes<HTMLInputElement> & { id: string; error?: string }) {
   return (
-    <input
+    <Input
       id={id}
       disabled={disabled}
       aria-invalid={Boolean(error)}
       className={cn(
-        "h-11 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground shadow-xs outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/20 disabled:cursor-not-allowed disabled:opacity-60",
+        "h-11 bg-background text-sm focus-visible:ring-2 focus-visible:ring-ring/20 disabled:opacity-60",
         error && "border-destructive focus-visible:border-destructive focus-visible:ring-destructive/20",
         className
       )}

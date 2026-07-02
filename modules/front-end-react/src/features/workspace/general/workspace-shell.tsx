@@ -1,15 +1,16 @@
 import type React from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 export function SkeletonForm() {
   return (
     <div className="space-y-5">
-      <div className="h-6 w-48 animate-pulse rounded bg-muted" />
+      <Skeleton className="h-6 w-48" />
       <div className="grid gap-5 lg:grid-cols-2">
-        <div className="h-16 animate-pulse rounded-md bg-muted" />
-        <div className="h-16 animate-pulse rounded-md bg-muted" />
+        <Skeleton className="h-16" />
+        <Skeleton className="h-16" />
       </div>
-      <div className="h-10 w-full animate-pulse rounded-md bg-muted" />
+      <Skeleton className="h-10 w-full" />
     </div>
   );
 }
