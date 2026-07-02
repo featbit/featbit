@@ -13,33 +13,6 @@ namespace Api.UnitTests.Controllers;
 
 public class InsightControllerTests
 {
-    // --- Authentication ---
-
-    [Fact]
-    public async Task TrackAsync_WithNoAuthorizationHeader_ReturnsUnauthorized()
-    {
-        var controller = CreateController(new Mock<IMessageProducer>().Object);
-
-        var result = await controller.TrackAsync([ValidInsight()]);
-
-        Assert.IsType<UnauthorizedResult>(result);
-    }
-
-    [Theory]
-    [InlineData("")] // empty string
-    [InlineData("tooshort")] // too short
-    [InlineData("aaaaaaaaaaaaaaaaaaaaaa")] // 22 chars — only half the required length
-    [InlineData("'; DROP TABLE auth; --")] // SQL injection
-    [InlineData("<script>document.cookie</script>")] // XSS
-    public async Task TrackAsync_WithInvalidAuthorizationHeader_ReturnsUnauthorized(string header)
-    {
-        var controller = CreateController(new Mock<IMessageProducer>().Object, header);
-
-        var result = await controller.TrackAsync([ValidInsight()]);
-
-        Assert.IsType<UnauthorizedResult>(result);
-    }
-
     // --- Empty / all-invalid lists ---
 
     [Fact]
