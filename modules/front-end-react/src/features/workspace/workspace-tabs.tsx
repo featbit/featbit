@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { localizedPath } from "@/features/layout/context";
 import { cn } from "@/lib/utils";
 
@@ -13,14 +14,23 @@ const workspaceTabs = [
 
 export function WorkspaceTabs({ lang, activeTab }: { lang: "en" | "zh"; activeTab: string }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+
+  function onTabChange(value: string) {
+    const tab = workspaceTabs.find((item) => item.key === value);
+    if (tab) {
+      navigate(localizedPath(lang, tab.href));
+    }
+  }
 
   return (
-    <div className="overflow-x-auto border-b border-border">
-      <nav className="flex min-w-max gap-8" aria-label={t("workspace.tabs.aria")}>
+    <Tabs value={activeTab} onValueChange={onTabChange} className="overflow-x-auto border-b border-border">
+      <TabsList className="flex min-w-max gap-8" aria-label={t("workspace.tabs.aria")}>
         {workspaceTabs.map((tab) => (
-          <Link
+          <TabsTrigger
             key={tab.key}
-            to={localizedPath(lang, tab.href)}
+            value={tab.key}
+            asChild
             className={cn(
               "relative px-0 py-2.5 text-sm font-medium transition-colors after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-transparent after:content-['']",
               activeTab === tab.key
@@ -28,10 +38,10 @@ export function WorkspaceTabs({ lang, activeTab }: { lang: "en" | "zh"; activeTa
                 : "text-muted-foreground hover:text-foreground"
             )}
           >
-            {t(tab.labelKey)}
-          </Link>
+            <Link to={localizedPath(lang, tab.href)}>{t(tab.labelKey)}</Link>
+          </TabsTrigger>
         ))}
-      </nav>
-    </div>
+      </TabsList>
+    </Tabs>
   );
 }

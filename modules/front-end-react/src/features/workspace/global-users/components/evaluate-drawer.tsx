@@ -2,6 +2,8 @@ import { Copy } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import {
   fetchEndUserFlags,
@@ -12,8 +14,7 @@ import {
   type PagedResult
 } from "../global-users-api";
 import { Pagination } from "./pagination";
-import { ActionLink, DrawerHeader, SearchBox, SimpleTable } from "./shared";
-import { useAnimatedPresence } from "./use-animated-presence";
+import { ActionLink, SearchBox, SimpleTable } from "./shared";
 
 export function EvaluateDrawer({
   user,
@@ -27,7 +28,7 @@ export function EvaluateDrawer({
   onCopied: () => void;
 }) {
   const { t } = useTranslation();
-  const { presentValue, isClosing } = useAnimatedPresence(user);
+  const presentValue = user;
   const [tab, setTab] = useState<"flags" | "segments">("flags");
   const [flagSearch, setFlagSearch] = useState("");
   const [debouncedFlagSearch, setDebouncedFlagSearch] = useState("");
@@ -94,25 +95,28 @@ export function EvaluateDrawer({
     };
   }, [segmentsRequestKey, presentValue]);
 
-  if (!presentValue) {
-    return null;
-  }
-
   const filteredSegments = segments.filter((segment) => segment.name.toLowerCase().includes(segmentSearch.trim().toLowerCase()));
 
   return (
-    <div className={cn("fixed inset-0 z-40 bg-black/10", isClosing ? "fb-overlay-exit" : "fb-overlay-enter")} onClick={onClose}>
-      <aside className={cn("ml-auto h-full w-full max-w-[960px] border-l border-border bg-background shadow-xl", isClosing ? "fb-drawer-exit" : "fb-drawer-enter")} onClick={(event) => event.stopPropagation()}>
-        <DrawerHeader
-          title={presentValue.name || t("workspace.globalUsers.unnamedUser")}
-          subtitle={
+    <Sheet open={Boolean(user)} onOpenChange={(open) => {
+      if (!open) {
+        onClose();
+      }
+    }}>
+      <SheetContent className="max-w-[960px] p-0">
+        <SheetHeader className="border-b border-border px-6 py-5 pr-12">
+          <SheetTitle className="truncate">{presentValue?.name || t("workspace.globalUsers.unnamedUser")}</SheetTitle>
+          <SheetDescription asChild>
             <span className="inline-flex min-w-0 items-center gap-2">
-              <span className="truncate font-mono">{presentValue.keyId}</span>
+              <span className="truncate font-mono">{presentValue?.keyId}</span>
               <Button
                 variant="ghost"
                 size="icon"
                 className="h-6 w-6"
                 onClick={() => {
+                  if (!presentValue?.keyId) {
+                    return;
+                  }
                   void navigator.clipboard.writeText(presentValue.keyId);
                   onCopied();
                 }}
@@ -120,57 +124,49 @@ export function EvaluateDrawer({
                 <Copy className="h-3.5 w-3.5" />
               </Button>
             </span>
-          }
-          onClose={onClose}
-        />
+          </SheetDescription>
+        </SheetHeader>
         <div className="px-6 py-4">
-          <div className="flex gap-8 border-b border-border">
-            <EvaluateTab active={tab === "flags"} onClick={() => setTab("flags")}>
-              {t("workspace.globalUsers.evaluate.flags")}
-            </EvaluateTab>
-            <EvaluateTab active={tab === "segments"} onClick={() => setTab("segments")}>
-              {t("workspace.globalUsers.evaluate.segments")}
-            </EvaluateTab>
-          </div>
-          {tab === "flags" ? (
-            <FlagsPanel
-              flags={flags}
-              isLoading={isFlagsLoading}
-              lang={lang}
-              search={flagSearch}
-              page={flagPage}
-              onCopied={onCopied}
-              onPageChange={setFlagPage}
-              onSearchChange={setFlagSearch}
-            />
-          ) : (
-            <SegmentsPanel
-              segments={filteredSegments}
-              isLoading={isSegmentsLoading}
-              lang={lang}
-              search={segmentSearch}
-              onSearchChange={setSegmentSearch}
-            />
-          )}
+          <Tabs value={tab} onValueChange={(value) => setTab(value as "flags" | "segments")}>
+            <TabsList className="flex gap-8 border-b border-border">
+              <TabsTrigger
+                value="flags"
+                className="relative cursor-pointer rounded-none px-0 py-2.5 text-sm font-medium data-[state=active]:text-blue-600 data-[state=active]:after:bg-blue-600 dark:data-[state=active]:text-blue-400 dark:data-[state=active]:after:bg-blue-500 after:absolute after:bottom-[-1px] after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-transparent after:content-['']"
+              >
+                {t("workspace.globalUsers.evaluate.flags")}
+              </TabsTrigger>
+              <TabsTrigger
+                value="segments"
+                className="relative cursor-pointer rounded-none px-0 py-2.5 text-sm font-medium data-[state=active]:text-blue-600 data-[state=active]:after:bg-blue-600 dark:data-[state=active]:text-blue-400 dark:data-[state=active]:after:bg-blue-500 after:absolute after:bottom-[-1px] after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-transparent after:content-['']"
+              >
+                {t("workspace.globalUsers.evaluate.segments")}
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="flags">
+              <FlagsPanel
+                flags={flags}
+                isLoading={isFlagsLoading}
+                lang={lang}
+                search={flagSearch}
+                page={flagPage}
+                onCopied={onCopied}
+                onPageChange={setFlagPage}
+                onSearchChange={setFlagSearch}
+              />
+            </TabsContent>
+            <TabsContent value="segments">
+              <SegmentsPanel
+                segments={filteredSegments}
+                isLoading={isSegmentsLoading}
+                lang={lang}
+                search={segmentSearch}
+                onSearchChange={setSegmentSearch}
+              />
+            </TabsContent>
+          </Tabs>
         </div>
-      </aside>
-    </div>
-  );
-}
-
-function EvaluateTab({ active, children, onClick }: { active: boolean; children: React.ReactNode; onClick: () => void }) {
-  return (
-    <button
-      className={cn(
-        "relative cursor-pointer px-0 py-2.5 text-sm font-medium transition-colors after:absolute after:bottom-[-1px] after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-transparent after:content-['']",
-        active
-          ? "text-blue-600 after:bg-blue-600 dark:text-blue-400 dark:after:bg-blue-500"
-          : "text-muted-foreground hover:text-foreground"
-      )}
-      onClick={onClick}
-    >
-      {children}
-    </button>
+      </SheetContent>
+    </Sheet>
   );
 }
 

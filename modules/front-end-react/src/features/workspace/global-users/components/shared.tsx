@@ -2,6 +2,9 @@ import { Search, X } from "lucide-react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
@@ -29,10 +32,10 @@ export function SearchBox({
   onChange: (value: string) => void;
 }) {
   return (
-    <div className={cn("flex h-10 items-center gap-2 rounded-md border border-input bg-background px-3", className)}>
-      <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
-      <input
-        className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+    <div className={cn("relative", className)}>
+      <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+      <Input
+        className="h-10 bg-background pl-9 text-sm"
         value={value}
         placeholder={placeholder}
         onKeyDown={(event) => event.stopPropagation()}
@@ -44,13 +47,14 @@ export function SearchBox({
 
 export function ActionLink({ children, onClick }: { children: ReactNode; onClick: () => void }) {
   return (
-    <button
+    <Button
       type="button"
-      className="inline-flex cursor-pointer items-center rounded-sm bg-transparent p-0 text-sm font-medium text-foreground transition-colors hover:text-blue-600 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring dark:hover:text-blue-400"
+      variant="link"
+      className="h-auto p-0 text-sm font-medium text-foreground"
       onClick={onClick}
     >
       {children}
-    </button>
+    </Button>
   );
 }
 
@@ -58,13 +62,13 @@ export function TableSkeleton({ columns }: { columns: number }) {
   return (
     <>
       {Array.from({ length: 8 }).map((_, rowIndex) => (
-        <tr key={rowIndex} className="border-b border-border last:border-b-0">
+        <TableRow key={rowIndex} className="last:border-b-0">
           {Array.from({ length: columns }).map((__, columnIndex) => (
-            <td key={columnIndex} className="px-5 py-4">
-              <div className="h-4 w-3/4 animate-pulse rounded bg-muted" />
-            </td>
+            <TableCell key={columnIndex} className="px-5 py-4">
+              <Skeleton className="h-4 w-3/4" />
+            </TableCell>
           ))}
-        </tr>
+        </TableRow>
       ))}
     </>
   );
@@ -108,20 +112,20 @@ export function SimpleTable({ columns, rows, loading }: { columns: string[]; row
   const { t } = useTranslation();
   return (
     <div className="overflow-hidden rounded-md border border-border">
-      <table className="w-full table-fixed text-sm">
-        <thead className="bg-muted/40 text-left text-foreground">
-          <tr>{columns.map((column) => <th key={column} className="px-4 py-3 font-medium">{column}</th>)}</tr>
-        </thead>
-        <tbody className="divide-y divide-border">
+      <Table className="table-fixed">
+        <TableHeader className="bg-muted/40 text-left text-foreground">
+          <TableRow className="hover:bg-transparent">{columns.map((column) => <TableHead key={column} className="px-4 py-3 font-medium text-foreground">{column}</TableHead>)}</TableRow>
+        </TableHeader>
+        <TableBody className="divide-y divide-border">
           {loading ? (
             <TableSkeleton columns={columns.length} />
           ) : rows.length === 0 ? (
-            <tr><td colSpan={columns.length}><StatusMessage title={t("workspace.globalUsers.emptySearch")} /></td></tr>
+            <TableRow><TableCell colSpan={columns.length} className="p-0"><StatusMessage title={t("workspace.globalUsers.emptySearch")} /></TableCell></TableRow>
           ) : rows.map((row, rowIndex) => (
-            <tr key={rowIndex}>{row.map((cell, cellIndex) => <td key={cellIndex} className="truncate px-4 py-3 align-middle">{cell}</td>)}</tr>
+            <TableRow key={rowIndex}>{row.map((cell, cellIndex) => <TableCell key={cellIndex} className="truncate px-4 py-3 align-middle">{cell}</TableCell>)}</TableRow>
           ))}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   );
 }

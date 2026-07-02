@@ -8,6 +8,8 @@ import {
   type ColumnDef
 } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { getCurrentWorkspace, localizedPath } from "@/features/layout/context";
 import { fetchWorkspaceDetails, type WorkspaceDetails } from "../workspace-api";
@@ -174,7 +176,7 @@ export function GlobalUsersPage({ lang }: { lang: "en" | "zh" }) {
             onImportClick={() => setImportOpen(true)}
           />
 
-          <div className="overflow-hidden rounded-md border border-border bg-card">
+          <Card className="overflow-hidden rounded-md shadow-none">
             {error ? (
               <div className="flex items-center justify-between border-b border-border bg-destructive/5 px-5 py-3 text-sm text-destructive">
                 {t("workspace.globalUsers.failedToLoad")}
@@ -191,7 +193,7 @@ export function GlobalUsersPage({ lang }: { lang: "en" | "zh" }) {
               onClearSearch={() => setSearch("")}
               onImportClick={() => setImportOpen(true)}
             />
-          </div>
+          </Card>
           {isGlobalUsersLicensed ? (
             <Pagination
               pageIndex={pageIndex}
@@ -243,7 +245,7 @@ function GlobalUsersToolbar({
       <Tooltip>
         <TooltipTrigger asChild>
           <span>
-            <Button className="h-10 bg-blue-600 px-5 text-white hover:bg-blue-700" disabled={!isGlobalUsersLicensed} onClick={onImportClick}>
+            <Button className="h-10 px-5" disabled={!isGlobalUsersLicensed} onClick={onImportClick}>
               <Upload className="h-4 w-4" />
               {t("workspace.globalUsers.importAction")}
             </Button>
@@ -278,57 +280,57 @@ function GlobalUsersTable({
 
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[760px] table-fixed text-sm">
-        <thead className="border-b border-border text-left text-foreground">
+      <Table className="min-w-[760px] table-fixed">
+        <TableHeader className="border-b border-border text-left text-foreground">
           {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id}>
+            <TableRow key={headerGroup.id} className="hover:bg-transparent">
               {headerGroup.headers.map((header) => (
-                <th key={header.id} className="px-5 py-4 font-semibold">
+                <TableHead key={header.id} className="px-5 py-4 font-semibold text-foreground">
                   <span className="inline-flex items-center gap-1.5">
                     {flexRender(header.column.columnDef.header, header.getContext())}
                     <ChevronsUpDown className="h-3.5 w-3.5 text-muted-foreground" />
                   </span>
-                </th>
+                </TableHead>
               ))}
-            </tr>
+            </TableRow>
           ))}
-        </thead>
-        <tbody>
+        </TableHeader>
+        <TableBody>
           {!isGlobalUsersLicensed ? (
-            <tr>
-              <td colSpan={columnsCount}>
+            <TableRow>
+              <TableCell colSpan={columnsCount} className="p-0">
                 <StatusMessage
                   title={t("workspace.globalUsers.gated.title")}
                   body={t("workspace.globalUsers.gated.body")}
                   action={<Button asChild variant="outline"><a href={localizedPath(lang, "/workspace/license")}>{t("workspace.globalUsers.gated.action")}</a></Button>}
                 />
-              </td>
-            </tr>
+              </TableCell>
+            </TableRow>
           ) : isLoading ? (
             <TableSkeleton columns={columnsCount} />
           ) : table.getRowModel().rows.length === 0 ? (
-            <tr>
-              <td colSpan={columnsCount}>
+            <TableRow>
+              <TableCell colSpan={columnsCount} className="p-0">
                 {hasSearch ? (
                   <StatusMessage title={t("workspace.globalUsers.emptySearch")} action={<Button variant="outline" onClick={onClearSearch}>{t("workspace.globalUsers.clearSearch")}</Button>} />
                 ) : (
                   <StatusMessage title={t("workspace.globalUsers.empty")} action={<Button variant="outline" onClick={onImportClick}>{t("workspace.globalUsers.importUsers")}</Button>} />
                 )}
-              </td>
-            </tr>
+              </TableCell>
+            </TableRow>
           ) : (
             table.getRowModel().rows.map((row) => (
-              <tr key={row.id} className="border-b border-border last:border-b-0">
+              <TableRow key={row.id} className="last:border-b-0">
                 {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id} className="px-5 py-4 align-middle text-foreground">
+                  <TableCell key={cell.id} className="px-5 py-4 align-middle text-foreground">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
+                  </TableCell>
                 ))}
-              </tr>
+              </TableRow>
             ))
           )}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   );
 }

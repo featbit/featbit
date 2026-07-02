@@ -2,10 +2,9 @@ import { FileJson, Loader2, UploadCloud } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { globalUsersTemplateUrl } from "../global-users-api";
-import { DrawerHeader } from "./shared";
-import { useAnimatedPresence } from "./use-animated-presence";
 
 const MAX_IMPORT_SIZE = 500 * 1024 * 1024;
 
@@ -24,11 +23,6 @@ export function ImportUsersModal({
 }) {
   const { t } = useTranslation();
   const [localError, setLocalError] = useState<string | null>(null);
-  const { presentValue, isClosing } = useAnimatedPresence(open);
-
-  if (!presentValue) {
-    return null;
-  }
 
   function validateAndImport(file: File | undefined) {
     setLocalError(null);
@@ -51,13 +45,16 @@ export function ImportUsersModal({
   }
 
   return (
-    <div className={cn("fixed inset-0 z-50 flex items-center justify-center bg-black/35 px-4", isClosing ? "fb-overlay-exit" : "fb-overlay-enter")}>
-      <div className={cn("w-full max-w-[560px] rounded-md border border-border bg-popover text-popover-foreground shadow-xl", isClosing ? "fb-modal-exit" : "fb-modal-enter")}>
-        <DrawerHeader
-          title={t("workspace.globalUsers.import.title")}
-          subtitle={t("workspace.globalUsers.import.intro")}
-          onClose={onClose}
-        />
+    <Dialog open={open} onOpenChange={(nextOpen) => {
+      if (!nextOpen) {
+        onClose();
+      }
+    }}>
+      <DialogContent className="max-w-[560px] p-0">
+        <DialogHeader className="border-b border-border px-6 py-5 pr-12">
+          <DialogTitle className="truncate">{t("workspace.globalUsers.import.title")}</DialogTitle>
+          <DialogDescription>{t("workspace.globalUsers.import.intro")}</DialogDescription>
+        </DialogHeader>
         <div className="space-y-4 px-6 py-5">
           <a className="inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:underline dark:text-blue-400" href={globalUsersTemplateUrl()} target="_blank" rel="noreferrer">
             <FileJson className="h-4 w-4" />
@@ -91,7 +88,7 @@ export function ImportUsersModal({
           </label>
           {localError || error ? <p className="text-sm text-destructive">{localError ?? error}</p> : null}
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -130,7 +130,7 @@ describe("App scaffold", () => {
     render(<App />);
 
     expect(await screen.findByRole("heading", { name: "Workspace" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "General" })).toHaveClass("text-blue-600");
+    expect(screen.getByRole("tab", { name: "General" })).toHaveClass("text-blue-600");
     expect(await screen.findByLabelText("Name")).toHaveValue("Acme Workspace");
     expect(await screen.findByLabelText("Key")).toHaveValue("acme");
     expect(screen.getByRole("heading", { name: "Single sign-on" })).toBeInTheDocument();

@@ -2,6 +2,7 @@ import { ChevronDown, Columns3, RotateCcw } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,7 +10,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
 import { SearchBox } from "./shared";
 
 export function DisplayColumnsMenu({
@@ -64,14 +64,7 @@ export function DisplayColumnsMenu({
                   toggleColumn(option);
                 }}
               >
-                <span
-                  className={cn(
-                    "flex h-4 w-4 items-center justify-center rounded-sm border border-input",
-                    selectedColumns.includes(option) && "border-blue-600 bg-blue-600 text-white"
-                  )}
-                >
-                  {selectedColumns.includes(option) ? "✓" : null}
-                </span>
+                <Checkbox checked={selectedColumns.includes(option)} className="pointer-events-none" />
                 <span className="truncate">{option}</span>
               </DropdownMenuItem>
             ))
