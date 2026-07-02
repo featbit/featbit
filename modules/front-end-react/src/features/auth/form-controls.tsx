@@ -1,5 +1,8 @@
 import type { ChangeEvent, ReactNode } from "react";
 import { useId } from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
 export function Field({
   label,
@@ -30,14 +33,19 @@ export function Field({
 
   return (
     <div className="block">
-      <label className="text-base font-medium text-foreground" htmlFor={inputId}>
+      <Label className="text-base font-medium text-foreground" htmlFor={inputId}>
         {label}
-      </label>
-      <span className="mt-2 flex h-12 items-center gap-4 rounded-md border border-input bg-background px-4 text-muted-foreground shadow-sm transition-colors focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 dark:bg-transparent">
-        {icon}
-        <input
+      </Label>
+      <span className="relative mt-2 block text-muted-foreground">
+        <span className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2">
+          {icon}
+        </span>
+        <Input
           id={inputId}
-          className="min-w-0 flex-1 bg-transparent text-base text-foreground outline-none placeholder:text-muted-foreground"
+          className={cn(
+            "h-12 bg-background pl-12 pr-4 text-base shadow-sm focus-visible:border-blue-500 focus-visible:ring-blue-500 dark:bg-transparent",
+            trailing && "pr-12"
+          )}
           type={type}
           placeholder={placeholder}
           value={value}
@@ -47,7 +55,7 @@ export function Field({
           required={required}
           onChange={onChange}
         />
-        {trailing}
+        {trailing ? <span className="absolute right-4 top-1/2 -translate-y-1/2">{trailing}</span> : null}
       </span>
     </div>
   );

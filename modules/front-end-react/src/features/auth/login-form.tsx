@@ -1,9 +1,12 @@
 import { useMutation } from "@tanstack/react-query";
 import { Building2, Eye, EyeOff, Lock, Mail } from "lucide-react";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import {
   completeLogin,
   getRememberedEmail,
@@ -25,6 +28,7 @@ export function LoginForm({
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const rememberMeId = useId();
   const [email, setEmail] = useState(() => getRememberedEmail());
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -113,21 +117,31 @@ export function LoginForm({
         />
 
         <div className="flex items-center text-base">
-          <label className="flex cursor-pointer items-center gap-3">
-            <input
-              className="h-5 w-5 cursor-pointer rounded border-input bg-background"
-              type="checkbox"
+          <div className="flex items-center gap-3">
+            <Checkbox
+              id={rememberMeId}
+              className="h-5 w-5"
               checked={rememberMe}
-              onChange={(event) => setRememberMe(event.target.checked)}
+              onCheckedChange={(checked) => setRememberMe(checked === true)}
             />
+            <Label htmlFor={rememberMeId} className="cursor-pointer text-base font-normal leading-normal">
             {t("auth.remember")}
-          </label>
+            </Label>
+          </div>
         </div>
 
-        {errorKey ? <p className="text-sm font-medium text-red-600">{t(`auth.errors.${errorKey}`)}</p> : null}
-        {success ? <p className="text-sm font-medium text-emerald-600">{success}</p> : null}
+        {errorKey ? (
+          <Alert variant="destructive">
+            <AlertDescription>{t(`auth.errors.${errorKey}`)}</AlertDescription>
+          </Alert>
+        ) : null}
+        {success ? (
+          <Alert variant="success">
+            <AlertDescription>{success}</AlertDescription>
+          </Alert>
+        ) : null}
 
-        <Button className="h-12 w-full bg-blue-600 text-base text-white shadow-sm hover:bg-blue-700" type="submit" disabled={loginMutation.isPending}>
+        <Button className="h-12 w-full text-base" type="submit" disabled={loginMutation.isPending}>
           {loginMutation.isPending ? "Signing in..." : t("auth.signIn")}
         </Button>
       </form>
