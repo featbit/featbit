@@ -7,9 +7,9 @@ public class Insight
 {
     public virtual EndUser? User { get; set; }
 
-    public IEnumerable<VariationInsight> Variations { get; set; } = Array.Empty<VariationInsight>();
+    public VariationInsight[] Variations { get; set; } = [];
 
-    public IEnumerable<MetricInsight> Metrics { get; set; } = Array.Empty<MetricInsight>();
+    public MetricInsight[] Metrics { get; set; } = [];
 
     public virtual bool IsValid()
     {
@@ -39,16 +39,22 @@ public class Insight
     public virtual ICollection<InsightMessage> InsightMessages(Guid envId)
     {
         var messages = new List<InsightMessage>();
+        var envIdString = $"{envId}";
 
         // flag messages
         foreach (var variation in Variations)
         {
+            if (variation.Variation == null)
+            {
+                continue;
+            }
+
             var flagId = $"{envId}-{variation.FeatureFlagKey}";
             var properties = new
             {
                 route = "/Variation/GetMultiOptionVariation",
                 flagId = flagId,
-                envId = envId.ToString(),
+                envId = envIdString,
                 accountId = string.Empty,
                 projectId = string.Empty,
                 featureFlagKey = variation.FeatureFlagKey,
@@ -66,7 +72,7 @@ public class Insight
             {
                 Uuid = Guid.NewGuid().ToString(),
                 DistinctId = flagId,
-                EnvId = envId.ToString(),
+                EnvId = envIdString,
                 Event = "FlagValue",
                 Properties = JsonSerializer.Serialize(properties),
                 Timestamp = variation.Timestamp * 1000 // milliseconds to microseconds
@@ -87,10 +93,10 @@ public class Insight
                 user = new { keyId = User!.KeyId, name = User!.Name },
                 applicationType = metric.AppType,
                 projectId = string.Empty,
-                envId = envId.ToString(),
+                envId = envIdString,
                 accountId = string.Empty,
                 tag_0 = User!.KeyId,
-                tag_1 = metric.NumericValue.ToString(),
+                tag_1 = $"{metric.NumericValue}",
                 tag_2 = User!.Name
             };
 
@@ -98,7 +104,7 @@ public class Insight
             {
                 Uuid = Guid.NewGuid().ToString(),
                 DistinctId = metric.EventName,
-                EnvId = envId.ToString(),
+                EnvId = envIdString,
                 Event = metric.Type,
                 Properties = JsonSerializer.Serialize(properties),
                 Timestamp = metric.Timestamp * 1000 // milliseconds to microseconds

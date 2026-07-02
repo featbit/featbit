@@ -6,8 +6,11 @@ import {
   SegmentListFilter,
   ISegmentListModel,
   ISegment,
-  ISegmentFlagReference
-} from "@features/safe/segments/types/segments-index";
+  ISegmentFlagReference,
+  CreateSegment,
+  SegmentType,
+  UpdateSegmentTargetingPayload
+} from "@features/safe/segments/types/segments";
 import { getCurrentProjectEnv } from "@utils/project-env";
 import { catchError } from "rxjs/operators";
 
@@ -24,7 +27,7 @@ export class SegmentService {
   constructor(private http: HttpClient) {
   }
 
-  public getSegmentList(filter: SegmentListFilter = new SegmentListFilter()): Observable<ISegmentListModel> {
+  getSegmentList(filter: SegmentListFilter = new SegmentListFilter()): Observable<ISegmentListModel> {
     const queryParam = {
       name: filter.name ?? '',
       isArchived: filter.isArchived,
@@ -38,70 +41,70 @@ export class SegmentService {
     );
   }
 
-  public getSegmentListForUser(filter: SegmentListFilter = new SegmentListFilter()): Observable<ISegmentListModel> {
-    const queryParam = {
-      name: filter.name ?? '',
-      pageIndex: filter.pageIndex - 1,
-      pageSize: filter.pageSize,
-    };
-
-    return this.http.get<ISegmentListModel>(
-      `${this.baseUrl}/users/${filter.userKeyId}`,
-      {params: new HttpParams({fromObject: queryParam})}
-    );
-  }
-
-  public getByIds(ids: string[]): Observable<ISegment[]> {
+  getByIds(ids: string[]): Observable<ISegment[]> {
     const url = `${this.baseUrl}/by-ids`;
     const queryParam = { ids: ids };
 
     return this.http.get<ISegment[]>(url, {params: new HttpParams({fromObject: queryParam})});
   }
 
-  public getSegment(id: string): Observable<ISegment> {
+  getSegment(id: string): Observable<ISegment> {
     return this.http.get<ISegment>(`${this.baseUrl}/${id}`);
   }
 
-  public isNameUsed(name: string): Observable<boolean> {
-    const url = `${this.baseUrl}/is-name-used?name=${name}`;
+  isKeyUsed(key: string, type: SegmentType): Observable<boolean> {
+    const url = `${this.baseUrl}/is-key-used?key=${key}&type=${type}`;
 
     return this.http.get<boolean>(url).pipe(catchError(() => of(undefined)));
   }
 
-  // 快速创建新的开关
-  public create(name: string, description: string) {
-    const body = {
-      name,
-      description,
-      included: [],
-      excluded: []
-    };
-
-    return this.http.post(this.baseUrl, body);
+  create(payload: CreateSegment): Observable<ISegment> {
+    return this.http.post<ISegment>(this.baseUrl, payload);
   }
 
-  delete(id: string): Observable<boolean> {
+  delete(id: string, comment?: string): Observable<boolean> {
     const url = `${this.baseUrl}/${id}`;
 
-    return this.http.delete<boolean>(url);
+    return this.http.delete<boolean>(url, { body: { comment } });
   }
 
-  public update(param: ISegment): Observable<any> {
-    return this.http.put(`${this.baseUrl}/${param.id}`, { ...param });
+  updateName(id: string, name: string, comment?: string): Observable<boolean> {
+    const url = `${this.baseUrl}/${id}/name`;
+    return this.http.put<boolean>(url, { name, comment });
   }
 
-  public archive(id: string): Observable<any> {
-    return this.http.put(`${this.baseUrl}/${id}/archive`, {});
+  updateDescription(id: string, description: string, comment?: string): Observable<boolean> {
+    const url = `${this.baseUrl}/${id}/description`;
+    return this.http.put<boolean>(url, { description, comment });
   }
 
-  public restore(id: string): Observable<any> {
+  updateTargeting(id: string, payload: UpdateSegmentTargetingPayload): Observable<boolean> {
+    const url = `${this.baseUrl}/${id}/targeting`;
+    return this.http.put<boolean>(url, payload);
+  }
+
+  archive(id: string, comment?: string): Observable<any> {
+    return this.http.put(`${this.baseUrl}/${id}/archive`, { comment });
+  }
+
+  restore(id: string, comment?: string): Observable<any> {
     const url = `${this.baseUrl}/${id}/restore`;
-    return this.http.put(url, {});
+    return this.http.put(url, { comment });
   }
 
-  public getFeatureFlagReferences(id: string): Observable<ISegmentFlagReference[]> {
+  getFeatureFlagReferences(id: string): Observable<ISegmentFlagReference[]> {
     const url = `${this.baseUrl}/${id}/flag-references`;
 
     return this.http.get<ISegmentFlagReference[]>(url).pipe(catchError(() => of(undefined)));
+  }
+
+  getAllTags(): Observable<string[]> {
+    const url = `${this.baseUrl}/all-tags`;
+    return this.http.get<string[]>(url);
+  }
+
+  setTags(id: string, tags: string[], comment?: string): Observable<boolean> {
+    const url = `${this.baseUrl}/${id}/tags`;
+    return this.http.put<boolean>(url, { tags, comment });
   }
 }

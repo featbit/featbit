@@ -1,0 +1,167 @@
+import { WorkspaceSubscription } from "@shared/types";
+
+export interface PricingPlan {
+  key: string;
+  name: string;
+  description: string;
+  order: number;
+  price: number;
+  yearlyPrice?: number; // Optional yearly price for plans that support annual billing
+  billingCycle: 'month' | 'year';
+  mauIncluded: number;
+  mauMax: number;
+  mauStep: number;
+  features: string[];
+  contactSales?: boolean;
+}
+
+export interface ProrationPreview {
+  currency: string;
+  immediateCharge: {
+    amount: number;                          // sum of proration lines (cents)
+    displayLines: Array<{
+      label: 'Unused time credit' | 'Prorated charge for plan change';
+      amount: number;
+      type: 'credit' | 'charge';
+    }>;
+    rawLines: Array<{
+      description: string | null;
+      amount: number;
+      currency: string;
+      period: { start: number; end: number }; // milliseconds
+    }>;
+  };
+  nextRenewal: {
+    amount: number;                          // sum of renewal lines (cents)
+    displayLines: Array<{
+      label: 'Subscription renewal';
+      amount: number;
+      type: 'charge';
+    }>;
+    rawLines: Array<{
+      description: string | null;
+      amount: number;
+      currency: string;
+      period: { start: number; end: number }; // milliseconds
+    }>;
+  };
+
+  nextBillingDate: number | null;            // milliseconds (Unix * 1000), or null
+}
+
+export const EMPTY_SUBSCRIPTION: WorkspaceSubscription = {
+  key: '',
+  name: '',
+  description: '',
+  order: 0,
+  includedMau: 0,
+  extraMau: 0,
+  totalMau: 0,
+  fineGrainedAcEnabled: false,
+  basePrice: 0,
+  price: 0,
+  billingCycle: 'month',
+  currentPeriodStart: new Date(),
+  currentPeriodEnd: new Date(),
+  isLocal: true
+};
+
+export enum UpdateAction {
+  UPGRADE = 'upgrade',
+  DOWNGRADE = 'downgrade',
+  UPDATE = 'update'
+}
+
+export interface UpdateSubscriptionModalData {
+  action: UpdateAction;
+  currentSubscription: WorkspaceSubscription;
+  newSubscription: WorkspaceSubscription;
+}
+
+export const PlanKeys = {
+  FREE: 'free',
+  PRO: 'pro',
+  GROWTH: 'growth',
+  ENTERPRISE: 'enterprise'
+}
+
+export const BillingCycle = {
+  MONTHLY: 'month',
+  YEARLY: 'year'
+}
+
+export const EXTRA_MAU_PER_10K_PER_MONTH_PRICE = 20; // $20 per 10K extra MAU
+export const FINE_GRAINED_AC_PER_MONTH_PRICE = 60; // $60 per month for fine-grained access control addon
+export const ENTERPRISE_YEARLY_PRICE = 4490; // $4490 per year for Enterprise plan with yearly billing
+
+export const PRICING_PLANS: PricingPlan[] = [
+  {
+    key: PlanKeys.FREE,
+    name: 'Free',
+    description: 'Get started with core feature flags at no cost.',
+    order: 0,
+    price: 0,
+    billingCycle: 'month',
+    mauIncluded: 1000,
+    mauMax: 1000,
+    mauStep: 0,
+    features: [
+      '1,000 MAU',
+      'Core feature flags',
+      'Advanced targeting and segmentation',
+      'Unlimited Projects & Environments',
+      'Webhooks and integrations',
+      'Audit Logs',
+      'IAM / RBAC (Basic)',
+      'Community support'
+    ]
+  },
+  {
+    key: PlanKeys.PRO,
+    name: 'Pro',
+    description: 'For growing teams need scale and support.',
+    order: 1,
+    price: 49,
+    billingCycle: 'month',
+    mauIncluded: 10_000,
+    mauMax: 300_000,
+    mauStep: 10_000,
+    features: [ '10K MAU included', 'Priority support' ]
+  },
+  {
+    key: PlanKeys.GROWTH,
+    name: 'Growth',
+    description: 'Advanced controls for scaling product teams.',
+    order: 2,
+    price: 149,
+    billingCycle: 'month',
+    mauIncluded: 40_000,
+    mauMax: 300_000,
+    mauStep: 10_000,
+    features: [ '40K MAU included', 'Flag Change Approval', 'Flag Change Scheduling', 'Flag comparison' ]
+  },
+  {
+    key: PlanKeys.ENTERPRISE,
+    name: 'Enterprise',
+    description: 'Full-featured platform for large organizations.',
+    order: 3,
+    price: 449,
+    yearlyPrice: ENTERPRISE_YEARLY_PRICE,
+    billingCycle: 'month',
+    mauIncluded: 80_000,
+    mauMax: 300_000,
+    mauStep: 10_000,
+    features: [
+      '80k MAU included',
+      'Private Discord channel',
+      '12-business-hour reply SLA',
+      '4-business-hour reply SLA',
+      'Dedicated SLA & support',
+      'Dedicated onboarding & training',
+      'Single Sign-On',
+      'Multi-organization',
+      'Global users & Shareable segments',
+      'FeatBit Auto agents'
+    ]
+  }
+];

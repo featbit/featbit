@@ -1,38 +1,70 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { ResourceFilterV2, ResourceSpaceLevel, ResourceTypeEnum, ResourceV2 } from "@shared/policy";
+import {
+  groupResources,
+  isChildResourceOf,
+  ResourceFilterV2,
+  ResourceSpaceLevel,
+  ResourceTypeEnum,
+  ResourceV2
+} from "@shared/policy";
 import { ResourceService } from "@services/resource.service";
 import { debounceTime } from "rxjs/operators";
 import { Subject } from "rxjs";
 
-interface GroupedItem {
-  name: string;
-  items: Item[];
+interface SelectableResourceV2 extends ResourceV2 {
+  selected: boolean;
+  disabled: boolean;
 }
 
-interface Item {
-  rn: string;
+interface GroupedSelectableResource {
   name: string;
+  items: SelectableResourceV2[];
 }
 
 @Component({
-  selector: 'resource-finder',
-  templateUrl: './resource-finder.component.html',
-  styleUrls: ['./resource-finder.component.less']
+    selector: 'resource-finder',
+    templateUrl: './resource-finder.component.html',
+    styleUrls: ['./resource-finder.component.less'],
+    standalone: false
 })
 export class ResourceFinderComponent implements OnInit {
+  private _isVisible: boolean = false;
+  get isVisible() {
+    return this._isVisible;
+  }
   @Input()
-  isVisible = false;
+  set isVisible(visible: boolean) {
+    this._isVisible = visible;
+    if (visible) {
+      this.selectedItems = this.groupedItems
+      .flatMap(x => x.items.filter(x => this.defaultSelected.includes(x.id)));
+
+      const selectedChildren = this.selectedItems
+      .flatMap(x => this.getChildResources(x))
+      .map(x => x.id);
+
+      for (const group of this.groupedItems) {
+        for (const resource of group.items) {
+          resource.selected = selectedChildren.includes(resource.id) || this.defaultSelected.includes(resource.id);
+          resource.disabled = selectedChildren.includes(resource.id) || resource.rn === this.unremovableRn;
+        }
+      }
+    }
+  }
   @Input()
-  resources: ResourceTypeEnum[] = [ResourceTypeEnum.Project, ResourceTypeEnum.Env, ResourceTypeEnum.Flag, ResourceTypeEnum.Segment];
+  resources: ResourceTypeEnum[] = [ ResourceTypeEnum.Project, ResourceTypeEnum.Env, ResourceTypeEnum.Flag, ResourceTypeEnum.Segment ];
   @Input()
   spaceLevel: ResourceSpaceLevel = ResourceSpaceLevel.Organization;
+  @Input()
+  defaultSelected: string[] = [];
+  @Input()
+  unremovableRn: string = '';
   @Output()
-  onClose: EventEmitter<string[]> = new EventEmitter<string[]>();
+  onClose: EventEmitter<ResourceV2[]> = new EventEmitter<ResourceV2[]>();
 
-  constructor(private resourceService: ResourceService) {
-  }
+  constructor(private resourceService: ResourceService) { }
 
-  groupedItems: GroupedItem[] = [];
+  groupedItems: GroupedSelectableResource[] = [];
   $search = new Subject<void>();
   isLoading = true;
   filter: ResourceFilterV2 = {
@@ -57,76 +89,82 @@ export class ResourceFinderComponent implements OnInit {
     this.$search.next();
   }
 
-  selectedItems: Item[] = [];
+  selectedItems: SelectableResourceV2[] = [];
 
-  toggleSelected(item: Item) {
-    let existedItem = this.selectedItems.find(x => x.rn === item.rn);
-    if (existedItem) {
-      this.removeFromSelected(existedItem);
+  toggleSelected(item: SelectableResourceV2) {
+    if (item.disabled) {
+      return;
+    }
+
+    let selectedItem = this.selectedItems.find(x => x.rn === item.rn);
+    if (selectedItem) {
+      this.removeFromSelected(selectedItem);
     } else {
       this.addToSelected(item);
     }
   }
 
-  addToSelected(item: Item) {
+  addToSelected(item: SelectableResourceV2) {
+    // remove all children from selected items and then add the parent
+    this.selectedItems = this.selectedItems.filter(x => !isChildResourceOf(x.rn, item.rn) || x.rn == this.unremovableRn);
     this.selectedItems.push(item);
+
+    // select current item and all its children
+    item.selected = true;
+    item.disabled = false;
+
+    this.getChildResources(item).forEach(x => {
+      x.selected = true;
+      x.disabled = true;
+    });
   }
 
-  removeFromSelected(item: Item) {
+  removeFromSelected(item: SelectableResourceV2) {
     this.selectedItems = this.selectedItems.filter(x => x.rn !== item.rn);
+
+    // deselect current item and all its children
+    item.selected = false;
+    item.disabled = false;
+
+    this.getChildResources(item).forEach(x => {
+      x.selected = false;
+      x.disabled = false;
+    });
   }
 
   onCancel() {
-    this.isVisible = false;
     this.onClose.emit([]);
   }
 
-  onContinue() {
-    this.isVisible = false;
-    this.onClose.emit(this.selectedItems.map(x => x.rn));
+  onOk() {
+    let snapshot = this.selectedItems.map(x => x);
+    this.onClose.emit(snapshot);
   }
 
   private fetchResources() {
-    this.groupedItems = [];
     this.isLoading = true;
     this.resourceService.getResourcesV2(this.filter).subscribe(resources => {
-      for (const resource of resources) {
-        const type = this.mapResourceType(resource.type);
-        const group = this.groupedItems.find(x => x.name === type);
-        if (group) {
-          group.items.push({
-            rn: resource.rn,
-            name: resource.pathName
-          });
-        } else {
-          this.groupedItems.push({
-            name: type,
-            items: [{
-              rn: resource.rn,
-              name: resource.pathName
-            }]
-          });
-        }
-      }
+      // filter out general resources
+      const concreteResources = resources.filter(x => !x.rn.includes('*'));
+
+      this.groupedItems = groupResources(concreteResources).map(x => ({
+          name: x.name,
+          items: x.items.map(r => ({
+              ...r,
+              selected: false,
+              disabled: false
+            })
+          )
+        })
+      );
 
       this.isLoading = false;
     });
   }
 
-  private mapResourceType(type: ResourceTypeEnum): string {
-    switch (type) {
-      case ResourceTypeEnum.organization:
-        return $localize`:@@common.organization:Organization`;
-      case ResourceTypeEnum.Project:
-        return $localize`:@@common.project:Project`;
-      case ResourceTypeEnum.Env:
-        return $localize`:@@common.environment:Environment`;
-      case ResourceTypeEnum.Flag:
-        return $localize`:@@common.flag:Flag`;
-      case ResourceTypeEnum.Segment:
-        return $localize`:@@common.segment:Segment`;
-      default:
-        return '';
-    }
+  private getChildResources(resource: ResourceV2): SelectableResourceV2[] {
+    return this.groupedItems.flatMap(
+      group => group.items.filter(x => isChildResourceOf(x.rn, resource.rn))
+    );
   }
 }

@@ -19,8 +19,6 @@
 
 // bordered input
 .standard-bordered-input {
-  border: 1px solid @grey20-color;
-  box-sizing: border-box;
   border-radius: 8px;
 
   i {
@@ -66,6 +64,11 @@
   color: @grey70-color;
 }
 
+// form error message
+.ant-form-item-explain {
+  margin-top: 1px;
+}
+
 // standard form
 .standard-form {
   nz-form-control {
@@ -73,7 +76,7 @@
   }
 
   // input
-  input {
+  input:not([type="checkbox"]) {
     .standard-form-input;
   }
 

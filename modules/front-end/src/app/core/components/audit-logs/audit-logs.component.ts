@@ -1,18 +1,17 @@
-import {Component, Input, OnInit} from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { Subject } from 'rxjs';
-import {AuditLogListFilter, IAuditLog, IAuditLogListModel, RefTypeEnum} from "@core/components/audit-log/types";
-import {IMember, IMemberListModel, MemberFilter} from "@features/safe/iam/types/member";
-import {AuditLogService} from "@services/audit-log.service";
-import {MemberService} from "@services/member.service";
-import {SegmentService} from "@services/segment.service";
-import {EnvUserService} from "@services/env-user.service";
-import {debounceTime, distinctUntilChanged} from "rxjs/operators";
-import {NzMessageService} from "ng-zorro-antd/message";
+import { AuditLogListFilter, IAuditLog, IAuditLogListModel, RefTypeEnum } from "@core/components/audit-log/types";
+import { IMember, IMemberListModel, MemberFilter } from "@features/safe/iam/types/member";
+import { AuditLogService } from "@services/audit-log.service";
+import { debounceTime, distinctUntilChanged } from "rxjs/operators";
+import { NzMessageService } from "ng-zorro-antd/message";
+import { OrganizationService } from "@services/organization.service";
 
 @Component({
   selector: 'audit-logs',
   templateUrl: './audit-logs.component.html',
-  styleUrls: ['./audit-logs.component.less']
+  styleUrls: [ './audit-logs.component.less' ],
+  standalone: false
 })
 export class AuditLogsComponent implements OnInit {
   @Input() auditLogFilter: AuditLogListFilter;
@@ -33,12 +32,9 @@ export class AuditLogsComponent implements OnInit {
   refTypeSegment: RefTypeEnum = RefTypeEnum.Segment;
   constructor(
     private auditLogService: AuditLogService,
-    private memberService: MemberService,
-    private segmentService: SegmentService,
-    private envUserService: EnvUserService,
+    private organizationService: OrganizationService,
     private msg: NzMessageService,
-  ) {
-  }
+  ) { }
 
   ngOnInit(): void {
     this.$memberSearch.pipe(
@@ -97,7 +93,7 @@ export class AuditLogsComponent implements OnInit {
 
   loadMemberList(query?: string) {
     this.membersLoading = true;
-    this.memberService.getList(new MemberFilter(query ?? '')).subscribe({
+    this.organizationService.getMemberList(new MemberFilter(query ?? '')).subscribe({
       next: (members) => {
         this.memberListModel = members;
         this.membersLoading = false;

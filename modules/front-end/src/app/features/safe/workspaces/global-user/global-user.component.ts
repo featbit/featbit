@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { SelectableOptions } from '@core/components/table/dashed-multi-select/dashed-multi-select.component';
 import { GlobalUser, GlobalUserFilter } from "@features/safe/workspaces/types/global-user";
 import { GlobalUserService } from "@services/global-user.service";
 import { debounceTime } from "rxjs/operators";
@@ -6,12 +7,12 @@ import { Subject } from "rxjs";
 import { NzMessageService } from "ng-zorro-antd/message";
 
 @Component({
-  selector: 'global-user',
-  templateUrl: './global-user.component.html',
-  styleUrls: ['./global-user.component.less']
+    selector: 'global-user',
+    templateUrl: './global-user.component.html',
+    styleUrls: ['./global-user.component.less'],
+    standalone: false
 })
 export class GlobalUserComponent implements OnInit {
-
 
   isLoading: boolean = true;
   users: GlobalUser[] = [];
@@ -20,8 +21,8 @@ export class GlobalUserComponent implements OnInit {
   filter: GlobalUserFilter = new GlobalUserFilter();
   search$ = new Subject<void>();
 
-  extraShowedColumns: string[] = [];
-  allExtraColumns: string[] = [];
+  selectedExtraColumns: string[] = [];
+  extraColumnOptions: SelectableOptions[] = [];
 
   constructor(private service: GlobalUserService, private msg: NzMessageService) {
   }
@@ -45,8 +46,8 @@ export class GlobalUserComponent implements OnInit {
 
         result.items.forEach(item => {
           item.customizedProperties.forEach(cp => {
-            if (this.allExtraColumns.indexOf(cp.name) === -1) {
-              this.allExtraColumns.push(cp.name);
+            if (!this.extraColumnOptions.some(opt => opt.value === cp.name)) {
+              this.extraColumnOptions.push({ label: cp.name, value: cp.name, selected: this.selectedExtraColumns.includes(cp.name) });
             }
           });
         });
@@ -68,12 +69,10 @@ export class GlobalUserComponent implements OnInit {
     this.search$.next();
   }
 
-  importModalVisible = false;
-  openImportModal() {
-    this.importModalVisible = true;
-  }
-  closeImportModal(success: boolean) {
-    this.importModalVisible = false;
+  uploadModalVisible = false;
+  uploadUrl = this.service.uploadUrl();
+  closeUploadModal(success: boolean) {
+    this.uploadModalVisible = false;
     if (success) {
       this.search$.next();
     }
@@ -98,6 +97,11 @@ export class GlobalUserComponent implements OnInit {
   closeEndUserDrawer() {
     this.selectedUser = null;
     this.endUserDrawerVisible = false;
+  }
+
+  onExtraColumnsChange(columns: string[]) {
+    this.selectedExtraColumns = columns;
+    this.extraColumnOptions.forEach(opt => opt.selected = columns.includes(opt.value));
   }
 
   getCustomizePropertyValue(user: GlobalUser, property: string): string {

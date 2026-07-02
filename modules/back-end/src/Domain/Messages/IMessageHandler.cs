@@ -4,5 +4,5 @@ public interface IMessageHandler
 {
     public string Topic { get; }
 
-    Task HandleAsync(string message, CancellationToken cancellationToken);
+    Task HandleAsync(string message);
 }

@@ -17,7 +17,11 @@ public interface IService<TEntity> where TEntity : Entity
 
     Task<ICollection<TEntity>> FindManyAsync(Expression<Func<TEntity, bool>> predicate);
 
+    Task<long> CountAsync(Expression<Func<TEntity, bool>> predicate);
+
     Task<bool> AnyAsync(Expression<Func<TEntity, bool>> predicate);
 
     Task UpdateAsync(TEntity segment);
+
+    Task DeleteOneAsync(Guid id);
 }

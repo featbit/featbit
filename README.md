@@ -12,19 +12,19 @@
     <a href="https://awsmfoss.com/featbit/">
       <img src="https://img.shields.io/badge/Awesome_F%2FOSS-Certified-purple?style=flat-square" alt="Read about RATH on medium"/>
     </a>
-    <a href="https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ">
-      <img src="https://img.shields.io/badge/Slack-green?style=flat-square&logo=slack&logoColor=white" alt="Join FeatBit on Slack"/>
+    <a href="https://discord.gg/h9dVMsQH">
+      <img src="https://img.shields.io/badge/Discord-5865F2?style=flat-square&logo=discord&logoColor=white" alt="Join FeatBit on Discord"/>
     </a>
     </div>
     <div id="badges">
     <a href="https://dotnet.microsoft.com/">
-      <img src="https://img.shields.io/badge/.NET-%3E=6.0-6E359E?style=flat-square&logo=csharp&logoColor=white"/>
+      <img src="https://img.shields.io/badge/.NET-8.0-6E359E?style=flat-square&logo=csharp&logoColor=white"/>
     </a>
     <a href="https://www.python.org/">
       <img src="https://img.shields.io/badge/Python-%3E=3.9-FFDD53?style=flat-square&logo=python&logoColor=white"/>
     </a>
     <a href="https://angular.io/">
-      <img src="https://img.shields.io/badge/Angular-16.0-DD0031?style=flat-square&logo=angular&logoColor=white"/>
+      <img src="https://img.shields.io/badge/Angular-19.0-DD0031?style=flat-square&logo=angular&logoColor=white"/>
     </a>
   </div>
 
@@ -34,8 +34,8 @@
       Documentation
     </a>
     |
-    <a href="https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ">
-      Community (Slack)
+    <a href="https://discord.gg/h9dVMsQH">
+      Community (Discord)
     </a>
     |
     <a href="https://www.linkedin.com/company/featbit">
@@ -55,7 +55,7 @@
 
 ## Try FeatBit Online
 
-Try FeatBit immediately with [our online demo](https://tryitonline.featbit.co). The video below shows you how to get started quickly.
+Try FeatBit immediately with [our online demo](https://app.featbit.co). The video below shows you how to get started quickly.
 
 https://github.com/featbit/featbit/assets/68597908/d836702d-6096-4025-9b9e-5128a8b52dcb
 
@@ -129,13 +129,13 @@ else
 
 ## Configure and run FeatBit anywhere
 
-The above sections show you how to get up and running quickly and easily. When you're ready to start configuring and customizing FeatBit for your own environment, check out the [Installation Documentation](https://docs.featbit.co/installation/full-installation), [K8s Manifest Files](https://github.com/featbit/featbit/tree/main/kubernetes) and [FeatBit Agent Documentation](https://docs.featbit.co/relay-proxy/featbit-agent) for getting started with self-managed deployments, FeatBit configuration options, or running FeatBit locally via docker.
+The above sections show you how to get up and running quickly and easily. When you're ready to start configuring and customizing FeatBit for your own environment, check out the [Installation Documentation](https://docs.featbit.co/installation/docker-compose), [K8s Manifest Files](https://github.com/featbit/featbit/tree/main/kubernetes) and [FeatBit Agent Documentation](https://docs.featbit.co/relay-proxy/overview#understanding-agents) for getting started with self-managed deployments, FeatBit configuration options, or running FeatBit locally via docker.
 
 ## Documentation & Community
 
 [Official Documentation](https://docs.featbit.co)
 
-[Join our Online Slack Support & Community](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ)
+[Join our Online Discord Support & Community](https://discord.gg/h9dVMsQH)
 
 [Connect with FeatBit on LinkedIn](https://www.linkedin.com/company/featbit)
 
@@ -189,7 +189,7 @@ FeatBit offers a range of features including:
 
 Building FeatBit is a collaborative effort, and we owe much gratitude to many intelligent and talented individuals.
 
-[**Join Slack to get your assignment**](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ).
+[**Join Discord to get your assignment**](https://discord.gg/h9dVMsQH).
 
 ### Contributors
 
@@ -205,9 +205,5 @@ Made with [contrib.rocks](https://contrib.rocks).
 
 FeatBit is an Open Core product. The bulk of the code is under permissive MIT license. See the [LICENSE](https://github.com/featbit/featbit/blob/main/LICENSE) file for details.
 
-The following listed features are protected by a commercial license key, please contact us by [Slack](https://join.slack.com/t/featbit/shared_invite/zt-1ew5e2vbb-x6Apan1xZOaYMnFzqZkGNQ) or [Email](mailto:contact@featbit.co) to get a license key or a trial license key:
-- Schedule
-- Change request
-- SSO
-- Multi-organizations
+Certain features in FeatBit are subject to licensing restrictions and require a valid license key. Check out the [License Documentation](https://docs.featbit.co/licenses/overview) for more information.
 

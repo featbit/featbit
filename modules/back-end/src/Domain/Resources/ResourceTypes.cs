@@ -4,6 +4,8 @@ public static class ResourceTypes
 {
     public const string All = "*";
 
+    public const string Workspace = "workspace";
+    
     public const string Organization = "organization";
 
     public const string Iam = "iam";

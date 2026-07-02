@@ -1,6 +1,6 @@
 namespace Domain.EndUsers;
 
-public class EndUserConsts
+public static class EndUserConsts
 {
     public const string KeyId = "keyId";
 

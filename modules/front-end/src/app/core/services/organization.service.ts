@@ -1,10 +1,13 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { firstValueFrom, Observable } from 'rxjs';
+import { firstValueFrom, Observable, of } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { IOnboarding, IOrganization } from '@shared/types';
 import { ProjectService } from './project.service';
 import { CURRENT_ORGANIZATION } from "@utils/localstorage-keys";
+import { catchError } from "rxjs/operators";
+import { UpdateOrganizationPayload } from "@features/safe/workspaces/types/organization";
+import { IMemberListModel, MemberFilter } from "@features/safe/iam/types/member";
 
 @Injectable({
   providedIn: 'root'
@@ -22,18 +25,30 @@ export class OrganizationService {
     return firstValueFrom(this.http.get<IOrganization[]>(`${this.baseUrl}?isSsoFirstLogin=${isSsoFirstLogin}`));
   }
 
+  isKeyUsed(key: string): Observable<boolean> {
+    const url = `${this.baseUrl}/is-key-used?key=${key}`;
+
+    return this.http.get<boolean>(url).pipe(catchError(() => of(undefined)));
+  }
+
   create(params: any): Observable<any> {
     const url = this.baseUrl;
     return this.http.post(url, params);
   }
 
-  update(params: any): Observable<any> {
-    return this.http.put(this.baseUrl, params);
+  update(payload: UpdateOrganizationPayload): Observable<any> {
+    return this.http.put(this.baseUrl, payload);
   }
 
-  addUser(params: any): Observable<any> {
-    const url = `${this.baseUrl}/add-user`;
-    return this.http.post<boolean>(url, params);
+  getMemberList(filter: MemberFilter = new MemberFilter()): Observable<IMemberListModel> {
+    const queryParam = {
+      searchText: filter.searchText ?? '',
+      pageIndex: filter.pageIndex - 1,
+      pageSize: filter.pageSize,
+    };
+
+    const url = `${this.baseUrl}/members`;
+    return this.http.get<IMemberListModel>(url, { params: new HttpParams({ fromObject: queryParam }) });
   }
 
   onboarding(payload: IOnboarding): Observable<any> {
@@ -46,6 +61,7 @@ export class OrganizationService {
       localStorage.setItem(CURRENT_ORGANIZATION(), JSON.stringify(org));
       const currentOrganization = this.organizations.find(ws => ws.id == org.id);
       currentOrganization.name = org.name;
+      currentOrganization.defaultPermissions = org.defaultPermissions;
     } else {
       localStorage.setItem(CURRENT_ORGANIZATION(), '');
     }
@@ -57,7 +73,10 @@ export class OrganizationService {
     if (!!organization) {
       const currentOrganization = this.organizations.find(ws => ws.id == organization.id);
       currentOrganization.name = organization.name;
+      currentOrganization.key = organization.key;
       currentOrganization.initialized = organization.initialized;
+      currentOrganization.defaultPermissions = organization.defaultPermissions;
+      currentOrganization.settings = organization.settings;
       localStorage.setItem(CURRENT_ORGANIZATION(), JSON.stringify(currentOrganization));
     } else {
       localStorage.setItem(CURRENT_ORGANIZATION(), '');

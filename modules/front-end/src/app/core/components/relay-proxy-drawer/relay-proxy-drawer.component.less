@@ -1,84 +1,51 @@
-@import "variables";
+.choose-env-button {
+  padding: 0;
+  margin: 4px 0;
 
-.token-wrapper {
-  margin: 32px 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  font-size: 15px;
-}
-
-.proxy-form {
   i {
     font-size: 16px;
-    cursor: pointer;
+  }
+}
+
+.scopes-changed-warning {
+  display: block;
+  color: #ffc107;
+  margin-top: 4px;
+}
+
+.not-synced-yet,
+.no-auto-agents-tip {
+  color: rgba(0, 0, 0, 0.4);
+  font-style: italic;
+  font-weight: bold;
+}
+
+.manual-agents {
+  button {
+    padding-left: 0;
   }
 
-  nz-form-label {
-    i {
-      margin-left: 16px;
-    }
+  a {
+    padding: 0;
   }
 
-  .scope-selectors {
-    margin-top: 8px;
+  .agent-item {
     display: flex;
-    flex-direction: column;
-    gap: 8px;
+    align-items: center;
+    justify-content: space-between;
 
-    .scope-form-row {
+    .meta {
+      flex: 1;
       display: flex;
-      justify-content: flex-start;
-      align-items: center;
-      gap: 16px;
+      gap: 8px;
 
-      ::ng-deep .ant-select-multiple .ant-select-selection-placeholder {
-        top: 40%;
-      }
-
-      .proj-env-selectors {
-        display: flex;
-        justify-content: flex-start;
-        gap: 16px;
-
-        nz-select {
-          &.project-selector {
-            width: 330px;
-          }
-
-          &.env-selector {
-            width: 540px;
-          }
-        }
+      .column {
+        width: 250px;
       }
     }
   }
+}
 
-  .agents .table-content-area {
-    i {
-      font-size: 13px;
-    }
-
-    .sync-button-new {
-      padding-left: 4px;
-    }
-
-    .status {
-      .status-wrapper {
-        display: flex;
-        justify-content: center;
-        gap: 4px;
-        align-items: center;
-      }
-
-      &.status-healthy, &.status-loading {
-        color: @green70-color;
-      }
-
-      &.status-unhealthy {
-        color: @yellow55-color;
-      }
-    }
-  }
+.align-end {
+  text-align: end;
 }

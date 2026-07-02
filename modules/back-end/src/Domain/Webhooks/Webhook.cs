@@ -21,6 +21,8 @@ public class Webhook : FullAuditedEntity
     public string Secret { get; set; }
 
     public bool IsActive { get; set; }
+    
+    public bool PreventEmptyPayloads { get; set; }
 
     public LastDelivery LastDelivery { get; set; }
 
@@ -35,6 +37,7 @@ public class Webhook : FullAuditedEntity
         string payloadTemplate,
         string secret,
         bool isActive,
+        bool preventEmptyPayloads,
         Guid creatorId) : base(creatorId)
     {
         OrgId = orgId;
@@ -50,6 +53,7 @@ public class Webhook : FullAuditedEntity
         Secret = secret ?? string.Empty;
 
         IsActive = isActive;
+        PreventEmptyPayloads = preventEmptyPayloads;
         LastDelivery = null;
     }
 
@@ -63,6 +67,7 @@ public class Webhook : FullAuditedEntity
         string payloadTemplate,
         string secret,
         bool isActive,
+        bool preventEmptyPayloads,
         Guid currentUserId)
     {
         Name = name;
@@ -77,6 +82,7 @@ public class Webhook : FullAuditedEntity
         Secret = secret ?? string.Empty;
 
         IsActive = isActive;
+        PreventEmptyPayloads = preventEmptyPayloads;
 
         MarkAsUpdated(currentUserId);
     }

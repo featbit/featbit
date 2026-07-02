@@ -13,9 +13,9 @@ const routes: Routes = [
     loadChildren: () => import("./features/safe/onboarding/onboarding.module").then(m => m.OnboardingModule),
   },
   {
-    path: 'select-organization',
+    path: 'select-workspace',
     canActivate: [authGuard],
-    loadChildren: () => import("./features/safe/select-organization/select-organization.module").then(m => m.SelectOrganizationModule),
+    loadChildren: () => import("./features/safe/select-workspace/select-workspace.module").then(m => m.SelectWorkspaceModule),
   },
   {
     path: '',

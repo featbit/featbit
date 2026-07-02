@@ -6,9 +6,9 @@ environment, connecting to our code base, and submitting code to the project.
 # Get Started
 
 FeatBit consists of multiple services, to learn more about the architecture, please read
-our [documentation](https://docs.featbit.co/tech-stack/architecture).
+our [documentation](https://docs.featbit.co/tech-stack/overview).
 
-![Architecture](https://2887964115-files.gitbook.io/~/files/v0/b/gitbook-x-prod.appspot.com/o/spaces%2FWMA5plqGXLhCIDCINvoc%2Fuploads%2FELW411vbJvKbSu1uG2Z0%2Fimage.png?alt=media&token=4fff2e66-cbca-4c45-b8c0-8fc99d357d13)
+![Architecture](https://docs.featbit.co/_next/static/media/architecture-overview.25fdb1db.svg)
 
 To get started, we need to clone FeatBit's repository first.
 
@@ -21,23 +21,19 @@ launch these two services from the code.
 
 ## Setup dependencies
 
+You can setup infrastructure dependencies using the `/docker/composes/docker-compose-infra.yml` file, for example
+
 ```bash
-# run mongodb and redis containers
-docker compose up -d mongodb redis
+cd featbit
 
-# run ui container if your work focus on Api only
-docker compose up -d ui
-
-# run api container if your work focus on UI only
-docker compose up -d api-server
+# start postgresql and redis
+docker compose --project-directory . -f ./docker/composes/docker-compose-infra.yml up -d redis postgresql
 ```
-
-Wait until those services are successfully launched, and we're ready to run API and/or UI locally.
 
 ## Run API
 
-The API project is built with [.NET 6](https://dotnet.microsoft.com/en-us/download/dotnet/6.0), make sure you have the
-latest .NET 6.0 SDK installed before you start.
+The API project is built with [.NET 8](https://dotnet.microsoft.com/en-us/download/dotnet/8.0), make sure you have the
+latest .NET 8.0 SDK installed before you start.
 
 Navigate to **modules/back-end/src/Api** folder and run `dotnet run`, then the swagger should be available
 at [http://localhost:5000/swagger](http://localhost:5000/swagger).
@@ -59,13 +55,59 @@ Then UI should be available at [http://localhost:4200](http://localhost:4200).
 The above process would launch the UI in English language.
 
 As **ng serve** only supports one single locale, during development, the locale-switcher component doesn't work. If you
-want to check a different language,
-run the app with one of the following
+want to check a different language, run the app with one of the following command
 
 ```
 npm run start // English, available at localhost:4200
 npm run start:zh // Chinese, available at localhost:4201
 ```
+
+### Serve UI under a path
+
+Instead of serving the UI directly at the domain root, you may need to serve it under a specific path, for example `http://localhost:4200/abc/def/`.
+
+#### Development Mode
+
+For local development, use the **start:base-href** command:
+
+```bash
+npm run start:base-href
+```
+
+This command is defined in `package.json` as:
+```json
+"start:base-href": "ng serve --serve-path /abc/def/ --configuration=development --port=4200"
+```
+
+**Important:** You must also update the `<base href>` tag in [index.html](./modules/front-end/src/index.html):
+
+```html
+<!-- Change from: -->
+<base href="/">
+
+<!-- To: -->
+<base href="/abc/def/">
+```
+
+You can replace `/abc/def/` with your own path in both the npm script and the index.html file.
+
+#### Docker Mode
+
+When running the UI in a Docker container, set the `BASE_HREF` environment variable in docker-compose.yml:
+
+```yaml
+services:
+  ui:
+    image: featbit/ui:latest
+    environment:
+      - BASE_HREF=/abc/def/
+    ports:
+      - "80:80"
+```
+
+The **ports** is important if you run this in your local machine.
+The Docker entrypoint script will automatically configure nginx and update all locale-specific index.html files with the correct base href.
+
 
 ### Internationalization
 

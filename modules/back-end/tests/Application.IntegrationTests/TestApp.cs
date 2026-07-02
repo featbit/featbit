@@ -2,18 +2,19 @@ using System.Net.Http.Headers;
 using System.Net.Mime;
 using System.Text;
 using System.Text.Json;
-using Application.Caches;
+using Application.Identity;
 using Application.Services;
 using Application.Users;
 using Domain.Users;
-using Infrastructure.Kafka;
-using Infrastructure.Redis;
+using Infrastructure.Caches;
+using Infrastructure.MQ;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace Application.IntegrationTests;
@@ -22,6 +23,9 @@ public class TestApp : WebApplicationFactory<Program>
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        builder.UseSetting(MqProvider.SectionName, MqProvider.None);
+        builder.UseSetting(CacheProvider.SectionName, CacheProvider.None);
+
         builder.ConfigureServices(collection =>
         {
             var passwordHasher = new ServiceDescriptor(
@@ -34,17 +38,18 @@ public class TestApp : WebApplicationFactory<Program>
             collection.Replace(passwordHasher);
             collection.Replace(currentUser);
 
-            collection.Replace(ServiceDescriptor.Singleton<IRedisClient, TestRedisClient>());
-            collection.Replace(ServiceDescriptor.Transient<ICachePopulatingService, TestCachePopulatingService>());
             collection.Replace(ServiceDescriptor.Transient<IWorkspaceService, TestWorkspaceService>());
             collection.Replace(ServiceDescriptor.Transient<IUserService, TestUserService>());
+            collection.Replace(ServiceDescriptor.Transient<IRefreshTokenService, TestRefreshTokenService>());
 
-            // remove the kafka consumer from the test application because it is not needed
-            var kafkaConsumerService =
-                collection.FirstOrDefault(x => x.ImplementationType == typeof(KafkaMessageConsumer));
-            if (kafkaConsumerService != null)
+            var hostedServices = collection.Where(x =>
+                x.ServiceType.IsAssignableTo(typeof(IHostedService)) &&
+                x.ImplementationType?.FullName?.Contains("Microsoft") == false
+            ).ToArray();
+
+            foreach (var service in hostedServices)
             {
-                collection.Remove(kafkaConsumerService);
+                collection.Remove(service);
             }
         });
 
@@ -59,7 +64,7 @@ public class TestApp : WebApplicationFactory<Program>
         var client = CreateClient();
         if (authenticated)
         {
-            AddAuthorizationHeader(client);
+            await AddAuthorizationHeader(client);
         }
 
         return await client.GetAsync(uri);
@@ -73,7 +78,7 @@ public class TestApp : WebApplicationFactory<Program>
         var client = CreateClient();
         if (authenticated)
         {
-            AddAuthorizationHeader(client);
+            await AddAuthorizationHeader(client);
         }
 
         var body = JsonSerializer.Serialize(payload);
@@ -82,21 +87,21 @@ public class TestApp : WebApplicationFactory<Program>
         return await client.PostAsync(uri, content);
     }
 
-    public string GetToken(User user)
+    public async Task<AuthTokens> GetTokenAsync(User user)
     {
         var scopeFactory = Services.GetRequiredService<IServiceScopeFactory>();
         using var scope = scopeFactory.CreateScope();
         var identityService = scope.ServiceProvider.GetRequiredService<IIdentityService>();
 
-        var token = identityService.IssueToken(user);
-        return token;
+        var tokens = await identityService.IssueTokensAsync(user, "::1");
+        return tokens;
     }
 
-    private void AddAuthorizationHeader(HttpClient client)
+    private async Task AddAuthorizationHeader(HttpClient client)
     {
-        var token = GetToken(TestUser.Instance());
+        var authTokens = await GetTokenAsync(TestUser.Instance());
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
-            JwtBearerDefaults.AuthenticationScheme, token
+            JwtBearerDefaults.AuthenticationScheme, authTokens.AccessToken
         );
     }
 }

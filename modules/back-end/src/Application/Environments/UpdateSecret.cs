@@ -16,7 +16,7 @@ public class UpdateSecretValidator : AbstractValidator<UpdateSecret>
     public UpdateSecretValidator()
     {
         RuleFor(x => x.Name)
-            .NotEmpty().WithErrorCode(ErrorCodes.NameIsRequired);
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("name"));
     }
 }
 

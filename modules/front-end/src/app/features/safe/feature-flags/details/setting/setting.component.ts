@@ -1,6 +1,7 @@
 import { Component, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
+import { NzModalService } from 'ng-zorro-antd/modal';
 import { MessageQueueService } from '@services/message-queue.service';
 import { copyToClipboard, getPathPrefix, uuidv4 } from "@utils/index";
 import { editor } from "monaco-editor";
@@ -8,7 +9,6 @@ import { FeatureFlagService } from "@services/feature-flag.service";
 import {
   FeatureFlag,
   IFeatureFlag,
-  ISettingPayload,
   isVariationValueValid,
   VariationTypeEnum
 } from "@features/safe/feature-flags/types/details";
@@ -17,32 +17,27 @@ import { ExperimentService } from "@services/experiment.service";
 import { ExperimentStatus, IExpt } from "@features/safe/experiments/types";
 import { NzSelectComponent } from "ng-zorro-antd/select";
 import { FormArray, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators } from "@angular/forms";
+import { PermissionsService } from "@services/permissions.service";
+import { permissionActions } from "@shared/policy";
+import { PermissionLicenseService } from "@services/permission-license.service";
+import { finalize } from "rxjs/operators";
+import { handleUpdateError } from "@features/safe/feature-flags/types/feature-flag";
+import { ChangeCommentService } from "@services/change-comment.service";
+import { ChangeOperation } from "@core/components/change-comment/types";
+import { Observable } from "rxjs";
+import { getCurrentProjectEnv } from "@utils/project-env";
+import { EnvironmentSetting } from "@shared/types";
 
 @Component({
-  selector: 'ff-setting',
-  templateUrl: './setting.component.html',
-  styleUrls: ['./setting.component.less']
+    selector: 'ff-setting',
+    templateUrl: './setting.component.html',
+    styleUrls: ['./setting.component.less'],
+    standalone: false
 })
 export class SettingComponent {
+  envSettings: EnvironmentSetting;
 
-  trackById(_, v: IVariation) {
-    return v.id;
-  }
-
-  compareWith(o1: string, o2: string): boolean {
-    if (!o1 || !o2) {
-      return false;
-    }
-
-    return o1 === o2;
-  }
-
-  copyText(text: string) {
-    copyToClipboard(text).then(
-      () => this.message.success($localize `:@@common.copy-success:Copied`)
-    );
-  }
-
+  revision: string = '';
   featureFlag: FeatureFlag = {} as FeatureFlag;
   isLoading = true;
   isEditingTitle = false;
@@ -53,11 +48,20 @@ export class SettingComponent {
   currentAllTags: string[] = [];
   selectedTag: string = '';
   isLoadingTags: boolean = true;
+  pendingTags: string[] = [];
   @ViewChild('tags') tagsSelect: NzSelectComponent;
   createTagPrefix = $localize`:@@common.create-tag:Create Tag`;
 
+  get hasPendingTagChanges(): boolean {
+    const saved = this.featureFlag.tags ?? [];
+    if (this.pendingTags.length !== saved.length) return true;
+    const sorted1 = [...this.pendingTags].sort();
+    const sorted2 = [...saved].sort();
+    return sorted1.some((t, i) => t !== sorted2[i]);
+  }
+
   isTagSelected(tag: string): boolean {
-    return this.featureFlag.tags.includes(tag);
+    return this.pendingTags.includes(tag);
   }
 
   onSearchTag(value: string) {
@@ -72,26 +76,57 @@ export class SettingComponent {
     }
   }
 
-  onRemoveTag(tag: string) {
-    this.featureFlag.removeTag(tag);
-    this.featureFlagService.setTags(this.featureFlag.key, this.featureFlag.tags).subscribe(_ => {
-      this.message.success($localize`:@@common.operation-success:Operation succeeded`);
-    });
+  onRemoveTag(event: MouseEvent, tag: string) {
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.UpdateFlagTags);
+    if (!isGranted) {
+      this.message.warning(this.permissionsService.genericDenyMessage);
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+
+    this.pendingTags = this.pendingTags.filter(t => t !== tag);
   }
 
   onAddTag() {
-    let actualTag = this.selectedTag.startsWith(this.createTagPrefix)
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.UpdateFlagTags);
+    if (!isGranted) {
+      this.message.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
+    if (!this.selectedTag) return;
+
+    const isNewTag = this.selectedTag.startsWith(this.createTagPrefix);
+    const actualTag = isNewTag
       ? this.selectedTag.replace(this.createTagPrefix, '').replace(/'/g, '').trim()
       : this.selectedTag.trim();
 
-    this.featureFlag.addTag(actualTag);
-    this.featureFlagService.setTags(this.featureFlag.key, this.featureFlag.tags).subscribe(_ => {
-      this.message.success($localize`:@@common.operation-success:Operation succeeded`);
-    });
+    if (!this.pendingTags.includes(actualTag)) {
+      this.pendingTags = [...this.pendingTags, actualTag];
+    }
 
-    this.allTags = [...this.allTags, actualTag];
+    if (isNewTag) {
+      this.allTags = [...this.allTags, actualTag];
+    }
+
     this.currentAllTags = this.allTags;
-    // clear current selected
+    this.tagsSelect.writeValue(null);
+  }
+
+  onSaveTags() {
+    this.promptChangeComment(ChangeOperation.UpdateTags).subscribe(comment => {
+      if (comment === null) return;
+      this.featureFlagService.setTags(this.featureFlag.key, this.pendingTags, comment).subscribe(_ => {
+        this.featureFlag.tags = [...this.pendingTags];
+        this.message.success($localize`:@@common.operation-success:Operation succeeded`);
+      });
+    });
+  }
+
+  onCancelSaveTags() {
+    this.pendingTags = [...(this.featureFlag.tags ?? [])];
+    this.currentAllTags = this.allTags;
     this.tagsSelect.writeValue(null);
   }
 
@@ -102,14 +137,22 @@ export class SettingComponent {
     private message: NzMessageService,
     private messageQueueService: MessageQueueService,
     private formBuilder: FormBuilder,
-    private router: Router
+    private router: Router,
+    private permissionsService: PermissionsService,
+    private permissionLicenseService: PermissionLicenseService,
+    private modal: NzModalService,
+    private changeCommentService: ChangeCommentService
   ) {
-    this.isLoading = true;
+    this.envSettings = getCurrentProjectEnv()!.envSettings;
+
     this.route.paramMap.subscribe( paramMap => {
       this.key = decodeURIComponent(paramMap.get('key'));
-      this.messageQueueService.subscribe(this.messageQueueService.topics.FLAG_TARGETING_CHANGED(this.key), () => this.loadData());
+      this.messageQueueService.subscribe(
+        this.messageQueueService.topics.FLAG_TARGETING_CHANGED(this.key),
+        (revision: string) => this.revision = revision
+      );
       this.loadData();
-    })
+    });
 
     this.featureFlagService.getAllTags().subscribe(allTags => {
       this.allTags = allTags;
@@ -135,30 +178,71 @@ export class SettingComponent {
   }
 
   private loadData() {
-    this.featureFlagService.getByKey(this.key).subscribe((result: IFeatureFlag) => {
-      this.featureFlag = new FeatureFlag(result);
-      this.isLoading = false;
-    }, () => this.isLoading = false)
+    this.isLoading = true;
+    this.featureFlagService.getByKey(this.key)
+    .pipe(finalize(() => this.isLoading = false))
+    .subscribe({
+      next: (result: IFeatureFlag) => {
+        this.featureFlag = new FeatureFlag(result);
+        this.pendingTags = [...this.featureFlag.tags];
+        this.revision = result.revision;
+      },
+      error: () => this.message.error($localize`:@@common.failed-to-load-data:Failed to load data`)
+    });
   }
 
-  onSaveDescription() {
-    this.onSaveSettings();
-  }
-
+  isToggling: boolean = false;
   onChangeStatus() {
-    this.featureFlag.isEnabled = !this.featureFlag.isEnabled;
-    this.onSaveSettings(() => this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key)));
-  }
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.ToggleFlag);
+    if (!isGranted) {
+      this.message.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
 
-  onChangeDisabledVariation() {
-    this.onSaveSettings(() => this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key)));
+    const operation = this.featureFlag.isEnabled ? ChangeOperation.ToggleOff : ChangeOperation.ToggleOn;
+    this.promptChangeComment(operation).subscribe(comment => {
+      if (comment === null) return;
+      const { isEnabled } = this.featureFlag;
+      this.isToggling = true;
+      this.featureFlagService.toggleStatus(this.key, !isEnabled, comment)
+      .pipe(finalize(() => this.isToggling = false))
+      .subscribe({
+        next: (revision) => {
+          this.featureFlag.isEnabled = !isEnabled;
+          this.onSettingUpdated(revision);
+        },
+        error: () => this.message.error($localize`:@@common.operation-failed:Operation failed`)
+      });
+    });
   }
 
   toggleTitleEditState(): void {
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.UpdateFlagName);
+    if (!isGranted) {
+      this.message.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
+    if (this.isEditingTitle) {
+      // Cancel editing, reset name to original value
+      this.featureFlag.name = this.featureFlag.originalData.name;
+    }
+
     this.isEditingTitle = !this.isEditingTitle;
   }
 
   toggleDescriptionEditState(): void {
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.UpdateFlagDescription);
+    if (!isGranted) {
+      this.message.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
+    if (this.isEditingDescription) {
+      // Cancel editing, reset description to original value
+      this.featureFlag.description = this.featureFlag.originalData.description;
+    }
+
     this.isEditingDescription = !this.isEditingDescription;
   }
 
@@ -184,6 +268,12 @@ export class SettingComponent {
 
   editVariationModalVisible: boolean = false;
   editVariations(): void {
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.UpdateFlagVariations);
+    if (!isGranted) {
+      this.message.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
     const { variationType, variations } = this.featureFlag;
 
     this.variationForm = this.formBuilder.group({
@@ -231,12 +321,12 @@ export class SettingComponent {
       return;
     }
 
-    this.experimentService.getFeatureFlagVariationReferences(this.featureFlag.id, id).subscribe({
-      next: (res) => {
-        if (res.length === 0) {
+    this.experimentService.getVariationReferences(this.featureFlag.id, id).subscribe({
+      next: (references) => {
+        if (references.length === 0) {
           this.variations.removeAt(index);
         } else {
-          this.variationExptReferences = [...res];
+          this.variationExptReferences = [...references];
           this.exptReferenceModalVisible = true;
         }
       },
@@ -245,20 +335,27 @@ export class SettingComponent {
   }
 
   saveVariations() {
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.UpdateFlagVariations);
+    if (!isGranted) {
+      this.message.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
     if (!this.variationForm.valid) {
       return;
     }
 
     const variations = this.variations.getRawValue();
-    this.featureFlagService.updateVariations(this.key, variations).subscribe({
-      next: () => {
-        this.featureFlag.variations = variations;
-        this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key));
-        this.editVariationModalVisible = false;
-
-        this.message.success($localize`:@@common.operation-success:Operation succeeded`);
-      },
-      error: err => this.message.error(err.error)
+    this.promptChangeComment(ChangeOperation.ChangeVariations).subscribe(comment => {
+      if (comment === null) return;
+      this.featureFlagService.updateVariations(this.key, variations, this.revision, comment).subscribe({
+        next: (revision) => {
+          this.featureFlag.variations = variations;
+          this.editVariationModalVisible = false;
+          this.onSettingUpdated(revision);
+        },
+        error: (err) => handleUpdateError(err, this.message, this.modal)
+      });
     });
   }
 
@@ -329,42 +426,112 @@ export class SettingComponent {
     this.exptReferenceModalVisible = false;
   }
 
-  onSaveSettings(cb?: Function) {
-    const { name, description, isEnabled, disabledVariationId } = this.featureFlag;
-    const payload: ISettingPayload = {
-      name,
-      description,
-      isEnabled,
-      disabledVariationId,
-    };
+  onSaveName() {
+    const { name } = this.featureFlag;
 
-    this.featureFlagService.updateSetting(this.key, payload).subscribe({
-      next: () => {
-        this.message.success($localize `:@@common.operation-success:Operation succeeded`);
-        this.isEditingTitle = false;
-        this.isEditingDescription = false;
-        cb && cb();
-      },
-      error: err => this.message.error(err.error)
+    this.promptChangeComment(ChangeOperation.ChangeName).subscribe(comment => {
+      if (comment === null) return;
+      this.featureFlagService.updateName(this.key, name, comment).subscribe({
+        next: (revision) => {
+          this.isEditingTitle = false;
+          this.onSettingUpdated(revision);
+        },
+        error: err => this.message.error(err.error)
+      });
+    });
+  }
+
+  onSaveDescription() {
+    const { description } = this.featureFlag;
+
+    this.promptChangeComment(ChangeOperation.ChangeDescription).subscribe(comment => {
+      if (comment === null) return;
+      this.featureFlagService.updateDescription(this.key, description, comment).subscribe({
+        next: (revision) => {
+          this.isEditingDescription = false;
+          this.onSettingUpdated(revision);
+        },
+        error: () => this.message.error($localize`:@@common.operation-failed:Operation failed`)
+      });
+    });
+  }
+
+  @ViewChild('offVariationSelect') offVariationSelect: NzSelectComponent;
+  onSaveOffVariation(newOffVariationId: string) {
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.UpdateFlagOffVariation);
+    if (!isGranted) {
+      this.message.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
+    this.promptChangeComment(ChangeOperation.ChangeOffVariation).subscribe(comment => {
+      if (comment === null) {
+        // revert to original off variation if user cancels the change comment prompt
+        this.offVariationSelect.writeValue(this.featureFlag.disabledVariationId);
+        return;
+      }
+
+      this.featureFlagService.updateOffVariation(this.key, newOffVariationId, this.revision, comment).subscribe({
+        next: (revision) => {
+          this.isEditingTitle = false;
+          this.featureFlag.disabledVariationId = newOffVariationId;
+          this.onSettingUpdated(revision);
+        },
+        error: (err) => handleUpdateError(err, this.message, this.modal)
+      });
     });
   }
 
   restoreFlag() {
-    this.featureFlagService.restore(this.featureFlag.key).subscribe(_ => {
-      this.featureFlag.isArchived = false;
-      this.message.success($localize `:@@common.operation-success:Operation succeeded`);
-      this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key));
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.RestoreFlag);
+    if (!isGranted) {
+      this.message.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
+    this.promptChangeComment(ChangeOperation.Restore).subscribe(comment => {
+      if (comment === null) return;
+      this.featureFlagService.restore(this.featureFlag.key, comment).subscribe(_ => {
+        this.featureFlag.isArchived = false;
+        this.message.success($localize `:@@common.operation-success:Operation succeeded`);
+        this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key));
+      });
     });
   }
 
   deleteFlag() {
-    this.featureFlagService.delete(this.featureFlag.key).subscribe(success => {
-      if (success) {
-        this.message.success($localize `:@@common.operation-success:Operation succeeded`);
-        this.router.navigateByUrl('/feature-flags');
-      } else {
-        this.message.error($localize `:@@common.operation-failed:Operation failed`);
-      }
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.featureFlag.rn, permissionActions.DeleteFlag);
+    if (!isGranted) {
+      this.message.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
+    this.promptChangeComment(ChangeOperation.Delete).subscribe(comment => {
+      if (comment === null) return;
+      this.featureFlagService.delete(this.featureFlag.key, comment).subscribe(success => {
+        if (success) {
+          this.message.success($localize `:@@common.operation-success:Operation succeeded`);
+          this.router.navigateByUrl('/feature-flags');
+        } else {
+          this.message.error($localize `:@@common.operation-failed:Operation failed`);
+        }
+      });
     });
+  }
+
+  copyText(text: string) {
+    copyToClipboard(text).then(
+      () => this.message.success($localize `:@@common.copy-success:Copied`)
+    );
+  }
+
+  private promptChangeComment(operation: ChangeOperation): Observable<string | null> {
+    return this.changeCommentService.promptFlag(this.key, operation);
+  }
+
+  private onSettingUpdated(revision: string) {
+    this.message.success($localize `:@@common.operation-success:Operation succeeded`);
+    this.revision = revision;
+    this.messageQueueService.emit(this.messageQueueService.topics.FLAG_SETTING_CHANGED(this.key));
   }
 }

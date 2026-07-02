@@ -6,16 +6,24 @@ public class Policy : AuditedEntity
 
     public string Name { get; set; }
 
+    public string Key { get; set; }
+
     public string Description { get; set; }
 
     public string Type { get; set; }
 
     public ICollection<PolicyStatement> Statements { get; set; }
 
-    public Policy(Guid organizationId, string name, string description)
+    // for ef core
+    protected Policy()
+    {
+    }
+
+    public Policy(Guid organizationId, string name, string key, string description)
     {
         OrganizationId = organizationId;
         Name = name;
+        Key = key;
         Description = description;
 
         Type = PolicyTypes.CustomerManaged;
@@ -35,5 +43,24 @@ public class Policy : AuditedEntity
         Statements = statements ?? Array.Empty<PolicyStatement>();
 
         UpdatedAt = DateTime.UtcNow;
+    }
+
+    public Policy Clone(Guid organizationId, string name, string key, string description)
+    {
+        // clear id
+        Id = Guid.Empty;
+
+        OrganizationId = organizationId;
+        Name = name;
+        Key = key;
+        Description = description;
+        Type = PolicyTypes.CustomerManaged;
+
+        // change audited properties
+        var now = DateTime.UtcNow;
+        CreatedAt = now;
+        UpdatedAt = now;
+
+        return this;
     }
 }

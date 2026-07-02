@@ -5,9 +5,10 @@ import { getProfile } from '@shared/utils';
 import { IdentityService } from "@services/identity.service";
 
 @Component({
-  selector: 'app-safe',
-  templateUrl: './safe.component.html',
-  styleUrls: ['./safe.component.less']
+    selector: 'app-safe',
+    templateUrl: './safe.component.html',
+    styleUrls: ['./safe.component.less'],
+    standalone: false
 })
 export class SafeComponent implements OnInit {
 
@@ -41,7 +42,7 @@ export class SafeComponent implements OnInit {
       },
       {
         title: $localize `:@@menu.end-users:End Users`,
-        icon: 'icons:icon-switch-user',
+        icon: 'icons:icon-end-users',
         path: '/users'
       },
       {
@@ -51,13 +52,8 @@ export class SafeComponent implements OnInit {
       },
       {
         title: $localize `:@@menu.experiments:Experiments`,
-        icon: 'icons:icon-expt',
+        icon: 'icons:icon-experiment',
         path: '/experiments'
-      },
-      {
-        title: $localize `:@@menu.data-sync:Data Sync`,
-        icon: 'icons:icon-data-sync',
-        path: '/data-sync'
       },
       {
         title: $localize `:@@auditlogs.audit-logs:Audit Logs`,
@@ -69,8 +65,13 @@ export class SafeComponent implements OnInit {
       },
       {
         title: $localize `:@@menu.workspace:Workspace`,
-        icon: 'bank',
+        icon: 'icons:icon-workspace',
         path: '/workspace'
+      },
+      {
+        title: $localize `:@@menu.organization:Organization`,
+        icon: 'icons:icon-organization',
+        path: '/organization'
       },
       {
         title: $localize `:@@menu.relay-proxies:Relay Proxies`,
@@ -119,7 +120,7 @@ export class SafeComponent implements OnInit {
     ];
   }
 
-  logout() {
-    this.identityService.doLogoutUser();
+  async logout() {
+    await this.identityService.doLogoutUser();
   }
 }

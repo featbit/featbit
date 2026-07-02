@@ -1,0 +1,70 @@
+@import "variables";
+
+.ant-transfer-list {
+  padding: 24px;
+  border: 1px solid @grey20-color;
+  border-radius: 20px;
+
+  .dot {
+    display: inline-block;
+    content: ' ';
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 12px;
+  }
+
+  &:first-child .ant-transfer-list-header-title::before {
+    .dot;
+    background: @grey30-color;
+  }
+
+  &:nth-child(3) .ant-transfer-list-header-title::before {
+    .dot;
+    background: @green60-color;
+  }
+}
+
+.ant-transfer-disabled .ant-transfer-list {
+  background-color: @grey5-color;
+}
+
+.ant-transfer-list-header-selected {
+  color: @grey70-color;
+  font-size: 14px;
+  line-height: 150%;
+}
+
+.ant-transfer-list-header-title {
+  font-size: 14px;
+  line-height: 150%;
+  color: @grey50-color;
+}
+
+.ant-transfer-list-body-with-search {
+  .ant-transfer-list-content-item input {
+    height: unset;
+  }
+
+  .ant-transfer-list-body-search-wrapper {
+    padding: 10px 0;
+
+    .ant-transfer-list-search {
+      padding: 4px 8px;
+      height: 40px;
+      border-radius: 32px;
+
+      input {
+        height: auto;
+      }
+
+      .ant-input-prefix {
+        font-size: 16px;
+      }
+    }
+  }
+}
+
+.ant-transfer-operation {
+  gap: 16px;
+}

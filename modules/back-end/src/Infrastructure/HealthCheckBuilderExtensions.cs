@@ -1,4 +1,8 @@
-﻿using Infrastructure.Kafka;
+﻿using Infrastructure.Caches;
+using Infrastructure.Caches.Redis;
+using Infrastructure.MQ;
+using Infrastructure.MQ.Kafka;
+using Infrastructure.Persistence;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -16,30 +20,34 @@ public static class HealthCheckBuilderExtensions
     {
         var tags = new[] { ReadinessTag };
 
-        var mongoDbConnectionString = configuration.GetValue<string>("MongoDb:ConnectionString");
-        var redisConnectionString = configuration.GetValue<string>("Redis:ConnectionString");
-
-        if (string.IsNullOrEmpty(mongoDbConnectionString) || string.IsNullOrEmpty(redisConnectionString))
+        var dbProvider = configuration.GetDbProvider();
+        if (dbProvider.Name == DbProvider.MongoDb)
         {
-            throw new InvalidOperationException("MongoDb and Redis connection strings must be configured.");
-        }
-
-        builder.Services
-            .AddHealthChecks()
-            .AddMongoDb(
-                mongoDbConnectionString,
-                tags: tags,
-                timeout: Timeout
-            )
-            .AddRedis(
-                redisConnectionString,
+            builder.AddMongoDb(
+                sp => sp.GetRequiredService<MongoDbClient>().Database,
                 tags: tags,
                 timeout: Timeout
             );
+        }
+        else
+        {
+            builder.AddDbContextCheck<AppDbContext>(tags: tags);
+        }
 
-        if (configuration.IsProVersion())
+        var mqProvider = configuration.GetMqProvider();
+        if (mqProvider == MqProvider.Kafka)
         {
             builder.AddKafka(configuration, tags, Timeout);
+        }
+
+        var cacheProvider = configuration.GetCacheProvider();
+        if (cacheProvider == CacheProvider.Redis)
+        {
+            builder.AddRedis(
+                serviceProvider => serviceProvider.GetRequiredService<IRedisClient>().Connection,
+                tags: tags,
+                timeout: Timeout
+            );
         }
 
         return builder;

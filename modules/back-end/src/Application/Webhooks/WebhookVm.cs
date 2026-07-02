@@ -27,6 +27,8 @@ public class WebhookVm
 
     public bool IsActive { get; set; }
 
+    public bool PreventEmptyPayloads { get; set; }
+
     public LastDelivery LastDelivery { get; set; }
 
     public UserVm Creator { get; set; }

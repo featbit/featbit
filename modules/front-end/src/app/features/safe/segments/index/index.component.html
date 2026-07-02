@@ -1,149 +1,163 @@
 <section class="body-container">
   <div class="table-content-area">
     <div class="table-search-area">
-      <div class="search-inputs">
-        <nz-input-group [nzPrefix]="prefixIconSearch">
-          <input nz-input type="text" placeholder="Filter by name" i18n-placeholder="@@segment.idx.filter-by-name" [(ngModel)]="segmentFilter.name" (ngModelChange)="onSearch(true)">
-        </nz-input-group>
-        <label nz-checkbox [(ngModel)]="segmentFilter.isArchived" (ngModelChange)="onSearch(true)" i18n="@@segment.idx.archived">Archived</label>
-        <ng-template #prefixIconSearch>
-          <i nz-icon nzType="icons:icon-search"></i>
-        </ng-template>
-      </div>
-      <div class="middle-btn">
-        <button nz-button nzType="primary" (click)="addSegment()">
-          <i nz-icon nzType="icons:icon-add"></i>
-          <ng-container i18n="@@common.add">Add</ng-container>
-        </button>
+      <div class="search-toolbar">
+        <div class="left-filters">
+          <nz-input-group [nzPrefix]="prefixIconSearch" class="main-search">
+            <input
+              nz-input
+              type="text"
+              placeholder="Filter by name"
+              i18n-placeholder="@@common.filter-by-name"
+              [(ngModel)]="segmentFilter.name"
+              (ngModelChange)="onSearch(true)">
+          </nz-input-group>
+          <ng-template #prefixIconSearch>
+            <i nz-icon nzType="icons:icon-search"></i>
+          </ng-template>
+          <button
+            nz-button
+            nzType="dashed"
+            [class.active]="segmentFilter.isArchived"
+            (click)="toggleArchiveFilter()"
+            i18n="@@ff.idx.show-archived">Show Archived</button>
+        </div>
+        <div class="right-actions">
+          <button class="btn-primary" nz-button nzType="primary" (click)="showCreationModal()">
+            <i nz-icon nzType="icons:icon-add"></i>
+            <ng-container i18n="@@common.add">Add</ng-container>
+          </button>
+        </div>
       </div>
     </div>
 
     <div class="table-wrapper">
-      <nz-table #table nzSize="small"
-                nzShowSizeChanger
-                [nzData]="segmentListModel.items"
-                [nzFrontPagination]="false"
-                [nzLoading]="loading"
-                [nzTotal]="segmentListModel.totalCount"
-                [(nzPageSize)]="segmentFilter.pageSize"
-                (nzPageSizeChange)="onSearch()"
-                [nzPageSizeOptions]="[10,20,30]"
-                [(nzPageIndex)]="segmentFilter.pageIndex"
-                (nzPageIndexChange)="onSearch()">
+      <nz-table
+        #table
+        nzSize="small"
+        nzShowSizeChanger
+        [nzData]="segmentListModel.items"
+        [nzFrontPagination]="false"
+        [nzLoading]="loading"
+        [nzTotal]="segmentListModel.totalCount"
+        [(nzPageSize)]="segmentFilter.pageSize"
+        (nzPageSizeChange)="onSearch()"
+        [nzPageSizeOptions]="[10,20,30]"
+        [(nzPageIndex)]="segmentFilter.pageIndex"
+        (nzPageIndexChange)="onSearch()">
         <thead>
           <tr>
-            <th nzWidth="35%" i18n="@@common.name">Name</th>
-            <th nzWidth="35%" i18n="@@common.last-updated">Last updated</th>
+            <th i18n="@@common.name">Name</th>
+            <th>
+              <span i18n="@@common.type" style="margin-right: 4px">Type</span>
+              <i style="cursor: pointer"
+                nz-icon
+                nz-tooltip="Shareable segment can be used across multiple environments while common segment can only be used in current environment."
+                i18n-nz-tooltip="@@segment.segment-type-tip"
+                nzType="icons:icon-info-outline">
+              </i>
+            </th>
+            <th i18n="@@common.tags">Tags</th>
+            <th i18n="@@common.last-updated">Last updated</th>
             <th i18n="@@common.actions">Actions</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let item of table.data">
-            <td style="cursor: pointer;" (click)="onIntoSegmentDetail(item)">
-              <span>{{item.name}}</span>
-            </td>
-            <td>{{getLocalDate(item.updatedAt) | date: 'YYYY-MM-dd HH:mm:ss'}}</td>
-            <td>
-              <a style="color:#23AD7F;" (click)="onIntoSegmentDetail(item)" i18n="@@common.details">Details</a>
-              <nz-divider nzType="vertical"></nz-divider>
-              <ng-container *ngIf="segmentFilter.isArchived;then archivedOps else unarchivedOps"></ng-container>
-              <ng-template #archivedOps>
-                <a style="color: #717D8A"
-                   i18n-nz-popconfirm="@@ff.are-you-sure-to-restore-segment"
-                   nz-popconfirm="Are you sure to restore this segment?"
-                   (nzOnConfirm)="restore(item)">
-                  <ng-container i18n="@@common.restore">Restore</ng-container>
-                </a>
+          @for (item of table.data; track item.id) {
+            <tr>
+              <!-- Name Column: name, key, created by, created at -->
+              <td class="name-cell">
+                <div class="name" [routerLink]="[item.id, 'targeting']">{{item.name}}</div>
+                <div class="key" (click)="copyText($event, item.key)">
+                  {{item.key}}
+                  <i class="copy-icon" nz-icon nzType="icons:icon-copy"></i>
+                </div>
+              </td>
+              <td>
+                @if (item.type === SegmentType.EnvironmentSpecific) {
+                  <nz-tag
+                    style="cursor: pointer"
+                    nz-tooltip
+                    nzTooltipPlacement="topLeft"
+                    nzTooltipTitle="This segment can only be used in current environment"
+                    i18n-nzTooltipTitle="@@segment.index.current-segment-tooltip">
+                    <span i18n="@@segment.current-environment">Current Environment</span>
+                  </nz-tag>
+                }
+                @if (item.type === SegmentType.Shared) {
+                  <nz-tag
+                    style="cursor: pointer"
+                    nzColor="#23AD7F"
+                    nz-tooltip
+                    nzTooltipPlacement="topLeft"
+                    [nzTooltipOverlayStyle]="{'max-width': '300px'}"
+                    [nzTooltipTitle]="scopesTooltip">
+                    <span i18n="@@segment.shareable">Shareable</span>
+                  </nz-tag>
+                }
+                <ng-template #scopesTooltip>
+                  <span i18n="@@common.shared-scopes">Shared Scopes</span>
+                  <ul style="max-height: 100px; overflow: auto">
+                    @for (event of item.scopes; track event) {
+                      <li>{{ event }}</li>
+                    }
+                  </ul>
+                </ng-template>
+              </td>
+              <td class="tags-cell">
+                @for (tag of item.tags; track tag) {
+                  <span class="tag" nz-tooltip [nzTooltipTitle]="tag">{{tag}}</span>
+                }
+              </td>
+              <td>{{item.updatedAt | date: 'yyyy-MM-dd HH:mm:ss'}}</td>
+              <td class="actions-cell">
+                <a class="action-link primary" [routerLink]="[item.id, 'targeting']" i18n="@@common.details">Details</a>
                 <nz-divider nzType="vertical"></nz-divider>
-                <a style="color: #FF513A" (click)="deleteArchiveValidation(item, true)">
-                  <ng-container i18n="@@common.remove">Remove</ng-container>
-                </a>
-              </ng-template>
-              <ng-template #unarchivedOps>
-                <a style="color: #717D8A" i18n="@@common.archive" (click)="deleteArchiveValidation(item, false)">Archive</a>
-              </ng-template>
-            </td>
-          </tr>
+                @if (segmentFilter.isArchived) {
+                  <a style="color: #717D8A"
+                     i18n-nz-popconfirm="@@ff.are-you-sure-to-restore-segment"
+                     nz-popconfirm="Are you sure to restore this segment?"
+                     [nzPopconfirmOverlayStyle]="{maxWidth: '350px'}"
+                     [nzCondition]="envSettings.requireChangeComment"
+                     (nzOnConfirm)="restore(item)">
+                    <ng-container i18n="@@common.restore">Restore</ng-container>
+                  </a>
+                  <nz-divider nzType="vertical"></nz-divider>
+                  <a style="color: #FF513A"
+                     nz-popconfirm="This operation cannot be reverted, are you sure to remove it?"
+                     i18n-nz-popconfirm="@@common.remove-confirm"
+                     [nzPopconfirmOverlayStyle]="{maxWidth: '350px'}"
+                     [nzCondition]="envSettings.requireChangeComment"
+                     (nzOnConfirm)="delete(item)">
+                    <ng-container i18n="@@common.remove">Remove</ng-container>
+                  </a>
+                } @else {
+                  @if (loadingFlagReferenceFor === item.id) {
+                    <i nz-icon nzType="loading" nzTheme="outline"></i>
+                  } @else {
+                    <a style="color: #717D8A" i18n="@@common.archive" (click)="archive(item)">Archive</a>
+                  }
+                }
+              </td>
+            </tr>
+          }
         </tbody>
       </nz-table>
     </div>
   </div>
 </section>
 
-<nz-modal [(nzVisible)]="createModalVisible"
-          [nzTitle]="modalTitle"
-          [nzCentered]="true"
-          [nzContent]="modalContent"
-  [nzFooter]="modalFooter" (nzOnCancel)="closeCreateModal()">
-  <ng-template #modalTitle><ng-container i18n="@@segment.idx.add-segment">Add segment</ng-container></ng-template>
-  <ng-template #modalContent>
-    <form nz-form [formGroup]="segmentForm" nzLayout="vertical">
-      <nz-form-item>
-        <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>
-        <nz-form-control nzHasFeedback i18n-nzValidatingTip="@@common.validating" nzValidatingTip="Validating..." [nzErrorTip]="segmentNameErrorTpl">
-          <input nz-input formControlName="name" />
-          <ng-template #segmentNameErrorTpl let-control>
-            <ng-container *ngIf="control.hasError('required')" i18n="@@common.name-cannot-be-empty">Name cannot be empty</ng-container>
-            <ng-container *ngIf="control.hasError('duplicated')" i18n="@@common.name-has-been-used">This name has been used</ng-container>
-            <ng-container *ngIf="control.hasError('unknown')" i18n="@@common.name-validation-failed">Name validation failed</ng-container>
-          </ng-template>
-        </nz-form-control>
-      </nz-form-item>
-      <nz-form-item>
-        <nz-form-label i18n="@@common.description">Description</nz-form-label>
-        <nz-form-control>
-          <textarea style="resize: none" nz-input formControlName="description" i18n-placeholder="@@common.description" placeholder="Description"></textarea>
-        </nz-form-control>
-      </nz-form-item>
-    </form>
-  </ng-template>
+<segment-creation-modal
+  [isVisible]="creationModalVisible"
+  (onClose)="closeCreationModal($event)"
+></segment-creation-modal>
 
-  <ng-template #modalFooter>
-    <button nz-button nzType="default" (click)="this.closeCreateModal()" i18n="@@common.cancel">Cancel</button>
-    <button nz-button nzType="primary" [nzLoading]="this.creating" [disabled]="!segmentForm.valid"
-      (click)="createSegment()" i18n="@@common.save">Save</button>
-  </ng-template>
-</nz-modal>
-
-<nz-modal [(nzVisible)]="deleteArchiveModalVisible"
-          [nzTitle]="deleteArchiveModalTitle"
-          [nzCentered]="true"
-          [nzContent]="deleteArchiveModalContent"
-          [nzFooter]="deleteArchiveModalFooter"
-          (nzOnCancel)="closeDeleteArchiveModal()">
-
-  <ng-template #deleteArchiveModalTitle>
-    <span *ngIf="isDelete" style="font-size:18px" i18n="@@segment.remove-segment">Remove segment: {{currentDeletingArchivingSegment.name}}</span>
-    <span *ngIf="!isDelete" style="font-size:18px" i18n="@@segment.archive-segment">Archive segment: {{currentDeletingArchivingSegment.name}}</span>
-  </ng-template>
-
-  <ng-template #deleteArchiveModalContent>
-    <div style="font-size:15px">
-      <ng-container i18n="@@common.segment">Segment</ng-container>
-      <span style="font-weight:800;display:inline-block;margin:0 3px;">{{currentDeletingArchivingSegment.name}}</span>
-      <ng-container *ngIf="isDelete" i18n="@@segment.permanent-remove-msg">will be permanently removed, this operation cannot be recovered!</ng-container>
-      <ng-container *ngIf="!isDelete" i18n="@@segment.archive-msg">will be archived!</ng-container>
-    </div>
-    <div *ngIf="currentDeletingArchivingSegmentFlagReferences.length > 0" class="warning-message">
-      <div class="warning">
-        <span class="warning-icon"><i nz-icon nzType="warning" nzTheme="fill"></i></span>
-        <div class="warning-content">
-          <ng-container i18n="@@segment.segment-used-by-flags">This segment is used by {{currentDeletingArchivingSegmentFlagReferences.length}} flags(s), remove all references before this operation!</ng-container>
-        </div>
-      </div>
-    </div>
-    <div *ngFor="let flag of currentDeletingArchivingSegmentFlagReferences" style="margin-top:5px">
-      <a (click)="openFlagPage(flag.key)">{{flag.name}}</a>
-    </div>
-  </ng-template>
-
-  <ng-template #deleteArchiveModalFooter>
-    <button nz-button nzType="default" (click)="this.closeDeleteArchiveModal()" i18n="@@common.cancel">Cancel</button>
-    <button nz-button nzType="primary" [nzLoading]="this.deletingOrArchiving"
-            [disabled]="currentDeletingArchivingSegmentFlagReferences.length > 0"
-            (click)="deleteArchive(currentDeletingArchivingSegment.id)" >
-      <ng-container *ngIf="isDelete" i18n="@@common.remove">Remove</ng-container>
-      <ng-container *ngIf="!isDelete" i18n="@@common.archive">Archive</ng-container>
-    </button>
-  </ng-template>
-</nz-modal>
+<flag-references-modal
+  [visible]="flagReferencesModalVisible"
+  [references]="flagReferences"
+  title="Can't archive segment"
+  i18n-title="@@segment.index.flag-references-modal-title"
+  description="We cannot archive this segment because it is being referenced by the following feature flags."
+  i18n-description="@@segment.index.flag-references-modal-description"
+  (onClose)="flagReferencesModalVisible = false">
+</flag-references-modal>

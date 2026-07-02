@@ -4,8 +4,14 @@ namespace Application.Projects;
 
 public class UpdateProject : IRequest<ProjectVm>
 {
+    /// <summary>
+    /// The ID of the project to update. Retrieved from the URL path.
+    /// </summary>
     public Guid Id { get; set; }
 
+    /// <summary>
+    /// The new name for the project
+    /// </summary>
     public string Name { get; set; }
 }
 
@@ -14,7 +20,7 @@ public class UpdateProjectValidator : AbstractValidator<UpdateProject>
     public UpdateProjectValidator()
     {
         RuleFor(x => x.Name)
-            .NotEmpty().WithErrorCode(ErrorCodes.NameIsRequired);
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("name"));
     }
 }
 

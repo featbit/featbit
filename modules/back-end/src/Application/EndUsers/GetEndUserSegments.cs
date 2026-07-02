@@ -2,6 +2,8 @@ namespace Application.EndUsers;
 
 public class GetEndUserSegments : IRequest<IEnumerable<EndUserSegmentVm>>
 {
+    public Guid WorkspaceId { get; set; }
+
     public Guid EnvId { get; set; }
 
     public Guid Id { get; set; }
@@ -10,18 +12,18 @@ public class GetEndUserSegments : IRequest<IEnumerable<EndUserSegmentVm>>
 public class GetEndUserSegmentsHandler : IRequestHandler<GetEndUserSegments, IEnumerable<EndUserSegmentVm>>
 {
     private readonly IEndUserService _endUserService;
-    private readonly ISegmentService _segmentService;
+    private readonly IEnvironmentAppService _envAppService;
 
-    public GetEndUserSegmentsHandler(IEndUserService endUserService, ISegmentService segmentService)
+    public GetEndUserSegmentsHandler(IEndUserService endUserService, IEnvironmentAppService envAppService)
     {
         _endUserService = endUserService;
-        _segmentService = segmentService;
+        _envAppService = envAppService;
     }
 
     public async Task<IEnumerable<EndUserSegmentVm>> Handle(GetEndUserSegments request, CancellationToken cancellationToken)
     {
         var endUser = await _endUserService.GetAsync(request.Id);
-        var segments = await _segmentService.FindManyAsync(x => x.EnvId == request.EnvId && !x.IsArchived);
+        var segments = await _envAppService.GetSegmentsAsync(request.WorkspaceId, request.EnvId);
 
         var result = segments
             .Where(x => x.IsMatch(endUser))

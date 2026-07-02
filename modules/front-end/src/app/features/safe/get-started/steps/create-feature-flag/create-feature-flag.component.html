@@ -1,122 +1,139 @@
 <div class="create-feature-flag">
-  <ng-template #loadingTem>
-    <div class="block">
-      <nz-skeleton [nzActive]="true"></nz-skeleton>
-    </div>
-  </ng-template>
 
-  <nz-page-header *ngIf="isFlagListInitialized; else loadingTem;">
-    <nz-page-header-title i18n="@@get-started.create-flag-title">Create a Feature Flag</nz-page-header-title>
-    <nz-page-header-content>
-      <div *ngIf="isFlagListInitialized && !isCreatingFlag" class="flag-selector">
-        <p nz-typography i18n="@@get-started.create-flag-paragraph-1">A Feature Flag controls what you want to release, who receive it and how it will be delivered.</p>
-        <p nz-typography i18n="@@get-started.create-flag-paragraph-2">Select an existing Flag or type the name to create a new one</p>
-        <nz-select
-          class="nz-select-40"
-          i18n-nzPlaceHolder="@@common.select-or-create-ff"
-          nzPlaceHolder="Select or create a feature flag"
-          nzShowSearch
-          nzServerSearch
-          [compareWith]="compareWith"
-          [ngModel]="flag"
-          (nzOnSearch)="onSearchFeatureFlag($event)"
-          (ngModelChange)="onFeatureFlagChange($event)"
-        >
-          <ng-container *ngFor="let ff of featureFlagList?.items">
-            <nz-option nzCustomContent *ngIf="!isFeatureFlagsLoading" [nzValue]="ff" [nzLabel]="ff.name">
-              <div class="flag-selection-item" [class]="{'creation-selection-item': ff.isNew}">
-                <div class="title">
-                  <ng-container *ngIf="ff.isNew" i18n="@@common.create-with-comma">Create:</ng-container>
-                  {{ ff.name }}
-                </div>
-              </div>
-            </nz-option>
-          </ng-container>
-          <nz-option *ngIf="isFeatureFlagsLoading" nzDisabled nzCustomContent>
-            <i nz-icon nzType="loading" class="loading-icon"></i>
-            <ng-container i18n="@@common.loading">Loading...</ng-container>
-          </nz-option>
-        </nz-select>
-      </div>
-
-      <div *ngIf="showCreationForm">
-        <form nz-form [formGroup]="form" class="standard-form" nzLayout="vertical">
-          <div>
-            <nz-form-item>
-              <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>
-              <nz-form-control i18n-nzErrorTip="@@common.name-cannot-be-empty" nzErrorTip="Name cannot be empty">
-                <input
-                  nz-input
-                  formControlName="name"
-                  placeholder="A human-friendly name for your feature flag"
-                  i18n-placeholder="@@ff.feature-flag-name"
-                />
-              </nz-form-control>
-            </nz-form-item>
-            <nz-form-item>
-              <nz-form-label
-                nzRequired
-                i18n-nzTooltipTitle="@@ff.key-creation-description"
-                nzTooltipTitle="Use key (case-sensitive) in your code to get the feature flag variation. Keys must only contain letters, numbers, ., _ or -.">
-                Key
-              </nz-form-label>
-              <nz-form-control nzHasFeedback i18n-nzValidatingTip="@@common.validating" nzValidatingTip="Validating..." [nzErrorTip]="keyErrorTpl">
-                <input nz-input formControlName="key" i18n-placeholder="@@common.key-generated-from-name" placeholder="Key can be auto-generated from name"/>
-                <ng-template #keyErrorTpl let-control>
-                  <ng-container *ngIf="control.hasError('required')" i18n="@@common.key-cannot-be-empty">Key cannot be empty</ng-container>
-                  <ng-container *ngIf="control.hasError('pattern')" i18n="@@common.key-format-error">Only allow letters, numbers, '.', '_' or '-'</ng-container>
-                  <ng-container *ngIf="control.hasError('duplicated')" i18n="@@common.key-has-been-used">This key has been used</ng-container>
-                  <ng-container *ngIf="control.hasError('unknown')" i18n="@@common.key-validation-failed">Key validation failed</ng-container>
-                </ng-template>
-              </nz-form-control>
-            </nz-form-item>
-            <nz-form-item>
-              <nz-form-label i18n="@@common.description">Description</nz-form-label>
-              <nz-form-control nzHasFeedback nzErrorTip="Cannot exceed 512 characters"
-                               i18n-nzErrorTip="@@ff.description.cannot-exceed-512-characters">
-          <textarea nz-input formControlName="description" i18n-placeholder="@@common.description"
-                    placeholder="Description">
-          </textarea>
-              </nz-form-control>
-            </nz-form-item>
+  @if (isFlagListInitialized) {
+    <nz-page-header>
+      <nz-page-header-title i18n="@@get-started.create-flag-title">Create a Feature Flag</nz-page-header-title>
+      <nz-page-header-content>
+        @if (isFlagListInitialized && !isCreatingFlag) {
+          <div class="flag-selector">
+            <p nz-typography i18n="@@get-started.create-flag-paragraph-1">A Feature Flag controls what you want to release, who receive it and how it will be delivered.</p>
+            <p nz-typography i18n="@@get-started.create-flag-paragraph-2">Select an existing Flag or type the name to create a new one</p>
+            <nz-select
+              class="nz-select-40"
+              i18n-nzPlaceHolder="@@common.select-or-create-ff"
+              nzPlaceHolder="Select or create a feature flag"
+              nzShowSearch
+              nzServerSearch
+              [compareWith]="compareWith"
+              [ngModel]="flag"
+              (nzOnSearch)="onSearchFeatureFlag($event)"
+              (ngModelChange)="onFeatureFlagChange($event)"
+              >
+              @if (isFeatureFlagsLoading) {
+                <nz-option nzDisabled nzCustomContent>
+                  <i nz-icon nzType="loading" class="loading-icon"></i>
+                  <ng-container i18n="@@common.loading">Loading...</ng-container>
+                </nz-option>
+              } @else {
+                @for (ff of featureFlagList?.items; track ff) {
+                  <nz-option nzCustomContent [nzValue]="ff" [nzLabel]="ff.name">
+                    <div class="flag-selection-item" [class]="{'creation-selection-item': ff.isNew}">
+                      <div class="title">
+                        @if (ff.isNew) {
+                          <ng-container i18n="@@common.create-with-comma">Create:</ng-container>
+                        }
+                        {{ ff.name }}
+                      </div>
+                    </div>
+                  </nz-option>
+                }
+              }
+            </nz-select>
           </div>
+        }
+        @if (showCreationForm) {
           <div>
-            <nz-form-item>
-              <nz-form-label
-                i18n-nzTooltipTitle="@@common.variation-type-tooltip"
-                nzTooltipTitle="We currently support string, boolean, number and json types. Once you have created a feature flag, you cannot change its variation type."
-                i18n="@@common.variation-type">Variation type</nz-form-label>
-              <nz-form-control>
-                <input nz-input [disabled]="true" [value]="variationTypeBoolean"/>
-              </nz-form-control>
-            </nz-form-item>
-            <nz-form-item>
-              <nz-form-label
-                i18n-nzTooltipTitle="@@common.default-serve-tooltip"
-                nzTooltipTitle="Define which variation users will see by default when the flag is Enabled or Disabled"
-                i18n="@@common.default-rule">Default Rule</nz-form-label>
-              <nz-form-control>
-                <div class="default-rule">
-                  <span class="default-rule-label" i18n="@@common.serve-if-on">If the flag is ON, serve</span>
-                  <span class="default-rule-value"><span class="variation-tip tip-0"></span><span>true</span></span>
+            <form nz-form [formGroup]="form" class="standard-form" nzLayout="vertical">
+              <div>
+                <nz-form-item>
+                  <nz-form-label nzRequired i18n="@@common.name">Name</nz-form-label>
+                  <nz-form-control i18n-nzErrorTip="@@common.name-cannot-be-empty" nzErrorTip="Name cannot be empty">
+                    <input
+                      nz-input
+                      formControlName="name"
+                      placeholder="A human-friendly name for your feature flag"
+                      i18n-placeholder="@@ff.feature-flag-name"
+                      />
+                    </nz-form-control>
+                  </nz-form-item>
+                  <nz-form-item>
+                    <nz-form-label
+                      nzRequired
+                      i18n-nzTooltipTitle="@@ff.key-creation-description"
+                      nzTooltipTitle="Use key (case-sensitive) in your code to get the feature flag variation. Keys must only contain letters, numbers, ., _ or -.">
+                      Key
+                    </nz-form-label>
+                    <nz-form-control nzHasFeedback i18n-nzValidatingTip="@@common.validating" nzValidatingTip="Validating..." [nzErrorTip]="keyErrorTpl">
+                      <input nz-input formControlName="key" i18n-placeholder="@@common.key-generated-from-name" placeholder="Key can be auto-generated from name"/>
+                      <ng-template #keyErrorTpl let-control>
+                        @if (control.hasError('required')) {
+                          <ng-container i18n="@@common.key-cannot-be-empty">Key cannot be empty</ng-container>
+                        }
+                        @if (control.hasError('pattern')) {
+                          <ng-container i18n="@@common.key-format-error">Only allow letters, numbers, '.', '_' or '-'</ng-container>
+                        }
+                        @if (control.hasError('duplicated')) {
+                          <ng-container i18n="@@common.key-has-been-used">This key has been used</ng-container>
+                        }
+                        @if (control.hasError('unknown')) {
+                          <ng-container i18n="@@common.key-validation-failed">Key validation failed</ng-container>
+                        }
+                      </ng-template>
+                    </nz-form-control>
+                  </nz-form-item>
+                  <nz-form-item>
+                    <nz-form-label i18n="@@common.description">Description</nz-form-label>
+                    <nz-form-control nzHasFeedback nzErrorTip="Cannot exceed 512 characters"
+                      i18n-nzErrorTip="@@ff.description.cannot-exceed-512-characters">
+                      <textarea nz-input formControlName="description" i18n-placeholder="@@common.description"
+                        placeholder="Description">
+                      </textarea>
+                    </nz-form-control>
+                  </nz-form-item>
                 </div>
-                <div class="default-rule">
-                  <span class="default-rule-label" i18n="@@common.serve-if-off">If the flag is OFF, serve</span>
-                  <span class="default-rule-value"><span class="variation-tip tip-1"></span><span>false</span></span>
+                <div>
+                  <nz-form-item>
+                    <nz-form-label
+                      i18n-nzTooltipTitle="@@common.variation-type-tooltip"
+                      nzTooltipTitle="We currently support string, boolean, number and json types. Once you have created a feature flag, you cannot change its variation type."
+                    i18n="@@common.variation-type">Variation type</nz-form-label>
+                    <nz-form-control>
+                      <input nz-input [disabled]="true" [value]="variationTypeBoolean"/>
+                    </nz-form-control>
+                  </nz-form-item>
+                  <nz-form-item>
+                    <nz-form-label
+                      i18n-nzTooltipTitle="@@common.default-serve-tooltip"
+                      nzTooltipTitle="Define which variation users will see by default when the flag is Enabled or Disabled"
+                    i18n="@@common.default-rule">Default Rule</nz-form-label>
+                    <nz-form-control>
+                      <div class="default-rule">
+                        <span class="default-rule-label" i18n="@@common.serve-if-on">If the flag is ON, serve</span>
+                        <span class="default-rule-value"><span class="variation-tip tip-0"></span><span>true</span></span>
+                      </div>
+                      <div class="default-rule">
+                        <span class="default-rule-label" i18n="@@common.serve-if-off">If the flag is OFF, serve</span>
+                        <span class="default-rule-value"><span class="variation-tip tip-1"></span><span>false</span></span>
+                      </div>
+                    </nz-form-control>
+                  </nz-form-item>
                 </div>
-              </nz-form-control>
-            </nz-form-item>
-          </div>
-        </form>
+              </form>
+            </div>
+          }
+        </nz-page-header-content>
+        <nz-page-header-extra>
+          <nz-button-group>
+            <button nz-button nzType="default" [disabled]="!isNextEnabled" (click)="next()">
+              <span i18n="@@common.next">Next</span>
+              <span nz-icon nzType="right"></span>
+            </button>
+          </nz-button-group>
+        </nz-page-header-extra>
+      </nz-page-header>
+    } @else {
+      <div class="block">
+        <nz-skeleton [nzActive]="true"></nz-skeleton>
       </div>
-    </nz-page-header-content>
-    <nz-page-header-extra>
-      <nz-button-group>
-        <button nz-button nzType="default" [disabled]="!isNextEnabled" (click)="next()">
-          <span i18n="@@common.next">Next</span>
-          <span nz-icon nzType="right"></span>
-        </button>
-      </nz-button-group>
-    </nz-page-header-extra>
-  </nz-page-header>
-</div>
+    }
+  </div>

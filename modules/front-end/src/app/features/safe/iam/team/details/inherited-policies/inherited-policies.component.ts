@@ -7,9 +7,10 @@ import { MemberService } from "@services/member.service";
 import { InheritedMemberPolicyFilter, IPagedInheritedMemberPolicy } from "@features/safe/iam/types/member";
 
 @Component({
-  selector: 'inherited-policies',
-  templateUrl: './inherited-policies.component.html',
-  styleUrls: ['./inherited-policies.component.less']
+    selector: 'inherited-policies',
+    templateUrl: './inherited-policies.component.html',
+    styleUrls: ['./inherited-policies.component.less'],
+    standalone: false
 })
 export class InheritedPoliciesComponent implements OnInit {
 

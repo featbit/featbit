@@ -104,6 +104,8 @@ public static class WebhookEvents
 
                 SegmentInstructionKind.UpdateName
                     or SegmentInstructionKind.UpdateDescription
+                    or SegmentInstructionKind.AddTags
+                    or SegmentInstructionKind.RemoveTags
                     => BasicInfoUpdated,
                 _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, null)
             };

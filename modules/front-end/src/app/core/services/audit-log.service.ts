@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { environment } from "../../../environments/environment";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { getCurrentProjectEnv } from "@utils/project-env";
-import { firstValueFrom, Observable } from "rxjs";
+import { Observable } from "rxjs";
 import { addDays, startOfDay } from 'date-fns'
 import { AuditLogListFilter, IAuditLogListModel } from "@core/components/audit-log/types";
 import { IInstruction } from "@core/components/change-list/instructions/types";
@@ -31,6 +31,7 @@ export class AuditLogService {
     }
 
     const queryParam = {
+      crossEnvironment: filter.crossEnvironment,
       query: filter.query ?? '',
       creatorId: filter.creatorId ?? '',
       refType: filter.refType ?? '',
@@ -38,7 +39,7 @@ export class AuditLogService {
       from,
       to,
       pageIndex: filter.pageIndex - 1,
-      pageSize: filter.pageSize,
+      pageSize: filter.pageSize
     };
 
     return this.http.get<IAuditLogListModel>(
@@ -47,8 +48,8 @@ export class AuditLogService {
     );
   }
 
-  compare(refType: string, previous: string, current: string): Promise<IInstruction[]> {
-    return firstValueFrom(this.http.post<IInstruction[]>(
+  compare(refType: string, previous: string, current: string): Observable<IInstruction[]> {
+    return this.http.post<IInstruction[]>(
       `${this.baseUrl}/compare`,
       {
         refType,
@@ -57,6 +58,6 @@ export class AuditLogService {
           current
         }
       }
-    ));
+    );
   }
 }

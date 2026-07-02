@@ -14,16 +14,16 @@ public class GetInsightsValidator : AbstractValidator<GetInsights>
     public GetInsightsValidator()
     {
         RuleFor(x => x.Filter.FeatureFlagKey)
-            .NotEmpty().WithErrorCode(ErrorCodes.KeyIsRequired);
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("featureFlagKey"));
 
         RuleFor(x => x.Filter.IntervalType)
-            .Must(IntervalType.IsDefined).WithErrorCode(ErrorCodes.InvalidIntervalType);
-        
+            .Must(IntervalType.IsDefined).WithErrorCode(ErrorCodes.Invalid("intervalType"));
+
         RuleFor(x => x.Filter.From)
-            .GreaterThan(0).WithErrorCode(ErrorCodes.InvalidFrom);
-        
+            .GreaterThan(0).WithErrorCode(ErrorCodes.Invalid("from"));
+
         RuleFor(x => x.Filter.To)
-            .GreaterThan(0).WithErrorCode(ErrorCodes.InvalidTo);
+            .GreaterThan(0).WithErrorCode(ErrorCodes.Invalid("to"));
     }
 }
 
@@ -37,11 +37,11 @@ public class GetInsightsHandler : IRequestHandler<GetInsights, IEnumerable<Insig
         _service = service;
         _olapService = olapService;
     }
-    
+
     public async Task<IEnumerable<InsightsVm>> Handle(GetInsights request, CancellationToken cancellationToken)
     {
         var featureFlag = await _service.GetAsync(request.EnvId, request.Filter.FeatureFlagKey);
-        
+
         var param = new InsightsParam
         {
             EnvId = request.EnvId,
@@ -52,7 +52,7 @@ public class GetInsightsHandler : IRequestHandler<GetInsights, IEnumerable<Insig
         };
 
         var stats = await _olapService.GetFeatureFlagInsights(param);
-        
+
         return stats.Select(s => new InsightsVm
         {
             Time = s.Time,
@@ -64,4 +64,3 @@ public class GetInsightsHandler : IRequestHandler<GetInsights, IEnumerable<Insig
         });
     }
 }
-

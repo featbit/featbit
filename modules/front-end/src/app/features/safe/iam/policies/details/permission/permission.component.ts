@@ -6,9 +6,10 @@ import { NzMessageService } from "ng-zorro-antd/message";
 import { IPolicyStatement } from "@shared/policy";
 
 @Component({
-  selector: 'permission',
-  templateUrl: './permission.component.html',
-  styleUrls: ['./permission.component.less']
+    selector: 'permission',
+    templateUrl: './permission.component.html',
+    styleUrls: ['./permission.component.less'],
+    standalone: false
 })
 export class PermissionComponent implements OnInit {
   constructor(

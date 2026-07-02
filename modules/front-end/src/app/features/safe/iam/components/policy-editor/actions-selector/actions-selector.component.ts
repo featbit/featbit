@@ -1,16 +1,21 @@
 import {Component, EventEmitter, Input, Output, ViewChild} from "@angular/core";
 import {NzSelectComponent} from "ng-zorro-antd/select";
 import {IamPolicyAction} from "@shared/policy";
+import { PermissionLicenseService } from "@services/permission-license.service";
+import { LicenseFeatureEnum } from "@shared/types";
 
 @Component({
-  selector: 'actions-selector',
-  templateUrl: './actions-selector.component.html',
-  styleUrls: ['./actions-selector.component.less']
+    selector: 'actions-selector',
+    templateUrl: './actions-selector.component.html',
+    styleUrls: ['./actions-selector.component.less'],
+    standalone: false
 })
 export class ActionsSelectorComponent {
 
   allActions: IamPolicyAction[];
   filteredActions: IamPolicyAction[];
+
+  isFineGrainedAccessControlGranted: boolean = false;
 
   @Output() onSelectedActionsChange = new EventEmitter<IamPolicyAction[]>();
   @Input('actions')
@@ -25,8 +30,19 @@ export class ActionsSelectorComponent {
   @ViewChild("actionsSelector", { static: true }) selectNode: NzSelectComponent;
   actionSelectModel: IamPolicyAction;
 
+  constructor(
+    private permissionLicenseService: PermissionLicenseService
+  ) {
+    this.isFineGrainedAccessControlGranted = permissionLicenseService.isGrantedByLicense(LicenseFeatureEnum.FineGrainedAccessControl);
+  }
+
   onActionChange() {
-    this.selectedActions = [...this.selectedActions, {...this.actionSelectModel}];
+    if (this.actionSelectModel.name === '*') {
+      this.selectedActions = [{...this.actionSelectModel}];
+    } else {
+      this.selectedActions = [...this.selectedActions, {...this.actionSelectModel}];
+    }
+
     this.onSelectedActionsChange.next(this.selectedActions);
     this.selectNode.writeValue(undefined);
     this.validate();
@@ -44,7 +60,7 @@ export class ActionsSelectorComponent {
 
   onSearchActions(query: string) {
     const regex = new RegExp(query, 'ig');
-    this.filteredActions = this.allActions.filter(act => regex.test(act.name) || regex.test(act.displayName));
+    this.filteredActions = this.allActions.filter(act => regex.test(act.name) || regex.test(act.description));
   }
 
   isActionSelected(act: IamPolicyAction) {
@@ -52,6 +68,11 @@ export class ActionsSelectorComponent {
   }
 
   getActionDigest(act: IamPolicyAction) {
-    return act.name;
+    return act.description;
+  }
+
+  isActionDisabled(act: IamPolicyAction): boolean {
+    const isAllActionsSelected = !!this.selectedActions.find(action => action.name === '*');
+    return isAllActionsSelected || (act.isFineGrainedAction && !this.isFineGrainedAccessControlGranted);
   }
 }

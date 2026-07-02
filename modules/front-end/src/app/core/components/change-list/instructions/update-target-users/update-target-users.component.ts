@@ -10,24 +10,36 @@ import { InstructionKindEnum } from "@core/components/change-list/constants";
   selector: 'update-target-users',
   template: `
     <div class="instruction">
-      <span class="variation">{{variation}}</span>:
-      <ng-container *ngIf="kind === InstructionKindEnum.SetTargetUsers">
-        <span i18n="@@common.clear-users" *ngIf="keyIds.length === 0">Clear user(s)</span>
-        <span i18n="@@common.set-users-as" *ngIf="keyIds.length > 0">Set user(s) as</span>
-        <nz-tag *ngFor="let keyId of keyIds">
-          {{keyId}}
-        </nz-tag>
-      </ng-container>
-      <ng-container *ngIf="kind !== InstructionKindEnum.SetTargetUsers">
-        <span i18n="@@common.add-users" *ngIf="kind === InstructionKindEnum.AddTargetUsers">Add user(s)</span>
-        <span i18n="@@common.remove-users" *ngIf="kind === InstructionKindEnum.RemoveTargetUsers">Remove user(s)</span>
-        <nz-tag *ngFor="let keyId of keyIds">
-          {{keyId}}
-        </nz-tag>
-      </ng-container>
+      <span class="variation">{{ variation }}</span>:
+      @if (kind === InstructionKindEnum.SetTargetUsers) {
+        @if (keyIds.length === 0) {
+          <span i18n="@@common.clear-users">Clear user(s)</span>
+        }
+        @if (keyIds.length > 0) {
+          <span i18n="@@common.set-users-as">Set user(s) as</span>
+        }
+        @for (keyId of keyIds; track keyId) {
+          <nz-tag>
+            {{ keyId }}
+          </nz-tag>
+        }
+      }
+      @if (kind !== InstructionKindEnum.SetTargetUsers) {
+        @if (kind === InstructionKindEnum.AddTargetUsers) {
+          <span i18n="@@common.add-users">Add user(s)</span>
+        }
+        @if (kind === InstructionKindEnum.RemoveTargetUsers) {
+          <span i18n="@@common.remove-users">Remove user(s)</span>
+        }
+        @for (keyId of keyIds; track keyId) {
+          <nz-tag>
+            {{ keyId }}
+          </nz-tag>
+        }
+      }
     </div>
   `,
-  styles: [`
+  styles: [ `
     .variation {
       font-weight: 600;
     }
@@ -39,7 +51,8 @@ import { InstructionKindEnum } from "@core/components/change-list/constants";
       margin-left: 2px;
       margin-right: 2px;
     }
-  `]
+  ` ],
+  standalone: false
 })
 export class UpdateTargetUsersComponent implements IInstructionComponent {
   data: IInstructionComponentData;

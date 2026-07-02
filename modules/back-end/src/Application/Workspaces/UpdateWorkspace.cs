@@ -5,10 +5,19 @@ namespace Application.Workspaces;
 
 public class UpdateWorkspace : IRequest<WorkspaceVm>
 {
+    /// <summary>
+    /// The ID of the workspace to update. Retrieved from the request header.
+    /// </summary>
     public Guid Id { get; set; }
 
+    /// <summary>
+    /// The new name for the workspace
+    /// </summary>
     public string Name { get; set; }
 
+    /// <summary>
+    /// The new key for the workspace
+    /// </summary>
     public string Key { get; set; }
 }
 

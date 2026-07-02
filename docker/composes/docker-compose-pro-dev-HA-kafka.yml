@@ -1,5 +1,4 @@
 name: featbit-pro-dev-kafka-ha
-version: "3"
 services:
   ui:
     image: featbit/ui:dev
@@ -11,6 +10,7 @@ services:
       - API_URL=http://localhost:5000
       - DEMO_URL=http://localhost:5173
       - EVALUATION_URL=http://localhost:5100
+      - BASE_HREF=/
     depends_on:
       - api-server
       - demo-dino-game-vue
@@ -26,10 +26,14 @@ services:
       context: ./modules/back-end
       dockerfile: ./deploy/Dockerfile
     environment:
-      - IS_PRO=true
+      - DbProvider=MongoDb
+      - MqProvider=Kafka
+      - CacheProvider=Redis
       - SSOEnabled=false
-      - KAFKA__BOOTSTRAPSERVERS=kafka:9092
-      - KAFKA__CONSUMERSERVERS=kafka-consumer:9092
+      - Kafka__Producer__bootstrap.servers=kafka:9092
+      - Kafka__Consumer__bootstrap.servers=kafka-consumer:9092
+      - Jwt__Algorithm=HS256
+      - Jwt__Key=please_change_me_to_a_secure_secret_key
     depends_on:
       mongodb:
         condition: service_started
@@ -49,9 +53,11 @@ services:
       context: ./modules/evaluation-server
       dockerfile: ./deploy/Dockerfile
     environment:
-      - IS_PRO=true
-      - KAFKA__BOOTSTRAPSERVERS=kafka:9092
-      - KAFKA__CONSUMERSERVERS=kafka-consumer:9092
+      - DbProvider=MongoDb
+      - MqProvider=Kafka
+      - CacheProvider=Redis
+      - Kafka__Producer__bootstrap.servers=kafka:9092
+      - Kafka__Consumer__bootstrap.servers=kafka-consumer:9092
     depends_on:
       mongodb:
         condition: service_started
@@ -78,16 +84,13 @@ services:
     networks:
       - featbit-network
     environment:
+      DB_PROVIDER: ClickHouse
       KAFKA_HOSTS: kafka:9092
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      REDIS_DB: 0
       CLICKHOUSE_HOST: clickhouse-server
       CLICKHOUSE_KAFKA_HOSTS: kafka-consumer:9092
-      IS_PRO: true
 
   mongodb:
-    image: mongo:5.0.14
+    image: mongo:5.0.32
     container_name: mongodb
     restart: on-failure
     ports:
@@ -103,7 +106,7 @@ services:
       - featbit-network
 
   redis:
-    image: bitnami/redis:6.2.10
+    image: bitnamilegacy/redis:6.2.10
     container_name: redis
     restart: on-failure
     environment:
@@ -116,7 +119,7 @@ services:
       - redis:/bitnami/redis/data
 
   kafka:
-    image: bitnami/kafka:3.5
+    image: bitnamilegacy/kafka:3.5
     container_name: kafka
     restart: on-failure
     ports:
@@ -138,7 +141,7 @@ services:
       - kafka:/bitnami/kafka
 
   kafka-consumer:
-    image: bitnami/kafka:3.5
+    image: bitnamilegacy/kafka:3.5
     container_name: kafka-consumer
     restart: on-failure
     ports:
@@ -173,10 +176,10 @@ services:
       - DESTINATION=kafka-consumer:9092
       - TOPICS=featbit-feature-flag-change,featbit-segment-change,featbit-endusers,featbit-insights
     networks:
-      - featbit-network    
-
+      - featbit-network
+  
   init-kafka-topics:
-    image: bitnami/kafka:3.5
+    image: bitnamilegacy/kafka:3.5
     depends_on:
       kafka:
         condition: service_started

@@ -1,8 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DoLoginComponent } from './do-login.component';
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
-import { HttpClientModule } from "@angular/common/http";
-import { NzMessageModule } from "ng-zorro-antd/message";
+import { provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 
 describe('DoLoginComponent', () => {
   let component: DoLoginComponent;
@@ -10,14 +9,10 @@ describe('DoLoginComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [
-        ReactiveFormsModule,
-        FormsModule,
-        HttpClientModule,
-        NzMessageModule
-      ],
-      declarations: [ DoLoginComponent ]
-    })
+    declarations: [DoLoginComponent],
+    imports: [ReactiveFormsModule, FormsModule],
+    providers: [provideHttpClient(withInterceptorsFromDi())]
+})
     .compileComponents();
   });
 

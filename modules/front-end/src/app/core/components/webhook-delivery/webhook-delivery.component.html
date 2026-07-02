@@ -10,7 +10,9 @@
     </div>
   </nz-tab>
   <nz-tab [nzTitle]="responseTitle">
-    <p class="error" *ngIf="_delivery.error">{{_delivery.error.message}}</p>
+    @if (_delivery.error) {
+      <p class="error">{{ _delivery.error.message }}</p>
+    }
     <span class="title">Headers</span>
     <div class="headers">
       <prism [code]="responseHeaders" language="http"></prism>
@@ -21,14 +23,17 @@
     </div>
     <ng-template #responseTitle>
       <span>Response</span>
-      <nz-tag *ngIf="_delivery.success" nzColor="success">{{ _delivery.response?.statusCode ?? 200 }}</nz-tag>
-      <nz-tag *ngIf="!_delivery.success" nzColor="error">{{ _delivery.response?.statusCode ?? 'ERROR' }}</nz-tag>
+      @if (_delivery.success) {
+        <nz-tag nzColor="success">{{ _delivery.response?.statusCode ?? 200 }}</nz-tag>
+      } @else {
+        <nz-tag nzColor="error">{{ _delivery.response?.statusCode ?? 'ERROR' }}</nz-tag>
+      }
     </ng-template>
   </nz-tab>
   <ng-template #extra>
-        <span class="completed-in">
-          <i nz-icon nzType="clock-circle" nzTheme="outline"></i>
-          <span class="text">Completed in {{ completedIn }} seconds.</span>
-        </span>
+    <span class="completed-in">
+      <i nz-icon nzType="clock-circle" nzTheme="outline"></i>
+      <span class="text">Completed in {{ completedIn }} seconds.</span>
+    </span>
   </ng-template>
 </nz-tabset>

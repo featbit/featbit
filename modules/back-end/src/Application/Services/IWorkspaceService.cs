@@ -1,3 +1,6 @@
+using Application.Usages;
+using Application.Workspaces;
+using Domain.Users;
 using Domain.Workspaces;
 
 namespace Application.Services;
@@ -7,4 +10,14 @@ public interface IWorkspaceService : IService<Workspace>
     Task<bool> HasKeyBeenUsedAsync(Guid workspaceId, string key);
 
     Task<string> GetDefaultWorkspaceAsync();
+
+    Task<int> GetFeatureUsageAsync(Guid workspaceId, string feature);
+
+    Task SaveRecordsAsync(AggregatedUsageRecords records);
+
+    Task<WorkspaceUsageVm> GetUsageAsync(Guid workspaceId, WorkspaceUsageFilter filter);
+
+    Task AddUserIfNotExistsAsync(Guid workspaceId, Guid userId);
+
+    Task RemoveUserAsync(Guid workspaceId, Guid userId);
 }

@@ -17,12 +17,10 @@ import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzSpaceModule } from 'ng-zorro-antd/space';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
-import { NzMessageModule } from 'ng-zorro-antd/message';
 import { NzTypographyModule } from 'ng-zorro-antd/typography';
 import { NzDividerModule } from 'ng-zorro-antd/divider';
 import { NzModalModule  } from 'ng-zorro-antd/modal';
 import { NzCollapseModule } from "ng-zorro-antd/collapse";
-import { NzDropDownModule } from "ng-zorro-antd/dropdown";
 import { DragDropModule } from "@angular/cdk/drag-drop";
 import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
@@ -30,6 +28,7 @@ import { SettingComponent } from './setting/setting.component';
 import {CoreModule} from "@core/core.module";
 import {AuditLogsComponent} from "@features/safe/segments/details/audit-logs/audit-logs.component";
 import {NzFormModule} from "ng-zorro-antd/form";
+import { FlagReferencesModalComponent } from "../flag-references-modal";
 
 @NgModule({
   declarations: [
@@ -54,19 +53,18 @@ import {NzFormModule} from "ng-zorro-antd/form";
     NzSpaceModule,
     NzPopconfirmModule,
     CommonModule,
-    NzMessageModule,
     NzTypographyModule,
     NzDividerModule,
     NzModalModule,
     DetailsRoutingModule,
     NzCollapseModule,
-    NzDropDownModule,
     NzSkeletonModule,
     DragDropModule,
     NzToolTipModule,
     NzDescriptionsModule,
     CoreModule,
-    NzFormModule
+    NzFormModule,
+    FlagReferencesModalComponent
   ],
   providers: [
   ]

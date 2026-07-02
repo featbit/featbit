@@ -14,6 +14,11 @@ public class EndUser : AuditedEntity
 
     public ICollection<EndUserCustomizedProperty> CustomizedProperties { get; set; }
 
+    // for dapper deserialization
+    public EndUser()
+    {
+    }
+
     public EndUser(
         Guid? workspaceId,
         Guid? envId,

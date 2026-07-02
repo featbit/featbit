@@ -1,24 +1,42 @@
+using Api.Authentication;
 using Application.Environments;
+using Domain.Policies;
 
 namespace Api.Controllers;
 
 [Route("api/v{version:apiVersion}/projects/{projectId:guid}/envs")]
 public class EnvironmentController : ApiControllerBase
 {
+    /// <summary>
+    /// Get an environment
+    /// </summary>
+    /// <remarks>
+    /// Get a single environment by ID.
+    /// </remarks>
+    [OpenApi]
     [HttpGet]
-    [Route("{envId:guid}")]
-    public async Task<ApiResponse<EnvironmentVm>> GetAsync(Guid envId)
+    [Route("{id:guid}")]
+    [Authorize(Permissions.CanAccessEnv)]
+    public async Task<ApiResponse<EnvironmentVm>> GetAsync(Guid id)
     {
         var request = new GetEnvironment
         {
-            Id = envId
+            Id = id
         };
 
         var project = await Mediator.Send(request);
         return Ok(project);
     }
 
+    /// <summary>
+    /// Create an environment
+    /// </summary>
+    /// <remarks>
+    /// Create a new environment with the given name, key and description.
+    /// </remarks>
+    [OpenApi]
     [HttpPost]
+    [Authorize(Permissions.CreateEnv)]
     public async Task<ApiResponse<EnvironmentVm>> CreateAsync(Guid projectId, CreateEnvironment request)
     {
         request.ProjectId = projectId;
@@ -27,7 +45,15 @@ public class EnvironmentController : ApiControllerBase
         return Ok(env);
     }
 
+    /// <summary>
+    /// Update an environment
+    /// </summary>
+    /// <remarks>
+    /// Update the name and description of an existing environment.
+    /// </remarks>
+    [OpenApi]
     [HttpPut("{id:guid}")]
+    [Authorize(Permissions.UpdateEnvSettings)]
     public async Task<ApiResponse<EnvironmentVm>> UpdateAsync(Guid id, UpdateEnvironment request)
     {
         request.Id = id;
@@ -36,7 +62,15 @@ public class EnvironmentController : ApiControllerBase
         return Ok(env);
     }
 
+    /// <summary>
+    /// Delete an environment
+    /// </summary>
+    /// <remarks>
+    /// Permanently delete an environment and all its associated data. This action cannot be undone.
+    /// </remarks>
+    [OpenApi]
     [HttpDelete("{id:guid}")]
+    [Authorize(Permissions.DeleteEnv)]
     public async Task<ApiResponse<bool>> DeleteAsync(Guid id)
     {
         var request = new DeleteEnvironment

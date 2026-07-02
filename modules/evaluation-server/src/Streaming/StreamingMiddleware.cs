@@ -1,43 +1,38 @@
-﻿using System.Net;
-using System.Net.WebSockets;
+﻿using System.Net.WebSockets;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Streaming.Connections;
+using Streaming.Messages;
 
 namespace Streaming;
 
-public class StreamingMiddleware
+public class StreamingMiddleware(
+    IHostApplicationLifetime applicationLifetime,
+    ILogger<StreamingMiddleware> logger,
+    RequestDelegate next)
 {
-    private const string StreamingPath = "/streaming";
-    private readonly IHostApplicationLifetime _applicationLifetime;
-    private readonly RequestDelegate _next;
-
-    public StreamingMiddleware(IHostApplicationLifetime applicationLifetime, RequestDelegate next)
+    public async Task InvokeAsync(
+        HttpContext httpContext,
+        IRequestValidator requestValidator,
+        MessageDispatcher dispatcher,
+        IConnectionManager connectionManager)
     {
-        _applicationLifetime = applicationLifetime;
-        _next = next;
-    }
-
-    public async Task InvokeAsync(HttpContext context, IRequestValidator requestValidator, IConnectionHandler handler)
-    {
-        var request = context.Request;
-
         // if not streaming request
-        if (!request.Path.StartsWithSegments(StreamingPath) || !context.WebSockets.IsWebSocketRequest)
+        if (!StreamingHelper.IsStreamingRequest(httpContext))
         {
-            await _next.Invoke(context);
+            await next.Invoke(httpContext);
             return;
         }
 
-        // transitions the request to a WebSocket connection
-        using var ws = await context.WebSockets.AcceptWebSocketAsync();
+        using var websocket = await httpContext.WebSockets.AcceptWebSocketAsync();
 
-        var query = context.Request.Query;
-        var connection =
-            await requestValidator.ValidateAsync(ws, query["type"], query["version"], query["token"]);
-        if (connection == null)
+        var connectionContext = new DefaultConnectionContext(websocket, httpContext);
+        var validationResult = await requestValidator.ValidateAsync(connectionContext);
+        if (!validationResult.IsValid)
         {
-            await ws.CloseOutputAsync(
+            logger.RequestRejected(httpContext.Request.QueryString.Value, validationResult.Reason);
+            await websocket.CloseOutputAsync(
                 (WebSocketCloseStatus)4003,
                 "invalid request, close by server",
                 CancellationToken.None
@@ -45,55 +40,21 @@ public class StreamingMiddleware
             return;
         }
 
-        // if the connection is valid (not null), attach the client to the connection
-        var client = await GetClientAsync(context);
-        connection.AttachClient(client);
+        await connectionContext.PrepareForProcessingAsync(validationResult.Secrets);
 
-        await handler.OnConnectedAsync(connection, _applicationLifetime.ApplicationStopping);
-    }
+        connectionManager.Add(connectionContext);
 
-    private static async Task<Client> GetClientAsync(HttpContext context)
-    {
-        var ipAddr = GetIpAddr();
-        var host = await GetHostAsync();
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(
+            httpContext.RequestAborted,
+            applicationLifetime.ApplicationStopping
+        );
 
-        return new Client(ipAddr, host);
+        // dispatch connection messages
+        await dispatcher.DispatchAsync(connectionContext, cts.Token);
 
-        string GetIpAddr()
-        {
-            if (context.Request.Headers.TryGetValue("X-Forwarded-For", out var forwardForHeaders))
-            {
-                return forwardForHeaders.FirstOrDefault(string.Empty)!;
-            }
+        // dispatch end means the connection was closed
+        await connectionContext.CloseAsync();
 
-            // cloudflare connecting IP header
-            // https://developers.cloudflare.com/fundamentals/reference/http-request-headers/#cf-connecting-ip
-            if (context.Request.Headers.TryGetValue("CF-Connecting-IP", out var cfConnectingIpHeaders))
-            {
-                return cfConnectingIpHeaders.FirstOrDefault(string.Empty)!;
-            }
-
-            var remoteIpAddr = context.Connection.RemoteIpAddress?.ToString();
-            return remoteIpAddr ?? string.Empty;
-        }
-
-        async Task<string> GetHostAsync()
-        {
-            if (string.IsNullOrEmpty(ipAddr))
-            {
-                return string.Empty;
-            }
-
-            try
-            {
-                var cancellationToken = new CancellationTokenSource(TimeSpan.FromSeconds(2)).Token;
-                return (await Dns.GetHostEntryAsync(ipAddr, cancellationToken)).HostName;
-            }
-            catch (Exception)
-            {
-                // allow clientHost to stay empty without failing the connection.
-                return string.Empty;
-            }
-        }
+        connectionManager.Remove(connectionContext);
     }
 }

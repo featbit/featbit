@@ -32,5 +32,6 @@ export class EndUserFlagFilter {
 export interface IEndUserSegment {
   id: string
   name: string
+  type: string
   updatedAt: Date
 }

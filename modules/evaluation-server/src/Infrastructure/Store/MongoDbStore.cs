@@ -1,11 +1,11 @@
 using Domain.Shared;
-using Infrastructure.MongoDb;
+using Infrastructure.Persistence.MongoDb;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace Infrastructure.Store;
 
-public class MongoDbStore : IStore
+public class MongoDbStore : IDbStore
 {
     public string Name => Stores.MongoDb;
 
@@ -49,11 +49,63 @@ public class MongoDbStore : IStore
 
     public async Task<IEnumerable<byte[]>> GetSegmentsAsync(Guid envId, long timestamp)
     {
-        var query = _mongodb.GetCollection<BsonDocument>("Segments")
-            .Find(x => x["envId"].AsGuid == envId && x["updatedAt"] > DateTime.UnixEpoch.AddMilliseconds(timestamp));
+        var (envRN, wsId) = await GetEnvRNAndWorkspaceId();
+        if (string.IsNullOrWhiteSpace(envRN) || wsId == Guid.Empty)
+        {
+            return [];
+        }
 
+        var query = _mongodb.GetCollection<BsonDocument>("Segments")
+            .Find(x => x["updatedAt"] > DateTime.UnixEpoch.AddMilliseconds(timestamp) &&
+                       x["workspaceId"].AsGuid == wsId &&
+                       ((BsonArray)x["scopes"]).Any(y => $"{envRN}:".StartsWith(string.Concat(y, ":"))));
+
+        // replace envId for shared segments
         var segments = await query.ToListAsync();
+        foreach (var segment in segments)
+        {
+            segment["envId"] = new BsonBinaryData(envId, GuidRepresentation.Standard);
+        }
+
         return segments.Select(x => x.ToJsonBytes());
+
+        async Task<(string rn, Guid workspaceId)> GetEnvRNAndWorkspaceId()
+        {
+            var rnQuery = _mongodb.GetCollection<BsonDocument>("Organizations").Aggregate()
+                .Lookup("Projects", "_id", "organizationId", "project")
+                .Unwind("project")
+                .Lookup("Environments", "project._id", "projectId", "env")
+                .Unwind("env")
+                .Match(x => x["env"]["_id"].AsGuid == envId)
+                .Project(new BsonDocument
+                {
+                    {
+                        "rn", new BsonDocument
+                        {
+                            {
+                                "$concat", new BsonArray
+                                {
+                                    "organization/",
+                                    "$key",
+                                    ":project/",
+                                    "$project.key",
+                                    ":env/",
+                                    "$env.key"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "workspaceId", "$workspaceId"
+                    }
+                });
+
+            var document = await rnQuery.FirstOrDefaultAsync();
+            var rn = document?["rn"].AsString ?? string.Empty;
+            var workspaceId = document?["workspaceId"].AsGuid ?? Guid.Empty;
+
+            return (rn, workspaceId);
+        }
     }
 
     public async Task<Secret?> GetSecretAsync(string secretString)

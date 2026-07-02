@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from "@angular/common/http";
 import { environment } from "src/environments/environment";
 import { Observable, of } from "rxjs";
 import {
+  ClonePolicyPayload,
   IPagedPolicy,
   IPagedPolicyGroup,
   IPagedPolicyMember,
@@ -41,14 +42,19 @@ export class PolicyService {
     return this.http.get<IPolicy>(`${this.baseUrl}/${id}`);
   }
 
-  isNameUsed(name: string) {
-    const url = `${this.baseUrl}/is-name-used?name=${name}`;
+  isKeyUsed(key: string) {
+    const url = `${this.baseUrl}/is-key-used?key=${key}`;
 
     return this.http.get<boolean>(url).pipe(catchError(() => of(undefined)));
   }
 
-  create(name: string, description: string): Observable<IPolicy> {
-    return this.http.post<IPolicy>(this.baseUrl, { name: name, description: description });
+  create(name: string, key: string, description: string): Observable<IPolicy> {
+    return this.http.post<IPolicy>(this.baseUrl, { name: name, key: key, description: description });
+  }
+
+  clone(originPolicyKey: string, payload: ClonePolicyPayload) {
+    const url = `${this.baseUrl}/clone/${originPolicyKey}`;
+    return this.http.post<IPolicy>(url, payload);
   }
 
   updateSetting(policy: IPolicy): Observable<IPolicy> {

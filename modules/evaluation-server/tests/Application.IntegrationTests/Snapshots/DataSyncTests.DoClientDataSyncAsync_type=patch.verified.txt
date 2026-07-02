@@ -1,0 +1,28 @@
+﻿{
+  messageType: data-sync,
+  data: {
+    eventType: patch,
+    userKeyId: Guid_1,
+    featureFlags: [
+      {
+        id: custom-rule-with-segment,
+        variation: true,
+        variationType: boolean,
+        variationId: Guid_2,
+        matchReason: default,
+        variationOptions: [
+          {
+            id: Guid_2,
+            value: true
+          },
+          {
+            id: Guid_3,
+            value: false
+          }
+        ],
+        sendToExperiment: true,
+        timestamp: 1674885485421
+      }
+    ]
+  }
+}

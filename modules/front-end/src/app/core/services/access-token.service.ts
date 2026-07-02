@@ -1,8 +1,7 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { environment } from "src/environments/environment";
-import { Observable, of } from "rxjs";
-import { catchError } from "rxjs/operators";
+import { Observable } from "rxjs";
 import {
   AccessTokenFilter,
   IAccessToken,
@@ -38,7 +37,7 @@ export class AccessTokenService {
   isNameUsed(name: string) {
     const url = `${this.baseUrl}/is-name-used?name=${name}`;
 
-    return this.http.get<boolean>(url).pipe(catchError(() => of(undefined)));
+    return this.http.get<boolean>(url);
   }
 
   create(name: string, type: string, permissions: IPolicyStatement[] = []): Observable<IAccessToken> {
@@ -53,8 +52,8 @@ export class AccessTokenService {
     return this.http.put(`${this.baseUrl}/${id}/toggle`, {});
   }
 
-  update(id: string, name: string): Observable<boolean> {
+  update(id: string, name: string, permissions: IPolicyStatement[] = []): Observable<IAccessToken> {
     const url = this.baseUrl;
-    return this.http.put<boolean>(url + `/${id}`, { name });
+    return this.http.put<IAccessToken>(url + `/${id}`, { name, permissions });
   }
 }

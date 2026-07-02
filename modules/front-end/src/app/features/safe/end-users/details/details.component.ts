@@ -6,9 +6,10 @@ import { EnvUserPropService } from "@services/env-user-prop.service";
 import { IUserProp } from "@shared/types";
 
 @Component({
-  selector: 'app-user-detail',
-  templateUrl: './details.component.html',
-  styleUrls: ['./details.component.less']
+    selector: 'app-user-detail',
+    templateUrl: './details.component.html',
+    styleUrls: ['./details.component.less'],
+    standalone: false
 })
 export class DetailsComponent implements OnInit {
 

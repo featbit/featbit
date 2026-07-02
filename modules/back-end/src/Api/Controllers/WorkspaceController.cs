@@ -1,5 +1,6 @@
 using Api.Authentication;
 using Application.Workspaces;
+using Domain.Policies;
 
 namespace Api.Controllers;
 
@@ -10,22 +11,33 @@ public class WorkspaceController : ApiControllerBase
     /// Get a workspace
     /// </summary>
     /// <remarks>
-    /// Get a workspace by id.
+    /// Get a workspace by id. ID is retrieved from the request header.
     /// </remarks>
     [OpenApi]
     [HttpGet]
     public async Task<ApiResponse<WorkspaceVm>> GetAsync()
     {
+        var permissions = await GetRequestPermissionsAsync();
+
         var request = new GetWorkspace
         {
             Id = WorkspaceId,
+            Permissions = permissions
         };
 
         var workspace = await Mediator.Send(request);
         return Ok(workspace);
     }
 
+    /// <summary>
+    /// Update workspace license
+    /// </summary>
+    /// <remarks>
+    /// Apply a license key to the workspace to unlock premium features.
+    /// </remarks>
+    [OpenApi]
     [HttpPut("license")]
+    [Authorize(Permissions.UpdateWorkspaceLicense)]
     public async Task<ApiResponse<WorkspaceVm>> UpdateLicenseAsync(UpdateLicense request)
     {
         request.Id = WorkspaceId;
@@ -34,7 +46,40 @@ public class WorkspaceController : ApiControllerBase
         return Ok(workspace);
     }
 
+    [HttpGet("usages")]
+    public async Task<ApiResponse<WorkspaceUsageVm>> GetUsagesAsync([FromQuery] WorkspaceUsageFilter filter)
+    {
+        var request = new GetWorkspaceUsages
+        {
+            WorkspaceId = WorkspaceId,
+            Filter = filter
+        };
+
+        var usage = await Mediator.Send(request);
+        return Ok(usage);
+    }
+
+    [HttpGet("license-quota")]
+    public async Task<ApiResponse<object>> GetLicenseQuotaAsync()
+    {
+        var request = new GetLicenseQuota
+        {
+            WorkspaceId = WorkspaceId
+        };
+
+        var usage = await Mediator.Send(request);
+        return Ok(usage);
+    }
+
+    /// <summary>
+    /// Update workspace OIDC SSO configuration
+    /// </summary>
+    /// <remarks>
+    /// Configure OpenID Connect (OIDC) single sign-on settings for the workspace.
+    /// </remarks>
+    [OpenApi]
     [HttpPut("sso-oidc")]
+    [Authorize(Permissions.UpdateWorkspaceSSOSettings)]
     public async Task<ApiResponse<WorkspaceVm>> UpdateOidcAsync(UpdateOidc request)
     {
         request.Id = WorkspaceId;
@@ -56,7 +101,15 @@ public class WorkspaceController : ApiControllerBase
         return Ok(isUsed);
     }
 
+    /// <summary>
+    /// Update workspace
+    /// </summary>
+    /// <remarks>
+    /// Update the name and key of the workspace.
+    /// </remarks>
+    [OpenApi]
     [HttpPut]
+    [Authorize(Permissions.UpdateWorkspaceGeneralSettings)]
     public async Task<ApiResponse<WorkspaceVm>> UpdateAsync(UpdateWorkspace request)
     {
         request.Id = WorkspaceId;

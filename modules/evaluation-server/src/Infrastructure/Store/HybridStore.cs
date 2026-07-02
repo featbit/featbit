@@ -1,6 +1,4 @@
 using Domain.Shared;
-using Infrastructure.MongoDb;
-using Infrastructure.Redis;
 using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Store;
@@ -9,17 +7,14 @@ public class HybridStore : IStore
 {
     public string Name => Stores.Hybrid;
 
-    private readonly IStore _redis;
-    private readonly IStore _mongodb;
-    private readonly IStore _none = new NoneStore();
+    private readonly Dictionary<string, IDbStore> _dbStores;
 
     private IStore AvailableStore { get; set; }
     private static StoreAvailabilityListener Listener => StoreAvailabilityListener.Instance;
 
-    public HybridStore(IRedisClient redisClient, IMongoDbClient mongodbClient, ILogger<HybridStore> logger)
+    public HybridStore(IEnumerable<IDbStore> dbStores, ILogger<HybridStore> logger)
     {
-        _redis = new RedisStore(redisClient);
-        _mongodb = new MongoDbStore(mongodbClient);
+        _dbStores = dbStores.ToDictionary(x => x.Name, x => x);
 
         AvailableStore = GetAvailableStore(Listener.AvailableStore);
 
@@ -34,15 +29,10 @@ public class HybridStore : IStore
 
         return;
 
-        IStore GetAvailableStore(string store)
-        {
-            return store switch
-            {
-                Stores.Redis => _redis,
-                Stores.MongoDb => _mongodb,
-                _ => _none
-            };
-        }
+        IStore GetAvailableStore(string store) =>
+            _dbStores.TryGetValue(store, out var availableStore)
+                ? availableStore
+                : throw new ArgumentException($"Store {store} is not supported");
     }
 
     public Task<bool> IsAvailableAsync() => Task.FromResult(Listener.AvailableStore != Stores.None);

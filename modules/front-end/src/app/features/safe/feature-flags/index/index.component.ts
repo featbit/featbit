@@ -1,64 +1,82 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Subject } from 'rxjs';
-import { encodeURIComponentFfc, getQueryParamsFromObject } from '@shared/utils';
+import { getProfile, getQueryParamsFromObject } from '@shared/utils';
 import {
-  IFeatureFlagListCheckItem,
+  FeatureFlagListCheckItem,
+  getFlagRN,
   IFeatureFlagListFilter,
   IFeatureFlagListItem,
   IFeatureFlagListModel,
 } from "../types/feature-flag";
-import { debounceTime, map } from 'rxjs/operators';
-import { FormBuilder } from "@angular/forms";
-import { getCurrentProjectEnv } from "@utils/project-env";
-import { ProjectService } from "@services/project.service";
-import { IEnvironment } from "@shared/types";
-import { NzNotificationService } from "ng-zorro-antd/notification";
+import { debounceTime } from 'rxjs/operators';
 import { FeatureFlagService } from "@services/feature-flag.service";
 import { NzModalService } from "ng-zorro-antd/modal";
 import { copyToClipboard } from '@utils/index';
+import { permissionActions } from "@shared/policy";
+import { getCurrentEnvRN, getCurrentProjectEnv } from "@utils/project-env";
+import { EnvironmentSetting } from "@shared/types";
+import { PermissionLicenseService } from "@services/permission-license.service";
+import { PermissionsService } from "@services/permissions.service";
+import { ChangeCommentService } from "@services/change-comment.service";
+import { ChangeOperation } from "@core/components/change-comment/types";
 
 @Component({
-  selector: 'index',
-  templateUrl: './index.component.html',
-  styleUrls: ['./index.component.less']
+    selector: 'index',
+    templateUrl: './index.component.html',
+    styleUrls: ['./index.component.less'],
+    standalone: false
 })
 export class IndexComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef,
-    private router: Router,
     private featureFlagService: FeatureFlagService,
     private msg: NzMessageService,
-    private fb: FormBuilder,
-    private projectService: ProjectService,
-    private notification: NzNotificationService,
     private modal: NzModalService,
+    private permissionsService: PermissionsService,
+    private permissionLicenseService: PermissionLicenseService,
+    private changeCommentService: ChangeCommentService
   ) { }
 
   featureFlagFilter: IFeatureFlagListFilter = new IFeatureFlagListFilter();
 
-  get isArchived() {
-    const value: any = this.featureFlagFilter.isArchived;
-    return value === 'true' || value === true;
+  // status filter
+  readonly statusOptions = [
+    { value: 'true', label: 'ON' },
+    { value: 'false', label: 'OFF' },
+  ];
+
+  onStatusFilterChange(value: string | undefined) {
+    this.featureFlagFilter.isEnabled = value as any;
+    this.onSearch(true);
   }
 
+  toggleArchiveFilter() {
+    this.featureFlagFilter.isArchived = !this.featureFlagFilter.isArchived;
+    this.onSearch(true);
+  }
+
+  envSettings: EnvironmentSetting;
+
   ngOnInit(): void {
+    this.envSettings = getCurrentProjectEnv()!.envSettings;
+
     this.route.queryParams.subscribe((params) => {
       Object.keys(params).forEach((k) => {
         if (k === 'tags') {
           if (params[k].length > 0) {
             this.featureFlagFilter[k] = params[k].split(',');
           }
+        } else if (k === 'isArchived') {
+          this.featureFlagFilter[k] = params[k] === 'true';
         } else {
           this.featureFlagFilter[k] = params[k];
         }
       });
     });
-
-    let currentProjectEnv = getCurrentProjectEnv();
 
     // get switch list
     this.$search.pipe(
@@ -70,25 +88,22 @@ export class IndexComponent implements OnInit {
 
     // get flag tags
     this.featureFlagService.getAllTags().subscribe(allTags => {
-      this.allTags = allTags;
+      this.tags = allTags.map(tag => ({
+        label: tag,
+        value: tag,
+        selected: (this.featureFlagFilter.tags || []).includes(tag)
+      }));
       this.isLoadingTags = false;
     });
-
-    // get current envs
-    const curProjectId = currentProjectEnv.projectId;
-    const curEnvId = currentProjectEnv.envId;
-
-    this.projectService.get(curProjectId)
-      .pipe(map(project => project.environments))
-      .subscribe(envs => {
-        this.envs = envs.filter(x => x.id !== curEnvId);
-        this.targetEnv = this.envs[0];
-      });
   }
 
   // tags
-  allTags: string[] = [];
+  tags = [];
   isLoadingTags: boolean = true;
+  onTagsChange(selectedTags: string[]) {
+    this.featureFlagFilter.tags = selectedTags;
+    this.onSearch(true);
+  }
 
   // table selection
   allChecked: boolean = false;
@@ -96,7 +111,7 @@ export class IndexComponent implements OnInit {
 
   onAllChecked(checked: boolean): void {
     this.listOfCurrentPageData
-      .forEach(item => this.updateCheckedSet(this.getItemKey(item), checked));
+      .forEach(item => this.updateCheckedSet(item, checked));
 
     this.refreshCheckedStatus();
   }
@@ -114,96 +129,86 @@ export class IndexComponent implements OnInit {
     this.indeterminate = !this.allChecked && currentPageData.some(item => this.itemChecked(item));
   }
 
-  getItemKey(item: IFeatureFlagListItem) {
-    return `${item.id};${item.name};`;
-  }
-
-  parseItemKey(key: string): { id: string, name: string } {
-    let [id, name] = key.split(';');
-    return { id, name };
-  }
-
   itemChecked(item: IFeatureFlagListItem): boolean {
-    const key = this.getItemKey(item);
-
-    return this.checkedItemKeys.has(key);
+    return !!this.checkedFlags[item.id];
   }
 
-  checkedItemKeys = new Set<string>();
-  updateCheckedSet(key: string, checked: boolean) {
+  checkedFlags: Record<string, IFeatureFlagListItem> = {};
+  updateCheckedSet(item: IFeatureFlagListItem, checked: boolean) {
     if (checked) {
-      this.checkedItemKeys.add(key);
+      this.checkedFlags[item.id] = item;
     } else {
-      this.checkedItemKeys.delete(key);
+      delete this.checkedFlags[item.id];
     }
   }
 
   onItemChecked(item: IFeatureFlagListItem): void {
-    const key = this.getItemKey(item);
-    const checked = this.checkedItemKeys.has(key);
+    const checked = this.itemChecked(item);
 
-    this.updateCheckedSet(key, !checked);
+    this.updateCheckedSet(item, !checked);
     this.refreshCheckedStatus();
   }
 
-  // batch copy
-  batchCopyVisible: boolean = false;
-  checkedItems: IFeatureFlagListCheckItem[] = [];
-  get totalSelected() {
-    return this.checkedItems.filter(x => x.checked).length;
-  }
-
-  envs: IEnvironment[] = [];
-  targetEnv: IEnvironment;
-  selectTargetEnv(env: IEnvironment) {
-    this.targetEnv = env;
-  }
-
-  openBatchCopyModal() {
-    if (this.checkedItemKeys.size === 0) {
+  copyVisible: boolean = false;
+  copyItems: FeatureFlagListCheckItem[] = [];
+  batchCopy() {
+    if (Object.keys(this.checkedFlags).length === 0) {
       this.msg.warning($localize `:@@ff.idx.select-ff-to-copy:Please select at least one feature flag to copy`);
       return;
     }
 
-    this.checkedItems = [];
-    for (const key of this.checkedItemKeys) {
-      const { id, name } = this.parseItemKey(key);
-      this.checkedItems.push({ id, name, checked: true });
+    this.copyItems = [];
+    for (const flag of Object.values(this.checkedFlags)) {
+      const rn = getFlagRN(flag.key, flag.tags);
+      const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(rn, permissionActions.CopyFlagTo);
+      if (!isGranted) {
+        this.msg.warning(this.permissionsService.flagActionDenyMessage($localize `:@@common.copy-lowercase:copy`, flag.name));
+        return;
+      }
+
+      const { id, name } = flag;
+      this.copyItems.push({ id, name, checked: true });
     }
 
-    this.batchCopyVisible = true;
+    this.copyVisible = true;
   }
 
-  isCopying: boolean = false;
-  batchCopy() {
-    this.isCopying = true;
+  copy(flag: IFeatureFlagListItem) {
+    const rn = getFlagRN(flag.key, flag.tags);
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(rn, permissionActions.CopyFlagTo);
+    if (!isGranted) {
+      this.msg.warning(this.permissionsService.flagActionDenyMessage($localize `:@@common.copy-lowercase:copy`, flag.name));
+      return;
+    }
 
-    this.featureFlagService
-      .copyToEnv(this.targetEnv.id, this.checkedItems.filter(x => x.checked).map(x => x.id))
-      .subscribe(copyToEnvResult => {
-        this.isCopying = false;
-        this.batchCopyVisible = false;
-        this.checkedItemKeys.clear();
-        this.refreshCheckedStatus();
-
-        let msg = $localize `:@@ff.idx.successfully-copied:Successfully copied`
-          + `<strong> ${copyToEnvResult.copiedCount} </strong>`
-          + $localize `:@@ff.idx.ff-to-env:feature flags to environment`
-          + `<strong> ${this.targetEnv.name} </strong>.`;
-
-        if (copyToEnvResult.ignored.length > 0) {
-          msg += '<br/>' + $localize `:@@ff.idx.following-ff-exist-in-targeting-env:Following feature flags have been ignored as they are already in the targeting environment`
-            + `<br/> ${copyToEnvResult.ignored.join(', ')}`;
-          this.notification.warning($localize `:@@ff.idx.copy-result:Copy result`, msg, { nzDuration: 0 });
-        } else {
-          this.notification.success($localize `:@@common.copy-success:Copied`,msg);
-        }
-      }, _ => {
-        this.isCopying = false;
-      });
+    this.copyItems = [ { id: flag.id, name: flag.name, checked: true } ];
+    this.copyVisible = true;
   }
 
-  //#region switch list
+  cloneVisible: boolean = false;
+  flagToClone: IFeatureFlagListItem;
+  clone(flag: IFeatureFlagListItem) {
+    const rn = getFlagRN(flag.key, flag.tags);
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(rn, permissionActions.CloneFlag);
+    if (!isGranted) {
+      this.msg.warning(this.permissionsService.flagActionDenyMessage($localize `:@@common.clone-lowercase:clone`, flag.name));
+      return;
+    }
+
+    this.flagToClone = flag;
+    this.cloneVisible = true;
+  }
+  cloneModalClosed(completed: boolean) {
+    this.flagToClone = undefined;
+    this.cloneVisible = false;
+  }
+
+  compareVisible: boolean = false;
+  flagToCompare: IFeatureFlagListItem;
+  compare(flag: IFeatureFlagListItem) {
+    this.flagToCompare = flag;
+    this.compareVisible = true;
+  }
 
   featureFlagListModel: IFeatureFlagListModel = {
     items: [],
@@ -244,85 +249,127 @@ export class IndexComponent implements OnInit {
 
   //#endregion
 
-  //#region create switch
   creationDrawerVisible: boolean = false;
+
+  openCreationDrawer(): void {
+    const rnPrefix = getCurrentEnvRN();
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(`${rnPrefix}:flag/*`, permissionActions.CreateFlag);
+    if (!isGranted) {
+      this.msg.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+    this.creationDrawerVisible = true;
+  }
 
   closeCreationDrawer() {
     this.creationDrawerVisible = false;
   }
 
-  //#endregion
   onToggleFeatureFlagStatus(data: IFeatureFlagListItem): void {
-    let msg: string = data.isEnabled
-      ? $localize`:@@ff.idx.flag-turned-off:The status of feature flag <b>${data.name}</b> is changed to OFF`
-      : $localize`:@@ff.idx.flag-turned-on:The status of feature flag <b>${data.name}</b> is changed to ON`;
+    const rn = getFlagRN(data.key, data.tags);
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(rn, permissionActions.ToggleFlag);
+    if (!isGranted) {
+      this.msg.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
 
-    this.featureFlagService.toggleStatus(data.key).subscribe({
-      next: _ => {
-        this.msg.success(msg);
-        data.isEnabled = !data.isEnabled;
-      },
-      error: _ => this.msg.error($localize`:@@ff.idx.status-change-failed:Failed to change feature flag status`)
+    const operation = data.isEnabled ? ChangeOperation.ToggleOff : ChangeOperation.ToggleOn;
+    this.changeCommentService.promptFlag(data.key, operation).subscribe(comment => {
+      if (comment === null) return;
+
+      data.isToggling = true;
+      this.featureFlagService.toggleStatus(data.key, !data.isEnabled, comment).subscribe({
+        next: _ => {
+          this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
+          data.isEnabled = !data.isEnabled;
+          data.lastChange = {
+            operator: getProfile(),
+            happenedAt: new Date(),
+            comment
+          };
+          data.isToggling = false;
+        },
+        error: _ => {
+          this.msg.error($localize`:@@common.operation-failed:Operation failed`)
+          data.isToggling = false;
+        }
+      });
     });
-  }
-
-  navigateToFlagDetail(key: string) {
-    this.router.navigateByUrl(`/feature-flags/${encodeURIComponentFfc(key)}/targeting`).then();
   }
 
   archive(flag: IFeatureFlagListItem) {
-    let msg = $localize`:@@ff.archive-flag-warning:Flag <strong>${flag.name}</strong> will be archived, and the value defined in your code will be returned for all your users. Remove code references to <strong>${flag.key}</strong> from your application before archiving.`;
+    const rn = getFlagRN(flag.key, flag.tags);
+    const isGranted = this.permissionLicenseService.isGrantedByLicenseAndPermission(rn, permissionActions.ArchiveFlag);
+    if (!isGranted) {
+      this.msg.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
 
-    this.modal.confirm({
-      nzContent: msg,
-      nzTitle: $localize`:@@ff.are-you-sure-to-archive-ff:Are you sure to archive this feature flag?`,
-      nzCentered: true,
-      nzClassName: 'information-modal-dialog',
-      nzOnOk: () => {
-        this.featureFlagService.archive(flag.key).subscribe({
-            next: () => {
-              this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
-              this.onSearch();
-            },
-            error: () => this.msg.error($localize`:@@common.operation-failed-try-again:Operation failed, please try again`)
-          }
-        );
-      }
-    });
+    const doArchive = (comment: string = '') => {
+      this.featureFlagService.archive(flag.key, comment).subscribe({
+        next: () => {
+          this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
+          this.onSearch();
+        },
+        error: () => this.msg.error($localize`:@@common.operation-failed-try-again:Operation failed, please try again`)
+      });
+    };
+
+    if (this.envSettings.requireChangeComment) {
+      this.changeCommentService.promptFlag(flag.key, ChangeOperation.ArchiveFlag).subscribe(comment => {
+        if (comment === null) return;
+        doArchive(comment);
+      });
+    } else {
+      const message =
+        $localize`:@@ff.archive-flag-warning:After archiving, the fallback value defined in your code will be returned for all your users. Be sure to remove code references to <strong>${flag.key}</strong> from your application before archiving.`;
+
+      this.modal.confirm({
+        nzContent: message,
+        nzTitle: $localize`:@@ff.are-you-sure-to-archive-ff:Are you sure to archive flag`,
+        nzCentered: true,
+        nzClassName: 'warning-modal-dialog',
+        nzOkText: $localize`:@@common.archive:Archive`,
+        nzWidth: '550px',
+        nzOnOk: doArchive
+      });
+    }
   }
 
   restore(flag: IFeatureFlagListItem) {
-    this.featureFlagService.restore(flag.key).subscribe({
-      next: () => {
-        this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
-        this.onSearch();
-      },
-      error: () => this.msg.error($localize`:@@common.operation-failed:Operation failed`)
+    this.changeCommentService.promptFlag(flag.key, ChangeOperation.Restore).subscribe(comment => {
+      if (comment === null) return;
+      this.featureFlagService.restore(flag.key, comment).subscribe({
+        next: () => {
+          this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
+          this.onSearch();
+        },
+        error: () => this.msg.error($localize`:@@common.operation-failed:Operation failed`)
+      });
     });
   }
 
   delete(flag: IFeatureFlagListItem) {
-    this.featureFlagService.delete(flag.key).subscribe({
-      next: () => {
-        this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
-        this.onSearch();
-      },
-      error: () => this.msg.error($localize`:@@common.operation-failed:Operation failed`)
+    this.changeCommentService.promptFlag(flag.key, ChangeOperation.Delete).subscribe(comment => {
+      if (comment === null) return;
+      this.featureFlagService.delete(flag.key, comment).subscribe({
+        next: () => {
+          this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
+          this.onSearch();
+        },
+        error: () => this.msg.error($localize`:@@common.operation-failed:Operation failed`)
+      });
     });
   }
 
-  getLocalDate(date: string) {
+  getLocalDate(date: string | Date) {
     if (!date) return '';
     return new Date(date);
   }
 
-  copyText(event, text: string) {
+  copyText(event: any, text: string) {
     copyToClipboard(text).then(
       () => this.msg.success($localize `:@@common.copy-success:Copied`)
     );
-  }
-
-  getVaritonsWithTitles(variations: string[]) {
-    return variations.map((v: string, index: number) => (`Variation ${index + 1}: ${v}`)).join(', ')
   }
 }

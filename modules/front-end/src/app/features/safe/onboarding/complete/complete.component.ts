@@ -4,9 +4,10 @@ import { IOrganization } from "@shared/types";
 import { getCurrentOrganization } from "@utils/project-env";
 
 @Component({
-  selector: 'onboarding-complete',
-  templateUrl: './complete.component.html',
-  styleUrls: ['./complete.component.less']
+    selector: 'onboarding-complete',
+    templateUrl: './complete.component.html',
+    styleUrls: ['./complete.component.less'],
+    standalone: false
 })
 export class CompleteComponent implements OnInit {
   isVisible: boolean = false;

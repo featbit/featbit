@@ -7,9 +7,10 @@ import {FeatureFlagService} from "@services/feature-flag.service";
 import { copyToClipboard } from "@utils/index";
 
 @Component({
-  selector: 'flag-triggers',
-  templateUrl: './flag-triggers.component.html',
-  styleUrls: ['./flag-triggers.component.less']
+    selector: 'flag-triggers',
+    templateUrl: './flag-triggers.component.html',
+    styleUrls: ['./flag-triggers.component.less'],
+    standalone: false
 })
 export class FlagTriggersComponent implements OnInit {
 

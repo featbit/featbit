@@ -1,0 +1,128 @@
+<div class="standard-div rows">
+  <div class="row">
+    <div class="row-title">
+      <span i18n="@@common.name">Name</span>
+      <nz-tag nzColor="blue">Key: {{currentOrganization.key}}</nz-tag>
+      <nz-tag class="copy-id" nzColor="geekblue" (click)="copyText(currentOrganization.id)">
+        <span i18n="@@common.copyId">Copy Id</span>
+        <i nz-icon i18n-nz-tooltip="@@org.org.org-id-copy-description" nz-tooltip="Copy ID of the organization, this ID may be needed when calling FeatBit REST API" nzType="icons:icon-info-outline"></i>
+      </nz-tag>
+    </div>
+
+    <form class="row-content" nz-form [formGroup]="organizationForm" [nzLayout]="'inline'" (ngSubmit)="updateOrganizationName()">
+      <nz-form-item class="extend">
+        <nz-form-control nzErrorTip="Name cannot be empty" i18n-nzErrorTip="@@common.name-cannot-be-empty">
+          <nz-input-group class="row-input-group" [nzPrefix]="orgIcon">
+            <input type="text" nz-input formControlName="name" placeholder="Organization name" i18n-placeholder="@@org.org.orgNamePlaceholder"/>
+            <ng-template #orgIcon>
+              <i nz-icon nzType="icons:icon-org"></i>
+            </ng-template>
+          </nz-input-group>
+        </nz-form-control>
+      </nz-form-item>
+      <button nz-button nzType="primary" [nzLoading]="isUpdating" [disabled]="!organizationForm.valid || !canUpdateOrgName">
+        <i nz-icon nzType="icons:icon-sync"></i>
+        <ng-container i18n="@@org.org.updateOrgName">Update</ng-container>
+      </button>
+    </form>
+  </div>
+  <div class="row">
+    <div class="row-title" i18n="@@org.org.sort-flags-by">Sort flags by</div>
+    <form class="row-content" nz-form [formGroup]="settingsForm" [nzLayout]="'inline'" (ngSubmit)="updateSortFlagsBy()">
+      <nz-form-item class="extend">
+        <nz-form-control>
+          <nz-select class="nz-select-40" nzPlaceHolder="Select sort option" formControlName="flagSortedBy" i18n-nzPlaceHolder="@@org.org.selectSortOption">
+            <nz-option [nzValue]="flagSortedBy.CreatedAt" nzLabel="Created At" i18n-nzLabel="@@common.created-at"></nz-option>
+            <nz-option [nzValue]="flagSortedBy.Key" nzLabel="Key" i18n-nzLabel="@@common.key"></nz-option>
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+      <button nz-button nzType="primary" [nzLoading]="isUpdating" [disabled]="!settingsForm.valid || !canUpdateSortFlagsBy">
+        <i nz-icon nzType="icons:icon-sync"></i>
+        <ng-container i18n="@@common.update">Update</ng-container>
+      </button>
+    </form>
+  </div>
+  <div class="row">
+    <div class="row-title" i18n="@@org.org.switchorg">Switch organization</div>
+    <div class="row-content">
+      <nz-select class="nz-select-40 extend" nzShowSearch nzPlaceHolder="Select organization" [(ngModel)]="currentOrganization" (ngModelChange)="onOrganizationChange()" i18n-nzPlaceHolder="@@org.org.selectOrg">
+        @for (org of allOrganizations; track org.id) {
+          <nz-option [nzLabel]="org.name" [nzValue]="org"></nz-option>
+        }
+      </nz-select>
+      <button class="create-org-btn" [disabled]="!license.isGranted(LicenseFeatureEnum.MultiOrg) || !canCreateOrg" nz-button nzType="primary" (click)="onCreateOrganizationClick()">
+        <i nz-icon nzType="icons:icon-add"></i>
+        <ng-container i18n="@@common.add">Add</ng-container>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="standard-div rows">
+  <h5 nz-typography>
+    <ng-container i18n="@@common.default-permissions">Default permissions</ng-container>
+    @if (defaultPermissionsForm.errors?.empty) {
+      <span style="margin-left: 4px; color: #ff4d4f" i18n="@@org.org.policy-group-set-at-least-one">(Policy and group cannot be both empty)</span>
+    }
+  </h5>
+  <form nz-form [formGroup]="defaultPermissionsForm" [nzLayout]="'vertical'" (ngSubmit)="updateDefaultPermissions()">
+    <nz-form-item>
+      <nz-form-label i18n="@@org.org.policy">Policy</nz-form-label>
+      <nz-form-control>
+        <nz-select
+          class="nz-select-40"
+          nzShowSearch
+          nzServerSearch
+          i18n-nzPlaceholder="@@org.org.policy-placeholder"
+          nzPlaceHolder="Policy"
+          (nzOnSearch)="getPolicies($event)"
+          formControlName="policyId">
+          @if (isPoliciesLoading) {
+            <nz-option nzDisabled nzCustomContent>
+              <i nz-icon nzType="loading" class="loading-icon"></i>
+              <ng-container i18n="@@common.loading">Loading...</ng-container>
+            </nz-option>
+          } @else {
+            @for (policy of policies.items; track policy) {
+              <nz-option nzCustomContent [nzLabel]="policy.name" [nzValue]="policy.id">
+                @if (policy.type === 'SysManaged') {
+                  <i style="color: #28a17d;" nz-icon nzType="star" nzTheme="outline"></i>
+                }
+                {{ policy.name }}
+              </nz-option>
+            }
+          }
+        </nz-select>
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+      <nz-form-label i18n="@@org.org.group">Group</nz-form-label>
+      <nz-form-control style="margin-top: 10px;">
+        <nz-select
+          class="nz-select-40"
+          nzShowSearch
+          nzServerSearch
+          i18n-nzPlaceholder="@@org.org.group-placeholder"
+          nzPlaceHolder="Group"
+          (nzOnSearch)="getGroups($event)"
+          formControlName="groupId">
+          @if (isGroupsLoading) {
+            <nz-option nzDisabled nzCustomContent>
+              <i nz-icon nzType="loading" class="loading-icon"></i>
+              <ng-container i18n="@@common.loading">Loading...</ng-container>
+            </nz-option>
+          } @else {
+            @for (group of groups.items; track group) {
+              <nz-option [nzLabel]="group.name" [nzValue]="group.id"></nz-option>
+            }
+          }
+        </nz-select>
+      </nz-form-control>
+    </nz-form-item>
+    <button nz-button class="permissions-btn" nzType="primary" [nzLoading]="isUpdating" [disabled]="!defaultPermissionsForm.valid || !canUpdateDefaultPermissions">
+      <i nz-icon nzType="icons:icon-sync"></i>
+      <ng-container i18n="@@common.update">Update</ng-container>
+    </button>
+  </form>
+</div>
+<organization-drawer [visible]="creatOrganizationFormVisible" (close)="onCreateOrganizationClosed($event)"></organization-drawer>

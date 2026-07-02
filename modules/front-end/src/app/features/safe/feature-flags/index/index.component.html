@@ -1,51 +1,61 @@
 <section class="body-container">
   <div class="table-content-area">
     <div class="table-search-area">
-      <div class="search-inputs">
-        <nz-input-group style="width: 220px" [nzPrefix]="prefixIconSearch">
-          <input nz-input type="text" placeholder="Filter by name or key" i18n-placeholder="@@ff.idx.filter-by-name-and-key" [(ngModel)]="featureFlagFilter.name" (ngModelChange)="onSearch(true)">
-        </nz-input-group>
-        <ng-template #prefixIconSearch>
-          <i nz-icon nzType="icons:icon-search"></i>
-        </ng-template>
-        <nz-select
-          class="nz-select-40 rounded filter"
-          nzMode="multiple"
-          nzAllowClear
-          [nzMaxTagCount]="1"
-          [nzMaxTagPlaceholder]="tagPlaceHolder"
-          [(ngModel)]="featureFlagFilter.tags"
-          (ngModelChange)="onSearch(true)"
-          i18n-nzPlaceHolder="@@ff.idx.filter-by-tags"
-          nzPlaceHolder="Filter by tags">
-          <ng-container *ngFor="let tag of allTags">
-            <nz-option *ngIf="!isLoadingTags" [nzValue]="tag" [nzLabel]="tag"></nz-option>
-          </ng-container>
-          <nz-option *ngIf="isLoadingTags" nzDisabled nzCustomContent>
-            <i nz-icon nzType="loading" class="loading-icon"></i>
-            <ng-container i18n="@@common.loading">Loading...</ng-container>
-          </nz-option>
-          <ng-template #tagPlaceHolder let-selectedList>and {{ selectedList.length }} more</ng-template>
-        </nz-select>
-        <nz-select class="nz-select-40 rounded filter" nzAllowClear [(ngModel)]="featureFlagFilter.isEnabled" (ngModelChange)="onSearch(true)" i18n-nzPlaceHolder="@@ff.idx.filter-by-status" nzPlaceHolder="Filter by status">
-          <nz-option nzValue="true" nzLabel="ON"></nz-option>
-          <nz-option nzValue="false" nzLabel="OFF"></nz-option>
-        </nz-select>
-        <label nz-checkbox [(ngModel)]="featureFlagFilter.isArchived" (ngModelChange)="onSearch(true)" i18n="@@ff.idx.archived">Archived</label>
-      </div>
-      <div class="middle-btn">
-        <button nz-button nzType="primary" (click)="creationDrawerVisible = true">
-          <i nz-icon nzType="icons:icon-add"></i>
-          <ng-container i18n="@@common.add">Add</ng-container>
-        </button>
-        <button class="more-action" nz-dropdown [nzDropdownMenu]="menu" >
-          <i nz-icon nzType="icons:icon-menu"></i>
-        </button>
-        <nz-dropdown-menu #menu="nzDropdownMenu">
-          <ul nz-menu>
-            <li nz-menu-item (click)="openBatchCopyModal()" i18n="@@ff.idx.copy-to-env">Copy to environment</li>
-          </ul>
-        </nz-dropdown-menu>
+      <div class="search-toolbar">
+        <div class="left-filters">
+          <nz-input-group [nzPrefix]="prefixIconSearch" class="main-search">
+            <input
+              nz-input type="text"
+              placeholder="Filter flags by name or key"
+              i18n-placeholder="@@ff.filter-by-name-and-key"
+              [(ngModel)]="featureFlagFilter.name"
+              (ngModelChange)="onSearch(true)">
+          </nz-input-group>
+          <ng-template #prefixIconSearch>
+            <i nz-icon nzType="icons:icon-search"></i>
+          </ng-template>
+
+          <dashed-multi-select
+            label="Tags"
+            i18n-label="@@common.tags"
+            [options]="tags"
+            [isLoading]="isLoadingTags"
+            (optionsChange)="onTagsChange($event)">
+          </dashed-multi-select>
+
+          <dashed-single-select
+            label="Status"
+            i18n-label="@@common.status"
+            [options]="statusOptions"
+            [value]="featureFlagFilter.isEnabled"
+            (valueChange)="onStatusFilterChange($event)">
+          </dashed-single-select>
+
+          <button
+            nz-button
+            nzType="dashed"
+            [class.active]="featureFlagFilter.isArchived"
+            (click)="toggleArchiveFilter()"
+            i18n="@@ff.idx.show-archived">Show Archived</button>
+        </div>
+        <div class="right-actions">
+          <button class="btn-secondary" nz-button [routerLink]="['/feature-flags/compare']">
+            <i nz-icon nzType="swap"></i>
+            <span i18n="@@common.compare">Compare</span>
+          </button>
+          <button nzType="primary" nz-button class="btn-primary" (click)="openCreationDrawer()">
+            <i nz-icon nzType="icons:icon-add"></i>
+            <span i18n="@@common.add">Add</span>
+          </button>
+          <button class="btn-more" nz-button nz-dropdown [nzDropdownMenu]="menu">
+            <i nz-icon nzType="ellipsis"></i>
+          </button>
+          <nz-dropdown-menu #menu="nzDropdownMenu">
+            <ul nz-menu>
+              <li nz-menu-item (click)="batchCopy()" i18n="@@ff.idx.batch-copy-to">Batch Copy To</li>
+            </ul>
+          </nz-dropdown-menu>
+        </div>
       </div>
     </div>
 
@@ -65,105 +75,177 @@
         (nzPageIndexChange)="onSearch()"
         (nzCurrentPageDataChange)="onCurrentPageDataChange($event)">
         <thead>
-        <tr>
-          <th [nzChecked]="allChecked" [nzIndeterminate]="indeterminate" (nzCheckedChange)="onAllChecked($event)"></th>
-          <th i18n="@@common.name">Name</th>
-          <th>
-            Key
-            <i nz-icon i18n-nz-tooltip="@@ff.key-description" nz-tooltip="Use key (case-sensitive) in your code to get the feature flag variation" nzType="icons:icon-info-outline"></i>
-          </th>
-          <th i18n="@@common.status">Status</th>
-          <th i18n="@@common.tags">Tags</th>
-          <th i18n="@@common.variations">Variations</th>
-          <th i18n="@@common.last-updated">Last updated</th>
-          <th i18n="@@common.actions">Actions</th>
-        </tr>
+          <tr>
+            <th [nzChecked]="allChecked" [nzIndeterminate]="indeterminate" (nzCheckedChange)="onAllChecked($event)"></th>
+            <th i18n="@@common.name">Name</th>
+            <th i18n="@@common.status">Status</th>
+            <th class="tags-header" i18n="@@common.tags">Tags</th>
+            <th class="last-change-header" i18n="@@common.last-change">Last Change</th>
+            <th i18n="@@common.actions">Actions</th>
+          </tr>
         </thead>
         <tbody>
-        <tr *ngFor="let featureFlag of table.data">
-          <td
-            [nzChecked]="itemChecked(featureFlag)"
-            (nzCheckedChange)="onItemChecked(featureFlag)"
-          ></td>
-          <td style="cursor:pointer" (click)="navigateToFlagDetail(featureFlag.key)">
-              <span>{{featureFlag.name}}</span>
-          </td>
-          <td>
-            <i (click)="copyText($event, featureFlag.key)" class="copy-icon" nz-icon nzType="icons:icon-copy"></i>
-            {{featureFlag.key}}
-          </td>
-          <td>
-            <nz-switch *ngIf="featureFlag.isEnabled"
-                       i18n-nz-popconfirm="@@ff.are-you-sure-to-turn-ff-off"
-                       nz-popconfirm="Are you sure to turn it off? The flag will return the variation that you specified for its off state."
-                       (nzOnConfirm)="onToggleFeatureFlagStatus(featureFlag)"
-                       nzControl="true"
-                       [ngModel]="featureFlag.isEnabled" nzCheckedChildren="ON" nzUnCheckedChildren="OFF">
-            </nz-switch>
-            <nz-switch *ngIf="!featureFlag.isEnabled"
-                       i18n-nz-popconfirm="@@ff.are-you-sure-to-turn-ff-on"
-                       nz-popconfirm="Are you sure to turn it on? The flag will return the matching targeting users' or rules' serving variation."
-                       (nzOnConfirm)="onToggleFeatureFlagStatus(featureFlag)"
-                       nzControl="true"
-                       [ngModel]="featureFlag.isEnabled" nzCheckedChildren="ON" nzUnCheckedChildren="OFF">
-            </nz-switch>
-          </td>
-          <td style="max-width: 168px;">
-            <span class="tag" *ngFor="let tag of featureFlag.tags">{{tag}}</span>
-          </td>
-          <td>
-            <div style="min-width: 60px;" >
-              <div *ngIf="featureFlag.isEnabled && featureFlag.serves?.enabledVariations?.length === 1">
-                <span class="variation-tip tip-0" style="margin-bottom:2px;"></span>
-                <span nz-tooltip="{{featureFlag.serves.enabledVariations[0]}}" style="margin-left: 0;margin-right:-3px;text-overflow: ellipsis;white-space: nowrap;max-width: 100px;display: inline-block;
-                             height: 18px;margin-top: 2px;overflow: hidden;">
-                  {{featureFlag.serves.enabledVariations[0]}}
-                </span>
-              </div>
-              <div *ngIf="featureFlag.isEnabled && featureFlag.serves?.enabledVariations?.length > 1"
-                   style="cursor: pointer;">
-                <span *ngFor="let _ of featureFlag.serves?.enabledVariations; let key=index; ">
-                  <span  class="variation-tip {{'tip-' + key % 9}}" style="margin-right:-3px;margin-bottom:2px;"></span>
-                </span>
-                <span nz-tooltip="{{ getVaritonsWithTitles(featureFlag.serves?.enabledVariations) }}" style="margin-left: 10px;margin-right:-3px;text-overflow: ellipsis;white-space: nowrap;max-width: 100px;display: inline-block;
-                             height: 18px;margin-top: 2px;overflow: hidden;">
-                  {{featureFlag.serves?.enabledVariations?.length}} <ng-container i18n="@@common.num-variations">Variations</ng-container>
-                </span>
-              </div>
-              <div *ngIf="!featureFlag.isEnabled" style="opacity: .5;">
-                <span class="variation-tip tip-9" style="margin-bottom:2px;background-color:darkgray;"></span>
-                <span nz-tooltip="{{featureFlag.serves.disabledVariation}}" style="margin-left: 0;margin-right:-3px;text-overflow: ellipsis;white-space: nowrap;max-width: 100px;display: inline-block;
-                             height: 18px;margin-top: 2px;overflow: hidden;">
-                  {{featureFlag.serves?.disabledVariation}}
-                </span>
-              </div>
-            </div>
-          </td>
-          <td>{{getLocalDate(featureFlag.updatedAt) | date: 'YYYY-MM-dd HH:mm'}}</td>
-          <td>
-            <a style="color: #23AD7F" (click)="navigateToFlagDetail(featureFlag.key)" i18n="@@common.details">Details</a>
-            <nz-divider nzType="vertical"></nz-divider>
-            <ng-container *ngIf="isArchived;then archivedOps else unarchivedOps"></ng-container>
-            <ng-template #archivedOps>
-              <a style="color: #717D8A"
-                 i18n-nz-popconfirm="@@ff.are-you-sure-to-restore-ff"
-                 nz-popconfirm="Are you sure to restore this feature flag?"
-                 (nzOnConfirm)="restore(featureFlag)">
-                <ng-container i18n="@@common.restore">Restore</ng-container>
-              </a>
-              <nz-divider nzType="vertical"></nz-divider>
-              <a style="color: #FF513A"
-                 i18n-nz-popconfirm="@@common.remove-confirm"
-                 nz-popconfirm="This operation cannot be reverted, are you sure to remove it?"
-                 (nzOnConfirm)="delete(featureFlag)">
-                <ng-container i18n="@@common.remove">Remove</ng-container>
-              </a>
-            </ng-template>
-            <ng-template #unarchivedOps>
-              <a style="color: #717D8A" i18n="@@common.archive" (click)="archive(featureFlag)">Archive</a>
-            </ng-template>
-          </td>
-        </tr>
+          @for (flag of table.data; track flag) {
+            <tr>
+              <td
+                [nzChecked]="itemChecked(flag)"
+                (nzCheckedChange)="onItemChecked(flag)"
+              ></td>
+              <!-- Name Column: name, key-->
+              <td class="name-cell">
+                <div class="flag-name" [routerLink]="[flag.key, 'targeting']">{{flag.name}}</div>
+                <div class="flag-key" (click)="copyText($event, flag.key)">
+                  {{flag.key}}
+                  <i class="copy-icon" nz-icon nzType="icons:icon-copy"></i>
+                </div>
+                @if (flag.creator) {
+                  <div class="flag-meta">
+                    <span i18n="@@common.created-by">Created by</span>
+                    <span class="creator-name">{{flag.creator.name || flag.creator.email}}</span>
+                    @if (flag.createdAt) {
+                      <span class="created-at">{{getLocalDate(flag.createdAt) | date: 'MMM d, yyyy'}}</span>
+                    }
+                  </div>
+                }
+              </td>
+              <!-- Status Column: on/off switch + serves variations -->
+              <td class="status-cell">
+                <div class="status-container">
+                  <div class="status-row">
+                    @if (flag.isEnabled) {
+                      <nz-switch
+                        i18n-nz-popconfirm="@@ff.turn-off-confirm"
+                        nz-popconfirm="Are you sure to turn it off? After turned off, the flag will return the variation that you specified for its off state."
+                        [nzPopconfirmOverlayStyle]="{maxWidth: '350px'}"
+                        [nzCondition]="envSettings.requireChangeComment"
+                        (nzOnConfirm)="onToggleFeatureFlagStatus(flag)"
+                        nzControl="true"
+                        [ngModel]="flag.isEnabled"
+                        [nzLoading]="flag.isToggling"
+                        nzCheckedChildren="ON"
+                        nzUnCheckedChildren="OFF">
+                      </nz-switch>
+                    } @else {
+                      <nz-switch
+                        i18n-nz-popconfirm="@@ff.turn-on-confirm"
+                        nz-popconfirm="Are you sure to turn it on? After turned on, the flag will return the serving variation that matches the targeted users or rules."
+                        [nzPopconfirmOverlayStyle]="{maxWidth: '350px'}"
+                        [nzCondition]="envSettings.requireChangeComment"
+                        (nzOnConfirm)="onToggleFeatureFlagStatus(flag)"
+                        nzControl="true"
+                        [ngModel]="flag.isEnabled"
+                        [nzLoading]="flag.isToggling"
+                        nzCheckedChildren="ON"
+                        nzUnCheckedChildren="OFF">
+                      </nz-switch>
+                    }
+                    <span class="variation-type-badge" [attr.data-type]="flag.variationType">{{flag.variationType}}</span>
+                  </div>
+                  <div class="serving-section" [class.disabled]="!flag.isEnabled">
+                    @if (flag.isEnabled && flag.serves?.enabledVariations?.length === 1) {
+                      <div class="serving-row">
+                        <span class="serving-label" i18n="@@ff.serving-variations">Serving: </span>
+                        <div class="serving-value" nz-tooltip="{{flag.serves.enabledVariations[0]}}">
+                          <span class="variation-tip tip-0"></span>
+                          <span class="value-text">{{ flag.serves.enabledVariations[0] }}</span>
+                        </div>
+                      </div>
+                    }
+                    @if (flag.isEnabled && flag.serves?.enabledVariations?.length > 1) {
+                      <div class="serving-row">
+                        <span class="serving-label" i18n="@@ff.serving-variations">Serving: </span>
+                        <div class="serving-value multiple" nz-tooltip [nzTooltipTitle]="variationsList">
+                          <div class="dots-group">
+                            @for (_ of flag.serves?.enabledVariations; track $index; let key = $index) {
+                              <span class="variation-tip {{'tip-' + key % 9}}"></span>
+                            }
+                          </div>
+                          <span class="value-text">{{ flag.serves?.enabledVariations?.length }} <ng-container i18n="@@common.num-variations">Variations</ng-container></span>
+                          <ng-template #variationsList>
+                            <ul>
+                              @for (variation of flag.serves?.enabledVariations; track $index) {
+                                <li>{{ variation }}</li>
+                              }
+                            </ul>
+                          </ng-template>
+                        </div>
+                      </div>
+                    }
+                    @if (!flag.isEnabled) {
+                      <div class="serving-row">
+                        <span class="serving-label" i18n="@@ff.serving-variations">Serving: </span>
+                        <div class="serving-value" nz-tooltip="{{flag.serves?.disabledVariation}}">
+                          <span class="variation-tip tip-disabled"></span>
+                          <span class="value-text">{{ flag.serves?.disabledVariation }}</span>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </div>
+              </td>
+              <!-- Tags Column -->
+              <td class="tags-cell">
+                @for (tag of flag.tags; track tag) {
+                  <span class="tag" nz-tooltip [nzTooltipTitle]="tag">{{tag}}</span>
+                }
+              </td>
+              <!-- Last Change Column -->
+              <td class="last-change-cell">
+                @if (flag.lastChange) {
+                  <div class="last-change-info">
+                    <div class="change-time">{{getLocalDate(flag.lastChange.happenedAt) | date: 'MMM d, yyyy HH:mm'}}</div>
+                    @if (flag.lastChange.operator) {
+                      <div class="updated-by">
+                        <span i18n="@@common.updated-by">Updated by</span>
+                        <span class="user">{{flag.lastChange.operator.name || flag.lastChange.operator.email}}</span>
+                      </div>
+                    }
+                    @if (flag.lastChange.comment) {
+                      <div class="change-comment" nz-tooltip [nzTooltipTitle]="flag.lastChange.comment">
+                        {{flag.lastChange.comment}}
+                      </div>
+                    }
+                  </div>
+                } @else {
+                  <div class="last-change-info">
+                    <span class="no-changes" i18n="@@ff.no-changes-since-creation">No changes since creation</span>
+                  </div>
+                }
+              </td>
+              <!-- Actions Column -->
+              <td class="actions-cell">
+                <div class="actions-row">
+                  <a class="action-link primary" [routerLink]="[flag.key, 'targeting']" i18n="@@common.details">Details</a>
+                  <nz-divider nzType="vertical"></nz-divider>
+                  <a class="action-link primary" (click)="copy(flag)" i18n="@@common.copy-to">Copy To</a>
+                  <nz-divider nzType="vertical"></nz-divider>
+                  <a class="action-link primary" (click)="clone(flag)" i18n="@@common.clone">Clone</a>
+                  <nz-divider nzType="vertical"></nz-divider>
+                  <a class="action-link primary" (click)="compare(flag)" i18n="@@common.compare">Compare</a>
+                  <nz-divider nzType="vertical"></nz-divider>
+                  @if (featureFlagFilter.isArchived) {
+                    <a class="action-link secondary"
+                      i18n-nz-popconfirm="@@ff.are-you-sure-to-restore-ff"
+                      nz-popconfirm="Are you sure to restore this feature flag?"
+                      [nzCondition]="envSettings.requireChangeComment"
+                      (nzOnConfirm)="restore(flag)">
+                      <ng-container i18n="@@common.restore">Restore</ng-container>
+                    </a>
+                    <nz-divider nzType="vertical"></nz-divider>
+                    <a class="action-link danger"
+                      i18n-nz-popconfirm="@@common.remove-confirm"
+                      nz-popconfirm="This operation cannot be reverted, are you sure to remove it?"
+                      [nzCondition]="envSettings.requireChangeComment"
+                      (nzOnConfirm)="delete(flag)">
+                      <ng-container i18n="@@common.remove">Remove</ng-container>
+                    </a>
+                  } @else {
+                    <a class="action-link secondary" i18n="@@common.archive" (click)="archive(flag)">Archive</a>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
         </tbody>
       </nz-table>
     </div>
@@ -171,51 +253,18 @@
 </section>
 
 <feature-flag-drawer [visible]="creationDrawerVisible" (onClose)="closeCreationDrawer()"></feature-flag-drawer>
-
-<nz-modal
-  nzAutofocus="cancel"
-  [(nzVisible)]="batchCopyVisible"
-  [nzOkDisabled]="totalSelected === 0"
-  [nzOkLoading]="isCopying"
-  (nzOnOk)="batchCopy()"
-  (nzOnCancel)="batchCopyVisible = false"
-  [nzCentered]="true"
-  i18n-nzTitle="@@common.bulk-copy"
-  nzTitle="Bulk copy"
-  nzWidth="820px"
-  nzMaskClosable="false">
-  <ng-container *nzModalContent>
-    <nz-alert
-      nzType="warning"
-      i18n-nzDescription="@@ff.idx.only-following-fields-are-copied"
-      nzDescription="Targeting user and rules will not be copied."
-      nzShowIcon
-      nzIconType="icons:icon-warning"
-    ></nz-alert>
-    <div class="batch-copy-content">
-      <nz-list class="overflow-y-list" style="--list-height: 320px" [nzHeader]="flagHeader">
-        <nz-list-item *ngFor="let item of checkedItems">
-          <label nz-checkbox [(ngModel)]="item.checked">{{ item.name }}</label>
-        </nz-list-item>
-        <ng-template #flagHeader>
-          <span class="header"><ng-container i18n="@@ff.idx.selected-ff">Selected feature flags</ng-container>: {{ totalSelected }}</span>
-        </ng-template>
-      </nz-list>
-      <div class="transfer-text">
-        <i nz-icon nzType="icons:icon-copy-to"></i>
-        <span i18n="@@common.copy-to">Copy</span>
-      </div>
-      <nz-list class="overflow-y-list" style="--list-height: 320px" [nzHeader]="envHeader">
-        <nz-list-item
-          *ngFor="let env of envs"
-          (click)="selectTargetEnv(env)"
-          [ngClass]="{'item-selected': env.id === targetEnv.id}">
-          {{ env.name }}
-        </nz-list-item>
-        <ng-template #envHeader>
-          <span class="header" i18n="@@common.targeting-env">Targeting environment</span>
-        </ng-template>
-      </nz-list>
-    </div>
-  </ng-container>
-</nz-modal>
+<copy-feature-flag-modal
+  [flags]="copyItems"
+  [visible]="copyVisible"
+  (close)="copyVisible = false">
+</copy-feature-flag-modal>
+<clone-feature-flag-modal
+  [flag]="flagToClone"
+  (close)="cloneModalClosed($event)"
+  [visible]="cloneVisible">
+</clone-feature-flag-modal>
+<compare-feature-flag-drawer
+  [flag]="flagToCompare"
+  [visible]="compareVisible"
+  (close)="compareVisible = false">
+</compare-feature-flag-drawer>

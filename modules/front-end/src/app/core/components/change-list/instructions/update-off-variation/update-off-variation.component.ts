@@ -11,10 +11,11 @@ import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
   template: `
     <div class="instruction">
       <span i18n="@@common.update-to">Update to</span>
-      <nz-tag>{{variation.name}}: {{variation.value}}</nz-tag>
+      <nz-tag>{{ variation.name }}: {{ variation.value }}</nz-tag>
     </div>
   `,
-  styleUrls: ['./update-off-variation.component.less']
+  styleUrls: [ './update-off-variation.component.less' ],
+  standalone: false
 })
 export class UpdateOffVariationComponent implements IInstructionComponent {
   data: IInstructionComponentData;

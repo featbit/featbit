@@ -19,14 +19,22 @@
             [nzPercent]="normalizedProgress"
             [nzStatus]="status"
           ></nz-progress>
-          <p i18n="@@get-started.listen-for-sdk-success" *ngIf="status === statusSuccess">Congratulations, your SDK is successfully set up.</p>
-          <p i18n="@@get-started.listen-for-sdk-failure" *ngIf="status === statusException">We were not able to detect any events, please go back to the previous step and make sure you have initialized the SDK with correct options.</p>
-          <button nz-button nzType="primary" *ngIf="status === statusException" (click)="start()">
-            <span i18n="@@common.retry">Retry</span>
-          </button>
-          <button nz-button nzType="primary" *ngIf="status === statusSuccess" (click)="onComplete.emit()">
-            <span i18n="@@common.start-journey">Start your journey</span>
-          </button>
+          @if (status === statusSuccess) {
+            <p i18n="@@get-started.listen-for-sdk-success">Congratulations, your SDK is successfully set up.</p>
+          }
+          @if (status === statusException) {
+            <p i18n="@@get-started.listen-for-sdk-failure">We were not able to detect any events, please go back to the previous step and make sure you have initialized the SDK with correct options.</p>
+          }
+          @if (status === statusException) {
+            <button nz-button nzType="primary" (click)="start()">
+              <span i18n="@@common.retry">Retry</span>
+            </button>
+          }
+          @if (status === statusSuccess) {
+            <button nz-button nzType="primary" (click)="onComplete.emit()">
+              <span i18n="@@common.start-journey">Start your journey</span>
+            </button>
+          }
         </div>
       </div>
     </nz-page-header-content>

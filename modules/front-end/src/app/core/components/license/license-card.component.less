@@ -1,0 +1,278 @@
+@import "variables";
+
+.loading-container {
+  padding: 24px 0;
+}
+
+.license-card {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid @divider-color;
+  overflow: hidden;
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  // License Status Header
+  .license-header {
+    background: linear-gradient(135deg, @grey5-color 0%, @grey10-color 100%);
+    padding: 10px 12px;
+    border-bottom: 1px solid @divider-color;
+
+    .license-plan {
+      font-weight: 500;
+      color: @grey70-color;
+      background: white;
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid @grey20-color;
+    }
+
+    .license-status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+
+      .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+
+        i {
+          font-size: 16px;
+        }
+
+        &.active {
+          background: @green5-color;
+          color: @green70-color;
+          border: 1px solid @green10-color;
+
+          i {
+            color: @green70-color;
+          }
+        }
+
+        &.warning {
+          background: #FFF7E6;
+          color: #FA8C16;
+          border: 1px solid #FFE58F;
+
+          i {
+            color: #FA8C16;
+          }
+        }
+
+        &.expired {
+          background: @red5-color;
+          color: @red40-color;
+          border: 1px solid @red10-color;
+
+          i {
+            color: @red40-color;
+          }
+        }
+      }
+    }
+  }
+
+  // License Information
+  .license-info {
+    padding: 24px;
+    background: white;
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+
+      .info-item {
+        .info-label {
+          color: @grey50-color;
+          font-size: 12px;
+          font-weight: 500;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          margin-bottom: 8px;
+        }
+
+        .info-value {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 14px;
+          color: @grey70-color;
+          font-weight: 500;
+
+          i {
+            color: @grey40-color;
+            font-size: 16px;
+          }
+
+          &.warning {
+            color: #FA8C16;
+
+            i {
+              color: #FA8C16;
+            }
+
+            .expiry-note {
+              color: #FA8C16;
+              font-weight: 400;
+            }
+          }
+
+          &.expired {
+            color: @red40-color;
+
+            i {
+              color: @red40-color;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Features Section
+  .license-features {
+    padding: 0 24px 24px 24px;
+
+    .features-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid @divider-color;
+
+      .features-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: @grey70-color;
+      }
+
+      .features-count {
+        font-size: 12px;
+        color: @grey50-color;
+        background: @grey5-color;
+        padding: 4px 12px;
+        border-radius: 12px;
+      }
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 12px;
+
+      .feature-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        border: 1px solid transparent;
+
+        &.granted {
+          background: @green5-color;
+          border-color: @green10-color;
+
+          .feature-icon i {
+            color: @green70-color;
+          }
+
+          .feature-content {
+            .feature-name {
+              color: @grey70-color;
+            }
+
+            .feature-status {
+              color: @green70-color;
+            }
+          }
+
+          &:hover {
+            background: @green10-color;
+          }
+        }
+
+        &.denied {
+          background: @grey5-color;
+          border-color: @grey10-color;
+
+          .feature-icon i {
+            color: @grey40-color;
+          }
+
+          .feature-content {
+            .feature-name {
+              color: @grey50-color;
+            }
+
+            .feature-status {
+              color: @grey40-color;
+            }
+          }
+
+          &:hover {
+            background: @grey10-color;
+          }
+        }
+
+        .feature-icon {
+          flex-shrink: 0;
+
+          i {
+            font-size: 20px;
+          }
+        }
+
+        .feature-content {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+
+          .feature-name {
+            font-weight: 500;
+            font-size: 14px;
+            line-height: 1.4;
+          }
+
+          .feature-status {
+            font-size: 12px;
+            font-weight: 400;
+          }
+        }
+      }
+    }
+  }
+
+  // Upgrade Notice
+  .upgrade-notice {
+    margin: 0 24px 24px 24px;
+    padding: 16px;
+    background: linear-gradient(135deg, @purple50-color, #8B5CF6);
+    border-radius: 8px;
+    color: white;
+
+    .upgrade-content {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+
+      i {
+        font-size: 18px;
+        color: rgba(255, 255, 255, 0.9);
+      }
+    }
+  }
+}

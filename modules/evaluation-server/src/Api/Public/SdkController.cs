@@ -1,9 +1,12 @@
+using Api.RateLimiting;
 using Domain.EndUsers;
-using Streaming.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using Streaming.Services;
 
 namespace Api.Public;
 
+[EnableRateLimiting(RateLimitingPolicies.Sdk)]
 public class SdkController : PublicApiControllerBase
 {
     private readonly IDataSyncService _dataSyncService;

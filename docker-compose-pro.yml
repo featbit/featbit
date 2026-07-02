@@ -1,5 +1,4 @@
 name: featbit-pro
-version: "3"
 services:
   ui:
     image: featbit/featbit-ui:latest
@@ -7,6 +6,7 @@ services:
       - API_URL=http://localhost:5000
       - DEMO_URL=https://featbit-samples.vercel.app
       - EVALUATION_URL=http://localhost:5100
+      - BASE_HREF=/
     depends_on:
       - api-server
     ports:
@@ -17,15 +17,18 @@ services:
   api-server:
     image: featbit/featbit-api-server:latest
     environment:
-      - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
-      - MongoDb__Database=featbit
+      - DbProvider=Postgres
+      - MqProvider=Kafka
+      - CacheProvider=Redis
+      - Postgres__ConnectionString=Host=postgresql;Port=5432;Username=postgres;Password=please_change_me;Database=featbit
       - Kafka__Producer__bootstrap.servers=kafka:9092
       - Kafka__Consumer__bootstrap.servers=kafka:9092
       - Redis__ConnectionString=redis:6379
       - OLAP__ServiceHost=http://da-server
-      - IS_PRO=true
+      - Jwt__Algorithm=HS256
+      - Jwt__Key=please_change_me_to_a_secure_secret_key
     depends_on:
-      - mongodb
+      - postgresql
       - redis
       - kafka
       - da-server
@@ -37,14 +40,15 @@ services:
   evaluation-server:
     image: featbit/featbit-evaluation-server:latest
     environment:
-      - MongoDb__ConnectionString=mongodb://admin:password@mongodb:27017
-      - MongoDb__Database=featbit
+      - DbProvider=Postgres
+      - MqProvider=Kafka
+      - CacheProvider=Redis
+      - Postgres__ConnectionString=Host=postgresql;Port=5432;Username=postgres;Password=please_change_me;Database=featbit
       - Kafka__Producer__bootstrap.servers=kafka:9092
       - Kafka__Consumer__bootstrap.servers=kafka:9092
       - Redis__ConnectionString=redis:6379
-      - IS_PRO=true
     depends_on:
-      - mongodb
+      - postgresql
       - kafka
       - redis
     ports:
@@ -62,31 +66,29 @@ services:
     networks:
       - featbit-network
     environment:
+      DB_PROVIDER: ClickHouse
       KAFKA_HOSTS: kafka:9092
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
       CLICKHOUSE_HOST: clickhouse-server
       CLICKHOUSE_KAFKA_HOSTS: kafka:9092
-      IS_PRO: true
       CHECK_DB_LIVNESS: true
 
-  mongodb:
-    image: mongo:5.0.14
+  postgresql:
+    image: postgres:15.10
+    container_name: postgresql
     restart: on-failure
     ports:
-      - "27017:27017"
+      - "5432:5432"
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=admin
-      - MONGO_INITDB_ROOT_PASSWORD=password
-      - MONGO_INITDB_DATABASE=featbit
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: please_change_me
     volumes:
-      - mongodb:/data/db
-      - ./infra/mongodb/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d/
+      - ./infra/postgresql/docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d/
+      - postgres:/var/lib/postgresql/data
     networks:
       - featbit-network
 
   redis:
-    image: bitnami/redis:6.2.10
+    image: bitnamilegacy/redis:6.2.10
     restart: on-failure
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
@@ -98,7 +100,7 @@ services:
       - redis:/data
 
   kafka:
-    image: bitnami/kafka:3.5
+    image: bitnamilegacy/kafka:3.5
     restart: on-failure
     ports:
       - '9092:9092'
@@ -119,7 +121,7 @@ services:
       - kafka:/bitnami/kafka
   
   init-kafka-topics:
-    image: bitnami/kafka:3.5
+    image: bitnamilegacy/kafka:3.5
     depends_on:
       kafka:
         condition: service_started
@@ -167,7 +169,7 @@ networks:
         - subnet: 172.10.0.0/16
 
 volumes:
-  mongodb:
+  postgres:
   redis:
   kafka:
   clickhouse-server:

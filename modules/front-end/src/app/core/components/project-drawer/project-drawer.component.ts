@@ -9,9 +9,10 @@ import { debounceTime, first, map, switchMap } from "rxjs/operators";
 import { slugify } from "@utils/index";
 
 @Component({
-  selector: 'app-project-drawer',
-  templateUrl: './project-drawer.component.html',
-  styleUrls: ['./project-drawer.component.less']
+    selector: 'app-project-drawer',
+    templateUrl: './project-drawer.component.html',
+    styleUrls: ['./project-drawer.component.less'],
+    standalone: false
 })
 export class ProjectDrawerComponent {
 

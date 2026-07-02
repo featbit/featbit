@@ -1,99 +1,136 @@
 <section class="body-container">
   <div class="detail-body">
-    <div class="banner" *ngIf="!isLoading; else loadingTem;">
-      <div class="references" *ngIf="flagReferences.length === 0" i18n="@@segment.details.segment-not-used">This segment is not used by any feature flag</div>
-      <div class="references" nz-dropdown [nzDropdownMenu]="menu" *ngIf="flagReferences.length > 0">
-        <a>
-          <ng-container i18n="@@segment.details.this-segment">This segment is used by</ng-container>
-          <span class="reference-count"> {{flagReferences.length}} </span>
-          <ng-container i18n="@@segment.details.num-ff">feature flag(s)</ng-container>
-          <i nz-icon nzType="down"></i>
-        </a>
+    @if (!isLoading) {
+      <div class="banner">
+        @if (flagReferences.length > 0) {
+          <span
+            class="flag-references-tip"
+            nz-tooltip
+            nzTooltipTitle="Click to view details"
+            i18n-nzTooltipTitle="@@segment.details.flag-references-tooltip"
+            (click)="flagReferencesModalVisible = true">
+            <span i18n="@@segment.details.referenced-by">Referenced by</span>
+            <span>{{ flagReferences.length }}</span>
+            <span i18n="@@segment.details.num-ff">feature flag(s)</span>
+          </span>
+        } @else {
+          <span class="flag-references-tip no-reference" i18n="@@segment.details.no-flag-references">No flag references</span>
+        }
+        <button nz-button nzType="primary" (click)="onReviewChanges()">
+          <i nz-icon nzType="icons:icon-save"></i>
+          <ng-container i18n="@@common.save">Save</ng-container>
+        </button>
       </div>
-      <nz-dropdown-menu #menu="nzDropdownMenu">
-        <ul nz-menu>
-          <li nz-menu-item *ngFor="let flag of flagReferences" (click)="openFlagPage(flag.key)">
-            {{flag.name}}
-          </li>
-        </ul>
-      </nz-dropdown-menu>
-      <button class="save-btn" nz-button nzType="primary" (click)="onReviewChanges()">
-        <i nz-icon nzType="icons:icon-save"></i>
-        <ng-container i18n="@@common.review-and-save">Review and save</ng-container>
-      </button>
-    </div>
+    } @else {
+      <div class="block">
+        <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 4 }"></nz-skeleton>
+      </div>
+    }
     <div class="content-container">
-      <div class="standard-div target-users" *ngIf="!isLoading; else loadingTem;">
-        <div class="rule-banner">
-          <div class="title-wraper">
-            <div class="title" i18n="@@common.targeting-users">Targeting users</div>
-            <i *ngIf="targetUsersActive" nz-icon (click)="targetUsersActive = !targetUsersActive" nzType="icons:icon-arrow-down"></i>
-            <i *ngIf="!targetUsersActive" nz-icon (click)="targetUsersActive = !targetUsersActive" nzType="icons:icon-arrow-right"></i>
-          </div>
-        </div>
-        <div *ngIf="targetUsersActive" style="margin-left: -12px;margin-top: 16px">
-          <div class="content">
-            <target-user
-              i18n-type="@@common.including-users"
-              type="Including users"
-              [tipIdx]="0"
-              [userList]="userList"
-              [selectedUserDetailList]="segmentDetail.includedUsers"
-              (search)="onSearchUser($event)"
-              (onSelectedUserListChange)="onSelectedUserListChange($event, true)">
-            </target-user>
-          </div>
-          <div class="content">
-            <target-user
-              i18n-type="@@common.excluding-users"
-              type="Excluding users"
-              [tipIdx]="1"
-              [userList]="userList"
-              [selectedUserDetailList]="segmentDetail.excludedUsers"
-              (search)="onSearchUser($event)"
-              (onSelectedUserListChange)="onSelectedUserListChange($event, false)">
-            </target-user>
-          </div>
-        </div>
-      </div>
-      <div class="standard-div" *ngIf="!isLoading && !isUserPropsLoading; else loadingTem;">
-        <div class="rule-banner">
-          <div class="title" i18n="@@common.rules">Rules</div>
-          <i nz-icon (click)="addRule()" nzType="icons:icon-add-outline"></i>
-        </div>
-        <div class="drop-list" cdkDropList (cdkDropListDropped)="onDrop($event)">
-          <ng-container *ngFor="let rule of segmentDetail.rules; let index=index; trackBy: trackRuleById;">
-            <div class="drop-box rule" cdkDrag>
-              <find-rule
-                [data]="rule"
-                [userProps]="userProps"
-                (addProperty)="onAddProperty($event)"
-                (deleteRule)="deleteRule(index)"
-                (onConditionChange)="onRuleConditionsChange($event, index)"
-                (updateRuleName)="rule.name = $event">
-              </find-rule>
+      @if (!isLoading) {
+        <div class="standard-div target-users">
+          <div class="rule-banner">
+            <div class="title-wraper">
+              <div class="title" i18n="@@common.targeting-users">Targeting users</div>
+              @if (targetUsersActive) {
+                <i nz-icon (click)="targetUsersActive = !targetUsersActive" nzType="icons:icon-arrow-down"></i>
+              } @else {
+                <i nz-icon (click)="targetUsersActive = !targetUsersActive" nzType="icons:icon-arrow-right"></i>
+              }
             </div>
-          </ng-container>
+            @if (!canUpdateTargetingUsers) {
+              <i [nz-tooltip]="noPermissionTooltipTpl" nz-icon nzType="warning"></i>
+            }
+          </div>
+          @if (targetUsersActive) {
+            <div style="margin-left: -12px;margin-top: 16px">
+              <div class="content">
+                <target-user
+                  i18n-type="@@common.including-users"
+                  type="Including users"
+                  [disabled]="!canUpdateTargetingUsers"
+                  [disableCreation]="segmentDetail.isShared"
+                  [userList]="userList"
+                  [selectedUserDetailList]="segmentDetail.includedUsers"
+                  (search)="onSearchUser($event)"
+                  (onSelectedUserListChange)="onSelectedUserListChange($event, true)">
+                </target-user>
+              </div>
+              <div class="content">
+                <target-user
+                  i18n-type="@@common.excluding-users"
+                  type="Excluding users"
+                  [disabled]="!canUpdateTargetingUsers"
+                  [disableCreation]="segmentDetail.isShared"
+                  [userList]="userList"
+                  [selectedUserDetailList]="segmentDetail.excludedUsers"
+                  (search)="onSearchUser($event)"
+                  (onSelectedUserListChange)="onSelectedUserListChange($event, false)">
+                </target-user>
+              </div>
+            </div>
+          }
         </div>
-      </div>
+      } @else {
+        <div class="block">
+          <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 4 }"></nz-skeleton>
+        </div>
+      }
+      @if (!isLoading && !isUserPropsLoading) {
+        <div class="standard-div">
+          <div class="rule-banner">
+            <div class="title" i18n="@@common.rules">Rules</div>
+            <i nz-icon (click)="addRule()" nzType="icons:icon-add-outline"></i>
+            @if (!canUpdateRules) {
+              <i [nz-tooltip]="noPermissionTooltipTpl" nz-icon nzType="warning"></i>
+            }
+          </div>
+          <div class="drop-list" cdkDropList (cdkDropListDropped)="onDrop($event)">
+            @for (rule of segmentDetail.rules; track trackRuleById(index, rule); let index = $index) {
+              <div class="drop-box rule" cdkDrag [cdkDragDisabled]="!canUpdateRules">
+                <find-rule
+                  [disabled]="!canUpdateRules"
+                  [data]="rule"
+                  [userProps]="userProps"
+                  (addProperty)="onAddProperty($event)"
+                  (deleteRule)="deleteRule(index)"
+                  (onConditionChange)="onRuleConditionsChange($event, index)"
+                  (updateRuleName)="rule.name = $event">
+                </find-rule>
+              </div>
+            }
+          </div>
+        </div>
+      } @else {
+        <div class="block">
+          <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 4 }"></nz-skeleton>
+        </div>
+      }
     </div>
   </div>
-  <ng-template #loadingTem>
-    <div class="block">
-      <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 4 }"></nz-skeleton>
-    </div>
+
+  <ng-template #noPermissionTooltipTpl>
+    <span class="validation-errors-title" i18n="@@permissions.need-permissions-to-operate">You don't have permissions to take this action, please contact the admin to grant you the necessary permissions</span>
   </ng-template>
 </section>
-<change-review
-  *ngIf="!isLoading"
-  [visible]="reviewModalVisible"
-  [refName]="segmentDetail.segment.name"
-  [previous]="originalData"
-  [current]="currentData"
-  [refType]="refType"
-  (onSave)="onSave($event)"
-  (onCancel)="onCloseReviewModal()"
->
-</change-review>
+@if (!isLoading) {
+  <change-review
+    [visible]="reviewModalVisible"
+    [data]="reviewModalData"
+    (onSave)="onSave($event)"
+    (onCancel)="onCloseReviewModal()"
+    >
+  </change-review>
+
+  <flag-references-modal
+    [visible]="flagReferencesModalVisible"
+    [references]="flagReferences"
+    title="Feature flag references"
+    i18n-title="@@segment.details.flag-references-modal-title"
+    description="This segment is referenced by the following feature flags."
+    i18n-description="@@segment.details.flag-references-modal-description"
+    (onClose)="flagReferencesModalVisible = false">
+  </flag-references-modal>
+}
 
 

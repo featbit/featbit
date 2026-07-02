@@ -8,9 +8,10 @@ import { GroupService } from "@services/group.service";
 import { GroupPolicyFilter, IPagedGroupPolicy } from "@features/safe/iam/types/group";
 
 @Component({
-  selector: 'policies',
-  templateUrl: './policies.component.html',
-  styleUrls: ['./policies.component.less']
+    selector: 'policies',
+    templateUrl: './policies.component.html',
+    styleUrls: ['./policies.component.less'],
+    standalone: false
 })
 export class PoliciesComponent implements OnInit {
 

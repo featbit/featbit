@@ -12,7 +12,6 @@ import { NzDrawerModule } from 'ng-zorro-antd/drawer';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzInputModule } from 'ng-zorro-antd/input';
-import { NzMessageModule } from 'ng-zorro-antd/message';
 import { NzOverlayModule } from 'ng-zorro-antd/core/overlay';
 import { NzOutletModule } from 'ng-zorro-antd/core/outlet';
 import { NzSelectModule } from 'ng-zorro-antd/select';
@@ -51,7 +50,7 @@ import { ProjectDrawerComponent } from "@core/components/project-drawer/project-
 import { MenuComponent } from "@core/components/menu/menu.component";
 import { HeaderComponent } from "@core/components/header/header.component";
 import { PropsDrawerComponent } from "@core/components/props-drawer/props-drawer.component";
-import { UploadDrawerComponent } from "@core/components/upload-drawer/upload-drawer.component";
+import { ImportEndUserComponent } from './components/import-end-user/import-end-user.component';
 import { MetricDrawerComponent } from "@core/components/metric-drawer/metric-drawer.component";
 import { ExperimentDrawerComponent } from "@core/components/experiment-drawer/experiment-drawer.component";
 import { G2LineChartComponent } from "@core/components/g2-chart/g2-line-chart/g2-line-chart.component";
@@ -82,7 +81,6 @@ import { AccessTokenStatusPipe } from "@core/pipes/access-token-status.pipe";
 import { NzCollapseModule } from "ng-zorro-antd/collapse";
 import { GuideComponent } from "@core/components/guide/guide.component";
 import { PrismComponent } from './components/prism/prism.component';
-import { RelayProxyDrawerComponent } from "@core/components/relay-proxy-drawer/relay-proxy-drawer.component";
 import { FeatureFlagDrawerComponent } from "@core/components/feature-flag-drawer/feature-flag-drawer.component";
 import { NzSwitchModule } from "ng-zorro-antd/switch";
 import {
@@ -90,7 +88,7 @@ import {
 } from "@core/components/pending-changes-drawer/pending-changes-drawer.component";
 import { ChangeListModule } from "@core/components/change-list/change-list.module";
 import { PipesModule } from "@core/pipes/pipes.module";
-import { LicenseComponent } from "@core/components/license/license.component";
+import { LicenseCardComponent } from "@core/components/license/license-card.component";
 import { WebhookDrawerComponent } from './components/webhook-drawer/webhook-drawer.component';
 import { HandlebarsService } from "@services/handlebars.service";
 import { TestWebhookModalComponent } from './components/test-webhook-modal/test-webhook-modal.component';
@@ -99,9 +97,23 @@ import { NzSkeletonModule } from "ng-zorro-antd/skeleton";
 import { WebhookDeliveriesComponent } from './components/webhook-deliveries/webhook-deliveries.component';
 import { NzSegmentedModule } from "ng-zorro-antd/segmented";
 import { ResourceFinderComponent } from './components/resource-finder/resource-finder.component';
-import { ImportUserComponent } from './components/import-user/import-user.component';
 import { EndUserDrawerComponent } from './components/end-user-drawer/end-user-drawer.component';
 import { NzDescriptionsModule } from "ng-zorro-antd/descriptions";
+import { SegmentCreationModalComponent } from './components/segment-creation-modal/segment-creation-modal.component';
+import { CopyFeatureFlagModalComponent } from '@core/components/copy-feature-flag-modal/copy-feature-flag-modal.component';
+import { BroadcastService } from "@services/broadcast.service";
+import { RelayProxyDrawerComponent } from '@core/components/relay-proxy-drawer/relay-proxy-drawer.component';
+import { RelayProxyAgentModalComponent } from './components/relay-proxy-agent-modal/relay-proxy-agent-modal.component';
+import { RelayProxyKeyModalComponent } from './components/relay-proxy-key-modal/relay-proxy-key-modal.component';
+import { CloneFeatureFlagModalComponent } from './components/clone-feature-flag-modal/clone-feature-flag-modal.component';
+import { CompareFeatureFlagDrawerComponent } from './components/compare-feature-flag-drawer/compare-feature-flag-drawer.component';
+import { ClonePolicyModalComponent } from "@core/components/clone-policy-modal/clone-policy-modal.component";
+import { ResourceEditorComponent } from "@core/components/resource-editor/resource-editor.component";
+import { PricingPlansComponent } from './components/pricing-plans/pricing-plans.component';
+import { NzSliderModule } from 'ng-zorro-antd/slider';
+import { UpdateSubscriptionModalComponent } from "./components/pricing-plans/update-subscription-modal/update-subscription-modal.component";
+import { ChangeCommentComponent } from '@core/components/change-comment/change-comment.component';
+import { ChangeCommentService } from '@core/services/change-comment.service';
 
 @NgModule({
   declarations: [
@@ -119,7 +131,7 @@ import { NzDescriptionsModule } from "ng-zorro-antd/descriptions";
     MenuComponent,
     HeaderComponent,
     PropsDrawerComponent,
-    UploadDrawerComponent,
+    ImportEndUserComponent,
     MetricDrawerComponent,
     ExperimentDrawerComponent,
     FeatureFlagDrawerComponent,
@@ -137,14 +149,25 @@ import { NzDescriptionsModule } from "ng-zorro-antd/descriptions";
     AccessTokenDrawerComponent,
     RelayProxyDrawerComponent,
     PrismComponent,
-    LicenseComponent,
+    LicenseCardComponent,
     WebhookDrawerComponent,
     TestWebhookModalComponent,
     WebhookDeliveryComponent,
     WebhookDeliveriesComponent,
     ResourceFinderComponent,
-    ImportUserComponent,
-    EndUserDrawerComponent
+    EndUserDrawerComponent,
+    SegmentCreationModalComponent,
+    CopyFeatureFlagModalComponent,
+    RelayProxyDrawerComponent,
+    RelayProxyAgentModalComponent,
+    RelayProxyKeyModalComponent,
+    CloneFeatureFlagModalComponent,
+    CompareFeatureFlagDrawerComponent,
+    ClonePolicyModalComponent,
+    ResourceEditorComponent,
+    PricingPlansComponent,
+    UpdateSubscriptionModalComponent,
+    ChangeCommentComponent
   ],
   imports: [
     CommonModule,
@@ -161,7 +184,6 @@ import { NzDescriptionsModule } from "ng-zorro-antd/descriptions";
     NzOutletModule,
     NzButtonModule,
     NzDrawerModule,
-    NzMessageModule,
     NzOverlayModule,
     NzDropDownModule,
     NzTableModule,
@@ -196,7 +218,8 @@ import { NzDescriptionsModule } from "ng-zorro-antd/descriptions";
     ChangeListModule,
     NzSkeletonModule,
     NzSegmentedModule,
-    NzDescriptionsModule
+    NzDescriptionsModule,
+    NzSliderModule
   ],
   exports: [
     SlugifyPipe,
@@ -224,7 +247,7 @@ import { NzDescriptionsModule } from "ng-zorro-antd/descriptions";
     MenuComponent,
     HeaderComponent,
     PropsDrawerComponent,
-    UploadDrawerComponent,
+    ImportEndUserComponent,
     MetricDrawerComponent,
     ExperimentDrawerComponent,
     G2LineChartComponent,
@@ -241,18 +264,32 @@ import { NzDescriptionsModule } from "ng-zorro-antd/descriptions";
     AccessTokenDrawerComponent,
     RelayProxyDrawerComponent,
     PrismComponent,
-    LicenseComponent,
+    LicenseCardComponent,
     WebhookDrawerComponent,
     TestWebhookModalComponent,
     WebhookDeliveryComponent,
     WebhookDeliveriesComponent,
     ResourceFinderComponent,
-    ImportUserComponent,
-    EndUserDrawerComponent
+    EndUserDrawerComponent,
+    SegmentCreationModalComponent,
+    CopyFeatureFlagModalComponent,
+    RelayProxyDrawerComponent,
+    RelayProxyAgentModalComponent,
+    RelayProxyKeyModalComponent,
+    CloneFeatureFlagModalComponent,
+    CompareFeatureFlagDrawerComponent,
+    ClonePolicyModalComponent,
+    ResourceEditorComponent,
+    PricingPlansComponent,
+    ChangeCommentComponent
+  ],
+  providers: [
+    ChangeCommentService
   ]
 })
 export class CoreModule {
-  constructor(handlebars: HandlebarsService) {
+  constructor(handlebars: HandlebarsService, broadcastService: BroadcastService) {
     handlebars.init();
+    broadcastService.init();
   }
 }

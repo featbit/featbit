@@ -8,9 +8,10 @@ import { IPagedPolicy, IPolicy, PolicyFilter, policyRn } from "@features/safe/ia
 import { PolicyService } from "@services/policy.service";
 
 @Component({
-  selector: 'iam-users',
-  templateUrl: './index.component.html',
-  styleUrls: ['./index.component.less']
+    selector: 'iam-users',
+    templateUrl: './index.component.html',
+    styleUrls: ['./index.component.less'],
+    standalone: false
 })
 export class IndexComponent implements OnInit {
 
@@ -69,10 +70,6 @@ export class IndexComponent implements OnInit {
     if (created) {
       this.getPolicies();
     }
-  }
-
-  navigateToDetail(id: string) {
-    this.router.navigateByUrl(`/iam/policies/${encodeURIComponentFfc(id)}/permission`);
   }
 
   delete(policy: IPolicy) {

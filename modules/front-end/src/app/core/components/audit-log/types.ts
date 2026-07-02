@@ -42,6 +42,7 @@ export interface IAuditLogListModel {
 
 export class AuditLogListFilter {
   constructor(
+    public crossEnvironment: boolean = false,
     public query?: string,
     public creatorId?: string,
     public refType?: RefTypeEnum,

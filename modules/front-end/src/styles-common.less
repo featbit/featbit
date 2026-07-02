@@ -3,8 +3,6 @@
 
 @import "../node_modules/ng-zorro-antd/code-editor/style/entry.less";
 
-@import "app/core/components/prism/prism.theme.less";
-
 // Override less variables to here
 // View all variables: https://github.com/NG-ZORRO/ng-zorro-antd/blob/master/components/style/themes/default.less
 
@@ -16,6 +14,17 @@
 @import "styles/standards.less";
 @import "styles/nz-drawer.less";
 @import "styles/nz-modal.less";
+@import "styles/nz-collapse.less";
+@import "styles/nz-alert.less";
+@import "styles/nz-transfer.less";
+@import "styles/nz-checkbox.less";
+@import "styles/nz-pagination.less";
+@import "styles/prism.theme.less";
+@import "styles/nz-dropdown.less";
+@import "styles/nz-table.less";
+@import "styles/nz-skeleton.less";
+@import "styles/nz-popover.less";
+
 @import "variables";
 
 html,
@@ -30,13 +39,6 @@ app-root {
 
 .ant-card-actions {
   padding: 6px 0 7px 0;
-}
-
-.ant-collapse {
-  border-radius: 8px;
-  .ant-collapse-item>.ant-collapse-header {
-    padding: 8px 16px;
-  }
 }
 
 .menu-list li a i {
@@ -73,7 +75,7 @@ app-root {
 /* width */
 ::-webkit-scrollbar {
   width: 14px;
-  height: 8px;
+  height: 14px;
 }
 
 /* Track */
@@ -156,127 +158,6 @@ app-root {
   top: 40%;
 }
 
-// table style
-.table-content-area {
-  width: 100%;
-  border-radius: 20px;
-  background-color: @grey5-color;
-
-  .table-search-area {
-    margin-bottom: 26px;
-    padding: 44px 24px 0 24px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 40px;
-    border-radius: 20px;
-
-    .search-inputs {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      gap: 16px;
-    }
-
-    // input group
-    nz-input-group {
-      width: 200px;
-      height: 40px;
-      border-radius: 32px;
-      padding-left: 15px;
-
-      i {
-        font-size: 20px;
-        color: @grey40-color;
-      }
-    }
-
-    // primary button
-    .ant-btn-primary {
-      .standard-btn;
-    }
-  }
-}
-
-// custom pagination
-.ant-pagination-options .ant-select-selector::after {
-  right: 2px;
-}
-
-.ant-pagination .ant-table-pagination {
-  line-height: 16px;
-}
-
-.custom-pagination-base {
-  border: none;
-  text-align: start;
-  margin-top: 0.5px;
-
-  i,
-  .anticon-left,
-  .anticon-right {
-    display: none;
-  }
-}
-
-.ant-pagination-prev .ant-pagination-item-link {
-  .custom-pagination-base;
-
-  &::before {
-    display: inline-block;
-    width: 24px;
-    height: 24px;
-    content: url("assets/icons/icon-left.svg");
-  }
-}
-
-.ant-pagination-next .ant-pagination-item-link {
-  .custom-pagination-base;
-
-  &::before {
-    display: inline-block;
-    width: 24px;
-    height: 24px;
-    content: url("assets/icons/icon-right.svg");
-  }
-}
-
-.ant-pagination-options-size-changer.ant-select .ant-select-selector {
-  color: @grey40-color;
-  border: 1px solid @grey30-color;
-  background-color: @grey5-color;
-}
-
-.ant-pagination-item {
-  border: none;
-  border-radius: 4px;
-  background-color: transparent;
-  text-align: center;
-  font-weight: 500;
-  font-size: 14px;
-  line-height: 150%;
-  margin-top: 0.5px !important;
-
-  a {
-    color: @grey40-color;
-  }
-}
-
-.ant-pagination-item-active {
-  border: none;
-  background: rgba(230, 255, 247, 0.6);
-  border-radius: 8px;
-  padding: 0 4px;
-
-  a {
-    color: @green60-color;
-  }
-}
-
-.ant-pagination.mini .ant-pagination-options {
-  margin-left: 12px;
-}
-
 // login tab style
 .login-wrapper {
   .ant-tabs-top>.ant-tabs-nav {
@@ -332,19 +213,6 @@ app-root {
   display: flex;
   align-items: center;
   gap: 8px;
-}
-
-// custom select dropdown and dropdown-menu
-.ant-select-dropdown,
-.ant-dropdown-menu {
-  border-radius: 12px;
-  box-shadow: 0 4px 12px 0 rgba(217, 217, 217, 0.5);
-  padding: 4px;
-}
-
-.ant-select-item,
-.ant-dropdown-menu-item {
-  border-radius: 8px;
 }
 
 // segment & flag tabs padding
@@ -455,265 +323,9 @@ app-root {
   }
 }
 
-.information-modal-dialog {
-  .ant-btn {
-    border-radius: 20px;
-    width: 80px;
-  }
-
-  .ant-modal-confirm-content {
-    margin-top: 24px;
-  }
-}
-
-// custom nz-transfer
-.ant-transfer-list {
-  padding: 24px;
-  border: 1px solid @grey20-color;
-  border-radius: 20px;
-
-  .dot {
-    display: inline-block;
-    content: ' ';
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    margin-right: 12px;
-  }
-
-  &:first-child .ant-transfer-list-header-title::before {
-    .dot;
-    background: @grey30-color;
-  }
-
-  &:nth-child(3) .ant-transfer-list-header-title::before {
-    .dot;
-    background: @green60-color;
-  }
-}
-
-.ant-transfer-disabled .ant-transfer-list {
-  background-color: @grey5-color;
-}
-
-.ant-transfer-list-header-selected {
-  color: @grey70-color;
-  font-size: 14px;
-  line-height: 150%;
-}
-
-.ant-transfer-list-header-title {
-  font-size: 14px;
-  line-height: 150%;
-  color: @grey50-color;
-}
-
-.ant-transfer-list-body-with-search {
-  .ant-transfer-list-content-item input {
-    height: unset;
-  }
-
-  .ant-transfer-list-body-search-wrapper {
-    padding: 10px 0;
-
-    .ant-transfer-list-search {
-      padding: 4px 8px;
-      height: 40px;
-      border-radius: 32px;
-
-      input {
-        height: auto;
-      }
-
-      .ant-input-prefix {
-        font-size: 16px;
-      }
-    }
-  }
-}
-
-.ant-transfer-operation {
-  gap: 16px;
-}
-
-// custom checkbox
-.ant-checkbox-inner {
-  border: 2px solid #A8B0B9;
-  background-color: white;
-
-  .ant-checkbox-disabled {
-    background-color: @grey20-color;
-  }
-
-  &::after {
-    left: 17.5%;
-    top: 45%;
-  }
-}
-
 // custom radio
 .ant-radio-inner {
   border-width: 2px;
-}
-
-// custom popover
-.ant-popover-inner {
-  border-radius: 10px;
-  box-shadow: 0 4px 12px 0 rgba(217, 217, 217, 0.5);
-
-  .ant-popover-buttons .ant-btn-sm {
-    border-radius: 20px;
-    padding: 0 12px;
-  }
-}
-
-// more selected items popover, for [nzMaxTagPlaceholder]
-.selected-items-popover {
-  padding-bottom: 12px;
-
-  .ant-popover-title {
-    font-size: 14px;
-    line-height: 150%;
-    color: @grey90-color;
-    border: none;
-    padding: 8px 16px;
-  }
-
-  .ant-popover-inner-content {
-    max-height: 120px;
-    padding: 4px 16px 8px 16px;
-    overflow-y: auto;
-
-    .more-select-items {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      width: 306px;
-
-      .more-select-item-content {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        background: #f5f5f5;
-        border: 1px solid @grey0-color;
-        border-radius: 2px;
-        padding: 0 4px;
-
-        width: 98px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-
-        .more-select-item-content-text {
-          width: 80px;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-
-        i {
-          background-color: rgba(0, 0, 0, 0);
-          font-size: 10px;
-          cursor: pointer;
-          color: @grey40-color;
-        }
-      }
-    }
-  }
-
-  .ant-popover-arrow {
-    width: 10px;
-    height: 10px;
-  }
-
-  .ant-popover-arrow-content {
-    width: 10px;
-    height: 10px;
-    transform: translateY(-6px) rotate(45deg);
-  }
-}
-
-// env secrets popover style
-.env-secret-popover, .license-data-popover {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 300px;
-  background-color: transparent;
-
-  .ant-popover-title {
-    min-width: 177px;
-    min-height: 40px;
-    margin: 0;
-    padding: 10px 16px 4px;
-    color: rgba(0, 0, 0, 0.85);
-    font-weight: 600;
-    border-bottom: 1px solid @grey0-color;
-  }
-
-  .ant-popover-content {
-    border-radius: 24px;
-    padding-right: 10px;
-
-    .ant-popover-inner {
-      border-radius: 10px;
-      border: 2px solid #bfd0e321;
-      box-shadow: 0 4px 12px 0 rgb(217 217 217 / 0%);
-
-      .ant-popover-inner-content {
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-      }
-    }
-
-    .env-secret-popover-content {
-      cursor: pointer;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-
-      .copy-icon {
-        font-size: 14px;
-      }
-    }
-
-    .env-secret-popover-content:hover {
-      color: @green70-color;
-    }
-  }
-}
-
-.license-data-popover {
-  max-width: 100%;
-}
-// custom nz-alert
-.ant-alert {
-  padding: 24px;
-  border-radius: 10px;
-  border-color: transparent;
-  color: @grey60-color;
-  font-size: 14px;
-  line-height: 150%;
-}
-
-.ant-alert-error {
-  background-color: @red5-color;
-
-  .ant-alert-icon {
-    font-size: 20px;
-    margin-right: 12px;
-    color: @red50-color;
-  }
-}
-
-.ant-alert-warning {
-  background-color: @yellow10-color;
-
-  .ant-alert-icon {
-    font-size: 20px;
-    margin-right: 12px;
-    color: @yellow55-color;
-  }
 }
 
 // custom notification

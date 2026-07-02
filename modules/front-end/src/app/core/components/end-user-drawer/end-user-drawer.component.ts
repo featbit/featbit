@@ -4,7 +4,8 @@ import { IUserType } from "@shared/types";
 @Component({
   selector: 'end-user-drawer',
   templateUrl: './end-user-drawer.component.html',
-  styleUrls: ['./end-user-drawer.component.less']
+  styleUrls: [ './end-user-drawer.component.less' ],
+  standalone: false
 })
 export class EndUserDrawerComponent {
   @Input()
@@ -16,12 +17,12 @@ export class EndUserDrawerComponent {
   set user(value: IUserType) {
     this._user = value;
     if (value) {
-      this.builtInProps.push({name: 'keyId', value: value.keyId});
-      this.builtInProps.push({name: 'name', value: value.name});
+      this.builtInProps = [
+        {name: 'keyId', value: value.keyId},
+        {name: 'name', value: value.name}
+      ];
 
-      value.customizedProperties.forEach((prop) => {
-        this.customizedProperties.push(prop);
-      });
+      this.customizedProperties = [...value.customizedProperties];
     }
   }
 

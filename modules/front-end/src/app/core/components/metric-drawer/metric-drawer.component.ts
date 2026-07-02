@@ -4,7 +4,6 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { BehaviorSubject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { MetricService } from '@services/metric.service';
-import { TeamService } from '@services/team.service';
 import { uuidv4 } from '@utils/index';
 import {
   CustomEventSuccessCriteria,
@@ -13,11 +12,14 @@ import {
   IMetric,
   UrlMatchType
 } from "@features/safe/experiments/types";
+import { OrganizationService } from "@services/organization.service";
+import { MemberFilter } from "@features/safe/iam/types/member";
 
 @Component({
-  selector: 'app-metric-drawer',
-  templateUrl: './metric-drawer.component.html',
-  styleUrls: ['./metric-drawer.component.less']
+    selector: 'app-metric-drawer',
+    templateUrl: './metric-drawer.component.html',
+    styleUrls: ['./metric-drawer.component.less'],
+    standalone: false
 })
 export class MetricDrawerComponent implements OnInit {
 
@@ -62,14 +64,14 @@ export class MetricDrawerComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private teamService: TeamService,
+    private organizationService: OrganizationService,
     private metricService: MetricService,
     private message: NzMessageService
   ) {
     this.maintainerSearchChange$.pipe(
       debounceTime(500)
     ).subscribe(searchText => {
-      this.teamService.search(searchText).subscribe({
+      this.organizationService.getMemberList(new MemberFilter(searchText)).subscribe({
         next: (result) => {
           this.maintainerList = result.items;
           this.isMaintainersLoading = false;

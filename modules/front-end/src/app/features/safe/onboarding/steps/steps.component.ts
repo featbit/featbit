@@ -6,16 +6,20 @@ import { OrganizationService } from "@services/organization.service";
 import { GET_STARTED } from "@utils/localstorage-keys";
 import { getCurrentOrganization } from "@utils/project-env";
 import { slugify } from "@utils/index";
+import { IOrganizationPermissions, IOrganizationSetting } from "@shared/types";
 
 @Component({
-  selector: 'init-steps',
-  templateUrl: './steps.component.html',
-  styleUrls: ['./steps.component.less']
+    selector: 'init-steps',
+    templateUrl: './steps.component.html',
+    styleUrls: ['./steps.component.less'],
+    standalone: false
 })
 export class StepsComponent implements OnInit {
 
   currentStep = 0;
   currentOrganizationId: string;
+  organizationPermission: IOrganizationPermissions;
+  organizationSettings: IOrganizationSetting;
   form: FormGroup;
 
   constructor(
@@ -38,6 +42,8 @@ export class StepsComponent implements OnInit {
 
     const organization = getCurrentOrganization();
     this.currentOrganizationId = organization.id;
+    this.organizationPermission = organization.defaultPermissions;
+    this.organizationSettings = organization.settings;
     this.form.patchValue({
       organizationName: organization.name
     });
@@ -45,8 +51,10 @@ export class StepsComponent implements OnInit {
 
   done(): void {
     const { organizationName, projectKey, projectName } = this.form.value;
+    const organizationKey = slugify(organizationName);
     const payload = {
       organizationName,
+      organizationKey,
       projectName,
       projectKey,
       environments: ['Dev', 'Prod']
@@ -57,7 +65,10 @@ export class StepsComponent implements OnInit {
         this.organizationService.setOrganization({
           id: this.currentOrganizationId,
           initialized: true,
-          name: organizationName
+          name: organizationName,
+          key: organizationKey,
+          settings: this.organizationSettings,
+          defaultPermissions: this.organizationPermission
         });
 
         if (!localStorage.getItem(GET_STARTED())) {

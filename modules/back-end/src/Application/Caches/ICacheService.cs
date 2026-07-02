@@ -11,9 +11,9 @@ public interface ICacheService
 
     Task DeleteFlagAsync(Guid envId, Guid flagId);
 
-    Task UpsertSegmentAsync(Segment segment);
+    Task UpsertSegmentAsync(ICollection<Guid> envIds, Segment segment);
 
-    Task DeleteSegmentAsync(Guid envId, Guid segmentId);
+    Task DeleteSegmentAsync(ICollection<Guid> envIds, Guid segmentId);
 
     Task UpsertLicenseAsync(Workspace workspace);
 
@@ -21,5 +21,5 @@ public interface ICacheService
 
     Task DeleteSecretAsync(Secret secret);
 
-    Task<string> GetLicenseAsync(Guid workspaceId);
+    Task<string> GetOrSetLicenseAsync(Guid workspaceId, Func<Task<string>> licenseGetter);
 }

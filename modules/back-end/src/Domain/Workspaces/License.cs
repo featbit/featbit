@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 namespace Domain.Workspaces;
 
 public record License
@@ -17,6 +19,8 @@ public record License
     public string Plan { get; set; } = string.Empty;
 
     public ICollection<string> Features { get; set; } = Array.Empty<string>();
+
+    public JsonElement? Metadata { get; set; }
 
     public bool IsValid(Guid workspaceId)
     {

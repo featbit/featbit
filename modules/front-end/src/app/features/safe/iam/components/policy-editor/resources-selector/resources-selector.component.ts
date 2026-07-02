@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, Output, ViewChild } from "@angular/core
 import { NzSelectComponent } from "ng-zorro-antd/select";
 import {
   isResourceGeneral,
-  Resource, ResourceFilter,
+  Resource, ResourceFilter, ResourceParamTypeEnum,
   ResourceParamViewModel,
   ResourceType,
   RNViewModel,
@@ -10,27 +10,28 @@ import {
 } from "@shared/policy";
 import { ResourceService } from "@services/resource.service";
 import { deepCopy } from "@utils/index";
+import { IResourceEditorOutputModel } from "@core/components/resource-editor/resource-editor.component";
 
 @Component({
-  selector: 'resources-selector',
-  templateUrl: './resources-selector.component.html',
-  styleUrls: ['./resources-selector.component.less']
+    selector: 'resources-selector',
+    templateUrl: './resources-selector.component.html',
+    styleUrls: ['./resources-selector.component.less'],
+    standalone: false
 })
 export class ResourcesSelectorComponent {
-  rscParams: ResourceParamViewModel[] = [];
-
   constructor(private resourceService: ResourceService) {}
 
   availableResources: Resource[];
 
   @Output() onSelectedResourcesChange = new EventEmitter<Resource[]>();
+  isResourceTypeGeneral: boolean = false;
   resourceType: ResourceType;
   @Input('resourceType')
   set _(data: ResourceType){
     if (data) {
       const previousType = this.resourceType?.type;
       this.resourceType = data;
-      this.resetModalParams();
+      this.isResourceTypeGeneral = isResourceGeneral(this.resourceType.type, this.resourceType.pattern);
       if (data.type !== previousType) {
         this.onSearchResources('');
       }
@@ -91,78 +92,31 @@ export class ResourcesSelectorComponent {
 
   editModalVisible = false;
   openEditModal(rsc: Resource) {
-    this.editModalVisible = true;
     this.currentRn = { id: rsc.id, val: rsc.rn, isInvalid: false };
-
-    const paramValues = rsc.rn.split(':')
-      .map(r => {
-        const part = r.split('/');
-        return {type: part[0], val: part[1], isAnyChecked: part[1] === '*' }})
-      .reduce((acc, { type, val, isAnyChecked}) => {
-        acc[type] = { val: val, isAnyChecked };
-        return acc;
-      }, {});
-
-    if (paramValues) {
-      this.rscParams = this.rscParams.map(p => ({...p, val: paramValues[p.resourceType].val, isAnyChecked: paramValues[p.resourceType].isAnyChecked}));
-    }
+    this.editModalVisible = true;
   }
 
   closeModal() {
     this.editModalVisible = false;
-    this.resetModalParams();
   }
 
-  resetModalParams() {
-    this.currentRn = {} as RNViewModel;
-    //deep copy
-    this.rscParams = deepCopy(rscParamsDict[this.resourceType.type]);
-  }
-
-  save() {
+  save(data: IResourceEditorOutputModel) {
+    const {id, val} = data;
     this.selectedResources = this.selectedResources.map(rsc => {
-      if (rsc.id !== this.currentRn.id) {
+      if (rsc.id !== id) {
         return rsc;
       }
 
       return {
         ...rsc,
-        rn: this.currentRn.val
+        rn: val
       }
     })
 
     this.closeModal();
-    this.resetModalParams();
     this.onSelectedResourcesChange.next(this.selectedResources);
     this.validate();
   }
 
-  isValAnyCheckedChanged(val: any) {
-    if (val.isAnyChecked) {
-      val.val = '*';
-    } else {
-      val.val = '';
-    }
-
-    this.vmValChanged();
-  }
-
   currentRn: RNViewModel;
-
-  vmValChanged() {
-    this.currentRn.isInvalid = false;
-
-    this.rscParams.forEach((val, idx) => {
-      const regex = new RegExp(val.placeholder.name, 'ig');
-
-      if (idx === 0) {
-        this.currentRn.val = this.resourceType.pattern.replace(regex, val.val);
-      } else {
-        this.currentRn.val = this.currentRn.val.replace(regex, val.val);
-      }
-
-      val.isInvalid = val.val.includes(':') || val.val.includes('{') || val.val.includes('}');
-      this.currentRn.isInvalid ||= val.isInvalid;
-    });
-  }
 }

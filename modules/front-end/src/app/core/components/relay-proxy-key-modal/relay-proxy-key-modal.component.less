@@ -1,0 +1,28 @@
+@import "variables";
+
+.content {
+  display: flex;
+  gap: 12px;
+  height: 180px;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.key {
+  padding: 12px;
+  border-radius: 4px;
+  background: @grey5-color;
+  border: 1px solid @grey40-color;
+
+  &:hover {
+    cursor: pointer;
+    color: @green60-color;
+  }
+}
+
+.footer {
+  button {
+    width: unset;
+    height: unset;
+  }
+}

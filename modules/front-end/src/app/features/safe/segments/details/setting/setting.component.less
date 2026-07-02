@@ -1,6 +1,10 @@
 @import "variables";
 
 .block {
+  &:not(:first-child) {
+    margin-top: 10px;
+  }
+
   padding: 20px 24px 24px 24px;
   background-color: @grey5-color;
   border-radius: 20px;
@@ -8,17 +12,23 @@
 
   .edit-save {
     cursor: pointer;
-    margin-left: 16px;
   }
 
   .title {
     display: flex;
     align-items: center;
+    gap: 8px;
     font-weight: 600;
     font-size: 16px;
     line-height: 150%;
     color: @grey80-color;
     height: 30px;
+
+    nz-tag {
+      padding: 0 4px;
+      border-radius: 4px;
+      margin: 0;
+    }
 
     .text {
       display: inline-block;
@@ -28,8 +38,28 @@
       max-width: 221px;
     }
     input {
-      width: 221px;
       border-radius: 8px;
+    }
+  }
+
+  .key {
+    margin-top: 16px;
+
+    .value {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 2px;
+
+      i {
+        cursor: pointer;
+        font-size: 13px;
+        color: @grey50-color;
+
+        &:hover {
+          color: @grey70-color;
+        }
+      }
     }
   }
 
@@ -47,12 +77,86 @@
 
     .edit-save {
       width: 100%;
-      text-align: right;
-      padding-right:14px;
+      display: flex;
+      justify-content: flex-end;
     }
 
     textarea {
       border-radius: 8px;
+      margin-bottom: 8px;
+    }
+  }
+
+  .tags {
+    margin-top: 16px;
+
+    .selected {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      row-gap: 4px;
+      border: 1px solid @grey20-color;
+      background-color: #ffffff;
+      padding: 5px;
+      box-sizing: border-box;
+      border-radius: 8px;
+      margin-bottom: 12px;
+
+      nz-tag {
+        background: @grey20-color;
+        border-radius: 4px;
+        padding: 2px 4px 2px 5px;
+        line-height: 15px;
+        margin: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+
+    nz-select {
+      width: 100%;
+    }
+
+    .tag-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 8px;
+
+      button {
+        width: unset;
+        height: unset;
+        border-radius: 16px;
+      }
+    }
+  }
+
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+
+    i {
+      cursor: pointer;
+    }
+  }
+
+  .shared-scopes {
+    margin-top: 8px;
+
+    span {
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    ul {
+      margin-top: 4px;
+      padding-inline-start: 24px;
+
+      li {
+        overflow-wrap: break-word;
+      }
     }
   }
 }

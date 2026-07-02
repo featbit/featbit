@@ -6,11 +6,17 @@ namespace Application.Services;
 
 public interface ISegmentService : IService<Segment>
 {
-    Task<PagedResult<Segment>> GetListAsync(Guid envId, SegmentFilter filter);
+    Task<PagedResult<Segment>> GetListAsync(Guid workspaceId, string rn, SegmentFilter filter);
 
-    Task<IEnumerable<Segment>> GetListAsync(Guid[] ids);
+    Task<ICollection<Segment>> GetListAsync(Guid workspaceId, string rn, bool includeArchived = false);
 
-    Task<IEnumerable<FlagReference>> GetFlagReferencesAsync(Guid envId, Guid id);
+    Task<ICollection<FlagReference>> GetFlagReferencesAsync(Guid envId, Guid id);
 
-    Task DeleteAsync(Guid id);
+    ValueTask<ICollection<Guid>> GetEnvironmentIdsAsync(Segment segment);
+
+    Task<bool> IsKeyUsedAsync(Guid workspaceId, string type, Guid envId, string key);
+
+    Task<ICollection<string>> GetAllTagsAsync(Guid envId);
+
+    Task<ICollection<SegmentCache>> GetCachesAsync();
 }

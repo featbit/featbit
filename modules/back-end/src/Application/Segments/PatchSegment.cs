@@ -1,7 +1,8 @@
 using Domain.AuditLogs;
 using Application.Users;
 using Application.Bases.Models;
-using Microsoft.AspNetCore.JsonPatch;
+using Domain.Segments;
+using Microsoft.AspNetCore.JsonPatch.SystemTextJson;
 
 namespace Application.Segments;
 
@@ -9,7 +10,7 @@ public class PatchSegment : IRequest<PatchResult>
 {
     public Guid Id { get; set; }
 
-    public JsonPatchDocument Patch { get; set; }
+    public JsonPatchDocument<Segment> Patch { get; set; }
 }
 
 public class PatchSegmentHandler : IRequestHandler<PatchSegment, PatchResult>
@@ -33,6 +34,11 @@ public class PatchSegmentHandler : IRequestHandler<PatchSegment, PatchResult>
         var segment = await _service.GetAsync(request.Id);
         var dataChange = new DataChange(segment);
 
+        var targetingPaths = new[] {"/included", "/excluded", "/rules"};
+        var isTargetingChange = request.Patch.Operations.Any(op =>
+            targetingPaths.Any(path => op.path.StartsWith(path, StringComparison.OrdinalIgnoreCase))
+        );
+
         var error = string.Empty;
         request.Patch.ApplyTo(segment, jsonPatchError => error = jsonPatchError.ErrorMessage);
 
@@ -47,7 +53,14 @@ public class PatchSegmentHandler : IRequestHandler<PatchSegment, PatchResult>
         await _service.UpdateAsync(segment);
 
         // publish on segment change notification
-        var notification = new OnSegmentChange(segment, Operations.Update, dataChange, _currentUser.Id);
+        var notification = new OnSegmentChange(
+            segment,
+            Operations.Update,
+            dataChange,
+            _currentUser.Id,
+            comment: "Updated via patch",
+            isTargetingChange: isTargetingChange
+        );
         await _publisher.Publish(notification, cancellationToken);
 
         return PatchResult.Ok();

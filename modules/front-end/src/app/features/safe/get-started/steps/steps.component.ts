@@ -3,9 +3,10 @@ import { Router } from "@angular/router";
 import { IFeatureFlagListItem } from "@features/safe/feature-flags/types/feature-flag";
 
 @Component({
-  selector: 'steps',
-  templateUrl: './steps.component.html',
-  styleUrls: ['./steps.component.less']
+    selector: 'steps',
+    templateUrl: './steps.component.html',
+    styleUrls: ['./steps.component.less'],
+    standalone: false
 })
 export class StepsComponent {
 

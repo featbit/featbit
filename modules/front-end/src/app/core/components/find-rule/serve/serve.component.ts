@@ -13,10 +13,12 @@ const DefaultDispatchKey = 'keyId';
 @Component({
   selector: 'app-serve',
   templateUrl: './serve.component.html',
-  styleUrls: ['./serve.component.less']
+  styleUrls: [ './serve.component.less' ],
+  standalone: false
 })
 export class ServeComponent implements OnChanges {
 
+  @Input() disabled: boolean = true;
   @Input() ruleVariations: IRuleVariation[] = [];
 
   availableVariations: IVariation[] = [];

@@ -3,31 +3,27 @@ import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { HTTP_INTERCEPTORS, HttpClientModule } from "@angular/common/http";
+import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from "@angular/common/http";
 import { RequestResponseInterceptor } from "@interceptors/request-response.interceptor";
 import { NZ_I18N, zh_CN, en_US } from "ng-zorro-antd/i18n";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { IconsProviderModule } from "./icons-provider.module";
 import { NzLayoutModule } from "ng-zorro-antd/layout";
-import { NzMessageModule } from "ng-zorro-antd/message";
 import { FormsModule } from "@angular/forms";
 import { NzSelectModule } from "ng-zorro-antd/select";
-import { NzNotificationModule } from "ng-zorro-antd/notification";
 
 @NgModule({
   declarations: [
     AppComponent
   ],
+  bootstrap: [AppComponent],
   imports: [
     BrowserModule,
     AppRoutingModule,
     FormsModule,
-    HttpClientModule,
     BrowserAnimationsModule,
     IconsProviderModule,
     NzLayoutModule,
-    NzMessageModule,
-    NzNotificationModule,
     NzSelectModule
   ],
   providers: [
@@ -45,8 +41,9 @@ import { NzNotificationModule } from "ng-zorro-antd/notification";
       },
       deps: [LOCALE_ID]
     },
-    { provide: HTTP_INTERCEPTORS, useClass: RequestResponseInterceptor, multi: true },
-  ],
-  bootstrap: [AppComponent]
+    {provide: HTTP_INTERCEPTORS, useClass: RequestResponseInterceptor, multi: true},
+    provideHttpClient(withInterceptorsFromDi()),
+  ]
 })
-export class AppModule { }
+export class AppModule {
+}

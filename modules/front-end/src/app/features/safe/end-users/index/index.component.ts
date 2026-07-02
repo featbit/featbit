@@ -1,38 +1,65 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { SelectableOptions } from '@core/components/table/dashed-multi-select/dashed-multi-select.component';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { EnvUserPropService } from "@services/env-user-prop.service";
-import { IUserProp, IUserType } from "@shared/types";
+import { IUserProp, IUserType, PageCursor } from "@shared/types";
 import { EnvUserFilter } from "@features/safe/end-users/types/featureflag-user";
 import { CURRENT_USER_FILTER_ATTRIBUTE } from "@utils/localstorage-keys";
 import { EnvUserService } from "@services/env-user.service";
 import { getCurrentProjectEnv } from "@utils/project-env";
-
+import { NzMessageService } from "ng-zorro-antd/message";
 
 @Component({
-  selector: 'app-user-index',
-  templateUrl: './index.component.html',
-  styleUrls: ['./index.component.less']
+    selector: 'app-user-index',
+    templateUrl: './index.component.html',
+    styleUrls: ['./index.component.less'],
+    standalone: false
 })
 export class IndexComponent implements OnInit {
   $search: Subject<void> = new Subject();
 
   currentEnvId: string;
 
+  // cursor based pagination
+  nextCursor?: PageCursor = undefined;
+  previousCursor?: PageCursor = undefined;
+  lastClickedPage: 'previous' | 'next' | null = null;
+
+  goPreviousPage() {
+    this.lastClickedPage = 'previous';
+
+    if (this.isLoading || !this.previousCursor) {
+      return;
+    }
+
+    this.fetchUserList(this.previousCursor);
+  }
+
+  goNextPage() {
+    this.lastClickedPage = 'next';
+
+    if (this.isLoading || !this.nextCursor) {
+      return;
+    }
+
+    this.fetchUserList(this.nextCursor);
+  }
+
   list = [];
-  totalCount: number;
-
   isLoading: boolean = true;
-  attributeManagevisible: boolean = false;
-  segmentsAndFlagsVisible: boolean = false;
 
-  filter: EnvUserFilter = new EnvUserFilter();
+  filter: EnvUserFilter = new EnvUserFilter('', undefined, 10);
+  pageSizeOptions = [
+    { label: '10 / page', value: 10 },
+    { label: '20 / page', value: 20 },
+    { label: '30 / page', value: 30 }
+  ];
 
   constructor(
     private envUserService: EnvUserService,
     private envUserPropService: EnvUserPropService,
-    private router: Router
+    private message: NzMessageService
   ) { }
 
   getCustomizePropertyValue(user: IUserType, propName: string): string {
@@ -46,48 +73,34 @@ export class IndexComponent implements OnInit {
     return '';
   }
 
-  storeFilterAndAttribute(triggerSearch: boolean = false) {
-    if (triggerSearch) {
-      this.$search.next();
-    }
-
+  storeSelectedExtraColumns() {
     const config = {
-      properties: this.filter.properties,
-      attributes: this.extraColumns
+      attributes: this.selectedExtraColumns
     };
 
     localStorage.setItem(CURRENT_USER_FILTER_ATTRIBUTE(this.currentEnvId), JSON.stringify(config));
   }
 
-  onSearchUserProperties(value: string = ''){
-    const regex = new RegExp(value || '', 'ig');
-    this.filteredProps = this.props.filter(p => regex.test(p.name)).map(p => p.name);
-  }
-
-  onSearchExtraColumns(value: string = ''){
-    const regex = new RegExp(value || '', 'ig');
-    this.filteredExtraColumns = this.props.filter(p => !p.isBuiltIn && regex.test(p.name)).map(p => p.name);
-  }
-
   props: IUserProp[];
-  filteredProps: string[];
-  extraColumns: string[];
-  filteredExtraColumns: string[];
+  selectedExtraColumns: string[];
+  extraColumnOptions: SelectableOptions[] = [];
 
   isUserPropsLoading: boolean = true;
   ngOnInit(): void {
     this.currentEnvId = getCurrentProjectEnv().envId;
 
     const filterAndAttributeConfig: any = JSON.parse(localStorage.getItem(CURRENT_USER_FILTER_ATTRIBUTE(this.currentEnvId)) || '{}');
-    this.filter.properties = filterAndAttributeConfig?.properties || [];
-    this.extraColumns = filterAndAttributeConfig?.attributes || [];
+    this.selectedExtraColumns = filterAndAttributeConfig?.attributes || [];
 
     this.envUserPropService.get().subscribe(props => {
       this.props = [...props];
-      this.filteredProps = this.props.map(p => p.name);
-      this.filteredExtraColumns = this.props.filter(p => !p.isBuiltIn).map(p => p.name);
+      this.extraColumnOptions = this.props.filter(p => !p.isBuiltIn).map(col => ({
+        label: col.name,
+        value: col.name,
+        selected: this.selectedExtraColumns.includes(col.name)
+      }));
       this.isUserPropsLoading = false;
-    })
+    });
 
     this.$search.pipe(
       debounceTime(400)
@@ -98,55 +111,72 @@ export class IndexComponent implements OnInit {
     this.$search.next();
   }
 
-  onRemoveFilterItem(prop: string) {
-    this.filter.properties = this.filter.properties.filter(p => p !== prop);
+  onExtraColumnsChange(columns: string[]) {
+    this.selectedExtraColumns = columns;
+    this.extraColumnOptions.forEach(opt => opt.selected = columns.includes(opt.value));
+    this.storeSelectedExtraColumns();
   }
 
-  onRemoveAttributeItem(prop: string) {
-    this.extraColumns = this.extraColumns.filter(p => p !== prop);
-  }
-
-  onSearch(resetPage?: boolean) {
-    if (resetPage) {
-      this.filter.pageIndex = 1;
-    }
+  onSearch() {
+    this.resetCursorPagination();
     this.$search.next();
   }
 
-  fetchUserList() {
+  onPageSizeChange(size: number) {
+    this.filter.pageSize = size;
+    this.resetCursorPagination();
+    this.$search.next();
+  }
+
+  resetCursorPagination() {
+    this.nextCursor = undefined;
+    this.previousCursor = undefined;
+    this.lastClickedPage = null;
+  }
+
+  fetchUserList(cursor?: PageCursor) {
     this.isLoading = true;
-    this.envUserService.search(this.filter).subscribe(
-      pagedResult => {
-        this.isLoading = false;
+
+    const request = {
+      ...this.filter,
+      cursor
+    };
+
+    this.envUserService.getList(request).subscribe({
+      next: pagedResult => {
         this.list = pagedResult.items;
-        this.totalCount = pagedResult.totalCount;
+        this.nextCursor = pagedResult.nextCursor;
+        this.previousCursor = pagedResult.previousCursor;
+        this.isLoading = false;
       },
-      _ => {
+      error: () => {
+        this.message.error($localize`:@@common.failed-to-load-data:Failed to load data`);
         this.isLoading = false;
       }
-    );
+    });
   }
 
-  navigateToUserDetail(user: IUserType) {
-    this.router.navigateByUrl(`/users/${encodeURIComponent(user.id)}`);
+  uploadModalVisible: boolean = false;
+  uploadUrl = this.envUserService.uploadUrl();
+  closeUploadModal(success: boolean) {
+    this.uploadModalVisible = false;
+    if (success) {
+      this.$search.next();
+    }
   }
 
-  onPropsSettingClick() {
-    this.attributeManagevisible = true;
-  }
-
-  onPropsSettingClose() {
-    this.attributeManagevisible = false;
-  }
-
+  propsDrawerVisible: boolean = false;
+  segmentsFlagsDrawerVisible: boolean = false;
   currentUser: IUserType = null;
-  onSegmentsAndFlagsClick(user: IUserType) {
+  openSegmentsFlagsDrawer(user: IUserType) {
     this.currentUser = {...user};
-    this.segmentsAndFlagsVisible = true;
+    this.segmentsFlagsDrawerVisible = true;
   }
 
-  onSegmentsAndFlagsClose() {
+  closeSegmentsFlagsDrawer() {
     this.currentUser = null;
-    this.segmentsAndFlagsVisible = false;
+    this.segmentsFlagsDrawerVisible = false;
   }
+
+  downloadConfirmVisible: boolean = false;
 }

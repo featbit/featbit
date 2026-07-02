@@ -1,7 +1,9 @@
 import hashlib
 import os
-from datetime import date, datetime
-from typing import Any, Callable, Optional, Union
+import random
+import uuid
+from datetime import date, datetime, timezone
+from typing import Any, Callable, Optional, Union, Dict
 from uuid import UUID
 
 import numpy as np
@@ -94,3 +96,28 @@ def dt_to_seconds_or_millis_or_micros(value: datetime, timespec="milliseconds") 
         return round(value.timestamp() * 1000000)
     else:
         return round(value.timestamp())
+
+
+def generate_guid() -> str:
+    guid_func = random.choice([uuid.uuid4, uuid.uuid1])
+    return str(guid_func())
+
+
+def create_event(properties: Optional[Dict[str, Any]] = {}) -> Dict[str, Any]:
+    if properties is None:
+        properties = {}
+
+    event_uuid = generate_guid()
+    event = properties.get("type", 'FlagValue')
+    timestamp = to_UTC_datetime(properties.get("timestamp", datetime.now(timezone.utc)))
+    distinct_id = properties.get("flagId", None) or properties.get("eventName", None)
+    env_id = properties.get("envId", None)
+
+    return {
+        "id": event_uuid,
+        "distinct_id": distinct_id,
+        "env_id": env_id,
+        "event": event,
+        "properties": properties,
+        "timestamp": timestamp
+    }

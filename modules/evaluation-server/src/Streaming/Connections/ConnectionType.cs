@@ -1,11 +1,10 @@
 ﻿namespace Streaming.Connections;
 
-public class ConnectionType
+public static class ConnectionType
 {
     public const string Server = "server";
     public const string Client = "client";
+    public const string RelayProxy = "relay-proxy";
 
-    public static readonly string[] All = [Server, Client];
-
-    public static bool IsRegistered(string? sdkType) => All.Contains(sdkType);
+    public static readonly string[] All = [Server, Client, RelayProxy];
 }

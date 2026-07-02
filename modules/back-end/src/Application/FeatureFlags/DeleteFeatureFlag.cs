@@ -1,10 +1,11 @@
+using Application.AuditLogs;
 using Application.Bases;
 using Application.Bases.Exceptions;
 using Application.Users;
 
 namespace Application.FeatureFlags;
 
-public class DeleteFeatureFlag : IRequest<bool>
+public class DeleteFeatureFlag : ResourceChangeRequest, IRequest<bool>
 {
     public Guid EnvId { get; set; }
 
@@ -32,13 +33,13 @@ public class DeleteFeatureFlagHandler : IRequestHandler<DeleteFeatureFlag, bool>
         var flag = await _service.GetAsync(request.EnvId, request.Key);
         if (!flag.IsArchived)
         {
-            throw new BusinessException(ErrorCodes.CannotDeleteUnArchivedFeatureFlag);
+            throw new BusinessException(ErrorCodes.CannotDeleteUnarchivedFeatureFlag);
         }
 
-        await _service.DeleteAsync(flag.Id);
+        await _service.DeleteOneAsync(flag.Id);
 
         // publish on feature flag delete notification
-        await _publisher.Publish(new OnFeatureFlagDeleted(flag, _currentUser.Id), cancellationToken);
+        await _publisher.Publish(new OnFeatureFlagDeleted(flag, _currentUser.Id, request.Comment), cancellationToken);
 
         return true;
     }

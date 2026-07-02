@@ -1,30 +1,95 @@
+using Domain.Shared;
+using Microsoft.Extensions.Logging.Testing;
 using Streaming.Connections;
-using Microsoft.Extensions.Logging;
-using TestBase;
 
 namespace Streaming.UnitTests.Connections;
 
 public class ConnectionManagerTests
 {
-    private readonly InMemoryFakeLogger<ConnectionManager> _logger = new();
+    [Fact]
+    public void Empty()
+    {
+        var logger = new FakeLogger<ConnectionManager>();
+        var manager = new ConnectionManager(logger);
+
+        Assert.Empty(manager.Connections);
+    }
 
     [Fact]
-    public void AddAndRemove()
+    public void ClientConnection()
     {
-        var manager = new ConnectionManager(_logger);
+        var logger = new FakeLogger<ConnectionManager>();
+        var manager = new ConnectionManager(logger);
 
-        var connection = new ConnectionBuilder().Build();
+        var context = new ConnectionContextBuilder().Build();
 
-        // add connection
-        manager.Add(connection);
-        Assert.Equal(LogLevel.Trace, _logger.Level);
-        Assert.Null(_logger.Ex);
-        Assert.Equal($"{connection.Id}: connection added.", _logger.Message);
+        manager.Add(context);
 
-        // remove connection
-        manager.Remove(connection);
-        Assert.Equal(LogLevel.Trace, _logger.Level);
-        Assert.Null(_logger.Ex);
-        Assert.Equal($"{connection.Id}: connection removed.", _logger.Message);
+        Assert.Single(manager.Connections);
+        Assert.NotNull(manager.Connections[context.Connection.Id]);
+
+        manager.Remove(context);
+        Assert.Empty(manager.Connections);
+    }
+
+    [Fact]
+    public void RelayProxyConnections()
+    {
+        var logger = new FakeLogger<ConnectionManager>();
+        var manager = new ConnectionManager(logger);
+
+        Secret[] secrets =
+        [
+            new(SecretTypes.Server, "p1", Guid.NewGuid(), "prod"),
+            new(SecretTypes.Server, "p2", Guid.NewGuid(), "prod"),
+        ];
+
+        var context = new ConnectionContextBuilder()
+            .WithType(ConnectionType.RelayProxy)
+            .WithServerSecrets(secrets)
+            .Build();
+
+        manager.Add(context);
+
+        // make sure all mapped connections are added
+        foreach (var mappedRpConnection in context.MappedRpConnections)
+        {
+            Assert.NotNull(manager.Connections[mappedRpConnection.Id]);
+        }
+
+        Assert.Equal(2, manager.Connections.Count);
+
+        manager.Remove(context);
+        Assert.Empty(manager.Connections);
+    }
+
+    [Fact]
+    public void GetEnvConnections()
+    {
+        var logger = new FakeLogger<ConnectionManager>();
+        var manager = new ConnectionManager(logger);
+
+        var s1 = new Secret(SecretTypes.Client, "p1", envId: Guid.NewGuid(), "dev");
+        var s2 = new Secret(SecretTypes.Client, "p2", envId: Guid.NewGuid(), "dev");
+
+        var c1 = new ConnectionContextBuilder()
+            .WithSecret(s1)
+            .Build();
+        var c2 = new ConnectionContextBuilder()
+            .WithSecret(s2)
+            .Build();
+
+        manager.Add(c1);
+        manager.Add(c2);
+
+        Assert.Equal(2, manager.Connections.Count);
+
+        var e1 = manager.GetEnvConnections(s1.EnvId);
+        Assert.Single(e1);
+        Assert.Equal(c1.Connection.Id, e1.First().Id);
+
+        var e2 = manager.GetEnvConnections(s2.EnvId);
+        Assert.Single(e2);
+        Assert.Equal(c2.Connection.Id, e2.First().Id);
     }
 }

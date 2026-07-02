@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.JsonPatch.Operations;
+using Microsoft.AspNetCore.JsonPatch.SystemTextJson.Operations;
 using Swashbuckle.AspNetCore.Filters;
 
 namespace Api.Swagger.Examples;
@@ -33,7 +33,7 @@ public class PatchFeatureFlagExamples : IMultipleExamplesProvider<List<Operation
                 new()
                 {
                     op = "replace",
-                    path = "isArchived",
+                    path = "/isArchived",
                     value = true
                 }
             }
@@ -46,7 +46,7 @@ public class PatchFeatureFlagExamples : IMultipleExamplesProvider<List<Operation
                 new()
                 {
                     op = "replace",
-                    path = "isArchived",
+                    path = "/isArchived",
                     value = false
                 }
             }
@@ -59,7 +59,7 @@ public class PatchFeatureFlagExamples : IMultipleExamplesProvider<List<Operation
                 new()
                 {
                     op = "replace",
-                    path = "isEnabled",
+                    path = "/isEnabled",
                     value = true
                 }
             }
@@ -72,7 +72,7 @@ public class PatchFeatureFlagExamples : IMultipleExamplesProvider<List<Operation
                 new()
                 {
                     op = "replace",
-                    path = "isEnabled",
+                    path = "/isEnabled",
                     value = false
                 }
             }
@@ -167,6 +167,36 @@ public class PatchFeatureFlagExamples : IMultipleExamplesProvider<List<Operation
                 {
                     op = "remove",
                     path = "/rules/0"
+                }
+            }
+        );
+
+        yield return SwaggerExample.Create(
+            "Add a new variation", new List<Operation>
+            {
+                new()
+                {
+                    op = "add",
+                    path = "/variations/-",
+                    value = new
+                    {
+                        id = "2848dccc-9659-4d43-bd86-2ed599efe595",
+                        name = "New variation",
+                        value = "new value"
+                    }
+                }
+            }
+        );
+
+        yield return SwaggerExample.Create(
+            "Update the first variation value",
+            new List<Operation>
+            {
+                new()
+                {
+                    op = "replace",
+                    path = "/variations/0/value",
+                    value = "new variation value"
                 }
             }
         );

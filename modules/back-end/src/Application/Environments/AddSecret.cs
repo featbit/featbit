@@ -23,10 +23,10 @@ public class AddSecretValidator : AbstractValidator<AddSecret>
     public AddSecretValidator()
     {
         RuleFor(x => x.Name)
-            .NotEmpty().WithErrorCode(ErrorCodes.NameIsRequired);
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("name"));
 
         RuleFor(x => x.Type)
-            .Must(SecretTypes.IsDefined).WithErrorCode(ErrorCodes.InvalidSecretType);
+            .Must(SecretTypes.IsDefined).WithErrorCode(ErrorCodes.Invalid("type"));
     }
 }
 

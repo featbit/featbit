@@ -4,16 +4,12 @@ import { CommonModule } from '@angular/common';
 import { WorkspacesRoutingModule } from './workspaces-routing.module';
 import { WorkspacesComponent } from './workspaces.component';
 import { NzTabsModule } from 'ng-zorro-antd/tabs';
-import { ProfileComponent } from './profile/profile.component';
-import { OrganizationComponent } from './organization/organization.component';
-import { ProjectComponent } from './project/project.component';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzTypographyModule } from 'ng-zorro-antd/typography';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzDividerModule } from 'ng-zorro-antd/divider';
 import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzMessageModule } from 'ng-zorro-antd/message';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzSelectModule } from 'ng-zorro-antd/select';
@@ -25,23 +21,35 @@ import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { NzRadioModule } from 'ng-zorro-antd/radio';
-import { ProjectFilterPipe } from "./project/project-filter.pipe";
+import { NzSegmentedModule } from 'ng-zorro-antd/segmented';
 import { NzSkeletonModule } from "ng-zorro-antd/skeleton";
 import { NzTagModule } from "ng-zorro-antd/tag";
+import { NzSliderModule } from "ng-zorro-antd/slider";
+import { NzProgressModule } from "ng-zorro-antd/progress";
 import { CoreModule } from "@core/core.module";
 import { NzToolTipModule } from "ng-zorro-antd/tooltip";
 import { WorkspaceComponent } from "@features/safe/workspaces/workspace/workspace.component";
-import { GlobalUserComponent } from './global-user/global-user.component';
+import { LicenseComponent } from './license/license.component';
+import { NzAlertComponent } from "ng-zorro-antd/alert";
+import { GlobalUserComponent } from "@features/safe/workspaces/global-user/global-user.component";
+import { DashedMultiSelectComponent } from "@core/components/table/dashed-multi-select/dashed-multi-select.component";
+import { UsageComponent } from "@features/safe/workspaces/usage/usage.component";
+import { BillingComponent } from './billing/billing.component';
+import { BillingInformationComponent } from "./billing/billing-information/billing-information.component";
+import { InvoicesComponent } from './billing/invoices/invoices.component';
+import { CheckoutReturnComponent } from "./billing/checkout-return/checkout-return.component";
 
 @NgModule({
   declarations: [
     WorkspacesComponent,
     WorkspaceComponent,
-    OrganizationComponent,
-    ProfileComponent,
-    ProjectComponent,
-    ProjectFilterPipe,
-    GlobalUserComponent
+    LicenseComponent,
+    GlobalUserComponent,
+    UsageComponent,
+    BillingComponent,
+    BillingInformationComponent,
+    InvoicesComponent,
+    CheckoutReturnComponent
   ],
   imports: [
     CommonModule,
@@ -52,7 +60,6 @@ import { GlobalUserComponent } from './global-user/global-user.component';
     NzIconModule,
     NzInputModule,
     NzButtonModule,
-    NzMessageModule,
     NzDividerModule,
     NzTypographyModule,
     NzModalModule,
@@ -64,13 +71,17 @@ import { GlobalUserComponent } from './global-user/global-user.component';
     NzSpaceModule,
     NzPopconfirmModule,
     NzRadioModule,
+    NzSegmentedModule,
     NzSkeletonModule,
     NzTagModule,
+    NzSliderModule,
+    NzProgressModule,
     ScrollingModule,
     ReactiveFormsModule,
     WorkspacesRoutingModule,
-    CoreModule,
-    NzToolTipModule
+    NzToolTipModule,
+    NzAlertComponent,
+    DashedMultiSelectComponent
   ]
 })
 export class WorkspacesModule { }

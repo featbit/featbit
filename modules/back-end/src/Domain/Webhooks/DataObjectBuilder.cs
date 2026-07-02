@@ -85,6 +85,7 @@ public static class DataObjectBuilder
                 ["id"] = segment.Id.ToString("D"),
                 ["name"] = segment.Name,
                 ["description"] = segment.Description,
+                ["tags"] = segment.Tags,
                 ["included"] = segment.Included,
                 ["excluded"] = segment.Excluded,
                 ["rules"] = segment.Rules,

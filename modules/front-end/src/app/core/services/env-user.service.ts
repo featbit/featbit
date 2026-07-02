@@ -1,9 +1,13 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { getCurrentProjectEnv } from '@utils/project-env';
+import { getCurrentOrganization, getCurrentProjectEnv } from '@utils/project-env';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import { EnvUserFilter, EnvUserPagedResult } from "@features/safe/end-users/types/featureflag-user";
+import {
+  EnvUserFilter,
+  EnvUserPagedResult,
+  EnvUserSearchFilter
+} from "@features/safe/end-users/types/featureflag-user";
 import { IUserType } from "@shared/types";
 import {
   EndUserFlagFilter,
@@ -14,6 +18,7 @@ import {
   IFeatureFlagEndUserFilter,
   IFeatureFlagEndUserPagedResult
 } from "@features/safe/feature-flags/details/insights/types";
+import { FlagSortedBy } from "@features/safe/workspaces/types/organization";
 
 @Injectable({
   providedIn: 'root'
@@ -48,22 +53,22 @@ export class EnvUserService {
     return this.http.put(this.baseUrl, { ...params });
   }
 
-  search(filter: EnvUserFilter = new EnvUserFilter()): Observable<EnvUserPagedResult> {
-    const query = {
-      searchText: filter.searchText ?? '',
-      properties: filter.properties || [],
-      excludedKeyIds: filter.excludedKeyIds || [],
-      includeGlobalUser: filter.includeGlobalUser ?? false,
-      pageIndex: filter.pageIndex - 1,
-      pageSize: filter.pageSize,
-    };
+  getList(filter: EnvUserFilter = new EnvUserFilter()): Observable<EnvUserPagedResult> {
+    const url = `${this.baseUrl}/list`;
+    return this.http.post<EnvUserPagedResult>(url, filter);
+  }
 
-    return this.http.post<EnvUserPagedResult>(this.baseUrl, query);
+  search(filter: EnvUserSearchFilter = new EnvUserSearchFilter()): Observable<IUserType[]> {
+    const url = `${this.baseUrl}/search`;
+    return this.http.post<IUserType[]>(url, filter);
   }
 
   getFlags(id: string, filter: EndUserFlagFilter = new EndUserFlagFilter()): Observable<IPagedEndUserFlag> {
+    const org = getCurrentOrganization();
+
     const queryParam = {
-      searchText: filter.searchText ?? '',
+      name: filter.searchText ?? '',
+      sortBy: org.settings?.flagSortedBy ?? FlagSortedBy.CreatedAt,
       pageIndex: filter.pageIndex - 1,
       pageSize: filter.pageSize,
     };
@@ -93,5 +98,10 @@ export class EnvUserService {
     const url = `${this.baseUrl}/get-by-featureflag`;
 
     return this.http.get<IFeatureFlagEndUserPagedResult>(url, {params: new HttpParams({fromObject: queryParam})});
+  }
+
+  download(filter: EnvUserFilter = new EnvUserFilter()): Observable<any> {
+    const url = `${this.baseUrl}/download`;
+    return this.http.post<any>(url, filter);
   }
 }

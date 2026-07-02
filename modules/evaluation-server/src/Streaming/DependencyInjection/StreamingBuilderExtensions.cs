@@ -1,94 +1,141 @@
+using Confluent.Kafka;
 using Domain.Messages;
 using Domain.Shared;
-using Infrastructure.Kafka;
-using Infrastructure.MongoDb;
-using Infrastructure.Redis;
+using Infrastructure;
+using Infrastructure.Caches;
+using Infrastructure.Fakes;
+using Infrastructure.MQ;
+using Infrastructure.MQ.Kafka;
+using Infrastructure.MQ.Postgres;
+using Infrastructure.MQ.Redis;
+using Infrastructure.Persistence;
 using Infrastructure.Store;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Streaming.Consumers;
 
 namespace Streaming.DependencyInjection;
 
 public static class StreamingBuilderExtensions
 {
-    public static IStreamingBuilder UseNullMessageQueue(this IStreamingBuilder builder)
-    {
-        builder.Services.AddSingleton<IMessageProducer, NullMessageProducer>();
-
-        return builder;
-    }
-
-    public static IStreamingBuilder UseRedisMessageQueue(this IStreamingBuilder builder)
+    public static IStreamingBuilder UseMq(this IStreamingBuilder builder, IConfiguration configuration)
     {
         var services = builder.Services;
 
-        services.AddSingleton<IMessageProducer, RedisMessageProducer>();
-        services.AddHostedService<RedisMessageConsumer>();
-
-        services
-            .AddSingleton<IMessageConsumer, FeatureFlagChangeMessageConsumer>()
-            .AddSingleton<IMessageConsumer, SegmentChangeMessageConsumer>();
+        var mqProvider = configuration.GetMqProvider();
+        switch (mqProvider)
+        {
+            case MqProvider.None:
+                AddNone();
+                break;
+            case MqProvider.Redis:
+                AddRedis();
+                break;
+            case MqProvider.Kafka:
+                AddKafka();
+                break;
+            case MqProvider.Postgres:
+                AddPostgres();
+                break;
+        }
 
         return builder;
+
+        void AddNone()
+        {
+            builder.Services.AddSingleton<IMessageProducer, NoneMessageProducer>();
+        }
+
+        void AddRedis()
+        {
+            services.TryAddRedis(configuration);
+
+            services.AddSingleton<IMessageProducer, RedisMessageProducer>();
+            services.AddHostedService<RedisMessageConsumer>();
+        }
+
+        void AddKafka()
+        {
+            var producerConfigDictionary = new Dictionary<string, string>();
+            configuration.GetSection("Kafka:Producer").Bind(producerConfigDictionary);
+            var producerConfig = new ProducerConfig(producerConfigDictionary);
+            services.AddSingleton(producerConfig);
+
+            var consumerConfigDictionary = new Dictionary<string, string>();
+            configuration.GetSection("Kafka:Consumer").Bind(consumerConfigDictionary);
+            var consumerConfig = new ConsumerConfig(consumerConfigDictionary);
+            services.AddSingleton(consumerConfig);
+
+            services.AddSingleton<IMessageProducer, KafkaMessageProducer>();
+            services.AddHostedService<KafkaMessageConsumer>();
+        }
+
+        void AddPostgres()
+        {
+            services.TryAddPostgres(configuration);
+
+            services.AddSingleton<IMessageProducer, PostgresMessageProducer>();
+            services.AddHostedService<PostgresMessageConsumer>();
+        }
     }
 
-    public static IStreamingBuilder UseKafkaMessageQueue(this IStreamingBuilder builder)
+    public static IStreamingBuilder UseStore(this IStreamingBuilder builder, IConfiguration configuration)
     {
         var services = builder.Services;
 
-        services.AddSingleton<IMessageProducer, KafkaMessageProducer>();
-        services.AddHostedService<KafkaMessageConsumer>();
+        var dbProvider = configuration.GetDbProvider();
+        switch (dbProvider.Name)
+        {
+            case DbProvider.Fake:
+                AddFake();
+                break;
+            case DbProvider.MongoDb:
+                AddMongoDb();
+                break;
+            case DbProvider.Postgres:
+                AddPostgres();
+                break;
+        }
 
-        services
-            .AddSingleton<IMessageConsumer, FeatureFlagChangeMessageConsumer>()
-            .AddSingleton<IMessageConsumer, SegmentChangeMessageConsumer>();
+        var cacheProvider = configuration.GetCacheProvider();
+        switch (cacheProvider)
+        {
+            case CacheProvider.Redis:
+                AddRedis();
+                break;
 
-        return builder;
-    }
-
-    public static IStreamingBuilder UseStore<TStoreType>(this IStreamingBuilder builder) where TStoreType : IStore
-    {
-        builder.Services.AddSingleton(typeof(IStore), typeof(TStoreType));
-
-        return builder;
-    }
-
-    public static IStreamingBuilder UseRedisStore(this IStreamingBuilder builder, ConfigurationManager configuration)
-    {
-        var services = builder.Services;
-
-        services.Configure<RedisOptions>(configuration.GetSection(RedisOptions.Redis));
-        services.TryAddSingleton<IRedisClient, RedisClient>();
-        services.AddSingleton<IStore, RedisStore>();
-
-        return builder;
-    }
-
-    public static IStreamingBuilder UseMongoDbStore(this IStreamingBuilder builder, ConfigurationManager configuration)
-    {
-        var services = builder.Services;
-
-        services.Configure<MongoDbOptions>(configuration.GetSection(MongoDbOptions.MongoDb));
-        services.TryAddSingleton<IMongoDbClient, MongoDbClient>();
-        services.AddSingleton<IStore, MongoDbStore>();
+            case CacheProvider.None:
+                // use db store if no cache provider is specified
+                services.AddSingleton<IStore>(x => x.GetRequiredService<IDbStore>());
+                break;
+        }
 
         return builder;
-    }
 
-    public static IStreamingBuilder UseHybridStore(this IStreamingBuilder builder, ConfigurationManager configuration)
-    {
-        var services = builder.Services;
+        void AddFake()
+        {
+            services.AddSingleton<IDbStore, FakeStore>();
+        }
 
-        services.Configure<MongoDbOptions>(configuration.GetSection(MongoDbOptions.MongoDb));
-        services.Configure<RedisOptions>(configuration.GetSection(RedisOptions.Redis));
+        void AddMongoDb()
+        {
+            services.TryAddMongoDb(configuration);
+            services.AddTransient<IDbStore, MongoDbStore>();
+        }
 
-        services.TryAddSingleton<IRedisClient, RedisClient>();
-        services.TryAddSingleton<IMongoDbClient, MongoDbClient>();
-        services.AddSingleton<IStore, HybridStore>();
-        services.AddHostedService<StoreAvailableSentinel>();
+        void AddPostgres()
+        {
+            services.TryAddPostgres(configuration);
+            services.AddTransient<IDbStore, PostgresStore>();
+        }
 
-        return builder;
+        void AddRedis()
+        {
+            services.TryAddRedis(configuration);
+            services.AddTransient<IDbStore, RedisStore>();
+
+            // use hybrid store if we use Redis cache
+            services.AddSingleton<IStore, HybridStore>();
+            services.AddHostedService<StoreAvailableSentinel>();
+        }
     }
 }

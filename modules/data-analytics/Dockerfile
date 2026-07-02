@@ -1,4 +1,4 @@
-FROM python:3.9-slim-buster
+FROM python:3.9-slim-bookworm
 ENV TEST=false \
     KAFKA_HOSTS=kafka:9092 \
     KAFKA_SECURITY_PROTOCOL=PLAINTEXT \
@@ -13,11 +13,12 @@ ENV TEST=false \
     CLICKHOUSE_REPLICATION=true \
     CLICKHOUSE_SECURE=false \
     CLICKHOUSE_VERIFY=true \
-    CACHE_TYPE=RedisCache \
-    REDIS_DB=0 \
-    REDIS_SSL=false \
-    REDIS_HOST=redis \
-    REDIS_PORT=6379 \
+    DB_PROVIDER=Postgres  \
+    POSTGRES_USER=postgres \
+    POSTGRES_PASSWORD=please_change_me \
+    POSTGRES_HOST=postgresql \
+    POSTGRES_PORT=5432 \
+    POSTGRES_DATABASE=featbit \
     MONGO_HOST=mongodb \
     MONGO_PORT=27017 \
     MONGO_URI=mongodb://admin:password@mongodb:27017 \

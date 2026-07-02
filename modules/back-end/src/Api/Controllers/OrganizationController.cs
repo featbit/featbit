@@ -1,3 +1,5 @@
+using Application.Bases.Models;
+using Application.Members;
 using Application.Organizations;
 using Domain.Workspaces;
 
@@ -29,6 +31,19 @@ public class OrganizationController : ApiControllerBase
         return Ok(vms);
     }
 
+    [HttpGet("is-key-used")]
+    public async Task<ApiResponse<bool>> IsKeyUsedAsync(string key)
+    {
+        var request = new IsKeyUsed
+        {
+            WorkspaceId = WorkspaceId,
+            Key = key
+        };
+
+        var isUsed = await Mediator.Send(request);
+        return Ok(isUsed);
+    }
+
     [HttpPost]
     [Authorize(LicenseFeatures.MultiOrg)]
     public async Task<ApiResponse<OrganizationVm>> CreateAsync(CreateOrganization request)
@@ -41,24 +56,17 @@ public class OrganizationController : ApiControllerBase
         return Ok(organization);
     }
 
-    [HttpPost("add-user")]
-    public async Task<ApiResponse<bool>> AddMemberByEmailAsync([FromBody] AddUser request)
+    [HttpGet("members")]
+    public async Task<ApiResponse<PagedResult<MemberVm>>> GetMembersAsync([FromQuery] MemberFilter filter)
     {
-        request.WorkspaceId = WorkspaceId;
-        request.OrganizationId = OrgId;
+        var request = new GetMemberList
+        {
+            OrganizationId = OrgId,
+            Filter = filter
+        };
 
-        var success = await Mediator.Send(request);
-
-        return Ok(success);
-    }
-
-    [HttpPut("remove-user")]
-    public async Task<ApiResponse<bool>> RemoveMemberAsync(RemoveUser request)
-    {
-        request.OrganizationId = OrgId;
-
-        var success = await Mediator.Send(request);
-        return Ok(success);
+        var members = await Mediator.Send(request);
+        return Ok(members);
     }
 
     [HttpPost("onboarding")]
@@ -72,7 +80,7 @@ public class OrganizationController : ApiControllerBase
     }
 
     [HttpPut]
-    public async Task<ApiResponse<OrganizationVm>> UpdateAsync(UpdateOrganizationName request)
+    public async Task<ApiResponse<OrganizationVm>> UpdateAsync(UpdateOrganization request)
     {
         request.Id = OrgId;
 

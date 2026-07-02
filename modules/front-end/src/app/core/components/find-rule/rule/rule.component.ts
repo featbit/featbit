@@ -2,16 +2,22 @@ import { ChangeDetectorRef, Component, EventEmitter, Input, Output } from '@angu
 import { isSegmentCondition, uuidv4 } from '@utils/index';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
-import { findIndex, IRuleOp, ruleOps } from '../ruleConfig';
-import { ISegment, ISegmentListModel, SegmentListFilter } from '@features/safe/segments/types/segments-index';
+import { findIndex } from '../ruleConfig';
+import {
+  ISegment,
+  ISegmentListModel,
+  SegmentListFilter,
+  SegmentType
+} from '@features/safe/segments/types/segments';
 import { SegmentService } from '@services/segment.service';
 import { IUserProp } from "@shared/types";
-import { ICondition } from "@shared/rules";
+import { ICondition, IRuleOp, RULE_OPS } from "@shared/rules";
 
 @Component({
   selector: 'app-rule',
   templateUrl: './rule.component.html',
-  styleUrls: ['./rule.component.less']
+  styleUrls: [ './rule.component.less' ],
+  standalone: false
 })
 export class RuleComponent {
 
@@ -30,6 +36,7 @@ export class RuleComponent {
     }
   };
 
+  @Input() disabled: boolean = true;
   @Input() isFirst: boolean;
   @Input() isLast: boolean;
 
@@ -107,7 +114,7 @@ export class RuleComponent {
   public ruleValueConfig: IRuleOp[] = [];
 
   constructor(private segmentService: SegmentService, private cdr: ChangeDetectorRef) {
-    this.ruleValueConfig = ruleOps;
+    this.ruleValueConfig = RULE_OPS;
     this.inputs.pipe(
       debounceTime(500)
     ).subscribe(e => {
@@ -215,4 +222,6 @@ export class RuleComponent {
 
     return description ?? value;
   }
+
+  protected readonly SegmentType = SegmentType;
 }

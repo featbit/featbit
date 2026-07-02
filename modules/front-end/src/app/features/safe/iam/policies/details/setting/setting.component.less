@@ -10,10 +10,16 @@
   border-radius: 20px;
   min-height: 50px;
 
-  .edit-save {
-    cursor: pointer;
-    margin-left: 16px;
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+
+    i {
+      cursor: pointer;
+    }
   }
+
   .title {
     color: @grey70-color;
 
@@ -21,6 +27,10 @@
       display: flex;
       align-items: center;
       justify-content: flex-start;
+
+      .actions {
+        margin-left: 8px;
+      }
     }
     .text {
       display: inline-block;
@@ -36,7 +46,6 @@
     }
 
     i{
-      margin-left: 8px;
       cursor: pointer;
     }
   }
@@ -53,14 +62,9 @@
       padding: 0;
     }
 
-    .edit-save {
-      width: 100%;
-      text-align: right;
-      padding-right:14px;
-    }
-
     textarea {
       border-radius: 8px;
+      margin-bottom: 8px;
     }
   }
 

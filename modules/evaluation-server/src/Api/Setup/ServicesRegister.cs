@@ -1,6 +1,11 @@
-using Confluent.Kafka;
-using Infrastructure.Fakes;
+using Api.Cors;
+using Api.RateLimiting;
+using Api.Services;
+using Domain.Workspaces;
 using Infrastructure;
+using Infrastructure.Services;
+using Serilog;
+using Streaming;
 using Streaming.DependencyInjection;
 
 namespace Api.Setup;
@@ -14,6 +19,9 @@ public static class ServicesRegister
 
         services.AddControllers();
 
+        // serilog
+        builder.Services.AddSerilog((_, lc) => ConfigureSerilog.Configure(lc, builder.Configuration));
+
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
@@ -22,48 +30,27 @@ public static class ServicesRegister
         services.AddHealthChecks().AddReadinessChecks(configuration);
 
         // cors
-        builder.Services.AddCors(options => options.AddDefaultPolicy(policyBuilder =>
-        {
-            policyBuilder
-                .AllowAnyOrigin()
-                .AllowAnyHeader()
-                .AllowAnyMethod();
-        }));
+        builder.AddCustomCors();
 
         // add bounded memory cache
         services.AddSingleton<IBoundedMemoryCache, BoundedMemoryCache>();
 
-        // build streaming service
-        var streamingBuilder = services.AddStreamingCore();
-        if (configuration.GetValue("IntegrationTests", false))
+        // streaming services
+        services
+            .AddStreamingCore(options => configuration.GetSection(StreamingOptions.Streaming).Bind(options))
+            .UseStore(configuration)
+            .UseMq(configuration);
+
+        // rate limiting
+        if (configuration.IsRateLimitingEnabled())
         {
-            streamingBuilder.UseStore<FakeStore>().UseNullMessageQueue();
+            builder.AddRateLimiting();
         }
-        else
-        {
-            streamingBuilder.UseHybridStore(configuration);
 
-            if (configuration.IsProVersion())
-            {
-                var producerConfigDictionary = new Dictionary<string, string>();
-                configuration.GetSection("Kafka:Producer").Bind(producerConfigDictionary);
-                var producerConfig = new ProducerConfig(producerConfigDictionary);
-                services.AddSingleton(producerConfig);
-
-                var consumerConfigDictionary = new Dictionary<string, string>();
-                configuration.GetSection("Kafka:Consumer").Bind(consumerConfigDictionary);
-                var consumerConfig = new ConsumerConfig(consumerConfigDictionary);
-                services.AddSingleton(consumerConfig);
-
-                // use kafka as message queue in pro version
-                streamingBuilder.UseKafkaMessageQueue();
-            }
-            else
-            {
-                // use redis as message queue in standard version
-                streamingBuilder.UseRedisMessageQueue();
-            }
-        }
+        // application services
+        LicenseVerifier.ImportPublicKey(configuration["PublicKey"]);
+        services.AddTransient<IRelayProxyAppService, RelayProxyAppService>();
+        services.AddTransient<IFeatureFlagService, FeatureFlagService>();
 
         return builder;
     }

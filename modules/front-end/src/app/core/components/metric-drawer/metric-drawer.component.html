@@ -32,17 +32,19 @@
             nzServerSearch
             formControlName="maintainerUserId"
             (nzOnSearch)="onSearchMaintainer($event)">
-            <ng-container *ngFor="let o of maintainerList">
-              <nz-option
-                *ngIf="!isMaintainersLoading"
-                [nzValue]="o.id"
-                [nzLabel]="o.name || o.email">
+            @if (isMaintainersLoading) {
+              <nz-option nzDisabled nzCustomContent>
+                <i nz-icon nzType="loading" class="loading-icon"></i>
+                <ng-container i18n="@@common.loading">Loading...</ng-container>
               </nz-option>
-            </ng-container>
-            <nz-option *ngIf="isMaintainersLoading" nzDisabled nzCustomContent>
-              <i nz-icon nzType="loading" class="loading-icon"></i>
-              <ng-container i18n="@@common.loading">Loading...</ng-container>
-            </nz-option>
+            } @else {
+              @for (o of maintainerList; track o) {
+                <nz-option
+                  [nzValue]="o.id"
+                  [nzLabel]="o.name || o.email">
+                </nz-option>
+              }
+            }
           </nz-select>
         </nz-form-control>
       </nz-form-item>
@@ -55,34 +57,36 @@
           </nz-select>
         </nz-form-control>
       </nz-form-item>
-      <ng-container
-        *ngIf="metricForm.value.eventType === pageViewEventType || metricForm.value.eventType === clickEventType">
-        <nz-form-item *ngIf="metricForm.value.eventType === clickEventType">
-          <nz-form-label>Targets</nz-form-label>
-          <nz-form-control nzErrorTip="Targets">
-            <input type="text" nz-input formControlName="elementTargets" i18n-placeholder="@@expt.metric.target-selector" placeholder="One or more CSS selector, seperated by (,)"/>
-          </nz-form-control>
-        </nz-form-item>
+      @if (metricForm.value.eventType === pageViewEventType || metricForm.value.eventType === clickEventType) {
+        @if (metricForm.value.eventType === clickEventType) {
+          <nz-form-item>
+            <nz-form-label>Targets</nz-form-label>
+            <nz-form-control nzErrorTip="Targets">
+              <input type="text" nz-input formControlName="elementTargets" i18n-placeholder="@@expt.metric.target-selector" placeholder="One or more CSS selector, seperated by (,)"/>
+            </nz-form-control>
+          </nz-form-item>
+        }
         <nz-form-item formArrayName="targetUrls">
           <nz-form-label>
             <span i18n="@@expt.metric.targeting-page-url">Targeting page URL</span>
             <i class="add-target-url-icon" (click)="addTargetUrl()" nz-icon nzType="icons:icon-add-outline"></i>
           </nz-form-label>
-          <nz-form-control
-            class="target-url-form-control"
-            *ngFor="let n of metricForm.controls.targetUrls.controls; let idx = index;"
-            nzErrorTip="URL！" formGroupName="{{idx}}">
-            <div class="target-url-row">
-              <nz-select class="nz-select-40" formControlName="matchType">
-                <nz-option i18n-nzLabel="@@expt.metric.string-including" nzLabel="String including" [nzValue]="substringUrlMatchType"></nz-option>
-              </nz-select>
-              <input type="text" nz-input formControlName="url" i18n-placeholder="@@expt.metric.targeting-page-url" placeholder="Targeting page URL"/>
-              <i (click)="removeTargetUrl(idx)" nz-icon nzType="icons:icon-delete"></i>
-            </div>
-          </nz-form-control>
+          @for (n of metricForm.controls.targetUrls.controls; track n; let idx = $index) {
+            <nz-form-control
+              class="target-url-form-control"
+              nzErrorTip="URL！" formGroupName="{{idx}}">
+              <div class="target-url-row">
+                <nz-select class="nz-select-40" formControlName="matchType">
+                  <nz-option i18n-nzLabel="@@expt.metric.string-including" nzLabel="String including" [nzValue]="substringUrlMatchType"></nz-option>
+                </nz-select>
+                <input type="text" nz-input formControlName="url" i18n-placeholder="@@expt.metric.targeting-page-url" placeholder="Targeting page URL"/>
+                <i (click)="removeTargetUrl(idx)" nz-icon nzType="icons:icon-delete"></i>
+              </div>
+            </nz-form-control>
+          }
         </nz-form-item>
-      </ng-container>
-      <ng-container *ngIf="metricForm.value.eventType === customEventType">
+      }
+      @if (metricForm.value.eventType === customEventType) {
         <nz-form-item>
           <nz-form-control>
             <nz-radio-group formControlName="customEventTrackOption" class="custom-event-option">
@@ -90,10 +94,12 @@
               <label nz-radio [nzValue]="customEventTrackNumeric" i18n="@@common.numeric">Numeric</label>
             </nz-radio-group>
           </nz-form-control>
-          <span class="radio-group-tip" *ngIf="metricForm.value.customEventTrackOption === customEventTrackNumeric">
-            <i nz-icon nzType="info-circle"></i>
-            <ng-container i18n="@@expt.metric.to-get-accurate-result-send-value-for-numeric">To obtain a accurate result, a numeraic value must be sent for numeric experiment</ng-container>
-          </span>
+          @if (metricForm.value.customEventTrackOption === customEventTrackNumeric) {
+            <span class="radio-group-tip">
+              <i nz-icon nzType="info-circle"></i>
+              <ng-container i18n="@@expt.metric.to-get-accurate-result-send-value-for-numeric">To obtain a accurate result, a numeraic value must be sent for numeric experiment</ng-container>
+            </span>
+          }
         </nz-form-item>
         <nz-form-item>
           <nz-form-label nzRequired i18n="@@expt.metric.event-name">Event name</nz-form-label>
@@ -117,7 +123,7 @@
             </nz-select>
           </nz-form-control>
         </nz-form-item>
-      </ng-container>
+      }
       <button nz-button class="submit-btn" [nzType]="'primary'" [nzLoading]="isLoading" i18n="@@common.save">Save</button>
     </form>
   </ng-container>

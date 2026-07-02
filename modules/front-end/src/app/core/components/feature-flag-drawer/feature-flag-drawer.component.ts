@@ -9,12 +9,14 @@ import { Router } from "@angular/router";
 import { NzSelectComponent } from "ng-zorro-antd/select";
 import { IVariation } from "@shared/rules";
 import { editor } from "monaco-editor";
-import { FlagKeyPattern, IFeatureFlagCreationPayload } from "@features/safe/feature-flags/types/feature-flag";
+import { IFeatureFlagCreationPayload } from "@features/safe/feature-flags/types/feature-flag";
+import { ResourceKeyPattern } from "@shared/types";
 
 @Component({
   selector: 'feature-flag-drawer',
   templateUrl: './feature-flag-drawer.component.html',
-  styleUrls: ['./feature-flag-drawer.component.less']
+  styleUrls: [ './feature-flag-drawer.component.less' ],
+  standalone: false
 })
 export class FeatureFlagDrawerComponent implements OnInit {
 
@@ -52,7 +54,7 @@ export class FeatureFlagDrawerComponent implements OnInit {
   initForm() {
     this.basicForm = this.fb.group({
       name: ['', Validators.required],
-      key: ['', [Validators.required, Validators.pattern(FlagKeyPattern)], [this.flagKeyAsyncValidator]],
+      key: ['', [Validators.required, Validators.pattern(ResourceKeyPattern)], [this.flagKeyAsyncValidator]],
       description: ['', Validators.maxLength(512)]
     });
 
@@ -124,15 +126,19 @@ export class FeatureFlagDrawerComponent implements OnInit {
   }
 
   onAddTag() {
-    let actualTag = this.selectedTag.startsWith(this.createTagPrefix)
+    const isNewTag = this.selectedTag.startsWith(this.createTagPrefix);
+
+    const actualTag = isNewTag
       ? this.selectedTag.replace(this.createTagPrefix, '').replace(/'/g, '').trim()
       : this.selectedTag.trim();
 
     this.selectedTags = [...this.selectedTags, actualTag];
 
-    this.allTags = [...this.allTags, actualTag];
+    if (isNewTag) {
+      this.allTags = [...this.allTags, actualTag];
+    }
+
     this.currentAllTags = this.allTags;
-    // clear current selected
     this.tagsSelect.writeValue(null);
   }
   //#endregion

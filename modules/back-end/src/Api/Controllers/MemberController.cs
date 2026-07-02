@@ -1,12 +1,22 @@
+using Api.Authentication;
 using Application.Bases.Models;
 using Application.Members;
 using Application.Policies;
+using Domain.Policies;
 
 namespace Api.Controllers;
 
 [Route("api/v{version:apiVersion}/members")]
+[Authorize(Permissions.CanManageIAM)]
 public class MemberController : ApiControllerBase
 {
+    /// <summary>
+    /// Get a member user
+    /// </summary>
+    /// <remarks>
+    /// Get a single member user by ID.
+    /// </remarks>
+    [OpenApi]
     [HttpGet("{memberId:guid}")]
     public async Task<ApiResponse<MemberVm>> GetAsync(Guid memberId)
     {
@@ -20,11 +30,41 @@ public class MemberController : ApiControllerBase
         return Ok(member);
     }
 
+    /// <summary>
+    /// Add a member user to the organization
+    /// </summary>
+    /// <remarks>
+    /// Adds an existing workspace user to the current organization. If no user with the given email exists
+    /// in the workspace, a new local account is automatically registered and then added to the organization.
+    ///
+    /// If neither <c>policyIds</c> nor <c>groupIds</c> are provided, the organization's default permissions
+    /// are applied to the new member.
+    /// </remarks>
+    [OpenApi]
+    [HttpPost("add")]
+    public async Task<ApiResponse<bool>> AddMemberAsync([FromBody] AddMember request)
+    {
+        request.WorkspaceId = WorkspaceId;
+        request.OrganizationId = OrgId;
+
+        var success = await Mediator.Send(request);
+
+        return Ok(success);
+    }
+
+    /// <summary>
+    /// Remove a member user from organization
+    /// </summary>
+    /// <remarks>
+    /// Remove a member user from the current organization.
+    /// </remarks>
+    [OpenApi]
     [HttpDelete("remove-from-org/{memberId:guid}")]
     public async Task<ApiResponse<bool>> RemoveFromOrganizationAsync(Guid memberId)
     {
         var request = new RemoveFromOrganization
         {
+            WorkspaceId = WorkspaceId,
             OrganizationId = OrgId,
             MemberId = memberId
         };
@@ -33,6 +73,13 @@ public class MemberController : ApiControllerBase
         return Ok(success);
     }
 
+    /// <summary>
+    /// Remove a member user from the workspace
+    /// </summary>
+    /// <remarks>
+    /// Remove a member user from the workspace.
+    /// </remarks>
+    [OpenApi]
     [HttpDelete("remove-from-workspace/{memberId:guid}")]
     public async Task<ApiResponse<bool>> RemoveFromWorkspaceAsync(Guid memberId)
     {
@@ -46,6 +93,13 @@ public class MemberController : ApiControllerBase
         return Ok(success);
     }
 
+    /// <summary>
+    /// Get member user list of current organization
+    /// </summary>
+    /// <remarks>
+    /// Get the list of all member users within the current organization.
+    /// </remarks>
+    [OpenApi]
     [HttpGet]
     public async Task<ApiResponse<PagedResult<MemberVm>>> GetListAsync([FromQuery] MemberFilter filter)
     {
@@ -59,6 +113,13 @@ public class MemberController : ApiControllerBase
         return Ok(members);
     }
 
+    /// <summary>
+    /// Get all groups of the member user
+    /// </summary>
+    /// <remarks>
+    /// Get the list of all groups of the member user within the current organization.
+    /// </remarks>
+    [OpenApi]
     [HttpGet("{memberId:guid}/groups")]
     public async Task<ApiResponse<PagedResult<MemberGroupVm>>> GetGroupsAsync(
         Guid memberId,
@@ -75,6 +136,13 @@ public class MemberController : ApiControllerBase
         return Ok(groups);
     }
 
+    /// <summary>
+    /// Get all policies of the member user
+    /// </summary>
+    /// <remarks>
+    /// Get the list of all direct and inherited policies of the member user within the current organization.
+    /// </remarks>
+    [OpenApi]
     [HttpGet("{memberId:guid}/policies")]
     public async Task<ApiResponse<IEnumerable<PolicyVm>>> GetPoliciesAsync(Guid memberId)
     {
@@ -88,6 +156,13 @@ public class MemberController : ApiControllerBase
         return Ok(vms);
     }
 
+    /// <summary>
+    /// Get all direct policies of the member user
+    /// </summary>
+    /// <remarks>
+    /// Get the list of all direct policies of the member user within the current organization.
+    /// </remarks>
+    [OpenApi]
     [HttpGet("{memberId:guid}/direct-policies")]
     public async Task<ApiResponse<PagedResult<MemberPolicyVm>>> GetDirectPoliciesAsync(
         Guid memberId,
@@ -104,6 +179,13 @@ public class MemberController : ApiControllerBase
         return Ok(policies);
     }
 
+    /// <summary>
+    /// Get all inherited policies of the member user
+    /// </summary>
+    /// <remarks>
+    /// Get the list of all inherited policies of the member user within the current organization.
+    /// </remarks>
+    [OpenApi]
     [HttpGet("{memberId:guid}/inherited-policies")]
     public async Task<ApiResponse<PagedResult<InheritedMemberPolicy>>> GetInheritedPoliciesAsync(
         Guid memberId,
@@ -120,6 +202,10 @@ public class MemberController : ApiControllerBase
         return Ok(policies);
     }
 
+    /// <summary>
+    /// Add a policy to a member user
+    /// </summary>
+    [OpenApi]
     [HttpPut("{memberId:guid}/add-policy/{policyId:guid}")]
     public async Task<ApiResponse<bool>> AddPolicyAsync(Guid memberId, Guid policyId)
     {
@@ -134,6 +220,10 @@ public class MemberController : ApiControllerBase
         return Ok(success);
     }
 
+    /// <summary>
+    /// Remove a policy from a member user
+    /// </summary>
+    [OpenApi]
     [HttpPut("{memberId:guid}/remove-policy/{policyId:guid}")]
     public async Task<ApiResponse<bool>> RemovePolicyAsync(Guid memberId, Guid policyId)
     {

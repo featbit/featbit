@@ -1,6 +1,4 @@
 using Domain.Shared;
-using Infrastructure.MongoDb;
-using Infrastructure.Redis;
 using Infrastructure.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -10,44 +8,50 @@ namespace Infrastructure.Store;
 
 public class StoreAvailableSentinel : IHostedService
 {
-    private readonly PeriodicTimer _periodicTimer = new(TimeSpan.FromSeconds(5));
-    private readonly TimeSpan _checkAvailableTimeout = TimeSpan.FromSeconds(1);
-    private readonly IStore[] _stores;
+    private readonly PeriodicTimer _periodicTimer = new(TimeSpan.FromSeconds(6));
+    private readonly TimeSpan _checkAvailableTimeout = TimeSpan.FromSeconds(2);
+
     private readonly IServiceProvider _serviceProvider;
+    private readonly IDbStore[] _dbStores;
     private readonly ILogger<StoreAvailableSentinel> _logger;
 
     public StoreAvailableSentinel(
         IServiceProvider serviceProvider,
-        IRedisClient redisClient,
-        IMongoDbClient mongodbClient,
+        IEnumerable<IDbStore> dbStores,
         ILogger<StoreAvailableSentinel> logger)
     {
         _serviceProvider = serviceProvider;
 
-        var redisStore = new RedisStore(redisClient);
-        var mongodbStore = new MongoDbStore(mongodbClient);
-        _stores = new IStore[] { redisStore, mongodbStore };
+        // order stores by name to ensure consistent store availability check order
+        // see `Stores.cs` for more details
+        _dbStores = dbStores.OrderBy(x => x.Name).ToArray();
+
+        // we assume that the first store (the highest priority store) is available by default
+        StoreAvailabilityListener.Instance.SetAvailable(_dbStores[0].Name);
+
         _logger = logger;
     }
 
-    public async Task StartAsync(CancellationToken cancellationToken)
+    public Task StartAsync(CancellationToken cancellationToken)
     {
         // eager resolve HybridStore to attach **OnStoreAvailabilityChanged** event handler
         // see HybridStore constructor for more details
         _ = _serviceProvider.GetRequiredService<IStore>();
 
-        // set available store for the first time
-        await SetAvailableStoreAsync(_checkAvailableTimeout, cancellationToken);
-
         // start checking store availability loop
         _ = StartCheckLoop(cancellationToken);
+
+        _logger.LogInformation(
+            "Store availability sentinel started. Default available store: {Store}.",
+            StoreAvailabilityListener.Instance.AvailableStore
+        );
+
+        return Task.CompletedTask;
     }
 
     public async Task StartCheckLoop(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Start checking store availability loop.");
-
-        while (await _periodicTimer.WaitForNextTickAsync(cancellationToken))
+        while (!cancellationToken.IsCancellationRequested)
         {
             try
             {
@@ -62,12 +66,14 @@ public class StoreAvailableSentinel : IHostedService
                 // log exception
                 _logger.LogError(ex, "Error occurred while checking store availability");
             }
+
+            await _periodicTimer.WaitForNextTickAsync(cancellationToken);
         }
     }
 
     public async Task SetAvailableStoreAsync(TimeSpan timeout, CancellationToken cancellationToken)
     {
-        foreach (var store in _stores)
+        foreach (var store in _dbStores)
         {
             var checkAvailableTask = store.IsAvailableAsync();
             var checkAvailableTimeoutTask = Task.Delay(timeout, cancellationToken);
@@ -89,7 +95,6 @@ public class StoreAvailableSentinel : IHostedService
             }
         }
 
-        StoreAvailabilityListener.Instance.SetAvailable(Stores.None);
         _logger.LogError("No available store can be used.");
     }
 

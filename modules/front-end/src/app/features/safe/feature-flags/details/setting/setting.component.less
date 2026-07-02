@@ -38,7 +38,16 @@
 
   .edit-save {
     cursor: pointer;
-    margin-left: 8px;
+  }
+
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+
+    i {
+      cursor: pointer;
+    }
   }
 
   .title {
@@ -49,6 +58,7 @@
     line-height: 150%;
     color: @grey70-color;
     height: 30px;
+    gap: 4px;
 
     .text {
       display: inline-block;
@@ -58,7 +68,6 @@
       max-width: 221px;
     }
     input {
-      width: 221px;
       border-radius: 8px;
     }
   }
@@ -91,26 +100,14 @@
     }
   }
 
-  .flag-key {
+  .key {
     margin-top: 16px;
 
-    .title {
-      display: flex;
-      justify-content: flex-start;
-      align-items: center;
-      gap: 8px;
-    }
-
-    i {
-      cursor: pointer;
-      font-size: 16px;
-    }
-
-    .key-container {
+    .value {
       display: flex;
       align-items: center;
       justify-content: flex-start;
-      gap: 8px;
+      gap: 2px;
 
       i {
         font-size: 13px;
@@ -119,7 +116,7 @@
   }
 
   .flag-description {
-    margin-top: 4px;
+    margin-top: 16px;
     color: @grey50-color;
     border: 1px solid @grey20-color;
     border-radius: 8px;
@@ -132,12 +129,13 @@
 
     .edit-save {
       width: 100%;
-      text-align: right;
-      padding-right:14px;
+      display: flex;
+      justify-content: flex-end;
     }
 
     textarea {
       border-radius: 8px;
+      margin-bottom: 8px;
     }
   }
 
@@ -147,7 +145,7 @@
     .selected {
       display: flex;
       flex-wrap: wrap;
-      gap: 0;
+      gap: 10px;
       row-gap: 4px;
       border: 1px solid @grey20-color;
       background-color: #ffffff;
@@ -161,7 +159,7 @@
         border-radius: 4px;
         padding: 2px 4px 2px 5px;
         line-height: 15px;
-        margin-right: 10px;
+        margin: 0;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -170,6 +168,19 @@
 
     nz-select {
       width: 100%;
+    }
+
+    .tag-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 8px;
+
+      button {
+        width: unset;
+        height: unset;
+        border-radius: 16px;
+      }
     }
   }
 
@@ -298,42 +309,6 @@
     }
   }
 
-  .languages-frameworks {
-    margin-top: 16px;
-    display: flex;
-    align-items: flex-start;
-    flex-direction: row;
-    flex-wrap: wrap;
-
-    .line {
-      margin: 3px 0;
-      width: 100%;
-
-      &:first-child{
-        margin-top: 0;
-      }
-
-      &:last-child{
-        margin-bottom: 0;
-      }
-
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      button {
-        border: none;
-        background: @purple50-color;
-        border-radius: 8px;
-        width: 120px;
-        height: 37px;
-        padding: 8px 12px;
-        color: #FFFFFF;
-        margin-bottom: 10px;
-        cursor: pointer;
-      }
-    }
-  }
-
   i:not(.warning-icon) {
     color: @grey50-color;
     &:hover {
@@ -436,10 +411,7 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-
-    ::ng-deep .ant-input-suffix {
-      padding-left: 6px;
-    }
+    gap: 16px;
 
     nz-input-group {
       height: 40px;
@@ -449,14 +421,15 @@
       }
     }
 
-    nz-form-control {
-      width: 238px;
+    nz-form-item {
+      flex: 1;
     }
+  }
+}
 
-    &.with-extra-options {
-      nz-form-control {
-        width: 218px;
-      }
-    }
+.actions {
+  button {
+    width: unset;
+    height: unset;
   }
 }

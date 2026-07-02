@@ -1,9 +1,11 @@
 import { Injectable } from "@angular/core";
 import { environment } from "../../../environments/environment";
 import { HttpClient, HttpParams } from "@angular/common/http";
-import { getCurrentProjectEnv } from "@utils/project-env";
+import { getCurrentOrganization, getCurrentProjectEnv } from "@utils/project-env";
 import { firstValueFrom, Observable, of } from "rxjs";
 import {
+  CloneFlagPayload,
+  CopyToEnvPrecheckResult,
   ICopyToEnvResult,
   IFeatureFlagCreationPayload,
   IFeatureFlagListFilter,
@@ -11,13 +13,20 @@ import {
 } from "@features/safe/feature-flags/types/feature-flag";
 import { catchError } from "rxjs/operators";
 import {
+  CreateChangeRequestPayload,
+  CreateSchedulePayload,
   IFeatureFlag,
-  IFeatureFlagTargeting,
-  ISettingPayload
+  UpdateFlagTargetingPayload
 } from "@features/safe/feature-flags/types/details";
-import {IInsightsFilter, IInsights} from "@features/safe/feature-flags/details/insights/types";
+import { IInsights, IInsightsFilter } from "@features/safe/feature-flags/details/insights/types";
 import { IVariation } from "@shared/rules";
 import { IPendingChanges } from "@core/components/pending-changes-drawer/types";
+import { FlagSortedBy } from "@features/safe/workspaces/types/organization";
+import {
+  CompareFlagDetail,
+  CompareFlagOverviews,
+  FlagSettingCopyOptions
+} from "@features/safe/feature-flags/types/compare-flag";
 
 @Injectable({
   providedIn: 'root'
@@ -32,9 +41,9 @@ export class FeatureFlagService {
   constructor(private http: HttpClient) {
   }
 
-  toggleStatus(key: string): Observable<any> {
-    const url = `${this.baseUrl}/${key}/toggle`;
-    return this.http.put(url, {})
+  toggleStatus(key: string, status: boolean, comment?: string): Observable<string> {
+    const url = `${this.baseUrl}/${key}/toggle/${status}`;
+    return this.http.put<string>(url, { comment })
   }
 
   getByKey(key: string): Observable<IFeatureFlag> {
@@ -42,10 +51,13 @@ export class FeatureFlagService {
   }
 
   getList(filter: IFeatureFlagListFilter = new IFeatureFlagListFilter()): Observable<IFeatureFlagListModel> {
+    const org = getCurrentOrganization();
+
     const queryParam = {
       name: filter.name ?? '',
       tags: filter.tags ?? [],
       isArchived: filter.isArchived,
+      sortBy: org.settings?.flagSortedBy ?? FlagSortedBy.CreatedAt,
       pageIndex: filter.pageIndex - 1,
       pageSize: filter.pageSize,
       isEnabled: filter.isEnabled ?? ''
@@ -59,6 +71,35 @@ export class FeatureFlagService {
 
   getPendingChanges(key: string): Promise<IPendingChanges[]> {
     return firstValueFrom(this.http.get<IPendingChanges[]>(`${this.baseUrl}/${key}/pending-changes`));
+  }
+
+  getCompareOverview(targetEnvIds: string[], flagFilter: IFeatureFlagListFilter): Observable<CompareFlagOverviews> {
+    const org = getCurrentOrganization();
+
+    const filter = {
+      name: flagFilter.name ?? '',
+      tags: flagFilter.tags ?? [],
+      sortBy: org.settings?.flagSortedBy ?? FlagSortedBy.CreatedAt,
+      pageIndex: flagFilter.pageIndex - 1,
+      pageSize: flagFilter.pageSize
+    };
+
+    return this.http.post<CompareFlagOverviews>(
+      `${this.baseUrl}/compare-overview`,
+      { targetEnvIds, filter }
+    );
+  }
+
+  compareFlag(targetEnvId: string, flagKey: string): Observable<CompareFlagDetail> {
+    const url = `${this.baseUrl}/${flagKey}/compare-with/${targetEnvId}`;
+
+    return this.http.get<CompareFlagDetail>(url);
+  }
+
+  copySettings(targetEnvId: string, flagKey: string, options: FlagSettingCopyOptions) {
+    const url = `${this.baseUrl}/${flagKey}/copy-settings-to/${targetEnvId}`;
+
+    return this.http.put(url, { options });
   }
 
   deleteSchedule(id: string): Observable<boolean> {
@@ -91,22 +132,34 @@ export class FeatureFlagService {
     return this.http.put<boolean>(url, {});
   }
 
-  updateSetting(key: string, payload: ISettingPayload): Observable<boolean> {
-    const url = `${this.baseUrl}/${key}/settings`;
+  updateName(key: string, name: string, comment?: string): Observable<string> {
+    const url = `${this.baseUrl}/${key}/name`;
 
-    return this.http.put<boolean>(url, payload);
+    return this.http.put<string>(url, { name, comment });
   }
 
-  updateVariations(key: string, variations: IVariation[]): Observable<boolean> {
+  updateDescription(key: string, description: string, comment?: string): Observable<string> {
+    const url = `${this.baseUrl}/${key}/description`;
+
+    return this.http.put<string>(url, { description, comment });
+  }
+
+  updateOffVariation(key: string, offVariationId: string, revision: string, comment?: string): Observable<string> {
+    const url = `${this.baseUrl}/${key}/off-variation`;
+
+    return this.http.put<string>(url, { offVariationId, revision, comment });
+  }
+
+  updateVariations(key: string, variations: IVariation[], revision: string, comment?: string): Observable<string> {
     const url = `${this.baseUrl}/${key}/variations`;
 
-    return this.http.put<boolean>(url, { variations });
+    return this.http.put<string>(url, { variations, revision, comment });
   }
 
-  delete(key: string): Observable<boolean> {
+  delete(key: string, comment?: string): Observable<boolean> {
     const url = `${this.baseUrl}/${key}`;
 
-    return this.http.delete<boolean>(url);
+    return this.http.delete<boolean>(url, { body: { comment } });
   }
 
   isKeyUsed(key: string): Observable<boolean> {
@@ -119,58 +172,52 @@ export class FeatureFlagService {
     return this.http.post(this.baseUrl, payload);
   }
 
-  copyToEnv(targetEnvId: string, flagIds: string[]): Observable<ICopyToEnvResult> {
+  copyToEnvPrecheck(targetEnvId: string, flagIds: string[]): Observable<CopyToEnvPrecheckResult[]> {
+    const url = `${this.baseUrl}/copy-to-env-precheck/${targetEnvId}`;
+
+    return this.http.post<CopyToEnvPrecheckResult[]>(url, flagIds);
+  }
+
+  copyToEnv(targetEnvId: string, flagIds: string[], precheckResults: CopyToEnvPrecheckResult[]): Observable<ICopyToEnvResult> {
     const url = `${this.baseUrl}/copy-to-env/${targetEnvId}`;
 
-    return this.http.post<ICopyToEnvResult>(url, flagIds);
+    return this.http.post<ICopyToEnvResult>(url, {
+      flagIds,
+      precheckResults
+    });
   }
 
-  archive(key: string): Observable<any> {
+  clone(originFlagKey: string, payload: CloneFlagPayload) {
+    const url = `${this.baseUrl}/clone/${originFlagKey}`;
+    return this.http.post(url, payload);
+  }
+
+  archive(key: string, comment?: string): Observable<boolean> {
     const url = `${this.baseUrl}/${key}/archive`;
-    return this.http.put(url, {});
+    return this.http.put<boolean>(url, { comment });
   }
 
-  restore(key: string): Observable<any> {
+  restore(key: string, comment?: string): Observable<boolean> {
     const url = `${this.baseUrl}/${key}/restore`;
-    return this.http.put(url, {});
+    return this.http.put<boolean>(url, { comment });
   }
 
-  updateTargeting(targeting: IFeatureFlagTargeting, comment?: string): Observable<boolean> {
-    const url = `${this.baseUrl}/${targeting.key}/targeting`;
+  updateTargeting(key: string,  payload: UpdateFlagTargetingPayload): Observable<string> {
+    const url = `${this.baseUrl}/${key}/targeting`;
 
-    const payload = {
-      targeting,
-      comment
-    };
-
-    return this.http.put<boolean>(url, payload);
+    return this.http.put<string>(url, payload);
   }
 
-  createSchedule(targeting: IFeatureFlagTargeting, scheduledTime: Date, title: string, reviewers: string[], reason: string, withChangeRequest: boolean = false): Observable<boolean> {
-    const url = `${this.baseUrl}/${targeting.key}/schedules`;
+  createSchedule(key: string, payload: CreateSchedulePayload): Observable<string> {
+    const url = `${this.baseUrl}/${key}/schedules`;
 
-    const payload = {
-      targeting,
-      scheduledTime,
-      title,
-      reason,
-      reviewers,
-      withChangeRequest
-    };
-
-    return this.http.post<boolean>(url, payload);
+    return this.http.post<string>(url, payload);
   }
 
-  createChangeRequest(targeting: IFeatureFlagTargeting, reviewers: string[], reason: string): Observable<boolean> {
-    const url = `${this.baseUrl}/${targeting.key}/change-requests`;
+  createChangeRequest(key: string, payload: CreateChangeRequestPayload): Observable<string> {
+    const url = `${this.baseUrl}/${key}/change-requests`;
 
-    const payload = {
-      targeting,
-      reviewers,
-      reason
-    };
-
-    return this.http.post<boolean>(url, payload);
+    return this.http.post<string>(url, payload);
   }
 
   getAllTags(): Observable<string[]> {
@@ -178,9 +225,9 @@ export class FeatureFlagService {
     return this.http.get<string[]>(url);
   }
 
-  setTags(flagKey: string, tags: string[]): Observable<boolean> {
+  setTags(flagKey: string, tags: string[], comment?: string): Observable<boolean> {
     const url = `${this.baseUrl}/${flagKey}/tags`;
-    return this.http.put<boolean>(url, tags);
+    return this.http.put<boolean>(url, { tags, comment });
   }
 
   getInsights(filter: IInsightsFilter): Observable<IInsights[]> {

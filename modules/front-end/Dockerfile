@@ -1,5 +1,5 @@
 # Stage 0, "build-stage", based on Node.js, to build and compile Angular
-FROM node:16.17 AS build-stage
+FROM node:22.19 AS build-stage
 
 WORKDIR /app
 COPY package*.json /app/
@@ -13,12 +13,18 @@ FROM nginx:1.23
 
 ENV API_URL \
     DEMO_URL \
-    EVALUATION_URL
+    EVALUATION_URL \
+    BASE_HREF \
+    DISPLAY_API_URL \
+    DISPLAY_EVALUATION_URL \
+    HOSTING_MODE
 
-RUN apt-get update -y && apt-get install gettext-base
+RUN apt-get update -y && apt-get install --no-install-recommends -y gettext-base && rm -rf /var/lib/apt/lists/*
 
-COPY --from=build-stage /app/dist/featbit/ /usr/share/nginx/featbit/
-COPY ./nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build-stage /app/dist/featbit/browser/ /usr/share/nginx/featbit/
+COPY ./nginx.conf.template /etc/nginx/conf.d/nginx.conf.template
+COPY ./nginx.base_href.conf.template /etc/nginx/conf.d/nginx.base_href.conf.template
+
 COPY docker-entrypoint.sh /scripts/
 WORKDIR /scripts
 RUN chmod +x docker-entrypoint.sh

@@ -9,7 +9,6 @@ import { IndexComponent } from './index.component';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzGridModule } from 'ng-zorro-antd/grid';
-import { NzMessageModule } from 'ng-zorro-antd/message';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzSwitchModule } from 'ng-zorro-antd/switch';
@@ -25,9 +24,12 @@ import { NzPopconfirmModule } from "ng-zorro-antd/popconfirm";
 import { NzListModule } from "ng-zorro-antd/list";
 import { NzAlertModule } from "ng-zorro-antd/alert";
 import { NzCheckboxModule } from "ng-zorro-antd/checkbox";
-import { NzNotificationModule } from "ng-zorro-antd/notification";
 import { CoreModule } from "@core/core.module";
 import { NzDividerModule } from "ng-zorro-antd/divider";
+import {
+  DashedSingleSelectComponent
+} from "@core/components/table/dashed-single-select/dashed-single-select.component";
+import { DashedMultiSelectComponent } from "@core/components/table/dashed-multi-select/dashed-multi-select.component";
 
 
 @NgModule({
@@ -39,7 +41,6 @@ import { NzDividerModule } from "ng-zorro-antd/divider";
     NzButtonModule,
     NzGridModule,
     NzModalModule,
-    NzMessageModule,
     FormsModule,
     NzTableModule,
     NzSpinModule,
@@ -59,8 +60,9 @@ import { NzDividerModule } from "ng-zorro-antd/divider";
     NzListModule,
     NzAlertModule,
     NzCheckboxModule,
-    NzNotificationModule,
-    NzDividerModule
+    NzDividerModule,
+    DashedSingleSelectComponent,
+    DashedMultiSelectComponent
   ]
 })
 export class IndexModule { }

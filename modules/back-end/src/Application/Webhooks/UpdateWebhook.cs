@@ -41,6 +41,7 @@ public class UpdateWebhookHandler : IRequestHandler<UpdateWebhook, WebhookVm>
             request.PayloadTemplate,
             request.Secret,
             request.IsActive,
+            request.PreventEmptyPayloads,
             _currentUser.Id
         );
 

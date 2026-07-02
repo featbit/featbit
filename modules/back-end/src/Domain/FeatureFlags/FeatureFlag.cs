@@ -34,7 +34,7 @@ public class FeatureFlag : FullAuditedEntity
 
     public bool ExptIncludeAllTargets { get; set; }
 
-    public ICollection<string> Tags { get; set; }
+    public string[] Tags { get; set; }
 
     public bool IsArchived { get; set; }
 
@@ -52,7 +52,7 @@ public class FeatureFlag : FullAuditedEntity
         ICollection<Variation> variations,
         string disabledVariationId,
         string enabledVariationId,
-        ICollection<string> tags,
+        string[] tags,
         Guid currentUserId) : base(currentUserId)
     {
         Revision = Guid.NewGuid();
@@ -79,14 +79,14 @@ public class FeatureFlag : FullAuditedEntity
                 new()
                 {
                     Id = enabledVariationId,
-                    Rollout = new double[] { 0, 1 },
+                    Rollout = [0, 1],
                     ExptRollout = 1
                 }
             }
         };
         ExptIncludeAllTargets = true;
 
-        Tags = tags ?? Array.Empty<string>();
+        Tags = tags ?? [];
         IsArchived = false;
     }
 
@@ -142,6 +142,36 @@ public class FeatureFlag : FullAuditedEntity
         return dataChange.To(this);
     }
 
+    public DataChange UpdateName(string name, Guid currentUserId)
+    {
+        var dataChange = new DataChange(this);
+
+        Name = name;
+        MarkAsUpdated(currentUserId);
+
+        return dataChange.To(this);
+    }
+
+    public DataChange UpdateDescription(string description, Guid currentUserId)
+    {
+        var dataChange = new DataChange(this);
+
+        Description = description;
+        MarkAsUpdated(currentUserId);
+
+        return dataChange.To(this);
+    }
+
+    public DataChange UpdateOffVariation(string offVariationId, Guid currentUserId)
+    {
+        var dataChange = new DataChange(this);
+
+        DisabledVariationId = offVariationId;
+        MarkAsUpdated(currentUserId);
+
+        return dataChange.To(this);
+    }
+
     public DataChange UpdateSetting(string name, string description, bool isEnabled, string disabledVariationId, Guid currentUserId)
     {
         var dataChange = new DataChange(this);
@@ -178,7 +208,7 @@ public class FeatureFlag : FullAuditedEntity
         return dataChange.To(this);
     }
 
-    public void CopyToEnv(Guid targetEnvId, Guid currentUserId)
+    public void CopyToEnv(Guid targetEnvId, Guid currentUserId, bool keepRules = false)
     {
         // clear id
         Id = Guid.Empty;
@@ -186,9 +216,13 @@ public class FeatureFlag : FullAuditedEntity
         // change envId
         EnvId = targetEnvId;
 
-        // clear targeting
+        // clear targeting-users
         TargetUsers = Array.Empty<TargetUser>();
-        Rules = Array.Empty<TargetRule>();
+
+        if (!keepRules)
+        {
+            Rules = Array.Empty<TargetRule>();
+        }
 
         // change audited properties
         CreatedAt = DateTime.UtcNow;
@@ -196,28 +230,56 @@ public class FeatureFlag : FullAuditedEntity
         MarkAsUpdated(currentUserId);
     }
 
-    public DataChange Toggle(Guid currentUserId)
+    public DataChange CopySettingsFrom(FlagCopyContext context, Guid currentUserId)
     {
         var dataChange = new DataChange(this);
 
-        IsEnabled = !IsEnabled;
+        FlagCopyHelper.CopySettings(context);
+        MarkAsUpdated(currentUserId);
+
+        dataChange.To(this);
+
+        return dataChange;
+    }
+
+    public FeatureFlag Clone(string name, string key, string description, string[] tags, Guid currentUserId)
+    {
+        // clear id
+        Id = Guid.Empty;
+
+        Name = name;
+        Key = key;
+        Description = description;
+        Tags = tags ?? [];
+
+        // change audited properties
+        CreatedAt = DateTime.UtcNow;
+        CreatorId = currentUserId;
+        MarkAsUpdated(currentUserId);
+
+        return this;
+    }
+
+    public DataChange Toggle(Guid currentUserId, bool status)
+    {
+        var dataChange = new DataChange(this);
+
+        IsEnabled = status;
         MarkAsUpdated(currentUserId);
 
         return dataChange.To(this);
     }
-
-    public Variation DisabledVariation => GetVariation(DisabledVariationId);
 
     public Variation GetVariation(string variationId)
     {
         return Variations.FirstOrDefault(x => x.Id == variationId);
     }
 
-    public DataChange SetTags(ICollection<string> tags, Guid currentUserId)
+    public DataChange SetTags(string[] tags, Guid currentUserId)
     {
         var dataChange = new DataChange(this);
 
-        Tags = tags ?? Array.Empty<string>();
+        Tags = tags ?? [];
         MarkAsUpdated(currentUserId);
 
         return dataChange.To(this);
@@ -236,6 +298,12 @@ public class FeatureFlag : FullAuditedEntity
 
         return dataChange.To(this);
     }
+
+    /// <summary>
+    /// Mark the feature flag as updated when a referenced segment's targeting is updated.
+    /// </summary>
+    /// <param name="operatorId">The ID of the operator making the change to the segment.</param>
+    public void ReferencedSegmentTargetingUpdated(Guid operatorId) => base.MarkAsUpdated(operatorId);
 
     public override void MarkAsUpdated(Guid updatorId)
     {

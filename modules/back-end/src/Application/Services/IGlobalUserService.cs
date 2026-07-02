@@ -4,7 +4,7 @@ using Domain.EndUsers;
 
 namespace Application.Services;
 
-public interface IGlobalUserService : IService<GlobalUser>
+public interface IGlobalUserService : IService<EndUser>
 {
-    Task<PagedResult<GlobalUser>> GetListAsync(Guid workspaceId, GlobalUserFilter filter);
+    Task<PagedResult<EndUser>> GetListAsync(Guid workspaceId, GlobalUserFilter filter);
 }

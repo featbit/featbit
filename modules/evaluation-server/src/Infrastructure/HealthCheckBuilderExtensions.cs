@@ -1,4 +1,9 @@
-﻿using Infrastructure.Kafka;
+﻿using Infrastructure.Caches;
+using Infrastructure.Caches.Redis;
+using Infrastructure.MQ;
+using Infrastructure.MQ.Kafka;
+using Infrastructure.Persistence;
+using Infrastructure.Persistence.MongoDb;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -16,30 +21,35 @@ public static class HealthCheckBuilderExtensions
     {
         var tags = new[] { ReadinessTag };
 
-        var mongoDbConnectionString = configuration["MongoDb:ConnectionString"];
-        var redisConnectionString = configuration["Redis:ConnectionString"];
-
-        if (string.IsNullOrEmpty(mongoDbConnectionString) || string.IsNullOrEmpty(redisConnectionString))
+        var dbProvider = configuration.GetDbProvider();
+        switch (dbProvider.Name)
         {
-            throw new InvalidOperationException("MongoDb and Redis connection strings must be configured.");
+            case DbProvider.MongoDb:
+                builder.AddMongoDb(
+                    sp => sp.GetRequiredService<IMongoDbClient>().Database,
+                    tags: tags,
+                    timeout: Timeout
+                );
+                break;
+            case DbProvider.Postgres:
+                builder.AddNpgSql(tags: tags);
+                break;
         }
 
-        builder.Services
-            .AddHealthChecks()
-            .AddMongoDb(
-                mongoDbConnectionString,
-                tags: tags,
-                timeout: Timeout
-            )
-            .AddRedis(
-                redisConnectionString,
+        var mqProvider = configuration.GetMqProvider();
+        if (mqProvider == MqProvider.Kafka)
+        {
+            builder.AddKafka(configuration, tags, Timeout);
+        }
+
+        var cacheProvider = configuration.GetCacheProvider();
+        if (cacheProvider == CacheProvider.Redis)
+        {
+            builder.AddRedis(
+                serviceProvider => serviceProvider.GetRequiredService<IRedisClient>().Connection,
                 tags: tags,
                 timeout: Timeout
             );
-
-        if (configuration.IsProVersion())
-        {
-            builder.AddKafka(configuration, tags, Timeout);
         }
 
         return builder;

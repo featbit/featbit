@@ -1,1 +1,5 @@
-<audit-logs [auditLogFilter]="auditLogFilter"></audit-logs>
+@if (isLoading) {
+  <nz-skeleton [nzActive]="true"></nz-skeleton>
+} @else {
+  <audit-logs [auditLogFilter]="auditLogFilter"></audit-logs>
+}

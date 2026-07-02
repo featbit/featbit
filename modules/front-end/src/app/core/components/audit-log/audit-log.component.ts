@@ -3,12 +3,13 @@ import { IFeatureFlag } from "@features/safe/feature-flags/types/details";
 import { encodeURIComponentFfc } from "@utils/index";
 import { Router } from "@angular/router";
 import { AuditLogOpEnum, IAuditLog, RefTypeEnum } from "@core/components/audit-log/types";
-import { ISegment } from "@features/safe/segments/types/segments-index";
+import { ISegment } from "@features/safe/segments/types/segments";
 
 @Component({
-  selector: 'audit-log',
-  templateUrl: './audit-log.component.html',
-  styleUrls: ['./audit-log.component.less']
+    selector: 'audit-log',
+    templateUrl: './audit-log.component.html',
+    styleUrls: ['./audit-log.component.less'],
+    standalone: false
 })
 export class AuditLogComponent {
   private previous: IFeatureFlag | ISegment | string;

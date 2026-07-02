@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -5,14 +6,14 @@ namespace Application.Caches;
 
 public class CachePopulatingHostedService : IHostedService
 {
-    private readonly ICachePopulatingService _populatingService;
+    private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<CachePopulatingHostedService> _logger;
 
     public CachePopulatingHostedService(
-        ICachePopulatingService populatingService,
+        IServiceProvider serviceProvider,
         ILogger<CachePopulatingHostedService> logger)
     {
-        _populatingService = populatingService;
+        _serviceProvider = serviceProvider;
         _logger = logger;
     }
 
@@ -20,7 +21,9 @@ public class CachePopulatingHostedService : IHostedService
     {
         try
         {
-            await _populatingService.PopulateAsync();
+            using var scope = _serviceProvider.CreateScope();
+            var populatingService = scope.ServiceProvider.GetRequiredService<ICachePopulatingService>();
+            await populatingService.PopulateAsync();
         }
         catch (Exception ex)
         {

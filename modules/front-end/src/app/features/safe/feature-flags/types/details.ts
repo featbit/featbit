@@ -1,5 +1,6 @@
 import { IRule, IRuleVariation, IVariation } from "@shared/rules";
 import { deepCopy, isNumeric, tryParseJSONObject } from "@utils/index";
+import { getFlagRN } from "@features/safe/feature-flags/types/feature-flag";
 
 export class FeatureFlag implements IFeatureFlag {
   originalData: IFeatureFlag;
@@ -15,6 +16,10 @@ export class FeatureFlag implements IFeatureFlag {
     this.originalData = deepCopy(data);
   }
 
+  get rn(): string {
+    return getFlagRN(this.originalData.key, this.originalData.tags);
+  }
+
   addTag(tag: string) {
     this.tags = [...this.tags, tag];
   }
@@ -27,6 +32,7 @@ export class FeatureFlag implements IFeatureFlag {
   creatorId: string;
   disabledVariationId: string;
   envId: string;
+  revision: string;
   exptIncludeAllTargets: boolean;
   tags: string[];
   fallthrough: IFallthrough;
@@ -47,6 +53,7 @@ export class FeatureFlag implements IFeatureFlag {
 export interface IFeatureFlag {
   id: string,
   envId: string,
+  revision: string,
   name: string,
   key: string,
   variationType: VariationTypeEnum,
@@ -66,13 +73,35 @@ export interface IFeatureFlag {
   description: string
 }
 
-export interface IFeatureFlagTargeting {
-  key: string,
+export type FlagTargeting = {
   targetUsers: IVariationUser[],
   rules: IRule[],
   fallthrough: IFallthrough,
   exptIncludeAllTargets: boolean
 }
+
+export type UpdateFlagTargetingPayload = {
+  targeting: FlagTargeting,
+  revision: string,
+  comment: string
+}
+
+export type CreateSchedulePayload = {
+  targeting: FlagTargeting,
+  revision: string,
+  scheduledTime: Date,
+  title: string,
+  reviewers: string[],
+  reason: string,
+  withChangeRequest: boolean
+};
+
+export type CreateChangeRequestPayload = {
+  targeting: FlagTargeting,
+  revision: string,
+  reviewers: string[],
+  reason: string
+};
 
 export interface IFallthrough {
   includedInExpt: boolean,

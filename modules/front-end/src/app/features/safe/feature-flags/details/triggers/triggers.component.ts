@@ -3,9 +3,10 @@ import { ActivatedRoute } from '@angular/router';
 import { Subject } from 'rxjs';
 
 @Component({
-  selector: 'ff-triggers',
-  templateUrl: './triggers.component.html',
-  styleUrls: ['./triggers.component.less']
+    selector: 'ff-triggers',
+    templateUrl: './triggers.component.html',
+    styleUrls: ['./triggers.component.less'],
+    standalone: false
 })
 export class TriggersComponent implements OnInit, OnDestroy {
 

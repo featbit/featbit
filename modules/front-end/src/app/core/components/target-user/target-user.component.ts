@@ -6,12 +6,14 @@ import { debounceTime, distinctUntilChanged, finalize } from 'rxjs/operators';
 import { EnvUserService } from '@services/env-user.service';
 import { IUserProp, IUserType } from '@shared/types';
 import { EnvUserPropService } from "@services/env-user-prop.service";
-import { EnvUserFilter } from "@features/safe/end-users/types/featureflag-user";
+import { EnvUserSearchFilter } from "@features/safe/end-users/types/featureflag-user";
+import { PermissionsService } from "@services/permissions.service";
 
 @Component({
   selector: 'target-user',
   templateUrl: './target-user.component.html',
-  styleUrls: ['./target-user.component.less']
+  styleUrls: [ './target-user.component.less' ],
+  standalone: false
 })
 export class TargetUserComponent implements OnInit {
 
@@ -23,9 +25,9 @@ export class TargetUserComponent implements OnInit {
     }
   };
 
+  @Input() disabled: boolean = true;
   @Input() type: string = '';
-  @Input() tipIdx: number = 0;
-  @Input() tipColor: string = '#7FFFD4';
+  @Input() disableCreation: boolean = false;
   @Input() selectedUserDetailList: IUserType[];
 
   get isLoading() {
@@ -37,7 +39,7 @@ export class TargetUserComponent implements OnInit {
   @Input("userList")
   set list(data: IUserType[]) {
     this.isLoadingUsers = false;
-    if (this.selectNode['searchValue'] && data.length === 0) {
+    if (!this.disableCreation && this.selectNode['searchValue'] && data.length === 0) {
       this.userList = [{
         keyId: this.selectNode['searchValue'],
         name: this.selectNode['searchValue'],
@@ -57,8 +59,8 @@ export class TargetUserComponent implements OnInit {
     });
   }
 
-  debouncer = new Subject<EnvUserFilter>();
-  @Output() search = new EventEmitter<EnvUserFilter>();
+  debouncer = new Subject<EnvUserSearchFilter>();
+  @Output() search = new EventEmitter<EnvUserSearchFilter>();
   @Output() onSelectedUserListChange = new EventEmitter<IUserType[]>();
 
   selectModel: IUserType;
@@ -81,6 +83,7 @@ export class TargetUserComponent implements OnInit {
   constructor(
     private envUserService: EnvUserService,
     private envUserPropService: EnvUserPropService,
+    private permissionsService: PermissionsService,
     private msg: NzMessageService) {
     this.debouncer.pipe(
       debounceTime(500),
@@ -99,7 +102,8 @@ export class TargetUserComponent implements OnInit {
       .filter(x => x.name.includes(value) || x.keyId.includes(value))
       .map(x => x.keyId);
 
-    const filter = new EnvUserFilter(value, [], excludedKeyIds, true, 1, 5);
+    // by default, we search for both env & global users
+    const filter = new EnvUserSearchFilter(value, excludedKeyIds);
     this.debouncer.next(filter);
   }
 
@@ -108,6 +112,11 @@ export class TargetUserComponent implements OnInit {
   }
 
   removeUser(user: IUserType){
+    if (this.disabled) {
+      this.msg.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
     this.selectedUserDetailList = this.selectedUserDetailList.filter(s => s.id !== user.id);
     this.onSelectedUserListChange.next(this.selectedUserDetailList);
   }
@@ -143,6 +152,11 @@ export class TargetUserComponent implements OnInit {
   }
 
   save() {
+    if (this.disabled) {
+      this.msg.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
     this.saving = true;
     const { keyId, name, customizedProperties } = this.currentEditingUser;
 

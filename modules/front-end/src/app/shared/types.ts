@@ -1,4 +1,5 @@
 import { UserOriginEnum } from "@features/safe/workspaces/types/profiles";
+import { FlagSortedBy } from "@features/safe/workspaces/types/organization";
 
 export interface IResponse {
   success: boolean,
@@ -47,7 +48,6 @@ export interface IProfile {
   id: string;
   email: string;
   name: string;
-  workspaceId: string;
   origin: UserOriginEnum;
 }
 
@@ -73,10 +73,50 @@ export interface IWorkspace {
   sso?: ISso
 }
 
+export interface WorkspaceSubscription {
+  key: string;
+  name: string;
+  description: string;
+  order: number;
+  includedMau: number;
+  extraMau: number;
+  totalMau: number;
+  fineGrainedAcEnabled: boolean;
+  basePrice: number;
+  price: number;
+  billingCycle: string;
+  currentPeriodStart: Date;
+  currentPeriodEnd: Date;
+  subscriberSince?: Date;
+  usage?: {
+    mau: number;
+  },
+  pendingDowngrade?: {
+    plan: string;
+    mau: number;
+    billingCycle: string;
+    addOnFeatures: string[];
+    effectiveAt: Date;
+  };
+  isLocal: boolean;
+}
+
+export interface IOrganizationPermissions {
+  policyIds: string[];
+  groupIds: string[];
+}
+
+export interface IOrganizationSetting {
+  flagSortedBy: FlagSortedBy;
+}
+
 export interface IOrganization {
   id: string,
   initialized: boolean,
   name: string,
+  key: string,
+  settings: IOrganizationSetting,
+  defaultPermissions: IOrganizationPermissions
 }
 
 export enum LicenseFeatureEnum {
@@ -85,7 +125,11 @@ export enum LicenseFeatureEnum {
   Schedule = 'schedule',
   ChangeRequest = 'change-request',
   MultiOrg = 'multi-organization',
-  GlobalUser = 'global-user'
+  GlobalUser = 'global-user',
+  ShareableSegment = 'shareable-segment',
+  AutoAgents = 'auto-agents',
+  FineGrainedAccessControl = 'fine-grained-ac',
+  FlagComparison = 'flag-comparison'
 }
 
 export interface ILicense {
@@ -95,22 +139,63 @@ export interface ILicense {
   iat: number,
   exp: number,
   issuer: string,
-  features: LicenseFeatureEnum[]
+  features: LicenseFeatureEnum[],
+  metadata?: any
 }
 
+const LICENSE_EXPIRING_DAYS_THRESHOLD = 30;
 export class License {
   data: ILicense;
-  constructor(private licenseStr: string) {
+  constructor(licenseStr: string) {
     this.data = licenseStr ? JSON.parse(atob(licenseStr.split('.')[1])): null;
   }
 
   isGranted(feature: LicenseFeatureEnum): boolean {
-    return this.data?.features?.includes(feature) || this.data?.features?.includes(LicenseFeatureEnum.Asterisk);
+    if (!this.data) {
+      return false;
+    }
+
+    if (this.data.exp < new Date().getTime()) {
+      return false;
+    }
+
+    return this.data.features?.includes(feature) || this.data.features?.includes(LicenseFeatureEnum.Asterisk);
+  }
+
+  isExpiringSoon(): boolean {
+    if (!this.data || !this.data.exp) {
+      return false;
+    }
+
+    const now = new Date().getTime();
+    const expirationDate = this.data.exp;
+    const daysUntilExpiration = (expirationDate - now) / (1000 * 60 * 60 * 24);
+
+    return daysUntilExpiration > 0 && daysUntilExpiration <= LICENSE_EXPIRING_DAYS_THRESHOLD;
+  }
+
+  getDaysUntilExpiration(): number {
+    if (!this.data || !this.data.exp) {
+      return -1;
+    }
+
+    const now = new Date().getTime();
+    const expirationDate = this.data.exp;
+    return Math.ceil((expirationDate - now) / (1000 * 60 * 60 * 24));
+  }
+
+  isExpired(): boolean {
+    if (!this.data || !this.data.exp) {
+      return false;
+    }
+
+    return this.data.exp < new Date().getTime();
   }
 }
 
 export interface IOnboarding {
   organizationName: string,
+  organizationKey: string,
   projectName: string,
   projectKey: string,
   environments: string[]
@@ -123,7 +208,8 @@ export interface IProjectEnv {
   envId: string,
   envKey: string,
   envName: string,
-  envSecrets: ISecret[]
+  envSecrets: ISecret[],
+  envSettings: EnvironmentSetting
 }
 
 export interface IProject {
@@ -139,7 +225,12 @@ export interface IEnvironment {
   name: string,
   key: string,
   description: string,
-  secrets: ISecret[]
+  secrets: ISecret[],
+  settings: EnvironmentSetting
+}
+
+export interface EnvironmentSetting {
+  requireChangeComment: boolean;
 }
 
 export interface ISecret {
@@ -152,19 +243,6 @@ export interface ISecret {
 export enum SecretTypeEnum {
   Client = 'client',
   Server = 'server'
-}
-
-export interface EnvironmentSetting {
-  id: string;
-  type: string;
-  key: string;
-  value: string;
-  tag?: string;
-  remark?: string;
-}
-
-export const EnvironmentSettingTypes = {
-  SyncUrls: 'sync-urls',
 }
 
 export enum OAuthProviderEnum {
@@ -181,4 +259,14 @@ export interface OAuthProvider {
 export interface SsoPreCheck {
   isEnabled: boolean;
   workspaceKey?: string;
+}
+
+export const ResourceKeyPattern: RegExp = /^[a-zA-Z0-9._-]+$/;
+
+export type PageCursorDirection = 'forward' | 'backward';
+
+export interface PageCursor {
+  id: string,
+  updatedAt: string,
+  direction: PageCursorDirection
 }

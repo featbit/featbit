@@ -1,41 +1,36 @@
 <div class="table-content-area">
   <div class="table-search-area">
-    <div class="search-inputs">
-      <nz-input-group class="query" [nzPrefix]="prefixIconSearch">
-        <input
-          nz-input
-          placeholder="Search by name"
-          i18n-placeholder="@@common.search-by-name"
-          [(ngModel)]="filter.name"
-          (ngModelChange)="onSearch(true)">
-      </nz-input-group>
-      <ng-template #prefixIconSearch>
-        <i nz-icon nzType="icons:icon-search"></i>
-      </ng-template>
-      <nz-select
-        class="nz-select-40 rounded filter"
-        nzMode="multiple"
-        i18n-nzPlaceHolder="@@users.idx.select-columns-to-add"
-        nzPlaceHolder="Add columns"
-        [nzShowArrow]="true"
-        [(ngModel)]="extraShowedColumns"
-        nzMaxTagCount="1"
-        [nzMaxTagPlaceholder]="morePlaceholder"
-      >
-        <nz-option
-          *ngFor="let item of allExtraColumns"
-          [nzLabel]="item"
-          [nzValue]="item"
-        ></nz-option>
-        <ng-template #morePlaceholder>
-          and {{ extraShowedColumns.length - 1 }} more
+    <div class="search-toolbar">
+      <div class="left-filters">
+        <nz-input-group [nzPrefix]="prefixIconSearch" class="main-search">
+          <input
+            nz-input
+            placeholder="Search by name"
+            i18n-placeholder="@@common.search-by-name"
+            [(ngModel)]="filter.name"
+            (ngModelChange)="onSearch(true)">
+        </nz-input-group>
+        <ng-template #prefixIconSearch>
+          <i nz-icon nzType="icons:icon-search"></i>
         </ng-template>
-      </nz-select>
+        <dashed-multi-select
+          [options]="extraColumnOptions"
+          [isLoading]="isLoading"
+          [labelTemplate]="columnSettingLabel"
+          (optionsChange)="onExtraColumnsChange($event)">
+          <ng-template #columnSettingLabel>
+            <i nz-icon nzType="icons:icon-column-setting"></i>
+            <span i18n="@@common.display">Display</span>
+          </ng-template>
+        </dashed-multi-select>
+      </div>
+      <div class="right-actions">
+        <button class="btn-primary" nz-button nzType="primary" (click)="uploadModalVisible = true">
+          <span nz-icon nzType="user-add" nzTheme="outline"></span>
+          <span i18n="@@common.import">Import</span>
+        </button>
+      </div>
     </div>
-    <button class="import-btn" nz-button nzType="primary" nzSize="large" (click)="openImportModal()">
-      <span nz-icon nzType="user-add" nzTheme="outline"></span>
-      <span i18n="@@common.import">Import</span>
-    </button>
   </div>
   <div class="table-wrapper">
     <nz-table
@@ -52,33 +47,42 @@
       (nzPageIndexChange)="onSearch()"
       [(nzPageIndex)]="filter.pageIndex">
       <thead>
-      <tr>
-        <th>keyId</th>
-        <th i18n="@@common.name">Name</th>
-        <th *ngFor="let prop of extraShowedColumns">{{prop}}</th>
-        <th i18n="@@common.actions">Actions</th>
-      </tr>
+        <tr>
+          <th>keyId</th>
+          <th i18n="@@common.name">Name</th>
+          @for (prop of selectedExtraColumns; track prop) {
+            <th>{{prop}}</th>
+          }
+          <th i18n="@@common.actions">Actions</th>
+        </tr>
       </thead>
       <tbody>
-      <ng-container *ngFor="let user of basicTable.data">
-        <tr>
-          <td>{{ user.keyId }}</td>
-          <td>
-            <span>{{ user.name }}</span>
-          </td>
-          <td *ngFor="let prop of extraShowedColumns">{{getCustomizePropertyValue(user, prop)}}</td>
-          <td>
-            <a class="primary-link-btn" i18n="@@users.idx.ff-segments" (click)="openEvaluationDrawer(user)">Evaluate on flags and segments</a>
-            <nz-divider nzType="vertical"></nz-divider>
-            <a class="primary-link-btn" nz-button nzType="link" i18n="@@common.details" (click)="openEndUserDrawer(user)">Details</a>
-          </td>
-        </tr>
-      </ng-container>
+        @for (user of basicTable.data; track user) {
+          <tr>
+            <td>{{ user.keyId }}</td>
+            <td>
+              <span>{{ user.name }}</span>
+            </td>
+            @for (prop of selectedExtraColumns; track prop) {
+              <td>{{getCustomizePropertyValue(user, prop)}}</td>
+            }
+            <td>
+              <a class="primary-link-btn" i18n="@@users.idx.evaluate" (click)="openEvaluationDrawer(user)">Evaluate</a>
+              <nz-divider nzType="vertical"></nz-divider>
+              <a class="primary-link-btn" nz-button nzType="link" i18n="@@common.details" (click)="openEndUserDrawer(user)">Details</a>
+            </td>
+          </tr>
+        }
       </tbody>
     </nz-table>
   </div>
 </div>
 
-<import-user [isVisible]="importModalVisible" (close)="closeImportModal($event)"></import-user>
+<import-end-user
+  [visible]="uploadModalVisible"
+  [uploadUrl]="uploadUrl"
+  templateUrl="assets/upload-global-users.json"
+  (close)="closeUploadModal($event)">
+</import-end-user>
 <user-segments-flags-drawer [visible]="evaluationDrawerVisible" [user]="selectedUser" (close)="closeEvaluationDrawer()"></user-segments-flags-drawer>
 <end-user-drawer [isVisible]="endUserDrawerVisible" (close)="closeEndUserDrawer()" [user]="selectedUser"></end-user-drawer>

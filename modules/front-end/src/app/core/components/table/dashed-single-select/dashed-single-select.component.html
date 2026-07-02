@@ -1,0 +1,19 @@
+<button
+  nzType="dashed"
+  nz-button
+  nz-dropdown
+  [nzDropdownMenu]="dropdownMenu">
+  <span>{{ label }}</span>:&nbsp;{{ selectedLabel }}
+  @if (hasValue) {
+    <i nz-icon nzType="close-circle" (click)="clearValue($event)"></i>
+  } @else {
+    <i nz-icon nzType="down"></i>
+  }
+</button>
+<nz-dropdown-menu #dropdownMenu="nzDropdownMenu">
+  <ul nz-menu>
+    @for (option of options; track option.value) {
+      <li nz-menu-item (click)="selectOption(option)">{{ option.label }}</li>
+    }
+  </ul>
+</nz-dropdown-menu>

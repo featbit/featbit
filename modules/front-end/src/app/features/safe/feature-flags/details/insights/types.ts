@@ -64,8 +64,8 @@ export interface IFeatureFlagEndUserPagedResult {
 
 
 export class InsightsFilter {
-  period: PeriodOption = PeriodOption.Last7D;
-  intervalType: IntervalType = IntervalType.Day;
+  period: PeriodOption = PeriodOption.Last30m;
+  intervalType: IntervalType = IntervalType.Minute;
 
   variationId: string = '';
   userQuery: string = '';

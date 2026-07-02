@@ -1,23 +1,28 @@
-import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
-import {NzMessageService} from 'ng-zorro-antd/message';
-import {EnvUserService} from '@services/env-user.service';
-import {SegmentService} from '@services/segment.service';
-import {IUserProp, IUserType} from '@shared/types';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { NzMessageService } from 'ng-zorro-antd/message';
+import { EnvUserService } from '@services/env-user.service';
+import { SegmentService } from '@services/segment.service';
+import { IUserProp, IUserType } from '@shared/types';
 
-import {ISegment, ISegmentFlagReference, Segment} from '../../types/segments-index';
-import {CdkDragDrop, moveItemInArray} from "@angular/cdk/drag-drop";
-import {EnvUserPropService} from "@services/env-user-prop.service";
-import {EnvUserFilter} from "@features/safe/end-users/types/featureflag-user";
-import {ICondition, IRule} from "@shared/rules";
-import {getPathPrefix} from "@utils/index";
-import {RefTypeEnum} from "@core/components/audit-log/types";
-import {MessageQueueService} from "@services/message-queue.service";
+import { ISegment, ISegmentFlagReference, Segment } from '../../types/segments';
+import { CdkDragDrop, moveItemInArray } from "@angular/cdk/drag-drop";
+import { EnvUserPropService } from "@services/env-user-prop.service";
+import { EnvUserSearchFilter } from "@features/safe/end-users/types/featureflag-user";
+import { ICondition, IRule } from "@shared/rules";
+import { RefTypeEnum } from "@core/components/audit-log/types";
+import { getCurrentProjectEnv } from "@utils/project-env";
+import { finalize } from 'rxjs';
+import { PermissionsService } from "@services/permissions.service";
+import { PermissionLicenseService } from "@services/permission-license.service";
+import { permissionActions } from "@shared/policy";
+import { ChangeReviewModalData, ReviewModalKindEnum } from "@core/components/change-review/types";
 
 @Component({
-  selector: 'segment-targeting',
-  templateUrl: './targeting.component.html',
-  styleUrls: ['./targeting.component.less']
+    selector: 'segment-targeting',
+    templateUrl: './targeting.component.html',
+    styleUrls: ['./targeting.component.less'],
+    standalone: false
 })
 export class TargetingComponent implements OnInit {
   public segmentDetail: Segment;
@@ -27,15 +32,27 @@ export class TargetingComponent implements OnInit {
   public id: string;
   public targetUsersActive = true;
   public flagReferences: ISegmentFlagReference[] = [];
+  flagReferencesModalVisible: boolean = false;
 
-  originalData: string = '{}';
-  currentData: string = '{}';
-  refType: RefTypeEnum = RefTypeEnum.Segment;
   reviewModalVisible: boolean = false;
+  reviewModalData: ChangeReviewModalData;
+
+  canUpdateTargetingUsers: boolean = false;
+  canUpdateRules: boolean = false;
 
   onReviewChanges() {
-    this.originalData = JSON.stringify(this.segmentDetail.originalData);
-    this.currentData = JSON.stringify(this.segmentDetail.dataToSave);
+    if (!this.canUpdateTargetingUsers && !this.canUpdateRules) {
+      this.msg.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
+    this.reviewModalData = {
+      previous: JSON.stringify(this.segmentDetail.originalData),
+      current: JSON.stringify(this.segmentDetail.dataToSave),
+      refType: RefTypeEnum.Segment,
+      refName: this.segmentDetail.name,
+      kind: ReviewModalKindEnum.Save
+    };
 
     this.reviewModalVisible = true;
   }
@@ -44,58 +61,57 @@ export class TargetingComponent implements OnInit {
     this.reviewModalVisible = false;
   }
 
+  currentEnvId: string = '';
+
   constructor(
-    private router: Router,
-    private route:ActivatedRoute,
+    private route: ActivatedRoute,
     private segmentService: SegmentService,
     private envUserService: EnvUserService,
     private envUserPropService: EnvUserPropService,
-    private messageQueueService: MessageQueueService,
-    private msg: NzMessageService
+    private msg: NzMessageService,
+    private permissionsService: PermissionsService,
+    private permissionLicenseService: PermissionLicenseService,
   ) {
     // user properties
-    this.envUserPropService.get().subscribe(properties => {
-      this.userProps = properties;
-      this.isUserPropsLoading = false;
-    }, () => this.isUserPropsLoading = false);
+    this.envUserPropService.get().subscribe({
+      next: (properties) => {
+        this.userProps = properties;
+        this.isUserPropsLoading = false;
+      },
+      error: () => this.isUserPropsLoading = false
+    });
   }
 
   ngOnInit(): void {
-    this.route.paramMap.subscribe( paramMap => {
-      this.id = decodeURIComponent(paramMap.get('id'));
-      this.messageQueueService.subscribe(this.messageQueueService.topics.SEGMENT_SETTING_CHANGED(this.id), () => this.refreshData());
-      this.loadData();
-      this.segmentService.getFeatureFlagReferences(this.id).subscribe((flags: ISegmentFlagReference[]) => {
-        this.flagReferences = [...flags];
-      });
-    })
-  }
+    this.currentEnvId = getCurrentProjectEnv().envId;
 
-  private async refreshData() {
-    return this.segmentService.getSegment(this.id).subscribe((result: ISegment) => {
-      if (result) {
-        const { name, description } = result;
-        this.segmentDetail.name = name;
-        this.segmentDetail.description = description;
+    this.route.paramMap.subscribe({
+      next: async (paramMap) => {
+        this.id = decodeURIComponent(paramMap.get('id'));
+        await this.loadData();
+        this.canUpdateTargetingUsers = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.segmentDetail.rn, permissionActions.UpdateSegmentTargetingUsers);
+        this.canUpdateRules = this.permissionLicenseService.isGrantedByLicenseAndPermission(this.segmentDetail.rn, permissionActions.UpdateSegmentRules);
+        this.segmentService.getFeatureFlagReferences(this.id).subscribe((flags: ISegmentFlagReference[]) => {
+          this.flagReferences = [...flags];
+        });
       }
-    })
+    });
   }
 
   private async loadData() {
-    return this.segmentService.getSegment(this.id).subscribe((result: ISegment) => {
-      if (result) {
-        this.id = result.id;
-        this.loadSegment(result);
-      }
-    })
-  }
-
-  public openFlagPage(flagKey: string) {
-    const url = this.router.serializeUrl(
-      this.router.createUrlTree([`/${getPathPrefix()}feature-flags/${flagKey}/targeting`])
-    );
-
-    window.open(url, '_blank');
+    return new Promise((resolve) => {
+      return this.segmentService.getSegment(this.id)
+      .pipe(finalize(() => resolve(null)))
+      .subscribe({
+        next: (result: ISegment) => {
+          if (result) {
+            this.id = result.id;
+            this.loadSegment(result);
+          }
+        },
+        error: () => this.msg.error($localize`:@@common.load-data-failed:Failed to load data, please refresh the page.`)
+      });
+    });
   }
 
   private loadSegment(segment: ISegment) {
@@ -104,8 +120,8 @@ export class TargetingComponent implements OnInit {
     const userKeyIds = [...segment.included, ...segment.excluded];
     if (userKeyIds.length > 0) {
       this.envUserService.getByKeyIds(userKeyIds).subscribe((users: IUserType[]) => {
-        this.segmentDetail.includedUsers = this.segmentDetail.segment.included.map(keyId => users.find(u => u.keyId === keyId) ?? this.createTemporaryUser(keyId));
-        this.segmentDetail.excludedUsers = this.segmentDetail.segment.excluded.map(keyId => users.find(u => u.keyId === keyId) ?? this.createTemporaryUser(keyId));
+        this.segmentDetail.includedUsers = this.segmentDetail.included.map(keyId => users.find(u => u.keyId === keyId) ?? this.createGlobalUser(keyId));
+        this.segmentDetail.excludedUsers = this.segmentDetail.excluded.map(keyId => users.find(u => u.keyId === keyId) ?? this.createGlobalUser(keyId));
 
         this.isLoading = false;
       });
@@ -114,13 +130,16 @@ export class TargetingComponent implements OnInit {
     }
   }
 
-  private createTemporaryUser(keyId: string): IUserType {
-    return { id: '', keyId, name: keyId };
+  private createGlobalUser(keyId: string): IUserType {
+    return { id: '', keyId, name: keyId, envId: null };
   }
 
-  public onSearchUser(filter: EnvUserFilter = new EnvUserFilter()) {
-    this.envUserService.search(filter).subscribe(pagedResult => {
-      this.userList = [...pagedResult.items];
+  public onSearchUser(filter: EnvUserSearchFilter = new EnvUserSearchFilter()) {
+    // shared segment can only reference global users
+    filter.globalUserOnly = this.segmentDetail.isShared;
+
+    this.envUserService.search(filter).subscribe(users => {
+      this.userList = users;
     })
   }
 
@@ -135,18 +154,23 @@ export class TargetingComponent implements OnInit {
   public onSave(data: any) {
     this.isLoading = true;
 
-    this.segmentService.update({...this.segmentDetail.dataToSave, comment: data.comment}).subscribe({
-      next: (result) => {
-        this.msg.success($localize `:@@common.operation-success:Operation succeeded`);
-        this.messageQueueService.emit(this.messageQueueService.topics.SEGMENT_TARGETING_CHANGED(this.id));
-        this.loadSegment(result);
-        this.isLoading = false;
-      },
-      error: _ => {
-        this.msg.error($localize `:@@common.operation-failed:Operation failed`);
-        this.isLoading = false;
-      }
-    });
+    const { included, excluded, rules } = this.segmentDetail.targetingDataToSave;
+    const payload = {
+      included,
+      excluded,
+      rules,
+      comment: data.comment
+    };
+
+    this.segmentService.updateTargeting(this.id, payload)
+      .pipe(finalize(() => this.isLoading = false))
+      .subscribe({
+        next: () => {
+          this.loadData();
+          this.msg.success($localize`:@@common.operation-success:Operation succeeded`);
+        },
+        error: () => this.msg.error($localize`:@@common.operation-failed:Operation failed`)
+      });
 
     this.reviewModalVisible = false;
   }
@@ -158,6 +182,11 @@ export class TargetingComponent implements OnInit {
   }
 
   addRule() {
+    if (!this.canUpdateRules) {
+      this.msg.warning(this.permissionsService.genericDenyMessage);
+      return;
+    }
+
     this.segmentDetail.newRule();
   }
 

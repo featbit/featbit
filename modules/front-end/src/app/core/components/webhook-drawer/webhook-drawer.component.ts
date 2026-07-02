@@ -22,7 +22,8 @@ import { getTestPayload } from "@core/components/test-webhook-modal/test-webhook
 @Component({
   selector: 'webhook-drawer',
   templateUrl: './webhook-drawer.component.html',
-  styleUrls: ['./webhook-drawer.component.less']
+  styleUrls: [ './webhook-drawer.component.less' ],
+  standalone: false
 })
 export class WebhookDrawerComponent implements OnInit {
 
@@ -39,6 +40,7 @@ export class WebhookDrawerComponent implements OnInit {
     payloadTemplate: FormControl<string>;
     secret: FormControl<string>;
     isActive: FormControl<boolean>;
+    preventEmptyPayloads: FormControl<boolean>;
   }>;
 
   constructor(
@@ -85,7 +87,8 @@ export class WebhookDrawerComponent implements OnInit {
       payloadTemplateType: new FormControl(this._webhook?.payloadTemplateType ?? 'default'),
       payloadTemplate: new FormControl(this._webhook?.payloadTemplate ?? WebhookDefaultPayloadTemplate, [this.jsonHandlebarsTemplateValidator]),
       secret: new FormControl(this._webhook?.secret),
-      isActive: new FormControl(this._webhook?.isActive ?? true)
+      isActive: new FormControl(this._webhook?.isActive ?? true),
+      preventEmptyPayloads: new FormControl(this._webhook?.preventEmptyPayloads ?? false),
     });
 
     if (this._webhook) {
@@ -160,6 +163,12 @@ export class WebhookDrawerComponent implements OnInit {
     return this.form.get('scopes') as FormArray;
   }
 
+  scopesTrackByFn(index: number, item: any) {
+    const projectId = item.get('projectId').value;
+    const envIds = item.get('envIds').value;
+    return `${projectId}-${envIds?.join(',')}`;
+  }
+
   private constructScopesFormArray(scopes: string[]): FormArray {
     let formGroups;
     if (!scopes || scopes.length === 0) {
@@ -227,13 +236,12 @@ export class WebhookDrawerComponent implements OnInit {
     return this.form.get('events') as FormArray;
   }
 
-  private constructEventsFormArray(events: string[]): FormArray {
+  private constructEventsFormArray(defaultSelectedEvents: string[] | undefined): FormArray {
     let groupedEvents = WebhookEvents.reduce((acc, event) => {
       let value = {
         group: event.group,
         label: event.label,
-        value: event.value,
-        checked: events?.includes(event.value) ?? false
+        value: event.value
       };
 
       if (!acc[event.group]) {
@@ -246,7 +254,8 @@ export class WebhookDrawerComponent implements OnInit {
 
     let formGroups = Object.keys(groupedEvents).map(group => {
       let events = groupedEvents[group];
-      let checkedCount = events.filter(e => e.checked).length;
+      let selectedEvents = events.filter(e => defaultSelectedEvents?.includes(e.value)).map(e => e.value);
+      let checkedCount = selectedEvents.length;
 
       return new FormGroup({
         group: new FormGroup({
@@ -254,13 +263,14 @@ export class WebhookDrawerComponent implements OnInit {
           indeterminate: new FormControl(checkedCount > 0 && checkedCount < events.length),
           checked: new FormControl(checkedCount === events.length)
         }),
-        events: new FormControl(groupedEvents[group])
+        events: new FormControl(events),
+        selectedEvents: new FormControl(selectedEvents)
       });
     });
 
     const eventsValidator = (control: FormArray) => {
-      let events = control.value?.flatMap(group => group.events);
-      if (events?.some(event => event.checked === true)) {
+      let selectedEvents = control.value?.flatMap(group => group.selectedEvents);
+      if (selectedEvents?.length > 0) {
         return null;
       }
 
@@ -269,24 +279,34 @@ export class WebhookDrawerComponent implements OnInit {
 
     const formArray = this.fb.array(formGroups, [eventsValidator]);
     formArray.controls.forEach(control => {
-      let eventsControl = control.get('events');
+      let events = control.get('events').value.map(e => e.value);
+      let selectedEventsControl = control.get('selectedEvents');
       let checkAllControl = control.get('group.checked');
       let indeterminateControl = control.get('group.indeterminate');
 
       checkAllControl.valueChanges.subscribe(checked => {
         indeterminateControl.setValue(false);
-        eventsControl.setValue(eventsControl.value.map(event => ({ ...event, checked })), { emitEvent: false });
+        if (checked) {
+          // select all events
+          selectedEventsControl.setValue(events, { emitEvent: false });
+        } else {
+          // deselect all events
+          selectedEventsControl.setValue([], { emitEvent: false });
+        }
       });
 
-      eventsControl.valueChanges.subscribe(events => {
-        if (events.every(event => event.checked === true)) {
+      selectedEventsControl.valueChanges.subscribe(selected => {
+        if (selected.length === events.length) {
+          // all events selected
           indeterminateControl.setValue(false);
           checkAllControl.setValue(true, { emitEvent: false });
-        } else if (events.some(event => event.checked === true)) {
-          indeterminateControl.setValue(true);
+        } else if (selected.length === 0) {
+          // no event selected
+          indeterminateControl.setValue(false);
           checkAllControl.setValue(false, { emitEvent: false });
         } else {
-          indeterminateControl.setValue(false);
+          // some events selected
+          indeterminateControl.setValue(true);
           checkAllControl.setValue(false, { emitEvent: false });
         }
       });
@@ -345,7 +365,7 @@ export class WebhookDrawerComponent implements OnInit {
   testWebhook: TestWebhook = null;
   testModalVisible: boolean = false;
   openTestModal() {
-    const { name, url, payloadTemplate, headers, secret } = this.form.value;
+    const { name, url, payloadTemplate, headers, secret, preventEmptyPayloads } = this.form.value;
     this.testWebhook = {
       id: uuidv4(),
       name,
@@ -354,7 +374,8 @@ export class WebhookDrawerComponent implements OnInit {
         .filter(header => header.key)
         .map(header => ({ key: header.key, value: header.value })),
       payloadTemplate,
-      secret
+      secret,
+      preventEmptyPayloads
     };
 
     this.testModalVisible = true;
@@ -366,21 +387,22 @@ export class WebhookDrawerComponent implements OnInit {
   }
 
   doSubmit() {
-    const { name, url, scopes, events, headers, payloadTemplateType, payloadTemplate, secret, isActive } = this.form.value;
+    const { name, url, scopes, events, headers, payloadTemplateType, payloadTemplate, secret, isActive, preventEmptyPayloads } = this.form.value;
     const payload = {
       name,
       url,
       scopes: scopes
         .filter(scope => scope.projectId && scope.envIds?.length > 0)
         .map(scope => `${scope.projectId}/${scope.envIds.join(',')}`),
-      events: events.flatMap(group => group.events.filter(event => event.checked).map(event => event.value)),
+      events: events.flatMap(group => group.selectedEvents),
       headers: headers
         .filter(header => header.key)
         .map(header => ({ key: header.key, value: header.value })),
       payloadTemplateType,
       payloadTemplate,
       secret,
-      isActive
+      isActive,
+      preventEmptyPayloads,
     };
 
     let responseHandler = {

@@ -4,7 +4,7 @@ import { USER_IS_IN_SEGMENT, USER_IS_NOT_IN_SEGMENT } from "@shared/constants";
 import { UserOriginEnum } from "@features/safe/workspaces/types/profiles";
 
 export function getPathPrefix() {
-  return location.pathname.match(/^(?<locale>\/en\/|\/zh\/)/i)?.groups['locale'] || '/';
+  return document.querySelector('base')?.getAttribute('href');
 }
 
 export function getProfile(): IProfile | null {
@@ -148,8 +148,4 @@ export const getTimezoneString = () => {
   const offset = - new Date().getTimezoneOffset() / 60;
 
   return encodeURIComponent(`Etc/GMT${offset >= 0 ? '-': '+'}${Math.abs(offset)}`);
-}
-
-export const trimJsonString = (json: string) => {
-  return JSON.stringify(JSON.parse(json));
 }

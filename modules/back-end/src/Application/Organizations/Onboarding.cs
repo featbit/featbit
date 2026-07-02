@@ -10,6 +10,8 @@ public class Onboarding : IRequest<bool>
 
     public string OrganizationName { get; set; }
 
+    public string OrganizationKey { get; set; }
+
     public string ProjectName { get; set; }
 
     public string ProjectKey { get; set; }
@@ -23,6 +25,9 @@ public class OnboardingValidator : AbstractValidator<Onboarding>
     {
         RuleFor(x => x.OrganizationName)
             .NotEmpty().WithErrorCode(ErrorCodes.Required("organizationName"));
+
+        RuleFor(x => x.OrganizationKey)
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("organizationKey"));
 
         RuleFor(x => x.ProjectName)
             .NotEmpty().WithErrorCode(ErrorCodes.Required("projectName"));
@@ -54,7 +59,7 @@ public class OnboardingHandler : IRequestHandler<Onboarding, bool>
     public async Task<bool> Handle(Onboarding request, CancellationToken cancellationToken)
     {
         var organization = await _organizationService.GetAsync(request.OrganizationId);
-        organization.Initialize(request.OrganizationName);
+        organization.Initialize(request.OrganizationName, request.OrganizationKey);
         await _organizationService.UpdateAsync(organization);
 
         var project = new Project(organization.Id, request.ProjectName, request.ProjectKey);

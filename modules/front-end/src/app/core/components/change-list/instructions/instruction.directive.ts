@@ -1,7 +1,8 @@
 import { Directive, ViewContainerRef } from "@angular/core";
 
 @Directive({
-  selector: '[instruction-host]'
+    selector: '[instruction-host]',
+    standalone: false
 })
 export class InstructionDirective {
 

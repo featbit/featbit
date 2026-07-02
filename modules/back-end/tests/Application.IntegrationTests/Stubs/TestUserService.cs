@@ -43,11 +43,11 @@ public class TestUserService : NullServiceBase<User>, IUserService
         return Task.FromResult<ICollection<User>>(users);
     }
 
-    public Task<ICollection<Workspace>> GetWorkspacesAsync(string email)
+    public Task<ICollection<Workspace>> GetWorkspacesAsync(Guid userId)
     {
         var workspaces = new[]
         {
-            TestWorkspace.Instance()
+            TestWorkspace.Instance
         };
 
         return Task.FromResult<ICollection<Workspace>>(workspaces);

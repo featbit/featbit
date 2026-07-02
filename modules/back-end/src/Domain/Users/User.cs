@@ -4,8 +4,6 @@ namespace Domain.Users;
 
 public class User : AuditedEntity
 {
-    public Guid WorkspaceId { get; set; }
-
     public string Name { get; set; }
 
     public string Email { get; set; }
@@ -14,43 +12,54 @@ public class User : AuditedEntity
 
     public string Origin { get; set; }
 
+    public string InitialPassword { get; set; }
+
     /// <summary>
     /// for test project use only
     /// </summary>
-    public User(Guid id, Guid workspaceId, string email, string password, string name = "", string origin = UserOrigin.Local)
+    public User(
+        Guid id, 
+        string email, 
+        string password, 
+        string name = "", 
+        string origin = UserOrigin.Local, 
+        string initialPassword = "")
     {
         Id = id;
 
-        WorkspaceId = workspaceId;
         Email = email;
         Password = password;
         Name = name;
         Origin = origin;
+        InitialPassword = initialPassword;
 
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = CreatedAt;
     }
 
-    public User(Guid workspaceId, string email, string password, string name = "", string origin = UserOrigin.Local)
+    public User(
+        string email, 
+        string password, 
+        string name = null, 
+        string origin = UserOrigin.Local, 
+        string initialPassword = "")
     {
-        WorkspaceId = workspaceId;
         Email = email;
         Password = password;
-        Name = name;
+        Name = string.IsNullOrWhiteSpace(name) ? email.Split('@')[0] : name;
         Origin = origin;
+        InitialPassword = initialPassword;
 
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = CreatedAt;
     }
 
-    public IEnumerable<Claim> Claims()
+    public Claim[] Claims()
     {
-        var claims = new List<Claim>
-        {
-            new(UserClaims.Id, Id.ToString()),
-            new(UserClaims.Email, Email),
-            new(UserClaims.WorkspaceId, WorkspaceId.ToString()),
-        };
+        Claim[] claims =
+        [
+            new(UserClaims.Id, Id.ToString())
+        ];
 
         return claims;
     }
@@ -60,6 +69,13 @@ public class User : AuditedEntity
         Email = email;
         Name = name;
 
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void UpdatePassword(string password)
+    {
+        Password = password;
+        InitialPassword = string.Empty;
         UpdatedAt = DateTime.UtcNow;
     }
 }

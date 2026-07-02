@@ -1,0 +1,199 @@
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
+import { debounceTime, first, map, switchMap } from "rxjs/operators";
+import { SegmentService } from "@services/segment.service";
+import { CreateSegment, ISegment, SegmentType } from "@features/safe/segments/types/segments";
+import { NzMessageService } from "ng-zorro-antd/message";
+import {
+  GroupedResource,
+  groupResources,
+  isChildResourceOf,
+  ResourceSpaceLevel,
+  ResourceTypeEnum,
+  ResourceV2
+} from "@shared/policy";
+import { getCurrentLicense, getCurrentOrganization, getCurrentProjectEnv } from "@utils/project-env";
+import { ResourceKeyPattern, LicenseFeatureEnum } from "@shared/types";
+import { slugify } from "@utils/index";
+
+@Component({
+    selector: 'segment-creation-modal',
+    templateUrl: './segment-creation-modal.component.html',
+    styleUrls: ['./segment-creation-modal.component.less'],
+    standalone: false
+})
+export class SegmentCreationModalComponent {
+  private _isVisible: boolean = false;
+  get isVisible() {
+    return this._isVisible;
+  }
+  @Input()
+  set isVisible(visible: boolean) {
+    this._isVisible = visible;
+    if (visible) {
+      this.init();
+    }
+  }
+
+  @Output()
+  onClose: EventEmitter<ISegment> = new EventEmitter<ISegment>();
+
+  form: FormGroup<{
+    name: FormControl<string>,
+    key: FormControl<string>;
+    description: FormControl<string>
+  }>;
+
+  selectedType: SegmentType = SegmentType.EnvironmentSpecific;
+  types = [
+    {
+      label: $localize`:@@segment.current-environment:Current Environment`,
+      value: SegmentType.EnvironmentSpecific
+    },
+    {
+      label: $localize`:@@segment.shareable:Shareable`,
+      value: SegmentType.Shared
+    }
+  ]
+
+  typeChanged(selectedType: string) {
+    this.selectedType = selectedType as SegmentType;
+    this.form.reset();
+  }
+
+  isShareableSegmentGranted: boolean = false;
+  currentEnvironment: ResourceV2;
+
+  constructor(
+    private formBuilder: FormBuilder,
+    private service: SegmentService,
+    private msg: NzMessageService
+  ) { }
+
+  init() {
+    this.form = this.formBuilder.group({
+      name: new FormControl('', [ Validators.required ]),
+      key: new FormControl('', {
+        validators: [ Validators.required, Validators.pattern(ResourceKeyPattern) ],
+        asyncValidators: [ this.segmentKeyAsyncValidator ],
+      }),
+      description: new FormControl('')
+    });
+
+    this.form.get('name').valueChanges.subscribe((name) => {
+      this.nameChange(name);
+    });
+
+    const currentOrg = getCurrentOrganization();
+    const curProjectEnv = getCurrentProjectEnv();
+
+    this.currentEnvironment = {
+      id: curProjectEnv.envId,
+      name: curProjectEnv.envName,
+      pathName: `${currentOrg.name}/${curProjectEnv.projectName}/${curProjectEnv.envName}`,
+      rn: `organization/${currentOrg.key}:project/${curProjectEnv.projectKey}:env/${curProjectEnv.envKey}`,
+      type: ResourceTypeEnum.Env,
+    };
+
+    const license = getCurrentLicense();
+    this.isShareableSegmentGranted = license.isGranted(LicenseFeatureEnum.ShareableSegment);
+
+    this.selectedType = SegmentType.EnvironmentSpecific;
+    this.selectedScopes = [ this.currentEnvironment ];
+  }
+
+  nameChange(name: string) {
+    let keyControl = this.form.get('key')!;
+    keyControl.setValue(slugify(name ?? ''));
+    keyControl.markAsDirty();
+  }
+
+  segmentKeyAsyncValidator = (control: FormControl) => control.valueChanges.pipe(
+    debounceTime(300),
+    switchMap(value => this.service.isKeyUsed(value as string, this.selectedType)),
+    map(isUsed => {
+      switch (isUsed) {
+        case true:
+          return { error: true, duplicated: true };
+        case undefined:
+          return { error: true, unknown: true };
+        default:
+          return null;
+      }
+    }),
+    first()
+  );
+
+  private _selectedScopes: ResourceV2[] = [];
+  get selectedScopes() {
+    return this._selectedScopes;
+  }
+  set selectedScopes(scopes: ResourceV2[]) {
+    this._selectedScopes = scopes;
+    this.groupedSelectedScopes = groupResources(scopes);
+  }
+  removeScope(scope: ResourceV2) {
+    this.selectedScopes = this.selectedScopes.filter(x => x.rn !== scope.rn);
+  }
+
+  get defaultSelectedScopes(): string[] {
+    return this.selectedScopes.map(x => x.id);
+  }
+
+  groupedSelectedScopes: GroupedResource[] = [];
+  resourceFinderVisible = false;
+  openResourceFinder() {
+    this.resourceFinderVisible = true;
+  }
+  closeResourceFinder(resources: ResourceV2[]) {
+    if (resources.length > 0) {
+      this.selectedScopes = resources;
+    }
+
+    this.resourceFinderVisible = false;
+  }
+
+  creating: boolean = false;
+  create() {
+    this.creating = true;
+
+    const { name, key, description } = this.form.value;
+    const type = this.selectedType;
+
+    const currentEnvRN = this.currentEnvironment.rn;
+    const scopes = this.selectedScopes
+      .map(x => x.rn)
+      .sort((a, b) => b.length - a.length);
+    if (scopes.find(x => x !== currentEnvRN && isChildResourceOf(currentEnvRN, x)) !== undefined) {
+      // remove current environment from scopes
+      scopes.splice(scopes.indexOf(currentEnvRN), 1);
+    }
+
+    const payload: CreateSegment = {
+      name,
+      key,
+      description,
+      type,
+      scopes
+    };
+
+    this.service.create(payload).subscribe({
+      next: (segment: ISegment) => {
+        this.creating = false;
+        this.close(segment);
+      },
+      error: () => {
+        this.msg.error($localize`:@@common.operation-failed:Operation failed`);
+        this.creating = false;
+      }
+    });
+  }
+
+  close(segment: ISegment) {
+    this.onClose.emit(segment);
+  }
+
+  protected readonly ResourceSpaceLevel = ResourceSpaceLevel;
+  protected readonly ResourceTypeEnum = ResourceTypeEnum;
+  protected readonly SegmentType = SegmentType;
+}

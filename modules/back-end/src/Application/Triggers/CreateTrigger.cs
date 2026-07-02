@@ -19,10 +19,10 @@ public class CreateTriggerValidator : AbstractValidator<CreateTrigger>
     public CreateTriggerValidator()
     {
         RuleFor(x => x.Type)
-            .Must(TriggerTypes.IsDefined).WithErrorCode(ErrorCodes.InvalidTriggerType);
+            .Must(TriggerTypes.IsDefined).WithErrorCode(ErrorCodes.Invalid("type"));
 
         RuleFor(x => x.Action)
-            .Must(TriggerActions.IsDefined).WithErrorCode(ErrorCodes.InvalidTriggerAction);
+            .Must(TriggerActions.IsDefined).WithErrorCode(ErrorCodes.Invalid("action"));
     }
 }
 

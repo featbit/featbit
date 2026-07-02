@@ -9,7 +9,6 @@ import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzInputModule } from 'ng-zorro-antd/input';
-import { NzMessageModule } from 'ng-zorro-antd/message';
 
 import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
@@ -34,7 +33,6 @@ import {CoreModule} from "@core/core.module";
     NzIconModule,
     NzInputModule,
     CoreModule,
-    NzMessageModule,
     NzDropDownModule,
     NzToolTipModule,
     NzDividerModule,

@@ -1,16 +1,19 @@
+using Application.AuditLogs;
 using Application.Users;
 using Domain.AuditLogs;
 
 namespace Application.FeatureFlags;
 
-public class ToggleFeatureFlag : IRequest<bool>
+public class ToggleFeatureFlag : ResourceChangeRequest, IRequest<Guid>
 {
     public Guid EnvId { get; set; }
 
     public string Key { get; set; }
+
+    public bool Status { get; set; }
 }
 
-public class ToggleFeatureFlagHandler : IRequestHandler<ToggleFeatureFlag, bool>
+public class ToggleFeatureFlagHandler : IRequestHandler<ToggleFeatureFlag, Guid>
 {
     private readonly IFeatureFlagService _service;
     private readonly ICurrentUser _currentUser;
@@ -26,16 +29,22 @@ public class ToggleFeatureFlagHandler : IRequestHandler<ToggleFeatureFlag, bool>
         _publisher = publisher;
     }
 
-    public async Task<bool> Handle(ToggleFeatureFlag request, CancellationToken cancellationToken)
+    public async Task<Guid> Handle(ToggleFeatureFlag request, CancellationToken cancellationToken)
     {
         var flag = await _service.GetAsync(request.EnvId, request.Key);
-        var dataChange = flag.Toggle(_currentUser.Id);
+        if (flag.IsEnabled == request.Status)
+        {
+            return flag.Revision;
+        }
+
+        var dataChange = flag.Toggle(_currentUser.Id, request.Status);
         await _service.UpdateAsync(flag);
 
         // publish on feature flag change notification
-        var notification = new OnFeatureFlagChanged(flag, Operations.Update, dataChange, _currentUser.Id);
+        var notification =
+            new OnFeatureFlagChanged(flag, Operations.Update, dataChange, _currentUser.Id, request.Comment);
         await _publisher.Publish(notification, cancellationToken);
 
-        return true;
+        return flag.Revision;
     }
 }

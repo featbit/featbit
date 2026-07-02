@@ -10,17 +10,13 @@ public class GetGlobalUserList : IRequest<PagedResult<GlobalUser>>
     public GlobalUserFilter Filter { get; set; }
 }
 
-public class GetGlobalUserListHandler : IRequestHandler<GetGlobalUserList, PagedResult<GlobalUser>>
+public class GetGlobalUserListHandler(IGlobalUserService service, IMapper mapper)
+    : IRequestHandler<GetGlobalUserList, PagedResult<GlobalUser>>
 {
-    private readonly IGlobalUserService _service;
-
-    public GetGlobalUserListHandler(IGlobalUserService service)
-    {
-        _service = service;
-    }
-
     public async Task<PagedResult<GlobalUser>> Handle(GetGlobalUserList request, CancellationToken cancellationToken)
     {
-        return await _service.GetListAsync(request.WorkspaceId, request.Filter);
+        var endUsers = await service.GetListAsync(request.WorkspaceId, request.Filter);
+
+        return mapper.Map<PagedResult<GlobalUser>>(endUsers);
     }
 }

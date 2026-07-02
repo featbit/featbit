@@ -2,9 +2,10 @@ import { Component } from '@angular/core';
 import { IdentityService } from "@services/identity.service";
 
 @Component({
-  selector: 'onboarding',
-  templateUrl: './onboarding.component.html',
-  styleUrls: ['./onboarding.component.less']
+    selector: 'onboarding',
+    templateUrl: './onboarding.component.html',
+    styleUrls: ['./onboarding.component.less'],
+    standalone: false
 })
 export class OnboardingComponent {
 
@@ -16,7 +17,7 @@ export class OnboardingComponent {
     this.menuExtended = extended;
   }
 
-  logout() {
-    this.identityService.doLogoutUser();
+  async logout() {
+    await this.identityService.doLogoutUser();
   }
 }

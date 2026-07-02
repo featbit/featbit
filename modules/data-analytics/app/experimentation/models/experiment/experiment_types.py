@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, Iterable, Optional, Tuple
 
 import numpy as np
@@ -98,7 +98,7 @@ class Experiment:
 
     @property
     def is_finished(self) -> bool:
-        return self._end.timestamp() < datetime.utcnow().timestamp()
+        return self._end.timestamp() < datetime.now(timezone.utc).timestamp()
 
     @property
     def event_numeric_type(self) -> int:

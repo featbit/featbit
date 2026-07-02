@@ -1,0 +1,201 @@
+@import "variables";
+
+.table-wrapper {
+  border-radius: 20px;
+  padding: 0 24px 16px 24px;
+
+  .ant-table table {
+    border-spacing:0 4px;
+    background: @grey5-color;
+
+    th {
+      border: none;
+      color: @grey50-color;
+
+      &:first-child {
+        padding-left: 30px;
+      }
+
+      &:last-child {
+        padding-right: 30px;
+      }
+
+      &::before {
+        background-color: transparent !important;
+      }
+    }
+
+    tr:not(.ant-table-measure-now) {
+      height: 56px;
+
+      td {
+        background-color: white;
+        border-bottom: none;
+        color: @grey70-color;
+        &:first-child {
+          padding-left: 30px;
+          border-top-left-radius: 10px;
+          border-bottom-left-radius: 10px;
+        }
+
+        &:last-child {
+          padding-right: 30px;
+          border-top-right-radius: 10px;
+          border-bottom-right-radius: 10px;
+        }
+      }
+    }
+  }
+
+  .spin {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255,0.5);
+  }
+
+  .tag {
+    background: @grey10-color;
+    border-radius: 4px;
+    font-size: 12px;
+    line-height: 150%;
+    color: @grey70-color;
+    display: inline-block;
+    margin-right: 8px;
+    white-space: nowrap;
+    padding: 2px 7px;
+    max-width: 85px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+// table style
+.table-content-area {
+  width: 100%;
+  border-radius: 20px;
+  background-color: @grey5-color;
+
+  .table-search-area {
+    padding: 20px 24px 8px;
+
+    .search-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      // Left side: filters
+      .left-filters {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex: 1;
+        min-width: 0;
+        flex-wrap: wrap;
+
+        .main-search {
+          width: 250px;
+          height: 36px;
+          border-radius: 16px;
+          padding-left: 6px;
+          transition: all 0.2s ease;
+
+          &.single {
+            width: 320px;
+          }
+
+          i {
+            color: @grey40-color;
+            font-size: 16px;
+          }
+
+          &:focus-within {
+            border-color: @primary-color;
+            background: @white;
+            box-shadow: 0 0 0 2px fade(@primary-color, 12%);
+          }
+
+          @media (max-width: 1280px) {
+            width: 150px;
+          }
+        }
+
+        button {
+          height: 36px;
+          border-radius: 12px;
+
+          &.active {
+            background: fade(@primary-color, 10%);
+            color: @primary-color;
+            border-color: @primary-color;
+            border-style: dashed;
+          }
+        }
+      }
+
+      // Right side: action buttons
+      .right-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0;
+
+        // Primary action (e.g. Add)
+        .btn-primary {
+          height: 36px;
+          width: 120px;
+          border-radius: 18px;
+          padding: 0 18px;
+          font-weight: 500;
+          gap: 6px;
+        }
+
+        // Secondary action (e.g. Compare)
+        .btn-secondary {
+          height: 36px;
+          width: 120px;
+          border-radius: 18px;
+          padding: 0 16px;
+          font-weight: 500;
+          color: @purple50-color;
+          border-color: fade(@purple50-color, 40%);
+          background: fade(@purple50-color, 6%);
+
+          &:hover {
+            color: @white;
+            background: @purple50-color;
+            border-color: @purple50-color;
+            box-shadow: 0 2px 8px fade(@purple50-color, 30%);
+          }
+        }
+
+        // More actions (ellipsis icon button)
+        .btn-more {
+          width: 36px;
+          height: 36px;
+          padding: 0;
+          border-radius: 50%;
+          border-color: @grey20-color;
+          color: @grey50-color;
+          background: transparent;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.2s ease;
+
+          .anticon {
+            font-size: 18px;
+          }
+
+          &:hover {
+            border-color: @grey30-color;
+            color: @grey80-color;
+            background: @grey10-color;
+          }
+        }
+      }
+    }
+  }
+}

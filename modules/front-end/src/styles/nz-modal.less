@@ -4,7 +4,25 @@
 // custom modal
 .ant-modal {
   min-width: 600px;
-  min-height: 400px;
+}
+
+.warning-modal-dialog {
+  &.ant-modal {
+    min-width: unset;
+  }
+
+  .ant-modal-confirm-title {
+    font-weight: 600;
+    font-size: 16px;
+  }
+
+  .ant-btn {
+    border-radius: 8px;
+  }
+
+  .ant-modal-confirm-content {
+    margin-top: 12px;
+  }
 }
 
 .ant-modal-content,
@@ -133,6 +151,15 @@
       cursor: pointer;
       border-radius: 4px;
 
+      &.disabled {
+        opacity: .5;
+
+        &:hover {
+          cursor: default;
+          background-color: unset;
+        }
+      }
+
       &:hover {
         background-color: @grey10-color;
       }
@@ -140,13 +167,54 @@
   }
 }
 
-// import-user modal
-.import-user-modal {
+.import-end-user-modal {
   .ant-modal-body {
     padding: 36px 40px 12px 40px;
   }
 
   .ant-modal-header::after {
     content: none;
+  }
+}
+
+.relay-proxy-key-modal,
+.relay-proxy-agent-modal,
+.segment-creation-modal,
+.copy-flag-modal,
+.download-confirm-modal,
+.change-comment-modal,
+.edit-variations-modal,
+.change-review-modal,
+.flag-references-modal {
+  &.ant-modal {
+    min-width: unset;
+  }
+
+  .ant-modal-body {
+    padding: 16px 40px 12px 40px;
+  }
+
+  .ant-modal-header::after {
+    content: none;
+  }
+}
+
+.update-subscription-modal {
+  &.ant-modal {
+    min-width: unset;
+  }
+
+  .ant-modal-header {
+    padding: 24px 32px 0;
+    border-bottom: none;
+  }
+
+  .ant-modal-body {
+    padding: 0 32px 16px;
+  }
+
+  .ant-modal-footer {
+    padding: 0 32px 24px;
+    border-top: none;
   }
 }

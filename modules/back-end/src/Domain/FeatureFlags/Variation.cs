@@ -2,10 +2,19 @@ namespace Domain.FeatureFlags;
 
 public class Variation
 {
+    /// <summary>
+    /// The unique identifier for the variation. Usually a GUID.
+    /// </summary>
     public string Id { get; set; }
 
+    /// <summary>
+    /// The name of the variation.
+    /// </summary>
     public string Name { get; set; }
 
+    /// <summary>
+    /// The value associated with the variation.
+    /// </summary>
     public string Value { get; set; }
 
     public bool IsValid()

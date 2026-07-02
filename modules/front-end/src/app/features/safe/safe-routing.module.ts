@@ -45,13 +45,6 @@ const routes: Routes = [
         },
       },
       {
-        path: 'data-sync',
-        loadChildren: () => import("./data-sync/data-sync.module").then(m => m.DataSyncModule),
-        data: {
-          breadcrumb: $localize `:@@data-sync:Data Sync`
-        },
-      },
-      {
         path: 'audit-logs',
         loadChildren: () => import("./audit-logs/audit-logs.module").then(m => m.AuditLogsModule),
         data: {
@@ -63,6 +56,13 @@ const routes: Routes = [
         loadChildren: () => import("./workspaces/workspaces.module").then(m => m.WorkspacesModule),
         data: {
           breadcrumb: $localize `:@@workspace:Workspace`
+        },
+      },
+      {
+        path: 'organization',
+        loadChildren: () => import("./organizations/organization.module").then(m => m.OrganizationModule),
+        data: {
+          breadcrumb: $localize `:@@organization:Organization`
         },
       },
       {

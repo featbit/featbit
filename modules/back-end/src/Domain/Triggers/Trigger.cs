@@ -73,7 +73,7 @@ public class Trigger : AuditedEntity
         }
 
         var dataChange = new DataChange(featureFlag);
-        featureFlag.Toggle(SystemUser.Id);
+        featureFlag.Toggle(SystemUser.Id, !featureFlag.IsEnabled);
 
         TriggeredTimes++;
         LastTriggeredAt = DateTime.UtcNow;

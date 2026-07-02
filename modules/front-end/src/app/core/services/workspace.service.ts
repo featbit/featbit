@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from "@angular/common/http";
 import { environment } from "src/environments/environment";
-import { firstValueFrom, Observable, of } from "rxjs";
+import { Observable, of } from "rxjs";
 import { IOidc, IWorkspace } from "@shared/types";
 import { CURRENT_WORKSPACE } from "@utils/localstorage-keys";
 import { catchError } from "rxjs/operators";
+import { LicenseQuota, WorkspaceUsage, WorkspaceUsageFilter } from "@features/safe/workspaces/types/workspace";
 
 @Injectable({
   providedIn: 'root'
@@ -25,10 +26,16 @@ export class WorkspaceService {
     return this.http.put<IWorkspace>(`${this.baseUrl}/sso-oidc`, oidc);
   }
 
-  getWorkspace(): Promise<IWorkspace> {
-    return firstValueFrom(
-      this.http.get<IWorkspace>(this.baseUrl).pipe(catchError(() => of(undefined)))
-    );
+  getLicenseQuota(): Observable<LicenseQuota | undefined> {
+    const url = `${this.baseUrl}/license-quota`;
+    return this.http.get<LicenseQuota>(url).pipe(catchError(() => of(undefined)));
+  }
+
+  getUsage(filter: WorkspaceUsageFilter): Observable<WorkspaceUsage | undefined> {
+    const url = `${this.baseUrl}/usages`;
+    return this.http
+      .get<WorkspaceUsage>(url, { params: { ...filter } })
+      .pipe(catchError(() => of(undefined)));
   }
 
   isKeyUsed(key: string): Observable<boolean> {

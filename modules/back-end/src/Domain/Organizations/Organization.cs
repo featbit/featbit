@@ -6,28 +6,45 @@ public class Organization : AuditedEntity
 
     public string Name { get; set; }
 
+    public OrganizationSetting Settings { get; set; }
+
+    public string Key { get; set; }
+
     public bool Initialized { get; set; }
 
     public string License { get; set; }
 
-    public Organization(Guid workspaceId, string name)
+    public OrganizationPermissions DefaultPermissions { get; set; }
+
+    // for ef core and System.Text.Json
+    public Organization()
+    {
+    }
+
+    public Organization(Guid workspaceId, string name, string key)
     {
         WorkspaceId = workspaceId;
         Name = name;
+        Key = key;
         Initialized = false;
         License = string.Empty;
+        Settings = new OrganizationSetting();
+        DefaultPermissions = new OrganizationPermissions();
     }
 
-    public void UpdateName(string name)
+    public void Update(string name, OrganizationSetting settings, OrganizationPermissions permissions)
     {
         Name = name;
+        Settings = settings;
+        DefaultPermissions = permissions;
 
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void Initialize(string name)
+    public void Initialize(string name, string key)
     {
         Name = name;
+        Key = key;
         Initialized = true;
 
         UpdatedAt = DateTime.UtcNow;

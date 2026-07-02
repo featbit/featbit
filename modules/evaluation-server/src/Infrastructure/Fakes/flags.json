@@ -12,10 +12,12 @@
     "variations": [
       {
         "id": "3da96792-debf-4878-905a-c9b5f9178cd0",
+        "name": "True",
         "value": "true"
       },
       {
         "id": "19cf9fb6-b790-4877-ab96-b5c5e73e0b46",
+        "name": "False",
         "value": "false"
       }
     ],
@@ -54,10 +56,12 @@
     "variations": [
       {
         "id": "8af48424-cdd7-42e6-b138-a6c589347ca1",
+        "name": "True",
         "value": "true"
       },
       {
         "id": "f7280f87-b277-4cec-9f8f-66e2f890e845",
+        "name": "False",
         "value": "false"
       }
     ],
@@ -104,10 +108,12 @@
     "variations": [
       {
         "id": "b74ab5bf-618d-438a-a2f4-ff1f15210809",
+        "name": "True",
         "value": "true"
       },
       {
         "id": "e228dd33-9a0d-43c7-ba94-752fbede1cec",
+        "name": "False",
         "value": "false"
       }
     ],
@@ -172,10 +178,12 @@
     "variations": [
       {
         "id": "e43f54c0-65f9-46a0-8684-3ad64c1fc933",
+        "name": "True",
         "value": "true"
       },
       {
         "id": "94db52f0-d000-4939-ad25-e7ae7ecd7726",
+        "name": "False",
         "value": "false"
       }
     ],
@@ -274,10 +282,12 @@
     "variations": [
       {
         "id": "d3e3b90b-9a63-4493-8e2f-25b145e8199d",
+        "name": "True",
         "value": "true"
       },
       {
         "id": "4cbc7313-f12b-4eb3-9d50-2711505e58a9",
+        "name": "False",
         "value": "false"
       }
     ],

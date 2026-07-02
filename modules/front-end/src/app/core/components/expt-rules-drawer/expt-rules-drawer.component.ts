@@ -1,7 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { ISegment } from '@features/safe/segments/types/segments-index';
-import { ruleOps, IRuleOp } from "@core/components/find-rule/ruleConfig";
+import { ISegment } from '@features/safe/segments/types/segments';
 import { SegmentService } from '@services/segment.service';
 import {
   getPercentageFromDecimal,
@@ -10,21 +9,24 @@ import {
   isSingleOperator
 } from '@utils/index';
 import {FeatureFlag, IFeatureFlag} from "@features/safe/feature-flags/types/details";
-import {IRuleVariation, isNotPercentageRollout} from "@shared/rules";
+import { IRuleVariation, isNotPercentageRollout, RULE_OPS } from "@shared/rules";
 import {FeatureFlagService} from "@services/feature-flag.service";
 import {IUserType} from "@shared/types";
+import { handleUpdateError } from "@features/safe/feature-flags/types/feature-flag";
+import { NzModalService } from "ng-zorro-antd/modal";
 
 @Component({
   selector: 'app-expt-rules-drawer',
   templateUrl: './expt-rules-drawer.component.html',
-  styleUrls: ['./expt-rules-drawer.component.less']
+  styleUrls: [ './expt-rules-drawer.component.less' ],
+  standalone: false
 })
 export class ExptRulesDrawerComponent {
 
   @Input() currentOrganizationId: number;
   @Input() visible: boolean = false;
   @Input() targetingUsersByVariation: { [key: string]: IUserType[] } = {};
-  @Output() close: EventEmitter<any> = new EventEmitter();
+  @Output() close: EventEmitter<boolean> = new EventEmitter();
 
   selectedSegmentDetailsDict: {[key: string]: ISegment[]} = {};
 
@@ -49,7 +51,7 @@ export class ExptRulesDrawerComponent {
           const result = {
             conditions: rule.conditions.map(condition => {
               const isSegment = isSegmentCondition(condition.property);
-              let ruleType: string = isSegment ? 'multi': ruleOps.filter((rule: IRuleOp) => rule.value === condition.op)[0].type;
+              let ruleType: string = isSegment ? 'multi': RULE_OPS.filter(ruleOp => ruleOp.value === condition.op)[0].type;
 
               let multipleValue: string[] = [];
 
@@ -177,25 +179,40 @@ export class ExptRulesDrawerComponent {
   constructor(
     private featureFlagService: FeatureFlagService,
     private segmentService: SegmentService,
-    private message: NzMessageService
-  ) {
-  }
+    private message: NzMessageService,
+    private modal: NzModalService
+  ) { }
 
   onClose() {
-    this.close.emit({ isSaved: false, data: this.featureFlag });
+    this.close.emit(false);
   }
 
   doSubmit() {
-    const { key, targetUsers, rules, fallthrough, exptIncludeAllTargets } = this.featureFlag;
+    const { key, targetUsers, rules, fallthrough, exptIncludeAllTargets, revision } = this.featureFlag;
 
-    this.featureFlagService.updateTargeting({ key, targetUsers, rules, fallthrough, exptIncludeAllTargets })
-      .subscribe((result) => {
+    const targeting = {
+      targetUsers,
+      rules,
+      fallthrough,
+      exptIncludeAllTargets,
+    };
+
+    const payload = {
+      targeting,
+      revision,
+      comment: 'Updated A/B test rule percentage'
+    };
+
+    this.featureFlagService.updateTargeting(key, payload).subscribe({
+      next: () => {
         this.message.success($localize `:@@common.operation-success:Operation succeeded`);
-        this.close.emit({ isSaved: true, data: this.featureFlag });
-      }, _ => {
-        this.message.error($localize `:@@common.operation-failed:Operation failed`);
-        this.close.emit({ isSaved: false, data: this.featureFlag });
-      })
+        this.close.emit(true);
+      },
+      error: (err) => {
+        this.close.emit(false);
+        handleUpdateError(err, this.message, this.modal);
+      }
+    });
   }
 
   getVariationValue(id: string): string{

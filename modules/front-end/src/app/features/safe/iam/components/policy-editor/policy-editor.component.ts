@@ -6,13 +6,15 @@ import {
   isResourceGeneral, permissionActions,
   Resource,
   resourcesTypes,
-  ResourceType
+  ResourceType, ResourceTypeEnum
 } from "@shared/policy";
 import {deepCopy, encodeURIComponentFfc, uuidv4} from "@utils/index";
 import { IPolicy, PolicyTypeEnum } from "@features/safe/iam/types/policy";
 import {NzMessageService} from "ng-zorro-antd/message";
 import {PolicyService} from "@services/policy.service";
 import {Router} from "@angular/router";
+import { PermissionLicenseService } from "@services/permission-license.service";
+import { LicenseFeatureEnum } from "@shared/types";
 
 class PolicyStatementViewModel {
   id: string;
@@ -33,7 +35,7 @@ class PolicyStatementViewModel {
 
       const allActions = [...Object.values(permissionActions)];
       this.selectedActions = statement.actions.map(act => {
-        const find = allActions.find(a => act === a.name);
+        const find = allActions.find(a => this.resourceType.type === a.resourceType && act === a.name);
         return find || act as unknown as IamPolicyAction;
       });
 
@@ -66,7 +68,7 @@ class PolicyStatementViewModel {
   onSelectedResourcesChange(resources: Resource[]) {
     this.selectedResources = [...resources];
     // All the resources here are the same type, and if it's general type, resources only contains one element
-    const isGeneralResource = isResourceGeneral(resources[0].type, resources[0].rn);
+    const isGeneralResource = isResourceGeneral(resources[0]?.type, resources[0]?.rn);
 
     this.availableActions = [...Object.values(permissionActions)].filter((rs) => rs.resourceType === this.resourceType?.type && (isGeneralResource || rs.isSpecificApplicable));
   }
@@ -91,50 +93,39 @@ class PolicyStatementViewModel {
 }
 
 @Component({
-  selector: 'iam-policy-editor',
-  templateUrl: './policy-editor.component.html',
-  styleUrls: ['./policy-editor.component.less']
+    selector: 'iam-policy-editor',
+    templateUrl: './policy-editor.component.html',
+    styleUrls: ['./policy-editor.component.less'],
+    standalone: false
 })
 export class PolicyEditorComponent {
+
+  cloneVisible: boolean = false;
 
   resourcesTypes: ResourceType[] = resourcesTypes;
   statements: PolicyStatementViewModel[] = [];
   readonly: boolean; // true if SysManaged
 
+  isFineGrainedAccessControlGranted: boolean = false;
+
   constructor(
-    private router: Router,
     private message: NzMessageService,
-    private policyService: PolicyService
-  ) { }
+    permissionLicenseService: PermissionLicenseService
+  ) {
+    this.isFineGrainedAccessControlGranted = permissionLicenseService.isGrantedByLicense(LicenseFeatureEnum.FineGrainedAccessControl);
+  }
 
   @Output()
   saveStatementsEvent = new EventEmitter<IPolicyStatement[]>();
 
-  private _policy: IPolicy;
+  policy: IPolicy;
   @Input('policy')
-  set _(policy: IPolicy) {
-    if (policy) {
-      this._policy = deepCopy(policy);
-      this.readonly = policy.type === PolicyTypeEnum.SysManaged;
-      this.statements = policy.statements.map(statement => new PolicyStatementViewModel(statement));
+  set _(data: IPolicy) {
+    if (data) {
+      this.policy = deepCopy(data);
+      this.readonly = data.type === PolicyTypeEnum.SysManaged;
+      this.statements = data.statements.map(statement => new PolicyStatementViewModel(statement));
     }
-  }
-
-  copyPolicy() {
-    const { name, description, statements } = this._policy;
-
-    this.policyService.create(`${name}_copy`, description).subscribe(
-      (p: IPolicy) => {
-
-        this.policyService.updateStatements(p.id, statements).subscribe(() => {
-          this.message.success($localize `:@@common.copy-success:Copied`);
-          this.router.navigateByUrl(`/iam/policies/${encodeURIComponentFfc(p.id)}/permission`);
-        }, _ => this.message.error($localize `:@@common.operation-failed:Operation failed`));
-      },
-      _ => {
-        this.message.success($localize `:@@common.operation-failed:Operation failed`);
-      }
-    )
   }
 
   saveStatements() {
@@ -153,7 +144,7 @@ export class PolicyEditorComponent {
   }
 
   addStatement() {
-    this.statements = [...this.statements, new PolicyStatementViewModel()];
+    this.statements = [new PolicyStatementViewModel(), ...this.statements];
   }
 
   removeStatement(statement: PolicyStatementViewModel) {

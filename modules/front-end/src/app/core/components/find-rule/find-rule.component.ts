@@ -1,18 +1,18 @@
 import { Component, EventEmitter, Input, Output, } from '@angular/core';
 import { SegmentService } from '@services/segment.service';
 import { isSegmentCondition, trackByFunction, uuidv4 } from '@utils/index';
-import { IRuleOp, ruleOps } from './ruleConfig';
-import { ISegment } from "@features/safe/segments/types/segments-index";
+import { ISegment } from "@features/safe/segments/types/segments";
 import { IRuleIdDispatchKey, IUserProp } from "@shared/types";
-import {ICondition, IRule, IRuleVariation, IVariation} from "@shared/rules";
+import { ICondition, IRule, IRuleVariation, IVariation, RULE_OPS } from "@shared/rules";
 
 @Component({
   selector: 'find-rule',
   templateUrl: './find-rule.component.html',
-  styleUrls: ['./find-rule.component.less']
+  styleUrls: [ './find-rule.component.less' ],
+  standalone: false
 })
 export class FindRuleComponent {
-
+  @Input() disabled: boolean = true;
   @Input() userProps: IUserProp[] = [];
   @Output() addProperty = new EventEmitter<IUserProp>();
   @Output() deleteRule = new EventEmitter<string>();
@@ -52,7 +52,7 @@ export class FindRuleComponent {
     } else {
       const segmentIds = value.conditions.flatMap((item: ICondition) => {
         const isSegment = isSegmentCondition(item.property);
-        let opType: string = isSegment ? 'multi': ruleOps.filter((op: IRuleOp) => op.value === item.op)[0].type;
+        let opType: string = isSegment ? 'multi': RULE_OPS.filter(op => op.value === item.op)[0].type;
 
         let defaultValue: string;
         let multipleValue: string[];

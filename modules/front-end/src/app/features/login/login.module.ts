@@ -9,7 +9,6 @@ import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DoLoginComponent } from './do-login/do-login.component';
-import { NzMessageModule } from 'ng-zorro-antd/message';
 import { NzTabsModule } from "ng-zorro-antd/tabs";
 import { NzIconModule } from "ng-zorro-antd/icon";
 import { NzToolTipModule } from "ng-zorro-antd/tooltip";
@@ -25,7 +24,6 @@ import { NzSpinModule } from "ng-zorro-antd/spin";
     NzFormModule,
     NzInputModule,
     NzButtonModule,
-    NzMessageModule,
     ReactiveFormsModule,
     LoginRoutingModule,
     NzTabsModule,

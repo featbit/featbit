@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { debounceTime, finalize } from 'rxjs/operators';
-import { Router } from "@angular/router";
 import { NzMessageService } from "ng-zorro-antd/message";
 import {
   AccessTokenFilter, AccessTokenStatusEnum, AccessTokenTypeEnum,
@@ -9,14 +8,16 @@ import {
   IPagedAccessToken
 } from "@features/safe/integrations/access-tokens/types/access-token";
 import { AccessTokenService } from "@services/access-token.service";
-import { TeamService } from "@services/team.service";
 import { PermissionsService } from "@services/permissions.service";
 import { generalResourceRNPattern, permissionActions } from "@shared/policy";
+import { OrganizationService } from "@services/organization.service";
+import { MemberFilter } from "@features/safe/iam/types/member";
 
 @Component({
-  selector: 'access-tokens',
-  templateUrl: './index.component.html',
-  styleUrls: ['./index.component.less']
+    selector: 'access-tokens',
+    templateUrl: './index.component.html',
+    styleUrls: ['./index.component.less'],
+    standalone: false
 })
 export class IndexComponent implements OnInit {
 
@@ -30,16 +31,15 @@ export class IndexComponent implements OnInit {
   canTakeActionOnServiceAccessToken = false;
 
   constructor(
-    private router: Router,
     private message: NzMessageService,
-    private teamService: TeamService,
+    private organizationService: OrganizationService,
     private permissionsService: PermissionsService,
     private accessTokenService: AccessTokenService
   ) {
     this.creatorSearchChange$.pipe(
       debounceTime(500)
     ).subscribe(searchText => {
-      this.teamService.search(searchText).subscribe({
+      this.organizationService.getMemberList(new MemberFilter(searchText)).subscribe({
         next: (result) => {
           this.creatorList = result.items;
           this.isCreatorsLoading = false;
@@ -116,7 +116,7 @@ export class IndexComponent implements OnInit {
     } else {
       this.accessTokens.items = this.accessTokens.items.map((ac) => {
         if (ac.id === data.id) {
-          return {...ac, name: data.name};
+          return {...ac, name: data.name, permissions: data.permissions};
         }
 
         return ac;

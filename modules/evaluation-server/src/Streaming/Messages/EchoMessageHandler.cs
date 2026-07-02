@@ -9,7 +9,7 @@ public class EchoMessageHandler : IMessageHandler
     public async Task HandleAsync(MessageContext ctx)
     {
         var connection = ctx.Connection;
-        var message = ctx.Message;
+        var message = new ServerMessage(MessageTypes.Echo, ctx.Data);
         var token = ctx.CancellationToken;
 
         await connection.SendAsync(message, token);

@@ -12,6 +12,7 @@ export interface Webhook {
   payloadTemplateType: string;
   payloadTemplate: string;
   isActive: boolean;
+  preventEmptyPayloads: boolean;
   creator: SimpleUser;
   lastDelivery?: LastDelivery;
 }
@@ -39,6 +40,7 @@ export const WebhookDefaultPayloadTemplate: string = `{
       "id": "{{data.object.id}}",
       "name": "{{data.object.name}}",
       "description": "{{data.object.description}}",
+      "tags": {{json data.object.tags}},
 {{#eq data.kind "feature flag"}}
       "key": "{{data.object.key}}",
       "variationType": "{{data.object.variationType}}",
@@ -49,7 +51,6 @@ export const WebhookDefaultPayloadTemplate: string = `{
       "disabledVariationId": "{{data.object.disabledVariationId}}",
       "fallthrough": {{json data.object.fallthrough}},
       "exptIncludeAllTargets": {{data.object.exptIncludeAllTargets}},
-      "tags": {{json data.object.tags}},
 {{/eq}}
 {{#eq data.kind "segment"}}
       "included": {{json data.object.included}},
@@ -160,7 +161,7 @@ export interface PagedWebhookDelivery {
   items: WebhookDelivery[];
 }
 
-export type TestWebhook = Pick<Webhook, 'id' | 'url' | 'name' | 'secret' | 'headers' | 'payloadTemplate'>;
+export type TestWebhook = Pick<Webhook, 'id' | 'url' | 'name' | 'secret' | 'headers' | 'payloadTemplate' | 'preventEmptyPayloads'>;
 
 export interface WebhookRequest {
   id: string;
@@ -171,4 +172,5 @@ export interface WebhookRequest {
   headers: { key: string; value: string; }[];
   events: string;
   payload: string;
+  preventEmptyPayloads: boolean;
 }

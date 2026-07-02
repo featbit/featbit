@@ -1,10 +1,10 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { WorkspacesComponent } from './workspaces.component';
-import { OrganizationComponent } from './organization/organization.component';
-import { ProfileComponent } from './profile/profile.component';
-import { ProjectComponent } from './project/project.component';
+import { LicenseComponent } from "@features/safe/workspaces/license/license.component";
+import { UsageComponent } from "@features/safe/workspaces/usage/usage.component";
 import { GlobalUserComponent } from "@features/safe/workspaces/global-user/global-user.component";
+import { BillingComponent } from "@features/safe/workspaces/billing/billing.component";
 
 const routes: Routes = [
   {
@@ -12,29 +12,29 @@ const routes: Routes = [
     component: WorkspacesComponent,
     children: [
       {
-        path: 'organization',
-        component: OrganizationComponent,
+        path: 'license',
+        component: LicenseComponent,
         data: {
-          breadcrumb: $localize`:@@workspace.routing.org:Organization`
+          breadcrumb: $localize`:@@workspace.routing.license:License`
         },
       }, {
-        path: 'projects',
-        component: ProjectComponent,
+        path: 'usage',
+        component: UsageComponent,
         data: {
-          breadcrumb: $localize`:@@workspace.routing.projects:Projects`
-        },
-      }, {
-        path: 'profile',
-        component: ProfileComponent,
+          breadcrumb: $localize`:@@workspace.routing.usage:Usage`
+        }
+      },{
+        path: 'billing',
+        component: BillingComponent,
         data: {
-          breadcrumb: $localize`:@@workspace.routing.profile:Profile`
-        },
-      }, {
+          breadcrumb: 'Billing'
+        }
+      },{
         path: 'global-users',
         component: GlobalUserComponent,
         data: {
           breadcrumb: $localize`:@@workspace.routing.global-users:Global Users`
-        },
+        }
       }, {
         path: '',
         redirectTo: '.',

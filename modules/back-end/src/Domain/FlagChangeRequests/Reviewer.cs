@@ -8,6 +8,11 @@ public class Reviewer
 
     public DateTime? Timestamp { get; set; }
 
+    // for ef core and System.Text.Json
+    public Reviewer()
+    {
+    }
+
     public Reviewer(Guid memberId)
     {
         MemberId = memberId;

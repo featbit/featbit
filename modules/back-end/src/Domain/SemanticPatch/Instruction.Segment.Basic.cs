@@ -43,3 +43,25 @@ public class SegmentDescriptionInstruction : SegmentInstruction
         }
     }
 }
+
+public class SegmentTagsInstruction : SegmentInstruction
+{
+    public SegmentTagsInstruction(string kind, ICollection<string> value) : base(kind, value)
+    {
+    }
+
+    public override void Apply(Segment segment)
+    {
+        if (Value is not ICollection<string> tags)
+        {
+            return;
+        }
+
+        segment.Tags = Kind switch
+        {
+            SegmentInstructionKind.AddTags => segment.Tags.Union(tags).ToArray(),
+            SegmentInstructionKind.RemoveTags => segment.Tags.Except(tags).ToArray(),
+            _ => segment.Tags
+        };
+    }
+}

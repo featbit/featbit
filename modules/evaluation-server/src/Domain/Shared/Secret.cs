@@ -2,13 +2,18 @@ namespace Domain.Shared;
 
 public class Secret
 {
-    public string Type { get; set; }
+    public string Type { get; set; } = string.Empty;
 
-    public string ProjectKey { get; set; }
+    public string ProjectKey { get; set; } = string.Empty;
 
-    public Guid EnvId { get; set; }
+    public Guid EnvId { get; set; } = Guid.Empty;
 
-    public string EnvKey { get; set; }
+    public string EnvKey { get; set; } = string.Empty;
+
+    // for dapper deserialization
+    public Secret()
+    {
+    }
 
     public Secret(string type, string projectKey, Guid envId, string envKey)
     {

@@ -7,7 +7,7 @@ namespace Streaming.Services;
 
 public interface IDataSyncService
 {
-    Task<object> GetPayloadAsync(Connection connection, DataSyncMessage message);
+    Task<object> GetPayloadAsync(ConnectionContext connectionContext, JsonElement request);
 
     Task<ClientSdkPayload> GetClientSdkPayloadAsync(Guid envId, EndUser user, long timestamp);
 

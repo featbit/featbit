@@ -1,4 +1,3 @@
-using System.Text;
 using Api.Authentication;
 using Api.Authentication.OAuth;
 using Api.Authentication.OpenIdConnect;
@@ -6,12 +5,13 @@ using Api.Authorization;
 using Api.Swagger;
 using Application.Services;
 using Domain.Workspaces;
-using Domain.Identity;
+using Domain.Policies;
 using Infrastructure;
-using Infrastructure.License;
+using Infrastructure.Services;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 using Swashbuckle.AspNetCore.Filters;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
@@ -21,8 +21,10 @@ public static class ServicesRegister
 {
     public static WebApplicationBuilder RegisterServices(this WebApplicationBuilder builder)
     {
+        // serilog
+        builder.Services.AddSerilog((_, lc) => ConfigureSerilog.Configure(lc, builder.Configuration));
+
         // add services for controllers
-        builder.Services.AddTransient<IConfigureOptions<MvcOptions>, ConfigureMvcOptions>();
         builder.Services.AddControllers();
 
         // make all generated paths URLs are lowercase
@@ -47,14 +49,15 @@ public static class ServicesRegister
         builder.Services.AddCors(options => options.AddDefaultPolicy(policyBuilder =>
         {
             policyBuilder
-                .AllowAnyOrigin()
+                .SetIsOriginAllowed(_ => true)
                 .AllowAnyHeader()
-                .AllowAnyMethod();
+                .AllowAnyMethod()
+                .AllowCredentials();
         }));
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
-        builder.Services.AddSwaggerGen();
+        builder.Services.AddSwaggerGen(options => options.CustomSchemaIds(type => SwashbuckleSchemaHelper.GetSchemaId(type)));
         builder.Services.AddSwaggerExamplesFromAssemblyOf<Program>();
 
         // health check dependencies
@@ -65,8 +68,9 @@ public static class ServicesRegister
         builder.Services.AddApplicationServices();
 
         // authentication
-        var jwtOption = builder.Configuration.GetSection(JwtOptions.Jwt);
-        builder.Services.Configure<JwtOptions>(jwtOption);
+        var jwtOptions = JwtOptionsBuilder.Build(builder.Configuration);
+        builder.Services.AddSingleton(jwtOptions);
+
         builder.Services
             .AddAuthentication(options =>
             {
@@ -93,23 +97,29 @@ public static class ServicesRegister
                     AuthenticationType = Schemes.JwtBearer,
 
                     ValidateIssuer = true,
-                    ValidIssuer = jwtOption["Issuer"],
+                    ValidIssuer = jwtOptions.Issuer,
 
                     ValidateAudience = true,
-                    ValidAudience = jwtOption["Audience"],
+                    ValidAudience = jwtOptions.Audience,
 
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOption["Key"]!))
+                    IssuerSigningKey = jwtOptions.VerificationSecurityKey,
+
+                    ValidAlgorithms = [jwtOptions.Algorithm],
+
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero
                 };
             })
             .AddOpenApi(Schemes.OpenApi);
 
         // authorization
         LicenseVerifier.ImportPublicKey(builder.Configuration["PublicKey"]);
-        builder.Services.AddSingleton<ILicenseService, LicenseService>();
-        builder.Services.AddSingleton<IPermissionChecker, DefaultPermissionChecker>();
-        builder.Services.AddSingleton<IAuthorizationHandler, PermissionRequirementHandler>();
-        builder.Services.AddSingleton<IAuthorizationHandler, LicenseRequirementHandler>();
+        builder.Services.AddTransient<ILicenseService, LicenseService>();
+        builder.Services.AddScoped<IRequestPermissions, RequestPermissions>();
+        builder.Services.AddScoped<IPermissionChecker, DefaultPermissionChecker>();
+        builder.Services.AddScoped<IAuthorizationHandler, PermissionRequirementHandler>();
+        builder.Services.AddScoped<IAuthorizationHandler, LicenseRequirementHandler>();
         builder.Services.AddAuthorization(options =>
         {
             // iam permission check 

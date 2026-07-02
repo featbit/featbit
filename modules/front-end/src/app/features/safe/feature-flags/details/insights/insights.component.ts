@@ -15,9 +15,10 @@ import {
 } from "@features/safe/feature-flags/details/insights/types";
 
 @Component({
-  selector: 'insights',
-  templateUrl: './insights.component.html',
-  styleUrls: ['./insights.component.less']
+    selector: 'insights',
+    templateUrl: './insights.component.html',
+    styleUrls: ['./insights.component.less'],
+    standalone: false
 })
 export class InsightsComponent implements OnInit {
 
@@ -228,7 +229,6 @@ export class InsightsComponent implements OnInit {
           source: source as any,
           dataGroupBy: 'label',
           padding: [50, 50, 50, 70],
-          lineShape: 'smooth',
           toolTip: { tplFormatter: tpl => tpl.replace("{value}", `{value}`) },
         };
 
