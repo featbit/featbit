@@ -20,6 +20,7 @@ export function LicensePage({ lang }: { lang: "en" | "zh" }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toastVariant, setToastVariant] = useState<"success" | "error">("success");
   const isSaas = getRuntimeEnv().hostingMode === HOSTING_MODE_SAAS;
   const canUpdateLicense = true;
 
@@ -43,6 +44,7 @@ export function LicensePage({ lang }: { lang: "en" | "zh" }) {
         setLicenseValue(nextWorkspace.license ?? "");
       } catch (error) {
         if (!cancelled) {
+          setToastVariant("error");
           setToastMessage(error instanceof Error ? error.message : t("workspace.requestFailed"));
         }
       } finally {
@@ -78,16 +80,18 @@ export function LicensePage({ lang }: { lang: "en" | "zh" }) {
       const updatedWorkspace = await updateWorkspaceLicense(licenseValue.trim());
       setWorkspace(updatedWorkspace);
       setLicenseValue(updatedWorkspace.license ?? licenseValue.trim());
+      setToastVariant("success");
       setToastMessage(t("workspace.license.updateSucceeded"));
-    } catch (error) {
-      setToastMessage(error instanceof Error ? error.message : t("workspace.license.invalidLicense"));
+    } catch {
+      setToastVariant("error");
+      setToastMessage(t("workspace.license.invalidLicense"));
     } finally {
       setIsUpdating(false);
     }
   }
 
   return (
-    <WorkspaceLayout workspace={workspace} lang={lang} activeTab="license" statusMessage={toastMessage}>
+    <WorkspaceLayout workspace={workspace} lang={lang} activeTab="license" statusMessage={toastMessage} statusVariant={toastVariant}>
       {isLoading ? (
         <LicenseSkeleton />
       ) : (
@@ -99,7 +103,10 @@ export function LicensePage({ lang }: { lang: "en" | "zh" }) {
               setLicenseValue={setLicenseValue}
               canUpdateLicense={canUpdateLicense}
               isUpdating={isUpdating}
-              onCopied={() => setToastMessage(t("workspace.license.copied"))}
+              onCopied={() => {
+                setToastVariant("success");
+                setToastMessage(t("workspace.license.copied"));
+              }}
               onUpdateLicense={onUpdateLicense}
             />
           ) : null}

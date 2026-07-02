@@ -1,20 +1,28 @@
-import { CheckCircle2 } from "lucide-react";
+import { useEffect } from "react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import type { WorkspaceDetails } from "./workspace-api";
 import { WorkspaceTabs } from "./workspace-tabs";
 
-function StatusToast({ message }: { message: string | null }) {
-  if (!message) {
-    return null;
-  }
+type StatusToastVariant = "success" | "error";
 
-  return (
-    <div role="status" className="fixed right-5 top-20 z-50 flex items-center gap-2 rounded-md border border-border bg-popover px-3 py-2 text-sm font-medium text-popover-foreground shadow-lg">
-      <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-      {message}
-    </div>
-  );
+function StatusToast({ message, variant }: { message: string | null; variant: StatusToastVariant }) {
+  useEffect(() => {
+    if (!message) {
+      return;
+    }
+
+    const options = { id: "workspace-status", duration: 2400 };
+    if (variant === "error") {
+      toast.error(message, options);
+      return;
+    }
+
+    toast.success(message, options);
+  }, [message, variant]);
+
+  return null;
 }
 
 export function WorkspaceLayout({
@@ -22,19 +30,21 @@ export function WorkspaceLayout({
   lang,
   activeTab,
   statusMessage,
+  statusVariant = "success",
   children
 }: {
   workspace: WorkspaceDetails;
   lang: "en" | "zh";
   activeTab: string;
   statusMessage?: string | null;
+  statusVariant?: StatusToastVariant;
   children: ReactNode;
 }) {
   const { t } = useTranslation();
 
   return (
     <div className="-m-5 min-h-[calc(100vh-4rem)] bg-background px-8 py-6">
-      <StatusToast message={statusMessage ?? null} />
+      <StatusToast message={statusMessage ?? null} variant={statusVariant} />
       <header className="mb-5 space-y-1">
         <h1 className="text-2xl font-semibold tracking-normal text-foreground">{t("workspace.title")}</h1>
         <p className="text-sm text-muted-foreground">

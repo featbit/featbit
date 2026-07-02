@@ -1,17 +1,8 @@
-import { getIdentityToken } from "@/features/auth/auth-api";
 import {
-  getCurrentOrganization,
-  getCurrentWorkspace,
+  fetchApi,
   persistCurrentWorkspace,
   type Workspace
 } from "@/features/layout/context";
-import { getRuntimeEnv } from "@/lib/env/runtime-env";
-
-type ApiEnvelope<T> = {
-  success?: boolean;
-  data?: T;
-  errors?: string[];
-};
 
 export type WorkspaceOidcSettings = {
   clientId: string;
@@ -29,44 +20,14 @@ export type WorkspaceDetails = Workspace & {
   } | null;
 };
 
-function apiOrigin() {
-  return getRuntimeEnv().apiUrl || "http://localhost:5000";
-}
-
-function unwrapApiResponse<T>(body: T | ApiEnvelope<T>): T {
-  if (body && typeof body === "object" && "data" in body) {
-    const envelope = body as ApiEnvelope<T>;
-    if (envelope.success === false) {
-      throw new Error(envelope.errors?.[0] || "Request failed");
-    }
-
-    return envelope.data as T;
-  }
-
-  return body as T;
-}
-
 async function workspaceRequest<T>(path: string, init?: RequestInit): Promise<T> {
-  const workspace = getCurrentWorkspace();
-  const organization = getCurrentOrganization();
-  const response = await fetch(`${apiOrigin()}${path}`, {
-    credentials: "include",
+  return fetchApi<T>(path, undefined, true, {
     ...init,
     headers: {
-      Authorization: `Bearer ${getIdentityToken() ?? ""}`,
       "Content-Type": "application/json",
-      Organization: organization.id ?? "",
-      Workspace: workspace.id ?? "",
       ...init?.headers
     }
   });
-
-  if (!response.ok) {
-    throw new Error(response.statusText || "Request failed");
-  }
-
-  const body = (await response.json()) as T | ApiEnvelope<T>;
-  return unwrapApiResponse<T>(body);
 }
 
 export async function updateWorkspaceIdentity(payload: Pick<Workspace, "id" | "name" | "key">) {

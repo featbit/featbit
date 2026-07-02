@@ -1,17 +1,18 @@
 import { Info } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { localizedPath, type Lang } from "@/features/layout/context";
 
 export function EmptyLicenseNotice({ isSaas, lang }: { isSaas: boolean; lang: Lang }) {
   const { t } = useTranslation();
 
   return (
-    <div className="mt-4 flex gap-3 rounded-md border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-950 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-100">
+    <Alert className="mt-4 flex gap-3 border-blue-200 bg-blue-50 text-sm text-blue-950 dark:border-blue-500/30 dark:bg-blue-500/10 dark:text-blue-100">
       <Info className="mt-0.5 h-4 w-4 shrink-0 text-blue-600 dark:text-blue-300" />
       <div>
-        <div className="font-semibold">{t("workspace.license.noLicense")}</div>
-        <p className="mt-1 text-blue-900/80 dark:text-blue-100/80">
+        <AlertTitle className="mb-0 font-semibold">{t("workspace.license.noLicense")}</AlertTitle>
+        <AlertDescription className="mt-1 text-blue-900/80 dark:text-blue-100/80">
           {isSaas ? (
             <>
               {t("workspace.license.noLicenseSaasDescription")}{" "}
@@ -27,8 +28,8 @@ export function EmptyLicenseNotice({ isSaas, lang }: { isSaas: boolean; lang: La
               </a>
             </>
           )}
-        </p>
+        </AlertDescription>
       </div>
-    </div>
+    </Alert>
   );
 }

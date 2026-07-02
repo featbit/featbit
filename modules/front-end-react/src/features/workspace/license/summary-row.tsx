@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import type { DecodedLicense, LicenseStatus } from "./license-types";
 import { daysUntilExpiration, displayPlan, formatDate } from "./license-utils";
@@ -54,13 +55,13 @@ export function SummaryRow({
   ];
 
   return (
-    <div className="grid overflow-hidden rounded-md border border-border bg-card shadow-sm sm:grid-cols-2 lg:grid-cols-4">
+    <Card className="grid overflow-hidden rounded-md shadow-sm sm:grid-cols-2 lg:grid-cols-4">
       {items.map((item, index) => (
         <div key={item.label} className={cn("px-6 py-4", index > 0 && "border-t border-border sm:border-l sm:border-t-0")}>
           <div className="text-xs font-medium text-muted-foreground">{item.label}</div>
           <div className="mt-2 min-h-6 text-lg font-semibold text-foreground">{item.value}</div>
         </div>
       ))}
-    </div>
+    </Card>
   );
 }

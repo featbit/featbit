@@ -14,6 +14,9 @@ Build the shared runtime layer used by every migrated page: env loading, typed A
 ## API Client
 
 - Implement a typed API client around `fetch` or a small wrapper, not Angular-era patterns.
+- The shared client must be exposed as the single `fetchApi` entry point for authenticated management API calls.
+- All migrated pages, feature modules, data hooks, and domain-specific API helpers must call `fetchApi` for authenticated FeatBit management API requests. Do not call `fetch` directly from feature code, and do not create feature-local request wrappers that bypass `fetchApi`.
+- Direct `fetch` is allowed only for public or authentication bootstrap endpoints that cannot depend on the authenticated management client, such as login, SSO pre-check, social provider discovery, login callbacks, refresh-token itself, and profile loading immediately after login.
 - Every authenticated request must include:
   - `Authorization: Bearer <token>`
   - `Organization: <currentOrgId>` when available
@@ -67,7 +70,7 @@ Layout-related components must follow the authenticated layout design contract i
 
 ## Acceptance Criteria
 
-- API client unit tests cover unwrap, error handling, auth headers, and refresh-token queue behavior.
+- API client unit tests cover unwrap, error handling, auth headers, refresh-token queue behavior, and feature-level API helpers reusing `fetchApi` instead of bypassing it.
 - Stores can restore current context from localStorage and update it without reloading the app.
 - Permission helpers are usable from routes, menus, and action buttons.
 - Base components use shadcn/ui defaults and do not copy Angular/ng-zorro styling.

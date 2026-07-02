@@ -2,6 +2,8 @@ import { Copy, LockKeyhole, Upload } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { WorkspaceDetails } from "../workspace-api";
 
@@ -14,29 +16,31 @@ function WorkspaceIdSection({ workspace, onCopied }: { workspace: WorkspaceDetai
   }
 
   return (
-    <div className="rounded-md border border-border bg-card p-4 shadow-sm">
-      <div className="mb-3 flex items-baseline justify-between gap-3">
-        <div>
-          <h2 className="text-base font-semibold text-foreground">{t("workspace.license.workspaceId")}</h2>
-          <p className="mt-1 text-xs text-muted-foreground">{t("workspace.license.workspaceIdHelper")}</p>
+    <Card className="rounded-md shadow-sm">
+      <CardContent className="p-4">
+        <div className="mb-3 flex items-baseline justify-between gap-3">
+          <div>
+            <h2 className="text-base font-semibold text-foreground">{t("workspace.license.workspaceId")}</h2>
+            <p className="mt-1 text-xs text-muted-foreground">{t("workspace.license.workspaceIdHelper")}</p>
+          </div>
         </div>
-      </div>
-      <div className="flex min-h-10 items-center gap-3 rounded-md border border-input bg-muted/50 px-3 py-2 dark:bg-muted/30">
-        <LockKeyhole className="h-4 w-4 shrink-0 text-muted-foreground" />
-        <code className="min-w-0 flex-1 truncate text-sm font-semibold text-foreground">{workspace.id}</code>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button type="button" variant="outline" size="sm" className="shrink-0 gap-2 bg-background" onClick={copyWorkspaceId}>
-                <Copy className="h-4 w-4" />
-                {t("workspace.license.copy")}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>{t("workspace.license.copyWorkspaceId")}</TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </div>
-    </div>
+        <div className="flex min-h-10 items-center gap-3 rounded-md border border-input bg-muted/50 px-3 py-2 dark:bg-muted/30">
+          <LockKeyhole className="h-4 w-4 shrink-0 text-muted-foreground" />
+          <code className="min-w-0 flex-1 truncate text-sm font-semibold text-foreground">{workspace.id}</code>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button type="button" variant="outline" size="sm" className="shrink-0 gap-2 bg-background" onClick={copyWorkspaceId}>
+                  <Copy className="h-4 w-4" />
+                  {t("workspace.license.copy")}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{t("workspace.license.copyWorkspaceId")}</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -78,55 +82,52 @@ function LicenseKeySection({
   }
 
   return (
-    <div className="rounded-md border border-border bg-card p-4 shadow-sm">
-      <div className="mb-3 flex min-h-10 items-start justify-between gap-3">
-        <div>
-          <h2 className="text-base font-semibold text-foreground">{t("workspace.license.licenseKey")}</h2>
-          {hasCurrentLicense && !editing ? null : (
-            <p className="mt-1 text-xs text-muted-foreground">{t("workspace.license.licenseKeyHelper")}</p>
-          )}
-        </div>
-      </div>
-      {hasCurrentLicense && !editing ? (
-        <div className="flex min-h-10 items-center gap-3 rounded-md border border-input bg-muted/40 px-3 py-2 dark:bg-muted/20">
-          <LockKeyhole className="h-4 w-4 shrink-0 text-muted-foreground" />
-          <div className="min-w-0 flex-1">
-            <code className="block truncate text-sm font-semibold text-foreground">{maskLicense(currentLicense ?? "")}</code>
+    <Card className="rounded-md shadow-sm">
+      <CardContent className="p-4">
+        <div className="mb-3 flex min-h-10 items-start justify-between gap-3">
+          <div>
+            <h2 className="text-base font-semibold text-foreground">{t("workspace.license.licenseKey")}</h2>
+            {hasCurrentLicense && !editing ? null : (
+              <p className="mt-1 text-xs text-muted-foreground">{t("workspace.license.licenseKeyHelper")}</p>
+            )}
           </div>
-          <Button type="button" variant="outline" size="sm" className="shrink-0 bg-background" disabled={!canUpdate || isUpdating} onClick={startEditing}>
-            {t("workspace.license.replace")}
-          </Button>
         </div>
-      ) : (
-        <>
-          <textarea
-            className="min-h-16 w-full resize-y rounded-md border border-input bg-background px-3 py-2 font-mono text-sm text-foreground shadow-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-60"
-            value={value}
-            disabled={!canUpdate || isUpdating}
-            placeholder={t("workspace.license.licensePlaceholder")}
-            onChange={(event) => setValue(event.target.value)}
-          />
-          <div className="mt-3 flex justify-end">
-            <div className="flex gap-2">
-              {hasCurrentLicense ? (
-                <Button type="button" variant="outline" disabled={isUpdating} onClick={cancelEditing}>
-                  {t("workspace.license.cancel")}
-                </Button>
-              ) : null}
-              <Button
-                type="button"
-                className="gap-2 bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500"
-                disabled={!canUpdate || isUpdating || !value.trim()}
-                onClick={onSubmit}
-              >
-                <Upload className="h-4 w-4" />
-                {isUpdating ? t("workspace.license.updating") : t("workspace.license.update")}
-              </Button>
+        {hasCurrentLicense && !editing ? (
+          <div className="flex min-h-10 items-center gap-3 rounded-md border border-input bg-muted/40 px-3 py-2 dark:bg-muted/20">
+            <LockKeyhole className="h-4 w-4 shrink-0 text-muted-foreground" />
+            <div className="min-w-0 flex-1">
+              <code className="block truncate text-sm font-semibold text-foreground">{maskLicense(currentLicense ?? "")}</code>
             </div>
+            <Button type="button" variant="outline" size="sm" className="shrink-0 bg-background" disabled={!canUpdate || isUpdating} onClick={startEditing}>
+              {t("workspace.license.replace")}
+            </Button>
           </div>
-        </>
-      )}
-    </div>
+        ) : (
+          <>
+            <Textarea
+              className="min-h-16 resize-y bg-background font-mono text-sm text-foreground shadow-sm disabled:opacity-60"
+              value={value}
+              disabled={!canUpdate || isUpdating}
+              placeholder={t("workspace.license.licensePlaceholder")}
+              onChange={(event) => setValue(event.target.value)}
+            />
+            <div className="mt-3 flex justify-end">
+              <div className="flex gap-2">
+                {hasCurrentLicense ? (
+                  <Button type="button" variant="outline" disabled={isUpdating} onClick={cancelEditing}>
+                    {t("workspace.license.cancel")}
+                  </Button>
+                ) : null}
+                <Button type="button" className="gap-2" disabled={!canUpdate || isUpdating || !value.trim()} onClick={onSubmit}>
+                  <Upload className="h-4 w-4" />
+                  {isUpdating ? t("workspace.license.updating") : t("workspace.license.update")}
+                </Button>
+              </div>
+            </div>
+          </>
+        )}
+      </CardContent>
+    </Card>
   );
 }
 
