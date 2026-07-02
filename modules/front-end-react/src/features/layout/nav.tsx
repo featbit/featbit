@@ -212,10 +212,11 @@ function SidebarNavItem({
   }
 
   const parentButton = (
-    <button
+    <Button
       type="button"
+      variant="ghost"
       className={cn(
-        "flex h-9 w-full cursor-pointer items-center gap-3 rounded-md px-3 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground",
+        "h-9 w-full justify-start gap-3 px-3 text-sm font-normal text-muted-foreground hover:text-foreground",
         collapsed && "justify-center px-0"
       )}
       aria-expanded={expanded}
@@ -231,7 +232,7 @@ function SidebarNavItem({
           <ChevronDown className="h-3.5 w-3.5 shrink-0" />
         )
       ) : null}
-    </button>
+    </Button>
   );
 
   if (collapsed) {
@@ -375,10 +376,11 @@ function AccountMenu({ lang, collapsed }: { lang: Lang; collapsed: boolean }) {
   }
 
   const trigger = (
-    <button
+    <Button
       type="button"
+      variant="ghost"
       className={cn(
-        "flex w-full cursor-pointer items-center gap-3 rounded-md p-2 text-left transition-colors hover:bg-accent",
+        "h-auto w-full justify-start gap-3 p-2 text-left font-normal",
         collapsed && "justify-center"
       )}
       aria-label={t("layout.account.account")}
@@ -399,7 +401,7 @@ function AccountMenu({ lang, collapsed }: { lang: Lang; collapsed: boolean }) {
           <ChevronDown className="h-4 w-4 text-muted-foreground" />
         )
       ) : null}
-    </button>
+    </Button>
   );
 
   return (

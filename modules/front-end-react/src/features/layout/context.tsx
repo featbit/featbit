@@ -1,18 +1,20 @@
 /* eslint-disable react-refresh/only-export-components */
-import { Award, Check, ChevronRight, ChevronsUpDown, Search } from "lucide-react";
+import { Award, Check, ChevronRight, ChevronsUpDown } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator
+} from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { getIdentityToken, getStoredUserProfile } from "@/features/auth/auth-api";
 import { getRuntimeEnv } from "@/lib/env/runtime-env";
 import { cn } from "@/lib/utils";
@@ -483,25 +485,27 @@ export function PlanBadge({ lang, workspace }: { lang: Lang; workspace: Workspac
     : t(badge.labelKey);
 
   return (
-    <Link
-      to={badge.href}
-      className="flex h-[46px] min-w-[11.5rem] items-center gap-3 rounded-md border border-border bg-card px-3 text-left shadow-sm transition-colors hover:bg-accent"
-      aria-label={t("layout.plan.aria", { label, plan })}
+    <Button
+      asChild
+      variant="outline"
+      className="h-[46px] min-w-[11.5rem] justify-start gap-3 bg-card px-3 text-left shadow-sm hover:bg-accent"
     >
-      <Award className={cn("h-5 w-5", badge.warning ? "text-amber-600" : "text-blue-600")} />
-      <span className="min-w-0 flex-1 space-y-0.5 leading-tight">
-        <span
-          className={cn(
-            "block text-[0.625rem] font-medium uppercase tracking-normal text-muted-foreground",
-            badge.warning && "text-amber-700 dark:text-amber-400"
-          )}
-        >
-          {label}
+      <Link to={badge.href} aria-label={t("layout.plan.aria", { label, plan })}>
+        <Award className={cn("h-5 w-5", badge.warning ? "text-amber-600" : "text-blue-600")} />
+        <span className="min-w-0 flex-1 space-y-0.5 leading-tight">
+          <span
+            className={cn(
+              "block text-[0.625rem] font-medium uppercase tracking-normal text-muted-foreground",
+              badge.warning && "text-amber-700 dark:text-amber-400"
+            )}
+          >
+            {label}
+          </span>
+          <span className="block text-[0.8125rem] font-bold leading-snug text-foreground">{plan}</span>
         </span>
-        <span className="block text-[0.8125rem] font-bold leading-snug text-foreground">{plan}</span>
-      </span>
-      <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
-    </Link>
+        <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+      </Link>
+    </Button>
   );
 }
 
@@ -518,6 +522,7 @@ export function ContextBar({
   setCurrentProjectEnv: (projectEnv: ProjectEnv) => void;
 }) {
   const { t } = useTranslation();
+  const [environmentSwitcherOpen, setEnvironmentSwitcherOpen] = useState(false);
   const [search, setSearch] = useState("");
   const queryClient = useQueryClient();
 
@@ -538,6 +543,7 @@ export function ContextBar({
     const projectEnv = projectEnvFromSelection(project, environment);
     saveCurrentProjectEnv(projectEnv);
     setCurrentProjectEnv(projectEnv);
+    setEnvironmentSwitcherOpen(false);
     void queryClient.invalidateQueries({ predicate: (query) => {
       const key = JSON.stringify(query.queryKey);
       return key.includes("projectId") || key.includes("envId") || key.includes(project.id) || key.includes(environment.id);
@@ -550,35 +556,36 @@ export function ContextBar({
       <span className="text-muted-foreground">/</span>
       <span className="truncate font-medium">{currentProjectEnv.projectName}</span>
       <span className="text-muted-foreground">/</span>
-        <DropdownMenu>
-        <DropdownMenuTrigger asChild>
+      <Popover open={environmentSwitcherOpen} onOpenChange={setEnvironmentSwitcherOpen}>
+        <PopoverTrigger asChild>
           <Button type="button" variant="ghost" className="h-8 gap-2 px-2">
             {currentProjectEnv.envName}
             <ChevronsUpDown className="h-3.5 w-3.5 text-muted-foreground" />
           </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-80 p-2">
-          <div className="flex h-9 items-center gap-2 rounded-md border border-input px-3">
-            <Search className="h-4 w-4 text-muted-foreground" />
-            <input
-              className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+        </PopoverTrigger>
+        <PopoverContent align="start" className="w-80 p-0">
+          <Command
+            shouldFilter={false}
+            className="p-2 [&_[cmdk-input-wrapper]]:mb-2 [&_[cmdk-input-wrapper]]:rounded-md [&_[cmdk-input-wrapper]]:border [&_[cmdk-input-wrapper]]:border-input [&_[cmdk-input-wrapper]]:px-3"
+          >
+            <CommandInput
+              className="h-9 py-2"
               value={search}
               placeholder={t("layout.context.searchEnvironments")}
-              onKeyDown={(event) => event.stopPropagation()}
-              onChange={(event) => setSearch(event.target.value)}
+              onValueChange={setSearch}
             />
-          </div>
-          <div className="mt-2 max-h-72 overflow-y-auto">
-            {groupedEnvironments.map((project) => (
-              <div key={project.id} className="py-1">
-                <DropdownMenuLabel className="flex items-center gap-1.5 px-2 text-[0.7rem] uppercase tracking-wide text-muted-foreground">
-                  {project.name}
-                </DropdownMenuLabel>
+            <CommandList className="max-h-72">
+              {groupedEnvironments.length === 0 ? <CommandEmpty>{t("layout.context.noEnvironments")}</CommandEmpty> : null}
+              {groupedEnvironments.map((project) => (
+                <CommandGroup key={project.id} heading={project.name} className="py-1">
                 {project.environments.map((environment) => (
-                  <DropdownMenuItem
+                  <CommandItem
                     key={`${project.id}:${environment.id}`}
-                    className="cursor-pointer justify-between pl-5"
-                    onSelect={() => selectEnvironment(project, environment)}
+                    value={`${project.name} ${project.key} ${environment.name} ${environment.key ?? ""}`}
+                    className="justify-between pl-5"
+                    onSelect={() => {
+                      selectEnvironment(project, environment);
+                    }}
                   >
                     <span className="flex min-w-0 items-center">
                       <span className="truncate">{environment.name}</span>
@@ -586,19 +593,20 @@ export function ContextBar({
                     {environment.id === currentProjectEnv.envId && project.id === currentProjectEnv.projectId ? (
                       <Check className="h-4 w-4" />
                     ) : null}
-                  </DropdownMenuItem>
+                  </CommandItem>
                 ))}
-              </div>
-            ))}
-          </div>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem asChild className="cursor-pointer">
-            <Link to="#manage-environments" className="text-muted-foreground">
+                </CommandGroup>
+              ))}
+            </CommandList>
+            <CommandSeparator className="my-1" />
+            <Button asChild variant="ghost" className="h-9 w-full justify-start px-2 text-muted-foreground">
+              <Link to="#manage-environments" onClick={() => setEnvironmentSwitcherOpen(false)}>
               {t("layout.context.manageEnvironments")}
             </Link>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+            </Button>
+          </Command>
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }

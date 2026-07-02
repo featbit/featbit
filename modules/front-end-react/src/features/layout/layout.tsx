@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Outlet, useLocation, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { Card, CardContent } from "@/components/ui/card";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import {
   chooseProjectEnv,
@@ -33,11 +34,11 @@ function EmptyWorkspace() {
   const { t } = useTranslation();
 
   return (
-    <section className="h-full rounded-md border border-dashed border-border bg-card/50 p-6">
-      <div className="flex h-full min-h-[24rem] items-center justify-center text-sm text-muted-foreground">
+    <Card className="h-full border-dashed bg-card/50 shadow-none">
+      <CardContent className="flex h-full min-h-[24rem] items-center justify-center p-6 text-sm text-muted-foreground">
         {t("layout.placeholder")}
-      </div>
-    </section>
+      </CardContent>
+    </Card>
   );
 }
 

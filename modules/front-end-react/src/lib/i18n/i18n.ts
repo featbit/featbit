@@ -80,6 +80,7 @@ i18n.use(initReactI18next).init({
           },
           context: {
             searchEnvironments: "Search environments",
+            noEnvironments: "No environments found.",
             manageEnvironments: "Manage environments"
           },
           environment: {
@@ -450,6 +451,7 @@ i18n.use(initReactI18next).init({
           },
           context: {
             searchEnvironments: "搜索项目或环境",
+            noEnvironments: "未找到环境。",
             manageEnvironments: "管理环境"
           },
           environment: {
