@@ -7,13 +7,28 @@ public class Insight
 {
     public EndUser? User { get; set; }
 
-    public VariationInsight[] Variations { get; set; } = [];
+    public VariationInsight[]? Variations { get; set; }
 
-    public MetricInsight[] Metrics { get; set; } = [];
+    public MetricInsight[]? Metrics { get; set; }
 
     public bool IsValid()
     {
-        return User != null && User.IsValid();
+        if (User == null || !User.IsValid())
+        {
+            return false;
+        }
+
+        if (Variations is not null && Variations.Any(x => !x.IsValid()))
+        {
+            return false;
+        }
+
+        if (Metrics is not null && Metrics.Any(x => !x.IsValid()))
+        {
+            return false;
+        }
+
+        return true;
     }
 
     public EndUserMessage EndUserMessage(Guid envId)
@@ -27,7 +42,7 @@ public class Insight
         var envIdString = $"{envId}";
 
         // flag messages
-        foreach (var variation in Variations)
+        foreach (var variation in Variations!)
         {
             if (variation.Variation == null)
             {
@@ -67,7 +82,7 @@ public class Insight
         }
 
         // metric messages
-        foreach (var metric in Metrics)
+        foreach (var metric in Metrics!)
         {
             var properties = new
             {

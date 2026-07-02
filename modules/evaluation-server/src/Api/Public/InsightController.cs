@@ -17,7 +17,7 @@ public class InsightController : PublicApiControllerBase
     private readonly MemoryCache _cache;
     private readonly MemoryCacheEntryOptions _cacheEntryOptions;
 
-    public InsightController(IMessageProducer producer, BoundedMemoryCache boundedMemoryCache)
+    public InsightController(IMessageProducer producer, IBoundedMemoryCache boundedMemoryCache)
     {
         _producer = producer;
         _cache = boundedMemoryCache.Instance;
@@ -53,7 +53,7 @@ public class InsightController : PublicApiControllerBase
             }
 
             insightMessages.AddRange(insight.InsightMessages(envId));
-            usage.AddEvents(insight.Variations.Length, insight.Metrics.Length);
+            usage.AddEvents(insight.Variations!.Length, insight.Metrics!.Length);
         }
 
         var tasks = endUserMessages.Select(x => _producer.PublishAsync(Topics.EndUser, x))
