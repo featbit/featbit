@@ -13,7 +13,22 @@ public class Insight
 
     public bool IsValid()
     {
-        return User != null && User.IsValid();
+        if (User == null || !User.IsValid())
+        {
+            return false;
+        }
+
+        if (Variations.Any(x => !x.IsValid()))
+        {
+            return false;
+        }
+
+        if (Metrics.Any(x => !x.IsValid()))
+        {
+            return false;
+        }
+
+        return true;
     }
 
     public EndUserMessage EndUserMessage(Guid envId)

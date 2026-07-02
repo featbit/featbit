@@ -50,7 +50,7 @@ public static class ServicesRegister
         services.AddSingleton<ITokenValidator, TokenValidator>();
 
         // add bounded memory cache
-        services.AddSingleton<BoundedMemoryCache>();
+        services.AddSingleton<IBoundedMemoryCache, BoundedMemoryCache>();
 
         // streaming services
         services
