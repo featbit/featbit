@@ -4,10 +4,10 @@ export const HOSTING_MODE_SAAS = "saas";
 export const FINE_GRAINED_ACCESS = "Fine-grained Access Control";
 
 export const planMeta = {
-  free: { name: "Free", description: "Core feature flags at no cost.", basePrice: 0, includedMau: 1000, monthlyPrice: 0 },
-  pro: { name: "Pro", description: "For growing teams that need scale.", basePrice: 49, includedMau: 10000, monthlyPrice: 49 },
-  growth: { name: "Growth", description: "Advanced controls for scaling product teams.", basePrice: 149, includedMau: 40000, monthlyPrice: 149 },
-  enterprise: { name: "Enterprise", description: "Full platform features for large organizations.", basePrice: 449, includedMau: 80000, monthlyPrice: 449 }
+  free: { name: "Free", nameKey: "workspace.billing.plans.free.name", descriptionKey: "workspace.billing.plans.free.description", basePrice: 0, includedMau: 1000, monthlyPrice: 0 },
+  pro: { name: "Pro", nameKey: "workspace.billing.plans.pro.name", descriptionKey: "workspace.billing.plans.pro.description", basePrice: 49, includedMau: 10000, monthlyPrice: 49 },
+  growth: { name: "Growth", nameKey: "workspace.billing.plans.growth.name", descriptionKey: "workspace.billing.plans.growth.description", basePrice: 149, includedMau: 40000, monthlyPrice: 149 },
+  enterprise: { name: "Enterprise", nameKey: "workspace.billing.plans.enterprise.name", descriptionKey: "workspace.billing.plans.enterprise.description", basePrice: 449, includedMau: 80000, monthlyPrice: 449 }
 };
 
 export type PlanKey = keyof typeof planMeta;

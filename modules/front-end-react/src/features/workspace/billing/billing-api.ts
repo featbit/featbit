@@ -14,7 +14,10 @@ export type BillingSubscription = {
   unitAmount?: number;
   currentPeriodStart?: string;
   currentPeriodEnd?: string;
+  periodStart?: string;
+  periodEnd?: string;
   createdAt?: string;
+  subscriberSince?: string;
   pendingDowngrade?: {
     plan?: string;
     effectiveAt?: string;
@@ -28,6 +31,10 @@ export type BillingSubscription = {
 export type BillingCycleUsage = {
   start?: string;
   end?: string;
+  startDate?: string;
+  endDate?: string;
+  periodStart?: string;
+  periodEnd?: string;
   mau?: number;
 };
 
@@ -96,6 +103,40 @@ function normalizeBillingInformation(value: BillingInformation | string | boolea
   }
 }
 
+function normalizeInvoices(value: BillingInvoice[] | string | null | undefined): BillingInvoice[] {
+  if (!value) {
+    return [];
+  }
+
+  if (Array.isArray(value)) {
+    return value;
+  }
+
+  try {
+    const parsedValue = JSON.parse(value) as unknown;
+    return Array.isArray(parsedValue) ? parsedValue as BillingInvoice[] : [];
+  } catch {
+    return [];
+  }
+}
+
+function normalizeObject<T extends object>(value: T | string | null | undefined): T | undefined {
+  if (!value) {
+    return undefined;
+  }
+
+  if (typeof value !== "string") {
+    return value;
+  }
+
+  try {
+    const parsedValue = JSON.parse(value) as unknown;
+    return parsedValue && typeof parsedValue === "object" && !Array.isArray(parsedValue) ? parsedValue as T : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 function toBillingInformationPayload(payload: BillingInformation): BillingInformation {
   return {
     companyName: payload.companyName ?? null,
@@ -107,12 +148,14 @@ function toBillingInformationPayload(payload: BillingInformation): BillingInform
   };
 }
 
-export function fetchSubscription() {
-  return billingRequest<BillingSubscription>("/api/v1/billing/subscription");
+export async function fetchSubscription() {
+  const subscription = await billingRequest<BillingSubscription | string>("/api/v1/billing/subscription");
+  return normalizeObject<BillingSubscription>(subscription);
 }
 
-export function fetchCurrentCycle() {
-  return billingRequest<BillingCycleUsage>("/api/v1/billing/current-cycle");
+export async function fetchCurrentCycle() {
+  const cycle = await billingRequest<BillingCycleUsage | string>("/api/v1/billing/current-cycle");
+  return normalizeObject<BillingCycleUsage>(cycle);
 }
 
 export async function fetchBillingInformation() {
@@ -130,8 +173,9 @@ export async function updateBillingInformation(payload: BillingInformation) {
   return Object.keys(normalizedInformation).length > 0 ? normalizedInformation : savedPayload;
 }
 
-export function fetchInvoices() {
-  return billingRequest<BillingInvoice[]>("/api/v1/billing/invoices");
+export async function fetchInvoices() {
+  const invoices = await billingRequest<BillingInvoice[] | string>("/api/v1/billing/invoices");
+  return normalizeInvoices(invoices);
 }
 
 export function fetchBillingLicense() {

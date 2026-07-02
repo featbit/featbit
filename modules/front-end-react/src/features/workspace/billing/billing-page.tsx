@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -42,6 +43,7 @@ import {
 } from "./billing-utils";
 
 export function BillingPage({ lang }: { lang: "en" | "zh" }) {
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -74,14 +76,14 @@ export function BillingPage({ lang }: { lang: "en" | "zh" }) {
 
   const billingInfoSchema = useMemo(
     () => z.object({
-      companyName: z.string().trim().min(1, "Company name is required"),
-      contactEmail: z.string().trim().min(1, "Contact email is required").email("Enter a valid email"),
-      address: z.string().trim().min(1, "Address is required"),
+      companyName: z.string().trim().min(1, t("workspace.billing.validation.companyName")),
+      contactEmail: z.string().trim().min(1, t("workspace.billing.validation.contactEmail")).email(t("workspace.billing.validation.email")),
+      address: z.string().trim().min(1, t("workspace.billing.validation.address")),
       addressLine2: z.string(),
       taxId: z.string(),
-      countryOrRegion: z.string().trim().min(1, "Country / Region is required")
+      countryOrRegion: z.string().trim().min(1, t("workspace.billing.validation.countryRegion"))
     }),
-    []
+    [t]
   );
 
   const billingInfoForm = useForm<BillingInfoForm>({
@@ -101,9 +103,9 @@ export function BillingPage({ lang }: { lang: "en" | "zh" }) {
     onSuccess: (updated) => {
       queryClient.setQueryData(["billing", "information"], updated);
       setEditBillingInfo(false);
-      toast.success("Billing information updated successfully.");
+      toast.success(t("workspace.billing.billingInfo.updated"));
     },
-    onError: () => toast.error("Failed to update billing information. Please try again later.")
+    onError: () => toast.error(t("workspace.billing.errors.saveBillingInfo"))
   });
 
   const prorationQuery = useQuery({
@@ -115,12 +117,12 @@ export function BillingPage({ lang }: { lang: "en" | "zh" }) {
   const updateSubscriptionMutation = useMutation({
     mutationFn: (change: PendingChange) => updateSubscription(change.kind, change.payload),
     onSuccess: () => {
-      toast.success("Subscription updated successfully.");
+      toast.success(t("workspace.billing.toast.subscriptionUpdated"));
       setPendingChange(null);
       setDrawerIntent(null);
       void queryClient.invalidateQueries({ queryKey: ["billing"] });
     },
-    onError: () => toast.error("Failed to update subscription. Please try again later.")
+    onError: () => toast.error(t("workspace.billing.errors.subscriptionUpdate"))
   });
 
   useEffect(() => {
@@ -218,15 +220,20 @@ export function BillingPage({ lang }: { lang: "en" | "zh" }) {
         ) : null}
 
         {subscriptionQuery.isError ? (
-          <Alert variant="destructive" className="rounded-md">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Failed to load subscription</AlertTitle>
-            <AlertDescription>
-              <Button className="mt-2" variant="outline" size="sm" onClick={retryAll}>
-                <RefreshCw className="h-3.5 w-3.5" />
-                Retry
-              </Button>
+          <Alert className="flex items-center gap-4 rounded-md border-destructive/30 bg-destructive/5 px-5 py-4 text-foreground">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-destructive/30 bg-background text-destructive">
+              <AlertCircle className="h-4 w-4" />
+            </span>
+            <div className="min-w-0 flex-1">
+            <AlertTitle className="mb-1 text-sm font-semibold text-foreground">{t("workspace.billing.errors.subscriptionTitle")}</AlertTitle>
+            <AlertDescription className="text-sm text-muted-foreground">
+                {t("workspace.billing.errors.subscriptionDescription")}
             </AlertDescription>
+            </div>
+            <Button className="shrink-0" variant="outline" size="sm" onClick={retryAll}>
+                <RefreshCw className="h-3.5 w-3.5" />
+                {t("workspace.billing.actions.retry")}
+            </Button>
           </Alert>
         ) : (
           <SubscriptionOverview

@@ -1,4 +1,4 @@
-﻿import i18n from "i18next";
+import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 
 i18n.use(initReactI18next).init({
@@ -308,6 +308,179 @@ i18n.use(initReactI18next).init({
               flagComparison: {
                 title: "Flag comparison",
                 description: "Compare flags across environments"
+              }
+            }
+          },
+          billing: {
+            errors: {
+              subscriptionTitle: "Failed to load subscription",
+              subscriptionDescription: "Subscription details are temporarily unavailable. You can still review billing information and invoices below.",
+              billingInfoLoad: "Failed to load billing information.",
+              invoicesLoad: "Failed to load invoices.",
+              saveBillingInfo: "Failed to update billing information. Please try again.",
+              subscriptionUpdate: "Failed to update subscription. Please try again.",
+              proration: "Unable to load proration preview. You will see the exact charge at checkout."
+            },
+            actions: {
+              retry: "Retry",
+              checkAgain: "Check again",
+              returnToBilling: "Return to billing",
+              contactSupport: "Contact support",
+              upgradePlan: "Upgrade plan",
+              manageSubscription: "Manage subscription",
+              edit: "Edit",
+              cancel: "Cancel",
+              saveChanges: "Save changes",
+              maybeLater: "Maybe later",
+              confirmUpgrade: "Confirm upgrade",
+              scheduleDowngrade: "Schedule downgrade",
+              updatePlan: "Update plan",
+              currentPlan: "Current plan",
+              upgradeTo: "Upgrade to {{plan}}",
+              downgradeTo: "Downgrade to {{plan}}"
+            },
+            checkout: {
+              confirmed: "Payment confirmed. Your subscription is active.",
+              timeoutTitle: "Payment verification is taking longer than expected.",
+              cancelled: "Payment cancelled. Your subscription was not changed.",
+              verifying: "Verifying payment..."
+            },
+            usageAlert: {
+              approaching: "Approaching usage limit",
+              exceeded: "MAU limit exceeded",
+              usedBadge: "{{percent}}% used",
+              description: "You've used {{used}} of {{purchased}} MAU in your current billing period. You may experience limits or overage charges."
+            },
+            overview: {
+              monthlyBilling: "Monthly billing",
+              yearlyBilling: "Yearly billing",
+              scheduledDowngrade: "You have a pending downgrade to {{plan}} at the end of the current billing period.",
+              billingPeriod: "Billing period",
+              nextCharge: "Next charge",
+              subscriberSince: "Subscriber since",
+              currentUsage: "Current usage",
+              mau: "Monthly Active Users (MAU)",
+              usedOf: "{{used}} of {{purchased}} used",
+              remaining: "{{remaining}} remaining",
+              criticalHeadroom: "Critical headroom",
+              watchUsage: "Watch usage closely",
+              healthyHeadroom: "Healthy headroom",
+              healthy: "Usage is healthy",
+              feeBreakdown: "Fee breakdown",
+              planFee: "{{plan}} plan",
+              fineGrained: "Fine-grained Access Control",
+              totalCharge: "Total charge",
+              perMonth: "{{amount}}/month",
+              plusPerMonth: "+ {{amount}}/month"
+            },
+            billingInfo: {
+              title: "Billing information",
+              description: "Used for workspace invoices and billing emails.",
+              editDescription: "Update invoice recipient, address, and tax details.",
+              companyName: "Company name",
+              contactEmail: "Contact email",
+              address: "Address",
+              addressLine2: "Address line 2",
+              taxId: "Tax ID",
+              countryRegion: "Country / Region",
+              notProvided: "Not provided",
+              updated: "Billing information updated."
+            },
+            invoices: {
+              title: "Invoice history",
+              description: "Recent invoices for this workspace.",
+              questions: "Questions about billing?",
+              billingDate: "Billing date",
+              plan: "Plan",
+              status: "Status",
+              amount: "Amount",
+              empty: "No invoices yet",
+              paid: "Paid",
+              pending: "Pending",
+              overdue: "Overdue",
+              unknown: "Unknown"
+            },
+            drawer: {
+              manageTitle: "Manage subscription",
+              manageDescription: "Review plans, MAU capacity, add-ons, and billing cycle for this workspace.",
+              upgradeTitle: "Upgrade plan",
+              upgradeDescription: "Increase capacity before this billing cycle reaches its MAU limit.",
+              approachingLimit: "Approaching MAU limit",
+              currentCapacity: "{{used}} of {{purchased}} MAU used - {{percent}}% of current capacity.",
+              currentPlanSummary: "Current plan",
+              mauCapacity: "MAU capacity",
+              currentTotal: "Current total",
+              recommended: "Recommended for scale",
+              fastestFix: "Fastest fix",
+              addCapacity: "Add capacity to {{plan}}",
+              addCapacityDescription: "Keep your current plan and increase MAU for the next invoice.",
+              selectedMau: "Selected MAU",
+              includedMau: "{{mau}} MAU included",
+              mauPlain: "{{mau}} MAU",
+              communitySupport: "Community support",
+              prioritySupport: "Priority support",
+              fineGrainedAccess: "Fine-grained access",
+              moreFeatures: "More features",
+              upgradeEnterprise: "Upgrade to Enterprise",
+              enterpriseDescription: "Move to higher included MAU and unlock enterprise controls.",
+              startingCapacity: "Starting capacity",
+              upTo: "up to {{mau}}",
+              enterpriseMonthly: "Enterprise monthly",
+              enterpriseYearly: "$4,490/year",
+              enterpriseFeatures: "SSO + Global Users",
+              yearlyOption: "Yearly option",
+              includedFeatures: "Included features",
+              support: "Support",
+              dedicatedSla: "Dedicated SLA",
+              enterpriseSummary: "80K MAU included - annual billing available - SSO - Global Users",
+              dedicatedOnboarding: "Dedicated SLA and onboarding",
+              advancedGovernance: "Multi-organization and advanced governance",
+              monthly: "Monthly",
+              yearly: "Yearly",
+              growthBase: "Growth base",
+              extendedMau: "Extended MAU",
+              projectedTotal: "Projected total"
+            },
+            dialog: {
+              upgradeTitle: "Upgrade subscription",
+              downgradeTitle: "Downgrade subscription",
+              upgradeDescription: "Your plan configuration is changing",
+              downgradeDescription: "Current access remains until renewal.",
+              newRecurringTotal: "New recurring total",
+              currentRecurringTotal: "Current recurring total",
+              selectedMau: "Selected MAU",
+              included: "Included",
+              calculating: "Calculating your prorated charge...",
+              credit: "Credit",
+              charge: "Charge",
+              totalDueToday: "Total due today"
+            },
+            validation: {
+              companyName: "Company name is required",
+              contactEmail: "Contact email is required",
+              email: "Enter a valid email",
+              address: "Address is required",
+              countryRegion: "Country / Region is required"
+            },
+            toast: {
+              subscriptionUpdated: "Subscription updated successfully."
+            },
+            plans: {
+              free: {
+                name: "Free",
+                description: "Core feature flags at no cost."
+              },
+              pro: {
+                name: "Pro",
+                description: "For growing teams that need scale."
+              },
+              growth: {
+                name: "Growth",
+                description: "Advanced controls for scaling product teams."
+              },
+              enterprise: {
+                name: "Enterprise",
+                description: "Full platform features for large organizations."
               }
             }
           },
@@ -679,6 +852,179 @@ i18n.use(initReactI18next).init({
               flagComparison: {
                 title: "开关对比",
                 description: "跨环境对比功能开关"
+              }
+            }
+          },
+          billing: {
+            errors: {
+              subscriptionTitle: "加载订阅失败",
+              subscriptionDescription: "订阅详情暂时不可用。你仍可以查看下方的账单信息和发票。",
+              billingInfoLoad: "加载账单信息失败。",
+              invoicesLoad: "加载发票失败。",
+              saveBillingInfo: "更新账单信息失败，请稍后重试。",
+              subscriptionUpdate: "更新订阅失败，请稍后重试。",
+              proration: "无法加载按比例计费预览。你将在结账时看到准确费用。"
+            },
+            actions: {
+              retry: "重试",
+              checkAgain: "重新检查",
+              returnToBilling: "返回账单",
+              contactSupport: "联系支持",
+              upgradePlan: "升级套餐",
+              manageSubscription: "管理订阅",
+              edit: "编辑",
+              cancel: "取消",
+              saveChanges: "保存更改",
+              maybeLater: "稍后再说",
+              confirmUpgrade: "确认升级",
+              scheduleDowngrade: "安排降级",
+              updatePlan: "更新套餐",
+              currentPlan: "当前套餐",
+              upgradeTo: "升级到 {{plan}}",
+              downgradeTo: "降级到 {{plan}}"
+            },
+            checkout: {
+              confirmed: "付款已确认。你的订阅已生效。",
+              timeoutTitle: "付款验证耗时比预期更长。",
+              cancelled: "付款已取消。你的订阅未发生变化。",
+              verifying: "正在验证付款..."
+            },
+            usageAlert: {
+              approaching: "即将达到用量上限",
+              exceeded: "MAU 上限已超出",
+              usedBadge: "已用 {{percent}}%",
+              description: "当前账单周期已使用 {{used}} / {{purchased}} MAU。你可能会遇到限制或超额费用。"
+            },
+            overview: {
+              monthlyBilling: "按月计费",
+              yearlyBilling: "按年计费",
+              scheduledDowngrade: "你有一个待生效的降级，当前账单周期结束后将变更为 {{plan}}。",
+              billingPeriod: "账单周期",
+              nextCharge: "下次扣费",
+              subscriberSince: "订阅开始时间",
+              currentUsage: "当前用量",
+              mau: "月活跃用户（MAU）",
+              usedOf: "已用 {{used}} / {{purchased}}",
+              remaining: "剩余 {{remaining}}",
+              criticalHeadroom: "容量余量严重不足",
+              watchUsage: "请密切关注用量",
+              healthyHeadroom: "容量余量健康",
+              healthy: "余量充足",
+              feeBreakdown: "费用明细",
+              planFee: "{{plan}} 套餐",
+              fineGrained: "细粒度访问控制",
+              totalCharge: "总费用",
+              perMonth: "{{amount}}/月",
+              plusPerMonth: "+ {{amount}}/月"
+            },
+            billingInfo: {
+              title: "账单信息",
+              description: "用于工作区发票和账单邮件。",
+              editDescription: "更新发票接收方、地址和税务信息。",
+              companyName: "公司名称",
+              contactEmail: "联系邮箱",
+              address: "地址",
+              addressLine2: "地址第二行",
+              taxId: "税号",
+              countryRegion: "国家 / 地区",
+              notProvided: "未提供",
+              updated: "账单信息已更新。"
+            },
+            invoices: {
+              title: "发票历史",
+              description: "当前工作区最近的发票。",
+              questions: "对账单有疑问？",
+              billingDate: "账单日期",
+              plan: "套餐",
+              status: "状态",
+              amount: "金额",
+              empty: "暂无发票",
+              paid: "已支付",
+              pending: "待支付",
+              overdue: "已逾期",
+              unknown: "未知"
+            },
+            drawer: {
+              manageTitle: "管理订阅",
+              manageDescription: "查看并调整当前工作区的套餐、MAU 容量、附加功能和计费周期。",
+              upgradeTitle: "升级套餐",
+              upgradeDescription: "在当前账单周期达到 MAU 上限前提升容量。",
+              approachingLimit: "即将达到 MAU 上限",
+              currentCapacity: "已使用 {{used}} / {{purchased}} MAU，占当前容量 {{percent}}%。",
+              currentPlanSummary: "当前套餐",
+              mauCapacity: "MAU 容量",
+              currentTotal: "当前总计",
+              recommended: "推荐用于规模化",
+              fastestFix: "最快解决",
+              addCapacity: "为 {{plan}} 增加容量",
+              addCapacityDescription: "保留当前套餐，并为下个账单增加 MAU。",
+              selectedMau: "已选 MAU",
+              includedMau: "包含 {{mau}} MAU",
+              mauPlain: "{{mau}} MAU",
+              communitySupport: "社区支持",
+              prioritySupport: "优先支持",
+              fineGrainedAccess: "细粒度访问",
+              moreFeatures: "更多功能",
+              upgradeEnterprise: "升级到 Enterprise",
+              enterpriseDescription: "提升内置 MAU，并解锁企业级控制能力。",
+              startingCapacity: "起始容量",
+              upTo: "最高 {{mau}}",
+              enterpriseMonthly: "Enterprise 月付",
+              enterpriseYearly: "$4,490/年",
+              enterpriseFeatures: "SSO + 全局用户",
+              yearlyOption: "年付选项",
+              includedFeatures: "包含功能",
+              support: "支持",
+              dedicatedSla: "专属 SLA",
+              enterpriseSummary: "包含 80K MAU - 支持年付 - SSO - 全局用户",
+              dedicatedOnboarding: "专属 SLA 和引导服务",
+              advancedGovernance: "多组织和高级治理",
+              monthly: "月付",
+              yearly: "年付",
+              growthBase: "Growth 基础费用",
+              extendedMau: "扩展 MAU",
+              projectedTotal: "预计总计"
+            },
+            dialog: {
+              upgradeTitle: "升级订阅",
+              downgradeTitle: "降级订阅",
+              upgradeDescription: "你的套餐配置将发生变化",
+              downgradeDescription: "当前权限将保留到续订日。",
+              newRecurringTotal: "新的周期费用",
+              currentRecurringTotal: "当前周期费用",
+              selectedMau: "已选 MAU",
+              included: "已包含",
+              calculating: "正在计算按比例费用...",
+              credit: "抵扣",
+              charge: "收费",
+              totalDueToday: "今日应付"
+            },
+            validation: {
+              companyName: "公司名称不能为空",
+              contactEmail: "联系邮箱不能为空",
+              email: "请输入有效邮箱",
+              address: "地址不能为空",
+              countryRegion: "国家 / 地区不能为空"
+            },
+            toast: {
+              subscriptionUpdated: "订阅已更新。"
+            },
+            plans: {
+              free: {
+                name: "Free",
+                description: "免费使用核心功能开关能力。"
+              },
+              pro: {
+                name: "Pro",
+                description: "适合需要扩展规模的成长团队。"
+              },
+              growth: {
+                name: "Growth",
+                description: "为规模化产品团队提供高级控制能力。"
+              },
+              enterprise: {
+                name: "Enterprise",
+                description: "面向大型组织的完整平台能力。"
               }
             }
           },
