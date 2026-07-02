@@ -13,7 +13,7 @@ export function App() {
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <AppRoutes />
-          <Toaster position="top-right" richColors />
+          <Toaster position="top-right" />
         </BrowserRouter>
       </QueryClientProvider>
     </ThemeProvider>
