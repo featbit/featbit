@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { localizedPath } from "@/features/layout/context";
+import { getRuntimeEnv } from "@/lib/env/runtime-env";
 import { cn } from "@/lib/utils";
 
 const workspaceTabs = [
@@ -15,9 +16,10 @@ const workspaceTabs = [
 export function WorkspaceTabs({ lang, activeTab }: { lang: "en" | "zh"; activeTab: string }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const tabs = workspaceTabs.filter((tab) => tab.key !== "billing" || getRuntimeEnv().hostingMode === "saas");
 
   function onTabChange(value: string) {
-    const tab = workspaceTabs.find((item) => item.key === value);
+    const tab = tabs.find((item) => item.key === value);
     if (tab) {
       navigate(localizedPath(lang, tab.href));
     }
@@ -26,7 +28,7 @@ export function WorkspaceTabs({ lang, activeTab }: { lang: "en" | "zh"; activeTa
   return (
     <Tabs value={activeTab} onValueChange={onTabChange} className="overflow-x-auto border-b border-border">
       <TabsList className="flex min-w-max gap-8" aria-label={t("workspace.tabs.aria")}>
-        {workspaceTabs.map((tab) => (
+        {tabs.map((tab) => (
           <TabsTrigger
             key={tab.key}
             value={tab.key}

@@ -1,5 +1,6 @@
 import { Navigate, useParams } from "react-router-dom";
 import { localizedPath, resolveLang } from "@/features/layout/context";
+import { BillingPage } from "./billing/billing-page";
 import { GeneralPage } from "./general/general-page";
 import { GlobalUsersPage } from "./global-users/global-users-page";
 import { LicensePage } from "./license/license-page";
@@ -14,6 +15,10 @@ export function WorkspacePage({ activeTab = "general" }: { activeTab?: string })
 
   if (activeTab === "global-users") {
     return <GlobalUsersPage lang={lang} />;
+  }
+
+  if (activeTab === "billing") {
+    return <BillingPage lang={lang} />;
   }
 
   if (activeTab !== "general") {
