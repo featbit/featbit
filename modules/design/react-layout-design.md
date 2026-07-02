@@ -10,10 +10,18 @@ This document is the implementation design contract for the authenticated React 
 ## Overall Direction
 
 - Build a modern FeatBit layout with shadcn/ui, Radix primitives, Tailwind CSS, and lucide-react.
+- Use shadcn/ui components as the default implementation source for standard controls and surfaces. Only create custom UI when shadcn does not provide the needed component or when FeatBit-specific behavior cannot be represented by composing shadcn components.
 - Do not copy Angular/ng-zorro styling or the old Angular color palette.
 - Prefer shadcn default neutral tokens, semantic colors, subtle borders, restrained shadows, compact density, and 6-8px radius controls.
 - Support light and dark mode as first-class themes using shadcn native dark-mode patterns.
 - Use the current FeatBit logo style: mark + wordmark when the sidebar is expanded, mark only when collapsed.
+
+## Component Usage
+
+- Prefer shadcn components for buttons, inputs, selects, checkboxes, switches, tabs, dropdown menus, command palettes, popovers, tooltips, dialogs, sheets/drawers, cards, badges, alerts, tables, forms, calendars, and chart wrappers.
+- Compose local product components from shadcn primitives before introducing custom markup or styling.
+- Custom components must keep shadcn/Tailwind tokens, semantic variants, focus rings, spacing, radius, and light/dark CSS variables.
+- Use Radix primitives directly only when shadcn does not expose the exact primitive needed.
 
 ## Layout
 

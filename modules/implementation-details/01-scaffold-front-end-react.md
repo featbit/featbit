@@ -9,6 +9,7 @@ Create the standalone React application foundation in `front-end-react` without 
 - Use Vite + React + TypeScript as a static SPA.
 - Use React Router in front-end SPA mode only.
 - Use shadcn/ui + Radix primitives + Tailwind CSS as the UI foundation.
+- Prefer shadcn/ui components wherever they exist. Build custom UI only when shadcn does not provide the needed component or when FeatBit-specific behavior cannot be achieved by composing shadcn components.
 - Support light/dark/system theme modes from the first scaffold using shadcn's native dark-mode pattern for Vite.
 - Use TanStack Query for server state, TanStack Table for tables, React Hook Form + Zod for forms, Recharts for charts, CodeMirror 6 for embedded structured editing, and Shiki for code highlighting.
 - Use `react-i18next` for i18n.
@@ -33,6 +34,7 @@ This document defines migration step 1: project initialization. When the user as
 - Configure Tailwind dark mode using shadcn's `darkMode: ["class"]` strategy and the standard shadcn CSS variables for background, foreground, card, popover, border, muted, primary, destructive, ring, and chart colors.
 - Add the shadcn-style `ThemeProvider` and `useTheme` helper for Vite. It should support `light`, `dark`, and `system`, persist the selected preference in local storage, and apply the theme class before app paint where possible to avoid theme flash.
 - Keep shadcn's default color variables as the baseline. Extend CSS variables only when a product-specific semantic need cannot be expressed with shadcn defaults, and do not use the Angular color scheme as the React palette. Do not introduce a separate custom theme framework.
+- Install and organize shadcn components as the default source for common UI primitives. Local wrappers in `src/components/common` or `src/components/layout` should compose shadcn components first and preserve shadcn variants, CSS variables, focus rings, spacing, and radius conventions. Do not create custom replacements for standard shadcn controls such as buttons, inputs, selects, checkboxes, switches, tabs, dropdown menus, command palettes, popovers, tooltips, dialogs, sheets/drawers, cards, badges, alerts, tables, or form primitives unless shadcn cannot cover the requirement.
 - Configure path aliases, at minimum:
   - `@/app`
   - `@/assets`
