@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 namespace Application.IntegrationTests.ReleaseDecisions;
 
 [Collection(nameof(TestApp))]
@@ -65,12 +67,49 @@ public class ReleaseDecisionExperimentControllerTests
     }
 
     [Fact]
+    public async Task MetricUpdate_PersistsTypeAndAggregation()
+    {
+        var metricsPath = $"/api/v1/envs/{TestWorkspace.Id}/release-decision/metrics";
+        var metricKey = $"metric_update_{Guid.NewGuid():N}";
+
+        var create = await _app.PostWithAccessTokenAsync(metricsPath, new
+        {
+            name = "Metric update persistence",
+            key = metricKey,
+            metricType = "binary",
+            metricAgg = "once",
+            status = "active"
+        });
+        create.EnsureSuccessStatusCode();
+        var metricId = GetJsonString(await create.Content.ReadAsStringAsync(), "data", "id");
+
+        var update = await _app.PutWithAccessTokenAsync($"{metricsPath}/{metricId}", new
+        {
+            name = "Metric update persistence",
+            key = metricKey,
+            metricType = "continuous",
+            metricAgg = "sum",
+            status = "active"
+        });
+        update.EnsureSuccessStatusCode();
+
+        var list = await _app.GetWithAccessTokenAsync($"{metricsPath}?key={metricKey}&pageIndex=0&pageSize=10");
+        list.EnsureSuccessStatusCode();
+        var listJson = await list.Content.ReadAsStringAsync();
+
+        Assert.Equal("continuous", GetJsonString(listJson, "data", "items", "0", "metricType"));
+        Assert.Equal("sum", GetJsonString(listJson, "data", "items", "0", "metricAgg"));
+    }
+
+    [Fact]
     public async Task OpenApiAccessToken_CanUseReleaseDecisionExperimentApi()
     {
         var experimentId = TestReleaseDecisionExperimentService.ExperimentId;
         var runId = TestReleaseDecisionExperimentService.RunId;
         var experimentPath = $"{BasePath}/{experimentId}";
         var runPath = $"{experimentPath}/runs/{runId}";
+        var metricsPath = $"/api/v1/envs/{TestWorkspace.Id}/release-decision/metrics";
+        var metricKey = $"checkout_activated_{Guid.NewGuid():N}";
 
         var responses = new[]
         {
@@ -89,12 +128,16 @@ public class ReleaseDecisionExperimentControllerTests
             {
                 stage = "measuring"
             }),
+            await _app.PostWithAccessTokenAsync(metricsPath, new
+            {
+                name = "Activation",
+                key = metricKey,
+                metricType = "binary",
+                metricAgg = "once"
+            }),
             await _app.PutWithAccessTokenAsync($"{experimentPath}/metrics", new
             {
-                metricName = "Activation",
-                metricEvent = "checkout_activated",
-                metricType = "binary",
-                metricAgg = "once",
+                metricKey,
                 expectedDirection = "increase_good",
                 guardrails = "[]"
             }),
@@ -130,5 +173,19 @@ public class ReleaseDecisionExperimentControllerTests
         Assert.All(responses, response => Assert.True(
             response.IsSuccessStatusCode,
             $"Expected success but got {(int)response.StatusCode} {response.ReasonPhrase}."));
+    }
+
+    private static string GetJsonString(string json, params string[] path)
+    {
+        using var document = JsonDocument.Parse(json);
+        var current = document.RootElement;
+        foreach (var segment in path)
+        {
+            current = current.ValueKind == JsonValueKind.Array
+                ? current[Convert.ToInt32(segment)]
+                : current.GetProperty(segment);
+        }
+
+        return current.GetString()!;
     }
 }

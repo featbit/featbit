@@ -104,26 +104,20 @@ export async function bindFeatbitFlagAction(formData: FormData) {
 
 export async function updateMetricsAction(formData: FormData) {
   const experimentId = formData.get("experimentId") as string;
-  const metricName = (formData.get("metricName") as string | null)?.trim() || null;
-  const metricEvent = (formData.get("metricEvent") as string | null)?.trim() || null;
-  const metricType = (formData.get("metricType") as string | null)?.trim() || "binary";
-  const metricAgg = (formData.get("metricAgg") as string | null)?.trim() || "once";
-  const expectedDirectionValue = (formData.get("expectedDirection") as string | null)?.trim();
+  const metricId = (formData.get("metricId") as string | null)?.trim() || null;
+  const metricKey = (formData.get("metricKey") as string | null)?.trim() || null;
+  const expectedDirectionRaw = (formData.get("expectedDirection") as string | null)?.trim();
   const expectedDirection =
-    expectedDirectionValue === "decrease_good" ? "decrease_good" : "increase_good";
-  const metricDescription = (formData.get("metricDescription") as string | null)?.trim() || null;
+    expectedDirectionRaw === "decrease_good" ? "decrease_good" : "increase_good";
   // guardrails arrives as a JSON string serialised by the client
   const guardrails = formData.get("guardrails") as string | null;
 
   const guardrailsJson = guardrails?.trim() || null;
 
   await updateExperimentMetrics(experimentId, {
-    metricName,
-    metricEvent,
-    metricType,
-    metricAgg,
+    metricId,
+    metricKey,
     expectedDirection,
-    metricDescription,
     guardrails: guardrailsJson,
   });
 

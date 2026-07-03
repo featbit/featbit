@@ -395,15 +395,23 @@ Assertions:
 - The experiment is bound to `rd-checkout-treatment-fixed-v1`
 - Control/treatment variations are preserved
 
-### 6. Configure Primary And Guardrail Metrics
+### 6. Register And Select Primary And Guardrail Metrics
 
-Purpose: verify release-decision metric configuration and cover multiple metric types.
+Purpose: verify environment-level release-decision metric management, experiment metric selection, and multiple metric types.
 
 API:
 
 | Action | Endpoint |
 | --- | --- |
-| Update metrics | `PUT /api/v1/envs/{envId}/release-decision/experiments/{id}/metrics` |
+| Look up metric by key | `GET /api/v1/envs/{envId}/release-decision/metrics?key={key}` |
+| Create missing metric | `POST /api/v1/envs/{envId}/release-decision/metrics` |
+| Update existing metric | `PUT /api/v1/envs/{envId}/release-decision/metrics/{metricId}` |
+| Create metric reuse experiment | `POST /api/v1/envs/{envId}/release-decision/experiments` |
+| Select experiment metrics | `PUT /api/v1/envs/{envId}/release-decision/experiments/{id}/metrics` |
+| Create metric reuse run | `POST /api/v1/envs/{envId}/release-decision/experiments/{id}/runs` |
+| Configure metric reuse run audience | `PUT /api/v1/envs/{envId}/release-decision/experiments/{id}/runs/{runId}/audience` |
+| Configure metric reuse run | `PUT /api/v1/envs/{envId}/release-decision/experiments/{id}/runs/{runId}` |
+| Configure metric reuse observation window | `PUT /api/v1/envs/{envId}/release-decision/experiments/{id}/runs/{runId}/observation-window` |
 | Read experiment | `GET /api/v1/envs/{envId}/release-decision/experiments/{id}` |
 
 Metrics:
@@ -416,8 +424,9 @@ Metrics:
 
 Assertions:
 
-- Primary metric exists and has the expected key/type
-- At least two guardrail metrics exist
+- Primary metric is registered as an active environment-level metric, then selected onto the experiment by metric id/key
+- A second release-decision experiment is created, bound to the checkout flag, selects the same primary metric, and has its own configured run, so the metric catalog includes a multi-experiment usage case with runs on both experiments
+- At least two guardrail metrics are registered as active environment-level metrics, then selected onto the experiment by metric id/key
 - Guardrails cover both binary and continuous metrics
 
 ### 7. Create Run And Seed Evaluation/Metric Data
@@ -478,7 +487,7 @@ For each scenario listed in the Traffic-Assignment Scenario Contract:
 - Create a feature flag dedicated to that scenario.
 - Update that scenario flag fallthrough split for the scenario.
 - Create a new release-decision experiment bound to that scenario flag.
-- Configure a scenario-specific primary metric event.
+- Register a scenario-specific primary metric, then select it onto the experiment by metric id/key.
 - Create a new run and set its observation window to the scenario's preset seed window.
 - Configure `controlVariant`, `treatmentVariant`, optional registered `layerId` plus `[sliceStart, sliceEnd)` fields, and `analysisSamplingPlan`.
 - Evaluate scenario-specific synthetic users through the SDK, then ingest scenario-specific raw exposure and metric events with timestamps inside the preset window.
@@ -540,6 +549,7 @@ Use this checklist after a live run. The Markdown report is the primary artifact
 | Segment identity | Live report `Resources` section, or `GET /api/v1/envs/{envId}/segments/{segmentId}` | `segmentId` is non-empty; `segmentKey = e2e-segment-fixed-v1` |
 | Segment list visibility | `GET /api/v1/envs/{envId}/segments?name=&isArchived=false&pageIndex=0&pageSize=100` | List contains `segmentKey = e2e-segment-fixed-v1` |
 | Experiment identity | Live report `Resources` section, or `GET /api/v1/envs/{envId}/release-decision/experiments/{id}` | `experimentId` is non-empty; experiment is bound to `rd-checkout-treatment-fixed-v1` |
+| Metric reuse experiment | Live report `Resources` and `Metrics` sections, or metric catalog UI | `metricReuseExperimentId` and `metricReuseRunId` are non-empty; primary metric `e2e_checkout_activated_fixed_v1` is used by both the main experiment and the reuse experiment, both experiments have runs, and the reuse run has flag, control/treatment, primary metric, and observation-window configuration |
 | Run identity | Live report `Resources` section, or experiment detail API response | `runId` is non-empty and belongs to the created experiment |
 | Secret handling | Live report body | Access token and Server SDK secret are masked; full raw secrets are not printed |
 

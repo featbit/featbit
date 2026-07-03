@@ -17,6 +17,7 @@ public class ReleaseDecisionExperimentService(
     AppDbContext dbContext,
     IExperimentStatsService statsService,
     IFeatureFlagService featureFlagService,
+    IReleaseDecisionMetricService metricService,
     ICurrentUser currentUser,
     IUserService userService)
     : IReleaseDecisionExperimentService
@@ -168,10 +169,11 @@ public class ReleaseDecisionExperimentService(
         update ??= new ReleaseDecisionMetricsUpdate();
 
         var experiment = await GetTrackedExperimentAsync(envId, id);
-        var primaryMetric = BuildPrimaryMetricJson(update);
-        var guardrails = Normalize(update.Guardrails);
+        var primaryMetric = await ResolveMetricAsync(envId, update.MetricId, Normalize(update.MetricKey, update.MetricEvent));
+        var primaryMetricJson = BuildPrimaryMetricJson(primaryMetric, update.ExpectedDirection);
+        var guardrails = await BuildGuardrailsJsonAsync(envId, update.Guardrails);
 
-        experiment.PrimaryMetric = primaryMetric;
+        experiment.PrimaryMetric = primaryMetricJson;
         experiment.Guardrails = guardrails;
         experiment.UpdatedAt = DateTime.UtcNow;
 
@@ -183,10 +185,10 @@ public class ReleaseDecisionExperimentService(
 
         if (latestRun != null)
         {
-            latestRun.PrimaryMetricEvent = Normalize(update.MetricEvent);
-            latestRun.MetricDescription = Normalize(update.MetricDescription);
-            latestRun.PrimaryMetricType = NormalizeMetricType(update.MetricType);
-            latestRun.PrimaryMetricAgg = NormalizeMetricAgg(update.MetricAgg);
+            latestRun.PrimaryMetricEvent = primaryMetric.Key;
+            latestRun.MetricDescription = primaryMetric.Description;
+            latestRun.PrimaryMetricType = NormalizeMetricType(primaryMetric.MetricType);
+            latestRun.PrimaryMetricAgg = NormalizeMetricAgg(primaryMetric.MetricAgg);
             latestRun.GuardrailEvents = BuildGuardrailEventsJson(guardrails);
             latestRun.UpdatedAt = experiment.UpdatedAt;
         }
@@ -1322,33 +1324,84 @@ public class ReleaseDecisionExperimentService(
         return (actorId, "Unknown actor", null, "unknown");
     }
 
-    private static string? BuildPrimaryMetricJson(ReleaseDecisionMetricsUpdate update)
+    private async Task<ReleaseDecisionMetricVm> ResolveMetricAsync(Guid envId, Guid? metricId, string? metricKey)
     {
-        if (string.IsNullOrWhiteSpace(update.MetricName) && string.IsNullOrWhiteSpace(update.MetricEvent))
+        if (!metricId.HasValue && string.IsNullOrWhiteSpace(metricKey))
+        {
+            throw new ArgumentException("Select an existing metric by metricId or metricKey.");
+        }
+
+        return await metricService.GetBySelectorAsync(envId, metricId, metricKey);
+    }
+
+    private async Task<string?> BuildGuardrailsJsonAsync(Guid envId, string? raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw))
         {
             return null;
         }
 
+        using var doc = JsonDocument.Parse(raw);
+        if (doc.RootElement.ValueKind != JsonValueKind.Array)
+        {
+            throw new ArgumentException("Guardrails must be a JSON array.");
+        }
+
+        var guardrails = new List<Dictionary<string, object>>();
+        foreach (var item in doc.RootElement.EnumerateArray())
+        {
+            if (item.ValueKind != JsonValueKind.Object)
+            {
+                continue;
+            }
+
+            var metricId = GetJsonGuid(item, "metricId") ?? GetJsonGuid(item, "id");
+            var metricKey =
+                GetJsonString(item, "metricKey") ??
+                GetJsonString(item, "key") ??
+                GetJsonString(item, "event");
+            var metric = await ResolveMetricAsync(envId, metricId, metricKey);
+            var direction = GetJsonString(item, "direction");
+            if (direction is not ("increase_bad" or "decrease_bad"))
+            {
+                direction = "increase_bad";
+            }
+
+            var payload = new Dictionary<string, object>
+            {
+                ["name"] = metric.Name,
+                ["event"] = metric.Key,
+                ["metricType"] = NormalizeMetricType(metric.MetricType),
+                ["metricAgg"] = NormalizeMetricAgg(metric.MetricAgg),
+                ["direction"] = direction,
+                ["inverse"] = direction == "increase_bad"
+            };
+
+            if (!string.IsNullOrWhiteSpace(metric.Description))
+            {
+                payload["description"] = metric.Description;
+            }
+
+            guardrails.Add(payload);
+        }
+
+        return JsonSerializer.Serialize(guardrails);
+    }
+
+    private static string BuildPrimaryMetricJson(ReleaseDecisionMetricVm metric, string? expectedDirection)
+    {
         var payload = new Dictionary<string, object>
         {
-            ["metricType"] = NormalizeMetricType(update.MetricType),
-            ["metricAgg"] = NormalizeMetricAgg(update.MetricAgg),
-            ["expectedDirection"] = NormalizeExpectedDirection(update.ExpectedDirection)
+            ["name"] = metric.Name,
+            ["event"] = metric.Key,
+            ["metricType"] = NormalizeMetricType(metric.MetricType),
+            ["metricAgg"] = NormalizeMetricAgg(metric.MetricAgg),
+            ["expectedDirection"] = NormalizeExpectedDirection(expectedDirection)
         };
 
-        if (!string.IsNullOrWhiteSpace(update.MetricName))
+        if (!string.IsNullOrWhiteSpace(metric.Description))
         {
-            payload["name"] = update.MetricName.Trim();
-        }
-
-        if (!string.IsNullOrWhiteSpace(update.MetricEvent))
-        {
-            payload["event"] = update.MetricEvent.Trim();
-        }
-
-        if (!string.IsNullOrWhiteSpace(update.MetricDescription))
-        {
-            payload["description"] = update.MetricDescription.Trim();
+            payload["description"] = metric.Description.Trim();
         }
 
         return JsonSerializer.Serialize(payload);
@@ -2632,6 +2685,15 @@ public class ReleaseDecisionExperimentService(
     {
         return element.TryGetProperty(property, out var value) && value.ValueKind == JsonValueKind.String
             ? value.GetString()
+            : null;
+    }
+
+    private static Guid? GetJsonGuid(JsonElement element, string property)
+    {
+        return element.TryGetProperty(property, out var value) &&
+               value.ValueKind == JsonValueKind.String &&
+               Guid.TryParse(value.GetString(), out var parsed)
+            ? parsed
             : null;
     }
 

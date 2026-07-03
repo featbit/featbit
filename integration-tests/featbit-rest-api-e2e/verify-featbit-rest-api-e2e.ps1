@@ -163,7 +163,7 @@ if ($manifestJson.expectedFinalState.analyze.runStatus -ne "analyzing") {
     throw "Manifest must define expected analyze run status."
 }
 
-$finalStepAssertions = @(($manifestJson.steps | Where-Object id -eq "9").assertions)
+$finalStepAssertions = @(($manifestJson.steps | Where-Object id -eq "10").assertions)
 foreach ($requiredFinalAssertion in @(
     "all 10 flags match expected final enabled state",
     "all 10 flags match expected final variants",

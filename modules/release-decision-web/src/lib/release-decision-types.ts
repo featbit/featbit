@@ -23,6 +23,19 @@ export interface Layer {
   updatedAt: Date;
 }
 
+export interface Metric {
+  id: string;
+  featbitEnvId: string | null;
+  name: string;
+  key: string;
+  description: string | null;
+  metricType: string;
+  metricAgg: string;
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface Experiment {
   id: string;
   createdAt: Date;

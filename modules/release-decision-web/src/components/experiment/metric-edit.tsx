@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { updateMetricsAction } from "@/lib/actions";
+import { listMetrics } from "@/lib/release-decision-client-data";
 import {
   Dialog,
   DialogContent,
@@ -8,306 +9,220 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Pencil, Plus, X, BarChart3 } from "lucide-react";
+import { Pencil, Plus, X, BarChart3, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { Experiment } from "@/lib/release-decision-types";
+import type { Experiment, Metric } from "@/lib/release-decision-types";
 
-/* ── Types ── */
 type GuardrailRow = {
-  name: string;
-  event: string;
-  metricType: "binary" | "continuous";
-  metricAgg: "once" | "count" | "sum" | "average";
+  metricKey: string;
   direction: "increase_bad" | "decrease_bad";
-  description: string;
+};
+
+type ParsedPrimary = {
+  event: string;
+  expectedDirection: "increase_good" | "decrease_good";
 };
 
 const NEW_GUARDRAIL: GuardrailRow = {
-  name: "",
-  event: "",
-  metricType: "binary",
-  metricAgg: "once",
+  metricKey: "",
   direction: "increase_bad",
-  description: "",
 };
 
-/* ── Parse primaryMetric from JSON or plain text ── */
-function parsePrimaryMetric(value: string | null | undefined) {
-  if (!value) {
-    return {
-      name: "",
-      event: "",
-      metricType: "binary",
-      metricAgg: "once",
-      expectedDirection: "increase_good",
-      description: "",
-    };
-  }
+function parseJson<T>(raw: string | null | undefined): T | null {
+  if (!raw?.trim()) return null;
   try {
-    const p = JSON.parse(value);
-    if (p && typeof p === "object") {
-      // Back-compat: legacy "numeric" rows surface as canonical "continuous".
-      const metricType =
-        p.metricType === "continuous" || p.metricType === "numeric"
-          ? "continuous"
-          : "binary";
-      return {
-        name: p.name ?? "",
-        event: p.event ?? "",
-        metricType,
-        metricAgg: p.metricAgg ?? "once",
-        expectedDirection:
-          p.expectedDirection === "decrease_good" ? "decrease_good" : "increase_good",
-        description: p.description ?? "",
-      };
-    }
-  } catch { /* plain text */ }
+    return JSON.parse(raw) as T;
+  } catch {
+    return null;
+  }
+}
+
+function parsePrimaryMetric(value: string | null | undefined): ParsedPrimary {
+  const parsed = parseJson<{ event?: string; key?: string; metricKey?: string }>(value);
   return {
-    name: value,
-    event: "",
-    metricType: "binary",
-    metricAgg: "once",
-    expectedDirection: "increase_good",
-    description: "",
+    event: parsed?.metricKey ?? parsed?.key ?? parsed?.event ?? "",
+    expectedDirection:
+      (parsed as { expectedDirection?: string } | null)?.expectedDirection === "decrease_good"
+        ? "decrease_good"
+        : "increase_good",
   };
 }
 
-/* ── Parse guardrails from JSON array or legacy free text ── */
 function parseGuardrailsToRows(value: string | null | undefined): GuardrailRow[] {
   if (!value) return [];
-  try {
-    const parsed = JSON.parse(value);
-    if (Array.isArray(parsed)) {
-      return parsed.map((g): GuardrailRow => ({
-        name: g.name ?? g.event ?? "",
-        event: g.event ?? g.name ?? "",
-        // Back-compat: legacy "numeric" rows surface as the canonical "continuous".
-        metricType:
-          g.metricType === "continuous" || g.metricType === "numeric"
-            ? "continuous"
-            : "binary",
-        metricAgg:
-          g.metricAgg === "count"
-            ? "count"
-            : g.metricAgg === "sum"
-              ? "sum"
-              : g.metricAgg === "average"
-                ? "average"
-                : "once",
-        // `inverse:true` from older data means lower is better, so an increase
-        // is the bad guardrail direction. Keep simple.
-        direction:
-          g.direction === "decrease_bad" || g.inverse === false
-            ? "decrease_bad"
-            : "increase_bad",
-        description: g.description ?? "",
-      }));
-    }
-  } catch { /* free text */ }
-  // Legacy free-text: "event_name — description" (one per line)
+  const parsed = parseJson<Array<Record<string, unknown>> | string[]>(value);
+  if (Array.isArray(parsed)) {
+    return parsed
+      .map((item): GuardrailRow | null => {
+        if (typeof item === "string") {
+          return { metricKey: item, direction: "increase_bad" };
+        }
+
+        const metricKey =
+          stringValue(item.metricKey) ??
+          stringValue(item.key) ??
+          stringValue(item.event) ??
+          "";
+        if (!metricKey) return null;
+
+        const direction =
+          item.direction === "decrease_bad" ? "decrease_bad" : "increase_bad";
+        return { metricKey, direction };
+      })
+      .filter((item): item is GuardrailRow => Boolean(item));
+  }
+
   return value
     .split("\n")
     .map((line) => line.trim())
     .filter(Boolean)
-    .map((line): GuardrailRow => {
-      const match = line.match(/^(.+?)\s*[—–-]+\s*(.+)$/);
-      const name = match ? match[1].trim() : line;
-      return {
-        ...NEW_GUARDRAIL,
-        name,
-        event: name,
-        description: match ? match[2].trim() : "",
-      };
-    });
+    .map((line) => ({ metricKey: line, direction: "increase_bad" }));
 }
 
-/* ── Styled native select ── */
-function NativeSelect({
-  id,
-  name,
-  value,
-  onChange,
-  children,
-}: {
-  id: string;
-  name: string;
-  value: string;
-  onChange: (value: string) => void;
-  children: React.ReactNode;
-}) {
+function stringValue(value: unknown) {
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+function metricLabel(metric: Metric) {
+  return `${metric.name} (${metric.key})`;
+}
+
+function metricTypeLabel(metric: Metric) {
+  return metric.metricType === "continuous"
+    ? `Numeric, ${metric.metricAgg}`
+    : "Binary conversion";
+}
+
+function MetricDetails({ metric }: { metric: Metric | undefined }) {
+  if (!metric) return null;
+
   return (
-    <select
-      id={id}
-      name={name}
-      value={value}
-      onChange={(event) => onChange(event.target.value)}
-      className={cn(
-        "h-8 w-full rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm",
-        "transition-colors outline-none",
-        "focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+    <div className="rounded-md border bg-muted/20 px-3 py-2 text-xs">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="font-medium text-foreground">{metric.name}</span>
+        <span className="fb-code-pill">{metric.key}</span>
+        <span className="text-muted-foreground">{metricTypeLabel(metric)}</span>
+      </div>
+      {metric.description && (
+        <p className="mt-1 leading-relaxed text-muted-foreground">
+          {metric.description}
+        </p>
       )}
-    >
-      {children}
-    </select>
+    </div>
   );
 }
 
-/* ── Dynamic guardrails editor ── */
-function GuardrailsEditor({ initialRows }: { initialRows: GuardrailRow[] }) {
-  const [rows, setRows] = useState<GuardrailRow[]>(initialRows);
-
+function GuardrailsEditor({
+  rows,
+  metrics,
+  onChange,
+}: {
+  rows: GuardrailRow[];
+  metrics: Metric[];
+  onChange: (rows: GuardrailRow[]) => void;
+}) {
   function update<K extends keyof GuardrailRow>(
     i: number,
     field: K,
     value: GuardrailRow[K],
   ) {
-    setRows((prev) =>
-      prev.map((r, idx) => (idx === i ? { ...r, [field]: value } : r)),
-    );
+    onChange(rows.map((r, idx) => (idx === i ? { ...r, [field]: value } : r)));
   }
 
   function add() {
-    setRows((prev) => [...prev, { ...NEW_GUARDRAIL }]);
+    onChange([...rows, { ...NEW_GUARDRAIL }]);
   }
 
   function remove(i: number) {
-    setRows((prev) => prev.filter((_, idx) => idx !== i));
+    onChange(rows.filter((_, idx) => idx !== i));
   }
+
+  const guardrailPayload = rows
+    .filter((row) => row.metricKey)
+    .map((row) => ({
+      metricKey: row.metricKey,
+      direction: row.direction,
+    }));
 
   return (
     <div className="space-y-2">
-      {/* Hidden input carries the JSON to the server action */}
-      <input type="hidden" name="guardrails" value={JSON.stringify(rows)} />
+      <input type="hidden" name="guardrails" value={JSON.stringify(guardrailPayload)} />
 
       {rows.length > 0 && (
         <div className="space-y-2">
-          {rows.map((row, i) => (
-            <div key={i} className="rounded-md border px-2.5 py-2 space-y-2 relative">
-              <button
-                type="button"
-                onClick={() => remove(i)}
-                className="absolute top-2 right-2 text-muted-foreground/40 hover:text-destructive transition-colors"
-                title="Remove"
-              >
-                <X className="size-3" />
-              </button>
+          {rows.map((row, i) => {
+            const metric = metrics.find((item) => item.key === row.metricKey);
+            return (
+              <div key={i} className="relative space-y-2 rounded-md border px-2.5 py-2">
+                <button
+                  type="button"
+                  onClick={() => remove(i)}
+                  className="absolute right-2 top-2 text-muted-foreground/40 transition-colors hover:text-destructive"
+                  title="Remove"
+                >
+                  <X className="size-3" />
+                </button>
 
-              <div className="space-y-1 pr-5">
-                <Label className="text-[10px] uppercase text-muted-foreground">
-                  Metric Name
-                </Label>
-                <Input
-                  value={row.name}
-                  onChange={(e) => update(i, "name", e.target.value)}
-                  placeholder="e.g. Checkout abandonment"
-                  className="text-xs h-7"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <Label className="text-[10px] uppercase text-muted-foreground">
-                  Event Name
-                </Label>
-                <Input
-                  value={row.event}
-                  onChange={(e) => update(i, "event", e.target.value)}
-                  placeholder="e.g. checkout_abandoned"
-                  className="text-xs font-mono h-7"
-                  required
-                />
-                <p className="text-[10px] text-muted-foreground/70">
-                  The event key tracked in your application.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-3 gap-2">
-                <div className="space-y-1">
+                <div className="space-y-1 pr-5">
                   <Label className="text-[10px] uppercase text-muted-foreground">
-                    Metric Type
+                    Metric
                   </Label>
                   <select
-                    value={row.metricType}
-                    onChange={(e) =>
-                      update(i, "metricType", e.target.value as GuardrailRow["metricType"])
-                    }
+                    value={row.metricKey}
+                    onChange={(event) => update(i, "metricKey", event.target.value)}
                     className={cn(
-                      "h-7 w-full rounded-md border border-input bg-transparent px-2 text-xs",
+                      "h-8 w-full rounded-md border border-input bg-transparent px-2 text-xs",
                       "focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50",
                     )}
                     required
                   >
-                    <option value="binary">Binary</option>
-                    <option value="continuous">Numeric</option>
+                    <option value="">Select metric</option>
+                    {metrics.map((option) => (
+                      <option key={option.id} value={option.key}>
+                        {metricLabel(option)}
+                      </option>
+                    ))}
                   </select>
                 </div>
-                <div className="space-y-1">
-                  <Label className="text-[10px] uppercase text-muted-foreground">
-                    Aggregation
-                  </Label>
-                  <select
-                    value={row.metricAgg}
-                    onChange={(e) =>
-                      update(i, "metricAgg", e.target.value as GuardrailRow["metricAgg"])
-                    }
-                    className={cn(
-                      "h-7 w-full rounded-md border border-input bg-transparent px-2 text-xs",
-                      "focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50",
-                    )}
-                    required
-                  >
-                    <option value="once">Once per user</option>
-                    <option value="count">Count all</option>
-                    <option value="sum">Sum values</option>
-                    <option value="average">Average values</option>
-                  </select>
-                </div>
+
                 <div className="space-y-1">
                   <Label className="text-[10px] uppercase text-muted-foreground">
                     Alarm If
                   </Label>
                   <select
                     value={row.direction}
-                    onChange={(e) =>
-                      update(i, "direction", e.target.value as GuardrailRow["direction"])
+                    onChange={(event) =>
+                      update(
+                        i,
+                        "direction",
+                        event.target.value === "decrease_bad"
+                          ? "decrease_bad"
+                          : "increase_bad",
+                      )
                     }
                     className={cn(
-                      "h-7 w-full rounded-md border border-input bg-transparent px-2 text-xs",
+                      "h-8 w-full rounded-md border border-input bg-transparent px-2 text-xs",
                       "focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50",
                     )}
-                    title="Which direction counts as a regression"
                     required
                   >
-                    <option value="increase_bad">↑ Increases</option>
-                    <option value="decrease_bad">↓ Decreases</option>
+                    <option value="increase_bad">Increases</option>
+                    <option value="decrease_bad">Decreases</option>
                   </select>
                 </div>
-              </div>
 
-              <div className="space-y-1">
-                <Label className="text-[10px] uppercase text-muted-foreground">
-                  Description{" "}
-                  <span className="text-muted-foreground/60 normal-case">(optional)</span>
-                </Label>
-                <Textarea
-                  value={row.description}
-                  onChange={(e) => update(i, "description", e.target.value)}
-                  placeholder="e.g. Streamlined flow must not confuse users"
-                  rows={2}
-                  className="text-xs resize-none"
-                />
+                <MetricDetails metric={metric} />
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
       <button
         type="button"
         onClick={add}
-        className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+        className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
       >
         <Plus className="size-3" />
         Add guardrail
@@ -316,7 +231,6 @@ function GuardrailsEditor({ initialRows }: { initialRows: GuardrailRow[] }) {
   );
 }
 
-/* ── Metric edit form (mounts fresh each time dialog opens) ── */
 function MetricEditForm({
   experiment,
   onDone,
@@ -326,16 +240,55 @@ function MetricEditForm({
   onDone: () => void;
   onCancel: () => void;
 }) {
-  const [metric, setMetric] = useState(() =>
-    parsePrimaryMetric(experiment.primaryMetric),
+  const initialPrimary = parsePrimaryMetric(experiment.primaryMetric);
+  const [metrics, setMetrics] = useState<Metric[]>([]);
+  const [primaryMetricKey, setPrimaryMetricKey] = useState(initialPrimary.event);
+  const [primaryExpectedDirection, setPrimaryExpectedDirection] = useState(initialPrimary.expectedDirection);
+  const [guardrails, setGuardrails] = useState<GuardrailRow[]>(() =>
+    parseGuardrailsToRows(experiment.guardrails),
   );
-  const guardrailRows = parseGuardrailsToRows(experiment.guardrails);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  function updateMetric<K extends keyof typeof metric>(
-    field: K,
-    value: (typeof metric)[K],
-  ) {
-    setMetric((prev) => ({ ...prev, [field]: value }));
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+
+    listMetrics({ status: "active" })
+      .then((items) => {
+        if (!cancelled) setMetrics(items);
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "Failed to load metrics.");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const activePrimary = useMemo(
+    () => metrics.find((metric) => metric.key === primaryMetricKey),
+    [metrics, primaryMetricKey],
+  );
+
+  if (loading) {
+    return (
+      <div className="flex items-center gap-2 py-6 text-sm text-muted-foreground">
+        <Loader2 className="size-4 animate-spin" />
+        Loading metrics...
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div className="rounded-md border border-destructive/30 p-3 text-sm text-destructive">{error}</div>;
   }
 
   return (
@@ -347,145 +300,88 @@ function MetricEditForm({
       className="space-y-4 pt-1"
     >
       <input type="hidden" name="experimentId" value={experiment.id} />
+      <input type="hidden" name="metricKey" value={primaryMetricKey} />
+      <input type="hidden" name="expectedDirection" value={primaryExpectedDirection} />
 
-      {/* ── Primary Metric ── */}
       <fieldset className="space-y-3 rounded-lg border px-3 pb-3 pt-2">
-        <legend className="px-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+        <legend className="px-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           Primary Metric
         </legend>
 
         <div className="space-y-1">
-          <Label htmlFor="metricName" className="text-xs">Metric Name</Label>
-          <Input
-            id="metricName"
-            name="metricName"
-            value={metric.name}
-            onChange={(event) => updateMetric("name", event.target.value)}
-            placeholder="e.g. Checkout completion rate"
-            className="text-sm"
-          />
-        </div>
-
-        <div className="space-y-1">
-          <Label htmlFor="metricEvent" className="text-xs">Event Name</Label>
-          <Input
-            id="metricEvent"
-            name="metricEvent"
-            value={metric.event}
-            onChange={(event) => updateMetric("event", event.target.value)}
-            placeholder="e.g. purchase_completed"
-            className="text-sm font-mono"
+          <Label htmlFor="metricKey" className="text-xs">Metric</Label>
+          <select
+            id="metricKey"
+            value={primaryMetricKey}
+            onChange={(event) => setPrimaryMetricKey(event.target.value)}
+            className={cn(
+              "h-9 w-full rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm",
+              "focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50",
+            )}
             required
-          />
-          <p className="text-[10px] text-muted-foreground">
-            The event key tracked in your application
-          </p>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-1">
-            <Label htmlFor="metricType" className="text-xs">Metric Type</Label>
-            <NativeSelect
-              id="metricType"
-              name="metricType"
-              value={metric.metricType}
-              onChange={(value) =>
-                updateMetric(
-                  "metricType",
-                  value === "continuous" ? "continuous" : "binary",
-                )
-              }
-            >
-              <option value="binary">Binary (conversion)</option>
-              <option value="continuous">Numeric (value)</option>
-            </NativeSelect>
-          </div>
-          <div className="space-y-1">
-            <Label htmlFor="metricAgg" className="text-xs">Aggregation</Label>
-            <NativeSelect
-              id="metricAgg"
-              name="metricAgg"
-              value={metric.metricAgg}
-              onChange={(value) =>
-                updateMetric(
-                  "metricAgg",
-                  value === "count" ||
-                    value === "sum" ||
-                    value === "average"
-                    ? value
-                    : "once",
-                )
-              }
-            >
-              <option value="once">Once per user</option>
-              <option value="count">Count all</option>
-              <option value="sum">Sum values</option>
-              <option value="average">Average values</option>
-            </NativeSelect>
-          </div>
+          >
+            <option value="">Select metric</option>
+            {metrics.map((metric) => (
+              <option key={metric.id} value={metric.key}>
+                {metricLabel(metric)}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="space-y-1">
-          <Label htmlFor="expectedDirection" className="text-xs">Better Direction</Label>
-          <NativeSelect
+          <Label htmlFor="expectedDirection" className="text-xs">Primary Better Direction</Label>
+          <select
             id="expectedDirection"
-            name="expectedDirection"
-            value={metric.expectedDirection}
-            onChange={(value) =>
-              updateMetric(
-                "expectedDirection",
-                value === "decrease_good" ? "decrease_good" : "increase_good",
+            value={primaryExpectedDirection}
+            onChange={(event) =>
+              setPrimaryExpectedDirection(
+                event.target.value === "decrease_good" ? "decrease_good" : "increase_good",
               )
             }
+            className={cn(
+              "h-9 w-full rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm",
+              "focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50",
+            )}
+            required
           >
             <option value="increase_good">Higher is better</option>
             <option value="decrease_good">Lower is better</option>
-          </NativeSelect>
+          </select>
         </div>
 
-        <div className="space-y-1">
-          <Label htmlFor="metricDescription" className="text-xs">
-            Description{" "}
-            <span className="text-muted-foreground/60">(optional)</span>
-          </Label>
-          <Textarea
-            id="metricDescription"
-            name="metricDescription"
-            value={metric.description}
-            onChange={(event) => updateMetric("description", event.target.value)}
-            placeholder="What does this metric measure and why does it matter?"
-            rows={2}
-            className="text-xs resize-none"
-          />
-        </div>
+        <MetricDetails metric={activePrimary} />
+
+        {metrics.length === 0 && (
+          <p className="text-xs leading-relaxed text-muted-foreground">
+            Create active metric keys from the Metrics page before configuring an experiment.
+          </p>
+        )}
       </fieldset>
 
-      {/* ── Guardrails ── */}
       <fieldset className="space-y-2 rounded-lg border px-3 pb-3 pt-2">
-        <legend className="px-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+        <legend className="px-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           Guardrails
         </legend>
-        <p className="text-[10px] text-muted-foreground">
-          Metrics that must not regress for this experiment to ship.
-        </p>
-        <GuardrailsEditor initialRows={guardrailRows} />
+        <GuardrailsEditor
+          rows={guardrails}
+          metrics={metrics}
+          onChange={setGuardrails}
+        />
       </fieldset>
 
       <DialogFooter className="gap-2 pt-1">
         <Button type="button" variant="outline" size="sm" onClick={onCancel}>
           Cancel
         </Button>
-        <Button type="submit" size="sm">Save</Button>
+        <Button type="submit" size="sm" disabled={!primaryMetricKey}>
+          Save
+        </Button>
       </DialogFooter>
     </form>
   );
 }
 
-/**
- * Pencil button + structured dialog for editing Primary Metric and Guardrails.
- * @deprecated Kept for legacy import compatibility — new flows should use
- * MetricEditPanel via a parent state toggle (same pattern as FlagIntegrationPanel).
- */
 export function MetricEditDialog({ experiment }: { experiment: Experiment }) {
   const [open, setOpen] = useState(false);
 
@@ -494,16 +390,16 @@ export function MetricEditDialog({ experiment }: { experiment: Experiment }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="ml-1 text-muted-foreground/50 hover:text-foreground transition-colors"
+        className="ml-1 text-muted-foreground/50 transition-colors hover:text-foreground"
         title="Edit metrics"
       >
         <Pencil className="size-3" />
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-sm">Edit Experiment Metrics</DialogTitle>
+            <DialogTitle className="text-sm">Select Experiment Metrics</DialogTitle>
           </DialogHeader>
 
           {open && (
@@ -519,12 +415,6 @@ export function MetricEditDialog({ experiment }: { experiment: Experiment }) {
   );
 }
 
-/**
- * Inline panel version — replaces stage content while editing metrics. Parent
- * controls open/close state; close button returns user to the summary view.
- * Mirrors the FlagIntegrationPanel UX so the edit flow stays in the stage
- * workspace instead of opening a covering sheet.
- */
 export function MetricEditPanel({
   experiment,
   onClose,
@@ -533,33 +423,25 @@ export function MetricEditPanel({
   onClose: () => void;
 }) {
   return (
-    <section className="flex flex-col h-full min-h-0 rounded-md border bg-background">
-      {/* Header */}
+    <section className="flex h-full min-h-0 flex-col rounded-md border bg-background">
       <div className="border-b px-5 py-4">
         <div className="flex items-start gap-4">
-          <div className="size-9 rounded-md bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center shrink-0">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-blue-100 dark:bg-blue-900/40">
             <BarChart3 className="size-5 text-blue-700 dark:text-blue-300" />
           </div>
-          <div className="flex-1 min-w-0">
-            <h2 className="text-base font-medium">Edit Experiment Metrics</h2>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Define the primary success metric and guardrails. These drive how
-              runs are analyzed.
+          <div className="min-w-0 flex-1">
+            <h2 className="text-base font-medium">Select Experiment Metrics</h2>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              Choose registered metric keys for analysis.
             </p>
           </div>
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            onClick={onClose}
-            title="Close"
-          >
+          <Button variant="ghost" size="icon-sm" onClick={onClose} title="Close">
             <X className="size-4" />
           </Button>
         </div>
       </div>
 
-      {/* Body */}
-      <div className="flex-1 min-h-0 overflow-y-auto px-5 py-4">
+      <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
         <MetricEditForm
           experiment={experiment}
           onDone={onClose}

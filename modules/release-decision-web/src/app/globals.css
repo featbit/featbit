@@ -694,7 +694,7 @@
   }
 
   .fb-metrics-grid {
-    min-width: 1120px;
+    min-width: 980px;
   }
 
   .fb-metrics-header,
@@ -704,7 +704,6 @@
       minmax(360px, 2.3fr)
       minmax(100px, 0.75fr)
       minmax(90px, 0.7fr)
-      minmax(110px, 0.8fr)
       minmax(150px, 1fr)
       minmax(260px, 1.7fr)
       minmax(88px, 0.6fr);

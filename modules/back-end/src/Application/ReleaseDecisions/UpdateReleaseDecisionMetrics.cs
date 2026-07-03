@@ -5,6 +5,10 @@ namespace Application.ReleaseDecisions;
 
 public class ReleaseDecisionMetricsUpdate
 {
+    public Guid? MetricId { get; set; }
+
+    public string MetricKey { get; set; }
+
     public string MetricName { get; set; }
 
     public string MetricEvent { get; set; }
@@ -43,27 +47,38 @@ public class UpdateReleaseDecisionMetricsValidator : AbstractValidator<UpdateRel
         When(x => x.Update != null, () =>
         {
             RuleFor(x => x.Update.MetricName)
-                .Must(value => !string.IsNullOrWhiteSpace(value))
-                .WithErrorCode(ErrorCodes.Required("metricName"));
-
-            RuleFor(x => x.Update.MetricName)
                 .MaximumLength(80)
                 .WithErrorCode(ErrorCodes.Invalid("metricName"))
                 .WithMessage("Metric name must be 80 characters or fewer.");
 
-            RuleFor(x => x.Update.MetricEvent)
-                .Must(value => !string.IsNullOrWhiteSpace(value))
-                .WithErrorCode(ErrorCodes.Required("metricEvent"));
+            RuleFor(x => x.Update)
+                .Must(HasPrimaryMetricSelector)
+                .WithErrorCode(ErrorCodes.Required("metric"))
+                .WithMessage("Select an existing metric by metricId, metricKey, or metricEvent.");
 
             RuleFor(x => x.Update.MetricEvent)
                 .MaximumLength(128)
                 .WithErrorCode(ErrorCodes.Invalid("metricEvent"))
-                .WithMessage("Metric event key must be 128 characters or fewer.");
+                .WithMessage("Metric event key must be 128 characters or fewer.")
+                .When(x => !string.IsNullOrWhiteSpace(x.Update.MetricEvent));
 
             RuleFor(x => x.Update.MetricEvent)
                 .Matches("^[A-Za-z0-9][A-Za-z0-9_.:-]*$")
                 .WithErrorCode(ErrorCodes.Invalid("metricEvent"))
-                .WithMessage("Metric event key must not contain spaces.");
+                .WithMessage("Metric event key must not contain spaces.")
+                .When(x => !string.IsNullOrWhiteSpace(x.Update.MetricEvent));
+
+            RuleFor(x => x.Update.MetricKey)
+                .MaximumLength(128)
+                .WithErrorCode(ErrorCodes.Invalid("metricKey"))
+                .WithMessage("Metric key must be 128 characters or fewer.")
+                .When(x => !string.IsNullOrWhiteSpace(x.Update.MetricKey));
+
+            RuleFor(x => x.Update.MetricKey)
+                .Matches("^[A-Za-z0-9][A-Za-z0-9_.:-]*$")
+                .WithErrorCode(ErrorCodes.Invalid("metricKey"))
+                .WithMessage("Metric key must not contain spaces.")
+                .When(x => !string.IsNullOrWhiteSpace(x.Update.MetricKey));
 
             RuleFor(x => x.Update.MetricType)
                 .Must(value => MetricTypes.Contains(value))
@@ -88,7 +103,7 @@ public class UpdateReleaseDecisionMetricsValidator : AbstractValidator<UpdateRel
                 .Must(BeValidGuardrails)
                 .WithErrorCode(ErrorCodes.Invalid("guardrails"))
                 .WithMessage(
-                    "Guardrails must be a JSON array. Each guardrail requires event, metricType, metricAgg, and alarm direction.");
+                    "Guardrails must be a JSON array. Each guardrail must select a registered metric by metricId, metricKey, key, or event.");
         });
     }
 
@@ -114,22 +129,7 @@ public class UpdateReleaseDecisionMetricsValidator : AbstractValidator<UpdateRel
                     return false;
                 }
 
-                if (string.IsNullOrWhiteSpace(GetJsonString(item, "event")))
-                {
-                    return false;
-                }
-
-                if (!MetricTypes.Contains(GetJsonString(item, "metricType")))
-                {
-                    return false;
-                }
-
-                if (!MetricAggs.Contains(GetJsonString(item, "metricAgg")))
-                {
-                    return false;
-                }
-
-                if (!HasAlarmDirection(item))
+                if (!HasMetricSelector(item))
                 {
                     return false;
                 }
@@ -143,6 +143,13 @@ public class UpdateReleaseDecisionMetricsValidator : AbstractValidator<UpdateRel
         }
     }
 
+    private static bool HasPrimaryMetricSelector(ReleaseDecisionMetricsUpdate update)
+    {
+        return update.MetricId.HasValue ||
+               !string.IsNullOrWhiteSpace(update.MetricKey) ||
+               !string.IsNullOrWhiteSpace(update.MetricEvent);
+    }
+
     private static bool HasAlarmDirection(JsonElement item)
     {
         if (item.TryGetProperty("inverse", out var inverse) &&
@@ -153,6 +160,15 @@ public class UpdateReleaseDecisionMetricsValidator : AbstractValidator<UpdateRel
 
         var direction = GetJsonString(item, "direction");
         return direction is "increase_bad" or "decrease_bad";
+    }
+
+    private static bool HasMetricSelector(JsonElement item)
+    {
+        return !string.IsNullOrWhiteSpace(GetJsonString(item, "metricId")) ||
+               !string.IsNullOrWhiteSpace(GetJsonString(item, "id")) ||
+               !string.IsNullOrWhiteSpace(GetJsonString(item, "metricKey")) ||
+               !string.IsNullOrWhiteSpace(GetJsonString(item, "key")) ||
+               !string.IsNullOrWhiteSpace(GetJsonString(item, "event"));
     }
 
     private static string GetJsonString(JsonElement item, string property)

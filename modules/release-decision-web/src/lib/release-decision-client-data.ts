@@ -8,10 +8,12 @@ import type {
   ReleaseDecisionExperimentRunUpdate,
   ReleaseDecisionLayer,
   ReleaseDecisionLayerUpdate,
+  ReleaseDecisionMetric,
+  ReleaseDecisionMetricUpdate,
   ReleaseDecisionMetricsUpdate,
   PagedResult,
 } from "@/lib/release-decision-api";
-import type { Activity, Experiment, ExperimentRun, Layer } from "@/lib/release-decision-types";
+import type { Activity, Experiment, ExperimentRun, Layer, Metric } from "@/lib/release-decision-types";
 
 export type ExperimentDetail = Experiment & {
   experimentRuns: ExperimentRun[];
@@ -43,6 +45,10 @@ function path(envId: string, suffix = "") {
 
 function layerPath(envId: string, suffix = "") {
   return `/envs/${envId}/release-decision/layers${suffix}`;
+}
+
+function metricPath(envId: string, suffix = "") {
+  return `/envs/${envId}/release-decision/metrics${suffix}`;
 }
 
 function toDate(value: string | Date | null | undefined): Date {
@@ -85,6 +91,16 @@ function mapLayer(layer: ReleaseDecisionLayer): Layer {
     assignmentUnitSelector: layer.assignmentUnitSelector ?? "user.keyId",
     createdAt: toDate(layer.createdAt),
     updatedAt: toDate(layer.updatedAt),
+  };
+}
+
+function mapMetric(metric: ReleaseDecisionMetric): Metric {
+  return {
+    ...metric,
+    featbitEnvId: metric.featbitEnvId ?? metric.featBitEnvId ?? null,
+    description: metric.description ?? null,
+    createdAt: toDate(metric.createdAt),
+    updatedAt: toDate(metric.updatedAt),
   };
 }
 
@@ -196,6 +212,54 @@ export async function updateLayer(id: string, data: ReleaseDecisionLayerUpdate) 
 export async function archiveLayer(id: string) {
   const envId = requireEnvId();
   await apiRequest<boolean>(layerPath(envId, `/${id}`), { method: "DELETE" });
+}
+
+export async function listMetrics(filter: {
+  name?: string;
+  key?: string;
+  status?: string;
+} = {}) {
+  const envId = requireEnvId();
+  const page = await apiRequest<PagedResult<ReleaseDecisionMetric>>(
+    metricPath(envId),
+    {
+      method: "GET",
+      query: {
+        pageIndex: 0,
+        pageSize: 200,
+        name: filter.name?.trim() || undefined,
+        key: filter.key?.trim() || undefined,
+        status: filter.status?.trim() || undefined,
+      },
+    },
+  );
+
+  return (page.items ?? []).map(mapMetric);
+}
+
+export async function createMetric(data: ReleaseDecisionMetricUpdate) {
+  const envId = requireEnvId();
+  const metric = await apiRequest<ReleaseDecisionMetric>(metricPath(envId), {
+    method: "POST",
+    body: data,
+  });
+
+  return mapMetric(metric);
+}
+
+export async function updateMetric(id: string, data: ReleaseDecisionMetricUpdate) {
+  const envId = requireEnvId();
+  const metric = await apiRequest<ReleaseDecisionMetric>(metricPath(envId, `/${id}`), {
+    method: "PUT",
+    body: data,
+  });
+
+  return mapMetric(metric);
+}
+
+export async function archiveMetric(id: string) {
+  const envId = requireEnvId();
+  await apiRequest<boolean>(metricPath(envId, `/${id}`), { method: "DELETE" });
 }
 
 export async function getExperiment(id: string) {

@@ -102,6 +102,7 @@ public class ReleaseDecisionLayerService(AppDbContext dbContext) : IReleaseDecis
     private async Task<ReleaseDecisionLayer> GetTrackedLayerAsync(Guid envId, Guid id)
     {
         var layer = await dbContext.Set<ReleaseDecisionLayer>()
+            .AsTracking()
             .FirstOrDefaultAsync(x => x.Id == id && x.FeatBitEnvId == envId);
 
         if (layer == null)

@@ -55,6 +55,7 @@ public static class DbServiceCollectionExtensions
             services.AddTransient<ITriggerService, MongoServices.TriggerService>();
             services.AddTransient<IReleaseDecisionExperimentService, MongoServices.ReleaseDecisionExperimentService>();
             services.AddTransient<IReleaseDecisionLayerService, MongoServices.ReleaseDecisionLayerService>();
+            services.AddTransient<IReleaseDecisionMetricService, MongoServices.ReleaseDecisionMetricService>();
             services.AddTransient<IAuditLogService, MongoServices.AuditLogService>();
             services.AddTransient<IAccessTokenService, MongoServices.AccessTokenService>();
             services.AddTransient<IRelayProxyService, MongoServices.RelayProxyService>();
@@ -98,6 +99,7 @@ public static class DbServiceCollectionExtensions
             services.AddTransient<ITriggerService, EntityFrameworkCoreServices.TriggerService>();
             services.AddTransient<IReleaseDecisionExperimentService, EntityFrameworkCoreServices.ReleaseDecisionExperimentService>();
             services.AddTransient<IReleaseDecisionLayerService, EntityFrameworkCoreServices.ReleaseDecisionLayerService>();
+            services.AddTransient<IReleaseDecisionMetricService, EntityFrameworkCoreServices.ReleaseDecisionMetricService>();
             services.AddTransient<IAuditLogService, EntityFrameworkCoreServices.AuditLogService>();
             services.AddTransient<IAccessTokenService, EntityFrameworkCoreServices.AccessTokenService>();
             services.AddTransient<IRelayProxyService, EntityFrameworkCoreServices.RelayProxyService>();

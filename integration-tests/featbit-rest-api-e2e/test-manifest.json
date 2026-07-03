@@ -72,7 +72,7 @@
       "key": "e2e_checkout_activated_fixed_v1",
       "type": "binary",
       "aggregation": "once",
-      "expectedDirection": "increase_good"
+      "selectionExpectedDirection": "increase_good"
     },
     "guardrails": [
       {
@@ -304,6 +304,7 @@
     {
       "id": "4",
       "name": "Verify flags through public evaluation without insight side effects",
+      "eventEndpoint": "POST /api/public/insight/track",
       "endpoints": [
         "POST /api/public/featureflag/evaluate"
       ],
@@ -330,12 +331,23 @@
     },
     {
       "id": "6",
-      "name": "Configure primary and guardrail metrics",
+      "name": "Register and select primary and guardrail metrics",
       "endpoints": [
-        "PUT /api/v1/envs/{envId}/release-decision/experiments/{id}/metrics"
+        "GET /api/v1/envs/{envId}/release-decision/metrics",
+        "POST /api/v1/envs/{envId}/release-decision/metrics",
+        "PUT /api/v1/envs/{envId}/release-decision/metrics/{metricId}",
+        "POST /api/v1/envs/{envId}/release-decision/experiments",
+        "PUT /api/v1/envs/{envId}/release-decision/experiments/{id}/metrics",
+        "POST /api/v1/envs/{envId}/release-decision/experiments/{id}/runs",
+        "PUT /api/v1/envs/{envId}/release-decision/experiments/{id}/runs/{runId}/audience",
+        "PUT /api/v1/envs/{envId}/release-decision/experiments/{id}/runs/{runId}",
+        "PUT /api/v1/envs/{envId}/release-decision/experiments/{id}/runs/{runId}/observation-window"
       ],
       "assertions": [
-        "primary metric is binary/once",
+        "primary metric is registered as an active environment-level binary/once metric",
+        "guardrails are registered as active environment-level metrics",
+        "experiment selects primary and guardrail metrics by metric id/key",
+        "a second experiment selects the same primary metric and creates its own configured run to verify multi-experiment metric usage",
         "guardrails include binary/once and continuous/average metrics"
       ]
     },

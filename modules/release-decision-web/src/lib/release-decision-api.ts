@@ -121,11 +121,34 @@ export interface ReleaseDecisionLayer {
   updatedAt: string;
 }
 
+export interface ReleaseDecisionMetric {
+  id: string;
+  featBitEnvId?: string;
+  featbitEnvId?: string;
+  name: string;
+  key: string;
+  description: string | null;
+  metricType: string;
+  metricAgg: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export type ReleaseDecisionLayerUpdate = {
   name: string;
   key: string;
   description?: string | null;
   assignmentUnitSelector?: string | null;
+  status?: string | null;
+};
+
+export type ReleaseDecisionMetricUpdate = {
+  name: string;
+  key: string;
+  description?: string | null;
+  metricType?: string | null;
+  metricAgg?: string | null;
   status?: string | null;
 };
 
@@ -158,6 +181,8 @@ export type ReleaseDecisionExperimentUpdate = Partial<
 };
 
 export type ReleaseDecisionMetricsUpdate = {
+  metricId?: string | null;
+  metricKey?: string | null;
   metricName?: string | null;
   metricEvent?: string | null;
   metricType?: string | null;
@@ -196,6 +221,10 @@ export function releaseDecisionLayersPath(envId: string, suffix = "") {
   return `/envs/${envId}/release-decision/layers${suffix}`;
 }
 
+export function releaseDecisionMetricsPath(envId: string, suffix = "") {
+  return `/envs/${envId}/release-decision/metrics${suffix}`;
+}
+
 export async function apiListLayers(
   envId: string,
   filter: Record<string, string | number | undefined> = {},
@@ -226,6 +255,40 @@ export async function apiUpdateLayer(
 
 export async function apiArchiveLayer(envId: string, id: string) {
   return apiRequest<boolean>(releaseDecisionLayersPath(envId, `/${id}`), {
+    method: "DELETE",
+  });
+}
+
+export async function apiListMetrics(
+  envId: string,
+  filter: Record<string, string | number | undefined> = {},
+) {
+  return apiRequest<PagedResult<ReleaseDecisionMetric>>(
+    releaseDecisionMetricsPath(envId),
+    { query: filter },
+  );
+}
+
+export async function apiCreateMetric(envId: string, body: ReleaseDecisionMetricUpdate) {
+  return apiRequest<ReleaseDecisionMetric>(releaseDecisionMetricsPath(envId), {
+    method: "POST",
+    body,
+  });
+}
+
+export async function apiUpdateMetric(
+  envId: string,
+  id: string,
+  body: ReleaseDecisionMetricUpdate,
+) {
+  return apiRequest<ReleaseDecisionMetric>(
+    releaseDecisionMetricsPath(envId, `/${id}`),
+    { method: "PUT", body },
+  );
+}
+
+export async function apiArchiveMetric(envId: string, id: string) {
+  return apiRequest<boolean>(releaseDecisionMetricsPath(envId, `/${id}`), {
     method: "DELETE",
   });
 }

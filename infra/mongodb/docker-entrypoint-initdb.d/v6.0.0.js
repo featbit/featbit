@@ -13,6 +13,9 @@ db.ReleaseDecisionExperiments.createIndex({ featBitEnvId: 1, flagKey: 1, updated
 db.ReleaseDecisionLayers.createIndex({ featBitEnvId: 1, key: 1 }, { unique: true });
 db.ReleaseDecisionLayers.createIndex({ featBitEnvId: 1, status: 1 });
 
+db.ReleaseDecisionMetrics.createIndex({ featBitEnvId: 1, key: 1 }, { unique: true });
+db.ReleaseDecisionMetrics.createIndex({ featBitEnvId: 1, status: 1 });
+
 db.ReleaseDecisionActivities.createIndex({ experimentId: 1, createdAt: -1 });
 db.ReleaseDecisionActivities.createIndex({ experimentId: 1, actorId: 1 });
 

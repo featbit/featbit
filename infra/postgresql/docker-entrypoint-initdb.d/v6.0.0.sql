@@ -77,6 +77,27 @@ CREATE UNIQUE INDEX IF NOT EXISTS ux_release_decision_layers_env_key
 CREATE INDEX IF NOT EXISTS ix_release_decision_layers_env_status
     ON release_decision_layers (featbit_env_id, status);
 
+CREATE TABLE IF NOT EXISTS release_decision_metrics
+(
+    id                 uuid primary key                  default gen_random_uuid(),
+    featbit_env_id     uuid                     not null,
+    name               varchar(256)             not null,
+    key                varchar(128)             not null,
+    description        text                     null,
+    metric_type        varchar(64)              not null default 'binary',
+    metric_agg         varchar(64)              not null default 'once',
+    expected_direction varchar(64)              not null default 'increase_good',
+    status             varchar(64)              not null default 'active',
+    created_at         timestamp with time zone not null default now(),
+    updated_at         timestamp with time zone not null default now()
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS ux_release_decision_metrics_env_key
+    ON release_decision_metrics (featbit_env_id, key);
+
+CREATE INDEX IF NOT EXISTS ix_release_decision_metrics_env_status
+    ON release_decision_metrics (featbit_env_id, status);
+
 CREATE TABLE IF NOT EXISTS release_decision_activities
 (
     id             uuid primary key                  default gen_random_uuid(),

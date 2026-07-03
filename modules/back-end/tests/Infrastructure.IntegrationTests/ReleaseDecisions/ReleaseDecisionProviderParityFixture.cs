@@ -1,6 +1,7 @@
 using Application.ExperimentStats;
 using Application.FeatureFlags;
 using Application.Services;
+using Application.Users;
 using Dapper;
 using Domain.EndUsers;
 using Domain.FeatureFlags;
@@ -276,6 +277,59 @@ public sealed class ReleaseDecisionProviderParityFixture : IAsyncLifetime
         ];
     }
 
+    public (string Name, IReleaseDecisionMetricService Service)[] CreateReleaseDecisionMetricServices()
+    {
+        return
+        [
+            ("Postgres", new global::Infrastructure.Services.EntityFrameworkCore.ReleaseDecisionMetricService(CreateDbContext())),
+            ("MongoDb", new global::Infrastructure.Services.MongoDb.ReleaseDecisionMetricService(CreateMongoDbClient()))
+        ];
+    }
+
+    public (string Name, IReleaseDecisionExperimentService ExperimentService, IReleaseDecisionMetricService MetricService)[]
+        CreateReleaseDecisionExperimentServices()
+    {
+        var currentUser = new FixtureCurrentUser();
+
+        var postgresDbContext = CreateDbContext();
+        var postgresMetricService = new global::Infrastructure.Services.EntityFrameworkCore.ReleaseDecisionMetricService(postgresDbContext);
+        var postgresStatsService = new global::Infrastructure.Services.EntityFrameworkCore.ReleaseDecisionExperimentStatsService(postgresDbContext);
+        var postgresFeatureFlagService = new global::Infrastructure.Services.EntityFrameworkCore.FeatureFlagService(postgresDbContext);
+        var postgresUserService = new global::Infrastructure.Services.EntityFrameworkCore.UserService(postgresDbContext);
+
+        var mongoDbClient = CreateMongoDbClient();
+        var mongoMetricService = new global::Infrastructure.Services.MongoDb.ReleaseDecisionMetricService(mongoDbClient);
+        var mongoStatsService = new global::Infrastructure.Services.MongoDb.ReleaseDecisionExperimentStatsService(mongoDbClient);
+        var mongoFeatureFlagService = new global::Infrastructure.Services.MongoDb.FeatureFlagService(mongoDbClient);
+        var mongoUserService = new global::Infrastructure.Services.MongoDb.UserService(mongoDbClient);
+
+        return
+        [
+            (
+                "Postgres",
+                new global::Infrastructure.Services.EntityFrameworkCore.ReleaseDecisionExperimentService(
+                    postgresDbContext,
+                    postgresStatsService,
+                    postgresFeatureFlagService,
+                    postgresMetricService,
+                    currentUser,
+                    postgresUserService),
+                postgresMetricService
+            ),
+            (
+                "MongoDb",
+                new global::Infrastructure.Services.MongoDb.ReleaseDecisionExperimentService(
+                    mongoDbClient,
+                    mongoStatsService,
+                    mongoFeatureFlagService,
+                    mongoMetricService,
+                    currentUser,
+                    mongoUserService),
+                mongoMetricService
+            )
+        ];
+    }
+
     private AppDbContext CreateDbContext()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
@@ -345,6 +399,119 @@ public sealed class ReleaseDecisionProviderParityFixture : IAsyncLifetime
                 created_at timestamp with time zone not null
             );
 
+            CREATE TABLE IF NOT EXISTS release_decision_metrics
+            (
+                id uuid primary key,
+                featbit_env_id uuid not null,
+                name varchar(256) not null,
+                key varchar(128) not null,
+                description text null,
+                metric_type varchar(64) not null,
+                metric_agg varchar(64) not null,
+                expected_direction varchar(64) not null,
+                status varchar(64) not null,
+                created_at timestamp with time zone not null,
+                updated_at timestamp with time zone not null
+            );
+
+            CREATE TABLE IF NOT EXISTS release_decision_experiments
+            (
+                id uuid primary key,
+                name varchar(256) not null,
+                description text null,
+                stage varchar(64) not null,
+                flag_key varchar(256) null,
+                featbit_project_key varchar(256) null,
+                featbit_env_id uuid null,
+                hypothesis text null,
+                access_token text null,
+                change text null,
+                constraints text null,
+                env_secret text null,
+                flag_server_url text null,
+                goal text null,
+                guardrails text null,
+                intent text null,
+                last_action text null,
+                last_learning text null,
+                open_questions text null,
+                primary_metric text null,
+                sandbox_id text null,
+                sandbox_status varchar(64) null,
+                variants text null,
+                conflict_analysis text null,
+                entry_mode varchar(64) null,
+                created_at timestamp with time zone not null,
+                updated_at timestamp with time zone not null
+            );
+
+            CREATE TABLE IF NOT EXISTS release_decision_experiment_runs
+            (
+                id uuid primary key,
+                experiment_id uuid not null,
+                slug varchar(128) not null,
+                status varchar(64) not null,
+                hypothesis text null,
+                method varchar(64) null,
+                method_reason text null,
+                primary_metric_event varchar(256) null,
+                metric_description text null,
+                guardrail_events text null,
+                guardrail_descriptions text null,
+                control_variant varchar(256) null,
+                treatment_variant varchar(256) null,
+                traffic_allocation text null,
+                minimum_sample integer null,
+                observation_start timestamp with time zone null,
+                observation_end timestamp with time zone null,
+                prior_proper boolean not null default false,
+                prior_mean double precision null,
+                prior_stddev double precision null,
+                input_data text null,
+                analysis_result text null,
+                decision text null,
+                decision_summary text null,
+                decision_reason text null,
+                what_changed text null,
+                what_happened text null,
+                confirmed_or_refuted text null,
+                why_it_happened text null,
+                next_hypothesis text null,
+                run_id varchar(128) null,
+                primary_metric_agg varchar(64) null,
+                primary_metric_type varchar(64) null,
+                traffic_percent double precision null,
+                layer_id varchar(128) null,
+                audience_filters text null,
+                traffic_offset integer null,
+                layer_key varchar(128) null,
+                allocation_key_selector varchar(256) null,
+                slice_start double precision null,
+                slice_end double precision null,
+                allocation_plan text null,
+                assignment_unit_selector varchar(256) null,
+                layer_traffic_percent double precision null,
+                analysis_sampling_plan text null,
+                data_source_mode varchar(64) null,
+                customer_endpoint_config text null,
+                created_at timestamp with time zone not null,
+                updated_at timestamp with time zone not null
+            );
+
+            CREATE TABLE IF NOT EXISTS release_decision_activities
+            (
+                id uuid primary key,
+                type varchar(128) not null,
+                title varchar(512) not null,
+                detail text null,
+                actor_id uuid null,
+                actor_name varchar(256) null,
+                actor_email varchar(512) null,
+                actor_type varchar(64) null,
+                created_at timestamp with time zone not null,
+                experiment_id uuid not null
+            );
+
             CREATE TABLE IF NOT EXISTS end_users
             (
                 env_id uuid null,
@@ -381,6 +548,27 @@ public sealed class ReleaseDecisionProviderParityFixture : IAsyncLifetime
 
             CREATE UNIQUE INDEX IF NOT EXISTS ix_release_decision_run_assignments_run_assignment_unit
                 ON release_decision_run_assignments (run_id, assignment_unit);
+
+            CREATE UNIQUE INDEX IF NOT EXISTS ix_release_decision_metrics_env_key
+                ON release_decision_metrics (featbit_env_id, key);
+
+            CREATE INDEX IF NOT EXISTS ix_release_decision_metrics_env_status
+                ON release_decision_metrics (featbit_env_id, status);
+
+            CREATE INDEX IF NOT EXISTS ix_release_decision_experiments_env_updated_at
+                ON release_decision_experiments (featbit_env_id, updated_at);
+
+            CREATE INDEX IF NOT EXISTS ix_release_decision_experiments_featbit_project_key
+                ON release_decision_experiments (featbit_project_key);
+
+            CREATE INDEX IF NOT EXISTS ix_release_decision_experiments_flag_key
+                ON release_decision_experiments (flag_key);
+
+            CREATE UNIQUE INDEX IF NOT EXISTS ix_release_decision_experiment_runs_experiment_id_slug
+                ON release_decision_experiment_runs (experiment_id, slug);
+
+            CREATE INDEX IF NOT EXISTS ix_release_decision_activities_experiment_id_created_at
+                ON release_decision_activities (experiment_id, created_at);
             """);
     }
 
@@ -806,6 +994,11 @@ public sealed class ReleaseDecisionProviderParityFixture : IAsyncLifetime
     private sealed class CountRow
     {
         public int Count { get; init; }
+    }
+
+    private sealed class FixtureCurrentUser : ICurrentUser
+    {
+        public Guid Id => Guid.Empty;
     }
 
     private sealed class ExposureSampleRow

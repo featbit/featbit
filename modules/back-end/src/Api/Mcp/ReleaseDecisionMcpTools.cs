@@ -31,7 +31,7 @@ public class ReleaseDecisionMcpTools(
     }
 
     [McpServerTool(Name = "featbit_release_decision_update_experiment")]
-    [Description("Patch release-decision experiment fields such as goal, intent, hypothesis, constraints, learning, and last action. Use featbit_release_decision_update_metrics for primary metrics and guardrails. The API resolves the FeatBit environment from the experiment.")]
+    [Description("Patch release-decision experiment fields such as goal, intent, hypothesis, constraints, learning, and last action. Use metric registry tools plus featbit_release_decision_update_metrics for primary metrics and guardrails. The API resolves the FeatBit environment from the experiment.")]
     public async Task<ReleaseDecisionExperimentDetailVm> UpdateExperiment(
         [Description("Release-decision experiment id.")]
         Guid experimentId,
@@ -67,7 +67,7 @@ public class ReleaseDecisionMcpTools(
     }
 
     [McpServerTool(Name = "featbit_release_decision_update_metrics")]
-    [Description("Update the complete primary metric contract and guardrail metric configuration for a release-decision experiment. Primary metric requires metricName, metricEvent, metricType, metricAgg, and expectedDirection (increase_good or decrease_good).")]
+    [Description("Select registered primary and guardrail metrics for a release-decision experiment. Primary metric must already exist in the metric registry and is selected by metricId, metricKey, or legacy metricEvent-as-key. Guardrails must be a JSON array selecting registered metrics by metricId, metricKey, key, or event.")]
     public async Task<ReleaseDecisionExperimentDetailVm> UpdateMetrics(
         [Description("Release-decision experiment id.")]
         Guid experimentId,

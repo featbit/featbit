@@ -1,6 +1,9 @@
 using Application.ExperimentStats;
 using Application.FeatureFlags;
+using Application.ReleaseDecisions;
 using Domain.FeatureFlags;
+using Domain.ReleaseDecisions;
+using System.Text.Json;
 
 namespace Infrastructure.IntegrationTests.ReleaseDecisions;
 
@@ -337,6 +340,125 @@ public sealed class ReleaseDecisionProviderParityTests(ReleaseDecisionProviderPa
                 expected.Items.SequenceEqual(actual.Items),
                 $"{results[0].Provider} and {result.Provider} should return the same end-user page.");
         }
+    }
+
+    [Fact]
+    public async Task Metric_catalog_updates_persist_across_providers()
+    {
+        foreach (var (provider, service) in fixture.CreateReleaseDecisionMetricServices())
+        {
+            var key = $"metric-update-{Guid.NewGuid():N}";
+            var created = await service.CreateAsync(ReleaseDecisionProviderParityFixture.EnvId, new ReleaseDecisionMetricUpdate
+            {
+                Name = "Metric update parity",
+                Key = key,
+                MetricType = "binary",
+                MetricAgg = "once",
+                Status = "active"
+            });
+
+            await service.UpdateAsync(ReleaseDecisionProviderParityFixture.EnvId, created.Id, new ReleaseDecisionMetricUpdate
+            {
+                Name = "Metric update parity",
+                Key = key,
+                MetricType = "continuous",
+                MetricAgg = "sum",
+                Status = "active"
+            });
+
+            var listed = await service.GetListAsync(ReleaseDecisionProviderParityFixture.EnvId, new ReleaseDecisionMetricFilter
+            {
+                Key = key,
+                PageIndex = 0,
+                PageSize = 10
+            });
+            var metric = Assert.Single(listed.Items);
+            Assert.Equal("continuous", metric.MetricType);
+            Assert.Equal("sum", metric.MetricAgg);
+            Assert.Equal("active", metric.Status);
+        }
+    }
+
+    [Fact]
+    public async Task Registered_metric_can_be_selected_by_multiple_experiments_across_providers()
+    {
+        foreach (var (provider, experimentService, metricService) in fixture.CreateReleaseDecisionExperimentServices())
+        {
+            var key = $"metric-reuse-{Guid.NewGuid():N}";
+            var metric = await metricService.CreateAsync(ReleaseDecisionProviderParityFixture.EnvId, new ReleaseDecisionMetricUpdate
+            {
+                Name = "Metric reuse parity",
+                Key = key,
+                Description = "One registered metric can be selected by multiple experiments.",
+                MetricType = "binary",
+                MetricAgg = "once",
+                Status = "active"
+            });
+
+            var firstExperiment = NewExperiment("Metric reuse first");
+            var secondExperiment = NewExperiment("Metric reuse second");
+            await experimentService.CreateAsync(firstExperiment);
+            await experimentService.CreateAsync(secondExperiment);
+
+            var first = await experimentService.UpdateMetricsAsync(
+                ReleaseDecisionProviderParityFixture.EnvId,
+                firstExperiment.Id,
+                new ReleaseDecisionMetricsUpdate
+                {
+                    MetricId = metric.Id,
+                    ExpectedDirection = "increase_good",
+                    Guardrails = "[]"
+                });
+            var second = await experimentService.UpdateMetricsAsync(
+                ReleaseDecisionProviderParityFixture.EnvId,
+                secondExperiment.Id,
+                new ReleaseDecisionMetricsUpdate
+                {
+                    MetricId = metric.Id,
+                    ExpectedDirection = "decrease_good",
+                    Guardrails = "[]"
+                });
+
+            AssertPrimaryMetric(provider, first, metric.Id, key, "increase_good");
+            AssertPrimaryMetric(provider, second, metric.Id, key, "decrease_good");
+        }
+    }
+
+    private static ReleaseDecisionExperiment NewExperiment(string name)
+    {
+        var now = DateTime.UtcNow;
+        return new ReleaseDecisionExperiment
+        {
+            Id = Guid.NewGuid(),
+            Name = name,
+            Description = "Provider parity experiment",
+            Stage = "hypothesis",
+            FeatBitProjectKey = "provider-parity",
+            FeatBitEnvId = ReleaseDecisionProviderParityFixture.EnvId,
+            SandboxStatus = "idle",
+            CreatedAt = now,
+            UpdatedAt = now
+        };
+    }
+
+    private static void AssertPrimaryMetric(
+        string provider,
+        ReleaseDecisionExperimentDetailVm experiment,
+        Guid metricId,
+        string metricKey,
+        string expectedDirection)
+    {
+        using var doc = JsonDocument.Parse(experiment.PrimaryMetric);
+        var root = doc.RootElement;
+
+        Assert.NotEqual(Guid.Empty, metricId);
+        Assert.Equal(metricKey, root.GetProperty("event").GetString());
+        Assert.Equal(expectedDirection, root.GetProperty("expectedDirection").GetString());
+        Assert.Equal("binary", root.GetProperty("metricType").GetString());
+        Assert.Equal("once", root.GetProperty("metricAgg").GetString());
+        Assert.True(
+            root.GetProperty("description").GetString()?.Contains("multiple experiments") == true,
+            $"{provider} should preserve the selected catalog metric description.");
     }
 
     private static NormalizedStats ExpectedStats(string metricType, string metricAgg)
