@@ -7,9 +7,9 @@ public class Insight
 {
     public EndUser? User { get; set; }
 
-    public VariationInsight[]? Variations { get; set; }
+    public VariationInsight?[]? Variations { get; set; } = [];
 
-    public MetricInsight[]? Metrics { get; set; }
+    public MetricInsight?[]? Metrics { get; set; } = [];
 
     public bool IsValid()
     {
@@ -18,12 +18,12 @@ public class Insight
             return false;
         }
 
-        if (Variations is not null && Variations.Any(x => !x.IsValid()))
+        if (Variations is not null && Variations.Any(x => x == null || !x.IsValid()))
         {
             return false;
         }
 
-        if (Metrics is not null && Metrics.Any(x => !x.IsValid()))
+        if (Metrics is not null && Metrics.Any(x => x == null || !x.IsValid()))
         {
             return false;
         }
@@ -44,7 +44,7 @@ public class Insight
         // flag messages
         foreach (var variation in Variations!)
         {
-            if (variation.Variation == null)
+            if (variation!.Variation == null)
             {
                 continue;
             }
@@ -86,7 +86,7 @@ public class Insight
         {
             var properties = new
             {
-                route = metric.Route,
+                route = metric!.Route,
                 type = metric.Type,
                 eventName = metric.EventName,
                 numericValue = metric.NumericValue,

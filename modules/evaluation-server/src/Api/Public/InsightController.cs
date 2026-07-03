@@ -29,9 +29,9 @@ public class InsightController : PublicApiControllerBase
     }
 
     [HttpPost("track")]
-    public async Task<IActionResult> TrackAsync(ICollection<Insight> insights)
+    public async Task<IActionResult> TrackAsync(ICollection<Insight?> insights)
     {
-        var validInsights = insights.Where(x => x.IsValid()).ToArray();
+        var validInsights = insights.Where(x => x != null && x.IsValid()).ToArray();
         if (validInsights.Length == 0)
         {
             return Ok();
@@ -44,7 +44,7 @@ public class InsightController : PublicApiControllerBase
         var usage = new InsightUsage(envId);
         foreach (var insight in validInsights)
         {
-            var key = $"{envId:N}:{insight.User!.KeyId}";
+            var key = $"{envId:N}:{insight!.User!.KeyId}";
             if (!_cache.TryGetValue(key, out _))
             {
                 _cache.Set(key, string.Empty, _cacheEntryOptions);

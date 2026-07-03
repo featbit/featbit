@@ -116,6 +116,7 @@ public class InsightControllerTests(TestApp app)
         var insights = new[]
         {
             ValidInsight("valid-user"),
+            null!,
             new Insight { User = null },
             new Insight { User = new EndUser { KeyId = "" } }
         };
@@ -139,7 +140,7 @@ public class InsightControllerTests(TestApp app)
     {
         var producer = new Mock<IMessageProducer>();
 
-        var insights = new Insight[]
+        var insights = new[]
         {
             new Insight
             {
@@ -171,7 +172,7 @@ public class InsightControllerTests(TestApp app)
     {
         var producer = new Mock<IMessageProducer>();
 
-        var insights = new Insight[]
+        var insights = new[]
         {
             new Insight
             {
