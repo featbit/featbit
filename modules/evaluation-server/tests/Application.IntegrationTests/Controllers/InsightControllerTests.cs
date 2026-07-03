@@ -1,29 +1,42 @@
-﻿using Api.Public;
-using Api.Setup;
+﻿using System.Net;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using Domain.EndUsers;
 using Domain.Evaluation;
 using Domain.Insights;
 using Domain.Messages;
 using Domain.Shared;
 using Domain.Usages;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace Api.UnitTests.Controllers;
+namespace Application.IntegrationTests.Controllers;
 
-public class InsightControllerTests
+[Collection(nameof(TestApp))]
+public class InsightControllerTests(TestApp app)
 {
+    [Fact]
+    public async Task TrackAsync_WithoutAuth_Returns401()
+    {
+        var producer = new Mock<IMessageProducer>();
+
+        var result = await TrackAsync(producer.Object, [ValidInsight()], withAuth: false);
+
+        Assert.Equal(HttpStatusCode.Unauthorized, result.StatusCode);
+        producer.VerifyNoOtherCalls();
+    }
+
     // --- Empty / all-invalid lists ---
 
     [Fact]
     public async Task TrackAsync_WithEmptyInsightList_ReturnsOkWithoutPublishing()
     {
         var producer = new Mock<IMessageProducer>();
-        var controller = CreateController(producer.Object, TestData.ServerSecretString);
 
-        var result = await controller.TrackAsync([]);
+        var result = await TrackAsync(producer.Object, []);
 
-        Assert.IsType<OkResult>(result);
+        Assert.Equal(HttpStatusCode.OK, result.StatusCode);
         producer.VerifyNoOtherCalls();
     }
 
@@ -31,8 +44,6 @@ public class InsightControllerTests
     public async Task TrackAsync_WithAllInvalidInsights_ReturnsOkWithoutPublishing()
     {
         var producer = new Mock<IMessageProducer>();
-        var controller = CreateController(producer.Object, TestData.ServerSecretString);
-
         var insights = new[]
         {
             new Insight { User = null },
@@ -44,9 +55,9 @@ public class InsightControllerTests
             }
         };
 
-        var result = await controller.TrackAsync(insights);
+        var result = await TrackAsync(producer.Object, insights);
 
-        Assert.IsType<OkResult>(result);
+        Assert.Equal(HttpStatusCode.OK, result.StatusCode);
         producer.VerifyNoOtherCalls();
     }
 
@@ -56,11 +67,11 @@ public class InsightControllerTests
     public async Task TrackAsync_WithValidInsight_ReturnsOkAndPublishesAllExpectedMessages()
     {
         var producer = new Mock<IMessageProducer>();
-        var controller = CreateController(producer.Object, TestData.ServerSecretString);
+        var insights = new[] { ValidInsight() };
 
-        var result = await controller.TrackAsync([ValidInsight()]);
+        var result = await TrackAsync(producer.Object, insights);
 
-        Assert.IsType<OkResult>(result);
+        Assert.Equal(HttpStatusCode.OK, result.StatusCode);
         producer.Verify(p => p.PublishAsync(Topics.EndUser, It.IsAny<EndUserMessage>()), Times.Once);
         producer.Verify(p => p.PublishAsync(Topics.Insights, It.IsAny<InsightMessage>()), Times.AtLeastOnce);
         producer.Verify(p => p.PublishAsync(Topics.Usage, It.IsAny<InsightUsage>()), Times.Once);
@@ -70,11 +81,15 @@ public class InsightControllerTests
     public async Task TrackAsync_SameUserTwice_DeduplicatesEndUserMessage()
     {
         var producer = new Mock<IMessageProducer>();
-        var controller = CreateController(producer.Object, TestData.ServerSecretString);
+        var insights = new[]
+        {
+            ValidInsight("user-1"),
+            ValidInsight("user-1", "other-flag")
+        };
 
-        var result = await controller.TrackAsync([ValidInsight("user-1"), ValidInsight("user-1", "other-flag")]);
+        var result = await TrackAsync(producer.Object, insights);
 
-        Assert.IsType<OkResult>(result);
+        Assert.Equal(HttpStatusCode.OK, result.StatusCode);
         producer.Verify(p => p.PublishAsync(Topics.EndUser, It.IsAny<EndUserMessage>()), Times.Once);
     }
 
@@ -82,11 +97,15 @@ public class InsightControllerTests
     public async Task TrackAsync_TwoDistinctUsers_PublishesEndUserMessageForEach()
     {
         var producer = new Mock<IMessageProducer>();
-        var controller = CreateController(producer.Object, TestData.ServerSecretString);
+        var insights = new[]
+        {
+            ValidInsight("user-1"),
+            ValidInsight("user-2")
+        };
 
-        var result = await controller.TrackAsync([ValidInsight("user-1"), ValidInsight("user-2")]);
+        var result = await TrackAsync(producer.Object, insights);
 
-        Assert.IsType<OkResult>(result);
+        Assert.Equal(HttpStatusCode.OK, result.StatusCode);
         producer.Verify(p => p.PublishAsync(Topics.EndUser, It.IsAny<EndUserMessage>()), Times.Exactly(2));
     }
 
@@ -94,13 +113,16 @@ public class InsightControllerTests
     public async Task TrackAsync_MixedValidAndInvalidInsights_OnlyProcessesValidOnes()
     {
         var producer = new Mock<IMessageProducer>();
-        var controller = CreateController(producer.Object, TestData.ServerSecretString);
+        var insights = new[]
+        {
+            ValidInsight("valid-user"),
+            new Insight { User = null },
+            new Insight { User = new EndUser { KeyId = "" } }
+        };
 
-        var insights = new[] { ValidInsight("valid-user"), new Insight { User = null } };
+        var result = await TrackAsync(producer.Object, insights);
 
-        var result = await controller.TrackAsync(insights);
-
-        Assert.IsType<OkResult>(result);
+        Assert.Equal(HttpStatusCode.OK, result.StatusCode);
         producer.Verify(p => p.PublishAsync(Topics.EndUser, It.IsAny<EndUserMessage>()), Times.Once);
     }
 
@@ -116,24 +138,26 @@ public class InsightControllerTests
     public async Task TrackAsync_WithMaliciousFlagKey_FiltersInsightWithoutPublishing(string flagKey)
     {
         var producer = new Mock<IMessageProducer>();
-        var controller = CreateController(producer.Object, TestData.ServerSecretString);
 
-        var insight = new Insight
+        var insights = new Insight[]
         {
-            User = new EndUser { KeyId = "user-1" },
-            Variations =
-            [
-                new VariationInsight
+            new Insight
+            {
+                User = new EndUser { KeyId = "user-1" },
+                Variations = new[]
                 {
-                    FeatureFlagKey = flagKey,
-                    Variation = new Variation("550e8400-e29b-41d4-a716-446655440000", "true")
+                    new VariationInsight
+                    {
+                        FeatureFlagKey = flagKey,
+                        Variation = new Variation("550e8400-e29b-41d4-a716-446655440000", "true")
+                    }
                 }
-            ]
+            }
         };
 
-        var result = await controller.TrackAsync([insight]);
+        var result = await TrackAsync(producer.Object, insights);
 
-        Assert.IsType<OkResult>(result);
+        Assert.Equal(HttpStatusCode.OK, result.StatusCode);
         producer.VerifyNoOtherCalls();
     }
 
@@ -146,33 +170,45 @@ public class InsightControllerTests
     public async Task TrackAsync_WithMaliciousEventName_FiltersInsightWithoutPublishing(string eventName)
     {
         var producer = new Mock<IMessageProducer>();
-        var controller = CreateController(producer.Object, TestData.ServerSecretString);
 
-        var insight = new Insight
+        var insights = new Insight[]
         {
-            User = new EndUser { KeyId = "user-1" },
-            Variations = [],
-            Metrics = [new MetricInsight { EventName = eventName, NumericValue = 1.0f }]
+            new Insight
+            {
+                User = new EndUser { KeyId = "user-1" },
+                Variations = [],
+                Metrics = new[]
+                {
+                    new MetricInsight { EventName = eventName, NumericValue = 1.0f }
+                }
+            }
         };
 
-        var result = await controller.TrackAsync([insight]);
+        var result = await TrackAsync(producer.Object, insights);
 
-        Assert.IsType<OkResult>(result);
+        Assert.Equal(HttpStatusCode.OK, result.StatusCode);
         producer.VerifyNoOtherCalls();
     }
-    
-    private static InsightController CreateController(IMessageProducer producer, string? authorizationHeader = null)
+
+    private async Task<HttpResponseMessage> TrackAsync(IMessageProducer producer, Insight[] insights,
+        bool withAuth = true)
     {
-        var controller = new InsightController(producer, new BoundedMemoryCache());
-        var httpContext = new DefaultHttpContext();
-        if (authorizationHeader is not null)
+        var trackApp = app.WithWebHostBuilder(builder =>
         {
-            httpContext.Request.Headers.Authorization = authorizationHeader;
+            builder.ConfigureTestServices(services =>
+            {
+                services.Replace(ServiceDescriptor.Singleton<IMessageProducer>(producer));
+            });
+        });
+
+        var client = trackApp.CreateClient();
+        if (withAuth)
+        {
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(TestData.ClientSecretString);
         }
 
-        controller.ControllerContext = new ControllerContext { HttpContext = httpContext };
-
-        return controller;
+        var response = await client.PostAsJsonAsync("/api/public/insight/track", insights);
+        return response;
     }
 
     private static Insight ValidInsight(string userKey = "user-1", string flagKey = "my-flag") => new()
