@@ -96,7 +96,7 @@ public class Insight
 
                 var properties = new
                 {
-                    route = metric!.Route,
+                    route = metric.Route,
                     type = metric.Type,
                     eventName = metric.EventName,
                     numericValue = metric.NumericValue,
