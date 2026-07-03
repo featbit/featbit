@@ -7,6 +7,8 @@ namespace Domain.Insights;
 
 public partial class VariationInsight
 {
+    private const int MaxFlagKeyLength = 128;
+
     // see also: modules/back-end/src/Domain/FeatureFlags/FeatureFlag.cs#L9
     [GeneratedRegex("^[a-zA-Z0-9._-]+$")]
     private static partial Regex KeyRegex();
@@ -21,7 +23,9 @@ public partial class VariationInsight
 
     public bool IsValid()
     {
-        if (string.IsNullOrWhiteSpace(FeatureFlagKey) || !KeyRegex().IsMatch(FeatureFlagKey))
+        if (string.IsNullOrWhiteSpace(FeatureFlagKey) ||
+            FeatureFlagKey.Length > MaxFlagKeyLength ||
+            !KeyRegex().IsMatch(FeatureFlagKey))
         {
             return false;
         }

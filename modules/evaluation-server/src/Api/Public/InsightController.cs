@@ -41,7 +41,7 @@ public class InsightController : PublicApiControllerBase
 
         var endUserMessages = new List<EndUserMessage>();
         var insightMessages = new List<InsightMessage>();
-        var usage = new InsightUsage(EnvId);
+        var usage = new InsightUsage(envId);
         foreach (var insight in validInsights)
         {
             var key = $"{envId:N}:{insight.User!.KeyId}";

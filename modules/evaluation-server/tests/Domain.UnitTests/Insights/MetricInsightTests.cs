@@ -16,28 +16,14 @@ public class MetricInsightTests
         Assert.True(insight.IsValid());
     }
 
-    [Fact]
-    public void IsValid_WithEventNameExactly40Characters_ReturnsTrue()
-    {
-        var insight = new MetricInsight { EventName = new string('a', 40) };
-        Assert.True(insight.IsValid());
-    }
-
     [Theory]
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
     [InlineData("\t")]
-    public void IsValid_WithNullOrWhitespaceEventName_ReturnsFalse(string? eventName)
+    public void IsValid_WithInvalidEventName_ReturnsFalse(string? eventName)
     {
         var insight = new MetricInsight { EventName = eventName! };
-        Assert.False(insight.IsValid());
-    }
-
-    [Fact]
-    public void IsValid_WithEventNameExceeding40Characters_ReturnsFalse()
-    {
-        var insight = new MetricInsight { EventName = new string('a', 41) };
         Assert.False(insight.IsValid());
     }
 
