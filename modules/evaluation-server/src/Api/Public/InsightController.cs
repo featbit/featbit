@@ -53,7 +53,7 @@ public class InsightController : PublicApiControllerBase
             }
 
             insightMessages.AddRange(insight.InsightMessages(envId));
-            usage.AddEvents(insight.Variations!.Length, insight.Metrics!.Length);
+            usage.AddEvents(insight.Variations?.Length ?? 0, insight.Metrics?.Length ?? 0);
         }
 
         var tasks = endUserMessages.Select(x => _producer.PublishAsync(Topics.EndUser, x))

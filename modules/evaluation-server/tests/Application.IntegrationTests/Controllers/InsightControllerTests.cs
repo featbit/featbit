@@ -21,7 +21,7 @@ public class InsightControllerTests(TestApp app)
     {
         var producer = new Mock<IMessageProducer>();
 
-        var result = await TrackAsync(producer.Object, [ValidInsight()], withAuth: false);
+        var result = await TrackAsync(producer.Object, [UserVariationInsight()], withAuth: false);
 
         Assert.Equal(HttpStatusCode.Unauthorized, result.StatusCode);
         producer.VerifyNoOtherCalls();
@@ -67,7 +67,7 @@ public class InsightControllerTests(TestApp app)
     public async Task TrackAsync_WithValidInsight_ReturnsOkAndPublishesAllExpectedMessages()
     {
         var producer = new Mock<IMessageProducer>();
-        var insights = new[] { ValidInsight() };
+        var insights = new[] { UserVariationInsight() };
 
         var result = await TrackAsync(producer.Object, insights);
 
@@ -83,8 +83,8 @@ public class InsightControllerTests(TestApp app)
         var producer = new Mock<IMessageProducer>();
         var insights = new[]
         {
-            ValidInsight("user-1"),
-            ValidInsight("user-1", "other-flag")
+            UserVariationInsight("user-1"),
+            UserVariationInsight("user-1", "other-flag")
         };
 
         var result = await TrackAsync(producer.Object, insights);
@@ -99,8 +99,8 @@ public class InsightControllerTests(TestApp app)
         var producer = new Mock<IMessageProducer>();
         var insights = new[]
         {
-            ValidInsight("user-1"),
-            ValidInsight("user-2")
+            UserVariationInsight("user-1"),
+            UserVariationInsight("user-2")
         };
 
         var result = await TrackAsync(producer.Object, insights);
@@ -115,7 +115,7 @@ public class InsightControllerTests(TestApp app)
         var producer = new Mock<IMessageProducer>();
         var insights = new[]
         {
-            ValidInsight("valid-user"),
+            UserVariationInsight("valid-user"),
             null!,
             new Insight { User = null },
             new Insight { User = new EndUser { KeyId = "" } }
@@ -191,7 +191,9 @@ public class InsightControllerTests(TestApp app)
         producer.VerifyNoOtherCalls();
     }
 
-    private async Task<HttpResponseMessage> TrackAsync(IMessageProducer producer, Insight[] insights,
+    private async Task<HttpResponseMessage> TrackAsync(
+        IMessageProducer producer,
+        Insight[] insights,
         bool withAuth = true)
     {
         var trackApp = app.WithWebHostBuilder(builder =>
@@ -212,7 +214,7 @@ public class InsightControllerTests(TestApp app)
         return response;
     }
 
-    private static Insight ValidInsight(string userKey = "user-1", string flagKey = "my-flag") => new()
+    private static Insight UserVariationInsight(string userKey = "user-1", string flagKey = "my-flag") => new()
     {
         User = new EndUser { KeyId = userKey, Name = "Test User" },
         Variations =

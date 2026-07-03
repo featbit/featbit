@@ -1,5 +1,3 @@
-#nullable disable
-
 using System.Text.RegularExpressions;
 using Domain.Evaluation;
 
@@ -13,9 +11,9 @@ public partial class VariationInsight
     [GeneratedRegex("^[a-zA-Z0-9._-]+$")]
     private static partial Regex KeyRegex();
 
-    public string FeatureFlagKey { get; set; }
+    public string? FeatureFlagKey { get; set; }
 
-    public Variation Variation { get; set; }
+    public Variation? Variation { get; set; }
 
     public bool SendToExperiment { get; set; }
 
@@ -30,7 +28,7 @@ public partial class VariationInsight
             return false;
         }
 
-        if (!Variation.IsValid())
+        if (Variation is null || !Variation.IsValid())
         {
             return false;
         }
