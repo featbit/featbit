@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import { Outlet, useLocation, useParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent } from "@/components/ui/card";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { fetchCurrentCycle, fetchSubscription } from "@/features/workspace/billing/billing-api";
+import { getRuntimeEnv } from "@/lib/env/runtime-env";
 import {
   chooseProjectEnv,
   ContextBar,
@@ -18,9 +21,11 @@ import {
   type Project,
   type ProjectEnv
 } from "./context";
+import { buildBillingGlobalMessages, GlobalMessageBanner } from "./global-message-banner";
 import { Sidebar } from "./nav";
 
 const SIDEBAR_STORAGE_KEY = "featbit:sidebar-collapsed";
+const HOSTING_MODE_SAAS = "saas";
 const onboardingProjectEnv: ProjectEnv = {
   projectId: "setup",
   projectName: "Setup project",
@@ -53,6 +58,17 @@ export function Layout() {
   const [organization, setOrganization] = useState(() => getCurrentOrganization());
   const [currentProjectEnv, setCurrentProjectEnv] = useState(() => isOnboarding ? onboardingProjectEnv : getCurrentProjectEnv());
   const [projects, setProjects] = useState<Project[]>(() => normalizeProjects(fallbackProjects));
+  const subscriptionQuery = useQuery({
+    queryKey: ["billing", "subscription"],
+    queryFn: fetchSubscription,
+    enabled: getRuntimeEnv().hostingMode === HOSTING_MODE_SAAS && !isOnboarding
+  });
+  const cycleQuery = useQuery({
+    queryKey: ["billing", "current-cycle"],
+    queryFn: fetchCurrentCycle,
+    enabled: getRuntimeEnv().hostingMode === HOSTING_MODE_SAAS && !isOnboarding
+  });
+  const globalMessage = buildBillingGlobalMessages(workspace, lang, subscriptionQuery.data, cycleQuery.data)[0];
 
   function setCollapsed(nextCollapsed: boolean) {
     localStorage.setItem(SIDEBAR_STORAGE_KEY, String(nextCollapsed));
@@ -104,22 +120,25 @@ export function Layout() {
 
   return (
     <TooltipProvider delayDuration={150}>
-      <div className="flex h-screen overflow-hidden bg-background text-foreground">
-        <Sidebar lang={lang} collapsed={collapsed} setCollapsed={setCollapsed} />
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-          <header className="flex h-16 shrink-0 items-center gap-4 border-b border-border bg-background px-5">
-            <ContextBar
-              workspace={workspace}
-              organization={organization}
-              currentProjectEnv={currentProjectEnv}
-              projects={projects}
-              setCurrentProjectEnv={setCurrentProjectEnv}
-            />
-            <PlanBadge lang={lang} workspace={workspace} />
-          </header>
-          <main className="min-h-0 flex-1 overflow-y-auto bg-muted/30 p-5">
-            <Outlet />
-          </main>
+      <div className="flex h-screen flex-col overflow-hidden bg-background text-foreground">
+        <GlobalMessageBanner message={globalMessage} />
+        <div className="flex min-h-0 flex-1 overflow-hidden">
+          <Sidebar lang={lang} collapsed={collapsed} setCollapsed={setCollapsed} />
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+            <header className="flex h-16 shrink-0 items-center gap-4 border-b border-border bg-background px-5">
+              <ContextBar
+                workspace={workspace}
+                organization={organization}
+                currentProjectEnv={currentProjectEnv}
+                projects={projects}
+                setCurrentProjectEnv={setCurrentProjectEnv}
+              />
+              <PlanBadge lang={lang} workspace={workspace} />
+            </header>
+            <main className="min-h-0 flex-1 overflow-y-auto bg-muted/30 p-5">
+              <Outlet />
+            </main>
+          </div>
         </div>
       </div>
     </TooltipProvider>

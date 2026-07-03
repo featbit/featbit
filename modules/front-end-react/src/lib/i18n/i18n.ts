@@ -69,6 +69,12 @@ i18n.use(initReactI18next).init({
             collapse: "Collapse sidebar",
             expand: "Expand sidebar"
           },
+          globalMessage: {
+            usageApproachingTitle: "Approaching usage limit",
+            usageExceededTitle: "MAU limit exceeded",
+            usageDescription: "You've used {{used}} of {{purchased}} MAU in your current billing period ({{percent}}% used). You may experience limits or overage charges.",
+            upgradePlan: "Upgrade plan"
+          },
           plan: {
             current: "Current Plan",
             free: "Free Plan",
@@ -612,6 +618,12 @@ i18n.use(initReactI18next).init({
           sidebar: {
             collapse: "收起侧边栏",
             expand: "展开侧边栏"
+          },
+          globalMessage: {
+            usageApproachingTitle: "即将达到用量上限",
+            usageExceededTitle: "MAU 上限已超出",
+            usageDescription: "当前账单周期已使用 {{used}} / {{purchased}} MAU（已用 {{percent}}%）。你可能会遇到限制或超额费用。",
+            upgradePlan: "升级套餐"
           },
           plan: {
             current: "当前订阅",

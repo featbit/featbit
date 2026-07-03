@@ -24,7 +24,7 @@ import {
   updateSubscription,
   type SubscriptionChangePayload
 } from "./billing-api";
-import { CheckoutAlert, type CheckoutState, UsageAlert } from "./components/billing-alerts";
+import { CheckoutAlert, type CheckoutState } from "./components/billing-alerts";
 import { BillingInformationPanel } from "./components/billing-information-panel";
 import { InvoiceHistoryPanel } from "./components/invoice-history-panel";
 import { PricingDrawer } from "./components/pricing-drawer";
@@ -72,7 +72,6 @@ export function BillingPage({ lang }: { lang: "en" | "zh" }) {
 
   const subscription = subscriptionQuery.data;
   const stats = usageStats(subscription, cycleQuery.data);
-  const showUsageAlert = stats.percent >= 90;
 
   const billingInfoSchema = useMemo(
     () => z.object({
@@ -208,16 +207,6 @@ export function BillingPage({ lang }: { lang: "en" | "zh" }) {
     <WorkspaceLayout workspace={workspace} lang={lang} activeTab="billing">
       <div className="space-y-6 pb-8 pt-5">
         <CheckoutAlert state={checkoutState} onCheckAgain={() => void fetchBillingLicense().then(() => setCheckoutState("confirmed")).catch(() => setCheckoutState("timeout"))} />
-
-        {showUsageAlert ? (
-          <UsageAlert
-            percent={stats.percent}
-            used={stats.used}
-            purchased={stats.purchased}
-            exceeded={stats.used > stats.purchased}
-            onUpgrade={() => setDrawerIntent("upgrade")}
-          />
-        ) : null}
 
         {subscriptionQuery.isError ? (
           <Alert className="flex items-center gap-4 rounded-md border-destructive/30 bg-destructive/5 px-5 py-4 text-foreground">
