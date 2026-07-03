@@ -25,6 +25,8 @@ public class EndUser
         if (Name is not null && Name.Length > MaxNameLength)
         {
             return false;
+        }
+
         if (CustomizedProperties is not null && CustomizedProperties.Any(x => x is null || !x.IsValid()))
         {
             return false;

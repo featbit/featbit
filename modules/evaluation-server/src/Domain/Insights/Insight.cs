@@ -18,12 +18,12 @@ public class Insight
             return false;
         }
 
-        if (Variations is not null && Variations.Any(x => x == null || !x.IsValid()))
+        if (Variations is not null && Variations.Any(x => x is null || !x.IsValid()))
         {
             return false;
         }
 
-        if (Metrics is not null && Metrics.Any(x => x == null || !x.IsValid()))
+        if (Metrics is not null && Metrics.Any(x => x is null || !x.IsValid()))
         {
             return false;
         }
@@ -46,7 +46,7 @@ public class Insight
         {
             foreach (var variation in Variations)
             {
-                if (variation!.Variation == null)
+                if (variation?.Variation == null)
                 {
                     continue;
                 }
@@ -89,6 +89,11 @@ public class Insight
         {
             foreach (var metric in Metrics)
             {
+                if (metric is null)
+                {
+                    continue;
+                }
+
                 var properties = new
                 {
                     route = metric!.Route,
