@@ -2,6 +2,7 @@ import type { BillingCycle, BillingSubscription, SubscriptionChangePayload } fro
 
 export const HOSTING_MODE_SAAS = "saas";
 export const FINE_GRAINED_ACCESS = "Fine-grained Access Control";
+export const ENTERPRISE_YEARLY_PRICE = 4490;
 
 export const planMeta = {
   free: { name: "Free", nameKey: "workspace.billing.plans.free.name", descriptionKey: "workspace.billing.plans.free.description", basePrice: 0, includedMau: 1000, monthlyPrice: 0 },
@@ -28,6 +29,11 @@ export type PendingChange = {
   payload: SubscriptionChangePayload;
   currentTotal: number;
   nextTotal: number;
+  currentPlan: PlanKey;
+  nextPlan: PlanKey;
+  currentMau: number;
+  currentBillingCycle: BillingCycle;
+  currentPeriodEnd?: string;
 };
 
 export type UsageStats = ReturnType<typeof usageStats>;
@@ -64,7 +70,7 @@ export function formatCurrency(amount: number, currency = "USD", compact = false
 }
 
 export function formatMoneyPerCycle(amount: number, cycle?: BillingCycle) {
-  const suffix = cycle === "yearly" ? "year" : "month";
+  const suffix = cycle === "yearly" || cycle === "year" ? "year" : "month";
   return `$${amount.toLocaleString("en-US")} / ${suffix}`;
 }
 
@@ -95,9 +101,13 @@ export function planRank(plan: PlanKey) {
 }
 
 export function planTotal(payload: Pick<SubscriptionChangePayload, "plan" | "mau" | "addOnFeatures"> & Partial<Pick<SubscriptionChangePayload, "billingCycle">>) {
-  const plan = planMeta[normalizePlan(payload.plan)];
+  const planKey = normalizePlan(payload.plan);
+  const plan = planMeta[planKey];
+  const isYearlyEnterprise = planKey === "enterprise" && (payload.billingCycle === "yearly" || payload.billingCycle === "year");
+  const cycleMultiplier = isYearlyEnterprise ? 12 : 1;
   const extraMau = Math.max(payload.mau - plan.includedMau, 0);
-  const extraMauPrice = Math.ceil(extraMau / 10000) * 20;
-  const addOnPrice = payload.addOnFeatures.includes(FINE_GRAINED_ACCESS) ? 60 : 0;
-  return plan.basePrice + extraMauPrice + addOnPrice;
+  const extraMauPrice = Math.ceil(extraMau / 10000) * 20 * cycleMultiplier;
+  const addOnPrice = payload.addOnFeatures.includes(FINE_GRAINED_ACCESS) ? 60 * cycleMultiplier : 0;
+  const basePrice = isYearlyEnterprise ? ENTERPRISE_YEARLY_PRICE : plan.basePrice;
+  return basePrice + extraMauPrice + addOnPrice;
 }

@@ -14,6 +14,7 @@ import { getRuntimeEnv } from "@/lib/env/runtime-env";
 import { fetchWorkspaceDetails, type WorkspaceDetails } from "../workspace-api";
 import { WorkspaceLayout } from "../workspace-layout";
 import {
+  createSubscription,
   fetchBillingInformation,
   fetchBillingLicense,
   fetchCurrentCycle,
@@ -99,8 +100,8 @@ export function BillingPage({ lang }: { lang: "en" | "zh" }) {
 
   const updateBillingInfoMutation = useMutation({
     mutationFn: updateBillingInformation,
-    onSuccess: (updated) => {
-      queryClient.setQueryData(["billing", "information"], updated);
+    onSuccess: (_updated, values) => {
+      queryClient.setQueryData(["billing", "information"], values);
       setEditBillingInfo(false);
       toast.success(t("workspace.billing.billingInfo.updated"));
     },
@@ -120,6 +121,19 @@ export function BillingPage({ lang }: { lang: "en" | "zh" }) {
       setPendingChange(null);
       setDrawerIntent(null);
       void queryClient.invalidateQueries({ queryKey: ["billing"] });
+    },
+    onError: () => toast.error(t("workspace.billing.errors.subscriptionUpdate"))
+  });
+
+  const createSubscriptionMutation = useMutation({
+    mutationFn: createSubscription,
+    onSuccess: (session) => {
+      if (session?.url) {
+        window.location.href = session.url;
+        return;
+      }
+
+      toast.error(t("workspace.billing.errors.subscriptionUpdate"));
     },
     onError: () => toast.error(t("workspace.billing.errors.subscriptionUpdate"))
   });
@@ -199,8 +213,25 @@ export function BillingPage({ lang }: { lang: "en" | "zh" }) {
     const current = currentTotal(subscription);
     const currentPlan = normalizePlan(subscription?.plan);
     const nextPlan = normalizePlan(payload.plan);
-    const kind = planRank(nextPlan) >= planRank(currentPlan) ? "upgrade" : "downgrade";
-    setPendingChange({ kind, payload, currentTotal: current, nextTotal });
+    if (currentPlan === "free" && nextPlan !== "free") {
+      createSubscriptionMutation.mutate(payload);
+      return;
+    }
+
+    const currentRank = planRank(currentPlan);
+    const nextRank = planRank(nextPlan);
+    const kind = nextRank > currentRank ? "upgrade" : nextRank < currentRank ? "downgrade" : nextTotal > current ? "upgrade" : "downgrade";
+    setPendingChange({
+      kind,
+      payload,
+      currentTotal: current,
+      nextTotal,
+      currentPlan,
+      nextPlan,
+      currentMau: subscription?.mau ?? subscription?.baseMau ?? 0,
+      currentBillingCycle: subscription?.billingCycle ?? "monthly",
+      currentPeriodEnd: subscription?.currentPeriodEnd ?? subscription?.periodEnd
+    });
   }
 
   return (

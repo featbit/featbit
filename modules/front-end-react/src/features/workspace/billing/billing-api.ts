@@ -71,6 +71,18 @@ export type ProrationPreview = {
   chargeAmount?: number;
   totalDueToday?: number;
   currency?: string;
+  immediateCharge?: {
+    amount?: number;
+    displayLines?: Array<{
+      label?: string;
+      amount?: number;
+      type?: "credit" | "charge" | string;
+    }>;
+  };
+};
+
+export type CheckoutSession = {
+  url?: string;
 };
 
 async function billingRequest<T>(path: string, init?: RequestInit): Promise<T> {
@@ -137,6 +149,22 @@ function normalizeObject<T extends object>(value: T | string | null | undefined)
   }
 }
 
+function normalizeUnknown(value: unknown) {
+  if (typeof value !== "string") {
+    return value;
+  }
+
+  try {
+    return JSON.parse(value) as unknown;
+  } catch {
+    return value;
+  }
+}
+
+function normalizeProrationPreview(value: ProrationPreview | string | null | undefined): ProrationPreview | undefined {
+  return normalizeObject<ProrationPreview>(value);
+}
+
 function toBillingInformationPayload(payload: BillingInformation): BillingInformation {
   return {
     companyName: payload.companyName ?? null,
@@ -145,6 +173,13 @@ function toBillingInformationPayload(payload: BillingInformation): BillingInform
     addressLine2: payload.addressLine2 ?? null,
     taxId: payload.taxId ?? null,
     country: payload.countryOrRegion ?? payload.country ?? null
+  };
+}
+
+function toSubscriptionPayload(payload: SubscriptionChangePayload): SubscriptionChangePayload {
+  return {
+    ...payload,
+    billingCycle: payload.billingCycle === "yearly" ? "year" : payload.billingCycle === "monthly" ? "month" : payload.billingCycle
   };
 }
 
@@ -164,13 +199,10 @@ export async function fetchBillingInformation() {
 }
 
 export async function updateBillingInformation(payload: BillingInformation) {
-  const savedPayload = toBillingInformationPayload(payload);
-  const information = await billingRequest<BillingInformation | string | boolean>("/api/v1/billing/billing-information", {
+  return billingRequest<boolean>("/api/v1/billing/billing-information", {
     method: "PUT",
-    body: JSON.stringify(savedPayload)
+    body: JSON.stringify(toBillingInformationPayload(payload))
   });
-  const normalizedInformation = normalizeBillingInformation(information);
-  return Object.keys(normalizedInformation).length > 0 ? normalizedInformation : savedPayload;
 }
 
 export async function fetchInvoices() {
@@ -178,20 +210,34 @@ export async function fetchInvoices() {
   return normalizeInvoices(invoices);
 }
 
-export function fetchBillingLicense() {
-  return billingRequest<unknown>("/api/v1/billing/license");
+export async function fetchBillingLicense() {
+  const license = await billingRequest<unknown>("/api/v1/billing/license");
+  return normalizeUnknown(license);
 }
 
-export function previewProration(payload: SubscriptionChangePayload) {
-  return billingRequest<ProrationPreview>("/api/v1/billing/subscription/proration-preview", {
+export async function previewProration(payload: SubscriptionChangePayload) {
+  const preview = await billingRequest<ProrationPreview | string>("/api/v1/billing/subscription/proration-preview", {
     method: "POST",
-    body: JSON.stringify(payload)
+    body: JSON.stringify(toSubscriptionPayload(payload))
   });
+
+  return normalizeProrationPreview(preview);
 }
 
-export function updateSubscription(kind: "upgrade" | "downgrade", payload: SubscriptionChangePayload) {
-  return billingRequest<BillingSubscription>(`/api/v1/billing/subscription/${kind}`, {
+export async function createSubscription(payload: SubscriptionChangePayload) {
+  const session = await billingRequest<CheckoutSession | string>("/api/v1/billing/subscription", {
     method: "POST",
-    body: JSON.stringify(payload)
+    body: JSON.stringify(toSubscriptionPayload(payload))
   });
+
+  return normalizeObject<CheckoutSession>(session);
+}
+
+export async function updateSubscription(kind: "upgrade" | "downgrade", payload: SubscriptionChangePayload) {
+  const subscription = await billingRequest<BillingSubscription | string>(`/api/v1/billing/subscription/${kind}`, {
+    method: "POST",
+    body: JSON.stringify(toSubscriptionPayload(payload))
+  });
+
+  return normalizeObject<BillingSubscription>(subscription);
 }
