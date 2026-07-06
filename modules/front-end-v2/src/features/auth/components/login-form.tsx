@@ -14,8 +14,8 @@ import {
   type OAuthProvider,
 } from "@/features/auth/auth-api"
 import type { Lang, LoginErrorKey } from "@/features/auth/auth-page-types"
-import { DividerLabel, Field } from "@/features/auth/form-controls"
-import { GitHubIcon, GoogleIcon } from "@/features/auth/social-icons"
+import { DividerLabel, Field } from "@/features/auth/components/form-controls"
+import { GitHubIcon, GoogleIcon } from "@/features/auth/components/social-icons"
 
 export function LoginForm({
   lang,

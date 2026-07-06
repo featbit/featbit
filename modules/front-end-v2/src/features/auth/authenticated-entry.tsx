@@ -137,7 +137,10 @@ export function AuthenticatedEntry({ children }: { children: ReactNode }) {
             projectEnvFromSelection(storedProject, storedEnvironment)
           )
         } else {
-          saveCurrentProjectEnv(chooseProjectEnv(projects))
+          const selectedProjectEnv = chooseProjectEnv(projects)
+          if (selectedProjectEnv) {
+            saveCurrentProjectEnv(selectedProjectEnv)
+          }
         }
 
         setStatus("ready")

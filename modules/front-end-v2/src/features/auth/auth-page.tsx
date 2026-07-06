@@ -10,12 +10,12 @@ import {
   loginBySocialCode,
   loginBySsoCode,
 } from "@/features/auth/auth-api"
-import { AuthFooter } from "@/features/auth/auth-footer"
-import { AuthHeader } from "@/features/auth/auth-header"
+import { AuthFooter } from "@/features/auth/components/auth-footer"
+import { AuthHeader } from "@/features/auth/components/auth-header"
 import { type AuthMode, resolveLang } from "@/features/auth/auth-page-types"
-import { LoginForm } from "@/features/auth/login-form"
-import { LeftPanel } from "@/features/auth/rollout-visual"
-import { SsoForm } from "@/features/auth/sso-form"
+import { LoginForm } from "@/features/auth/components/login-form"
+import { LeftPanel } from "@/features/auth/components/rollout-visual"
+import { SsoForm } from "@/features/auth/components/sso-form"
 
 export function AuthPage({ mode }: { mode: AuthMode }) {
   const params = useParams()

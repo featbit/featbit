@@ -19,10 +19,10 @@ export function ContextBar({
   projects,
   setCurrentProjectEnv,
 }: {
-  organization: Organization
-  currentProjectEnv: ProjectEnv
+  organization: Organization | null
+  currentProjectEnv: ProjectEnv | null
   projects: Project[]
-  setCurrentProjectEnv: (projectEnv: ProjectEnv) => void
+  setCurrentProjectEnv: (projectEnv: ProjectEnv | null) => void
 }) {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
@@ -45,10 +45,10 @@ export function ContextBar({
 
   return (
     <div className="relative flex min-w-0 flex-1 items-center gap-2 text-sm">
-      <span className="truncate font-medium">{organization.name}</span>
+      <span className="truncate font-medium">{organization?.name ?? ""}</span>
       <span className="text-muted-foreground">/</span>
       <span className="truncate font-medium">
-        {currentProjectEnv.projectName}
+        {currentProjectEnv?.projectName ?? ""}
       </span>
       <span className="text-muted-foreground">/</span>
       <Popover open={open} onOpenChange={setOpen}>
@@ -59,8 +59,9 @@ export function ContextBar({
               variant="ghost"
               className="h-8 gap-2 px-2"
               aria-expanded={open}
+              disabled={!currentProjectEnv}
             >
-              {currentProjectEnv.envName}
+              {currentProjectEnv?.envName ?? ""}
               <ChevronsUpDown className="size-3.5 text-muted-foreground" />
             </Button>
           }
@@ -98,8 +99,8 @@ export function ContextBar({
                 </p>
                 {project.environments.map((environment) => {
                   const selected =
-                    project.id === currentProjectEnv.projectId &&
-                    environment.id === currentProjectEnv.envId
+                    project.id === currentProjectEnv?.projectId &&
+                    environment.id === currentProjectEnv?.envId
 
                   return (
                     <button

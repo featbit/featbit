@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate, useParams } from "react-router-dom"
 import { signOut } from "@/features/auth/auth-api"
-import { AuthHeader } from "@/features/auth/auth-header"
+import { AuthHeader } from "@/features/auth/components/auth-header"
 import {
   getCurrentOrganization,
   localizedPath,
@@ -11,8 +11,8 @@ import {
   saveCurrentProjectEnv,
 } from "@/features/layout/layout-context"
 import { completeOnboarding } from "@/features/onboarding/onboarding-api"
-import { CreationPreview } from "@/features/onboarding/creation-preview"
-import { OnboardingForm } from "@/features/onboarding/onboarding-form"
+import { CreationPreview } from "@/features/onboarding/components/creation-preview"
+import { OnboardingForm } from "@/features/onboarding/components/onboarding-form"
 import { slugify } from "@/features/onboarding/onboarding-utils"
 
 const defaultEnvironments = ["Dev", "Prod"]
@@ -24,7 +24,7 @@ export function OnboardingPage() {
   const navigate = useNavigate()
   const currentOrganization = getCurrentOrganization()
   const [organizationName, setOrganizationName] = useState(
-    currentOrganization.name
+    currentOrganization?.name ?? ""
   )
   const [projectName, setProjectName] = useState("Example project")
   const [projectKey, setProjectKey] = useState("example-project")
@@ -32,10 +32,10 @@ export function OnboardingPage() {
   const [error, setError] = useState("")
 
   useEffect(() => {
-    if (currentOrganization.initialized !== false) {
+    if (currentOrganization?.initialized !== false) {
       navigate(localizedPath(lang, "/app/feature-flags"), { replace: true })
     }
-  }, [currentOrganization.initialized, lang, navigate])
+  }, [currentOrganization?.initialized, lang, navigate])
 
   const organizationKey = useMemo(
     () => slugify(organizationName),
@@ -55,6 +55,10 @@ export function OnboardingPage() {
 
   async function submit() {
     if (!canSubmit || isSubmitting) {
+      return
+    }
+
+    if (!currentOrganization) {
       return
     }
 

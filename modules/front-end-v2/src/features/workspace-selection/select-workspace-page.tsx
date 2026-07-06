@@ -22,7 +22,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { getStoredUserProfile, signOut } from "@/features/auth/auth-api"
-import { AuthHeader } from "@/features/auth/auth-header"
+import { AuthHeader } from "@/features/auth/components/auth-header"
 import {
   clearCurrentProjectEnv,
   fetchOrganizations,
@@ -40,7 +40,7 @@ import type {
 import {
   SelectionItem,
   SelectionList,
-} from "@/features/workspace-selection/selection-list"
+} from "@/features/workspace-selection/components/selection-list"
 
 type SelectionStep = "workspace" | "organization"
 

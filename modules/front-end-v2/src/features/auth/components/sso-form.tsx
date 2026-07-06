@@ -9,7 +9,7 @@ import {
   type SsoPreCheck,
 } from "@/features/auth/auth-api"
 import type { Lang } from "@/features/auth/auth-page-types"
-import { Field } from "@/features/auth/form-controls"
+import { Field } from "@/features/auth/components/form-controls"
 
 export function SsoForm({
   lang,

@@ -14,31 +14,6 @@ import { fetchApi } from "@/lib/api/authenticated-api"
 
 const IS_SSO_FIRST_LOGIN_STORAGE_KEY = "is-sso-first-login"
 
-const fallbackOrganization: Organization = {
-  id: "acme-org",
-  name: "Acme Corp",
-  key: "acme",
-}
-
-const fallbackWorkspace: Workspace = {
-  id: "acme-workspace",
-  name: "Acme Workspace",
-  key: "acme",
-}
-
-export const fallbackProjects: Project[] = [
-  {
-    id: "growth",
-    name: "Growth Platform",
-    key: "growth",
-    environments: [
-      { id: "prod", name: "Production", key: "prod", type: "prod" },
-      { id: "staging", name: "Staging", key: "staging", type: "staging" },
-      { id: "dev", name: "Development", key: "dev", type: "dev" },
-    ],
-  },
-]
-
 function scopedStorageKey(key: string, profile: StoredUserProfile) {
   return profile.id ? `${key}_${profile.id}` : key
 }
@@ -84,27 +59,15 @@ export function projectEnvFromSelection(
 }
 
 export function getCurrentWorkspace() {
-  return (
-    readStorageObject<Workspace>(contextKey("current-workspace")) ??
-    fallbackWorkspace
-  )
+  return getStoredWorkspace()
 }
 
 export function getCurrentOrganization() {
-  return (
-    readStorageObject<Organization>(contextKey("current-organization")) ??
-    fallbackOrganization
-  )
+  return getStoredOrganization()
 }
 
 export function getCurrentProjectEnv() {
-  return (
-    readStorageObject<ProjectEnv>(contextKey("current-project")) ??
-    projectEnvFromSelection(
-      fallbackProjects[0],
-      fallbackProjects[0].environments[0]
-    )
-  )
+  return getStoredProjectEnv()
 }
 
 export function getStoredWorkspace() {
@@ -163,37 +126,17 @@ export function normalizeProjects(projects: Project[]) {
   }))
 }
 
-export function chooseWorkspace(workspaces: Workspace[]) {
-  const currentWorkspace = getCurrentWorkspace()
-  return (
-    workspaces.find((workspace) => workspace.id === currentWorkspace.id) ??
-    workspaces[0] ??
-    currentWorkspace
-  )
-}
-
-export function chooseOrganization(organizations: Organization[]) {
-  const currentOrganization = getCurrentOrganization()
-  return (
-    organizations.find(
-      (organization) => organization.id === currentOrganization.id
-    ) ??
-    organizations[0] ??
-    currentOrganization
-  )
-}
-
 export function chooseProjectEnv(projects: Project[]) {
   const currentProjectEnv = getCurrentProjectEnv()
   const currentProject = projects.find(
     (project) =>
-      project.id === currentProjectEnv.projectId ||
-      project.key === currentProjectEnv.projectKey
+      project.id === currentProjectEnv?.projectId ||
+      project.key === currentProjectEnv?.projectKey
   )
   const currentEnvironment = currentProject?.environments.find(
     (environment) =>
-      environment.id === currentProjectEnv.envId ||
-      environment.key === currentProjectEnv.envKey
+      environment.id === currentProjectEnv?.envId ||
+      environment.key === currentProjectEnv?.envKey
   )
 
   if (currentProject && currentEnvironment) {
@@ -206,7 +149,7 @@ export function chooseProjectEnv(projects: Project[]) {
     return projectEnvFromSelection(firstProject, firstEnvironment)
   }
 
-  return currentProjectEnv
+  return currentProjectEnv ?? null
 }
 
 export function persistCurrentWorkspace(workspace: Workspace) {

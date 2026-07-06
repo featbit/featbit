@@ -8,7 +8,7 @@ import { getRuntimeEnv } from "@/lib/env/runtime-env"
 
 const HOSTING_MODE_SAAS = "saas"
 
-function badgeCopy(workspace: Workspace) {
+function badgeCopy(workspace: Workspace | null) {
   if (getRuntimeEnv().hostingMode === HOSTING_MODE_SAAS) {
     return {
       labelKey: "layout.plan.free",
@@ -16,7 +16,7 @@ function badgeCopy(workspace: Workspace) {
     }
   }
 
-  if (workspace.license) {
+  if (workspace?.license) {
     return {
       labelKey: "layout.plan.current",
       valueKey: "layout.plan.enterprise",
@@ -34,7 +34,7 @@ export function SubscriptionLicenseBadge({
   workspace,
 }: {
   lang: Lang
-  workspace: Workspace
+  workspace: Workspace | null
 }) {
   const { t } = useTranslation()
   const copy = badgeCopy(workspace)

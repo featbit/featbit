@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Outlet, useParams } from "react-router-dom"
-import { ContextBar } from "@/features/layout/context-bar"
+import { ContextBar } from "@/features/layout/components/context-bar"
 import {
   chooseProjectEnv,
   fetchProjects,
-  fallbackProjects,
   getCurrentOrganization,
   getCurrentProjectEnv,
   getCurrentWorkspace,
@@ -18,8 +17,8 @@ import type {
   ProjectEnv,
   Workspace,
 } from "@/features/layout/layout-types"
-import { Sidebar } from "@/features/layout/sidebar"
-import { SubscriptionLicenseBadge } from "@/features/layout/subscription-license-badge"
+import { Sidebar } from "@/features/layout/components/sidebar"
+import { SubscriptionLicenseBadge } from "@/features/layout/components/subscription-license-badge"
 
 const SIDEBAR_STORAGE_KEY = "featbit:sidebar-collapsed"
 
@@ -30,16 +29,15 @@ export function AuthenticatedLayout() {
   const [collapsed, setCollapsedState] = useState(
     () => localStorage.getItem(SIDEBAR_STORAGE_KEY) === "true"
   )
-  const [workspace, setWorkspace] = useState<Workspace>(() =>
+  const [workspace, setWorkspace] = useState<Workspace | null>(() =>
     getCurrentWorkspace()
   )
-  const [organization, setOrganization] = useState<Organization>(() =>
+  const [organization, setOrganization] = useState<Organization | null>(() =>
     getCurrentOrganization()
   )
-  const [currentProjectEnv, setCurrentProjectEnv] = useState<ProjectEnv>(() =>
-    getCurrentProjectEnv()
-  )
-  const [projects, setProjects] = useState<Project[]>(fallbackProjects)
+  const [currentProjectEnv, setCurrentProjectEnv] =
+    useState<ProjectEnv | null>(() => getCurrentProjectEnv())
+  const [projects, setProjects] = useState<Project[]>([])
 
   function setCollapsed(nextCollapsed: boolean) {
     localStorage.setItem(SIDEBAR_STORAGE_KEY, String(nextCollapsed))
@@ -66,17 +64,17 @@ export function AuthenticatedLayout() {
           return
         }
 
-        const nextProjects =
-          loadedProjects.length > 0 ? loadedProjects : fallbackProjects
-        const nextProjectEnv = chooseProjectEnv(nextProjects)
+        const nextProjectEnv = chooseProjectEnv(loadedProjects)
 
-        saveCurrentProjectEnv(nextProjectEnv)
+        if (nextProjectEnv) {
+          saveCurrentProjectEnv(nextProjectEnv)
+        }
 
-        setProjects(nextProjects)
+        setProjects(loadedProjects)
         setCurrentProjectEnv(nextProjectEnv)
       } catch {
         if (!cancelled) {
-          setProjects(fallbackProjects)
+          setProjects([])
         }
       }
     }
