@@ -3,6 +3,7 @@ import {
   fetchWorkspaceDetails,
   isWorkspaceKeyUsed,
   updateWorkspaceIdentity,
+  updateWorkspaceLicense,
   updateWorkspaceOidcSettings,
 } from "@/features/workspace/workspace-api"
 
@@ -147,6 +148,41 @@ describe("workspace api", () => {
     )
     expect(localStorage.getItem("current-workspace_user-1")).toContain(
       "Workspace"
+    )
+  })
+
+  it("updates the workspace license and persists the returned workspace", async () => {
+    localStorage.setItem("token", "auth-token")
+    localStorage.setItem(
+      "auth",
+      JSON.stringify({ id: "user-1", email: "user@example.com" })
+    )
+
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      jsonResponse({
+        success: true,
+        data: {
+          id: "workspace-1",
+          name: "Workspace",
+          key: "workspace",
+          license: "new-license",
+        },
+      })
+    )
+
+    await expect(updateWorkspaceLicense("new-license")).resolves.toMatchObject({
+      id: "workspace-1",
+      license: "new-license",
+    })
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://localhost:5000/api/v1/workspaces/license",
+      expect.objectContaining({
+        method: "PUT",
+        body: JSON.stringify({ license: "new-license" }),
+      })
+    )
+    expect(localStorage.getItem("current-workspace_user-1")).toContain(
+      "new-license"
     )
   })
 

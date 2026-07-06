@@ -13,6 +13,7 @@ import { AuthenticatedLayout } from "@/features/layout/authenticated-layout"
 import { LayoutPlaceholder } from "@/features/layout/layout-placeholder"
 import { OnboardingPage } from "@/features/onboarding/onboarding-page"
 import { GeneralPage } from "@/features/workspace/general/general-page"
+import { LicensePage } from "@/features/workspace/license/license-page"
 import { SelectWorkspacePage } from "@/features/workspace-selection/select-workspace-page"
 import { getRuntimeEnv } from "@/lib/env/runtime-env"
 
@@ -164,6 +165,7 @@ export function AppRoutes() {
       <Route path="/:lang/app" element={<SecureRoute />}>
         <Route index element={<LayoutPlaceholder />} />
         <Route path="workspace" element={<GeneralPage />} />
+        <Route path="workspace/license" element={<LicensePage />} />
         <Route path="*" element={<LayoutPlaceholder />} />
       </Route>
       <Route path="/:lang/*" element={<ShellPage />} />

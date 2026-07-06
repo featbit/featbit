@@ -7,9 +7,11 @@ import type { WorkspaceDetails } from "@/features/workspace/workspace-api"
 function StatusToast({
   message,
   variant,
+  eventId,
 }: {
   message: string | null
   variant: "success" | "error"
+  eventId?: number
 }) {
   useEffect(() => {
     if (!message) {
@@ -23,7 +25,7 @@ function StatusToast({
     }
 
     toast.success(message, options)
-  }, [message, variant])
+  }, [message, variant, eventId])
 
   return null
 }
@@ -34,6 +36,7 @@ export function WorkspaceLayout({
   activeTab,
   statusMessage,
   statusVariant = "success",
+  statusEventId,
   children,
 }: {
   workspace: WorkspaceDetails | null
@@ -41,6 +44,7 @@ export function WorkspaceLayout({
   activeTab: string
   statusMessage?: string | null
   statusVariant?: "success" | "error"
+  statusEventId?: number
   children: ReactNode
 }) {
   const { t } = useTranslation()
@@ -50,6 +54,7 @@ export function WorkspaceLayout({
       <StatusToast
         message={statusMessage ?? null}
         variant={statusVariant}
+        eventId={statusEventId}
       />
       <header className="mb-5 space-y-1">
         <h1 className="text-2xl font-semibold tracking-normal">

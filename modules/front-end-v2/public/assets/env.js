@@ -4,6 +4,6 @@ window.env = window.env || {
   EVALUATION_URL: "",
   DISPLAY_API_URL: "",
   DISPLAY_EVALUATION_URL: "",
-  HOSTING_MODE: "saas",
+  HOSTING_MODE: "",
   VERSION: "dev"
 };
