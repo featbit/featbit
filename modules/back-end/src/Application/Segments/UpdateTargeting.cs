@@ -89,17 +89,10 @@ public class UpdateTargetingHandler(
         async Task CheckPermissionsAsync()
         {
             var instructions = SegmentComparer.Compare(dataChange).ToArray();
-            List<string> requiredPermissions = [];
-
-            if (instructions.Any(x => SegmentInstructionKind.UpdateRuleKinds.Contains(x.Kind)))
-            {
-                requiredPermissions.Add(Permissions.UpdateSegmentRules);
-            }
-
-            if (instructions.Any(x => SegmentInstructionKind.UpdateTargetUsersKinds.Contains(x.Kind)))
-            {
-                requiredPermissions.Add(Permissions.UpdateSegmentTargetingUsers);
-            }
+            var requiredPermissions = instructions
+                .Select(x => x.Permission)
+                .Where(permission => !string.IsNullOrEmpty(permission))
+                .ToHashSet();
 
             if (requiredPermissions.Count == 0)
             {

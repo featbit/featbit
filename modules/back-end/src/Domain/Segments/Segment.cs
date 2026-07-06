@@ -163,4 +163,11 @@ public class Segment : AuditedEntity
 
         return json;
     }
+
+    public void MarkAsUpdated(Guid updatorId)
+    {
+        // We may change segment to `FullAuditEntity` in the future, so keep unused `updatorId` parameter for now.
+
+        UpdatedAt = DateTime.UtcNow;
+    }
 }
