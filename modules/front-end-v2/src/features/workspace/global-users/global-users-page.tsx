@@ -1,4 +1,4 @@
-import { ChevronsUpDown, Upload } from "lucide-react"
+import { Upload } from "lucide-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link, useParams } from "react-router-dom"
@@ -408,13 +408,10 @@ function GlobalUsersTable({
                   key={header.id}
                   className="px-5 py-4 text-sm font-semibold"
                 >
-                  <span className="inline-flex items-center gap-1.5">
-                    {flexRender(
-                      header.column.columnDef.header,
-                      header.getContext()
-                    )}
-                    <ChevronsUpDown className="size-3.5 text-muted-foreground" />
-                  </span>
+                  {flexRender(
+                    header.column.columnDef.header,
+                    header.getContext()
+                  )}
                 </th>
               ))}
             </tr>

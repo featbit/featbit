@@ -68,6 +68,7 @@ export function DisplayColumnsMenu({
               <DropdownMenuItem
                 key={option}
                 className="cursor-pointer gap-3"
+                closeOnClick={false}
                 onClick={(event) => {
                   event.preventDefault()
                   toggleColumn(option)

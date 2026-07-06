@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/popover"
 import {
   projectEnvFromSelection,
-  saveCurrentProjectEnv,
 } from "@/features/layout/layout-context"
 import type { Organization, Project, ProjectEnv } from "@/features/layout/layout-types"
 
@@ -18,12 +17,12 @@ export function ContextBar({
   organization,
   currentProjectEnv,
   projects,
-  setCurrentProjectEnv,
+  onProjectEnvChange,
 }: {
   organization: Organization | null
   currentProjectEnv: ProjectEnv | null
   projects: Project[]
-  setCurrentProjectEnv: (projectEnv: ProjectEnv | null) => void
+  onProjectEnvChange: (projectEnv: ProjectEnv) => void
 }) {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
@@ -115,8 +114,7 @@ export function ContextBar({
                           project,
                           environment
                         )
-                        saveCurrentProjectEnv(nextProjectEnv)
-                        setCurrentProjectEnv(nextProjectEnv)
+                        onProjectEnvChange(nextProjectEnv)
                         setOpen(false)
                       }}
                     >

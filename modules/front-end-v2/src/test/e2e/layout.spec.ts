@@ -54,20 +54,55 @@ test.describe("layout", () => {
     await expect(page.getByText("Light")).toBeVisible()
   })
 
-  test("switches project and environment using real project data", async ({
+  test("switches the app environment and returns to the current module root", async ({
     page,
   }) => {
     await mockContextEndpoints(page)
     await setAuthenticatedUser(page)
-    await setCurrentContext(page)
+    await page.addInitScript((license) => {
+      const userId = "test-user-id"
+      localStorage.setItem(
+        `current-workspace_${userId}`,
+        JSON.stringify({
+          id: "ws-1",
+          key: "acme-workspace",
+          name: "Acme Workspace",
+          license,
+        })
+      )
+      localStorage.setItem(
+        `current-organization_${userId}`,
+        JSON.stringify({
+          id: "org-1",
+          key: "acme-org",
+          name: "Acme Corp",
+          initialized: true,
+        })
+      )
 
-    await page.goto("/en/app")
+      const projectKey = `current-project_${userId}`
+      if (!localStorage.getItem(projectKey)) {
+        localStorage.setItem(
+          projectKey,
+          JSON.stringify({
+            projectId: "project-commerce",
+            projectName: "Commerce Apps",
+            projectKey: "commerce",
+            envId: "env-prod-cn",
+            envKey: "prod-cn",
+            envName: "Production CN",
+          })
+        )
+      }
+    }, createLicense("Growth"))
+
+    await page.goto("/en/app/workspace/global-users")
 
     await page.getByRole("button", { name: /Production CN/ }).click()
     await expect(page.getByText("Growth Platform")).toBeVisible()
     await page.getByRole("button", { name: "Staging" }).click()
 
-    await expect(page.getByText("Growth Platform")).toBeVisible()
+    await expect(page).toHaveURL(/\/en\/app\/workspace$/)
     await expect(page.getByRole("button", { name: /Staging/ })).toBeVisible()
     await expect(
       page.evaluate(() =>

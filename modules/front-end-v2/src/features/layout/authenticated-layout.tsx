@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { Outlet, useParams } from "react-router-dom"
+import { Outlet, useLocation, useParams } from "react-router-dom"
 import { ContextBar } from "@/features/layout/components/context-bar"
 import {
   chooseProjectEnv,
@@ -21,9 +21,27 @@ import { Sidebar } from "@/features/layout/components/sidebar"
 import { SubscriptionLicenseBadge } from "@/features/layout/components/subscription-license-badge"
 
 const SIDEBAR_STORAGE_KEY = "featbit:sidebar-collapsed"
+const UI_BROADCAST_CHANNEL = "featbit-ui-broadcast-channel"
+const ENV_CHANGED_MESSAGE = "env-changed"
+
+function getEnvironmentReloadPath(pathname: string) {
+  const segments = pathname.split("/").filter(Boolean)
+  const [lang, appSegment, featureSegment] = segments
+
+  if (lang && appSegment === "app" && featureSegment) {
+    return `/${lang}/app/${featureSegment}`
+  }
+
+  if (lang && appSegment === "app") {
+    return `/${lang}/app`
+  }
+
+  return pathname || "/"
+}
 
 export function AuthenticatedLayout() {
   const { lang: langParam } = useParams()
+  const location = useLocation()
   const lang = resolveLang(langParam)
   const { i18n } = useTranslation()
   const [collapsed, setCollapsedState] = useState(
@@ -43,6 +61,42 @@ export function AuthenticatedLayout() {
     localStorage.setItem(SIDEBAR_STORAGE_KEY, String(nextCollapsed))
     setCollapsedState(nextCollapsed)
   }
+
+  function changeCurrentProjectEnv(nextProjectEnv: ProjectEnv) {
+    const isSameProjectEnv =
+      currentProjectEnv?.projectId === nextProjectEnv.projectId &&
+      currentProjectEnv?.envId === nextProjectEnv.envId
+
+    if (isSameProjectEnv) {
+      return
+    }
+
+    saveCurrentProjectEnv(nextProjectEnv)
+    setCurrentProjectEnv(nextProjectEnv)
+    if ("BroadcastChannel" in window) {
+      const channel = new BroadcastChannel(UI_BROADCAST_CHANNEL)
+      channel.postMessage(ENV_CHANGED_MESSAGE)
+      channel.close()
+    }
+    window.location.assign(getEnvironmentReloadPath(location.pathname))
+  }
+
+  useEffect(() => {
+    if (!("BroadcastChannel" in window)) {
+      return
+    }
+
+    const channel = new BroadcastChannel(UI_BROADCAST_CHANNEL)
+    channel.onmessage = (event) => {
+      if (event.data === ENV_CHANGED_MESSAGE) {
+        window.location.assign(getEnvironmentReloadPath(location.pathname))
+      }
+    }
+
+    return () => {
+      channel.close()
+    }
+  }, [location.pathname])
 
   useEffect(() => {
     document.documentElement.lang = lang
@@ -95,7 +149,7 @@ export function AuthenticatedLayout() {
             organization={organization}
             currentProjectEnv={currentProjectEnv}
             projects={projects}
-            setCurrentProjectEnv={setCurrentProjectEnv}
+            onProjectEnvChange={changeCurrentProjectEnv}
           />
           <SubscriptionLicenseBadge lang={lang} workspace={workspace} />
         </header>
