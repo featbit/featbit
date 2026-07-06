@@ -11,6 +11,14 @@ import {
 } from "@/components/ui/sheet"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import {
   fetchEndUserFlags,
   fetchEndUserSegments,
   type EndUserFlag,
@@ -19,7 +27,7 @@ import {
   type PagedResult,
 } from "../global-users-api"
 import { Pagination } from "./pagination"
-import { ActionLink, SearchBox, SimpleTable } from "./shared"
+import { ActionLink, SearchBox, StatusMessage, TableSkeleton } from "./shared"
 
 export function EvaluateDrawer({
   user,
@@ -223,56 +231,82 @@ function FlagsPanel({
         className="mb-4 max-w-sm"
         onChange={onSearchChange}
       />
-      <SimpleTable
-        columns={[
-          t("workspace.globalUsers.name"),
-          "Key",
-          t("workspace.globalUsers.evaluate.variation"),
-          t("workspace.globalUsers.actions"),
-        ]}
-        loading={isLoading}
-        rows={flags.items.map((flag) => [
-          flag.name,
-          <span
-            key="key"
-            className="inline-flex min-w-0 items-center gap-2 font-mono"
-          >
-            <span className="truncate">{flag.key}</span>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="size-6"
-              onClick={() => {
-                void navigator.clipboard.writeText(flag.key)
-                onCopied()
-              }}
-            >
-              <Copy className="size-3.5" />
-            </Button>
-          </span>,
-          <span
-            key="variation"
-            className="inline-flex max-w-[14rem] items-center gap-2"
-          >
-            <span className="size-2 rounded-full bg-primary" />
-            <span className="truncate rounded-md bg-muted px-2 py-1 text-xs">
-              {flag.matchVariation || "-"}
-            </span>
-          </span>,
-          <ActionLink
-            key="details"
-            onClick={() =>
-              window.open(
-                `/${lang}/feature-flags/${encodeURIComponent(flag.key)}/targeting`,
-                "_blank"
-              )
-            }
-          >
-            {t("workspace.globalUsers.detailsAction")}
-          </ActionLink>,
-        ])}
-      />
+      <div className="overflow-hidden rounded-md border bg-background">
+        <Table className="table-fixed">
+          <TableHeader className="border-b text-left text-foreground">
+            <TableRow className="hover:bg-transparent">
+              <TableHead className="px-5 py-4 font-semibold">
+                {t("workspace.globalUsers.name")}
+              </TableHead>
+              <TableHead className="px-5 py-4 font-semibold">Key</TableHead>
+              <TableHead className="px-5 py-4 font-semibold">
+                {t("workspace.globalUsers.evaluate.variation")}
+              </TableHead>
+              <TableHead className="px-5 py-4 font-semibold">
+                {t("workspace.globalUsers.actions")}
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              <TableSkeleton columns={4} />
+            ) : flags.items.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={4} className="p-0">
+                  <StatusMessage
+                    title={t("workspace.globalUsers.emptySearch")}
+                  />
+                </TableCell>
+              </TableRow>
+            ) : (
+              flags.items.map((flag) => (
+                <TableRow key={flag.key}>
+                  <TableCell className="truncate px-5 py-4 align-middle text-sm">
+                    {flag.name}
+                  </TableCell>
+                  <TableCell className="px-5 py-4 align-middle text-sm">
+                    <span className="inline-flex min-w-0 items-center gap-2 font-mono">
+                      <span className="truncate">{flag.key}</span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="size-6"
+                        onClick={() => {
+                          void navigator.clipboard.writeText(flag.key)
+                          onCopied()
+                        }}
+                      >
+                        <Copy className="size-3.5" />
+                      </Button>
+                    </span>
+                  </TableCell>
+                  <TableCell className="px-5 py-4 align-middle text-sm">
+                    <span className="inline-flex max-w-[14rem] items-center gap-2">
+                      <span className="size-2 rounded-full bg-primary" />
+                      <span className="truncate rounded-md bg-muted px-2 py-1 text-xs">
+                        {flag.matchVariation || "-"}
+                      </span>
+                    </span>
+                  </TableCell>
+                  <TableCell className="px-5 py-4 align-middle text-sm">
+                    <ActionLink
+                      onClick={() =>
+                        window.open(
+                          `/${lang}/feature-flags/${encodeURIComponent(flag.key)}/targeting`,
+                          "_blank"
+                        )
+                      }
+                    >
+                      {t("workspace.globalUsers.detailsAction")}
+                    </ActionLink>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
       <Pagination
         pageIndex={page}
         pageSize={10}
@@ -308,34 +342,71 @@ function SegmentsPanel({
         className="mb-4 max-w-sm"
         onChange={onSearchChange}
       />
-      <SimpleTable
-        columns={[
-          t("workspace.globalUsers.name"),
-          t("workspace.globalUsers.evaluate.type"),
-          t("workspace.globalUsers.evaluate.lastUpdated"),
-          t("workspace.globalUsers.actions"),
-        ]}
-        loading={isLoading}
-        rows={segments.map((segment) => [
-          segment.name,
-          segment.type,
-          new Intl.DateTimeFormat(lang === "zh" ? "zh-CN" : "en-US", {
-            dateStyle: "medium",
-            timeStyle: "short",
-          }).format(new Date(segment.updatedAt)),
-          <ActionLink
-            key="details"
-            onClick={() =>
-              window.open(
-                `/${lang}/segments/details/${encodeURIComponent(segment.id)}/targeting`,
-                "_blank"
-              )
-            }
-          >
-            {t("workspace.globalUsers.detailsAction")}
-          </ActionLink>,
-        ])}
-      />
+      <div className="overflow-hidden rounded-md border bg-background">
+        <Table className="table-fixed">
+          <TableHeader className="border-b text-left text-foreground">
+            <TableRow className="hover:bg-transparent">
+              <TableHead className="px-5 py-4 font-semibold">
+                {t("workspace.globalUsers.name")}
+              </TableHead>
+              <TableHead className="px-5 py-4 font-semibold">
+                {t("workspace.globalUsers.evaluate.type")}
+              </TableHead>
+              <TableHead className="px-5 py-4 font-semibold">
+                {t("workspace.globalUsers.evaluate.lastUpdated")}
+              </TableHead>
+              <TableHead className="px-5 py-4 font-semibold">
+                {t("workspace.globalUsers.actions")}
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              <TableSkeleton columns={4} />
+            ) : segments.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={4} className="p-0">
+                  <StatusMessage
+                    title={t("workspace.globalUsers.emptySearch")}
+                  />
+                </TableCell>
+              </TableRow>
+            ) : (
+              segments.map((segment) => (
+                <TableRow key={segment.id}>
+                  <TableCell className="truncate px-5 py-4 align-middle text-sm">
+                    {segment.name}
+                  </TableCell>
+                  <TableCell className="truncate px-5 py-4 align-middle text-sm">
+                    {segment.type}
+                  </TableCell>
+                  <TableCell className="truncate px-5 py-4 align-middle text-sm">
+                    {new Intl.DateTimeFormat(
+                      lang === "zh" ? "zh-CN" : "en-US",
+                      {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      }
+                    ).format(new Date(segment.updatedAt))}
+                  </TableCell>
+                  <TableCell className="px-5 py-4 align-middle text-sm">
+                    <ActionLink
+                      onClick={() =>
+                        window.open(
+                          `/${lang}/segments/details/${encodeURIComponent(segment.id)}/targeting`,
+                          "_blank"
+                        )
+                      }
+                    >
+                      {t("workspace.globalUsers.detailsAction")}
+                    </ActionLink>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   )
 }
