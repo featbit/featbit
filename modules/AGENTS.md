@@ -21,6 +21,10 @@
 
 - Do not copy Angular/ng-zorro styling one-to-one.
 - Prefer shadcn/ui and Tailwind default tokens for buttons, text colors, spacing, radius, focus rings, and common controls.
+- When migrating any module into `front-end-v2`, prefer the native shadcn/Base UI components in `front-end-v2/src/components/ui/*`.
+- Do not modify the original `components/ui/*` shadcn component files for migration-specific needs; compose or wrap them from feature/layout files.
+- Prefer shadcn default component styles and tokens. Add only small amounts of Tailwind in feature or layout files when necessary.
+- Split migrated code by responsibility so individual files do not become unusually large.
 - Copy only necessary assets such as FeatBit logo, brand SVGs, sample JSON, `env.template.js`, required Monaco assets, and irreplaceable business-specific icons.
 - Do not copy the old Angular login background.
 - Redesign the login page for the React implementation.

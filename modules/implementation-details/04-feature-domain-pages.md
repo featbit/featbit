@@ -4,6 +4,13 @@
 
 Migrate the main product domains page by page while preserving backend API contracts and improving the user experience with the new React UI system.
 
+## Module Migration Requirements
+
+- Prefer the native shadcn/Base UI components in `front-end-v2/src/components/ui/*` for standard controls and surfaces.
+- Do not modify the original `components/ui/*` shadcn component files during module migration.
+- Prefer shadcn default component styles and tokens. Add only small amounts of Tailwind in feature or layout files when the default component composition does not cover the requirement.
+- Split files by responsibility, such as page container, data hooks, table columns, filters, forms, dialogs/drawers, route glue, and shared helpers, so individual module files do not become unusually large.
+
 ## Migration Order
 
 1. Feature Flags
