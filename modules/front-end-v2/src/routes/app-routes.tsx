@@ -1,5 +1,13 @@
-import { Navigate, Route, Routes, useLocation } from "react-router-dom"
+import {
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+  useParams,
+} from "react-router-dom"
 import { useTranslation } from "react-i18next"
+import { AuthPage } from "@/features/auth/auth-page"
+import { getIdentityToken } from "@/features/auth/auth-api"
 import { getRuntimeEnv } from "@/lib/env/runtime-env"
 
 type SupportedLanguage = "en" | "zh"
@@ -51,7 +59,17 @@ function LocalizedAuthRedirect({ mode }: { mode: "login" | "sso" }) {
   return <Navigate to={`/${lang}/${path}${location.search}`} replace />
 }
 
-function ShellPage({ kind }: { kind: "login" | "sso" | "app" }) {
+function AuthRoute({ mode }: { mode: "login" | "sso" }) {
+  const { lang = getPreferredLanguage() } = useParams()
+
+  if (getIdentityToken()) {
+    return <Navigate to={`/${lang}/app`} replace />
+  }
+
+  return <AuthPage mode={mode} />
+}
+
+function ShellPage() {
   const { t } = useTranslation()
   const env = getRuntimeEnv()
 
@@ -62,10 +80,10 @@ function ShellPage({ kind }: { kind: "login" | "sso" | "app" }) {
           {t("shell.eyebrow")}
         </p>
         <h1 className="text-2xl font-semibold tracking-normal">
-          {t(`shell.${kind}.title`)}
+          {t("shell.app.title")}
         </h1>
         <p className="text-sm leading-6 text-muted-foreground">
-          {t(`shell.${kind}.description`)}
+          {t("shell.app.description")}
         </p>
         <p className="text-xs text-muted-foreground">
           {t("shell.version", { version: env.version })}
@@ -81,9 +99,9 @@ export function AppRoutes() {
       <Route path="/" element={<LanguageRedirect />} />
       <Route path="/login" element={<LocalizedAuthRedirect mode="login" />} />
       <Route path="/login/sso" element={<LocalizedAuthRedirect mode="sso" />} />
-      <Route path="/:lang/login" element={<ShellPage kind="login" />} />
-      <Route path="/:lang/login/sso" element={<ShellPage kind="sso" />} />
-      <Route path="/:lang/*" element={<ShellPage kind="app" />} />
+      <Route path="/:lang/login" element={<AuthRoute mode="login" />} />
+      <Route path="/:lang/login/sso" element={<AuthRoute mode="sso" />} />
+      <Route path="/:lang/*" element={<ShellPage />} />
       <Route path="*" element={<LanguageRedirect />} />
     </Routes>
   )

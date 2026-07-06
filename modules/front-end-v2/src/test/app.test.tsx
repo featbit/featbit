@@ -13,7 +13,7 @@ describe("App shell", () => {
     render(<App />)
 
     expect(
-      await screen.findByRole("heading", { name: "Login route ready" })
+      await screen.findByText("Sign in to your workspace")
     ).toBeInTheDocument()
   })
 
@@ -22,9 +22,7 @@ describe("App shell", () => {
 
     render(<App />)
 
-    expect(
-      await screen.findByRole("heading", { name: "SSO route ready" })
-    ).toBeInTheDocument()
+    expect(await screen.findByText("Sign in with SSO")).toBeInTheDocument()
   })
 
   it("reads runtime env version with a dev fallback", async () => {

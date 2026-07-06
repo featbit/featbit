@@ -1,0 +1,75 @@
+import { useId, type ChangeEvent, type ReactNode } from "react"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Separator } from "@/components/ui/separator"
+import { cn } from "@/lib/utils"
+
+export function Field({
+  label,
+  type = "text",
+  placeholder,
+  icon,
+  trailing,
+  value,
+  disabled,
+  autoComplete,
+  name,
+  required,
+  onChange,
+}: {
+  label: string
+  type?: string
+  placeholder: string
+  icon: ReactNode
+  trailing?: ReactNode
+  value: string
+  disabled?: boolean
+  autoComplete?: string
+  name: string
+  required?: boolean
+  onChange: (event: ChangeEvent<HTMLInputElement>) => void
+}) {
+  const inputId = useId()
+
+  return (
+    <div>
+      <Label htmlFor={inputId}>{label}</Label>
+      <span className="relative mt-2 block text-muted-foreground">
+        <span className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2">
+          {icon}
+        </span>
+        <Input
+          id={inputId}
+          className={cn("h-12 pl-12 pr-4 text-base", trailing && "pr-12")}
+          type={type}
+          placeholder={placeholder}
+          value={value}
+          disabled={disabled}
+          autoComplete={autoComplete}
+          name={name}
+          required={required}
+          onChange={onChange}
+        />
+        {trailing ? (
+          <span className="absolute inset-y-0 right-4 flex items-center">
+            {trailing}
+          </span>
+        ) : null}
+      </span>
+    </div>
+  )
+}
+
+export function DividerLabel({ children }: { children: ReactNode }) {
+  return (
+    <div className="flex w-full items-center justify-center gap-4 text-sm text-muted-foreground">
+      <span className="flex-1">
+        <Separator />
+      </span>
+      <span className="whitespace-nowrap">{children}</span>
+      <span className="flex-1">
+        <Separator />
+      </span>
+    </div>
+  )
+}
