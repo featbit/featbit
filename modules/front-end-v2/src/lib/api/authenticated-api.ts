@@ -103,7 +103,7 @@ async function getRefreshedToken() {
   return refreshTokenPromise
 }
 
-export async function fetchAuthenticatedApi<T>(
+export async function fetchApi<T>(
   path: string,
   init?: RequestInit,
   token = getIdentityToken(),
@@ -120,7 +120,7 @@ export async function fetchAuthenticatedApi<T>(
 
   if (response.status === 401 && retryOnUnauthorized) {
     const refreshedToken = await getRefreshedToken()
-    return fetchAuthenticatedApi<T>(path, init, refreshedToken, false)
+    return fetchApi<T>(path, init, refreshedToken, false)
   }
 
   if (!response.ok) {

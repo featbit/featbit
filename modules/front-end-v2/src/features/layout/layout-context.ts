@@ -10,7 +10,7 @@ import type {
   ProjectEnv,
   Workspace,
 } from "@/features/layout/layout-types"
-import { fetchAuthenticatedApi } from "@/lib/api/authenticated-api"
+import { fetchApi } from "@/lib/api/authenticated-api"
 
 const IS_SSO_FIRST_LOGIN_STORAGE_KEY = "is-sso-first-login"
 
@@ -218,19 +218,19 @@ export function persistCurrentOrganization(organization: Organization) {
 }
 
 export async function fetchWorkspaces() {
-  return fetchAuthenticatedApi<Workspace[]>("/api/v1/user/workspaces")
+  return fetchApi<Workspace[]>("/api/v1/user/workspaces")
 }
 
 export async function fetchOrganizations() {
   const isSsoFirstLogin =
     localStorage.getItem(IS_SSO_FIRST_LOGIN_STORAGE_KEY) === "true"
-  return fetchAuthenticatedApi<Organization[]>(
+  return fetchApi<Organization[]>(
     `/api/v1/organizations?isSsoFirstLogin=${isSsoFirstLogin}`
   )
 }
 
 export async function fetchProjects() {
-  const projects = await fetchAuthenticatedApi<Project[]>("/api/v1/projects")
+  const projects = await fetchApi<Project[]>("/api/v1/projects")
   return normalizeProjects(
     projects.sort((a, b) => a.name.localeCompare(b.name))
   )
@@ -241,7 +241,7 @@ export async function joinCurrentOrganizationIfSsoFirstLogin() {
     return
   }
 
-  await fetchAuthenticatedApi<boolean>("/api/v1/user/join-organization", {
+  await fetchApi<boolean>("/api/v1/user/join-organization", {
     method: "POST",
   })
   localStorage.removeItem(IS_SSO_FIRST_LOGIN_STORAGE_KEY)

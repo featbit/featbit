@@ -1,4 +1,4 @@
-import { fetchAuthenticatedApi } from "@/lib/api/authenticated-api"
+import { fetchApi } from "@/lib/api/authenticated-api"
 
 export type OnboardingPayload = {
   organizationName: string
@@ -9,7 +9,7 @@ export type OnboardingPayload = {
 }
 
 export async function completeOnboarding(payload: OnboardingPayload) {
-  return fetchAuthenticatedApi<boolean>("/api/v1/organizations/onboarding", {
+  return fetchApi<boolean>("/api/v1/organizations/onboarding", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
