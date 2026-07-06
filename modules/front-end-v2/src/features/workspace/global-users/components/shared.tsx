@@ -5,19 +5,21 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 
-export function TextCell({
-  value,
-  muted,
-}: {
-  value: string
-  muted?: boolean
-}) {
+export function TextCell({ value, muted }: { value: string; muted?: boolean }) {
   const text = value || "-"
   return (
     <Tooltip>
@@ -51,7 +53,7 @@ export function SearchBox({
 }) {
   return (
     <div className={cn("relative", className)}>
-      <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+      <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
       <Input
         className="bg-background pl-9 text-sm"
         value={value}
@@ -86,13 +88,13 @@ export function TableSkeleton({ columns }: { columns: number }) {
   return (
     <>
       {Array.from({ length: 8 }).map((_, rowIndex) => (
-        <tr key={rowIndex} className="border-b last:border-b-0">
+        <TableRow key={rowIndex} className="last:border-b-0">
           {Array.from({ length: columns }).map((__, columnIndex) => (
-            <td key={columnIndex} className="px-5 py-4">
+            <TableCell key={columnIndex} className="px-5 py-4">
               <Skeleton className="h-4 w-3/4" />
-            </td>
+            </TableCell>
           ))}
-        </tr>
+        </TableRow>
       ))}
     </>
   )
@@ -132,41 +134,41 @@ export function SimpleTable({
   const { t } = useTranslation()
   return (
     <div className="overflow-hidden rounded-md border">
-      <table className="w-full table-fixed">
-        <thead className="bg-muted/40 text-left text-foreground">
-          <tr className="border-b">
+      <Table className="table-fixed">
+        <TableHeader className="bg-muted/40 text-left text-foreground">
+          <TableRow className="hover:bg-transparent">
             {columns.map((column) => (
-              <th key={column} className="px-4 py-3 text-sm font-medium">
+              <TableHead key={column} className="px-4 py-3 font-medium">
                 {column}
-              </th>
+              </TableHead>
             ))}
-          </tr>
-        </thead>
-        <tbody>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {loading ? (
             <TableSkeleton columns={columns.length} />
           ) : rows.length === 0 ? (
-            <tr>
-              <td colSpan={columns.length} className="p-0">
+            <TableRow>
+              <TableCell colSpan={columns.length} className="p-0">
                 <StatusMessage title={t("workspace.globalUsers.emptySearch")} />
-              </td>
-            </tr>
+              </TableCell>
+            </TableRow>
           ) : (
             rows.map((row, rowIndex) => (
-              <tr key={rowIndex} className="border-b last:border-b-0">
+              <TableRow key={rowIndex}>
                 {row.map((cell, cellIndex) => (
-                  <td
+                  <TableCell
                     key={cellIndex}
                     className="truncate px-4 py-3 align-middle text-sm"
                   >
                     {cell}
-                  </td>
+                  </TableCell>
                 ))}
-              </tr>
+              </TableRow>
             ))
           )}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   )
 }

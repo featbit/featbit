@@ -3,11 +3,13 @@ import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs"
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
   fetchEndUserFlags,
   fetchEndUserSegments,
@@ -16,7 +18,6 @@ import {
   type GlobalUser,
   type PagedResult,
 } from "../global-users-api"
-import { DrawerShell } from "./dialog-shell"
 import { Pagination } from "./pagination"
 import { ActionLink, SearchBox, SimpleTable } from "./shared"
 
@@ -48,7 +49,9 @@ export function EvaluateDrawer({
   const segmentsRequestKey = user?.id ?? ""
   const [loadedFlagsRequestKey, setLoadedFlagsRequestKey] = useState("")
   const [loadedSegmentsRequestKey, setLoadedSegmentsRequestKey] = useState("")
-  const isFlagsLoading = Boolean(user && flagsRequestKey !== loadedFlagsRequestKey)
+  const isFlagsLoading = Boolean(
+    user && flagsRequestKey !== loadedFlagsRequestKey
+  )
   const isSegmentsLoading = Boolean(
     user && segmentsRequestKey !== loadedSegmentsRequestKey
   )
@@ -118,69 +121,76 @@ export function EvaluateDrawer({
   )
 
   return (
-    <DrawerShell
+    <Sheet
       open={Boolean(user)}
-      title={user?.name || t("workspace.globalUsers.unnamedUser")}
-      description={
-        <span className="inline-flex min-w-0 items-center gap-2">
-          <span className="truncate font-mono">{user?.keyId}</span>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="size-6"
-            onClick={() => {
-              if (!user?.keyId) {
-                return
-              }
-              void navigator.clipboard.writeText(user.keyId)
-              onCopied()
-            }}
-          >
-            <Copy className="size-3.5" />
-          </Button>
-        </span>
-      }
-      wide
-      onClose={onClose}
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen) {
+          onClose()
+        }
+      }}
     >
-      <div className="px-6 py-4">
-        <Tabs
-          value={tab}
-          onValueChange={(value) => setTab(value as "flags" | "segments")}
-        >
-          <TabsList variant="line">
-            <TabsTrigger value="flags">
-              {t("workspace.globalUsers.evaluate.flags")}
-            </TabsTrigger>
-            <TabsTrigger value="segments">
-              {t("workspace.globalUsers.evaluate.segments")}
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent value="flags">
-            <FlagsPanel
-              flags={flags}
-              isLoading={isFlagsLoading}
-              lang={lang}
-              search={flagSearch}
-              page={flagPage}
-              onCopied={onCopied}
-              onPageChange={setFlagPage}
-              onSearchChange={setFlagSearch}
-            />
-          </TabsContent>
-          <TabsContent value="segments">
-            <SegmentsPanel
-              segments={filteredSegments}
-              isLoading={isSegmentsLoading}
-              lang={lang}
-              search={segmentSearch}
-              onSearchChange={setSegmentSearch}
-            />
-          </TabsContent>
-        </Tabs>
-      </div>
-    </DrawerShell>
+      <SheetContent className="gap-0 p-0 data-[side=right]:w-[min(100vw,960px)] data-[side=right]:sm:max-w-[960px]">
+        <SheetHeader className="border-b px-6 py-5 pr-12">
+          <SheetTitle className="truncate">
+            {user?.name || t("workspace.globalUsers.unnamedUser")}
+          </SheetTitle>
+          <SheetDescription className="inline-flex min-w-0 items-center gap-2">
+            <span className="truncate font-mono">{user?.keyId}</span>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="size-6"
+              onClick={() => {
+                if (!user?.keyId) {
+                  return
+                }
+                void navigator.clipboard.writeText(user.keyId)
+                onCopied()
+              }}
+            >
+              <Copy className="size-3.5" />
+            </Button>
+          </SheetDescription>
+        </SheetHeader>
+        <div className="flex-1 overflow-y-auto px-6 py-4">
+          <Tabs
+            value={tab}
+            onValueChange={(value) => setTab(value as "flags" | "segments")}
+          >
+            <TabsList variant="line">
+              <TabsTrigger value="flags">
+                {t("workspace.globalUsers.evaluate.flags")}
+              </TabsTrigger>
+              <TabsTrigger value="segments">
+                {t("workspace.globalUsers.evaluate.segments")}
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="flags">
+              <FlagsPanel
+                flags={flags}
+                isLoading={isFlagsLoading}
+                lang={lang}
+                search={flagSearch}
+                page={flagPage}
+                onCopied={onCopied}
+                onPageChange={setFlagPage}
+                onSearchChange={setFlagSearch}
+              />
+            </TabsContent>
+            <TabsContent value="segments">
+              <SegmentsPanel
+                segments={filteredSegments}
+                isLoading={isSegmentsLoading}
+                lang={lang}
+                search={segmentSearch}
+                onSearchChange={setSegmentSearch}
+              />
+            </TabsContent>
+          </Tabs>
+        </div>
+      </SheetContent>
+    </Sheet>
   )
 }
 
@@ -223,7 +233,10 @@ function FlagsPanel({
         loading={isLoading}
         rows={flags.items.map((flag) => [
           flag.name,
-          <span key="key" className="inline-flex min-w-0 items-center gap-2 font-mono">
+          <span
+            key="key"
+            className="inline-flex min-w-0 items-center gap-2 font-mono"
+          >
             <span className="truncate">{flag.key}</span>
             <Button
               type="button"
@@ -238,7 +251,10 @@ function FlagsPanel({
               <Copy className="size-3.5" />
             </Button>
           </span>,
-          <span key="variation" className="inline-flex max-w-[14rem] items-center gap-2">
+          <span
+            key="variation"
+            className="inline-flex max-w-[14rem] items-center gap-2"
+          >
             <span className="size-2 rounded-full bg-primary" />
             <span className="truncate rounded-md bg-muted px-2 py-1 text-xs">
               {flag.matchVariation || "-"}

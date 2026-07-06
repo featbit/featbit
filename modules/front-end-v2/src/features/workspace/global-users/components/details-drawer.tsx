@@ -1,8 +1,13 @@
 import { Copy } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet"
 import type { GlobalUser } from "../global-users-api"
-import { DrawerShell } from "./dialog-shell"
 
 export function DetailsDrawer({
   user,
@@ -23,26 +28,36 @@ export function DetailsDrawer({
   ]
 
   return (
-    <DrawerShell
+    <Sheet
       open={Boolean(user)}
-      title={t("workspace.globalUsers.details.title")}
-      onClose={onClose}
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen) {
+          onClose()
+        }
+      }}
     >
-      <div className="space-y-7 px-6 py-5">
-        <PropertySection
-          title={t("workspace.globalUsers.details.builtIn")}
-          rows={rows}
-          onCopied={onCopied}
-        />
-        <PropertySection
-          title={t("workspace.globalUsers.details.custom")}
-          rows={user?.customizedProperties ?? []}
-          empty={t("workspace.globalUsers.details.noCustomProperties")}
-          alwaysShowCopy
-          onCopied={onCopied}
-        />
-      </div>
-    </DrawerShell>
+      <SheetContent className="gap-0 p-0 data-[side=right]:w-[min(100vw,540px)] data-[side=right]:sm:max-w-[540px]">
+        <SheetHeader className="border-b px-6 py-5 pr-12">
+          <SheetTitle className="truncate">
+            {t("workspace.globalUsers.details.title")}
+          </SheetTitle>
+        </SheetHeader>
+        <div className="flex-1 space-y-7 overflow-y-auto px-6 py-5">
+          <PropertySection
+            title={t("workspace.globalUsers.details.builtIn")}
+            rows={rows}
+            onCopied={onCopied}
+          />
+          <PropertySection
+            title={t("workspace.globalUsers.details.custom")}
+            rows={user?.customizedProperties ?? []}
+            empty={t("workspace.globalUsers.details.noCustomProperties")}
+            alwaysShowCopy
+            onCopied={onCopied}
+          />
+        </div>
+      </SheetContent>
+    </Sheet>
   )
 }
 

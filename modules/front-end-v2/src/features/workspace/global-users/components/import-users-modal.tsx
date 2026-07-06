@@ -1,9 +1,15 @@
 import { FileJson, Loader2, UploadCloud } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
 import { globalUsersTemplateUrl } from "../global-users-api"
-import { DialogShell } from "./dialog-shell"
 
 const MAX_IMPORT_SIZE = 500 * 1024 * 1024
 
@@ -46,60 +52,72 @@ export function ImportUsersModal({
   }
 
   return (
-    <DialogShell
+    <Dialog
       open={open}
-      title={t("workspace.globalUsers.import.title")}
-      description={t("workspace.globalUsers.import.intro")}
-      onClose={onClose}
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen) {
+          onClose()
+        }
+      }}
     >
-      <div className="space-y-4 px-6 py-5">
-        <a
-          className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
-          href={globalUsersTemplateUrl()}
-          target="_blank"
-          rel="noreferrer"
-        >
-          <FileJson className="size-4" />
-          {t("workspace.globalUsers.import.viewTemplate")}
-        </a>
-        <ul className="space-y-1 text-sm text-muted-foreground">
-          <li>{t("workspace.globalUsers.import.noteKey")}</li>
-          <li>{t("workspace.globalUsers.import.noteProperties")}</li>
-        </ul>
-        <label
-          className={cn(
-            "flex min-h-44 cursor-pointer flex-col items-center justify-center rounded-md border border-dashed border-input bg-background px-6 py-8 text-center transition-colors hover:bg-accent",
-            uploading && "pointer-events-none opacity-70"
-          )}
-          onDragOver={(event) => event.preventDefault()}
-          onDrop={(event) => {
-            event.preventDefault()
-            validateAndImport(event.dataTransfer.files[0])
-          }}
-        >
-          {uploading ? (
-            <Loader2 className="size-8 animate-spin text-primary" />
-          ) : (
-            <UploadCloud className="size-9 text-primary" />
-          )}
-          <span className="mt-3 text-sm font-medium">
-            {t("workspace.globalUsers.import.drop")}
-          </span>
-          <span className="mt-1 text-xs text-muted-foreground">
-            {t("workspace.globalUsers.import.constraints")}
-          </span>
-          <input
-            type="file"
-            accept="application/json,.json"
-            className="sr-only"
-            disabled={uploading}
-            onChange={(event) => validateAndImport(event.target.files?.[0])}
-          />
-        </label>
-        {localError || error ? (
-          <p className="text-sm text-destructive">{localError ?? error}</p>
-        ) : null}
-      </div>
-    </DialogShell>
+      <DialogContent className="max-h-[85vh] gap-0 overflow-hidden p-0 sm:max-w-[560px]">
+        <DialogHeader className="border-b px-6 py-5 pr-12">
+          <DialogTitle className="truncate">
+            {t("workspace.globalUsers.import.title")}
+          </DialogTitle>
+          <DialogDescription>
+            {t("workspace.globalUsers.import.intro")}
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4 overflow-y-auto px-6 py-5">
+          <a
+            className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
+            href={globalUsersTemplateUrl()}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <FileJson className="size-4" />
+            {t("workspace.globalUsers.import.viewTemplate")}
+          </a>
+          <ul className="space-y-1 text-sm text-muted-foreground">
+            <li>{t("workspace.globalUsers.import.noteKey")}</li>
+            <li>{t("workspace.globalUsers.import.noteProperties")}</li>
+          </ul>
+          <label
+            className={cn(
+              "flex min-h-44 cursor-pointer flex-col items-center justify-center rounded-md border border-dashed border-input bg-background px-6 py-8 text-center transition-colors hover:bg-accent",
+              uploading && "pointer-events-none opacity-70"
+            )}
+            onDragOver={(event) => event.preventDefault()}
+            onDrop={(event) => {
+              event.preventDefault()
+              validateAndImport(event.dataTransfer.files[0])
+            }}
+          >
+            {uploading ? (
+              <Loader2 className="size-8 animate-spin text-primary" />
+            ) : (
+              <UploadCloud className="size-9 text-primary" />
+            )}
+            <span className="mt-3 text-sm font-medium">
+              {t("workspace.globalUsers.import.drop")}
+            </span>
+            <span className="mt-1 text-xs text-muted-foreground">
+              {t("workspace.globalUsers.import.constraints")}
+            </span>
+            <input
+              type="file"
+              accept="application/json,.json"
+              className="sr-only"
+              disabled={uploading}
+              onChange={(event) => validateAndImport(event.target.files?.[0])}
+            />
+          </label>
+          {localError || error ? (
+            <p className="text-sm text-destructive">{localError ?? error}</p>
+          ) : null}
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 }
