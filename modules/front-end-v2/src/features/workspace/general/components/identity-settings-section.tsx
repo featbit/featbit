@@ -2,9 +2,9 @@ import { Loader2, Save } from "lucide-react"
 import type { UseFormReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
-import { InputField, TextInput } from "@/features/workspace/components/form-fields"
-import { Section } from "@/features/workspace/components/workspace-shell"
-import type { IdentityFormValues } from "@/features/workspace/workspace-types"
+import { InputField, TextInput } from "@/features/workspace/general/components/form-fields"
+import { Section } from "@/features/workspace/general/components/workspace-shell"
+import type { IdentityFormValues } from "@/features/workspace/general/workspace-types"
 
 function PermissionNote({ show, text }: { show: boolean; text: string }) {
   return show ? <p className="text-xs text-muted-foreground">{text}</p> : null

@@ -5,10 +5,10 @@ import { useTranslation } from "react-i18next"
 import { useParams } from "react-router-dom"
 import { z } from "zod"
 import { getCurrentWorkspace, resolveLang } from "@/features/layout/layout-context"
-import { IdentitySettingsSection } from "@/features/workspace/components/identity-settings-section"
-import { SsoSettingsSection } from "@/features/workspace/components/sso-settings-section"
+import { IdentitySettingsSection } from "@/features/workspace/general/components/identity-settings-section"
+import { SsoSettingsSection } from "@/features/workspace/general/components/sso-settings-section"
 import { WorkspaceLayout } from "@/features/workspace/components/workspace-layout"
-import { SkeletonForm } from "@/features/workspace/components/workspace-shell"
+import { SkeletonForm } from "@/features/workspace/general/components/workspace-shell"
 import {
   fetchWorkspaceDetails,
   isWorkspaceKeyUsed,
@@ -19,11 +19,11 @@ import {
 import type {
   IdentityFormValues,
   SsoFormValues,
-} from "@/features/workspace/workspace-types"
+} from "@/features/workspace/general/workspace-types"
 import {
   emptySsoValues,
   isSsoLicensed,
-} from "@/features/workspace/workspace-utils"
+} from "@/features/workspace/general/workspace-utils"
 
 export function GeneralPage() {
   const { t } = useTranslation()

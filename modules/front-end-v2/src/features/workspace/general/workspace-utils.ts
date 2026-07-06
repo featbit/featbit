@@ -1,5 +1,8 @@
 import type { WorkspaceDetails } from "@/features/workspace/workspace-api"
-import type { LicensePayload, SsoFormValues } from "@/features/workspace/workspace-types"
+import type {
+  LicensePayload,
+  SsoFormValues,
+} from "@/features/workspace/general/workspace-types"
 
 function decodeBase64UrlJson<T>(value: string): T | null {
   try {

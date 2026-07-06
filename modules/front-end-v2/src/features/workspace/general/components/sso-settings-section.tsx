@@ -15,9 +15,9 @@ import type {
 } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
-import { InputField, TextInput } from "@/features/workspace/components/form-fields"
-import { Section } from "@/features/workspace/components/workspace-shell"
-import type { SsoFormValues } from "@/features/workspace/workspace-types"
+import { InputField, TextInput } from "@/features/workspace/general/components/form-fields"
+import { Section } from "@/features/workspace/general/components/workspace-shell"
+import type { SsoFormValues } from "@/features/workspace/general/workspace-types"
 
 function StatusBadge({ children }: { children: React.ReactNode }) {
   return (

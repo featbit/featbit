@@ -12,7 +12,7 @@ import { getIdentityToken } from "@/features/auth/auth-api"
 import { AuthenticatedLayout } from "@/features/layout/authenticated-layout"
 import { LayoutPlaceholder } from "@/features/layout/layout-placeholder"
 import { OnboardingPage } from "@/features/onboarding/onboarding-page"
-import { GeneralPage } from "@/features/workspace/general-page"
+import { GeneralPage } from "@/features/workspace/general/general-page"
 import { SelectWorkspacePage } from "@/features/workspace-selection/select-workspace-page"
 import { getRuntimeEnv } from "@/lib/env/runtime-env"
 
