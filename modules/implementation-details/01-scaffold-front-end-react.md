@@ -33,6 +33,7 @@ This document defines migration step 1: project initialization. When the user as
 - Create `front-end-react` as an independent package with its own `package.json`, `tsconfig`, Vite config, Tailwind config, ESLint config, test config, and README.
 - Configure Tailwind dark mode using shadcn's `darkMode: ["class"]` strategy and the standard shadcn CSS variables for background, foreground, card, popover, border, muted, primary, destructive, ring, and chart colors.
 - Add the shadcn-style `ThemeProvider` and `useTheme` helper for Vite. It should support `light`, `dark`, and `system`, persist the selected preference in local storage, and apply the theme class before app paint where possible to avoid theme flash.
+- Keep the theme provider in the current shadcn Vite location: `src/components/theme-provider.tsx`, imported as `@/components/theme-provider`. Do not create or migrate a provider under `src/lib/theme/theme-provider.tsx`.
 - Keep shadcn's default color variables as the baseline. Extend CSS variables only when a product-specific semantic need cannot be expressed with shadcn defaults, and do not use the Angular color scheme as the React palette. Do not introduce a separate custom theme framework.
 - Install and organize shadcn components as the default source for common UI primitives. Local wrappers in `src/components/common` or `src/components/layout` should compose shadcn components first and preserve shadcn variants, CSS variables, focus rings, spacing, and radius conventions. Do not create custom replacements for standard shadcn controls such as buttons, inputs, selects, checkboxes, switches, tabs, dropdown menus, command palettes, popovers, tooltips, dialogs, sheets/drawers, cards, badges, alerts, tables, or form primitives unless shadcn cannot cover the requirement.
 - Configure path aliases, at minimum:
@@ -86,7 +87,6 @@ front-end-react/
       env/
       i18n/
       permissions/
-      theme/
       test/
     routes/
     stores/

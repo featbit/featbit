@@ -71,6 +71,7 @@ When the user asks for one of these steps by number, keep the implementation ins
 - Clicking the subscription/license badge should navigate to Workspace billing/subscription settings. Free plan should open the pricing/upgrade flow; paid/license states should open the license or subscription detail page.
 - Use the left-bottom Account button as the single authenticated identity and preference entry point. FeatBit does not support configurable user avatars, so show the user's name/email with an initial or generic user icon only.
 - Put `Light`, `Dark`, and `System` theme switching inside the Account menu. The control should use the shadcn-style `ThemeProvider` / `useTheme` pattern, persist user preference, and update the document theme without requiring a route refresh.
+- Import theme state from `@/components/theme-provider`. Do not use or recreate `@/lib/theme/theme-provider`; that was an old migration path and should stay removed.
 - Put language switching inside the Account menu for authenticated routes.
 - Do not show subscription/plan information in the Account menu; the top-right subscription/license badge is the only plan summary entry.
 - Show the current app version in the Account menu. Follow the local `feat/show-current-version` branch: read the value from runtime env `window.env.version`, default to `dev`, display it as `Version: <version>`, and optionally link the row to `https://github.com/featbit/featbit`.
