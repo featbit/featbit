@@ -83,7 +83,7 @@ export function ContextBar({
               />
             </label>
           </div>
-          <div className="max-h-72 overflow-y-auto px-3 pb-1">
+          <div className="max-h-72 overflow-y-auto px-3 pb-1 pt-1">
             {groupedProjects.length === 0 ? (
               <p className="px-3 py-6 text-center text-sm text-muted-foreground">
                 {t("layout.context.noEnvironments")}
@@ -106,7 +106,7 @@ export function ContextBar({
                     <button
                       key={`${project.id}:${environment.id}`}
                       type="button"
-                      className={`flex h-9 w-full items-center rounded-md py-0 pl-8 pr-3 text-left text-sm leading-none hover:bg-accent ${
+                      className={`flex h-9 w-full items-center rounded-md px-3 py-0 text-left text-sm leading-none hover:bg-accent ${
                         selected ? "bg-accent text-accent-foreground" : ""
                       }`}
                       onClick={() => {
