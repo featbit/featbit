@@ -9,7 +9,7 @@ Migrate the application layout: login, auth guard, secure layout, side navigatio
 - Use shadcn/ui components as the first choice for layout controls and interaction surfaces.
 - Compose shadcn components for buttons, inputs, forms, dropdown menus, command palettes, popovers, tooltips, dialogs, sheets/drawers, tabs, badges, cards, alerts, navigation menus, and table-like surfaces before considering custom UI.
 - Build a custom component only when shadcn does not provide the needed primitive or when FeatBit-specific behavior cannot be represented cleanly through shadcn composition.
-- Custom layout components such as `SidebarNav`, `ContextBar`, `AccountMenu`, and `SubscriptionLicenseBadge` should still use shadcn/Radix primitives internally where practical and preserve shadcn tokens, variants, focus states, spacing, and radius conventions.
+- Custom layout components such as `SidebarNav`, `ContextBar`, `AccountMenu`, and `SubscriptionLicenseBadge` should still use shadcn/Base UI primitives internally where practical and preserve shadcn tokens, variants, focus states, spacing, and radius conventions.
 
 ## Step Scope
 

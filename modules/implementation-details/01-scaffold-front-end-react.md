@@ -8,7 +8,7 @@ Create the standalone React application foundation in `front-end-react` without 
 
 - Use Vite + React + TypeScript as a static SPA.
 - Use React Router in front-end SPA mode only.
-- Use shadcn/ui + Radix primitives + Tailwind CSS as the UI foundation.
+- Use shadcn/ui + Base UI primitives + Tailwind CSS as the UI foundation.
 - Prefer shadcn/ui components wherever they exist. Build custom UI only when shadcn does not provide the needed component or when FeatBit-specific behavior cannot be achieved by composing shadcn components.
 - Support light/dark/system theme modes from the first scaffold using shadcn's native dark-mode pattern for Vite.
 - Use TanStack Query for server state, TanStack Table for tables, React Hook Form + Zod for forms, Recharts for charts, CodeMirror 6 for embedded structured editing, and Shiki for code highlighting.

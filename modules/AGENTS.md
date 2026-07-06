@@ -10,7 +10,7 @@
 ## Technology Decisions
 
 - Use Vite SPA + React Router in front-end SPA mode only.
-- Use TypeScript, shadcn/ui, Radix primitives, Tailwind CSS, and `lucide-react`.
+- Use TypeScript, shadcn/ui, Base UI primitives, Tailwind CSS, and `lucide-react`.
 - Use TanStack Query for server state and TanStack Table for tables.
 - Use React Hook Form + Zod for forms.
 - Use `react-i18next` for i18n.
