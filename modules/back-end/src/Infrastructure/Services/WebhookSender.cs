@@ -99,7 +99,7 @@ public class WebhookSender : IWebhookSender
 
             var blockedError = new
             {
-                message = $"Webhook target is not allowed: {invalidReason}"
+                message = "Webhook target is not allowed. The URL must be an absolute http/https URL that resolves to a public IP address."
             };
             delivery.SetError(blockedError);
             delivery.Ended();
