@@ -1,24 +1,24 @@
 {
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
-    "target": "es2023",
+    "target": "ES2023",
     "lib": ["ES2023"],
-    "module": "esnext",
+    "module": "ESNext",
     "types": ["node"],
     "skipLibCheck": true,
 
     /* Bundler mode */
     "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true,
-    "moduleDetection": "force",
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
     "noEmit": true,
-
-    /* Linting */
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "erasableSyntaxOnly": true,
-    "noFallthroughCasesInSwitch": true
+    "skipLibCheck": true
   },
-  "include": ["vite.config.ts"]
+  "include": [
+    "eslint.config.js",
+    "playwright.config.ts",
+    "playwright.containers.config.ts",
+    "vite.config.ts",
+    "vitest.config.ts"
+  ]
 }

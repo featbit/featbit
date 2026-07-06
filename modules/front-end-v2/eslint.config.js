@@ -18,5 +18,33 @@ export default defineConfig([
     languageOptions: {
       globals: globals.browser,
     },
+    rules: {
+      'react-refresh/only-export-components': [
+        'warn',
+        {
+          allowConstantExport: true,
+          allowExportNames: ['buttonVariants', 'useTheme'],
+        },
+      ],
+    },
+  },
+  {
+    files: ['public/assets/*.js'],
+    languageOptions: {
+      globals: {
+        window: 'readonly',
+      },
+    },
+  },
+  {
+    files: ['scripts/*.mjs'],
+    languageOptions: {
+      globals: {
+        console: 'readonly',
+        fetch: 'readonly',
+        process: 'readonly',
+        setTimeout: 'readonly',
+      },
+    },
   },
 ])
