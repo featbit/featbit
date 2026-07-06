@@ -87,7 +87,6 @@ export function OnboardingPage() {
         envId: "dev",
         envName: "Dev",
         envKey: "dev",
-        envType: "dev",
       })
 
       if (!localStorage.getItem("get-started")) {

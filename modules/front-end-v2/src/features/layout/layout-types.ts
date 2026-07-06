@@ -4,14 +4,11 @@ export type Lang = "en" | "zh"
 
 export type Icon = ComponentType<SVGProps<SVGSVGElement>>
 
-export type EnvironmentType = "prod" | "staging" | "dev"
-
 export type Environment = {
   id: string
   projectId?: string
   name: string
   key?: string
-  type?: EnvironmentType
 }
 
 export type Project = {
@@ -28,7 +25,6 @@ export type ProjectEnv = {
   envId: string
   envName: string
   envKey: string
-  envType: EnvironmentType
 }
 
 export type Organization = {

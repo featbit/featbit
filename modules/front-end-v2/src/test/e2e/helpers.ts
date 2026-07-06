@@ -142,7 +142,6 @@ export async function setCurrentContext(page: Page) {
         envId: "env-prod-cn",
         envKey: "prod-cn",
         envName: "Production CN",
-        envType: "prod",
       })
     )
   }, license)

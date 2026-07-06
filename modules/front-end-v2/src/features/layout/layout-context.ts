@@ -54,7 +54,6 @@ export function projectEnvFromSelection(
     envId: environment.id,
     envName: environment.name,
     envKey: environment.key ?? "",
-    envType: environment.type ?? inferEnvironmentType(environment),
   }
 }
 
@@ -99,31 +98,6 @@ function saveCurrentOrganization(organization: Organization) {
     contextKey("current-organization"),
     JSON.stringify(organization)
   )
-}
-
-export function inferEnvironmentType(
-  environment: Pick<Environment, "name" | "key">
-): "prod" | "staging" | "dev" {
-  const value = `${environment.name} ${environment.key ?? ""}`.toLowerCase()
-  if (value.includes("prod") || value.includes("生产")) {
-    return "prod"
-  }
-
-  if (value.includes("stag") || value.includes("qa") || value.includes("预发")) {
-    return "staging"
-  }
-
-  return "dev"
-}
-
-export function normalizeProjects(projects: Project[]) {
-  return projects.map((project) => ({
-    ...project,
-    environments: project.environments.map((environment) => ({
-      ...environment,
-      type: environment.type ?? inferEnvironmentType(environment),
-    })),
-  }))
 }
 
 export function chooseProjectEnv(projects: Project[]) {
@@ -173,10 +147,7 @@ export async function fetchOrganizations() {
 }
 
 export async function fetchProjects() {
-  const projects = await fetchApi<Project[]>("/api/v1/projects")
-  return normalizeProjects(
-    projects.sort((a, b) => a.name.localeCompare(b.name))
-  )
+  return fetchApi<Project[]>("/api/v1/projects")
 }
 
 export async function joinCurrentOrganizationIfSsoFirstLogin() {
