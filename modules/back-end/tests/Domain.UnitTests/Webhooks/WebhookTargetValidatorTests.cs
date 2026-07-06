@@ -29,6 +29,18 @@ public class WebhookTargetValidatorTests
     [InlineData("http://[2002:7f00:0001::]/")] // 6to4 127.0.0.1
     // IPv6 unique-local
     [InlineData("http://[fc00::1]/")]
+    // multicast
+    [InlineData("http://224.0.0.1/")]
+    [InlineData("http://239.255.255.250/")]
+    // reserved / future use (includes limited broadcast)
+    [InlineData("http://240.0.0.1/")]
+    [InlineData("http://255.255.255.255/")]
+    // benchmark testing RFC 2544
+    [InlineData("http://198.18.0.1/")]
+    [InlineData("http://198.19.255.255/")]
+    // TEST-NET-2 and TEST-NET-3 (RFC 5737)
+    [InlineData("http://198.51.100.1/")]
+    [InlineData("http://203.0.113.1/")]
     // disallowed schemes
     [InlineData("file:///etc/passwd")]
     [InlineData("gopher://127.0.0.1/")]

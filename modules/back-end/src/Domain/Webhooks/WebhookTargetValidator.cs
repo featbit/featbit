@@ -156,8 +156,18 @@ public static class WebhookTargetValidator
             if (b[0] == 172 && b[1] >= 16 && b[1] <= 31) return false;
             // 192.168.0.0/16
             if (b[0] == 192 && b[1] == 168) return false;
-            // 192.0.0.0/24 and 192.0.2.0/24 (IETF protocol assignments / TEST-NET)
+            // 192.0.0.0/24 and 192.0.2.0/24 (IETF protocol assignments / TEST-NET-1)
             if (b[0] == 192 && b[1] == 0 && (b[2] == 0 || b[2] == 2)) return false;
+            // 198.18.0.0/15 (network benchmark testing, RFC 2544)
+            if (b[0] == 198 && b[1] >= 18 && b[1] <= 19) return false;
+            // 198.51.100.0/24 (TEST-NET-2, RFC 5737)
+            if (b[0] == 198 && b[1] == 51 && b[2] == 100) return false;
+            // 203.0.113.0/24 (TEST-NET-3, RFC 5737)
+            if (b[0] == 203 && b[1] == 0 && b[2] == 113) return false;
+            // 224.0.0.0/4 (multicast)
+            if (b[0] >= 224 && b[0] <= 239) return false;
+            // 240.0.0.0/4 (reserved / future use, includes limited broadcast 255.255.255.255)
+            if (b[0] >= 240) return false;
 
             return true;
         }
