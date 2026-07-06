@@ -38,7 +38,7 @@ function FeatBitBrand({ lang, collapsed }: { lang: Lang; collapsed: boolean }) {
 
 function isActivePath(pathname: string, href: string, lang: Lang) {
   const localizedHref = localizedPath(lang, href)
-  return pathname === localizedHref || pathname.startsWith(`${localizedHref}/`)
+  return pathname === localizedHref
 }
 
 function SidebarNavLink({
@@ -103,6 +103,7 @@ function SidebarNavItem({
         variant="ghost"
         className={cn(
           "h-9 w-full justify-start gap-3 px-3 text-sm font-normal text-muted-foreground hover:text-foreground",
+          "hover:bg-transparent active:translate-y-0 active:bg-transparent aria-expanded:bg-transparent aria-expanded:text-muted-foreground",
           collapsed && "justify-center px-0"
         )}
         title={collapsed ? label : undefined}

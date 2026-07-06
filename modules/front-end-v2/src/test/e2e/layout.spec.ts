@@ -81,6 +81,24 @@ test.describe("layout", () => {
     })
   })
 
+  test("marks only the current sidebar page as active", async ({ page }) => {
+    await mockContextEndpoints(page)
+    await setAuthenticatedUser(page)
+    await setCurrentContext(page)
+
+    await page.goto("/en/app/feature-flags")
+
+    await expect(page.getByRole("link", { name: "Feature Flags" })).toHaveClass(
+      /(^|\s)bg-accent(\s|$)/
+    )
+    await expect(page.getByRole("link", { name: "Get Started" })).not.toHaveClass(
+      /(^|\s)bg-accent(\s|$)/
+    )
+    await expect(page.getByRole("button", { name: "IAM" })).not.toHaveClass(
+      /(^|\s)bg-muted(\s|$)/
+    )
+  })
+
   test("keeps focus in the project and environment search field while typing", async ({
     page,
   }) => {
