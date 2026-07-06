@@ -39,6 +39,7 @@ export function LicensePage() {
     "success"
   )
   const [statusEventId, setStatusEventId] = useState(0)
+  const [licenseUpdateEventId, setLicenseUpdateEventId] = useState(0)
   const isSaas = getRuntimeEnv().hostingMode === HOSTING_MODE_SAAS
   const canUpdateLicense = true
 
@@ -105,6 +106,7 @@ export function LicensePage() {
       const updatedWorkspace = await updateWorkspaceLicense(licenseValue.trim())
       setWorkspace(updatedWorkspace)
       setLicenseValue(updatedWorkspace.license ?? licenseValue.trim())
+      setLicenseUpdateEventId((current) => current + 1)
       showStatus(t("workspace.license.updateSucceeded"), "success")
     } catch {
       showStatus(t("workspace.license.invalidLicense"), "error")
@@ -133,6 +135,7 @@ export function LicensePage() {
               setLicenseValue={setLicenseValue}
               canUpdateLicense={canUpdateLicense}
               isUpdating={isUpdating}
+              licenseUpdateEventId={licenseUpdateEventId}
               onCopied={() => {
                 showStatus(t("workspace.license.copied"), "success")
               }}
