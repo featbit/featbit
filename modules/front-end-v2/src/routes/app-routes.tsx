@@ -7,7 +7,10 @@ import {
 } from "react-router-dom"
 import { useTranslation } from "react-i18next"
 import { AuthPage } from "@/features/auth/auth-page"
+import { AuthenticatedEntry } from "@/features/auth/authenticated-entry"
 import { getIdentityToken } from "@/features/auth/auth-api"
+import { AuthenticatedLayout } from "@/features/layout/authenticated-layout"
+import { LayoutPlaceholder } from "@/features/layout/layout-placeholder"
 import { getRuntimeEnv } from "@/lib/env/runtime-env"
 
 type SupportedLanguage = "en" | "zh"
@@ -69,6 +72,25 @@ function AuthRoute({ mode }: { mode: "login" | "sso" }) {
   return <AuthPage mode={mode} />
 }
 
+function SecureRoute() {
+  const { lang = getPreferredLanguage() } = useParams()
+  const location = useLocation()
+
+  if (!getIdentityToken()) {
+    localStorage.setItem(
+      "login-redirect-url",
+      `${location.pathname}${location.search}`
+    )
+    return <Navigate to={`/${lang}/login`} replace />
+  }
+
+  return (
+    <AuthenticatedEntry>
+      <AuthenticatedLayout />
+    </AuthenticatedEntry>
+  )
+}
+
 function ShellPage() {
   const { t } = useTranslation()
   const env = getRuntimeEnv()
@@ -101,6 +123,10 @@ export function AppRoutes() {
       <Route path="/login/sso" element={<LocalizedAuthRedirect mode="sso" />} />
       <Route path="/:lang/login" element={<AuthRoute mode="login" />} />
       <Route path="/:lang/login/sso" element={<AuthRoute mode="sso" />} />
+      <Route path="/:lang/app" element={<SecureRoute />}>
+        <Route index element={<LayoutPlaceholder />} />
+        <Route path="*" element={<LayoutPlaceholder />} />
+      </Route>
       <Route path="/:lang/*" element={<ShellPage />} />
       <Route path="*" element={<LanguageRedirect />} />
     </Routes>
