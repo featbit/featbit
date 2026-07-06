@@ -40,7 +40,7 @@ export function WorkspaceTabs({
     <Tabs
       value={activeTab}
       onValueChange={onTabChange}
-      className="overflow-x-auto border-b"
+      className="overflow-x-auto border-b [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
     >
       <TabsList
         variant="line"
