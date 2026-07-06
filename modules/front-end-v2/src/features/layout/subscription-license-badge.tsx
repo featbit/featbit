@@ -48,15 +48,17 @@ export function SubscriptionLicenseBadge({
       className={buttonVariants({
         variant: "outline",
         className:
-          "h-11 min-w-44 justify-start gap-3 bg-card px-3 text-left shadow-sm hover:bg-accent",
+          "h-11 min-w-52 justify-start gap-4 bg-card px-4 text-left shadow-sm hover:bg-accent",
       })}
     >
       <Award className="size-5 text-blue-600" />
       <span className="min-w-0 flex-1 leading-tight">
-        <span className="block text-xs font-medium uppercase text-muted-foreground">
+        <span className="block text-[0.625rem] font-medium uppercase text-muted-foreground">
           {label}
         </span>
-        <span className="block truncate text-sm font-semibold">{value}</span>
+        <span className="block truncate text-[0.8125rem] font-semibold">
+          {value}
+        </span>
       </span>
       <ChevronRight className="size-4 text-muted-foreground" />
     </Link>
