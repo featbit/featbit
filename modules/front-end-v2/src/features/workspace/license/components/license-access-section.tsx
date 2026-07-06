@@ -1,5 +1,5 @@
 import { Copy, LockKeyhole, Upload } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -93,7 +93,6 @@ function LicenseKeySection({
   isUpdating,
   onSubmit,
   currentLicense,
-  updateEventId,
 }: {
   value: string
   setValue: (value: string) => void
@@ -101,17 +100,10 @@ function LicenseKeySection({
   isUpdating: boolean
   onSubmit: () => void
   currentLicense?: string
-  updateEventId: number
 }) {
   const { t } = useTranslation()
   const [editing, setEditing] = useState(!currentLicense)
   const hasCurrentLicense = Boolean(currentLicense)
-
-  useEffect(() => {
-    if (updateEventId > 0) {
-      setEditing(false)
-    }
-  }, [updateEventId])
 
   function maskLicense(license: string) {
     if (license.length <= 18) {
@@ -219,13 +211,13 @@ export function LicenseAccessSection({
       <div className="grid gap-5 lg:grid-cols-2">
       <WorkspaceIdSection workspace={workspace} onCopied={onCopied} />
       <LicenseKeySection
+        key={licenseUpdateEventId}
         value={licenseValue}
         setValue={setLicenseValue}
         canUpdate={canUpdateLicense}
         isUpdating={isUpdating}
         onSubmit={onUpdateLicense}
         currentLicense={workspace.license}
-        updateEventId={licenseUpdateEventId}
       />
       </div>
     </section>
