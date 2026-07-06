@@ -166,6 +166,58 @@ i18n.use(initReactI18next).init({
             },
           },
         },
+        workspace: {
+          title: "Workspace",
+          operationSucceeded: "Operation succeeded",
+          requestFailed: "Request failed",
+          saving: "Saving",
+          tabs: {
+            aria: "Workspace sections",
+            general: "General",
+            license: "License",
+            usage: "Usage",
+            billing: "Billing",
+            globalUsers: "Global Users",
+          },
+          validation: {
+            required: "This field is required",
+            url: "Enter a valid URL",
+            keyUsed: "This key has been used",
+          },
+          general: {
+            accessConfiguration: "Access configuration",
+            identity: {
+              name: "Name",
+              key: "Key",
+              helper:
+                "These settings identify your workspace and are used across FeatBit.",
+              save: "Save changes",
+              permissionNote:
+                "You need workspace administrator permissions to update these settings.",
+            },
+            sso: {
+              title: "Single sign-on",
+              clientId: "Client ID",
+              clientSecret: "Client secret",
+              tokenEndpoint: "Token endpoint",
+              clientAuthenticationMethod: "Client authentication method",
+              authorizationEndpoint: "Authorization endpoint",
+              scope: "Scope",
+              userEmailClaim: "User email claim",
+              helper:
+                "SSO settings are used to authenticate users via your identity provider.",
+              save: "Save SSO settings",
+              showSecret: "Show client secret",
+              hideSecret: "Hide client secret",
+              restrictedBadge: "Restricted",
+              restrictedDescription:
+                "You do not have permission to view or edit SSO settings.",
+              unlicensedBadge: "License required",
+              unlicensedDescription:
+                "Single sign-on is a paid feature. Add a license that includes SSO to enable it for this workspace.",
+            },
+          },
+        },
         shell: {
           eyebrow: "FeatBit React migration",
           login: {
@@ -340,6 +392,54 @@ i18n.use(initReactI18next).init({
               light: "浅色",
               dark: "深色",
               system: "跟随系统",
+            },
+          },
+        },
+        workspace: {
+          title: "工作区",
+          operationSucceeded: "操作成功",
+          requestFailed: "请求失败",
+          saving: "保存中",
+          tabs: {
+            aria: "工作区页面",
+            general: "通用",
+            license: "许可证",
+            usage: "用量",
+            billing: "账单",
+            globalUsers: "全局用户",
+          },
+          validation: {
+            required: "此字段不能为空",
+            url: "请输入有效 URL",
+            keyUsed: "该 Key 已被使用",
+          },
+          general: {
+            accessConfiguration: "访问配置",
+            identity: {
+              name: "名称",
+              key: "Key",
+              helper: "这些设置用于标识工作区，并会在 FeatBit 中使用。",
+              save: "保存更改",
+              permissionNote: "需要工作区管理员权限才能更新这些设置。",
+            },
+            sso: {
+              title: "单点登录",
+              clientId: "Client ID",
+              clientSecret: "Client secret",
+              tokenEndpoint: "Token endpoint",
+              clientAuthenticationMethod: "Client authentication method",
+              authorizationEndpoint: "Authorization endpoint",
+              scope: "Scope",
+              userEmailClaim: "User email claim",
+              helper: "SSO 设置用于通过身份提供商认证用户。",
+              save: "保存 SSO 设置",
+              showSecret: "显示 client secret",
+              hideSecret: "隐藏 client secret",
+              restrictedBadge: "受限",
+              restrictedDescription: "你没有权限查看或编辑 SSO 设置。",
+              unlicensedBadge: "需要许可证",
+              unlicensedDescription:
+                "单点登录是付费功能。请添加包含 SSO 的许可证以启用该功能。",
             },
           },
         },

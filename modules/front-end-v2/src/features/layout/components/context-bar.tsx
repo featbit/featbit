@@ -2,6 +2,7 @@ import { Check, ChevronsUpDown, Search, Settings } from "lucide-react"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import {
   Popover,
   PopoverContent,
@@ -75,8 +76,8 @@ export function ContextBar({
           <div className="p-3">
             <label className="relative block text-muted-foreground">
               <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2" />
-              <input
-                className="h-9 w-full rounded-md border bg-background pl-9 pr-3 text-sm outline-none ring-ring placeholder:text-muted-foreground focus:ring-2"
+              <Input
+                className="pl-9"
                 value={search}
                 placeholder={t("layout.context.searchEnvironments")}
                 onChange={(event) => setSearch(event.target.value)}
