@@ -11,7 +11,8 @@ Migrate the application layout: login, auth guard, secure layout, side navigatio
 - Build a custom component only when shadcn does not provide the needed primitive or when FeatBit-specific behavior cannot be represented cleanly through shadcn composition.
 - Custom layout components such as `SidebarNav`, `ContextBar`, `AccountMenu`, and `SubscriptionLicenseBadge` should still use shadcn/Base UI primitives internally where practical and preserve shadcn tokens, variants, focus states, spacing, and radius conventions.
 - When migrating layout behavior from `front-end-react`, treat the old implementation as a behavioral reference, not a component or styling source. Recreate the layout in `front-end-v2` with the current shadcn/ui + Base UI setup and default shadcn styles wherever possible.
-- Do not change generated shadcn files under `src/components/ui/*` to satisfy layout-specific needs. Keep those files as the original component source, and apply product-specific composition, spacing, or behavior in layout-level components or thin wrappers.
+- If a needed shadcn component is missing from `src/components/ui/*`, add it through the shadcn CLI or official shadcn source for the current `front-end-v2` setup.
+- Do not change existing or newly generated shadcn files under `src/components/ui/*` to satisfy layout-specific needs. Keep those files as the original component source, and apply product-specific composition, spacing, or behavior in layout-level components or thin wrappers.
 - Split layout implementation into focused modules instead of creating large monolithic files. Expected boundaries include the authenticated shell, sidebar navigation, navigation model/data, top context bar, environment switcher, subscription/license badge, account menu, layout route guard, and small shared helpers.
 
 ## Step Scope

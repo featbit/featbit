@@ -23,6 +23,7 @@
 - Prefer shadcn/ui and Tailwind default tokens for buttons, text colors, spacing, radius, focus rings, and common controls.
 - When migrating any module into `front-end-v2`, prefer the native shadcn/Base UI components in `front-end-v2/src/components/ui/*`.
 - Do not modify the original `components/ui/*` shadcn component files for migration-specific needs; compose or wrap them from feature/layout files.
+- If a needed shadcn component is missing from `front-end-v2/src/components/ui/*`, it may be added using the shadcn CLI or official shadcn source for the current `front-end-v2` setup. After a shadcn component file is generated or downloaded into `components/ui/*`, do not hand-edit that generated component file.
 - Prefer shadcn default component styles and tokens. Add only small amounts of Tailwind in feature or layout files when necessary.
 - Split migrated code by responsibility so individual files do not become unusually large.
 - Copy only necessary assets such as FeatBit logo, brand SVGs, sample JSON, `env.template.js`, required Monaco assets, and irreplaceable business-specific icons.
