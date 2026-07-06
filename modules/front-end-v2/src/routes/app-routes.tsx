@@ -11,6 +11,8 @@ import { AuthenticatedEntry } from "@/features/auth/authenticated-entry"
 import { getIdentityToken } from "@/features/auth/auth-api"
 import { AuthenticatedLayout } from "@/features/layout/authenticated-layout"
 import { LayoutPlaceholder } from "@/features/layout/layout-placeholder"
+import { OnboardingPage } from "@/features/onboarding/onboarding-page"
+import { SelectWorkspacePage } from "@/features/workspace-selection/select-workspace-page"
 import { getRuntimeEnv } from "@/lib/env/runtime-env"
 
 type SupportedLanguage = "en" | "zh"
@@ -91,6 +93,36 @@ function SecureRoute() {
   )
 }
 
+function SelectWorkspaceRoute() {
+  const { lang = getPreferredLanguage() } = useParams()
+  const location = useLocation()
+
+  if (!getIdentityToken()) {
+    localStorage.setItem(
+      "login-redirect-url",
+      `${location.pathname}${location.search}`
+    )
+    return <Navigate to={`/${lang}/login`} replace />
+  }
+
+  return <SelectWorkspacePage />
+}
+
+function OnboardingRoute() {
+  const { lang = getPreferredLanguage() } = useParams()
+  const location = useLocation()
+
+  if (!getIdentityToken()) {
+    localStorage.setItem(
+      "login-redirect-url",
+      `${location.pathname}${location.search}`
+    )
+    return <Navigate to={`/${lang}/login`} replace />
+  }
+
+  return <OnboardingPage />
+}
+
 function ShellPage() {
   const { t } = useTranslation()
   const env = getRuntimeEnv()
@@ -123,6 +155,11 @@ export function AppRoutes() {
       <Route path="/login/sso" element={<LocalizedAuthRedirect mode="sso" />} />
       <Route path="/:lang/login" element={<AuthRoute mode="login" />} />
       <Route path="/:lang/login/sso" element={<AuthRoute mode="sso" />} />
+      <Route
+        path="/:lang/select-workspace"
+        element={<SelectWorkspaceRoute />}
+      />
+      <Route path="/:lang/onboarding" element={<OnboardingRoute />} />
       <Route path="/:lang/app" element={<SecureRoute />}>
         <Route index element={<LayoutPlaceholder />} />
         <Route path="*" element={<LayoutPlaceholder />} />

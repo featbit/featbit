@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react"
+import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { App } from "@/app/app"
 
@@ -73,6 +73,98 @@ describe("App shell", () => {
           JSON.stringify({
             success: true,
             data: { token: "refreshed-token" },
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        )
+      }
+
+      return new Response(JSON.stringify({ success: true, data: [] }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      })
+    })
+  }
+
+  function mockWorkspaceSelectionApi() {
+    return vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+      const url = String(input)
+
+      if (url.endsWith("/api/v1/user/workspaces")) {
+        return new Response(
+          JSON.stringify({
+            success: true,
+            data: [
+              { id: "ws-one", key: "one", name: "Workspace One" },
+              { id: "ws-two", key: "two", name: "Workspace Two" },
+            ],
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        )
+      }
+
+      return new Response(JSON.stringify({ success: true, data: [] }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      })
+    })
+  }
+
+  function mockOnboardingApi() {
+    let onboardingCompleted = false
+
+    return vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+      const url = String(input)
+
+      if (url.endsWith("/api/v1/user/workspaces")) {
+        return new Response(
+          JSON.stringify({
+            success: true,
+            data: [{ id: "ws-real", key: "real", name: "Real Workspace" }],
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        )
+      }
+
+      if (url.endsWith("/api/v1/organizations/onboarding")) {
+        onboardingCompleted = true
+        return new Response(JSON.stringify({ success: true, data: true }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        })
+      }
+
+      if (url.includes("/api/v1/organizations")) {
+        return new Response(
+          JSON.stringify({
+            success: true,
+            data: [
+              {
+                id: "org-new",
+                key: "new-org",
+                name: "New Org",
+                initialized: onboardingCompleted,
+              },
+            ],
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        )
+      }
+
+      if (url.endsWith("/api/v1/projects")) {
+        return new Response(
+          JSON.stringify({
+            success: true,
+            data: [
+              {
+                id: "project-created",
+                key: "example-project",
+                name: "Example project",
+                environments: [
+                  { id: "env-dev", key: "dev", name: "Dev" },
+                  { id: "env-prod", key: "prod", name: "Prod" },
+                ],
+              },
+            ],
           }),
           { status: 200, headers: { "Content-Type": "application/json" } }
         )
@@ -196,5 +288,87 @@ describe("App shell", () => {
         }),
       })
     )
+  })
+
+  it("redirects authenticated users without selected workspace to workspace selection", async () => {
+    mockWorkspaceSelectionApi()
+    window.history.pushState({}, "", "/en/app")
+    signIn()
+
+    render(<App />)
+
+    expect(await screen.findByText("Select a workspace")).toBeInTheDocument()
+    expect(await screen.findByText("Workspace One")).toBeInTheDocument()
+    expect(await screen.findByText("Workspace Two")).toBeInTheDocument()
+  })
+
+  it("redirects uninitialized organizations to onboarding", async () => {
+    mockOnboardingApi()
+    window.history.pushState({}, "", "/en/app")
+    signIn()
+
+    render(<App />)
+
+    expect(
+      await screen.findByText("Set up your first organization")
+    ).toBeInTheDocument()
+  })
+
+  it("completes onboarding and persists the initialized organization", async () => {
+    const fetchMock = mockOnboardingApi()
+    window.history.pushState({}, "", "/en/onboarding")
+    signIn()
+    localStorage.setItem(
+      "current-workspace_user-1",
+      JSON.stringify({ id: "ws-real", key: "real", name: "Real Workspace" })
+    )
+    localStorage.setItem(
+      "current-organization_user-1",
+      JSON.stringify({
+        id: "org-new",
+        key: "new-org",
+        name: "New Org",
+        initialized: false,
+      })
+    )
+
+    render(<App />)
+
+    fireEvent.click(await screen.findByText("Complete setup"))
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.stringContaining("/api/v1/organizations/onboarding"),
+        expect.objectContaining({
+          method: "POST",
+          body: JSON.stringify({
+            organizationName: "New Org",
+            organizationKey: "new-org",
+            projectName: "Example project",
+            projectKey: "example-project",
+            environments: ["Dev", "Prod"],
+          }),
+        })
+      )
+    })
+    expect(localStorage.getItem("current-organization_user-1")).toContain(
+      '"initialized":true'
+    )
+    expect(localStorage.getItem("current-project_user-1")).toContain(
+      '"projectName":"Example project"'
+    )
+    expect(localStorage.getItem("current-project_user-1")).toContain(
+      '"envName":"Dev"'
+    )
+    expect(
+      await screen.findByText(
+        "Authenticated layout ready. Page content will migrate in later steps."
+      )
+    ).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByText("New Org")).toBeInTheDocument()
+      expect(screen.getByText("Example project")).toBeInTheDocument()
+      expect(screen.getByText("Dev")).toBeInTheDocument()
+    })
   })
 })

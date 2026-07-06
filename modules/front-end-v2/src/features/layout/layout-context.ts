@@ -123,6 +123,10 @@ export function saveCurrentProjectEnv(projectEnv: ProjectEnv) {
   localStorage.setItem(contextKey("current-project"), JSON.stringify(projectEnv))
 }
 
+export function clearCurrentProjectEnv() {
+  localStorage.removeItem(contextKey("current-project"))
+}
+
 function saveCurrentWorkspace(workspace: Workspace) {
   localStorage.setItem(contextKey("current-workspace"), JSON.stringify(workspace))
 }
@@ -182,10 +186,14 @@ export function chooseOrganization(organizations: Organization[]) {
 export function chooseProjectEnv(projects: Project[]) {
   const currentProjectEnv = getCurrentProjectEnv()
   const currentProject = projects.find(
-    (project) => project.id === currentProjectEnv.projectId
+    (project) =>
+      project.id === currentProjectEnv.projectId ||
+      project.key === currentProjectEnv.projectKey
   )
   const currentEnvironment = currentProject?.environments.find(
-    (environment) => environment.id === currentProjectEnv.envId
+    (environment) =>
+      environment.id === currentProjectEnv.envId ||
+      environment.key === currentProjectEnv.envKey
   )
 
   if (currentProject && currentEnvironment) {

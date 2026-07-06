@@ -37,6 +37,68 @@ i18n.use(initReactI18next).init({
             workspaceKeyRequired: "Workspace key is required",
           },
         },
+        selectWorkspace: {
+          workspace: {
+            title: "Select a workspace",
+            subtitle: "Choose a workspace to continue as {{email}}.",
+            search: "Search workspaces...",
+            empty: "No workspaces found.",
+          },
+          organization: {
+            title: "Select an organization",
+            subtitle: "Choose an organization to continue as {{email}}.",
+            search: "Search organizations...",
+            empty: "No organizations found.",
+            noneTitle: "No organizations available",
+            noneDescription:
+              "There are no organizations available in this workspace.",
+          },
+          backToWorkspaces: "Back to workspaces",
+          signInWithAnotherEmail: "Sign in with another email",
+          errors: {
+            loadWorkspaces: "Unable to load workspaces. Please try again.",
+            loadOrganizations:
+              "Unable to load organizations. Please try again.",
+            joinOrganization:
+              "Unable to join this organization. Please try again.",
+          },
+        },
+        onboarding: {
+          title: "Set up your first organization",
+          subtitle:
+            "Create the basic structure FeatBit needs before you start releasing features.",
+          complete: "Complete setup",
+          organization: {
+            section: "Organization",
+            name: "Organization name",
+            placeholder: "Acme Inc.",
+            helper:
+              "This is the top-level space for teams, projects, and access control.",
+          },
+          project: {
+            section: "Project",
+            name: "Project name",
+            key: "Project key",
+            namePlaceholder: "Example project",
+            keyPlaceholder: "example-project",
+            helper:
+              "Project keys are generated from the name and used in SDK configuration.",
+          },
+          environments: {
+            section: "Environments",
+            helper:
+              "FeatBit will create Dev and Prod environments with SDK secrets for your first project.",
+          },
+          preview: {
+            title: "Setup preview",
+            organizationFallback: "Organization",
+            projectFallback: "Example project",
+            sdkSecret: "SDK secret",
+          },
+          errors: {
+            submit: "Unable to complete onboarding. Please try again.",
+          },
+        },
         layout: {
           placeholder: "Authenticated layout ready. Page content will migrate in later steps.",
           sidebar: {
@@ -157,6 +219,61 @@ i18n.use(initReactI18next).init({
             incorrectEmailOrPassword: "邮箱或密码不正确",
             loginError: "发生错误，请联系支持团队。",
             workspaceKeyRequired: "请输入工作区 key",
+          },
+        },
+        selectWorkspace: {
+          workspace: {
+            title: "选择工作区",
+            subtitle: "请选择一个工作区，以 {{email}} 的身份继续。",
+            search: "搜索工作区...",
+            empty: "未找到工作区。",
+          },
+          organization: {
+            title: "选择组织",
+            subtitle: "请选择一个组织，以 {{email}} 的身份继续。",
+            search: "搜索组织...",
+            empty: "未找到组织。",
+            noneTitle: "没有可用组织",
+            noneDescription: "当前工作区下没有可用组织。",
+          },
+          backToWorkspaces: "返回工作区",
+          signInWithAnotherEmail: "使用其他邮箱登录",
+          errors: {
+            loadWorkspaces: "无法加载工作区，请重试。",
+            loadOrganizations: "无法加载组织，请重试。",
+            joinOrganization: "无法加入该组织，请重试。",
+          },
+        },
+        onboarding: {
+          title: "设置你的第一个组织",
+          subtitle: "在开始发布功能前，先创建 FeatBit 所需的基础结构。",
+          complete: "完成设置",
+          organization: {
+            section: "组织",
+            name: "组织名称",
+            placeholder: "Acme Inc.",
+            helper: "组织是团队、项目和访问控制的顶层空间。",
+          },
+          project: {
+            section: "项目",
+            name: "项目名称",
+            key: "项目 key",
+            namePlaceholder: "Example project",
+            keyPlaceholder: "example-project",
+            helper: "项目 key 会根据名称生成，并用于 SDK 配置。",
+          },
+          environments: {
+            section: "环境",
+            helper: "FeatBit 会为你的第一个项目创建 Dev 和 Prod 环境及 SDK 密钥。",
+          },
+          preview: {
+            title: "设置预览",
+            organizationFallback: "组织",
+            projectFallback: "Example project",
+            sdkSecret: "SDK 密钥",
+          },
+          errors: {
+            submit: "无法完成初始化，请重试。",
           },
         },
         layout: {
