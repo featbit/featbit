@@ -48,7 +48,7 @@ export function SubscriptionLicenseBadge({
       className={buttonVariants({
         variant: "outline",
         className:
-          "h-11 min-w-52 justify-start gap-4 bg-card px-4 text-left shadow-sm hover:bg-accent",
+          "h-10 min-w-52 justify-start gap-4 bg-card px-4 text-left shadow-sm hover:bg-accent",
       })}
     >
       <Award className="size-5 text-blue-600" />
