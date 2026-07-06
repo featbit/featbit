@@ -91,6 +91,21 @@ public class WebhookSender : IWebhookSender
         var delivery = new WebhookDelivery(request.Id, request.Events);
         delivery.Started();
 
+        if (!WebhookTargetValidator.IsValidTarget(request.Url, out var invalidReason))
+        {
+            _logger.LogWarning(
+                "Blocked webhook '{Name}' to a non-public target: {Reason}", request.Name, invalidReason
+            );
+
+            var blockedError = new
+            {
+                message = $"Webhook target is not allowed: {invalidReason}"
+            };
+            delivery.SetError(blockedError);
+            delivery.Ended();
+            return delivery;
+        }
+
         try
         {
             var httpRequest = CreateWebhookHttpRequest();
