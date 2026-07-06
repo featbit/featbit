@@ -70,7 +70,7 @@ test.describe("workspace general", () => {
     await page.goto("/en/app/workspace")
 
     await expect(page.getByRole("heading", { name: "Workspace" })).toBeVisible()
-    await expect(page.getByRole("link", { name: "General" })).toBeVisible()
+    await expect(page.getByRole("tab", { name: "General" })).toBeVisible()
     await expect(page.getByLabel("Name")).toHaveValue("Acme Workspace")
     await expect(page.getByLabel("Key")).toHaveValue("acme-workspace")
     await expect(page.getByLabel("Client ID")).toHaveValue("featbit-client")

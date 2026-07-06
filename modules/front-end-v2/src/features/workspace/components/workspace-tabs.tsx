@@ -1,8 +1,8 @@
-import { Link } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { useTranslation } from "react-i18next"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { localizedPath } from "@/features/layout/layout-context"
 import { getRuntimeEnv } from "@/lib/env/runtime-env"
-import { cn } from "@/lib/utils"
 
 const workspaceTabs = [
   { key: "general", href: "/app/workspace", labelKey: "workspace.tabs.general" },
@@ -24,30 +24,39 @@ export function WorkspaceTabs({
   activeTab: string
 }) {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const tabs = workspaceTabs.filter(
     (tab) => tab.key !== "billing" || getRuntimeEnv().hostingMode === "saas"
   )
 
+  function onTabChange(value: string) {
+    const tab = tabs.find((item) => item.key === value)
+    if (tab) {
+      navigate(localizedPath(lang, tab.href))
+    }
+  }
+
   return (
-    <nav
+    <Tabs
+      value={activeTab}
+      onValueChange={onTabChange}
       className="overflow-x-auto border-b"
-      aria-label={t("workspace.tabs.aria")}
     >
-      <div className="flex min-w-max gap-8">
+      <TabsList
+        variant="line"
+        className="flex min-w-max gap-8"
+        aria-label={t("workspace.tabs.aria")}
+      >
         {tabs.map((tab) => (
-          <Link
+          <TabsTrigger
             key={tab.key}
-            to={localizedPath(lang, tab.href)}
-            className={cn(
-              "relative py-2.5 text-sm font-medium text-muted-foreground transition-colors after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:rounded-full after:bg-transparent after:content-[''] hover:text-foreground",
-              activeTab === tab.key &&
-                "text-blue-600 after:bg-blue-600 dark:text-blue-400 dark:after:bg-blue-500"
-            )}
+            value={tab.key}
+            className="px-0 py-2.5"
           >
             {t(tab.labelKey)}
-          </Link>
+          </TabsTrigger>
         ))}
-      </div>
-    </nav>
+      </TabsList>
+    </Tabs>
   )
 }
