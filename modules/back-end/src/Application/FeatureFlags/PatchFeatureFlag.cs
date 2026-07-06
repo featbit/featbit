@@ -21,7 +21,7 @@ public class PatchFeatureFlag : IRequest<PatchResult>
 }
 
 public class PatchFeatureFlagHandler(
-    IFeatureFlagService service,
+    IFeatureFlagService flagService,
     IResourceService resourceService,
     ICurrentUser currentUser,
     IPublisher publisher)
@@ -29,7 +29,7 @@ public class PatchFeatureFlagHandler(
 {
     public async Task<PatchResult> Handle(PatchFeatureFlag request, CancellationToken cancellationToken)
     {
-        var flag = await service.GetAsync(request.EnvId, request.Key);
+        var flag = await flagService.GetAsync(request.EnvId, request.Key);
         var dataChange = new DataChange(flag);
 
         var error = string.Empty;
@@ -45,7 +45,7 @@ public class PatchFeatureFlagHandler(
 
         await CheckPermissionsAsync();
 
-        await service.UpdateAsync(flag);
+        await flagService.UpdateAsync(flag);
 
         // publish on feature flag change notification
         var notification = new OnFeatureFlagChanged(flag, Operations.Update, dataChange, currentUser.Id);
