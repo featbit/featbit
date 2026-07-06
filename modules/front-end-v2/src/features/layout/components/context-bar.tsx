@@ -92,7 +92,7 @@ export function ContextBar({
             {groupedProjects.map((project, index) => (
               <div
                 key={project.id}
-                className={index === 0 ? "pb-2" : "border-t pb-2 pt-3"}
+                className={index === 0 ? "pb-2" : "pb-2 pt-2"}
               >
                 <p className="pb-2 text-xs font-medium leading-4 text-muted-foreground">
                   {project.name}
