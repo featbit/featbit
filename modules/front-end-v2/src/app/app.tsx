@@ -2,16 +2,19 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { BrowserRouter } from "react-router-dom"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
+import { getRuntimeEnv } from "@/lib/env/runtime-env"
 import { AppRoutes } from "@/routes/app-routes"
 import "@/lib/i18n/i18n"
 
 const queryClient = new QueryClient()
 
 export function App() {
+  const { baseHref } = getRuntimeEnv()
+
   return (
     <ThemeProvider defaultTheme="system" storageKey="featbit:theme">
       <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
+        <BrowserRouter basename={baseHref}>
           <AppRoutes />
         </BrowserRouter>
         <Toaster position="top-right" />

@@ -1,0 +1,11 @@
+node_modules
+dist
+dist-ssr
+test-results
+playwright-report
+coverage
+*.log
+*.local
+.git
+.idea
+.vscode
