@@ -17,6 +17,7 @@
         <PackageReference Include="AspNetCore.HealthChecks.MongoDb" Version="9.0.0" />
         <PackageReference Include="AspNetCore.HealthChecks.Redis" Version="9.0.0" />
         <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="10.0.8" />
+        <PackageReference Include="Microsoft.Security.AntiSSRF" Version="1.0.0" />
         <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.18.0" />
         <PackageReference Include="StackExchange.Redis" Version="2.13.1" />
         <PackageReference Include="Dapper" Version="2.1.79" />
