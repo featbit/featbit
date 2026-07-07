@@ -13,7 +13,7 @@ type ApiEnvelope<T> = {
 const IDENTITY_TOKEN_STORAGE_KEY = "token"
 
 function apiOrigin() {
-  return getRuntimeEnv().apiUrl || "http://localhost:5000"
+  return getRuntimeEnv().apiUrl
 }
 
 function unwrapApiResponse<T>(body: T | ApiEnvelope<T>): T {

@@ -80,7 +80,7 @@ function saveRememberedEmail(email: string, rememberMe: boolean) {
 }
 
 function apiOrigin() {
-  return getRuntimeEnv().apiUrl || "http://localhost:5000"
+  return getRuntimeEnv().apiUrl
 }
 
 function apiUrl(path: string) {

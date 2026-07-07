@@ -23,13 +23,10 @@ function runtimeEnvPlugin() {
           }
 
           response.setHeader("Content-Type", "application/javascript")
-          response.end(`window.env = window.env || {
+          response.end(`window.env = {
   API_URL: ${JSON.stringify(apiUrl)},
-  DEMO_URL: "",
-  EVALUATION_URL: "",
   DISPLAY_API_URL: ${JSON.stringify(apiUrl)},
-  DISPLAY_EVALUATION_URL: "",
-  HOSTING_MODE: "test",
+  HOSTING_MODE: "self-hosted",
   VERSION: "e2e"
 };
 `)

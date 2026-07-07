@@ -17,6 +17,7 @@ function jsonResponse(body: unknown, init?: ResponseInit) {
 
 describe("workspace api", () => {
   beforeEach(() => {
+    window.env = { API_URL: "http://localhost:5000" }
     localStorage.clear()
     sessionStorage.clear()
     vi.restoreAllMocks()

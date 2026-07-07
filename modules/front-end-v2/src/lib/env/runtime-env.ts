@@ -23,10 +23,8 @@ export type RuntimeEnv = {
   version: string
 }
 
-function readValue(env: RawRuntimeEnv, key: RuntimeEnvKey, fallback = "") {
-  return (
-    env[key] ?? env[key.toLowerCase() as Lowercase<RuntimeEnvKey>] ?? fallback
-  )
+function readValue(env: RawRuntimeEnv, key: RuntimeEnvKey) {
+  return env[key] ?? env[key.toLowerCase() as Lowercase<RuntimeEnvKey>] ?? ""
 }
 
 export function getRuntimeEnv(): RuntimeEnv {
@@ -40,7 +38,7 @@ export function getRuntimeEnv(): RuntimeEnv {
     displayApiUrl: readValue(env, "DISPLAY_API_URL"),
     displayEvaluationUrl: readValue(env, "DISPLAY_EVALUATION_URL"),
     hostingMode: readValue(env, "HOSTING_MODE"),
-    version: readValue(env, "VERSION", "dev"),
+    version: readValue(env, "VERSION"),
   }
 }
 
