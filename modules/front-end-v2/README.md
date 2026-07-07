@@ -1,51 +1,81 @@
-# React + TypeScript + Vite + shadcn/ui
+<h1 align="center">
+FeatBit UI
+</h1>
 
-This is a template for a new Vite project with React, TypeScript, and shadcn/ui.
+<div align="center">
 
-## Docker
+<!--
+Make New Badge Pattern badges inline
+See https://github.com/all-?/all-contributors/issues/361#issuecomment-637166066
+-->
 
-Build the production image:
+[![stars](https://img.shields.io/github/stars/featbit/featbit.svg?style=flat&logo=github&colorB=red&label=stars)](https://github.com/featbit/featbit)
+[![Node](https://img.shields.io/badge/node->=16.0-success?logo=node.js&logoColor=white)](https://www.typescriptlang.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-4.7-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Angular](https://img.shields.io/badge/Angular-14.0-DD0031?logo=angular&logoColor=white)](https://angular.io/)
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/featbit/featbit/FeatBit%20UI%20change%20validations)](https://github.com/featbit/featbit/actions/workflows/ui-change-validations.yml?branch=main)
 
-```bash
-docker build -t featbit/front-end-v2 --build-arg VERSION=dev .
+</div>
+
+FeatBit includes a customer UI/Portal. You can use it as the management portal.
+
+The FeatBit UI provides features for managing and updating feature flags, users, rollback, configuration peer reviews, permission management, organization management, audit logs, and many other features.
+
+# Getting Started
+
+Usually, you should run UI along with all other services by running in the root of the repository :
+```
+docker compose -f ./docker-compse.yml up -d
+```
+The UI will be available at http://localhost:8081
+
+## Run locally with development mode
+
+If you already have the API server, Evaluation server and Data analytics server running somewhere, and you want to launch UI on a different machine or want to do some development work on UI,
+you can run the UI locally. Open the file [env.js](public/assets/env.js), and fill the variables like this:
+```js
+window.env = window.env || {
+  API_URL: "http://localhost:5000",
+  DEMO_URL: "https://featbit-samples.vercel.app",
+  EVALUATION_URL: "http://localhost:5100",
+  BASE_HREF: "",
+  DISPLAY_API_URL: "",
+  DISPLAY_EVALUATION_URL: "",
+}
+```
+Assuming you are running other service on the same machine:
+- **API_URL**: the url of the API server
+- **DEMO_URL**: the url of the dino-game demo, it should be running somewhere
+- **EVALUATION_URL**: the url of the evaluation server
+
+Then run
+```
+npm run dev
 ```
 
-Run it with Nginx:
+The UI will be available at http://localhost:4200
 
-```bash
-docker run --rm -p 8085:80 `
-  -e API_URL=http://localhost:5000 `
-  -e EVALUATION_URL=http://localhost:5100 `
-  -e HOSTING_MODE=saas `
-  featbit-front-end-v2:test
+## Install with Docker
+
+The following variables could be overridden by environment variables when running the container:
+- **API_URL**: **Mandatory**, the url of the API Server, default value is http://localhost:5000, it overrides **url**
+- **DEMO_URL**: **Optional**, set the value if you deploy the [dino-game demo](https://github.com/featbit/featbit-samples/tree/main/samples/dino-game/interactive-demo-vue) on your own server, otherwise it would use our demo deployed on https://featbit-samples.vercel.app. The link doesn't work if you click directly on it, it needs extra parameters. **demoUrl**
+- **EVALUATION_URL**: **Optional**, the url of the evaluation server, this is used by the demo, ignore it if you don't want to run the demo, the default value is http://localhost:5100. It overrides **evaluationUrl**
+- **DISPLAY_API_URL**: **Optional**, the display url of the API server. This is an optional variable used when you want to override the API URL displayed in the 'Getting Started' UI.
+- **DISPLAY_EVALUATION_URL**: **Optional**, the display url of the Evaluation server. This is an optional variable used when you want to override the Event and Streaming URL displayed in the 'Getting Started' UI.
+- **BASE_HREF**: **Optional**, set the value if you want to deploy FeatBit UI to a path, for example https://www.example.com/abc/def/, in this case, the value should be `/abc/def/`.
+
+Bind the port 8081 or any other available port to 80.
+
+### Build docker image and run container from the source code
+```
+docker build -t featbit/ui:local .
+docker run -d -p 8081:80 -e API_URL="http://localhost:5000" -e DEMO_URL="https://featbit-samples.vercel.app" -e EVALUATION_URL="http://localhost:5100" --name featbit-ui featbit/ui:local
 ```
 
-The container serves the Vite build from `/usr/share/nginx/featbit`, exposes
-`/health`, supports `/en/*` and `/zh/*` SPA routes, and generates
-`/assets/env.js` from runtime environment variables on startup. Supported
-runtime keys are `API_URL`, `DEMO_URL`, `EVALUATION_URL`, `BASE_HREF`,
-`DISPLAY_API_URL`, `DISPLAY_EVALUATION_URL`, `HOSTING_MODE`, and `VERSION`.
-
-For sub-path hosting, set `BASE_HREF` without a trailing slash:
-
-```bash
-docker run --rm -p 8080:80 -e BASE_HREF=/featbit featbit/front-end-v2
+### Run docker container from our prebuilt docker hub image
+```
+docker run -d -p 8081:80 -e API_URL="http://localhost:5000" -e DEMO_URL="https://featbit-samples.vercel.app" -e EVALUATION_URL="http://localhost:5100" --name featbit-ui featbit/featbit-ui:latest
 ```
 
-## Adding components
-
-To add components to your app, run the following command:
-
-```bash
-npx shadcn@latest add button
-```
-
-This will place the ui components in the `src/components` directory.
-
-## Using components
-
-To use the components in your app, import them as follows:
-
-```tsx
-import { Button } from "@/components/ui/button"
-```
+Then go to http://localhost:8081
