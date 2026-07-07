@@ -7,5 +7,6 @@ export const environment = {
   evaluationUrl: window['env']['evaluationUrl'] || 'http://localhost:5100',
   displayApiUrl: window['env']['displayApiUrl'],
   displayEvaluationUrl: window['env']['displayEvaluationUrl'],
-  hostingMode: window['env']['hostingMode'] || HOSTING_MODE.SELF_HOSTED
+  hostingMode: window['env']['hostingMode'] || HOSTING_MODE.SELF_HOSTED,
+  version: window['env']['version'] || 'dev'
 };

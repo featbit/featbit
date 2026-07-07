@@ -3,6 +3,7 @@ import { IMenuItem } from './menu';
 import { getProfile } from "@utils/index";
 import { IProfile } from "@shared/types";
 import { MessageQueueService } from "@services/message-queue.service";
+import { environment } from 'src/environments/environment';
 
 @Component({
     selector: 'app-menu',
@@ -18,15 +19,21 @@ export class MenuComponent implements OnInit {
   @Input() menuExtended: boolean = true;
 
   profile: IProfile;
-  constructor(
-    private messageQueueService: MessageQueueService
-  ) {
+  userInitial: string = 'A';
+  appVersion: string = environment.version;
+
+  setProfile() {
     this.profile = getProfile();
+    this.userInitial = ((this.profile?.name || this.profile?.email) ?? '?').charAt(0).toUpperCase();
+  }
+
+  constructor(private messageQueueService: MessageQueueService) {
+    this.setProfile();
   }
 
   ngOnInit(): void {
     this.messageQueueService.subscribe(this.messageQueueService.topics.USER_PROFILE_CHANGED, () => {
-      this.profile = getProfile();
+      this.setProfile();
     });
   }
   toggleMenuMode() {

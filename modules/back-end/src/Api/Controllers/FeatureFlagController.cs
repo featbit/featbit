@@ -268,7 +268,8 @@ public class FeatureFlagController : ApiControllerBase
         {
             EnvId = envId,
             Key = key,
-            Patch = patch
+            Patch = patch,
+            Permissions =  await GetRequestPermissionsAsync()
         };
 
         var result = await Mediator.Send(request);

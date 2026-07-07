@@ -1,14 +1,31 @@
 .locale-switcher {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
+  display: inline-flex;
   align-items: center;
+  background: #f0f0f0;
+  border-radius: 8px;
+  padding: 2px;
+  gap: 2px;
 
   .locale {
     cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    color: #8c8c8c;
+    padding: 4px 10px;
+    border-radius: 6px;
+    line-height: 1.4;
+    transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+    user-select: none;
+
+    &:hover:not(.active) {
+      color: #595959;
+    }
 
     &.active {
-      font-weight: 700;
+      background: #fff;
+      color: #1677ff;
+      font-weight: 600;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.10);
     }
   }
 }

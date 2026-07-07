@@ -61,6 +61,14 @@ public static class FlagInstructionKind
     public const string UpdateRuleVariationOrRollouts = nameof(UpdateRuleVariationOrRollouts);
 
     public const string Noop = nameof(Noop);
+    
+    public static readonly string[] UpdateVariationKinds =
+    [
+        UpdateVariationType,
+        AddVariation,
+        RemoveVariation,
+        UpdateVariation
+    ];
 
     public static readonly string[] UpdateDefaultRuleKinds =
     [

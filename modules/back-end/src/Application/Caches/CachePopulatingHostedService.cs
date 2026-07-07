@@ -23,11 +23,19 @@ public class CachePopulatingHostedService : IHostedService
         {
             using var scope = _serviceProvider.CreateScope();
             var populatingService = scope.ServiceProvider.GetRequiredService<ICachePopulatingService>();
-            await populatingService.PopulateAsync();
+            await populatingService.PopulateAsync(cancellationToken);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            // The host is shutting down
+            throw;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Exception occurred when populating cache.");
+            // Re-throw so the host fails to start and let the orchestrator (Kubernetes,
+            // systemd, Docker, etc.) drive recovery via its restart policy.
+            _logger.LogCritical(ex, "Exception occurred when populating cache. Host will not start.");
+            throw;
         }
     }
 

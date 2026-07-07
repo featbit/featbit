@@ -29,14 +29,9 @@ public class InsightController : PublicApiControllerBase
     }
 
     [HttpPost("track")]
-    public async Task<IActionResult> TrackAsync(ICollection<Insight> insights)
+    public async Task<IActionResult> TrackAsync(ICollection<Insight?> insights)
     {
-        if (!Authenticated)
-        {
-            return Unauthorized();
-        }
-
-        var validInsights = insights.Where(x => x.IsValid()).ToArray();
+        var validInsights = insights.Where(x => x != null && x.IsValid()).ToArray();
         if (validInsights.Length == 0)
         {
             return Ok();
@@ -46,10 +41,10 @@ public class InsightController : PublicApiControllerBase
 
         var endUserMessages = new List<EndUserMessage>();
         var insightMessages = new List<InsightMessage>();
-        var usage = new InsightUsage(EnvId);
+        var usage = new InsightUsage(envId);
         foreach (var insight in validInsights)
         {
-            var key = $"{envId:N}:{insight.User!.KeyId}";
+            var key = $"{envId:N}:{insight!.User!.KeyId}";
             if (!_cache.TryGetValue(key, out _))
             {
                 _cache.Set(key, string.Empty, _cacheEntryOptions);
@@ -58,7 +53,7 @@ public class InsightController : PublicApiControllerBase
             }
 
             insightMessages.AddRange(insight.InsightMessages(envId));
-            usage.AddEvents(insight.Variations.Length, insight.Metrics.Length);
+            usage.AddEvents(insight.Variations?.Length ?? 0, insight.Metrics?.Length ?? 0);
         }
 
         var tasks = endUserMessages.Select(x => _producer.PublishAsync(Topics.EndUser, x))

@@ -37,7 +37,7 @@ public class PostgresStore(NpgsqlDataSource dataSource) : IDbStore
         return rows.Select(row => RowSerializer.SerializeFlag((row as IDictionary<string, object>)!));
     }
 
-    public async Task<IEnumerable<byte[]>> GetFlagsAsync(IEnumerable<string> ids)
+    public async Task<IEnumerable<byte[]>> GetFlagsAsync(string[] ids)
     {
         await using var connection = await dataSource.OpenConnectionAsync();
 
