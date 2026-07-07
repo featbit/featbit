@@ -1,4 +1,9 @@
-import { ChevronDown, ChevronUp, PanelLeftClose, PanelLeftOpen } from "lucide-react"
+import {
+  ChevronDown,
+  ChevronUp,
+  PanelLeftClose,
+  PanelLeftOpen,
+} from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link, useLocation } from "react-router-dom"
@@ -12,7 +17,7 @@ import { cn } from "@/lib/utils"
 function FeatBitBrand({ lang, collapsed }: { lang: Lang; collapsed: boolean }) {
   return (
     <Link
-      to={localizedPath(lang, "/app")}
+      to={localizedPath(lang, "")}
       className={cn(
         "flex h-12 items-center gap-3 rounded-md px-2 text-foreground",
         collapsed && "justify-center px-0"
@@ -203,7 +208,7 @@ export function Sidebar({
           {navigationGroups.map((group) => (
             <section key={group.labelKey} className="space-y-1">
               {!collapsed ? (
-                <h2 className="px-3 pb-1 text-xs font-medium uppercase text-muted-foreground">
+                <h2 className="px-3 pb-1 text-xs font-medium text-muted-foreground uppercase">
                   {t(group.labelKey)}
                 </h2>
               ) : null}

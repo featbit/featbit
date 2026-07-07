@@ -1,9 +1,4 @@
-import {
-  AlertCircle,
-  AlertTriangle,
-  CheckCircle2,
-  Info,
-} from "lucide-react"
+import { AlertCircle, AlertTriangle, CheckCircle2, Info } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
 import { buttonVariants } from "@/components/ui/button"
@@ -85,7 +80,7 @@ export function GlobalMessageBanner({ message }: { message?: GlobalMessage }) {
         </span>
       </div>
       <Link
-        to={localizedPath(message.lang, "/app/workspace/billing?open=pricing")}
+        to={localizedPath(message.lang, "/workspace/billing?open=pricing")}
         className={buttonVariants({
           variant: "outline",
           size: "sm",

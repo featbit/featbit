@@ -33,7 +33,7 @@ describe("auth persistence", () => {
     await completeLogin(
       { success: true, data: { token: "auth-token" } },
       navigate,
-      "/en/app",
+      "/en",
       { email: "user@example.com", rememberMe: false }
     )
 
@@ -41,7 +41,7 @@ describe("auth persistence", () => {
     expect(sessionStorage.getItem("token")).toBeNull()
     expect(getIdentityToken()).toBe("auth-token")
     expect(getRememberedEmail()).toBe("")
-    expect(navigate).toHaveBeenCalledWith("/en/app")
+    expect(navigate).toHaveBeenCalledWith("/en")
   })
 
   it("stores auth token and remembered email when remember me is on", async () => {
@@ -50,7 +50,7 @@ describe("auth persistence", () => {
     await completeLogin(
       { success: true, data: { token: "auth-token" } },
       navigate,
-      "/en/app",
+      "/en",
       { email: "user@example.com", rememberMe: true }
     )
 
@@ -58,7 +58,7 @@ describe("auth persistence", () => {
     expect(sessionStorage.getItem("token")).toBeNull()
     expect(getIdentityToken()).toBe("auth-token")
     expect(getRememberedEmail()).toBe("user@example.com")
-    expect(navigate).toHaveBeenCalledWith("/en/app")
+    expect(navigate).toHaveBeenCalledWith("/en")
   })
 
   it("keeps previous workspace, organization, and project selections after login", async () => {

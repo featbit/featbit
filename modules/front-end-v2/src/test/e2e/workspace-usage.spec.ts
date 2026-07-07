@@ -131,7 +131,7 @@ test.describe("workspace usage", () => {
   }) => {
     await setupUsagePage(page)
 
-    await page.goto("/en/app/workspace/usage")
+    await page.goto("/en/workspace/usage")
 
     await expect(page.getByRole("tab", { name: "Usage" })).toHaveAttribute(
       "aria-selected",
@@ -155,7 +155,9 @@ test.describe("workspace usage", () => {
     await expect(
       page.getByRole("row", { name: /Production Acme Corp/ })
     ).toBeVisible()
-    await expect(page.getByRole("row", { name: /Staging Acme Corp/ })).toBeVisible()
+    await expect(
+      page.getByRole("row", { name: /Staging Acme Corp/ })
+    ).toBeVisible()
     await expect(page.getByText("5,600,000")).toBeVisible()
     await expect(page.getByText("(71.8%)")).toBeVisible()
   })
@@ -168,9 +170,11 @@ test.describe("workspace usage", () => {
       },
     })
 
-    await page.goto("/en/app/workspace/usage")
+    await page.goto("/en/workspace/usage")
 
-    await expect(page.getByRole("combobox", { name: "This month" })).toBeVisible()
+    await expect(
+      page.getByRole("combobox", { name: "This month" })
+    ).toBeVisible()
     await expect(page.getByText("Daily Trend")).toBeVisible()
 
     await page.getByRole("combobox", { name: "This month" }).click()
@@ -189,9 +193,11 @@ test.describe("workspace usage", () => {
   }) => {
     const setup = await setupUsagePage(page, { hostingMode: "self-hosted" })
 
-    await page.goto("/en/app/workspace/usage")
+    await page.goto("/en/workspace/usage")
 
-    await expect(page.getByRole("combobox", { name: "This month" })).toBeVisible()
+    await expect(
+      page.getByRole("combobox", { name: "This month" })
+    ).toBeVisible()
     await expect(page.getByText("Daily Trend")).toBeVisible()
     expect(setup.getCurrentCycleRequestCount()).toBe(0)
   })

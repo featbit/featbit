@@ -8,11 +8,7 @@ import {
 } from "lucide-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import {
-  useNavigate,
-  useParams,
-  useSearchParams,
-} from "react-router-dom"
+import { useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -33,10 +29,7 @@ import {
   persistCurrentWorkspace,
   resolveLang,
 } from "@/features/layout/layout-context"
-import type {
-  Organization,
-  Workspace,
-} from "@/features/layout/layout-types"
+import type { Organization, Workspace } from "@/features/layout/layout-types"
 import {
   SelectionItem,
   SelectionList,
@@ -67,8 +60,9 @@ export function SelectWorkspacePage() {
   const [step, setStep] = useState<SelectionStep>("workspace")
   const [workspaces, setWorkspaces] = useState<Workspace[]>([])
   const [organizations, setOrganizations] = useState<Organization[]>([])
-  const [selectedWorkspace, setSelectedWorkspace] =
-    useState<Workspace | null>(null)
+  const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(
+    null
+  )
   const [search, setSearch] = useState("")
   const [loadingWorkspaces, setLoadingWorkspaces] = useState(true)
   const [loadingOrganizations, setLoadingOrganizations] = useState(false)
@@ -91,7 +85,7 @@ export function SelectWorkspacePage() {
           return
         }
 
-        navigate(`/${lang}/app`, { replace: true })
+        navigate(`/${lang}`, { replace: true })
       } catch {
         setError(t("selectWorkspace.errors.joinOrganization"))
         setJoiningOrganizationId("")
@@ -304,7 +298,7 @@ export function SelectWorkspacePage() {
                         loading={joiningOrganizationId === organization.id}
                         disabled={Boolean(
                           joiningOrganizationId &&
-                            joiningOrganizationId !== organization.id
+                          joiningOrganizationId !== organization.id
                         )}
                         onClick={() => void selectOrganization(organization)}
                       />

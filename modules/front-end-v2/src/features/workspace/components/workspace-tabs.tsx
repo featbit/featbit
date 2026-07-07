@@ -5,13 +5,21 @@ import { localizedPath } from "@/features/layout/layout-context"
 import { getRuntimeEnv } from "@/lib/env/runtime-env"
 
 const workspaceTabs = [
-  { key: "general", href: "/app/workspace", labelKey: "workspace.tabs.general" },
-  { key: "license", href: "/app/workspace/license", labelKey: "workspace.tabs.license" },
-  { key: "usage", href: "/app/workspace/usage", labelKey: "workspace.tabs.usage" },
-  { key: "billing", href: "/app/workspace/billing", labelKey: "workspace.tabs.billing" },
+  { key: "general", href: "/workspace", labelKey: "workspace.tabs.general" },
+  {
+    key: "license",
+    href: "/workspace/license",
+    labelKey: "workspace.tabs.license",
+  },
+  { key: "usage", href: "/workspace/usage", labelKey: "workspace.tabs.usage" },
+  {
+    key: "billing",
+    href: "/workspace/billing",
+    labelKey: "workspace.tabs.billing",
+  },
   {
     key: "global-users",
-    href: "/app/workspace/global-users",
+    href: "/workspace/global-users",
     labelKey: "workspace.tabs.globalUsers",
   },
 ]
@@ -40,7 +48,7 @@ export function WorkspaceTabs({
     <Tabs
       value={activeTab}
       onValueChange={onTabChange}
-      className="overflow-x-auto border-b [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      className="[scrollbar-width:none] overflow-x-auto border-b [&::-webkit-scrollbar]:hidden"
     >
       <TabsList
         variant="line"
@@ -48,11 +56,7 @@ export function WorkspaceTabs({
         aria-label={t("workspace.tabs.aria")}
       >
         {tabs.map((tab) => (
-          <TabsTrigger
-            key={tab.key}
-            value={tab.key}
-            className="px-0 py-2.5"
-          >
+          <TabsTrigger key={tab.key} value={tab.key} className="px-0 py-2.5">
             {t(tab.labelKey)}
           </TabsTrigger>
         ))}

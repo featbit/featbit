@@ -73,7 +73,7 @@ function AuthRoute({ mode }: { mode: "login" | "sso" }) {
   const { lang = getPreferredLanguage() } = useParams()
 
   if (getIdentityToken()) {
-    return <Navigate to={`/${lang}/app`} replace />
+    return <Navigate to={`/${lang}`} replace />
   }
 
   return <AuthPage mode={mode} />
@@ -165,7 +165,7 @@ export function AppRoutes() {
         element={<SelectWorkspaceRoute />}
       />
       <Route path="/:lang/onboarding" element={<OnboardingRoute />} />
-      <Route path="/:lang/app" element={<SecureRoute />}>
+      <Route path="/:lang" element={<SecureRoute />}>
         <Route index element={<LayoutPlaceholder />} />
         <Route path="workspace" element={<GeneralPage />} />
         <Route path="workspace/billing" element={<BillingPage />} />

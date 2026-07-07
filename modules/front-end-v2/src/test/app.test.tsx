@@ -206,7 +206,7 @@ describe("App shell", () => {
   })
 
   it("reads runtime env version with a dev fallback", async () => {
-    window.history.pushState({}, "", "/en/app")
+    window.history.pushState({}, "", "/en")
     signIn()
     mockLayoutContextApi()
 
@@ -221,7 +221,7 @@ describe("App shell", () => {
   })
 
   it("redirects unauthenticated app routes to login", async () => {
-    window.history.pushState({}, "", "/en/app")
+    window.history.pushState({}, "", "/en")
 
     render(<App />)
 
@@ -231,7 +231,7 @@ describe("App shell", () => {
   })
 
   it("uses the authenticated route language for layout copy", async () => {
-    window.history.pushState({}, "", "/zh/app")
+    window.history.pushState({}, "", "/zh")
     signIn()
     mockLayoutContextApi()
 
@@ -244,7 +244,7 @@ describe("App shell", () => {
 
   it("loads real context data for the authenticated context bar", async () => {
     const fetchMock = mockLayoutContextApi()
-    window.history.pushState({}, "", "/en/app")
+    window.history.pushState({}, "", "/en")
     signIn()
 
     render(<App />)
@@ -292,7 +292,7 @@ describe("App shell", () => {
 
   it("redirects authenticated users without selected workspace to workspace selection", async () => {
     mockWorkspaceSelectionApi()
-    window.history.pushState({}, "", "/en/app")
+    window.history.pushState({}, "", "/en")
     signIn()
 
     render(<App />)
@@ -304,7 +304,7 @@ describe("App shell", () => {
 
   it("redirects uninitialized organizations to onboarding", async () => {
     mockOnboardingApi()
-    window.history.pushState({}, "", "/en/app")
+    window.history.pushState({}, "", "/en")
     signIn()
 
     render(<App />)

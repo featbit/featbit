@@ -96,12 +96,11 @@ test.describe("workspace global users", () => {
     await setupGlobalUsersPage({ page })
     await mockGlobalUsers(page)
 
-    await page.goto("/en/app/workspace/global-users")
+    await page.goto("/en/workspace/global-users")
 
-    await expect(page.getByRole("tab", { name: "Global Users" })).toHaveAttribute(
-      "aria-selected",
-      "true"
-    )
+    await expect(
+      page.getByRole("tab", { name: "Global Users" })
+    ).toHaveAttribute("aria-selected", "true")
     await expect(page.getByText("Alpha User")).toBeVisible()
     await expect(page.getByText("Beta User")).toBeVisible()
 
@@ -115,82 +114,94 @@ test.describe("workspace global users", () => {
     await setupGlobalUsersPage({ page })
     await mockGlobalUsers(page)
 
-    await page.goto("/en/app/workspace/global-users")
+    await page.goto("/en/workspace/global-users")
     await page.getByPlaceholder("Search by name").fill("beta")
 
     await expect(page.getByText("Beta User")).toBeVisible()
     await expect(page.getByText("Alpha User")).toHaveCount(0)
   })
 
-  test("shows license gate when global users is not enabled", async ({ page }) => {
+  test("shows license gate when global users is not enabled", async ({
+    page,
+  }) => {
     await setupGlobalUsersPage({
       page,
       license: createLimitedLicense(["sso"]),
     })
 
-    await page.goto("/en/app/workspace/global-users")
+    await page.goto("/en/workspace/global-users")
 
     await expect(page.getByText("Global Users is not enabled")).toBeVisible()
     await expect(page.getByRole("link", { name: "Open License" })).toBeVisible()
     await expect(page.getByRole("button", { name: "Import" })).toBeDisabled()
   })
 
-  test("imports global users and shows success notification", async ({ page }) => {
+  test("imports global users and shows success notification", async ({
+    page,
+  }) => {
     await setupGlobalUsersPage({ page })
     await mockGlobalUsers(page)
     await page.route("**/api/v1/global-users/upload", async (route) => {
       await route.fulfill({ json: { success: true, data: true } })
     })
 
-    await page.goto("/en/app/workspace/global-users")
+    await page.goto("/en/workspace/global-users")
     await page.getByRole("button", { name: "Import" }).click()
     await page
       .locator('input[type="file"]')
       .setInputFiles("public/assets/upload-global-users.json")
 
-    await expect(page.getByText("User data has been successfully imported.")).toBeVisible()
+    await expect(
+      page.getByText("User data has been successfully imported.")
+    ).toBeVisible()
   })
 
   test("opens user details and evaluate panels", async ({ page }) => {
     await setupGlobalUsersPage({ page })
     await mockGlobalUsers(page)
-    await page.route("**/api/v1/envs/*/end-users/user-1/flags?*", async (route) => {
-      await route.fulfill({
-        json: {
-          success: true,
-          data: {
-            totalCount: 1,
-            items: [
+    await page.route(
+      "**/api/v1/envs/*/end-users/user-1/flags?*",
+      async (route) => {
+        await route.fulfill({
+          json: {
+            success: true,
+            data: {
+              totalCount: 1,
+              items: [
+                {
+                  name: "Checkout flow",
+                  key: "checkout-flow",
+                  variationType: "boolean",
+                  variations: [],
+                  matchVariation: "On",
+                  matchReason: "Targeted",
+                },
+              ],
+            },
+          },
+        })
+      }
+    )
+    await page.route(
+      "**/api/v1/envs/*/end-users/user-1/segments",
+      async (route) => {
+        await route.fulfill({
+          json: {
+            success: true,
+            data: [
               {
-                name: "Checkout flow",
-                key: "checkout-flow",
-                variationType: "boolean",
-                variations: [],
-                matchVariation: "On",
-                matchReason: "Targeted",
+                id: "segment-1",
+                name: "Beta users",
+                type: "shared",
+                updatedAt: "2026-07-06T00:00:00.000Z",
               },
             ],
           },
-        },
-      })
-    })
-    await page.route("**/api/v1/envs/*/end-users/user-1/segments", async (route) => {
-      await route.fulfill({
-        json: {
-          success: true,
-          data: [
-            {
-              id: "segment-1",
-              name: "Beta users",
-              type: "shared",
-              updatedAt: "2026-07-06T00:00:00.000Z",
-            },
-          ],
-        },
-      })
-    })
+        })
+      }
+    )
 
-    await page.goto("/en/app/workspace/global-users")
+    await page.goto("/en/workspace/global-users")
     await page.getByRole("button", { name: "Details" }).first().click()
     const detailsDialog = page.getByRole("dialog", { name: "User profile" })
     await expect(detailsDialog).toBeVisible()

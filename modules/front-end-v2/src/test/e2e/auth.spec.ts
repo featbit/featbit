@@ -32,9 +32,7 @@ test.describe("login page", () => {
 
     await page.goto("/en/login")
 
-    await expect(page.getByLabel("Email")).toHaveValue(
-      "remembered@example.com"
-    )
+    await expect(page.getByLabel("Email")).toHaveValue("remembered@example.com")
     await expect(
       page.getByRole("checkbox", { name: "Remember me" })
     ).toBeChecked()
@@ -68,7 +66,9 @@ test.describe("login page", () => {
     await page.getByLabel("Password", { exact: true }).fill("bad-password")
     await page.getByRole("button", { name: "Sign in", exact: true }).click()
 
-    await expect(page.getByText("Email and/or password incorrect")).toBeVisible()
+    await expect(
+      page.getByText("Email and/or password incorrect")
+    ).toBeVisible()
     await expect(page).toHaveURL(/\/en\/login$/)
   })
 
@@ -86,7 +86,7 @@ test.describe("login page", () => {
     await page.getByRole("checkbox", { name: "Remember me" }).check()
     await page.getByRole("button", { name: "Sign in", exact: true }).click()
 
-    await expect(page).toHaveURL(/\/en\/app$/)
+    await expect(page).toHaveURL(/\/en$/)
     await expect(
       page.getByText(
         "Authenticated layout ready. Page content will migrate in later steps."
@@ -115,10 +115,12 @@ test.describe("login page", () => {
       })
     })
 
-    await page.goto("/login?social-logged-in=true&code=google-code&state=Google")
+    await page.goto(
+      "/login?social-logged-in=true&code=google-code&state=Google"
+    )
 
     await expect(page.getByText("Signing in...")).toBeVisible()
-    await expect(page).toHaveURL(/\/en\/app$/)
+    await expect(page).toHaveURL(/\/en$/)
     await expect(
       page.evaluate(() => localStorage.getItem("token"))
     ).resolves.toBe("social-token")

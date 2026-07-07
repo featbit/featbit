@@ -17,7 +17,7 @@ test.describe("layout", () => {
     await setAuthenticatedUser(page)
     await setCurrentContext(page)
 
-    await page.goto("/en/app")
+    await page.goto("/en")
 
     await expect(page.getByText("Layout User")).toBeVisible()
     await expect(page.getByText("Acme Corp")).toBeVisible()
@@ -102,13 +102,13 @@ test.describe("layout", () => {
       }
     }, createLicense("Growth"))
 
-    await page.goto("/en/app/workspace/global-users")
+    await page.goto("/en/workspace/global-users")
 
     await page.getByRole("button", { name: /Production CN/ }).click()
     await expect(page.getByText("Growth Platform")).toBeVisible()
     await page.getByRole("button", { name: "Staging" }).click()
 
-    await expect(page).toHaveURL(/\/en\/app\/workspace$/)
+    await expect(page).toHaveURL(/\/en\/workspace$/)
     await expect(page.getByRole("button", { name: /Staging/ })).toBeVisible()
     await expect(
       page.evaluate(() =>
@@ -127,7 +127,7 @@ test.describe("layout", () => {
     await setAuthenticatedUser(page)
     await setCurrentContext(page)
 
-    await page.goto("/en/app/feature-flags")
+    await page.goto("/en/feature-flags")
 
     await expect(page.getByRole("link", { name: "Feature Flags" })).toHaveClass(
       /(^|\s)bg-accent(\s|$)/
@@ -147,7 +147,7 @@ test.describe("layout", () => {
     await setAuthenticatedUser(page)
     await setCurrentContext(page)
 
-    await page.goto("/en/app")
+    await page.goto("/en")
 
     await page.getByRole("button", { name: /Production CN/ }).click()
     const searchInput = page.getByPlaceholder("Search environments...")
@@ -164,7 +164,7 @@ test.describe("layout", () => {
     await setAuthenticatedUser(page, { token: "expired-token" })
     await setCurrentContext(page)
 
-    await page.goto("/en/app")
+    await page.goto("/en")
 
     await expect(page.getByText("Acme Corp")).toBeVisible()
     await expect(page.getByText("Commerce Apps")).toBeVisible()
@@ -233,7 +233,7 @@ test.describe("layout", () => {
       })
     })
 
-    await page.goto("/en/app")
+    await page.goto("/en")
 
     await expect(
       page.getByRole("link", { name: "Free Plan: Upgrade Now" })
@@ -270,12 +270,12 @@ test.describe("layout", () => {
       })
     })
 
-    await page.goto("/en/app")
+    await page.goto("/en")
 
     await expect(page.getByText("Approaching usage limit")).toBeVisible()
     await expect(page.getByText(/57,000 of 60,000 MAU/)).toBeVisible()
     await expect(
       page.getByRole("link", { name: "Upgrade plan" })
-    ).toHaveAttribute("href", "/en/app/workspace/billing?open=pricing")
+    ).toHaveAttribute("href", "/en/workspace/billing?open=pricing")
   })
 })

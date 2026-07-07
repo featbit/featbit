@@ -35,14 +35,14 @@ const HOSTING_MODE_SAAS = "saas"
 
 function getEnvironmentReloadPath(pathname: string) {
   const segments = pathname.split("/").filter(Boolean)
-  const [lang, appSegment, featureSegment] = segments
+  const [lang, featureSegment] = segments
 
-  if (lang && appSegment === "app" && featureSegment) {
-    return `/${lang}/app/${featureSegment}`
+  if (lang && featureSegment) {
+    return `/${lang}/${featureSegment}`
   }
 
-  if (lang && appSegment === "app") {
-    return `/${lang}/app`
+  if (lang) {
+    return `/${lang}`
   }
 
   return pathname || "/"

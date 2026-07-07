@@ -33,7 +33,7 @@ export function OnboardingPage() {
 
   useEffect(() => {
     if (currentOrganization?.initialized !== false) {
-      navigate(localizedPath(lang, "/app/feature-flags"), { replace: true })
+      navigate(localizedPath(lang, "/feature-flags"), { replace: true })
     }
   }, [currentOrganization?.initialized, lang, navigate])
 
@@ -43,9 +43,9 @@ export function OnboardingPage() {
   )
   const canSubmit = Boolean(
     organizationName.trim() &&
-      organizationKey &&
-      projectName.trim() &&
-      projectKey.trim()
+    organizationKey &&
+    projectName.trim() &&
+    projectKey.trim()
   )
 
   function updateProjectName(value: string) {
@@ -90,13 +90,13 @@ export function OnboardingPage() {
       })
 
       if (!localStorage.getItem("get-started")) {
-        navigate(`${localizedPath(lang, "/app/get-started")}?status=init`, {
+        navigate(`${localizedPath(lang, "/get-started")}?status=init`, {
           replace: true,
         })
         return
       }
 
-      navigate(`${localizedPath(lang, "/app/feature-flags")}?status=init`, {
+      navigate(`${localizedPath(lang, "/feature-flags")}?status=init`, {
         replace: true,
       })
     } catch {
@@ -135,7 +135,9 @@ export function OnboardingPage() {
               organizationName={
                 organizationName || t("onboarding.preview.organizationFallback")
               }
-              projectName={projectName || t("onboarding.preview.projectFallback")}
+              projectName={
+                projectName || t("onboarding.preview.projectFallback")
+              }
               projectKey={projectKey || "example-project"}
             />
           </div>

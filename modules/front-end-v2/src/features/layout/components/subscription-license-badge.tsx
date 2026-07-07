@@ -43,7 +43,7 @@ export function SubscriptionLicenseBadge({
 
   return (
     <Link
-      to={localizedPath(lang, "/app/workspace/billing")}
+      to={localizedPath(lang, "/workspace/billing")}
       aria-label={t("layout.plan.aria", { label, plan: value })}
       className={buttonVariants({
         variant: "outline",
@@ -53,7 +53,7 @@ export function SubscriptionLicenseBadge({
     >
       <Award className="size-5 text-blue-600" />
       <span className="min-w-0 flex-1 leading-tight">
-        <span className="block text-[0.625rem] font-medium uppercase text-muted-foreground">
+        <span className="block text-[0.625rem] font-medium text-muted-foreground uppercase">
           {label}
         </span>
         <span className="block truncate text-[0.8125rem] font-semibold">

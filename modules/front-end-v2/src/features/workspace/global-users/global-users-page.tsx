@@ -438,7 +438,7 @@ function GlobalUsersTable({
                 action={
                   <Link
                     className={cn(buttonVariants({ variant: "outline" }))}
-                    to={localizedPath(lang, "/app/workspace/license")}
+                    to={localizedPath(lang, "/workspace/license")}
                   >
                     {t("workspace.globalUsers.gated.action")}
                   </Link>

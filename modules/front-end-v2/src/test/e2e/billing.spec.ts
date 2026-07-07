@@ -105,7 +105,7 @@ test.describe("workspace billing", () => {
   }) => {
     await setupBillingPage(page)
 
-    await page.goto("/en/app/workspace/billing")
+    await page.goto("/en/workspace/billing")
 
     await expect(page.getByRole("tab", { name: "Billing" })).toHaveAttribute(
       "aria-selected",

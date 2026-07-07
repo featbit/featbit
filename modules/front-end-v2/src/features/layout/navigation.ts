@@ -24,7 +24,7 @@ export const navigationGroups: NavGroup[] = [
     items: [
       {
         labelKey: "layout.nav.items.getStarted",
-        href: "/app",
+        href: "",
         icon: Rocket,
       },
     ],
@@ -34,17 +34,17 @@ export const navigationGroups: NavGroup[] = [
     items: [
       {
         labelKey: "layout.nav.items.featureFlags",
-        href: "/app/feature-flags",
+        href: "/feature-flags",
         icon: Flag,
       },
       {
         labelKey: "layout.nav.items.segments",
-        href: "/app/segments",
+        href: "/segments",
         icon: Layers3,
       },
       {
         labelKey: "layout.nav.items.endUsers",
-        href: "/app/end-users",
+        href: "/end-users",
         icon: UsersRound,
       },
     ],
@@ -54,12 +54,12 @@ export const navigationGroups: NavGroup[] = [
     items: [
       {
         labelKey: "layout.nav.items.experiments",
-        href: "/app/experiments",
+        href: "/experiments",
         icon: FlaskConical,
       },
       {
         labelKey: "layout.nav.items.metrics",
-        href: "/app/metrics",
+        href: "/metrics",
         icon: BarChart3,
       },
     ],
@@ -69,12 +69,12 @@ export const navigationGroups: NavGroup[] = [
     items: [
       {
         labelKey: "layout.nav.items.auditLogs",
-        href: "/app/audit-logs",
+        href: "/audit-logs",
         icon: Logs,
       },
       {
         labelKey: "layout.nav.items.changeRequests",
-        href: "/app/change-requests",
+        href: "/change-requests",
         icon: GitPullRequest,
       },
     ],
@@ -84,17 +84,17 @@ export const navigationGroups: NavGroup[] = [
     items: [
       {
         labelKey: "layout.nav.items.relayProxies",
-        href: "/app/relay-proxies",
+        href: "/relay-proxies",
         icon: Waypoints,
       },
       {
         labelKey: "layout.nav.items.webhooks",
-        href: "/app/integrations/webhooks",
+        href: "/integrations/webhooks",
         icon: Webhook,
       },
       {
         labelKey: "layout.nav.items.accessTokens",
-        href: "/app/integrations/access-tokens",
+        href: "/integrations/access-tokens",
         icon: KeyRound,
       },
     ],
@@ -104,32 +104,32 @@ export const navigationGroups: NavGroup[] = [
     items: [
       {
         labelKey: "layout.nav.items.workspace",
-        href: "/app/workspace",
+        href: "/workspace",
         icon: Building2,
       },
       {
         labelKey: "layout.nav.items.organization",
-        href: "/app/organization",
+        href: "/organization",
         icon: Boxes,
       },
       {
         labelKey: "layout.nav.items.iam",
-        href: "/app/iam",
+        href: "/iam",
         icon: ShieldCheck,
         children: [
           {
             labelKey: "layout.nav.items.team",
-            href: "/app/iam/team",
+            href: "/iam/team",
             icon: UserRound,
           },
           {
             labelKey: "layout.nav.items.groups",
-            href: "/app/iam/groups",
+            href: "/iam/groups",
             icon: UsersRound,
           },
           {
             labelKey: "layout.nav.items.policies",
-            href: "/app/iam/policies",
+            href: "/iam/policies",
             icon: UserRoundKey,
           },
         ],

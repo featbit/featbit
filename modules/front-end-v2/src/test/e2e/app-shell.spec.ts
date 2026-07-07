@@ -64,7 +64,7 @@ test("renders the application shell placeholder", async ({ page }) => {
     )
   })
 
-  await page.goto("/en/app")
+  await page.goto("/en")
 
   await expect(page.getByText("Real Org")).toBeVisible()
   await expect(page.getByText("Real Platform")).toBeVisible()

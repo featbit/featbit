@@ -128,7 +128,7 @@ test.describe("workspace license", () => {
       license: createCustomLicense({ plan: "Growth" }),
     })
 
-    await page.goto("/en/app/workspace/license")
+    await page.goto("/en/workspace/license")
 
     await expect(
       page.getByRole("heading", { name: "License status" })
@@ -141,7 +141,7 @@ test.describe("workspace license", () => {
   test("renders no-license guidance", async ({ page }) => {
     await setupLicensePage({ page, license: null })
 
-    await page.goto("/en/app/workspace/license")
+    await page.goto("/en/workspace/license")
 
     await expect(page.getByText("No License Available")).toBeVisible()
     await expect(page.getByText("https://www.featbit.co/pricing")).toBeVisible()
@@ -158,7 +158,7 @@ test.describe("workspace license", () => {
       }),
     })
 
-    await page.goto("/en/app/workspace/license")
+    await page.goto("/en/workspace/license")
 
     await expect(page.getByText("Expired")).toBeVisible()
     await expect(page.getByText("Single sign-on")).toBeVisible()
@@ -188,28 +188,30 @@ test.describe("workspace license", () => {
       })
     })
 
-    await page.goto("/en/app/workspace/license")
+    await page.goto("/en/workspace/license")
 
     await expect(page.getByRole("tab", { name: "License" })).toHaveAttribute(
       "aria-selected",
       "true"
     )
-    await expect(page.getByRole("heading", { name: "License status" })).toBeVisible()
+    await expect(
+      page.getByRole("heading", { name: "License status" })
+    ).toBeVisible()
     await expect(page.getByText("Growth")).toBeVisible()
     await expect(page.getByText("Single sign-on")).toBeVisible()
     await expect(page.getByText("Granted").first()).toBeVisible()
 
     await page.getByRole("button", { name: "Replace" }).click()
-    await page
-      .getByPlaceholder("Enter your license here")
-      .fill(updatedLicense)
+    await page.getByPlaceholder("Enter your license here").fill(updatedLicense)
     await page.getByRole("button", { name: "Update license" }).click()
 
     await expect(page.getByText("License updated!")).toBeVisible()
     await expect(page.getByRole("main").getByText("Enterprise")).toBeVisible()
     await expect(page.getByRole("button", { name: "Replace" })).toBeVisible()
     await expect(
-      page.evaluate(() => localStorage.getItem("current-workspace_test-user-id"))
+      page.evaluate(() =>
+        localStorage.getItem("current-workspace_test-user-id")
+      )
     ).resolves.toContain(updatedLicense)
   })
 
@@ -228,7 +230,7 @@ test.describe("workspace license", () => {
       })
     })
 
-    await page.goto("/en/app/workspace/license")
+    await page.goto("/en/workspace/license")
 
     await page.getByRole("button", { name: "Replace" }).click()
     await page
@@ -237,7 +239,9 @@ test.describe("workspace license", () => {
     await page.getByRole("button", { name: "Update license" }).click()
 
     await expect(
-      page.getByText("Invalid license, please contact FeatBit team to get a license!")
+      page.getByText(
+        "Invalid license, please contact FeatBit team to get a license!"
+      )
     ).toBeVisible()
     await expect(page.getByPlaceholder("Enter your license here")).toBeVisible()
   })

@@ -245,7 +245,7 @@ export function BillingPage() {
   }, [location.pathname, location.search, navigate, queryClient])
 
   if (!isSaas) {
-    return <Navigate to={localizedPath(lang, "/app/workspace")} replace />
+    return <Navigate to={localizedPath(lang, "/workspace")} replace />
   }
 
   function retryAll() {

@@ -67,7 +67,7 @@ test.describe("workspace general", () => {
       })
     })
 
-    await page.goto("/en/app/workspace")
+    await page.goto("/en/workspace")
 
     await expect(page.getByRole("heading", { name: "Workspace" })).toBeVisible()
     await expect(page.getByRole("tab", { name: "General" })).toBeVisible()
@@ -80,7 +80,9 @@ test.describe("workspace general", () => {
 
     await expect(page.getByText("Operation succeeded")).toBeVisible()
     await expect(
-      page.evaluate(() => localStorage.getItem("current-workspace_test-user-id"))
+      page.evaluate(() =>
+        localStorage.getItem("current-workspace_test-user-id")
+      )
     ).resolves.toContain("Acme Workspace Updated")
   })
 })

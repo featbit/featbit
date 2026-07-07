@@ -32,7 +32,9 @@ export function LoginForm({
   const [email, setEmail] = useState(() => getRememberedEmail())
   const [password, setPassword] = useState("")
   const [passwordVisible, setPasswordVisible] = useState(false)
-  const [rememberMe, setRememberMe] = useState(() => Boolean(getRememberedEmail()))
+  const [rememberMe, setRememberMe] = useState(() =>
+    Boolean(getRememberedEmail())
+  )
   const [errorKey, setErrorKey] = useState<LoginErrorKey | null>(null)
   const loginMutation = useMutation({
     mutationFn: async (credentials: {
@@ -46,7 +48,7 @@ export function LoginForm({
       )
 
       if (response.success) {
-        await completeLogin(response, navigate, `/${lang}/app`, {
+        await completeLogin(response, navigate, `/${lang}`, {
           email: credentials.email,
           rememberMe: credentials.rememberMe,
         })
@@ -138,7 +140,10 @@ export function LoginForm({
               {t("auth.remember")}
             </Label>
           </div>
-          <a href="/forgot-password" className="text-sm text-blue-600 hover:underline">
+          <a
+            href="/forgot-password"
+            className="text-sm text-blue-600 hover:underline"
+          >
             {t("auth.forgot")}
           </a>
         </div>
@@ -149,7 +154,11 @@ export function LoginForm({
           </Alert>
         ) : null}
 
-        <Button className="h-12 w-full text-base" type="submit" disabled={loginMutation.isPending}>
+        <Button
+          className="h-12 w-full text-base"
+          type="submit"
+          disabled={loginMutation.isPending}
+        >
           {loginMutation.isPending ? t("auth.signingIn") : t("auth.signIn")}
         </Button>
       </form>
