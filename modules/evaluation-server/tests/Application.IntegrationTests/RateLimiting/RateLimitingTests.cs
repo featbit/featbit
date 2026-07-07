@@ -3,6 +3,10 @@ using System.Net.Http.Json;
 using System.Net.WebSockets;
 using Domain.Shared;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Internal;
 
 namespace Application.IntegrationTests.RateLimiting;
 
@@ -163,13 +167,21 @@ public class RateLimitingTests
             ("RateLimiting:Endpoints:Streaming:PermitLimit", "1")
         );
 
+        var appWithClock = app.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureTestServices(collection =>
+            {
+                collection.Replace(ServiceDescriptor.Singleton<ISystemClock>(new TestClock(TestData.ClientToken.Timestamp)));
+            });
+        });
+
         // Consume the single permit for the Streaming endpoint.
         // FixedWindowRateLimiter does not restore permits on lease disposal — they reset
         // only at the end of the window — so no need to close the first socket first.
-        var (firstConnected, _, _) = await TryConnectStreamingAsync(app, TestData.ClientTokenString);
+        var (firstConnected, _, _) = await TryConnectStreamingAsync(appWithClock, TestData.ClientTokenString);
         Assert.True(firstConnected);
 
-        var (_, _, secondError) = await TryConnectStreamingAsync(app, TestData.ClientTokenString);
+        var (_, _, secondError) = await TryConnectStreamingAsync(appWithClock, TestData.ClientTokenString);
         Assert.NotNull(secondError);
         Assert.Contains("429", secondError);
     }

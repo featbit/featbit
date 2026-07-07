@@ -29,7 +29,7 @@ public class MongoDbStore : IDbStore
         return flags.Select(x => x.ToJsonBytes());
     }
 
-    public async Task<IEnumerable<byte[]>> GetFlagsAsync(IEnumerable<string> ids)
+    public async Task<IEnumerable<byte[]>> GetFlagsAsync(string[] ids)
     {
         var query = _mongodb.GetCollection<BsonDocument>("FeatureFlags")
             .Find(x => ids.Select(Guid.Parse).Contains(x["_id"].AsGuid));

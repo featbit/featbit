@@ -63,7 +63,7 @@
             </div>
           </div>
           <div class="selector-divider"></div>
-          <div class="selector-item" [routerLink]="['/organization/projects']"
+          <div class="selector-item" (click)="envModalVisible=true"
                [nz-tooltip]="isSmallScreen ? projectTooltip : null"
                nzTooltipPlacement="bottom">
             <div class="item-icon proj-icon">

@@ -7,6 +7,7 @@ using Domain.Utils;
 using Domain.Webhooks;
 using HandlebarsDotNet;
 using Microsoft.Extensions.Logging;
+using Microsoft.Security.AntiSSRF;
 
 namespace Infrastructure.Services;
 
@@ -98,6 +99,16 @@ public class WebhookSender : IWebhookSender
 
             var response = await _client.SendAsync(httpRequest);
             await delivery.AddResponseAsync(response);
+        }
+        catch (AntiSSRFException ex)
+        {
+            _logger.LogWarning("Blocked webhook request to '{Url}' due to AntiSSRF policy: {Message}", request.Url, ex.Message);
+
+            var error = new
+            {
+                message = "Webhook target is not allowed. The URL must be an absolute http/https URL that resolves to a public IP address."
+            };
+            delivery.SetError(error);
         }
         catch (Exception ex)
         {

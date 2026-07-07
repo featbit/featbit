@@ -85,22 +85,10 @@ public class UpdateTargetingHandler(
         async Task CheckPermissionsAsync()
         {
             var instructions = FlagComparer.Compare(dataChange).ToArray();
-            List<string> requiredPermissions = [];
-
-            if (instructions.Any(x => FlagInstructionKind.UpdateDefaultRuleKinds.Contains(x.Kind)))
-            {
-                requiredPermissions.Add(Permissions.UpdateFlagDefaultRule);
-            }
-
-            if (instructions.Any(x => FlagInstructionKind.UpdateTargetUsersKinds.Contains(x.Kind)))
-            {
-                requiredPermissions.Add(Permissions.UpdateFlagIndividualTargeting);
-            }
-
-            if (instructions.Any(x => FlagInstructionKind.UpdateRuleKinds.Contains(x.Kind)))
-            {
-                requiredPermissions.Add(Permissions.UpdateFlagTargetingRules);
-            }
+            var requiredPermissions = instructions
+                .Select(x => x.Permission)
+                .Where(permission => !string.IsNullOrEmpty(permission))
+                .ToHashSet();
 
             if (requiredPermissions.Count == 0)
             {

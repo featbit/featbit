@@ -11,12 +11,34 @@
   }
 }
 
+.loading-container {
+  height: 400px;
+
+  nz-spin {
+    top: 50%;
+  }
+}
+
+.no-projects {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+}
+
 .project-list {
   display: flex;
   flex-direction: column;
   gap: 24px;
   height: calc(100% - 32px);
   margin-top: 24px;
+
+  .load-more {
+    display: flex;
+    justify-content: center;
+    margin-top: 8px;
+    margin-bottom: 24px;
+  }
 
   .ant-tag {
     margin: 0;

@@ -39,12 +39,24 @@ export class TargetUserComponent implements OnInit {
   @Input("userList")
   set list(data: IUserType[]) {
     this.isLoadingUsers = false;
-    if (!this.disableCreation && this.selectNode['searchValue'] && data.length === 0) {
+    if (this.disableCreation) {
+      this.userList = [...data];
+      return;
+    }
+
+    const searchValue = this.selectNode?.['searchValue'];
+    if (!searchValue) {
+      this.userList = [...data];
+      return;
+    }
+
+    const hasExactMatch = data.some(u => u.keyId === searchValue) || this.selectedUserDetailList?.some(u => u.keyId === searchValue);
+    if (!hasExactMatch) {
       this.userList = [{
-        keyId: this.selectNode['searchValue'],
-        name: this.selectNode['searchValue'],
+        keyId: searchValue,
+        name: searchValue,
         isNew: true
-      } as IUserType];
+      } as IUserType, ...data];
     } else {
       this.userList = [...data];
     }

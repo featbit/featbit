@@ -166,7 +166,8 @@ public class SegmentController : ApiControllerBase
         var request = new PatchSegment
         {
             Id = segmentId,
-            Patch = patch
+            Patch = patch,
+            Permissions = await GetRequestPermissionsAsync()
         };
 
         var result = await Mediator.Send(request);

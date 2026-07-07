@@ -97,10 +97,12 @@ JWT (JSON Web Token) configuration for authentication and authorization.
 
 ### Redis
 
-| Name                      | Description                                                                                  | Default Value  |
-|---------------------------|----------------------------------------------------------------------------------------------|----------------|
-| `Redis__ConnectionString` | Redis Connection String                                                                      | `"redis:6379"` |
-| `Redis__Password`         | Redis Password (Optional). If provided, override the password specified in connection string | `""`           |
+| Name                            | Description                                                                                                                                                                                                               | Default Value  |
+|---------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------|
+| `Redis__ConnectionString`       | Redis Connection String                                                                                                                                                                                                   | `"redis:6379"` |
+| `Redis__Password`               | Redis Password (Optional). If provided, override the password specified in connection string                                                                                                                              | `""`           |
+| `Redis__PopulateLockTtlSeconds` | Lock TTL (seconds) for the startup Redis populate. Must exceed the expected populate duration; if the lock expires mid-populate a second instance can start a concurrent populate. Increase for large datasets.           | `60`           |
+| `Redis__PopulateMaxWaitSeconds` | Maximum seconds an instance will wait for another instance to finish populating Redis before throwing. Should be comfortably larger than `PopulateLockTtlSeconds` so a crashed instance's lock can expire and be retaken. | `90`           |
 
 ### Kafka
 

@@ -8,7 +8,7 @@ public interface IStore
 
     Task<IEnumerable<byte[]>> GetFlagsAsync(Guid envId, long timestamp);
 
-    Task<IEnumerable<byte[]>> GetFlagsAsync(IEnumerable<string> ids);
+    Task<IEnumerable<byte[]>> GetFlagsAsync(string[] ids);
 
     Task<byte[]> GetSegmentAsync(string id);
 

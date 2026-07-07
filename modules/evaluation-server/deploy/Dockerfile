@@ -55,6 +55,9 @@ ADD https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/relea
 RUN chmod +x otel-dotnet-auto-install.sh
 RUN ./otel-dotnet-auto-install.sh
 
+ARG VERSION=dev
+ENV VERSION=$VERSION
+
 WORKDIR $INSTALL_DIR
 COPY --from=publish $INSTALL_DIR ./
 COPY --from=build /source/start.sh ./start.sh

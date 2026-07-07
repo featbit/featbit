@@ -1,7 +1,10 @@
+using Application.Bases.Exceptions;
 using Domain.AuditLogs;
 using Application.Users;
 using Application.Bases.Models;
 using Domain.FeatureFlags;
+using Domain.Policies;
+using Domain.SemanticPatch;
 using Microsoft.AspNetCore.JsonPatch.SystemTextJson;
 
 namespace Application.FeatureFlags;
@@ -13,27 +16,20 @@ public class PatchFeatureFlag : IRequest<PatchResult>
     public string Key { get; set; }
 
     public JsonPatchDocument<FeatureFlag> Patch { get; set; }
+
+    public PolicyStatement[] Permissions { get; set; } = [];
 }
 
-public class PatchFeatureFlagHandler : IRequestHandler<PatchFeatureFlag, PatchResult>
+public class PatchFeatureFlagHandler(
+    IFeatureFlagService flagService,
+    IResourceService resourceService,
+    ICurrentUser currentUser,
+    IPublisher publisher)
+    : IRequestHandler<PatchFeatureFlag, PatchResult>
 {
-    private readonly IFeatureFlagService _service;
-    private readonly ICurrentUser _currentUser;
-    private readonly IPublisher _publisher;
-
-    public PatchFeatureFlagHandler(
-        IFeatureFlagService service,
-        ICurrentUser currentUser,
-        IPublisher publisher)
-    {
-        _service = service;
-        _currentUser = currentUser;
-        _publisher = publisher;
-    }
-
     public async Task<PatchResult> Handle(PatchFeatureFlag request, CancellationToken cancellationToken)
     {
-        var flag = await _service.GetAsync(request.EnvId, request.Key);
+        var flag = await flagService.GetAsync(request.EnvId, request.Key);
         var dataChange = new DataChange(flag);
 
         var error = string.Empty;
@@ -44,15 +40,37 @@ public class PatchFeatureFlagHandler : IRequestHandler<PatchFeatureFlag, PatchRe
             return PatchResult.Fail(error);
         }
 
-        flag.MarkAsUpdated(_currentUser.Id);
+        flag.MarkAsUpdated(currentUser.Id);
         dataChange.To(flag);
 
-        await _service.UpdateAsync(flag);
+        await CheckPermissionsAsync();
+
+        await flagService.UpdateAsync(flag);
 
         // publish on feature flag change notification
-        var notification = new OnFeatureFlagChanged(flag, Operations.Update, dataChange, _currentUser.Id);
-        await _publisher.Publish(notification, cancellationToken);
+        var notification = new OnFeatureFlagChanged(flag, Operations.Update, dataChange, currentUser.Id);
+        await publisher.Publish(notification, cancellationToken);
 
         return PatchResult.Ok();
+
+        async Task CheckPermissionsAsync()
+        {
+            var instructions = FlagComparer.Compare(dataChange).ToArray();
+            var requiredPermissions = instructions
+                .Select(x => x.Permission)
+                .Where(permission => !string.IsNullOrEmpty(permission))
+                .ToHashSet();
+
+            if (requiredPermissions.Count == 0)
+            {
+                return;
+            }
+
+            var rn = await resourceService.GetFlagRnAsync(flag.EnvId, flag.Key);
+            if (requiredPermissions.Any(permission => !PolicyHelper.IsAllowed(request.Permissions, rn, permission)))
+            {
+                throw new ForbiddenException();
+            }
+        }
     }
 }
