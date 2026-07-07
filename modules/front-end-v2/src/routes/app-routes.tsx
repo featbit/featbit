@@ -12,6 +12,7 @@ import { getIdentityToken } from "@/features/auth/auth-api"
 import { AuthenticatedLayout } from "@/features/layout/authenticated-layout"
 import { LayoutPlaceholder } from "@/features/layout/layout-placeholder"
 import { OnboardingPage } from "@/features/onboarding/onboarding-page"
+import { BillingPage } from "@/features/workspace/billing/billing-page"
 import { GeneralPage } from "@/features/workspace/general/general-page"
 import { GlobalUsersPage } from "@/features/workspace/global-users/global-users-page"
 import { LicensePage } from "@/features/workspace/license/license-page"
@@ -166,6 +167,7 @@ export function AppRoutes() {
       <Route path="/:lang/app" element={<SecureRoute />}>
         <Route index element={<LayoutPlaceholder />} />
         <Route path="workspace" element={<GeneralPage />} />
+        <Route path="workspace/billing" element={<BillingPage />} />
         <Route path="workspace/license" element={<LicensePage />} />
         <Route path="workspace/global-users" element={<GlobalUsersPage />} />
         <Route path="*" element={<LayoutPlaceholder />} />

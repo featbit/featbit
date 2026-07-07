@@ -22,7 +22,9 @@ test.describe("layout", () => {
     await expect(page.getByText("Layout User")).toBeVisible()
     await expect(page.getByText("Acme Corp")).toBeVisible()
     await expect(page.getByText("Commerce Apps")).toBeVisible()
-    await expect(page.getByRole("button", { name: /Production CN/ })).toBeVisible()
+    await expect(
+      page.getByRole("button", { name: /Production CN/ })
+    ).toBeVisible()
     await expect(
       page.getByRole("link", { name: "Current Plan: Enterprise" })
     ).toBeVisible()
@@ -30,7 +32,9 @@ test.describe("layout", () => {
     await expect(page.getByRole("link", { name: "Groups" })).toBeVisible()
     await expect(page.getByRole("link", { name: "Policies" })).toBeVisible()
     await expect(page.getByRole("link", { name: "Webhooks" })).toBeVisible()
-    await expect(page.getByRole("link", { name: "Access Tokens" })).toBeVisible()
+    await expect(
+      page.getByRole("link", { name: "Access Tokens" })
+    ).toBeVisible()
 
     await page.getByRole("button", { name: "Collapse sidebar" }).click()
 
@@ -42,7 +46,9 @@ test.describe("layout", () => {
     ).resolves.toBe("true")
 
     await page.reload()
-    await expect(page.getByRole("button", { name: "Expand sidebar" })).toBeVisible()
+    await expect(
+      page.getByRole("button", { name: "Expand sidebar" })
+    ).toBeVisible()
 
     await page.getByRole("button", { name: "Account" }).click()
     await expect(page.getByText("Version: 2026.06.25")).toBeVisible()
@@ -126,9 +132,9 @@ test.describe("layout", () => {
     await expect(page.getByRole("link", { name: "Feature Flags" })).toHaveClass(
       /(^|\s)bg-accent(\s|$)/
     )
-    await expect(page.getByRole("link", { name: "Get Started" })).not.toHaveClass(
-      /(^|\s)bg-accent(\s|$)/
-    )
+    await expect(
+      page.getByRole("link", { name: "Get Started" })
+    ).not.toHaveClass(/(^|\s)bg-accent(\s|$)/)
     await expect(page.getByRole("button", { name: "IAM" })).not.toHaveClass(
       /(^|\s)bg-muted(\s|$)/
     )
@@ -232,5 +238,44 @@ test.describe("layout", () => {
     await expect(
       page.getByRole("link", { name: "Free Plan: Upgrade Now" })
     ).toBeVisible()
+  })
+
+  test("renders the global billing usage message when usage is high", async ({
+    page,
+  }) => {
+    await mockRuntimeEnv(page, { HOSTING_MODE: "saas" })
+    await mockContextEndpoints(page)
+    await setAuthenticatedUser(page)
+    await setCurrentContext(page)
+
+    await page.route("**/api/v1/billing/subscription", async (route) => {
+      await route.fulfill({
+        json: {
+          success: true,
+          data: {
+            plan: "Growth",
+            billingCycle: "monthly",
+            mau: 60000,
+            usage: { mau: 57000 },
+          },
+        },
+      })
+    })
+    await page.route("**/api/v1/billing/current-cycle", async (route) => {
+      await route.fulfill({
+        json: {
+          success: true,
+          data: { mau: 57000 },
+        },
+      })
+    })
+
+    await page.goto("/en/app")
+
+    await expect(page.getByText("Approaching usage limit")).toBeVisible()
+    await expect(page.getByText(/57,000 of 60,000 MAU/)).toBeVisible()
+    await expect(
+      page.getByRole("link", { name: "Upgrade plan" })
+    ).toHaveAttribute("href", "/en/app/workspace/billing?open=pricing")
   })
 })

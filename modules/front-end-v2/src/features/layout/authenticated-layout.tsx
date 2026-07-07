@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react"
+import { useQuery } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
 import { Outlet, useLocation, useParams } from "react-router-dom"
 import { ContextBar } from "@/features/layout/components/context-bar"
+import { GlobalMessageBanner } from "@/features/layout/components/global-message-banner"
+import { buildBillingGlobalMessages } from "@/features/layout/global-message"
 import {
   chooseProjectEnv,
   fetchProjects,
@@ -19,10 +22,16 @@ import type {
 } from "@/features/layout/layout-types"
 import { Sidebar } from "@/features/layout/components/sidebar"
 import { SubscriptionLicenseBadge } from "@/features/layout/components/subscription-license-badge"
+import {
+  fetchCurrentCycle,
+  fetchSubscription,
+} from "@/features/workspace/billing/billing-api"
+import { getRuntimeEnv } from "@/lib/env/runtime-env"
 
 const SIDEBAR_STORAGE_KEY = "featbit:sidebar-collapsed"
 const UI_BROADCAST_CHANNEL = "featbit-ui-broadcast-channel"
 const ENV_CHANGED_MESSAGE = "env-changed"
+const HOSTING_MODE_SAAS = "saas"
 
 function getEnvironmentReloadPath(pathname: string) {
   const segments = pathname.split("/").filter(Boolean)
@@ -53,9 +62,27 @@ export function AuthenticatedLayout() {
   const [organization, setOrganization] = useState<Organization | null>(() =>
     getCurrentOrganization()
   )
-  const [currentProjectEnv, setCurrentProjectEnv] =
-    useState<ProjectEnv | null>(() => getCurrentProjectEnv())
+  const [currentProjectEnv, setCurrentProjectEnv] = useState<ProjectEnv | null>(
+    () => getCurrentProjectEnv()
+  )
   const [projects, setProjects] = useState<Project[]>([])
+  const isSaas = getRuntimeEnv().hostingMode === HOSTING_MODE_SAAS
+  const subscriptionQuery = useQuery({
+    queryKey: ["billing", "subscription"],
+    queryFn: fetchSubscription,
+    enabled: isSaas,
+  })
+  const cycleQuery = useQuery({
+    queryKey: ["billing", "current-cycle"],
+    queryFn: fetchCurrentCycle,
+    enabled: isSaas,
+  })
+  const globalMessage = buildBillingGlobalMessages(
+    workspace,
+    lang,
+    subscriptionQuery.data,
+    cycleQuery.data
+  )[0]
 
   function setCollapsed(nextCollapsed: boolean) {
     localStorage.setItem(SIDEBAR_STORAGE_KEY, String(nextCollapsed))
@@ -141,21 +168,28 @@ export function AuthenticatedLayout() {
   }, [])
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background text-foreground">
-      <Sidebar lang={lang} collapsed={collapsed} setCollapsed={setCollapsed} />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-14 shrink-0 items-center gap-4 border-b bg-background px-5">
-          <ContextBar
-            organization={organization}
-            currentProjectEnv={currentProjectEnv}
-            projects={projects}
-            onProjectEnvChange={changeCurrentProjectEnv}
-          />
-          <SubscriptionLicenseBadge lang={lang} workspace={workspace} />
-        </header>
-        <main className="min-h-0 flex-1 overflow-y-auto bg-muted/30 p-5">
-          <Outlet />
-        </main>
+    <div className="flex h-screen flex-col overflow-hidden bg-background text-foreground">
+      <GlobalMessageBanner message={globalMessage} />
+      <div className="flex min-h-0 flex-1 overflow-hidden">
+        <Sidebar
+          lang={lang}
+          collapsed={collapsed}
+          setCollapsed={setCollapsed}
+        />
+        <div className="flex min-w-0 flex-1 flex-col">
+          <header className="flex h-14 shrink-0 items-center gap-4 border-b bg-background px-5">
+            <ContextBar
+              organization={organization}
+              currentProjectEnv={currentProjectEnv}
+              projects={projects}
+              onProjectEnvChange={changeCurrentProjectEnv}
+            />
+            <SubscriptionLicenseBadge lang={lang} workspace={workspace} />
+          </header>
+          <main className="min-h-0 flex-1 overflow-y-auto bg-muted/30 p-5">
+            <Outlet />
+          </main>
+        </div>
       </div>
     </div>
   )
