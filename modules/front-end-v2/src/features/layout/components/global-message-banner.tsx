@@ -1,4 +1,9 @@
-import { AlertCircle, AlertTriangle, CheckCircle2, Info } from "lucide-react"
+import {
+  AlertCircle,
+  AlertTriangle,
+  CheckCircle2,
+  Info,
+} from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
 import { buttonVariants } from "@/components/ui/button"
@@ -24,8 +29,7 @@ const globalMessageStyles: Record<
       "border-blue-200 bg-blue-50 text-blue-950 dark:border-blue-900/60 dark:bg-blue-950/30 dark:text-blue-100",
     icon: "text-blue-600 dark:text-blue-300",
     text: "text-blue-900/80 dark:text-blue-100/80",
-    button:
-      "text-blue-900/70 hover:bg-blue-100 hover:text-blue-950 dark:text-blue-100/70 dark:hover:bg-blue-900/50 dark:hover:text-blue-50",
+    button: "bg-card text-card-foreground shadow-sm hover:bg-accent",
     Icon: Info,
   },
   success: {
@@ -33,8 +37,7 @@ const globalMessageStyles: Record<
       "border-emerald-200 bg-emerald-50 text-emerald-950 dark:border-emerald-900/60 dark:bg-emerald-950/30 dark:text-emerald-100",
     icon: "text-emerald-600 dark:text-emerald-300",
     text: "text-emerald-900/80 dark:text-emerald-100/80",
-    button:
-      "text-emerald-900/70 hover:bg-emerald-100 hover:text-emerald-950 dark:text-emerald-100/70 dark:hover:bg-emerald-900/50 dark:hover:text-emerald-50",
+    button: "bg-card text-card-foreground shadow-sm hover:bg-accent",
     Icon: CheckCircle2,
   },
   warning: {
@@ -42,8 +45,7 @@ const globalMessageStyles: Record<
       "border-amber-200 bg-amber-50 text-amber-950 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-100",
     icon: "text-amber-600 dark:text-amber-300",
     text: "text-amber-900/80 dark:text-amber-100/80",
-    button:
-      "text-amber-900/70 hover:bg-amber-100 hover:text-amber-950 dark:text-amber-100/70 dark:hover:bg-amber-900/50 dark:hover:text-amber-50",
+    button: "bg-card text-card-foreground shadow-sm hover:bg-accent",
     Icon: AlertTriangle,
   },
   destructive: {
@@ -51,8 +53,7 @@ const globalMessageStyles: Record<
       "border-destructive/30 bg-destructive/10 text-destructive dark:border-destructive/40 dark:bg-destructive/20",
     icon: "text-destructive",
     text: "text-destructive/80",
-    button:
-      "text-destructive/80 hover:bg-destructive/10 hover:text-destructive",
+    button: "bg-card text-card-foreground shadow-sm hover:bg-accent",
     Icon: AlertCircle,
   },
 }
@@ -86,6 +87,7 @@ export function GlobalMessageBanner({ message }: { message?: GlobalMessage }) {
       <Link
         to={localizedPath(message.lang, "/app/workspace/billing?open=pricing")}
         className={buttonVariants({
+          variant: "outline",
           size: "sm",
           className: cn("ml-3 h-7 shrink-0 px-3", styles.button),
         })}

@@ -225,6 +225,38 @@ i18n.use(initReactI18next).init({
                 "Single sign-on is a paid feature. Add a license that includes SSO to enable it for this workspace.",
             },
           },
+          usage: {
+            periods: {
+              currentBilling: "Current billing cycle",
+              previousBilling: "Previous billing cycle",
+              thisMonth: "This month",
+              last7d: "Last 7 days",
+              last30d: "Last 30 days",
+            },
+            metrics: {
+              newUsers: "New Users",
+              flagEvaluations: "Flag Evaluations",
+              customMetrics: "Custom Metrics",
+            },
+            uniqueUsers: "Unique Users",
+            flagEvaluations: "Flag Evaluations",
+            customMetrics: "Custom Metrics",
+            dailyTrend: "Daily Trend",
+            perEnvironment: "Per Environment",
+            perEnvironmentSubtitle:
+              "See which environments contribute the most to your usage",
+            environment: "Environment",
+            failedToLoad: "Failed to load usage data.",
+            retry: "Retry",
+            emptyTrend: "No trend data for this period",
+            emptyEnvironments: "No environment usage for this period",
+            vs: {
+              prev7d: "vs prev 7 days",
+              prev30d: "vs prev 30 days",
+              prevPeriod: "vs prev period",
+              lastMonth: "vs last month",
+            },
+          },
           license: {
             workspaceId: "Workspace ID",
             workspaceIdHelper:
@@ -863,6 +895,37 @@ i18n.use(initReactI18next).init({
               unlicensedBadge: "需要许可证",
               unlicensedDescription:
                 "单点登录是付费功能。请添加包含 SSO 的许可证以启用该功能。",
+            },
+          },
+          usage: {
+            periods: {
+              currentBilling: "当前账单周期",
+              previousBilling: "上一个账单周期",
+              thisMonth: "本月",
+              last7d: "最近 7 天",
+              last30d: "最近 30 天",
+            },
+            metrics: {
+              newUsers: "新增用户",
+              flagEvaluations: "开关评估",
+              customMetrics: "自定义指标",
+            },
+            uniqueUsers: "唯一用户",
+            flagEvaluations: "开关评估",
+            customMetrics: "自定义指标",
+            dailyTrend: "每日趋势",
+            perEnvironment: "按环境",
+            perEnvironmentSubtitle: "查看哪些环境贡献了最多用量",
+            environment: "环境",
+            failedToLoad: "加载用量数据失败。",
+            retry: "重试",
+            emptyTrend: "当前周期没有趋势数据",
+            emptyEnvironments: "当前周期没有环境用量",
+            vs: {
+              prev7d: "较前 7 天",
+              prev30d: "较前 30 天",
+              prevPeriod: "较上一周期",
+              lastMonth: "较上月",
             },
           },
           license: {

@@ -16,6 +16,7 @@ import { BillingPage } from "@/features/workspace/billing/billing-page"
 import { GeneralPage } from "@/features/workspace/general/general-page"
 import { GlobalUsersPage } from "@/features/workspace/global-users/global-users-page"
 import { LicensePage } from "@/features/workspace/license/license-page"
+import { UsagePage } from "@/features/workspace/usage/usage-page"
 import { SelectWorkspacePage } from "@/features/workspace-selection/select-workspace-page"
 import { getRuntimeEnv } from "@/lib/env/runtime-env"
 
@@ -169,6 +170,7 @@ export function AppRoutes() {
         <Route path="workspace" element={<GeneralPage />} />
         <Route path="workspace/billing" element={<BillingPage />} />
         <Route path="workspace/license" element={<LicensePage />} />
+        <Route path="workspace/usage" element={<UsagePage />} />
         <Route path="workspace/global-users" element={<GlobalUsersPage />} />
         <Route path="*" element={<LayoutPlaceholder />} />
       </Route>
