@@ -8,10 +8,29 @@ import {
   setCurrentContext,
 } from "./helpers"
 
-async function setupUsagePage(page: Page) {
+type UsagePageSetupOptions = {
+  hostingMode?: string
+  currentCycle?: {
+    startDate: string
+    endDate: string
+  }
+}
+
+async function setupUsagePage(
+  page: Page,
+  {
+    hostingMode = "saas",
+    currentCycle = {
+      startDate: "2026-07-01T00:00:00.000Z",
+      endDate: "2026-08-01T00:00:00.000Z",
+    },
+  }: UsagePageSetupOptions = {}
+) {
+  let currentCycleRequestCount = 0
+
   await mockRuntimeEnv(page, {
     API_URL: "http://localhost:5000",
-    HOSTING_MODE: "saas",
+    HOSTING_MODE: hostingMode,
     VERSION: "e2e",
   })
   await mockContextEndpoints(page)
@@ -33,13 +52,12 @@ async function setupUsagePage(page: Page) {
   })
 
   await page.route("**/api/v1/billing/current-cycle", async (route) => {
+    currentCycleRequestCount += 1
+
     await route.fulfill({
       json: {
         success: true,
-        data: JSON.stringify({
-          startDate: "2026-07-01T00:00:00.000Z",
-          endDate: "2026-08-01T00:00:00.000Z",
-        }),
+        data: JSON.stringify(currentCycle),
       },
     })
   })
@@ -101,6 +119,10 @@ async function setupUsagePage(page: Page) {
       },
     })
   })
+
+  return {
+    getCurrentCycleRequestCount: () => currentCycleRequestCount,
+  }
 }
 
 test.describe("workspace usage", () => {
@@ -136,5 +158,41 @@ test.describe("workspace usage", () => {
     await expect(page.getByRole("row", { name: /Staging Acme Corp/ })).toBeVisible()
     await expect(page.getByText("5,600,000")).toBeVisible()
     await expect(page.getByText("(71.8%)")).toBeVisible()
+  })
+
+  test("hides billing-cycle periods for long SaaS cycles", async ({ page }) => {
+    await setupUsagePage(page, {
+      currentCycle: {
+        startDate: "2026-07-03T07:27:56.700Z",
+        endDate: "2125-07-03T07:27:56.700Z",
+      },
+    })
+
+    await page.goto("/en/app/workspace/usage")
+
+    await expect(page.getByRole("combobox", { name: "This month" })).toBeVisible()
+    await expect(page.getByText("Daily Trend")).toBeVisible()
+
+    await page.getByRole("combobox", { name: "This month" }).click()
+    await expect(page.getByRole("option", { name: "This month" })).toBeVisible()
+    await expect(
+      page.getByRole("option", { name: "Current billing cycle" })
+    ).toHaveCount(0)
+    await expect(
+      page.getByRole("option", { name: "Previous billing cycle" })
+    ).toHaveCount(0)
+    await page.keyboard.press("Escape")
+  })
+
+  test("uses this month without requesting billing cycle outside SaaS", async ({
+    page,
+  }) => {
+    const setup = await setupUsagePage(page, { hostingMode: "self-hosted" })
+
+    await page.goto("/en/app/workspace/usage")
+
+    await expect(page.getByRole("combobox", { name: "This month" })).toBeVisible()
+    await expect(page.getByText("Daily Trend")).toBeVisible()
+    expect(setup.getCurrentCycleRequestCount()).toBe(0)
   })
 })
