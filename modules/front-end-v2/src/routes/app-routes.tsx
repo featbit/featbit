@@ -5,12 +5,12 @@ import {
   useLocation,
   useParams,
 } from "react-router-dom"
-import { useTranslation } from "react-i18next"
 import { AuthPage } from "@/features/auth/auth-page"
 import { AuthenticatedEntry } from "@/features/auth/authenticated-entry"
 import { getIdentityToken } from "@/features/auth/auth-api"
 import { AuthenticatedLayout } from "@/features/layout/authenticated-layout"
 import { LayoutPlaceholder } from "@/features/layout/layout-placeholder"
+import { NotFoundPage } from "@/features/layout/not-found-page"
 import { OnboardingPage } from "@/features/onboarding/onboarding-page"
 import { BillingPage } from "@/features/workspace/billing/billing-page"
 import { GeneralPage } from "@/features/workspace/general/general-page"
@@ -18,7 +18,6 @@ import { GlobalUsersPage } from "@/features/workspace/global-users/global-users-
 import { LicensePage } from "@/features/workspace/license/license-page"
 import { UsagePage } from "@/features/workspace/usage/usage-page"
 import { SelectWorkspacePage } from "@/features/workspace-selection/select-workspace-page"
-import { getRuntimeEnv } from "@/lib/env/runtime-env"
 
 type SupportedLanguage = "en" | "zh"
 
@@ -128,30 +127,6 @@ function OnboardingRoute() {
   return <OnboardingPage />
 }
 
-function ShellPage() {
-  const { t } = useTranslation()
-  const env = getRuntimeEnv()
-
-  return (
-    <main className="flex min-h-svh items-center justify-center bg-background p-6 text-foreground">
-      <section className="flex w-full max-w-md flex-col gap-3">
-        <p className="text-sm font-medium text-muted-foreground">
-          {t("shell.eyebrow")}
-        </p>
-        <h1 className="text-2xl font-semibold tracking-normal">
-          {t("shell.app.title")}
-        </h1>
-        <p className="text-sm leading-6 text-muted-foreground">
-          {t("shell.app.description")}
-        </p>
-        <p className="text-xs text-muted-foreground">
-          {t("shell.version", { version: env.version })}
-        </p>
-      </section>
-    </main>
-  )
-}
-
 export function AppRoutes() {
   return (
     <Routes>
@@ -172,9 +147,10 @@ export function AppRoutes() {
         <Route path="workspace/license" element={<LicensePage />} />
         <Route path="workspace/usage" element={<UsagePage />} />
         <Route path="workspace/global-users" element={<GlobalUsersPage />} />
+        {/*TODO remove the following line when migration completed*/}
         <Route path="*" element={<LayoutPlaceholder />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Route>
-      <Route path="/:lang/*" element={<ShellPage />} />
       <Route path="*" element={<LanguageRedirect />} />
     </Routes>
   )

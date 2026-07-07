@@ -361,9 +361,7 @@ describe("App shell", () => {
       '"envName":"Dev"'
     )
     expect(
-      await screen.findByText(
-        "Authenticated layout ready. Page content will migrate in later steps."
-      )
+      await screen.findByRole("heading", { name: "Page not found" })
     ).toBeInTheDocument()
     await waitFor(() => {
       expect(screen.getByText("New Org")).toBeInTheDocument()
