@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useParams } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
-import type { SortingState } from "@tanstack/react-table"
+import { Alert, AlertAction, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import {
   getCurrentWorkspace,
@@ -43,9 +43,6 @@ export function UsagePage() {
     useState<PeriodKey | null>(null)
   const [selectedMetric, setSelectedMetric] =
     useState<MetricKey>("flagEvaluations")
-  const [sorting, setSorting] = useState<SortingState>([
-    { id: "flagEvaluations", desc: true },
-  ])
 
   const cycleQuery = useQuery({
     queryKey: ["billing", "current-cycle"],
@@ -152,13 +149,17 @@ export function UsagePage() {
         />
 
         {hasError ? (
-          <div className="flex items-center justify-between gap-4 rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-            <span>{t("workspace.usage.failedToLoad")}</span>
-            <Button type="button" variant="outline" size="sm" onClick={retry}>
-              <RefreshCw className="size-3.5" />
-              {t("workspace.usage.retry")}
-            </Button>
-          </div>
+          <Alert variant="destructive">
+            <AlertDescription>
+              {t("workspace.usage.failedToLoad")}
+            </AlertDescription>
+            <AlertAction>
+              <Button type="button" variant="outline" size="sm" onClick={retry}>
+                <RefreshCw className="size-3.5" />
+                {t("workspace.usage.retry")}
+              </Button>
+            </AlertAction>
+          </Alert>
         ) : null}
 
         <div className="grid gap-4 lg:grid-cols-3">
@@ -206,9 +207,7 @@ export function UsagePage() {
           data={usage?.environmentUsages ?? []}
           isLoading={isInitialLoading}
           lang={lang}
-          sorting={sorting}
           summary={summary}
-          onSortingChange={setSorting}
         />
       </div>
     </WorkspaceLayout>

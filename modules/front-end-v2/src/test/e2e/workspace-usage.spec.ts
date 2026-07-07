@@ -36,10 +36,10 @@ async function setupUsagePage(page: Page) {
     await route.fulfill({
       json: {
         success: true,
-        data: {
-          start: "2026-07-01T00:00:00.000Z",
-          end: "2026-08-01T00:00:00.000Z",
-        },
+        data: JSON.stringify({
+          startDate: "2026-07-01T00:00:00.000Z",
+          endDate: "2026-08-01T00:00:00.000Z",
+        }),
       },
     })
   })

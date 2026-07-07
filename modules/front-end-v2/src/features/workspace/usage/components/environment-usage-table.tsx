@@ -1,18 +1,15 @@
-import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react"
-import { useMemo, type Dispatch, type SetStateAction } from "react"
+import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import {
   flexRender,
   getCoreRowModel,
-  getSortedRowModel,
   useReactTable,
   type ColumnDef,
-  type SortingState,
 } from "@tanstack/react-table"
-import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -34,16 +31,12 @@ export function EnvironmentUsageTable({
   data,
   isLoading,
   lang,
-  sorting,
   summary,
-  onSortingChange,
 }: {
   data: EnvironmentUsage[]
   isLoading: boolean
   lang: "en" | "zh"
-  sorting: SortingState
   summary?: UsageSummary
-  onSortingChange: Dispatch<SetStateAction<SortingState>>
 }) {
   const { t } = useTranslation()
   const columns = useMemo<ColumnDef<EnvironmentUsage>[]>(
@@ -89,28 +82,25 @@ export function EnvironmentUsageTable({
   const table = useReactTable({
     data,
     columns,
-    state: { sorting },
-    onSortingChange,
     getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
   })
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>{t("workspace.usage.perEnvironment")}</CardTitle>
-        <p className="text-sm text-muted-foreground">
+        <CardDescription>
           {t("workspace.usage.perEnvironmentSubtitle")}
-        </p>
+        </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="overflow-hidden rounded-md border">
+        <div className="overflow-hidden rounded-md border bg-background">
           <Table className="min-w-[900px] table-fixed">
-            <TableHeader className="bg-muted/40">
+            <TableHeader className="border-b text-left text-foreground">
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id} className="hover:bg-transparent">
                   {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id} className="px-4 py-3">
+                    <TableHead key={header.id} className="px-5 py-4 font-semibold">
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -139,7 +129,7 @@ export function EnvironmentUsageTable({
                     {row.getVisibleCells().map((cell) => (
                       <TableCell
                         key={cell.id}
-                        className="px-4 py-3 align-middle"
+                        className="px-5 py-4 align-middle text-sm text-foreground"
                       >
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
@@ -170,27 +160,7 @@ function metricColumn({
 }): ColumnDef<EnvironmentUsage> {
   return {
     accessorKey: key,
-    header: ({ column }) => {
-      const sorted = column.getIsSorted()
-
-      return (
-        <Button
-          type="button"
-          variant="ghost"
-          className="h-auto px-0 py-0 font-medium text-foreground hover:bg-transparent"
-          onClick={() => column.toggleSorting(sorted === "asc")}
-        >
-          {label}
-          {sorted === "asc" ? (
-            <ArrowUp className="size-3.5" />
-          ) : sorted === "desc" ? (
-            <ArrowDown className="size-3.5" />
-          ) : (
-            <ArrowUpDown className="size-3.5 text-muted-foreground" />
-          )}
-        </Button>
-      )
-    },
+    header: label,
     cell: ({ row }) => {
       const value = row.original[key]
       const percent = getUsagePercent(value, total)
@@ -219,10 +189,10 @@ function UsageTableSkeleton({ columns }: { columns: number }) {
   return (
     <>
       {Array.from({ length: 4 }).map((_, rowIndex) => (
-        <TableRow key={rowIndex}>
+        <TableRow key={rowIndex} className="last:border-b-0">
           {Array.from({ length: columns }).map((__, columnIndex) => (
-            <TableCell key={columnIndex} className="px-4 py-3">
-              <Skeleton className="h-5 w-3/4" />
+            <TableCell key={columnIndex} className="px-5 py-4">
+              <Skeleton className="h-4 w-3/4" />
             </TableCell>
           ))}
         </TableRow>

@@ -38,7 +38,10 @@ export function PeriodSelector({
             value={selectedPeriod}
             onValueChange={(value) => onPeriodChange(value as PeriodKey)}
           >
-            <SelectTrigger className="h-9 w-full bg-background sm:w-56">
+            <SelectTrigger
+              aria-label={selectedPeriodLabel}
+              className="h-9 w-full bg-background sm:w-56"
+            >
               <SelectValue>{selectedPeriodLabel}</SelectValue>
             </SelectTrigger>
             <SelectContent>

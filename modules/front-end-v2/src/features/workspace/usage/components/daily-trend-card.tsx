@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button"
 import {
   Card,
+  CardAction,
   CardContent,
   CardHeader,
   CardTitle,
@@ -47,24 +48,26 @@ export function DailyTrendCard({
     <Card>
       <CardHeader className="gap-3 sm:grid-cols-[1fr_auto]">
         <CardTitle>{t("workspace.usage.dailyTrend")}</CardTitle>
-        {isLoading ? (
-          <Skeleton className="h-8 w-full sm:w-80" />
-        ) : (
-          <div className="inline-flex rounded-md border bg-background p-0.5">
-            {metricKeys.map((metric) => (
-              <Button
-                key={metric}
-                type="button"
-                variant={selectedMetric === metric ? "secondary" : "ghost"}
-                size="sm"
-                className="h-7 rounded-sm px-3 text-xs"
-                onClick={() => onMetricChange(metric)}
-              >
-                {t(`workspace.usage.metrics.${metric}`)}
-              </Button>
-            ))}
-          </div>
-        )}
+        <CardAction className="col-start-1 row-start-2 justify-self-start sm:col-start-2 sm:row-start-1 sm:justify-self-end">
+          {isLoading ? (
+            <Skeleton className="h-8 w-full sm:w-80" />
+          ) : (
+            <div className="inline-flex rounded-md border bg-background p-0.5">
+              {metricKeys.map((metric) => (
+                <Button
+                  key={metric}
+                  type="button"
+                  variant={selectedMetric === metric ? "secondary" : "ghost"}
+                  size="sm"
+                  className="h-7 rounded-sm px-3 text-xs"
+                  onClick={() => onMetricChange(metric)}
+                >
+                  {t(`workspace.usage.metrics.${metric}`)}
+                </Button>
+              ))}
+            </div>
+          )}
+        </CardAction>
       </CardHeader>
       <CardContent>
         <div className="h-[280px]">
