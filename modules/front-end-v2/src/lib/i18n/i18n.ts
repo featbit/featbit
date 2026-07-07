@@ -989,7 +989,7 @@ i18n.use(initReactI18next).init({
               monthlyBilling: "按月计费",
               yearlyBilling: "按年计费",
               scheduledDowngrade:
-                "你有一个待生效的降级，当前账单周期结束后将变更为 {{plan}}。",
+                "你有一个待生效的订阅降级，当前账单周期结束后将变更为 {{plan}}。",
               billingPeriod: "账单周期",
               nextCharge: "下次扣费",
               subscriberSince: "订阅开始时间",
