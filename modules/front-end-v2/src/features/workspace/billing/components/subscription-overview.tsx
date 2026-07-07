@@ -97,9 +97,9 @@ export function SubscriptionOverview({
                 {t(plan.nameKey)}
               </h2>
               <Badge
-                variant="outline"
-                className="border-blue-200 bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-300"
-              >
+                  variant="default"
+                  className="whitespace-nowrap"
+                >
                 {subscription?.billingCycle === "yearly"
                   ? t("workspace.billing.overview.yearlyBilling")
                   : t("workspace.billing.overview.monthlyBilling")}
