@@ -2,7 +2,10 @@ import { Loader2, Save } from "lucide-react"
 import type { UseFormReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
-import { InputField, TextInput } from "@/features/workspace/general/components/form-fields"
+import {
+  InputField,
+  TextInput,
+} from "@/features/workspace/general/components/form-fields"
 import { Section } from "@/features/workspace/general/components/workspace-shell"
 import type { IdentityFormValues } from "@/features/workspace/general/workspace-types"
 
@@ -53,7 +56,7 @@ export function IdentitySettingsSection({
           </InputField>
         </div>
         <div className="flex flex-col gap-4 pt-1 sm:flex-row sm:items-center sm:justify-between">
-          <div className="space-y-1">
+          <div className="min-w-0 space-y-1">
             <p className="text-sm text-muted-foreground">
               {t("workspace.general.identity.helper")}
             </p>
@@ -68,7 +71,9 @@ export function IdentitySettingsSection({
             ) : (
               <Save className="size-4" />
             )}
-            {isSaving ? t("workspace.saving") : t("workspace.general.identity.save")}
+            {isSaving
+              ? t("workspace.saving")
+              : t("workspace.general.identity.save")}
           </Button>
         </div>
       </form>

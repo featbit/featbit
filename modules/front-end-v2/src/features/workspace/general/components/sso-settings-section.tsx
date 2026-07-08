@@ -7,25 +7,20 @@ import {
   Save,
   ShieldCheck,
 } from "lucide-react"
-import type React from "react"
 import type {
   FieldErrors,
   UseFormRegister,
   UseFormReturn,
 } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { InputField, TextInput } from "@/features/workspace/general/components/form-fields"
+import {
+  InputField,
+  TextInput,
+} from "@/features/workspace/general/components/form-fields"
 import { Section } from "@/features/workspace/general/components/workspace-shell"
 import type { SsoFormValues } from "@/features/workspace/general/workspace-types"
-
-function StatusBadge({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="w-fit shrink-0 rounded-lg border bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground">
-      {children}
-    </span>
-  )
-}
 
 function SsoFields({
   register,
@@ -74,7 +69,7 @@ function SsoFields({
             type="button"
             variant="ghost"
             size="icon-sm"
-            className="absolute right-1 top-1/2 -translate-y-1/2 text-muted-foreground"
+            className="absolute top-1/2 right-1 -translate-y-1/2 text-muted-foreground"
             aria-label={
               secretVisible
                 ? t("workspace.general.sso.hideSecret")
@@ -83,7 +78,11 @@ function SsoFields({
             disabled={disabled}
             onClick={() => setSecretVisible(!secretVisible)}
           >
-            {secretVisible ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+            {secretVisible ? (
+              <EyeOff className="size-4" />
+            ) : (
+              <Eye className="size-4" />
+            )}
           </Button>
         </div>
       </InputField>
@@ -169,7 +168,9 @@ function RestrictedSsoSettings() {
           </p>
         </div>
       </div>
-      <StatusBadge>{t("workspace.general.sso.restrictedBadge")}</StatusBadge>
+      <Badge variant="outline" className="bg-background text-muted-foreground">
+        {t("workspace.general.sso.restrictedBadge")}
+      </Badge>
     </div>
   )
 }
@@ -192,7 +193,9 @@ function UnlicensedSsoSettings() {
           </p>
         </div>
       </div>
-      <StatusBadge>{t("workspace.general.sso.unlicensedBadge")}</StatusBadge>
+      <Badge variant="outline" className="bg-background text-muted-foreground">
+        {t("workspace.general.sso.unlicensedBadge")}
+      </Badge>
     </div>
   )
 }
@@ -217,7 +220,10 @@ export function SsoSettingsSection({
   const { t } = useTranslation()
 
   return (
-    <Section title={t("workspace.general.accessConfiguration")} className="pb-2">
+    <Section
+      title={t("workspace.general.accessConfiguration")}
+      className="pb-2"
+    >
       {!isLicensed ? (
         <UnlicensedSsoSettings />
       ) : canUpdate ? (
@@ -236,7 +242,7 @@ export function SsoSettingsSection({
             disabled={isSaving}
           />
           <div className="flex flex-col gap-4 pt-1 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-muted-foreground">
+            <p className="min-w-0 text-sm text-muted-foreground">
               {t("workspace.general.sso.helper")}
             </p>
             <Button type="submit" size="lg" disabled={isSaving}>
@@ -245,7 +251,9 @@ export function SsoSettingsSection({
               ) : (
                 <Save className="size-4" />
               )}
-              {isSaving ? t("workspace.saving") : t("workspace.general.sso.save")}
+              {isSaving
+                ? t("workspace.saving")
+                : t("workspace.general.sso.save")}
             </Button>
           </div>
         </form>

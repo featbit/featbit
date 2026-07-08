@@ -4,7 +4,10 @@ import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useParams } from "react-router-dom"
 import { z } from "zod"
-import { getCurrentWorkspace, resolveLang } from "@/features/layout/layout-context"
+import {
+  getCurrentWorkspace,
+  resolveLang,
+} from "@/features/layout/layout-context"
 import { IdentitySettingsSection } from "@/features/workspace/general/components/identity-settings-section"
 import { SsoSettingsSection } from "@/features/workspace/general/components/sso-settings-section"
 import { WorkspaceLayout } from "@/features/workspace/components/workspace-layout"
@@ -39,6 +42,7 @@ export function GeneralPage() {
   const [statusVariant, setStatusVariant] = useState<"success" | "error">(
     "success"
   )
+  const [statusEventId, setStatusEventId] = useState(0)
   const [secretVisible, setSecretVisible] = useState(false)
   const [canUpdateSsoSettings, setCanUpdateSsoSettings] = useState(true)
   const canUpdateGeneralSettings = true
@@ -61,7 +65,11 @@ export function GeneralPage() {
       z.object({
         clientId: z.string().trim().min(1, requiredMessage),
         clientSecret: z.string().trim().min(1, requiredMessage),
-        tokenEndpoint: z.string().trim().min(1, requiredMessage).url(urlMessage),
+        tokenEndpoint: z
+          .string()
+          .trim()
+          .min(1, requiredMessage)
+          .url(urlMessage),
         clientAuthenticationMethod: z.string().trim().min(1, requiredMessage),
         authorizationEndpoint: z
           .string()
@@ -92,6 +100,7 @@ export function GeneralPage() {
   function showStatus(message: string, variant: "success" | "error") {
     setStatusVariant(variant)
     setStatusMessage(message)
+    setStatusEventId((current) => current + 1)
   }
 
   useEffect(() => {
@@ -114,7 +123,9 @@ export function GeneralPage() {
       } catch (error) {
         if (!cancelled) {
           showStatus(
-            error instanceof Error ? error.message : t("workspace.requestFailed"),
+            error instanceof Error
+              ? error.message
+              : t("workspace.requestFailed"),
             "error"
           )
         }
@@ -216,6 +227,7 @@ export function GeneralPage() {
       activeTab="general"
       statusMessage={statusMessage}
       statusVariant={statusVariant}
+      statusEventId={statusEventId}
     >
       {isLoading ? (
         <div className="py-8">
