@@ -13,6 +13,7 @@ import type {
 import { fetchApi } from "@/lib/api/authenticated-api"
 
 const IS_SSO_FIRST_LOGIN_STORAGE_KEY = "is-sso-first-login"
+const ORGANIZATION_CHANGED_EVENT = "featbit:organization-changed"
 
 function scopedStorageKey(key: string, profile: StoredUserProfile) {
   return profile.id ? `${key}_${profile.id}` : key
@@ -82,7 +83,10 @@ export function getStoredProjectEnv() {
 }
 
 export function saveCurrentProjectEnv(projectEnv: ProjectEnv) {
-  localStorage.setItem(contextKey("current-project"), JSON.stringify(projectEnv))
+  localStorage.setItem(
+    contextKey("current-project"),
+    JSON.stringify(projectEnv)
+  )
 }
 
 export function clearCurrentProjectEnv() {
@@ -90,7 +94,10 @@ export function clearCurrentProjectEnv() {
 }
 
 function saveCurrentWorkspace(workspace: Workspace) {
-  localStorage.setItem(contextKey("current-workspace"), JSON.stringify(workspace))
+  localStorage.setItem(
+    contextKey("current-workspace"),
+    JSON.stringify(workspace)
+  )
 }
 
 function saveCurrentOrganization(organization: Organization) {
@@ -132,6 +139,16 @@ export function persistCurrentWorkspace(workspace: Workspace) {
 
 export function persistCurrentOrganization(organization: Organization) {
   saveCurrentOrganization(organization)
+
+  window.dispatchEvent(new Event(ORGANIZATION_CHANGED_EVENT))
+}
+
+export function onCurrentOrganizationChanged(callback: () => void) {
+  window.addEventListener(ORGANIZATION_CHANGED_EVENT, callback)
+
+  return () => {
+    window.removeEventListener(ORGANIZATION_CHANGED_EVENT, callback)
+  }
 }
 
 export async function fetchWorkspaces() {

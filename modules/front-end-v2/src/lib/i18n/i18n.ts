@@ -181,6 +181,73 @@ i18n.use(initReactI18next).init({
             },
           },
         },
+        organization: {
+          title: "Organization",
+          operationSucceeded: "Operation succeeded",
+          operationFailed: "Operation failed",
+          copied: "Copied",
+          empty: "No organizations are available for this workspace.",
+          tabs: {
+            general: "General",
+            projects: "Projects",
+          },
+          select: {
+            placeholder: "Select option",
+            loading: "Loading...",
+          },
+          actions: {
+            copy: "Copy",
+            copyField: "Copy {{label}}",
+            saveChanges: "Save changes",
+            saveSorting: "Save sorting",
+            savePermissions: "Save permissions",
+            createOrganization: "Create organization",
+          },
+          identity: {
+            id: "ID",
+            key: "Key",
+            name: "Name",
+            helper:
+              "These settings identify your organization and are used across FeatBit.",
+          },
+          preferences: {
+            title: "Preferences",
+            sortFlagsBy: "Sort flags by",
+            sortHelper:
+              "Default ordering for feature flag lists in this organization.",
+            defaultPolicy: "Default policy",
+            defaultGroup: "Default group",
+            permissionsHelper:
+              "Assign a default policy or group to users when they join this organization.",
+          },
+          switch: {
+            title: "Switch organization",
+            organization: "Organization",
+            helper:
+              "Switching organizations clears the current project and environment context.",
+            switched: "Organization switched",
+          },
+          create: {
+            title: "Create organization",
+            description: "Create a new organization in this workspace.",
+            namePlaceholder: "Organization name",
+            keyPlaceholder: "organization-key",
+            keyHelper: "Keys may contain letters, numbers, '.', '_' or '-'.",
+            keyAvailable: "Key is available",
+            succeeded: "Organization successfully created",
+          },
+          validation: {
+            nameRequired: "Name is required",
+            keyRequired: "Key is required",
+          },
+          options: {
+            systemManaged: "System managed",
+            flagSort: {
+              createdAt: "Created at",
+              key: "Key",
+            },
+          },
+        },
         workspace: {
           title: "Workspace",
           operationSucceeded: "Operation succeeded",
@@ -808,7 +875,7 @@ i18n.use(initReactI18next).init({
               auditLogs: "审计日志",
               changeRequests: "变更请求",
               workspace: "工作区",
-              organization: "组织",
+              organization: "组织机构",
               iam: "IAM",
               team: "团队",
               groups: "用户组",
@@ -854,6 +921,69 @@ i18n.use(initReactI18next).init({
               light: "浅色",
               dark: "深色",
               system: "跟随系统",
+            },
+          },
+        },
+        organization: {
+          title: "组织机构",
+          operationSucceeded: "操作成功",
+          operationFailed: "操作失败",
+          copied: "已复制",
+          empty: "当前工作区没有可用的组织。",
+          tabs: {
+            general: "通用",
+            projects: "项目",
+          },
+          select: {
+            placeholder: "请选择",
+            loading: "加载中...",
+          },
+          actions: {
+            copy: "复制",
+            copyField: "复制 {{label}}",
+            saveChanges: "保存变更",
+            saveSorting: "保存排序",
+            savePermissions: "保存权限",
+            createOrganization: "创建机构",
+          },
+          identity: {
+            id: "ID",
+            key: "Key",
+            name: "名称",
+            helper: "这些设置用于标识你的组织机构，并会在 FeatBit 中使用。",
+          },
+          preferences: {
+            title: "偏好设置",
+            sortFlagsBy: "开关排序方式",
+            sortHelper: "此组织机构中功能开关列表的默认排序方式。",
+            defaultPolicy: "默认策略",
+            defaultGroup: "默认组",
+            permissionsHelper: "用户加入此组织机构时，为其分配默认策略或组。",
+          },
+          switch: {
+            title: "切换机构",
+            organization: "组织机构",
+            helper: "切换机构会清除当前项目和环境上下文。",
+            switched: "机构已切换",
+          },
+          create: {
+            title: "创建机构",
+            description: "在当前工作区中创建一个新机构。",
+            namePlaceholder: "名称",
+            keyPlaceholder: "organization-key",
+            keyHelper: "Key 可以包含字母、数字、'.'、'_' 或 '-'。",
+            keyAvailable: "Key 可用",
+            succeeded: "机构创建成功",
+          },
+          validation: {
+            nameRequired: "名称不能为空",
+            keyRequired: "Key 不能为空",
+          },
+          options: {
+            systemManaged: "系统托管",
+            flagSort: {
+              createdAt: "创建于",
+              key: "Key",
             },
           },
         },

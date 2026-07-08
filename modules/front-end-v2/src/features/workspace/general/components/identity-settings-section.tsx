@@ -28,7 +28,7 @@ export function IdentitySettingsSection({
 
   return (
     <Section>
-      <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
         <div className="grid gap-5 lg:grid-cols-2">
           <InputField
             id="workspaceName"
@@ -55,7 +55,7 @@ export function IdentitySettingsSection({
             />
           </InputField>
         </div>
-        <div className="flex flex-col gap-4 pt-1 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-3 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0 space-y-1">
             <p className="text-sm text-muted-foreground">
               {t("workspace.general.identity.helper")}

@@ -11,6 +11,7 @@ import {
   getCurrentOrganization,
   getCurrentProjectEnv,
   getCurrentWorkspace,
+  onCurrentOrganizationChanged,
   resolveLang,
   saveCurrentProjectEnv,
 } from "@/features/layout/layout-context"
@@ -31,6 +32,7 @@ import { getRuntimeEnv } from "@/lib/env/runtime-env"
 const SIDEBAR_STORAGE_KEY = "featbit:sidebar-collapsed"
 const UI_BROADCAST_CHANNEL = "featbit-ui-broadcast-channel"
 const ENV_CHANGED_MESSAGE = "env-changed"
+const ORG_CHANGED_MESSAGE = "org-changed"
 const HOSTING_MODE_SAAS = "saas"
 
 function getEnvironmentReloadPath(pathname: string) {
@@ -118,12 +120,22 @@ export function AuthenticatedLayout() {
       if (event.data === ENV_CHANGED_MESSAGE) {
         window.location.assign(getEnvironmentReloadPath(location.pathname))
       }
+
+      if (event.data === ORG_CHANGED_MESSAGE) {
+        window.location.assign(`/${lang}`)
+      }
     }
 
     return () => {
       channel.close()
     }
-  }, [location.pathname])
+  }, [lang, location.pathname])
+
+  useEffect(() => {
+    return onCurrentOrganizationChanged(() => {
+      setOrganization(getCurrentOrganization())
+    })
+  }, [])
 
   useEffect(() => {
     document.documentElement.lang = lang

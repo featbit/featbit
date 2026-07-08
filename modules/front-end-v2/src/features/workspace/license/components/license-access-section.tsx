@@ -1,14 +1,10 @@
-import { Copy, LockKeyhole, Upload } from "lucide-react"
+import type React from "react"
+import { LockKeyhole, Upload } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
+import { CopyField } from "@/components/copy-field"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
 import type { WorkspaceDetails } from "@/features/workspace/workspace-api"
 import { cn } from "@/lib/utils"
 
@@ -61,33 +57,12 @@ function WorkspaceIdSection({
           {t("workspace.license.workspaceIdHelper")}
         </p>
       </div>
-      <CodeField>
-        <LockKeyhole className="size-4 shrink-0 text-muted-foreground" />
-        <code className="min-w-0 flex-1 truncate text-sm font-semibold">
-          {workspace.id}
-        </code>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="h-6 shrink-0 gap-1.5 bg-background px-2 text-xs"
-                  onClick={copyWorkspaceId}
-                >
-                  <Copy className="size-3.5" />
-                  {t("workspace.license.copy")}
-                </Button>
-              }
-            />
-            <TooltipContent>
-              {t("workspace.license.copyWorkspaceId")}
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </CodeField>
+      <CopyField
+        value={workspace.id}
+        buttonLabel={t("workspace.license.copy")}
+        tooltip={t("workspace.license.copyWorkspaceId")}
+        onCopy={copyWorkspaceId}
+      />
     </div>
   )
 }

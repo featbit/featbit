@@ -18,6 +18,7 @@ import { GlobalUsersPage } from "@/features/workspace/global-users/global-users-
 import { LicensePage } from "@/features/workspace/license/license-page"
 import { UsagePage } from "@/features/workspace/usage/usage-page"
 import { SelectWorkspacePage } from "@/features/workspace-selection/select-workspace-page"
+import { OrganizationGeneralPage } from "@/features/organization/general/general-page"
 
 type SupportedLanguage = "en" | "zh"
 
@@ -147,6 +148,7 @@ export function AppRoutes() {
         <Route path="workspace/license" element={<LicensePage />} />
         <Route path="workspace/usage" element={<UsagePage />} />
         <Route path="workspace/global-users" element={<GlobalUsersPage />} />
+        <Route path="organization" element={<OrganizationGeneralPage />} />
         {/*TODO remove the following line when migration completed*/}
         <Route path="*" element={<LayoutPlaceholder />} />
         <Route path="*" element={<NotFoundPage />} />

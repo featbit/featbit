@@ -227,21 +227,23 @@ export function SsoSettingsSection({
       {!isLicensed ? (
         <UnlicensedSsoSettings />
       ) : canUpdate ? (
-        <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
+        <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className="flex items-center gap-3">
             <h3 className="text-base font-semibold">
               {t("workspace.general.sso.title")}
             </h3>
             <ShieldCheck className="size-5 text-emerald-600 dark:text-emerald-400" />
           </div>
-          <SsoFields
-            register={form.register}
-            errors={form.formState.errors}
-            secretVisible={secretVisible}
-            setSecretVisible={setSecretVisible}
-            disabled={isSaving}
-          />
-          <div className="flex flex-col gap-4 pt-1 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mt-6">
+            <SsoFields
+              register={form.register}
+              errors={form.formState.errors}
+              secretVisible={secretVisible}
+              setSecretVisible={setSecretVisible}
+              disabled={isSaving}
+            />
+          </div>
+          <div className="mt-3 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <p className="min-w-0 text-sm text-muted-foreground">
               {t("workspace.general.sso.helper")}
             </p>
