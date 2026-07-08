@@ -7,6 +7,7 @@ This document defines the React design target for the Organization admin area. A
 This design document covers only the Organization content area inside the authenticated layout.
 
 - Implementing this page must not modify authenticated layout primitives such as the context bar, sidebar navigation, account menu, top-right subscription/license badge, layout spacing contract, or route-level layout frame.
+- Projects tab design and mockups should show only the main page content area. Do not include the sidebar, context bar, or other authenticated shell chrome when documenting or implementing this tab.
 - Organization belongs under Admin navigation, next to Workspace, IAM, Relay Proxies, and Integrations.
 - The top application context bar remains `Organization / Project / Environment`. Organization page content may show organization identity and switching controls, but it must not change the global context bar contract.
 - Profile management is an Angular functional reference, but React should treat user profile as an account-level surface. If `/organization/profile` is preserved for route compatibility, it should redirect to or reuse the account Profile surface rather than make Organization own personal account settings.
@@ -193,60 +194,130 @@ Create organization drawer:
 
 ## Projects Tab
 
-The Projects tab is an operational inventory of projects, environments, and SDK secrets. React should preserve Angular's hierarchy but redesign the presentation to be easier to scan.
+The Projects tab is an operational inventory of projects, environments, and SDK secrets. Angular's current page preserves the needed behavior, but its card spacing, action density, colored tags, and secret wrapping make the hierarchy hard to scan. React should redesign the page as a compact resource-management workbench while preserving every functional capability.
+
+### Functional Scope
+
+Preserve these Angular behaviors:
+
+- List all accessible projects for the current organization and keep the current project first.
+- Filter projects locally by project name.
+- Incrementally reveal projects with a `Load more` action when the list is long.
+- Create, edit, delete, and copy the ID for a project.
+- Create, edit, delete, and copy the ID for an environment.
+- Edit environment `Name`, `Key`, `Description`, and `Require change comment`.
+- Create, edit, delete, copy, and view SDK secrets for each environment.
+- Support `client` and `server` secret types; type can be selected during creation and is locked during edit.
+- Keep project/environment keys generated from name during creation and validated asynchronously for uniqueness.
+- Emit or replace the existing project-list/current-secret refresh behavior after project, environment, and secret changes.
+- Update local current project/environment context when the current project name, current environment name, current environment settings, or current environment secrets change.
+- Prevent deleting the current project or current environment.
+
+### Page Structure
 
 Toolbar:
 
 - Left: search input `Filter by name`.
-- Right: primary `Create project` button.
+- Right: primary `Create project` button with `Plus`.
 - Search filters project names locally unless the backend later supports server-side filtering.
 - Keep toolbar visible above loading, empty, and filtered-empty states.
+- Search input width should be around `320-420px`, not the Angular `520px` pill. Use the standard shadcn input height and a `Search` icon.
+- Do not add environment or secret filters in the first migration. The first view should be understandable before it becomes a full inventory table.
 
-Recommended layout:
+Main inventory:
 
-- Use a project list with each project as a bordered section row, not a decorative card grid.
-- The current project should appear first and show a compact `Current` badge.
-- Each project row has a header with project name, key, current badge, and an action menu.
-- Under each project header, show environments in a compact nested table/list with columns for Environment, Key, Description, Secrets, and Actions.
-- Show current environment with a `Current` badge in the Environment cell.
-- Keep copy-ID actions as icon buttons with tooltips inside row actions or action menus.
+- Use a vertical list of project sections. Each section is a compact `rounded-md border bg-background` resource block matching the current `front-end-v2` table containers, with no ambient shadow and no nested cards.
+- Project sections use a single compact header row and an environment `Table` below it. Do not use Angular's separate gray environment cards.
+- The current project appears first and shows a compact neutral `Current` badge beside the project name.
+- Project header must not consume much vertical space. Keep it to one line with tight padding, roughly `px-4 py-2` or equivalent.
+- Project header left side: project name, `Key: {key}` badge, optional `Current` badge, and muted metadata such as `{environmentCount} environments`, all on one line with truncation.
+- Project header right side: `Add environment` outline button and an icon-only `Edit project` button using the same edit icon treatment as secret edit-name actions. Replace the old three-dot project menu with this compact edit icon button.
+- Keep `Add environment` visible because it is a common project-management action. Keep the project header action area short; do not add a full button strip.
+- Under each project header, show environments in a compact table-like list with columns:
+  - `Environment`: environment name, optional `Current` badge, and a secondary ID-copy icon in the same cell.
+  - `Key`: monospace/truncated key.
+  - `Description`: single-line truncated description with muted empty text when absent.
+  - `Require change comment`: compact enabled/disabled badge for `settings.requireChangeComment`. The column header must include an info tooltip icon.
+  - `Secrets`: a readable secret access area with visible copy controls, not a dense inline text dump.
+  - `Actions`: `MoreHorizontal` menu.
+- The `Require change comment` header tooltip should explain: `When enabled, users must provide a comment before saving flag or segment changes in this environment.`
+- Use the current shadcn `Table` implementation style: `table-fixed`, `rounded-md border` wrapper, `TableHeader` with `bg-muted/40` or border-only treatment, `TableHead` compact padding, and `TableCell` `align-middle`.
+- Prefer real `Table` over a CSS grid for the environment list so the page matches existing React table surfaces.
+- Environment rows must vertically center all cell content, including badges, copy buttons, secret rows, and action menus. Use `align-middle`/`items-center` patterns rather than top-aligned multi-line blocks.
+- Use compact row density. Keep environment rows as short as practical while preserving secret readability; prefer small text, `h-7`/`h-8` icon buttons, tight cell padding, and one-line truncated metadata.
+- Project sections should have stable compact vertical spacing (`mt-4`, `gap-2` style rhythm) and must not resize when menus open.
 
 Project actions:
 
-- Edit project.
-- Delete project, hidden or disabled for the current project and guarded by confirmation.
-- Add environment.
-- Copy project ID.
+- Header button: Add environment.
+- Header icon button: Edit project.
+- Delete project is disabled or hidden for the current project. Prefer disabled with helper text in the confirmation/action state when feasible: `This project cannot be removed while it is the current project.`
+- Delete project requires confirmation: `This operation cannot be reverted. Remove this project?`
 
 Environment actions:
 
-- Edit environment.
-- Delete environment, hidden or disabled for the current environment and guarded by confirmation.
-- Copy environment ID.
+- Menu items: Edit environment, Copy environment ID, Delete environment.
+- Delete environment is disabled or hidden for the current environment. Prefer disabled with helper text when feasible: `This environment cannot be removed while it is the current environment.`
+- Delete environment requires confirmation: `This operation cannot be reverted. Remove this environment?`
 
 Secret actions:
 
-- Add secret.
-- Edit secret name.
-- Delete secret, guarded by confirmation with the warning that the secret must be removed from SDKs first.
-- Copy secret value.
+- Add secret should be available from the `Secrets` cell with a compact `Plus` icon button or `Add secret` text button when the user has permission.
+- The `Secrets` cell `Add secret` action must open the same create-secret dialog/sheet flow as the `View secrets` surface. It creates a secret for that row's environment.
+- The create-secret flow opened from either place must let the user choose `Type` before submitting.
+- Secret row actions in the main table: Copy secret value only.
+- Secret row actions in the `View secrets` sheet: Copy secret value, Edit secret name, and Delete secret.
+- Copy must be a first-class visible action. Each shown secret needs its own copy icon button next to the masked/truncated value, with tooltip `Copy secret`.
+- The `Secrets` cell should also expose a `View secrets` action when an environment has any secret. This opens a focused sheet for viewing and copying the environment's secrets.
+- Delete secret is guarded by confirmation with Angular's important warning preserved: `This operation cannot be reverted. Make sure this secret is removed from all SDKs before removing.`
+- Copying a secret value uses an icon button and toast `Copied`; clicking the raw value should not be the only copy path.
+- Secrets are editable only for their display name. Users can create secrets, rename existing secrets, and delete secrets, but cannot edit secret `Type` or `Value`.
 
 Secret display:
 
-- Show secret name, type badge (`server` or `client`), and masked/truncated value with copy action.
+- Show each secret on its own row. Each row contains secret name, type badge (`server` or `client`), masked/truncated value, and copy action.
 - Do not expose long secret strings as raw wrapping text in the environment row.
-- If an environment has many secrets, collapse after a small count and offer `View all`.
+- Use neutral badges for both `client` and `server`. Do not recreate Angular's cyan/geekblue tag colors.
+- Use `font-mono text-xs` for secret values and truncate to a stable width.
+- If a secret name or masked value does not fit, truncate with ellipsis and provide a tooltip with the full visible text. Copy still copies the full secret value.
+- Show at most two compact secret rows in the environment row. If there are more, show `+N more` and a `View secrets` control. Opening it lists all secrets for that environment.
+- The expanded secret view is a right-side `Sheet`, not an inline expansion. It should be optimized for scanning and copying: rows with `Name`, `Type`, masked `Value`, copy button, edit-name button, and delete button. Keep row height compact but give the value column enough width to distinguish secrets.
+- The sheet must show both the corresponding project and environment. Use title/subtitle such as `Production secrets` plus `Growth Platform / Production`, or an equivalent compact header treatment.
+- Values remain masked/truncated by default; copying copies the full value. Do not add an eye/reveal action in the first migration unless product/security requirements ask for explicit reveal.
+- If an environment has no secrets, show muted `No secrets` plus the same `Add secret` action when the user can create one.
 
 Drawers and dialogs:
 
-- Project create/edit: drawer with `Name`, `Key`, and any backend-supported project fields.
-- Environment create/edit: drawer with `Name`, `Key`, `Description`, and environment settings supported by the Angular env drawer.
-- Secret create/edit: small dialog is acceptable because the form is short; use a drawer only if future fields expand.
+- Project create/edit: right-side `Sheet`, `420-480px` wide, with `Name` and `Key`.
+- Environment create/edit: right-side `Sheet`, `420-480px` wide, with `Name`, `Key`, `Description`, and a checkbox/toggle for `Require change comment`.
+- Secret create/edit-name: compact `Dialog` is acceptable because the form is short. Creation fields are `Name` and `Type`; edit fields include `Name` only.
+- `Type` selection uses the existing Angular enum values: `client` and `server`. Present them as `Client Side SDK` and `Server Side SDK`.
+- During secret edit, show `Type` and masked `Value` as read-only context only if useful, but the only editable field must be `Name`.
+- Creating a secret from the environment row or from the secrets sheet must use the same validation, permission check, mutation, and success handling.
+- Drawer/dialog footers use one primary action: `Create project`, `Save project`, `Create environment`, `Save environment`, `Create secret`, or `Save secret`. Do not add a secondary Cancel button unless the shared dialog pattern requires it.
+- Project and environment keys auto-generate from name on create, are disabled on edit, and use debounced async uniqueness validation with required, duplicated, and unknown states.
+- Required validation messages stay inline and close to the field.
 
 Pagination:
 
 - Preserve Angular's "load more" behavior only if the API remains list-based. Prefer a compact list with incremental reveal over full table pagination while project counts are small.
 - If organizations commonly have many projects, move to TanStack Table or virtualized grouped rows later.
+- Initial reveal count may remain `3` for parity, but React should make the visible count a page constant rather than embedding the value in UI components.
+
+### Permission And Context Rules
+
+- `Create project` requires `CreateProject` on the general project RN.
+- `Edit project` requires `UpdateProjectSettings` on the project RN.
+- `Delete project` requires `DeleteProject` on the project RN.
+- `Add environment` requires `CreateEnv` on the project RN.
+- `Edit environment` requires `UpdateEnvSettings` on the environment RN.
+- `Delete environment` requires `DeleteEnv` on the environment RN.
+- `Create secret`, `Edit secret name`, and `Delete secret` require the corresponding environment-secret permissions on the environment RN. Do not expose editing for secret `Type` or `Value`.
+- Disabled controls should show short permission or current-context notes in place. Do not rely only on a toast after click.
+- After any project/environment mutation, invalidate the layout project list query and the organization projects query.
+- After editing the current project, update the current project name in localStorage and the layout context.
+- After editing the current environment, update current environment name and settings in localStorage and the layout context.
+- After changing secrets for the current environment, update current environment secrets in localStorage and refresh any header/context secret popover data.
 
 ## Account Profile Compatibility
 
@@ -272,6 +343,7 @@ Reference anchors:
 Layout rules:
 
 - Use the existing React authenticated layout language from `react-layout-design.md`.
+- This page contract is for the main content area only. Visual design artifacts for Projects must exclude the global sidebar, top context bar, account menu, and subscription/license badge.
 - Prefer compact section dividers over nested cards.
 - Use cards only for repeated resource blocks where the boundary helps scanning, such as project sections.
 - The General tab is page-body content only; it must not redesign or depend on sidebar/topbar visuals.
@@ -282,6 +354,13 @@ Layout rules:
   - Line tabs use the foreground underline from the current Tabs implementation, not a blue underline.
 - General tab forms use a two-column grid with long one-column fields. A field may use one column or two explicitly, but `Name`, `Sort flags by`, and `Organization` should stay one-column width.
 - The four General-tab action buttons, `Save changes`, `Save sorting`, `Save permissions`, and `Create organization`, must use the same fixed visual width and align to the same right edge.
+- Projects tab uses bordered resource blocks plus table-like nested rows. It must not use wide pill search inputs, large rounded Angular cards, green action links, or raw wrapping secret values.
+- Projects tables should visually match existing React tables: `rounded-md border` wrapper, shadcn `Table`, muted or border-only header, compact `px-4 py-3` or tighter cells, and `align-middle` cells.
+- Projects tab uses a compact density target: reduce row padding, avoid extra helper text inside rows, keep cell content vertically centered, and avoid multi-line wrapping except for the bounded secret row stack.
+- Use the exact column label `Require change comment`; do not use the shorter `Change comments` label because it hides the boolean setting's meaning.
+- Put a compact info icon beside the `Require change comment` column header and show its explanation in a tooltip. Do not put long helper text inside every row.
+- Environment action menus use neutral destructive styling only for delete menu items; ordinary edit/copy/add actions remain neutral. Project edit is a direct button, not a menu item.
+- Project edit uses an icon-only button with tooltip `Edit project`; do not render a text `Edit project` button in the project header.
 - Use fixed product type scale, not fluid headings.
 - Use lucide icons only where they improve recognition: copy, plus, search, shield, users, key, lock, more, trash, edit.
 - Dark mode must match light-mode hierarchy and alignment exactly.
@@ -307,6 +386,12 @@ Projects tab:
 - Project with no environments: show an inline empty row with `Add environment` when allowed.
 - Environment with no secrets: show `No secrets` and an add action when allowed.
 - Delete disabled for current project/environment: explain that current context cannot be removed.
+- Permission denied: disable the relevant create/edit/delete/add-secret action and show a short note in the menu, row, drawer, or dialog state.
+- Key validation pending: show validating state near the key field without blocking unrelated fields.
+- Duplicated or unknown key validation: keep the drawer open and show inline error text.
+- Secret list overflow: show the first two secrets and a `View secrets` or `+N more` control.
+- Secret creation: opening `Add secret` from either the environment row or the secrets sheet shows the same required `Name` and `Type` fields.
+- Load more: keep the button centered below the project list; loading more must not reset search.
 - Copy success: toast `Copied`.
 
 Account Profile:
@@ -322,9 +407,12 @@ Account Profile:
 - Sorting and default permissions live in the same `Preferences` visual section but must submit through separate forms/mutations because they use different backend APIs.
 - Search inputs should update results without requiring submit.
 - Async selects should debounce remote search and show option-level loading.
+- Project and environment key fields should debounce uniqueness validation at roughly the Angular cadence (`300ms`) unless the shared validation helper uses a different standard.
 - Destructive actions use shadcn confirmation dialogs or a shared `ConfirmAction` wrapper.
 - Action menus should group low-frequency actions so project/environment rows stay scannable.
 - Drawers close on successful create/edit and preserve typed values on validation errors.
+- Secret dialogs close on successful add/edit-name and preserve typed values on validation errors.
+- Secret type is selectable during creation. Existing secrets allow `Name` editing only; `Type` and `Value` are read-only.
 - Switching organizations is a context-changing action; show immediate feedback and invalidate context-bound queries.
 
 ## Content Requirements
@@ -345,8 +433,25 @@ Primary labels:
 - `Switch organization`
 - `Create organization`
 - `Project`
+- `Projects`
+- `Create project`
+- `Edit project`
+- `Add environment`
 - `Environment`
+- `Environments`
+- `Description`
+- `Require change comment`
 - `Secrets`
+- `Create secret`
+- `Add secret`
+- `Edit secret`
+- `Edit secret name`
+- `Type`
+- `Client Side SDK`
+- `Server Side SDK`
+- `Load more`
+- `View secrets`
+- `Copy secret`
 
 Operational helper copy:
 
@@ -359,6 +464,17 @@ Operational helper copy:
 - `Multi-organization is not enabled for this workspace.`
 - `This project cannot be removed while it is the current project.`
 - `This environment cannot be removed while it is the current environment.`
+- `Keys are used in URLs and resource names. They can contain letters, numbers, dots, underscores, and hyphens.`
+- `When enabled, users must provide a comment before saving flag or segment changes in this environment.`
+- `Open all secrets for this environment.`
+- `Copied`
+- `This operation cannot be reverted. Remove this project?`
+- `This operation cannot be reverted. Remove this environment?`
+- `This operation cannot be reverted. Make sure this secret is removed from all SDKs before removing.`
+- `No projects yet. Create a project to start adding environments.`
+- `No projects match this filter.`
+- `No environments yet. Add an environment to make this project usable.`
+- `No secrets`
 
 Dynamic content ranges:
 
@@ -376,7 +492,11 @@ Dynamic content ranges:
 - Invalidate project/environment context queries after organization switching, project edits, environment edits, and secret changes.
 - Split implementation by responsibility: page container, tabs/layout, API hooks, forms, project inventory, drawers/dialogs, permission helpers, and copy helpers.
 - Split General tab mutations by backend contract: identity/name update, sorting preference update, default permissions update, and create organization.
+- Split Projects tab by responsibility: projects page container, toolbar/search, project section, compact environment table row, secret cell, secrets sheet, project sheet, environment sheet, secret dialog, confirm wrappers, and project context synchronization helpers.
 - Use React Hook Form + Zod for forms and async validation where needed.
+- Reuse Angular endpoint contracts for project, environment, and environment-secret APIs: `/api/v1/projects`, `/api/v1/projects/{projectId}/envs`, and `/api/v1/envs/{envId}/secrets`.
+- Preserve the existing key uniqueness checks for project and environment creation.
+- Preserve the existing localStorage current project/environment shape so the layout context bar, header secret access, and route guards continue to work, but do not include those shell elements in the Projects page implementation.
 - Use shadcn `Button`, `Input`, `Select`/combobox composition, `Tabs`, `Sheet`, `Dialog`, `Table`, `Badge`, `Skeleton`, `Tooltip`, and `DropdownMenu`.
 - Do not hand-edit generated `src/components/ui/*` files for this feature.
 - Page must work in both `/en` and `/zh` routes.
