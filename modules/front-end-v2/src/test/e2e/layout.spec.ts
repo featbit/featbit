@@ -28,13 +28,18 @@ test.describe("layout", () => {
     await expect(
       page.getByRole("link", { name: "Current Plan: Enterprise" })
     ).toBeVisible()
-    await expect(page.getByRole("link", { name: "Team" })).toBeVisible()
-    await expect(page.getByRole("link", { name: "Groups" })).toBeVisible()
-    await expect(page.getByRole("link", { name: "Policies" })).toBeVisible()
+    await expect(page.getByRole("link", { name: "Team" })).toHaveCount(0)
+    await expect(page.getByRole("link", { name: "Groups" })).toHaveCount(0)
+    await expect(page.getByRole("link", { name: "Policies" })).toHaveCount(0)
     await expect(page.getByRole("link", { name: "Webhooks" })).toBeVisible()
     await expect(
       page.getByRole("link", { name: "Access Tokens" })
     ).toBeVisible()
+
+    await page.getByRole("button", { name: "IAM" }).click()
+    await expect(page.getByRole("link", { name: "Team" })).toBeVisible()
+    await expect(page.getByRole("link", { name: "Groups" })).toBeVisible()
+    await expect(page.getByRole("link", { name: "Policies" })).toBeVisible()
 
     await page.getByRole("button", { name: "Collapse sidebar" }).click()
 

@@ -154,9 +154,7 @@ export function Sidebar({
   setCollapsed: (collapsed: boolean) => void
 }) {
   const { t } = useTranslation()
-  const [expandedNav, setExpandedNav] = useState<Record<string, boolean>>({
-    "layout.nav.items.iam": true,
-  })
+  const [expandedNav, setExpandedNav] = useState<Record<string, boolean>>({})
 
   function toggleNavItem(labelKey: string) {
     setExpandedNav((current) => ({

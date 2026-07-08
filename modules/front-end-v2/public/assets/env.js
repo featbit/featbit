@@ -5,6 +5,5 @@ window.env = window.env || {
   BASE_HREF: "",
   DISPLAY_API_URL: "",
   DISPLAY_EVALUATION_URL: "",
-  HOSTING_MODE: "self-hosted",
   VERSION: "",
 }
