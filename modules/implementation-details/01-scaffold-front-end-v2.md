@@ -1,8 +1,8 @@
-# 01 - Scaffold `front-end-react`
+# 01 - Scaffold `front-end-v2`
 
 ## Goal
 
-Create the standalone React application foundation in `front-end-react` without modifying the existing Angular `front-end`.
+Create the standalone React application foundation in `front-end-v2` without modifying the existing Angular `front-end`.
 
 ## Decisions
 
@@ -26,11 +26,11 @@ This document defines migration step 1: project initialization. When the user as
 - For packages without an LTS concept, use the latest stable release that is compatible with the selected LTS runtime and the rest of the stack.
 - Do not use prerelease channels or versions marked `rc`, `alpha`, `beta`, `next`, `canary`, or `experimental`.
 - Prefer exact or lockfile-pinned resolved versions after installation so repeat installs are deterministic.
-- If the latest stable version conflicts with another required package, choose the newest mutually compatible stable version and document the reason in `front-end-react/README.md`.
+- If the latest stable version conflicts with another required package, choose the newest mutually compatible stable version and document the reason in `front-end-v2/README.md`.
 
 ## Required Setup
 
-- Create `front-end-react` as an independent package with its own `package.json`, `tsconfig`, Vite config, Tailwind config, ESLint config, test config, and README.
+- Create `front-end-v2` as an independent package with its own `package.json`, `tsconfig`, Vite config, Tailwind config, ESLint config, test config, and README.
 - Configure Tailwind dark mode using shadcn's `darkMode: ["class"]` strategy and the standard shadcn CSS variables for background, foreground, card, popover, border, muted, primary, destructive, ring, and chart colors.
 - Add the shadcn-style `ThemeProvider` and `useTheme` helper for Vite. It should support `light`, `dark`, and `system`, persist the selected preference in local storage, and apply the theme class before app paint where possible to avoid theme flash.
 - Keep the theme provider in the current shadcn Vite location: `src/components/theme-provider.tsx`, imported as `@/components/theme-provider`. Do not create or migrate a provider under `src/lib/theme/theme-provider.tsx`.
@@ -70,7 +70,7 @@ This document defines migration step 1: project initialization. When the user as
 Use this baseline layout:
 
 ```text
-front-end-react/
+front-end-v2/
   public/
     assets/
   src/

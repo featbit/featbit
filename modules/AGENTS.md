@@ -3,7 +3,7 @@
 ## React Migration Context
 
 - The existing Angular project in `front-end` is the read-only reference implementation.
-- The new React implementation belongs in `front-end-react`.
+- The new React implementation belongs in `front-end-v2`.
 - Follow `plan.md` and `implementation-details/*.md` for the migration plan and detailed implementation guidance.
 - Do not rename `plan.md` to `AGENTS.md`; keep this file as durable agent instructions and keep the migration plan separate.
 
