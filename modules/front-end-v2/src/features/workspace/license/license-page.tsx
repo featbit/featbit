@@ -139,6 +139,9 @@ export function LicensePage() {
               onCopied={() => {
                 showStatus(t("workspace.license.copied"), "success")
               }}
+              onCopyFailed={() => {
+                showStatus(t("workspace.requestFailed"), "error")
+              }}
               onUpdateLicense={onUpdateLicense}
             />
           ) : null}

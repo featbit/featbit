@@ -29,8 +29,7 @@ const featureCatalog: LicenseFeature[] = [
   {
     id: "multi-organization",
     labelKey: "workspace.license.features.multiOrganization.title",
-    descriptionKey:
-      "workspace.license.features.multiOrganization.description",
+    descriptionKey: "workspace.license.features.multiOrganization.description",
   },
   {
     id: "global-user",
@@ -83,7 +82,7 @@ export function FeatureGrid({
             <Card
               key={feature.id}
               className={cn(
-                "rounded-md shadow-sm",
+                "rounded-md",
                 !granted &&
                   "border-dashed bg-muted/30 text-muted-foreground shadow-none dark:bg-muted/15"
               )}
@@ -92,15 +91,13 @@ export function FeatureGrid({
                 <FeatureIcon
                   className={cn(
                     "size-4 shrink-0",
-                    granted
-                      ? "text-emerald-500"
-                      : "text-muted-foreground/70"
+                    granted ? "text-emerald-500" : "text-muted-foreground/70"
                   )}
                 />
                 <div className="min-w-0 flex-1">
                   <h3
                     className={cn(
-                      "text-sm font-medium leading-5",
+                      "text-sm leading-5 font-medium",
                       !granted && "text-muted-foreground"
                     )}
                   >
@@ -111,7 +108,7 @@ export function FeatureGrid({
                   </p>
                 </div>
                 <Badge
-                  variant={granted ? "default" : "outline"}
+                  variant={granted ? "secondary" : "outline"}
                   className="shrink-0"
                 >
                   {granted

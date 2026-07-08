@@ -34,15 +34,21 @@ function CodeField({
 function WorkspaceIdSection({
   workspace,
   onCopied,
+  onCopyFailed,
 }: {
   workspace: WorkspaceDetails
   onCopied: () => void
+  onCopyFailed: () => void
 }) {
   const { t } = useTranslation()
 
   async function copyWorkspaceId() {
-    await navigator.clipboard.writeText(workspace.id)
-    onCopied()
+    try {
+      await navigator.clipboard.writeText(workspace.id)
+      onCopied()
+    } catch {
+      onCopyFailed()
+    }
   }
 
   return (
@@ -162,7 +168,7 @@ function LicenseKeySection({
               type="button"
               variant="ghost"
               size="sm"
-            className="h-6 shrink-0 px-2 text-xs"
+              className="h-6 shrink-0 px-2 text-xs"
               disabled={isUpdating}
               onClick={cancelEditing}
             >
@@ -194,6 +200,7 @@ export function LicenseAccessSection({
   canUpdateLicense,
   isUpdating,
   onCopied,
+  onCopyFailed,
   onUpdateLicense,
   licenseUpdateEventId,
 }: {
@@ -203,22 +210,27 @@ export function LicenseAccessSection({
   canUpdateLicense: boolean
   isUpdating: boolean
   onCopied: () => void
+  onCopyFailed: () => void
   onUpdateLicense: () => void
   licenseUpdateEventId: number
 }) {
   return (
     <section className="border-b py-8 first:pt-7">
       <div className="grid gap-5 lg:grid-cols-2">
-      <WorkspaceIdSection workspace={workspace} onCopied={onCopied} />
-      <LicenseKeySection
-        key={licenseUpdateEventId}
-        value={licenseValue}
-        setValue={setLicenseValue}
-        canUpdate={canUpdateLicense}
-        isUpdating={isUpdating}
-        onSubmit={onUpdateLicense}
-        currentLicense={workspace.license}
-      />
+        <WorkspaceIdSection
+          workspace={workspace}
+          onCopied={onCopied}
+          onCopyFailed={onCopyFailed}
+        />
+        <LicenseKeySection
+          key={licenseUpdateEventId}
+          value={licenseValue}
+          setValue={setLicenseValue}
+          canUpdate={canUpdateLicense}
+          isUpdating={isUpdating}
+          onSubmit={onUpdateLicense}
+          currentLicense={workspace.license}
+        />
       </div>
     </section>
   )

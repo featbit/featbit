@@ -83,19 +83,19 @@ export function SummaryRow({
   ]
 
   return (
-    <Card className="grid overflow-hidden rounded-md shadow-sm sm:grid-cols-2 lg:grid-cols-4">
+    <Card className="grid overflow-hidden rounded-md sm:grid-cols-2 lg:grid-cols-4">
       {items.map((item, index) => (
         <div
           key={item.label}
           className={cn(
             "px-3 py-2",
-            index > 0 && "border-t sm:border-l sm:border-t-0"
+            index > 0 && "border-t sm:border-t-0 sm:border-l"
           )}
         >
           <div className="text-xs leading-4 text-muted-foreground">
             {item.label}
           </div>
-          <div className="mt-0.5 text-sm font-medium leading-5">
+          <div className="mt-0.5 text-sm leading-5 font-medium">
             {item.value}
           </div>
         </div>
