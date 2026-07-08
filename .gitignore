@@ -24,3 +24,5 @@ modules/package-lock.json
 modules/package.json
 modules/front-end-v2/test-results/
 
+/modules/.codex
+/modules/.impeccable
