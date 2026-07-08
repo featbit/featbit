@@ -5,5 +5,5 @@ window.env = window.env || {
   BASE_HREF: "",
   DISPLAY_API_URL: "",
   DISPLAY_EVALUATION_URL: "",
-  VERSION: "",
+  VERSION: "dev",
 }
