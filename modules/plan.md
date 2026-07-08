@@ -27,7 +27,7 @@ Initial executable steps:
 Future steps will be appended below this list as the migration scope expands:
 
 4. Build core infrastructure: env loader, API client, auth/session store, workspace/org/project/env store, permission/license helpers, and base toast/dialog/drawer/table/form components. See [implementation detail 02](implementation-details/02-core-infrastructure.md).
-5. Migrate feature domains page by page: feature flags, users, segments, experiments, audit logs, workspace, organization, relay proxies, IAM, and integrations. See [implementation detail 04](implementation-details/04-feature-domain-pages.md).
+5. Migrate feature domains page by page: feature flags, users, segments, experiments, audit logs, workspace, organization, relay proxies, IAM, and integrations. See [implementation detail 04](implementation-details/04-feature-domain-pages.md); Organization follows [organization-page-design.md](design/organization-page-design.md).
 6. Migrate complex capabilities: feature flag targeting/rules, change review/pending changes, policy editor, resource editor/finder, lightweight JSON editor, Shiki/lightweight CodeBlock, and Recharts charting. See [implementation detail 05](implementation-details/05-complex-capabilities.md).
 7. Migrate i18n copy: extract English/Chinese resources from Angular templates and `messages.zh.xlf`, then organize them as react-i18next JSON namespaces. See [implementation detail 06](implementation-details/06-i18n-migration.md).
 8. Align deployment and documentation: README, local development commands, production build, Docker/Nginx, environment variables, and future cutover steps. See [implementation detail 07](implementation-details/07-deployment-and-documentation.md).
