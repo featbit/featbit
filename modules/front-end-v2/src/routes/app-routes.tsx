@@ -150,7 +150,12 @@ export function AppRoutes() {
         <Route path="workspace/usage" element={<UsagePage />} />
         <Route path="workspace/global-users" element={<GlobalUsersPage />} />
         <Route path="organization" element={<OrganizationGeneralPage />} />
-        <Route path="organization/projects" element={<OrganizationProjectsPage />} />
+        <Route
+          path="organization/projects"
+          element={<OrganizationProjectsPage />}
+        />
+        {/*Remove the following line when migration completed*/}
+        <Route path="*" element={<LayoutPlaceholder />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
       <Route path="*" element={<LanguageRedirect />} />
