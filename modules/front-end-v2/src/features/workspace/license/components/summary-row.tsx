@@ -48,12 +48,10 @@ function ExpirationValue({
 }
 
 export function SummaryRow({
-  isSaas,
   license,
   status,
   lang,
 }: {
-  isSaas: boolean
   license: DecodedLicense | null
   status: LicenseStatus
   lang: "en" | "zh"
@@ -61,12 +59,8 @@ export function SummaryRow({
   const { t } = useTranslation()
   const items = [
     {
-      label: isSaas
-        ? t("workspace.license.source")
-        : t("workspace.license.currentPlan"),
-      value: isSaas
-        ? t("workspace.license.saasSource")
-        : displayPlan(license?.plan),
+      label: t("workspace.license.currentPlan"),
+      value: displayPlan(license?.plan),
     },
     {
       label: t("workspace.license.statusLabel"),

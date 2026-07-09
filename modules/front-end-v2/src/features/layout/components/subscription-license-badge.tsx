@@ -4,22 +4,28 @@ import { Link } from "react-router-dom"
 import { buttonVariants } from "@/components/ui/button"
 import { localizedPath } from "@/features/layout/layout-context"
 import type { Lang, Workspace } from "@/features/layout/layout-types"
+import {
+  displayPlan,
+  parseLicense,
+} from "@/features/workspace/license/license-utils"
 import { getRuntimeEnv } from "@/lib/env/runtime-env"
 
 const HOSTING_MODE_SAAS = "saas"
 
 function badgeCopy(workspace: Workspace | null) {
+  if (workspace?.license) {
+    const license = parseLicense(workspace.license)
+
+    return {
+      labelKey: "layout.plan.current",
+      value: displayPlan(license?.plan),
+    }
+  }
+
   if (getRuntimeEnv().hostingMode === HOSTING_MODE_SAAS) {
     return {
       labelKey: "layout.plan.free",
       valueKey: "layout.plan.upgradeNow",
-    }
-  }
-
-  if (workspace?.license) {
-    return {
-      labelKey: "layout.plan.current",
-      valueKey: "layout.plan.enterprise",
     }
   }
 
@@ -37,13 +43,17 @@ export function SubscriptionLicenseBadge({
   workspace: Workspace | null
 }) {
   const { t } = useTranslation()
+  const href =
+    getRuntimeEnv().hostingMode === HOSTING_MODE_SAAS
+      ? "/workspace/billing"
+      : "/workspace/license"
   const copy = badgeCopy(workspace)
   const label = t(copy.labelKey)
-  const value = t(copy.valueKey)
+  const value = "value" in copy ? copy.value : t(copy.valueKey)
 
   return (
     <Link
-      to={localizedPath(lang, "/workspace/billing")}
+      to={localizedPath(lang, href)}
       aria-label={t("layout.plan.aria", { label, plan: value })}
       className={buttonVariants({
         variant: "outline",

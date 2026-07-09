@@ -153,7 +153,6 @@ export function LicensePage() {
             {license ? (
               <div className="mt-3">
                 <SummaryRow
-                  isSaas={isSaas}
                   license={license}
                   status={status}
                   lang={lang}
