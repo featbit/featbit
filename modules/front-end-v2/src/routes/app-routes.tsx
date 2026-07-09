@@ -19,6 +19,7 @@ import { LicensePage } from "@/features/workspace/license/license-page"
 import { UsagePage } from "@/features/workspace/usage/usage-page"
 import { SelectWorkspacePage } from "@/features/workspace-selection/select-workspace-page"
 import { OrganizationGeneralPage } from "@/features/organization/general/general-page"
+import { OrganizationProjectsPage } from "@/features/organization/projects/projects-page"
 
 type SupportedLanguage = "en" | "zh"
 
@@ -149,6 +150,7 @@ export function AppRoutes() {
         <Route path="workspace/usage" element={<UsagePage />} />
         <Route path="workspace/global-users" element={<GlobalUsersPage />} />
         <Route path="organization" element={<OrganizationGeneralPage />} />
+        <Route path="organization/projects" element={<OrganizationProjectsPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
       <Route path="*" element={<LanguageRedirect />} />

@@ -1,6 +1,7 @@
 import { Check, ChevronsUpDown, Search, Settings } from "lucide-react"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { Link, useParams } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -9,7 +10,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import {
+  localizedPath,
   projectEnvFromSelection,
+  resolveLang,
 } from "@/features/layout/layout-context"
 import type { Organization, Project, ProjectEnv } from "@/features/layout/layout-types"
 
@@ -25,6 +28,8 @@ export function ContextBar({
   onProjectEnvChange: (projectEnv: ProjectEnv) => void
 }) {
   const { t } = useTranslation()
+  const { lang: langParam } = useParams()
+  const lang = resolveLang(langParam)
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState("")
 
@@ -130,9 +135,9 @@ export function ContextBar({
           </div>
           <div className="mx-3 h-px bg-border" />
           <Button
-            type="button"
             variant="ghost"
             className="m-3 mt-2 h-9 w-[calc(100%-1.5rem)] justify-start gap-2 px-2 text-muted-foreground"
+            render={<Link to={localizedPath(lang, "/organization/projects")} />}
             onClick={() => setOpen(false)}
           >
             <Settings className="size-4" />

@@ -12,6 +12,7 @@ import {
   getCurrentProjectEnv,
   getCurrentWorkspace,
   onCurrentOrganizationChanged,
+  onProjectsChanged,
   resolveLang,
   saveCurrentProjectEnv,
 } from "@/features/layout/layout-context"
@@ -110,6 +111,26 @@ export function AuthenticatedLayout() {
     window.location.assign(getEnvironmentReloadPath(location.pathname))
   }
 
+  async function loadContext() {
+    try {
+      setWorkspace(getCurrentWorkspace())
+      setOrganization(getCurrentOrganization())
+      setCurrentProjectEnv(getCurrentProjectEnv())
+
+      const loadedProjects = await fetchProjects()
+      const nextProjectEnv = chooseProjectEnv(loadedProjects)
+
+      if (nextProjectEnv) {
+        saveCurrentProjectEnv(nextProjectEnv)
+      }
+
+      setProjects(loadedProjects)
+      setCurrentProjectEnv(nextProjectEnv)
+    } catch {
+      setProjects([])
+    }
+  }
+
   useEffect(() => {
     if (!("BroadcastChannel" in window)) {
       return
@@ -138,6 +159,12 @@ export function AuthenticatedLayout() {
   }, [])
 
   useEffect(() => {
+    return onProjectsChanged(() => {
+      void loadContext()
+    })
+  }, [])
+
+  useEffect(() => {
     document.documentElement.lang = lang
     void i18n.changeLanguage(lang)
   }, [i18n, lang])
@@ -145,7 +172,7 @@ export function AuthenticatedLayout() {
   useEffect(() => {
     let cancelled = false
 
-    async function loadContext() {
+    async function loadInitialContext() {
       try {
         setWorkspace(getCurrentWorkspace())
         setOrganization(getCurrentOrganization())
@@ -172,7 +199,7 @@ export function AuthenticatedLayout() {
       }
     }
 
-    void loadContext()
+    void loadInitialContext()
 
     return () => {
       cancelled = true

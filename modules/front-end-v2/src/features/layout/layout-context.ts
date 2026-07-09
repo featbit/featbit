@@ -14,6 +14,7 @@ import { fetchApi } from "@/lib/api/authenticated-api"
 
 const IS_SSO_FIRST_LOGIN_STORAGE_KEY = "is-sso-first-login"
 const ORGANIZATION_CHANGED_EVENT = "featbit:organization-changed"
+const PROJECTS_CHANGED_EVENT = "featbit:projects-changed"
 
 function scopedStorageKey(key: string, profile: StoredUserProfile) {
   return profile.id ? `${key}_${profile.id}` : key
@@ -148,6 +149,18 @@ export function onCurrentOrganizationChanged(callback: () => void) {
 
   return () => {
     window.removeEventListener(ORGANIZATION_CHANGED_EVENT, callback)
+  }
+}
+
+export function notifyProjectsChanged() {
+  window.dispatchEvent(new Event(PROJECTS_CHANGED_EVENT))
+}
+
+export function onProjectsChanged(callback: () => void) {
+  window.addEventListener(PROJECTS_CHANGED_EVENT, callback)
+
+  return () => {
+    window.removeEventListener(PROJECTS_CHANGED_EVENT, callback)
   }
 }
 
