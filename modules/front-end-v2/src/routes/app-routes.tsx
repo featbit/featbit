@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react"
 import {
   Navigate,
   Route,
@@ -5,22 +6,79 @@ import {
   useLocation,
   useParams,
 } from "react-router-dom"
-import { AuthPage } from "@/features/auth/auth-page"
 import { AuthenticatedEntry } from "@/features/auth/authenticated-entry"
 import { getIdentityToken } from "@/features/auth/auth-api"
-import { AuthenticatedLayout } from "@/features/layout/authenticated-layout"
 import { LayoutPlaceholder } from "@/features/layout/layout-placeholder"
-import { NotFoundPage } from "@/features/layout/not-found-page"
-import { OnboardingPage } from "@/features/onboarding/onboarding-page"
-import { ProfilePage } from "@/features/profile/profile-page"
-import { BillingPage } from "@/features/workspace/billing/billing-page"
-import { GeneralPage } from "@/features/workspace/general/general-page"
-import { GlobalUsersPage } from "@/features/workspace/global-users/global-users-page"
-import { LicensePage } from "@/features/workspace/license/license-page"
-import { UsagePage } from "@/features/workspace/usage/usage-page"
-import { SelectWorkspacePage } from "@/features/workspace-selection/select-workspace-page"
-import { OrganizationGeneralPage } from "@/features/organization/general/general-page"
-import { OrganizationProjectsPage } from "@/features/organization/projects/projects-page"
+
+const AuthPage = lazy(() =>
+  import("@/features/auth/auth-page").then((module) => ({
+    default: module.AuthPage,
+  }))
+)
+const AuthenticatedLayout = lazy(() =>
+  import("@/features/layout/authenticated-layout").then((module) => ({
+    default: module.AuthenticatedLayout,
+  }))
+)
+const NotFoundPage = lazy(() =>
+  import("@/features/layout/not-found-page").then((module) => ({
+    default: module.NotFoundPage,
+  }))
+)
+const OnboardingPage = lazy(() =>
+  import("@/features/onboarding/onboarding-page").then((module) => ({
+    default: module.OnboardingPage,
+  }))
+)
+const ProfilePage = lazy(() =>
+  import("@/features/profile/profile-page").then((module) => ({
+    default: module.ProfilePage,
+  }))
+)
+const BillingPage = lazy(() =>
+  import("@/features/workspace/billing/billing-page").then((module) => ({
+    default: module.BillingPage,
+  }))
+)
+const GeneralPage = lazy(() =>
+  import("@/features/workspace/general/general-page").then((module) => ({
+    default: module.GeneralPage,
+  }))
+)
+const GlobalUsersPage = lazy(() =>
+  import("@/features/workspace/global-users/global-users-page").then(
+    (module) => ({
+      default: module.GlobalUsersPage,
+    })
+  )
+)
+const LicensePage = lazy(() =>
+  import("@/features/workspace/license/license-page").then((module) => ({
+    default: module.LicensePage,
+  }))
+)
+const UsagePage = lazy(() =>
+  import("@/features/workspace/usage/usage-page").then((module) => ({
+    default: module.UsagePage,
+  }))
+)
+const SelectWorkspacePage = lazy(() =>
+  import("@/features/workspace-selection/select-workspace-page").then(
+    (module) => ({
+      default: module.SelectWorkspacePage,
+    })
+  )
+)
+const OrganizationGeneralPage = lazy(() =>
+  import("@/features/organization/general/general-page").then((module) => ({
+    default: module.OrganizationGeneralPage,
+  }))
+)
+const OrganizationProjectsPage = lazy(() =>
+  import("@/features/organization/projects/projects-page").then((module) => ({
+    default: module.OrganizationProjectsPage,
+  }))
+)
 
 type SupportedLanguage = "en" | "zh"
 
@@ -136,41 +194,53 @@ function ProfileCompatibilityRedirect() {
   return <Navigate to={`/${lang}/account/profile`} replace />
 }
 
+function RouteFallback() {
+  return <div className="min-h-32" />
+}
+
 export function AppRoutes() {
   return (
-    <Routes>
-      <Route path="/" element={<LanguageRedirect />} />
-      <Route path="/login" element={<LocalizedAuthRedirect mode="login" />} />
-      <Route path="/login/sso" element={<LocalizedAuthRedirect mode="sso" />} />
-      <Route path="/:lang/login" element={<AuthRoute mode="login" />} />
-      <Route path="/:lang/login/sso" element={<AuthRoute mode="sso" />} />
-      <Route
-        path="/:lang/select-workspace"
-        element={<SelectWorkspaceRoute />}
-      />
-      <Route path="/:lang/onboarding" element={<OnboardingRoute />} />
-      <Route path="/:lang" element={<SecureRoute />}>
-        <Route index element={<LayoutPlaceholder />} />
-        <Route path="workspace" element={<GeneralPage />} />
-        <Route path="workspace/billing" element={<BillingPage />} />
-        <Route path="workspace/license" element={<LicensePage />} />
-        <Route path="workspace/usage" element={<UsagePage />} />
-        <Route path="workspace/global-users" element={<GlobalUsersPage />} />
-        <Route path="organization" element={<OrganizationGeneralPage />} />
+    <Suspense fallback={<RouteFallback />}>
+      <Routes>
+        <Route path="/" element={<LanguageRedirect />} />
         <Route
-          path="organization/profile"
-          element={<ProfileCompatibilityRedirect />}
+          path="/login"
+          element={<LocalizedAuthRedirect mode="login" />}
         />
         <Route
-          path="organization/projects"
-          element={<OrganizationProjectsPage />}
+          path="/login/sso"
+          element={<LocalizedAuthRedirect mode="sso" />}
         />
-        <Route path="account/profile" element={<ProfilePage />} />
-        {/*Remove the following line when migration completed*/}
-        <Route path="*" element={<LayoutPlaceholder />} />
-        <Route path="*" element={<NotFoundPage />} />
-      </Route>
-      <Route path="*" element={<LanguageRedirect />} />
-    </Routes>
+        <Route path="/:lang/login" element={<AuthRoute mode="login" />} />
+        <Route path="/:lang/login/sso" element={<AuthRoute mode="sso" />} />
+        <Route
+          path="/:lang/select-workspace"
+          element={<SelectWorkspaceRoute />}
+        />
+        <Route path="/:lang/onboarding" element={<OnboardingRoute />} />
+        <Route path="/:lang" element={<SecureRoute />}>
+          <Route index element={<LayoutPlaceholder />} />
+          <Route path="workspace" element={<GeneralPage />} />
+          <Route path="workspace/billing" element={<BillingPage />} />
+          <Route path="workspace/license" element={<LicensePage />} />
+          <Route path="workspace/usage" element={<UsagePage />} />
+          <Route path="workspace/global-users" element={<GlobalUsersPage />} />
+          <Route path="organization" element={<OrganizationGeneralPage />} />
+          <Route
+            path="organization/profile"
+            element={<ProfileCompatibilityRedirect />}
+          />
+          <Route
+            path="organization/projects"
+            element={<OrganizationProjectsPage />}
+          />
+          <Route path="account/profile" element={<ProfilePage />} />
+          {/*Remove the following line when migration completed*/}
+          <Route path="*" element={<LayoutPlaceholder />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Route>
+        <Route path="*" element={<LanguageRedirect />} />
+      </Routes>
+    </Suspense>
   )
 }
