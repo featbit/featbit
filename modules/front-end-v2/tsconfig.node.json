@@ -11,8 +11,7 @@
     "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
     "strict": true,
-    "noEmit": true,
-    "skipLibCheck": true
+    "noEmit": true
   },
   "include": [
     "eslint.config.js",

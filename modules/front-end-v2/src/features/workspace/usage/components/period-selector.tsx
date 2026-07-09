@@ -1,12 +1,18 @@
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
-import type { PeriodKey, PeriodOption, WorkspaceUsageFilter } from "../usage-types"
+import type {
+  PeriodKey,
+  PeriodOption,
+  WorkspaceUsageFilter,
+} from "../usage-types"
 import { rangeLabel } from "../usage-utils"
 
 export function PeriodSelector({
@@ -45,11 +51,13 @@ export function PeriodSelector({
               <SelectValue>{selectedPeriodLabel}</SelectValue>
             </SelectTrigger>
             <SelectContent>
-              {options.map((period) => (
-                <SelectItem key={period.value} value={period.value}>
-                  {period.label}
-                </SelectItem>
-              ))}
+              <SelectGroup>
+                {options.map((period) => (
+                  <SelectItem key={period.value} value={period.value}>
+                    {period.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
             </SelectContent>
           </Select>
           <span className="text-sm text-muted-foreground sm:min-w-52 sm:text-right">

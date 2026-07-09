@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input"
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -50,7 +51,10 @@ export function SecretDialog({
   const schema = useMemo(
     () =>
       z.object({
-        name: z.string().trim().min(1, t("organization.validation.nameRequired")),
+        name: z
+          .string()
+          .trim()
+          .min(1, t("organization.validation.nameRequired")),
         type: z.enum(["client", "server"]),
       }),
     [t]
@@ -88,7 +92,11 @@ export function SecretDialog({
             label={t("organization.projects.fields.name")}
             error={form.formState.errors.name?.message}
           >
-            <Input id="secretName" disabled={saving} {...form.register("name")} />
+            <Input
+              id="secretName"
+              disabled={saving}
+              {...form.register("name")}
+            />
           </Field>
           <Field id="secretType" label={t("organization.projects.fields.type")}>
             <Select
@@ -108,12 +116,14 @@ export function SecretDialog({
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="client">
-                  {t("organization.projects.secretTypes.client")}
-                </SelectItem>
-                <SelectItem value="server">
-                  {t("organization.projects.secretTypes.server")}
-                </SelectItem>
+                <SelectGroup>
+                  <SelectItem value="client">
+                    {t("organization.projects.secretTypes.client")}
+                  </SelectItem>
+                  <SelectItem value="server">
+                    {t("organization.projects.secretTypes.server")}
+                  </SelectItem>
+                </SelectGroup>
               </SelectContent>
             </Select>
           </Field>
