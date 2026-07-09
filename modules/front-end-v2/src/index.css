@@ -2,6 +2,7 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/inter";
+@import "./styles/scrollbar.css";
 
 @custom-variant dark (&:is(.dark *));
 
