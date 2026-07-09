@@ -1,10 +1,15 @@
-# Gated-Commit Cross-DC Consistency (Option A)
+# Gated-Commit Cross-DC Consistency
 
 **This is the canonical documentation for the consistency feature** — mechanism, configuration
 reference, metrics, rollout/rollback, validation, and known limitations. The module READMEs
 ([`modules/control-plane`](../../modules/control-plane/README.md),
 [`modules/evaluation-server`](../../modules/evaluation-server/README.md)) carry short summaries
 and link here.
+
+Issue numbers cited throughout (e.g. `#84`) are development-history breadcrumbs: they refer to
+the tracker of the fork where this feature was built and reviewed
+([wss-rbrennan/featbit](https://github.com/wss-rbrennan/featbit/issues)) and can be viewed
+there. They are kept for provenance.
 
 Operator guide for the control plane's **gated-commit** consistency mode, which guarantees
 that a flag/segment change is not served by any *live* data center until **every live DC has
@@ -38,17 +43,18 @@ serve the old value while others serve the new one.
    uncommitted value.
 5. **Evict & recover** — a DC that stops heartbeating is dropped from the live set after its
    lease expires (so it can't block commits forever). When it returns, a **recovery worker**
-   backfills its Redis with the current committed state (flags, segments, **and secrets** — #91)
+   backfills its Redis with the current committed state (flags, segments, **and secrets** — `#91`)
    before it rejoins. Secrets are not staged/gated in either mode; they are backfilled
    unconditionally so SDK auth recovers along with flag/segment values, not after them.
 
-Consistency model: **Model A** — the control plane gates on its *own* per-DC Redis writes plus
-lease liveness. A partitioned-but-alive DC keeps serving its last *committed* value
+Consistency model: the control plane gates on its *own* per-DC Redis writes plus
+lease liveness — it deliberately does **not** wait for evaluation-server acknowledgment
+(a stricter, eval-confirmed gate is a possible future extension; see the end of this doc). A partitioned-but-alive DC keeps serving its last *committed* value
 (consistent-but-stale) and reconverges on return; it is treated as "not live" while unreachable.
 
 ---
 
-## 1a. Leader election (#71) — opt-in, default OFF
+## 1a. Leader election (`#71`) — opt-in, default OFF
 
 The three gated-commit workers — the **commit coordinator**, the **recovery worker**, and the
 advisory **DcId consistency checker** — can be gated to run on exactly **one** control-plane
@@ -109,14 +115,14 @@ replica at a time, elected via a Redis lock. Election is **opt-in**:
 *local* signal — its own Redis connection transitioning disconnected→connected — so gating it on
 cluster-wide leadership would leave a non-leader replica unable to self-heal its own cache after a
 local Redis blip. Its backfill (via the shared `IDcBackfiller`) covers **flags, segments, and
-secrets** (#91) and is idempotent, so redundant reconciles across replicas are harmless, matching
+secrets** (`#91`) and is idempotent, so redundant reconciles across replicas are harmless, matching
 the same idempotency argument that makes the leader-elected workers' brief dual-leadership windows
 safe. A follow-up could gate it too if its
 multi-replica redundancy ever becomes a measurable cost, but it is out of scope here.
 
 ---
 
-## 1c. Backfill trigger hygiene (#92)
+## 1c. Backfill trigger hygiene (`#92`)
 
 Four hardening items on top of the shared `IDcBackfiller`, all applying to **both**
 `CacheReconciler` and `RecoveryWorker` (they share one `IDcBackfiller` singleton):
@@ -136,7 +142,7 @@ Four hardening items on top of the shared `IDcBackfiller`, all applying to **bot
   lives on the shared `DcBackfiller` singleton itself, so **either** caller's concurrent call for a
   DcId already being backfilled returns immediately (`IDcBackfiller.Skipped`, see below) instead of
   doing redundant work — safe because every underlying write is idempotent/only-advance-guarded
-  (#89).
+  (`#89`).
 - **Honest recovery metrics/logs:** `BackfillDcAsync` returns the sentinel `IDcBackfiller.Skipped`
   (`-1`) — distinct from a legitimate `0` (a real backfill that happened to touch zero flags, e.g. a
   secret/segment-only tick) — when the composite cache is unavailable OR the call coalesced with one
@@ -152,7 +158,7 @@ Four hardening items on top of the shared `IDcBackfiller`, all applying to **bot
   failing — and RecoveryWorker/CacheReconciler write every flag/segment/secret for a DC
   **sequentially** within a tick, so that stall accumulates linearly for the whole outage.
   `CacheServiceCollectionExtensions.AddRedis` now appends explicit `connectTimeout`/`syncTimeout`
-  (default **1500ms** each, see `Redis:ConnectTimeoutMs` / `Redis:SyncTimeoutMs` in §3 — #108:
+  (default **1500ms** each, see `Redis:ConnectTimeoutMs` / `Redis:SyncTimeoutMs` in §3 — `#108`:
   moved from `ControlPlane:Redis:*`, which is still read as a back-compat fallback) to every per-DC
   connection string, UNLESS that option is already present in the instance's configured
   `ConnectionString` (an operator override always wins). Trade-off: 1500ms is deliberately generous
@@ -161,7 +167,7 @@ Four hardening items on top of the shared `IDcBackfiller`, all applying to **bot
 
 ---
 
-## 1d. Consistency guarantee: bounded-skew by design (decision record, #25)
+## 1d. Consistency guarantee: bounded-skew by design (decision record, `#25`)
 
 Gated commit guarantees **no live DC ever serves a version it does not already hold locally** —
 but the commit *flip* itself is **bounded-skew, not zero-skew**. When the coordinator advances the
@@ -172,7 +178,7 @@ new one. Crucially, by the time the flip begins, **every live DC has already sta
 version**, so the residual skew is only "old committed vs new committed", never "value you don't
 have".
 
-**Decision (Risk #1 of the implementation plan): accept bounded-skew convergence + MQ push as the
+**Decision (Risk `#1` of the implementation plan): accept bounded-skew convergence + MQ push as the
 default.** The strict-zero-skew alternative — reading the pointer with a linearizable/primary-only
 read on the hot evaluation path — was rejected for the default because it adds a cross-region read
 per evaluation-relevant fetch and a hard dependency on primary reachability (a partitioned region
@@ -181,8 +187,9 @@ need literally zero skew can revisit that trade-off; nothing in the design precl
 
 Corollary recorded for the future: if the source of truth ever becomes async multi-master
 (active/active Postgres), the bounded-skew guarantee weakens further (the pointer is no longer
-majority-linearizable) and Option A degrades toward eventual consistency — that is Model B (#44)
-territory, not a config change.
+majority-linearizable) and this design degrades toward eventual consistency — recovering the
+guarantee would require the stronger eval-server-confirmed gate (a future extension), not a
+config change.
 
 ---
 
@@ -246,21 +253,21 @@ Watch for those warnings (and the `unmatched_dc_count` metric) right after enabl
 |---|---|---|---|
 | `ControlPlane:ConsistencyMode` | `BestEffort` | CP + ELS | `GatedCommit` turns the whole feature on |
 | `ControlPlane:LeaseTtlSeconds` | `15` | CP | Heartbeat → lease lifetime; eviction threshold |
-| `ControlPlane:HeartbeatIntervalSeconds` | `5` | ELS | Heartbeat cadence. **MUST be `<= LeaseTtlSeconds/3`** (e.g. 5s against the 15s TTL default) — a slower cadence lets each DC's lease expire between heartbeats, flapping the live set and stalling GatedCommit (#99). The control plane logs a one-time-per-DC warning when it detects this. |
-| `ControlPlane:HeartbeatStalenessThresholdSeconds` | `15` | ELS | Self-fence (D5, #22) readiness threshold: an eval-server pod fails `/health/readiness` (HTTP 503) once it has been unable to publish a heartbeat for longer than this. Default is 3x the `HeartbeatIntervalSeconds` default (5s), coinciding with the `LeaseTtlSeconds` default (15s) — a few missed heartbeats before the fence trips (#104; previously 180s, incoherent with the post-#99 5s interval default). |
+| `ControlPlane:HeartbeatIntervalSeconds` | `5` | ELS | Heartbeat cadence. **MUST be `<= LeaseTtlSeconds/3`** (e.g. 5s against the 15s TTL default) — a slower cadence lets each DC's lease expire between heartbeats, flapping the live set and stalling GatedCommit (`#99`). The control plane logs a one-time-per-DC warning when it detects this. |
+| `ControlPlane:HeartbeatStalenessThresholdSeconds` | `15` | ELS | Self-fence (D5, `#22`) readiness threshold: an eval-server pod fails `/health/readiness` (HTTP 503) once it has been unable to publish a heartbeat for longer than this. Default is 3x the `HeartbeatIntervalSeconds` default (5s), coinciding with the `LeaseTtlSeconds` default (15s) — a few missed heartbeats before the fence trips (`#104`; previously 180s, incoherent with the post-`#99` 5s interval default). |
 | `ControlPlane:CommitCoordinator:IntervalSeconds` | `5` | CP | Commit-evaluation tick |
 | `ControlPlane:Recovery:IntervalSeconds` | `10` | CP | Returning-DC backfill tick |
 | `ControlPlane:DcIdConsistency:IntervalSeconds` | `60` | CP | DcId-mismatch advisory check |
-| `ControlPlane:LeaderElection:Enabled` | `false` | CP | Opt-in leader election for the gated-commit workers (#71, see §1a); default off runs every replica (safe but redundant under multiple replicas) |
-| `ControlPlane:LeaderElection:TtlSeconds` | `30` | CP | Leader lock TTL, only relevant when `Enabled=true` (#71, see §1a) |
+| `ControlPlane:LeaderElection:Enabled` | `false` | CP | Opt-in leader election for the gated-commit workers (`#71`, see §1a); default off runs every replica (safe but redundant under multiple replicas) |
+| `ControlPlane:LeaderElection:TtlSeconds` | `30` | CP | Leader lock TTL, only relevant when `Enabled=true` (`#71`, see §1a) |
 | `ControlPlane:LeaderElection:RenewIntervalSeconds` | `10` | CP | Leader lock acquire/renew tick, only relevant when `Enabled=true` |
 | `ControlPlane:StagedFlagGc:IntervalSeconds` | `300` | API/back-end | GC of superseded `v{ts}` keys |
-| `ControlPlane:CacheReconcile:MinBackfillIntervalSeconds` | `300` | CP | Per-DC reconnect-flap backfill cooldown (#92, see §1c) |
-| `Redis:ConnectTimeoutMs` | `1500` | CP | Per-DC Redis connect timeout override (#92, see §1c). #108: moved from `ControlPlane:Redis:ConnectTimeoutMs`, matching the back-end/eval-server `Redis:*` convention (#106); the old key is still read as a back-compat fallback. |
-| `Redis:SyncTimeoutMs` | `1500` | CP | Per-DC Redis command (sync) timeout override (#92, see §1c). #108: moved from `ControlPlane:Redis:SyncTimeoutMs` (same back-compat fallback as above). |
+| `ControlPlane:CacheReconcile:MinBackfillIntervalSeconds` | `300` | CP | Per-DC reconnect-flap backfill cooldown (`#92`, see §1c) |
+| `Redis:ConnectTimeoutMs` | `1500` | CP | Per-DC Redis connect timeout override (`#92`, see §1c). `#108`: moved from `ControlPlane:Redis:ConnectTimeoutMs`, matching the back-end/eval-server `Redis:*` convention (`#106`); the old key is still read as a back-compat fallback. |
+| `Redis:SyncTimeoutMs` | `1500` | CP | Per-DC Redis command (sync) timeout override (`#92`, see §1c). `#108`: moved from `ControlPlane:Redis:SyncTimeoutMs` (same back-compat fallback as above). |
 | `Redis:Instances[].DcId` | — | CP | DC label per Redis instance (join key) |
 | `ControlPlane:DcId` / `:Region` | — | ELS | This pod's DC identity (must match a Redis `DcId`) |
-| `Kafka:Consumer:group.id` | `featbit-control-plane` | CP | Consumer group for the control-plane trigger topics. When left at the shipped default AND `Redis:Instances:0:DcId` is non-empty, the control plane auto-suffixes it with `-{DcId}` (e.g. `featbit-control-plane-west`) so DCs sharing a broker don't collide on a single group id (#100). An explicitly-set non-default group id (e.g. `Deploy-FeatBitClusters.ps1`'s per-cluster literal) is always left untouched; no DcId configured leaves the default group id unchanged (single-DC/legacy behavior). See `MqServiceCollectionExtensions.ResolveConsumerGroupId`. |
+| `Kafka:Consumer:group.id` | `featbit-control-plane` | CP | Consumer group for the control-plane trigger topics. When left at the shipped default AND `Redis:Instances:0:DcId` is non-empty, the control plane auto-suffixes it with `-{DcId}` (e.g. `featbit-control-plane-west`) so DCs sharing a broker don't collide on a single group id (`#100`). An explicitly-set non-default group id (e.g. `Deploy-FeatBitClusters.ps1`'s per-cluster literal) is always left untouched; no DcId configured leaves the default group id unchanged (single-DC/legacy behavior). See `MqServiceCollectionExtensions.ResolveConsumerGroupId`. |
 
 ---
 
@@ -276,8 +283,8 @@ OpenTelemetry/`MeterListener`):
 | `control_plane.consistency.pending_backlog` | gauge | `resource_type` | currently-pending items |
 | `control_plane.consistency.evicted_commits` | counter | `dc_id` | commits that proceeded without an evicted DC |
 | `control_plane.consistency.unmatched_dc_count` | gauge | `direction` | DcId config/lease mismatches |
-| `control_plane.consistency.applied_watermark_lag_ms` | gauge | `dc_id`, `env_id` | live DC's lag (ms) behind the most-advanced live DC's applied watermark, per env (#69/#84) |
-| `control_plane.consistency.is_leader` | gauge | `instance_id` | 1 if this replica currently holds the leader lock, else 0; when election is disabled (default) always reports 1 for every replica (#71, see §1a) |
+| `control_plane.consistency.applied_watermark_lag_ms` | gauge | `dc_id`, `env_id` | live DC's lag (ms) behind the most-advanced live DC's applied watermark, per env (`#69`/`#84`) |
+| `control_plane.consistency.is_leader` | gauge | `instance_id` | 1 if this replica currently holds the leader lock, else 0; when election is disabled (default) always reports 1 for every replica (`#71`, see §1a) |
 
 **Alert on:** sustained `pending_backlog > 0` (commits stuck — a live DC not staging, or a DcId
 mismatch), rising `evicted_commits` (a DC repeatedly dropping out), and any non-zero
@@ -289,13 +296,13 @@ mismatch), rising `evicted_commits` (a DC repeatedly dropping out), and any non-
 
 1. **Pre-flight:** confirm each DC's ELS `ControlPlane:DcId` equals that DC's control-plane
    `Redis:Instances[].DcId`. Confirm all DCs are heartbeating (leases present). Two settings
-   MUST be coherent or leases flap / processing stalls (both bit the first QA enablement, #25):
+   MUST be coherent or leases flap / processing stalls (both bit the first QA enablement, `#25`):
    - `ControlPlane:HeartbeatIntervalSeconds` ≤ `LeaseTtlSeconds`/3 (e.g. 5s against the 15s TTL).
      The ELS appsettings default is now 5s and `HeartbeatService` falls back to 5s (not 60s) when
-     the setting is unset/0; see #99. `Deploy-FeatBitClusters.ps1` also sets it explicitly.
+     the setting is unset/0; see `#99`. `Deploy-FeatBitClusters.ps1` also sets it explicitly.
    - Each DC's control plane needs its **own Kafka consumer `group.id`** when DCs share a broker
      (e.g. `featbit-control-plane-<dc>`); a shared group id makes change processing single-owner
-     and non-deterministic under partitions; see #100.
+     and non-deterministic under partitions; see `#100`.
 2. **Enable** `ConsistencyMode=GatedCommit` on the control plane and all evaluation servers;
    restart.
 3. **Smoke:** watch logs for `DcIdConsistencyChecker` warnings and `unmatched_dc_count`; resolve
@@ -316,10 +323,10 @@ mismatch), rising `evicted_commits` (a DC repeatedly dropping out), and any non-
 - [ ] **Eviction:** keep `east` down past `LeaseTtlSeconds`; confirm the change then commits on
       `west` and `evicted_commits{dc_id=east}` increments.
 - [ ] **Recovery:** bring `east` back; confirm the recovery worker backfills its Redis to the
-      current committed state (flags, segments, **and secrets** — #91) and it serves correct values.
+      current committed state (flags, segments, **and secrets** — `#91`) and it serves correct values.
 - [ ] **Segments:** repeat happy-path + recovery for a segment change and a segment-dependent
       flag.
-- [ ] **Secrets (#91):** wipe `east`'s `featbit:secret:*` keys directly (simulating the cache-loss
+- [ ] **Secrets (`#91`):** wipe `east`'s `featbit:secret:*` keys directly (simulating the cache-loss
       scenario the recovery/reconciler backfill exists for); confirm a recovery/reconcile tick
       restores them and SDK auth against `east` succeeds again — without needing a flag/segment
       change to trigger it (secrets are backfilled unconditionally, not gated on a flag/segment event).
@@ -387,14 +394,14 @@ configured, so a run on a BestEffort cluster, or without Chaos Mesh, degrades gr
 
 ## 8. Known limitations / open follow-ups
 
-- **Connected clients during a recovery** (#54): after a returned DC's Redis is backfilled, SDK
+- **Connected clients during a recovery** (`#54`): after a returned DC's Redis is backfilled, SDK
   clients that stayed connected through the outage keep stale values until they reconnect/next
   full-sync (a per-DC client-refresh push is not yet implemented).
-- **Eval-server applied watermark** (#46/#69): the heartbeat watermark (now covering flags AND
-  segments, #83) is persisted per-DC in `DcLease.AppliedWatermarks` and consumed by the
-  `applied_watermark_lag_ms` gauge (#84) — it is **not** used for commit gating (Model A remains
+- **Eval-server applied watermark** (`#46`/`#69`): the heartbeat watermark (now covering flags AND
+  segments, `#83`) is persisted per-DC in `DcLease.AppliedWatermarks` and consumed by the
+  `applied_watermark_lag_ms` gauge (`#84`) — it is **not** used for commit gating (the gate remains
   staged-everywhere), only for the per-DC/per-env lag metric above.
-- **Self-fence (D5, #22):** implemented as a hard readiness fence — `HeartbeatFreshnessHealthCheck`
+- **Self-fence (D5, `#22`):** implemented as a hard readiness fence — `HeartbeatFreshnessHealthCheck`
   fails `/health/readiness` (HTTP 503) once a pod has been unable to publish a heartbeat for longer
   than `ControlPlane:HeartbeatStalenessThresholdSeconds` (default 15s), pulling a
   partitioned/evicted DC's eval servers out of load-balancer rotation rather than letting them keep
@@ -402,12 +409,12 @@ configured, so a run on a BestEffort cluster, or without Chaos Mesh, degrades gr
   restarted); it rejoins rotation once heartbeats resume. See CP-13 above.
 - **EF residual window:** the optimistic guards on `SetPending`/`PromotePending` are atomic on
   Mongo but load-check-save on EF/Postgres (no rowversion) — a documented narrow window.
-- **EF `SetPendingAsync` retry-exhaustion edge (#107):** on Postgres, `SetPendingAsync`
+- **EF `SetPendingAsync` retry-exhaustion edge (`#107`):** on Postgres, `SetPendingAsync`
   (`FeatureFlagService`/`SegmentService`, EF) retries `DbUpdateConcurrencyException` (the xmin
-  token, #76) with a bounded budget and jittered backoff
+  token, `#76`) with a bounded budget and jittered backoff
   (`PendingOpRetryPolicy.MaxRetries` = 8; `Random(10, 50)ms * attemptNumber` between attempts,
   ~1-2s worst case) rather than retrying unboundedly or making the write atomic via
-  `ExecuteUpdate`/jsonb-predicate translation (evaluated and rejected — see #72 design notes on
+  `ExecuteUpdate`/jsonb-predicate translation (evaluated and rejected — see `#72` design notes on
   translation fragility) or reordering the handler's Redis-stage-then-DB-write sequence (rejected
   — subtle coordinator interactions). This makes exhaustion effectively unreachable under realistic
   contention, but does not eliminate it: under pathological contention (far more concurrent racers
@@ -418,9 +425,10 @@ configured, so a run on a BestEffort cluster, or without Chaos Mesh, degrades gr
   (`ControlPlane:StagedFlagGc:IntervalSeconds`, §-referenced above) rather than lingering forever.
   Exhaustion is not silent: it logs an ERROR with the entity type, key/id, version, and attempt
   count before rethrowing, so it is diagnosable via logs even though the write itself is lost.
-- **Multi-replica control plane (#71 — resolved):** the coordinator/recovery/checker workers can be
+- **Multi-replica control plane (`#71` — resolved):** the coordinator/recovery/checker workers can be
   gated to run only on the elected leader via the opt-in, default-off
   `ControlPlane:LeaderElection:Enabled` (§1a); left disabled, every replica runs — safe but
   redundant. `CacheReconciler` intentionally still runs on every replica regardless (§1b).
-- **Stronger model:** an eval-server-confirmed gate (Model B) is documented in #44 as a future
-  enhancement.
+- **Stronger model:** an eval-server-confirmed commit gate — the coordinator would wait for the
+  evaluation servers themselves to acknowledge applying a version, rather than for the value to
+  be present in each DC's Redis — is a possible future enhancement.
