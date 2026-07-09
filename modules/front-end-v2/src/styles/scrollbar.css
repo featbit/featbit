@@ -1,15 +1,15 @@
 :root {
   color-scheme: light;
   --scrollbar-track: transparent;
-  --scrollbar-thumb: oklch(0.556 0 0 / 68%);
-  --scrollbar-thumb-hover: oklch(0.439 0 0 / 85%);
+  --scrollbar-thumb: oklch(0.62 0 0 / 58%);
+  --scrollbar-thumb-hover: oklch(0.5 0 0 / 76%);
 }
 
 .dark {
   color-scheme: dark;
   --scrollbar-track: transparent;
-  --scrollbar-thumb: oklch(1 0 0 / 34%);
-  --scrollbar-thumb-hover: oklch(1 0 0 / 48%);
+  --scrollbar-thumb: oklch(1 0 0 / 28%);
+  --scrollbar-thumb-hover: oklch(1 0 0 / 42%);
 }
 
 @layer base {
