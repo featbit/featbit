@@ -22,6 +22,7 @@ Related design contracts:
 - Authenticated layout: [react-layout-design.md](react-layout-design.md)
 - Workspace admin precedent: [workspace-page-design.md](workspace-page-design.md)
 - Global Users table and drawer precedent: [workspace-global-users-page-design.md](workspace-global-users-page-design.md)
+- Account Profile surface: [profile-page-design.md](profile-page-design.md)
 
 ## Angular Functional Reference
 
@@ -327,6 +328,7 @@ Angular's Profile tab updates the current user's name/email and resets local-use
 - `/organization/profile` may redirect to account Profile for backward-compatible bookmarks.
 - The account Profile design should preserve Angular behavior: update name/email; reset password only for local-origin users; validate email, current password, new password, and confirm password.
 - Do not duplicate profile forms inside Organization tabs.
+- Follow the dedicated Profile page contract in [profile-page-design.md](profile-page-design.md).
 
 ## Visual Direction
 

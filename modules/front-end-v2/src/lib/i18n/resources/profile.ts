@@ -1,0 +1,81 @@
+export const enProfile = {
+          title: "Profile",
+          subtitle: "Manage your personal account details and local password.",
+          saving: "Saving",
+          operationFailed: "Operation failed, please try again",
+          operationFailedShort: "Operation failed",
+          accountDetails: {
+            title: "Account details",
+            name: "Name",
+            email: "Email",
+            accountType: "Account type",
+            save: "Save profile",
+            helper:
+              "Changes are saved to your user profile and reflected in the account menu.",
+            updated: "Profile successfully updated",
+          },
+          accountTypes: {
+            local: "Local account",
+            sso: "SSO account",
+            external: "External account",
+          },
+          password: {
+            title: "Password",
+            currentPassword: "Current password",
+            newPassword: "New password",
+            confirmPassword: "Confirm new password",
+            minimum: "Minimum 6 characters",
+            helper:
+              "Available for local accounts only. SSO and social accounts do not reset passwords here.",
+            reset: "Reset password",
+            resetSuccess: "Reset password success",
+            resetFailed: "Reset password failed, reason: {{reason}}.",
+            unknownReason: "Unknown reason",
+          },
+          validation: {
+            required: "This field is required",
+            email: "Enter a valid email address",
+            passwordLength: "Password must be at least 6 characters",
+            passwordMismatch: "Password is inconsistent",
+          },
+        } as const
+
+export const zhProfile = {
+          title: "个人资料",
+          subtitle: "管理你的个人账户信息和本地密码。",
+          saving: "保存中",
+          operationFailed: "操作失败，请重试",
+          operationFailedShort: "操作失败",
+          accountDetails: {
+            title: "账户信息",
+            name: "名称",
+            email: "邮箱",
+            accountType: "账户类型",
+            save: "保存资料",
+            helper: "更改会保存到你的用户资料，并同步显示在账户菜单中。",
+            updated: "个人资料已更新",
+          },
+          accountTypes: {
+            local: "本地账户",
+            sso: "SSO 账户",
+            external: "外部账户",
+          },
+          password: {
+            title: "密码",
+            currentPassword: "当前密码",
+            newPassword: "新密码",
+            confirmPassword: "确认新密码",
+            minimum: "至少 6 个字符",
+            helper: "仅本地账户可在此重置密码。SSO 和社交账户不在此处重置密码。",
+            reset: "重置密码",
+            resetSuccess: "密码重置成功",
+            resetFailed: "密码重置失败，原因：{{reason}}。",
+            unknownReason: "未知原因",
+          },
+          validation: {
+            required: "此字段为必填项",
+            email: "请输入有效的邮箱地址",
+            passwordLength: "密码长度至少为 6 个字符",
+            passwordMismatch: "两次输入的密码不一致",
+          },
+        } as const

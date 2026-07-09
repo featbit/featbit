@@ -11,7 +11,7 @@ import {
   Sun,
   User,
 } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useTheme } from "@/components/theme-provider"
@@ -34,6 +34,7 @@ import {
 } from "@/features/auth/auth-api"
 import { localizedPath } from "@/features/layout/layout-context"
 import type { Lang } from "@/features/layout/layout-types"
+import { PROFILE_CHANGED_EVENT } from "@/features/profile/profile-api"
 import { getRuntimeEnv } from "@/lib/env/runtime-env"
 import { cn } from "@/lib/utils"
 
@@ -59,7 +60,7 @@ export function AccountMenu({
   const navigate = useNavigate()
   const { theme, setTheme } = useTheme()
   const [accountMenuOpen, setAccountMenuOpen] = useState(false)
-  const profile = getStoredUserProfile()
+  const [profile, setProfile] = useState(() => getStoredUserProfile())
   const name = profile.name || "Test User"
   const email = profile.email || "test@featbit.com"
   const initials = getInitials(name)
@@ -79,6 +80,20 @@ export function AccountMenu({
     signOut()
     navigate(localizedPath(lang, "/login"), { replace: true })
   }
+
+  function handleProfileClick() {
+    setAccountMenuOpen(false)
+    navigate(localizedPath(lang, "/account/profile"))
+  }
+
+  useEffect(() => {
+    function syncProfile() {
+      setProfile(getStoredUserProfile())
+    }
+
+    window.addEventListener(PROFILE_CHANGED_EVENT, syncProfile)
+    return () => window.removeEventListener(PROFILE_CHANGED_EVENT, syncProfile)
+  }, [])
 
   const trigger = (
     <Button
@@ -139,7 +154,10 @@ export function AccountMenu({
           </div>
           <DropdownMenuSeparator className="mx-3 my-0" />
           <div className="p-2">
-            <DropdownMenuItem className="h-8 cursor-pointer gap-3 rounded-md px-2 text-sm font-medium">
+            <DropdownMenuItem
+              className="h-8 cursor-pointer gap-3 rounded-md px-2 text-sm font-medium"
+              onClick={handleProfileClick}
+            >
               <User className="size-4 text-muted-foreground" />
               {t("layout.account.profile")}
             </DropdownMenuItem>

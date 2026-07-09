@@ -57,7 +57,8 @@ Migrate the main product domains page by page while preserving backend API contr
 ## Workspace And Organization
 
 - Workspace: migrate settings, members/global users, projects, environments, secrets, and detailed billing/subscription/license/plan-related views. Follow the React design contract in [workspace-page-design.md](../design/workspace-page-design.md) for the Workspace admin page.
-- Organization: migrate organization profile/settings, organization switching/creation, default permissions, projects, environments, and environment secrets. Follow the React design contract in [organization-page-design.md](../design/organization-page-design.md) for the Organization admin page. Angular's Profile tab is a functional reference, but React should keep personal profile management in the account/profile surface or use `/organization/profile` only as a compatibility alias.
+- Organization: migrate organization settings, organization switching/creation, default permissions, projects, environments, and environment secrets. Follow the React design contract in [organization-page-design.md](../design/organization-page-design.md) for the Organization admin page. Angular's Profile tab is a functional reference only; React must keep personal profile management in the account Profile surface documented in [profile-page-design.md](../design/profile-page-design.md), and use `/organization/profile` only as a compatibility alias.
+- Account Profile: migrate Angular's profile update and local-user password reset into the independent `/:lang/account/profile` page opened from the Account menu. Preserve update name/email, local-only password reset, email validation, password min-length, confirm-password matching, stored profile refresh, and `/organization/profile` redirect compatibility.
 - Keep destructive actions behind confirmation flows.
 
 ## Relay Proxies

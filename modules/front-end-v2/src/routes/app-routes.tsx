@@ -12,6 +12,7 @@ import { AuthenticatedLayout } from "@/features/layout/authenticated-layout"
 import { LayoutPlaceholder } from "@/features/layout/layout-placeholder"
 import { NotFoundPage } from "@/features/layout/not-found-page"
 import { OnboardingPage } from "@/features/onboarding/onboarding-page"
+import { ProfilePage } from "@/features/profile/profile-page"
 import { BillingPage } from "@/features/workspace/billing/billing-page"
 import { GeneralPage } from "@/features/workspace/general/general-page"
 import { GlobalUsersPage } from "@/features/workspace/global-users/global-users-page"
@@ -129,6 +130,12 @@ function OnboardingRoute() {
   return <OnboardingPage />
 }
 
+function ProfileCompatibilityRedirect() {
+  const { lang = getPreferredLanguage() } = useParams()
+
+  return <Navigate to={`/${lang}/account/profile`} replace />
+}
+
 export function AppRoutes() {
   return (
     <Routes>
@@ -151,9 +158,14 @@ export function AppRoutes() {
         <Route path="workspace/global-users" element={<GlobalUsersPage />} />
         <Route path="organization" element={<OrganizationGeneralPage />} />
         <Route
+          path="organization/profile"
+          element={<ProfileCompatibilityRedirect />}
+        />
+        <Route
           path="organization/projects"
           element={<OrganizationProjectsPage />}
         />
+        <Route path="account/profile" element={<ProfilePage />} />
         {/*Remove the following line when migration completed*/}
         <Route path="*" element={<LayoutPlaceholder />} />
         <Route path="*" element={<NotFoundPage />} />

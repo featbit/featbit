@@ -4,6 +4,7 @@ import { enAuth, zhAuth } from "./resources/auth"
 import { enLayout, zhLayout } from "./resources/layout"
 import { enOnboarding, zhOnboarding } from "./resources/onboarding"
 import { enOrganization, zhOrganization } from "./resources/organization"
+import { enProfile, zhProfile } from "./resources/profile"
 import {
   enWorkspaceSelection,
   zhWorkspaceSelection,
@@ -19,6 +20,7 @@ i18n.use(initReactI18next).init({
         onboarding: enOnboarding,
         layout: enLayout,
         organization: enOrganization,
+        profile: enProfile,
         workspace: enWorkspace,
       },
     },
@@ -29,6 +31,7 @@ i18n.use(initReactI18next).init({
         onboarding: zhOnboarding,
         layout: zhLayout,
         organization: zhOrganization,
+        profile: zhProfile,
         workspace: zhWorkspace,
       },
     },

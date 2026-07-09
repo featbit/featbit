@@ -6,6 +6,7 @@ This document is the implementation design contract for the authenticated React 
 
 - Light theme concept: [react-layout-light.png](react-layout-light.png)
 - Dark theme concept: [react-layout-dark.png](react-layout-dark.png)
+- Account Profile page concept: [profile-page-light.png](profile-page-light.png)
 
 ## Overall Direction
 
@@ -80,6 +81,7 @@ Navigation groups:
   - Version
   - Sign out
 - Do not duplicate plan/subscription information in the Account menu.
+- `Profile` navigates to the independent account Profile page documented in [profile-page-design.md](profile-page-design.md), not to an Organization tab.
 
 ## Subscription And License Badge
 
