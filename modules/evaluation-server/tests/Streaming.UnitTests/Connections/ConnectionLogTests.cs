@@ -1,13 +1,14 @@
 using Domain.Shared;
 using Microsoft.Extensions.Logging.Testing;
 using Streaming.Connections;
+using Streaming.UnitTests.Builders;
 
 namespace Streaming.UnitTests.Connections;
 
 public class ConnectionLogTests
 {
     [Fact]
-    public void ClientConnectionProperties()
+    public void Add_ClientConnection_LogsAllConnectionProperties()
     {
         var logger = new FakeLogger<ConnectionManager>();
         var manager = new ConnectionManager(logger);
@@ -38,11 +39,11 @@ public class ConnectionLogTests
             ["connection.env.key"] = context.Connection.EnvKey
         };
 
-        Assert.Equivalent(latestRecord.StructuredState, expectedProperties, strict: true);
+        Assert.Equivalent(expectedProperties, latestRecord.StructuredState, strict: true);
     }
 
     [Fact]
-    public void RelayProxyConnectionProperties()
+    public void Add_RelayProxyConnection_LogsRelayProxyConnectionsProperty()
     {
         var logger = new FakeLogger<ConnectionManager>();
         var manager = new ConnectionManager(logger);
@@ -81,6 +82,6 @@ public class ConnectionLogTests
             ["connection.rp.connections"] = "p1:prod,p2:prod"
         };
 
-        Assert.Equivalent(latestRecord.StructuredState, expectedProperties, strict: true);
+        Assert.Equivalent(expectedProperties, latestRecord.StructuredState, strict: true);
     }
 }

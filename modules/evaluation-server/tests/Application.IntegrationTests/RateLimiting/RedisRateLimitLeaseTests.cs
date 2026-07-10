@@ -3,10 +3,11 @@ using Api.RateLimiting;
 
 namespace Application.IntegrationTests.RateLimiting;
 
+[Trait("Category", "Host")]
 public class RedisRateLimitLeaseTests
 {
     [Fact]
-    public void RejectedLease_ExposesRetryAfterMetadata()
+    public void Constructor_RejectedLeaseWithRetryAfter_ExposesRetryAfterMetadata()
     {
         var retryAfterName = MetadataName.RetryAfter.Name;
 
@@ -23,7 +24,7 @@ public class RedisRateLimitLeaseTests
     }
 
     [Fact]
-    public void AcquiredLease_HasNoRetryAfterMetadata()
+    public void Constructor_AcquiredLease_HasNoMetadata()
     {
         var lease = new RedisRateLimitLease(isAcquired: true);
 

@@ -1,15 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using Infrastructure.Caches.Redis;
 using Infrastructure.Store;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Testing;
 using Moq;
 using StackExchange.Redis;
-using Xunit;
 
 namespace Infrastructure.UnitTests;
 
