@@ -43,7 +43,15 @@ function FeatBitBrand({ lang, collapsed }: { lang: Lang; collapsed: boolean }) {
 
 function isActivePath(pathname: string, href: string, lang: Lang) {
   const localizedHref = localizedPath(lang, href)
-  return pathname === localizedHref
+  if (href === "") {
+    return pathname === localizedHref
+  }
+
+  return pathname === localizedHref || pathname.startsWith(`${localizedHref}/`)
+}
+
+function hasActiveChild(pathname: string, item: NavItem, lang: Lang) {
+  return item.children?.some((child) => isActivePath(pathname, child.href, lang))
 }
 
 function SidebarNavLink({
@@ -94,8 +102,11 @@ function SidebarNavItem({
   onToggle: () => void
 }) {
   const { t } = useTranslation()
+  const location = useLocation()
   const Icon = item.icon
   const label = t(item.labelKey)
+  const childActive = hasActiveChild(location.pathname, item, lang)
+  const open = expanded || childActive
 
   if (!item.children?.length) {
     return <SidebarNavLink item={item} lang={lang} collapsed={collapsed} />
@@ -109,17 +120,18 @@ function SidebarNavItem({
         className={cn(
           "h-9 w-full justify-start gap-3 px-3 text-sm font-normal text-muted-foreground hover:text-foreground",
           "hover:bg-transparent active:translate-y-0 active:bg-transparent aria-expanded:bg-transparent aria-expanded:text-muted-foreground",
+          childActive && "text-foreground",
           collapsed && "justify-center px-0"
         )}
         title={collapsed ? label : undefined}
-        aria-expanded={expanded}
+        aria-expanded={open}
         onClick={onToggle}
       >
         <Icon className="size-4 shrink-0" />
         {!collapsed ? (
           <>
             <span className="min-w-0 flex-1 truncate text-left">{label}</span>
-            {expanded ? (
+            {open ? (
               <ChevronUp className="size-3.5 shrink-0" />
             ) : (
               <ChevronDown className="size-3.5 shrink-0" />
@@ -127,7 +139,7 @@ function SidebarNavItem({
           </>
         ) : null}
       </Button>
-      {!collapsed && expanded ? (
+      {!collapsed && open ? (
         <div className="space-y-1">
           {item.children.map((child) => (
             <SidebarNavLink
