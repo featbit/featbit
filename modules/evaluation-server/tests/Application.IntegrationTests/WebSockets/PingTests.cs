@@ -4,6 +4,7 @@ using Streaming.Messages;
 
 namespace Application.IntegrationTests.WebSockets;
 
+[Trait("Category", "Host")]
 [Collection(nameof(TestApp))]
 public class PingTests
 {
@@ -15,7 +16,7 @@ public class PingTests
     }
 
     [Fact]
-    public async Task PingAsync()
+    public async Task PingMessage_ValidConnection_ServerRepliesWithPong()
     {
         var ws = await _app.ConnectWithTokenAsync();
 

@@ -12,6 +12,12 @@ public class PermissionRequirementHandler(IPermissionChecker permissionChecker)
             return;
         }
 
+        // unauthenticated users have no permissions
+        if (context.User.Identity?.IsAuthenticated != true)
+        {
+            return;
+        }
+
         if (await permissionChecker.IsGrantedAsync(httpContext, requirement))
         {
             context.Succeed(requirement);

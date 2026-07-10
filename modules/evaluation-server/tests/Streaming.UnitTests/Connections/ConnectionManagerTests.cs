@@ -1,13 +1,14 @@
 using Domain.Shared;
 using Microsoft.Extensions.Logging.Testing;
 using Streaming.Connections;
+using Streaming.UnitTests.Builders;
 
 namespace Streaming.UnitTests.Connections;
 
 public class ConnectionManagerTests
 {
     [Fact]
-    public void Empty()
+    public void Connections_NewManager_IsEmpty()
     {
         var logger = new FakeLogger<ConnectionManager>();
         var manager = new ConnectionManager(logger);
@@ -16,7 +17,7 @@ public class ConnectionManagerTests
     }
 
     [Fact]
-    public void ClientConnection()
+    public void AddRemove_ClientConnection_TracksAndRemovesByConnectionId()
     {
         var logger = new FakeLogger<ConnectionManager>();
         var manager = new ConnectionManager(logger);
@@ -33,7 +34,7 @@ public class ConnectionManagerTests
     }
 
     [Fact]
-    public void RelayProxyConnections()
+    public void AddRemove_RelayProxyConnection_TracksAndRemovesAllMappedConnections()
     {
         var logger = new FakeLogger<ConnectionManager>();
         var manager = new ConnectionManager(logger);
@@ -64,7 +65,7 @@ public class ConnectionManagerTests
     }
 
     [Fact]
-    public void GetEnvConnections()
+    public void GetEnvConnections_ByEnvId_ReturnsOnlyMatchingConnections()
     {
         var logger = new FakeLogger<ConnectionManager>();
         var manager = new ConnectionManager(logger);

@@ -11,7 +11,7 @@ public class ConnectionToStringTests
     private readonly WebSocket _websocket = Mock.Of<WebSocket>(x => x.State == WebSocketState.Open);
 
     [Fact]
-    public void ClientSideConnection()
+    public void ToString_ClientSideConnectionWithUser_FormatsAllConnectionFields()
     {
         var connection = new Connection(_websocket, TestData.ClientSecret);
         connection.AttachUser(new EndUser
@@ -28,12 +28,11 @@ public class ConnectionToStringTests
 
         var expectedLog =
             $"The connection is: id={connection.Id},type=client,projectEnv=webapp:dev,user=tester,status=Open";
-
-        Assert.Equal(log, expectedLog);
+        Assert.Equal(expectedLog, log);
     }
 
     [Fact]
-    public void ServerSideConnection()
+    public void ToString_ServerSideConnectionWithoutUser_FormatsWithEmptyUser()
     {
         var connection = new Connection(_websocket, TestData.ServerSecret);
 
@@ -41,7 +40,6 @@ public class ConnectionToStringTests
 
         var expectedLog =
             $"The connection is: id={connection.Id},type=server,projectEnv=webapp:prod,user=,status=Open";
-
-        Assert.Equal(log, expectedLog);
+        Assert.Equal(expectedLog, log);
     }
 }

@@ -2,6 +2,7 @@ using Microsoft.Net.Http.Headers;
 
 namespace Application.IntegrationTests.Cors;
 
+[Trait("Category", "Host")]
 [Collection(nameof(TestApp))]
 public class CorsTests
 {
@@ -13,7 +14,7 @@ public class CorsTests
     }
 
     [Fact]
-    public async Task Disabled_DoesNotEmitCorsHeaders()
+    public async Task Preflight_CorsDisabled_DoesNotEmitCorsHeaders()
     {
         var client = GetClient(enabled: false);
 
@@ -23,7 +24,7 @@ public class CorsTests
     }
 
     [Fact]
-    public async Task Enabled_AllowsAnyOrigin_WithWildcardDefaults()
+    public async Task Preflight_DefaultWildcardOrigins_AllowsAnyOrigin()
     {
         var client = GetClient();
 
@@ -33,7 +34,7 @@ public class CorsTests
     }
 
     [Fact]
-    public async Task Enabled_AllowsListedOrigin()
+    public async Task Preflight_ListedOrigin_EchoesOrigin()
     {
         var client = GetClient(origins: "https://app.example.com;https://admin.example.com");
 
@@ -43,7 +44,7 @@ public class CorsTests
     }
 
     [Fact]
-    public async Task Enabled_RejectsUnlistedOrigin()
+    public async Task Preflight_UnlistedOrigin_OmitsAllowOriginHeader()
     {
         var client = GetClient(origins: "https://app.example.com");
 
@@ -53,7 +54,7 @@ public class CorsTests
     }
 
     [Fact]
-    public async Task Enabled_AllowsConfiguredHeader()
+    public async Task Preflight_ConfiguredHeader_AllowsHeader()
     {
         var client = GetClient(origins: "https://app.example.com", headers: "X-Custom;Authorization");
 
@@ -67,7 +68,7 @@ public class CorsTests
     }
 
     [Fact]
-    public async Task Enabled_AllowsConfiguredMethod()
+    public async Task Preflight_ConfiguredMethod_AllowsMethod()
     {
         var client = GetClient(origins: "https://app.example.com", methods: "GET;POST");
 
@@ -81,7 +82,7 @@ public class CorsTests
     }
 
     [Fact]
-    public async Task Enabled_RejectsDisallowedHeader()
+    public async Task Preflight_DisallowedHeader_NotIncludedInAllowHeaders()
     {
         var client = GetClient(origins: "https://app.example.com", headers: "X-Custom;Authorization");
 
@@ -95,7 +96,7 @@ public class CorsTests
     }
 
     [Fact]
-    public async Task Enabled_RejectsDisallowedMethod()
+    public async Task Preflight_DisallowedMethod_NotIncludedInAllowMethods()
     {
         var client = GetClient(origins: "https://app.example.com", methods: "GET;POST");
 
@@ -109,7 +110,7 @@ public class CorsTests
     }
 
     [Fact]
-    public async Task Enabled_AllowsCredentials_WithExplicitOrigin()
+    public async Task Preflight_AllowCredentialsWithExplicitOrigin_EmitsAllowCredentialsHeader()
     {
         var client = GetClient(origins: "https://app.example.com", allowCredentials: true);
 

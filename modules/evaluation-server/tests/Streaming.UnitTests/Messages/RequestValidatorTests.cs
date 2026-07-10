@@ -13,7 +13,7 @@ namespace Streaming.UnitTests.Messages;
 public class RequestValidatorTests
 {
     [Fact]
-    public async Task Valid()
+    public async Task ValidateAsync_ValidClientRequest_ReturnsSecretForEnvironment()
     {
         var context = SetupTestContext();
         var validator = SetupValidator();
@@ -28,7 +28,7 @@ public class RequestValidatorTests
     }
 
     [Fact]
-    public async Task ValidRelayProxy()
+    public async Task ValidateAsync_ValidRelayProxyRequest_ReturnsAllServerSecretsForProxy()
     {
         var rpService = new Mock<IRelayProxyService>();
 
@@ -55,7 +55,7 @@ public class RequestValidatorTests
     [Theory]
     [InlineData("")]
     [InlineData("unknown")]
-    public async Task InvalidType(string type)
+    public async Task ValidateAsync_UnknownOrEmptyConnectionType_FailsWithInvalidType(string type)
     {
         await EnsureInvalidAsync(
             expectedReason: $"Invalid type: {type}",
@@ -65,7 +65,7 @@ public class RequestValidatorTests
 
     [Theory]
     [InlineData("unknown")]
-    public async Task InvalidVersion(string version)
+    public async Task ValidateAsync_UnsupportedProtocolVersion_FailsWithInvalidVersion(string version)
     {
         await EnsureInvalidAsync(
             expectedReason: $"Invalid version: {version}",
@@ -74,35 +74,56 @@ public class RequestValidatorTests
     }
 
     [Fact]
-    public async Task InvalidToken()
+    public async Task ValidateAsync_EmptyToken_FailsWithInvalidToken()
     {
         await EnsureInvalidAsync(
             expectedReason: "Missing token",
             token: string.Empty
         );
+    }
 
+    [Fact]
+    public async Task ValidateAsync_MalformedToken_FailsWithInvalidToken()
+    {
         await EnsureInvalidAsync(
             expectedReason: "Invalid token: 123456",
             token: "123456"
         );
+    }
 
+    [Fact]
+    public async Task ValidateAsync_TokenIssuedTooFarInPast_FailsWithExpired()
+    {
         await EnsureInvalidAsync(
             expectedReason: $"Token is expired: {TestData.ClientTokenString}",
             current: TestData.ClientToken.Timestamp + 31 * 1000
         );
+    }
 
+    [Fact]
+    public async Task ValidateAsync_TokenIssuedTooFarInFuture_FailsWithExpired()
+    {
         await EnsureInvalidAsync(
             expectedReason: $"Token is expired: {TestData.ClientTokenString}",
             current: TestData.ClientToken.Timestamp - 31 * 1000
         );
+    }
 
+    [Fact]
+    public async Task ValidateAsync_SecretNotFoundInStore_FailsWithSecretNotFound()
+    {
         var nullStore = new Mock<IStore>();
         nullStore.Setup(x => x.GetSecretAsync(It.IsAny<string>())).ReturnsAsync(() => null);
+
         await EnsureInvalidAsync(
             expectedReason: $"Secret is not found: {TestData.ClientSecretString}",
             store: nullStore.Object
         );
+    }
 
+    [Fact]
+    public async Task ValidateAsync_ClientSecretUsedAsServerConnection_FailsWithInconsistentSecret()
+    {
         await EnsureInvalidAsync(
             expectedReason: $"Inconsistent secret used: {SecretTypes.Client}. Request type: {ConnectionType.Server}",
             type: ConnectionType.Server
@@ -110,7 +131,7 @@ public class RequestValidatorTests
     }
 
     [Fact]
-    public async Task InvalidRelayProxyToken()
+    public async Task ValidateAsync_RelayProxyTokenNotInService_FailsWithInvalidRelayProxyToken()
     {
         var rpService = new Mock<IRelayProxyService>();
         rpService.Setup(x => x.GetServerSecretsAsync(It.IsAny<string>()))
@@ -125,7 +146,7 @@ public class RequestValidatorTests
     }
 
     [Fact]
-    public async Task LookupSecretThrows()
+    public async Task ValidateAsync_StoreThrowsException_ReturnsUnavailable()
     {
         var errorStoreMock = new Mock<IStore>();
         errorStoreMock.Setup(x => x.GetSecretAsync(It.IsAny<string>()))

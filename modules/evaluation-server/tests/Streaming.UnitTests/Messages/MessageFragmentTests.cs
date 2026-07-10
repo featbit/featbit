@@ -5,7 +5,7 @@ namespace Streaming.UnitTests.Messages;
 public class MessageFragmentTests
 {
     [Fact]
-    public void CreateMessageFragment()
+    public void Constructor_BufferWithContentLength_StoresOnlyContentLengthBytes()
     {
         const byte contentLength = 10;
         var buffer = new byte[100];
@@ -27,7 +27,7 @@ public class MessageFragmentTests
     }
 
     [Fact]
-    public void GetBytesFromMessageSegments()
+    public void GetBytes_MultipleFragments_ConcatenatesPayloadsInAppendOrder()
     {
         var fragments = new MessageFragments();
 
@@ -52,7 +52,7 @@ public class MessageFragmentTests
     }
 
     [Fact]
-    public void FreeMessageFragments()
+    public void Free_FragmentsWithContent_ClearsCountAndZeroesBuffers()
     {
         var fragments = new MessageFragments();
 

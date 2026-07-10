@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Application.IntegrationTests.Configuration;
 
+[Trait("Category", "Host")]
 [Collection(nameof(TestApp))]
 public class KafkaConfigTests
 {
@@ -15,7 +16,7 @@ public class KafkaConfigTests
     }
 
     [Fact]
-    public async Task DefaultProducerConsumerConfig()
+    public async Task KafkaConfig_DefaultRegistration_RegistersExpectedProducerAndConsumerConfig()
     {
         var proServices = _app.WithWebHostBuilder(builder => builder.UseSetting(MqProvider.SectionName, MqProvider.Kafka))
             .Services;
