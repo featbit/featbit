@@ -15,15 +15,7 @@ RUN npm run build:prod
 FROM nginx:1.23
 
 ARG VERSION=dev
-
-ENV API_URL \
-    DEMO_URL \
-    EVALUATION_URL \
-    BASE_HREF \
-    DISPLAY_API_URL \
-    DISPLAY_EVALUATION_URL \
-    HOSTING_MODE \
-    VERSION=$VERSION
+ENV VERSION=$VERSION
 
 RUN apt-get update -y && apt-get install --no-install-recommends -y gettext-base && rm -rf /var/lib/apt/lists/*
 
