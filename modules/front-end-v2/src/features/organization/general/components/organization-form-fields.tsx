@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label"
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -128,21 +129,23 @@ export function OrganizationSelect({
         </SelectValue>
       </SelectTrigger>
       <SelectContent>
-        {options.map((option) => (
-          <SelectItem key={option.value} value={option.value}>
-            <span className="flex min-w-0 flex-1 items-center gap-2">
-              <span className="truncate">{option.label}</span>
-              {option.badge ? (
-                <Badge
-                  variant="outline"
-                  className="ml-auto h-5 shrink-0 bg-background px-1.5 text-[0.65rem] font-medium text-muted-foreground"
-                >
-                  {option.badge}
-                </Badge>
-              ) : null}
-            </span>
-          </SelectItem>
-        ))}
+        <SelectGroup>
+          {options.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              <span className="flex min-w-0 flex-1 items-center gap-2">
+                <span className="truncate">{option.label}</span>
+                {option.badge ? (
+                  <Badge
+                    variant="outline"
+                    className="ml-auto h-5 shrink-0 bg-background px-1.5 text-[0.65rem] font-medium text-muted-foreground"
+                  >
+                    {option.badge}
+                  </Badge>
+                ) : null}
+              </span>
+            </SelectItem>
+          ))}
+        </SelectGroup>
       </SelectContent>
     </Select>
   )
