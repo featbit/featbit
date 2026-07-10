@@ -79,6 +79,11 @@ const OrganizationProjectsPage = lazy(() =>
     default: module.OrganizationProjectsPage,
   }))
 )
+const TeamPage = lazy(() =>
+  import("@/features/iam/team/team-page").then((module) => ({
+    default: module.TeamPage,
+  }))
+)
 
 type SupportedLanguage = "en" | "zh"
 
@@ -234,6 +239,8 @@ export function AppRoutes() {
             path="organization/projects"
             element={<OrganizationProjectsPage />}
           />
+          <Route path="iam" element={<Navigate to="team" replace />} />
+          <Route path="iam/team" element={<TeamPage />} />
           <Route path="account/profile" element={<ProfilePage />} />
           {/*Remove the following line when migration completed*/}
           <Route path="*" element={<LayoutPlaceholder />} />
