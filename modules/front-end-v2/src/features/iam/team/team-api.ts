@@ -99,7 +99,7 @@ export function fetchPolicyOptions(params: { name: string }) {
     `/api/v1/policies${queryString({
       name: params.name,
       pageIndex: 0,
-      pageSize: 20,
+      pageSize: 10,
     })}`
   )
 }
@@ -109,7 +109,7 @@ export function fetchGroupOptions(params: { name: string }) {
     `/api/v1/groups${queryString({
       name: params.name,
       pageIndex: 0,
-      pageSize: 20,
+      pageSize: 10,
     })}`
   )
 }

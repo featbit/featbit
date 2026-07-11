@@ -739,17 +739,20 @@ function AddMemberSheet({
   const [email, setEmail] = useState("")
   const [policies, setPolicies] = useState<PolicyOption[]>([])
   const [groups, setGroups] = useState<GroupOption[]>([])
-  const [error, setError] = useState<string | null>(null)
+  const [emailError, setEmailError] = useState<string | null>(null)
+  const [permissionsError, setPermissionsError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
 
   async function submit() {
-    setError(null)
-    if (!email.trim() || !/^\S+@\S+\.\S+$/.test(email.trim())) {
-      setError("Enter a valid email.")
-      return
-    }
-    if (policies.length === 0 && groups.length === 0) {
-      setError("Select at least one policy or group.")
+    const hasValidEmail = /^\S+@\S+\.\S+$/.test(email.trim())
+    const hasPermissions = policies.length > 0 || groups.length > 0
+
+    setEmailError(hasValidEmail ? null : "Enter a valid email.")
+    setPermissionsError(
+      hasPermissions ? null : "Select at least one policy or group."
+    )
+
+    if (!hasValidEmail || !hasPermissions) {
       return
     }
 
@@ -783,8 +786,18 @@ function AddMemberSheet({
               id="team-member-email"
               value={email}
               placeholder="new.user@acme.io"
-              onChange={(event) => setEmail(event.target.value)}
+              aria-invalid={Boolean(emailError)}
+              onChange={(event) => {
+                const nextEmail = event.target.value
+                setEmail(nextEmail)
+                if (/^\S+@\S+\.\S+$/.test(nextEmail.trim())) {
+                  setEmailError(null)
+                }
+              }}
             />
+            {emailError ? (
+              <p className="text-sm text-destructive">{emailError}</p>
+            ) : null}
           </div>
 
           <section className="space-y-4">
@@ -797,33 +810,29 @@ function AddMemberSheet({
               </p>
             </div>
 
-            <PermissionMultiPicker
-              label="Policy"
-              selectedLabel="Selected policies"
-              placeholder="Search policies"
+            <PolicyMultiPicker
               selected={policies}
-              onSelectedChange={setPolicies}
-              getOptionMeta={(item) =>
-                item.type === "SysManaged" ? (
-                  <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                    <Star className="size-3" />
-                    System
-                  </span>
-                ) : null
-              }
-              loadOptions={loadPolicyOptions}
+              onSelectedChange={(nextPolicies) => {
+                setPolicies(nextPolicies)
+                if (nextPolicies.length > 0 || groups.length > 0) {
+                  setPermissionsError(null)
+                }
+              }}
             />
 
-            <PermissionMultiPicker
-              label="Group"
-              selectedLabel="Selected groups"
-              placeholder="Search groups"
+            <GroupMultiPicker
               selected={groups}
-              onSelectedChange={setGroups}
-              loadOptions={loadGroupOptions}
+              onSelectedChange={(nextGroups) => {
+                setGroups(nextGroups)
+                if (policies.length > 0 || nextGroups.length > 0) {
+                  setPermissionsError(null)
+                }
+              }}
             />
 
-            {error ? <p className="text-sm text-destructive">{error}</p> : null}
+            {permissionsError ? (
+              <p className="text-sm text-destructive">{permissionsError}</p>
+            ) : null}
           </section>
         </div>
 
@@ -842,6 +851,52 @@ const loadPolicyOptions = (query: string) =>
 
 const loadGroupOptions = (query: string) =>
   fetchGroupOptions({ name: query }).then((result) => result.items)
+
+function PolicyMultiPicker({
+  selected,
+  onSelectedChange,
+}: {
+  selected: PolicyOption[]
+  onSelectedChange: (options: PolicyOption[]) => void
+}) {
+  return (
+    <PermissionMultiPicker
+      label="Policies"
+      selectedLabel="Selected policies"
+      placeholder="Search policies"
+      selected={selected}
+      onSelectedChange={onSelectedChange}
+      getOptionMeta={(item) =>
+        item.type === "SysManaged" ? (
+          <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+            <Star className="size-3" />
+            System
+          </span>
+        ) : null
+      }
+      loadOptions={loadPolicyOptions}
+    />
+  )
+}
+
+function GroupMultiPicker({
+  selected,
+  onSelectedChange,
+}: {
+  selected: GroupOption[]
+  onSelectedChange: (options: GroupOption[]) => void
+}) {
+  return (
+    <PermissionMultiPicker
+      label="Groups"
+      selectedLabel="Selected groups"
+      placeholder="Search groups"
+      selected={selected}
+      onSelectedChange={onSelectedChange}
+      loadOptions={loadGroupOptions}
+    />
+  )
+}
 
 function PermissionMultiPicker<TOption extends { id: string; name: string }>({
   label,
@@ -892,12 +947,17 @@ function PermissionMultiPicker<TOption extends { id: string; name: string }>({
     }
   }, [loadOptions, query])
 
-  const mergedOptions = useMemo(() => {
-    const next = new Map<string, TOption>()
-    selected.forEach((option) => next.set(option.id, option))
-    options.forEach((option) => next.set(option.id, option))
-    return Array.from(next.values())
-  }, [options, selected])
+  const filteredOptions = useMemo(() => {
+    const normalizedQuery = query.trim().toLocaleLowerCase()
+
+    if (!normalizedQuery) {
+      return options
+    }
+
+    return options.filter((option) =>
+      option.name.toLocaleLowerCase().includes(normalizedQuery)
+    )
+  }, [options, query])
 
   function toggleOption(option: TOption) {
     const exists = selected.some(
@@ -923,13 +983,18 @@ function PermissionMultiPicker<TOption extends { id: string; name: string }>({
         </span>
       </div>
 
-      <Command shouldFilter={false} className="rounded-none p-0">
-        <CommandInput
-          value={query}
-          placeholder={placeholder}
-          onValueChange={setQuery}
-        />
-        <CommandList className="max-h-40 border-t">
+      <Command
+        shouldFilter={false}
+        className="rounded-none p-0 [&_[data-slot=command-input-wrapper]]:p-0"
+      >
+        <div className="px-2 py-2">
+          <CommandInput
+            value={query}
+            placeholder={placeholder}
+            onValueChange={setQuery}
+          />
+        </div>
+        <CommandList className="max-h-40 overflow-y-auto border-t pt-1 [scrollbar-color:var(--border)_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar]:block [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent">
           {loading ? (
             <div className="space-y-2 p-2">
               <Skeleton className="h-8 w-full" />
@@ -938,8 +1003,8 @@ function PermissionMultiPicker<TOption extends { id: string; name: string }>({
           ) : (
             <>
               <CommandEmpty>No results found.</CommandEmpty>
-              <CommandGroup>
-                {mergedOptions.map((option) => {
+              <CommandGroup className="[&_[cmdk-group-items]]:space-y-1">
+                {filteredOptions.map((option) => {
                   const isSelected = selected.some(
                     (selectedOption) => selectedOption.id === option.id
                   )
@@ -949,6 +1014,7 @@ function PermissionMultiPicker<TOption extends { id: string; name: string }>({
                       key={option.id}
                       value={`${option.name} ${option.id}`}
                       data-checked={isSelected}
+                      className="border border-transparent data-[checked=true]:border-primary/20 data-[checked=true]:bg-primary/10 data-[checked=true]:text-foreground data-[checked=true]:*:[svg]:text-primary"
                       onSelect={() => toggleOption(option)}
                     >
                       <span className="min-w-0 flex-1 truncate">
@@ -986,8 +1052,8 @@ function PermissionMultiPicker<TOption extends { id: string; name: string }>({
             {selected.map((option) => (
               <Badge
                 key={option.id}
-                variant="secondary"
-                className="max-w-full gap-1 rounded-full py-0.5 pr-1 pl-2 font-normal"
+                variant="outline"
+                className="max-w-full gap-1 rounded-full border-primary/30 bg-primary/10 py-0.5 pr-1 pl-2 font-normal text-primary"
               >
                 <span className="min-w-0 truncate">{option.name}</span>
                 <button
