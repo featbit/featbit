@@ -1,96 +1,39 @@
-import {
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  Copy,
-  Plus,
-  Search,
-  Star,
-  X,
-} from "lucide-react"
-import type { ReactNode } from "react"
+import { Plus, Search } from "lucide-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { Link, useParams } from "react-router-dom"
 import { useTranslation } from "react-i18next"
+import { Link, useParams } from "react-router-dom"
 import { toast } from "sonner"
 import {
-  flexRender,
   getCoreRowModel,
   useReactTable,
   type ColumnDef,
 } from "@tanstack/react-table"
-import { getStoredUserProfile } from "@/features/auth/auth-api"
 import { Button, buttonVariants } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command"
-import {
-  Sheet,
-  SheetContent,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet"
-import { Skeleton } from "@/components/ui/skeleton"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+import { TooltipProvider } from "@/components/ui/tooltip"
+import { getStoredUserProfile } from "@/features/auth/auth-api"
 import { localizedPath, resolveLang } from "@/features/layout/layout-context"
 import { cn } from "@/lib/utils"
+import { AddMemberSheet } from "./components/add-member-sheet"
 import {
-  addTeamMember,
-  fetchGroupOptions,
-  fetchPolicyOptions,
+  RemoveMemberDialog,
+  type RemoveTarget,
+} from "./components/remove-member-dialog"
+import {
+  CopyCell,
+  EmailResourceCell,
+  GroupsCell,
+  RowActions,
+  TeamTable,
+} from "./components/team-table"
+import { TeamPagination } from "./components/team-pagination"
+import {
   fetchTeamMembers,
   memberResourceName,
   removeMemberFromOrganization,
   removeMemberFromWorkspace,
-  type GroupOption,
-  type PolicyOption,
   type TeamMember,
 } from "./team-api"
-
-type RemoveTarget = {
-  member: TeamMember
-  scope: "organization" | "workspace"
-} | null
-
-const pageSizeOptions = [10, 20, 30]
 
 export function TeamPage() {
   const { t } = useTranslation()
@@ -115,7 +58,6 @@ export function TeamPage() {
       setDebouncedSearch(search)
       setPageIndex(1)
     }, 300)
-
     return () => window.clearTimeout(timeout)
   }, [search])
 
@@ -138,9 +80,7 @@ export function TeamPage() {
       .finally(() => setIsLoading(false))
   }, [debouncedSearch, pageIndex, pageSize, t])
 
-  useEffect(() => {
-    loadMembers()
-  }, [loadMembers])
+  useEffect(() => loadMembers(), [loadMembers])
 
   const copyText = useCallback(
     async (value: string) => {
@@ -151,9 +91,7 @@ export function TeamPage() {
   )
 
   async function confirmRemove() {
-    if (!removeTarget) {
-      return
-    }
+    if (!removeTarget) return
 
     setIsRemoving(true)
     try {
@@ -229,37 +167,31 @@ export function TeamPage() {
       {
         id: "actions",
         header: t("iam.team.columns.actions"),
-        cell: ({ row }) => {
-          const isCurrentUser = profile.email === row.original.email
-          return (
-            <div className="flex items-center gap-1">
-              <Link
-                to={localizedPath(
-                  lang,
-                  `/iam/team/${encodeURIComponent(row.original.id)}/groups`
-                )}
-                className={cn(
-                  buttonVariants({ variant: "ghost", size: "sm" }),
-                  "font-medium"
-                )}
-              >
-                {t("iam.team.details")}
-              </Link>
-              <RowActions
-                disabled={isCurrentUser}
-                onRemoveFromOrg={() =>
-                  setRemoveTarget({
-                    member: row.original,
-                    scope: "organization",
-                  })
-                }
-                onRemoveFromWorkspace={() =>
-                  setRemoveTarget({ member: row.original, scope: "workspace" })
-                }
-              />
-            </div>
-          )
-        },
+        cell: ({ row }) => (
+          <div className="flex items-center gap-1">
+            <Link
+              to={localizedPath(
+                lang,
+                `/iam/team/${encodeURIComponent(row.original.id)}/groups`
+              )}
+              className={cn(
+                buttonVariants({ variant: "ghost", size: "sm" }),
+                "font-medium"
+              )}
+            >
+              {t("iam.team.details")}
+            </Link>
+            <RowActions
+              disabled={profile.email === row.original.email}
+              onRemoveFromOrg={() =>
+                setRemoveTarget({ member: row.original, scope: "organization" })
+              }
+              onRemoveFromWorkspace={() =>
+                setRemoveTarget({ member: row.original, scope: "workspace" })
+              }
+            />
+          </div>
+        ),
       },
     ],
     [copyText, lang, profile.email, t]
@@ -304,12 +236,7 @@ export function TeamPage() {
           {error ? (
             <div className="flex items-center justify-between border-b bg-destructive/5 px-5 py-3 text-sm text-destructive">
               {t("iam.team.loadFailed")}
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={loadMembers}
-              >
+              <Button variant="outline" size="sm" onClick={loadMembers}>
                 {t("iam.team.retry")}
               </Button>
             </div>
@@ -324,7 +251,7 @@ export function TeamPage() {
           />
         </div>
 
-        <Pagination
+        <TeamPagination
           pageIndex={pageIndex}
           pageSize={pageSize}
           totalCount={data.totalCount}
@@ -350,807 +277,11 @@ export function TeamPage() {
           target={removeTarget}
           saving={isRemoving}
           onOpenChange={(open) => {
-            if (!open) {
-              setRemoveTarget(null)
-            }
+            if (!open) setRemoveTarget(null)
           }}
           onConfirm={confirmRemove}
         />
       </div>
     </TooltipProvider>
-  )
-}
-
-function EmailResourceCell({
-  member,
-  onCopy,
-}: {
-  member: TeamMember
-  onCopy: () => void
-}) {
-  const { t } = useTranslation()
-  const resourceName = memberResourceName(member)
-
-  return (
-    <div className="min-w-0 space-y-1">
-      <Tooltip>
-        <TooltipTrigger
-          render={<span className="block truncate text-foreground" />}
-        >
-          {member.email || "-"}
-        </TooltipTrigger>
-        {member.email ? <TooltipContent>{member.email}</TooltipContent> : null}
-      </Tooltip>
-      <div className="flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
-        <Tooltip>
-          <TooltipTrigger
-            render={
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-xs"
-                className="size-5 shrink-0 text-muted-foreground"
-                onClick={onCopy}
-              />
-            }
-          >
-            <Copy className="size-3" />
-          </TooltipTrigger>
-          <TooltipContent>{t("iam.team.copyResourceName")}</TooltipContent>
-        </Tooltip>
-        <Tooltip>
-          <TooltipTrigger
-            render={
-              <span className="block min-w-0 truncate font-mono text-[0.72rem]" />
-            }
-          >
-            {resourceName}
-          </TooltipTrigger>
-          <TooltipContent>{resourceName}</TooltipContent>
-        </Tooltip>
-      </div>
-    </div>
-  )
-}
-
-function CopyCell({
-  value,
-  label,
-  onCopy,
-}: {
-  value: string
-  label: string
-  onCopy: () => void
-}) {
-  return (
-    <div className="flex min-w-0 items-center gap-2">
-      <Tooltip>
-        <TooltipTrigger
-          render={
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              className="size-7 shrink-0 text-muted-foreground"
-              onClick={onCopy}
-            />
-          }
-        >
-          <Copy className="size-3.5" />
-        </TooltipTrigger>
-        <TooltipContent>{label}</TooltipContent>
-      </Tooltip>
-      <Tooltip>
-        <TooltipTrigger
-          render={
-            <span className="block min-w-0 truncate font-mono text-xs text-foreground" />
-          }
-        >
-          {value}
-        </TooltipTrigger>
-        <TooltipContent>{value}</TooltipContent>
-      </Tooltip>
-    </div>
-  )
-}
-
-function GroupsCell({ groups }: { groups: TeamMember["groups"] }) {
-  if (!groups.length) {
-    return <span className="text-muted-foreground">-</span>
-  }
-
-  return (
-    <div className="flex min-w-0 flex-wrap items-center gap-2">
-      {groups.map((group) => (
-        <Tooltip key={group.id}>
-          <TooltipTrigger
-            render={
-              <Badge
-                variant="outline"
-                className="max-w-44 justify-start rounded-full px-2 font-normal"
-              >
-                <span className="min-w-0 truncate text-left">{group.name}</span>
-              </Badge>
-            }
-          ></TooltipTrigger>
-          <TooltipContent>{group.name}</TooltipContent>
-        </Tooltip>
-      ))}
-    </div>
-  )
-}
-
-function RowActions({
-  disabled,
-  onRemoveFromOrg,
-  onRemoveFromWorkspace,
-}: {
-  disabled: boolean
-  onRemoveFromOrg: () => void
-  onRemoveFromWorkspace: () => void
-}) {
-  const { t } = useTranslation()
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <Button type="button" variant="ghost" size="sm">
-            {t("iam.team.manage.button")}
-            <ChevronDown className="size-3.5 text-muted-foreground" />
-          </Button>
-        }
-      />
-      <DropdownMenuContent align="end" className="w-48">
-        {disabled ? (
-          <DropdownMenuItem disabled>
-            {t("iam.team.manage.cannotRemoveSelf")}
-          </DropdownMenuItem>
-        ) : (
-          <DropdownMenuGroup>
-            <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
-              {t("iam.team.manage.heading")}
-            </DropdownMenuLabel>
-            <DropdownMenuItem
-              className="cursor-pointer text-destructive"
-              onClick={onRemoveFromOrg}
-            >
-              {t("iam.team.manage.organization")}
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              className="cursor-pointer text-destructive"
-              onClick={onRemoveFromWorkspace}
-            >
-              {t("iam.team.manage.workspace")}
-            </DropdownMenuItem>
-          </DropdownMenuGroup>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
-  )
-}
-
-function TeamTable({
-  table,
-  columnsCount,
-  isLoading,
-  hasSearch,
-  onClearSearch,
-  onAddMember,
-}: {
-  table: ReturnType<typeof useReactTable<TeamMember>>
-  columnsCount: number
-  isLoading: boolean
-  hasSearch: boolean
-  onClearSearch: () => void
-  onAddMember: () => void
-}) {
-  const { t } = useTranslation()
-  return (
-    <Table className="min-w-[920px] table-fixed">
-      <TableHeader className="border-b text-left text-foreground">
-        {table.getHeaderGroups().map((headerGroup) => (
-          <TableRow key={headerGroup.id} className="hover:bg-transparent">
-            {headerGroup.headers.map((header) => (
-              <TableHead key={header.id} className="px-5 py-4 font-semibold">
-                {flexRender(
-                  header.column.columnDef.header,
-                  header.getContext()
-                )}
-              </TableHead>
-            ))}
-          </TableRow>
-        ))}
-      </TableHeader>
-      <TableBody>
-        {isLoading ? (
-          <TeamTableSkeleton columns={columnsCount} />
-        ) : table.getRowModel().rows.length === 0 ? (
-          <TableRow>
-            <TableCell colSpan={columnsCount} className="p-0">
-              <StatusMessage
-                title={
-                  hasSearch
-                    ? t("iam.team.noSearchResults")
-                    : t("iam.team.empty")
-                }
-                action={
-                  hasSearch ? (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={onClearSearch}
-                    >
-                      {t("iam.team.clearSearch")}
-                    </Button>
-                  ) : (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={onAddMember}
-                    >
-                      {t("iam.team.addMember")}
-                    </Button>
-                  )
-                }
-              />
-            </TableCell>
-          </TableRow>
-        ) : (
-          table.getRowModel().rows.map((row) => (
-            <TableRow key={row.id}>
-              {row.getVisibleCells().map((cell) => (
-                <TableCell
-                  key={cell.id}
-                  className="px-5 py-4 align-middle text-sm text-foreground"
-                >
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </TableCell>
-              ))}
-            </TableRow>
-          ))
-        )}
-      </TableBody>
-    </Table>
-  )
-}
-
-function TeamTableSkeleton({ columns }: { columns: number }) {
-  return (
-    <>
-      {Array.from({ length: 5 }).map((_, rowIndex) => (
-        <TableRow key={rowIndex}>
-          {Array.from({ length: columns }).map((__, columnIndex) => (
-            <TableCell key={columnIndex} className="px-5 py-5">
-              <Skeleton className="h-4 w-3/4" />
-            </TableCell>
-          ))}
-        </TableRow>
-      ))}
-    </>
-  )
-}
-
-function StatusMessage({
-  title,
-  action,
-}: {
-  title: string
-  action?: ReactNode
-}) {
-  return (
-    <div className="flex min-h-64 flex-col items-center justify-center gap-4 px-6 py-12 text-center">
-      <p className="text-sm font-medium text-foreground">{title}</p>
-      {action}
-    </div>
-  )
-}
-
-function Pagination({
-  pageIndex,
-  pageSize,
-  totalCount,
-  onPageIndexChange,
-  onPageSizeChange,
-}: {
-  pageIndex: number
-  pageSize: number
-  totalCount: number
-  onPageIndexChange: (page: number) => void
-  onPageSizeChange: (size: number) => void
-}) {
-  const { t } = useTranslation()
-  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize))
-  const first = totalCount === 0 ? 0 : (pageIndex - 1) * pageSize + 1
-  const last = Math.min(totalCount, pageIndex * pageSize)
-  const pages = Array.from(
-    new Set([1, pageIndex - 1, pageIndex, pageIndex + 1, totalPages])
-  )
-    .filter((page) => page >= 1 && page <= totalPages)
-    .sort((a, b) => a - b)
-
-  return (
-    <div className="flex flex-col gap-3 py-4 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
-      <div>
-        {t("iam.team.pagination.summary", { first, last, total: totalCount })}
-      </div>
-      <div className="flex flex-wrap items-center gap-2">
-        <Button
-          type="button"
-          variant="outline"
-          size="icon"
-          disabled={pageIndex <= 1}
-          onClick={() => onPageIndexChange(pageIndex - 1)}
-        >
-          <ChevronLeft className="size-4" />
-        </Button>
-        {pages.map((page, index) => {
-          const previous = pages[index - 1]
-          return (
-            <span key={page} className="flex items-center gap-2">
-              {previous && page - previous > 1 ? (
-                <span className="px-2 text-foreground">...</span>
-              ) : null}
-              <Button
-                type="button"
-                variant={page === pageIndex ? "outline" : "ghost"}
-                size="icon"
-                className={cn(
-                  page === pageIndex && "border-primary text-primary"
-                )}
-                onClick={() => onPageIndexChange(page)}
-              >
-                {page}
-              </Button>
-            </span>
-          )
-        })}
-        <Button
-          type="button"
-          variant="outline"
-          size="icon"
-          disabled={pageIndex >= totalPages}
-          onClick={() => onPageIndexChange(pageIndex + 1)}
-        >
-          <ChevronRight className="size-4" />
-        </Button>
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            render={
-              <Button
-                type="button"
-                variant="outline"
-                className="ml-0 min-w-28 justify-between md:ml-4"
-              >
-                {t("iam.team.pagination.perPage", { count: pageSize })}
-                <ChevronDown className="size-4 text-muted-foreground" />
-              </Button>
-            }
-          />
-          <DropdownMenuContent align="end">
-            {pageSizeOptions.map((option) => (
-              <DropdownMenuItem
-                key={option}
-                className="cursor-pointer"
-                onClick={() => onPageSizeChange(option)}
-              >
-                {t("iam.team.pagination.perPage", { count: option })}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-    </div>
-  )
-}
-
-function AddMemberSheet({
-  open,
-  onOpenChange,
-  onAdded,
-}: {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onAdded: () => void
-}) {
-  const { t } = useTranslation()
-  const [email, setEmail] = useState("")
-  const [policies, setPolicies] = useState<PolicyOption[]>([])
-  const [groups, setGroups] = useState<GroupOption[]>([])
-  const [emailError, setEmailError] = useState<string | null>(null)
-  const [permissionsError, setPermissionsError] = useState<string | null>(null)
-  const [saving, setSaving] = useState(false)
-
-  async function submit() {
-    const hasValidEmail = /^\S+@\S+\.\S+$/.test(email.trim())
-    const hasPermissions = policies.length > 0 || groups.length > 0
-
-    setEmailError(hasValidEmail ? null : t("iam.team.add.emailInvalid"))
-    setPermissionsError(
-      hasPermissions ? null : t("iam.team.add.permissionRequired")
-    )
-
-    if (!hasValidEmail || !hasPermissions) {
-      return
-    }
-
-    setSaving(true)
-    try {
-      await addTeamMember({
-        email: email.trim(),
-        policyIds: policies.map((policy) => policy.id),
-        groupIds: groups.map((group) => group.id),
-      })
-      toast.success(t("iam.team.operationSucceeded"))
-      onAdded()
-    } catch {
-      toast.error(t("iam.team.operationFailed"))
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="gap-0 p-0 data-[side=right]:w-[min(100vw,500px)] data-[side=right]:sm:max-w-[500px]">
-        <SheetHeader className="border-b px-6 py-5 pr-12">
-          <SheetTitle>{t("iam.team.add.title")}</SheetTitle>
-        </SheetHeader>
-
-        <div className="flex-1 space-y-7 overflow-y-auto px-6 py-5">
-          <div className="space-y-2">
-            <Label htmlFor="team-member-email">{t("iam.team.add.email")}</Label>
-            <Input
-              id="team-member-email"
-              value={email}
-              placeholder={t("iam.team.add.emailPlaceholder")}
-              aria-invalid={Boolean(emailError)}
-              onChange={(event) => {
-                const nextEmail = event.target.value
-                setEmail(nextEmail)
-                if (/^\S+@\S+\.\S+$/.test(nextEmail.trim())) {
-                  setEmailError(null)
-                }
-              }}
-            />
-            {emailError ? (
-              <p className="text-sm text-destructive">{emailError}</p>
-            ) : null}
-          </div>
-
-          <section className="space-y-4">
-            <div className="flex items-center gap-5">
-              <h3 className="text-sm font-semibold text-foreground">
-                {t("iam.team.add.permissions")}
-              </h3>
-              <p className="text-xs text-muted-foreground">
-                {t("iam.team.add.permissionsHint")}
-              </p>
-            </div>
-
-            <PolicyMultiPicker
-              selected={policies}
-              onSelectedChange={(nextPolicies) => {
-                setPolicies(nextPolicies)
-                if (nextPolicies.length > 0 || groups.length > 0) {
-                  setPermissionsError(null)
-                }
-              }}
-            />
-
-            <GroupMultiPicker
-              selected={groups}
-              onSelectedChange={(nextGroups) => {
-                setGroups(nextGroups)
-                if (policies.length > 0 || nextGroups.length > 0) {
-                  setPermissionsError(null)
-                }
-              }}
-            />
-
-            {permissionsError ? (
-              <p className="text-sm text-destructive">{permissionsError}</p>
-            ) : null}
-          </section>
-        </div>
-
-        <SheetFooter className="px-6 py-4 sm:flex-row sm:justify-end">
-          <Button type="button" disabled={saving} onClick={submit}>
-            {saving ? t("iam.team.add.adding") : t("iam.team.add.submit")}
-          </Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
-  )
-}
-
-const loadPolicyOptions = (query: string) =>
-  fetchPolicyOptions({ name: query }).then((result) => result.items)
-
-const loadGroupOptions = (query: string) =>
-  fetchGroupOptions({ name: query }).then((result) => result.items)
-
-function PolicyMultiPicker({
-  selected,
-  onSelectedChange,
-}: {
-  selected: PolicyOption[]
-  onSelectedChange: (options: PolicyOption[]) => void
-}) {
-  const { t } = useTranslation()
-  return (
-    <PermissionMultiPicker
-      label={t("iam.team.add.policies")}
-      selectedLabel={t("iam.team.add.selectedPolicies")}
-      placeholder={t("iam.team.add.searchPolicies")}
-      emptyType={t("iam.team.add.policies")}
-      selected={selected}
-      onSelectedChange={onSelectedChange}
-      getOptionMeta={(item) =>
-        item.type === "SysManaged" ? (
-          <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-            <Star className="size-3" />
-            {t("iam.team.add.system")}
-          </span>
-        ) : null
-      }
-      loadOptions={loadPolicyOptions}
-    />
-  )
-}
-
-function GroupMultiPicker({
-  selected,
-  onSelectedChange,
-}: {
-  selected: GroupOption[]
-  onSelectedChange: (options: GroupOption[]) => void
-}) {
-  const { t } = useTranslation()
-  return (
-    <PermissionMultiPicker
-      label={t("iam.team.add.groups")}
-      selectedLabel={t("iam.team.add.selectedGroups")}
-      placeholder={t("iam.team.add.searchGroups")}
-      emptyType={t("iam.team.add.groups")}
-      selected={selected}
-      onSelectedChange={onSelectedChange}
-      loadOptions={loadGroupOptions}
-    />
-  )
-}
-
-function PermissionMultiPicker<TOption extends { id: string; name: string }>({
-  label,
-  selectedLabel,
-  placeholder,
-  emptyType,
-  selected,
-  onSelectedChange,
-  loadOptions,
-  getOptionMeta,
-}: {
-  label: string
-  selectedLabel: string
-  placeholder: string
-  emptyType: string
-  selected: TOption[]
-  onSelectedChange: (options: TOption[]) => void
-  loadOptions: (query: string) => Promise<TOption[]>
-  getOptionMeta?: (option: TOption) => ReactNode
-}) {
-  const { t } = useTranslation()
-  const [query, setQuery] = useState("")
-  const [options, setOptions] = useState<TOption[]>([])
-  const [loading, setLoading] = useState(false)
-
-  useEffect(() => {
-    let cancelled = false
-    const timeout = window.setTimeout(() => {
-      setLoading(true)
-      loadOptions(query)
-        .then((items) => {
-          if (!cancelled) {
-            setOptions(items)
-          }
-        })
-        .catch(() => {
-          if (!cancelled) {
-            setOptions([])
-          }
-        })
-        .finally(() => {
-          if (!cancelled) {
-            setLoading(false)
-          }
-        })
-    }, 200)
-
-    return () => {
-      cancelled = true
-      window.clearTimeout(timeout)
-    }
-  }, [loadOptions, query])
-
-  const filteredOptions = useMemo(() => {
-    const normalizedQuery = query.trim().toLocaleLowerCase()
-
-    if (!normalizedQuery) {
-      return options
-    }
-
-    return options.filter((option) =>
-      option.name.toLocaleLowerCase().includes(normalizedQuery)
-    )
-  }, [options, query])
-
-  function toggleOption(option: TOption) {
-    const exists = selected.some(
-      (selectedOption) => selectedOption.id === option.id
-    )
-
-    if (exists) {
-      onSelectedChange(
-        selected.filter((selectedOption) => selectedOption.id !== option.id)
-      )
-      return
-    }
-
-    onSelectedChange([...selected, option])
-  }
-
-  return (
-    <div className="overflow-hidden rounded-lg border bg-background">
-      <div className="flex items-center justify-between border-b px-3 py-2">
-        <Label className="text-sm font-medium">{label}</Label>
-        <span className="text-xs text-muted-foreground">
-          {t("iam.team.add.selectedCount", { count: selected.length })}
-        </span>
-      </div>
-
-      <Command
-        shouldFilter={false}
-        className="rounded-none p-0 [&_[data-slot=command-input-wrapper]]:p-0"
-      >
-        <div className="px-2 py-2">
-          <CommandInput
-            value={query}
-            placeholder={placeholder}
-            onValueChange={setQuery}
-          />
-        </div>
-        <CommandList className="max-h-40 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] overflow-y-auto border-t pt-1 [&::-webkit-scrollbar]:block [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent">
-          {loading ? (
-            <div className="space-y-2 p-2">
-              <Skeleton className="h-8 w-full" />
-              <Skeleton className="h-8 w-4/5" />
-            </div>
-          ) : (
-            <>
-              <CommandEmpty>{t("iam.team.add.noResults")}</CommandEmpty>
-              <CommandGroup className="[&_[cmdk-group-items]]:space-y-1">
-                {filteredOptions.map((option) => {
-                  const isSelected = selected.some(
-                    (selectedOption) => selectedOption.id === option.id
-                  )
-
-                  return (
-                    <CommandItem
-                      key={option.id}
-                      value={`${option.name} ${option.id}`}
-                      data-checked={isSelected}
-                      className="border border-transparent data-[checked=true]:border-primary/20 data-[checked=true]:bg-primary/10 data-[checked=true]:text-foreground data-[checked=true]:*:[svg]:text-primary"
-                      onSelect={() => toggleOption(option)}
-                    >
-                      <span className="min-w-0 flex-1 truncate">
-                        {option.name}
-                      </span>
-                      {getOptionMeta?.(option)}
-                    </CommandItem>
-                  )
-                })}
-              </CommandGroup>
-            </>
-          )}
-        </CommandList>
-      </Command>
-
-      <div className="space-y-2 border-t bg-muted/30 px-3 py-2.5">
-        <div className="flex items-center justify-between gap-3">
-          <span className="text-xs font-medium text-foreground">
-            {selectedLabel}
-          </span>
-          {selected.length > 0 ? (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="h-6 px-2 text-xs"
-              onClick={() => onSelectedChange([])}
-            >
-              {t("iam.team.add.clearAll")}
-            </Button>
-          ) : null}
-        </div>
-        {selected.length > 0 ? (
-          <div className="flex flex-wrap gap-1.5">
-            {selected.map((option) => (
-              <Badge
-                key={option.id}
-                variant="outline"
-                className="max-w-full gap-1 rounded-full border-primary/30 bg-primary/10 py-0.5 pr-1 pl-2 font-normal text-primary"
-              >
-                <span className="min-w-0 truncate">{option.name}</span>
-                <button
-                  type="button"
-                  className="rounded-full p-0.5 text-muted-foreground hover:bg-background hover:text-foreground"
-                  onClick={() =>
-                    onSelectedChange(
-                      selected.filter(
-                        (selectedOption) => selectedOption.id !== option.id
-                      )
-                    )
-                  }
-                >
-                  <X className="size-3" />
-                </button>
-              </Badge>
-            ))}
-          </div>
-        ) : (
-          <p className="text-xs text-muted-foreground">
-            {t("iam.team.add.noneSelected", { type: emptyType })}
-          </p>
-        )}
-      </div>
-    </div>
-  )
-}
-
-function RemoveMemberDialog({
-  target,
-  saving,
-  onOpenChange,
-  onConfirm,
-}: {
-  target: RemoveTarget
-  saving: boolean
-  onOpenChange: (open: boolean) => void
-  onConfirm: () => void
-}) {
-  const { t } = useTranslation()
-  const isWorkspace = target?.scope === "workspace"
-
-  return (
-    <Dialog open={Boolean(target)} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>
-            {isWorkspace
-              ? t("iam.team.remove.workspaceTitle")
-              : t("iam.team.remove.organizationTitle")}
-          </DialogTitle>
-          <DialogDescription>
-            {isWorkspace
-              ? t("iam.team.remove.workspaceDescription")
-              : t("iam.team.remove.organizationDescription")}
-          </DialogDescription>
-        </DialogHeader>
-        <div className="flex justify-end gap-2">
-          <DialogClose render={<Button type="button" variant="outline" />}>
-            {t("iam.team.remove.cancel")}
-          </DialogClose>
-          <Button
-            type="button"
-            variant="destructive"
-            disabled={saving}
-            onClick={onConfirm}
-          >
-            {saving
-              ? t("iam.team.remove.removing")
-              : t("iam.team.remove.confirm")}
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
   )
 }
