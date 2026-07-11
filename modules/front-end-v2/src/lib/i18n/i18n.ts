@@ -2,6 +2,7 @@ import i18n from "i18next"
 import { initReactI18next } from "react-i18next"
 import { enAuth, zhAuth } from "./resources/auth"
 import { enLayout, zhLayout } from "./resources/layout"
+import { enIam, zhIam } from "./resources/iam"
 import { enOnboarding, zhOnboarding } from "./resources/onboarding"
 import { enOrganization, zhOrganization } from "./resources/organization"
 import { enProfile, zhProfile } from "./resources/profile"
@@ -19,6 +20,7 @@ i18n.use(initReactI18next).init({
         selectWorkspace: enWorkspaceSelection,
         onboarding: enOnboarding,
         layout: enLayout,
+        iam: enIam,
         organization: enOrganization,
         profile: enProfile,
         workspace: enWorkspace,
@@ -30,6 +32,7 @@ i18n.use(initReactI18next).init({
         selectWorkspace: zhWorkspaceSelection,
         onboarding: zhOnboarding,
         layout: zhLayout,
+        iam: zhIam,
         organization: zhOrganization,
         profile: zhProfile,
         workspace: zhWorkspace,

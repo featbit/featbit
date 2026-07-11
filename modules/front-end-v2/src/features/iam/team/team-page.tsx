@@ -3,7 +3,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Copy,
-  MoreHorizontal,
   Plus,
   Search,
   Star,
@@ -12,6 +11,7 @@ import {
 import type { ReactNode } from "react"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { Link, useParams } from "react-router-dom"
+import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import {
   flexRender,
@@ -33,7 +33,9 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
@@ -91,6 +93,7 @@ type RemoveTarget = {
 const pageSizeOptions = [10, 20, 30]
 
 export function TeamPage() {
+  const { t } = useTranslation()
   const params = useParams()
   const lang = resolveLang(params.lang)
   const profile = useMemo(() => getStoredUserProfile(), [])
@@ -129,20 +132,23 @@ export function TeamPage() {
         setError(
           requestError instanceof Error
             ? requestError.message
-            : "Failed to load team members"
+            : t("iam.team.loadFailed")
         )
       )
       .finally(() => setIsLoading(false))
-  }, [debouncedSearch, pageIndex, pageSize])
+  }, [debouncedSearch, pageIndex, pageSize, t])
 
   useEffect(() => {
     loadMembers()
   }, [loadMembers])
 
-  async function copyText(value: string) {
-    await navigator.clipboard.writeText(value)
-    toast.success("Copied")
-  }
+  const copyText = useCallback(
+    async (value: string) => {
+      await navigator.clipboard.writeText(value)
+      toast.success(t("iam.team.copied"))
+    },
+    [t]
+  )
 
   async function confirmRemove() {
     if (!removeTarget) {
@@ -162,10 +168,10 @@ export function TeamPage() {
           (item) => item.id !== removeTarget.member.id
         ),
       }))
-      toast.success("Operation succeeded")
+      toast.success(t("iam.team.operationSucceeded"))
       setRemoveTarget(null)
     } catch {
-      toast.error("Operation failed")
+      toast.error(t("iam.team.operationFailed"))
     } finally {
       setIsRemoving(false)
     }
@@ -175,7 +181,7 @@ export function TeamPage() {
     () => [
       {
         accessorKey: "email",
-        header: "Email",
+        header: t("iam.team.columns.email"),
         cell: ({ row }) => (
           <EmailResourceCell
             member={row.original}
@@ -185,7 +191,7 @@ export function TeamPage() {
       },
       {
         accessorKey: "name",
-        header: "Name",
+        header: t("iam.team.columns.name"),
         cell: ({ row }) => (
           <Link
             to={localizedPath(
@@ -197,23 +203,23 @@ export function TeamPage() {
               !row.original.name && "text-muted-foreground"
             )}
           >
-            {row.original.name || "No name"}
+            {row.original.name || t("iam.team.noName")}
           </Link>
         ),
       },
       {
         id: "groups",
-        header: "Groups",
+        header: t("iam.team.columns.groups"),
         cell: ({ row }) => <GroupsCell groups={row.original.groups ?? []} />,
       },
       {
         accessorKey: "initialPassword",
-        header: "Initial password",
+        header: t("iam.team.columns.initialPassword"),
         cell: ({ row }) =>
           row.original.initialPassword ? (
             <CopyCell
               value={row.original.initialPassword}
-              label="Copy password"
+              label={t("iam.team.copyPassword")}
               onCopy={() => copyText(row.original.initialPassword!)}
             />
           ) : (
@@ -222,22 +228,22 @@ export function TeamPage() {
       },
       {
         id: "actions",
-        header: "Actions",
+        header: t("iam.team.columns.actions"),
         cell: ({ row }) => {
           const isCurrentUser = profile.email === row.original.email
           return (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1">
               <Link
                 to={localizedPath(
                   lang,
                   `/iam/team/${encodeURIComponent(row.original.id)}/groups`
                 )}
                 className={cn(
-                  buttonVariants({ variant: "link" }),
-                  "h-auto p-0 font-semibold no-underline hover:underline"
+                  buttonVariants({ variant: "ghost", size: "sm" }),
+                  "font-medium"
                 )}
               >
-                Details
+                {t("iam.team.details")}
               </Link>
               <RowActions
                 disabled={isCurrentUser}
@@ -256,7 +262,7 @@ export function TeamPage() {
         },
       },
     ],
-    [lang, profile.email]
+    [copyText, lang, profile.email, t]
   )
 
   const table = useReactTable({
@@ -270,9 +276,11 @@ export function TeamPage() {
     <TooltipProvider>
       <div className="-m-5 min-h-[calc(100vh-3.5rem)] bg-background px-8 py-6">
         <header className="mb-10 space-y-1">
-          <h1 className="text-2xl font-semibold tracking-normal">Team</h1>
+          <h1 className="text-2xl font-semibold tracking-normal">
+            {t("iam.team.title")}
+          </h1>
           <p className="text-sm text-muted-foreground">
-            Manage organization members and their effective access.
+            {t("iam.team.subtitle")}
           </p>
         </header>
 
@@ -281,28 +289,28 @@ export function TeamPage() {
             <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={search}
-              placeholder="Filter by email"
+              placeholder={t("iam.team.searchPlaceholder")}
               className="pl-9"
               onChange={(event) => setSearch(event.target.value)}
             />
           </div>
           <Button type="button" onClick={() => setAddOpen(true)}>
             <Plus className="size-4" />
-            Add member
+            {t("iam.team.addMember")}
           </Button>
         </div>
 
         <div className="overflow-hidden rounded-md border bg-background">
           {error ? (
             <div className="flex items-center justify-between border-b bg-destructive/5 px-5 py-3 text-sm text-destructive">
-              Failed to load team members
+              {t("iam.team.loadFailed")}
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 onClick={loadMembers}
               >
-                Retry
+                {t("iam.team.retry")}
               </Button>
             </div>
           ) : null}
@@ -360,6 +368,7 @@ function EmailResourceCell({
   member: TeamMember
   onCopy: () => void
 }) {
+  const { t } = useTranslation()
   const resourceName = memberResourceName(member)
 
   return (
@@ -387,7 +396,7 @@ function EmailResourceCell({
           >
             <Copy className="size-3" />
           </TooltipTrigger>
-          <TooltipContent>Copy RN</TooltipContent>
+          <TooltipContent>{t("iam.team.copyResourceName")}</TooltipContent>
         </Tooltip>
         <Tooltip>
           <TooltipTrigger
@@ -480,35 +489,40 @@ function RowActions({
   onRemoveFromOrg: () => void
   onRemoveFromWorkspace: () => void
 }) {
+  const { t } = useTranslation()
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <Button type="button" variant="outline" size="icon-sm">
-            <MoreHorizontal className="size-4" />
+          <Button type="button" variant="ghost" size="sm">
+            {t("iam.team.manage.button")}
+            <ChevronDown className="size-3.5 text-muted-foreground" />
           </Button>
         }
       />
-      <DropdownMenuContent align="end" className="w-60">
+      <DropdownMenuContent align="end" className="w-48">
         {disabled ? (
           <DropdownMenuItem disabled>
-            You cannot remove yourself.
+            {t("iam.team.manage.cannotRemoveSelf")}
           </DropdownMenuItem>
         ) : (
-          <>
+          <DropdownMenuGroup>
+            <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
+              {t("iam.team.manage.heading")}
+            </DropdownMenuLabel>
             <DropdownMenuItem
               className="cursor-pointer text-destructive"
               onClick={onRemoveFromOrg}
             >
-              Remove from organization
+              {t("iam.team.manage.organization")}
             </DropdownMenuItem>
             <DropdownMenuItem
               className="cursor-pointer text-destructive"
               onClick={onRemoveFromWorkspace}
             >
-              Remove from workspace
+              {t("iam.team.manage.workspace")}
             </DropdownMenuItem>
-          </>
+          </DropdownMenuGroup>
         )}
       </DropdownMenuContent>
     </DropdownMenu>
@@ -530,6 +544,7 @@ function TeamTable({
   onClearSearch: () => void
   onAddMember: () => void
 }) {
+  const { t } = useTranslation()
   return (
     <Table className="min-w-[920px] table-fixed">
       <TableHeader className="border-b text-left text-foreground">
@@ -555,8 +570,8 @@ function TeamTable({
               <StatusMessage
                 title={
                   hasSearch
-                    ? "No members match this email"
-                    : "No team members yet"
+                    ? t("iam.team.noSearchResults")
+                    : t("iam.team.empty")
                 }
                 action={
                   hasSearch ? (
@@ -565,7 +580,7 @@ function TeamTable({
                       variant="outline"
                       onClick={onClearSearch}
                     >
-                      Clear search
+                      {t("iam.team.clearSearch")}
                     </Button>
                   ) : (
                     <Button
@@ -573,7 +588,7 @@ function TeamTable({
                       variant="outline"
                       onClick={onAddMember}
                     >
-                      Add member
+                      {t("iam.team.addMember")}
                     </Button>
                   )
                 }
@@ -643,6 +658,7 @@ function Pagination({
   onPageIndexChange: (page: number) => void
   onPageSizeChange: (size: number) => void
 }) {
+  const { t } = useTranslation()
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize))
   const first = totalCount === 0 ? 0 : (pageIndex - 1) * pageSize + 1
   const last = Math.min(totalCount, pageIndex * pageSize)
@@ -655,7 +671,7 @@ function Pagination({
   return (
     <div className="flex flex-col gap-3 py-4 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
       <div>
-        Showing {first} to {last} of {totalCount} members
+        {t("iam.team.pagination.summary", { first, last, total: totalCount })}
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <Button
@@ -705,7 +721,7 @@ function Pagination({
                 variant="outline"
                 className="ml-0 min-w-28 justify-between md:ml-4"
               >
-                {pageSize} / page
+                {t("iam.team.pagination.perPage", { count: pageSize })}
                 <ChevronDown className="size-4 text-muted-foreground" />
               </Button>
             }
@@ -717,7 +733,7 @@ function Pagination({
                 className="cursor-pointer"
                 onClick={() => onPageSizeChange(option)}
               >
-                {option} / page
+                {t("iam.team.pagination.perPage", { count: option })}
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
@@ -736,6 +752,7 @@ function AddMemberSheet({
   onOpenChange: (open: boolean) => void
   onAdded: () => void
 }) {
+  const { t } = useTranslation()
   const [email, setEmail] = useState("")
   const [policies, setPolicies] = useState<PolicyOption[]>([])
   const [groups, setGroups] = useState<GroupOption[]>([])
@@ -747,9 +764,9 @@ function AddMemberSheet({
     const hasValidEmail = /^\S+@\S+\.\S+$/.test(email.trim())
     const hasPermissions = policies.length > 0 || groups.length > 0
 
-    setEmailError(hasValidEmail ? null : "Enter a valid email.")
+    setEmailError(hasValidEmail ? null : t("iam.team.add.emailInvalid"))
     setPermissionsError(
-      hasPermissions ? null : "Select at least one policy or group."
+      hasPermissions ? null : t("iam.team.add.permissionRequired")
     )
 
     if (!hasValidEmail || !hasPermissions) {
@@ -763,10 +780,10 @@ function AddMemberSheet({
         policyIds: policies.map((policy) => policy.id),
         groupIds: groups.map((group) => group.id),
       })
-      toast.success("Operation succeeded")
+      toast.success(t("iam.team.operationSucceeded"))
       onAdded()
     } catch {
-      toast.error("Operation failed")
+      toast.error(t("iam.team.operationFailed"))
     } finally {
       setSaving(false)
     }
@@ -776,16 +793,16 @@ function AddMemberSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="gap-0 p-0 data-[side=right]:w-[min(100vw,500px)] data-[side=right]:sm:max-w-[500px]">
         <SheetHeader className="border-b px-6 py-5 pr-12">
-          <SheetTitle>Add team member</SheetTitle>
+          <SheetTitle>{t("iam.team.add.title")}</SheetTitle>
         </SheetHeader>
 
         <div className="flex-1 space-y-7 overflow-y-auto px-6 py-5">
           <div className="space-y-2">
-            <Label htmlFor="team-member-email">Email</Label>
+            <Label htmlFor="team-member-email">{t("iam.team.add.email")}</Label>
             <Input
               id="team-member-email"
               value={email}
-              placeholder="new.user@acme.io"
+              placeholder={t("iam.team.add.emailPlaceholder")}
               aria-invalid={Boolean(emailError)}
               onChange={(event) => {
                 const nextEmail = event.target.value
@@ -803,10 +820,10 @@ function AddMemberSheet({
           <section className="space-y-4">
             <div className="flex items-center gap-5">
               <h3 className="text-sm font-semibold text-foreground">
-                Permissions
+                {t("iam.team.add.permissions")}
               </h3>
               <p className="text-xs text-muted-foreground">
-                Select at least one policy or group.
+                {t("iam.team.add.permissionsHint")}
               </p>
             </div>
 
@@ -838,7 +855,7 @@ function AddMemberSheet({
 
         <SheetFooter className="px-6 py-4 sm:flex-row sm:justify-end">
           <Button type="button" disabled={saving} onClick={submit}>
-            {saving ? "Adding..." : "Add member"}
+            {saving ? t("iam.team.add.adding") : t("iam.team.add.submit")}
           </Button>
         </SheetFooter>
       </SheetContent>
@@ -859,18 +876,20 @@ function PolicyMultiPicker({
   selected: PolicyOption[]
   onSelectedChange: (options: PolicyOption[]) => void
 }) {
+  const { t } = useTranslation()
   return (
     <PermissionMultiPicker
-      label="Policies"
-      selectedLabel="Selected policies"
-      placeholder="Search policies"
+      label={t("iam.team.add.policies")}
+      selectedLabel={t("iam.team.add.selectedPolicies")}
+      placeholder={t("iam.team.add.searchPolicies")}
+      emptyType={t("iam.team.add.policies")}
       selected={selected}
       onSelectedChange={onSelectedChange}
       getOptionMeta={(item) =>
         item.type === "SysManaged" ? (
           <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
             <Star className="size-3" />
-            System
+            {t("iam.team.add.system")}
           </span>
         ) : null
       }
@@ -886,11 +905,13 @@ function GroupMultiPicker({
   selected: GroupOption[]
   onSelectedChange: (options: GroupOption[]) => void
 }) {
+  const { t } = useTranslation()
   return (
     <PermissionMultiPicker
-      label="Groups"
-      selectedLabel="Selected groups"
-      placeholder="Search groups"
+      label={t("iam.team.add.groups")}
+      selectedLabel={t("iam.team.add.selectedGroups")}
+      placeholder={t("iam.team.add.searchGroups")}
+      emptyType={t("iam.team.add.groups")}
       selected={selected}
       onSelectedChange={onSelectedChange}
       loadOptions={loadGroupOptions}
@@ -902,6 +923,7 @@ function PermissionMultiPicker<TOption extends { id: string; name: string }>({
   label,
   selectedLabel,
   placeholder,
+  emptyType,
   selected,
   onSelectedChange,
   loadOptions,
@@ -910,11 +932,13 @@ function PermissionMultiPicker<TOption extends { id: string; name: string }>({
   label: string
   selectedLabel: string
   placeholder: string
+  emptyType: string
   selected: TOption[]
   onSelectedChange: (options: TOption[]) => void
   loadOptions: (query: string) => Promise<TOption[]>
   getOptionMeta?: (option: TOption) => ReactNode
 }) {
+  const { t } = useTranslation()
   const [query, setQuery] = useState("")
   const [options, setOptions] = useState<TOption[]>([])
   const [loading, setLoading] = useState(false)
@@ -979,7 +1003,7 @@ function PermissionMultiPicker<TOption extends { id: string; name: string }>({
       <div className="flex items-center justify-between border-b px-3 py-2">
         <Label className="text-sm font-medium">{label}</Label>
         <span className="text-xs text-muted-foreground">
-          {selected.length} selected
+          {t("iam.team.add.selectedCount", { count: selected.length })}
         </span>
       </div>
 
@@ -994,7 +1018,7 @@ function PermissionMultiPicker<TOption extends { id: string; name: string }>({
             onValueChange={setQuery}
           />
         </div>
-        <CommandList className="max-h-40 overflow-y-auto border-t pt-1 [scrollbar-color:var(--border)_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar]:block [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent">
+        <CommandList className="max-h-40 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] overflow-y-auto border-t pt-1 [&::-webkit-scrollbar]:block [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent">
           {loading ? (
             <div className="space-y-2 p-2">
               <Skeleton className="h-8 w-full" />
@@ -1002,7 +1026,7 @@ function PermissionMultiPicker<TOption extends { id: string; name: string }>({
             </div>
           ) : (
             <>
-              <CommandEmpty>No results found.</CommandEmpty>
+              <CommandEmpty>{t("iam.team.add.noResults")}</CommandEmpty>
               <CommandGroup className="[&_[cmdk-group-items]]:space-y-1">
                 {filteredOptions.map((option) => {
                   const isSelected = selected.some(
@@ -1043,7 +1067,7 @@ function PermissionMultiPicker<TOption extends { id: string; name: string }>({
               className="h-6 px-2 text-xs"
               onClick={() => onSelectedChange([])}
             >
-              Clear all
+              {t("iam.team.add.clearAll")}
             </Button>
           ) : null}
         </div>
@@ -1074,7 +1098,7 @@ function PermissionMultiPicker<TOption extends { id: string; name: string }>({
           </div>
         ) : (
           <p className="text-xs text-muted-foreground">
-            No {label.toLowerCase()} selected.
+            {t("iam.team.add.noneSelected", { type: emptyType })}
           </p>
         )}
       </div>
@@ -1093,6 +1117,7 @@ function RemoveMemberDialog({
   onOpenChange: (open: boolean) => void
   onConfirm: () => void
 }) {
+  const { t } = useTranslation()
   const isWorkspace = target?.scope === "workspace"
 
   return (
@@ -1100,17 +1125,19 @@ function RemoveMemberDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {isWorkspace ? "Remove from workspace" : "Remove from organization"}
+            {isWorkspace
+              ? t("iam.team.remove.workspaceTitle")
+              : t("iam.team.remove.organizationTitle")}
           </DialogTitle>
           <DialogDescription>
             {isWorkspace
-              ? "This operation will remove the user from the workspace and all related organizations."
-              : "This operation will remove the user from the current organization."}
+              ? t("iam.team.remove.workspaceDescription")
+              : t("iam.team.remove.organizationDescription")}
           </DialogDescription>
         </DialogHeader>
         <div className="flex justify-end gap-2">
           <DialogClose render={<Button type="button" variant="outline" />}>
-            Cancel
+            {t("iam.team.remove.cancel")}
           </DialogClose>
           <Button
             type="button"
@@ -1118,7 +1145,9 @@ function RemoveMemberDialog({
             disabled={saving}
             onClick={onConfirm}
           >
-            {saving ? "Removing..." : "Remove"}
+            {saving
+              ? t("iam.team.remove.removing")
+              : t("iam.team.remove.confirm")}
           </Button>
         </div>
       </DialogContent>
