@@ -102,34 +102,36 @@ export function ContextBar({
                 <p className="pb-2 text-xs font-medium leading-4 text-muted-foreground">
                   {project.name}
                 </p>
-                {project.environments.map((environment) => {
-                  const selected =
-                    project.id === currentProjectEnv?.projectId &&
-                    environment.id === currentProjectEnv?.envId
+                <div className="space-y-1">
+                  {project.environments.map((environment) => {
+                    const selected =
+                      project.id === currentProjectEnv?.projectId &&
+                      environment.id === currentProjectEnv?.envId
 
-                  return (
-                    <button
-                      key={`${project.id}:${environment.id}`}
-                      type="button"
-                      className={`flex h-9 w-full items-center rounded-md px-3 py-0 text-left text-sm leading-none hover:bg-accent ${
-                        selected ? "bg-accent text-accent-foreground" : ""
-                      }`}
-                      onClick={() => {
-                        const nextProjectEnv = projectEnvFromSelection(
-                          project,
-                          environment
-                        )
-                        onProjectEnvChange(nextProjectEnv)
-                        setOpen(false)
-                      }}
-                    >
-                      <span className="min-w-0 flex-1 truncate">
-                        {environment.name}
-                      </span>
-                      {selected ? <Check className="size-4" /> : null}
-                    </button>
-                  )
-                })}
+                    return (
+                      <button
+                        key={`${project.id}:${environment.id}`}
+                        type="button"
+                        className={`flex h-9 w-full items-center rounded-md px-3 py-0 text-left text-sm leading-none hover:bg-accent ${
+                          selected ? "bg-accent text-accent-foreground" : ""
+                        }`}
+                        onClick={() => {
+                          const nextProjectEnv = projectEnvFromSelection(
+                            project,
+                            environment
+                          )
+                          onProjectEnvChange(nextProjectEnv)
+                          setOpen(false)
+                        }}
+                      >
+                        <span className="min-w-0 flex-1 truncate">
+                          {environment.name}
+                        </span>
+                        {selected ? <Check className="size-4" /> : null}
+                      </button>
+                    )
+                  })}
+                </div>
               </div>
             ))}
           </div>
