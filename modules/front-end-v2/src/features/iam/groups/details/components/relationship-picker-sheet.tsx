@@ -1,4 +1,5 @@
 import { Star, X } from "lucide-react"
+import { useTranslation } from "react-i18next"
 import { useEffect, useRef, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -18,14 +19,15 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import { Skeleton } from "@/components/ui/skeleton"
-import type { RelationshipOption, RelationshipOptionPage } from "../group-api"
-import type { GroupTranslations } from "../group-translations"
+import type {
+  RelationshipOption,
+  RelationshipOptionPage,
+} from "../../group-api"
 
 export function RelationshipPickerSheet({
   open,
   title,
   kind,
-  copy,
   saving,
   loadOptions,
   onOpenChange,
@@ -34,7 +36,6 @@ export function RelationshipPickerSheet({
   open: boolean
   title: string
   kind: "members" | "policies"
-  copy: GroupTranslations
   saving: boolean
   loadOptions: (
     query: string,
@@ -43,6 +44,7 @@ export function RelationshipPickerSheet({
   onOpenChange: (open: boolean) => void
   onSubmit: (selected: RelationshipOption[]) => void
 }) {
+  const { t } = useTranslation()
   const [query, setQuery] = useState("")
   const [options, setOptions] = useState<RelationshipOption[]>([])
   const [selected, setSelected] = useState<RelationshipOption[]>([])
@@ -128,21 +130,25 @@ export function RelationshipPickerSheet({
   }, [hasMore, loading, loadingMore, options.length])
 
   const isMembers = kind === "members"
-  const selectedLabel = isMembers ? copy.selectedMembers : copy.selectedPolicies
+  const selectedLabel = isMembers
+    ? t("iam.groups.selectedMembers")
+    : t("iam.groups.selectedPolicies")
   const availableLabel = isMembers
-    ? copy.availableMembers
-    : copy.availablePolicies
-  const placeholder = isMembers ? copy.searchMembers : copy.searchPolicies
+    ? t("iam.groups.availableMembers")
+    : t("iam.groups.availablePolicies")
+  const placeholder = isMembers
+    ? t("iam.groups.searchMembers")
+    : t("iam.groups.searchPolicies")
   const emptyMessage = query.trim()
     ? isMembers
-      ? copy.noMatchingMembers
-      : copy.noMatchingPolicies
+      ? t("iam.groups.noMatchingMembers")
+      : t("iam.groups.noMatchingPolicies")
     : isMembers
-      ? copy.noAvailableMembers
-      : copy.noAvailablePolicies
+      ? t("iam.groups.noAvailableMembers")
+      : t("iam.groups.noAvailablePolicies")
   const noSelectionMessage = isMembers
-    ? copy.noSelectedMembers
-    : copy.noSelectedPolicies
+    ? t("iam.groups.noSelectedMembers")
+    : t("iam.groups.noSelectedPolicies")
 
   function toggle(option: RelationshipOption) {
     setSelected((current) =>
@@ -166,7 +172,7 @@ export function RelationshipPickerSheet({
               </span>
               <div className="flex items-center gap-3">
                 <span className="text-xs text-muted-foreground">
-                  {copy.selectedCount(selected.length)}
+                  {t("iam.groups.selectedCount", { count: selected.length })}
                 </span>
                 {selected.length ? (
                   <Button
@@ -176,7 +182,7 @@ export function RelationshipPickerSheet({
                     className="h-6 px-1.5 text-xs"
                     onClick={() => setSelected([])}
                   >
-                    {copy.clearAll}
+                    {t("iam.groups.clearAll")}
                   </Button>
                 ) : null}
               </div>
@@ -193,7 +199,7 @@ export function RelationshipPickerSheet({
                       <span className="truncate">{option.name}</span>
                       <button
                         type="button"
-                        aria-label={`${copy.remove} ${option.name}`}
+                        aria-label={`${t("iam.groups.remove")} ${option.name}`}
                         className="rounded-full p-0.5 text-muted-foreground hover:bg-background hover:text-foreground"
                         onClick={() => toggle(option)}
                       >
@@ -255,7 +261,7 @@ export function RelationshipPickerSheet({
                               {option.type === "SysManaged" ? (
                                 <span className="inline-flex items-center gap-1 text-xs font-normal text-muted-foreground">
                                   <Star className="size-3" />
-                                  {copy.system}
+                                  {t("iam.groups.system")}
                                 </span>
                               ) : null}
                             </div>
@@ -286,7 +292,7 @@ export function RelationshipPickerSheet({
             disabled={!selected.length || saving}
             onClick={() => onSubmit(selected)}
           >
-            {saving ? copy.adding : copy.add}
+            {saving ? t("iam.groups.adding") : t("iam.groups.add")}
           </Button>
         </SheetFooter>
       </SheetContent>

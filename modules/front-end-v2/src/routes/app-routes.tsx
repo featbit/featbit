@@ -90,12 +90,12 @@ const TeamDetailsPage = lazy(() =>
   }))
 )
 const GroupPage = lazy(() =>
-  import("@/features/iam/group/index/group-page").then((module) => ({
+  import("@/features/iam/groups/index/index-page").then((module) => ({
     default: module.GroupPage,
   }))
 )
 const GroupDetailsPage = lazy(() =>
-  import("@/features/iam/group/details/details-page").then((module) => ({
+  import("@/features/iam/groups/details/details-page").then((module) => ({
     default: module.GroupDetailsPage,
   }))
 )
