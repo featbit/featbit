@@ -1,5 +1,5 @@
-import { ArrowLeft, Copy, Plus, Search, Star } from "lucide-react"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { ArrowLeft, Check, Copy, Plus, Search, Star } from "lucide-react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
 import { toast } from "sonner"
 import type { ColumnDef } from "@tanstack/react-table"
@@ -76,6 +76,8 @@ export function TeamDetailsPage() {
   const [member, setMember] = useState<TeamMember | null>(null)
   const [memberLoading, setMemberLoading] = useState(true)
   const [memberError, setMemberError] = useState(false)
+  const [resourceNameCopied, setResourceNameCopied] = useState(false)
+  const copyFeedbackTimeoutRef = useRef<number | null>(null)
   const [counts, setCounts] = useState({ groups: 0, direct: 0, inherited: 0 })
   const [search, setSearch] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
@@ -189,8 +191,24 @@ export function TeamDetailsPage() {
   const copyResourceName = useCallback(async () => {
     if (!resourceName) return
     await navigator.clipboard.writeText(resourceName)
-    toast.success(copy.copied)
-  }, [copy.copied, resourceName])
+    setResourceNameCopied(true)
+    if (copyFeedbackTimeoutRef.current !== null) {
+      window.clearTimeout(copyFeedbackTimeoutRef.current)
+    }
+    copyFeedbackTimeoutRef.current = window.setTimeout(() => {
+      setResourceNameCopied(false)
+      copyFeedbackTimeoutRef.current = null
+    }, 1500)
+  }, [resourceName])
+
+  useEffect(
+    () => () => {
+      if (copyFeedbackTimeoutRef.current !== null) {
+        window.clearTimeout(copyFeedbackTimeoutRef.current)
+      }
+    },
+    []
+  )
 
   const groupColumns = useMemo<ColumnDef<MemberDetailGroup>[]>(
     () => [
@@ -678,14 +696,21 @@ export function TeamDetailsPage() {
                 <p className="mt-1 truncate text-sm text-muted-foreground">
                   {member?.email}
                 </p>
-                <div className="mt-3 flex min-w-0 items-center gap-3 text-sm">
-                  <span className="shrink-0 text-muted-foreground">
-                    {copy.resourceName}
-                  </span>
+                <div className="mt-3 inline-flex h-8 max-w-full items-stretch overflow-hidden rounded-lg border border-input/60 bg-background">
                   <Tooltip>
                     <TooltipTrigger
                       render={
-                        <code className="min-w-0 truncate rounded-md border bg-muted/30 px-2 py-1 font-mono text-xs text-foreground" />
+                        <span className="flex w-10 shrink-0 cursor-default items-center justify-center border-r border-input/60 bg-muted/20 text-xs font-medium text-muted-foreground" />
+                      }
+                    >
+                      RN
+                    </TooltipTrigger>
+                    <TooltipContent>{copy.resourceName}</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={
+                        <code className="max-w-[360px] min-w-0 truncate px-3 py-1.5 font-mono text-xs font-normal text-foreground" />
                       }
                     >
                       {resourceName}
@@ -698,14 +723,22 @@ export function TeamDetailsPage() {
                         <Button
                           type="button"
                           variant="ghost"
-                          size="icon-xs"
+                          size="icon-sm"
+                          className="h-full w-9 shrink-0 rounded-none border-0 border-l border-input/60 hover:bg-muted/40"
+                          aria-label={copy.copyResourceName}
                           onClick={copyResourceName}
                         />
                       }
                     >
-                      <Copy className="size-3.5" />
+                      {resourceNameCopied ? (
+                        <Check className="size-3.5" />
+                      ) : (
+                        <Copy className="size-3.5" />
+                      )}
                     </TooltipTrigger>
-                    <TooltipContent>{copy.copyResourceName}</TooltipContent>
+                    <TooltipContent>
+                      {resourceNameCopied ? copy.copied : copy.copyResourceName}
+                    </TooltipContent>
                   </Tooltip>
                 </div>
               </div>
