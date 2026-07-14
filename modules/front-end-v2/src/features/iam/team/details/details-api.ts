@@ -1,5 +1,5 @@
 import { fetchApi } from "@/lib/api/authenticated-api"
-import type { PagedResult, TeamMember } from "../team-api"
+import type { PagedResult, TeamMember } from "../index/team-api"
 
 export type MemberDetailGroup = {
   id: string

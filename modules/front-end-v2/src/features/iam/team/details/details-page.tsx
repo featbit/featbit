@@ -17,7 +17,7 @@ import {
 import { getStoredUserProfile } from "@/features/auth/auth-api"
 import { localizedPath, resolveLang } from "@/features/layout/layout-context"
 import { cn } from "@/lib/utils"
-import { memberResourceName, type TeamMember } from "../team-api"
+import { memberResourceName, type TeamMember } from "../index/team-api"
 import {
   addMemberToGroups,
   addPoliciesToMember,

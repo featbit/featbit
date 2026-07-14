@@ -80,7 +80,7 @@ const OrganizationProjectsPage = lazy(() =>
   }))
 )
 const TeamPage = lazy(() =>
-  import("@/features/iam/team/team-page").then((module) => ({
+  import("@/features/iam/team/index/team-page").then((module) => ({
     default: module.TeamPage,
   }))
 )
