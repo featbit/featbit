@@ -1,5 +1,45 @@
 import { fetchApi } from "@/lib/api/authenticated-api"
-import type { PagedResult, TeamMember } from "../index/team-api"
+
+export type PagedResult<T> = {
+  totalCount: number
+  items: T[]
+}
+
+export type MemberGroup = {
+  id: string
+  name: string
+  description?: string
+  memberId?: string
+  isGroupMember?: boolean
+}
+
+export type TeamMember = {
+  id: string
+  email: string
+  invitorId?: string
+  initialPassword?: string
+  groups: MemberGroup[]
+  name: string
+}
+
+export type PolicyOption = {
+  id: string
+  name: string
+  type: string
+  description?: string
+}
+
+export type GroupOption = {
+  id: string
+  name: string
+  description?: string
+}
+
+export type AddMemberPayload = {
+  email: string
+  policyIds: string[]
+  groupIds: string[]
+}
 
 export type MemberDetailGroup = {
   id: string
@@ -52,12 +92,76 @@ function queryString(
       searchParams.set(key, String(value))
     }
   })
+
   const value = searchParams.toString()
   return value ? `?${value}` : ""
 }
 
 function memberPath(memberId: string, suffix = "") {
   return `/api/v1/members/${encodeURIComponent(memberId)}${suffix}`
+}
+
+export function memberResourceName(member: Pick<TeamMember, "email">) {
+  return `member/${member.email}`
+}
+
+export function fetchTeamMembers(params: {
+  searchText: string
+  pageIndex: number
+  pageSize: number
+}) {
+  return fetchApi<PagedResult<TeamMember>>(
+    `/api/v1/members${queryString({
+      searchText: params.searchText,
+      pageIndex: params.pageIndex,
+      pageSize: params.pageSize,
+    })}`
+  )
+}
+
+export function addTeamMember(payload: AddMemberPayload) {
+  return fetchApi<boolean>("/api/v1/members/add", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  })
+}
+
+export function removeMemberFromOrganization(memberId: string) {
+  return fetchApi<boolean>(
+    `/api/v1/members/remove-from-org/${encodeURIComponent(memberId)}`,
+    { method: "DELETE" }
+  )
+}
+
+export function removeMemberFromWorkspace(memberId: string) {
+  return fetchApi<boolean>(
+    `/api/v1/members/remove-from-workspace/${memberId}`,
+    { method: "DELETE" }
+  )
+}
+
+export function fetchPolicyOptions(params: {
+  name: string
+  pageIndex: number
+}) {
+  return fetchApi<PagedResult<PolicyOption>>(
+    `/api/v1/policies${queryString({
+      name: params.name,
+      pageIndex: params.pageIndex,
+      pageSize: 10,
+    })}`
+  )
+}
+
+export function fetchGroupOptions(params: { name: string; pageIndex: number }) {
+  return fetchApi<PagedResult<GroupOption>>(
+    `/api/v1/groups${queryString({
+      name: params.name,
+      pageIndex: params.pageIndex,
+      pageSize: 10,
+    })}`
+  )
 }
 
 export function fetchMemberDetail(memberId: string) {
@@ -237,12 +341,5 @@ export function removePolicyFromMember(memberId: string, policyId: string) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({}),
     }
-  )
-}
-
-export function removeMemberFromOrganization(memberId: string) {
-  return fetchApi<boolean>(
-    `/api/v1/members/remove-from-org/${encodeURIComponent(memberId)}`,
-    { method: "DELETE" }
   )
 }

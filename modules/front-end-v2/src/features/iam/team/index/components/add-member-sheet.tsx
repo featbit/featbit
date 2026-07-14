@@ -11,7 +11,11 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet"
-import { addTeamMember, type GroupOption, type PolicyOption } from "../team-api"
+import {
+  addTeamMember,
+  type GroupOption,
+  type PolicyOption,
+} from "../../team-api"
 import { GroupMultiPicker, PolicyMultiPicker } from "./permission-multi-picker"
 
 export function AddMemberSheet({

@@ -1,5 +1,6 @@
 import { ArrowLeft, Check, Copy, Plus, Search, Star } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { Link, useNavigate, useParams } from "react-router-dom"
 import { toast } from "sonner"
 import type { ColumnDef } from "@tanstack/react-table"
@@ -17,7 +18,6 @@ import {
 import { getStoredUserProfile } from "@/features/auth/auth-api"
 import { localizedPath, resolveLang } from "@/features/layout/layout-context"
 import { cn } from "@/lib/utils"
-import { memberResourceName, type TeamMember } from "../index/team-api"
 import {
   addMemberToGroups,
   addPoliciesToMember,
@@ -27,6 +27,7 @@ import {
   fetchMemberDirectPolicies,
   fetchMemberGroups,
   fetchMemberInheritedPolicies,
+  memberResourceName,
   removeMemberFromGroup,
   removeMemberFromOrganization,
   removePolicyFromMember,
@@ -34,15 +35,15 @@ import {
   type MemberDirectPolicy,
   type MemberInheritedPolicy,
   type RelationshipOption,
-} from "./details-api"
-import { getDetailsTranslations } from "./details-translations"
-import { DetailsDataTable } from "./details-data-table"
-import { DetailsPagination } from "./details-pagination"
+  type TeamMember,
+} from "../team-api"
+import { DetailsDataTable } from "./components/details-data-table"
+import { DetailsPagination } from "./components/details-pagination"
 import {
   RemoveRelationshipDialog,
   type RemoveDialogTarget,
-} from "./remove-relationship-dialog"
-import { RelationshipPickerSheet } from "./relationship-picker-sheet"
+} from "./components/remove-relationship-dialog"
+import { RelationshipPickerSheet } from "./components/relationship-picker-sheet"
 
 type DetailTab = "groups" | "direct-policies" | "inherited-policies"
 
@@ -66,7 +67,7 @@ export function TeamDetailsPage() {
   const params = useParams()
   const navigate = useNavigate()
   const lang = resolveLang(params.lang)
-  const copy = useMemo(() => getDetailsTranslations(lang), [lang])
+  const { t } = useTranslation()
   const memberId = params.memberId ?? ""
   const requestedTab = params.tab as DetailTab | undefined
   const activeTab =
@@ -184,7 +185,8 @@ export function TeamDetailsPage() {
     return () => window.clearTimeout(timeout)
   }, [loadRelationships])
 
-  const memberName = member?.name || member?.email || copy.noName
+  const memberName =
+    member?.name || member?.email || t("iam.team.details.noName")
   const resourceName = member ? memberResourceName(member) : ""
   const isCurrentUser = member?.email === profile.email
 
@@ -214,7 +216,7 @@ export function TeamDetailsPage() {
     () => [
       {
         accessorKey: "name",
-        header: copy.name,
+        header: t("iam.team.details.name"),
         size: 320,
         cell: ({ row }) => {
           const resourceName = `group/${row.original.name}`
@@ -241,14 +243,16 @@ export function TeamDetailsPage() {
                         className="size-5 shrink-0 text-muted-foreground"
                         onClick={async () => {
                           await navigator.clipboard.writeText(resourceName)
-                          toast.success(copy.copied)
+                          toast.success(t("iam.team.details.copied"))
                         }}
                       />
                     }
                   >
                     <Copy className="size-3" />
                   </TooltipTrigger>
-                  <TooltipContent>{copy.copyResourceName}</TooltipContent>
+                  <TooltipContent>
+                    {t("iam.team.details.copyResourceName")}
+                  </TooltipContent>
                 </Tooltip>
                 <Tooltip>
                   <TooltipTrigger
@@ -267,7 +271,7 @@ export function TeamDetailsPage() {
       },
       {
         accessorKey: "description",
-        header: copy.description,
+        header: t("iam.team.details.description"),
         size: 500,
         cell: ({ row }) => (
           <span className="text-muted-foreground">
@@ -277,7 +281,7 @@ export function TeamDetailsPage() {
       },
       {
         id: "actions",
-        header: copy.actions,
+        header: t("iam.team.details.actions"),
         size: 220,
         cell: ({ row }) => (
           <RowActions
@@ -285,8 +289,8 @@ export function TeamDetailsPage() {
               lang,
               `/iam/groups/${encodeURIComponent(row.original.id)}/team`
             )}
-            detailsLabel={copy.details}
-            removeLabel={copy.remove}
+            detailsLabel={t("iam.team.details.details")}
+            removeLabel={t("iam.team.details.remove")}
             onRemove={() =>
               setRemoveTarget({
                 kind: "group",
@@ -298,14 +302,14 @@ export function TeamDetailsPage() {
         ),
       },
     ],
-    [copy, lang]
+    [lang, t]
   )
 
   const directPolicyColumns = useMemo<ColumnDef<MemberDirectPolicy>[]>(
     () => [
       {
         accessorKey: "name",
-        header: copy.name,
+        header: t("iam.team.details.name"),
         size: 300,
         cell: ({ row }) => {
           const resourceName = `policy/${row.original.key || row.original.id}`
@@ -332,14 +336,16 @@ export function TeamDetailsPage() {
                         className="size-5 shrink-0 text-muted-foreground"
                         onClick={async () => {
                           await navigator.clipboard.writeText(resourceName)
-                          toast.success(copy.copied)
+                          toast.success(t("iam.team.details.copied"))
                         }}
                       />
                     }
                   >
                     <Copy className="size-3" />
                   </TooltipTrigger>
-                  <TooltipContent>{copy.copyResourceName}</TooltipContent>
+                  <TooltipContent>
+                    {t("iam.team.details.copyResourceName")}
+                  </TooltipContent>
                 </Tooltip>
                 <Tooltip>
                   <TooltipTrigger
@@ -358,14 +364,14 @@ export function TeamDetailsPage() {
       },
       {
         accessorKey: "type",
-        header: copy.type,
+        header: t("iam.team.details.type"),
         size: 180,
         cell: ({ row }) => {
           const typeLabel =
             row.original.type === "SysManaged"
-              ? copy.systemManaged
+              ? t("iam.team.details.systemManaged")
               : row.original.type === "CustomerManaged"
-                ? copy.customerManaged
+                ? t("iam.team.details.customerManaged")
                 : "-"
           return (
             <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
@@ -379,7 +385,7 @@ export function TeamDetailsPage() {
       },
       {
         accessorKey: "description",
-        header: copy.description,
+        header: t("iam.team.details.description"),
         size: 420,
         cell: ({ row }) => {
           const description = row.original.description || "-"
@@ -403,7 +409,7 @@ export function TeamDetailsPage() {
       },
       {
         id: "actions",
-        header: copy.actions,
+        header: t("iam.team.details.actions"),
         size: 200,
         cell: ({ row }) => (
           <RowActions
@@ -411,8 +417,8 @@ export function TeamDetailsPage() {
               lang,
               `/iam/policies/${encodeURIComponent(row.original.id)}/permission`
             )}
-            detailsLabel={copy.details}
-            removeLabel={copy.remove}
+            detailsLabel={t("iam.team.details.details")}
+            removeLabel={t("iam.team.details.remove")}
             onRemove={() =>
               setRemoveTarget({
                 kind: "policy",
@@ -424,14 +430,14 @@ export function TeamDetailsPage() {
         ),
       },
     ],
-    [copy, lang]
+    [lang, t]
   )
 
   const inheritedPolicyColumns = useMemo<ColumnDef<MemberInheritedPolicy>[]>(
     () => [
       {
         accessorKey: "name",
-        header: copy.name,
+        header: t("iam.team.details.name"),
         size: 280,
         cell: ({ row }) => {
           const resourceName = `policy/${row.original.key || row.original.id}`
@@ -458,14 +464,16 @@ export function TeamDetailsPage() {
                         className="size-5 shrink-0 text-muted-foreground"
                         onClick={async () => {
                           await navigator.clipboard.writeText(resourceName)
-                          toast.success(copy.copied)
+                          toast.success(t("iam.team.details.copied"))
                         }}
                       />
                     }
                   >
                     <Copy className="size-3" />
                   </TooltipTrigger>
-                  <TooltipContent>{copy.copyResourceName}</TooltipContent>
+                  <TooltipContent>
+                    {t("iam.team.details.copyResourceName")}
+                  </TooltipContent>
                 </Tooltip>
                 <Tooltip>
                   <TooltipTrigger
@@ -484,7 +492,7 @@ export function TeamDetailsPage() {
       },
       {
         accessorKey: "groupName",
-        header: copy.group,
+        header: t("iam.team.details.group"),
         size: 180,
         cell: ({ row }) => (
           <Tooltip>
@@ -499,14 +507,14 @@ export function TeamDetailsPage() {
       },
       {
         accessorKey: "type",
-        header: copy.type,
+        header: t("iam.team.details.type"),
         size: 180,
         cell: ({ row }) => {
           const typeLabel =
             row.original.type === "SysManaged"
-              ? copy.systemManaged
+              ? t("iam.team.details.systemManaged")
               : row.original.type === "CustomerManaged"
-                ? copy.customerManaged
+                ? t("iam.team.details.customerManaged")
                 : "-"
           return (
             <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
@@ -520,7 +528,7 @@ export function TeamDetailsPage() {
       },
       {
         accessorKey: "description",
-        header: copy.description,
+        header: t("iam.team.details.description"),
         size: 380,
         cell: ({ row }) => {
           const description = row.original.description || "-"
@@ -544,7 +552,7 @@ export function TeamDetailsPage() {
       },
       {
         id: "actions",
-        header: copy.actions,
+        header: t("iam.team.details.actions"),
         size: 160,
         cell: ({ row }) => (
           <Link
@@ -558,12 +566,12 @@ export function TeamDetailsPage() {
               "font-medium whitespace-nowrap"
             )}
           >
-            {copy.details}
+            {t("iam.team.details.details")}
           </Link>
         ),
       },
     ],
-    [copy, lang]
+    [lang, t]
   )
 
   const loadGroupOptions = useCallback(
@@ -584,12 +592,12 @@ export function TeamDetailsPage() {
         memberId,
         selected.map((item) => item.id)
       )
-      toast.success(copy.operationSucceeded)
+      toast.success(t("iam.team.details.operationSucceeded"))
       setGroupSheetOpen(false)
       loadRelationships()
       loadCounts()
     } catch {
-      toast.error(copy.operationFailed)
+      toast.error(t("iam.team.details.operationFailed"))
     } finally {
       setSavingSheet(false)
     }
@@ -602,12 +610,12 @@ export function TeamDetailsPage() {
         memberId,
         selected.map((item) => item.id)
       )
-      toast.success(copy.operationSucceeded)
+      toast.success(t("iam.team.details.operationSucceeded"))
       setPolicySheetOpen(false)
       loadRelationships()
       loadCounts()
     } catch {
-      toast.error(copy.operationFailed)
+      toast.error(t("iam.team.details.operationFailed"))
     } finally {
       setSavingSheet(false)
     }
@@ -625,7 +633,7 @@ export function TeamDetailsPage() {
         await removeMemberFromOrganization(memberId)
       }
 
-      toast.success(copy.operationSucceeded)
+      toast.success(t("iam.team.details.operationSucceeded"))
       setRemoveTarget(null)
       if (removeTarget.kind === "member") {
         navigate(localizedPath(lang, "/iam/team"))
@@ -634,7 +642,7 @@ export function TeamDetailsPage() {
         loadCounts()
       }
     } catch {
-      toast.error(copy.operationFailed)
+      toast.error(t("iam.team.details.operationFailed"))
     } finally {
       setRemoving(false)
     }
@@ -648,18 +656,24 @@ export function TeamDetailsPage() {
         : inheritedPolicies
   const hasSearch = Boolean(debouncedSearch)
   const emptyMessage = hasSearch
-    ? copy.noSearchResults
+    ? t("iam.team.details.noSearchResults")
     : activeTab === "groups"
-      ? copy.groupsEmpty
+      ? t("iam.team.details.groupsEmpty")
       : activeTab === "direct-policies"
-        ? copy.directPoliciesEmpty
-        : copy.inheritedPoliciesEmpty
+        ? t("iam.team.details.directPoliciesEmpty")
+        : t("iam.team.details.inheritedPoliciesEmpty")
   const emptyAction = hasSearch
-    ? { label: copy.clearSearch, onClick: () => setSearch("") }
+    ? { label: t("iam.team.details.clearSearch"), onClick: () => setSearch("") }
     : activeTab === "groups"
-      ? { label: copy.addToGroup, onClick: () => setGroupSheetOpen(true) }
+      ? {
+          label: t("iam.team.details.addToGroup"),
+          onClick: () => setGroupSheetOpen(true),
+        }
       : activeTab === "direct-policies"
-        ? { label: copy.addPolicy, onClick: () => setPolicySheetOpen(true) }
+        ? {
+            label: t("iam.team.details.addPolicy"),
+            onClick: () => setPolicySheetOpen(true),
+          }
         : undefined
 
   return (
@@ -670,14 +684,14 @@ export function TeamDetailsPage() {
           className="mb-5 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="size-4" />
-          {copy.team}
+          {t("iam.team.details.team")}
         </Link>
 
         {memberError ? (
           <div className="flex items-center justify-between rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-            {copy.loadingFailed}
+            {t("iam.team.details.loadingFailed")}
             <Button variant="outline" size="sm" onClick={loadMember}>
-              {copy.retry}
+              {t("iam.team.details.retry")}
             </Button>
           </div>
         ) : (
@@ -705,7 +719,9 @@ export function TeamDetailsPage() {
                     >
                       RN
                     </TooltipTrigger>
-                    <TooltipContent>{copy.resourceName}</TooltipContent>
+                    <TooltipContent>
+                      {t("iam.team.details.resourceName")}
+                    </TooltipContent>
                   </Tooltip>
                   <Tooltip>
                     <TooltipTrigger
@@ -725,7 +741,7 @@ export function TeamDetailsPage() {
                           variant="ghost"
                           size="icon-sm"
                           className="h-full w-9 shrink-0 rounded-none border-0 border-l border-input/60 hover:bg-muted/40"
-                          aria-label={copy.copyResourceName}
+                          aria-label={t("iam.team.details.copyResourceName")}
                           onClick={copyResourceName}
                         />
                       }
@@ -737,7 +753,9 @@ export function TeamDetailsPage() {
                       )}
                     </TooltipTrigger>
                     <TooltipContent>
-                      {resourceNameCopied ? copy.copied : copy.copyResourceName}
+                      {resourceNameCopied
+                        ? t("iam.team.details.copied")
+                        : t("iam.team.details.copyResourceName")}
                     </TooltipContent>
                   </Tooltip>
                 </div>
@@ -757,7 +775,7 @@ export function TeamDetailsPage() {
                 })
               }
             >
-              {copy.removeMember}
+              {t("iam.team.details.removeMember")}
             </Button>
           </header>
         )}
@@ -778,15 +796,19 @@ export function TeamDetailsPage() {
             variant="line"
             className="h-10 w-full justify-start gap-7 border-b p-0"
           >
-            <Tab value="groups" label={copy.groups} count={counts.groups} />
+            <Tab
+              value="groups"
+              label={t("iam.team.details.groups")}
+              count={counts.groups}
+            />
             <Tab
               value="direct-policies"
-              label={copy.directPolicies}
+              label={t("iam.team.details.directPolicies")}
               count={counts.direct}
             />
             <Tab
               value="inherited-policies"
-              label={copy.inheritedPolicies}
+              label={t("iam.team.details.inheritedPolicies")}
               count={counts.inherited}
             />
           </TabsList>
@@ -798,7 +820,9 @@ export function TeamDetailsPage() {
             <Input
               value={search}
               placeholder={
-                activeTab === "groups" ? copy.filterGroups : copy.filterPolicies
+                activeTab === "groups"
+                  ? t("iam.team.details.filterGroups")
+                  : t("iam.team.details.filterPolicies")
               }
               className="pl-9"
               onChange={(event) => setSearch(event.target.value)}
@@ -807,21 +831,21 @@ export function TeamDetailsPage() {
           {activeTab === "groups" ? (
             <Button type="button" onClick={() => setGroupSheetOpen(true)}>
               <Plus className="size-4" />
-              {copy.addToGroup}
+              {t("iam.team.details.addToGroup")}
             </Button>
           ) : activeTab === "direct-policies" ? (
             <Button type="button" onClick={() => setPolicySheetOpen(true)}>
               <Plus className="size-4" />
-              {copy.addPolicy}
+              {t("iam.team.details.addPolicy")}
             </Button>
           ) : null}
         </div>
 
         {relationshipError ? (
           <div className="mb-3 flex items-center justify-between rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-            {copy.relationshipLoadFailed}
+            {t("iam.team.details.relationshipLoadFailed")}
             <Button variant="outline" size="sm" onClick={loadRelationships}>
-              {copy.retry}
+              {t("iam.team.details.retry")}
             </Button>
           </div>
         ) : null}
@@ -856,14 +880,17 @@ export function TeamDetailsPage() {
           pageSize={pageSize}
           totalCount={activeData.totalCount}
           summary={(first, last, total) =>
-            copy.showing(
+            t("iam.team.details.showing", {
               first,
               last,
               total,
-              activeTab === "groups" ? copy.groupsNoun : copy.policiesNoun
-            )
+              noun:
+                activeTab === "groups"
+                  ? t("iam.team.details.groupsNoun")
+                  : t("iam.team.details.policiesNoun"),
+            })
           }
-          perPage={copy.perPage}
+          perPage={(count) => t("iam.team.details.perPage", { count })}
           onPageIndexChange={setPageIndex}
           onPageSizeChange={(size) => {
             setPageSize(size)
@@ -874,9 +901,8 @@ export function TeamDetailsPage() {
         {groupSheetOpen ? (
           <RelationshipPickerSheet
             open={groupSheetOpen}
-            title={copy.addGroupsTitle(memberName)}
+            title={t("iam.team.details.addGroupsTitle", { name: memberName })}
             kind="groups"
-            copy={copy}
             saving={savingSheet}
             loadOptions={loadGroupOptions}
             onOpenChange={setGroupSheetOpen}
@@ -887,9 +913,10 @@ export function TeamDetailsPage() {
         {policySheetOpen ? (
           <RelationshipPickerSheet
             open={policySheetOpen}
-            title={copy.addPoliciesTitle(memberName)}
+            title={t("iam.team.details.addPoliciesTitle", {
+              name: memberName,
+            })}
             kind="policies"
-            copy={copy}
             saving={savingSheet}
             loadOptions={loadPolicyOptions}
             onOpenChange={setPolicySheetOpen}
@@ -900,7 +927,6 @@ export function TeamDetailsPage() {
         <RemoveRelationshipDialog
           target={removeTarget}
           saving={removing}
-          copy={copy}
           onOpenChange={(open) => {
             if (!open) setRemoveTarget(null)
           }}

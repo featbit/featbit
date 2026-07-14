@@ -26,7 +26,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { memberResourceName, type TeamMember } from "../team-api"
+import { memberResourceName, type TeamMember } from "../../team-api"
 
 export function EmailResourceCell({
   member,

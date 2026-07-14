@@ -33,7 +33,7 @@ import {
   removeMemberFromOrganization,
   removeMemberFromWorkspace,
   type TeamMember,
-} from "./team-api"
+} from "../team-api"
 
 export function TeamPage() {
   const { t } = useTranslation()
@@ -179,7 +179,7 @@ export function TeamPage() {
                 "font-medium"
               )}
             >
-              {t("iam.team.details")}
+              {t("iam.team.viewDetails")}
             </Link>
             <RowActions
               disabled={profile.email === row.original.email}

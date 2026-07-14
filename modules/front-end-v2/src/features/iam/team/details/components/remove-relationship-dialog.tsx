@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -7,7 +8,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import type { DetailsTranslations } from "./details-translations"
 
 export type RemoveDialogTarget = {
   kind: "group" | "policy" | "member"
@@ -18,37 +18,36 @@ export type RemoveDialogTarget = {
 export function RemoveRelationshipDialog({
   target,
   saving,
-  copy,
   onOpenChange,
   onConfirm,
 }: {
   target: RemoveDialogTarget
   saving: boolean
-  copy: DetailsTranslations
   onOpenChange: (open: boolean) => void
   onConfirm: () => void
 }) {
+  const { t } = useTranslation()
   const title =
     target?.kind === "group"
-      ? copy.removeGroupTitle
+      ? t("iam.team.details.removeGroupTitle")
       : target?.kind === "policy"
-        ? copy.removePolicyTitle
-        : copy.removeMemberTitle
+        ? t("iam.team.details.removePolicyTitle")
+        : t("iam.team.details.removeMemberTitle")
   const description =
     target?.kind === "group" ? (
       <>
-        {copy.removeGroupDescriptionBefore}
+        {t("iam.team.details.removeGroupDescriptionBefore")}
         <strong className="font-semibold text-foreground">{target.name}</strong>
-        {copy.removeGroupDescriptionAfter}
+        {t("iam.team.details.removeGroupDescriptionAfter")}
       </>
     ) : target?.kind === "policy" ? (
       <>
-        {copy.removePolicyDescriptionBefore}
+        {t("iam.team.details.removePolicyDescriptionBefore")}
         <strong className="font-semibold text-foreground">{target.name}</strong>
-        {copy.removePolicyDescriptionAfter}
+        {t("iam.team.details.removePolicyDescriptionAfter")}
       </>
     ) : (
-      copy.removeMemberDescription
+      t("iam.team.details.removeMemberDescription")
     )
 
   return (
@@ -60,7 +59,7 @@ export function RemoveRelationshipDialog({
         </DialogHeader>
         <div className="flex justify-end gap-2">
           <DialogClose render={<Button type="button" variant="outline" />}>
-            {copy.cancel}
+            {t("iam.team.details.cancel")}
           </DialogClose>
           <Button
             type="button"
@@ -68,7 +67,9 @@ export function RemoveRelationshipDialog({
             disabled={saving}
             onClick={onConfirm}
           >
-            {saving ? copy.removing : copy.remove}
+            {saving
+              ? t("iam.team.details.removing")
+              : t("iam.team.details.remove")}
           </Button>
         </div>
       </DialogContent>

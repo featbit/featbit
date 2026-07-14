@@ -20,7 +20,7 @@ import {
   type GroupOption,
   type PagedResult,
   type PolicyOption,
-} from "../team-api"
+} from "../../team-api"
 
 const loadPolicyOptions = (query: string, pageIndex: number) =>
   fetchPolicyOptions({ name: query, pageIndex })

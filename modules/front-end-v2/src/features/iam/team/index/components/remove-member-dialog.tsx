@@ -8,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import type { TeamMember } from "../team-api"
+import type { TeamMember } from "../../team-api"
 
 export type RemoveTarget = {
   member: TeamMember

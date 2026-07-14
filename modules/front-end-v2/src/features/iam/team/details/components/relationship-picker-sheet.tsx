@@ -1,5 +1,6 @@
 import { Star, X } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -18,14 +19,12 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import { Skeleton } from "@/components/ui/skeleton"
-import type { DetailsTranslations } from "./details-translations"
-import type { RelationshipOption, RelationshipOptionPage } from "./details-api"
+import type { RelationshipOption, RelationshipOptionPage } from "../../team-api"
 
 export function RelationshipPickerSheet({
   open,
   title,
   kind,
-  copy,
   saving,
   loadOptions,
   onOpenChange,
@@ -34,7 +33,6 @@ export function RelationshipPickerSheet({
   open: boolean
   title: string
   kind: "groups" | "policies"
-  copy: DetailsTranslations
   saving: boolean
   loadOptions: (
     query: string,
@@ -43,6 +41,7 @@ export function RelationshipPickerSheet({
   onOpenChange: (open: boolean) => void
   onSubmit: (selected: RelationshipOption[]) => void
 }) {
+  const { t } = useTranslation()
   const [query, setQuery] = useState("")
   const [options, setOptions] = useState<RelationshipOption[]>([])
   const [selected, setSelected] = useState<RelationshipOption[]>([])
@@ -133,21 +132,29 @@ export function RelationshipPickerSheet({
   }, [hasMore, loading, loadingMore, options.length])
 
   const selectedLabel =
-    kind === "groups" ? copy.selectedGroups : copy.selectedPolicies
+    kind === "groups"
+      ? t("iam.team.details.selectedGroups")
+      : t("iam.team.details.selectedPolicies")
   const availableLabel =
-    kind === "groups" ? copy.availableGroups : copy.availablePolicies
+    kind === "groups"
+      ? t("iam.team.details.availableGroups")
+      : t("iam.team.details.availablePolicies")
   const placeholder =
-    kind === "groups" ? copy.searchGroups : copy.searchPolicies
+    kind === "groups"
+      ? t("iam.team.details.searchGroups")
+      : t("iam.team.details.searchPolicies")
   const hasQuery = Boolean(query.trim())
   const emptyMessage = hasQuery
     ? kind === "groups"
-      ? copy.noMatchingGroups
-      : copy.noMatchingPolicies
+      ? t("iam.team.details.noMatchingGroups")
+      : t("iam.team.details.noMatchingPolicies")
     : kind === "groups"
-      ? copy.noAvailableGroups
-      : copy.noAvailablePolicies
+      ? t("iam.team.details.noAvailableGroups")
+      : t("iam.team.details.noAvailablePolicies")
   const noSelectionMessage =
-    kind === "groups" ? copy.noSelectedGroups : copy.noSelectedPolicies
+    kind === "groups"
+      ? t("iam.team.details.noSelectedGroups")
+      : t("iam.team.details.noSelectedPolicies")
 
   function toggleOption(option: RelationshipOption) {
     setSelected((current) =>
@@ -164,7 +171,7 @@ export function RelationshipPickerSheet({
       </span>
       <div className="flex items-center gap-3">
         <span className="text-xs text-muted-foreground">
-          {copy.selectedCount(selected.length)}
+          {t("iam.team.details.selectedCount", { count: selected.length })}
         </span>
         {selected.length ? (
           <Button
@@ -174,7 +181,7 @@ export function RelationshipPickerSheet({
             className="h-6 px-1.5 text-xs"
             onClick={() => setSelected([])}
           >
-            {copy.clearAll}
+            {t("iam.team.details.clearAll")}
           </Button>
         ) : null}
       </div>
@@ -270,7 +277,7 @@ export function RelationshipPickerSheet({
                               {option.type === "SysManaged" ? (
                                 <span className="inline-flex items-center gap-1 text-xs font-normal text-muted-foreground">
                                   <Star className="size-3" />
-                                  {copy.system}
+                                  {t("iam.team.details.system")}
                                 </span>
                               ) : null}
                             </div>
@@ -304,11 +311,11 @@ export function RelationshipPickerSheet({
           >
             {kind === "policies"
               ? saving
-                ? copy.attaching
-                : copy.attach
+                ? t("iam.team.details.attaching")
+                : t("iam.team.details.attach")
               : saving
-                ? copy.adding
-                : copy.add}
+                ? t("iam.team.details.adding")
+                : t("iam.team.details.add")}
           </Button>
         </SheetFooter>
       </SheetContent>
