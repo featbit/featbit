@@ -89,6 +89,16 @@ const TeamDetailsPage = lazy(() =>
     default: module.TeamDetailsPage,
   }))
 )
+const GroupPage = lazy(() =>
+  import("@/features/iam/group/index/group-page").then((module) => ({
+    default: module.GroupPage,
+  }))
+)
+const GroupDetailsPage = lazy(() =>
+  import("@/features/iam/group/details/details-page").then((module) => ({
+    default: module.GroupDetailsPage,
+  }))
+)
 
 type SupportedLanguage = "en" | "zh"
 
@@ -244,6 +254,11 @@ export function AppRoutes() {
           <Route path="iam" element={<Navigate to="team" replace />} />
           <Route path="iam/team" element={<TeamPage />} />
           <Route path="iam/team/:memberId/:tab" element={<TeamDetailsPage />} />
+          <Route path="iam/groups" element={<GroupPage />} />
+          <Route
+            path="iam/groups/:groupId/:tab"
+            element={<GroupDetailsPage />}
+          />
           <Route path="account/profile" element={<ProfilePage />} />
           {/*Remove the following line when migration completed*/}
           <Route path="*" element={<LayoutPlaceholder />} />
