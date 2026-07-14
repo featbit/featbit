@@ -1,0 +1,67 @@
+import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import type { DetailsCopy } from "./details-copy"
+
+export type RemoveDialogTarget = {
+  kind: "group" | "policy" | "member"
+  id: string
+  name: string
+} | null
+
+export function RemoveRelationshipDialog({
+  target,
+  saving,
+  copy,
+  onOpenChange,
+  onConfirm,
+}: {
+  target: RemoveDialogTarget
+  saving: boolean
+  copy: DetailsCopy
+  onOpenChange: (open: boolean) => void
+  onConfirm: () => void
+}) {
+  const title =
+    target?.kind === "group"
+      ? copy.removeGroupTitle
+      : target?.kind === "policy"
+        ? copy.removePolicyTitle
+        : copy.removeMemberTitle
+  const description =
+    target?.kind === "group"
+      ? copy.removeGroupDescription(target.name)
+      : target?.kind === "policy"
+        ? copy.removePolicyDescription(target.name)
+        : copy.removeMemberDescription
+
+  return (
+    <Dialog open={Boolean(target)} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
+        </DialogHeader>
+        <div className="flex justify-end gap-2">
+          <DialogClose render={<Button type="button" variant="outline" />}>
+            {copy.cancel}
+          </DialogClose>
+          <Button
+            type="button"
+            variant="destructive"
+            disabled={saving}
+            onClick={onConfirm}
+          >
+            {saving ? copy.removing : copy.remove}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}

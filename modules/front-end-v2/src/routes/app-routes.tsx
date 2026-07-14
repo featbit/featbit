@@ -84,6 +84,11 @@ const TeamPage = lazy(() =>
     default: module.TeamPage,
   }))
 )
+const TeamDetailsPage = lazy(() =>
+  import("@/features/iam/team/details/details-page").then((module) => ({
+    default: module.TeamDetailsPage,
+  }))
+)
 
 type SupportedLanguage = "en" | "zh"
 
@@ -208,10 +213,7 @@ export function AppRoutes() {
     <Suspense fallback={<RouteFallback />}>
       <Routes>
         <Route path="/" element={<LanguageRedirect />} />
-        <Route
-          path="/login"
-          element={<LocalizedAuthRedirect mode="login" />}
-        />
+        <Route path="/login" element={<LocalizedAuthRedirect mode="login" />} />
         <Route
           path="/login/sso"
           element={<LocalizedAuthRedirect mode="sso" />}
@@ -241,6 +243,7 @@ export function AppRoutes() {
           />
           <Route path="iam" element={<Navigate to="team" replace />} />
           <Route path="iam/team" element={<TeamPage />} />
+          <Route path="iam/team/:memberId/:tab" element={<TeamDetailsPage />} />
           <Route path="account/profile" element={<ProfilePage />} />
           {/*Remove the following line when migration completed*/}
           <Route path="*" element={<LayoutPlaceholder />} />
