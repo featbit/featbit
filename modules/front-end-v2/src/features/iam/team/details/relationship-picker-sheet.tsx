@@ -51,14 +51,18 @@ export function RelationshipPickerSheet({
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
   const requestVersion = useRef(0)
+  const loadingMoreRef = useRef(false)
   const listRef = useRef<HTMLDivElement | null>(null)
   const sentinelRef = useRef<HTMLDivElement | null>(null)
+  const loadNextPageRef = useRef<() => Promise<void>>(async () => {})
 
   useEffect(() => {
     if (!open) return
 
     const version = ++requestVersion.current
+    loadingMoreRef.current = false
     const timeout = window.setTimeout(() => {
+      setLoadingMore(false)
       setLoading(true)
       setPageIndex(0)
       loadOptions(query, 0)
@@ -81,6 +85,36 @@ export function RelationshipPickerSheet({
     return () => window.clearTimeout(timeout)
   }, [loadOptions, open, query])
 
+  async function loadNextPage() {
+    if (!hasMore || loading || loadingMoreRef.current) return
+
+    const nextPage = pageIndex + 1
+    const version = requestVersion.current
+    loadingMoreRef.current = true
+    setLoadingMore(true)
+    try {
+      const result = await loadOptions(query, nextPage)
+      if (requestVersion.current !== version) return
+
+      setOptions((current) => {
+        const merged = new Map(current.map((item) => [item.id, item]))
+        result.items.forEach((item) => merged.set(item.id, item))
+        return Array.from(merged.values())
+      })
+      setPageIndex(nextPage)
+      setHasMore(result.hasMore)
+    } catch {
+      // Keep the loaded pages visible so scrolling can retry the request.
+    } finally {
+      loadingMoreRef.current = false
+      if (requestVersion.current === version) setLoadingMore(false)
+    }
+  }
+
+  useEffect(() => {
+    loadNextPageRef.current = loadNextPage
+  })
+
   useEffect(() => {
     const root = listRef.current
     const sentinel = sentinelRef.current
@@ -89,31 +123,14 @@ export function RelationshipPickerSheet({
     const observer = new IntersectionObserver(
       (entries) => {
         if (!entries.some((entry) => entry.isIntersecting)) return
-
-        const nextPage = pageIndex + 1
-        const version = requestVersion.current
-        setLoadingMore(true)
-        loadOptions(query, nextPage)
-          .then((result) => {
-            if (requestVersion.current !== version) return
-            setOptions((current) => {
-              const merged = new Map(current.map((item) => [item.id, item]))
-              result.items.forEach((item) => merged.set(item.id, item))
-              return Array.from(merged.values())
-            })
-            setPageIndex(nextPage)
-            setHasMore(result.hasMore)
-          })
-          .finally(() => {
-            if (requestVersion.current === version) setLoadingMore(false)
-          })
+        void loadNextPageRef.current()
       },
       { root, rootMargin: "0px 0px 16px" }
     )
 
     observer.observe(sentinel)
     return () => observer.disconnect()
-  }, [hasMore, loadOptions, loading, loadingMore, pageIndex, query])
+  }, [hasMore, loading, loadingMore, options.length])
 
   const selectedLabel =
     kind === "groups" ? copy.selectedGroups : copy.selectedPolicies
@@ -121,8 +138,16 @@ export function RelationshipPickerSheet({
     kind === "groups" ? copy.availableGroups : copy.availablePolicies
   const placeholder =
     kind === "groups" ? copy.searchGroups : copy.searchPolicies
-  const emptyMessage =
-    kind === "groups" ? copy.noAvailableGroups : copy.noAvailablePolicies
+  const hasQuery = Boolean(query.trim())
+  const emptyMessage = hasQuery
+    ? kind === "groups"
+      ? copy.noMatchingGroups
+      : copy.noMatchingPolicies
+    : kind === "groups"
+      ? copy.noAvailableGroups
+      : copy.noAvailablePolicies
+  const noSelectionMessage =
+    kind === "groups" ? copy.noSelectedGroups : copy.noSelectedPolicies
 
   function toggleOption(option: RelationshipOption) {
     setSelected((current) =>
@@ -132,6 +157,64 @@ export function RelationshipPickerSheet({
     )
   }
 
+  const selectedHeader = (
+    <div className="flex items-center justify-between gap-3">
+      <span className="text-sm font-medium text-foreground">
+        {selectedLabel}
+      </span>
+      <div className="flex items-center gap-3">
+        <span className="text-xs text-muted-foreground">
+          {copy.selectedCount(selected.length)}
+        </span>
+        {selected.length ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-6 px-1.5 text-xs"
+            onClick={() => setSelected([])}
+          >
+            {copy.clearAll}
+          </Button>
+        ) : null}
+      </div>
+    </div>
+  )
+
+  const selectedItems = selected.length ? (
+    <div className="flex flex-wrap gap-1.5">
+      {selected.map((option) => (
+        <Badge
+          key={option.id}
+          variant="secondary"
+          className="max-w-full gap-1 rounded-full border-border py-0.5 pr-1 pl-2 font-normal"
+        >
+          <span className="truncate">{option.name}</span>
+          <button
+            type="button"
+            className="rounded-full p-0.5 text-muted-foreground hover:bg-background hover:text-foreground"
+            onClick={() => toggleOption(option)}
+          >
+            <X className="size-3" />
+          </button>
+        </Badge>
+      ))}
+    </div>
+  ) : null
+
+  const selectedSection = (
+    <section className="mb-3">
+      {selectedHeader}
+      <div className="mt-2 min-h-10 rounded-lg border bg-muted/30 px-3 py-2.5">
+        {selectedItems ?? (
+          <p className="text-xs leading-5 text-muted-foreground">
+            {noSelectionMessage}
+          </p>
+        )}
+      </div>
+    </section>
+  )
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="gap-0 p-0 data-[side=right]:w-[min(100vw,520px)] data-[side=right]:sm:max-w-[520px]">
@@ -139,67 +222,25 @@ export function RelationshipPickerSheet({
           <SheetTitle className="text-lg font-semibold">{title}</SheetTitle>
         </SheetHeader>
 
-        <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-hidden px-6 py-5">
+        <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden px-6 py-5">
+          {selectedSection}
+          <div className="text-sm font-medium text-foreground">
+            {availableLabel}
+          </div>
           <Command
             shouldFilter={false}
-            className="min-h-0 rounded-none p-0 [&_[data-slot=command-input-wrapper]]:p-0"
+            className="h-auto min-h-0 flex-none overflow-hidden rounded-lg border p-0 [&_[data-slot=command-input-wrapper]]:p-0"
           >
-            <CommandInput
-              value={query}
-              placeholder={placeholder}
-              onValueChange={setQuery}
-            />
-
-            <section className="mt-5 rounded-lg border bg-muted/30 px-3 py-3">
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-sm font-medium text-foreground">
-                  {selectedLabel}
-                </span>
-                <div className="flex items-center gap-3">
-                  <span className="text-xs text-muted-foreground">
-                    {copy.selectedCount(selected.length)}
-                  </span>
-                  {selected.length ? (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 px-1.5 text-xs"
-                      onClick={() => setSelected([])}
-                    >
-                      {copy.clearAll}
-                    </Button>
-                  ) : null}
-                </div>
-              </div>
-              {selected.length ? (
-                <div className="mt-3 flex flex-wrap gap-1.5">
-                  {selected.map((option) => (
-                    <Badge
-                      key={option.id}
-                      variant="secondary"
-                      className="max-w-full gap-1 rounded-full border-border py-0.5 pr-1 pl-2 font-normal"
-                    >
-                      <span className="truncate">{option.name}</span>
-                      <button
-                        type="button"
-                        className="rounded-full p-0.5 text-muted-foreground hover:bg-background hover:text-foreground"
-                        onClick={() => toggleOption(option)}
-                      >
-                        <X className="size-3" />
-                      </button>
-                    </Badge>
-                  ))}
-                </div>
-              ) : null}
-            </section>
-
-            <div className="mt-5 mb-2 text-sm font-medium text-foreground">
-              {availableLabel}
+            <div className="px-2 py-2">
+              <CommandInput
+                value={query}
+                placeholder={placeholder}
+                onValueChange={setQuery}
+              />
             </div>
             <CommandList
               ref={listRef}
-              className="max-h-80 min-h-40 flex-none [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] overflow-y-auto rounded-lg border p-1 [&::-webkit-scrollbar]:block [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border"
+              className="max-h-40 flex-none [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] overflow-y-auto border-t p-1 [&::-webkit-scrollbar]:block [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border"
             >
               {loading ? (
                 <div className="space-y-2 p-2">

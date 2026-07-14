@@ -48,6 +48,10 @@ const en = {
   availablePolicies: "Available policies",
   noAvailableGroups: "This member already belongs to every available group.",
   noAvailablePolicies: "Every available policy is already assigned directly.",
+  noMatchingGroups: "No groups match your search.",
+  noMatchingPolicies: "No policies match your search.",
+  noSelectedGroups: "No groups selected yet.",
+  noSelectedPolicies: "No policies selected yet.",
   add: "Add",
   attach: "Attach",
   adding: "Adding...",
@@ -68,6 +72,12 @@ const en = {
 }
 
 const zh: typeof en = {
+  noMatchingGroups:
+    "\u6ca1\u6709\u4e0e\u641c\u7d22\u5173\u952e\u8bcd\u5339\u914d\u7684\u7ec4\u3002",
+  noMatchingPolicies:
+    "\u6ca1\u6709\u4e0e\u641c\u7d22\u5173\u952e\u8bcd\u5339\u914d\u7684\u7b56\u7565\u3002",
+  noSelectedGroups: "\u5c1a\u672a\u9009\u62e9\u4efb\u4f55\u7ec4\u3002",
+  noSelectedPolicies: "\u5c1a\u672a\u9009\u62e9\u4efb\u4f55\u7b56\u7565\u3002",
   team: "团队",
   noName: "未设置名称",
   resourceName: "资源名称（RN）",
