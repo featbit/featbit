@@ -1,6 +1,6 @@
 import { Star, X } from "lucide-react"
 import type { ReactNode } from "react"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -18,14 +18,15 @@ import {
   fetchGroupOptions,
   fetchPolicyOptions,
   type GroupOption,
+  type PagedResult,
   type PolicyOption,
 } from "../team-api"
 
-const loadPolicyOptions = (query: string) =>
-  fetchPolicyOptions({ name: query }).then((result) => result.items)
+const loadPolicyOptions = (query: string, pageIndex: number) =>
+  fetchPolicyOptions({ name: query, pageIndex })
 
-const loadGroupOptions = (query: string) =>
-  fetchGroupOptions({ name: query }).then((result) => result.items)
+const loadGroupOptions = (query: string, pageIndex: number) =>
+  fetchGroupOptions({ name: query, pageIndex })
 
 export function PolicyMultiPicker({
   selected,
@@ -93,21 +94,41 @@ function PermissionMultiPicker<TOption extends { id: string; name: string }>({
   emptyType: string
   selected: TOption[]
   onSelectedChange: (options: TOption[]) => void
-  loadOptions: (query: string) => Promise<TOption[]>
+  loadOptions: (
+    query: string,
+    pageIndex: number
+  ) => Promise<PagedResult<TOption>>
   getOptionMeta?: (option: TOption) => ReactNode
 }) {
   const { t } = useTranslation()
   const [query, setQuery] = useState("")
   const [options, setOptions] = useState<TOption[]>([])
   const [loading, setLoading] = useState(false)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [searchActive, setSearchActive] = useState(false)
+  const [pageIndex, setPageIndex] = useState(0)
+  const [totalCount, setTotalCount] = useState(0)
+  const requestVersion = useRef(0)
+  const loadingMoreRef = useRef(false)
+  const listRef = useRef<HTMLDivElement | null>(null)
+  const loadMoreSentinelRef = useRef<HTMLDivElement | null>(null)
+  const loadNextPageRef = useRef<() => Promise<void>>(async () => {})
 
   useEffect(() => {
+    if (!searchActive) {
+      return
+    }
+
     let cancelled = false
+    const version = requestVersion.current
     const timeout = window.setTimeout(() => {
-      setLoading(true)
-      loadOptions(query)
-        .then((items) => {
-          if (!cancelled) setOptions(items)
+      loadOptions(query, 0)
+        .then((result) => {
+          if (!cancelled && version === requestVersion.current) {
+            setOptions(result.items)
+            setTotalCount(result.totalCount)
+            setPageIndex(0)
+          }
         })
         .catch(() => {
           if (!cancelled) setOptions([])
@@ -120,7 +141,7 @@ function PermissionMultiPicker<TOption extends { id: string; name: string }>({
       cancelled = true
       window.clearTimeout(timeout)
     }
-  }, [loadOptions, query])
+  }, [loadOptions, query, searchActive])
 
   const filteredOptions = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase()
@@ -139,6 +160,58 @@ function PermissionMultiPicker<TOption extends { id: string; name: string }>({
     )
   }
 
+  async function loadNextPage() {
+    if (loading || loadingMoreRef.current || options.length >= totalCount) {
+      return
+    }
+
+    const nextPageIndex = pageIndex + 1
+    const version = requestVersion.current
+    loadingMoreRef.current = true
+    setLoadingMore(true)
+    try {
+      const result = await loadOptions(query, nextPageIndex)
+      if (version !== requestVersion.current) return
+
+      setOptions((current) => {
+        const merged = new Map(current.map((option) => [option.id, option]))
+        result.items.forEach((option) => merged.set(option.id, option))
+        return Array.from(merged.values())
+      })
+      setTotalCount(result.totalCount)
+      setPageIndex(nextPageIndex)
+    } catch {
+      // Keep the loaded pages visible so the user can retry by scrolling again.
+    } finally {
+      loadingMoreRef.current = false
+      if (version === requestVersion.current) setLoadingMore(false)
+    }
+  }
+
+  useEffect(() => {
+    loadNextPageRef.current = loadNextPage
+  })
+
+  useEffect(() => {
+    if (!searchActive) return
+
+    const root = listRef.current
+    const sentinel = loadMoreSentinelRef.current
+    if (!root || !sentinel) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          void loadNextPageRef.current()
+        }
+      },
+      { root, rootMargin: "0px 0px 8px" }
+    )
+
+    observer.observe(sentinel)
+    return () => observer.disconnect()
+  }, [loading, loadingMore, options.length, searchActive, totalCount])
+
   return (
     <div className="overflow-hidden rounded-lg border bg-background">
       <div className="flex items-center justify-between border-b px-3 py-2">
@@ -147,52 +220,7 @@ function PermissionMultiPicker<TOption extends { id: string; name: string }>({
           {t("iam.team.add.selectedCount", { count: selected.length })}
         </span>
       </div>
-      <Command
-        shouldFilter={false}
-        className="rounded-none p-0 [&_[data-slot=command-input-wrapper]]:p-0"
-      >
-        <div className="px-2 py-2">
-          <CommandInput
-            value={query}
-            placeholder={placeholder}
-            onValueChange={setQuery}
-          />
-        </div>
-        <CommandList className="max-h-40 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] overflow-y-auto border-t pt-1 [&::-webkit-scrollbar]:block [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent">
-          {loading ? (
-            <div className="space-y-2 p-2">
-              <Skeleton className="h-8 w-full" />
-              <Skeleton className="h-8 w-4/5" />
-            </div>
-          ) : (
-            <>
-              <CommandEmpty>{t("iam.team.add.noResults")}</CommandEmpty>
-              <CommandGroup className="[&_[cmdk-group-items]]:space-y-1">
-                {filteredOptions.map((option) => {
-                  const isSelected = selected.some(
-                    (item) => item.id === option.id
-                  )
-                  return (
-                    <CommandItem
-                      key={option.id}
-                      value={`${option.name} ${option.id}`}
-                      data-checked={isSelected}
-                      className="border border-transparent data-[checked=true]:border-primary/20 data-[checked=true]:bg-primary/10 data-[checked=true]:text-foreground data-[checked=true]:*:[svg]:text-primary"
-                      onSelect={() => toggleOption(option)}
-                    >
-                      <span className="min-w-0 flex-1 truncate">
-                        {option.name}
-                      </span>
-                      {getOptionMeta?.(option)}
-                    </CommandItem>
-                  )
-                })}
-              </CommandGroup>
-            </>
-          )}
-        </CommandList>
-      </Command>
-      <div className="space-y-2 border-t bg-muted/30 px-3 py-2.5">
+      <div className="space-y-2 border-b bg-muted/30 px-3 py-2.5">
         <div className="flex items-center justify-between gap-3">
           <span className="text-xs font-medium text-foreground">
             {selectedLabel}
@@ -214,12 +242,15 @@ function PermissionMultiPicker<TOption extends { id: string; name: string }>({
             {selected.map((option) => (
               <Badge
                 key={option.id}
-                variant="outline"
-                className="max-w-full gap-1 rounded-full border-primary/30 bg-primary/10 py-0.5 pr-1 pl-2 font-normal text-primary"
+                variant="secondary"
+                className="max-w-full gap-1 rounded-full border-border py-0.5 pr-1 pl-2 font-normal"
               >
                 <span className="min-w-0 truncate">{option.name}</span>
                 <button
                   type="button"
+                  aria-label={t("iam.team.add.removeSelected", {
+                    name: option.name,
+                  })}
                   className="rounded-full p-0.5 text-muted-foreground hover:bg-background hover:text-foreground"
                   onClick={() =>
                     onSelectedChange(
@@ -238,6 +269,81 @@ function PermissionMultiPicker<TOption extends { id: string; name: string }>({
           </p>
         )}
       </div>
+      <Command
+        shouldFilter={false}
+        className="rounded-none p-0 [&_[data-slot=command-input-wrapper]]:p-0"
+      >
+        <div className="px-2 py-2">
+          <CommandInput
+            value={query}
+            placeholder={placeholder}
+            onFocus={() => {
+              if (!searchActive) {
+                requestVersion.current += 1
+                setSearchActive(true)
+                setOptions([])
+                setPageIndex(0)
+                setTotalCount(0)
+                setLoadingMore(false)
+                setLoading(true)
+              }
+            }}
+            onValueChange={(nextQuery) => {
+              requestVersion.current += 1
+              setQuery(nextQuery)
+              setOptions([])
+              setPageIndex(0)
+              setTotalCount(0)
+              setLoadingMore(false)
+              setLoading(true)
+            }}
+          />
+        </div>
+        {searchActive ? (
+          <CommandList
+            ref={listRef}
+            className="max-h-40 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] overflow-y-auto border-t pt-1 [&::-webkit-scrollbar]:block [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent"
+          >
+            {loading ? (
+              <div className="space-y-2 p-2">
+                <Skeleton className="h-8 w-full" />
+                <Skeleton className="h-8 w-4/5" />
+              </div>
+            ) : (
+              <>
+                <CommandEmpty>{t("iam.team.add.noResults")}</CommandEmpty>
+                <CommandGroup className="[&_[cmdk-group-items]]:space-y-1">
+                  {filteredOptions.map((option) => {
+                    const isSelected = selected.some(
+                      (item) => item.id === option.id
+                    )
+                    return (
+                      <CommandItem
+                        key={option.id}
+                        value={`${option.name} ${option.id}`}
+                        data-checked={isSelected}
+                        className="data-[checked=true]:bg-accent data-[checked=true]:text-accent-foreground data-[checked=true]:*:[svg]:text-foreground"
+                        onSelect={() => toggleOption(option)}
+                      >
+                        <span className="min-w-0 flex-1 truncate">
+                          {option.name}
+                        </span>
+                        {getOptionMeta?.(option)}
+                      </CommandItem>
+                    )
+                  })}
+                </CommandGroup>
+                {loadingMore ? (
+                  <div className="p-2">
+                    <Skeleton className="h-8 w-full" />
+                  </div>
+                ) : null}
+                <div ref={loadMoreSentinelRef} className="h-px" aria-hidden />
+              </>
+            )}
+          </CommandList>
+        ) : null}
+      </Command>
     </div>
   )
 }

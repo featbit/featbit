@@ -94,21 +94,24 @@ export function removeMemberFromWorkspace(memberId: string) {
   )
 }
 
-export function fetchPolicyOptions(params: { name: string }) {
+export function fetchPolicyOptions(params: {
+  name: string
+  pageIndex: number
+}) {
   return fetchApi<PagedResult<PolicyOption>>(
     `/api/v1/policies${queryString({
       name: params.name,
-      pageIndex: 0,
+      pageIndex: params.pageIndex,
       pageSize: 10,
     })}`
   )
 }
 
-export function fetchGroupOptions(params: { name: string }) {
+export function fetchGroupOptions(params: { name: string; pageIndex: number }) {
   return fetchApi<PagedResult<GroupOption>>(
     `/api/v1/groups${queryString({
       name: params.name,
-      pageIndex: 0,
+      pageIndex: params.pageIndex,
       pageSize: 10,
     })}`
   )

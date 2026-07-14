@@ -69,6 +69,7 @@ Migrate the main product domains page by page while preserving backend API contr
 ## IAM
 
 - Implement Team, Groups, and Policies.
+- Follow the React Team list and add-member design contract in [iam-team-page-design.md](../design/iam-team-page-design.md).
 - Centralize policy editor behavior and permission previews.
 - Menu visibility and actions must use the shared permission helpers.
 
