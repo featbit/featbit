@@ -35,11 +35,21 @@ export function RemoveRelationshipDialog({
         ? copy.removePolicyTitle
         : copy.removeMemberTitle
   const description =
-    target?.kind === "group"
-      ? copy.removeGroupDescription(target.name)
-      : target?.kind === "policy"
-        ? copy.removePolicyDescription(target.name)
-        : copy.removeMemberDescription
+    target?.kind === "group" ? (
+      <>
+        {copy.removeGroupDescriptionBefore}
+        <strong className="font-semibold text-foreground">{target.name}</strong>
+        {copy.removeGroupDescriptionAfter}
+      </>
+    ) : target?.kind === "policy" ? (
+      <>
+        {copy.removePolicyDescriptionBefore}
+        <strong className="font-semibold text-foreground">{target.name}</strong>
+        {copy.removePolicyDescriptionAfter}
+      </>
+    ) : (
+      copy.removeMemberDescription
+    )
 
   return (
     <Dialog open={Boolean(target)} onOpenChange={onOpenChange}>
