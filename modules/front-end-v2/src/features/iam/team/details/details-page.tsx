@@ -35,7 +35,7 @@ import {
   type MemberInheritedPolicy,
   type RelationshipOption,
 } from "./details-api"
-import { getDetailsCopy } from "./details-copy"
+import { getDetailsTranslations } from "./details-translations"
 import { DetailsDataTable } from "./details-data-table"
 import { DetailsPagination } from "./details-pagination"
 import {
@@ -66,7 +66,7 @@ export function TeamDetailsPage() {
   const params = useParams()
   const navigate = useNavigate()
   const lang = resolveLang(params.lang)
-  const copy = useMemo(() => getDetailsCopy(lang), [lang])
+  const copy = useMemo(() => getDetailsTranslations(lang), [lang])
   const memberId = params.memberId ?? ""
   const requestedTab = params.tab as DetailTab | undefined
   const activeTab =

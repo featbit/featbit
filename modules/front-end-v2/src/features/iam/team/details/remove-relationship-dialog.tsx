@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import type { DetailsCopy } from "./details-copy"
+import type { DetailsTranslations } from "./details-translations"
 
 export type RemoveDialogTarget = {
   kind: "group" | "policy" | "member"
@@ -24,7 +24,7 @@ export function RemoveRelationshipDialog({
 }: {
   target: RemoveDialogTarget
   saving: boolean
-  copy: DetailsCopy
+  copy: DetailsTranslations
   onOpenChange: (open: boolean) => void
   onConfirm: () => void
 }) {

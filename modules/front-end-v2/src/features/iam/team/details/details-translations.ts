@@ -142,8 +142,8 @@ const zh: typeof en = {
   removing: "移除中...",
 }
 
-export function getDetailsCopy(lang: Lang) {
+export function getDetailsTranslations(lang: Lang) {
   return lang === "zh" ? zh : en
 }
 
-export type DetailsCopy = typeof en
+export type DetailsTranslations = typeof en

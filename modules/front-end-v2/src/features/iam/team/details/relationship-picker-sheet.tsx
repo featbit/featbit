@@ -18,7 +18,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import { Skeleton } from "@/components/ui/skeleton"
-import type { DetailsCopy } from "./details-copy"
+import type { DetailsTranslations } from "./details-translations"
 import type { RelationshipOption, RelationshipOptionPage } from "./details-api"
 
 export function RelationshipPickerSheet({
@@ -34,7 +34,7 @@ export function RelationshipPickerSheet({
   open: boolean
   title: string
   kind: "groups" | "policies"
-  copy: DetailsCopy
+  copy: DetailsTranslations
   saving: boolean
   loadOptions: (
     query: string,
