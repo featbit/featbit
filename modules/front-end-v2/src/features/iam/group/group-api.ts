@@ -97,6 +97,17 @@ export function createGroup(payload: { name: string; description: string }) {
   })
 }
 
+export function updateGroup(group: Pick<Group, "id" | "name" | "description">) {
+  return fetchApi<Group>(groupPath(group.id), {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      name: group.name,
+      description: group.description ?? "",
+    }),
+  })
+}
+
 export function deleteGroup(groupId: string) {
   return fetchApi<boolean>(groupPath(groupId), { method: "DELETE" })
 }

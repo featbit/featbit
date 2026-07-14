@@ -1,5 +1,20 @@
-import { ArrowLeft, Check, Copy, Plus, Search, Star } from "lucide-react"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import {
+  ArrowLeft,
+  Check,
+  Copy,
+  Pencil,
+  Plus,
+  Search,
+  Star,
+} from "lucide-react"
+import {
+  type KeyboardEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
 import { toast } from "sonner"
 import type { ColumnDef } from "@tanstack/react-table"
@@ -8,6 +23,7 @@ import { Button, buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Textarea } from "@/components/ui/textarea"
 import {
   Tooltip,
   TooltipContent,
@@ -30,10 +46,12 @@ import {
   fetchGroupMembers,
   fetchGroupPolicies,
   groupResourceName,
+  isGroupNameUsed,
   memberResourceName,
   policyResourceName,
   removeMemberFromGroup,
   removePolicyFromGroup,
+  updateGroup,
   type Group,
   type GroupMember,
   type GroupPolicy,
@@ -65,6 +83,14 @@ export function GroupDetailsPage() {
   const [group, setGroup] = useState<Group | null>(null)
   const [groupLoading, setGroupLoading] = useState(true)
   const [groupError, setGroupError] = useState(false)
+  const [nameEditing, setNameEditing] = useState(false)
+  const [nameDraft, setNameDraft] = useState("")
+  const [nameSaving, setNameSaving] = useState(false)
+  const [nameError, setNameError] = useState<string | null>(null)
+  const [descriptionEditing, setDescriptionEditing] = useState(false)
+  const [descriptionDraft, setDescriptionDraft] = useState("")
+  const [descriptionSaving, setDescriptionSaving] = useState(false)
+  const [descriptionError, setDescriptionError] = useState<string | null>(null)
   const [resourceCopied, setResourceCopied] = useState(false)
   const copyTimeoutRef = useRef<number | null>(null)
   const [counts, setCounts] = useState({ team: 0, policies: 0 })
@@ -103,7 +129,15 @@ export function GroupDetailsPage() {
     setGroupLoading(true)
     setGroupError(false)
     fetchGroup(groupId)
-      .then(setGroup)
+      .then((nextGroup) => {
+        setGroup(nextGroup)
+        setNameDraft(nextGroup.name)
+        setNameEditing(false)
+        setNameError(null)
+        setDescriptionDraft(nextGroup.description ?? "")
+        setDescriptionEditing(false)
+        setDescriptionError(null)
+      })
       .catch(() => setGroupError(true))
       .finally(() => setGroupLoading(false))
   }, [groupId])
@@ -170,6 +204,112 @@ export function GroupDetailsPage() {
   }, [loadRelationships])
 
   const resourceName = group ? groupResourceName(group) : ""
+  const nameChanged = nameDraft.trim() !== (group?.name ?? "").trim()
+  const descriptionChanged =
+    descriptionDraft.trim() !== (group?.description ?? "").trim()
+
+  function startNameEdit() {
+    if (!group) return
+    setNameDraft(group.name)
+    setNameError(null)
+    setNameEditing(true)
+  }
+
+  function cancelNameEdit() {
+    setNameDraft(group?.name ?? "")
+    setNameError(null)
+    setNameEditing(false)
+  }
+
+  async function saveName() {
+    if (!group || !nameChanged) return
+    const nextName = nameDraft.trim()
+    if (!nextName) {
+      setNameError(copy.groupNameRequired)
+      return
+    }
+    setNameSaving(true)
+    setNameError(null)
+    try {
+      if (await isGroupNameUsed(nextName)) {
+        setNameError(copy.groupNameUnavailable)
+        return
+      }
+      const updatedGroup = await updateGroup({
+        id: group.id,
+        name: nextName,
+        description: group.description,
+      })
+      setGroup(updatedGroup)
+      setNameDraft(updatedGroup.name)
+      setNameEditing(false)
+      toast.success(copy.operationSucceeded)
+    } catch {
+      setNameError(copy.groupNameUpdateFailed)
+      toast.error(copy.operationFailed)
+    } finally {
+      setNameSaving(false)
+    }
+  }
+
+  function handleNameKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    if (event.key === "Escape") {
+      event.preventDefault()
+      cancelNameEdit()
+      return
+    }
+    if (event.key === "Enter") {
+      event.preventDefault()
+      void saveName()
+    }
+  }
+
+  function startDescriptionEdit() {
+    if (!group) return
+    setDescriptionDraft(group.description ?? "")
+    setDescriptionError(null)
+    setDescriptionEditing(true)
+  }
+
+  function cancelDescriptionEdit() {
+    setDescriptionDraft(group?.description ?? "")
+    setDescriptionError(null)
+    setDescriptionEditing(false)
+  }
+
+  async function saveDescription() {
+    if (!group || !descriptionChanged) return
+    setDescriptionSaving(true)
+    setDescriptionError(null)
+    try {
+      const updatedGroup = await updateGroup({
+        id: group.id,
+        name: group.name,
+        description: descriptionDraft.trim(),
+      })
+      setGroup(updatedGroup)
+      setDescriptionDraft(updatedGroup.description ?? "")
+      setDescriptionEditing(false)
+      toast.success(copy.operationSucceeded)
+    } catch {
+      setDescriptionError(copy.descriptionUpdateFailed)
+      toast.error(copy.operationFailed)
+    } finally {
+      setDescriptionSaving(false)
+    }
+  }
+
+  function handleDescriptionKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
+    if (event.key === "Escape") {
+      event.preventDefault()
+      cancelDescriptionEdit()
+      return
+    }
+    if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
+      event.preventDefault()
+      void saveDescription()
+    }
+  }
 
   const copyHeaderResource = useCallback(async () => {
     if (!resourceName) return
@@ -480,13 +620,142 @@ export function GroupDetailsPage() {
                 <Skeleton className="h-8 w-80" />
               </div>
             ) : (
-              <div className="min-w-0">
-                <h1 className="truncate text-2xl font-semibold tracking-normal">
-                  {group?.name || copy.noName}
-                </h1>
-                <p className="mt-1 truncate text-sm text-muted-foreground">
-                  {group?.description || copy.noDescription}
-                </p>
+              <div className="min-w-0 flex-1">
+                {nameEditing ? (
+                  <div className="w-full max-w-2xl space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Input
+                        autoFocus
+                        value={nameDraft}
+                        disabled={nameSaving}
+                        aria-invalid={Boolean(nameError)}
+                        className="max-w-xl text-base font-semibold"
+                        onChange={(event) => setNameDraft(event.target.value)}
+                        onKeyDown={handleNameKeyDown}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        disabled={nameSaving}
+                        onClick={cancelNameEdit}
+                      >
+                        {copy.cancel}
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        disabled={nameSaving || !nameChanged}
+                        onClick={() => void saveName()}
+                      >
+                        {nameSaving ? copy.saving : copy.save}
+                      </Button>
+                    </div>
+                    {nameError ? (
+                      <p className="text-sm text-destructive">{nameError}</p>
+                    ) : null}
+                  </div>
+                ) : (
+                  <div className="flex max-w-2xl items-end gap-1.5">
+                    <h1 className="min-w-0 truncate text-2xl font-semibold tracking-normal">
+                      {group?.name || copy.noName}
+                    </h1>
+                    <Tooltip>
+                      <TooltipTrigger
+                        render={
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon-sm"
+                            className="size-6 shrink-0 text-muted-foreground"
+                            aria-label={copy.editGroupName}
+                            disabled={descriptionEditing}
+                            onClick={startNameEdit}
+                          />
+                        }
+                      >
+                        <Pencil className="size-3" />
+                      </TooltipTrigger>
+                      <TooltipContent>{copy.editGroupName}</TooltipContent>
+                    </Tooltip>
+                  </div>
+                )}
+                {descriptionEditing ? (
+                  <div className="mt-2 w-full max-w-2xl space-y-2">
+                    <Textarea
+                      autoFocus
+                      rows={3}
+                      value={descriptionDraft}
+                      disabled={descriptionSaving}
+                      aria-invalid={Boolean(descriptionError)}
+                      onChange={(event) =>
+                        setDescriptionDraft(event.target.value)
+                      }
+                      onKeyDown={handleDescriptionKeyDown}
+                    />
+                    {descriptionError ? (
+                      <p className="text-sm text-destructive">
+                        {descriptionError}
+                      </p>
+                    ) : null}
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        disabled={descriptionSaving}
+                        onClick={cancelDescriptionEdit}
+                      >
+                        {copy.cancel}
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        disabled={descriptionSaving || !descriptionChanged}
+                        onClick={() => void saveDescription()}
+                      >
+                        {descriptionSaving ? copy.saving : copy.save}
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mt-1 flex max-w-2xl items-end gap-1.5">
+                    {group?.description ? (
+                      <p className="min-w-0 truncate text-sm text-muted-foreground">
+                        {group.description}
+                      </p>
+                    ) : (
+                      <button
+                        type="button"
+                        className="text-sm text-muted-foreground hover:text-foreground hover:underline disabled:cursor-not-allowed disabled:no-underline disabled:opacity-50"
+                        disabled={nameEditing}
+                        onClick={startDescriptionEdit}
+                      >
+                        {copy.addDescription}
+                      </button>
+                    )}
+                    {group?.description ? (
+                      <Tooltip>
+                        <TooltipTrigger
+                          render={
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon-sm"
+                              className="size-6 shrink-0 text-muted-foreground"
+                              aria-label={copy.editDescription}
+                              disabled={nameEditing}
+                              onClick={startDescriptionEdit}
+                            />
+                          }
+                        >
+                          <Pencil className="size-3" />
+                        </TooltipTrigger>
+                        <TooltipContent>{copy.editDescription}</TooltipContent>
+                      </Tooltip>
+                    ) : null}
+                  </div>
+                )}
                 <div className="mt-3 inline-flex h-8 max-w-full items-stretch overflow-hidden rounded-lg border border-input/60 bg-background">
                   <Tooltip>
                     <TooltipTrigger
