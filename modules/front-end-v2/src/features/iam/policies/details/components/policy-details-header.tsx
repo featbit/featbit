@@ -314,30 +314,53 @@ export function PolicyDetailsHeader({
             </div>
           )}
 
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            <div className="inline-flex h-8 max-w-full items-stretch overflow-hidden rounded-lg border border-input/60 bg-background">
-              <span className="flex w-10 items-center justify-center border-r border-input/60 bg-muted/20 text-xs font-medium text-muted-foreground">
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <div className="flex h-7 max-w-full min-w-0 items-center gap-1.5 rounded-md bg-muted/60 pr-0.5 pl-2">
+              <span className="shrink-0 text-xs font-medium text-muted-foreground">
                 RN
               </span>
-              <code className="max-w-[360px] truncate px-3 py-1.5 font-mono text-xs text-foreground">
-                {resourceName}
-              </code>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-sm"
-                className="h-full w-9 rounded-none border-l border-input/60"
-                aria-label={t("iam.policies.copyResourceName")}
-                onClick={() => void copyResourceName()}
-              >
-                {resourceCopied ? (
-                  <Check className="size-3.5" />
-                ) : (
-                  <Copy className="size-3.5" />
-                )}
-              </Button>
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <code
+                      tabIndex={0}
+                      className="max-w-[360px] min-w-0 truncate rounded-sm px-1 font-mono text-xs leading-5 text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+                    />
+                  }
+                >
+                  {resourceName}
+                </TooltipTrigger>
+                <TooltipContent className="max-w-[min(28rem,calc(100vw-2rem))] font-mono break-all">
+                  {resourceName}
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      className="size-7 shrink-0 text-muted-foreground hover:bg-background/80 hover:text-foreground"
+                      aria-label={t("iam.policies.copyResourceName")}
+                      onClick={() => void copyResourceName()}
+                    />
+                  }
+                >
+                  {resourceCopied ? (
+                    <Check className="size-3.5" />
+                  ) : (
+                    <Copy className="size-3.5" />
+                  )}
+                </TooltipTrigger>
+                <TooltipContent>
+                  {resourceCopied
+                    ? t("iam.policies.copied")
+                    : t("iam.policies.copyResourceName")}
+                </TooltipContent>
+              </Tooltip>
             </div>
-            <Badge variant="secondary" className="font-normal">
+            <Badge variant="secondary" className="h-7 px-2.5 font-normal">
               {readonly
                 ? t("iam.policies.systemManaged")
                 : t("iam.policies.customerManaged")}

@@ -710,28 +710,24 @@ export function TeamDetailsPage() {
                 <p className="mt-1 truncate text-sm text-muted-foreground">
                   {member?.email}
                 </p>
-                <div className="mt-3 inline-flex h-8 max-w-full items-stretch overflow-hidden rounded-lg border border-input/60 bg-background">
+                <div className="mt-3 inline-flex h-7 max-w-full min-w-0 items-center gap-1.5 rounded-md bg-muted/60 pr-0.5 pl-2">
+                  <span className="shrink-0 text-xs font-medium text-muted-foreground">
+                    RN
+                  </span>
                   <Tooltip>
                     <TooltipTrigger
                       render={
-                        <span className="flex w-10 shrink-0 cursor-default items-center justify-center border-r border-input/60 bg-muted/20 text-xs font-medium text-muted-foreground" />
-                      }
-                    >
-                      RN
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      {t("iam.team.details.resourceName")}
-                    </TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger
-                      render={
-                        <code className="max-w-[360px] min-w-0 truncate px-3 py-1.5 font-mono text-xs font-normal text-foreground" />
+                        <code
+                          tabIndex={0}
+                          className="max-w-[360px] min-w-0 truncate rounded-sm px-1 font-mono text-xs leading-5 font-normal text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+                        />
                       }
                     >
                       {resourceName}
                     </TooltipTrigger>
-                    <TooltipContent>{resourceName}</TooltipContent>
+                    <TooltipContent className="max-w-[min(28rem,calc(100vw-2rem))] font-mono break-all">
+                      {resourceName}
+                    </TooltipContent>
                   </Tooltip>
                   <Tooltip>
                     <TooltipTrigger
@@ -740,7 +736,7 @@ export function TeamDetailsPage() {
                           type="button"
                           variant="ghost"
                           size="icon-sm"
-                          className="h-full w-9 shrink-0 rounded-none border-0 border-l border-input/60 hover:bg-muted/40"
+                          className="size-7 shrink-0 text-muted-foreground hover:bg-background/80 hover:text-foreground"
                           aria-label={t("iam.team.details.copyResourceName")}
                           onClick={copyResourceName}
                         />
