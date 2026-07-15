@@ -3,6 +3,7 @@ import { useEffect, useId, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { SelectedItemsField } from "@/components/selected-items-field"
 import { SelectableCommandList } from "@/components/selectable-command-list"
+import { SelectionFilterTabs } from "@/components/selection-filter-tabs"
 import { Button } from "@/components/ui/button"
 import { Command, CommandInput } from "@/components/ui/command"
 import { Popover, PopoverContent } from "@/components/ui/popover"
@@ -242,7 +243,10 @@ export function ResourcePicker({
           onOpenChange={(next) => {
             setOpen(next)
             setLoading(next)
-            if (next) setDraft(resources)
+            if (next) {
+              setDraft(resources)
+              setFilter("all")
+            }
           }}
         >
           <SelectedItemsField
@@ -288,30 +292,17 @@ export function ResourcePicker({
                   "iam.policies.details.permissionsEditor.searchResources"
                 )}
               />
-              <div className="flex gap-5 border-b px-3 pt-2">
-                {(["all", "selected"] as const).map((value) => (
-                  <button
-                    key={value}
-                    type="button"
-                    className={cn(
-                      "border-b-2 px-0.5 pb-2 text-sm font-medium",
-                      filter === value
-                        ? "border-primary text-foreground"
-                        : "border-transparent text-muted-foreground"
-                    )}
-                    onClick={() => setFilter(value)}
-                  >
-                    {value === "all"
-                      ? t("iam.policies.details.permissionsEditor.allFilter")
-                      : t(
-                          "iam.policies.details.permissionsEditor.selectedFilter",
-                          {
-                            count: draft.length,
-                          }
-                        )}
-                  </button>
-                ))}
-              </div>
+              <SelectionFilterTabs
+                value={filter}
+                onValueChange={setFilter}
+                allLabel={t("iam.policies.details.permissionsEditor.allFilter")}
+                selectedLabel={(count) =>
+                  t("iam.policies.details.permissionsEditor.selectedFilter", {
+                    count,
+                  })
+                }
+                selectedCount={draft.length}
+              />
               <SelectableCommandList
                 items={mergedOptions}
                 getKey={(item) => item.rn}

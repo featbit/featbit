@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -34,6 +34,7 @@ export function AddMemberSheet({
   const [emailError, setEmailError] = useState<string | null>(null)
   const [permissionsError, setPermissionsError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const sheetContentRef = useRef<HTMLDivElement | null>(null)
 
   async function submit() {
     const hasValidEmail = /^\S+@\S+\.\S+$/.test(email.trim())
@@ -62,7 +63,10 @@ export function AddMemberSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="gap-0 p-0 data-[side=right]:w-[min(100vw,500px)] data-[side=right]:sm:max-w-[500px]">
+      <SheetContent
+        ref={sheetContentRef}
+        className="gap-0 p-0 data-[side=right]:w-[min(100vw,500px)] data-[side=right]:sm:max-w-[500px]"
+      >
         <SheetHeader className="border-b px-6 py-5 pr-12">
           <SheetTitle>{t("iam.team.add.title")}</SheetTitle>
         </SheetHeader>
@@ -96,6 +100,7 @@ export function AddMemberSheet({
               </p>
             </div>
             <PolicyMultiPicker
+              portalContainer={sheetContentRef}
               selected={policies}
               onSelectedChange={(next) => {
                 setPolicies(next)
@@ -105,6 +110,7 @@ export function AddMemberSheet({
               }}
             />
             <GroupMultiPicker
+              portalContainer={sheetContentRef}
               selected={groups}
               onSelectedChange={(next) => {
                 setGroups(next)

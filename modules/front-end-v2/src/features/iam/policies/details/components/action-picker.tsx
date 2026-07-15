@@ -3,6 +3,10 @@ import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { SelectedItemsField } from "@/components/selected-items-field"
 import { SelectableCommandList } from "@/components/selectable-command-list"
+import {
+  SelectionFilterTabs,
+  type SelectionFilter,
+} from "@/components/selection-filter-tabs"
 import { Button } from "@/components/ui/button"
 import { Command, CommandInput } from "@/components/ui/command"
 import { Popover, PopoverContent } from "@/components/ui/popover"
@@ -23,12 +27,17 @@ export function ActionPicker({
 }) {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
+  const [filter, setFilter] = useState<SelectionFilter>("all")
   const [search, setSearch] = useState("")
   const available = actionsForStatement(statement)
   const visible = (() => {
     const query = search.trim().toLowerCase()
-    if (!query) return available
-    return available.filter((item) =>
+    const filtered =
+      filter === "selected"
+        ? available.filter((item) => statement.actions.includes(item.name))
+        : available
+    if (!query) return filtered
+    return filtered.filter((item) =>
       `${label(item.name)} ${item.name}`.toLocaleLowerCase().includes(query)
     )
   })()
@@ -59,7 +68,13 @@ export function ActionPicker({
   })
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover
+      open={open}
+      onOpenChange={(nextOpen) => {
+        setOpen(nextOpen)
+        if (nextOpen) setFilter("all")
+      }}
+    >
       <SelectedItemsField
         items={selectedActions}
         getKey={(action) => action.name}
@@ -95,6 +110,17 @@ export function ActionPicker({
               "iam.policies.details.permissionsEditor.searchActions"
             )}
           />
+          <SelectionFilterTabs
+            value={filter}
+            onValueChange={setFilter}
+            allLabel={t("iam.policies.details.permissionsEditor.allFilter")}
+            selectedLabel={(count) =>
+              t("iam.policies.details.permissionsEditor.selectedFilter", {
+                count,
+              })
+            }
+            selectedCount={statement.actions.length}
+          />
           <SelectableCommandList
             items={visible}
             getKey={(item) => item.name}
@@ -104,7 +130,11 @@ export function ActionPicker({
               Boolean(item.fineGrained && !fineGrainedGranted)
             }
             onSelect={(item) => toggle(item.name)}
-            emptyContent={t("iam.policies.details.permissionsEditor.noActions")}
+            emptyContent={t(
+              filter === "selected"
+                ? "iam.policies.details.permissionsEditor.noActionsSelected"
+                : "iam.policies.details.permissionsEditor.noActions"
+            )}
             listClassName="h-[clamp(10rem,40dvh,18rem)] max-h-none [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] overflow-y-auto [&_[data-slot=command-empty]]:flex [&_[data-slot=command-empty]]:h-full [&_[data-slot=command-empty]]:items-center [&_[data-slot=command-empty]]:justify-center [&::-webkit-scrollbar]:block [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent"
             renderItem={(item) => {
               const locked = Boolean(item.fineGrained && !fineGrainedGranted)
