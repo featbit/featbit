@@ -99,6 +99,11 @@ const GroupDetailsPage = lazy(() =>
     default: module.GroupDetailsPage,
   }))
 )
+const PolicyPage = lazy(() =>
+  import("@/features/iam/policies/index/index-page").then((module) => ({
+    default: module.PolicyPage,
+  }))
+)
 
 type SupportedLanguage = "en" | "zh"
 
@@ -259,6 +264,7 @@ export function AppRoutes() {
             path="iam/groups/:groupId/:tab"
             element={<GroupDetailsPage />}
           />
+          <Route path="iam/policies" element={<PolicyPage />} />
           <Route path="account/profile" element={<ProfilePage />} />
           {/*Remove the following line when migration completed*/}
           <Route path="*" element={<LayoutPlaceholder />} />
