@@ -69,6 +69,17 @@ describe("ActionPicker", () => {
     )
     fireEvent.click(screen.getByRole("button", { name: "Specific actions" }))
     expect(onChange).toHaveBeenLastCalledWith([])
+
+    rerender(
+      <ActionPicker
+        statement={{ ...statement, actions: [] }}
+        fineGrainedGranted
+        onChange={onChange}
+      />
+    )
+    expect(
+      screen.queryByPlaceholderText("Search actions...")
+    ).not.toBeInTheDocument()
   })
 
   it("only offers all actions when the resource type has no specific actions", () => {

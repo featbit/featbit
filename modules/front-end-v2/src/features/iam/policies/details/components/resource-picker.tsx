@@ -1,4 +1,4 @@
-import { CheckCircle2, Globe2, ListChecks } from "lucide-react"
+import { Globe2, ListChecks } from "lucide-react"
 import { useEffect, useId, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { SelectedItemsField } from "@/components/selected-items-field"
@@ -117,8 +117,8 @@ export function ResourcePicker({
     }
     onChange([])
     setDraft([])
-    setLoading(true)
-    setOpen(true)
+    setLoading(false)
+    setOpen(false)
   }
 
   function toggle(rn: string) {
@@ -163,9 +163,6 @@ export function ResourcePicker({
             <span className="min-w-0 flex-1 truncate font-medium text-foreground">
               {t("iam.policies.details.permissionsEditor.allResources")}
             </span>
-            {mode === "all" ? (
-              <CheckCircle2 className="size-3.5 shrink-0 text-primary" />
-            ) : null}
           </Button>
           <Button
             type="button"
@@ -191,9 +188,6 @@ export function ResourcePicker({
             <span className="min-w-0 flex-1 truncate font-medium text-foreground">
               {t("iam.policies.details.permissionsEditor.specificResources")}
             </span>
-            {mode === "specific" ? (
-              <CheckCircle2 className="size-3.5 shrink-0 text-primary" />
-            ) : null}
           </Button>
           <p
             id={scopeDescriptionId}
@@ -225,7 +219,6 @@ export function ResourcePicker({
             <span className="min-w-0 flex-1 truncate font-medium text-foreground">
               {t("iam.policies.details.permissionsEditor.allResources")}
             </span>
-            <CheckCircle2 className="size-3.5 shrink-0 text-primary" />
           </Button>
           <p
             id={scopeDescriptionId}

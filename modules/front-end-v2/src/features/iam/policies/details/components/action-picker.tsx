@@ -1,4 +1,4 @@
-import { CheckCheck, CheckCircle2, ListChecks, LockKeyhole } from "lucide-react"
+import { CheckCheck, ListChecks, LockKeyhole } from "lucide-react"
 import { useId, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { SelectedItemsField } from "@/components/selected-items-field"
@@ -78,7 +78,7 @@ export function ActionPicker({
     onChange([])
     setFilter("all")
     setSearch("")
-    setOpen(true)
+    setOpen(false)
   }
 
   const selectedActions = statement.actions.map((name) => {
@@ -117,9 +117,6 @@ export function ActionPicker({
           <span className="min-w-0 flex-1 truncate font-medium text-foreground">
             {t("iam.policies.details.permissionsEditor.allActions")}
           </span>
-          {mode === "all" ? (
-            <CheckCircle2 className="size-3.5 shrink-0 text-primary" />
-          ) : null}
         </Button>
         {supportsSpecific ? (
           <Button
@@ -146,9 +143,6 @@ export function ActionPicker({
             <span className="min-w-0 flex-1 truncate font-medium text-foreground">
               {t("iam.policies.details.permissionsEditor.specificActions")}
             </span>
-            {mode === "specific" ? (
-              <CheckCircle2 className="size-3.5 shrink-0 text-primary" />
-            ) : null}
           </Button>
         ) : null}
         <p
