@@ -666,7 +666,7 @@ export function TeamDetailsPage() {
     ? { label: t("iam.team.details.clearSearch"), onClick: () => setSearch("") }
     : activeTab === "groups"
       ? {
-          label: t("iam.team.details.addToGroup"),
+          label: t("iam.team.details.addToGroups"),
           onClick: () => setGroupSheetOpen(true),
         }
       : activeTab === "direct-policies"
@@ -831,7 +831,7 @@ export function TeamDetailsPage() {
           {activeTab === "groups" ? (
             <Button type="button" onClick={() => setGroupSheetOpen(true)}>
               <Plus className="size-4" />
-              {t("iam.team.details.addToGroup")}
+              {t("iam.team.details.addToGroups")}
             </Button>
           ) : activeTab === "direct-policies" ? (
             <Button type="button" onClick={() => setPolicySheetOpen(true)}>

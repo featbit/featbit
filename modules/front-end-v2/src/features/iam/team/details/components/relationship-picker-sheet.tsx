@@ -247,7 +247,7 @@ export function RelationshipPickerSheet({
             </div>
             <CommandList
               ref={listRef}
-              className="max-h-40 flex-none [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] overflow-y-auto border-t p-1 [&::-webkit-scrollbar]:block [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border"
+              className="max-h-80 flex-none [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] overflow-y-auto border-t p-1 [&::-webkit-scrollbar]:block [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border"
             >
               {loading ? (
                 <div className="space-y-2 p-2">
@@ -277,15 +277,10 @@ export function RelationshipPickerSheet({
                               {option.type === "SysManaged" ? (
                                 <span className="inline-flex items-center gap-1 text-xs font-normal text-muted-foreground">
                                   <Star className="size-3" />
-                                  {t("iam.team.details.system")}
+                                  {t("iam.team.details.systemManaged")}
                                 </span>
                               ) : null}
                             </div>
-                            {kind === "groups" && option.description ? (
-                              <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                                {option.description}
-                              </p>
-                            ) : null}
                           </div>
                         </CommandItem>
                       )
