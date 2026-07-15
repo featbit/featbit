@@ -786,12 +786,9 @@ export function TeamDetailsPage() {
               localizedPath(lang, `/iam/team/${memberId}/${value as DetailTab}`)
             )
           }}
-          className="gap-0"
+          className="[scrollbar-width:none] overflow-x-auto border-b [&::-webkit-scrollbar]:hidden"
         >
-          <TabsList
-            variant="line"
-            className="h-10 w-full justify-start gap-7 border-b p-0"
-          >
+          <TabsList variant="line" className="flex min-w-max gap-8">
             <Tab
               value="groups"
               label={t("iam.team.details.groups")}
@@ -943,7 +940,7 @@ function Tab({
   count: number
 }) {
   return (
-    <TabsTrigger value={value} className="h-10 flex-none gap-2 px-4">
+    <TabsTrigger value={value} className="flex-none gap-2 px-0 py-2.5">
       {label}
       <Badge variant="secondary" className="rounded-full px-1.5 font-normal">
         {count}
