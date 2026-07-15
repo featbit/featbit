@@ -1,21 +1,11 @@
-import {
-  CheckCircle2,
-  ChevronsUpDown,
-  Globe2,
-  ListChecks,
-  X,
-} from "lucide-react"
+import { CheckCircle2, Globe2, ListChecks } from "lucide-react"
 import { useEffect, useId, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { SelectedItemsField } from "@/components/selected-items-field"
 import { SelectableCommandList } from "@/components/selectable-command-list"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Command, CommandInput } from "@/components/ui/command"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
+import { Popover, PopoverContent } from "@/components/ui/popover"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 import { fetchPolicyResources } from "../policy-details-api"
@@ -255,78 +245,34 @@ export function ResourcePicker({
             if (next) setDraft(resources)
           }}
         >
-          <div
-            className={cn(
-              "overflow-hidden rounded-lg border bg-background",
-              invalid && "border-destructive"
+          <SelectedItemsField
+            items={selectedResources}
+            getKey={(resource) => resource.rn}
+            getLabel={(resource) => resource.name}
+            getDescription={(resource) => resource.rn}
+            heading={t(
+              "iam.policies.details.permissionsEditor.selectedResourcesHeading",
+              {
+                count: draft.length,
+                type: selectedResourceType,
+              }
             )}
-          >
-            <div className="flex min-h-9 items-center justify-between gap-3 border-b px-3 py-1.5">
-              <span className="min-w-0 truncate text-xs font-medium text-foreground">
-                {t(
-                  "iam.policies.details.permissionsEditor.selectedResourcesHeading",
-                  {
-                    count: draft.length,
-                    type: selectedResourceType,
-                  }
-                )}
-              </span>
-              <PopoverTrigger
-                render={
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 shrink-0 gap-1.5 px-2 text-xs"
-                    disabled={disabled}
-                  >
-                    {t(
-                      "iam.policies.details.permissionsEditor.manageResources"
-                    )}
-                    <ChevronsUpDown className="size-3.5" />
-                  </Button>
-                }
-              />
-            </div>
-            {selectedResources.length ? (
-              <div className="max-h-28 overflow-y-auto p-2">
-                <div className="flex flex-wrap gap-1.5">
-                  {selectedResources.map((resource) => (
-                    <Badge
-                      key={resource.rn}
-                      variant="secondary"
-                      className="max-w-full gap-1 rounded-full border-border py-0.5 pr-1 pl-2 font-normal"
-                    >
-                      <span
-                        className="max-w-56 min-w-0 truncate"
-                        title={`${resource.name}\n${resource.rn}`}
-                      >
-                        {resource.name}
-                      </span>
-                      <button
-                        type="button"
-                        aria-label={t(
-                          "iam.policies.details.permissionsEditor.removeSelectedResource",
-                          { name: resource.name }
-                        )}
-                        className="rounded-full p-0.5 text-muted-foreground hover:bg-background hover:text-foreground disabled:pointer-events-none disabled:opacity-50"
-                        disabled={disabled}
-                        onClick={() => removeSelected(resource.rn)}
-                      >
-                        <X className="size-3" />
-                      </button>
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <p className="px-3 py-2.5 text-xs text-muted-foreground">
-                {t(
-                  "iam.policies.details.permissionsEditor.noSelectedResources"
-                )}
-              </p>
+            manageLabel={t(
+              "iam.policies.details.permissionsEditor.manageResources"
             )}
-          </div>
+            emptyContent={t(
+              "iam.policies.details.permissionsEditor.noSelectedResources"
+            )}
+            removeLabel={(resource) =>
+              t(
+                "iam.policies.details.permissionsEditor.removeSelectedResource",
+                { name: resource.name }
+              )
+            }
+            onRemove={(resource) => removeSelected(resource.rn)}
+            disabled={disabled}
+            invalid={invalid}
+          />
           <PopoverContent
             align="start"
             className="w-[min(32rem,calc(100vw-2rem))] p-0"

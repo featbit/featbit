@@ -1,15 +1,11 @@
-import { ChevronsUpDown, LockKeyhole } from "lucide-react"
+import { LockKeyhole } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
+import { SelectedItemsField } from "@/components/selected-items-field"
 import { SelectableCommandList } from "@/components/selectable-command-list"
 import { Button } from "@/components/ui/button"
 import { Command, CommandInput } from "@/components/ui/command"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import { cn } from "@/lib/utils"
+import { Popover, PopoverContent } from "@/components/ui/popover"
 import { actionsForStatement, type PolicyStatement } from "../permission-model"
 
 export function ActionPicker({
@@ -25,10 +21,9 @@ export function ActionPicker({
   invalid?: boolean
   onChange: (actions: string[]) => void
 }) {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState("")
-  const [draft, setDraft] = useState(statement.actions)
   const available = actionsForStatement(statement)
   const visible = (() => {
     const query = search.trim().toLowerCase()
@@ -46,55 +41,47 @@ export function ActionPicker({
   }
 
   function toggle(name: string) {
-    setDraft((current) => {
-      if (current.includes(name)) return current.filter((item) => item !== name)
-      if (name === "*") return ["*"]
-      return [...current.filter((item) => item !== "*"), name]
-    })
+    const next = statement.actions.includes(name)
+      ? statement.actions.filter((item) => item !== name)
+      : name === "*"
+        ? ["*"]
+        : [...statement.actions.filter((item) => item !== "*"), name]
+    onChange(next)
   }
 
-  const selectedLabels = statement.actions.slice(0, 2).map(label)
-  const listFormatter = new Intl.ListFormat(
-    i18n.resolvedLanguage === "zh" ? "zh-CN" : "en-US",
-    { style: "short", type: "conjunction" }
-  )
-  const selectedSummary = listFormatter.format(selectedLabels)
+  const selectedActions = statement.actions.map((name) => {
+    const item = available.find((candidate) => candidate.name === name)
+    return {
+      name,
+      label: label(name),
+      locked: Boolean(item?.fineGrained && !fineGrainedGranted),
+    }
+  })
 
   return (
-    <Popover
-      open={open}
-      onOpenChange={(next) => {
-        setOpen(next)
-        if (next) setDraft(statement.actions)
-      }}
-    >
-      <PopoverTrigger
-        render={
-          <Button
-            type="button"
-            variant="outline"
-            className={cn(
-              "h-auto min-h-8 w-full justify-between px-3 py-2 font-normal",
-              invalid && "border-destructive"
-            )}
-            disabled={disabled}
-          >
-            <span className="truncate text-left">
-              {statement.actions.length
-                ? statement.actions.length > 2
-                  ? t(
-                      "iam.policies.details.permissionsEditor.summaryOverflow",
-                      {
-                        items: selectedSummary,
-                        count: statement.actions.length - 2,
-                      }
-                    )
-                  : selectedSummary
-                : t("iam.policies.details.permissionsEditor.selectActions")}
-            </span>
-            <ChevronsUpDown className="size-4 text-muted-foreground" />
-          </Button>
+    <Popover open={open} onOpenChange={setOpen}>
+      <SelectedItemsField
+        items={selectedActions}
+        getKey={(action) => action.name}
+        getLabel={(action) => action.label}
+        getDescription={(action) => action.name}
+        heading={t(
+          "iam.policies.details.permissionsEditor.selectedActionsHeading",
+          { count: statement.actions.length }
+        )}
+        manageLabel={t("iam.policies.details.permissionsEditor.manageActions")}
+        emptyContent={t(
+          "iam.policies.details.permissionsEditor.noSelectedActions"
+        )}
+        removeLabel={(action) =>
+          t("iam.policies.details.permissionsEditor.removeSelectedAction", {
+            name: action.label,
+          })
         }
+        onRemove={(action) => toggle(action.name)}
+        isItemDisabled={(action) => action.locked}
+        disabled={disabled}
+        invalid={invalid}
       />
       <PopoverContent
         align="start"
@@ -112,12 +99,13 @@ export function ActionPicker({
             items={visible}
             getKey={(item) => item.name}
             getValue={(item) => item.name}
-            isSelected={(item) => draft.includes(item.name)}
+            isSelected={(item) => statement.actions.includes(item.name)}
             isDisabled={(item) =>
               Boolean(item.fineGrained && !fineGrainedGranted)
             }
             onSelect={(item) => toggle(item.name)}
             emptyContent={t("iam.policies.details.permissionsEditor.noActions")}
+            listClassName="h-[clamp(10rem,40dvh,18rem)] max-h-none [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] overflow-y-auto [&_[data-slot=command-empty]]:flex [&_[data-slot=command-empty]]:h-full [&_[data-slot=command-empty]]:items-center [&_[data-slot=command-empty]]:justify-center [&::-webkit-scrollbar]:block [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent"
             renderItem={(item) => {
               const locked = Boolean(item.fineGrained && !fineGrainedGranted)
               return (
@@ -141,19 +129,12 @@ export function ActionPicker({
             type="button"
             variant="ghost"
             size="sm"
-            onClick={() => setDraft([])}
-            disabled={!draft.length}
+            onClick={() => onChange([])}
+            disabled={!statement.actions.length}
           >
             {t("iam.policies.details.permissionsEditor.clearAll")}
           </Button>
-          <Button
-            type="button"
-            size="sm"
-            onClick={() => {
-              onChange(draft)
-              setOpen(false)
-            }}
-          >
+          <Button type="button" size="sm" onClick={() => setOpen(false)}>
             {t("iam.policies.details.permissionsEditor.done")}
           </Button>
         </div>

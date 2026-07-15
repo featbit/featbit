@@ -298,6 +298,12 @@ export const enIam = {
     "details.permissionsEditor.removeSelectedResource": "Remove {{name}}",
     "details.permissionsEditor.noSelectedResources":
       "No resources selected. Use Manage to add resources.",
+    "details.permissionsEditor.selectedActionsHeading":
+      "Selected actions ({{count}})",
+    "details.permissionsEditor.manageActions": "Manage",
+    "details.permissionsEditor.removeSelectedAction": "Remove {{name}}",
+    "details.permissionsEditor.noSelectedActions":
+      "No actions selected. Use Manage to add actions.",
     "details.permissionsEditor.selectResources": "Select resources",
     "details.permissionsEditor.searchResources": "Search resources...",
     "details.permissionsEditor.loadingResources": "Loading resources...",
@@ -645,6 +651,12 @@ export const zhIam = {
     "details.permissionsEditor.removeSelectedResource": "移除 {{name}}",
     "details.permissionsEditor.noSelectedResources":
       "尚未选择资源，请使用“管理”添加资源。",
+    "details.permissionsEditor.selectedActionsHeading":
+      "已选择的操作（{{count}}）",
+    "details.permissionsEditor.manageActions": "管理",
+    "details.permissionsEditor.removeSelectedAction": "移除 {{name}}",
+    "details.permissionsEditor.noSelectedActions":
+      "尚未选择操作，请使用“管理”添加操作。",
     "details.permissionsEditor.selectResources": "选择资源",
     "details.permissionsEditor.searchResources": "搜索资源...",
     "details.permissionsEditor.loadingResources": "正在加载资源...",
