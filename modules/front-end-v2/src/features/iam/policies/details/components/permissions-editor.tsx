@@ -64,6 +64,7 @@ import {
   RESOURCE_PATTERNS,
   RESOURCE_TYPES,
   createPolicyStatement,
+  initialActionsForResourceType,
   isAllResources,
   resourceDisplayName,
   type PolicyEffect,
@@ -130,7 +131,7 @@ export function PermissionsEditor({
     updateStatement(statement.id, {
       resourceType,
       resources: [RESOURCE_PATTERNS[resourceType]],
-      actions: resourceType === "*" ? ["*"] : [],
+      actions: initialActionsForResourceType(resourceType, fineGrainedGranted),
     })
   }
 
@@ -156,57 +157,18 @@ export function PermissionsEditor({
   if (loading || !policy) {
     return (
       <div className="space-y-4 py-4">
-        <div className="flex justify-between">
-          <div className="space-y-2">
-            <Skeleton className="h-5 w-32" />
-            <Skeleton className="h-4 w-72" />
+        <div className="overflow-hidden rounded-lg border">
+          <div className="flex min-h-12 items-center justify-end border-b bg-muted/20 px-3 py-2">
+            <Skeleton className="h-8 w-56" />
           </div>
-          <Skeleton className="h-8 w-40" />
+          <Skeleton className="h-52 w-full rounded-none" />
         </div>
-        <Skeleton className="h-52 w-full" />
       </div>
     )
   }
 
   return (
     <section className="space-y-4 py-4">
-      <div className="flex flex-wrap items-center justify-end gap-2">
-        {!readOnly ? (
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => {
-              const statement = createPolicyStatement()
-              setStatements((items) => [...items, statement])
-              setExpandedId(statement.id)
-            }}
-          >
-            <Plus />
-            {t("iam.policies.details.permissionsEditor.addPermission")}
-          </Button>
-        ) : null}
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => setCloneOpen(true)}
-        >
-          <Copy />
-          {t("iam.policies.details.permissionsEditor.clone")}
-        </Button>
-        {!readOnly ? (
-          <Button
-            type="button"
-            disabled={!dirty || saving}
-            onClick={() => void save()}
-          >
-            <Save />
-            {saving
-              ? t("iam.policies.saving")
-              : t("iam.policies.details.permissionsEditor.saveChanges")}
-          </Button>
-        ) : null}
-      </div>
-
       {!fineGrainedGranted ? (
         <Alert className="border-amber-300 bg-amber-50 text-amber-950 dark:border-amber-800 dark:bg-amber-950/20 dark:text-amber-100">
           <ShieldAlert />
@@ -234,6 +196,42 @@ export function PermissionsEditor({
       ) : null}
 
       <div className="overflow-hidden rounded-lg border">
+        <div className="flex min-h-12 flex-wrap items-center justify-end gap-2 border-b bg-muted/20 px-3 py-2">
+          {!readOnly ? (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                const statement = createPolicyStatement()
+                setStatements((items) => [...items, statement])
+                setExpandedId(statement.id)
+              }}
+            >
+              <Plus />
+              {t("iam.policies.details.permissionsEditor.addPermission")}
+            </Button>
+          ) : null}
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setCloneOpen(true)}
+          >
+            <Copy />
+            {t("iam.policies.details.permissionsEditor.clone")}
+          </Button>
+          {!readOnly ? (
+            <Button
+              type="button"
+              disabled={!dirty || saving}
+              onClick={() => void save()}
+            >
+              <Save />
+              {saving
+                ? t("iam.policies.saving")
+                : t("iam.policies.details.permissionsEditor.saveChanges")}
+            </Button>
+          ) : null}
+        </div>
         <Table>
           <TableHeader>
             <TableRow className="hover:bg-transparent">
@@ -512,7 +510,12 @@ function PermissionRows({
                   disabled={readOnly}
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue />
+                    <SelectValue>
+                      {t(
+                        `iam.policies.details.permissionsEditor.resourceTypes.${statement.resourceType}`,
+                        { defaultValue: statement.resourceType }
+                      )}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>

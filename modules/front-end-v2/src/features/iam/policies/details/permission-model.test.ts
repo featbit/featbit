@@ -3,6 +3,7 @@ import {
   RESOURCE_PATTERNS,
   actionsForStatement,
   createPolicyStatement,
+  initialActionsForResourceType,
   isAllResources,
   resourceDisplayName,
   type PolicyStatement,
@@ -52,5 +53,12 @@ describe("permission model", () => {
     expect(resourceDisplayName("project/shop:env/production")).toBe(
       "production"
     )
+  })
+
+  it("defaults fine-grained resource actions to all when unlicensed", () => {
+    expect(initialActionsForResourceType("flag", false)).toEqual(["*"])
+    expect(initialActionsForResourceType("segment", false)).toEqual(["*"])
+    expect(initialActionsForResourceType("flag", true)).toEqual([])
+    expect(initialActionsForResourceType("env", false)).toEqual([])
   })
 })

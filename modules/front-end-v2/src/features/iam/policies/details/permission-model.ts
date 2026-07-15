@@ -204,6 +204,18 @@ export function actionsForStatement(statement: PolicyStatement) {
   )
 }
 
+export function initialActionsForResourceType(
+  resourceType: ResourceType,
+  fineGrainedGranted: boolean
+) {
+  const requiresFineGrainedAccess =
+    resourceType === "flag" || resourceType === "segment"
+  return resourceType === "*" ||
+    (requiresFineGrainedAccess && !fineGrainedGranted)
+    ? ["*"]
+    : []
+}
+
 export function createPolicyStatement(): PolicyStatement {
   return {
     id: crypto.randomUUID(),

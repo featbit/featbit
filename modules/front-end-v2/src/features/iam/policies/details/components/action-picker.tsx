@@ -37,7 +37,9 @@ export function ActionPicker({
   const available = actionsForStatement(statement).filter(
     (action) => action.name !== "*"
   )
-  const supportsSpecific = available.length > 0
+  const supportsSpecific = available.some(
+    (action) => !action.fineGrained || fineGrainedGranted
+  )
   const mode: ActionMode =
     !supportsSpecific || statement.actions.includes("*") ? "all" : "specific"
   const visible = (() => {
