@@ -334,7 +334,7 @@ export const enIam = {
     "details.permissionsEditor.enterpriseRequired": "Enterprise required",
     "details.permissionsEditor.enterpriseTitle": "Fine-grained permissions",
     "details.permissionsEditor.enterpriseDescription":
-      "Feature flag and segment resource permissions require an Enterprise plan.",
+      "Feature flag and segment resource permissions is a paid feature. Upgrade your plan to enable fine-grained access control.",
     "details.permissionsEditor.systemManagedTitle": "System-managed policy",
     "details.permissionsEditor.systemManagedDescription":
       "System-managed policies cannot be modified. Clone this policy to customize its permissions.",
@@ -698,7 +698,7 @@ export const zhIam = {
     "details.permissionsEditor.enterpriseRequired": "需要企业版",
     "details.permissionsEditor.enterpriseTitle": "细粒度权限",
     "details.permissionsEditor.enterpriseDescription":
-      "功能开关和分群资源权限需要企业版方案。",
+      "功能开关和用户组资源权限是付费功能，升级套餐即可启用细粒度访问控制。",
     "details.permissionsEditor.systemManagedTitle": "系统托管策略",
     "details.permissionsEditor.systemManagedDescription":
       "系统托管策略无法修改。请克隆此策略以自定义其权限。",
@@ -720,11 +720,11 @@ export const zhIam = {
     "details.permissionsEditor.resourceTypes.project": "项目",
     "details.permissionsEditor.resourceTypes.env": "环境",
     "details.permissionsEditor.resourceTypes.flag": "功能开关",
-    "details.permissionsEditor.resourceTypes.segment": "分群",
+    "details.permissionsEditor.resourceTypes.segment": "用户组",
     "details.permissionsEditor.resourceTypePlurals.project": "项目",
     "details.permissionsEditor.resourceTypePlurals.env": "环境",
     "details.permissionsEditor.resourceTypePlurals.flag": "功能开关",
-    "details.permissionsEditor.resourceTypePlurals.segment": "分群",
+    "details.permissionsEditor.resourceTypePlurals.segment": "用户组",
     "details.permissionsEditor.actionLabels.*": "全部操作",
     "details.permissionsEditor.actionLabels.CanAccessProject": "访问项目",
     "details.permissionsEditor.actionLabels.CreateProject": "创建项目",
@@ -758,17 +758,20 @@ export const zhIam = {
     "details.permissionsEditor.actionLabels.UpdateFlagDefaultRule":
       "更新默认规则",
     "details.permissionsEditor.actionLabels.UpdateFlagVariations": "更新变体",
-    "details.permissionsEditor.actionLabels.CreateSegment": "创建分群",
-    "details.permissionsEditor.actionLabels.ArchiveSegment": "归档分群",
-    "details.permissionsEditor.actionLabels.RestoreSegment": "恢复分群",
-    "details.permissionsEditor.actionLabels.DeleteSegment": "删除分群",
-    "details.permissionsEditor.actionLabels.UpdateSegmentName": "更新分群名称",
+    "details.permissionsEditor.actionLabels.CreateSegment": "创建用户组",
+    "details.permissionsEditor.actionLabels.ArchiveSegment": "归档用户组",
+    "details.permissionsEditor.actionLabels.RestoreSegment": "恢复用户组",
+    "details.permissionsEditor.actionLabels.DeleteSegment": "删除用户组",
+    "details.permissionsEditor.actionLabels.UpdateSegmentName":
+      "更新用户组名称",
     "details.permissionsEditor.actionLabels.UpdateSegmentDescription":
-      "更新分群描述",
-    "details.permissionsEditor.actionLabels.UpdateSegmentTags": "更新分群标签",
+      "更新用户组描述",
+    "details.permissionsEditor.actionLabels.UpdateSegmentTags":
+      "更新用户组标签",
     "details.permissionsEditor.actionLabels.UpdateSegmentTargetingUsers":
-      "更新分群定向用户",
-    "details.permissionsEditor.actionLabels.UpdateSegmentRules": "更新分群规则",
+      "更新用户组定向用户",
+    "details.permissionsEditor.actionLabels.UpdateSegmentRules":
+      "更新用户组规则",
     "details.permissionsEditor.actionLabels.UpdateWorkspaceGeneralSettings":
       "更新工作区常规设置",
     "details.permissionsEditor.actionLabels.UpdateWorkspaceLicense":

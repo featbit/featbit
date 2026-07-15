@@ -170,51 +170,41 @@ export function PermissionsEditor({
 
   return (
     <section className="space-y-4 py-4">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h2 className="text-lg leading-snug font-semibold">
-            {t("iam.policies.details.permissionsEditor.title")}
-          </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {t("iam.policies.details.permissionsEditor.description")}
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          {!readOnly ? (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                const statement = createPolicyStatement()
-                setStatements((items) => [...items, statement])
-                setExpandedId(statement.id)
-              }}
-            >
-              <Plus />
-              {t("iam.policies.details.permissionsEditor.addPermission")}
-            </Button>
-          ) : null}
+      <div className="flex flex-wrap items-center justify-end gap-2">
+        {!readOnly ? (
           <Button
             type="button"
             variant="outline"
-            onClick={() => setCloneOpen(true)}
+            onClick={() => {
+              const statement = createPolicyStatement()
+              setStatements((items) => [...items, statement])
+              setExpandedId(statement.id)
+            }}
           >
-            <Copy />
-            {t("iam.policies.details.permissionsEditor.clone")}
+            <Plus />
+            {t("iam.policies.details.permissionsEditor.addPermission")}
           </Button>
-          {!readOnly ? (
-            <Button
-              type="button"
-              disabled={!dirty || saving}
-              onClick={() => void save()}
-            >
-              <Save />
-              {saving
-                ? t("iam.policies.saving")
-                : t("iam.policies.details.permissionsEditor.saveChanges")}
-            </Button>
-          ) : null}
-        </div>
+        ) : null}
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => setCloneOpen(true)}
+        >
+          <Copy />
+          {t("iam.policies.details.permissionsEditor.clone")}
+        </Button>
+        {!readOnly ? (
+          <Button
+            type="button"
+            disabled={!dirty || saving}
+            onClick={() => void save()}
+          >
+            <Save />
+            {saving
+              ? t("iam.policies.saving")
+              : t("iam.policies.details.permissionsEditor.saveChanges")}
+          </Button>
+        ) : null}
       </div>
 
       {!fineGrainedGranted ? (
