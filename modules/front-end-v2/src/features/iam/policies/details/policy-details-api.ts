@@ -1,8 +1,9 @@
 import { fetchApi } from "@/lib/api/authenticated-api"
 import type { Policy } from "../policy-api"
+import type { PolicyResource, PolicyStatement } from "./permission-model"
 
 export type PolicyDetail = Policy & {
-  statements?: unknown[]
+  statements?: PolicyStatement[]
 }
 
 export type PolicyMember = {
@@ -76,6 +77,42 @@ export function updatePolicySettings(
       description: policy.description ?? "",
     }),
   })
+}
+
+export function updatePolicyStatements(
+  policyId: string,
+  statements: PolicyStatement[]
+) {
+  return fetchApi<PolicyDetail>(policyPath(policyId, "/statements"), {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(statements),
+  })
+}
+
+export function fetchPolicyResources(name: string, type: string) {
+  return fetchApi<PolicyResource[]>(
+    `/api/v1/resources${queryString({ name, type })}`
+  )
+}
+
+export function clonePolicy(
+  originPolicyKey: string,
+  payload: {
+    originPolicyType: string
+    name: string
+    key: string
+    description: string
+  }
+) {
+  return fetchApi<Policy>(
+    `/api/v1/policies/clone/${encodeURIComponent(originPolicyKey)}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    }
+  )
 }
 
 export function removePolicy(policyId: string) {

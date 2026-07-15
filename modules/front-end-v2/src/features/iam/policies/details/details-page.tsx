@@ -1,4 +1,4 @@
-import { ArrowLeft, ShieldCheck } from "lucide-react"
+import { ArrowLeft } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link, useNavigate, useParams } from "react-router-dom"
@@ -9,6 +9,7 @@ import { TooltipProvider } from "@/components/ui/tooltip"
 import { RemoveDialog } from "@/features/iam/groups/components/remove-dialog"
 import { localizedPath, resolveLang } from "@/features/layout/layout-context"
 import { PolicyDetailsHeader } from "./components/policy-details-header"
+import { PermissionsEditor } from "./components/permissions-editor"
 import {
   PolicyRelationships,
   type PolicyRelationshipTab,
@@ -172,7 +173,13 @@ export function PolicyDetailsPage() {
             </Tabs>
 
             {activeTab === "permission" ? (
-              <PermissionsPlaceholder />
+              <PermissionsEditor
+                key={policy?.id ?? "permissions-loading"}
+                policy={policy}
+                loading={loading}
+                lang={lang}
+                onPolicyChange={setPolicy}
+              />
             ) : (
               <PolicyRelationships
                 key={activeTab}
@@ -231,29 +238,5 @@ function DetailTab({
         {count}
       </Badge>
     </TabsTrigger>
-  )
-}
-
-function PermissionsPlaceholder() {
-  const { t } = useTranslation()
-  return (
-    <div className="flex min-h-52 items-center justify-center rounded-md border border-dashed bg-muted/10 px-6 py-12 text-center">
-      <div className="max-w-md">
-        <div className="mx-auto mb-3 flex size-10 items-center justify-center rounded-lg border bg-background">
-          <ShieldCheck className="size-5 text-muted-foreground" />
-        </div>
-        <h2 className="font-semibold text-foreground">
-          {t("iam.policies.details.permissionsPlaceholderTitle", {
-            defaultValue: "Permissions editor coming next",
-          })}
-        </h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {t("iam.policies.details.permissionsPlaceholderDescription", {
-            defaultValue:
-              "Team and group assignments are available now. Permission statements will be added in the next step.",
-          })}
-        </p>
-      </div>
-    </div>
   )
 }

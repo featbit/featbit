@@ -2,16 +2,10 @@ import { Star, X } from "lucide-react"
 import type { ReactNode } from "react"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { SelectableCommandList } from "@/components/selectable-command-list"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command"
+import { Command, CommandInput } from "@/components/ui/command"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
@@ -300,39 +294,24 @@ function PermissionMultiPicker<TOption extends { id: string; name: string }>({
           />
         </div>
         {searchActive ? (
-          <CommandList
-            ref={listRef}
-            className="max-h-40 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] overflow-y-auto border-t pt-1 [&::-webkit-scrollbar]:block [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent"
-          >
-            {loading ? (
+          <SelectableCommandList
+            items={filteredOptions}
+            getKey={(option) => option.id}
+            getValue={(option) => `${option.name} ${option.id}`}
+            isSelected={(option) =>
+              selected.some((item) => item.id === option.id)
+            }
+            onSelect={toggleOption}
+            emptyContent={t("iam.team.add.noResults")}
+            loading={loading}
+            loadingContent={
               <div className="space-y-2 p-2">
                 <Skeleton className="h-8 w-full" />
                 <Skeleton className="h-8 w-4/5" />
               </div>
-            ) : (
+            }
+            afterItems={
               <>
-                <CommandEmpty>{t("iam.team.add.noResults")}</CommandEmpty>
-                <CommandGroup className="[&_[cmdk-group-items]]:space-y-1">
-                  {filteredOptions.map((option) => {
-                    const isSelected = selected.some(
-                      (item) => item.id === option.id
-                    )
-                    return (
-                      <CommandItem
-                        key={option.id}
-                        value={`${option.name} ${option.id}`}
-                        data-checked={isSelected}
-                        className="data-[checked=true]:bg-accent data-[checked=true]:text-accent-foreground data-[checked=true]:*:[svg]:text-foreground"
-                        onSelect={() => toggleOption(option)}
-                      >
-                        <span className="min-w-0 flex-1 truncate">
-                          {option.name}
-                        </span>
-                        {getOptionMeta?.(option)}
-                      </CommandItem>
-                    )
-                  })}
-                </CommandGroup>
                 {loadingMore ? (
                   <div className="p-2">
                     <Skeleton className="h-8 w-full" />
@@ -340,8 +319,16 @@ function PermissionMultiPicker<TOption extends { id: string; name: string }>({
                 ) : null}
                 <div ref={loadMoreSentinelRef} className="h-px" aria-hidden />
               </>
+            }
+            listRef={listRef}
+            listClassName="max-h-40 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] overflow-y-auto border-t pt-1 [&::-webkit-scrollbar]:block [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent"
+            renderItem={(option) => (
+              <>
+                <span className="min-w-0 flex-1 truncate">{option.name}</span>
+                {getOptionMeta?.(option)}
+              </>
             )}
-          </CommandList>
+          />
         ) : null}
       </Command>
     </div>
