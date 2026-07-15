@@ -7,9 +7,10 @@ import {
   SelectionFilterTabs,
   type SelectionFilter,
 } from "@/components/selection-filter-tabs"
+import { StablePopoverContent } from "@/components/stable-popover-content"
 import { Button } from "@/components/ui/button"
 import { Command, CommandInput } from "@/components/ui/command"
-import { Popover, PopoverContent } from "@/components/ui/popover"
+import { Popover } from "@/components/ui/popover"
 import { actionsForStatement, type PolicyStatement } from "../permission-model"
 
 export function ActionPicker({
@@ -98,7 +99,7 @@ export function ActionPicker({
         disabled={disabled}
         invalid={invalid}
       />
-      <PopoverContent
+      <StablePopoverContent
         align="start"
         className="w-[min(28rem,calc(100vw-2rem))] p-0"
       >
@@ -135,7 +136,7 @@ export function ActionPicker({
                 ? "iam.policies.details.permissionsEditor.noActionsSelected"
                 : "iam.policies.details.permissionsEditor.noActions"
             )}
-            listClassName="h-[clamp(10rem,40dvh,18rem)] max-h-none [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] overflow-y-auto [&_[data-slot=command-empty]]:flex [&_[data-slot=command-empty]]:h-full [&_[data-slot=command-empty]]:items-center [&_[data-slot=command-empty]]:justify-center [&::-webkit-scrollbar]:block [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent"
+            listClassName="max-h-[clamp(10rem,40dvh,18rem)] [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] overflow-y-auto [&_[data-slot=command-empty]]:flex [&_[data-slot=command-empty]]:min-h-20 [&_[data-slot=command-empty]]:items-center [&_[data-slot=command-empty]]:justify-center [&::-webkit-scrollbar]:block [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent"
             renderItem={(item) => {
               const locked = Boolean(item.fineGrained && !fineGrainedGranted)
               return (
@@ -168,7 +169,7 @@ export function ActionPicker({
             {t("iam.policies.details.permissionsEditor.done")}
           </Button>
         </div>
-      </PopoverContent>
+      </StablePopoverContent>
     </Popover>
   )
 }

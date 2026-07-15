@@ -1,4 +1,3 @@
-import { Popover as PopoverPrimitive } from "@base-ui/react/popover"
 import { Star } from "lucide-react"
 import type { ReactNode, RefObject } from "react"
 import { useEffect, useMemo, useRef, useState } from "react"
@@ -9,11 +8,11 @@ import {
   SelectionFilterTabs,
   type SelectionFilter,
 } from "@/components/selection-filter-tabs"
+import { StablePopoverContent } from "@/components/stable-popover-content"
 import { Button } from "@/components/ui/button"
 import { Command, CommandInput } from "@/components/ui/command"
 import { Popover } from "@/components/ui/popover"
 import { Skeleton } from "@/components/ui/skeleton"
-import { cn } from "@/lib/utils"
 import {
   fetchGroupOptions,
   fetchPolicyOptions,
@@ -273,8 +272,8 @@ function PermissionMultiPicker<TOption extends { id: string; name: string }>({
           onSelectedChange(selected.filter((item) => item.id !== option.id))
         }
       />
-      <SheetPopoverContent
-        container={portalContainer}
+      <StablePopoverContent
+        portalContainer={portalContainer}
         align="start"
         className="w-[min(28rem,calc(100vw-2rem))] p-0"
       >
@@ -328,7 +327,7 @@ function PermissionMultiPicker<TOption extends { id: string; name: string }>({
               ) : null
             }
             listRef={listRef}
-            listClassName="h-[clamp(10rem,40dvh,18rem)] max-h-none [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] overflow-y-auto [&_[data-slot=command-empty]]:flex [&_[data-slot=command-empty]]:h-full [&_[data-slot=command-empty]]:items-center [&_[data-slot=command-empty]]:justify-center [&::-webkit-scrollbar]:block [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent"
+            listClassName="max-h-[clamp(10rem,40dvh,18rem)] [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] overflow-y-auto [&_[data-slot=command-empty]]:flex [&_[data-slot=command-empty]]:min-h-20 [&_[data-slot=command-empty]]:items-center [&_[data-slot=command-empty]]:justify-center [&::-webkit-scrollbar]:block [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent"
             renderItem={(option) => (
               <>
                 <span className="min-w-0 flex-1 truncate">{option.name}</span>
@@ -351,34 +350,7 @@ function PermissionMultiPicker<TOption extends { id: string; name: string }>({
             {t("iam.policies.details.permissionsEditor.done")}
           </Button>
         </div>
-      </SheetPopoverContent>
+      </StablePopoverContent>
     </Popover>
-  )
-}
-
-function SheetPopoverContent({
-  container,
-  className,
-  children,
-  align = "center",
-}: {
-  container: RefObject<HTMLElement | null>
-  className?: string
-  children: ReactNode
-  align?: PopoverPrimitive.Positioner.Props["align"]
-}) {
-  return (
-    <PopoverPrimitive.Portal container={container}>
-      <PopoverPrimitive.Positioner align={align} side="bottom" sideOffset={4}>
-        <PopoverPrimitive.Popup
-          className={cn(
-            "z-50 rounded-md border bg-popover text-popover-foreground shadow-md outline-none",
-            className
-          )}
-        >
-          {children}
-        </PopoverPrimitive.Popup>
-      </PopoverPrimitive.Positioner>
-    </PopoverPrimitive.Portal>
   )
 }

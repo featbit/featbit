@@ -4,9 +4,10 @@ import { useTranslation } from "react-i18next"
 import { SelectedItemsField } from "@/components/selected-items-field"
 import { SelectableCommandList } from "@/components/selectable-command-list"
 import { SelectionFilterTabs } from "@/components/selection-filter-tabs"
+import { StablePopoverContent } from "@/components/stable-popover-content"
 import { Button } from "@/components/ui/button"
 import { Command, CommandInput } from "@/components/ui/command"
-import { Popover, PopoverContent } from "@/components/ui/popover"
+import { Popover } from "@/components/ui/popover"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 import { fetchPolicyResources } from "../policy-details-api"
@@ -277,7 +278,7 @@ export function ResourcePicker({
             disabled={disabled}
             invalid={invalid}
           />
-          <PopoverContent
+          <StablePopoverContent
             align="start"
             className="w-[min(32rem,calc(100vw-2rem))] p-0"
           >
@@ -335,7 +336,7 @@ export function ResourcePicker({
                     <Skeleton className="h-10 w-4/5" />
                   </div>
                 }
-                listClassName="h-[clamp(10rem,40dvh,18rem)] max-h-none [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] overflow-y-auto [&_[data-slot=command-empty]]:flex [&_[data-slot=command-empty]]:h-full [&_[data-slot=command-empty]]:items-center [&_[data-slot=command-empty]]:justify-center [&::-webkit-scrollbar]:block [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent"
+                listClassName="max-h-[clamp(10rem,40dvh,18rem)] [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] overflow-y-auto [&_[data-slot=command-empty]]:flex [&_[data-slot=command-empty]]:min-h-20 [&_[data-slot=command-empty]]:items-center [&_[data-slot=command-empty]]:justify-center [&::-webkit-scrollbar]:block [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent"
                 renderItem={(item) => (
                   <span className="min-w-0 flex-1">
                     <span className="block truncate">{item.name}</span>
@@ -363,7 +364,7 @@ export function ResourcePicker({
                 {t("iam.policies.details.permissionsEditor.done")}
               </Button>
             </div>
-          </PopoverContent>
+          </StablePopoverContent>
         </Popover>
       ) : null}
     </div>
