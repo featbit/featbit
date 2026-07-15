@@ -6,10 +6,10 @@ import { ActionPicker } from "./action-picker"
 
 const statement: PolicyStatement = {
   id: "statement-1",
-  resourceType: "*",
+  resourceType: "flag",
   effect: "allow",
-  actions: ["*"],
-  resources: ["*"],
+  actions: ["CreateFlag"],
+  resources: ["project/*:env/*:flag/*"],
 }
 
 beforeAll(() => {
@@ -26,6 +26,9 @@ describe("ActionPicker", () => {
       />
     )
 
+    expect(
+      screen.getByRole("button", { name: "Specific actions" })
+    ).toHaveAttribute("aria-pressed", "true")
     fireEvent.click(screen.getByRole("button", { name: "Manage" }))
 
     expect(screen.getByRole("button", { name: "All" })).toBeInTheDocument()
@@ -37,7 +40,60 @@ describe("ActionPicker", () => {
     fireEvent.click(selectedFilter)
 
     expect(
-      screen.getByRole("option", { name: "All actions" })
+      screen.getByRole("option", { name: "Create flags" })
     ).toBeInTheDocument()
+    expect(
+      screen.queryByRole("option", { name: "All actions" })
+    ).not.toBeInTheDocument()
+  })
+
+  it("switches between all and specific action modes", () => {
+    const onChange = vi.fn()
+    const { rerender } = render(
+      <ActionPicker
+        statement={statement}
+        fineGrainedGranted
+        onChange={onChange}
+      />
+    )
+
+    fireEvent.click(screen.getByRole("button", { name: "All actions" }))
+    expect(onChange).toHaveBeenLastCalledWith(["*"])
+
+    rerender(
+      <ActionPicker
+        statement={{ ...statement, actions: ["*"] }}
+        fineGrainedGranted
+        onChange={onChange}
+      />
+    )
+    fireEvent.click(screen.getByRole("button", { name: "Specific actions" }))
+    expect(onChange).toHaveBeenLastCalledWith([])
+  })
+
+  it("only offers all actions when the resource type has no specific actions", () => {
+    render(
+      <ActionPicker
+        statement={{
+          ...statement,
+          resourceType: "*",
+          actions: ["*"],
+          resources: ["*"],
+        }}
+        fineGrainedGranted
+        onChange={vi.fn()}
+      />
+    )
+
+    expect(screen.getByRole("button", { name: "All actions" })).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    )
+    expect(
+      screen.queryByRole("button", { name: "Specific actions" })
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole("button", { name: "Manage" })
+    ).not.toBeInTheDocument()
   })
 })

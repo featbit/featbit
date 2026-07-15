@@ -127,13 +127,10 @@ export function PermissionsEditor({
     statement: PolicyStatement,
     resourceType: ResourceType
   ) {
-    const hasAllAction = PERMISSION_ACTIONS.some(
-      (action) => action.resourceType === resourceType && action.name === "*"
-    )
     updateStatement(statement.id, {
       resourceType,
       resources: [RESOURCE_PATTERNS[resourceType]],
-      actions: hasAllAction ? ["*"] : [],
+      actions: resourceType === "*" ? ["*"] : [],
     })
   }
 
@@ -549,6 +546,7 @@ function PermissionRows({
                     onChange({
                       resources,
                       actions: statement.actions.filter((name) => {
+                        if (name === "*") return true
                         const action = PERMISSION_ACTIONS.find(
                           (item) =>
                             item.resourceType === statement.resourceType &&

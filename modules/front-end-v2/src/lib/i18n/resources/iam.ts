@@ -289,6 +289,12 @@ export const enIam = {
     "details.permissionsEditor.specificResources": "Specific resources",
     "details.permissionsEditor.specificResourcesDescription":
       "Choose one or more individual resources.",
+    "details.permissionsEditor.allActions": "All actions",
+    "details.permissionsEditor.allActionsDescription":
+      "Apply this permission to every action for this resource type.",
+    "details.permissionsEditor.specificActions": "Specific actions",
+    "details.permissionsEditor.specificActionsDescription":
+      "Choose one or more individual actions.",
     "details.permissionsEditor.allResourceType": "All {{type}} resources",
     "details.permissionsEditor.resourcesSelectedByType":
       "{{count}} {{type}} selected",
@@ -649,6 +655,12 @@ export const zhIam = {
     "details.permissionsEditor.specificResources": "指定资源",
     "details.permissionsEditor.specificResourcesDescription":
       "选择一个或多个具体资源。",
+    "details.permissionsEditor.allActions": "所有操作",
+    "details.permissionsEditor.allActionsDescription":
+      "将此权限应用于该资源类型的所有操作。",
+    "details.permissionsEditor.specificActions": "指定操作",
+    "details.permissionsEditor.specificActionsDescription":
+      "选择一个或多个具体操作。",
     "details.permissionsEditor.allResourceType": "所有{{type}}资源",
     "details.permissionsEditor.resourcesSelectedByType":
       "已选择 {{count}} 个{{type}}",
