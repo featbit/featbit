@@ -2,7 +2,9 @@ import {
   AlertTriangle,
   ChevronDown,
   ChevronRight,
+  CircleAlert,
   Copy,
+  ListChecks,
   Plus,
   Save,
   ShieldAlert,
@@ -33,6 +35,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import {
   getCurrentWorkspace,
   localizedPath,
@@ -355,16 +363,23 @@ function PermissionRows({
     `iam.policies.details.permissionsEditor.resourceTypePlurals.${statement.resourceType}`,
     { defaultValue: statement.resourceType }
   )
-  const actionLabels = statement.actions.slice(0, 3).map((name) => {
+  const actions = statement.actions.map((name) => {
     const item = PERMISSION_ACTIONS.find(
       (candidate) =>
         candidate.resourceType === statement.resourceType &&
         candidate.name === name
     )
-    return t(`iam.policies.details.permissionsEditor.actionLabels.${name}`, {
-      defaultValue: item?.label ?? name,
-    })
+    return {
+      name,
+      label: t(`iam.policies.details.permissionsEditor.actionLabels.${name}`, {
+        defaultValue: item?.label ?? name,
+      }),
+    }
   })
+  const resources = statement.resources.map((resource) => ({
+    key: resource,
+    label: resourceDisplayName(resource),
+  }))
   const resourceSummary = isAllResources(statement)
     ? statement.resourceType === "*"
       ? t("iam.policies.details.permissionsEditor.allResources")
@@ -408,37 +423,47 @@ function PermissionRows({
           </Badge>
         </TableCell>
         <TableCell className="max-w-80">
-          <span className="block truncate font-medium">{resourceSummary}</span>
-          {!isAllResources(statement) ? (
-            <span className="block truncate text-xs text-muted-foreground">
-              {summaryText(
-                statement.resources.slice(0, 3).map(resourceDisplayName),
-                statement.resources.length,
-                listFormatter,
-                (items, count) =>
-                  t("iam.policies.details.permissionsEditor.summaryOverflow", {
-                    items,
-                    count,
-                  })
-              )}
+          <div
+            className={cn(
+              "flex items-center gap-1.5 font-medium",
+              !isAllResources(statement) &&
+                resources.length === 0 &&
+                "text-destructive"
+            )}
+          >
+            {isAllResources(statement) || resources.length > 0 ? (
+              <ListChecks className="size-3.5 shrink-0 text-muted-foreground" />
+            ) : (
+              <CircleAlert className="size-3.5 shrink-0" />
+            )}
+            <span className="truncate">
+              {!isAllResources(statement) && resources.length === 0
+                ? t(
+                    "iam.policies.details.permissionsEditor.noResourcesSelected"
+                  )
+                : resourceSummary}
             </span>
+          </div>
+          {!isAllResources(statement) && resources.length > 0 ? (
+            <div className="mt-0.5 flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
+              <span className="min-w-0 truncate">
+                {formatList(
+                  listFormatter,
+                  resources.slice(0, 3).map((resource) => resource.label)
+                )}
+              </span>
+              <OverflowBadge
+                items={resources.slice(3)}
+                ariaLabel={t(
+                  "iam.policies.details.permissionsEditor.moreResources",
+                  { count: Math.max(resources.length - 3, 0) }
+                )}
+              />
+            </div>
           ) : null}
         </TableCell>
         <TableCell className="max-w-80">
-          <span className="block truncate">
-            {actionLabels.length
-              ? summaryText(
-                  actionLabels,
-                  statement.actions.length,
-                  listFormatter,
-                  (items, count) =>
-                    t(
-                      "iam.policies.details.permissionsEditor.summaryOverflow",
-                      { items, count }
-                    )
-                )
-              : t("iam.policies.details.permissionsEditor.noActionsSelected")}
-          </span>
+          <CollapsedActionsSummary actions={actions} />
         </TableCell>
         <TableCell>
           {!readOnly ? (
@@ -565,13 +590,116 @@ function PermissionRows({
   )
 }
 
-function summaryText(
-  items: string[],
-  total: number,
-  formatter: Intl.ListFormat,
-  overflow: (items: string, count: number) => string
-) {
-  const formatted = formatter.format(items)
-  const remaining = total - items.length
-  return remaining > 0 ? overflow(formatted, remaining) : formatted
+function CollapsedActionsSummary({
+  actions,
+}: {
+  actions: Array<{ name: string; label: string }>
+}) {
+  const { t, i18n } = useTranslation()
+  const listFormatter = new Intl.ListFormat(
+    i18n.resolvedLanguage === "zh" ? "zh-CN" : "en-US",
+    { style: "short", type: "conjunction" }
+  )
+
+  if (actions.some((action) => action.name === "*")) {
+    return (
+      <div className="min-w-0">
+        <div className="flex items-center gap-1.5 font-medium">
+          <ListChecks className="size-3.5 shrink-0 text-muted-foreground" />
+          <span className="truncate">
+            {t("iam.policies.details.permissionsEditor.actionLabels.*")}
+          </span>
+        </div>
+        <p className="mt-0.5 truncate text-xs text-muted-foreground">
+          {t("iam.policies.details.permissionsEditor.allActionsSummary")}
+        </p>
+      </div>
+    )
+  }
+
+  if (actions.length === 0) {
+    return (
+      <div className="flex items-center gap-1.5 text-destructive">
+        <CircleAlert className="size-3.5 shrink-0" />
+        <span className="truncate font-medium">
+          {t("iam.policies.details.permissionsEditor.noActionsSelected")}
+        </span>
+      </div>
+    )
+  }
+
+  const visibleActions = actions.slice(0, 3)
+  const remainingActions = actions.slice(3)
+
+  return (
+    <div className="min-w-0">
+      <div className="flex items-center gap-1.5 font-medium">
+        <ListChecks className="size-3.5 shrink-0 text-muted-foreground" />
+        <span className="truncate">
+          {t("iam.policies.details.permissionsEditor.actionsSelectedCount", {
+            count: actions.length,
+          })}
+        </span>
+      </div>
+      <div className="mt-0.5 flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
+        <span className="min-w-0 truncate">
+          {formatList(
+            listFormatter,
+            visibleActions.map((action) => action.label)
+          )}
+        </span>
+        <OverflowBadge
+          items={remainingActions.map((action) => ({
+            key: action.name,
+            label: action.label,
+          }))}
+          ariaLabel={t("iam.policies.details.permissionsEditor.moreActions", {
+            count: remainingActions.length,
+          })}
+        />
+      </div>
+    </div>
+  )
+}
+
+function OverflowBadge({
+  items,
+  ariaLabel,
+}: {
+  items: Array<{ key: string; label: string }>
+  ariaLabel: string
+}) {
+  if (items.length === 0) return null
+
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <Badge
+              variant="outline"
+              tabIndex={0}
+              className="h-5 shrink-0 cursor-help rounded-md border-foreground/25 bg-muted/70 px-1.5 text-[0.7rem] font-semibold text-foreground shadow-xs"
+              aria-label={ariaLabel}
+            />
+          }
+        >
+          +{items.length}
+        </TooltipTrigger>
+        <TooltipContent className="max-w-72 items-start p-1.5">
+          <div className="max-h-[min(14rem,calc(var(--available-height)-0.75rem))] min-w-0 [scrollbar-gutter:stable] space-y-1 overflow-y-auto overscroll-contain px-1.5 py-0.5 pr-2">
+            {items.map((item) => (
+              <p key={item.key} className="break-words">
+                {item.label}
+              </p>
+            ))}
+          </div>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  )
+}
+
+function formatList(formatter: Intl.ListFormat, items: string[]) {
+  return formatter.format(items).replace(", & ", " & ")
 }
