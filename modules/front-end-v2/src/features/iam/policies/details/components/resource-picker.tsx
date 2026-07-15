@@ -130,11 +130,11 @@ export function ResourcePicker({
   }
 
   function toggle(rn: string) {
-    setDraft((current) =>
-      current.includes(rn)
-        ? current.filter((item) => item !== rn)
-        : [...current, rn]
-    )
+    const next = draft.includes(rn)
+      ? draft.filter((item) => item !== rn)
+      : [...draft, rn]
+    setDraft(next)
+    onChange(next)
   }
 
   function removeSelected(rn: string) {
@@ -153,7 +153,7 @@ export function ResourcePicker({
             aria-pressed={mode === "all"}
             aria-describedby={scopeDescriptionId}
             className={cn(
-              "h-10 justify-start gap-2 px-3 text-left whitespace-normal",
+              "h-8 justify-start gap-2 px-3 text-left whitespace-normal",
               mode === "all" &&
                 "border-primary bg-primary/5 hover:border-primary hover:bg-primary/10"
             )}
@@ -162,7 +162,7 @@ export function ResourcePicker({
           >
             <span
               className={cn(
-                "flex size-6 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground",
+                "flex size-5 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground",
                 mode === "all" && "bg-primary text-primary-foreground"
               )}
             >
@@ -181,7 +181,7 @@ export function ResourcePicker({
             aria-pressed={mode === "specific"}
             aria-describedby={scopeDescriptionId}
             className={cn(
-              "h-10 justify-start gap-2 px-3 text-left whitespace-normal",
+              "h-8 justify-start gap-2 px-3 text-left whitespace-normal",
               mode === "specific" &&
                 "border-primary bg-primary/5 hover:border-primary hover:bg-primary/10"
             )}
@@ -190,7 +190,7 @@ export function ResourcePicker({
           >
             <span
               className={cn(
-                "flex size-6 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground",
+                "flex size-5 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground",
                 mode === "specific" && "bg-primary text-primary-foreground"
               )}
             >
@@ -223,11 +223,11 @@ export function ResourcePicker({
             variant="outline"
             aria-pressed={true}
             aria-describedby={scopeDescriptionId}
-            className="h-10 justify-start gap-2 border-primary bg-primary/5 px-3 text-left whitespace-normal hover:border-primary hover:bg-primary/10"
+            className="h-8 justify-start gap-2 border-primary bg-primary/5 px-3 text-left whitespace-normal hover:border-primary hover:bg-primary/10"
             disabled={disabled}
             onClick={() => changeMode("all")}
           >
-            <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
+            <span className="flex size-5 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
               <Globe2 className="size-3.5" />
             </span>
             <span className="min-w-0 flex-1 truncate font-medium text-foreground">
@@ -414,19 +414,15 @@ export function ResourcePicker({
                 type="button"
                 variant="ghost"
                 size="sm"
-                onClick={() => setDraft([])}
+                onClick={() => {
+                  setDraft([])
+                  onChange([])
+                }}
                 disabled={!draft.length}
               >
                 {t("iam.policies.details.permissionsEditor.clearAll")}
               </Button>
-              <Button
-                type="button"
-                size="sm"
-                onClick={() => {
-                  onChange(draft)
-                  setOpen(false)
-                }}
-              >
+              <Button type="button" size="sm" onClick={() => setOpen(false)}>
                 {t("iam.policies.details.permissionsEditor.done")}
               </Button>
             </div>
