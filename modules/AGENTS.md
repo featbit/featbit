@@ -25,6 +25,7 @@
 - Do not modify the original `components/ui/*` shadcn component files for migration-specific needs; compose or wrap them from feature/layout files.
 - If a needed shadcn component is missing from `front-end-v2/src/components/ui/*`, it may be added using the shadcn CLI or official shadcn source for the current `front-end-v2` setup. After a shadcn component file is generated or downloaded into `components/ui/*`, do not hand-edit that generated component file.
 - Prefer shadcn default component styles and tokens. Add only small amounts of Tailwind in feature or layout files when necessary.
+- Every shadcn/Base UI `Select` must include `SelectGroup` inside `SelectContent`, and every `SelectItem` must be nested in a `SelectGroup`. Never render `SelectItem` directly under `SelectContent`, even when the select has only one logical group. Follow the `OrganizationSelect` composition in `front-end-v2/src/features/organization/general/components/organization-form-fields.tsx`; this preserves the expected option spacing, grouping semantics, and popup alignment with the trigger.
 - Split migrated code by responsibility so individual files do not become unusually large.
 - Copy only necessary assets such as FeatBit logo, brand SVGs, sample JSON, `env.template.js`, required Monaco assets, and irreplaceable business-specific icons.
 - Do not copy the old Angular login background.

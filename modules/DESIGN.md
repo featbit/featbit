@@ -176,6 +176,25 @@ FeatBit is flat by default. Depth is conveyed through borders, tonal layers, sti
 - **Style:** use `Badge` variants. Outline badges are bordered and neutral; destructive badges are reserved for destructive or expired states.
 - **State:** badges should communicate status, license gating, or compact metadata. Do not invent local badge components when the shared Badge works.
 
+### Selects
+- **Required composition:** every shadcn/Base UI `Select` must render its options inside `SelectContent > SelectGroup > SelectItem`. This requirement also applies when the select contains only one logical group and does not display a group label.
+- **Do not** render `SelectItem` directly under `SelectContent`. Omitting `SelectGroup` changes the expected option padding/group semantics and can cause the popup to appear misaligned with the trigger.
+- **Reference implementation:** follow `OrganizationSelect` in `front-end-v2/src/features/organization/general/components/organization-form-fields.tsx`.
+
+```tsx
+<Select value={value} onValueChange={onValueChange}>
+  <SelectTrigger>
+    <SelectValue />
+  </SelectTrigger>
+  <SelectContent>
+    <SelectGroup>
+      <SelectItem value="first">First option</SelectItem>
+      <SelectItem value="second">Second option</SelectItem>
+    </SelectGroup>
+  </SelectContent>
+</Select>
+```
+
 ### Cards / Containers
 - **Corner Style:** softly rounded (14px for cards, 10px or less for most controls).
 - **Background:** `--card` or `--background`; secondary areas use `--muted/50` or `--muted/30`.

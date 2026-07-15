@@ -19,6 +19,7 @@ import { Label } from "@/components/ui/label"
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -476,12 +477,14 @@ function PermissionRows({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="allow">
-                      {t("iam.policies.details.permissionsEditor.allow")}
-                    </SelectItem>
-                    <SelectItem value="deny">
-                      {t("iam.policies.details.permissionsEditor.deny")}
-                    </SelectItem>
+                    <SelectGroup>
+                      <SelectItem value="allow">
+                        {t("iam.policies.details.permissionsEditor.allow")}
+                      </SelectItem>
+                      <SelectItem value="deny">
+                        {t("iam.policies.details.permissionsEditor.deny")}
+                      </SelectItem>
+                    </SelectGroup>
                   </SelectContent>
                 </Select>
               </div>
@@ -500,14 +503,16 @@ function PermissionRows({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {RESOURCE_TYPES.map((type) => (
-                      <SelectItem key={type} value={type}>
-                        {t(
-                          `iam.policies.details.permissionsEditor.resourceTypes.${type}`,
-                          { defaultValue: type }
-                        )}
-                      </SelectItem>
-                    ))}
+                    <SelectGroup>
+                      {RESOURCE_TYPES.map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {t(
+                            `iam.policies.details.permissionsEditor.resourceTypes.${type}`,
+                            { defaultValue: type }
+                          )}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
                   </SelectContent>
                 </Select>
                 <ResourcePicker
