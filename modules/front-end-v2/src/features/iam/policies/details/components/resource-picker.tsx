@@ -3,11 +3,12 @@ import {
   ChevronsUpDown,
   Globe2,
   ListChecks,
-  LoaderCircle,
+  X,
 } from "lucide-react"
 import { useEffect, useId, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { SelectableCommandList } from "@/components/selectable-command-list"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Command, CommandInput } from "@/components/ui/command"
 import {
@@ -15,6 +16,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 import { fetchPolicyResources } from "../policy-details-api"
 import {
@@ -40,16 +42,8 @@ export function ResourcePicker({
   invalid?: boolean
   onChange: (resources: string[]) => void
 }) {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const scopeDescriptionId = useId()
-  const listFormatter = useMemo(
-    () =>
-      new Intl.ListFormat(i18n.resolvedLanguage === "zh" ? "zh-CN" : "en-US", {
-        style: "short",
-        type: "conjunction",
-      }),
-    [i18n.resolvedLanguage]
-  )
   const supportsSpecific = SPECIFIC_RESOURCE_TYPES.has(resourceType)
   const selectedResourceType = t(
     `iam.policies.details.permissionsEditor.resourceTypePlurals.${resourceType}`,
@@ -68,14 +62,23 @@ export function ResourcePicker({
 
   useEffect(() => {
     if (!open || mode !== "specific") return
+    let cancelled = false
     const timeout = window.setTimeout(() => {
-      setLoading(true)
       fetchPolicyResources(search, resourceType)
-        .then((items) => setOptions(Array.isArray(items) ? items : []))
-        .catch(() => setOptions([]))
-        .finally(() => setLoading(false))
+        .then((items) => {
+          if (!cancelled) setOptions(Array.isArray(items) ? items : [])
+        })
+        .catch(() => {
+          if (!cancelled) setOptions([])
+        })
+        .finally(() => {
+          if (!cancelled) setLoading(false)
+        })
     }, 300)
-    return () => window.clearTimeout(timeout)
+    return () => {
+      cancelled = true
+      window.clearTimeout(timeout)
+    }
   }, [mode, open, resourceType, search])
 
   const mergedOptions = useMemo(() => {
@@ -103,11 +106,16 @@ export function ResourcePicker({
       : visible
   }, [draft, filter, options, resourceType, search])
 
-  const selectedNames = draft.slice(0, 2).map((rn) => {
-    return (
-      options.find((item) => item.rn === rn)?.name ?? resourceDisplayName(rn)
-    )
-  })
+  const selectedResources = useMemo(
+    () =>
+      draft.map((rn) => ({
+        rn,
+        name:
+          options.find((item) => item.rn === rn)?.name ??
+          resourceDisplayName(rn),
+      })),
+    [draft, options]
+  )
 
   function changeMode(next: ScopeMode) {
     if (next === "all") {
@@ -117,6 +125,7 @@ export function ResourcePicker({
     }
     onChange([])
     setDraft([])
+    setLoading(true)
     setOpen(true)
   }
 
@@ -126,6 +135,12 @@ export function ResourcePicker({
         ? current.filter((item) => item !== rn)
         : [...current, rn]
     )
+  }
+
+  function removeSelected(rn: string) {
+    const next = draft.filter((item) => item !== rn)
+    setDraft(next)
+    onChange(next)
   }
 
   return (
@@ -236,56 +251,82 @@ export function ResourcePicker({
           open={open}
           onOpenChange={(next) => {
             setOpen(next)
+            setLoading(next)
             if (next) setDraft(resources)
           }}
         >
-          <PopoverTrigger
-            render={
-              <Button
-                type="button"
-                variant="outline"
-                className={cn(
-                  "h-auto min-h-8 w-full justify-between px-3 py-2 font-normal",
-                  invalid && "border-destructive"
+          <div
+            className={cn(
+              "overflow-hidden rounded-lg border bg-background",
+              invalid && "border-destructive"
+            )}
+          >
+            <div className="flex min-h-9 items-center justify-between gap-3 border-b px-3 py-1.5">
+              <span className="min-w-0 truncate text-xs font-medium text-foreground">
+                {t(
+                  "iam.policies.details.permissionsEditor.selectedResourcesHeading",
+                  {
+                    count: draft.length,
+                    type: selectedResourceType,
+                  }
                 )}
-                disabled={disabled}
-              >
-                <span className="min-w-0 text-left">
-                  {draft.length ? (
-                    <>
-                      <span className="block truncate text-foreground">
-                        {t(
-                          "iam.policies.details.permissionsEditor.resourcesSelectedByType",
-                          {
-                            count: draft.length,
-                            type: selectedResourceType,
-                          }
+              </span>
+              <PopoverTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 shrink-0 gap-1.5 px-2 text-xs"
+                    disabled={disabled}
+                  >
+                    {t(
+                      "iam.policies.details.permissionsEditor.manageResources"
+                    )}
+                    <ChevronsUpDown className="size-3.5" />
+                  </Button>
+                }
+              />
+            </div>
+            {selectedResources.length ? (
+              <div className="max-h-28 overflow-y-auto p-2">
+                <div className="flex flex-wrap gap-1.5">
+                  {selectedResources.map((resource) => (
+                    <Badge
+                      key={resource.rn}
+                      variant="secondary"
+                      className="max-w-full gap-1 rounded-full border-border py-0.5 pr-1 pl-2 font-normal"
+                    >
+                      <span
+                        className="max-w-56 min-w-0 truncate"
+                        title={`${resource.name}\n${resource.rn}`}
+                      >
+                        {resource.name}
+                      </span>
+                      <button
+                        type="button"
+                        aria-label={t(
+                          "iam.policies.details.permissionsEditor.removeSelectedResource",
+                          { name: resource.name }
                         )}
-                      </span>
-                      <span className="block truncate text-xs text-muted-foreground">
-                        {draft.length > 2
-                          ? t(
-                              "iam.policies.details.permissionsEditor.summaryOverflow",
-                              {
-                                items: listFormatter.format(selectedNames),
-                                count: draft.length - 2,
-                              }
-                            )
-                          : listFormatter.format(selectedNames)}
-                      </span>
-                    </>
-                  ) : (
-                    <span className="text-muted-foreground">
-                      {t(
-                        "iam.policies.details.permissionsEditor.selectResources"
-                      )}
-                    </span>
-                  )}
-                </span>
-                <ChevronsUpDown className="size-4 text-muted-foreground" />
-              </Button>
-            }
-          />
+                        className="rounded-full p-0.5 text-muted-foreground hover:bg-background hover:text-foreground disabled:pointer-events-none disabled:opacity-50"
+                        disabled={disabled}
+                        onClick={() => removeSelected(resource.rn)}
+                      >
+                        <X className="size-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <p className="px-3 py-2.5 text-xs text-muted-foreground">
+                {t(
+                  "iam.policies.details.permissionsEditor.noSelectedResources"
+                )}
+              </p>
+            )}
+          </div>
           <PopoverContent
             align="start"
             className="w-[min(32rem,calc(100vw-2rem))] p-0"
@@ -293,7 +334,10 @@ export function ResourcePicker({
             <Command shouldFilter={false} className="rounded-md">
               <CommandInput
                 value={search}
-                onValueChange={setSearch}
+                onValueChange={(value) => {
+                  setLoading(true)
+                  setSearch(value)
+                }}
                 placeholder={t(
                   "iam.policies.details.permissionsEditor.searchResources"
                 )}
@@ -336,14 +380,25 @@ export function ResourcePicker({
                 )}
                 loading={loading}
                 loadingContent={
-                  <div className="flex items-center justify-center gap-2 py-8 text-sm text-muted-foreground">
-                    <LoaderCircle className="size-4 animate-spin" />
-                    {t(
+                  <div
+                    className="h-full space-y-2 p-2"
+                    aria-label={t(
                       "iam.policies.details.permissionsEditor.loadingResources"
                     )}
+                  >
+                    <span className="sr-only">
+                      {t(
+                        "iam.policies.details.permissionsEditor.loadingResources"
+                      )}
+                    </span>
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-11/12" />
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-4/5" />
                   </div>
                 }
-                listClassName="max-h-72"
+                listClassName="h-[clamp(10rem,40dvh,18rem)] max-h-none [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] overflow-y-auto [&_[data-slot=command-empty]]:flex [&_[data-slot=command-empty]]:h-full [&_[data-slot=command-empty]]:items-center [&_[data-slot=command-empty]]:justify-center [&::-webkit-scrollbar]:block [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent"
                 renderItem={(item) => (
                   <span className="min-w-0 flex-1">
                     <span className="block truncate">{item.name}</span>

@@ -292,6 +292,12 @@ export const enIam = {
     "details.permissionsEditor.allResourceType": "All {{type}} resources",
     "details.permissionsEditor.resourcesSelectedByType":
       "{{count}} {{type}} selected",
+    "details.permissionsEditor.selectedResourcesHeading":
+      "Selected {{type}} ({{count}})",
+    "details.permissionsEditor.manageResources": "Manage",
+    "details.permissionsEditor.removeSelectedResource": "Remove {{name}}",
+    "details.permissionsEditor.noSelectedResources":
+      "No resources selected. Use Manage to add resources.",
     "details.permissionsEditor.selectResources": "Select resources",
     "details.permissionsEditor.searchResources": "Search resources...",
     "details.permissionsEditor.loadingResources": "Loading resources...",
@@ -633,6 +639,12 @@ export const zhIam = {
     "details.permissionsEditor.allResourceType": "所有{{type}}资源",
     "details.permissionsEditor.resourcesSelectedByType":
       "已选择 {{count}} 个{{type}}",
+    "details.permissionsEditor.selectedResourcesHeading":
+      "已选择的{{type}}（{{count}}）",
+    "details.permissionsEditor.manageResources": "管理",
+    "details.permissionsEditor.removeSelectedResource": "移除 {{name}}",
+    "details.permissionsEditor.noSelectedResources":
+      "尚未选择资源，请使用“管理”添加资源。",
     "details.permissionsEditor.selectResources": "选择资源",
     "details.permissionsEditor.searchResources": "搜索资源...",
     "details.permissionsEditor.loadingResources": "正在加载资源...",
