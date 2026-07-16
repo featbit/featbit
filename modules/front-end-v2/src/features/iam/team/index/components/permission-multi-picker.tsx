@@ -254,7 +254,6 @@ function PermissionMultiPicker<TOption extends { id: string; name: string }>({
         items={selected}
         getKey={(option) => option.id}
         getLabel={(option) => option.name}
-        getDescription={(option) => option.id}
         heading={
           <>
             {label}
