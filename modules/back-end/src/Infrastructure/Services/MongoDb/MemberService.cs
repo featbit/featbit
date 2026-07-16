@@ -187,7 +187,17 @@ public class MemberService(MongoDbClient mongoDb) : IMemberService
 
     public async Task<IEnumerable<Policy>> GetPoliciesAsync(Guid organizationId, Guid memberId)
     {
-        // direct policies
+        var assignments = await GetPermissionAssignmentsAsync(organizationId, memberId);
+
+        return assignments
+            .GroupBy(x => x.Policy.Id)
+            .Select(x => x.First().Policy);
+    }
+
+    public async Task<IReadOnlyCollection<MemberPermissionPolicyAssignment>> GetPermissionAssignmentsAsync(
+        Guid organizationId,
+        Guid memberId)
+    {
         var policies = mongoDb.QueryableOf<Policy>();
         var memberPolicies = mongoDb.QueryableOf<MemberPolicy>();
 
@@ -212,14 +222,38 @@ public class MemberService(MongoDbClient mongoDb) : IMemberService
             join policy in policies
                 on groupPolicy.PolicyId equals policy.Id
             where groupMember.OrganizationId == organizationId && groupMember.MemberId == memberId
-            select policy;
+            select new
+            {
+                GroupId = theGroup.Id,
+                GroupName = theGroup.Name,
+                Policy = policy
+            };
 
         var directPolicies = await directPolicyQuery.ToListAsync();
         var inheritedPolicies = await inheritedPolicyQuery.ToListAsync();
 
-        // distinct by policy name
-        var allPolicies = directPolicies.Concat(inheritedPolicies).GroupBy(x => x.Name).Select(x => x.First());
-        return allPolicies;
+        var assignments = directPolicies
+            .Select(policy => new MemberPermissionPolicyAssignment
+            {
+                Policy = policy,
+                Source = new MemberPermissionSourceVm
+                {
+                    AssignmentType = MemberPermissionAssignmentTypes.Direct
+                }
+            })
+            .Concat(inheritedPolicies.Select(x => new MemberPermissionPolicyAssignment
+            {
+                Policy = x.Policy,
+                Source = new MemberPermissionSourceVm
+                {
+                    AssignmentType = MemberPermissionAssignmentTypes.Group,
+                    GroupId = x.GroupId,
+                    GroupName = x.GroupName
+                }
+            }))
+            .ToArray();
+
+        return assignments;
     }
 
     public async Task<PolicyStatement[]> GetPermissionsAsync(Guid organizationId, Guid memberId)

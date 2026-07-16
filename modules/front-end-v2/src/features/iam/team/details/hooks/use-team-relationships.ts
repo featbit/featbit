@@ -95,7 +95,11 @@ export function useTeamRelationships({
   }, [memberId])
 
   const loadRelationships = useCallback(() => {
-    if (!memberId) return
+    if (!memberId || activeTab === "permissions") {
+      setLoading(false)
+      setError(false)
+      return
+    }
     setLoading(true)
     setError(false)
 

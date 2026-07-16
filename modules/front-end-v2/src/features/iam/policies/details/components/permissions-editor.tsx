@@ -10,9 +10,9 @@ import {
   ShieldAlert,
   Trash2,
 } from "lucide-react"
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import { toast } from "sonner"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
@@ -85,6 +85,7 @@ export function PermissionsEditor({
 }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const [statements, setStatements] = useState<PolicyStatement[]>(
     policy?.statements ?? []
   )
@@ -92,6 +93,27 @@ export function PermissionsEditor({
   const [saving, setSaving] = useState(false)
   const [cloneOpen, setCloneOpen] = useState(false)
   const [showErrors, setShowErrors] = useState(false)
+  const handledStatementHighlight = useRef("")
+  const requestedStatementIds = useMemo(
+    () =>
+      Array.from(new Set(searchParams.getAll("statementId").filter(Boolean))),
+    [searchParams]
+  )
+  const requestedFocusStatementId =
+    searchParams.get("focusStatementId")?.trim() ?? ""
+  const requestedStatementKey = JSON.stringify([
+    requestedFocusStatementId,
+    ...requestedStatementIds,
+  ])
+  const highlightedStatementIds = useMemo(
+    () =>
+      new Set(
+        requestedStatementIds.filter((id) =>
+          statements.some((statement) => statement.id === id)
+        )
+      ),
+    [requestedStatementIds, statements]
+  )
 
   const original = JSON.stringify(policy?.statements ?? [])
   const current = JSON.stringify(statements)
@@ -115,6 +137,56 @@ export function PermissionsEditor({
     license,
     getLicenseStatus(license)
   )
+
+  useEffect(() => {
+    if (
+      !policy ||
+      !requestedStatementKey ||
+      handledStatementHighlight.current === requestedStatementKey
+    ) {
+      return
+    }
+
+    const availableStatementIds = new Set(
+      policy.statements?.map((statement) => statement.id) ?? []
+    )
+    const focusStatementId =
+      requestedFocusStatementId &&
+      requestedStatementIds.includes(requestedFocusStatementId) &&
+      availableStatementIds.has(requestedFocusStatementId)
+        ? requestedFocusStatementId
+        : requestedStatementIds.find((id) => availableStatementIds.has(id))
+
+    if (!focusStatementId) {
+      handledStatementHighlight.current = requestedStatementKey
+      toast.info(
+        t("iam.policies.details.permissionsEditor.matchedStatementUnavailable")
+      )
+      return
+    }
+
+    const frame = window.requestAnimationFrame(() => {
+      handledStatementHighlight.current = requestedStatementKey
+      setExpandedId(focusStatementId)
+      document
+        .getElementById(statementRowId(focusStatementId))
+        ?.scrollIntoView({
+          block: "center",
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
+            .matches
+            ? "auto"
+            : "smooth",
+        })
+    })
+
+    return () => window.cancelAnimationFrame(frame)
+  }, [
+    policy,
+    requestedFocusStatementId,
+    requestedStatementIds,
+    requestedStatementKey,
+    t,
+  ])
 
   function updateStatement(id: string, patch: Partial<PolicyStatement>) {
     setStatements((items) =>
@@ -261,6 +333,7 @@ export function PermissionsEditor({
                     index={index}
                     statement={statement}
                     expanded={expanded}
+                    highlighted={highlightedStatementIds.has(statement.id)}
                     readOnly={readOnly}
                     invalid={statementInvalid}
                     fineGrainedGranted={fineGrainedGranted}
@@ -314,6 +387,7 @@ function PermissionRows({
   index,
   statement,
   expanded,
+  highlighted,
   readOnly,
   invalid,
   fineGrainedGranted,
@@ -325,6 +399,7 @@ function PermissionRows({
   index: number
   statement: PolicyStatement
   expanded: boolean
+  highlighted: boolean
   readOnly: boolean
   invalid: boolean
   fineGrainedGranted: boolean
@@ -379,8 +454,13 @@ function PermissionRows({
   return (
     <>
       <TableRow
+        id={statementRowId(statement.id)}
         aria-expanded={expanded}
-        className={cn(expanded && "border-b-0 bg-muted/30")}
+        className={cn(
+          expanded && "border-b-0 bg-muted/30",
+          highlighted &&
+            "bg-primary/[0.04] hover:bg-primary/[0.06] dark:bg-primary/[0.08] dark:hover:bg-primary/[0.1]"
+        )}
       >
         <TableCell>
           <Button
@@ -396,16 +476,26 @@ function PermissionRows({
           </Button>
         </TableCell>
         <TableCell>
-          <Badge
-            variant="outline"
-            className={cn(
-              statement.effect === "allow"
-                ? "border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300"
-                : "border-red-300 bg-red-50 text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300"
-            )}
-          >
-            {t(`iam.policies.details.permissionsEditor.${statement.effect}`)}
-          </Badge>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <Badge
+              variant="outline"
+              className={cn(
+                statement.effect === "allow"
+                  ? "border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300"
+                  : "border-red-300 bg-red-50 text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300"
+              )}
+            >
+              {t(`iam.policies.details.permissionsEditor.${statement.effect}`)}
+            </Badge>
+            {highlighted ? (
+              <Badge
+                variant="secondary"
+                className="border border-border bg-background/80 font-normal text-muted-foreground"
+              >
+                {t("iam.policies.details.permissionsEditor.matchedStatement")}
+              </Badge>
+            ) : null}
+          </div>
         </TableCell>
         <TableCell className="max-w-80">
           <div
@@ -469,7 +559,13 @@ function PermissionRows({
         </TableCell>
       </TableRow>
       {expanded ? (
-        <TableRow className="bg-muted/30 hover:bg-muted/30">
+        <TableRow
+          className={cn(
+            "bg-muted/30 hover:bg-muted/30",
+            highlighted &&
+              "bg-primary/[0.04] hover:bg-primary/[0.06] dark:bg-primary/[0.08] dark:hover:bg-primary/[0.1]"
+          )}
+        >
           <TableCell colSpan={5} className="p-0 whitespace-normal">
             <div className="grid gap-5 border-t px-5 py-5 lg:grid-cols-[12rem_minmax(0,1fr)_minmax(0,1fr)]">
               <div className="space-y-2">
@@ -579,6 +675,10 @@ function PermissionRows({
       ) : null}
     </>
   )
+}
+
+function statementRowId(statementId: string) {
+  return `policy-statement-${statementId}`
 }
 
 function CollapsedActionsSummary({

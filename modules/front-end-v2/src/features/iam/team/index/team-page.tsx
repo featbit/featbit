@@ -134,7 +134,7 @@ export function TeamPage() {
           <Link
             to={localizedPath(
               lang,
-              `/iam/team/${encodeURIComponent(row.original.id)}/groups`
+              `/iam/team/${encodeURIComponent(row.original.id)}/permissions`
             )}
             className={cn(
               "font-semibold text-foreground hover:underline",
@@ -172,7 +172,7 @@ export function TeamPage() {
             <Link
               to={localizedPath(
                 lang,
-                `/iam/team/${encodeURIComponent(row.original.id)}/groups`
+                `/iam/team/${encodeURIComponent(row.original.id)}/permissions`
               )}
               className={cn(
                 buttonVariants({ variant: "ghost", size: "sm" }),

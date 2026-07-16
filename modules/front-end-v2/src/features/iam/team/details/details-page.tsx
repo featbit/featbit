@@ -27,6 +27,7 @@ import { TeamRelationships } from "./components/team-relationships"
 import type { TeamDetailTab } from "./details-types"
 
 const validTabs = new Set<TeamDetailTab>([
+  "permissions",
   "groups",
   "direct-policies",
   "inherited-policies",
@@ -40,7 +41,7 @@ export function TeamDetailsPage() {
   const memberId = params.memberId ?? ""
   const requestedTab = params.tab as TeamDetailTab | undefined
   const activeTab =
-    requestedTab && validTabs.has(requestedTab) ? requestedTab : "groups"
+    requestedTab && validTabs.has(requestedTab) ? requestedTab : "permissions"
   const profile = useMemo(() => getStoredUserProfile(), [])
 
   const [member, setMember] = useState<TeamMember | null>(null)
@@ -53,7 +54,7 @@ export function TeamDetailsPage() {
 
   useEffect(() => {
     if (!requestedTab || !validTabs.has(requestedTab)) {
-      navigate(localizedPath(lang, `/iam/team/${memberId}/groups`), {
+      navigate(localizedPath(lang, `/iam/team/${memberId}/permissions`), {
         replace: true,
       })
     }

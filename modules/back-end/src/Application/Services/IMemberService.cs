@@ -19,6 +19,10 @@ public interface IMemberService
 
     Task<IEnumerable<Policy>> GetPoliciesAsync(Guid organizationId, Guid memberId);
 
+    Task<IReadOnlyCollection<MemberPermissionPolicyAssignment>> GetPermissionAssignmentsAsync(
+        Guid organizationId,
+        Guid memberId);
+
     Task<PolicyStatement[]> GetPermissionsAsync(Guid organizationId, Guid memberId);
 
     Task<PagedResult<MemberPolicyVm>> GetDirectPoliciesAsync(Guid organizationId, Guid memberId, MemberPolicyFilter filter);

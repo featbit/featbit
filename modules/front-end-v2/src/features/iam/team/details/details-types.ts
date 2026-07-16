@@ -1,1 +1,2 @@
-export type TeamDetailTab = "groups" | "direct-policies" | "inherited-policies"
+export type TeamDetailTab =
+  "permissions" | "groups" | "direct-policies" | "inherited-policies"
