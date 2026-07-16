@@ -2,6 +2,7 @@ import { Plus, Search } from "lucide-react"
 import { useCallback, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
+import { useQueryClient } from "@tanstack/react-query"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -17,6 +18,10 @@ import {
   useTeamRelationships,
   type TeamRelationshipRemoveTarget,
 } from "../hooks/use-team-relationships"
+import {
+  clearRelationshipOptionsCache,
+  prefetchRelationshipOptions,
+} from "../relationship-options-cache"
 import { DetailsPagination } from "./details-pagination"
 import { DirectPoliciesTab } from "./direct-policies-tab"
 import { GroupsTab } from "./groups-tab"
@@ -38,11 +43,40 @@ export function TeamRelationships({
   onTabChange: (tab: TeamDetailTab) => void
 }) {
   const { t } = useTranslation()
+  const queryClient = useQueryClient()
   const relationships = useTeamRelationships({ memberId, activeTab })
   const [groupSheetOpen, setGroupSheetOpen] = useState(false)
   const [policySheetOpen, setPolicySheetOpen] = useState(false)
   const [removeTarget, setRemoveTarget] =
     useState<TeamRelationshipRemoveTarget | null>(null)
+  const groupOptionsCacheKey = `team:${memberId}:groups`
+  const policyOptionsCacheKey = `team:${memberId}:policies`
+
+  const prefetchGroups = useCallback(() => {
+    void prefetchRelationshipOptions(
+      queryClient,
+      groupOptionsCacheKey,
+      relationships.loadGroupOptions
+    )
+  }, [groupOptionsCacheKey, queryClient, relationships.loadGroupOptions])
+
+  const prefetchPolicies = useCallback(() => {
+    void prefetchRelationshipOptions(
+      queryClient,
+      policyOptionsCacheKey,
+      relationships.loadPolicyOptions
+    )
+  }, [policyOptionsCacheKey, queryClient, relationships.loadPolicyOptions])
+
+  const openGroupSheet = useCallback(() => {
+    prefetchGroups()
+    setGroupSheetOpen(true)
+  }, [prefetchGroups])
+
+  const openPolicySheet = useCallback(() => {
+    prefetchPolicies()
+    setPolicySheetOpen(true)
+  }, [prefetchPolicies])
 
   const copyRowResource = useCallback(
     async (value: string) => {
@@ -70,12 +104,14 @@ export function TeamRelationships({
 
   async function addGroups(selected: RelationshipOption[]) {
     if (await relationships.addGroups(selected)) {
+      clearRelationshipOptionsCache(queryClient, groupOptionsCacheKey)
       setGroupSheetOpen(false)
     }
   }
 
   async function addPolicies(selected: RelationshipOption[]) {
     if (await relationships.addPolicies(selected)) {
+      clearRelationshipOptionsCache(queryClient, policyOptionsCacheKey)
       setPolicySheetOpen(false)
     }
   }
@@ -83,6 +119,12 @@ export function TeamRelationships({
   async function confirmRemove() {
     if (!removeTarget) return
     if (await relationships.removeRelationship(removeTarget)) {
+      clearRelationshipOptionsCache(
+        queryClient,
+        removeTarget.kind === "group"
+          ? groupOptionsCacheKey
+          : policyOptionsCacheKey
+      )
       setRemoveTarget(null)
     }
   }
@@ -114,12 +156,12 @@ export function TeamRelationships({
     : activeTab === "groups"
       ? {
           label: t("iam.team.details.addToGroups"),
-          onClick: () => setGroupSheetOpen(true),
+          onClick: openGroupSheet,
         }
       : activeTab === "direct-policies"
         ? {
             label: t("iam.team.details.addPolicy"),
-            onClick: () => setPolicySheetOpen(true),
+            onClick: openPolicySheet,
           }
         : undefined
 
@@ -164,12 +206,22 @@ export function TeamRelationships({
           />
         </div>
         {activeTab === "groups" ? (
-          <Button type="button" onClick={() => setGroupSheetOpen(true)}>
+          <Button
+            type="button"
+            onPointerEnter={prefetchGroups}
+            onFocus={prefetchGroups}
+            onClick={openGroupSheet}
+          >
             <Plus className="size-4" />
             {t("iam.team.details.addToGroups")}
           </Button>
         ) : activeTab === "direct-policies" ? (
-          <Button type="button" onClick={() => setPolicySheetOpen(true)}>
+          <Button
+            type="button"
+            onPointerEnter={prefetchPolicies}
+            onFocus={prefetchPolicies}
+            onClick={openPolicySheet}
+          >
             <Plus className="size-4" />
             {t("iam.team.details.addPolicy")}
           </Button>
@@ -240,6 +292,7 @@ export function TeamRelationships({
           open={groupSheetOpen}
           title={t("iam.team.details.addGroupsTitle", { name: memberName })}
           kind="groups"
+          cacheKey={groupOptionsCacheKey}
           saving={relationships.saving}
           loadOptions={relationships.loadGroupOptions}
           onOpenChange={setGroupSheetOpen}
@@ -252,6 +305,7 @@ export function TeamRelationships({
           open={policySheetOpen}
           title={t("iam.team.details.addPoliciesTitle", { name: memberName })}
           kind="policies"
+          cacheKey={policyOptionsCacheKey}
           saving={relationships.saving}
           loadOptions={relationships.loadPolicyOptions}
           onOpenChange={setPolicySheetOpen}

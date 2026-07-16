@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
 import { toast } from "sonner"
+import { useQueryClient } from "@tanstack/react-query"
 import type { ColumnDef } from "@tanstack/react-table"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -16,6 +17,10 @@ import { RelationshipPickerSheet as MemberPickerSheet } from "@/features/iam/gro
 import { RelationshipPickerSheet as GroupPickerSheet } from "@/features/iam/team/details/components/relationship-picker-sheet"
 import { DetailsDataTable } from "@/features/iam/team/details/components/details-data-table"
 import { DetailsPagination } from "@/features/iam/team/details/components/details-pagination"
+import {
+  clearRelationshipOptionsCache,
+  prefetchRelationshipOptions,
+} from "@/features/iam/team/details/relationship-options-cache"
 import { localizedPath } from "@/features/layout/layout-context"
 import type { Lang } from "@/features/layout/layout-types"
 import { cn } from "@/lib/utils"
@@ -57,6 +62,7 @@ export function PolicyRelationships({
   onCountsChange: (counts: { team: number; groups: number }) => void
 }) {
   const { t } = useTranslation()
+  const queryClient = useQueryClient()
   const [search, setSearch] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
   const [pageIndex, setPageIndex] = useState(1)
@@ -70,6 +76,7 @@ export function PolicyRelationships({
   const [savingPicker, setSavingPicker] = useState(false)
   const [removeTarget, setRemoveTarget] = useState<RemoveTarget>(null)
   const [removing, setRemoving] = useState(false)
+  const groupOptionsCacheKey = `policy:${policyId}:groups`
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
@@ -280,6 +287,19 @@ export function PolicyRelationships({
     [policyId]
   )
 
+  const prefetchGroupPicker = useCallback(() => {
+    void prefetchRelationshipOptions(
+      queryClient,
+      groupOptionsCacheKey,
+      loadGroupOptions
+    )
+  }, [groupOptionsCacheKey, loadGroupOptions, queryClient])
+
+  const openGroupPicker = useCallback(() => {
+    prefetchGroupPicker()
+    setGroupPickerOpen(true)
+  }, [prefetchGroupPicker])
+
   async function addMembers(selected: RelationshipOption[]) {
     setSavingPicker(true)
     try {
@@ -305,6 +325,7 @@ export function PolicyRelationships({
         policyId,
         selected.map((item) => item.id)
       )
+      clearRelationshipOptionsCache(queryClient, groupOptionsCacheKey)
       toast.success(t("iam.policies.operationSucceeded"))
       setGroupPickerOpen(false)
       loadRelationships()
@@ -324,6 +345,7 @@ export function PolicyRelationships({
         await removePolicyFromMember(policyId, removeTarget.id)
       } else {
         await removePolicyFromGroup(policyId, removeTarget.id)
+        clearRelationshipOptionsCache(queryClient, groupOptionsCacheKey)
       }
       toast.success(t("iam.policies.operationSucceeded"))
       setRemoveTarget(null)
@@ -364,10 +386,12 @@ export function PolicyRelationships({
         </div>
         <Button
           type="button"
+          onPointerEnter={
+            activeTab === "groups" ? prefetchGroupPicker : undefined
+          }
+          onFocus={activeTab === "groups" ? prefetchGroupPicker : undefined}
           onClick={() =>
-            activeTab === "team"
-              ? setMemberPickerOpen(true)
-              : setGroupPickerOpen(true)
+            activeTab === "team" ? setMemberPickerOpen(true) : openGroupPicker()
           }
         >
           <Plus className="size-4" />
@@ -405,7 +429,7 @@ export function PolicyRelationships({
           emptyMessage={emptyMessage}
           emptyAction={{
             label: t("iam.team.details.addToGroups"),
-            onClick: () => setGroupPickerOpen(true),
+            onClick: openGroupPicker,
           }}
         />
       )}
@@ -458,6 +482,7 @@ export function PolicyRelationships({
           name: policyName,
         })}
         kind="groups"
+        cacheKey={groupOptionsCacheKey}
         saving={savingPicker}
         loadOptions={loadGroupOptions}
         onOpenChange={setGroupPickerOpen}
