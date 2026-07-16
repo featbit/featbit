@@ -56,9 +56,5 @@ export function fetchPermissionResources(name: string, type: ResourceType) {
   const params = new URLSearchParams()
   if (name) params.set("name", name)
   params.set("type", type)
-  return fetchApi<PolicyResource[]>(
-    `/api/v1/resources?${params.toString()}`
-  ).then((resources) =>
-    resources.filter((resource) => !resource.rn.includes("*"))
-  )
+  return fetchApi<PolicyResource[]>(`/api/v1/resources?${params.toString()}`)
 }

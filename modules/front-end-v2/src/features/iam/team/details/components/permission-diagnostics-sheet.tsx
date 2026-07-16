@@ -352,6 +352,9 @@ function ResourceCombobox({
   const [options, setOptions] = useState<PolicyResource[]>([])
   const [loading, setLoading] = useState(false)
   const requestVersion = useRef(0)
+  const selectedResourceLabel = value
+    ? resourceOptionLabel(value, type, t)
+    : t("iam.team.details.selectResource")
 
   useEffect(() => {
     if (!open) return
@@ -385,33 +388,17 @@ function ResourceCombobox({
             variant="outline"
             className="h-8 w-full justify-between bg-background px-2.5 font-normal"
             aria-expanded={open}
+            aria-label={
+              value
+                ? `${selectedResourceLabel}: ${value.rn}`
+                : selectedResourceLabel
+            }
           >
-            <Tooltip>
-              <TooltipTrigger
-                render={
-                  <span
-                    tabIndex={0}
-                    className={
-                      value
-                        ? "truncate outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
-                        : "truncate text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
-                    }
-                  />
-                }
-              >
-                {value?.name ?? t("iam.team.details.selectResource")}
-              </TooltipTrigger>
-              {value ? (
-                <TooltipContent className="max-w-[min(26rem,calc(100vw-2rem))]">
-                  <p className="font-medium [overflow-wrap:anywhere] break-words">
-                    {value.name}
-                  </p>
-                  <p className="mt-0.5 font-mono text-xs break-all opacity-80">
-                    {value.rn}
-                  </p>
-                </TooltipContent>
-              ) : null}
-            </Tooltip>
+            <span
+              className={value ? "truncate" : "truncate text-muted-foreground"}
+            >
+              {selectedResourceLabel}
+            </span>
             <ChevronsUpDown className="size-4 shrink-0 text-muted-foreground" />
           </Button>
         }
@@ -430,7 +417,9 @@ function ResourceCombobox({
           <SelectableCommandList
             items={options}
             getKey={(item) => item.rn}
-            getValue={(item) => `${item.name} ${item.rn}`}
+            getValue={(item) =>
+              `${resourceOptionLabel(item, type, t)} ${item.rn}`
+            }
             isSelected={(item) => item.rn === value?.rn}
             onSelect={(item) => {
               onChange(item)
@@ -449,7 +438,7 @@ function ResourceCombobox({
             renderItem={(item) => (
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium [overflow-wrap:anywhere] break-words">
-                  {item.name}
+                  {resourceOptionLabel(item, type, t)}
                 </p>
                 <p className="font-mono text-xs break-all text-muted-foreground">
                   {item.rn}
@@ -678,6 +667,16 @@ function allResourcesLabel(resourceType: ResourceType, t: TFunction) {
   return t("iam.team.details.allResourcesOfType", {
     type: pluralType,
   })
+}
+
+function resourceOptionLabel(
+  resource: PolicyResource,
+  resourceType: ResourceType,
+  t: TFunction
+) {
+  return isWildcardResource(resource.rn)
+    ? allResourcesLabel(resourceType, t)
+    : resource.name
 }
 
 function WildcardResourceValue({
