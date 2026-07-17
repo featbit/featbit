@@ -1,5 +1,11 @@
-import { ListChecks, Search, ShieldCheck } from "lucide-react"
-import { useMemo, useState } from "react"
+import {
+  ChevronDown,
+  ChevronRight,
+  ListChecks,
+  Search,
+  ShieldCheck,
+} from "lucide-react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
 import { Badge } from "@/components/ui/badge"
@@ -33,6 +39,7 @@ import {
   permissionActionFallback,
 } from "../permissions-model"
 import { PermissionDiagnosticsSheet } from "./permission-diagnostics-sheet"
+import { PermissionStatementDetails } from "./permission-statement-details"
 
 export function PermissionsTab({
   memberId,
@@ -52,6 +59,9 @@ export function PermissionsTab({
   const { t } = useTranslation()
   const [search, setSearch] = useState("")
   const [diagnosticsOpen, setDiagnosticsOpen] = useState(false)
+  const [expandedPermissionKey, setExpandedPermissionKey] = useState<
+    string | null
+  >(null)
 
   const filteredItems = useMemo(
     () =>
@@ -113,19 +123,24 @@ export function PermissionsTab({
       ) : null}
 
       <div className="overflow-hidden rounded-lg border">
-        <Table className="min-w-[880px] table-fixed">
+        <Table className="min-w-[960px] table-fixed">
           <TableHeader>
             <TableRow className="hover:bg-transparent">
-              <TableHead className="w-[12%] px-5 py-3 font-semibold">
+              <TableHead className="w-[5%] px-1 py-3">
+                <span className="sr-only">
+                  {t("iam.team.details.permissionDetails")}
+                </span>
+              </TableHead>
+              <TableHead className="w-[11%] px-5 py-3 font-semibold">
                 {t("iam.team.details.effect")}
               </TableHead>
-              <TableHead className="w-[29%] px-5 py-3 font-semibold">
+              <TableHead className="w-[28%] px-5 py-3 font-semibold">
                 {t("iam.team.details.resourceScope")}
               </TableHead>
-              <TableHead className="w-[31%] px-5 py-3 font-semibold">
+              <TableHead className="w-[30%] px-5 py-3 font-semibold">
                 {t("iam.team.details.actions")}
               </TableHead>
-              <TableHead className="w-[28%] px-5 py-3 font-semibold">
+              <TableHead className="w-[26%] px-5 py-3 font-semibold">
                 {t("iam.team.details.grantedThrough")}
               </TableHead>
             </TableRow>
@@ -134,6 +149,9 @@ export function PermissionsTab({
             {loading ? (
               Array.from({ length: 4 }).map((_, index) => (
                 <TableRow key={index}>
+                  <TableCell className="px-1 py-4">
+                    <Skeleton className="mx-auto size-7 rounded-md" />
+                  </TableCell>
                   <TableCell className="px-5 py-4">
                     <Skeleton className="h-5 w-14 rounded-full" />
                   </TableCell>
@@ -152,17 +170,26 @@ export function PermissionsTab({
                 </TableRow>
               ))
             ) : filteredItems.length ? (
-              filteredItems.map((permission) => (
-                <PermissionRow
-                  key={`${permission.policyId}:${permission.statementId}`}
-                  permission={permission}
-                  lang={lang}
-                  t={t}
-                />
-              ))
+              filteredItems.map((permission) => {
+                const rowKey = permissionRowKey(permission)
+                const expanded = expandedPermissionKey === rowKey
+
+                return (
+                  <PermissionRow
+                    key={rowKey}
+                    permission={permission}
+                    lang={lang}
+                    t={t}
+                    expanded={expanded}
+                    onToggle={() =>
+                      setExpandedPermissionKey(expanded ? null : rowKey)
+                    }
+                  />
+                )
+              })
             ) : (
               <TableRow className="hover:bg-transparent">
-                <TableCell colSpan={4} className="h-40 px-5 text-center">
+                <TableCell colSpan={5} className="h-40 px-5 text-center">
                   <div className="mx-auto max-w-sm whitespace-normal">
                     <p className="text-sm font-medium">
                       {search
@@ -196,10 +223,14 @@ function PermissionRow({
   permission,
   lang,
   t,
+  expanded,
+  onToggle,
 }: {
   permission: MemberPermission
   lang: Lang
   t: TFunction
+  expanded: boolean
+  onToggle: () => void
 }) {
   const allResources = isAllResourceScope(
     permission.resourceType,
@@ -225,76 +256,119 @@ function PermissionRow({
     lang,
     `/iam/policies/${encodeURIComponent(permission.policyId)}/permission`
   )}?${statementSearch.toString()}`
+  const detailsId = permissionDetailsId(permission)
 
   return (
-    <TableRow>
-      <TableCell className="px-5 py-4 align-top">
-        <Badge
-          variant="outline"
-          className={
-            permission.effect === "allow"
-              ? "border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
-              : "border-red-300 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950/40 dark:text-red-300"
-          }
-        >
-          {permission.effect === "allow"
-            ? t("iam.team.details.allow")
-            : t("iam.team.details.deny")}
-        </Badge>
-      </TableCell>
-      <TableCell className="px-5 py-4 align-top whitespace-normal">
-        <SummaryCell
-          title={
-            allResources
-              ? t("iam.team.details.allResourcesByType", {
-                  type: resourceType,
-                })
-              : t("iam.team.details.resourcesSelected", {
-                  count: permission.resources.length,
-                  type: selectedResourceType,
-                })
-          }
-          values={allResources ? [] : resourceNames}
-          rawValues={allResources ? permission.resources : permission.resources}
-          visibleCount={2}
-          t={t}
-        />
-      </TableCell>
-      <TableCell className="px-5 py-4 align-top whitespace-normal">
-        <SummaryCell
-          title={
-            allActions
-              ? t("iam.team.details.allActions")
-              : t("iam.team.details.actionsSelected", {
-                  count: permission.actions.length,
-                })
-          }
-          values={allActions ? [] : actionNames}
-          rawValues={permission.actions}
-          visibleCount={3}
-          t={t}
-        />
-      </TableCell>
-      <TableCell className="px-5 py-4 align-top whitespace-normal">
-        <Tooltip>
-          <TooltipTrigger
-            render={
-              <Link
-                to={policyUrl}
-                className="block truncate text-sm font-semibold text-foreground hover:underline"
-              />
+    <>
+      <TableRow
+        aria-expanded={expanded}
+        className={
+          expanded
+            ? "border-b-0 bg-muted/30 hover:bg-muted/30 has-aria-expanded:bg-muted/30"
+            : undefined
+        }
+      >
+        <TableCell className="px-1 py-2 align-middle">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="mx-auto size-11 shrink-0"
+            aria-expanded={expanded}
+            aria-controls={detailsId}
+            aria-label={t(
+              expanded
+                ? "iam.team.details.collapsePermission"
+                : "iam.team.details.expandPermission",
+              { policy: permission.policyName }
+            )}
+            onClick={onToggle}
+          >
+            {expanded ? (
+              <ChevronDown className="size-4" />
+            ) : (
+              <ChevronRight className="size-4" />
+            )}
+          </Button>
+        </TableCell>
+        <TableCell className="px-5 py-4 align-top">
+          <Badge
+            variant="outline"
+            className={
+              permission.effect === "allow"
+                ? "border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
+                : "border-red-300 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950/40 dark:text-red-300"
             }
           >
+            {permission.effect === "allow"
+              ? t("iam.team.details.allow")
+              : t("iam.team.details.deny")}
+          </Badge>
+        </TableCell>
+        <TableCell className="px-5 py-4 align-top whitespace-normal">
+          <SummaryCell
+            title={
+              allResources
+                ? t("iam.team.details.allResourcesByType", {
+                    type: resourceType,
+                  })
+                : t("iam.team.details.resourcesSelected", {
+                    count: permission.resources.length,
+                    type: selectedResourceType,
+                  })
+            }
+            values={allResources ? [] : resourceNames}
+            rawValues={
+              allResources ? permission.resources : permission.resources
+            }
+            visibleCount={2}
+          />
+        </TableCell>
+        <TableCell className="px-5 py-4 align-top whitespace-normal">
+          <SummaryCell
+            title={
+              allActions
+                ? t("iam.team.details.allActions")
+                : t("iam.team.details.actionsSelected", {
+                    count: permission.actions.length,
+                  })
+            }
+            values={allActions ? [] : actionNames}
+            rawValues={actionNames}
+            visibleCount={3}
+          />
+        </TableCell>
+        <TableCell className="px-5 py-4 align-top whitespace-normal">
+          <Link
+            to={policyUrl}
+            className="line-clamp-2 text-sm font-semibold [overflow-wrap:anywhere] text-foreground hover:underline"
+          >
             {permission.policyName}
-          </TooltipTrigger>
-          <TooltipContent className="max-w-[min(28rem,calc(100vw-2rem))] [overflow-wrap:anywhere] break-words">
-            {permission.policyName}
-          </TooltipContent>
-        </Tooltip>
-        <SourceSummary sources={permission.sources} t={t} />
-      </TableCell>
-    </TableRow>
+          </Link>
+          <SourceSummary sources={permission.sources} t={t} />
+        </TableCell>
+      </TableRow>
+      {expanded ? (
+        <TableRow className="bg-muted/30 hover:bg-muted/30">
+          <TableCell colSpan={5} className="p-0 whitespace-normal">
+            <PermissionStatementDetails
+              id={detailsId}
+              permission={permission}
+              t={t}
+            />
+          </TableCell>
+        </TableRow>
+      ) : null}
+    </>
   )
+}
+
+function permissionRowKey(permission: MemberPermission) {
+  return `${permission.policyId}:${permission.statementId}`
+}
+
+function permissionDetailsId(permission: MemberPermission) {
+  return `team-permission-${permissionRowKey(permission).replace(/[^a-zA-Z0-9_-]/g, "-")}`
 }
 
 function SummaryCell({
@@ -302,13 +376,11 @@ function SummaryCell({
   values,
   rawValues,
   visibleCount,
-  t,
 }: {
   title: string
   values: string[]
   rawValues: string[]
   visibleCount: number
-  t: TFunction
 }) {
   const visible = values.slice(0, visibleCount)
   const overflow = Math.max(0, values.length - visible.length)
@@ -317,54 +389,17 @@ function SummaryCell({
     <div className="min-w-0">
       <div className="flex min-w-0 items-center gap-2">
         <ListChecks className="size-4 shrink-0 text-muted-foreground" />
-        <Tooltip>
-          <TooltipTrigger
-            render={
-              <span
-                tabIndex={0}
-                className="truncate text-sm font-semibold outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
-              />
-            }
-          >
-            {title}
-          </TooltipTrigger>
-          <TooltipContent className="max-w-[min(28rem,calc(100vw-2rem))] break-words">
-            {title}
-          </TooltipContent>
-        </Tooltip>
+        <span className="truncate text-sm font-semibold">{title}</span>
       </div>
       {visible.length ? (
         <div className="mt-1 flex min-w-0 items-center gap-1.5 pl-6 text-xs leading-5 text-muted-foreground">
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <span
-                  tabIndex={0}
-                  className="truncate outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
-                />
-              }
-            >
-              {visible.join(", ")}
-            </TooltipTrigger>
-            <TooltipContent className="max-h-64 max-w-[min(28rem,calc(100vw-2rem))] [scrollbar-width:thin] overflow-y-auto p-3">
-              <ul className="space-y-1 font-mono text-xs">
-                {rawValues.slice(0, visible.length).map((value, index) => (
-                  <li
-                    key={`${value}:${index}`}
-                    className="[overflow-wrap:anywhere] break-words"
-                  >
-                    {value}
-                  </li>
-                ))}
-              </ul>
-            </TooltipContent>
-          </Tooltip>
+          <TruncatedListTooltip
+            text={visible.join(", ")}
+            values={rawValues}
+            enabled={overflow === 0}
+          />
           {overflow ? (
-            <OverflowTooltip
-              label={`+${overflow}`}
-              heading={t("iam.team.details.completeList")}
-              values={rawValues}
-            />
+            <OverflowTooltip label={`+${overflow}`} values={rawValues} />
           ) : null}
         </div>
       ) : null}
@@ -391,30 +426,11 @@ function SourceSummary({
 
   return (
     <div className="mt-1 flex min-w-0 items-center gap-1.5 text-xs leading-5 text-muted-foreground">
-      <Tooltip>
-        <TooltipTrigger
-          render={
-            <span
-              tabIndex={0}
-              className="truncate outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
-            />
-          }
-        >
-          {visible.join(" \u00b7 ")}
-        </TooltipTrigger>
-        <TooltipContent className="max-h-64 max-w-[min(28rem,calc(100vw-2rem))] [scrollbar-width:thin] overflow-y-auto p-3">
-          <ul className="space-y-1 text-xs">
-            {visible.map((value, index) => (
-              <li
-                key={`${value}:${index}`}
-                className="[overflow-wrap:anywhere] break-words"
-              >
-                {value}
-              </li>
-            ))}
-          </ul>
-        </TooltipContent>
-      </Tooltip>
+      <TruncatedListTooltip
+        text={visible.join(" \u00b7 ")}
+        values={labels}
+        enabled={overflow === 0}
+      />
       {overflow ? (
         <OverflowTooltip
           label={`+${overflow}`}
@@ -426,13 +442,71 @@ function SourceSummary({
   )
 }
 
+function TruncatedListTooltip({
+  text,
+  values,
+  enabled,
+}: {
+  text: string
+  values: string[]
+  enabled: boolean
+}) {
+  const triggerRef = useRef<HTMLSpanElement>(null)
+  const [truncated, setTruncated] = useState(false)
+
+  useEffect(() => {
+    const trigger = triggerRef.current
+    if (!trigger) return
+
+    const measure = () => {
+      setTruncated(trigger.scrollWidth > trigger.clientWidth + 1)
+    }
+
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(trigger)
+
+    return () => observer.disconnect()
+  }, [text])
+
+  const active = enabled && truncated
+
+  return (
+    <Tooltip disabled={!active}>
+      <TooltipTrigger
+        render={
+          <span
+            ref={triggerRef}
+            tabIndex={active ? 0 : undefined}
+            className="min-w-0 truncate outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+          />
+        }
+      >
+        {text}
+      </TooltipTrigger>
+      <TooltipContent className="max-h-64 max-w-[min(26rem,calc(100vw-2rem))] [scrollbar-width:thin] overflow-y-auto p-3">
+        <ul className="space-y-1 text-xs">
+          {values.map((value, index) => (
+            <li
+              key={`${value}:${index}`}
+              className="[overflow-wrap:anywhere] break-words"
+            >
+              {value}
+            </li>
+          ))}
+        </ul>
+      </TooltipContent>
+    </Tooltip>
+  )
+}
+
 function OverflowTooltip({
   label,
   heading,
   values,
 }: {
   label: string
-  heading: string
+  heading?: string
   values: string[]
 }) {
   return (
@@ -448,7 +522,7 @@ function OverflowTooltip({
         {label}
       </TooltipTrigger>
       <TooltipContent className="max-h-64 max-w-[min(26rem,calc(100vw-2rem))] [scrollbar-width:thin] overflow-y-auto p-3">
-        <p className="mb-1.5 font-medium">{heading}</p>
+        {heading ? <p className="mb-1.5 font-medium">{heading}</p> : null}
         <ul className="space-y-1 text-xs">
           {values.map((value, index) => (
             <li

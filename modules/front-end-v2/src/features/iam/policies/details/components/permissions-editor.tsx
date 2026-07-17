@@ -538,7 +538,8 @@ function PermissionRows({
                 )}
               </span>
               <OverflowBadge
-                items={resources.slice(3)}
+                items={resources}
+                overflowCount={Math.max(resources.length - 3, 0)}
                 ariaLabel={t(
                   "iam.policies.details.permissionsEditor.moreResources",
                   { count: Math.max(resources.length - 3, 0) }
@@ -730,7 +731,7 @@ function CollapsedActionsSummary({
   }
 
   const visibleActions = actions.slice(0, 3)
-  const remainingActions = actions.slice(3)
+  const overflowCount = Math.max(actions.length - 3, 0)
 
   return (
     <div className="min-w-0">
@@ -750,12 +751,13 @@ function CollapsedActionsSummary({
           )}
         </span>
         <OverflowBadge
-          items={remainingActions.map((action) => ({
+          items={actions.map((action) => ({
             key: action.name,
             label: action.label,
           }))}
+          overflowCount={overflowCount}
           ariaLabel={t("iam.policies.details.permissionsEditor.moreActions", {
-            count: remainingActions.length,
+            count: overflowCount,
           })}
         />
       </div>
@@ -765,12 +767,14 @@ function CollapsedActionsSummary({
 
 function OverflowBadge({
   items,
+  overflowCount,
   ariaLabel,
 }: {
   items: Array<{ key: string; label: string }>
+  overflowCount: number
   ariaLabel: string
 }) {
-  if (items.length === 0) return null
+  if (overflowCount === 0) return null
 
   return (
     <TooltipProvider>
@@ -785,7 +789,7 @@ function OverflowBadge({
             />
           }
         >
-          +{items.length}
+          +{overflowCount}
         </TooltipTrigger>
         <TooltipContent className="max-w-72 items-start p-1.5">
           <div className="max-h-[min(14rem,calc(var(--available-height)-0.75rem))] min-w-0 [scrollbar-gutter:stable] space-y-1 overflow-y-auto overscroll-contain px-1.5 py-0.5 pr-2">
