@@ -126,6 +126,7 @@ export function PermissionsEditor({
     () => parseLicense(getCurrentWorkspace()?.license),
     []
   )
+  const licenseStatus = getLicenseStatus(license)
   const fineGrainedGranted = isFeatureGranted(
     {
       id: "fine-grained-ac",
@@ -134,8 +135,14 @@ export function PermissionsEditor({
         "workspace.license.features.fineGrainedAccessControl.description",
     },
     license,
-    getLicenseStatus(license)
+    licenseStatus
   )
+  const hasFineGrainedStatements = statements.some(
+    (statement) =>
+      statement.resourceType === "flag" || statement.resourceType === "segment"
+  )
+  const showFineGrainedNotice =
+    !readOnly && !fineGrainedGranted && hasFineGrainedStatements
 
   useEffect(() => {
     if (
@@ -240,14 +247,18 @@ export function PermissionsEditor({
 
   return (
     <section className="space-y-4 py-4">
-      {!fineGrainedGranted ? (
+      {showFineGrainedNotice ? (
         <Alert className="border-amber-300 bg-amber-50 text-amber-950 dark:border-amber-800 dark:bg-amber-950/20 dark:text-amber-100">
           <ShieldAlert />
           <AlertTitle>
             {t("iam.policies.details.permissionsEditor.enterpriseTitle")}
           </AlertTitle>
           <AlertDescription className="text-amber-900/80 dark:text-amber-100/80">
-            {t("iam.policies.details.permissionsEditor.enterpriseDescription")}
+            {t(
+              licenseStatus === "expired"
+                ? "iam.policies.details.permissionsEditor.enterpriseExpiredDescription"
+                : "iam.policies.details.permissionsEditor.enterpriseDescription"
+            )}
           </AlertDescription>
         </Alert>
       ) : null}

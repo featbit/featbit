@@ -394,6 +394,8 @@ export const enIam = {
     "details.permissionsEditor.enterpriseTitle": "Fine-grained permissions",
     "details.permissionsEditor.enterpriseDescription":
       "Feature flag and segment resource permissions is a paid feature. Upgrade your plan to enable fine-grained access control.",
+    "details.permissionsEditor.enterpriseExpiredDescription":
+      "Your license has expired. Renew it to restore fine-grained access control for feature flag and segment resources.",
     "details.permissionsEditor.systemManagedTitle": "System-managed policy",
     "details.permissionsEditor.systemManagedDescription":
       "System-managed policies cannot be modified. Clone this policy to customize its permissions.",
@@ -822,6 +824,8 @@ export const zhIam = {
     "details.permissionsEditor.enterpriseTitle": "细粒度权限",
     "details.permissionsEditor.enterpriseDescription":
       "功能开关和用户组资源权限是付费功能，升级套餐即可启用细粒度访问控制。",
+    "details.permissionsEditor.enterpriseExpiredDescription":
+      "许可证已过期。续订许可证即可恢复功能开关和用户组资源的细粒度访问控制。",
     "details.permissionsEditor.systemManagedTitle": "系统托管策略",
     "details.permissionsEditor.systemManagedDescription":
       "系统托管策略无法修改。请克隆此策略以自定义其权限。",
