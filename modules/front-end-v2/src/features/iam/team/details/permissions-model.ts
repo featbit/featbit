@@ -50,7 +50,6 @@ export function matchesPermissionQuery(
     permission.policyType,
     permission.resourceType,
     ...permission.actions,
-    ...permission.resources,
     ...permission.sources.flatMap((source) => [
       source.assignmentType,
       source.groupName ?? "",

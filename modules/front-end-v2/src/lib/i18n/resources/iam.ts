@@ -82,7 +82,8 @@ export const enIam = {
       assignedPermissions: "Assigned permissions",
       assignedPermissionsDescription:
         "Permissions assigned directly or inherited through groups.",
-      filterPermissions: "Filter permissions",
+      filterPermissions: "Policy, resource, action, or group...",
+      searchPermissions: "Search permissions",
       checkAccess: "Check access",
       checkAccessDescription:
         "Evaluate whether this member can perform an action on a resource.",
@@ -523,7 +524,8 @@ export const zhIam = {
       permissions: "权限",
       assignedPermissions: "已分配权限",
       assignedPermissionsDescription: "直接分配或通过组继承的权限规则。",
-      filterPermissions: "筛选权限",
+      filterPermissions: "策略、资源、操作或用户组...",
+      searchPermissions: "搜索权限",
       checkAccess: "检查访问权限",
       checkAccessDescription: "检查该成员能否对指定资源执行某项操作。",
       effect: "效果",

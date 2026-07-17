@@ -58,6 +58,7 @@ export function PermissionsTab({
       items.filter((permission) =>
         matchesPermissionQuery(permission, search, [
           resourceTypeLabel(permission.resourceType, t),
+          ...permission.resources.map(resourceDisplayName),
           ...permission.actions.map((action) => actionLabel(action, t)),
           permission.effect === "allow"
             ? t("iam.team.details.allow")
@@ -84,6 +85,7 @@ export function PermissionsTab({
             <Input
               value={search}
               placeholder={t("iam.team.details.filterPermissions")}
+              aria-label={t("iam.team.details.searchPermissions")}
               className="pl-9"
               onChange={(event) => setSearch(event.target.value)}
             />

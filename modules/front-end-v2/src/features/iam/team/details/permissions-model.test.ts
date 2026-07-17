@@ -42,7 +42,14 @@ describe("permissions model", () => {
 
   it("matches policy, resource, action, source, and localized labels", () => {
     expect(matchesPermissionQuery(permission, "administrators")).toBe(true)
-    expect(matchesPermissionQuery(permission, "production")).toBe(true)
+    expect(
+      matchesPermissionQuery(permission, "production", ["production"])
+    ).toBe(true)
+    expect(
+      matchesPermissionQuery(permission, "project/demo:env/production", [
+        "production",
+      ])
+    ).toBe(false)
     expect(matchesPermissionQuery(permission, "UpdateEnvSettings")).toBe(true)
     expect(matchesPermissionQuery(permission, "platform team")).toBe(true)
     expect(
