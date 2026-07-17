@@ -34,7 +34,7 @@ FROM build AS publish
 ARG INSTALL_DIR
 WORKDIR /source/control-plane/src/Api
 
-RUN dotnet publish -a $TARGETARCH -o $INSTALL_DIR
+RUN dotnet publish -a $TARGETARCH --no-restore -o $INSTALL_DIR
 
 # final stage/image
 FROM mcr.microsoft.com/dotnet/aspnet:10.0
@@ -51,7 +51,7 @@ ENV ASPNETCORE_URLS=http://*:5200 \
     DOTNET_SHARED_STORE=$INSTALL_DIR/store \
     ENABLE_OPENTELEMETRY=false \
     OTEL_DOTNET_AUTO_HOME=$INSTALL_DIR \
-    OTEL_SERVICE_NAME=featbit-els \
+    OTEL_SERVICE_NAME=featbit-cp \
     OTEL_TRACES_EXPORTER=otlp \
     OTEL_METRICS_EXPORTER=otlp \
     OTEL_LOGS_EXPORTER=otlp \
@@ -62,6 +62,9 @@ ENV ASPNETCORE_URLS=http://*:5200 \
 ADD https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v${OTEL_VERSION}/otel-dotnet-auto-install.sh otel-dotnet-auto-install.sh
 RUN chmod +x otel-dotnet-auto-install.sh
 RUN ./otel-dotnet-auto-install.sh
+
+ARG VERSION=dev
+ENV VERSION=$VERSION
 
 WORKDIR $INSTALL_DIR
 COPY --from=publish $INSTALL_DIR ./
