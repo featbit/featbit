@@ -369,7 +369,7 @@ export function RelationshipPickerSheet({
           </Command>
         </div>
 
-        <SheetFooter className="border-t bg-background px-6 py-4 sm:flex-row sm:justify-end">
+        <SheetFooter className="bg-background px-6 py-4 sm:flex-row sm:justify-end">
           <Button
             type="button"
             disabled={!selected.length || saving}

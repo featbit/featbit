@@ -157,7 +157,7 @@ export function ClonePolicySheet({
             />
           </div>
         </form>
-        <SheetFooter className="border-t px-6 py-4 sm:flex-row sm:justify-end">
+        <SheetFooter className="px-6 py-4 sm:flex-row sm:justify-end">
           <Button
             type="button"
             variant="outline"
