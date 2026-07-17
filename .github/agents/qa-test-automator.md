@@ -67,7 +67,7 @@ Produce ready-to-run code following the matched patterns. Include:
 
 This repository contains multiple testing layers. Always match the right layer to the test being automated.
 
-### Python Scenario Automation (`control-plane-qa/automation-py/`)
+### Python Scenario Automation (`e2e/control-plane/automation-py/`)
 
 **Use for**: Cross-DC integration scenarios, control-plane correctness and resilience tests (CP-01, CP-02, CP-03 style tests).
 
@@ -134,7 +134,7 @@ This repository contains multiple testing layers. Always match the right layer t
 - **Style**: black (line-length 100), isort (profile black), flake8, mypy.
 - **Pytest markers**: `@pytest.mark.cp02`, `@pytest.mark.cp03`, `@pytest.mark.integration`.
 
-### Seed Data (`control-plane-qa/automation-py/scripts/seed_data.py`)
+### Seed Data (`e2e/control-plane/automation-py/scripts/seed_data.py`)
 
 **Use for**: Bootstrapping test data (organizations, projects, environments, feature flags) before scenario execution.
 
@@ -223,7 +223,7 @@ This repository contains multiple testing layers. Always match the right layer t
 - **Assertions**: Jasmine matchers (`expect().toBeTruthy()`, `.toEqual()`, `.toContain()`).
 - **File naming**: `[component-name].component.spec.ts`.
 
-### Manual QA Test Script Format (`control-plane-qa/manual_scripts/`)
+### Manual QA Test Script Format (`e2e/control-plane/manual_scripts/`)
 
 The manual test scripts follow this Markdown structure:
 
@@ -264,7 +264,7 @@ Narrative objective.
 
 1. **Always reuse existing utilities.** If `BaseScenario` has `toggle_flag()`, use it. If `AssertionRegistry` has `add_pass()`, use it. Never create parallel helpers.
 
-2. **Match file placement.** New Python scenarios go in `control-plane-qa/automation-py/scenarios/`. New C# tests go alongside existing test projects. New Angular specs go next to the component.
+2. **Match file placement.** New Python scenarios go in `e2e/control-plane/automation-py/scenarios/`. New C# tests go alongside existing test projects. New Angular specs go next to the component.
 
 3. **Match naming conventions exactly.**
    - Python scenarios: `cpXX.py` with `CPxxScenario` class.

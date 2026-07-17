@@ -146,7 +146,7 @@ Notes:
 
 When a control plane is deployed, the evaluation server participates in the cross-DC consistency
 machinery (see [`modules/control-plane/README.md`](../control-plane/README.md) and the
-[operator guide](../../control-plane-qa/00-Docs/GATED-COMMIT-CONSISTENCY.md)):
+[operator guide](../../e2e/control-plane/00-Docs/GATED-COMMIT-CONSISTENCY.md)):
 
 | Key | Default | Purpose |
 |---|---|---|

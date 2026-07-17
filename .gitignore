@@ -34,19 +34,19 @@ benchmark/k6-scripts/test-results/
 .idea/
 
 # Control-plane QA local artifacts (never commit)
-/control-plane-qa/deployment.env
-/control-plane-qa/port-forwards.log
-/control-plane-qa/windows-hyperv/.quickstart-state-hyperv.json
-/control-plane-qa/Setup Challenges.txt
+/e2e/control-plane/deployment.env
+/e2e/control-plane/port-forwards.log
+/e2e/control-plane/windows-hyperv/.quickstart-state-hyperv.json
+/e2e/control-plane/Setup Challenges.txt
 /build-featbit-images.ps1
 
 # Quickstart wizard progress state files (any platform subdir: ubuntu, windows-wsl, …)
-control-plane-qa/.quickstart-state-*.json
-control-plane-qa/**/.quickstart-state-*.json
+e2e/control-plane/.quickstart-state-*.json
+e2e/control-plane/**/.quickstart-state-*.json
 
 # otel-demo upstream source clone (fetched on demand by Build-OtelDemoImages.ps1)
-control-plane-qa/01-Infrastructure/otel-demo/build/
+e2e/control-plane/01-Infrastructure/otel-demo/build/
 
 # Automation test artifacts (scenario run outputs, timelines, assertion results)
-control-plane-qa/artifacts/
-control-plane-qa/01-Infrastructure/windows-hyperv/.quickstart-state-hyperv.json
+e2e/control-plane/artifacts/
+e2e/control-plane/01-Infrastructure/windows-hyperv/.quickstart-state-hyperv.json

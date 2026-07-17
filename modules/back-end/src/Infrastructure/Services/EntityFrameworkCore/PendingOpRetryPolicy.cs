@@ -19,7 +19,7 @@ namespace Infrastructure.Services.EntityFrameworkCore;
 /// If the budget is ever exhausted anyway (pathological contention), the caller logs an ERROR
 /// with actionable context and rethrows — see FeatureFlagService/SegmentService SetPendingAsync.
 /// The residual edge (an orphaned Redis stage, GC'd by StagedFlagGc) is documented in
-/// control-plane-qa/00-Docs/GATED-COMMIT-CONSISTENCY.md under Known limitations.
+/// e2e/control-plane/00-Docs/GATED-COMMIT-CONSISTENCY.md under Known limitations.
 /// </summary>
 internal static class PendingOpRetryPolicy
 {

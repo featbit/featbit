@@ -15,7 +15,8 @@ modules/
   control-plane/      # Cross-DC control plane API (.NET 8, C#)
   front-end/          # Web UI (Angular 19, TypeScript)
   data-analytics/     # Analytics server (Python 3.9+, Flask)
-control-plane-qa/     # QA infrastructure for multi-cluster testing
+e2e/
+  control-plane/  # Control-Plane infrastructure for multi-cluster testing
 ```
 
 **Data flow:** The API publishes changes to `cp-*` Kafka topics → the Control Plane consumes and updates Redis in all DCs, then republishes to default topics → Evaluation Servers push flag updates to SDK clients via WebSocket.
@@ -76,7 +77,7 @@ npm run i18n           # extract + validate i18n strings
 
 Python 3.9+ with Flask. Dependencies in `requirements.txt`.
 
-### QA Automation (`control-plane-qa/02-Tests/automation-py/`)
+### Control-Plane QA Automation (`e2e/control-plane/02-Tests/automation-py/`)
 
 Python 3.9–3.11, managed with Poetry. Uses pytest + Click CLI.
 

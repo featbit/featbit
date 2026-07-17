@@ -126,7 +126,7 @@ Kubernetes manifests are in `kubernetes/` (standard, pro, demo, minikube variant
 
 ## Control Plane QA
 
-The `control-plane-qa/` directory manages multi-cluster (west/east) Minikube deployments for
+The `e2e/control-plane/` directory manages multi-cluster (west/east) Minikube deployments for
 testing cross-datacenter feature flag propagation. It is organized into three numbered
 subdirectories:
 
@@ -150,7 +150,7 @@ version control as a durable record. When adding a new simulation writeup, put i
 `02-Tests/simulations/` and commit it; when a script/tool needs a scratch output location, use
 `artifacts/`.
 
-PowerShell scripts in `control-plane-qa/` use approved PowerShell verbs in their names (e.g.
+PowerShell scripts in `e2e/control-plane/` use approved PowerShell verbs in their names (e.g.
 `Deploy-`, `Initialize-`, `Start-`) and target multi-cluster Minikube deployments.
 
 ---

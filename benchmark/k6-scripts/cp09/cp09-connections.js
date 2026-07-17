@@ -2,7 +2,7 @@
  * Long-running WebSocket load and lifecycle observer for cp09-pod-heartbeats.
  *
  * The default mode targets the nginx active/active load balancer at
- * featbit-eval.local:80 (defined in control-plane-qa/01-Infrastructure/nginx.conf,
+ * featbit-eval.local:80 (defined in e2e/control-plane/01-Infrastructure/nginx.conf,
  * upstream featbit_eval round-robins across 127.0.0.1:5100 and 127.0.0.1:5101).
  * When the west pod dies, the nginx upstream health check (default 1 fail /
  * fail_timeout=10s) marks it down and routes new connections — including

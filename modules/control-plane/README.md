@@ -47,7 +47,7 @@ Key configuration (full reference in the operator guide linked below):
 | `Kafka:Consumer:group.id` | `featbit-control-plane` | Automatically suffixed with `Redis:Instances[0].DcId` when set, so control planes sharing a broker never collide |
 
 📖 **The canonical feature documentation is
-[`control-plane-qa/00-Docs/GATED-COMMIT-CONSISTENCY.md`](../../control-plane-qa/00-Docs/GATED-COMMIT-CONSISTENCY.md)** —
+[`e2e/control-plane/00-Docs/GATED-COMMIT-CONSISTENCY.md`](../../e2e/control-plane/00-Docs/GATED-COMMIT-CONSISTENCY.md)** —
 mechanism details, complete config reference, emitted metrics
 (`FeatBit.ControlPlane.Consistency` meter), rollout/rollback procedure, validation checklist,
 and known limitations. Rollback from `GatedCommit` is a config flip back to `BestEffort` with no

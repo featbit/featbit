@@ -4,7 +4,7 @@
 `cp09-pod-heartbeats`. By default it opens real FeatBit evaluation-server
 streaming connections through the nginx active/active load balancer at
 `featbit-eval.local:80` (defined in
-`control-plane-qa/01-Infrastructure/nginx.conf`, upstream `featbit_eval`
+`e2e/control-plane/01-Infrastructure/nginx.conf`, upstream `featbit_eval`
 round-robins across `127.0.0.1:5100` and `127.0.0.1:5101`). When the west pod
 dies, the nginx upstream marks it down (`max_fails=1` / `fail_timeout=10s` by
 default) and routes new connections — including VU reconnects — to east,
@@ -90,7 +90,7 @@ SDK streaming connections.
 ## Python automation
 
 The CP-09 scenario uses the `K6Runner` helper in
-`control-plane-qa\02-Tests\automation-py\core\k6_runner.py` to launch this
+`e2e\control-plane\02-Tests\automation-py\core\k6_runner.py` to launch this
 script as a background k6 process, export the k6 summary into the scenario
 artifacts directory, tail stdout/stderr for `CP09_EVENT` lines, and stop the
 run cleanly from the scenario's cleanup path. `cp09-pod-heartbeats` then
