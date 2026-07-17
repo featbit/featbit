@@ -110,6 +110,17 @@ function LicenseKeySection({
         <h2 className="text-sm font-medium">
           {t("workspace.license.licenseKey")}
         </h2>
+        <p className="mt-1 text-xs text-muted-foreground">
+          {t("workspace.license.licenseKeyHelper")}{" "}
+          <a
+            className="underline decoration-muted-foreground/60 underline-offset-4 transition-colors hover:text-foreground hover:decoration-foreground focus-visible:text-foreground focus-visible:decoration-foreground"
+            href="https://www.featbit.co/pricing"
+            target="_blank"
+            rel="noreferrer"
+          >
+            {t("workspace.license.licenseKeyOptions")}
+          </a>
+        </p>
       </div>
       {hasCurrentLicense && !editing ? (
         <CodeField className="bg-muted/40 dark:bg-muted/20">

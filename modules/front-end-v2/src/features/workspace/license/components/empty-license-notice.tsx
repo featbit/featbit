@@ -30,17 +30,7 @@ export function EmptyLicenseNotice({
             </Link>
           </>
         ) : (
-          <>
-            {t("workspace.license.noLicenseDescription")}{" "}
-            <a
-              className="font-medium underline underline-offset-4"
-              href="https://www.featbit.co/pricing"
-              target="_blank"
-              rel="noreferrer"
-            >
-              https://www.featbit.co/pricing
-            </a>
-          </>
+          t("workspace.license.noLicenseDescription")
         )}
       </AlertDescription>
     </Alert>
