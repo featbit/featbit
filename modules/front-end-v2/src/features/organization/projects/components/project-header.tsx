@@ -30,7 +30,7 @@ export function ProjectHeader({
         <h2 className="truncate text-sm font-semibold">{project.name}</h2>
         {isCurrent ? (
           <Badge className="bg-foreground text-background hover:bg-foreground">
-            {t("organization.projects.current")}
+            {t("organization.projects.currentProject")}
           </Badge>
         ) : null}
         <Badge variant="outline" className="max-w-48 truncate font-normal">

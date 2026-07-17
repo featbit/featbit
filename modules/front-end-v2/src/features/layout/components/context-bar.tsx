@@ -1,9 +1,16 @@
-import { Check, ChevronsUpDown, Search, Settings } from "lucide-react"
+import { ChevronsUpDown, Settings } from "lucide-react"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link, useParams } from "react-router-dom"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
 import {
   Popover,
   PopoverContent,
@@ -14,7 +21,11 @@ import {
   projectEnvFromSelection,
   resolveLang,
 } from "@/features/layout/layout-context"
-import type { Organization, Project, ProjectEnv } from "@/features/layout/layout-types"
+import type {
+  Organization,
+  Project,
+  ProjectEnv,
+} from "@/features/layout/layout-types"
 
 export function ContextBar({
   organization,
@@ -33,20 +44,32 @@ export function ContextBar({
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState("")
 
-  const groupedProjects = useMemo(() => {
-    const normalizedSearch = search.trim().toLowerCase()
+  const orderedProjects = useMemo(() => {
+    const availableProjects = projects.filter(
+      (project) => project.environments.length > 0
+    )
+    const currentProject = availableProjects.find(
+      (project) => project.id === currentProjectEnv?.projectId
+    )
 
-    return projects
-      .map((project) => ({
-        ...project,
-        environments: project.environments.filter((environment) => {
-          const haystack =
-            `${project.name} ${project.key} ${environment.name} ${environment.key}`.toLowerCase()
-          return haystack.includes(normalizedSearch)
-        }),
-      }))
-      .filter((project) => project.environments.length > 0)
-  }, [projects, search])
+    if (!currentProject) {
+      return availableProjects
+    }
+
+    return [
+      currentProject,
+      ...availableProjects.filter(
+        (project) => project.id !== currentProject.id
+      ),
+    ]
+  }, [currentProjectEnv?.projectId, projects])
+
+  function handleOpenChange(nextOpen: boolean) {
+    setOpen(nextOpen)
+    if (!nextOpen) {
+      setSearch("")
+    }
+  }
 
   return (
     <div className="relative flex min-w-0 flex-1 items-center gap-2 text-sm">
@@ -56,7 +79,7 @@ export function ContextBar({
         {currentProjectEnv?.projectName ?? ""}
       </span>
       <span className="text-muted-foreground">/</span>
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover open={open} onOpenChange={handleOpenChange}>
         <PopoverTrigger
           render={
             <Button
@@ -77,70 +100,68 @@ export function ContextBar({
           sideOffset={8}
           className="w-[19rem] rounded-lg border-border/80 p-0 shadow-lg"
         >
-          <div className="p-3">
-            <label className="relative block text-muted-foreground">
-              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2" />
-              <Input
-                className="pl-9"
+          <Command className="h-auto w-full rounded-lg p-0 [&_[data-slot=command-input-wrapper]]:p-0">
+            <div className="p-3">
+              <CommandInput
                 value={search}
                 placeholder={t("layout.context.searchEnvironments")}
-                onChange={(event) => setSearch(event.target.value)}
+                onValueChange={setSearch}
               />
-            </label>
-          </div>
-          <div className="max-h-72 overflow-y-auto px-3 pb-1 pt-1">
-            {groupedProjects.length === 0 ? (
-              <p className="px-3 py-6 text-center text-sm text-muted-foreground">
-                {t("layout.context.noEnvironments")}
-              </p>
-            ) : null}
-            {groupedProjects.map((project, index) => (
-              <div
-                key={project.id}
-                className={index === 0 ? "pb-2" : "pb-2 pt-2"}
-              >
-                <p className="pb-2 text-xs font-medium leading-4 text-muted-foreground">
-                  {project.name}
-                </p>
-                <div className="space-y-1">
-                  {project.environments.map((environment) => {
-                    const selected =
-                      project.id === currentProjectEnv?.projectId &&
-                      environment.id === currentProjectEnv?.envId
+            </div>
+            <CommandList className="max-h-72 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent]">
+              <CommandEmpty>{t("layout.context.noEnvironments")}</CommandEmpty>
+              {orderedProjects.map((project) => {
+                const isCurrentProject =
+                  project.id === currentProjectEnv?.projectId
 
-                    return (
-                      <button
-                        key={`${project.id}:${environment.id}`}
-                        type="button"
-                        className={`flex h-9 w-full items-center rounded-md px-3 py-0 text-left text-sm leading-none hover:bg-accent ${
-                          selected ? "bg-accent text-accent-foreground" : ""
-                        }`}
-                        onClick={() => {
-                          const nextProjectEnv = projectEnvFromSelection(
-                            project,
-                            environment
-                          )
-                          onProjectEnvChange(nextProjectEnv)
-                          setOpen(false)
-                        }}
-                      >
-                        <span className="min-w-0 flex-1 truncate">
-                          {environment.name}
-                        </span>
-                        {selected ? <Check className="size-4" /> : null}
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
+                return (
+                  <CommandGroup
+                    key={project.id}
+                    heading={`${project.name}${
+                      isCurrentProject
+                        ? ` · ${t("layout.context.currentProject")}`
+                        : ""
+                    }`}
+                    className="[&_[cmdk-group-items]]:space-y-1"
+                  >
+                    {project.environments.map((environment) => {
+                      const selected =
+                        isCurrentProject &&
+                        environment.id === currentProjectEnv?.envId
+
+                      return (
+                        <CommandItem
+                          key={`${project.id}:${environment.id}`}
+                          value={`${project.name} ${project.key} ${environment.name} ${environment.key} ${project.id} ${environment.id}`}
+                          data-checked={selected}
+                          className="h-9 rounded-md px-3 py-0 leading-none data-[checked=true]:bg-accent data-[checked=true]:text-accent-foreground"
+                          onSelect={() => {
+                            const nextProjectEnv = projectEnvFromSelection(
+                              project,
+                              environment
+                            )
+                            onProjectEnvChange(nextProjectEnv)
+                            handleOpenChange(false)
+                          }}
+                        >
+                          <span className="min-w-0 flex-1 truncate">
+                            {environment.name}
+                          </span>
+                        </CommandItem>
+                      )
+                    })}
+                  </CommandGroup>
+                )
+              })}
+            </CommandList>
+          </Command>
           <div className="mx-3 h-px bg-border" />
           <Button
+            nativeButton={false}
             variant="ghost"
             className="m-3 mt-2 h-9 w-[calc(100%-1.5rem)] justify-start gap-2 px-2 text-muted-foreground"
             render={<Link to={localizedPath(lang, "/organization/projects")} />}
-            onClick={() => setOpen(false)}
+            onClick={() => handleOpenChange(false)}
           >
             <Settings className="size-4" />
             {t("layout.context.manageEnvironments")}

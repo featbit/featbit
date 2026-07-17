@@ -42,8 +42,9 @@ export const enLayout = {
     },
   },
   context: {
-    searchEnvironments: "Search environments...",
+    searchEnvironments: "Search projects or environments...",
     noEnvironments: "No environments found.",
+    currentProject: "Current",
     manageEnvironments: "Manage environments",
   },
   globalMessage: {
@@ -117,8 +118,9 @@ export const zhLayout = {
     },
   },
   context: {
-    searchEnvironments: "搜索环境...",
+    searchEnvironments: "搜索项目或环境...",
     noEnvironments: "没有找到环境。",
+    currentProject: "当前项目",
     manageEnvironments: "管理环境",
   },
   globalMessage: {

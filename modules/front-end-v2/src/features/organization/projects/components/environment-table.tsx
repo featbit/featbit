@@ -184,7 +184,7 @@ export function EnvironmentTable({
                     </span>
                     {isCurrent ? (
                       <Badge className="bg-foreground text-background hover:bg-foreground">
-                        {t("organization.projects.current")}
+                        {t("organization.projects.currentEnvironment")}
                       </Badge>
                     ) : null}
                   </div>

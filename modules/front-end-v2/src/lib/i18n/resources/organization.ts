@@ -66,7 +66,8 @@ export const enOrganization = {
           },
           projects: {
             search: "Filter by project name",
-            current: "Current",
+            currentProject: "Current",
+            currentEnvironment: "Current",
             enabled: "Enabled",
             disabled: "Disabled",
             empty: "No projects yet. Create a project to start adding environments.",
@@ -223,7 +224,8 @@ export const zhOrganization = {
           },
           projects: {
             search: "按项目名称筛选",
-            current: "当前",
+            currentProject: "当前项目",
+            currentEnvironment: "当前环境",
             enabled: "已启用",
             disabled: "已禁用",
             empty: "暂无项目。创建项目后即可添加环境。",
