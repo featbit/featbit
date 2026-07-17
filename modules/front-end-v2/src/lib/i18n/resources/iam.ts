@@ -126,11 +126,11 @@ export const enIam = {
       evaluationResult: "Evaluation result",
       allowed: "Allowed",
       denied: "Denied",
-      allowedDescription: "A matching allow rule grants this access.",
+      allowedDescription: "A matching allow statement grants this access.",
       explicitDenyDescription:
-        "A matching deny rule takes precedence over allow rules.",
+        "A matching deny statement takes precedence over allow statements.",
       noMatchingRuleDescription:
-        "No assigned permission rule matches this resource and action.",
+        "No assigned permission statement matches this resource and action.",
       matchedPolicies: "Matched policies",
       matchingStatements_one: "{{count}} matching statement",
       matchingStatements_other: "{{count}} matching statements",
@@ -408,7 +408,7 @@ export const enIam = {
     "details.permissionsEditor.removeRule": "Remove permission {{number}}",
     "details.permissionsEditor.matchedStatement": "Matched",
     "details.permissionsEditor.matchedStatementUnavailable":
-      "The matched permission rule may have been changed or removed.",
+      "The matched permission statement may have been changed or removed.",
     "details.permissionsEditor.resourceTypes.*": "All",
     "details.permissionsEditor.resourceTypes.workspace": "Workspace",
     "details.permissionsEditor.resourceTypes.organization": "Organization",

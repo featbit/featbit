@@ -101,10 +101,9 @@ export function PermissionsEditor({
   )
   const requestedFocusStatementId =
     searchParams.get("focusStatementId")?.trim() ?? ""
-  const requestedStatementKey = JSON.stringify([
-    requestedFocusStatementId,
-    ...requestedStatementIds,
-  ])
+  const requestedStatementKey = requestedStatementIds.length
+    ? JSON.stringify([requestedFocusStatementId, ...requestedStatementIds])
+    : ""
   const highlightedStatementIds = useMemo(
     () =>
       new Set(
