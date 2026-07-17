@@ -16,6 +16,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import { EnvironmentSecretsPopover } from "@/features/layout/components/environment-secrets-popover"
 import {
   localizedPath,
   projectEnvFromSelection,
@@ -41,7 +42,8 @@ export function ContextBar({
   const { t } = useTranslation()
   const { lang: langParam } = useParams()
   const lang = resolveLang(langParam)
-  const [open, setOpen] = useState(false)
+  const [environmentOpen, setEnvironmentOpen] = useState(false)
+  const [secretsOpen, setSecretsOpen] = useState(false)
   const [search, setSearch] = useState("")
 
   const orderedProjects = useMemo(() => {
@@ -64,9 +66,46 @@ export function ContextBar({
     ]
   }, [currentProjectEnv?.projectId, projects])
 
-  function handleOpenChange(nextOpen: boolean) {
-    setOpen(nextOpen)
+  const currentEnvironment = useMemo(() => {
+    const currentProject = projects.find(
+      (project) => project.id === currentProjectEnv?.projectId
+    )
+
+    return currentProject?.environments.find(
+      (environment) => environment.id === currentProjectEnv?.envId
+    )
+  }, [currentProjectEnv?.envId, currentProjectEnv?.projectId, projects])
+
+  const manageSecretsHref = useMemo(() => {
+    const projectsPath = localizedPath(lang, "/organization/projects")
+
+    if (!currentProjectEnv) {
+      return projectsPath
+    }
+
+    const searchParams = new URLSearchParams({
+      view: "secrets",
+      projectId: currentProjectEnv.projectId,
+      environmentId: currentProjectEnv.envId,
+    })
+
+    return `${projectsPath}?${searchParams.toString()}`
+  }, [currentProjectEnv, lang])
+
+  function handleEnvironmentOpenChange(nextOpen: boolean) {
+    setEnvironmentOpen(nextOpen)
+    if (nextOpen) {
+      setSecretsOpen(false)
+    }
     if (!nextOpen) {
+      setSearch("")
+    }
+  }
+
+  function handleSecretsOpenChange(nextOpen: boolean) {
+    setSecretsOpen(nextOpen)
+    if (nextOpen) {
+      setEnvironmentOpen(false)
       setSearch("")
     }
   }
@@ -79,14 +118,17 @@ export function ContextBar({
         {currentProjectEnv?.projectName ?? ""}
       </span>
       <span className="text-muted-foreground">/</span>
-      <Popover open={open} onOpenChange={handleOpenChange}>
+      <Popover
+        open={environmentOpen}
+        onOpenChange={handleEnvironmentOpenChange}
+      >
         <PopoverTrigger
           render={
             <Button
               type="button"
               variant="ghost"
               className="h-8 gap-2 px-2"
-              aria-expanded={open}
+              aria-expanded={environmentOpen}
               disabled={!currentProjectEnv}
             >
               {currentProjectEnv?.envName ?? ""}
@@ -141,7 +183,7 @@ export function ContextBar({
                               environment
                             )
                             onProjectEnvChange(nextProjectEnv)
-                            handleOpenChange(false)
+                            handleEnvironmentOpenChange(false)
                           }}
                         >
                           <span className="min-w-0 flex-1 truncate">
@@ -161,13 +203,22 @@ export function ContextBar({
             variant="ghost"
             className="m-3 mt-2 h-9 w-[calc(100%-1.5rem)] justify-start gap-2 px-2 text-muted-foreground"
             render={<Link to={localizedPath(lang, "/organization/projects")} />}
-            onClick={() => handleOpenChange(false)}
+            onClick={() => handleEnvironmentOpenChange(false)}
           >
             <Settings className="size-4" />
             {t("layout.context.manageEnvironments")}
           </Button>
         </PopoverContent>
       </Popover>
+      <EnvironmentSecretsPopover
+        open={secretsOpen}
+        onOpenChange={handleSecretsOpenChange}
+        projectName={currentProjectEnv?.projectName ?? ""}
+        environmentName={currentProjectEnv?.envName ?? ""}
+        secrets={currentEnvironment?.secrets ?? []}
+        manageHref={manageSecretsHref}
+        disabled={!currentEnvironment}
+      />
     </div>
   )
 }

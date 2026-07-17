@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useParams } from "react-router-dom"
+import { useParams, useSearchParams } from "react-router-dom"
 import { toast } from "sonner"
 import {
   getCurrentOrganization,
@@ -71,6 +71,7 @@ function projectEnvFromData(
 export function OrganizationProjectsPage() {
   const { t } = useTranslation()
   const params = useParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   const lang = resolveLang(params.lang)
   const [projects, setProjects] = useState<OrganizationProject[]>([])
   const [currentProjectEnv, setCurrentProjectEnv] = useState<ProjectEnv | null>(
@@ -86,14 +87,27 @@ export function OrganizationProjectsPage() {
   const [environmentSheetOpen, setEnvironmentSheetOpen] = useState(false)
   const [secretTarget, setSecretTarget] = useState<SecretTarget>(null)
   const [secretDialogOpen, setSecretDialogOpen] = useState(false)
-  const [secretsTarget, setSecretsTarget] =
-    useState<EnvironmentTarget>(null)
+  const [secretsTarget, setSecretsTarget] = useState<EnvironmentTarget>(null)
   const [secretsSheetOpen, setSecretsSheetOpen] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null)
   const organization = useMemo(
     () => normalizeOrganization(getCurrentOrganization()),
     []
   )
+  const linkedSecretsTarget = useMemo<EnvironmentTarget>(() => {
+    if (searchParams.get("view") !== "secrets") {
+      return null
+    }
+
+    const projectId = searchParams.get("projectId")
+    const environmentId = searchParams.get("environmentId")
+    const project = projects.find((item) => item.id === projectId)
+    const environment = project?.environments.find(
+      (item) => item.id === environmentId
+    )
+
+    return project && environment ? { project, environment } : null
+  }, [projects, searchParams])
 
   function sortProjects(nextProjects: OrganizationProject[]) {
     const currentProjectId = currentProjectEnv?.projectId
@@ -114,9 +128,7 @@ export function OrganizationProjectsPage() {
 
   function showError(error: unknown) {
     toast.error(
-      error instanceof Error
-        ? error.message
-        : t("organization.operationFailed")
+      error instanceof Error ? error.message : t("organization.operationFailed")
     )
   }
 
@@ -471,10 +483,10 @@ export function OrganizationProjectsPage() {
   }
 
   function openEditSecret(secret: EnvironmentSecret) {
-    if (!secretsTarget?.environment) {
+    if (!activeSecretsTarget?.environment) {
       return
     }
-    setSecretTarget({ environment: secretsTarget.environment, secret })
+    setSecretTarget({ environment: activeSecretsTarget.environment, secret })
     setSecretDialogOpen(true)
   }
 
@@ -487,7 +499,8 @@ export function OrganizationProjectsPage() {
     try {
       if (secretTarget.secret) {
         const environment =
-          findEnvironment(secretTarget.environment.id) ?? secretTarget.environment
+          findEnvironment(secretTarget.environment.id) ??
+          secretTarget.environment
         await updateSecretName(
           environment.id,
           secretTarget.secret.id,
@@ -521,14 +534,15 @@ export function OrganizationProjectsPage() {
   }
 
   async function removeSecret(secret: EnvironmentSecret) {
-    if (!secretsTarget?.environment) {
+    if (!activeSecretsTarget?.environment) {
       return
     }
 
     setSaving(true)
     try {
       const environment =
-        findEnvironment(secretsTarget.environment.id) ?? secretsTarget.environment
+        findEnvironment(activeSecretsTarget.environment.id) ??
+        activeSecretsTarget.environment
       await deleteSecret(environment.id, secret.id)
       updateEnvironmentInState({
         ...environment,
@@ -562,16 +576,37 @@ export function OrganizationProjectsPage() {
     setSecretsSheetOpen(true)
   }
 
-  const currentSecretsEnvironment = secretsTarget?.environment
-    ? projects
-        .find((project) => project.id === secretsTarget.project.id)
-        ?.environments.find((env) => env.id === secretsTarget.environment?.id) ??
-      secretsTarget.environment
+  function handleSecretsSheetOpenChange(open: boolean) {
+    setSecretsSheetOpen(open)
+
+    if (open || searchParams.get("view") !== "secrets") {
+      return
+    }
+
+    const nextSearchParams = new URLSearchParams(searchParams)
+    nextSearchParams.delete("view")
+    nextSearchParams.delete("projectId")
+    nextSearchParams.delete("environmentId")
+    setSearchParams(nextSearchParams, { replace: true })
+  }
+
+  const activeSecretsTarget = linkedSecretsTarget ?? secretsTarget
+
+  const currentSecretsEnvironment = activeSecretsTarget?.environment
+    ? (projects
+        .find((project) => project.id === activeSecretsTarget.project.id)
+        ?.environments.find(
+          (env) => env.id === activeSecretsTarget.environment?.id
+        ) ?? activeSecretsTarget.environment)
     : null
-  const currentSecretsProject = secretsTarget?.project ?? null
+  const currentSecretsProject = activeSecretsTarget?.project ?? null
 
   return (
-    <OrganizationLayout organization={organization} lang={lang} activeTab="projects">
+    <OrganizationLayout
+      organization={organization}
+      lang={lang}
+      activeTab="projects"
+    >
       <ProjectInventory
         projects={projects}
         currentProjectEnv={currentProjectEnv}
@@ -607,10 +642,10 @@ export function OrganizationProjectsPage() {
       />
 
       <SecretsSheet
-        open={secretsSheetOpen}
+        open={secretsSheetOpen || linkedSecretsTarget !== null}
         project={currentSecretsProject}
         environment={currentSecretsEnvironment}
-        onOpenChange={setSecretsSheetOpen}
+        onOpenChange={handleSecretsSheetOpenChange}
         onAddSecret={openAddSecret}
         onCopySecret={copyText}
         onEditSecret={openEditSecret}
