@@ -69,7 +69,7 @@ import {
   createPolicyStatement,
   initialActionsForResourceType,
   isAllResources,
-  resourceDisplayName,
+  resolvedResourceDisplayName,
   type PolicyResource,
   type PolicyEffect,
   type PolicyStatement,
@@ -483,7 +483,7 @@ function PermissionRows({
   })
   const resources = statement.resources.map((resource) => ({
     key: resource,
-    label: resourceDisplayName(
+    label: resolvedResourceDisplayName(
       resource,
       resourceOptionsByRn.get(resource)?.name
     ),

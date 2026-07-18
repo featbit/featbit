@@ -6,10 +6,7 @@ import {
 import { fetchPolicyResources } from "./policy-details-api"
 import type { ResourceType } from "./permission-model"
 
-const policyResourceOptionsRootKey = [
-  "iam",
-  "policy-resource-options",
-] as const
+const policyResourceOptionsRootKey = ["iam", "policy-resource-options"] as const
 const policyResourceOptionsStaleTime = 30_000
 
 export function policyResourceOptionsQuery(

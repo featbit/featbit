@@ -6,6 +6,7 @@ import {
   initialActionsForResourceType,
   isAllResources,
   resourceDisplayName,
+  resolvedResourceDisplayName,
   type PolicyStatement,
 } from "./permission-model"
 
@@ -58,9 +59,9 @@ describe("permission model", () => {
   it("prefers a resolved resource name and falls back when it is blank", () => {
     const rn = "project/shop:env/production"
 
-    expect(resourceDisplayName(rn, " Production ")).toBe("Production")
-    expect(resourceDisplayName(rn, "   ")).toBe("production")
-    expect(resourceDisplayName("project/", "")).toBe("project/")
+    expect(resolvedResourceDisplayName(rn, " Production ")).toBe("Production")
+    expect(resolvedResourceDisplayName(rn, "   ")).toBe("production")
+    expect(resolvedResourceDisplayName("project/", "")).toBe("project/")
   })
 
   it("defaults fine-grained resource actions to all when unlicensed", () => {

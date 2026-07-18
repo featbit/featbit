@@ -16,6 +16,7 @@ import {
   RESOURCE_PATTERNS,
   SPECIFIC_RESOURCE_TYPES,
   resourceDisplayName,
+  resolvedResourceDisplayName,
   type PolicyResource,
   type ResourceType,
 } from "../permission-model"
@@ -106,7 +107,7 @@ export function ResourcePicker({
         const matchedOption = options.find((item) => item.rn === rn)
         return {
           rn,
-          name: resourceDisplayName(rn, matchedOption?.name),
+          name: resolvedResourceDisplayName(rn, matchedOption?.name),
         }
       }),
     [draft, options]

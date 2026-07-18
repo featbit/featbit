@@ -36,10 +36,7 @@ describe("policy resource options cache", () => {
     await fetchPolicyResourceOptions(queryClient, "env", "production")
 
     expect(mocks.fetchPolicyResources).toHaveBeenCalledTimes(1)
-    expect(mocks.fetchPolicyResources).toHaveBeenCalledWith(
-      "production",
-      "env"
-    )
+    expect(mocks.fetchPolicyResources).toHaveBeenCalledWith("production", "env")
     expect(
       queryClient.getQueryData(
         policyResourceOptionsQuery("env", "production").queryKey
