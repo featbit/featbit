@@ -260,13 +260,27 @@ export function PermissionDiagnosticsSheet({
                 </SelectTrigger>
                 <SelectContent align="start">
                   <SelectGroup>
-                    {actions.map((item) => (
-                      <SelectItem key={item.name} value={item.name}>
-                        <span className="min-w-0 [overflow-wrap:anywhere] break-words whitespace-normal">
-                          {actionOptionLabel(item, t)}
-                        </span>
-                      </SelectItem>
-                    ))}
+                    {actions.map((item) => {
+                      const label = actionOptionLabel(item, t)
+
+                      return (
+                        <SelectItem
+                          key={item.name}
+                          value={item.name}
+                          label={label}
+                          className="py-1.5"
+                        >
+                          <span className="flex min-w-0 flex-col items-start gap-0.5 overflow-hidden">
+                            <span className="w-full truncate leading-5 font-medium">
+                              {label}
+                            </span>
+                            <span className="w-full truncate font-mono text-xs leading-4 text-muted-foreground opacity-80">
+                              {item.name}
+                            </span>
+                          </span>
+                        </SelectItem>
+                      )
+                    })}
                   </SelectGroup>
                 </SelectContent>
               </Select>
@@ -467,6 +481,7 @@ function EvaluationResult({
   const matchedPolicies = groupMemberPermissionsByPolicy(
     evaluation.matchedRules
   )
+  const evaluatedActionLabel = actionLabel(evaluation.action, t)
   const reason =
     evaluation.decision === "allowed"
       ? t("iam.team.details.allowedDescription")
@@ -522,8 +537,15 @@ function EvaluationResult({
           <dt className="text-xs font-medium text-muted-foreground">
             {t("iam.team.details.action")}
           </dt>
-          <dd className="mt-1 text-sm font-medium [overflow-wrap:anywhere] break-words">
-            {actionLabel(evaluation.action, t)}
+          <dd className="mt-1 flex min-w-0 flex-col gap-0.5">
+            <span className="text-sm leading-5 font-medium [overflow-wrap:anywhere] break-words">
+              {evaluatedActionLabel}
+            </span>
+            {evaluatedActionLabel !== evaluation.action ? (
+              <span className="font-mono text-xs leading-4 [overflow-wrap:anywhere] break-words text-muted-foreground">
+                {evaluation.action}
+              </span>
+            ) : null}
           </dd>
         </div>
       </dl>
@@ -690,11 +712,30 @@ function WildcardResourceValue({
   resource: string
   className: string
 }) {
+  const [tooltipOpen, setTooltipOpen] = useState(false)
+  const triggerRef = useRef<HTMLSpanElement | null>(null)
+
   return (
-    <Tooltip>
+    <Tooltip
+      open={tooltipOpen}
+      onOpenChange={(nextOpen, eventDetails) => {
+        // Base UI's delay group can emit a transient `none` close while
+        // this Sheet tooltip is mounting. Ignore it only while the trigger
+        // still owns hover or keyboard focus.
+        const triggerStillActive =
+          triggerRef.current?.matches(":hover") ||
+          document.activeElement === triggerRef.current
+        if (!nextOpen && eventDetails.reason === "none" && triggerStillActive) {
+          return
+        }
+        setTooltipOpen(nextOpen)
+      }}
+    >
       <TooltipTrigger
+        closeOnClick={false}
         render={
           <span
+            ref={triggerRef}
             id={id}
             tabIndex={0}
             className={`${className} cursor-help outline-none focus-visible:ring-2 focus-visible:ring-ring/50`}
@@ -704,7 +745,7 @@ function WildcardResourceValue({
         <span className="truncate">{label}</span>
         <span className="sr-only">: {resource}</span>
       </TooltipTrigger>
-      <TooltipContent className="max-w-[min(28rem,calc(100vw-2rem))] font-mono [overflow-wrap:anywhere] break-words">
+      <TooltipContent className="pointer-events-none max-w-[min(28rem,calc(100vw-2rem))] font-mono [overflow-wrap:anywhere] break-words">
         {resource}
       </TooltipContent>
     </Tooltip>

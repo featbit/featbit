@@ -894,7 +894,7 @@ export const zhIam = {
     "details.permissionsEditor.actionLabels.UpdateFlagDescription":
       "更新功能开关描述",
     "details.permissionsEditor.actionLabels.UpdateFlagOffVariation":
-      "更新关闭变体",
+      "更新关闭返回值",
     "details.permissionsEditor.actionLabels.UpdateFlagTags": "更新功能开关标签",
     "details.permissionsEditor.actionLabels.UpdateFlagIndividualTargeting":
       "更新单独定向",
@@ -902,7 +902,7 @@ export const zhIam = {
       "更新定向规则",
     "details.permissionsEditor.actionLabels.UpdateFlagDefaultRule":
       "更新默认规则",
-    "details.permissionsEditor.actionLabels.UpdateFlagVariations": "更新变体",
+    "details.permissionsEditor.actionLabels.UpdateFlagVariations": "更新返回值",
     "details.permissionsEditor.actionLabels.CreateSegment": "创建用户组",
     "details.permissionsEditor.actionLabels.ArchiveSegment": "归档用户组",
     "details.permissionsEditor.actionLabels.RestoreSegment": "恢复用户组",
