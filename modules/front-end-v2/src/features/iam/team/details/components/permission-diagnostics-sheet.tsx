@@ -716,39 +716,47 @@ function WildcardResourceValue({
   const triggerRef = useRef<HTMLSpanElement | null>(null)
 
   return (
-    <Tooltip
-      open={tooltipOpen}
-      onOpenChange={(nextOpen, eventDetails) => {
-        // Base UI's delay group can emit a transient `none` close while
-        // this Sheet tooltip is mounting. Ignore it only while the trigger
-        // still owns hover or keyboard focus.
-        const triggerStillActive =
-          triggerRef.current?.matches(":hover") ||
-          document.activeElement === triggerRef.current
-        if (!nextOpen && eventDetails.reason === "none" && triggerStillActive) {
-          return
-        }
-        setTooltipOpen(nextOpen)
-      }}
-    >
-      <TooltipTrigger
-        closeOnClick={false}
-        render={
-          <span
-            ref={triggerRef}
-            id={id}
-            tabIndex={0}
-            className={`${className} cursor-help outline-none focus-visible:ring-2 focus-visible:ring-ring/50`}
-          />
-        }
+    <span id={id} className={className}>
+      <Tooltip
+        open={tooltipOpen}
+        onOpenChange={(nextOpen, eventDetails) => {
+          // Base UI's delay group can emit a transient `none` close while
+          // this Sheet tooltip is mounting. Ignore it only while the trigger
+          // still owns hover or keyboard focus.
+          const triggerStillActive =
+            triggerRef.current?.matches(":hover") ||
+            document.activeElement === triggerRef.current
+          if (
+            !nextOpen &&
+            eventDetails.reason === "none" &&
+            triggerStillActive
+          ) {
+            return
+          }
+          setTooltipOpen(nextOpen)
+        }}
       >
-        <span className="truncate">{label}</span>
-        <span className="sr-only">: {resource}</span>
-      </TooltipTrigger>
-      <TooltipContent className="pointer-events-none max-w-[min(28rem,calc(100vw-2rem))] font-mono [overflow-wrap:anywhere] break-words">
-        {resource}
-      </TooltipContent>
-    </Tooltip>
+        <TooltipTrigger
+          closeOnClick={false}
+          render={
+            <span
+              ref={triggerRef}
+              tabIndex={0}
+              className="inline-flex min-w-0 max-w-full cursor-help rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+            />
+          }
+        >
+          <span className="truncate">{label}</span>
+          <span className="sr-only">: {resource}</span>
+        </TooltipTrigger>
+        <TooltipContent
+          align="start"
+          className="pointer-events-none max-w-[min(28rem,calc(100vw-2rem))] font-mono [overflow-wrap:anywhere] break-words"
+        >
+          {resource}
+        </TooltipContent>
+      </Tooltip>
+    </span>
   )
 }
 
