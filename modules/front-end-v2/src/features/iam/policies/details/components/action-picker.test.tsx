@@ -40,8 +40,9 @@ describe("ActionPicker", () => {
     fireEvent.click(selectedFilter)
 
     expect(
-      screen.getByRole("option", { name: "Create flags" })
+      screen.getByRole("option", { name: /Create flags.*CreateFlag/ })
     ).toBeInTheDocument()
+    expect(screen.getByText("CreateFlag")).toHaveClass("font-mono")
     expect(
       screen.queryByRole("option", { name: "All actions" })
     ).not.toBeInTheDocument()

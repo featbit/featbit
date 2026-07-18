@@ -742,7 +742,7 @@ function WildcardResourceValue({
             <span
               ref={triggerRef}
               tabIndex={0}
-              className="inline-flex min-w-0 max-w-full cursor-help rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+              className="inline-flex max-w-full min-w-0 cursor-help rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
             />
           }
         >

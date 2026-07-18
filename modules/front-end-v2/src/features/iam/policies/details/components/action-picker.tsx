@@ -234,17 +234,29 @@ export function ActionPicker({
                   const locked = Boolean(
                     item.fineGrained && !fineGrainedGranted
                   )
+                  const actionLabel = label(item.name)
                   return (
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate">{label(item.name)}</span>
-                      {locked ? (
-                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <LockKeyhole className="size-3" />
-                          {t(
-                            "iam.policies.details.permissionsEditor.enterpriseRequired"
-                          )}
+                      <span className="block truncate leading-5 font-medium">
+                        {actionLabel}
+                      </span>
+                      <span className="flex min-w-0 items-start gap-2 text-xs leading-4 text-muted-foreground">
+                        <span
+                          aria-hidden="true"
+                          className="min-w-0 font-mono [overflow-wrap:anywhere] break-words"
+                        >
+                          {item.name}
                         </span>
-                      ) : null}
+                        <span className="sr-only">, {item.name}. </span>
+                        {locked ? (
+                          <span className="ml-auto flex shrink-0 items-center gap-1">
+                            <LockKeyhole className="size-3" />
+                            {t(
+                              "iam.policies.details.permissionsEditor.enterpriseRequired"
+                            )}
+                          </span>
+                        ) : null}
+                      </span>
                     </span>
                   )
                 }}
