@@ -1,3 +1,4 @@
+import { useQueries } from "@tanstack/react-query"
 import {
   AlertTriangle,
   ChevronDown,
@@ -55,6 +56,7 @@ import { cn } from "@/lib/utils"
 import { ActionPicker } from "./action-picker"
 import { ClonePolicySheet } from "./clone-policy-sheet"
 import { ResourcePicker } from "./resource-picker"
+import { policyResourceOptionsQuery } from "../policy-resource-options-cache"
 import {
   updatePolicyStatements,
   type PolicyDetail,
@@ -63,10 +65,12 @@ import {
   PERMISSION_ACTIONS,
   RESOURCE_PATTERNS,
   RESOURCE_TYPES,
+  SPECIFIC_RESOURCE_TYPES,
   createPolicyStatement,
   initialActionsForResourceType,
   isAllResources,
   resourceDisplayName,
+  type PolicyResource,
   type PolicyEffect,
   type PolicyStatement,
   type ResourceType,
@@ -113,6 +117,34 @@ export function PermissionsEditor({
       ),
     [requestedStatementIds, statements]
   )
+  const summaryResourceTypes = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          statements
+            .filter(
+              (statement) =>
+                statement.resources.length > 0 &&
+                !isAllResources(statement) &&
+                SPECIFIC_RESOURCE_TYPES.has(statement.resourceType)
+            )
+            .map((statement) => statement.resourceType)
+        )
+      ),
+    [statements]
+  )
+  const resourceOptionQueries = useQueries({
+    queries: summaryResourceTypes.map((resourceType) =>
+      policyResourceOptionsQuery(resourceType, "")
+    ),
+  })
+  const resourceOptionsByRn = useMemo(() => {
+    const byRn = new Map<string, PolicyResource>()
+    resourceOptionQueries.forEach((query) => {
+      query.data?.forEach((resource) => byRn.set(resource.rn, resource))
+    })
+    return byRn
+  }, [resourceOptionQueries])
 
   const original = JSON.stringify(policy?.statements ?? [])
   const current = JSON.stringify(statements)
@@ -347,6 +379,7 @@ export function PermissionsEditor({
                     readOnly={readOnly}
                     invalid={statementInvalid}
                     fineGrainedGranted={fineGrainedGranted}
+                    resourceOptionsByRn={resourceOptionsByRn}
                     onToggle={() =>
                       setExpandedId(expanded ? null : statement.id)
                     }
@@ -401,6 +434,7 @@ function PermissionRows({
   readOnly,
   invalid,
   fineGrainedGranted,
+  resourceOptionsByRn,
   onToggle,
   onChange,
   onResourceTypeChange,
@@ -413,6 +447,7 @@ function PermissionRows({
   readOnly: boolean
   invalid: boolean
   fineGrainedGranted: boolean
+  resourceOptionsByRn: ReadonlyMap<string, PolicyResource>
   onToggle: () => void
   onChange: (patch: Partial<PolicyStatement>) => void
   onResourceTypeChange: (type: ResourceType) => void
@@ -448,7 +483,10 @@ function PermissionRows({
   })
   const resources = statement.resources.map((resource) => ({
     key: resource,
-    label: resourceDisplayName(resource),
+    label: resourceDisplayName(
+      resource,
+      resourceOptionsByRn.get(resource)?.name
+    ),
   }))
   const resourceSummary = isAllResources(statement)
     ? statement.resourceType === "*"

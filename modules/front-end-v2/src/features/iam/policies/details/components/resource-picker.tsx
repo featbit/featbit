@@ -1,6 +1,7 @@
 import { Globe2, ListChecks } from "lucide-react"
 import { useEffect, useId, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { useQueryClient } from "@tanstack/react-query"
 import { SelectedItemsField } from "@/components/selected-items-field"
 import { SelectableCommandList } from "@/components/selectable-command-list"
 import { SelectionFilterTabs } from "@/components/selection-filter-tabs"
@@ -10,7 +11,7 @@ import { Command, CommandInput } from "@/components/ui/command"
 import { Popover } from "@/components/ui/popover"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
-import { fetchPolicyResources } from "../policy-details-api"
+import { fetchPolicyResourceOptions } from "../policy-resource-options-cache"
 import {
   RESOURCE_PATTERNS,
   SPECIFIC_RESOURCE_TYPES,
@@ -35,6 +36,7 @@ export function ResourcePicker({
   onChange: (resources: string[]) => void
 }) {
   const { t } = useTranslation()
+  const queryClient = useQueryClient()
   const scopeDescriptionId = useId()
   const supportsSpecific = SPECIFIC_RESOURCE_TYPES.has(resourceType)
   const selectedResourceType = t(
@@ -56,7 +58,7 @@ export function ResourcePicker({
     if (!open || mode !== "specific") return
     let cancelled = false
     const timeout = window.setTimeout(() => {
-      fetchPolicyResources(search, resourceType)
+      fetchPolicyResourceOptions(queryClient, resourceType, search)
         .then((items) => {
           if (!cancelled) setOptions(Array.isArray(items) ? items : [])
         })
@@ -71,7 +73,7 @@ export function ResourcePicker({
       cancelled = true
       window.clearTimeout(timeout)
     }
-  }, [mode, open, resourceType, search])
+  }, [mode, open, queryClient, resourceType, search])
 
   const mergedOptions = useMemo(() => {
     const byRn = new Map(options.map((item) => [item.rn, item]))
@@ -100,12 +102,13 @@ export function ResourcePicker({
 
   const selectedResources = useMemo(
     () =>
-      draft.map((rn) => ({
-        rn,
-        name:
-          options.find((item) => item.rn === rn)?.name ??
-          resourceDisplayName(rn),
-      })),
+      draft.map((rn) => {
+        const matchedOption = options.find((item) => item.rn === rn)
+        return {
+          rn,
+          name: resourceDisplayName(rn, matchedOption?.name),
+        }
+      }),
     [draft, options]
   )
 

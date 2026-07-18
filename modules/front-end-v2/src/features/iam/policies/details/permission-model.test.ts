@@ -55,6 +55,14 @@ describe("permission model", () => {
     )
   })
 
+  it("prefers a resolved resource name and falls back when it is blank", () => {
+    const rn = "project/shop:env/production"
+
+    expect(resourceDisplayName(rn, " Production ")).toBe("Production")
+    expect(resourceDisplayName(rn, "   ")).toBe("production")
+    expect(resourceDisplayName("project/", "")).toBe("project/")
+  })
+
   it("defaults fine-grained resource actions to all when unlicensed", () => {
     expect(initialActionsForResourceType("flag", false)).toEqual(["*"])
     expect(initialActionsForResourceType("segment", false)).toEqual(["*"])

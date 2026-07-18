@@ -226,7 +226,10 @@ export function createPolicyStatement(): PolicyStatement {
   }
 }
 
-export function resourceDisplayName(rn: string) {
+export function resourceDisplayName(rn: string, resourceName?: string) {
+  const normalizedName = resourceName?.trim()
+  if (normalizedName) return normalizedName
+
   const lastPart = rn.split(":").at(-1) ?? rn
   return lastPart.split("/").at(-1) || rn
 }
