@@ -522,8 +522,8 @@ function EvaluationResult({
           <dt className="text-xs font-medium text-muted-foreground">
             {t("iam.team.details.action")}
           </dt>
-          <dd className="mt-1 font-mono text-xs leading-5 [overflow-wrap:anywhere] break-words select-text">
-            {evaluation.action}
+          <dd className="mt-1 text-sm font-medium [overflow-wrap:anywhere] break-words">
+            {actionLabel(evaluation.action, t)}
           </dd>
         </div>
       </dl>

@@ -45,8 +45,18 @@ describe("PermissionsTab", () => {
     const toggle = screen.getByRole("button", {
       name: "Expand permission from Environment administrators",
     })
+    const policyLink = screen.getByRole("link", {
+      name: "Environment administrators",
+    })
 
     expect(toggle).toHaveAttribute("aria-expanded", "false")
+    expect(policyLink).toHaveClass(
+      "line-clamp-2",
+      "font-semibold",
+      "text-foreground",
+      "hover:underline",
+      "focus-visible:ring-2"
+    )
     expect(screen.queryByText("CanAccessEnv")).not.toBeInTheDocument()
 
     fireEvent.click(toggle)

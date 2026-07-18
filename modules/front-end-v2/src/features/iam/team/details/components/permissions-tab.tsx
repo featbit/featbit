@@ -341,7 +341,7 @@ function PermissionRow({
         <TableCell className="px-5 py-4 align-top whitespace-normal">
           <Link
             to={policyUrl}
-            className="line-clamp-2 text-sm font-semibold [overflow-wrap:anywhere] text-foreground hover:underline"
+            className="line-clamp-2 rounded-sm text-sm font-semibold [overflow-wrap:anywhere] text-foreground outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2"
           >
             {permission.policyName}
           </Link>
