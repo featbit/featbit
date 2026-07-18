@@ -133,7 +133,7 @@ test.describe("workspace license", () => {
     await expect(
       page.getByRole("heading", { name: "License status" })
     ).toBeVisible()
-    await expect(page.getByText("SaaS").first()).toBeVisible()
+    await expect(page.getByRole("main").getByText("Growth")).toBeVisible()
     await expect(page.getByText("Active")).toBeVisible()
     await expect(page.getByRole("button", { name: "Replace" })).toHaveCount(0)
   })
@@ -144,7 +144,11 @@ test.describe("workspace license", () => {
     await page.goto("/en/workspace/license")
 
     await expect(page.getByText("No License Available")).toBeVisible()
-    await expect(page.getByText("https://www.featbit.co/pricing")).toBeVisible()
+    await expect(
+      page.getByRole("link", {
+        name: "Request a free trial or contact the FeatBit team.",
+      })
+    ).toHaveAttribute("href", "https://www.featbit.co/pricing")
     await expect(page.getByText("Not included").first()).toBeVisible()
   })
 
@@ -197,7 +201,7 @@ test.describe("workspace license", () => {
     await expect(
       page.getByRole("heading", { name: "License status" })
     ).toBeVisible()
-    await expect(page.getByText("Growth")).toBeVisible()
+    await expect(page.getByRole("main").getByText("Growth")).toBeVisible()
     await expect(page.getByText("Single sign-on")).toBeVisible()
     await expect(page.getByText("Granted").first()).toBeVisible()
 

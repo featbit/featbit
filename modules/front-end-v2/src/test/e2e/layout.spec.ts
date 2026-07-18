@@ -26,7 +26,7 @@ test.describe("layout", () => {
       page.getByRole("button", { name: /Production CN/ })
     ).toBeVisible()
     await expect(
-      page.getByRole("link", { name: "Current Plan: Enterprise" })
+      page.getByRole("link", { name: "Current Plan: Growth" })
     ).toBeVisible()
     await expect(page.getByRole("link", { name: "Team" })).toHaveCount(0)
     await expect(page.getByRole("link", { name: "Groups" })).toHaveCount(0)
@@ -111,7 +111,7 @@ test.describe("layout", () => {
 
     await page.getByRole("button", { name: /Production CN/ }).click()
     await expect(page.getByText("Growth Platform")).toBeVisible()
-    await page.getByRole("button", { name: "Staging" }).click()
+    await page.getByRole("option", { name: "Staging" }).click()
 
     await expect(page).toHaveURL(/\/en\/workspace$/)
     await expect(page.getByRole("button", { name: /Staging/ })).toBeVisible()
@@ -155,7 +155,7 @@ test.describe("layout", () => {
     await page.goto("/en")
 
     await page.getByRole("button", { name: /Production CN/ }).click()
-    const searchInput = page.getByPlaceholder("Search environments...")
+    const searchInput = page.getByRole("combobox")
     await searchInput.fill("P")
 
     await expect(searchInput).toBeFocused()
@@ -241,8 +241,8 @@ test.describe("layout", () => {
     await page.goto("/en")
 
     await expect(
-      page.getByRole("link", { name: "Free Plan: Upgrade Now" })
-    ).toBeVisible()
+      page.getByRole("link", { name: "Current Plan: Free" })
+    ).toHaveAttribute("href", "/en/workspace/billing")
   })
 
   test("renders the global billing usage message when usage is high", async ({
