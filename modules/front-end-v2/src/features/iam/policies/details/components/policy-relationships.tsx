@@ -472,6 +472,10 @@ export function PolicyRelationships({
         kind="members"
         saving={savingPicker}
         loadOptions={loadMemberOptions}
+        noAvailableMessage={t("iam.policies.details.noAvailableMembers", {
+          defaultValue:
+            "Every available member is already assigned to this policy.",
+        })}
         onOpenChange={setMemberPickerOpen}
         onSubmit={addMembers}
       />
@@ -485,6 +489,10 @@ export function PolicyRelationships({
         cacheKey={groupOptionsCacheKey}
         saving={savingPicker}
         loadOptions={loadGroupOptions}
+        noAvailableMessage={t("iam.policies.details.noAvailableGroups", {
+          defaultValue:
+            "Every available group is already assigned to this policy.",
+        })}
         onOpenChange={setGroupPickerOpen}
         onSubmit={addGroups}
       />

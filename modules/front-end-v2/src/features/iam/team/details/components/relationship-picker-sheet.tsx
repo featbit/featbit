@@ -32,6 +32,7 @@ export function RelationshipPickerSheet({
   cacheKey,
   saving,
   loadOptions,
+  noAvailableMessage,
   onOpenChange,
   onSubmit,
 }: {
@@ -41,6 +42,7 @@ export function RelationshipPickerSheet({
   cacheKey: string
   saving: boolean
   loadOptions: RelationshipOptionsLoader
+  noAvailableMessage?: string
   onOpenChange: (open: boolean) => void
   onSubmit: (selected: RelationshipOption[]) => void
 }) {
@@ -53,6 +55,11 @@ export function RelationshipPickerSheet({
   const [hasMore, setHasMore] = useState(false)
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
+  const [initialLoadErrorQuery, setInitialLoadErrorQuery] = useState<
+    string | undefined
+  >()
+  const [loadMoreError, setLoadMoreError] = useState(false)
+  const [retryVersion, setRetryVersion] = useState(0)
   const [filter, setFilter] = useState<SelectionFilter>("all")
   const [loadedQuery, setLoadedQuery] = useState<string | null>(null)
   const requestVersion = useRef(0)
@@ -79,6 +86,8 @@ export function RelationshipPickerSheet({
         setPageIndex(0)
         setLoadedQuery(query)
         setLoadingMore(false)
+        setInitialLoadErrorQuery(undefined)
+        setLoadMoreError(false)
         setLoading(false)
       }, 0)
       return () => window.clearTimeout(applyCachedTimeout)
@@ -88,6 +97,8 @@ export function RelationshipPickerSheet({
       if (requestVersion.current !== version) return
       setOptions([])
       setLoadingMore(false)
+      setInitialLoadErrorQuery(undefined)
+      setLoadMoreError(false)
       setLoading(true)
       setPageIndex(0)
       setLoadedQuery(null)
@@ -100,12 +111,14 @@ export function RelationshipPickerSheet({
             setOptions(result.items)
             setHasMore(result.hasMore)
             setLoadedQuery(query)
+            setInitialLoadErrorQuery(undefined)
           })
           .catch(() => {
             if (requestVersion.current === version) {
               setOptions([])
               setHasMore(false)
               setLoadedQuery(query)
+              setInitialLoadErrorQuery(query)
             }
           })
           .finally(() => {
@@ -119,14 +132,30 @@ export function RelationshipPickerSheet({
       window.clearTimeout(resetTimeout)
       window.clearTimeout(loadTimeout)
     }
-  }, [cacheKey, filter, loadOptions, open, query, queryClient])
+  }, [
+    cacheKey,
+    filter,
+    kind,
+    loadOptions,
+    open,
+    query,
+    queryClient,
+    retryVersion,
+  ])
 
-  async function loadNextPage() {
-    if (!hasMore || loading || loadingMoreRef.current) return
+  async function loadNextPage(forceRetry = false) {
+    if (
+      !hasMore ||
+      loading ||
+      loadingMoreRef.current ||
+      (loadMoreError && !forceRetry)
+    )
+      return
 
     const nextPage = pageIndex + 1
     const version = requestVersion.current
     loadingMoreRef.current = true
+    setLoadMoreError(false)
     setLoadingMore(true)
     try {
       const result = await loadOptions(query, nextPage)
@@ -140,7 +169,9 @@ export function RelationshipPickerSheet({
       setPageIndex(nextPage)
       setHasMore(result.hasMore)
     } catch {
-      // Keep the loaded pages visible so scrolling can retry the request.
+      if (requestVersion.current === version) {
+        setLoadMoreError(true)
+      }
     } finally {
       loadingMoreRef.current = false
       if (requestVersion.current === version) setLoadingMore(false)
@@ -160,7 +191,8 @@ export function RelationshipPickerSheet({
       !sentinel ||
       !hasMore ||
       loading ||
-      loadingMore
+      loadingMore ||
+      loadMoreError
     )
       return
 
@@ -174,7 +206,15 @@ export function RelationshipPickerSheet({
 
     observer.observe(sentinel)
     return () => observer.disconnect()
-  }, [filter, hasMore, loading, loadingMore, options.length])
+  }, [
+    filter,
+    hasMore,
+    kind,
+    loading,
+    loadingMore,
+    loadMoreError,
+    options.length,
+  ])
 
   const selectedLabel =
     kind === "groups"
@@ -184,14 +224,17 @@ export function RelationshipPickerSheet({
     kind === "groups"
       ? t("iam.team.details.searchGroups")
       : t("iam.team.details.searchPolicies")
-  const hasQuery = Boolean(query.trim())
+  const normalizedQuery = query.trim()
+  const hasQuery = Boolean(normalizedQuery)
+  const initialLoadFailed = initialLoadErrorQuery === query
   const emptyMessage = hasQuery
     ? kind === "groups"
       ? t("iam.team.details.noMatchingGroups")
       : t("iam.team.details.noMatchingPolicies")
-    : kind === "groups"
-      ? t("iam.team.details.noAvailableGroups")
-      : t("iam.team.details.noAvailablePolicies")
+    : (noAvailableMessage ??
+      (kind === "groups"
+        ? t("iam.team.details.noAvailableGroups")
+        : t("iam.team.details.noAvailablePolicies")))
   const noSelectionMessage =
     kind === "groups"
       ? t("iam.team.details.noSelectedGroups")
@@ -203,23 +246,87 @@ export function RelationshipPickerSheet({
       : undefined
   const visibleOptions = useMemo(() => {
     if (filter === "all") {
-      return cachedResult?.items ?? (loadedQuery === query ? options : [])
+      return loadedQuery === query ? options : (cachedResult?.items ?? [])
     }
 
-    const normalizedQuery = query.trim().toLocaleLowerCase()
-    if (!normalizedQuery) return selected
+    const normalizedSelectedQuery = query.trim().toLocaleLowerCase()
+    if (!normalizedSelectedQuery) return selected
     return selected.filter((option) =>
-      option.name.toLocaleLowerCase().includes(normalizedQuery)
+      option.name.toLocaleLowerCase().includes(normalizedSelectedQuery)
     )
   }, [cachedResult, filter, loadedQuery, options, query, selected])
 
   function toggleOption(option: RelationshipOption) {
-    setSelected((current) =>
-      current.some((item) => item.id === option.id)
-        ? current.filter((item) => item.id !== option.id)
-        : [...current, option]
-    )
+    const nextSelected = selected.some((item) => item.id === option.id)
+      ? selected.filter((item) => item.id !== option.id)
+      : [...selected, option]
+
+    setSelected(nextSelected)
+    if (filter === "selected" && !nextSelected.length) {
+      setFilter("all")
+    }
   }
+
+  function clearSelected() {
+    setSelected([])
+    if (filter === "selected") setFilter("all")
+  }
+
+  function retryInitialLoad() {
+    setInitialLoadErrorQuery(undefined)
+    setLoading(true)
+    setRetryVersion((current) => current + 1)
+  }
+
+  const relationshipSearchEmptyContent = (
+    <div className="flex flex-col items-center gap-2 px-3 text-center">
+      <p className="max-w-full text-sm break-words text-muted-foreground">
+        {t(
+          kind === "groups"
+            ? filter === "selected"
+              ? "iam.team.details.noMatchingSelectedGroupsWithQuery"
+              : "iam.team.details.noMatchingGroupsWithQuery"
+            : filter === "selected"
+              ? "iam.team.details.noMatchingSelectedPoliciesWithQuery"
+              : "iam.team.details.noMatchingPoliciesWithQuery",
+          { query: normalizedQuery }
+        )}
+      </p>
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        className="h-7 px-2 text-xs"
+        onClick={() => setQuery("")}
+      >
+        {t("iam.team.details.clearSearch")}
+      </Button>
+    </div>
+  )
+
+  const initialLoadErrorContent = (
+    <div
+      role="alert"
+      className="flex flex-col items-center gap-2 px-3 text-center"
+    >
+      <p className="text-sm text-destructive">
+        {t(
+          kind === "groups"
+            ? "iam.team.details.groupsLoadFailed"
+            : "iam.team.details.policiesLoadFailed"
+        )}
+      </p>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="h-7 px-2 text-xs"
+        onClick={retryInitialLoad}
+      >
+        {t("iam.team.details.retry")}
+      </Button>
+    </div>
+  )
 
   const selectedSection = (
     <section>
@@ -237,7 +344,7 @@ export function RelationshipPickerSheet({
               variant="ghost"
               size="sm"
               className="h-6 px-1.5 text-xs"
-              onClick={() => setSelected([])}
+              onClick={clearSelected}
             >
               {t("iam.team.details.clearAll")}
             </Button>
@@ -293,9 +400,9 @@ export function RelationshipPickerSheet({
           {selectedSection}
           <Command
             shouldFilter={false}
-            className="h-auto min-h-0 flex-none overflow-hidden rounded-lg border p-0 [&_[data-slot=command-input-wrapper]]:p-0"
+            className="h-auto min-h-0 flex-none overflow-hidden rounded-lg border-0 p-0 [&_[data-slot=command-input-wrapper]]:p-0 [&_[data-slot=input-group]]:border-input! [&_[data-slot=input-group]]:bg-background!"
           >
-            <div className="px-2 py-2">
+            <div className="py-2">
               <CommandInput
                 value={query}
                 placeholder={placeholder}
@@ -320,11 +427,13 @@ export function RelationshipPickerSheet({
               }
               onSelect={toggleOption}
               emptyContent={
-                filter === "selected"
-                  ? hasQuery
-                    ? emptyMessage
-                    : noSelectionMessage
-                  : emptyMessage
+                initialLoadFailed
+                  ? initialLoadErrorContent
+                  : hasQuery
+                    ? relationshipSearchEmptyContent
+                    : filter === "selected"
+                      ? noSelectionMessage
+                      : emptyMessage
               }
               loading={
                 filter === "all" &&
@@ -344,6 +453,29 @@ export function RelationshipPickerSheet({
                     {loadingMore ? (
                       <div className="p-2">
                         <Skeleton className="h-12 w-full" />
+                      </div>
+                    ) : null}
+                    {loadMoreError ? (
+                      <div
+                        role="alert"
+                        className="flex items-center justify-center gap-2 px-3 py-2 text-xs text-destructive"
+                      >
+                        <span>
+                          {t(
+                            kind === "groups"
+                              ? "iam.team.details.groupsLoadMoreFailed"
+                              : "iam.team.details.policiesLoadMoreFailed"
+                          )}
+                        </span>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="h-7 px-2 text-xs"
+                          onClick={() => void loadNextPage(true)}
+                        >
+                          {t("iam.team.details.retry")}
+                        </Button>
                       </div>
                     ) : null}
                     <div ref={sentinelRef} className="h-px" aria-hidden />
