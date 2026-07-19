@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react"
+import { useState } from "react"
 import { beforeAll, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n/i18n"
 import type { PolicyStatement } from "../permission-model"
@@ -46,6 +47,37 @@ describe("ActionPicker", () => {
     expect(
       screen.queryByRole("option", { name: "All actions" })
     ).not.toBeInTheDocument()
+  })
+
+  it("returns to all actions after removing the last selected action", () => {
+    function ControlledActionPicker() {
+      const [actions, setActions] = useState(["CreateFlag"])
+
+      return (
+        <ActionPicker
+          statement={{ ...statement, actions }}
+          fineGrainedGranted
+          onChange={setActions}
+        />
+      )
+    }
+
+    render(<ControlledActionPicker />)
+
+    fireEvent.click(screen.getByRole("button", { name: "Manage" }))
+    fireEvent.click(screen.getByRole("tab", { name: "Selected (1)" }))
+    fireEvent.click(
+      screen.getByRole("option", { name: /Create flags.*CreateFlag/ })
+    )
+
+    expect(screen.getByRole("tab", { name: "All" })).toHaveAttribute(
+      "aria-selected",
+      "true"
+    )
+    expect(screen.getByRole("tab", { name: "Selected (0)" })).toHaveAttribute(
+      "aria-disabled",
+      "true"
+    )
   })
 
   it("switches between all and specific action modes", () => {

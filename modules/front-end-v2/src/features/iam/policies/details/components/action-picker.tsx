@@ -67,6 +67,7 @@ export function ActionPicker({
       : name === "*"
         ? ["*"]
         : [...statement.actions.filter((item) => item !== "*"), name]
+    if (next.length === 0) setFilter("all")
     onChange(next)
   }
 
@@ -267,7 +268,10 @@ export function ActionPicker({
                 type="button"
                 variant="ghost"
                 size="sm"
-                onClick={() => onChange([])}
+                onClick={() => {
+                  setFilter("all")
+                  onChange([])
+                }}
                 disabled={!statement.actions.length}
               >
                 {t("iam.policies.details.permissionsEditor.clearAll")}

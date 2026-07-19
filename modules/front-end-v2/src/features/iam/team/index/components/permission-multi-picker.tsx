@@ -181,9 +181,14 @@ function PermissionMultiPicker<TOption extends { id: string; name: string }>({
     )
   }, [filter, filteredOptions, query, selected])
 
+  function updateSelected(nextSelected: TOption[]) {
+    if (!nextSelected.length) setFilter("all")
+    onSelectedChange(nextSelected)
+  }
+
   function toggleOption(option: TOption) {
     const exists = selected.some((item) => item.id === option.id)
-    onSelectedChange(
+    updateSelected(
       exists
         ? selected.filter((item) => item.id !== option.id)
         : [...selected, option]
@@ -268,7 +273,7 @@ function PermissionMultiPicker<TOption extends { id: string; name: string }>({
           t("iam.team.add.removeSelected", { name: option.name })
         }
         onRemove={(option) =>
-          onSelectedChange(selected.filter((item) => item.id !== option.id))
+          updateSelected(selected.filter((item) => item.id !== option.id))
         }
       />
       <StablePopoverContent
@@ -340,7 +345,7 @@ function PermissionMultiPicker<TOption extends { id: string; name: string }>({
             type="button"
             variant="ghost"
             size="sm"
-            onClick={() => onSelectedChange([])}
+            onClick={() => updateSelected([])}
             disabled={!selected.length}
           >
             {t("iam.team.add.clearAll")}

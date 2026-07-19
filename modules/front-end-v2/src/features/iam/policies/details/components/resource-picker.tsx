@@ -129,13 +129,16 @@ export function ResourcePicker({
     const next = draft.includes(rn)
       ? draft.filter((item) => item !== rn)
       : [...draft, rn]
-    setDraft(next)
-    onChange(next)
+    updateDraft(next)
   }
 
   function removeSelected(rn: string) {
-    const next = draft.filter((item) => item !== rn)
+    updateDraft(draft.filter((item) => item !== rn))
+  }
+
+  function updateDraft(next: string[]) {
     setDraft(next)
+    if (next.length === 0) setFilter("all")
     onChange(next)
   }
 
@@ -349,10 +352,7 @@ export function ResourcePicker({
                 type="button"
                 variant="ghost"
                 size="sm"
-                onClick={() => {
-                  setDraft([])
-                  onChange([])
-                }}
+                onClick={() => updateDraft([])}
                 disabled={!draft.length}
               >
                 {t("iam.policies.details.permissionsEditor.clearAll")}

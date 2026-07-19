@@ -11,8 +11,18 @@ vi.mock("../../team-api", () => ({
   fetchGroupOptions: vi.fn(() => new Promise(() => undefined)),
 }))
 
-function PickerInSheet() {
-  const [selected, setSelected] = useState<PolicyOption[]>([])
+const policy: PolicyOption = {
+  id: "policy-1",
+  name: "Policy one",
+  type: "CustomerManaged",
+}
+
+function PickerInSheet({
+  initialSelected = [],
+}: {
+  initialSelected?: PolicyOption[]
+}) {
+  const [selected, setSelected] = useState<PolicyOption[]>(initialSelected)
   const sheetContentRef = useRef<HTMLDivElement | null>(null)
   return (
     <Sheet open>
@@ -42,5 +52,39 @@ describe("PolicyMultiPicker", () => {
       "true"
     )
     expect(screen.queryByText("No results found.")).not.toBeInTheDocument()
+  })
+
+  it("returns to All after removing the last selected option", () => {
+    render(<PickerInSheet initialSelected={[policy]} />)
+
+    fireEvent.click(screen.getByRole("button", { name: "Manage" }))
+    fireEvent.click(screen.getByRole("tab", { name: "Selected (1)" }))
+    fireEvent.click(screen.getByRole("option", { name: "Policy one" }))
+
+    expect(screen.getByRole("tab", { name: "All" })).toHaveAttribute(
+      "aria-selected",
+      "true"
+    )
+    expect(screen.getByRole("tab", { name: "Selected (0)" })).toHaveAttribute(
+      "aria-disabled",
+      "true"
+    )
+  })
+
+  it("returns to All after clearing every selected option", () => {
+    render(<PickerInSheet initialSelected={[policy]} />)
+
+    fireEvent.click(screen.getByRole("button", { name: "Manage" }))
+    fireEvent.click(screen.getByRole("tab", { name: "Selected (1)" }))
+    fireEvent.click(screen.getByRole("button", { name: "Clear all" }))
+
+    expect(screen.getByRole("tab", { name: "All" })).toHaveAttribute(
+      "aria-selected",
+      "true"
+    )
+    expect(screen.getByRole("tab", { name: "Selected (0)" })).toHaveAttribute(
+      "aria-disabled",
+      "true"
+    )
   })
 })
