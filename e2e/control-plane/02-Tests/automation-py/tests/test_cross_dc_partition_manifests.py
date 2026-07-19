@@ -42,8 +42,8 @@ def test_partition_commands_apply_each_side_to_its_own_cluster():
 
 
 def test_manifests_never_target_own_node():
-    west = (QA_ROOT / "01-Infrastructure/chaos-mesh/cross-dc-partition-west.yaml").read_text()
-    east = (QA_ROOT / "01-Infrastructure/chaos-mesh/cross-dc-partition-east.yaml").read_text()
+    west = (QA_ROOT / "01-Infrastructure/chaos-mesh/cross-dc-partition-west.yaml").read_text(encoding="utf-8")
+    east = (QA_ROOT / "01-Infrastructure/chaos-mesh/cross-dc-partition-east.yaml").read_text(encoding="utf-8")
     assert "172.31.0.10" not in west.split("externalTargets")[1]  # west's own node
     assert "172.31.0.20" in west.split("externalTargets")[1]
     assert "172.31.0.20" not in east.split("externalTargets")[1]  # east's own node
