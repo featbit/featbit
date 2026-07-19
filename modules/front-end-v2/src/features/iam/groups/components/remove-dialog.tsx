@@ -1,13 +1,14 @@
 import type { ReactNode } from "react"
-import { Button } from "@/components/ui/button"
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { Button } from "@/components/ui/button"
 
 export function RemoveDialog({
   open,
@@ -31,16 +32,18 @@ export function RemoveDialog({
   onConfirm: () => void
 }) {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
-        </DialogHeader>
-        <div className="flex justify-end gap-2">
-          <DialogClose render={<Button type="button" variant="outline" />}>
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{title}</AlertDialogTitle>
+          <AlertDialogDescription>{description}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel
+            render={<Button type="button" variant="outline" />}
+          >
             {cancelLabel}
-          </DialogClose>
+          </AlertDialogCancel>
           <Button
             type="button"
             variant="destructive"
@@ -49,8 +52,8 @@ export function RemoveDialog({
           >
             {saving ? savingLabel : confirmLabel}
           </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }

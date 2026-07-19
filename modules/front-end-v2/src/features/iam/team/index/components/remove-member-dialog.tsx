@@ -1,13 +1,14 @@
 import { useTranslation } from "react-i18next"
-import { Button } from "@/components/ui/button"
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { Button } from "@/components/ui/button"
 import type { TeamMember } from "../../team-api"
 
 export type RemoveTarget = {
@@ -30,24 +31,26 @@ export function RemoveMemberDialog({
   const isWorkspace = target?.scope === "workspace"
 
   return (
-    <Dialog open={Boolean(target)} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>
+    <AlertDialog open={Boolean(target)} onOpenChange={onOpenChange}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>
             {isWorkspace
               ? t("iam.team.remove.workspaceTitle")
               : t("iam.team.remove.organizationTitle")}
-          </DialogTitle>
-          <DialogDescription>
+          </AlertDialogTitle>
+          <AlertDialogDescription>
             {isWorkspace
               ? t("iam.team.remove.workspaceDescription")
               : t("iam.team.remove.organizationDescription")}
-          </DialogDescription>
-        </DialogHeader>
-        <div className="flex justify-end gap-2">
-          <DialogClose render={<Button type="button" variant="outline" />}>
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel
+            render={<Button type="button" variant="outline" />}
+          >
             {t("iam.team.remove.cancel")}
-          </DialogClose>
+          </AlertDialogCancel>
           <Button
             type="button"
             variant="destructive"
@@ -58,8 +61,8 @@ export function RemoveMemberDialog({
               ? t("iam.team.remove.removing")
               : t("iam.team.remove.confirm")}
           </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }

@@ -1,12 +1,13 @@
-import { Button } from "@/components/ui/button"
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { Button } from "@/components/ui/button"
 import type { Policy } from "../../policy-api"
 
 export function RemovePolicyDialog({
@@ -33,22 +34,24 @@ export function RemovePolicyDialog({
   onConfirm: () => void
 }) {
   return (
-    <Dialog open={Boolean(policy)} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>
+    <AlertDialog open={Boolean(policy)} onOpenChange={onOpenChange}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{title}</AlertDialogTitle>
+          <AlertDialogDescription>
             {descriptionBefore}
             <strong className="font-semibold text-foreground">
               {policy?.name}
             </strong>
             {descriptionAfter}
-          </DialogDescription>
-        </DialogHeader>
-        <div className="flex justify-end gap-2">
-          <DialogClose render={<Button type="button" variant="outline" />}>
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel
+            render={<Button type="button" variant="outline" />}
+          >
             {cancelLabel}
-          </DialogClose>
+          </AlertDialogCancel>
           <Button
             type="button"
             variant="destructive"
@@ -57,8 +60,8 @@ export function RemovePolicyDialog({
           >
             {saving ? savingLabel : confirmLabel}
           </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }
