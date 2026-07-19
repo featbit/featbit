@@ -299,14 +299,16 @@ export function GroupDetailsHeader({
                   {group.description}
                 </p>
               ) : (
-                <button
+                <Button
                   type="button"
-                  className="text-sm text-muted-foreground hover:text-foreground hover:underline disabled:cursor-not-allowed disabled:no-underline disabled:opacity-50"
+                  variant="link"
+                  size="sm"
+                  className="h-auto p-0 text-sm font-normal text-muted-foreground hover:text-foreground disabled:no-underline"
                   disabled={nameEditing}
                   onClick={startDescriptionEdit}
                 >
                   {t("iam.groups.addDescription")}
-                </button>
+                </Button>
               )}
               {group?.description ? (
                 <Tooltip>

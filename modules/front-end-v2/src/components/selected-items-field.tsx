@@ -102,15 +102,17 @@ export function SelectedItemsField<TItem>({
                         </div>
                       </TooltipContent>
                     </Tooltip>
-                    <button
+                    <Button
                       type="button"
+                      variant="ghost"
+                      size="icon-xs"
                       aria-label={removeLabel(item)}
-                      className="rounded-full p-0.5 text-muted-foreground hover:bg-background hover:text-foreground disabled:pointer-events-none disabled:opacity-50"
+                      className="rounded-full text-muted-foreground hover:bg-background hover:text-foreground"
                       disabled={disabled || itemDisabled}
                       onClick={() => onRemove(item)}
                     >
                       <X className="size-3" />
-                    </button>
+                    </Button>
                   </Badge>
                 )
               })}

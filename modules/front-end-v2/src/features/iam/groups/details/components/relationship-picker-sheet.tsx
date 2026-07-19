@@ -323,14 +323,16 @@ export function RelationshipPickerSheet({
                       className="max-w-full gap-1 rounded-full border-border py-0.5 pr-1 pl-2 font-normal"
                     >
                       <span className="truncate">{option.name}</span>
-                      <button
+                      <Button
                         type="button"
+                        variant="ghost"
+                        size="icon-xs"
                         aria-label={`${t("iam.groups.remove")} ${option.name}`}
-                        className="rounded-full p-0.5 text-muted-foreground hover:bg-background hover:text-foreground"
+                        className="rounded-full text-muted-foreground hover:bg-background hover:text-foreground"
                         onClick={() => toggle(option)}
                       >
                         <X className="size-3" />
-                      </button>
+                      </Button>
                     </Badge>
                   ))}
                 </div>
