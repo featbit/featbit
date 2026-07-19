@@ -1,5 +1,5 @@
 import type { ReactNode } from "react"
-import { cn } from "@/lib/utils"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export type SelectionFilter = "all" | "selected"
 
@@ -17,28 +17,29 @@ export function SelectionFilterTabs({
   selectedCount: number
 }) {
   return (
-    <div className="flex gap-5 border-b px-3 pt-2">
-      {(["all", "selected"] as const).map((filter) => {
-        const disabled = filter === "selected" && selectedCount === 0
-        return (
-          <button
-            key={filter}
-            type="button"
-            aria-pressed={value === filter}
-            className={cn(
-              "border-b-2 px-0.5 pb-2 text-sm font-medium",
-              value === filter
-                ? "border-primary text-foreground"
-                : "border-transparent text-muted-foreground",
-              disabled && "cursor-not-allowed opacity-50"
-            )}
-            disabled={disabled}
-            onClick={() => onValueChange(filter)}
-          >
-            {filter === "all" ? allLabel : selectedLabel(selectedCount)}
-          </button>
-        )
-      })}
-    </div>
+    <Tabs
+      value={value}
+      onValueChange={(nextValue) => onValueChange(nextValue as SelectionFilter)}
+      className="gap-0"
+    >
+      <TabsList
+        variant="line"
+        className="w-full justify-start gap-5 rounded-none border-b px-3 pt-2 group-data-horizontal/tabs:h-auto"
+      >
+        <TabsTrigger
+          value="all"
+          className="h-auto flex-none rounded-none px-0.5 pt-0 pb-2"
+        >
+          {allLabel}
+        </TabsTrigger>
+        <TabsTrigger
+          value="selected"
+          className="h-auto flex-none rounded-none px-0.5 pt-0 pb-2"
+          disabled={selectedCount === 0}
+        >
+          {selectedLabel(selectedCount)}
+        </TabsTrigger>
+      </TabsList>
+    </Tabs>
   )
 }

@@ -70,7 +70,7 @@ function policyPage(hasMore = false) {
 
 async function selectGroupAndOpenSelectedFilter() {
   fireEvent.click(await screen.findByRole("option", { name: "Group one" }))
-  fireEvent.click(screen.getByRole("button", { name: "Selected (1)" }))
+  fireEvent.click(screen.getByRole("tab", { name: "Selected (1)" }))
 }
 
 describe("RelationshipPickerSheet groups", () => {
@@ -90,11 +90,14 @@ describe("RelationshipPickerSheet groups", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Clear all" }))
 
-    expect(screen.getByRole("button", { name: "All" })).toHaveAttribute(
-      "aria-pressed",
+    expect(screen.getByRole("tab", { name: "All" })).toHaveAttribute(
+      "aria-selected",
       "true"
     )
-    expect(screen.getByRole("button", { name: "Selected (0)" })).toBeDisabled()
+    expect(screen.getByRole("tab", { name: "Selected (0)" })).toHaveAttribute(
+      "aria-disabled",
+      "true"
+    )
     expect(
       await screen.findByRole("option", { name: "Group one" })
     ).toBeVisible()
@@ -106,11 +109,14 @@ describe("RelationshipPickerSheet groups", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Remove Group one" }))
 
-    expect(screen.getByRole("button", { name: "All" })).toHaveAttribute(
-      "aria-pressed",
+    expect(screen.getByRole("tab", { name: "All" })).toHaveAttribute(
+      "aria-selected",
       "true"
     )
-    expect(screen.getByRole("button", { name: "Selected (0)" })).toBeDisabled()
+    expect(screen.getByRole("tab", { name: "Selected (0)" })).toHaveAttribute(
+      "aria-disabled",
+      "true"
+    )
   })
 
   it("retries an initial load failure", async () => {
@@ -237,7 +243,7 @@ describe("RelationshipPickerSheet policies", () => {
 
   async function selectPolicyAndOpenSelectedFilter() {
     fireEvent.click(await screen.findByRole("option", { name: "Policy one" }))
-    fireEvent.click(screen.getByRole("button", { name: "Selected (1)" }))
+    fireEvent.click(screen.getByRole("tab", { name: "Selected (1)" }))
   }
 
   it("uses the same unframed picker layout as Add to groups", async () => {
@@ -268,11 +274,14 @@ describe("RelationshipPickerSheet policies", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Clear all" }))
 
-    expect(screen.getByRole("button", { name: "All" })).toHaveAttribute(
-      "aria-pressed",
+    expect(screen.getByRole("tab", { name: "All" })).toHaveAttribute(
+      "aria-selected",
       "true"
     )
-    expect(screen.getByRole("button", { name: "Selected (0)" })).toBeDisabled()
+    expect(screen.getByRole("tab", { name: "Selected (0)" })).toHaveAttribute(
+      "aria-disabled",
+      "true"
+    )
     expect(
       await screen.findByRole("option", { name: "Policy one" })
     ).toBeVisible()
@@ -284,11 +293,14 @@ describe("RelationshipPickerSheet policies", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Remove Policy one" }))
 
-    expect(screen.getByRole("button", { name: "All" })).toHaveAttribute(
-      "aria-pressed",
+    expect(screen.getByRole("tab", { name: "All" })).toHaveAttribute(
+      "aria-selected",
       "true"
     )
-    expect(screen.getByRole("button", { name: "Selected (0)" })).toBeDisabled()
+    expect(screen.getByRole("tab", { name: "Selected (0)" })).toHaveAttribute(
+      "aria-disabled",
+      "true"
+    )
   })
 
   it("retries an initial policy load failure", async () => {

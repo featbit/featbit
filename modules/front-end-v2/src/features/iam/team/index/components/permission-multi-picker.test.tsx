@@ -37,7 +37,10 @@ describe("PolicyMultiPicker", () => {
     const input = screen.getByPlaceholderText("Search policies")
     expect(input.closest("[data-open]")).not.toBeNull()
     expect(input.closest('[data-slot="sheet-content"]')).not.toBeNull()
-    expect(screen.getByRole("button", { name: "Selected (0)" })).toBeDisabled()
+    expect(screen.getByRole("tab", { name: "Selected (0)" })).toHaveAttribute(
+      "aria-disabled",
+      "true"
+    )
     expect(screen.queryByText("No results found.")).not.toBeInTheDocument()
   })
 })

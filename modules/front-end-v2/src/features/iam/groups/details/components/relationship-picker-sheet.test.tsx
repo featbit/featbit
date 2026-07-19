@@ -114,7 +114,7 @@ describe.each(scenarios)("RelationshipPickerSheet $kind", (scenario) => {
         name: new RegExp(scenario.firstName),
       })
     )
-    fireEvent.click(screen.getByRole("button", { name: "Selected (1)" }))
+    fireEvent.click(screen.getByRole("tab", { name: "Selected (1)" }))
   }
 
   it("uses the same unframed layout as Add to groups", async () => {
@@ -140,8 +140,8 @@ describe.each(scenarios)("RelationshipPickerSheet $kind", (scenario) => {
     expect(command).not.toHaveClass("border")
     expect(searchSection).toHaveClass("py-2")
     expect(searchSection).not.toHaveClass("px-2")
-    expect(screen.getByRole("button", { name: "All" })).toHaveAttribute(
-      "aria-pressed",
+    expect(screen.getByRole("tab", { name: "All" })).toHaveAttribute(
+      "aria-selected",
       "true"
     )
     expect(screen.queryByText(scenario.availableLabel)).not.toBeInTheDocument()
@@ -153,11 +153,14 @@ describe.each(scenarios)("RelationshipPickerSheet $kind", (scenario) => {
 
     fireEvent.click(screen.getByRole("button", { name: "Clear all" }))
 
-    expect(screen.getByRole("button", { name: "All" })).toHaveAttribute(
-      "aria-pressed",
+    expect(screen.getByRole("tab", { name: "All" })).toHaveAttribute(
+      "aria-selected",
       "true"
     )
-    expect(screen.getByRole("button", { name: "Selected (0)" })).toBeDisabled()
+    expect(screen.getByRole("tab", { name: "Selected (0)" })).toHaveAttribute(
+      "aria-disabled",
+      "true"
+    )
     expect(
       await screen.findByRole("option", {
         name: new RegExp(scenario.firstName),
@@ -175,11 +178,14 @@ describe.each(scenarios)("RelationshipPickerSheet $kind", (scenario) => {
       })
     )
 
-    expect(screen.getByRole("button", { name: "All" })).toHaveAttribute(
-      "aria-pressed",
+    expect(screen.getByRole("tab", { name: "All" })).toHaveAttribute(
+      "aria-selected",
       "true"
     )
-    expect(screen.getByRole("button", { name: "Selected (0)" })).toBeDisabled()
+    expect(screen.getByRole("tab", { name: "Selected (0)" })).toHaveAttribute(
+      "aria-disabled",
+      "true"
+    )
   })
 
   it("retries an initial load failure", async () => {

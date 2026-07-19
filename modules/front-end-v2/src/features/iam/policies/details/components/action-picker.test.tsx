@@ -31,8 +31,8 @@ describe("ActionPicker", () => {
     ).toHaveAttribute("aria-pressed", "true")
     fireEvent.click(screen.getByRole("button", { name: "Manage" }))
 
-    expect(screen.getByRole("button", { name: "All" })).toBeInTheDocument()
-    const selectedFilter = screen.getByRole("button", {
+    expect(screen.getByRole("tab", { name: "All" })).toBeInTheDocument()
+    const selectedFilter = screen.getByRole("tab", {
       name: "Selected (1)",
     })
     expect(selectedFilter).toBeEnabled()
