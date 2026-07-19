@@ -7,11 +7,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 FeatBit is a self-hosted feature flag management platform with a microservices architecture. Five independent services communicate via pluggable message queues:
 
 ```
-UI (Angular 19) → API Server (.NET 8) → Message Queue → Evaluation Server (.NET 8)
+UI (Angular 19) → API Server (.NET 10) → Message Queue → Evaluation Server (.NET 10)
                                        ↓
                              Data Analytics (Python/Flask)
 
-Control Plane (.NET 8) — optional broker between API and Evaluation Servers
+Control Plane (.NET 10) — optional broker between API and Evaluation Servers
 ```
 
 ### Service Locations

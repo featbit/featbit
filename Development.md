@@ -32,8 +32,8 @@ docker compose --project-directory . -f ./docker/composes/docker-compose-infra.y
 
 ## Run API
 
-The API project is built with [.NET 8](https://dotnet.microsoft.com/en-us/download/dotnet/8.0), make sure you have the
-latest .NET 8.0 SDK installed before you start.
+The API project is built with [.NET 10](https://dotnet.microsoft.com/en-us/download/dotnet/10.0), make sure you have the
+latest .NET 10.0 SDK installed before you start.
 
 Navigate to **modules/back-end/src/Api** folder and run `dotnet run`, then the swagger should be available
 at [http://localhost:5000/swagger](http://localhost:5000/swagger).

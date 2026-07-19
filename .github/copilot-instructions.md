@@ -10,9 +10,9 @@ Before you start any work, state how you would verify it. After you finish, run 
 
 ```
 modules/
-  back-end/           # API server (.NET 8, C#, Clean Architecture)
-  evaluation-server/  # Flag evaluation + streaming (.NET 8, C#)
-  control-plane/      # Cross-DC control plane API (.NET 8, C#)
+  back-end/           # API server (.NET 10, C#, Clean Architecture)
+  evaluation-server/  # Flag evaluation + streaming (.NET 10, C#)
+  control-plane/      # Cross-DC control plane API (.NET 10, C#)
   front-end/          # Web UI (Angular 19, TypeScript)
   data-analytics/     # Analytics server (Python 3.9+, Flask)
 e2e/
@@ -92,7 +92,7 @@ Style: black (line-length 100), isort (profile black), flake8, mypy.
 
 ## Coding Conventions
 
-### C# (.NET 8)
+### C# (.NET 10)
 
 - `<Nullable>enable</Nullable>` and `<ImplicitUsings>enable</ImplicitUsings>` in all projects
 - xUnit with `[Fact]` and `[Theory]`; mocking with Moq
