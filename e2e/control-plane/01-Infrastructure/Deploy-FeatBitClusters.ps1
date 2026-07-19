@@ -793,7 +793,7 @@ else {
 }
 
 Write-Info "Checking Docker registry..."
-$registryRunning = docker ps --filter "name=registry" --filter "status=running" --format "{{.Names}}" | Select-String -Pattern "^registry$"
+$registryRunning = docker ps --filter "name=registry" --filter "status=running" --format "{{.Names}}" | Select-String -Pattern "^featbit-registry$"
 if (-not $registryRunning) {
     Write-Warning "Local Docker registry not running on port 5000"
     Write-Info "Starting registry container..."
