@@ -109,6 +109,11 @@ const PolicyDetailsPage = lazy(() =>
     default: module.PolicyDetailsPage,
   }))
 )
+const AccessTokensPage = lazy(() =>
+  import("@/features/access-tokens/access-tokens-page").then((module) => ({
+    default: module.AccessTokensPage,
+  }))
+)
 
 type SupportedLanguage = "en" | "zh"
 
@@ -273,6 +278,10 @@ export function AppRoutes() {
           <Route
             path="iam/policies/:policyId/:tab"
             element={<PolicyDetailsPage />}
+          />
+          <Route
+            path="integrations/access-tokens"
+            element={<AccessTokensPage />}
           />
           <Route path="account/profile" element={<ProfilePage />} />
           {/*Remove the following line when migration completed*/}
