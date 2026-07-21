@@ -409,7 +409,16 @@ export function AccessTokenSheet({
                   onChange={setPermissions}
                 />
               </div>
-            ) : null}
+            ) : (
+              <section className="space-y-1 border-t pt-6">
+                <h3 className="text-sm font-semibold text-foreground">
+                  {t("accessTokens.permissions.title")}
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  {t("accessTokens.permissions.personalInherited")}
+                </p>
+              </section>
+            )}
           </div>
 
           {!readOnly ? (

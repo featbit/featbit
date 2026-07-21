@@ -29,7 +29,7 @@ function renderWithQueryClient(element: ReactElement) {
 }
 
 describe("AccessTokenSheet", () => {
-  it("does not show Type helper copy in the New sheet", () => {
+  it("shows inherited permissions separately from the Type field", () => {
     renderWithQueryClient(
       <AccessTokenSheet {...sharedProps} mode="new" token={null} />
     )
@@ -40,6 +40,10 @@ describe("AccessTokenSheet", () => {
     expect(
       screen.queryByText("Service tokens require explicit permissions")
     ).not.toBeInTheDocument()
+    expect(
+      screen.getByRole("heading", { name: "Permissions" })
+    ).toBeInTheDocument()
+    expect(screen.getByText("Uses your user permissions")).toBeInTheDocument()
   })
 
   it("keeps Type read-only in the Edit sheet without helper copy", () => {
@@ -64,6 +68,9 @@ describe("AccessTokenSheet", () => {
 
     expect(
       screen.queryByText("Service tokens require explicit permissions")
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByText("Uses your user permissions")
     ).not.toBeInTheDocument()
     expect(screen.getByRole("combobox", { name: /Type/ })).toBeDisabled()
   })
