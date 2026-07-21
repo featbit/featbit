@@ -114,6 +114,11 @@ const AccessTokensPage = lazy(() =>
     default: module.AccessTokensPage,
   }))
 )
+const RelayProxiesPage = lazy(() =>
+  import("@/features/relay-proxies/relay-proxies-page").then((module) => ({
+    default: module.RelayProxiesPage,
+  }))
+)
 
 type SupportedLanguage = "en" | "zh"
 
@@ -279,10 +284,8 @@ export function AppRoutes() {
             path="iam/policies/:policyId/:tab"
             element={<PolicyDetailsPage />}
           />
-          <Route
-            path="access-tokens"
-            element={<AccessTokensPage />}
-          />
+          <Route path="access-tokens" element={<AccessTokensPage />} />
+          <Route path="relay-proxies" element={<RelayProxiesPage />} />
           <Route path="account/profile" element={<ProfilePage />} />
           {/*Remove the following line when migration completed*/}
           <Route path="*" element={<LayoutPlaceholder />} />
