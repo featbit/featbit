@@ -89,6 +89,11 @@ const enAccessTokens = {
       "Select at least one permission for a service access token.",
   },
   permissions: {
+    preservedFineGrainedTitle: "Specific actions preserved",
+    preservedFineGrainedDescription:
+      "This token keeps the specific actions created under an earlier Fine-grained Access Control license. They are read-only now; selecting Select all replaces them with every action in that category.",
+    preservedFineGrainedReadOnlyDescription:
+      "This token keeps the specific actions created under an earlier Fine-grained Access Control license. They are read-only under the current license.",
     title: "Permissions",
     subtitle: "Choose only the API capabilities this service needs.",
     selected: "{{count}} selected",
@@ -265,6 +270,11 @@ const zhAccessTokens = {
     servicePolicyRequired: "请为服务访问令牌至少选择一项权限。",
   },
   permissions: {
+    preservedFineGrainedTitle: "已保留具体操作权限",
+    preservedFineGrainedDescription:
+      "此令牌保留了在之前的 Fine-grained Access Control 许可证下创建的具体操作权限。当前这些权限为只读；选择“全选”会将其替换为该类别的所有操作。",
+    preservedFineGrainedReadOnlyDescription:
+      "此令牌保留了在之前的 Fine-grained Access Control 许可证下创建的具体操作权限。在当前许可证下，这些权限为只读。",
     title: "权限",
     subtitle: "仅选择此服务所需的 API 能力。",
     selected: "已选 {{count}} 项",

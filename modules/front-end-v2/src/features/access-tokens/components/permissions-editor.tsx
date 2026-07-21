@@ -1,8 +1,9 @@
 import { Radio } from "@base-ui/react/radio"
 import { RadioGroup } from "@base-ui/react/radio-group"
-import { Info } from "lucide-react"
+import { Info, LockKeyhole } from "lucide-react"
 import type { RefObject } from "react"
 import { useTranslation } from "react-i18next"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
   Tooltip,
@@ -13,6 +14,7 @@ import { cn } from "@/lib/utils"
 import {
   PERMISSION_CATEGORIES,
   canGrantAction,
+  supportsFineGrainedActions,
   visibleActions,
 } from "../access-token-permissions"
 import type {
@@ -46,6 +48,16 @@ export function PermissionsEditor({
   )
   const missingPermission = validationAttempted && selectedCount === 0
 
+  const hasPreservedFineGrainedActions =
+    !fineGrainedGranted &&
+    PERMISSION_CATEGORIES.some((category) =>
+      category.actions.some(
+        (permissionAction) =>
+          permissionAction.fineGrained &&
+          draft[category.type].selectedActions.includes(permissionAction.name)
+      )
+    )
+
   function updateCategory(
     type: ResourceType,
     next: PermissionDraft[ResourceType]
@@ -73,11 +85,39 @@ export function PermissionsEditor({
         ) : null}
       </div>
 
+      {hasPreservedFineGrainedActions ? (
+        <Alert className="border-amber-300 bg-amber-50 text-amber-950 dark:border-amber-800 dark:bg-amber-950/20 dark:text-amber-100">
+          <LockKeyhole />
+          <AlertTitle>
+            {t("accessTokens.permissions.preservedFineGrainedTitle")}
+          </AlertTitle>
+          <AlertDescription className="text-amber-900/80 dark:text-amber-100/80">
+            {t(
+              readOnly
+                ? "accessTokens.permissions.preservedFineGrainedReadOnlyDescription"
+                : "accessTokens.permissions.preservedFineGrainedDescription"
+            )}
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
       <div className="border-y">
         {PERMISSION_CATEGORIES.map((category) => {
           const categoryDraft = draft[category.type]
-          const actions = visibleActions(category, fineGrainedGranted)
-          const editableActions = actions.filter(
+          const coarseActionsOnly =
+            !fineGrainedGranted && supportsFineGrainedActions(category)
+          const selectableActions = visibleActions(category, fineGrainedGranted)
+          const preservedFineGrainedActions = coarseActionsOnly
+            ? category.actions.filter(
+                (permissionAction) =>
+                  permissionAction.fineGrained &&
+                  categoryDraft.selectedActions.includes(permissionAction.name)
+              )
+            : []
+          const displayedActions = coarseActionsOnly
+            ? [...selectableActions, ...preservedFineGrainedActions]
+            : selectableActions
+          const editableActions = selectableActions.filter(
             (permissionAction) =>
               !readOnly &&
               canGrantAction(policies, category.type, permissionAction.name) &&
@@ -89,9 +129,12 @@ export function PermissionsEditor({
           ).length
           const allEditableSelected =
             editableNames.length > 0 &&
-            editableSelectedCount === editableNames.length
-          const partiallySelected =
-            editableSelectedCount > 0 && !allEditableSelected
+            (coarseActionsOnly
+              ? categoryDraft.selectedActions.includes("*")
+              : editableSelectedCount === editableNames.length)
+          const partiallySelected = coarseActionsOnly
+            ? categoryDraft.selectedActions.length > 0 && !allEditableSelected
+            : editableSelectedCount > 0 && !allEditableSelected
           const scopeInvalid =
             validationAttempted &&
             categoryDraft.selectedActions.length > 0 &&
@@ -102,8 +145,17 @@ export function PermissionsEditor({
           const scopeResource = category.supportsSpecific
             ? t(`accessTokens.permissions.scopeNouns.${category.type}`)
             : ""
+          const selectedActionCount = categoryDraft.selectedActions.length
 
           function setAllActions(checked: boolean) {
+            if (coarseActionsOnly) {
+              updateCategory(category.type, {
+                ...categoryDraft,
+                selectedActions: checked ? ["*"] : [],
+              })
+              return
+            }
+
             const preserved = categoryDraft.selectedActions.filter(
               (name) => !editableNames.includes(name)
             )
@@ -112,7 +164,7 @@ export function PermissionsEditor({
               selectedActions: checked
                 ? [
                     ...preserved,
-                    ...actions
+                    ...selectableActions
                       .map((item) => item.name)
                       .filter((name) => editableNames.includes(name)),
                   ]
@@ -124,7 +176,7 @@ export function PermissionsEditor({
             updateCategory(category.type, {
               ...categoryDraft,
               selectedActions: checked
-                ? actions
+                ? selectableActions
                     .map((item) => item.name)
                     .filter(
                       (actionName) =>
@@ -151,7 +203,7 @@ export function PermissionsEditor({
                   </h4>
                   <span className="text-xs text-muted-foreground">
                     {t("accessTokens.permissions.selected", {
-                      count: categoryDraft.selectedActions.length,
+                      count: selectedActionCount,
                     })}
                   </span>
                 </div>
@@ -227,62 +279,64 @@ export function PermissionsEditor({
                   ) : null}
                 </div>
               ) : null}
-              <div className="grid grid-cols-3 gap-x-6 gap-y-3">
-                {actions.map((permissionAction) => {
-                  const authorized = canGrantAction(
-                    policies,
-                    category.type,
-                    permissionAction.name
-                  )
-                  const licensed =
-                    !permissionAction.fineGrained || fineGrainedGranted
-                  const disabled = readOnly || !authorized || !licensed
-                  const checked = categoryDraft.selectedActions.includes(
-                    permissionAction.name
-                  )
+              {displayedActions.length ? (
+                <div className="grid grid-cols-3 gap-x-6 gap-y-3">
+                  {displayedActions.map((permissionAction) => {
+                    const authorized = canGrantAction(
+                      policies,
+                      category.type,
+                      permissionAction.name
+                    )
+                    const licensed =
+                      !permissionAction.fineGrained || fineGrainedGranted
+                    const disabled = readOnly || !authorized || !licensed
+                    const checked = categoryDraft.selectedActions.includes(
+                      permissionAction.name
+                    )
 
-                  return (
-                    <div
-                      key={permissionAction.name}
-                      className="flex min-w-0 items-center gap-2"
-                    >
-                      <Checkbox
-                        id={`access-token-${category.type}-${permissionAction.name}`}
-                        checked={checked}
-                        disabled={disabled}
-                        onCheckedChange={(nextChecked) =>
-                          toggleAction(permissionAction.name, nextChecked)
-                        }
-                      />
-                      <label
-                        htmlFor={`access-token-${category.type}-${permissionAction.name}`}
-                        className={cn(
-                          "min-w-0 truncate text-xs text-foreground",
-                          disabled && !readOnly && "text-muted-foreground"
-                        )}
+                    return (
+                      <div
+                        key={permissionAction.name}
+                        className="flex min-w-0 items-center gap-2"
                       >
-                        {permissionAction.name}
-                      </label>
-                      <Tooltip>
-                        <TooltipTrigger
-                          render={
-                            <button
-                              type="button"
-                              className="shrink-0 rounded-sm text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
-                              aria-label={t(permissionAction.descriptionKey)}
-                            />
+                        <Checkbox
+                          id={`access-token-${category.type}-${permissionAction.name}`}
+                          checked={checked}
+                          disabled={disabled}
+                          onCheckedChange={(nextChecked) =>
+                            toggleAction(permissionAction.name, nextChecked)
                           }
+                        />
+                        <label
+                          htmlFor={`access-token-${category.type}-${permissionAction.name}`}
+                          className={cn(
+                            "min-w-0 truncate text-xs text-foreground",
+                            disabled && !readOnly && "text-muted-foreground"
+                          )}
                         >
-                          <Info className="size-3.5" />
-                        </TooltipTrigger>
-                        <TooltipContent className="max-w-64">
-                          {t(permissionAction.descriptionKey)}
-                        </TooltipContent>
-                      </Tooltip>
-                    </div>
-                  )
-                })}
-              </div>
+                          {permissionAction.name}
+                        </label>
+                        <Tooltip>
+                          <TooltipTrigger
+                            render={
+                              <button
+                                type="button"
+                                className="shrink-0 rounded-sm text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+                                aria-label={t(permissionAction.descriptionKey)}
+                              />
+                            }
+                          >
+                            <Info className="size-3.5" />
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-64">
+                            {t(permissionAction.descriptionKey)}
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
+                    )
+                  })}
+                </div>
+              ) : null}
             </section>
           )
         })}

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import {
+  PERMISSION_CATEGORIES,
   canManageAccessTokenType,
   createEmptyPermissionDraft,
   permissionDraftFromStatements,
@@ -71,9 +72,33 @@ describe("access token permission model", () => {
     const basicDraft = permissionDraftFromStatements(saved, false)
     expect(basicDraft.flag.selectedActions).toEqual(["*"])
 
+    const concreteFlagActions = PERMISSION_CATEGORIES.find(
+      (category) => category.type === "flag"
+    )!.actions.filter((item) => item.name !== "*")
     const fineGrainedDraft = permissionDraftFromStatements(saved, true)
-    expect(fineGrainedDraft.flag.selectedActions).not.toContain("*")
-    expect(fineGrainedDraft.flag.selectedActions).toContain("CreateFlag")
+    expect(fineGrainedDraft.flag.selectedActions).toEqual(
+      concreteFlagActions.map((item) => item.name)
+    )
+    expect(permissionDraftToStatements(fineGrainedDraft)[0].actions).toEqual(
+      concreteFlagActions.map((item) => item.name)
+    )
+  })
+
+  it("preserves saved specific actions after fine-grained access is removed", () => {
+    const saved = [
+      statement({
+        resourceType: "flag",
+        actions: ["CreateFlag", "ToggleFlag"],
+        resources: ["project/*:env/*:flag/*"],
+      }),
+    ]
+
+    const draft = permissionDraftFromStatements(saved, false)
+    expect(draft.flag.selectedActions).toEqual(["CreateFlag", "ToggleFlag"])
+    expect(permissionDraftToStatements(draft)[0]).toMatchObject({
+      resourceType: "flag",
+      actions: ["CreateFlag", "ToggleFlag"],
+    })
   })
 
   it("serializes every selected Specific resource without collapsing it", () => {

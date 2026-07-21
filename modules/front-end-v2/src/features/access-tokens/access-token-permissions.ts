@@ -243,18 +243,21 @@ export const PERMISSION_CATEGORIES: PermissionCategory[] = [
   },
 ]
 
+export function supportsFineGrainedActions(category: PermissionCategory) {
+  return category.actions.some((item) => item.fineGrained)
+}
+
 export function visibleActions(
   category: PermissionCategory,
   fineGrainedGranted: boolean
 ) {
-  if (
-    fineGrainedGranted &&
-    (category.type === "flag" || category.type === "segment")
-  ) {
-    return category.actions.filter((item) => item.name !== "*")
+  if (!supportsFineGrainedActions(category)) {
+    return category.actions
   }
 
-  return category.actions
+  return fineGrainedGranted
+    ? category.actions.filter((item) => item.name !== "*")
+    : category.actions.filter((item) => item.name === "*")
 }
 
 export function createEmptyPermissionDraft(): PermissionDraft {
@@ -286,14 +289,11 @@ export function permissionDraftFromStatements(
 
     const savedActions = new Set(matching.flatMap((item) => item.actions))
     const actions = visibleActions(category, fineGrainedGranted)
-    draft[category.type].selectedActions = savedActions.has("*")
-      ? !fineGrainedGranted &&
-        (category.type === "flag" || category.type === "segment")
-        ? actions.filter((item) => item.name === "*").map((item) => item.name)
-        : actions.map((item) => item.name)
-      : actions
-          .filter((item) => savedActions.has(item.name))
-          .map((item) => item.name)
+    draft[category.type].selectedActions = (
+      savedActions.has("*") ? actions : category.actions
+    )
+      .filter((item) => savedActions.has("*") || savedActions.has(item.name))
+      .map((item) => item.name)
 
     const resources = Array.from(
       new Set(matching.flatMap((item) => item.resources))
