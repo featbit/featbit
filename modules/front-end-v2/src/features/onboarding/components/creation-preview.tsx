@@ -1,4 +1,4 @@
-import { Building2, CircleDot, Folder, SquareCode } from "lucide-react"
+import { Box, Building2, Folder, SquareCode } from "lucide-react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { cn } from "@/lib/utils"
@@ -39,19 +39,19 @@ export function CreationPreview({
           <EnvironmentPreview
             name="Dev"
             tone="green"
-            className="absolute left-[5%] top-1 -translate-x-1/2"
+            className="absolute top-1 left-[5%] -translate-x-1/2"
           />
           <EnvironmentPreview
             name="Prod"
             tone="blue"
-            className="absolute left-[75%] top-1 -translate-x-1/2"
+            className="absolute top-1 left-[75%] -translate-x-1/2"
           />
         </div>
       </div>
 
       <div className="rounded-md border border-amber-300 bg-amber-50 px-5 py-4 text-amber-950 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-100">
         <div className="flex gap-4">
-          <CircleDot className="mt-0.5 size-5 shrink-0 text-amber-500" />
+          <Box className="mt-0.5 size-5 shrink-0 text-amber-500" />
           <p className="text-sm leading-6">
             {t("onboarding.environments.helper")}
           </p>
@@ -158,10 +158,10 @@ function EnvironmentPreview({
   return (
     <div className={cn("flex w-44 min-w-0 flex-col items-center", className)}>
       <div className="flex size-18 items-center justify-center rounded-md border bg-card shadow-sm">
-        <span
+        <Box
           className={cn(
-            "size-4 rounded-full",
-            tone === "green" ? "bg-emerald-600" : "bg-blue-600"
+            "size-8",
+            tone === "green" ? "text-emerald-600" : "text-blue-600"
           )}
         />
       </div>

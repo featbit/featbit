@@ -1,6 +1,15 @@
 import { Radio } from "@base-ui/react/radio"
 import { RadioGroup } from "@base-ui/react/radio-group"
-import { Info, LockKeyhole } from "lucide-react"
+import {
+  Building2,
+  Box,
+  Flag,
+  Folder,
+  Info,
+  Layers3,
+  LockKeyhole,
+  ShieldCheck,
+} from "lucide-react"
 import type { RefObject } from "react"
 import { useTranslation } from "react-i18next"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -23,6 +32,15 @@ import type {
   UserPolicy,
 } from "../access-token-types"
 import { ResourceSelection } from "./resource-selection"
+
+const CATEGORY_ICONS = {
+  flag: Flag,
+  segment: Layers3,
+  project: Folder,
+  env: Box,
+  iam: ShieldCheck,
+  workspace: Building2,
+} satisfies Record<ResourceType, typeof Flag>
 
 export function PermissionsEditor({
   portalContainer,
@@ -142,6 +160,7 @@ export function PermissionsEditor({
             categoryDraft.scope === "specific" &&
             categoryDraft.specificResources.length === 0
           const categoryLabel = t(category.labelKey)
+          const CategoryIcon = CATEGORY_ICONS[category.type]
           const scopeResource = category.supportsSpecific
             ? t(`accessTokens.permissions.scopeNouns.${category.type}`)
             : ""
@@ -192,20 +211,26 @@ export function PermissionsEditor({
           return (
             <section
               key={category.type}
-              className="space-y-4 border-b px-0 py-5 last:border-b-0"
+              className="space-y-3 border-b py-4 last:border-b-0"
               tabIndex={scopeInvalid ? -1 : undefined}
               data-permission-error={scopeInvalid || undefined}
             >
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex min-w-0 items-baseline gap-2">
-                  <h4 className="font-medium text-foreground">
-                    {categoryLabel}
-                  </h4>
-                  <span className="text-xs text-muted-foreground">
-                    {t("accessTokens.permissions.selected", {
-                      count: selectedActionCount,
-                    })}
-                  </span>
+              <div className="flex min-h-9 items-center justify-between gap-4 rounded-md bg-muted/40 px-3 py-1.5">
+                <div className="flex min-w-0 items-center gap-2.5">
+                  <CategoryIcon
+                    className="size-4 shrink-0 text-muted-foreground"
+                    aria-hidden="true"
+                  />
+                  <div className="flex min-w-0 items-baseline gap-2">
+                    <h4 className="truncate text-sm font-semibold text-foreground">
+                      {categoryLabel}
+                    </h4>
+                    <span className="shrink-0 text-xs text-muted-foreground">
+                      {t("accessTokens.permissions.selected", {
+                        count: selectedActionCount,
+                      })}
+                    </span>
+                  </div>
                 </div>
                 {!readOnly ? (
                   <label className="flex cursor-pointer items-center gap-2 text-xs font-medium text-foreground">
@@ -220,130 +245,137 @@ export function PermissionsEditor({
                 ) : null}
               </div>
 
-              {category.supportsSpecific ? (
-                <div className="space-y-3">
-                  <div className="flex items-center gap-5 text-xs">
-                    <span className="font-medium text-foreground">
-                      {t("accessTokens.permissions.appliesTo")}
-                    </span>
-                    <RadioGroup
-                      aria-label={t("accessTokens.permissions.scopeLabel", {
-                        category: categoryLabel,
-                      })}
-                      value={categoryDraft.scope}
-                      disabled={readOnly}
-                      className="flex items-center gap-5"
-                      onValueChange={(scope) =>
-                        updateCategory(category.type, {
-                          ...categoryDraft,
-                          scope,
-                        })
-                      }
-                    >
-                      {(["all", "specific"] as const).map((scope) => (
-                        <label
-                          key={scope}
-                          className={cn(
-                            "flex items-center gap-2 text-foreground",
-                            readOnly ? "cursor-default" : "cursor-pointer"
-                          )}
-                        >
-                          <Radio.Root
-                            value={scope}
-                            className="flex size-4 items-center justify-center rounded-full border border-input outline-none focus-visible:ring-3 focus-visible:ring-ring/50 data-checked:border-primary"
-                          >
-                            <Radio.Indicator className="size-2 rounded-full bg-primary" />
-                          </Radio.Root>
-                          {t(`accessTokens.permissions.scopeOptions.${scope}`, {
-                            resource: scopeResource,
-                          })}
-                        </label>
-                      ))}
-                    </RadioGroup>
-                  </div>
-
-                  {categoryDraft.scope === "specific" ? (
-                    <ResourceSelection
-                      portalContainer={portalContainer}
-                      resourceType={category.type}
-                      resources={categoryDraft.specificResources}
-                      readOnly={readOnly}
-                      invalid={scopeInvalid}
-                      onChange={(specificResources) => {
-                        const appliesToAllResources =
-                          specificResources.includes(category.pattern)
-                        updateCategory(category.type, {
-                          ...categoryDraft,
-                          scope: appliesToAllResources
-                            ? "all"
-                            : categoryDraft.scope,
-                          specificResources: appliesToAllResources
-                            ? []
-                            : specificResources,
-                        })
-                      }}
-                    />
-                  ) : null}
-                </div>
-              ) : null}
-              {displayedActions.length ? (
-                <div className="grid grid-cols-3 gap-x-6 gap-y-3">
-                  {displayedActions.map((permissionAction) => {
-                    const authorized = canGrantAction(
-                      policies,
-                      category.type,
-                      permissionAction.name
-                    )
-                    const licensed =
-                      !permissionAction.fineGrained || fineGrainedGranted
-                    const disabled = readOnly || !authorized || !licensed
-                    const checked = categoryDraft.selectedActions.includes(
-                      permissionAction.name
-                    )
-
-                    return (
-                      <div
-                        key={permissionAction.name}
-                        className="flex min-w-0 items-center gap-2"
+              <div className="space-y-3 px-3 sm:pl-10">
+                {category.supportsSpecific ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-5 text-xs">
+                      <span className="font-medium text-foreground">
+                        {t("accessTokens.permissions.appliesTo")}
+                      </span>
+                      <RadioGroup
+                        aria-label={t("accessTokens.permissions.scopeLabel", {
+                          category: categoryLabel,
+                        })}
+                        value={categoryDraft.scope}
+                        disabled={readOnly}
+                        className="flex items-center gap-5"
+                        onValueChange={(scope) =>
+                          updateCategory(category.type, {
+                            ...categoryDraft,
+                            scope,
+                          })
+                        }
                       >
-                        <Checkbox
-                          id={`access-token-${category.type}-${permissionAction.name}`}
-                          checked={checked}
-                          disabled={disabled}
-                          onCheckedChange={(nextChecked) =>
-                            toggleAction(permissionAction.name, nextChecked)
-                          }
-                        />
-                        <label
-                          htmlFor={`access-token-${category.type}-${permissionAction.name}`}
-                          className={cn(
-                            "min-w-0 truncate text-xs text-foreground",
-                            disabled && !readOnly && "text-muted-foreground"
-                          )}
-                        >
-                          {permissionAction.name}
-                        </label>
-                        <Tooltip>
-                          <TooltipTrigger
-                            render={
-                              <button
-                                type="button"
-                                className="shrink-0 rounded-sm text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
-                                aria-label={t(permissionAction.descriptionKey)}
-                              />
-                            }
+                        {(["all", "specific"] as const).map((scope) => (
+                          <label
+                            key={scope}
+                            className={cn(
+                              "flex items-center gap-2 text-foreground",
+                              readOnly ? "cursor-default" : "cursor-pointer"
+                            )}
                           >
-                            <Info className="size-3.5" />
-                          </TooltipTrigger>
-                          <TooltipContent className="max-w-64">
-                            {t(permissionAction.descriptionKey)}
-                          </TooltipContent>
-                        </Tooltip>
-                      </div>
-                    )
-                  })}
-                </div>
-              ) : null}
+                            <Radio.Root
+                              value={scope}
+                              className="flex size-4 items-center justify-center rounded-full border border-input outline-none focus-visible:ring-3 focus-visible:ring-ring/50 data-checked:border-primary"
+                            >
+                              <Radio.Indicator className="size-2 rounded-full bg-primary" />
+                            </Radio.Root>
+                            {t(
+                              `accessTokens.permissions.scopeOptions.${scope}`,
+                              {
+                                resource: scopeResource,
+                              }
+                            )}
+                          </label>
+                        ))}
+                      </RadioGroup>
+                    </div>
+
+                    {categoryDraft.scope === "specific" ? (
+                      <ResourceSelection
+                        portalContainer={portalContainer}
+                        resourceType={category.type}
+                        resources={categoryDraft.specificResources}
+                        readOnly={readOnly}
+                        invalid={scopeInvalid}
+                        onChange={(specificResources) => {
+                          const appliesToAllResources =
+                            specificResources.includes(category.pattern)
+                          updateCategory(category.type, {
+                            ...categoryDraft,
+                            scope: appliesToAllResources
+                              ? "all"
+                              : categoryDraft.scope,
+                            specificResources: appliesToAllResources
+                              ? []
+                              : specificResources,
+                          })
+                        }}
+                      />
+                    ) : null}
+                  </div>
+                ) : null}
+                {displayedActions.length ? (
+                  <div className="grid grid-cols-3 gap-x-6 gap-y-3">
+                    {displayedActions.map((permissionAction) => {
+                      const authorized = canGrantAction(
+                        policies,
+                        category.type,
+                        permissionAction.name
+                      )
+                      const licensed =
+                        !permissionAction.fineGrained || fineGrainedGranted
+                      const disabled = readOnly || !authorized || !licensed
+                      const checked = categoryDraft.selectedActions.includes(
+                        permissionAction.name
+                      )
+
+                      return (
+                        <div
+                          key={permissionAction.name}
+                          className="flex min-w-0 items-center gap-2"
+                        >
+                          <Checkbox
+                            id={`access-token-${category.type}-${permissionAction.name}`}
+                            checked={checked}
+                            disabled={disabled}
+                            onCheckedChange={(nextChecked) =>
+                              toggleAction(permissionAction.name, nextChecked)
+                            }
+                          />
+                          <label
+                            htmlFor={`access-token-${category.type}-${permissionAction.name}`}
+                            className={cn(
+                              "min-w-0 truncate text-xs text-foreground",
+                              disabled && !readOnly && "text-muted-foreground"
+                            )}
+                          >
+                            {permissionAction.name}
+                          </label>
+                          <Tooltip>
+                            <TooltipTrigger
+                              render={
+                                <button
+                                  type="button"
+                                  className="shrink-0 rounded-sm text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+                                  aria-label={t(
+                                    permissionAction.descriptionKey
+                                  )}
+                                />
+                              }
+                            >
+                              <Info className="size-3.5" />
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-64">
+                              {t(permissionAction.descriptionKey)}
+                            </TooltipContent>
+                          </Tooltip>
+                        </div>
+                      )
+                    })}
+                  </div>
+                ) : null}
+              </div>
             </section>
           )
         })}

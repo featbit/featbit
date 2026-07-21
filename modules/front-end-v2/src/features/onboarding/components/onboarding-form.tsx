@@ -1,4 +1,5 @@
 import {
+  Box,
   Building2,
   Check,
   Folder,
@@ -107,18 +108,18 @@ export function OnboardingForm({
 
         <SectionDivider />
 
-        <div>
-          <h2 className="text-base font-semibold">
-            {t("onboarding.environments.section")}
-          </h2>
-          <div className="mt-4 flex flex-wrap gap-3">
+        <SetupSection
+          icon={<Box className="size-6" />}
+          title={t("onboarding.environments.section")}
+        >
+          <div className="flex flex-wrap gap-3">
             <EnvironmentPill name="Dev" tone="green" />
             <EnvironmentPill name="Prod" tone="blue" />
           </div>
-          <p className="mt-3 text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             {t("onboarding.environments.helper")}
           </p>
-        </div>
+        </SetupSection>
 
         {error ? (
           <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive">
@@ -220,10 +221,10 @@ function EnvironmentPill({
 }) {
   return (
     <div className="inline-flex h-11 items-center gap-3 rounded-md border bg-card px-5 text-base font-semibold shadow-sm">
-      <span
+      <Box
         className={cn(
-          "size-3 rounded-full",
-          tone === "green" ? "bg-emerald-600" : "bg-blue-600"
+          "size-4",
+          tone === "green" ? "text-emerald-600" : "text-blue-600"
         )}
       />
       {name}

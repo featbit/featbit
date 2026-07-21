@@ -280,7 +280,7 @@ export function AppRoutes() {
             element={<PolicyDetailsPage />}
           />
           <Route
-            path="integrations/access-tokens"
+            path="access-tokens"
             element={<AccessTokensPage />}
           />
           <Route path="account/profile" element={<ProfilePage />} />

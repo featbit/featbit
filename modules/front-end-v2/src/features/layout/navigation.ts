@@ -89,12 +89,12 @@ export const navigationGroups: NavGroup[] = [
       },
       {
         labelKey: "layout.nav.items.webhooks",
-        href: "/integrations/webhooks",
+        href: "/webhooks",
         icon: Webhook,
       },
       {
         labelKey: "layout.nav.items.accessTokens",
-        href: "/integrations/access-tokens",
+        href: "/access-tokens",
         icon: KeyRound,
       },
     ],
