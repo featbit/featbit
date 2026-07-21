@@ -1,5 +1,5 @@
-import { ArrowLeft, Check, Copy } from "lucide-react"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { ArrowLeft, Copy } from "lucide-react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link, useNavigate, useParams } from "react-router-dom"
 import { toast } from "sonner"
@@ -47,8 +47,6 @@ export function TeamDetailsPage() {
   const [member, setMember] = useState<TeamMember | null>(null)
   const [memberLoading, setMemberLoading] = useState(true)
   const [memberError, setMemberError] = useState(false)
-  const [resourceNameCopied, setResourceNameCopied] = useState(false)
-  const copyFeedbackTimeoutRef = useRef<number | null>(null)
   const [removeTarget, setRemoveTarget] = useState<RemoveDialogTarget>(null)
   const [removing, setRemoving] = useState(false)
 
@@ -83,24 +81,8 @@ export function TeamDetailsPage() {
   const copyResourceName = useCallback(async () => {
     if (!resourceName) return
     await navigator.clipboard.writeText(resourceName)
-    setResourceNameCopied(true)
-    if (copyFeedbackTimeoutRef.current !== null) {
-      window.clearTimeout(copyFeedbackTimeoutRef.current)
-    }
-    copyFeedbackTimeoutRef.current = window.setTimeout(() => {
-      setResourceNameCopied(false)
-      copyFeedbackTimeoutRef.current = null
-    }, 1500)
-  }, [resourceName])
-
-  useEffect(
-    () => () => {
-      if (copyFeedbackTimeoutRef.current !== null) {
-        window.clearTimeout(copyFeedbackTimeoutRef.current)
-      }
-    },
-    []
-  )
+    toast.success(t("iam.team.details.copied"))
+  }, [resourceName, t])
 
   async function removeMember() {
     if (!removeTarget || removeTarget.kind !== "member") return
@@ -187,16 +169,10 @@ export function TeamDetailsPage() {
                         />
                       }
                     >
-                      {resourceNameCopied ? (
-                        <Check className="size-3.5" />
-                      ) : (
-                        <Copy className="size-3.5" />
-                      )}
+                      <Copy className="size-3.5" />
                     </TooltipTrigger>
                     <TooltipContent>
-                      {resourceNameCopied
-                        ? t("iam.team.details.copied")
-                        : t("iam.team.details.copyResourceName")}
+                      {t("iam.team.details.copyResourceName")}
                     </TooltipContent>
                   </Tooltip>
                 </div>

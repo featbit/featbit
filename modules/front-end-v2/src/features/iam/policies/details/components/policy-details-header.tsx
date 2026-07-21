@@ -1,5 +1,5 @@
-import { Check, Copy, Pencil } from "lucide-react"
-import { type KeyboardEvent, useEffect, useRef, useState } from "react"
+import { Copy, Pencil } from "lucide-react"
+import { type KeyboardEvent, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
@@ -39,18 +39,6 @@ export function PolicyDetailsHeader({
   const [descriptionDraft, setDescriptionDraft] = useState("")
   const [descriptionSaving, setDescriptionSaving] = useState(false)
   const [descriptionError, setDescriptionError] = useState<string | null>(null)
-  const [resourceCopied, setResourceCopied] = useState(false)
-  const copyTimeoutRef = useRef<number | null>(null)
-
-  useEffect(
-    () => () => {
-      if (copyTimeoutRef.current !== null) {
-        window.clearTimeout(copyTimeoutRef.current)
-      }
-    },
-    []
-  )
-
   const readonly = policy?.type === "SysManaged"
   const resourceName = policy ? policyResourceName(policy) : ""
   const nameChanged = nameDraft.trim() !== (policy?.name ?? "").trim()
@@ -161,14 +149,7 @@ export function PolicyDetailsHeader({
   async function copyResourceName() {
     if (!resourceName) return
     await navigator.clipboard.writeText(resourceName)
-    setResourceCopied(true)
-    if (copyTimeoutRef.current !== null) {
-      window.clearTimeout(copyTimeoutRef.current)
-    }
-    copyTimeoutRef.current = window.setTimeout(() => {
-      setResourceCopied(false)
-      copyTimeoutRef.current = null
-    }, 1500)
+    toast.success(t("iam.policies.copied"))
   }
 
   if (error) {
@@ -347,16 +328,10 @@ export function PolicyDetailsHeader({
                     />
                   }
                 >
-                  {resourceCopied ? (
-                    <Check className="size-3.5" />
-                  ) : (
-                    <Copy className="size-3.5" />
-                  )}
+                  <Copy className="size-3.5" />
                 </TooltipTrigger>
                 <TooltipContent>
-                  {resourceCopied
-                    ? t("iam.policies.copied")
-                    : t("iam.policies.copyResourceName")}
+                  {t("iam.policies.copyResourceName")}
                 </TooltipContent>
               </Tooltip>
             </div>

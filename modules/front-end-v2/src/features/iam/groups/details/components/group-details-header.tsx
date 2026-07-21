@@ -1,5 +1,5 @@
-import { Check, Copy, Pencil } from "lucide-react"
-import { type KeyboardEvent, useEffect, useRef, useState } from "react"
+import { Copy, Pencil } from "lucide-react"
+import { type KeyboardEvent, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -42,18 +42,6 @@ export function GroupDetailsHeader({
   const [descriptionDraft, setDescriptionDraft] = useState("")
   const [descriptionSaving, setDescriptionSaving] = useState(false)
   const [descriptionError, setDescriptionError] = useState<string | null>(null)
-  const [resourceCopied, setResourceCopied] = useState(false)
-  const copyTimeoutRef = useRef<number | null>(null)
-
-  useEffect(
-    () => () => {
-      if (copyTimeoutRef.current !== null) {
-        window.clearTimeout(copyTimeoutRef.current)
-      }
-    },
-    []
-  )
-
   const resourceName = group ? groupResourceName(group) : ""
   const nameChanged = nameDraft.trim() !== (group?.name ?? "").trim()
   const descriptionChanged =
@@ -165,14 +153,7 @@ export function GroupDetailsHeader({
   async function copyResourceName() {
     if (!resourceName) return
     await navigator.clipboard.writeText(resourceName)
-    setResourceCopied(true)
-    if (copyTimeoutRef.current !== null) {
-      window.clearTimeout(copyTimeoutRef.current)
-    }
-    copyTimeoutRef.current = window.setTimeout(() => {
-      setResourceCopied(false)
-      copyTimeoutRef.current = null
-    }, 1500)
+    toast.success(t("iam.groups.copied"))
   }
 
   if (error) {
@@ -367,16 +348,10 @@ export function GroupDetailsHeader({
                   />
                 }
               >
-                {resourceCopied ? (
-                  <Check className="size-3.5" />
-                ) : (
-                  <Copy className="size-3.5" />
-                )}
+                <Copy className="size-3.5" />
               </TooltipTrigger>
               <TooltipContent>
-                {resourceCopied
-                  ? t("iam.groups.copied")
-                  : t("iam.groups.copyResourceName")}
+                {t("iam.groups.copyResourceName")}
               </TooltipContent>
             </Tooltip>
           </div>
