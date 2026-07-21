@@ -311,6 +311,19 @@ export function PermissionsEditor({
 
       <div className="overflow-hidden rounded-lg border">
         <div className="flex min-h-12 flex-wrap items-center justify-end gap-2 border-b bg-muted/20 px-3 py-2">
+          {dirty ? (
+            <span
+              role="status"
+              aria-live="polite"
+              className="mr-auto inline-flex min-w-0 items-center gap-2 text-xs font-medium text-muted-foreground"
+            >
+              <span
+                aria-hidden="true"
+                className="size-1.5 shrink-0 rounded-full bg-amber-500"
+              />
+              {t("iam.policies.details.permissionsEditor.unsavedChanges")}
+            </span>
+          ) : null}
           {!readOnly ? (
             <Button
               type="button"

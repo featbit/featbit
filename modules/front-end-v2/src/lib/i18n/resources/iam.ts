@@ -368,6 +368,7 @@ export const enIam = {
     "details.permissionsEditor.cloneName": "{{name}} copy",
     "details.permissionsEditor.cloning": "Cloning...",
     "details.permissionsEditor.saveChanges": "Save changes",
+    "details.permissionsEditor.unsavedChanges": "Unsaved changes",
     "details.permissionsEditor.effect": "Effect",
     "details.permissionsEditor.allow": "Allow",
     "details.permissionsEditor.deny": "Deny",
@@ -391,6 +392,9 @@ export const enIam = {
     "details.permissionsEditor.selectedResourcesHeading":
       "Selected {{type}} ({{count}})",
     "details.permissionsEditor.manageResources": "Manage",
+    "details.permissionsEditor.editSelectedResourceRn":
+      "Edit resource name for {{name}}",
+    "details.permissionsEditor.editResourceRn": "Edit RN",
     "details.permissionsEditor.removeSelectedResource": "Remove {{name}}",
     "details.permissionsEditor.noSelectedResources":
       "No resources selected. Use Manage to add resources.",
@@ -421,12 +425,39 @@ export const enIam = {
     "details.permissionsEditor.moreResources": "{{count}} more resources",
     "details.permissionsEditor.clearAll": "Clear all",
     "details.permissionsEditor.done": "Done",
+    "details.permissionsEditor.rnEditor.title": "Edit resource scope (RN)",
+    "details.permissionsEditor.rnEditor.description":
+      "Resource name (RN) uniquely identifies resources. All data can be seen as a resource, Project, Environment and Feature flag for example.",
+    "details.permissionsEditor.rnEditor.resourceName": "Resulting resource RN",
+    "details.permissionsEditor.rnEditor.legalCharacters":
+      "Values cannot include {, }, or :.",
+    "details.permissionsEditor.rnEditor.wildcardDescription":
+      "Any uses * to broaden access to every matching resource at that level.",
+    "details.permissionsEditor.rnEditor.any.project": "Any project",
+    "details.permissionsEditor.rnEditor.any.environment": "Any environment",
+    "details.permissionsEditor.rnEditor.any.featureFlag": "Any feature flag",
+    "details.permissionsEditor.rnEditor.any.segment": "Any segment",
+    "details.permissionsEditor.rnEditor.fields.project": "Project",
+    "details.permissionsEditor.rnEditor.fields.environment": "Environment",
+    "details.permissionsEditor.rnEditor.fields.featureFlag": "Feature flag",
+    "details.permissionsEditor.rnEditor.fields.segment": "Segment",
+    "details.permissionsEditor.rnEditor.fields.tags": "Tags",
+    "details.permissionsEditor.rnEditor.tagsPlaceholder": "tag-one, tag-two",
+    "details.permissionsEditor.rnEditor.validation.required":
+      "{{field}} is required.",
+    "details.permissionsEditor.rnEditor.validation.invalidCharacters":
+      "{{field}} cannot include {, }, or :.",
+    "details.permissionsEditor.rnEditor.validation.duplicate":
+      "This resource name is already selected.",
+    "details.permissionsEditor.rnEditor.cancel": "Cancel",
+    "details.permissionsEditor.rnEditor.apply": "Apply",
     "details.permissionsEditor.enterpriseRequired": "Enterprise required",
-    "details.permissionsEditor.enterpriseTitle": "Fine-grained permissions",
+    "details.permissionsEditor.enterpriseTitle":
+      "Fine-grained access control permissions",
     "details.permissionsEditor.enterpriseDescription":
-      "Feature flag and segment resource permissions is a paid feature. Upgrade your plan to enable fine-grained access control.",
+      "Choosing specific actions for feature flags and segments requires the paid Fine-grained access control add-on. Contact the FeatBit team to add it to your license.",
     "details.permissionsEditor.enterpriseExpiredDescription":
-      "Your license has expired. Renew it to restore fine-grained access control for feature flag and segment resources.",
+      "Your license has expired. Renew it with the Fine-grained access control add-on to continue choosing specific actions for feature flags and segments.",
     "details.permissionsEditor.systemManagedTitle": "System-managed policy",
     "details.permissionsEditor.systemManagedDescription":
       "System-managed policies cannot be modified. Clone this policy to customize its permissions.",
@@ -828,6 +859,7 @@ export const zhIam = {
     "details.permissionsEditor.cloneName": "{{name}} 副本",
     "details.permissionsEditor.cloning": "克隆中...",
     "details.permissionsEditor.saveChanges": "保存更改",
+    "details.permissionsEditor.unsavedChanges": "有未保存的更改",
     "details.permissionsEditor.effect": "效果",
     "details.permissionsEditor.allow": "允许",
     "details.permissionsEditor.deny": "拒绝",
@@ -851,6 +883,9 @@ export const zhIam = {
     "details.permissionsEditor.selectedResourcesHeading":
       "已选择的{{type}}（{{count}}）",
     "details.permissionsEditor.manageResources": "管理",
+    "details.permissionsEditor.editSelectedResourceRn":
+      "编辑 {{name}} 的资源名称",
+    "details.permissionsEditor.editResourceRn": "编辑 RN",
     "details.permissionsEditor.removeSelectedResource": "移除 {{name}}",
     "details.permissionsEditor.noSelectedResources":
       "尚未选择资源，请使用“管理”添加资源。",
@@ -879,12 +914,38 @@ export const zhIam = {
     "details.permissionsEditor.moreResources": "另外 {{count}} 项资源",
     "details.permissionsEditor.clearAll": "清除全部",
     "details.permissionsEditor.done": "完成",
+    "details.permissionsEditor.rnEditor.title": "编辑资源范围 (RN)",
+    "details.permissionsEditor.rnEditor.description":
+      "资源名称 (RN) 用于唯一标识资源。所有数据都可以被视为资源，例如项目、环境和功能开关。",
+    "details.permissionsEditor.rnEditor.resourceName": "生成的资源 RN",
+    "details.permissionsEditor.rnEditor.legalCharacters":
+      "值不能包含 {、} 或 :。",
+    "details.permissionsEditor.rnEditor.wildcardDescription":
+      "“任意”使用 *，并将访问范围扩大到该层级的所有匹配资源。",
+    "details.permissionsEditor.rnEditor.any.project": "任意项目",
+    "details.permissionsEditor.rnEditor.any.environment": "任意环境",
+    "details.permissionsEditor.rnEditor.any.featureFlag": "任意功能开关",
+    "details.permissionsEditor.rnEditor.any.segment": "任意用户组",
+    "details.permissionsEditor.rnEditor.fields.project": "项目",
+    "details.permissionsEditor.rnEditor.fields.environment": "环境",
+    "details.permissionsEditor.rnEditor.fields.featureFlag": "功能开关",
+    "details.permissionsEditor.rnEditor.fields.segment": "用户组",
+    "details.permissionsEditor.rnEditor.fields.tags": "标签",
+    "details.permissionsEditor.rnEditor.tagsPlaceholder": "标签一, 标签二",
+    "details.permissionsEditor.rnEditor.validation.required":
+      "{{field}}不能为空。",
+    "details.permissionsEditor.rnEditor.validation.invalidCharacters":
+      "{{field}}不能包含 {、} 或 :。",
+    "details.permissionsEditor.rnEditor.validation.duplicate":
+      "该资源名称已被选择。",
+    "details.permissionsEditor.rnEditor.cancel": "取消",
+    "details.permissionsEditor.rnEditor.apply": "应用",
     "details.permissionsEditor.enterpriseRequired": "需要企业版",
-    "details.permissionsEditor.enterpriseTitle": "细粒度权限",
+    "details.permissionsEditor.enterpriseTitle": "细粒度访问控制权限",
     "details.permissionsEditor.enterpriseDescription":
-      "功能开关和用户组资源权限是付费功能，升级套餐即可启用细粒度访问控制。",
+      "为功能开关和用户组选择具体操作需要额外付费的“细粒度访问控制”许可证功能。请联系 FeatBit 团队将其添加到许可证中。",
     "details.permissionsEditor.enterpriseExpiredDescription":
-      "许可证已过期。续订许可证即可恢复功能开关和用户组资源的细粒度访问控制。",
+      "许可证已过期。续订包含“细粒度访问控制”附加功能的许可证后，即可继续为功能开关和用户组选择具体操作。",
     "details.permissionsEditor.systemManagedTitle": "系统托管策略",
     "details.permissionsEditor.systemManagedDescription":
       "系统托管策略无法修改。请克隆此策略以自定义其权限。",

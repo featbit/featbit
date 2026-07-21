@@ -97,4 +97,50 @@ describe("PermissionsEditor resource summaries", () => {
     expect(screen.getByText("All Environment resources")).toBeVisible()
     expect(mocks.fetchPolicyResources).not.toHaveBeenCalled()
   })
+
+  it("marks the page draft as unsaved after applying an RN edit", async () => {
+    mocks.fetchPolicyResources.mockResolvedValue([])
+    renderEditor([envStatement(["project/shop:env/prod"])])
+
+    const saveChanges = screen.getByRole("button", { name: "Save changes" })
+    expect(saveChanges).toBeDisabled()
+    expect(screen.queryByText("Unsaved changes")).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole("button", { name: "Toggle permission 1" }))
+    fireEvent.click(
+      screen.getByRole("button", { name: "Edit resource name for prod" })
+    )
+
+    const environment = screen.getByLabelText("Environment")
+    await waitFor(() => expect(environment).toHaveValue("prod"))
+    fireEvent.change(environment, { target: { value: "staging" } })
+
+    const apply = screen.getByRole("button", { name: "Apply" })
+    await waitFor(() => expect(apply).toBeEnabled())
+    fireEvent.click(apply)
+
+    expect(await screen.findByText("Unsaved changes")).toBeVisible()
+    expect(saveChanges).toBeEnabled()
+  })
+
+  it("explains that the paid feature applies to specific actions", () => {
+    renderEditor([
+      {
+        id: "statement-1",
+        resourceType: "flag",
+        effect: "allow",
+        actions: ["*"],
+        resources: ["project/*:env/*:flag/*"],
+      },
+    ])
+
+    expect(
+      screen.getByText("Fine-grained access control permissions")
+    ).toBeVisible()
+    expect(
+      screen.getByText(
+        "Choosing specific actions for feature flags and segments requires the paid Fine-grained access control add-on. Contact the FeatBit team to add it to your license."
+      )
+    ).toBeVisible()
+  })
 })

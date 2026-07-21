@@ -2,7 +2,6 @@ import { Globe2, ListChecks } from "lucide-react"
 import { useEffect, useId, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useQueryClient } from "@tanstack/react-query"
-import { SelectedItemsField } from "@/components/selected-items-field"
 import { SelectableCommandList } from "@/components/selectable-command-list"
 import { SelectionFilterTabs } from "@/components/selection-filter-tabs"
 import { StablePopoverContent } from "@/components/stable-popover-content"
@@ -20,6 +19,9 @@ import {
   type PolicyResource,
   type ResourceType,
 } from "../permission-model"
+import { ResourceRnEditorDialog } from "./resource-rn-editor-dialog"
+import { isEditableResourceType } from "./resource-rn"
+import { SelectedResourceField } from "./selected-resource-field"
 
 type ScopeMode = "all" | "specific"
 
@@ -54,6 +56,10 @@ export function ResourcePicker({
   const [loading, setLoading] = useState(false)
   const [options, setOptions] = useState<PolicyResource[]>([])
   const [draft, setDraft] = useState<string[]>(resources)
+  const [editingResource, setEditingResource] = useState<{
+    name: string
+    rn: string
+  } | null>(null)
 
   useEffect(() => {
     if (!open || mode !== "specific") return
@@ -140,6 +146,16 @@ export function ResourcePicker({
     setDraft(next)
     if (next.length === 0) setFilter("all")
     onChange(next)
+  }
+
+  function updateResourceRn(nextRn: string) {
+    if (!editingResource) return
+    updateDraft(
+      nextRn === generalPattern
+        ? [generalPattern]
+        : draft.map((rn) => (rn === editingResource.rn ? nextRn : rn))
+    )
+    setEditingResource(null)
   }
 
   return (
@@ -239,130 +255,153 @@ export function ResourcePicker({
       )}
 
       {mode === "specific" ? (
-        <Popover
-          open={open}
-          onOpenChange={(next) => {
-            setOpen(next)
-            setLoading(next)
-            if (next) {
-              setDraft(resources)
-              setFilter("all")
-            }
-          }}
-        >
-          <SelectedItemsField
-            items={selectedResources}
-            getKey={(resource) => resource.rn}
-            getLabel={(resource) => resource.name}
-            getDescription={(resource) => resource.rn}
-            heading={t(
-              "iam.policies.details.permissionsEditor.selectedResourcesHeading",
-              {
-                count: draft.length,
-                type: selectedResourceType,
+        <>
+          <Popover
+            open={open}
+            onOpenChange={(next) => {
+              setOpen(next)
+              setLoading(next)
+              if (next) {
+                setDraft(resources)
+                setFilter("all")
               }
-            )}
-            manageLabel={t(
-              "iam.policies.details.permissionsEditor.manageResources"
-            )}
-            emptyContent={t(
-              "iam.policies.details.permissionsEditor.noSelectedResources"
-            )}
-            removeLabel={(resource) =>
-              t(
-                "iam.policies.details.permissionsEditor.removeSelectedResource",
-                { name: resource.name }
-              )
-            }
-            onRemove={(resource) => removeSelected(resource.rn)}
-            disabled={disabled}
-            invalid={invalid}
-          />
-          <StablePopoverContent
-            align="start"
-            className="w-[min(32rem,calc(100vw-2rem))] p-0"
+            }}
           >
-            <Command shouldFilter={false} className="rounded-md">
-              <CommandInput
-                value={search}
-                onValueChange={(value) => {
-                  setLoading(true)
-                  setSearch(value)
-                }}
-                placeholder={t(
-                  "iam.policies.details.permissionsEditor.searchResources"
-                )}
-              />
-              <SelectionFilterTabs
-                value={filter}
-                onValueChange={setFilter}
-                allLabel={t("iam.policies.details.permissionsEditor.allFilter")}
-                selectedLabel={(count) =>
-                  t("iam.policies.details.permissionsEditor.selectedFilter", {
-                    count,
-                  })
+            <SelectedResourceField
+              items={selectedResources}
+              heading={t(
+                "iam.policies.details.permissionsEditor.selectedResourcesHeading",
+                {
+                  count: draft.length,
+                  type: selectedResourceType,
                 }
-                selectedCount={draft.length}
-              />
-              <SelectableCommandList
-                items={mergedOptions}
-                getKey={(item) => item.rn}
-                getValue={(item) => item.rn}
-                isSelected={(item) => draft.includes(item.rn)}
-                onSelect={(item) => toggle(item.rn)}
-                emptyContent={t(
-                  "iam.policies.details.permissionsEditor.noResources"
-                )}
-                groupHeading={t(
-                  "iam.policies.details.permissionsEditor.availableResources"
-                )}
-                loading={loading}
-                loadingContent={
-                  <div
-                    className="h-full space-y-2 p-2"
-                    aria-label={t(
-                      "iam.policies.details.permissionsEditor.loadingResources"
-                    )}
-                  >
-                    <span className="sr-only">
-                      {t(
+              )}
+              manageLabel={t(
+                "iam.policies.details.permissionsEditor.manageResources"
+              )}
+              editText={t(
+                "iam.policies.details.permissionsEditor.editResourceRn"
+              )}
+              emptyContent={t(
+                "iam.policies.details.permissionsEditor.noSelectedResources"
+              )}
+              editLabel={(resource) =>
+                t(
+                  "iam.policies.details.permissionsEditor.editSelectedResourceRn",
+                  { name: resource.name }
+                )
+              }
+              onEdit={setEditingResource}
+              removeLabel={(resource) =>
+                t(
+                  "iam.policies.details.permissionsEditor.removeSelectedResource",
+                  { name: resource.name }
+                )
+              }
+              onRemove={(resource) => removeSelected(resource.rn)}
+              disabled={disabled}
+              invalid={invalid}
+            />
+            <StablePopoverContent
+              align="start"
+              className="w-[min(32rem,calc(100vw-2rem))] p-0"
+            >
+              <Command shouldFilter={false} className="rounded-md">
+                <CommandInput
+                  value={search}
+                  onValueChange={(value) => {
+                    setLoading(true)
+                    setSearch(value)
+                  }}
+                  placeholder={t(
+                    "iam.policies.details.permissionsEditor.searchResources"
+                  )}
+                />
+                <SelectionFilterTabs
+                  value={filter}
+                  onValueChange={setFilter}
+                  allLabel={t(
+                    "iam.policies.details.permissionsEditor.allFilter"
+                  )}
+                  selectedLabel={(count) =>
+                    t("iam.policies.details.permissionsEditor.selectedFilter", {
+                      count,
+                    })
+                  }
+                  selectedCount={draft.length}
+                />
+                <SelectableCommandList
+                  items={mergedOptions}
+                  getKey={(item) => item.rn}
+                  getValue={(item) => item.rn}
+                  isSelected={(item) => draft.includes(item.rn)}
+                  onSelect={(item) => toggle(item.rn)}
+                  emptyContent={t(
+                    "iam.policies.details.permissionsEditor.noResources"
+                  )}
+                  groupHeading={t(
+                    "iam.policies.details.permissionsEditor.availableResources"
+                  )}
+                  loading={loading}
+                  loadingContent={
+                    <div
+                      className="h-full space-y-2 p-2"
+                      aria-label={t(
                         "iam.policies.details.permissionsEditor.loadingResources"
                       )}
+                    >
+                      <span className="sr-only">
+                        {t(
+                          "iam.policies.details.permissionsEditor.loadingResources"
+                        )}
+                      </span>
+                      <Skeleton className="h-10 w-full" />
+                      <Skeleton className="h-10 w-full" />
+                      <Skeleton className="h-10 w-11/12" />
+                      <Skeleton className="h-10 w-full" />
+                      <Skeleton className="h-10 w-4/5" />
+                    </div>
+                  }
+                  listClassName="max-h-[clamp(10rem,40dvh,18rem)] [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] overflow-y-auto [&_[data-slot=command-empty]]:flex [&_[data-slot=command-empty]]:min-h-20 [&_[data-slot=command-empty]]:items-center [&_[data-slot=command-empty]]:justify-center [&::-webkit-scrollbar]:block [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent"
+                  renderItem={(item) => (
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate">{item.name}</span>
+                      <span className="block truncate font-mono text-xs text-muted-foreground">
+                        {item.rn}
+                      </span>
                     </span>
-                    <Skeleton className="h-10 w-full" />
-                    <Skeleton className="h-10 w-full" />
-                    <Skeleton className="h-10 w-11/12" />
-                    <Skeleton className="h-10 w-full" />
-                    <Skeleton className="h-10 w-4/5" />
-                  </div>
-                }
-                listClassName="max-h-[clamp(10rem,40dvh,18rem)] [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] overflow-y-auto [&_[data-slot=command-empty]]:flex [&_[data-slot=command-empty]]:min-h-20 [&_[data-slot=command-empty]]:items-center [&_[data-slot=command-empty]]:justify-center [&::-webkit-scrollbar]:block [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent"
-                renderItem={(item) => (
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate">{item.name}</span>
-                    <span className="block truncate font-mono text-xs text-muted-foreground">
-                      {item.rn}
-                    </span>
-                  </span>
-                )}
-              />
-            </Command>
-            <div className="flex items-center justify-between border-t p-2">
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => updateDraft([])}
-                disabled={!draft.length}
-              >
-                {t("iam.policies.details.permissionsEditor.clearAll")}
-              </Button>
-              <Button type="button" size="sm" onClick={() => setOpen(false)}>
-                {t("iam.policies.details.permissionsEditor.done")}
-              </Button>
-            </div>
-          </StablePopoverContent>
-        </Popover>
+                  )}
+                />
+              </Command>
+              <div className="flex items-center justify-between border-t p-2">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => updateDraft([])}
+                  disabled={!draft.length}
+                >
+                  {t("iam.policies.details.permissionsEditor.clearAll")}
+                </Button>
+                <Button type="button" size="sm" onClick={() => setOpen(false)}>
+                  {t("iam.policies.details.permissionsEditor.done")}
+                </Button>
+              </div>
+            </StablePopoverContent>
+          </Popover>
+          {editingResource && isEditableResourceType(resourceType) ? (
+            <ResourceRnEditorDialog
+              open
+              resourceType={resourceType}
+              rn={editingResource.rn}
+              selectedResources={draft}
+              onOpenChange={(nextOpen) => {
+                if (!nextOpen) setEditingResource(null)
+              }}
+              onApply={updateResourceRn}
+            />
+          ) : null}
+        </>
       ) : null}
     </div>
   )
