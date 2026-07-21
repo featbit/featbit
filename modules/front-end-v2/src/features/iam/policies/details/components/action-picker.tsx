@@ -40,8 +40,14 @@ export function ActionPicker({
   const supportsSpecific = available.some(
     (action) => !action.fineGrained || fineGrainedGranted
   )
+  const hasSelectedSpecificActions = statement.actions.some(
+    (action) => action !== "*"
+  )
   const mode: ActionMode =
-    !supportsSpecific || statement.actions.includes("*") ? "all" : "specific"
+    statement.actions.includes("*") ||
+    (!supportsSpecific && !hasSelectedSpecificActions)
+      ? "all"
+      : "specific"
   const visible = (() => {
     const query = search.trim().toLowerCase()
     const filtered =
@@ -121,7 +127,7 @@ export function ActionPicker({
             {t("iam.policies.details.permissionsEditor.allActions")}
           </span>
         </Button>
-        {supportsSpecific ? (
+        {supportsSpecific || mode === "specific" ? (
           <Button
             type="button"
             variant="outline"
@@ -253,7 +259,7 @@ export function ActionPicker({
                           <span className="ml-auto flex shrink-0 items-center gap-1">
                             <LockKeyhole className="size-3" />
                             {t(
-                              "iam.policies.details.permissionsEditor.enterpriseRequired"
+                              "iam.policies.details.permissionsEditor.fineGrainedRequired"
                             )}
                           </span>
                         ) : null}

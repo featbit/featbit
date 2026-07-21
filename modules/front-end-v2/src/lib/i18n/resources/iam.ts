@@ -451,7 +451,8 @@ export const enIam = {
       "This resource name is already selected.",
     "details.permissionsEditor.rnEditor.cancel": "Cancel",
     "details.permissionsEditor.rnEditor.apply": "Apply",
-    "details.permissionsEditor.enterpriseRequired": "Enterprise required",
+    "details.permissionsEditor.fineGrainedRequired":
+      "Fine-grained access required",
     "details.permissionsEditor.enterpriseTitle":
       "Fine-grained access control permissions",
     "details.permissionsEditor.enterpriseDescription":
@@ -940,7 +941,7 @@ export const zhIam = {
       "该资源名称已被选择。",
     "details.permissionsEditor.rnEditor.cancel": "取消",
     "details.permissionsEditor.rnEditor.apply": "应用",
-    "details.permissionsEditor.enterpriseRequired": "需要企业版",
+    "details.permissionsEditor.fineGrainedRequired": "需要细粒度访问控制",
     "details.permissionsEditor.enterpriseTitle": "细粒度访问控制权限",
     "details.permissionsEditor.enterpriseDescription":
       "为功能开关和用户组选择具体操作需要额外付费的“细粒度访问控制”许可证功能。请联系 FeatBit 团队将其添加到许可证中。",

@@ -172,4 +172,33 @@ describe("ActionPicker", () => {
       ).not.toBeInTheDocument()
     }
   )
+
+  it("keeps saved specific actions visible after fine-grained access is removed", () => {
+    render(
+      <ActionPicker
+        statement={statement}
+        fineGrainedGranted={false}
+        onChange={vi.fn()}
+      />
+    )
+
+    expect(screen.getByRole("button", { name: "All actions" })).toHaveAttribute(
+      "aria-pressed",
+      "false"
+    )
+    expect(
+      screen.getByRole("button", { name: "Specific actions" })
+    ).toHaveAttribute("aria-pressed", "true")
+    expect(screen.getByText("Create flags")).toBeVisible()
+    expect(screen.getByRole("button", { name: "Manage" })).toBeVisible()
+
+    fireEvent.click(screen.getByRole("button", { name: "Manage" }))
+
+    expect(
+      screen.getAllByText("Fine-grained access required").length
+    ).toBeGreaterThan(0)
+    expect(
+      screen.getByRole("option", { name: /Create flags.*CreateFlag/ })
+    ).toHaveAttribute("aria-disabled", "true")
+  })
 })
