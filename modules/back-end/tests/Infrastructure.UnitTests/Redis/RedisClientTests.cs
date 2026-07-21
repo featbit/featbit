@@ -1,6 +1,6 @@
 using Infrastructure.Caches.Redis;
 
-namespace Application.UnitTests.Caches.Redis;
+namespace Infrastructure.UnitTests.Redis;
 
 /// <summary>
 /// #106 unit coverage for <see cref="RedisClient.EnsureSelfHealingOptions"/>: the connection-string

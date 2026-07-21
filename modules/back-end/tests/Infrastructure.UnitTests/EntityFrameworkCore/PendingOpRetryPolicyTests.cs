@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using Infrastructure.Services.EntityFrameworkCore;
 
-namespace Application.UnitTests.EntityFrameworkCore;
+namespace Infrastructure.UnitTests.EntityFrameworkCore;
 
 /// <summary>
 /// #107/#108: deterministic, no-real-infra unit coverage for the shared retry budget/backoff that

@@ -34,7 +34,7 @@
 
     <ItemGroup>
         <!-- Surface internal members (e.g. RedisClient.EnsureSelfHealingOptions, #106) to unit tests. -->
-        <InternalsVisibleTo Include="Application.UnitTests"/>
+        <InternalsVisibleTo Include="Infrastructure.UnitTests"/>
     </ItemGroup>
 
 </Project>
