@@ -113,42 +113,50 @@ function RowActions({
   }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            aria-label={t("accessTokens.actions.menu", { name: token.name })}
-            disabled={mutating}
-          />
-        }
+    <div className="flex items-center justify-end gap-1">
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        disabled={mutating}
+        onClick={() => onEdit(token)}
       >
-        <MoreHorizontal className="size-4" />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-36">
-        <DropdownMenuItem onClick={() => onEdit(token)}>
-          {t("accessTokens.actions.edit")}
-        </DropdownMenuItem>
-        {token.status === "Inactive" ? (
-          <DropdownMenuItem onClick={() => onActivate(token)}>
-            {t("accessTokens.actions.activate")}
-          </DropdownMenuItem>
-        ) : (
-          <DropdownMenuItem onClick={() => onDeactivate(token)}>
-            {t("accessTokens.actions.deactivate")}
-          </DropdownMenuItem>
-        )}
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          className="text-destructive focus:text-destructive"
-          onClick={() => onRemove(token)}
+        {t("accessTokens.actions.edit")}
+      </Button>
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          render={
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              aria-label={t("accessTokens.actions.menu", { name: token.name })}
+              disabled={mutating}
+            />
+          }
         >
-          {t("accessTokens.actions.remove")}
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+          <MoreHorizontal className="size-4" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="min-w-36">
+          {token.status === "Inactive" ? (
+            <DropdownMenuItem onClick={() => onActivate(token)}>
+              {t("accessTokens.actions.activate")}
+            </DropdownMenuItem>
+          ) : (
+            <DropdownMenuItem onClick={() => onDeactivate(token)}>
+              {t("accessTokens.actions.deactivate")}
+            </DropdownMenuItem>
+          )}
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            className="text-destructive focus:text-destructive"
+            onClick={() => onRemove(token)}
+          >
+            {t("accessTokens.actions.remove")}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   )
 }
 
@@ -255,7 +263,7 @@ export function AccessTokenTable({
       },
       {
         id: "actions",
-        size: 90,
+        size: 140,
         header: () => (
           <span className="block text-right">
             {t("accessTokens.columns.actions")}
