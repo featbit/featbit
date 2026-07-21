@@ -1,12 +1,7 @@
-using System.Text.Json;
-using System.Text.Json.Nodes;
 using Application.Caches;
-using Application.Configuration;
 using Application.Segments.MessagePublishing.SegmentChange;
 using Domain.AuditLogs;
-using Domain.Messages;
 using Domain.Segments;
-using Domain.Utils;
 using Microsoft.Extensions.Configuration;
 
 namespace Application.Segments;

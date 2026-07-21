@@ -1,5 +1,4 @@
 using Application.Caches;
-using Application.Configuration;
 using Domain.Messages;
 using Microsoft.Extensions.Configuration;
 using Environment = Domain.Environments.Environment;

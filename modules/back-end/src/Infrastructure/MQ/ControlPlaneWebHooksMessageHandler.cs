@@ -1,8 +1,7 @@
 using System.Text.Json;
-using Application.Configuration;
+using Application;
 using Application.FeatureFlags;
 using Application.Segments;
-using Domain.FeatureFlags;
 using Domain.Messages;
 using Domain.Utils;
 using Microsoft.Extensions.Configuration;

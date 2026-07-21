@@ -1,11 +1,7 @@
 using System.Diagnostics.Metrics;
 using Api.Infrastructure.Caches;
-using Application.Configuration;
+using Application;
 using Application.ControlPlane;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace Api.Application.ControlPlane;
 

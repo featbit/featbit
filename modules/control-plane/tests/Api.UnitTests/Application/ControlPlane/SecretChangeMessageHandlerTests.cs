@@ -4,7 +4,6 @@ using Application.Caches;
 using Domain.Environments;
 using Domain.Environments.MessagePublishing;
 using Domain.Utils;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Testing;
 using Moq;
 

@@ -2,7 +2,6 @@ using System.Diagnostics.Metrics;
 using Api.Application.ControlPlane;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Testing;
-using Moq;
 
 namespace Api.UnitTests.Application.ControlPlane;
 

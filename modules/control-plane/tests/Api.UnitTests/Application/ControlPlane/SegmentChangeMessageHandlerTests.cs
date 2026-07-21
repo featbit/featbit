@@ -6,7 +6,6 @@ using Application.Services;
 using Domain.Messages;
 using Domain.Segments;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Testing;
 using Moq;
 

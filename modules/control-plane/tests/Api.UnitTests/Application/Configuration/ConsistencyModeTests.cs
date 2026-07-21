@@ -1,4 +1,5 @@
-using Application.Configuration;
+using Application;
+using Application.ControlPlane;
 using Microsoft.Extensions.Configuration;
 
 namespace Api.UnitTests.Application.Configuration;

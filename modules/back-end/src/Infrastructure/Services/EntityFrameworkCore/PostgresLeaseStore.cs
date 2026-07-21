@@ -1,6 +1,5 @@
 using Application.ControlPlane;
 using Domain.ControlPlane;
-using Infrastructure.Persistence.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services.EntityFrameworkCore;

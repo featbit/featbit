@@ -1,8 +1,6 @@
 using Api.Infrastructure.Caches;
-using Application.Configuration;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using Application;
+using Application.ControlPlane;
 
 namespace Api.Application.ControlPlane;
 

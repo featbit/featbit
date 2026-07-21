@@ -1,5 +1,4 @@
 using Application.Caches;
-using Application.Configuration;
 using Application.ControlPlane;
 using Application.Services;
 using Api.Infrastructure.Caches;
@@ -7,7 +6,6 @@ using Domain.Environments;
 using Domain.FeatureFlags;
 using Domain.Messages;
 using Domain.Segments;
-using Microsoft.Extensions.DependencyInjection;
 using Action = Domain.Messages.Action;
 
 namespace Api.Application.ControlPlane;

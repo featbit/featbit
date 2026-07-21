@@ -1,7 +1,6 @@
 using Application.Bases;
 using Application.Bases.Exceptions;
 using Application.Caches;
-using Application.Configuration;
 using Domain.Messages;
 using Domain.Workspaces;
 using Microsoft.Extensions.Configuration;

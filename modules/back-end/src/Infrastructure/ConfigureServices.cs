@@ -1,6 +1,5 @@
 using Application;
 using Application.Usages;
-using Application.Configuration;
 using Application.FeatureFlags.MessagePublishing.FeatureFlagChange;
 using Application.Segments;
 using Application.Segments.MessagePublishing.SegmentChange;

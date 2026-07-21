@@ -1,6 +1,4 @@
 using System.Diagnostics.Metrics;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace Api.Application.ControlPlane;
 

@@ -3,7 +3,6 @@ using Api.Application.ControlPlane;
 using Application.Caches;
 using Domain.Utils;
 using Domain.Workspaces;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Testing;
 using Moq;
 

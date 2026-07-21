@@ -1,10 +1,8 @@
 using Application.Caches;
-using Application.Configuration;
 using Application.FeatureFlags.MessagePublishing.FeatureFlagChange;
 using Domain.AuditLogs;
 using Domain.FeatureFlags;
 using Domain.FlagRevisions;
-using Domain.Messages;
 using Microsoft.Extensions.Configuration;
 
 namespace Application.FeatureFlags;

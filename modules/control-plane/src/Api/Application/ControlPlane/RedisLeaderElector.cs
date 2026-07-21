@@ -1,8 +1,5 @@
 using System.Diagnostics.Metrics;
 using Infrastructure.Caches.Redis;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 
 namespace Api.Application.ControlPlane;
@@ -21,7 +18,7 @@ namespace Api.Application.ControlPlane;
 /// configuration, so this is a single lock across replicas, and instance[0] being down already stalls
 /// the commit pipeline, so the lock adds no new failure mode.
 ///
-/// Pattern follows <see cref="Infrastructure.Caches.Redis.RedisPopulatingService"/>: StackExchange
+/// Pattern follows <see cref="RedisPopulatingService"/>: StackExchange
 /// <c>LockTakeAsync</c>/<c>LockExtendAsync</c>/<c>LockReleaseAsync</c> with a Guid lock value (this
 /// instance's <see cref="InstanceId"/>).
 ///

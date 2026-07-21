@@ -1,5 +1,6 @@
 using System.Globalization;
-using Application.Configuration;
+using Application;
+using Application.ControlPlane;
 using Infrastructure.Caches.Redis;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;

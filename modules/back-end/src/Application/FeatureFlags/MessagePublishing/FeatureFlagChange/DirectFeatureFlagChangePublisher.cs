@@ -1,4 +1,3 @@
-using Domain.FeatureFlags;
 using Domain.Messages;
 
 namespace Application.FeatureFlags.MessagePublishing.FeatureFlagChange;

@@ -1,8 +1,7 @@
 using Api.Application.ControlPlane;
 using Api.Infrastructure.Caches;
 using Api.IntegrationTests.Fixtures;
-using Application.Caches;
-using Application.Configuration;
+using Application.ControlPlane;
 using Application.Services;
 using Domain.FeatureFlags;
 using Domain.Messages;

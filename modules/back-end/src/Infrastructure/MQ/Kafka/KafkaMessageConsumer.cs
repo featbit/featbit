@@ -66,7 +66,6 @@ public partial class KafkaMessageConsumer : BackgroundService
 
                 var handler = scope.ServiceProvider.GetKeyedService<IMessageHandler>(consumeResult.Topic);
                 if (handler == null)
-
                 {
                     Log.NoHandlerForTopic(_logger, consumeResult.Topic);
                     continue;

@@ -1,5 +1,4 @@
 using Application.Caches;
-using Application.Configuration;
 using Domain.Environments;
 using Domain.Messages;
 using Microsoft.Extensions.Configuration;

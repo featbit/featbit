@@ -1,6 +1,6 @@
 using Api.Application.ControlPlane;
 using Api.Infrastructure.Caches;
-using Application.Configuration;
+using Application.ControlPlane;
 using Infrastructure.Caches.Redis;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;

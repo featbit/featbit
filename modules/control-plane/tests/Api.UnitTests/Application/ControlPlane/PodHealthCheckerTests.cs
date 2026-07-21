@@ -1,7 +1,6 @@
 using Api.Application.ControlPlane;
 using Application.Caches;
 using Domain.Health;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Testing;
 using Microsoft.Extensions.Options;
 using Moq;

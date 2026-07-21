@@ -1,19 +1,14 @@
 using System.Diagnostics.Metrics;
 using Application.Caches;
-using Application.Configuration;
 using Application.ControlPlane;
 using Application.Segments;
 using Application.Services;
 using Api.Infrastructure.Caches;
+using Application;
 using Domain.AuditLogs;
 using Domain.ControlPlane;
-using Domain.FeatureFlags;
 using Domain.Messages;
 using Domain.Segments;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace Api.Application.ControlPlane;
 

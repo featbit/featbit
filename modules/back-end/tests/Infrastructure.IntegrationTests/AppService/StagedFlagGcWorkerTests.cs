@@ -1,4 +1,4 @@
-using Application.Configuration;
+using Application.ControlPlane;
 using Infrastructure.AppService;
 using Infrastructure.Caches.Redis;
 using Microsoft.Extensions.Configuration;

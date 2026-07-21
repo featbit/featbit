@@ -1,11 +1,10 @@
 using Api.Application.ControlPlane;
 using Api.Infrastructure.Caches;
 using Application.Caches;
-using Application.Configuration;
+using Application.ControlPlane;
 using Domain.FeatureFlags;
 using Domain.Messages;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 

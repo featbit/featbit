@@ -2,7 +2,6 @@ using Api.Infrastructure.Caches;
 using Application.Caches;
 using Domain.Environments;
 using Domain.Health;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Testing;
 using Moq;
 

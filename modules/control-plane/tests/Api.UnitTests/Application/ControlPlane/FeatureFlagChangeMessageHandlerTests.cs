@@ -8,7 +8,6 @@ using Domain.FeatureFlags;
 using Domain.Messages;
 using Domain.Utils;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Testing;
 using Moq;
 

@@ -1,6 +1,5 @@
 using Api.UnitTests.Stubs;
 using Api.Application.ControlPlane;
-using Application.Configuration;
 using Application.ControlPlane;
 using Domain.ControlPlane;
 using Microsoft.Extensions.Configuration;
