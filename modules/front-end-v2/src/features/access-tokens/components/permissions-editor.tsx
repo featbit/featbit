@@ -223,7 +223,7 @@ export function PermissionsEditor({
               {category.supportsSpecific ? (
                 <div className="space-y-3">
                   <div className="flex items-center gap-5 text-xs">
-                    <span className="font-medium text-muted-foreground">
+                    <span className="font-medium text-foreground">
                       {t("accessTokens.permissions.appliesTo")}
                     </span>
                     <RadioGroup

@@ -161,7 +161,7 @@ export function ResourceSelection({
             resources={resources}
             onChange={onChange}
           >
-            <Button type="button" variant="ghost" size="sm">
+            <Button type="button" variant="outline" size="sm">
               <Plus className="size-3.5" />
               {t("accessTokens.permissions.addResource")}
             </Button>
@@ -170,22 +170,22 @@ export function ResourceSelection({
       </div>
 
       {resources.length ? (
-        <div className="flex flex-wrap gap-2">
+        <div className="space-y-2">
           {resources.map((resourceName) => {
             const label = resourcePathLabel(resourceName)
             return (
               <div
                 key={resourceName}
-                className="inline-flex h-7 max-w-full items-center overflow-hidden rounded-md border bg-muted/30"
+                className="flex h-8 w-full min-w-0 items-stretch overflow-hidden rounded-md border bg-background"
               >
                 {readOnly ? (
                   <Tooltip>
                     <TooltipTrigger
                       render={
-                        <span className="max-w-72 truncate px-2.5 text-xs" />
+                        <span className="flex min-w-0 flex-1 items-center px-3 font-mono text-xs" />
                       }
                     >
-                      {label}
+                      <span className="truncate">{resourceName}</span>
                     </TooltipTrigger>
                     <TooltipContent>{resourceName}</TooltipContent>
                   </Tooltip>
@@ -196,8 +196,7 @@ export function ResourceSelection({
                         <Button
                           type="button"
                           variant="ghost"
-                          size="xs"
-                          className="max-w-72 gap-1.5 rounded-none px-2.5 font-normal"
+                          className="h-auto min-w-0 flex-1 justify-between gap-3 rounded-none px-3 font-mono text-xs font-normal"
                           aria-label={t(
                             "accessTokens.permissions.editResource",
                             { resource: label }
@@ -206,7 +205,7 @@ export function ResourceSelection({
                         />
                       }
                     >
-                      <span className="truncate">{label}</span>
+                      <span className="truncate">{resourceName}</span>
                       <Pencil className="size-3 shrink-0 text-muted-foreground" />
                     </TooltipTrigger>
                     <TooltipContent>{resourceName}</TooltipContent>
@@ -216,7 +215,7 @@ export function ResourceSelection({
                   <Button
                     type="button"
                     variant="ghost"
-                    size="icon-xs"
+                    size="icon"
                     className="rounded-none border-l text-muted-foreground hover:text-foreground"
                     aria-label={t("accessTokens.permissions.removeResource", {
                       resource: label,

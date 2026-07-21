@@ -97,6 +97,7 @@ describe("ResourceSelection", () => {
       </QueryClientProvider>
     )
 
+    expect(screen.getByText(selectedRn)).toBeInTheDocument()
     fireEvent.click(
       screen.getByRole("button", {
         name: "Edit shop / production / beta-users;release,beta",
@@ -127,5 +128,33 @@ describe("ResourceSelection", () => {
         "project/shop:env/production:segment/early-access;release,beta",
       ])
     )
+  })
+
+  it("removes a selected RN without opening the editor", () => {
+    const onChange = vi.fn()
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    })
+    const selectedRn = "project/shop:env/production:segment/beta-users"
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <ResourceSelectionHarness
+          resources={[selectedRn]}
+          onChange={onChange}
+        />
+      </QueryClientProvider>
+    )
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Remove shop / production / beta-users",
+      })
+    )
+
+    expect(onChange).toHaveBeenCalledWith([])
+    expect(
+      screen.queryByRole("heading", { name: "Edit resource scope (RN)" })
+    ).not.toBeInTheDocument()
   })
 })

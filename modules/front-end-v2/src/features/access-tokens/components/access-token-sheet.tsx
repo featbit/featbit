@@ -292,7 +292,7 @@ export function AccessTokenSheet({
 
         <SheetHeader className="border-b px-6 py-5 pr-12">
           <SheetTitle>{title}</SheetTitle>
-          <SheetDescription>{subtitle}</SheetDescription>
+          <SheetDescription className="sr-only">{subtitle}</SheetDescription>
         </SheetHeader>
 
         <form className="contents" onSubmit={handleSubmit(submit)}>
@@ -301,88 +301,99 @@ export function AccessTokenSheet({
             data-access-token-sheet
             className="flex-1 space-y-6 overflow-y-auto px-6 py-5"
           >
-            <div className="grid items-start gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="access-token-name">
-                  {t("accessTokens.sheet.name")}
-                  <span className="ml-0.5 text-destructive" aria-hidden="true">
-                    *
-                  </span>
-                </Label>
-                <Input
-                  id="access-token-name"
-                  {...nameField}
-                  autoFocus={!readOnly}
-                  readOnly={readOnly}
-                  placeholder={t("accessTokens.sheet.namePlaceholder")}
-                  aria-invalid={
-                    Boolean(errors.name || nameAvailabilityError) || undefined
-                  }
-                  onChange={(event) => {
-                    nameField.onChange(event)
-                    setNameAvailabilityError("")
-                    setCheckingName(false)
-                  }}
-                />
-                {errors.name?.message || nameAvailabilityError ? (
-                  <p className="text-xs text-destructive">
-                    {errors.name?.message || nameAvailabilityError}
-                  </p>
-                ) : checkingName ? (
-                  <p className="text-xs text-muted-foreground">
-                    {t("accessTokens.sheet.validating")}
-                  </p>
-                ) : null}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="access-token-type">
-                  {t("accessTokens.sheet.type")}
-                  <span className="ml-0.5 text-destructive" aria-hidden="true">
-                    *
-                  </span>
-                </Label>
-                <Controller
-                  control={control}
-                  name="type"
-                  render={({ field }) => (
-                    <Select
-                      value={field.value}
-                      disabled={mode !== "new" || readOnly}
-                      onValueChange={(nextType) => {
-                        if (!nextType) return
-                        field.onChange(nextType)
-                        setTypeError("")
-                        if (nextType === "Personal") {
-                          setPermissionValidationAttempted(false)
-                        }
-                      }}
+            <div className="space-y-2">
+              <div className="grid items-start gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="access-token-name">
+                    {t("accessTokens.sheet.name")}
+                    <span
+                      className="ml-0.5 text-destructive"
+                      aria-hidden="true"
                     >
-                      <SelectTrigger id="access-token-type" className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent align="start">
-                        <SelectGroup>
-                          <SelectItem
-                            value="Personal"
-                            disabled={mode === "new" && !canManagePersonal}
-                          >
-                            {t("accessTokens.types.Personal")}
-                          </SelectItem>
-                          <SelectItem
-                            value="Service"
-                            disabled={mode === "new" && !canManageService}
-                          >
-                            {t("accessTokens.types.Service")}
-                          </SelectItem>
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-                {typeError ? (
-                  <p className="text-xs text-destructive">{typeError}</p>
-                ) : null}
+                      *
+                    </span>
+                  </Label>
+                  <Input
+                    id="access-token-name"
+                    {...nameField}
+                    autoFocus={!readOnly}
+                    readOnly={readOnly}
+                    placeholder={t("accessTokens.sheet.namePlaceholder")}
+                    aria-invalid={
+                      Boolean(errors.name || nameAvailabilityError) || undefined
+                    }
+                    onChange={(event) => {
+                      nameField.onChange(event)
+                      setNameAvailabilityError("")
+                      setCheckingName(false)
+                    }}
+                  />
+                  {errors.name?.message || nameAvailabilityError ? (
+                    <p className="text-xs text-destructive">
+                      {errors.name?.message || nameAvailabilityError}
+                    </p>
+                  ) : checkingName ? (
+                    <p className="text-xs text-muted-foreground">
+                      {t("accessTokens.sheet.validating")}
+                    </p>
+                  ) : null}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="access-token-type">
+                    {t("accessTokens.sheet.type")}
+                    <span
+                      className="ml-0.5 text-destructive"
+                      aria-hidden="true"
+                    >
+                      *
+                    </span>
+                  </Label>
+                  <Controller
+                    control={control}
+                    name="type"
+                    render={({ field }) => (
+                      <Select
+                        value={field.value}
+                        disabled={mode !== "new" || readOnly}
+                        onValueChange={(nextType) => {
+                          if (!nextType) return
+                          field.onChange(nextType)
+                          setTypeError("")
+                          if (nextType === "Personal") {
+                            setPermissionValidationAttempted(false)
+                          }
+                        }}
+                      >
+                        <SelectTrigger
+                          id="access-token-type"
+                          className="w-full"
+                        >
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent align="start">
+                          <SelectGroup>
+                            <SelectItem
+                              value="Personal"
+                              disabled={mode === "new" && !canManagePersonal}
+                            >
+                              {t("accessTokens.types.Personal")}
+                            </SelectItem>
+                            <SelectItem
+                              value="Service"
+                              disabled={mode === "new" && !canManageService}
+                            >
+                              {t("accessTokens.types.Service")}
+                            </SelectItem>
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                  {typeError ? (
+                    <p className="text-xs text-destructive">{typeError}</p>
+                  ) : null}
+                </div>
               </div>
             </div>
 
