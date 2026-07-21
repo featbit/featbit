@@ -269,12 +269,19 @@ export function PermissionsEditor({
                       resources={categoryDraft.specificResources}
                       readOnly={readOnly}
                       invalid={scopeInvalid}
-                      onChange={(specificResources) =>
+                      onChange={(specificResources) => {
+                        const appliesToAllResources =
+                          specificResources.includes(category.pattern)
                         updateCategory(category.type, {
                           ...categoryDraft,
-                          specificResources,
+                          scope: appliesToAllResources
+                            ? "all"
+                            : categoryDraft.scope,
+                          specificResources: appliesToAllResources
+                            ? []
+                            : specificResources,
                         })
-                      }
+                      }}
                     />
                   ) : null}
                 </div>

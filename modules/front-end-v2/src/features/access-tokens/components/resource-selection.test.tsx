@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { fireEvent, render, screen } from "@testing-library/react"
+import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { useRef } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
@@ -16,7 +16,13 @@ vi.mock("../access-tokens-api", async (importOriginal) => ({
   fetchAccessTokenResources: mocks.fetchAccessTokenResources,
 }))
 
-function ResourceSelectionHarness({ onChange }: { onChange: () => void }) {
+function ResourceSelectionHarness({
+  resources = [],
+  onChange,
+}: {
+  resources?: string[]
+  onChange: (resources: string[]) => void
+}) {
   const portalContainer = useRef<HTMLDivElement | null>(null)
 
   return (
@@ -27,7 +33,7 @@ function ResourceSelectionHarness({ onChange }: { onChange: () => void }) {
           <ResourceSelection
             portalContainer={portalContainer}
             resourceType="segment"
-            resources={[]}
+            resources={resources}
             readOnly={false}
             invalid={false}
             onChange={onChange}
@@ -72,5 +78,54 @@ describe("ResourceSelection", () => {
 
     fireEvent.click(await screen.findByText("Production segment"))
     expect(onChange).toHaveBeenCalledWith(["project/store:segment/production"])
+  })
+
+  it("edits the RN of a selected resource", async () => {
+    const onChange = vi.fn()
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    })
+    const selectedRn =
+      "project/shop:env/production:segment/beta-users;release,beta"
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <ResourceSelectionHarness
+          resources={[selectedRn]}
+          onChange={onChange}
+        />
+      </QueryClientProvider>
+    )
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Edit shop / production / beta-users;release,beta",
+      })
+    )
+
+    expect(
+      screen.getByRole("heading", { name: "Edit resource scope (RN)" })
+    ).toBeInTheDocument()
+    const segment = screen.getByLabelText("Segment")
+    const preview = screen.getByLabelText("Resulting resource RN")
+    await waitFor(() => expect(segment).toHaveValue("beta-users"))
+    expect(screen.getByLabelText("Tags")).toHaveValue("release,beta")
+
+    fireEvent.change(segment, { target: { value: "early-access" } })
+    await waitFor(() =>
+      expect(preview).toHaveValue(
+        "project/shop:env/production:segment/early-access;release,beta"
+      )
+    )
+
+    const apply = screen.getByRole("button", { name: "Apply" })
+    await waitFor(() => expect(apply).toBeEnabled())
+    fireEvent.click(apply)
+
+    await waitFor(() =>
+      expect(onChange).toHaveBeenCalledWith([
+        "project/shop:env/production:segment/early-access;release,beta",
+      ])
+    )
   })
 })

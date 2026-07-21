@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { LoaderCircle, Plus, X } from "lucide-react"
+import { LoaderCircle, Pencil, Plus, X } from "lucide-react"
 import { useEffect, useState, type ReactElement, type RefObject } from "react"
 import { useTranslation } from "react-i18next"
 import { StablePopoverContent } from "@/components/stable-popover-content"
@@ -18,24 +18,22 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { ResourceRnEditorDialog } from "@/features/iam/policies/details/components/resource-rn-editor-dialog"
+import { isEditableResourceType } from "@/features/iam/policies/details/components/resource-rn"
 import { fetchAccessTokenResources } from "../access-tokens-api"
 import { resourcePathLabel } from "../access-token-permissions"
 import type { PolicyResource, ResourceType } from "../access-token-types"
-
-type PickerMode = { kind: "add" } | { kind: "edit"; resourceName: string }
 
 function ResourcePickerPopover({
   portalContainer,
   resourceType,
   resources,
-  mode,
   onChange,
   children,
 }: {
   portalContainer: RefObject<HTMLDivElement | null>
   resourceType: ResourceType
   resources: string[]
-  mode: PickerMode
   onChange: (resources: string[]) => void
   children: ReactElement
 }) {
@@ -57,24 +55,6 @@ function ResourcePickerPopover({
   })
 
   function selectResource(resource: PolicyResource) {
-    if (mode.kind === "edit") {
-      if (
-        resource.rn !== mode.resourceName &&
-        resources.includes(resource.rn)
-      ) {
-        setOpen(false)
-        return
-      }
-
-      onChange(
-        resources.map((item) =>
-          item === mode.resourceName ? resource.rn : item
-        )
-      )
-      setOpen(false)
-      return
-    }
-
     onChange(
       resources.includes(resource.rn)
         ? resources.filter((item) => item !== resource.rn)
@@ -138,13 +118,11 @@ function ResourcePickerPopover({
             </CommandGroup>
           </CommandList>
         </Command>
-        {mode.kind === "add" ? (
-          <div className="flex justify-end border-t p-2">
-            <Button type="button" size="sm" onClick={() => setOpen(false)}>
-              {t("accessTokens.permissions.done")}
-            </Button>
-          </div>
-        ) : null}
+        <div className="flex justify-end border-t p-2">
+          <Button type="button" size="sm" onClick={() => setOpen(false)}>
+            {t("accessTokens.permissions.done")}
+          </Button>
+        </div>
       </StablePopoverContent>
     </Popover>
   )
@@ -166,6 +144,7 @@ export function ResourceSelection({
   onChange: (resources: string[]) => void
 }) {
   const { t } = useTranslation()
+  const [editingResource, setEditingResource] = useState<string | null>(null)
 
   return (
     <div className="space-y-2" aria-invalid={invalid || undefined}>
@@ -180,7 +159,6 @@ export function ResourceSelection({
             portalContainer={portalContainer}
             resourceType={resourceType}
             resources={resources}
-            mode={{ kind: "add" }}
             onChange={onChange}
           >
             <Button type="button" variant="ghost" size="sm">
@@ -213,27 +191,23 @@ export function ResourceSelection({
                   </Tooltip>
                 ) : (
                   <Tooltip>
-                    <TooltipTrigger render={<span className="min-w-0" />}>
-                      <ResourcePickerPopover
-                        portalContainer={portalContainer}
-                        resourceType={resourceType}
-                        resources={resources}
-                        mode={{ kind: "edit", resourceName }}
-                        onChange={onChange}
-                      >
+                    <TooltipTrigger
+                      render={
                         <Button
                           type="button"
                           variant="ghost"
                           size="xs"
-                          className="max-w-72 rounded-none px-2.5 font-normal"
+                          className="max-w-72 gap-1.5 rounded-none px-2.5 font-normal"
                           aria-label={t(
                             "accessTokens.permissions.editResource",
                             { resource: label }
                           )}
-                        >
-                          <span className="truncate">{label}</span>
-                        </Button>
-                      </ResourcePickerPopover>
+                          onClick={() => setEditingResource(resourceName)}
+                        />
+                      }
+                    >
+                      <span className="truncate">{label}</span>
+                      <Pencil className="size-3 shrink-0 text-muted-foreground" />
                     </TooltipTrigger>
                     <TooltipContent>{resourceName}</TooltipContent>
                   </Tooltip>
@@ -270,6 +244,26 @@ export function ResourceSelection({
         <p className="text-xs text-destructive">
           {t("accessTokens.permissions.selectAtLeastOneResource")}
         </p>
+      ) : null}
+
+      {editingResource && isEditableResourceType(resourceType) ? (
+        <ResourceRnEditorDialog
+          open
+          resourceType={resourceType}
+          rn={editingResource}
+          selectedResources={resources}
+          onOpenChange={(nextOpen) => {
+            if (!nextOpen) setEditingResource(null)
+          }}
+          onApply={(nextRn) => {
+            onChange(
+              resources.map((resource) =>
+                resource === editingResource ? nextRn : resource
+              )
+            )
+            setEditingResource(null)
+          }}
+        />
       ) : null}
     </div>
   )

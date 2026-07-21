@@ -1,4 +1,11 @@
-import { fireEvent, render, screen, within } from "@testing-library/react"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react"
 import { useRef, useState } from "react"
 import { describe, expect, it } from "vitest"
 import "@/lib/i18n/i18n"
@@ -150,5 +157,43 @@ describe("PermissionsEditor fine-grained license states", () => {
     expect(
       screen.queryByText("Specific actions preserved")
     ).not.toBeInTheDocument()
+  })
+
+  it("normalizes an all-resource RN edit back to the All scope", async () => {
+    const draft = createEmptyPermissionDraft()
+    draft.project = {
+      selectedActions: ["CreateProject"],
+      scope: "specific",
+      specificResources: ["project/shop"],
+    }
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    })
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <PermissionsEditorHarness
+          initialDraft={draft}
+          fineGrainedGranted={false}
+        />
+      </QueryClientProvider>
+    )
+
+    const category = categorySection("Project")
+    fireEvent.click(within(category).getByRole("button", { name: "Edit shop" }))
+    const project = screen.getByLabelText("Project")
+    await waitFor(() => expect(project).toHaveValue("shop"))
+
+    fireEvent.click(screen.getByRole("checkbox", { name: "Any project" }))
+    const apply = screen.getByRole("button", { name: "Apply" })
+    await waitFor(() => expect(apply).toBeEnabled())
+    fireEvent.click(apply)
+
+    await waitFor(() =>
+      expect(renderedDraft().project).toMatchObject({
+        scope: "all",
+        specificResources: [],
+      })
+    )
   })
 })
