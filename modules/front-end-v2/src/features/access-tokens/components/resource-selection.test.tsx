@@ -19,9 +19,11 @@ vi.mock("../access-tokens-api", async (importOriginal) => ({
 function ResourceSelectionHarness({
   resources = [],
   onChange,
+  onSubmit,
 }: {
   resources?: string[]
   onChange: (resources: string[]) => void
+  onSubmit?: () => void
 }) {
   const portalContainer = useRef<HTMLDivElement | null>(null)
 
@@ -30,14 +32,21 @@ function ResourceSelectionHarness({
       <SheetContent showCloseButton={false}>
         <SheetTitle className="sr-only">Access token</SheetTitle>
         <div ref={portalContainer} data-testid="sheet-portal-container">
-          <ResourceSelection
-            portalContainer={portalContainer}
-            resourceType="segment"
-            resources={resources}
-            readOnly={false}
-            invalid={false}
-            onChange={onChange}
-          />
+          <form
+            onSubmit={(event) => {
+              event.preventDefault()
+              onSubmit?.()
+            }}
+          >
+            <ResourceSelection
+              portalContainer={portalContainer}
+              resourceType="segment"
+              resources={resources}
+              readOnly={false}
+              invalid={false}
+              onChange={onChange}
+            />
+          </form>
         </div>
       </SheetContent>
     </Sheet>
@@ -82,6 +91,7 @@ describe("ResourceSelection", () => {
 
   it("edits the RN of a selected resource", async () => {
     const onChange = vi.fn()
+    const onSubmit = vi.fn()
     const queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false } },
     })
@@ -93,6 +103,7 @@ describe("ResourceSelection", () => {
         <ResourceSelectionHarness
           resources={[selectedRn]}
           onChange={onChange}
+          onSubmit={onSubmit}
         />
       </QueryClientProvider>
     )
@@ -128,6 +139,7 @@ describe("ResourceSelection", () => {
         "project/shop:env/production:segment/early-access;release,beta",
       ])
     )
+    expect(onSubmit).not.toHaveBeenCalled()
   })
 
   it("removes a selected RN without opening the editor", () => {

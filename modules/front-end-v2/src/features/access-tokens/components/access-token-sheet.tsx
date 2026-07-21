@@ -87,7 +87,7 @@ export function AccessTokenSheet({
   canManageService: boolean
   onOpenChange: (open: boolean) => void
   onCreated: (result: { name: string; token: string }) => void
-  onSaved: () => void
+  onSaved: (token: AccessToken) => void
 }) {
   const { t } = useTranslation()
   const portalContainer = useRef<HTMLDivElement | null>(null)
@@ -237,12 +237,12 @@ export function AccessTokenSheet({
     setSaving(true)
     try {
       if (mode === "edit" && token) {
-        await updateAccessToken(token.id, {
+        const updatedToken = await updateAccessToken(token.id, {
           name: trimmedName,
           permissions: statements,
         })
         toast.success(t("accessTokens.operationSucceeded"))
-        onSaved()
+        onSaved(updatedToken)
       } else {
         const created = await createAccessToken({
           name: trimmedName,

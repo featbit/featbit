@@ -37,6 +37,7 @@ import type {
   AccessTokenCreator,
   AccessTokenSheetMode,
   AccessTokenType,
+  PagedAccessTokens,
 } from "./access-token-types"
 import {
   AccessTokenConfirmDialog,
@@ -340,7 +341,25 @@ export function AccessTokensPage() {
               setCreatedResult(result)
               void invalidateList()
             }}
-            onSaved={() => {
+            onSaved={(updatedToken) => {
+              queryClient.setQueriesData<PagedAccessTokens>(
+                { queryKey: ["access-tokens"] },
+                (current) =>
+                  current
+                    ? {
+                        ...current,
+                        items: current.items.map((item) =>
+                          item.id === updatedToken.id
+                            ? {
+                                ...item,
+                                ...updatedToken,
+                                creator: updatedToken.creator ?? item.creator,
+                              }
+                            : item
+                        ),
+                      }
+                    : current
+              )
               setSheet(null)
               void invalidateList()
             }}

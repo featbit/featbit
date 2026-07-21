@@ -144,7 +144,13 @@ export function ResourceRnEditorDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <form className="space-y-4" onSubmit={form.handleSubmit(apply)}>
+        <form
+          className="space-y-4"
+          onSubmit={(event) => {
+            event.stopPropagation()
+            void form.handleSubmit(apply)(event)
+          }}
+        >
           <div className="space-y-1.5">
             <Label htmlFor="resource-rn-preview">
               {t(
