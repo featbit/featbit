@@ -50,8 +50,15 @@ public class OpenApiHandler(
             if (accessToken.LastUsedAt is null ||
                 DateTime.UtcNow - accessToken.LastUsedAt.Value >= LastUsedAtRefreshInterval)
             {
-                accessToken.RefreshLastUsedAt();
-                await accessTokenService.UpdateAsync(accessToken);
+                try
+                {
+                    await accessTokenService.RefreshLastUsedAtAsync(accessToken.Id);
+                }
+                catch (Exception ex)
+                {
+                    // a transient DB error here shouldn't reject valid access token
+                    Logger.LogWarning(ex, "Failed to refresh LastUsedAt for access token {AccessTokenId}", accessToken.Id);
+                }
             }
 
             // construct ticket
