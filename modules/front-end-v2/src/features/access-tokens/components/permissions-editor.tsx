@@ -119,7 +119,7 @@ export function PermissionsEditor({
         </Alert>
       ) : null}
 
-      <div className="border-y">
+      <div className="space-y-4">
         {PERMISSION_CATEGORIES.map((category) => {
           const categoryDraft = draft[category.type]
           const coarseActionsOnly =
@@ -211,7 +211,7 @@ export function PermissionsEditor({
           return (
             <section
               key={category.type}
-              className="space-y-3 border-b py-4 last:border-b-0"
+              className="space-y-3"
               tabIndex={scopeInvalid ? -1 : undefined}
               data-permission-error={scopeInvalid || undefined}
             >

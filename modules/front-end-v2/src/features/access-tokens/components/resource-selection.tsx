@@ -170,64 +170,56 @@ export function ResourceSelection({
       </div>
 
       {resources.length ? (
-        <div className="space-y-2">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,22rem),1fr))] gap-2">
           {resources.map((resourceName) => {
             const label = resourcePathLabel(resourceName)
             return (
               <div
                 key={resourceName}
-                className="flex h-8 w-full min-w-0 items-stretch overflow-hidden rounded-md border bg-background"
+                className="flex min-h-9 w-full min-w-0 items-center gap-2 rounded-md border bg-background px-2 py-0.5"
               >
-                {readOnly ? (
-                  <Tooltip>
-                    <TooltipTrigger
-                      render={
-                        <span className="flex min-w-0 flex-1 items-center px-3 font-mono text-xs" />
-                      }
-                    >
-                      <span className="truncate">{resourceName}</span>
-                    </TooltipTrigger>
-                    <TooltipContent>{resourceName}</TooltipContent>
-                  </Tooltip>
-                ) : (
-                  <Tooltip>
-                    <TooltipTrigger
-                      render={
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          className="h-auto min-w-0 flex-1 justify-between gap-3 rounded-none px-3 font-mono text-xs font-normal"
-                          aria-label={t(
-                            "accessTokens.permissions.editResource",
-                            { resource: label }
-                          )}
-                          onClick={() => setEditingResource(resourceName)}
-                        />
-                      }
-                    >
-                      <span className="truncate">{resourceName}</span>
-                      <Pencil className="size-3 shrink-0 text-muted-foreground" />
-                    </TooltipTrigger>
-                    <TooltipContent>{resourceName}</TooltipContent>
-                  </Tooltip>
-                )}
-                {!readOnly ? (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="rounded-none border-l text-muted-foreground hover:text-foreground"
-                    aria-label={t("accessTokens.permissions.removeResource", {
-                      resource: label,
-                    })}
-                    onClick={() =>
-                      onChange(
-                        resources.filter((item) => item !== resourceName)
-                      )
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <span className="flex min-w-0 flex-1 items-center font-mono text-xs" />
                     }
                   >
-                    <X className="size-3" />
-                  </Button>
+                    <span className="truncate">{resourceName}</span>
+                  </TooltipTrigger>
+                  <TooltipContent>{resourceName}</TooltipContent>
+                </Tooltip>
+                {!readOnly ? (
+                  <>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-7 shrink-0 gap-1.5 px-2 text-xs"
+                      aria-label={t("accessTokens.permissions.editResource", {
+                        resource: label,
+                      })}
+                      onClick={() => setEditingResource(resourceName)}
+                    >
+                      <Pencil className="size-3.5" />
+                      {t("accessTokens.permissions.editResourceRn")}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon-sm"
+                      className="text-muted-foreground hover:text-foreground"
+                      aria-label={t("accessTokens.permissions.removeResource", {
+                        resource: label,
+                      })}
+                      onClick={() =>
+                        onChange(
+                          resources.filter((item) => item !== resourceName)
+                        )
+                      }
+                    >
+                      <X className="size-3.5" />
+                    </Button>
+                  </>
                 ) : null}
               </div>
             )

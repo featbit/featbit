@@ -98,11 +98,11 @@ describe("ResourceSelection", () => {
     )
 
     expect(screen.getByText(selectedRn)).toBeInTheDocument()
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: "Edit shop / production / beta-users;release,beta",
-      })
-    )
+    const editRn = screen.getByRole("button", {
+      name: "Edit shop / production / beta-users;release,beta",
+    })
+    expect(editRn).toHaveTextContent("Edit RN")
+    fireEvent.click(editRn)
 
     expect(
       screen.getByRole("heading", { name: "Edit resource scope (RN)" })
