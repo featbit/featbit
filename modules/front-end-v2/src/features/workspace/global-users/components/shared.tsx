@@ -44,11 +44,13 @@ export function SearchBox({
   value,
   placeholder,
   className,
+  stopKeyDownPropagation = true,
   onChange,
 }: {
   value: string
   placeholder: string
   className?: string
+  stopKeyDownPropagation?: boolean
   onChange: (value: string) => void
 }) {
   return (
@@ -58,7 +60,11 @@ export function SearchBox({
         className="bg-background pl-9 text-sm"
         value={value}
         placeholder={placeholder}
-        onKeyDown={(event) => event.stopPropagation()}
+        onKeyDown={
+          stopKeyDownPropagation
+            ? (event) => event.stopPropagation()
+            : undefined
+        }
         onChange={(event) => onChange(event.target.value)}
       />
     </div>
