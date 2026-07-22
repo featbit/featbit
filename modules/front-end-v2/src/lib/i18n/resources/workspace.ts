@@ -471,6 +471,8 @@ export const enWorkspace = {
     },
     details: {
       title: "User profile",
+      filter: "Filter properties",
+      noMatch: "No properties match your search",
       builtIn: "Built-in properties",
       custom: "Custom properties",
       noCustomProperties: "No custom properties",
@@ -932,6 +934,8 @@ export const zhWorkspace = {
     },
     details: {
       title: "用户资料",
+      filter: "筛选属性",
+      noMatch: "没有符合搜索条件的属性",
       builtIn: "内置属性",
       custom: "自定义属性",
       noCustomProperties: "没有自定义属性",

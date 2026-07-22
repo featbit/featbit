@@ -205,7 +205,12 @@ test.describe("workspace global users", () => {
     await page.getByRole("button", { name: "Details" }).first().click()
     const detailsDialog = page.getByRole("dialog", { name: "User profile" })
     await expect(detailsDialog).toBeVisible()
-    await expect(detailsDialog.getByText("user-alpha")).toBeVisible()
+    await expect(detailsDialog.getByText("user-alpha").first()).toBeVisible()
+    await expect(detailsDialog.locator("dd button")).toHaveCount(3)
+
+    await detailsDialog.getByPlaceholder("Filter properties").fill("department")
+    await expect(detailsDialog.getByText("department")).toBeVisible()
+    await expect(detailsDialog.locator("dd button")).toHaveCount(1)
 
     await page.keyboard.press("Escape")
     await page.getByRole("button", { name: "Evaluate" }).first().click()
