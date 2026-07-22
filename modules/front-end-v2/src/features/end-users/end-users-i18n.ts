@@ -1,6 +1,8 @@
 import { i18n } from "@/lib/i18n/i18n"
 
 const en = {
+  title: "End Users",
+  subtitle: "Manage end users and their properties in the current environment.",
   search: "Search by name or keyId",
   display: "Display",
   searchColumns: "Search columns",
@@ -116,6 +118,8 @@ const en = {
 
 const zh = {
   ...en,
+  title: "目标用户",
+  subtitle: "管理当前环境中的目标用户及其属性。",
   search: "按名称或 Key ID 搜索",
   display: "显示列",
   searchColumns: "搜索列",

@@ -261,6 +261,15 @@ export function EndUsersPage() {
   return (
     <TooltipProvider>
       <div className="-m-5 min-h-[calc(100vh-3.5rem)] bg-background px-8 py-7">
+        <header className="mb-10 space-y-1">
+          <h1 className="text-2xl font-semibold tracking-normal">
+            {t("endUsers.title")}
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            {t("endUsers.subtitle")}
+          </p>
+        </header>
+
         <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-wrap items-center gap-3">
             <SearchInput

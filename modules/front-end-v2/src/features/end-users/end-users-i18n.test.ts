@@ -10,6 +10,7 @@ describe("end user Chinese translations", () => {
   it("uses the approved product terminology", async () => {
     await i18n.changeLanguage("zh")
 
+    expect(i18n.t("endUsers.title")).toBe("目标用户")
     expect(i18n.t("endUsers.empty")).toBe("暂无目标用户")
     expect(i18n.t("endUsers.evaluateDrawer.segments")).toBe("用户组")
     expect(i18n.t("endUsers.evaluateDrawer.variation")).toBe("返回值")
