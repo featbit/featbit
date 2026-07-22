@@ -175,6 +175,7 @@ export function EndUsersPage() {
     () => [
       {
         accessorKey: "name",
+        size: 180,
         header: t("endUsers.name"),
         cell: ({ row }) =>
           row.original.name ? (
@@ -187,11 +188,13 @@ export function EndUsersPage() {
       },
       {
         accessorKey: "keyId",
+        size: 200,
         header: t("endUsers.keyId"),
         cell: ({ row }) => <TruncatedValue value={row.original.keyId} mono />,
       },
       ...selectedColumns.map((column): ColumnDef<EndUser> => ({
         id: column,
+        size: 180,
         header: column,
         cell: ({ row }) => {
           const rawValue =
@@ -209,6 +212,7 @@ export function EndUsersPage() {
       })),
       {
         id: "actions",
+        size: 150,
         header: t("endUsers.actions"),
         cell: ({ row }) => (
           <div className="flex items-center gap-2 whitespace-nowrap">
@@ -314,21 +318,34 @@ export function EndUsersPage() {
               </Button>
             </div>
           ) : null}
-          <Table className="min-w-[760px] table-fixed">
+          <Table
+            className="table-fixed"
+            style={{ minWidth: Math.max(760, table.getTotalSize()) }}
+          >
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id} className="hover:bg-transparent">
-                  {headerGroup.headers.map((header) => (
-                    <TableHead
-                      key={header.id}
-                      className="px-5 py-4 font-semibold"
-                    >
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                    </TableHead>
-                  ))}
+                  {headerGroup.headers.map((header) => {
+                    const headerContent = header.column.columnDef.header
+                    return (
+                      <TableHead
+                        key={header.id}
+                        className="overflow-hidden px-5 py-4 font-semibold"
+                        style={{ width: header.getSize() }}
+                      >
+                        <div
+                          className="truncate"
+                          title={
+                            typeof headerContent === "string"
+                              ? headerContent
+                              : undefined
+                          }
+                        >
+                          {flexRender(headerContent, header.getContext())}
+                        </div>
+                      </TableHead>
+                    )
+                  })}
                 </TableRow>
               ))}
             </TableHeader>
@@ -366,7 +383,8 @@ export function EndUsersPage() {
                     {row.getVisibleCells().map((cell) => (
                       <TableCell
                         key={cell.id}
-                        className="px-5 py-4 align-middle"
+                        className="overflow-hidden px-5 py-4 align-middle"
+                        style={{ width: cell.column.getSize() }}
                       >
                         {flexRender(
                           cell.column.columnDef.cell,

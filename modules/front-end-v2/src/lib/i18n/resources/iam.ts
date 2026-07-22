@@ -1010,7 +1010,7 @@ export const zhIam = {
     "details.permissionsEditor.actionLabels.UpdateFlagIndividualTargeting":
       "更新单独定向",
     "details.permissionsEditor.actionLabels.UpdateFlagTargetingRules":
-      "更新定向规则",
+      "更新匹配规则",
     "details.permissionsEditor.actionLabels.UpdateFlagDefaultRule":
       "更新默认规则",
     "details.permissionsEditor.actionLabels.UpdateFlagVariations": "更新返回值",

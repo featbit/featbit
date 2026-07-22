@@ -185,7 +185,7 @@ export const enWebhooks = {
 
 export const zhWebhooks = {
   ...enWebhooks,
-  subtitle: "将功能开关和分群事件发送到外部服务。",
+  subtitle: "将功能开关和用户组事件发送到外部服务。",
   search: "按名称筛选",
   project: "项目",
   projectSearch: "搜索项目",
@@ -205,7 +205,7 @@ export const zhWebhooks = {
   loadFailed: "无法加载 Webhooks。",
   projectLoadFailed: "无法加载项目。",
   empty: "还没有 Webhook",
-  emptyHelper: "创建 Webhook，将功能开关和分群事件发送到外部服务。",
+  emptyHelper: "创建 Webhook，将功能开关和用户组事件发送到外部服务。",
   filteredEmpty: "没有符合筛选条件的 Webhook。",
   clearFilters: "清除筛选",
   showing: "显示第 {{from}} 至 {{to}} 条，共 {{total}} 个 Webhook",
@@ -231,7 +231,7 @@ export const zhWebhooks = {
     viewLogs: "查看日志",
     remove: "移除",
   },
-  eventGroups: { featureFlag: "功能开关", segment: "分群" },
+  eventGroups: { featureFlag: "功能开关", segment: "用户组" },
   events: {
     created: "已创建",
     toggled: "启停状态已变更",
@@ -241,7 +241,7 @@ export const zhWebhooks = {
     offVariationChanged: "关闭 Variation 已变更",
     defaultRuleChanged: "默认规则已变更",
     targetUsersChanged: "目标用户已变更",
-    targetingRulesChanged: "定向规则已变更",
+    targetingRulesChanged: "匹配规则已变更",
     basicInfoUpdated: "基本信息已更新",
     deleted: "已删除",
     rulesChanged: "规则已变更",

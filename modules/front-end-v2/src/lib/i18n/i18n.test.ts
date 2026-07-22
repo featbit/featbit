@@ -18,9 +18,12 @@ describe("integration page translations", () => {
     await i18n.changeLanguage("zh")
 
     expect(i18n.t("webhooks.subtitle")).toBe(
-      "将功能开关和分群事件发送到外部服务。"
+      "将功能开关和用户组事件发送到外部服务。"
     )
     expect(i18n.t("relayProxies.title")).toBe("中继代理")
     expect(i18n.t("accessTokens.title")).toBe("访问令牌")
+    expect(i18n.t("layout.nav.items.endUsers")).toBe("目标用户")
+    expect(i18n.t("layout.nav.items.segments")).toBe("用户组")
+    expect(i18n.t("workspace.globalUsers.evaluate.segments")).toBe("用户组")
   })
 })

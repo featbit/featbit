@@ -175,11 +175,13 @@ export function GlobalUsersPage() {
     () => [
       {
         accessorKey: "keyId",
+        size: 200,
         header: "keyId",
         cell: ({ row }) => <TextCell value={row.original.keyId} />,
       },
       {
         accessorKey: "name",
+        size: 180,
         header: t("workspace.globalUsers.name"),
         cell: ({ row }) =>
           row.original.name ? (
@@ -192,6 +194,7 @@ export function GlobalUsersPage() {
       },
       ...selectedColumns.map((column): ColumnDef<GlobalUser> => ({
         id: column,
+        size: 180,
         header: column,
         cell: ({ row }) => {
           const value =
@@ -203,6 +206,7 @@ export function GlobalUsersPage() {
       })),
       {
         id: "actions",
+        size: 150,
         header: t("workspace.globalUsers.actions"),
         cell: ({ row }) => (
           <div className="flex items-center gap-2">
@@ -220,6 +224,8 @@ export function GlobalUsersPage() {
     [selectedColumns, t]
   )
 
+  // TanStack Table exposes intentionally non-memoizable callbacks.
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data: data.items,
     columns,
@@ -413,18 +419,34 @@ function GlobalUsersTable({
   const { t } = useTranslation()
 
   return (
-    <Table className="min-w-[760px] table-fixed">
+    <Table
+      className="table-fixed"
+      style={{ minWidth: Math.max(760, table.getTotalSize()) }}
+    >
       <TableHeader className="border-b text-left text-foreground">
         {table.getHeaderGroups().map((headerGroup) => (
           <TableRow key={headerGroup.id} className="hover:bg-transparent">
-            {headerGroup.headers.map((header) => (
-              <TableHead key={header.id} className="px-5 py-4 font-semibold">
-                {flexRender(
-                  header.column.columnDef.header,
-                  header.getContext()
-                )}
-              </TableHead>
-            ))}
+            {headerGroup.headers.map((header) => {
+              const headerContent = header.column.columnDef.header
+              return (
+                <TableHead
+                  key={header.id}
+                  className="overflow-hidden px-5 py-4 font-semibold"
+                  style={{ width: header.getSize() }}
+                >
+                  <div
+                    className="truncate"
+                    title={
+                      typeof headerContent === "string"
+                        ? headerContent
+                        : undefined
+                    }
+                  >
+                    {flexRender(headerContent, header.getContext())}
+                  </div>
+                </TableHead>
+              )
+            })}
           </TableRow>
         ))}
       </TableHeader>
@@ -486,7 +508,8 @@ function GlobalUsersTable({
               {row.getVisibleCells().map((cell) => (
                 <TableCell
                   key={cell.id}
-                  className="px-5 py-4 align-middle text-sm text-foreground"
+                  className="overflow-hidden px-5 py-4 align-middle text-sm text-foreground"
+                  style={{ width: cell.column.getSize() }}
                 >
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </TableCell>

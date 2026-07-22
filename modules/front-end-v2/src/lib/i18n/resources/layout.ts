@@ -110,8 +110,8 @@ export const zhLayout = {
     items: {
       getStarted: "开始",
       featureFlags: "功能开关",
-      segments: "用户分群",
-      endUsers: "终端用户",
+      segments: "用户组",
+      endUsers: "目标用户",
       experiments: "实验",
       metrics: "指标",
       auditLogs: "审计日志",
