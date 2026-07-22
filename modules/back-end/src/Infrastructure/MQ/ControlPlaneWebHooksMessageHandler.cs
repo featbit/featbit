@@ -8,75 +8,79 @@ using Microsoft.Extensions.Configuration;
 
 namespace Infrastructure.MQ;
 
-public class ControlPlaneWebHooksMessageHandler(IWebhookHandler webhookHandler, IConfiguration configuration) : IMessageHandler
+public class ControlPlaneWebHooksMessageHandler(IWebhookHandler webhookHandler, IConfiguration configuration)
+    : IMessageHandler
 {
     public string Topic => ControlPlaneTopics.ControlPlaneWebHooks;
 
-    public async Task HandleAsync(string message)
+    public Task HandleAsync(string message)
     {
         using var document = JsonDocument.Parse(message);
         var root = document.RootElement;
         if (!root.TryGetProperty("type", out var type) || !root.TryGetProperty("region", out var region))
         {
-            throw new InvalidDataException("invalid web hook message");
+            throw new InvalidDataException("Invalid control plane webhook message");
         }
-        
+
         var controlPlaneWebHookType = type.Deserialize<ControlPlaneWebHookType>(ReusableJsonSerializerOptions.Web);
         var deserializedRegionNode = region.Deserialize<string>(ReusableJsonSerializerOptions.Web);
         if (deserializedRegionNode != configuration.GetRegion())
         {
-            return;
+            return Task.CompletedTask;
         }
 
         switch (controlPlaneWebHookType)
         {
             case ControlPlaneWebHookType.Segment:
-                await HandleSegments(root);
+                HandleSegments(root);
                 break;
             case ControlPlaneWebHookType.FeatureFlag:
-                await HandleFlag(root);
+                HandleFlag(root);
                 break;
             default:
-                throw new InvalidDataException("unsupported web hook type");
+                throw new InvalidDataException("Unsupported control plane webhook type");
         }
+
+        return Task.CompletedTask;
     }
 
-    private async Task HandleSegments(JsonElement root)
+    private void HandleSegments(JsonElement root)
     {
-        if (!root.TryGetProperty("notification", out var notification) ||
-            !root.TryGetProperty("envIds", out var envIds))
+        if (!root.TryGetProperty("notification", out var notificationElem) ||
+            !root.TryGetProperty("envIds", out var envIdsElem))
         {
-            throw new InvalidDataException("invalid segment web hook");
+            throw new InvalidDataException("Invalid segment change data");
         }
-        
-        var deserializedNotificationNode = notification.Deserialize<OnSegmentChange>(ReusableJsonSerializerOptions.Web);
-        var envIdsNode = envIds.Deserialize<List<Guid>>(ReusableJsonSerializerOptions.Web);
 
-        if (deserializedNotificationNode is not null && envIdsNode is not null)
+        var notification = notificationElem.Deserialize<OnSegmentChange>(ReusableJsonSerializerOptions.Web);
+        var envIds = envIdsElem.Deserialize<List<Guid>>(ReusableJsonSerializerOptions.Web);
+
+        if (notification is not null && envIds is not null)
         {
-            foreach (var envId in envIdsNode)
+            foreach (var envId in envIds)
             {
                 // handle webhook asynchronously
                 _ = webhookHandler.HandleAsync(
                     envId,
-                    deserializedNotificationNode.Segment,
-                    deserializedNotificationNode.DataChange,
-                    deserializedNotificationNode.OperatorId
+                    notification.Segment,
+                    notification.DataChange,
+                    notification.OperatorId
                 );
             }
         }
     }
 
-    private async Task HandleFlag(JsonElement root)
+    private void HandleFlag(JsonElement root)
     {
-        if (!root.TryGetProperty("notification", out var notification))
+        if (!root.TryGetProperty("notification", out var notificationElem))
         {
-            throw new InvalidDataException("invalid flag change data");
+            throw new InvalidDataException("Invalid flag change data");
         }
-        var deserializedFlagNotification = notification.Deserialize<OnFeatureFlagChanged>(ReusableJsonSerializerOptions.Web);
-        if (deserializedFlagNotification is not null)
+
+        var notification = notificationElem.Deserialize<OnFeatureFlagChanged>(ReusableJsonSerializerOptions.Web);
+        if (notification is not null)
         {
-            _ = webhookHandler.HandleAsync(deserializedFlagNotification.Flag, deserializedFlagNotification.DataChange, deserializedFlagNotification.OperatorId);
+            _ = webhookHandler.HandleAsync(notification.Flag, notification.DataChange, notification.OperatorId);
         }
     }
 }

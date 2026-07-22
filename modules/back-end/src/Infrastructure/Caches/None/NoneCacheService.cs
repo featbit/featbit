@@ -57,9 +57,5 @@ public class NoneCacheService : ICacheService
 
     public Task DeletePodConnection(Guid podId) => Task.CompletedTask;
 
-    public async Task<List<HealthMessage>> GetAllHealthMessages()
-    {
-        return new List<HealthMessage>();
-    }
-
+    public Task<List<HealthMessage>> GetAllHealthMessages() => Task.FromResult(new List<HealthMessage>());
 }
