@@ -14,12 +14,7 @@ public static class ConfigurationExtensions
             return mode == HostingMode.SaaS;
         }
 
-        public bool UseControlPlane()
-        {
-            var config = configuration.GetSection("UseControlPlane").Value ?? bool.FalseString;
-
-            return config == bool.TrueString;
-        }
+        public bool UseControlPlane() => configuration.GetValue<bool>("UseControlPlane");
 
         public string GetRegion() => configuration.GetSection("Region").Value ?? "local";
 
