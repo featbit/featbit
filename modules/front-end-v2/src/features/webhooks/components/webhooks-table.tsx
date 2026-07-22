@@ -101,24 +101,24 @@ export function WebhooksTable({
     <TooltipProvider delay={300}>
       <div className="overflow-hidden rounded-lg border">
         <Table>
-          <TableHeader className="bg-muted/40">
-            <TableRow>
-              <TableHead className="w-[20%] pl-4">
+          <TableHeader className="border-b text-left text-foreground">
+            <TableRow className="hover:bg-transparent">
+              <TableHead className="w-[20%] px-5 py-4 font-semibold">
                 {t("webhooks.columns.webhook")}
               </TableHead>
-              <TableHead className="w-[14%]">
+              <TableHead className="w-[14%] px-5 py-4 font-semibold">
                 {t("webhooks.columns.status")}
               </TableHead>
-              <TableHead className="w-[22%]">
+              <TableHead className="w-[22%] px-5 py-4 font-semibold">
                 {t("webhooks.columns.endpoint")}
               </TableHead>
-              <TableHead className="w-[19%]">
+              <TableHead className="w-[19%] px-5 py-4 font-semibold">
                 {t("webhooks.columns.scopes")}
               </TableHead>
-              <TableHead className="w-[13%]">
+              <TableHead className="w-[13%] px-5 py-4 font-semibold">
                 {t("webhooks.columns.events")}
               </TableHead>
-              <TableHead className="pr-4 text-right">
+              <TableHead className="px-5 py-4 text-right font-semibold">
                 <span className="sr-only">{t("webhooks.columns.actions")}</span>
               </TableHead>
             </TableRow>

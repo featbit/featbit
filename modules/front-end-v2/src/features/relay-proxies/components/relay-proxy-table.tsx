@@ -49,20 +49,24 @@ export function RelayProxyTable({
   return (
     <div className="overflow-hidden rounded-lg border">
       <Table>
-        <TableHeader className="bg-muted/40">
-          <TableRow>
-            <TableHead className="w-[20%] pl-4">
+        <TableHeader className="border-b text-left text-foreground">
+          <TableRow className="hover:bg-transparent">
+            <TableHead className="w-[20%] px-5 py-4 font-semibold">
               {t("relayProxies.columns.relayProxy")}
             </TableHead>
-            <TableHead className="w-[20%]">
+            <TableHead className="w-[20%] px-5 py-4 font-semibold">
               {t("relayProxies.columns.description")}
             </TableHead>
-            <TableHead className="w-[24%]">
+            <TableHead className="w-[24%] px-5 py-4 font-semibold">
               {t("relayProxies.columns.serves")}
             </TableHead>
-            <TableHead>{t("relayProxies.columns.agents")}</TableHead>
-            <TableHead>{t("relayProxies.columns.lastUpdated")}</TableHead>
-            <TableHead className="pr-4 text-right">
+            <TableHead className="px-5 py-4 font-semibold">
+              {t("relayProxies.columns.agents")}
+            </TableHead>
+            <TableHead className="px-5 py-4 font-semibold">
+              {t("relayProxies.columns.lastUpdated")}
+            </TableHead>
+            <TableHead className="px-5 py-4 text-right font-semibold">
               {t("relayProxies.columns.actions")}
             </TableHead>
           </TableRow>

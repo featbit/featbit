@@ -310,13 +310,13 @@ export function AccessTokenTable({
   return (
     <div className="overflow-x-auto rounded-md border bg-background">
       <Table className="min-w-[1120px] table-fixed">
-        <TableHeader className="bg-muted/30">
+        <TableHeader className="border-b text-left text-foreground">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id} className="hover:bg-transparent">
               {headerGroup.headers.map((header) => (
                 <TableHead
                   key={header.id}
-                  className="h-11 px-4 font-semibold text-foreground"
+                  className="px-5 py-4 font-semibold"
                   style={{ width: header.getSize() }}
                 >
                   {flexRender(
