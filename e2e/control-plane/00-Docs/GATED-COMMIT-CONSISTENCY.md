@@ -2,8 +2,8 @@
 
 **This is the canonical documentation for the consistency feature** — mechanism, configuration
 reference, metrics, rollout/rollback, validation, and known limitations. The module READMEs
-([`modules/control-plane`](../../modules/control-plane/README.md),
-[`modules/evaluation-server`](../../modules/evaluation-server/README.md)) carry short summaries
+([`modules/control-plane`](../../../modules/control-plane/README.md),
+[`modules/evaluation-server`](../../../modules/evaluation-server/README.md)) carry short summaries
 and link here.
 
 Issue numbers cited throughout (e.g. `#84`) are development-history breadcrumbs: they refer to
