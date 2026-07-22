@@ -8,6 +8,7 @@ import { enOnboarding, zhOnboarding } from "./resources/onboarding"
 import { enOrganization, zhOrganization } from "./resources/organization"
 import { enProfile, zhProfile } from "./resources/profile"
 import { enRelayProxies, zhRelayProxies } from "./resources/relay-proxies"
+import { enSegments, zhSegments } from "./resources/segments"
 import { enWebhooks, zhWebhooks } from "./resources/webhooks"
 import {
   enWorkspaceSelection,
@@ -30,6 +31,7 @@ i18n.use(initReactI18next).init({
         webhooks: enWebhooks,
         relayProxies: enRelayProxies,
         accessTokens: enAccessTokens,
+        segments: enSegments,
       },
     },
     zh: {
@@ -45,6 +47,7 @@ i18n.use(initReactI18next).init({
         webhooks: zhWebhooks,
         relayProxies: zhRelayProxies,
         accessTokens: zhAccessTokens,
+        segments: zhSegments,
       },
     },
   },

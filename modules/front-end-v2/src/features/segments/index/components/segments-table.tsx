@@ -1,0 +1,394 @@
+import { Copy, Info, Loader2, MoreHorizontal } from "lucide-react"
+import { useTranslation } from "react-i18next"
+import { Link } from "react-router-dom"
+import { Badge } from "@/components/ui/badge"
+import { Button, buttonVariants } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { Skeleton } from "@/components/ui/skeleton"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import { localizedPath } from "@/features/layout/layout-context"
+import type { Lang } from "@/features/layout/layout-types"
+import { cn } from "@/lib/utils"
+import type { Segment } from "../segments-types"
+
+type Props = {
+  items: Segment[]
+  loading: boolean
+  archived: boolean
+  lang: Lang
+  query: string
+  mutatingId: string | null
+  canArchive: (segment: Segment) => boolean
+  canRestore: (segment: Segment) => boolean
+  canRemove: (segment: Segment) => boolean
+  onCopy: (key: string) => void
+  onArchive: (segment: Segment) => void
+  onRestore: (segment: Segment) => void
+  onRemove: (segment: Segment) => void
+  onClearSearch: () => void
+  onCreate: () => void
+  canCreate: boolean
+}
+
+function TypeCell({ segment }: { segment: Segment }) {
+  const { t } = useTranslation()
+  if (segment.type === "shared") {
+    return (
+      <Popover>
+        <PopoverTrigger
+          render={
+            <button
+              type="button"
+              className="rounded-sm text-sm text-foreground underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
+            />
+          }
+        >
+          {t("segments.shareable")}
+        </PopoverTrigger>
+        <PopoverContent align="start" className="w-80 p-3">
+          <p className="mb-2 text-sm font-medium">
+            {t("segments.sharedScopes")}
+          </p>
+          {segment.scopes?.length ? (
+            <ul className="max-h-48 space-y-1.5 overflow-y-auto text-xs text-muted-foreground">
+              {segment.scopes.map((scope) => (
+                <li key={scope} className="font-mono break-all">
+                  {scope}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              {t("segments.noSharedScopes")}
+            </p>
+          )}
+        </PopoverContent>
+      </Popover>
+    )
+  }
+
+  return (
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <span className="cursor-help text-sm text-foreground" tabIndex={0} />
+        }
+      >
+        {t("segments.currentEnvironment")}
+      </TooltipTrigger>
+      <TooltipContent>{t("segments.currentEnvironmentHelp")}</TooltipContent>
+    </Tooltip>
+  )
+}
+
+function TagsCell({ tags }: { tags: string[] }) {
+  const visible = tags.slice(0, 2)
+  const hidden = tags.slice(2)
+
+  if (!tags.length) return <span className="text-muted-foreground">-</span>
+
+  return (
+    <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+      {visible.map((tag) => (
+        <Tooltip key={tag}>
+          <TooltipTrigger
+            render={
+              <Badge
+                variant="outline"
+                className="max-w-32 rounded-full font-normal"
+              />
+            }
+          >
+            <span className="truncate">{tag}</span>
+          </TooltipTrigger>
+          <TooltipContent>{tag}</TooltipContent>
+        </Tooltip>
+      ))}
+      {hidden.length ? (
+        <Popover>
+          <PopoverTrigger
+            render={<Button type="button" variant="outline" size="xs" />}
+          >
+            +{hidden.length}
+          </PopoverTrigger>
+          <PopoverContent align="start" className="w-56 p-2">
+            <div className="flex flex-wrap gap-1.5">
+              {hidden.map((tag) => (
+                <Badge key={tag} variant="outline" className="font-normal">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          </PopoverContent>
+        </Popover>
+      ) : null}
+    </div>
+  )
+}
+
+export function SegmentsTable({
+  items,
+  loading,
+  archived,
+  lang,
+  query,
+  mutatingId,
+  canArchive,
+  canRestore,
+  canRemove,
+  onCopy,
+  onArchive,
+  onRestore,
+  onRemove,
+  onClearSearch,
+  onCreate,
+  canCreate,
+}: Props) {
+  const { t } = useTranslation()
+
+  return (
+    <Table className="min-w-[900px] table-fixed">
+      <TableHeader className="border-b text-left text-foreground">
+        <TableRow className="hover:bg-transparent">
+          <TableHead className="w-[25%] px-5 py-4 font-semibold">
+            {t("segments.columns.segment")}
+          </TableHead>
+          <TableHead className="w-[19%] px-5 py-4 font-semibold">
+            <span className="inline-flex items-center gap-1.5">
+              {t("segments.columns.type")}
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <button
+                      type="button"
+                      aria-label={t("segments.typeHelp")}
+                      className="rounded-sm text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    />
+                  }
+                >
+                  <Info className="size-3.5" />
+                </TooltipTrigger>
+                <TooltipContent className="max-w-80">
+                  {t("segments.typeHelp")}
+                </TooltipContent>
+              </Tooltip>
+            </span>
+          </TableHead>
+          <TableHead className="w-[25%] px-5 py-4 font-semibold">
+            {t("segments.columns.tags")}
+          </TableHead>
+          <TableHead className="w-[18%] px-5 py-4 font-semibold">
+            {t("segments.columns.updated")}
+          </TableHead>
+          <TableHead className="w-[13%] px-5 py-4 font-semibold">
+            {t("segments.columns.actions")}
+          </TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {loading ? (
+          Array.from({ length: 5 }).map((_, rowIndex) => (
+            <TableRow key={rowIndex}>
+              {Array.from({ length: 5 }).map((__, columnIndex) => (
+                <TableCell key={columnIndex} className="px-5 py-5">
+                  <Skeleton className="h-4 w-3/4" />
+                </TableCell>
+              ))}
+            </TableRow>
+          ))
+        ) : items.length === 0 ? (
+          <TableRow>
+            <TableCell colSpan={5} className="p-0">
+              <div className="flex min-h-64 flex-col items-center justify-center gap-2 px-6 py-12 text-center">
+                <p className="text-sm font-medium text-foreground">
+                  {query
+                    ? t("segments.filteredEmpty", { query })
+                    : archived
+                      ? t("segments.archivedEmpty")
+                      : t("segments.empty")}
+                </p>
+                {!query ? (
+                  <p className="text-sm text-muted-foreground">
+                    {t(
+                      archived
+                        ? "segments.archivedEmptyHelper"
+                        : "segments.emptyHelper"
+                    )}
+                  </p>
+                ) : null}
+                {query ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="mt-2"
+                    onClick={onClearSearch}
+                  >
+                    {t("segments.clearSearch")}
+                  </Button>
+                ) : canCreate && !archived ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="mt-2"
+                    onClick={onCreate}
+                  >
+                    {t("segments.new")}
+                  </Button>
+                ) : null}
+              </div>
+            </TableCell>
+          </TableRow>
+        ) : (
+          items.map((segment) => {
+            const pending = mutatingId === segment.id
+            const detailsHref = localizedPath(
+              lang,
+              `/segments/${encodeURIComponent(segment.id)}/targeting`
+            )
+            return (
+              <TableRow key={segment.id}>
+                <TableCell className="px-5 py-4 align-middle">
+                  <div className="min-w-0 space-y-1.5">
+                    <Link
+                      to={detailsHref}
+                      className="block truncate font-semibold text-foreground hover:underline"
+                    >
+                      {segment.name}
+                    </Link>
+                    <div className="flex min-w-0 items-center gap-1">
+                      <button
+                        type="button"
+                        aria-label={t("segments.copyKey", { key: segment.key })}
+                        className="flex min-w-0 items-center gap-1.5 rounded bg-muted px-2 py-1 font-mono text-xs text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                        onClick={() => onCopy(segment.key)}
+                      >
+                        <span className="truncate">{segment.key}</span>
+                        <Copy className="size-3 shrink-0" />
+                      </button>
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell className="px-5 py-4 align-middle">
+                  <TypeCell segment={segment} />
+                </TableCell>
+                <TableCell className="px-5 py-4 align-middle">
+                  <TagsCell tags={segment.tags ?? []} />
+                </TableCell>
+                <TableCell className="px-5 py-4 align-middle whitespace-nowrap text-muted-foreground">
+                  {new Intl.DateTimeFormat(lang === "zh" ? "zh-CN" : "en-CA", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: false,
+                  }).format(new Date(segment.updatedAt))}
+                </TableCell>
+                <TableCell className="px-5 py-4 align-middle">
+                  <div className="flex items-center gap-1 whitespace-nowrap">
+                    <Link
+                      to={detailsHref}
+                      className={cn(
+                        buttonVariants({ variant: "ghost", size: "sm" }),
+                        "font-medium"
+                      )}
+                    >
+                      {t("segments.details")}
+                    </Link>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger
+                        render={
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon-sm"
+                            aria-label={t("segments.moreActions", {
+                              name: segment.name,
+                            })}
+                          />
+                        }
+                      >
+                        {pending ? (
+                          <Loader2 className="animate-spin" />
+                        ) : (
+                          <MoreHorizontal />
+                        )}
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="min-w-24">
+                        {archived ? (
+                          <>
+                            <DropdownMenuItem
+                              disabled={pending || !canRestore(segment)}
+                              className="cursor-pointer"
+                              title={
+                                !canRestore(segment)
+                                  ? t("segments.permissionDenied")
+                                  : undefined
+                              }
+                              onClick={() => onRestore(segment)}
+                            >
+                              {t("segments.restore")}
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              disabled={pending || !canRemove(segment)}
+                              className="cursor-pointer text-destructive data-[highlighted]:text-destructive"
+                              title={
+                                !canRemove(segment)
+                                  ? t("segments.permissionDenied")
+                                  : undefined
+                              }
+                              onClick={() => onRemove(segment)}
+                            >
+                              {t("segments.remove")}
+                            </DropdownMenuItem>
+                          </>
+                        ) : (
+                          <DropdownMenuItem
+                            disabled={pending || !canArchive(segment)}
+                            className="cursor-pointer"
+                            title={
+                              !canArchive(segment)
+                                ? t("segments.permissionDenied")
+                                : undefined
+                            }
+                            onClick={() => onArchive(segment)}
+                          >
+                            {t("segments.archive")}
+                          </DropdownMenuItem>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </TableCell>
+              </TableRow>
+            )
+          })
+        )}
+      </TableBody>
+    </Table>
+  )
+}

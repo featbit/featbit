@@ -12,7 +12,7 @@ Do not change the authenticated sidebar, context bar, account menu, subscription
 - Properties action light concept: [end-users-properties-light.png](end-users-properties-light.png)
 - Property preset values light concept: [end-users-property-presets-light.png](end-users-property-presets-light.png)
 
-The main-page image defines the accepted default hierarchy and density. The Evaluate, Details, and Properties images define the accepted right-drawer interaction states and keep the same End Users page visible behind them. The preset-values image defines the nested local-edit dialog. All images intentionally exclude the sidebar, context bar, and page hero. Generated sample data is illustrative only; implementation must render API data.
+The main-page image defines the accepted default hierarchy and density below the page header. The Evaluate, Details, and Properties images define the accepted right-drawer interaction states and keep the same End Users page visible behind them. The preset-values image defines the nested local-edit dialog. All images intentionally exclude the sidebar and context bar. Generated sample data is illustrative only; implementation must render API data.
 
 ## Finalized Design Decisions
 
@@ -34,7 +34,7 @@ These decisions supersede earlier exploration and are the implementation target:
 - Preserve every Angular End Users capability and backend contract.
 - Redesign the presentation for the React workbench rather than cloning ng-zorro.
 - Match the current React Global Users table: compact controls, neutral shadcn surfaces, thin borders, restrained color, and lightweight row actions.
-- Keep the page table-first. Do not add a title block, summary cards, avatars, decorative empty-state art, or another navigation layer.
+- Keep the page table-first. Include the standard compact page header used by adjacent React environment pages, but do not add summary cards, avatars, decorative empty-state art, or another navigation layer.
 - Treat the current organization, project, and environment from the existing context bar as authoritative. Do not repeat that context inside the page.
 - Use the shared React patterns and native shadcn/Base UI primitives. Do not modify generated files in `src/components/ui` for feature-specific needs.
 
@@ -58,9 +58,10 @@ The React migration must preserve:
 
 Content order:
 
-1. Compact toolbar
-2. Single bordered data table
-3. Cursor pagination row
+1. Standard page header: `End Users` with a concise environment-scoped description
+2. Compact toolbar
+3. Single bordered data table
+4. Cursor pagination row
 
 Use the same main-content width and page padding as the surrounding React authenticated pages. The toolbar sits directly above the table with approximately 20 px of separation from the table. The table is a single `background` surface with a neutral border and small radius; do not wrap it in another card.
 

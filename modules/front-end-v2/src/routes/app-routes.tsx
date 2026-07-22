@@ -129,6 +129,11 @@ const EndUsersPage = lazy(() =>
     default: module.EndUsersPage,
   }))
 )
+const SegmentsPage = lazy(() =>
+  import("@/features/segments/index/segments-page").then((module) => ({
+    default: module.SegmentsPage,
+  }))
+)
 
 type SupportedLanguage = "en" | "zh"
 
@@ -298,6 +303,7 @@ export function AppRoutes() {
           <Route path="relay-proxies" element={<RelayProxiesPage />} />
           <Route path="webhooks" element={<WebhooksPage />} />
           <Route path="end-users" element={<EndUsersPage />} />
+          <Route path="segments" element={<SegmentsPage />} />
           <Route path="account/profile" element={<ProfilePage />} />
           {/*Remove the following line when migration completed*/}
           <Route path="*" element={<LayoutPlaceholder />} />

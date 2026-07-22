@@ -12,6 +12,7 @@ describe("integration page translations", () => {
     expect(i18n.t("webhooks.title")).toBe("Webhooks")
     expect(i18n.t("relayProxies.title")).toBe("Relay proxies")
     expect(i18n.t("accessTokens.title")).toBe("Access Tokens")
+    expect(i18n.t("segments.create.multipleScopes")).toBe("Shareable")
   })
 
   it("resolves the Chinese resources from the global bundle", async () => {
@@ -25,5 +26,6 @@ describe("integration page translations", () => {
     expect(i18n.t("layout.nav.items.endUsers")).toBe("目标用户")
     expect(i18n.t("layout.nav.items.segments")).toBe("用户组")
     expect(i18n.t("workspace.globalUsers.evaluate.segments")).toBe("用户组")
+    expect(i18n.t("segments.create.multipleScopes")).toBe("共享")
   })
 })
