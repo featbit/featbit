@@ -5,37 +5,36 @@ namespace Application;
 
 public static class ConfigurationExtensions
 {
-    public static bool IsSaasHosting(this IConfiguration configuration)
+    extension(IConfiguration configuration)
     {
-        var mode = configuration.GetSection(HostingMode.SectionName).Value ?? HostingMode.SelfHosted;
-
-        return mode == HostingMode.SaaS;
-    }
-    
-    public static bool UseControlPlane(this IConfiguration configuration)
-    {
-        return configuration.GetValue<bool>("UseControlPlane");
-    }
-
-    public static string GetRegion(this IConfiguration configuration)
-    {
-        return configuration.GetValue<string>("Region");
-    }
-
-    /// <summary>
-    /// Reads the control plane consistency mode from configuration key
-    /// "ControlPlane:ConsistencyMode". Returns <see cref="ConsistencyMode.BestEffort"/>
-    /// when the key is unset or cannot be parsed. Never throws.
-    /// </summary>
-    public static ConsistencyMode GetConsistencyMode(this IConfiguration configuration)
-    {
-        var value = configuration.GetValue<string>("ControlPlane:ConsistencyMode");
-
-        if (Enum.TryParse<ConsistencyMode>(value, ignoreCase: true, out var mode))
+        public bool IsSaasHosting()
         {
-            return mode;
+            var mode = configuration.GetSection(HostingMode.SectionName).Value ?? HostingMode.SelfHosted;
+
+            return mode == HostingMode.SaaS;
         }
 
-        return ConsistencyMode.BestEffort;
+        public bool UseControlPlane()
+        {
+            var config = configuration.GetSection("UseControlPlane").Value ?? bool.FalseString;
+
+            return config == bool.TrueString;
+        }
+
+        public string GetRegion() => configuration.GetSection("Region").Value ?? "local";
+
+        /// <summary>
+        /// Reads the control plane consistency mode from configuration key
+        /// "ControlPlane:ConsistencyMode". Returns <see cref="ConsistencyMode.BestEffort"/>
+        /// when the key is unset or cannot be parsed. Never throws.
+        /// </summary>
+        public ConsistencyMode GetConsistencyMode()
+        {
+            var value = configuration.GetSection("ControlPlane:ConsistencyMode").Value;
+
+            return Enum.TryParse<ConsistencyMode>(value, ignoreCase: true, out var mode)
+                ? mode
+                : ConsistencyMode.BestEffort;
+        }
     }
 }
