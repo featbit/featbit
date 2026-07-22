@@ -82,9 +82,10 @@ export function SegmentsPage() {
   const [pageSize, setPageSize] = useState(10)
   const [sheetOpen, setSheetOpen] = useState(false)
   const [confirmation, setConfirmation] = useState<SegmentConfirmation>(null)
-  const [references, setReferences] = useState<SegmentFlagReference[] | null>(
-    null
-  )
+  const [referenceDialog, setReferenceDialog] = useState<{
+    segmentName: string
+    references: SegmentFlagReference[]
+  } | null>(null)
   const [referenceLoadingId, setReferenceLoadingId] = useState<string | null>(
     null
   )
@@ -220,8 +221,9 @@ export function SegmentsPage() {
     setReferenceLoadingId(segment.id)
     try {
       const result = await fetchSegmentFlagReferences(envId, segment.id)
-      if (result.length) setReferences(result)
-      else setConfirmation({ kind: "archive", segment })
+      if (result.length) {
+        setReferenceDialog({ segmentName: segment.name, references: result })
+      } else setConfirmation({ kind: "archive", segment })
     } catch {
       toast.error(t("segments.referencesLoadFailed"))
     } finally {
@@ -425,10 +427,11 @@ export function SegmentsPage() {
         />
 
         <SegmentReferencesDialog
-          references={references}
+          references={referenceDialog?.references ?? null}
+          segmentName={referenceDialog?.segmentName ?? ""}
           envId={envId}
           lang={lang}
-          onClose={() => setReferences(null)}
+          onClose={() => setReferenceDialog(null)}
         />
       </div>
     </TooltipProvider>

@@ -41,7 +41,6 @@ export function SegmentConfirmDialog({
   if (!target) return null
 
   const titleKey = `segments.confirm.${target.kind}Title`
-  const descriptionKey = `segments.confirm.${target.kind}Description`
   const pendingKey = `segments.confirm.${
     target.kind === "archive"
       ? "archiving"
@@ -68,7 +67,13 @@ export function SegmentConfirmDialog({
         <DialogHeader>
           <DialogTitle>{t(titleKey)}</DialogTitle>
           <DialogDescription>
-            {t(descriptionKey, { name: target.segment.name })}
+            {target.kind === "restore"
+              ? t("segments.confirm.restoreDescriptionBefore")
+              : null}
+            <strong className="font-semibold text-foreground">
+              {target.segment.name}
+            </strong>
+            {t(`segments.confirm.${target.kind}DescriptionAfter`)}
           </DialogDescription>
         </DialogHeader>
         {requireComment ? (
@@ -119,11 +124,13 @@ export function SegmentConfirmDialog({
 
 export function SegmentReferencesDialog({
   references,
+  segmentName,
   envId,
   lang,
   onClose,
 }: {
   references: SegmentFlagReference[] | null
+  segmentName: string
   envId: string
   lang: Lang
   onClose: () => void
@@ -137,7 +144,10 @@ export function SegmentReferencesDialog({
         <DialogHeader>
           <DialogTitle>{t("segments.references.title")}</DialogTitle>
           <DialogDescription>
-            {t("segments.references.description")}
+            <strong className="font-semibold text-foreground">
+              {segmentName}
+            </strong>
+            {t("segments.references.descriptionAfter")}
           </DialogDescription>
         </DialogHeader>
         <div className="max-h-72 space-y-2 overflow-y-auto">
@@ -169,14 +179,14 @@ export function SegmentReferencesDialog({
                   lang,
                   `/feature-flags/${encodeURIComponent(reference.id)}/targeting`
                 )}
-                className="flex items-center gap-3 rounded-lg border p-3 hover:bg-muted"
+                className="flex items-center gap-3 rounded-lg border px-3 py-1.5 hover:bg-muted"
               >
                 {content}
               </Link>
             ) : (
               <div
                 key={`${reference.envId}-${reference.id}`}
-                className="flex items-center gap-3 rounded-lg border p-3 opacity-70"
+                className="flex items-center gap-3 rounded-lg border px-3 py-1.5 opacity-70"
               >
                 {content}
               </div>

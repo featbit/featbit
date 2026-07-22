@@ -104,13 +104,14 @@ export const enSegments = {
   },
   confirm: {
     archiveTitle: "Archive segment?",
-    archiveDescription:
-      "This segment is not referenced by any feature flag and can be safely archived.",
+    archiveDescriptionAfter:
+      " is not referenced by any feature flag and can be safely archived.",
     restoreTitle: "Restore segment?",
-    restoreDescription: "Restore “{{name}}” to the active segments list?",
+    restoreDescriptionBefore: "Restore ",
+    restoreDescriptionAfter: " to the active segments list?",
     removeTitle: "Remove segment permanently?",
-    removeDescription:
-      "“{{name}}” will be permanently removed. This action cannot be undone.",
+    removeDescriptionAfter:
+      " will be permanently removed. This action cannot be undone.",
     comment: "Change comment",
     commentPlaceholder: "Explain why this change is being made",
     commentRequired: "A change comment is required.",
@@ -121,8 +122,8 @@ export const enSegments = {
   },
   references: {
     title: "Segment is in use",
-    description:
-      "This segment cannot be archived because it is referenced by the following feature flags.",
+    descriptionAfter:
+      " is referenced by the following feature flags and cannot be archived.",
     outsideEnvironment: "Not in this environment",
     close: "Close",
   },
@@ -233,11 +234,12 @@ export const zhSegments = {
   confirm: {
     ...enSegments.confirm,
     archiveTitle: "归档用户组？",
-    archiveDescription: "此用户组未被任何功能开关引用，可以安全归档。",
+    archiveDescriptionAfter: " 未被任何功能开关引用，可以安全归档。",
     restoreTitle: "恢复用户组？",
-    restoreDescription: "将“{{name}}”恢复到活动用户组列表？",
+    restoreDescriptionBefore: "确定要恢复 ",
+    restoreDescriptionAfter: " 用户组吗？",
     removeTitle: "永久删除用户组？",
-    removeDescription: "“{{name}}”将被永久删除，此操作无法撤销。",
+    removeDescriptionAfter: " 将被永久删除，此操作无法撤销。",
     comment: "变更备注",
     commentPlaceholder: "说明进行此变更的原因",
     commentRequired: "必须填写变更备注。",
@@ -249,7 +251,7 @@ export const zhSegments = {
   references: {
     ...enSegments.references,
     title: "用户组正在使用中",
-    description: "此用户组被以下功能开关引用，因此无法归档。",
+    descriptionAfter: " 被以下功能开关引用，因此无法归档。",
     outsideEnvironment: "不在当前环境中",
     close: "关闭",
   },
