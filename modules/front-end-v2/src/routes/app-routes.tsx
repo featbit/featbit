@@ -119,6 +119,11 @@ const RelayProxiesPage = lazy(() =>
     default: module.RelayProxiesPage,
   }))
 )
+const WebhooksPage = lazy(() =>
+  import("@/features/webhooks/webhooks-page").then((module) => ({
+    default: module.WebhooksPage,
+  }))
+)
 
 type SupportedLanguage = "en" | "zh"
 
@@ -286,6 +291,7 @@ export function AppRoutes() {
           />
           <Route path="access-tokens" element={<AccessTokensPage />} />
           <Route path="relay-proxies" element={<RelayProxiesPage />} />
+          <Route path="webhooks" element={<WebhooksPage />} />
           <Route path="account/profile" element={<ProfilePage />} />
           {/*Remove the following line when migration completed*/}
           <Route path="*" element={<LayoutPlaceholder />} />
