@@ -1,4 +1,3 @@
-import { Eye } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -162,7 +161,7 @@ export function RelayProxyTable({
                           size="sm"
                           onClick={() => onView(relayProxy)}
                         >
-                          <Eye /> {t("relayProxies.actions.view")}
+                          {t("relayProxies.actions.view")}
                         </Button>
                       )}
                     </div>
