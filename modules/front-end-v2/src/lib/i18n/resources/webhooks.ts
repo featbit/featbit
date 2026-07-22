@@ -1,6 +1,4 @@
-import { i18n } from "@/lib/i18n/i18n"
-
-const en = {
+export const enWebhooks = {
   title: "Webhooks",
   subtitle: "Send feature flag and segment events to external services.",
   search: "Filter by name",
@@ -185,8 +183,8 @@ const en = {
   },
 }
 
-const zh = {
-  ...en,
+export const zhWebhooks = {
+  ...enWebhooks,
   subtitle: "将功能开关和分群事件发送到外部服务。",
   search: "按名称筛选",
   project: "项目",
@@ -261,7 +259,7 @@ const zh = {
     templateInvalid: "请输入有效的 JSON Handlebars 模板。",
   },
   sheet: {
-    ...en.sheet,
+    ...enWebhooks.sheet,
     newTitle: "新建 Webhook",
     editTitle: "编辑 {{name}}",
     general: "常规",
@@ -294,7 +292,7 @@ const zh = {
     escapeHint: "按 Esc 退出展开视图",
   },
   environments: {
-    ...en.environments,
+    ...enWebhooks.environments,
     title: "选择环境",
     description: "选择此 Webhook 要监听的环境。",
     selected: "已选环境",
@@ -319,7 +317,7 @@ const zh = {
     confirm: "移除 Webhook",
   },
   debug: {
-    ...en.debug,
+    ...enWebhooks.debug,
     title: "实时调试",
     description: "向 <webhookName>{{name}}</webhookName> 发送示例事件。",
     event: "事件",
@@ -333,7 +331,7 @@ const zh = {
     notSent: "请求未发送",
   },
   delivery: {
-    ...en.delivery,
+    ...enWebhooks.delivery,
     request: "请求",
     response: "响应 {{status}}",
     completedIn: "耗时 {{duration}}",
@@ -342,7 +340,7 @@ const zh = {
     body: "Body",
   },
   logs: {
-    ...en.logs,
+    ...enWebhooks.logs,
     title: "{{name}} 的交付日志",
     allEvents: "所有事件",
     past15Days: "过去 15 天",
@@ -356,6 +354,3 @@ const zh = {
     showing: "显示第 {{from}} 至 {{to}} 条，共 {{total}} 条交付记录",
   },
 }
-
-i18n.addResourceBundle("en", "common", { webhooks: en }, true, false)
-i18n.addResourceBundle("zh", "common", { webhooks: zh }, true, false)

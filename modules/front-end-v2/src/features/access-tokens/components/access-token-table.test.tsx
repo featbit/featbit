@@ -2,7 +2,6 @@ import { render, screen } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
 import { describe, expect, it, vi } from "vitest"
 import "@/lib/i18n/i18n"
-import "../access-tokens-i18n"
 import { AccessTokenTable } from "./access-token-table"
 
 describe("AccessTokenTable", () => {

@@ -14,7 +14,6 @@ import {
   createEmptyPermissionDraft,
 } from "../access-token-permissions"
 import type { PermissionDraft, UserPolicy } from "../access-token-types"
-import "../access-tokens-i18n"
 import { PermissionsEditor } from "./permissions-editor"
 
 const ownerPolicies: UserPolicy[] = [

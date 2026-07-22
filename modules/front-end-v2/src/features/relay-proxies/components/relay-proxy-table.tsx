@@ -20,12 +20,12 @@ type Props = {
   onRemove: (relayProxy: RelayProxy) => void
 }
 
-function formattedDate(value?: string) {
+function formattedDate(value: string | undefined, locale: string) {
   if (!value) return "—"
   const date = new Date(value)
   return Number.isNaN(date.getTime())
     ? "—"
-    : new Intl.DateTimeFormat(undefined, {
+    : new Intl.DateTimeFormat(locale, {
         dateStyle: "medium",
         timeStyle: "short",
       }).format(date)
@@ -44,7 +44,8 @@ export function RelayProxyTable({
   onView,
   onRemove,
 }: Props) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const locale = i18n.resolvedLanguage === "zh" ? "zh-CN" : "en-US"
   return (
     <div className="overflow-hidden rounded-lg border">
       <Table>
@@ -133,7 +134,7 @@ export function RelayProxyTable({
                     </div>
                   </TableCell>
                   <TableCell className="align-middle text-xs text-muted-foreground">
-                    {formattedDate(relayProxy.updatedAt)}
+                    {formattedDate(relayProxy.updatedAt, locale)}
                   </TableCell>
                   <TableCell className="pr-4 align-middle">
                     <div className="flex justify-end gap-1">

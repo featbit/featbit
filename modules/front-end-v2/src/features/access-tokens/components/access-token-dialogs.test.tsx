@@ -1,7 +1,6 @@
 import { render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import "@/lib/i18n/i18n"
-import "../access-tokens-i18n"
 import {
   AccessTokenConfirmDialog,
   type AccessTokenConfirmTarget,

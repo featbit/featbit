@@ -1,6 +1,4 @@
-import { i18n } from "@/lib/i18n/i18n"
-
-const en = {
+export const enRelayProxies = {
   title: "Relay proxies",
   subtitle:
     "Route feature flag data through proxies close to your applications.",
@@ -166,8 +164,8 @@ const en = {
   },
 }
 
-const zh = {
-  ...en,
+export const zhRelayProxies = {
+  ...enRelayProxies,
   title: "中继代理",
   subtitle: "通过靠近应用的代理分发功能开关数据。",
   search: "按名称筛选...",
@@ -208,7 +206,7 @@ const zh = {
     noEnvironments: "未选择环境",
   },
   removeDialog: {
-    ...en.removeDialog,
+    ...enRelayProxies.removeDialog,
     title: "移除中继代理？",
     descriptionBefore: "中继代理 ",
     descriptionAfter:
@@ -218,7 +216,7 @@ const zh = {
     confirm: "移除中继代理",
   },
   keyDialog: {
-    ...en.keyDialog,
+    ...enRelayProxies.keyDialog,
     title: "中继代理已创建",
     description: "请立即复制此密钥。关闭对话框后，密钥将被隐藏。",
     warningTitle: "请安全保存此密钥",
@@ -228,7 +226,7 @@ const zh = {
     done: "完成",
   },
   environments: {
-    ...en.environments,
+    ...enRelayProxies.environments,
     title: "选择环境",
     description: "选择此中继代理要服务的环境。",
     selected: "已选环境",
@@ -242,7 +240,7 @@ const zh = {
     apply: "应用环境（{{count}}）",
   },
   manualAgent: {
-    ...en.manualAgent,
+    ...enRelayProxies.manualAgent,
     addTitle: "添加手动 Agent",
     editTitle: "编辑手动 Agent",
     description: "配置 FeatBit 可直接访问的 Agent。",
@@ -257,7 +255,7 @@ const zh = {
     add: "添加 Agent",
   },
   sheet: {
-    ...en.sheet,
+    ...enRelayProxies.sheet,
     newTitle: "新建中继代理",
     editTitle: "编辑中继代理",
     viewTitle: "查看中继代理",
@@ -294,6 +292,3 @@ const zh = {
     cancel: "取消",
   },
 }
-
-i18n.addResourceBundle("en", "common", { relayProxies: en }, true, false)
-i18n.addResourceBundle("zh", "common", { relayProxies: zh }, true, false)

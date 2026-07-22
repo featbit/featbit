@@ -30,7 +30,6 @@ import {
   removeRelayProxy,
   updateRelayProxy,
 } from "./relay-proxies-api"
-import "./relay-proxies-i18n"
 import { canUseRelayProxies } from "./relay-proxy-permissions"
 import type {
   RelayProxy,

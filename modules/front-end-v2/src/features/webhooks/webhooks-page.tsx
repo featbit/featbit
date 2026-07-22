@@ -51,7 +51,6 @@ import {
   removeWebhook,
   updateWebhook,
 } from "./webhooks-api"
-import "./webhooks-i18n"
 import type { Webhook, WebhookPayload, WebhookSheetMode } from "./webhook-types"
 
 type SheetState = {

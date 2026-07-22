@@ -30,7 +30,6 @@ import {
   removeAccessToken,
   toggleAccessTokenStatus,
 } from "./access-tokens-api"
-import "./access-tokens-i18n"
 import { canManageAccessTokenType } from "./access-token-permissions"
 import type {
   AccessToken,

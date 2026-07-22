@@ -3,7 +3,6 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import type { ReactElement } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n/i18n"
-import "../access-tokens-i18n"
 import type { AccessToken } from "../access-token-types"
 import { AccessTokenSheet } from "./access-token-sheet"
 

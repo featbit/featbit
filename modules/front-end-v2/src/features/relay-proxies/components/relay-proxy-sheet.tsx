@@ -141,13 +141,13 @@ function Section({
   )
 }
 
-function formatDate(value?: string) {
-  if (!value) return "Never"
+function formatDate(value: string | undefined, locale: string, never: string) {
+  if (!value) return never
   const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return "Never"
+  if (Number.isNaN(date.getTime())) return never
 
   const seconds = Math.round((date.getTime() - Date.now()) / 1000)
-  const formatter = new Intl.RelativeTimeFormat(undefined, { numeric: "auto" })
+  const formatter = new Intl.RelativeTimeFormat(locale, { numeric: "auto" })
   const units: Array<[Intl.RelativeTimeFormatUnit, number]> = [
     ["year", 31_536_000],
     ["month", 2_592_000],
@@ -175,7 +175,9 @@ export function RelayProxySheet({
   onValidateName,
   onRetryEnvironments,
 }: Props) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const locale = i18n.resolvedLanguage === "zh" ? "zh-CN" : "en-US"
+  const never = t("relayProxies.sheet.never")
   const readOnly = mode === "view"
   const [environmentPickerOpen, setEnvironmentPickerOpen] = useState(false)
   const [agents, setAgents] = useState<RelayProxyAgent[]>(
@@ -531,7 +533,11 @@ export function RelayProxySheet({
                                 <p className="font-medium">{agent.id}</p>
                                 <p className="mt-1 text-xs text-muted-foreground">
                                   {t("relayProxies.sheet.registered", {
-                                    time: formatDate(agent.registeredAt),
+                                    time: formatDate(
+                                      agent.registeredAt,
+                                      locale,
+                                      never
+                                    ),
                                   })}
                                 </p>
                               </TableCell>
@@ -540,7 +546,9 @@ export function RelayProxySheet({
                                 <p className="mt-1 text-xs text-muted-foreground">
                                   {t("relayProxies.sheet.reportedValue", {
                                     time: formatDate(
-                                      String(status.reportedAt ?? "")
+                                      String(status.reportedAt ?? ""),
+                                      locale,
+                                      never
                                     ),
                                   })}
                                 </p>
@@ -555,7 +563,9 @@ export function RelayProxySheet({
                                 <p className="mt-2 text-xs text-muted-foreground">
                                   {t("relayProxies.sheet.lastSyncedValue", {
                                     time: formatDate(
-                                      String(status.lastSyncedAt ?? "")
+                                      String(status.lastSyncedAt ?? ""),
+                                      locale,
+                                      never
                                     ),
                                   })}
                                 </p>
@@ -658,7 +668,7 @@ export function RelayProxySheet({
                               </TableCell>
                               <TableCell className="align-middle text-sm text-muted-foreground">
                                 {agent.syncAt
-                                  ? formatDate(agent.syncAt)
+                                  ? formatDate(agent.syncAt, locale, never)
                                   : t("relayProxies.sheet.notSyncedYet")}
                               </TableCell>
                               <TableCell className="align-middle text-sm text-muted-foreground">

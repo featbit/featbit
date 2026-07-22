@@ -4,7 +4,6 @@ import { useRef } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
 import "@/lib/i18n/i18n"
-import "../access-tokens-i18n"
 import { ResourceSelection } from "./resource-selection"
 
 const mocks = vi.hoisted(() => ({

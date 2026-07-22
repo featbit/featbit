@@ -1,6 +1,4 @@
-import { i18n } from "@/lib/i18n/i18n"
-
-const enAccessTokens = {
+export const enAccessTokens = {
   title: "Access Tokens",
   subtitle: "Create and manage tokens used to access the FeatBit API.",
   filterByName: "Filter by name...",
@@ -188,7 +186,7 @@ const enAccessTokens = {
   },
 }
 
-const zhAccessTokens = {
+export const zhAccessTokens = {
   title: "访问令牌",
   subtitle: "创建和管理用于访问 FeatBit API 的令牌。",
   filterByName: "按名称筛选...",
@@ -369,18 +367,3 @@ const zhAccessTokens = {
     copyFailed: "无法复制令牌。",
   },
 }
-
-i18n.addResourceBundle(
-  "en",
-  "common",
-  { accessTokens: enAccessTokens },
-  true,
-  false
-)
-i18n.addResourceBundle(
-  "zh",
-  "common",
-  { accessTokens: zhAccessTokens },
-  true,
-  false
-)
