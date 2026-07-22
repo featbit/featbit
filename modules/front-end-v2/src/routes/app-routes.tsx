@@ -124,6 +124,11 @@ const WebhooksPage = lazy(() =>
     default: module.WebhooksPage,
   }))
 )
+const EndUsersPage = lazy(() =>
+  import("@/features/end-users/end-users-page").then((module) => ({
+    default: module.EndUsersPage,
+  }))
+)
 
 type SupportedLanguage = "en" | "zh"
 
@@ -292,6 +297,7 @@ export function AppRoutes() {
           <Route path="access-tokens" element={<AccessTokensPage />} />
           <Route path="relay-proxies" element={<RelayProxiesPage />} />
           <Route path="webhooks" element={<WebhooksPage />} />
+          <Route path="end-users" element={<EndUsersPage />} />
           <Route path="account/profile" element={<ProfilePage />} />
           {/*Remove the following line when migration completed*/}
           <Route path="*" element={<LayoutPlaceholder />} />
