@@ -32,6 +32,7 @@ import {
   getCurrentProjectEnv,
   resolveLang,
 } from "@/features/layout/layout-context"
+import { cn } from "@/lib/utils"
 import {
   downloadEndUsers,
   fetchEndUserProperties,
@@ -330,7 +331,11 @@ export function EndUsersPage() {
                     return (
                       <TableHead
                         key={header.id}
-                        className="overflow-hidden px-5 py-4 font-semibold"
+                        className={cn(
+                          "overflow-hidden px-5 py-4 font-semibold",
+                          header.column.id === "actions" &&
+                            "sticky right-0 z-20 bg-background"
+                        )}
                         style={{ width: header.getSize() }}
                       >
                         <div
@@ -379,11 +384,15 @@ export function EndUsersPage() {
                 )
               ) : (
                 table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.original.id}>
+                  <TableRow key={row.original.id} className="group">
                     {row.getVisibleCells().map((cell) => (
                       <TableCell
                         key={cell.id}
-                        className="overflow-hidden px-5 py-4 align-middle"
+                        className={cn(
+                          "overflow-hidden px-5 py-4 align-middle",
+                          cell.column.id === "actions" &&
+                            "sticky right-0 z-10 bg-background transition-colors group-hover:bg-muted/50"
+                        )}
                         style={{ width: cell.column.getSize() }}
                       >
                         {flexRender(

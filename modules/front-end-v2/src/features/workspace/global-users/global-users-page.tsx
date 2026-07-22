@@ -431,7 +431,11 @@ function GlobalUsersTable({
               return (
                 <TableHead
                   key={header.id}
-                  className="overflow-hidden px-5 py-4 font-semibold"
+                  className={cn(
+                    "overflow-hidden px-5 py-4 font-semibold",
+                    header.column.id === "actions" &&
+                      "sticky right-0 z-20 bg-background"
+                  )}
                   style={{ width: header.getSize() }}
                 >
                   <div
@@ -504,11 +508,15 @@ function GlobalUsersTable({
           </TableRow>
         ) : (
           table.getRowModel().rows.map((row) => (
-            <TableRow key={row.id}>
+            <TableRow key={row.id} className="group">
               {row.getVisibleCells().map((cell) => (
                 <TableCell
                   key={cell.id}
-                  className="overflow-hidden px-5 py-4 align-middle text-sm text-foreground"
+                  className={cn(
+                    "overflow-hidden px-5 py-4 align-middle text-sm text-foreground",
+                    cell.column.id === "actions" &&
+                      "sticky right-0 z-10 bg-background transition-colors group-hover:bg-muted/50"
+                  )}
                   style={{ width: cell.column.getSize() }}
                 >
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
