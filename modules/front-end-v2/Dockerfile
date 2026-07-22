@@ -6,7 +6,7 @@ RUN npm ci
 COPY ./ /app/
 RUN npm run build
 
-FROM nginx:1.23
+FROM nginx:1.30
 
 ARG VERSION=dev
 
