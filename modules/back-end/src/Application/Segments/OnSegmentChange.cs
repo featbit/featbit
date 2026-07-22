@@ -1,5 +1,4 @@
 using Application.Caches;
-using Application.Segments.MessagePublishing.SegmentChange;
 using Domain.AuditLogs;
 using Domain.Segments;
 using Microsoft.Extensions.Configuration;

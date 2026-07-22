@@ -1,8 +1,7 @@
 using Application;
+using Application.FeatureFlags;
 using Application.Usages;
-using Application.FeatureFlags.MessagePublishing.FeatureFlagChange;
 using Application.Segments;
-using Application.Segments.MessagePublishing.SegmentChange;
 using Domain.Users;
 using Infrastructure.Caches;
 using Infrastructure.MQ;
