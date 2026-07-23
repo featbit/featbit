@@ -32,13 +32,23 @@ The Angular page is the functional reference only. The React page must use the c
 
 ![Segments details Targeting review light design](segments-details-targeting-review-light.png)
 
+![Segments details Targeting review v2 light design](segments-details-targeting-review-v2-light.png)
+
 ![Segments details Settings light design](segments-details-settings-light.png)
 
 ![Segments details Settings review light design](segments-details-settings-review-light.png)
 
+![Segments details Settings review v2 light design](segments-details-settings-review-v2-light.png)
+
 ![Segments details History light design](segments-details-history-light.png)
 
-The first image defines the accepted default `Targeting` hierarchy and desktop density. The second defines the accepted bounded-list treatment when Included or Excluded contains many users. The third defines the accepted Targeting review Dialog with its History-aligned muted change surface, semantic grouping, and vertical condition diffs. The fourth defines the accepted `Settings` form hierarchy and dirty state. The fifth defines the accepted Settings review Dialog with its History-aligned muted change surface and vertical scalar diffs. The sixth defines the accepted `History` activity-list hierarchy, muted change surface, and compact default treatment for high-cardinality user changes. Sample Segment, user, tag, scope, and rule values are illustrative; implementation must render API data.
+![Segments details History table v2 light design](segments-details-history-table-v2-light.png)
+
+![Segments details History Raw data light design](segments-details-history-raw-data-light.png)
+
+![Segments details History expanded ledger v2 light design](segments-details-history-expanded-ledger-v2-light.png)
+
+The default Targeting and many-users images define the accepted editor hierarchy. `segments-details-targeting-review-v2-light.png` is the authoritative Targeting Review design and supersedes its earlier review image. The Settings page image defines the form and dirty state; `segments-details-settings-review-v2-light.png` is the authoritative Settings Review design and supersedes its earlier review image. The former History stream image remains a reference only for muted semantic-detail treatment; its layout is superseded. The History table v2, expanded ledger v2, and Raw data images are authoritative for the current History workflow. Sample Segment, user, tag, scope, and rule values are illustrative; implementation must render API data.
 
 ## Finalized Design Direction
 
@@ -50,7 +60,7 @@ Use the selected **Focused workbench** direction:
 - give rules the full content width so conditions remain readable;
 - keep save state visible near the tab content without turning the page into a dashboard;
 - use thin borders and quiet tonal surfaces, not nested cards or ambient shadows;
-- let History chronology come from localized date headings, a fixed `HH:mm` column, indentation, and whitespace rather than timeline decoration or event separators;
+- present History as a compact expandable React table with one-line timestamps, no vertical dividers, and complete details on demand;
 - keep the page information-dense but preserve 32-36px interactive controls and clear section spacing.
 
 The page starts inside the existing main content area. Do not draw, replace, or restyle the sidebar or context bar.
@@ -232,32 +242,35 @@ Header:
 
 ### Targeting change list
 
-Show one heading row with `Changes` on the left and ordinary muted `{count} changes` text on the right. The count represents the complete deterministic set of atomic change instructions and is not a Badge.
+Show one heading row with `Changes` followed immediately by ordinary small muted `{count} changes`. The count represents the complete deterministic set of semantic targeting changes and is not a Badge. Do not right-align the count. Targeting Review is a pre-save draft review and therefore does not expose History's `View raw data` action.
 
 Put Targeting users and Rules on one continuous neutral surface equivalent to the History `bg-muted/60` treatment:
 
 - use the current React semantic `muted` token so the surface adapts to light and dark themes;
 - use `rounded-md`, approximately 14-16px padding, no border, no shadow, and no horizontal separators;
-- use typography, indentation, and 18-24px vertical whitespace instead of section or rule dividers;
+- use one compact three-column ledger independent of the page/editor grid: object `minmax(170px, 190px)`, operation `96px`, and flexible content `minmax(0, 1fr)`, with a consistent 16px column gap;
+- use typography, indentation, and approximately 10-12px vertical whitespace instead of section or rule dividers;
 - do not create independent cards or nested backgrounds for groups, users, rules, or conditions;
 - keep the Dialog header, Changes heading, Change comment, and footer outside this surface.
 
 Targeting users:
 
-- show `Targeting users` as a normal medium-weight group heading;
-- render `Included users` and `Excluded users` as separate aligned rows beneath it;
-- use three columns for collection label, neutral operation/count, and affected identities;
+- do not show a separate `Targeting users` group heading;
+- render `Included users` and `Excluded users` directly as aligned ledger rows;
+- use the shared three columns for collection label, neutral operation/count, and affected identities;
 - within each collection, render Added and Removed as separate rows and include the affected count, for example `Added · 2`;
 - render affected users as plain inline identities that wrap within the value column. Do not use avatars, chips, status Badges, or colored operation text;
 - prefer display name, then email, then key, and expose the complete stable key through a Tooltip when the visible identity is not the key;
-- preserve every affected identity in deterministic diff order inside the bounded Changes surface; do not summarize or silently truncate a high-cardinality collection;
+- when a user operation affects more than two identities, show the first two in stable diff order and place inline `Show {remaining} more` immediately after them with approximately 8px gap; expansion reveals every remaining identity inside the same bounded Changes surface and changes the control to `Show less`;
+- preserve every affected identity in deterministic diff order; preview disclosure must never discard or silently truncate a high-cardinality collection;
 - omit unchanged collections and empty Added/Removed subrows.
 
 Rules:
 
-- separate Rules from Targeting users with approximately 22-24px of whitespace, not a divider, and show `Rules` as a normal medium-weight group heading;
-- give each changed rule a compact header containing its medium-weight name and neutral operation label;
-- separate changed rules with approximately 18-20px of whitespace and no nested rule card;
+- do not show a separate `Rules` group heading;
+- identify every changed rule with a compact neutral outline `Rule` Badge immediately before its ordinary-text name in the object column; the Badge represents object type only;
+- show the rule's Added, Removed, Updated, or Moved operation as ordinary neutral text in the operation column, never as a Badge;
+- separate changed rules with approximately 10-12px of whitespace and no nested rule card;
 - added rule: show `Added` and its complete readable condition summary beneath the header;
 - removed rule: show `Removed` and its complete previous condition summary beneath the header;
 - renamed rule: show the old muted name, a neutral down arrow on its own compact line, and the new foreground name;
@@ -266,7 +279,7 @@ Rules:
 - reordered rule: show `Moved from position {before} to {after}`;
 - use neutral text treatments for Added, Removed, Updated, and Moved; do not rely on green/red status colors.
 
-The complete muted Changes surface has `max-height: 360px` and `overflow-y: auto` when content exceeds that height. It is the only inner vertical scrollbar in the Dialog. Use `scrollbar-gutter: stable` and `overscroll-behavior: contain`; keep the surface keyboard focusable and label it from the visible Changes heading and count. Do not show raw JSON, endpoint names, IAM permission names, technical IDs, or request payloads.
+The complete muted Changes surface has `max-height: 360px` and `overflow-y: auto` when content exceeds that height. It is the only inner vertical scrollbar in the Dialog; expanded user and rule disclosures grow inside this surface and do not create nested scrollbars. Use `scrollbar-gutter: stable` and `overscroll-behavior: contain`; keep the surface keyboard focusable and label it from the visible Changes heading and count. Do not show raw JSON, endpoint names, IAM permission names, technical IDs, or request payloads.
 
 ### Targeting diff completeness requirement
 
@@ -405,29 +418,29 @@ Header:
 - description `Review the pending changes to {segmentName} before saving.`;
 - standard Close button, disabled while saving.
 
-The `Changes` heading row shows `Changes` on the left and ordinary muted `{count} changes` text on the right. Do not use a count Badge.
+The `Changes` heading row shows `Changes` followed immediately by ordinary small muted `{count} changes`; do not right-align the count or use a Badge. For Settings, the count is the number of dirty, permitted field operations (`Name`, `Description`, and/or `Tags`), matching the independently authorized and submitted endpoints rather than counting individual tag values. Settings Review is a pre-save draft review and does not expose History's `View raw data` action.
 
 Put the complete field-level diff on one neutral tonal surface equivalent to the History `bg-muted/60` treatment:
 
 - use the current React semantic `muted` token so the surface adapts to light and dark themes;
 - use `rounded-md`, approximately 12-16px padding, no border, no shadow, and no horizontal separators between fields;
 - use one continuous surface rather than a card per field;
-- use a stable two-column grid with an approximately 100-112px field-label column and a flexible value column;
+- use a compact three-column ledger: field `110px`, operation `90px`, and flexible content `minmax(0, 1fr)`, with a consistent 16px column gap;
 - separate field groups with approximately 16-20px of whitespace;
 - keep endpoint names, IAM action names, JSON, and request payloads out of the UI.
 
 Render only dirty fields that the user is currently permitted to update:
 
-- `Name`: show the old muted value, a neutral down arrow on its own compact line, then the new foreground value. Do not switch to a horizontal arrow for short names; Name and Description use the same vertical reading direction.
-- `Description`: show the old muted value, a neutral down arrow on its own compact line, then the new foreground value so long text remains readable.
-- `Tags`: show separate `Added` and `Removed` subrows with quiet neutral chips; omit either subrow when empty. Added and Removed are neutral non-interactive labels, not colored statuses or links.
+- `Name`: show `Name` in the field column, neutral `Updated` in the operation column, then the old muted value, a neutral down arrow on its own compact line, and the new foreground value in the content column. Do not switch to a horizontal arrow for short names; Name and Description use the same vertical reading direction.
+- `Description`: show `Description`, neutral `Updated`, and the old-arrow-new values through the same three columns so long text remains readable.
+- `Tags`: treat Tags as one field-level change for count and permission purposes, while showing separate `Added · {count}` and `Removed · {count}` operation subrows with quiet neutral chips in the content column; omit either subrow when empty. Added and Removed are neutral non-interactive labels, not colored statuses or links.
 
 #### High-cardinality Tags review
 
 Large Added and Removed tag collections use compact previews and local disclosure without creating independent cards or independent scrollbars.
 
 - When an Added or Removed collection contains three or fewer tags, show every chip and omit its disclosure action.
-- When a collection contains more than three tags, show the first three in stable diff order, include the total with the operation label such as `Added · 12`, and show a text button `Show {remaining} more`.
+- When a collection contains more than three tags, show the first three in stable diff order, include the total with the operation label such as `Added · 12`, and place the inline text button `Show {remaining} more` immediately after the visible chips with approximately 8px gap; never push it to the far edge of the surface.
 - Added and Removed expand independently. Expanding one does not expand the other and changes only its control to `Show less`.
 - Keep the preview chips in the summary subrow and reveal only the remaining chips beneath it.
 - Let expanded chips wrap naturally within the value column. Do not add avatars, another background, a nested card, a horizontal divider, or a Badge representing the remaining count.
@@ -462,7 +475,7 @@ If any operation fails, keep the Dialog open and replace the change presentation
 
 ## History Tab
 
-History is a read-only audit activity list. It does not use the Targeting or Settings Review Dialog layout. Keep the persistent Segment summary header visible so the audited resource remains unambiguous.
+History is a read-only audit table built as a reusable audit-history component. It does not use the Targeting or Settings Review Dialog layout. Keep the persistent Segment summary header visible so the audited resource remains unambiguous.
 
 ### History query contract
 
@@ -474,14 +487,14 @@ History is a read-only audit activity list. It does not use the Targeting or Set
 
 ### History toolbar
 
-Use one compact toolbar row directly above the activity list:
+Use one compact toolbar row directly above the audit table:
 
 - search input with Search icon and placeholder `Filter by name or comment`;
 - searchable team-member Combobox with default label `All team members`;
 - date-range Popover with Calendar icon and default label `Any date`;
 - for a Shareable Segment only, right-aligned muted text `Across {count} scopes` with an Info tooltip explaining that history includes every shared scope.
 
-The embedded Segment History does not show the global Audit Logs `Filter by type` control because both reference type and reference ID are fixed by the page.
+The embedded Segment and Feature Flag History pages do not show the global Audit Logs `Filter by type` control because both reference type and reference ID are fixed by their routes. The global Audit Logs page retains its type filter.
 
 Debounce the text query by 400ms. Search team members server-side with the existing 500ms debounce. Changing query, creator, or date range resets the audit-log page index to the first page and replaces the previously accumulated result set. Clearing a filter restores the unfiltered Segment history.
 
@@ -517,49 +530,93 @@ The date control is a true inclusive start/end range filter, not a single-date p
 - Prevent or normalize an end date earlier than the start date through the range-selection primitive; do not show an impossible range.
 - During implementation, if Calendar is still absent from `front-end-v2/src/components/ui`, add it from the official shadcn source/CLI for the current setup and do not hand-edit the generated primitive.
 
-### Activity list
+### Reusable audit table
 
-Use a flat chronological stream on the page background. Do not render a bordered outer list, an event card, a table, an Angular-style timeline rail, timeline dots, horizontal separators between events, avatars, or a second outer card.
+Use the same neutral shadcn/TanStack table language as the current React Team page: one outer border, a quiet header row, horizontal row boundaries, compact cells, and no vertical column dividers. Every audit row is collapsed by default, including the first row. A leading Chevron disclosure button expands only that record and exposes its field-level details directly beneath the summary row.
 
-- Group records by localized calendar date and show the date as a normal semibold heading.
-- Within each date, order records newest first.
-- Under a date heading, use a fixed narrow time column and a flexible event-content column.
-- Render time as localized `HH:mm` only, right-aligned in muted text. The date heading already carries the calendar date, so do not repeat a full timestamp inside every event.
-- Align every event narrative and change surface to the same content-column start.
-- Separate events with approximately 20-24px of vertical whitespace and date groups with approximately 28-32px. Do not reintroduce horizontal rules to replace the removed timeline.
-- The narrative leads with the actor identity, readable operation, and Segment name. Show actor email when no display name exists; when both exist, use the compact `email (name)` treatment shown in the asset.
-- Place the optional change comment directly beneath the narrative as muted body text.
-- Supported operation copy covers Create, Update, Archive, Restore, Remove, and any future operation returned by the API through a safe readable fallback.
-- Do not use green/red operation colors. Destructive history is historical information, not a destructive action.
-- A navigable Segment name may open the Segment Targeting route for non-Remove records. Remove records must not expose a broken destination.
+The shared component supports these columns:
+
+| Column | Segment / Feature Flag details | Global Audit Logs | Content |
+| --- | --- | --- | --- |
+| Disclosure | Show | Show | Unlabelled visual column with an accessible `Expand event` / `Collapse event` name. |
+| Date | Show | Show | Complete localized date and time on one line, for example `Jul 23, 2026 10:42`. Do not split the date and time across lines. |
+| User | Show | Show | Display name with email as secondary text; fall back safely to email, access-token name, `System`, or creator ID. Do not show avatars. |
+| Type | Hide | Show | Plain localized text derived from `refType`: `Segment` or `Feature flag`. Do not use a Badge. Unknown future reference types use a readable fallback rather than disappearing. |
+| Event | Show | Show | Concise localized event summary derived from `operation` and, for updates, `instructions`. |
+| Comment | Show | Show | One-line preview of the optional comment; truncate with a Tooltip and use an em dash when absent. |
+
+Column order is fixed:
+
+- Segment and Feature Flag details: `Date | User | Event | Comment` after the disclosure control.
+- Global Audit Logs: `Date | User | Type | Event | Comment` after the disclosure control.
+- Insert `Type` immediately after `User` on the global page so resource classification is visible before interpreting the event.
+
+The component must receive an explicit page-context or column-visibility configuration; it must not infer whether to show `Type` from incidental filter state. `Type` comes directly from the audit record's `refType`. Only the two currently supported values, Segment and Feature Flag, require first-class localized copy.
+
+`Event` is a UI summary rather than a backend field. Map Create, Archive, Restore, and Remove from `operation`. For Update records, derive `Updated settings` from name/description/tag instructions and `Updated targeting` from target-user/rule instructions. If one record contains both categories, contains no instructions, or contains an unknown instruction kind, fall back safely to `Updated segment` or `Updated feature flag`; never infer an event from free-form comment text. Unknown future operations use a readable localized fallback.
+
+Make Event a compact two-line cell when semantic instructions are available:
+
+- The first line is the Event title, for example `Updated targeting`.
+- The second line is a system-generated, muted summary of the actual instructions, for example `Added 18 included users · Updated 2 rules` or `Changed name · Added 3 tags`.
+- Generate summary fragments from semantic instruction kinds and values, never from the free-form comment or raw JSON diff.
+- Show at most two fragments in the row. When additional distinct fragments exist, append localized `· {count} more`; the complete semantic diff remains available after expansion.
+- Count affected domain items rather than instruction objects: one instruction containing 18 users is summarized as `Added 18 included users`, not `1 change`.
+- Preserve deterministic category order and localized whole-message grammar. If an instruction cannot be summarized safely, omit only that preview fragment and retain it in the expanded semantic fallback and Raw data view.
+- Events without semantic instructions remain a one-line Event cell.
+
+Do not add a `Changes` summary column. The semantic instruction count does not reliably represent the number of user-perceived changes, and the disclosure control already communicates whether details are available. Keep summary rows single-line at normal desktop widths. Date and Type never wrap. User, Event, and Comment may truncate only with a Tooltip containing their complete value. Use neutral historical styling rather than green/red operation colors. The entire row may not masquerade as a navigation link; only the disclosure control and genuine resource links are interactive.
 
 ### Visible change details
 
-Render field-level change instructions by default beneath the event comment. Do not require an event-level `View changes` disclosure and do not make the user open every audit record to understand it.
+Render field-level change instructions only inside the expanded table row. The summary row remains compact and scannable; expansion is the explicit way to inspect one event's complete diff. Begin the expanded content with one heading row: `Changes` followed immediately by ordinary small muted `{count} changes` when semantic changes exist, and a compact outline `View raw data` button at the far right when `dataChange.previous` or `dataChange.current` exists. The count is not a Badge and is omitted when no semantic changes exist.
 
-- Put only the concrete field-level diff on one neutral tonal surface equivalent to `bg-muted/60`; keep the narrative and comment on the page background.
+The count represents the complete deterministic set of semantic ledger entries rendered for the event, not the raw backend `instructions.length` and not the number of affected collection members. For example, one Included-users entry that adds 18 users contributes one change, while two independently changed rule conditions contribute two changes. Unknown instructions represented by a structured fallback still contribute to the count.
+
+- The expanded cell spans every visible column and contains only the concrete field-level diff on one neutral tonal surface equivalent to `bg-muted/60`.
 - Use the current React semantic `muted` token rather than a hard-coded blue-gray, lavender, or warm tint. The surface must adapt to light and dark themes.
 - Use the shared medium radius (`rounded-md`), approximately 10-12px vertical padding and 12-16px horizontal padding, no border, and no shadow.
-- Give all event diff surfaces the same content width and left/right alignment, using a full-width block capped around `max-w-3xl`.
+- Use one compact inner three-column ledger independent of the outer table columns: object `minmax(180px, 220px)`, operation `100px`, and flexible content `minmax(0, 1fr)`, with a consistent 16px column gap. Do not use equal fractional columns, `space-between`, or any layout that stretches empty space between the three values.
 - Do not create nested background cards for individual fields, users, rules, or instructions.
 - Render Added, Removed, Updated, and Moved as neutral non-interactive text. Only genuine navigation and disclosure controls use link styling.
+- Identify each rule by placing a compact neutral outline `Rule` Badge immediately before its ordinary-text rule name in the object column. The Badge communicates object type only; never use a Badge for Added, Removed, Updated, or Moved.
 - Preserve the audit record's complete instruction list with History-specific compact rows for users, rules, conditions, name, description, tags, and every other Segment instruction returned by the API.
 - Description and other before/after scalar values use a clear vertical old-to-new reading order inside the same surface.
 - Long values wrap when practical or truncate only with a recoverable Tooltip; no instruction or value may disappear beyond recovery.
-- Events with no field-level instructions omit the muted surface instead of rendering an empty container.
+- Show the row disclosure when semantic instructions or raw `dataChange` are available. If only raw data exists, the expanded row shows concise muted text `No structured changes available` and the `View raw data` action; it does not render an empty muted surface.
+
+### Raw data JSON diff
+
+`View raw data` opens a wide shadcn Dialog containing a read-only, side-by-side JSON comparison. This is an advanced audit and troubleshooting view; the semantic Changes presentation remains the default and the Dialog must never open automatically.
+
+- Dialog title: `Raw data`.
+- Beneath the title, show one compact metadata line containing the localized Event, complete timestamp, and User. On the global Audit Logs page, include Type. Do not add an avatar or repeat the complete table row as a card.
+- Label the panes `Previous` and `Current`. For Create, identify the absent previous side as `No previous data`; for Remove, identify the absent current side as `No current data`.
+- Use CodeMirror 6 `MergeView` from `@codemirror/merge`, with `a` bound to `dataChange.previous` and `b` bound to `dataChange.current`.
+- Configure both editor states with `@codemirror/lang-json`, `EditorState.readOnly.of(true)`, and `EditorView.editable.of(false)`. Disable accept/reject merge controls; this view never mutates audit data.
+- Enable line numbers, change gutters, changed-range highlighting, synchronized vertical alignment, and inline character highlighting where CodeMirror can calculate it reliably.
+- Collapse long unchanged regions with a small context margin and allow each collapsed region to be expanded. Keep visible text such as `Show {count} unchanged lines`; do not rely only on a fold icon.
+- Parse and pretty-print valid JSON with consistent two-space indentation before comparison. Preserve array order and serialized object-key order. If one side is missing, compare against an empty document. If parsing fails, show the original string as read-only text and a quiet `Invalid JSON snapshot` notice without preventing comparison of the other side.
+- The MergeView occupies the Dialog body at a bounded height of approximately `min(65vh, 720px)` and scrolls internally. Keep the Dialog header and pane labels visible; do not let a large snapshot make the page or Dialog grow without bound.
+- Use restrained addition/removal background tints that work in light and dark themes, together with `+`/`−` gutter markers and pane labels so color is never the only difference indicator. Do not reuse destructive button styling for removed JSON.
+- Preserve native text selection, copy, and CodeMirror search. Pane-level Copy actions may copy the complete normalized Previous or Current snapshot and must report success or failure through the existing toast pattern.
+- Mount MergeView only after the Dialog opens and call `destroy()` when it closes. Configure a bounded diff scan/timeout so very large or highly divergent snapshots fall back to a coarser diff rather than freezing the page.
+- If neither snapshot exists, hide `View raw data`; never open an empty Dialog.
+
+The project already uses CodeMirror 6 and `@codemirror/lang-json`, but does not currently include `@codemirror/merge`. During implementation, add the compatible official `@codemirror/merge` package as a normal dependency; do not copy its source or build a custom diff engine.
 
 ### High-cardinality Included and Excluded users
 
-Included and Excluded are separate change rows inside the same event diff surface. Do not turn them into side-by-side comparison panels, nested cards, avatar lists, Badge collections, or comma-separated unbounded text.
+Included and Excluded are separate ledger rows inside the same event diff surface. Do not turn them into side-by-side comparison panels, nested cards, avatar lists, Badge collections, or comma-separated unbounded text.
 
 Default collapsed row:
 
-- Use aligned columns for collection label, neutral operation/count, compact user preview, and disclosure action.
-- Copy follows `{collection} | {operation} · {total} | {preview users} | Show {remaining} more`, for example `Included users | Added · 18 | Aisha Khan, Daniel Smith | Show 16 more`.
+- Use the shared three-column ledger for collection label, neutral operation/count, and compact user content.
+- Copy follows `{collection} | {operation} · {total} | {preview users} Show {remaining} more`, for example `Included users | Added · 18 | Aisha Khan, Daniel Smith Show 16 more`.
 - When the collection contains one or two users, show all names and omit the disclosure action.
 - When it contains more than two users, show the first two names in stable API order and omit email addresses from the collapsed preview.
 - Truncate an unusually long preview only when necessary and provide a Tooltip containing the complete previewed identities.
-- `Show {remaining} more` is a text button, not a Badge or bordered button.
+- `Show {remaining} more` is an inline text button immediately following the preview identities with approximately 8px of gap. It is not a separate right-aligned action column, Badge, or bordered button; when wrapping is necessary it remains adjacent to the preview flow.
 
 Expanded row:
 
@@ -577,14 +634,12 @@ Expanded row:
 
 ### High-cardinality Rules changes
 
-Rules use the same progressive-disclosure principle without hiding the existence of rule changes.
+Rules use the same continuous three-column ledger without a separate `Rules` group heading. Every visible rule begins with the neutral outline `Rule` Badge and its name in the object column, its operation in the operation column, and its complete condition summary or vertical old-arrow-new diff in the content column.
 
-- Label the group `Rules · {count} changes`.
 - When there are three or fewer rule changes, show every rule and omit disclosure controls.
-- When there are more than three changes, show the first two in stable API order and a text button `Show {remaining} more`.
-- The collapsed rule row exposes at least the rule name and neutral operation so the audit record remains understandable without expansion.
-- Expanding Rules reveals the remaining rules inline within the same event diff surface and changes the control to `Show less`.
-- Each expanded rule shows its name and operation; condition-level attribute, operator, and before/after value changes appear beneath it with compact indentation.
+- When there are more than three changes, show the first two in stable API order and place an inline text button `Show {remaining} more` after the second visible rule content.
+- Expanding Rules reveals the remaining rule ledger rows inline within the same event diff surface and changes the control to `Show less`.
+- Each expanded rule shows condition-level attribute, operator, and before/after value changes with compact indentation in the content column.
 - Limit expanded Rules content to `max-height: 320px`; use an independent vertical scrollbar beyond that height, with stable scrollbar gutter and contained overscroll behavior.
 - Rules, Included users, and Excluded users expand and scroll independently.
 - Do not add an event-level accordion around these local disclosures and do not silently omit rule or condition instructions.
@@ -605,19 +660,21 @@ The History renderer must be driven by the complete audit instruction payload, n
 - condition addition, removal, attribute/operator/value replacement, multi-value changes, and rules with zero conditions;
 - Rules collections at, below, and above the disclosure threshold and 320px scrolling threshold;
 - events containing several instruction categories at once without changing their API order or dropping a category;
-- Create, Update, Archive, Restore, Remove, events with no instructions, and unknown future operations or instruction types.
+- Event preview summaries containing zero, one, two, and more than two fragments, including instructions whose value contains many affected users, tags, rules, or conditions;
+- Create, Update, Archive, Restore, Remove, events with no instructions, and unknown future operations or instruction types;
+- valid Previous/Current JSON, one missing snapshot, both missing snapshots, invalid JSON on either side, identical snapshots, very large snapshots, highly divergent snapshots, long lines, Unicode values, light/dark themes, and opening and closing Raw data repeatedly without leaking editor instances.
 
-Use a safe readable structured fallback for an unknown instruction rather than hiding it or rendering raw unbounded JSON. Counts, collapsed previews, disclosure labels, and expanded collections must remain deterministic across repeated renders of the same record.
+Use a safe readable structured fallback for an unknown instruction rather than hiding it or injecting raw unbounded JSON into the semantic Changes surface. Raw snapshots remain recoverable through the explicit bounded Raw data Dialog. Counts, collapsed previews, disclosure labels, and expanded collections must remain deterministic across repeated renders of the same record.
 
 ### History pagination
 
-Center one outline `Load more` button below the activity stream while `loaded < total`. A pending state on `Load more` must not replace or dim records already loaded.
+Center one outline `Load more` button below the table while `loaded < total`. A pending state on `Load more` must not replace or dim records already loaded.
 
 Hide `Load more` when all records are loaded. Do not use numbered pagination for this embedded history workflow.
 
 ### History states
 
-- Initial loading uses toolbar and activity-row skeletons; keep the header and History tab visible.
+- Initial loading uses toolbar and table-row skeletons; keep the header and History tab visible.
 - Filter changes keep the toolbar interactive and replace the list with compact loading rows.
 - Initial empty state: `No history yet` with concise text explaining that future Segment changes appear here.
 - Filtered empty state: `No changes match these filters` with `Clear filters`.
@@ -680,7 +737,8 @@ Do not show errors before a field is interacted with or the user requests review
 - Provide English and Simplified Chinese values together.
 - Use `Shareable` in English and `共享` in Chinese.
 - Parameterize Segment names, Feature Flag counts, scope counts, user counts, and operation summaries.
-- Localize History date/time formatting, `{count} changes`, `{count} users`, `Show {remaining} more`, `Show less`, and the accessible names for Included, Excluded, and Rules scroll regions.
+- Localize History date/time formatting, the `Type` values `Segment` and `Feature flag`, Event titles and preview summaries, `· {count} more`, `{count} changes`, `{count} users`, `Show {remaining} more`, `Show less`, and the accessible names for row disclosures and Included, Excluded, and Rules scroll regions.
+- Localize `View raw data`, `Raw data`, `Previous`, `Current`, `No previous data`, `No current data`, `No structured changes available`, `Invalid JSON snapshot`, `Show {count} unchanged lines`, pane Copy actions, and copy feedback.
 - Localize the member-search placeholder/empty/error states, `Any date`, the applied date-range label, `Select an end date`, `Clear`, `Cancel`, and `Apply`.
 - Localize the Settings Review `{count} changes`, Added/Removed tag counts, `Show {remaining} more`, `Show less`, and the accessible name for the bounded Changes region.
 - Localize the Targeting Review `{count} changes`, Targeting users/Rules headings, Included/Excluded operation counts, rule operations, move summaries, and the accessible name for its bounded Changes region.
@@ -693,6 +751,8 @@ Do not show errors before a field is interacted with or the user requests review
 - Keep visible labels for user collections, rule names, fields, and Dialogs.
 - Entire user result rows and permitted rule controls receive pointer cursors.
 - Icon-only actions require accessible names and tooltips where their meaning is not visible.
+- Each History disclosure button exposes `aria-expanded`, controls the corresponding detail row/region, and has an event-specific accessible name. A row is expandable when semantic instructions or raw snapshots exist; rows with neither do not expose a misleading control.
+- The Raw data Dialog has a visible title, returns focus to its `View raw data` trigger on close, keeps both pane labels programmatically associated with their read-only editors, and preserves keyboard access to collapsed unchanged regions, search, scrolling, selection, and Copy actions.
 - Use the standard shadcn focus ring; keep focus visible on complete clickable rows and drag handles.
 - History high-cardinality disclosures use native buttons with `aria-expanded` and `aria-controls`; the corresponding bounded scroll regions are keyboard focusable and have collection-specific accessible names.
 - Expanding or collapsing a History user/rule collection retains focus on its trigger and never moves focus into the scroll region automatically.
@@ -712,9 +772,11 @@ Do not show errors before a field is interacted with or the user requests review
 - Below the space needed for two usable user panels, stack them without changing their order.
 - Metadata and command rows may wrap, but the primary action remains easy to locate.
 - Condition rows may wrap their value control below attribute/operator on constrained desktop widths.
-- History keeps its date heading above a fixed `HH:mm` column and flexible event column; on constrained widths, the time remains a short leading column rather than becoming a repeated full timestamp.
+- History keeps Date on one line. At constrained desktop widths, preserve Date and Type, then allow User, Event, and Comment to truncate with recoverable Tooltips; use horizontal table scrolling before stacking cells or splitting the timestamp.
+- The Event cell retains its title and one-line muted preview. Truncate the preview with a Tooltip only when the available table width cannot contain its two fragments and `{count} more` disclosure.
+- Keep the Raw data comparison side by side at supported desktop widths. If the Dialog is constrained below two readable panes, switch to CodeMirror's unified read-only merge view rather than compressing either pane into illegibility.
 - Expanded History user collections use two columns when space allows and one column when constrained; the 240px maximum height and vertical-scroll behavior remain unchanged.
-- History diff rows may wrap their preview and action without changing the order label, operation/count, value, then disclosure.
+- Expanded History diff rows may wrap their preview and action without changing the order label, operation/count, value, then local disclosure.
 - Settings Review keeps its field-label/value grid at the accepted Dialog width. If the Dialog is constrained, place the field label above its value without changing the old-arrow-new reading order.
 - Tags wrap inside the Settings Review value column; the Changes surface remains capped at 320px and scrolls independently while comment and footer actions remain visible.
 - Targeting Review keeps its three-column user rows at the accepted Dialog width. When constrained, operation/count stays with the collection label and identities wrap beneath without changing their semantic order.
@@ -739,6 +801,9 @@ The React migration must preserve:
 - opening current-environment Feature Flag references while disclosing inaccessible cross-environment references;
 - Segment audit logs filtered by reference type and ID;
 - cross-environment History for Shareable Segments;
+- reuse one audit-table component across Segment History, Feature Flag History, and global Audit Logs, with context-controlled Type-column visibility;
+- derive deterministic Event preview summaries from semantic instructions without treating instruction count as affected-item count;
+- expose previous/current audit snapshots through an explicitly opened, bounded, read-only CodeMirror MergeView;
 - complete History instruction rendering with bounded, independently expandable high-cardinality user and rule collections;
 - loading, success, error, empty, validation, and dirty-navigation feedback.
 
@@ -750,16 +815,21 @@ The React migration must preserve:
 - Included and Excluded users are side by side at normal desktop widths and remain independently operable.
 - Rules are full-width, compact, reorderable, and expose every Angular condition operation.
 - Targeting Review produces a complete, deterministic, non-mutating semantic diff for every supported user, rule, condition, operator, value, and combined-change edge case listed in the Targeting diff completeness requirement; automated tests cover the full matrix rather than only the design-image examples.
-- Targeting Review uses one borderless semantic muted Changes surface, plain user identities with neutral operation counts, whitespace-based Targeting users/Rules grouping, vertical condition diffs, and one bounded 360px scrollbar without dropping any atomic change.
+- Targeting Review uses one borderless semantic muted Changes surface with a compact three-column ledger, inline user disclosures, neutral `Rule` object Badges, vertical condition diffs, an inline Changes count, and one bounded 360px scrollbar without dropping any atomic change. It has no intermediate Targeting-users or Rules group headings and no Raw data action.
 - Unsaved changes are explicit and saving always passes through review/change-comment behavior.
 - Settings preserves independent name, description, and tags permissions and backend operations.
-- Settings Review uses one borderless semantic muted Changes surface, renders Name and Description with the same vertical old-to-new pattern, and keeps non-interactive Added/Removed labels neutral.
+- Settings Review uses one borderless semantic muted Changes surface with a compact field/operation/content ledger, an inline dirty-field count, the same vertical old-to-new pattern for Name and Description, and neutral non-interactive Added/Removed tag labels. It has no Raw data action.
 - Settings Review shows at most three Added/Removed tag chips by default; larger collections expand independently inside the single bounded 320px Changes scroll region without hiding any tag.
-- History preserves Segment filtering, member/date/text filters, Shareable cross-environment behavior, localized date grouping, fixed `HH:mm` indentation, complete visible instructions, and incremental centered `Load more` pagination without adopting either Review Dialog design.
+- History preserves Segment filtering, member/date/text filters, Shareable cross-environment behavior, complete expandable instructions, and incremental centered `Load more` pagination without adopting either Review Dialog design.
 - The History member filter performs debounced server-side name/email search with loading, empty, error, selected, and clear states; it is not a non-searchable Select.
 - The History date filter selects an inclusive start/end range, keeps selection as a local draft until Apply, formats the applied range in the trigger, and clears both endpoints together.
-- History uses no timeline rail, timeline dots, event cards, outer bordered list, or horizontal event separators; hierarchy comes from date headings, the time column, alignment, and whitespace.
-- Field-level History diffs use the React semantic muted surface with uniform width, medium radius, no border, and no shadow; non-interactive operation labels do not look like links.
+- History uses the current React table style with no vertical dividers. Every row is collapsed by default; Date remains on one line, the column is named `Event`, not `Activity`, and there is no `Changes` summary column.
+- The reusable component hides `Type` on Segment and Feature Flag details pages and shows it immediately after User on the global Audit Logs page. Type is plain localized text derived from `refType`, not a Badge.
+- Event summaries are deterministically derived from `operation` and instruction categories, with a safe generic fallback for mixed, empty, or unknown update instructions.
+- Event cells add at most two muted system-generated change-summary fragments plus a localized `{count} more` remainder, while Comment remains independent user-authored context.
+- Expanded field-level History diffs use the React semantic muted surface with uniform width, medium radius, no border, and no shadow; non-interactive operation labels do not look like links.
+- Expanded History details use the compact object/operation/content ledger, place `{count} changes` immediately after `Changes`, keep `View raw data` at the far right, put user `Show more` controls directly after the preview, and mark rule objects with neutral outline `Rule` Badges.
+- Expanded rows expose `View raw data` only when a snapshot exists. It opens a bounded, read-only CodeMirror 6 JSON MergeView with Previous/Current labels, collapsed unchanged regions, accessible non-color diff markers, invalid/missing snapshot handling, and large-input safeguards.
 - Included and Excluded History changes show at most two preview names by default, expand independently to bounded 240px two-column user lists with vertical scrolling, and keep `Show less` outside the scroll region.
 - Rules History changes remain visible when small; large groups show two changes by default and expand independently inside a bounded 320px vertically scrollable region without dropping condition-level details.
 - Permission or license denial disables mutation without hiding persisted data.
