@@ -302,6 +302,29 @@ describe("App shell", () => {
     expect(await screen.findByText("Workspace Two")).toBeInTheDocument()
   })
 
+  it("returns to login when both the access and refresh tokens have expired", async () => {
+    window.history.pushState({}, "", "/en/webhooks")
+    signIn()
+    localStorage.setItem("login-redirect-url", "/en/webhooks")
+
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(JSON.stringify({ success: false }), {
+        status: 401,
+        statusText: "Unauthorized",
+        headers: { "Content-Type": "application/json" },
+      })
+    )
+
+    render(<App />)
+
+    expect(
+      await screen.findByText("Sign in to your workspace")
+    ).toBeInTheDocument()
+    expect(window.location.pathname).toBe("/en/login")
+    expect(localStorage.getItem("login-redirect-url")).toBe("/en/webhooks")
+    expect(localStorage.getItem("token")).toBeNull()
+  })
+
   it("redirects uninitialized organizations to onboarding", async () => {
     mockOnboardingApi()
     window.history.pushState({}, "", "/en")

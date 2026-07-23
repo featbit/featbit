@@ -1,4 +1,5 @@
 import {
+  expireSession,
   getIdentityToken,
   getStoredUserProfile,
 } from "@/features/auth/auth-api"
@@ -11,6 +12,7 @@ type ApiEnvelope<T> = {
 }
 
 const IDENTITY_TOKEN_STORAGE_KEY = "token"
+const REFRESH_TOKEN_LOCK_NAME = "featbit:refresh-token"
 
 function apiOrigin() {
   return getRuntimeEnv().apiUrl
@@ -80,6 +82,10 @@ async function refreshIdentityToken() {
   })
 
   if (!response.ok) {
+    if (response.status === 401) {
+      expireSession()
+    }
+
     throw new Error(response.statusText || "Failed to refresh token")
   }
 
@@ -95,10 +101,31 @@ async function refreshIdentityToken() {
   return token
 }
 
-async function getRefreshedToken() {
-  refreshTokenPromise ??= refreshIdentityToken().finally(() => {
-    refreshTokenPromise = null
+async function refreshIdentityTokenAcrossTabs(staleToken: string | null) {
+  if (!navigator.locks) {
+    return refreshIdentityToken()
+  }
+
+  return navigator.locks.request(REFRESH_TOKEN_LOCK_NAME, async () => {
+    const latestToken = getIdentityToken()
+    if (!latestToken) {
+      throw new Error("Session expired")
+    }
+
+    if (latestToken !== staleToken) {
+      return latestToken
+    }
+
+    return refreshIdentityToken()
   })
+}
+
+async function getRefreshedToken(staleToken: string | null) {
+  refreshTokenPromise ??= refreshIdentityTokenAcrossTabs(staleToken).finally(
+    () => {
+      refreshTokenPromise = null
+    }
+  )
 
   return refreshTokenPromise
 }
@@ -119,8 +146,16 @@ export async function fetchApi<T>(
   })
 
   if (response.status === 401 && retryOnUnauthorized) {
-    const refreshedToken = await getRefreshedToken()
+    if (!getIdentityToken()) {
+      throw new Error("Session expired")
+    }
+
+    const refreshedToken = await getRefreshedToken(token)
     return fetchApi<T>(path, init, refreshedToken, false)
+  }
+
+  if (response.status === 401) {
+    expireSession()
   }
 
   if (!response.ok) {

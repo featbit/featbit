@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { localizedPath } from "@/features/layout/layout-context"
 import type { Lang } from "@/features/layout/layout-types"
-import type { Segment, SegmentFlagReference } from "../segments-types"
+import type { Segment, SegmentFlagReference } from "../../segments-types"
 
 export type SegmentConfirmation = {
   kind: "archive" | "restore" | "remove"

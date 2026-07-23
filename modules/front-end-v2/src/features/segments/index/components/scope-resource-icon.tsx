@@ -1,6 +1,6 @@
 import { Box, Building2, Folder, type LucideIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
-import type { ScopeResource } from "../segments-types"
+import type { ScopeResource } from "../../segments-types"
 
 const scopeResourceIcons: Record<ScopeResource["type"], LucideIcon> = {
   organization: Building2,

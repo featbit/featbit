@@ -1,7 +1,15 @@
 import type { Segment, UserPolicy } from "./segments-types"
 
 export type SegmentAction =
-  "CreateSegment" | "ArchiveSegment" | "RestoreSegment" | "DeleteSegment"
+  | "CreateSegment"
+  | "ArchiveSegment"
+  | "RestoreSegment"
+  | "DeleteSegment"
+  | "UpdateSegmentName"
+  | "UpdateSegmentDescription"
+  | "UpdateSegmentTags"
+  | "UpdateSegmentTargetingUsers"
+  | "UpdateSegmentRules"
 
 function wildcardMatches(pattern: string, value: string) {
   const escaped = pattern.replace(/[.+?^${}()|[\]\\]/g, "\\$&")

@@ -36,20 +36,20 @@ import {
   isSegmentKeyUsed,
   removeSegment,
   restoreSegment,
-} from "./segments-api"
+} from "../segments-api"
 import {
   canUseSegmentAction,
   environmentRn,
   segmentRn,
   type SegmentAction,
-} from "./segments-permissions"
+} from "../segments-permissions"
 import type {
   ScopeResource,
   Segment,
   SegmentFlagReference,
   SegmentPayload,
   SegmentType,
-} from "./segments-types"
+} from "../segments-types"
 import {
   SegmentConfirmDialog,
   SegmentReferencesDialog,

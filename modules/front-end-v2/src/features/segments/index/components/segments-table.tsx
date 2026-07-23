@@ -32,7 +32,7 @@ import {
 import { localizedPath } from "@/features/layout/layout-context"
 import type { Lang } from "@/features/layout/layout-types"
 import { cn } from "@/lib/utils"
-import type { Segment } from "../segments-types"
+import type { Segment } from "../../segments-types"
 
 type Props = {
   items: Segment[]

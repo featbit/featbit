@@ -35,7 +35,7 @@ import type {
   ScopeResource,
   SegmentPayload,
   SegmentType,
-} from "../segments-types"
+} from "../../segments-types"
 import { ScopeResourceIcon } from "./scope-resource-icon"
 import { ScopePickerDialog } from "./scope-picker-dialog"
 

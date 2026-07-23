@@ -1,7 +1,7 @@
 import type { ReactNode } from "react"
 import { useEffect, useState } from "react"
 import { Navigate, useLocation, useParams } from "react-router-dom"
-import { signOut } from "@/features/auth/auth-api"
+import { getIdentityToken, signOut } from "@/features/auth/auth-api"
 import {
   chooseProjectEnv,
   fetchOrganizations,
@@ -146,6 +146,11 @@ export function AuthenticatedEntry({ children }: { children: ReactNode }) {
         setStatus("ready")
       } catch {
         if (!cancelled) {
+          if (!getIdentityToken()) {
+            setStatus("login")
+            return
+          }
+
           setSelectStep("workspace")
           setStatus("select-workspace")
         }

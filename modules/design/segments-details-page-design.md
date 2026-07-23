@@ -315,7 +315,7 @@ Diff calculation must be pure: it must not mutate the saved Segment, current dra
 
 Use the current environment's `Require change comment` setting (`requireChangeComment`) as the only source of required state:
 
-- when enabled, show a required marker, require a non-empty trimmed comment, and disable submission while invalid;
+- when enabled, render the visible label `Change comment *`, with the `*` immediately after the label in the standard destructive/error color; require a non-empty trimmed comment and disable submission while invalid;
 - when not enabled, show `(optional)` inline with `Change comment` and allow an empty value;
 - use placeholder `Describe why this change is needed`;
 - show helper text `Used for auditing and change tracking.`
@@ -453,7 +453,7 @@ Large Added and Removed tag collections use compact previews and local disclosur
 Below the Changes surface, show one `Change comment` textarea:
 
 - read the current environment's `Require change comment` setting (`requireChangeComment`) as the only source of whether the field is mandatory;
-- when `Require change comment` is enabled, show a required marker, require a non-empty trimmed value, and disable submission while invalid;
+- when `Require change comment` is enabled, render the visible label `Change comment *`, with the `*` immediately after the label in the standard destructive/error color; require a non-empty trimmed value and disable submission while invalid;
 - when `Require change comment` is not enabled, show `(optional)` inline with the label, allow an empty value, and do not show required validation;
 - use placeholder `Describe why this change is needed`;
 - show helper text `Used for auditing and change tracking.`;

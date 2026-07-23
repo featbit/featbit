@@ -1,4 +1,4 @@
-import type { ScopeResource } from "../segments-types"
+import type { ScopeResource } from "../../segments-types"
 
 export const scopeResourceGroups: Array<{
   type: ScopeResource["type"]

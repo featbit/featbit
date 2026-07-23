@@ -5,6 +5,7 @@ const USER_PROFILE = "auth"
 const IS_SSO_FIRST_LOGIN = "is-sso-first-login"
 const LOGIN_REDIRECT_URL = "login-redirect-url"
 const REMEMBERED_EMAIL = "remembered-email"
+const SESSION_EXPIRED_EVENT = "featbit:session-expired"
 
 type ApiEnvelope<T> = {
   success?: boolean
@@ -42,6 +43,19 @@ function clearAuthStorage() {
 
 export function signOut() {
   clearAuthStorage()
+}
+
+export function expireSession() {
+  clearAuthStorage()
+  window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT))
+}
+
+export function onSessionExpired(callback: () => void) {
+  window.addEventListener(SESSION_EXPIRED_EVENT, callback)
+
+  return () => {
+    window.removeEventListener(SESSION_EXPIRED_EVENT, callback)
+  }
 }
 
 export function getStoredUserProfile(): StoredUserProfile {

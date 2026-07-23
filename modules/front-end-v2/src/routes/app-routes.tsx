@@ -1,13 +1,14 @@
-import { lazy, Suspense } from "react"
+import { lazy, Suspense, useEffect } from "react"
 import {
   Navigate,
   Route,
   Routes,
   useLocation,
+  useNavigate,
   useParams,
 } from "react-router-dom"
 import { AuthenticatedEntry } from "@/features/auth/authenticated-entry"
-import { getIdentityToken } from "@/features/auth/auth-api"
+import { getIdentityToken, onSessionExpired } from "@/features/auth/auth-api"
 import { LayoutPlaceholder } from "@/features/layout/layout-placeholder"
 
 const AuthPage = lazy(() =>
@@ -134,6 +135,11 @@ const SegmentsPage = lazy(() =>
     default: module.SegmentsPage,
   }))
 )
+const SegmentDetailsPage = lazy(() =>
+  import("@/features/segments/details/segment-details-page").then((module) => ({
+    default: module.SegmentDetailsPage,
+  }))
+)
 
 type SupportedLanguage = "en" | "zh"
 
@@ -197,6 +203,7 @@ function AuthRoute({ mode }: { mode: "login" | "sso" }) {
 function SecureRoute() {
   const { lang = getPreferredLanguage() } = useParams()
   const location = useLocation()
+  useSessionExpiredRedirect()
 
   if (!getIdentityToken()) {
     localStorage.setItem(
@@ -216,6 +223,7 @@ function SecureRoute() {
 function SelectWorkspaceRoute() {
   const { lang = getPreferredLanguage() } = useParams()
   const location = useLocation()
+  useSessionExpiredRedirect()
 
   if (!getIdentityToken()) {
     localStorage.setItem(
@@ -231,6 +239,7 @@ function SelectWorkspaceRoute() {
 function OnboardingRoute() {
   const { lang = getPreferredLanguage() } = useParams()
   const location = useLocation()
+  useSessionExpiredRedirect()
 
   if (!getIdentityToken()) {
     localStorage.setItem(
@@ -251,6 +260,29 @@ function ProfileCompatibilityRedirect() {
 
 function RouteFallback() {
   return <div className="min-h-32" />
+}
+
+function useSessionExpiredRedirect() {
+  const location = useLocation()
+  const navigate = useNavigate()
+
+  useEffect(
+    () =>
+      onSessionExpired(() => {
+        const lang = location.pathname.split("/")[1] === "zh" ? "zh" : "en"
+        const redirectUrl = `${location.pathname}${location.search}`
+
+        if (
+          !localStorage.getItem("login-redirect-url") &&
+          !location.pathname.endsWith("/select-workspace")
+        ) {
+          localStorage.setItem("login-redirect-url", redirectUrl)
+        }
+
+        navigate(`/${lang}/login`, { replace: true })
+      }),
+    [location.pathname, location.search, navigate]
+  )
 }
 
 export function AppRoutes() {
@@ -304,6 +336,11 @@ export function AppRoutes() {
           <Route path="webhooks" element={<WebhooksPage />} />
           <Route path="end-users" element={<EndUsersPage />} />
           <Route path="segments" element={<SegmentsPage />} />
+          <Route path="segments/:segmentId" element={<SegmentDetailsPage />} />
+          <Route
+            path="segments/:segmentId/:tab"
+            element={<SegmentDetailsPage />}
+          />
           <Route path="account/profile" element={<ProfilePage />} />
           {/*Remove the following line when migration completed*/}
           <Route path="*" element={<LayoutPlaceholder />} />
