@@ -1,4 +1,4 @@
-namespace Domain.Environments.MessagePublishing;
+namespace Domain.Environments;
 
 public enum SecretChangeOperations
 {

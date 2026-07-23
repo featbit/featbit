@@ -1,6 +1,6 @@
 ﻿#nullable enable
 
-namespace Domain.Health;
+namespace Domain.ControlPlane;
 
 public sealed record HealthMessage
 {

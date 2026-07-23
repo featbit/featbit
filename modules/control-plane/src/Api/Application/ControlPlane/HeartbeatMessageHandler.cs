@@ -4,7 +4,6 @@ using Application;
 using Application.Caches;
 using Application.ControlPlane;
 using Domain.ControlPlane;
-using Domain.Health;
 using Domain.Messages;
 
 namespace Api.Application.ControlPlane;

@@ -1,5 +1,5 @@
 using System.Text.Json;
-using Domain.Health;
+using Domain.ControlPlane;
 
 namespace Domain.UnitTests.Health;
 

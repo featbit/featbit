@@ -3,7 +3,7 @@ using Domain.Segments;
 using Domain.FeatureFlags;
 using Domain.Workspaces;
 using Domain.Connections;
-using Domain.Health;
+using Domain.ControlPlane;
 
 namespace Application.Caches;
 

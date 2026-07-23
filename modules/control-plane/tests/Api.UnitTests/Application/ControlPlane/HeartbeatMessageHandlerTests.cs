@@ -3,7 +3,6 @@ using Api.Application.ControlPlane;
 using Application.Caches;
 using Application.ControlPlane;
 using Domain.ControlPlane;
-using Domain.Health;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Testing;
