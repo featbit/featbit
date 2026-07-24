@@ -12,12 +12,7 @@ import {
   indentWithTab,
 } from "@codemirror/commands"
 import { json } from "@codemirror/lang-json"
-import {
-  bracketMatching,
-  defaultHighlightStyle,
-  indentOnInput,
-  syntaxHighlighting,
-} from "@codemirror/language"
+import { bracketMatching, indentOnInput } from "@codemirror/language"
 import { linter, lintGutter } from "@codemirror/lint"
 import { highlightSelectionMatches, searchKeymap } from "@codemirror/search"
 import { Compartment, EditorState } from "@codemirror/state"
@@ -36,6 +31,7 @@ import { createPortal } from "react-dom"
 import { useTranslation } from "react-i18next"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { codeMirrorEditorStyle } from "@/lib/code-mirror/editor-style"
 import { validateJsonHandlebars } from "../webhook-utils"
 
 const completionValues = [
@@ -64,55 +60,6 @@ function webhookCompletions(context: CompletionContext) {
     options: completionValues.map((label) => ({ label, type: "variable" })),
   }
 }
-
-const editorTheme = EditorView.theme(
-  {
-    "&": {
-      height: "100%",
-      color: "var(--color-slate-200)",
-      backgroundColor: "var(--color-slate-950)",
-      fontSize: "13px",
-    },
-    ".cm-content": {
-      caretColor: "var(--color-slate-50)",
-      fontFamily:
-        "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
-      padding: "12px 0",
-    },
-    ".cm-cursor": { borderLeftColor: "var(--color-slate-50)" },
-    ".cm-selectionBackground, &.cm-focused .cm-selectionBackground": {
-      backgroundColor: "var(--color-slate-700)",
-    },
-    ".cm-activeLine": { backgroundColor: "var(--color-slate-900)" },
-    ".cm-activeLineGutter": {
-      backgroundColor: "var(--color-slate-900)",
-    },
-    ".cm-gutters": {
-      backgroundColor: "var(--color-slate-950)",
-      color: "var(--color-slate-400)",
-      borderRight: "1px solid var(--color-slate-800)",
-    },
-    ".cm-lineNumbers .cm-gutterElement": { padding: "0 10px 0 8px" },
-    ".cm-scroller": { overflow: "auto" },
-    ".cm-tooltip": {
-      backgroundColor: "var(--color-slate-900)",
-      border: "1px solid var(--color-slate-700)",
-      color: "var(--color-slate-200)",
-    },
-    ".cm-tooltip-autocomplete ul li[aria-selected]": {
-      backgroundColor: "var(--color-slate-700)",
-      color: "var(--color-white)",
-    },
-    ".cm-diagnostic-error": {
-      borderLeftColor: "var(--color-destructive)",
-    },
-    ".cm-lintRange-error": {
-      backgroundImage: "none",
-      textDecoration: "underline wavy var(--color-destructive)",
-    },
-  },
-  { dark: true }
-)
 
 type Props = {
   value: string
@@ -144,6 +91,7 @@ export function CodeMirrorTemplateEditor({
 
   useEffect(() => {
     if (!embeddedHost.current || viewRef.current) return
+    const isDark = document.documentElement.classList.contains("dark")
     const state = EditorState.create({
       doc: initialValue.current,
       extensions: [
@@ -158,7 +106,6 @@ export function CodeMirrorTemplateEditor({
         autocompletion({ override: [webhookCompletions] }),
         highlightActiveLine(),
         highlightSelectionMatches(),
-        syntaxHighlighting(defaultHighlightStyle),
         json(),
         lintGutter(),
         linter(
@@ -193,7 +140,7 @@ export function CodeMirrorTemplateEditor({
           if (update.docChanged)
             onChangeRef.current(update.state.doc.toString())
         }),
-        editorTheme,
+        codeMirrorEditorStyle(isDark, { fillHeight: true }),
       ],
     })
     viewRef.current = new EditorView({
@@ -246,14 +193,13 @@ export function CodeMirrorTemplateEditor({
 
   return (
     <>
-      <div className="overflow-hidden rounded-md border bg-slate-950">
-        <div className="flex items-center justify-between border-b border-white/10 px-3 py-2">
-          <span className="text-xs text-slate-400">JSON Handlebars</span>
+      <div className="overflow-hidden rounded-md border bg-background">
+        <div className="flex items-center justify-between border-b bg-muted/30 px-3 py-2">
+          <span className="text-xs text-muted-foreground">JSON Handlebars</span>
           <Button
             type="button"
             variant="ghost"
             size="xs"
-            className="text-slate-300 hover:bg-white/10 hover:text-white"
             onClick={() => onExpandedChange(true)}
           >
             <Scan />
@@ -295,8 +241,11 @@ export function CodeMirrorTemplateEditor({
                   {t("webhooks.editor.exit")}
                 </Button>
               </div>
-              <div ref={expandedHost} className="min-h-0 flex-1 bg-slate-950" />
-              <div className="flex h-8 shrink-0 items-center justify-between border-t border-white/10 bg-slate-950 px-4 text-xs text-slate-400">
+              <div
+                ref={expandedHost}
+                className="min-h-0 flex-1 bg-background"
+              />
+              <div className="flex h-8 shrink-0 items-center justify-between border-t bg-muted/30 px-4 text-xs text-muted-foreground">
                 <span>JSON Handlebars</span>
                 <span>{t("webhooks.editor.escapeHint")}</span>
               </div>

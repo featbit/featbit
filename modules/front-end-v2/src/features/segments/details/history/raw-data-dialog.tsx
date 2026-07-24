@@ -1,9 +1,7 @@
 import { json } from "@codemirror/lang-json"
-import { HighlightStyle, syntaxHighlighting } from "@codemirror/language"
 import { MergeView } from "@codemirror/merge"
 import { EditorState } from "@codemirror/state"
 import { EditorView, lineNumbers } from "@codemirror/view"
-import { tags } from "@lezer/highlight"
 import { CircleMinus, CirclePlus } from "lucide-react"
 import { useLayoutEffect, useRef } from "react"
 import { useTranslation } from "react-i18next"
@@ -14,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { codeMirrorEditorStyle } from "@/lib/code-mirror/editor-style"
 import type { AuditLog } from "../../segments-types"
 
 function formattedJson(value?: string) {
@@ -25,147 +24,6 @@ function formattedJson(value?: string) {
   }
 }
 
-const jsonHighlightStyle = HighlightStyle.define([
-  { tag: tags.propertyName, color: "var(--cm-json-property)" },
-  { tag: tags.string, color: "var(--cm-json-string)" },
-  { tag: tags.number, color: "var(--cm-json-number)" },
-  { tag: [tags.bool, tags.null], color: "var(--cm-json-literal)" },
-  {
-    tag: [tags.bracket, tags.separator],
-    color: "var(--cm-json-punctuation)",
-  },
-])
-
-const rawDataTheme = EditorView.theme({
-  "&": {
-    maxHeight: "calc(78vh - 11rem)",
-    color: "var(--foreground)",
-    backgroundColor: "var(--background)",
-    "--cm-json-property": "#0451a5",
-    "--cm-json-string": "#a31515",
-    "--cm-json-number": "#098658",
-    "--cm-json-literal": "#6f42c1",
-    "--cm-json-punctuation": "var(--foreground)",
-    "--cm-collapse-color": "var(--muted-foreground)",
-    "--cm-collapse-background": "var(--muted)",
-    "--cm-collapse-hover": "var(--accent)",
-    "--cm-collapse-border": "var(--border)",
-  },
-  ".dark &": {
-    color: "#d4d4d4",
-    backgroundColor: "#1e1e1e",
-    "--cm-json-property": "#9cdcfe",
-    "--cm-json-string": "#ce9178",
-    "--cm-json-number": "#b5cea8",
-    "--cm-json-literal": "#c586c0",
-    "--cm-json-punctuation": "#d4d4d4",
-    "--cm-collapse-color": "#a6a6a6",
-    "--cm-collapse-background": "#252526",
-    "--cm-collapse-hover": "#2a2d2e",
-    "--cm-collapse-border": "#333333",
-  },
-  ".cm-scroller": {
-    overflow: "auto",
-    maxHeight: "calc(78vh - 11rem)",
-    fontFamily:
-      "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
-  },
-  ".cm-content": {
-    padding: "12px 0",
-  },
-  ".cm-gutters": {
-    color: "var(--muted-foreground)",
-    backgroundColor: "var(--muted)",
-    borderRight: "1px solid var(--border)",
-  },
-  ".cm-lineNumbers .cm-gutterElement": {
-    padding: "0 8px",
-  },
-  ".cm-changeGutter": {
-    width: "20px",
-    paddingLeft: "0",
-  },
-  "&.cm-merge-a .cm-changedLine": {
-    backgroundColor: "var(--color-red-100)",
-  },
-  "&.cm-merge-b .cm-changedLine": {
-    backgroundColor: "var(--color-green-200)",
-  },
-  "&.cm-merge-a .cm-changedText, &.cm-merge-b .cm-changedText": {
-    background: "none",
-  },
-  "&.cm-merge-a .cm-changedLineGutter": {
-    width: "20px",
-    color: "var(--color-red-700)",
-    backgroundColor: "var(--color-red-100)",
-  },
-  "&.cm-merge-b .cm-changedLineGutter": {
-    width: "20px",
-    color: "var(--color-green-700)",
-    backgroundColor: "var(--color-green-200)",
-  },
-  "&.cm-merge-a .cm-changedLineGutter::after": {
-    content: '"−"',
-    display: "block",
-    textAlign: "center",
-  },
-  "&.cm-merge-b .cm-changedLineGutter::after": {
-    content: '"+"',
-    display: "block",
-    textAlign: "center",
-  },
-  ".dark &.cm-merge-a .cm-changedLine, .dark &.cm-merge-a .cm-changedLineGutter":
-    {
-      backgroundColor: "#3b2426",
-    },
-  ".dark &.cm-merge-b .cm-changedLine, .dark &.cm-merge-b .cm-changedLineGutter":
-    {
-      backgroundColor: "#20382a",
-    },
-  ".dark &.cm-merge-a .cm-changedText": {
-    backgroundColor: "#5a2d31",
-  },
-  ".dark &.cm-merge-b .cm-changedText": {
-    backgroundColor: "#275c38",
-  },
-  ".dark &.cm-merge-a .cm-changedLineGutter": {
-    color: "#f48771",
-    backgroundColor: "#512b2f",
-    fontWeight: "700",
-  },
-  ".dark &.cm-merge-b .cm-changedLineGutter": {
-    color: "#89d185",
-    backgroundColor: "#244a31",
-    fontWeight: "700",
-  },
-  ".dark & .cm-gutters": {
-    color: "#858585",
-    backgroundColor: "#181818",
-    borderRightColor: "#333333",
-  },
-  ".cm-collapsedLines.cm-collapsedLines": {
-    color: "var(--cm-collapse-color)",
-    background: "var(--cm-collapse-background)",
-    borderTop: "1px solid var(--cm-collapse-border)",
-    borderBottom: "1px solid var(--cm-collapse-border)",
-    boxShadow: "none",
-    textShadow: "none",
-  },
-  ".cm-collapsedLines.cm-collapsedLines:hover": {
-    color: "var(--foreground)",
-    background: "var(--cm-collapse-hover)",
-  },
-  ".cm-collapsedLines.cm-collapsedLines::before, .cm-collapsedLines.cm-collapsedLines::after":
-    {
-      content: '"···"',
-      color: "var(--cm-collapse-color)",
-    },
-  ".dark & .cm-selectionBackground, .dark &.cm-focused .cm-selectionBackground":
-    {
-      backgroundColor: "#264f78",
-    },
-})
-
 function RawDataDiff({ auditLog }: { auditLog: AuditLog }) {
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -175,12 +33,10 @@ function RawDataDiff({ auditLog }: { auditLog: AuditLog }) {
     const readonly = [
       json(),
       lineNumbers(),
-      syntaxHighlighting(jsonHighlightStyle),
       EditorState.readOnly.of(true),
       EditorView.editable.of(false),
-      EditorView.darkTheme.of(isDark),
       EditorView.lineWrapping,
-      rawDataTheme,
+      codeMirrorEditorStyle(isDark),
     ]
     const merge = new MergeView({
       parent: containerRef.current,
@@ -204,7 +60,7 @@ function RawDataDiff({ auditLog }: { auditLog: AuditLog }) {
   return (
     <div
       ref={containerRef}
-      className="min-h-0 overflow-hidden rounded-md border [&_.cm-editor]:text-xs [&_.cm-mergeView]:max-h-[calc(78vh-11rem)] [&_.cm-mergeView]:overflow-auto"
+      className="min-h-0 overflow-hidden rounded-md border [&_.cm-editor]:max-h-[calc(78vh-11rem)] [&_.cm-mergeView]:max-h-[calc(78vh-11rem)] [&_.cm-mergeView]:overflow-auto [&_.cm-scroller]:max-h-[calc(78vh-11rem)]"
     />
   )
 }
