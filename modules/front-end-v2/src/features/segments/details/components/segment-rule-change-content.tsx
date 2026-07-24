@@ -38,6 +38,76 @@ function conditionText(
   return `${condition.property} ${operation} ${conditionValues(condition).join(", ")}`.trim()
 }
 
+type ConditionChange = {
+  id: string
+  action: "added" | "removed" | "updated"
+  previous?: string
+  current?: string
+}
+
+function changedConditions(
+  previous: SegmentRule,
+  current: SegmentRule,
+  t: ReturnType<typeof useTranslation>["t"]
+): ConditionChange[] {
+  const previousById = new Map(
+    previous.conditions.map((condition) => [condition.id, condition])
+  )
+  const currentIds = new Set(
+    current.conditions.map((condition) => condition.id)
+  )
+  const changes: ConditionChange[] = []
+
+  for (const condition of current.conditions) {
+    const oldCondition = previousById.get(condition.id)
+    const currentText = conditionText(condition, t)
+    if (!oldCondition) {
+      changes.push({ id: condition.id, action: "added", current: currentText })
+      continue
+    }
+    const previousText = conditionText(oldCondition, t)
+    if (previousText !== currentText) {
+      changes.push({
+        id: condition.id,
+        action: "updated",
+        previous: previousText,
+        current: currentText,
+      })
+    }
+  }
+
+  for (const condition of previous.conditions) {
+    if (!currentIds.has(condition.id)) {
+      changes.push({
+        id: condition.id,
+        action: "removed",
+        previous: conditionText(condition, t),
+      })
+    }
+  }
+
+  return changes
+}
+
+function ConditionSummary({ rule }: { rule: SegmentRule }) {
+  const { t } = useTranslation()
+  if (!rule.conditions.length) return <span>—</span>
+  return (
+    <div>
+      {rule.conditions.map((condition, index) => (
+        <div key={condition.id || index}>
+          {index > 0 ? (
+            <div className="my-2 text-xs font-medium text-muted-foreground">
+              {t("segments.detailsPage.rules.and")}
+            </div>
+          ) : null}
+          <p className="break-words">{conditionText(condition, t)}</p>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export function SegmentRuleChangeContent({
   previous,
   current,
@@ -47,53 +117,66 @@ export function SegmentRuleChangeContent({
 }) {
   const { t } = useTranslation()
   const displayedRule = current ?? previous
-  if (!displayedRule?.conditions.length) return <span>—</span>
+  if (!displayedRule) return <span>—</span>
 
-  const previousById = new Map(
-    previous?.conditions.map((condition) => [condition.id, condition]) ?? []
-  )
-  const currentIds = new Set(
-    current?.conditions.map((condition) => condition.id) ?? []
-  )
+  if (!previous || !current) {
+    return <ConditionSummary rule={displayedRule} />
+  }
+
+  const renamed = previous.name !== current.name
+  const conditionChanges = changedConditions(previous, current, t)
 
   return (
-    <div className="min-w-0">
-      {previous && current && previous.name !== current.name ? (
-        <div className="mb-2">
+    <div className="min-w-0 space-y-3">
+      {renamed ? (
+        <section className="space-y-1.5">
+          <p className="text-xs font-medium text-muted-foreground">
+            {t("segments.detailsPage.review.labels.name")}
+          </p>
           <ChangePair previous={previous.name} current={current.name} />
-        </div>
+        </section>
       ) : null}
-      {(current ?? previous)?.conditions.map((condition, index) => {
-        const oldCondition = previousById.get(condition.id)
-        const oldText = oldCondition ? conditionText(oldCondition, t) : ""
-        const newText = conditionText(condition, t)
-        return (
-          <div key={condition.id || index}>
-            {index > 0 ? (
-              <div className="py-1 font-mono text-[0.7rem] font-semibold text-muted-foreground">
-                {t("segments.detailsPage.rules.and")}
+      {conditionChanges.length ? (
+        <section className="space-y-1.5">
+          <p className="text-xs font-medium text-muted-foreground">
+            {t("segments.detailsPage.review.labels.conditions")}
+          </p>
+          <div>
+            {conditionChanges.map((change, index) => (
+              <div key={`${change.action}-${change.id}`}>
+                {index > 0 ? (
+                  <div className="my-2 text-xs font-medium text-muted-foreground">
+                    {t("segments.detailsPage.rules.and")}
+                  </div>
+                ) : null}
+                {change.action === "updated" ? (
+                  <ChangePair
+                    previous={change.previous ?? ""}
+                    current={change.current ?? ""}
+                  />
+                ) : (
+                  <div className="space-y-0.5">
+                    <p className="text-xs text-muted-foreground">
+                      {t(
+                        `segments.detailsPage.review.actions.${change.action}`
+                      )}
+                    </p>
+                    <p
+                      className={
+                        change.action === "removed"
+                          ? "break-words text-muted-foreground"
+                          : "break-words"
+                      }
+                    >
+                      {change.current ?? change.previous}
+                    </p>
+                  </div>
+                )}
               </div>
-            ) : null}
-            {oldCondition && oldText !== newText ? (
-              <ChangePair previous={oldText} current={newText} />
-            ) : (
-              <p className="break-words">{newText}</p>
-            )}
+            ))}
           </div>
-        )
-      })}
-      {previous && current
-        ? previous.conditions
-            .filter((condition) => !currentIds.has(condition.id))
-            .map((condition) => (
-              <div key={condition.id} className="mt-2">
-                <ChangePair
-                  previous={conditionText(condition, t)}
-                  current="—"
-                />
-              </div>
-            ))
-        : null}
+        </section>
+      ) : null}
     </div>
   )
 }

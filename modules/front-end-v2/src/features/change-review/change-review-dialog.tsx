@@ -55,17 +55,40 @@ export function ChangeReviewDialog<TChange extends ChangeReviewItem>({
   onOpenChange,
   onSave,
 }: Props<TChange>) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      {open ? (
+        <ReviewDialogContent
+          idPrefix={idPrefix}
+          layout={layout}
+          changes={changes}
+          requireComment={requireComment}
+          saving={saving}
+          copy={copy}
+          ledger={ledger}
+          onClose={() => onOpenChange(false)}
+          onSave={onSave}
+        />
+      ) : null}
+    </Dialog>
+  )
+}
+
+function ReviewDialogContent<TChange extends ChangeReviewItem>({
+  idPrefix,
+  layout,
+  changes,
+  requireComment,
+  saving,
+  copy,
+  ledger,
+  onClose,
+  onSave,
+}: Omit<Props<TChange>, "open" | "onOpenChange"> & { onClose: () => void }) {
   const [comment, setComment] = useState("")
 
-  function setOpen(nextOpen: boolean) {
-    if (!nextOpen) {
-      setComment("")
-    }
-    onOpenChange(nextOpen)
-  }
-
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <>
       <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>{copy.title}</DialogTitle>
@@ -105,7 +128,7 @@ export function ChangeReviewDialog<TChange extends ChangeReviewItem>({
             type="button"
             variant="outline"
             disabled={saving}
-            onClick={() => setOpen(false)}
+            onClick={onClose}
           >
             {copy.cancel}
           </Button>
@@ -118,6 +141,6 @@ export function ChangeReviewDialog<TChange extends ChangeReviewItem>({
           </Button>
         </DialogFooter>
       </DialogContent>
-    </Dialog>
+    </>
   )
 }

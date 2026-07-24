@@ -4,6 +4,34 @@ import { i18n } from "@/lib/i18n/i18n"
 import { ChangeLedger } from "./change-ledger"
 
 describe("ChangeLedger", () => {
+  it("shows affected user counts for targeting collections", async () => {
+    await i18n.changeLanguage("en")
+    render(
+      <ChangeLedger
+        layout="targeting"
+        changes={[
+          {
+            kind: "users",
+            label: "includedUsers",
+            action: "added",
+            affectedCount: 3,
+            values: ["user-1", "user-2", "user-3"],
+          },
+          {
+            kind: "users",
+            label: "excludedUsers",
+            action: "removed",
+            affectedCount: 1,
+            values: ["user-4"],
+          },
+        ]}
+      />
+    )
+
+    expect(screen.getByText("Added · 3")).toBeVisible()
+    expect(screen.getByText("Removed · 1")).toBeVisible()
+  })
+
   it("shows tag additions and removals without a redundant Updated action", async () => {
     await i18n.changeLanguage("en")
 
@@ -57,5 +85,64 @@ describe("ChangeLedger", () => {
     expect(container.firstElementChild?.firstElementChild).toHaveClass(
       "grid-cols-[minmax(11.25rem,13.75rem)_6.25rem_minmax(0,1fr)]"
     )
+  })
+
+  it("separates a rule name change from its changed conditions", async () => {
+    await i18n.changeLanguage("en")
+    render(
+      <ChangeLedger
+        layout="targeting"
+        changes={[
+          {
+            kind: "rule",
+            label: "Enterprise accounts",
+            action: "updated",
+            previousRule: {
+              id: "rule-1",
+              name: "Enterprise customers",
+              conditions: [
+                {
+                  id: "condition-1",
+                  property: "plan",
+                  op: "Equal",
+                  value: "professional",
+                },
+                {
+                  id: "condition-2",
+                  property: "region",
+                  op: "Equal",
+                  value: "US",
+                },
+              ],
+            },
+            currentRule: {
+              id: "rule-1",
+              name: "Enterprise accounts",
+              conditions: [
+                {
+                  id: "condition-1",
+                  property: "plan",
+                  op: "Equal",
+                  value: "enterprise",
+                },
+                {
+                  id: "condition-2",
+                  property: "region",
+                  op: "Equal",
+                  value: "US",
+                },
+              ],
+            },
+          },
+        ]}
+      />
+    )
+
+    expect(screen.getByText("Name")).toBeVisible()
+    expect(screen.getByText("Conditions")).toBeVisible()
+    expect(screen.getByText("Enterprise customers")).toBeVisible()
+    expect(screen.getByText("plan equals professional")).toBeVisible()
+    expect(screen.getByText("plan equals enterprise")).toBeVisible()
+    expect(screen.queryByText("region equals US")).not.toBeInTheDocument()
   })
 })

@@ -13,7 +13,6 @@ import {
   resolveLang,
 } from "@/features/layout/layout-context"
 import {
-  fetchAllSegmentTags,
   fetchCurrentEnvironmentSettings,
   fetchCurrentUserPolicies,
   fetchSegment,
@@ -106,12 +105,6 @@ export function SegmentDetailsPage() {
     enabled: Boolean(
       envId && segment && segment.included.length + segment.excluded.length
     ),
-  })
-  const tagsQuery = useQuery({
-    queryKey: ["segment-tags", envId],
-    queryFn: () => fetchAllSegmentTags(envId),
-    enabled: Boolean(envId && activeTab === "settings"),
-    staleTime: 60_000,
   })
   const permissionsQuery = useQuery({
     queryKey: ["segment-user-policies", workspace?.id ?? ""],
@@ -217,7 +210,6 @@ export function SegmentDetailsPage() {
           <SettingsTab
             envId={envId}
             segment={segment}
-            allTags={tagsQuery.data ?? []}
             requireComment={settingsQuery.data?.requireChangeComment ?? false}
             canUpdateName={can("UpdateSegmentName")}
             canUpdateDescription={can("UpdateSegmentDescription")}

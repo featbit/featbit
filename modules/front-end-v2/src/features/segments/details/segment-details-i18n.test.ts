@@ -15,6 +15,9 @@ describe("segment details global translations", () => {
     expect(
       i18n.t("segments.detailsPage.review.actions.addedCount", { count: 2 })
     ).toBe("Added · 2")
+    expect(
+      i18n.t("segments.detailsPage.settings.createTag", { tag: "release" })
+    ).toBe('Create tag "release"')
   })
 
   it("uses the agreed Chinese product terminology", async () => {
@@ -25,5 +28,8 @@ describe("segment details global translations", () => {
     expect(
       i18n.t("segments.detailsPage.review.actions.removedCount", { count: 2 })
     ).toBe("已移除 · 2")
+    expect(
+      i18n.t("segments.detailsPage.settings.createTag", { tag: "发布" })
+    ).toBe("创建标签“发布”")
   })
 })

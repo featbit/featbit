@@ -116,7 +116,7 @@ export function ChangeLedger<TChange extends ChangeReviewItem>({
   return (
     <div
       className={cn(
-        "max-h-[45vh] space-y-1 overflow-y-auto rounded-md bg-muted/40 p-3",
+        "max-h-[45vh] space-y-0 overflow-y-auto rounded-md bg-muted/40 p-3",
         className
       )}
     >
@@ -127,7 +127,7 @@ export function ChangeLedger<TChange extends ChangeReviewItem>({
             <div
               key={key}
               className={cn(
-                "grid gap-x-4 px-2 py-2.5 text-sm",
+                "grid gap-x-4 px-2 py-2 text-sm",
                 columns.groupedRow
               )}
             >
@@ -158,7 +158,7 @@ export function ChangeLedger<TChange extends ChangeReviewItem>({
         return (
           <div
             key={key}
-            className={cn("grid gap-x-4 px-2 py-2.5 text-sm", columns.row)}
+            className={cn("grid gap-x-4 px-2 py-2 text-sm", columns.row)}
           >
             <div className="min-w-0 self-start">
               {renderLabel?.(change) ?? (
@@ -166,7 +166,13 @@ export function ChangeLedger<TChange extends ChangeReviewItem>({
               )}
             </div>
             <span className="self-start text-muted-foreground">
-              {change.action ? copy.action(change.action) : null}
+              {change.action &&
+              change.affectedCount !== undefined &&
+              (change.action === "added" || change.action === "removed")
+                ? copy.actionCount(change.action, change.affectedCount)
+                : change.action
+                  ? copy.action(change.action)
+                  : null}
             </span>
             <div className="min-w-0">
               {customContent !== undefined ? (

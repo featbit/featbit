@@ -118,6 +118,17 @@ export function searchSegmentUsers(
   )
 }
 
+export function createSegmentEndUser(envId: string, keyId: string) {
+  return fetchApi<SegmentEndUser>(
+    `/api/v1/envs/${encodeURIComponent(envId)}/end-users`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ keyId, name: keyId }),
+    }
+  )
+}
+
 export function fetchSegmentUserProperties(envId: string) {
   return fetchApi<SegmentUserProperty[]>(
     `/api/v1/envs/${encodeURIComponent(envId)}/end-user-properties`

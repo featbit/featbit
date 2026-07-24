@@ -39,7 +39,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { searchSegmentUsers, updateSegmentTargeting } from "../../segments-api"
+import {
+  createSegmentEndUser,
+  searchSegmentUsers,
+  updateSegmentTargeting,
+} from "../../segments-api"
 import type {
   Segment,
   SegmentEndUser,
@@ -91,7 +95,7 @@ function userLabel(user: SegmentEndUser) {
   return user.name?.trim() || user.keyId
 }
 
-function UserPicker({
+export function UserPicker({
   envId,
   shared,
   selected,
@@ -107,6 +111,7 @@ function UserPicker({
   onAdd: (user: SegmentEndUser) => void
 }) {
   const { t } = useTranslation()
+  const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState("")
   const [debounced, setDebounced] = useState("")
@@ -126,6 +131,30 @@ function UserPicker({
       }),
     enabled: open,
   })
+
+  const createMutation = useMutation({
+    mutationFn: (keyId: string) => createSegmentEndUser(envId, keyId),
+    onSuccess: (user) => {
+      onAdd(user)
+      setOpen(false)
+      setSearch("")
+      void queryClient.invalidateQueries({
+        queryKey: ["segment-user-search", envId],
+      })
+      void queryClient.invalidateQueries({ queryKey: ["end-users", envId] })
+    },
+    onError: () =>
+      toast.error(t("segments.detailsPage.targeting.userCreateFailed")),
+  })
+
+  const keyId = search.trim()
+  const canCreate =
+    !shared &&
+    Boolean(keyId) &&
+    query.isSuccess &&
+    debounced === keyId &&
+    !excluded.includes(keyId) &&
+    !(query.data ?? []).some((user) => user.keyId === keyId)
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -169,9 +198,31 @@ function UserPicker({
               </div>
             ) : null}
             <CommandEmpty>
-              {t("segments.detailsPage.targeting.noUsers")}
+              {shared && keyId
+                ? t("segments.detailsPage.targeting.sharedUsersOnly")
+                : t("segments.detailsPage.targeting.noUsers")}
             </CommandEmpty>
             <CommandGroup>
+              {canCreate ? (
+                <CommandItem
+                  value={`create-${keyId}`}
+                  disabled={createMutation.isPending}
+                  onSelect={() => createMutation.mutate(keyId)}
+                >
+                  {createMutation.isPending ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <Plus className="size-4" />
+                  )}
+                  <span className="truncate">
+                    {createMutation.isPending
+                      ? t("segments.detailsPage.targeting.creatingUser")
+                      : t("segments.detailsPage.targeting.createUser", {
+                          keyId,
+                        })}
+                  </span>
+                </CommandItem>
+              ) : null}
               {(query.data ?? [])
                 .filter((user) => !selected.includes(user.keyId))
                 .map((user) => (

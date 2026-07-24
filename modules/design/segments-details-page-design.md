@@ -274,6 +274,7 @@ Rules:
 - added rule: show `Added` and its complete readable condition summary beneath the header;
 - removed rule: show `Removed` and its complete previous condition summary beneath the header;
 - renamed rule: show the old muted name, a neutral down arrow on its own compact line, and the new foreground name;
+- when the same rule changes both its name and one or more conditions, group the content column into explicitly labelled `Name` and `Conditions` sections; keep the current rule name in the object column as its identity, show only genuinely changed conditions in the Conditions section, and do not repeat unchanged conditions;
 - edited condition: show the complete previous muted attribute/operator/value expression, a neutral down arrow on its own compact line, and the complete new foreground expression;
 - added or removed condition: label the operation and show the complete expression;
 - reordered rule: show `Moved from position {before} to {after}`;

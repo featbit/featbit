@@ -9,6 +9,7 @@ export type ChangeReviewItem = {
   kind: string
   label: string
   action?: ChangeReviewAction
+  affectedCount?: number
   previous?: string
   current?: string
   values?: string[]

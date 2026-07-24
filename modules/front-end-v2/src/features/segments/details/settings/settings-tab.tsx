@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { X } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -22,11 +21,11 @@ import {
   stableSettings,
   type ReviewChange,
 } from "../segment-details-utils"
+import { SegmentTagPicker } from "./segment-tag-picker"
 
 type Props = {
   envId: string
   segment: Segment
-  allTags: string[]
   requireComment: boolean
   canUpdateName: boolean
   canUpdateDescription: boolean
@@ -43,7 +42,6 @@ type FormValues = {
 export function SettingsTab({
   envId,
   segment,
-  allTags,
   requireComment,
   canUpdateName,
   canUpdateDescription,
@@ -53,7 +51,6 @@ export function SettingsTab({
   const { t } = useTranslation()
   const queryClient = useQueryClient()
   const [reviewOpen, setReviewOpen] = useState(false)
-  const [tagInput, setTagInput] = useState("")
   const schema = useMemo(
     () =>
       z.object({
@@ -155,19 +152,21 @@ export function SettingsTab({
           })
         )
       } else toast.success(t("segments.operationSucceeded"))
+      if (
+        !failed.includes("tags") &&
+        JSON.stringify([...segment.tags].sort()) !==
+          JSON.stringify([...draft.tags].sort())
+      ) {
+        void queryClient.invalidateQueries({
+          queryKey: ["segment-tags", envId],
+        })
+      }
       void queryClient.invalidateQueries({ queryKey: ["segment-audit-logs"] })
     },
     onError: () => toast.error(t("segments.operationFailed")),
   })
 
   const tags = values.tags ?? []
-  function addTag(raw: string) {
-    const tag = raw.trim()
-    if (!tag || tags.includes(tag)) return
-    form.setValue("tags", [...tags, tag], { shouldDirty: true })
-    setTagInput("")
-  }
-
   return (
     <form
       className="space-y-8 pt-4 pb-5"
@@ -244,54 +243,15 @@ export function SettingsTab({
         <p className="text-sm text-muted-foreground">
           {t("segments.detailsPage.settings.tagsHelp")}
         </p>
-        <div className="flex min-h-11 flex-wrap items-center gap-2 rounded-md border px-3 py-2 focus-within:ring-2 focus-within:ring-ring/30">
-          {tags.map((tag) => (
-            <span
-              key={tag}
-              className="inline-flex items-center gap-1 rounded-md bg-muted px-2.5 py-1 text-xs"
-            >
-              {tag}
-              <button
-                type="button"
-                disabled={!canUpdateTags}
-                aria-label={t("segments.detailsPage.settings.removeTag", {
-                  tag,
-                })}
-                onClick={() =>
-                  form.setValue(
-                    "tags",
-                    tags.filter((item) => item !== tag),
-                    { shouldDirty: true }
-                  )
-                }
-              >
-                <X className="size-3" />
-              </button>
-            </span>
-          ))}
-          <Input
-            list="segment-tag-options"
-            value={tagInput}
-            disabled={!canUpdateTags}
-            className="h-7 min-w-48 flex-1 border-0 px-1 shadow-none focus-visible:ring-0"
-            placeholder={t("segments.detailsPage.settings.tagPlaceholder")}
-            onChange={(event) => setTagInput(event.target.value)}
-            onBlur={() => addTag(tagInput)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter" || event.key === ",") {
-                event.preventDefault()
-                addTag(tagInput)
-              }
-            }}
-          />
-          <datalist id="segment-tag-options">
-            {allTags
-              .filter((tag) => !tags.includes(tag))
-              .map((tag) => (
-                <option key={tag} value={tag} />
-              ))}
-          </datalist>
-        </div>
+        <SegmentTagPicker
+          key={`${envId}-${segment.id}`}
+          envId={envId}
+          tags={tags}
+          disabled={!canUpdateTags}
+          onChange={(nextTags) =>
+            form.setValue("tags", nextTags, { shouldDirty: true })
+          }
+        />
         <p className="text-xs text-muted-foreground">
           {t("segments.detailsPage.settings.tagInputHelp")}
         </p>

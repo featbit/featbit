@@ -62,6 +62,11 @@ describe("segment details utilities", () => {
     expect(
       targetingChanges(segment, current).map((item) => item.label)
     ).toEqual(["includedUsers", "Account plan"])
+    expect(targetingChanges(segment, current)[0]).toMatchObject({
+      action: "added",
+      affectedCount: 1,
+      values: ["user-2"],
+    })
     expect(settingsChanges(segment, current).map((item) => item.field)).toEqual(
       ["name", "tags"]
     )

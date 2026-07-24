@@ -195,6 +195,7 @@ function listChanges(
             kind: "users" as const,
             label,
             action: "added" as const,
+            affectedCount: added.length,
             values: added,
           },
         ]
@@ -205,6 +206,7 @@ function listChanges(
             kind: "users" as const,
             label,
             action: "removed" as const,
+            affectedCount: removed.length,
             values: removed,
           },
         ]
