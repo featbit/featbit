@@ -69,6 +69,18 @@ describe("HistoryTab rows", () => {
     const summaryComment = await screen.findByText(auditLog.comment)
     expect(summaryComment).toHaveClass("inline-block", "max-w-full")
 
+    const clearFilters = screen.getByRole("button", {
+      name: "Clear filters",
+    })
+    expect(clearFilters).toBeDisabled()
+
+    const search = screen.getByPlaceholderText("Filter by name or comment")
+    fireEvent.change(search, { target: { value: "release" } })
+    expect(clearFilters).toBeEnabled()
+    fireEvent.click(clearFilters)
+    expect(search).toHaveValue("")
+    expect(clearFilters).toBeDisabled()
+
     const expandButton = screen.getByRole("button", {
       name: "Expand event",
     })

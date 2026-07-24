@@ -243,6 +243,7 @@ export function HistoryTab({
     range?.from && range.to
       ? `${dayFormatter.format(range.from)} – ${dayFormatter.format(range.to)}`
       : t("segments.detailsPage.history.anyDate")
+  const filtersApplied = Boolean(search || member || range?.from || range?.to)
   const items = logsQuery.data?.items ?? []
 
   function renderFragment(log: AuditLog) {
@@ -447,6 +448,24 @@ export function HistoryTab({
             </div>
           </PopoverContent>
         </Popover>
+
+        <Button
+          type="button"
+          variant="ghost"
+          disabled={!filtersApplied}
+          onClick={() => {
+            setSearch("")
+            setDebouncedSearch("")
+            setMember(null)
+            setRange(undefined)
+            setDraftRange(undefined)
+            setMemberOpen(false)
+            setDateOpen(false)
+            setPageSize(10)
+          }}
+        >
+          {t("segments.detailsPage.history.clearFilters")}
+        </Button>
 
         {segment.type === "shared" ? (
           <div className="ml-auto flex items-center gap-2 text-sm text-primary">

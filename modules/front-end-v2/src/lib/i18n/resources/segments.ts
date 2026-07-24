@@ -120,6 +120,7 @@ const enSegmentDetails = {
     anyDate: "Any date",
     selectEndDate: "Select an end date",
     clear: "Clear",
+    clearFilters: "Clear filters",
     apply: "Apply",
     acrossScopes: "Across {{count}} scopes",
     acrossScopesHelp:
@@ -327,6 +328,7 @@ const zhSegmentDetails = {
     anyDate: "任意日期",
     selectEndDate: "请选择结束日期",
     clear: "清除",
+    clearFilters: "清除筛选",
     apply: "应用",
     acrossScopes: "跨 {{count}} 个范围",
     acrossScopesHelp: "此共享用户组的历史记录包含其所有范围。",
