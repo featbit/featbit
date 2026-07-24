@@ -32,6 +32,7 @@ import {
 import { localizedPath } from "@/features/layout/layout-context"
 import type { Lang } from "@/features/layout/layout-types"
 import { cn } from "@/lib/utils"
+import { SegmentTypeCell } from "../../components/segment-type-cell"
 import type { Segment } from "../../segments-types"
 
 type Props = {
@@ -51,57 +52,6 @@ type Props = {
   onClearSearch: () => void
   onCreate: () => void
   canCreate: boolean
-}
-
-function TypeCell({ segment }: { segment: Segment }) {
-  const { t } = useTranslation()
-  if (segment.type === "shared") {
-    return (
-      <Popover>
-        <PopoverTrigger
-          render={
-            <button
-              type="button"
-              className="rounded-sm text-sm text-foreground underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
-            />
-          }
-        >
-          {t("segments.shareable")}
-        </PopoverTrigger>
-        <PopoverContent align="start" className="w-80 p-3">
-          <p className="mb-2 text-sm font-medium">
-            {t("segments.sharedScopes")}
-          </p>
-          {segment.scopes?.length ? (
-            <ul className="max-h-48 space-y-1.5 overflow-y-auto text-xs text-muted-foreground">
-              {segment.scopes.map((scope) => (
-                <li key={scope} className="font-mono break-all">
-                  {scope}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-xs text-muted-foreground">
-              {t("segments.noSharedScopes")}
-            </p>
-          )}
-        </PopoverContent>
-      </Popover>
-    )
-  }
-
-  return (
-    <Tooltip>
-      <TooltipTrigger
-        render={
-          <span className="cursor-help text-sm text-foreground" tabIndex={0} />
-        }
-      >
-        {t("segments.currentEnvironment")}
-      </TooltipTrigger>
-      <TooltipContent>{t("segments.currentEnvironmentHelp")}</TooltipContent>
-    </Tooltip>
-  )
 }
 
 function TagsCell({ tags }: { tags: string[] }) {
@@ -292,7 +242,10 @@ export function SegmentsTable({
                   </div>
                 </TableCell>
                 <TableCell className="px-5 py-4 align-middle">
-                  <TypeCell segment={segment} />
+                  <SegmentTypeCell
+                    type={segment.type}
+                    scopes={segment.scopes}
+                  />
                 </TableCell>
                 <TableCell className="px-5 py-4 align-middle">
                   <TagsCell tags={segment.tags ?? []} />

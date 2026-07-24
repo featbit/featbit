@@ -1,4 +1,4 @@
-import { Copy } from "lucide-react"
+import { Copy, ExternalLink } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
@@ -18,6 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { SegmentTypeCell } from "@/features/segments/components/segment-type-cell"
 import {
   fetchEndUserFlags,
   fetchEndUserSegments,
@@ -139,10 +140,12 @@ export function EvaluateDrawer({
     >
       <SheetContent className="gap-0 p-0 data-[side=right]:w-[min(100vw,960px)] data-[side=right]:sm:max-w-[960px]">
         <SheetHeader className="border-b px-6 py-5 pr-12">
-          <SheetTitle className="truncate">
-            {user?.name || t("workspace.globalUsers.unnamedUser")}
-          </SheetTitle>
+          <SheetTitle>{t("workspace.globalUsers.evaluateAction")}</SheetTitle>
           <SheetDescription className="inline-flex min-w-0 items-center gap-2">
+            <span className="truncate">
+              {user?.name || t("workspace.globalUsers.unnamedUser")}
+            </span>
+            <span>·</span>
             <span className="truncate font-mono">{user?.keyId}</span>
             <Button
               type="button"
@@ -299,6 +302,7 @@ function FlagsPanel({
                       }
                     >
                       {t("workspace.globalUsers.detailsAction")}
+                      <ExternalLink className="size-3.5" />
                     </ActionLink>
                   </TableCell>
                 </TableRow>
@@ -377,8 +381,11 @@ function SegmentsPanel({
                   <TableCell className="truncate px-5 py-4 align-middle text-sm">
                     {segment.name}
                   </TableCell>
-                  <TableCell className="truncate px-5 py-4 align-middle text-sm">
-                    {segment.type}
+                  <TableCell className="px-5 py-4 align-middle text-sm">
+                    <SegmentTypeCell
+                      type={segment.type}
+                      scopes={segment.scopes}
+                    />
                   </TableCell>
                   <TableCell className="truncate px-5 py-4 align-middle text-sm">
                     {new Intl.DateTimeFormat(
@@ -393,12 +400,13 @@ function SegmentsPanel({
                     <ActionLink
                       onClick={() =>
                         window.open(
-                          `/${lang}/segments/details/${encodeURIComponent(segment.id)}/targeting`,
+                          `/${lang}/segments/${encodeURIComponent(segment.id)}/targeting`,
                           "_blank"
                         )
                       }
                     >
                       {t("workspace.globalUsers.detailsAction")}
+                      <ExternalLink className="size-3.5" />
                     </ActionLink>
                   </TableCell>
                 </TableRow>

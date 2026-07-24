@@ -27,6 +27,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { SegmentTypeCell } from "@/features/segments/components/segment-type-cell"
 import { fetchEndUserFlags, fetchEndUserSegments } from "../end-users-api"
 import type { EndUser, EndUserFlag } from "../end-users-types"
 import {
@@ -112,8 +113,12 @@ export function EvaluateSheet({
       <Sheet open={Boolean(user)} onOpenChange={onOpenChange}>
         <SheetContent className="gap-0 p-0 data-[side=right]:w-[min(100vw,960px)] data-[side=right]:sm:max-w-[960px]">
           <SheetHeader className="border-b px-6 py-5 pr-12">
-            <SheetTitle>{user?.name || t("endUsers.unnamed")}</SheetTitle>
+            <SheetTitle>{t("endUsers.evaluate")}</SheetTitle>
             <SheetDescription className="flex items-center gap-2">
+              <span className="truncate">
+                {user?.name || t("endUsers.unnamed")}
+              </span>
+              <span>·</span>
               <span className="truncate font-mono">{user?.keyId}</span>
               <Button
                 type="button"
@@ -323,8 +328,11 @@ export function EvaluateSheet({
                             <TableCell className="truncate px-5 py-4">
                               {segment.name}
                             </TableCell>
-                            <TableCell className="truncate px-5 py-4">
-                              {segment.type}
+                            <TableCell className="px-5 py-4">
+                              <SegmentTypeCell
+                                type={segment.type}
+                                scopes={segment.scopes}
+                              />
                             </TableCell>
                             <TableCell className="truncate px-5 py-4">
                               {new Intl.DateTimeFormat(
@@ -338,7 +346,7 @@ export function EvaluateSheet({
                                 className="h-auto p-0"
                                 onClick={() =>
                                   window.open(
-                                    `/${lang}/segments/details/${encodeURIComponent(segment.id)}/targeting`,
+                                    `/${lang}/segments/${encodeURIComponent(segment.id)}/targeting`,
                                     "_blank"
                                   )
                                 }

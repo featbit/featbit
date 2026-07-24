@@ -174,6 +174,12 @@ export function EndUsersPage() {
   const columns = useMemo<ColumnDef<EndUser>[]>(
     () => [
       {
+        accessorKey: "keyId",
+        size: 200,
+        header: t("endUsers.keyId"),
+        cell: ({ row }) => <TruncatedValue value={row.original.keyId} mono />,
+      },
+      {
         accessorKey: "name",
         size: 180,
         header: t("endUsers.name"),
@@ -185,12 +191,6 @@ export function EndUsersPage() {
               {t("endUsers.unnamed")}
             </span>
           ),
-      },
-      {
-        accessorKey: "keyId",
-        size: 200,
-        header: t("endUsers.keyId"),
-        cell: ({ row }) => <TruncatedValue value={row.original.keyId} mono />,
       },
       ...selectedColumns.map((column): ColumnDef<EndUser> => ({
         id: column,
@@ -212,23 +212,24 @@ export function EndUsersPage() {
       })),
       {
         id: "actions",
-        size: 150,
+        size: 200,
         header: t("endUsers.actions"),
         cell: ({ row }) => (
-          <div className="flex items-center gap-2 whitespace-nowrap">
+          <div className="flex items-center gap-1 whitespace-nowrap">
             <Button
               type="button"
-              variant="link"
-              className="h-auto p-0"
+              variant="ghost"
+              size="sm"
+              className="font-medium"
               onClick={() => setEvaluateUser(row.original)}
             >
               {t("endUsers.evaluate")}
             </Button>
-            <span className="h-4 w-px bg-border" />
             <Button
               type="button"
-              variant="link"
-              className="h-auto p-0"
+              variant="ghost"
+              size="sm"
+              className="font-medium"
               onClick={() => setDetailsUser(row.original)}
             >
               {t("endUsers.details")}
@@ -314,7 +315,7 @@ export function EndUsersPage() {
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-md border bg-background">
+        <div className="isolate overflow-hidden rounded-md border bg-background">
           {listQuery.isError ? (
             <div className="flex items-center justify-between border-b bg-destructive/5 px-5 py-3 text-sm text-destructive">
               {t("endUsers.loadFailed")}
@@ -341,6 +342,10 @@ export function EndUsersPage() {
                         key={header.id}
                         className={cn(
                           "overflow-hidden px-5 py-4 font-semibold",
+                          header.column.id === "keyId" &&
+                            "sticky left-0 z-20 bg-background",
+                          header.column.id === "name" &&
+                            "sticky left-[200px] z-20 bg-background",
                           header.column.id === "actions" &&
                             "sticky right-0 z-20 bg-background"
                         )}
@@ -392,14 +397,21 @@ export function EndUsersPage() {
                 )
               ) : (
                 table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.original.id} className="group">
+                  <TableRow
+                    key={row.original.id}
+                    className="group hover:bg-muted"
+                  >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell
                         key={cell.id}
                         className={cn(
-                          "overflow-hidden px-5 py-4 align-middle",
+                          "overflow-hidden px-5 py-4 align-middle transition-colors",
+                          cell.column.id === "keyId" &&
+                            "sticky left-0 z-10 bg-background group-hover:bg-muted",
+                          cell.column.id === "name" &&
+                            "sticky left-[200px] z-10 bg-background group-hover:bg-muted",
                           cell.column.id === "actions" &&
-                            "sticky right-0 z-10 bg-background transition-colors group-hover:bg-muted/50"
+                            "sticky right-0 z-10 bg-background group-hover:bg-muted"
                         )}
                         style={{ width: cell.column.getSize() }}
                       >

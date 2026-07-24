@@ -61,6 +61,7 @@ export type EndUserSegment = {
   id: string
   name: string
   type: string
+  scopes: string[]
   updatedAt: string
 }
 

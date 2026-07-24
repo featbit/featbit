@@ -66,32 +66,27 @@ export function DetailsDrawer({
       <SheetContent className="gap-0 p-0 data-[side=right]:w-[min(100vw,540px)] data-[side=right]:sm:max-w-[540px]">
         <SheetHeader className="border-b px-6 py-5 pr-12">
           <SheetTitle>{t("workspace.globalUsers.details.title")}</SheetTitle>
-          <SheetDescription className="sr-only">
-            {t("workspace.globalUsers.details.title")}
+          <SheetDescription className="flex items-center gap-2">
+            <span className="truncate">
+              {user?.name || t("workspace.globalUsers.unnamedUser")}
+            </span>
+            <span>·</span>
+            <span className="truncate font-mono">{user?.keyId}</span>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              className="size-7"
+              onClick={() => user?.keyId && copy(user.keyId)}
+            >
+              <Copy className="size-3.5" />
+            </Button>
           </SheetDescription>
         </SheetHeader>
         <div className="flex-1 overflow-y-auto px-6 py-5">
-          <div>
-            <p className="text-base font-semibold text-foreground">
-              {user?.name || t("workspace.globalUsers.unnamedUser")}
-            </p>
-            <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
-              <span className="truncate font-mono">{user?.keyId}</span>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-sm"
-                className="size-7"
-                onClick={() => user?.keyId && copy(user.keyId)}
-              >
-                <Copy className="size-3.5" />
-              </Button>
-            </div>
-          </div>
           <SearchBox
             value={search}
             placeholder={t("workspace.globalUsers.details.filter")}
-            className="mt-5"
             stopKeyDownPropagation={false}
             onChange={setSearch}
           />

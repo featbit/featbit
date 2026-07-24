@@ -35,7 +35,6 @@ import { EvaluateDrawer } from "@/features/workspace/global-users/components/eva
 import { ImportUsersModal } from "@/features/workspace/global-users/components/import-users-modal"
 import { Pagination } from "@/features/workspace/global-users/components/pagination"
 import {
-  ActionLink,
   SearchBox,
   StatusMessage,
   TableSkeleton,
@@ -206,17 +205,28 @@ export function GlobalUsersPage() {
       })),
       {
         id: "actions",
-        size: 150,
+        size: 200,
         header: t("workspace.globalUsers.actions"),
         cell: ({ row }) => (
-          <div className="flex items-center gap-2">
-            <ActionLink onClick={() => setEvaluateUser(row.original)}>
+          <div className="flex items-center gap-1 whitespace-nowrap">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="font-medium"
+              onClick={() => setEvaluateUser(row.original)}
+            >
               {t("workspace.globalUsers.evaluateAction")}
-            </ActionLink>
-            <span className="h-4 w-px bg-border" />
-            <ActionLink onClick={() => setDetailsUser(row.original)}>
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="font-medium"
+              onClick={() => setDetailsUser(row.original)}
+            >
               {t("workspace.globalUsers.detailsAction")}
-            </ActionLink>
+            </Button>
           </div>
         ),
       },
@@ -270,7 +280,7 @@ export function GlobalUsersPage() {
             onImportClick={() => setImportOpen(true)}
           />
 
-          <div className="overflow-hidden rounded-md border bg-background">
+          <div className="isolate overflow-hidden rounded-md border bg-background">
             {error ? (
               <div className="flex items-center justify-between border-b bg-destructive/5 px-5 py-3 text-sm text-destructive">
                 {t("workspace.globalUsers.failedToLoad")}
@@ -433,6 +443,10 @@ function GlobalUsersTable({
                   key={header.id}
                   className={cn(
                     "overflow-hidden px-5 py-4 font-semibold",
+                    header.column.id === "keyId" &&
+                      "sticky left-0 z-20 bg-background",
+                    header.column.id === "name" &&
+                      "sticky left-[200px] z-20 bg-background",
                     header.column.id === "actions" &&
                       "sticky right-0 z-20 bg-background"
                   )}
@@ -508,14 +522,18 @@ function GlobalUsersTable({
           </TableRow>
         ) : (
           table.getRowModel().rows.map((row) => (
-            <TableRow key={row.id} className="group">
+            <TableRow key={row.id} className="group hover:bg-muted">
               {row.getVisibleCells().map((cell) => (
                 <TableCell
                   key={cell.id}
                   className={cn(
-                    "overflow-hidden px-5 py-4 align-middle text-sm text-foreground",
+                    "overflow-hidden px-5 py-4 align-middle text-sm text-foreground transition-colors",
+                    cell.column.id === "keyId" &&
+                      "sticky left-0 z-10 bg-background group-hover:bg-muted",
+                    cell.column.id === "name" &&
+                      "sticky left-[200px] z-10 bg-background group-hover:bg-muted",
                     cell.column.id === "actions" &&
-                      "sticky right-0 z-10 bg-background transition-colors group-hover:bg-muted/50"
+                      "sticky right-0 z-10 bg-background group-hover:bg-muted"
                   )}
                   style={{ width: cell.column.getSize() }}
                 >

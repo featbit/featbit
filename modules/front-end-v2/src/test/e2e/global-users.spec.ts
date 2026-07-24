@@ -205,7 +205,13 @@ test.describe("workspace global users", () => {
     await page.getByRole("button", { name: "Details" }).first().click()
     const detailsDialog = page.getByRole("dialog", { name: "User profile" })
     await expect(detailsDialog).toBeVisible()
-    await expect(detailsDialog.getByText("user-alpha").first()).toBeVisible()
+    const detailsDescription = detailsDialog.locator(
+      '[data-slot="sheet-description"]'
+    )
+    await expect(
+      detailsDescription.getByText("Alpha User", { exact: true })
+    ).toBeVisible()
+    await expect(detailsDescription.getByText("user-alpha")).toBeVisible()
     await expect(detailsDialog.locator("dd button")).toHaveCount(3)
 
     await detailsDialog.getByPlaceholder("Filter properties").fill("department")
@@ -214,8 +220,22 @@ test.describe("workspace global users", () => {
 
     await page.keyboard.press("Escape")
     await page.getByRole("button", { name: "Evaluate" }).first().click()
-    await expect(page.getByText("Checkout flow")).toBeVisible()
-    await page.getByRole("tab", { name: "Segments" }).click()
-    await expect(page.getByText("Beta users")).toBeVisible()
+    const evaluateDialog = page.getByRole("dialog", { name: "Evaluate" })
+    await expect(evaluateDialog).toBeVisible()
+    const evaluateDescription = evaluateDialog.locator(
+      '[data-slot="sheet-description"]'
+    )
+    await expect(
+      evaluateDescription.getByText("Alpha User", { exact: true })
+    ).toBeVisible()
+    await expect(evaluateDescription.getByText("user-alpha")).toBeVisible()
+    await expect(evaluateDialog.getByText("Checkout flow")).toBeVisible()
+    await evaluateDialog.getByRole("tab", { name: "Segments" }).click()
+    await expect(evaluateDialog.getByText("Beta users")).toBeVisible()
+
+    const detailsPopupPromise = page.waitForEvent("popup")
+    await evaluateDialog.getByRole("button", { name: "Details" }).click()
+    const detailsPopup = await detailsPopupPromise
+    await expect(detailsPopup).toHaveURL("/en/segments/segment-1/targeting")
   })
 })
