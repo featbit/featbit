@@ -391,6 +391,7 @@ export function WebhooksPage() {
           environmentsLoading={environmentQuery.isLoading}
           environmentsError={environmentQuery.isError}
           isSaving={saveMutation.isPending}
+          liveDebugOpen={Boolean(debugWebhook)}
           onOpenChange={(nextOpen) => !nextOpen && setSheet(null)}
           onModeChange={(mode) => setSheet({ mode, webhook: sheet.webhook })}
           onRetryEnvironments={() => void environmentQuery.refetch()}

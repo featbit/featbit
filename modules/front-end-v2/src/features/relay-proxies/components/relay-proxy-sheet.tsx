@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Plus, X } from "lucide-react"
+import { Box, Plus, X } from "lucide-react"
 import { useMemo, useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -437,6 +437,7 @@ export function RelayProxySheet({
                                 <Badge variant="secondary" className="gap-1" />
                               }
                             >
+                              <Box aria-hidden className="size-3.5" />
                               {environment.pathName}
                               {!readOnly && (
                                 <button

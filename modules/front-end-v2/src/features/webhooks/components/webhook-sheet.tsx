@@ -1,6 +1,16 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useQuery } from "@tanstack/react-query"
-import { Bug, Copy, Eye, EyeOff, Pencil, Plus, Trash2, X } from "lucide-react"
+import {
+  Box,
+  Bug,
+  Copy,
+  Eye,
+  EyeOff,
+  Pencil,
+  Plus,
+  Trash2,
+  X,
+} from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -132,6 +142,7 @@ export function WebhookSheet({
   environmentsLoading,
   environmentsError,
   isSaving,
+  liveDebugOpen,
   onOpenChange,
   onModeChange,
   onRetryEnvironments,
@@ -146,6 +157,7 @@ export function WebhookSheet({
   environmentsLoading: boolean
   environmentsError: boolean
   isSaving: boolean
+  liveDebugOpen: boolean
   onOpenChange: (open: boolean) => void
   onModeChange: (mode: WebhookSheetMode) => void
   onRetryEnvironments: () => void
@@ -351,10 +363,18 @@ export function WebhookSheet({
       : mode === "edit"
         ? t("webhooks.sheet.editTitle", { name: webhook?.name ?? "" })
         : (webhook?.name ?? "")
+  const nestedSurfaceOpen =
+    environmentPickerOpen || expandedEditor || discardOpen || liveDebugOpen
 
   return (
     <TooltipProvider delay={300}>
-      <Sheet open={open} onOpenChange={() => undefined}>
+      <Sheet
+        open={open}
+        disablePointerDismissal={nestedSurfaceOpen}
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen && !nestedSurfaceOpen) attemptClose()
+        }}
+      >
         <SheetContent
           showCloseButton={false}
           className="gap-0 p-0 data-[side=right]:w-[min(100vw,850px)] data-[side=right]:sm:max-w-[850px]"
@@ -513,6 +533,7 @@ export function WebhookSheet({
                         variant="secondary"
                         className="font-normal"
                       >
+                        <Box aria-hidden className="size-3.5" />
                         {scope}
                       </Badge>
                     ))}
@@ -542,6 +563,7 @@ export function WebhookSheet({
                               <Badge variant="secondary" className="gap-1" />
                             }
                           >
+                            <Box aria-hidden className="size-3.5" />
                             {resource.pathName}
                             <button
                               type="button"
