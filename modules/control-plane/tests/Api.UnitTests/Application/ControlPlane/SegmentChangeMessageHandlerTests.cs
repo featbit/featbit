@@ -97,7 +97,7 @@ public class SegmentChangeMessageHandlerTests
             .ReturnsAsync(new Collection<FlagReference>());
 
         _segSvc
-            .Setup(x => x.PublishSegmentChangeMessage(It.IsAny<Guid>(), It.IsAny<ICollection<FlagReference>>(),
+            .Setup(x => x.PublishChangeMessage(It.IsAny<Guid>(), It.IsAny<ICollection<FlagReference>>(),
                 It.IsAny<Segment>()))
             .Returns(Task.CompletedTask);
 
@@ -117,10 +117,10 @@ public class SegmentChangeMessageHandlerTests
             Times.Never);
 
         _segSvc.Verify(
-            x => x.PublishSegmentChangeMessage(env1, It.IsAny<ICollection<FlagReference>>(), It.IsAny<Segment>()),
+            x => x.PublishChangeMessage(env1, It.IsAny<ICollection<FlagReference>>(), It.IsAny<Segment>()),
             Times.Once);
         _segSvc.Verify(
-            x => x.PublishSegmentChangeMessage(env2, It.IsAny<ICollection<FlagReference>>(), It.IsAny<Segment>()),
+            x => x.PublishChangeMessage(env2, It.IsAny<ICollection<FlagReference>>(), It.IsAny<Segment>()),
             Times.Once);
 
         // BestEffort must NOT use the stage/commit path.
@@ -192,7 +192,7 @@ public class SegmentChangeMessageHandlerTests
             x => x.OnSegmentUpdatedAsync(It.IsAny<Segment>(), It.IsAny<Guid>(), It.IsAny<ICollection<FlagReference>>()),
             Times.Never);
         _segSvc.Verify(
-            x => x.PublishSegmentChangeMessage(
+            x => x.PublishChangeMessage(
                 It.IsAny<Guid>(), It.IsAny<ICollection<FlagReference>>(), It.IsAny<Segment>()),
             Times.Never);
         _segSvc.Verify(

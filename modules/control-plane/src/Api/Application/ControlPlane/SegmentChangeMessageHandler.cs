@@ -83,7 +83,7 @@ public class SegmentChangeMessageHandler(
                         }
 
                         // publish segment change message
-                        await segmentMessageService.PublishSegmentChangeMessage(envId, affectedFlags,
+                        await segmentMessageService.PublishChangeMessage(envId, affectedFlags,
                             deserializedSegmentNonEnvironmentSpecificNode);
                     }
                 }

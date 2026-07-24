@@ -552,7 +552,7 @@ public sealed class SegmentCommitCoordinatorWorkerTests : IntegrationTestBase, I
             return ValueTask.FromResult<ICollection<FlagReference>>([]);
         }
 
-        public Task PublishSegmentChangeMessage(Guid envId, ICollection<FlagReference> affectedFlags, Segment segment)
+        public Task PublishChangeMessage(Guid envId, ICollection<FlagReference> affectedFlags, Segment segment)
         {
             Published.Add((envId, affectedFlags, segment));
             return Task.CompletedTask;

@@ -45,7 +45,7 @@ public class OnFeatureFlagChangedHandler(
     ICacheService cache,
     IAuditLogService auditLogService,
     IWebhookHandler webhookHandler,
-    IFeatureFlagChangePublisher featureFlagChangePublisher, 
+    IFeatureFlagChangePublisher featureFlagChangePublisher,
     IConfiguration configuration)
     : INotificationHandler<OnFeatureFlagChanged>
 {
@@ -71,6 +71,5 @@ public class OnFeatureFlagChangedHandler(
             // handle webhooks
             _ = webhookHandler.HandleAsync(notification.Flag, notification.DataChange, notification.OperatorId);
         }
-        
     }
 }

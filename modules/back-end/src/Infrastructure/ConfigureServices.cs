@@ -1,7 +1,5 @@
 using Application;
-using Application.FeatureFlags;
 using Application.Usages;
-using Application.Segments;
 using Domain.Users;
 using Infrastructure.Caches;
 using Infrastructure.MQ;
@@ -74,8 +72,6 @@ public static class ConfigureServices
         services.AddDbSpecificServices(configuration);
         services.AddTransient<IEnvironmentAppService, AppServices.EnvironmentAppService>();
         services.AddTransient<IFeatureFlagAppService, AppServices.FeatureFlagAppService>();
-        services.AddTransient<ISegmentMessageService, SegmentMessageService>();
-        services.AddChangePublishingServices(configuration);
         if (configuration.IsSaasHosting())
         {
             services.AddTransient<IBillingService, Services.BillingService>();
@@ -87,23 +83,6 @@ public static class ConfigureServices
 
         // InsightsWriter must be a singleton service
         services.AddSingleton(typeof(AppServices.InsightsWriter));
-
-        return services;
-    }
-
-    private static IServiceCollection AddChangePublishingServices(
-        this IServiceCollection services, IConfiguration configuration)
-    {
-        if (configuration.UseControlPlane())
-        {
-            services.AddScoped<ISegmentChangePublisher, ControlPlaneSegmentChangePublisher>();
-            services.AddScoped<IFeatureFlagChangePublisher, ControlPlaneFeatureFlagChangePublisher>();
-        }
-        else
-        {
-            services.AddScoped<ISegmentChangePublisher, DirectSegmentChangePublisher>();
-            services.AddScoped<IFeatureFlagChangePublisher, DirectFeatureFlagChangePublisher>();
-        }
 
         return services;
     }

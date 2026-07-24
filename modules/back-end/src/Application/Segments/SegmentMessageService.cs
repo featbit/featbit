@@ -6,7 +6,8 @@ using Domain.Segments;
 
 namespace Application.Segments;
 
-public class SegmentMessageService(ISegmentService segmentService, IMessageProducer messageProducer) : ISegmentMessageService
+public class SegmentMessageService(ISegmentService segmentService, IMessageProducer messageProducer)
+    : ISegmentMessageService
 {
     public async ValueTask<ICollection<FlagReference>> GetAffectedFlagsAsync(Guid envId, OnSegmentChange notification)
     {
@@ -26,7 +27,7 @@ public class SegmentMessageService(ISegmentService segmentService, IMessageProdu
         return affectedFlags;
     }
 
-    public async Task PublishSegmentChangeMessage(Guid envId, ICollection<FlagReference> affectedFlags, Segment segment)
+    public async Task PublishChangeMessage(Guid envId, ICollection<FlagReference> affectedFlags, Segment segment)
     {
         JsonObject message = new()
         {

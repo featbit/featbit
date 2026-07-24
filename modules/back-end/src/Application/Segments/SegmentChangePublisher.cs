@@ -31,7 +31,7 @@ public class DirectSegmentChangePublisher(
             }
 
             // publish segment change message
-            await segmentMessageService.PublishSegmentChangeMessage(envId, affectedFlags, segment);
+            await segmentMessageService.PublishChangeMessage(envId, affectedFlags, segment);
         }
     }
 }

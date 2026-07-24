@@ -552,7 +552,7 @@ public sealed class CommitCoordinatorWorker : BackgroundService
                     }
 
                     // publish segment change message
-                    await segmentMessageService.PublishSegmentChangeMessage(envId, affectedFlags, committedSegment);
+                    await segmentMessageService.PublishChangeMessage(envId, affectedFlags, committedSegment);
                 }
 
                 count++;

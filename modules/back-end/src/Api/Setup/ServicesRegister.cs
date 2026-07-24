@@ -65,7 +65,7 @@ public static class ServicesRegister
 
         // add infrastructure & application services
         builder.Services.AddInfrastructureServices(builder.Configuration);
-        builder.Services.AddApplicationServices();
+        builder.Services.AddApplicationServices(builder.Configuration);
 
         // authentication
         var jwtOptions = JwtOptionsBuilder.Build(builder.Configuration);

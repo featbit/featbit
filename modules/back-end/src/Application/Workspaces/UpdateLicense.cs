@@ -53,7 +53,7 @@ public class UpdateLicenseHandler(
 
         // update license cache
         await cacheService.UpsertLicenseAsync(workspace);
-        
+
         if (configuration.UseControlPlane())
         {
             await messageProducer.PublishAsync(ControlPlaneTopics.ControlPlaneLicenseChange, workspace);

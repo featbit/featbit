@@ -529,7 +529,7 @@ public sealed class ConsistencyMetricsTests : IntegrationTestBase, IAsyncLifetim
         public ValueTask<ICollection<FlagReference>> GetAffectedFlagsAsync(Guid envId, OnSegmentChange notification) =>
             ValueTask.FromResult<ICollection<FlagReference>>([]);
 
-        public Task PublishSegmentChangeMessage(Guid envId, ICollection<FlagReference> affectedFlags, Segment segment) =>
+        public Task PublishChangeMessage(Guid envId, ICollection<FlagReference> affectedFlags, Segment segment) =>
             Task.CompletedTask;
     }
 
