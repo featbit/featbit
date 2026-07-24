@@ -50,21 +50,6 @@ export const navigationGroups: NavGroup[] = [
     ],
   },
   {
-    labelKey: "layout.nav.groups.experimentation",
-    items: [
-      {
-        labelKey: "layout.nav.items.experiments",
-        href: "/experiments",
-        icon: FlaskConical,
-      },
-      {
-        labelKey: "layout.nav.items.metrics",
-        href: "/metrics",
-        icon: BarChart3,
-      },
-    ],
-  },
-  {
     labelKey: "layout.nav.groups.governance",
     items: [
       {
@@ -76,6 +61,21 @@ export const navigationGroups: NavGroup[] = [
         labelKey: "layout.nav.items.changeRequests",
         href: "/change-requests",
         icon: GitPullRequest,
+      },
+    ],
+  },
+  {
+    labelKey: "layout.nav.groups.experimentation",
+    items: [
+      {
+        labelKey: "layout.nav.items.experiments",
+        href: "/experiments",
+        icon: FlaskConical,
+      },
+      {
+        labelKey: "layout.nav.items.metrics",
+        href: "/metrics",
+        icon: BarChart3,
       },
     ],
   },

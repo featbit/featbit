@@ -179,24 +179,21 @@ export function SettingsTab({
           </h2>
           <div className="flex items-center gap-4">
             {dirty ? (
-              <span className="text-sm text-muted-foreground">
-                {t("segments.detailsPage.unsavedChanges")}
-              </span>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={saveMutation.isPending}
+                onClick={() =>
+                  form.reset({
+                    name: segment.name,
+                    description: segment.description,
+                    tags: segment.tags,
+                  })
+                }
+              >
+                {t("segments.detailsPage.discard")}
+              </Button>
             ) : null}
-            <Button
-              type="button"
-              variant="outline"
-              disabled={!dirty || saveMutation.isPending}
-              onClick={() =>
-                form.reset({
-                  name: segment.name,
-                  description: segment.description,
-                  tags: segment.tags,
-                })
-              }
-            >
-              {t("segments.detailsPage.discard")}
-            </Button>
             <Button type="submit" disabled={!dirty || saveMutation.isPending}>
               {t("segments.detailsPage.reviewAndSave")}
             </Button>

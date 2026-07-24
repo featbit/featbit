@@ -189,6 +189,8 @@ export function SegmentDetailsPage() {
           references={referencesQuery.data ?? []}
           activeTab={activeTab}
           basePath={segmentsPath}
+          envId={envId}
+          lang={lang}
         />
         {activeTab === "targeting" ? (
           propertiesQuery.isLoading || usersQuery.isLoading ? (

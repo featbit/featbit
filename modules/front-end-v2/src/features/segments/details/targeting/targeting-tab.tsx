@@ -1,15 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import {
-  GripVertical,
-  Loader2,
-  MoreVertical,
-  Plus,
-  Search,
-  X,
-} from "lucide-react"
-import { useEffect, useMemo, useState } from "react"
+import { GripVertical, Loader2, Plus, Search, Trash2, X } from "lucide-react"
+import type { DragEvent, KeyboardEvent } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   Command,
@@ -19,12 +14,6 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
 import {
   Popover,
@@ -93,6 +82,23 @@ type Props = {
 
 function userLabel(user: SegmentEndUser) {
   return user.name?.trim() || user.keyId
+}
+
+function userOptionValue(user: SegmentEndUser) {
+  return `${user.envId ?? "global"}:${user.id}:${user.keyId}`
+}
+
+function GlobalUserBadge() {
+  const { t } = useTranslation()
+
+  return (
+    <Badge
+      variant="outline"
+      className="h-5 shrink-0 px-1.5 text-[10px] font-normal"
+    >
+      {t("segments.detailsPage.targeting.globalUser")}
+    </Badge>
+  )
 }
 
 export function UserPicker({
@@ -228,17 +234,20 @@ export function UserPicker({
                 .map((user) => (
                   <CommandItem
                     key={`${user.envId ?? "global"}-${user.keyId}`}
-                    value={user.keyId}
+                    value={userOptionValue(user)}
                     onSelect={() => {
                       onAdd(user)
                       setOpen(false)
                       setSearch("")
                     }}
                   >
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium">
-                        {userLabel(user)}
-                      </p>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex min-w-0 items-center gap-2">
+                        <p className="truncate text-sm font-medium">
+                          {userLabel(user)}
+                        </p>
+                        {user.envId === null ? <GlobalUserBadge /> : null}
+                      </div>
                       <p className="truncate text-xs text-muted-foreground">
                         {user.keyId}
                       </p>
@@ -303,10 +312,13 @@ function UserPanel({
                 key={key}
                 className="flex items-center justify-between gap-3 border-b px-2 py-2 last:border-b-0"
               >
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium">
-                    {user ? userLabel(user) : key}
-                  </p>
+                <div className="min-w-0 flex-1">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <p className="truncate text-sm font-medium">
+                      {user ? userLabel(user) : key}
+                    </p>
+                    {user?.envId === null ? <GlobalUserBadge /> : null}
+                  </div>
                   <p className="truncate text-xs text-muted-foreground">
                     {user?.keyId ?? key}
                   </p>
@@ -342,12 +354,26 @@ function RuleEditor({
   rule,
   properties,
   disabled,
+  canMoveUp,
+  canMoveDown,
+  onDragStart,
+  onDrag,
+  onDragEnd,
+  onMoveUp,
+  onMoveDown,
   onChange,
   onRemove,
 }: {
   rule: SegmentRule
   properties: SegmentUserProperty[]
   disabled: boolean
+  canMoveUp: boolean
+  canMoveDown: boolean
+  onDragStart: (event: DragEvent<HTMLButtonElement>) => void
+  onDrag: (event: DragEvent<HTMLButtonElement>) => void
+  onDragEnd: () => void
+  onMoveUp: () => void
+  onMoveDown: () => void
   onChange: (rule: SegmentRule) => void
   onRemove: () => void
 }) {
@@ -361,13 +387,35 @@ function RuleEditor({
     [properties]
   )
 
+  function handleReorderKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
+    if (event.key === "ArrowUp" && canMoveUp) {
+      event.preventDefault()
+      onMoveUp()
+    }
+    if (event.key === "ArrowDown" && canMoveDown) {
+      event.preventDefault()
+      onMoveDown()
+    }
+  }
+
   return (
     <article className="rounded-md border">
       <div className="flex items-center gap-3 border-b px-3 py-2">
-        <GripVertical
-          className="size-4 shrink-0 cursor-grab text-muted-foreground"
-          aria-hidden
-        />
+        <button
+          type="button"
+          draggable={!disabled}
+          disabled={disabled}
+          aria-label={t("segments.detailsPage.rules.reorderRule", {
+            rule: rule.name,
+          })}
+          className="inline-flex size-8 shrink-0 cursor-grab items-center justify-center rounded-sm text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring active:cursor-grabbing disabled:cursor-not-allowed disabled:opacity-50"
+          onDragStart={onDragStart}
+          onDrag={onDrag}
+          onDragEnd={onDragEnd}
+          onKeyDown={handleReorderKeyDown}
+        >
+          <GripVertical className="size-4" aria-hidden />
+        </button>
         <Input
           value={rule.name}
           disabled={disabled}
@@ -375,29 +423,19 @@ function RuleEditor({
           aria-label={t("segments.detailsPage.rules.ruleName")}
           onChange={(event) => onChange({ ...rule, name: event.target.value })}
         />
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            render={
-              <Button
-                type="button"
-                size="icon-sm"
-                variant="ghost"
-                className="ml-auto"
-                disabled={disabled}
-              />
-            }
-          >
-            <MoreVertical />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem
-              className="text-destructive focus:text-destructive"
-              onClick={onRemove}
-            >
-              {t("segments.detailsPage.rules.removeRule")}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <Button
+          type="button"
+          size="sm"
+          variant="ghost"
+          className="ml-auto text-destructive hover:bg-destructive/10 hover:text-destructive"
+          disabled={disabled}
+          onClick={onRemove}
+        >
+          <span className="inline-flex items-center gap-1 leading-none">
+            <Trash2 className="size-3.5 -translate-y-px" />
+            <span>{t("segments.detailsPage.rules.removeRule")}</span>
+          </span>
+        </Button>
       </div>
       <div className="space-y-2 px-4 py-3">
         {rule.conditions.map((condition, index) => {
@@ -405,13 +443,18 @@ function RuleEditor({
           const valueDisabled =
             condition.op === "IsTrue" || condition.op === "IsFalse"
           return (
-            <div key={condition.id}>
-              {index ? (
-                <p className="mb-2 text-xs font-medium text-muted-foreground">
-                  {t("segments.detailsPage.rules.and")}
-                </p>
-              ) : null}
-              <div className="grid grid-cols-[minmax(10rem,1fr)_minmax(10rem,.9fr)_minmax(14rem,2fr)_2rem] gap-3">
+            <div
+              key={condition.id}
+              className="grid grid-cols-[1.75rem_minmax(10rem,1fr)_minmax(10rem,.9fr)_minmax(14rem,2fr)_2rem] gap-3"
+            >
+              <span className="flex h-8 items-center text-xs font-medium text-muted-foreground">
+                {t(
+                  index === 0
+                    ? "segments.detailsPage.rules.if"
+                    : "segments.detailsPage.rules.and"
+                )}
+              </span>
+              <div className="contents">
                 <Select
                   value={condition.property}
                   disabled={disabled}
@@ -533,8 +576,10 @@ function RuleEditor({
             })
           }
         >
-          <Plus />
-          {t("segments.detailsPage.rules.addCondition")}
+          <span className="inline-flex items-center gap-1 leading-none">
+            <Plus className="size-3.5 -translate-y-px" />
+            <span>{t("segments.detailsPage.rules.addCondition")}</span>
+          </span>
         </Button>
       </div>
     </article>
@@ -556,7 +601,23 @@ export function TargetingTab({
   const [draft, setDraft] = useState(() => cloneSegment(segment))
   const [resolvedUsers, setResolvedUsers] = useState(users)
   const [reviewOpen, setReviewOpen] = useState(false)
-  const [dragIndex, setDragIndex] = useState<number | null>(null)
+  const [dragRuleId, setDragRuleId] = useState<string | null>(null)
+  const dragPreviewRef = useRef<HTMLElement | null>(null)
+  const dragPreviewOffsetRef = useRef({ x: 0, y: 0 })
+
+  function removeDragPreview() {
+    dragPreviewRef.current?.remove()
+    dragPreviewRef.current = null
+  }
+
+  function positionDragPreview(clientX: number, clientY: number) {
+    const preview = dragPreviewRef.current
+    if (!preview || (clientX === 0 && clientY === 0)) return
+    const { x, y } = dragPreviewOffsetRef.current
+    preview.style.transform = `translate3d(${clientX - x}px, ${clientY - y}px, 0)`
+  }
+
+  useEffect(() => removeDragPreview, [])
 
   const dirty = stableTargeting(draft) !== stableTargeting(segment)
   const changes = useMemo(
@@ -588,6 +649,24 @@ export function TargetingTab({
     setResolvedUsers((current) => new Map(current).set(user.keyId, user))
   }
 
+  function moveRule(sourceId: string, targetId: string) {
+    if (sourceId === targetId) return
+    setDraft((current) => {
+      const sourceIndex = current.rules.findIndex(
+        (rule) => rule.id === sourceId
+      )
+      const targetIndex = current.rules.findIndex(
+        (rule) => rule.id === targetId
+      )
+      if (sourceIndex < 0 || targetIndex < 0) return current
+
+      const rules = [...current.rules]
+      const [moved] = rules.splice(sourceIndex, 1)
+      rules.splice(targetIndex, 0, moved)
+      return { ...current, rules }
+    })
+  }
+
   return (
     <div className="space-y-7 pt-4 pb-5">
       <section>
@@ -597,20 +676,32 @@ export function TargetingTab({
           </h2>
           <div className="flex items-center gap-5">
             {dirty ? (
-              <span className="text-sm text-muted-foreground">
-                {t("segments.detailsPage.unsavedChanges")}
-              </span>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={saveMutation.isPending}
+                onClick={() => {
+                  setDraft(cloneSegment(segment))
+                  setDragRuleId(null)
+                }}
+              >
+                {t("segments.detailsPage.discard")}
+              </Button>
             ) : null}
             <Button
               type="button"
-              disabled={!dirty || (!canUpdateRules && !canUpdateUsers)}
+              disabled={
+                !dirty ||
+                saveMutation.isPending ||
+                (!canUpdateRules && !canUpdateUsers)
+              }
               onClick={() => setReviewOpen(true)}
             >
               {t("segments.detailsPage.reviewAndSave")}
             </Button>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
           <UserPanel
             title={t("segments.detailsPage.targeting.included")}
             envId={envId}
@@ -673,24 +764,87 @@ export function TargetingTab({
           {draft.rules.map((rule, index) => (
             <div
               key={rule.id}
-              draggable={canUpdateRules}
-              onDragStart={() => setDragIndex(index)}
-              onDragOver={(event) => event.preventDefault()}
-              onDrop={() => {
-                if (dragIndex === null || dragIndex === index) return
-                setDraft((current) => {
-                  const rules = [...current.rules]
-                  const [moved] = rules.splice(dragIndex, 1)
-                  rules.splice(index, 0, moved)
-                  return { ...current, rules }
-                })
-                setDragIndex(null)
+              data-rule-id={rule.id}
+              className={
+                dragRuleId === rule.id
+                  ? "opacity-35 transition-opacity"
+                  : "transition-opacity"
+              }
+              onDragOver={(event) => {
+                if (!canUpdateRules) return
+                event.preventDefault()
+                event.dataTransfer.dropEffect = "move"
+              }}
+              onDrop={(event) => {
+                event.preventDefault()
+                const sourceId =
+                  event.dataTransfer.getData("text/plain") || dragRuleId
+                if (sourceId) moveRule(sourceId, rule.id)
+                removeDragPreview()
+                setDragRuleId(null)
               }}
             >
               <RuleEditor
                 rule={rule}
                 properties={properties}
                 disabled={!canUpdateRules}
+                canMoveUp={index > 0}
+                canMoveDown={index < draft.rules.length - 1}
+                onDragStart={(event) => {
+                  removeDragPreview()
+                  event.dataTransfer.effectAllowed = "move"
+                  event.dataTransfer.setData("text/plain", rule.id)
+                  const card = event.currentTarget
+                    .closest("[data-rule-id]")
+                    ?.querySelector("article")
+                  if (card) {
+                    const bounds = card.getBoundingClientRect()
+                    const pointerX = Number.isFinite(event.clientX)
+                      ? event.clientX
+                      : bounds.left
+                    const pointerY = Number.isFinite(event.clientY)
+                      ? event.clientY
+                      : bounds.top
+                    const preview = card.cloneNode(true) as HTMLElement
+                    preview.setAttribute("aria-hidden", "true")
+                    preview.setAttribute("inert", "")
+                    preview.dataset.ruleDragPreview = ""
+                    preview.style.position = "fixed"
+                    preview.style.inset = "0 auto auto 0"
+                    preview.style.width = `${bounds.width}px`
+                    preview.style.pointerEvents = "none"
+                    preview.style.zIndex = "50"
+                    preview.style.backgroundColor = "var(--background)"
+                    preview.style.opacity = "1"
+                    preview.style.transform = `translate3d(${bounds.left}px, ${bounds.top}px, 0)`
+                    preview.style.willChange = "transform"
+                    document.body.append(preview)
+                    dragPreviewRef.current = preview
+                    dragPreviewOffsetRef.current = {
+                      x: Math.max(0, pointerX - bounds.left),
+                      y: Math.max(0, pointerY - bounds.top),
+                    }
+
+                    const transparentDragImage = document.createElement("div")
+                    transparentDragImage.style.position = "fixed"
+                    transparentDragImage.style.width = "1px"
+                    transparentDragImage.style.height = "1px"
+                    transparentDragImage.style.opacity = "0"
+                    document.body.append(transparentDragImage)
+                    event.dataTransfer.setDragImage(transparentDragImage, 0, 0)
+                    window.setTimeout(() => transparentDragImage.remove(), 0)
+                  }
+                  setDragRuleId(rule.id)
+                }}
+                onDrag={(event) =>
+                  positionDragPreview(event.clientX, event.clientY)
+                }
+                onDragEnd={() => {
+                  removeDragPreview()
+                  setDragRuleId(null)
+                }}
+                onMoveUp={() => moveRule(rule.id, draft.rules[index - 1].id)}
+                onMoveDown={() => moveRule(rule.id, draft.rules[index + 1].id)}
                 onChange={(updated) =>
                   setDraft((current) => ({
                     ...current,

@@ -1,8 +1,9 @@
 import { json } from "@codemirror/lang-json"
-import { defaultHighlightStyle, syntaxHighlighting } from "@codemirror/language"
+import { HighlightStyle, syntaxHighlighting } from "@codemirror/language"
 import { MergeView } from "@codemirror/merge"
 import { EditorState } from "@codemirror/state"
 import { EditorView, lineNumbers } from "@codemirror/view"
+import { tags } from "@lezer/highlight"
 import { CircleMinus, CirclePlus } from "lucide-react"
 import { useLayoutEffect, useRef } from "react"
 import { useTranslation } from "react-i18next"
@@ -24,11 +25,44 @@ function formattedJson(value?: string) {
   }
 }
 
+const jsonHighlightStyle = HighlightStyle.define([
+  { tag: tags.propertyName, color: "var(--cm-json-property)" },
+  { tag: tags.string, color: "var(--cm-json-string)" },
+  { tag: tags.number, color: "var(--cm-json-number)" },
+  { tag: [tags.bool, tags.null], color: "var(--cm-json-literal)" },
+  {
+    tag: [tags.bracket, tags.separator],
+    color: "var(--cm-json-punctuation)",
+  },
+])
+
 const rawDataTheme = EditorView.theme({
   "&": {
     maxHeight: "calc(78vh - 11rem)",
     color: "var(--foreground)",
     backgroundColor: "var(--background)",
+    "--cm-json-property": "#0451a5",
+    "--cm-json-string": "#a31515",
+    "--cm-json-number": "#098658",
+    "--cm-json-literal": "#6f42c1",
+    "--cm-json-punctuation": "var(--foreground)",
+    "--cm-collapse-color": "var(--muted-foreground)",
+    "--cm-collapse-background": "var(--muted)",
+    "--cm-collapse-hover": "var(--accent)",
+    "--cm-collapse-border": "var(--border)",
+  },
+  ".dark &": {
+    color: "#d4d4d4",
+    backgroundColor: "#1e1e1e",
+    "--cm-json-property": "#9cdcfe",
+    "--cm-json-string": "#ce9178",
+    "--cm-json-number": "#b5cea8",
+    "--cm-json-literal": "#c586c0",
+    "--cm-json-punctuation": "#d4d4d4",
+    "--cm-collapse-color": "#a6a6a6",
+    "--cm-collapse-background": "#252526",
+    "--cm-collapse-hover": "#2a2d2e",
+    "--cm-collapse-border": "#333333",
   },
   ".cm-scroller": {
     overflow: "auto",
@@ -82,13 +116,53 @@ const rawDataTheme = EditorView.theme({
   },
   ".dark &.cm-merge-a .cm-changedLine, .dark &.cm-merge-a .cm-changedLineGutter":
     {
-      backgroundColor:
-        "color-mix(in oklch, var(--destructive) 28%, var(--background))",
+      backgroundColor: "#3b2426",
     },
   ".dark &.cm-merge-b .cm-changedLine, .dark &.cm-merge-b .cm-changedLineGutter":
     {
-      backgroundColor:
-        "color-mix(in oklch, var(--color-green-500) 28%, var(--background))",
+      backgroundColor: "#20382a",
+    },
+  ".dark &.cm-merge-a .cm-changedText": {
+    backgroundColor: "#5a2d31",
+  },
+  ".dark &.cm-merge-b .cm-changedText": {
+    backgroundColor: "#275c38",
+  },
+  ".dark &.cm-merge-a .cm-changedLineGutter": {
+    color: "#f48771",
+    backgroundColor: "#512b2f",
+    fontWeight: "700",
+  },
+  ".dark &.cm-merge-b .cm-changedLineGutter": {
+    color: "#89d185",
+    backgroundColor: "#244a31",
+    fontWeight: "700",
+  },
+  ".dark & .cm-gutters": {
+    color: "#858585",
+    backgroundColor: "#181818",
+    borderRightColor: "#333333",
+  },
+  ".cm-collapsedLines.cm-collapsedLines": {
+    color: "var(--cm-collapse-color)",
+    background: "var(--cm-collapse-background)",
+    borderTop: "1px solid var(--cm-collapse-border)",
+    borderBottom: "1px solid var(--cm-collapse-border)",
+    boxShadow: "none",
+    textShadow: "none",
+  },
+  ".cm-collapsedLines.cm-collapsedLines:hover": {
+    color: "var(--foreground)",
+    background: "var(--cm-collapse-hover)",
+  },
+  ".cm-collapsedLines.cm-collapsedLines::before, .cm-collapsedLines.cm-collapsedLines::after":
+    {
+      content: '"···"',
+      color: "var(--cm-collapse-color)",
+    },
+  ".dark & .cm-selectionBackground, .dark &.cm-focused .cm-selectionBackground":
+    {
+      backgroundColor: "#264f78",
     },
 })
 
@@ -97,12 +171,14 @@ function RawDataDiff({ auditLog }: { auditLog: AuditLog }) {
 
   useLayoutEffect(() => {
     if (!containerRef.current) return
+    const isDark = document.documentElement.classList.contains("dark")
     const readonly = [
       json(),
       lineNumbers(),
-      syntaxHighlighting(defaultHighlightStyle),
+      syntaxHighlighting(jsonHighlightStyle),
       EditorState.readOnly.of(true),
       EditorView.editable.of(false),
+      EditorView.darkTheme.of(isDark),
       EditorView.lineWrapping,
       rawDataTheme,
     ]

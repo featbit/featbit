@@ -1,6 +1,4 @@
-import { i18n } from "@/lib/i18n/i18n"
-
-const en = {
+export const enEndUsers = {
   title: "End Users",
   subtitle: "Manage end users and their properties in the current environment.",
   search: "Search by name or keyId",
@@ -116,8 +114,8 @@ const en = {
   },
 }
 
-const zh = {
-  ...en,
+export const zhEndUsers = {
+  ...enEndUsers,
   title: "目标用户",
   subtitle: "管理当前环境中的目标用户及其属性。",
   search: "按名称或 Key ID 搜索",
@@ -146,7 +144,7 @@ const zh = {
   operationSucceeded: "操作成功",
   operationFailed: "操作失败",
   importDialog: {
-    ...en.importDialog,
+    ...enEndUsers.importDialog,
     title: "导入目标用户",
     intro: "选择 JSON 数据文件以创建或更新目标用户。",
     template: "查看模板",
@@ -160,7 +158,7 @@ const zh = {
     error: "目标用户数据导入失败，请检查文件后重试。",
   },
   downloadDialog: {
-    ...en.downloadDialog,
+    ...enEndUsers.downloadDialog,
     title: "下载目标用户",
     description: "下载当前环境中符合筛选条件的目标用户？",
     cancel: "取消",
@@ -170,7 +168,7 @@ const zh = {
     limitBody: "请缩小筛选范围后重试。",
   },
   detailsDrawer: {
-    ...en.detailsDrawer,
+    ...enEndUsers.detailsDrawer,
     title: "目标用户资料",
     filter: "按属性名称或值筛选",
     builtIn: "内置属性",
@@ -179,7 +177,7 @@ const zh = {
     noMatch: "没有属性符合当前搜索",
   },
   evaluateDrawer: {
-    ...en.evaluateDrawer,
+    ...enEndUsers.evaluateDrawer,
     flags: "功能开关",
     segments: "用户组",
     filterFlags: "按名称或 Key 筛选",
@@ -196,7 +194,7 @@ const zh = {
     close: "关闭",
   },
   propertiesDrawer: {
-    ...en.propertiesDrawer,
+    ...enEndUsers.propertiesDrawer,
     title: "目标用户属性",
     filter: "按名称筛选",
     add: "添加属性",
@@ -218,7 +216,7 @@ const zh = {
     loadFailed: "加载目标用户属性失败",
   },
   presetsDialog: {
-    ...en.presetsDialog,
+    ...enEndUsers.presetsDialog,
     title: "{{name}} 的预设值",
     value: "值",
     valueHelp: "用于匹配规则",
@@ -234,6 +232,3 @@ const zh = {
     duplicate: "该值已存在。",
   },
 }
-
-i18n.addResourceBundle("en", "common", { endUsers: en }, true, true)
-i18n.addResourceBundle("zh", "common", { endUsers: zh }, true, true)

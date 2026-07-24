@@ -1,4 +1,3 @@
-import "./end-users-i18n"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Download, MoreHorizontal, Settings, Upload } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"

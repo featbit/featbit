@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
+import "@/lib/i18n/i18n"
 import {
   fetchSegmentAuditLogs,
   fetchSegmentTeamMembers,
@@ -45,8 +46,8 @@ const auditLog: AuditLog = {
   instructions: [{ kind: "UpdateSegmentName", value: "After" }],
 }
 
-describe("HistoryTab comments", () => {
-  it("shows the comment in the summary and expanded details", async () => {
+describe("HistoryTab rows", () => {
+  it("expands from the row and keeps the arrow control working", async () => {
     vi.mocked(fetchSegmentAuditLogs).mockResolvedValue({
       items: [auditLog],
       totalCount: 1,
@@ -68,12 +69,18 @@ describe("HistoryTab comments", () => {
     const summaryComment = await screen.findByText(auditLog.comment)
     expect(summaryComment).toHaveClass("inline-block", "max-w-full")
 
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: "segments.detailsPage.history.expand",
-      })
-    )
+    const expandButton = screen.getByRole("button", {
+      name: "Expand event",
+    })
+
+    fireEvent.click(summaryComment)
 
     expect(screen.getAllByText(auditLog.comment)).toHaveLength(2)
+    expect(expandButton).toHaveAttribute("aria-expanded", "true")
+
+    fireEvent.click(expandButton)
+
+    expect(screen.getAllByText(auditLog.comment)).toHaveLength(1)
+    expect(expandButton).toHaveAttribute("aria-expanded", "false")
   })
 })

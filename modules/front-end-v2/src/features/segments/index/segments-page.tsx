@@ -50,9 +50,9 @@ import type {
   SegmentPayload,
   SegmentType,
 } from "../segments-types"
+import { SegmentReferencesDialog } from "../components/segment-references-dialog"
 import {
   SegmentConfirmDialog,
-  SegmentReferencesDialog,
   type SegmentConfirmation,
 } from "./components/segment-dialogs"
 import { SegmentSheet } from "./components/segment-sheet"

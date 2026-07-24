@@ -1,5 +1,8 @@
 import { render, screen, waitFor } from "@testing-library/react"
-import { describe, expect, it, vi } from "vitest"
+import { EditorState, type Extension } from "@codemirror/state"
+import { EditorView } from "@codemirror/view"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import "@/lib/i18n/i18n"
 import type { AuditLog } from "../../segments-types"
 import { RawDataDialog } from "./raw-data-dialog"
 
@@ -35,6 +38,14 @@ const auditLog: AuditLog = {
   instructions: [],
 }
 
+afterEach(() => {
+  document.documentElement.classList.remove("dark")
+})
+
+beforeEach(() => {
+  mergeViewMock.mockClear()
+})
+
 describe("RawDataDialog", () => {
   it("passes formatted previous and current snapshots to the merge view", async () => {
     render(<RawDataDialog auditLog={auditLog} onOpenChange={vi.fn()} />)
@@ -46,14 +57,10 @@ describe("RawDataDialog", () => {
     )
     expect(screen.getByRole("dialog")).not.toHaveClass("h-[78vh]")
     expect(
-      screen
-        .getByText("segments.detailsPage.history.previous")
-        .querySelector(".lucide-circle-minus")
+      screen.getByText("Previous").querySelector(".lucide-circle-minus")
     ).toBeInTheDocument()
     expect(
-      screen
-        .getByText("segments.detailsPage.history.current")
-        .querySelector(".lucide-circle-plus")
+      screen.getByText("Current").querySelector(".lucide-circle-plus")
     ).toBeInTheDocument()
 
     const config = mergeViewMock.mock.calls[0][0] as {
@@ -66,5 +73,19 @@ describe("RawDataDialog", () => {
     expect(config.b.doc).toBe(
       JSON.stringify(JSON.parse(auditLog.dataChange.current!), null, 2)
     )
+  })
+
+  it("uses CodeMirror's dark theme when the application is in dark mode", async () => {
+    document.documentElement.classList.add("dark")
+
+    render(<RawDataDialog auditLog={auditLog} onOpenChange={vi.fn()} />)
+
+    await waitFor(() => expect(mergeViewMock).toHaveBeenCalledOnce())
+    const config = mergeViewMock.mock.calls[0][0] as {
+      a: { extensions: Extension }
+    }
+    const state = EditorState.create({ extensions: config.a.extensions })
+
+    expect(state.facet(EditorView.darkTheme)).toBe(true)
   })
 })

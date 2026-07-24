@@ -1,4 +1,4 @@
-import { ArrowLeft, Check, ChevronsUpDown, Copy, Flag } from "lucide-react"
+import { ArrowLeft, ChevronsUpDown, Copy } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
@@ -6,25 +6,33 @@ import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
-import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
-import type { Segment, SegmentFlagReference } from "../../segments-types"
+import type { Lang } from "@/features/layout/layout-types"
+import { SegmentReferencesDialog } from "../../components/segment-references-dialog"
+import type {
+  ScopeResource,
+  Segment,
+  SegmentFlagReference,
+} from "../../segments-types"
+import { ScopeResourceIcon } from "../../index/components/scope-resource-icon"
 
 type Props = {
   segment: Segment
   references: SegmentFlagReference[]
   activeTab: "targeting" | "settings" | "history"
   basePath: string
+  envId: string
+  lang: Lang
+}
+
+function scopeResourceType(scope: string): ScopeResource["type"] {
+  const type = scope.split(":").at(-1)?.split("/")[0]
+  if (type === "project" || type === "env") return type
+  return "organization"
 }
 
 export function SegmentDetailsHeader({
@@ -32,6 +40,8 @@ export function SegmentDetailsHeader({
   references,
   activeTab,
   basePath,
+  envId,
+  lang,
 }: Props) {
   const { t } = useTranslation()
   const [referencesOpen, setReferencesOpen] = useState(false)
@@ -96,7 +106,10 @@ export function SegmentDetailsHeader({
                               key={scope}
                               className="flex items-center gap-2 rounded-md px-2 py-2 text-sm"
                             >
-                              <Check className="size-3.5 text-primary" />
+                              <ScopeResourceIcon
+                                type={scopeResourceType(scope)}
+                                className="size-3.5"
+                              />
                               <span className="truncate font-mono text-xs">
                                 {scope}
                               </span>
@@ -172,40 +185,13 @@ export function SegmentDetailsHeader({
         </nav>
       </header>
 
-      <Dialog open={referencesOpen} onOpenChange={setReferencesOpen}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>{t("segments.references.title")}</DialogTitle>
-            <DialogDescription>
-              {t("segments.detailsPage.referencesDescription")}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="max-h-80 space-y-1 overflow-y-auto">
-            {references.length ? (
-              references.map((reference) => (
-                <div
-                  key={`${reference.envId}-${reference.id}`}
-                  className="flex items-center gap-3 rounded-md border px-3 py-2.5"
-                >
-                  <Flag className="size-4 text-muted-foreground" />
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-medium">
-                      {reference.name}
-                    </p>
-                    <p className="truncate font-mono text-xs text-muted-foreground">
-                      {reference.key}
-                    </p>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="py-8 text-center text-sm text-muted-foreground">
-                {t("segments.detailsPage.noFlagReferences")}
-              </p>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+      <SegmentReferencesDialog
+        references={referencesOpen ? references : null}
+        segmentName={segment.name}
+        envId={envId}
+        lang={lang}
+        onClose={() => setReferencesOpen(false)}
+      />
     </>
   )
 }

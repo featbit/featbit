@@ -1,7 +1,5 @@
-import { ExternalLink } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -13,9 +11,7 @@ import {
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { localizedPath } from "@/features/layout/layout-context"
-import type { Lang } from "@/features/layout/layout-types"
-import type { Segment, SegmentFlagReference } from "../../segments-types"
+import type { Segment } from "../../segments-types"
 
 export type SegmentConfirmation = {
   kind: "archive" | "restore" | "remove"
@@ -115,87 +111,6 @@ export function SegmentConfirmDialog({
             }}
           >
             {saving ? t(pendingKey) : t(actionKey)}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  )
-}
-
-export function SegmentReferencesDialog({
-  references,
-  segmentName,
-  envId,
-  lang,
-  onClose,
-}: {
-  references: SegmentFlagReference[] | null
-  segmentName: string
-  envId: string
-  lang: Lang
-  onClose: () => void
-}) {
-  const { t } = useTranslation()
-  if (!references) return null
-
-  return (
-    <Dialog open onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>{t("segments.references.title")}</DialogTitle>
-          <DialogDescription>
-            <strong className="font-semibold text-foreground">
-              {segmentName}
-            </strong>
-            {t("segments.references.descriptionAfter")}
-          </DialogDescription>
-        </DialogHeader>
-        <div className="max-h-72 space-y-2 overflow-y-auto">
-          {references.map((reference) => {
-            const inCurrentEnvironment = reference.envId === envId
-            const content = (
-              <>
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate font-medium">
-                    {reference.name}
-                  </span>
-                  <span className="block truncate font-mono text-xs text-muted-foreground">
-                    {reference.key}
-                  </span>
-                </span>
-                {inCurrentEnvironment ? (
-                  <ExternalLink className="size-4 shrink-0 text-muted-foreground" />
-                ) : (
-                  <span className="shrink-0 text-xs text-muted-foreground">
-                    {t("segments.references.outsideEnvironment")}
-                  </span>
-                )}
-              </>
-            )
-            return inCurrentEnvironment ? (
-              <Link
-                key={`${reference.envId}-${reference.id}`}
-                to={localizedPath(
-                  lang,
-                  `/feature-flags/${encodeURIComponent(reference.id)}/targeting`
-                )}
-                className="flex items-center gap-3 rounded-lg border px-3 py-1.5 hover:bg-muted"
-              >
-                {content}
-              </Link>
-            ) : (
-              <div
-                key={`${reference.envId}-${reference.id}`}
-                className="flex items-center gap-3 rounded-lg border px-3 py-1.5 opacity-70"
-              >
-                {content}
-              </div>
-            )
-          })}
-        </div>
-        <DialogFooter>
-          <Button type="button" onClick={onClose}>
-            {t("segments.references.close")}
           </Button>
         </DialogFooter>
       </DialogContent>

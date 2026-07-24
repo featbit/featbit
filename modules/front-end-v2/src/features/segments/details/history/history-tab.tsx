@@ -171,6 +171,15 @@ export function HistoryTab({
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
   const [rawData, setRawData] = useState<AuditLog | null>(null)
 
+  const toggleExpanded = (logId: string) => {
+    setExpanded((current) => {
+      const next = new Set(current)
+      if (next.has(logId)) next.delete(logId)
+      else next.add(logId)
+      return next
+    })
+  }
+
   useEffect(() => {
     const timeout = window.setTimeout(() => {
       setDebouncedSearch(search.trim())
@@ -284,7 +293,7 @@ export function HistoryTab({
               <span className="truncate">
                 {member
                   ? memberLabel(member)
-                  : t("segments.detailsPage.history.allMembers")}
+                  : t("segments.detailsPage.history.allUsers")}
               </span>
               <ChevronDown className="size-4 text-muted-foreground" />
             </PopoverTrigger>
@@ -512,7 +521,10 @@ export function HistoryTab({
                 )
                 return (
                   <Fragment key={log.id}>
-                    <TableRow className="hover:bg-transparent">
+                    <TableRow
+                      className="cursor-pointer hover:bg-muted/50"
+                      onClick={() => toggleExpanded(log.id)}
+                    >
                       <TableCell>
                         <Button
                           type="button"
@@ -524,14 +536,10 @@ export function HistoryTab({
                               ? t("segments.detailsPage.history.collapse")
                               : t("segments.detailsPage.history.expand")
                           }
-                          onClick={() =>
-                            setExpanded((current) => {
-                              const next = new Set(current)
-                              if (next.has(log.id)) next.delete(log.id)
-                              else next.add(log.id)
-                              return next
-                            })
-                          }
+                          onClick={(event) => {
+                            event.stopPropagation()
+                            toggleExpanded(log.id)
+                          }}
                         >
                           {isExpanded ? <ChevronDown /> : <ChevronRight />}
                         </Button>

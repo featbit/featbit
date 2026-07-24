@@ -2,6 +2,7 @@ import i18n from "i18next"
 import { initReactI18next } from "react-i18next"
 import { enAccessTokens, zhAccessTokens } from "./resources/access-tokens"
 import { enAuth, zhAuth } from "./resources/auth"
+import { enEndUsers, zhEndUsers } from "./resources/end-users"
 import { enLayout, zhLayout } from "./resources/layout"
 import { enIam, zhIam } from "./resources/iam"
 import { enOnboarding, zhOnboarding } from "./resources/onboarding"
@@ -31,6 +32,7 @@ i18n.use(initReactI18next).init({
         webhooks: enWebhooks,
         relayProxies: enRelayProxies,
         accessTokens: enAccessTokens,
+        endUsers: enEndUsers,
         segments: enSegments,
       },
     },
@@ -47,6 +49,7 @@ i18n.use(initReactI18next).init({
         webhooks: zhWebhooks,
         relayProxies: zhRelayProxies,
         accessTokens: zhAccessTokens,
+        endUsers: zhEndUsers,
         segments: zhSegments,
       },
     },
