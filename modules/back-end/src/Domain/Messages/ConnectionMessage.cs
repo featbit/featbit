@@ -1,4 +1,4 @@
-﻿namespace Domain.Connections;
+﻿namespace Domain.Messages;
 
 public class ConnectionMessage
 {

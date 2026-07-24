@@ -2,8 +2,8 @@ using Domain.Environments;
 using Domain.Segments;
 using Domain.FeatureFlags;
 using Domain.Workspaces;
-using Domain.Connections;
 using Domain.ControlPlane;
+using Domain.Messages;
 
 namespace Application.Caches;
 

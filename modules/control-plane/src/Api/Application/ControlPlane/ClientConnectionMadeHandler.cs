@@ -1,6 +1,5 @@
 ﻿using System.Text.Json;
 using Application.Caches;
-using Domain.Connections;
 using Domain.Messages;
 
 namespace Api.Application.ControlPlane;

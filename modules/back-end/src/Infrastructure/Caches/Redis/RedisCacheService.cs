@@ -1,9 +1,9 @@
 using System.Text.Json;
 using Application.Caches;
-using Domain.Connections;
 using Domain.ControlPlane;
 using Domain.Environments;
 using Domain.FeatureFlags;
+using Domain.Messages;
 using Domain.Segments;
 using Domain.Workspaces;
 using StackExchange.Redis;

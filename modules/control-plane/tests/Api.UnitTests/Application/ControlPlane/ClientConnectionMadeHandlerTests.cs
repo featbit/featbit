@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Api.Application.ControlPlane;
 using Application.Caches;
-using Domain.Connections;
+using Domain.Messages;
 using Microsoft.Extensions.Logging.Testing;
 using Moq;
 
