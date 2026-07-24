@@ -506,6 +506,7 @@ export function HistoryTab({
                   t("segments.detailsPage.history.system")
                 const fragment = renderFragment(log)
                 const changes = historyChanges(log, t)
+                const comment = log.comment?.trim()
                 const hasRawData = Boolean(
                   log.dataChange.previous || log.dataChange.current
                 )
@@ -555,16 +556,22 @@ export function HistoryTab({
                         ) : null}
                       </TableCell>
                       <TableCell className="max-w-80">
-                        <Tooltip>
-                          <TooltipTrigger
-                            render={<p className="truncate text-sm" />}
-                          >
-                            {log.comment || "—"}
-                          </TooltipTrigger>
-                          {log.comment ? (
-                            <TooltipContent>{log.comment}</TooltipContent>
-                          ) : null}
-                        </Tooltip>
+                        {comment ? (
+                          <Tooltip>
+                            <TooltipTrigger
+                              render={
+                                <span className="inline-block max-w-full truncate align-middle text-sm" />
+                              }
+                            >
+                              {comment}
+                            </TooltipTrigger>
+                            <TooltipContent>{comment}</TooltipContent>
+                          </Tooltip>
+                        ) : (
+                          <span className="text-sm text-muted-foreground">
+                            —
+                          </span>
+                        )}
                       </TableCell>
                     </TableRow>
                     {isExpanded ? (
@@ -593,11 +600,14 @@ export function HistoryTab({
                                   type="button"
                                   variant="outline"
                                   size="sm"
+                                  className="leading-none"
                                   onClick={() => setRawData(log)}
                                 >
-                                  {t(
-                                    "segments.detailsPage.history.viewRawData"
-                                  )}
+                                  <span className="relative top-px">
+                                    {t(
+                                      "segments.detailsPage.history.viewRawData"
+                                    )}
+                                  </span>
                                 </Button>
                               ) : null}
                             </div>
@@ -614,6 +624,22 @@ export function HistoryTab({
                                 )}
                               </p>
                             )}
+                            <div className="mt-4 border-t pt-3">
+                              <p className="text-xs font-medium text-muted-foreground">
+                                {t(
+                                  "segments.detailsPage.history.columns.comment"
+                                )}
+                              </p>
+                              <p
+                                className={
+                                  comment
+                                    ? "mt-1 text-sm break-words whitespace-pre-wrap"
+                                    : "mt-1 text-sm text-muted-foreground"
+                                }
+                              >
+                                {comment || "—"}
+                              </p>
+                            </div>
                           </div>
                         </TableCell>
                       </TableRow>
