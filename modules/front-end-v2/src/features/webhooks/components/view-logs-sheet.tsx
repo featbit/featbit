@@ -325,28 +325,6 @@ function ViewLogsSheetContent({
               {t("webhooks.logs.showing", { from, to, total: data.totalCount })}
             </span>
             <div className="flex items-center gap-2">
-              <Select
-                value={String(pageSize)}
-                onValueChange={(value) => {
-                  if (!value) return
-                  setPageSize(Number(value))
-                  setPageIndex(1)
-                  setExpandedId(null)
-                }}
-              >
-                <SelectTrigger className="w-28">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {[5, 10, 20].map((size) => (
-                      <SelectItem key={size} value={String(size)}>
-                        {t("webhooks.perPage", { count: size })}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
               <Button
                 variant="outline"
                 size="icon-sm"
@@ -372,6 +350,30 @@ function ViewLogsSheetContent({
               >
                 <ChevronRight />
               </Button>
+              <Select
+                value={String(pageSize)}
+                onValueChange={(value) => {
+                  if (!value) return
+                  setPageSize(Number(value))
+                  setPageIndex(1)
+                  setExpandedId(null)
+                }}
+              >
+                <SelectTrigger className="w-28">
+                  <SelectValue>
+                    {t("webhooks.perPage", { count: pageSize })}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {[5, 10, 20].map((size) => (
+                      <SelectItem key={size} value={String(size)}>
+                        {t("webhooks.perPage", { count: size })}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </div>

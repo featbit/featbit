@@ -1,5 +1,4 @@
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 import {
   Select,
@@ -9,8 +8,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import type { Lang } from "@/features/layout/layout-types"
+import { flagsCopy } from "../flags-copy"
 
-export function SegmentsPagination({
+export function FlagsPagination({
+  lang,
   pageIndex,
   pageSize,
   totalCount,
@@ -18,6 +20,7 @@ export function SegmentsPagination({
   onPageIndexChange,
   onPageSizeChange,
 }: {
+  lang: Lang
   pageIndex: number
   pageSize: number
   totalCount: number
@@ -25,23 +28,22 @@ export function SegmentsPagination({
   onPageIndexChange: (page: number) => void
   onPageSizeChange: (size: number) => void
 }) {
-  const { t } = useTranslation()
   if (!totalCount) return null
-
+  const c = flagsCopy(lang)
   const pageCount = Math.max(1, Math.ceil(totalCount / pageSize))
   const from = (pageIndex - 1) * pageSize + 1
   const to = Math.min(pageIndex * pageSize, totalCount)
 
   return (
-    <div className="mt-4 flex items-center justify-between gap-4 text-sm text-muted-foreground">
-      <span>{t("segments.showing", { from, to, total: totalCount })}</span>
+    <div className="mt-4 flex flex-wrap items-center justify-between gap-4 text-sm text-muted-foreground">
+      <span>{c.showing(from, to, totalCount)}</span>
       <div className="flex items-center gap-2">
         <Button
           type="button"
           variant="outline"
           size="icon-sm"
           disabled={disabled || pageIndex <= 1}
-          aria-label={t("segments.previous")}
+          aria-label={c.previous}
           onClick={() => onPageIndexChange(pageIndex - 1)}
         >
           <ChevronLeft />
@@ -54,7 +56,7 @@ export function SegmentsPagination({
           variant="outline"
           size="icon-sm"
           disabled={disabled || pageIndex >= pageCount}
-          aria-label={t("segments.next")}
+          aria-label={c.next}
           onClick={() => onPageIndexChange(pageIndex + 1)}
         >
           <ChevronRight />
@@ -65,15 +67,13 @@ export function SegmentsPagination({
           disabled={disabled}
         >
           <SelectTrigger className="w-32">
-            <SelectValue>
-              {t("segments.perPage", { count: pageSize })}
-            </SelectValue>
+            <SelectValue>{c.perPage(pageSize)}</SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
               {[10, 20, 30].map((size) => (
                 <SelectItem key={size} value={String(size)}>
-                  {t("segments.perPage", { count: size })}
+                  {c.perPage(size)}
                 </SelectItem>
               ))}
             </SelectGroup>

@@ -159,7 +159,7 @@ export function CursorPagination({
         disabled={disabled}
       >
         <SelectTrigger className="min-w-28">
-          <SelectValue />
+          <SelectValue>{perPageLabel(pageSize)}</SelectValue>
         </SelectTrigger>
         <SelectContent align="end">
           <SelectGroup>

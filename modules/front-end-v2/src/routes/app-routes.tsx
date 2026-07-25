@@ -145,6 +145,11 @@ const AuditLogsPage = lazy(() =>
     default: module.AuditLogsPage,
   }))
 )
+const FlagsPage = lazy(() =>
+  import("@/features/flags/flags-page").then((module) => ({
+    default: module.FlagsPage,
+  }))
+)
 
 type SupportedLanguage = "en" | "zh"
 
@@ -341,6 +346,7 @@ export function AppRoutes() {
           <Route path="webhooks" element={<WebhooksPage />} />
           <Route path="end-users" element={<EndUsersPage />} />
           <Route path="audit-logs" element={<AuditLogsPage />} />
+          <Route path="feature-flags" element={<FlagsPage />} />
           <Route path="segments" element={<SegmentsPage />} />
           <Route path="segments/:segmentId" element={<SegmentDetailsPage />} />
           <Route

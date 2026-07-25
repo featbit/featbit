@@ -268,26 +268,6 @@ export function RelayProxiesPage() {
             })}
           </span>
           <div className="flex items-center gap-2">
-            <Select
-              value={String(pageSize)}
-              onValueChange={(value) => {
-                setPageSize(Number(value))
-                setPageIndex(1)
-              }}
-            >
-              <SelectTrigger className="w-32">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  {[10, 20, 30].map((size) => (
-                    <SelectItem key={size} value={String(size)}>
-                      {t("relayProxies.perPage", { count: size })}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
             <Button
               variant="outline"
               size="icon-sm"
@@ -309,6 +289,28 @@ export function RelayProxiesPage() {
               <ChevronRight />
               <span className="sr-only">{t("relayProxies.next")}</span>
             </Button>
+            <Select
+              value={String(pageSize)}
+              onValueChange={(value) => {
+                setPageSize(Number(value))
+                setPageIndex(1)
+              }}
+            >
+              <SelectTrigger className="w-32">
+                <SelectValue>
+                  {t("relayProxies.perPage", { count: pageSize })}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {[10, 20, 30].map((size) => (
+                    <SelectItem key={size} value={String(size)}>
+                      {t("relayProxies.perPage", { count: size })}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
           </div>
         </div>
       )}

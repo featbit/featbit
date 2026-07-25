@@ -334,27 +334,6 @@ export function WebhooksPage() {
             {t("webhooks.showing", { from, to, total: data.totalCount })}
           </span>
           <div className="flex items-center gap-2">
-            <Select
-              value={String(pageSize)}
-              onValueChange={(value) => {
-                if (!value) return
-                setPageSize(Number(value))
-                setPageIndex(1)
-              }}
-            >
-              <SelectTrigger className="w-32">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  {[10, 20, 30].map((size) => (
-                    <SelectItem key={size} value={String(size)}>
-                      {t("webhooks.perPage", { count: size })}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
             <Button
               variant="outline"
               size="icon-sm"
@@ -376,6 +355,29 @@ export function WebhooksPage() {
             >
               <ChevronRight />
             </Button>
+            <Select
+              value={String(pageSize)}
+              onValueChange={(value) => {
+                if (!value) return
+                setPageSize(Number(value))
+                setPageIndex(1)
+              }}
+            >
+              <SelectTrigger className="w-32">
+                <SelectValue>
+                  {t("webhooks.perPage", { count: pageSize })}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {[10, 20, 30].map((size) => (
+                    <SelectItem key={size} value={String(size)}>
+                      {t("webhooks.perPage", { count: size })}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
           </div>
         </div>
       ) : null}
