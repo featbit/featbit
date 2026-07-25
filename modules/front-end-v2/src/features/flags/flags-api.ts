@@ -1,8 +1,10 @@
 import { fetchApi } from "@/lib/api/authenticated-api"
 import type {
   CopyPrecheckResult,
+  FlagComparisonDetail,
   FlagCreationPayload,
   FlagListFilter,
+  FlagSettingCopyOptions,
   PagedFeatureFlags,
   UserPolicy,
 } from "./flags-types"
@@ -152,6 +154,32 @@ export function copyFeatureFlags(
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ flagIds, precheckResults }),
+    }
+  )
+}
+
+export function compareFeatureFlag(
+  envId: string,
+  targetEnvId: string,
+  flagKey: string
+) {
+  return fetchApi<FlagComparisonDetail | null>(
+    `${flagsPath(envId)}/${encodeURIComponent(flagKey)}/compare-with/${encodeURIComponent(targetEnvId)}`
+  )
+}
+
+export function copyFeatureFlagSettings(
+  envId: string,
+  targetEnvId: string,
+  flagKey: string,
+  options: FlagSettingCopyOptions
+) {
+  return fetchApi<unknown>(
+    `${flagsPath(envId)}/${encodeURIComponent(flagKey)}/copy-settings-to/${encodeURIComponent(targetEnvId)}`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ options }),
     }
   )
 }

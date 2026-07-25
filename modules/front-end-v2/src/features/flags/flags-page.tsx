@@ -5,6 +5,11 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import {
+  getLicenseStatus,
+  isFeatureGranted,
+  parseLicense,
+} from "@/features/workspace/license/license-utils"
+import {
   getCurrentOrganization,
   getCurrentProjectEnv,
   getCurrentWorkspace,
@@ -33,6 +38,7 @@ import {
 } from "./flags-permissions"
 import type { FeatureFlag, FlagCreationPayload } from "./flags-types"
 import { CopyFlagsDialog } from "./components/copy-flags-dialog"
+import { FlagDifferencesSheet } from "./components/flag-differences-sheet"
 import { FlagEditorSheet } from "./components/flag-editor-sheet"
 import {
   FlagConfirmDialog,
@@ -86,6 +92,7 @@ export function FlagsPage() {
   const [editorOpen, setEditorOpen] = useState(false)
   const [cloneTarget, setCloneTarget] = useState<FeatureFlag | null>(null)
   const [copyTargets, setCopyTargets] = useState<FeatureFlag[]>([])
+  const [compareTarget, setCompareTarget] = useState<FeatureFlag | null>(null)
 
   const selectedTags = useMemo(
     () => searchParams.get("tags")?.split(",").filter(Boolean) ?? [],
@@ -181,6 +188,16 @@ export function FlagsPage() {
   const canCreate =
     permissionsQuery.isSuccess &&
     canUseFlagAction(policies, `${envRn}:flag/*`, "CreateFlag")
+  const decodedLicense = parseLicense(workspace?.license)
+  const comparisonGranted = isFeatureGranted(
+    {
+      id: "flag-comparison",
+      labelKey: "workspace.license.features.flagComparison.title",
+      descriptionKey: "workspace.license.features.flagComparison.description",
+    },
+    decodedLicense,
+    getLicenseStatus(decodedLicense)
+  )
 
   const invalidateList = useCallback(
     () => queryClient.invalidateQueries({ queryKey: ["feature-flags"] }),
@@ -439,14 +456,7 @@ export function FlagsPage() {
                 setEditorOpen(true)
               })
             }
-            onCompare={(flag) =>
-              navigate(
-                localizedPath(
-                  lang,
-                  `/feature-flags/compare?key=${encodeURIComponent(flag.key)}`
-                )
-              )
-            }
+            onCompare={(flag) => setCompareTarget(flag)}
             onArchive={(flag) => setConfirmation({ kind: "archive", flag })}
             onRestore={(flag) => setConfirmation({ kind: "restore", flag })}
             onRemove={(flag) => setConfirmation({ kind: "remove", flag })}
@@ -485,6 +495,20 @@ export function FlagsPage() {
           onConfirm={(comment) =>
             confirmation && mutation.mutate({ target: confirmation, comment })
           }
+        />
+        <FlagDifferencesSheet
+          lang={lang}
+          envId={envId}
+          flag={compareTarget}
+          open={Boolean(compareTarget)}
+          comparisonGranted={comparisonGranted}
+          canCopy={
+            compareTarget ? canPerform(compareTarget, "CopyFlagTo") : false
+          }
+          onOpenChange={(open) => {
+            if (!open) setCompareTarget(null)
+          }}
+          onCopied={() => void invalidateList()}
         />
         <FlagEditorSheet
           envId={envId}

@@ -78,3 +78,73 @@ export type FlagCreationPayload = {
   disabledVariationId: string
   variations: Array<{ id: string; name: string; value: string }>
 }
+
+export type FlagComparisonVariation = {
+  id: string
+  name?: string
+  value: string
+}
+
+export type FlagComparisonRule = {
+  id?: string
+  name?: string
+  conditions?: Array<Record<string, unknown>>
+  variations?: Array<Record<string, unknown>>
+  [key: string]: unknown
+}
+
+export type FlagComparisonTargetUsers = {
+  variationId: string
+  keyIds: string[]
+}
+
+export type FlagComparisonFallthrough = {
+  variations?: Array<Record<string, unknown>>
+  [key: string]: unknown
+}
+
+export type FlagComparisonValue = {
+  id: string
+  name: string
+  key: string
+  isEnabled: boolean
+  variations: FlagComparisonVariation[]
+  targetUsers: FlagComparisonTargetUsers[]
+  rules: FlagComparisonRule[]
+  fallthrough: FlagComparisonFallthrough | null
+  disabledVariationId: string
+}
+
+export type FlagComparisonDetail = {
+  source: FlagComparisonValue
+  target: FlagComparisonValue
+  diff: {
+    onOffState: {
+      source: boolean
+      target: boolean
+      isDifferent: boolean
+    }
+    individualTargeting: Array<{ isDifferent: boolean }>
+    targetingRule: Array<{ isDifferent: boolean }>
+    defaultRule: { isDifferent: boolean }
+    offVariation: { isDifferent: boolean }
+  }
+  relatedSegments: Array<{ key: string; value: string }>
+  isRulesCopyable: boolean
+}
+
+export type FlagSettingCopyMode = "append" | "overwrite"
+
+export type FlagSettingCopyOptions = {
+  onOffState: boolean
+  individualTargeting: {
+    copy: boolean
+    mode: FlagSettingCopyMode
+  }
+  targetingRule: {
+    copy: boolean
+    mode: FlagSettingCopyMode
+  }
+  defaultRule: boolean
+  offVariation: boolean
+}
