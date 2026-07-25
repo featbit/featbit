@@ -65,7 +65,7 @@ public class RedisSegmentStageCommitTests : IntegrationTestBase, IAsyncLifetime
         await sut.StageSegmentAsync(segmentV1, v1);
         await sut.CommitSegmentAsync(envIds, segmentIdString, v1);
 
-        var committedKey = RedisCaches.SegmentCommittedPointer(segmentId);
+        var committedKey = RedisKeys.SegmentCommittedPointer(segmentId);
         var indexKey = RedisKeys.SegmentIndex(envId);
 
         Assert.Equal(v1.ToString(), (string?)await db.StringGetAsync(committedKey));
@@ -77,9 +77,9 @@ public class RedisSegmentStageCommitTests : IntegrationTestBase, IAsyncLifetime
         var segmentV2 = NewSegment(envId, segmentId, v2);
         await sut.StageSegmentAsync(segmentV2, v2);
 
-        Assert.True(await db.KeyExistsAsync(RedisCaches.SegmentVersion(segmentId, v2)),
+        Assert.True(await db.KeyExistsAsync(RedisKeys.SegmentVersion(segmentId, v2)),
             "staged versioned value key should exist");
-        Assert.True(await db.KeyExistsAsync(RedisCaches.SegmentVersion(segmentId, v1)),
+        Assert.True(await db.KeyExistsAsync(RedisKeys.SegmentVersion(segmentId, v1)),
             "previously committed versioned value key should still exist");
 
         // ACCEPTANCE: after StageSegmentAsync the committed pointer/index are unchanged.
@@ -95,8 +95,8 @@ public class RedisSegmentStageCommitTests : IntegrationTestBase, IAsyncLifetime
 
         // cleanup
         await db.KeyDeleteAsync(committedKey);
-        await db.KeyDeleteAsync(RedisCaches.SegmentVersion(segmentId, v1));
-        await db.KeyDeleteAsync(RedisCaches.SegmentVersion(segmentId, v2));
+        await db.KeyDeleteAsync(RedisKeys.SegmentVersion(segmentId, v1));
+        await db.KeyDeleteAsync(RedisKeys.SegmentVersion(segmentId, v2));
         await db.SortedSetRemoveAsync(indexKey, segmentIdString);
     }
 
@@ -120,11 +120,11 @@ public class RedisSegmentStageCommitTests : IntegrationTestBase, IAsyncLifetime
         // staging must NOT add the segment to the env index nor move the committed pointer.
         Assert.False((await db.SortedSetScoreAsync(indexKey, segmentIdString)).HasValue,
             "staging must not write the sorted-set index");
-        Assert.False(await db.KeyExistsAsync(RedisCaches.SegmentCommittedPointer(segmentId)),
+        Assert.False(await db.KeyExistsAsync(RedisKeys.SegmentCommittedPointer(segmentId)),
             "staging must not write the committed pointer");
 
         // cleanup
-        await db.KeyDeleteAsync(RedisCaches.SegmentVersion(segmentId, ts));
+        await db.KeyDeleteAsync(RedisKeys.SegmentVersion(segmentId, ts));
     }
 
     private static Segment NewSegment(Guid envId, Guid segmentId, long ts)

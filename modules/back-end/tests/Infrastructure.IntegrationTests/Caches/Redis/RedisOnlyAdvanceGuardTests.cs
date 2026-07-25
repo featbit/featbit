@@ -69,7 +69,7 @@ public class RedisOnlyAdvanceGuardTests : IntegrationTestBase, IAsyncLifetime
         var flagId = Guid.NewGuid();
         var flagIdString = flagId.ToString();
 
-        var committedKey = RedisCaches.FlagCommittedPointer(flagId);
+        var committedKey = RedisKeys.FlagCommittedPointer(flagId);
         var indexKey = RedisKeys.FlagIndex(envId);
 
         try
@@ -111,7 +111,7 @@ public class RedisOnlyAdvanceGuardTests : IntegrationTestBase, IAsyncLifetime
         var flagId = Guid.NewGuid();
         var flagIdString = flagId.ToString();
 
-        var committedKey = RedisCaches.FlagCommittedPointer(flagId);
+        var committedKey = RedisKeys.FlagCommittedPointer(flagId);
         var indexKey = RedisKeys.FlagIndex(envId);
 
         try
@@ -149,7 +149,7 @@ public class RedisOnlyAdvanceGuardTests : IntegrationTestBase, IAsyncLifetime
         var segmentIdString = segmentId.ToString();
         var envIds = new[] { envId };
 
-        var committedKey = RedisCaches.SegmentCommittedPointer(segmentId);
+        var committedKey = RedisKeys.SegmentCommittedPointer(segmentId);
         var indexKey = RedisKeys.SegmentIndex(envId);
 
         try
@@ -183,7 +183,7 @@ public class RedisOnlyAdvanceGuardTests : IntegrationTestBase, IAsyncLifetime
         var segmentIdString = segmentId.ToString();
         var envIds = new[] { envId };
 
-        var committedKey = RedisCaches.SegmentCommittedPointer(segmentId);
+        var committedKey = RedisKeys.SegmentCommittedPointer(segmentId);
         var indexKey = RedisKeys.SegmentIndex(envId);
 
         try

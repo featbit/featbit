@@ -197,7 +197,7 @@ public sealed class DcBackfillerOnlyAdvanceTests : IntegrationTestBase, IAsyncLi
         await _dcbCache.StageFlagAsync(flagAtTs2, ts2);
         await _dcbCache.CommitFlagAsync(_envId, flagAtTs2.Id.ToString(), ts2);
 
-        var pointerKey = RedisCaches.FlagCommittedPointer(flagAtTs2.Id);
+        var pointerKey = RedisKeys.FlagCommittedPointer(flagAtTs2.Id);
         Assert.Equal(ts2, (long)(await _mux.GetDatabase(1).StringGetAsync(pointerKey)));
 
         // ---- the backfill runs, holding the STALE ts1 Mongo snapshot ----
@@ -267,7 +267,7 @@ public sealed class DcBackfillerOnlyAdvanceTests : IntegrationTestBase, IAsyncLi
         await _dcbCache.StageSegmentAsync(segmentAtTs2, ts2);
         await _dcbCache.CommitSegmentAsync(envIds, segmentAtTs2.Id.ToString(), ts2);
 
-        var pointerKey = RedisCaches.SegmentCommittedPointer(segmentAtTs2.Id);
+        var pointerKey = RedisKeys.SegmentCommittedPointer(segmentAtTs2.Id);
         Assert.Equal(ts2, (long)(await _mux.GetDatabase(1).StringGetAsync(pointerKey)));
 
         var backfiller = CreateBackfiller(new NoopMessageProducer());

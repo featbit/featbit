@@ -57,9 +57,9 @@ public class StagedFlagGcWorkerTests : IntegrationTestBase, IAsyncLifetime
         const long v1 = 1000L;
         const long v2 = 2000L;
 
-        var v1Key = RedisCaches.FlagVersion(flagId, v1);
-        var v2Key = RedisCaches.FlagVersion(flagId, v2);
-        var pointerKey = RedisCaches.FlagCommittedPointer(flagId);
+        var v1Key = RedisKeys.FlagVersion(flagId, v1);
+        var v2Key = RedisKeys.FlagVersion(flagId, v2);
+        var pointerKey = RedisKeys.FlagCommittedPointer(flagId);
 
         // seed: two versioned value keys + a committed pointer at v2.
         await db.StringSetAsync(v1Key, "v1-value");
@@ -97,9 +97,9 @@ public class StagedFlagGcWorkerTests : IntegrationTestBase, IAsyncLifetime
         const long v1 = 1000L;
         const long v2 = 2000L;
 
-        var v1Key = RedisCaches.FlagVersion(flagId, v1);
-        var v2Key = RedisCaches.FlagVersion(flagId, v2);
-        var pointerKey = RedisCaches.FlagCommittedPointer(flagId);
+        var v1Key = RedisKeys.FlagVersion(flagId, v1);
+        var v2Key = RedisKeys.FlagVersion(flagId, v2);
+        var pointerKey = RedisKeys.FlagCommittedPointer(flagId);
 
         // seed: versioned value keys but NO committed pointer.
         await db.StringSetAsync(v1Key, "v1-value");

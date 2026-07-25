@@ -74,7 +74,7 @@ public class RedisHasStagedFlagTests : IntegrationTestBase, IAsyncLifetime
         Assert.False(await sut.HasStagedFlagAsync(Guid.NewGuid(), ts));
 
         // cleanup
-        await db.KeyDeleteAsync(RedisCaches.FlagVersion(flagId, ts));
+        await db.KeyDeleteAsync(RedisKeys.FlagVersion(flagId, ts));
     }
 
     private static FeatureFlag NewFlag(Guid envId, Guid flagId, long ts) => new()

@@ -138,7 +138,7 @@ public sealed class StagedFlagGcWorker : BackgroundService
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var pointerKey = RedisCaches.FlagCommittedPointer(flagId);
+            var pointerKey = RedisKeys.FlagCommittedPointer(flagId);
             var pointerValue = await db.StringGetAsync(pointerKey);
 
             // No committed pointer => never delete (unstaged/uncommitted versions are untouched).

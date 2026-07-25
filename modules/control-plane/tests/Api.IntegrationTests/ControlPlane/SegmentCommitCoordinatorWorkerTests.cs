@@ -292,8 +292,8 @@ public sealed class SegmentCommitCoordinatorWorkerTests : IntegrationTestBase, I
         Assert.Null(raw.Pending);
 
         // committed pointer advanced in BOTH DCs (broadcast)
-        var dcaPointer = await _mux.GetDatabase(0).StringGetAsync(RedisCaches.SegmentCommittedPointer(segment.Id));
-        var dcbPointer = await _mux.GetDatabase(1).StringGetAsync(RedisCaches.SegmentCommittedPointer(segment.Id));
+        var dcaPointer = await _mux.GetDatabase(0).StringGetAsync(RedisKeys.SegmentCommittedPointer(segment.Id));
+        var dcbPointer = await _mux.GetDatabase(1).StringGetAsync(RedisKeys.SegmentCommittedPointer(segment.Id));
         Assert.Equal(v, (long)dcaPointer);
         Assert.Equal(v, (long)dcbPointer);
 

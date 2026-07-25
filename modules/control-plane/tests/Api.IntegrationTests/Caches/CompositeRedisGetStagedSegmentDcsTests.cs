@@ -83,7 +83,7 @@ public class CompositeRedisGetStagedSegmentDcsTests : IntegrationTestBase, IAsyn
         Assert.True(await sut.HasStagedSegmentAsync(segmentId, ts));
 
         // cleanup
-        await _mux!.GetDatabase(0).KeyDeleteAsync(RedisCaches.SegmentVersion(segmentId, ts));
+        await _mux!.GetDatabase(0).KeyDeleteAsync(RedisKeys.SegmentVersion(segmentId, ts));
     }
 
     private static Segment NewSegment(Guid segmentId, long ts) => new(

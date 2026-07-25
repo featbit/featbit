@@ -263,8 +263,8 @@ public sealed class CommitCoordinatorWorkerTests : IntegrationTestBase, IAsyncLi
         Assert.Null(raw.Pending);
 
         // committed pointer advanced in BOTH DCs (broadcast)
-        var dcaPointer = await _mux.GetDatabase(0).StringGetAsync(RedisCaches.FlagCommittedPointer(flag.Id));
-        var dcbPointer = await _mux.GetDatabase(1).StringGetAsync(RedisCaches.FlagCommittedPointer(flag.Id));
+        var dcaPointer = await _mux.GetDatabase(0).StringGetAsync(RedisKeys.FlagCommittedPointer(flag.Id));
+        var dcbPointer = await _mux.GetDatabase(1).StringGetAsync(RedisKeys.FlagCommittedPointer(flag.Id));
         Assert.Equal(v, (long)dcaPointer);
         Assert.Equal(v, (long)dcbPointer);
 

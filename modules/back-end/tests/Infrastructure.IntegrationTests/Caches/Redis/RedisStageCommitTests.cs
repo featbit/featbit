@@ -63,7 +63,7 @@ public class RedisStageCommitTests : IntegrationTestBase, IAsyncLifetime
         await sut.StageFlagAsync(flagV1, v1);
         await sut.CommitFlagAsync(envId, flagIdString, v1);
 
-        var committedKey = RedisCaches.FlagCommittedPointer(flagId);
+        var committedKey = RedisKeys.FlagCommittedPointer(flagId);
         var indexKey = RedisKeys.FlagIndex(envId);
 
         Assert.Equal(v1.ToString(), (string?)await db.StringGetAsync(committedKey));
@@ -75,9 +75,9 @@ public class RedisStageCommitTests : IntegrationTestBase, IAsyncLifetime
         var flagV2 = NewFlag(envId, flagId, v2);
         await sut.StageFlagAsync(flagV2, v2);
 
-        Assert.True(await db.KeyExistsAsync(RedisCaches.FlagVersion(flagId, v2)),
+        Assert.True(await db.KeyExistsAsync(RedisKeys.FlagVersion(flagId, v2)),
             "staged versioned value key should exist");
-        Assert.True(await db.KeyExistsAsync(RedisCaches.FlagVersion(flagId, v1)),
+        Assert.True(await db.KeyExistsAsync(RedisKeys.FlagVersion(flagId, v1)),
             "previously committed versioned value key should still exist");
 
         // ACCEPTANCE: after StageFlagAsync the committed pointer is unchanged.
@@ -93,8 +93,8 @@ public class RedisStageCommitTests : IntegrationTestBase, IAsyncLifetime
 
         // cleanup
         await db.KeyDeleteAsync(committedKey);
-        await db.KeyDeleteAsync(RedisCaches.FlagVersion(flagId, v1));
-        await db.KeyDeleteAsync(RedisCaches.FlagVersion(flagId, v2));
+        await db.KeyDeleteAsync(RedisKeys.FlagVersion(flagId, v1));
+        await db.KeyDeleteAsync(RedisKeys.FlagVersion(flagId, v2));
         await db.SortedSetRemoveAsync(indexKey, flagIdString);
     }
 
@@ -118,11 +118,11 @@ public class RedisStageCommitTests : IntegrationTestBase, IAsyncLifetime
         // staging must NOT add the flag to the env index nor move the committed pointer.
         Assert.False((await db.SortedSetScoreAsync(indexKey, flagIdString)).HasValue,
             "staging must not write the sorted-set index");
-        Assert.False(await db.KeyExistsAsync(RedisCaches.FlagCommittedPointer(flagId)),
+        Assert.False(await db.KeyExistsAsync(RedisKeys.FlagCommittedPointer(flagId)),
             "staging must not write the committed pointer");
 
         // cleanup
-        await db.KeyDeleteAsync(RedisCaches.FlagVersion(flagId, ts));
+        await db.KeyDeleteAsync(RedisKeys.FlagVersion(flagId, ts));
     }
 
     private static FeatureFlag NewFlag(Guid envId, Guid flagId, long ts) => new()

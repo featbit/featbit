@@ -298,7 +298,7 @@ public sealed class RecoveryWorkerTests : IntegrationTestBase, IAsyncLifetime
 
         // dc-b is still at v1 and never got v2.
         Assert.False(await _dcbCache.HasStagedFlagAsync(v2.Id, v2Ts));
-        var dcbPointerBefore = await _mux.GetDatabase(1).StringGetAsync(RedisCaches.FlagCommittedPointer(v2.Id));
+        var dcbPointerBefore = await _mux.GetDatabase(1).StringGetAsync(RedisKeys.FlagCommittedPointer(v2.Id));
         Assert.Equal(v1Ts, (long)dcbPointerBefore);
 
         // A recovery tick now sees only dc-a live; nothing returned.
@@ -316,7 +316,7 @@ public sealed class RecoveryWorkerTests : IntegrationTestBase, IAsyncLifetime
         // dc-b's Redis now has v2: versioned value key + committed pointer + index all at v2.
         Assert.True(await _dcbCache.HasStagedFlagAsync(v2.Id, v2Ts));
 
-        var dcbPointerAfter = await _mux.GetDatabase(1).StringGetAsync(RedisCaches.FlagCommittedPointer(v2.Id));
+        var dcbPointerAfter = await _mux.GetDatabase(1).StringGetAsync(RedisKeys.FlagCommittedPointer(v2.Id));
         Assert.Equal(v2Ts, (long)dcbPointerAfter);
 
         var dcbIndexScore = await _mux.GetDatabase(1)
@@ -325,7 +325,7 @@ public sealed class RecoveryWorkerTests : IntegrationTestBase, IAsyncLifetime
         Assert.Equal(v2Ts, (long)dcbIndexScore!.Value);
 
         // dc-a was untouched by the recovery (it was already live, not returning).
-        var dcaPointer = await _mux.GetDatabase(0).StringGetAsync(RedisCaches.FlagCommittedPointer(v2.Id));
+        var dcaPointer = await _mux.GetDatabase(0).StringGetAsync(RedisKeys.FlagCommittedPointer(v2.Id));
         Assert.Equal(v2Ts, (long)dcaPointer);
     }
 
@@ -386,7 +386,7 @@ public sealed class RecoveryWorkerTests : IntegrationTestBase, IAsyncLifetime
         // dc-b is still at v1 and never got v2.
         Assert.False(await _dcbCache.HasStagedSegmentAsync(s2.Id, s2Ts));
         var dcbPointerBefore =
-            await _mux.GetDatabase(1).StringGetAsync(RedisCaches.SegmentCommittedPointer(s2.Id));
+            await _mux.GetDatabase(1).StringGetAsync(RedisKeys.SegmentCommittedPointer(s2.Id));
         Assert.Equal(s1Ts, (long)dcbPointerBefore);
 
         // A recovery tick now sees only dc-a live; nothing returned.
@@ -405,7 +405,7 @@ public sealed class RecoveryWorkerTests : IntegrationTestBase, IAsyncLifetime
         Assert.True(await _dcbCache.HasStagedSegmentAsync(s2.Id, s2Ts));
 
         var dcbPointerAfter =
-            await _mux.GetDatabase(1).StringGetAsync(RedisCaches.SegmentCommittedPointer(s2.Id));
+            await _mux.GetDatabase(1).StringGetAsync(RedisKeys.SegmentCommittedPointer(s2.Id));
         Assert.Equal(s2Ts, (long)dcbPointerAfter);
 
         var dcbIndexScore = await _mux.GetDatabase(1)
@@ -415,13 +415,13 @@ public sealed class RecoveryWorkerTests : IntegrationTestBase, IAsyncLifetime
 
         // dc-a was untouched by the recovery (it was already live, not returning).
         var dcaPointer =
-            await _mux.GetDatabase(0).StringGetAsync(RedisCaches.SegmentCommittedPointer(s2.Id));
+            await _mux.GetDatabase(0).StringGetAsync(RedisKeys.SegmentCommittedPointer(s2.Id));
         Assert.Equal(s2Ts, (long)dcaPointer);
 
         // the flag backfill still works (don't regress): dc-b has the flag committed at v1.
         Assert.True(await _dcbCache.HasStagedFlagAsync(flag.Id, flagTs));
         var dcbFlagPointer =
-            await _mux.GetDatabase(1).StringGetAsync(RedisCaches.FlagCommittedPointer(flag.Id));
+            await _mux.GetDatabase(1).StringGetAsync(RedisKeys.FlagCommittedPointer(flag.Id));
         Assert.Equal(flagTs, (long)dcbFlagPointer);
     }
 
@@ -571,15 +571,15 @@ public sealed class RecoveryWorkerTests : IntegrationTestBase, IAsyncLifetime
 
         // Both DCs were written from the IDENTICAL shared snapshot: same committed pointer (ts) for
         // both the flag and the segment on both DCs.
-        var dcaFlagPointer = await _mux.GetDatabase(0).StringGetAsync(RedisCaches.FlagCommittedPointer(flag.Id));
-        var dcbFlagPointer = await _mux.GetDatabase(1).StringGetAsync(RedisCaches.FlagCommittedPointer(flag.Id));
+        var dcaFlagPointer = await _mux.GetDatabase(0).StringGetAsync(RedisKeys.FlagCommittedPointer(flag.Id));
+        var dcbFlagPointer = await _mux.GetDatabase(1).StringGetAsync(RedisKeys.FlagCommittedPointer(flag.Id));
         Assert.Equal(flagTs, (long)dcaFlagPointer);
         Assert.Equal(flagTs, (long)dcbFlagPointer);
 
         var dcaSegmentPointer =
-            await _mux.GetDatabase(0).StringGetAsync(RedisCaches.SegmentCommittedPointer(segment.Id));
+            await _mux.GetDatabase(0).StringGetAsync(RedisKeys.SegmentCommittedPointer(segment.Id));
         var dcbSegmentPointer =
-            await _mux.GetDatabase(1).StringGetAsync(RedisCaches.SegmentCommittedPointer(segment.Id));
+            await _mux.GetDatabase(1).StringGetAsync(RedisKeys.SegmentCommittedPointer(segment.Id));
         Assert.Equal(segmentTs, (long)dcaSegmentPointer);
         Assert.Equal(segmentTs, (long)dcbSegmentPointer);
 

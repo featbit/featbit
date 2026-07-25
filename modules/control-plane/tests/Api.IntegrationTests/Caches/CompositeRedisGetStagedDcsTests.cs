@@ -83,7 +83,7 @@ public class CompositeRedisGetStagedDcsTests : IntegrationTestBase, IAsyncLifeti
         Assert.True(await sut.HasStagedFlagAsync(flagId, ts));
 
         // cleanup
-        await _mux!.GetDatabase(0).KeyDeleteAsync(RedisCaches.FlagVersion(flagId, ts));
+        await _mux!.GetDatabase(0).KeyDeleteAsync(RedisKeys.FlagVersion(flagId, ts));
     }
 
     private static FeatureFlag NewFlag(Guid envId, Guid flagId, long ts) => new()

@@ -154,7 +154,7 @@ public class RedisCacheService(IRedisClient redis) : ICacheService
     public async Task<bool> CommitFlagAsync(Guid envId, string flagId, long ts)
     {
         // flip the committed pointer to the staged version, but only if it advances
-        var pointerKey = RedisCaches.FlagCommittedPointer(Guid.Parse(flagId));
+        var pointerKey = RedisKeys.FlagCommittedPointer(Guid.Parse(flagId));
         var pointerResult = await Redis.ScriptEvaluateAsync(OnlyAdvancePointerScript, [pointerKey], [ts]);
         var accepted = (int)pointerResult == 1;
 
@@ -176,7 +176,7 @@ public class RedisCacheService(IRedisClient redis) : ICacheService
     /// </summary>
     public Task<bool> HasStagedFlagAsync(Guid id, long ts)
     {
-        return Redis.KeyExistsAsync(RedisCaches.FlagVersion(id, ts));
+        return Redis.KeyExistsAsync(RedisKeys.FlagVersion(id, ts));
     }
 
     public async Task DeleteFlagAsync(Guid envId, Guid flagId)
@@ -276,7 +276,7 @@ public class RedisCacheService(IRedisClient redis) : ICacheService
     public async Task<bool> CommitSegmentAsync(ICollection<Guid> envIds, string segmentId, long ts)
     {
         // flip the committed pointer to the staged version, but only if it advances
-        var pointerKey = RedisCaches.SegmentCommittedPointer(Guid.Parse(segmentId));
+        var pointerKey = RedisKeys.SegmentCommittedPointer(Guid.Parse(segmentId));
         var pointerResult = await Redis.ScriptEvaluateAsync(OnlyAdvancePointerScript, [pointerKey], [ts]);
         var accepted = (int)pointerResult == 1;
 
@@ -300,7 +300,7 @@ public class RedisCacheService(IRedisClient redis) : ICacheService
     /// </summary>
     public Task<bool> HasStagedSegmentAsync(Guid id, long ts)
     {
-        return Redis.KeyExistsAsync(RedisCaches.SegmentVersion(id, ts));
+        return Redis.KeyExistsAsync(RedisKeys.SegmentVersion(id, ts));
     }
 
     public async Task DeleteSegmentAsync(ICollection<Guid> envIds, Guid segmentId)
