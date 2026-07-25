@@ -10,11 +10,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
@@ -54,15 +49,22 @@ type Props = {
   canCreate: boolean
 }
 
-function TagsCell({ tags }: { tags: string[] }) {
-  const visible = tags.slice(0, 2)
-  const hidden = tags.slice(2)
+function formatDate(value: string, lang: Lang, withTime = false) {
+  if (!value) return ""
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ""
+  return new Intl.DateTimeFormat(lang === "zh" ? "zh-CN" : "en-US", {
+    dateStyle: "medium",
+    ...(withTime ? { timeStyle: "short" } : {}),
+  }).format(date)
+}
 
+function TagsCell({ tags }: { tags: string[] }) {
   if (!tags.length) return <span className="text-muted-foreground">-</span>
 
   return (
     <div className="flex min-w-0 flex-wrap items-center gap-1.5">
-      {visible.map((tag) => (
+      {tags.map((tag) => (
         <Tooltip key={tag}>
           <TooltipTrigger
             render={
@@ -77,24 +79,6 @@ function TagsCell({ tags }: { tags: string[] }) {
           <TooltipContent>{tag}</TooltipContent>
         </Tooltip>
       ))}
-      {hidden.length ? (
-        <Popover>
-          <PopoverTrigger
-            render={<Button type="button" variant="outline" size="xs" />}
-          >
-            +{hidden.length}
-          </PopoverTrigger>
-          <PopoverContent align="start" className="w-56 p-2">
-            <div className="flex flex-wrap gap-1.5">
-              {hidden.map((tag) => (
-                <Badge key={tag} variant="outline" className="font-normal">
-                  {tag}
-                </Badge>
-              ))}
-            </div>
-          </PopoverContent>
-        </Popover>
-      ) : null}
     </div>
   )
 }
@@ -163,7 +147,7 @@ export function SegmentsTable({
           Array.from({ length: 5 }).map((_, rowIndex) => (
             <TableRow key={rowIndex}>
               {Array.from({ length: 5 }).map((__, columnIndex) => (
-                <TableCell key={columnIndex} className="px-5 py-5">
+                <TableCell key={columnIndex} className="px-5 py-2.5">
                   <Skeleton className="h-4 w-3/4" />
                 </TableCell>
               ))}
@@ -220,8 +204,8 @@ export function SegmentsTable({
             )
             return (
               <TableRow key={segment.id}>
-                <TableCell className="px-5 py-4 align-middle">
-                  <div className="min-w-0 space-y-1.5">
+                <TableCell className="px-5 py-2 align-middle">
+                  <div className="min-w-0 space-y-1">
                     <Link
                       to={detailsHref}
                       className="block truncate font-semibold text-foreground hover:underline"
@@ -232,7 +216,7 @@ export function SegmentsTable({
                       <button
                         type="button"
                         aria-label={t("segments.copyKey", { key: segment.key })}
-                        className="flex min-w-0 items-center gap-1.5 rounded bg-muted px-2 py-1 font-mono text-xs text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                        className="flex min-w-0 items-center gap-1.5 rounded bg-muted px-2 py-0.5 font-mono text-xs text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                         onClick={() => onCopy(segment.key)}
                       >
                         <span className="truncate">{segment.key}</span>
@@ -241,26 +225,19 @@ export function SegmentsTable({
                     </div>
                   </div>
                 </TableCell>
-                <TableCell className="px-5 py-4 align-middle">
+                <TableCell className="px-5 py-2 align-middle">
                   <SegmentTypeCell
                     type={segment.type}
                     scopes={segment.scopes}
                   />
                 </TableCell>
-                <TableCell className="px-5 py-4 align-middle">
+                <TableCell className="px-5 py-2 align-middle">
                   <TagsCell tags={segment.tags ?? []} />
                 </TableCell>
-                <TableCell className="px-5 py-4 align-middle whitespace-nowrap text-muted-foreground">
-                  {new Intl.DateTimeFormat(lang === "zh" ? "zh-CN" : "en-CA", {
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: false,
-                  }).format(new Date(segment.updatedAt))}
+                <TableCell className="px-5 py-2 align-middle whitespace-nowrap text-muted-foreground">
+                  {formatDate(segment.updatedAt, lang, true)}
                 </TableCell>
-                <TableCell className="px-5 py-4 align-middle">
+                <TableCell className="px-5 py-2 align-middle">
                   <div className="flex items-center gap-1 whitespace-nowrap">
                     <Link
                       to={detailsHref}

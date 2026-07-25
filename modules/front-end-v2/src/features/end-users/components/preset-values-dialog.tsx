@@ -154,7 +154,7 @@ export function PresetValuesDialog({
             {t("endUsers.presetsDialog.warning")}
           </div>
         </div>
-        <DialogFooter className="mx-0 mb-0 justify-between px-6 sm:justify-between">
+        <DialogFooter className="mx-0 mb-0 justify-between border-t-0 bg-transparent px-6 sm:justify-between">
           <Button
             type="button"
             variant="ghost"

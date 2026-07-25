@@ -412,7 +412,7 @@ function VariationDialog({
         <pre className="m-6 max-h-[55vh] overflow-auto rounded-md bg-zinc-950 p-4 text-sm whitespace-pre-wrap text-zinc-50">
           {formatted}
         </pre>
-        <DialogFooter className="mx-0 mb-0 justify-between px-6 sm:justify-between">
+        <DialogFooter className="mx-0 mb-0 justify-between border-t-0 bg-transparent px-6 sm:justify-between">
           <Button type="button" variant="outline" onClick={format}>
             {t("endUsers.evaluateDrawer.format")}
           </Button>

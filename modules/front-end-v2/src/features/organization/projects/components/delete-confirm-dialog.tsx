@@ -50,8 +50,10 @@ export function DeleteConfirmDialog({
           <AlertDialogTitle>{target?.title}</AlertDialogTitle>
           <AlertDialogDescription>{target?.description}</AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel render={<Button variant="outline" disabled={saving} />}>
+        <AlertDialogFooter className="border-t-0 bg-transparent">
+          <AlertDialogCancel
+            render={<Button variant="outline" disabled={saving} />}
+          >
             {cancelLabel}
           </AlertDialogCancel>
           <AlertDialogAction

@@ -92,7 +92,7 @@ export function SegmentConfirmDialog({
             ) : null}
           </div>
         ) : null}
-        <DialogFooter>
+        <DialogFooter className="border-t-0 bg-transparent">
           <Button
             type="button"
             variant="outline"

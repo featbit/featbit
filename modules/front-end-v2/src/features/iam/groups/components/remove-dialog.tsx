@@ -38,7 +38,7 @@ export function RemoveDialog({
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter>
+        <AlertDialogFooter className="border-t-0 bg-transparent">
           <AlertDialogCancel
             render={<Button type="button" variant="outline" />}
           >

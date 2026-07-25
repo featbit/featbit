@@ -132,7 +132,7 @@ export function SecretDialog({
               {t("organization.projects.helper.typeReadOnly")}
             </p>
           ) : null}
-          <DialogFooter>
+          <DialogFooter className="border-t-0 bg-transparent">
             <Button type="submit" disabled={saving}>
               {saving ? <Loader2 className="animate-spin" /> : <Save />}
               {isEditing

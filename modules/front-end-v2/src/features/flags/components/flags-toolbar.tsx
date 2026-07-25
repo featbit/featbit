@@ -62,7 +62,10 @@ type Props = {
 export function FlagsToolbar(props: Props) {
   const c = flagsCopy(props.lang)
   const filtersApplied = Boolean(
-    props.search.trim() || props.selectedTags.length || props.status !== "all"
+    props.search.trim() ||
+    props.selectedTags.length ||
+    props.status !== "all" ||
+    props.archived
   )
   const visibleTags = props.selectedTags.slice(0, 2)
   const hiddenTagCount = props.selectedTags.length - visibleTags.length

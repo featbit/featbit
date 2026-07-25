@@ -468,7 +468,7 @@ export function SegmentSheet({
               {t("segments.create.discardDescription")}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
+          <AlertDialogFooter className="border-t-0 bg-transparent">
             <Button
               type="button"
               variant="outline"

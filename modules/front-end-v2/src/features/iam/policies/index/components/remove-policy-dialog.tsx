@@ -46,7 +46,7 @@ export function RemovePolicyDialog({
             {descriptionAfter}
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter>
+        <AlertDialogFooter className="border-t-0 bg-transparent">
           <AlertDialogCancel
             render={<Button type="button" variant="outline" />}
           >

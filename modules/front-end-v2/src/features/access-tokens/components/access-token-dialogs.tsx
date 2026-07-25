@@ -72,7 +72,7 @@ export function AccessTokenConfirmDialog({
             ) : null}
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter>
+        <AlertDialogFooter className="border-t-0 bg-transparent">
           <AlertDialogCancel render={<Button variant="outline" />}>
             {t("accessTokens.confirm.cancel")}
           </AlertDialogCancel>

@@ -43,7 +43,7 @@ export function DownloadUsersDialog({
             </p>
           </div>
         ) : null}
-        <DialogFooter className="mx-0 mb-0 px-6">
+        <DialogFooter className="mx-0 mb-0 border-t-0 bg-transparent px-6">
           <Button
             type="button"
             variant="outline"

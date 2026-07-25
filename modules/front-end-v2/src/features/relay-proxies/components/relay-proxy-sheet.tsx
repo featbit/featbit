@@ -825,7 +825,7 @@ export function RelayProxySheet({
               })}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
+          <AlertDialogFooter className="border-t-0 bg-transparent">
             <Button
               variant="outline"
               onClick={() => setRemoveAgentTarget(null)}

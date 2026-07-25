@@ -316,7 +316,7 @@ export function UpdateSubscriptionDialog({
           </div>
         ) : null}
 
-        <div className="flex justify-end gap-2 border-t px-6 py-4">
+        <div className="flex justify-end gap-2 px-6 py-4">
           <Button
             variant="outline"
             disabled={updating}

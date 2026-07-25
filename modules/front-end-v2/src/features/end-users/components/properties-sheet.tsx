@@ -357,7 +357,7 @@ export function PropertiesSheet({
               })}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
+          <AlertDialogFooter className="border-t-0 bg-transparent">
             <Button variant="outline" onClick={() => setRemoveTarget(null)}>
               {t("endUsers.propertiesDrawer.cancel")}
             </Button>

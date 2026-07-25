@@ -297,7 +297,7 @@ export function LiveDebugDialog({
           ) : null}
         </div>
 
-        <DialogFooter className="m-0 rounded-none bg-popover px-6 py-4 sm:items-center">
+        <DialogFooter className="m-0 rounded-none border-t-0 bg-transparent px-6 py-4 sm:items-center">
           <span className="mr-auto max-w-md text-xs text-muted-foreground">
             {t("webhooks.debug.warning")}
           </span>

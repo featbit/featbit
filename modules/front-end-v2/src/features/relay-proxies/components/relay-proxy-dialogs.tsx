@@ -53,7 +53,7 @@ export function RemoveRelayProxyDialog({
             ) : null}
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter>
+        <AlertDialogFooter className="border-t-0 bg-transparent">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             {t("relayProxies.removeDialog.cancel")}
           </Button>
@@ -128,7 +128,7 @@ export function RelayProxyKeyDialog({
             {t("relayProxies.keyDialog.copyFailed")}
           </p>
         )}
-        <DialogFooter>
+        <DialogFooter className="border-t-0 bg-transparent">
           <Button disabled={!copied} onClick={onDone}>
             {t("relayProxies.keyDialog.done")}
           </Button>

@@ -31,7 +31,7 @@ export function RemoveWebhookDialog({
             {t("webhooks.remove.description", { name: target?.name ?? "" })}
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter>
+        <AlertDialogFooter className="border-t-0 bg-transparent">
           <Button
             variant="outline"
             disabled={isRemoving}

@@ -240,7 +240,7 @@ export function FlagsTable(props: Props) {
           Array.from({ length: 5 }).map((_, row) => (
             <TableRow key={row}>
               {Array.from({ length: 6 }).map((__, column) => (
-                <TableCell key={column} className="px-5 py-5">
+                <TableCell key={column} className="px-5 py-2.5">
                   <Skeleton className="h-4 w-3/4" />
                 </TableCell>
               ))}
@@ -300,14 +300,14 @@ export function FlagsTable(props: Props) {
                 data-state={selected ? "selected" : undefined}
                 className="data-[state=selected]:bg-muted/40"
               >
-                <TableCell className="px-5 py-4">
+                <TableCell className="px-5 py-2">
                   <Checkbox
                     checked={selected}
                     onCheckedChange={() => props.onToggleSelected(flag)}
                   />
                 </TableCell>
-                <TableCell className="px-5 py-4">
-                  <div className="min-w-0 space-y-1.5">
+                <TableCell className="px-5 py-2">
+                  <div className="min-w-0 space-y-1">
                     <Link
                       to={detailsHref}
                       className="block truncate font-semibold text-foreground hover:underline"
@@ -320,7 +320,7 @@ export function FlagsTable(props: Props) {
                           <button
                             type="button"
                             aria-label={c.copyKey(flag.key)}
-                            className="inline-flex max-w-full items-center gap-1.5 rounded bg-muted px-2 py-1 font-mono text-xs text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                            className="inline-flex max-w-full items-center gap-1.5 rounded bg-muted px-2 py-0.5 font-mono text-xs text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                             onClick={() => props.onCopyKey(flag.key)}
                           />
                         }
@@ -345,7 +345,7 @@ export function FlagsTable(props: Props) {
                     ) : null}
                   </div>
                 </TableCell>
-                <TableCell className="px-5 py-4">
+                <TableCell className="px-5 py-2">
                   <ServingCell
                     flag={flag}
                     lang={props.lang}
@@ -354,11 +354,11 @@ export function FlagsTable(props: Props) {
                     onToggle={() => props.onToggle(flag)}
                   />
                 </TableCell>
-                <TableCell className="px-5 py-4">
+                <TableCell className="px-5 py-2">
                   <TagsCell tags={flag.tags ?? []} />
                 </TableCell>
-                <TableCell className="px-5 py-4">
-                  <div className="max-w-full min-w-0 space-y-1.5 text-sm">
+                <TableCell className="px-5 py-2">
+                  <div className="max-w-full min-w-0 space-y-1 text-sm">
                     {flag.lastChange ? (
                       <>
                         <p>
@@ -398,7 +398,7 @@ export function FlagsTable(props: Props) {
                     )}
                   </div>
                 </TableCell>
-                <TableCell className="px-5 py-4">
+                <TableCell className="px-5 py-2">
                   <div className="flex items-center gap-2 whitespace-nowrap">
                     <Link
                       to={detailsHref}
@@ -414,7 +414,7 @@ export function FlagsTable(props: Props) {
                         render={
                           <Button
                             type="button"
-                            variant="outline"
+                            variant="ghost"
                             size="icon-sm"
                             aria-label={c.moreActions(flag.name)}
                           />

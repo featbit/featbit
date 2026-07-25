@@ -25,6 +25,73 @@ const segment: Segment = {
 }
 
 describe("SegmentsTable", () => {
+  it("formats the last change date like the feature flags table", () => {
+    render(
+      <MemoryRouter>
+        <SegmentsTable
+          items={[segment]}
+          loading={false}
+          archived={false}
+          lang="en"
+          query=""
+          mutatingId={null}
+          canArchive={() => true}
+          canRestore={() => true}
+          canRemove={() => true}
+          onCopy={vi.fn()}
+          onArchive={vi.fn()}
+          onRestore={vi.fn()}
+          onRemove={vi.fn()}
+          onClearSearch={vi.fn()}
+          onCreate={vi.fn()}
+          canCreate
+        />
+      </MemoryRouter>
+    )
+
+    const expected = new Intl.DateTimeFormat("en-US", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    }).format(new Date(segment.updatedAt))
+
+    expect(screen.getByText(expected)).toBeInTheDocument()
+  })
+
+  it("shows every tag without collapsing tags into a count", () => {
+    render(
+      <MemoryRouter>
+        <SegmentsTable
+          items={[
+            {
+              ...segment,
+              tags: ["backend", "release", "production"],
+            },
+          ]}
+          loading={false}
+          archived={false}
+          lang="en"
+          query=""
+          mutatingId={null}
+          canArchive={() => true}
+          canRestore={() => true}
+          canRemove={() => true}
+          onCopy={vi.fn()}
+          onArchive={vi.fn()}
+          onRestore={vi.fn()}
+          onRemove={vi.fn()}
+          onClearSearch={vi.fn()}
+          onCreate={vi.fn()}
+          canCreate
+        />
+      </MemoryRouter>
+    )
+
+    expect(screen.getByText("backend")).toBeInTheDocument()
+    expect(screen.getByText("release")).toBeInTheDocument()
+    expect(screen.getByText("production")).toBeInTheDocument()
+    expect(screen.queryByText("+1")).not.toBeInTheDocument()
+  })
+
   it("shows shared scopes with resource icons on hover", async () => {
     render(
       <MemoryRouter>

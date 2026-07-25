@@ -127,7 +127,7 @@ export function ManualAgentDialog({
             )}
           </div>
         </div>
-        <DialogFooter>
+        <DialogFooter className="border-t-0 bg-transparent">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             {t("relayProxies.manualAgent.cancel")}
           </Button>

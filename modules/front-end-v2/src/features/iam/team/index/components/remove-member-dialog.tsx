@@ -45,7 +45,7 @@ export function RemoveMemberDialog({
               : t("iam.team.remove.organizationDescription")}
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter>
+        <AlertDialogFooter className="border-t-0 bg-transparent">
           <AlertDialogCancel
             render={<Button type="button" variant="outline" />}
           >

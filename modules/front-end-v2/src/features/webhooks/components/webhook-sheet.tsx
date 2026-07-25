@@ -985,7 +985,7 @@ export function WebhookSheet({
               {t("webhooks.discard.description")}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
+          <AlertDialogFooter className="border-t-0 bg-transparent">
             <Button variant="outline" onClick={() => setDiscardOpen(false)}>
               {t("webhooks.discard.keepEditing")}
             </Button>

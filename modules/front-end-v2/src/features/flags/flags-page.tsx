@@ -320,7 +320,7 @@ export function FlagsPage() {
   }
   function clearFilters() {
     setSearch("")
-    updateParams({ name: null, tags: null, status: null }, true)
+    updateParams({ name: null, tags: null, status: null, archived: null }, true)
   }
   function requirePermission(
     flag: FeatureFlag,
@@ -487,6 +487,7 @@ export function FlagsPage() {
           }
         />
         <FlagEditorSheet
+          envId={envId}
           lang={lang}
           open={editorOpen}
           source={cloneTarget}

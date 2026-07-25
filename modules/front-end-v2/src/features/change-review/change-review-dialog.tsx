@@ -123,7 +123,7 @@ function ReviewDialogContent<TChange extends ChangeReviewItem>({
             <p className="text-xs text-muted-foreground">{copy.commentHelp}</p>
           </div>
         </div>
-        <DialogFooter>
+        <DialogFooter className="border-t-0 bg-transparent">
           <Button
             type="button"
             variant="outline"

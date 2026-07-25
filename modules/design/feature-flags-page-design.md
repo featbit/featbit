@@ -148,14 +148,14 @@ The following styling rules are strict consistency requirements:
 - rows remain flat with the shared subtle hover state and no individual cards or shadows;
 - badges, key pills, action links, and ellipsis buttons reuse the same radius, border, and focus treatment as Segments.
 
-| Column | Preferred width | Content |
-| --- | ---: | --- |
-| Selection | 48-56px | Page checkbox and row checkbox |
-| Flag | 28% | Name, copyable key, creator and creation date |
-| Status & serving | 23% | Switch, type badge, serving summary |
-| Tags | 17% | Up to two visible tags and `+N` overflow |
-| Last change | 20% | Time, actor, optional comment |
-| Actions | 12% | Visible Details action and overflow menu |
+| Column           | Preferred width | Content                                       |
+| ---------------- | --------------: | --------------------------------------------- |
+| Selection        |         48-56px | Page checkbox and row checkbox                |
+| Flag             |             28% | Name, copyable key, creator and creation date |
+| Status & serving |             23% | Switch, type badge, serving summary           |
+| Tags             |             17% | Up to two visible tags and `+N` overflow      |
+| Last change      |             20% | Time, actor, optional comment                 |
+| Actions          |             12% | Visible Details action and overflow menu      |
 
 Keep a minimum table width. Do not hide Tags at narrower desktop widths as Angular does; horizontal scrolling preserves the complete operational view.
 
@@ -308,9 +308,11 @@ These surfaces are part of the index workflow even though the Feature Flag detai
 
 ### Copy to environment dialog
 
-![Copy to environment dialog, light theme](feature-flags-copy-to-environment-dialog-light.png)
+![Copy to environment precheck states, light theme](feature-flag-copy-to-environment-dialog.png)
 
 Reuse one Dialog for the row-level `Copy to environment` action and the contextual multi-row action. The row entry supplies one flag; the contextual action supplies the complete retained selection, including selections from other pages.
+
+The visual reference is a six-state board for one stable Dialog: Ready to copy, Limitations not acknowledged, Key conflict blocked, Checking, Precheck failed, and Permission or license denied. Source/target context, flag identity, list geometry, and footer placement remain stable while only result content and action availability change.
 
 #### Dialog structure
 
@@ -319,7 +321,8 @@ Reuse one Dialog for the row-level `Copy to environment` action and the contextu
   - title: `Copy to environment`;
   - description: `Choose a target environment and review what can be copied.`;
   - standard close button.
-- Body is scrollable; header and footer remain fixed when many flags are selected.
+- Only the flag precheck list is scrollable when many flags are selected. Header, environment scope card, and footer remain fixed.
+- Header and footer have no divider line. The footer also has no tinted or contrasting background.
 
 #### Environment scope
 
@@ -327,6 +330,9 @@ Reuse one Dialog for the row-level `Copy to environment` action and the contextu
   - `Source` is the current `Project / Environment` and is read-only;
   - ArrowRight communicates copy direction;
   - `Target environment` is a required searchable Select.
+- Implement the scope card as a coordinated two-row grid: both labels share the first row, both environment values use the same 28 px-tall compact row, and the arrow is vertically centered on the value row.
+- Prefix both selected environment values with the standard 16 px `Box` environment icon. Keep the icon, value text, and vertical alignment identical on both sides.
+- Use a 20 px ArrowRight and bias the column split slightly toward the target so the direction indicator sits just left of the card's geometric center.
 - Group target options by project and show `Project / Environment` labels.
 - Exclude the current source environment.
 - Follow the React Select composition rule: `SelectContent > SelectGroup > SelectItem`.
@@ -335,41 +341,70 @@ Reuse one Dialog for the row-level `Copy to environment` action and the contextu
 
 #### Precheck summary and list
 
-- Section heading: `Flags to copy` with `<selected> of <total> selected` aligned to the right.
-- Render a compact bordered list with horizontal row separators rather than a stack of cards.
+- Do not add a section heading, selection summary, or header checkbox above the flag list.
+- Render one compact bordered list with horizontal row separators rather than unrelated cards.
 - Each row shows:
-  - selection checkbox;
-  - flag name and copyable key;
-  - concise status on the right;
-  - expand/collapse affordance only when explanatory details exist.
+  - a left identity region with flag name and monospace key; tags are intentionally omitted from this Dialog;
+  - show the row selection checkbox only for multi-flag actions; a single supplied flag is implicitly selected and does not show a redundant row checkbox;
+  - a right result region separated by a vertical divider, containing status and supporting details;
+  - the two regions stack only on narrow mobile widths where the desktop columns cannot remain readable.
 - Safe result:
   - checked by default;
   - CheckCircle plus `Ready to copy`;
-  - no expanded explanation is required.
+  - helper text `All copy checks passed.`.
 - Copyable warning result:
-  - unchecked by default;
-  - AlertTriangle plus `<count> limitation` or `<count> limitations`;
-  - explicit `Copy anyway` checkbox/action selects the flag despite omitted settings;
-  - expanded details list only relevant restrictions, including Individual Targeting omission, incompatible Targeting Rules, or property compatibility information.
+  - leave the affected flag out of the copy selection by default;
+  - AlertTriangle plus `Copy with limitations`;
+  - show only relevant restrictions inline: Individual Targeting omission, incompatible Targeting Rules, and user properties that will be added to the target environment;
+  - show one unchecked inclusion control labeled `Copy this flag without these settings`, with helper text `Leave unchecked to skip this flag.`;
+  - checking this control directly adds the warning flag to the copy selection; leaving it unchecked skips only this flag and does not block copying safe flags.
 - Key conflict:
   - disabled and unselected;
-  - CircleX plus `Flag already exists in target`;
-  - cannot be selected through `Copy anyway`.
+  - CircleX plus `This flag cannot be copied`;
+  - helper text `A flag with this key already exists in the target environment.`;
+  - does not offer a limitations acknowledgement.
 - The existing Angular `keyCheck`, `targetUserCheck`, `targetRuleCheck`, `newProperties`, and `passed` outcomes remain the behavioral source of truth.
 - The permanent Angular Restrictions banner is replaced by contextual details under affected flags; its business meaning is not removed.
 
+#### Stable precheck states
+
+- Ready to copy:
+  - selected safe flags enable the primary action;
+  - icon and text communicate success together.
+- Limitations not acknowledged:
+  - the warning flag does not contribute to the selected count;
+  - safe selected flags can still be copied;
+  - inclusion confirmation is scoped to that flag and target environment.
+- Key conflict blocked:
+  - disable the row checkbox and primary action when no other copyable flag is selected;
+  - do not offer an acknowledgement for a non-bypassable conflict.
+- Checking:
+  - retain source, target, and every supplied flag identity;
+  - show compact progress indicators and result-shaped skeleton lines;
+  - disable selection changes and the primary action while keeping Cancel available.
+- Precheck failed:
+  - retain source, target, and flag identities;
+  - show `Precheck failed. Please try again.` with a visible `Retry` action;
+  - keep the primary action disabled until a retry succeeds.
+- Permission or license denied:
+  - retain the affected flag identities and keep the primary action visible but disabled;
+  - keep the flag identity rows in the left column and show one shared unavailable state spanning the right column;
+  - show `Copy unavailable` and name the actual permission or license reason when it is known;
+  - show `Learn more` only when a relevant license destination exists.
+
 #### Selection behavior
 
-- Header checkbox selects or clears all currently copyable safe flags; it never selects blocked flags or warning flags without explicit `Copy anyway` acknowledgement.
-- Safe flags are selected automatically after a successful precheck, matching Angular behavior.
-- `Copy anyway` is scoped to its flag and must not acknowledge limitations for other flags.
+- Safe flags are selected automatically after a successful precheck; warning flags are not.
+- A warning flag is added only through its `Copy this flag without these settings` control, which directly governs whether that flag is copied.
+- A single warning flag therefore starts with `0 / 1 flags selected` and the primary action disabled until the inclusion control is checked.
+- Leaving one warning flag unchecked does not prevent other selected safe flags from being copied.
 - For a row-level copy, the same list renders one item without introducing a separate single-copy UI.
 
 #### Footer and completion
 
-- Left: `<count> flags selected` or `No flags selected`; do not repeat source/target environment.
-- Right: outline `Cancel` and primary `Copy <count> flags`; use singular `Copy 1 flag` when appropriate.
-- Disable the primary action until a target is selected, precheck completes, and at least one flag is selected.
+- Left: `<selected> / <total> flags selected`, including `0 / <total> flags selected`.
+- Right: outline `Cancel` and primary `Copy <selected count> flag(s)`; the button always uses the actual selected count, including `Copy 0 flags` when nothing is selected.
+- Disable the primary action until a target is selected, precheck completes, at least one flag is selected, and every selected warning flag is acknowledged.
 - During mutation, keep the Dialog open, disable target/selection changes, and show `Copying…`.
 - Success closes the Dialog, shows a success toast, refreshes the Index list, and clears retained row selection.
 - Failure preserves target, precheck results, and selection so the user can retry.
@@ -386,8 +421,18 @@ Reuse one Dialog for the row-level `Copy to environment` action and the contextu
 ### Compare
 
 - The page-level Compare button navigates to cross-environment comparison.
-- The row-level Compare menu item opens the single-flag comparison drawer used by Angular.
-- The comparison page and detailed comparison sheet follow [feature-flags-compare-page-design.md](feature-flags-compare-page-design.md).
+- The row-level `Compare` item in the three-dot menu opens the **same right-side detailed comparison Sheet** as the Compare page's `View differences` entry. Do not design or implement a second drawer, dialog, compact variant, or Angular-styled comparison surface for the index entry.
+- Reuse the same Sheet frame, width, backdrop, header hierarchy, three-column settings table, row order, difference states, selection controls, append/overwrite modes, `After copy` previews, compatibility warnings, sticky footer, and `Copy settings` behavior defined in [feature-flags-compare-page-design.md](feature-flags-compare-page-design.md).
+- The only entry-context difference is target selection. `View differences` already has a locked target environment from the selected matrix cell; Index `Compare` opens the same Sheet with the current environment locked as Source and a searchable Target environment selector in the same header position.
+- Until a Target is selected, keep the shared Sheet header and direction layout visible, show `Select a target environment to view differences` in the comparison body, and keep `Copy settings` disabled. Do not render an empty settings grid or a separate target-selection step.
+- After Target selection, load the comparison in place. From that point onward, the Index and Compare-page entries are visually and behaviorally identical. Changing Target clears stale selections and previews before loading the new comparison.
+- Preserve the flag identity in the shared header: title `Compare <flag name>`, copyable key, Source, ArrowRight, Target, and close action. The selected flag is locked; there is no flag picker inside the Sheet.
+
+#### Shared View differences visual reference
+
+![Shared View differences Sheet opened from Compare](feature-flags-review-differences-sheet-light.png)
+
+This existing Sheet is the visual source of truth for the Index three-dot `Compare` action. The dimmed page behind it changes according to the entry point; the Sheet itself does not.
 
 ### Archive, restore, and remove
 
@@ -474,12 +519,16 @@ This is guidance for a future implementation only. This design task does not aut
 - [ ] Details remains visible; secondary row actions move to overflow.
 - [ ] Single and batch Copy To workflows preserve prechecks and restrictions.
 - [ ] Index Copy to environment uses one shared Dialog with searchable project-grouped target selection and a retained-selection-aware flag list.
-- [ ] Safe flags default selected, warning flags require per-flag `Copy anyway`, and key-conflict flags remain blocked.
+- [ ] Safe flags default selected; warning flags are copied only when their `Copy this flag without these settings` control is checked, and key-conflict flags remain blocked.
+- [ ] Copy to environment preserves one stable layout across ready, unacknowledged limitation, blocked conflict, checking, retryable failure, and permission/license-denied states.
+- [ ] Copy to environment Header and Footer have no divider, and the Footer has no contrasting background.
 - [ ] Selection actions live in the responsive page toolbar, never inside or in place of the table header.
 - [ ] Compare and New flag remain visible when rows are selected.
 - [ ] Large, medium, and compact desktop layouts follow the three visual references.
 - [ ] Compact desktop uses horizontal table scrolling without hiding columns or converting rows to cards.
 - [ ] Clone and both Compare entry points are preserved.
+- [ ] The Index three-dot Compare action reuses the Compare page's View differences Sheet instead of introducing another drawer or dialog.
+- [ ] The shared Sheet differs only in Target context: Compare-page entry locks the matrix Target; Index entry selects Target in the same header position, then renders the identical comparison and copy UI.
 - [ ] Archive, restore, and permanent remove behavior is preserved.
 - [ ] Permission and license denial is visible and understandable.
 - [ ] Loading, retryable error, first-use empty, archived empty, and filtered empty states are specified.

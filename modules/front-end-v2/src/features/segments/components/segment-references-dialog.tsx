@@ -92,7 +92,7 @@ export function SegmentReferencesDialog({
             {t("segments.detailsPage.noFlagReferences")}
           </p>
         )}
-        <DialogFooter>
+        <DialogFooter className="border-t-0 bg-transparent">
           <Button type="button" onClick={onClose}>
             {t("segments.references.close")}
           </Button>
