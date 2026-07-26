@@ -155,6 +155,11 @@ const FlagsComparePage = lazy(() =>
     default: module.FlagsComparePage,
   }))
 )
+const FlagDetailsPage = lazy(() =>
+  import("@/features/flags/details/flag-details-page").then((module) => ({
+    default: module.FlagDetailsPage,
+  }))
+)
 
 type SupportedLanguage = "en" | "zh"
 
@@ -352,9 +357,10 @@ export function AppRoutes() {
           <Route path="end-users" element={<EndUsersPage />} />
           <Route path="audit-logs" element={<AuditLogsPage />} />
           <Route path="feature-flags" element={<FlagsPage />} />
+          <Route path="feature-flags/compare" element={<FlagsComparePage />} />
           <Route
-            path="feature-flags/compare"
-            element={<FlagsComparePage />}
+            path="feature-flags/:flagKey/targeting"
+            element={<FlagDetailsPage />}
           />
           <Route path="segments" element={<SegmentsPage />} />
           <Route path="segments/:segmentId" element={<SegmentDetailsPage />} />

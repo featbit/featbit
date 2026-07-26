@@ -126,10 +126,17 @@ describe("targeting UserPicker", () => {
   it("creates a missing environment user and selects it", async () => {
     renderPicker()
 
-    fireEvent.click(screen.getByRole("button", { name: /Search by name/ }))
-    fireEvent.change(await screen.findByPlaceholderText(/Search by name/), {
-      target: { value: "new-user" },
-    })
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Search by name or keyId to add",
+      })
+    )
+    fireEvent.change(
+      await screen.findByPlaceholderText("Search by name or keyId to add"),
+      {
+        target: { value: "new-user" },
+      }
+    )
     fireEvent.click(
       await screen.findByRole("option", {
         name: 'Create user "new-user"',
@@ -235,6 +242,15 @@ describe("targeting UserPicker", () => {
 })
 
 describe("TargetingTab actions", () => {
+  it("adds a rule with one default condition", () => {
+    renderTargeting()
+
+    fireEvent.click(screen.getByRole("button", { name: "Add rule" }))
+
+    expect(screen.getByDisplayValue("Rule 1")).toBeVisible()
+    expect(screen.getByText("IF")).toBeVisible()
+  })
+
   it("labels the first and following rule conditions with IF and AND", () => {
     renderTargeting([
       {

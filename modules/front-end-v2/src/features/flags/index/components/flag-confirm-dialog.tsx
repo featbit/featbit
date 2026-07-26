@@ -24,6 +24,7 @@ export type FlagConfirmation = {
 } | null
 
 export function FlagConfirmDialog({
+  lang,
   target,
   saving,
   requireComment,

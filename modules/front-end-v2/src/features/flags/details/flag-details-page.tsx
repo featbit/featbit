@@ -1,0 +1,406 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useMemo, useState } from "react"
+import { useNavigate, useParams } from "react-router-dom"
+import { toast } from "sonner"
+import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
+import { TooltipProvider } from "@/components/ui/tooltip"
+import {
+  getCurrentProjectEnv,
+  getCurrentWorkspace,
+  localizedPath,
+  resolveLang,
+} from "@/features/layout/layout-context"
+import {
+  fetchSegmentUserProperties,
+  fetchSegmentUsersByKeyIds,
+} from "@/features/segments/segments-api"
+import type { SegmentEndUser } from "@/features/segments/segments-types"
+import {
+  getLicenseStatus,
+  isFeatureGranted,
+  parseLicense,
+} from "@/features/workspace/license/license-utils"
+import {
+  createFlagChangeRequest,
+  createFlagSchedule,
+  fetchFeatureFlag,
+  fetchFlagEnvironmentSettings,
+  fetchFlagPolicies,
+  fetchPendingFlagChanges,
+  removePendingFlagChange,
+  toggleFeatureFlag,
+  updateFeatureFlagTargeting,
+} from "../flags-api"
+import {
+  canUseFlagAction,
+  environmentRn,
+  featureFlagRn,
+  type FlagAction,
+} from "../flags-permissions"
+import type { FeatureFlag, PendingFlagChange } from "../flags-types"
+import {
+  FlagConfirmDialog,
+  type FlagConfirmation,
+} from "../index/components/flag-confirm-dialog"
+import { FlagChangeReviewDialog } from "./flag-change-review-dialog"
+import { FlagDetailsHeader } from "./flag-details-header"
+import { PendingChangesSheet } from "./targeting/pending-changes-sheet"
+import { TargetingTab } from "./targeting/targeting-tab"
+import {
+  TargetingSubmissionDialog,
+  type TargetingSubmission,
+} from "./targeting/targeting-submission-dialog"
+import {
+  cloneFlag,
+  stableFlagTargeting,
+  targetingOf,
+  targetingReviewChanges,
+} from "./targeting/targeting-utils"
+
+export function FlagDetailsPage() {
+  const params = useParams()
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const lang = resolveLang(params.lang)
+  const flagKey = decodeURIComponent(params.flagKey ?? "")
+  const projectEnv = getCurrentProjectEnv()
+  const workspace = getCurrentWorkspace()
+  const envId = projectEnv?.envId ?? ""
+  const basePath = localizedPath(lang, "/feature-flags")
+  const [draft, setDraft] = useState<{
+    key: string
+    value: FeatureFlag
+  } | null>(null)
+  const [resolvedUsers, setResolvedUsers] = useState<
+    Map<string, SegmentEndUser>
+  >(new Map())
+  const [reviewOpen, setReviewOpen] = useState(false)
+  const [pendingOpen, setPendingOpen] = useState(false)
+  const [confirmation, setConfirmation] = useState<FlagConfirmation>(null)
+  const [submissionMode, setSubmissionMode] = useState<
+    "schedule" | "change-request" | null
+  >(null)
+
+  const flagQuery = useQuery({
+    queryKey: ["feature-flag-details", envId, flagKey],
+    queryFn: () => fetchFeatureFlag(envId, flagKey),
+    enabled: Boolean(envId && flagKey),
+  })
+  const saved = flagQuery.data ?? null
+  const flag = draft?.key === flagKey ? draft.value : saved
+  const selectedKeys = useMemo(
+    () => (saved?.targetUsers ?? []).flatMap((item) => item.keyIds),
+    [saved?.targetUsers]
+  )
+  const usersQuery = useQuery({
+    queryKey: ["flag-selected-users", envId, selectedKeys],
+    queryFn: () => fetchSegmentUsersByKeyIds(envId, selectedKeys),
+    enabled: Boolean(envId && selectedKeys.length),
+  })
+  const propertiesQuery = useQuery({
+    queryKey: ["flag-user-properties", envId],
+    queryFn: () => fetchSegmentUserProperties(envId),
+    enabled: Boolean(envId),
+    staleTime: 60_000,
+  })
+  const pendingQuery = useQuery({
+    queryKey: ["flag-pending-changes", envId, flagKey],
+    queryFn: () => fetchPendingFlagChanges(envId, flagKey),
+    enabled: Boolean(envId && flagKey),
+  })
+  const policiesQuery = useQuery({
+    queryKey: ["feature-flag-policies", workspace?.id ?? ""],
+    queryFn: fetchFlagPolicies,
+    staleTime: 5 * 60_000,
+  })
+  const settingsQuery = useQuery({
+    queryKey: ["feature-flag-environment-settings", envId],
+    queryFn: () => fetchFlagEnvironmentSettings(envId),
+    enabled: Boolean(envId),
+    staleTime: 5 * 60_000,
+  })
+
+  const users = useMemo(() => {
+    const map = new Map(resolvedUsers)
+    for (const user of usersQuery.data ?? []) map.set(user.keyId, user)
+    return map
+  }, [resolvedUsers, usersQuery.data])
+  const resourceRn = flag
+    ? featureFlagRn(
+        environmentRn({
+          projectKey: projectEnv?.projectKey ?? "",
+          environmentKey: projectEnv?.envKey ?? "",
+        }),
+        flag
+      )
+    : ""
+  function can(action: FlagAction) {
+    return Boolean(
+      flag &&
+      policiesQuery.isSuccess &&
+      canUseFlagAction(policiesQuery.data, resourceRn, action)
+    )
+  }
+  const dirty = Boolean(
+    saved && flag && stableFlagTargeting(saved) !== stableFlagTargeting(flag)
+  )
+  const changes = useMemo(
+    () => (saved && flag ? targetingReviewChanges(saved, flag) : []),
+    [flag, saved]
+  )
+  const decodedLicense = parseLicense(workspace?.license)
+  const licenseStatus = getLicenseStatus(decodedLicense)
+  const scheduleGranted = isFeatureGranted(
+    { id: "schedule", labelKey: "", descriptionKey: "" },
+    decodedLicense,
+    licenseStatus
+  )
+  const changeRequestGranted = isFeatureGranted(
+    { id: "change-request", labelKey: "", descriptionKey: "" },
+    decodedLicense,
+    licenseStatus
+  )
+
+  const saveMutation = useMutation({
+    mutationFn: (comment: string) =>
+      updateFeatureFlagTargeting(envId, flagKey, {
+        targeting: targetingOf(flag!),
+        revision: flag?.revision ?? "",
+        comment,
+      }),
+    onSuccess: (revision) => {
+      const updated = { ...cloneFlag(flag!), revision }
+      queryClient.setQueryData(
+        ["feature-flag-details", envId, flagKey],
+        updated
+      )
+      setDraft(null)
+      setReviewOpen(false)
+      toast.success(lang === "zh" ? "操作成功" : "Operation succeeded")
+      void queryClient.invalidateQueries({ queryKey: ["feature-flags"] })
+    },
+    onError: () =>
+      toast.error(
+        lang === "zh"
+          ? "操作失败，请重试。"
+          : "Operation failed. Please try again."
+      ),
+  })
+  const toggleMutation = useMutation({
+    mutationFn: ({
+      nextEnabled,
+      comment,
+    }: {
+      nextEnabled: boolean
+      comment: string
+    }) => toggleFeatureFlag(envId, flagKey, nextEnabled, comment),
+    onSuccess: (revision, variables) => {
+      const savedUpdated = {
+        ...cloneFlag(saved!),
+        isEnabled: variables.nextEnabled,
+        revision,
+      }
+      const draftUpdated = {
+        ...cloneFlag(flag!),
+        isEnabled: variables.nextEnabled,
+        revision,
+      }
+      queryClient.setQueryData(
+        ["feature-flag-details", envId, flagKey],
+        savedUpdated
+      )
+      setDraft(dirty ? { key: flagKey, value: draftUpdated } : null)
+      setConfirmation(null)
+      toast.success(lang === "zh" ? "操作成功" : "Operation succeeded")
+    },
+    onError: () =>
+      toast.error(
+        lang === "zh"
+          ? "操作失败，请重试。"
+          : "Operation failed. Please try again."
+      ),
+  })
+  const submissionMutation = useMutation({
+    mutationFn: (input: TargetingSubmission) => {
+      if (submissionMode === "schedule") {
+        return createFlagSchedule(envId, flagKey, {
+          targeting: targetingOf(flag!),
+          revision: flag?.revision ?? "",
+          scheduledTime: new Date(input.scheduledTime).toISOString(),
+          title: input.title,
+          reviewers: input.reviewers,
+          reason: input.reason,
+          withChangeRequest: input.withChangeRequest,
+        })
+      }
+      return createFlagChangeRequest(envId, flagKey, {
+        targeting: targetingOf(flag!),
+        revision: flag?.revision ?? "",
+        reviewers: input.reviewers,
+        reason: input.reason,
+      })
+    },
+    onSuccess: () => {
+      setSubmissionMode(null)
+      toast.success(lang === "zh" ? "操作成功" : "Operation succeeded")
+      void pendingQuery.refetch()
+    },
+    onError: () =>
+      toast.error(
+        lang === "zh"
+          ? "操作失败，请重试。"
+          : "Operation failed. Please try again."
+      ),
+  })
+  const removePendingMutation = useMutation({
+    mutationFn: (item: PendingFlagChange) =>
+      removePendingFlagChange(envId, item),
+    onSuccess: (_, item) => {
+      queryClient.setQueryData(
+        ["flag-pending-changes", envId, flagKey],
+        (current: PendingFlagChange[] | undefined) =>
+          current?.filter((candidate) => candidate.id !== item.id) ?? []
+      )
+      toast.success(lang === "zh" ? "操作成功" : "Operation succeeded")
+    },
+    onError: () =>
+      toast.error(
+        lang === "zh"
+          ? "操作失败，请重试。"
+          : "Operation failed. Please try again."
+      ),
+  })
+
+  if (!envId || !flagKey || flagQuery.isError) {
+    return (
+      <div className="-m-5 flex min-h-[calc(100vh-3.5rem)] items-center justify-center bg-background p-8">
+        <div className="space-y-4 text-center">
+          <p className="text-sm text-muted-foreground">
+            {lang === "zh"
+              ? "无法加载功能开关。"
+              : "Feature flag could not be loaded."}
+          </p>
+          <div className="flex justify-center gap-2">
+            <Button variant="outline" onClick={() => navigate(basePath)}>
+              {lang === "zh" ? "返回功能开关" : "Back to feature flags"}
+            </Button>
+            {envId && flagKey ? (
+              <Button onClick={() => void flagQuery.refetch()}>
+                {lang === "zh" ? "重试" : "Retry"}
+              </Button>
+            ) : null}
+          </div>
+        </div>
+      </div>
+    )
+  }
+  if (
+    !flag ||
+    policiesQuery.isLoading ||
+    propertiesQuery.isLoading ||
+    usersQuery.isLoading
+  ) {
+    return (
+      <div className="-m-5 min-h-[calc(100vh-3.5rem)] bg-background px-8 py-6">
+        <Skeleton className="mb-6 h-5 w-28" />
+        <Skeleton className="mb-5 h-20 w-full" />
+        <Skeleton className="mb-6 h-11 w-full" />
+        <Skeleton className="h-[40rem] w-full" />
+      </div>
+    )
+  }
+
+  return (
+    <TooltipProvider>
+      <div className="-m-5 min-h-[calc(100vh-3.5rem)] bg-background px-6 py-6 lg:px-8">
+        <FlagDetailsHeader
+          flag={flag}
+          lang={lang}
+          basePath={basePath}
+          toggling={toggleMutation.isPending}
+          canToggle={can("ToggleFlag")}
+          onToggle={() =>
+            setConfirmation({
+              kind: "toggle",
+              flag,
+              nextEnabled: !flag.isEnabled,
+            })
+          }
+        />
+        <TargetingTab
+          lang={lang}
+          flag={flag}
+          users={users}
+          properties={propertiesQuery.data ?? []}
+          pendingCount={pendingQuery.data?.length ?? 0}
+          dirty={dirty}
+          saving={saveMutation.isPending}
+          canUpdateDefault={can("UpdateFlagDefaultRule")}
+          canUpdateUsers={can("UpdateFlagIndividualTargeting")}
+          canUpdateRules={can("UpdateFlagRules")}
+          onDraftChange={(value) => setDraft({ key: flagKey, value })}
+          onResolveUser={(user) =>
+            setResolvedUsers((current) =>
+              new Map(current).set(user.keyId, user)
+            )
+          }
+          onDiscard={() => setDraft(null)}
+          onReview={() => setReviewOpen(true)}
+          onOpenPending={() => setPendingOpen(true)}
+          scheduleGranted={scheduleGranted}
+          changeRequestGranted={changeRequestGranted}
+          onSchedule={() => setSubmissionMode("schedule")}
+          onChangeRequest={() => setSubmissionMode("change-request")}
+        />
+        <FlagChangeReviewDialog
+          open={reviewOpen}
+          lang={lang}
+          flagName={flag.name}
+          changes={changes}
+          requireComment={settingsQuery.data?.requireChangeComment ?? false}
+          saving={saveMutation.isPending}
+          onOpenChange={setReviewOpen}
+          onSave={(comment) => saveMutation.mutate(comment)}
+        />
+        <PendingChangesSheet
+          open={pendingOpen}
+          lang={lang}
+          items={pendingQuery.data ?? []}
+          removingId={
+            removePendingMutation.isPending
+              ? (removePendingMutation.variables?.id ?? null)
+              : null
+          }
+          onOpenChange={setPendingOpen}
+          onRemove={(item) => removePendingMutation.mutate(item)}
+        />
+        <TargetingSubmissionDialog
+          key={submissionMode ?? "closed"}
+          mode={submissionMode}
+          lang={lang}
+          flagName={flag.name}
+          changes={changes}
+          saving={submissionMutation.isPending}
+          onOpenChange={(open) => !open && setSubmissionMode(null)}
+          onSubmit={(value) => submissionMutation.mutate(value)}
+        />
+        <FlagConfirmDialog
+          key={confirmation ? `toggle-${flag.id}` : "closed"}
+          lang={lang}
+          target={confirmation}
+          saving={toggleMutation.isPending}
+          requireComment={settingsQuery.data?.requireChangeComment ?? false}
+          onOpenChange={(open) => !open && setConfirmation(null)}
+          onConfirm={(comment) =>
+            confirmation?.nextEnabled !== undefined &&
+            toggleMutation.mutate({
+              nextEnabled: confirmation.nextEnabled,
+              comment,
+            })
+          }
+        />
+      </div>
+    </TooltipProvider>
+  )
+}

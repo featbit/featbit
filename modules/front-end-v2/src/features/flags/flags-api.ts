@@ -5,12 +5,96 @@ import type {
   FlagCreationPayload,
   FlagListFilter,
   FlagSettingCopyOptions,
+  FlagTargeting,
+  FeatureFlag,
+  PendingFlagChange,
   PagedFeatureFlags,
   UserPolicy,
 } from "./flags-types"
 
 function flagsPath(envId: string) {
   return `/api/v1/envs/${encodeURIComponent(envId)}/feature-flags`
+}
+
+export function fetchFeatureFlag(envId: string, key: string) {
+  return fetchApi<FeatureFlag>(`${flagsPath(envId)}/${encodeURIComponent(key)}`)
+}
+
+export function updateFeatureFlagTargeting(
+  envId: string,
+  key: string,
+  input: { targeting: FlagTargeting; revision: string; comment: string }
+) {
+  return fetchApi<string>(
+    `${flagsPath(envId)}/${encodeURIComponent(key)}/targeting`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    }
+  )
+}
+
+export function fetchPendingFlagChanges(envId: string, key: string) {
+  return fetchApi<PendingFlagChange[]>(
+    `${flagsPath(envId)}/${encodeURIComponent(key)}/pending-changes`
+  )
+}
+
+export function createFlagSchedule(
+  envId: string,
+  key: string,
+  input: {
+    targeting: FlagTargeting
+    revision: string
+    scheduledTime: string
+    title: string
+    reviewers: string[]
+    reason: string
+    withChangeRequest: boolean
+  }
+) {
+  return fetchApi<string>(
+    `${flagsPath(envId)}/${encodeURIComponent(key)}/schedules`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    }
+  )
+}
+
+export function createFlagChangeRequest(
+  envId: string,
+  key: string,
+  input: {
+    targeting: FlagTargeting
+    revision: string
+    reviewers: string[]
+    reason: string
+  }
+) {
+  return fetchApi<string>(
+    `${flagsPath(envId)}/${encodeURIComponent(key)}/change-requests`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    }
+  )
+}
+
+export function removePendingFlagChange(
+  envId: string,
+  item: Pick<PendingFlagChange, "id" | "type">
+) {
+  const collection = item.type === "Schedule" ? "schedules" : "change-requests"
+  return fetchApi<boolean>(
+    `${flagsPath(envId)}/${collection}/${encodeURIComponent(item.id)}`,
+    {
+      method: "DELETE",
+    }
+  )
 }
 
 export function fetchFeatureFlags(envId: string, filter: FlagListFilter) {

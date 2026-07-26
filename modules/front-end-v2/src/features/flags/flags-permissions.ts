@@ -8,6 +8,9 @@ export type FlagAction =
   | "ArchiveFlag"
   | "RestoreFlag"
   | "DeleteFlag"
+  | "UpdateFlagIndividualTargeting"
+  | "UpdateFlagRules"
+  | "UpdateFlagDefaultRule"
 
 function wildcardMatches(pattern: string, value: string) {
   const escaped = pattern.replace(/[.+?^${}()|[\]\\]/g, "\\$&")

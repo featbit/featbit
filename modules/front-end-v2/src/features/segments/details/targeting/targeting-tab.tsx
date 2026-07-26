@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { GripVertical, Loader2, Plus, Search, Trash2, X } from "lucide-react"
-import type { DragEvent, KeyboardEvent } from "react"
-import { useEffect, useMemo, useRef, useState } from "react"
+import type { DragEvent, KeyboardEvent, ReactNode } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
@@ -49,6 +49,7 @@ import {
   targetingChanges,
   withConditionValues,
 } from "../segment-details-utils"
+import { useRuleDragPreview } from "./rule-drag-preview"
 
 const operators = [
   "Equal",
@@ -262,7 +263,7 @@ export function UserPicker({
   )
 }
 
-function UserPanel({
+export function UserPanel({
   title,
   envId,
   shared,
@@ -350,7 +351,7 @@ function UserPanel({
   )
 }
 
-function RuleEditor({
+export function RuleEditor({
   rule,
   properties,
   disabled,
@@ -363,6 +364,7 @@ function RuleEditor({
   onMoveDown,
   onChange,
   onRemove,
+  footer,
 }: {
   rule: SegmentRule
   properties: SegmentUserProperty[]
@@ -376,6 +378,7 @@ function RuleEditor({
   onMoveDown: () => void
   onChange: (rule: SegmentRule) => void
   onRemove: () => void
+  footer?: ReactNode
 }) {
   const { t } = useTranslation()
   const propertyOptions = useMemo(
@@ -581,6 +584,7 @@ function RuleEditor({
             <span>{t("segments.detailsPage.rules.addCondition")}</span>
           </span>
         </Button>
+        {footer}
       </div>
     </article>
   )
@@ -602,22 +606,7 @@ export function TargetingTab({
   const [resolvedUsers, setResolvedUsers] = useState(users)
   const [reviewOpen, setReviewOpen] = useState(false)
   const [dragRuleId, setDragRuleId] = useState<string | null>(null)
-  const dragPreviewRef = useRef<HTMLElement | null>(null)
-  const dragPreviewOffsetRef = useRef({ x: 0, y: 0 })
-
-  function removeDragPreview() {
-    dragPreviewRef.current?.remove()
-    dragPreviewRef.current = null
-  }
-
-  function positionDragPreview(clientX: number, clientY: number) {
-    const preview = dragPreviewRef.current
-    if (!preview || (clientX === 0 && clientY === 0)) return
-    const { x, y } = dragPreviewOffsetRef.current
-    preview.style.transform = `translate3d(${clientX - x}px, ${clientY - y}px, 0)`
-  }
-
-  useEffect(() => removeDragPreview, [])
+  const { startPreview, movePreview, removePreview } = useRuleDragPreview()
 
   const dirty = stableTargeting(draft) !== stableTargeting(segment)
   const changes = useMemo(
@@ -751,7 +740,14 @@ export function TargetingTab({
                     name: t("segments.detailsPage.rules.defaultName", {
                       count: current.rules.length + 1,
                     }),
-                    conditions: [],
+                    conditions: [
+                      {
+                        id: newId(),
+                        property: "keyId",
+                        op: "Equal",
+                        value: "",
+                      },
+                    ],
                   },
                 ],
               }))
@@ -765,6 +761,7 @@ export function TargetingTab({
             <div
               key={rule.id}
               data-rule-id={rule.id}
+              data-rule-drag-container
               className={
                 dragRuleId === rule.id
                   ? "opacity-35 transition-opacity"
@@ -780,7 +777,7 @@ export function TargetingTab({
                 const sourceId =
                   event.dataTransfer.getData("text/plain") || dragRuleId
                 if (sourceId) moveRule(sourceId, rule.id)
-                removeDragPreview()
+                removePreview()
                 setDragRuleId(null)
               }}
             >
@@ -791,56 +788,14 @@ export function TargetingTab({
                 canMoveUp={index > 0}
                 canMoveDown={index < draft.rules.length - 1}
                 onDragStart={(event) => {
-                  removeDragPreview()
                   event.dataTransfer.effectAllowed = "move"
                   event.dataTransfer.setData("text/plain", rule.id)
-                  const card = event.currentTarget
-                    .closest("[data-rule-id]")
-                    ?.querySelector("article")
-                  if (card) {
-                    const bounds = card.getBoundingClientRect()
-                    const pointerX = Number.isFinite(event.clientX)
-                      ? event.clientX
-                      : bounds.left
-                    const pointerY = Number.isFinite(event.clientY)
-                      ? event.clientY
-                      : bounds.top
-                    const preview = card.cloneNode(true) as HTMLElement
-                    preview.setAttribute("aria-hidden", "true")
-                    preview.setAttribute("inert", "")
-                    preview.dataset.ruleDragPreview = ""
-                    preview.style.position = "fixed"
-                    preview.style.inset = "0 auto auto 0"
-                    preview.style.width = `${bounds.width}px`
-                    preview.style.pointerEvents = "none"
-                    preview.style.zIndex = "50"
-                    preview.style.backgroundColor = "var(--background)"
-                    preview.style.opacity = "1"
-                    preview.style.transform = `translate3d(${bounds.left}px, ${bounds.top}px, 0)`
-                    preview.style.willChange = "transform"
-                    document.body.append(preview)
-                    dragPreviewRef.current = preview
-                    dragPreviewOffsetRef.current = {
-                      x: Math.max(0, pointerX - bounds.left),
-                      y: Math.max(0, pointerY - bounds.top),
-                    }
-
-                    const transparentDragImage = document.createElement("div")
-                    transparentDragImage.style.position = "fixed"
-                    transparentDragImage.style.width = "1px"
-                    transparentDragImage.style.height = "1px"
-                    transparentDragImage.style.opacity = "0"
-                    document.body.append(transparentDragImage)
-                    event.dataTransfer.setDragImage(transparentDragImage, 0, 0)
-                    window.setTimeout(() => transparentDragImage.remove(), 0)
-                  }
+                  startPreview(event)
                   setDragRuleId(rule.id)
                 }}
-                onDrag={(event) =>
-                  positionDragPreview(event.clientX, event.clientY)
-                }
+                onDrag={(event) => movePreview(event.clientX, event.clientY)}
                 onDragEnd={() => {
-                  removeDragPreview()
+                  removePreview()
                   setDragRuleId(null)
                 }}
                 onMoveUp={() => moveRule(rule.id, draft.rules[index - 1].id)}
