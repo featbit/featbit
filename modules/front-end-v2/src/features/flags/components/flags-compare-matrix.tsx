@@ -4,10 +4,11 @@ import {
   CheckCircle2,
   ChevronRight,
   Copy,
+  ExternalLink,
   Info,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
@@ -22,8 +23,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { localizedPath } from "@/features/layout/layout-context"
-import type { Lang } from "@/features/layout/layout-types"
+import { localizedProjectEnvPath } from "@/features/layout/layout-context"
+import type { Lang, ProjectEnv } from "@/features/layout/layout-types"
 import { Link } from "react-router-dom"
 import type {
   CompareEnvironment,
@@ -52,10 +53,12 @@ const differenceCategories: DifferenceCategory[] = [
 function FlagIdentity({
   flag,
   lang,
+  source,
   onCopyKey,
 }: {
   flag: FlagCompareOverview
   lang: Lang
+  source: Pick<ProjectEnv, "projectId" | "envId">
   onCopyKey: (key: string) => void
 }) {
   const zh = lang === "zh"
@@ -64,9 +67,10 @@ function FlagIdentity({
   return (
     <div className="min-w-0 space-y-2">
       <Link
-        to={localizedPath(
+        to={localizedProjectEnvPath(
           lang,
-          `/feature-flags/${encodeURIComponent(flag.key)}/targeting`
+          `/feature-flags/${encodeURIComponent(flag.key)}/targeting`,
+          source
         )}
         target="_blank"
         rel="noopener noreferrer"
@@ -141,6 +145,49 @@ function FlagIdentity({
   )
 }
 
+function TargetFlagLink({
+  flag,
+  target,
+  lang,
+}: {
+  flag: FlagCompareOverview
+  target: CompareEnvironment
+  lang: Lang
+}) {
+  const zh = lang === "zh"
+  const href = localizedProjectEnvPath(
+    lang,
+    `/feature-flags/${encodeURIComponent(flag.key)}/targeting`,
+    { projectId: target.projectId, envId: target.id }
+  )
+
+  return (
+    <Link
+      to={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={buttonVariants({
+        variant: "link",
+        size: "sm",
+        className: "font-medium",
+      })}
+      aria-label={
+        zh
+          ? `在新标签页中打开 ${target.label} 的 ${flag.name}`
+          : `Open ${flag.name} in ${target.label} in a new tab`
+      }
+    >
+      <span className="leading-4">
+        {zh ? "在此环境中打开开关" : "Open flag in this environment"}
+      </span>
+      <ExternalLink
+        data-icon="inline-end"
+        className="size-3.5 -translate-y-px"
+      />
+    </Link>
+  )
+}
+
 function DifferenceCell({
   flag,
   target,
@@ -211,9 +258,12 @@ function DifferenceCell({
   )
   if (!differences.length) {
     return (
-      <div className="flex items-center gap-2 text-sm">
-        <CheckCircle2 className="size-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
-        <span>{zh ? "无差异" : "No differences"}</span>
+      <div className="space-y-2.5">
+        <div className="flex items-center gap-2 text-sm">
+          <CheckCircle2 className="size-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+          <span>{zh ? "无差异" : "No differences"}</span>
+        </div>
+        <TargetFlagLink flag={flag} target={target} lang={lang} />
       </div>
     )
   }
@@ -233,24 +283,28 @@ function DifferenceCell({
           </Badge>
         ))}
       </div>
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        className="font-medium"
-        onClick={onReview}
-      >
-        <span className="translate-y-px">
-          {zh ? "查看差异" : "Review differences"}
-        </span>
-        <ChevronRight />
-      </Button>
+      <div className="flex flex-col items-start gap-0.5">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="font-medium"
+          onClick={onReview}
+        >
+          <span className="translate-y-px">
+            {zh ? "查看差异" : "Review differences"}
+          </span>
+          <ChevronRight />
+        </Button>
+        <TargetFlagLink flag={flag} target={target} lang={lang} />
+      </div>
     </div>
   )
 }
 
 export function FlagsCompareMatrix({
   lang,
+  source,
   items,
   targets,
   loading,
@@ -263,6 +317,7 @@ export function FlagsCompareMatrix({
   onClearFilters,
 }: {
   lang: Lang
+  source: Pick<ProjectEnv, "projectId" | "envId">
   items: FlagCompareOverview[]
   targets: CompareEnvironment[]
   loading: boolean
@@ -368,6 +423,7 @@ export function FlagsCompareMatrix({
                     <FlagIdentity
                       flag={flag}
                       lang={lang}
+                      source={source}
                       onCopyKey={onCopyKey}
                     />
                   </TableCell>

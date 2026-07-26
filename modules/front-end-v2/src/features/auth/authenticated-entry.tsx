@@ -4,26 +4,23 @@ import { Navigate, useLocation, useParams } from "react-router-dom"
 import { getIdentityToken, signOut } from "@/features/auth/auth-api"
 import {
   chooseProjectEnv,
+  clearTabProjectEnv,
   fetchOrganizations,
   fetchProjects,
   fetchWorkspaces,
   getStoredOrganization,
-  getStoredProjectEnv,
   getStoredWorkspace,
   joinCurrentOrganizationIfSsoFirstLogin,
   persistCurrentOrganization,
   persistCurrentWorkspace,
-  projectEnvFromSelection,
   resolveLang,
+  resolveTabProjectEnvRequest,
   saveCurrentProjectEnv,
+  saveTabProjectEnv,
 } from "@/features/layout/layout-context"
 
 type EntryStatus =
-  | "loading"
-  | "ready"
-  | "login"
-  | "select-workspace"
-  | "onboarding"
+  "loading" | "ready" | "login" | "select-workspace" | "onboarding"
 
 function EntryLoading() {
   return (
@@ -124,23 +121,20 @@ export function AuthenticatedEntry({ children }: { children: ReactNode }) {
           return
         }
 
-        const storedProjectEnv = getStoredProjectEnv()
-        const storedProject = projects.find(
-          (project) => project.id === storedProjectEnv?.projectId
+        const requestedTabProjectEnv = resolveTabProjectEnvRequest(
+          projects,
+          location.search
         )
-        const storedEnvironment = storedProject?.environments.find(
-          (environment) => environment.id === storedProjectEnv?.envId
-        )
-
-        if (storedProject && storedEnvironment) {
-          saveCurrentProjectEnv(
-            projectEnvFromSelection(storedProject, storedEnvironment)
-          )
-        } else {
-          const selectedProjectEnv = chooseProjectEnv(projects)
-          if (selectedProjectEnv) {
-            saveCurrentProjectEnv(selectedProjectEnv)
+        if (requestedTabProjectEnv !== undefined) {
+          clearTabProjectEnv()
+          if (requestedTabProjectEnv) {
+            saveTabProjectEnv(requestedTabProjectEnv)
           }
+        }
+
+        const selectedProjectEnv = chooseProjectEnv(projects)
+        if (selectedProjectEnv) {
+          saveCurrentProjectEnv(selectedProjectEnv)
         }
 
         setStatus("ready")

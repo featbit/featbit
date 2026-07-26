@@ -472,7 +472,7 @@ export function FlagsComparePage() {
     })
   }
 
-  if (!envId) {
+  if (!projectEnv || !envId) {
     return (
       <div className="-m-5 flex min-h-[calc(100vh-3.5rem)] items-center justify-center bg-background p-8">
         <p className="text-sm text-muted-foreground">
@@ -611,6 +611,7 @@ export function FlagsComparePage() {
 
             <FlagsCompareMatrix
               lang={lang}
+              source={projectEnv}
               items={overview.items}
               targets={appliedTargets}
               loading={overviewQuery.isLoading && !overviewQuery.data}

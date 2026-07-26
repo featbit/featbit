@@ -127,6 +127,91 @@ test.describe("layout", () => {
     })
   })
 
+  test("keeps explicit environment contexts isolated between tabs", async ({
+    context,
+    page,
+  }) => {
+    await mockContextEndpoints(page)
+    await setAuthenticatedUser(page)
+    await setCurrentContext(page)
+
+    await page.goto(
+      "/en/feature-flags/checkout/targeting?context=environment&projectId=project-growth&envId=env-staging-growth"
+    )
+    await expect(page.getByRole("button", { name: /Staging/ })).toBeVisible()
+
+    const otherPage = await context.newPage()
+    await mockContextEndpoints(otherPage)
+    await setAuthenticatedUser(otherPage)
+    await setCurrentContext(otherPage)
+
+    try {
+      await otherPage.goto(
+        "/en/feature-flags/checkout/targeting?context=environment&projectId=project-commerce&envId=env-dev-commerce"
+      )
+      await expect(
+        otherPage.getByRole("button", { name: /Development/ })
+      ).toBeVisible()
+
+      await expect(
+        page.evaluate(() =>
+          JSON.parse(
+            sessionStorage.getItem("current-project-tab_test-user-id") ?? "{}"
+          )
+        )
+      ).resolves.toMatchObject({
+        projectId: "project-growth",
+        envId: "env-staging-growth",
+      })
+      await expect(
+        otherPage.evaluate(() =>
+          JSON.parse(
+            sessionStorage.getItem("current-project-tab_test-user-id") ?? "{}"
+          )
+        )
+      ).resolves.toMatchObject({
+        projectId: "project-commerce",
+        envId: "env-dev-commerce",
+      })
+      await expect(
+        page.evaluate(() =>
+          JSON.parse(
+            localStorage.getItem("current-project_test-user-id") ?? "{}"
+          )
+        )
+      ).resolves.toMatchObject({ envId: "env-prod-cn" })
+
+      await page.reload()
+      await otherPage.reload()
+
+      await expect(page.getByRole("button", { name: /Staging/ })).toBeVisible()
+      await expect(
+        otherPage.getByRole("button", { name: /Development/ })
+      ).toBeVisible()
+
+      await otherPage.evaluate(() => {
+        const channel = new BroadcastChannel("featbit-ui-broadcast-channel")
+        channel.postMessage("env-changed")
+        channel.close()
+      })
+      await expect(page.getByRole("button", { name: /Staging/ })).toBeVisible()
+
+      await page.goto(
+        "/en/feature-flags/checkout/targeting?context=environment&projectId=project-growth&envId=env-inaccessible"
+      )
+      await expect(
+        page.getByRole("button", { name: /Production CN/ })
+      ).toBeVisible()
+      await expect(
+        page.evaluate(() =>
+          sessionStorage.getItem("current-project-tab_test-user-id")
+        )
+      ).resolves.toBeNull()
+    } finally {
+      await otherPage.close()
+    }
+  })
+
   test("marks only the current sidebar page as active", async ({ page }) => {
     await mockContextEndpoints(page)
     await setAuthenticatedUser(page)

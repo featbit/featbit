@@ -15,13 +15,18 @@ import { fetchApi } from "@/lib/api/authenticated-api"
 const IS_SSO_FIRST_LOGIN_STORAGE_KEY = "is-sso-first-login"
 const ORGANIZATION_CHANGED_EVENT = "featbit:organization-changed"
 const PROJECTS_CHANGED_EVENT = "featbit:projects-changed"
+const TAB_PROJECT_ENV_STORAGE_KEY = "current-project-tab"
+const TAB_CONTEXT_PARAM = "context"
+const TAB_CONTEXT_VALUE = "environment"
+const TAB_PROJECT_ID_PARAM = "projectId"
+const TAB_ENV_ID_PARAM = "envId"
 
 function scopedStorageKey(key: string, profile: StoredUserProfile) {
   return profile.id ? `${key}_${profile.id}` : key
 }
 
-function readStorageObject<T>(key: string): T | null {
-  const rawValue = localStorage.getItem(key)
+function readStorageObject<T>(storage: Storage, key: string): T | null {
+  const rawValue = storage.getItem(key)
   if (!rawValue) {
     return null
   }
@@ -43,6 +48,21 @@ export function resolveLang(value: string | undefined): Lang {
 
 export function localizedPath(lang: Lang, href: string) {
   return `/${lang}${href}`
+}
+
+export function localizedProjectEnvPath(
+  lang: Lang,
+  href: string,
+  projectEnv: Pick<ProjectEnv, "projectId" | "envId">
+) {
+  const searchParams = new URLSearchParams({
+    [TAB_CONTEXT_PARAM]: TAB_CONTEXT_VALUE,
+    [TAB_PROJECT_ID_PARAM]: projectEnv.projectId,
+    [TAB_ENV_ID_PARAM]: projectEnv.envId,
+  })
+  const separator = href.includes("?") ? "&" : "?"
+
+  return `${localizedPath(lang, href)}${separator}${searchParams.toString()}`
 }
 
 export function projectEnvFromSelection(
@@ -68,22 +88,83 @@ export function getCurrentOrganization() {
 }
 
 export function getCurrentProjectEnv() {
-  return getStoredProjectEnv()
+  return getStoredTabProjectEnv() ?? getStoredProjectEnv()
 }
 
 export function getStoredWorkspace() {
-  return readStorageObject<Workspace>(contextKey("current-workspace"))
+  return readStorageObject<Workspace>(
+    localStorage,
+    contextKey("current-workspace")
+  )
 }
 
 export function getStoredOrganization() {
-  return readStorageObject<Organization>(contextKey("current-organization"))
+  return readStorageObject<Organization>(
+    localStorage,
+    contextKey("current-organization")
+  )
 }
 
 export function getStoredProjectEnv() {
-  return readStorageObject<ProjectEnv>(contextKey("current-project"))
+  return readStorageObject<ProjectEnv>(
+    localStorage,
+    contextKey("current-project")
+  )
+}
+
+export function getStoredTabProjectEnv() {
+  return readStorageObject<ProjectEnv>(
+    sessionStorage,
+    contextKey(TAB_PROJECT_ENV_STORAGE_KEY)
+  )
+}
+
+export function hasTabProjectEnvOverride() {
+  return (
+    sessionStorage.getItem(contextKey(TAB_PROJECT_ENV_STORAGE_KEY)) !== null
+  )
+}
+
+export function resolveTabProjectEnvRequest(
+  projects: Project[],
+  search: string
+): ProjectEnv | null | undefined {
+  const searchParams = new URLSearchParams(search)
+  if (searchParams.get(TAB_CONTEXT_PARAM) !== TAB_CONTEXT_VALUE) {
+    return undefined
+  }
+
+  const projectId = searchParams.get(TAB_PROJECT_ID_PARAM)
+  const envId = searchParams.get(TAB_ENV_ID_PARAM)
+  if (!projectId || !envId) {
+    return null
+  }
+
+  const project = projects.find((item) => item.id === projectId)
+  const environment = project?.environments.find((item) => item.id === envId)
+
+  return project && environment
+    ? projectEnvFromSelection(project, environment)
+    : null
+}
+
+export function saveTabProjectEnv(projectEnv: ProjectEnv) {
+  sessionStorage.setItem(
+    contextKey(TAB_PROJECT_ENV_STORAGE_KEY),
+    JSON.stringify(projectEnv)
+  )
+}
+
+export function clearTabProjectEnv() {
+  sessionStorage.removeItem(contextKey(TAB_PROJECT_ENV_STORAGE_KEY))
 }
 
 export function saveCurrentProjectEnv(projectEnv: ProjectEnv) {
+  if (hasTabProjectEnvOverride()) {
+    saveTabProjectEnv(projectEnv)
+    return
+  }
+
   localStorage.setItem(
     contextKey("current-project"),
     JSON.stringify(projectEnv)
@@ -92,6 +173,7 @@ export function saveCurrentProjectEnv(projectEnv: ProjectEnv) {
 
 export function clearCurrentProjectEnv() {
   localStorage.removeItem(contextKey("current-project"))
+  clearTabProjectEnv()
 }
 
 function saveCurrentWorkspace(workspace: Workspace) {

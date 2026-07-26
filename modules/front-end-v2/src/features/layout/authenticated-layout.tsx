@@ -7,10 +7,12 @@ import { GlobalMessageBanner } from "@/features/layout/components/global-message
 import { buildBillingGlobalMessages } from "@/features/layout/global-message"
 import {
   chooseProjectEnv,
+  clearTabProjectEnv,
   fetchProjects,
   getCurrentOrganization,
   getCurrentProjectEnv,
   getCurrentWorkspace,
+  hasTabProjectEnvOverride,
   onCurrentOrganizationChanged,
   onProjectsChanged,
   resolveLang,
@@ -101,9 +103,10 @@ export function AuthenticatedLayout() {
       return
     }
 
+    const isTabScoped = hasTabProjectEnvOverride()
     saveCurrentProjectEnv(nextProjectEnv)
     setCurrentProjectEnv(nextProjectEnv)
-    if ("BroadcastChannel" in window) {
+    if (!isTabScoped && "BroadcastChannel" in window) {
       const channel = new BroadcastChannel(UI_BROADCAST_CHANNEL)
       channel.postMessage(ENV_CHANGED_MESSAGE)
       channel.close()
@@ -138,11 +141,12 @@ export function AuthenticatedLayout() {
 
     const channel = new BroadcastChannel(UI_BROADCAST_CHANNEL)
     channel.onmessage = (event) => {
-      if (event.data === ENV_CHANGED_MESSAGE) {
+      if (event.data === ENV_CHANGED_MESSAGE && !hasTabProjectEnvOverride()) {
         window.location.assign(getEnvironmentReloadPath(location.pathname))
       }
 
       if (event.data === ORG_CHANGED_MESSAGE) {
+        clearTabProjectEnv()
         window.location.assign(`/${lang}`)
       }
     }
