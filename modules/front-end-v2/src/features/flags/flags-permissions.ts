@@ -15,11 +15,10 @@ function wildcardMatches(pattern: string, value: string) {
 }
 
 export function environmentRn(input: {
-  organizationKey: string
   projectKey: string
   environmentKey: string
 }) {
-  return `organization/${input.organizationKey}:project/${input.projectKey}:env/${input.environmentKey}`
+  return `project/${input.projectKey}:env/${input.environmentKey}`
 }
 
 export function featureFlagRn(
@@ -30,6 +29,48 @@ export function featureFlagRn(
   return `${envRn}:flag/${flag.key}${tags}`
 }
 
+function resourceMatches(resourceRn: string, pattern: string) {
+  if (!resourceRn || !pattern) return false
+
+  const resourceSegments = resourceRn.split(":")
+  const patternSegments = pattern.split(":")
+  if (patternSegments.length > resourceSegments.length) return false
+
+  return patternSegments.every((patternSegment, index) => {
+    const [patternPath, patternTags] = patternSegment.split(";", 2)
+    const [resourcePath, resourceTags] = resourceSegments[index].split(";", 2)
+
+    if (!wildcardMatches(patternPath, resourcePath)) return false
+    if (patternTags === undefined || patternTags === "") return true
+    if (!resourceTags) return false
+
+    const tags = resourceTags.split(",")
+    return patternTags
+      .split(",")
+      .some((patternTag) =>
+        tags.some((tag) => wildcardMatches(patternTag, tag))
+      )
+  })
+}
+
+function statementMatches(
+  statement: UserPolicy["statements"][number],
+  resourceRn: string,
+  action: FlagAction
+) {
+  if (
+    statement.resourceType === "*" ||
+    statement.resourceType.toLowerCase() === "all"
+  ) {
+    return true
+  }
+
+  return (
+    (statement.actions.includes(action) || statement.actions.includes("*")) &&
+    statement.resources.some((pattern) => resourceMatches(resourceRn, pattern))
+  )
+}
+
 export function canUseFlagAction(
   policies: UserPolicy[],
   resourceRn: string,
@@ -38,19 +79,16 @@ export function canUseFlagAction(
   if (policies.some((policy) => policy.type.toLowerCase() === "owner"))
     return true
 
-  return policies.some((policy) =>
-    policy.statements.some(
-      (statement) =>
-        statement.effect.toLowerCase() === "allow" &&
-        (statement.resourceType === "feature-flag" ||
-          statement.resourceType === "flag" ||
-          statement.resourceType === "*") &&
-        statement.resources.some((resource) =>
-          wildcardMatches(resource, resourceRn)
-        ) &&
-        (statement.actions.includes(action) ||
-          statement.actions.includes("*") ||
-          statement.actions.includes("FlagAllActions"))
+  const matchedStatements = policies.flatMap((policy) =>
+    policy.statements.filter((statement) =>
+      statementMatches(statement, resourceRn, action)
+    )
+  )
+
+  return (
+    matchedStatements.length > 0 &&
+    matchedStatements.every(
+      (statement) => statement.effect.toLowerCase() === "allow"
     )
   )
 }

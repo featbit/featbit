@@ -373,7 +373,6 @@ export function FlagsComparePage() {
   )
 
   const envRn = environmentRn({
-    organizationKey: organization?.key ?? "",
     projectKey: projectEnv?.projectKey ?? "",
     environmentKey: projectEnv?.envKey ?? "",
   })

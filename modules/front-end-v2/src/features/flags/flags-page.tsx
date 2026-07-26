@@ -77,7 +77,6 @@ export function FlagsPage() {
   const projectEnv = getCurrentProjectEnv()
   const envId = projectEnv?.envId ?? ""
   const envRn = environmentRn({
-    organizationKey: organization?.key ?? "",
     projectKey: projectEnv?.projectKey ?? "",
     environmentKey: projectEnv?.envKey ?? "",
   })
