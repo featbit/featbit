@@ -1,11 +1,12 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { fetchFeatureFlagTags } from "../flags-api"
-import type { FeatureFlag } from "../flags-types"
+import "@/lib/i18n/i18n"
+import { fetchFeatureFlagTags } from "../../flags-api"
+import type { FeatureFlag } from "../../flags-types"
 import { FlagEditorSheet } from "./flag-editor-sheet"
 
-vi.mock("../flags-api", () => ({
+vi.mock("../../flags-api", () => ({
   fetchFeatureFlagTags: vi.fn(),
 }))
 

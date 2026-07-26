@@ -57,14 +57,14 @@ import {
   canUseFlagAction,
   environmentRn,
   featureFlagRn,
-} from "./flags-permissions"
-import { fetchFeatureFlagTags, fetchFlagPolicies } from "./flags-api"
-import type { FeatureFlag } from "./flags-types"
-import { CopyFlagsDialog } from "./components/copy-flags-dialog"
-import { FlagDifferencesSheet } from "./components/flag-differences-sheet"
+} from "../flags-permissions"
+import { fetchFeatureFlagTags, fetchFlagPolicies } from "../flags-api"
+import type { FeatureFlag } from "../flags-types"
+import { CopyFlagsDialog } from "../components/copy-flags-dialog"
+import { FlagDifferencesSheet } from "../components/flag-differences-sheet"
 import { FlagsCompareMatrix } from "./components/flags-compare-matrix"
 import { FlagsCompareScope } from "./components/flags-compare-scope"
-import { FlagsPagination } from "./components/flags-pagination"
+import { FlagsPagination } from "../components/flags-pagination"
 import type {
   CompareEnvironment,
   CompareOverviewRequest,

@@ -1,4 +1,5 @@
 import { Copy, Loader2, MoreHorizontal } from "lucide-react"
+import { useTranslation } from "react-i18next"
 import { Badge } from "@/components/ui/badge"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -28,8 +29,7 @@ import { localizedPath } from "@/features/layout/layout-context"
 import type { Lang } from "@/features/layout/layout-types"
 import { cn } from "@/lib/utils"
 import { Link } from "react-router-dom"
-import { flagsCopy } from "../flags-copy"
-import type { FeatureFlag } from "../flags-types"
+import type { FeatureFlag } from "../../flags-types"
 
 type Props = {
   lang: Lang
@@ -106,7 +106,6 @@ function TagsCell({ tags }: { tags: string[] }) {
 
 function ServingCell({
   flag,
-  lang,
   pending,
   allowed,
   onToggle,
@@ -117,11 +116,11 @@ function ServingCell({
   allowed: boolean
   onToggle: () => void
 }) {
-  const c = flagsCopy(lang)
+  const { t } = useTranslation()
   const enabledValues = flag.serves?.enabledVariations ?? []
   const displayed = flag.isEnabled
     ? enabledValues.length > 1
-      ? c.variations(enabledValues.length)
+      ? t("featureFlags.variations", { count: enabledValues.length })
       : enabledValues[0] || "—"
     : flag.serves?.disabledVariation || "—"
   return (
@@ -133,7 +132,9 @@ function ServingCell({
           onCheckedChange={onToggle}
         />
         <span className="text-xs font-medium">
-          {flag.isEnabled ? c.on : c.off}
+          {flag.isEnabled
+            ? t("featureFlags.on")
+            : t("featureFlags.off")}
         </span>
         <Badge variant="outline" className="font-normal text-muted-foreground">
           {flag.variationType.toUpperCase()}
@@ -148,7 +149,9 @@ function ServingCell({
             <span className="inline-flex max-w-52 items-center gap-1.5 rounded-md border bg-muted/40 px-2 py-1 text-xs" />
           }
         >
-          <span className="shrink-0 text-muted-foreground">{c.serving}:</span>
+          <span className="shrink-0 text-muted-foreground">
+            {t("featureFlags.serving")}:
+          </span>
           <span className="flex shrink-0 items-center -space-x-0.5">
             {flag.isEnabled && enabledValues.length ? (
               enabledValues.map((value, index) => (
@@ -201,7 +204,7 @@ function ServingCell({
 }
 
 export function FlagsTable(props: Props) {
-  const c = flagsCopy(props.lang)
+  const { t } = useTranslation()
   const pageSelected =
     props.items.length > 0 &&
     props.items.every((flag) => props.selectedIds.has(flag.id))
@@ -219,19 +222,19 @@ export function FlagsTable(props: Props) {
             />
           </TableHead>
           <TableHead className="w-[28%] px-5 py-4 font-semibold">
-            {c.name}
+            {t("featureFlags.name")}
           </TableHead>
           <TableHead className="w-[20%] px-5 py-4 font-semibold">
-            {c.statusServing}
+            {t("featureFlags.statusServing")}
           </TableHead>
           <TableHead className="w-[20%] px-5 py-4 font-semibold">
-            {c.tags}
+            {t("featureFlags.tags")}
           </TableHead>
           <TableHead className="w-[20%] px-5 py-4 font-semibold">
-            {c.lastChange}
+            {t("featureFlags.lastChange")}
           </TableHead>
           <TableHead className="w-[12%] px-5 py-4 font-semibold">
-            {c.actions}
+            {t("featureFlags.actions")}
           </TableHead>
         </TableRow>
       </TableHeader>
@@ -252,17 +255,17 @@ export function FlagsTable(props: Props) {
               <div className="flex min-h-64 flex-col items-center justify-center gap-2 px-6 py-12 text-center">
                 <p className="text-sm font-medium">
                   {props.hasFilters
-                    ? c.filteredEmpty
+                    ? t("featureFlags.filteredEmpty")
                     : props.archived
-                      ? c.archivedEmpty
-                      : c.empty}
+                      ? t("featureFlags.archivedEmpty")
+                      : t("featureFlags.empty")}
                 </p>
                 <p className="max-w-md text-sm text-muted-foreground">
                   {props.hasFilters
                     ? ""
                     : props.archived
-                      ? c.archivedEmptyHelper
-                      : c.emptyHelper}
+                      ? t("featureFlags.archivedEmptyHelper")
+                      : t("featureFlags.emptyHelper")}
                 </p>
                 {props.hasFilters ? (
                   <Button
@@ -271,7 +274,7 @@ export function FlagsTable(props: Props) {
                     className="mt-2"
                     onClick={props.onClearFilters}
                   >
-                    {c.clearFilters}
+                    {t("featureFlags.clearFilters")}
                   </Button>
                 ) : props.canCreate && !props.archived ? (
                   <Button
@@ -280,7 +283,7 @@ export function FlagsTable(props: Props) {
                     className="mt-2"
                     onClick={props.onCreate}
                   >
-                    {c.newFlag}
+                    {t("featureFlags.newFlag")}
                   </Button>
                 ) : null}
               </div>
@@ -319,7 +322,9 @@ export function FlagsTable(props: Props) {
                         render={
                           <button
                             type="button"
-                            aria-label={c.copyKey(flag.key)}
+                            aria-label={t("featureFlags.copyKey", {
+                              key: flag.key,
+                            })}
                             className="inline-flex max-w-full items-center gap-1.5 rounded bg-muted px-2 py-0.5 font-mono text-xs text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
                             onClick={() => props.onCopyKey(flag.key)}
                           />
@@ -333,7 +338,7 @@ export function FlagsTable(props: Props) {
                     {personName(flag.creator) ? (
                       <p className="flex min-w-0 items-center gap-1.5 text-xs">
                         <span className="shrink-0 text-muted-foreground">
-                          {c.createdBy}
+                          {t("featureFlags.createdBy")}
                         </span>
                         <span className="truncate font-medium text-foreground">
                           {personName(flag.creator)}
@@ -371,7 +376,7 @@ export function FlagsTable(props: Props) {
                         {personName(flag.lastChange.operator) ? (
                           <p className="flex min-w-0 items-center gap-1.5 text-xs">
                             <span className="shrink-0 text-muted-foreground">
-                              {c.updatedBy}
+                              {t("featureFlags.updatedBy")}
                             </span>
                             <span className="truncate font-medium text-foreground">
                               {personName(flag.lastChange.operator)}
@@ -394,7 +399,9 @@ export function FlagsTable(props: Props) {
                         ) : null}
                       </>
                     ) : (
-                      <p className="text-muted-foreground">{c.noChanges}</p>
+                      <p className="text-muted-foreground">
+                        {t("featureFlags.noChanges")}
+                      </p>
                     )}
                   </div>
                 </TableCell>
@@ -407,7 +414,7 @@ export function FlagsTable(props: Props) {
                         "font-medium"
                       )}
                     >
-                      {c.details}
+                      {t("featureFlags.details")}
                     </Link>
                     <DropdownMenu>
                       <DropdownMenuTrigger
@@ -416,7 +423,9 @@ export function FlagsTable(props: Props) {
                             type="button"
                             variant="ghost"
                             size="icon-sm"
-                            aria-label={c.moreActions(flag.name)}
+                            aria-label={t("featureFlags.moreActions", {
+                              name: flag.name,
+                            })}
                           />
                         }
                       >
@@ -428,13 +437,13 @@ export function FlagsTable(props: Props) {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="min-w-48">
                         <DropdownMenuItem onClick={() => props.onCopyTo(flag)}>
-                          {c.copyTo}
+                          {t("featureFlags.copyTo")}
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => props.onClone(flag)}>
-                          {c.clone}
+                          {t("featureFlags.clone")}
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => props.onCompare(flag)}>
-                          {c.compare}
+                          {t("featureFlags.compare")}
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         {props.archived ? (
@@ -443,24 +452,24 @@ export function FlagsTable(props: Props) {
                               disabled={pending || !props.canRestore(flag)}
                               title={
                                 !props.canRestore(flag)
-                                  ? c.permissionDenied
+                                  ? t("featureFlags.permissionDenied")
                                   : undefined
                               }
                               onClick={() => props.onRestore(flag)}
                             >
-                              {c.restore}
+                              {t("featureFlags.restore")}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               disabled={pending || !props.canRemove(flag)}
                               className="text-destructive data-[highlighted]:text-destructive"
                               title={
                                 !props.canRemove(flag)
-                                  ? c.permissionDenied
+                                  ? t("featureFlags.permissionDenied")
                                   : undefined
                               }
                               onClick={() => props.onRemove(flag)}
                             >
-                              {c.remove}
+                              {t("featureFlags.remove")}
                             </DropdownMenuItem>
                           </>
                         ) : (
@@ -468,12 +477,12 @@ export function FlagsTable(props: Props) {
                             disabled={pending || !props.canArchive(flag)}
                             title={
                               !props.canArchive(flag)
-                                ? c.permissionDenied
+                                ? t("featureFlags.permissionDenied")
                                 : undefined
                             }
                             onClick={() => props.onArchive(flag)}
                           >
-                            {c.archive}
+                            {t("featureFlags.archive")}
                           </DropdownMenuItem>
                         )}
                       </DropdownMenuContent>

@@ -6,6 +6,7 @@ import {
   Plus,
   Search,
 } from "lucide-react"
+import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 import {
   Command,
@@ -35,7 +36,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import type { Lang } from "@/features/layout/layout-types"
-import { flagsCopy } from "../flags-copy"
 
 type Props = {
   lang: Lang
@@ -60,7 +60,7 @@ type Props = {
 }
 
 export function FlagsToolbar(props: Props) {
-  const c = flagsCopy(props.lang)
+  const { t } = useTranslation()
   const filtersApplied = Boolean(
     props.search.trim() ||
     props.selectedTags.length ||
@@ -70,8 +70,8 @@ export function FlagsToolbar(props: Props) {
   const visibleTags = props.selectedTags.slice(0, 2)
   const hiddenTagCount = props.selectedTags.length - visibleTags.length
   const tagLabel = props.selectedTags.length
-    ? `${c.tags}: ${visibleTags.join(", ")}${hiddenTagCount ? ` +${hiddenTagCount}` : ""}`
-    : `${c.tags}: ${c.any}`
+    ? `${t("featureFlags.tags")}: ${visibleTags.join(", ")}${hiddenTagCount ? ` +${hiddenTagCount}` : ""}`
+    : `${t("featureFlags.tags")}: ${t("featureFlags.any")}`
 
   function toggleTag(tag: string) {
     props.onTagsChange(
@@ -89,7 +89,7 @@ export function FlagsToolbar(props: Props) {
           <Input
             value={props.search}
             className="pl-9"
-            placeholder={c.search}
+            placeholder={t("featureFlags.search")}
             onChange={(event) => props.onSearchChange(event.target.value)}
           />
         </div>
@@ -108,10 +108,10 @@ export function FlagsToolbar(props: Props) {
           </PopoverTrigger>
           <PopoverContent align="start" className="w-52 p-0">
             <Command>
-              <CommandInput placeholder={c.tags} />
+              <CommandInput placeholder={t("featureFlags.tags")} />
               <CommandList>
                 <CommandEmpty>
-                  {props.tagsLoading ? "…" : c.noTags}
+                  {props.tagsLoading ? "…" : t("featureFlags.noTags")}
                 </CommandEmpty>
                 <CommandGroup>
                   {props.tags.map((tag) => (
@@ -136,7 +136,7 @@ export function FlagsToolbar(props: Props) {
                   className="w-full"
                   onClick={() => props.onTagsChange([])}
                 >
-                  {c.clearAll}
+                  {t("featureFlags.clearAll")}
                 </Button>
               </div>
             ) : null}
@@ -150,19 +150,19 @@ export function FlagsToolbar(props: Props) {
         >
           <SelectTrigger className="w-32">
             <SelectValue>
-              {c.status}:{" "}
+              {t("featureFlags.status")}:{" "}
               {props.status === "all"
-                ? c.any
+                ? t("featureFlags.any")
                 : props.status === "on"
-                  ? c.on
-                  : c.off}
+                  ? t("featureFlags.on")
+                  : t("featureFlags.off")}
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              <SelectItem value="all">{c.any}</SelectItem>
-              <SelectItem value="on">{c.on}</SelectItem>
-              <SelectItem value="off">{c.off}</SelectItem>
+              <SelectItem value="all">{t("featureFlags.any")}</SelectItem>
+              <SelectItem value="on">{t("featureFlags.on")}</SelectItem>
+              <SelectItem value="off">{t("featureFlags.off")}</SelectItem>
             </SelectGroup>
           </SelectContent>
         </Select>
@@ -174,7 +174,7 @@ export function FlagsToolbar(props: Props) {
           onClick={() => props.onArchivedChange(!props.archived)}
         >
           <Archive />
-          {c.showArchived}
+          {t("featureFlags.showArchived")}
         </Button>
         <Button
           type="button"
@@ -182,7 +182,7 @@ export function FlagsToolbar(props: Props) {
           disabled={!filtersApplied}
           onClick={props.onClearFilters}
         >
-          {c.clearFilters}
+          {t("featureFlags.clearFilters")}
         </Button>
       </div>
 
@@ -190,7 +190,7 @@ export function FlagsToolbar(props: Props) {
         {props.selectedCount ? (
           <div className="flex items-center gap-2">
             <span className="text-sm whitespace-nowrap">
-              {c.selected(props.selectedCount)}
+              {t("featureFlags.selected", { count: props.selectedCount })}
             </span>
             <Tooltip>
               <TooltipTrigger
@@ -208,11 +208,13 @@ export function FlagsToolbar(props: Props) {
                   onClick={props.onCopySelected}
                 >
                   <Copy />
-                  {c.copyTo}
+                  {t("featureFlags.copyTo")}
                 </Button>
               </TooltipTrigger>
               {!props.canCopySelected ? (
-                <TooltipContent>{c.permissionDenied}</TooltipContent>
+                <TooltipContent>
+                  {t("featureFlags.permissionDenied")}
+                </TooltipContent>
               ) : null}
             </Tooltip>
             <Button
@@ -220,7 +222,7 @@ export function FlagsToolbar(props: Props) {
               variant="ghost"
               onClick={props.onClearSelection}
             >
-              {c.clear}
+              {t("featureFlags.clear")}
             </Button>
             <div className="mx-1 hidden h-8 w-px bg-border 2xl:block" />
           </div>
@@ -230,7 +232,7 @@ export function FlagsToolbar(props: Props) {
         <div className="flex items-center gap-2">
           <Button type="button" variant="outline" onClick={props.onCompare}>
             <GitCompareArrows />
-            {c.compare}
+            {t("featureFlags.compare")}
           </Button>
           <Tooltip>
             <TooltipTrigger
@@ -247,11 +249,13 @@ export function FlagsToolbar(props: Props) {
                 onClick={props.onCreate}
               >
                 <Plus />
-                {c.newFlag}
+                {t("featureFlags.newFlag")}
               </Button>
             </TooltipTrigger>
             {!props.canCreate ? (
-              <TooltipContent>{c.permissionDenied}</TooltipContent>
+              <TooltipContent>
+                {t("featureFlags.permissionDenied")}
+              </TooltipContent>
             ) : null}
           </Tooltip>
         </div>

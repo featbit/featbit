@@ -2,6 +2,7 @@ import { Popover as PopoverPrimitive } from "@base-ui/react/popover"
 import { useQuery } from "@tanstack/react-query"
 import { Loader2, Plus, X } from "lucide-react"
 import { type ReactNode, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 import {
   Command,
@@ -13,8 +14,7 @@ import {
 } from "@/components/ui/command"
 import { Popover, PopoverTrigger } from "@/components/ui/popover"
 import type { Lang } from "@/features/layout/layout-types"
-import { fetchFeatureFlagTags } from "../flags-api"
-import { flagsCopy } from "../flags-copy"
+import { fetchFeatureFlagTags } from "../../flags-api"
 
 function FlagTagPopoverContent({ children }: { children: ReactNode }) {
   return (
@@ -35,7 +35,6 @@ function FlagTagPopoverContent({ children }: { children: ReactNode }) {
 
 export function FlagTagPicker({
   envId,
-  lang,
   tags,
   disabled,
   onChange,
@@ -48,7 +47,7 @@ export function FlagTagPicker({
   onChange: (tags: string[]) => void
   onOpenChange?: (open: boolean) => void
 }) {
-  const c = flagsCopy(lang)
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState("")
   const [createdTags, setCreatedTags] = useState<string[]>([])
@@ -99,7 +98,7 @@ export function FlagTagPicker({
           <button
             type="button"
             disabled={disabled}
-            aria-label={c.removeTag(tag)}
+            aria-label={t("featureFlags.removeTag", { tag })}
             onClick={() => onChange(tags.filter((item) => item !== tag))}
           >
             <X className="size-3" />
@@ -125,40 +124,40 @@ export function FlagTagPicker({
           }
         >
           <Plus className="size-4" />
-          {c.tagPlaceholder}
+          {t("featureFlags.tagPlaceholder")}
         </PopoverTrigger>
         <FlagTagPopoverContent>
           <Command shouldFilter={false}>
             <CommandInput
               value={search}
-              placeholder={c.tagPlaceholder}
+              placeholder={t("featureFlags.tagPlaceholder")}
               onValueChange={setSearch}
             />
             <CommandList>
               {tagsQuery.isLoading ? (
                 <div className="flex items-center justify-center gap-2 py-6 text-sm text-muted-foreground">
                   <Loader2 className="size-4 animate-spin" />
-                  {c.loading}
+                  {t("featureFlags.loading")}
                 </div>
               ) : null}
               {tagsQuery.isError && !tagsQuery.data ? (
                 <div className="flex items-center justify-between gap-3 px-3 py-4 text-sm text-destructive">
-                  <span>{c.tagsLoadFailed}</span>
+                  <span>{t("featureFlags.tagsLoadFailed")}</span>
                   <Button
                     type="button"
                     size="sm"
                     variant="outline"
                     onClick={() => void tagsQuery.refetch()}
                   >
-                    {c.retry}
+                    {t("featureFlags.retry")}
                   </Button>
                 </div>
               ) : null}
               {!tagsQuery.isLoading ? (
-                <CommandEmpty>{c.noTags}</CommandEmpty>
+                <CommandEmpty>{t("featureFlags.noTags")}</CommandEmpty>
               ) : null}
               {availableTags.length ? (
-                <CommandGroup heading={c.availableTags}>
+                <CommandGroup heading={t("featureFlags.availableTags")}>
                   {availableTags.map((tag) => (
                     <CommandItem
                       key={tag}
@@ -177,7 +176,7 @@ export function FlagTagPicker({
                     onSelect={() => addTag(query, true)}
                   >
                     <Plus className="size-4" />
-                    {c.createTag(query)}
+                    {t("featureFlags.createTag", { tag: query })}
                   </CommandItem>
                 </CommandGroup>
               ) : null}

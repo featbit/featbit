@@ -77,6 +77,16 @@ describe("global feature translations", () => {
     ).toBe("创建标签“发布”")
   })
 
+  it("resolves Feature Flags copy from the global bundle", async () => {
+    await i18n.changeLanguage("en")
+    expect(i18n.t("featureFlags.title")).toBe("Feature flags")
+    expect(i18n.t("featureFlags.selected", { count: 2 })).toBe("2 selected")
+
+    await i18n.changeLanguage("zh")
+    expect(i18n.t("featureFlags.title")).toBe("功能开关")
+    expect(i18n.t("featureFlags.selected", { count: 2 })).toBe("已选择 2 项")
+  })
+
   it("does not expose retired Chinese end-user terminology", async () => {
     await i18n.changeLanguage("zh")
 

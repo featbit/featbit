@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useNavigate, useParams, useSearchParams } from "react-router-dom"
+import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { TooltipProvider } from "@/components/ui/tooltip"
@@ -28,23 +29,22 @@ import {
   removeFeatureFlag,
   restoreFeatureFlag,
   toggleFeatureFlag,
-} from "./flags-api"
-import { flagsCopy } from "./flags-copy"
+} from "../flags-api"
 import {
   canUseFlagAction,
   environmentRn,
   featureFlagRn,
   type FlagAction,
-} from "./flags-permissions"
-import type { FeatureFlag, FlagCreationPayload } from "./flags-types"
-import { CopyFlagsDialog } from "./components/copy-flags-dialog"
-import { FlagDifferencesSheet } from "./components/flag-differences-sheet"
+} from "../flags-permissions"
+import type { FeatureFlag, FlagCreationPayload } from "../flags-types"
+import { CopyFlagsDialog } from "../components/copy-flags-dialog"
+import { FlagDifferencesSheet } from "../components/flag-differences-sheet"
 import { FlagEditorSheet } from "./components/flag-editor-sheet"
 import {
   FlagConfirmDialog,
   type FlagConfirmation,
 } from "./components/flag-confirm-dialog"
-import { FlagsPagination } from "./components/flags-pagination"
+import { FlagsPagination } from "../components/flags-pagination"
 import { FlagsTable } from "./components/flags-table"
 import { FlagsToolbar } from "./components/flags-toolbar"
 
@@ -66,7 +66,7 @@ function positiveInt(
 export function FlagsPage() {
   const { lang: langParam } = useParams()
   const lang = resolveLang(langParam)
-  const c = flagsCopy(lang)
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -226,7 +226,7 @@ export function FlagsPage() {
     onSuccess: (_, variables) => {
       const target = variables.target
       setConfirmation(null)
-      toast.success(c.operationSucceeded)
+      toast.success(t("featureFlags.operationSucceeded"))
       setSelectedIds((current) => {
         const next = new Set(current)
         next.delete(target.flag.id)
@@ -245,14 +245,14 @@ export function FlagsPage() {
         updateParams({ page: String(pageIndex - 1) })
       void invalidateList()
     },
-    onError: () => toast.error(c.operationFailed),
+    onError: () => toast.error(t("featureFlags.operationFailed")),
   })
   const createMutation = useMutation({
     mutationFn: (payload: FlagCreationPayload) =>
       createFeatureFlag(envId, payload),
     onSuccess: (_, payload) => {
       setEditorOpen(false)
-      toast.success(c.operationSucceeded)
+      toast.success(t("featureFlags.operationSucceeded"))
       void invalidateList()
       navigate(
         localizedPath(
@@ -261,7 +261,7 @@ export function FlagsPage() {
         )
       )
     },
-    onError: () => toast.error(c.operationFailed),
+    onError: () => toast.error(t("featureFlags.operationFailed")),
   })
   const cloneMutation = useMutation({
     mutationFn: ({
@@ -279,7 +279,7 @@ export function FlagsPage() {
     onSuccess: (_, variables) => {
       setEditorOpen(false)
       setCloneTarget(null)
-      toast.success(c.operationSucceeded)
+      toast.success(t("featureFlags.operationSucceeded"))
       void invalidateList()
       navigate(
         localizedPath(
@@ -288,7 +288,7 @@ export function FlagsPage() {
         )
       )
     },
-    onError: () => toast.error(c.operationFailed),
+    onError: () => toast.error(t("featureFlags.operationFailed")),
   })
 
   const data = listQuery.data ?? { items: [], totalCount: 0 }
@@ -344,13 +344,15 @@ export function FlagsPage() {
     next: () => void
   ) {
     if (canPerform(flag, action)) next()
-    else toast.error(c.permissionDenied)
+    else toast.error(t("featureFlags.permissionDenied"))
   }
 
   if (!envId)
     return (
       <div className="-m-5 flex min-h-[calc(100vh-3.5rem)] items-center justify-center bg-background p-8">
-        <p className="text-sm text-muted-foreground">{c.loadFailed}</p>
+        <p className="text-sm text-muted-foreground">
+          {t("featureFlags.loadFailed")}
+        </p>
       </div>
     )
 
@@ -358,8 +360,12 @@ export function FlagsPage() {
     <TooltipProvider>
       <div className="-m-5 min-h-[calc(100vh-3.5rem)] bg-background px-6 py-6 lg:px-8">
         <header className="mb-9 space-y-1">
-          <h1 className="text-2xl font-semibold tracking-normal">{c.title}</h1>
-          <p className="text-sm text-muted-foreground">{c.subtitle}</p>
+          <h1 className="text-2xl font-semibold tracking-normal">
+            {t("featureFlags.title")}
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            {t("featureFlags.subtitle")}
+          </p>
         </header>
         <FlagsToolbar
           lang={lang}
@@ -396,14 +402,14 @@ export function FlagsPage() {
         <div className="overflow-x-auto rounded-md border bg-background">
           {listQuery.isError ? (
             <div className="flex items-center justify-between border-b bg-destructive/5 px-5 py-3 text-sm text-destructive">
-              <span>{c.loadFailed}</span>
+              <span>{t("featureFlags.loadFailed")}</span>
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 onClick={() => void listQuery.refetch()}
               >
-                {c.retry}
+                {t("featureFlags.retry")}
               </Button>
             </div>
           ) : null}
@@ -439,9 +445,9 @@ export function FlagsPage() {
             onCopyKey={async (key) => {
               try {
                 await navigator.clipboard.writeText(key)
-                toast.success(c.copied)
+                toast.success(t("featureFlags.copied"))
               } catch {
-                toast.error(c.operationFailed)
+                toast.error(t("featureFlags.operationFailed"))
               }
             }}
             onCopyTo={(flag) =>

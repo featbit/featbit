@@ -1,5 +1,6 @@
 import { Loader2, MousePointerClick } from "lucide-react"
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -14,8 +15,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import type { Lang } from "@/features/layout/layout-types"
-import { flagsCopy } from "../flags-copy"
-import type { FeatureFlag } from "../flags-types"
+import type { FeatureFlag } from "../../flags-types"
 
 export type FlagConfirmation = {
   kind: "toggle" | "archive" | "restore" | "remove"
@@ -24,7 +24,6 @@ export type FlagConfirmation = {
 } | null
 
 export function FlagConfirmDialog({
-  lang,
   target,
   saving,
   requireComment,
@@ -38,7 +37,7 @@ export function FlagConfirmDialog({
   onOpenChange: (open: boolean) => void
   onConfirm: (comment: string) => void
 }) {
-  const c = flagsCopy(lang)
+  const { t } = useTranslation()
   const [comment, setComment] = useState("")
   const [confirmationKey, setConfirmationKey] = useState("")
   if (!target) return null
@@ -47,42 +46,50 @@ export function FlagConfirmDialog({
   const content =
     target.kind === "toggle"
       ? {
-          title: c.toggleTitle(Boolean(target.nextEnabled)),
-          body: c.toggleBody(Boolean(target.nextEnabled)),
-          action: c.confirm,
+          title: t(
+            target.nextEnabled
+              ? "featureFlags.toggleOnTitle"
+              : "featureFlags.toggleOffTitle"
+          ),
+          body: t(
+            target.nextEnabled
+              ? "featureFlags.toggleOnBody"
+              : "featureFlags.toggleOffBody"
+          ),
+          action: t("featureFlags.confirm"),
         }
       : target.kind === "archive"
         ? {
-            title: c.archiveTitle,
-            body: c.archiveBody(target.flag.key),
-            action: c.archive,
+            title: t("featureFlags.archiveTitle"),
+            body: t("featureFlags.archiveBody", { key: target.flag.key }),
+            action: t("featureFlags.archive"),
           }
         : target.kind === "restore"
           ? {
-              title: c.restoreTitle,
+              title: t("featureFlags.restoreTitle"),
               body: (
                 <>
-                  {c.restoreBodyBefore}{" "}
+                  {t("featureFlags.restoreBodyBefore")}{" "}
                   <span className="rounded bg-muted px-1 py-0.5 font-mono font-medium text-foreground">
                     {target.flag.key}
                   </span>{" "}
-                  {c.restoreBodyAfter}
+                  {t("featureFlags.restoreBodyAfter")}
                 </>
               ),
-              action: c.restore,
+              action: t("featureFlags.restore"),
             }
           : {
-              title: c.removeTitle,
+              title: t("featureFlags.removeTitle"),
               body: (
                 <>
-                  {c.removeBodyBefore}{" "}
+                  {t("featureFlags.removeBodyBefore")}{" "}
                   <span className="rounded bg-muted px-1 py-0.5 font-mono font-medium text-foreground">
                     {target.flag.key}
                   </span>{" "}
-                  {c.removeBodyAfter}
+                  {t("featureFlags.removeBodyAfter")}
                 </>
               ),
-              action: c.remove,
+              action: t("featureFlags.remove"),
             }
 
   return (
@@ -115,26 +122,28 @@ export function FlagConfirmDialog({
               id="flag-archive-key-prompt"
               className="flex flex-wrap items-center gap-1.5 text-sm font-medium"
             >
-              <span>{c.archiveKeyPromptBefore}</span>
+              <span>{t("featureFlags.archiveKeyPromptBefore")}</span>
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 className="h-6 border-primary/40 bg-primary/5 px-1.5 font-mono text-xs font-semibold text-primary hover:bg-primary/10 hover:text-primary"
                 disabled={saving}
-                aria-label={c.useArchiveKey(target.flag.key)}
+                aria-label={t("featureFlags.useArchiveKey", {
+                  key: target.flag.key,
+                })}
                 onClick={() => setConfirmationKey(target.flag.key)}
               >
                 <MousePointerClick className="size-3" />
                 {target.flag.key}
               </Button>
-              <span>{c.archiveKeyPromptAfter}</span>
+              <span>{t("featureFlags.archiveKeyPromptAfter")}</span>
             </p>
             <Input
               id="flag-archive-key"
               aria-labelledby="flag-archive-key-prompt"
               value={confirmationKey}
-              placeholder={c.archiveKeyPlaceholder}
+              placeholder={t("featureFlags.archiveKeyPlaceholder")}
               autoComplete="off"
               spellCheck={false}
               onChange={(event) => setConfirmationKey(event.target.value)}
@@ -142,7 +151,9 @@ export function FlagConfirmDialog({
           </div>
         ) : null}
         <AlertDialogFooter className="border-t-0 bg-transparent">
-          <AlertDialogCancel disabled={saving}>{c.cancel}</AlertDialogCancel>
+          <AlertDialogCancel disabled={saving}>
+            {t("featureFlags.cancel")}
+          </AlertDialogCancel>
           <Button
             type="button"
             variant={target.kind === "remove" ? "destructive" : "default"}

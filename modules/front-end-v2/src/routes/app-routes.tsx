@@ -146,12 +146,12 @@ const AuditLogsPage = lazy(() =>
   }))
 )
 const FlagsPage = lazy(() =>
-  import("@/features/flags/flags-page").then((module) => ({
+  import("@/features/flags/index/flags-page").then((module) => ({
     default: module.FlagsPage,
   }))
 )
 const FlagsComparePage = lazy(() =>
-  import("@/features/flags/flags-compare-page").then((module) => ({
+  import("@/features/flags/compare/flags-compare-page").then((module) => ({
     default: module.FlagsComparePage,
   }))
 )

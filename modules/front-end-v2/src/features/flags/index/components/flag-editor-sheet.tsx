@@ -32,7 +32,7 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { getCurrentProjectEnv } from "@/features/layout/layout-context"
 import type { Lang } from "@/features/layout/layout-types"
-import type { FeatureFlag, FlagCreationPayload } from "../flags-types"
+import type { FeatureFlag, FlagCreationPayload } from "../../flags-types"
 import { FlagTagPicker } from "./flag-tag-picker"
 import {
   createDefaultFlagVariationSettings,
