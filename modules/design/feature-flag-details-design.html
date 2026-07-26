@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Feature flag details design</title>
+  <style>
+    :root{--bg:#fff;--fg:#18181b;--muted:#71717a;--soft:#f4f4f5;--line:#e4e4e7;--blue:#1d4ed8;--red:#dc2626;--green:#16a34a;--amber:#a16207}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:14px;line-height:1.45}.page{width:1536px;height:1024px;padding:26px 32px 40px;overflow:hidden}.back{color:var(--blue);font-size:14px;margin-bottom:18px}.back:before{content:"←";font-size:18px;margin-right:8px}.top{display:flex;justify-content:space-between;gap:28px}.identity{min-width:0}.identity h1{font-size:26px;line-height:1.25;margin:0;font-weight:650}.meta{display:flex;align-items:center;gap:24px;margin-top:14px;white-space:nowrap}.meta-group{display:flex;align-items:center;gap:8px}.label,.helper{color:var(--muted)}.code{font-family:"SFMono-Regular",Consolas,monospace;font-size:12px;border:1px solid var(--line);background:#fafafa;border-radius:7px;padding:6px 10px}.badge{display:inline-flex;align-items:center;gap:6px;min-height:22px;padding:2px 8px;border-radius:999px;background:var(--soft);font-size:12px}.badge.outline{background:#fff;border:1px solid var(--line)}.dot{width:7px;height:7px;border-radius:50%;background:var(--green)}.top-actions{display:flex;align-items:center;gap:10px;padding-top:3px}.switch{width:40px;height:22px;border-radius:999px;background:#18181b;padding:3px;display:inline-flex;justify-content:flex-end}.switch:after{content:"";width:16px;height:16px;border-radius:50%;background:#fff}.button{height:34px;padding:0 12px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--fg);display:inline-flex;align-items:center;justify-content:center;gap:7px;font-weight:500}.button.primary{background:#18181b;color:#fff;border-color:#18181b}.button.ghost{border-color:transparent;background:transparent}.button.danger{color:var(--red);border-color:#fecaca}.button.small{height:30px;padding:0 10px;font-size:13px}.tabs{display:flex;border-bottom:1px solid var(--line);margin-top:22px}.tab{position:relative;padding:11px 15px;color:#52525b}.tab.active{color:var(--fg);font-weight:550}.tab.active:after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:#18181b}.command{height:58px;display:flex;align-items:center;justify-content:flex-end;gap:12px}.unsaved{color:#52525b}.content{padding:0 4px}.section{margin-top:19px}.section:first-child{margin-top:8px}.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}.section-title{font-size:17px;font-weight:620}.section-note{color:var(--muted);font-size:13px}.panel{border:1px solid var(--line);border-radius:10px;background:#fff}.panel.soft{border:0;background:#f7f7f8}.row{display:flex;align-items:center;gap:12px;min-height:48px;padding:10px 14px;border-top:1px solid var(--line)}.row:first-child{border-top:0}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}.rule-grid{display:grid;grid-template-columns:42px 260px 1fr 300px 36px;align-items:center;gap:10px}.field{height:34px;border:1px solid var(--line);border-radius:7px;background:#fff;padding:7px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.field.select:after{content:"⌄";float:right;color:#52525b}.serve{display:flex;align-items:center;gap:8px}.bar{height:8px;width:92px;border-radius:8px;overflow:hidden;background:#e4e4e7;display:flex}.bar i:first-child{width:75%;background:#18181b}.bar i:last-child{width:25%;background:#a1a1aa}.person{display:flex;align-items:center;gap:9px;padding:8px 10px;border-top:1px solid #eee}.person:first-of-type{border-top:0}.avatar{width:26px;height:26px;border-radius:50%;background:#e4e4e7;display:grid;place-items:center;font-size:11px}.person-copy{min-width:0}.person-copy small{display:block;color:var(--muted)}.grow{flex:1}.muted{color:var(--muted)}.warn{display:flex;align-items:center;gap:9px;background:#fefce8;color:#713f12;border-radius:8px;padding:9px 12px;margin-bottom:12px}.form{width:760px}.form-group{margin-bottom:19px}.form-label{display:block;font-weight:550;margin-bottom:7px}.input{width:100%;min-height:36px;border:1px solid var(--line);border-radius:8px;padding:8px 11px;background:#fff}.textarea{height:86px}.help{color:var(--muted);font-size:13px;margin-top:6px}.danger-zone{margin-top:34px;border-top:1px solid var(--line);padding-top:20px;width:760px}.table{border:1px solid var(--line);border-radius:10px;overflow:hidden}.tr{display:grid;align-items:center;min-height:56px;border-top:1px solid var(--line);padding:0 14px;column-gap:16px}.tr:first-child{border-top:0}.tr.head{background:#fafafa;min-height:44px;font-weight:550}.trigger-cols{grid-template-columns:1.1fr .75fr .8fr 1.5fr .7fr 210px}.insight-cols{grid-template-columns:1.15fr 1fr .7fr 1fr}.history-cols{grid-template-columns:40px 220px 230px 1.2fr 1fr}.variation-cols{grid-template-columns:34px 230px 1fr 130px 120px}.toolbar{display:flex;align-items:center;gap:10px;margin-bottom:14px}.toolbar .field{min-width:210px}.chart{height:285px;padding:18px 20px 12px;position:relative}.chart svg{width:100%;height:220px}.legend{display:flex;gap:18px;color:var(--muted);font-size:12px}.legend span:before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:#18181b;margin-right:6px}.legend span:nth-child(2):before{background:#71717a}.legend span:nth-child(3):before{background:#2563eb}.metric{font-size:24px;font-weight:650}.submetric{font-size:12px;color:var(--muted)}.value-chip{font-family:"SFMono-Regular",Consolas,monospace;background:#f4f4f5;border-radius:6px;padding:5px 8px;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.drag{color:#71717a;font-size:18px}.new-url{background:#fefce8;color:#713f12;border-radius:7px;padding:7px 9px;font-size:12px}.empty{padding:44px;text-align:center;color:var(--muted)}.footer-note{position:absolute;bottom:18px;right:32px;color:#a1a1aa;font-size:11px}.only{display:none}body[data-tab="targeting"] .targeting,body[data-tab="variations"] .variations,body[data-tab="triggers"] .triggers,body[data-tab="insights"] .insights,body[data-tab="settings"] .settings,body[data-tab="history"] .history{display:block}
+    body[data-tab="targeting"] .page{height:1360px}.rule-card{border:1px solid var(--line);border-radius:7px;overflow:hidden;background:#fff;margin-top:12px}.rule-card:first-child{margin-top:0}.rule-head{display:flex;align-items:center;gap:12px;padding:8px 12px;border-bottom:1px solid var(--line)}.rule-name{width:350px}.remove-rule{margin-left:auto;color:var(--red);font-weight:500}.rule-body{padding:11px 16px}.condition{display:grid;grid-template-columns:28px minmax(160px,1fr) minmax(160px,.9fr) minmax(260px,2fr) 32px;align-items:center;gap:12px;margin-top:8px}.condition:first-child{margin-top:0}.logic{font-size:12px;font-weight:600;color:var(--muted)}.icon-action{height:32px;width:32px;display:grid;place-items:center;color:#52525b}.add-condition{display:inline-flex;margin-top:8px;color:var(--blue);font-weight:500}.rule-serve{display:grid;grid-template-columns:28px 92px 1fr;align-items:start;gap:12px;border-top:1px solid var(--line);margin-top:11px;padding-top:11px}.percent-input{height:34px;border:1px solid var(--line);border-radius:7px;background:#fff;display:flex;align-items:center;justify-content:space-between;padding-left:10px}.percent-input span:last-child{height:32px;border-left:1px solid var(--line);display:grid;place-items:center;padding:0 10px;color:var(--muted)}.rollout-panel{margin-top:10px;border-radius:8px;background:var(--soft);padding:13px 14px}.rollout-toolbar{display:flex;align-items:center;justify-content:space-between;gap:20px}.dispatch-control{display:flex;align-items:center;gap:9px}.dispatch-control .field{width:170px}.allocation-list{margin-top:11px;border-top:1px solid var(--line)}.allocation-row{display:grid;grid-template-columns:190px minmax(180px,420px) 100px;justify-content:start;align-items:center;gap:16px;min-height:48px;border-bottom:1px solid var(--line)}.variation-name{display:flex;align-items:center;gap:8px;font-weight:500}.allocation-track{height:8px;border-radius:999px;background:#d4d4d8;overflow:hidden}.allocation-fill{display:block;height:100%;border-radius:999px;background:#18181b}.allocation-fill.secondary{background:#71717a}.rollout-footer{display:flex;align-items:center;gap:14px;padding-top:11px}.allocation-total{font-weight:600}.allocation-remaining{color:var(--muted);font-size:13px}.rollout-actions{display:flex;gap:8px;margin-left:auto}
+    .allocation-list{display:grid;gap:8px;border-top:0}.allocation-row{min-height:40px;border-bottom:0}.rule-serve{grid-template-columns:28px 1fr}.remove-rule{display:inline-flex;align-items:center;gap:4px;line-height:1}.remove-rule svg{width:14px;height:14px;transform:translateY(-1px)}.user-panel{min-width:0;border:1px solid var(--line);border-radius:6px;padding:16px}.user-panel-head{display:flex;align-items:baseline;gap:8px;margin-bottom:12px}.user-count{color:var(--muted);font-size:12px}.user-search{height:36px;width:100%;display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:0 11px;color:var(--muted)}.user-list{max-height:176px;margin-top:8px;overflow-y:auto;padding-right:4px}.user-row{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line);padding:8px}.user-row:last-child{border-bottom:0}.user-copy{min-width:0;flex:1}.user-copy strong{display:block;font-size:14px;font-weight:500}.user-copy small{display:block;color:var(--muted);font-size:12px}.user-remove{width:32px;height:32px;display:grid;place-items:center;border-radius:6px}.more-button{width:34px;padding:0}.more-button svg{width:16px;height:16px}.many-only,.flag-off-only{display:none}.flag-on-only{display:inline-flex}body[data-state="many"] .many-only{display:block}body[data-state="many"] .default-only{display:none}body[data-state="many"] .allocation-row.many-only{display:grid}body[data-state="many"] .page{height:1600px}body[data-state="off"] .flag-on-only{display:none}body[data-state="off"] .flag-off-only{display:flex}body[data-state="off"] .inline-state{display:inline-flex}body[data-state="off"] .switch{justify-content:flex-start;background:#a1a1aa}body[data-state="off"] .off-rule-row{background:var(--soft)}body[data-state="off"] .page{height:1420px}
+    .review-overlay{display:none;position:fixed;inset:0;z-index:50;background:rgba(24,24,27,.38);align-items:center;justify-content:center;padding:28px}.review-dialog{width:768px;max-height:calc(100vh - 56px);overflow:auto;border:1px solid var(--line);border-radius:10px;background:#fff;box-shadow:0 18px 50px rgba(0,0,0,.22)}.review-inner{padding:24px 28px 20px}.review-header{position:relative}.review-title{margin:0;font-size:20px;line-height:1.35;font-weight:650}.review-description{margin:6px 38px 0 0;color:var(--muted)}.dialog-close{position:absolute;right:-7px;top:-7px;width:34px;height:34px;border:0;border-radius:7px;background:transparent;font-size:24px;line-height:1;color:#3f3f46}.review-section{margin-top:24px}.review-section-head{display:flex;align-items:baseline;gap:12px;margin-bottom:10px}.review-section-head strong{font-size:14px}.review-count{color:var(--muted)}.change-ledger{max-height:330px;overflow:auto;border-radius:7px;background:#f7f7f8;padding:10px 12px}.change-row{display:grid;grid-template-columns:205px 96px minmax(0,1fr);gap:16px;align-items:start;padding:11px 10px}.change-object{display:flex;align-items:center;gap:8px;min-width:0;font-weight:500}.change-kind{display:inline-flex;align-items:center;height:23px;border:1px solid #d4d4d8;border-radius:5px;padding:0 7px;background:#fff;font-size:12px;font-weight:500;flex:0 0 auto}.change-operation{color:#52525b}.change-content{min-width:0}.change-label{display:block;color:var(--muted);font-size:12px;margin-bottom:2px}.change-arrow{display:block;color:#71717a;line-height:1.2;margin:2px 0}.review-fields{display:grid;gap:15px;margin-top:20px}.review-field label{display:block;font-weight:550;margin-bottom:7px}.required{color:var(--red);margin-left:2px}.review-field .input,.review-field .textarea{font-size:14px}.review-field .textarea{height:78px;color:#a1a1aa}.review-help{font-size:12px;color:var(--muted);margin-top:6px}.schedule-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.review-approval{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:12px 14px;border-radius:8px;background:#f7f7f8}.review-approval-copy strong{display:block}.review-approval-copy span{display:block;color:var(--muted);font-size:12px;margin-top:2px}.mini-switch{width:38px;height:22px;border-radius:999px;background:#18181b;padding:3px;display:flex;justify-content:flex-end;flex:0 0 auto}.mini-switch:after{content:"";width:16px;height:16px;border-radius:50%;background:#fff}.reviewer-input{min-height:38px;border:1px solid var(--line);border-radius:8px;padding:5px 8px;display:flex;align-items:center;gap:6px}.reviewer-chip{display:inline-flex;align-items:center;gap:6px;border-radius:6px;background:var(--soft);padding:4px 7px;font-size:13px}.review-footer{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}.state-review .review-overlay,.state-schedule .review-overlay,.state-change-request .review-overlay{display:flex}.mode-review,.mode-schedule,.mode-change-request{display:none!important}.state-review .mode-review,.state-schedule .mode-schedule,.state-change-request .mode-change-request{display:block!important}.state-review .review-footer .mode-review,.state-schedule .review-footer .mode-schedule,.state-change-request .review-footer .mode-change-request{display:inline-flex!important}.state-schedule .review-fields.mode-schedule,.state-change-request .review-fields.mode-change-request,.state-review .review-fields.mode-review{display:grid!important}.state-schedule .review-dialog{width:800px}.state-schedule .change-ledger{max-height:260px}.state-schedule .change-row{padding-top:8px;padding-bottom:8px}.state-change-request .review-dialog{width:768px}
+    .state-schedule .change-ledger{max-height:230px}@media (min-height:1100px){.state-schedule .change-ledger{max-height:330px}}
+    .pending-overlay{display:none;position:fixed;inset:0;z-index:50;background:rgba(24,24,27,.38)}.state-pending .pending-overlay{display:block}.pending-sheet{height:100%;width:760px;margin-left:auto;background:#fff;display:flex;flex-direction:column;box-shadow:-8px 0 24px rgba(0,0,0,.14)}.pending-header{position:relative;flex:0 0 auto;border-bottom:1px solid var(--line);padding:20px 56px 18px 24px}.pending-title-row{display:flex;align-items:center;gap:10px}.pending-title{margin:0;font-size:20px;line-height:1.35;font-weight:650}.pending-description{margin:5px 0 0;color:var(--muted)}.pending-close{position:absolute;right:18px;top:18px;width:34px;height:34px;border:0;border-radius:7px;background:transparent;font-size:24px;line-height:1}.pending-body{min-height:0;overflow-y:auto;padding:18px 20px 28px}.pending-summary{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.pending-summary strong{font-size:14px}.pending-filter{height:32px;min-width:126px}.pending-list{overflow:hidden;border:1px solid var(--line);border-radius:9px}.pending-item{padding:16px;border-top:1px solid var(--line)}.pending-item:first-child{border-top:0}.pending-item-head{display:flex;align-items:flex-start;gap:10px}.pending-type-icon{width:30px;height:30px;display:grid;place-items:center;flex:0 0 auto;border-radius:7px;background:var(--soft);color:#52525b}.pending-type-icon svg{width:16px;height:16px}.pending-item-title{min-width:0;flex:1}.pending-item-title strong{display:block;font-size:14px}.pending-type{display:block;color:var(--muted);font-size:12px;margin-top:2px}.status{display:inline-flex;align-items:center;height:24px;border-radius:999px;padding:0 8px;font-size:12px;font-weight:500}.status.review{background:#fef3c7;color:#854d0e}.status.approved{background:#dcfce7;color:#166534}.status.execution{background:#e0f2fe;color:#075985}.pending-more{width:32px;height:32px;border:0;background:transparent;border-radius:7px;display:grid;place-items:center;color:#52525b;font-size:20px}.pending-time{display:flex;align-items:center;gap:7px;margin:12px 0 0 40px;font-weight:500}.pending-time span{color:var(--muted);font-weight:400}.pending-reason{margin:8px 0 0 40px;color:#3f3f46}.pending-reviewers{display:flex;align-items:center;gap:8px;margin:12px 0 0 40px}.pending-reviewers-label{color:var(--muted);font-size:12px}.reviewer-state{display:inline-flex;align-items:center;gap:6px;border-radius:6px;background:var(--soft);padding:4px 7px;font-size:12px}.reviewer-dot{width:7px;height:7px;border-radius:50%;background:#a1a1aa}.reviewer-dot.green{background:var(--green)}.pending-disclosure{display:flex;align-items:center;justify-content:space-between;width:calc(100% - 40px);height:34px;margin:13px 0 0 40px;border:0;background:transparent;padding:0;color:#18181b;font-weight:550}.pending-disclosure span:last-child{color:var(--muted);font-weight:400}.pending-ledger{margin:4px 0 0 40px;max-height:none;padding:7px 9px}.pending-ledger .change-row{grid-template-columns:170px 84px minmax(0,1fr);gap:12px;padding:8px}.pending-item-footer{display:flex;align-items:center;gap:10px;margin:13px 0 0 40px}.pending-author{min-width:0;flex:1;color:var(--muted);font-size:12px}.pending-actions{display:flex;gap:8px}.button.destructive-ghost{color:var(--red);background:transparent;border-color:transparent}.collapsed-summary{margin:10px 0 0 40px;color:var(--muted);font-size:13px}.pending-empty{padding:70px 24px;text-align:center}.pending-empty strong{display:block;margin-bottom:5px}.pending-empty span{color:var(--muted)}
+  </style>
+</head>
+<body data-tab="targeting">
+<main class="page">
+  <div class="back">Feature flags</div>
+  <div class="top">
+    <div class="identity">
+      <h1>Checkout redesign</h1>
+      <div class="meta">
+        <span class="badge outline" id="variation-type">BOOLEAN</span>
+        <span class="meta-group"><span class="label">Key</span><span class="code">checkout-redesign&nbsp; ⧉</span></span>
+        <span class="meta-group"><span class="label">Tags</span><span class="badge">checkout</span><span class="badge">growth</span></span>
+        <span class="meta-group"><span class="label">Updated</span><span>Jul 24, 2026 14:32</span></span>
+      </div>
+    </div>
+    <div class="top-actions"><span class="switch"></span><strong id="flag-status">ON</strong></div>
+  </div>
+  <nav class="tabs">
+    <span class="tab" data-name="targeting">Targeting</span><span class="tab" data-name="variations">Variations</span><span class="tab" data-name="triggers">Triggers</span><span class="tab" data-name="insights">Insights</span><span class="tab" data-name="settings">Settings</span><span class="tab" data-name="history">History</span>
+  </nav>
+
+  <section class="only targeting">
+    <div class="command"><button class="button small">◷ 2 pending changes</button><button class="button">Discard changes</button><button class="button primary">Review &amp; save</button><button class="button more-button" aria-label="More targeting actions" title="More targeting actions"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.75"/><circle cx="12" cy="12" r="1.75"/><circle cx="19" cy="12" r="1.75"/></svg></button></div>
+    <div class="content">
+      <div class="warn flag-off-only">△ <span>Targeting rules are inactive while this flag is OFF. The OFF variation below is returned for every evaluation.</span></div>
+      <div class="section">
+        <div class="section-head"><div><span class="section-title">Default rule</span> <span class="section-note">Used when no individual target or rule matches.</span></div></div>
+        <div class="panel">
+          <div class="row"><strong style="width:150px">When flag is ON</strong><span class="muted">Serve</span><div class="serve"><div class="bar"><i></i><i></i></div><span>Control 75%</span><span class="muted">·</span><span>New checkout 25%</span></div><span class="section-note flag-off-only inline-state">Inactive while flag is OFF</span><button class="button small" style="margin-left:auto">Edit rollout</button></div>
+          <div class="row off-rule-row"><strong style="width:150px">When flag is OFF</strong><span class="muted">Serve</span><span class="badge outline"><span class="dot" style="background:#71717a"></span>Control</span><span class="section-note flag-on-only">Inactive while flag is ON · Control is not currently returned by this rule.</span><span class="badge outline flag-off-only inline-state"><span class="dot" style="background:#18181b"></span>Active now</span><strong class="flag-off-only inline-state">Control is returned for every evaluation.</strong></div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-head"><span class="section-title">Individual targeting</span><span class="section-note">Target specific end users by key.</span></div>
+        <div class="grid2">
+          <section class="user-panel"><div class="user-panel-head"><strong>Control</strong><span class="user-count">· 1</span></div><div class="user-search">⌕ <span>Search by name or email to add</span></div><div class="user-list"><div class="user-row"><div class="user-copy"><strong>Aisha Khan</strong><small>user-10482</small></div><span class="user-remove">×</span></div></div></section>
+          <section class="user-panel"><div class="user-panel-head"><strong>New checkout</strong><span class="user-count">· 1</span></div><div class="user-search">⌕ <span>Search by name or email to add</span></div><div class="user-list"><div class="user-row"><div class="user-copy"><strong>Daniel Smith</strong><small>user-10791</small></div><span class="user-remove">×</span></div></div></section>
+          <section class="user-panel many-only"><div class="user-panel-head"><strong>Internal preview</strong><span class="user-count">· 1</span></div><div class="user-search">⌕ <span>Search by name or email to add</span></div><div class="user-list"><div class="user-row"><div class="user-copy"><strong>Priya Shah</strong><small>user-10936</small></div><span class="user-remove">×</span></div></div></section>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-head"><span class="section-title">Targeting rules</span><button class="button small">＋ Add rule</button></div>
+        <div>
+          <article class="rule-card">
+            <div class="rule-head"><span class="drag">⠿</span><div class="field rule-name">Enterprise accounts</div><span class="remove-rule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg><span>Remove rule</span></span></div>
+            <div class="rule-body">
+              <div class="condition"><span class="logic">IF</span><div class="field select">company</div><div class="field select">is one of</div><div class="field">Acme Corp</div><span class="icon-action">×</span></div>
+              <div class="condition"><span class="logic">AND</span><div class="field select">plan</div><div class="field select">is one of</div><div class="field">Enterprise</div><span class="icon-action">×</span></div>
+              <span class="add-condition">＋ Add condition</span>
+              <div class="rule-serve"><strong>Serve</strong><div class="field select">New checkout</div></div>
+            </div>
+          </article>
+          <article class="rule-card">
+            <div class="rule-head"><span class="drag">⠿</span><div class="field rule-name">Gradual rollout</div><span class="remove-rule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg><span>Remove rule</span></span></div>
+            <div class="rule-body">
+              <div class="condition"><span class="logic">IF</span><div class="field select">country</div><div class="field select">is one of</div><div class="field">DE, FR</div><span class="icon-action">×</span></div>
+              <span class="add-condition">＋ Add condition</span>
+              <div class="rule-serve"><strong style="padding-top:8px">Serve</strong><div><div class="field select" style="width:280px">Rollout percentage</div><div class="rollout-panel"><div class="rollout-toolbar"><div><strong>Percentage rollout</strong><div class="section-note">Allocate exactly 100% across variations.</div></div><div class="dispatch-control"><span class="muted">Dispatch by&nbsp; ⓘ</span><div class="field select">keyId</div></div></div><div class="allocation-list"><div class="allocation-row"><span class="variation-name"><span class="dot" style="background:#18181b"></span>Control</span><span class="allocation-track"><span class="allocation-fill default-only" style="width:50%"></span><span class="allocation-fill many-only" style="width:40%"></span></span><div class="percent-input"><span class="default-only">50</span><span class="many-only">40</span><span>%</span></div></div><div class="allocation-row"><span class="variation-name"><span class="dot" style="background:#71717a"></span>New checkout</span><span class="allocation-track"><span class="allocation-fill secondary default-only" style="width:50%"></span><span class="allocation-fill secondary many-only" style="width:35%"></span></span><div class="percent-input"><span class="default-only">50</span><span class="many-only">35</span><span>%</span></div></div><div class="allocation-row many-only"><span class="variation-name"><span class="dot" style="background:#a1a1aa"></span>Internal preview</span><span class="allocation-track"><span class="allocation-fill secondary" style="width:25%"></span></span><div class="percent-input"><span>25</span><span>%</span></div></div></div><div class="rollout-footer"><span class="allocation-total">100% allocated</span><span class="allocation-remaining">0% remaining</span><div class="rollout-actions"><button class="button small">Cancel</button><button class="button primary small">Apply</button></div></div></div></div></div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="only variations">
+    <div class="command"><span class="unsaved">Unsaved changes</span><button class="button">Discard</button><button class="button primary">Review &amp; save</button></div>
+    <div class="content">
+      <div class="section-head"><div><div class="section-title">Variations</div><div class="section-note">Values returned by the SDK. The data type cannot be changed after creation.</div></div><button class="button">＋ Add variation</button></div>
+      <div class="panel soft" style="padding:12px 14px;margin-bottom:14px"><span class="label">Data type</span><span class="badge outline" style="margin-left:12px">BOOLEAN</span></div>
+      <div class="table">
+        <div class="tr head variation-cols"><span></span><span>Name</span><span>Value</span><span>Used by</span><span></span></div>
+        <div class="tr variation-cols"><span class="drag">⠿</span><div class="field">Control</div><div class="field select">false</div><span class="muted">Default OFF</span><span><button class="button small">•••</button></span></div>
+        <div class="tr variation-cols"><span class="drag">⠿</span><div class="field">New checkout</div><div class="field select">true</div><span class="muted">2 rules</span><span><button class="button small">•••</button></span></div>
+        <div class="tr variation-cols"><span class="drag">⠿</span><div class="field">Internal preview</div><div class="field select">true</div><span class="muted">1 user</span><span><button class="button small">•••</button></span></div>
+      </div>
+      <div class="section panel soft" style="padding:15px 16px"><strong>Editing safeguards</strong><div class="section-note" style="margin-top:5px">A variation in use by the default rule, individual targeting, or targeting rules cannot be removed until those references are reassigned.</div></div>
+    </div>
+  </section>
+
+  <section class="only triggers">
+    <div class="command"><button class="button primary">＋ Add trigger</button></div>
+    <div class="content">
+      <div class="section-head"><div><div class="section-title">Event triggers</div><div class="section-note">Programmatically turn this feature flag on or off.</div></div></div>
+      <div class="table">
+        <div class="tr head trigger-cols"><span>Type</span><span>Action</span><span>Status</span><span>Trigger URL</span><span>Usage</span><span>Actions</span></div>
+        <div class="tr trigger-cols" style="min-height:96px"><div><strong>General</strong><div class="section-note">Enable after deployment</div></div><span class="badge outline">Turn ON</span><span><span class="switch" style="vertical-align:middle"></span></span><div><div class="code">https://app.featbit.co/api/v1/trigger/••••••</div><div class="new-url" style="margin-top:7px">Copy and save this URL now. It will be masked after leaving this page.</div></div><div><strong>0</strong><div class="submetric">Never triggered</div></div><div><button class="button small">Copy URL</button> <button class="button small">•••</button></div></div>
+        <div class="tr trigger-cols"><div><strong>General</strong><div class="section-note">Emergency rollback</div></div><span class="badge outline">Turn OFF</span><span><span class="switch" style="background:#a1a1aa;justify-content:flex-start"></span></span><div class="code">https://app.featbit.co/api/v1/trigger/••••••</div><div><strong>12</strong><div class="submetric">Jul 20, 09:41</div></div><div><button class="button small">Reset URL</button> <button class="button small">•••</button></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="only insights">
+    <div class="command"></div>
+    <div class="content">
+      <div class="toolbar"><div class="field select">Last 7 days</div><div class="field select">Daily</div></div>
+      <div class="panel chart">
+        <div style="display:flex;justify-content:space-between"><div><div class="section-title">Flag evaluations</div><div class="section-note">Evaluation volume by variation</div></div><div style="text-align:right"><div class="metric">84,291</div><div class="submetric">total evaluations</div></div></div>
+        <svg viewBox="0 0 1200 210" preserveAspectRatio="none"><g stroke="#e4e4e7" stroke-width="1"><path d="M0 40H1200M0 90H1200M0 140H1200M0 190H1200"/></g><path d="M0 164 C120 145 160 155 250 118 S420 92 500 104 S690 74 770 85 S940 38 1200 48" fill="none" stroke="#18181b" stroke-width="3"/><path d="M0 184 C130 180 210 172 300 162 S470 154 570 142 S760 132 880 120 S1050 112 1200 96" fill="none" stroke="#71717a" stroke-width="3"/><path d="M0 195 C190 192 270 190 400 184 S610 180 750 166 S990 158 1200 150" fill="none" stroke="#2563eb" stroke-width="3"/></svg>
+        <div class="legend"><span>Total</span><span>Control</span><span>New checkout</span></div>
+      </div>
+      <div class="section"><div class="section-head"><span class="section-title">End users</span></div><div class="toolbar"><div class="field" style="min-width:360px">⌕&nbsp;&nbsp; Filter by key or name</div><div class="field select">All variations</div></div><div class="table"><div class="tr head insight-cols"><span>Key</span><span>Name</span><span>Variation</span><span>Last evaluated</span></div><div class="tr insight-cols"><span class="code">user-10482</span><span>Aisha Khan</span><span class="badge outline">New checkout</span><span>Jul 26, 2026 11:42</span></div><div class="tr insight-cols"><span class="code">user-10791</span><span>Daniel Smith</span><span class="badge outline">Control</span><span>Jul 26, 2026 11:39</span></div></div></div>
+    </div>
+  </section>
+
+  <section class="only settings">
+    <div class="command"><span class="unsaved">Unsaved changes</span><button class="button">Discard</button><button class="button primary">Review &amp; save</button></div>
+    <div class="content form">
+      <div class="section-title" style="margin-bottom:14px">General</div>
+      <div class="form-group"><label class="form-label">Name</label><div class="input">Checkout redesign</div><div class="help">A human-friendly name for this feature flag.</div></div>
+      <div class="form-group"><label class="form-label">Description <span class="muted">(optional)</span></label><div class="input textarea">Release the redesigned checkout flow gradually.</div></div>
+      <div class="form-group"><label class="form-label">Tags</label><div class="input"><span class="badge">checkout&nbsp; ×</span> <span class="badge">growth&nbsp; ×</span> <span class="muted" style="margin-left:10px">Search or create tag</span></div><div class="help">Use tags to organize and filter feature flags.</div></div>
+      <div class="danger-zone"><div class="section-title">Lifecycle</div><div class="row" style="padding-left:0"><div><strong>Archive feature flag</strong><div class="section-note">Archived flags stop appearing in the active list and can be restored later.</div></div><button class="button danger" style="margin-left:auto">Archive</button></div></div>
+    </div>
+  </section>
+
+  <section class="only history">
+    <div class="command"></div>
+    <div class="content">
+      <div class="toolbar"><div class="field" style="min-width:360px">⌕&nbsp;&nbsp; Filter by name or comment</div><div class="field select">All team members</div><div class="field select">Any date</div></div>
+      <div class="table"><div class="tr head history-cols"><span></span><span>Date</span><span>User</span><span>Event</span><span>Comment</span></div><div class="tr history-cols"><span>›</span><span>Jul 24, 2026 14:32</span><div>Emma Wilson<div class="submetric">emma@acme.io</div></div><div>Updated targeting<div class="submetric">Changed default rollout · Updated 1 rule</div></div><span>Expanded checkout to 25%.</span></div><div class="tr history-cols"><span>›</span><span>Jul 23, 2026 09:15</span><div>Liam Chen<div class="submetric">liam@acme.io</div></div><div>Updated variations<div class="submetric">Added Internal preview</div></div><span>Prepared internal validation.</span></div><div class="tr history-cols"><span>›</span><span>Jul 22, 2026 16:40</span><div>Priya Shah<div class="submetric">priya@acme.io</div></div><div>Updated settings<div class="submetric">Changed description · Added 2 tags</div></div><span>Aligned release metadata.</span></div><div class="tr history-cols"><span>›</span><span>Jul 20, 2026 10:22</span><div>Ava Martin<div class="submetric">ava@acme.io</div></div><div>Turned flag on<div class="submetric">Status OFF → ON</div></div><span>Started staged release.</span></div></div>
+      <div style="text-align:center;margin-top:16px"><button class="button">Load more</button></div>
+    </div>
+  </section>
+  <div class="footer-note">Feature Flag Details · main content only · light theme</div>
+</main>
+<div class="review-overlay" role="presentation">
+  <section class="review-dialog" role="dialog" aria-modal="true" aria-labelledby="review-dialog-title">
+    <div class="review-inner">
+      <header class="review-header">
+        <h2 class="review-title mode-review" id="review-dialog-title">Review targeting changes</h2>
+        <h2 class="review-title mode-schedule">Schedule targeting changes</h2>
+        <h2 class="review-title mode-change-request">Request approval for targeting changes</h2>
+        <p class="review-description mode-review">Review the pending changes to Checkout redesign before saving.</p>
+        <p class="review-description mode-schedule">Choose when these reviewed targeting changes should take effect.</p>
+        <p class="review-description mode-change-request">Send these reviewed targeting changes to selected reviewers for approval.</p>
+        <button class="dialog-close" aria-label="Close">&times;</button>
+      </header>
+
+      <div class="review-section">
+        <div class="review-section-head"><strong>Changes</strong><span class="review-count">4 changes</span></div>
+        <div class="change-ledger">
+          <div class="change-row"><div class="change-object"><span class="change-kind">Default rule</span><span>Flag ON</span></div><div class="change-operation">Updated</div><div class="change-content"><span class="change-label">Serve</span><span>Control 100%</span><span class="change-arrow">&darr;</span><span>Control 75% &middot; New checkout 25%</span></div></div>
+          <div class="change-row"><div class="change-object"><span class="change-kind">Targeting</span><span>New checkout</span></div><div class="change-operation">Added &middot; 1</div><div class="change-content">Daniel Smith <span class="muted">(user-10791)</span></div></div>
+          <div class="change-row"><div class="change-object"><span class="change-kind">Rule</span><span>Enterprise accounts</span></div><div class="change-operation">Updated</div><div class="change-content"><span class="change-label">plan</span><span>Professional</span><span class="change-arrow">&darr;</span><span>Enterprise</span></div></div>
+          <div class="change-row"><div class="change-object"><span class="change-kind">Rule</span><span>Gradual rollout</span></div><div class="change-operation">Updated</div><div class="change-content"><span class="change-label">Serve</span><span>Control 50% &middot; New checkout 50%</span><span class="change-arrow">&darr;</span><span>Control 40% &middot; New checkout 60%</span></div></div>
+        </div>
+      </div>
+
+      <div class="review-fields mode-review">
+        <div class="review-field"><label>Change comment <span class="muted" style="font-weight:400">(optional)</span></label><div class="input textarea">Describe why this change is needed</div><div class="review-help">Used for auditing and change tracking.</div></div>
+      </div>
+
+      <div class="review-fields mode-schedule">
+        <div class="schedule-grid">
+          <div class="review-field"><label>Title<span class="required">*</span></label><div class="input">Expand checkout rollout</div></div>
+          <div class="review-field"><label>Scheduled time<span class="required">*</span></label><div class="input">Jul 29, 2026&nbsp;&nbsp; 10:00</div><div class="review-help">Europe/Berlin (UTC+02:00)</div></div>
+        </div>
+        <div class="review-field"><label>Reason<span class="required">*</span></label><div class="input textarea">Roll out after the scheduled production deployment.</div></div>
+        <div class="review-approval"><div class="review-approval-copy"><strong>Require approval</strong><span>Reviewers must approve before this schedule can run.</span></div><span class="mini-switch" aria-label="Require approval enabled"></span></div>
+        <div class="review-field"><label>Reviewers<span class="required">*</span></label><div class="reviewer-input"><span class="reviewer-chip">Emma Wilson &times;</span><span class="reviewer-chip">Liam Chen &times;</span><span class="muted">Search members</span></div></div>
+      </div>
+
+      <div class="review-fields mode-change-request">
+        <div class="review-field"><label>Reason<span class="required">*</span></label><div class="input textarea">Increase exposure after successful internal validation.</div></div>
+        <div class="review-field"><label>Reviewers<span class="required">*</span></label><div class="reviewer-input"><span class="reviewer-chip">Emma Wilson &times;</span><span class="reviewer-chip">Liam Chen &times;</span><span class="muted">Search members</span></div><div class="review-help">At least one reviewer is required. You cannot review your own request.</div></div>
+      </div>
+
+      <footer class="review-footer">
+        <button class="button">Cancel</button>
+        <button class="button primary mode-review">Save changes</button>
+        <button class="button primary mode-schedule">Schedule changes</button>
+        <button class="button primary mode-change-request">Submit request</button>
+      </footer>
+    </div>
+  </section>
+</div>
+<div class="pending-overlay" role="presentation">
+  <aside class="pending-sheet" role="dialog" aria-modal="true" aria-labelledby="pending-title">
+    <header class="pending-header">
+      <div class="pending-title-row"><h2 class="pending-title" id="pending-title">Pending changes</h2><span class="badge">3</span></div>
+      <p class="pending-description">Review scheduled changes and approval requests for Checkout redesign.</p>
+      <button class="pending-close" aria-label="Close pending changes">&times;</button>
+    </header>
+    <div class="pending-body">
+      <div class="pending-summary"><strong>3 pending changes &middot; 1 needs your review</strong><div class="field select pending-filter">All statuses</div></div>
+      <div class="pending-list">
+        <article class="pending-item">
+          <div class="pending-item-head">
+            <span class="pending-type-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/></svg></span>
+            <div class="pending-item-title"><strong>Expand checkout rollout</strong><span class="pending-type">Scheduled change with approval</span></div>
+            <span class="status review">Pending review</span><button class="pending-more" aria-label="More actions">&hellip;</button>
+          </div>
+          <div class="pending-time">Jul 29, 2026 at 10:00 <span>Europe/Berlin</span></div>
+          <p class="pending-reason">Roll out after the scheduled production deployment.</p>
+          <div class="pending-reviewers"><span class="pending-reviewers-label">Reviewers</span><span class="reviewer-state"><i class="reviewer-dot"></i>Emma Wilson &middot; Pending</span><span class="reviewer-state"><i class="reviewer-dot green"></i>Liam Chen &middot; Approved</span></div>
+          <button class="pending-disclosure"><span>Changes</span><span>4 changes &nbsp;&#8963;</span></button>
+          <div class="change-ledger pending-ledger">
+            <div class="change-row"><div class="change-object"><span class="change-kind">Default rule</span><span>Flag ON</span></div><div class="change-operation">Updated</div><div class="change-content"><span class="change-label">Serve</span><span>Control 100%</span><span class="change-arrow">&darr;</span><span>Control 75% &middot; New checkout 25%</span></div></div>
+            <div class="change-row"><div class="change-object"><span class="change-kind">Targeting</span><span>New checkout</span></div><div class="change-operation">Added &middot; 1</div><div class="change-content">Daniel Smith <span class="muted">(user-10791)</span></div></div>
+            <div class="change-row"><div class="change-object"><span class="change-kind">Rule</span><span>Enterprise</span></div><div class="change-operation">Updated</div><div class="change-content"><span class="change-label">plan</span><span>Professional</span><span class="change-arrow">&darr;</span><span>Enterprise</span></div></div>
+            <div class="change-row"><div class="change-object"><span class="change-kind">Rule</span><span>Gradual rollout</span></div><div class="change-operation">Updated</div><div class="change-content"><span class="change-label">Serve</span><span>Control 50% &middot; New checkout 50%</span><span class="change-arrow">&darr;</span><span>Control 40% &middot; New checkout 60%</span></div></div>
+          </div>
+          <div class="pending-item-footer"><span class="pending-author">Created by Priya Shah &middot; Jul 26, 2026 at 14:32</span><div class="pending-actions"><button class="button small">Decline</button><button class="button primary small">Approve</button></div></div>
+        </article>
+
+        <article class="pending-item">
+          <div class="pending-item-head">
+            <span class="pending-type-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 9v9a3 3 0 0 0 3 3h6M18 15V6a3 3 0 0 0-3-3H9"/></svg></span>
+            <div class="pending-item-title"><strong>Change request</strong><span class="pending-type">Increase checkout exposure after internal validation.</span></div>
+            <span class="status approved">Approved</span><button class="pending-more" aria-label="More actions">&hellip;</button>
+          </div>
+          <div class="pending-reviewers"><span class="pending-reviewers-label">Reviewers</span><span class="reviewer-state"><i class="reviewer-dot green"></i>2 of 2 approved</span></div>
+          <button class="pending-disclosure"><span>Changes</span><span>2 changes &nbsp;&#8964;</span></button>
+          <div class="pending-item-footer"><span class="pending-author">Created by Emma Wilson &middot; Jul 25, 2026 at 09:18</span><div class="pending-actions"><button class="button primary small">Apply changes</button></div></div>
+        </article>
+
+        <article class="pending-item">
+          <div class="pending-item-head">
+            <span class="pending-type-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+            <div class="pending-item-title"><strong>Disable legacy checkout</strong><span class="pending-type">Scheduled change</span></div>
+            <span class="status execution">Pending execution</span><button class="pending-more" aria-label="More actions">&hellip;</button>
+          </div>
+          <div class="pending-time">Aug 2, 2026 at 08:00 <span>Europe/Berlin</span></div>
+          <button class="pending-disclosure"><span>Changes</span><span>1 change &nbsp;&#8964;</span></button>
+          <div class="pending-item-footer"><span class="pending-author">Created by Liam Chen &middot; Jul 24, 2026 at 16:05</span></div>
+        </article>
+      </div>
+    </div>
+  </aside>
+</div>
+<script>
+  const params=new URLSearchParams(location.search);
+  const tab=params.get('tab')||'targeting';
+  const state=params.get('state')||'default';
+  document.body.dataset.tab=tab;
+  document.body.dataset.state=state;
+  document.body.classList.add(`state-${state}`);
+  if(state==='many') document.querySelector('#variation-type').textContent='STRING';
+  if(state==='off') document.querySelector('#flag-status').textContent='OFF';
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.name===tab));
+</script>
+</body>
+</html>
