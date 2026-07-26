@@ -189,6 +189,44 @@ describe("App shell", () => {
     )
   }
 
+  function mockNoAccessibleEnvironmentsApi() {
+    return vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+      const url = String(input)
+
+      if (url.endsWith("/api/v1/user/workspaces")) {
+        return new Response(
+          JSON.stringify({
+            success: true,
+            data: [{ id: "ws-real", key: "real", name: "Real Workspace" }],
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        )
+      }
+
+      if (url.includes("/api/v1/organizations")) {
+        return new Response(
+          JSON.stringify({
+            success: true,
+            data: [
+              {
+                id: "org-real",
+                key: "real-org",
+                name: "Real Org",
+                initialized: true,
+              },
+            ],
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        )
+      }
+
+      return new Response(JSON.stringify({ success: true, data: [] }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      })
+    })
+  }
+
   it("redirects to the localized login route", async () => {
     render(<App />)
 
@@ -228,6 +266,55 @@ describe("App shell", () => {
     expect(
       await screen.findByText("Sign in to your workspace")
     ).toBeInTheDocument()
+  })
+
+  it("signs out and explains when no environment is accessible", async () => {
+    mockNoAccessibleEnvironmentsApi()
+    window.history.pushState({}, "", "/en/feature-flags")
+    signIn()
+    localStorage.setItem(
+      "current-project_user-1",
+      JSON.stringify({
+        projectId: "project-stale",
+        projectKey: "stale",
+        projectName: "Stale project",
+        envId: "env-stale",
+        envKey: "stale",
+        envName: "Stale environment",
+      })
+    )
+
+    render(<App />)
+
+    expect(await screen.findByText("Permission Denied")).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        "You don't have permission to access any projects or environments. Contact an administrator to request access."
+      )
+    ).toBeInTheDocument()
+    expect(window.location.pathname).toBe("/en/login")
+    expect(window.location.search).toBe("?reason=permission-denied")
+    expect(localStorage.getItem("token")).toBeNull()
+    expect(localStorage.getItem("auth")).toBeNull()
+  })
+
+  it("signs out only the current tab for an inaccessible URL environment", async () => {
+    mockLayoutContextApi()
+    window.history.pushState(
+      {},
+      "",
+      "/en/feature-flags?context=environment&projectId=project-real&envId=env-inaccessible"
+    )
+    signIn()
+
+    render(<App />)
+
+    expect(await screen.findByText("Permission Denied")).toBeInTheDocument()
+    expect(window.location.pathname).toBe("/en/login")
+    expect(window.location.search).toBe("?reason=permission-denied")
+    expect(localStorage.getItem("token")).toBe("refreshed-token")
+    expect(localStorage.getItem("auth")).toContain("user-1")
+    expect(sessionStorage.getItem("featbit:tab-signed-out")).toBe("true")
   })
 
   it("uses the authenticated route language for layout copy", async () => {

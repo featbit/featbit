@@ -199,14 +199,22 @@ test.describe("layout", () => {
       await page.goto(
         "/en/feature-flags/checkout/targeting?context=environment&projectId=project-growth&envId=env-inaccessible"
       )
-      await expect(
-        page.getByRole("button", { name: /Production CN/ })
-      ).toBeVisible()
+      await expect(page).toHaveURL(/\/en\/login\?reason=permission-denied$/)
+      await expect(page.getByText("Permission Denied")).toBeVisible()
       await expect(
         page.evaluate(() =>
           sessionStorage.getItem("current-project-tab_test-user-id")
         )
       ).resolves.toBeNull()
+      await expect(
+        page.evaluate(() => sessionStorage.getItem("featbit:tab-signed-out"))
+      ).resolves.toBe("true")
+      await expect(
+        otherPage.getByRole("button", { name: /Development/ })
+      ).toBeVisible()
+      await expect(
+        otherPage.evaluate(() => localStorage.getItem("token"))
+      ).resolves.toBe("e2e-token")
     } finally {
       await otherPage.close()
     }

@@ -6,6 +6,7 @@ const IS_SSO_FIRST_LOGIN = "is-sso-first-login"
 const LOGIN_REDIRECT_URL = "login-redirect-url"
 const REMEMBERED_EMAIL = "remembered-email"
 const SESSION_EXPIRED_EVENT = "featbit:session-expired"
+const TAB_SIGNED_OUT = "featbit:tab-signed-out"
 
 type ApiEnvelope<T> = {
   success?: boolean
@@ -39,10 +40,17 @@ function clearAuthStorage() {
   localStorage.removeItem(USER_PROFILE)
   sessionStorage.removeItem(IDENTITY_TOKEN)
   sessionStorage.removeItem(USER_PROFILE)
+  sessionStorage.removeItem(TAB_SIGNED_OUT)
 }
 
 export function signOut() {
   clearAuthStorage()
+}
+
+export function signOutCurrentTab() {
+  sessionStorage.removeItem(IDENTITY_TOKEN)
+  sessionStorage.removeItem(USER_PROFILE)
+  sessionStorage.setItem(TAB_SIGNED_OUT, "true")
 }
 
 export function expireSession() {
@@ -59,6 +67,10 @@ export function onSessionExpired(callback: () => void) {
 }
 
 export function getStoredUserProfile(): StoredUserProfile {
+  if (sessionStorage.getItem(TAB_SIGNED_OUT) === "true") {
+    return {}
+  }
+
   const rawProfile =
     localStorage.getItem(USER_PROFILE) ?? sessionStorage.getItem(USER_PROFILE)
 
@@ -77,6 +89,10 @@ export function getStoredUserProfile(): StoredUserProfile {
 }
 
 export function getIdentityToken() {
+  if (sessionStorage.getItem(TAB_SIGNED_OUT) === "true") {
+    return null
+  }
+
   return localStorage.getItem(IDENTITY_TOKEN)
 }
 
@@ -166,9 +182,7 @@ export async function getProfile(token: string) {
     },
   })
 
-  return unwrapEnvelope(
-    await parseJsonResponse<ApiEnvelope<unknown>>(response)
-  )
+  return unwrapEnvelope(await parseJsonResponse<ApiEnvelope<unknown>>(response))
 }
 
 export async function completeLogin(

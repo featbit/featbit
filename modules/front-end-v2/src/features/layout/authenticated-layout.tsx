@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
-import { Outlet, useLocation, useParams } from "react-router-dom"
+import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom"
+import { signOut } from "@/features/auth/auth-api"
 import { ContextBar } from "@/features/layout/components/context-bar"
 import { GlobalMessageBanner } from "@/features/layout/components/global-message-banner"
 import { buildBillingGlobalMessages } from "@/features/layout/global-message"
@@ -56,6 +57,7 @@ function getEnvironmentReloadPath(pathname: string) {
 export function AuthenticatedLayout() {
   const { lang: langParam } = useParams()
   const location = useLocation()
+  const navigate = useNavigate()
   const lang = resolveLang(langParam)
   const { i18n } = useTranslation()
   const [collapsed, setCollapsedState] = useState(
@@ -88,6 +90,10 @@ export function AuthenticatedLayout() {
     subscriptionQuery.data,
     cycleQuery.data
   )[0]
+  const denyEnvironmentAccess = useCallback(() => {
+    signOut()
+    navigate(`/${lang}/login?reason=permission-denied`, { replace: true })
+  }, [lang, navigate])
 
   function setCollapsed(nextCollapsed: boolean) {
     localStorage.setItem(SIDEBAR_STORAGE_KEY, String(nextCollapsed))
@@ -112,26 +118,6 @@ export function AuthenticatedLayout() {
       channel.close()
     }
     window.location.assign(getEnvironmentReloadPath(location.pathname))
-  }
-
-  async function loadContext() {
-    try {
-      setWorkspace(getCurrentWorkspace())
-      setOrganization(getCurrentOrganization())
-      setCurrentProjectEnv(getCurrentProjectEnv())
-
-      const loadedProjects = await fetchProjects()
-      const nextProjectEnv = chooseProjectEnv(loadedProjects)
-
-      if (nextProjectEnv) {
-        saveCurrentProjectEnv(nextProjectEnv)
-      }
-
-      setProjects(loadedProjects)
-      setCurrentProjectEnv(nextProjectEnv)
-    } catch {
-      setProjects([])
-    }
   }
 
   useEffect(() => {
@@ -164,9 +150,32 @@ export function AuthenticatedLayout() {
 
   useEffect(() => {
     return onProjectsChanged(() => {
+      async function loadContext() {
+        try {
+          setWorkspace(getCurrentWorkspace())
+          setOrganization(getCurrentOrganization())
+          setCurrentProjectEnv(getCurrentProjectEnv())
+
+          const loadedProjects = await fetchProjects()
+          const nextProjectEnv = chooseProjectEnv(loadedProjects)
+
+          if (!nextProjectEnv) {
+            denyEnvironmentAccess()
+            return
+          }
+
+          saveCurrentProjectEnv(nextProjectEnv)
+
+          setProjects(loadedProjects)
+          setCurrentProjectEnv(nextProjectEnv)
+        } catch {
+          setProjects([])
+        }
+      }
+
       void loadContext()
     })
-  }, [])
+  }, [denyEnvironmentAccess])
 
   useEffect(() => {
     document.documentElement.lang = lang
@@ -190,9 +199,12 @@ export function AuthenticatedLayout() {
 
         const nextProjectEnv = chooseProjectEnv(loadedProjects)
 
-        if (nextProjectEnv) {
-          saveCurrentProjectEnv(nextProjectEnv)
+        if (!nextProjectEnv) {
+          denyEnvironmentAccess()
+          return
         }
+
+        saveCurrentProjectEnv(nextProjectEnv)
 
         setProjects(loadedProjects)
         setCurrentProjectEnv(nextProjectEnv)
@@ -208,7 +220,7 @@ export function AuthenticatedLayout() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [denyEnvironmentAccess])
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background text-foreground">

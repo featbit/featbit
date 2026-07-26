@@ -3,6 +3,8 @@ import {
   completeLogin,
   getIdentityToken,
   getRememberedEmail,
+  getStoredUserProfile,
+  signOutCurrentTab,
 } from "@/features/auth/auth-api"
 
 describe("auth persistence", () => {
@@ -59,6 +61,31 @@ describe("auth persistence", () => {
     expect(getIdentityToken()).toBe("auth-token")
     expect(getRememberedEmail()).toBe("user@example.com")
     expect(navigate).toHaveBeenCalledWith("/en")
+  })
+
+  it("signs out only the current tab and restores it after login", async () => {
+    localStorage.setItem("token", "shared-token")
+    localStorage.setItem(
+      "auth",
+      JSON.stringify({ id: "user-1", email: "user@example.com" })
+    )
+
+    signOutCurrentTab()
+
+    expect(localStorage.getItem("token")).toBe("shared-token")
+    expect(localStorage.getItem("auth")).toContain("user-1")
+    expect(sessionStorage.getItem("featbit:tab-signed-out")).toBe("true")
+    expect(getIdentityToken()).toBeNull()
+    expect(getStoredUserProfile()).toEqual({})
+
+    await completeLogin(
+      { success: true, data: { token: "new-token" } },
+      vi.fn(),
+      "/en"
+    )
+
+    expect(sessionStorage.getItem("featbit:tab-signed-out")).toBeNull()
+    expect(getIdentityToken()).toBe("new-token")
   })
 
   it("keeps previous workspace, organization, and project selections after login", async () => {

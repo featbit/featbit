@@ -2,7 +2,7 @@ import { useMutation, useQuery } from "@tanstack/react-query"
 import { useEffect, useMemo, useRef } from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate, useParams, useSearchParams } from "react-router-dom"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
   completeLogin,
   getSocialProviders,
@@ -89,6 +89,7 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
       ? externalLoginMutation.error.message
       : t("auth.errors.loginError")
     : ""
+  const permissionDenied = searchParams.get("reason") === "permission-denied"
 
   return (
     <main className="min-h-screen bg-background text-foreground">
@@ -97,6 +98,16 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
         <LeftPanel />
         <section className="grid min-h-[calc(100vh-4rem)] grid-rows-[minmax(0,1fr)_auto] border-border lg:border-l">
           <div className="flex min-h-0 w-full flex-col justify-center py-8">
+            {permissionDenied ? (
+              <div className="mx-auto mb-6 w-full max-w-[560px] px-8 sm:px-12 lg:px-0">
+                <Alert variant="destructive">
+                  <AlertTitle>{t("auth.permissionDenied.title")}</AlertTitle>
+                  <AlertDescription>
+                    {t("auth.permissionDenied.environmentAccess")}
+                  </AlertDescription>
+                </Alert>
+              </div>
+            ) : null}
             {externalLoginError ? (
               <div className="mx-auto mb-6 w-full max-w-[560px] px-8 sm:px-12 lg:px-0">
                 <Alert variant="destructive">

@@ -1,4 +1,9 @@
 export const enAuth = {
+          permissionDenied: {
+            title: "Permission Denied",
+            environmentAccess:
+              "You don't have permission to access any projects or environments. Contact an administrator to request access.",
+          },
           hero: {
             title: "Release with confidence",
             subtitle: "Ship better features. Safely. At scale.",
@@ -32,6 +37,11 @@ export const enAuth = {
         } as const
 
 export const zhAuth = {
+          permissionDenied: {
+            title: "权限不足",
+            environmentAccess:
+              "您没有任何项目或环境的访问权限，请联系管理员为您授予所需权限。",
+          },
           hero: {
             title: "自信发布",
             subtitle: "更安全、更稳定、更规模化地交付功能。",

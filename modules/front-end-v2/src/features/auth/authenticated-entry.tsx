@@ -1,7 +1,11 @@
 import type { ReactNode } from "react"
 import { useEffect, useState } from "react"
 import { Navigate, useLocation, useParams } from "react-router-dom"
-import { getIdentityToken, signOut } from "@/features/auth/auth-api"
+import {
+  getIdentityToken,
+  signOut,
+  signOutCurrentTab,
+} from "@/features/auth/auth-api"
 import {
   chooseProjectEnv,
   clearTabProjectEnv,
@@ -20,7 +24,12 @@ import {
 } from "@/features/layout/layout-context"
 
 type EntryStatus =
-  "loading" | "ready" | "login" | "select-workspace" | "onboarding"
+  | "loading"
+  | "ready"
+  | "login"
+  | "permission-denied"
+  | "select-workspace"
+  | "onboarding"
 
 function EntryLoading() {
   return (
@@ -125,17 +134,26 @@ export function AuthenticatedEntry({ children }: { children: ReactNode }) {
           projects,
           location.search
         )
+        if (requestedTabProjectEnv === null) {
+          clearTabProjectEnv()
+          signOutCurrentTab()
+          setStatus("permission-denied")
+          return
+        }
+
         if (requestedTabProjectEnv !== undefined) {
           clearTabProjectEnv()
-          if (requestedTabProjectEnv) {
-            saveTabProjectEnv(requestedTabProjectEnv)
-          }
+          saveTabProjectEnv(requestedTabProjectEnv)
         }
 
         const selectedProjectEnv = chooseProjectEnv(projects)
-        if (selectedProjectEnv) {
-          saveCurrentProjectEnv(selectedProjectEnv)
+        if (!selectedProjectEnv) {
+          signOut()
+          setStatus("permission-denied")
+          return
         }
+
+        saveCurrentProjectEnv(selectedProjectEnv)
 
         setStatus("ready")
       } catch {
@@ -164,6 +182,10 @@ export function AuthenticatedEntry({ children }: { children: ReactNode }) {
 
   if (status === "login") {
     return <Navigate to={`/${lang}/login`} replace />
+  }
+
+  if (status === "permission-denied") {
+    return <Navigate to={`/${lang}/login?reason=permission-denied`} replace />
   }
 
   if (status === "select-workspace") {

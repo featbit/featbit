@@ -213,7 +213,7 @@ export function chooseProjectEnv(projects: Project[]) {
     return projectEnvFromSelection(firstProject, firstEnvironment)
   }
 
-  return currentProjectEnv ?? null
+  return null
 }
 
 export function persistCurrentWorkspace(workspace: Workspace) {

@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest"
 import type { Project, ProjectEnv } from "@/features/layout/layout-types"
 import {
   clearTabProjectEnv,
+  chooseProjectEnv,
   getCurrentProjectEnv,
   getStoredProjectEnv,
   getStoredTabProjectEnv,
@@ -100,5 +101,35 @@ describe("tab-scoped project environment", () => {
 
     clearTabProjectEnv()
     expect(getCurrentProjectEnv()).toEqual(source)
+  })
+})
+
+describe("project environment access", () => {
+  beforeEach(() => {
+    localStorage.clear()
+    sessionStorage.clear()
+    localStorage.setItem("auth", JSON.stringify({ id: "user-1" }))
+  })
+
+  it("falls back to the first accessible environment", () => {
+    saveCurrentProjectEnv(source)
+
+    expect(chooseProjectEnv(projects)).toEqual(target)
+  })
+
+  it("returns null when no environment is accessible", () => {
+    saveCurrentProjectEnv(source)
+
+    expect(chooseProjectEnv([])).toBeNull()
+    expect(
+      chooseProjectEnv([
+        {
+          id: "project-empty",
+          key: "empty",
+          name: "Empty project",
+          environments: [],
+        },
+      ])
+    ).toBeNull()
   })
 })
