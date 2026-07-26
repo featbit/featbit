@@ -50,6 +50,14 @@ describe("FlagDifferenceValue targeting rules", () => {
     expect(screen.getAllByText("equals")[0]).toHaveClass("font-mono")
     expect(screen.getByText("location")).not.toHaveClass("font-mono")
     expect(screen.getByText("Serve")).toHaveClass("font-mono")
+    expect(screen.getByTestId("rule-variation-name")).toHaveClass(
+      "font-normal",
+      "text-foreground"
+    )
+    expect(screen.getByTestId("rule-variation-name")).not.toHaveAttribute(
+      "data-slot",
+      "badge"
+    )
     expect(screen.getByText("IF")).toHaveClass("w-10")
     expect(screen.getByText("AND")).toHaveClass("w-10")
     expect(screen.getByText("Serve")).toHaveClass("w-10")
@@ -115,6 +123,9 @@ describe("FlagDifferenceValue targeting rules", () => {
 
     expect(screen.getByText("75%")).toBeVisible()
     expect(screen.getByText("25%")).toBeVisible()
+    expect(
+      screen.getAllByTestId("targeting-variation-percentage")[0]
+    ).toHaveClass("text-xs", "text-muted-foreground")
     expect(screen.getByText("Dispatch by")).toBeVisible()
     expect(screen.getByText("keyId")).toBeVisible()
   })
@@ -144,5 +155,13 @@ describe("FlagDifferenceValue targeting rules", () => {
 
     expect(screen.getByText("Dispatch by")).toBeVisible()
     expect(screen.getByText("country")).toBeVisible()
+    expect(screen.getAllByTestId("default-variation-name")[0]).toHaveClass(
+      "font-normal"
+    )
+    const defaultPercentage = screen.getAllByTestId(
+      "default-variation-percentage"
+    )[0]
+    expect(defaultPercentage).toHaveClass("text-xs", "text-muted-foreground")
+    expect(screen.queryByText(/·/)).not.toBeInTheDocument()
   })
 })

@@ -54,6 +54,20 @@ function DispatchKeyValue({
   )
 }
 
+function VariationPercentage({
+  percentage,
+  testId,
+}: {
+  percentage: number
+  testId: string
+}) {
+  return (
+    <span data-testid={testId} className="text-xs text-muted-foreground">
+      {percentage}%
+    </span>
+  )
+}
+
 function RuleServeValue({
   rule,
   flag,
@@ -76,26 +90,24 @@ function RuleServeValue({
         const rollout = item.rollout
         const percentage =
           showPercentage && Array.isArray(rollout)
-            ? `${Math.round(Number(rollout[1] ?? 0) * 100)}%`
+            ? Math.round(Number(rollout[1] ?? 0) * 100)
             : null
         return (
           <span
             key={`${variationId}-${index}`}
             className="inline-flex items-center gap-1.5"
           >
-            <Badge
-              variant="outline"
-              className={cn(
-                label.toLowerCase() === "true" &&
-                  "border-emerald-600/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
-              )}
+            <span
+              data-testid="rule-variation-name"
+              className="text-xs font-normal text-foreground"
             >
               {label}
-            </Badge>
-            {percentage ? (
-              <span className="text-xs text-muted-foreground">
-                {percentage}
-              </span>
+            </span>
+            {percentage !== null ? (
+              <VariationPercentage
+                percentage={percentage}
+                testId="targeting-variation-percentage"
+              />
             ) : null}
           </span>
         )
@@ -229,9 +241,19 @@ function DefaultRuleValue({
             ? Math.round(Number(rollout[1] ?? 0) * 100)
             : null
         return (
-          <p key={`${variationId}-${index}`} className="text-xs">
-            {variationLabel(flag, variationId)}
-            {percentage === null ? "" : ` · ${percentage}%`}
+          <p
+            key={`${variationId}-${index}`}
+            className="flex items-center gap-2 text-xs font-normal text-foreground"
+          >
+            <span data-testid="default-variation-name" className="font-normal">
+              {variationLabel(flag, variationId)}
+            </span>
+            {percentage === null ? null : (
+              <VariationPercentage
+                percentage={percentage}
+                testId="default-variation-percentage"
+              />
+            )}
           </p>
         )
       })}
