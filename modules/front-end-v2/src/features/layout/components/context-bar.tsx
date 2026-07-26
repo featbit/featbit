@@ -1,4 +1,4 @@
-import { ChevronsUpDown, Settings } from "lucide-react"
+import { Box, ChevronsUpDown, Settings } from "lucide-react"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link, useParams } from "react-router-dom"
@@ -186,6 +186,10 @@ export function ContextBar({
                             handleEnvironmentOpenChange(false)
                           }}
                         >
+                          <Box
+                            aria-hidden
+                            className="size-4 shrink-0 text-muted-foreground"
+                          />
                           <span className="min-w-0 flex-1 truncate">
                             {environment.name}
                           </span>
