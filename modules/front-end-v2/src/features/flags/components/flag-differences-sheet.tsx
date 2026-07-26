@@ -573,6 +573,7 @@ export function FlagDifferencesSheet({
                             flag={detail.source}
                             setting={row.key}
                             lang={lang}
+                            tooltipUserStyle="added"
                           />
                         </div>
                         <div className="px-5 py-5">
@@ -580,6 +581,7 @@ export function FlagDifferencesSheet({
                             flag={detail.target}
                             setting={row.key}
                             lang={lang}
+                            tooltipUserStyle="existing"
                           />
                           {rowSelected ? (
                             <div className="mt-4">
