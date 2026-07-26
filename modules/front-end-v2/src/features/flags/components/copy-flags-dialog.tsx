@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   CircleX,
   Loader2,
+  Lock,
   ShieldAlert,
 } from "lucide-react"
 import { useMemo, useState } from "react"
@@ -50,6 +51,7 @@ export function CopyFlagsDialog({
   envId,
   flags,
   open,
+  lockedTarget = null,
   onOpenChange,
   onSuccess,
 }: {
@@ -57,19 +59,21 @@ export function CopyFlagsDialog({
   envId: string
   flags: FeatureFlag[]
   open: boolean
+  lockedTarget?: { id: string; name: string } | null
   onOpenChange: (open: boolean) => void
   onSuccess: () => void
 }) {
   const zh = lang === "zh"
   const source = getCurrentProjectEnv()
-  const [targetEnvId, setTargetEnvId] = useState("")
+  const [selectedTargetEnvId, setSelectedTargetEnvId] = useState("")
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [selectionTouched, setSelectionTouched] = useState(false)
+  const targetEnvId = lockedTarget?.id ?? selectedTargetEnvId
 
   const projectsQuery = useQuery({
     queryKey: ["projects", "flag-copy"],
     queryFn: fetchProjects,
-    enabled: open,
+    enabled: open && !lockedTarget,
     staleTime: 60_000,
   })
   const precheckQuery = useQuery({
@@ -139,9 +143,12 @@ export function CopyFlagsDialog({
     .filter((project) => project.environments.length)
   const selectedTarget = targetProjects
     .flatMap((project) =>
-      project.environments.map((environment) => ({ project, environment }))
+      project.environments.map((environment) => ({
+        id: environment.id,
+        name: `${project.name} / ${environment.name}`,
+      }))
     )
-    .find(({ environment }) => environment.id === targetEnvId)
+    .find((environment) => environment.id === targetEnvId)
   const licenseHref =
     getRuntimeEnv().hostingMode === "saas"
       ? "/workspace/billing"
@@ -377,9 +384,13 @@ export function CopyFlagsDialog({
         <DialogHeader className="px-5 pt-5 pb-4">
           <DialogTitle>{zh ? "复制到环境" : "Copy to environment"}</DialogTitle>
           <DialogDescription>
-            {zh
-              ? "选择目标环境并检查可以复制的内容。"
-              : "Choose a target environment and review what can be copied."}
+            {lockedTarget
+              ? zh
+                ? "检查可以复制到此目标环境的内容。"
+                : "Review what can be copied to this target environment."
+              : zh
+                ? "选择目标环境并检查可以复制的内容。"
+                : "Choose a target environment and review what can be copied."}
           </DialogDescription>
         </DialogHeader>
 
@@ -408,58 +419,71 @@ export function CopyFlagsDialog({
               data-testid="copy-target-environment"
               className="col-start-3 row-start-2 min-w-0"
             >
-              <Select
-                value={targetEnvId}
-                onValueChange={(value) => {
-                  setTargetEnvId(value ?? "")
-                  resetSelection()
-                }}
-                disabled={mutation.isPending}
-              >
-                <SelectTrigger
-                  size="sm"
-                  className="w-full border-0 bg-transparent p-0 text-sm shadow-none focus-visible:ring-0 dark:bg-transparent dark:hover:bg-transparent"
+              {lockedTarget ? (
+                <div className="flex h-7 min-w-0 items-center gap-2 text-sm font-medium">
+                  <Box
+                    aria-hidden
+                    className="size-4 shrink-0 text-muted-foreground"
+                  />
+                  <span className="truncate">{lockedTarget.name}</span>
+                  <Lock className="ml-auto size-3.5 shrink-0 text-muted-foreground" />
+                </div>
+              ) : (
+                <Select
+                  value={selectedTargetEnvId}
+                  onValueChange={(value) => {
+                    setSelectedTargetEnvId(value ?? "")
+                    resetSelection()
+                  }}
+                  disabled={mutation.isPending}
                 >
-                  <SelectValue>
-                    {selectedTarget ? (
-                      <span className="flex min-w-0 items-center gap-2 font-medium">
-                        <Box
-                          aria-hidden
-                          className="size-4 shrink-0 text-muted-foreground"
-                        />
-                        <span className="truncate">
-                          {selectedTarget.project.name} /{" "}
-                          {selectedTarget.environment.name}
-                        </span>
-                      </span>
-                    ) : zh ? (
-                      "选择环境"
-                    ) : (
-                      "Select environment"
-                    )}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {targetProjects.map((project) => (
-                    <SelectGroup key={project.id}>
-                      <SelectLabel>{project.name}</SelectLabel>
-                      {project.environments.map((environment) => (
-                        <SelectItem key={environment.id} value={environment.id}>
-                          <span className="flex min-w-0 items-center gap-2">
-                            <Box
-                              aria-hidden
-                              className="size-4 shrink-0 text-muted-foreground"
-                            />
-                            <span className="truncate">
-                              {project.name} / {environment.name}
-                            </span>
+                  <SelectTrigger
+                    size="sm"
+                    className="w-full border-0 bg-transparent p-0 text-sm shadow-none focus-visible:ring-0 dark:bg-transparent dark:hover:bg-transparent"
+                  >
+                    <SelectValue>
+                      {selectedTarget ? (
+                        <span className="flex min-w-0 items-center gap-2 font-medium">
+                          <Box
+                            aria-hidden
+                            className="size-4 shrink-0 text-muted-foreground"
+                          />
+                          <span className="truncate">
+                            {selectedTarget.name}
                           </span>
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  ))}
-                </SelectContent>
-              </Select>
+                        </span>
+                      ) : zh ? (
+                        "选择环境"
+                      ) : (
+                        "Select environment"
+                      )}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {targetProjects.map((project) => (
+                      <SelectGroup key={project.id}>
+                        <SelectLabel>{project.name}</SelectLabel>
+                        {project.environments.map((environment) => (
+                          <SelectItem
+                            key={environment.id}
+                            value={environment.id}
+                          >
+                            <span className="flex min-w-0 items-center gap-2">
+                              <Box
+                                aria-hidden
+                                className="size-4 shrink-0 text-muted-foreground"
+                              />
+                              <span className="truncate">
+                                {project.name} / {environment.name}
+                              </span>
+                            </span>
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
           </div>
 
