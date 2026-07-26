@@ -54,10 +54,14 @@ const editorTheme = EditorView.theme({
   ".cm-cursor": {
     borderLeftColor: "var(--foreground)",
   },
-  ".cm-selectionBackground, &.cm-focused .cm-selectionBackground": {
-    backgroundColor: "var(--accent)",
+  "&.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .cm-selectionLayer .cm-selectionBackground":
+    {
+      backgroundColor: "#add6ff !important",
+    },
+  ".cm-activeLine": {
+    backgroundColor: "#cceeff44",
   },
-  ".cm-activeLine, .cm-activeLineGutter": {
+  ".cm-activeLineGutter": {
     backgroundColor: "var(--muted)",
   },
   ".cm-gutters": {
@@ -172,11 +176,14 @@ const editorTheme = EditorView.theme({
   ".dark & .cm-cursor": {
     borderLeftColor: "#d4d4d4",
   },
-  ".dark & .cm-selectionBackground, .dark &.cm-focused .cm-selectionBackground":
+  ".dark &.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground, .dark & .cm-selectionLayer .cm-selectionBackground":
     {
-      backgroundColor: "#264f78",
+      backgroundColor: "#264f78 !important",
     },
-  ".dark & .cm-activeLine, .dark & .cm-activeLineGutter": {
+  ".dark & .cm-activeLine": {
+    backgroundColor: "#99eeff33",
+  },
+  ".dark & .cm-activeLineGutter": {
     backgroundColor: "#252526",
   },
   ".dark & .cm-tooltip": {

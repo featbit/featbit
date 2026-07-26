@@ -36,6 +36,28 @@ describe("codeMirrorEditorStyle", () => {
     expect(getComputedStyle(view.dom).height).toBe("100%")
   })
 
+  it("keeps the light selection visible against the active line", () => {
+    const view = createEditor()
+    view.dom.classList.add("cm-focused")
+    const selectionLayer = document.createElement("div")
+    selectionLayer.className = "cm-selectionLayer"
+    const selection = document.createElement("div")
+    selection.className = "cm-selectionBackground"
+    const activeLine = document.createElement("div")
+    activeLine.className = "cm-activeLine"
+    selectionLayer.appendChild(selection)
+    view.scrollDOM.append(selectionLayer)
+    view.dom.appendChild(activeLine)
+
+    expect(getComputedStyle(selection).backgroundColor).toBe(
+      "rgb(173, 214, 255)"
+    )
+    expect(getComputedStyle(selection).backgroundColor).not.toBe(
+      getComputedStyle(activeLine).backgroundColor
+    )
+    expect(getComputedStyle(activeLine).backgroundColor).toContain("rgba")
+  })
+
   it("keeps an empty merge spacer from inheriting the editor line height", () => {
     const view = createEditor()
     const spacer = document.createElement("div")
