@@ -1,4 +1,5 @@
 import { PreviewCard } from "@base-ui/react/preview-card"
+import { Info } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import {
   Tooltip,
@@ -7,6 +8,18 @@ import {
 } from "@/components/ui/tooltip"
 import type { ScopeResource, SegmentType } from "../segments-types"
 import { ScopeResourceIcon } from "../index/components/scope-resource-icon"
+
+const typeTriggerClassName =
+  "-mx-1.5 inline-flex cursor-help items-center gap-1.5 rounded-md px-1.5 py-0.5 text-sm text-foreground outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
+
+function TypeTriggerContent({ label }: { label: string }) {
+  return (
+    <>
+      <span>{label}</span>
+      <Info className="size-3.5 shrink-0 text-muted-foreground" />
+    </>
+  )
+}
 
 function scopeResourceType(scope: string): ScopeResource["type"] {
   const type = scope.split(":").at(-1)?.split("/")[0]
@@ -29,14 +42,9 @@ export function SegmentTypeCell({
         <PreviewCard.Trigger
           delay={200}
           closeDelay={100}
-          render={
-            <button
-              type="button"
-              className="rounded-sm text-sm text-foreground underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
-            />
-          }
+          render={<button type="button" className={typeTriggerClassName} />}
         >
-          {t("segments.shareable")}
+          <TypeTriggerContent label={t("segments.shareable")} />
         </PreviewCard.Trigger>
         <PreviewCard.Portal>
           <PreviewCard.Positioner
@@ -81,11 +89,9 @@ export function SegmentTypeCell({
   return (
     <Tooltip>
       <TooltipTrigger
-        render={
-          <span className="cursor-help text-sm text-foreground" tabIndex={0} />
-        }
+        render={<span className={typeTriggerClassName} tabIndex={0} />}
       >
-        {t("segments.currentEnvironment")}
+        <TypeTriggerContent label={t("segments.currentEnvironment")} />
       </TooltipTrigger>
       <TooltipContent>{t("segments.currentEnvironmentHelp")}</TooltipContent>
     </Tooltip>

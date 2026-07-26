@@ -1,4 +1,4 @@
-import { Copy, Info, Loader2, MoreHorizontal } from "lucide-react"
+import { Copy, Loader2, MoreHorizontal } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
 import { Badge } from "@/components/ui/badge"
@@ -111,25 +111,7 @@ export function SegmentsTable({
             {t("segments.columns.segment")}
           </TableHead>
           <TableHead className="w-[19%] px-5 py-4 font-semibold">
-            <span className="inline-flex items-center gap-1.5">
-              {t("segments.columns.type")}
-              <Tooltip>
-                <TooltipTrigger
-                  render={
-                    <button
-                      type="button"
-                      aria-label={t("segments.typeHelp")}
-                      className="rounded-sm text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    />
-                  }
-                >
-                  <Info className="size-3.5" />
-                </TooltipTrigger>
-                <TooltipContent className="max-w-80">
-                  {t("segments.typeHelp")}
-                </TooltipContent>
-              </Tooltip>
-            </span>
+            {t("segments.columns.type")}
           </TableHead>
           <TableHead className="w-[25%] px-5 py-4 font-semibold">
             {t("segments.columns.tags")}
