@@ -21,6 +21,7 @@ export type FlagDifferenceKey =
   | "offVariation"
 
 const MAX_VISIBLE_TARGET_USERS = 10
+const UNARY_RULE_OPERATORS = new Set(["IsTrue", "IsFalse"])
 
 function variationLabel(flag: FlagComparisonValue, variationId: string) {
   const variation = flag.variations.find((item) => item.id === variationId)
@@ -156,36 +157,43 @@ function RulesValue({
           </summary>
           <div className="border-t">
             {(rule.conditions ?? []).length ? (
-              (rule.conditions ?? []).map((condition, conditionIndex) => (
-                <div
-                  key={conditionIndex}
-                  data-testid="rule-condition-row"
-                  className="grid grid-cols-[2.5rem_minmax(0,1fr)] items-baseline gap-x-1.5 px-3 py-1 text-xs first:pt-2 last:pb-2"
-                >
-                  <SyntaxKeyword>
-                    {conditionIndex === 0
-                      ? lang === "zh"
-                        ? "如果"
-                        : "IF"
-                      : lang === "zh"
-                        ? "并且"
-                        : "AND"}
-                  </SyntaxKeyword>
-                  <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
-                    <span className="break-words text-foreground">
-                      {scalar(
-                        condition.property ?? condition.key ?? "Condition"
+              (rule.conditions ?? []).map((condition, conditionIndex) => {
+                const operator = scalar(
+                  condition.op ?? condition.operator ?? ""
+                )
+                return (
+                  <div
+                    key={conditionIndex}
+                    data-testid="rule-condition-row"
+                    className="grid grid-cols-[2.5rem_minmax(0,1fr)] items-baseline gap-x-1.5 px-3 py-1 text-xs first:pt-2 last:pb-2"
+                  >
+                    <SyntaxKeyword>
+                      {conditionIndex === 0
+                        ? lang === "zh"
+                          ? "如果"
+                          : "IF"
+                        : lang === "zh"
+                          ? "并且"
+                          : "AND"}
+                    </SyntaxKeyword>
+                    <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
+                      <span className="break-words text-foreground">
+                        {scalar(
+                          condition.property ?? condition.key ?? "Condition"
+                        )}
+                      </span>
+                      <span className="font-mono font-medium text-muted-foreground">
+                        {operator}
+                      </span>
+                      {UNARY_RULE_OPERATORS.has(operator) ? null : (
+                        <span className="break-words text-foreground">
+                          {scalar(condition.value ?? condition.values ?? "")}
+                        </span>
                       )}
-                    </span>
-                    <span className="font-mono font-medium text-muted-foreground">
-                      {scalar(condition.op ?? condition.operator ?? "")}
-                    </span>
-                    <span className="break-words text-foreground">
-                      {scalar(condition.value ?? condition.values ?? "")}
-                    </span>
+                    </div>
                   </div>
-                </div>
-              ))
+                )
+              })
             ) : (
               <p className="px-3 py-2.5 text-xs text-muted-foreground">
                 {lang === "zh" ? "无条件" : "No conditions"}

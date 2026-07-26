@@ -239,6 +239,33 @@ describe("FlagDifferenceValue targeting rules", () => {
     expect(screen.queryByText("THEN")).not.toBeInTheDocument()
   })
 
+  it("hides the stored value for every unary rule operator", () => {
+    render(
+      <FlagDifferenceValue
+        flag={comparisonValue([
+          {
+            id: "rule-1",
+            name: "Boolean rule",
+            conditions: [
+              { property: "enabled", op: "IsTrue", value: "IsTrue" },
+              { property: "blocked", op: "IsFalse", value: "IsFalse" },
+              { property: "country", op: "Equal", value: "FR" },
+            ],
+            variations: [{ id: "true", rollout: [0, 1] }],
+          },
+        ])}
+        setting="targetingRule"
+      />
+    )
+
+    const conditions = screen.getAllByTestId("rule-condition-row")
+    expect(conditions[0]).toHaveTextContent("IFenabledIsTrue")
+    expect(conditions[0]).not.toHaveTextContent("IsTrueIsTrue")
+    expect(conditions[1]).toHaveTextContent("ANDblockedIsFalse")
+    expect(conditions[1]).not.toHaveTextContent("IsFalseIsFalse")
+    expect(conditions[2]).toHaveTextContent("ANDcountryEqualFR")
+  })
+
   it("uses the same keyword width with Chinese labels", () => {
     render(
       <FlagDifferenceValue
