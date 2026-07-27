@@ -143,6 +143,30 @@ describe("FlagDifferenceValue targeting rules", () => {
     expect(screen.queryByText("Source users appended")).not.toBeInTheDocument()
   })
 
+  it("renders the appended targeting-rules preview", () => {
+    const target = comparisonValue([])
+    const source = comparisonValue([
+      {
+        id: "source-rule",
+        name: "Source rule",
+        conditions: [{ property: "country", op: "Equal", value: "US" }],
+        variations: [{ id: "true", rollout: [0, 1] }],
+      },
+    ])
+
+    render(
+      <FlagDifferenceValue
+        flag={target}
+        source={source}
+        setting="targetingRule"
+        previewMode="append"
+      />
+    )
+
+    expect(screen.getByText("Source rules appended")).toBeVisible()
+    expect(screen.getByText("Source rule")).toBeVisible()
+  })
+
   it("shows newly appended users immediately in the +N tooltip", async () => {
     const target = comparisonValue([])
     target.targetUsers = [

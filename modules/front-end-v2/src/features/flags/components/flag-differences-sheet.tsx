@@ -9,7 +9,7 @@ import {
   Loader2,
   Lock,
 } from "lucide-react"
-import { useMemo, useState } from "react"
+import { useId, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -145,6 +145,7 @@ export function FlagDifferencesSheet({
   const [modes, setModes] = useState<
     Record<"individualTargeting" | "targetingRule", FlagSettingCopyMode>
   >({ individualTargeting: "overwrite", targetingRule: "overwrite" })
+  const modeOptionIdPrefix = useId()
   const targetId = lockedTarget?.id ?? selectedTargetId
 
   const projectsQuery = useQuery({
@@ -511,19 +512,29 @@ export function FlagDifferencesSheet({
                             }))
                           }
                         >
-                          {(["overwrite", "append"] as const).map((value) => (
-                            <label
-                              key={value}
-                              className="flex cursor-pointer items-center gap-2 text-xs"
-                            >
-                              <RadioGroupItem value={value} />
-                              {t(
-                                `featureFlags.differencesSheet.${
-                                  value === "overwrite" ? "overwrite" : "append"
-                                }${row.key === "targetingRule" ? "Rules" : "Users"}`
-                              )}
-                            </label>
-                          ))}
+                          {(["overwrite", "append"] as const).map((value) => {
+                            const optionId = `${modeOptionIdPrefix}-${row.key}-${value}`
+                            return (
+                              <div
+                                key={value}
+                                className="flex items-center gap-2 text-xs"
+                              >
+                                <RadioGroupItem id={optionId} value={value} />
+                                <label
+                                  htmlFor={optionId}
+                                  className="cursor-pointer"
+                                >
+                                  {t(
+                                    `featureFlags.differencesSheet.${
+                                      value === "overwrite"
+                                        ? "overwrite"
+                                        : "append"
+                                    }${row.key === "targetingRule" ? "Rules" : "Users"}`
+                                  )}
+                                </label>
+                              </div>
+                            )
+                          })}
                         </RadioGroup>
                       ) : null}
                     </div>

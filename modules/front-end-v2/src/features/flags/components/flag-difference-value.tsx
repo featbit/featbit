@@ -498,6 +498,8 @@ export function FlagDifferenceValue({
   lang?: Lang
   tooltipUserStyle?: "added" | "existing"
 }) {
+  const { t } = useTranslation()
+
   if (!source || previewMode !== "append")
     return (
       <BaseValue

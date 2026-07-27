@@ -238,6 +238,34 @@ describe("FlagDifferencesSheet", () => {
     expect(onOpenChange).toHaveBeenCalledWith(false)
   })
 
+  it("changes the targeting-rule copy mode without closing the sheet", async () => {
+    mocks.compare.mockResolvedValueOnce({
+      ...detail,
+      isRulesCopyable: true,
+    })
+    const onOpenChange = vi.fn()
+    renderSheet({
+      lockedTarget: { id: "target-env", name: "Growth Platform / Staging" },
+      onOpenChange,
+    })
+
+    const targetingRules = await screen.findByRole("checkbox", {
+      name: "Targeting rules",
+    })
+    fireEvent.click(targetingRules)
+
+    const appendRulesLabel = screen.getByText("Append rules")
+    const appendRules = screen.getByRole("radio", { name: "Append rules" })
+    const inputId = appendRulesLabel.getAttribute("for")
+    expect(inputId).toBeTruthy()
+    expect(document.getElementById(inputId!)).toHaveAttribute("type", "radio")
+
+    fireEvent.click(appendRulesLabel)
+
+    expect(appendRules).toHaveAttribute("aria-checked", "true")
+    expect(onOpenChange).not.toHaveBeenCalled()
+  })
+
   it("shows an environment icon when the flag is missing in the target", async () => {
     mocks.compare.mockResolvedValueOnce(null)
     renderSheet()
