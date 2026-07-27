@@ -60,6 +60,7 @@ function ServingControl({
   flag,
   value,
   dispatchKey,
+  properties,
   disabled,
   embedded = false,
   statusLabel,
@@ -68,6 +69,7 @@ function ServingControl({
   flag: FeatureFlag
   value: FlagRuleVariation[]
   dispatchKey?: string | null
+  properties: SegmentUserProperty[]
   disabled: boolean
   embedded?: boolean
   statusLabel?: string
@@ -145,6 +147,7 @@ function ServingControl({
         variations={flag.variations ?? []}
         value={value}
         dispatchKey={dispatchKey}
+        properties={properties}
         disabled={disabled}
         onCancel={() => setEditing(false)}
         onApply={(next, property) => {
@@ -352,6 +355,7 @@ export function TargetingTab({
                 flag={flag}
                 value={defaultValue}
                 dispatchKey={flag.fallthrough?.dispatchKey}
+                properties={properties}
                 disabled={!canUpdateDefault}
                 statusLabel={
                   !flag.isEnabled
@@ -586,6 +590,7 @@ export function TargetingTab({
                     flag={flag}
                     value={rule.variations}
                     dispatchKey={rule.dispatchKey}
+                    properties={properties}
                     disabled={!canUpdateRules}
                     onChange={(value, dispatchKey) =>
                       onDraftChange({

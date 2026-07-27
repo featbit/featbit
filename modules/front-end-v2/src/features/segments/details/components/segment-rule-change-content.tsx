@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next"
+import { ArrowDown } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import {
   Tooltip,
@@ -41,8 +42,8 @@ function conditionText(
 type ConditionChange = {
   id: string
   action: "added" | "removed" | "updated"
-  previous?: string
-  current?: string
+  previous?: SegmentCondition
+  current?: SegmentCondition
 }
 
 function changedConditions(
@@ -62,7 +63,7 @@ function changedConditions(
     const oldCondition = previousById.get(condition.id)
     const currentText = conditionText(condition, t)
     if (!oldCondition) {
-      changes.push({ id: condition.id, action: "added", current: currentText })
+      changes.push({ id: condition.id, action: "added", current: condition })
       continue
     }
     const previousText = conditionText(oldCondition, t)
@@ -70,8 +71,8 @@ function changedConditions(
       changes.push({
         id: condition.id,
         action: "updated",
-        previous: previousText,
-        current: currentText,
+        previous: oldCondition,
+        current: condition,
       })
     }
   }
@@ -81,12 +82,53 @@ function changedConditions(
       changes.push({
         id: condition.id,
         action: "removed",
-        previous: conditionText(condition, t),
+        previous: condition,
       })
     }
   }
 
   return changes
+}
+
+function ConditionExpression({ condition }: { condition: SegmentCondition }) {
+  const { t } = useTranslation()
+  const operation = t(`segments.detailsPage.rules.operators.${condition.op}`, {
+    defaultValue: condition.op,
+  })
+  const unary = condition.op === "IsTrue" || condition.op === "IsFalse"
+  return (
+    <span className="inline-flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
+      <span className="break-words">{condition.property}</span>
+      <span className="font-mono font-medium text-muted-foreground">
+        {operation}
+      </span>
+      {unary ? null : (
+        <span className="break-words">
+          {conditionValues(condition).join(", ")}
+        </span>
+      )}
+    </span>
+  )
+}
+
+function ConditionPair({
+  previous,
+  current,
+}: {
+  previous: SegmentCondition
+  current: SegmentCondition
+}) {
+  return (
+    <div className="space-y-1">
+      <p className="text-muted-foreground">
+        <ConditionExpression condition={previous} />
+      </p>
+      <ArrowDown className="size-3.5 text-muted-foreground" />
+      <p>
+        <ConditionExpression condition={current} />
+      </p>
+    </div>
+  )
 }
 
 function ConditionSummary({ rule }: { rule: SegmentRule }) {
@@ -97,11 +139,13 @@ function ConditionSummary({ rule }: { rule: SegmentRule }) {
       {rule.conditions.map((condition, index) => (
         <div key={condition.id || index}>
           {index > 0 ? (
-            <div className="my-2 text-xs font-medium text-muted-foreground">
+            <div className="my-2 font-mono text-xs font-medium text-muted-foreground">
               {t("segments.detailsPage.rules.and")}
             </div>
           ) : null}
-          <p className="break-words">{conditionText(condition, t)}</p>
+          <p>
+            <ConditionExpression condition={condition} />
+          </p>
         </div>
       ))}
     </div>
@@ -145,14 +189,14 @@ export function SegmentRuleChangeContent({
             {conditionChanges.map((change, index) => (
               <div key={`${change.action}-${change.id}`}>
                 {index > 0 ? (
-                  <div className="my-2 text-xs font-medium text-muted-foreground">
+                  <div className="my-2 font-mono text-xs font-medium text-muted-foreground">
                     {t("segments.detailsPage.rules.and")}
                   </div>
                 ) : null}
                 {change.action === "updated" ? (
-                  <ChangePair
-                    previous={change.previous ?? ""}
-                    current={change.current ?? ""}
+                  <ConditionPair
+                    previous={change.previous!}
+                    current={change.current!}
                   />
                 ) : (
                   <div className="space-y-0.5">
@@ -168,7 +212,9 @@ export function SegmentRuleChangeContent({
                           : "break-words"
                       }
                     >
-                      {change.current ?? change.previous}
+                      <ConditionExpression
+                        condition={change.current ?? change.previous!}
+                      />
                     </p>
                   </div>
                 )}

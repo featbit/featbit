@@ -141,8 +141,15 @@ describe("ChangeLedger", () => {
     expect(screen.getByText("Name")).toBeVisible()
     expect(screen.getByText("Conditions")).toBeVisible()
     expect(screen.getByText("Enterprise customers")).toBeVisible()
-    expect(screen.getByText("plan equals professional")).toBeVisible()
-    expect(screen.getByText("plan equals enterprise")).toBeVisible()
-    expect(screen.queryByText("region equals US")).not.toBeInTheDocument()
+    expect(screen.getAllByText("equals")).toSatisfy((items: HTMLElement[]) =>
+      items.every((item) => item.classList.contains("font-mono"))
+    )
+    expect(screen.getAllByText("plan")).toSatisfy((items: HTMLElement[]) =>
+      items.every((item) => !item.classList.contains("font-mono"))
+    )
+    expect(screen.getByText("professional")).not.toHaveClass("font-mono")
+    expect(screen.getByText("enterprise")).not.toHaveClass("font-mono")
+    expect(screen.queryByText("region")).not.toBeInTheDocument()
+    expect(screen.queryByText("US")).not.toBeInTheDocument()
   })
 })

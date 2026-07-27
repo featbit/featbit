@@ -20,6 +20,7 @@ import type {
   FlagRuleVariation,
   FlagVariation,
 } from "../../flags-types"
+import type { SegmentUserProperty } from "@/features/segments/segments-types"
 import { ROLLOUT_MARKER_COLORS } from "./rollout-colors"
 import {
   allocationPercentages,
@@ -74,6 +75,7 @@ export function PercentageRolloutEditor({
   variations,
   value,
   dispatchKey,
+  properties,
   disabled,
   onCancel,
   onApply,
@@ -81,6 +83,7 @@ export function PercentageRolloutEditor({
   variations: FlagVariation[]
   value: FlagRuleVariation[]
   dispatchKey?: string | null
+  properties: SegmentUserProperty[]
   disabled?: boolean
   onCancel: () => void
   onApply: (value: FlagRuleVariation[], dispatchKey: string) => void
@@ -95,7 +98,19 @@ export function PercentageRolloutEditor({
     }))
   }, [value, variations])
   const [items, setItems] = useState(initial)
-  const [property, setProperty] = useState(dispatchKey || "keyId")
+  const dispatchKeys = useMemo(
+    () => [
+      ...new Set([
+        "keyId",
+        "name",
+        ...properties.map((property) => property.name).filter(Boolean),
+      ]),
+    ],
+    [properties]
+  )
+  const [property, setProperty] = useState(() =>
+    dispatchKey && dispatchKeys.includes(dispatchKey) ? dispatchKey : "keyId"
+  )
   const total = items.reduce((sum, item) => sum + item.percentage, 0)
 
   return (
@@ -123,13 +138,16 @@ export function PercentageRolloutEditor({
             disabled={disabled}
             onValueChange={(value) => value && setProperty(value)}
           >
-            <SelectTrigger className="w-44">
+            <SelectTrigger className="w-44" aria-label="Dispatch by property">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectItem value="keyId">keyId</SelectItem>
-                <SelectItem value="name">name</SelectItem>
+                {dispatchKeys.map((key) => (
+                  <SelectItem key={key} value={key}>
+                    {key}
+                  </SelectItem>
+                ))}
               </SelectGroup>
             </SelectContent>
           </Select>

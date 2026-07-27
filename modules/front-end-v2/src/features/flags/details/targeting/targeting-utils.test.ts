@@ -70,6 +70,23 @@ describe("feature flag targeting utilities", () => {
     expect(stableFlagTargeting(previous)).toBe(stableFlagTargeting(renamed))
   })
 
+  it("includes the OFF variation in dirty and review change detection", () => {
+    const previous = flag()
+    const current = structuredClone(previous)
+    current.disabledVariationId = "new"
+
+    expect(stableFlagTargeting(current)).not.toBe(stableFlagTargeting(previous))
+    expect(targetingReviewChanges(previous, current)).toEqual([
+      expect.objectContaining({
+        kind: "default",
+        label: "Flag OFF",
+        action: "updated",
+        previous: "Control",
+        current: "New checkout",
+      }),
+    ])
+  })
+
   it("creates semantic review entries for defaults, users, and rules", () => {
     const previous = flag()
     const current = structuredClone(previous)
@@ -79,6 +96,37 @@ describe("feature flag targeting utilities", () => {
     expect(
       targetingReviewChanges(previous, current).map((item) => item.kind)
     ).toEqual(["default", "targeting", "targeting", "rule"])
+  })
+
+  it("keeps added rule conditions in the review model", () => {
+    const previous = flag()
+    const current = structuredClone(previous)
+    current.rules![0].conditions.push({
+      id: "condition-2",
+      property: "region",
+      op: "Equal",
+      value: "EU",
+    })
+
+    const change = targetingReviewChanges(previous, current).find(
+      (item) => item.kind === "rule"
+    )
+    expect(change?.previousRule?.conditions).toHaveLength(1)
+    expect(change?.currentRule?.conditions).toHaveLength(2)
+    expect(change?.previous).toBe("New checkout")
+    expect(change?.current).toBe("New checkout")
+  })
+
+  it("omits percentages when a rule serves one variation", () => {
+    const previous = flag()
+    const current = structuredClone(previous)
+    current.rules![0].variations = [{ id: "control", rollout: [0, 1] }]
+
+    const change = targetingReviewChanges(previous, current).find(
+      (item) => item.kind === "rule"
+    )
+    expect(change?.previous).toBe("New checkout")
+    expect(change?.current).toBe("Control")
   })
 
   it("rejects incomplete rules and invalid rollout totals", () => {

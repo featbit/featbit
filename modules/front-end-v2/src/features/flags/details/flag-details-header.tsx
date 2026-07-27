@@ -97,15 +97,6 @@ export function FlagDetailsHeader({
                 ))}
               </div>
             ) : null}
-            <span className="text-muted-foreground">
-              {lang === "zh" ? "更新于" : "Updated"}{" "}
-              <span className="text-foreground">
-                {new Intl.DateTimeFormat(lang === "zh" ? "zh-CN" : "en", {
-                  dateStyle: "medium",
-                  timeStyle: "short",
-                }).format(new Date(flag.updatedAt))}
-              </span>
-            </span>
           </div>
         </div>
         <div className="flex h-9 shrink-0 items-center gap-2 pt-1">

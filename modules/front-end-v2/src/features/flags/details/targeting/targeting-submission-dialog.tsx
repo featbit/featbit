@@ -1,5 +1,6 @@
-import { Check, Loader2, Search, X } from "lucide-react"
-import { useEffect, useState } from "react"
+import { Check, Loader2, X } from "lucide-react"
+import { useEffect, useState, type ReactNode } from "react"
+import { Popover as PopoverPrimitive } from "@base-ui/react/popover"
 import { useQuery } from "@tanstack/react-query"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -21,13 +22,14 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
+import { Popover, PopoverTrigger } from "@/components/ui/popover"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import type { ChangeReviewItem } from "@/features/change-review/change-review-types"
 import { ChangeLedger } from "@/features/change-review/change-ledger"
 import { getStoredUserProfile } from "@/features/auth/auth-api"
@@ -41,6 +43,30 @@ export type TargetingSubmission = {
   reason: string
   reviewers: string[]
   withChangeRequest: boolean
+}
+
+function localDateTimeInputValue(timestamp: number) {
+  const date = new Date(timestamp)
+  const local = new Date(timestamp - date.getTimezoneOffset() * 60_000)
+  return local.toISOString().slice(0, 16)
+}
+
+function ReviewerPopoverContent({ children }: { children: ReactNode }) {
+  return (
+    <PopoverPrimitive.Portal>
+      <PopoverPrimitive.Positioner
+        align="start"
+        side="bottom"
+        sideOffset={4}
+        className="z-[60]"
+        data-slot="reviewer-popover-positioner"
+      >
+        <PopoverPrimitive.Popup className="w-[var(--anchor-width)] rounded-md border bg-popover text-popover-foreground shadow-md outline-none">
+          {children}
+        </PopoverPrimitive.Popup>
+      </PopoverPrimitive.Positioner>
+    </PopoverPrimitive.Portal>
+  )
 }
 
 function ReviewerPicker({
@@ -71,18 +97,50 @@ function ReviewerPicker({
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger
           render={
-            <Button
-              type="button"
-              variant="outline"
-              disabled={disabled}
-              className="w-full justify-start font-normal text-muted-foreground"
+            <div
+              role="combobox"
+              aria-label="Search reviewers"
+              aria-expanded={open}
+              aria-disabled={disabled}
+              tabIndex={disabled ? -1 : 0}
+              className="flex max-h-24 min-h-8 w-full flex-wrap items-center gap-1.5 overflow-y-auto rounded-lg border border-input bg-transparent px-2 py-1 text-sm transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 dark:bg-input/30"
             />
           }
         >
-          <Search />
-          Search reviewers
+          {selected.map((member) => (
+            <Badge
+              key={member.id}
+              variant="secondary"
+              className="h-6 gap-1 font-normal"
+            >
+              <Tooltip>
+                <TooltipTrigger
+                  render={<span tabIndex={0} className="cursor-default" />}
+                >
+                  {member.name}
+                </TooltipTrigger>
+                <TooltipContent>{member.email}</TooltipContent>
+              </Tooltip>
+              <button
+                type="button"
+                disabled={disabled}
+                aria-label={`Remove ${member.name}`}
+                className="rounded-sm outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+                onClick={(event) => {
+                  event.preventDefault()
+                  event.stopPropagation()
+                  onChange(selected.filter((item) => item.id !== member.id))
+                }}
+              >
+                <X className="size-3" />
+              </button>
+            </Badge>
+          ))}
+          <span className="min-w-28 flex-1 text-left text-muted-foreground">
+            Search reviewers
+          </span>
         </PopoverTrigger>
-        <PopoverContent align="start" className="w-[var(--anchor-width)] p-0">
+        <ReviewerPopoverContent>
           <Command shouldFilter={false}>
             <CommandInput
               value={search}
@@ -133,27 +191,8 @@ function ReviewerPicker({
               </CommandGroup>
             </CommandList>
           </Command>
-        </PopoverContent>
+        </ReviewerPopoverContent>
       </Popover>
-      {selected.length ? (
-        <div className="flex flex-wrap gap-2">
-          {selected.map((member) => (
-            <Badge key={member.id} variant="secondary" className="gap-1">
-              {member.name}
-              <button
-                type="button"
-                disabled={disabled}
-                aria-label={`Remove ${member.name}`}
-                onClick={() =>
-                  onChange(selected.filter((item) => item.id !== member.id))
-                }
-              >
-                <X className="size-3" />
-              </button>
-            </Badge>
-          ))}
-        </div>
-      ) : null}
     </div>
   )
 }
@@ -183,6 +222,7 @@ export function TargetingSubmissionDialog({
   const [withApproval, setWithApproval] = useState(false)
   const [reviewers, setReviewers] = useState<SegmentTeamMember[]>([])
   const [openedAt] = useState(() => Date.now())
+  const minimumScheduledTime = localDateTimeInputValue(openedAt)
   const reviewerRequired = !schedule || withApproval
   const future =
     !schedule || (scheduledTime && new Date(scheduledTime).getTime() > openedAt)
@@ -210,7 +250,10 @@ export function TargetingSubmissionDialog({
               : `Submit the pending targeting changes to ${flagName}.`}
           </DialogDescription>
         </DialogHeader>
-        <div className="max-h-[68vh] space-y-4 overflow-y-auto pr-1">
+        <div
+          data-slot="submission-dialog-body"
+          className="max-h-[68vh] space-y-4 overflow-y-auto px-1"
+        >
           <div className="space-y-2">
             <div className="flex items-baseline gap-3">
               <Label>{zh ? "变更" : "Changes"}</Label>
@@ -255,7 +298,9 @@ export function TargetingSubmissionDialog({
                 <Input
                   id="schedule-time"
                   type="datetime-local"
+                  min={minimumScheduledTime}
                   value={scheduledTime}
+                  onClick={(event) => event.currentTarget.showPicker?.()}
                   onChange={(event) => setScheduledTime(event.target.value)}
                 />
                 {scheduledTime && !future ? (

@@ -1,6 +1,12 @@
 import { ChangeReviewDialog } from "@/features/change-review/change-review-dialog"
-import type { ChangeReviewItem } from "@/features/change-review/change-review-types"
 import type { Lang } from "@/features/layout/layout-types"
+import {
+  FlagChangeBadgeLabel,
+  FlagDefaultChangeContent,
+  FlagRuleChangeContent,
+  FlagRuleChangeLabel,
+} from "./targeting/flag-rule-change-content"
+import type { FlagTargetingReviewChange } from "./targeting/targeting-utils"
 
 export function FlagChangeReviewDialog({
   open,
@@ -15,7 +21,7 @@ export function FlagChangeReviewDialog({
   open: boolean
   lang: Lang
   flagName: string
-  changes: ChangeReviewItem[]
+  changes: FlagTargetingReviewChange[]
   requireComment: boolean
   saving: boolean
   onOpenChange: (open: boolean) => void
@@ -63,6 +69,46 @@ export function FlagChangeReviewDialog({
           showMore: (count) =>
             zh ? `再显示 ${count} 项` : `Show ${count} more`,
           showLess: zh ? "收起" : "Show less",
+        },
+        renderLabel: (change) => {
+          if (change.kind === "rule")
+            return <FlagRuleChangeLabel name={change.label} />
+          if (change.kind === "targeting")
+            return (
+              <FlagChangeBadgeLabel
+                badge={zh ? "用户" : "User"}
+                name={change.label}
+              />
+            )
+          if (change.kind === "default")
+            return (
+              <FlagChangeBadgeLabel
+                badge={zh ? "默认" : "Default"}
+                name={change.label}
+              />
+            )
+          return undefined
+        },
+        renderContent: (change) => {
+          if (change.kind === "rule")
+            return (
+              <FlagRuleChangeContent
+                previousRule={change.previousRule}
+                currentRule={change.currentRule}
+                previousServing={change.previousServing}
+                currentServing={change.currentServing}
+                zh={zh}
+              />
+            )
+          if (change.kind === "default")
+            return (
+              <FlagDefaultChangeContent
+                previous={change.previousServing}
+                current={change.currentServing}
+                zh={zh}
+              />
+            )
+          return undefined
         },
       }}
       onOpenChange={onOpenChange}

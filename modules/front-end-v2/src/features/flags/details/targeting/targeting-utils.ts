@@ -6,6 +6,18 @@ import type {
   FlagTargeting,
 } from "../../flags-types"
 
+export type FlagTargetingReviewChange = ChangeReviewItem & {
+  previousRule?: FlagRule
+  currentRule?: FlagRule
+  previousServing?: FlagServingReview
+  currentServing?: FlagServingReview
+}
+
+export type FlagServingReview = {
+  variations: Array<{ id: string; name: string; percentage?: number }>
+  dispatchKey?: string
+}
+
 export function newFlagRule(count: number): FlagRule {
   return {
     id: crypto.randomUUID(),
@@ -40,7 +52,10 @@ export function targetingOf(flag: FeatureFlag): FlagTargeting {
 }
 
 export function stableFlagTargeting(flag: FeatureFlag) {
-  return JSON.stringify(targetingOf(flag))
+  return JSON.stringify({
+    ...targetingOf(flag),
+    disabledVariationId: flag.disabledVariationId,
+  })
 }
 
 export function allocationPercentages(variations: FlagRuleVariation[]) {
@@ -65,7 +80,14 @@ export function rolloutFromPercentages(
 }
 
 function servingLabel(flag: FeatureFlag, variations: FlagRuleVariation[]) {
-  return allocationPercentages(variations)
+  const allocations = allocationPercentages(variations)
+  if (allocations.length === 1) {
+    const variation = flag.variations?.find(
+      (candidate) => candidate.id === allocations[0].id
+    )
+    return variation?.name || variation?.value || allocations[0].id
+  }
+  return allocations
     .map((item) => {
       const variation = flag.variations?.find(
         (candidate) => candidate.id === item.id
@@ -75,20 +97,112 @@ function servingLabel(flag: FeatureFlag, variations: FlagRuleVariation[]) {
     .join(" · ")
 }
 
+function servingReview(
+  flag: FeatureFlag,
+  variations: FlagRuleVariation[],
+  dispatchKey?: string | null
+): FlagServingReview {
+  const allocations = allocationPercentages(variations)
+  const showPercentage = allocations.length > 1
+  return {
+    variations: allocations.map((item) => {
+      const variation = flag.variations?.find(
+        (candidate) => candidate.id === item.id
+      )
+      return {
+        id: item.id,
+        name: variation?.name || variation?.value || item.id,
+        percentage: showPercentage ? item.percentage : undefined,
+      }
+    }),
+    dispatchKey: showPercentage ? dispatchKey || "keyId" : undefined,
+  }
+}
+
+function variationLabel(flag: FeatureFlag, variationId?: string) {
+  const variation = flag.variations?.find(
+    (candidate) => candidate.id === variationId
+  )
+  return variation?.name || variation?.value || variationId || "—"
+}
+
+function stableServing(
+  variations: FlagRuleVariation[],
+  dispatchKey?: string | null
+) {
+  const allocations = allocationPercentages(variations)
+  return JSON.stringify({
+    allocations,
+    dispatchKey: allocations.length > 1 ? dispatchKey || "keyId" : null,
+  })
+}
+
+function stableRuleForReview(rule: FlagRule) {
+  return JSON.stringify({
+    name: rule.name,
+    conditions: rule.conditions.map((condition) => ({
+      id: condition.id,
+      property: condition.property,
+      op: condition.op,
+      value: condition.value,
+    })),
+    serving: stableServing(rule.variations, rule.dispatchKey),
+  })
+}
+
 export function targetingReviewChanges(
   previous: FeatureFlag,
   current: FeatureFlag
 ) {
-  const changes: ChangeReviewItem[] = []
+  const changes: FlagTargetingReviewChange[] = []
   if (
-    JSON.stringify(previous.fallthrough) !== JSON.stringify(current.fallthrough)
+    stableServing(
+      previous.fallthrough?.variations ?? [],
+      previous.fallthrough?.dispatchKey
+    ) !==
+    stableServing(
+      current.fallthrough?.variations ?? [],
+      current.fallthrough?.dispatchKey
+    )
   ) {
     changes.push({
       kind: "default",
-      label: "Default rule · Flag ON",
+      label: "Flag ON",
       action: "updated",
       previous: servingLabel(previous, previous.fallthrough?.variations ?? []),
       current: servingLabel(current, current.fallthrough?.variations ?? []),
+      previousServing: servingReview(
+        previous,
+        previous.fallthrough?.variations ?? [],
+        previous.fallthrough?.dispatchKey
+      ),
+      currentServing: servingReview(
+        current,
+        current.fallthrough?.variations ?? [],
+        current.fallthrough?.dispatchKey
+      ),
+      literalLabel: true,
+    })
+  }
+  if (previous.disabledVariationId !== current.disabledVariationId) {
+    changes.push({
+      kind: "default",
+      label: "Flag OFF",
+      action: "updated",
+      previous: variationLabel(previous, previous.disabledVariationId),
+      current: variationLabel(current, current.disabledVariationId),
+      previousServing: servingReview(
+        previous,
+        previous.disabledVariationId
+          ? [{ id: previous.disabledVariationId, rollout: [0, 1] }]
+          : []
+      ),
+      currentServing: servingReview(
+        current,
+        current.disabledVariationId
+          ? [{ id: current.disabledVariationId, rollout: [0, 1] }]
+          : []
+      ),
       literalLabel: true,
     })
   }
@@ -125,13 +239,23 @@ export function targetingReviewChanges(
   )
   for (const rule of current.rules ?? []) {
     const old = oldRules.get(rule.id)
-    if (!old || JSON.stringify(old) !== JSON.stringify(rule)) {
+    if (!old || stableRuleForReview(old) !== stableRuleForReview(rule)) {
       changes.push({
         kind: "rule",
-        label: `Rule · ${rule.name}`,
+        label: rule.name,
         action: old ? "updated" : "added",
         previous: old ? servingLabel(previous, old.variations) : undefined,
         current: servingLabel(current, rule.variations),
+        previousServing: old
+          ? servingReview(previous, old.variations, old.dispatchKey)
+          : undefined,
+        currentServing: servingReview(
+          current,
+          rule.variations,
+          rule.dispatchKey
+        ),
+        previousRule: old,
+        currentRule: rule,
         literalLabel: true,
       })
     }
@@ -140,8 +264,15 @@ export function targetingReviewChanges(
     if (!nextRules.has(rule.id)) {
       changes.push({
         kind: "rule",
-        label: `Rule · ${rule.name}`,
+        label: rule.name,
         action: "removed",
+        previous: servingLabel(previous, rule.variations),
+        previousServing: servingReview(
+          previous,
+          rule.variations,
+          rule.dispatchKey
+        ),
+        previousRule: rule,
         literalLabel: true,
       })
     }
