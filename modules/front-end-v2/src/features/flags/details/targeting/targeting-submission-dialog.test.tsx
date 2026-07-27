@@ -15,7 +15,11 @@ vi.mock("@/features/segments/segments-api", () => ({
 
 window.HTMLElement.prototype.scrollIntoView = vi.fn()
 
-function renderDialog(mode: "schedule" | "change-request") {
+function renderDialog(
+  mode: "schedule" | "change-request",
+  initialReason?: string,
+  onModeChange = vi.fn()
+) {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   })
@@ -27,8 +31,12 @@ function renderDialog(mode: "schedule" | "change-request") {
           lang="en"
           flagName="Checkout redesign"
           changes={[]}
+          initialReason={initialReason}
+          scheduleGranted
+          changeRequestGranted
           saving={false}
           onOpenChange={vi.fn()}
+          onModeChange={onModeChange}
           onSubmit={vi.fn()}
         />
       </TooltipProvider>
@@ -118,5 +126,32 @@ describe("targeting submission dialog", () => {
     fireEvent.pointerMove(document, { pointerType: "mouse" })
     fireEvent.mouseEnter(reviewerName)
     expect(await screen.findByText("emma@example.com")).toBeVisible()
+  })
+
+  it("carries the review comment into the selected submission flow", () => {
+    renderDialog("schedule", "Coordinate with support")
+
+    expect(screen.getByLabelText(/Reason/)).toHaveValue(
+      "Coordinate with support"
+    )
+  })
+
+  it("keeps save options available from a submission flow", async () => {
+    const onModeChange = vi.fn()
+    renderDialog("schedule", "Coordinate with support", onModeChange)
+
+    fireEvent.click(screen.getByRole("button", { name: "More save options" }))
+    expect(await screen.findByText("Request approval")).toBeVisible()
+    expect(screen.getByText("Apply immediately")).toBeVisible()
+
+    fireEvent.click(screen.getByText("Request approval"))
+    expect(onModeChange).toHaveBeenCalledWith(
+      "change-request",
+      "Coordinate with support"
+    )
+
+    fireEvent.click(screen.getByRole("button", { name: "More save options" }))
+    fireEvent.click(await screen.findByText("Save changes"))
+    expect(onModeChange).toHaveBeenCalledWith("save", "Coordinate with support")
   })
 })

@@ -1,3 +1,4 @@
+import { Clock3, UserRoundCheck } from "lucide-react"
 import { ChangeReviewDialog } from "@/features/change-review/change-review-dialog"
 import type { Lang } from "@/features/layout/layout-types"
 import {
@@ -15,8 +16,13 @@ export function FlagChangeReviewDialog({
   changes,
   requireComment,
   saving,
+  initialComment,
+  scheduleGranted,
+  changeRequestGranted,
   onOpenChange,
   onSave,
+  onSchedule,
+  onChangeRequest,
 }: {
   open: boolean
   lang: Lang
@@ -24,8 +30,13 @@ export function FlagChangeReviewDialog({
   changes: FlagTargetingReviewChange[]
   requireComment: boolean
   saving: boolean
+  initialComment?: string
+  scheduleGranted: boolean
+  changeRequestGranted: boolean
   onOpenChange: (open: boolean) => void
   onSave: (comment: string) => void
+  onSchedule: (comment: string) => void
+  onChangeRequest: (comment: string) => void
 }) {
   const zh = lang === "zh"
   return (
@@ -36,6 +47,7 @@ export function FlagChangeReviewDialog({
       changes={changes}
       requireComment={requireComment}
       saving={saving}
+      initialComment={initialComment}
       copy={{
         title: zh ? "审核定向变更" : "Review targeting changes",
         description: zh
@@ -111,6 +123,28 @@ export function FlagChangeReviewDialog({
           return undefined
         },
       }}
+      saveOptions={[
+        ...(scheduleGranted
+          ? [
+              {
+                label: zh ? "璁″垝鍙樻洿" : "Schedule changes",
+                icon: <Clock3 />,
+                onSelect: onSchedule,
+              },
+            ]
+          : []),
+        ...(changeRequestGranted
+          ? [
+              {
+                label: zh ? "璇锋眰瀹℃牳" : "Request approval",
+                icon: <UserRoundCheck />,
+                onSelect: onChangeRequest,
+              },
+            ]
+          : []),
+      ]}
+      saveOptionsLabel={zh ? "鏇村淇濆瓨閫夐」" : "More save options"}
+      saveImmediatelyDescription={zh ? "绔嬪嵆搴旂敤" : "Apply immediately"}
       onOpenChange={onOpenChange}
       onSave={onSave}
     />

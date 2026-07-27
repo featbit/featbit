@@ -76,11 +76,13 @@ export function FlagDetailsPage() {
     Map<string, SegmentEndUser>
   >(new Map())
   const [reviewOpen, setReviewOpen] = useState(false)
+  const [reviewInitialComment, setReviewInitialComment] = useState("")
   const [pendingOpen, setPendingOpen] = useState(false)
   const [confirmation, setConfirmation] = useState<FlagConfirmation>(null)
-  const [submissionMode, setSubmissionMode] = useState<
-    "schedule" | "change-request" | null
-  >(null)
+  const [submission, setSubmission] = useState<{
+    mode: "schedule" | "change-request"
+    initialReason: string
+  } | null>(null)
 
   const flagQuery = useQuery({
     queryKey: ["feature-flag-details", envId, flagKey],
@@ -223,7 +225,7 @@ export function FlagDetailsPage() {
   })
   const submissionMutation = useMutation({
     mutationFn: (input: TargetingSubmission) => {
-      if (submissionMode === "schedule") {
+      if (submission?.mode === "schedule") {
         return createFlagSchedule(envId, flagKey, {
           targeting: targetingOf(flag!),
           revision: flag?.revision ?? "",
@@ -242,7 +244,7 @@ export function FlagDetailsPage() {
       })
     },
     onSuccess: () => {
-      setSubmissionMode(null)
+      setSubmission(null)
       toast.success(lang === "zh" ? "操作成功" : "Operation succeeded")
       void pendingQuery.refetch()
     },
@@ -346,12 +348,19 @@ export function FlagDetailsPage() {
             )
           }
           onDiscard={() => setDraft(null)}
-          onReview={() => setReviewOpen(true)}
+          onReview={() => {
+            setReviewInitialComment("")
+            setReviewOpen(true)
+          }}
           onOpenPending={() => setPendingOpen(true)}
           scheduleGranted={scheduleGranted}
           changeRequestGranted={changeRequestGranted}
-          onSchedule={() => setSubmissionMode("schedule")}
-          onChangeRequest={() => setSubmissionMode("change-request")}
+          onSchedule={() =>
+            setSubmission({ mode: "schedule", initialReason: "" })
+          }
+          onChangeRequest={() =>
+            setSubmission({ mode: "change-request", initialReason: "" })
+          }
         />
         <FlagChangeReviewDialog
           open={reviewOpen}
@@ -360,8 +369,19 @@ export function FlagDetailsPage() {
           changes={changes}
           requireComment={settingsQuery.data?.requireChangeComment ?? false}
           saving={saveMutation.isPending}
+          initialComment={reviewInitialComment}
+          scheduleGranted={scheduleGranted}
+          changeRequestGranted={changeRequestGranted}
           onOpenChange={setReviewOpen}
           onSave={(comment) => saveMutation.mutate(comment)}
+          onSchedule={(comment) => {
+            setReviewOpen(false)
+            setSubmission({ mode: "schedule", initialReason: comment })
+          }}
+          onChangeRequest={(comment) => {
+            setReviewOpen(false)
+            setSubmission({ mode: "change-request", initialReason: comment })
+          }}
         />
         <PendingChangesSheet
           open={pendingOpen}
@@ -376,13 +396,27 @@ export function FlagDetailsPage() {
           onRemove={(item) => removePendingMutation.mutate(item)}
         />
         <TargetingSubmissionDialog
-          key={submissionMode ?? "closed"}
-          mode={submissionMode}
+          key={submission ? "submission" : "closed"}
+          mode={submission?.mode ?? null}
           lang={lang}
           flagName={flag.name}
           changes={changes}
+          initialReason={submission?.initialReason}
+          scheduleGranted={scheduleGranted}
+          changeRequestGranted={changeRequestGranted}
           saving={submissionMutation.isPending}
-          onOpenChange={(open) => !open && setSubmissionMode(null)}
+          onOpenChange={(open) => !open && setSubmission(null)}
+          onModeChange={(mode, reason) => {
+            if (mode === "save") {
+              setSubmission(null)
+              setReviewInitialComment(reason)
+              setReviewOpen(true)
+              return
+            }
+            setSubmission((current) =>
+              current ? { ...current, mode, initialReason: reason } : current
+            )
+          }}
           onSubmit={(value) => submissionMutation.mutate(value)}
         />
         <FlagConfirmDialog

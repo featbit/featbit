@@ -1,4 +1,4 @@
-import { Check, Loader2, X } from "lucide-react"
+import { Check, Clock3, Loader2, UserRoundCheck, X } from "lucide-react"
 import { useEffect, useState, type ReactNode } from "react"
 import { Popover as PopoverPrimitive } from "@base-ui/react/popover"
 import { useQuery } from "@tanstack/react-query"
@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/tooltip"
 import type { ChangeReviewItem } from "@/features/change-review/change-review-types"
 import { ChangeLedger } from "@/features/change-review/change-ledger"
+import { ReviewSaveSplitButton } from "@/features/change-review/change-review-dialog"
 import { getStoredUserProfile } from "@/features/auth/auth-api"
 import type { Lang } from "@/features/layout/layout-types"
 import { fetchSegmentTeamMembers } from "@/features/segments/segments-api"
@@ -202,23 +203,34 @@ export function TargetingSubmissionDialog({
   lang,
   flagName,
   changes,
+  initialReason,
+  scheduleGranted,
+  changeRequestGranted,
   saving,
   onOpenChange,
+  onModeChange,
   onSubmit,
 }: {
   mode: "schedule" | "change-request" | null
   lang: Lang
   flagName: string
   changes: ChangeReviewItem[]
+  initialReason?: string
+  scheduleGranted: boolean
+  changeRequestGranted: boolean
   saving: boolean
   onOpenChange: (open: boolean) => void
+  onModeChange: (
+    mode: "save" | "schedule" | "change-request",
+    reason: string
+  ) => void
   onSubmit: (value: TargetingSubmission) => void
 }) {
   const zh = lang === "zh"
   const schedule = mode === "schedule"
   const [title, setTitle] = useState("")
   const [scheduledTime, setScheduledTime] = useState("")
-  const [reason, setReason] = useState("")
+  const [reason, setReason] = useState(initialReason ?? "")
   const [withApproval, setWithApproval] = useState(false)
   const [reviewers, setReviewers] = useState<SegmentTeamMember[]>([])
   const [openedAt] = useState(() => Date.now())
@@ -369,10 +381,49 @@ export function TargetingSubmissionDialog({
           >
             {zh ? "取消" : "Cancel"}
           </Button>
-          <Button
-            type="button"
-            disabled={!valid || saving}
-            onClick={() =>
+          <ReviewSaveSplitButton
+            primaryLabel={
+              schedule
+                ? zh
+                  ? "计划变更"
+                  : "Schedule changes"
+                : zh
+                  ? "提交请求"
+                  : "Submit request"
+            }
+            savingLabel={zh ? "提交中…" : "Submitting…"}
+            saving={saving}
+            primaryDisabled={!valid}
+            menuLabel={zh ? "更多保存选项" : "More save options"}
+            options={[
+              {
+                label: zh ? "保存变更" : "Save changes",
+                description: zh ? "立即应用" : "Apply immediately",
+                onSelect: () => onModeChange("save", reason.trim()),
+              },
+              ...(scheduleGranted
+                ? [
+                    {
+                      label: zh ? "计划变更" : "Schedule changes",
+                      icon: <Clock3 />,
+                      current: schedule,
+                      onSelect: () => onModeChange("schedule", reason.trim()),
+                    },
+                  ]
+                : []),
+              ...(changeRequestGranted
+                ? [
+                    {
+                      label: zh ? "请求审核" : "Request approval",
+                      icon: <UserRoundCheck />,
+                      current: !schedule,
+                      onSelect: () =>
+                        onModeChange("change-request", reason.trim()),
+                    },
+                  ]
+                : []),
+            ]}
+            onPrimary={() =>
               onSubmit({
                 title: title.trim(),
                 scheduledTime,
@@ -381,16 +432,7 @@ export function TargetingSubmissionDialog({
                 withChangeRequest: reviewerRequired,
               })
             }
-          >
-            {saving ? <Loader2 className="animate-spin" /> : null}
-            {schedule
-              ? zh
-                ? "计划变更"
-                : "Schedule changes"
-              : zh
-                ? "提交请求"
-                : "Submit request"}
-          </Button>
+          />
         </DialogFooter>
       </DialogContent>
     </Dialog>

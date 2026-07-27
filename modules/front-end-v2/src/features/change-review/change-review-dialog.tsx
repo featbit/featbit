@@ -1,4 +1,6 @@
-import { useState } from "react"
+import { Menu as MenuPrimitive } from "@base-ui/react/menu"
+import { Fragment, useState, type ReactNode } from "react"
+import { Check, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -8,6 +10,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import {
+  DropdownMenu,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { ChangeLedger, type ChangeLedgerProps } from "./change-ledger"
@@ -15,6 +23,100 @@ import type {
   ChangeLedgerLayout,
   ChangeReviewItem,
 } from "./change-review-types"
+
+function ReviewSaveOptionsContent({ children }: { children: ReactNode }) {
+  return (
+    <MenuPrimitive.Portal>
+      <MenuPrimitive.Positioner
+        align="end"
+        side="top"
+        sideOffset={4}
+        className="z-[60]"
+        data-slot="review-save-options-positioner"
+      >
+        <MenuPrimitive.Popup className="w-64 overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md outline-none">
+          {children}
+        </MenuPrimitive.Popup>
+      </MenuPrimitive.Positioner>
+    </MenuPrimitive.Portal>
+  )
+}
+
+export type ReviewSaveOption = {
+  label: string
+  description?: string
+  icon?: ReactNode
+  current?: boolean
+  disabled?: boolean
+  onSelect: () => void
+}
+
+export function ReviewSaveSplitButton({
+  primaryLabel,
+  savingLabel,
+  saving,
+  primaryDisabled,
+  menuLabel,
+  options,
+  onPrimary,
+}: {
+  primaryLabel: string
+  savingLabel: string
+  saving: boolean
+  primaryDisabled: boolean
+  menuLabel: string
+  options: ReviewSaveOption[]
+  onPrimary: () => void
+}) {
+  return (
+    <div data-slot="review-save-split" className="inline-flex">
+      <Button
+        type="button"
+        className="rounded-r-none border-r-0"
+        disabled={saving || primaryDisabled}
+        onClick={onPrimary}
+      >
+        {saving ? savingLabel : primaryLabel}
+      </Button>
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          render={
+            <Button
+              type="button"
+              size="icon"
+              className="rounded-l-none border-l border-primary-foreground/20"
+              disabled={saving}
+              aria-label={menuLabel}
+            />
+          }
+        >
+          <ChevronDown />
+        </DropdownMenuTrigger>
+        <ReviewSaveOptionsContent>
+          {options.map((option, index) => (
+            <Fragment key={option.label}>
+              {index === 1 ? <DropdownMenuSeparator /> : null}
+              <DropdownMenuItem
+                disabled={option.disabled}
+                onClick={option.onSelect}
+              >
+                {option.current ? <Check /> : option.icon}
+                <div>
+                  <div>{option.label}</div>
+                  {option.description ? (
+                    <div className="text-xs text-muted-foreground">
+                      {option.description}
+                    </div>
+                  ) : null}
+                </div>
+              </DropdownMenuItem>
+            </Fragment>
+          ))}
+        </ReviewSaveOptionsContent>
+      </DropdownMenu>
+    </div>
+  )
+}
 
 export type ChangeReviewDialogCopy = {
   title: string
@@ -37,8 +139,16 @@ type Props<TChange extends ChangeReviewItem> = {
   changes: TChange[]
   requireComment: boolean
   saving: boolean
+  initialComment?: string
   copy: ChangeReviewDialogCopy
   ledger: Omit<ChangeLedgerProps<TChange>, "changes" | "layout">
+  saveOptions?: Array<{
+    label: string
+    icon?: ReactNode
+    onSelect: (comment: string) => void
+  }>
+  saveOptionsLabel?: string
+  saveImmediatelyDescription?: string
   onOpenChange: (open: boolean) => void
   onSave: (comment: string) => void
 }
@@ -50,8 +160,12 @@ export function ChangeReviewDialog<TChange extends ChangeReviewItem>({
   changes,
   requireComment,
   saving,
+  initialComment,
   copy,
   ledger,
+  saveOptions,
+  saveOptionsLabel,
+  saveImmediatelyDescription,
   onOpenChange,
   onSave,
 }: Props<TChange>) {
@@ -64,8 +178,12 @@ export function ChangeReviewDialog<TChange extends ChangeReviewItem>({
           changes={changes}
           requireComment={requireComment}
           saving={saving}
+          initialComment={initialComment}
           copy={copy}
           ledger={ledger}
+          saveOptions={saveOptions}
+          saveOptionsLabel={saveOptionsLabel}
+          saveImmediatelyDescription={saveImmediatelyDescription}
           onClose={() => onOpenChange(false)}
           onSave={onSave}
         />
@@ -80,12 +198,16 @@ function ReviewDialogContent<TChange extends ChangeReviewItem>({
   changes,
   requireComment,
   saving,
+  initialComment,
   copy,
   ledger,
+  saveOptions,
+  saveOptionsLabel,
+  saveImmediatelyDescription,
   onClose,
   onSave,
 }: Omit<Props<TChange>, "open" | "onOpenChange"> & { onClose: () => void }) {
-  const [comment, setComment] = useState("")
+  const [comment, setComment] = useState(initialComment ?? "")
 
   return (
     <>
@@ -132,13 +254,37 @@ function ReviewDialogContent<TChange extends ChangeReviewItem>({
           >
             {copy.cancel}
           </Button>
-          <Button
-            type="button"
-            disabled={saving || (requireComment && !comment.trim())}
-            onClick={() => onSave(comment.trim())}
-          >
-            {saving ? copy.saving : copy.save}
-          </Button>
+          {saveOptions?.length ? (
+            <ReviewSaveSplitButton
+              primaryLabel={copy.save}
+              savingLabel={copy.saving}
+              saving={saving}
+              primaryDisabled={Boolean(requireComment && !comment.trim())}
+              menuLabel={saveOptionsLabel ?? copy.save}
+              options={[
+                {
+                  label: copy.save,
+                  description: saveImmediatelyDescription,
+                  current: true,
+                  disabled: Boolean(requireComment && !comment.trim()),
+                  onSelect: () => onSave(comment.trim()),
+                },
+                ...saveOptions.map((option) => ({
+                  ...option,
+                  onSelect: () => option.onSelect(comment.trim()),
+                })),
+              ]}
+              onPrimary={() => onSave(comment.trim())}
+            />
+          ) : (
+            <Button
+              type="button"
+              disabled={saving || (requireComment && !comment.trim())}
+              onClick={() => onSave(comment.trim())}
+            >
+              {saving ? copy.saving : copy.save}
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </>
