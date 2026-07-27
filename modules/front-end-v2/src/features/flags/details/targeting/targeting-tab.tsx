@@ -418,7 +418,7 @@ export function TargetingTab({
       </section>
 
       <section>
-        <div className="mb-3 flex items-center justify-between">
+        <div className="mb-3 flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
           <h2 className="text-base font-medium">
             {t("featureFlags.detailsPage.individualTargeting")}
           </h2>

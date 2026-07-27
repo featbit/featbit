@@ -115,7 +115,7 @@ export function PercentageRolloutEditor({
 
   return (
     <div className="mt-2 rounded-md bg-muted/70 p-3.5">
-      <div className="mb-4 flex items-start justify-between gap-6">
+      <div className="mb-4">
         <div>
           <h4 className="text-sm font-medium">
             {t("featureFlags.detailsPage.rollout.title")}
@@ -124,42 +124,11 @@ export function PercentageRolloutEditor({
             {t("featureFlags.detailsPage.rollout.help")}
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">
-            {t("featureFlags.detailsPage.rollout.dispatchBy")}
-          </span>
-          <Tooltip>
-            <TooltipTrigger className="text-muted-foreground">
-              <Info className="size-3.5" />
-            </TooltipTrigger>
-            <TooltipContent>
-              {t("featureFlags.detailsPage.rollout.dispatchHelp")}
-            </TooltipContent>
-          </Tooltip>
-          <Select
-            value={property}
-            disabled={disabled}
-            onValueChange={(value) => value && setProperty(value)}
-          >
-            <SelectTrigger
-              className="w-44"
-              aria-label={t("featureFlags.detailsPage.rollout.dispatchLabel")}
-            >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                {dispatchKeys.map((key) => (
-                  <SelectItem key={key} value={key}>
-                    {key}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </div>
       </div>
-      <div className="space-y-3">
+      <div
+        data-slot="rollout-variations"
+        className="w-full max-w-3xl space-y-3"
+      >
         {items.map((item, index) => {
           const variation = variations.find(
             (candidate) => candidate.id === item.id
@@ -167,7 +136,7 @@ export function PercentageRolloutEditor({
           return (
             <div
               key={item.id}
-              className="grid max-w-3xl grid-cols-[11rem_minmax(8rem,26rem)_6.25rem] items-center gap-4"
+              className="grid grid-cols-[11rem_minmax(8rem,1fr)_6.25rem] items-center gap-4"
             >
               <div className="flex min-w-0 items-center gap-2 text-sm font-medium">
                 <span
@@ -211,24 +180,65 @@ export function PercentageRolloutEditor({
           )
         })}
       </div>
-      <div className="mt-4 flex items-end justify-between gap-4">
-        <div className="flex items-center gap-4 text-xs">
-          <span className="font-medium">
-            {t("featureFlags.detailsPage.rollout.allocated", { count: total })}
-          </span>
-          <span
-            className={
-              total > 100 ? "text-destructive" : "text-muted-foreground"
-            }
-          >
-            {total > 100
-              ? t("featureFlags.detailsPage.rollout.overAllocated", {
-                  count: total - 100,
-                })
-              : t("featureFlags.detailsPage.rollout.remaining", {
-                  count: 100 - total,
-                })}
-          </span>
+      <div
+        data-slot="rollout-footer"
+        className="mt-4 flex w-full max-w-3xl items-end justify-between gap-4"
+      >
+        <div className="space-y-3">
+          <div data-slot="rollout-dispatch" className="flex items-center gap-2">
+            <span className="text-sm font-medium">
+              {t("featureFlags.detailsPage.rollout.dispatchBy")}
+            </span>
+            <Tooltip>
+              <TooltipTrigger className="text-muted-foreground">
+                <Info className="size-3.5" />
+              </TooltipTrigger>
+              <TooltipContent>
+                {t("featureFlags.detailsPage.rollout.dispatchHelp")}
+              </TooltipContent>
+            </Tooltip>
+            <Select
+              value={property}
+              disabled={disabled}
+              onValueChange={(value) => value && setProperty(value)}
+            >
+              <SelectTrigger
+                className="w-44"
+                aria-label={t("featureFlags.detailsPage.rollout.dispatchLabel")}
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {dispatchKeys.map((key) => (
+                    <SelectItem key={key} value={key}>
+                      {key}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex items-center gap-4 text-xs">
+            <span className="font-medium">
+              {t("featureFlags.detailsPage.rollout.allocated", {
+                count: total,
+              })}
+            </span>
+            <span
+              className={
+                total > 100 ? "text-destructive" : "text-muted-foreground"
+              }
+            >
+              {total > 100
+                ? t("featureFlags.detailsPage.rollout.overAllocated", {
+                    count: total - 100,
+                  })
+                : t("featureFlags.detailsPage.rollout.remaining", {
+                    count: 100 - total,
+                  })}
+            </span>
+          </div>
         </div>
         <div className="flex gap-2">
           <Button

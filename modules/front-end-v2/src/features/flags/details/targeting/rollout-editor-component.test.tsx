@@ -57,6 +57,25 @@ describe("percentage rollout editor", () => {
     const trigger = screen.getByRole("combobox", {
       name: "Dispatch by property",
     })
+    const variations = document.querySelector(
+      '[data-slot="rollout-variations"]'
+    )
+    const dispatch = document.querySelector('[data-slot="rollout-dispatch"]')
+    const footer = document.querySelector('[data-slot="rollout-footer"]')
+    expect(variations).toBeInTheDocument()
+    expect(variations).toHaveClass("w-full", "max-w-3xl")
+    expect(variations?.firstElementChild).toHaveClass(
+      "grid-cols-[11rem_minmax(8rem,1fr)_6.25rem]"
+    )
+    expect(dispatch).toBeInTheDocument()
+    expect(footer).toHaveClass("w-full", "max-w-3xl")
+    expect(screen.getByText("Dispatch by")).toHaveClass(
+      "text-sm",
+      "font-medium"
+    )
+    expect(variations?.compareDocumentPosition(dispatch as Node) ?? 0).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    )
     expect(trigger).toHaveTextContent("plan")
     fireEvent.click(trigger)
 

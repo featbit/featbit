@@ -96,10 +96,20 @@ describe("feature flag targeting tab", () => {
     expect(
       screen.getByText("Default rule").parentElement?.parentElement
     ).toHaveClass("flex-wrap-reverse")
-    expect(screen.getByText("Individual targeting")).toBeVisible()
-    expect(
-      screen.getByText("Target specific end users by keyId.")
-    ).toBeVisible()
+    const individualTargeting = screen.getByText("Individual targeting")
+    const individualTargetingHelp = screen.getByText(
+      "Target specific end users by keyId."
+    )
+    expect(individualTargeting).toBeVisible()
+    expect(individualTargetingHelp).toBeVisible()
+    expect(individualTargeting.parentElement).toBe(
+      individualTargetingHelp.parentElement
+    )
+    expect(individualTargeting.parentElement).toHaveClass(
+      "flex-wrap",
+      "items-baseline",
+      "gap-x-2"
+    )
     expect(screen.getByText("Targeting rules")).toBeVisible()
     expect(
       screen.getByText(
