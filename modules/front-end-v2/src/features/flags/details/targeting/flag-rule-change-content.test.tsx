@@ -21,6 +21,34 @@ function rule(conditions: FlagRule["conditions"]): FlagRule {
 }
 
 describe("feature flag rule review content", () => {
+  it("labels conditions when a complete rule is added", async () => {
+    await i18n.changeLanguage("en")
+    const current = rule([
+      {
+        id: "condition-1",
+        property: "role",
+        op: "IsOneOf",
+        value: '["admin"]',
+      },
+    ])
+
+    render(
+      <FlagRuleChangeContent
+        currentRule={current}
+        currentServing={{
+          variations: [{ id: "new", name: "Variation B" }],
+        }}
+      />
+    )
+
+    expect(screen.getByText("Conditions")).toBeVisible()
+    expect(screen.getByText("role")).toBeVisible()
+    expect(screen.getByText("is one of")).toBeVisible()
+    expect(screen.getByText("admin")).toBeVisible()
+    expect(screen.getByText("Serve")).toBeVisible()
+    expect(screen.getByText("Variation B")).toBeVisible()
+  })
+
   it("uses the shared Rule badge and shows added conditions instead of unchanged serving", async () => {
     await i18n.changeLanguage("en")
     const previous = rule([

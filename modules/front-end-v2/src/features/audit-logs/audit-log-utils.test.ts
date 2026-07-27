@@ -110,7 +110,8 @@ describe("audit log presentation", () => {
           previous: JSON.stringify(base),
           current: JSON.stringify({ ...base, name: "Enterprise accounts" }),
         },
-      })
+      }),
+      i18n.t
     )
 
     expect(changes).toEqual([
@@ -121,6 +122,49 @@ describe("audit log presentation", () => {
         current: "Enterprise accounts",
       }),
     ])
+  })
+
+  it("builds semantic changes for a created feature flag snapshot", () => {
+    const changes = auditHistoryChanges(
+      log({
+        operation: "Create",
+        dataChange: {
+          current: JSON.stringify({
+            id: "flag-1",
+            name: "Checkout redesign",
+            key: "checkout-redesign",
+            isEnabled: false,
+            variationType: "boolean",
+            tags: ["checkout"],
+            variations: [
+              { id: "on", name: "Enabled", value: "true" },
+              { id: "off", name: "Disabled", value: "false" },
+            ],
+            disabledVariationId: "off",
+            targetUsers: [],
+            rules: [],
+            fallthrough: {
+              variations: [{ id: "on", rollout: [0, 1] }],
+              dispatchKey: "keyId",
+            },
+          }),
+        },
+      }),
+      i18n.t
+    )
+
+    expect(changes.length).toBeGreaterThan(0)
+    expect(changes).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          label: "Name",
+          current: "Checkout redesign",
+        }),
+        expect.objectContaining({ label: "Variations" }),
+        expect.objectContaining({ label: "Flag ON" }),
+        expect.objectContaining({ label: "Flag OFF" }),
+      ])
+    )
   })
 
   it("uses inclusive local-day bounds and detects every filter type", () => {

@@ -1,6 +1,7 @@
 import { Check, Copy } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
+import { Link } from "react-router-dom"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { DetailBackLink } from "@/components/detail-back-link"
@@ -23,9 +24,11 @@ const tabs = [
 export function FlagDetailsHeader({
   flag,
   basePath,
+  activeTab,
 }: {
   flag: FeatureFlag
   basePath: string
+  activeTab: (typeof tabs)[number]
 }) {
   const { t } = useTranslation()
   const [copied, setCopied] = useState(false)
@@ -112,16 +115,20 @@ export function FlagDetailsHeader({
         aria-label={t("featureFlags.detailsPage.tabsLabel")}
       >
         {tabs.map((tab) => {
-          const active = tab === "targeting"
-          return (
-            <span
+          const active = tab === activeTab
+          const className = active
+            ? "border-b-2 border-foreground px-3 pb-3 text-sm font-medium text-foreground"
+            : "px-3 pb-3 text-sm text-muted-foreground"
+          return tab === "targeting" || tab === "history" ? (
+            <Link
               key={tab}
-              className={
-                active
-                  ? "border-b-2 border-foreground px-3 pb-3 text-sm font-medium text-foreground"
-                  : "px-3 pb-3 text-sm text-muted-foreground"
-              }
+              to={`${basePath}/${encodeURIComponent(flag.key)}/${tab}`}
+              className={className}
             >
+              {t(`featureFlags.detailsPage.tabs.${tab}`)}
+            </Link>
+          ) : (
+            <span key={tab} className={className}>
               {t(`featureFlags.detailsPage.tabs.${tab}`)}
             </span>
           )

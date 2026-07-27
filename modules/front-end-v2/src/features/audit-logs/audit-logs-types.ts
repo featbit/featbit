@@ -34,6 +34,8 @@ export type AuditLogFilters = {
   query: string
   creatorId?: string
   refType?: string
+  refId?: string
+  crossEnvironment?: boolean
   from?: number
   to?: number
 }

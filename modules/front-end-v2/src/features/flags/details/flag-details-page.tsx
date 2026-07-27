@@ -48,6 +48,7 @@ import {
 } from "../index/components/flag-confirm-dialog"
 import { FlagChangeReviewDialog } from "./flag-change-review-dialog"
 import { FlagDetailsHeader } from "./flag-details-header"
+import { HistoryTab } from "./history/history-tab"
 import { PendingChangesSheet } from "./targeting/pending-changes-sheet"
 import { TargetingTab } from "./targeting/targeting-tab"
 import {
@@ -68,6 +69,7 @@ export function FlagDetailsPage() {
   const queryClient = useQueryClient()
   const lang = resolveLang(params.lang)
   const flagKey = decodeURIComponent(params.flagKey ?? "")
+  const activeTab = params.tab === "history" ? "history" : "targeting"
   const projectEnv = getCurrentProjectEnv()
   const workspace = getCurrentWorkspace()
   const envId = projectEnv?.envId ?? ""
@@ -102,28 +104,29 @@ export function FlagDetailsPage() {
   const usersQuery = useQuery({
     queryKey: ["flag-selected-users", envId, selectedKeys],
     queryFn: () => fetchSegmentUsersByKeyIds(envId, selectedKeys),
-    enabled: Boolean(envId && selectedKeys.length),
+    enabled: Boolean(activeTab === "targeting" && envId && selectedKeys.length),
   })
   const propertiesQuery = useQuery({
     queryKey: ["flag-user-properties", envId],
     queryFn: () => fetchSegmentUserProperties(envId),
-    enabled: Boolean(envId),
+    enabled: Boolean(activeTab === "targeting" && envId),
     staleTime: 60_000,
   })
   const pendingQuery = useQuery({
     queryKey: ["flag-pending-changes", envId, flagKey],
     queryFn: () => fetchPendingFlagChanges(envId, flagKey),
-    enabled: Boolean(envId && flagKey),
+    enabled: Boolean(activeTab === "targeting" && envId && flagKey),
   })
   const policiesQuery = useQuery({
     queryKey: ["feature-flag-policies", workspace?.id ?? ""],
     queryFn: fetchFlagPolicies,
+    enabled: activeTab === "targeting",
     staleTime: 5 * 60_000,
   })
   const settingsQuery = useQuery({
     queryKey: ["feature-flag-environment-settings", envId],
     queryFn: () => fetchFlagEnvironmentSettings(envId),
-    enabled: Boolean(envId),
+    enabled: Boolean(activeTab === "targeting" && envId),
     staleTime: 5 * 60_000,
   })
 
@@ -342,9 +345,10 @@ export function FlagDetailsPage() {
   }
   if (
     !flag ||
-    policiesQuery.isLoading ||
-    propertiesQuery.isLoading ||
-    usersQuery.isLoading
+    (activeTab === "targeting" &&
+      (policiesQuery.isLoading ||
+        propertiesQuery.isLoading ||
+        usersQuery.isLoading))
   ) {
     return (
       <div className="-m-5 min-h-[calc(100vh-3.5rem)] bg-background px-8 py-6">
@@ -359,50 +363,58 @@ export function FlagDetailsPage() {
   return (
     <TooltipProvider>
       <div className="-m-5 min-h-[calc(100vh-3.5rem)] bg-background px-6 py-6 lg:px-8">
-        <FlagDetailsHeader flag={flag} basePath={basePath} />
-        <TargetingTab
+        <FlagDetailsHeader
           flag={flag}
-          users={users}
-          properties={propertiesQuery.data ?? []}
-          pendingCount={pendingQuery.data?.length ?? 0}
-          dirty={dirty}
-          saving={saveMutation.isPending}
-          toggling={toggleMutation.isPending}
-          canToggle={can("ToggleFlag")}
-          canUpdateOffVariation={can("UpdateFlagOffVariation")}
-          canUpdateDefault={can("UpdateFlagDefaultRule")}
-          canUpdateUsers={can("UpdateFlagIndividualTargeting")}
-          canUpdateRules={can("UpdateFlagRules")}
-          onDraftChange={(value) => setDraft({ key: flagKey, value })}
-          onResolveUser={(user) =>
-            setResolvedUsers((current) =>
-              new Map(current).set(user.keyId, user)
-            )
-          }
-          onDiscard={() => setDraft(null)}
-          onReview={() => {
-            setReviewInitialComment("")
-            setReviewOpen(true)
-          }}
-          onOpenPending={() => setPendingOpen(true)}
-          scheduleGranted={scheduleGranted}
-          changeRequestGranted={changeRequestGranted}
-          onSchedule={() =>
-            setSubmission({ mode: "schedule", initialReason: "" })
-          }
-          onChangeRequest={() =>
-            setSubmission({ mode: "change-request", initialReason: "" })
-          }
-          onToggle={(nextEnabled) =>
-            setConfirmation({
-              kind: "toggle",
-              flag,
-              nextEnabled,
-              hasUnsavedTargeting: dirty,
-              savedOffVariation: savedOffVariationLabel,
-            })
-          }
+          basePath={basePath}
+          activeTab={activeTab}
         />
+        {activeTab === "history" ? (
+          <HistoryTab envId={envId} flagId={flag.id} lang={lang} />
+        ) : (
+          <TargetingTab
+            flag={flag}
+            users={users}
+            properties={propertiesQuery.data ?? []}
+            pendingCount={pendingQuery.data?.length ?? 0}
+            dirty={dirty}
+            saving={saveMutation.isPending}
+            toggling={toggleMutation.isPending}
+            canToggle={can("ToggleFlag")}
+            canUpdateOffVariation={can("UpdateFlagOffVariation")}
+            canUpdateDefault={can("UpdateFlagDefaultRule")}
+            canUpdateUsers={can("UpdateFlagIndividualTargeting")}
+            canUpdateRules={can("UpdateFlagRules")}
+            onDraftChange={(value) => setDraft({ key: flagKey, value })}
+            onResolveUser={(user) =>
+              setResolvedUsers((current) =>
+                new Map(current).set(user.keyId, user)
+              )
+            }
+            onDiscard={() => setDraft(null)}
+            onReview={() => {
+              setReviewInitialComment("")
+              setReviewOpen(true)
+            }}
+            onOpenPending={() => setPendingOpen(true)}
+            scheduleGranted={scheduleGranted}
+            changeRequestGranted={changeRequestGranted}
+            onSchedule={() =>
+              setSubmission({ mode: "schedule", initialReason: "" })
+            }
+            onChangeRequest={() =>
+              setSubmission({ mode: "change-request", initialReason: "" })
+            }
+            onToggle={(nextEnabled) =>
+              setConfirmation({
+                kind: "toggle",
+                flag,
+                nextEnabled,
+                hasUnsavedTargeting: dirty,
+                savedOffVariation: savedOffVariationLabel,
+              })
+            }
+          />
+        )}
         <FlagChangeReviewDialog
           open={reviewOpen}
           flagName={flag.name}
@@ -450,7 +462,7 @@ export function FlagDetailsPage() {
           }
         />
         <TargetingSubmissionDialog
-          key={submission ? "submission" : "closed"}
+          key={submission ? "submission-open" : "submission-closed"}
           mode={submission?.mode ?? null}
           flagName={flag.name}
           changes={changes}
@@ -473,7 +485,9 @@ export function FlagDetailsPage() {
           onSubmit={(value) => submissionMutation.mutate(value)}
         />
         <FlagConfirmDialog
-          key={confirmation ? `toggle-${flag.id}` : "closed"}
+          key={
+            confirmation ? `toggle-${flag.id}` : "toggle-confirmation-closed"
+          }
           target={confirmation}
           saving={toggleMutation.isPending}
           requireComment={settingsQuery.data?.requireChangeComment ?? false}

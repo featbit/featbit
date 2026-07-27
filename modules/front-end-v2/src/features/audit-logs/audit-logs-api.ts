@@ -12,11 +12,11 @@ export function fetchAuditLogs(
   pageSize: number
 ) {
   const params = new URLSearchParams({
-    crossEnvironment: "false",
+    crossEnvironment: String(filters.crossEnvironment ?? false),
     query: filters.query,
     creatorId: filters.creatorId ?? "",
     refType: filters.refType ?? "",
-    refId: "",
+    refId: filters.refId ?? "",
     from: filters.from ? String(filters.from) : "",
     to: filters.to ? String(filters.to) : "",
     pageIndex: String(pageIndex),

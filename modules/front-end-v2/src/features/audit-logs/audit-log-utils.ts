@@ -1,5 +1,10 @@
 import type { TFunction } from "i18next"
 import type { ChangeReviewItem } from "@/features/change-review/change-review-types"
+import type { FeatureFlag } from "@/features/flags/flags-types"
+import {
+  targetingReviewChanges,
+  type FlagTargetingReviewChange,
+} from "@/features/flags/details/targeting/targeting-utils"
 import {
   auditEventKind,
   segmentSnapshot,
@@ -236,7 +241,159 @@ function genericInstructionChanges(
     })
 }
 
-export function auditHistoryChanges(log: AuditLog): ReviewChange[] {
+function flagSnapshot(value?: string) {
+  return recordSnapshot(value) as FeatureFlag | null
+}
+
+function flagFieldChange(
+  label: string,
+  previous: string | undefined,
+  current: string | undefined
+): FlagTargetingReviewChange | null {
+  if (previous === current) return null
+  return {
+    kind: "field",
+    label,
+    literalLabel: true,
+    action:
+      previous === undefined
+        ? "added"
+        : current === undefined
+          ? "removed"
+          : "updated",
+    previous,
+    current,
+  }
+}
+
+function flagState(flag: FeatureFlag, t: TFunction) {
+  if (flag.isArchived) return t("featureFlags.archive")
+  if (flag.isEnabled === true) return t("featureFlags.on")
+  if (flag.isEnabled === false) return t("featureFlags.off")
+  return undefined
+}
+
+function boundedValue(value: string) {
+  return value.length > 120 ? `${value.slice(0, 117)}…` : value
+}
+
+function variationSummary(variation: { name?: string; value: string }) {
+  return variation.name?.trim() || boundedValue(variation.value)
+}
+
+function variationDetail(variation: { name?: string; value: string }) {
+  const value = boundedValue(variation.value)
+  return variation.name?.trim() ? `${variation.name} · ${value}` : value
+}
+
+function flagSnapshotChanges(
+  previous: FeatureFlag,
+  current: FeatureFlag,
+  t: TFunction
+): FlagTargetingReviewChange[] {
+  const changes: FlagTargetingReviewChange[] = []
+  const fields = [
+    flagFieldChange(
+      t("featureFlags.status"),
+      flagState(previous, t),
+      flagState(current, t)
+    ),
+    flagFieldChange(t("featureFlags.editor.name"), previous.name, current.name),
+    flagFieldChange(
+      t("featureFlags.detailsPage.key"),
+      previous.key,
+      current.key
+    ),
+    flagFieldChange(
+      t("featureFlags.editor.description"),
+      previous.description || undefined,
+      current.description || undefined
+    ),
+    flagFieldChange(
+      t("featureFlags.variationsEditor.type"),
+      previous.variationType?.toUpperCase(),
+      current.variationType?.toUpperCase()
+    ),
+  ]
+  changes.push(...fields.filter((change) => change !== null))
+
+  const previousTags = previous.tags ?? []
+  const currentTags = current.tags ?? []
+  const addedTags = currentTags.filter((tag) => !previousTags.includes(tag))
+  const removedTags = previousTags.filter((tag) => !currentTags.includes(tag))
+  if (addedTags.length || removedTags.length) {
+    changes.push({
+      kind: "tags",
+      label: t("featureFlags.detailsPage.tags"),
+      literalLabel: true,
+      valueGroups: [
+        ...(addedTags.length
+          ? [{ action: "added" as const, values: addedTags }]
+          : []),
+        ...(removedTags.length
+          ? [{ action: "removed" as const, values: removedTags }]
+          : []),
+      ],
+    })
+  }
+
+  const previousVariations = new Map(
+    (previous.variations ?? []).map((variation) => [variation.id, variation])
+  )
+  const currentVariations = new Map(
+    (current.variations ?? []).map((variation) => [variation.id, variation])
+  )
+  const addedVariations = (current.variations ?? [])
+    .filter((variation) => !previousVariations.has(variation.id))
+    .map(variationSummary)
+  const removedVariations = (previous.variations ?? [])
+    .filter((variation) => !currentVariations.has(variation.id))
+    .map(variationSummary)
+  if (addedVariations.length || removedVariations.length) {
+    changes.push({
+      kind: "variations",
+      label: t("featureFlags.variationsEditor.variations"),
+      literalLabel: true,
+      valueGroups: [
+        ...(addedVariations.length
+          ? [{ action: "added" as const, values: addedVariations }]
+          : []),
+        ...(removedVariations.length
+          ? [{ action: "removed" as const, values: removedVariations }]
+          : []),
+      ],
+    })
+  }
+  for (const variation of current.variations ?? []) {
+    const before = previousVariations.get(variation.id)
+    if (
+      before &&
+      (before.name !== variation.name || before.value !== variation.value)
+    ) {
+      changes.push({
+        kind: "variation",
+        label: variation.name || before.name || variation.value,
+        literalLabel: true,
+        action: "updated",
+        previous: variationDetail(before),
+        current: variationDetail(variation),
+      })
+    }
+  }
+
+  changes.push(
+    ...targetingReviewChanges(previous, current, {
+      flagOn: t("featureFlags.detailsPage.flagOn"),
+      flagOff: t("featureFlags.detailsPage.flagOff"),
+    })
+  )
+  return changes
+}
+
+export function auditHistoryChanges(
+  log: AuditLog,
+  t: TFunction
+): ReviewChange[] | FlagTargetingReviewChange[] {
   if (log.refType === "Segment") {
     const previous = segmentSnapshot(log.dataChange.previous)
     const current = segmentSnapshot(log.dataChange.current)
@@ -245,6 +402,20 @@ export function auditHistoryChanges(log: AuditLog): ReviewChange[] {
         ...targetingChanges(previous, current),
         ...settingsReviewChanges(previous, current),
       ]
+      if (changes.length) return changes
+    }
+  }
+
+  if (log.refType === "FeatureFlag") {
+    const operation = log.operation.toLowerCase()
+    const previous =
+      flagSnapshot(log.dataChange.previous) ??
+      (operation === "create" ? ({} as FeatureFlag) : null)
+    const current =
+      flagSnapshot(log.dataChange.current) ??
+      (operation === "remove" ? ({} as FeatureFlag) : null)
+    if (previous && current) {
+      const changes = flagSnapshotChanges(previous, current, t)
       if (changes.length) return changes
     }
   }

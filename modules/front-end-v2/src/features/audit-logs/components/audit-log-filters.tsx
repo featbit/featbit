@@ -48,6 +48,7 @@ export function AuditLogFilters({
   refType,
   range,
   filtersApplied,
+  showRefType = true,
   onSearchChange,
   onUserChange,
   onRefTypeChange,
@@ -60,6 +61,7 @@ export function AuditLogFilters({
   refType: string
   range: DateRange | undefined
   filtersApplied: boolean
+  showRefType?: boolean
   onSearchChange: (value: string) => void
   onUserChange: (value: AuditUser | null) => void
   onRefTypeChange: (value: string) => void
@@ -203,31 +205,33 @@ export function AuditLogFilters({
         ) : null}
       </div>
 
-      <Select
-        value={refType || "all"}
-        onValueChange={(value) =>
-          onRefTypeChange(value === "all" || value === null ? "" : value)
-        }
-      >
-        <SelectTrigger className="w-52">
-          <SelectValue>
-            {refType === "FeatureFlag"
-              ? t("auditLogs.featureFlag")
-              : refType === "Segment"
-                ? t("auditLogs.segment")
-                : t("auditLogs.allTypes")}
-          </SelectValue>
-        </SelectTrigger>
-        <SelectContent>
-          <SelectGroup>
-            <SelectItem value="all">{t("auditLogs.allTypes")}</SelectItem>
-            <SelectItem value="FeatureFlag">
-              {t("auditLogs.featureFlag")}
-            </SelectItem>
-            <SelectItem value="Segment">{t("auditLogs.segment")}</SelectItem>
-          </SelectGroup>
-        </SelectContent>
-      </Select>
+      {showRefType ? (
+        <Select
+          value={refType || "all"}
+          onValueChange={(value) =>
+            onRefTypeChange(value === "all" || value === null ? "" : value)
+          }
+        >
+          <SelectTrigger className="w-52">
+            <SelectValue>
+              {refType === "FeatureFlag"
+                ? t("auditLogs.featureFlag")
+                : refType === "Segment"
+                  ? t("auditLogs.segment")
+                  : t("auditLogs.allTypes")}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectItem value="all">{t("auditLogs.allTypes")}</SelectItem>
+              <SelectItem value="FeatureFlag">
+                {t("auditLogs.featureFlag")}
+              </SelectItem>
+              <SelectItem value="Segment">{t("auditLogs.segment")}</SelectItem>
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      ) : null}
 
       <Popover
         open={dateOpen}

@@ -359,7 +359,7 @@ export function AppRoutes() {
           <Route path="feature-flags" element={<FlagsPage />} />
           <Route path="feature-flags/compare" element={<FlagsComparePage />} />
           <Route
-            path="feature-flags/:flagKey/targeting"
+            path="feature-flags/:flagKey/:tab"
             element={<FlagDetailsPage />}
           />
           <Route path="segments" element={<SegmentsPage />} />

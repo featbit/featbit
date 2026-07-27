@@ -167,7 +167,14 @@ export function RuleChangeContent({
   if (!displayedRule) return <span>—</span>
 
   if (!previous || !current) {
-    return <ConditionSummary rule={displayedRule} />
+    return (
+      <section className="space-y-1.5">
+        <p className="text-xs font-medium text-muted-foreground">
+          {t("targeting.review.labels.conditions")}
+        </p>
+        <ConditionSummary rule={displayedRule} />
+      </section>
+    )
   }
 
   const renamed = previous.name !== current.name

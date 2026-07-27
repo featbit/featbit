@@ -19,6 +19,9 @@ import {
 } from "@/components/ui/tooltip"
 import { localizedPath } from "@/features/layout/layout-context"
 import type { Lang } from "@/features/layout/layout-types"
+import { ChangeLedger as SharedChangeLedger } from "@/features/change-review/change-ledger"
+import { useFlagChangeLedgerAdapter } from "@/features/flags/details/targeting/use-flag-change-ledger-adapter"
+import type { FlagTargetingReviewChange } from "@/features/flags/details/targeting/targeting-utils"
 import { ChangeLedger } from "@/features/segments/details/components/change-ledger"
 import {
   auditEventFragments,
@@ -94,6 +97,7 @@ export function AuditLogTable({
   locale,
   loading,
   filtered,
+  resourceScoped = false,
   onClearFilters,
   onViewRawData,
 }: {
@@ -102,10 +106,12 @@ export function AuditLogTable({
   locale: string
   loading: boolean
   filtered: boolean
+  resourceScoped?: boolean
   onClearFilters: () => void
   onViewRawData: (log: AuditLog) => void
 }) {
   const { t } = useTranslation()
+  const flagLedger = useFlagChangeLedgerAdapter()
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
   const dateFormatter = useMemo(
     () =>
@@ -115,6 +121,7 @@ export function AuditLogTable({
       }),
     [locale]
   )
+  const columnCount = resourceScoped ? 5 : 7
 
   function toggleExpanded(logId: string) {
     setExpanded((current) => {
@@ -132,8 +139,12 @@ export function AuditLogTable({
           <TableHead className="w-12" />
           <TableHead className="w-52">{t("auditLogs.date")}</TableHead>
           <TableHead className="w-56">{t("auditLogs.user")}</TableHead>
-          <TableHead className="w-36">{t("auditLogs.type")}</TableHead>
-          <TableHead className="w-64">{t("auditLogs.keyName")}</TableHead>
+          {!resourceScoped ? (
+            <>
+              <TableHead className="w-36">{t("auditLogs.type")}</TableHead>
+              <TableHead className="w-64">{t("auditLogs.keyName")}</TableHead>
+            </>
+          ) : null}
           <TableHead>{t("auditLogs.event")}</TableHead>
           <TableHead>{t("auditLogs.comment")}</TableHead>
         </TableRow>
@@ -142,7 +153,7 @@ export function AuditLogTable({
         {loading ? (
           Array.from({ length: 5 }, (_, index) => (
             <TableRow key={index}>
-              <TableCell colSpan={7} className="h-[68px] px-4">
+              <TableCell colSpan={columnCount} className="h-[68px] px-4">
                 <Skeleton className="h-8 w-full" />
               </TableCell>
             </TableRow>
@@ -156,7 +167,7 @@ export function AuditLogTable({
               log.creatorId ||
               t("auditLogs.system")
             const fragment = auditEventFragments(log, t)
-            const changes = auditHistoryChanges(log)
+            const changes = auditHistoryChanges(log, t)
             const comment = log.comment?.trim()
             const hasRawData = Boolean(
               log.dataChange.previous || log.dataChange.current
@@ -198,12 +209,16 @@ export function AuditLogTable({
                       </p>
                     ) : null}
                   </TableCell>
-                  <TableCell className="whitespace-nowrap">
-                    {auditTypeLabel(log.refType, t)}
-                  </TableCell>
-                  <TableCell className="max-w-64">
-                    <ObjectIdentity log={log} lang={lang} />
-                  </TableCell>
+                  {!resourceScoped ? (
+                    <>
+                      <TableCell className="whitespace-nowrap">
+                        {auditTypeLabel(log.refType, t)}
+                      </TableCell>
+                      <TableCell className="max-w-64">
+                        <ObjectIdentity log={log} lang={lang} />
+                      </TableCell>
+                    </>
+                  ) : null}
                   <TableCell className="max-w-80">
                     <p className="truncate">{auditEventTitle(log, t)}</p>
                     {fragment ? (
@@ -239,7 +254,10 @@ export function AuditLogTable({
 
                 {isExpanded ? (
                   <TableRow className="hover:bg-transparent">
-                    <TableCell colSpan={7} className="p-3 whitespace-normal">
+                    <TableCell
+                      colSpan={columnCount}
+                      className="p-3 whitespace-normal"
+                    >
                       <div className="rounded-md bg-muted/40 p-4">
                         <div className="mb-3 flex items-center justify-between">
                           <div className="flex items-baseline gap-2">
@@ -264,11 +282,20 @@ export function AuditLogTable({
                           ) : null}
                         </div>
                         {changes.length ? (
-                          <ChangeLedger
-                            changes={changes}
-                            layout="history"
-                            className="max-h-[32rem] bg-transparent p-0"
-                          />
+                          log.refType === "FeatureFlag" ? (
+                            <SharedChangeLedger
+                              changes={changes as FlagTargetingReviewChange[]}
+                              layout="history"
+                              className="max-h-[32rem] bg-transparent p-0"
+                              {...flagLedger}
+                            />
+                          ) : (
+                            <ChangeLedger
+                              changes={changes}
+                              layout="history"
+                              className="max-h-[32rem] bg-transparent p-0"
+                            />
+                          )
                         ) : (
                           <p className="py-5 text-center text-sm text-muted-foreground">
                             {t("auditLogs.noSemanticChanges")}
@@ -297,7 +324,7 @@ export function AuditLogTable({
           })
         ) : (
           <TableRow>
-            <TableCell colSpan={7} className="h-48 text-center">
+            <TableCell colSpan={columnCount} className="h-48 text-center">
               <div className="mx-auto max-w-md space-y-2">
                 <p className="font-medium">
                   {filtered
