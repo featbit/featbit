@@ -21,6 +21,7 @@ import {
   useSearchParams,
 } from "react-router-dom"
 import { toast } from "sonner"
+import { useTranslation } from "react-i18next"
 import {
   Alert,
   AlertAction,
@@ -153,7 +154,6 @@ function CompareTagsPopoverContent({ children }: { children: ReactNode }) {
 }
 
 function CompareTagsFilter({
-  lang,
   tags,
   selectedTags,
   loading,
@@ -162,7 +162,6 @@ function CompareTagsFilter({
   onChange,
   onRetry,
 }: {
-  lang: "en" | "zh"
   tags: string[]
   selectedTags: string[]
   loading: boolean
@@ -171,14 +170,14 @@ function CompareTagsFilter({
   onChange: (tags: string[]) => void
   onRetry: () => void
 }) {
-  const zh = lang === "zh"
+  const { t } = useTranslation()
   const visibleTags = selectedTags.slice(0, 2)
   const hiddenTagCount = selectedTags.length - visibleTags.length
   const label = selectedTags.length
-    ? `${zh ? "标签" : "Tags"}: ${visibleTags.join(", ")}${hiddenTagCount ? ` +${hiddenTagCount}` : ""}`
-    : zh
-      ? "标签"
-      : "Tags"
+    ? t("featureFlags.comparePage.tags.selectedLabel", {
+        tags: `${visibleTags.join(", ")}${hiddenTagCount ? ` +${hiddenTagCount}` : ""}`,
+      })
+    : t("featureFlags.comparePage.tags.label")
 
   function toggle(tag: string) {
     onChange(
@@ -205,32 +204,28 @@ function CompareTagsFilter({
       </PopoverTrigger>
       <CompareTagsPopoverContent>
         <Command>
-          <CommandInput placeholder={zh ? "搜索标签" : "Search tags"} />
+          <CommandInput
+            placeholder={t("featureFlags.comparePage.tags.search")}
+          />
           <CommandList>
             {error ? (
               <div className="flex items-center justify-between gap-3 px-3 py-4 text-sm text-destructive">
-                <span>
-                  {zh ? "无法加载标签。" : "Tags could not be loaded."}
-                </span>
+                <span>{t("featureFlags.comparePage.tags.loadFailed")}</span>
                 <Button
                   type="button"
                   size="sm"
                   variant="outline"
                   onClick={onRetry}
                 >
-                  {zh ? "重试" : "Retry"}
+                  {t("featureFlags.comparePage.tags.retry")}
                 </Button>
               </div>
             ) : null}
             {!error ? (
               <CommandEmpty>
                 {loading
-                  ? zh
-                    ? "正在加载…"
-                    : "Loading…"
-                  : zh
-                    ? "未找到标签"
-                    : "No tags found"}
+                  ? t("featureFlags.comparePage.tags.loading")
+                  : t("featureFlags.comparePage.tags.empty")}
               </CommandEmpty>
             ) : null}
             {!error ? (
@@ -258,7 +253,7 @@ function CompareTagsFilter({
               className="w-full"
               onClick={() => onChange([])}
             >
-              {zh ? "全部清除" : "Clear all"}
+              {t("featureFlags.comparePage.tags.clearAll")}
             </Button>
           </div>
         ) : null}
@@ -270,7 +265,7 @@ function CompareTagsFilter({
 export function FlagsComparePage() {
   const { lang: langParam } = useParams()
   const lang = resolveLang(langParam)
-  const zh = lang === "zh"
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
   const queryClient = useQueryClient()
@@ -475,9 +470,7 @@ export function FlagsComparePage() {
     return (
       <div className="-m-5 flex min-h-[calc(100vh-3.5rem)] items-center justify-center bg-background p-8">
         <p className="text-sm text-muted-foreground">
-          {zh
-            ? "无法加载当前项目和环境。"
-            : "The current project and environment could not be loaded."}
+          {t("featureFlags.comparePage.loadContextFailed")}
         </p>
       </div>
     )
@@ -497,20 +490,17 @@ export function FlagsComparePage() {
             }}
           >
             <ArrowLeft />
-            {zh ? "功能开关" : "Feature flags"}
+            {t("featureFlags.comparePage.back")}
           </Button>
           <h1 className="text-2xl font-semibold tracking-normal">
-            {zh ? "比较功能开关" : "Compare feature flags"}
+            {t("featureFlags.comparePage.title")}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {zh
-              ? "比较不同环境中的功能开关设置，并只复制你需要的内容。"
-              : "Compare flag settings across environments and copy only what you need."}
+            {t("featureFlags.comparePage.subtitle")}
           </p>
         </header>
 
         <FlagsCompareScope
-          lang={lang}
           source={projectEnv}
           environments={environments}
           selectedIds={normalizedDraftIds}
@@ -528,14 +518,10 @@ export function FlagsComparePage() {
           <Alert className="mt-4 bg-muted/30">
             <Lock />
             <AlertTitle>
-              {zh
-                ? "功能开关比较不可用"
-                : "Feature flag comparison is unavailable"}
+              {t("featureFlags.comparePage.unavailableTitle")}
             </AlertTitle>
             <AlertDescription>
-              {zh
-                ? "当前许可证不包含跨环境比较和设置复制功能。"
-                : "Your current license does not include cross-environment comparison and settings copy."}
+              {t("featureFlags.comparePage.unavailableDescription")}
             </AlertDescription>
           </Alert>
         ) : null}
@@ -544,14 +530,10 @@ export function FlagsComparePage() {
           <Alert variant="destructive" className="mt-4 bg-destructive/5">
             <AlertTriangle />
             <AlertTitle>
-              {zh
-                ? "无法加载比较结果"
-                : "Comparison results could not be loaded."}
+              {t("featureFlags.comparePage.resultsFailed")}
             </AlertTitle>
             <AlertDescription>
-              {zh
-                ? "已保留当前比较范围和筛选条件，请重试。"
-                : "Your current comparison scope and filters have been preserved."}
+              {t("featureFlags.comparePage.resultsFailedHelp")}
             </AlertDescription>
             <AlertAction>
               <Button
@@ -563,7 +545,7 @@ export function FlagsComparePage() {
                   else void overviewQuery.refetch()
                 }}
               >
-                {zh ? "重试" : "Retry"}
+                {t("featureFlags.comparePage.retry")}
               </Button>
             </AlertAction>
           </Alert>
@@ -577,12 +559,11 @@ export function FlagsComparePage() {
                 <Input
                   value={search}
                   className="pl-9"
-                  placeholder={zh ? "按名称或键筛选" : "Filter by name or key"}
+                  placeholder={t("featureFlags.comparePage.search")}
                   onChange={(event) => setSearch(event.target.value)}
                 />
               </div>
               <CompareTagsFilter
-                lang={lang}
                 tags={tagsQuery.data ?? []}
                 selectedTags={selectedTags}
                 loading={tagsQuery.isLoading}
@@ -598,13 +579,13 @@ export function FlagsComparePage() {
               />
               {hasFilters ? (
                 <Button type="button" variant="ghost" onClick={clearFilters}>
-                  {zh ? "清除筛选" : "Clear filters"}
+                  {t("featureFlags.comparePage.clearFilters")}
                 </Button>
               ) : null}
               <p className="ml-auto text-sm text-muted-foreground">
-                {zh
-                  ? `正在比较 ${appliedTargets.length} 个环境`
-                  : `Comparing ${appliedTargets.length} environments`}
+                {t("featureFlags.comparePage.comparing", {
+                  count: appliedTargets.length,
+                })}
               </p>
             </div>
 
@@ -630,11 +611,9 @@ export function FlagsComparePage() {
               onCopyKey={async (key) => {
                 try {
                   await navigator.clipboard.writeText(key)
-                  toast.success(zh ? "已复制功能开关键" : "Flag key copied")
+                  toast.success(t("featureFlags.comparePage.keyCopied"))
                 } catch {
-                  toast.error(
-                    zh ? "无法复制功能开关键" : "Flag key could not be copied"
-                  )
+                  toast.error(t("featureFlags.comparePage.keyCopyFailed"))
                 }
               }}
               onClearFilters={clearFilters}

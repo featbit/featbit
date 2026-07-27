@@ -67,3 +67,4 @@ describe("percentage rollout editor", () => {
     expect(screen.getAllByRole("option")).toHaveLength(4)
   })
 })
+import "@/lib/i18n/i18n"

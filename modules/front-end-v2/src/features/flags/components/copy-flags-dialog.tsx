@@ -10,6 +10,7 @@ import {
   ShieldAlert,
 } from "lucide-react"
 import { useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -63,7 +64,7 @@ export function CopyFlagsDialog({
   onOpenChange: (open: boolean) => void
   onSuccess: () => void
 }) {
-  const zh = lang === "zh"
+  const { t } = useTranslation()
   const source = getCurrentProjectEnv()
   const [selectedTargetEnvId, setSelectedTargetEnvId] = useState("")
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
@@ -122,15 +123,12 @@ export function CopyFlagsDialog({
       ),
     onSuccess: (result) => {
       toast.success(
-        zh
-          ? `已复制 ${result.copiedCount} 个功能开关`
-          : `${result.copiedCount} feature flags copied`
+        t("featureFlags.copyDialog.copied", { count: result.copiedCount })
       )
       onSuccess()
       onOpenChange(false)
     },
-    onError: () =>
-      toast.error(zh ? "复制失败，请重试。" : "Copy failed. Please try again."),
+    onError: () => toast.error(t("featureFlags.copyDialog.failed")),
   })
 
   const targetProjects = (projectsQuery.data ?? [])
@@ -188,7 +186,9 @@ export function CopyFlagsDialog({
       <div className="flex min-w-0 items-start gap-3 px-3 py-3">
         {flags.length > 1 && !warning ? (
           <Checkbox
-            aria-label={zh ? `选择 ${flag.name}` : `Select ${flag.name}`}
+            aria-label={t("featureFlags.copyDialog.selectFlag", {
+              name: flag.name,
+            })}
             className="mt-0.5"
             checked={activeSelectedIds.has(flag.id)}
             disabled={
@@ -220,7 +220,7 @@ export function CopyFlagsDialog({
     if (!targetEnvId) {
       return (
         <p className="text-xs text-muted-foreground">
-          {zh ? "请选择目标环境。" : "Choose a target environment."}
+          {t("featureFlags.copyDialog.chooseTarget")}
         </p>
       )
     }
@@ -230,9 +230,7 @@ export function CopyFlagsDialog({
           <Loader2 className="mt-0.5 size-5 shrink-0 animate-spin text-primary" />
           <div className="min-w-0 flex-1 space-y-2">
             <p className="text-xs text-muted-foreground">
-              {zh
-                ? "正在检查这些功能开关是否可以复制…"
-                : "Checking whether these flags can be copied…"}
+              {t("featureFlags.copyDialog.checking")}
             </p>
             <Skeleton className="h-2 w-full" />
             <Skeleton className="h-2 w-2/3" />
@@ -245,7 +243,7 @@ export function CopyFlagsDialog({
         <div className="flex items-center justify-between gap-3">
           <p className="flex min-w-0 items-center gap-2 text-xs text-destructive">
             <CircleX className="size-4 shrink-0" />
-            {zh ? "预检失败，请重试。" : "Precheck failed. Please try again."}
+            {t("featureFlags.copyDialog.precheckFailed")}
           </p>
           <Button
             type="button"
@@ -253,7 +251,7 @@ export function CopyFlagsDialog({
             variant="outline"
             onClick={() => void precheckQuery.refetch()}
           >
-            {zh ? "重试" : "Retry"}
+            {t("featureFlags.copyDialog.retry")}
           </Button>
         </div>
       )
@@ -263,12 +261,10 @@ export function CopyFlagsDialog({
         <div className="space-y-2 text-destructive">
           <p className="flex items-center gap-2 text-xs font-medium">
             <CircleX className="text-destructive-foreground size-4 shrink-0 fill-destructive" />
-            {zh ? "无法复制此功能开关" : "This flag cannot be copied"}
+            {t("featureFlags.copyDialog.blocked")}
           </p>
           <p className="pl-6 text-xs leading-5">
-            {zh
-              ? "目标环境中已存在具有此 Key 的功能开关。"
-              : "A flag with this key already exists in the target environment."}
+            {t("featureFlags.copyDialog.duplicateKey")}
           </p>
         </div>
       )
@@ -278,40 +274,32 @@ export function CopyFlagsDialog({
         <div className="space-y-2">
           <p className="flex items-center gap-2 text-xs font-medium text-amber-600 dark:text-amber-400">
             <AlertTriangle className="size-4 shrink-0 fill-amber-500 text-amber-500" />
-            {zh ? "复制时存在限制" : "Copy with limitations"}
+            {t("featureFlags.copyDialog.limitations")}
           </p>
           <ul className="space-y-2 pl-5 text-xs text-muted-foreground">
             {!result.targetUserCheck ? (
               <li className="list-disc pl-0.5">
                 <span className="font-medium text-foreground">
-                  {zh
-                    ? "单独定向不会被复制"
-                    : "Individual targeting won't be copied"}
+                  {t("featureFlags.copyDialog.usersSkipped")}
                 </span>
                 <span className="mt-0.5 block">
-                  {zh
-                    ? "用户属于特定环境。"
-                    : "Users are environment-specific."}
+                  {t("featureFlags.copyDialog.usersScoped")}
                 </span>
               </li>
             ) : null}
             {!result.targetRuleCheck ? (
               <li className="list-disc pl-0.5">
                 <span className="font-medium text-foreground">
-                  {zh
-                    ? "定向规则不会被复制"
-                    : "Targeting rules won't be copied"}
+                  {t("featureFlags.copyDialog.rulesSkipped")}
                 </span>
                 <span className="mt-0.5 block">
-                  {zh
-                    ? "规则引用了目标环境中不可用的 Segment。"
-                    : "Rules reference segments unavailable in the target environment."}
+                  {t("featureFlags.copyDialog.rulesUnavailable")}
                 </span>
               </li>
             ) : null}
             {result.newProperties.length ? (
               <li className="list-disc pl-0.5 text-foreground">
-                {zh ? "要添加的用户属性：" : "User properties to add:"}{" "}
+                {t("featureFlags.copyDialog.propertiesAdded")}{" "}
                 {result.newProperties.map((property) => (
                   <code
                     key={property}
@@ -325,11 +313,9 @@ export function CopyFlagsDialog({
           </ul>
           <div className="flex items-start gap-2 text-xs">
             <Checkbox
-              aria-label={
-                zh
-                  ? `忽略受限设置并复制 ${flag.name}`
-                  : `Copy ${flag.name} without limited settings`
-              }
+              aria-label={t("featureFlags.copyDialog.includeLimited", {
+                name: flag.name,
+              })}
               checked={activeSelectedIds.has(flag.id)}
               disabled={mutation.isPending}
               onCheckedChange={(checked) =>
@@ -345,14 +331,10 @@ export function CopyFlagsDialog({
               }
             >
               <span className="font-medium">
-                {zh
-                  ? "不复制上述设置，仍复制此开关"
-                  : "Copy this flag without these settings"}
+                {t("featureFlags.copyDialog.includeLimitedTitle")}
               </span>
               <span className="mt-0.5 block text-muted-foreground">
-                {zh
-                  ? "未选中时将跳过此功能开关。"
-                  : "Leave unchecked to skip this flag."}
+                {t("featureFlags.copyDialog.includeLimitedHelp")}
               </span>
             </button>
           </div>
@@ -364,10 +346,10 @@ export function CopyFlagsDialog({
         <div className="space-y-1.5">
           <p className="flex items-center gap-2 text-xs font-medium text-emerald-600 dark:text-emerald-400">
             <CheckCircle2 className="size-4 shrink-0 fill-emerald-600 text-emerald-600 dark:fill-emerald-400 dark:text-emerald-400" />
-            {zh ? "可以复制" : "Ready to copy"}
+            {t("featureFlags.copyDialog.ready")}
           </p>
           <p className="pl-6 text-xs text-muted-foreground">
-            {zh ? "所有复制检查均已通过。" : "All copy checks passed."}
+            {t("featureFlags.copyDialog.readyHelp")}
           </p>
         </div>
       )
@@ -382,25 +364,21 @@ export function CopyFlagsDialog({
     >
       <DialogContent className="flex max-h-[85vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-[720px]">
         <DialogHeader className="px-5 pt-5 pb-4">
-          <DialogTitle>{zh ? "复制到环境" : "Copy to environment"}</DialogTitle>
+          <DialogTitle>{t("featureFlags.copyDialog.title")}</DialogTitle>
           <DialogDescription>
             {lockedTarget
-              ? zh
-                ? "检查可以复制到此目标环境的内容。"
-                : "Review what can be copied to this target environment."
-              : zh
-                ? "选择目标环境并检查可以复制的内容。"
-                : "Choose a target environment and review what can be copied."}
+              ? t("featureFlags.copyDialog.lockedDescription")
+              : t("featureFlags.copyDialog.description")}
           </DialogDescription>
         </DialogHeader>
 
         <div className="flex min-h-0 flex-1 flex-col gap-3 px-5 pb-4">
           <div className="grid shrink-0 grid-cols-[minmax(0,0.92fr)_auto_minmax(0,1.08fr)] grid-rows-[auto_auto] gap-x-3 gap-y-1 rounded-lg border px-3 py-2.5">
             <p className="col-start-1 row-start-1 text-xs leading-4 text-muted-foreground">
-              {zh ? "来源" : "Source"}
+              {t("featureFlags.copyDialog.source")}
             </p>
             <p className="col-start-3 row-start-1 text-xs leading-4 text-muted-foreground">
-              {zh ? "目标环境" : "Target environment"}
+              {t("featureFlags.copyDialog.target")}
             </p>
             <div
               data-testid="copy-source-environment"
@@ -452,10 +430,8 @@ export function CopyFlagsDialog({
                             {selectedTarget.name}
                           </span>
                         </span>
-                      ) : zh ? (
-                        "选择环境"
                       ) : (
-                        "Select environment"
+                        t("featureFlags.copyDialog.selectEnvironment")
                       )}
                     </SelectValue>
                   </SelectTrigger>
@@ -505,18 +481,16 @@ export function CopyFlagsDialog({
                     <ShieldAlert className="size-9 shrink-0 text-primary" />
                     <div className="space-y-2">
                       <p className="text-sm font-medium">
-                        {zh ? "复制不可用" : "Copy unavailable"}
+                        {t("featureFlags.copyDialog.unavailable")}
                       </p>
                       <p className="max-w-64 text-xs leading-5 text-muted-foreground">
-                        {zh
-                          ? "您的权限或当前许可证不允许复制这些功能开关。"
-                          : "Your permissions or current license don't allow copying these flags."}
+                        {t("featureFlags.copyDialog.unavailableHelp")}
                       </p>
                       <Link
                         to={localizedPath(lang, licenseHref)}
                         className="inline-block text-xs font-medium text-primary hover:underline"
                       >
-                        {zh ? "了解更多" : "Learn more"}
+                        {t("featureFlags.copyDialog.learnMore")}
                       </Link>
                     </div>
                   </div>
@@ -540,9 +514,10 @@ export function CopyFlagsDialog({
 
         <DialogFooter className="m-0 rounded-none border-t-0 bg-transparent px-5 py-4">
           <span className="mr-auto self-center text-sm">
-            {zh
-              ? `已选择 ${selectedCount} / ${flags.length} 个功能开关`
-              : `${selectedCount} / ${flags.length} flags selected`}
+            {t("featureFlags.copyDialog.selected", {
+              selected: selectedCount,
+              total: flags.length,
+            })}
           </span>
           <Button
             type="button"
@@ -550,7 +525,7 @@ export function CopyFlagsDialog({
             disabled={mutation.isPending}
             onClick={() => onOpenChange(false)}
           >
-            {zh ? "取消" : "Cancel"}
+            {t("featureFlags.copyDialog.cancel")}
           </Button>
           <Button
             type="button"
@@ -564,9 +539,7 @@ export function CopyFlagsDialog({
             onClick={() => mutation.mutate()}
           >
             {mutation.isPending ? <Loader2 className="animate-spin" /> : null}
-            {zh
-              ? `复制 ${selectedCount} 个功能开关`
-              : `Copy ${selectedCount} ${selectedCount === 1 ? "flag" : "flags"}`}
+            {t("featureFlags.copyDialog.copy", { count: selectedCount })}
           </Button>
         </DialogFooter>
       </DialogContent>

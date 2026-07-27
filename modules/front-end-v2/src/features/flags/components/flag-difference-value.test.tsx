@@ -1,5 +1,6 @@
-import { fireEvent, render, screen } from "@testing-library/react"
+import { cleanup, fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
+import { i18n } from "@/lib/i18n/i18n"
 import type { FlagComparisonValue } from "../flags-types"
 import { FlagDifferenceValue } from "./flag-difference-value"
 
@@ -266,7 +267,8 @@ describe("FlagDifferenceValue targeting rules", () => {
     expect(conditions[2]).toHaveTextContent("ANDcountryEqualFR")
   })
 
-  it("uses the same keyword width with Chinese labels", () => {
+  it("uses the same keyword width with Chinese labels", async () => {
+    await i18n.changeLanguage("zh")
     render(
       <FlagDifferenceValue
         lang="zh"
@@ -300,6 +302,8 @@ describe("FlagDifferenceValue targeting rules", () => {
       "bg-muted"
     )
     expect(screen.queryByText("Serve")).not.toBeInTheDocument()
+    cleanup()
+    await i18n.changeLanguage("en")
   })
 
   it("keeps percentages for a multi-variation rollout", () => {
@@ -365,3 +369,4 @@ describe("FlagDifferenceValue targeting rules", () => {
     expect(screen.queryByText(/·/)).not.toBeInTheDocument()
   })
 })
+import "@/lib/i18n/i18n"

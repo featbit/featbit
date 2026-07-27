@@ -1,9 +1,9 @@
 import { useTranslation } from "react-i18next"
-import type { ReviewChange } from "../segment-details-utils"
 import {
-  SegmentRuleChangeContent,
-  SegmentRuleChangeLabel,
-} from "./segment-rule-change-content"
+  RuleChangeContent,
+  RuleChangeLabel,
+} from "@/features/targeting/rule-change-content"
+import type { ReviewChange } from "../segment-details-utils"
 
 export function useSegmentChangeLedgerAdapter() {
   const { t } = useTranslation()
@@ -30,11 +30,11 @@ export function useSegmentChangeLedgerAdapter() {
     },
     renderLabel: (change: ReviewChange) =>
       change.kind === "rule" || change.kind === "ruleSummary" ? (
-        <SegmentRuleChangeLabel name={change.label} />
+        <RuleChangeLabel name={change.label} />
       ) : undefined,
     renderContent: (change: ReviewChange) =>
       change.kind === "rule" ? (
-        <SegmentRuleChangeContent
+        <RuleChangeContent
           previous={change.previousRule}
           current={change.currentRule}
         />

@@ -155,3 +155,4 @@ describe("targeting submission dialog", () => {
     expect(onModeChange).toHaveBeenCalledWith("save", "Coordinate with support")
   })
 })
+import "@/lib/i18n/i18n"

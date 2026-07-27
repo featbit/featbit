@@ -21,6 +21,7 @@ import {
 } from "@codemirror/view"
 import { CircleAlert, CircleCheck } from "lucide-react"
 import { useEffect, useMemo, useRef, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -30,28 +31,26 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import type { Lang } from "@/features/layout/layout-types"
 import { codeMirrorEditorStyle } from "@/lib/code-mirror/editor-style"
 
-function getJsonError(value: string, zh: boolean) {
-  if (!value.trim()) return zh ? "请输入 JSON 值。" : "Enter a JSON value."
+function getJsonError(
+  value: string,
+  t: ReturnType<typeof useTranslation>["t"]
+) {
+  if (!value.trim()) return t("featureFlags.jsonEditor.required")
 
   try {
     const parsed: unknown = JSON.parse(value)
     if (!parsed || typeof parsed !== "object") {
-      return zh
-        ? "JSON 值必须是对象或数组。"
-        : "The JSON value must be an object or array."
+      return t("featureFlags.jsonEditor.objectOrArray")
     }
     return null
   } catch (error) {
     const detail =
       error instanceof SyntaxError
         ? error.message.replace(/^JSON\.parse:\s*/i, "")
-        : zh
-          ? "无法解析 JSON。"
-          : "Unable to parse JSON."
-    return zh ? `JSON 语法错误：${detail}` : `JSON syntax error: ${detail}`
+        : t("featureFlags.jsonEditor.parseFailed")
+    return t("featureFlags.jsonEditor.syntaxError", { detail })
   }
 }
 
@@ -144,33 +143,31 @@ function JsonCodeMirror({
 
 export function FlagJsonEditorDialog({
   open,
-  lang,
   variationName,
   value,
   onOpenChange,
   onApply,
 }: {
   open: boolean
-  lang: Lang
   variationName: string
   value: string
   onOpenChange: (open: boolean) => void
   onApply: (value: string) => void
 }) {
-  const zh = lang === "zh"
+  const { t } = useTranslation()
   const [draft, setDraft] = useState(value)
 
-  const error = useMemo(() => getJsonError(draft, zh), [draft, zh])
+  const error = useMemo(() => getJsonError(draft, t), [draft, t])
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[82vh] overflow-hidden sm:max-w-4xl">
         <DialogHeader>
-          <DialogTitle>{zh ? "编辑 JSON 值" : "Edit JSON value"}</DialogTitle>
+          <DialogTitle>{t("featureFlags.jsonEditor.title")}</DialogTitle>
           <DialogDescription>
-            {zh
-              ? `正在编辑变体“${variationName}”。语法问题会直接标记在编辑器中。`
-              : `Editing variation “${variationName}”. Syntax issues are marked directly in the editor.`}
+            {t("featureFlags.jsonEditor.description", {
+              name: variationName,
+            })}
           </DialogDescription>
         </DialogHeader>
 
@@ -191,12 +188,11 @@ export function FlagJsonEditorDialog({
               <CircleCheck className="size-4 shrink-0" />
             )}
             <span className="truncate">
-              {error ||
-                (zh ? "有效的 JSON 对象或数组" : "Valid JSON object or array")}
+              {error || t("featureFlags.jsonEditor.valid")}
             </span>
           </div>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            {zh ? "取消" : "Cancel"}
+            {t("featureFlags.jsonEditor.cancel")}
           </Button>
           <Button
             disabled={Boolean(error)}
@@ -204,7 +200,7 @@ export function FlagJsonEditorDialog({
               if (!error) onApply(draft)
             }}
           >
-            {zh ? "应用" : "Apply"}
+            {t("featureFlags.jsonEditor.apply")}
           </Button>
         </DialogFooter>
       </DialogContent>

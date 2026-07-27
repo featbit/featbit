@@ -1,4 +1,5 @@
 import { ArrowDown } from "lucide-react"
+import { useTranslation } from "react-i18next"
 import { Badge } from "@/components/ui/badge"
 import {
   Tooltip,
@@ -6,9 +7,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import {
-  SegmentRuleChangeContent,
-  SegmentRuleChangeLabel,
-} from "@/features/segments/details/components/segment-rule-change-content"
+  RuleChangeContent,
+  RuleChangeLabel,
+} from "@/features/targeting/rule-change-content"
 import type { FlagRule } from "../../flags-types"
 import type { FlagServingReview } from "./targeting-utils"
 
@@ -25,7 +26,7 @@ function stableRuleDefinition(rule: FlagRule) {
 }
 
 export function FlagRuleChangeLabel({ name }: { name: string }) {
-  return <SegmentRuleChangeLabel name={name} />
+  return <RuleChangeLabel name={name} />
 }
 
 export function FlagChangeBadgeLabel({
@@ -54,13 +55,12 @@ export function FlagChangeBadgeLabel({
 
 function FlagServeValue({
   value,
-  zh,
   previous = false,
 }: {
   value?: FlagServingReview
-  zh: boolean
   previous?: boolean
 }) {
+  const { t } = useTranslation()
   return (
     <div className="flex min-w-0 flex-wrap items-center gap-1.5 text-xs">
       {value?.variations.length ? (
@@ -87,7 +87,7 @@ function FlagServeValue({
       )}
       {value?.dispatchKey ? (
         <span className="inline-flex items-center gap-1 text-muted-foreground">
-          <span>{zh ? "基于属性" : "Dispatch by"}</span>
+          <span>{t("featureFlags.detailsPage.review.dispatchBy")}</span>
           <span className={previous ? undefined : "text-foreground"}>
             {value.dispatchKey}
           </span>
@@ -100,26 +100,25 @@ function FlagServeValue({
 function FlagServeChange({
   previous,
   current,
-  zh,
 }: {
   previous?: FlagServingReview
   current?: FlagServingReview
-  zh: boolean
 }) {
+  const { t } = useTranslation()
   return (
     <section className="space-y-1.5">
       <p className="font-mono text-xs font-medium text-muted-foreground">
-        {zh ? "返回" : "Serve"}
+        {t("featureFlags.detailsPage.review.serve")}
       </p>
       {!previous ? (
-        <FlagServeValue value={current} zh={zh} />
+        <FlagServeValue value={current} />
       ) : !current ? (
-        <FlagServeValue value={previous} zh={zh} previous />
+        <FlagServeValue value={previous} previous />
       ) : (
         <div className="space-y-1">
-          <FlagServeValue value={previous} zh={zh} previous />
+          <FlagServeValue value={previous} previous />
           <ArrowDown className="size-3.5 text-muted-foreground" />
-          <FlagServeValue value={current} zh={zh} />
+          <FlagServeValue value={current} />
         </div>
       )}
     </section>
@@ -129,13 +128,11 @@ function FlagServeChange({
 export function FlagDefaultChangeContent({
   previous,
   current,
-  zh,
 }: {
   previous?: FlagServingReview
   current?: FlagServingReview
-  zh: boolean
 }) {
-  return <FlagServeChange previous={previous} current={current} zh={zh} />
+  return <FlagServeChange previous={previous} current={current} />
 }
 
 export function FlagRuleChangeContent({
@@ -143,13 +140,11 @@ export function FlagRuleChangeContent({
   currentRule,
   previousServing,
   currentServing,
-  zh,
 }: {
   previousRule?: FlagRule
   currentRule?: FlagRule
   previousServing?: FlagServingReview
   currentServing?: FlagServingReview
-  zh: boolean
 }) {
   const definitionChanged =
     !previousRule ||
@@ -163,17 +158,10 @@ export function FlagRuleChangeContent({
   return (
     <div className="min-w-0 space-y-3">
       {definitionChanged ? (
-        <SegmentRuleChangeContent
-          previous={previousRule}
-          current={currentRule}
-        />
+        <RuleChangeContent previous={previousRule} current={currentRule} />
       ) : null}
       {servingChanged ? (
-        <FlagServeChange
-          previous={previousServing}
-          current={currentServing}
-          zh={zh}
-        />
+        <FlagServeChange previous={previousServing} current={currentServing} />
       ) : null}
     </div>
   )

@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Box, Flag, Loader2 } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useForm, useWatch } from "react-hook-form"
+import { useTranslation } from "react-i18next"
 import { z } from "zod"
 import {
   AlertDialog,
@@ -31,7 +32,6 @@ import {
 } from "@/components/ui/sheet"
 import { Textarea } from "@/components/ui/textarea"
 import { getCurrentProjectEnv } from "@/features/layout/layout-context"
-import type { Lang } from "@/features/layout/layout-types"
 import type { FeatureFlag, FlagCreationPayload } from "../../flags-types"
 import { FlagTagPicker } from "./flag-tag-picker"
 import {
@@ -71,7 +71,7 @@ const schema = z
         context.addIssue({
           code: "custom",
           path: ["variations", index, "value"],
-          message: "Invalid variation value",
+          message: "invalidVariationValue",
         })
       }
     })
@@ -82,14 +82,14 @@ const schema = z
       context.addIssue({
         code: "custom",
         path: ["enabledVariationId"],
-        message: "Select an enabled variation",
+        message: "enabledVariationRequired",
       })
     }
     if (!variationIds.has(values.disabledVariationId)) {
       context.addIssue({
         code: "custom",
         path: ["disabledVariationId"],
-        message: "Select a disabled variation",
+        message: "disabledVariationRequired",
       })
     }
   })
@@ -106,7 +106,6 @@ function toKey(value: string) {
 
 export function FlagEditorSheet({
   envId,
-  lang,
   open,
   source,
   saving,
@@ -116,7 +115,6 @@ export function FlagEditorSheet({
   onClone,
 }: {
   envId: string
-  lang: Lang
   open: boolean
   source: FeatureFlag | null
   saving: boolean
@@ -128,7 +126,7 @@ export function FlagEditorSheet({
     payload: { name: string; key: string; description: string; tags: string[] }
   ) => Promise<void>
 }) {
-  const zh = lang === "zh"
+  const { t } = useTranslation()
   const sourceContext = getCurrentProjectEnv()
   const [tagPickerOpen, setTagPickerOpen] = useState(false)
   const [variationDialogOpen, setVariationDialogOpen] = useState(false)
@@ -162,7 +160,9 @@ export function FlagEditorSheet({
 
   useEffect(() => {
     if (!open) return
-    const cloneName = source ? `${source.name} copy` : ""
+    const cloneName = source
+      ? t("featureFlags.editor.copyName", { name: source.name })
+      : ""
     const variationSettings = createDefaultFlagVariationSettings()
     form.reset(
       source
@@ -181,7 +181,7 @@ export function FlagEditorSheet({
             ...variationSettings,
           }
     )
-  }, [form, open, source])
+  }, [form, open, source, t])
 
   const nestedSurfaceOpen = tagPickerOpen || variationDialogOpen || discardOpen
 
@@ -198,7 +198,7 @@ export function FlagEditorSheet({
     const keyUsed = await onValidateKey(values.key)
     if (keyUsed) {
       form.setError("key", {
-        message: zh ? "该键已被使用" : "This key is already in use",
+        message: t("featureFlags.editor.keyInUse"),
       })
       return
     }
@@ -234,11 +234,11 @@ export function FlagEditorSheet({
     <>
       <div className="space-y-2">
         <Label htmlFor="flag-name">
-          {zh ? "名称" : "Name"}
+          {t("featureFlags.editor.name")}
           <span className="text-destructive" aria-hidden="true">
             *
           </span>
-          <span className="sr-only">{zh ? "必填" : "required"}</span>
+          <span className="sr-only">{t("featureFlags.editor.required")}</span>
         </Label>
         <Input
           id="flag-name"
@@ -256,17 +256,17 @@ export function FlagEditorSheet({
         />
         {form.formState.errors.name ? (
           <p className="text-xs text-destructive">
-            {zh ? "请输入有效名称" : "Enter a valid name"}
+            {t("featureFlags.editor.invalidName")}
           </p>
         ) : null}
       </div>
       <div className="space-y-2">
         <Label htmlFor="flag-key">
-          {zh ? "键" : "Key"}
+          {t("featureFlags.editor.key")}
           <span className="text-destructive" aria-hidden="true">
             *
           </span>
-          <span className="sr-only">{zh ? "必填" : "required"}</span>
+          <span className="sr-only">{t("featureFlags.editor.required")}</span>
         </Label>
         <Input
           id="flag-key"
@@ -279,14 +279,14 @@ export function FlagEditorSheet({
         {form.formState.errors.key ? (
           <p className="text-xs text-destructive">
             {form.formState.errors.key.message ||
-              (zh
-                ? "仅支持字母、数字、点、下划线和连字符"
-                : "Use letters, numbers, dots, underscores, or hyphens")}
+              t("featureFlags.editor.invalidKey")}
           </p>
         ) : null}
       </div>
       <div className="space-y-2">
-        <Label htmlFor="flag-description">{zh ? "描述" : "Description"}</Label>
+        <Label htmlFor="flag-description">
+          {t("featureFlags.editor.description")}
+        </Label>
         <Textarea
           id="flag-description"
           disabled={saving}
@@ -295,10 +295,9 @@ export function FlagEditorSheet({
         />
       </div>
       <div className="space-y-2">
-        <Label>{zh ? "标签" : "Tags"}</Label>
+        <Label>{t("featureFlags.editor.tags")}</Label>
         <FlagTagPicker
           envId={envId}
-          lang={lang}
           tags={tags
             .split(",")
             .map((tag) => tag.trim())
@@ -323,11 +322,13 @@ export function FlagEditorSheet({
         disabled={saving}
         onClick={attemptClose}
       >
-        {zh ? "取消" : "Cancel"}
+        {t("featureFlags.editor.cancel")}
       </Button>
       <Button type="button" disabled={saving} onClick={() => void submit()}>
         {saving ? <Loader2 className="animate-spin" /> : null}
-        {source ? (zh ? "克隆" : "Clone") : zh ? "创建功能开关" : "Create flag"}
+        {source
+          ? t("featureFlags.editor.clone")
+          : t("featureFlags.editor.create")}
       </Button>
     </>
   )
@@ -337,17 +338,15 @@ export function FlagEditorSheet({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            {zh ? "放弃更改？" : "Discard changes?"}
+            {t("featureFlags.editor.discardTitle")}
           </AlertDialogTitle>
           <AlertDialogDescription>
-            {zh
-              ? "尚未保存的功能开关配置将会丢失。"
-              : "Your unsaved feature flag configuration will be lost."}
+            {t("featureFlags.editor.discardDescription")}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className="border-t-0 bg-transparent">
           <Button variant="outline" onClick={() => setDiscardOpen(false)}>
-            {zh ? "继续编辑" : "Keep editing"}
+            {t("featureFlags.editor.keepEditing")}
           </Button>
           <Button
             variant="destructive"
@@ -356,7 +355,7 @@ export function FlagEditorSheet({
               onOpenChange(false)
             }}
           >
-            {zh ? "放弃更改" : "Discard changes"}
+            {t("featureFlags.editor.discard")}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
@@ -375,13 +374,9 @@ export function FlagEditorSheet({
         >
           <DialogContent className="sm:max-w-lg" showCloseButton={!saving}>
             <DialogHeader>
-              <DialogTitle>
-                {zh ? "克隆功能开关" : "Clone feature flag"}
-              </DialogTitle>
+              <DialogTitle>{t("featureFlags.editor.cloneTitle")}</DialogTitle>
               <DialogDescription>
-                {zh
-                  ? "完整的定向配置将被克隆。"
-                  : "The complete targeting configuration will be cloned."}
+                {t("featureFlags.editor.cloneDescription")}
               </DialogDescription>
               <div className="mt-1 grid min-w-0 gap-2 rounded-lg border bg-muted/30 p-2 text-left sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
                 <div className="flex min-w-0 items-center gap-2">
@@ -409,7 +404,7 @@ export function FlagEditorSheet({
             </DialogHeader>
             <form className="space-y-5 pt-2" onSubmit={submit}>
               <h3 className="text-sm font-semibold text-foreground">
-                {zh ? "克隆详情" : "Clone details"}
+                {t("featureFlags.editor.cloneDetails")}
               </h3>
               {commonFields}
             </form>
@@ -437,7 +432,7 @@ export function FlagEditorSheet({
           showCloseButton={!saving}
         >
           <SheetHeader className="border-b px-6 py-5">
-            <SheetTitle>{zh ? "新建功能开关" : "New feature flag"}</SheetTitle>
+            <SheetTitle>{t("featureFlags.editor.newTitle")}</SheetTitle>
           </SheetHeader>
           <form
             className="min-h-0 flex-1 overflow-y-auto px-6 py-5"
@@ -446,7 +441,6 @@ export function FlagEditorSheet({
             <div className="space-y-5">
               <div className="space-y-5">{commonFields}</div>
               <FlagVariationsEditor
-                lang={lang}
                 disabled={saving}
                 showErrors={form.formState.submitCount > 0}
                 onNestedSurfaceOpenChange={setVariationDialogOpen}

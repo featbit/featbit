@@ -492,7 +492,6 @@ export function FlagsPage() {
               ? `${confirmation.kind}-${confirmation.flag.id}`
               : "closed"
           }
-          lang={lang}
           target={confirmation}
           saving={mutation.isPending}
           requireComment={settingsQuery.data?.requireChangeComment ?? false}
@@ -517,7 +516,6 @@ export function FlagsPage() {
         />
         <FlagEditorSheet
           envId={envId}
-          lang={lang}
           open={editorOpen}
           source={cloneTarget}
           saving={createMutation.isPending || cloneMutation.isPending}

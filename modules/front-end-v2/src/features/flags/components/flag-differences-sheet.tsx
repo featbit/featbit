@@ -10,6 +10,7 @@ import {
   Lock,
 } from "lucide-react"
 import { useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -69,8 +70,6 @@ type Props = {
 
 type RowDefinition = {
   key: FlagDifferenceKey
-  en: string
-  zh: string
   different: (detail: FlagComparisonDetail) => boolean
   copyable: (detail: FlagComparisonDetail) => boolean
   supportsMode?: boolean
@@ -79,15 +78,11 @@ type RowDefinition = {
 const rows: RowDefinition[] = [
   {
     key: "onOffState",
-    en: "On/OFF state",
-    zh: "开启/关闭状态",
     different: (detail) => detail.diff.onOffState.isDifferent,
     copyable: () => true,
   },
   {
     key: "individualTargeting",
-    en: "Individual targeting",
-    zh: "单独定向",
     different: (detail) =>
       detail.diff.individualTargeting.some((item) => item.isDifferent),
     copyable: () => true,
@@ -95,8 +90,6 @@ const rows: RowDefinition[] = [
   },
   {
     key: "targetingRule",
-    en: "Targeting rules",
-    zh: "定向规则",
     different: (detail) =>
       detail.diff.targetingRule.some((item) => item.isDifferent),
     copyable: (detail) => detail.isRulesCopyable,
@@ -104,15 +97,11 @@ const rows: RowDefinition[] = [
   },
   {
     key: "defaultRule",
-    en: "Default rule",
-    zh: "默认规则",
     different: (detail) => detail.diff.defaultRule.isDifferent,
     copyable: () => true,
   },
   {
     key: "offVariation",
-    en: "Off variation",
-    zh: "关闭变体",
     different: (detail) => detail.diff.offVariation.isDifferent,
     copyable: () => true,
   },
@@ -148,7 +137,7 @@ export function FlagDifferencesSheet({
   onOpenChange,
   onCopied,
 }: Props) {
-  const zh = lang === "zh"
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const source = getCurrentProjectEnv()
   const [selectedTargetId, setSelectedTargetId] = useState("")
@@ -238,7 +227,7 @@ export function FlagDifferencesSheet({
         getCopyOptions(selected, modes)
       ),
     onSuccess: () => {
-      toast.success(zh ? "设置复制成功。" : "Settings copied successfully.")
+      toast.success(t("featureFlags.differencesSheet.copied"))
       void queryClient.invalidateQueries({
         queryKey: ["feature-flag-difference"],
       })
@@ -247,8 +236,7 @@ export function FlagDifferencesSheet({
       if (!lockedTarget) setSelectedTargetId("")
       onOpenChange(false)
     },
-    onError: () =>
-      toast.error(zh ? "复制失败，请重试。" : "Copy failed. Please try again."),
+    onError: () => toast.error(t("featureFlags.differencesSheet.copyFailed")),
   })
   const selectAllDisabled = !eligibleKeys.size || copyMutation.isPending
 
@@ -275,7 +263,9 @@ export function FlagDifferencesSheet({
       >
         <SheetHeader className="shrink-0 border-b border-border px-5 py-5 pr-14 sm:px-8">
           <SheetTitle className="text-lg font-semibold">
-            {zh ? "比较" : "Compare"} {flag?.name ?? "-"}
+            {t("featureFlags.differencesSheet.compare", {
+              name: flag?.name ?? "-",
+            })}
           </SheetTitle>
           <SheetDescription className="flex items-center gap-2">
             <code className="rounded bg-muted px-2 py-0.5 text-xs text-foreground">
@@ -285,17 +275,15 @@ export function FlagDifferencesSheet({
               type="button"
               variant="ghost"
               size="icon-xs"
-              aria-label={zh ? "复制功能开关键" : "Copy feature flag key"}
+              aria-label={t("featureFlags.differencesSheet.copyKey")}
               disabled={!flag?.key}
               onClick={async () => {
                 if (!flag?.key) return
                 try {
                   await navigator.clipboard.writeText(flag.key)
-                  toast.success(zh ? "已复制 Key。" : "Key copied.")
+                  toast.success(t("featureFlags.differencesSheet.keyCopied"))
                 } catch {
-                  toast.error(
-                    zh ? "无法复制 Key。" : "Key could not be copied."
-                  )
+                  toast.error(t("featureFlags.differencesSheet.keyCopyFailed"))
                 }
               }}
             >
@@ -308,7 +296,7 @@ export function FlagDifferencesSheet({
           <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-end gap-4 px-5 py-4 sm:px-8">
             <div className="min-w-0">
               <p className="mb-1.5 text-xs text-muted-foreground">
-                {zh ? "来源" : "Source"}
+                {t("featureFlags.differencesSheet.source")}
               </p>
               <div
                 data-testid="flag-difference-source"
@@ -324,7 +312,7 @@ export function FlagDifferencesSheet({
             <ArrowRight className="mb-2.5 size-4 text-muted-foreground" />
             <div className="min-w-0">
               <p className="mb-1.5 text-xs text-muted-foreground">
-                {zh ? "目标" : "Target"}
+                {t("featureFlags.differencesSheet.target")}
               </p>
               {lockedTarget ? (
                 <div className="flex h-8 min-w-0 items-center gap-2 rounded-md border bg-muted/40 px-3">
@@ -350,10 +338,8 @@ export function FlagDifferencesSheet({
                             {selectedTarget.name}
                           </span>
                         </span>
-                      ) : zh ? (
-                        "选择目标环境"
                       ) : (
-                        "Select target environment"
+                        t("featureFlags.differencesSheet.selectTarget")
                       )}
                     </SelectValue>
                   </SelectTrigger>
@@ -382,21 +368,15 @@ export function FlagDifferencesSheet({
           {!comparisonGranted ? (
             <div className="m-8 rounded-md bg-muted/50 p-5">
               <p className="font-medium">
-                {zh
-                  ? "功能开关比较不可用"
-                  : "Feature flag comparison is unavailable"}
+                {t("featureFlags.differencesSheet.unavailable")}
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
-                {zh
-                  ? "当前许可证不包含功能开关比较。"
-                  : "Your current license does not include feature flag comparison."}
+                {t("featureFlags.differencesSheet.unavailableHelp")}
               </p>
             </div>
           ) : !selectedTarget ? (
             <div className="flex min-h-64 items-center justify-center p-8 text-center text-sm text-muted-foreground">
-              {zh
-                ? "请选择目标环境以查看差异"
-                : "Select a target environment to view differences"}
+              {t("featureFlags.differencesSheet.selectTargetHelp")}
             </div>
           ) : comparisonQuery.isLoading ? (
             <div className="space-y-3 p-8">
@@ -406,27 +386,21 @@ export function FlagDifferencesSheet({
             </div>
           ) : comparisonQuery.isError ? (
             <div className="m-8 flex items-center justify-between gap-4 rounded-md bg-destructive/5 p-4 text-sm text-destructive">
-              <span>
-                {zh
-                  ? "无法加载比较结果，请重试。"
-                  : "Comparison results could not be loaded. Please try again."}
-              </span>
+              <span>{t("featureFlags.differencesSheet.loadFailed")}</span>
               <Button
                 type="button"
                 size="sm"
                 variant="outline"
                 onClick={() => void comparisonQuery.refetch()}
               >
-                {zh ? "重试" : "Retry"}
+                {t("featureFlags.differencesSheet.retry")}
               </Button>
             </div>
           ) : !detail ? (
             <div className="flex min-h-64 items-center justify-center p-8 text-center">
               <div>
                 <p className="font-medium">
-                  {zh
-                    ? "目标环境中不存在此功能开关"
-                    : "Flag not found in target environment"}
+                  {t("featureFlags.differencesSheet.missingTarget")}
                 </p>
                 <p
                   data-testid="missing-target-environment"
@@ -442,20 +416,20 @@ export function FlagDifferencesSheet({
               <div className="grid grid-cols-[220px_minmax(280px,1fr)_minmax(280px,1fr)] border-b bg-muted/30 text-xs font-medium">
                 <div className="flex items-center gap-3 px-5 py-3">
                   <Checkbox
-                    aria-label={zh ? "全选" : "Select all"}
+                    aria-label={t("featureFlags.differencesSheet.selectAll")}
                     checked={allSelected}
                     indeterminate={someSelected}
                     disabled={selectAllDisabled}
                     onCheckedChange={toggleAll}
                   />
-                  {zh ? "全选" : "Select all"}
+                  {t("featureFlags.differencesSheet.selectAll")}
                 </div>
                 <div
                   data-testid="source-settings-heading"
                   className="flex min-w-0 items-center gap-2 px-5 py-3"
                 >
                   <span className="shrink-0 font-normal text-muted-foreground">
-                    {zh ? "设置位于" : "Settings in"}
+                    {t("featureFlags.differencesSheet.settingsIn")}
                   </span>
                   <span className="flex min-w-0 items-center gap-1">
                     <Box className="size-3.5 shrink-0 text-muted-foreground" />
@@ -469,7 +443,7 @@ export function FlagDifferencesSheet({
                   className="flex min-w-0 items-center gap-2 px-5 py-3"
                 >
                   <span className="shrink-0 font-normal text-muted-foreground">
-                    {zh ? "设置位于" : "Settings in"}
+                    {t("featureFlags.differencesSheet.settingsIn")}
                   </span>
                   <span className="flex min-w-0 items-center gap-1">
                     <Box className="size-3.5 shrink-0 text-muted-foreground" />
@@ -501,14 +475,16 @@ export function FlagDifferencesSheet({
                     <div className="px-5 py-5">
                       <div className="flex items-start gap-3">
                         <Checkbox
-                          aria-label={zh ? row.zh : row.en}
+                          aria-label={t(
+                            `featureFlags.differencesSheet.rows.${row.key}`
+                          )}
                           checked={rowSelected}
                           disabled={rowDisabled}
                           onCheckedChange={() => toggleRow(row.key)}
                         />
                         <div className="min-w-0">
                           <p className="text-sm font-medium">
-                            {zh ? row.zh : row.en}
+                            {t(`featureFlags.differencesSheet.rows.${row.key}`)}
                           </p>
                           <p
                             className={cn(
@@ -519,12 +495,8 @@ export function FlagDifferencesSheet({
                             )}
                           >
                             {different
-                              ? zh
-                                ? "有差异"
-                                : "Different"
-                              : zh
-                                ? "无差异"
-                                : "No difference"}
+                              ? t("featureFlags.differencesSheet.different")
+                              : t("featureFlags.differencesSheet.noDifference")}
                           </p>
                         </div>
                       </div>
@@ -545,13 +517,11 @@ export function FlagDifferencesSheet({
                               className="flex cursor-pointer items-center gap-2 text-xs"
                             >
                               <RadioGroupItem value={value} />
-                              {value === "overwrite"
-                                ? zh
-                                  ? "覆盖现有内容"
-                                  : `Overwrite ${row.key === "targetingRule" ? "rules" : "users"}`
-                                : zh
-                                  ? "追加到现有内容"
-                                  : `Append ${row.key === "targetingRule" ? "rules" : "users"}`}
+                              {t(
+                                `featureFlags.differencesSheet.${
+                                  value === "overwrite" ? "overwrite" : "append"
+                                }${row.key === "targetingRule" ? "Rules" : "Users"}`
+                              )}
                             </label>
                           ))}
                         </RadioGroup>
@@ -561,9 +531,7 @@ export function FlagDifferencesSheet({
                       <div className="col-span-2 flex gap-2 px-5 py-5 text-xs text-amber-700 dark:text-amber-300">
                         <AlertTriangle className="size-4 shrink-0" />
                         <span>
-                          {zh
-                            ? "定向规则引用了环境特定或与目标环境不兼容的 Segment，因此无法复制。"
-                            : "Targeting rules reference environment-specific or incompatible segments and cannot be copied."}
+                          {t("featureFlags.differencesSheet.rulesNotCopyable")}
                         </span>
                       </div>
                     ) : (
@@ -587,9 +555,17 @@ export function FlagDifferencesSheet({
                             <div className="mt-4">
                               <p className="mb-2 flex items-center gap-1.5 text-xs font-medium text-primary">
                                 <ArrowDown className="size-3.5" />
-                                {zh ? "复制后" : "After copy"}
+                                {t("featureFlags.differencesSheet.afterCopy")}
                                 {row.supportsMode
-                                  ? ` · ${mode === "append" ? (zh ? "保留目标内容" : "Existing target content kept") : zh ? "替换目标内容" : "Existing target content replaced"}`
+                                  ? ` · ${
+                                      mode === "append"
+                                        ? t(
+                                            "featureFlags.differencesSheet.targetKept"
+                                          )
+                                        : t(
+                                            "featureFlags.differencesSheet.targetReplaced"
+                                          )
+                                    }`
                                   : ""}
                               </p>
                               <div className="rounded-md bg-primary/5 px-3 py-3">
@@ -616,12 +592,10 @@ export function FlagDifferencesSheet({
         <SheetFooter className="shrink-0 flex-row items-center justify-between bg-transparent px-5 py-4 sm:px-8">
           <p className="text-sm text-muted-foreground">
             {selected.size
-              ? zh
-                ? `已选择 ${selected.size} 项设置`
-                : `${selected.size} settings selected`
-              : zh
-                ? "未选择设置"
-                : "No settings selected"}
+              ? t("featureFlags.differencesSheet.selected", {
+                  count: selected.size,
+                })
+              : t("featureFlags.differencesSheet.noneSelected")}
           </p>
           <div className="flex gap-2">
             <Button
@@ -630,7 +604,7 @@ export function FlagDifferencesSheet({
               disabled={copyMutation.isPending}
               onClick={() => changeOpen(false)}
             >
-              {zh ? "取消" : "Cancel"}
+              {t("featureFlags.differencesSheet.cancel")}
             </Button>
             <Button
               type="button"
@@ -645,12 +619,8 @@ export function FlagDifferencesSheet({
                 <Check />
               )}
               {copyMutation.isPending
-                ? zh
-                  ? "复制中…"
-                  : "Copying…"
-                : zh
-                  ? "复制设置"
-                  : "Copy settings"}
+                ? t("featureFlags.differencesSheet.copying")
+                : t("featureFlags.differencesSheet.copySettings")}
             </Button>
           </div>
         </SheetFooter>

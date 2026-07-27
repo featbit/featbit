@@ -1,5 +1,6 @@
 import { Check, Clock3, Loader2, UserRoundCheck, X } from "lucide-react"
 import { useEffect, useState, type ReactNode } from "react"
+import { useTranslation } from "react-i18next"
 import { Popover as PopoverPrimitive } from "@base-ui/react/popover"
 import { useQuery } from "@tanstack/react-query"
 import { Badge } from "@/components/ui/badge"
@@ -34,7 +35,6 @@ import type { ChangeReviewItem } from "@/features/change-review/change-review-ty
 import { ChangeLedger } from "@/features/change-review/change-ledger"
 import { ReviewSaveSplitButton } from "@/features/change-review/change-review-dialog"
 import { getStoredUserProfile } from "@/features/auth/auth-api"
-import type { Lang } from "@/features/layout/layout-types"
 import { fetchSegmentTeamMembers } from "@/features/segments/segments-api"
 import type { SegmentTeamMember } from "@/features/segments/segments-types"
 
@@ -79,6 +79,7 @@ function ReviewerPicker({
   disabled: boolean
   onChange: (members: SegmentTeamMember[]) => void
 }) {
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState("")
   const [debounced, setDebounced] = useState("")
@@ -100,7 +101,9 @@ function ReviewerPicker({
           render={
             <div
               role="combobox"
-              aria-label="Search reviewers"
+              aria-label={t(
+                "featureFlags.detailsPage.submission.searchReviewers"
+              )}
               aria-expanded={open}
               aria-disabled={disabled}
               tabIndex={disabled ? -1 : 0}
@@ -125,7 +128,10 @@ function ReviewerPicker({
               <button
                 type="button"
                 disabled={disabled}
-                aria-label={`Remove ${member.name}`}
+                aria-label={t(
+                  "featureFlags.detailsPage.submission.removeReviewer",
+                  { name: member.name }
+                )}
                 className="rounded-sm outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
                 onClick={(event) => {
                   event.preventDefault()
@@ -138,24 +144,28 @@ function ReviewerPicker({
             </Badge>
           ))}
           <span className="min-w-28 flex-1 text-left text-muted-foreground">
-            Search reviewers
+            {t("featureFlags.detailsPage.submission.searchReviewers")}
           </span>
         </PopoverTrigger>
         <ReviewerPopoverContent>
           <Command shouldFilter={false}>
             <CommandInput
               value={search}
-              placeholder="Search by name or email"
+              placeholder={t(
+                "featureFlags.detailsPage.submission.searchReviewersPlaceholder"
+              )}
               onValueChange={setSearch}
             />
             <CommandList>
               {query.isLoading ? (
                 <div className="flex items-center justify-center gap-2 py-6 text-sm text-muted-foreground">
                   <Loader2 className="size-4 animate-spin" />
-                  Loading…
+                  {t("featureFlags.detailsPage.submission.loadingReviewers")}
                 </div>
               ) : null}
-              <CommandEmpty>No reviewers found.</CommandEmpty>
+              <CommandEmpty>
+                {t("featureFlags.detailsPage.submission.noReviewers")}
+              </CommandEmpty>
               <CommandGroup>
                 {(query.data?.items ?? [])
                   .filter((member) => member.id !== currentUserId)
@@ -200,7 +210,6 @@ function ReviewerPicker({
 
 export function TargetingSubmissionDialog({
   mode,
-  lang,
   flagName,
   changes,
   initialReason,
@@ -212,7 +221,6 @@ export function TargetingSubmissionDialog({
   onSubmit,
 }: {
   mode: "schedule" | "change-request" | null
-  lang: Lang
   flagName: string
   changes: ChangeReviewItem[]
   initialReason?: string
@@ -226,7 +234,7 @@ export function TargetingSubmissionDialog({
   ) => void
   onSubmit: (value: TargetingSubmission) => void
 }) {
-  const zh = lang === "zh"
+  const { t } = useTranslation()
   const schedule = mode === "schedule"
   const [title, setTitle] = useState("")
   const [scheduledTime, setScheduledTime] = useState("")
@@ -249,17 +257,13 @@ export function TargetingSubmissionDialog({
         <DialogHeader>
           <DialogTitle>
             {schedule
-              ? zh
-                ? "计划定向变更"
-                : "Schedule targeting changes"
-              : zh
-                ? "请求审核定向变更"
-                : "Request approval for targeting changes"}
+              ? t("featureFlags.detailsPage.submission.scheduleTitle")
+              : t("featureFlags.detailsPage.submission.requestTitle")}
           </DialogTitle>
           <DialogDescription>
-            {zh
-              ? `提交 ${flagName} 的待处理变更。`
-              : `Submit the pending targeting changes to ${flagName}.`}
+            {t("featureFlags.detailsPage.submission.description", {
+              name: flagName,
+            })}
           </DialogDescription>
         </DialogHeader>
         <div
@@ -268,9 +272,11 @@ export function TargetingSubmissionDialog({
         >
           <div className="space-y-2">
             <div className="flex items-baseline gap-3">
-              <Label>{zh ? "变更" : "Changes"}</Label>
+              <Label>{t("featureFlags.detailsPage.submission.changes")}</Label>
               <span className="text-sm text-muted-foreground">
-                {changes.length} {zh ? "项变更" : "changes"}
+                {t("featureFlags.detailsPage.submission.changeCount", {
+                  count: changes.length,
+                })}
               </span>
             </div>
             <ChangeLedger
@@ -279,13 +285,15 @@ export function TargetingSubmissionDialog({
               copy={{
                 label: (change) => change.label,
                 action: (action) =>
-                  ({ added: "Added", removed: "Removed", updated: "Updated" })[
-                    action
-                  ],
+                  t(`featureFlags.detailsPage.review.${action}`),
                 actionCount: (action, count) =>
-                  `${action === "added" ? "Added" : "Removed"} · ${count}`,
-                showMore: (count) => `Show ${count} more`,
-                showLess: "Show less",
+                  t("featureFlags.detailsPage.review.actionCount", {
+                    action: t(`featureFlags.detailsPage.review.${action}`),
+                    count,
+                  }),
+                showMore: (count) =>
+                  t("featureFlags.detailsPage.review.showMore", { count }),
+                showLess: t("featureFlags.detailsPage.review.showLess"),
               }}
             />
           </div>
@@ -293,7 +301,7 @@ export function TargetingSubmissionDialog({
             <>
               <div className="space-y-2">
                 <Label htmlFor="schedule-title">
-                  {zh ? "标题" : "Title"}
+                  {t("featureFlags.detailsPage.submission.title")}
                   <span className="text-destructive"> *</span>
                 </Label>
                 <Input
@@ -304,7 +312,7 @@ export function TargetingSubmissionDialog({
               </div>
               <div className="space-y-2">
                 <Label htmlFor="schedule-time">
-                  {zh ? "计划时间" : "Scheduled time"}
+                  {t("featureFlags.detailsPage.submission.scheduledTime")}
                   <span className="text-destructive"> *</span>
                 </Label>
                 <Input
@@ -317,7 +325,7 @@ export function TargetingSubmissionDialog({
                 />
                 {scheduledTime && !future ? (
                   <p className="text-xs text-destructive">
-                    Scheduled time must be in the future.
+                    {t("featureFlags.detailsPage.submission.futureTime")}
                   </p>
                 ) : (
                   <p className="text-xs text-muted-foreground">
@@ -329,7 +337,7 @@ export function TargetingSubmissionDialog({
           ) : null}
           <div className="space-y-2">
             <Label htmlFor="submission-reason">
-              {zh ? "原因" : "Reason"}
+              {t("featureFlags.detailsPage.submission.reason")}
               <span className="text-destructive"> *</span>
             </Label>
             <Textarea
@@ -343,12 +351,10 @@ export function TargetingSubmissionDialog({
             <div className="flex items-center justify-between rounded-md border p-3">
               <div>
                 <Label htmlFor="require-approval">
-                  {zh ? "需要审核" : "Require approval"}
+                  {t("featureFlags.detailsPage.submission.requireApproval")}
                 </Label>
                 <p className="text-xs text-muted-foreground">
-                  {zh
-                    ? "在计划时间应用前由审核人批准。"
-                    : "Ask reviewers to approve before the scheduled change is applied."}
+                  {t("featureFlags.detailsPage.submission.approvalHelp")}
                 </p>
               </div>
               <Switch
@@ -361,7 +367,7 @@ export function TargetingSubmissionDialog({
           {reviewerRequired ? (
             <div className="space-y-2">
               <Label>
-                {zh ? "审核人" : "Reviewers"}
+                {t("featureFlags.detailsPage.submission.reviewers")}
                 <span className="text-destructive"> *</span>
               </Label>
               <ReviewerPicker
@@ -379,32 +385,30 @@ export function TargetingSubmissionDialog({
             disabled={saving}
             onClick={() => onOpenChange(false)}
           >
-            {zh ? "取消" : "Cancel"}
+            {t("featureFlags.detailsPage.submission.cancel")}
           </Button>
           <ReviewSaveSplitButton
             primaryLabel={
               schedule
-                ? zh
-                  ? "计划变更"
-                  : "Schedule changes"
-                : zh
-                  ? "提交请求"
-                  : "Submit request"
+                ? t("featureFlags.detailsPage.submission.schedule")
+                : t("featureFlags.detailsPage.submission.submitRequest")
             }
-            savingLabel={zh ? "提交中…" : "Submitting…"}
+            savingLabel={t("featureFlags.detailsPage.submission.submitting")}
             saving={saving}
             primaryDisabled={!valid}
-            menuLabel={zh ? "更多保存选项" : "More save options"}
+            menuLabel={t("featureFlags.detailsPage.submission.moreSaveOptions")}
             options={[
               {
-                label: zh ? "保存变更" : "Save changes",
-                description: zh ? "立即应用" : "Apply immediately",
+                label: t("featureFlags.detailsPage.submission.save"),
+                description: t(
+                  "featureFlags.detailsPage.submission.applyImmediately"
+                ),
                 onSelect: () => onModeChange("save", reason.trim()),
               },
               ...(scheduleGranted
                 ? [
                     {
-                      label: zh ? "计划变更" : "Schedule changes",
+                      label: t("featureFlags.detailsPage.submission.schedule"),
                       icon: <Clock3 />,
                       current: schedule,
                       onSelect: () => onModeChange("schedule", reason.trim()),
@@ -414,7 +418,9 @@ export function TargetingSubmissionDialog({
               ...(changeRequestGranted
                 ? [
                     {
-                      label: zh ? "请求审核" : "Request approval",
+                      label: t(
+                        "featureFlags.detailsPage.submission.requestApproval"
+                      ),
                       icon: <UserRoundCheck />,
                       current: !schedule,
                       onSelect: () =>

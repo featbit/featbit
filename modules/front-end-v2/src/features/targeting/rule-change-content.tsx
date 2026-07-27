@@ -7,15 +7,18 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { ChangePair } from "@/features/change-review/change-ledger"
-import type { SegmentCondition, SegmentRule } from "../../segments-types"
-import { conditionValues } from "../segment-details-utils"
+import type {
+  SegmentCondition,
+  SegmentRule,
+} from "@/features/segments/segments-types"
+import { conditionValues } from "./targeting-utils"
 
-export function SegmentRuleChangeLabel({ name }: { name: string }) {
+export function RuleChangeLabel({ name }: { name: string }) {
   const { t } = useTranslation()
   return (
     <div className="flex min-w-0 items-center gap-2">
       <Badge variant="outline" className="shrink-0 font-normal">
-        {t("segments.detailsPage.rules.rule")}
+        {t("targeting.rules.rule")}
       </Badge>
       <Tooltip>
         <TooltipTrigger
@@ -33,7 +36,7 @@ function conditionText(
   condition: SegmentCondition,
   t: ReturnType<typeof useTranslation>["t"]
 ) {
-  const operation = t(`segments.detailsPage.rules.operators.${condition.op}`, {
+  const operation = t(`targeting.rules.operators.${condition.op}`, {
     defaultValue: condition.op,
   })
   return `${condition.property} ${operation} ${conditionValues(condition).join(", ")}`.trim()
@@ -92,7 +95,7 @@ function changedConditions(
 
 function ConditionExpression({ condition }: { condition: SegmentCondition }) {
   const { t } = useTranslation()
-  const operation = t(`segments.detailsPage.rules.operators.${condition.op}`, {
+  const operation = t(`targeting.rules.operators.${condition.op}`, {
     defaultValue: condition.op,
   })
   const unary = condition.op === "IsTrue" || condition.op === "IsFalse"
@@ -140,7 +143,7 @@ function ConditionSummary({ rule }: { rule: SegmentRule }) {
         <div key={condition.id || index}>
           {index > 0 ? (
             <div className="my-2 font-mono text-xs font-medium text-muted-foreground">
-              {t("segments.detailsPage.rules.and")}
+              {t("targeting.rules.and")}
             </div>
           ) : null}
           <p>
@@ -152,7 +155,7 @@ function ConditionSummary({ rule }: { rule: SegmentRule }) {
   )
 }
 
-export function SegmentRuleChangeContent({
+export function RuleChangeContent({
   previous,
   current,
 }: {
@@ -175,7 +178,7 @@ export function SegmentRuleChangeContent({
       {renamed ? (
         <section className="space-y-1.5">
           <p className="text-xs font-medium text-muted-foreground">
-            {t("segments.detailsPage.review.labels.name")}
+            {t("targeting.review.labels.name")}
           </p>
           <ChangePair previous={previous.name} current={current.name} />
         </section>
@@ -183,14 +186,14 @@ export function SegmentRuleChangeContent({
       {conditionChanges.length ? (
         <section className="space-y-1.5">
           <p className="text-xs font-medium text-muted-foreground">
-            {t("segments.detailsPage.review.labels.conditions")}
+            {t("targeting.review.labels.conditions")}
           </p>
           <div>
             {conditionChanges.map((change, index) => (
               <div key={`${change.action}-${change.id}`}>
                 {index > 0 ? (
                   <div className="my-2 font-mono text-xs font-medium text-muted-foreground">
-                    {t("segments.detailsPage.rules.and")}
+                    {t("targeting.rules.and")}
                   </div>
                 ) : null}
                 {change.action === "updated" ? (
@@ -201,9 +204,7 @@ export function SegmentRuleChangeContent({
                 ) : (
                   <div className="space-y-0.5">
                     <p className="text-xs text-muted-foreground">
-                      {t(
-                        `segments.detailsPage.review.actions.${change.action}`
-                      )}
+                      {t(`targeting.review.actions.${change.action}`)}
                     </p>
                     <p
                       className={

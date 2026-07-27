@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge"
+import { useTranslation } from "react-i18next"
 import {
   Tooltip,
   TooltipContent,
@@ -47,14 +48,14 @@ function SyntaxKeyword({ children }: { children: string }) {
 
 function DispatchKeyValue({
   dispatchKey,
-  lang,
 }: {
   dispatchKey: unknown
   lang: Lang
 }) {
+  const { t } = useTranslation()
   return (
     <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-      <span>{lang === "zh" ? "基于属性" : "Dispatch by"}</span>
+      <span>{t("featureFlags.differenceValue.dispatchBy")}</span>
       <span data-testid="dispatch-key" className="font-normal text-foreground">
         {scalar(dispatchKey)}
       </span>
@@ -85,13 +86,14 @@ function RuleServeValue({
   flag: FlagComparisonValue
   lang: Lang
 }) {
+  const { t } = useTranslation()
   const variations = rule.variations ?? []
   if (!variations.length) return null
   const showPercentage = variations.length > 1
 
   return (
     <div className="flex flex-wrap items-center gap-1.5">
-      <SyntaxKeyword>{lang === "zh" ? "返回" : "Serve"}</SyntaxKeyword>
+      <SyntaxKeyword>{t("featureFlags.differenceValue.serve")}</SyntaxKeyword>
       {variations.map((item, index) => {
         const variationId = scalar(item.id ?? item.variationId)
         const label = variationLabel(flag, variationId)
@@ -136,10 +138,11 @@ function RulesValue({
   startAt?: number
   lang: Lang
 }) {
+  const { t } = useTranslation()
   if (!flag.rules.length)
     return (
       <p className="text-muted-foreground">
-        {lang === "zh" ? "无定向规则" : "No targeting rules"}
+        {t("featureFlags.differenceValue.noRules")}
       </p>
     )
 
@@ -153,7 +156,9 @@ function RulesValue({
         >
           <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2.5 text-xs font-medium [&::-webkit-details-marker]:hidden">
             <ChevronRight className="size-3.5 shrink-0 text-muted-foreground transition-transform group-open:rotate-90" />
-            <span className="truncate">{rule.name || "Targeting rule"}</span>
+            <span className="truncate">
+              {rule.name || t("featureFlags.differenceValue.targetingRule")}
+            </span>
           </summary>
           <div className="border-t">
             {(rule.conditions ?? []).length ? (
@@ -169,17 +174,15 @@ function RulesValue({
                   >
                     <SyntaxKeyword>
                       {conditionIndex === 0
-                        ? lang === "zh"
-                          ? "如果"
-                          : "IF"
-                        : lang === "zh"
-                          ? "并且"
-                          : "AND"}
+                        ? t("featureFlags.differenceValue.if")
+                        : t("featureFlags.differenceValue.and")}
                     </SyntaxKeyword>
                     <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
                       <span className="break-words text-foreground">
                         {scalar(
-                          condition.property ?? condition.key ?? "Condition"
+                          condition.property ??
+                            condition.key ??
+                            t("featureFlags.differenceValue.condition")
                         )}
                       </span>
                       <span className="font-mono font-medium text-muted-foreground">
@@ -196,7 +199,7 @@ function RulesValue({
               })
             ) : (
               <p className="px-3 py-2.5 text-xs text-muted-foreground">
-                {lang === "zh" ? "无条件" : "No conditions"}
+                {t("featureFlags.differenceValue.noConditions")}
               </p>
             )}
             {(rule.variations ?? []).length ? (
@@ -214,7 +217,6 @@ function RulesValue({
 function TargetUserBadge({
   user,
   added,
-  lang,
   inTooltip = false,
 }: {
   user: string
@@ -222,18 +224,15 @@ function TargetUserBadge({
   lang: Lang
   inTooltip?: boolean
 }) {
+  const { t } = useTranslation()
   return (
     <Badge
       variant="outline"
       data-user-origin={added ? "added" : "existing"}
       title={
         added
-          ? lang === "zh"
-            ? "从来源环境新增"
-            : "Added from source"
-          : lang === "zh"
-            ? "目标环境中现有"
-            : "Existing in target"
+          ? t("featureFlags.differenceValue.addedFromSource")
+          : t("featureFlags.differenceValue.existingInTarget")
       }
       className={
         added
@@ -261,11 +260,12 @@ function IndividualTargetingValue({
   showOriginLegend?: boolean
   tooltipUserStyle?: "added" | "existing"
 }) {
+  const { t } = useTranslation()
   const groups = flag.targetUsers.filter((item) => item.keyIds.length)
   if (!groups.length)
     return (
       <p className="text-muted-foreground">
-        {lang === "zh" ? "无单独定向用户" : "No individual targeting"}
+        {t("featureFlags.differenceValue.noIndividualTargeting")}
       </p>
     )
 
@@ -279,11 +279,11 @@ function IndividualTargetingValue({
           >
             <span className="inline-flex items-center gap-1">
               <span className="size-2.5 rounded-sm border border-muted-foreground/30 bg-background" />
-              {lang === "zh" ? "现有" : "Existing"}
+              {t("featureFlags.differenceValue.existing")}
             </span>
             <span className="inline-flex items-center gap-1">
               <span className="size-2.5 rounded-sm border border-primary/40 bg-primary/10" />
-              {lang === "zh" ? "新增" : "Added"}
+              {t("featureFlags.differenceValue.added")}
             </span>
           </div>
         ) : null}
@@ -314,11 +314,10 @@ function IndividualTargetingValue({
                 {hiddenCount > 0 ? (
                   <Tooltip>
                     <TooltipTrigger
-                      aria-label={
-                        lang === "zh"
-                          ? `显示全部 ${item.keyIds.length} 个用户`
-                          : `Show all ${item.keyIds.length} users`
-                      }
+                      aria-label={t(
+                        "featureFlags.differenceValue.showAllUsers",
+                        { count: item.keyIds.length }
+                      )}
                       className="inline-flex h-5 cursor-help items-center rounded-md border bg-secondary px-2 text-xs font-normal text-secondary-foreground"
                     >
                       +{hiddenCount}
@@ -326,7 +325,7 @@ function IndividualTargetingValue({
                     <TooltipContent className="max-h-64 max-w-80 overflow-y-auto">
                       <div className="min-w-0">
                         <p className="mb-1 font-medium">
-                          {lang === "zh" ? "全部用户" : "All users"}
+                          {t("featureFlags.differenceValue.allUsers")}
                         </p>
                         <div
                           data-testid="target-users-tooltip-list"
@@ -409,9 +408,14 @@ function DefaultRuleValue({
   flag: FlagComparisonValue
   lang: Lang
 }) {
+  const { t } = useTranslation()
   const variations = flag.fallthrough?.variations ?? []
   if (!variations.length)
-    return <p className="text-muted-foreground">No default rule</p>
+    return (
+      <p className="text-muted-foreground">
+        {t("featureFlags.differenceValue.noDefaultRule")}
+      </p>
+    )
   const showPercentage = variations.length > 1
 
   return (
@@ -509,7 +513,9 @@ export function FlagDifferenceValue({
       <div className="space-y-3">
         <RulesValue flag={flag} lang={lang} />
         <div className="border-t pt-2">
-          <p className="mb-2 text-xs font-medium">Source rules appended</p>
+          <p className="mb-2 text-xs font-medium">
+            {t("featureFlags.differenceValue.sourceRulesAppended")}
+          </p>
           <RulesValue flag={source} startAt={flag.rules.length} lang={lang} />
         </div>
       </div>

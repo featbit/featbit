@@ -1,15 +1,18 @@
 import { describe, expect, it } from "vitest"
-import { ROLLOUT_MARKER_COLORS } from "./rollout-colors"
+import {
+  VARIATION_MARKER_COLORS,
+  variationMarkerColor,
+} from "../../variation-colors"
 
 describe("rollout variation colors", () => {
   it("provides ten distinct non-neutral colors", () => {
-    expect(ROLLOUT_MARKER_COLORS).toHaveLength(10)
-    expect(new Set(ROLLOUT_MARKER_COLORS)).toHaveLength(10)
+    expect(VARIATION_MARKER_COLORS).toHaveLength(10)
+    expect(new Set(VARIATION_MARKER_COLORS)).toHaveLength(10)
     expect(
-      ROLLOUT_MARKER_COLORS.every((color) => color.includes("dark:bg-"))
+      VARIATION_MARKER_COLORS.every((color) => color.includes("dark:bg-"))
     ).toBe(true)
     expect(
-      ROLLOUT_MARKER_COLORS.every(
+      VARIATION_MARKER_COLORS.every(
         (color) =>
           !color.includes("zinc") &&
           !color.includes("gray") &&
@@ -18,5 +21,8 @@ describe("rollout variation colors", () => {
           !color.includes("stone")
       )
     ).toBe(true)
+    expect(variationMarkerColor(VARIATION_MARKER_COLORS.length)).toBe(
+      VARIATION_MARKER_COLORS[0]
+    )
   })
 })

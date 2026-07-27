@@ -18,10 +18,10 @@ export type FlagServingReview = {
   dispatchKey?: string
 }
 
-export function newFlagRule(count: number): FlagRule {
+export function newFlagRule(name: string): FlagRule {
   return {
     id: crypto.randomUUID(),
-    name: `Rule ${count}`,
+    name,
     dispatchKey: "keyId",
     conditions: [
       {
@@ -152,7 +152,8 @@ function stableRuleForReview(rule: FlagRule) {
 
 export function targetingReviewChanges(
   previous: FeatureFlag,
-  current: FeatureFlag
+  current: FeatureFlag,
+  labels: { flagOn: string; flagOff: string }
 ) {
   const changes: FlagTargetingReviewChange[] = []
   if (
@@ -167,7 +168,7 @@ export function targetingReviewChanges(
   ) {
     changes.push({
       kind: "default",
-      label: "Flag ON",
+      label: labels.flagOn,
       action: "updated",
       previous: servingLabel(previous, previous.fallthrough?.variations ?? []),
       current: servingLabel(current, current.fallthrough?.variations ?? []),
@@ -187,7 +188,7 @@ export function targetingReviewChanges(
   if (previous.disabledVariationId !== current.disabledVariationId) {
     changes.push({
       kind: "default",
-      label: "Flag OFF",
+      label: labels.flagOff,
       action: "updated",
       previous: variationLabel(previous, previous.disabledVariationId),
       current: variationLabel(current, current.disabledVariationId),
@@ -280,20 +281,25 @@ export function targetingReviewChanges(
   return changes
 }
 
-export function validateTargeting(flag: FeatureFlag) {
+export function validateTargeting(
+  flag: FeatureFlag,
+  messages: {
+    allocation: string
+    conditionRequired: string
+    conditionIncomplete: string
+  }
+) {
   const errors = new Map<string, string>()
   const fallthroughTotal = allocationPercentages(
     flag.fallthrough?.variations ?? []
   ).reduce((sum, item) => sum + item.percentage, 0)
-  if (fallthroughTotal !== 100)
-    errors.set("default", "Allocate exactly 100% across variations.")
+  if (fallthroughTotal !== 100) errors.set("default", messages.allocation)
   for (const rule of flag.rules ?? []) {
     const total = allocationPercentages(rule.variations).reduce(
       (sum, item) => sum + item.percentage,
       0
     )
-    if (!rule.conditions.length)
-      errors.set(rule.id, "Add at least one complete condition.")
+    if (!rule.conditions.length) errors.set(rule.id, messages.conditionRequired)
     else if (
       rule.conditions.some(
         (item) =>
@@ -302,9 +308,8 @@ export function validateTargeting(flag: FeatureFlag) {
           (!(item.op === "IsTrue" || item.op === "IsFalse") && !item.value)
       )
     ) {
-      errors.set(rule.id, "Complete every condition before reviewing changes.")
-    } else if (total !== 100)
-      errors.set(rule.id, "Allocate exactly 100% across variations.")
+      errors.set(rule.id, messages.conditionIncomplete)
+    } else if (total !== 100) errors.set(rule.id, messages.allocation)
   }
   return errors
 }

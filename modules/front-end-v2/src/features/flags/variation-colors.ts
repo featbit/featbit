@@ -1,4 +1,4 @@
-export const ROLLOUT_MARKER_COLORS = [
+export const VARIATION_MARKER_COLORS = [
   "bg-blue-600 dark:bg-blue-400",
   "bg-emerald-600 dark:bg-emerald-400",
   "bg-amber-500 dark:bg-amber-400",
@@ -10,3 +10,7 @@ export const ROLLOUT_MARKER_COLORS = [
   "bg-lime-600 dark:bg-lime-400",
   "bg-fuchsia-600 dark:bg-fuchsia-400",
 ] as const
+
+export function variationMarkerColor(index: number) {
+  return VARIATION_MARKER_COLORS[index % VARIATION_MARKER_COLORS.length]
+}

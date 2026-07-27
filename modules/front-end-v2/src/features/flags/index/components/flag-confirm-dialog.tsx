@@ -14,7 +14,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import type { Lang } from "@/features/layout/layout-types"
 import type { FeatureFlag } from "../../flags-types"
 
 export type FlagConfirmation = {
@@ -24,14 +23,12 @@ export type FlagConfirmation = {
 } | null
 
 export function FlagConfirmDialog({
-  lang,
   target,
   saving,
   requireComment,
   onOpenChange,
   onConfirm,
 }: {
-  lang: Lang
   target: FlagConfirmation
   saving: boolean
   requireComment: boolean
@@ -103,16 +100,12 @@ export function FlagConfirmDialog({
         {requireComment ? (
           <div className="space-y-2">
             <Label htmlFor="flag-change-comment">
-              {lang === "zh" ? "变更说明" : "Change comment"}
+              {t("featureFlags.changeComment")}
             </Label>
             <Textarea
               id="flag-change-comment"
               value={comment}
-              placeholder={
-                lang === "zh"
-                  ? "说明此次变更的原因"
-                  : "Explain why this change is needed"
-              }
+              placeholder={t("featureFlags.changeCommentPlaceholder")}
               onChange={(event) => setComment(event.target.value)}
             />
           </div>

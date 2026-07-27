@@ -257,3 +257,4 @@ describe("FlagDifferencesSheet", () => {
     expect(environment).toHaveTextContent("Growth Platform / Staging")
   })
 })
+import "@/lib/i18n/i18n"

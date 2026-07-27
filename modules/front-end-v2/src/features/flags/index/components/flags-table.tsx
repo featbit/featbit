@@ -30,6 +30,7 @@ import type { Lang } from "@/features/layout/layout-types"
 import { cn } from "@/lib/utils"
 import { Link } from "react-router-dom"
 import type { FeatureFlag } from "../../flags-types"
+import { variationMarkerColor } from "../../variation-colors"
 
 type Props = {
   lang: Lang
@@ -71,18 +72,6 @@ function formatDate(value: string, lang: Lang, withTime = false) {
     ...(withTime ? { timeStyle: "short" } : {}),
   }).format(date)
 }
-
-const variationDotColors = [
-  "bg-emerald-500",
-  "bg-blue-500",
-  "bg-violet-500",
-  "bg-amber-500",
-  "bg-rose-500",
-  "bg-cyan-500",
-  "bg-fuchsia-500",
-  "bg-lime-500",
-  "bg-orange-500",
-]
 
 function TagsCell({ tags }: { tags: string[] }) {
   if (!tags.length) return <span className="text-muted-foreground">—</span>
@@ -132,9 +121,7 @@ function ServingCell({
           onCheckedChange={onToggle}
         />
         <span className="text-xs font-medium">
-          {flag.isEnabled
-            ? t("featureFlags.on")
-            : t("featureFlags.off")}
+          {flag.isEnabled ? t("featureFlags.on") : t("featureFlags.off")}
         </span>
         <Badge variant="outline" className="font-normal text-muted-foreground">
           {flag.variationType.toUpperCase()}
@@ -159,7 +146,7 @@ function ServingCell({
                   key={`${value}-${index}`}
                   className={cn(
                     "size-2 rounded-full ring-1 ring-background",
-                    variationDotColors[index % variationDotColors.length]
+                    variationMarkerColor(index)
                   )}
                 />
               ))
@@ -180,7 +167,7 @@ function ServingCell({
                   <span
                     className={cn(
                       "mt-1 size-2 shrink-0 rounded-full",
-                      variationDotColors[index % variationDotColors.length]
+                      variationMarkerColor(index)
                     )}
                   />
                   <span className="min-w-0 font-mono text-xs break-all whitespace-pre-wrap">

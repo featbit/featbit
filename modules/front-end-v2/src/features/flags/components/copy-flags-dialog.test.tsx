@@ -334,3 +334,4 @@ describe("CopyFlagsDialog", () => {
     expect(screen.getByRole("button", { name: "Copy 0 flags" })).toBeDisabled()
   })
 })
+import "@/lib/i18n/i18n"

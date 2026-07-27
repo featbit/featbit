@@ -5,6 +5,12 @@ import type {
   SegmentRule,
 } from "../segments-types"
 import type { ChangeReviewItem } from "@/features/change-review/change-review-types"
+import { conditionValues } from "@/features/targeting/targeting-utils"
+export {
+  conditionValues,
+  newTargetingId as newId,
+  withConditionValues,
+} from "@/features/targeting/targeting-utils"
 
 const targetingKinds = new Set([
   "AddTargetUsersToIncluded",
@@ -29,37 +35,8 @@ const settingsKinds = new Set([
   "RemoveTags",
 ])
 
-export function newId() {
-  return crypto.randomUUID()
-}
-
 export function cloneSegment(segment: Segment): Segment {
   return structuredClone(segment)
-}
-
-export function conditionValues(condition: SegmentCondition) {
-  if (condition.op !== "IsOneOf" && condition.op !== "NotOneOf") {
-    return [condition.value]
-  }
-  try {
-    const parsed = JSON.parse(condition.value)
-    return Array.isArray(parsed) ? parsed.map(String) : [condition.value]
-  } catch {
-    return condition.value ? [condition.value] : []
-  }
-}
-
-export function withConditionValues(
-  condition: SegmentCondition,
-  values: string[]
-) {
-  return {
-    ...condition,
-    value:
-      condition.op === "IsOneOf" || condition.op === "NotOneOf"
-        ? JSON.stringify(values)
-        : (values[0] ?? ""),
-  }
 }
 
 export function normalizedRules(rules: SegmentRule[]) {

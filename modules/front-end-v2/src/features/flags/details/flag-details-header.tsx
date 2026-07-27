@@ -1,5 +1,6 @@
 import { Check, Copy, Loader2 } from "lucide-react"
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -9,33 +10,31 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import type { Lang } from "@/features/layout/layout-types"
 import type { FeatureFlag } from "../flags-types"
 
 const tabs = [
-  "Targeting",
-  "Variations",
-  "Triggers",
-  "Insights",
-  "Settings",
-  "History",
-]
+  "targeting",
+  "variations",
+  "triggers",
+  "insights",
+  "settings",
+  "history",
+] as const
 
 export function FlagDetailsHeader({
   flag,
-  lang,
   basePath,
   toggling,
   canToggle,
   onToggle,
 }: {
   flag: FeatureFlag
-  lang: Lang
   basePath: string
   toggling: boolean
   canToggle: boolean
   onToggle: () => void
 }) {
+  const { t } = useTranslation()
   const [copied, setCopied] = useState(false)
 
   async function copyKey() {
@@ -51,7 +50,7 @@ export function FlagDetailsHeader({
         className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
       >
         <span aria-hidden>←</span>
-        {lang === "zh" ? "功能开关" : "Feature flags"}
+        {t("featureFlags.detailsPage.featureFlags")}
       </Link>
       <div className="mt-6 flex items-start justify-between gap-6">
         <div className="min-w-0">
@@ -68,7 +67,7 @@ export function FlagDetailsHeader({
               {flag.variationType.toUpperCase()}
             </Badge>
             <div className="flex items-center gap-2 text-muted-foreground">
-              <span>{lang === "zh" ? "键" : "Key"}</span>
+              <span>{t("featureFlags.detailsPage.key")}</span>
               <div className="flex h-8 items-center rounded-md border bg-background pl-3 font-mono text-xs text-foreground">
                 <span className="max-w-64 truncate">{flag.key}</span>
                 <Button
@@ -76,7 +75,7 @@ export function FlagDetailsHeader({
                   variant="ghost"
                   size="icon-sm"
                   className="ml-1"
-                  aria-label={lang === "zh" ? "复制开关键" : "Copy flag key"}
+                  aria-label={t("featureFlags.detailsPage.copyKey")}
                   onClick={() => void copyKey()}
                 >
                   {copied ? (
@@ -89,7 +88,7 @@ export function FlagDetailsHeader({
             </div>
             {flag.tags?.length ? (
               <div className="flex flex-wrap items-center gap-2 text-muted-foreground">
-                <span>{lang === "zh" ? "标签" : "Tags"}</span>
+                <span>{t("featureFlags.detailsPage.tags")}</span>
                 {flag.tags.map((tag) => (
                   <Badge key={tag} variant="secondary" className="font-normal">
                     {tag}
@@ -106,9 +105,7 @@ export function FlagDetailsHeader({
           <Switch
             checked={flag.isEnabled}
             disabled={toggling || !canToggle || flag.isArchived}
-            aria-label={
-              lang === "zh" ? "切换功能开关状态" : "Toggle feature flag status"
-            }
+            aria-label={t("featureFlags.detailsPage.toggleStatus")}
             onCheckedChange={onToggle}
           />
           <span className="text-sm font-semibold">
@@ -118,10 +115,10 @@ export function FlagDetailsHeader({
       </div>
       <nav
         className="mt-6 flex h-11 items-end gap-0 border-b"
-        aria-label="Feature flag details"
+        aria-label={t("featureFlags.detailsPage.tabsLabel")}
       >
         {tabs.map((tab) => {
-          const active = tab === "Targeting"
+          const active = tab === "targeting"
           return (
             <span
               key={tab}
@@ -131,7 +128,7 @@ export function FlagDetailsHeader({
                   : "px-3 pb-3 text-sm text-muted-foreground"
               }
             >
-              {tab}
+              {t(`featureFlags.detailsPage.tabs.${tab}`)}
             </span>
           )
         })}

@@ -13,7 +13,6 @@ import {
   CommandList,
 } from "@/components/ui/command"
 import { Popover, PopoverTrigger } from "@/components/ui/popover"
-import type { Lang } from "@/features/layout/layout-types"
 import { fetchFeatureFlagTags } from "../../flags-api"
 
 function FlagTagPopoverContent({ children }: { children: ReactNode }) {
@@ -41,7 +40,6 @@ export function FlagTagPicker({
   onOpenChange,
 }: {
   envId: string
-  lang: Lang
   tags: string[]
   disabled: boolean
   onChange: (tags: string[]) => void

@@ -26,6 +26,7 @@ import {
 import { localizedProjectEnvPath } from "@/features/layout/layout-context"
 import type { Lang, ProjectEnv } from "@/features/layout/layout-types"
 import { Link } from "react-router-dom"
+import { useTranslation } from "react-i18next"
 import type {
   CompareEnvironment,
   FlagCompareOverview,
@@ -34,20 +35,14 @@ import type {
 
 type DifferenceCategory = {
   key: keyof Omit<FlagDiffOverview, "targetEnvId">
-  en: string
-  zh: string
 }
 
 const differenceCategories: DifferenceCategory[] = [
-  { key: "onOffState", en: "On/OFF state", zh: "开关状态" },
-  {
-    key: "individualTargeting",
-    en: "Individual targeting",
-    zh: "单独定向",
-  },
-  { key: "targetingRule", en: "Targeting rules", zh: "定向规则" },
-  { key: "defaultRule", en: "Default rule", zh: "默认规则" },
-  { key: "offVariation", en: "Off variation", zh: "关闭变体" },
+  { key: "onOffState" },
+  { key: "individualTargeting" },
+  { key: "targetingRule" },
+  { key: "defaultRule" },
+  { key: "offVariation" },
 ]
 
 function FlagIdentity({
@@ -61,7 +56,7 @@ function FlagIdentity({
   source: Pick<ProjectEnv, "projectId" | "envId">
   onCopyKey: (key: string) => void
 }) {
-  const zh = lang === "zh"
+  const { t } = useTranslation()
   const visibleTags = flag.tags.slice(0, 2)
 
   return (
@@ -76,7 +71,9 @@ function FlagIdentity({
         rel="noopener noreferrer"
         className="block truncate text-sm font-semibold text-foreground underline-offset-4 hover:underline focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
         title={flag.name}
-        aria-label={`${flag.name} (${zh ? "在新标签页打开详情" : "open details in a new tab"})`}
+        aria-label={t("featureFlags.comparePage.matrix.openDetails", {
+          name: flag.name,
+        })}
       >
         {flag.name}
       </Link>
@@ -94,14 +91,18 @@ function FlagIdentity({
                 type="button"
                 variant="ghost"
                 size="icon-xs"
-                aria-label={`${zh ? "复制功能开关键" : "Copy feature flag key"} ${flag.key}`}
+                aria-label={t("featureFlags.comparePage.matrix.copyFlagKey", {
+                  key: flag.key,
+                })}
                 onClick={() => onCopyKey(flag.key)}
               />
             }
           >
             <Copy />
           </TooltipTrigger>
-          <TooltipContent>{zh ? "复制键" : "Copy key"}</TooltipContent>
+          <TooltipContent>
+            {t("featureFlags.comparePage.matrix.copyKey")}
+          </TooltipContent>
         </Tooltip>
       </div>
       {flag.tags.length ? (
@@ -125,7 +126,9 @@ function FlagIdentity({
                     variant="outline"
                     className="cursor-help font-normal"
                     tabIndex={0}
-                    aria-label={zh ? "显示所有标签" : "Show all tags"}
+                    aria-label={t(
+                      "featureFlags.comparePage.matrix.showAllTags"
+                    )}
                   />
                 }
               >
@@ -133,7 +136,7 @@ function FlagIdentity({
               </TooltipTrigger>
               <TooltipContent className="max-w-80 flex-col items-start gap-1 whitespace-normal">
                 <span className="font-medium">
-                  {zh ? "所有标签" : "All tags"}
+                  {t("featureFlags.comparePage.matrix.allTags")}
                 </span>
                 <span className="break-words">{flag.tags.join(", ")}</span>
               </TooltipContent>
@@ -154,7 +157,7 @@ function TargetFlagLink({
   target: CompareEnvironment
   lang: Lang
 }) {
-  const zh = lang === "zh"
+  const { t } = useTranslation()
   const href = localizedProjectEnvPath(
     lang,
     `/feature-flags/${encodeURIComponent(flag.key)}/targeting`,
@@ -171,14 +174,13 @@ function TargetFlagLink({
         size: "sm",
         className: "font-medium",
       })}
-      aria-label={
-        zh
-          ? `在新标签页中打开 ${target.label} 的 ${flag.name}`
-          : `Open ${flag.name} in ${target.label} in a new tab`
-      }
+      aria-label={t("featureFlags.comparePage.matrix.openTargetLabel", {
+        name: flag.name,
+        environment: target.label,
+      })}
     >
       <span className="leading-4">
-        {zh ? "在此环境中打开开关" : "Open flag in this environment"}
+        {t("featureFlags.comparePage.matrix.openTarget")}
       </span>
       <ExternalLink
         data-icon="inline-end"
@@ -205,7 +207,7 @@ function DifferenceCell({
   onReview: () => void
   onCopy: () => void
 }) {
-  const zh = lang === "zh"
+  const { t } = useTranslation()
   const diff = flag.diffs.find((item) => item.targetEnvId === target.id)
 
   if (!diff) {
@@ -214,7 +216,7 @@ function DifferenceCell({
         <div className="flex items-center gap-2 text-sm">
           <Info className="size-4 shrink-0 text-muted-foreground" />
           <Badge variant="secondary" className="font-normal">
-            {zh ? "未找到功能开关" : "Flag not found"}
+            {t("featureFlags.comparePage.matrix.flagNotFound")}
           </Badge>
         </div>
         <Tooltip>
@@ -233,19 +235,15 @@ function DifferenceCell({
             >
               <Copy />
               <span className="translate-y-px">
-                {zh ? "复制功能开关到这里" : "Copy flag here"}
+                {t("featureFlags.comparePage.matrix.copyHere")}
               </span>
             </Button>
           </TooltipTrigger>
           {!canCopy ? (
             <TooltipContent>
               {permissionPending
-                ? zh
-                  ? "正在检查权限…"
-                  : "Checking permissions…"
-                : zh
-                  ? "你没有复制此功能开关的权限。"
-                  : "You do not have permission to copy this flag."}
+                ? t("featureFlags.comparePage.matrix.checkingPermissions")
+                : t("featureFlags.comparePage.matrix.copyDenied")}
             </TooltipContent>
           ) : null}
         </Tooltip>
@@ -261,7 +259,7 @@ function DifferenceCell({
       <div className="space-y-2.5">
         <div className="flex items-center gap-2 text-sm">
           <CheckCircle2 className="size-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
-          <span>{zh ? "无差异" : "No differences"}</span>
+          <span>{t("featureFlags.comparePage.matrix.noDifferences")}</span>
         </div>
         <TargetFlagLink flag={flag} target={target} lang={lang} />
       </div>
@@ -272,14 +270,14 @@ function DifferenceCell({
     <div className="space-y-2.5">
       <p className="flex items-center gap-2 text-sm text-amber-700 dark:text-amber-300">
         <AlertTriangle className="size-4 shrink-0 fill-amber-500 text-amber-500" />
-        {zh
-          ? `${differences.length} 处差异`
-          : `${differences.length} ${differences.length === 1 ? "difference" : "differences"}`}
+        {t("featureFlags.comparePage.matrix.differenceCount", {
+          count: differences.length,
+        })}
       </p>
       <div className="flex flex-wrap gap-1.5">
         {differences.map((category) => (
           <Badge key={category.key} variant="outline" className="font-normal">
-            {zh ? category.zh : category.en}
+            {t(`featureFlags.comparePage.matrix.categories.${category.key}`)}
           </Badge>
         ))}
       </div>
@@ -292,7 +290,7 @@ function DifferenceCell({
           onClick={onReview}
         >
           <span className="translate-y-px">
-            {zh ? "查看差异" : "Review differences"}
+            {t("featureFlags.comparePage.matrix.reviewDifferences")}
           </span>
           <ChevronRight />
         </Button>
@@ -329,7 +327,7 @@ export function FlagsCompareMatrix({
   onCopyKey: (key: string) => void
   onClearFilters: () => void
 }) {
-  const zh = lang === "zh"
+  const { t } = useTranslation()
   const columnCount = targets.length + 1
   const minWidth = 280 + targets.length * 300
 
@@ -345,7 +343,7 @@ export function FlagsCompareMatrix({
         <TableHeader>
           <TableRow className="hover:bg-transparent">
             <TableHead className="sticky left-0 z-20 h-11 bg-muted/30 px-4">
-              {zh ? "功能开关" : "Feature flag"}
+              {t("featureFlags.comparePage.matrix.featureFlag")}
             </TableHead>
             {targets.map((target) => (
               <TableHead key={target.id} className="h-11 bg-muted/30 px-4">
@@ -394,12 +392,8 @@ export function FlagsCompareMatrix({
                 <div className="mx-auto max-w-md space-y-3 whitespace-normal">
                   <p className="text-sm text-muted-foreground">
                     {hasFilters
-                      ? zh
-                        ? "没有功能开关匹配当前筛选条件。"
-                        : "No feature flags match the current filters."
-                      : zh
-                        ? "当前源环境中没有功能开关。"
-                        : "No feature flags are available in the source environment."}
+                      ? t("featureFlags.comparePage.matrix.filteredEmpty")
+                      : t("featureFlags.comparePage.matrix.sourceEmpty")}
                   </p>
                   {hasFilters ? (
                     <Button
@@ -408,7 +402,7 @@ export function FlagsCompareMatrix({
                       size="sm"
                       onClick={onClearFilters}
                     >
-                      {zh ? "清除筛选" : "Clear filters"}
+                      {t("featureFlags.comparePage.matrix.clearFilters")}
                     </Button>
                   ) : null}
                 </div>

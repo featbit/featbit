@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { useNavigate, useParams } from "react-router-dom"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -59,6 +60,7 @@ import {
 } from "./targeting/targeting-utils"
 
 export function FlagDetailsPage() {
+  const { t } = useTranslation()
   const params = useParams()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -148,8 +150,14 @@ export function FlagDetailsPage() {
     saved && flag && stableFlagTargeting(saved) !== stableFlagTargeting(flag)
   )
   const changes = useMemo(
-    () => (saved && flag ? targetingReviewChanges(saved, flag) : []),
-    [flag, saved]
+    () =>
+      saved && flag
+        ? targetingReviewChanges(saved, flag, {
+            flagOn: t("featureFlags.detailsPage.flagOn"),
+            flagOff: t("featureFlags.detailsPage.flagOff"),
+          })
+        : [],
+    [flag, saved, t]
   )
   const decodedLicense = parseLicense(workspace?.license)
   const licenseStatus = getLicenseStatus(decodedLicense)
@@ -179,15 +187,10 @@ export function FlagDetailsPage() {
       )
       setDraft(null)
       setReviewOpen(false)
-      toast.success(lang === "zh" ? "操作成功" : "Operation succeeded")
+      toast.success(t("featureFlags.operationSucceeded"))
       void queryClient.invalidateQueries({ queryKey: ["feature-flags"] })
     },
-    onError: () =>
-      toast.error(
-        lang === "zh"
-          ? "操作失败，请重试。"
-          : "Operation failed. Please try again."
-      ),
+    onError: () => toast.error(t("featureFlags.operationFailed")),
   })
   const toggleMutation = useMutation({
     mutationFn: ({
@@ -214,14 +217,9 @@ export function FlagDetailsPage() {
       )
       setDraft(dirty ? { key: flagKey, value: draftUpdated } : null)
       setConfirmation(null)
-      toast.success(lang === "zh" ? "操作成功" : "Operation succeeded")
+      toast.success(t("featureFlags.operationSucceeded"))
     },
-    onError: () =>
-      toast.error(
-        lang === "zh"
-          ? "操作失败，请重试。"
-          : "Operation failed. Please try again."
-      ),
+    onError: () => toast.error(t("featureFlags.operationFailed")),
   })
   const submissionMutation = useMutation({
     mutationFn: (input: TargetingSubmission) => {
@@ -245,15 +243,10 @@ export function FlagDetailsPage() {
     },
     onSuccess: () => {
       setSubmission(null)
-      toast.success(lang === "zh" ? "操作成功" : "Operation succeeded")
+      toast.success(t("featureFlags.operationSucceeded"))
       void pendingQuery.refetch()
     },
-    onError: () =>
-      toast.error(
-        lang === "zh"
-          ? "操作失败，请重试。"
-          : "Operation failed. Please try again."
-      ),
+    onError: () => toast.error(t("featureFlags.operationFailed")),
   })
   const removePendingMutation = useMutation({
     mutationFn: (item: PendingFlagChange) =>
@@ -264,14 +257,9 @@ export function FlagDetailsPage() {
         (current: PendingFlagChange[] | undefined) =>
           current?.filter((candidate) => candidate.id !== item.id) ?? []
       )
-      toast.success(lang === "zh" ? "操作成功" : "Operation succeeded")
+      toast.success(t("featureFlags.operationSucceeded"))
     },
-    onError: () =>
-      toast.error(
-        lang === "zh"
-          ? "操作失败，请重试。"
-          : "Operation failed. Please try again."
-      ),
+    onError: () => toast.error(t("featureFlags.operationFailed")),
   })
 
   if (!envId || !flagKey || flagQuery.isError) {
@@ -279,17 +267,15 @@ export function FlagDetailsPage() {
       <div className="-m-5 flex min-h-[calc(100vh-3.5rem)] items-center justify-center bg-background p-8">
         <div className="space-y-4 text-center">
           <p className="text-sm text-muted-foreground">
-            {lang === "zh"
-              ? "无法加载功能开关。"
-              : "Feature flag could not be loaded."}
+            {t("featureFlags.detailsPage.loadFailed")}
           </p>
           <div className="flex justify-center gap-2">
             <Button variant="outline" onClick={() => navigate(basePath)}>
-              {lang === "zh" ? "返回功能开关" : "Back to feature flags"}
+              {t("featureFlags.detailsPage.back")}
             </Button>
             {envId && flagKey ? (
               <Button onClick={() => void flagQuery.refetch()}>
-                {lang === "zh" ? "重试" : "Retry"}
+                {t("featureFlags.retry")}
               </Button>
             ) : null}
           </div>
@@ -318,7 +304,6 @@ export function FlagDetailsPage() {
       <div className="-m-5 min-h-[calc(100vh-3.5rem)] bg-background px-6 py-6 lg:px-8">
         <FlagDetailsHeader
           flag={flag}
-          lang={lang}
           basePath={basePath}
           toggling={toggleMutation.isPending}
           canToggle={can("ToggleFlag")}
@@ -331,7 +316,6 @@ export function FlagDetailsPage() {
           }
         />
         <TargetingTab
-          lang={lang}
           flag={flag}
           users={users}
           properties={propertiesQuery.data ?? []}
@@ -364,7 +348,6 @@ export function FlagDetailsPage() {
         />
         <FlagChangeReviewDialog
           open={reviewOpen}
-          lang={lang}
           flagName={flag.name}
           changes={changes}
           requireComment={settingsQuery.data?.requireChangeComment ?? false}
@@ -385,7 +368,6 @@ export function FlagDetailsPage() {
         />
         <PendingChangesSheet
           open={pendingOpen}
-          lang={lang}
           items={pendingQuery.data ?? []}
           removingId={
             removePendingMutation.isPending
@@ -398,7 +380,6 @@ export function FlagDetailsPage() {
         <TargetingSubmissionDialog
           key={submission ? "submission" : "closed"}
           mode={submission?.mode ?? null}
-          lang={lang}
           flagName={flag.name}
           changes={changes}
           initialReason={submission?.initialReason}

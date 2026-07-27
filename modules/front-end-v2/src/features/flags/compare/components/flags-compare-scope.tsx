@@ -8,6 +8,7 @@ import {
   X,
 } from "lucide-react"
 import { type MouseEvent, useEffect, useMemo, useRef, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 import {
   Command,
@@ -22,7 +23,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import type { Lang, ProjectEnv } from "@/features/layout/layout-types"
+import type { ProjectEnv } from "@/features/layout/layout-types"
 import type { CompareEnvironment } from "../flags-compare-types"
 
 function EnvironmentChip({
@@ -60,15 +61,13 @@ function EnvironmentChip({
 function HiddenEnvironmentPopover({
   environments,
   disabled,
-  lang,
   onRemove,
 }: {
   environments: CompareEnvironment[]
   disabled: boolean
-  lang: Lang
   onRemove: (id: string) => void
 }) {
-  const zh = lang === "zh"
+  const { t } = useTranslation()
   if (!environments.length) return null
 
   return (
@@ -80,11 +79,9 @@ function HiddenEnvironmentPopover({
             size="xs"
             variant="secondary"
             disabled={disabled}
-            aria-label={
-              zh
-                ? `显示另外 ${environments.length} 个已选环境`
-                : `Show ${environments.length} more selected environments`
-            }
+            aria-label={t("featureFlags.comparePage.scope.showMoreSelected", {
+              count: environments.length,
+            })}
             className="h-6 px-2"
           />
         }
@@ -93,9 +90,9 @@ function HiddenEnvironmentPopover({
       </PopoverTrigger>
       <PopoverContent align="start" className="w-80 p-0">
         <div className="border-b px-3 py-2 text-xs font-medium">
-          {zh
-            ? `另外 ${environments.length} 个已选环境`
-            : `${environments.length} more selected`}
+          {t("featureFlags.comparePage.scope.moreSelected", {
+            count: environments.length,
+          })}
         </div>
         <div className="max-h-64 overflow-y-auto p-1">
           {environments.map((environment) => (
@@ -115,7 +112,7 @@ function HiddenEnvironmentPopover({
                 variant="ghost"
                 size="icon-xs"
                 disabled={disabled}
-                aria-label={`${zh ? "移除" : "Remove"} ${environment.label}`}
+                aria-label={`${t("featureFlags.comparePage.scope.remove")} ${environment.label}`}
                 onClick={() => onRemove(environment.id)}
               >
                 <X />
@@ -134,7 +131,6 @@ function TargetEnvironmentPicker({
   loading,
   error,
   disabled,
-  lang,
   onChange,
   onRetry,
 }: {
@@ -143,11 +139,10 @@ function TargetEnvironmentPicker({
   loading: boolean
   error: boolean
   disabled: boolean
-  lang: Lang
   onChange: (ids: string[]) => void
   onRetry: () => void
 }) {
-  const zh = lang === "zh"
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState("")
   const selectedViewportRef = useRef<HTMLDivElement>(null)
@@ -215,7 +210,7 @@ function TargetEnvironmentPicker({
     setOpen(true)
   }
 
-  const removeLabel = zh ? "移除" : "Remove"
+  const removeLabel = t("featureFlags.comparePage.scope.remove")
 
   useEffect(() => {
     const viewport = selectedViewportRef.current
@@ -298,7 +293,6 @@ function TargetEnvironmentPicker({
             <HiddenEnvironmentPopover
               environments={hiddenSelected}
               disabled={disabled}
-              lang={lang}
               onRemove={remove}
             />
           </div>
@@ -354,17 +348,13 @@ function TargetEnvironmentPicker({
                   ? "ml-auto size-7 shrink-0 px-0"
                   : "h-7 min-w-0 flex-1 justify-between px-1 font-normal text-muted-foreground"
               }
-              aria-label={
-                zh ? "选择要比较的目标环境" : "Select target environments"
-              }
+              aria-label={t("featureFlags.comparePage.scope.selectTargets")}
             />
           }
         >
           {!selected.length ? (
             <span className="truncate">
-              {zh
-                ? "选择一个或多个环境进行比较"
-                : "Select one or more environments to compare"}
+              {t("featureFlags.comparePage.scope.selectTargetsHelp")}
             </span>
           ) : null}
           <ChevronDown className="size-4 shrink-0" />
@@ -375,9 +365,9 @@ function TargetEnvironmentPicker({
         >
           <div className="flex h-10 items-center justify-between border-b px-3 text-xs">
             <span className="font-medium">
-              {zh
-                ? `已选择 ${selected.length} 个`
-                : `${selected.length} selected`}
+              {t("featureFlags.comparePage.scope.selected", {
+                count: selected.length,
+              })}
             </span>
             <Button
               type="button"
@@ -386,44 +376,38 @@ function TargetEnvironmentPicker({
               disabled={!selected.length || disabled}
               onClick={() => onChange([])}
             >
-              {zh ? "全部清除" : "Clear all"}
+              {t("featureFlags.comparePage.scope.clearAll")}
             </Button>
           </div>
           <Command shouldFilter={false}>
             <CommandInput
               value={search}
-              placeholder={
-                zh ? "搜索项目或环境" : "Search projects or environments"
-              }
+              placeholder={t("featureFlags.comparePage.scope.search")}
               onValueChange={setSearch}
             />
             <CommandList className="max-h-80">
               {loading ? (
                 <div className="flex items-center justify-center gap-2 py-8 text-sm text-muted-foreground">
                   <Loader2 className="size-4 animate-spin" />
-                  {zh ? "正在加载环境…" : "Loading environments…"}
+                  {t("featureFlags.comparePage.scope.loading")}
                 </div>
               ) : null}
               {error ? (
                 <div className="flex items-center justify-between gap-3 px-3 py-4 text-sm text-destructive">
-                  <span>
-                    {zh
-                      ? "无法加载环境。"
-                      : "Environments could not be loaded."}
-                  </span>
+                  <span>{t("featureFlags.comparePage.scope.loadFailed")}</span>
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
                     onClick={onRetry}
                   >
-                    {zh ? "重试" : "Retry"}
+                    {t("featureFlags.comparePage.scope.retry")}
                   </Button>
                 </div>
               ) : null}
               {!loading && !error ? (
                 <CommandEmpty>
-                  {zh ? "未找到环境" : "No environments found"}
+                  {t("featureFlags.comparePage.scope.empty")}
                 </CommandEmpty>
               ) : null}
               {!loading && !error
@@ -452,7 +436,6 @@ function TargetEnvironmentPicker({
 }
 
 export function FlagsCompareScope({
-  lang,
   source,
   environments,
   selectedIds,
@@ -465,7 +448,6 @@ export function FlagsCompareScope({
   onApply,
   onRetry,
 }: {
-  lang: Lang
   source: ProjectEnv | null
   environments: CompareEnvironment[]
   selectedIds: string[]
@@ -478,13 +460,13 @@ export function FlagsCompareScope({
   onApply: () => void
   onRetry: () => void
 }) {
-  const zh = lang === "zh"
+  const { t } = useTranslation()
 
   return (
     <section className="grid gap-4 rounded-md border bg-background p-4 lg:grid-cols-[minmax(240px,0.85fr)_auto_minmax(340px,1.4fr)_auto] lg:items-end lg:gap-y-2">
       <div className="min-w-0 lg:col-start-1 lg:row-start-1">
         <p className="mb-1.5 text-sm font-medium">
-          {zh ? "源环境" : "Source environment"}
+          {t("featureFlags.comparePage.scope.source")}
         </p>
         <div className="flex h-9 min-w-0 items-center gap-2 rounded-md border bg-muted/40 px-3">
           <Box className="size-4 shrink-0 text-muted-foreground" />
@@ -501,7 +483,7 @@ export function FlagsCompareScope({
         <div className="min-w-0 lg:col-start-3 lg:row-start-1">
           <p className="mb-1.5 flex items-center gap-2 text-sm font-medium">
             <ArrowRight className="size-4 text-muted-foreground lg:hidden" />
-            {zh ? "目标环境" : "Target environments"}
+            {t("featureFlags.comparePage.scope.targets")}
           </p>
           <TargetEnvironmentPicker
             environments={environments}
@@ -509,7 +491,6 @@ export function FlagsCompareScope({
             loading={loading}
             error={error}
             disabled={disabled || applying}
-            lang={lang}
             onChange={onChange}
             onRetry={onRetry}
           />
@@ -517,9 +498,7 @@ export function FlagsCompareScope({
         {hasUnappliedChanges ? (
           <p className="mt-2 flex items-center gap-1.5 text-xs text-amber-700 lg:col-start-3 lg:row-start-2 lg:mt-0 dark:text-amber-300">
             <AlertTriangle className="size-3.5 shrink-0" />
-            {zh
-              ? "选择已更改。应用后刷新比较结果。"
-              : "Selection changed. Apply to refresh comparison."}
+            {t("featureFlags.comparePage.scope.changed")}
           </p>
         ) : null}
       </div>
@@ -531,7 +510,9 @@ export function FlagsCompareScope({
         onClick={onApply}
       >
         {applying ? <Loader2 className="animate-spin" /> : null}
-        {applying ? (zh ? "应用中" : "Applying") : zh ? "应用" : "Apply"}
+        {applying
+          ? t("featureFlags.comparePage.scope.applying")
+          : t("featureFlags.comparePage.scope.apply")}
       </Button>
     </section>
   )

@@ -1,5 +1,6 @@
 import { Info } from "lucide-react"
 import { useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -20,8 +21,8 @@ import type {
   FlagRuleVariation,
   FlagVariation,
 } from "../../flags-types"
+import { variationMarkerColor } from "../../variation-colors"
 import type { SegmentUserProperty } from "@/features/segments/segments-types"
-import { ROLLOUT_MARKER_COLORS } from "./rollout-colors"
 import {
   allocationPercentages,
   rolloutFromPercentages,
@@ -41,9 +42,7 @@ export function ServingSummary({
         {values.map((item, index) => (
           <span
             key={item.id}
-            className={
-              ROLLOUT_MARKER_COLORS[index % ROLLOUT_MARKER_COLORS.length]
-            }
+            className={variationMarkerColor(index)}
             style={{ width: `${item.percentage}%` }}
           />
         ))}
@@ -57,7 +56,7 @@ export function ServingSummary({
             <div key={item.id} className="flex shrink-0 items-center gap-1.5">
               <span
                 aria-hidden="true"
-                className={`size-2 shrink-0 rounded-full ${ROLLOUT_MARKER_COLORS[index % ROLLOUT_MARKER_COLORS.length]}`}
+                className={`size-2 shrink-0 rounded-full ${variationMarkerColor(index)}`}
               />
               <span>
                 {variation?.name || variation?.value || item.id}{" "}
@@ -88,6 +87,7 @@ export function PercentageRolloutEditor({
   onCancel: () => void
   onApply: (value: FlagRuleVariation[], dispatchKey: string) => void
 }) {
+  const { t } = useTranslation()
   const initial = useMemo(() => {
     const current = new Map(
       allocationPercentages(value).map((item) => [item.id, item.percentage])
@@ -117,20 +117,23 @@ export function PercentageRolloutEditor({
     <div className="mt-2 rounded-md bg-muted/70 p-3.5">
       <div className="mb-4 flex items-start justify-between gap-6">
         <div>
-          <h4 className="text-sm font-medium">Percentage rollout</h4>
+          <h4 className="text-sm font-medium">
+            {t("featureFlags.detailsPage.rollout.title")}
+          </h4>
           <p className="text-xs text-muted-foreground">
-            Allocate exactly 100% across variations.
+            {t("featureFlags.detailsPage.rollout.help")}
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">Dispatch by</span>
+          <span className="text-xs text-muted-foreground">
+            {t("featureFlags.detailsPage.rollout.dispatchBy")}
+          </span>
           <Tooltip>
             <TooltipTrigger className="text-muted-foreground">
               <Info className="size-3.5" />
             </TooltipTrigger>
             <TooltipContent>
-              Users with the same value are placed in the same stable percentage
-              bucket.
+              {t("featureFlags.detailsPage.rollout.dispatchHelp")}
             </TooltipContent>
           </Tooltip>
           <Select
@@ -138,7 +141,10 @@ export function PercentageRolloutEditor({
             disabled={disabled}
             onValueChange={(value) => value && setProperty(value)}
           >
-            <SelectTrigger className="w-44" aria-label="Dispatch by property">
+            <SelectTrigger
+              className="w-44"
+              aria-label={t("featureFlags.detailsPage.rollout.dispatchLabel")}
+            >
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -165,7 +171,7 @@ export function PercentageRolloutEditor({
             >
               <div className="flex min-w-0 items-center gap-2 text-sm font-medium">
                 <span
-                  className={`size-2 shrink-0 rounded-full ${ROLLOUT_MARKER_COLORS[index % ROLLOUT_MARKER_COLORS.length]}`}
+                  className={`size-2 shrink-0 rounded-full ${variationMarkerColor(index)}`}
                 />
                 <span className="truncate">
                   {variation?.name || variation?.value || item.id}
@@ -173,7 +179,7 @@ export function PercentageRolloutEditor({
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-muted">
                 <div
-                  className={`h-full rounded-full ${ROLLOUT_MARKER_COLORS[index % ROLLOUT_MARKER_COLORS.length]}`}
+                  className={`h-full rounded-full ${variationMarkerColor(index)}`}
                   style={{ width: `${Math.min(100, item.percentage)}%` }}
                 />
               </div>
@@ -207,15 +213,21 @@ export function PercentageRolloutEditor({
       </div>
       <div className="mt-4 flex items-end justify-between gap-4">
         <div className="flex items-center gap-4 text-xs">
-          <span className="font-medium">{total}% allocated</span>
+          <span className="font-medium">
+            {t("featureFlags.detailsPage.rollout.allocated", { count: total })}
+          </span>
           <span
             className={
               total > 100 ? "text-destructive" : "text-muted-foreground"
             }
           >
             {total > 100
-              ? `${total - 100}% over allocated`
-              : `${100 - total}% remaining`}
+              ? t("featureFlags.detailsPage.rollout.overAllocated", {
+                  count: total - 100,
+                })
+              : t("featureFlags.detailsPage.rollout.remaining", {
+                  count: 100 - total,
+                })}
           </span>
         </div>
         <div className="flex gap-2">
@@ -226,7 +238,7 @@ export function PercentageRolloutEditor({
             disabled={disabled}
             onClick={onCancel}
           >
-            Cancel
+            {t("featureFlags.detailsPage.rollout.cancel")}
           </Button>
           <Button
             type="button"
@@ -234,7 +246,7 @@ export function PercentageRolloutEditor({
             disabled={disabled || total !== 100}
             onClick={() => onApply(rolloutFromPercentages(items), property)}
           >
-            Apply
+            {t("featureFlags.detailsPage.rollout.apply")}
           </Button>
         </div>
       </div>

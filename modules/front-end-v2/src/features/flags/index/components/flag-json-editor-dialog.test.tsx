@@ -38,3 +38,4 @@ describe("FlagJsonEditorDialog", () => {
     expect(screen.getByRole("button", { name: "Apply" })).toBeEnabled()
   })
 })
+import "@/lib/i18n/i18n"

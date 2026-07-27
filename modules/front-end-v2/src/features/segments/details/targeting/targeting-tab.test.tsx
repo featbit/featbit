@@ -11,7 +11,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n/i18n"
 import { createSegmentEndUser, searchSegmentUsers } from "../../segments-api"
 import type { Segment, SegmentEndUser, SegmentRule } from "../../segments-types"
-import { TargetingTab, UserPicker } from "./targeting-tab"
+import { UserPicker } from "@/features/targeting/user-panel"
+import { TargetingTab } from "./targeting-tab"
 
 vi.mock("../../segments-api", () => ({
   createSegmentEndUser: vi.fn(),

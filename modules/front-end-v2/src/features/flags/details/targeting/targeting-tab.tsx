@@ -1,5 +1,6 @@
 import { Clock3, MoreHorizontal, Plus } from "lucide-react"
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -21,17 +22,14 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import type { Lang } from "@/features/layout/layout-types"
-import {
-  RuleEditor,
-  UserPanel,
-} from "@/features/segments/details/targeting/targeting-tab"
 import type {
   SegmentEndUser,
   SegmentRule,
   SegmentUserProperty,
 } from "@/features/segments/segments-types"
-import { useRuleDragPreview } from "@/features/segments/details/targeting/rule-drag-preview"
+import { RuleEditor } from "@/features/targeting/rule-editor"
+import { useRuleDragPreview } from "@/features/targeting/rule-drag-preview"
+import { UserPanel } from "@/features/targeting/user-panel"
 import type {
   FeatureFlag,
   FlagRule,
@@ -75,13 +73,14 @@ function ServingControl({
   statusLabel?: string
   onChange: (value: FlagRuleVariation[], dispatchKey: string) => void
 }) {
+  const { t } = useTranslation()
   const [editing, setEditing] = useState(false)
   const rollout = value.length > 1
   const selectedVariation = flag.variations?.find(
     (variation) => variation.id === value[0]?.id
   )
   const selectedLabel = rollout
-    ? "Rollout percentage"
+    ? t("featureFlags.detailsPage.rolloutPercentage")
     : selectedVariation?.name || selectedVariation?.value || ""
   const control = (
     <div className="flex min-w-0 items-center gap-3">
@@ -107,8 +106,8 @@ function ServingControl({
           className="w-72 max-w-full"
           aria-label={
             embedded
-              ? "Default rule serving variation"
-              : "Rule serving variation"
+              ? t("featureFlags.detailsPage.defaultServingLabel")
+              : t("featureFlags.detailsPage.ruleServingLabel")
           }
         >
           <SelectValue>{selectedLabel}</SelectValue>
@@ -120,7 +119,9 @@ function ServingControl({
                 {variation.name || variation.value}
               </SelectItem>
             ))}
-            <SelectItem value="__rollout">Rollout percentage</SelectItem>
+            <SelectItem value="__rollout">
+              {t("featureFlags.detailsPage.rolloutPercentage")}
+            </SelectItem>
           </SelectGroup>
         </SelectContent>
       </Select>
@@ -135,7 +136,7 @@ function ServingControl({
             disabled={disabled}
             onClick={() => setEditing(true)}
           >
-            Edit rollout
+            {t("featureFlags.detailsPage.editRollout")}
           </Button>
         </>
       ) : null}
@@ -166,7 +167,9 @@ function ServingControl({
   return (
     <div>
       <div className="grid grid-cols-[1.75rem_minmax(10rem,1fr)] items-center gap-3 border-t pt-3">
-        <span className="text-xs font-semibold">Serve</span>
+        <span className="text-xs font-semibold">
+          {t("featureFlags.detailsPage.serve")}
+        </span>
         {control}
       </div>
       {editor}
@@ -175,7 +178,6 @@ function ServingControl({
 }
 
 export function TargetingTab({
-  lang,
   flag,
   users,
   properties,
@@ -195,7 +197,6 @@ export function TargetingTab({
   onSchedule,
   onChangeRequest,
 }: {
-  lang: Lang
   flag: FeatureFlag
   users: Map<string, SegmentEndUser>
   properties: SegmentUserProperty[]
@@ -215,7 +216,7 @@ export function TargetingTab({
   onSchedule: () => void
   onChangeRequest: () => void
 }) {
-  const zh = lang === "zh"
+  const { t } = useTranslation()
   const [errors, setErrors] = useState(new Map<string, string>())
   const [dragRuleId, setDragRuleId] = useState<string | null>(null)
   const { startPreview, movePreview, removePreview } = useRuleDragPreview()
@@ -243,7 +244,15 @@ export function TargetingTab({
   }
 
   function review() {
-    const next = validateTargeting(flag)
+    const next = validateTargeting(flag, {
+      allocation: t("featureFlags.detailsPage.validation.allocation"),
+      conditionRequired: t(
+        "featureFlags.detailsPage.validation.conditionRequired"
+      ),
+      conditionIncomplete: t(
+        "featureFlags.detailsPage.validation.conditionIncomplete"
+      ),
+    })
     setErrors(next)
     if (!next.size) onReview()
   }
@@ -258,19 +267,19 @@ export function TargetingTab({
         <div className="mb-3 flex min-h-9 flex-wrap items-center justify-between gap-3">
           <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
             <h2 className="text-base font-medium">
-              {zh ? "默认规则" : "Default rule"}
+              {t("featureFlags.detailsPage.defaultRule")}
             </h2>
             <p className="text-xs text-muted-foreground">
-              {zh
-                ? "未匹配单独定向或规则时使用。"
-                : "Used when no individual target and rule matches."}
+              {t("featureFlags.detailsPage.defaultRuleHelp")}
             </p>
           </div>
           <div className="flex items-center justify-end gap-3">
             {pendingCount ? (
               <Button type="button" variant="outline" onClick={onOpenPending}>
                 <Clock3 />
-                {pendingCount} {zh ? "项待处理变更" : "pending changes"}
+                {t("featureFlags.detailsPage.pendingChanges", {
+                  count: pendingCount,
+                })}
               </Button>
             ) : null}
             {dirty ? (
@@ -280,7 +289,7 @@ export function TargetingTab({
                 disabled={saving}
                 onClick={onDiscard}
               >
-                {zh ? "放弃变更" : "Discard changes"}
+                {t("featureFlags.detailsPage.discard")}
               </Button>
             ) : null}
             <Button
@@ -292,7 +301,7 @@ export function TargetingTab({
               }
               onClick={review}
             >
-              {zh ? "审核并保存" : "Review & save"}
+              {t("featureFlags.detailsPage.reviewAndSave")}
             </Button>
             <Tooltip>
               <TooltipTrigger
@@ -304,9 +313,7 @@ export function TargetingTab({
                           type="button"
                           size="icon"
                           variant="outline"
-                          aria-label={
-                            zh ? "更多定向操作" : "More targeting actions"
-                          }
+                          aria-label={t("featureFlags.detailsPage.moreActions")}
                         />
                       }
                     >
@@ -317,20 +324,20 @@ export function TargetingTab({
                         disabled={!dirty || !scheduleGranted}
                         onClick={onSchedule}
                       >
-                        {zh ? "计划变更" : "Schedule changes"}
+                        {t("featureFlags.detailsPage.scheduleChanges")}
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         disabled={!dirty || !changeRequestGranted}
                         onClick={onChangeRequest}
                       >
-                        {zh ? "变更请求" : "Change request"}
+                        {t("featureFlags.detailsPage.changeRequest")}
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 }
               />
               <TooltipContent>
-                {zh ? "更多定向操作" : "More targeting actions"}
+                {t("featureFlags.detailsPage.moreActions")}
               </TooltipContent>
             </Tooltip>
           </div>
@@ -344,10 +351,10 @@ export function TargetingTab({
         >
           <div className="grid min-h-12 grid-cols-[10rem_3rem_minmax(0,1fr)] items-center gap-3 px-3">
             <span className="text-sm font-semibold">
-              {zh ? "功能开关开启时" : "When flag is ON"}
+              {t("featureFlags.detailsPage.whenOn")}
             </span>
             <span className="text-xs text-muted-foreground">
-              {zh ? "返回" : "Serve"}
+              {t("featureFlags.detailsPage.serve")}
             </span>
             <div className="min-w-0">
               <ServingControl
@@ -359,9 +366,7 @@ export function TargetingTab({
                 disabled={!canUpdateDefault}
                 statusLabel={
                   !flag.isEnabled
-                    ? zh
-                      ? "当前未生效"
-                      : "Inactive now"
+                    ? t("featureFlags.detailsPage.inactiveNow")
                     : undefined
                 }
                 onChange={(value, dispatchKey) =>
@@ -385,10 +390,10 @@ export function TargetingTab({
             }
           >
             <span className="text-sm font-semibold">
-              {zh ? "功能开关关闭时" : "When flag is OFF"}
+              {t("featureFlags.detailsPage.whenOff")}
             </span>
             <span className="text-xs text-muted-foreground">
-              {zh ? "返回" : "Serve"}
+              {t("featureFlags.detailsPage.serve")}
             </span>
             <div className="flex items-center gap-3">
               <Select
@@ -401,7 +406,7 @@ export function TargetingTab({
               >
                 <SelectTrigger
                   className="w-72 max-w-full"
-                  aria-label="Flag OFF serving variation"
+                  aria-label={t("featureFlags.detailsPage.offServingLabel")}
                 >
                   <SelectValue>
                     {offVariation?.name || offVariation?.value || ""}
@@ -419,18 +424,17 @@ export function TargetingTab({
               </Select>
               {flag.isEnabled ? (
                 <Badge variant="outline">
-                  {zh ? "当前未生效" : "Inactive now"}
+                  {t("featureFlags.detailsPage.inactiveNow")}
                 </Badge>
               ) : (
                 <>
                   <Badge variant="outline">
-                    {zh ? "当前生效" : "Active now"}
+                    {t("featureFlags.detailsPage.activeNow")}
                   </Badge>
                   <span className="text-sm font-medium">
-                    {offVariation?.name || offVariation?.value}{" "}
-                    {zh
-                      ? "会为每次评估返回。"
-                      : "is returned for every evaluation."}
+                    {t("featureFlags.detailsPage.offVariationActive", {
+                      variation: offVariation?.name || offVariation?.value,
+                    })}
                   </span>
                 </>
               )}
@@ -447,12 +451,10 @@ export function TargetingTab({
       <section>
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-base font-medium">
-            {zh ? "单独定向" : "Individual targeting"}
+            {t("featureFlags.detailsPage.individualTargeting")}
           </h2>
           <p className="text-xs text-muted-foreground">
-            {zh
-              ? "按键定向特定终端用户。"
-              : "Target specific end users by keyId."}
+            {t("featureFlags.detailsPage.individualTargetingHelp")}
           </p>
         </div>
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
@@ -478,7 +480,7 @@ export function TargetingTab({
       <section>
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-base font-medium">
-            {zh ? "定向规则" : "Targeting rules"}
+            {t("featureFlags.detailsPage.targetingRules")}
           </h2>
           <Button
             type="button"
@@ -490,13 +492,17 @@ export function TargetingTab({
                 ...flag,
                 rules: [
                   ...(flag.rules ?? []),
-                  newFlagRule((flag.rules?.length ?? 0) + 1),
+                  newFlagRule(
+                    t("featureFlags.detailsPage.defaultRuleName", {
+                      count: (flag.rules?.length ?? 0) + 1,
+                    })
+                  ),
                 ],
               })
             }
           >
             <Plus />
-            {zh ? "添加规则" : "Add rule"}
+            {t("featureFlags.detailsPage.addRule")}
           </Button>
         </div>
         <div className="space-y-3">
@@ -614,16 +620,12 @@ export function TargetingTab({
           ))}
           {!flag.rules?.length ? (
             <div className="rounded-md border border-dashed px-5 py-10 text-center text-sm text-muted-foreground">
-              {zh
-                ? "暂无规则。添加规则以根据用户属性进行匹配。"
-                : "No rules yet. Add a rule to match users by their properties."}
+              {t("featureFlags.detailsPage.rulesEmpty")}
             </div>
           ) : null}
         </div>
         <p className="mt-3 text-xs text-muted-foreground">
-          {zh
-            ? "开关开启时，匹配用户获得规则变体；未匹配用户使用默认规则。"
-            : "When the flag is ON, matched users receive the rule’s variation; unmatched users fall through to the default rule."}
+          {t("featureFlags.detailsPage.rulesHelp")}
         </p>
       </section>
     </div>

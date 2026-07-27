@@ -12,6 +12,7 @@ import { enOrganization, zhOrganization } from "./resources/organization"
 import { enProfile, zhProfile } from "./resources/profile"
 import { enRelayProxies, zhRelayProxies } from "./resources/relay-proxies"
 import { enSegments, zhSegments } from "./resources/segments"
+import { enTargeting, zhTargeting } from "./resources/targeting"
 import { enWebhooks, zhWebhooks } from "./resources/webhooks"
 import {
   enWorkspaceSelection,
@@ -38,6 +39,7 @@ i18n.use(initReactI18next).init({
         endUsers: enEndUsers,
         featureFlags: enFeatureFlags,
         segments: enSegments,
+        targeting: enTargeting,
       },
     },
     zh: {
@@ -57,6 +59,7 @@ i18n.use(initReactI18next).init({
         endUsers: zhEndUsers,
         featureFlags: zhFeatureFlags,
         segments: zhSegments,
+        targeting: zhTargeting,
       },
     },
   },

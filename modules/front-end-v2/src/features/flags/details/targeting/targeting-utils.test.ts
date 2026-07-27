@@ -8,6 +8,13 @@ import {
   validateTargeting,
 } from "./targeting-utils"
 
+const reviewLabels = { flagOn: "Flag ON", flagOff: "Flag OFF" }
+const validationMessages = {
+  allocation: "Allocate exactly 100% across variations.",
+  conditionRequired: "Add at least one complete condition.",
+  conditionIncomplete: "Complete every condition before reviewing changes.",
+}
+
 function flag(): FeatureFlag {
   return {
     id: "flag-1",
@@ -76,7 +83,7 @@ describe("feature flag targeting utilities", () => {
     current.disabledVariationId = "new"
 
     expect(stableFlagTargeting(current)).not.toBe(stableFlagTargeting(previous))
-    expect(targetingReviewChanges(previous, current)).toEqual([
+    expect(targetingReviewChanges(previous, current, reviewLabels)).toEqual([
       expect.objectContaining({
         kind: "default",
         label: "Flag OFF",
@@ -94,7 +101,9 @@ describe("feature flag targeting utilities", () => {
     current.targetUsers = [{ variationId: "new", keyIds: ["user-2"] }]
     current.rules![0].conditions[0].value = "professional"
     expect(
-      targetingReviewChanges(previous, current).map((item) => item.kind)
+      targetingReviewChanges(previous, current, reviewLabels).map(
+        (item) => item.kind
+      )
     ).toEqual(["default", "targeting", "targeting", "rule"])
   })
 
@@ -108,7 +117,7 @@ describe("feature flag targeting utilities", () => {
       value: "EU",
     })
 
-    const change = targetingReviewChanges(previous, current).find(
+    const change = targetingReviewChanges(previous, current, reviewLabels).find(
       (item) => item.kind === "rule"
     )
     expect(change?.previousRule?.conditions).toHaveLength(1)
@@ -122,7 +131,7 @@ describe("feature flag targeting utilities", () => {
     const current = structuredClone(previous)
     current.rules![0].variations = [{ id: "control", rollout: [0, 1] }]
 
-    const change = targetingReviewChanges(previous, current).find(
+    const change = targetingReviewChanges(previous, current, reviewLabels).find(
       (item) => item.kind === "rule"
     )
     expect(change?.previous).toBe("New checkout")
@@ -133,7 +142,7 @@ describe("feature flag targeting utilities", () => {
     const current = flag()
     current.fallthrough!.variations = [{ id: "control", rollout: [0, 0.5] }]
     current.rules![0].conditions = []
-    const errors = validateTargeting(current)
+    const errors = validateTargeting(current, validationMessages)
     expect(errors.has("default")).toBe(true)
     expect(errors.has("rule-1")).toBe(true)
   })

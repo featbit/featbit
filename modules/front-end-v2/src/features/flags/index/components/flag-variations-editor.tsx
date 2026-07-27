@@ -1,5 +1,6 @@
 import { Braces, Plus, Trash2 } from "lucide-react"
 import { useState } from "react"
+import { Trans, useTranslation } from "react-i18next"
 import {
   AlertDialog,
   AlertDialogContent,
@@ -20,7 +21,6 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
-import type { Lang } from "@/features/layout/layout-types"
 import { FlagJsonEditorDialog } from "./flag-json-editor-dialog"
 import {
   createDefaultFlagVariationSettings,
@@ -32,28 +32,26 @@ import {
 } from "./flag-variation-draft"
 
 export function FlagVariationsEditor({
-  lang,
   value,
   disabled,
   showErrors,
   onChange,
   onNestedSurfaceOpenChange,
 }: {
-  lang: Lang
   value: FlagVariationSettingsDraft
   disabled: boolean
   showErrors: boolean
   onChange: (value: FlagVariationSettingsDraft) => void
   onNestedSurfaceOpenChange?: (open: boolean) => void
 }) {
-  const zh = lang === "zh"
+  const { t, i18n } = useTranslation()
   const [pendingVariationType, setPendingVariationType] =
     useState<FlagVariationType | null>(null)
   const [pendingDeleteIndex, setPendingDeleteIndex] = useState<number | null>(
     null
   )
   const [jsonEditorIndex, setJsonEditorIndex] = useState<number | null>(null)
-  const untitledVariation = zh ? "未命名变体" : "Untitled variation"
+  const untitledVariation = t("featureFlags.variationsEditor.untitled")
   const enabledVariation = value.variations.find(
     (variation) => variation.id === value.enabledVariationId
   )
@@ -70,14 +68,10 @@ export function FlagVariationsEditor({
   const pendingDeleteRoles = pendingDeleteVariation
     ? [
         value.enabledVariationId === pendingDeleteVariation.id
-          ? zh
-            ? "开启时返回"
-            : "Serve when on"
+          ? t("featureFlags.variationsEditor.serveWhenOn")
           : null,
         value.disabledVariationId === pendingDeleteVariation.id
-          ? zh
-            ? "关闭时返回"
-            : "Serve when off"
+          ? t("featureFlags.variationsEditor.serveWhenOff")
           : null,
       ].filter(Boolean)
     : []
@@ -168,15 +162,14 @@ export function FlagVariationsEditor({
   function valueErrorMessage(
     error: ReturnType<typeof getFlagVariationValueError>
   ) {
-    if (error === "required") return zh ? "请输入值" : "Enter a value"
+    if (error === "required")
+      return t("featureFlags.variationsEditor.valueRequired")
     if (error === "boolean")
-      return zh ? "请输入 true 或 false" : "Use true or false"
+      return t("featureFlags.variationsEditor.booleanInvalid")
     if (error === "number")
-      return zh ? "请输入有效数字" : "Enter a valid number"
+      return t("featureFlags.variationsEditor.numberInvalid")
     if (error === "json") {
-      return zh
-        ? "请输入有效的 JSON 对象或数组"
-        : "Enter a valid JSON object or array"
+      return t("featureFlags.variationsEditor.jsonInvalid")
     }
     return ""
   }
@@ -186,11 +179,11 @@ export function FlagVariationsEditor({
       <div className="space-y-5">
         <section className="space-y-4 border-t pt-5">
           <h3 className="text-base font-semibold text-foreground">
-            {zh ? "变体设置" : "Variation settings"}
+            {t("featureFlags.variationsEditor.title")}
           </h3>
 
           <div className="space-y-2">
-            <Label>{zh ? "变体类型" : "Variation type"}</Label>
+            <Label>{t("featureFlags.variationsEditor.type")}</Label>
             <Select
               value={value.variationType}
               disabled={disabled}
@@ -218,18 +211,16 @@ export function FlagVariationsEditor({
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
-              {zh
-                ? "功能开关创建后不能更改变体类型。"
-                : "The variation type cannot be changed after the flag is created."}
+              {t("featureFlags.variationsEditor.typeHelp")}
             </p>
           </div>
 
           <div className="space-y-2">
-            <Label>{zh ? "变体" : "Variations"}</Label>
+            <Label>{t("featureFlags.variationsEditor.variations")}</Label>
             <div className="overflow-hidden rounded-md border">
               {value.variationType === "json" ? (
                 <div className="grid grid-cols-[minmax(0,1fr)_2rem] gap-2 bg-muted/40 px-2 py-1.5 text-xs font-medium text-muted-foreground">
-                  <span>{zh ? "名称与 JSON 值" : "Name and JSON value"}</span>
+                  <span>{t("featureFlags.variationsEditor.nameAndJson")}</span>
                   <span />
                 </div>
               ) : (
@@ -240,8 +231,8 @@ export function FlagVariationsEditor({
                       : "grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_2rem] gap-2 bg-muted/40 px-2 py-1.5 text-xs font-medium text-muted-foreground"
                   }
                 >
-                  <span>{zh ? "名称" : "Name"}</span>
-                  <span>{zh ? "值" : "Value"}</span>
+                  <span>{t("featureFlags.variationsEditor.name")}</span>
+                  <span>{t("featureFlags.variationsEditor.value")}</span>
                   {value.variationType === "boolean" ? null : <span />}
                 </div>
               )}
@@ -271,14 +262,14 @@ export function FlagVariationsEditor({
                         <Input
                           value={variation.name}
                           disabled={disabled}
-                          placeholder={zh ? "名称" : "Name"}
+                          placeholder={t("featureFlags.variationsEditor.name")}
                           onChange={(event) =>
                             updateVariation(index, "name", event.target.value)
                           }
                         />
                         {showErrors && nameInvalid ? (
                           <p className="text-xs text-destructive">
-                            {zh ? "请输入变体名称" : "Enter a variation name"}
+                            {t("featureFlags.variationsEditor.nameRequired")}
                           </p>
                         ) : null}
                       </div>
@@ -290,7 +281,9 @@ export function FlagVariationsEditor({
                               disabled || value.variationType === "boolean"
                             }
                             className="font-mono"
-                            placeholder={zh ? "值" : "Value"}
+                            placeholder={t(
+                              "featureFlags.variationsEditor.value"
+                            )}
                             onChange={(event) =>
                               updateVariation(
                                 index,
@@ -313,7 +306,7 @@ export function FlagVariationsEditor({
                           variant="ghost"
                           className="self-center"
                           disabled={disabled}
-                          aria-label={zh ? "删除变体" : "Delete variation"}
+                          aria-label={t("featureFlags.variationsEditor.delete")}
                           onClick={() => requestRemoveVariation(index)}
                         >
                           <Trash2 />
@@ -328,7 +321,10 @@ export function FlagVariationsEditor({
                             variant="outline"
                             disabled={disabled}
                             className="h-10 w-full justify-between gap-3 px-3 text-left"
-                            aria-label={`${zh ? "编辑 JSON" : "Edit JSON for"} ${variation.name || untitledVariation}`}
+                            aria-label={t(
+                              "featureFlags.variationsEditor.editJsonFor",
+                              { name: variation.name || untitledVariation }
+                            )}
                             onClick={() => setJsonEditor(index)}
                           >
                             <code className="min-w-0 flex-1 truncate font-mono text-xs font-normal text-foreground">
@@ -336,7 +332,7 @@ export function FlagVariationsEditor({
                             </code>
                             <span className="flex shrink-0 items-center gap-1.5 text-xs text-muted-foreground">
                               <Braces className="size-4" />
-                              {zh ? "编辑 JSON" : "Edit JSON"}
+                              {t("featureFlags.variationsEditor.editJson")}
                             </span>
                           </Button>
                           {showErrors && valueError ? (
@@ -360,7 +356,7 @@ export function FlagVariationsEditor({
                 onClick={addVariation}
               >
                 <Plus />
-                {zh ? "添加变体" : "Add variation"}
+                {t("featureFlags.variationsEditor.add")}
               </Button>
             ) : null}
           </div>
@@ -368,11 +364,11 @@ export function FlagVariationsEditor({
 
         <section className="space-y-4 border-t pt-5">
           <h3 className="text-base font-semibold text-foreground">
-            {zh ? "默认规则" : "Default rule"}
+            {t("featureFlags.variationsEditor.defaultRule")}
           </h3>
           <div className="space-y-3">
             <DefaultVariationSelect
-              label={zh ? "开启时返回" : "Serve when on"}
+              label={t("featureFlags.variationsEditor.serveWhenOn")}
               value={value.enabledVariationId}
               variations={value.variations}
               disabled={disabled}
@@ -383,7 +379,7 @@ export function FlagVariationsEditor({
               }
             />
             <DefaultVariationSelect
-              label={zh ? "关闭时返回" : "Serve when off"}
+              label={t("featureFlags.variationsEditor.serveWhenOff")}
               value={value.disabledVariationId}
               variations={value.variations}
               disabled={disabled}
@@ -398,26 +394,15 @@ export function FlagVariationsEditor({
           <label className="flex w-full items-center justify-between rounded-md border px-3 py-3 sm:max-w-[420px]">
             <span>
               <span className="block text-sm font-medium">
-                {zh ? "创建后开启" : "Turn on after creation"}
+                {t("featureFlags.variationsEditor.turnOn")}
               </span>
               <span className="text-xs text-muted-foreground">
-                {zh ? (
-                  <>
-                    开启后，将立即应用
-                    <span className="font-medium text-foreground">
-                      开启时返回
-                    </span>
-                    中选择的值。
-                  </>
-                ) : (
-                  <>
-                    The value defined by{" "}
-                    <span className="font-medium text-foreground">
-                      Serve when on
-                    </span>{" "}
-                    will be applied immediately when enabled.
-                  </>
-                )}
+                <Trans
+                  i18nKey="featureFlags.variationsEditor.turnOnHelp"
+                  components={{
+                    strong: <span className="font-medium text-foreground" />,
+                  }}
+                />
               </span>
             </span>
             <Switch
@@ -438,17 +423,15 @@ export function FlagVariationsEditor({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {zh ? "更改变体类型？" : "Change variation type?"}
+              {t("featureFlags.variationsEditor.changeTypeTitle")}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {zh
-                ? "更改类型会重置所有变体名称、值以及默认规则选择。"
-                : "Changing the type resets all variation names, values, and default rule selections."}
+              {t("featureFlags.variationsEditor.changeTypeDescription")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="border-t-0 bg-transparent">
             <Button variant="outline" onClick={() => setTypeConfirmation(null)}>
-              {zh ? "保留当前设置" : "Keep current settings"}
+              {t("featureFlags.variationsEditor.keepSettings")}
             </Button>
             <Button
               variant="destructive"
@@ -457,7 +440,7 @@ export function FlagVariationsEditor({
                   applyVariationType(pendingVariationType)
               }}
             >
-              {zh ? "更改类型" : "Change type"}
+              {t("featureFlags.variationsEditor.changeType")}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -472,13 +455,23 @@ export function FlagVariationsEditor({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {zh ? "删除变体？" : "Delete variation?"}
+              {t("featureFlags.variationsEditor.deleteTitle")}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {pendingDeleteVariation && pendingDeleteReplacement
-                ? zh
-                  ? `“${pendingDeleteVariation.name || untitledVariation}”正被${pendingDeleteRoles.join("和")}使用。删除后，这些选择将更新为“${pendingDeleteReplacement.name || untitledVariation}”。`
-                  : `“${pendingDeleteVariation.name || untitledVariation}” is used by ${pendingDeleteRoles.join(" and ")}. Deleting it will update ${pendingDeleteRoles.length > 1 ? "these selections" : "this selection"} to “${pendingDeleteReplacement.name || untitledVariation}”.`
+                ? t("featureFlags.variationsEditor.deleteDescription", {
+                    variation: pendingDeleteVariation.name || untitledVariation,
+                    roles: new Intl.ListFormat(
+                      i18n.resolvedLanguage === "zh" ? "zh-CN" : "en-US"
+                    ).format(pendingDeleteRoles),
+                    selection: t(
+                      pendingDeleteRoles.length > 1
+                        ? "featureFlags.variationsEditor.theseSelections"
+                        : "featureFlags.variationsEditor.thisSelection"
+                    ),
+                    replacement:
+                      pendingDeleteReplacement.name || untitledVariation,
+                  })
                 : ""}
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -487,7 +480,7 @@ export function FlagVariationsEditor({
               variant="outline"
               onClick={() => setDeleteConfirmation(null)}
             >
-              {zh ? "取消" : "Cancel"}
+              {t("featureFlags.variationsEditor.cancel")}
             </Button>
             <Button
               variant="destructive"
@@ -498,7 +491,7 @@ export function FlagVariationsEditor({
                 setDeleteConfirmation(null)
               }}
             >
-              {zh ? "删除并更新规则" : "Delete and update rules"}
+              {t("featureFlags.variationsEditor.deleteAndUpdate")}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -507,7 +500,6 @@ export function FlagVariationsEditor({
       <FlagJsonEditorDialog
         key={jsonEditorIndex ?? "closed"}
         open={Boolean(jsonEditorVariation)}
-        lang={lang}
         variationName={jsonEditorVariation?.name || untitledVariation}
         value={jsonEditorVariation?.value ?? "{}"}
         onOpenChange={(nextOpen) => {

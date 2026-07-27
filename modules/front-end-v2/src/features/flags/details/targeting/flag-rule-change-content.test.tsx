@@ -59,7 +59,6 @@ describe("feature flag rule review content", () => {
           currentServing={{
             variations: [{ id: "new", name: "New checkout" }],
           }}
-          zh={false}
         />
       </TooltipProvider>
     )
@@ -107,7 +106,6 @@ describe("feature flag rule review content", () => {
           current={{
             variations: [{ id: "b", name: "Variation B" }],
           }}
-          zh={false}
         />
         <FlagDefaultChangeContent
           previous={{
@@ -116,7 +114,6 @@ describe("feature flag rule review content", () => {
           current={{
             variations: [{ id: "a", name: "Variation A" }],
           }}
-          zh={false}
         />
       </>
     )
@@ -141,7 +138,6 @@ describe("feature flag rule review content", () => {
           ],
           dispatchKey: "keyId",
         }}
-        zh={false}
       />
     )
 
