@@ -12,11 +12,10 @@ public static class Topics
 
     public const string Insights = "featbit-insights";
     public const string Usage = "featbit-usage";
-    
-    public const string FeatbitConnectionMade = "featbit-connection-made";
-    public const string FeatbitConnectionClosed = "featbit-connection-closed";
+
+    public const string ConnectionMade = "featbit-connection-made";
+    public const string ConnectionClosed = "featbit-connection-closed";
     public const string PodHeartbeat = "featbit-pod-heartbeat";
-  
 
     public static string ToChannel(string topic) => topic switch
     {
