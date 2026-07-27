@@ -120,6 +120,12 @@ function ServingControl({
       {rollout && !editing ? (
         <>
           <ServingSummary flag={flag} allocations={value} />
+          <span className="inline-flex shrink-0 items-center gap-1 text-xs text-muted-foreground">
+            <span>{t("featureFlags.detailsPage.rollout.dispatchBy")}</span>
+            <span className="font-medium text-foreground">
+              {dispatchKey || "keyId"}
+            </span>
+          </span>
           <Button
             type="button"
             size="sm"
@@ -260,6 +266,11 @@ export function TargetingTab({
   const offVariation = variations.find(
     (item) => item.id === flag.disabledVariationId
   )
+  const archived = Boolean(flag.isArchived)
+  const canEditOffVariation = canUpdateOffVariation && !archived
+  const canEditDefault = canUpdateDefault && !archived
+  const canEditUsers = canUpdateUsers && !archived
+  const canEditRules = canUpdateRules && !archived
   return (
     <div className="space-y-6 pt-3 pb-6">
       <section className="pt-1 pb-2">
@@ -308,7 +319,7 @@ export function TargetingTab({
                 })}
               </Button>
             ) : null}
-            {dirty ? (
+            {dirty && !archived ? (
               <Button
                 type="button"
                 variant="outline"
@@ -318,36 +329,38 @@ export function TargetingTab({
                 {t("featureFlags.detailsPage.discard")}
               </Button>
             ) : null}
-            <ReviewSaveSplitButton
-              primaryLabel={t("featureFlags.detailsPage.reviewAndSave")}
-              savingLabel={t("featureFlags.detailsPage.review.saving")}
-              saving={saving}
-              primaryDisabled={
-                !dirty ||
-                (!canUpdateOffVariation &&
-                  !canUpdateDefault &&
-                  !canUpdateUsers &&
-                  !canUpdateRules)
-              }
-              menuLabel={t("featureFlags.detailsPage.moreActions")}
-              menuSide="bottom"
-              separateAfterFirst={false}
-              options={[
-                {
-                  label: t("featureFlags.detailsPage.scheduleChanges"),
-                  icon: <Clock3 />,
-                  disabled: !dirty || !scheduleGranted,
-                  onSelect: onSchedule,
-                },
-                {
-                  label: t("featureFlags.detailsPage.changeRequest"),
-                  icon: <UserRoundCheck />,
-                  disabled: !dirty || !changeRequestGranted,
-                  onSelect: onChangeRequest,
-                },
-              ]}
-              onPrimary={review}
-            />
+            {!archived ? (
+              <ReviewSaveSplitButton
+                primaryLabel={t("featureFlags.detailsPage.reviewAndSave")}
+                savingLabel={t("featureFlags.detailsPage.review.saving")}
+                saving={saving}
+                primaryDisabled={
+                  !dirty ||
+                  (!canEditOffVariation &&
+                    !canEditDefault &&
+                    !canEditUsers &&
+                    !canEditRules)
+                }
+                menuLabel={t("featureFlags.detailsPage.moreActions")}
+                menuSide="bottom"
+                separateAfterFirst={false}
+                options={[
+                  {
+                    label: t("featureFlags.detailsPage.scheduleChanges"),
+                    icon: <Clock3 />,
+                    disabled: !dirty || !scheduleGranted,
+                    onSelect: onSchedule,
+                  },
+                  {
+                    label: t("featureFlags.detailsPage.changeRequest"),
+                    icon: <UserRoundCheck />,
+                    disabled: !dirty || !changeRequestGranted,
+                    onSelect: onChangeRequest,
+                  },
+                ]}
+                onPrimary={review}
+              />
+            ) : null}
           </div>
         </div>
         <div
@@ -357,11 +370,11 @@ export function TargetingTab({
               : "overflow-hidden rounded-md border"
           }
         >
-          <div className="grid min-h-12 grid-cols-[10rem_3rem_minmax(0,1fr)] items-center gap-3 px-3">
-            <span className="text-sm font-semibold">
+          <div className="grid min-h-12 grid-cols-[10rem_3rem_minmax(0,1fr)] items-start gap-3 px-3">
+            <span className="self-start pt-4 text-sm font-semibold">
               {t("featureFlags.detailsPage.whenOn")}
             </span>
-            <span className="text-xs text-muted-foreground">
+            <span className="self-start pt-4 text-xs text-muted-foreground">
               {t("featureFlags.detailsPage.serve")}
             </span>
             <div className="min-w-0">
@@ -371,7 +384,7 @@ export function TargetingTab({
                 value={defaultValue}
                 dispatchKey={flag.fallthrough?.dispatchKey}
                 properties={properties}
-                disabled={!canUpdateDefault}
+                disabled={!canEditDefault}
                 statusLabel={
                   !flag.isEnabled
                     ? t("featureFlags.detailsPage.inactiveNow")
@@ -406,7 +419,7 @@ export function TargetingTab({
             <div className="flex items-center gap-3">
               <Select
                 value={flag.disabledVariationId}
-                disabled={!canUpdateOffVariation}
+                disabled={!canEditOffVariation}
                 onValueChange={(value) =>
                   value &&
                   onDraftChange({ ...flag, disabledVariationId: value })
@@ -475,7 +488,7 @@ export function TargetingTab({
               otherKeys={allKeys.filter(
                 (key) => !keysFor(variation.id).includes(key)
               )}
-              disabled={!canUpdateUsers}
+              disabled={!canEditUsers}
               onChange={(keys) => updateUsers(variation.id, keys)}
               onResolved={onResolveUser}
             />
@@ -492,7 +505,7 @@ export function TargetingTab({
             type="button"
             size="sm"
             variant="outline"
-            disabled={!canUpdateRules}
+            disabled={!canEditRules}
             onClick={() =>
               onDraftChange({
                 ...flag,
@@ -525,12 +538,13 @@ export function TargetingTab({
                     : "transition-opacity"
               }
               onDragOver={(event) => {
-                if (!canUpdateRules) return
+                if (!canEditRules) return
                 event.preventDefault()
                 event.dataTransfer.dropEffect = "move"
               }}
               onDrop={(event) => {
                 event.preventDefault()
+                if (!canEditRules) return
                 const sourceId =
                   event.dataTransfer.getData("text/plain") || dragRuleId
                 const rules = [...(flag.rules ?? [])]
@@ -549,7 +563,7 @@ export function TargetingTab({
               <RuleEditor
                 rule={rule as SegmentRule}
                 properties={properties}
-                disabled={!canUpdateRules}
+                disabled={!canEditRules}
                 canMoveUp={index > 0}
                 canMoveDown={index < (flag.rules?.length ?? 0) - 1}
                 onDragStart={(event) => {
@@ -603,7 +617,7 @@ export function TargetingTab({
                     value={rule.variations}
                     dispatchKey={rule.dispatchKey}
                     properties={properties}
-                    disabled={!canUpdateRules}
+                    disabled={!canEditRules}
                     onChange={(value, dispatchKey) =>
                       onDraftChange({
                         ...flag,

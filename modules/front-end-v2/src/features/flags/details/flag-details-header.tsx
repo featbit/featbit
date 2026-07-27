@@ -59,22 +59,23 @@ export function FlagDetailsHeader({
               {t("featureFlags.status")}
             </span>
             <Badge variant="outline" className="gap-1.5 font-semibold">
-              {flag.isArchived ? null : (
-                <span
-                  className={
-                    flag.isEnabled
-                      ? "size-1.5 rounded-full bg-emerald-600"
-                      : "size-1.5 rounded-full bg-muted-foreground"
-                  }
-                />
-              )}
-              {flag.isArchived
-                ? t("featureFlags.archive")
-                : flag.isEnabled
-                  ? t("featureFlags.on")
-                  : t("featureFlags.off")}
+              <span
+                className={
+                  flag.isEnabled
+                    ? "size-1.5 rounded-full bg-emerald-600"
+                    : "size-1.5 rounded-full bg-muted-foreground"
+                }
+              />
+              {flag.isEnabled ? t("featureFlags.on") : t("featureFlags.off")}
             </Badge>
           </div>
+          <Badge variant="secondary" className="font-normal">
+            {t(
+              flag.isArchived
+                ? "featureFlags.detailsPage.archived"
+                : "featureFlags.detailsPage.active"
+            )}
+          </Badge>
           <Badge variant="outline" className="font-normal">
             {flag.variationType.toUpperCase()}
           </Badge>
@@ -119,7 +120,9 @@ export function FlagDetailsHeader({
           const className = active
             ? "border-b-2 border-foreground px-3 pb-3 text-sm font-medium text-foreground"
             : "px-3 pb-3 text-sm text-muted-foreground"
-          return tab === "targeting" || tab === "history" ? (
+          return tab === "targeting" ||
+            tab === "settings" ||
+            tab === "history" ? (
             <Link
               key={tab}
               to={`${basePath}/${encodeURIComponent(flag.key)}/${tab}`}

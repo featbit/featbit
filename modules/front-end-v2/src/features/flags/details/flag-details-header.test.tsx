@@ -47,6 +47,21 @@ describe("FlagDetailsHeader", () => {
     expect(summaryRow).toHaveClass("mt-4", "flex-wrap")
     expect(summaryRow?.firstElementChild).toBe(statusLabel.parentElement)
     expect(statusLabel.parentElement).toHaveTextContent("ON")
+    expect(screen.getByText("Active")).toBeVisible()
     expect(screen.queryByRole("switch")).toBeNull()
+  })
+
+  it("shows archived lifecycle state separately from serving status", () => {
+    render(
+      <MemoryRouter>
+        <FlagDetailsHeader
+          flag={{ ...flag, isArchived: true }}
+          basePath="/en-US/feature-flags"
+        />
+      </MemoryRouter>
+    )
+
+    expect(screen.getByText("Archived")).toBeVisible()
+    expect(screen.getByText("Status").parentElement).toHaveTextContent("ON")
   })
 })

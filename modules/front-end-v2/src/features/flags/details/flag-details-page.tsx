@@ -49,6 +49,7 @@ import {
 import { FlagChangeReviewDialog } from "./flag-change-review-dialog"
 import { FlagDetailsHeader } from "./flag-details-header"
 import { HistoryTab } from "./history/history-tab"
+import { SettingsTab } from "./settings/settings-tab"
 import { PendingChangesSheet } from "./targeting/pending-changes-sheet"
 import { TargetingTab } from "./targeting/targeting-tab"
 import {
@@ -69,7 +70,10 @@ export function FlagDetailsPage() {
   const queryClient = useQueryClient()
   const lang = resolveLang(params.lang)
   const flagKey = decodeURIComponent(params.flagKey ?? "")
-  const activeTab = params.tab === "history" ? "history" : "targeting"
+  const activeTab =
+    params.tab === "history" || params.tab === "settings"
+      ? params.tab
+      : "targeting"
   const projectEnv = getCurrentProjectEnv()
   const workspace = getCurrentWorkspace()
   const envId = projectEnv?.envId ?? ""
@@ -120,13 +124,15 @@ export function FlagDetailsPage() {
   const policiesQuery = useQuery({
     queryKey: ["feature-flag-policies", workspace?.id ?? ""],
     queryFn: fetchFlagPolicies,
-    enabled: activeTab === "targeting",
+    enabled: activeTab === "targeting" || activeTab === "settings",
     staleTime: 5 * 60_000,
   })
   const settingsQuery = useQuery({
     queryKey: ["feature-flag-environment-settings", envId],
     queryFn: () => fetchFlagEnvironmentSettings(envId),
-    enabled: Boolean(activeTab === "targeting" && envId),
+    enabled: Boolean(
+      (activeTab === "targeting" || activeTab === "settings") && envId
+    ),
     staleTime: 5 * 60_000,
   })
 
@@ -345,10 +351,10 @@ export function FlagDetailsPage() {
   }
   if (
     !flag ||
-    (activeTab === "targeting" &&
+    ((activeTab === "targeting" || activeTab === "settings") &&
       (policiesQuery.isLoading ||
-        propertiesQuery.isLoading ||
-        usersQuery.isLoading))
+        (activeTab === "targeting" &&
+          (propertiesQuery.isLoading || usersQuery.isLoading))))
   ) {
     return (
       <div className="-m-5 min-h-[calc(100vh-3.5rem)] bg-background px-8 py-6">
@@ -370,6 +376,26 @@ export function FlagDetailsPage() {
         />
         {activeTab === "history" ? (
           <HistoryTab envId={envId} flagId={flag.id} lang={lang} />
+        ) : activeTab === "settings" ? (
+          <SettingsTab
+            envId={envId}
+            flag={flag}
+            requireComment={settingsQuery.data?.requireChangeComment ?? false}
+            canUpdateName={can("UpdateFlagName")}
+            canUpdateDescription={can("UpdateFlagDescription")}
+            canUpdateTags={can("UpdateFlagTags")}
+            canArchive={can("ArchiveFlag")}
+            canRestore={can("RestoreFlag")}
+            canDelete={can("DeleteFlag")}
+            onSaved={(updated) => {
+              queryClient.setQueryData(
+                ["feature-flag-details", envId, flagKey],
+                updated
+              )
+              setDraft(null)
+            }}
+            onRemoved={() => navigate(basePath)}
+          />
         ) : (
           <TargetingTab
             flag={flag}

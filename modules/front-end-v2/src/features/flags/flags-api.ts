@@ -20,6 +20,54 @@ export function fetchFeatureFlag(envId: string, key: string) {
   return fetchApi<FeatureFlag>(`${flagsPath(envId)}/${encodeURIComponent(key)}`)
 }
 
+export function updateFeatureFlagName(
+  envId: string,
+  key: string,
+  name: string,
+  comment = ""
+) {
+  return fetchApi<string>(
+    `${flagsPath(envId)}/${encodeURIComponent(key)}/name`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, comment }),
+    }
+  )
+}
+
+export function updateFeatureFlagDescription(
+  envId: string,
+  key: string,
+  description: string,
+  comment = ""
+) {
+  return fetchApi<string>(
+    `${flagsPath(envId)}/${encodeURIComponent(key)}/description`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ description, comment }),
+    }
+  )
+}
+
+export function updateFeatureFlagTags(
+  envId: string,
+  key: string,
+  tags: string[],
+  comment = ""
+) {
+  return fetchApi<boolean>(
+    `${flagsPath(envId)}/${encodeURIComponent(key)}/tags`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tags, comment }),
+    }
+  )
+}
+
 export function updateFeatureFlagTargeting(
   envId: string,
   key: string,

@@ -190,6 +190,15 @@ describe("feature flag targeting tab", () => {
     const defaultServing = screen.getByRole("combobox", {
       name: "Default rule serving variation",
     })
+    expect(screen.getByText("When flag is ON")).toHaveClass(
+      "self-start",
+      "pt-4"
+    )
+    expect(
+      screen
+        .getAllByText("Serve")
+        .filter((element) => element.classList.contains("self-start"))
+    ).toHaveLength(1)
     expect(defaultServing).toHaveTextContent("Rollout percentage")
     expect(defaultServing).toHaveClass("w-72")
     expect(screen.getByText("Inactive now")).toBeVisible()
@@ -200,6 +209,8 @@ describe("feature flag targeting tab", () => {
     const newAllocation = screen.getByText("New checkout 25%")
     expect(controlAllocation.previousElementSibling).toHaveClass("bg-blue-600")
     expect(newAllocation.previousElementSibling).toHaveClass("bg-emerald-600")
+    const defaultDispatch = screen.getByText("Dispatch by")
+    expect(defaultDispatch.nextElementSibling).toHaveTextContent("keyId")
   })
 
   it("shows the active OFF rule and inactive ON rule", () => {
@@ -234,6 +245,40 @@ describe("feature flag targeting tab", () => {
     renderTargeting(exampleFlag(), false)
     expect(screen.queryByRole("button", { name: "Discard changes" })).toBeNull()
     expect(screen.getByRole("button", { name: "Review & save" })).toBeDisabled()
+  })
+
+  it("makes archived targeting read-only and hides mutation commands", () => {
+    renderTargeting(exampleFlag({ isArchived: true }), true)
+
+    expect(
+      screen.getByRole("switch", { name: "Toggle feature flag status" })
+    ).toHaveAttribute("aria-disabled", "true")
+    expect(
+      screen.getByRole("combobox", {
+        name: "Default rule serving variation",
+      })
+    ).toBeDisabled()
+    expect(
+      screen.getByRole("combobox", { name: "Flag OFF serving variation" })
+    ).toBeDisabled()
+    expect(screen.getByRole("button", { name: "Add rule" })).toBeDisabled()
+    for (const addUser of screen.getAllByRole("button", {
+      name: "Search by name or keyId to add",
+    })) {
+      expect(addUser).toBeDisabled()
+    }
+    expect(
+      screen.queryByRole("button", { name: "Discard changes" })
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole("button", { name: "Review & save" })
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole("button", { name: "More targeting actions" })
+    ).not.toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: "2 pending changes" })
+    ).toBeEnabled()
   })
 
   it("adds a rule through the shared Segment rule editor contract", () => {
@@ -299,6 +344,41 @@ describe("feature flag targeting tab", () => {
     expect(offServing).toHaveTextContent("Control")
     expect(offServing).not.toHaveTextContent("control")
     expect(ruleServing).toHaveClass("w-72")
+  })
+
+  it("shows Dispatch by in targeting rule percentage summaries", () => {
+    renderTargeting(
+      exampleFlag({
+        rules: [
+          {
+            id: "rule-1",
+            name: "Known users",
+            dispatchKey: "email",
+            conditions: [
+              {
+                id: "condition-1",
+                property: "keyId",
+                op: "Equal",
+                value: "user-1",
+              },
+            ],
+            variations: [
+              { id: "control", rollout: [0, 0.6] },
+              { id: "new", rollout: [0.6, 1] },
+            ],
+          },
+        ],
+      })
+    )
+
+    const dispatchLabels = screen.getAllByText("Dispatch by")
+    expect(dispatchLabels).toHaveLength(2)
+    expect(
+      dispatchLabels.map((label) => label.nextElementSibling?.textContent)
+    ).toEqual(["keyId", "email"])
+    for (const dispatchBy of dispatchLabels) {
+      expect(dispatchBy.parentElement).toHaveClass("text-muted-foreground")
+    }
   })
 
   it("uses the shared rule card preview while dragging", () => {
