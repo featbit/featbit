@@ -37,8 +37,11 @@ export function ServingSummary({
 }) {
   const values = allocationPercentages(allocations)
   return (
-    <div className="flex min-w-0 items-center gap-2">
-      <div className="flex h-2 w-24 shrink-0 overflow-hidden rounded-full bg-muted">
+    <div
+      data-slot="serving-summary"
+      className="flex min-w-0 w-full flex-col items-start gap-2 xl:w-auto xl:flex-row xl:items-center"
+    >
+      <div className="flex h-2 w-full max-w-72 shrink-0 overflow-hidden rounded-full bg-muted xl:w-24">
         {values.map((item, index) => (
           <span
             key={item.id}
@@ -47,7 +50,7 @@ export function ServingSummary({
           />
         ))}
       </div>
-      <div className="flex min-w-0 items-center gap-3 overflow-hidden text-sm">
+      <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-sm">
         {values.map((item, index) => {
           const variation = flag.variations?.find(
             (candidate) => candidate.id === item.id

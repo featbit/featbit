@@ -74,7 +74,7 @@ function ServingControl({
     ? t("featureFlags.detailsPage.rolloutPercentage")
     : selectedVariation?.name || selectedVariation?.value || ""
   const control = (
-    <div className="flex min-w-0 items-center gap-3">
+    <div className="flex min-w-0 flex-wrap items-center gap-3">
       <Select
         value={rollout ? "__rollout" : value[0]?.id}
         disabled={disabled}
@@ -118,24 +118,29 @@ function ServingControl({
       </Select>
       {statusLabel ? <Badge variant="outline">{statusLabel}</Badge> : null}
       {rollout && !editing ? (
-        <>
+        <div
+          data-slot="serving-rollout-summary"
+          className="flex min-w-0 w-full flex-col items-start gap-2 xl:w-auto xl:flex-1 xl:flex-row xl:items-center"
+        >
           <ServingSummary flag={flag} allocations={value} />
-          <span className="inline-flex shrink-0 items-center gap-1 text-xs text-muted-foreground">
-            <span>{t("featureFlags.detailsPage.rollout.dispatchBy")}</span>
-            <span className="font-medium text-foreground">
-              {dispatchKey || "keyId"}
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="inline-flex shrink-0 items-center gap-1 text-xs text-muted-foreground">
+              <span>{t("featureFlags.detailsPage.rollout.dispatchBy")}</span>
+              <span className="font-medium text-foreground">
+                {dispatchKey || "keyId"}
+              </span>
             </span>
-          </span>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            disabled={disabled}
-            onClick={() => setEditing(true)}
-          >
-            {t("featureFlags.detailsPage.editRollout")}
-          </Button>
-        </>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              disabled={disabled}
+              onClick={() => setEditing(true)}
+            >
+              {t("featureFlags.detailsPage.editRollout")}
+            </Button>
+          </div>
+        </div>
       ) : null}
     </div>
   )
@@ -163,8 +168,11 @@ function ServingControl({
     )
   return (
     <div>
-      <div className="grid grid-cols-[1.75rem_minmax(10rem,1fr)] items-center gap-3 border-t pt-3">
-        <span className="text-xs font-semibold">
+      <div className="grid grid-cols-[1.75rem_minmax(10rem,1fr)] items-start gap-3 border-t pt-3">
+        <span
+          data-slot="targeting-rule-serve-label"
+          className="flex h-8 items-center text-xs font-medium text-muted-foreground"
+        >
           {t("featureFlags.detailsPage.serve")}
         </span>
         {control}
@@ -370,11 +378,14 @@ export function TargetingTab({
               : "overflow-hidden rounded-md border"
           }
         >
-          <div className="grid min-h-12 grid-cols-[10rem_3rem_minmax(0,1fr)] items-start gap-3 px-3">
-            <span className="self-start pt-4 text-sm font-semibold">
+          <div className="grid min-h-12 grid-cols-[3rem_minmax(0,1fr)] items-start gap-3 px-3 py-3 xl:grid-cols-[10rem_3rem_minmax(0,1fr)] xl:py-0">
+            <span className="col-span-2 self-start text-sm font-semibold xl:col-span-1 xl:pt-4">
               {t("featureFlags.detailsPage.whenOn")}
             </span>
-            <span className="self-start pt-4 text-xs text-muted-foreground">
+            <span
+              data-slot="default-on-serve-label"
+              className="flex h-12 self-start items-center text-xs text-muted-foreground"
+            >
               {t("featureFlags.detailsPage.serve")}
             </span>
             <div className="min-w-0">
@@ -406,11 +417,11 @@ export function TargetingTab({
           <div
             className={
               flag.isEnabled
-                ? "grid min-h-12 grid-cols-[10rem_3rem_minmax(0,1fr)] items-center gap-3 border-t px-3"
-                : "grid min-h-12 grid-cols-[10rem_3rem_minmax(0,1fr)] items-center gap-3 border-t bg-muted/60 px-3"
+                ? "grid min-h-12 grid-cols-[3rem_minmax(0,1fr)] items-center gap-3 border-t px-3 py-3 xl:grid-cols-[10rem_3rem_minmax(0,1fr)] xl:py-0"
+                : "grid min-h-12 grid-cols-[3rem_minmax(0,1fr)] items-center gap-3 border-t bg-muted/60 px-3 py-3 xl:grid-cols-[10rem_3rem_minmax(0,1fr)] xl:py-0"
             }
           >
-            <span className="text-sm font-semibold">
+            <span className="col-span-2 text-sm font-semibold xl:col-span-1">
               {t("featureFlags.detailsPage.whenOff")}
             </span>
             <span className="text-xs text-muted-foreground">

@@ -217,13 +217,18 @@ describe("feature flag targeting tab", () => {
     })
     expect(screen.getByText("When flag is ON")).toHaveClass(
       "self-start",
-      "pt-4"
+      "col-span-2",
+      "xl:col-span-1",
+      "xl:pt-4"
     )
     expect(
       screen
         .getAllByText("Serve")
-        .filter((element) => element.classList.contains("self-start"))
-    ).toHaveLength(1)
+        .find(
+          (element) =>
+            element.getAttribute("data-slot") === "default-on-serve-label"
+        )
+    ).toHaveClass("flex", "h-12", "self-start", "items-center")
     expect(defaultServing).toHaveTextContent("Rollout percentage")
     expect(defaultServing).toHaveClass("w-72")
     expect(screen.getByText("Inactive now")).toBeVisible()
@@ -234,8 +239,17 @@ describe("feature flag targeting tab", () => {
     const newAllocation = screen.getByText("New checkout 25%")
     expect(controlAllocation.previousElementSibling).toHaveClass("bg-blue-600")
     expect(newAllocation.previousElementSibling).toHaveClass("bg-emerald-600")
+    expect(controlAllocation.closest('[data-slot="serving-summary"]')).toHaveClass(
+      "w-full",
+      "flex-col",
+      "xl:w-auto",
+      "xl:flex-row"
+    )
     const defaultDispatch = screen.getByText("Dispatch by")
     expect(defaultDispatch.nextElementSibling).toHaveTextContent("keyId")
+    expect(
+      defaultDispatch.closest('[data-slot="serving-rollout-summary"]')
+    ).toHaveClass("w-full", "flex-col", "xl:w-auto", "xl:flex-row")
   })
 
   it("shows the active OFF rule and inactive ON rule", () => {
@@ -404,6 +418,22 @@ describe("feature flag targeting tab", () => {
     for (const dispatchBy of dispatchLabels) {
       expect(dispatchBy.parentElement).toHaveClass("text-muted-foreground")
     }
+    expect(
+      screen
+        .getAllByText("Serve")
+        .find(
+          (element) =>
+            element.getAttribute("data-slot") ===
+            "targeting-rule-serve-label"
+        )
+    ).toHaveClass(
+      "flex",
+      "h-8",
+      "items-center",
+      "text-xs",
+      "font-medium",
+      "text-muted-foreground"
+    )
   })
 
   it("uses the shared rule card preview while dragging", () => {
