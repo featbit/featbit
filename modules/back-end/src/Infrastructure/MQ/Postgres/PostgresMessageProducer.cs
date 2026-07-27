@@ -7,7 +7,7 @@ using Npgsql;
 
 namespace Infrastructure.MQ.Postgres;
 
-public partial class PostgresMessageProducer(NpgsqlDataSource dataSource, ILogger<PostgresMessageProducer> logger, string[] topics)
+public partial class PostgresMessageProducer(NpgsqlDataSource dataSource, ILogger<PostgresMessageProducer> logger)
     : IMessageProducer
 {
     // IMessageProducer is Singleton, so we can use a field to store the last cleanup time
@@ -15,7 +15,7 @@ public partial class PostgresMessageProducer(NpgsqlDataSource dataSource, ILogge
 
     public async Task PublishAsync<TMessage>(string topic, TMessage message) where TMessage : class
     {
-        var isNotificationTopic = topics.Contains(topic);
+        var isNotificationTopic = topic is Topics.FeatureFlagChange or Topics.SegmentChange;
 
         try
         {

@@ -203,7 +203,7 @@ public static class MqServiceCollectionExtensions
                 var dataSource = sp.GetRequiredService<NpgsqlDataSource>();
                 var logger = sp.GetRequiredService<ILogger<PostgresMessageProducer>>();
 
-                return new PostgresMessageProducer(dataSource, logger, []);
+                return new PostgresMessageProducer(dataSource, logger);
             });
             services.AddHostedService(sp =>
             {
