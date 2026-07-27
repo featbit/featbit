@@ -1,6 +1,7 @@
 using Application.Bases;
 using Application.FeatureFlags;
 using Domain.FeatureFlags;
+using Domain.Policies;
 
 namespace Application.UnitTests.Validators;
 
@@ -103,6 +104,24 @@ public class FeatureFlagValidatorTests
         var result = new UpdateOffVariationValidator().Validate(new UpdateOffVariation { OffVariationId = string.Empty });
 
         Assert.Contains(result.Errors, e => e.ErrorCode == ErrorCodes.Required("offVariationId"));
+    }
+
+    [Fact]
+    public void UpdateTargeting_EmptyDisabledVariationId_RequiredError()
+    {
+        var request = new UpdateTargeting(
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            "flag",
+            new UpdateTargetingPayload
+            {
+                Targeting = new FlagTargeting { DisabledVariationId = string.Empty }
+            },
+            Array.Empty<PolicyStatement>());
+
+        var result = new UpdateTargetingValidator().Validate(request);
+
+        Assert.Contains(result.Errors, e => e.ErrorCode == ErrorCodes.Required("disabledVariationId"));
     }
 
     [Fact]

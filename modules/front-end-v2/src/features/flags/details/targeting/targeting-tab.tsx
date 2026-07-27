@@ -177,6 +177,7 @@ export function TargetingTab({
   saving,
   toggling,
   canToggle,
+  canUpdateOffVariation,
   canUpdateDefault,
   canUpdateUsers,
   canUpdateRules,
@@ -199,6 +200,7 @@ export function TargetingTab({
   saving: boolean
   toggling: boolean
   canToggle: boolean
+  canUpdateOffVariation: boolean
   canUpdateDefault: boolean
   canUpdateUsers: boolean
   canUpdateRules: boolean
@@ -322,7 +324,10 @@ export function TargetingTab({
               saving={saving}
               primaryDisabled={
                 !dirty ||
-                (!canUpdateDefault && !canUpdateUsers && !canUpdateRules)
+                (!canUpdateOffVariation &&
+                  !canUpdateDefault &&
+                  !canUpdateUsers &&
+                  !canUpdateRules)
               }
               menuLabel={t("featureFlags.detailsPage.moreActions")}
               menuSide="bottom"
@@ -401,7 +406,7 @@ export function TargetingTab({
             <div className="flex items-center gap-3">
               <Select
                 value={flag.disabledVariationId}
-                disabled={!canUpdateDefault}
+                disabled={!canUpdateOffVariation}
                 onValueChange={(value) =>
                   value &&
                   onDraftChange({ ...flag, disabledVariationId: value })

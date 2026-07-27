@@ -41,6 +41,7 @@ export function cloneFlag(flag: FeatureFlag): FeatureFlag {
 
 export function targetingOf(flag: FeatureFlag): FlagTargeting {
   return {
+    disabledVariationId: flag.disabledVariationId ?? "",
     targetUsers: (flag.targetUsers ?? []).filter((item) => item.keyIds.length),
     rules: flag.rules ?? [],
     fallthrough: flag.fallthrough ?? {
@@ -52,10 +53,7 @@ export function targetingOf(flag: FeatureFlag): FlagTargeting {
 }
 
 export function stableFlagTargeting(flag: FeatureFlag) {
-  return JSON.stringify({
-    ...targetingOf(flag),
-    disabledVariationId: flag.disabledVariationId,
-  })
+  return JSON.stringify(targetingOf(flag))
 }
 
 export function allocationPercentages(variations: FlagRuleVariation[]) {

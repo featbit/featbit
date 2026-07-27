@@ -317,6 +317,7 @@ export function FlagDetailsPage() {
           saving={saveMutation.isPending}
           toggling={toggleMutation.isPending}
           canToggle={can("ToggleFlag")}
+          canUpdateOffVariation={can("UpdateFlagOffVariation")}
           canUpdateDefault={can("UpdateFlagDefaultRule")}
           canUpdateUsers={can("UpdateFlagIndividualTargeting")}
           canUpdateRules={can("UpdateFlagRules")}

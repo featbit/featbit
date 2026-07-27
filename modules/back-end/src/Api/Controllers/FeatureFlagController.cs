@@ -414,7 +414,7 @@ public class FeatureFlagController : ApiControllerBase
     /// Update the targeting of a feature flag
     /// </summary>
     /// <remarks>
-    /// Update the targeting users, rules and default rule of a feature flag.
+    /// Update the off variation, targeting users, rules and default rule of a feature flag.
     /// </remarks>
     [OpenApi]
     [HttpPut("{key}/targeting")]

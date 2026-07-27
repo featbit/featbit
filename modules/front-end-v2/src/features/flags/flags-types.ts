@@ -85,6 +85,7 @@ export type FlagFallthrough = {
 }
 
 export type FlagTargeting = {
+  disabledVariationId: string
   targetUsers: FlagTargetUsers[]
   rules: FlagRule[]
   fallthrough: FlagFallthrough

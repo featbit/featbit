@@ -4,6 +4,7 @@ import {
   allocationPercentages,
   rolloutFromPercentages,
   stableFlagTargeting,
+  targetingOf,
   targetingReviewChanges,
   validateTargeting,
 } from "./targeting-utils"
@@ -82,6 +83,7 @@ describe("feature flag targeting utilities", () => {
     const current = structuredClone(previous)
     current.disabledVariationId = "new"
 
+    expect(targetingOf(current).disabledVariationId).toBe("new")
     expect(stableFlagTargeting(current)).not.toBe(stableFlagTargeting(previous))
     expect(targetingReviewChanges(previous, current, reviewLabels)).toEqual([
       expect.objectContaining({

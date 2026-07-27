@@ -199,6 +199,7 @@ public class FeatureFlag : FullAuditedEntity
     {
         var dataChange = new DataChange(this);
 
+        DisabledVariationId = targeting.DisabledVariationId;
         TargetUsers = targeting.TargetUsers;
         Rules = targeting.Rules;
         Fallthrough = targeting.Fallthrough;

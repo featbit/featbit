@@ -48,7 +48,11 @@ function exampleFlag(overrides: Partial<FeatureFlag> = {}): FeatureFlag {
   }
 }
 
-function renderTargeting(flag = exampleFlag(), dirty = true) {
+function renderTargeting(
+  flag = exampleFlag(),
+  dirty = true,
+  canUpdateOffVariation = true
+) {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   })
@@ -67,6 +71,7 @@ function renderTargeting(flag = exampleFlag(), dirty = true) {
     saving: false,
     toggling: false,
     canToggle: true,
+    canUpdateOffVariation,
     canUpdateDefault: true,
     canUpdateUsers: true,
     canUpdateRules: true,
@@ -110,7 +115,9 @@ describe("feature flag targeting tab", () => {
       screen.queryByRole("heading", { name: "Targeting configuration" })
     ).not.toBeInTheDocument()
     expect(
-      screen.queryByText("Edit default serving, individual targeting, and rules.")
+      screen.queryByText(
+        "Edit default serving, individual targeting, and rules."
+      )
     ).not.toBeInTheDocument()
     const statusSwitch = screen.getByRole("switch", {
       name: "Toggle feature flag status",
@@ -213,6 +220,14 @@ describe("feature flag targeting tab", () => {
     expect(
       screen.getByText("Control is returned for every evaluation.")
     ).toBeVisible()
+  })
+
+  it("requires the off-variation permission to edit When flag is OFF", () => {
+    renderTargeting(exampleFlag(), true, false)
+
+    expect(
+      screen.getByRole("combobox", { name: "Flag OFF serving variation" })
+    ).toBeDisabled()
   })
 
   it("keeps review disabled and omits discard when the draft is clean", () => {
