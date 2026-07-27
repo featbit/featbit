@@ -65,6 +65,8 @@ function renderTargeting(flag = exampleFlag(), dirty = true) {
     pendingCount: 2,
     dirty,
     saving: false,
+    toggling: false,
+    canToggle: true,
     canUpdateDefault: true,
     canUpdateUsers: true,
     canUpdateRules: true,
@@ -77,6 +79,7 @@ function renderTargeting(flag = exampleFlag(), dirty = true) {
     changeRequestGranted: true,
     onSchedule: vi.fn(),
     onChangeRequest: vi.fn(),
+    onToggle: vi.fn(),
   }
   const result = render(
     <QueryClientProvider client={client}>
@@ -89,13 +92,32 @@ function renderTargeting(flag = exampleFlag(), dirty = true) {
 describe("feature flag targeting tab", () => {
   it("renders the default rule, one user panel per variation, and toolbar actions", async () => {
     const props = renderTargeting()
-    expect(screen.getByText("Default rule")).toBeVisible()
+    const defaultRuleHeading = screen.getByRole("heading", {
+      name: "Default rule",
+    })
+    expect(defaultRuleHeading).toBeVisible()
     expect(
       screen.getByText("Used when no individual target and rule matches.")
     ).toBeVisible()
+    const statusHeading = screen.getByRole("heading", { name: "Flag status" })
+    expect(statusHeading).toBeVisible()
     expect(
-      screen.getByText("Default rule").parentElement?.parentElement
-    ).toHaveClass("flex-wrap-reverse")
+      screen.getByText(
+        "Status changes apply immediately and are not included in Review & save."
+      )
+    ).toBeVisible()
+    expect(
+      screen.queryByRole("heading", { name: "Targeting configuration" })
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByText("Edit default serving, individual targeting, and rules.")
+    ).not.toBeInTheDocument()
+    const statusSwitch = screen.getByRole("switch", {
+      name: "Toggle feature flag status",
+    })
+    expect(statusSwitch).toBeChecked()
+    fireEvent.click(statusSwitch)
+    expect(props.onToggle).toHaveBeenCalledWith(false, expect.anything())
     const individualTargeting = screen.getByText("Individual targeting")
     const individualTargetingHelp = screen.getByText(
       "Target specific end users by keyId."
@@ -151,9 +173,13 @@ describe("feature flag targeting tab", () => {
     ).toBeVisible()
     fireEvent.click(screen.getByText("Schedule changes"))
     expect(props.onSchedule).toHaveBeenCalledOnce()
-    expect(
-      screen.getByRole("button", { name: "2 pending changes" })
-    ).toBeVisible()
+    const pendingChanges = screen.getByRole("button", {
+      name: "2 pending changes",
+    })
+    expect(pendingChanges).toBeVisible()
+    const toolbarSection = pendingChanges.closest("section")
+    expect(toolbarSection).not.toBe(statusHeading.closest("section"))
+    expect(toolbarSection).toBe(defaultRuleHeading.closest("section"))
     const defaultServing = screen.getByRole("combobox", {
       name: "Default rule serving variation",
     })
@@ -171,6 +197,14 @@ describe("feature flag targeting tab", () => {
 
   it("shows the active OFF rule and inactive ON rule", () => {
     renderTargeting(exampleFlag({ isEnabled: false }))
+    expect(
+      screen.getByText(
+        "Status changes apply immediately and are not included in Review & save."
+      )
+    ).toBeVisible()
+    expect(
+      screen.getByRole("switch", { name: "Toggle feature flag status" })
+    ).not.toBeChecked()
     expect(screen.getByText("Inactive now")).toBeVisible()
     expect(screen.getByText("Active now")).toBeVisible()
     expect(

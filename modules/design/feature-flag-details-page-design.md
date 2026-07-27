@@ -90,6 +90,7 @@ Tab order is fixed: `Targeting`, `Variations`, `Triggers`, `Insights`, `Settings
 
 Show one wrapping metadata line:
 
+- last confirmed server status as a muted `Status` label followed by a compact neutral outline Badge containing a semantic dot and `ON`, `OFF`, or `Archived`;
 - immutable variation type as a neutral outline Badge: `BOOLEAN`, `STRING`, `NUMBER`, or `JSON`;
 - `Key` followed by a compact monospace copy field and copy action;
 - saved Tags as quiet secondary Badges, omitted when empty;
@@ -99,13 +100,13 @@ Do not repeat these as disabled form fields in the active tab. Key and type are 
 
 ### Status
 
-Place the controlled ON/OFF switch and textual state at the right edge of the title row. It is the only header action. Changing status opens a compact confirmation dialog that explains the resulting serving behavior. When environment settings require a change comment, collect it before submission. Show a pending state on the switch without optimistic flicker.
+Place the last confirmed server status as the first item on the left of the metadata row, before variation type, Key, Tags, and Updated. Keep the title row reserved for the flag name so long names do not compete with state. The status is read-only, is not focusable, and must not visually resemble a switch or button. Its explicit `ON`, `OFF`, or `Archived` text remains present so color is never the only status signal.
 
 Do not render a header overflow menu. `Archive` belongs in `Settings > Lifecycle`, where its consequence and recoverability can be explained in context; a one-item three-dot menu adds indirection without saving meaningful space.
 
 For an archived flag:
 
-- replace the switch with an `Archived` Badge;
+- replace the ON/OFF status Badge with an `Archived` Badge;
 - keep all information readable but disable mutation controls;
 - expose `Restore` and `Remove permanently` in the Settings lifecycle section;
 - require the same permission and change-comment behavior as Angular;
@@ -115,9 +116,17 @@ For an archived flag:
 
 Targeting follows the accepted Segment Details editor rhythm while preserving Feature Flag-specific serving behavior.
 
-### Command row
+### Flag status
 
-Align the command group to the right below the tabs:
+Place one compact Flag status row first below the tabs. Keep it on the page background without a filled card or separator; typography and vertical whitespace provide the hierarchy. Keep `Flag status`, the controlled switch immediately after the heading, and explicit `ON` or `OFF` text in one left-aligned cluster. The helper copy is invariant and makes the save boundary explicit: `Status changes apply immediately and are not included in Review & save.` Keeping the switch beside its label prevents a pointer trip across the full workbench. This is the only interactive global status control on the page.
+
+Changing the switch opens the existing compact confirmation dialog and explains the effective saved serving behavior. When environment settings require a change comment, collect it before submission. While the request is pending, disable the switch and show its pending state without optimistic movement; after success, update both this control and the read-only header status. On failure, retain the last confirmed state in both locations and show the standard recoverable error feedback.
+
+If the Targeting draft is dirty, the confirmation must state that unsaved Targeting edits are not applied by the status change and must describe the currently saved OFF variation, not an unsaved selector value. An archived or unauthorized flag keeps the status row readable but disables the switch with the established permission or lifecycle explanation.
+
+### Targeting configuration and command row
+
+Place a plain Targeting configuration row directly below Flag status. Use the left side for `Targeting configuration` and the helper `Edit default serving, individual targeting, and rules.` Align the draft command group on the right. This names the scope of Review & save, fills the formerly empty toolbar area with useful context, and visually separates draft operations from the immediate status operation:
 
 - `n pending changes` opens the scheduled/change-request surface and is visible only when the server returns pending items;
 - `Discard changes` is an outline button shown when the current draft differs from the loaded revision; it resets the complete Targeting draft to the last confirmed server value after the shared confirmation behavior where required;
@@ -128,12 +137,12 @@ Command order is fixed: pending changes, Discard changes, Review & save, MoreHor
 
 ### Default rule
 
-Default rule is the first section because it communicates the final fallback for both flag states.
+Default rule is the first serving editor immediately after the Targeting configuration row because it communicates the final fallback for both flag states.
 
 It contains two compact rows on one bordered surface:
 
 1. `When flag is ON` — configure a single served variation or a percentage rollout across variations. Percentage rows show the distribution visibly and support the existing dispatch-key/user-property behavior.
-2. `When flag is OFF` — `If OFF, serve` is represented here as one variation selector whose status copy is driven by the current header switch:
+2. `When flag is OFF` — `If OFF, serve` is represented here as one variation selector whose status copy is driven by the last confirmed global status:
    - while the flag is ON, show `Inactive while flag is ON · {variation} is not currently returned by this rule.` in muted text;
    - while the flag is OFF, give the row a quiet muted background, show neutral `Active now`, and state `{variation} is returned for every evaluation.` The copy must interpolate the currently selected OFF variation rather than a cached name.
 
@@ -288,7 +297,8 @@ Reference state: `feature-flag-details-targeting-pending-changes-light.png`.
 
 The following decisions are locked for the React handoff and take precedence over older Feature Flag or Segment design screenshots where they differ:
 
-- Keep the global ON/OFF switch in the persistent page header; do not duplicate or move it into Targeting.
+- Keep only a read-only `Status` Badge in the persistent page header. Place the page's single interactive global ON/OFF switch in the Targeting `Flag status` row before Default rule.
+- Keep status mutation separate from the Targeting draft: it preserves confirmation and change-comment behavior, updates both status displays only after server success, and does not implicitly save dirty targeting edits.
 - Link Default rule state copy to the last confirmed switch state. ON makes the OFF value explicitly inactive; OFF highlights the OFF row, marks it `Active now`, and names the exact Variation returned for every evaluation.
 - Use the Targeting command order `Pending changes` → `Discard changes` → `Review & save` → icon-only `MoreHorizontal`. The far-right menu contains only Schedule changes and Change request.
 - Build each Individual targeting Variation from the current React Segment `UserPanel`/`UserPicker`: title with inline count, full-width search trigger, no Avatar, stable key as secondary text, ghost `X`, and bounded internal user-list scrolling.
@@ -521,7 +531,7 @@ License gating applies to Schedule and Change Request independently. A license-g
 
 ## Functional Invariants
 
-- The status switch preserves Angular confirmation and optional/required change-comment behavior.
+- The Targeting status switch preserves Angular confirmation and optional/required change-comment behavior; the persistent header status is read-only.
 - `If OFF, serve` is part of Targeting > Default rule and nowhere else.
 - Targeting preserves default, individual, ordered rule, percentage rollout, property/operator, validation, review, schedule, change-request, and pending-change behavior.
 - Variations preserves immutable type, typed validation, add/edit/remove, ordering, expanded string/JSON editing, revision, and comment behavior.
@@ -537,6 +547,7 @@ License gating applies to Schedule and Change Request independently. A license-g
 - Only Feature Flag details main content and its directly owned overlays are designed; sidebar and context bar remain unchanged.
 - The page has exactly six route-backed tabs in this order: Targeting, Variations, Triggers, Insights, Settings, History.
 - The persistent header exposes identity, immutable metadata, and status without reproducing Angular's stacked settings blocks or adding a one-item overflow menu.
+- The persistent header shows only read-only status, while Targeting contains the page's single interactive global ON/OFF switch.
 - Targeting shows ON and OFF default serving on one compact Default rule surface; `If OFF, serve` is not duplicated elsewhere.
 - Targeting and Settings visibly follow the accepted Segment Details hierarchy and review patterns while retaining Feature Flag-specific behavior.
 - Variations is a first-class editor tab, not a modal launched from Settings.

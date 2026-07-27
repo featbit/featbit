@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
-import { describe, expect, it, vi } from "vitest"
+import { describe, expect, it } from "vitest"
 import "@/lib/i18n/i18n"
 import type { FeatureFlag } from "../flags-types"
 import { FlagDetailsHeader } from "./flag-details-header"
@@ -20,13 +20,7 @@ describe("FlagDetailsHeader", () => {
   it("matches the Team details back-link treatment", () => {
     render(
       <MemoryRouter>
-        <FlagDetailsHeader
-          flag={flag}
-          basePath="/en-US/feature-flags"
-          toggling={false}
-          canToggle
-          onToggle={vi.fn()}
-        />
+        <FlagDetailsHeader flag={flag} basePath="/en-US/feature-flags" />
       </MemoryRouter>
     )
 
@@ -38,5 +32,21 @@ describe("FlagDetailsHeader", () => {
       "hover:text-foreground"
     )
     expect(backLink.querySelector("svg")).toHaveClass("lucide-arrow-left")
+  })
+
+  it("shows read-only status first in the summary row", () => {
+    render(
+      <MemoryRouter>
+        <FlagDetailsHeader flag={flag} basePath="/en-US/feature-flags" />
+      </MemoryRouter>
+    )
+
+    expect(screen.getByRole("heading", { name: flag.name })).toBeVisible()
+    const statusLabel = screen.getByText("Status")
+    const summaryRow = statusLabel.parentElement?.parentElement
+    expect(summaryRow).toHaveClass("mt-4", "flex-wrap")
+    expect(summaryRow?.firstElementChild).toBe(statusLabel.parentElement)
+    expect(statusLabel.parentElement).toHaveTextContent("ON")
+    expect(screen.queryByRole("switch")).toBeNull()
   })
 })

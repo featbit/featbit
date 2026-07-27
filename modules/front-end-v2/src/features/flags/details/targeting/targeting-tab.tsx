@@ -1,4 +1,4 @@
-import { Clock3, Plus, UserRoundCheck } from "lucide-react"
+import { Clock3, Loader2, Plus, UserRoundCheck } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Badge } from "@/components/ui/badge"
@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Switch } from "@/components/ui/switch"
 import { ReviewSaveSplitButton } from "@/features/change-review/change-review-dialog"
 import type {
   SegmentEndUser,
@@ -174,6 +175,8 @@ export function TargetingTab({
   pendingCount,
   dirty,
   saving,
+  toggling,
+  canToggle,
   canUpdateDefault,
   canUpdateUsers,
   canUpdateRules,
@@ -186,6 +189,7 @@ export function TargetingTab({
   changeRequestGranted,
   onSchedule,
   onChangeRequest,
+  onToggle,
 }: {
   flag: FeatureFlag
   users: Map<string, SegmentEndUser>
@@ -193,6 +197,8 @@ export function TargetingTab({
   pendingCount: number
   dirty: boolean
   saving: boolean
+  toggling: boolean
+  canToggle: boolean
   canUpdateDefault: boolean
   canUpdateUsers: boolean
   canUpdateRules: boolean
@@ -205,6 +211,7 @@ export function TargetingTab({
   changeRequestGranted: boolean
   onSchedule: () => void
   onChangeRequest: () => void
+  onToggle: (nextEnabled: boolean) => void
 }) {
   const { t } = useTranslation()
   const [errors, setErrors] = useState(new Map<string, string>())
@@ -252,9 +259,36 @@ export function TargetingTab({
     (item) => item.id === flag.disabledVariationId
   )
   return (
-    <div className="space-y-7 pt-3 pb-6">
+    <div className="space-y-6 pt-3 pb-6">
+      <section className="pt-1 pb-2">
+        <div className="min-w-0">
+          <div className="flex items-center gap-3">
+            <h2 className="text-base font-medium">
+              {t("featureFlags.detailsPage.flagStatus")}
+            </h2>
+            <div className="flex shrink-0 items-center gap-2">
+              {toggling ? (
+                <Loader2 className="size-4 animate-spin text-muted-foreground" />
+              ) : null}
+              <Switch
+                checked={flag.isEnabled}
+                disabled={toggling || !canToggle || flag.isArchived}
+                aria-label={t("featureFlags.detailsPage.toggleStatus")}
+                onCheckedChange={onToggle}
+              />
+              <span className="text-sm font-semibold">
+                {t(flag.isEnabled ? "featureFlags.on" : "featureFlags.off")}
+              </span>
+            </div>
+          </div>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            {t("featureFlags.detailsPage.statusImmediateHelp")}
+          </p>
+        </div>
+      </section>
+
       <section>
-        <div className="mb-3 flex min-h-9 flex-wrap-reverse items-center justify-between gap-3">
+        <div className="mb-3 flex min-h-8 flex-wrap items-center justify-between gap-3">
           <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
             <h2 className="text-base font-medium">
               {t("featureFlags.detailsPage.defaultRule")}
@@ -263,7 +297,7 @@ export function TargetingTab({
               {t("featureFlags.detailsPage.defaultRuleHelp")}
             </p>
           </div>
-          <div className="flex items-center justify-end gap-3">
+          <div className="ml-auto flex flex-wrap items-center justify-end gap-3">
             {pendingCount ? (
               <Button type="button" variant="outline" onClick={onOpenPending}>
                 <Clock3 />
@@ -397,9 +431,7 @@ export function TargetingTab({
                 </Badge>
               ) : (
                 <>
-                  <Badge variant="outline">
-                    {t("featureFlags.detailsPage.activeNow")}
-                  </Badge>
+                  <Badge>{t("featureFlags.detailsPage.activeNow")}</Badge>
                   <span className="text-sm font-medium">
                     {t("featureFlags.detailsPage.offVariationActive", {
                       variation: offVariation?.name || offVariation?.value,

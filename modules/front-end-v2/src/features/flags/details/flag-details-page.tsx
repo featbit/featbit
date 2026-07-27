@@ -149,6 +149,11 @@ export function FlagDetailsPage() {
   const dirty = Boolean(
     saved && flag && stableFlagTargeting(saved) !== stableFlagTargeting(flag)
   )
+  const savedOffVariation = saved?.variations?.find(
+    (variation) => variation.id === saved.disabledVariationId
+  )
+  const savedOffVariationLabel =
+    savedOffVariation?.name || savedOffVariation?.value || undefined
   const changes = useMemo(
     () =>
       saved && flag
@@ -302,19 +307,7 @@ export function FlagDetailsPage() {
   return (
     <TooltipProvider>
       <div className="-m-5 min-h-[calc(100vh-3.5rem)] bg-background px-6 py-6 lg:px-8">
-        <FlagDetailsHeader
-          flag={flag}
-          basePath={basePath}
-          toggling={toggleMutation.isPending}
-          canToggle={can("ToggleFlag")}
-          onToggle={() =>
-            setConfirmation({
-              kind: "toggle",
-              flag,
-              nextEnabled: !flag.isEnabled,
-            })
-          }
-        />
+        <FlagDetailsHeader flag={flag} basePath={basePath} />
         <TargetingTab
           flag={flag}
           users={users}
@@ -322,6 +315,8 @@ export function FlagDetailsPage() {
           pendingCount={pendingQuery.data?.length ?? 0}
           dirty={dirty}
           saving={saveMutation.isPending}
+          toggling={toggleMutation.isPending}
+          canToggle={can("ToggleFlag")}
           canUpdateDefault={can("UpdateFlagDefaultRule")}
           canUpdateUsers={can("UpdateFlagIndividualTargeting")}
           canUpdateRules={can("UpdateFlagRules")}
@@ -344,6 +339,15 @@ export function FlagDetailsPage() {
           }
           onChangeRequest={() =>
             setSubmission({ mode: "change-request", initialReason: "" })
+          }
+          onToggle={(nextEnabled) =>
+            setConfirmation({
+              kind: "toggle",
+              flag,
+              nextEnabled,
+              hasUnsavedTargeting: dirty,
+              savedOffVariation: savedOffVariationLabel,
+            })
           }
         />
         <FlagChangeReviewDialog
@@ -402,7 +406,6 @@ export function FlagDetailsPage() {
         />
         <FlagConfirmDialog
           key={confirmation ? `toggle-${flag.id}` : "closed"}
-          lang={lang}
           target={confirmation}
           saving={toggleMutation.isPending}
           requireComment={settingsQuery.data?.requireChangeComment ?? false}

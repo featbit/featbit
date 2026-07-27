@@ -53,6 +53,10 @@ export const enFeatureFlags = {
   toggleOnBody:
     "Targeting and rules will determine the variation served to users.",
   toggleOffBody: "All users will receive the configured off variation.",
+  toggleUnsavedTargetingNotice:
+    "Unsaved Targeting edits will not be applied by this status change.",
+  toggleSavedOffVariationNotice:
+    "The currently saved OFF variation is {{variation}}.",
   archiveTitle: "Archive feature flag?",
   archiveBody:
     "The fallback value in your code will be returned for all users. Remove references to {{key}} before archiving.",
@@ -85,6 +89,9 @@ export const enFeatureFlags = {
     tags: "Tags",
     copyKey: "Copy flag key",
     toggleStatus: "Toggle feature flag status",
+    flagStatus: "Flag status",
+    statusImmediateHelp:
+      "Status changes apply immediately and are not included in Review & save.",
     tabsLabel: "Feature flag details",
     tabs: {
       targeting: "Targeting",
@@ -526,6 +533,8 @@ export const zhFeatureFlags: typeof enFeatureFlags = {
   toggleOffTitle: "关闭功能开关？",
   toggleOnBody: "将根据用户定向和规则返回变体。",
   toggleOffBody: "所有用户将收到配置的关闭变体。",
+  toggleUnsavedTargetingNotice: "此状态变更不会应用尚未保存的定向编辑。",
+  toggleSavedOffVariationNotice: "当前已保存的关闭变体是 {{variation}}。",
   archiveTitle: "归档功能开关？",
   archiveBody: "所有用户将收到代码中的回退值。归档前请移除对 {{key}} 的引用。",
   archiveKeyPromptBefore: "请输入",
@@ -556,6 +565,8 @@ export const zhFeatureFlags: typeof enFeatureFlags = {
     tags: "标签",
     copyKey: "复制功能开关键",
     toggleStatus: "切换功能开关状态",
+    flagStatus: "功能开关状态",
+    statusImmediateHelp: "状态变更会立即生效，不包含在“审核并保存”中。",
     tabsLabel: "功能开关详情",
     tabs: {
       targeting: "定向",

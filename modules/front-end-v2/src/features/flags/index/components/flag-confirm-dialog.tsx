@@ -20,6 +20,8 @@ export type FlagConfirmation = {
   kind: "toggle" | "archive" | "restore" | "remove"
   flag: FeatureFlag
   nextEnabled?: boolean
+  hasUnsavedTargeting?: boolean
+  savedOffVariation?: string
 } | null
 
 export function FlagConfirmDialog({
@@ -49,10 +51,26 @@ export function FlagConfirmDialog({
               ? "featureFlags.toggleOnTitle"
               : "featureFlags.toggleOffTitle"
           ),
-          body: t(
-            target.nextEnabled
-              ? "featureFlags.toggleOnBody"
-              : "featureFlags.toggleOffBody"
+          body: (
+            <>
+              {t(
+                target.nextEnabled
+                  ? "featureFlags.toggleOnBody"
+                  : "featureFlags.toggleOffBody"
+              )}
+              {target.hasUnsavedTargeting ? (
+                <span className="mt-2 block">
+                  {t("featureFlags.toggleUnsavedTargetingNotice")}
+                </span>
+              ) : null}
+              {!target.nextEnabled && target.savedOffVariation ? (
+                <span className="mt-2 block">
+                  {t("featureFlags.toggleSavedOffVariationNotice", {
+                    variation: target.savedOffVariation,
+                  })}
+                </span>
+              ) : null}
+            </>
           ),
           action: t("featureFlags.confirm"),
         }
