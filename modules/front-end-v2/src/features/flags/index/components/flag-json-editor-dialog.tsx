@@ -54,6 +54,18 @@ function getJsonError(
   }
 }
 
+function formatJson(value: string) {
+  try {
+    return JSON.stringify(JSON.parse(value), null, 2)
+  } catch {
+    return value
+  }
+}
+
+function compactJson(value: string) {
+  return JSON.stringify(JSON.parse(value))
+}
+
 function JsonCodeMirror({
   value,
   onChange,
@@ -69,6 +81,18 @@ function JsonCodeMirror({
   useEffect(() => {
     onChangeRef.current = onChange
   }, [onChange])
+
+  useEffect(() => {
+    const view = viewRef.current
+    if (!view) return
+
+    const currentValue = view.state.doc.toString()
+    if (currentValue === value) return
+
+    view.dispatch({
+      changes: { from: 0, to: currentValue.length, insert: value },
+    })
+  }, [value])
 
   useEffect(() => {
     if (!hostRef.current || viewRef.current) return
@@ -155,7 +179,7 @@ export function FlagJsonEditorDialog({
   onApply: (value: string) => void
 }) {
   const { t } = useTranslation()
-  const [draft, setDraft] = useState(value)
+  const [draft, setDraft] = useState(() => formatJson(value))
 
   const error = useMemo(() => getJsonError(draft, t), [draft, t])
 
@@ -191,13 +215,23 @@ export function FlagJsonEditorDialog({
               {error || t("featureFlags.jsonEditor.valid")}
             </span>
           </div>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={Boolean(error)}
+            onClick={() => {
+              if (!error) setDraft(formatJson(draft))
+            }}
+          >
+            {t("featureFlags.jsonEditor.format")}
+          </Button>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             {t("featureFlags.jsonEditor.cancel")}
           </Button>
           <Button
             disabled={Boolean(error)}
             onClick={() => {
-              if (!error) onApply(draft)
+              if (!error) onApply(compactJson(draft))
             }}
           >
             {t("featureFlags.jsonEditor.apply")}

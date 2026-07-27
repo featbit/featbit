@@ -64,4 +64,24 @@ describe("FlagDetailsHeader", () => {
     expect(screen.getByText("Archived")).toBeVisible()
     expect(screen.getByText("Status").parentElement).toHaveTextContent("ON")
   })
+
+  it("places Settings immediately after Variations", () => {
+    render(
+      <MemoryRouter>
+        <FlagDetailsHeader flag={flag} basePath="/en-US/feature-flags" />
+      </MemoryRouter>
+    )
+
+    const tabs = screen.getByRole("navigation", {
+      name: "Feature flag details",
+    })
+    expect(Array.from(tabs.children).map((tab) => tab.textContent)).toEqual([
+      "Targeting",
+      "Variations",
+      "Settings",
+      "Triggers",
+      "Insights",
+      "History",
+    ])
+  })
 })

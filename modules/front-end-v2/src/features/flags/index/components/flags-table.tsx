@@ -93,6 +93,30 @@ function TagsCell({ tags }: { tags: string[] }) {
   )
 }
 
+type ServingVariation = {
+  name: string
+  value: string
+}
+
+function servingVariations(
+  flag: FeatureFlag,
+  values: string[]
+): ServingVariation[] {
+  const usedVariationIds = new Set<string>()
+
+  return values.map((value) => {
+    const variation = flag.variations?.find(
+      (item) => item.value === value && !usedVariationIds.has(item.id)
+    )
+    if (variation) usedVariationIds.add(variation.id)
+
+    return {
+      name: variation?.name.trim() ?? "",
+      value,
+    }
+  })
+}
+
 function ServingCell({
   flag,
   pending,
@@ -107,11 +131,18 @@ function ServingCell({
 }) {
   const { t } = useTranslation()
   const enabledValues = flag.serves?.enabledVariations ?? []
-  const displayed = flag.isEnabled
-    ? enabledValues.length > 1
-      ? t("featureFlags.variations", { count: enabledValues.length })
-      : enabledValues[0] || "—"
-    : flag.serves?.disabledVariation || "—"
+  const servedVariations = servingVariations(
+    flag,
+    flag.isEnabled
+      ? enabledValues
+      : flag.serves?.disabledVariation
+        ? [flag.serves.disabledVariation]
+        : []
+  )
+  const displayed =
+    servedVariations
+      .map((variation) => variation.name || variation.value)
+      .join(", ") || "—"
   return (
     <div className="space-y-2.5">
       <div className="flex items-center gap-2">
@@ -140,10 +171,10 @@ function ServingCell({
             {t("featureFlags.serving")}:
           </span>
           <span className="flex shrink-0 items-center -space-x-0.5">
-            {flag.isEnabled && enabledValues.length ? (
-              enabledValues.map((value, index) => (
+            {flag.isEnabled && servedVariations.length ? (
+              servedVariations.map((variation, index) => (
                 <span
-                  key={`${value}-${index}`}
+                  key={`${variation.value}-${index}`}
                   className={cn(
                     "size-2 rounded-full ring-1 ring-background",
                     variationMarkerColor(index)
@@ -157,30 +188,41 @@ function ServingCell({
           <span className="min-w-0 truncate font-medium">{displayed}</span>
         </TooltipTrigger>
         <TooltipContent className="max-w-80 p-2">
-          <div className="space-y-1.5">
-            {flag.isEnabled && enabledValues.length ? (
-              enabledValues.map((value, index) => (
+          <div className="space-y-2">
+            {servedVariations.length ? (
+              servedVariations.map((variation, index) => (
                 <div
-                  key={`${value}-${index}`}
+                  key={`${variation.value}-${index}`}
                   className="flex min-w-0 items-start gap-2"
                 >
                   <span
                     className={cn(
                       "mt-1 size-2 shrink-0 rounded-full",
-                      variationMarkerColor(index)
+                      flag.isEnabled
+                        ? variationMarkerColor(index)
+                        : "bg-muted-foreground/60"
                     )}
                   />
-                  <span className="min-w-0 font-mono text-xs break-all whitespace-pre-wrap">
-                    {value}
-                  </span>
+                  <dl className="grid min-w-0 grid-cols-[auto_1fr] gap-x-2 gap-y-0.5 text-xs">
+                    <dt className="text-background/70">
+                      {t("featureFlags.variationsEditor.name")}
+                    </dt>
+                    <dd className="min-w-0 break-words">
+                      {variation.name || "—"}
+                    </dd>
+                    <dt className="text-background/70">
+                      {t("featureFlags.variationsEditor.value")}
+                    </dt>
+                    <dd className="min-w-0 font-mono break-all whitespace-pre-wrap">
+                      {variation.value}
+                    </dd>
+                  </dl>
                 </div>
               ))
             ) : (
               <div className="flex min-w-0 items-start gap-2">
                 <span className="mt-1 size-2 shrink-0 rounded-full bg-muted-foreground/60" />
-                <span className="min-w-0 font-mono text-xs break-all whitespace-pre-wrap">
-                  {displayed}
-                </span>
+                <span className="text-xs">{displayed}</span>
               </div>
             )}
           </div>

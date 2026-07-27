@@ -15,9 +15,9 @@ import type { FeatureFlag } from "../flags-types"
 const tabs = [
   "targeting",
   "variations",
+  "settings",
   "triggers",
   "insights",
-  "settings",
   "history",
 ] as const
 

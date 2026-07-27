@@ -316,6 +316,7 @@ export const enFeatureFlags = {
     description:
       "Editing variation “{{name}}”. Syntax issues are marked directly in the editor.",
     valid: "Valid JSON object or array",
+    format: "Format",
     cancel: "Cancel",
     apply: "Apply",
   },
@@ -842,6 +843,7 @@ export const zhFeatureFlags: typeof enFeatureFlags = {
     title: "编辑 JSON 值",
     description: "正在编辑变体“{{name}}”。语法问题会直接标记在编辑器中。",
     valid: "有效的 JSON 对象或数组",
+    format: "格式化",
     cancel: "取消",
     apply: "应用",
   },
