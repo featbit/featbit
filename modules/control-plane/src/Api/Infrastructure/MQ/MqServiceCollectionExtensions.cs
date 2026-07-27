@@ -198,13 +198,7 @@ public static class MqServiceCollectionExtensions
         {
             services.TryAddPostgres(configuration);
 
-            services.AddSingleton<IMessageProducer, PostgresMessageProducer>(sp =>
-            {
-                var dataSource = sp.GetRequiredService<NpgsqlDataSource>();
-                var logger = sp.GetRequiredService<ILogger<PostgresMessageProducer>>();
-
-                return new PostgresMessageProducer(dataSource, logger);
-            });
+            services.AddSingleton<IMessageProducer, PostgresMessageProducer>();
             services.AddHostedService(sp =>
             {
                 var scopeFactory = sp.GetRequiredService<IServiceScopeFactory>();
