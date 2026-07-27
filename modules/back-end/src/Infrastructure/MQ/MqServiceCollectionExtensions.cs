@@ -118,11 +118,9 @@ public static class MqServiceCollectionExtensions
                 var dataSource = sp.GetRequiredService<NpgsqlDataSource>();
                 var logger = sp.GetRequiredService<ILogger<PostgresMessageConsumer>>();
 
-
                 return new PostgresMessageConsumer(scopeFactory, dataSource, logger, topics);
             });
         }
-
 
         void AddMessageHandlers()
         {

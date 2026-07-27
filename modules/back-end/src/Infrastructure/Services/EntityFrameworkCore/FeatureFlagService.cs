@@ -122,10 +122,6 @@ public class FeatureFlagService(AppDbContext dbContext, ILogger<FeatureFlagServi
             );
     }
 
-    // Committed-vs-pending, Postgres/EF parity with the Mongo FeatureFlagService.
-    // Matches the Mongo behavior exactly (including its current limitations); no
-    // concurrency/monotonicity guards here — those are tracked as #33/#34.
-
     public async Task<FeatureFlag> GetCommittedAsync(Guid envId, string key)
     {
         // No-tracking so stripping the pending slot below is purely a read-shaping

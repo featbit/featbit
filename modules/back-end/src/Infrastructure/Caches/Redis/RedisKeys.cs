@@ -54,6 +54,11 @@ public static class RedisKeys
     /// </summary>
     public static RedisKey FlagVersion(Guid id, long ts) => new($"{Flag(id)}:v{ts}");
 
+    /// <summary>
+    /// SCAN match pattern selecting only versioned flag value keys.
+    /// </summary>
+    public const string VersionedFlagKeyPattern = "featbit:flag:*:v*";
+
     // --- B2 stage/commit storage (segment equivalents of B1) ---------------------------------
     // Mirrors the B1 flag stage/commit storage for segments so the old committed segment value
     // stays readable while a new version is staged:

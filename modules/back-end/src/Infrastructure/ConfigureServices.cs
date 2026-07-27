@@ -26,9 +26,12 @@ public static class ConfigureServices
         // flag schedule worker
         services.AddHostedService<AppServices.FlagScheduleWorker>();
 
-        // staged flag version GC worker (B5): reclaims superseded versioned flag value keys.
-        // The worker itself no-ops unless ControlPlane:ConsistencyMode is GatedCommit.
-        services.AddHostedService<AppServices.StagedFlagGcWorker>();
+        if (configuration.UseControlPlane())
+        {
+            // staged flag version GC worker (B5): reclaims superseded versioned flag value keys.
+            // The worker itself no-ops unless ControlPlane:ConsistencyMode is GatedCommit.
+            services.AddHostedService<AppServices.StagedFlagGcWorker>();
+        }
 
         // track usage
         services.AddOptions<UsageTrackingOptions>()

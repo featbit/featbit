@@ -30,9 +30,6 @@ public sealed class StagedFlagGcWorker : BackgroundService
     /// </summary>
     public static readonly TimeSpan DefaultInterval = TimeSpan.FromMinutes(5);
 
-    /// <summary>SCAN match pattern selecting only versioned flag value keys.</summary>
-    private const string VersionedFlagKeyPattern = "featbit:flag:*:v*";
-
     private const string VersionSeparator = ":v";
 
     private readonly IRedisClient _redis;
@@ -114,7 +111,7 @@ public sealed class StagedFlagGcWorker : BackgroundService
                 continue;
             }
 
-            await foreach (var key in server.KeysAsync(pattern: VersionedFlagKeyPattern, pageSize: 250)
+            await foreach (var key in server.KeysAsync(pattern: RedisKeys.VersionedFlagKeyPattern, pageSize: 250)
                                .WithCancellation(cancellationToken))
             {
                 if (!TryParseVersionedKey(key, out var flagId, out var ts))

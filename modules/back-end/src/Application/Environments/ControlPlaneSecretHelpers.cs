@@ -20,7 +20,7 @@ public static class ControlPlaneSecretHelpers
 
         return secretUpsertMessage;
     }
-    
+
     public static JsonObject CreateDeleteMessage(Secret secret)
     {
         var secretNode = JsonSerializer.SerializeToNode(secret, ReusableJsonSerializerOptions.Web);

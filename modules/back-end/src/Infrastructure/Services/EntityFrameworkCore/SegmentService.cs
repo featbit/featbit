@@ -175,16 +175,6 @@ public class SegmentService(AppDbContext dbContext, ILogger<SegmentService> logg
         }
     }
 
-    // Committed-vs-pending, Postgres/EF parity with the Mongo SegmentService. Keyed by segment Id
-    // (a segment is a single entity, possibly shared across envs). Matches the Mongo behavior.
-
-    // Bounded retry budget for the optimistic-concurrency loops below: a racing writer that
-    // wins the row makes SaveChanges throw DbUpdateConcurrencyException (Postgres xmin token,
-    // #72/#76). Each retry re-reads the fresh row and re-evaluates the version guard, so a
-    // losing racer converges to the same outcome the Mongo provider gets from its version-
-    // filtered UpdateOneAsync/ReplaceOneAsync: no-op (SetPendingAsync) or false (PromotePendingAsync).
-    // See PendingOpRetryPolicy for the budget/backoff rationale (shared with FeatureFlagService, #107/#108).
-
     public async Task<Segment> GetCommittedAsync(Guid id)
     {
         // No-tracking so stripping the pending slot below is purely a read-shaping
@@ -203,6 +193,13 @@ public class SegmentService(AppDbContext dbContext, ILogger<SegmentService> logg
 
         return segment;
     }
+
+    // Bounded retry budget for the optimistic-concurrency loops below: a racing writer that
+    // wins the row makes SaveChanges throw DbUpdateConcurrencyException (Postgres xmin token,
+    // #72/#76). Each retry re-reads the fresh row and re-evaluates the version guard, so a
+    // losing racer converges to the same outcome the Mongo provider gets from its version-
+    // filtered UpdateOneAsync/ReplaceOneAsync: no-op (SetPendingAsync) or false (PromotePendingAsync).
+    // See PendingOpRetryPolicy for the budget/backoff rationale (shared with FeatureFlagService, #107/#108).
 
     public async Task SetPendingAsync(
         Guid id,
