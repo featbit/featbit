@@ -242,7 +242,7 @@ export function SettingsTab({
       className="space-y-8 pt-4 pb-8"
       onSubmit={form.handleSubmit(() => setReviewOpen(true))}
     >
-      <section className="space-y-5">
+      <section className="max-w-3xl space-y-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-base font-medium">
             {t("featureFlags.detailsPage.settings.general")}
@@ -266,7 +266,7 @@ export function SettingsTab({
           ) : null}
         </div>
 
-        <div className="max-w-3xl space-y-5">
+        <div className="space-y-5">
           <div className="space-y-2">
             <Label htmlFor="flag-name">
               {t("featureFlags.detailsPage.settings.fields.name")}

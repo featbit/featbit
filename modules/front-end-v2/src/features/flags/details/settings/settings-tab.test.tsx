@@ -52,6 +52,18 @@ function renderSettings(value: FeatureFlag = flag) {
 }
 
 describe("SettingsTab", () => {
+  it("keeps the save actions inside the General section", () => {
+    renderSettings()
+    const general = screen.getByRole("heading", { name: "General" })
+    const generalSection = general.closest("section")
+    const lifecycle = screen.getByRole("heading", { name: "Lifecycle" })
+
+    expect(generalSection).toContainElement(
+      screen.getByRole("button", { name: "Review & save" })
+    )
+    expect(generalSection).not.toContainElement(lifecycle)
+  })
+
   it("shows the dirty command row and discards the draft", async () => {
     renderSettings()
     expect(
