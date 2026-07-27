@@ -1,5 +1,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { createEvent, fireEvent, render, screen } from "@testing-library/react"
+import {
+  createEvent,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import "@/lib/i18n/i18n"
 import type { FeatureFlag } from "../../flags-types"
@@ -81,12 +87,15 @@ function renderTargeting(flag = exampleFlag(), dirty = true) {
 }
 
 describe("feature flag targeting tab", () => {
-  it("renders the default rule, one user panel per variation, and toolbar actions", () => {
-    renderTargeting()
+  it("renders the default rule, one user panel per variation, and toolbar actions", async () => {
+    const props = renderTargeting()
     expect(screen.getByText("Default rule")).toBeVisible()
     expect(
       screen.getByText("Used when no individual target and rule matches.")
     ).toBeVisible()
+    expect(
+      screen.getByText("Default rule").parentElement?.parentElement
+    ).toHaveClass("flex-wrap-reverse")
     expect(screen.getByText("Individual targeting")).toBeVisible()
     expect(
       screen.getByText("Target specific end users by keyId.")
@@ -103,7 +112,35 @@ describe("feature flag targeting tab", () => {
       )
     ).toBeVisible()
     expect(screen.getByText("Internal preview")).toBeVisible()
-    expect(screen.getByRole("button", { name: "Review & save" })).toBeEnabled()
+    const review = screen.getByRole("button", { name: "Review & save" })
+    const moreActions = screen.getByRole("button", {
+      name: "More targeting actions",
+    })
+    expect(review).toBeEnabled()
+    expect(review).toHaveClass("rounded-r-none", "border-r-0")
+    expect(moreActions).toHaveClass("rounded-l-none")
+    fireEvent.click(moreActions)
+    await waitFor(() =>
+      expect(screen.getByText("Schedule changes")).toBeVisible()
+    )
+    expect(
+      screen.getByText("Schedule changes").closest('[role="menuitem"]')
+    ).toHaveClass("cursor-pointer")
+    expect(
+      screen
+        .getByText("Schedule changes")
+        .closest('[role="menuitem"]')
+        ?.querySelector(".lucide-clock-3")
+    ).toBeVisible()
+    const changeRequest = screen.getByText("Change request")
+    expect(changeRequest).toBeVisible()
+    expect(
+      changeRequest
+        .closest('[role="menuitem"]')
+        ?.querySelector(".lucide-user-round-check")
+    ).toBeVisible()
+    fireEvent.click(screen.getByText("Schedule changes"))
+    expect(props.onSchedule).toHaveBeenCalledOnce()
     expect(
       screen.getByRole("button", { name: "2 pending changes" })
     ).toBeVisible()

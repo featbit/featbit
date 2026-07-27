@@ -1,14 +1,8 @@
-import { Clock3, MoreHorizontal, Plus } from "lucide-react"
+import { Clock3, Plus, UserRoundCheck } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import {
   Select,
   SelectContent,
@@ -17,11 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+import { ReviewSaveSplitButton } from "@/features/change-review/change-review-dialog"
 import type {
   SegmentEndUser,
   SegmentRule,
@@ -264,7 +254,7 @@ export function TargetingTab({
   return (
     <div className="space-y-7 pt-3 pb-6">
       <section>
-        <div className="mb-3 flex min-h-9 flex-wrap items-center justify-between gap-3">
+        <div className="mb-3 flex min-h-9 flex-wrap-reverse items-center justify-between gap-3">
           <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
             <h2 className="text-base font-medium">
               {t("featureFlags.detailsPage.defaultRule")}
@@ -292,54 +282,33 @@ export function TargetingTab({
                 {t("featureFlags.detailsPage.discard")}
               </Button>
             ) : null}
-            <Button
-              type="button"
-              disabled={
+            <ReviewSaveSplitButton
+              primaryLabel={t("featureFlags.detailsPage.reviewAndSave")}
+              savingLabel={t("featureFlags.detailsPage.review.saving")}
+              saving={saving}
+              primaryDisabled={
                 !dirty ||
-                saving ||
                 (!canUpdateDefault && !canUpdateUsers && !canUpdateRules)
               }
-              onClick={review}
-            >
-              {t("featureFlags.detailsPage.reviewAndSave")}
-            </Button>
-            <Tooltip>
-              <TooltipTrigger
-                render={
-                  <DropdownMenu>
-                    <DropdownMenuTrigger
-                      render={
-                        <Button
-                          type="button"
-                          size="icon"
-                          variant="outline"
-                          aria-label={t("featureFlags.detailsPage.moreActions")}
-                        />
-                      }
-                    >
-                      <MoreHorizontal />
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem
-                        disabled={!dirty || !scheduleGranted}
-                        onClick={onSchedule}
-                      >
-                        {t("featureFlags.detailsPage.scheduleChanges")}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        disabled={!dirty || !changeRequestGranted}
-                        onClick={onChangeRequest}
-                      >
-                        {t("featureFlags.detailsPage.changeRequest")}
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                }
-              />
-              <TooltipContent>
-                {t("featureFlags.detailsPage.moreActions")}
-              </TooltipContent>
-            </Tooltip>
+              menuLabel={t("featureFlags.detailsPage.moreActions")}
+              menuSide="bottom"
+              separateAfterFirst={false}
+              options={[
+                {
+                  label: t("featureFlags.detailsPage.scheduleChanges"),
+                  icon: <Clock3 />,
+                  disabled: !dirty || !scheduleGranted,
+                  onSelect: onSchedule,
+                },
+                {
+                  label: t("featureFlags.detailsPage.changeRequest"),
+                  icon: <UserRoundCheck />,
+                  disabled: !dirty || !changeRequestGranted,
+                  onSelect: onChangeRequest,
+                },
+              ]}
+              onPrimary={review}
+            />
           </div>
         </div>
         <div

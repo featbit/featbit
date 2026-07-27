@@ -24,12 +24,18 @@ import type {
   ChangeReviewItem,
 } from "./change-review-types"
 
-function ReviewSaveOptionsContent({ children }: { children: ReactNode }) {
+function ReviewSaveOptionsContent({
+  children,
+  side = "top",
+}: {
+  children: ReactNode
+  side?: "top" | "bottom"
+}) {
   return (
     <MenuPrimitive.Portal>
       <MenuPrimitive.Positioner
         align="end"
-        side="top"
+        side={side}
         sideOffset={4}
         className="z-[60]"
         data-slot="review-save-options-positioner"
@@ -57,6 +63,8 @@ export function ReviewSaveSplitButton({
   saving,
   primaryDisabled,
   menuLabel,
+  menuSide = "top",
+  separateAfterFirst = true,
   options,
   onPrimary,
 }: {
@@ -65,6 +73,8 @@ export function ReviewSaveSplitButton({
   saving: boolean
   primaryDisabled: boolean
   menuLabel: string
+  menuSide?: "top" | "bottom"
+  separateAfterFirst?: boolean
   options: ReviewSaveOption[]
   onPrimary: () => void
 }) {
@@ -92,11 +102,14 @@ export function ReviewSaveSplitButton({
         >
           <ChevronDown />
         </DropdownMenuTrigger>
-        <ReviewSaveOptionsContent>
+        <ReviewSaveOptionsContent side={menuSide}>
           {options.map((option, index) => (
             <Fragment key={option.label}>
-              {index === 1 ? <DropdownMenuSeparator /> : null}
+              {separateAfterFirst && index === 1 ? (
+                <DropdownMenuSeparator />
+              ) : null}
               <DropdownMenuItem
+                className="cursor-pointer [&_svg]:size-4 [&_svg]:shrink-0"
                 disabled={option.disabled}
                 onClick={option.onSelect}
               >

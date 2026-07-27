@@ -36,6 +36,9 @@ describe("FlagChangeReviewDialog save options", () => {
       document.querySelector('[data-slot="review-save-options-positioner"]')
     ).toHaveClass("z-[60]")
     expect(screen.getByText("Schedule changes")).toBeVisible()
+    expect(
+      screen.getByText("Schedule changes").closest('[role="menuitem"]')
+    ).toHaveClass("[&_svg]:size-4", "[&_svg]:shrink-0")
     expect(screen.getByText("Request approval")).toBeVisible()
     expect(screen.queryByText(/Schedule with approval/)).not.toBeInTheDocument()
     expect(screen.queryByText(/changes…/)).not.toBeInTheDocument()
