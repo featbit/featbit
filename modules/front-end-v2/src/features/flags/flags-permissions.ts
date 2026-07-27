@@ -11,6 +11,7 @@ export type FlagAction =
   | "UpdateFlagIndividualTargeting"
   | "UpdateFlagRules"
   | "UpdateFlagDefaultRule"
+  | "UpdateFlagOffVariation"
 
 function wildcardMatches(pattern: string, value: string) {
   const escaped = pattern.replace(/[.+?^${}()|[\]\\]/g, "\\$&")

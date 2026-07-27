@@ -6,6 +6,7 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { getStoredUserProfile } from "@/features/auth/auth-api"
 import {
   getCurrentProjectEnv,
   getCurrentWorkspace,
@@ -30,6 +31,7 @@ import {
   fetchFlagPolicies,
   fetchPendingFlagChanges,
   removePendingFlagChange,
+  updateFlagChangeRequest,
   toggleFeatureFlag,
   updateFeatureFlagTargeting,
 } from "../flags-api"
@@ -266,6 +268,56 @@ export function FlagDetailsPage() {
     },
     onError: () => toast.error(t("featureFlags.operationFailed")),
   })
+  const pendingActionMutation = useMutation({
+    mutationFn: ({
+      item,
+      action,
+    }: {
+      item: PendingFlagChange
+      action: "approve" | "decline" | "apply"
+    }) =>
+      updateFlagChangeRequest(envId, item.changeRequestId ?? item.id, action),
+    onSuccess: (_, { item, action }) => {
+      const currentUserId = getStoredUserProfile().id
+      queryClient.setQueryData(
+        ["flag-pending-changes", envId, flagKey],
+        (current: PendingFlagChange[] | undefined) =>
+          (current ?? []).map((candidate) => {
+            if (candidate.id !== item.id) return candidate
+            const status =
+              action === "apply"
+                ? "Applied"
+                : action === "decline"
+                  ? "Declined"
+                  : candidate.type === "Schedule"
+                    ? "PendingExecution"
+                    : "Approved"
+            return {
+              ...candidate,
+              status,
+              reviewers:
+                action === "apply"
+                  ? candidate.reviewers
+                  : candidate.reviewers?.map((reviewer) =>
+                      reviewer.memberId === currentUserId
+                        ? {
+                            ...reviewer,
+                            action:
+                              action === "approve" ? "Approve" : "Decline",
+                            timestamp: new Date().toISOString(),
+                          }
+                        : reviewer
+                    ),
+            }
+          })
+      )
+      toast.success(t("featureFlags.operationSucceeded"))
+      if (action === "apply") {
+        void flagQuery.refetch()
+      }
+    },
+    onError: () => toast.error(t("featureFlags.operationFailed")),
+  })
 
   if (!envId || !flagKey || flagQuery.isError) {
     return (
@@ -373,14 +425,29 @@ export function FlagDetailsPage() {
         />
         <PendingChangesSheet
           open={pendingOpen}
+          flagName={flag.name}
           items={pendingQuery.data ?? []}
+          loading={pendingQuery.isLoading}
+          failed={pendingQuery.isError}
           removingId={
             removePendingMutation.isPending
               ? (removePendingMutation.variables?.id ?? null)
               : null
           }
+          acting={
+            pendingActionMutation.isPending
+              ? {
+                  id: pendingActionMutation.variables?.item.id ?? "",
+                  action: pendingActionMutation.variables?.action ?? "approve",
+                }
+              : null
+          }
           onOpenChange={setPendingOpen}
+          onRetry={() => void pendingQuery.refetch()}
           onRemove={(item) => removePendingMutation.mutate(item)}
+          onAction={(item, action) =>
+            pendingActionMutation.mutate({ item, action })
+          }
         />
         <TargetingSubmissionDialog
           key={submission ? "submission" : "closed"}

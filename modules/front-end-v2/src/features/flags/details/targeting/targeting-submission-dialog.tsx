@@ -31,12 +31,13 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import type { ChangeReviewItem } from "@/features/change-review/change-review-types"
 import { ChangeLedger } from "@/features/change-review/change-ledger"
 import { ReviewSaveSplitButton } from "@/features/change-review/change-review-dialog"
 import { getStoredUserProfile } from "@/features/auth/auth-api"
 import { fetchSegmentTeamMembers } from "@/features/segments/segments-api"
 import type { SegmentTeamMember } from "@/features/segments/segments-types"
+import type { FlagTargetingReviewChange } from "./targeting-utils"
+import { useFlagChangeLedgerAdapter } from "./use-flag-change-ledger-adapter"
 
 export type TargetingSubmission = {
   title: string
@@ -222,7 +223,7 @@ export function TargetingSubmissionDialog({
 }: {
   mode: "schedule" | "change-request" | null
   flagName: string
-  changes: ChangeReviewItem[]
+  changes: FlagTargetingReviewChange[]
   initialReason?: string
   scheduleGranted: boolean
   changeRequestGranted: boolean
@@ -235,6 +236,7 @@ export function TargetingSubmissionDialog({
   onSubmit: (value: TargetingSubmission) => void
 }) {
   const { t } = useTranslation()
+  const ledger = useFlagChangeLedgerAdapter()
   const schedule = mode === "schedule"
   const [title, setTitle] = useState("")
   const [scheduledTime, setScheduledTime] = useState("")
@@ -279,23 +281,7 @@ export function TargetingSubmissionDialog({
                 })}
               </span>
             </div>
-            <ChangeLedger
-              changes={changes}
-              layout="targeting"
-              copy={{
-                label: (change) => change.label,
-                action: (action) =>
-                  t(`featureFlags.detailsPage.review.${action}`),
-                actionCount: (action, count) =>
-                  t("featureFlags.detailsPage.review.actionCount", {
-                    action: t(`featureFlags.detailsPage.review.${action}`),
-                    count,
-                  }),
-                showMore: (count) =>
-                  t("featureFlags.detailsPage.review.showMore", { count }),
-                showLess: t("featureFlags.detailsPage.review.showLess"),
-              }}
-            />
+            <ChangeLedger changes={changes} layout="targeting" {...ledger} />
           </div>
           {schedule ? (
             <>

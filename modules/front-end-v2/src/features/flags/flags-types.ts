@@ -95,16 +95,25 @@ export type FlagTargeting = {
 export type PendingFlagChange = {
   id: string
   type: "Schedule" | "ChangeRequest"
-  status: string
+  status:
+    "PendingReview" | "PendingExecution" | "Approved" | "Declined" | "Applied"
   flagId: string
   creatorId: string
   creatorName: string
   createdAt: string
+  dataChange: { previous?: string; current?: string }
+  instructions: Array<{ kind: string; value: unknown }>
   scheduleTitle?: string
   scheduledTime?: string
   changeRequestId?: string
   changeRequestReason?: string
-  reviewers?: Array<{ memberId: string; action: string; timestamp: string }>
+  reviewers?: Array<{
+    memberId: string
+    name?: string
+    email?: string
+    action: string
+    timestamp?: string | null
+  }>
 }
 
 export type PagedFeatureFlags = {

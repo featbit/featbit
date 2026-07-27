@@ -1,13 +1,8 @@
 import { Clock3, UserRoundCheck } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { ChangeReviewDialog } from "@/features/change-review/change-review-dialog"
-import {
-  FlagChangeBadgeLabel,
-  FlagDefaultChangeContent,
-  FlagRuleChangeContent,
-  FlagRuleChangeLabel,
-} from "./targeting/flag-rule-change-content"
 import type { FlagTargetingReviewChange } from "./targeting/targeting-utils"
+import { useFlagChangeLedgerAdapter } from "./targeting/use-flag-change-ledger-adapter"
 
 export function FlagChangeReviewDialog({
   open,
@@ -37,6 +32,7 @@ export function FlagChangeReviewDialog({
   onChangeRequest: (comment: string) => void
 }) {
   const { t } = useTranslation()
+  const ledger = useFlagChangeLedgerAdapter()
   return (
     <ChangeReviewDialog
       open={open}
@@ -64,58 +60,7 @@ export function FlagChangeReviewDialog({
         save: t("featureFlags.detailsPage.review.save"),
         saving: t("featureFlags.detailsPage.review.saving"),
       }}
-      ledger={{
-        copy: {
-          label: (change) => change.label,
-          action: (action) => t(`featureFlags.detailsPage.review.${action}`),
-          actionCount: (action, count) =>
-            t("featureFlags.detailsPage.review.actionCount", {
-              action: t(`featureFlags.detailsPage.review.${action}`),
-              count,
-            }),
-          showMore: (count) =>
-            t("featureFlags.detailsPage.review.showMore", { count }),
-          showLess: t("featureFlags.detailsPage.review.showLess"),
-        },
-        renderLabel: (change) => {
-          if (change.kind === "rule")
-            return <FlagRuleChangeLabel name={change.label} />
-          if (change.kind === "targeting")
-            return (
-              <FlagChangeBadgeLabel
-                badge={t("featureFlags.detailsPage.review.user")}
-                name={change.label}
-              />
-            )
-          if (change.kind === "default")
-            return (
-              <FlagChangeBadgeLabel
-                badge={t("featureFlags.detailsPage.review.default")}
-                name={change.label}
-              />
-            )
-          return undefined
-        },
-        renderContent: (change) => {
-          if (change.kind === "rule")
-            return (
-              <FlagRuleChangeContent
-                previousRule={change.previousRule}
-                currentRule={change.currentRule}
-                previousServing={change.previousServing}
-                currentServing={change.currentServing}
-              />
-            )
-          if (change.kind === "default")
-            return (
-              <FlagDefaultChangeContent
-                previous={change.previousServing}
-                current={change.currentServing}
-              />
-            )
-          return undefined
-        },
-      }}
+      ledger={ledger}
       saveOptions={[
         ...(scheduleGranted
           ? [

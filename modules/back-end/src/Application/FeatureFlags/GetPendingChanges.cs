@@ -1,3 +1,4 @@
+using Application.Bases.Exceptions;
 using Domain.FlagChangeRequests;
 using Domain.FlagSchedules;
 using Domain.SemanticPatch;
@@ -6,6 +7,8 @@ namespace Application.FeatureFlags;
 
 public class GetPendingChanges : IRequest<IEnumerable<PendingChangesVm>>
 {
+    public Guid OrgId { get; set; }
+
     public Guid EnvId { get; set; }
 
     public string Key { get; set; }
@@ -17,6 +20,7 @@ public class GetPendingChangesHandler : IRequestHandler<GetPendingChanges, IEnum
     private readonly IFlagChangeRequestService _flagChangeRequestService;
     private readonly IFlagDraftService _flagDraftService;
     private readonly IUserService _userService;
+    private readonly IMemberService _memberService;
     private readonly IFeatureFlagService _flagService;
 
     public GetPendingChangesHandler(
@@ -24,12 +28,14 @@ public class GetPendingChangesHandler : IRequestHandler<GetPendingChanges, IEnum
         IFlagChangeRequestService flagChangeRequestService,
         IFlagDraftService flagDraftService,
         IUserService userService,
+        IMemberService memberService,
         IFeatureFlagService flagService)
     {
         _flagScheduleService = flagScheduleService;
         _flagChangeRequestService = flagChangeRequestService;
         _flagDraftService = flagDraftService;
         _userService = userService;
+        _memberService = memberService;
         _flagService = flagService;
     }
 
@@ -56,6 +62,24 @@ public class GetPendingChangesHandler : IRequestHandler<GetPendingChanges, IEnum
         var userIds =
             pendingSchedules.Select(x => x.CreatorId).Union(pendingChangeRequests.Select(cr => cr.CreatorId));
         var users = await _userService.GetListAsync(userIds);
+
+        var reviewerMembers = new Dictionary<Guid, (string Name, string Email)>();
+        var reviewerIds = pendingChangeRequests
+            .SelectMany(changeRequest => changeRequest.Reviewers)
+            .Select(reviewer => reviewer.MemberId)
+            .Distinct();
+        foreach (var reviewerId in reviewerIds)
+        {
+            try
+            {
+                var member = await _memberService.GetAsync(request.OrgId, reviewerId);
+                reviewerMembers[reviewerId] = (member.Name, member.Email);
+            }
+            catch (EntityNotFoundException)
+            {
+                // Keep the reviewer ID as the frontend fallback if the member no longer exists.
+            }
+        }
 
         var result = new List<PendingChangesVm>();
 
@@ -91,6 +115,17 @@ public class GetPendingChangesHandler : IRequestHandler<GetPendingChanges, IEnum
             {
                 vm.CreatorId = user.Id;
                 vm.CreatorName = user.Name;
+            }
+
+            foreach (var reviewer in vm.Reviewers ?? Enumerable.Empty<PendingChangeReviewerVm>())
+            {
+                if (!reviewerMembers.TryGetValue(reviewer.MemberId, out var member))
+                {
+                    continue;
+                }
+
+                reviewer.Name = member.Name;
+                reviewer.Email = member.Email;
             }
 
             return vm;

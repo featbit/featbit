@@ -97,6 +97,21 @@ export function removePendingFlagChange(
   )
 }
 
+export function updateFlagChangeRequest(
+  envId: string,
+  id: string,
+  action: "approve" | "decline" | "apply"
+) {
+  return fetchApi<boolean>(
+    `${flagsPath(envId)}/change-requests/${encodeURIComponent(id)}/${action}`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({}),
+    }
+  )
+}
+
 export function fetchFeatureFlags(envId: string, filter: FlagListFilter) {
   const params = new URLSearchParams({
     name: filter.name,

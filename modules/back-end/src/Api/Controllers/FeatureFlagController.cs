@@ -306,6 +306,7 @@ public class FeatureFlagController : ApiControllerBase
     {
         var request = new GetPendingChanges
         {
+            OrgId = OrgId,
             EnvId = envId,
             Key = key
         };
