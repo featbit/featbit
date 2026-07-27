@@ -1,10 +1,11 @@
-import { ArrowLeft, ChevronsUpDown, Copy } from "lucide-react"
+import { ChevronsUpDown, Copy } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
 import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { DetailBackLink } from "@/components/detail-back-link"
 import {
   Popover,
   PopoverContent,
@@ -59,13 +60,7 @@ export function SegmentDetailsHeader({
   return (
     <>
       <header>
-        <Link
-          to={basePath}
-          className="mb-5 inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
-        >
-          <ArrowLeft className="size-4" />
-          {t("segments.title")}
-        </Link>
+        <DetailBackLink to={basePath}>{t("segments.title")}</DetailBackLink>
         <div className="flex items-start justify-between gap-6">
           <div className="min-w-0">
             <h1 className="truncate text-2xl font-semibold tracking-normal">

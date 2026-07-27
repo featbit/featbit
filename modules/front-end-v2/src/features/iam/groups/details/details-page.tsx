@@ -1,8 +1,8 @@
-import { ArrowLeft } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { Link, useNavigate, useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import { toast } from "sonner"
+import { DetailBackLink } from "@/components/detail-back-link"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { localizedPath, resolveLang } from "@/features/layout/layout-context"
 import { RemoveDialog } from "../components/remove-dialog"
@@ -75,13 +75,9 @@ export function GroupDetailsPage() {
   return (
     <TooltipProvider>
       <div className="-m-5 min-h-[calc(100vh-3.5rem)] bg-background px-8 py-6">
-        <Link
-          to={localizedPath(lang, "/iam/groups")}
-          className="mb-5 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="size-4" />
+        <DetailBackLink to={localizedPath(lang, "/iam/groups")}>
           {t("iam.groups.groups")}
-        </Link>
+        </DetailBackLink>
 
         <GroupDetailsHeader
           key={groupId}

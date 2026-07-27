@@ -25,6 +25,30 @@ const segment: Segment = {
 }
 
 describe("SegmentDetailsHeader", () => {
+  it("matches the Team details back-link treatment", () => {
+    render(
+      <MemoryRouter>
+        <SegmentDetailsHeader
+          segment={segment}
+          references={[]}
+          activeTab="targeting"
+          basePath="/en-US/segments"
+          envId="env-1"
+          lang="en"
+        />
+      </MemoryRouter>
+    )
+
+    const backLink = screen.getByRole("link", { name: "Segments" })
+    expect(backLink).toHaveClass(
+      "mb-5",
+      "gap-1.5",
+      "text-muted-foreground",
+      "hover:text-foreground"
+    )
+    expect(backLink.querySelector("svg")).toHaveClass("lucide-arrow-left")
+  })
+
   it("shows the corresponding icon for every shared scope", async () => {
     render(
       <MemoryRouter>

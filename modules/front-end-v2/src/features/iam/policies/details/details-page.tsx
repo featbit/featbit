@@ -1,8 +1,8 @@
-import { ArrowLeft } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { Link, useNavigate, useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import { toast } from "sonner"
+import { DetailBackLink } from "@/components/detail-back-link"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { TooltipProvider } from "@/components/ui/tooltip"
@@ -127,13 +127,9 @@ export function PolicyDetailsPage() {
   return (
     <TooltipProvider>
       <div className="-m-5 min-h-[calc(100vh-3.5rem)] bg-background px-8 py-6">
-        <Link
-          to={localizedPath(lang, "/iam/policies")}
-          className="mb-5 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="size-4" />
+        <DetailBackLink to={localizedPath(lang, "/iam/policies")}>
           {t("iam.policies.title")}
-        </Link>
+        </DetailBackLink>
 
         <PolicyDetailsHeader
           key={policyId}

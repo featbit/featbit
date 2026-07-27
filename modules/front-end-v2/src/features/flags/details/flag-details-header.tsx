@@ -1,9 +1,9 @@
 import { Check, Copy, Loader2 } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { Link } from "react-router-dom"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { DetailBackLink } from "@/components/detail-back-link"
 import { Switch } from "@/components/ui/switch"
 import {
   Tooltip,
@@ -45,14 +45,10 @@ export function FlagDetailsHeader({
 
   return (
     <header>
-      <Link
-        to={basePath}
-        className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
-      >
-        <span aria-hidden>←</span>
+      <DetailBackLink to={basePath}>
         {t("featureFlags.detailsPage.featureFlags")}
-      </Link>
-      <div className="mt-6 flex items-start justify-between gap-6">
+      </DetailBackLink>
+      <div className="flex items-start justify-between gap-6">
         <div className="min-w-0">
           <Tooltip>
             <TooltipTrigger className="block max-w-full">

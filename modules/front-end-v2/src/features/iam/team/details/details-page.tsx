@@ -1,7 +1,8 @@
-import { ArrowLeft, Copy } from "lucide-react"
+import { Copy } from "lucide-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { Link, useNavigate, useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
+import { DetailBackLink } from "@/components/detail-back-link"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -106,13 +107,9 @@ export function TeamDetailsPage() {
   return (
     <TooltipProvider>
       <div className="-m-5 min-h-[calc(100vh-3.5rem)] bg-background px-8 py-6">
-        <Link
-          to={localizedPath(lang, "/iam/team")}
-          className="mb-5 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="size-4" />
+        <DetailBackLink to={localizedPath(lang, "/iam/team")}>
           {t("iam.team.details.team")}
-        </Link>
+        </DetailBackLink>
 
         {memberError ? (
           <div className="flex items-center justify-between rounded-md border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
