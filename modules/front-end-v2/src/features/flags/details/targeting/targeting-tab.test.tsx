@@ -197,6 +197,18 @@ describe("feature flag targeting tab", () => {
       name: "2 pending changes",
     })
     expect(pendingChanges).toBeVisible()
+    expect(defaultRuleHeading.parentElement).toHaveClass(
+      "order-2",
+      "w-full",
+      "xl:order-1",
+      "xl:w-auto"
+    )
+    expect(pendingChanges.parentElement).toHaveClass(
+      "order-1",
+      "w-full",
+      "xl:order-2",
+      "xl:w-auto"
+    )
     const toolbarSection = pendingChanges.closest("section")
     expect(toolbarSection).not.toBe(statusHeading.closest("section"))
     expect(toolbarSection).toBe(defaultRuleHeading.closest("section"))

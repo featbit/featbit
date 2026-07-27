@@ -302,7 +302,7 @@ export function TargetingTab({
 
       <section>
         <div className="mb-3 flex min-h-8 flex-wrap items-center justify-between gap-3">
-          <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
+          <div className="order-2 flex min-w-0 w-full flex-wrap items-baseline gap-x-2 gap-y-1 xl:order-1 xl:w-auto">
             <h2 className="text-base font-medium">
               {t("featureFlags.detailsPage.defaultRule")}
             </h2>
@@ -310,7 +310,7 @@ export function TargetingTab({
               {t("featureFlags.detailsPage.defaultRuleHelp")}
             </p>
           </div>
-          <div className="ml-auto flex flex-wrap items-center justify-end gap-3">
+          <div className="order-1 ml-auto flex w-full flex-wrap items-center justify-end gap-3 xl:order-2 xl:w-auto">
             {pendingCount ? (
               <Button type="button" variant="outline" onClick={onOpenPending}>
                 <Clock3 />
