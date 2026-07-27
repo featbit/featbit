@@ -489,6 +489,7 @@ export function TargetingTab({
                 (key) => !keysFor(variation.id).includes(key)
               )}
               disabled={!canEditUsers}
+              density="compact"
               onChange={(keys) => updateUsers(variation.id, keys)}
               onResolved={onResolveUser}
             />

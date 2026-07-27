@@ -5,6 +5,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import "@/lib/i18n/i18n"
@@ -139,6 +140,18 @@ describe("feature flag targeting tab", () => {
       "items-baseline",
       "gap-x-2"
     )
+    const controlUserPanel = screen
+      .getByRole("heading", { name: "Control" })
+      .closest("section")
+    expect(controlUserPanel).toHaveClass("p-3")
+    expect(
+      within(controlUserPanel!).getByRole("button", {
+        name: "Search by name or keyId to add",
+      })
+    ).toHaveClass("h-8")
+    expect(
+      screen.getByText("Aisha Khan").parentElement?.parentElement?.parentElement
+    ).toHaveClass("py-1.5")
     expect(screen.getByText("Targeting rules")).toBeVisible()
     expect(
       screen.getByText(

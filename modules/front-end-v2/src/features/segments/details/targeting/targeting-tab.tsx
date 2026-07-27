@@ -132,7 +132,7 @@ export function TargetingTab({
             </Button>
           </div>
         </div>
-        <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
           <UserPanel
             title={t("segments.detailsPage.targeting.included")}
             envId={envId}
@@ -141,6 +141,7 @@ export function TargetingTab({
             users={resolvedUsers}
             otherKeys={draft.excluded}
             disabled={!canUpdateUsers}
+            density="compact"
             onChange={(included) =>
               setDraft((current) => ({ ...current, included }))
             }
@@ -154,6 +155,7 @@ export function TargetingTab({
             users={resolvedUsers}
             otherKeys={draft.included}
             disabled={!canUpdateUsers}
+            density="compact"
             onChange={(excluded) =>
               setDraft((current) => ({ ...current, excluded }))
             }

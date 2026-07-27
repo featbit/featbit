@@ -23,6 +23,7 @@ import {
   searchSegmentUsers,
 } from "@/features/segments/segments-api"
 import type { SegmentEndUser } from "@/features/segments/segments-types"
+import { cn } from "@/lib/utils"
 
 function userLabel(user: SegmentEndUser) {
   return user.name?.trim() || user.keyId
@@ -51,6 +52,7 @@ export function UserPicker({
   selected,
   excluded,
   disabled,
+  compact = false,
   onAdd,
 }: {
   envId: string
@@ -58,6 +60,7 @@ export function UserPicker({
   selected: string[]
   excluded: string[]
   disabled: boolean
+  compact?: boolean
   onAdd: (user: SegmentEndUser) => void
 }) {
   const { t } = useTranslation()
@@ -113,7 +116,10 @@ export function UserPicker({
             type="button"
             variant="outline"
             disabled={disabled}
-            className="h-9 w-full justify-start font-normal text-muted-foreground"
+            className={cn(
+              "w-full justify-start font-normal text-muted-foreground",
+              compact ? "h-8" : "h-9"
+            )}
           />
         }
       >
@@ -213,6 +219,7 @@ export function UserPanel({
   users,
   otherKeys,
   disabled,
+  density = "default",
   onChange,
   onResolved,
 }: {
@@ -223,13 +230,19 @@ export function UserPanel({
   users: Map<string, SegmentEndUser>
   otherKeys: string[]
   disabled: boolean
+  density?: "default" | "compact"
   onChange: (keys: string[]) => void
   onResolved: (user: SegmentEndUser) => void
 }) {
   const { t } = useTranslation()
+  const compact = density === "compact"
   return (
-    <section className="min-w-0 rounded-md border p-4">
-      <div className="mb-3 flex items-baseline gap-2">
+    <section
+      className={cn("min-w-0 rounded-md border", compact ? "p-3" : "p-4")}
+    >
+      <div
+        className={cn("flex items-baseline gap-2", compact ? "mb-2" : "mb-3")}
+      >
         <h3 className="text-sm font-medium">{title}</h3>
         {keys.length ? (
           <span className="text-xs text-muted-foreground">· {keys.length}</span>
@@ -241,19 +254,28 @@ export function UserPanel({
         selected={keys}
         excluded={[...keys, ...otherKeys]}
         disabled={disabled}
+        compact={compact}
         onAdd={(user) => {
           onResolved(user)
           onChange([...keys, user.keyId])
         }}
       />
-      <div className="mt-2 max-h-44 overflow-y-auto pr-1">
+      <div
+        className={cn(
+          "overflow-y-auto pr-1",
+          compact ? "mt-1 max-h-36" : "mt-2 max-h-44"
+        )}
+      >
         {keys.length ? (
           keys.map((key) => {
             const user = users.get(key)
             return (
               <div
                 key={key}
-                className="flex items-center justify-between gap-3 border-b px-2 py-2 last:border-b-0"
+                className={cn(
+                  "flex items-center justify-between gap-3 border-b px-2 last:border-b-0",
+                  compact ? "py-1.5" : "py-2"
+                )}
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex min-w-0 items-center gap-2">
@@ -284,7 +306,12 @@ export function UserPanel({
             )
           })
         ) : (
-          <p className="px-2 py-6 text-center text-xs text-muted-foreground">
+          <p
+            className={cn(
+              "px-2 text-center text-xs text-muted-foreground",
+              compact ? "py-4" : "py-6"
+            )}
+          >
             {t("targeting.users.empty")}
           </p>
         )}

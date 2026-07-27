@@ -5,6 +5,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react"
 import { useState } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
@@ -295,10 +296,24 @@ describe("TargetingTab actions", () => {
     expect(
       screen.queryByRole("button", { name: "Discard changes" })
     ).not.toBeInTheDocument()
+    const includedPanel = screen
+      .getByRole("heading", { name: "Included users" })
+      .closest("section")
+    expect(includedPanel?.parentElement).toHaveClass(
+      "grid-cols-1",
+      "gap-4",
+      "xl:grid-cols-2"
+    )
+    expect(includedPanel).toHaveClass("p-3")
     expect(
-      screen.getByRole("heading", { name: "Included users" }).closest("section")
+      within(includedPanel!).getByRole("button", {
+        name: "Search by name or keyId to add",
+      })
+    ).toHaveClass("h-8")
+    expect(
+      screen.getByText("Existing user").parentElement?.parentElement
         ?.parentElement
-    ).toHaveClass("grid-cols-1", "xl:grid-cols-2")
+    ).toHaveClass("py-1.5")
 
     fireEvent.click(
       screen.getByRole("button", { name: "Remove Existing user" })
