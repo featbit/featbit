@@ -267,6 +267,26 @@ describe("TargetingTab actions", () => {
     expect(screen.getByText("AND")).toBeVisible()
   })
 
+  it("shows the translated operator label instead of its internal value", () => {
+    renderTargeting([
+      {
+        id: "rule-1",
+        name: "Country rule",
+        conditions: [
+          {
+            id: "condition-1",
+            property: "country",
+            op: "IsOneOf",
+            value: ["DE", "FR"],
+          },
+        ],
+      },
+    ])
+
+    expect(screen.getByText("is one of")).toBeVisible()
+    expect(screen.queryByText("IsOneOf")).not.toBeInTheDocument()
+  })
+
   it("shows Discard only while targeting has unsaved changes", async () => {
     renderTargeting()
 

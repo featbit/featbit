@@ -500,7 +500,11 @@ export function RuleEditor({
                   }}
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue />
+                    <SelectValue>
+                      {t(
+                        `segments.detailsPage.rules.operators.${condition.op}`
+                      )}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
