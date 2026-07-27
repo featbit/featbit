@@ -1,12 +1,6 @@
 import { Popover as PopoverPrimitive } from "@base-ui/react/popover"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import {
-  AlertTriangle,
-  ArrowLeft,
-  ChevronsUpDown,
-  Lock,
-  Search,
-} from "lucide-react"
+import { AlertTriangle, ChevronsUpDown, Lock, Search } from "lucide-react"
 import {
   type ReactNode,
   useCallback,
@@ -29,6 +23,7 @@ import {
   AlertTitle,
 } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
+import { DetailBackLink } from "@/components/detail-back-link"
 import {
   Command,
   CommandEmpty,
@@ -480,18 +475,17 @@ export function FlagsComparePage() {
     <TooltipProvider>
       <div className="-m-5 min-h-[calc(100vh-3.5rem)] bg-background px-6 py-6 lg:px-8">
         <header className="mb-6">
-          <Button
-            type="button"
-            variant="link"
-            className="mb-3 h-auto px-0 text-sm font-normal"
-            onClick={() => {
-              if (location.key !== "default") navigate(-1)
-              else navigate(localizedPath(lang, "/feature-flags"))
+          <DetailBackLink
+            to={localizedPath(lang, "/feature-flags")}
+            onClick={(event) => {
+              if (location.key !== "default") {
+                event.preventDefault()
+                navigate(-1)
+              }
             }}
           >
-            <ArrowLeft />
             {t("featureFlags.comparePage.back")}
-          </Button>
+          </DetailBackLink>
           <h1 className="text-2xl font-semibold tracking-normal">
             {t("featureFlags.comparePage.title")}
           </h1>
