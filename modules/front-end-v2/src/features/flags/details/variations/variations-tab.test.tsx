@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import "@/lib/i18n/i18n"
 import type { FeatureFlag } from "../../flags-types"
+import { variationMarkerColor } from "../../variation-colors"
 import { VariationsTab } from "./variations-tab"
 
 const flag: FeatureFlag = {
@@ -24,6 +25,27 @@ const flag: FeatureFlag = {
 }
 
 describe("VariationsTab drag sorting", () => {
+  it("assigns the shared predefined colors by variation order", () => {
+    const { container } = render(
+      <TooltipProvider>
+        <VariationsTab
+          flag={flag}
+          dirty={false}
+          saving={false}
+          canUpdate
+          onChange={vi.fn()}
+          onDiscard={vi.fn()}
+          onReview={vi.fn()}
+        />
+      </TooltipProvider>
+    )
+
+    const markers = container.querySelectorAll("[data-variation-color]")
+    expect(markers).toHaveLength(2)
+    expect(markers[0]).toHaveClass(...variationMarkerColor(0).split(" "))
+    expect(markers[1]).toHaveClass(...variationMarkerColor(1).split(" "))
+  })
+
   it("renders Add variation below and outside the table", () => {
     const onChange = vi.fn()
     const { container } = render(
