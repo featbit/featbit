@@ -105,9 +105,12 @@ export function VariationsTab({
           </div>
         </div>
 
-        <div className="flex h-12 items-center gap-3 rounded-lg bg-muted/60 px-4 text-sm">
-          <div className="flex items-center gap-3">
-            <span className="text-muted-foreground">
+        <div
+          data-variation-data-type
+          className="flex h-12 items-center rounded-lg bg-muted/60 px-4 text-sm"
+        >
+          <div className="flex items-baseline gap-2">
+            <span className="leading-5 text-muted-foreground">
               {t("featureFlags.detailsPage.variations.dataType")}
             </span>
             <Badge variant="outline" className="bg-background font-normal">

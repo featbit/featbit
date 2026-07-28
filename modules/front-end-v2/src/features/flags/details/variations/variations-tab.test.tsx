@@ -24,7 +24,29 @@ const flag: FeatureFlag = {
   fallthrough: { variations: [] },
 }
 
-describe("VariationsTab drag sorting", () => {
+describe("VariationsTab", () => {
+  it("aligns the data type label and badge by their text baselines", () => {
+    const { container } = render(
+      <TooltipProvider>
+        <VariationsTab
+          flag={{ ...flag, variationType: "json" }}
+          dirty={false}
+          saving={false}
+          canUpdate
+          onChange={vi.fn()}
+          onDiscard={vi.fn()}
+          onReview={vi.fn()}
+        />
+      </TooltipProvider>
+    )
+
+    const row = container.querySelector("[data-variation-data-type]")
+    expect(row).toHaveClass("items-center")
+    expect(row?.firstElementChild).toHaveClass("items-baseline")
+    expect(screen.getByText("Data type")).toHaveClass("leading-5")
+    expect(screen.getByText("JSON")).toBeVisible()
+  })
+
   it("assigns the shared predefined colors by variation order", () => {
     const { container } = render(
       <TooltipProvider>
