@@ -67,6 +67,13 @@ export function SegmentDetailsHeader({
               {segment.name}
             </h1>
             <div className="mt-4 flex flex-wrap items-center gap-x-7 gap-y-3 text-sm">
+              <Badge variant="secondary" className="font-normal">
+                {t(
+                  segment.isArchived
+                    ? "segments.detailsPage.archived"
+                    : "segments.detailsPage.active"
+                )}
+              </Badge>
               <div className="flex items-center gap-2">
                 <span>
                   {segment.type === "shared"

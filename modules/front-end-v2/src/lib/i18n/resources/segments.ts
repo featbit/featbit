@@ -5,6 +5,8 @@ const enSegmentDetails = {
   loading: "Loading...",
   reviewAndSave: "Review & save",
   discard: "Discard changes",
+  active: "Active",
+  archived: "Archived",
   loadFailed: "Segment details could not be loaded.",
   backToSegments: "Back to segments",
   scopeCount: "{{count}} scopes",
@@ -79,6 +81,17 @@ const enSegmentDetails = {
     tagsLoadFailed: "Tags could not be loaded.",
     removeTag: "Remove tag {{tag}}",
     partialFailure: "Some changes could not be saved: {{fields}}.",
+    lifecycle: "Lifecycle",
+    archiveTitle: "Archive segment",
+    archiveHelp:
+      "Archive this segment so it can no longer be used for targeting.",
+    restoreTitle: "Restore segment",
+    restoreHelp:
+      "Restore this segment to make it available for targeting and editing again.",
+    removeTitle: "Remove segment permanently",
+    removeHelp:
+      "Permanently remove this archived segment. This action cannot be undone.",
+    removePermanently: "Remove permanently",
   },
   review: {
     targeting: { title: "Review targeting changes" },
@@ -275,6 +288,14 @@ const zhSegmentDetails = {
   settings: {
     ...enSegmentDetails.settings,
     general: "常规",
+    lifecycle: "生命周期",
+    archiveTitle: "归档用户组",
+    archiveHelp: "归档后，此用户组将无法再用于定向匹配。",
+    restoreTitle: "恢复用户组",
+    restoreHelp: "恢复后，此用户组将重新可用于定向匹配和编辑。",
+    removeTitle: "永久删除用户组",
+    removeHelp: "永久删除此已归档用户组。此操作无法撤销。",
+    removePermanently: "永久删除",
     nameHelp: "便于理解的用户组名称。",
     tagsHelp: "使用标签组织和筛选用户组。",
     tagPlaceholder: "搜索或创建标签",
@@ -541,7 +562,11 @@ export const enSegments = {
 
 export const zhSegments = {
   ...enSegments,
-  detailsPage: zhSegmentDetails,
+  detailsPage: {
+    ...zhSegmentDetails,
+    active: "活跃",
+    archived: "已归档",
+  },
   title: "用户组",
   subtitle: "对用户进行分组，以便在功能开关中保持一致的定向规则。",
   search: "按名称筛选",

@@ -216,7 +216,11 @@ export function SegmentDetailsPage() {
             canUpdateName={can("UpdateSegmentName")}
             canUpdateDescription={can("UpdateSegmentDescription")}
             canUpdateTags={can("UpdateSegmentTags")}
+            canArchive={can("ArchiveSegment")}
+            canRestore={can("RestoreSegment")}
+            canDelete={can("DeleteSegment")}
             onSaved={onSaved}
+            onRemoved={() => navigate(segmentsPath)}
           />
         ) : null}
         {activeTab === "history" ? (

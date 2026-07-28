@@ -25,6 +25,38 @@ const segment: Segment = {
 }
 
 describe("SegmentDetailsHeader", () => {
+  it("shows the segment lifecycle state", () => {
+    const { rerender } = render(
+      <MemoryRouter>
+        <SegmentDetailsHeader
+          segment={segment}
+          references={[]}
+          activeTab="settings"
+          basePath="/en-US/segments"
+          envId="env-1"
+          lang="en"
+        />
+      </MemoryRouter>
+    )
+
+    expect(screen.getByText("Active")).toBeVisible()
+
+    rerender(
+      <MemoryRouter>
+        <SegmentDetailsHeader
+          segment={{ ...segment, isArchived: true }}
+          references={[]}
+          activeTab="settings"
+          basePath="/en-US/segments"
+          envId="env-1"
+          lang="en"
+        />
+      </MemoryRouter>
+    )
+
+    expect(screen.getByText("Archived")).toBeVisible()
+  })
+
   it("matches the Team details back-link treatment", () => {
     render(
       <MemoryRouter>
