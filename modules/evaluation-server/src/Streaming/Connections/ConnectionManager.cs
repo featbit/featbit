@@ -1,106 +1,50 @@
 using System.Collections.Concurrent;
-using Domain.ControlPlane;
-using Domain.Messages;
 using Microsoft.Extensions.Logging;
 
 namespace Streaming.Connections;
 
-public sealed partial class ConnectionManager(ILogger<ConnectionManager> logger, IMessageProducer producer)
-    : IConnectionManager
+public sealed partial class ConnectionManager(ILogger<ConnectionManager> logger) : IConnectionManager
 {
     internal readonly ConcurrentDictionary<string, Connection> Connections = new(StringComparer.Ordinal);
 
-    public async Task Add(ConnectionContext context)
+    public Task Add(ConnectionContext context)
     {
         if (context.Type == ConnectionType.RelayProxy)
         {
             foreach (var connection in context.MappedRpConnections)
             {
-                try
-                {
-                    var added = Connections.TryAdd(connection.Id, connection);
-                    if (added)
-                    {
-                        await producer.PublishAsync(Topics.ConnectionMade,
-                            ConnectionMessage.CreateConnectionMadeMessage(connection.Id, connection.EnvId,
-                                connection.Secret.ProjectKey));
-                        Log.ConnectionAdded(logger, context);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Log.AddConnectionFailed(logger, context, ex);
-                }
+                Connections.TryAdd(connection.Id, connection);
             }
         }
         else
         {
-            try
-            {
-                var added = Connections.TryAdd(context.Connection.Id, context.Connection);
-                if (added)
-                {
-                    await producer.PublishAsync(Topics.ConnectionMade,
-                        ConnectionMessage.CreateConnectionMadeMessage(context.Connection.Id, context.Connection.EnvId,
-                            context.Connection.Secret.ProjectKey));
-                    Log.ConnectionAdded(logger, context);
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.AddConnectionFailed(logger, context, ex);
-            }
+            Connections.TryAdd(context.Connection.Id, context.Connection);
         }
+
+        Log.ConnectionAdded(logger, context);
+
+        return Task.CompletedTask;
     }
 
-    public async Task Remove(ConnectionContext context)
+    public Task Remove(ConnectionContext context)
     {
-        bool connectionRemoved = false;
-
         if (context.Type == ConnectionType.RelayProxy)
         {
             foreach (var mappedConnection in context.MappedRpConnections)
             {
-                try
-                {
-                    connectionRemoved = Connections.TryRemove(mappedConnection.Id, out _);
-                    if (!connectionRemoved)
-                    {
-                        continue;
-                    }
-
-                    await producer.PublishAsync(Topics.ConnectionClosed,
-                        ConnectionMessage.CreateConnectionClosedMessage(context.Connection.Id,
-                            context.Connection.EnvId,
-                            mappedConnection.Secret.ProjectKey));
-                    Log.ConnectionRemoved(logger, context);
-                }
-                catch (Exception ex)
-                {
-                    Log.RemoveConnectionFailed(logger, context, ex);
-                }
+                Connections.TryRemove(mappedConnection.Id, out _);
             }
         }
         else
         {
-            try
-            {
-                connectionRemoved = Connections.TryRemove(context.Connection.Id, out _);
-                if (connectionRemoved)
-                {
-                    await producer.PublishAsync(Topics.ConnectionClosed,
-                        ConnectionMessage.CreateConnectionClosedMessage(context.Connection.Id, context.Connection.EnvId,
-                            context.Connection.Secret.ProjectKey));
-                    Log.ConnectionRemoved(logger, context);
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.RemoveConnectionFailed(logger, context, ex);
-            }
+            Connections.TryRemove(context.Connection.Id, out _);
         }
 
         context.MarkAsClosed();
+
+        Log.ConnectionRemoved(logger, context);
+
+        return Task.CompletedTask;
     }
 
     public ICollection<Connection> GetEnvConnections(Guid envId)
@@ -121,8 +65,5 @@ public sealed partial class ConnectionManager(ILogger<ConnectionManager> logger,
         return connections;
     }
 
-    public ICollection<Connection> GetAllConnections()
-    {
-        return Connections.Values;
-    }
+    public ICollection<Connection> GetAllConnections() => Connections.Values;
 }

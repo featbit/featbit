@@ -1,4 +1,4 @@
-﻿namespace Api.Configuration;
+﻿namespace Api;
 
 /// <summary>
 /// Controls how the control plane propagates changes across data centers.

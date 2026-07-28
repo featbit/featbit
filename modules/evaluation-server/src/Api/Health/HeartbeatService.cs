@@ -1,4 +1,3 @@
-using Api.Configuration;
 using Domain.ControlPlane;
 using Domain.Messages;
 using Streaming.ControlPlane;

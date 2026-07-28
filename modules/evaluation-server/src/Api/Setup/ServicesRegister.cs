@@ -1,5 +1,4 @@
 using Api.Authentication;
-using Api.Configuration;
 using Api.Cors;
 using Api.Health;
 using Api.RateLimiting;
@@ -10,8 +9,10 @@ using Infrastructure;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Serilog;
 using Streaming;
+using Streaming.Connections;
 using Streaming.DependencyInjection;
 using Streaming.ControlPlane;
 
@@ -74,6 +75,9 @@ public static class ServicesRegister
 
         if (configuration.UseControlPlane())
         {
+            // Replace the default IConnectionManager with ControlPlaneConnectionManager
+            services.Replace(ServiceDescriptor.Singleton<IConnectionManager, ControlPlaneConnectionManager>());
+            
             // The control-plane topology requires the local DC Redis: the control-plane writes
             // flag/segment changes into per-DC Redis, and the eval server's heartbeat derives the
             // applied watermark from that same Redis via RedisAppliedWatermarkReader. Ensure

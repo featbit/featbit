@@ -1,8 +1,5 @@
-using System.Net.WebSockets;
-using Domain.Messages;
 using Domain.Shared;
 using Microsoft.Extensions.Logging.Testing;
-using Moq;
 using Streaming.Connections;
 using Streaming.UnitTests.Builders;
 
@@ -14,8 +11,7 @@ public class ConnectionManagerTests
     public void Connections_NewManager_IsEmpty()
     {
         var logger = new FakeLogger<ConnectionManager>();
-        var messageProducer = new Mock<IMessageProducer>();
-        var manager = new ConnectionManager(logger, messageProducer.Object);
+        var manager = new ConnectionManager(logger);
 
         Assert.Empty(manager.Connections);
     }
@@ -24,8 +20,7 @@ public class ConnectionManagerTests
     public void AddRemove_ClientConnection_TracksAndRemovesByConnectionId()
     {
         var logger = new FakeLogger<ConnectionManager>();
-        var messageProducer = new Mock<IMessageProducer>();
-        var manager = new ConnectionManager(logger, messageProducer.Object);
+        var manager = new ConnectionManager(logger);
 
         var context = new ConnectionContextBuilder().Build();
 
@@ -42,8 +37,7 @@ public class ConnectionManagerTests
     public void AddRemove_RelayProxyConnection_TracksAndRemovesAllMappedConnections()
     {
         var logger = new FakeLogger<ConnectionManager>();
-        var messageProducer = new Mock<IMessageProducer>();
-        var manager = new ConnectionManager(logger, messageProducer.Object);
+        var manager = new ConnectionManager(logger);
 
         Secret[] secrets =
         [
@@ -74,8 +68,7 @@ public class ConnectionManagerTests
     public void GetEnvConnections_ByEnvId_ReturnsOnlyMatchingConnections()
     {
         var logger = new FakeLogger<ConnectionManager>();
-        var messageProducer = new Mock<IMessageProducer>();
-        var manager = new ConnectionManager(logger, messageProducer.Object);
+        var manager = new ConnectionManager(logger);
 
         var s1 = new Secret(SecretTypes.Client, "p1", envId: Guid.NewGuid(), "dev");
         var s2 = new Secret(SecretTypes.Client, "p2", envId: Guid.NewGuid(), "dev");
