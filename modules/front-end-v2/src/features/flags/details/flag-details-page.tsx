@@ -34,6 +34,7 @@ import {
   updateFlagChangeRequest,
   toggleFeatureFlag,
   updateFeatureFlagTargeting,
+  updateFeatureFlagVariations,
 } from "../flags-api"
 import {
   canUseFlagAction,
@@ -49,6 +50,7 @@ import {
 import { FlagChangeReviewDialog } from "./flag-change-review-dialog"
 import { FlagDetailsHeader } from "./flag-details-header"
 import { HistoryTab } from "./history/history-tab"
+import { InsightsTab } from "./insights/insights-tab"
 import { SettingsTab } from "./settings/settings-tab"
 import { PendingChangesSheet } from "./targeting/pending-changes-sheet"
 import { TargetingTab } from "./targeting/targeting-tab"
@@ -62,6 +64,13 @@ import {
   targetingOf,
   targetingReviewChanges,
 } from "./targeting/targeting-utils"
+import { TriggersTab } from "./triggers/triggers-tab"
+import { VariationsReviewDialog } from "./variations/variations-review-dialog"
+import { VariationsTab } from "./variations/variations-tab"
+import {
+  stableVariations,
+  variationReviewChanges,
+} from "./variations/variations-utils"
 
 export function FlagDetailsPage() {
   const { t } = useTranslation()
@@ -71,7 +80,11 @@ export function FlagDetailsPage() {
   const lang = resolveLang(params.lang)
   const flagKey = decodeURIComponent(params.flagKey ?? "")
   const activeTab =
-    params.tab === "history" || params.tab === "settings"
+    params.tab === "history" ||
+    params.tab === "insights" ||
+    params.tab === "settings" ||
+    params.tab === "variations" ||
+    params.tab === "triggers"
       ? params.tab
       : "targeting"
   const projectEnv = getCurrentProjectEnv()
@@ -86,6 +99,7 @@ export function FlagDetailsPage() {
     Map<string, SegmentEndUser>
   >(new Map())
   const [reviewOpen, setReviewOpen] = useState(false)
+  const [variationsReviewOpen, setVariationsReviewOpen] = useState(false)
   const [reviewInitialComment, setReviewInitialComment] = useState("")
   const [pendingOpen, setPendingOpen] = useState(false)
   const [confirmation, setConfirmation] = useState<FlagConfirmation>(null)
@@ -124,14 +138,20 @@ export function FlagDetailsPage() {
   const policiesQuery = useQuery({
     queryKey: ["feature-flag-policies", workspace?.id ?? ""],
     queryFn: fetchFlagPolicies,
-    enabled: activeTab === "targeting" || activeTab === "settings",
+    enabled:
+      activeTab === "targeting" ||
+      activeTab === "settings" ||
+      activeTab === "variations",
     staleTime: 5 * 60_000,
   })
   const settingsQuery = useQuery({
     queryKey: ["feature-flag-environment-settings", envId],
     queryFn: () => fetchFlagEnvironmentSettings(envId),
     enabled: Boolean(
-      (activeTab === "targeting" || activeTab === "settings") && envId
+      (activeTab === "targeting" ||
+        activeTab === "settings" ||
+        activeTab === "variations") &&
+      envId
     ),
     staleTime: 5 * 60_000,
   })
@@ -160,6 +180,11 @@ export function FlagDetailsPage() {
   const dirty = Boolean(
     saved && flag && stableFlagTargeting(saved) !== stableFlagTargeting(flag)
   )
+  const variationsDirty = Boolean(
+    saved &&
+    flag &&
+    stableVariations(saved.variations) !== stableVariations(flag.variations)
+  )
   const savedOffVariation = saved?.variations?.find(
     (variation) => variation.id === saved.disabledVariationId
   )
@@ -174,6 +199,13 @@ export function FlagDetailsPage() {
           })
         : [],
     [flag, saved, t]
+  )
+  const variationChanges = useMemo(
+    () =>
+      saved && flag
+        ? variationReviewChanges(saved.variations ?? [], flag.variations ?? [])
+        : [],
+    [flag, saved]
   )
   const decodedLicense = parseLicense(workspace?.license)
   const licenseStatus = getLicenseStatus(decodedLicense)
@@ -234,6 +266,36 @@ export function FlagDetailsPage() {
       setDraft(dirty ? { key: flagKey, value: draftUpdated } : null)
       setConfirmation(null)
       toast.success(t("featureFlags.operationSucceeded"))
+    },
+    onError: () => toast.error(t("featureFlags.operationFailed")),
+  })
+  const variationsMutation = useMutation({
+    mutationFn: (comment: string) =>
+      updateFeatureFlagVariations(envId, flagKey, {
+        variations: (flag?.variations ?? []).map((variation) => ({
+          ...variation,
+          name: variation.name.trim(),
+        })),
+        revision: flag?.revision ?? "",
+        comment,
+      }),
+    onSuccess: (revision) => {
+      const updated = {
+        ...cloneFlag(flag!),
+        variations: (flag?.variations ?? []).map((variation) => ({
+          ...variation,
+          name: variation.name.trim(),
+        })),
+        revision,
+      }
+      queryClient.setQueryData(
+        ["feature-flag-details", envId, flagKey],
+        updated
+      )
+      setDraft(null)
+      setVariationsReviewOpen(false)
+      toast.success(t("featureFlags.operationSucceeded"))
+      void queryClient.invalidateQueries({ queryKey: ["feature-flags"] })
     },
     onError: () => toast.error(t("featureFlags.operationFailed")),
   })
@@ -351,7 +413,9 @@ export function FlagDetailsPage() {
   }
   if (
     !flag ||
-    ((activeTab === "targeting" || activeTab === "settings") &&
+    ((activeTab === "targeting" ||
+      activeTab === "settings" ||
+      activeTab === "variations") &&
       (policiesQuery.isLoading ||
         (activeTab === "targeting" &&
           (propertiesQuery.isLoading || usersQuery.isLoading))))
@@ -376,6 +440,8 @@ export function FlagDetailsPage() {
         />
         {activeTab === "history" ? (
           <HistoryTab envId={envId} flagId={flag.id} lang={lang} />
+        ) : activeTab === "insights" ? (
+          <InsightsTab envId={envId} flag={flag} />
         ) : activeTab === "settings" ? (
           <SettingsTab
             envId={envId}
@@ -396,6 +462,23 @@ export function FlagDetailsPage() {
             }}
             onRemoved={() => navigate(basePath)}
           />
+        ) : activeTab === "variations" ? (
+          <VariationsTab
+            flag={flag}
+            dirty={variationsDirty}
+            saving={variationsMutation.isPending}
+            canUpdate={can("UpdateFlagVariations")}
+            onChange={(variations) =>
+              setDraft({
+                key: flagKey,
+                value: { ...cloneFlag(flag), variations },
+              })
+            }
+            onDiscard={() => setDraft(null)}
+            onReview={() => setVariationsReviewOpen(true)}
+          />
+        ) : activeTab === "triggers" ? (
+          <TriggersTab flagId={flag.id} archived={Boolean(flag.isArchived)} />
         ) : (
           <TargetingTab
             flag={flag}
@@ -460,6 +543,15 @@ export function FlagDetailsPage() {
             setReviewOpen(false)
             setSubmission({ mode: "change-request", initialReason: comment })
           }}
+        />
+        <VariationsReviewDialog
+          open={variationsReviewOpen}
+          flagName={flag.name}
+          changes={variationChanges}
+          requireComment={settingsQuery.data?.requireChangeComment ?? false}
+          saving={variationsMutation.isPending}
+          onOpenChange={setVariationsReviewOpen}
+          onSave={(comment) => variationsMutation.mutate(comment)}
         />
         <PendingChangesSheet
           open={pendingOpen}

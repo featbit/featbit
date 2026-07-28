@@ -11,6 +11,7 @@ export type FlagAction =
   | "UpdateFlagName"
   | "UpdateFlagDescription"
   | "UpdateFlagTags"
+  | "UpdateFlagVariations"
   | "UpdateFlagIndividualTargeting"
   | "UpdateFlagRules"
   | "UpdateFlagDefaultRule"

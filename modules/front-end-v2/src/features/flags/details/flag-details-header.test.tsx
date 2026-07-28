@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react"
+import { render, screen, within } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
 import { describe, expect, it } from "vitest"
 import "@/lib/i18n/i18n"
@@ -20,7 +20,11 @@ describe("FlagDetailsHeader", () => {
   it("matches the Team details back-link treatment", () => {
     render(
       <MemoryRouter>
-        <FlagDetailsHeader flag={flag} basePath="/en-US/feature-flags" />
+        <FlagDetailsHeader
+          flag={flag}
+          basePath="/en-US/feature-flags"
+          activeTab="targeting"
+        />
       </MemoryRouter>
     )
 
@@ -37,7 +41,11 @@ describe("FlagDetailsHeader", () => {
   it("shows read-only status first in the summary row", () => {
     render(
       <MemoryRouter>
-        <FlagDetailsHeader flag={flag} basePath="/en-US/feature-flags" />
+        <FlagDetailsHeader
+          flag={flag}
+          basePath="/en-US/feature-flags"
+          activeTab="targeting"
+        />
       </MemoryRouter>
     )
 
@@ -57,6 +65,7 @@ describe("FlagDetailsHeader", () => {
         <FlagDetailsHeader
           flag={{ ...flag, isArchived: true }}
           basePath="/en-US/feature-flags"
+          activeTab="targeting"
         />
       </MemoryRouter>
     )
@@ -68,7 +77,11 @@ describe("FlagDetailsHeader", () => {
   it("places Settings immediately after Variations", () => {
     render(
       <MemoryRouter>
-        <FlagDetailsHeader flag={flag} basePath="/en-US/feature-flags" />
+        <FlagDetailsHeader
+          flag={flag}
+          basePath="/en-US/feature-flags"
+          activeTab="targeting"
+        />
       </MemoryRouter>
     )
 
@@ -83,5 +96,15 @@ describe("FlagDetailsHeader", () => {
       "Insights",
       "History",
     ])
+    expect(within(tabs).getAllByRole("link")).toHaveLength(6)
+    expect(
+      within(tabs).getByRole("link", { name: "Triggers" })
+    ).toHaveAttribute("href", "/en-US/feature-flags/checkout-redesign/triggers")
+    expect(
+      within(tabs).getByRole("link", { name: "Insights" })
+    ).toHaveAttribute("href", "/en-US/feature-flags/checkout-redesign/insights")
+    expect(
+      within(tabs).getByRole("link", { name: "Targeting" })
+    ).toHaveAttribute("aria-current", "page")
   })
 })

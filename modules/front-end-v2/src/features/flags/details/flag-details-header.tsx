@@ -120,20 +120,15 @@ export function FlagDetailsHeader({
           const className = active
             ? "border-b-2 border-foreground px-3 pb-3 text-sm font-medium text-foreground"
             : "px-3 pb-3 text-sm text-muted-foreground"
-          return tab === "targeting" ||
-            tab === "settings" ||
-            tab === "history" ? (
+          return (
             <Link
               key={tab}
               to={`${basePath}/${encodeURIComponent(flag.key)}/${tab}`}
               className={className}
+              aria-current={active ? "page" : undefined}
             >
               {t(`featureFlags.detailsPage.tabs.${tab}`)}
             </Link>
-          ) : (
-            <span key={tab} className={className}>
-              {t(`featureFlags.detailsPage.tabs.${tab}`)}
-            </span>
           )
         })}
       </nav>

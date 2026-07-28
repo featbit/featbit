@@ -10,6 +10,7 @@ import type {
   PendingFlagChange,
   PagedFeatureFlags,
   UserPolicy,
+  FlagVariation,
 } from "./flags-types"
 
 function flagsPath(envId: string) {
@@ -75,6 +76,21 @@ export function updateFeatureFlagTargeting(
 ) {
   return fetchApi<string>(
     `${flagsPath(envId)}/${encodeURIComponent(key)}/targeting`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    }
+  )
+}
+
+export function updateFeatureFlagVariations(
+  envId: string,
+  key: string,
+  input: { variations: FlagVariation[]; revision: string; comment: string }
+) {
+  return fetchApi<string>(
+    `${flagsPath(envId)}/${encodeURIComponent(key)}/variations`,
     {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
