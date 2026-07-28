@@ -252,14 +252,11 @@ export function ChangeRequestFilters({
         </SelectContent>
       </Select>
 
-      <Button
-        type="button"
-        variant="ghost"
-        disabled={!filtersApplied}
-        onClick={onClear}
-      >
-        {copy.clearFilters}
-      </Button>
+      {filtersApplied ? (
+        <Button type="button" variant="ghost" onClick={onClear}>
+          {copy.clearFilters}
+        </Button>
+      ) : null}
     </div>
   )
 }

@@ -41,6 +41,7 @@ public class GetChangeRequestListHandlerTests
             reason: "Approved after QA",
             status: FlagChangeRequestStatus.Approved);
         approvedChangeRequest.Id = Guid.NewGuid();
+        approvedChangeRequest.UpdatorId = currentUserId;
         var flag = new FeatureFlag
         {
             Id = flagId,
@@ -49,6 +50,7 @@ public class GetChangeRequestListHandlerTests
             Key = "checkout-v2"
         };
         var creator = new User(creatorId, "maya@example.com", "password", "Maya Chen");
+        var updator = new User(currentUserId, "jon@example.com", "password", "Jon Bell");
         var reviewer = new Member
         {
             Id = currentUserId,
@@ -64,6 +66,10 @@ public class GetChangeRequestListHandlerTests
         flagService
             .Setup(service => service.FindManyAsync(It.IsAny<Expression<Func<FeatureFlag, bool>>>()))
             .ReturnsAsync([flag]);
+        var resourceService = new Mock<IResourceService>();
+        resourceService
+            .Setup(service => service.GetEnvRnAsync(envId))
+            .ReturnsAsync("project/game-runner:env/dev");
         var draftService = new Mock<IFlagDraftService>();
         draftService
             .Setup(service => service.FindManyAsync(It.IsAny<Expression<Func<FlagDraft, bool>>>()))
@@ -71,7 +77,7 @@ public class GetChangeRequestListHandlerTests
         var userService = new Mock<IUserService>();
         userService
             .Setup(service => service.GetListAsync(It.IsAny<IEnumerable<Guid>>()))
-            .ReturnsAsync([creator]);
+            .ReturnsAsync([creator, updator]);
         var memberService = new Mock<IMemberService>();
         memberService.Setup(service => service.GetAsync(orgId, currentUserId)).ReturnsAsync(reviewer);
         var currentUser = new Mock<ICurrentUser>();
@@ -80,6 +86,7 @@ public class GetChangeRequestListHandlerTests
             changeRequestService.Object,
             draftService.Object,
             flagService.Object,
+            resourceService.Object,
             userService.Object,
             memberService.Object,
             currentUser.Object);
@@ -93,12 +100,17 @@ public class GetChangeRequestListHandlerTests
         var pendingItem = result.Items.Single(item => item.Id == changeRequest.Id);
         Assert.Equal("Checkout V2", pendingItem.FlagName);
         Assert.Equal("checkout-v2", pendingItem.FlagKey);
+        Assert.Equal("project/game-runner:env/dev", pendingItem.ScopeRn);
         Assert.Equal("Maya Chen", pendingItem.CreatorName);
+        Assert.Equal("Maya Chen", pendingItem.UpdatorName);
         Assert.True(pendingItem.CanReview);
         Assert.False(pendingItem.CanApply);
         Assert.Equal("Jon Bell", Assert.Single(pendingItem.Reviewers).Name);
 
         var approvedItem = result.Items.Single(item => item.Id == approvedChangeRequest.Id);
+        Assert.Equal(currentUserId, approvedItem.UpdatorId);
+        Assert.Equal("Jon Bell", approvedItem.UpdatorName);
+        Assert.Equal("jon@example.com", approvedItem.UpdatorEmail);
         Assert.False(approvedItem.CanReview);
         Assert.True(approvedItem.CanApply);
     }

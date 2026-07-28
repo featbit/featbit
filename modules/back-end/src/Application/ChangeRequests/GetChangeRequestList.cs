@@ -22,6 +22,7 @@ public class GetChangeRequestListHandler(
     IFlagChangeRequestService changeRequestService,
     IFlagDraftService flagDraftService,
     IFeatureFlagService flagService,
+    IResourceService resourceService,
     IUserService userService,
     IMemberService memberService,
     ICurrentUser currentUser)
@@ -39,10 +40,17 @@ public class GetChangeRequestListHandler(
 
         var flagIds = page.Items.Select(item => item.FlagId).Distinct().ToArray();
         var draftIds = page.Items.Select(item => item.FlagDraftId).Distinct().ToArray();
-        var creatorIds = page.Items.Select(item => item.CreatorId).Distinct().ToArray();
+        var userIds = page.Items
+            .SelectMany(item => new[] { item.CreatorId, item.UpdatorId })
+            .Distinct()
+            .ToArray();
         var reviewerIds = page.Items
             .SelectMany(item => item.Reviewers)
             .Select(reviewer => reviewer.MemberId)
+            .Distinct()
+            .ToArray();
+        var environmentIds = page.Items
+            .Select(item => item.EnvId)
             .Distinct()
             .ToArray();
 
@@ -52,9 +60,15 @@ public class GetChangeRequestListHandler(
         ICollection<FlagDraft> drafts = draftIds.Length == 0
             ? Array.Empty<FlagDraft>()
             : await flagDraftService.FindManyAsync(draft => draftIds.Contains(draft.Id));
-        ICollection<User> creators = creatorIds.Length == 0
+        ICollection<User> users = userIds.Length == 0
             ? Array.Empty<User>()
-            : await userService.GetListAsync(creatorIds);
+            : await userService.GetListAsync(userIds);
+        var environmentRns = new Dictionary<Guid, string>();
+        foreach (var environmentId in environmentIds)
+        {
+            environmentRns[environmentId] =
+                await resourceService.GetEnvRnAsync(environmentId) ?? string.Empty;
+        }
         var reviewerMembers = new Dictionary<Guid, (string Name, string Email)>();
 
         foreach (var reviewerId in reviewerIds)
@@ -74,14 +88,15 @@ public class GetChangeRequestListHandler(
         {
             var flag = flags.FirstOrDefault(item => item.Id == changeRequest.FlagId);
             var draft = drafts.FirstOrDefault(item => item.Id == changeRequest.FlagDraftId);
-            var creator = creators.FirstOrDefault(item => item.Id == changeRequest.CreatorId);
-
+            var creator = users.FirstOrDefault(item => item.Id == changeRequest.CreatorId);
+            var updator = users.FirstOrDefault(item => item.Id == changeRequest.UpdatorId);
             return new ChangeRequestVm
             {
                 Id = changeRequest.Id,
                 FlagId = changeRequest.FlagId,
                 FlagName = flag?.Name ?? string.Empty,
                 FlagKey = flag?.Key ?? string.Empty,
+                ScopeRn = environmentRns.GetValueOrDefault(changeRequest.EnvId, string.Empty),
                 Reason = changeRequest.Reason,
                 Status = changeRequest.Status,
                 CreatorId = changeRequest.CreatorId,
@@ -89,6 +104,9 @@ public class GetChangeRequestListHandler(
                 CreatorEmail = creator?.Email ?? string.Empty,
                 CreatedAt = changeRequest.CreatedAt,
                 UpdatedAt = changeRequest.UpdatedAt,
+                UpdatorId = changeRequest.UpdatorId,
+                UpdatorName = updator?.Name ?? string.Empty,
+                UpdatorEmail = updator?.Email ?? string.Empty,
                 DataChange = draft?.DataChange ?? new DataChange(),
                 Instructions = draft == null
                     ? Array.Empty<FlagInstruction>()

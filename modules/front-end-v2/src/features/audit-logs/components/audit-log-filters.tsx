@@ -301,14 +301,11 @@ export function AuditLogFilters({
         </PopoverContent>
       </Popover>
 
-      <Button
-        type="button"
-        variant="ghost"
-        disabled={!filtersApplied}
-        onClick={onClear}
-      >
-        {t("auditLogs.clearFilters")}
-      </Button>
+      {filtersApplied ? (
+        <Button type="button" variant="ghost" onClick={onClear}>
+          {t("auditLogs.clearFilters")}
+        </Button>
+      ) : null}
     </div>
   )
 }

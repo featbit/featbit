@@ -15,6 +15,19 @@ const flag: FeatureFlag = {
   isEnabled: true,
   createdAt: "2026-07-01T10:00:00Z",
   updatedAt: "2026-07-01T10:00:00Z",
+  creator: {
+    id: "author-1",
+    name: "Maya Chen",
+    email: "maya@example.com",
+  },
+  lastChange: {
+    operator: {
+      id: "updater-1",
+      name: "Jordan Lee",
+      email: "jordan@example.com",
+    },
+    happenedAt: "2026-07-01T11:00:00Z",
+  },
   variationType: "boolean",
   variations: [
     { id: "available", name: "Available", value: "true" },
@@ -70,6 +83,32 @@ describe("FlagsTable serving markers", () => {
     expect(markers).toHaveLength(2)
     expect(markers[0]).toHaveClass(...variationMarkerColor(0).split(" "))
     expect(markers[1]).toHaveClass(...variationMarkerColor(1).split(" "))
+  })
+
+  it("links creator and last-change operator to Team member details and shows emails on hover", async () => {
+    renderTable()
+
+    const creatorLink = screen.getByRole("link", { name: "Maya Chen" })
+    expect(creatorLink).toHaveAttribute(
+      "href",
+      "/en/iam/team/author-1/permissions"
+    )
+    expect(creatorLink).toHaveAttribute("target", "_blank")
+    expect(creatorLink).toHaveAttribute("rel", "noopener noreferrer")
+    fireEvent.pointerMove(document, { pointerType: "mouse" })
+    fireEvent.mouseEnter(creatorLink)
+    expect(await screen.findByText("maya@example.com")).toBeInTheDocument()
+
+    const updaterLink = screen.getByRole("link", { name: "Jordan Lee" })
+    expect(updaterLink).toHaveAttribute(
+      "href",
+      "/en/iam/team/updater-1/permissions"
+    )
+    expect(updaterLink).toHaveAttribute("target", "_blank")
+    expect(updaterLink).toHaveAttribute("rel", "noopener noreferrer")
+    fireEvent.mouseLeave(creatorLink)
+    fireEvent.mouseEnter(updaterLink)
+    expect(await screen.findByText("jordan@example.com")).toBeInTheDocument()
   })
 
   it("shows variation names and reveals both names and values on hover", async () => {

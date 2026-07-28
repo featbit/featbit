@@ -9,6 +9,7 @@ import { useParams } from "react-router-dom"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
+import { TooltipProvider } from "@/components/ui/tooltip"
 import { getStoredUserProfile } from "@/features/auth/auth-api"
 import {
   getCurrentProjectEnv,
@@ -33,7 +34,6 @@ const PAGE_SIZE = 20
 export function ChangeRequestsPage() {
   const { lang: langParam } = useParams()
   const lang = resolveLang(langParam)
-  const locale = lang === "zh" ? "zh-CN" : "en-US"
   const copy = changeRequestsCopy(lang)
   const projectEnv = getCurrentProjectEnv()
   const envId = projectEnv?.envId ?? ""
@@ -88,7 +88,6 @@ export function ChangeRequestsPage() {
     [listQuery.data]
   )
   const firstPage = listQuery.data?.pages[0]
-  const totalCount = firstPage?.totalCount ?? 0
   const needsReviewCount = firstPage?.needsReviewCount ?? 0
   const reviewMutation = useMutation({
     mutationFn: async ({
@@ -160,30 +159,31 @@ export function ChangeRequestsPage() {
         <p className="text-sm text-muted-foreground">{copy.subtitle}</p>
       </header>
 
-      <div className="mb-5">
-        <ChangeRequestFilters
-          query={query}
-          author={author}
-          reviewer={reviewer}
-          status={status}
-          filtersApplied={filtersApplied}
-          copy={copy}
-          onQueryChange={setQuery}
-          onAuthorChange={setAuthor}
-          onReviewerChange={setReviewer}
-          onStatusChange={setStatus}
-          onClear={clearFilters}
-        />
-      </div>
-
-      <div className="mb-3 flex min-h-5 justify-end">
-        {listQuery.isLoading ? (
-          <Skeleton className="h-4 w-48" />
-        ) : (
-          <p className="text-sm text-muted-foreground">
-            {copy.summary(totalCount, needsReviewCount)}
-          </p>
-        )}
+      <div className="mb-3 flex flex-col gap-2 xl:flex-row xl:items-center">
+        <div className="min-w-0 flex-1">
+          <ChangeRequestFilters
+            query={query}
+            author={author}
+            reviewer={reviewer}
+            status={status}
+            filtersApplied={filtersApplied}
+            copy={copy}
+            onQueryChange={setQuery}
+            onAuthorChange={setAuthor}
+            onReviewerChange={setReviewer}
+            onStatusChange={setStatus}
+            onClear={clearFilters}
+          />
+        </div>
+        <div className="flex min-h-5 shrink-0 justify-end">
+          {listQuery.isLoading ? (
+            <Skeleton className="h-4 w-48" />
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              {copy.summary(needsReviewCount)}
+            </p>
+          )}
+        </div>
       </div>
 
       <div className="overflow-x-auto rounded-md border bg-background">
@@ -207,22 +207,30 @@ export function ChangeRequestsPage() {
             </Button>
           </div>
         ) : (
-          <div className="min-w-[1180px]">
-            <ChangeRequestTable
-              items={items}
-              lang={lang}
-              locale={locale}
-              envName={projectEnv?.envName ?? ""}
-              currentUserId={currentUserId}
-              loading={listQuery.isLoading}
-              filtered={filtersApplied}
-              acting={acting}
-              copy={copy}
-              onAction={(item, action) =>
-                reviewMutation.mutate({ item, action })
-              }
-              onClearFilters={clearFilters}
-            />
+          <div className="min-w-[1400px]">
+            <TooltipProvider>
+              <ChangeRequestTable
+                items={items}
+                lang={lang}
+                currentUserId={currentUserId}
+                loading={listQuery.isLoading}
+                filtered={filtersApplied}
+                acting={acting}
+                copy={copy}
+                onAction={(item, action) =>
+                  reviewMutation.mutate({ item, action })
+                }
+                onCopyKey={async (key) => {
+                  try {
+                    await navigator.clipboard.writeText(key)
+                    toast.success(copy.keyCopied)
+                  } catch {
+                    toast.error(copy.copyFailed)
+                  }
+                }}
+                onClearFilters={clearFilters}
+              />
+            </TooltipProvider>
           </div>
         )}
       </div>

@@ -24,6 +24,7 @@ export type ChangeRequestItem = {
   flagId: string
   flagName: string
   flagKey: string
+  scopeRn: string
   reason: string
   status: ChangeRequestStatus
   creatorId: string
@@ -31,6 +32,9 @@ export type ChangeRequestItem = {
   creatorEmail: string
   createdAt: string
   updatedAt: string
+  updatorId: string
+  updatorName: string
+  updatorEmail: string
   dataChange: { previous?: string; current?: string }
   instructions: Array<{ kind: string; value: unknown }>
   reviewers: ChangeRequestReviewer[]

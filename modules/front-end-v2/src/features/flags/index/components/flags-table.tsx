@@ -29,7 +29,7 @@ import { localizedPath } from "@/features/layout/layout-context"
 import type { Lang } from "@/features/layout/layout-types"
 import { cn } from "@/lib/utils"
 import { Link } from "react-router-dom"
-import type { FeatureFlag } from "../../flags-types"
+import type { FeatureFlag, FlagUser } from "../../flags-types"
 import { variationMarkerColor } from "../../variation-colors"
 
 type Props = {
@@ -61,6 +61,40 @@ type Props = {
 
 function personName(person?: { name?: string; email?: string }) {
   return person?.name || person?.email || ""
+}
+
+function TeamMemberLink({ person, lang }: { person: FlagUser; lang: Lang }) {
+  const name = personName(person)
+  const hasMemberId =
+    Boolean(person.id) && person.id !== "00000000-0000-0000-0000-000000000000"
+
+  if (!hasMemberId) {
+    return <span className="truncate font-medium text-foreground">{name}</span>
+  }
+
+  const link = (
+    <Link
+      to={localizedPath(
+        lang,
+        `/iam/team/${encodeURIComponent(person.id!)}/permissions`
+      )}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="truncate font-medium text-foreground underline-offset-4 hover:underline focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+      onClick={(event) => event.stopPropagation()}
+    >
+      {name}
+    </Link>
+  )
+
+  return person.email ? (
+    <Tooltip>
+      <TooltipTrigger render={link} />
+      <TooltipContent>{person.email}</TooltipContent>
+    </Tooltip>
+  ) : (
+    link
+  )
 }
 
 function formatDate(value: string, lang: Lang, withTime = false) {
@@ -369,9 +403,10 @@ export function FlagsTable(props: Props) {
                         <span className="shrink-0 text-muted-foreground">
                           {t("featureFlags.createdBy")}
                         </span>
-                        <span className="truncate font-medium text-foreground">
-                          {personName(flag.creator)}
-                        </span>
+                        <TeamMemberLink
+                          person={flag.creator!}
+                          lang={props.lang}
+                        />
                         <span className="shrink-0 text-muted-foreground">
                           · {formatDate(flag.createdAt, props.lang)}
                         </span>
@@ -407,9 +442,10 @@ export function FlagsTable(props: Props) {
                             <span className="shrink-0 text-muted-foreground">
                               {t("featureFlags.updatedBy")}
                             </span>
-                            <span className="truncate font-medium text-foreground">
-                              {personName(flag.lastChange.operator)}
-                            </span>
+                            <TeamMemberLink
+                              person={flag.lastChange.operator!}
+                              lang={props.lang}
+                            />
                           </p>
                         ) : null}
                         {flag.lastChange.comment ? (

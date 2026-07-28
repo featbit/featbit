@@ -1,4 +1,10 @@
-import { ChevronDown, ChevronRight, ExternalLink } from "lucide-react"
+import {
+  Box,
+  ChevronDown,
+  ChevronRight,
+  Copy,
+  ExternalLink,
+} from "lucide-react"
 import { Fragment, useMemo, useState } from "react"
 import { Link } from "react-router-dom"
 import { Badge } from "@/components/ui/badge"
@@ -12,6 +18,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { ChangeLedger } from "@/features/change-review/change-ledger"
 import type { PendingFlagChange } from "@/features/flags/flags-types"
 import {
@@ -77,6 +88,44 @@ function reviewerDot(decision: ReturnType<typeof reviewerDecision>) {
   return "bg-amber-500"
 }
 
+function TeamMemberLink({
+  id,
+  name,
+  email,
+  lang,
+  className,
+}: {
+  id: string
+  name: string
+  email?: string
+  lang: Lang
+  className?: string
+}) {
+  const link = (
+    <Link
+      to={localizedPath(
+        lang,
+        `/iam/team/${encodeURIComponent(id)}/permissions`
+      )}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`truncate font-medium text-foreground underline-offset-4 hover:underline focus-visible:rounded-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none ${className ?? ""}`}
+      onClick={(event) => event.stopPropagation()}
+    >
+      {name}
+    </Link>
+  )
+
+  return email ? (
+    <Tooltip>
+      <TooltipTrigger render={link} />
+      <TooltipContent>{email}</TooltipContent>
+    </Tooltip>
+  ) : (
+    link
+  )
+}
+
 function toPendingChange(item: ChangeRequestItem): PendingFlagChange {
   return {
     id: item.id,
@@ -94,34 +143,25 @@ function toPendingChange(item: ChangeRequestItem): PendingFlagChange {
   }
 }
 
-function relativeTime(value: string, locale: string) {
-  const timestamp = new Date(value).getTime()
-  if (!Number.isFinite(timestamp)) return ""
-
-  const deltaSeconds = Math.round((timestamp - Date.now()) / 1000)
-  const absoluteSeconds = Math.abs(deltaSeconds)
-  const formatter = new Intl.RelativeTimeFormat(locale, { numeric: "auto" })
-
-  if (absoluteSeconds < 60) return formatter.format(deltaSeconds, "second")
-  if (absoluteSeconds < 3_600)
-    return formatter.format(Math.round(deltaSeconds / 60), "minute")
-  if (absoluteSeconds < 86_400)
-    return formatter.format(Math.round(deltaSeconds / 3_600), "hour")
-  if (absoluteSeconds < 604_800)
-    return formatter.format(Math.round(deltaSeconds / 86_400), "day")
-
-  return new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(
-    new Date(timestamp)
-  )
+function formatDate(value: string, lang: Lang, withTime = false) {
+  if (!value) return ""
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ""
+  return new Intl.DateTimeFormat(lang === "zh" ? "zh-CN" : "en-US", {
+    dateStyle: "medium",
+    ...(withTime ? { timeStyle: "short" } : {}),
+  }).format(date)
 }
 
 function ReviewerList({
   reviewers,
   currentUserId,
+  lang,
   copy,
 }: {
   reviewers: ChangeRequestReviewer[]
   currentUserId?: string
+  lang: Lang
   copy: ChangeRequestsCopy
 }) {
   const visible = reviewers.slice(0, 2)
@@ -142,9 +182,13 @@ function ReviewerList({
             className="flex min-w-0 items-center gap-2"
           >
             <ReviewerAvatar name={name} />
-            <span className="max-w-32 truncate text-sm" title={name}>
-              {name}
-            </span>
+            <TeamMemberLink
+              id={reviewer.memberId}
+              name={name}
+              email={reviewer.email}
+              lang={lang}
+              className="max-w-32 text-sm"
+            />
             <span
               className={`size-1.5 shrink-0 rounded-full ${reviewerDot(decision)}`}
               title={copy.reviewerStatuses[decision]}
@@ -164,26 +208,24 @@ function ReviewerList({
 export function ChangeRequestTable({
   items,
   lang,
-  locale,
-  envName,
   currentUserId,
   loading,
   filtered,
   acting,
   copy,
   onAction,
+  onCopyKey,
   onClearFilters,
 }: {
   items: ChangeRequestItem[]
   lang: Lang
-  locale: string
-  envName: string
   currentUserId?: string
   loading: boolean
   filtered: boolean
   acting: { id: string; action: ChangeRequestAction } | null
   copy: ChangeRequestsCopy
   onAction: (item: ChangeRequestItem, action: ChangeRequestAction) => void
+  onCopyKey: (key: string) => void
   onClearFilters: () => void
 }) {
   const ledger = useFlagChangeLedgerAdapter()
@@ -209,10 +251,10 @@ export function ChangeRequestTable({
           <TableHead className="w-[19rem] max-w-[19rem]">
             {copy.request}
           </TableHead>
-          <TableHead className="w-48">{copy.author}</TableHead>
+          <TableHead className="w-72">{copy.scope}</TableHead>
           <TableHead className="w-56">{copy.reviewers}</TableHead>
           <TableHead className="w-36">{copy.status}</TableHead>
-          <TableHead className="w-32">{copy.updated}</TableHead>
+          <TableHead className="w-48">{copy.lastChange}</TableHead>
           <TableHead className="w-52 text-center">{copy.actions}</TableHead>
         </TableRow>
       </TableHeader>
@@ -230,8 +272,9 @@ export function ChangeRequestTable({
             const expanded = visibleExpandedId === item.id
             const creator =
               item.creatorName || item.creatorEmail || copy.unknownUser
+            const updator =
+              item.updatorName || item.updatorEmail || copy.unknownUser
             const requestTitle = item.reason?.trim() || copy.fallbackRequest
-            const flagName = item.flagName || copy.unavailableFlag
             const targetingHref = item.flagKey
               ? `${localizedPath(
                   lang,
@@ -266,29 +309,66 @@ export function ChangeRequestTable({
                     </Button>
                   </TableCell>
                   <TableCell className="w-[19rem] max-w-[19rem] py-3">
-                    <p className="truncate font-medium" title={requestTitle}>
-                      {requestTitle}
-                    </p>
-                    <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                      {flagName}
-                      {item.flagKey ? ` · ${item.flagKey}` : ""}
-                      {envName ? ` · ${envName}` : ""}
-                    </p>
-                  </TableCell>
-                  <TableCell className="w-48 max-w-48 py-3">
-                    <div className="min-w-0">
-                      <p className="truncate text-sm">{creator}</p>
-                      {item.creatorName && item.creatorEmail ? (
-                        <p className="truncate text-xs text-muted-foreground">
-                          {item.creatorEmail}
-                        </p>
+                    <div className="min-w-0 space-y-1">
+                      <p className="truncate font-medium" title={requestTitle}>
+                        {requestTitle}
+                      </p>
+                      {item.flagKey ? (
+                        <Tooltip>
+                          <TooltipTrigger
+                            render={
+                              <button
+                                type="button"
+                                aria-label={copy.copyKey(item.flagKey)}
+                                className="inline-flex max-w-full items-center gap-1.5 rounded bg-muted px-2 py-0.5 font-mono text-xs text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                                onClick={(event) => {
+                                  event.stopPropagation()
+                                  onCopyKey(item.flagKey)
+                                }}
+                              />
+                            }
+                          >
+                            <span className="truncate">{item.flagKey}</span>
+                            <Copy className="size-3 shrink-0" />
+                          </TooltipTrigger>
+                          <TooltipContent>{item.flagKey}</TooltipContent>
+                        </Tooltip>
                       ) : null}
+                      <p className="flex min-w-0 items-center gap-1.5 text-xs">
+                        <span className="shrink-0 text-muted-foreground">
+                          {copy.createdBy}
+                        </span>
+                        <TeamMemberLink
+                          id={item.creatorId}
+                          name={creator}
+                          email={item.creatorEmail}
+                          lang={lang}
+                        />
+                        <span className="shrink-0 text-muted-foreground">
+                          · {formatDate(item.createdAt, lang)}
+                        </span>
+                      </p>
+                    </div>
+                  </TableCell>
+                  <TableCell className="w-72 max-w-72 py-3">
+                    <div className="flex min-w-0 items-center gap-2">
+                      <Box
+                        aria-hidden
+                        className="size-4 shrink-0 text-muted-foreground"
+                      />
+                      <span
+                        className="truncate font-mono text-xs text-muted-foreground"
+                        title={item.scopeRn || undefined}
+                      >
+                        {item.scopeRn || "—"}
+                      </span>
                     </div>
                   </TableCell>
                   <TableCell className="py-3">
                     <ReviewerList
                       reviewers={item.reviewers}
                       currentUserId={currentUserId}
+                      lang={lang}
                       copy={copy}
                     />
                   </TableCell>
@@ -300,8 +380,27 @@ export function ChangeRequestTable({
                       {copy.statuses[item.status]}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-sm whitespace-nowrap text-muted-foreground">
-                    {relativeTime(item.updatedAt || item.createdAt, locale)}
+                  <TableCell className="w-48 max-w-48 py-3">
+                    <div className="max-w-full min-w-0 space-y-1 text-sm">
+                      <p>
+                        {formatDate(
+                          item.updatedAt || item.createdAt,
+                          lang,
+                          true
+                        )}
+                      </p>
+                      <p className="flex min-w-0 items-center gap-1.5 text-xs">
+                        <span className="shrink-0 text-muted-foreground">
+                          {copy.updatedBy}
+                        </span>
+                        <TeamMemberLink
+                          id={item.updatorId}
+                          name={updator}
+                          email={item.updatorEmail}
+                          lang={lang}
+                        />
+                      </p>
+                    </div>
                   </TableCell>
                   <TableCell className="w-52 py-3 text-center">
                     {item.canReview ? (

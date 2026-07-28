@@ -22,6 +22,8 @@ public class ChangeRequestVm
 
     public string FlagKey { get; set; }
 
+    public string ScopeRn { get; set; }
+
     public string Reason { get; set; }
 
     public string Status { get; set; }
@@ -35,6 +37,12 @@ public class ChangeRequestVm
     public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }
+
+    public Guid UpdatorId { get; set; }
+
+    public string UpdatorName { get; set; }
+
+    public string UpdatorEmail { get; set; }
 
     public DataChange DataChange { get; set; }
 

@@ -176,14 +176,11 @@ export function FlagsToolbar(props: Props) {
           <Archive />
           {t("featureFlags.showArchived")}
         </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          disabled={!filtersApplied}
-          onClick={props.onClearFilters}
-        >
-          {t("featureFlags.clearFilters")}
-        </Button>
+        {filtersApplied ? (
+          <Button type="button" variant="ghost" onClick={props.onClearFilters}>
+            {t("featureFlags.clearFilters")}
+          </Button>
+        ) : null}
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3 2xl:justify-end">
