@@ -1,13 +1,7 @@
-import { Copy, MoreHorizontal, RotateCw, Trash2 } from "lucide-react"
+import { Copy } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { Switch } from "@/components/ui/switch"
 import { TableCell, TableRow } from "@/components/ui/table"
 import {
@@ -71,10 +65,7 @@ export function TriggerTableRow({
         ) : null}
       </TableCell>
       <TableCell>
-        <Badge
-          variant="outline"
-          className="min-w-24 justify-start bg-background font-normal"
-        >
+        <Badge variant="outline" className="min-w-24 bg-background font-normal">
           {t(
             trigger.action === "turn-on"
               ? "featureFlags.detailsPage.triggers.turnOn"
@@ -83,21 +74,57 @@ export function TriggerTableRow({
         </Badge>
       </TableCell>
       <TableCell>
-        <Switch
-          checked={trigger.isEnabled}
-          disabled={!editable || toggling}
-          aria-label={t("featureFlags.detailsPage.triggers.toggleStatus", {
-            description:
-              trigger.description ||
-              t("featureFlags.detailsPage.triggers.general"),
-          })}
-          onCheckedChange={onToggle}
-        />
+        <div className="flex items-center gap-2">
+          <Switch
+            checked={trigger.isEnabled}
+            disabled={!editable || toggling}
+            aria-label={t("featureFlags.detailsPage.triggers.toggleStatus", {
+              description:
+                trigger.description ||
+                t("featureFlags.detailsPage.triggers.general"),
+            })}
+            onCheckedChange={onToggle}
+          />
+          <span className="text-xs font-medium">
+            {t(
+              trigger.isEnabled
+                ? "featureFlags.detailsPage.triggers.enabled"
+                : "featureFlags.detailsPage.triggers.disabled"
+            )}
+          </span>
+        </div>
       </TableCell>
       <TableCell className="py-3 whitespace-normal">
-        <code className="block truncate rounded-md border bg-muted/30 px-2.5 py-1.5 text-xs">
-          {token ? flagTriggerUrl(token) : maskedFlagTriggerUrl()}
-        </code>
+        {token ? (
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  type="button"
+                  className="h-8 w-full max-w-full justify-start gap-2.5 px-2.5 font-normal"
+                  variant="outline"
+                  disabled={!editable}
+                  aria-label={t("featureFlags.detailsPage.triggers.copyUrl")}
+                  onClick={onCopy}
+                >
+                  <code className="min-w-0 flex-1 truncate text-left text-xs">
+                    {flagTriggerUrl(token)}
+                  </code>
+                  <Copy className="size-3.5" />
+                </Button>
+              }
+            />
+            <TooltipContent>
+              {t("featureFlags.detailsPage.triggers.copyUrl")}
+            </TooltipContent>
+          </Tooltip>
+        ) : (
+          <div className="flex h-8 max-w-full items-center rounded-lg border bg-background px-2.5">
+            <code className="min-w-0 flex-1 truncate text-xs">
+              {maskedFlagTriggerUrl()}
+            </code>
+          </div>
+        )}
         {token ? (
           <p className="mt-1.5 rounded-md bg-amber-50 px-2.5 py-2 text-xs text-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
             {t("featureFlags.detailsPage.triggers.revealWarning")}
@@ -137,60 +164,24 @@ export function TriggerTableRow({
       </TableCell>
       <TableCell className="px-4">
         <div className="flex items-center gap-1.5">
-          {token ? (
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={!editable}
-              onClick={onCopy}
-            >
-              <Copy />
-              {t("featureFlags.detailsPage.triggers.copyUrl")}
-            </Button>
-          ) : (
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={!editable}
-              onClick={() => onConfirm({ kind: "reset", trigger })}
-            >
-              <RotateCw />
-              {t("featureFlags.detailsPage.triggers.reset")}
-            </Button>
-          )}
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              render={
-                <Button
-                  variant="outline"
-                  size="icon-sm"
-                  disabled={!editable}
-                  aria-label={t(
-                    "featureFlags.detailsPage.triggers.moreActions"
-                  )}
-                />
-              }
-            >
-              <MoreHorizontal />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {token ? (
-                <DropdownMenuItem
-                  onClick={() => onConfirm({ kind: "reset", trigger })}
-                >
-                  <RotateCw />
-                  {t("featureFlags.detailsPage.triggers.reset")}
-                </DropdownMenuItem>
-              ) : null}
-              <DropdownMenuItem
-                className="text-destructive"
-                onClick={() => onConfirm({ kind: "remove", trigger })}
-              >
-                <Trash2 />
-                {t("featureFlags.detailsPage.triggers.remove")}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="font-medium"
+            disabled={!editable}
+            onClick={() => onConfirm({ kind: "reset", trigger })}
+          >
+            {t("featureFlags.detailsPage.triggers.reset")}
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+            disabled={!editable}
+            onClick={() => onConfirm({ kind: "remove", trigger })}
+          >
+            {t("featureFlags.detailsPage.triggers.remove")}
+          </Button>
         </div>
       </TableCell>
     </TableRow>

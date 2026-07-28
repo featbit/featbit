@@ -243,28 +243,9 @@ export function SettingsTab({
       onSubmit={form.handleSubmit(() => setReviewOpen(true))}
     >
       <section className="max-w-3xl space-y-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-base font-medium">
-            {t("featureFlags.detailsPage.settings.general")}
-          </h2>
-          {!archived ? (
-            <div className="flex items-center gap-3">
-              {dirty ? (
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={saveMutation.isPending}
-                  onClick={() => form.reset(baseline)}
-                >
-                  {t("featureFlags.detailsPage.discard")}
-                </Button>
-              ) : null}
-              <Button type="submit" disabled={!dirty || saveMutation.isPending}>
-                {t("featureFlags.detailsPage.reviewAndSave")}
-              </Button>
-            </div>
-          ) : null}
-        </div>
+        <h2 className="text-base font-medium">
+          {t("featureFlags.detailsPage.settings.general")}
+        </h2>
 
         <div className="space-y-5">
           <div className="space-y-2">
@@ -319,6 +300,24 @@ export function SettingsTab({
             </p>
           </div>
         </div>
+
+        {!archived ? (
+          <div className="flex items-center justify-end gap-3 pt-1">
+            {dirty ? (
+              <Button
+                type="button"
+                variant="outline"
+                disabled={saveMutation.isPending}
+                onClick={() => form.reset(baseline)}
+              >
+                {t("featureFlags.detailsPage.discard")}
+              </Button>
+            ) : null}
+            <Button type="submit" disabled={!dirty || saveMutation.isPending}>
+              {t("featureFlags.detailsPage.reviewAndSave")}
+            </Button>
+          </div>
+        ) : null}
       </section>
 
       <section className="max-w-3xl border-t pt-6">
@@ -377,7 +376,7 @@ export function SettingsTab({
             </div>
           </div>
         ) : (
-          <div className="flex items-start justify-between gap-6 border-t py-3">
+          <div className="flex items-start justify-between gap-6 py-3">
             <div className="space-y-1">
               <p className="text-sm font-medium">
                 {t("featureFlags.detailsPage.settings.archiveTitle")}

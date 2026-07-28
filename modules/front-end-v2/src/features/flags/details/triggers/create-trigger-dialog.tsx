@@ -44,8 +44,11 @@ export function CreateTriggerDialog({
   const [description, setDescription] = useState("")
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => !saving && onOpenChange(nextOpen)}
+    >
+      <DialogContent className="sm:max-w-md" showCloseButton={!saving}>
         <DialogHeader>
           <DialogTitle>
             {t("featureFlags.detailsPage.triggers.createTitle")}
@@ -55,7 +58,18 @@ export function CreateTriggerDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-1">
+        <form
+          className="space-y-4"
+          onSubmit={(event) => {
+            event.preventDefault()
+            onCreate({
+              targetId,
+              type,
+              action,
+              description: description.trim(),
+            })
+          }}
+        >
           <div className="space-y-2">
             <Label htmlFor="trigger-type">
               {t("featureFlags.detailsPage.triggers.type")}
@@ -66,7 +80,9 @@ export function CreateTriggerDialog({
               disabled={saving}
             >
               <SelectTrigger id="trigger-type" className="w-full">
-                <SelectValue />
+                <SelectValue>
+                  {t("featureFlags.detailsPage.triggers.general")}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
@@ -88,7 +104,13 @@ export function CreateTriggerDialog({
               disabled={saving}
             >
               <SelectTrigger id="trigger-action" className="w-full">
-                <SelectValue />
+                <SelectValue>
+                  {t(
+                    action === "turn-on"
+                      ? "featureFlags.detailsPage.triggers.turnOn"
+                      : "featureFlags.detailsPage.triggers.turnOff"
+                  )}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
@@ -118,34 +140,26 @@ export function CreateTriggerDialog({
               onChange={(event) => setDescription(event.target.value)}
             />
           </div>
-        </div>
 
-        <DialogFooter>
-          <Button
-            type="button"
-            variant="outline"
-            disabled={saving}
-            onClick={() => onOpenChange(false)}
-          >
-            {t("featureFlags.cancel")}
-          </Button>
-          <Button
-            type="button"
-            disabled={!targetId || !type || !action || saving}
-            onClick={() =>
-              onCreate({
-                targetId,
-                type,
-                action,
-                description: description.trim(),
-              })
-            }
-          >
-            {saving
-              ? t("featureFlags.detailsPage.triggers.creating")
-              : t("featureFlags.detailsPage.triggers.create")}
-          </Button>
-        </DialogFooter>
+          <DialogFooter className="border-t-0 bg-transparent">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={saving}
+              onClick={() => onOpenChange(false)}
+            >
+              {t("featureFlags.cancel")}
+            </Button>
+            <Button
+              type="submit"
+              disabled={!targetId || !type || !action || saving}
+            >
+              {saving
+                ? t("featureFlags.detailsPage.triggers.creating")
+                : t("featureFlags.detailsPage.triggers.create")}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   )

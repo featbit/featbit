@@ -1,12 +1,12 @@
 import { useTranslation } from "react-i18next"
 import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import type { FlagTrigger } from "./triggers-api"
 
@@ -27,20 +27,21 @@ export function TriggerConfirmDialog({
   onConfirm: () => void
 }) {
   const { t } = useTranslation()
-  const kind = target?.kind ?? "reset"
+  if (!target) return null
+  const kind = target.kind
 
   return (
-    <AlertDialog open={Boolean(target)} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>
+    <Dialog open onOpenChange={(open) => !saving && onOpenChange(open)}>
+      <DialogContent className="sm:max-w-md" showCloseButton={!saving}>
+        <DialogHeader>
+          <DialogTitle>
             {t(`featureFlags.detailsPage.triggers.${kind}Title`)}
-          </AlertDialogTitle>
-          <AlertDialogDescription>
+          </DialogTitle>
+          <DialogDescription>
             {t(`featureFlags.detailsPage.triggers.${kind}Description`)}
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter className="border-t-0 bg-transparent">
           <Button
             type="button"
             variant="outline"
@@ -59,8 +60,8 @@ export function TriggerConfirmDialog({
               ? t("featureFlags.detailsPage.triggers.working")
               : t(`featureFlags.detailsPage.triggers.${kind}`)}
           </Button>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }

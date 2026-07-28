@@ -145,23 +145,22 @@ export function TriggersTab({
 
   return (
     <div className="pt-3">
-      <div className="flex min-h-12 items-center justify-end">
-        {editable ? (
-          <Button onClick={() => setCreateOpen(true)}>
-            <Plus />
-            {t("featureFlags.detailsPage.triggers.add")}
-          </Button>
-        ) : null}
-      </div>
-
-      <section className="mt-1 space-y-3">
-        <div>
-          <h2 className="text-base font-semibold">
-            {t("featureFlags.detailsPage.triggers.title")}
-          </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {t("featureFlags.detailsPage.triggers.help")}
-          </p>
+      <section className="space-y-3">
+        <div className="flex min-h-12 items-center justify-between gap-4">
+          <div>
+            <h2 className="text-base font-semibold">
+              {t("featureFlags.detailsPage.triggers.title")}
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {t("featureFlags.detailsPage.triggers.help")}
+            </p>
+          </div>
+          {editable ? (
+            <Button className="shrink-0" onClick={() => setCreateOpen(true)}>
+              <Plus />
+              {t("featureFlags.detailsPage.triggers.add")}
+            </Button>
+          ) : null}
         </div>
 
         {triggersQuery.isError ? (
@@ -199,22 +198,22 @@ export function TriggersTab({
             <Table className="min-w-[1120px]">
               <TableHeader className="bg-muted/30">
                 <TableRow className="hover:bg-transparent">
-                  <TableHead className="w-[19%] px-4">
+                  <TableHead className="w-[16%] px-4">
                     {t("featureFlags.detailsPage.triggers.type")}
                   </TableHead>
-                  <TableHead className="w-[13%]">
+                  <TableHead className="w-[11%]">
                     {t("featureFlags.detailsPage.triggers.action")}
                   </TableHead>
-                  <TableHead className="w-[10%]">
+                  <TableHead className="w-[12%]">
                     {t("featureFlags.detailsPage.triggers.status")}
                   </TableHead>
-                  <TableHead className="w-[31%]">
+                  <TableHead className="w-[29%]">
                     {t("featureFlags.detailsPage.triggers.url")}
                   </TableHead>
-                  <TableHead className="w-[13%]">
+                  <TableHead className="w-[12%]">
                     {t("featureFlags.detailsPage.triggers.usage")}
                   </TableHead>
-                  <TableHead className="w-[14%] px-4">
+                  <TableHead className="w-[20%] px-4">
                     {t("featureFlags.actions")}
                   </TableHead>
                 </TableRow>
@@ -278,7 +277,7 @@ export function TriggersTab({
 function TriggersSkeleton() {
   return (
     <div className="overflow-hidden rounded-lg border">
-      <div className="grid min-w-[1120px] grid-cols-[19%_13%_10%_31%_13%_14%] border-b bg-muted/30 px-4 py-3">
+      <div className="grid min-w-[1120px] grid-cols-[16%_11%_12%_29%_12%_20%] border-b bg-muted/30 px-4 py-3">
         {Array.from({ length: 6 }).map((_, index) => (
           <Skeleton key={index} className="h-4 w-16" />
         ))}
@@ -286,11 +285,14 @@ function TriggersSkeleton() {
       {Array.from({ length: 2 }).map((_, index) => (
         <div
           key={index}
-          className="grid min-w-[1120px] grid-cols-[19%_13%_10%_31%_13%_14%] items-center border-b px-4 py-4 last:border-b-0"
+          className="grid min-w-[1120px] grid-cols-[16%_11%_12%_29%_12%_20%] items-center border-b px-4 py-4 last:border-b-0"
         >
           <Skeleton className="h-8 w-32" />
           <Skeleton className="h-6 w-24" />
-          <Skeleton className="h-5 w-8" />
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-5 w-8" />
+            <Skeleton className="h-4 w-14" />
+          </div>
           <Skeleton className="h-8 w-[90%]" />
           <Skeleton className="h-8 w-24" />
           <Skeleton className="h-8 w-28" />
