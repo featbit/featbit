@@ -50,14 +50,15 @@ public class ControlPlaneCommandMessageConsumer(
                     await adminService.PushFullSyncToAllActiveSdks();
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException($"Invalid action: {command.Action}");
+                    throw new InvalidOperationException($"Invalid action: {command.Action}");
             }
         }
         catch (Exception ex)
         {
             logger.LogError(
                 ex,
-                "Exception occurred while processing push full sync change message"
+                "Exception occurred while processing control plane command message: {Message}",
+                message
             );
         }
     }
