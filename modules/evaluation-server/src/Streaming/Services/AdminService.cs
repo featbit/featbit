@@ -90,7 +90,6 @@ namespace Streaming.Services
                 try
                 {
                     serverPayload = await dataSyncService.GetServerSdkPayloadAsync(envId, 0);
-                    serverPayload.EventType = DataSyncEventTypes.Full;
                 }
                 catch (Exception ex)
                 {
@@ -165,9 +164,7 @@ namespace Streaming.Services
             await sendGate.WaitAsync();
             try
             {
-                var clientPayload = await dataSyncService.GetClientSdkPayloadAsync(
-                    envId, connection.User!, 0);
-                clientPayload.EventType = DataSyncEventTypes.Full;
+                var clientPayload = await dataSyncService.GetClientSdkPayloadAsync(envId, connection.User!, 0);
                 var clientMessage = new ServerMessage(MessageTypes.DataSync, clientPayload);
                 await connection.SendAsync(clientMessage, CancellationToken.None);
             }

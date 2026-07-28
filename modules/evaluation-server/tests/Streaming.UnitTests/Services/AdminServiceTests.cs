@@ -39,12 +39,11 @@ public class AdminServiceTests
         var (s3, ws3) = MakeServerConnection(EnvA);
 
         var sut = CreateSut(out var dataSync, out _, s1, s2, s3);
-        var serverPayload = new ServerSdkPayload(DataSyncEventTypes.Patch, [], []);
+    var serverPayload = new ServerSdkPayload(DataSyncEventTypes.Full, [], []);
         dataSync.Setup(x => x.GetServerSdkPayloadAsync(EnvA, 0)).ReturnsAsync(serverPayload);
 
         await sut.PushFullSyncToAllActiveSdks();
 
-        Assert.Equal(DataSyncEventTypes.Full, serverPayload.EventType);
         dataSync.Verify(x => x.GetServerSdkPayloadAsync(EnvA, 0), Times.Once);
         VerifySentOnce(ws1);
         VerifySentOnce(ws2);
@@ -263,23 +262,6 @@ public class AdminServiceTests
         Assert.Contains(
             logger.Collector.GetSnapshot(),
             e => e.Level == LogLevel.Error);
-    }
-
-    [Fact]
-    public async Task PushFullSync_ClientPayload_EventTypeIsRewrittenToFull()
-    {
-        var alice = new EndUser { KeyId = "alice", Name = "Alice" };
-        var (client, _) = MakeClientConnection(EnvA, alice);
-        var payload = new ClientSdkPayload(DataSyncEventTypes.Patch, "alice", []);
-
-        var sut = CreateSut(out var dataSync, out _, client);
-        dataSync
-            .Setup(x => x.GetClientSdkPayloadAsync(EnvA, alice, 0))
-            .ReturnsAsync(payload);
-
-        await sut.PushFullSyncToAllActiveSdks();
-
-        Assert.Equal(DataSyncEventTypes.Full, payload.EventType);
     }
 
     [Fact]
