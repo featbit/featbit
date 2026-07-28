@@ -26,7 +26,7 @@ public class StreamingServiceCollectionExtensionsTests
         Assert.Contains(services, d => d.ServiceType == typeof(StreamingOptions));
         AssertRegistered<ISystemClock, SystemClock>(services);
         AssertRegistered<IRequestValidator, RequestValidator>(services);
-        AssertRegistered<IConnectionManager, ConnectionManager>(services);
+        AssertRegistered<IConnectionManager, DefaultConnectionManager>(services);
         AssertRegistered<IDataSyncService, DataSyncService>(services);
         Assert.Contains(services, d =>
             d.ServiceType == typeof(IRelayProxyService) && d.ImplementationType == typeof(RelayProxyService));

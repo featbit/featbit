@@ -10,8 +10,8 @@ public class ConnectionLogTests
     [Fact]
     public void Add_ClientConnection_LogsAllConnectionProperties()
     {
-        var logger = new FakeLogger<ConnectionManager>();
-        var manager = new ConnectionManager(logger);
+        var logger = new FakeLogger<DefaultConnectionManager>();
+        var manager = new DefaultConnectionManager(logger);
 
         var context = new ConnectionContextBuilder().Build();
         manager.Add(context);
@@ -45,8 +45,8 @@ public class ConnectionLogTests
     [Fact]
     public void Add_RelayProxyConnection_LogsRelayProxyConnectionsProperty()
     {
-        var logger = new FakeLogger<ConnectionManager>();
-        var manager = new ConnectionManager(logger);
+        var logger = new FakeLogger<DefaultConnectionManager>();
+        var manager = new DefaultConnectionManager(logger);
 
         Secret[] secrets =
         [

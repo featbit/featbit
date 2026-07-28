@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Streaming.Connections;
 
-public sealed partial class ConnectionManager(ILogger<ConnectionManager> logger) : IConnectionManager
+public sealed partial class DefaultConnectionManager(ILogger<DefaultConnectionManager> logger) : IConnectionManager
 {
     internal readonly ConcurrentDictionary<string, Connection> Connections = new(StringComparer.Ordinal);
 

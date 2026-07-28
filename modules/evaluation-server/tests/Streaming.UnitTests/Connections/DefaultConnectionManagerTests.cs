@@ -5,13 +5,13 @@ using Streaming.UnitTests.Builders;
 
 namespace Streaming.UnitTests.Connections;
 
-public class ConnectionManagerTests
+public class DefaultConnectionManagerTests
 {
     [Fact]
     public void Connections_NewManager_IsEmpty()
     {
-        var logger = new FakeLogger<ConnectionManager>();
-        var manager = new ConnectionManager(logger);
+        var logger = new FakeLogger<DefaultConnectionManager>();
+        var manager = new DefaultConnectionManager(logger);
 
         Assert.Empty(manager.Connections);
     }
@@ -19,8 +19,8 @@ public class ConnectionManagerTests
     [Fact]
     public void AddRemove_ClientConnection_TracksAndRemovesByConnectionId()
     {
-        var logger = new FakeLogger<ConnectionManager>();
-        var manager = new ConnectionManager(logger);
+        var logger = new FakeLogger<DefaultConnectionManager>();
+        var manager = new DefaultConnectionManager(logger);
 
         var context = new ConnectionContextBuilder().Build();
 
@@ -36,8 +36,8 @@ public class ConnectionManagerTests
     [Fact]
     public void AddRemove_RelayProxyConnection_TracksAndRemovesAllMappedConnections()
     {
-        var logger = new FakeLogger<ConnectionManager>();
-        var manager = new ConnectionManager(logger);
+        var logger = new FakeLogger<DefaultConnectionManager>();
+        var manager = new DefaultConnectionManager(logger);
 
         Secret[] secrets =
         [
@@ -67,8 +67,8 @@ public class ConnectionManagerTests
     [Fact]
     public void GetEnvConnections_ByEnvId_ReturnsOnlyMatchingConnections()
     {
-        var logger = new FakeLogger<ConnectionManager>();
-        var manager = new ConnectionManager(logger);
+        var logger = new FakeLogger<DefaultConnectionManager>();
+        var manager = new DefaultConnectionManager(logger);
 
         var s1 = new Secret(SecretTypes.Client, "p1", envId: Guid.NewGuid(), "dev");
         var s2 = new Secret(SecretTypes.Client, "p2", envId: Guid.NewGuid(), "dev");

@@ -75,9 +75,9 @@ public static class ServicesRegister
 
         if (configuration.UseControlPlane())
         {
-            // Replace the default IConnectionManager with ControlPlaneConnectionManager
+            // Replace the `DefaultConnectionManager` with `ControlPlaneConnectionManager`
             services.Replace(ServiceDescriptor.Singleton<IConnectionManager, ControlPlaneConnectionManager>());
-            
+
             // The control-plane topology requires the local DC Redis: the control-plane writes
             // flag/segment changes into per-DC Redis, and the eval server's heartbeat derives the
             // applied watermark from that same Redis via RedisAppliedWatermarkReader. Ensure

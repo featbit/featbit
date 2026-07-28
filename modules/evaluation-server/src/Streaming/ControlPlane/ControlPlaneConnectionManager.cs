@@ -35,12 +35,12 @@ public sealed class ControlPlaneConnectionManager(
                 {
                     var message = connection.AsMessage(ConnectionMessageType.ConnectionMade);
                     await producer.PublishAsync(Topics.ConnectionMade, message);
-                    ConnectionManager.Log.ConnectionAdded(logger, context);
+                    DefaultConnectionManager.Log.ConnectionAdded(logger, context);
                 }
             }
             catch (Exception ex)
             {
-                ConnectionManager.Log.AddConnectionFailed(logger, context, ex);
+                DefaultConnectionManager.Log.AddConnectionFailed(logger, context, ex);
             }
         }
     }
@@ -69,12 +69,12 @@ public sealed class ControlPlaneConnectionManager(
                 {
                     var message = connection.AsMessage(ConnectionMessageType.ConnectionClosed);
                     await producer.PublishAsync(Topics.ConnectionClosed, message);
-                    ConnectionManager.Log.ConnectionRemoved(logger, context);
+                    DefaultConnectionManager.Log.ConnectionRemoved(logger, context);
                 }
             }
             catch (Exception ex)
             {
-                ConnectionManager.Log.RemoveConnectionFailed(logger, context, ex);
+                DefaultConnectionManager.Log.RemoveConnectionFailed(logger, context, ex);
             }
         }
     }

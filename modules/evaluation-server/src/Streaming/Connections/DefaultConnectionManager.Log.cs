@@ -2,7 +2,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Streaming.Connections;
 
-partial class ConnectionManager
+partial class DefaultConnectionManager
 {
     public static partial class Log
     {

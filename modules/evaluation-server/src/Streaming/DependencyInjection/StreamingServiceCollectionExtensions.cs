@@ -45,7 +45,7 @@ public static class StreamingServiceCollectionExtensions
         services.AddTransient(typeof(IRelayProxyService), rpServiceType);
 
         // connection
-        services.AddSingleton<IConnectionManager, ConnectionManager>();
+        services.AddSingleton<IConnectionManager, DefaultConnectionManager>();
 
         // message handlers
         services
