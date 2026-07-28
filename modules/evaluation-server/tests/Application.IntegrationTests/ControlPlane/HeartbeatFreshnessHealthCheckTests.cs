@@ -3,7 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging.Abstractions;
 
-namespace Application.IntegrationTests.Health;
+namespace Application.IntegrationTests.ControlPlane;
 
 /// <summary>
 /// Pure unit tests for <see cref="HeartbeatFreshnessHealthCheck"/> (no infra). The clock and the

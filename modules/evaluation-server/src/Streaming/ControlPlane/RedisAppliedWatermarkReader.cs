@@ -2,7 +2,7 @@ using Infrastructure.Caches.Redis;
 using StackExchange.Redis;
 using Streaming.Connections;
 
-namespace Streaming.Health;
+namespace Streaming.ControlPlane;
 
 /// <summary>
 /// <see cref="IAppliedWatermarkReader"/> that derives the per-env applied watermark from the

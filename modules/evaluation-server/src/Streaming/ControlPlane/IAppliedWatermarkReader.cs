@@ -1,4 +1,4 @@
-namespace Streaming.Health;
+namespace Streaming.ControlPlane;
 
 /// <summary>
 /// Computes the applied watermark per environment from the local DC Redis — the shared,

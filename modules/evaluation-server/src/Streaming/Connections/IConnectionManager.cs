@@ -19,7 +19,7 @@ public interface IConnectionManager
     /// </summary>
     /// <returns></returns>
     ICollection<Connection> GetEnvConnections(Guid envId);
-        
+
     /// <summary>
     /// Get all connections
     /// </summary>

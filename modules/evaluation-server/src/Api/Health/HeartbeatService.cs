@@ -1,7 +1,7 @@
 using Api.Configuration;
-using Domain.Health;
+using Domain.ControlPlane;
 using Domain.Messages;
-using Streaming.Health;
+using Streaming.ControlPlane;
 
 namespace Api.Health;
 

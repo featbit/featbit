@@ -1,11 +1,11 @@
 using System.Text.Json;
-using Domain.Messages;
+using Domain.ControlPlane;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Streaming.Consumers;
 using Streaming.Services;
-using Action = Domain.Messages.Action;
+using Action = Domain.ControlPlane.Action;
 
 namespace Streaming.UnitTests.Consumers;
 

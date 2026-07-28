@@ -22,10 +22,6 @@ public class FeatureFlagChangeMessageConsumer(
 
         var envId = flag.GetProperty("envId").GetGuid();
 
-        // The applied watermark is no longer tracked here: it is derived on demand from the local
-        // DC Redis flag index by IAppliedWatermarkReader (see HeartbeatService), so all pods in a
-        // DC agree and a fresh pod is immediately correct.
-
         var connections = connectionManager.GetEnvConnections(envId);
         foreach (var connection in connections)
         {

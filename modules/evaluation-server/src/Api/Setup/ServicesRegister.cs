@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Authorization;
 using Serilog;
 using Streaming;
 using Streaming.DependencyInjection;
-using Streaming.Health;
+using Streaming.ControlPlane;
 
 namespace Api.Setup;
 

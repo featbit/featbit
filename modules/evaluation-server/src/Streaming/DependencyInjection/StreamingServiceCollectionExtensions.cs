@@ -10,7 +10,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 using Streaming.Connections;
 using Streaming.Consumers;
-using Streaming.Health;
 using Streaming.Messages;
 using Streaming.Services;
 

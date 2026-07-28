@@ -1,11 +1,10 @@
-using Api.Configuration;
 using Api.Health;
 using Domain.Messages;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
-using Streaming.Health;
+using Streaming.ControlPlane;
 
-namespace Application.IntegrationTests.Health;
+namespace Application.IntegrationTests.ControlPlane;
 
 /// <summary>
 /// Pure unit tests for the heartbeat payload construction (no infra). Exercises

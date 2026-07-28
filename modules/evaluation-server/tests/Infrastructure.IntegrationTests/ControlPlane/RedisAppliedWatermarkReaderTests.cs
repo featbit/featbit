@@ -5,9 +5,9 @@ using Infrastructure.IntegrationTests.Fixtures;
 using Moq;
 using StackExchange.Redis;
 using Streaming.Connections;
-using Streaming.Health;
+using Streaming.ControlPlane;
 
-namespace Infrastructure.IntegrationTests.Health;
+namespace Infrastructure.IntegrationTests.ControlPlane;
 
 /// <summary>
 /// Issue #46 integration tests: <see cref="RedisAppliedWatermarkReader"/> derives the per-env

@@ -1,4 +1,4 @@
-﻿namespace Domain.Health;
+﻿namespace Domain.ControlPlane;
 
 public static class InfrastructureInfo
 {

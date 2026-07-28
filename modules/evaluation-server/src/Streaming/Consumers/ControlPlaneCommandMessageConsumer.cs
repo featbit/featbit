@@ -1,10 +1,11 @@
 using System.Text.Json;
+using Domain.ControlPlane;
 using Domain.Messages;
 using Domain.Shared;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Streaming.Services;
-using Action = Domain.Messages.Action;
+using Action = Domain.ControlPlane.Action;
 
 namespace Streaming.Consumers;
 

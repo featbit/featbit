@@ -1,5 +1,5 @@
 using System.Collections.Concurrent;
-using Domain.Connection;
+using Domain.ControlPlane;
 using Domain.Messages;
 using Microsoft.Extensions.Logging;
 

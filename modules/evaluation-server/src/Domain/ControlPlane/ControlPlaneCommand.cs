@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Domain.Messages;
+namespace Domain.ControlPlane;
 
 public class ControlPlaneCommand
 {
