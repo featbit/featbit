@@ -120,7 +120,7 @@ function ServingControl({
       {rollout && !editing ? (
         <div
           data-slot="serving-rollout-summary"
-          className="flex min-w-0 w-full flex-col items-start gap-2 xl:w-auto xl:flex-1 xl:flex-row xl:items-center"
+          className="flex w-full min-w-0 flex-col items-start gap-2 xl:w-auto xl:flex-1 xl:flex-row xl:items-center"
         >
           <ServingSummary flag={flag} allocations={value} />
           <div className="flex flex-wrap items-center gap-3">
@@ -190,6 +190,7 @@ export function TargetingTab({
   dirty,
   saving,
   toggling,
+  readOnly = false,
   canToggle,
   canUpdateOffVariation,
   canUpdateDefault,
@@ -213,6 +214,7 @@ export function TargetingTab({
   dirty: boolean
   saving: boolean
   toggling: boolean
+  readOnly?: boolean
   canToggle: boolean
   canUpdateOffVariation: boolean
   canUpdateDefault: boolean
@@ -275,10 +277,10 @@ export function TargetingTab({
     (item) => item.id === flag.disabledVariationId
   )
   const archived = Boolean(flag.isArchived)
-  const canEditOffVariation = canUpdateOffVariation && !archived
-  const canEditDefault = canUpdateDefault && !archived
-  const canEditUsers = canUpdateUsers && !archived
-  const canEditRules = canUpdateRules && !archived
+  const canEditOffVariation = canUpdateOffVariation && !archived && !readOnly
+  const canEditDefault = canUpdateDefault && !archived && !readOnly
+  const canEditUsers = canUpdateUsers && !archived && !readOnly
+  const canEditRules = canUpdateRules && !archived && !readOnly
   return (
     <div className="space-y-6 pt-3 pb-6">
       <section className="pt-1 pb-2">
@@ -293,7 +295,7 @@ export function TargetingTab({
               ) : null}
               <Switch
                 checked={flag.isEnabled}
-                disabled={toggling || !canToggle || flag.isArchived}
+                disabled={readOnly || toggling || !canToggle || flag.isArchived}
                 aria-label={t("featureFlags.detailsPage.toggleStatus")}
                 onCheckedChange={onToggle}
               />
@@ -310,7 +312,7 @@ export function TargetingTab({
 
       <section>
         <div className="mb-3 flex min-h-8 flex-wrap items-center justify-between gap-3">
-          <div className="order-2 flex min-w-0 w-full flex-wrap items-baseline gap-x-2 gap-y-1 xl:order-1 xl:w-auto">
+          <div className="order-2 flex w-full min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1 xl:order-1 xl:w-auto">
             <h2 className="text-base font-medium">
               {t("featureFlags.detailsPage.defaultRule")}
             </h2>
@@ -319,7 +321,7 @@ export function TargetingTab({
             </p>
           </div>
           <div className="order-1 ml-auto flex w-full flex-wrap items-center justify-end gap-3 xl:order-2 xl:w-auto">
-            {pendingCount ? (
+            {!readOnly && pendingCount ? (
               <Button type="button" variant="outline" onClick={onOpenPending}>
                 <Clock3 />
                 {t("featureFlags.detailsPage.pendingChanges", {
@@ -327,7 +329,7 @@ export function TargetingTab({
                 })}
               </Button>
             ) : null}
-            {dirty && !archived ? (
+            {dirty && !archived && !readOnly ? (
               <Button
                 type="button"
                 variant="outline"
@@ -337,7 +339,7 @@ export function TargetingTab({
                 {t("featureFlags.detailsPage.discard")}
               </Button>
             ) : null}
-            {!archived ? (
+            {!archived && !readOnly ? (
               <ReviewSaveSplitButton
                 primaryLabel={t("featureFlags.detailsPage.reviewAndSave")}
                 savingLabel={t("featureFlags.detailsPage.review.saving")}
@@ -384,7 +386,7 @@ export function TargetingTab({
             </span>
             <span
               data-slot="default-on-serve-label"
-              className="flex h-12 self-start items-center text-xs text-muted-foreground"
+              className="flex h-12 items-center self-start text-xs text-muted-foreground"
             >
               {t("featureFlags.detailsPage.serve")}
             </span>

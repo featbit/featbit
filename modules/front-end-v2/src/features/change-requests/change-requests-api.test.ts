@@ -4,6 +4,7 @@ import {
   createChangeRequest,
   deleteChangeRequest,
   fetchChangeRequestMembers,
+  fetchChangeRequestPreview,
   fetchChangeRequests,
   performChangeRequestAction,
 } from "./change-requests-api"
@@ -54,6 +55,16 @@ describe("change requests API", () => {
 
     expect(fetchApi).toHaveBeenCalledWith(
       "/api/v1/members?searchText=maya+chen&pageIndex=0&pageSize=20"
+    )
+  })
+
+  it("loads a read-only targeting preview from the centralized controller", async () => {
+    vi.mocked(fetchApi).mockResolvedValue({})
+
+    await fetchChangeRequestPreview("env / 1", "request / 1")
+
+    expect(fetchApi).toHaveBeenCalledWith(
+      "/api/v1/envs/env%20%2F%201/change-requests/request%20%2F%201/preview"
     )
   })
 

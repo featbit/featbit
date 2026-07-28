@@ -29,6 +29,24 @@ public class ChangeRequestController : ApiControllerBase
     }
 
     /// <summary>
+    /// Preview the targeting configuration produced by a change request without applying it.
+    /// </summary>
+    [HttpGet("{id:guid}/preview")]
+    [Authorize(LicenseFeatures.ChangeRequest)]
+    public async Task<ApiResponse<ChangeRequestPreviewVm>> GetPreviewAsync(Guid envId, Guid id)
+    {
+        var request = new GetChangeRequestPreview
+        {
+            OrgId = OrgId,
+            EnvId = envId,
+            Id = id
+        };
+
+        var preview = await Mediator.Send(request);
+        return Ok(preview);
+    }
+
+    /// <summary>
     /// Create a change request for a feature flag.
     /// </summary>
     [HttpPost("{key}")]

@@ -52,7 +52,8 @@ function exampleFlag(overrides: Partial<FeatureFlag> = {}): FeatureFlag {
 function renderTargeting(
   flag = exampleFlag(),
   dirty = true,
-  canUpdateOffVariation = true
+  canUpdateOffVariation = true,
+  readOnly = false
 ) {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -71,6 +72,7 @@ function renderTargeting(
     dirty,
     saving: false,
     toggling: false,
+    readOnly,
     canToggle: true,
     canUpdateOffVariation,
     canUpdateDefault: true,
@@ -239,12 +241,9 @@ describe("feature flag targeting tab", () => {
     const newAllocation = screen.getByText("New checkout 25%")
     expect(controlAllocation.previousElementSibling).toHaveClass("bg-blue-600")
     expect(newAllocation.previousElementSibling).toHaveClass("bg-emerald-600")
-    expect(controlAllocation.closest('[data-slot="serving-summary"]')).toHaveClass(
-      "w-full",
-      "flex-col",
-      "xl:w-auto",
-      "xl:flex-row"
-    )
+    expect(
+      controlAllocation.closest('[data-slot="serving-summary"]')
+    ).toHaveClass("w-full", "flex-col", "xl:w-auto", "xl:flex-row")
     const defaultDispatch = screen.getByText("Dispatch by")
     expect(defaultDispatch.nextElementSibling).toHaveTextContent("keyId")
     expect(
@@ -318,6 +317,40 @@ describe("feature flag targeting tab", () => {
     expect(
       screen.getByRole("button", { name: "2 pending changes" })
     ).toBeEnabled()
+  })
+
+  it("makes change request previews read-only and hides all workflow actions", () => {
+    renderTargeting(exampleFlag(), true, true, true)
+
+    expect(
+      screen.getByRole("switch", { name: "Toggle feature flag status" })
+    ).toHaveAttribute("aria-disabled", "true")
+    expect(
+      screen.getByRole("combobox", {
+        name: "Default rule serving variation",
+      })
+    ).toBeDisabled()
+    expect(
+      screen.getByRole("combobox", { name: "Flag OFF serving variation" })
+    ).toBeDisabled()
+    expect(screen.getByRole("button", { name: "Add rule" })).toBeDisabled()
+    for (const addUser of screen.getAllByRole("button", {
+      name: "Search by name or keyId to add",
+    })) {
+      expect(addUser).toBeDisabled()
+    }
+    expect(
+      screen.queryByRole("button", { name: "2 pending changes" })
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole("button", { name: "Discard changes" })
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole("button", { name: "Review & save" })
+    ).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole("button", { name: "More targeting actions" })
+    ).not.toBeInTheDocument()
   })
 
   it("adds a rule through the shared Segment rule editor contract", () => {
@@ -423,8 +456,7 @@ describe("feature flag targeting tab", () => {
         .getAllByText("Serve")
         .find(
           (element) =>
-            element.getAttribute("data-slot") ===
-            "targeting-rule-serve-label"
+            element.getAttribute("data-slot") === "targeting-rule-serve-label"
         )
     ).toHaveClass(
       "flex",

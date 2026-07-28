@@ -109,6 +109,19 @@ export const enFeatureFlags = {
     defaultRuleHelp: "Used when no individual target and rule matches.",
     pendingChanges: "{{count}} pending change",
     pendingChanges_other: "{{count}} pending changes",
+    preview: {
+      title: "Previewing change request",
+      appliedTitle: "Change request applied",
+      description:
+        "This is how Targeting will look after this change request is applied. The current configuration has not changed.",
+      appliedDescription:
+        "This change request has been applied. You are viewing the current Targeting configuration in read-only mode.",
+      reason: "Reason:",
+      viewCurrent: "View current targeting",
+      loadFailed: "Change request preview could not be loaded.",
+      loadFailedHelp: "The current Targeting configuration has not changed.",
+      retry: "Retry",
+    },
     discard: "Discard changes",
     reviewAndSave: "Review & save",
     moreActions: "More targeting actions",
@@ -763,6 +776,19 @@ export const zhFeatureFlags: typeof enFeatureFlags = {
     defaultRuleHelp: "当没有单独定向用户且没有规则匹配时使用。",
     pendingChanges: "{{count}} 项待处理变更",
     pendingChanges_other: "{{count}} 项待处理变更",
+    preview: {
+      title: "正在预览变更请求",
+      appliedTitle: "变更请求已应用",
+      description:
+        "这是应用该变更请求后 Targeting 将呈现的配置。当前配置尚未改变。",
+      appliedDescription:
+        "该变更请求已经应用。你正在以只读模式查看当前 Targeting 配置。",
+      reason: "原因：",
+      viewCurrent: "查看当前 Targeting",
+      loadFailed: "无法加载变更请求预览。",
+      loadFailedHelp: "当前 Targeting 配置没有发生改变。",
+      retry: "重试",
+    },
     discard: "放弃变更",
     reviewAndSave: "审核并保存",
     moreActions: "更多定向操作",

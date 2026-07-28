@@ -1,3 +1,5 @@
+import type { FeatureFlag } from "@/features/flags/flags-types"
+
 export type ChangeRequestStatus =
   "PendingReview" | "Approved" | "Declined" | "Applied"
 
@@ -40,6 +42,13 @@ export type ChangeRequestPage = {
   items: ChangeRequestItem[]
   totalCount: number
   needsReviewCount: number
+}
+
+export type ChangeRequestPreview = {
+  id: string
+  reason: string
+  status: ChangeRequestStatus
+  flag: FeatureFlag
 }
 
 export type ChangeRequestFilters = {

@@ -5,6 +5,7 @@ import type {
   ChangeRequestMember,
   ChangeRequestPage,
   ChangeRequestAction,
+  ChangeRequestPreview,
 } from "./change-requests-types"
 
 function changeRequestsPath(envId: string, suffix = "") {
@@ -39,6 +40,12 @@ export function fetchChangeRequestMembers(searchText: string) {
 
   return fetchApi<{ items: ChangeRequestMember[]; totalCount: number }>(
     `/api/v1/members?${params}`
+  )
+}
+
+export function fetchChangeRequestPreview(envId: string, id: string) {
+  return fetchApi<ChangeRequestPreview>(
+    changeRequestsPath(envId, `/${encodeURIComponent(id)}/preview`)
   )
 }
 

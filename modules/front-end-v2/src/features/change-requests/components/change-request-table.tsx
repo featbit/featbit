@@ -233,10 +233,10 @@ export function ChangeRequestTable({
             const requestTitle = item.reason?.trim() || copy.fallbackRequest
             const flagName = item.flagName || copy.unavailableFlag
             const targetingHref = item.flagKey
-              ? localizedPath(
+              ? `${localizedPath(
                   lang,
                   `/feature-flags/${encodeURIComponent(item.flagKey)}/targeting`
-                )
+                )}?changeRequestId=${encodeURIComponent(item.id)}&mode=preview`
               : ""
             const changes = pendingChanges(toPendingChange(item), {
               flagOn: copy.flagOn,

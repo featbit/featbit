@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useNavigate, useParams } from "react-router-dom"
+import { useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -10,8 +10,10 @@ import { getStoredUserProfile } from "@/features/auth/auth-api"
 import {
   createChangeRequest,
   deleteChangeRequest,
+  fetchChangeRequestPreview,
   performChangeRequestAction,
 } from "@/features/change-requests/change-requests-api"
+import { ChangeRequestPreviewAlert } from "@/features/change-requests/components/change-request-preview-alert"
 import {
   getCurrentProjectEnv,
   getCurrentWorkspace,
@@ -85,6 +87,7 @@ export function FlagDetailsPage() {
   const { t } = useTranslation()
   const params = useParams()
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const queryClient = useQueryClient()
   const lang = resolveLang(params.lang)
   const flagKey = decodeURIComponent(params.flagKey ?? "")
@@ -96,6 +99,11 @@ export function FlagDetailsPage() {
     params.tab === "triggers"
       ? params.tab
       : "targeting"
+  const previewChangeRequestId =
+    activeTab === "targeting" && searchParams.get("mode") === "preview"
+      ? (searchParams.get("changeRequestId")?.trim() ?? "")
+      : ""
+  const previewing = Boolean(previewChangeRequestId)
   const projectEnv = getCurrentProjectEnv()
   const workspace = getCurrentWorkspace()
   const envId = projectEnv?.envId ?? ""
@@ -126,9 +134,22 @@ export function FlagDetailsPage() {
     queryFn: () => fetchFeatureFlag(envId, flagKey),
     enabled: Boolean(envId && flagKey),
   })
+  const previewQuery = useQuery({
+    queryKey: ["change-request-preview", envId, previewChangeRequestId],
+    queryFn: () => fetchChangeRequestPreview(envId, previewChangeRequestId),
+    enabled: Boolean(envId && previewChangeRequestId),
+    retry: false,
+  })
   const saved = flagQuery.data ?? null
-  const targetingFlag =
-    saved && targetingDraft?.key === flagKey
+  const changeRequestPreview =
+    previewQuery.data?.flag.key === flagKey ? previewQuery.data : undefined
+  const previewFailed = Boolean(
+    previewing &&
+    (previewQuery.isError || (previewQuery.isSuccess && !changeRequestPreview))
+  )
+  const targetingFlag = previewing
+    ? (changeRequestPreview?.flag ?? null)
+    : saved && targetingDraft?.key === flagKey
       ? withFlagTargeting(saved, targetingDraft.value)
       : saved
   const variationsFlag =
@@ -136,8 +157,8 @@ export function FlagDetailsPage() {
       ? withFlagVariations(saved, variationsDraft.value)
       : saved
   const selectedKeys = useMemo(
-    () => (saved?.targetUsers ?? []).flatMap((item) => item.keyIds),
-    [saved?.targetUsers]
+    () => (targetingFlag?.targetUsers ?? []).flatMap((item) => item.keyIds),
+    [targetingFlag?.targetUsers]
   )
   const usersQuery = useQuery({
     queryKey: ["flag-selected-users", envId, selectedKeys],
@@ -153,13 +174,15 @@ export function FlagDetailsPage() {
   const pendingQuery = useQuery({
     queryKey: ["flag-pending-changes", envId, flagKey],
     queryFn: () => fetchPendingFlagChanges(envId, flagKey),
-    enabled: Boolean(activeTab === "targeting" && envId && flagKey),
+    enabled: Boolean(
+      activeTab === "targeting" && !previewing && envId && flagKey
+    ),
   })
   const policiesQuery = useQuery({
     queryKey: ["feature-flag-policies", workspace?.id ?? ""],
     queryFn: fetchFlagPolicies,
     enabled:
-      activeTab === "targeting" ||
+      (activeTab === "targeting" && !previewing) ||
       activeTab === "settings" ||
       activeTab === "variations",
     staleTime: 5 * 60_000,
@@ -171,10 +194,18 @@ export function FlagDetailsPage() {
       (activeTab === "targeting" ||
         activeTab === "settings" ||
         activeTab === "variations") &&
+      !previewing &&
       envId
     ),
     staleTime: 5 * 60_000,
   })
+
+  function exitChangeRequestPreview() {
+    const next = new URLSearchParams(searchParams)
+    next.delete("changeRequestId")
+    next.delete("mode")
+    setSearchParams(next, { replace: true })
+  }
 
   const users = useMemo(() => {
     const map = new Map(resolvedUsers)
@@ -197,11 +228,13 @@ export function FlagDetailsPage() {
       canUseFlagAction(policiesQuery.data, resourceRn, action)
     )
   }
-  const dirty = Boolean(
-    saved &&
-    targetingFlag &&
-    stableFlagTargeting(saved) !== stableFlagTargeting(targetingFlag)
-  )
+  const dirty =
+    !previewing &&
+    Boolean(
+      saved &&
+      targetingFlag &&
+      stableFlagTargeting(saved) !== stableFlagTargeting(targetingFlag)
+    )
   const variationsDirty = Boolean(
     saved &&
     variationsFlag &&
@@ -442,12 +475,12 @@ export function FlagDetailsPage() {
   }
   if (
     !saved ||
-    ((activeTab === "targeting" ||
-      activeTab === "settings" ||
-      activeTab === "variations") &&
-      (policiesQuery.isLoading ||
-        (activeTab === "targeting" &&
-          (propertiesQuery.isLoading || usersQuery.isLoading))))
+    (activeTab === "targeting" &&
+      (propertiesQuery.isLoading ||
+        usersQuery.isLoading ||
+        (previewing ? previewQuery.isLoading : policiesQuery.isLoading))) ||
+    ((activeTab === "settings" || activeTab === "variations") &&
+      policiesQuery.isLoading)
   ) {
     return (
       <div className="-m-5 min-h-[calc(100vh-3.5rem)] bg-background px-8 py-6">
@@ -507,52 +540,87 @@ export function FlagDetailsPage() {
           />
         ) : activeTab === "triggers" ? (
           <TriggersTab flagId={saved.id} archived={Boolean(saved.isArchived)} />
-        ) : (
-          <TargetingTab
-            flag={targetingFlag!}
-            users={users}
-            properties={propertiesQuery.data ?? []}
-            pendingCount={pendingQuery.data?.length ?? 0}
-            dirty={dirty}
-            saving={saveMutation.isPending}
-            toggling={toggleMutation.isPending}
-            canToggle={can("ToggleFlag")}
-            canUpdateOffVariation={can("UpdateFlagOffVariation")}
-            canUpdateDefault={can("UpdateFlagDefaultRule")}
-            canUpdateUsers={can("UpdateFlagIndividualTargeting")}
-            canUpdateRules={can("UpdateFlagRules")}
-            onDraftChange={(value) =>
-              setTargetingDraft({ key: flagKey, value: targetingOf(value) })
-            }
-            onResolveUser={(user) =>
-              setResolvedUsers((current) =>
-                new Map(current).set(user.keyId, user)
-              )
-            }
-            onDiscard={() => setTargetingDraft(null)}
-            onReview={() => {
-              setReviewInitialComment("")
-              setReviewOpen(true)
-            }}
-            onOpenPending={() => setPendingOpen(true)}
-            scheduleGranted={scheduleGranted}
-            changeRequestGranted={changeRequestGranted}
-            onSchedule={() =>
-              setSubmission({ mode: "schedule", initialReason: "" })
-            }
-            onChangeRequest={() =>
-              setSubmission({ mode: "change-request", initialReason: "" })
-            }
-            onToggle={(nextEnabled) =>
-              setConfirmation({
-                kind: "toggle",
-                flag: targetingFlag!,
-                nextEnabled,
-                hasUnsavedTargeting: dirty,
-                savedOffVariation: savedOffVariationLabel,
-              })
-            }
+        ) : previewing && previewFailed ? (
+          <ChangeRequestPreviewAlert
+            failed
+            onRetry={() => void previewQuery.refetch()}
+            onExit={exitChangeRequestPreview}
           />
+        ) : (
+          <>
+            {previewing ? (
+              <ChangeRequestPreviewAlert
+                preview={changeRequestPreview}
+                failed={false}
+                onRetry={() => void previewQuery.refetch()}
+                onExit={exitChangeRequestPreview}
+              />
+            ) : null}
+            <TargetingTab
+              flag={targetingFlag!}
+              users={users}
+              properties={propertiesQuery.data ?? []}
+              pendingCount={previewing ? 0 : (pendingQuery.data?.length ?? 0)}
+              dirty={dirty}
+              saving={saveMutation.isPending}
+              toggling={toggleMutation.isPending}
+              readOnly={previewing}
+              canToggle={!previewing && can("ToggleFlag")}
+              canUpdateOffVariation={
+                !previewing && can("UpdateFlagOffVariation")
+              }
+              canUpdateDefault={!previewing && can("UpdateFlagDefaultRule")}
+              canUpdateUsers={
+                !previewing && can("UpdateFlagIndividualTargeting")
+              }
+              canUpdateRules={!previewing && can("UpdateFlagRules")}
+              onDraftChange={(value) => {
+                if (!previewing) {
+                  setTargetingDraft({
+                    key: flagKey,
+                    value: targetingOf(value),
+                  })
+                }
+              }}
+              onResolveUser={(user) =>
+                setResolvedUsers((current) =>
+                  new Map(current).set(user.keyId, user)
+                )
+              }
+              onDiscard={() => setTargetingDraft(null)}
+              onReview={() => {
+                if (previewing) return
+                setReviewInitialComment("")
+                setReviewOpen(true)
+              }}
+              onOpenPending={() => !previewing && setPendingOpen(true)}
+              scheduleGranted={scheduleGranted}
+              changeRequestGranted={changeRequestGranted}
+              onSchedule={() => {
+                if (!previewing) {
+                  setSubmission({ mode: "schedule", initialReason: "" })
+                }
+              }}
+              onChangeRequest={() => {
+                if (!previewing) {
+                  setSubmission({
+                    mode: "change-request",
+                    initialReason: "",
+                  })
+                }
+              }}
+              onToggle={(nextEnabled) => {
+                if (previewing) return
+                setConfirmation({
+                  kind: "toggle",
+                  flag: targetingFlag!,
+                  nextEnabled,
+                  hasUnsavedTargeting: dirty,
+                  savedOffVariation: savedOffVariationLabel,
+                })
+              }}
+            />
+          </>
         )}
         <FlagChangeReviewDialog
           open={reviewOpen}

@@ -79,7 +79,7 @@ describe("ChangeRequestTable", () => {
     })
     expect(targetingLink).toHaveAttribute(
       "href",
-      "/en/feature-flags/checkout-v2/targeting"
+      "/en/feature-flags/checkout-v2/targeting?changeRequestId=request-1&mode=preview"
     )
     expect(targetingLink).toHaveAttribute("target", "_blank")
     expect(targetingLink).toHaveAttribute("rel", "noopener noreferrer")
@@ -125,8 +125,13 @@ describe("ChangeRequestTable", () => {
       screen.getByRole("button", { name: "Expand change request" })
     )
 
-    expect(
-      screen.getByRole("link", { name: "View in targeting" })
-    ).toHaveAttribute("target", "_blank")
+    const targetingLink = screen.getByRole("link", {
+      name: "View in targeting",
+    })
+    expect(targetingLink).toHaveAttribute("target", "_blank")
+    expect(targetingLink).toHaveAttribute(
+      "href",
+      "/en/feature-flags/checkout-v2/targeting?changeRequestId=request-3&mode=preview"
+    )
   })
 })
