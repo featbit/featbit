@@ -19,6 +19,7 @@
 
 ## UI And Asset Rules
 
+- Do not modify `front-end-v2/src/index.css`.
 - Do not copy Angular/ng-zorro styling one-to-one.
 - Prefer shadcn/ui and Tailwind default tokens for buttons, text colors, spacing, radius, focus rings, and common controls.
 - When migrating any module into `front-end-v2`, prefer the native shadcn/Base UI components in `front-end-v2/src/components/ui/*`.
