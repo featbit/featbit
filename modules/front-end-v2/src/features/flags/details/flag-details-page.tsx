@@ -8,6 +8,11 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { getStoredUserProfile } from "@/features/auth/auth-api"
 import {
+  createChangeRequest,
+  deleteChangeRequest,
+  performChangeRequestAction,
+} from "@/features/change-requests/change-requests-api"
+import {
   getCurrentProjectEnv,
   getCurrentWorkspace,
   localizedPath,
@@ -24,14 +29,12 @@ import {
   parseLicense,
 } from "@/features/workspace/license/license-utils"
 import {
-  createFlagChangeRequest,
   createFlagSchedule,
   fetchFeatureFlag,
   fetchFlagEnvironmentSettings,
   fetchFlagPolicies,
   fetchPendingFlagChanges,
-  removePendingFlagChange,
-  updateFlagChangeRequest,
+  removePendingSchedule,
   toggleFeatureFlag,
   updateFeatureFlagTargeting,
   updateFeatureFlagVariations,
@@ -332,7 +335,7 @@ export function FlagDetailsPage() {
           withChangeRequest: input.withChangeRequest,
         })
       }
-      return createFlagChangeRequest(envId, flagKey, {
+      return createChangeRequest(envId, flagKey, {
         targeting: targetingOf(targetingFlag!),
         revision: saved?.revision ?? "",
         reviewers: input.reviewers,
@@ -348,7 +351,9 @@ export function FlagDetailsPage() {
   })
   const removePendingMutation = useMutation({
     mutationFn: (item: PendingFlagChange) =>
-      removePendingFlagChange(envId, item),
+      item.type === "Schedule"
+        ? removePendingSchedule(envId, item.id)
+        : deleteChangeRequest(envId, item.changeRequestId ?? item.id),
     onSuccess: (_, item) => {
       queryClient.setQueryData(
         ["flag-pending-changes", envId, flagKey],
@@ -367,7 +372,11 @@ export function FlagDetailsPage() {
       item: PendingFlagChange
       action: "approve" | "decline" | "apply"
     }) =>
-      updateFlagChangeRequest(envId, item.changeRequestId ?? item.id, action),
+      performChangeRequestAction(
+        envId,
+        item.changeRequestId ?? item.id,
+        action
+      ),
     onSuccess: (_, { item, action }) => {
       const currentUserId = getStoredUserProfile().id
       queryClient.setQueryData(

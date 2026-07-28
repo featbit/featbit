@@ -145,6 +145,11 @@ const AuditLogsPage = lazy(() =>
     default: module.AuditLogsPage,
   }))
 )
+const ChangeRequestsPage = lazy(() =>
+  import("@/features/change-requests/change-requests-page").then((module) => ({
+    default: module.ChangeRequestsPage,
+  }))
+)
 const FlagsPage = lazy(() =>
   import("@/features/flags/index/flags-page").then((module) => ({
     default: module.FlagsPage,
@@ -356,6 +361,7 @@ export function AppRoutes() {
           <Route path="webhooks" element={<WebhooksPage />} />
           <Route path="end-users" element={<EndUsersPage />} />
           <Route path="audit-logs" element={<AuditLogsPage />} />
+          <Route path="change-requests" element={<ChangeRequestsPage />} />
           <Route path="feature-flags" element={<FlagsPage />} />
           <Route path="feature-flags/compare" element={<FlagsComparePage />} />
           <Route

@@ -128,50 +128,11 @@ export function createFlagSchedule(
   )
 }
 
-export function createFlagChangeRequest(
-  envId: string,
-  key: string,
-  input: {
-    targeting: FlagTargeting
-    revision: string
-    reviewers: string[]
-    reason: string
-  }
-) {
-  return fetchApi<string>(
-    `${flagsPath(envId)}/${encodeURIComponent(key)}/change-requests`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(input),
-    }
-  )
-}
-
-export function removePendingFlagChange(
-  envId: string,
-  item: Pick<PendingFlagChange, "id" | "type">
-) {
-  const collection = item.type === "Schedule" ? "schedules" : "change-requests"
+export function removePendingSchedule(envId: string, id: string) {
   return fetchApi<boolean>(
-    `${flagsPath(envId)}/${collection}/${encodeURIComponent(item.id)}`,
+    `${flagsPath(envId)}/schedules/${encodeURIComponent(id)}`,
     {
       method: "DELETE",
-    }
-  )
-}
-
-export function updateFlagChangeRequest(
-  envId: string,
-  id: string,
-  action: "approve" | "decline" | "apply"
-) {
-  return fetchApi<boolean>(
-    `${flagsPath(envId)}/change-requests/${encodeURIComponent(id)}/${action}`,
-    {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({}),
     }
   )
 }
