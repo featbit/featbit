@@ -5,13 +5,13 @@ namespace Api.Health;
 /// <see cref="HeartbeatService"/> last managed to publish a heartbeat to the control plane.
 /// The <see cref="HeartbeatFreshnessHealthCheck"/> reads this to decide whether the pod has
 /// likely been evicted / partitioned from the control plane (no successful publish for longer
-/// than a threshold) and should report itself <c>Degraded</c> to operators.
+/// than a threshold) and should report itself <c>Unhealthy</c> to operators.
 /// </summary>
 /// <remarks>
-/// This is an observational signal only. Under <c>GatedCommit</c> a stale heartbeat means the
-/// pod can no longer prove liveness to the control plane, but it keeps serving its
-/// last-committed (consistent) values — so we surface <c>Degraded</c>, never <c>Unhealthy</c>,
-/// and never fail readiness.
+/// Under <c>GatedCommit</c> a stale heartbeat means the pod can no longer prove liveness to the
+/// control plane, so it is fenced: the health check reports <c>Unhealthy</c>, which fails
+/// <c>/health/readiness</c> and pulls the pod out of load-balancer rotation until heartbeats
+/// resume. This is a hard fence (consistency over availability), not merely observational.
 /// </remarks>
 public interface IHeartbeatPublishStatus
 {

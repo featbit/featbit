@@ -89,10 +89,10 @@ public static class ServicesRegister
             services.AddSingleton<IAppliedWatermarkReader, RedisAppliedWatermarkReader>();
 
             // D5 (#22): shared singleton recording the last successful heartbeat publish, plus the
-            // freshness health check that surfaces a Degraded (not Unhealthy) self-fence signal under
-            // GatedCommit. Tagged Readiness so it appears on /health/readiness; ASP.NET Core maps
-            // Degraded -> HTTP 200 by default (only Unhealthy -> 503), so a Degraded result is
-            // observational and does NOT fail readiness.
+            // freshness health check that surfaces an Unhealthy self-fence signal under GatedCommit.
+            // Tagged Readiness so it appears on /health/readiness; ASP.NET Core maps Unhealthy -> HTTP
+            // 503, so a stale heartbeat under GatedCommit is a HARD fence: the pod fails readiness and
+            // is pulled from load-balancer rotation until heartbeats resume.
             services.AddSingleton<IHeartbeatPublishStatus, HeartbeatPublishStatus>();
             healthChecks.AddCheck<HeartbeatFreshnessHealthCheck>(
                 "heartbeat-freshness",
