@@ -12,6 +12,7 @@ public class StreamingOptions
     public string[] SupportedTypes { get; set; } = ConnectionType.All;
 
     public IRelayProxyService? CustomRpService { get; set; } = null;
+
     public bool TrackClientHostName { get; set; } = true;
 
     public int TokenExpirySeconds { get; set; } = 30;
