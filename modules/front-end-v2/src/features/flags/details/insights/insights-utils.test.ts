@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { chartSeries, insightRange, INSIGHTS_INTERVALS } from "./insights-utils"
+import { VARIATION_CHART_COLORS } from "../../variation-colors"
 
 describe("insights utilities", () => {
   it("keeps the Angular-compatible interval choices", () => {
@@ -35,6 +36,9 @@ describe("insights utilities", () => {
       "Control",
       "New checkout",
     ])
+    expect(result.series.map((series) => series.color)).toEqual(
+      VARIATION_CHART_COLORS.slice(0, 2)
+    )
     expect(result.data[0]).toMatchObject({
       total: 18,
       variation0: 11,

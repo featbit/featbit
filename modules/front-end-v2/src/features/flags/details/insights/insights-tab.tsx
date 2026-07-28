@@ -40,6 +40,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import type { FeatureFlag } from "../../flags-types"
+import { VARIATION_CHART_COLOR_VARS } from "../../variation-colors"
 import {
   fetchEvaluatedEndUsers,
   fetchFeatureFlagInsights,
@@ -254,7 +255,9 @@ export function InsightsTab({
               }
             />
           ) : (
-            <div className="relative h-80">
+            <div
+              className={`relative h-80 [--insights-total-color:var(--color-yellow-700)] dark:[--insights-total-color:var(--color-yellow-300)] ${VARIATION_CHART_COLOR_VARS}`}
+            >
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart
                   data={chart.data}
@@ -304,8 +307,8 @@ export function InsightsTab({
                     type="monotone"
                     dataKey="total"
                     name={t("featureFlags.detailsPage.insights.total")}
-                    stroke="var(--foreground)"
-                    strokeWidth={2.5}
+                    stroke="var(--insights-total-color)"
+                    strokeWidth={3}
                     dot={false}
                     activeDot={{ r: 4 }}
                   />

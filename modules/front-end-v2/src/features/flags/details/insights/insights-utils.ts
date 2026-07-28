@@ -4,6 +4,7 @@ import type {
   InsightsInterval,
   InsightsPeriod,
 } from "./insights-types"
+import { variationChartColor } from "../../variation-colors"
 
 export const INSIGHTS_PERIODS: InsightsPeriod[] = [
   "30m",
@@ -28,19 +29,6 @@ export const INSIGHTS_INTERVALS: Record<InsightsPeriod, InsightsInterval[]> = {
   "6M": ["DAY", "WEEK", "MONTH"],
   "12M": ["DAY", "WEEK", "MONTH"],
 }
-
-export const INSIGHT_SERIES_COLORS = [
-  "#2563eb",
-  "#059669",
-  "#d97706",
-  "#7c3aed",
-  "#e11d48",
-  "#0891b2",
-  "#ea580c",
-  "#4f46e5",
-  "#65a30d",
-  "#c026d3",
-] as const
 
 export function insightRange(
   period: InsightsPeriod,
@@ -104,7 +92,7 @@ export function chartSeries(
     series: names.map((name, index) => ({
       key: `variation${index}`,
       name,
-      color: INSIGHT_SERIES_COLORS[index % INSIGHT_SERIES_COLORS.length],
+      color: variationChartColor(index),
     })),
     data: insights.map((point) => {
       const row: Record<string, string | number> = {
