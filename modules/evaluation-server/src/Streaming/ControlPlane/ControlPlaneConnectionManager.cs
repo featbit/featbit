@@ -49,18 +49,18 @@ public sealed class ControlPlaneConnectionManager(
     {
         if (context.Type == ConnectionType.RelayProxy)
         {
-            var removeTasks = context.MappedRpConnections.Select(connection => RemoveSingleAsync(connection, context));
+            var removeTasks = context.MappedRpConnections.Select(RemoveSingleAsync);
             await Task.WhenAll(removeTasks);
         }
         else
         {
-            await RemoveSingleAsync(context.Connection, context);
+            await RemoveSingleAsync(context.Connection);
         }
 
         context.MarkAsClosed();
         return;
 
-        async Task RemoveSingleAsync(Connection connection, ConnectionContext connectionContext)
+        async Task RemoveSingleAsync(Connection connection)
         {
             try
             {
@@ -69,12 +69,12 @@ public sealed class ControlPlaneConnectionManager(
                 {
                     var message = connection.AsMessage(ConnectionMessageType.ConnectionClosed);
                     await producer.PublishAsync(Topics.ConnectionClosed, message);
-                    ConnectionManager.Log.ConnectionRemoved(logger, connectionContext);
+                    ConnectionManager.Log.ConnectionRemoved(logger, context);
                 }
             }
             catch (Exception ex)
             {
-                ConnectionManager.Log.RemoveConnectionFailed(logger, connectionContext, ex);
+                ConnectionManager.Log.RemoveConnectionFailed(logger, context, ex);
             }
         }
     }
