@@ -9,6 +9,11 @@ namespace Infrastructure;
 
 public static class ConfigurationExtensions
 {
+    public static bool UseControlPlane(this IConfiguration configuration)
+    {
+        return configuration.GetValue<bool>("ControlPlane:Enabled");
+    }
+
     public static string GetMqProvider(this IConfiguration configuration)
     {
         var provider = configuration.GetValue(MqProvider.SectionName, MqProvider.Redis)!;

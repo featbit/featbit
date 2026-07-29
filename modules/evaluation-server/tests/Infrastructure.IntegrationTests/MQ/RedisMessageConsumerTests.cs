@@ -2,7 +2,9 @@ using Domain.Messages;
 using Infrastructure.Caches.Redis;
 using Infrastructure.IntegrationTests.Fixtures;
 using Infrastructure.MQ.Redis;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Logging.Testing;
 using Moq;
 using StackExchange.Redis;
 
@@ -37,6 +39,7 @@ public class RedisMessageConsumerTests(RedisFixture fixture)
 
         var sut = new RedisMessageConsumer(
             redisClient.Object,
+            CreateConfiguration(useControlPlane: true),
             [handler.Object],
             NullLogger<RedisMessageConsumer>.Instance);
 
@@ -62,6 +65,16 @@ public class RedisMessageConsumerTests(RedisFixture fixture)
         }
     }
 
+    private static IConfiguration CreateConfiguration(bool useControlPlane)
+    {
+        return new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["ControlPlane:Enabled"] = useControlPlane.ToString()
+            })
+            .Build();
+    }
+
     private static async Task WaitForSubscriptionAsync(
         IServer server,
         RedisChannel channel,
@@ -83,4 +96,5 @@ public class RedisMessageConsumerTests(RedisFixture fixture)
             await Task.Delay(25, timeout.Token);
         }
     }
+
 }
