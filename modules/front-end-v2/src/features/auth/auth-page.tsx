@@ -94,12 +94,12 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
   return (
     <main className="min-h-screen bg-background text-foreground">
       <AuthHeader lang={lang} />
-      <div className="grid min-h-[calc(100vh-4rem)] lg:grid-cols-[1.45fr_1fr]">
+      <div className="grid min-h-[calc(100vh-4rem)] 2xl:grid-cols-[1.45fr_1fr]">
         <LeftPanel />
-        <section className="grid min-h-[calc(100vh-4rem)] grid-rows-[minmax(0,1fr)_auto] border-border lg:border-l">
+        <section className="grid min-h-[calc(100vh-4rem)] grid-rows-[minmax(0,1fr)_auto] border-border 2xl:border-l">
           <div className="flex min-h-0 w-full flex-col justify-center py-8">
             {permissionDenied ? (
-              <div className="mx-auto mb-6 w-full max-w-[560px] px-8 sm:px-12 lg:px-0">
+              <div className="mx-auto mb-6 w-full max-w-[560px] px-8 sm:px-12 2xl:px-0">
                 <Alert variant="destructive">
                   <AlertTitle>{t("auth.permissionDenied.title")}</AlertTitle>
                   <AlertDescription>
@@ -109,14 +109,14 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
               </div>
             ) : null}
             {externalLoginError ? (
-              <div className="mx-auto mb-6 w-full max-w-[560px] px-8 sm:px-12 lg:px-0">
+              <div className="mx-auto mb-6 w-full max-w-[560px] px-8 sm:px-12 2xl:px-0">
                 <Alert variant="destructive">
                   <AlertDescription>{externalLoginError}</AlertDescription>
                 </Alert>
               </div>
             ) : null}
             {externalLoginMutation.isPending ? (
-              <div className="mx-auto mb-6 w-full max-w-[560px] px-8 sm:px-12 lg:px-0">
+              <div className="mx-auto mb-6 w-full max-w-[560px] px-8 sm:px-12 2xl:px-0">
                 <Alert>
                   <AlertDescription>{t("auth.signingIn")}</AlertDescription>
                 </Alert>

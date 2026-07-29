@@ -36,7 +36,7 @@ export function SsoForm({
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-[560px] flex-col justify-start px-8 pb-8 sm:px-12 lg:px-0">
+    <div className="mx-auto flex w-full max-w-[560px] flex-col justify-start px-8 pb-8 sm:px-12 2xl:px-0">
       <Button
         type="button"
         variant="link"

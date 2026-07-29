@@ -24,6 +24,31 @@ test.describe("login page", () => {
     await expect(page.getByRole("button", { name: "Okta" })).toHaveCount(0)
   })
 
+  test("keeps the login form centered at medium desktop widths", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 800 })
+    await mockAuthEndpoints(page)
+    await page.goto("/en/login")
+
+    await expect(
+      page.getByRole("heading", { name: "Release with confidence" })
+    ).toBeHidden()
+
+    const emailBounds = await page.getByLabel("Email").boundingBox()
+    if (!emailBounds) {
+      throw new Error("Email field is not visible")
+    }
+
+    expect(emailBounds.x).toBeGreaterThan(48)
+    expect(emailBounds.x + emailBounds.width).toBeLessThan(1280 - 48)
+
+    await page.setViewportSize({ width: 1536, height: 1024 })
+    await expect(
+      page.getByRole("heading", { name: "Release with confidence" })
+    ).toBeVisible()
+  })
+
   test("pre-fills remembered email and remember-me state", async ({ page }) => {
     await mockAuthEndpoints(page)
     await page.addInitScript(() => {
