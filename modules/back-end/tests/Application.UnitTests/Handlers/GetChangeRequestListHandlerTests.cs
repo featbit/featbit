@@ -38,10 +38,9 @@ public class GetChangeRequestListHandlerTests
             flagId,
             [currentUserId],
             creatorId,
-            reason: "Approved after QA",
-            status: FlagChangeRequestStatus.Approved);
+            reason: "Approved after QA");
+        approvedChangeRequest.Approve(currentUserId);
         approvedChangeRequest.Id = Guid.NewGuid();
-        approvedChangeRequest.UpdatorId = currentUserId;
         var flag = new FeatureFlag
         {
             Id = flagId,

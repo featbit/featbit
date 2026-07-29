@@ -101,7 +101,7 @@ public class ChangeRequestController : ApiControllerBase
     }
 
     /// <summary>
-    /// Apply an approved change request when the current user is a reviewer or creator.
+    /// Apply an approved change request when the current user is the creator or an approving reviewer.
     /// </summary>
     [HttpPut("{id:guid}/apply")]
     [Authorize(LicenseFeatures.ChangeRequest)]
