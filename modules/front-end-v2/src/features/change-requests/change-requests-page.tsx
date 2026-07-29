@@ -5,7 +5,7 @@ import {
 } from "@tanstack/react-query"
 import { Loader2 } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
-import { useParams } from "react-router-dom"
+import { useParams, useSearchParams } from "react-router-dom"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -28,22 +28,30 @@ import type {
 } from "./change-requests-types"
 import { ChangeRequestFilters } from "./components/change-request-filters"
 import { ChangeRequestTable } from "./components/change-request-table"
+import { ChangeRequestDecisionDialog } from "./components/change-request-decision-dialog"
 
 const PAGE_SIZE = 20
 
 export function ChangeRequestsPage() {
   const { lang: langParam } = useParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   const lang = resolveLang(langParam)
   const copy = changeRequestsCopy(lang)
   const projectEnv = getCurrentProjectEnv()
   const envId = projectEnv?.envId ?? ""
   const currentUserId = getStoredUserProfile().id
+  const focusedChangeRequestId =
+    searchParams.get("changeRequestId")?.trim() ?? ""
   const queryClient = useQueryClient()
   const [query, setQuery] = useState("")
   const [debouncedQuery, setDebouncedQuery] = useState("")
   const [author, setAuthor] = useState<OrganizationMember | null>(null)
   const [reviewer, setReviewer] = useState<OrganizationMember | null>(null)
   const [status, setStatus] = useState<ChangeRequestStatus>()
+  const [decisionTarget, setDecisionTarget] = useState<{
+    item: ChangeRequestItem
+    action: Extract<ChangeRequestAction, "approve" | "decline">
+  } | null>(null)
 
   useEffect(() => {
     const timeout = window.setTimeout(
@@ -53,11 +61,14 @@ export function ChangeRequestsPage() {
     return () => window.clearTimeout(timeout)
   }, [query])
 
-  const filtersApplied = Boolean(query.trim() || author || reviewer || status)
+  const filtersApplied = Boolean(
+    focusedChangeRequestId || query.trim() || author || reviewer || status
+  )
   const listQuery = useInfiniteQuery({
     queryKey: [
       "change-requests",
       envId,
+      focusedChangeRequestId,
       debouncedQuery,
       author?.id,
       reviewer?.id,
@@ -67,6 +78,7 @@ export function ChangeRequestsPage() {
       fetchChangeRequests(
         envId,
         {
+          id: focusedChangeRequestId || undefined,
           query: debouncedQuery,
           creatorId: author?.id,
           reviewerId: reviewer?.id,
@@ -93,15 +105,23 @@ export function ChangeRequestsPage() {
     mutationFn: async ({
       item,
       action,
+      comment,
     }: {
       item: ChangeRequestItem
       action: ChangeRequestAction
+      comment?: string
     }) => {
-      const success = await performChangeRequestAction(envId, item.id, action)
+      const success = await performChangeRequestAction(
+        envId,
+        item.id,
+        action,
+        comment
+      )
       if (!success) throw new Error(copy.actionUnavailable)
       return { action, item }
     },
     onSuccess: ({ action, item }) => {
+      setDecisionTarget(null)
       toast.success(copy.actionSucceeded(action))
       void queryClient.invalidateQueries({
         queryKey: ["change-requests", envId],
@@ -137,6 +157,9 @@ export function ChangeRequestsPage() {
     setAuthor(null)
     setReviewer(null)
     setStatus(undefined)
+    const nextSearchParams = new URLSearchParams(searchParams)
+    nextSearchParams.delete("changeRequestId")
+    setSearchParams(nextSearchParams, { replace: true })
   }
 
   if (!envId) {
@@ -211,15 +234,21 @@ export function ChangeRequestsPage() {
             <TooltipProvider>
               <ChangeRequestTable
                 items={items}
+                initialExpandedId={focusedChangeRequestId || undefined}
+                focused={Boolean(focusedChangeRequestId)}
                 lang={lang}
                 currentUserId={currentUserId}
                 loading={listQuery.isLoading}
                 filtered={filtersApplied}
                 acting={acting}
                 copy={copy}
-                onAction={(item, action) =>
-                  reviewMutation.mutate({ item, action })
-                }
+                onAction={(item, action) => {
+                  if (action === "apply") {
+                    reviewMutation.mutate({ item, action })
+                    return
+                  }
+                  setDecisionTarget({ item, action })
+                }}
                 onCopyKey={async (key) => {
                   try {
                     await navigator.clipboard.writeText(key)
@@ -234,6 +263,24 @@ export function ChangeRequestsPage() {
           </div>
         )}
       </div>
+
+      {decisionTarget ? (
+        <ChangeRequestDecisionDialog
+          key={`${decisionTarget.item.id}-${decisionTarget.action}`}
+          action={decisionTarget.action}
+          requestTitle={
+            decisionTarget.item.reason?.trim() || copy.fallbackRequest
+          }
+          saving={reviewMutation.isPending}
+          copy={copy}
+          onOpenChange={(open) => {
+            if (!open) setDecisionTarget(null)
+          }}
+          onConfirm={(comment) =>
+            reviewMutation.mutate({ ...decisionTarget, comment })
+          }
+        />
+      ) : null}
 
       {listQuery.hasNextPage || nextPageError ? (
         <div className="flex justify-center pt-5">

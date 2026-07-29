@@ -16,6 +16,11 @@ public class FlagChangeRequestService(AppDbContext dbContext)
         var query = Queryable.Where(item => item.OrgId == orgId && item.EnvId == envId);
         var search = filter.Query?.Trim().ToLower();
 
+        if (filter.Id.HasValue)
+        {
+            query = query.Where(item => item.Id == filter.Id.Value);
+        }
+
         if (!string.IsNullOrWhiteSpace(search))
         {
             query = query.Where(item => item.Reason != null && item.Reason.ToLower().Contains(search));

@@ -22,6 +22,7 @@ export function fetchChangeRequests(
     pageSize: String(pageSize),
   })
 
+  if (filters.id) params.set("id", filters.id)
   if (filters.query) params.set("query", filters.query)
   if (filters.creatorId) params.set("creatorId", filters.creatorId)
   if (filters.reviewerId) params.set("reviewerId", filters.reviewerId)
@@ -59,11 +60,20 @@ export function createChangeRequest(
 export function performChangeRequestAction(
   envId: string,
   id: string,
-  action: ChangeRequestAction
+  action: ChangeRequestAction,
+  comment: string | undefined
 ) {
   return fetchApi<boolean>(
     changeRequestsPath(envId, `/${encodeURIComponent(id)}/${action}`),
-    { method: "PUT" }
+    {
+      method: "PUT",
+      ...(comment === undefined
+        ? {}
+        : {
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ comment }),
+          }),
+    }
   )
 }
 

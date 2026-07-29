@@ -16,6 +16,11 @@ public class FlagChangeRequestService(MongoDbClient mongoDb)
         var query = Queryable.Where(item => item.OrgId == orgId && item.EnvId == envId);
         var search = filter.Query?.Trim();
 
+        if (filter.Id.HasValue)
+        {
+            query = query.Where(item => item.Id == filter.Id.Value);
+        }
+
         if (!string.IsNullOrWhiteSpace(search))
         {
             query = query.Where(item =>

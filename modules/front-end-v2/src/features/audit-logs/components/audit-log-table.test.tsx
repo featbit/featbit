@@ -66,6 +66,12 @@ describe("AuditLogTable", () => {
 
     expect(expand).toHaveAttribute("aria-expanded", "true")
     expect(screen.getByText("Changes")).toBeInTheDocument()
+    expect(screen.getByText("Changes").closest("tr")).toHaveClass(
+      "bg-muted/20",
+      "hover:bg-muted/20"
+    )
+    expect(screen.getByText("Changes").closest(".rounded-md")).toBeNull()
+    expect(screen.getByText("Updated").closest(".max-w-3xl")).not.toBeNull()
     expect(
       screen.getByRole("button", { name: "View raw data" })
     ).toBeInTheDocument()
@@ -155,5 +161,130 @@ describe("AuditLogTable", () => {
 
     expect(screen.getByText("1 change")).toBeInTheDocument()
     expect(screen.getByText("Segment-specific change")).toBeInTheDocument()
+  })
+
+  it("shows a decision detail instead of an empty semantic change ledger", () => {
+    render(
+      <MemoryRouter>
+        <TooltipProvider>
+          <AuditLogTable
+            items={[
+              {
+                ...auditLog,
+                operation: "DeclineFlagChangeRequest",
+                comment: "Needs a rollback plan.",
+                instructions: [],
+              },
+            ]}
+            lang="en"
+            locale="en"
+            loading={false}
+            filtered={false}
+            onClearFilters={vi.fn()}
+            onViewRawData={vi.fn()}
+          />
+        </TooltipProvider>
+      </MemoryRouter>
+    )
+
+    expect(screen.getByText("Declined change request")).toBeInTheDocument()
+    fireEvent.click(screen.getByRole("button", { name: "Expand audit log" }))
+
+    expect(screen.getByText("Decision")).toBeInTheDocument()
+    expect(screen.queryByText("No semantic changes available.")).toBeNull()
+    expect(
+      screen.queryByRole("button", { name: "View raw data" })
+    ).not.toBeInTheDocument()
+    expect(screen.getAllByText("Needs a rollback plan.")).toHaveLength(2)
+  })
+
+  it("shows the snapshotted request context and targeting link", () => {
+    const baseFlag = {
+      id: "flag-1",
+      name: "Checkout redesign",
+      key: "checkout-redesign",
+      description: "",
+      isEnabled: true,
+      isArchived: false,
+      variationType: "boolean",
+      variations: [
+        { id: "on", name: "Enabled", value: "true" },
+        { id: "off", name: "Disabled", value: "false" },
+      ],
+      disabledVariationId: "off",
+      targetUsers: [],
+      rules: [],
+      fallthrough: {
+        variations: [{ id: "on", rollout: [0, 1] }],
+        dispatchKey: "keyId",
+      },
+      tags: [],
+    }
+    const decisionSnapshot = JSON.stringify({
+      id: "flag-1",
+      name: "Checkout redesign",
+      key: "checkout-redesign",
+      changeRequestId: "request-1",
+      requestComment: "Roll out after QA approval.",
+      proposedDataChange: {
+        previous: JSON.stringify(baseFlag),
+        current: JSON.stringify({
+          ...baseFlag,
+          fallthrough: {
+            ...baseFlag.fallthrough,
+            variations: [{ id: "off", rollout: [0, 1] }],
+          },
+        }),
+      },
+    })
+
+    render(
+      <MemoryRouter>
+        <TooltipProvider>
+          <AuditLogTable
+            items={[
+              {
+                ...auditLog,
+                operation: "ApproveFlagChangeRequest",
+                comment: "Looks good.",
+                dataChange: {
+                  previous: decisionSnapshot,
+                  current: decisionSnapshot,
+                },
+                instructions: [],
+              },
+            ]}
+            lang="en"
+            locale="en"
+            loading={false}
+            filtered={false}
+            onClearFilters={vi.fn()}
+            onViewRawData={vi.fn()}
+          />
+        </TooltipProvider>
+      </MemoryRouter>
+    )
+
+    fireEvent.click(screen.getByRole("button", { name: "Expand audit log" }))
+
+    expect(screen.getByText("Request comment")).toBeInTheDocument()
+    expect(screen.getByText("Reviewer comment")).toBeInTheDocument()
+    expect(screen.getByText("Roll out after QA approval.")).toBeInTheDocument()
+    expect(screen.getByText("Targeting changes")).toBeInTheDocument()
+    expect(
+      screen.getByRole("link", { name: "View change request" })
+    ).toHaveAttribute("href", "/en/change-requests?changeRequestId=request-1")
+    expect(
+      screen.getByRole("link", { name: "View change request" })
+    ).toHaveAttribute("target", "_blank")
+    expect(
+      screen.getByRole("link", { name: "View change request" })
+    ).toHaveAttribute("rel", "noopener noreferrer")
+    expect(
+      screen.getByRole("link", { name: "View change request" }).firstChild
+    ).toHaveClass("translate-y-px")
+    expect(
+      screen.queryByRole("button", { name: "View raw data" })
+    ).not.toBeInTheDocument()
   })
 })

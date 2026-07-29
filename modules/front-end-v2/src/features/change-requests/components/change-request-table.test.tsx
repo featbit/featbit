@@ -91,6 +91,10 @@ describe("ChangeRequestTable", () => {
     )
     expect(targetingLink).toHaveAttribute("target", "_blank")
     expect(targetingLink).toHaveAttribute("rel", "noopener noreferrer")
+    expect(targetingLink).toHaveClass("border", "h-7")
+    expect(targetingLink.firstChild).toHaveClass("translate-y-px")
+    expect(targetingLink.closest(".justify-between")).not.toBeNull()
+    expect(targetingLink.closest(".max-w-3xl")).toBeNull()
     expect(
       screen.queryByRole("columnheader", { name: "Author" })
     ).not.toBeInTheDocument()
@@ -213,5 +217,140 @@ describe("ChangeRequestTable", () => {
       "href",
       "/en/feature-flags/checkout-v2/targeting?changeRequestId=request-3&mode=preview"
     )
+  })
+
+  it("uses the same flag labels and history ledger layout as audit logs", () => {
+    const baseFlag = {
+      id: "flag-1",
+      name: "Checkout V2",
+      key: "checkout-v2",
+      isEnabled: true,
+      isArchived: false,
+      variationType: "boolean",
+      variations: [
+        { id: "on", name: "True", value: "true" },
+        { id: "off", name: "False", value: "false" },
+      ],
+      disabledVariationId: "off",
+      targetUsers: [],
+      rules: [],
+      fallthrough: {
+        variations: [{ id: "off", rollout: [0, 1] }],
+        dispatchKey: "keyId",
+      },
+      tags: [],
+    }
+
+    render(
+      <MemoryRouter>
+        <TooltipProvider>
+          <ChangeRequestTable
+            items={[
+              {
+                ...observerRequest,
+                dataChange: {
+                  previous: JSON.stringify(baseFlag),
+                  current: JSON.stringify({
+                    ...baseFlag,
+                    fallthrough: {
+                      ...baseFlag.fallthrough,
+                      variations: [{ id: "on", rollout: [0, 1] }],
+                    },
+                  }),
+                },
+              },
+            ]}
+            lang="en"
+            currentUserId="current-user"
+            loading={false}
+            filtered={false}
+            acting={null}
+            copy={changeRequestsCopy("en")}
+            onAction={vi.fn()}
+            onCopyKey={vi.fn()}
+            onClearFilters={vi.fn()}
+          />
+        </TooltipProvider>
+      </MemoryRouter>
+    )
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Expand change request" })
+    )
+
+    expect(screen.getByText("Flag ON")).toBeInTheDocument()
+    expect(screen.getByText("Updated").closest(".grid")).toHaveClass(
+      "grid-cols-[minmax(11.25rem,13.75rem)_6.25rem_minmax(0,1fr)]"
+    )
+  })
+
+  it("expands the change request selected by a deep link", () => {
+    render(
+      <MemoryRouter>
+        <TooltipProvider>
+          <ChangeRequestTable
+            items={[reviewableRequest, applicableRequest]}
+            initialExpandedId="request-2"
+            lang="en"
+            currentUserId="current-user"
+            loading={false}
+            filtered
+            acting={null}
+            copy={changeRequestsCopy("en")}
+            onAction={vi.fn()}
+            onCopyKey={vi.fn()}
+            onClearFilters={vi.fn()}
+          />
+        </TooltipProvider>
+      </MemoryRouter>
+    )
+
+    expect(
+      screen
+        .getByText("Increase mobile rollout to 50%.")
+        .closest("tr")
+        ?.querySelector('[aria-expanded="true"]')
+    ).not.toBeNull()
+    expect(
+      screen
+        .getByText("Ready for review after QA sign-off.")
+        .closest("tr")
+        ?.querySelector('[aria-expanded="false"]')
+    ).not.toBeNull()
+  })
+
+  it("explains when a deep-linked change request is unavailable", () => {
+    const onClearFilters = vi.fn()
+    render(
+      <MemoryRouter>
+        <TooltipProvider>
+          <ChangeRequestTable
+            items={[]}
+            initialExpandedId="missing-request"
+            focused
+            lang="en"
+            currentUserId="current-user"
+            loading={false}
+            filtered
+            acting={null}
+            copy={changeRequestsCopy("en")}
+            onAction={vi.fn()}
+            onCopyKey={vi.fn()}
+            onClearFilters={onClearFilters}
+          />
+        </TooltipProvider>
+      </MemoryRouter>
+    )
+
+    expect(screen.getByText("Change request unavailable")).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        "It may have been deleted, belong to another environment, or you may not have access."
+      )
+    ).toBeInTheDocument()
+    fireEvent.click(
+      screen.getByRole("button", { name: "View all change requests" })
+    )
+    expect(onClearFilters).toHaveBeenCalledOnce()
   })
 })

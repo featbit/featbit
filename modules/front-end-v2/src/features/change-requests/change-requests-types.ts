@@ -50,6 +50,7 @@ export type ChangeRequestPreview = {
 }
 
 export type ChangeRequestFilters = {
+  id?: string
   query: string
   creatorId?: string
   reviewerId?: string

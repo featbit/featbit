@@ -30,6 +30,16 @@ const en = {
   approving: "Approving...",
   decline: "Decline",
   declining: "Declining...",
+  approveDialogTitle: "Approve change request",
+  declineDialogTitle: "Decline change request",
+  decisionDialogDescriptionBefore: "Record your decision for “",
+  decisionDialogDescriptionAfter: "”.",
+  decisionComment: "Comment",
+  optional: "optional",
+  approveCommentPlaceholder: "Add context for your approval",
+  declineCommentPlaceholder: "Explain why this change request is declined",
+  declineCommentRequired: "A comment is required when declining.",
+  cancel: "Cancel",
   apply: "Apply changes",
   applying: "Applying changes...",
   viewInTargeting: "View in targeting",
@@ -41,8 +51,6 @@ const en = {
   unknownUser: "Unknown user",
   reviewerFallback: (id: string) => `Reviewer ${id}`,
   you: "You",
-  flagOn: "On",
-  flagOff: "Off",
   summary: (reviewCount: number) => `${reviewCount} need your review`,
   expand: "Expand change request",
   collapse: "Collapse change request",
@@ -56,6 +64,10 @@ const en = {
     "Change requests submitted from feature flag Targeting will appear here.",
   filteredEmptyTitle: "No change requests match these filters",
   filteredEmptyDescription: "Clear the filters or try a different search.",
+  unavailableTitle: "Change request unavailable",
+  unavailableDescription:
+    "It may have been deleted, belong to another environment, or you may not have access.",
+  viewAll: "View all change requests",
   actionSucceeded: (action: "approve" | "decline" | "apply") =>
     action === "apply"
       ? "Changes applied."
@@ -129,8 +141,6 @@ const zh: ChangeRequestsCopy = {
   unknownUser: "未知用户",
   reviewerFallback: (id) => `审核人 ${id}`,
   you: "你",
-  flagOn: "开启",
-  flagOff: "关闭",
   summary: (reviewCount) => `${reviewCount} 个需要你审核`,
   expand: "展开变更请求",
   collapse: "收起变更请求",
@@ -143,6 +153,22 @@ const zh: ChangeRequestsCopy = {
   emptyDescription: "从功能开关 Targeting 提交的变更请求将显示在这里。",
   filteredEmptyTitle: "没有符合当前筛选条件的变更请求",
   filteredEmptyDescription: "请清除筛选条件或尝试其它搜索内容。",
+  unavailableTitle: "变更请求不可用",
+  unavailableDescription:
+    "该变更请求可能已被删除、属于其它环境，或者你没有访问权限。",
+  viewAll: "查看所有变更请求",
+  approveDialogTitle: "\u6279\u51c6\u53d8\u66f4\u8bf7\u6c42",
+  declineDialogTitle: "\u62d2\u7edd\u53d8\u66f4\u8bf7\u6c42",
+  decisionDialogDescriptionBefore: "\u8bb0\u5f55\u4f60\u5bf9\u201c",
+  decisionDialogDescriptionAfter: "\u201d\u7684\u51b3\u5b9a\u3002",
+  decisionComment: "\u8bc4\u8bba",
+  optional: "\u53ef\u9009",
+  approveCommentPlaceholder: "\u6dfb\u52a0\u6279\u51c6\u8bf4\u660e",
+  declineCommentPlaceholder:
+    "\u8bf4\u660e\u62d2\u7edd\u8be5\u53d8\u66f4\u8bf7\u6c42\u7684\u539f\u56e0",
+  declineCommentRequired:
+    "\u62d2\u7edd\u65f6\u5fc5\u987b\u586b\u5199\u8bc4\u8bba\u3002",
+  cancel: "\u53d6\u6d88",
   actionSucceeded: (action) =>
     action === "apply"
       ? "变更已应用。"

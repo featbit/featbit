@@ -2,7 +2,7 @@ import { ChevronDown, ChevronRight } from "lucide-react"
 import { Fragment, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
@@ -19,7 +19,11 @@ import {
 } from "@/components/ui/tooltip"
 import { localizedPath } from "@/features/layout/layout-context"
 import type { Lang } from "@/features/layout/layout-types"
-import { auditObjectIdentity, auditTypeLabel } from "../audit-log-utils"
+import {
+  auditDecisionSnapshot,
+  auditObjectIdentity,
+  auditTypeLabel,
+} from "../audit-log-utils"
 import type { AuditLog } from "../audit-logs-types"
 import {
   type AuditLogTableAdapter,
@@ -159,6 +163,8 @@ export function AuditLogTable({
             const eventTitle = rowAdapter.eventTitle(log)
             const eventSubtitle = rowAdapter.eventSubtitle(log)
             const changeDetails = rowAdapter.changeDetails(log)
+            const decisionDetails = changeDetails.kind === "decision"
+            const decisionSnapshot = auditDecisionSnapshot(log)
             const comment = log.comment?.trim()
             const hasRawData = Boolean(
               log.dataChange.previous || log.dataChange.current
@@ -244,44 +250,78 @@ export function AuditLogTable({
                 </TableRow>
 
                 {isExpanded ? (
-                  <TableRow className="hover:bg-transparent">
+                  <TableRow className="bg-muted/20 hover:bg-muted/20">
                     <TableCell
                       colSpan={columnCount}
-                      className="p-3 whitespace-normal"
+                      className="px-16 py-4 whitespace-normal"
                     >
-                      <div className="rounded-md bg-muted/40 p-4">
+                      <div>
                         <div className="mb-3 flex items-center justify-between">
                           <div className="flex items-baseline gap-2">
                             <h3 className="text-sm font-medium">
-                              {t("auditLogs.changes")}
+                              {t(
+                                decisionDetails
+                                  ? "auditLogs.decision"
+                                  : "auditLogs.changes"
+                              )}
                             </h3>
-                            <span className="text-sm text-muted-foreground">
-                              {t("auditLogs.changeCount", {
-                                count: changeDetails.count,
-                              })}
-                            </span>
+                            {!decisionDetails ? (
+                              <span className="text-sm text-muted-foreground">
+                                {t("auditLogs.changeCount", {
+                                  count: changeDetails.count,
+                                })}
+                              </span>
+                            ) : null}
                           </div>
-                          {hasRawData ? (
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={() => onViewRawData(log)}
-                            >
-                              {t("auditLogs.viewRawData")}
-                            </Button>
-                          ) : null}
+                          <div className="flex items-center gap-2">
+                            {decisionSnapshot?.changeRequestId ? (
+                              <Link
+                                to={`${localizedPath(
+                                  lang,
+                                  "/change-requests"
+                                )}?changeRequestId=${encodeURIComponent(
+                                  decisionSnapshot.changeRequestId
+                                )}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={buttonVariants({
+                                  variant: "outline",
+                                  size: "sm",
+                                })}
+                              >
+                                <span className="translate-y-px">
+                                  {t("auditLogs.viewChangeRequest")}
+                                </span>
+                              </Link>
+                            ) : null}
+                            {hasRawData && !decisionDetails ? (
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => onViewRawData(log)}
+                              >
+                                {t("auditLogs.viewRawData")}
+                              </Button>
+                            ) : null}
+                          </div>
                         </div>
                         {changeDetails.content ? (
-                          changeDetails.content
-                        ) : (
+                          <div className="max-w-3xl">
+                            {changeDetails.content}
+                          </div>
+                        ) : !decisionDetails ? (
                           <p className="py-5 text-center text-sm text-muted-foreground">
                             {t("auditLogs.noSemanticChanges")}
                           </p>
-                        )}
+                        ) : null}
                         <div className="mt-4 border-t pt-3">
                           <p className="text-xs font-medium text-muted-foreground">
-                            {t("auditLogs.comment")}
+                            {t(
+                              decisionDetails
+                                ? "auditLogs.reviewerComment"
+                                : "auditLogs.comment"
+                            )}
                           </p>
                           <p
                             className={

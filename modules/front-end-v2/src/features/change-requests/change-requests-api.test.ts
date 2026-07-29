@@ -25,6 +25,7 @@ describe("change requests API", () => {
     await fetchChangeRequests(
       "env / 1",
       {
+        id: "11111111-1111-1111-1111-111111111111",
         query: "after QA",
         creatorId: "author-1",
         reviewerId: "reviewer-1",
@@ -38,6 +39,7 @@ describe("change requests API", () => {
     const parsed = new URL(url, "https://featbit.test")
     expect(parsed.pathname).toBe("/api/v1/envs/env%20%2F%201/change-requests")
     expect(Object.fromEntries(parsed.searchParams)).toEqual({
+      id: "11111111-1111-1111-1111-111111111111",
       query: "after QA",
       creatorId: "author-1",
       reviewerId: "reviewer-1",
@@ -84,19 +86,36 @@ describe("change requests API", () => {
     )
   })
 
-  it.each(["approve", "decline", "apply"] as const)(
-    "sends the %s action to the centralized controller",
-    async (action) => {
-      vi.mocked(fetchApi).mockResolvedValue(true)
+  it("sends apply without a decision body", async () => {
+    vi.mocked(fetchApi).mockResolvedValue(true)
 
-      await performChangeRequestAction("env-1", "request-1", action)
+    await performChangeRequestAction("env-1", "request-1", "apply", undefined)
 
-      expect(fetchApi).toHaveBeenCalledWith(
-        `/api/v1/envs/env-1/change-requests/request-1/${action}`,
-        { method: "PUT" }
-      )
-    }
-  )
+    expect(fetchApi).toHaveBeenCalledWith(
+      "/api/v1/envs/env-1/change-requests/request-1/apply",
+      { method: "PUT" }
+    )
+  })
+
+  it("sends the decision comment for the new review flow", async () => {
+    vi.mocked(fetchApi).mockResolvedValue(true)
+
+    await performChangeRequestAction(
+      "env-1",
+      "request-1",
+      "decline",
+      "Needs a rollback plan."
+    )
+
+    expect(fetchApi).toHaveBeenCalledWith(
+      "/api/v1/envs/env-1/change-requests/request-1/decline",
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ comment: "Needs a rollback plan." }),
+      }
+    )
+  })
 
   it("deletes through the centralized controller", async () => {
     vi.mocked(fetchApi).mockResolvedValue(true)

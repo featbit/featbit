@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { i18n } from "@/lib/i18n/i18n"
 import {
+  auditDecisionSnapshot,
   auditEventTitle,
   auditHistoryChanges,
   auditObjectIdentity,
@@ -85,6 +86,43 @@ describe("audit log presentation", () => {
         i18n.t
       )
     ).toBe("Updated targeting")
+  })
+
+  it("labels every change request decision as its own audit event", () => {
+    expect(
+      auditEventTitle(log({ operation: "ApproveFlagChangeRequest" }), i18n.t)
+    ).toBe("Approved change request")
+    expect(
+      auditEventTitle(log({ operation: "DeclineFlagChangeRequest" }), i18n.t)
+    ).toBe("Declined change request")
+  })
+
+  it("reads the immutable change request context from a decision snapshot", () => {
+    const proposedDataChange = {
+      previous: JSON.stringify({ id: "flag-1", rules: [] }),
+      current: JSON.stringify({ id: "flag-1", rules: [{ id: "rule-1" }] }),
+    }
+    const snapshot = JSON.stringify({
+      id: "flag-1",
+      name: "Checkout",
+      key: "checkout-v2",
+      changeRequestId: "request-1",
+      requestComment: "Ready for review",
+      proposedDataChange,
+    })
+
+    expect(
+      auditDecisionSnapshot(
+        log({
+          operation: "ApproveFlagChangeRequest",
+          dataChange: { previous: snapshot, current: snapshot },
+        })
+      )
+    ).toEqual({
+      changeRequestId: "request-1",
+      requestComment: "Ready for review",
+      proposedDataChange,
+    })
   })
 
   it("reuses segment semantic changes when complete snapshots are available", () => {

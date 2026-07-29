@@ -1,14 +1,9 @@
-import {
-  Box,
-  ChevronDown,
-  ChevronRight,
-  Copy,
-  ExternalLink,
-} from "lucide-react"
+import { Box, ChevronDown, ChevronRight, Copy } from "lucide-react"
 import { Fragment, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
@@ -169,6 +164,8 @@ function ReviewerList({
 
 export function ChangeRequestTable({
   items,
+  initialExpandedId,
+  focused = false,
   lang,
   currentUserId,
   loading,
@@ -180,6 +177,8 @@ export function ChangeRequestTable({
   onClearFilters,
 }: {
   items: ChangeRequestItem[]
+  initialExpandedId?: string
+  focused?: boolean
   lang: Lang
   currentUserId?: string
   loading: boolean
@@ -190,13 +189,17 @@ export function ChangeRequestTable({
   onCopyKey: (key: string) => void
   onClearFilters: () => void
 }) {
+  const { t } = useTranslation()
   const ledger = useFlagChangeLedgerAdapter()
   const [expandedId, setExpandedId] = useState<string | null | undefined>(
     undefined
   )
   const defaultExpandedId = useMemo(
-    () => items.find((item) => item.canReview)?.id ?? null,
-    [items]
+    () =>
+      items.some((item) => item.id === initialExpandedId)
+        ? initialExpandedId!
+        : (items.find((item) => item.canReview)?.id ?? null),
+    [initialExpandedId, items]
   )
   const visibleExpandedId =
     expandedId === undefined ? defaultExpandedId : expandedId
@@ -244,8 +247,8 @@ export function ChangeRequestTable({
                 )}?changeRequestId=${encodeURIComponent(item.id)}&mode=preview`
               : ""
             const changes = pendingChanges(toPendingChange(item), {
-              flagOn: copy.flagOn,
-              flagOff: copy.flagOff,
+              flagOn: t("featureFlags.detailsPage.flagOn"),
+              flagOff: t("featureFlags.detailsPage.flagOff"),
             })
             const isActing = acting?.id === item.id
 
@@ -419,9 +422,9 @@ export function ChangeRequestTable({
                       colSpan={7}
                       className="px-16 py-4 whitespace-normal"
                     >
-                      <div className="max-w-3xl">
-                        <div>
-                          <div className="mb-2 flex items-baseline gap-2">
+                      <div>
+                        <div className="mb-3 flex items-center justify-between gap-4">
+                          <div className="flex items-baseline gap-2">
                             <h3 className="text-sm font-medium">
                               {copy.targetingChanges}
                             </h3>
@@ -429,11 +432,28 @@ export function ChangeRequestTable({
                               {copy.changeCount(changes.length)}
                             </span>
                           </div>
+                          {targetingHref ? (
+                            <Link
+                              to={targetingHref}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={buttonVariants({
+                                variant: "outline",
+                                size: "sm",
+                              })}
+                            >
+                              <span className="translate-y-px">
+                                {copy.viewInTargeting}
+                              </span>
+                            </Link>
+                          ) : null}
+                        </div>
+                        <div className="max-w-3xl">
                           {changes.length ? (
                             <ChangeLedger
                               changes={changes}
-                              layout="targeting"
-                              className="max-h-none bg-transparent p-0"
+                              layout="history"
+                              className="max-h-[32rem] bg-transparent p-0"
                               {...ledger}
                             />
                           ) : (
@@ -442,17 +462,6 @@ export function ChangeRequestTable({
                             </p>
                           )}
                         </div>
-                        {targetingHref ? (
-                          <Link
-                            to={targetingHref}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="mt-3 inline-flex h-8 items-center gap-1.5 text-sm font-medium underline underline-offset-4"
-                          >
-                            {copy.viewInTargeting}
-                            <ExternalLink className="size-3.5" />
-                          </Link>
-                        ) : null}
                       </div>
                     </TableCell>
                   </TableRow>
@@ -465,12 +474,18 @@ export function ChangeRequestTable({
             <TableCell colSpan={7} className="h-52 text-center">
               <div className="mx-auto max-w-md space-y-2">
                 <p className="font-medium">
-                  {filtered ? copy.filteredEmptyTitle : copy.emptyTitle}
+                  {focused
+                    ? copy.unavailableTitle
+                    : filtered
+                      ? copy.filteredEmptyTitle
+                      : copy.emptyTitle}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  {filtered
-                    ? copy.filteredEmptyDescription
-                    : copy.emptyDescription}
+                  {focused
+                    ? copy.unavailableDescription
+                    : filtered
+                      ? copy.filteredEmptyDescription
+                      : copy.emptyDescription}
                 </p>
                 {filtered ? (
                   <Button
@@ -479,7 +494,7 @@ export function ChangeRequestTable({
                     size="sm"
                     onClick={onClearFilters}
                   >
-                    {copy.clearFilters}
+                    {focused ? copy.viewAll : copy.clearFilters}
                   </Button>
                 ) : null}
               </div>

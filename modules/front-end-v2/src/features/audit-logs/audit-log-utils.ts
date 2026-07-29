@@ -14,6 +14,7 @@ import {
 } from "@/features/segments/details/segment-details-utils"
 import type {
   AuditInstruction,
+  ChangeRequestDecisionAuditSnapshot,
   AuditLog,
   AuditObjectIdentity,
 } from "./audit-logs-types"
@@ -120,6 +121,10 @@ export function auditEventTitle(log: AuditLog, t: TFunction) {
       return t("auditLogs.restored")
     case "remove":
       return t("auditLogs.removed")
+    case "approveflagchangerequest":
+      return t("auditLogs.approvedChangeRequest")
+    case "declineflagchangerequest":
+      return t("auditLogs.declinedChangeRequest")
     case "applyflagchangerequest":
       return t("auditLogs.appliedChangeRequest")
     case "applyflagschedule":
@@ -149,6 +154,51 @@ export function auditEventTitle(log: AuditLog, t: TFunction) {
       return t("auditLogs.updated")
     default:
       return log.operation || t("auditLogs.unknownEvent")
+  }
+}
+
+export function isChangeRequestDecisionOperation(operation: string) {
+  const normalized = operation.toLowerCase()
+  return (
+    normalized === "approveflagchangerequest" ||
+    normalized === "declineflagchangerequest"
+  )
+}
+
+export function auditDecisionSnapshot(
+  log: AuditLog
+): ChangeRequestDecisionAuditSnapshot | null {
+  if (!isChangeRequestDecisionOperation(log.operation)) return null
+
+  const snapshot =
+    recordSnapshot(log.dataChange.current) ??
+    recordSnapshot(log.dataChange.previous)
+  if (!snapshot) return null
+
+  const proposed = snapshot.proposedDataChange
+  const proposedRecord =
+    proposed && typeof proposed === "object" && !Array.isArray(proposed)
+      ? (proposed as Record<string, unknown>)
+      : null
+  const previous = proposedRecord?.previous
+  const current = proposedRecord?.current
+
+  return {
+    changeRequestId:
+      typeof snapshot.changeRequestId === "string"
+        ? snapshot.changeRequestId
+        : "",
+    requestComment:
+      typeof snapshot.requestComment === "string"
+        ? snapshot.requestComment
+        : null,
+    proposedDataChange:
+      typeof previous === "string" || typeof current === "string"
+        ? {
+            ...(typeof previous === "string" ? { previous } : {}),
+            ...(typeof current === "string" ? { current } : {}),
+          }
+        : null,
   }
 }
 

@@ -5,6 +5,14 @@ export type AuditInstruction = {
   value: unknown
 }
 
+export type AuditDataChange = { previous?: string; current?: string }
+
+export type ChangeRequestDecisionAuditSnapshot = {
+  changeRequestId: string
+  requestComment: string | null
+  proposedDataChange: AuditDataChange | null
+}
+
 export type AuditLog = {
   id: string
   refId: string
@@ -15,7 +23,7 @@ export type AuditLog = {
   creatorEmail: string
   createdAt: string
   comment: string
-  dataChange: { previous?: string; current?: string }
+  dataChange: AuditDataChange
   instructions: AuditInstruction[]
 }
 

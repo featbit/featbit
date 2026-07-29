@@ -5,6 +5,11 @@ namespace Application.ChangeRequests;
 public class ChangeRequestFilter : PagedRequest
 {
     /// <summary>
+    /// Return a specific change request.
+    /// </summary>
+    public Guid? Id { get; set; }
+
+    /// <summary>
     /// The comment or part of the comment of a change request.
     /// </summary>
     public string Query { get; set; }

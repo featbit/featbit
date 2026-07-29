@@ -13,6 +13,8 @@ import {
   fetchChangeRequestPreview,
   performChangeRequestAction,
 } from "@/features/change-requests/change-requests-api"
+import { changeRequestsCopy } from "@/features/change-requests/change-requests-copy"
+import { ChangeRequestDecisionDialog } from "@/features/change-requests/components/change-request-decision-dialog"
 import { ChangeRequestPreviewAlert } from "@/features/change-requests/components/change-request-preview-alert"
 import {
   getCurrentProjectEnv,
@@ -90,6 +92,7 @@ export function FlagDetailsPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const queryClient = useQueryClient()
   const lang = resolveLang(params.lang)
+  const changeRequestCopy = changeRequestsCopy(lang)
   const flagKey = decodeURIComponent(params.flagKey ?? "")
   const activeTab =
     params.tab === "history" ||
@@ -123,6 +126,10 @@ export function FlagDetailsPage() {
   const [variationsReviewOpen, setVariationsReviewOpen] = useState(false)
   const [reviewInitialComment, setReviewInitialComment] = useState("")
   const [pendingOpen, setPendingOpen] = useState(false)
+  const [pendingDecision, setPendingDecision] = useState<{
+    item: PendingFlagChange
+    action: "approve" | "decline"
+  } | null>(null)
   const [confirmation, setConfirmation] = useState<FlagConfirmation>(null)
   const [submission, setSubmission] = useState<{
     mode: "schedule" | "change-request"
@@ -401,16 +408,20 @@ export function FlagDetailsPage() {
     mutationFn: ({
       item,
       action,
+      comment,
     }: {
       item: PendingFlagChange
       action: "approve" | "decline" | "apply"
+      comment?: string
     }) =>
       performChangeRequestAction(
         envId,
         item.changeRequestId ?? item.id,
-        action
+        action,
+        comment
       ),
     onSuccess: (_, { item, action }) => {
+      setPendingDecision(null)
       const currentUserId = getStoredUserProfile().id
       queryClient.setQueryData(
         ["flag-pending-changes", envId, flagKey],
@@ -673,10 +684,33 @@ export function FlagDetailsPage() {
           onOpenChange={setPendingOpen}
           onRetry={() => void pendingQuery.refetch()}
           onRemove={(item) => removePendingMutation.mutate(item)}
-          onAction={(item, action) =>
-            pendingActionMutation.mutate({ item, action })
-          }
+          onAction={(item, action) => {
+            if (action === "apply") {
+              pendingActionMutation.mutate({ item, action })
+              return
+            }
+            setPendingDecision({ item, action })
+          }}
         />
+        {pendingDecision ? (
+          <ChangeRequestDecisionDialog
+            key={`${pendingDecision.item.id}-${pendingDecision.action}`}
+            action={pendingDecision.action}
+            requestTitle={
+              pendingDecision.item.changeRequestReason?.trim() ||
+              pendingDecision.item.scheduleTitle?.trim() ||
+              changeRequestCopy.fallbackRequest
+            }
+            saving={pendingActionMutation.isPending}
+            copy={changeRequestCopy}
+            onOpenChange={(open) => {
+              if (!open) setPendingDecision(null)
+            }}
+            onConfirm={(comment) =>
+              pendingActionMutation.mutate({ ...pendingDecision, comment })
+            }
+          />
+        ) : null}
         <TargetingSubmissionDialog
           key={submission ? "submission-open" : "submission-closed"}
           mode={submission?.mode ?? null}

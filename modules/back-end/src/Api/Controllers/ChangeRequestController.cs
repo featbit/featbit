@@ -69,13 +69,17 @@ public class ChangeRequestController : ApiControllerBase
     /// </summary>
     [HttpPut("{id:guid}/approve")]
     [Authorize(LicenseFeatures.ChangeRequest)]
-    public async Task<ApiResponse<bool>> ApproveAsync(Guid envId, Guid id)
+    public async Task<ApiResponse<bool>> ApproveAsync(
+        Guid envId,
+        Guid id,
+        ChangeRequestDecision decision)
     {
         var request = new ApproveFlagChangeRequest
         {
             OrgId = OrgId,
             EnvId = envId,
-            Id = id
+            Id = id,
+            Comment = decision.Comment
         };
 
         var success = await Mediator.Send(request);
@@ -87,13 +91,17 @@ public class ChangeRequestController : ApiControllerBase
     /// </summary>
     [HttpPut("{id:guid}/decline")]
     [Authorize(LicenseFeatures.ChangeRequest)]
-    public async Task<ApiResponse<bool>> DeclineAsync(Guid envId, Guid id)
+    public async Task<ApiResponse<bool>> DeclineAsync(
+        Guid envId,
+        Guid id,
+        ChangeRequestDecision decision)
     {
         var request = new DeclineFlagChangeRequest
         {
             OrgId = OrgId,
             EnvId = envId,
-            Id = id
+            Id = id,
+            Comment = decision.Comment
         };
 
         var success = await Mediator.Send(request);
