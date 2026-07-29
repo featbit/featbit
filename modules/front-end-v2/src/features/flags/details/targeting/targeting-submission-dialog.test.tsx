@@ -3,14 +3,14 @@ import { fireEvent, render, screen, within } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { getStoredUserProfile } from "@/features/auth/auth-api"
-import { fetchSegmentTeamMembers } from "@/features/segments/segments-api"
+import { fetchOrganizationMembers } from "@/features/organization/organization-members-api"
 import { TargetingSubmissionDialog } from "./targeting-submission-dialog"
 
 vi.mock("@/features/auth/auth-api", () => ({
   getStoredUserProfile: vi.fn(),
 }))
-vi.mock("@/features/segments/segments-api", () => ({
-  fetchSegmentTeamMembers: vi.fn(),
+vi.mock("@/features/organization/organization-members-api", () => ({
+  fetchOrganizationMembers: vi.fn(),
 }))
 
 window.HTMLElement.prototype.scrollIntoView = vi.fn()
@@ -47,7 +47,7 @@ function renderDialog(
 describe("targeting submission dialog", () => {
   beforeEach(() => {
     vi.mocked(getStoredUserProfile).mockReturnValue({ id: "current-user" })
-    vi.mocked(fetchSegmentTeamMembers).mockResolvedValue({
+    vi.mocked(fetchOrganizationMembers).mockResolvedValue({
       items: [],
       totalCount: 0,
     })
@@ -98,7 +98,7 @@ describe("targeting submission dialog", () => {
   })
 
   it("keeps selected reviewer chips inside the multi-select control", async () => {
-    vi.mocked(fetchSegmentTeamMembers).mockResolvedValue({
+    vi.mocked(fetchOrganizationMembers).mockResolvedValue({
       items: [
         {
           id: "reviewer-1",

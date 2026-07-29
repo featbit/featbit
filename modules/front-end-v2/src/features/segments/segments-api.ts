@@ -11,7 +11,6 @@ import type {
   SegmentPayload,
   SegmentRule,
   SegmentType,
-  SegmentTeamMember,
   SegmentUserProperty,
   UserPolicy,
 } from "./segments-types"
@@ -179,21 +178,6 @@ export function compareSegmentData(
         dataChange: { previous, current },
       }),
     }
-  )
-}
-
-export function fetchSegmentTeamMembers(input: {
-  searchText: string
-  pageIndex?: number
-  pageSize?: number
-}) {
-  const params = new URLSearchParams({
-    searchText: input.searchText,
-    pageIndex: String(input.pageIndex ?? 0),
-    pageSize: String(input.pageSize ?? 20),
-  })
-  return fetchApi<{ items: SegmentTeamMember[]; totalCount: number }>(
-    `/api/v1/members?${params}`
   )
 }
 

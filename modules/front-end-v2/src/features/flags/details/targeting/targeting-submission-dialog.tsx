@@ -34,8 +34,10 @@ import {
 import { ChangeLedger } from "@/features/change-review/change-ledger"
 import { ReviewSaveSplitButton } from "@/features/change-review/change-review-dialog"
 import { getStoredUserProfile } from "@/features/auth/auth-api"
-import { fetchSegmentTeamMembers } from "@/features/segments/segments-api"
-import type { SegmentTeamMember } from "@/features/segments/segments-types"
+import {
+  fetchOrganizationMembers,
+  type OrganizationMember,
+} from "@/features/organization/organization-members-api"
 import type { FlagTargetingReviewChange } from "./targeting-utils"
 import { useFlagChangeLedgerAdapter } from "./use-flag-change-ledger-adapter"
 
@@ -76,9 +78,9 @@ function ReviewerPicker({
   disabled,
   onChange,
 }: {
-  selected: SegmentTeamMember[]
+  selected: OrganizationMember[]
   disabled: boolean
-  onChange: (members: SegmentTeamMember[]) => void
+  onChange: (members: OrganizationMember[]) => void
 }) {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
@@ -92,7 +94,7 @@ function ReviewerPicker({
   const query = useQuery({
     queryKey: ["flag-reviewers", debounced],
     queryFn: () =>
-      fetchSegmentTeamMembers({ searchText: debounced, pageSize: 20 }),
+      fetchOrganizationMembers({ searchText: debounced, pageSize: 20 }),
     enabled: open,
   })
   return (
@@ -242,7 +244,7 @@ export function TargetingSubmissionDialog({
   const [scheduledTime, setScheduledTime] = useState("")
   const [reason, setReason] = useState(initialReason ?? "")
   const [withApproval, setWithApproval] = useState(false)
-  const [reviewers, setReviewers] = useState<SegmentTeamMember[]>([])
+  const [reviewers, setReviewers] = useState<OrganizationMember[]>([])
   const [openedAt] = useState(() => Date.now())
   const minimumScheduledTime = localDateTimeInputValue(openedAt)
   const reviewerRequired = !schedule || withApproval

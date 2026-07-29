@@ -3,7 +3,6 @@ import { fetchApi } from "@/lib/api/authenticated-api"
 import {
   createChangeRequest,
   deleteChangeRequest,
-  fetchChangeRequestMembers,
   fetchChangeRequestPreview,
   fetchChangeRequests,
   performChangeRequestAction,
@@ -46,16 +45,6 @@ describe("change requests API", () => {
       pageIndex: "2",
       pageSize: "20",
     })
-  })
-
-  it("uses the members endpoint for author and reviewer options", async () => {
-    vi.mocked(fetchApi).mockResolvedValue({ items: [], totalCount: 0 })
-
-    await fetchChangeRequestMembers("maya chen")
-
-    expect(fetchApi).toHaveBeenCalledWith(
-      "/api/v1/members?searchText=maya+chen&pageIndex=0&pageSize=20"
-    )
   })
 
   it("loads a read-only targeting preview from the centralized controller", async () => {

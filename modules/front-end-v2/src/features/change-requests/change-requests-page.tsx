@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { getStoredUserProfile } from "@/features/auth/auth-api"
+import type { OrganizationMember } from "@/features/organization/organization-members-api"
 import {
   getCurrentProjectEnv,
   resolveLang,
@@ -22,7 +23,6 @@ import {
 import { changeRequestsCopy } from "./change-requests-copy"
 import type {
   ChangeRequestItem,
-  ChangeRequestMember,
   ChangeRequestAction,
   ChangeRequestStatus,
 } from "./change-requests-types"
@@ -41,8 +41,8 @@ export function ChangeRequestsPage() {
   const queryClient = useQueryClient()
   const [query, setQuery] = useState("")
   const [debouncedQuery, setDebouncedQuery] = useState("")
-  const [author, setAuthor] = useState<ChangeRequestMember | null>(null)
-  const [reviewer, setReviewer] = useState<ChangeRequestMember | null>(null)
+  const [author, setAuthor] = useState<OrganizationMember | null>(null)
+  const [reviewer, setReviewer] = useState<OrganizationMember | null>(null)
   const [status, setStatus] = useState<ChangeRequestStatus>()
 
   useEffect(() => {

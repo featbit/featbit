@@ -13,6 +13,8 @@ public interface IMemberService
 
     Task<PagedResult<Member>> GetListAsync(Guid organizationId, MemberFilter filter);
 
+    Task<PagedResult<Member>> GetLookupListAsync(Guid organizationId, MemberFilter filter);
+
     Task<List<MemberGroup>> GetGroupsAsync(Guid organizationId, IEnumerable<Guid> memberIds);
 
     Task<PagedResult<MemberGroup>> GetGroupsAsync(Guid organizationId, Guid memberId, MemberGroupFilter filter);

@@ -5,12 +5,6 @@ export type ChangeRequestStatus =
 
 export type ChangeRequestAction = "approve" | "decline" | "apply"
 
-export type ChangeRequestMember = {
-  id: string
-  name: string
-  email: string
-}
-
 export type ChangeRequestReviewer = {
   memberId: string
   name?: string

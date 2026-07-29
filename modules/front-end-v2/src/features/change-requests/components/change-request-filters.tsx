@@ -12,6 +12,10 @@ import {
 } from "@/components/ui/command"
 import { Input } from "@/components/ui/input"
 import {
+  fetchOrganizationMembers,
+  type OrganizationMember,
+} from "@/features/organization/organization-members-api"
+import {
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -24,14 +28,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { fetchChangeRequestMembers } from "../change-requests-api"
 import type { ChangeRequestsCopy } from "../change-requests-copy"
-import type {
-  ChangeRequestMember,
-  ChangeRequestStatus,
-} from "../change-requests-types"
+import type { ChangeRequestStatus } from "../change-requests-types"
 
-function memberLabel(member: ChangeRequestMember) {
+function memberLabel(member: OrganizationMember) {
   return member.name?.trim() || member.email || member.id
 }
 
@@ -43,12 +43,12 @@ function MemberFilter({
   copy,
   onChange,
 }: {
-  value: ChangeRequestMember | null
+  value: OrganizationMember | null
   label: string
   allLabel: string
   searchPlaceholder: string
   copy: ChangeRequestsCopy
-  onChange: (member: ChangeRequestMember | null) => void
+  onChange: (member: OrganizationMember | null) => void
 }) {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState("")
@@ -64,7 +64,7 @@ function MemberFilter({
 
   const membersQuery = useQuery({
     queryKey: ["change-request-members", debouncedSearch],
-    queryFn: () => fetchChangeRequestMembers(debouncedSearch),
+    queryFn: () => fetchOrganizationMembers({ searchText: debouncedSearch }),
     enabled: open,
     staleTime: 30_000,
   })
@@ -177,14 +177,14 @@ export function ChangeRequestFilters({
   onClear,
 }: {
   query: string
-  author: ChangeRequestMember | null
-  reviewer: ChangeRequestMember | null
+  author: OrganizationMember | null
+  reviewer: OrganizationMember | null
   status?: ChangeRequestStatus
   filtersApplied: boolean
   copy: ChangeRequestsCopy
   onQueryChange: (value: string) => void
-  onAuthorChange: (member: ChangeRequestMember | null) => void
-  onReviewerChange: (member: ChangeRequestMember | null) => void
+  onAuthorChange: (member: OrganizationMember | null) => void
+  onReviewerChange: (member: OrganizationMember | null) => void
   onStatusChange: (status: ChangeRequestStatus | undefined) => void
   onClear: () => void
 }) {

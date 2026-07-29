@@ -62,6 +62,21 @@ public class MemberService(MongoDbClient mongoDb) : IMemberService
 
     public async Task<PagedResult<Member>> GetListAsync(Guid organizationId, MemberFilter filter)
     {
+        var members = await GetLookupListAsync(organizationId, filter);
+
+        // get member groups
+        var memberIds = members.Items.Select(x => x.Id);
+        var groups = await GetGroupsAsync(organizationId, memberIds);
+        foreach (var member in members.Items)
+        {
+            member.Groups = groups.Where(x => x.MemberId == member.Id);
+        }
+
+        return members;
+    }
+
+    public async Task<PagedResult<Member>> GetLookupListAsync(Guid organizationId, MemberFilter filter)
+    {
         var users = mongoDb.QueryableOf<User>();
         var organizationUsers = mongoDb.QueryableOf<OrganizationUser>();
 
@@ -96,14 +111,6 @@ public class MemberService(MongoDbClient mongoDb) : IMemberService
             .Skip(filter.PageIndex * filter.PageSize)
             .Take(filter.PageSize)
             .ToListAsync();
-
-        // get member groups
-        var memberIds = items.Select(x => x.Id);
-        var groups = await GetGroupsAsync(organizationId, memberIds);
-        foreach (var member in items)
-        {
-            member.Groups = groups.Where(x => x.MemberId == member.Id);
-        }
 
         return new PagedResult<Member>(totalCount, items);
     }

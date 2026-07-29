@@ -70,12 +70,6 @@ export type PagedAuditLogs = {
   totalCount: number
 }
 
-export type SegmentTeamMember = {
-  id: string
-  name: string
-  email: string
-}
-
 export type PagedSegments = {
   items: Segment[]
   totalCount: number

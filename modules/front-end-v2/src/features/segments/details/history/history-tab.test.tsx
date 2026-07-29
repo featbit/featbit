@@ -2,16 +2,16 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import "@/lib/i18n/i18n"
-import {
-  fetchSegmentAuditLogs,
-  fetchSegmentTeamMembers,
-} from "../../segments-api"
+import { fetchOrganizationMembers } from "@/features/organization/organization-members-api"
+import { fetchSegmentAuditLogs } from "../../segments-api"
 import type { AuditLog, Segment } from "../../segments-types"
 import { HistoryTab } from "./history-tab"
 
 vi.mock("../../segments-api", () => ({
   fetchSegmentAuditLogs: vi.fn(),
-  fetchSegmentTeamMembers: vi.fn(),
+}))
+vi.mock("@/features/organization/organization-members-api", () => ({
+  fetchOrganizationMembers: vi.fn(),
 }))
 
 const segment: Segment = {
@@ -52,7 +52,7 @@ describe("HistoryTab rows", () => {
       items: [auditLog],
       totalCount: 1,
     })
-    vi.mocked(fetchSegmentTeamMembers).mockResolvedValue({
+    vi.mocked(fetchOrganizationMembers).mockResolvedValue({
       items: [],
       totalCount: 0,
     })

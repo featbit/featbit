@@ -42,15 +42,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import {
-  fetchSegmentAuditLogs,
-  fetchSegmentTeamMembers,
-} from "../../segments-api"
-import type {
-  AuditInstruction,
-  AuditLog,
-  Segment,
-  SegmentTeamMember,
-} from "../../segments-types"
+  fetchOrganizationMembers,
+  type OrganizationMember,
+} from "@/features/organization/organization-members-api"
+import { fetchSegmentAuditLogs } from "../../segments-api"
+import type { AuditInstruction, AuditLog, Segment } from "../../segments-types"
 import { ChangeLedger } from "../components/change-ledger"
 import {
   auditEventKind,
@@ -74,7 +70,7 @@ function dayAfter(date: Date) {
   ).getTime()
 }
 
-function memberLabel(member: SegmentTeamMember) {
+function memberLabel(member: OrganizationMember) {
   return member.name?.trim() || member.email || member.id
 }
 
@@ -163,7 +159,7 @@ export function HistoryTab({
   const [memberOpen, setMemberOpen] = useState(false)
   const [memberSearch, setMemberSearch] = useState("")
   const [debouncedMemberSearch, setDebouncedMemberSearch] = useState("")
-  const [member, setMember] = useState<SegmentTeamMember | null>(null)
+  const [member, setMember] = useState<OrganizationMember | null>(null)
   const [dateOpen, setDateOpen] = useState(false)
   const [range, setRange] = useState<DateRange | undefined>()
   const [draftRange, setDraftRange] = useState<DateRange | undefined>()
@@ -199,7 +195,7 @@ export function HistoryTab({
   const membersQuery = useQuery({
     queryKey: ["segment-history-members", debouncedMemberSearch],
     queryFn: () =>
-      fetchSegmentTeamMembers({ searchText: debouncedMemberSearch }),
+      fetchOrganizationMembers({ searchText: debouncedMemberSearch }),
     enabled: memberOpen,
     staleTime: 30_000,
   })

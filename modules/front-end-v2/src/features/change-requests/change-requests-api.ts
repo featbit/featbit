@@ -2,7 +2,6 @@ import { fetchApi } from "@/lib/api/authenticated-api"
 import type { FlagTargeting } from "@/features/flags/flags-types"
 import type {
   ChangeRequestFilters,
-  ChangeRequestMember,
   ChangeRequestPage,
   ChangeRequestAction,
   ChangeRequestPreview,
@@ -29,18 +28,6 @@ export function fetchChangeRequests(
   if (filters.status) params.set("status", filters.status)
 
   return fetchApi<ChangeRequestPage>(`${changeRequestsPath(envId)}?${params}`)
-}
-
-export function fetchChangeRequestMembers(searchText: string) {
-  const params = new URLSearchParams({
-    searchText,
-    pageIndex: "0",
-    pageSize: "20",
-  })
-
-  return fetchApi<{ items: ChangeRequestMember[]; totalCount: number }>(
-    `/api/v1/members?${params}`
-  )
 }
 
 export function fetchChangeRequestPreview(envId: string, id: string) {
