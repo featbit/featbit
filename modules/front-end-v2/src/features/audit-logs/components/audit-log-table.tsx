@@ -74,19 +74,12 @@ function ObjectIdentity({ log, lang }: { log: AuditLog; lang: Lang }) {
           <TooltipContent>{identity.name}</TooltipContent>
         </Tooltip>
       )}
-      <Tooltip>
-        <TooltipTrigger
-          render={
-            <span
-              className={`mt-0.5 block max-w-full truncate font-mono text-xs text-muted-foreground ${nameClass}`}
-              onClick={(event) => event.stopPropagation()}
-            />
-          }
-        >
-          {identity.key}
-        </TooltipTrigger>
-        <TooltipContent>{identity.key}</TooltipContent>
-      </Tooltip>
+      <span
+        className={`mt-0.5 block max-w-full truncate font-mono text-xs text-muted-foreground ${nameClass}`}
+        onClick={(event) => event.stopPropagation()}
+      >
+        {identity.key}
+      </span>
     </div>
   )
 }
@@ -225,7 +218,7 @@ export function AuditLogTable({
                       <Tooltip>
                         <TooltipTrigger
                           render={
-                            <span className="block max-w-full truncate text-xs text-muted-foreground" />
+                            <span className="inline-block max-w-full truncate align-middle text-xs text-muted-foreground" />
                           }
                         >
                           {fragment}
