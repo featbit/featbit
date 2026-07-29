@@ -224,7 +224,7 @@ export function SegmentDetailsPage() {
           />
         ) : null}
         {activeTab === "history" ? (
-          <HistoryTab envId={envId} segment={segment} />
+          <HistoryTab envId={envId} segment={segment} lang={lang} />
         ) : null}
       </div>
     </TooltipProvider>

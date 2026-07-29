@@ -1,705 +1,206 @@
-import { useQuery } from "@tanstack/react-query"
-import {
-  CalendarDays,
-  Check,
-  ChevronDown,
-  ChevronRight,
-  Info,
-  Loader2,
-  Search,
-  X,
-} from "lucide-react"
-import { Fragment, useEffect, useMemo, useState } from "react"
+import { useInfiniteQuery } from "@tanstack/react-query"
+import { Info, Loader2 } from "lucide-react"
+import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import type { DateRange } from "react-day-picker"
 import { Button } from "@/components/ui/button"
-import { Calendar } from "@/components/ui/calendar"
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command"
-import { Input } from "@/components/ui/input"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import {
-  fetchOrganizationMembers,
-  type OrganizationMember,
-} from "@/features/organization/organization-members-api"
-import { fetchSegmentAuditLogs } from "../../segments-api"
-import type { AuditInstruction, AuditLog, Segment } from "../../segments-types"
-import { ChangeLedger } from "../components/change-ledger"
-import {
-  auditEventKind,
-  auditFragments,
-  segmentSnapshot,
-  settingsReviewChanges,
-  targetingChanges,
-  type ReviewChange,
-} from "../segment-details-utils"
-import { RawDataDialog } from "./raw-data-dialog"
+  dayAfter,
+  hasAppliedFilters,
+  startOfDay,
+} from "@/features/audit-logs/audit-log-utils"
+import { fetchAuditLogs } from "@/features/audit-logs/audit-logs-api"
+import type {
+  AuditLog,
+  AuditUser,
+} from "@/features/audit-logs/audit-logs-types"
+import { AuditLogFilters } from "@/features/audit-logs/components/audit-log-filters"
+import { AuditLogRawDataDialog } from "@/features/audit-logs/components/audit-log-raw-data-dialog"
+import { AuditLogTable } from "@/features/audit-logs/components/audit-log-table"
+import type { Lang } from "@/features/layout/layout-types"
+import type { Segment } from "../../segments-types"
+import { useSegmentAuditLogAdapter } from "./segment-audit-log-adapter"
 
-function dayStart(date: Date) {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime()
-}
-
-function dayAfter(date: Date) {
-  return new Date(
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate() + 1
-  ).getTime()
-}
-
-function memberLabel(member: OrganizationMember) {
-  return member.name?.trim() || member.email || member.id
-}
-
-function instructionValue(value: unknown) {
-  if (typeof value === "string") return value || "—"
-  if (Array.isArray(value)) return value.map(String).join(", ") || "—"
-  try {
-    return JSON.stringify(value)
-  } catch {
-    return "—"
-  }
-}
-
-function eventTitle(log: AuditLog, t: ReturnType<typeof useTranslation>["t"]) {
-  const operation = log.operation.toLowerCase()
-  if (operation === "create")
-    return t("segments.detailsPage.history.events.created")
-  if (operation === "archive")
-    return t("segments.detailsPage.history.events.archived")
-  if (operation === "restore")
-    return t("segments.detailsPage.history.events.restored")
-  if (operation === "remove")
-    return t("segments.detailsPage.history.events.removed")
-  if (operation === "update") {
-    return t(
-      `segments.detailsPage.history.events.${auditEventKind(log.instructions)}`
-    )
-  }
-  return t("segments.detailsPage.history.events.unknown", {
-    operation: log.operation,
-  })
-}
-
-function instructionText(
-  instruction: AuditInstruction,
-  t: ReturnType<typeof useTranslation>["t"]
-) {
-  return t(`segments.detailsPage.history.instructions.${instruction.kind}`, {
-    count: Array.isArray(instruction.value) ? instruction.value.length : 1,
-    defaultValue: instruction.kind,
-  })
-}
-
-function instructionAction(kind: string): ReviewChange["action"] {
-  if (kind.startsWith("Add")) return "added"
-  if (kind.startsWith("Remove")) return "removed"
-  return "updated"
-}
-
-function historyChanges(
-  log: AuditLog,
-  t: ReturnType<typeof useTranslation>["t"]
-): ReviewChange[] {
-  const previous = segmentSnapshot(log.dataChange.previous)
-  const current = segmentSnapshot(log.dataChange.current)
-  if (previous && current) {
-    const semantic = [
-      ...targetingChanges(previous, current),
-      ...settingsReviewChanges(previous, current),
-    ]
-    if (semantic.length) return semantic
-  }
-
-  return log.instructions.map((instruction) => {
-    const value = instructionValue(instruction.value)
-    return {
-      kind: instruction.kind.includes("Rule") ? "ruleSummary" : "generic",
-      label: instructionText(instruction, t),
-      literalLabel: true,
-      action: instructionAction(instruction.kind),
-      current: value,
-    }
-  })
-}
+const PAGE_SIZE = 10
 
 export function HistoryTab({
   envId,
   segment,
+  lang,
 }: {
   envId: string
   segment: Segment
+  lang: Lang
 }) {
   const { t, i18n } = useTranslation()
+  const locale = i18n.resolvedLanguage || lang
+  const adapter = useSegmentAuditLogAdapter()
   const [search, setSearch] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
-  const [memberOpen, setMemberOpen] = useState(false)
-  const [memberSearch, setMemberSearch] = useState("")
-  const [debouncedMemberSearch, setDebouncedMemberSearch] = useState("")
-  const [member, setMember] = useState<OrganizationMember | null>(null)
-  const [dateOpen, setDateOpen] = useState(false)
+  const [user, setUser] = useState<AuditUser | null>(null)
   const [range, setRange] = useState<DateRange | undefined>()
-  const [draftRange, setDraftRange] = useState<DateRange | undefined>()
-  const [pageSize, setPageSize] = useState(10)
-  const [expanded, setExpanded] = useState<Set<string>>(new Set())
   const [rawData, setRawData] = useState<AuditLog | null>(null)
-
-  const toggleExpanded = (logId: string) => {
-    setExpanded((current) => {
-      const next = new Set(current)
-      if (next.has(logId)) next.delete(logId)
-      else next.add(logId)
-      return next
-    })
-  }
-
-  useEffect(() => {
-    const timeout = window.setTimeout(() => {
-      setDebouncedSearch(search.trim())
-      setPageSize(10)
-    }, 350)
-    return () => window.clearTimeout(timeout)
-  }, [search])
 
   useEffect(() => {
     const timeout = window.setTimeout(
-      () => setDebouncedMemberSearch(memberSearch.trim()),
-      300
+      () => setDebouncedSearch(search.trim()),
+      400
     )
     return () => window.clearTimeout(timeout)
-  }, [memberSearch])
+  }, [search])
 
-  const membersQuery = useQuery({
-    queryKey: ["segment-history-members", debouncedMemberSearch],
-    queryFn: () =>
-      fetchOrganizationMembers({ searchText: debouncedMemberSearch }),
-    enabled: memberOpen,
-    staleTime: 30_000,
+  const filtersApplied = hasAppliedFilters({
+    query: search,
+    creatorId: user?.id,
+    from: range?.from,
+    to: range?.to,
   })
-  const logsQuery = useQuery({
+  const logsQuery = useInfiniteQuery({
     queryKey: [
-      "segment-audit-logs",
+      "segment-history",
       envId,
       segment.id,
+      segment.type,
       debouncedSearch,
-      member?.id,
+      user?.id,
       range?.from?.toISOString(),
       range?.to?.toISOString(),
-      pageSize,
     ],
-    queryFn: () =>
-      fetchSegmentAuditLogs(envId, {
-        segmentId: segment.id,
-        crossEnvironment: segment.type === "shared",
-        query: debouncedSearch,
-        creatorId: member?.id,
-        from: range?.from ? dayStart(range.from) : undefined,
-        to: range?.to ? dayAfter(range.to) : undefined,
-        pageIndex: 0,
-        pageSize,
-      }),
+    queryFn: ({ pageParam }) =>
+      fetchAuditLogs(
+        envId,
+        {
+          query: debouncedSearch,
+          creatorId: user?.id,
+          refType: "Segment",
+          refId: segment.id,
+          crossEnvironment: segment.type === "shared",
+          from: range?.from ? startOfDay(range.from) : undefined,
+          to: range?.to ? dayAfter(range.to) : undefined,
+        },
+        pageParam,
+        PAGE_SIZE
+      ),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, pages) => {
+      const loaded = pages.reduce((count, page) => count + page.items.length, 0)
+      return loaded < lastPage.totalCount ? pages.length : undefined
+    },
+    enabled: Boolean(envId && segment.id),
   })
-
-  const dateFormatter = useMemo(
-    () =>
-      new Intl.DateTimeFormat(i18n.language, {
-        dateStyle: "medium",
-        timeStyle: "short",
-      }),
-    [i18n.language]
+  const items = useMemo(
+    () => logsQuery.data?.pages.flatMap((page) => page.items) ?? [],
+    [logsQuery.data]
   )
-  const dayFormatter = useMemo(
-    () => new Intl.DateTimeFormat(i18n.language, { dateStyle: "medium" }),
-    [i18n.language]
-  )
-  const rangeLabel =
-    range?.from && range.to
-      ? `${dayFormatter.format(range.from)} – ${dayFormatter.format(range.to)}`
-      : t("segments.detailsPage.history.anyDate")
-  const filtersApplied = Boolean(search || member || range?.from || range?.to)
-  const items = logsQuery.data?.items ?? []
 
-  function renderFragment(log: AuditLog) {
-    const fragments = auditFragments(log.instructions)
-    if (!fragments.length) return null
-    const visible = fragments.slice(0, 2).map((fragment) =>
-      t(`segments.detailsPage.history.fragments.${fragment.kind}`, {
-        count: fragment.count,
-        defaultValue: `${fragment.kind} ${fragment.count}`,
-      })
-    )
-    if (fragments.length > 2) {
-      visible.push(
-        t("segments.detailsPage.history.moreFragments", {
-          count: fragments.length - 2,
-        })
-      )
-    }
-    return visible.join(" · ")
+  function clearFilters() {
+    setSearch("")
+    setDebouncedSearch("")
+    setUser(null)
+    setRange(undefined)
   }
+
+  const initialError = logsQuery.isError && items.length === 0
+  const nextPageError = logsQuery.isError && items.length > 0
 
   return (
     <div className="space-y-5 py-5">
-      <div className="flex items-center gap-4">
-        <div className="relative w-80">
-          <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={search}
-            className="pl-9"
-            placeholder={t("segments.detailsPage.history.search")}
-            onChange={(event) => setSearch(event.target.value)}
-          />
-        </div>
-
-        <div className="flex items-center gap-1">
-          <Popover open={memberOpen} onOpenChange={setMemberOpen}>
-            <PopoverTrigger
-              render={
-                <Button
-                  type="button"
-                  variant="outline"
-                  role="combobox"
-                  aria-expanded={memberOpen}
-                  className="w-64 justify-between font-normal"
-                />
-              }
-            >
-              <span className="truncate">
-                {member
-                  ? memberLabel(member)
-                  : t("segments.detailsPage.history.allUsers")}
-              </span>
-              <ChevronDown className="size-4 text-muted-foreground" />
-            </PopoverTrigger>
-            <PopoverContent align="start" className="w-80 p-0">
-              <Command shouldFilter={false}>
-                <CommandInput
-                  value={memberSearch}
-                  placeholder={t("segments.detailsPage.history.memberSearch")}
-                  onValueChange={setMemberSearch}
-                />
-                <CommandList>
-                  {membersQuery.isLoading ? (
-                    <div className="flex items-center justify-center gap-2 py-6 text-sm text-muted-foreground">
-                      <Loader2 className="size-4 animate-spin" />
-                      {t("segments.detailsPage.loading")}
-                    </div>
-                  ) : membersQuery.isError ? (
-                    <div className="flex items-center justify-between px-3 py-4 text-sm text-destructive">
-                      {t("segments.detailsPage.history.memberLoadFailed")}
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        onClick={() => void membersQuery.refetch()}
-                      >
-                        {t("segments.retry")}
-                      </Button>
-                    </div>
-                  ) : null}
-                  <CommandEmpty>
-                    {t("segments.detailsPage.history.noMembers")}
-                  </CommandEmpty>
-                  <CommandGroup>
-                    {(membersQuery.data?.items ?? []).map((option) => (
-                      <CommandItem
-                        key={option.id}
-                        value={option.id}
-                        onSelect={() => {
-                          setMember(option)
-                          setMemberOpen(false)
-                          setPageSize(10)
-                        }}
-                      >
-                        <Check
-                          className={
-                            member?.id === option.id
-                              ? "size-4 opacity-100"
-                              : "size-4 opacity-0"
-                          }
-                        />
-                        <div className="min-w-0">
-                          <p className="truncate text-sm">
-                            {memberLabel(option)}
-                          </p>
-                          {option.email && option.name ? (
-                            <p className="truncate text-xs text-muted-foreground">
-                              {option.email}
-                            </p>
-                          ) : null}
-                        </div>
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
-          {member ? (
-            <Button
-              type="button"
-              size="icon-sm"
-              variant="ghost"
-              aria-label={t("segments.detailsPage.history.clearMember")}
-              onClick={() => {
-                setMember(null)
-                setPageSize(10)
-              }}
-            >
-              <X />
-            </Button>
-          ) : null}
-        </div>
-
-        <Popover
-          open={dateOpen}
-          onOpenChange={(open) => {
-            setDateOpen(open)
-            if (open) setDraftRange(range)
-            else setDraftRange(range)
-          }}
-        >
-          <PopoverTrigger
-            render={
-              <Button
-                type="button"
-                variant="outline"
-                className="w-64 justify-start font-normal"
-                aria-label={rangeLabel}
-              />
-            }
-          >
-            <CalendarDays className="size-4" />
-            <span className="truncate">{rangeLabel}</span>
-          </PopoverTrigger>
-          <PopoverContent align="start" className="w-auto p-3">
-            <Calendar
-              mode="range"
-              numberOfMonths={2}
-              selected={draftRange}
-              onSelect={setDraftRange}
-            />
-            <p className="min-h-5 px-2 text-xs text-muted-foreground">
-              {draftRange?.from && !draftRange.to
-                ? t("segments.detailsPage.history.selectEndDate")
-                : ""}
-            </p>
-            <div className="flex justify-end gap-2 px-2 pt-1">
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => {
-                  setRange(undefined)
-                  setDraftRange(undefined)
-                  setDateOpen(false)
-                  setPageSize(10)
-                }}
-              >
-                {t("segments.detailsPage.history.clear")}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  setDraftRange(range)
-                  setDateOpen(false)
-                }}
-              >
-                {t("segments.confirm.cancel")}
-              </Button>
-              <Button
-                type="button"
-                disabled={!draftRange?.from || !draftRange.to}
-                onClick={() => {
-                  setRange(draftRange)
-                  setDateOpen(false)
-                  setPageSize(10)
-                }}
-              >
-                {t("segments.detailsPage.history.apply")}
-              </Button>
+      <AuditLogFilters
+        locale={locale}
+        search={search}
+        user={user}
+        refType="Segment"
+        range={range}
+        filtersApplied={filtersApplied}
+        showRefType={false}
+        endContent={
+          segment.type === "shared" ? (
+            <div className="flex items-center gap-2 text-sm text-primary">
+              {t("segments.detailsPage.history.acrossScopes", {
+                count: segment.scopes.length,
+              })}
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <button
+                      type="button"
+                      className="inline-flex size-6 items-center justify-center rounded-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                      aria-label={t(
+                        "segments.detailsPage.history.acrossScopesHelp"
+                      )}
+                    />
+                  }
+                >
+                  <Info className="size-4" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  {t("segments.detailsPage.history.acrossScopesHelp")}
+                </TooltipContent>
+              </Tooltip>
             </div>
-          </PopoverContent>
-        </Popover>
+          ) : undefined
+        }
+        onSearchChange={setSearch}
+        onUserChange={setUser}
+        onRefTypeChange={() => undefined}
+        onRangeChange={setRange}
+        onClear={clearFilters}
+      />
 
-        <Button
-          type="button"
-          variant="ghost"
-          disabled={!filtersApplied}
-          onClick={() => {
-            setSearch("")
-            setDebouncedSearch("")
-            setMember(null)
-            setRange(undefined)
-            setDraftRange(undefined)
-            setMemberOpen(false)
-            setDateOpen(false)
-            setPageSize(10)
-          }}
-        >
-          {t("segments.detailsPage.history.clearFilters")}
-        </Button>
-
-        {segment.type === "shared" ? (
-          <div className="ml-auto flex items-center gap-2 text-sm text-primary">
-            {t("segments.detailsPage.history.acrossScopes", {
-              count: segment.scopes.length,
-            })}
-            <Tooltip>
-              <TooltipTrigger render={<Info className="size-4" />} />
-              <TooltipContent>
-                {t("segments.detailsPage.history.acrossScopesHelp")}
-              </TooltipContent>
-            </Tooltip>
-          </div>
-        ) : null}
-      </div>
-
-      <div className="overflow-hidden rounded-md border">
-        {logsQuery.isError ? (
-          <div className="flex items-center justify-between bg-destructive/5 px-4 py-3 text-sm text-destructive">
-            {t("segments.detailsPage.history.loadFailed")}
+      <div className="overflow-x-auto rounded-md border bg-background">
+        {initialError ? (
+          <div className="flex min-h-40 items-center justify-between gap-4 px-5 py-4 text-sm text-destructive">
+            {t("auditLogs.loadFailed")}
             <Button
               type="button"
-              size="sm"
               variant="outline"
+              size="sm"
               onClick={() => void logsQuery.refetch()}
             >
-              {t("segments.retry")}
+              {t("auditLogs.retry")}
             </Button>
           </div>
-        ) : null}
-        <Table>
-          <TableHeader>
-            <TableRow className="hover:bg-transparent">
-              <TableHead className="w-12" />
-              <TableHead>
-                {t("segments.detailsPage.history.columns.date")}
-              </TableHead>
-              <TableHead>
-                {t("segments.detailsPage.history.columns.user")}
-              </TableHead>
-              <TableHead>
-                {t("segments.detailsPage.history.columns.event")}
-              </TableHead>
-              <TableHead>
-                {t("segments.detailsPage.history.columns.comment")}
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {logsQuery.isLoading ? (
-              <TableRow>
-                <TableCell
-                  colSpan={5}
-                  className="h-40 text-center text-muted-foreground"
-                >
-                  <Loader2 className="mx-auto size-5 animate-spin" />
-                </TableCell>
-              </TableRow>
-            ) : items.length ? (
-              items.map((log) => {
-                const isExpanded = expanded.has(log.id)
-                const creator =
-                  log.creatorName ||
-                  log.creatorEmail ||
-                  log.creatorId ||
-                  t("segments.detailsPage.history.system")
-                const fragment = renderFragment(log)
-                const changes = historyChanges(log, t)
-                const comment = log.comment?.trim()
-                const hasRawData = Boolean(
-                  log.dataChange.previous || log.dataChange.current
-                )
-                return (
-                  <Fragment key={log.id}>
-                    <TableRow
-                      className="cursor-pointer hover:bg-muted/50"
-                      onClick={() => toggleExpanded(log.id)}
-                    >
-                      <TableCell>
-                        <Button
-                          type="button"
-                          size="icon-sm"
-                          variant="ghost"
-                          aria-expanded={isExpanded}
-                          aria-label={
-                            isExpanded
-                              ? t("segments.detailsPage.history.collapse")
-                              : t("segments.detailsPage.history.expand")
-                          }
-                          onClick={(event) => {
-                            event.stopPropagation()
-                            toggleExpanded(log.id)
-                          }}
-                        >
-                          {isExpanded ? <ChevronDown /> : <ChevronRight />}
-                        </Button>
-                      </TableCell>
-                      <TableCell className="whitespace-nowrap">
-                        {dateFormatter.format(new Date(log.createdAt))}
-                      </TableCell>
-                      <TableCell className="max-w-56">
-                        <p className="truncate">{creator}</p>
-                        {log.creatorEmail && log.creatorName ? (
-                          <p className="truncate text-xs text-muted-foreground">
-                            {log.creatorEmail}
-                          </p>
-                        ) : null}
-                      </TableCell>
-                      <TableCell className="max-w-80">
-                        <p className="truncate">{eventTitle(log, t)}</p>
-                        {fragment ? (
-                          <p className="truncate text-xs text-muted-foreground">
-                            {fragment}
-                          </p>
-                        ) : null}
-                      </TableCell>
-                      <TableCell className="max-w-80">
-                        {comment ? (
-                          <Tooltip>
-                            <TooltipTrigger
-                              render={
-                                <span className="inline-block max-w-full truncate align-middle text-sm" />
-                              }
-                            >
-                              {comment}
-                            </TooltipTrigger>
-                            <TooltipContent>{comment}</TooltipContent>
-                          </Tooltip>
-                        ) : (
-                          <span className="text-sm text-muted-foreground">
-                            —
-                          </span>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                    {isExpanded ? (
-                      <TableRow className="hover:bg-transparent">
-                        <TableCell
-                          colSpan={5}
-                          className="p-3 whitespace-normal"
-                        >
-                          <div className="rounded-md bg-muted/40 p-4">
-                            <div className="mb-3 flex items-center justify-between">
-                              <div className="flex items-baseline gap-2">
-                                <h3 className="text-sm font-medium">
-                                  {t("segments.detailsPage.history.changes")}
-                                </h3>
-                                <span className="text-sm text-muted-foreground">
-                                  {t(
-                                    "segments.detailsPage.review.changeCount",
-                                    {
-                                      count: changes.length,
-                                    }
-                                  )}
-                                </span>
-                              </div>
-                              {hasRawData ? (
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  size="sm"
-                                  className="leading-none"
-                                  onClick={() => setRawData(log)}
-                                >
-                                  <span className="relative top-px">
-                                    {t(
-                                      "segments.detailsPage.history.viewRawData"
-                                    )}
-                                  </span>
-                                </Button>
-                              ) : null}
-                            </div>
-                            {changes.length ? (
-                              <ChangeLedger
-                                changes={changes}
-                                layout="history"
-                                className="max-h-[32rem] bg-transparent p-0"
-                              />
-                            ) : (
-                              <p className="py-5 text-center text-sm text-muted-foreground">
-                                {t(
-                                  "segments.detailsPage.history.noSemanticChanges"
-                                )}
-                              </p>
-                            )}
-                            <div className="mt-4 border-t pt-3">
-                              <p className="text-xs font-medium text-muted-foreground">
-                                {t(
-                                  "segments.detailsPage.history.columns.comment"
-                                )}
-                              </p>
-                              <p
-                                className={
-                                  comment
-                                    ? "mt-1 text-sm break-words whitespace-pre-wrap"
-                                    : "mt-1 text-sm text-muted-foreground"
-                                }
-                              >
-                                {comment || "—"}
-                              </p>
-                            </div>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ) : null}
-                  </Fragment>
-                )
-              })
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={5}
-                  className="h-40 text-center text-muted-foreground"
-                >
-                  {t("segments.detailsPage.history.empty")}
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+        ) : (
+          <div className="min-w-[920px]">
+            <AuditLogTable
+              items={items}
+              lang={lang}
+              locale={locale}
+              loading={logsQuery.isLoading}
+              filtered={filtersApplied}
+              resourceScoped
+              adapter={adapter}
+              onClearFilters={clearFilters}
+              onViewRawData={setRawData}
+            />
+          </div>
+        )}
       </div>
 
-      {(logsQuery.data?.totalCount ?? 0) > items.length ? (
+      {logsQuery.hasNextPage || nextPageError ? (
         <div className="flex justify-center">
           <Button
             type="button"
             variant="outline"
-            disabled={logsQuery.isFetching}
-            onClick={() => setPageSize((current) => current + 10)}
+            disabled={logsQuery.isFetchingNextPage}
+            onClick={() => void logsQuery.fetchNextPage()}
           >
-            {logsQuery.isFetching ? <Loader2 className="animate-spin" /> : null}
-            {t("segments.detailsPage.history.loadMore")}
+            {logsQuery.isFetchingNextPage ? (
+              <Loader2 className="animate-spin" />
+            ) : null}
+            {nextPageError ? t("auditLogs.retry") : t("auditLogs.loadMore")}
           </Button>
         </div>
       ) : null}
 
-      <RawDataDialog
+      <AuditLogRawDataDialog
         auditLog={rawData}
+        locale={locale}
         onOpenChange={(open) => !open && setRawData(null)}
       />
     </div>

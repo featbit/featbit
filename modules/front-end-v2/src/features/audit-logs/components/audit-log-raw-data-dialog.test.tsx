@@ -1,10 +1,10 @@
-import { render, screen, waitFor } from "@testing-library/react"
 import { EditorState, type Extension } from "@codemirror/state"
 import { EditorView } from "@codemirror/view"
+import { render, screen, waitFor } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n/i18n"
-import type { AuditLog } from "../../segments-types"
-import { RawDataDialog } from "./raw-data-dialog"
+import type { AuditLog } from "../audit-logs-types"
+import { AuditLogRawDataDialog } from "./audit-log-raw-data-dialog"
 
 const mergeViewMock = vi.hoisted(() => vi.fn())
 
@@ -32,8 +32,8 @@ const auditLog: AuditLog = {
   createdAt: "2026-07-23T08:42:00.000Z",
   comment: "",
   dataChange: {
-    previous: '{"name":"Before","included":["user-1"]}',
-    current: '{"name":"After","included":["user-1","user-2"]}',
+    previous: '{"id":"segment-1","name":"Before","included":["user-1"]}',
+    current: '{"id":"segment-1","name":"After","included":["user-1","user-2"]}',
   },
   instructions: [],
 }
@@ -46,16 +46,22 @@ beforeEach(() => {
   mergeViewMock.mockClear()
 })
 
-describe("RawDataDialog", () => {
-  it("passes formatted previous and current snapshots to the merge view", async () => {
-    render(<RawDataDialog auditLog={auditLog} onOpenChange={vi.fn()} />)
+describe("AuditLogRawDataDialog", () => {
+  it("renders Segment snapshots through the shared merge view", async () => {
+    render(
+      <AuditLogRawDataDialog
+        auditLog={auditLog}
+        locale="en"
+        onOpenChange={vi.fn()}
+      />
+    )
 
     await waitFor(() => expect(mergeViewMock).toHaveBeenCalledOnce())
     expect(screen.getByRole("dialog")).toHaveClass(
       "max-h-[78vh]",
       "grid-rows-[auto_auto_auto]"
     )
-    expect(screen.getByRole("dialog")).not.toHaveClass("h-[78vh]")
+    expect(screen.getByText(/Segment · After/)).toBeInTheDocument()
     expect(
       screen.getByText("Previous").querySelector(".lucide-circle-minus")
     ).toBeInTheDocument()
@@ -78,7 +84,13 @@ describe("RawDataDialog", () => {
   it("uses CodeMirror's dark theme when the application is in dark mode", async () => {
     document.documentElement.classList.add("dark")
 
-    render(<RawDataDialog auditLog={auditLog} onOpenChange={vi.fn()} />)
+    render(
+      <AuditLogRawDataDialog
+        auditLog={auditLog}
+        locale="en"
+        onOpenChange={vi.fn()}
+      />
+    )
 
     await waitFor(() => expect(mergeViewMock).toHaveBeenCalledOnce())
     const config = mergeViewMock.mock.calls[0][0] as {

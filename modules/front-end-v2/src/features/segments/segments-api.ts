@@ -2,7 +2,6 @@ import { fetchApi } from "@/lib/api/authenticated-api"
 import type {
   EnvironmentSettings,
   AuditInstruction,
-  PagedAuditLogs,
   PagedSegments,
   ScopeResource,
   Segment,
@@ -131,35 +130,6 @@ export function createSegmentEndUser(envId: string, keyId: string) {
 export function fetchSegmentUserProperties(envId: string) {
   return fetchApi<SegmentUserProperty[]>(
     `/api/v1/envs/${encodeURIComponent(envId)}/end-user-properties`
-  )
-}
-
-export function fetchSegmentAuditLogs(
-  envId: string,
-  input: {
-    segmentId: string
-    crossEnvironment: boolean
-    query: string
-    creatorId?: string
-    from?: number
-    to?: number
-    pageIndex: number
-    pageSize: number
-  }
-) {
-  const params = new URLSearchParams({
-    crossEnvironment: String(input.crossEnvironment),
-    query: input.query,
-    creatorId: input.creatorId ?? "",
-    refType: "Segment",
-    refId: input.segmentId,
-    from: input.from ? String(input.from) : "",
-    to: input.to ? String(input.to) : "",
-    pageIndex: String(input.pageIndex),
-    pageSize: String(input.pageSize),
-  })
-  return fetchApi<PagedAuditLogs>(
-    `/api/v1/envs/${encodeURIComponent(envId)}/audit-logs?${params}`
   )
 }
 

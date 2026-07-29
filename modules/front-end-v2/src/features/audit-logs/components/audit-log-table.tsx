@@ -19,18 +19,12 @@ import {
 } from "@/components/ui/tooltip"
 import { localizedPath } from "@/features/layout/layout-context"
 import type { Lang } from "@/features/layout/layout-types"
-import { ChangeLedger as SharedChangeLedger } from "@/features/change-review/change-ledger"
-import { useFlagChangeLedgerAdapter } from "@/features/flags/details/targeting/use-flag-change-ledger-adapter"
-import type { FlagTargetingReviewChange } from "@/features/flags/details/targeting/targeting-utils"
-import { ChangeLedger } from "@/features/segments/details/components/change-ledger"
-import {
-  auditEventFragments,
-  auditEventTitle,
-  auditHistoryChanges,
-  auditObjectIdentity,
-  auditTypeLabel,
-} from "../audit-log-utils"
+import { auditObjectIdentity, auditTypeLabel } from "../audit-log-utils"
 import type { AuditLog } from "../audit-logs-types"
+import {
+  type AuditLogTableAdapter,
+  useDefaultAuditLogTableAdapter,
+} from "./audit-log-table-adapter"
 
 function ObjectIdentity({ log, lang }: { log: AuditLog; lang: Lang }) {
   const { t } = useTranslation()
@@ -91,6 +85,7 @@ export function AuditLogTable({
   loading,
   filtered,
   resourceScoped = false,
+  adapter,
   onClearFilters,
   onViewRawData,
 }: {
@@ -100,11 +95,13 @@ export function AuditLogTable({
   loading: boolean
   filtered: boolean
   resourceScoped?: boolean
+  adapter?: AuditLogTableAdapter
   onClearFilters: () => void
   onViewRawData: (log: AuditLog) => void
 }) {
   const { t } = useTranslation()
-  const flagLedger = useFlagChangeLedgerAdapter()
+  const defaultAdapter = useDefaultAuditLogTableAdapter()
+  const rowAdapter = adapter ?? defaultAdapter
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
   const dateFormatter = useMemo(
     () =>
@@ -159,8 +156,9 @@ export function AuditLogTable({
               log.creatorEmail ||
               log.creatorId ||
               t("auditLogs.system")
-            const fragment = auditEventFragments(log, t)
-            const changes = auditHistoryChanges(log, t)
+            const eventTitle = rowAdapter.eventTitle(log)
+            const eventSubtitle = rowAdapter.eventSubtitle(log)
+            const changeDetails = rowAdapter.changeDetails(log)
             const comment = log.comment?.trim()
             const hasRawData = Boolean(
               log.dataChange.previous || log.dataChange.current
@@ -213,17 +211,17 @@ export function AuditLogTable({
                     </>
                   ) : null}
                   <TableCell className="max-w-80">
-                    <p className="truncate">{auditEventTitle(log, t)}</p>
-                    {fragment ? (
+                    <p className="truncate">{eventTitle}</p>
+                    {eventSubtitle ? (
                       <Tooltip>
                         <TooltipTrigger
                           render={
                             <span className="inline-block max-w-full truncate align-middle text-xs text-muted-foreground" />
                           }
                         >
-                          {fragment}
+                          {eventSubtitle}
                         </TooltipTrigger>
-                        <TooltipContent>{fragment}</TooltipContent>
+                        <TooltipContent>{eventSubtitle}</TooltipContent>
                       </Tooltip>
                     ) : null}
                   </TableCell>
@@ -259,7 +257,7 @@ export function AuditLogTable({
                             </h3>
                             <span className="text-sm text-muted-foreground">
                               {t("auditLogs.changeCount", {
-                                count: changes.length,
+                                count: changeDetails.count,
                               })}
                             </span>
                           </div>
@@ -274,21 +272,8 @@ export function AuditLogTable({
                             </Button>
                           ) : null}
                         </div>
-                        {changes.length ? (
-                          log.refType === "FeatureFlag" ? (
-                            <SharedChangeLedger
-                              changes={changes as FlagTargetingReviewChange[]}
-                              layout="history"
-                              className="max-h-[32rem] bg-transparent p-0"
-                              {...flagLedger}
-                            />
-                          ) : (
-                            <ChangeLedger
-                              changes={changes}
-                              layout="history"
-                              className="max-h-[32rem] bg-transparent p-0"
-                            />
-                          )
+                        {changeDetails.content ? (
+                          changeDetails.content
                         ) : (
                           <p className="py-5 text-center text-sm text-muted-foreground">
                             {t("auditLogs.noSemanticChanges")}

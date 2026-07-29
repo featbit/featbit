@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import "@/lib/i18n/i18n"
 import type { AuditLog } from "../audit-logs-types"
+import type { AuditLogTableAdapter } from "./audit-log-table-adapter"
 import { AuditLogTable } from "./audit-log-table"
 
 const auditLog: AuditLog = {
@@ -114,5 +115,45 @@ describe("AuditLogTable", () => {
         document.querySelector('[data-slot="tooltip-content"]')
       ).toHaveAttribute("data-side", "top")
     )
+  })
+
+  it("renders resource-specific event and change content from an adapter", () => {
+    const adapter: AuditLogTableAdapter = {
+      eventTitle: () => "Updated segment settings",
+      eventSubtitle: () => "Changed segment name",
+      changeDetails: () => ({
+        count: 1,
+        content: <p>Segment-specific change</p>,
+      }),
+    }
+
+    render(
+      <MemoryRouter>
+        <TooltipProvider>
+          <AuditLogTable
+            items={[{ ...auditLog, refType: "Segment" }]}
+            lang="en"
+            locale="en"
+            loading={false}
+            filtered={false}
+            resourceScoped
+            adapter={adapter}
+            onClearFilters={vi.fn()}
+            onViewRawData={vi.fn()}
+          />
+        </TooltipProvider>
+      </MemoryRouter>
+    )
+
+    expect(
+      screen.getAllByRole("columnheader").map((header) => header.textContent)
+    ).toEqual(["", "Date", "User", "Event", "Comment"])
+    expect(screen.getByText("Updated segment settings")).toBeInTheDocument()
+    expect(screen.getByText("Changed segment name")).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole("button", { name: "Expand audit log" }))
+
+    expect(screen.getByText("1 change")).toBeInTheDocument()
+    expect(screen.getByText("Segment-specific change")).toBeInTheDocument()
   })
 })

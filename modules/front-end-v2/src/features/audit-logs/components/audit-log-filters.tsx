@@ -7,7 +7,7 @@ import {
   Search,
   X,
 } from "lucide-react"
-import { useEffect, useMemo, useState } from "react"
+import { type ReactNode, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import type { DateRange } from "react-day-picker"
 import { Button } from "@/components/ui/button"
@@ -49,6 +49,7 @@ export function AuditLogFilters({
   range,
   filtersApplied,
   showRefType = true,
+  endContent,
   onSearchChange,
   onUserChange,
   onRefTypeChange,
@@ -62,6 +63,7 @@ export function AuditLogFilters({
   range: DateRange | undefined
   filtersApplied: boolean
   showRefType?: boolean
+  endContent?: ReactNode
   onSearchChange: (value: string) => void
   onUserChange: (value: AuditUser | null) => void
   onRefTypeChange: (value: string) => void
@@ -306,6 +308,8 @@ export function AuditLogFilters({
           {t("auditLogs.clearFilters")}
         </Button>
       ) : null}
+
+      {endContent ? <div className="ml-auto shrink-0">{endContent}</div> : null}
     </div>
   )
 }

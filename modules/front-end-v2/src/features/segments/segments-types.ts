@@ -1,3 +1,5 @@
+export type { AuditInstruction } from "@/features/audit-logs/audit-logs-types"
+
 export type SegmentType = "environment-specific" | "shared"
 
 export type Segment = {
@@ -44,30 +46,6 @@ export type SegmentUserProperty = {
   isBuiltIn: boolean
   isDigestField: boolean
   remark: string
-}
-
-export type AuditInstruction = {
-  kind: string
-  value: unknown
-}
-
-export type AuditLog = {
-  id: string
-  refId: string
-  refType: string
-  operation: string
-  creatorId: string
-  creatorName: string
-  creatorEmail: string
-  createdAt: string
-  comment: string
-  dataChange: { previous?: string; current?: string }
-  instructions: AuditInstruction[]
-}
-
-export type PagedAuditLogs = {
-  items: AuditLog[]
-  totalCount: number
 }
 
 export type PagedSegments = {
