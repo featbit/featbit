@@ -22,7 +22,7 @@ function SecretValue({
 }) {
   const { t } = useTranslation()
   return (
-    <div className="grid min-w-0 grid-cols-[minmax(64px,104px)_auto_24ch_auto] items-center gap-1">
+    <div className="grid min-w-0 grid-cols-[minmax(64px,104px)_auto_minmax(0,1fr)_auto] items-center gap-1">
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger

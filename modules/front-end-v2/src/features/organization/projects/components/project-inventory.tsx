@@ -17,7 +17,7 @@ export { SecretsSheet } from "./secrets-sheet"
 
 type EnvironmentSortByProject = Record<string, EnvironmentSort>
 
-const PROJECT_PAGE_SIZE = 2
+const PROJECT_PAGE_SIZE = 10;
 
 export function ProjectInventory({
   projects,
