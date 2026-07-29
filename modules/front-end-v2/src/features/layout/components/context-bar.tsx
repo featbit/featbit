@@ -16,7 +16,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import { EnvironmentSecretsPopover } from "@/features/layout/components/environment-secrets-popover"
+import { EnvironmentSdkConfigurationPopover } from "@/features/layout/components/environment-sdk-configuration-popover"
 import {
   localizedPath,
   projectEnvFromSelection,
@@ -214,7 +214,8 @@ export function ContextBar({
           </Button>
         </PopoverContent>
       </Popover>
-      <EnvironmentSecretsPopover
+      <span aria-hidden className="ml-1 h-4 w-px shrink-0 bg-border" />
+      <EnvironmentSdkConfigurationPopover
         open={secretsOpen}
         onOpenChange={handleSecretsOpenChange}
         projectName={currentProjectEnv?.projectName ?? ""}
