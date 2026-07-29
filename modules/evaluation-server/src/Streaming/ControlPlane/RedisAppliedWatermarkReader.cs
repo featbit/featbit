@@ -63,7 +63,7 @@ public sealed class RedisAppliedWatermarkReader : IAppliedWatermarkReader
 
         // Fire every env's read unawaited so StackExchange.Redis pipelines all outstanding
         // commands over the shared multiplexer connection instead of paying N sequential RTTs
-        // (the same Task.WhenAll convention RedisStore.ReadWithPointersAsync uses for its batched
+        // (the same Task.WhenAll convention GatedCommitRedisStore uses for its batched
         // GETs). At thousands of envs/pod, sequential reads could inflate the heartbeat period
         // toward the lease TTL and reopen the flap #99 fixed.
         var envTasks = envIds

@@ -3,10 +3,13 @@ using Api.Cors;
 using Api.Health;
 using Api.RateLimiting;
 using Api.Services;
+using Domain.ControlPlane;
+using Domain.Shared;
 using Domain.Shared.Authentication;
 using Domain.Workspaces;
 using Infrastructure;
 using Infrastructure.Services;
+using Infrastructure.Store;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -77,6 +80,23 @@ public static class ServicesRegister
         {
             // Replace the `DefaultConnectionManager` with `ControlPlaneConnectionManager`
             services.Replace(ServiceDescriptor.Singleton<IConnectionManager, ControlPlaneConnectionManager>());
+
+            // Replace the `RedisStore` with `GatedCommitRedisStore` if the consistency mode is set to GatedCommit
+            if (configuration.GetConsistencyMode() == ConsistencyMode.GatedCommit)
+            {
+                var count = services.Count;
+                for (var i = 0; i < count; i++)
+                {
+                    var descriptor = services[i];
+                    if (descriptor.ServiceType == typeof(IDbStore) && descriptor.ImplementationType == typeof(RedisStore))
+                    {
+                        services.RemoveAt(i);
+                        break;
+                    }
+                }
+
+                services.Add(ServiceDescriptor.Transient<IDbStore, GatedCommitRedisStore>());
+            }
 
             // The control-plane topology requires the local DC Redis: the control-plane writes
             // flag/segment changes into per-DC Redis, and the eval server's heartbeat derives the

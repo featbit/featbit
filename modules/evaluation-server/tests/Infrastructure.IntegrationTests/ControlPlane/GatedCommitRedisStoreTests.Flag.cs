@@ -1,28 +1,28 @@
 using System.Text;
 using Infrastructure.Caches.Redis;
 using Infrastructure.IntegrationTests.Fixtures;
-using Infrastructure.Store;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using StackExchange.Redis;
+using Streaming.ControlPlane;
 
-namespace Infrastructure.IntegrationTests.Store;
+namespace Infrastructure.IntegrationTests.ControlPlane;
 
 /// <summary>
-/// D2 integration tests: <see cref="RedisStore"/> flag reads must honor the committed pointer
+/// D2 integration tests: <see cref="GatedCommitRedisStore"/> flag reads must honor the committed pointer
 /// written by the back-end gated commit path, and fall back to the legacy main key otherwise.
 ///
 /// Uses the shared Redis Testcontainer and flushes Redis before each test.
 /// </summary>
 [Collection(RedisCollection.Name)]
-public class RedisStoreCommittedPointerTests : IntegrationTestBase, IAsyncLifetime
+public class GatedCommitReadFlagTests : IntegrationTestBase, IAsyncLifetime
 {
     private readonly RedisFixture _fixture;
     private ConnectionMultiplexer _connection = null!;
     private IDatabase _db = null!;
-    private RedisStore _sut = null!;
+    private GatedCommitRedisStore _sut = null!;
 
-    public RedisStoreCommittedPointerTests(RedisFixture fixture)
+    public GatedCommitReadFlagTests(RedisFixture fixture)
     {
         _fixture = fixture;
     }
@@ -46,7 +46,9 @@ public class RedisStoreCommittedPointerTests : IntegrationTestBase, IAsyncLifeti
         clientMock.Setup(x => x.GetDatabase()).Returns(_db);
         clientMock.Setup(x => x.IsHealthyAsync()).ReturnsAsync(true);
 
-        _sut = new RedisStore(clientMock.Object, NullLogger<RedisStore>.Instance);
+        _sut = new GatedCommitRedisStore(
+            clientMock.Object,
+            NullLogger<GatedCommitRedisStore>.Instance);
     }
 
     private static byte[] FlagValue(string id, long ts) =>

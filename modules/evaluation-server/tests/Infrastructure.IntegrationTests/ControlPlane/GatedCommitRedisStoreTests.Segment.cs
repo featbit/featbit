@@ -1,30 +1,30 @@
 using System.Text;
 using Infrastructure.Caches.Redis;
 using Infrastructure.IntegrationTests.Fixtures;
-using Infrastructure.Store;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using StackExchange.Redis;
+using Streaming.ControlPlane;
 
-namespace Infrastructure.IntegrationTests.Store;
+namespace Infrastructure.IntegrationTests.ControlPlane;
 
 /// <summary>
-/// D4 integration tests: <see cref="RedisStore"/> segment reads must honor the committed pointer
+/// D4 integration tests: <see cref="GatedCommitRedisStore"/> segment reads must honor the committed pointer
 /// written by the back-end gated commit path (<c>featbit:segment-committed:{id}</c>), and fall back
 /// to the legacy main key (<c>featbit:segment:{id}</c>) otherwise. Mirrors the D2 flag tests in
-/// <see cref="RedisStoreCommittedPointerTests"/>.
+/// <see cref="GatedCommitReadFlagTests"/>.
 ///
 /// Uses the shared Redis Testcontainer and flushes Redis before each test.
 /// </summary>
 [Collection(RedisCollection.Name)]
-public class RedisStoreSegmentCommittedPointerTests : IntegrationTestBase, IAsyncLifetime
+public class GatedCommitReadSegmentTests : IntegrationTestBase, IAsyncLifetime
 {
     private readonly RedisFixture _fixture;
     private ConnectionMultiplexer _connection = null!;
     private IDatabase _db = null!;
-    private RedisStore _sut = null!;
+    private GatedCommitRedisStore _sut = null!;
 
-    public RedisStoreSegmentCommittedPointerTests(RedisFixture fixture)
+    public GatedCommitReadSegmentTests(RedisFixture fixture)
     {
         _fixture = fixture;
     }
@@ -48,7 +48,7 @@ public class RedisStoreSegmentCommittedPointerTests : IntegrationTestBase, IAsyn
         clientMock.Setup(x => x.GetDatabase()).Returns(_db);
         clientMock.Setup(x => x.IsHealthyAsync()).ReturnsAsync(true);
 
-        _sut = new RedisStore(clientMock.Object, NullLogger<RedisStore>.Instance);
+        _sut = new GatedCommitRedisStore(clientMock.Object, NullLogger<GatedCommitRedisStore>.Instance);
     }
 
     private static byte[] SegmentValue(string id, long ts) =>

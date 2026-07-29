@@ -1,4 +1,5 @@
 using System.Diagnostics.Metrics;
+using Domain.ControlPlane;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Api.Health;

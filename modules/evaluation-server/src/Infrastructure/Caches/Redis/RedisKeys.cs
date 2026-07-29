@@ -34,7 +34,7 @@ public static class RedisKeys
     // from the flag value key, plus a committed-pointer key recording the authoritative version:
     //   featbit:flag:{id}:v{ts}        -- immutable per-version snapshot ("staged" value)
     //   featbit:flag-committed:{id}    -- value is the committed timestamp ({ts}) as a string
-    // RedisStore reads the pointer to resolve which versioned value is authoritative; when the
+    // GatedCommitRedisStore reads the pointer to resolve which versioned value is authoritative; when the
     // pointer is absent it falls back to the legacy single-value Flag key (BestEffort path).
 
     /// <summary>
@@ -70,7 +70,7 @@ public static class RedisKeys
     // version:
     //   featbit:segment:{id}:v{ts}        -- immutable per-version snapshot ("staged" value)
     //   featbit:segment-committed:{id}    -- value is the committed timestamp ({ts}) as a string
-    // RedisStore reads the pointer to resolve which versioned value is authoritative; when the
+    // GatedCommitRedisStore reads the pointer to resolve which versioned value is authoritative; when the
     // pointer is absent it falls back to the legacy single-value Segment key (BestEffort path).
 
     /// <summary>

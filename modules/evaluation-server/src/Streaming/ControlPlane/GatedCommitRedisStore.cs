@@ -1,12 +1,15 @@
 using System.Text;
 using Domain.Shared;
 using Infrastructure.Caches.Redis;
+using Infrastructure.Store;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 
-namespace Infrastructure.Store;
+namespace Streaming.ControlPlane;
 
-public class RedisStore(IRedisClient redisClient, ILogger<RedisStore> logger) : IDbStore
+public class GatedCommitRedisStore(
+    IRedisClient redisClient,
+    ILogger<GatedCommitRedisStore> logger) : IDbStore
 {
     public string Name => Stores.Redis;
 
@@ -16,87 +19,64 @@ public class RedisStore(IRedisClient redisClient, ILogger<RedisStore> logger) : 
 
     public async Task<IEnumerable<byte[]>> GetFlagsAsync(Guid envId, long timestamp)
     {
-        // get flag keys
         var index = RedisKeys.FlagIndex(envId);
         var ids = await Redis.SortedSetRangeByScoreAsync(index, timestamp, exclude: Exclude.Start);
 
-        var keys = new RedisKey[ids.Length];
-        for (var i = 0; i < ids.Length; i++)
-        {
-            keys[i] = RedisKeys.Flag(ids[i]!);
-        }
-
-        var tasks = new Task<RedisValue>[keys.Length];
-        for (var i = 0; i < keys.Length; i++)
-        {
-            tasks[i] = Redis.StringGetAsync(keys[i]);
-        }
-
-        var values = await Task.WhenAll(tasks);
-
-        return FilterOrphans(values, keys, envId, "flag");
+        return await GetFlagsByIdsAsync(ids.Select(id => id.ToString()), envId);
     }
 
     public async Task<IEnumerable<byte[]>> GetFlagsAsync(string[] ids)
     {
-        var keys = new RedisKey[ids.Length];
-        for (var i = 0; i < ids.Length; i++)
-        {
-            keys[i] = RedisKeys.Flag(ids[i]);
-        }
+        return await GetFlagsByIdsAsync(ids, envId: null);
+    }
 
-        var tasks = new Task<RedisValue>[keys.Length];
-        for (var i = 0; i < keys.Length; i++)
-        {
-            tasks[i] = Redis.StringGetAsync(keys[i]);
-        }
+    private async Task<IEnumerable<byte[]>> GetFlagsByIdsAsync(IEnumerable<string> ids, Guid? envId)
+    {
+        var (values, keys) = await ReadWithPointersAsync(
+            ids,
+            RedisKeys.FlagCommittedPointer,
+            RedisKeys.FlagVersion,
+            RedisKeys.Flag);
 
-        var values = await Task.WhenAll(tasks);
-
-        return FilterOrphans(values, keys, envId: null, "flag");
+        return FilterOrphans(values, keys, envId, "flag");
     }
 
     public async Task<byte[]> GetSegmentAsync(string id)
     {
-        var key = RedisKeys.Segment(id);
-        var segment = await Redis.StringGetAsync(key);
+        var (values, _) = await ReadWithPointersAsync(
+            new[] { id },
+            RedisKeys.SegmentCommittedPointer,
+            RedisKeys.SegmentVersion,
+            RedisKeys.Segment);
 
-        return (byte[])segment!;
+        return values[0]!;
     }
 
     public async Task<IEnumerable<byte[]>> GetSegmentsAsync(Guid envId, long timestamp)
     {
-        // get segment keys
         var index = RedisKeys.SegmentIndex(envId);
         var ids = await Redis.SortedSetRangeByScoreAsync(index, timestamp, exclude: Exclude.Start);
-        var keys = new RedisKey[ids.Length];
-        for (var i = 0; i < ids.Length; i++)
-        {
-            keys[i] = RedisKeys.Segment(ids[i]!);
-        }
 
-        var tasks = new Task<RedisValue>[keys.Length];
-        for (var i = 0; i < keys.Length; i++)
-        {
-            tasks[i] = Redis.StringGetAsync(keys[i]);
-        }
+        var (values, keys) = await ReadWithPointersAsync(
+            ids.Select(id => id.ToString()),
+            RedisKeys.SegmentCommittedPointer,
+            RedisKeys.SegmentVersion,
+            RedisKeys.Segment);
 
-        var values = await Task.WhenAll(tasks);
-
-        // for shared segments, replace empty envId with actual envId
         const string emptyEnvId = "\"envId\":\"\",";
 
         var orphans = new List<string>();
         var jsonBytes = new List<byte[]>(values.Length);
         for (var i = 0; i < values.Length; i++)
         {
-            if (!values[i].HasValue)
+            var value = values[i];
+            if (value is null)
             {
-                orphans.Add(keys[i].ToString());
+                orphans.Add(keys[i]);
                 continue;
             }
 
-            var strValue = (string)values[i]!;
+            var strValue = Encoding.UTF8.GetString(value);
             if (strValue.Contains(emptyEnvId))
             {
                 var newStrValue = strValue.Replace(emptyEnvId, $"\"envId\":\"{envId}\",");
@@ -104,7 +84,7 @@ public class RedisStore(IRedisClient redisClient, ILogger<RedisStore> logger) : 
             }
             else
             {
-                jsonBytes.Add((byte[])values[i]!);
+                jsonBytes.Add(value);
             }
         }
 
@@ -130,13 +110,46 @@ public class RedisStore(IRedisClient redisClient, ILogger<RedisStore> logger) : 
         );
     }
 
-    // Filters out entries whose backing key was missing and logs the orphan keys so
-    // operators can spot accumulating drift between an env's index and its values. Without this
-    // filter, a single orphan index member produces a null byte[] that crashes JsonDocument.Parse
-    // downstream and aborts the entire env's data-sync.
+    private async Task<(byte[]?[] values, string[] keys)> ReadWithPointersAsync(
+        IEnumerable<string> ids,
+        Func<string, RedisKey> committedPointerKey,
+        Func<string, long, RedisKey> versionKey,
+        Func<string, RedisKey> mainKey)
+    {
+        var idList = ids.ToList();
+        var pointerTasks = idList.Select(id => Redis.StringGetAsync(committedPointerKey(id)));
+        var pointers = await Task.WhenAll(pointerTasks);
+
+        var resolvedKeys = new RedisKey[idList.Count];
+        for (var i = 0; i < idList.Count; i++)
+        {
+            var pointer = pointers[i];
+            resolvedKeys[i] = pointer.HasValue
+                ? versionKey(idList[i], (long)pointer)
+                : mainKey(idList[i]);
+        }
+
+        var valueTasks = new Task<RedisValue>[resolvedKeys.Length];
+        for (var i = 0; i < resolvedKeys.Length; i++)
+        {
+            valueTasks[i] = Redis.StringGetAsync(resolvedKeys[i]);
+        }
+
+        var rawValues = await Task.WhenAll(valueTasks);
+        var values = new byte[]?[rawValues.Length];
+        var keyStrings = new string[resolvedKeys.Length];
+        for (var i = 0; i < rawValues.Length; i++)
+        {
+            values[i] = rawValues[i].HasValue ? (byte[])rawValues[i]! : null;
+            keyStrings[i] = resolvedKeys[i].ToString();
+        }
+
+        return (values, keyStrings);
+    }
+
     private IEnumerable<byte[]> FilterOrphans(
-        RedisValue[] values,
-        RedisKey[] keys,
+        byte[]?[] values,
+        string[] keys,
         Guid? envId,
         string entityName)
     {
@@ -144,13 +157,14 @@ public class RedisStore(IRedisClient redisClient, ILogger<RedisStore> logger) : 
         var jsonBytes = new List<byte[]>(values.Length);
         for (var i = 0; i < values.Length; i++)
         {
-            if (values[i].HasValue)
+            var value = values[i];
+            if (value is not null)
             {
-                jsonBytes.Add((byte[])values[i]!);
+                jsonBytes.Add(value);
             }
             else
             {
-                orphans.Add(keys[i].ToString());
+                orphans.Add(keys[i]);
             }
         }
 
