@@ -46,6 +46,12 @@ test.describe("layout", () => {
     await expect(page.getByText("Feature Flags")).toHaveCount(0)
     await expect(page.getByText("Team")).toHaveCount(0)
     await expect(page.getByText("Webhooks")).toHaveCount(0)
+
+    await page.getByRole("button", { name: "IAM" }).click()
+    await expect(page.getByText("Team", { exact: true })).toBeVisible()
+    await expect(page.getByText("Groups", { exact: true })).toBeVisible()
+    await expect(page.getByText("Policies", { exact: true })).toBeVisible()
+
     await expect(
       page.evaluate(() => localStorage.getItem("featbit:sidebar-collapsed"))
     ).resolves.toBe("true")

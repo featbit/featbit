@@ -8,6 +8,12 @@ import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Link, useLocation } from "react-router-dom"
 import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { AccountMenu } from "@/features/layout/components/account-menu"
 import { localizedPath } from "@/features/layout/layout-context"
 import type { Lang, NavItem } from "@/features/layout/layout-types"
@@ -51,7 +57,9 @@ function isActivePath(pathname: string, href: string, lang: Lang) {
 }
 
 function hasActiveChild(pathname: string, item: NavItem, lang: Lang) {
-  return item.children?.some((child) => isActivePath(pathname, child.href, lang))
+  return item.children?.some((child) =>
+    isActivePath(pathname, child.href, lang)
+  )
 }
 
 function SidebarNavLink({
@@ -107,9 +115,69 @@ function SidebarNavItem({
   const label = t(item.labelKey)
   const childActive = hasActiveChild(location.pathname, item, lang)
   const open = expanded || childActive
+  const [collapsedMenuOpen, setCollapsedMenuOpen] = useState(false)
 
   if (!item.children?.length) {
     return <SidebarNavLink item={item} lang={lang} collapsed={collapsed} />
+  }
+
+  if (collapsed) {
+    return (
+      <DropdownMenu
+        open={collapsedMenuOpen}
+        onOpenChange={setCollapsedMenuOpen}
+      >
+        <DropdownMenuTrigger
+          render={
+            <Button
+              type="button"
+              variant="ghost"
+              className={cn(
+                "h-9 w-full justify-center px-0 text-muted-foreground hover:text-foreground",
+                "hover:bg-accent active:translate-y-0 active:bg-accent",
+                (childActive || collapsedMenuOpen) &&
+                  "bg-accent text-foreground"
+              )}
+              title={label}
+              aria-label={label}
+            >
+              <Icon className="size-4 shrink-0" />
+            </Button>
+          }
+        />
+        <DropdownMenuContent
+          align="start"
+          side="right"
+          sideOffset={8}
+          className="min-w-44 rounded-lg border-border/80 shadow-lg"
+          aria-label={label}
+        >
+          {item.children.map((child) => {
+            const ChildIcon = child.icon
+            const active = isActivePath(location.pathname, child.href, lang)
+
+            return (
+              <DropdownMenuItem
+                key={child.href}
+                render={
+                  <Link
+                    to={localizedPath(lang, child.href)}
+                    aria-current={active ? "page" : undefined}
+                  />
+                }
+                className={cn(
+                  "h-8 cursor-pointer",
+                  active && "bg-accent text-accent-foreground"
+                )}
+              >
+                <ChildIcon className="size-4 shrink-0 text-muted-foreground" />
+                <span>{t(child.labelKey)}</span>
+              </DropdownMenuItem>
+            )
+          })}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    )
   }
 
   return (
