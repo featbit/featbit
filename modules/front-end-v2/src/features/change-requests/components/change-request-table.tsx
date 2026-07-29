@@ -27,6 +27,7 @@ import {
 import { useFlagChangeLedgerAdapter } from "@/features/flags/details/targeting/use-flag-change-ledger-adapter"
 import { localizedPath } from "@/features/layout/layout-context"
 import type { Lang } from "@/features/layout/layout-types"
+import { cn } from "@/lib/utils"
 import type { ChangeRequestsCopy } from "../change-requests-copy"
 import type {
   ChangeRequestAction,
@@ -437,10 +438,12 @@ export function ChangeRequestTable({
                               to={targetingHref}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className={buttonVariants({
-                                variant: "outline",
-                                size: "sm",
-                              })}
+                              className={cn(
+                                buttonVariants({
+                                  variant: "outline",
+                                  size: "sm",
+                                })
+                              )}
                             >
                               <span className="translate-y-px">
                                 {copy.viewInTargeting}

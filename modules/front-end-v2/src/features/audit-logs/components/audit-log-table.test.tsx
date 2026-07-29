@@ -199,6 +199,7 @@ describe("AuditLogTable", () => {
   })
 
   it("shows the snapshotted request context and targeting link", () => {
+    const onViewRawData = vi.fn()
     const baseFlag = {
       id: "flag-1",
       name: "Checkout redesign",
@@ -259,7 +260,7 @@ describe("AuditLogTable", () => {
             loading={false}
             filtered={false}
             onClearFilters={vi.fn()}
-            onViewRawData={vi.fn()}
+            onViewRawData={onViewRawData}
           />
         </TooltipProvider>
       </MemoryRouter>
@@ -283,8 +284,14 @@ describe("AuditLogTable", () => {
     expect(
       screen.getByRole("link", { name: "View change request" }).firstChild
     ).toHaveClass("translate-y-px")
+    fireEvent.click(screen.getByRole("button", { name: "View raw data" }))
     expect(
-      screen.queryByRole("button", { name: "View raw data" })
-    ).not.toBeInTheDocument()
+      screen.getByRole("button", { name: "View raw data" }).firstChild
+    ).toHaveClass("translate-y-px")
+    expect(onViewRawData).toHaveBeenCalledOnce()
+    expect(onViewRawData.mock.calls[0]?.[0]).toMatchObject({
+      operation: "ApproveFlagChangeRequest",
+      dataChange: JSON.parse(decisionSnapshot).proposedDataChange,
+    })
   })
 })

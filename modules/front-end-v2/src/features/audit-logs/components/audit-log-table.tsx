@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/tooltip"
 import { localizedPath } from "@/features/layout/layout-context"
 import type { Lang } from "@/features/layout/layout-types"
+import { cn } from "@/lib/utils"
 import {
   auditDecisionSnapshot,
   auditObjectIdentity,
@@ -166,9 +167,13 @@ export function AuditLogTable({
             const decisionDetails = changeDetails.kind === "decision"
             const decisionSnapshot = auditDecisionSnapshot(log)
             const comment = log.comment?.trim()
-            const hasRawData = Boolean(
-              log.dataChange.previous || log.dataChange.current
-            )
+            const rawDataLog = decisionDetails
+              ? decisionSnapshot?.proposedDataChange
+                ? { ...log, dataChange: decisionSnapshot.proposedDataChange }
+                : null
+              : log.dataChange.previous || log.dataChange.current
+                ? log
+                : null
 
             return (
               <Fragment key={log.id}>
@@ -284,24 +289,28 @@ export function AuditLogTable({
                                 )}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className={buttonVariants({
-                                  variant: "outline",
-                                  size: "sm",
-                                })}
+                                className={cn(
+                                  buttonVariants({
+                                    variant: "outline",
+                                    size: "sm",
+                                  })
+                                )}
                               >
                                 <span className="translate-y-px">
                                   {t("auditLogs.viewChangeRequest")}
                                 </span>
                               </Link>
                             ) : null}
-                            {hasRawData && !decisionDetails ? (
+                            {rawDataLog ? (
                               <Button
                                 type="button"
                                 variant="outline"
                                 size="sm"
-                                onClick={() => onViewRawData(log)}
+                                onClick={() => onViewRawData(rawDataLog)}
                               >
-                                {t("auditLogs.viewRawData")}
+                                <span className="translate-y-px">
+                                  {t("auditLogs.viewRawData")}
+                                </span>
                               </Button>
                             ) : null}
                           </div>
