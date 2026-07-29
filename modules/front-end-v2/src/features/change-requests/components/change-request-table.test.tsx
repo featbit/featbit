@@ -159,6 +159,7 @@ describe("ChangeRequestTable", () => {
     expect(await screen.findByText("jordan@example.com")).toBeInTheDocument()
 
     const reviewerLink = screen.getAllByRole("link", { name: "You" })[0]
+    expect(reviewerLink.closest("td")?.querySelector(".size-6")).toBeNull()
     expect(reviewerLink).toHaveAttribute(
       "href",
       "/en/iam/team/current-user/permissions"

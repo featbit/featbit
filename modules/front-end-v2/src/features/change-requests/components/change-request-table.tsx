@@ -39,43 +39,6 @@ import type {
   ChangeRequestReviewer,
 } from "../change-requests-types"
 
-const avatarColors = [
-  "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300",
-  "bg-violet-100 text-violet-800 dark:bg-violet-950 dark:text-violet-300",
-  "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300",
-  "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300",
-  "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300",
-]
-
-function initials(value: string) {
-  const parts = value.trim().split(/\s+/).filter(Boolean)
-  if (!parts.length) return "?"
-  return parts
-    .slice(0, 2)
-    .map((part) => part[0])
-    .join("")
-    .toUpperCase()
-}
-
-function colorFor(value: string) {
-  const hash = Array.from(value).reduce(
-    (total, character) => total + character.charCodeAt(0),
-    0
-  )
-  return avatarColors[hash % avatarColors.length]
-}
-
-function ReviewerAvatar({ name }: { name: string }) {
-  return (
-    <span
-      aria-hidden="true"
-      className={`inline-flex size-6 shrink-0 items-center justify-center rounded-full text-[0.625rem] font-medium ${colorFor(name)}`}
-    >
-      {initials(name)}
-    </span>
-  )
-}
-
 function reviewerDecision(reviewer: ChangeRequestReviewer) {
   if (reviewer.action === "Approve") return "approved"
   if (reviewer.action === "Decline") return "declined"
@@ -179,9 +142,8 @@ function ReviewerList({
         return (
           <div
             key={reviewer.memberId}
-            className="flex min-w-0 items-center gap-2"
+            className="flex min-w-0 items-center gap-1.5"
           >
-            <ReviewerAvatar name={name} />
             <TeamMemberLink
               id={reviewer.memberId}
               name={name}
@@ -197,7 +159,7 @@ function ReviewerList({
         )
       })}
       {reviewers.length > visible.length ? (
-        <span className="pl-8 text-xs text-muted-foreground">
+        <span className="text-xs text-muted-foreground">
           +{reviewers.length - visible.length}
         </span>
       ) : null}
