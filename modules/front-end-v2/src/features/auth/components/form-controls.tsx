@@ -1,4 +1,4 @@
-import { useId, type ChangeEvent, type ReactNode } from "react"
+import { useId, type ChangeEvent, type ReactNode, type Ref } from "react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
@@ -12,9 +12,13 @@ export function Field({
   trailing,
   value,
   disabled,
+  readOnly,
   autoComplete,
   name,
   required,
+  description,
+  error,
+  inputRef,
   onChange,
 }: {
   label: string
@@ -24,30 +28,49 @@ export function Field({
   trailing?: ReactNode
   value: string
   disabled?: boolean
+  readOnly?: boolean
   autoComplete?: string
   name: string
   required?: boolean
+  description?: string
+  error?: string
+  inputRef?: Ref<HTMLInputElement>
   onChange: (event: ChangeEvent<HTMLInputElement>) => void
 }) {
   const inputId = useId()
+  const descriptionId = useId()
+  const errorId = useId()
+  const describedBy = error ? errorId : description ? descriptionId : undefined
 
   return (
     <div>
       <Label htmlFor={inputId}>{label}</Label>
-      <span className="relative mt-2 block text-muted-foreground">
-        <span className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2">
+      <span
+        className={cn(
+          "relative mt-2 block text-muted-foreground",
+          error && "text-destructive"
+        )}
+      >
+        <span className="pointer-events-none absolute top-1/2 left-4 z-10 -translate-y-1/2">
           {icon}
         </span>
         <Input
+          ref={inputRef}
           id={inputId}
-          className={cn("h-12 pl-12 pr-4 text-base", trailing && "pr-12")}
+          className={cn(
+            "h-12 pr-4 pl-12 text-base text-foreground",
+            trailing && "pr-12"
+          )}
           type={type}
           placeholder={placeholder}
           value={value}
           disabled={disabled}
+          readOnly={readOnly}
           autoComplete={autoComplete}
           name={name}
           required={required}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={describedBy}
           onChange={onChange}
         />
         {trailing ? (
@@ -56,6 +79,15 @@ export function Field({
           </span>
         ) : null}
       </span>
+      {error ? (
+        <p id={errorId} className="mt-2 text-sm text-destructive" role="alert">
+          {error}
+        </p>
+      ) : description ? (
+        <p id={descriptionId} className="mt-2 text-sm text-muted-foreground">
+          {description}
+        </p>
+      ) : null}
     </div>
   )
 }

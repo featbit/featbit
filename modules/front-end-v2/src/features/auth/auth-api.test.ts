@@ -27,7 +27,7 @@ describe("auth persistence", () => {
     )
   })
 
-  it("stores auth token in localStorage and forgets email when remember me is off", async () => {
+  it("stores auth token in localStorage and forgets email when remember-email is off", async () => {
     const navigate = vi.fn()
 
     localStorage.setItem("remembered-email", "old@example.com")
@@ -46,7 +46,7 @@ describe("auth persistence", () => {
     expect(navigate).toHaveBeenCalledWith("/en")
   })
 
-  it("stores auth token and remembered email when remember me is on", async () => {
+  it("stores auth token and remembered email when remember-email is on", async () => {
     const navigate = vi.fn()
 
     await completeLogin(

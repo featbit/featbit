@@ -1,13 +1,9 @@
 import { ArrowLeft, Building2 } from "lucide-react"
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
-import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
-import {
-  getSsoAuthorizeUrl,
-  type SsoPreCheck,
-} from "@/features/auth/auth-api"
+import { getSsoAuthorizeUrl, type SsoPreCheck } from "@/features/auth/auth-api"
 import type { Lang } from "@/features/auth/auth-page-types"
 import { Field } from "@/features/auth/components/form-controls"
 
@@ -20,28 +16,32 @@ export function SsoForm({
 }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const workspaceKeyRef = useRef<HTMLInputElement>(null)
   const [workspaceKey, setWorkspaceKey] = useState(preCheck?.workspaceKey ?? "")
-  const [error, setError] = useState("")
+  const [hasError, setHasError] = useState(false)
+  const [isRedirecting, setIsRedirecting] = useState(false)
 
   function handleSsoSubmit() {
-    setError("")
+    setHasError(false)
 
     const trimmedWorkspaceKey = workspaceKey.trim()
     if (!trimmedWorkspaceKey) {
-      setError(t("auth.errors.workspaceKeyRequired"))
+      setHasError(true)
+      workspaceKeyRef.current?.focus()
       return
     }
 
-    window.location.href = getSsoAuthorizeUrl(trimmedWorkspaceKey)
+    setIsRedirecting(true)
+    window.location.assign(getSsoAuthorizeUrl(trimmedWorkspaceKey))
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-[560px] flex-col justify-start px-8 pb-8 sm:px-12 2xl:px-0">
+    <div className="mx-auto flex w-full max-w-[480px] flex-col justify-start px-6 pb-8 sm:px-10 2xl:min-h-[520px] 2xl:px-0">
       <Button
         type="button"
         variant="link"
         className="mb-14 h-auto justify-start gap-3 p-0 text-base"
-        onClick={() => navigate(`/${lang}/login`)}
+        onClick={() => navigate(`/${lang}/login`, { replace: true })}
       >
         <ArrowLeft className="size-5" />
         {t("auth.backToSignIn")}
@@ -58,6 +58,7 @@ export function SsoForm({
 
       <form
         className="mt-14 space-y-8"
+        noValidate
         onSubmit={(event) => {
           event.preventDefault()
           handleSsoSubmit()
@@ -68,20 +69,29 @@ export function SsoForm({
           placeholder="acme-prod"
           icon={<Building2 className="size-6" />}
           value={workspaceKey}
-          disabled={Boolean(preCheck?.workspaceKey)}
-          autoComplete="organization"
+          readOnly={Boolean(preCheck?.workspaceKey)}
+          autoComplete="off"
           name="workspaceKey"
           required
-          onChange={(event) => setWorkspaceKey(event.target.value)}
+          description={
+            preCheck?.workspaceKey
+              ? t("auth.sso.configuredWorkspace")
+              : undefined
+          }
+          error={hasError ? t("auth.errors.workspaceKeyRequired") : undefined}
+          inputRef={workspaceKeyRef}
+          onChange={(event) => {
+            setWorkspaceKey(event.target.value)
+            setHasError(false)
+          }}
         />
-        {error ? (
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        ) : null}
-        <Button className="h-14 w-full gap-3 text-lg" type="submit">
+        <Button
+          className="h-14 w-full gap-3 text-lg"
+          type="submit"
+          disabled={isRedirecting}
+        >
           <Building2 className="size-6" />
-          {t("auth.continueSso")}
+          {isRedirecting ? t("auth.redirectingSso") : t("auth.continueSso")}
         </Button>
       </form>
     </div>

@@ -3,10 +3,11 @@ import { Building2, Eye, EyeOff, Lock, Mail } from "lucide-react"
 import { useId, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Alert, AlertAction, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   completeLogin,
   getRememberedEmail,
@@ -20,10 +21,20 @@ import { GitHubIcon, GoogleIcon } from "@/features/auth/components/social-icons"
 export function LoginForm({
   lang,
   socialProviders,
+  isSsoEnabled,
+  isExternalOptionsLoading,
+  hasExternalOptionsError,
+  isRetryingExternalOptions,
+  onRetryExternalOptions,
   onSocialLogin,
 }: {
   lang: Lang
   socialProviders: OAuthProvider[]
+  isSsoEnabled: boolean
+  isExternalOptionsLoading: boolean
+  hasExternalOptionsError: boolean
+  isRetryingExternalOptions: boolean
+  onRetryExternalOptions: () => void
   onSocialLogin: (provider: OAuthProvider) => void
 }) {
   const { t } = useTranslation()
@@ -68,6 +79,11 @@ export function LoginForm({
   const visibleProviders = socialProviders.filter((provider) =>
     ["Google", "GitHub"].includes(provider.name)
   )
+  const hasExternalOptions =
+    visibleProviders.length > 0 ||
+    isSsoEnabled ||
+    isExternalOptionsLoading ||
+    hasExternalOptionsError
 
   function handleLogin() {
     setErrorKey(null)
@@ -75,7 +91,7 @@ export function LoginForm({
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-[560px] flex-col justify-start px-8 pb-8 sm:px-12 2xl:px-0">
+    <div className="mx-auto flex w-full max-w-[480px] flex-col justify-start px-6 pb-8 sm:px-10 2xl:min-h-[520px] 2xl:px-0">
       <div>
         <h2 className="text-3xl font-semibold tracking-tight">
           {t("auth.login.title")}
@@ -112,7 +128,11 @@ export function LoginForm({
             <button
               type="button"
               className="inline-flex size-8 items-center justify-center text-muted-foreground hover:text-foreground"
-              aria-label={passwordVisible ? "Hide password" : "Show password"}
+              aria-label={
+                passwordVisible
+                  ? t("auth.hidePassword")
+                  : t("auth.showPassword")
+              }
               onClick={() => setPasswordVisible((visible) => !visible)}
             >
               {passwordVisible ? (
@@ -129,23 +149,15 @@ export function LoginForm({
           onChange={(event) => setPassword(event.target.value)}
         />
 
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <Checkbox
-              id={rememberMeId}
-              checked={rememberMe}
-              onCheckedChange={(checked) => setRememberMe(checked === true)}
-            />
-            <Label htmlFor={rememberMeId} className="font-normal">
-              {t("auth.remember")}
-            </Label>
-          </div>
-          <a
-            href="/forgot-password"
-            className="text-sm text-blue-600 hover:underline"
-          >
-            {t("auth.forgot")}
-          </a>
+        <div className="flex items-center gap-3">
+          <Checkbox
+            id={rememberMeId}
+            checked={rememberMe}
+            onCheckedChange={(checked) => setRememberMe(checked === true)}
+          />
+          <Label htmlFor={rememberMeId} className="font-normal">
+            {t("auth.rememberEmail")}
+          </Label>
         </div>
 
         {errorKey ? (
@@ -163,40 +175,78 @@ export function LoginForm({
         </Button>
       </form>
 
-      <div className="mt-8 space-y-6">
-        {visibleProviders.length > 0 ? (
-          <>
-            <DividerLabel>{t("auth.continueWith")}</DividerLabel>
-            <div className="grid grid-cols-2 gap-5">
-              {visibleProviders.map((provider) => (
-                <Button
-                  key={provider.name}
-                  type="button"
-                  variant="outline"
-                  className="h-12 gap-3 text-base"
-                  onClick={() => onSocialLogin(provider)}
-                >
-                  {provider.name === "Google" ? <GoogleIcon /> : <GitHubIcon />}
-                  {provider.name}
-                </Button>
-              ))}
-            </div>
-          </>
-        ) : null}
+      {hasExternalOptions ? (
+        <div className="mt-8 space-y-6">
+          {visibleProviders.length > 0 ? (
+            <>
+              <DividerLabel>{t("auth.continueWith")}</DividerLabel>
+              <div className="grid grid-cols-2 gap-5">
+                {visibleProviders.map((provider) => (
+                  <Button
+                    key={provider.name}
+                    type="button"
+                    variant="outline"
+                    className="h-12 gap-3 text-base"
+                    onClick={() => onSocialLogin(provider)}
+                  >
+                    {provider.name === "Google" ? (
+                      <GoogleIcon />
+                    ) : (
+                      <GitHubIcon />
+                    )}
+                    {provider.name}
+                  </Button>
+                ))}
+              </div>
+            </>
+          ) : null}
 
-        <div className="space-y-6">
-          <DividerLabel>{t("auth.enterprise")}</DividerLabel>
-          <Button
-            type="button"
-            variant="outline"
-            className="h-12 w-full gap-3 text-base"
-            onClick={() => navigate(`/${lang}/login/sso`)}
-          >
-            <Building2 className="size-5" />
-            {t("auth.ssoButton")}
-          </Button>
+          {isSsoEnabled ? (
+            <div className="space-y-6">
+              <DividerLabel>{t("auth.enterprise")}</DividerLabel>
+              <Button
+                type="button"
+                variant="outline"
+                className="h-12 w-full gap-3 text-base"
+                onClick={() => navigate(`/${lang}/login/sso`)}
+              >
+                <Building2 className="size-5" />
+                {t("auth.ssoButton")}
+              </Button>
+            </div>
+          ) : null}
+
+          {isExternalOptionsLoading ? (
+            <div
+              className="space-y-3"
+              role="status"
+              aria-label={t("auth.loadingOptions")}
+            >
+              <Skeleton className="mx-auto h-4 w-36 motion-reduce:animate-none" />
+              <Skeleton className="h-12 w-full motion-reduce:animate-none" />
+            </div>
+          ) : null}
+
+          {hasExternalOptionsError ? (
+            <Alert>
+              <AlertDescription>{t("auth.optionsError")}</AlertDescription>
+              <AlertAction>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  disabled={isRetryingExternalOptions}
+                  onClick={onRetryExternalOptions}
+                >
+                  {isRetryingExternalOptions
+                    ? t("auth.retrying")
+                    : t("auth.retry")}
+                </Button>
+              </AlertAction>
+            </Alert>
+          ) : null}
         </div>
-      </div>
+      ) : null}
     </div>
   )
 }

@@ -50,7 +50,9 @@ function RolloutCard({
       </div>
       <div className="mt-2 flex items-center justify-between gap-3 text-sm">
         <span className="whitespace-nowrap">{label}</span>
-        <span className={cn("flex items-center gap-2 whitespace-nowrap", toneClass)}>
+        <span
+          className={cn("flex items-center gap-2 whitespace-nowrap", toneClass)}
+        >
           <span className="size-1.5 rounded-full bg-current" />
           {status}
         </span>
@@ -60,39 +62,42 @@ function RolloutCard({
 }
 
 function RolloutVisual() {
+  const { t } = useTranslation()
+
   return (
     <div className="relative left-1/2 mt-10 h-[450px] w-[820px] max-w-[calc(100vw-2rem)] origin-top -translate-x-1/2 overflow-visible [@media(max-height:800px)]:h-[386px] [@media(max-height:800px)]:scale-[0.86] [@media(min-height:1100px)]:h-[540px] [@media(min-height:1100px)]:scale-[1.2]">
-      <DotGrid className="absolute left-0 top-15" />
-      <DotGrid className="absolute left-[58%] top-[-10px]" />
-      <span className="absolute left-[15%] top-[100px] size-2.5 rounded-full bg-orange-500" />
-      <span className="absolute left-[18%] top-[250px] size-2.5 rounded-full bg-blue-500" />
+      <DotGrid className="absolute top-15 left-0" />
+      <DotGrid className="absolute top-[-10px] left-[58%]" />
+      <span className="absolute top-[100px] left-[15%] size-2.5 rounded-full bg-orange-500" />
+      <span className="absolute top-[250px] left-[18%] size-2.5 rounded-full bg-blue-500" />
       <span className="absolute bottom-24 left-[30%] size-3 rounded-full border-4 border-blue-300 dark:border-blue-500" />
-      <span className="absolute left-0 top-[440px] size-2.5 rounded-full bg-red-300" />
-      <span className="absolute left-[40%] top-[450px] size-2.5 rounded-full bg-green-300" />
+      <span className="absolute top-[440px] left-0 size-2.5 rounded-full bg-red-300" />
+      <span className="absolute top-[450px] left-[40%] size-2.5 rounded-full bg-green-300" />
 
-      <div className="absolute left-0 top-[168px] flex w-48 flex-col rounded-lg border bg-background/60 px-4 py-3 shadow-sm backdrop-blur-sm">
+      <div className="absolute top-[168px] left-0 flex w-48 flex-col rounded-lg border bg-background/60 px-4 py-3 shadow-sm backdrop-blur-sm">
         <div className="flex items-center gap-3 text-sm font-medium">
           <Flag className="size-5 fill-current" />
-          <span>New checkout flow</span>
+          <span>{t("auth.rollout.featureName")}</span>
         </div>
         <p className="mt-3 text-sm">
-          Rule <span className="mx-2 inline-block size-2 rounded-full bg-emerald-600" />
-          <span className="text-emerald-600">On</span>
+          {t("auth.rollout.rule")}{" "}
+          <span className="mx-2 inline-block size-2 rounded-full bg-emerald-600" />
+          <span className="text-emerald-600">{t("auth.rollout.on")}</span>
         </p>
       </div>
 
-      <div className="absolute left-0 top-[300px] rounded-lg border bg-background/60 px-4 py-3 shadow-sm backdrop-blur-sm">
+      <div className="absolute top-[300px] left-0 rounded-lg border bg-background/60 px-4 py-3 shadow-sm backdrop-blur-sm">
         <p className="text-sm">
           <span className="mr-3 inline-block size-2.5 rounded-full bg-emerald-500" />
-          Rollout status
+          {t("auth.rollout.rolloutStatus")}
         </p>
         <p className="mt-2 pl-7 text-base font-medium text-emerald-600">
-          Healthy
+          {t("auth.rollout.healthy")}
         </p>
       </div>
 
       <svg
-        className="absolute left-[180px] top-[70px] h-[340px] w-[380px] overflow-visible"
+        className="absolute top-[70px] left-[180px] h-[340px] w-[380px] overflow-visible"
         aria-hidden="true"
       >
         <path
@@ -121,28 +126,52 @@ function RolloutVisual() {
         />
       </svg>
 
-      <span className="absolute left-[198px] top-[198px] size-6 rounded-full border-[6px] border-emerald-700 bg-background" />
-      <div className="absolute left-[280px] top-[47px] flex items-center gap-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm shadow-sm dark:border-emerald-600/50 dark:bg-emerald-950">
+      <span className="absolute top-[198px] left-[198px] size-6 rounded-full border-[6px] border-emerald-700 bg-background" />
+      <div className="absolute top-[47px] left-[280px] flex items-center gap-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm shadow-sm dark:border-emerald-600/50 dark:bg-emerald-950">
         <Users className="size-4" />
-        Beta users
+        {t("auth.rollout.betaUsers")}
       </div>
-      <span className="absolute left-[505px] top-[65px] size-2.5 rounded-full bg-emerald-700" />
-      <div className="absolute left-[280px] top-[186px] flex items-center gap-3 rounded-lg border border-orange-200 bg-orange-50 px-4 py-3 text-sm shadow-sm dark:border-orange-500/50 dark:bg-orange-950">
+      <span className="absolute top-[65px] left-[505px] size-2.5 rounded-full bg-emerald-700" />
+      <div className="absolute top-[186px] left-[280px] flex items-center gap-3 rounded-lg border border-orange-200 bg-orange-50 px-4 py-3 text-sm shadow-sm dark:border-orange-500/50 dark:bg-orange-950">
         <TrendingUp className="size-4" />
-        Gradual rollout
+        {t("auth.rollout.gradualRollout")}
       </div>
-      <span className="absolute left-[505px] top-[205px] size-2.5 rounded-full bg-orange-500" />
-      <span className="absolute left-[505px] top-[301px] size-2.5 rounded-full bg-slate-500" />
-      <div className="absolute left-[280px] top-[384px] flex items-center gap-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm shadow-sm dark:border-blue-500/50 dark:bg-blue-950">
+      <span className="absolute top-[205px] left-[505px] size-2.5 rounded-full bg-orange-500" />
+      <span className="absolute top-[301px] left-[505px] size-2.5 rounded-full bg-slate-500" />
+      <div className="absolute top-[384px] left-[280px] flex items-center gap-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm shadow-sm dark:border-blue-500/50 dark:bg-blue-950">
         <Globe2 className="size-4" />
-        Internal team
+        {t("auth.rollout.internalTeam")}
       </div>
-      <span className="absolute left-[505px] top-[403px] size-2.5 rounded-full bg-blue-500" />
+      <span className="absolute top-[403px] left-[505px] size-2.5 rounded-full bg-blue-500" />
 
-      <RolloutCard className="left-[525px] top-[30px]" percent="50%" label="Users in group A" status="Ready" tone="green" />
-      <RolloutCard className="left-[525px] top-[156px]" percent="30%" label="Users in group B" status="Monitoring" tone="orange" />
-      <RolloutCard className="left-[525px] top-[262px]" percent="20%" label="Everyone else" status="Off" tone="slate" />
-      <RolloutCard className="left-[525px] top-[376px]" percent="100%" label="Team only" status="Stable" tone="blue" />
+      <RolloutCard
+        className="top-[30px] left-[525px]"
+        percent="50%"
+        label={t("auth.rollout.groupA")}
+        status={t("auth.rollout.ready")}
+        tone="green"
+      />
+      <RolloutCard
+        className="top-[156px] left-[525px]"
+        percent="30%"
+        label={t("auth.rollout.groupB")}
+        status={t("auth.rollout.monitoring")}
+        tone="orange"
+      />
+      <RolloutCard
+        className="top-[262px] left-[525px]"
+        percent="20%"
+        label={t("auth.rollout.everyoneElse")}
+        status={t("auth.rollout.off")}
+        tone="slate"
+      />
+      <RolloutCard
+        className="top-[376px] left-[525px]"
+        percent="100%"
+        label={t("auth.rollout.teamOnly")}
+        status={t("auth.rollout.stable")}
+        tone="blue"
+      />
     </div>
   )
 }
@@ -151,8 +180,8 @@ export function LeftPanel() {
   const { t } = useTranslation()
 
   return (
-    <section className="relative hidden min-h-[calc(100vh-4rem)] min-w-0 flex-col justify-start overflow-hidden pb-8 pl-16 pr-4 pt-[clamp(2rem,6vh,7rem)] xl:pl-20 xl:pr-6 2xl:flex">
-      <h1 className="max-w-none whitespace-nowrap text-5xl font-semibold leading-tight tracking-tight text-foreground">
+    <section className="relative hidden min-h-[calc(100dvh-4rem)] min-w-0 flex-col justify-start overflow-hidden pt-[clamp(2rem,6vh,7rem)] pr-4 pb-8 pl-16 xl:pr-6 xl:pl-20 2xl:flex">
+      <h1 className="max-w-none text-5xl leading-tight font-semibold tracking-tight whitespace-nowrap text-foreground">
         {t("auth.hero.title")}
       </h1>
       <p className="mt-4 text-lg text-muted-foreground">

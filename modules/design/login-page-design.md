@@ -7,7 +7,7 @@ Implementation must strictly follow these design images:
 - Light theme: [login-page-concept.png](login-page-concept.png)
 - Dark theme: [login-page-layout-dark.png](login-page-layout-dark.png)
 
-These images are the required implementation contract for the React login page. They are not optional references. Layout, hierarchy, spacing rhythm, color treatment, control styling, borders, and light/dark behavior should match the saved designs as closely as practical in the browser. Any intentional visual deviation must update this document and the saved design assets first.
+These images are the required visual contract for the React login page. They are not optional references. Layout, hierarchy, spacing rhythm, color treatment, control styling, borders, and light/dark behavior should match the saved designs as closely as practical in the browser. The behavioral and availability requirements below take precedence over controls shown in a static image when the corresponding capability is absent or server-gated.
 
 Related SSO page design: [sso-login-page-design.md](sso-login-page-design.md)
 
@@ -29,6 +29,7 @@ Related SSO page design: [sso-login-page-design.md](sso-login-page-design.md)
 - Left side contains the brand statement and an abstract release-path visual.
 - Right side contains the login form in a structured column, not a floating card.
 - Footer links should remain quiet and should not have a divider line.
+- Privacy and Help must open the official FeatBit privacy page and documentation rather than unresolved local routes.
 
 ## Left Visual Direction
 
@@ -43,13 +44,17 @@ Related SSO page design: [sso-login-page-design.md](sso-login-page-design.md)
 - Keep the form order:
   - Email
   - Password
-  - Remember me / Forgot password
+  - Remember email
   - Sign in
-  - Google / GitHub OAuth buttons
-  - Enterprise sign-in section
-  - Sign in with SSO
+  - Available Google / GitHub OAuth buttons
+  - Enterprise sign-in section when SSO is enabled
+  - Sign in with SSO when SSO is enabled
+- Do not show a password-recovery link until a real unauthenticated recovery flow exists.
+- `Remember email` only describes and controls whether the email address is prefilled on a future visit; it must not imply different session persistence.
 - Google and GitHub should be grouped under `or continue with`.
 - SSO should be visually separated under `Enterprise sign-in`; it should not look like a third social OAuth button.
+- Only show the SSO section when `/api/v1/sso/pre-check` reports that SSO is enabled.
+- While external options are loading or unavailable, show compact loading or retry feedback without blocking email/password sign-in.
 - Do not include helper text under Enterprise sign-in.
 - Clicking `Sign in with SSO` should navigate to or reveal the dedicated SSO flow described in [sso-login-page-design.md](sso-login-page-design.md).
 - Do not place checkmark, success, verified, or tick icons in the right login area.
@@ -73,3 +78,4 @@ Related SSO page design: [sso-login-page-design.md](sso-login-page-design.md)
 - Ensure the layout works for both `/en/login` and `/zh/login`.
 - Theme switching must be available before authentication and should share the same persisted `light` / `dark` / `system` theme behavior as the React layout.
 - On smaller screens, collapse to a single-column login-first layout and hide or simplify the left visual.
+- Keep the logo, theme control, and language switcher on one unclipped row at 320px and wider. Preserve the current query string and hash when switching languages.

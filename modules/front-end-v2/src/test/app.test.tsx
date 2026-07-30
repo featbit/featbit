@@ -189,6 +189,27 @@ describe("App shell", () => {
     )
   }
 
+  function mockAuthOptionsApi(ssoEnabled = true) {
+    return vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
+      const url = String(input)
+
+      if (url.endsWith("/api/v1/sso/pre-check")) {
+        return new Response(
+          JSON.stringify({
+            success: true,
+            data: { isEnabled: ssoEnabled, workspaceKey: "" },
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        )
+      }
+
+      return new Response(JSON.stringify({ success: true, data: [] }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      })
+    })
+  }
+
   function mockNoAccessibleEnvironmentsApi() {
     return vi.spyOn(globalThis, "fetch").mockImplementation(async (input) => {
       const url = String(input)
@@ -237,6 +258,7 @@ describe("App shell", () => {
 
   it("renders the localized SSO route", async () => {
     window.history.pushState({}, "", "/en/login/sso")
+    mockAuthOptionsApi()
 
     render(<App />)
 
