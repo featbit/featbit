@@ -24,7 +24,7 @@ export const navigationGroups: NavGroup[] = [
     items: [
       {
         labelKey: "layout.nav.items.getStarted",
-        href: "",
+        href: "/get-started",
         icon: Rocket,
       },
     ],

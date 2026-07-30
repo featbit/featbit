@@ -165,6 +165,11 @@ const FlagDetailsPage = lazy(() =>
     default: module.FlagDetailsPage,
   }))
 )
+const GetStartedPage = lazy(() =>
+  import("@/features/get-started/get-started-page").then((module) => ({
+    default: module.GetStartedPage,
+  }))
+)
 
 type SupportedLanguage = "en" | "zh"
 
@@ -329,6 +334,7 @@ export function AppRoutes() {
         <Route path="/:lang/onboarding" element={<OnboardingRoute />} />
         <Route path="/:lang" element={<SecureRoute />}>
           <Route index element={<LayoutPlaceholder />} />
+          <Route path="get-started" element={<GetStartedPage />} />
           <Route path="workspace" element={<GeneralPage />} />
           <Route path="workspace/billing" element={<BillingPage />} />
           <Route path="workspace/license" element={<LicensePage />} />
