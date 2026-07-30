@@ -105,7 +105,11 @@ export function VerifyConnectionStep({
   return (
     <section className="flex min-h-[38rem] flex-col rounded-lg border bg-card">
       <header className="px-5 pt-5">
-        <h2 className="text-xl font-semibold">
+        <h2
+          data-get-started-step-heading
+          tabIndex={-1}
+          className="rounded-sm text-xl font-semibold outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+        >
           {t("getStarted.verify.title")}
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">

@@ -13,20 +13,21 @@ type ResourceLink = {
 
 function ResourceRow({ resource }: { resource: ResourceLink }) {
   const commonClass =
-    "flex min-h-9 items-center justify-between gap-3 rounded-md px-1 text-sm transition-colors"
+    "flex min-h-8 items-center justify-between gap-3 rounded-md px-1 text-sm transition-colors"
 
   if (!resource.href) {
     return (
-      <span
-        className={cn(
-          commonClass,
-          "cursor-not-allowed text-muted-foreground/60"
-        )}
-        title={resource.disabledReason}
-      >
-        <span>{resource.label}</span>
-        <ExternalLink className="size-3.5 shrink-0" />
-      </span>
+      <div className="rounded-md px-1 py-1">
+        <div className="flex min-h-7 items-center justify-between gap-3 text-sm text-muted-foreground/60">
+          <span>{resource.label}</span>
+          <ExternalLink className="size-3.5 shrink-0" />
+        </div>
+        {resource.disabledReason ? (
+          <p className="mt-0.5 pr-5 text-xs leading-4 text-muted-foreground">
+            {resource.disabledReason}
+          </p>
+        ) : null}
+      </div>
     )
   }
 
@@ -136,14 +137,17 @@ export function ResourcesRail({
   ]
 
   return (
-    <aside className="self-start rounded-lg border bg-card p-5">
+    <aside className="self-start rounded-lg border bg-card p-4 @min-[70rem]:sticky @min-[70rem]:top-5">
       <h2 className="text-base font-semibold">
         {t("getStarted.resources.title")}
       </h2>
-      <div className="mt-4 divide-y">
+      <div className="mt-3 grid gap-x-8 gap-y-5 @min-[48rem]:grid-cols-2 @min-[64rem]:grid-cols-3 @min-[70rem]:block @min-[70rem]:divide-y">
         {groups.map((group) => (
-          <section key={group.title} className="py-4 first:pt-0 last:pb-0">
-            <h3 className="mb-2 text-sm font-semibold">{group.title}</h3>
+          <section
+            key={group.title}
+            className="@min-[70rem]:py-3 @min-[70rem]:first:pt-0 @min-[70rem]:last:pb-0"
+          >
+            <h3 className="mb-1.5 text-sm font-semibold">{group.title}</h3>
             <div className="space-y-0.5">
               {group.links.map((resource) => (
                 <ResourceRow key={resource.label} resource={resource} />

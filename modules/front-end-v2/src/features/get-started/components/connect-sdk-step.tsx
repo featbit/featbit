@@ -1,16 +1,10 @@
-import {
-  Circle,
-  CircleAlert,
-  Eye,
-  EyeOff,
-  ExternalLink,
-  Loader2,
-} from "lucide-react"
+import { CircleAlert, Eye, EyeOff, ExternalLink, Info } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   Select,
   SelectContent,
@@ -118,12 +112,16 @@ export function ConnectSdkStep({
     },
   ]
   const configurationRowClass =
-    "grid items-center gap-3 px-4 py-2 sm:grid-cols-[minmax(9rem,0.7fr)_minmax(0,1.3fr)_4.5rem]"
+    "grid items-center gap-3 px-4 py-2 @min-[42rem]:grid-cols-[minmax(9rem,0.7fr)_minmax(0,1.3fr)_4.5rem]"
 
   return (
     <section className="flex min-h-[46rem] flex-col rounded-lg border bg-card">
       <header className="px-5 pt-5">
-        <h2 className="text-xl font-semibold">
+        <h2
+          data-get-started-step-heading
+          tabIndex={-1}
+          className="rounded-sm text-xl font-semibold outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+        >
           {t("getStarted.connectSdk.title")}
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -132,11 +130,11 @@ export function ConnectSdkStep({
       </header>
 
       <div className="flex-1 space-y-5 px-5 py-4">
-        <Alert className="border-amber-200 bg-amber-50/50 text-foreground dark:border-amber-900/70 dark:bg-amber-950/20">
-          <Circle className="mt-1 size-2.5 fill-amber-500 text-amber-500" />
-          <AlertTitle>{t("getStarted.connectSdk.waitingTitle")}</AlertTitle>
+        <Alert>
+          <Info />
+          <AlertTitle>{t("getStarted.connectSdk.setupTitle")}</AlertTitle>
           <AlertDescription>
-            {t("getStarted.connectSdk.waitingDescription")}
+            {t("getStarted.connectSdk.setupDescription")}
           </AlertDescription>
         </Alert>
 
@@ -161,9 +159,30 @@ export function ConnectSdkStep({
             {t("getStarted.connectSdk.configuration")}
           </h3>
           {environmentLoading ? (
-            <div className="flex h-36 items-center justify-center gap-2 rounded-lg border text-sm text-muted-foreground">
-              <Loader2 className="size-4 animate-spin" />
-              {t("getStarted.connectSdk.loadingConfiguration")}
+            <div
+              role="status"
+              aria-label={t("getStarted.connectSdk.loadingConfiguration")}
+              className="overflow-hidden rounded-lg border"
+            >
+              <span className="sr-only">
+                {t("getStarted.connectSdk.loadingConfiguration")}
+              </span>
+              {["secret", "streaming", "events", "open-api"].map(
+                (row, index) => (
+                  <div
+                    key={row}
+                    className={`${configurationRowClass} min-h-9 border-b last:border-b-0`}
+                  >
+                    <Skeleton className="h-4 w-28" />
+                    <Skeleton
+                      className={
+                        index === 0 ? "h-7 w-full max-w-64" : "h-4 w-44"
+                      }
+                    />
+                    <Skeleton className="ml-auto h-7 w-14" />
+                  </div>
+                )
+              )}
             </div>
           ) : environmentError ? (
             <Alert variant="destructive">
@@ -199,13 +218,11 @@ export function ConnectSdkStep({
                     >
                       <SelectTrigger
                         size="sm"
-                        className="w-full min-w-0 sm:max-w-56"
+                        className="w-full min-w-0 @min-[42rem]:max-w-56"
                       >
                         <SelectValue>
                           {selectedSecret
-                            ? `${selectedSecret.name} · ${t(
-                                `getStarted.common.${selectedSecret.type}`
-                              )}`
+                            ? selectedSecret.name
                             : t("getStarted.connectSdk.selectSecret")}
                         </SelectValue>
                       </SelectTrigger>
@@ -232,7 +249,7 @@ export function ConnectSdkStep({
                         <Badge variant="outline" className="shrink-0 uppercase">
                           {t(`getStarted.common.${selectedSecret.type}`)}
                         </Badge>
-                        <code className="hidden min-w-0 flex-1 truncate text-xs text-muted-foreground lg:block">
+                        <code className="min-w-0 flex-1 truncate text-xs text-muted-foreground">
                           {secretVisible
                             ? selectedSecret.value
                             : maskSecret(selectedSecret.value)}
@@ -345,7 +362,7 @@ export function ConnectSdkStep({
         </div>
       </div>
 
-      <footer className="flex min-h-16 items-center justify-between border-t bg-muted/10 px-5 py-3">
+      <footer className="sticky bottom-0 z-10 flex min-h-16 items-center justify-between rounded-b-lg border-t bg-card/95 px-5 py-3 supports-[backdrop-filter]:bg-card/90 supports-[backdrop-filter]:backdrop-blur-sm">
         <Button type="button" variant="outline" onClick={onBack}>
           {t("getStarted.common.back")}
         </Button>

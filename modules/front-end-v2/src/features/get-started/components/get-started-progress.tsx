@@ -14,10 +14,12 @@ export function GetStartedProgress({
   step,
   flag,
   sdkId,
+  onStepChange,
 }: {
   step: GetStartedStep
   flag: GetStartedFlag | null
   sdkId: SdkId
+  onStepChange: (step: GetStartedStep) => void
 }) {
   const { t } = useTranslation()
   const sdk = getSdkDefinition(sdkId)
@@ -28,6 +30,8 @@ export function GetStartedProgress({
         const label = t(`getStarted.steps.${stepKey}`)
         const completed = index < step
         const active = index === step
+        const itemClassName =
+          "flex h-full min-h-17 min-w-0 items-center gap-3 px-5 py-3 text-left lg:px-6"
         const supporting =
           completed && index === 0
             ? flag?.key
@@ -35,12 +39,8 @@ export function GetStartedProgress({
               ? sdk.label
               : ""
 
-        return (
-          <li
-            key={stepKey}
-            className="flex min-w-0 items-center gap-3 px-5 py-3 lg:px-6"
-            aria-current={active ? "step" : undefined}
-          >
+        const content = (
+          <>
             <span
               className={cn(
                 "flex size-8 shrink-0 items-center justify-center rounded-full border text-sm font-medium",
@@ -64,6 +64,29 @@ export function GetStartedProgress({
                 </code>
               ) : null}
             </span>
+          </>
+        )
+
+        return (
+          <li
+            key={stepKey}
+            className="min-w-0"
+            aria-current={active ? "step" : undefined}
+          >
+            {completed ? (
+              <button
+                type="button"
+                className={cn(
+                  itemClassName,
+                  "w-full rounded-md transition-colors hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
+                )}
+                onClick={() => onStepChange(index as GetStartedStep)}
+              >
+                {content}
+              </button>
+            ) : (
+              <div className={itemClassName}>{content}</div>
+            )}
           </li>
         )
       })}

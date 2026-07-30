@@ -339,9 +339,13 @@ export function CreateFeatureFlagStep({
   }
 
   return (
-    <section className="flex min-h-[38rem] flex-col rounded-lg border bg-card">
+    <section className="flex flex-col rounded-lg border bg-card">
       <header className="px-5 pt-5">
-        <h2 className="text-xl font-semibold">
+        <h2
+          data-get-started-step-heading
+          tabIndex={-1}
+          className="rounded-sm text-xl font-semibold outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+        >
           {t("getStarted.createFlag.title")}
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
@@ -349,7 +353,7 @@ export function CreateFeatureFlagStep({
         </p>
       </header>
 
-      <div className="flex-1 space-y-5 px-5 py-5">
+      <div className="space-y-5 px-5 py-5">
         <div className="space-y-2">
           <Label>{t("getStarted.createFlag.featureFlag")}</Label>
           <Popover open={pickerOpen} onOpenChange={handlePickerOpenChange}>

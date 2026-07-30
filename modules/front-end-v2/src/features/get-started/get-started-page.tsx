@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { CircleAlert } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate, useParams } from "react-router-dom"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -27,6 +27,8 @@ export function GetStartedPage() {
   const [flag, setFlag] = useState<GetStartedFlag | null>(null)
   const [sdkId, setSdkId] = useState<SdkId>("javascript")
   const [selectedSecretId, setSelectedSecretId] = useState("")
+  const pageRef = useRef<HTMLDivElement>(null)
+  const previousStepRef = useRef<GetStartedStep>(step)
   const environmentQuery = useQuery({
     queryKey: [
       "get-started",
@@ -44,12 +46,28 @@ export function GetStartedPage() {
     localStorage.setItem("get-started", "true")
   }, [])
 
+  useLayoutEffect(() => {
+    if (previousStepRef.current === step) return
+    previousStepRef.current = step
+
+    const page = pageRef.current
+    const scrollContainer = page?.closest("main")
+    if (scrollContainer) scrollContainer.scrollTop = 0
+
+    page
+      ?.querySelector<HTMLElement>("[data-get-started-step-heading]")
+      ?.focus({ preventScroll: true })
+  }, [step])
+
   function exitToFeatureFlags() {
     navigate(localizedPath(lang, "/feature-flags"))
   }
 
   return (
-    <div className="-m-5 min-h-[calc(100vh-3.5rem)] bg-background px-6 py-6 lg:px-8">
+    <div
+      ref={pageRef}
+      className="-m-5 min-h-[calc(100vh-3.5rem)] bg-background px-6 py-6 lg:px-8"
+    >
       <header className="mb-6 space-y-1">
         <h1 className="text-2xl font-semibold tracking-normal">
           {t("getStarted.title")}
@@ -59,8 +77,13 @@ export function GetStartedPage() {
         </p>
       </header>
 
-      <div className="space-y-5">
-        <GetStartedProgress step={step} flag={flag} sdkId={sdkId} />
+      <div className="@container space-y-5">
+        <GetStartedProgress
+          step={step}
+          flag={flag}
+          sdkId={sdkId}
+          onStepChange={setStep}
+        />
 
         {!projectEnv ? (
           <Alert variant="destructive">
@@ -71,7 +94,7 @@ export function GetStartedPage() {
             </AlertDescription>
           </Alert>
         ) : (
-          <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(20rem,24rem)]">
+          <div className="grid items-start gap-5 @min-[70rem]:grid-cols-[minmax(0,1fr)_18rem]">
             {step === 0 ? (
               <CreateFeatureFlagStep
                 value={flag}

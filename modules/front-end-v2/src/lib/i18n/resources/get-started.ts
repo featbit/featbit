@@ -79,8 +79,9 @@ export const enGetStarted = {
   connectSdk: {
     title: "Connect an SDK",
     subtitle: "Choose your stack, copy the configuration, then run your app.",
-    waitingTitle: "Waiting for your first evaluation",
-    waitingDescription: "Run your app, then continue when you're ready.",
+    setupTitle: "Run your app after setup",
+    setupDescription:
+      "Copy the configuration below, initialize the SDK, then continue to verify the first evaluation.",
     configuration: "SDK configuration",
     loadingConfiguration: "Loading environment configuration...",
     configurationUnavailable: "Environment configuration is unavailable",
@@ -238,8 +239,8 @@ export const zhGetStarted: typeof enGetStarted = {
   connectSdk: {
     title: "连接 SDK",
     subtitle: "选择技术栈，复制配置，然后运行应用。",
-    waitingTitle: "等待首次评估事件",
-    waitingDescription: "运行应用，准备好后继续。",
+    setupTitle: "完成设置后运行应用",
+    setupDescription: "复制以下配置并初始化 SDK，然后继续验证首次评估事件。",
     configuration: "SDK 配置",
     loadingConfiguration: "正在加载环境配置...",
     configurationUnavailable: "环境配置不可用",

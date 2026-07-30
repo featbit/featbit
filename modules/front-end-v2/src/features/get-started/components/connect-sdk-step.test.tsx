@@ -9,7 +9,7 @@ vi.mock("./code-block", () => ({
 }))
 
 describe("ConnectSdkStep", () => {
-  it("uses a compact secret selector", () => {
+  it("uses a compact secret selector without repeating its type", () => {
     render(
       <MemoryRouter>
         <ConnectSdkStep
@@ -47,6 +47,47 @@ describe("ConnectSdkStep", () => {
       </MemoryRouter>
     )
 
-    expect(screen.getByRole("combobox")).toHaveAttribute("data-size", "sm")
+    const selector = screen.getByRole("combobox")
+    expect(selector).toHaveAttribute("data-size", "sm")
+    expect(selector).toHaveTextContent("Client Key")
+    expect(selector).not.toHaveTextContent("client")
+    expect(screen.getByText("Run your app after setup")).toBeVisible()
+    expect(screen.queryByText("Waiting for your first evaluation")).toBeNull()
+    expect(
+      screen
+        .getByRole("button", { name: "Continue to verification" })
+        .closest("footer")
+    ).toHaveClass("sticky", "bottom-0")
+  })
+
+  it("uses configuration-shaped skeleton rows while loading", () => {
+    render(
+      <MemoryRouter>
+        <ConnectSdkStep
+          lang="en"
+          flag={{
+            name: "Checkout redesign",
+            key: "checkout-redesign",
+            variationType: "boolean",
+            isEnabled: false,
+          }}
+          sdkId="javascript"
+          environmentLoading
+          environmentError={false}
+          selectedSecretId=""
+          onSdkChange={vi.fn()}
+          onSecretChange={vi.fn()}
+          onRetryEnvironment={vi.fn()}
+          onBack={vi.fn()}
+          onContinue={vi.fn()}
+        />
+      </MemoryRouter>
+    )
+
+    expect(
+      screen.getByRole("status", {
+        name: "Loading environment configuration...",
+      })
+    ).toBeVisible()
   })
 })
