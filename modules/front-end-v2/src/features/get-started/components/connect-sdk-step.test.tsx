@@ -53,11 +53,11 @@ describe("ConnectSdkStep", () => {
     expect(selector).not.toHaveTextContent("client")
     expect(screen.getByText("Run your app after setup")).toBeVisible()
     expect(screen.queryByText("Waiting for your first evaluation")).toBeNull()
-    expect(
-      screen
-        .getByRole("button", { name: "Continue to verification" })
-        .closest("footer")
-    ).toHaveClass("sticky", "bottom-0")
+    const footer = screen
+      .getByRole("button", { name: "Continue to verification" })
+      .closest("footer")
+    expect(footer).toHaveClass("sticky", "bottom-0", "z-10")
+    expect(footer?.closest("section")).toHaveClass("isolate")
   })
 
   it("uses configuration-shaped skeleton rows while loading", () => {

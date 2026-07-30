@@ -115,7 +115,7 @@ export function ConnectSdkStep({
     "grid items-center gap-3 px-4 py-2 @min-[42rem]:grid-cols-[minmax(9rem,0.7fr)_minmax(0,1.3fr)_4.5rem]"
 
   return (
-    <section className="flex min-h-[46rem] flex-col rounded-lg border bg-card">
+    <section className="isolate flex min-h-[46rem] flex-col rounded-lg border bg-card">
       <header className="px-5 pt-5">
         <h2
           data-get-started-step-heading
