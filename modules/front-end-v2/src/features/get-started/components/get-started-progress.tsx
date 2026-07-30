@@ -1,4 +1,5 @@
 import { Check } from "lucide-react"
+import { useTranslation } from "react-i18next"
 import { cn } from "@/lib/utils"
 import { getSdkDefinition } from "../sdk-definitions"
 import type {
@@ -7,11 +8,7 @@ import type {
   SdkId,
 } from "../get-started-types"
 
-const STEPS = [
-  "Create a feature flag",
-  "Connect an SDK",
-  "Verify connection",
-] as const
+const STEP_KEYS = ["createFlag", "connectSdk", "verifyConnection"] as const
 
 export function GetStartedProgress({
   step,
@@ -22,11 +19,13 @@ export function GetStartedProgress({
   flag: GetStartedFlag | null
   sdkId: SdkId
 }) {
+  const { t } = useTranslation()
   const sdk = getSdkDefinition(sdkId)
 
   return (
     <ol className="grid min-h-17 grid-cols-3 overflow-hidden rounded-lg border bg-card">
-      {STEPS.map((label, index) => {
+      {STEP_KEYS.map((stepKey, index) => {
+        const label = t(`getStarted.steps.${stepKey}`)
         const completed = index < step
         const active = index === step
         const supporting =
@@ -38,7 +37,7 @@ export function GetStartedProgress({
 
         return (
           <li
-            key={label}
+            key={stepKey}
             className="flex min-w-0 items-center gap-3 px-5 py-3 lg:px-6"
             aria-current={active ? "step" : undefined}
           >

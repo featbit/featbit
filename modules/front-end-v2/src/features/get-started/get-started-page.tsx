@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { CircleAlert } from "lucide-react"
 import { useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { useNavigate, useParams } from "react-router-dom"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
@@ -17,6 +18,7 @@ import { fetchGetStartedEnvironment } from "./get-started-api"
 import type { GetStartedFlag, GetStartedStep, SdkId } from "./get-started-types"
 
 export function GetStartedPage() {
+  const { t } = useTranslation()
   const { lang: langParam } = useParams()
   const lang = resolveLang(langParam)
   const navigate = useNavigate()
@@ -49,10 +51,11 @@ export function GetStartedPage() {
   return (
     <div className="-m-5 min-h-[calc(100vh-3.5rem)] bg-background px-6 py-6 lg:px-8">
       <header className="mb-6 space-y-1">
-        <h1 className="text-2xl font-semibold tracking-normal">Get started</h1>
+        <h1 className="text-2xl font-semibold tracking-normal">
+          {t("getStarted.title")}
+        </h1>
         <p className="text-sm text-muted-foreground">
-          Create your first flag, connect an SDK, and verify the first
-          evaluation.
+          {t("getStarted.subtitle")}
         </p>
       </header>
 
@@ -62,10 +65,9 @@ export function GetStartedPage() {
         {!projectEnv ? (
           <Alert variant="destructive">
             <CircleAlert />
-            <AlertTitle>No environment selected</AlertTitle>
+            <AlertTitle>{t("getStarted.noEnvironment.title")}</AlertTitle>
             <AlertDescription>
-              Select an accessible project and environment from the context bar
-              to continue.
+              {t("getStarted.noEnvironment.description")}
             </AlertDescription>
           </Alert>
         ) : (

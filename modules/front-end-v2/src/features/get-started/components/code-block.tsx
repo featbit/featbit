@@ -1,4 +1,5 @@
 import { useEffect, useState, type CSSProperties } from "react"
+import { useTranslation } from "react-i18next"
 import { highlightCode, type HighlightedCode } from "../syntax-highlighter"
 import { CopyButton } from "./copy-button"
 
@@ -22,6 +23,7 @@ export function CodeBlock({
   lineNumbers?: boolean
   maxHeightClassName?: string
 }) {
+  const { t } = useTranslation()
   const source = code.trim()
   const lines = source.split("\n")
   const highlightKey = highlight ? `${language}:${source}` : ""
@@ -60,7 +62,7 @@ export function CodeBlock({
         <span>{language}</span>
         <CopyButton
           value={copyValue.trim()}
-          label={`Copy ${language} code`}
+          label={t("getStarted.common.copyCode", { language })}
           iconOnly
         />
       </div>

@@ -1,6 +1,7 @@
 import { CheckCircle2, CircleAlert, Clock3, RefreshCw } from "lucide-react"
 import { useQuery } from "@tanstack/react-query"
 import { useEffect, useMemo, useState } from "react"
+import { Trans, useTranslation } from "react-i18next"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { fetchFeatureFlagInsights } from "@/features/flags/details/insights/insights-api"
@@ -27,6 +28,7 @@ export function VerifyConnectionStep({
   onBack: () => void
   onExit: () => void
 }) {
+  const { t } = useTranslation()
   const sdk = getSdkDefinition(sdkId)
   const [startedAt, setStartedAt] = useState(() => Date.now())
   const [now, setNow] = useState(startedAt)
@@ -77,10 +79,14 @@ export function VerifyConnectionStep({
       insightsQuery.dataUpdatedAt,
       insightsQuery.errorUpdatedAt
     )
-    if (!updatedAt) return "Not checked yet"
+    if (!updatedAt) return t("getStarted.verify.notCheckedYet")
     const secondsAgo = Math.max(0, Math.floor((now - updatedAt) / 1000))
-    return secondsAgo < 10 ? "Just now" : `${formatDuration(secondsAgo)} ago`
-  }, [insightsQuery.dataUpdatedAt, insightsQuery.errorUpdatedAt, now])
+    return secondsAgo < 10
+      ? t("getStarted.verify.justNow")
+      : t("getStarted.verify.ago", {
+          duration: formatDuration(secondsAgo),
+        })
+  }, [insightsQuery.dataUpdatedAt, insightsQuery.errorUpdatedAt, now, t])
 
   function retry() {
     const nextStart = Date.now()
@@ -91,30 +97,35 @@ export function VerifyConnectionStep({
 
   const connectionLabel =
     effectiveStatus === "success"
-      ? "Connected"
+      ? t("getStarted.verify.statuses.connected")
       : effectiveStatus === "timeout"
-        ? "Not detected"
-        : "Listening"
+        ? t("getStarted.verify.statuses.notDetected")
+        : t("getStarted.verify.statuses.listening")
 
   return (
     <section className="flex min-h-[38rem] flex-col rounded-lg border bg-card">
       <header className="px-5 pt-5">
-        <h2 className="text-xl font-semibold">Verify connection</h2>
+        <h2 className="text-xl font-semibold">
+          {t("getStarted.verify.title")}
+        </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Run your app and evaluate the selected flag. FeatBit will confirm the
-          first event.
+          {t("getStarted.verify.subtitle")}
         </p>
       </header>
 
       <div className="flex-1 space-y-5 px-5 py-5">
         <div className="space-y-3">
-          <h3 className="text-sm font-semibold">Connection</h3>
+          <h3 className="text-sm font-semibold">
+            {t("getStarted.verify.connection")}
+          </h3>
           <div className="flex min-h-36 items-center gap-2 rounded-lg border px-6 py-5">
             <div className="flex min-h-20 w-44 shrink-0 flex-col items-center justify-center rounded-lg border bg-muted/20 px-4 text-center">
-              <span className="text-sm font-semibold">Your app</span>
+              <span className="text-sm font-semibold">
+                {t("getStarted.verify.yourApp")}
+              </span>
               <span className="mt-1 text-sm text-muted-foreground">
                 {sdk.label}{" "}
-                {sdk.recommendedSecretType === "server" ? "server" : "client"}
+                {t(`getStarted.common.${sdk.recommendedSecretType}`)}
               </span>
             </div>
             <div className="relative h-6 min-w-24 flex-1 px-2">
@@ -135,14 +146,16 @@ export function VerifyConnectionStep({
             <div className="flex min-h-20 w-44 shrink-0 flex-col items-center justify-center rounded-lg border bg-muted/20 px-4 text-center">
               <span className="text-sm font-semibold">FeatBit</span>
               <span className="mt-1 text-sm text-muted-foreground">
-                Evaluation service
+                {t("getStarted.verify.evaluationService")}
               </span>
             </div>
           </div>
         </div>
 
         <div className="grid min-h-14 items-center gap-3 rounded-lg border px-4 py-2 sm:grid-cols-[12rem_minmax(0,1fr)_auto]">
-          <span className="text-sm font-medium">Watching flag</span>
+          <span className="text-sm font-medium">
+            {t("getStarted.verify.watchingFlag")}
+          </span>
           <code className="min-w-0 truncate text-sm text-muted-foreground">
             {flag.key}
           </code>
@@ -155,12 +168,12 @@ export function VerifyConnectionStep({
               <span className="mt-0.5 size-5 shrink-0 rounded-full border-[3px] border-amber-500" />
               <div className="min-w-0 flex-1">
                 <h3 className="text-base font-semibold">
-                  Listening for an evaluation
+                  {t("getStarted.verify.listeningTitle")}
                 </h3>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {insightsQuery.isError
-                    ? "We could not check events. Retrying..."
-                    : "Run the starter code from Step 2. Detection can take up to 5 seconds."}
+                    ? t("getStarted.verify.checkFailed")
+                    : t("getStarted.verify.listeningDescription")}
                 </p>
                 <div className="mt-5">
                   <div
@@ -176,8 +189,16 @@ export function VerifyConnectionStep({
                     />
                   </div>
                   <div className="mt-3 flex items-center justify-between font-mono text-xs text-muted-foreground tabular-nums">
-                    <span>{formatDuration(elapsedSeconds)} elapsed</span>
-                    <span>{formatDuration(remainingSeconds)} remaining</span>
+                    <span>
+                      {t("getStarted.verify.elapsed", {
+                        duration: formatDuration(elapsedSeconds),
+                      })}
+                    </span>
+                    <span>
+                      {t("getStarted.verify.remaining", {
+                        duration: formatDuration(remainingSeconds),
+                      })}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -188,9 +209,13 @@ export function VerifyConnectionStep({
         {effectiveStatus === "success" ? (
           <Alert className="border-green-200 bg-green-50/50 dark:border-green-900/70 dark:bg-green-950/20">
             <CheckCircle2 className="text-green-600 dark:text-green-500" />
-            <AlertTitle>Connection verified</AlertTitle>
+            <AlertTitle>{t("getStarted.verify.successTitle")}</AlertTitle>
             <AlertDescription>
-              FeatBit received an evaluation for <code>{flag.key}</code>.
+              <Trans
+                i18nKey="getStarted.verify.successDescription"
+                values={{ flagKey: flag.key }}
+                components={{ code: <code /> }}
+              />
             </AlertDescription>
           </Alert>
         ) : null}
@@ -198,10 +223,9 @@ export function VerifyConnectionStep({
         {effectiveStatus === "timeout" ? (
           <Alert variant="destructive">
             <CircleAlert />
-            <AlertTitle>No evaluation detected</AlertTitle>
+            <AlertTitle>{t("getStarted.verify.timeoutTitle")}</AlertTitle>
             <AlertDescription>
-              Check the secret, endpoints, and flag key, then run the
-              application again.
+              {t("getStarted.verify.timeoutDescription")}
             </AlertDescription>
           </Alert>
         ) : null}
@@ -209,13 +233,13 @@ export function VerifyConnectionStep({
         <div className="flex flex-wrap items-center gap-x-8 gap-y-3 text-sm text-muted-foreground">
           <span className="inline-flex items-center gap-2">
             <Clock3 className="size-4" />
-            Checks every 5 seconds
+            {t("getStarted.verify.checksEvery")}
           </span>
           <span className="inline-flex items-center gap-2">
             <RefreshCw
               className={`size-4 ${insightsQuery.isFetching ? "animate-spin" : ""}`}
             />
-            Last checked {lastChecked.toLocaleLowerCase()}
+            {t("getStarted.verify.lastChecked", { value: lastChecked })}
           </span>
         </div>
       </div>
@@ -223,26 +247,26 @@ export function VerifyConnectionStep({
       <footer className="flex min-h-16 items-center justify-between border-t bg-muted/10 px-5 py-3">
         <Button type="button" variant="outline" onClick={onBack}>
           {effectiveStatus === "success" || effectiveStatus === "timeout"
-            ? "Back to SDK setup"
-            : "Back"}
+            ? t("getStarted.verify.backToSdk")
+            : t("getStarted.common.back")}
         </Button>
         <div className="flex items-center gap-2">
           {effectiveStatus === "timeout" ? (
             <Button type="button" variant="ghost" onClick={onExit}>
-              Skip
+              {t("getStarted.common.skip")}
             </Button>
           ) : null}
           {effectiveStatus === "timeout" ? (
             <Button type="button" onClick={retry}>
-              Retry
+              {t("getStarted.common.retry")}
             </Button>
           ) : effectiveStatus === "success" ? (
             <Button type="button" onClick={onExit}>
-              View feature flags
+              {t("getStarted.verify.viewFeatureFlags")}
             </Button>
           ) : (
             <Button type="button" variant="outline" onClick={onExit}>
-              Skip
+              {t("getStarted.common.skip")}
             </Button>
           )}
         </div>

@@ -11,6 +11,7 @@ import {
 } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useForm, useWatch } from "react-hook-form"
+import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { z } from "zod"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -57,14 +58,20 @@ import { createBooleanFlagPayload, toFlagKey } from "../get-started-utils"
 
 const KEY_PATTERN = /^[A-Za-z0-9._-]+$/
 const formSchema = z.object({
-  name: z.string().trim().min(1, "Enter a feature flag name.").max(200),
+  name: z
+    .string()
+    .trim()
+    .min(1, "getStarted.createFlag.validation.nameRequired")
+    .max(200),
   key: z
     .string()
     .trim()
-    .min(1, "Enter a feature flag key.")
+    .min(1, "getStarted.createFlag.validation.keyRequired")
     .max(200)
-    .regex(KEY_PATTERN, "Use only letters, numbers, '.', '_' or '-'."),
-  description: z.string().max(512, "Description cannot exceed 512 characters."),
+    .regex(KEY_PATTERN, "getStarted.createFlag.validation.keyFormat"),
+  description: z
+    .string()
+    .max(512, "getStarted.createFlag.validation.descriptionTooLong"),
 })
 
 type FormValues = z.infer<typeof formSchema>
@@ -93,6 +100,7 @@ export function CreateFeatureFlagStep({
   value: GetStartedFlag | null
   onComplete: (flag: GetStartedFlag) => void
 }) {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const projectEnv = getCurrentProjectEnv()
   const workspace = getCurrentWorkspace()
@@ -219,11 +227,11 @@ export function CreateFeatureFlagStep({
       void queryClient.invalidateQueries({
         queryKey: ["get-started", "feature-flags", envId],
       })
-      toast.success("Feature flag created")
+      toast.success(t("getStarted.createFlag.created"))
       onComplete(created)
     },
-    onError: (error) => {
-      toast.error(error.message || "Could not create the feature flag")
+    onError: () => {
+      toast.error(t("getStarted.createFlag.createFailed"))
     },
   })
 
@@ -245,11 +253,13 @@ export function CreateFeatureFlagStep({
   const pickerLabel =
     effectiveMode === "create"
       ? watchedName.trim()
-        ? `Create “${watchedName.trim()}”`
-        : "Create a feature flag"
+        ? t("getStarted.createFlag.createNamed", {
+            name: watchedName.trim(),
+          })
+        : t("getStarted.createFlag.createNew")
       : candidate
         ? candidate.name
-        : "Select or create a feature flag"
+        : t("getStarted.createFlag.selectOrCreate")
 
   function beginCreate(name: string) {
     const nextName = name.trim()
@@ -286,7 +296,9 @@ export function CreateFeatureFlagStep({
       const used = await isFeatureFlagKeyUsed(envId, key)
       if (used) {
         setKeyValidation({ key, status: "used" })
-        form.setError("key", { message: "This key is already in use." })
+        form.setError("key", {
+          message: "getStarted.createFlag.validation.keyUsed",
+        })
         return
       }
       setKeyValidation({ key, status: "available" })
@@ -294,15 +306,19 @@ export function CreateFeatureFlagStep({
     } catch {
       setKeyValidation({ key, status: "error" })
       form.setError("key", {
-        message: "We could not validate this key. Try again.",
+        message: "getStarted.createFlag.validation.keyFailed",
       })
     }
   })
 
   const nameField = form.register("name")
+  const nameError = form.formState.errors.name?.message
   const keyError =
     form.formState.errors.key?.message ??
-    (displayedKeyValidation === "used" ? "This key is already in use." : "")
+    (displayedKeyValidation === "used"
+      ? "getStarted.createFlag.validation.keyUsed"
+      : "")
+  const descriptionError = form.formState.errors.description?.message
   const createDisabled =
     !form.formState.isValid ||
     displayedKeyValidation !== "available" ||
@@ -313,9 +329,9 @@ export function CreateFeatureFlagStep({
       <section className="rounded-lg border bg-card p-5">
         <Alert variant="destructive">
           <CircleAlert />
-          <AlertTitle>No environment selected</AlertTitle>
+          <AlertTitle>{t("getStarted.noEnvironment.title")}</AlertTitle>
           <AlertDescription>
-            Select an accessible environment from the context bar to continue.
+            {t("getStarted.noEnvironment.description")}
           </AlertDescription>
         </Alert>
       </section>
@@ -325,16 +341,17 @@ export function CreateFeatureFlagStep({
   return (
     <section className="flex min-h-[38rem] flex-col rounded-lg border bg-card">
       <header className="px-5 pt-5">
-        <h2 className="text-xl font-semibold">Create a feature flag</h2>
+        <h2 className="text-xl font-semibold">
+          {t("getStarted.createFlag.title")}
+        </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Choose an existing flag or create a Boolean flag for your first
-          evaluation.
+          {t("getStarted.createFlag.subtitle")}
         </p>
       </header>
 
       <div className="flex-1 space-y-5 px-5 py-5">
         <div className="space-y-2">
-          <Label>Feature flag</Label>
+          <Label>{t("getStarted.createFlag.featureFlag")}</Label>
           <Popover open={pickerOpen} onOpenChange={handlePickerOpenChange}>
             <PopoverTrigger
               render={
@@ -342,7 +359,7 @@ export function CreateFeatureFlagStep({
                   type="button"
                   variant="outline"
                   role="combobox"
-                  aria-label="Select or create a feature flag"
+                  aria-label={t("getStarted.createFlag.selectOrCreate")}
                   className="h-10 w-full justify-between px-3 font-normal"
                 />
               }
@@ -361,7 +378,7 @@ export function CreateFeatureFlagStep({
                 </span>
                 {effectiveMode === "create" ? (
                   <Badge variant="outline" className="ml-1 shrink-0">
-                    NEW
+                    {t("getStarted.common.new")}
                   </Badge>
                 ) : null}
               </span>
@@ -374,34 +391,38 @@ export function CreateFeatureFlagStep({
               <Command shouldFilter={false}>
                 <CommandInput
                   value={search}
-                  placeholder="Search by name or key"
+                  placeholder={t("getStarted.createFlag.searchPlaceholder")}
                   onValueChange={setSearch}
                 />
                 <CommandList>
                   {flagsQuery.isFetching ? (
                     <div className="flex items-center justify-center gap-2 py-6 text-sm text-muted-foreground">
                       <Loader2 className="size-4 animate-spin" />
-                      Searching feature flags...
+                      {t("getStarted.createFlag.searching")}
                     </div>
                   ) : null}
                   {flagsQuery.isError ? (
                     <div className="flex items-center justify-between gap-3 px-3 py-4 text-sm text-destructive">
-                      <span>Could not load feature flags.</span>
+                      <span>{t("getStarted.createFlag.loadFailed")}</span>
                       <Button
                         type="button"
                         size="sm"
                         variant="outline"
                         onClick={() => void flagsQuery.refetch()}
                       >
-                        Retry
+                        {t("getStarted.common.retry")}
                       </Button>
                     </div>
                   ) : null}
                   {!flagsQuery.isFetching && !showCreateOption ? (
-                    <CommandEmpty>No feature flags found.</CommandEmpty>
+                    <CommandEmpty>
+                      {t("getStarted.createFlag.notFound")}
+                    </CommandEmpty>
                   ) : null}
                   {flags.length ? (
-                    <CommandGroup heading="Feature flags">
+                    <CommandGroup
+                      heading={t("getStarted.createFlag.groupTitle")}
+                    >
                       {flags.map((flag) => (
                         <CommandItem
                           key={flag.id}
@@ -416,7 +437,9 @@ export function CreateFeatureFlagStep({
                             </code>
                           </span>
                           <span className="text-xs text-muted-foreground">
-                            {flag.isEnabled ? "ON" : "OFF"}
+                            {flag.isEnabled
+                              ? t("getStarted.common.on")
+                              : t("getStarted.common.off")}
                           </span>
                         </CommandItem>
                       ))}
@@ -430,9 +453,13 @@ export function CreateFeatureFlagStep({
                       >
                         <Plus className="size-4" />
                         <span className="min-w-0 flex-1 truncate">
-                          Create “{search.trim()}”
+                          {t("getStarted.createFlag.createNamed", {
+                            name: search.trim(),
+                          })}
                         </span>
-                        <Badge variant="outline">NEW</Badge>
+                        <Badge variant="outline">
+                          {t("getStarted.common.new")}
+                        </Badge>
                       </CommandItem>
                     </CommandGroup>
                   ) : null}
@@ -441,7 +468,7 @@ export function CreateFeatureFlagStep({
             </PopoverContent>
           </Popover>
           <p className="text-xs text-muted-foreground">
-            Search by name or key, or type a name to create one.
+            {t("getStarted.createFlag.searchHelp")}
           </p>
         </div>
 
@@ -460,10 +487,10 @@ export function CreateFeatureFlagStep({
           <div className="rounded-lg border border-dashed px-5 py-8 text-center">
             <Flag className="mx-auto size-5 text-muted-foreground" />
             <p className="mt-2 text-sm font-medium">
-              Choose a feature flag to continue
+              {t("getStarted.createFlag.chooseTitle")}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
-              Existing flags are reused without changing their configuration.
+              {t("getStarted.createFlag.chooseDescription")}
             </p>
           </div>
         ) : null}
@@ -478,9 +505,13 @@ export function CreateFeatureFlagStep({
                 </code>
               </div>
               <div className="flex shrink-0 items-center gap-2">
-                <Badge variant="outline">BOOLEAN</Badge>
+                <Badge variant="outline">
+                  {t("getStarted.common.boolean")}
+                </Badge>
                 <Badge variant="secondary">
-                  {candidate.isEnabled ? "ON" : "OFF"}
+                  {candidate.isEnabled
+                    ? t("getStarted.common.on")
+                    : t("getStarted.common.off")}
                 </Badge>
               </div>
             </div>
@@ -498,10 +529,14 @@ export function CreateFeatureFlagStep({
             className="space-y-5"
             onSubmit={submitCreate}
           >
-            <h3 className="text-base font-semibold">Flag details</h3>
+            <h3 className="text-base font-semibold">
+              {t("getStarted.createFlag.flagDetails")}
+            </h3>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="get-started-flag-name">Name</Label>
+                <Label htmlFor="get-started-flag-name">
+                  {t("getStarted.createFlag.name")}
+                </Label>
                 <Input
                   id="get-started-flag-name"
                   disabled={createMutation.isPending}
@@ -514,14 +549,14 @@ export function CreateFeatureFlagStep({
                     })
                   }}
                 />
-                {form.formState.errors.name ? (
-                  <p className="text-xs text-destructive">
-                    {form.formState.errors.name.message}
-                  </p>
+                {nameError ? (
+                  <p className="text-xs text-destructive">{t(nameError)}</p>
                 ) : null}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="get-started-flag-key">Key</Label>
+                <Label htmlFor="get-started-flag-key">
+                  {t("getStarted.createFlag.key")}
+                </Label>
                 <div className="relative">
                   <Input
                     id="get-started-flag-key"
@@ -533,24 +568,26 @@ export function CreateFeatureFlagStep({
                     {displayedKeyValidation === "checking" ? (
                       <>
                         <Loader2 className="size-3.5 animate-spin text-muted-foreground" />
-                        <span className="text-muted-foreground">Checking</span>
+                        <span className="text-muted-foreground">
+                          {t("getStarted.createFlag.checking")}
+                        </span>
                       </>
                     ) : null}
                     {displayedKeyValidation === "available" ? (
                       <>
                         <CheckCircle2 className="size-3.5 text-green-600 dark:text-green-500" />
                         <span className="text-green-700 dark:text-green-400">
-                          Available
+                          {t("getStarted.createFlag.available")}
                         </span>
                       </>
                     ) : null}
                   </span>
                 </div>
                 {keyError ? (
-                  <p className="text-xs text-destructive">{keyError}</p>
+                  <p className="text-xs text-destructive">{t(keyError)}</p>
                 ) : displayedKeyValidation === "error" ? (
                   <p className="text-xs text-destructive">
-                    We could not validate this key. Try again.
+                    {t("getStarted.createFlag.validation.keyFailed")}
                   </p>
                 ) : null}
               </div>
@@ -559,7 +596,7 @@ export function CreateFeatureFlagStep({
             <div className="space-y-2">
               <div className="flex items-center justify-between gap-3">
                 <Label htmlFor="get-started-flag-description">
-                  Description (optional)
+                  {t("getStarted.createFlag.descriptionOptional")}
                 </Label>
                 {watchedDescription.length >= 450 ? (
                   <span
@@ -578,34 +615,38 @@ export function CreateFeatureFlagStep({
                 disabled={createMutation.isPending}
                 {...form.register("description")}
               />
-              {form.formState.errors.description ? (
+              {descriptionError ? (
                 <p className="text-xs text-destructive">
-                  {form.formState.errors.description.message}
+                  {t(descriptionError)}
                 </p>
               ) : null}
             </div>
 
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <h3 className="text-base font-semibold">Boolean preset</h3>
-                <Badge variant="outline">BOOLEAN</Badge>
+                <h3 className="text-base font-semibold">
+                  {t("getStarted.createFlag.booleanPreset")}
+                </h3>
+                <Badge variant="outline">
+                  {t("getStarted.common.boolean")}
+                </Badge>
               </div>
               <p className="text-xs text-muted-foreground">
-                The variation type cannot be changed after creation.
+                {t("getStarted.createFlag.variationTypeLocked")}
               </p>
               <div className="overflow-hidden rounded-lg border text-sm">
                 <div className="grid grid-cols-[minmax(0,1fr)_minmax(8rem,1fr)] items-center border-b px-4 py-2.5">
-                  <span>When the flag is ON, serve</span>
+                  <span>{t("getStarted.createFlag.whenOn")}</span>
                   <span className="flex items-center gap-3">
                     <span className="size-2.5 rounded-full bg-green-600" />
-                    True
+                    {t("getStarted.createFlag.true")}
                   </span>
                 </div>
                 <div className="grid grid-cols-[minmax(0,1fr)_minmax(8rem,1fr)] items-center px-4 py-2.5">
-                  <span>When the flag is OFF, serve</span>
+                  <span>{t("getStarted.createFlag.whenOff")}</span>
                   <span className="flex items-center gap-3">
                     <span className="size-2.5 rounded-full bg-slate-400" />
-                    False
+                    {t("getStarted.createFlag.false")}
                   </span>
                 </div>
               </div>
@@ -614,10 +655,11 @@ export function CreateFeatureFlagStep({
             {createMutation.isError ? (
               <Alert variant="destructive">
                 <CircleAlert />
-                <AlertTitle>Feature flag was not created</AlertTitle>
+                <AlertTitle>
+                  {t("getStarted.createFlag.createFailedTitle")}
+                </AlertTitle>
                 <AlertDescription>
-                  {createMutation.error.message ||
-                    "Check the form and try again."}
+                  {t("getStarted.createFlag.createFailedDescription")}
                 </AlertDescription>
               </Alert>
             ) : null}
@@ -630,10 +672,11 @@ export function CreateFeatureFlagStep({
         flagsQuery.data.totalCount === 0 ? (
           <Alert>
             <CircleAlert />
-            <AlertTitle>No feature flags are available</AlertTitle>
+            <AlertTitle>
+              {t("getStarted.createFlag.unavailableTitle")}
+            </AlertTitle>
             <AlertDescription>
-              You do not have permission to create one in this environment.
-              Contact an administrator to continue.
+              {t("getStarted.createFlag.unavailableDescription")}
             </AlertDescription>
           </Alert>
         ) : null}
@@ -649,7 +692,7 @@ export function CreateFeatureFlagStep({
             {createMutation.isPending ? (
               <Loader2 className="size-4 animate-spin" />
             ) : null}
-            Create & continue
+            {t("getStarted.createFlag.createAndContinue")}
           </Button>
         ) : (
           <Button
@@ -657,7 +700,7 @@ export function CreateFeatureFlagStep({
             disabled={!candidate}
             onClick={() => candidate && onComplete(candidate)}
           >
-            Continue with flag
+            {t("getStarted.createFlag.continueWithFlag")}
           </Button>
         )}
       </footer>

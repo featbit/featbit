@@ -1,4 +1,5 @@
 import { ExternalLink } from "lucide-react"
+import { useTranslation } from "react-i18next"
 import { getRuntimeEnv } from "@/lib/env/runtime-env"
 import { cn } from "@/lib/utils"
 import type { GetStartedEnvironment } from "../get-started-types"
@@ -51,6 +52,7 @@ export function ResourcesRail({
 }: {
   environment?: GetStartedEnvironment
 }) {
+  const { t } = useTranslation()
   const runtimeEnv = getRuntimeEnv()
   const clientSecret = environment?.secrets.find(
     (secret) => secret.type === "client"
@@ -62,75 +64,82 @@ export function ResourcesRail({
   )
   const groups: Array<{ title: string; links: ResourceLink[] }> = [
     {
-      title: "Quick demo",
+      title: t("getStarted.resources.groups.quickDemo"),
       links: [
         {
-          label: "Create flags for the demo",
+          label: t("getStarted.resources.links.createDemoFlags"),
           href: "https://docs.featbit.co/getting-started/create-two-feature-flags",
         },
         {
-          label: "Try the interactive demo",
+          label: t("getStarted.resources.links.interactiveDemo"),
           href: demoUrl,
-          disabledReason:
-            "A client secret and evaluation URL are required for the interactive demo.",
+          disabledReason: t("getStarted.resources.interactiveDemoUnavailable"),
         },
       ],
     },
     {
-      title: "Learn",
+      title: t("getStarted.resources.groups.learn"),
       links: [
         {
-          label: "SDK documentation",
+          label: t("getStarted.resources.links.sdkDocumentation"),
           href: "https://docs.featbit.co/getting-started/connect-an-sdk",
         },
         {
-          label: "Open API documentation",
+          label: t("getStarted.resources.links.openApiDocumentation"),
           href: "https://docs.featbit.co/api-docs/overview",
         },
         {
-          label: "Experimentation guide",
+          label: t("getStarted.resources.links.experimentationGuide"),
           href: "https://docs.featbit.co/experimentation/understanding-experimentation",
         },
       ],
     },
     {
-      title: "Deploy",
+      title: t("getStarted.resources.groups.deploy"),
       links: [
         {
-          label: "Deploy with Docker Compose",
+          label: t("getStarted.resources.links.deployDockerCompose"),
           href: "https://docs.featbit.co/installation/docker-compose",
         },
       ],
     },
     {
-      title: "Team",
+      title: t("getStarted.resources.groups.team"),
       links: [
         {
-          label: "Invite team members",
+          label: t("getStarted.resources.links.inviteTeam"),
           href: "https://docs.featbit.co/iam/teams",
         },
         {
-          label: "Manage custom permissions",
+          label: t("getStarted.resources.links.managePermissions"),
           href: "https://docs.featbit.co/iam/policies",
         },
       ],
     },
     {
-      title: "Community & support",
+      title: t("getStarted.resources.groups.community"),
       links: [
-        { label: "Discord community", href: "https://discord.gg/h9dVMsQH" },
         {
-          label: "Open an issue on GitHub",
+          label: t("getStarted.resources.links.discord"),
+          href: "https://discord.gg/h9dVMsQH",
+        },
+        {
+          label: t("getStarted.resources.links.githubIssue"),
           href: "https://github.com/featbit/featbit",
         },
-        { label: "Email support", href: "mailto:contact@featbit.com" },
+        {
+          label: t("getStarted.resources.links.emailSupport"),
+          href: "mailto:contact@featbit.com",
+        },
       ],
     },
   ]
 
   return (
     <aside className="self-start rounded-lg border bg-card p-5">
-      <h2 className="text-base font-semibold">Resources</h2>
+      <h2 className="text-base font-semibold">
+        {t("getStarted.resources.title")}
+      </h2>
       <div className="mt-4 divide-y">
         {groups.map((group) => (
           <section key={group.title} className="py-4 first:pt-0 last:pb-0">

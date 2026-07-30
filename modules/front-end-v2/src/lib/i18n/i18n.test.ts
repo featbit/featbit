@@ -17,6 +17,8 @@ describe("global feature translations", () => {
     expect(i18n.t("auditLogs.comment")).toBe("Comment")
     expect(i18n.t("auditLogs.allUsers")).toBe("All users")
     expect(i18n.t("endUsers.title")).toBe("End Users")
+    expect(i18n.t("getStarted.title")).toBe("Get started")
+    expect(i18n.t("getStarted.steps.connectSdk")).toBe("Connect an SDK")
     expect(i18n.t("segments.create.multipleScopes")).toBe("Shareable")
     expect(i18n.t("segments.detailsPage.tabs.targeting")).toBe("Targeting")
     expect(i18n.t("segments.detailsPage.history.events.settings")).toBe(
@@ -52,6 +54,8 @@ describe("global feature translations", () => {
     expect(i18n.t("auditLogs.changeCount", { count: 2 })).toBe("2 项变更")
     expect(i18n.t("auditLogs.allUsers")).toBe("所有用户")
     expect(i18n.t("endUsers.title")).toBe("目标用户")
+    expect(i18n.t("getStarted.title")).toBe("开始使用")
+    expect(i18n.t("getStarted.steps.connectSdk")).toBe("连接 SDK")
     expect(i18n.t("endUsers.empty")).toBe("暂无目标用户")
     expect(i18n.t("endUsers.evaluateDrawer.segments")).toBe("用户组")
     expect(i18n.t("endUsers.evaluateDrawer.variation")).toBe("返回值")

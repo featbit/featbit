@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import "@/lib/i18n/i18n"
 import { CodeBlock } from "./code-block"
 
 const mocks = vi.hoisted(() => ({

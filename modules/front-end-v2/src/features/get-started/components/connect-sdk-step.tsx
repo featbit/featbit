@@ -7,6 +7,7 @@ import {
   Loader2,
 } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -59,6 +60,7 @@ export function ConnectSdkStep({
   onBack: () => void
   onContinue: () => void
 }) {
+  const { t } = useTranslation()
   const [revealedSecretId, setRevealedSecretId] = useState("")
   const definition = getSdkDefinition(sdkId)
   const endpoints = useMemo(() => resolveSdkEndpoints(), [])
@@ -105,9 +107,15 @@ export function ConnectSdkStep({
       : snippet
   const ready = Boolean(selectedSecret && streamingUrl && eventUrl)
   const endpointRows = [
-    { label: "Streaming URL", value: streamingUrl },
-    { label: "Event URL", value: eventUrl },
-    { label: "Open API endpoint", value: openApiEndpoint },
+    {
+      label: t("getStarted.connectSdk.streamingUrl"),
+      value: streamingUrl,
+    },
+    { label: t("getStarted.connectSdk.eventUrl"), value: eventUrl },
+    {
+      label: t("getStarted.connectSdk.openApiEndpoint"),
+      value: openApiEndpoint,
+    },
   ]
   const configurationRowClass =
     "grid items-center gap-3 px-4 py-2 sm:grid-cols-[minmax(9rem,0.7fr)_minmax(0,1.3fr)_4.5rem]"
@@ -115,18 +123,20 @@ export function ConnectSdkStep({
   return (
     <section className="flex min-h-[46rem] flex-col rounded-lg border bg-card">
       <header className="px-5 pt-5">
-        <h2 className="text-xl font-semibold">Connect an SDK</h2>
+        <h2 className="text-xl font-semibold">
+          {t("getStarted.connectSdk.title")}
+        </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Choose your stack, copy the configuration, then run your app.
+          {t("getStarted.connectSdk.subtitle")}
         </p>
       </header>
 
       <div className="flex-1 space-y-5 px-5 py-4">
         <Alert className="border-amber-200 bg-amber-50/50 text-foreground dark:border-amber-900/70 dark:bg-amber-950/20">
           <Circle className="mt-1 size-2.5 fill-amber-500 text-amber-500" />
-          <AlertTitle>Waiting for your first evaluation</AlertTitle>
+          <AlertTitle>{t("getStarted.connectSdk.waitingTitle")}</AlertTitle>
           <AlertDescription>
-            Run your app, then continue when you&apos;re ready.
+            {t("getStarted.connectSdk.waitingDescription")}
           </AlertDescription>
         </Alert>
 
@@ -147,32 +157,40 @@ export function ConnectSdkStep({
         </Tabs>
 
         <div className="space-y-2">
-          <h3 className="text-sm font-semibold">SDK configuration</h3>
+          <h3 className="text-sm font-semibold">
+            {t("getStarted.connectSdk.configuration")}
+          </h3>
           {environmentLoading ? (
             <div className="flex h-36 items-center justify-center gap-2 rounded-lg border text-sm text-muted-foreground">
               <Loader2 className="size-4 animate-spin" />
-              Loading environment configuration...
+              {t("getStarted.connectSdk.loadingConfiguration")}
             </div>
           ) : environmentError ? (
             <Alert variant="destructive">
               <CircleAlert />
-              <AlertTitle>Environment configuration is unavailable</AlertTitle>
+              <AlertTitle>
+                {t("getStarted.connectSdk.configurationUnavailable")}
+              </AlertTitle>
               <AlertDescription className="flex items-center justify-between gap-3">
-                <span>Check your connection and try again.</span>
+                <span>
+                  {t(
+                    "getStarted.connectSdk.configurationUnavailableDescription"
+                  )}
+                </span>
                 <Button
                   type="button"
                   size="sm"
                   variant="outline"
                   onClick={onRetryEnvironment}
                 >
-                  Retry
+                  {t("getStarted.common.retry")}
                 </Button>
               </AlertDescription>
             </Alert>
           ) : (
             <div className="overflow-hidden rounded-lg border text-sm">
               <div className={`${configurationRowClass} min-h-10 border-b`}>
-                <span>Environment secret</span>
+                <span>{t("getStarted.connectSdk.environmentSecret")}</span>
                 {environment?.secrets.length ? (
                   <div className="flex min-w-0 items-center gap-2">
                     <Select
@@ -185,8 +203,10 @@ export function ConnectSdkStep({
                       >
                         <SelectValue>
                           {selectedSecret
-                            ? `${selectedSecret.name} · ${selectedSecret.type}`
-                            : "Select secret"}
+                            ? `${selectedSecret.name} · ${t(
+                                `getStarted.common.${selectedSecret.type}`
+                              )}`
+                            : t("getStarted.connectSdk.selectSecret")}
                         </SelectValue>
                       </SelectTrigger>
                       <SelectContent align="start">
@@ -196,8 +216,11 @@ export function ConnectSdkStep({
                               <span className="min-w-0 truncate">
                                 {secret.name}
                               </span>
-                              <Badge variant="outline" className="ml-auto">
-                                {secret.type.toUpperCase()}
+                              <Badge
+                                variant="outline"
+                                className="ml-auto uppercase"
+                              >
+                                {t(`getStarted.common.${secret.type}`)}
                               </Badge>
                             </SelectItem>
                           ))}
@@ -206,8 +229,8 @@ export function ConnectSdkStep({
                     </Select>
                     {selectedSecret ? (
                       <>
-                        <Badge variant="outline" className="shrink-0">
-                          {selectedSecret.type.toUpperCase()}
+                        <Badge variant="outline" className="shrink-0 uppercase">
+                          {t(`getStarted.common.${selectedSecret.type}`)}
                         </Badge>
                         <code className="hidden min-w-0 flex-1 truncate text-xs text-muted-foreground lg:block">
                           {secretVisible
@@ -221,8 +244,8 @@ export function ConnectSdkStep({
                           className="size-7 shrink-0"
                           aria-label={
                             secretVisible
-                              ? "Hide environment secret"
-                              : "Show environment secret"
+                              ? t("getStarted.connectSdk.hideSecret")
+                              : t("getStarted.connectSdk.showSecret")
                           }
                           onClick={() =>
                             setRevealedSecretId((current) =>
@@ -244,7 +267,7 @@ export function ConnectSdkStep({
                 ) : (
                   <div className="min-w-0">
                     <p className="text-sm text-destructive">
-                      No environment secrets
+                      {t("getStarted.connectSdk.noSecrets")}
                     </p>
                     <a
                       href={localizedPath(
@@ -253,7 +276,7 @@ export function ConnectSdkStep({
                       )}
                       className="text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground"
                     >
-                      Manage secrets
+                      {t("getStarted.connectSdk.manageSecrets")}
                     </a>
                   </div>
                 )}
@@ -270,7 +293,7 @@ export function ConnectSdkStep({
                 >
                   <span>{row.label}</span>
                   <code className="min-w-0 truncate text-xs text-muted-foreground">
-                    {row.value || "Not configured"}
+                    {row.value || t("getStarted.common.notConfigured")}
                   </code>
                   <CopyButton value={row.value} />
                 </div>
@@ -278,14 +301,17 @@ export function ConnectSdkStep({
             </div>
           )}
           <p className="text-xs text-muted-foreground">
-            {definition.label} works best with a{" "}
-            {definition.recommendedSecretType} secret. You can select another
-            available secret when needed.
+            {t("getStarted.connectSdk.recommendedSecret", {
+              sdk: definition.label,
+              type: t(`getStarted.common.${definition.recommendedSecretType}`),
+            })}
           </p>
         </div>
 
         <div className="space-y-2">
-          <h3 className="text-sm font-semibold">1. Install package</h3>
+          <h3 className="text-sm font-semibold">
+            {t("getStarted.connectSdk.installPackage")}
+          </h3>
           <CodeBlock
             code={definition.install}
             language={definition.installLanguage}
@@ -294,7 +320,9 @@ export function ConnectSdkStep({
         </div>
 
         <div className="space-y-2">
-          <h3 className="text-sm font-semibold">2. Initialize client</h3>
+          <h3 className="text-sm font-semibold">
+            {t("getStarted.connectSdk.initializeClient")}
+          </h3>
           <CodeBlock
             code={visibleSnippet}
             copyValue={snippet}
@@ -309,7 +337,9 @@ export function ConnectSdkStep({
             rel="noreferrer"
             className="inline-flex min-h-8 items-center gap-1.5 text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
           >
-            View {definition.label} SDK documentation
+            {t("getStarted.connectSdk.viewDocumentation", {
+              sdk: definition.label,
+            })}
             <ExternalLink className="size-3.5" />
           </a>
         </div>
@@ -317,10 +347,10 @@ export function ConnectSdkStep({
 
       <footer className="flex min-h-16 items-center justify-between border-t bg-muted/10 px-5 py-3">
         <Button type="button" variant="outline" onClick={onBack}>
-          Back
+          {t("getStarted.common.back")}
         </Button>
         <Button type="button" disabled={!ready} onClick={onContinue}>
-          Continue to verification
+          {t("getStarted.connectSdk.continueVerification")}
         </Button>
       </footer>
     </section>

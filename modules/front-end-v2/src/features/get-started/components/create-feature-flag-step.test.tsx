@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import { i18n } from "@/lib/i18n/i18n"
 import { CreateFeatureFlagStep } from "./create-feature-flag-step"
 
 window.HTMLElement.prototype.scrollIntoView = vi.fn()
@@ -47,7 +48,8 @@ function renderStep(onComplete = vi.fn()) {
 }
 
 describe("CreateFeatureFlagStep", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
+    await i18n.changeLanguage("en")
     vi.clearAllMocks()
     mocks.fetchFlagPolicies.mockResolvedValue([
       { type: "Owner", statements: [] },
@@ -123,6 +125,23 @@ describe("CreateFeatureFlagStep", () => {
     expect(
       await screen.findByPlaceholderText("Search by name or key")
     ).toHaveValue("")
+  })
+
+  it("uses the global Chinese translations", async () => {
+    await i18n.changeLanguage("zh")
+    mocks.fetchFeatureFlags.mockResolvedValue({ totalCount: 0, items: [] })
+
+    renderStep()
+
+    expect(
+      await screen.findByRole("heading", {
+        level: 2,
+        name: "创建功能开关",
+      })
+    ).toBeVisible()
+    expect(
+      await screen.findByRole("button", { name: "创建并继续" })
+    ).toBeVisible()
   })
 
   it("creates a disabled Boolean flag and continues", async () => {

@@ -5,6 +5,7 @@ import { enAuditLogs, zhAuditLogs } from "./resources/audit-logs"
 import { enAuth, zhAuth } from "./resources/auth"
 import { enEndUsers, zhEndUsers } from "./resources/end-users"
 import { enFeatureFlags, zhFeatureFlags } from "./resources/feature-flags"
+import { enGetStarted, zhGetStarted } from "./resources/get-started"
 import { enLayout, zhLayout } from "./resources/layout"
 import { enIam, zhIam } from "./resources/iam"
 import { enOnboarding, zhOnboarding } from "./resources/onboarding"
@@ -38,6 +39,7 @@ i18n.use(initReactI18next).init({
         auditLogs: enAuditLogs,
         endUsers: enEndUsers,
         featureFlags: enFeatureFlags,
+        getStarted: enGetStarted,
         segments: enSegments,
         targeting: enTargeting,
       },
@@ -58,6 +60,7 @@ i18n.use(initReactI18next).init({
         auditLogs: zhAuditLogs,
         endUsers: zhEndUsers,
         featureFlags: zhFeatureFlags,
+        getStarted: zhGetStarted,
         segments: zhSegments,
         targeting: zhTargeting,
       },
