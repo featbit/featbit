@@ -131,6 +131,16 @@ const EndUsersPage = lazy(() =>
     default: module.EndUsersPage,
   }))
 )
+const ExperimentsPage = lazy(() =>
+  import("@/features/experimentation/experimentation-pages").then((module) => ({
+    default: module.ExperimentsPage,
+  }))
+)
+const MetricsPage = lazy(() =>
+  import("@/features/experimentation/experimentation-pages").then((module) => ({
+    default: module.MetricsPage,
+  }))
+)
 const SegmentsPage = lazy(() =>
   import("@/features/segments/index/segments-page").then((module) => ({
     default: module.SegmentsPage,
@@ -373,6 +383,8 @@ export function AppRoutes() {
           <Route path="relay-proxies" element={<RelayProxiesPage />} />
           <Route path="webhooks" element={<WebhooksPage />} />
           <Route path="end-users" element={<EndUsersPage />} />
+          <Route path="experiments" element={<ExperimentsPage />} />
+          <Route path="metrics" element={<MetricsPage />} />
           <Route path="audit-logs" element={<AuditLogsPage />} />
           <Route path="change-requests" element={<ChangeRequestsPage />} />
           <Route path="feature-flags" element={<FlagsPage />} />
