@@ -39,7 +39,7 @@ public static class MiddlewareRegister
         app.UseAuthentication();
         app.UseAuthorization();
 
-// Configure the HTTP request pipeline.
+        // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {
             app.MapOpenApi().AllowAnonymous();
@@ -51,7 +51,6 @@ public static class MiddlewareRegister
 
         app.MapControllers();
 
-        app.Run();
         return app;
     }
 }
