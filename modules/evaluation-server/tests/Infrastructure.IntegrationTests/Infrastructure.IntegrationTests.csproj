@@ -47,6 +47,15 @@
         <EmbeddedResource Include="..\..\..\..\infra\postgresql\docker-entrypoint-initdb.d\*.sql">
             <LogicalName>FeatBitPostgresInitDb.%(Filename)%(Extension)</LogicalName>
         </EmbeddedResource>
+
+        <!--
+            Schema changes not yet in a released vX.Y.Z.sql script, kept here
+            (not under infra/) so they can never reach a real deployment.
+            Always applied last, after all released scripts.
+        -->
+        <EmbeddedResource Include="Fixtures\vNext.sql">
+            <LogicalName>FeatBitPostgresInitDb.vNext.sql</LogicalName>
+        </EmbeddedResource>
     </ItemGroup>
 
 </Project>
