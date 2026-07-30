@@ -126,11 +126,9 @@ test.describe("login page", () => {
     await page.getByRole("checkbox", { name: "Remember email" }).check()
     await page.getByRole("button", { name: "Sign in", exact: true }).click()
 
-    await expect(page).toHaveURL(/\/en$/)
+    await expect(page).toHaveURL(/\/en\/get-started$/)
     await expect(
-      page.getByText(
-        "Authenticated layout ready. Page content will migrate in later steps."
-      )
+      page.getByRole("heading", { name: "Get started" })
     ).toBeVisible()
     await expect(page.getByText("Acme Corp")).toBeVisible()
     await expect(page.getByText("Growth Platform")).toBeVisible()
@@ -141,6 +139,42 @@ test.describe("login page", () => {
     await expect(
       page.evaluate(() => localStorage.getItem("remembered-email"))
     ).resolves.toBe("test@featbit.com")
+  })
+
+  test("opens feature flags after a returning user signs in", async ({
+    page,
+  }) => {
+    await mockAuthEndpoints(page, {
+      loginResponse: { success: true, data: { token: "e2e-token" } },
+    })
+    await mockContextEndpoints(page)
+    await page.route("**/api/v1/envs/*/feature-flags?*", async (route) => {
+      await route.fulfill({
+        json: { success: true, data: { items: [], totalCount: 0 } },
+      })
+    })
+    await page.route(
+      "**/api/v1/envs/*/feature-flags/all-tags",
+      async (route) => {
+        await route.fulfill({ json: { success: true, data: [] } })
+      }
+    )
+    await page.route("**/api/v1/user/policies", async (route) => {
+      await route.fulfill({ json: { success: true, data: [] } })
+    })
+    await page.addInitScript(() => {
+      localStorage.setItem("get-started", "true")
+    })
+
+    await page.goto("/en/login")
+    await page.getByLabel("Email", { exact: true }).fill("test@featbit.com")
+    await page.getByLabel("Password", { exact: true }).fill("123456")
+    await page.getByRole("button", { name: "Sign in", exact: true }).click()
+
+    await expect(page).toHaveURL(/\/en\/feature-flags$/)
+    await expect(
+      page.getByRole("heading", { name: "Feature flags" })
+    ).toBeVisible()
   })
 
   test("handles a social login callback that returns to a non-localized path", async ({
@@ -163,7 +197,7 @@ test.describe("login page", () => {
       page.getByRole("heading", { name: "Completing sign-in" })
     ).toBeVisible()
     await expect(page.getByLabel("Email", { exact: true })).toHaveCount(0)
-    await expect(page).toHaveURL(/\/en$/)
+    await expect(page).toHaveURL(/\/en\/get-started$/)
     await expect(
       page.evaluate(() => localStorage.getItem("token"))
     ).resolves.toBe("social-token")

@@ -6,7 +6,9 @@ test("renders the localized login shell", async ({ page }) => {
   await expect(page.getByText("Sign in to your workspace")).toBeVisible()
 })
 
-test("renders the application shell placeholder", async ({ page }) => {
+test("routes the application shell to get started for a first-time user", async ({
+  page,
+}) => {
   await page.route("**/api/v1/user/workspaces", async (route) => {
     await route.fulfill({
       status: 200,
@@ -70,9 +72,6 @@ test("renders the application shell placeholder", async ({ page }) => {
   await expect(page.getByText("Real Platform")).toBeVisible()
   await expect(page.getByText("Real Production")).toBeVisible()
   await expect(page.getByRole("link", { name: "Get Started" })).toBeVisible()
-  await expect(
-    page.getByText(
-      "Authenticated layout ready. Page content will migrate in later steps."
-    )
-  ).toBeVisible()
+  await expect(page).toHaveURL(/\/en\/get-started$/)
+  await expect(page.getByRole("heading", { name: "Get started" })).toBeVisible()
 })

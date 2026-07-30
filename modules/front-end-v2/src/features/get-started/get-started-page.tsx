@@ -15,6 +15,7 @@ import { GetStartedProgress } from "./components/get-started-progress"
 import { ResourcesRail } from "./components/resources-rail"
 import { VerifyConnectionStep } from "./components/verify-connection-step"
 import { fetchGetStartedEnvironment } from "./get-started-api"
+import { markGetStartedVisited } from "./get-started-state"
 import type { GetStartedFlag, GetStartedStep, SdkId } from "./get-started-types"
 
 export function GetStartedPage() {
@@ -43,7 +44,7 @@ export function GetStartedPage() {
   })
 
   useEffect(() => {
-    localStorage.setItem("get-started", "true")
+    markGetStartedVisited()
   }, [])
 
   useLayoutEffect(() => {

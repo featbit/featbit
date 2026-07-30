@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate, useParams } from "react-router-dom"
 import { signOut } from "@/features/auth/auth-api"
 import { AuthHeader } from "@/features/auth/components/auth-header"
+import { getAuthenticatedLandingPath } from "@/features/get-started/get-started-state"
 import {
   getCurrentOrganization,
   localizedPath,
@@ -23,6 +24,7 @@ export function OnboardingPage() {
   const lang = resolveLang(params.lang)
   const navigate = useNavigate()
   const currentOrganization = getCurrentOrganization()
+  const completedHereRef = useRef(false)
   const [organizationName, setOrganizationName] = useState(
     currentOrganization?.name ?? ""
   )
@@ -32,8 +34,13 @@ export function OnboardingPage() {
   const [error, setError] = useState("")
 
   useEffect(() => {
-    if (currentOrganization?.initialized !== false) {
-      navigate(localizedPath(lang, "/feature-flags"), { replace: true })
+    if (
+      !completedHereRef.current &&
+      currentOrganization?.initialized !== false
+    ) {
+      navigate(localizedPath(lang, getAuthenticatedLandingPath()), {
+        replace: true,
+      })
     }
   }, [currentOrganization?.initialized, lang, navigate])
 
@@ -74,6 +81,7 @@ export function OnboardingPage() {
         environments: defaultEnvironments,
       })
 
+      completedHereRef.current = true
       persistCurrentOrganization({
         ...currentOrganization,
         initialized: true,
@@ -89,16 +97,10 @@ export function OnboardingPage() {
         envKey: "dev",
       })
 
-      if (!localStorage.getItem("get-started")) {
-        navigate(`${localizedPath(lang, "/get-started")}?status=init`, {
-          replace: true,
-        })
-        return
-      }
-
-      navigate(`${localizedPath(lang, "/feature-flags")}?status=init`, {
-        replace: true,
-      })
+      navigate(
+        `${localizedPath(lang, getAuthenticatedLandingPath())}?status=init`,
+        { replace: true }
+      )
     } catch {
       setError(t("onboarding.errors.submit"))
     } finally {

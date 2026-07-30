@@ -9,6 +9,7 @@ import {
 } from "react-router-dom"
 import { AuthenticatedEntry } from "@/features/auth/authenticated-entry"
 import { getIdentityToken, onSessionExpired } from "@/features/auth/auth-api"
+import { getAuthenticatedLandingPath } from "@/features/get-started/get-started-state"
 import { LayoutPlaceholder } from "@/features/layout/layout-placeholder"
 
 const AuthPage = lazy(() =>
@@ -230,6 +231,12 @@ function AuthRoute({ mode }: { mode: "login" | "sso" }) {
   return <AuthPage mode={mode} />
 }
 
+function AuthenticatedLandingRedirect() {
+  const { lang = getPreferredLanguage() } = useParams()
+
+  return <Navigate to={`/${lang}${getAuthenticatedLandingPath()}`} replace />
+}
+
 function SecureRoute() {
   const { lang = getPreferredLanguage() } = useParams()
   const location = useLocation()
@@ -333,7 +340,7 @@ export function AppRoutes() {
         />
         <Route path="/:lang/onboarding" element={<OnboardingRoute />} />
         <Route path="/:lang" element={<SecureRoute />}>
-          <Route index element={<LayoutPlaceholder />} />
+          <Route index element={<AuthenticatedLandingRedirect />} />
           <Route path="get-started" element={<GetStartedPage />} />
           <Route path="workspace" element={<GeneralPage />} />
           <Route path="workspace/billing" element={<BillingPage />} />

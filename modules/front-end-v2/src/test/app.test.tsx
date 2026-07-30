@@ -265,19 +265,34 @@ describe("App shell", () => {
     expect(await screen.findByText("Sign in with SSO")).toBeInTheDocument()
   })
 
-  it("reads runtime env version with a dev fallback", async () => {
+  it("routes first-time authenticated users to get started", async () => {
     window.history.pushState({}, "", "/en")
     signIn()
     mockLayoutContextApi()
 
     render(<App />)
 
-    expect(await screen.findByText("Real Org")).toBeInTheDocument()
-    expect(
-      await screen.findByText(
-        "Authenticated layout ready. Page content will migrate in later steps."
-      )
-    ).toBeInTheDocument()
+    await waitFor(
+      () => expect(window.location.pathname).toBe("/en/get-started"),
+      { timeout: 3_000 }
+    )
+    await waitFor(() => {
+      expect(localStorage.getItem("get-started")).toBe("true")
+    })
+  })
+
+  it("routes returning authenticated users to feature flags", async () => {
+    window.history.pushState({}, "", "/en")
+    signIn()
+    localStorage.setItem("get-started", "true")
+    mockLayoutContextApi()
+
+    render(<App />)
+
+    await waitFor(
+      () => expect(window.location.pathname).toBe("/en/feature-flags"),
+      { timeout: 3_000 }
+    )
   })
 
   it("redirects unauthenticated app routes to login", async () => {
@@ -340,7 +355,7 @@ describe("App shell", () => {
   })
 
   it("uses the authenticated route language for layout copy", async () => {
-    window.history.pushState({}, "", "/zh")
+    window.history.pushState({}, "", "/zh/migration-placeholder")
     signIn()
     mockLayoutContextApi()
 
@@ -353,7 +368,7 @@ describe("App shell", () => {
 
   it("loads real context data for the authenticated context bar", async () => {
     const fetchMock = mockLayoutContextApi()
-    window.history.pushState({}, "", "/en")
+    window.history.pushState({}, "", "/en/migration-placeholder")
     signIn()
 
     render(<App />)
@@ -493,8 +508,10 @@ describe("App shell", () => {
       '"envName":"Dev"'
     )
     expect(
-      await screen.findByRole("heading", { name: "Page not found" })
+      await screen.findByRole("heading", { name: "Get started" })
     ).toBeInTheDocument()
+    expect(window.location.pathname).toBe("/en/get-started")
+    expect(window.location.search).toBe("?status=init")
     await waitFor(() => {
       expect(screen.getByText("New Org")).toBeInTheDocument()
       expect(screen.getByText("Example project")).toBeInTheDocument()
