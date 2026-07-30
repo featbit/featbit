@@ -91,6 +91,40 @@ describe("CreateFeatureFlagStep", () => {
     expect(mocks.createFeatureFlag).not.toHaveBeenCalled()
   })
 
+  it("opens the flag selector with an empty search", async () => {
+    mocks.fetchFeatureFlags.mockResolvedValue({
+      totalCount: 1,
+      items: [
+        {
+          id: "flag-1",
+          name: "Checkout redesign",
+          key: "checkout-redesign",
+          description: "Controls checkout",
+          tags: [],
+          variationType: "boolean",
+          isEnabled: false,
+          createdAt: "2026-01-01",
+          updatedAt: "2026-01-01",
+        },
+      ],
+    })
+    renderStep()
+
+    const picker = await screen.findByRole("combobox", {
+      name: /select or create a feature flag/i,
+    })
+    fireEvent.click(picker)
+    fireEvent.click(
+      await screen.findByRole("option", { name: /checkout redesign/i })
+    )
+
+    fireEvent.click(picker)
+
+    expect(
+      await screen.findByPlaceholderText("Search by name or key")
+    ).toHaveValue("")
+  })
+
   it("creates a disabled Boolean flag and continues", async () => {
     mocks.fetchFeatureFlags.mockResolvedValue({ totalCount: 0, items: [] })
     const onComplete = renderStep()

@@ -271,6 +271,14 @@ export function CreateFeatureFlagStep({
     setPickerOpen(false)
   }
 
+  function handlePickerOpenChange(open: boolean) {
+    if (open) {
+      setSearch("")
+      setDebouncedSearch("")
+    }
+    setPickerOpen(open)
+  }
+
   const submitCreate = form.handleSubmit(async (values) => {
     const key = values.key.trim()
     try {
@@ -327,7 +335,7 @@ export function CreateFeatureFlagStep({
       <div className="flex-1 space-y-5 px-5 py-5">
         <div className="space-y-2">
           <Label>Feature flag</Label>
-          <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
+          <Popover open={pickerOpen} onOpenChange={handlePickerOpenChange}>
             <PopoverTrigger
               render={
                 <Button
