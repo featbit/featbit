@@ -1,6 +1,6 @@
 using Api.Authentication;
+using Api.ControlPlane;
 using Api.Cors;
-using Api.Health;
 using Api.RateLimiting;
 using Api.Services;
 using Domain.ControlPlane;

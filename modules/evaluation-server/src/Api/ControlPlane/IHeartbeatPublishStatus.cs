@@ -1,4 +1,4 @@
-namespace Api.Health;
+namespace Api.ControlPlane;
 
 /// <summary>
 /// D5 (#22) self-fence signal. A process-wide singleton recording when the

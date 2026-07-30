@@ -1,4 +1,4 @@
-using Api.Health;
+using Api.ControlPlane;
 using Domain.Messages;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;

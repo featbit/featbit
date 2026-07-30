@@ -2,7 +2,7 @@ using Domain.ControlPlane;
 using Domain.Messages;
 using Streaming.ControlPlane;
 
-namespace Api.Health;
+namespace Api.ControlPlane;
 
 public class HeartbeatService(
     IMessageProducer messageProducer,

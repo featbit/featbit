@@ -1,4 +1,4 @@
-using Api.Health;
+using Api.ControlPlane;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging.Abstractions;

@@ -2,7 +2,7 @@ using System.Diagnostics.Metrics;
 using Domain.ControlPlane;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-namespace Api.Health;
+namespace Api.ControlPlane;
 
 /// <summary>
 /// D5 (#22) self-fence / readiness signal. Reports whether this evaluation-server pod is still
