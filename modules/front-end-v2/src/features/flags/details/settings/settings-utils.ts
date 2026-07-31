@@ -23,7 +23,7 @@ export function flagSettingsOf(flag: FeatureFlag): FlagSettingsValues {
 
 export function stableFlagSettings(values: FlagSettingsValues) {
   return JSON.stringify({
-    name: values.name.trim(),
+    name: values.name,
     description: values.description,
     tags: [...values.tags].sort(),
   })
@@ -34,13 +34,13 @@ export function flagSettingsReviewChanges(
   current: FlagSettingsValues
 ): FlagSettingsReviewChange[] {
   const changes: FlagSettingsReviewChange[] = []
-  if (previous.name !== current.name.trim()) {
+  if (previous.name !== current.name) {
     changes.push({
       kind: "field",
       label: "name",
       action: "updated",
       previous: previous.name,
-      current: current.name.trim(),
+      current: current.name,
     })
   }
   if (previous.description !== current.description) {

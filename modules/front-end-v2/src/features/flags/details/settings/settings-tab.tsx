@@ -92,23 +92,46 @@ export function SettingsTab({
     }),
     [baseline, watched.description, watched.name, watched.tags]
   )
-  const dirty = stableFlagSettings(draft) !== stableFlagSettings(baseline)
+  const submittedDraft = useMemo<FlagSettingsValues>(
+    () => ({
+      name:
+        !canUpdateName || draft.name === baseline.name
+          ? baseline.name
+          : draft.name.trim(),
+      description: canUpdateDescription
+        ? draft.description
+        : baseline.description,
+      tags: canUpdateTags ? draft.tags : baseline.tags,
+    }),
+    [
+      baseline.description,
+      baseline.name,
+      baseline.tags,
+      canUpdateDescription,
+      canUpdateName,
+      canUpdateTags,
+      draft.description,
+      draft.name,
+      draft.tags,
+    ]
+  )
+  const dirty =
+    stableFlagSettings(submittedDraft) !== stableFlagSettings(baseline)
   const changes = useMemo(
-    () => flagSettingsReviewChanges(baseline, draft),
-    [baseline, draft]
+    () => flagSettingsReviewChanges(baseline, submittedDraft),
+    [baseline, submittedDraft]
   )
   const archived = Boolean(flag.isArchived)
 
   const saveMutation = useMutation({
     mutationFn: async (comment: string) => {
-      const normalizedDraft = { ...draft, name: draft.name.trim() }
       const revision = await updateFeatureFlagGeneral(
         envId,
         flag.key,
-        normalizedDraft,
+        submittedDraft,
         comment
       )
-      return { ...flag, ...normalizedDraft, revision }
+      return { ...flag, ...submittedDraft, revision }
     },
     onSuccess: (saved) => {
       onSaved(saved)

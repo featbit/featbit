@@ -19,15 +19,29 @@ const flag: FeatureFlag = {
 }
 
 describe("feature flag settings utilities", () => {
-  it("normalizes names and tag order for dirty-state comparison", () => {
-    const settings = flagSettingsOf(flag)
+  it("normalizes tag order for dirty-state comparison", () => {
+    const settings = {
+      ...flagSettingsOf(flag),
+      tags: ["checkout", "growth"],
+    }
     expect(
       stableFlagSettings({
         ...settings,
-        name: ` ${settings.name} `,
         tags: [...settings.tags].reverse(),
       })
     ).toBe(stableFlagSettings(settings))
+  })
+
+  it("preserves name whitespace in comparisons", () => {
+    const previous = {
+      ...flagSettingsOf(flag),
+      name: `${flag.name} `,
+    }
+
+    expect(stableFlagSettings(previous)).not.toBe(
+      stableFlagSettings({ ...previous, name: flag.name })
+    )
+    expect(flagSettingsReviewChanges(previous, previous)).toEqual([])
   })
 
   it("builds semantic changes for fields and tags", () => {

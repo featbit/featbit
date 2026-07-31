@@ -1,5 +1,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { fireEvent, render, screen, waitFor } from "@testing-library/react"
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n/i18n"
 import { ApiRequestError } from "@/lib/api/authenticated-api"
@@ -36,20 +42,33 @@ const flag: FeatureFlag = {
   variationType: "boolean",
 }
 
-function renderSettings(value: FeatureFlag = flag) {
+function renderSettings(
+  value: FeatureFlag = flag,
+  permissions: Partial<{
+    canUpdateName: boolean
+    canUpdateDescription: boolean
+    canUpdateTags: boolean
+  }> = {}
+) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   })
   const onSaved = vi.fn()
+  const generalPermissions = {
+    canUpdateName: true,
+    canUpdateDescription: true,
+    canUpdateTags: true,
+    ...permissions,
+  }
   const result = render(
     <QueryClientProvider client={queryClient}>
       <SettingsTab
         envId="env-1"
         flag={value}
         requireComment={false}
-        canUpdateName
-        canUpdateDescription
-        canUpdateTags
+        canUpdateName={generalPermissions.canUpdateName}
+        canUpdateDescription={generalPermissions.canUpdateDescription}
+        canUpdateTags={generalPermissions.canUpdateTags}
         canArchive
         canRestore
         canDelete
@@ -164,6 +183,45 @@ describe("SettingsTab", () => {
       tags: [],
       revision: "revision-2",
     })
+  })
+
+  it("preserves an unchanged stored name with trailing whitespace", async () => {
+    vi.mocked(updateFeatureFlagGeneral).mockResolvedValue("revision-2")
+    const storedFlag = {
+      ...flag,
+      name: "Checkout redesign ",
+      description: "Original description",
+    }
+    renderSettings(storedFlag, {
+      canUpdateName: false,
+      canUpdateDescription: true,
+      canUpdateTags: false,
+    })
+
+    fireEvent.change(screen.getByLabelText(/Description/), {
+      target: { value: "Updated description" },
+    })
+    fireEvent.click(screen.getByRole("button", { name: "Review & save" }))
+
+    const dialog = await screen.findByRole("dialog")
+    expect(within(dialog).getByText("Description")).toBeVisible()
+    expect(within(dialog).queryByText("Name")).not.toBeInTheDocument()
+    fireEvent.click(
+      within(dialog).getByRole("button", { name: "Save changes" })
+    )
+
+    await waitFor(() =>
+      expect(updateFeatureFlagGeneral).toHaveBeenCalledWith(
+        "env-1",
+        "checkout-redesign",
+        {
+          name: "Checkout redesign ",
+          description: "Updated description",
+          tags: ["checkout"],
+        },
+        ""
+      )
+    )
   })
 
   it("shows a permission error when the General update returns 403", async () => {
