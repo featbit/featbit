@@ -4,6 +4,7 @@ namespace Application.IntegrationTests;
 
 [Trait("Category", "Host")]
 [Collection(nameof(TestApp))]
+[Trait("Category", "Integration")]
 public class SmokeTests
 {
     private readonly TestApp _app;

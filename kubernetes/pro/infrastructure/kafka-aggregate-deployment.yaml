@@ -1,0 +1,129 @@
+# Kafka Aggregate Broker
+#
+# Dedicated broker that evaluation-server and da-server consumers subscribe to.
+# MirrorMaker instances replicate flag/segment change messages from the local
+# main kafka broker (kafka:9092) to this broker.  The remote MirrorMaker from
+# the other cluster also produces INTO this broker via the NodePort (30094),
+# giving eval-server a single aggregated view of changes from both clusters.
+#
+# KAFKA_CFG_ADVERTISED_LISTENERS is set to a placeholder here.
+# Deploy-FeatBitClusters.ps1 patches it per-cluster after apply:
+#   PLAINTEXT://kafka-aggregate:9092,PLAINTEXT_HOST://<NODE_SHARED_IP>:30094
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: kafka-aggregate
+  name: kafka-aggregate
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka-aggregate
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: kafka-aggregate
+    spec:
+      securityContext:
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+      initContainers:
+        - name: volume-permissions
+          image: bitnamilegacy/kafka:3.8
+          command:
+            - /bin/bash
+          args:
+            - -ec
+            - |
+              mkdir -p /bitnami/kafka
+              chown -R 1001:1001 /bitnami/kafka
+              find /bitnami/kafka -mindepth 1 -maxdepth 1 -not -name ".snapshot" -not -name "lost+found" | xargs -r chown -R 1001:1001
+          securityContext:
+            runAsUser: 0
+            allowPrivilegeEscalation: false
+          resources:
+            requests:
+              memory: 64Mi
+              cpu: 25m
+              ephemeral-storage: 1Gi
+            limits:
+              memory: 128Mi
+              cpu: 200m
+              ephemeral-storage: 2Gi
+          volumeMounts:
+            - name: kafka-aggregate
+              mountPath: /bitnami/kafka
+      imagePullSecrets:
+        - name: registry-credentials
+      containers:
+        - name: kafka-aggregate
+          image: bitnamilegacy/kafka:3.8
+          ports:
+            - containerPort: 9092
+              name: internal
+            - containerPort: 30094
+              name: external
+            - containerPort: 9093
+              name: controller
+          env:
+            - name: BITNAMI_DEBUG
+              value: "false"
+            - name: ALLOW_PLAINTEXT_LISTENER
+              value: "true"
+            - name: KAFKA_CFG_NODE_ID
+              value: "0"
+            - name: KAFKA_CFG_PROCESS_ROLES
+              value: controller,broker
+            - name: KAFKA_CFG_CONTROLLER_QUORUM_VOTERS
+              value: 0@kafka-aggregate:9093
+            - name: KAFKA_CFG_CONTROLLER_LISTENER_NAMES
+              value: CONTROLLER
+            - name: KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP
+              value: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT
+            - name: KAFKA_CFG_LISTENERS
+              value: PLAINTEXT://:9092,PLAINTEXT_HOST://:30094,CONTROLLER://:9093
+            # PLACEHOLDER — deploy script patches this with the real node IP on the
+            # shared bridge network so the remote MirrorMaker can reach this broker.
+            - name: KAFKA_CFG_ADVERTISED_LISTENERS
+              value: PLAINTEXT://kafka-aggregate:9092,PLAINTEXT_HOST://127.0.0.1:30094
+            - name: KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE
+              value: "true"
+            - name: KAFKA_DEFAULT_REPLICATION_FACTOR
+              value: "1"
+            - name: KAFKA_NUM_PARTITIONS
+              value: "1"
+            - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
+              value: "1"
+            - name: KAFKA_LOG_CLEANUP_POLICY
+              value: compact
+            # Cap the JVM heap so the aggregate broker fits a test-sized
+            # footprint. Default Bitnami heap is -Xmx1024m; SUT topics are
+            # single-partition and low-throughput, so 512m is ample.
+            - name: KAFKA_HEAP_OPTS
+              value: "-Xmx512m -Xms256m"
+          resources:
+            requests:
+              memory: 768Mi
+              cpu: 100m
+              ephemeral-storage: 2Gi
+            limits:
+              memory: 1Gi
+              cpu: 1500m
+              ephemeral-storage: 4Gi
+          volumeMounts:
+            - mountPath: /bitnami/kafka
+              name: kafka-aggregate
+          securityContext:
+            runAsUser: 1001
+            runAsGroup: 0
+            allowPrivilegeEscalation: false
+      restartPolicy: Always
+      volumes:
+        - name: kafka-aggregate
+          persistentVolumeClaim:
+            claimName: kafka-aggregate
+status: {}

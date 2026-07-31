@@ -14,7 +14,7 @@ assignees: ''
 
 # Setup dev environment
 
-Please read the [doc](../blob/main/Development.md) to set up your development environment.
+Please read the [doc](../../Development.md) to set up your development environment.
 
 # Deadline
 

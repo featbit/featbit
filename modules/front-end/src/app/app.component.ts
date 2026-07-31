@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import packageInfo from '../../package.json';
 import { environment } from '../environments/environment';
 import { ThemeService } from '@core/services/theme.service';
 
@@ -22,7 +21,7 @@ export class AppComponent {
 
   constructor(themeService: ThemeService) {
     themeService.init();
-    console.log(`Env: ${environment.production ? 'Prod' : 'dev' }; Version: ${packageInfo.version}`);
+    console.log(`Env: ${environment.production ? 'Prod' : 'dev' }; Version: ${environment.version}`);
   }
 }
 

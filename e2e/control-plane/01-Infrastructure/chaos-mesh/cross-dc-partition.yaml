@@ -1,0 +1,37 @@
+# Cross-DC network partition for GatedCommit consistency tests (CP-11 / CP-12).
+#
+# Applied VERBATIM by the suite to BOTH clusters (no templating happens — the external
+# targets below must match the deployed topology). Under the per-cluster Redis/Sentinel
+# topology, cross-DC and control-plane-infra traffic uses:
+#   172.31.0.10  west node on the shared cluster network (east -> west peer redis fwd :31649)
+#   172.31.0.20  east node on the shared cluster network (west -> east peer redis fwd :31649)
+#   192.168.58.1 east's host gateway (host.minikube.internal: shared Kafka 9092 / Mongo 27017)
+#
+# Effect per cluster of blocking all three from featbit pods' egress:
+#   west: loses only 172.31.0.20 (east peer) — keeps its own gateway 192.168.49.1, so
+#         Kafka/Mongo stay reachable and west remains the writable survivor.
+#   east: loses 172.31.0.10 (west peer) AND 192.168.58.1 (its Kafka/Mongo route) — fully
+#         isolated: heartbeats stop, its lease expires, it becomes the evicted DC.
+# Intra-cluster pod-to-pod traffic never leaves the cluster network, so it stays up —
+# a clean partition of just the east<->west + east<->control-plane-infra links.
+#
+# Usage:
+#   start: kubectl --context <west|east> apply  -f cross-dc-partition.yaml
+#   stop:  kubectl --context <west|east> delete -f cross-dc-partition.yaml --ignore-not-found
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: cross-dc-partition
+  namespace: chaos-mesh
+spec:
+  action: partition
+  mode: all
+  selector:
+    namespaces:
+      - featbit
+  direction: both
+  externalTargets:
+    - "172.31.0.10"
+    - "172.31.0.20"
+    - "192.168.58.1"
+  duration: "10m"

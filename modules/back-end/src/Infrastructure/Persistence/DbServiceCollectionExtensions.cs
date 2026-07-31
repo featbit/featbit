@@ -58,6 +58,7 @@ public static class DbServiceCollectionExtensions
             services.AddTransient<IWebhookService, MongoServices.WebhookService>();
             services.AddTransient<IInsightService, MongoServices.InsightService>();
             services.AddTransient<IRefreshTokenService, MongoServices.RefreshTokenService>();
+            services.AddTransient<Application.ControlPlane.ILeaseStore, MongoServices.MongoLeaseStore>();
         }
 
         void AddEntityFrameworkCoreServices()
@@ -97,6 +98,7 @@ public static class DbServiceCollectionExtensions
             services.AddTransient<IWebhookService, EntityFrameworkCoreServices.WebhookService>();
             services.AddTransient<IInsightService, EntityFrameworkCoreServices.InsightService>();
             services.AddTransient<IRefreshTokenService, EntityFrameworkCoreServices.RefreshTokenService>();
+            services.AddTransient<Application.ControlPlane.ILeaseStore, EntityFrameworkCoreServices.PostgresLeaseStore>();
         }
     }
 }

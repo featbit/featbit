@@ -1,3 +1,16 @@
+# Deployment environment file — contains registry credentials, never commit.
+# Copy deployment.env.example to deployment.env and fill in your values.
+deployment.env
+
+# Local image-map override for registry namespace customisation (e.g. Harbor).
+# Copy kubernetes/infra-image-map.local.json.example to infra-image-map.local.json.
+kubernetes/infra-image-map.local.json
+
+# Generated (ephemeral) manifests produced by deployment scripts.
+# These are never committed; they are produced at deploy time with
+# registry-rewritten image refs and other environment-specific values.
+kubernetes/.generated/
+
 # Ignore Mac DS_Store files
 .DS_Store
 **/.DS_Store
@@ -15,6 +28,7 @@ benchmark/k6-scripts/test-results/
 
 #Ignore dev logs
 .logs/
+*.log
 
 #Ignore IntelliJ IDEA files
 .idea/
@@ -27,3 +41,21 @@ modules/front-end-v2/test-results/
 /modules/.codex
 /modules/.impeccable
 /modules/.agents
+
+# Control-plane QA local artifacts (never commit)
+/e2e/control-plane/deployment.env
+/e2e/control-plane/port-forwards.log
+/e2e/control-plane/windows-hyperv/.quickstart-state-hyperv.json
+/e2e/control-plane/Setup Challenges.txt
+/build-featbit-images.ps1
+
+# Quickstart wizard progress state files (any platform subdir: ubuntu, windows-wsl, …)
+e2e/control-plane/.quickstart-state-*.json
+e2e/control-plane/**/.quickstart-state-*.json
+
+# otel-demo upstream source clone (fetched on demand by Build-OtelDemoImages.ps1)
+e2e/control-plane/01-Infrastructure/otel-demo/build/
+
+# Automation test artifacts (scenario run outputs, timelines, assertion results)
+e2e/control-plane/artifacts/
+e2e/control-plane/01-Infrastructure/windows-hyperv/.quickstart-state-hyperv.json

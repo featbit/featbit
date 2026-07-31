@@ -1,6 +1,7 @@
 using Application.Bases;
 using Application.Bases.Exceptions;
 using Application.Caches;
+using Domain.Messages;
 using Domain.Workspaces;
 using Microsoft.Extensions.Configuration;
 
@@ -33,7 +34,8 @@ public class UpdateLicenseHandler(
     IWorkspaceService service,
     ICacheService cacheService,
     IMapper mapper,
-    IConfiguration configuration)
+    IConfiguration configuration,
+    IMessageProducer messageProducer)
     : IRequestHandler<UpdateLicense, WorkspaceVm>
 {
     public async Task<WorkspaceVm> Handle(UpdateLicense request, CancellationToken cancellationToken)
@@ -51,6 +53,11 @@ public class UpdateLicenseHandler(
 
         // update license cache
         await cacheService.UpsertLicenseAsync(workspace);
+
+        if (configuration.UseControlPlane())
+        {
+            await messageProducer.PublishAsync(ControlPlaneTopics.ControlPlaneLicenseChange, workspace);
+        }
 
         return mapper.Map<WorkspaceVm>(workspace);
     }

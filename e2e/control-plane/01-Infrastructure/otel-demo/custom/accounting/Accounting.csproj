@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+		<!-- accounting's Directory.Build.props sets NuGetAudit + TreatWarningsAsErrors,
+		     so the pinned upstream OpenTelemetry 1.14.0 NU1902 advisories become build
+		     ERRORS. Disable the audit for this QA image so it builds against the pinned
+		     deps (the advisories are an upstream dependency concern, not our change). -->
+		<NuGetAudit>false</NuGetAudit>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Confluent.Kafka" Version="2.12.0" />
+		<PackageReference Include="EFCore.NamingConventions" Version="10.0.0-rc.2" />
+		<PackageReference Include="Google.Protobuf" Version="3.33.1" />
+		<PackageReference Include="Grpc.Tools" Version="2.68.1">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.0" />
+		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
+		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
+		<PackageReference Include="OpenTelemetry.AutoInstrumentation" Version="1.13.0" />
+		<!-- FeatBit native .NET server-side SDK (NOT OpenFeature) for accounting feature flags. -->
+		<PackageReference Include="FeatBit.ServerSdk" Version="1.2.11" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<!-- GrpcServices is 'none' so that we do not need to depend on the grpc nuget package, and we only need protobuf support. -->
+		<Protobuf Include="src\protos\demo.proto" GrpcServices="none" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="src\protos\" />
+	</ItemGroup>
+
+</Project>

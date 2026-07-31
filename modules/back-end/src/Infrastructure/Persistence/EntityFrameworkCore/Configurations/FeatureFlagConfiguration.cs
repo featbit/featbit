@@ -25,5 +25,16 @@ public class FeatureFlagConfiguration : IEntityTypeConfiguration<FeatureFlag>
         builder.Property(x => x.TargetUsers).HasColumnType("jsonb");
         builder.Property(x => x.Rules).HasColumnType("jsonb");
         builder.Property(x => x.Fallthrough).HasColumnType("jsonb");
+
+        // Committed-vs-pending (parity with the Mongo path). CommittedVersion is a plain
+        // bigint column; Pending is a complex object stored as jsonb, mirroring how the
+        // other complex properties above (Variations/Rules/Fallthrough) are persisted.
+        builder.Property(x => x.CommittedVersion).IsRequired();
+        builder.Property(x => x.Pending).HasColumnType("jsonb");
+
+        // Postgres xmin as an optimistic concurrency token (#72): changes on every row
+        // update, so a racing writer makes SaveChanges throw DbUpdateConcurrencyException
+        // instead of silently overwriting. System column - no DDL, Mongo unaffected.
+        builder.Property<uint>("xmin").IsRowVersion();
     }
 }

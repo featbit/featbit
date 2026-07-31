@@ -26,7 +26,7 @@ public class StreamingServiceCollectionExtensionsTests
         Assert.Contains(services, d => d.ServiceType == typeof(StreamingOptions));
         AssertRegistered<ISystemClock, SystemClock>(services);
         AssertRegistered<IRequestValidator, RequestValidator>(services);
-        AssertRegistered<IConnectionManager, ConnectionManager>(services);
+        AssertRegistered<IConnectionManager, DefaultConnectionManager>(services);
         AssertRegistered<IDataSyncService, DataSyncService>(services);
         Assert.Contains(services, d =>
             d.ServiceType == typeof(IRelayProxyService) && d.ImplementationType == typeof(RelayProxyService));
@@ -46,9 +46,10 @@ public class StreamingServiceCollectionExtensionsTests
             .Where(d => d.ServiceType == typeof(IMessageConsumer))
             .Select(d => d.ImplementationType)
             .ToList();
-        Assert.Equal(2, consumerTypes.Count);
+        Assert.Equal(3, consumerTypes.Count);
         Assert.Contains(typeof(FeatureFlagChangeMessageConsumer), consumerTypes);
         Assert.Contains(typeof(SegmentChangeMessageConsumer), consumerTypes);
+        Assert.Contains(typeof(ControlPlaneCommandMessageConsumer), consumerTypes);
     }
 
     private static void AssertRegistered<TService, TImpl>(IServiceCollection services) =>

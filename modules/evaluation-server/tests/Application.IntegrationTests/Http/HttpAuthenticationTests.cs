@@ -6,6 +6,7 @@ namespace Application.IntegrationTests.Http;
 
 [Trait("Category", "Host")]
 [Collection(nameof(TestApp))]
+[Trait("Category", "Integration")]
 public class HttpAuthenticationTests
 {
     private readonly TestApp _app;
