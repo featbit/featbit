@@ -39,7 +39,7 @@ describe("get started utilities", () => {
   })
 
   it("masks secrets while retaining the last four characters", () => {
-    expect(maskSecret("server-secret-7K2M")).toMatch(/^\*+7K2M$/)
+    expect(maskSecret("server-secret-7K2M")).toBe("********7K2M")
     expect(maskSecret("")).toBe("Not configured")
   })
 

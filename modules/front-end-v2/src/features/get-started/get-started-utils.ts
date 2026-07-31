@@ -43,7 +43,7 @@ export function createBooleanFlagPayload(
 export function maskSecret(value: string) {
   if (!value) return "Not configured"
   const visible = value.slice(-4)
-  return `${"*".repeat(Math.max(8, value.length - visible.length))}${visible}`
+  return `********${visible}`
 }
 
 export function hasEvaluationEvents(insights: FeatureFlagInsight[]) {

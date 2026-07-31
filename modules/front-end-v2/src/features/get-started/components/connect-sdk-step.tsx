@@ -1,4 +1,4 @@
-import { CircleAlert, Eye, EyeOff, ExternalLink, Info } from "lucide-react"
+import { Check, CircleAlert, Eye, EyeOff, ExternalLink } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -26,6 +26,7 @@ import type {
 import { maskSecret } from "../get-started-utils"
 import { CodeBlock } from "./code-block"
 import { CopyButton } from "./copy-button"
+import { SdkEndpointsPopover } from "./sdk-endpoints-popover"
 
 export function ConnectSdkStep({
   lang,
@@ -64,7 +65,14 @@ export function ConnectSdkStep({
     endpoints.find((endpoint) => endpoint.id === "eventUrl")?.value ?? ""
   const openApiEndpoint =
     endpoints.find((endpoint) => endpoint.id === "openApiEndpoint")?.value ?? ""
-  const selectedSecret = environment?.secrets.find(
+  const compatibleSecrets = useMemo(
+    () =>
+      environment?.secrets.filter(
+        (secret) => secret.type === definition.recommendedSecretType
+      ) ?? [],
+    [definition.recommendedSecretType, environment?.secrets]
+  )
+  const selectedSecret = compatibleSecrets.find(
     (secret) => secret.id === selectedSecretId
   )
   const secretVisible = Boolean(
@@ -72,18 +80,9 @@ export function ConnectSdkStep({
   )
 
   useEffect(() => {
-    if (selectedSecret || !environment?.secrets.length) return
-    const recommended =
-      environment.secrets.find(
-        (secret) => secret.type === definition.recommendedSecretType
-      ) ?? environment.secrets[0]
-    onSecretChange(recommended.id)
-  }, [
-    definition.recommendedSecretType,
-    environment,
-    onSecretChange,
-    selectedSecret,
-  ])
+    const nextSecretId = selectedSecret?.id ?? compatibleSecrets[0]?.id ?? ""
+    if (nextSecretId !== selectedSecretId) onSecretChange(nextSecretId)
+  }, [compatibleSecrets, onSecretChange, selectedSecret, selectedSecretId])
 
   const secretValue = selectedSecret?.value ?? "the-sdk-secret"
   const snippet = definition.buildSnippet({
@@ -99,24 +98,40 @@ export function ConnectSdkStep({
           maskSecret(selectedSecret.value)
         )
       : snippet
-  const ready = Boolean(selectedSecret && streamingUrl && eventUrl)
+  const ready = Boolean(
+    selectedSecret &&
+    selectedSecret.type === definition.recommendedSecretType &&
+    streamingUrl &&
+    eventUrl
+  )
   const endpointRows = [
     {
+      id: "streamingUrl",
       label: t("getStarted.connectSdk.streamingUrl"),
       value: streamingUrl,
     },
-    { label: t("getStarted.connectSdk.eventUrl"), value: eventUrl },
     {
+      id: "eventUrl",
+      label: t("getStarted.connectSdk.eventUrl"),
+      value: eventUrl,
+    },
+    {
+      id: "openApiEndpoint",
       label: t("getStarted.connectSdk.openApiEndpoint"),
       value: openApiEndpoint,
     },
   ]
-  const configurationRowClass =
-    "grid items-center gap-3 px-4 py-2 @min-[42rem]:grid-cols-[minmax(9rem,0.7fr)_minmax(0,1.3fr)_4.5rem]"
+  const sdkSide =
+    definition.recommendedSecretType === "client"
+      ? t("getStarted.connectSdk.clientSide")
+      : t("getStarted.connectSdk.serverSide")
+  const secretTypeLabel = t(
+    `getStarted.common.${definition.recommendedSecretType}`
+  )
 
   return (
     <section className="isolate flex min-h-[46rem] flex-col rounded-lg border bg-card">
-      <header className="px-5 pt-5">
+      <header className="border-b px-5 py-4">
         <h2
           data-get-started-step-heading
           tabIndex={-1}
@@ -129,97 +144,111 @@ export function ConnectSdkStep({
         </p>
       </header>
 
-      <div className="flex-1 space-y-5 px-5 py-4">
-        <Alert>
-          <Info />
-          <AlertTitle>{t("getStarted.connectSdk.setupTitle")}</AlertTitle>
-          <AlertDescription>
-            {t("getStarted.connectSdk.setupDescription")}
-          </AlertDescription>
-        </Alert>
-
-        <Tabs
-          value={sdkId}
-          onValueChange={(value) => onSdkChange(value as SdkId)}
-        >
-          <TabsList
-            variant="line"
-            className="no-scrollbar w-full justify-start gap-5 overflow-x-auto border-b px-1 pb-1"
-          >
-            {SDK_DEFINITIONS.map((sdk) => (
-              <TabsTrigger key={sdk.id} value={sdk.id} className="px-3">
-                {sdk.label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
-
-        <div className="space-y-2">
+      <div className="grid flex-1 gap-5 px-5 py-4 @min-[52rem]:grid-cols-[13rem_minmax(0,1fr)]">
+        <aside className="min-w-0 border-b pb-4 @min-[52rem]:border-r @min-[52rem]:border-b-0 @min-[52rem]:pr-4 @min-[52rem]:pb-0">
           <h3 className="text-sm font-semibold">
-            {t("getStarted.connectSdk.configuration")}
+            {t("getStarted.connectSdk.chooseSdk")}
           </h3>
-          {environmentLoading ? (
-            <div
-              role="status"
-              aria-label={t("getStarted.connectSdk.loadingConfiguration")}
-              className="overflow-hidden rounded-lg border"
+          <Tabs
+            value={sdkId}
+            orientation="vertical"
+            className="mt-3 block"
+            onValueChange={(value) => onSdkChange(value as SdkId)}
+          >
+            <TabsList
+              aria-label={t("getStarted.connectSdk.chooseSdk")}
+              className="w-full gap-1 bg-transparent p-0 text-foreground"
             >
-              <span className="sr-only">
-                {t("getStarted.connectSdk.loadingConfiguration")}
-              </span>
-              {["secret", "streaming", "events", "open-api"].map(
-                (row, index) => (
-                  <div
-                    key={row}
-                    className={`${configurationRowClass} min-h-9 border-b last:border-b-0`}
-                  >
-                    <Skeleton className="h-4 w-28" />
-                    <Skeleton
-                      className={
-                        index === 0 ? "h-7 w-full max-w-64" : "h-4 w-44"
-                      }
-                    />
-                    <Skeleton className="ml-auto h-7 w-14" />
-                  </div>
-                )
-              )}
-            </div>
-          ) : environmentError ? (
-            <Alert variant="destructive">
-              <CircleAlert />
-              <AlertTitle>
-                {t("getStarted.connectSdk.configurationUnavailable")}
-              </AlertTitle>
-              <AlertDescription className="flex items-center justify-between gap-3">
-                <span>
-                  {t(
-                    "getStarted.connectSdk.configurationUnavailableDescription"
-                  )}
-                </span>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  onClick={onRetryEnvironment}
+              {SDK_DEFINITIONS.map((sdk) => (
+                <TabsTrigger
+                  key={sdk.id}
+                  value={sdk.id}
+                  className="h-10 w-full flex-none justify-start rounded-md border border-transparent px-3 py-0 font-normal text-foreground shadow-none hover:bg-muted/60 data-active:border-border data-active:bg-muted data-active:font-medium data-active:shadow-none"
                 >
-                  {t("getStarted.common.retry")}
-                </Button>
-              </AlertDescription>
-            </Alert>
-          ) : (
-            <div className="overflow-hidden rounded-lg border text-sm">
-              <div className={`${configurationRowClass} min-h-10 border-b`}>
+                  <span className="truncate">{sdk.label}</span>
+                  {sdk.id === sdkId ? (
+                    <Check aria-hidden className="ml-auto size-4" />
+                  ) : null}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+        </aside>
+
+        <div className="min-w-0 space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-2.5">
+              <h3 className="truncate text-lg font-semibold">
+                {definition.label} SDK
+              </h3>
+              <Badge
+                variant="outline"
+                className="h-6 shrink-0 px-2 font-normal"
+              >
+                {sdkSide}
+              </Badge>
+            </div>
+            <a
+              href={definition.documentationUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-sm text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
+            >
+              {t("getStarted.connectSdk.viewDocumentationShort")}
+              <ExternalLink aria-hidden className="size-3.5" />
+            </a>
+          </div>
+
+          <div className="space-y-2">
+            <h3 className="text-sm font-semibold">
+              {t("getStarted.connectSdk.configuration")}
+            </h3>
+            {environmentLoading ? (
+              <div
+                role="status"
+                aria-label={t("getStarted.connectSdk.loadingConfiguration")}
+                className="grid min-h-14 items-center gap-3 rounded-lg border px-3 py-2 @min-[56rem]:grid-cols-[8rem_9rem_minmax(0,1fr)_auto]"
+              >
+                <span className="sr-only">
+                  {t("getStarted.connectSdk.loadingConfiguration")}
+                </span>
+                <Skeleton className="h-4 w-28" />
+                <Skeleton className="h-7 w-full" />
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-7 w-28" />
+              </div>
+            ) : environmentError ? (
+              <Alert variant="destructive">
+                <CircleAlert />
+                <AlertTitle>
+                  {t("getStarted.connectSdk.configurationUnavailable")}
+                </AlertTitle>
+                <AlertDescription className="flex items-center justify-between gap-3">
+                  <span>
+                    {t(
+                      "getStarted.connectSdk.configurationUnavailableDescription"
+                    )}
+                  </span>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={onRetryEnvironment}
+                  >
+                    {t("getStarted.common.retry")}
+                  </Button>
+                </AlertDescription>
+              </Alert>
+            ) : (
+              <div className="grid min-h-14 items-center gap-2 rounded-lg border px-3 py-2 text-sm @min-[56rem]:grid-cols-[8rem_9rem_minmax(0,1fr)_auto]">
                 <span>{t("getStarted.connectSdk.environmentSecret")}</span>
-                {environment?.secrets.length ? (
-                  <div className="flex min-w-0 items-center gap-2">
+                {compatibleSecrets.length ? (
+                  <>
                     <Select
                       value={selectedSecretId || null}
                       onValueChange={(value) => value && onSecretChange(value)}
                     >
-                      <SelectTrigger
-                        size="sm"
-                        className="w-full min-w-0 @min-[42rem]:max-w-56"
-                      >
+                      <SelectTrigger size="sm" className="w-full min-w-0">
                         <SelectValue>
                           {selectedSecret
                             ? selectedSecret.name
@@ -228,141 +257,113 @@ export function ConnectSdkStep({
                       </SelectTrigger>
                       <SelectContent align="start">
                         <SelectGroup>
-                          {environment.secrets.map((secret) => (
+                          {compatibleSecrets.map((secret) => (
                             <SelectItem key={secret.id} value={secret.id}>
                               <span className="min-w-0 truncate">
                                 {secret.name}
                               </span>
-                              <Badge
-                                variant="outline"
-                                className="ml-auto uppercase"
-                              >
-                                {t(`getStarted.common.${secret.type}`)}
-                              </Badge>
                             </SelectItem>
                           ))}
                         </SelectGroup>
                       </SelectContent>
                     </Select>
-                    {selectedSecret ? (
-                      <>
-                        <Badge variant="outline" className="shrink-0 uppercase">
-                          {t(`getStarted.common.${selectedSecret.type}`)}
-                        </Badge>
-                        <code className="min-w-0 flex-1 truncate text-xs text-muted-foreground">
-                          {secretVisible
-                            ? selectedSecret.value
-                            : maskSecret(selectedSecret.value)}
-                        </code>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon-sm"
-                          className="size-7 shrink-0"
-                          aria-label={
-                            secretVisible
-                              ? t("getStarted.connectSdk.hideSecret")
-                              : t("getStarted.connectSdk.showSecret")
-                          }
-                          onClick={() =>
-                            setRevealedSecretId((current) =>
-                              current === selectedSecretId
-                                ? ""
-                                : selectedSecretId
-                            )
-                          }
-                        >
-                          {secretVisible ? (
-                            <EyeOff className="size-3.5" />
-                          ) : (
-                            <Eye className="size-3.5" />
-                          )}
-                        </Button>
-                      </>
-                    ) : null}
-                  </div>
+                    <code className="min-w-0 truncate font-mono text-xs text-muted-foreground">
+                      {selectedSecret
+                        ? secretVisible
+                          ? selectedSecret.value
+                          : maskSecret(selectedSecret.value)
+                        : t("getStarted.common.notConfigured")}
+                    </code>
+                    <div className="flex items-center justify-end gap-1">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-sm"
+                        className="size-7 shrink-0"
+                        disabled={!selectedSecret}
+                        aria-label={
+                          secretVisible
+                            ? t("getStarted.connectSdk.hideSecret")
+                            : t("getStarted.connectSdk.showSecret")
+                        }
+                        onClick={() =>
+                          setRevealedSecretId((current) =>
+                            current === selectedSecretId ? "" : selectedSecretId
+                          )
+                        }
+                      >
+                        {secretVisible ? (
+                          <EyeOff className="size-3.5" />
+                        ) : (
+                          <Eye className="size-3.5" />
+                        )}
+                      </Button>
+                      <CopyButton
+                        value={selectedSecret?.value ?? ""}
+                        iconOnly
+                      />
+                      <span
+                        aria-hidden
+                        className="mx-1 h-5 w-px shrink-0 bg-border"
+                      />
+                      <SdkEndpointsPopover endpoints={endpointRows} />
+                    </div>
+                  </>
                 ) : (
-                  <div className="min-w-0">
-                    <p className="text-sm text-destructive">
-                      {t("getStarted.connectSdk.noSecrets")}
-                    </p>
-                    <a
-                      href={localizedPath(
-                        lang,
-                        "/organization/projects?view=secrets"
-                      )}
-                      className="text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground"
-                    >
-                      {t("getStarted.connectSdk.manageSecrets")}
-                    </a>
-                  </div>
+                  <>
+                    <div className="min-w-0 @min-[56rem]:col-span-2">
+                      <p className="truncate text-sm text-destructive">
+                        {t("getStarted.connectSdk.noCompatibleSecrets", {
+                          type: secretTypeLabel,
+                        })}
+                      </p>
+                      <a
+                        href={localizedPath(
+                          lang,
+                          "/organization/projects?view=secrets"
+                        )}
+                        className="text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground"
+                      >
+                        {t("getStarted.connectSdk.manageSecrets")}
+                      </a>
+                    </div>
+                    <div className="flex justify-end">
+                      <SdkEndpointsPopover endpoints={endpointRows} />
+                    </div>
+                  </>
                 )}
-                <div className="flex items-center justify-end">
-                  {selectedSecret ? (
-                    <CopyButton value={selectedSecret.value} />
-                  ) : null}
-                </div>
               </div>
-              {endpointRows.map((row) => (
-                <div
-                  key={row.label}
-                  className={`${configurationRowClass} min-h-9 border-b last:border-b-0`}
-                >
-                  <span>{row.label}</span>
-                  <code className="min-w-0 truncate text-xs text-muted-foreground">
-                    {row.value || t("getStarted.common.notConfigured")}
-                  </code>
-                  <CopyButton value={row.value} />
-                </div>
-              ))}
-            </div>
-          )}
-          <p className="text-xs text-muted-foreground">
-            {t("getStarted.connectSdk.recommendedSecret", {
-              sdk: definition.label,
-              type: t(`getStarted.common.${definition.recommendedSecretType}`),
-            })}
-          </p>
-        </div>
+            )}
+          </div>
 
-        <div className="space-y-2">
-          <h3 className="text-sm font-semibold">
-            {t("getStarted.connectSdk.installPackage")}
-          </h3>
-          <CodeBlock
-            code={definition.install}
-            language={definition.installLanguage}
-            maxHeightClassName="max-h-36"
-          />
-        </div>
+          <div className="space-y-2">
+            <h3 className="text-sm font-semibold">
+              {t("getStarted.connectSdk.installPackage")}
+            </h3>
+            <CodeBlock
+              code={definition.install}
+              language={definition.installLanguage}
+              maxHeightClassName="max-h-24"
+            />
+          </div>
 
-        <div className="space-y-2">
-          <h3 className="text-sm font-semibold">
-            {t("getStarted.connectSdk.initializeClient")}
-          </h3>
-          <CodeBlock
-            code={visibleSnippet}
-            copyValue={snippet}
-            language={definition.codeLanguage}
-            highlight
-            lineNumbers
-            maxHeightClassName="max-h-60"
-          />
-          <a
-            href={definition.documentationUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex min-h-8 items-center gap-1.5 text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
-          >
-            {t("getStarted.connectSdk.viewDocumentation", {
-              sdk: definition.label,
-            })}
-            <ExternalLink className="size-3.5" />
-          </a>
+          <div className="space-y-2">
+            <h3 className="text-sm font-semibold">
+              {t("getStarted.connectSdk.initializeClient")}
+            </h3>
+            <CodeBlock
+              code={visibleSnippet}
+              copyValue={snippet}
+              language={definition.codeLanguage}
+              highlight
+              lineNumbers
+              maxHeightClassName="min-h-48 max-h-60"
+            />
+          </div>
         </div>
       </div>
 
-      <footer className="sticky bottom-0 z-10 flex min-h-16 items-center justify-between rounded-b-lg border-t bg-card/95 px-5 py-3 supports-[backdrop-filter]:bg-card/90 supports-[backdrop-filter]:backdrop-blur-sm">
+      <footer className="flex min-h-16 items-center justify-between rounded-b-lg border-t bg-card px-5 py-3">
         <Button type="button" variant="outline" onClick={onBack}>
           {t("getStarted.common.back")}
         </Button>
