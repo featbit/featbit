@@ -1,4 +1,4 @@
-import { useTranslation } from "react-i18next"
+import { Trans, useTranslation } from "react-i18next"
 import { ChangeReviewDialog } from "@/features/change-review/change-review-dialog"
 import type { FlagSettingsReviewChange } from "./settings-utils"
 
@@ -30,9 +30,15 @@ export function SettingsReviewDialog({
       saving={saving}
       copy={{
         title: t("featureFlags.detailsPage.settings.reviewTitle"),
-        description: t("featureFlags.detailsPage.settings.reviewDescription", {
-          name: flagName,
-        }),
+        description: (
+          <Trans
+            i18nKey="featureFlags.detailsPage.settings.reviewDescription"
+            values={{ name: flagName }}
+            components={{
+              strong: <strong className="font-semibold text-foreground" />,
+            }}
+          />
+        ),
         changes: t("featureFlags.detailsPage.review.changes"),
         changeCount: (count) =>
           t("featureFlags.detailsPage.review.changeCount", { count }),

@@ -177,7 +177,7 @@ export const enFeatureFlags = {
         "A variation in use by the default rule, individual targeting, or targeting rules cannot be removed until those references are reassigned.",
       reviewTitle: "Review variation changes",
       reviewDescription:
-        "Review the pending changes to {{name}} before saving.",
+        "Review the pending changes to <strong>{{name}}</strong> before saving.",
       order: "Variation order",
     },
     triggers: {
@@ -284,7 +284,7 @@ export const enFeatureFlags = {
       removePermanently: "Remove permanently",
       reviewTitle: "Review settings changes",
       reviewDescription:
-        "Review the pending changes to {{name}} before saving.",
+        "Review the pending changes to <strong>{{name}}</strong> before saving.",
       partialFailure:
         "Some settings could not be saved: {{fields}}. The failed changes remain in the form.",
     },
@@ -312,7 +312,8 @@ export const enFeatureFlags = {
     },
     review: {
       title: "Review targeting changes",
-      description: "Review the pending changes to {{name}} before saving.",
+      description:
+        "Review the pending changes to <strong>{{name}}</strong> before saving.",
       changes: "Changes",
       changeCount: "{{count}} change",
       changeCount_other: "{{count}} changes",
@@ -392,7 +393,8 @@ export const enFeatureFlags = {
     submission: {
       scheduleTitle: "Schedule targeting changes",
       requestTitle: "Request approval for targeting changes",
-      description: "Submit the pending targeting changes to {{name}}.",
+      description:
+        "Submit the pending targeting changes to <strong>{{name}}</strong>.",
       changes: "Changes",
       changeCount: "{{count}} change",
       changeCount_other: "{{count}} changes",
@@ -842,7 +844,7 @@ export const zhFeatureFlags: typeof enFeatureFlags = {
       safeguardsHelp:
         "默认规则、单独定向或定向规则正在使用的变体，必须先重新分配这些引用才能移除。",
       reviewTitle: "审核变体更改",
-      reviewDescription: "保存前审核 {{name}} 的待处理更改。",
+      reviewDescription: "保存前审核 <strong>{{name}}</strong> 的待处理更改。",
       order: "变体顺序",
     },
     triggers: {
@@ -942,7 +944,7 @@ export const zhFeatureFlags: typeof enFeatureFlags = {
       removeHelp: "永久移除此功能开关。此操作无法撤销。",
       removePermanently: "永久移除",
       reviewTitle: "审核设置变更",
-      reviewDescription: "保存前审核 {{name}} 的待处理变更。",
+      reviewDescription: "保存前审核 <strong>{{name}}</strong> 的待处理变更。",
       partialFailure:
         "部分设置无法保存：{{fields}}。失败的变更仍保留在表单中。",
     },
@@ -969,7 +971,7 @@ export const zhFeatureFlags: typeof enFeatureFlags = {
     },
     review: {
       title: "审核定向变更",
-      description: "保存前审核 {{name}} 的待处理变更。",
+      description: "保存前审核 <strong>{{name}}</strong> 的待处理变更。",
       changes: "变更",
       changeCount: "{{count}} 项变更",
       changeCount_other: "{{count}} 项变更",
@@ -1047,7 +1049,7 @@ export const zhFeatureFlags: typeof enFeatureFlags = {
     submission: {
       scheduleTitle: "计划定向变更",
       requestTitle: "请求审核定向变更",
-      description: "提交 {{name}} 的待处理变更。",
+      description: "提交 <strong>{{name}}</strong> 的待处理变更。",
       changes: "变更",
       changeCount: "{{count}} 项变更",
       changeCount_other: "{{count}} 项变更",

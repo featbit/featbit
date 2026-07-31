@@ -1,5 +1,5 @@
 import { Clock3, UserRoundCheck } from "lucide-react"
-import { useTranslation } from "react-i18next"
+import { Trans, useTranslation } from "react-i18next"
 import { ChangeReviewDialog } from "@/features/change-review/change-review-dialog"
 import type { FlagTargetingReviewChange } from "./targeting/targeting-utils"
 import { useFlagChangeLedgerAdapter } from "./targeting/use-flag-change-ledger-adapter"
@@ -44,9 +44,15 @@ export function FlagChangeReviewDialog({
       initialComment={initialComment}
       copy={{
         title: t("featureFlags.detailsPage.review.title"),
-        description: t("featureFlags.detailsPage.review.description", {
-          name: flagName,
-        }),
+        description: (
+          <Trans
+            i18nKey="featureFlags.detailsPage.review.description"
+            values={{ name: flagName }}
+            components={{
+              strong: <strong className="font-semibold text-foreground" />,
+            }}
+          />
+        ),
         changes: t("featureFlags.detailsPage.review.changes"),
         changeCount: (count) =>
           t("featureFlags.detailsPage.review.changeCount", { count }),

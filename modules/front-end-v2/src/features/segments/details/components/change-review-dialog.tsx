@@ -1,4 +1,4 @@
-import { useTranslation } from "react-i18next"
+import { Trans, useTranslation } from "react-i18next"
 import { ChangeReviewDialog as SharedChangeReviewDialog } from "@/features/change-review/change-review-dialog"
 import type { ReviewChange } from "../segment-details-utils"
 import { useSegmentChangeLedgerAdapter } from "./segment-change-ledger-adapter"
@@ -37,9 +37,15 @@ export function ChangeReviewDialog({
       saving={saving}
       copy={{
         title: t(`segments.detailsPage.review.${kind}.title`),
-        description: t("segments.detailsPage.review.description", {
-          name: segmentName,
-        }),
+        description: (
+          <Trans
+            i18nKey="segments.detailsPage.review.description"
+            values={{ name: segmentName }}
+            components={{
+              strong: <strong className="font-semibold text-foreground" />,
+            }}
+          />
+        ),
         changes: t("segments.detailsPage.review.changes"),
         changeCount: (count) =>
           t("segments.detailsPage.review.changeCount", { count }),

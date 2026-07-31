@@ -96,7 +96,8 @@ const enSegmentDetails = {
   review: {
     targeting: { title: "Review targeting changes" },
     settings: { title: "Review settings changes" },
-    description: "Review the pending changes to {{name}} before saving.",
+    description:
+      "Review the pending changes to <strong>{{name}}</strong> before saving.",
     changes: "Changes",
     changeCount: "{{count}} change",
     changeCount_other: "{{count}} changes",
@@ -282,7 +283,7 @@ const zhSegmentDetails = {
     ...enSegmentDetails.review,
     targeting: { title: "检查匹配规则更改" },
     settings: { title: "检查设置更改" },
-    description: "保存前请检查对 {{name}} 的待处理更改。",
+    description: "保存前请检查对 <strong>{{name}}</strong> 的待处理更改。",
     changes: "更改",
     changeCount: "{{count}} 项更改",
     changeCount_other: "{{count}} 项更改",

@@ -220,6 +220,9 @@ describe("SettingsTab actions", () => {
     const dialog = await screen.findByRole("dialog")
     expect(within(dialog).getByText("Description")).toBeVisible()
     expect(within(dialog).queryByText("Name")).not.toBeInTheDocument()
+    const segmentName = within(dialog).getByText("Release users")
+    expect(segmentName.tagName).toBe("STRONG")
+    expect(segmentName).toHaveClass("font-semibold", "text-foreground")
     fireEvent.click(
       within(dialog).getByRole("button", { name: "Save changes" })
     )

@@ -53,6 +53,17 @@ describe("targeting submission dialog", () => {
     })
   })
 
+  it.each(["schedule", "change-request"] as const)(
+    "emphasizes the feature flag name in the %s dialog",
+    (mode) => {
+      renderDialog(mode)
+
+      const flagName = screen.getByText("Checkout redesign")
+      expect(flagName.tagName).toBe("STRONG")
+      expect(flagName).toHaveClass("font-semibold", "text-foreground")
+    }
+  )
+
   it("opens the native date-time picker from the whole input", () => {
     const showPicker = vi.fn()
     Object.defineProperty(window.HTMLInputElement.prototype, "showPicker", {

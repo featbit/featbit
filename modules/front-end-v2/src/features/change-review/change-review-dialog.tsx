@@ -133,7 +133,7 @@ export function ReviewSaveSplitButton({
 
 export type ChangeReviewDialogCopy = {
   title: string
-  description: string
+  description: ReactNode
   changes: string
   changeCount: (count: number) => string
   comment: string

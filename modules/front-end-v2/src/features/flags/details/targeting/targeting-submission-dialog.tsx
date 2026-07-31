@@ -1,6 +1,6 @@
 import { Check, Clock3, Loader2, UserRoundCheck, X } from "lucide-react"
 import { useEffect, useState, type ReactNode } from "react"
-import { useTranslation } from "react-i18next"
+import { Trans, useTranslation } from "react-i18next"
 import { Popover as PopoverPrimitive } from "@base-ui/react/popover"
 import { useQuery } from "@tanstack/react-query"
 import { Badge } from "@/components/ui/badge"
@@ -265,9 +265,13 @@ export function TargetingSubmissionDialog({
               : t("featureFlags.detailsPage.submission.requestTitle")}
           </DialogTitle>
           <DialogDescription>
-            {t("featureFlags.detailsPage.submission.description", {
-              name: flagName,
-            })}
+            <Trans
+              i18nKey="featureFlags.detailsPage.submission.description"
+              values={{ name: flagName }}
+              components={{
+                strong: <strong className="font-semibold text-foreground" />,
+              }}
+            />
           </DialogDescription>
         </DialogHeader>
         <div

@@ -24,6 +24,10 @@ describe("FlagChangeReviewDialog save options", () => {
       />
     )
 
+    const flagName = screen.getByText("Checkout redesign")
+    expect(flagName.tagName).toBe("STRONG")
+    expect(flagName).toHaveClass("font-semibold", "text-foreground")
+
     fireEvent.change(screen.getByLabelText(/Change comment/), {
       target: { value: "Coordinate with support" },
     })

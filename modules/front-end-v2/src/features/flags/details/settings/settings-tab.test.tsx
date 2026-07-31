@@ -206,6 +206,9 @@ describe("SettingsTab", () => {
     const dialog = await screen.findByRole("dialog")
     expect(within(dialog).getByText("Description")).toBeVisible()
     expect(within(dialog).queryByText("Name")).not.toBeInTheDocument()
+    const flagName = within(dialog).getByText("Checkout redesign")
+    expect(flagName.tagName).toBe("STRONG")
+    expect(flagName).toHaveClass("font-semibold", "text-foreground")
     fireEvent.click(
       within(dialog).getByRole("button", { name: "Save changes" })
     )
