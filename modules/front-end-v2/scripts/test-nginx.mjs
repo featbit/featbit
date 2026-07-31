@@ -1,59 +1,49 @@
 import assert from "node:assert/strict"
 import { execFileSync } from "node:child_process"
-import { existsSync, readdirSync, statSync } from "node:fs"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url))
 const projectDirectory = path.resolve(scriptDirectory, "..")
-const distDirectory = path.join(projectDirectory, "dist")
-const assetsDirectory = path.join(distDirectory, "assets")
-const nginxImage = process.env.FEATBIT_NGINX_IMAGE || "nginx:1.30.4"
+const imageVersion = "nginx-test"
+const testImage = `featbit-front-end-v2-nginx-test:${process.pid}-${Date.now()}`
 const baseHref = "/fbtest"
+const runtimeEnvironment = {
+  API_URL: "https://api.example.test",
+  DEMO_URL: "https://demo.example.test",
+  EVALUATION_URL: "https://evaluation.example.test",
+  DISPLAY_API_URL: "https://display-api.example.test",
+  DISPLAY_EVALUATION_URL: "https://display-evaluation.example.test",
+  HOSTING_MODE: "self-hosted",
+}
 const runningContainers = new Set()
+let imageBuilt = false
 
 function docker(args, options = {}) {
-  return execFileSync("docker", args, {
+  const output = execFileSync("docker", args, {
     cwd: projectDirectory,
     encoding: "utf8",
     windowsHide: true,
     ...options,
-  }).trim()
-}
-
-function assertBuildOutput() {
-  assert.ok(
-    existsSync(path.join(distDirectory, "index.html")),
-    "Run the production build before testing Nginx."
-  )
-  assert.ok(
-    existsSync(assetsDirectory),
-    "The production build does not contain an assets directory."
-  )
-
-  const sourceMaps = readdirSync(assetsDirectory).filter((file) =>
-    file.endsWith(".map")
-  )
-  assert.deepEqual(
-    sourceMaps,
-    [],
-    "Production source maps must not be emitted into the public assets directory."
-  )
-}
-
-function findHashedJavaScriptAsset() {
-  const asset = readdirSync(assetsDirectory).find((file) => {
-    const fullPath = path.join(assetsDirectory, file)
-    return (
-      /-[A-Za-z0-9_-]{8,}\.js$/.test(file) && statSync(fullPath).size > 1000
-    )
   })
 
-  assert.ok(
-    asset,
-    "Could not find a hashed JavaScript asset to exercise immutable caching and gzip."
+  return typeof output === "string" ? output.trim() : ""
+}
+
+function buildTestImage() {
+  console.log(`Building test image ${testImage} from the project Dockerfile.`)
+  docker(
+    [
+      "build",
+      "--build-arg",
+      `VERSION=${imageVersion}`,
+      "--tag",
+      testImage,
+      ".",
+    ],
+    { stdio: "inherit" }
   )
-  return asset
+  imageBuilt = true
 }
 
 function uniqueContainerName(mode) {
@@ -62,33 +52,17 @@ function uniqueContainerName(mode) {
 
 function startContainer(mode) {
   const name = uniqueContainerName(mode)
-  const args = [
-    "run",
-    "--rm",
-    "-d",
-    "--name",
-    name,
-    "-p",
-    "127.0.0.1::80",
-    "-v",
-    `${distDirectory}:/usr/share/nginx/featbit:ro`,
-  ]
+  const args = ["run", "--rm", "-d", "--name", name, "-p", "127.0.0.1::80"]
 
-  if (mode === "base") {
-    args.push(
-      "-e",
-      `BASE_HREF=${baseHref}`,
-      "-v",
-      `${path.join(projectDirectory, "nginx.base_href.conf.template")}:/etc/nginx/templates/default.conf.template:ro`
-    )
-  } else {
-    args.push(
-      "-v",
-      `${path.join(projectDirectory, "nginx.conf.template")}:/etc/nginx/conf.d/default.conf:ro`
-    )
+  for (const [key, value] of Object.entries(runtimeEnvironment)) {
+    args.push("-e", `${key}=${value}`)
   }
 
-  args.push(nginxImage)
+  if (mode === "base") {
+    args.push("-e", `BASE_HREF=${baseHref}/`)
+  }
+
+  args.push(testImage)
   docker(args)
   runningContainers.add(name)
 
@@ -141,7 +115,11 @@ function assertSecurityHeaders(response) {
   )
 }
 
-async function assertHtml(origin, requestPath) {
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+}
+
+async function assertHtml(origin, requestPath, prefix) {
   const { response, body } = await request(origin, requestPath)
   assert.equal(
     response.status,
@@ -152,13 +130,66 @@ async function assertHtml(origin, requestPath) {
   assert.match(response.headers.get("content-type") || "", /^text\/html\b/)
   assert.match(body, /<div id="root"><\/div>/)
   assertSecurityHeaders(response)
+
+  const assetPrefix = `${prefix}/assets/`
+  assert.match(
+    body,
+    new RegExp(`href="${escapeRegExp(assetPrefix)}featbit-logo\\.svg"`),
+    `${requestPath} should reference the expected favicon path.`
+  )
+
+  if (prefix) {
+    assert.doesNotMatch(
+      body,
+      /(?:href|src)="\/assets\//,
+      `${requestPath} should not contain root-relative asset paths.`
+    )
+  }
+
+  const hashedAsset = body.match(
+    new RegExp(
+      `src="${escapeRegExp(assetPrefix)}([^"/]+-[A-Za-z0-9_-]{8,}\\.js)"`
+    )
+  )?.[1]
+  assert.ok(
+    hashedAsset,
+    `${requestPath} should reference a hashed JavaScript entry asset.`
+  )
+
+  return hashedAsset
 }
 
-async function assertStaticResponses(origin, prefix, hashedAsset) {
-  const envResponse = await fetch(`${origin}${prefix}/assets/env.js`)
-  assert.equal(envResponse.status, 200)
-  assert.equal(envResponse.headers.get("cache-control"), "no-store")
-  assertSecurityHeaders(envResponse)
+async function assertRuntimeEnvironment(origin, prefix, expectedBaseHref) {
+  const { response, body } = await request(origin, `${prefix}/assets/env.js`)
+  assert.equal(response.status, 200)
+  assert.equal(response.headers.get("cache-control"), "no-store")
+  assert.match(
+    response.headers.get("content-type") || "",
+    /^(?:application|text)\/javascript\b/
+  )
+  assertSecurityHeaders(response)
+
+  const expectedEnvironment = {
+    ...runtimeEnvironment,
+    BASE_HREF: expectedBaseHref,
+    VERSION: imageVersion,
+  }
+
+  for (const [key, value] of Object.entries(expectedEnvironment)) {
+    assert.ok(
+      body.includes(`${key}: ${JSON.stringify(value)}`),
+      `env.js should contain ${key}.`
+    )
+  }
+}
+
+async function assertStaticResponses(
+  origin,
+  prefix,
+  hashedAsset,
+  expectedBaseHref
+) {
+  await assertRuntimeEnvironment(origin, prefix, expectedBaseHref)
 
   const assetResponse = await fetch(
     `${origin}${prefix}/assets/${hashedAsset}`,
@@ -209,31 +240,36 @@ async function assertHealthRoutes(origin) {
   assert.equal(invalidHealth.status, 404)
 }
 
-async function testDefaultConfiguration(hashedAsset) {
+async function testDefaultConfiguration() {
   const container = startContainer("default")
   await waitForServer(container.origin)
 
   await assertHealthRoutes(container.origin)
-  await assertHtml(container.origin, "/")
-  await assertHtml(container.origin, "/index.html")
-  await assertHtml(container.origin, "/login")
-  await assertHtml(container.origin, "/en/feature-flags/checkout.v2/targeting")
-  await assertStaticResponses(container.origin, "", hashedAsset)
+  const hashedAsset = await assertHtml(container.origin, "/", "")
+  await assertHtml(container.origin, "/index.html", "")
+  await assertHtml(container.origin, "/login", "")
+  await assertHtml(
+    container.origin,
+    "/en/feature-flags/checkout.v2/targeting",
+    ""
+  )
+  await assertStaticResponses(container.origin, "", hashedAsset, "")
 }
 
-async function testBaseHrefConfiguration(hashedAsset) {
+async function testBaseHrefConfiguration() {
   const container = startContainer("base")
   await waitForServer(container.origin)
 
   await assertHealthRoutes(container.origin)
-  await assertHtml(container.origin, baseHref)
-  await assertHtml(container.origin, `${baseHref}/`)
-  await assertHtml(container.origin, `${baseHref}/login`)
+  const hashedAsset = await assertHtml(container.origin, baseHref, baseHref)
+  await assertHtml(container.origin, `${baseHref}/`, baseHref)
+  await assertHtml(container.origin, `${baseHref}/login`, baseHref)
   await assertHtml(
     container.origin,
-    `${baseHref}/en/feature-flags/checkout.v2/targeting`
+    `${baseHref}/en/feature-flags/checkout.v2/targeting`,
+    baseHref
   )
-  await assertStaticResponses(container.origin, baseHref, hashedAsset)
+  await assertStaticResponses(container.origin, baseHref, hashedAsset, baseHref)
 
   assert.equal((await fetch(`${container.origin}/`)).status, 404)
   assert.equal((await fetch(`${container.origin}/index.html`)).status, 404)
@@ -250,15 +286,24 @@ function stopContainers() {
   }
 }
 
-assertBuildOutput()
-const hashedAsset = findHashedJavaScriptAsset()
+function removeTestImage() {
+  if (!imageBuilt) return
+
+  try {
+    docker(["image", "rm", testImage], { stdio: "ignore" })
+  } catch {
+    // Keep the original test result if Docker cannot remove the temporary image.
+  }
+}
 
 try {
-  await testDefaultConfiguration(hashedAsset)
-  await testBaseHrefConfiguration(hashedAsset)
+  buildTestImage()
+  await testDefaultConfiguration()
+  await testBaseHrefConfiguration()
   console.log(
-    "Nginx routing, caching, compression, and security header checks passed."
+    "Built-image entrypoint, runtime environment, routing, caching, compression, and security header checks passed."
   )
 } finally {
   stopContainers()
+  removeTestImage()
 }

@@ -12,7 +12,7 @@
     "test:component": "vitest run --config vitest.config.ts",
     "test:e2e": "node ./scripts/run-e2e.mjs",
     "test:e2e:containers": "node ./scripts/run-e2e-containers.mjs --config playwright.containers.config.ts",
-    "test:nginx": "vite build && node ./scripts/test-nginx.mjs",
+    "test:nginx": "node ./scripts/test-nginx.mjs",
     "typecheck": "tsc -b",
     "preview": "vite preview"
   },
