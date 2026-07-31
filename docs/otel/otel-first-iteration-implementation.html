@@ -550,6 +550,108 @@
       font-size: 0.85rem;
     }
 
+    .concept-card {
+      margin: 4px 0 24px;
+      padding: 18px;
+      border: 1px solid #a9d4c6;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--accent-pale), #ffffff 72%);
+    }
+
+    .concept-card .concept-label {
+      margin-bottom: 4px;
+      color: var(--accent);
+      font-size: 0.67rem;
+      font-weight: 850;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .concept-card h3 {
+      margin-bottom: 8px;
+      font-size: 1.08rem;
+      line-height: 1.3;
+    }
+
+    .concept-card > p {
+      margin-bottom: 14px;
+      color: #3f5249;
+      font-size: 0.88rem;
+    }
+
+    .mapping-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .mapping-row {
+      display: grid;
+      grid-template-columns: minmax(105px, 0.8fr) minmax(90px, 1fr) 22px minmax(145px, 1.35fr);
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.86);
+    }
+
+    .mapping-name {
+      color: var(--muted);
+      font-size: 0.76rem;
+      font-weight: 800;
+    }
+
+    .mapping-value {
+      color: #285043;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 750;
+    }
+
+    .mapping-arrow {
+      color: var(--accent);
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .concept-foot {
+      margin: 12px 0 0 !important;
+      padding-top: 11px;
+      border-top: 1px solid rgba(8, 122, 99, 0.15);
+      color: var(--muted) !important;
+      font-size: 0.79rem !important;
+    }
+
+    .diagnostic-table td:first-child {
+      width: 34%;
+    }
+
+    .question-strip {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 7px;
+      margin-top: 13px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      color: #43544c;
+      background: var(--surface-soft);
+      font-size: 0.82rem;
+    }
+
+    .question-strip strong {
+      color: var(--ink);
+    }
+
+    .question-pill {
+      padding: 3px 7px;
+      border-radius: 6px;
+      color: var(--accent-dark);
+      background: var(--accent-soft);
+      font-weight: 700;
+    }
+
     .inline-code-row {
       display: flex;
       flex-wrap: wrap;
@@ -916,6 +1018,14 @@
         grid-template-columns: 1fr;
       }
 
+      .mapping-row {
+        grid-template-columns: 1fr auto 1.35fr;
+      }
+
+      .mapping-name {
+        grid-column: 1 / -1;
+      }
+
       th,
       td {
         min-width: 210px;
@@ -1110,30 +1220,87 @@
         <div class="brief-grid">
           <article class="brief">
             <h3>Task goal</h3>
-            <p>Measure WebSocket arrival rate, active sockets, logical subscriptions, lifetime, and abnormal closes.</p>
+            <p>Show connection demand, current WebSocket capacity, environment-routing load, and connection stability.</p>
           </article>
           <article class="brief">
             <h3>Why</h3>
             <p>
-              A physical socket and an environment subscription are not always the same
-              <button class="help-button" type="button" data-note="socket-subscription" aria-label="Explain socket versus subscription">?</button>.
+              One Agent WebSocket can carry updates for many environments, so counting sockets alone can hide load and failure impact.
             </p>
           </article>
+        </div>
+
+        <div class="concept-card">
+          <p class="concept-label">Term definition</p>
+          <h3>
+            Logical subscription = one active environment route inside ELS
+            <button class="help-button" type="button" data-note="socket-subscription" aria-label="Explain logical subscriptions">?</button>
+          </h3>
+          <p>
+            It is a proposed operational counting unit based on the entries managed by
+            <code>ConnectionManager</code>: one mapped <code>Connection</code> tells ELS where to send changes for one environment.
+          </p>
+          <div class="mapping-list" aria-label="Socket and logical subscription examples">
+            <div class="mapping-row">
+              <span class="mapping-name">Normal SDK</span>
+              <span class="mapping-value">1 WebSocket</span>
+              <span class="mapping-arrow">→</span>
+              <span class="mapping-value">1 environment route</span>
+            </div>
+            <div class="mapping-row">
+              <span class="mapping-name">Agent relay-proxy</span>
+              <span class="mapping-value">1 WebSocket</span>
+              <span class="mapping-arrow">→</span>
+              <span class="mapping-value">N environment routes</span>
+            </div>
+          </div>
+          <p class="concept-foot">
+            It does not count flags, evaluations, end users, or the number of SDK processes behind an Agent.
+          </p>
         </div>
 
         <div class="measure-block">
           <h3>What to measure</h3>
           <div class="metric-table-wrap">
-            <table>
-              <thead><tr><th>Metric</th><th>Purpose</th></tr></thead>
+            <table class="diagnostic-table">
+              <thead><tr><th>Metric</th><th>What it counts</th><th>Problem it helps reveal</th></tr></thead>
               <tbody>
-                <tr><td><code class="metric">featbit.streaming.upgrade.requests</code></td><td>New WebSocket attempts by type and outcome</td></tr>
-                <tr><td><code class="metric">featbit.streaming.sockets.active</code></td><td>Current physical sockets</td></tr>
-                <tr><td><code class="metric">featbit.streaming.subscriptions.active</code></td><td>Current logical environment subscriptions</td></tr>
-                <tr><td><code class="metric">featbit.streaming.connection.closed</code></td><td>Normal and abnormal closes</td></tr>
-                <tr><td><code class="metric">featbit.streaming.connection.duration</code></td><td>Connection lifetime distribution</td></tr>
+                <tr>
+                  <td><code class="metric">featbit.streaming.upgrade.requests</code></td>
+                  <td>WebSocket attempts over time, split by result</td>
+                  <td>Reconnect storms, validation failures, or rate-limit rejection</td>
+                </tr>
+                <tr>
+                  <td><code class="metric">featbit.streaming.sockets.active</code></td>
+                  <td>Accepted physical WebSockets open now</td>
+                  <td>Instance capacity, uneven load, or a connection leak</td>
+                </tr>
+                <tr>
+                  <td><code class="metric">featbit.streaming.subscriptions.active</code></td>
+                  <td>Active environment routes represented by those sockets</td>
+                  <td>Actual fanout load and the blast radius hidden behind Agent sockets</td>
+                </tr>
+                <tr>
+                  <td><code class="metric">featbit.streaming.connection.closed</code></td>
+                  <td>Connections closed, split by close outcome</td>
+                  <td>Abnormal churn caused by server, client, network, or shutdown</td>
+                </tr>
+                <tr>
+                  <td><code class="metric">featbit.streaming.connection.duration</code></td>
+                  <td>How long accepted connections remain open</td>
+                  <td>Short-lived connection regressions, proxy timeouts, or unstable networks</td>
+                </tr>
               </tbody>
             </table>
+          </div>
+          <div class="question-strip">
+            <strong>M1 answers:</strong>
+            <span class="question-pill">Are clients reconnecting?</span>
+            <span class="question-pill">Are instances near connection capacity?</span>
+            <span class="question-pill">How many environment routes depend on each socket?</span>
+            <button class="help-button" type="button" data-note="routing-concentration" aria-label="Explain environment routes per socket">?</button>
+            <span class="question-pill">Are connections becoming unstable?</span>
+            <button class="help-button" type="button" data-note="streaming-diagnosis" aria-label="Show examples of problems diagnosed by M1">?</button>
           </div>
           <p class="implementation-note">
             An <code>env.id</code> view is optional and off by default
@@ -1163,36 +1330,95 @@
         <div class="brief-grid">
           <article class="brief">
             <h3>Task goal</h3>
-            <p>Detect publish or consume failures, stopped consumers, backlog, old messages, and known message loss.</p>
+            <p>Show whether internal messages are published, waiting, consumed, handled, and acknowledged successfully.</p>
           </article>
           <article class="brief">
             <h3>Why</h3>
-            <p>Kafka, Redis, and PostgreSQL have different delivery and acknowledgement behavior; logs cannot show the complete state.</p>
+            <p>A request may succeed while its asynchronous message later fails, waits in a queue, or reaches a stopped consumer.</p>
           </article>
+        </div>
+
+        <div class="concept-card">
+          <p class="concept-label">Scope</p>
+          <h3>
+            M2 watches the internal server message pipeline
+            <button class="help-button" type="button" data-note="messaging-boundary" aria-label="Explain the scope of M2 messaging">?</button>
+          </h3>
+          <p>
+            It covers messages exchanged through Kafka, Redis, or PostgreSQL. A logical subscription is an M1 streaming concept and is not measured here.
+          </p>
+          <div class="trace-flow" aria-label="Internal message pipeline">
+            <span class="trace-node">producer</span><span class="trace-arrow">→</span>
+            <span class="trace-node">broker / queue</span><span class="trace-arrow">→</span>
+            <span class="trace-node">consumer</span><span class="trace-arrow">→</span>
+            <span class="trace-node">handler</span><span class="trace-arrow">→</span>
+            <span class="trace-node">ack / offset</span>
+          </div>
+          <p class="concept-foot">
+            M2 answers whether the asynchronous transport is healthy. M3 adds Flag Change-specific end-to-end propagation.
+          </p>
         </div>
 
         <div class="measure-block">
           <h3>What to measure</h3>
           <div class="metric-table-wrap">
-            <table>
-              <thead><tr><th>Metric</th><th>Purpose</th></tr></thead>
+            <table class="diagnostic-table">
+              <thead><tr><th>Metric</th><th>What it counts</th><th>Problem it helps reveal</th></tr></thead>
               <tbody>
-                <tr><td><code class="metric">featbit.messaging.operations</code></td><td>Publish, handle, and settlement outcomes</td></tr>
-                <tr><td><code class="metric">featbit.messaging.operation.duration</code></td><td>Delivery or handler duration</td></tr>
-                <tr><td><code class="metric">featbit.messaging.messages.dropped/redelivered</code></td><td>Known loss or redelivery</td></tr>
-                <tr><td><code class="metric">featbit.messaging.queue.depth</code></td><td>Durable backlog</td></tr>
-                <tr><td><code class="metric">featbit.messaging.oldest_message.age</code></td><td>Age of the oldest pending message</td></tr>
-                <tr><td><code class="metric">featbit.messaging.consumer.running</code></td><td>Whether the consumer is active</td></tr>
+                <tr>
+                  <td><code class="metric">featbit.messaging.operations</code></td>
+                  <td>Publish, handle, and acknowledgement attempts by outcome</td>
+                  <td>Which messaging stage is failing</td>
+                </tr>
+                <tr>
+                  <td><code class="metric">featbit.messaging.operation.duration</code></td>
+                  <td>Provider delivery or handler time</td>
+                  <td>Slow broker, database, or message handler</td>
+                </tr>
+                <tr>
+                  <td><code class="metric">featbit.messaging.messages.dropped/redelivered</code></td>
+                  <td>Messages known to be lost or delivered again</td>
+                  <td>Silent data loss, duplicate processing, or acknowledgement problems</td>
+                </tr>
+                <tr>
+                  <td><code class="metric">featbit.messaging.queue.depth</code></td>
+                  <td>Number of durable messages waiting</td>
+                  <td>Consumer capacity shortage or a stopped consumer</td>
+                </tr>
+                <tr>
+                  <td><code class="metric">featbit.messaging.oldest_message.age</code></td>
+                  <td>How long the oldest durable message has waited</td>
+                  <td>A small number of stuck messages that queue depth may hide</td>
+                </tr>
+                <tr>
+                  <td><code class="metric">featbit.messaging.consumer.running</code></td>
+                  <td>Whether the consumer task or subscription is active</td>
+                  <td>A terminated consumer that no longer emits errors</td>
+                </tr>
                 <tr>
                   <td><code class="metric">featbit.messaging.consumer.heartbeat.age</code></td>
                   <td>
-                    Consumer-loop liveness
+                    Time since the consumer loop or subscription showed liveness
                     <button class="help-button" type="button" data-note="heartbeat-success" aria-label="Explain heartbeat versus last success">?</button>
                   </td>
+                  <td>A stuck loop or disconnected provider even when traffic is idle</td>
                 </tr>
-                <tr><td><code class="metric">featbit.messaging.consumer.last_success.age</code></td><td>Time since successful message handling</td></tr>
+                <tr>
+                  <td><code class="metric">featbit.messaging.consumer.last_success.age</code></td>
+                  <td>Time since a message completed handling</td>
+                  <td>Incoming work is no longer being processed successfully</td>
+                </tr>
               </tbody>
             </table>
+          </div>
+          <div class="question-strip">
+            <strong>M2 answers:</strong>
+            <span class="question-pill">Did publishing fail?</span>
+            <span class="question-pill">Is backlog growing?</span>
+            <span class="question-pill">Is the consumer alive?</span>
+            <span class="question-pill">Were messages lost or replayed?</span>
+            <span class="question-pill">Which stage is slow?</span>
+            <button class="help-button" type="button" data-note="messaging-diagnosis" aria-label="Show examples of problems diagnosed by M2">?</button>
           </div>
         </div>
 
@@ -1225,26 +1451,72 @@
         <div class="brief-grid">
           <article class="brief">
             <h3>Task goal</h3>
-            <p>Show whether a change completed persistence, publish, consume, and WebSocket fanout.</p>
+            <p>Show whether a saved Flag Change crossed every server-side stage and reached its WebSocket send targets.</p>
           </article>
           <article class="brief">
             <h3>Why</h3>
-            <p>Healthy APIs and connected sockets do not prove that the newest configuration is propagating.</p>
+            <p>The API can return success and sockets can remain connected while clients continue receiving stale configuration.</p>
           </article>
+        </div>
+
+        <div class="concept-card">
+          <p class="concept-label">Failure path to locate</p>
+          <h3>
+            M3 follows one business event across back-end and ELS
+            <button class="help-button" type="button" data-note="flag-change-scope" aria-label="Explain the scope of M3 Flag Change propagation">?</button>
+          </h3>
+          <p>
+            It connects generic messaging health to a concrete operational question:
+            “the flag was changed—how far did that change get?”
+          </p>
+          <div class="trace-flow" aria-label="Flag Change server propagation stages">
+            <span class="trace-node">flag persisted</span><span class="trace-arrow">→</span>
+            <span class="trace-node">MQ published</span><span class="trace-arrow">→</span>
+            <span class="trace-node">ELS consumed</span><span class="trace-arrow">→</span>
+            <span class="trace-node">socket fanout</span>
+          </div>
+          <p class="concept-foot">
+            The required metrics describe aggregate stage health. Optional T1 is used when one specific sampled change must be followed.
+          </p>
         </div>
 
         <div class="measure-block">
           <h3>What to measure</h3>
           <div class="metric-table-wrap">
-            <table>
-              <thead><tr><th>Metric</th><th>Purpose</th></tr></thead>
+            <table class="diagnostic-table">
+              <thead><tr><th>Metric</th><th>What it counts</th><th>Problem it helps reveal</th></tr></thead>
               <tbody>
-                <tr><td><code class="metric">featbit.flag_change.operations</code></td><td>Outcome for persist, publish, consume, and fanout</td></tr>
-                <tr><td><code class="metric">featbit.flag_change.propagation.duration</code></td><td>Persistence-to-consume and persistence-to-fanout latency</td></tr>
-                <tr><td><code class="metric">featbit.flag_change.fanout.connections</code></td><td>Target, successful, and failed sends</td></tr>
-                <tr><td><code class="metric">featbit.flag_change.config.last_success.age</code></td><td>Time since ELS last completed propagation</td></tr>
+                <tr>
+                  <td><code class="metric">featbit.flag_change.operations</code></td>
+                  <td>Success or failure at persist, publish, consume, and fanout</td>
+                  <td>A stage gap: saved but not published, published but not consumed, or consumed but not sent</td>
+                </tr>
+                <tr>
+                  <td><code class="metric">featbit.flag_change.propagation.duration</code></td>
+                  <td>Persistence-to-consume and persistence-to-fanout time</td>
+                  <td>Changes eventually arrive but exceed the propagation SLO</td>
+                </tr>
+                <tr>
+                  <td><code class="metric">featbit.flag_change.fanout.connections</code></td>
+                  <td>Target, successful, and failed socket sends per change</td>
+                  <td>Partial delivery: some connected targets receive the change while others fail</td>
+                </tr>
+                <tr>
+                  <td><code class="metric">featbit.flag_change.config.last_success.age</code></td>
+                  <td>Time since ELS last completed a Flag Change fanout</td>
+                  <td>A silently stalled propagation pipeline when new changes are still being published</td>
+                </tr>
               </tbody>
             </table>
+          </div>
+          <div class="question-strip">
+            <strong>M3 answers:</strong>
+            <span class="question-pill">Was the change saved?</span>
+            <span class="question-pill">Did MQ deliver it?</span>
+            <span class="question-pill">Did ELS consume it?</span>
+            <span class="question-pill">Did any socket sends fail?</span>
+            <span class="question-pill">How long did propagation take?</span>
+            <button class="help-button" type="button" data-note="flag-change-diagnosis" aria-label="Show examples of problems diagnosed by M3">?</button>
           </div>
           <p class="implementation-note">
             Server success ends at socket send
@@ -1282,32 +1554,80 @@
         <div class="brief-grid">
           <article class="brief">
             <h3>Task goal</h3>
-            <p>Expose store health, current selection, probe latency, and failover transitions.</p>
+            <p>Show whether ELS can read its configuration data, which provider is serving reads, and whether fallback is stable.</p>
           </article>
           <article class="brief">
             <h3>Why</h3>
-            <p>Readiness cannot reveal slow probes, intermittent failures, fallback usage, or failover flapping.</p>
+            <p>ELS may continue running on a fallback store while the preferred provider is down, slow, or repeatedly recovering and failing.</p>
           </article>
+        </div>
+
+        <div class="concept-card">
+          <p class="concept-label">Term definition</p>
+          <h3>
+            Store = the ELS data source for Flags, Segments, and SDK Secrets
+            <button class="help-button" type="button" data-note="store-definition" aria-label="Explain what an ELS Store is">?</button>
+          </h3>
+          <p>
+            ELS reads these objects through the <code>IStore</code> abstraction. With Redis enabled,
+            <code>HybridStore</code> prefers Redis and can fall back to the configured MongoDB or PostgreSQL database.
+          </p>
+          <div class="trace-flow" aria-label="ELS store selection">
+            <span class="trace-node">ELS read</span><span class="trace-arrow">→</span>
+            <span class="trace-node">IStore</span><span class="trace-arrow">→</span>
+            <span class="trace-node">Redis preferred</span><span class="trace-arrow">or</span>
+            <span class="trace-node">MongoDB / PostgreSQL fallback</span>
+          </div>
+          <p class="concept-foot">
+            This Store is not the message queue and not the backend used to store OpenTelemetry data.
+          </p>
         </div>
 
         <div class="measure-block">
           <h3>What to measure</h3>
           <div class="metric-table-wrap">
-            <table>
-              <thead><tr><th>Metric</th><th>Purpose</th></tr></thead>
+            <table class="diagnostic-table">
+              <thead><tr><th>Metric</th><th>What it measures</th><th>Problem it helps reveal</th></tr></thead>
               <tbody>
                 <tr>
-                  <td><code class="metric">featbit.store.available / selected</code></td>
+                  <td><code class="metric">featbit.store.available</code></td>
+                  <td>Latest health-probe result for each configured provider</td>
+                  <td>Redis, MongoDB, or PostgreSQL is unavailable</td>
+                </tr>
+                <tr>
+                  <td><code class="metric">featbit.store.selected</code></td>
                   <td>
-                    Last probe result and current route
+                    Which provider currently serves ELS reads
                     <button class="help-button" type="button" data-note="available-selected" aria-label="Explain availability versus selection">?</button>
                   </td>
+                  <td>ELS has failed over and is operating on a fallback</td>
                 </tr>
-                <tr><td><code class="metric">featbit.store.last_success.age</code></td><td>Time since a provider last passed a probe</td></tr>
-                <tr><td><code class="metric">featbit.store.health_check.operations/duration</code></td><td>Probe outcomes and latency</td></tr>
-                <tr><td><code class="metric">featbit.store.failover.transitions</code></td><td>Provider selection changes</td></tr>
+                <tr>
+                  <td><code class="metric">featbit.store.last_success.age</code></td>
+                  <td>Time since each provider last passed a probe</td>
+                  <td>A provider has been unhealthy for a sustained period</td>
+                </tr>
+                <tr>
+                  <td><code class="metric">featbit.store.health_check.operations/duration</code></td>
+                  <td>Probe outcome and elapsed time</td>
+                  <td>Timeouts, intermittent errors, or a provider becoming slow before failure</td>
+                </tr>
+                <tr>
+                  <td><code class="metric">featbit.store.failover.transitions</code></td>
+                  <td>Changes from one selected provider to another</td>
+                  <td>Failover flapping or frequent primary/fallback switching</td>
+                </tr>
               </tbody>
             </table>
+          </div>
+          <div class="question-strip">
+            <strong>M4 answers:</strong>
+            <span class="question-pill">Can ELS read configuration?</span>
+            <span class="question-pill">Which provider is serving reads?</span>
+            <span class="question-pill">Is ELS running on fallback?</span>
+            <span class="question-pill">Are all providers unavailable?</span>
+            <span class="question-pill">Is failover flapping?</span>
+            <button class="help-button" type="button" data-note="store-diagnosis" aria-label="Show examples of problems diagnosed by M4">?</button>
           </div>
         </div>
 
@@ -1333,29 +1653,106 @@
         <div class="brief-grid">
           <article class="brief">
             <h3>Task goal</h3>
-            <p>Detect buffer saturation, overwritten data, flush failure, and background workers that stop.</p>
+            <p>Show whether in-process work is accumulating, being dropped, flushing successfully, and still being processed by background loops.</p>
           </article>
           <article class="brief">
             <h3>Why</h3>
-            <p>Usage, Insights, and PostgreSQL notification paths may remove or overwrite work before persistence succeeds.</p>
+            <p>The API can remain healthy while buffered records are silently overwritten or a background task has stopped.</p>
           </article>
+        </div>
+
+        <div class="concept-card">
+          <p class="concept-label">Term definition</p>
+          <h3>
+            Buffer holds temporary in-memory work; Worker processes it in the background
+            <button class="help-button" type="button" data-note="buffer-worker-definition" aria-label="Explain FeatBit buffers and workers">?</button>
+          </h3>
+          <p>
+            A Buffer decouples a fast producer from slower persistence or handling. A Worker is the long-running loop that drains, flushes, consumes, or periodically checks state.
+          </p>
+          <div class="mapping-list" aria-label="FeatBit buffer and worker examples">
+            <div class="mapping-row">
+              <span class="mapping-name">Usage</span>
+              <span class="mapping-value">bounded Channel</span>
+              <span class="mapping-arrow">→</span>
+              <span class="mapping-value">UsageFlushWorker → database</span>
+            </div>
+            <div class="mapping-row">
+              <span class="mapping-name">Insights</span>
+              <span class="mapping-value">in-memory List</span>
+              <span class="mapping-arrow">→</span>
+              <span class="mapping-value">1-second flush loop → database</span>
+            </div>
+            <div class="mapping-row">
+              <span class="mapping-name">Postgres notification</span>
+              <span class="mapping-value">bounded Channel</span>
+              <span class="mapping-arrow">→</span>
+              <span class="mapping-value">ELS consumer loop → handler</span>
+            </div>
+            <div class="mapping-row">
+              <span class="mapping-name">Store health</span>
+              <span class="mapping-value">no buffer</span>
+              <span class="mapping-arrow">→</span>
+              <span class="mapping-value">StoreAvailableSentinel loop</span>
+            </div>
+          </div>
+          <p class="concept-foot">
+            These are process-local structures. Unlike a durable MQ queue from M2, their pending contents may disappear when the process stops.
+          </p>
         </div>
 
         <div class="measure-block">
           <h3>What to measure</h3>
           <div class="metric-table-wrap">
-            <table>
-              <thead><tr><th>Metric</th><th>Purpose</th></tr></thead>
+            <table class="diagnostic-table">
+              <thead><tr><th>Metric</th><th>What it measures</th><th>Problem it helps reveal</th></tr></thead>
               <tbody>
-                <tr><td><code class="metric">featbit.buffer.items/capacity</code></td><td>Current occupancy and limit</td></tr>
-                <tr><td><code class="metric">featbit.buffer.items.dropped</code></td><td>Items lost through capacity, flush failure, or shutdown</td></tr>
-                <tr><td><code class="metric">featbit.buffer.flush.operations/duration/batch_size</code></td><td>Batch result, latency, and size</td></tr>
-                <tr><td><code class="metric">featbit.worker.running</code></td><td>Whether a loop is active</td></tr>
-                <tr><td><code class="metric">featbit.worker.heartbeat.age</code></td><td>Time since the last loop iteration</td></tr>
-                <tr><td><code class="metric">featbit.worker.last_success.age</code></td><td>Time since a successful non-empty flush</td></tr>
-                <tr><td><code class="metric">featbit.worker.loop.failures</code></td><td>Loop failures</td></tr>
+                <tr>
+                  <td><code class="metric">featbit.buffer.items/capacity</code></td>
+                  <td>Current in-memory item count and configured limit</td>
+                  <td>A bounded buffer is near overflow, or an unbounded buffer is growing toward memory pressure</td>
+                </tr>
+                <tr>
+                  <td><code class="metric">featbit.buffer.items.dropped</code></td>
+                  <td>Items known to be lost through capacity, failed flush, or shutdown</td>
+                  <td>Missing Usage, Insight, or notification data without a process crash</td>
+                </tr>
+                <tr>
+                  <td><code class="metric">featbit.buffer.flush.operations/duration/batch_size</code></td>
+                  <td>Flush outcome, elapsed time, and number of input items</td>
+                  <td>A slow or failing database prevents workers from keeping up</td>
+                </tr>
+                <tr>
+                  <td><code class="metric">featbit.worker.running</code></td>
+                  <td>Whether each background loop is active</td>
+                  <td>A worker terminated and will no longer process work</td>
+                </tr>
+                <tr>
+                  <td><code class="metric">featbit.worker.heartbeat.age</code></td>
+                  <td>Time since the loop completed an iteration, including an idle one</td>
+                  <td>The task still exists but is stuck or no longer making progress</td>
+                </tr>
+                <tr>
+                  <td><code class="metric">featbit.worker.last_success.age</code></td>
+                  <td>Time since a successful non-empty flush</td>
+                  <td>Work is arriving but has stopped reaching persistent storage</td>
+                </tr>
+                <tr>
+                  <td><code class="metric">featbit.worker.loop.failures</code></td>
+                  <td>Background-loop exceptions by bounded reason</td>
+                  <td>A recurring error is degrading or repeatedly interrupting processing</td>
+                </tr>
               </tbody>
             </table>
+          </div>
+          <div class="question-strip">
+            <strong>M5 answers:</strong>
+            <span class="question-pill">Is in-memory work accumulating?</span>
+            <span class="question-pill">Are items being dropped?</span>
+            <span class="question-pill">Can persistence keep up?</span>
+            <span class="question-pill">Is a worker stopped or stuck?</span>
+            <span class="question-pill">Could shutdown lose pending work?</span>
+            <button class="help-button" type="button" data-note="buffer-worker-diagnosis" aria-label="Show examples of problems diagnosed by M5">?</button>
           </div>
         </div>
 
@@ -1612,9 +2009,37 @@
   <template data-note-template="socket-subscription">
     <article class="note-card" data-rendered-note="socket-subscription">
       <p class="note-context">M1 · Streaming</p>
-      <h3>Socket vs subscription</h3>
-      <p>A socket is one physical WebSocket connection. A subscription represents one environment receiving updates.</p>
-      <p>Normal connections are usually 1:1. A FeatBit Agent connection can be 1:N, so both numbers are needed for capacity and impact analysis.</p>
+      <h3>Logical subscription is an ELS routing entry</h3>
+      <p>This is not a user-facing subscription object. It means one active <code>Connection</code> entry associated with an environment secret in <code>ConnectionManager</code>.</p>
+      <p>A normal connection creates one entry. A <code>relay-proxy</code> creates one mapped entry for each supplied environment secret while sharing the same WebSocket.</p>
+      <p>This count approximates configuration fanout work and the number of environment routes affected if a socket disappears.</p>
+    </article>
+  </template>
+
+  <template data-note-template="streaming-diagnosis">
+    <article class="note-card" data-rendered-note="streaming-diagnosis">
+      <p class="note-context">M1 · Streaming</p>
+      <h3>How to read the M1 signals together</h3>
+      <ul>
+        <li><strong>Upgrade rate rises, active sockets stay flat:</strong> clients may be reconnecting or being rejected.</li>
+        <li><strong>Active sockets keep rising:</strong> check instance capacity, load distribution, and possible cleanup leaks.</li>
+        <li><strong>Subscriptions are much higher than sockets:</strong> each Agent socket carries several environment routes; one lost socket therefore affects more environments.</li>
+        <li><strong>Abnormal closes rise and duration falls:</strong> look for server regressions, load-balancer timeouts, or network instability.</li>
+      </ul>
+      <p>M1 tells operations where the connection problem is. It does not measure evaluations, flag usage, or whether an SDK applied a change.</p>
+    </article>
+  </template>
+
+  <template data-note-template="routing-concentration">
+    <article class="note-card" data-rendered-note="routing-concentration">
+      <p class="note-context">M1 · Streaming</p>
+      <h3>Environment routes per socket</h3>
+      <p>This means the approximate ratio <code>subscriptions.active / sockets.active</code>. It describes route concentration, not network traffic, message rate, CPU usage, or an additional metric.</p>
+      <ul>
+        <li><strong>Normal SDK:</strong> normally 1 route ÷ 1 socket = 1.</li>
+        <li><strong>Agent relay-proxy:</strong> N routes ÷ 1 socket = N.</li>
+      </ul>
+      <p>A high ratio is not automatically bad. It means that one Agent socket represents more environments, so losing or reconnecting that socket has a larger operational impact.</p>
     </article>
   </template>
 
@@ -1633,6 +2058,30 @@
       <h3>Heartbeat vs last success</h3>
       <p>A consumer can be healthy while no messages arrive. Its heartbeat should remain fresh even though <code>last_success.age</code> increases.</p>
       <p>Use heartbeat for worker liveness; use last success only together with incoming work or backlog.</p>
+    </article>
+  </template>
+
+  <template data-note-template="messaging-boundary">
+    <article class="note-card" data-rendered-note="messaging-boundary">
+      <p class="note-context">M2 · Messaging</p>
+      <h3>M2 does not measure logical subscriptions</h3>
+      <p>Logical subscriptions belong to M1 and describe environment routes attached to WebSockets.</p>
+      <p>M2 observes asynchronous server messages moving through Kafka, Redis, or PostgreSQL—for example Flag Change, Segment Change, Usage, Insight, or End User messages.</p>
+    </article>
+  </template>
+
+  <template data-note-template="messaging-diagnosis">
+    <article class="note-card" data-rendered-note="messaging-diagnosis">
+      <p class="note-context">M2 · Messaging</p>
+      <h3>How to read the M2 signals together</h3>
+      <ul>
+        <li><strong>Publish failures rise:</strong> the producer or provider is rejecting delivery.</li>
+        <li><strong>Queue depth and oldest age rise:</strong> consumers cannot keep up or have stopped.</li>
+        <li><strong>Running is 1 but heartbeat is stale:</strong> the consumer task exists but its loop or provider connection may be stuck.</li>
+        <li><strong>Heartbeat is fresh but handling fails:</strong> transport works; investigate the handler or its database dependency.</li>
+        <li><strong>Drops or redeliveries rise:</strong> investigate capacity, retry, and acknowledgement semantics.</li>
+      </ul>
+      <p>M2 localizes the unhealthy messaging stage. It does not guarantee end-to-end Flag Change delivery; M3 covers that business flow.</p>
     </article>
   </template>
 
@@ -1667,6 +2116,31 @@
     </article>
   </template>
 
+  <template data-note-template="flag-change-scope">
+    <article class="note-card" data-rendered-note="flag-change-scope">
+      <p class="note-context">M3 · Flag Change</p>
+      <h3>M2 health vs M3 propagation</h3>
+      <p>M2 says whether Kafka, Redis, PostgreSQL, and their consumers are generally healthy. M3 asks whether Flag Change events specifically progress through the required stages.</p>
+      <p>This distinction matters because a broker can look healthy overall while one destination, handler, or fanout path is failing.</p>
+    </article>
+  </template>
+
+  <template data-note-template="flag-change-diagnosis">
+    <article class="note-card" data-rendered-note="flag-change-diagnosis">
+      <p class="note-context">M3 · Flag Change</p>
+      <h3>How to read the M3 signals together</h3>
+      <ul>
+        <li><strong>Persist succeeds but publish fails:</strong> investigate the back-end producer or messaging provider.</li>
+        <li><strong>Publish rises but consume does not:</strong> investigate the topic/channel, ELS consumer, or acknowledgement behavior.</li>
+        <li><strong>Consume succeeds but fanout fails:</strong> investigate ELS payload creation and WebSocket sends.</li>
+        <li><strong>Fanout has partial failures:</strong> only some active targets failed; correlate with M1 connection stability.</li>
+        <li><strong>Propagation p95 rises:</strong> combine M2 queue/handler signals with fanout duration to locate the delay.</li>
+        <li><strong>Last success is stale while publishes continue:</strong> the pipeline is silently stalled even if sockets still look healthy.</li>
+      </ul>
+      <p>A target count of zero can be valid when no client is connected, so it should not alert by itself.</p>
+    </article>
+  </template>
+
   <template data-note-template="message-envelope">
     <article class="note-card" data-rendered-note="message-envelope">
       <p class="note-context">M3 · Flag Change</p>
@@ -1694,12 +2168,67 @@
     </article>
   </template>
 
+  <template data-note-template="store-definition">
+    <article class="note-card" data-rendered-note="store-definition">
+      <p class="note-context">M4 · Store</p>
+      <h3>What ELS reads from a Store</h3>
+      <ul>
+        <li><strong>Flags and Segments:</strong> configuration used for evaluation and data synchronization.</li>
+        <li><strong>SDK Secrets:</strong> data used to validate streaming connections.</li>
+      </ul>
+      <p>Without Redis, ELS can use the configured MongoDB or PostgreSQL store directly. With Redis cache enabled, <code>HybridStore</code> monitors Redis and the database and selects the highest-priority available provider.</p>
+    </article>
+  </template>
+
+  <template data-note-template="store-diagnosis">
+    <article class="note-card" data-rendered-note="store-diagnosis">
+      <p class="note-context">M4 · Store</p>
+      <h3>How to read the M4 signals together</h3>
+      <ul>
+        <li><strong>Redis becomes unavailable and the database is selected:</strong> fallback works, but ELS may have higher read latency and the primary issue still needs attention.</li>
+        <li><strong>Every available gauge is 0:</strong> ELS cannot reliably validate connections or load configuration data.</li>
+        <li><strong>Probe duration approaches its timeout:</strong> the provider is degrading before a hard failure.</li>
+        <li><strong>Failover transitions repeat:</strong> primary and fallback are flapping, creating unstable latency and extra operational noise.</li>
+        <li><strong>Selected remains set while all providers are unavailable:</strong> current routing state is stale; availability must be checked separately.</li>
+      </ul>
+    </article>
+  </template>
+
   <template data-note-template="drop-oldest">
     <article class="note-card" data-rendered-note="drop-oldest">
       <p class="note-context">M5 · Buffers</p>
       <h3><code>TryWrite</code> can hide a drop</h3>
       <p>With <code>DropOldest</code>, a channel may accept the new item and return success while evicting an older item.</p>
       <p>Use the item-dropped callback or an equivalent wrapper to count the actual loss.</p>
+    </article>
+  </template>
+
+  <template data-note-template="buffer-worker-definition">
+    <article class="note-card" data-rendered-note="buffer-worker-definition">
+      <p class="note-context">M5 · Buffers and workers</p>
+      <h3>Concrete FeatBit examples</h3>
+      <ul>
+        <li><strong>UsageTracker:</strong> a bounded channel, default capacity 10,000; <code>UsageFlushWorker</code> drains it every five seconds.</li>
+        <li><strong>InsightsWriter:</strong> an in-memory list; its own loop snapshots and writes it every second.</li>
+        <li><strong>ELS PostgreSQL notifications:</strong> a bounded channel, capacity 1,000; a consumer loop handles the notification IDs.</li>
+        <li><strong>StoreAvailableSentinel:</strong> a worker without a buffer; it periodically probes Store availability.</li>
+      </ul>
+      <p>M2 focuses on external message-provider health. M5 focuses on process-local queues, batch flushes, and background-task liveness.</p>
+    </article>
+  </template>
+
+  <template data-note-template="buffer-worker-diagnosis">
+    <article class="note-card" data-rendered-note="buffer-worker-diagnosis">
+      <p class="note-context">M5 · Buffers and workers</p>
+      <h3>How to read the M5 signals together</h3>
+      <ul>
+        <li><strong>Items approach capacity and drops rise:</strong> producers are faster than the worker, and data is already being lost.</li>
+        <li><strong>An unbounded item count keeps rising:</strong> the process is accumulating memory and may eventually be terminated.</li>
+        <li><strong>Flush duration and failures rise:</strong> investigate the database or downstream persistence path.</li>
+        <li><strong>Running is 0:</strong> the background task stopped.</li>
+        <li><strong>Running is 1 but heartbeat is stale:</strong> the task exists but is blocked or stuck.</li>
+        <li><strong>Heartbeat is fresh, last success is stale, and items rise:</strong> the loop runs but cannot persist its batches.</li>
+      </ul>
     </article>
   </template>
 
