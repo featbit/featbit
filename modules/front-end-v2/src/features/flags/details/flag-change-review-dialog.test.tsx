@@ -10,7 +10,6 @@ describe("FlagChangeReviewDialog save options", () => {
     render(
       <FlagChangeReviewDialog
         open
-        lang="en"
         flagName="Checkout redesign"
         changes={[]}
         requireComment={false}
@@ -64,7 +63,6 @@ describe("FlagChangeReviewDialog save options", () => {
     render(
       <FlagChangeReviewDialog
         open
-        lang="en"
         flagName="Checkout redesign"
         changes={[]}
         requireComment={false}
@@ -90,7 +88,6 @@ describe("FlagChangeReviewDialog save options", () => {
     render(
       <FlagChangeReviewDialog
         open
-        lang="en"
         flagName="Checkout redesign"
         changes={[]}
         requireComment={false}

@@ -121,10 +121,11 @@ describe("FlagsTable serving markers", () => {
     fireEvent.pointerMove(document, { pointerType: "mouse" })
     fireEvent.mouseEnter(serving!)
 
-    const tooltip = (await screen.findByText("true")).closest(
+    const tooltip = (await screen.findByText("true")).closest<HTMLElement>(
       '[data-slot="tooltip-content"]'
     )
     expect(tooltip).not.toBeNull()
+    if (!tooltip) throw new Error("Expected the serving tooltip to be rendered")
     expect(within(tooltip).getByText("Available")).toBeVisible()
     expect(within(tooltip).getByText("Unavailable")).toBeVisible()
     expect(within(tooltip).getByText("true")).toBeVisible()
@@ -147,10 +148,11 @@ describe("FlagsTable serving markers", () => {
     fireEvent.pointerMove(document, { pointerType: "mouse" })
     fireEvent.mouseEnter(serving!)
 
-    const tooltip = (await screen.findByText("Value")).closest(
+    const tooltip = (await screen.findByText("Value")).closest<HTMLElement>(
       '[data-slot="tooltip-content"]'
     )
     expect(tooltip).not.toBeNull()
+    if (!tooltip) throw new Error("Expected the serving tooltip to be rendered")
     expect(within(tooltip).getByText("Name")).toBeVisible()
     expect(within(tooltip).getByText("—")).toBeVisible()
     expect(within(tooltip).getByText("Value")).toBeVisible()

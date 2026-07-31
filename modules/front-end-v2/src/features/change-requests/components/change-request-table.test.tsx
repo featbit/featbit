@@ -201,9 +201,7 @@ describe("ChangeRequestTable", () => {
       </MemoryRouter>
     )
 
-    expect(
-      screen.queryByRole("link", { name: "View", exact: true })
-    ).not.toBeInTheDocument()
+    expect(screen.queryByRole("link", { name: "View" })).not.toBeInTheDocument()
 
     fireEvent.click(
       screen.getByRole("button", { name: "Expand change request" })

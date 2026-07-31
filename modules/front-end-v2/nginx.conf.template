@@ -1,15 +1,9 @@
-map $http_accept_language $accept_language {
-  ~*^zh zh;
-  ~*^en en;
-  default en;
-}
-
 server {
   server_tokens off;
 
   gzip            on;
-  gzip_static     on;
-  gzip_types      text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+  gzip_vary       on;
+  gzip_types      text/plain text/css application/json application/javascript image/svg+xml text/xml application/xml application/xml+rss text/javascript;
   gzip_proxied    no-cache no-store private expired auth;
   gzip_min_length 1000;
 
@@ -17,32 +11,52 @@ server {
   server_name featbit;
   root /usr/share/nginx/featbit;
 
-  location /health {
+  add_header_inherit merge;
+  add_header X-Content-Type-Options "nosniff" always;
+  add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+  add_header X-Frame-Options "SAMEORIGIN" always;
+  add_header Content-Security-Policy "frame-ancestors 'self'" always;
+
+  location = /health {
     access_log off;
-    add_header Content-Type text/plain;
+    default_type text/plain;
+    add_header Cache-Control "no-store";
     return 200 "healthy\n";
+  }
+
+  location ^~ /health/ {
+    return 404;
   }
 
   location = /assets/env.js {
     try_files $uri =404;
-    add_header Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0";
+    add_header Cache-Control "no-store";
   }
 
-  location ~* \.(?:jpg|jpeg|gif|png|ico|cur|gz|svg|svgz|mp4|ogg|ogv|webm|htc|woff|woff2)$ {
+  location ~* \.map$ {
+    access_log off;
+    return 404;
+  }
+
+  location ~* "^/assets/.+-[A-Za-z0-9_-]{8,}\.(?:css|js|jpg|jpeg|gif|png|ico|cur|svg|svgz|mp4|ogg|ogv|webm|htc|woff|woff2)$" {
+    try_files $uri =404;
+    add_header Cache-Control "public, max-age=31536000, immutable";
+    access_log off;
+  }
+
+  location ~* ^/assets/ {
     try_files $uri =404;
     add_header Cache-Control "public, max-age=2592000";
     access_log off;
   }
 
-  location ~* \.(?:css|js)$ {
+  location = /index.html {
     try_files $uri =404;
-    add_header Cache-Control "public, max-age=31449600";
-    access_log off;
+    add_header Cache-Control "no-store";
   }
 
   location ~* ^/(en|zh)(/.*)?$ {
     try_files $uri $uri/ /index.html;
-    add_header Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0";
   }
 
   location ~ ^.+\..+$ {
@@ -51,6 +65,5 @@ server {
 
   location / {
     try_files $uri $uri/ /index.html;
-    add_header Cache-Control "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0";
   }
 }

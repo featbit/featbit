@@ -363,9 +363,9 @@ export function FlagDetailsPage() {
     onError: () => toast.error(t("featureFlags.operationFailed")),
   })
   const submissionMutation = useMutation({
-    mutationFn: (input: TargetingSubmission) => {
+    mutationFn: async (input: TargetingSubmission) => {
       if (submission?.mode === "schedule") {
-        return createFlagSchedule(envId, flagKey, {
+        await createFlagSchedule(envId, flagKey, {
           targeting: targetingOf(targetingFlag!),
           revision: saved?.revision ?? "",
           scheduledTime: new Date(input.scheduledTime).toISOString(),
@@ -374,8 +374,9 @@ export function FlagDetailsPage() {
           reason: input.reason,
           withChangeRequest: input.withChangeRequest,
         })
+        return
       }
-      return createChangeRequest(envId, flagKey, {
+      await createChangeRequest(envId, flagKey, {
         targeting: targetingOf(targetingFlag!),
         revision: saved?.revision ?? "",
         reviewers: input.reviewers,

@@ -51,7 +51,7 @@ export const enTargeting = {
       updated: "Updated",
     },
   },
-} as const
+}
 
 export const zhTargeting: typeof enTargeting = {
   loading: "加载中...",

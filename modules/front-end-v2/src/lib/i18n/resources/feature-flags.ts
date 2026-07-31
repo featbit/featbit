@@ -673,7 +673,7 @@ export const enFeatureFlags = {
     copying: "Copying…",
     copySettings: "Copy settings",
   },
-} as const
+}
 
 export const zhFeatureFlags: typeof enFeatureFlags = {
   title: "功能开关",

@@ -84,8 +84,12 @@ describe("VariationsTab", () => {
       </TooltipProvider>
     )
 
-    const table = container.querySelector("[data-variations-table]")
-    const addAction = container.querySelector("[data-variation-add-action]")
+    const table = container.querySelector<HTMLElement>(
+      "[data-variations-table]"
+    )
+    const addAction = container.querySelector<HTMLElement>(
+      "[data-variation-add-action]"
+    )
     expect(table).not.toContainElement(addAction)
     expect(table?.nextElementSibling).toBe(addAction)
     expect(screen.queryByText("2 variations")).not.toBeInTheDocument()

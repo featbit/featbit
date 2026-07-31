@@ -28,7 +28,6 @@ function renderDialog(
       <TooltipProvider>
         <TargetingSubmissionDialog
           mode={mode}
-          lang="en"
           flagName="Checkout redesign"
           changes={[]}
           initialReason={initialReason}

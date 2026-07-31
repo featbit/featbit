@@ -7,7 +7,6 @@ describe("FlagJsonEditorDialog", () => {
     render(
       <FlagJsonEditorDialog
         open
-        lang="en"
         variationName="Broken JSON"
         value="{invalid"
         onOpenChange={vi.fn()}
@@ -27,7 +26,6 @@ describe("FlagJsonEditorDialog", () => {
     render(
       <FlagJsonEditorDialog
         open
-        lang="en"
         variationName="Array JSON"
         value="[]"
         onOpenChange={vi.fn()}
@@ -45,7 +43,6 @@ describe("FlagJsonEditorDialog", () => {
     render(
       <FlagJsonEditorDialog
         open
-        lang="en"
         variationName="Configuration"
         value='{"enabled":true,"limits":[1,2]}'
         onOpenChange={vi.fn()}
@@ -54,15 +51,11 @@ describe("FlagJsonEditorDialog", () => {
     )
 
     expect(
-      screen
-        .getByTestId("flag-json-code-editor")
-        .querySelectorAll(".cm-line")
+      screen.getByTestId("flag-json-code-editor").querySelectorAll(".cm-line")
     ).toHaveLength(7)
 
     fireEvent.click(screen.getByRole("button", { name: "Apply" }))
-    expect(onApply).toHaveBeenCalledWith(
-      '{"enabled":true,"limits":[1,2]}'
-    )
+    expect(onApply).toHaveBeenCalledWith('{"enabled":true,"limits":[1,2]}')
   })
 
   it("preserves whitespace inside JSON string values when applying", () => {
@@ -70,7 +63,6 @@ describe("FlagJsonEditorDialog", () => {
     render(
       <FlagJsonEditorDialog
         open
-        lang="en"
         variationName="Message"
         value='{"message":"hello world there"}'
         onOpenChange={vi.fn()}
@@ -79,9 +71,7 @@ describe("FlagJsonEditorDialog", () => {
     )
 
     fireEvent.click(screen.getByRole("button", { name: "Apply" }))
-    expect(onApply).toHaveBeenCalledWith(
-      '{"message":"hello world there"}'
-    )
+    expect(onApply).toHaveBeenCalledWith('{"message":"hello world there"}')
   })
 })
 import "@/lib/i18n/i18n"

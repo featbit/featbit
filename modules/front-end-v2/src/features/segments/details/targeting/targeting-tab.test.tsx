@@ -279,7 +279,7 @@ describe("TargetingTab actions", () => {
             id: "condition-1",
             property: "country",
             op: "IsOneOf",
-            value: ["DE", "FR"],
+            value: "DE, FR",
           },
         ],
       },

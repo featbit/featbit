@@ -38,7 +38,6 @@ describe("FlagEditorSheet", () => {
       <QueryClientProvider client={queryClient}>
         <FlagEditorSheet
           envId="env-1"
-          lang="en"
           open
           source={source}
           saving={false}
@@ -71,7 +70,6 @@ describe("FlagEditorSheet", () => {
       <QueryClientProvider client={queryClient}>
         <FlagEditorSheet
           envId="env-1"
-          lang="en"
           open
           source={source}
           saving={false}
@@ -100,7 +98,6 @@ describe("FlagEditorSheet", () => {
       <QueryClientProvider client={queryClient}>
         <FlagEditorSheet
           envId="env-1"
-          lang="en"
           open
           source={null}
           saving={false}
@@ -128,7 +125,6 @@ describe("FlagEditorSheet", () => {
       <QueryClientProvider client={queryClient}>
         <FlagEditorSheet
           envId="env-1"
-          lang="en"
           open
           source={null}
           saving={false}
@@ -154,7 +150,6 @@ describe("FlagEditorSheet", () => {
       <QueryClientProvider client={queryClient}>
         <FlagEditorSheet
           envId="env-1"
-          lang="en"
           open
           source={null}
           saving={false}
@@ -186,7 +181,6 @@ describe("FlagEditorSheet", () => {
       <QueryClientProvider client={queryClient}>
         <FlagEditorSheet
           envId="env-1"
-          lang="en"
           open
           source={null}
           saving={false}
@@ -213,7 +207,6 @@ describe("FlagEditorSheet", () => {
       <QueryClientProvider client={queryClient}>
         <FlagEditorSheet
           envId="env-1"
-          lang="en"
           open
           source={null}
           saving={false}
@@ -251,7 +244,6 @@ describe("FlagEditorSheet", () => {
       <QueryClientProvider client={queryClient}>
         <FlagEditorSheet
           envId="env-1"
-          lang="en"
           open
           source={null}
           saving={false}
@@ -319,7 +311,6 @@ describe("FlagEditorSheet", () => {
       <QueryClientProvider client={queryClient}>
         <FlagEditorSheet
           envId="env-1"
-          lang="en"
           open
           source={null}
           saving={false}
@@ -361,7 +352,6 @@ describe("FlagEditorSheet", () => {
       <QueryClientProvider client={queryClient}>
         <FlagEditorSheet
           envId="env-1"
-          lang="en"
           open
           source={null}
           saving={false}
@@ -407,7 +397,6 @@ describe("FlagEditorSheet", () => {
       <QueryClientProvider client={queryClient}>
         <FlagEditorSheet
           envId="env-1"
-          lang="en"
           open
           source={null}
           saving={false}
@@ -453,7 +442,6 @@ describe("FlagEditorSheet", () => {
       <QueryClientProvider client={queryClient}>
         <FlagEditorSheet
           envId="env-1"
-          lang="en"
           open
           source={null}
           saving
@@ -486,7 +474,6 @@ describe("FlagEditorSheet", () => {
       <QueryClientProvider client={queryClient}>
         <FlagEditorSheet
           envId="env-1"
-          lang="en"
           open
           source={null}
           saving={false}

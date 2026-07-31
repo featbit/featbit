@@ -73,7 +73,7 @@ export function FlagVariationsEditor({
         value.disabledVariationId === pendingDeleteVariation.id
           ? t("featureFlags.variationsEditor.serveWhenOff")
           : null,
-      ].filter(Boolean)
+      ].filter((role): role is string => role !== null)
     : []
 
   function setTypeConfirmation(variationType: FlagVariationType | null) {
