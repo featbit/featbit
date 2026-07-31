@@ -7,7 +7,6 @@ import {
 import type { Segment, UserPolicy } from "./segments-types"
 
 const envRn = environmentRn({
-  organizationKey: "acme",
   projectKey: "payments",
   environmentKey: "production",
 })
@@ -30,7 +29,7 @@ function policy(
 
 describe("segment permissions", () => {
   it("builds the environment and tagged segment resource names", () => {
-    expect(envRn).toBe("organization/acme:project/payments:env/production")
+    expect(envRn).toBe("project/payments:env/production")
     expect(segmentRn(envRn, segment)).toBe(`${envRn}:segment/enterprise;paid`)
   })
 
@@ -54,15 +53,46 @@ describe("segment permissions", () => {
     ).toBe(true)
   })
 
+  it("grants only the independently allowed General field", () => {
+    const policies = [
+      policy(["project/*:env/*:segment/*"], ["UpdateSegmentDescription"]),
+    ]
+    const resourceRn = segmentRn(envRn, segment)
+
+    expect(
+      canUseSegmentAction(policies, resourceRn, "UpdateSegmentDescription")
+    ).toBe(true)
+    expect(canUseSegmentAction(policies, resourceRn, "UpdateSegmentName")).toBe(
+      false
+    )
+    expect(canUseSegmentAction(policies, resourceRn, "UpdateSegmentTags")).toBe(
+      false
+    )
+  })
+
+  it("matches parent scopes and tagged resources like the backend matcher", () => {
+    const resourceRn = segmentRn(envRn, segment)
+
+    expect(
+      canUseSegmentAction(
+        [policy(["project/payments:env/production"], ["ArchiveSegment"])],
+        resourceRn,
+        "ArchiveSegment"
+      )
+    ).toBe(true)
+    expect(
+      canUseSegmentAction(
+        [policy([`${envRn}:segment/*;internal,pa*`], ["ArchiveSegment"])],
+        resourceRn,
+        "ArchiveSegment"
+      )
+    ).toBe(true)
+  })
+
   it("does not grant a matching action outside the statement resource", () => {
     expect(
       canUseSegmentAction(
-        [
-          policy(
-            ["organization/acme:project/other:env/*:segment/*"],
-            ["ArchiveSegment"]
-          ),
-        ],
+        [policy(["project/other:env/*:segment/*"], ["ArchiveSegment"])],
         segmentRn(envRn, segment),
         "ArchiveSegment"
       )
@@ -73,6 +103,19 @@ describe("segment permissions", () => {
     expect(
       canUseSegmentAction(
         [policy([`${envRn}:segment/*`], ["ArchiveSegment"], "deny")],
+        segmentRn(envRn, segment),
+        "ArchiveSegment"
+      )
+    ).toBe(false)
+  })
+
+  it("gives a matching deny statement precedence over an allow", () => {
+    expect(
+      canUseSegmentAction(
+        [
+          policy(["project/*:env/*:segment/*"], ["ArchiveSegment"]),
+          policy([`${envRn}:segment/enterprise`], ["ArchiveSegment"], "deny"),
+        ],
         segmentRn(envRn, segment),
         "ArchiveSegment"
       )

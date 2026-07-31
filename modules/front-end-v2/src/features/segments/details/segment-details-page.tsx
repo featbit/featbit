@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import {
-  getCurrentOrganization,
   getCurrentProjectEnv,
   getCurrentWorkspace,
   localizedPath,
@@ -47,12 +46,10 @@ export function SegmentDetailsPage() {
     requestedTab && tabs.has(requestedTab) ? requestedTab : "targeting"
   ) as DetailsTab
   const workspace = getCurrentWorkspace()
-  const organization = getCurrentOrganization()
   const projectEnv = getCurrentProjectEnv()
   const envId = projectEnv?.envId ?? ""
   const segmentsPath = localizedPath(lang, "/segments")
   const envRn = environmentRn({
-    organizationKey: organization?.key ?? "",
     projectKey: projectEnv?.projectKey ?? "",
     environmentKey: projectEnv?.envKey ?? "",
   })

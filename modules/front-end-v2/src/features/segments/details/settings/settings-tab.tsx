@@ -9,13 +9,12 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { ApiRequestError } from "@/lib/api/authenticated-api"
 import {
   archiveSegment,
   removeSegment,
   restoreSegment,
-  updateSegmentDescription,
-  updateSegmentName,
-  updateSegmentTags,
+  updateSegmentGeneral,
 } from "../../segments-api"
 import type { Segment } from "../../segments-types"
 import {
@@ -103,84 +102,66 @@ export function SettingsTab({
     }),
     [segment, values.description, values.name, values.tags]
   )
-  const dirty = stableSettings(draft) !== stableSettings(segment)
+  const submittedDraft = useMemo(
+    () => ({
+      ...draft,
+      name:
+        !canUpdateName || draft.name === segment.name
+          ? segment.name
+          : draft.name.trim(),
+      description: canUpdateDescription
+        ? draft.description
+        : segment.description,
+      tags: canUpdateTags ? draft.tags : segment.tags,
+    }),
+    [
+      canUpdateDescription,
+      canUpdateName,
+      canUpdateTags,
+      draft,
+      segment.description,
+      segment.name,
+      segment.tags,
+    ]
+  )
+  const dirty = stableSettings(submittedDraft) !== stableSettings(segment)
   const changes = useMemo<ReviewChange[]>(
-    () => settingsReviewChanges(segment, draft),
-    [draft, segment]
+    () => settingsReviewChanges(segment, submittedDraft),
+    [segment, submittedDraft]
   )
   const archived = Boolean(segment.isArchived)
 
   const saveMutation = useMutation({
     mutationFn: async (comment: string) => {
-      const pending: Array<{
-        field: "name" | "description" | "tags"
-        request: Promise<boolean>
-      }> = []
-      if (segment.name !== draft.name) {
-        pending.push({
-          field: "name",
-          request: updateSegmentName(envId, segment.id, draft.name, comment),
-        })
+      const input = {
+        name: submittedDraft.name,
+        description: submittedDraft.description,
+        tags: submittedDraft.tags,
       }
-      if (segment.description !== draft.description) {
-        pending.push({
-          field: "description",
-          request: updateSegmentDescription(
-            envId,
-            segment.id,
-            draft.description,
-            comment
-          ),
-        })
-      }
-      if (
-        JSON.stringify([...segment.tags].sort()) !==
-        JSON.stringify([...draft.tags].sort())
-      ) {
-        pending.push({
-          field: "tags",
-          request: updateSegmentTags(envId, segment.id, draft.tags, comment),
-        })
-      }
-      const results = await Promise.allSettled(
-        pending.map((item) => item.request)
+      const success = await updateSegmentGeneral(
+        envId,
+        segment.id,
+        input,
+        comment
       )
-      const saved = { ...segment }
-      const failed: string[] = []
-      results.forEach((result, index) => {
-        const field = pending[index].field
-        if (result.status === "fulfilled") {
-          if (field === "name") saved.name = draft.name
-          if (field === "description") saved.description = draft.description
-          if (field === "tags") saved.tags = draft.tags
-        } else failed.push(field)
-      })
-      return { saved, failed }
+      if (!success) throw new Error("Segment General update failed")
+      return { ...segment, ...input }
     },
-    onSuccess: ({ saved, failed }) => {
+    onSuccess: (saved) => {
       onSaved(saved)
       setReviewOpen(false)
-      if (failed.length) {
-        toast.error(
-          t("segments.detailsPage.settings.partialFailure", {
-            fields: failed
-              .map((field) => t(`segments.detailsPage.review.labels.${field}`))
-              .join(", "),
-          })
-        )
-      } else toast.success(t("segments.operationSucceeded"))
-      if (
-        !failed.includes("tags") &&
-        JSON.stringify([...segment.tags].sort()) !==
-          JSON.stringify([...draft.tags].sort())
-      ) {
-        void queryClient.invalidateQueries({
-          queryKey: ["segment-tags", envId],
-        })
-      }
+      toast.success(t("segments.operationSucceeded"))
+      void queryClient.invalidateQueries({
+        queryKey: ["segment-tags", envId],
+      })
       void queryClient.invalidateQueries({ queryKey: ["segment-audit-logs"] })
     },
-    onError: () => toast.error(t("segments.operationFailed")),
+    onError: (error) =>
+      toast.error(
+        error instanceof ApiRequestError && error.status === 403
+          ? t("segments.permissionDenied")
+          : t("segments.operationFailed")
+      ),
   })
 
   const lifecycleMutation = useMutation({

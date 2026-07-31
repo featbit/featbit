@@ -95,6 +95,24 @@ public class SegmentValidatorTests
     }
 
     [Fact]
+    public void UpdateGeneral_EmptyName_NameRequiredError()
+    {
+        var request = new UpdateGeneral(
+            Guid.NewGuid(),
+            new UpdateGeneralPayload
+            {
+                Name = string.Empty,
+                Description = "Description",
+                Tags = []
+            },
+            []);
+
+        var result = new UpdateGeneralValidator().Validate(request);
+
+        Assert.Contains(result.Errors, e => e.ErrorCode == ErrorCodes.Required("name"));
+    }
+
+    [Fact]
     public void UpdateTargeting_RuleWithoutSegmentCondition_NoErrors()
     {
         var rule = new MatchRule

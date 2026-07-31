@@ -3,7 +3,7 @@ import { fetchApi } from "@/lib/api/authenticated-api"
 import {
   createSegmentEndUser,
   fetchAllSegmentTags,
-  updateSegmentTags,
+  updateSegmentGeneral,
 } from "./segments-api"
 
 vi.mock("@/lib/api/authenticated-api", () => ({
@@ -25,22 +25,28 @@ describe("segments tag API", () => {
     )
   })
 
-  it("persists the selected and newly created tags with the change comment", async () => {
+  it("updates name, description, and tags through the General endpoint", async () => {
     vi.mocked(fetchApi).mockResolvedValue(true)
 
-    await updateSegmentTags(
+    await updateSegmentGeneral(
       "env-1",
       "segment-1",
-      ["release", "new-tag"],
+      {
+        name: "Release users",
+        description: "Updated description",
+        tags: ["release", "new-tag"],
+      },
       "Organize rollout"
     )
 
     expect(fetchApi).toHaveBeenCalledWith(
-      "/api/v1/envs/env-1/segments/segment-1/tags",
+      "/api/v1/envs/env-1/segments/segment-1/general",
       {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          name: "Release users",
+          description: "Updated description",
           tags: ["release", "new-tag"],
           comment: "Organize rollout",
         }),

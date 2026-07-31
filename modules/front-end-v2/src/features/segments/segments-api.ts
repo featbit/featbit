@@ -44,43 +44,21 @@ export function updateSegmentTargeting(
   )
 }
 
-function updateSegmentField(
+export function updateSegmentGeneral(
   envId: string,
   segmentId: string,
-  field: "name" | "description" | "tags",
-  value: string | string[],
-  comment: string
+  input: { name: string; description: string; tags: string[] },
+  comment = ""
 ) {
   return fetchApi<boolean>(
-    `${segmentBasePath(envId)}/${encodeURIComponent(segmentId)}/${field}`,
+    `${segmentBasePath(envId)}/${encodeURIComponent(segmentId)}/general`,
     {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ [field]: value, comment }),
+      body: JSON.stringify({ ...input, comment }),
     }
   )
 }
-
-export const updateSegmentName = (
-  envId: string,
-  segmentId: string,
-  name: string,
-  comment: string
-) => updateSegmentField(envId, segmentId, "name", name, comment)
-
-export const updateSegmentDescription = (
-  envId: string,
-  segmentId: string,
-  description: string,
-  comment: string
-) => updateSegmentField(envId, segmentId, "description", description, comment)
-
-export const updateSegmentTags = (
-  envId: string,
-  segmentId: string,
-  tags: string[],
-  comment: string
-) => updateSegmentField(envId, segmentId, "tags", tags, comment)
 
 export function fetchAllSegmentTags(envId: string) {
   return fetchApi<string[]>(`${segmentBasePath(envId)}/all-tags`)

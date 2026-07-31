@@ -84,6 +84,18 @@ public class Segment : AuditedEntity
         return dataChange.To(this);
     }
 
+    public DataChange UpdateGeneral(string name, string description, string[] tags)
+    {
+        var dataChange = new DataChange(this);
+
+        Name = name;
+        Description = description;
+        Tags = tags ?? [];
+        UpdatedAt = DateTime.UtcNow;
+
+        return dataChange.To(this);
+    }
+
     public DataChange UpdateTargeting(
         string[] included,
         string[] excluded,

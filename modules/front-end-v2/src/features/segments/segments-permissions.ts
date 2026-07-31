@@ -17,11 +17,10 @@ function wildcardMatches(pattern: string, value: string) {
 }
 
 export function environmentRn(input: {
-  organizationKey: string
   projectKey: string
   environmentKey: string
 }) {
-  return `organization/${input.organizationKey}:project/${input.projectKey}:env/${input.environmentKey}`
+  return `project/${input.projectKey}:env/${input.environmentKey}`
 }
 
 export function segmentRn(
@@ -30,6 +29,51 @@ export function segmentRn(
 ) {
   const tags = segment.tags?.length ? `;${segment.tags.join(",")}` : ""
   return `${envRn}:segment/${segment.key}${tags}`
+}
+
+function resourceMatches(resourceRn: string, pattern: string) {
+  if (!resourceRn || !pattern) return false
+
+  const resourceSegments = resourceRn.split(":")
+  const patternSegments = pattern.split(":")
+  if (patternSegments.length > resourceSegments.length) return false
+
+  return patternSegments.every((patternSegment, index) => {
+    const [patternPath, patternTags] = patternSegment.split(";", 2)
+    const [resourcePath, resourceTags] = resourceSegments[index].split(";", 2)
+
+    if (!wildcardMatches(patternPath, resourcePath)) return false
+    if (patternTags === undefined || patternTags === "") return true
+    if (!resourceTags) return false
+
+    const tags = resourceTags.split(",")
+    return patternTags
+      .split(",")
+      .some((patternTag) =>
+        tags.some((tag) => wildcardMatches(patternTag, tag))
+      )
+  })
+}
+
+function statementMatches(
+  statement: UserPolicy["statements"][number],
+  resourceRn: string,
+  action: SegmentAction
+) {
+  if (
+    statement.resourceType === "*" ||
+    statement.resourceType.toLowerCase() === "all"
+  ) {
+    return true
+  }
+
+  return (
+    statement.resourceType === "segment" &&
+    (statement.actions.includes(action) ||
+      statement.actions.includes("*") ||
+      statement.actions.includes("SegmentAllActions")) &&
+    statement.resources.some((pattern) => resourceMatches(resourceRn, pattern))
+  )
 }
 
 export function canUseSegmentAction(
@@ -41,18 +85,16 @@ export function canUseSegmentAction(
     return true
   }
 
-  return policies.some((policy) =>
-    policy.statements.some(
-      (statement) =>
-        statement.effect.toLowerCase() === "allow" &&
-        (statement.resourceType === "segment" ||
-          statement.resourceType === "*") &&
-        statement.resources.some((resource) =>
-          wildcardMatches(resource, resourceRn)
-        ) &&
-        (statement.actions.includes(action) ||
-          statement.actions.includes("*") ||
-          statement.actions.includes("SegmentAllActions"))
+  const matchedStatements = policies.flatMap((policy) =>
+    policy.statements.filter((statement) =>
+      statementMatches(statement, resourceRn, action)
+    )
+  )
+
+  return (
+    matchedStatements.length > 0 &&
+    matchedStatements.every(
+      (statement) => statement.effect.toLowerCase() === "allow"
     )
   )
 }
