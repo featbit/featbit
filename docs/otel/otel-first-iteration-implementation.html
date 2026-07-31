@@ -1,0 +1,1895 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Interactive FeatBit OpenTelemetry first-iteration implementation guide.">
+  <title>FeatBit OpenTelemetry — First Iteration</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --page: #f3f6f3;
+      --surface: #ffffff;
+      --surface-soft: #f7faf8;
+      --ink: #15211d;
+      --muted: #607068;
+      --line: #dce5df;
+      --line-strong: #c8d6ce;
+      --accent: #087a63;
+      --accent-dark: #045c4b;
+      --accent-soft: #ddf3eb;
+      --accent-pale: #eff9f5;
+      --amber: #9b6400;
+      --amber-soft: #fff0c7;
+      --red: #a23c36;
+      --red-soft: #fbe8e6;
+      --blue: #315d9d;
+      --blue-soft: #e8f0fb;
+      --shadow: 0 18px 45px rgba(29, 53, 42, 0.10);
+      --shadow-soft: 0 8px 24px rgba(29, 53, 42, 0.06);
+      --radius: 18px;
+      --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      --sans: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 90px;
+    }
+
+    body {
+      min-width: 320px;
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% 0%, rgba(8, 122, 99, 0.08), transparent 29rem),
+        var(--page);
+      font-family: var(--sans);
+      line-height: 1.58;
+    }
+
+    button,
+    a {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    a {
+      color: var(--accent-dark);
+      text-underline-offset: 3px;
+    }
+
+    code {
+      font-family: var(--mono);
+    }
+
+    .reading-progress {
+      position: fixed;
+      inset: 0 auto auto 0;
+      z-index: 100;
+      width: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #0b8f73, #58b38d);
+      transition: width 80ms linear;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      min-height: 66px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 10px 28px;
+      border-bottom: 1px solid rgba(200, 214, 206, 0.85);
+      background: rgba(247, 250, 248, 0.91);
+      backdrop-filter: blur(15px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 34px;
+      height: 34px;
+      flex: 0 0 auto;
+      place-items: center;
+      border-radius: 10px;
+      color: white;
+      background: var(--accent);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      box-shadow: 0 5px 14px rgba(8, 122, 99, 0.24);
+    }
+
+    .brand-copy {
+      min-width: 0;
+    }
+
+    .brand-copy strong,
+    .brand-copy span {
+      display: block;
+    }
+
+    .brand-copy strong {
+      font-size: 0.93rem;
+    }
+
+    .brand-copy span {
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 0.76rem;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mode-toggle,
+    .source-link,
+    .panel-close {
+      display: inline-flex;
+      min-height: 38px;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: 1px solid var(--line-strong);
+      border-radius: 999px;
+      color: var(--ink);
+      background: var(--surface);
+      font: inherit;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      transition: border-color 160ms ease, background 160ms ease, color 160ms ease, transform 160ms ease;
+    }
+
+    .mode-toggle {
+      padding: 7px 14px 7px 9px;
+    }
+
+    .source-link {
+      padding: 7px 14px;
+    }
+
+    .mode-toggle:hover,
+    .source-link:hover,
+    .panel-close:hover {
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    .mode-toggle[aria-pressed="true"] {
+      border-color: var(--accent);
+      color: var(--accent-dark);
+      background: var(--accent-soft);
+    }
+
+    .mode-indicator {
+      display: inline-grid;
+      width: 23px;
+      height: 23px;
+      place-items: center;
+      border-radius: 50%;
+      color: white;
+      background: var(--accent);
+      font-size: 0.78rem;
+    }
+
+    .page-shell {
+      display: grid;
+      grid-template-columns: 218px minmax(0, 900px);
+      gap: 28px;
+      max-width: 1220px;
+      margin: 0 auto;
+      padding: 30px 24px 80px;
+      transition: max-width 180ms ease, grid-template-columns 180ms ease;
+    }
+
+    body.commentary-mode .page-shell {
+      grid-template-columns: 205px minmax(0, 790px) 350px;
+      max-width: 1450px;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 92px;
+      align-self: start;
+      max-height: calc(100vh - 115px);
+      overflow: auto;
+      padding: 8px;
+    }
+
+    .sidebar-label {
+      margin: 0 10px 10px;
+      color: var(--muted);
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .sidebar a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 2px 0;
+      padding: 8px 10px;
+      border-radius: 9px;
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 650;
+      text-decoration: none;
+      transition: color 140ms ease, background 140ms ease;
+    }
+
+    .sidebar a:hover,
+    .sidebar a.active {
+      color: var(--accent-dark);
+      background: var(--accent-soft);
+    }
+
+    .nav-id {
+      width: 29px;
+      flex: 0 0 auto;
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      font-weight: 800;
+    }
+
+    main {
+      min-width: 0;
+    }
+
+    .hero,
+    .doc-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.95);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: clamp(28px, 5vw, 54px);
+    }
+
+    .hero::after {
+      position: absolute;
+      right: -85px;
+      bottom: -105px;
+      width: 260px;
+      height: 260px;
+      border: 38px solid rgba(8, 122, 99, 0.06);
+      border-radius: 50%;
+      content: "";
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      color: var(--accent);
+      font-size: 0.75rem;
+      font-weight: 850;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin-top: 0;
+    }
+
+    h1 {
+      max-width: 720px;
+      margin-bottom: 16px;
+      font-size: clamp(2.15rem, 5vw, 4rem);
+      line-height: 1.02;
+      letter-spacing: -0.055em;
+    }
+
+    .hero-summary {
+      max-width: 690px;
+      margin-bottom: 24px;
+      color: var(--muted);
+      font-size: 1.04rem;
+    }
+
+    .scope-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .scope-chip,
+    .priority-chip,
+    .cost-chip {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 800;
+    }
+
+    .scope-chip {
+      padding: 7px 10px;
+      color: var(--accent-dark);
+      background: var(--accent-soft);
+    }
+
+    .hero-guide {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 13px;
+      max-width: 680px;
+      margin-top: 28px;
+      padding: 15px 17px;
+      border: 1px solid #f0d594;
+      border-radius: 13px;
+      background: #fff9e9;
+    }
+
+    .hero-guide .help-button {
+      margin-top: 1px;
+    }
+
+    .hero-guide strong,
+    .hero-guide span {
+      display: block;
+    }
+
+    .hero-guide span {
+      margin-top: 2px;
+      color: #755f31;
+      font-size: 0.86rem;
+    }
+
+    .doc-card {
+      margin-top: 22px;
+      padding: clamp(22px, 4vw, 34px);
+    }
+
+    .section-meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .section-id {
+      display: inline-grid;
+      min-width: 38px;
+      height: 29px;
+      place-items: center;
+      border-radius: 8px;
+      color: white;
+      background: var(--accent);
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 900;
+    }
+
+    .priority-chip,
+    .cost-chip {
+      padding: 5px 9px;
+    }
+
+    .priority-chip {
+      color: var(--blue);
+      background: var(--blue-soft);
+    }
+
+    .priority-chip.optional {
+      color: var(--amber);
+      background: var(--amber-soft);
+    }
+
+    .cost-chip {
+      color: var(--muted);
+      background: var(--surface-soft);
+    }
+
+    .doc-card h2 {
+      margin-bottom: 22px;
+      font-size: clamp(1.45rem, 3vw, 2rem);
+      line-height: 1.14;
+      letter-spacing: -0.03em;
+    }
+
+    .brief-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .brief {
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: var(--surface-soft);
+    }
+
+    .brief h3,
+    .measure-block h3,
+    .implement-block h3 {
+      margin-bottom: 7px;
+      font-size: 0.75rem;
+      font-weight: 850;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+    }
+
+    .brief h3 {
+      color: var(--accent);
+    }
+
+    .brief p {
+      margin-bottom: 0;
+      color: #3e4e46;
+      font-size: 0.91rem;
+    }
+
+    .measure-block,
+    .implement-block {
+      margin-top: 24px;
+    }
+
+    .measure-block > h3,
+    .implement-block > h3 {
+      margin-bottom: 12px;
+      color: var(--muted);
+    }
+
+    .metric-table-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.86rem;
+    }
+
+    th,
+    td {
+      padding: 11px 13px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    th {
+      color: var(--muted);
+      background: var(--surface-soft);
+      font-size: 0.69rem;
+      font-weight: 850;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    td:first-child {
+      width: 47%;
+    }
+
+    .metric {
+      display: inline;
+      color: #155948;
+      font-size: 0.78rem;
+      overflow-wrap: anywhere;
+    }
+
+    .steps {
+      display: grid;
+      gap: 9px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      counter-reset: steps;
+    }
+
+    .steps li {
+      position: relative;
+      min-height: 30px;
+      padding-left: 38px;
+      color: #34443c;
+      font-size: 0.9rem;
+      counter-increment: steps;
+    }
+
+    .steps li::before {
+      position: absolute;
+      top: -1px;
+      left: 0;
+      display: grid;
+      width: 25px;
+      height: 25px;
+      place-items: center;
+      border-radius: 8px;
+      color: var(--accent-dark);
+      background: var(--accent-soft);
+      content: counter(steps);
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      font-weight: 900;
+    }
+
+    .implementation-note {
+      margin: 16px 0 0;
+      padding: 12px 14px;
+      border-left: 3px solid var(--accent);
+      border-radius: 0 9px 9px 0;
+      color: #385249;
+      background: var(--accent-pale);
+      font-size: 0.85rem;
+    }
+
+    .inline-code-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 11px 0 0;
+    }
+
+    .code-chip {
+      padding: 6px 9px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: #315047;
+      background: var(--surface-soft);
+      font-family: var(--mono);
+      font-size: 0.76rem;
+    }
+
+    .trace-flow {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      padding: 15px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: var(--surface-soft);
+    }
+
+    .trace-node {
+      padding: 7px 9px;
+      border-radius: 8px;
+      color: var(--accent-dark);
+      background: var(--accent-soft);
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 750;
+    }
+
+    .trace-arrow {
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .help-button {
+      display: inline-grid;
+      width: 20px;
+      height: 20px;
+      margin-left: 4px;
+      padding: 0;
+      place-items: center;
+      border: 1px solid #87b9aa;
+      border-radius: 50%;
+      color: var(--accent-dark);
+      background: var(--accent-soft);
+      font: 800 0.72rem/1 var(--sans);
+      vertical-align: 1px;
+      cursor: pointer;
+      transition: color 150ms ease, background 150ms ease, transform 150ms ease;
+    }
+
+    .help-button:hover,
+    .help-button:focus-visible {
+      color: white;
+      background: var(--accent);
+      transform: scale(1.08);
+    }
+
+    .help-button:focus-visible,
+    .mode-toggle:focus-visible,
+    .source-link:focus-visible,
+    .panel-close:focus-visible,
+    .sidebar a:focus-visible {
+      outline: 3px solid rgba(8, 122, 99, 0.23);
+      outline-offset: 2px;
+    }
+
+    .commentary-panel {
+      position: fixed;
+      top: 82px;
+      right: 24px;
+      z-index: 80;
+      width: min(390px, calc(100vw - 40px));
+      max-height: calc(100vh - 105px);
+      overflow: hidden;
+      border: 1px solid var(--line-strong);
+      border-radius: 18px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      opacity: 0;
+      transform: translateX(calc(100% + 42px));
+      pointer-events: none;
+      transition: opacity 180ms ease, transform 220ms ease;
+    }
+
+    body.panel-open .commentary-panel {
+      opacity: 1;
+      transform: translateX(0);
+      pointer-events: auto;
+    }
+
+    body.commentary-mode .commentary-panel {
+      position: sticky;
+      top: 90px;
+      right: auto;
+      z-index: 10;
+      grid-column: 3;
+      align-self: start;
+      width: auto;
+      max-height: calc(100vh - 112px);
+      opacity: 1;
+      transform: none;
+      pointer-events: auto;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 15px 16px;
+      border-bottom: 1px solid var(--line);
+      background: var(--surface-soft);
+    }
+
+    .panel-heading {
+      min-width: 0;
+    }
+
+    .panel-heading span,
+    .panel-heading strong {
+      display: block;
+    }
+
+    .panel-heading span {
+      color: var(--accent);
+      font-size: 0.65rem;
+      font-weight: 850;
+      letter-spacing: 0.11em;
+      text-transform: uppercase;
+    }
+
+    .panel-heading strong {
+      overflow: hidden;
+      font-size: 0.94rem;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .panel-close {
+      width: 31px;
+      min-height: 31px;
+      flex: 0 0 auto;
+      padding: 0;
+      border-radius: 9px;
+      font-size: 1rem;
+    }
+
+    .panel-content {
+      max-height: calc(100vh - 174px);
+      overflow: auto;
+      padding: 16px;
+      scroll-behavior: smooth;
+    }
+
+    .empty-commentary {
+      padding: 20px 8px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 0.88rem;
+    }
+
+    .empty-commentary .empty-mark {
+      display: grid;
+      width: 38px;
+      height: 38px;
+      margin: 0 auto 10px;
+      place-items: center;
+      border-radius: 50%;
+      color: var(--accent-dark);
+      background: var(--accent-soft);
+      font-weight: 850;
+    }
+
+    .note-card {
+      padding: 15px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: var(--surface);
+      transition: border-color 180ms ease, background 180ms ease;
+    }
+
+    .note-card + .note-card {
+      margin-top: 12px;
+    }
+
+    .note-card.highlight {
+      border-color: var(--accent);
+      background: var(--accent-pale);
+    }
+
+    .note-context {
+      margin: 0 0 4px;
+      color: var(--accent);
+      font-size: 0.66rem;
+      font-weight: 850;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+    }
+
+    .note-card h3 {
+      margin-bottom: 7px;
+      font-size: 1rem;
+      line-height: 1.25;
+    }
+
+    .note-card p,
+    .note-card li {
+      color: #44554d;
+      font-size: 0.84rem;
+    }
+
+    .note-card p:last-child {
+      margin-bottom: 0;
+    }
+
+    .note-card ul {
+      margin: 8px 0 0;
+      padding-left: 18px;
+    }
+
+    .panel-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 70;
+      display: none;
+      border: 0;
+      background: rgba(15, 30, 24, 0.25);
+      cursor: default;
+    }
+
+    body.panel-open:not(.commentary-mode) .panel-backdrop {
+      display: block;
+    }
+
+    .done-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .done-list li {
+      position: relative;
+      padding: 13px 13px 13px 38px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      color: #3d4e46;
+      background: var(--surface-soft);
+      font-size: 0.86rem;
+    }
+
+    .done-list li::before {
+      position: absolute;
+      top: 12px;
+      left: 13px;
+      display: grid;
+      width: 18px;
+      height: 18px;
+      place-items: center;
+      border-radius: 50%;
+      color: white;
+      background: var(--accent);
+      content: "✓";
+      font-size: 0.66rem;
+      font-weight: 900;
+    }
+
+    .footer {
+      padding: 28px 10px 0;
+      color: var(--muted);
+      font-size: 0.78rem;
+      text-align: center;
+    }
+
+    noscript {
+      display: block;
+      margin: 16px auto;
+      padding: 12px 16px;
+      color: #6f551e;
+      background: var(--amber-soft);
+      text-align: center;
+    }
+
+    @media (max-width: 1180px) {
+      body.commentary-mode .page-shell {
+        grid-template-columns: 205px minmax(0, 850px);
+        max-width: 1180px;
+      }
+
+      body.commentary-mode .commentary-panel {
+        position: fixed;
+        top: 82px;
+        right: 24px;
+        z-index: 80;
+        width: min(390px, calc(100vw - 40px));
+        max-height: calc(100vh - 105px);
+      }
+
+      body.commentary-mode.panel-open .panel-backdrop {
+        display: block;
+      }
+    }
+
+    @media (max-width: 780px) {
+      html {
+        scroll-padding-top: 76px;
+      }
+
+      .topbar {
+        min-height: 60px;
+        padding: 9px 14px;
+      }
+
+      .brand-copy span,
+      .source-link {
+        display: none;
+      }
+
+      .mode-toggle {
+        padding-right: 11px;
+      }
+
+      .page-shell,
+      body.commentary-mode .page-shell {
+        display: block;
+        padding: 18px 12px 70px;
+      }
+
+      .sidebar {
+        display: none;
+      }
+
+      .hero,
+      .doc-card {
+        border-radius: 15px;
+      }
+
+      .hero {
+        padding: 27px 21px;
+      }
+
+      h1 {
+        font-size: clamp(2rem, 12vw, 3.25rem);
+      }
+
+      .doc-card {
+        padding: 22px 18px;
+      }
+
+      .brief-grid,
+      .done-list {
+        grid-template-columns: 1fr;
+      }
+
+      th,
+      td {
+        min-width: 210px;
+      }
+
+      .commentary-panel,
+      body.commentary-mode .commentary-panel {
+        inset: auto 0 0;
+        width: 100%;
+        max-height: 76vh;
+        border-radius: 18px 18px 0 0;
+        transform: translateY(102%);
+      }
+
+      body.panel-open .commentary-panel,
+      body.commentary-mode.panel-open .commentary-panel {
+        transform: translateY(0);
+      }
+
+      .panel-content {
+        max-height: calc(76vh - 64px);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    @media print {
+      .topbar,
+      .sidebar,
+      .commentary-panel,
+      .panel-backdrop,
+      .reading-progress,
+      .help-button,
+      .hero-guide {
+        display: none !important;
+      }
+
+      body,
+      .page-shell {
+        background: white;
+      }
+
+      .page-shell,
+      body.commentary-mode .page-shell {
+        display: block;
+        max-width: none;
+        padding: 0;
+      }
+
+      .hero,
+      .doc-card {
+        break-inside: avoid;
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="reading-progress" id="readingProgress" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">fb</span>
+      <div class="brand-copy">
+        <strong>FeatBit Observability</strong>
+        <span>First iteration implementation guide</span>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button class="mode-toggle" id="modeToggle" type="button" aria-pressed="false">
+        <span class="mode-indicator" aria-hidden="true">?</span>
+        <span id="modeLabel">Commentary mode</span>
+      </button>
+      <a class="source-link" href="./otel-first-iteration-implementation.md">Markdown source</a>
+    </div>
+  </header>
+
+  <noscript>The document remains readable, but question-mark commentary requires JavaScript.</noscript>
+
+  <div class="page-shell">
+    <nav class="sidebar" aria-label="Document sections">
+      <p class="sidebar-label">Contents</p>
+      <a href="#overview"><span class="nav-id">00</span>Overview</a>
+      <a href="#foundation"><span class="nav-id">01</span>Foundation</a>
+      <a href="#m1"><span class="nav-id">M1</span>Streaming</a>
+      <a href="#m2"><span class="nav-id">M2</span>Messaging</a>
+      <a href="#m3"><span class="nav-id">M3</span>Flag Change</a>
+      <a href="#m4"><span class="nav-id">M4</span>Stores</a>
+      <a href="#m5"><span class="nav-id">M5</span>Buffers</a>
+      <a href="#m6"><span class="nav-id">M6</span>Rate limiting</a>
+      <a href="#alerts"><span class="nav-id">A</span>Alerts</a>
+      <a href="#t1"><span class="nav-id">T1</span>Optional trace</a>
+      <a href="#done"><span class="nav-id">✓</span>Done</a>
+    </nav>
+
+    <main id="mainContent">
+      <section class="hero" id="overview" data-section>
+        <p class="eyebrow">Metrics first · server only</p>
+        <h1>OpenTelemetry<br>first iteration</h1>
+        <p class="hero-summary">
+          The smallest useful set of FeatBit signals for operational stability:
+          M1–M6 are required, while the Flag Change trace is an optional diagnostic tool.
+        </p>
+        <div class="scope-row" aria-label="Scope">
+          <span class="scope-chip">back-end</span>
+          <span class="scope-chip">evaluation-server</span>
+          <span class="scope-chip">M1–M6 required</span>
+          <span class="scope-chip">T1 optional</span>
+          <span class="scope-chip">No SDK telemetry</span>
+        </div>
+        <div class="hero-guide">
+          <button class="help-button" type="button" data-note="interaction-model" aria-label="Explain how interactive commentary works">?</button>
+          <div>
+            <strong>Read lightly; expand only when needed.</strong>
+            <span>Click a question mark for one explanation, or enable Commentary mode to keep all notes beside the document.</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="doc-card" id="foundation" data-section>
+        <div class="section-meta">
+          <span class="section-id">01</span>
+          <span class="priority-chip">Prerequisite</span>
+          <span class="cost-chip">Shared once</span>
+        </div>
+        <h2>Shared foundation</h2>
+
+        <div class="brief-grid">
+          <article class="brief">
+            <h3>Task goal</h3>
+            <p>Make FeatBit custom metrics exportable, consistent, and safe for production.</p>
+          </article>
+          <article class="brief">
+            <h3>Why</h3>
+            <p>Automatic instrumentation covers infrastructure, but not FeatBit states such as active subscriptions or message drops.</p>
+          </article>
+        </div>
+
+        <div class="measure-block">
+          <h3>What to measure</h3>
+          <p>
+            Use one custom Meter source
+            <button class="help-button" type="button" data-note="meter-source" aria-label="Explain custom Meter sources">?</button>
+            per service and identify instances through OTel resource attributes.
+          </p>
+          <div class="inline-code-row">
+            <span class="code-chip">FeatBit.Backend</span>
+            <span class="code-chip">FeatBit.EvaluationServer</span>
+            <span class="code-chip">service.name</span>
+            <span class="code-chip">service.instance.id</span>
+          </div>
+        </div>
+
+        <div class="implement-block">
+          <h3>How to implement</h3>
+          <ol class="steps">
+            <li>Register the relevant Meter with <code>OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES</code>.</li>
+            <li>Correct the back-end service name and both Dockerfile endpoint typos.</li>
+            <li>Create instruments once, then reuse them.</li>
+            <li>
+              Keep metric attributes finite
+              <button class="help-button" type="button" data-note="cardinality" aria-label="Explain finite metric attributes">?</button>
+              and exclude identifiers or secrets.
+            </li>
+            <li>
+              Gauge callbacks read cached or atomic state only
+              <button class="help-button" type="button" data-note="nonblocking-gauge" aria-label="Explain non-blocking gauge callbacks">?</button>.
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="doc-card" id="m1" data-section>
+        <div class="section-meta">
+          <span class="section-id">M1</span>
+          <span class="priority-chip">Required</span>
+          <span class="cost-chip">Very low</span>
+        </div>
+        <h2>Streaming connections</h2>
+
+        <div class="brief-grid">
+          <article class="brief">
+            <h3>Task goal</h3>
+            <p>Measure WebSocket arrival rate, active sockets, logical subscriptions, lifetime, and abnormal closes.</p>
+          </article>
+          <article class="brief">
+            <h3>Why</h3>
+            <p>
+              A physical socket and an environment subscription are not always the same
+              <button class="help-button" type="button" data-note="socket-subscription" aria-label="Explain socket versus subscription">?</button>.
+            </p>
+          </article>
+        </div>
+
+        <div class="measure-block">
+          <h3>What to measure</h3>
+          <div class="metric-table-wrap">
+            <table>
+              <thead><tr><th>Metric</th><th>Purpose</th></tr></thead>
+              <tbody>
+                <tr><td><code class="metric">featbit.streaming.upgrade.requests</code></td><td>New WebSocket attempts by type and outcome</td></tr>
+                <tr><td><code class="metric">featbit.streaming.sockets.active</code></td><td>Current physical sockets</td></tr>
+                <tr><td><code class="metric">featbit.streaming.subscriptions.active</code></td><td>Current logical environment subscriptions</td></tr>
+                <tr><td><code class="metric">featbit.streaming.connection.closed</code></td><td>Normal and abnormal closes</td></tr>
+                <tr><td><code class="metric">featbit.streaming.connection.duration</code></td><td>Connection lifetime distribution</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="implementation-note">
+            An <code>env.id</code> view is optional and off by default
+            <button class="help-button" type="button" data-note="environment-view" aria-label="Explain the optional environment view">?</button>.
+          </p>
+        </div>
+
+        <div class="implement-block">
+          <h3>How to implement</h3>
+          <ol class="steps">
+            <li>Record the result as soon as the handshake is decided, including rate-limit rejection.</li>
+            <li>Maintain socket and subscription totals with atomic deltas in <a href="../../modules/evaluation-server/src/Streaming/StreamingMiddleware.cs">StreamingMiddleware</a> and <a href="../../modules/evaluation-server/src/Streaming/Connections/ConnectionManager.cs">ConnectionManager</a>.</li>
+            <li>Count one subscription for a normal socket and the mapped environment count for an Agent socket.</li>
+            <li>Use <code>try/finally</code> to guarantee decrement; never scan all connections during collection.</li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="doc-card" id="m2" data-section>
+        <div class="section-meta">
+          <span class="section-id">M2</span>
+          <span class="priority-chip">Required</span>
+          <span class="cost-chip">Low</span>
+        </div>
+        <h2>Messaging and consumers</h2>
+
+        <div class="brief-grid">
+          <article class="brief">
+            <h3>Task goal</h3>
+            <p>Detect publish or consume failures, stopped consumers, backlog, old messages, and known message loss.</p>
+          </article>
+          <article class="brief">
+            <h3>Why</h3>
+            <p>Kafka, Redis, and PostgreSQL have different delivery and acknowledgement behavior; logs cannot show the complete state.</p>
+          </article>
+        </div>
+
+        <div class="measure-block">
+          <h3>What to measure</h3>
+          <div class="metric-table-wrap">
+            <table>
+              <thead><tr><th>Metric</th><th>Purpose</th></tr></thead>
+              <tbody>
+                <tr><td><code class="metric">featbit.messaging.operations</code></td><td>Publish, handle, and settlement outcomes</td></tr>
+                <tr><td><code class="metric">featbit.messaging.operation.duration</code></td><td>Delivery or handler duration</td></tr>
+                <tr><td><code class="metric">featbit.messaging.messages.dropped/redelivered</code></td><td>Known loss or redelivery</td></tr>
+                <tr><td><code class="metric">featbit.messaging.queue.depth</code></td><td>Durable backlog</td></tr>
+                <tr><td><code class="metric">featbit.messaging.oldest_message.age</code></td><td>Age of the oldest pending message</td></tr>
+                <tr><td><code class="metric">featbit.messaging.consumer.running</code></td><td>Whether the consumer is active</td></tr>
+                <tr>
+                  <td><code class="metric">featbit.messaging.consumer.heartbeat.age</code></td>
+                  <td>
+                    Consumer-loop liveness
+                    <button class="help-button" type="button" data-note="heartbeat-success" aria-label="Explain heartbeat versus last success">?</button>
+                  </td>
+                </tr>
+                <tr><td><code class="metric">featbit.messaging.consumer.last_success.age</code></td><td>Time since successful message handling</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="implement-block">
+          <h3>How to implement</h3>
+          <ol class="steps">
+            <li>Instrument provider adapters rather than every caller.</li>
+            <li>
+              Treat provider-confirmed delivery as publish success
+              <button class="help-button" type="button" data-note="delivery-confirmation" aria-label="Explain provider-confirmed delivery">?</button>.
+            </li>
+            <li>Poll durable backlog in the background and expose cached values.</li>
+            <li>
+              Do not expose queue depth for Redis Pub/Sub
+              <button class="help-button" type="button" data-note="provider-queues" aria-label="Explain provider-specific queue metrics">?</button>.
+            </li>
+            <li>Update consumer heartbeat independently from message traffic; count loss only when it is known.</li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="doc-card" id="m3" data-section>
+        <div class="section-meta">
+          <span class="section-id">M3</span>
+          <span class="priority-chip">Required</span>
+          <span class="cost-chip">Low</span>
+        </div>
+        <h2>Flag Change propagation</h2>
+
+        <div class="brief-grid">
+          <article class="brief">
+            <h3>Task goal</h3>
+            <p>Show whether a change completed persistence, publish, consume, and WebSocket fanout.</p>
+          </article>
+          <article class="brief">
+            <h3>Why</h3>
+            <p>Healthy APIs and connected sockets do not prove that the newest configuration is propagating.</p>
+          </article>
+        </div>
+
+        <div class="measure-block">
+          <h3>What to measure</h3>
+          <div class="metric-table-wrap">
+            <table>
+              <thead><tr><th>Metric</th><th>Purpose</th></tr></thead>
+              <tbody>
+                <tr><td><code class="metric">featbit.flag_change.operations</code></td><td>Outcome for persist, publish, consume, and fanout</td></tr>
+                <tr><td><code class="metric">featbit.flag_change.propagation.duration</code></td><td>Persistence-to-consume and persistence-to-fanout latency</td></tr>
+                <tr><td><code class="metric">featbit.flag_change.fanout.connections</code></td><td>Target, successful, and failed sends</td></tr>
+                <tr><td><code class="metric">featbit.flag_change.config.last_success.age</code></td><td>Time since ELS last completed propagation</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="implementation-note">
+            Server success ends at socket send
+            <button class="help-button" type="button" data-note="server-boundary" aria-label="Explain the server-side success boundary">?</button>;
+            it does not mean that an SDK applied the update.
+          </p>
+        </div>
+
+        <div class="implement-block">
+          <h3>How to implement</h3>
+          <ol class="steps">
+            <li>
+              Add a versioned internal message envelope
+              <button class="help-button" type="button" data-note="message-envelope" aria-label="Explain the Flag Change message envelope">?</button>.
+            </li>
+            <li>Deploy backward-compatible consumers before changing producers.</li>
+            <li>Measure persistence around the actual flag write and publish success after provider confirmation.</li>
+            <li>In <a href="../../modules/evaluation-server/src/Streaming/Consumers/FeatureFlagChangeMessageConsumer.cs">FeatureFlagChangeMessageConsumer</a>, record one aggregate fanout result per change.</li>
+            <li>
+              Defer numeric revision lag
+              <button class="help-button" type="button" data-note="revision-guid" aria-label="Explain why revision lag is deferred">?</button>.
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="doc-card" id="m4" data-section>
+        <div class="section-meta">
+          <span class="section-id">M4</span>
+          <span class="priority-chip">Required</span>
+          <span class="cost-chip">Very low</span>
+        </div>
+        <h2>Store availability</h2>
+
+        <div class="brief-grid">
+          <article class="brief">
+            <h3>Task goal</h3>
+            <p>Expose store health, current selection, probe latency, and failover transitions.</p>
+          </article>
+          <article class="brief">
+            <h3>Why</h3>
+            <p>Readiness cannot reveal slow probes, intermittent failures, fallback usage, or failover flapping.</p>
+          </article>
+        </div>
+
+        <div class="measure-block">
+          <h3>What to measure</h3>
+          <div class="metric-table-wrap">
+            <table>
+              <thead><tr><th>Metric</th><th>Purpose</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><code class="metric">featbit.store.available / selected</code></td>
+                  <td>
+                    Last probe result and current route
+                    <button class="help-button" type="button" data-note="available-selected" aria-label="Explain availability versus selection">?</button>
+                  </td>
+                </tr>
+                <tr><td><code class="metric">featbit.store.last_success.age</code></td><td>Time since a provider last passed a probe</td></tr>
+                <tr><td><code class="metric">featbit.store.health_check.operations/duration</code></td><td>Probe outcomes and latency</td></tr>
+                <tr><td><code class="metric">featbit.store.failover.transitions</code></td><td>Provider selection changes</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="implement-block">
+          <h3>How to implement</h3>
+          <ol class="steps">
+            <li>Wrap each probe in <a href="../../modules/evaluation-server/src/Infrastructure/Store/StoreAvailableSentinel.cs">StoreAvailableSentinel</a>.</li>
+            <li>Cache the latest result and timestamp for gauge callbacks.</li>
+            <li>Keep availability and selection separate; count only actual route transitions.</li>
+            <li>Monitor the sentinel loop through M5 worker metrics.</li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="doc-card" id="m5" data-section>
+        <div class="section-meta">
+          <span class="section-id">M5</span>
+          <span class="priority-chip">Required</span>
+          <span class="cost-chip">Very low–low</span>
+        </div>
+        <h2>Buffers and workers</h2>
+
+        <div class="brief-grid">
+          <article class="brief">
+            <h3>Task goal</h3>
+            <p>Detect buffer saturation, overwritten data, flush failure, and background workers that stop.</p>
+          </article>
+          <article class="brief">
+            <h3>Why</h3>
+            <p>Usage, Insights, and PostgreSQL notification paths may remove or overwrite work before persistence succeeds.</p>
+          </article>
+        </div>
+
+        <div class="measure-block">
+          <h3>What to measure</h3>
+          <div class="metric-table-wrap">
+            <table>
+              <thead><tr><th>Metric</th><th>Purpose</th></tr></thead>
+              <tbody>
+                <tr><td><code class="metric">featbit.buffer.items/capacity</code></td><td>Current occupancy and limit</td></tr>
+                <tr><td><code class="metric">featbit.buffer.items.dropped</code></td><td>Items lost through capacity, flush failure, or shutdown</td></tr>
+                <tr><td><code class="metric">featbit.buffer.flush.operations/duration/batch_size</code></td><td>Batch result, latency, and size</td></tr>
+                <tr><td><code class="metric">featbit.worker.running</code></td><td>Whether a loop is active</td></tr>
+                <tr><td><code class="metric">featbit.worker.heartbeat.age</code></td><td>Time since the last loop iteration</td></tr>
+                <tr><td><code class="metric">featbit.worker.last_success.age</code></td><td>Time since a successful non-empty flush</td></tr>
+                <tr><td><code class="metric">featbit.worker.loop.failures</code></td><td>Loop failures</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="implement-block">
+          <h3>How to implement</h3>
+          <ol class="steps">
+            <li>Maintain atomic counts on enqueue, dequeue, and snapshot.</li>
+            <li>
+              Use the bounded-channel item-dropped callback
+              <button class="help-button" type="button" data-note="drop-oldest" aria-label="Explain bounded-channel DropOldest behavior">?</button>.
+            </li>
+            <li>Count an unretried failed batch as dropped; record duration and size once per flush.</li>
+            <li>Update worker heartbeat on idle iterations and last success only after a non-empty successful flush.</li>
+            <li>
+              Measure bytes only when already known
+              <button class="help-button" type="button" data-note="buffer-bytes" aria-label="Explain when to measure buffer bytes">?</button>.
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="doc-card" id="m6" data-section>
+        <div class="section-meta">
+          <span class="section-id">M6</span>
+          <span class="priority-chip">Required</span>
+          <span class="cost-chip">Low</span>
+        </div>
+        <h2>Rate limiting and validation</h2>
+
+        <div class="brief-grid">
+          <article class="brief">
+            <h3>Task goal</h3>
+            <p>Detect Redis rate-limit fail-open and classify streaming validation safely.</p>
+          </article>
+          <article class="brief">
+            <h3>Why</h3>
+            <p>
+              Fail-open protects availability but silently removes rate-limit protection
+              <button class="help-button" type="button" data-note="fail-open" aria-label="Explain rate-limit fail-open">?</button>.
+            </p>
+          </article>
+        </div>
+
+        <div class="measure-block">
+          <h3>What to measure</h3>
+          <div class="metric-table-wrap">
+            <table>
+              <thead><tr><th>Metric</th><th>Purpose</th></tr></thead>
+              <tbody>
+                <tr><td><code class="metric">featbit.ratelimit.decisions</code></td><td>Allowed, rejected, and fail-open decisions</td></tr>
+                <tr><td><code class="metric">featbit.streaming.validation.operations</code></td><td>Accepted, invalid, and unavailable validation results</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="implement-block">
+          <h3>How to implement</h3>
+          <ol class="steps">
+            <li>Record exactly one outcome per limiter acquisition; avoid double-counting rejection.</li>
+            <li>Instrument both Redis and in-memory limiters; separate fail-open from normal allow.</li>
+            <li>
+              Add a finite reason code to validation results
+              <button class="help-button" type="button" data-note="finite-reasons" aria-label="Explain finite validation reason codes">?</button>.
+            </li>
+            <li>Record validation once and remove raw tokens, secrets, or query strings from logs and attributes.</li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="doc-card" id="alerts" data-section>
+        <div class="section-meta">
+          <span class="section-id">A</span>
+          <span class="priority-chip">Required</span>
+          <span class="cost-chip">Operational</span>
+        </div>
+        <h2>Alerts and Collector health</h2>
+
+        <div class="brief-grid">
+          <article class="brief">
+            <h3>Task goal</h3>
+            <p>Turn M1–M6 into actionable alerts and detect telemetry loss.</p>
+          </article>
+          <article class="brief">
+            <h3>Why</h3>
+            <p>An OTel Collector failure can otherwise make an unhealthy service appear quiet.</p>
+          </article>
+        </div>
+
+        <div class="measure-block">
+          <h3>What to measure</h3>
+          <div class="metric-table-wrap">
+            <table>
+              <thead><tr><th>Area</th><th>Minimum alert</th></tr></thead>
+              <tbody>
+                <tr><td>Streaming</td><td>Abnormal closes or unexpected connection change</td></tr>
+                <tr><td>Messaging</td><td>Failure, known drop, stale consumer, or backlog above SLO</td></tr>
+                <tr><td>Flag Change</td><td>Publish without consume, fanout failure, or slow propagation</td></tr>
+                <tr><td>Store</td><td>All providers unavailable or repeated failover</td></tr>
+                <tr><td>Buffer / worker</td><td>High utilization, any drop, or stale worker</td></tr>
+                <tr><td>Rate limit</td><td>Any fail-open</td></tr>
+                <tr><td>Collector</td><td>Receiver refusal, export failure, or queue saturation</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="implement-block">
+          <h3>How to implement</h3>
+          <ol class="steps">
+            <li>
+              Scrape application metrics on <code>8889</code> and Collector self-metrics on <code>8888</code>
+              <button class="help-button" type="button" data-note="collector-ports" aria-label="Explain Collector metrics ports">?</button>.
+            </li>
+            <li>Use sustained conditions and deployment-specific SLOs rather than universal absolute thresholds.</li>
+            <li>
+              Do not alert on <code>last_success.age</code> alone
+              <button class="help-button" type="button" data-note="idle-alerts" aria-label="Explain idle-pipeline alerting">?</button>.
+            </li>
+            <li>Verify that exporter failure never blocks FeatBit traffic.</li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="doc-card" id="t1" data-section>
+        <div class="section-meta">
+          <span class="section-id">T1</span>
+          <span class="priority-chip optional">Optional</span>
+          <span class="cost-chip">Debug / sampled</span>
+        </div>
+        <h2>Flag Change trace</h2>
+
+        <div class="brief-grid">
+          <article class="brief">
+            <h3>Task goal</h3>
+            <p>Locate a sampled propagation delay in persistence, publish, consume, or fanout.</p>
+          </article>
+          <article class="brief">
+            <h3>Why</h3>
+            <p>Metrics show that propagation is unhealthy; a trace locates the responsible stage.</p>
+          </article>
+        </div>
+
+        <div class="measure-block">
+          <h3>What to measure</h3>
+          <div class="trace-flow" aria-label="Flag Change trace stages">
+            <span class="trace-node">persist</span><span class="trace-arrow">→</span>
+            <span class="trace-node">publish</span><span class="trace-arrow">→</span>
+            <span class="trace-node">consume</span><span class="trace-arrow">→</span>
+            <span class="trace-node">fanout</span>
+          </div>
+          <p class="implementation-note">
+            One aggregate fanout span only—never one span per connection.
+          </p>
+        </div>
+
+        <div class="implement-block">
+          <h3>How to implement</h3>
+          <ol class="steps">
+            <li>Propagate W3C trace context in the internal message envelope.</li>
+            <li>Register the custom ActivitySource with <code>OTEL_DOTNET_AUTO_TRACES_ADDITIONAL_SOURCES</code>.</li>
+            <li>
+              Control and sample this trace separately from global tracing
+              <button class="help-button" type="button" data-note="trace-control" aria-label="Explain custom trace controls">?</button>.
+            </li>
+            <li>
+              No SDK participation is required
+              <button class="help-button" type="button" data-note="shared-backend" aria-label="Explain trace correlation across server services">?</button>.
+            </li>
+          </ol>
+          <div class="inline-code-row">
+            <span class="code-chip">FEATBIT_OTEL_CUSTOM_TRACES=flag_change</span>
+            <span class="code-chip">FEATBIT_OTEL_CUSTOM_TRACE_SAMPLE_RATIO=0.05</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="doc-card" id="done" data-section>
+        <div class="section-meta">
+          <span class="section-id">✓</span>
+          <span class="priority-chip">Definition of done</span>
+        </div>
+        <h2>First iteration complete</h2>
+        <ul class="done-list">
+          <li>M1–M6 are visible with bounded attributes.</li>
+          <li>No sensitive or unbounded identifier appears in metrics.</li>
+          <li>Gauge collection performs no I/O or connection scanning.</li>
+          <li>Failure scenarios trigger the intended alerts.</li>
+          <li>Exporter failure does not affect FeatBit availability.</li>
+          <li>Streaming and fanout show no material regression.</li>
+        </ul>
+      </section>
+
+      <p class="footer">
+        Interactive companion to
+        <a href="./otel-operations-stability-priority.md">OpenTelemetry Priorities for Operational Stability</a>.
+      </p>
+    </main>
+
+    <aside class="commentary-panel" id="commentaryPanel" aria-label="Commentary" aria-hidden="true">
+      <header class="panel-header">
+        <div class="panel-heading">
+          <span>Interactive notes</span>
+          <strong id="panelTitle">Commentary</strong>
+        </div>
+        <button class="panel-close" id="panelClose" type="button" aria-label="Close commentary">×</button>
+      </header>
+      <div class="panel-content" id="commentaryContent" aria-live="polite">
+        <div class="empty-commentary">
+          <span class="empty-mark">?</span>
+          Select a question mark in the document to see its explanation.
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <button class="panel-backdrop" id="panelBackdrop" type="button" aria-label="Close commentary"></button>
+
+  <template data-note-template="interaction-model">
+    <article class="note-card" data-rendered-note="interaction-model">
+      <p class="note-context">How to use this page</p>
+      <h3>Reading vs Commentary mode</h3>
+      <p>Reading mode opens one explanation at a time. Commentary mode keeps every explanation visible in the right rail.</p>
+      <p>When a new question is answered later, its explanation can be added as another note without making the main document heavier.</p>
+    </article>
+  </template>
+
+  <template data-note-template="meter-source">
+    <article class="note-card" data-rendered-note="meter-source">
+      <p class="note-context">Foundation</p>
+      <h3>Why a custom Meter source?</h3>
+      <p>A .NET <code>Meter</code> owns custom instruments. Auto-instrumentation exports them only when the source name is registered, so stable source names are part of the telemetry contract.</p>
+    </article>
+  </template>
+
+  <template data-note-template="cardinality">
+    <article class="note-card" data-rendered-note="cardinality">
+      <p class="note-context">Foundation</p>
+      <h3>Finite attributes</h3>
+      <p>Each unique attribute combination creates another time series. Values such as flag keys, users, environments, or connections can grow without bound and make storage and queries expensive.</p>
+      <p>Use small enumerations such as <code>success</code>, <code>failure</code>, <code>kafka</code>, or <code>redis</code>.</p>
+    </article>
+  </template>
+
+  <template data-note-template="nonblocking-gauge">
+    <article class="note-card" data-rendered-note="nonblocking-gauge">
+      <p class="note-context">Foundation</p>
+      <h3>Why callbacks must stay cheap</h3>
+      <p>The metrics SDK invokes observable-gauge callbacks during collection. Database calls, connection scans, or long locks here can delay collection and increase application contention.</p>
+      <p>Update state during normal operations, then let the callback read only atomics or a cached snapshot.</p>
+    </article>
+  </template>
+
+  <template data-note-template="socket-subscription">
+    <article class="note-card" data-rendered-note="socket-subscription">
+      <p class="note-context">M1 · Streaming</p>
+      <h3>Socket vs subscription</h3>
+      <p>A socket is one physical WebSocket connection. A subscription represents one environment receiving updates.</p>
+      <p>Normal connections are usually 1:1. A FeatBit Agent connection can be 1:N, so both numbers are needed for capacity and impact analysis.</p>
+    </article>
+  </template>
+
+  <template data-note-template="environment-view">
+    <article class="note-card" data-rendered-note="environment-view">
+      <p class="note-context">M1 · Streaming</p>
+      <h3>Why <code>env.id</code> is optional</h3>
+      <p>Per-environment connection counts are useful during investigation, but a SaaS installation may have many environments. Keeping this view off by default protects metric cardinality.</p>
+      <p>Enable it for a bounded set or a limited diagnostic window.</p>
+    </article>
+  </template>
+
+  <template data-note-template="heartbeat-success">
+    <article class="note-card" data-rendered-note="heartbeat-success">
+      <p class="note-context">M2 · Messaging</p>
+      <h3>Heartbeat vs last success</h3>
+      <p>A consumer can be healthy while no messages arrive. Its heartbeat should remain fresh even though <code>last_success.age</code> increases.</p>
+      <p>Use heartbeat for worker liveness; use last success only together with incoming work or backlog.</p>
+    </article>
+  </template>
+
+  <template data-note-template="delivery-confirmation">
+    <article class="note-card" data-rendered-note="delivery-confirmation">
+      <p class="note-context">M2 · Messaging</p>
+      <h3>Enqueued is not delivered</h3>
+      <p>For example, Kafka can accept a local enqueue before the broker confirms delivery. A control-plane publish should be marked successful only after the provider reports success.</p>
+      <p>High-throughput event paths may remain callback-based, but the callback must own the final outcome metric.</p>
+    </article>
+  </template>
+
+  <template data-note-template="provider-queues">
+    <article class="note-card" data-rendered-note="provider-queues">
+      <p class="note-context">M2 · Messaging</p>
+      <h3>Queue metrics depend on the provider</h3>
+      <ul>
+        <li>Kafka: consumer lag and message timestamp.</li>
+        <li>PostgreSQL: pending row count and oldest enqueue time.</li>
+        <li>Redis list: list length; age needs an enqueue timestamp.</li>
+        <li>Redis Pub/Sub: no durable backlog exists.</li>
+      </ul>
+    </article>
+  </template>
+
+  <template data-note-template="server-boundary">
+    <article class="note-card" data-rendered-note="server-boundary">
+      <p class="note-context">M3 · Flag Change</p>
+      <h3>What fanout success proves</h3>
+      <p>It proves that ELS completed its socket-send operation. It does not prove that the network delivered the message, or that a client SDK received and applied it.</p>
+      <p>Client application outcomes require SDK-side instrumentation and are outside this iteration.</p>
+    </article>
+  </template>
+
+  <template data-note-template="message-envelope">
+    <article class="note-card" data-rendered-note="message-envelope">
+      <p class="note-context">M3 · Flag Change</p>
+      <h3>Why add an envelope?</h3>
+      <p>The current message is the flag payload itself. A small envelope adds a stable change ID, occurrence time, schema version, and later trace context without changing the SDK protocol.</p>
+      <p>Consumers should accept both formats during a rolling upgrade.</p>
+    </article>
+  </template>
+
+  <template data-note-template="revision-guid">
+    <article class="note-card" data-rendered-note="revision-guid">
+      <p class="note-context">M3 · Flag Change</p>
+      <h3>Why there is no numeric revision lag</h3>
+      <p>FeatBit currently uses a GUID for a flag revision. GUIDs provide identity, not ordering, so subtracting two revisions is meaningless.</p>
+      <p>A lag metric needs a monotonic environment or configuration sequence first.</p>
+    </article>
+  </template>
+
+  <template data-note-template="available-selected">
+    <article class="note-card" data-rendered-note="available-selected">
+      <p class="note-context">M4 · Store</p>
+      <h3>Availability vs selection</h3>
+      <p><code>available</code> is the latest health-probe result. <code>selected</code> is the provider currently used for routing.</p>
+      <p>They can differ: current code may retain the previous selection after every provider fails. Showing both makes this state visible instead of hiding it.</p>
+    </article>
+  </template>
+
+  <template data-note-template="drop-oldest">
+    <article class="note-card" data-rendered-note="drop-oldest">
+      <p class="note-context">M5 · Buffers</p>
+      <h3><code>TryWrite</code> can hide a drop</h3>
+      <p>With <code>DropOldest</code>, a channel may accept the new item and return success while evicting an older item.</p>
+      <p>Use the item-dropped callback or an equivalent wrapper to count the actual loss.</p>
+    </article>
+  </template>
+
+  <template data-note-template="buffer-bytes">
+    <article class="note-card" data-rendered-note="buffer-bytes">
+      <p class="note-context">M5 · Buffers</p>
+      <h3>Bytes are optional</h3>
+      <p>Do not serialize buffered objects only to calculate a metric—the measurement could cost more than the work being observed.</p>
+      <p>Use item count and capacity unless byte size is already available.</p>
+    </article>
+  </template>
+
+  <template data-note-template="fail-open">
+    <article class="note-card" data-rendered-note="fail-open">
+      <p class="note-context">M6 · Rate limiting</p>
+      <h3>Fail-open trade-off</h3>
+      <p>When Redis is unavailable, FeatBit accepts the request so the service remains available. The request is valid, but rate-limit protection was bypassed.</p>
+      <p>Record this separately from a normal allow and alert whenever it occurs.</p>
+    </article>
+  </template>
+
+  <template data-note-template="finite-reasons">
+    <article class="note-card" data-rendered-note="finite-reasons">
+      <p class="note-context">M6 · Validation</p>
+      <h3>Use reason codes, not messages</h3>
+      <p>Free-text errors may contain tokens, secrets, or unbounded values. A small enum such as <code>expired_token</code>, <code>type_mismatch</code>, or <code>backend_unavailable</code> is safe and queryable.</p>
+    </article>
+  </template>
+
+  <template data-note-template="collector-ports">
+    <article class="note-card" data-rendered-note="collector-ports">
+      <p class="note-context">Alerts</p>
+      <h3>Two metric surfaces</h3>
+      <p>Port <code>8889</code> exposes application metrics exported through the Collector. Port <code>8888</code> exposes the Collector's own health and pipeline metrics.</p>
+      <p>Both are required: otherwise the observability pipeline can fail silently.</p>
+    </article>
+  </template>
+
+  <template data-note-template="idle-alerts">
+    <article class="note-card" data-rendered-note="idle-alerts">
+      <p class="note-context">Alerts</p>
+      <h3>Idle is not necessarily unhealthy</h3>
+      <p>If no changes or messages are expected, <code>last_success.age</code> naturally grows. Alert only when it is stale and there is evidence of incoming work, backlog, or publish activity.</p>
+    </article>
+  </template>
+
+  <template data-note-template="trace-control">
+    <article class="note-card" data-rendered-note="trace-control">
+      <p class="note-context">T1 · Trace</p>
+      <h3>Why use a FeatBit-specific switch?</h3>
+      <p>The global OTel sampler also affects automatic HTTP and dependency traces. A category switch enables the Flag Change trace for diagnosis without changing every other trace.</p>
+      <p>Check the switch before building tags or starting timers so disabled overhead stays minimal.</p>
+    </article>
+  </template>
+
+  <template data-note-template="shared-backend">
+    <article class="note-card" data-rendered-note="shared-backend">
+      <p class="note-context">T1 · Trace</p>
+      <h3>How the two server services connect</h3>
+      <p>The back-end places W3C trace context in the internal MQ envelope, and ELS continues from that context. No customer SDK is involved.</p>
+      <p>If both services export to the same trace backend, the UI shows one joined trace. With separate backends, each half still works but cannot be displayed as one trace.</p>
+    </article>
+  </template>
+
+  <script>
+    (() => {
+      const body = document.body;
+      const panel = document.getElementById("commentaryPanel");
+      const panelContent = document.getElementById("commentaryContent");
+      const panelTitle = document.getElementById("panelTitle");
+      const panelClose = document.getElementById("panelClose");
+      const panelBackdrop = document.getElementById("panelBackdrop");
+      const modeToggle = document.getElementById("modeToggle");
+      const modeLabel = document.getElementById("modeLabel");
+      const progress = document.getElementById("readingProgress");
+      const templates = [...document.querySelectorAll("template[data-note-template]")];
+      const templateMap = new Map(templates.map((template) => [template.dataset.noteTemplate, template]));
+      let commentaryMode = false;
+      let lastTrigger = null;
+
+      function setPanelOpen(open) {
+        body.classList.toggle("panel-open", open);
+        panel.setAttribute("aria-hidden", String(!open));
+      }
+
+      function cloneNote(id) {
+        const template = templateMap.get(id);
+        return template ? template.content.cloneNode(true) : null;
+      }
+
+      function renderSingle(id) {
+        const note = cloneNote(id);
+        if (!note) return;
+        panelTitle.textContent = "Commentary";
+        panelContent.replaceChildren(note);
+        setPanelOpen(true);
+      }
+
+      function renderAll() {
+        const fragment = document.createDocumentFragment();
+        templates.forEach((template) => fragment.append(template.content.cloneNode(true)));
+        panelTitle.textContent = "All commentary";
+        panelContent.replaceChildren(fragment);
+        setPanelOpen(true);
+      }
+
+      function focusRenderedNote(id) {
+        requestAnimationFrame(() => {
+          const note = panelContent.querySelector(`[data-rendered-note="${id}"]`);
+          if (!note) return;
+          panelContent.querySelectorAll(".note-card.highlight").forEach((card) => card.classList.remove("highlight"));
+          note.classList.add("highlight");
+          note.scrollIntoView({ block: "nearest", behavior: "smooth" });
+          window.setTimeout(() => note.classList.remove("highlight"), 1500);
+        });
+      }
+
+      function setCommentaryMode(enabled) {
+        commentaryMode = enabled;
+        body.classList.toggle("commentary-mode", enabled);
+        modeToggle.setAttribute("aria-pressed", String(enabled));
+        modeLabel.textContent = enabled ? "Reading mode" : "Commentary mode";
+        if (enabled) {
+          renderAll();
+        } else {
+          setPanelOpen(false);
+        }
+      }
+
+      document.querySelectorAll(".help-button[data-note]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const id = button.dataset.note;
+          lastTrigger = button;
+          if (commentaryMode) {
+            if (!body.classList.contains("panel-open")) renderAll();
+            focusRenderedNote(id);
+          } else {
+            renderSingle(id);
+          }
+        });
+      });
+
+      modeToggle.addEventListener("click", () => setCommentaryMode(!commentaryMode));
+
+      panelClose.addEventListener("click", () => {
+        if (commentaryMode) {
+          setCommentaryMode(false);
+        } else {
+          setPanelOpen(false);
+        }
+        lastTrigger?.focus();
+      });
+
+      panelBackdrop.addEventListener("click", () => {
+        if (commentaryMode) setCommentaryMode(false);
+        else setPanelOpen(false);
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key !== "Escape" || !body.classList.contains("panel-open")) return;
+        if (commentaryMode) setCommentaryMode(false);
+        else setPanelOpen(false);
+        lastTrigger?.focus();
+      });
+
+      const navLinks = [...document.querySelectorAll(".sidebar a")];
+      const sections = [...document.querySelectorAll("[data-section]")];
+      const observer = new IntersectionObserver((entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (!visible) return;
+        navLinks.forEach((link) => {
+          const active = link.getAttribute("href") === `#${visible.target.id}`;
+          link.classList.toggle("active", active);
+          if (active) link.setAttribute("aria-current", "location");
+          else link.removeAttribute("aria-current");
+        });
+      }, { rootMargin: "-15% 0px -68% 0px", threshold: [0, 0.2, 0.6] });
+      sections.forEach((section) => observer.observe(section));
+
+      function updateProgress() {
+        const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+        const ratio = scrollable > 0 ? Math.min(1, window.scrollY / scrollable) : 0;
+        progress.style.width = `${ratio * 100}%`;
+      }
+      updateProgress();
+      window.addEventListener("scroll", updateProgress, { passive: true });
+      window.addEventListener("resize", updateProgress);
+    })();
+  </script>
+</body>
+</html>
