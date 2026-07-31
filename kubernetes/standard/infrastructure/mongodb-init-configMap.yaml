@@ -68,6 +68,7 @@ data:
             _id: organizationId,
             workspaceId: workspaceId,
             name: "playground",
+            key: "playground",
             initialized: false,
             createdAt: new Date(),
             updatedAt: new Date()
@@ -90,6 +91,22 @@ data:
         }
     )
     print('collection seeded: OrganizationUsers')
+
+    // seed workspace users (links the seeded user to the seeded workspace).
+    // Without this row, /api/v1/user/workspaces returns empty and the front-end
+    // auth guard silently logs the user out after login.
+    print('clean and seed collection: WorkspaceUsers')
+    db.WorkspaceUsers.deleteMany({})
+    db.WorkspaceUsers.insertOne(
+        {
+            _id: UUID(),
+            workspaceId: workspaceId,
+            userId: userId,
+            createdAt: new Date(),
+            updatedAt: new Date()
+        }
+    )
+    print('collection seeded: WorkspaceUsers')
 
     // seed system managed policies
     print('clean and seed collection: Policies')

@@ -20,6 +20,12 @@ public class EntityFrameworkCoreService<TEntity>(AppDbContext dbContext) : IServ
 
     protected IDbConnection DbConnection => dbContext.Database.GetDbConnection();
 
+    // Exposed so derived services can detach a stale tracked entity after a
+    // DbUpdateConcurrencyException (see FeatureFlagService's retry-on-conflict loops) —
+    // without this, re-querying on retry would return the same stale tracked instance
+    // via the context's identity map instead of the fresh row.
+    protected AppDbContext DbContext => dbContext;
+
     protected async Task<int> SaveChangesAsync() => await dbContext.SaveChangesAsync();
 
     public async Task<TEntity> GetAsync(Guid id)

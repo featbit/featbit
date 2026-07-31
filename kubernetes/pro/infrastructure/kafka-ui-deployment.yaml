@@ -1,0 +1,55 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-ui
+  namespace: featbit
+spec:
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: kafka-ui
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: kafka-ui
+  name: kafka-ui
+  namespace: featbit
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka-ui
+  template:
+    metadata:
+      labels:
+        app: kafka-ui
+    spec:
+      imagePullSecrets:
+        - name: registry-credentials
+      containers:
+        - name: kafka-ui
+          image: provectuslabs/kafka-ui:latest
+          env:
+            - name: KAFKA_CLUSTERS_0_NAME
+              value: featbit-main
+            - name: KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS
+              value: kafka:9092
+            - name: KAFKA_CLUSTERS_1_NAME
+              value: featbit-aggregate
+            - name: KAFKA_CLUSTERS_1_BOOTSTRAPSERVERS
+              value: kafka-aggregate:9092
+            - name: DYNAMIC_CONFIG_ENABLED
+              value: "true"
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              memory: 384Mi
+              cpu: 50m
+            limits:
+              memory: 640Mi
+              cpu: 750m
+      restartPolicy: Always

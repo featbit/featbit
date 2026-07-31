@@ -1,5 +1,6 @@
 using Confluent.Kafka;
 using Domain.Messages;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -10,9 +11,11 @@ public partial class KafkaMessageConsumer : BackgroundService
     private readonly ILogger<KafkaMessageConsumer> _logger;
     private readonly IConsumer<Null, string> _consumer;
     private readonly IEnumerable<IMessageConsumer> _messageHandlers;
+    private readonly string[] _topics;
 
     public KafkaMessageConsumer(
         ConsumerConfig config,
+        IConfiguration configuration,
         ILogger<KafkaMessageConsumer> logger,
         IEnumerable<IMessageConsumer> messageHandlers)
     {
@@ -21,6 +24,9 @@ public partial class KafkaMessageConsumer : BackgroundService
 
         config.GroupId = $"evaluation-server-{Guid.NewGuid()}";
         _consumer = new ConsumerBuilder<Null, string>(config).Build();
+        _topics = configuration.UseControlPlane()
+            ? [Topics.FeatureFlagChange, Topics.SegmentChange, Topics.ControlPlaneCommand]
+            : [Topics.FeatureFlagChange, Topics.SegmentChange];
     }
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -33,12 +39,10 @@ public partial class KafkaMessageConsumer : BackgroundService
 
     private async Task StartConsumerLoop(CancellationToken cancellationToken)
     {
-        var topics = new[] { Topics.FeatureFlagChange, Topics.SegmentChange };
-
-        _consumer.Subscribe(topics);
+        _consumer.Subscribe(_topics);
         _logger.LogInformation(
-            "Start consuming flag & segment change messages through topics: {Topics}.",
-            string.Join(',', topics)
+            "Start consuming messages through topics: {Topics}.",
+            string.Join(',', _topics)
         );
 
         ConsumeResult<Null, string>? consumeResult = null;

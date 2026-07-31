@@ -6,6 +6,8 @@ This directory contains these compose files for development purposes, including
   use MongoDb as the database.
 - [docker-compose-dev-postgres.yml](docker-compose-dev-postgres.yml): FeatBit Standard, images will be built from code
   directly, and use Postgres as the database
+- [docker-compose-dev-controlplane.yml](docker-compose-dev-controlplane.yml): FeatBit Standard with the Control Plane
+  enabled, images will be built from code directly, and use Postgres and Kafka
 - [docker-compose-pro-dev.yml](docker-compose-pro-dev.yml): FeatBit Professional, images will be built from code
   directly
 - [docker-compose-infra.yml](docker-compose-infra.yml): FeatBit infrastructures

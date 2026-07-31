@@ -6,6 +6,7 @@ namespace Application.IntegrationTests.WebSockets;
 
 [Trait("Category", "Host")]
 [Collection(nameof(TestApp))]
+[Trait("Category", "Integration")]
 public class PingTests
 {
     private readonly TestApp _app;

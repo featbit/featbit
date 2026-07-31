@@ -1,0 +1,69 @@
+# MirrorMaker — Local Replication (kafka → kafka-aggregate, same cluster)
+#
+# Replicates ALL featbit-* messages from the local main broker (kafka:9092)
+# to the local aggregate broker (kafka-aggregate:9092).
+#
+# All app consumers (api-server, control-plane, evaluation-server) read from
+# kafka-aggregate; all producers write to kafka (main). This MirrorMaker is
+# the bridge between production and consumption within the same cluster.
+#
+# The remote MirrorMaker instance (kafka-mirrormaker-remote) handles
+# replicating flag/segment change events into the OTHER cluster's aggregate.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: kafka-mirrormaker-local
+  name: kafka-mirrormaker-local
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka-mirrormaker-local
+  template:
+    metadata:
+      labels:
+        app: kafka-mirrormaker-local
+    spec:
+      securityContext:
+        runAsUser: 1001
+        runAsGroup: 1001
+      imagePullSecrets:
+        - name: registry-credentials
+      containers:
+        - name: mirrormaker
+          image: bitnamilegacy/kafka:3.8
+          command:
+            - /bin/bash
+            - -c
+            - |
+              mkdir -p /tmp/mm
+
+              cat > /tmp/mm/consumer.properties << 'EOF'
+              bootstrap.servers=kafka:9092
+              group.id=featbit-mirrormaker-local
+              auto.offset.reset=earliest
+              auto.commit.enable=true
+              EOF
+
+              cat > /tmp/mm/producer.properties << 'EOF'
+              bootstrap.servers=kafka-aggregate:9092
+              EOF
+
+              echo "Starting local MirrorMaker: kafka:9092 -> kafka-aggregate:9092"
+              exec /opt/bitnami/kafka/bin/kafka-mirror-maker.sh \
+                --consumer.config /tmp/mm/consumer.properties \
+                --producer.config /tmp/mm/producer.properties \
+                --whitelist 'featbit-.*' \
+                --num.streams 1
+          resources:
+            requests:
+              memory: 192Mi
+              cpu: 50m
+              ephemeral-storage: 512Mi
+            limits:
+              memory: 320Mi
+              cpu: 750m
+              ephemeral-storage: 1Gi
+      restartPolicy: Always
+status: {}

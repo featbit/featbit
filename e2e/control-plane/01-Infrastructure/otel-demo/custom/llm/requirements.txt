@@ -1,0 +1,10 @@
+# OpenTelemetry Demo llm service — FeatBit-instrumented variant.
+# flagd / OpenFeature deps removed; FeatBit native Python SDK added.
+# OpenTelemetry distro added so the Flask app is auto-instrumented and flag
+# values can be recorded as span attributes (see app.py / Dockerfile entrypoint).
+fb-python-sdk==1.1.7
+flask==3.1.2
+opentelemetry-distro==0.60b1
+opentelemetry-exporter-otlp-proto-grpc==1.39.1
+python-dotenv==1.2.1
+python-json-logger==4.0.0

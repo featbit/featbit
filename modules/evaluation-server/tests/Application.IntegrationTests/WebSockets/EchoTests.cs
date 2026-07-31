@@ -5,6 +5,7 @@ namespace Application.IntegrationTests.WebSockets;
 
 [Trait("Category", "Host")]
 [Collection(nameof(TestApp))]
+[Trait("Category", "Integration")]
 public class EchoTests
 {
     private readonly TestApp _app;

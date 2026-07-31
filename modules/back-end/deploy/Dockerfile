@@ -34,7 +34,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0
 RUN apt-get update && apt-get install -y curl unzip && rm -rf /var/lib/apt/lists/*
 
 ARG INSTALL_DIR
-ARG OTEL_VERSION=1.7.0
+ARG OTEL_VERSION=1.16.0
 
 # ensure we listen on any IP Address
 ENV ASPNETCORE_URLS=http://*:5000 \
@@ -43,11 +43,11 @@ ENV ASPNETCORE_URLS=http://*:5000 \
     DOTNET_SHARED_STORE=$INSTALL_DIR/store \
     ENABLE_OPENTELEMETRY=false \
     OTEL_DOTNET_AUTO_HOME=$INSTALL_DIR \
-    OTEL_SERVICE_NAME=featbit-els \
+    OTEL_SERVICE_NAME=featbit-api \
     OTEL_TRACES_EXPORTER=otlp \
     OTEL_METRICS_EXPORTER=otlp \
     OTEL_LOGS_EXPORTER=otlp \
-    OTEL_EXPORTER_OTLP_ENDPOINT=http://locahost:4317 \
+    OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317 \
     OTEL_EXPORTER_OTLP_PROTOCOL=grpc \
     OTEL_EXPORTER_OTLP_INSECURE=true
 

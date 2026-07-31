@@ -40,6 +40,14 @@ public class AccessTokenService(MongoDbClient mongoDb) : MongoDbService<AccessTo
         return new PagedResult<AccessToken>(totalCount, items);
     }
 
+    public async Task RefreshLastUsedAtAsync(Guid id)
+    {
+        var filter = Builders<AccessToken>.Filter.Eq(x => x.Id, id);
+        var update = Builders<AccessToken>.Update.Set(x => x.LastUsedAt, DateTime.UtcNow);
+
+        await Collection.UpdateOneAsync(filter, update);
+    }
+
     public Task<bool> IsNameUsedAsync(Guid organizationId, string name)
     {
         return AnyAsync(x =>

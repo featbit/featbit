@@ -17,6 +17,8 @@ spec:
     spec:
       containers:
         - env:
+            - name: Jwt__Key
+              value: please_change_me_to_a_secure_secret_key
             - name: MongoDb__ConnectionString
               value: mongodb://admin:password@mongodb:27017
             - name: MongoDb__Database

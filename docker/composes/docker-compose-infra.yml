@@ -1,7 +1,7 @@
 name: featbit-infra
 services:
   mongodb:
-    image: mongo:5.0.32
+    image: ${MONGO_COMPOSE_IMAGE:-mongo:5.0.32}
     restart: on-failure
     ports:
       - "27017:27017"
@@ -16,7 +16,7 @@ services:
       - featbit-network
 
   redis:
-    image: bitnamilegacy/redis:6.2.10
+    image: ${REDIS_IMAGE:-bitnamilegacy/redis:6.2.10}
     restart: on-failure
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
@@ -28,7 +28,7 @@ services:
       - redis:/data
 
   kafka:
-    image: bitnamilegacy/kafka:3.5
+    image: ${KAFKA_IMAGE:-bitnamilegacy/kafka:3.5}
     restart: on-failure
     ports:
       - '9092:9092'
@@ -49,7 +49,7 @@ services:
       - kafka:/bitnami/kafka
 
   init-kafka-topics:
-    image: bitnamilegacy/kafka:3.5
+    image: ${KAFKA_IMAGE:-bitnamilegacy/kafka:3.5}
     depends_on:
       kafka:
         condition: service_started
@@ -64,12 +64,21 @@ services:
         /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-segment-change;
         /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-endusers;
         /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-insights;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-control-plane-feature-flag-change;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-control-plane-segment-change;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-control-plane-secret-change;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-control-plane-license-change;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-control-plane-command;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-control-plane-web-hooks;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-connection-made;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-connection-closed;
+        /opt/bitnami/kafka/bin/kafka-topics.sh --create --if-not-exists --bootstrap-server kafka:9092 --partitions 1 --replication-factor 1 --topic featbit-pod-heartbeat;
         echo "Seed kafka topic finished." 
     networks:
       - featbit-network
 
   clickhouse-server:
-    image: clickhouse/clickhouse-server:23.7
+    image: ${CLICKHOUSE_IMAGE:-clickhouse/clickhouse-server:23.7}
     restart: on-failure
     depends_on:
       - kafka
@@ -88,7 +97,7 @@ services:
       - clickhouse-server:/var/lib/clickhouse
       
   postgresql:
-    image: postgres:15.10
+    image: ${POSTGRES_COMPOSE_IMAGE:-postgres:15.10}
     restart: on-failure
     ports:
       - "5432:5432"

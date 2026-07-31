@@ -1,0 +1,62 @@
+[tool.poetry]
+name = "control-plane-automation"
+version = "1.0.0"
+description = "Control-plane scenario automation for cross-DC correctness and resilience testing"
+authors = ["FeatBit QA"]
+readme = "README.md"
+packages = [
+    { include = "cli" },
+    { include = "core" },
+    { include = "scenarios" },
+    { include = "scripts" },
+]
+
+[tool.poetry.dependencies]
+python = ">=3.9,<4.0"
+pytest = ">=7.4.0"
+requests = ">=2.31.0"
+click = ">=8.1.0"
+pydantic = ">=2.0.0"
+tenacity = ">=8.2.0"
+python-dotenv = ">=1.0.0"
+colorama = ">=0.4.6"
+structlog = ">=24.4.0"
+rich = ">=13.0.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest-cov = ">=4.1.0"
+black = ">=23.0.0"
+isort = ">=5.12.0"
+flake8 = ">=6.0.0"
+mypy = ">=1.0.0"
+
+[tool.poetry.scripts]
+automation = "cli.main:cli"
+
+[tool.pytest.ini_options]
+testpaths = ["scenarios", "tests"]
+python_files = ["test_*.py", "*_test.py"]
+addopts = "-v --strict-markers"
+markers = [
+    "cp02: CP-02 cross-DC correctness scenarios",
+    "cp03: CP-03 resilience scenarios",
+    "integration: integration tests requiring live environment",
+]
+
+[tool.black]
+line-length = 100
+target-version = ["py39"]
+
+[tool.isort]
+profile = "black"
+line_length = 100
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+
+[build-system]
+requires = ["poetry-core>=1.9.0"]
+build-backend = "poetry.core.masonry.api"

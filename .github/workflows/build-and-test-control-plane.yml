@@ -1,0 +1,50 @@
+name: Build and Test Control Plane
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'modules/control-plane/**'
+      - '.github/build-and-test-control-plane.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'modules/control-plane/**'
+      - '.github/build-and-test-control-plane.yml'
+
+jobs:
+  validate:
+    name: build-and-test-control-plane
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: modules/control-plane
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore Packages
+        run: dotnet restore
+
+      - name: Build Solution
+        run: dotnet build -c Release --no-restore
+
+      - name: Run Tests
+        # Category=Integration tests require external Docker infrastructure (Mongo, Redis)
+        # that CI does not provision; they are local-only.
+        run: dotnet test -c Release --no-build --verbosity normal --filter "Category!=Integration" --collect:"XPlat Code Coverage" --results-directory TestResults
+
+      - name: Upload Coverage Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-control-plane
+          path: modules/control-plane/TestResults/**/coverage.cobertura.xml
+          if-no-files-found: warn

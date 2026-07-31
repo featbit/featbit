@@ -1,0 +1,22 @@
+{
+  "description": [
+    "Local override for infra-image-map.json.",
+    "Values here are registry-relative paths appended to CUSTOM_IMAGE_REGISTRY.",
+    "This file is gitignored — edit freely without affecting other contributors.",
+    "",
+    "These paths match the Harbor dockerhub-proxy namespace layout:",
+    "  dockerhub/bitnamilegacy/  — Bitnami legacy images (kafka, redis, etc.)",
+    "  dockerhub/library/        — Official Docker Library images",
+    "  dockerhub/clickhouse/     — ClickHouse official images",
+    "  dockerhub/provectuslabs/  — Provectus images"
+  ],
+  "images": {
+    "bitnamilegacy/kafka:3.8":            "dockerhub/bitnamilegacy/kafka:3.8",
+    "bitnamilegacy/redis:7.2":            "dockerhub/bitnamilegacy/redis:7.2",
+    "mongo:7.0":                          "dockerhub/library/mongo:7.0",
+    "clickhouse/clickhouse-server:24.8":  "dockerhub/clickhouse/clickhouse-server:24.8",
+    "busybox:1.36":                       "dockerhub/library/busybox:1.36",
+    "provectuslabs/kafka-ui:latest":      "dockerhub/provectuslabs/kafka-ui:latest",
+    "postgres:15.10":                     "dockerhub/library/postgres:15.10"
+  }
+}

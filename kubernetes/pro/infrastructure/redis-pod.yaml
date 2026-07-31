@@ -5,15 +5,23 @@ metadata:
     app: redis
   name: redis
 spec:
+  imagePullSecrets:
+    - name: registry-credentials
   containers:
     - env:
         - name: ALLOW_EMPTY_PASSWORD
           value: "yes"
-      image: bitnamilegacy/redis:6.2.10
+      image: bitnamilegacy/redis:7.2
       name: redis
       ports:
         - containerPort: 6379
-      resources: {}
+      resources:
+        requests:
+          memory: 64Mi
+          cpu: 25m
+        limits:
+          memory: 192Mi
+          cpu: 500m
       volumeMounts:
         - mountPath: /data
           name: redis

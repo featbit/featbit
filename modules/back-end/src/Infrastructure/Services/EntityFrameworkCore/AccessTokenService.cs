@@ -40,6 +40,13 @@ public class AccessTokenService(AppDbContext dbContext)
         return new PagedResult<AccessToken>(totalCount, items);
     }
 
+    public async Task RefreshLastUsedAtAsync(Guid id)
+    {
+        await Queryable
+            .Where(x => x.Id == id)
+            .ExecuteUpdateAsync(x => x.SetProperty(token => token.LastUsedAt, DateTime.UtcNow));
+    }
+
     public async Task<bool> IsNameUsedAsync(Guid organizationId, string name)
     {
         var isNameUsed = await AnyAsync(x =>
