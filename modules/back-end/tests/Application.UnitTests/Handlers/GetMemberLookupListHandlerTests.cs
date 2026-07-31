@@ -94,7 +94,7 @@ public class GetMemberLookupListHandlerTests
 
     private static IMapper CreateMapper()
     {
-        var configuration = new MapperConfiguration(config => config.AddProfile<MapperProfile>());
+        var configuration = new MapperConfiguration(config => config.AddProfile<Members.MapperProfile>());
         configuration.AssertConfigurationIsValid();
         return configuration.CreateMapper();
     }

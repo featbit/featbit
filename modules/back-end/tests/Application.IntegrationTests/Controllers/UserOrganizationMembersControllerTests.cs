@@ -2,10 +2,9 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Api;
-using Application.Bases;
+using Api.Controllers;
 using Application.Bases.Models;
 using Application.Members;
-using MediatR;
 using Moq;
 
 namespace Application.IntegrationTests.Controllers;
