@@ -1785,13 +1785,14 @@
         <div class="brief-grid">
           <article class="brief">
             <h3>Task goal</h3>
-            <p>Detect Redis rate-limit fail-open and classify streaming validation safely.</p>
+            <p>Observe all ELS rate-limit decisions—whether in-memory or Redis-backed—and classify Streaming validation results.</p>
           </article>
           <article class="brief">
             <h3>Why</h3>
             <p>
-              Fail-open protects availability but silently removes rate-limit protection
-              <button class="help-button" type="button" data-note="fail-open" aria-label="Explain rate-limit fail-open">?</button>.
+              Rejections reveal overload or limits set too low; Redis fail-open silently removes distributed protection
+              <button class="help-button" type="button" data-note="fail-open" aria-label="Explain rate-limit storage and fail-open">?</button>;
+              validation results separate bad client input from a server dependency outage.
             </p>
           </article>
         </div>
@@ -1802,8 +1803,8 @@
             <table>
               <thead><tr><th>Metric</th><th>Purpose</th></tr></thead>
               <tbody>
-                <tr><td><code class="metric">featbit.ratelimit.decisions</code></td><td>Allowed, rejected, and fail-open decisions</td></tr>
-                <tr><td><code class="metric">featbit.streaming.validation.operations</code></td><td>Accepted, invalid, and unavailable validation results</td></tr>
+                <tr><td><code class="metric">featbit.ratelimit.decisions</code></td><td>All in-memory and Redis-backed allowed/rejected decisions; fail-open applies only to Redis</td></tr>
+                <tr><td><code class="metric">featbit.streaming.validation.operations</code></td><td>Accepted, invalid, and unavailable results that distinguish client errors from dependency failures</td></tr>
               </tbody>
             </table>
           </div>
@@ -1834,11 +1835,15 @@
         <div class="brief-grid">
           <article class="brief">
             <h3>Task goal</h3>
-            <p>Turn M1–M6 into actionable alerts and detect telemetry loss.</p>
+            <p>Turn M1–M6 into dashboards and actionable alerts in the monitoring backend, and detect telemetry loss.</p>
           </article>
           <article class="brief">
             <h3>Why</h3>
-            <p>An OTel Collector failure can otherwise make an unhealthy service appear quiet.</p>
+            <p>
+              FeatBit emits signals; Prometheus and Grafana aggregate and evaluate them over time
+              <button class="help-button" type="button" data-note="alert-placement" aria-label="Explain where dashboards and alerts run">?</button>.
+              Collector self-metrics prevent a broken telemetry pipeline from making an unhealthy service appear quiet.
+            </p>
           </article>
         </div>
 
@@ -1867,6 +1872,7 @@
               Scrape application metrics on <code>8889</code> and Collector self-metrics on <code>8888</code>
               <button class="help-button" type="button" data-note="collector-ports" aria-label="Explain Collector metrics ports">?</button>.
             </li>
+            <li>Build dashboards in Grafana; evaluate alert rules in Grafana Alerting or Prometheus, using Alertmanager when Prometheus owns the rules.</li>
             <li>Use sustained conditions and deployment-specific SLOs rather than universal absolute thresholds.</li>
             <li>
               Do not alert on <code>last_success.age</code> alone
@@ -1892,7 +1898,10 @@
           </article>
           <article class="brief">
             <h3>Why</h3>
-            <p>Metrics show that propagation is unhealthy; a trace locates the responsible stage.</p>
+            <p>
+              Metrics show that propagation is unhealthy; a sampled trace locates whether one Flag Change was delayed or failed in persistence, publish, consume, or fanout
+              <button class="help-button" type="button" data-note="trace-diagnosis" aria-label="Explain problems diagnosed by the Flag Change trace">?</button>.
+            </p>
           </article>
         </div>
 
@@ -1905,7 +1914,10 @@
             <span class="trace-node">fanout</span>
           </div>
           <p class="implementation-note">
-            One aggregate fanout span only—never one span per connection.
+            Create one <code>flag_change.fanout</code> span for each Flag Change, covering the whole batch of WebSocket sends; do not create a span for every connection
+            <button class="help-button" type="button" data-note="aggregate-fanout" aria-label="Explain one aggregate fanout span">?</button>.
+            The trace ends at the ELS socket-send boundary
+            <button class="help-button" type="button" data-note="server-boundary" aria-label="Explain the server-side trace boundary">?</button>.
           </p>
         </div>
 
@@ -2244,8 +2256,9 @@
   <template data-note-template="fail-open">
     <article class="note-card" data-rendered-note="fail-open">
       <p class="note-context">M6 · Rate limiting</p>
-      <h3>Fail-open trade-off</h3>
-      <p>When Redis is unavailable, FeatBit accepts the request so the service remains available. The request is valid, but rate-limit protection was bypassed.</p>
+      <h3>Redis is optional</h3>
+      <p>By default, each ELS instance keeps its own rate-limit state in memory. Redis is used only when distributed limiting is enabled and Redis is the configured cache, so all ELS instances share the same counters.</p>
+      <p>If Redis is unavailable or times out, FeatBit accepts the request to preserve availability. Distributed rate-limit protection was bypassed; this is the special <code>fail_open</code> outcome.</p>
       <p>Record this separately from a normal allow and alert whenever it occurs.</p>
     </article>
   </template>
@@ -2267,6 +2280,20 @@
     </article>
   </template>
 
+  <template data-note-template="alert-placement">
+    <article class="note-card" data-rendered-note="alert-placement">
+      <p class="note-context">Alerts</p>
+      <h3>Where observation and alerting happen</h3>
+      <ul>
+        <li><strong>FeatBit:</strong> emits M1–M6 metric samples.</li>
+        <li><strong>OTel Collector:</strong> receives, batches, and exports telemetry; it is not normally the business alert engine.</li>
+        <li><strong>Prometheus:</strong> stores time series and calculates rates, sums, ratios, and time-window conditions. It can evaluate alert rules.</li>
+        <li><strong>Grafana:</strong> visualizes Prometheus data and can also evaluate alert rules. Prometheus-owned alerts are normally routed through Alertmanager.</li>
+      </ul>
+      <p>Collector Health uses the same path, but observes whether telemetry is being received, queued, and exported successfully.</p>
+    </article>
+  </template>
+
   <template data-note-template="idle-alerts">
     <article class="note-card" data-rendered-note="idle-alerts">
       <p class="note-context">Alerts</p>
@@ -2281,6 +2308,29 @@
       <h3>Why use a FeatBit-specific switch?</h3>
       <p>The global OTel sampler also affects automatic HTTP and dependency traces. A category switch enables the Flag Change trace for diagnosis without changing every other trace.</p>
       <p>Check the switch before building tags or starting timers so disabled overhead stays minimal.</p>
+    </article>
+  </template>
+
+  <template data-note-template="trace-diagnosis">
+    <article class="note-card" data-rendered-note="trace-diagnosis">
+      <p class="note-context">T1 · Trace</p>
+      <h3>Problems this trace can locate</h3>
+      <ul>
+        <li><strong>Persist:</strong> the Flag Change was slow or failed while being saved.</li>
+        <li><strong>Publish:</strong> saving succeeded, but publishing to the internal message system was slow or failed.</li>
+        <li><strong>Consume:</strong> the message was published, but ELS received or processed it late.</li>
+        <li><strong>Fanout:</strong> ELS received the change, but WebSocket delivery was slow or partially failed.</li>
+      </ul>
+      <p>Use M3 metrics for trends and alerts. Enable or sample T1 when an incident needs stage-level diagnosis.</p>
+    </article>
+  </template>
+
+  <template data-note-template="aggregate-fanout">
+    <article class="note-card" data-rendered-note="aggregate-fanout">
+      <p class="note-context">T1 · Fanout</p>
+      <h3>One span per Flag Change</h3>
+      <p>If one Flag Change is sent to 10,000 WebSocket connections, create one fanout span—not 10,000 connection spans.</p>
+      <p>Record aggregate values such as <code>target_count</code>, <code>success_count</code>, <code>failure_count</code>, and total duration. This keeps tracing overhead and storage bounded while still showing whether fanout was slow or partially failed.</p>
     </article>
   </template>
 
