@@ -203,18 +203,20 @@ Performance impact: very low to low.
 
 ### Task goal
 
-Detect Redis rate-limit fail-open and classify streaming validation failures without exposing sensitive data.
+Observe all ELS rate-limit decisions—whether in-memory or Redis-backed—and classify Streaming validation results without exposing sensitive data.
 
 ### Why
 
-The Redis limiter intentionally allows requests when Redis fails. This protects availability but silently removes rate-limit protection unless measured.
+Rejections can indicate excessive traffic or limits set too low. A Redis-backed distributed limiter can also fail open, silently removing distributed protection. Streaming validation results distinguish bad client input from a server-side dependency outage.
+
+Rate limiting does not require Redis. When enabled in its default non-distributed mode, every ELS instance keeps independent counters in memory. Redis is used only when distributed limiting is enabled and Redis is the configured cache, allowing all ELS instances to share counters.
 
 ### What to measure
 
 | Metric | Purpose |
 |---|---|
-| `featbit.ratelimit.decisions` | `allowed`, `rejected`, and `fail_open` decisions |
-| `featbit.streaming.validation.operations` | Accepted, invalid, and unavailable validation results |
+| `featbit.ratelimit.decisions` | All in-memory and Redis-backed `allowed` and `rejected` decisions; `fail_open` applies only to Redis |
+| `featbit.streaming.validation.operations` | Accepted, invalid, and unavailable results that distinguish client errors from dependency failures |
 
 Use finite attributes for backend, policy, algorithm, result, and reason. Never attach the partition key, environment, IP, token, secret, or raw error.
 
@@ -222,7 +224,7 @@ Use finite attributes for backend, policy, algorithm, result, and reason. Never 
 
 - Record exactly one result per limiter acquisition; avoid counting a rejection both inside the limiter and in `OnRejected`.
 - Instrument both Redis and in-memory limiters.
-- Distinguish Redis error and timeout fail-open from normal allow decisions.
+- When Redis fails or times out, record `fail_open` separately from a normal allow decision and alert on it.
 - Add a finite reason code to `ValidationResult`; do not parse metric labels from free-text messages.
 - Record validation once after `ValidateAsync`.
 - Remove or redact raw tokens, secrets, and query strings from validation logs.
@@ -233,11 +235,13 @@ Performance impact: low; this adds counters only, with no timing on the evaluati
 
 ### Task goal
 
-Turn the metrics into actionable alerts and detect telemetry loss.
+Turn M1–M6 into dashboards and actionable alerts in the monitoring backend, and detect telemetry loss.
 
 ### Why
 
-An OTel Collector failure can otherwise make an unhealthy service appear quiet.
+FeatBit emits metric samples. The OTel Collector receives, batches, and exports them; it is not normally the business alert engine. Prometheus stores the time series and calculates rates, sums, ratios, and time-window conditions. Grafana visualizes those results and can also evaluate alert rules.
+
+Alert rules may run in Grafana Alerting or Prometheus. When Prometheus owns the rules, Alertmanager normally routes the notifications. Collector self-metrics prevent a broken telemetry pipeline from making an unhealthy service appear quiet.
 
 ### What to measure
 
@@ -254,6 +258,7 @@ An OTel Collector failure can otherwise make an unhealthy service appear quiet.
 ### How to implement
 
 - Scrape application metrics on Collector port `8889` and Collector internal metrics on `8888`.
+- Build dashboards in Grafana. Evaluate alert rules in Grafana Alerting or Prometheus, using Alertmanager when Prometheus owns the rules.
 - Alert on sustained conditions where appropriate; avoid paging on one short probe failure.
 - Do not alert on `last_success.age` alone when there is no incoming work.
 - Use deployment-specific SLOs and traffic baselines.
@@ -269,7 +274,7 @@ Locate a sampled Flag Change delay in persistence, publish, consume, or fanout.
 
 ### Why
 
-Metrics show that propagation is unhealthy; a trace helps locate the slow or failed stage.
+M3 metrics show that propagation is unhealthy; a sampled trace locates whether one Flag Change was delayed or failed in persistence, publish, consume, or fanout.
 
 ### What to measure
 
@@ -277,7 +282,16 @@ Metrics show that propagation is unhealthy; a trace helps locate the slow or fai
 flag_change.persist -> flag_change.publish -> flag_change.consume -> flag_change.fanout
 ```
 
-Create one aggregate fanout span with target, success, failure, and total duration. Never create one span per connection.
+The stages answer:
+
+- `persist`: Was saving the Flag Change slow or unsuccessful?
+- `publish`: Was publishing to the internal message system slow or unsuccessful?
+- `consume`: Did ELS receive or process the message late?
+- `fanout`: Was WebSocket delivery slow or partially unsuccessful?
+
+Create one `flag_change.fanout` span for each Flag Change, covering the complete batch of WebSocket sends. Even if one change targets 10,000 connections, create one span rather than 10,000 connection spans. Record target, success, failure, and total duration on that aggregate span.
+
+The trace ends at the ELS socket-send boundary. It does not prove that the network delivered the message or that an SDK received and applied it. Use M3 metrics for trends and alerts; enable or sample T1 when an incident requires stage-level diagnosis.
 
 ### How to implement
 
