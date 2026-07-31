@@ -45,9 +45,7 @@ public class PendingChangesVm
         CreatedAt = changeRequest.CreatedAt;
         Status = changeRequest.Status;
         ChangeRequestReason = changeRequest.Reason;
-        Reviewers = changeRequest.Reviewers
-            .Select(x => new PendingChangeReviewerVm(x))
-            .ToArray();
+        Reviewers = [.. changeRequest.Reviewers.Select(x => new PendingChangeReviewerVm(x))];
     }
 
     public PendingChangesVm(FlagSchedule schedule, FlagChangeRequest changeRequest)
@@ -65,9 +63,7 @@ public class PendingChangesVm
         if (changeRequest != null)
         {
             ChangeRequestReason = changeRequest.Reason;
-            Reviewers = changeRequest.Reviewers
-                .Select(x => new PendingChangeReviewerVm(x))
-                .ToArray();
+            Reviewers = [.. changeRequest.Reviewers.Select(x => new PendingChangeReviewerVm(x))];
         }
     }
 }

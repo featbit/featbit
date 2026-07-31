@@ -67,14 +67,3 @@ public class GetChangeRequestPreviewHandler(
         return JsonSerializer.Deserialize<FeatureFlag>(json, ReusableJsonSerializerOptions.Web)!;
     }
 }
-
-public class ChangeRequestPreviewVm
-{
-    public Guid Id { get; set; }
-
-    public string Reason { get; set; }
-
-    public string Status { get; set; }
-
-    public FeatureFlag Flag { get; set; }
-}

@@ -14,44 +14,28 @@ public class ApproveFlagChangeRequest : IRequest<bool>
     public string Comment { get; set; }
 }
 
-public class ApproveFlagChangeRequestHandler : IRequestHandler<ApproveFlagChangeRequest, bool>
+public class ApproveFlagChangeRequestHandler(
+    IFlagChangeRequestService changeRequestService,
+    IFlagScheduleService scheduleService,
+    IFeatureFlagService flagService,
+    IFlagDraftService draftService,
+    IAuditLogService auditLogService,
+    ICurrentUser currentUser)
+    : IRequestHandler<ApproveFlagChangeRequest, bool>
 {
-    private readonly IFlagChangeRequestService _flagChangeRequestService;
-    private readonly IFlagScheduleService _flagScheduleService;
-    private readonly IFeatureFlagService _featureFlagService;
-    private readonly IFlagDraftService _flagDraftService;
-    private readonly IAuditLogService _auditLogService;
-    private readonly ICurrentUser _currentUser;
-
-    public ApproveFlagChangeRequestHandler(
-        IFlagChangeRequestService flagChangeRequestService,
-        IFlagScheduleService flagScheduleService,
-        IFeatureFlagService featureFlagService,
-        IFlagDraftService flagDraftService,
-        IAuditLogService auditLogService,
-        ICurrentUser currentUser)
-    {
-        _flagChangeRequestService = flagChangeRequestService;
-        _flagScheduleService = flagScheduleService;
-        _featureFlagService = featureFlagService;
-        _flagDraftService = flagDraftService;
-        _auditLogService = auditLogService;
-        _currentUser = currentUser;
-    }
-
     public async Task<bool> Handle(ApproveFlagChangeRequest request, CancellationToken cancellationToken)
     {
-        var changeRequest = await _flagChangeRequestService.FindOneAsync(
+        var changeRequest = await changeRequestService.FindOneAsync(
             x => x.OrgId == request.OrgId && x.EnvId == request.EnvId && x.Id == request.Id
         );
 
         // check if change request can be approved by current user
-        if (changeRequest?.CanBeApprovedBy(_currentUser.Id) != true)
+        if (changeRequest?.CanBeApprovedBy(currentUser.Id) != true)
         {
             return false;
         }
 
-        var flag = await _featureFlagService.FindOneAsync(
+        var flag = await flagService.FindOneAsync(
             x => x.EnvId == request.EnvId && x.Id == changeRequest.FlagId
         );
         if (flag == null)
@@ -59,7 +43,7 @@ public class ApproveFlagChangeRequestHandler : IRequestHandler<ApproveFlagChange
             return false;
         }
 
-        var draft = await _flagDraftService.FindOneAsync(
+        var draft = await draftService.FindOneAsync(
             x => x.EnvId == request.EnvId && x.Id == changeRequest.FlagDraftId
         );
         if (draft == null)
@@ -68,17 +52,18 @@ public class ApproveFlagChangeRequestHandler : IRequestHandler<ApproveFlagChange
         }
 
         var comment = request.Comment?.Trim() ?? string.Empty;
-        changeRequest.Approve(_currentUser.Id);
-        await _flagChangeRequestService.UpdateAsync(changeRequest);
+        changeRequest.Approve(currentUser.Id);
+        await changeRequestService.UpdateAsync(changeRequest);
 
         // update schedule status if exists
         if (changeRequest.ScheduleId.HasValue)
         {
-            var schedule = await _flagScheduleService.GetAsync(changeRequest.ScheduleId.Value);
-            schedule.PendingExecution(_currentUser.Id);
-            await _flagScheduleService.UpdateAsync(schedule);
+            var schedule = await scheduleService.GetAsync(changeRequest.ScheduleId.Value);
+            schedule.PendingExecution(currentUser.Id);
+            await scheduleService.UpdateAsync(schedule);
         }
 
+        // write audit log
         var snapshot = new FlagChangeRequestDecisionAuditSnapshot
         {
             Id = flag.Id,
@@ -94,8 +79,9 @@ public class ApproveFlagChangeRequestHandler : IRequestHandler<ApproveFlagChange
             Operations.ApproveFlagChangeRequest,
             dataChange,
             comment,
-            _currentUser.Id);
-        await _auditLogService.AddOneAsync(auditLog);
+            currentUser.Id
+        );
+        await auditLogService.AddOneAsync(auditLog);
 
         return true;
     }

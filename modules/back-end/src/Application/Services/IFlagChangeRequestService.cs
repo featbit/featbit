@@ -9,5 +9,6 @@ public interface IFlagChangeRequestService : IService<FlagChangeRequest>
         Guid orgId,
         Guid envId,
         Guid currentUserId,
-        ChangeRequestFilter filter);
+        ChangeRequestFilter filter
+    );
 }

@@ -1,4 +1,5 @@
 using Domain.AuditLogs;
+using Domain.FeatureFlags;
 using Domain.SemanticPatch;
 
 namespace Application.ChangeRequests;
@@ -66,4 +67,15 @@ public class ChangeRequestReviewerVm
     public string Action { get; set; }
 
     public DateTime? Timestamp { get; set; }
+}
+
+public class ChangeRequestPreviewVm
+{
+    public Guid Id { get; set; }
+
+    public string Reason { get; set; }
+
+    public string Status { get; set; }
+
+    public FeatureFlag Flag { get; set; }
 }

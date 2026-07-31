@@ -14,31 +14,15 @@ public class DeclineFlagChangeRequest : IRequest<bool>
     public string Comment { get; set; }
 }
 
-public class DeclineFlagChangeRequestHandler : IRequestHandler<DeclineFlagChangeRequest, bool>
+public class DeclineFlagChangeRequestHandler(
+    IFlagChangeRequestService changeRequestService,
+    IFlagScheduleService scheduleService,
+    IFeatureFlagService flagService,
+    IFlagDraftService draftService,
+    IAuditLogService auditLogService,
+    ICurrentUser currentUser)
+    : IRequestHandler<DeclineFlagChangeRequest, bool>
 {
-    private readonly IFlagChangeRequestService _flagChangeRequestService;
-    private readonly IFlagScheduleService _flagScheduleService;
-    private readonly IFeatureFlagService _featureFlagService;
-    private readonly IFlagDraftService _flagDraftService;
-    private readonly IAuditLogService _auditLogService;
-    private readonly ICurrentUser _currentUser;
-
-    public DeclineFlagChangeRequestHandler(
-        IFlagChangeRequestService flagChangeRequestService,
-        IFlagScheduleService flagScheduleService,
-        IFeatureFlagService featureFlagService,
-        IFlagDraftService flagDraftService,
-        IAuditLogService auditLogService,
-        ICurrentUser currentUser)
-    {
-        _flagChangeRequestService = flagChangeRequestService;
-        _flagScheduleService = flagScheduleService;
-        _featureFlagService = featureFlagService;
-        _flagDraftService = flagDraftService;
-        _auditLogService = auditLogService;
-        _currentUser = currentUser;
-    }
-
     public async Task<bool> Handle(DeclineFlagChangeRequest request, CancellationToken cancellationToken)
     {
         var comment = request.Comment?.Trim() ?? string.Empty;
@@ -47,17 +31,17 @@ public class DeclineFlagChangeRequestHandler : IRequestHandler<DeclineFlagChange
             return false;
         }
 
-        var changeRequest = await _flagChangeRequestService.FindOneAsync(
+        var changeRequest = await changeRequestService.FindOneAsync(
             x => x.OrgId == request.OrgId && x.EnvId == request.EnvId && x.Id == request.Id
         );
 
         // check if change request can be declined by current user
-        if (changeRequest?.CanBeDeclinedBy(_currentUser.Id) != true)
+        if (changeRequest?.CanBeDeclinedBy(currentUser.Id) != true)
         {
             return false;
         }
 
-        var flag = await _featureFlagService.FindOneAsync(
+        var flag = await flagService.FindOneAsync(
             x => x.EnvId == request.EnvId && x.Id == changeRequest.FlagId
         );
         if (flag == null)
@@ -65,7 +49,7 @@ public class DeclineFlagChangeRequestHandler : IRequestHandler<DeclineFlagChange
             return false;
         }
 
-        var draft = await _flagDraftService.FindOneAsync(
+        var draft = await draftService.FindOneAsync(
             x => x.EnvId == request.EnvId && x.Id == changeRequest.FlagDraftId
         );
         if (draft == null)
@@ -73,17 +57,18 @@ public class DeclineFlagChangeRequestHandler : IRequestHandler<DeclineFlagChange
             return false;
         }
 
-        changeRequest.Decline(_currentUser.Id);
-        await _flagChangeRequestService.UpdateAsync(changeRequest);
+        changeRequest.Decline(currentUser.Id);
+        await changeRequestService.UpdateAsync(changeRequest);
 
         // update schedule status if change request is attached to a schedule
         if (changeRequest.ScheduleId.HasValue)
         {
-            var schedule = await _flagScheduleService.GetAsync(changeRequest.ScheduleId.Value);
-            schedule.Decline(_currentUser.Id);
-            await _flagScheduleService.UpdateAsync(schedule);
+            var schedule = await scheduleService.GetAsync(changeRequest.ScheduleId.Value);
+            schedule.Decline(currentUser.Id);
+            await scheduleService.UpdateAsync(schedule);
         }
 
+        // write audit log
         var snapshot = new FlagChangeRequestDecisionAuditSnapshot
         {
             Id = flag.Id,
@@ -99,8 +84,9 @@ public class DeclineFlagChangeRequestHandler : IRequestHandler<DeclineFlagChange
             Operations.DeclineFlagChangeRequest,
             dataChange,
             comment,
-            _currentUser.Id);
-        await _auditLogService.AddOneAsync(auditLog);
+            currentUser.Id
+        );
+        await auditLogService.AddOneAsync(auditLog);
 
         return true;
     }

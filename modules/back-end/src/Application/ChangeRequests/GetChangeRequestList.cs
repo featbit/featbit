@@ -36,7 +36,8 @@ public class GetChangeRequestListHandler(
             request.OrgId,
             request.EnvId,
             currentUser.Id,
-            request.Filter);
+            request.Filter
+        );
 
         var flagIds = page.Items.Select(item => item.FlagId).Distinct().ToArray();
         var draftIds = page.Items.Select(item => item.FlagDraftId).Distinct().ToArray();
@@ -54,13 +55,13 @@ public class GetChangeRequestListHandler(
             .Distinct()
             .ToArray();
 
-        ICollection<FeatureFlag> flags = flagIds.Length == 0
+        var flags = flagIds.Length == 0
             ? Array.Empty<FeatureFlag>()
             : await flagService.FindManyAsync(flag => flagIds.Contains(flag.Id));
-        ICollection<FlagDraft> drafts = draftIds.Length == 0
+        var drafts = draftIds.Length == 0
             ? Array.Empty<FlagDraft>()
             : await flagDraftService.FindManyAsync(draft => draftIds.Contains(draft.Id));
-        ICollection<User> users = userIds.Length == 0
+        var users = userIds.Length == 0
             ? Array.Empty<User>()
             : await userService.GetListAsync(userIds);
         var environmentRns = new Dictionary<Guid, string>();
@@ -69,6 +70,7 @@ public class GetChangeRequestListHandler(
             environmentRns[environmentId] =
                 await resourceService.GetEnvRnAsync(environmentId) ?? string.Empty;
         }
+
         var reviewerMembers = new Dictionary<Guid, (string Name, string Email)>();
 
         foreach (var reviewerId in reviewerIds)
