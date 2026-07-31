@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
@@ -9,13 +9,12 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { ApiRequestError } from "@/lib/api/authenticated-api"
 import {
   archiveFeatureFlag,
   removeFeatureFlag,
   restoreFeatureFlag,
-  updateFeatureFlagDescription,
-  updateFeatureFlagName,
-  updateFeatureFlagTags,
+  updateFeatureFlagGeneral,
 } from "../../flags-api"
 import type { FeatureFlag } from "../../flags-types"
 import {
@@ -28,7 +27,6 @@ import {
   flagSettingsOf,
   flagSettingsReviewChanges,
   stableFlagSettings,
-  type FlagSettingsField,
   type FlagSettingsValues,
 } from "./settings-utils"
 
@@ -63,10 +61,6 @@ export function SettingsTab({
   const queryClient = useQueryClient()
   const [reviewOpen, setReviewOpen] = useState(false)
   const [confirmation, setConfirmation] = useState<FlagConfirmation>(null)
-  const partialResult = useRef<{
-    draft: FlagSettingsValues
-    failed: FlagSettingsField[]
-  } | null>(null)
   const baseline = useMemo(() => flagSettingsOf(flag), [flag])
   const schema = useMemo(
     () =>
@@ -86,16 +80,7 @@ export function SettingsTab({
   })
 
   useEffect(() => {
-    const partial = partialResult.current
     form.reset(baseline)
-    if (partial) {
-      for (const field of partial.failed) {
-        form.setValue(field, partial.draft[field] as never, {
-          shouldDirty: true,
-        })
-      }
-      partialResult.current = null
-    }
   }, [baseline, form])
 
   const watched = useWatch({ control: form.control })
@@ -117,93 +102,30 @@ export function SettingsTab({
   const saveMutation = useMutation({
     mutationFn: async (comment: string) => {
       const normalizedDraft = { ...draft, name: draft.name.trim() }
-      const pending: Array<{
-        field: FlagSettingsField
-        request: Promise<string | boolean>
-      }> = []
-      if (baseline.name !== normalizedDraft.name) {
-        pending.push({
-          field: "name",
-          request: updateFeatureFlagName(
-            envId,
-            flag.key,
-            normalizedDraft.name,
-            comment
-          ),
-        })
-      }
-      if (baseline.description !== normalizedDraft.description) {
-        pending.push({
-          field: "description",
-          request: updateFeatureFlagDescription(
-            envId,
-            flag.key,
-            normalizedDraft.description,
-            comment
-          ),
-        })
-      }
-      if (
-        JSON.stringify([...baseline.tags].sort()) !==
-        JSON.stringify([...normalizedDraft.tags].sort())
-      ) {
-        pending.push({
-          field: "tags",
-          request: updateFeatureFlagTags(
-            envId,
-            flag.key,
-            normalizedDraft.tags,
-            comment
-          ),
-        })
-      }
-      const results = await Promise.allSettled(
-        pending.map((item) => item.request)
+      const revision = await updateFeatureFlagGeneral(
+        envId,
+        flag.key,
+        normalizedDraft,
+        comment
       )
-      const saved = { ...flag }
-      const failed: FlagSettingsField[] = []
-      results.forEach((result, index) => {
-        const field = pending[index].field
-        if (result.status === "rejected" || result.value === false) {
-          failed.push(field)
-          return
-        }
-        if (field === "name") saved.name = normalizedDraft.name
-        if (field === "description")
-          saved.description = normalizedDraft.description
-        if (field === "tags") saved.tags = normalizedDraft.tags
-        if (typeof result.value === "string") saved.revision = result.value
-      })
-      return { saved, failed, draft: normalizedDraft }
+      return { ...flag, ...normalizedDraft, revision }
     },
-    onSuccess: ({ saved, failed, draft: submittedDraft }) => {
-      partialResult.current = failed.length
-        ? { draft: submittedDraft, failed }
-        : null
+    onSuccess: (saved) => {
       onSaved(saved)
       setReviewOpen(false)
-      if (failed.length) {
-        toast.error(
-          t("featureFlags.detailsPage.settings.partialFailure", {
-            fields: failed
-              .map((field) =>
-                t(`featureFlags.detailsPage.settings.fields.${field}`)
-              )
-              .join(", "),
-          })
-        )
-      } else {
-        toast.success(t("featureFlags.operationSucceeded"))
-      }
-      if (!failed.includes("tags")) {
-        void queryClient.invalidateQueries({
-          queryKey: ["feature-flag-tags", envId],
-        })
-      }
+      toast.success(t("featureFlags.operationSucceeded"))
+      void queryClient.invalidateQueries({
+        queryKey: ["feature-flag-tags", envId],
+      })
       void queryClient.invalidateQueries({ queryKey: ["feature-flags"] })
       void queryClient.invalidateQueries({ queryKey: ["flag-audit-logs"] })
     },
-    onError: () => toast.error(t("featureFlags.operationFailed")),
+    onError: (error) =>
+      toast.error(
+        error instanceof ApiRequestError && error.status === 403
+          ? t("featureFlags.permissionDenied")
+          : t("featureFlags.operationFailed")
+      ),
   })
 
   const lifecycleMutation = useMutation({

@@ -230,6 +230,27 @@ public class FeatureFlagController : ApiControllerBase
     }
 
     /// <summary>
+    /// Update the general information of a feature flag
+    /// </summary>
+    /// <remarks>
+    /// Update the name, description, and tags of a feature flag in a single operation.
+    /// Permissions are checked for each field that is changed.
+    /// </remarks>
+    [OpenApi]
+    [HttpPut("{key}/general")]
+    public async Task<ApiResponse<Guid>> UpdateGeneralAsync(
+        Guid envId,
+        string key,
+        UpdateGeneralPayload payload)
+    {
+        var permissions = await GetRequestPermissionsAsync();
+        var request = new UpdateGeneral(envId, key, payload, permissions);
+
+        var revision = await Mediator.Send(request);
+        return Ok(revision);
+    }
+
+    /// <summary>
     /// Update the off variation of a feature flag
     /// </summary>
     /// <remarks>

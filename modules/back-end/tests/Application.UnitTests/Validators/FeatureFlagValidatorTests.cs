@@ -99,6 +99,25 @@ public class FeatureFlagValidatorTests
     }
 
     [Fact]
+    public void UpdateGeneral_EmptyName_NameRequiredError()
+    {
+        var request = new UpdateGeneral(
+            Guid.NewGuid(),
+            "flag",
+            new UpdateGeneralPayload
+            {
+                Name = string.Empty,
+                Description = "Description",
+                Tags = []
+            },
+            []);
+
+        var result = new UpdateGeneralValidator().Validate(request);
+
+        Assert.Contains(result.Errors, e => e.ErrorCode == ErrorCodes.Required("name"));
+    }
+
+    [Fact]
     public void UpdateOffVariation_Empty_OffVariationIdRequiredError()
     {
         var result = new UpdateOffVariationValidator().Validate(new UpdateOffVariation { OffVariationId = string.Empty });

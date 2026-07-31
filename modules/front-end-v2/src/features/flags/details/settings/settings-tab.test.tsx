@@ -1,7 +1,10 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
-import { describe, expect, it, vi } from "vitest"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n/i18n"
+import { ApiRequestError } from "@/lib/api/authenticated-api"
+import { toast } from "sonner"
+import { updateFeatureFlagGeneral } from "../../flags-api"
 import type { FeatureFlag } from "../../flags-types"
 import { SettingsTab } from "./settings-tab"
 
@@ -9,10 +12,15 @@ vi.mock("../../flags-api", () => ({
   archiveFeatureFlag: vi.fn(),
   removeFeatureFlag: vi.fn(),
   restoreFeatureFlag: vi.fn(),
-  updateFeatureFlagDescription: vi.fn(),
-  updateFeatureFlagName: vi.fn(),
-  updateFeatureFlagTags: vi.fn(),
+  updateFeatureFlagGeneral: vi.fn(),
   fetchFeatureFlagTags: vi.fn().mockResolvedValue([]),
+}))
+
+vi.mock("sonner", () => ({
+  toast: {
+    error: vi.fn(),
+    success: vi.fn(),
+  },
 }))
 
 const flag: FeatureFlag = {
@@ -32,7 +40,8 @@ function renderSettings(value: FeatureFlag = flag) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   })
-  return render(
+  const onSaved = vi.fn()
+  const result = render(
     <QueryClientProvider client={queryClient}>
       <SettingsTab
         envId="env-1"
@@ -44,14 +53,21 @@ function renderSettings(value: FeatureFlag = flag) {
         canArchive
         canRestore
         canDelete
-        onSaved={vi.fn()}
+        onSaved={onSaved}
         onRemoved={vi.fn()}
       />
     </QueryClientProvider>
   )
+  return { ...result, onSaved }
 }
 
 describe("SettingsTab", () => {
+  beforeEach(() => {
+    vi.mocked(updateFeatureFlagGeneral).mockReset()
+    vi.mocked(toast.error).mockReset()
+    vi.mocked(toast.success).mockReset()
+  })
+
   it("keeps the save actions inside the General section", () => {
     renderSettings()
     const general = screen.getByRole("heading", { name: "General" })
@@ -113,5 +129,60 @@ describe("SettingsTab", () => {
     expect(
       screen.queryByRole("button", { name: "Archive" })
     ).not.toBeInTheDocument()
+  })
+
+  it("saves General changes with one combined request", async () => {
+    vi.mocked(updateFeatureFlagGeneral).mockResolvedValue("revision-2")
+    const { onSaved } = renderSettings()
+
+    fireEvent.change(screen.getByLabelText("Name"), {
+      target: { value: "Checkout rollout" },
+    })
+    fireEvent.change(screen.getByLabelText(/Description/), {
+      target: { value: "Updated description" },
+    })
+    fireEvent.click(screen.getByRole("button", { name: "Remove tag checkout" }))
+    fireEvent.click(screen.getByRole("button", { name: "Review & save" }))
+    fireEvent.click(await screen.findByRole("button", { name: "Save changes" }))
+
+    await waitFor(() =>
+      expect(updateFeatureFlagGeneral).toHaveBeenCalledWith(
+        "env-1",
+        "checkout-redesign",
+        {
+          name: "Checkout rollout",
+          description: "Updated description",
+          tags: [],
+        },
+        ""
+      )
+    )
+    expect(onSaved).toHaveBeenCalledWith({
+      ...flag,
+      name: "Checkout rollout",
+      description: "Updated description",
+      tags: [],
+      revision: "revision-2",
+    })
+  })
+
+  it("shows a permission error when the General update returns 403", async () => {
+    vi.mocked(updateFeatureFlagGeneral).mockRejectedValue(
+      new ApiRequestError(403, "Forbidden")
+    )
+    const { onSaved } = renderSettings()
+
+    fireEvent.change(screen.getByLabelText("Name"), {
+      target: { value: "Checkout rollout" },
+    })
+    fireEvent.click(screen.getByRole("button", { name: "Review & save" }))
+    fireEvent.click(await screen.findByRole("button", { name: "Save changes" }))
+
+    await waitFor(() =>
+      expect(toast.error).toHaveBeenCalledWith(
+        "You do not have permission to perform this action."
+      )
+    )
+    expect(onSaved).not.toHaveBeenCalled()
   })
 })

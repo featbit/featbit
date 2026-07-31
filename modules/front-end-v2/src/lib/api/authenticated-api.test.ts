@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import { fetchApi } from "@/lib/api/authenticated-api"
+import { ApiRequestError, fetchApi } from "@/lib/api/authenticated-api"
 
 function jsonResponse(body: unknown, init?: ResponseInit) {
   return new Response(JSON.stringify(body), {
@@ -190,5 +190,20 @@ describe("authenticated api", () => {
     await expect(fetchApi("/api/v1/workspaces")).rejects.toThrow("Unauthorized")
 
     expect(localStorage.getItem("token")).toBeNull()
+  })
+
+  it("preserves the HTTP status on failed requests", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+      jsonResponse(
+        { success: false, errors: ["Forbidden"] },
+        { status: 403, statusText: "Forbidden" }
+      )
+    )
+
+    await expect(fetchApi("/api/v1/workspaces")).rejects.toMatchObject({
+      name: "ApiRequestError",
+      status: 403,
+      message: "Forbidden",
+    } satisfies Partial<ApiRequestError>)
   })
 })

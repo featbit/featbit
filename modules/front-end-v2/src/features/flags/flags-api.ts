@@ -21,50 +21,18 @@ export function fetchFeatureFlag(envId: string, key: string) {
   return fetchApi<FeatureFlag>(`${flagsPath(envId)}/${encodeURIComponent(key)}`)
 }
 
-export function updateFeatureFlagName(
+export function updateFeatureFlagGeneral(
   envId: string,
   key: string,
-  name: string,
+  input: { name: string; description: string; tags: string[] },
   comment = ""
 ) {
   return fetchApi<string>(
-    `${flagsPath(envId)}/${encodeURIComponent(key)}/name`,
+    `${flagsPath(envId)}/${encodeURIComponent(key)}/general`,
     {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, comment }),
-    }
-  )
-}
-
-export function updateFeatureFlagDescription(
-  envId: string,
-  key: string,
-  description: string,
-  comment = ""
-) {
-  return fetchApi<string>(
-    `${flagsPath(envId)}/${encodeURIComponent(key)}/description`,
-    {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ description, comment }),
-    }
-  )
-}
-
-export function updateFeatureFlagTags(
-  envId: string,
-  key: string,
-  tags: string[],
-  comment = ""
-) {
-  return fetchApi<boolean>(
-    `${flagsPath(envId)}/${encodeURIComponent(key)}/tags`,
-    {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ tags, comment }),
+      body: JSON.stringify({ ...input, comment }),
     }
   )
 }

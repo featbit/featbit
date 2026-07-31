@@ -11,6 +11,16 @@ type ApiEnvelope<T> = {
   errors?: string[]
 }
 
+export class ApiRequestError extends Error {
+  readonly status: number
+
+  constructor(status: number, message: string) {
+    super(message)
+    this.name = "ApiRequestError"
+    this.status = status
+  }
+}
+
 const IDENTITY_TOKEN_STORAGE_KEY = "token"
 const REFRESH_TOKEN_LOCK_NAME = "featbit:refresh-token"
 
@@ -159,7 +169,10 @@ export async function fetchApi<T>(
   }
 
   if (!response.ok) {
-    throw new Error(response.statusText || "Request failed")
+    throw new ApiRequestError(
+      response.status,
+      response.statusText || "Request failed"
+    )
   }
 
   const body = (await response.json()) as T | ApiEnvelope<T>
