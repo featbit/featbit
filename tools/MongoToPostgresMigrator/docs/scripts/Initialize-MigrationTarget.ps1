@@ -88,14 +88,14 @@ if (-not $env:PGPASSWORD) {
 }
 
 function Invoke-PsqlFile {
-    param([Parameter(Mandatory)][string]$Db, [Parameter(Mandatory)][string]$Path)
-    & psql -v ON_ERROR_STOP=1 --no-psqlrc -h $PgHost -p $Port -U $Username -d $Db -f $Path
+    param([Parameter(Mandatory)][string]$DbName, [Parameter(Mandatory)][string]$Path)
+    & psql -v ON_ERROR_STOP=1 --no-psqlrc -h $PgHost -p $Port -U $Username -d $DbName -f $Path
     if ($LASTEXITCODE -ne 0) { throw "psql failed running '$Path' (exit $LASTEXITCODE)." }
 }
 
 function Invoke-PsqlScalar {
-    param([Parameter(Mandatory)][string]$Db, [Parameter(Mandatory)][string]$Sql)
-    $out = & psql -v ON_ERROR_STOP=1 --no-psqlrc -tAq -h $PgHost -p $Port -U $Username -d $Db -c $Sql
+    param([Parameter(Mandatory)][string]$DbName, [Parameter(Mandatory)][string]$Sql)
+    $out = & psql -v ON_ERROR_STOP=1 --no-psqlrc -tAq -h $PgHost -p $Port -U $Username -d $DbName -c $Sql
     if ($LASTEXITCODE -ne 0) { throw "psql query failed (exit $LASTEXITCODE)." }
     return ($out | Select-Object -First 1)
 }
@@ -109,11 +109,11 @@ if (-not $TruncateOnly) {
 
     # 1. Ensure the target database exists.
     if (-not $SkipDatabaseCreate) {
-        $exists = Invoke-PsqlScalar -Db $MaintenanceDatabase `
+        $exists = Invoke-PsqlScalar -DbName $MaintenanceDatabase `
             -Sql "SELECT 1 FROM pg_database WHERE datname = '$Database';"
         if ($exists -ne '1') {
             Write-Host "Creating database '$Database'..."
-            [void](Invoke-PsqlScalar -Db $MaintenanceDatabase -Sql "CREATE DATABASE $Database;")
+            [void](Invoke-PsqlScalar -DbName $MaintenanceDatabase -Sql "CREATE DATABASE $Database;")
         }
         else {
             Write-Host "Database '$Database' already exists; skipping CREATE DATABASE."
@@ -139,7 +139,7 @@ if (-not $TruncateOnly) {
             $tempFiles += $temp
             Set-Content -Path $temp.FullName -Value $content -NoNewline
             Write-Host "  applying $($script.Name)"
-            Invoke-PsqlFile -Db $MaintenanceDatabase -Path $temp.FullName
+            Invoke-PsqlFile -DbName $MaintenanceDatabase -Path $temp.FullName
         }
     }
     finally {
@@ -149,6 +149,6 @@ if (-not $TruncateOnly) {
 
 # 3. Truncate the 29 domain tables (safe to repeat).
 Write-Host "Truncating domain tables in '$Database'..."
-Invoke-PsqlFile -Db $MaintenanceDatabase -Path $truncateSql
+Invoke-PsqlFile -DbName $MaintenanceDatabase -Path $truncateSql
 
 Write-Host "Done. Target '$Database' is provisioned and empty; ready for MongoToPostgresMigrator." -ForegroundColor Green
