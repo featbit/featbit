@@ -50,12 +50,6 @@ public class GetChangeRequestPreviewHandler(
             previewFlag.ApplyDraft(draft);
         }
 
-        return new ChangeRequestPreviewVm
-        {
-            Id = changeRequest.Id,
-            Reason = changeRequest.Reason,
-            Status = changeRequest.Status,
-            Flag = previewFlag
-        };
+        return new ChangeRequestPreviewVm(changeRequest, previewFlag);
     }
 }

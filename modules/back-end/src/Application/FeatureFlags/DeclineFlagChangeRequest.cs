@@ -69,15 +69,7 @@ public class DeclineFlagChangeRequestHandler(
         }
 
         // write audit log
-        var snapshot = new FlagChangeRequestDecisionAuditSnapshot
-        {
-            Id = flag.Id,
-            Name = flag.Name,
-            Key = flag.Key,
-            ChangeRequestId = changeRequest.Id,
-            RequestComment = changeRequest.Reason,
-            ProposedDataChange = draft.DataChange
-        };
+        var snapshot = new FlagChangeRequestDecisionAuditSnapshot(flag, changeRequest, draft);
         var dataChange = new DataChange().To(snapshot);
         var auditLog = AuditLog.For(
             flag,

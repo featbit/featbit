@@ -136,4 +136,12 @@ public class ChangeRequestPreviewVm
     public string Status { get; set; }
 
     public FeatureFlag Flag { get; set; }
+
+    public ChangeRequestPreviewVm(FlagChangeRequest changeRequest, FeatureFlag flag)
+    {
+        Id = changeRequest.Id;
+        Reason = changeRequest.Reason;
+        Status = changeRequest.Status;
+        Flag = flag;
+    }
 }
