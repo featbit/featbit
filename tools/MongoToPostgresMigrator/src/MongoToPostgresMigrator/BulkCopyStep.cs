@@ -49,7 +49,8 @@ public sealed class BulkCopyStep<T>(string name, int copyBatchSize) : EntityStep
         long fallbackInserted = 0;
         var buffer = new List<T>(_copyBatchSize);
 
-        await foreach (var entity in ReadEntitiesAsync(ctx))
+        // Read and write run concurrently — see ReadEntitiesPrefetchedAsync.
+        await foreach (var entity in ReadEntitiesPrefetchedAsync(ctx))
         {
             buffer.Add(entity);
             if (buffer.Count >= _copyBatchSize)

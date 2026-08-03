@@ -87,7 +87,8 @@ public sealed class EndUserCopyStep(string name, int copyBatchSize) : EntityStep
         long fallbackInserted = 0;
         var buffer = new List<EndUser>(_copyBatchSize);
 
-        await foreach (var endUser in ReadEntitiesAsync(ctx))
+        // Read and write run concurrently — see ReadEntitiesPrefetchedAsync.
+        await foreach (var endUser in ReadEntitiesPrefetchedAsync(ctx))
         {
             buffer.Add(endUser);
             if (buffer.Count >= _copyBatchSize)

@@ -1,3 +1,4 @@
+using System.Threading.Channels;
 using Domain.Bases;
 using Infrastructure.Persistence.EntityFrameworkCore;
 using Infrastructure.Persistence.MongoDb;
@@ -157,6 +158,70 @@ public class EntityStep<T>(string name) : IEntityStep where T : Entity
             }
         }
     }
+
+    /// <summary>
+    /// <see cref="ReadEntitiesAsync"/> with the MongoDB read running concurrently
+    /// with whatever consumes it.
+    /// <para>
+    /// Consumed directly, <see cref="ReadEntitiesAsync"/> interleaves strictly
+    /// with the caller: the reader blocks while a block is written, then the
+    /// writer blocks while the next MongoDB batch (up to 16 MB per round trip) is
+    /// fetched. On a local database both waits are negligible, but across a WAN
+    /// they dominate, and the run costs the <em>sum</em> of read and write time —
+    /// visible as bursts of fast COPYs separated by stalls. Reading through a
+    /// bounded channel lets the next fetch be in flight while the current rows are
+    /// written, so the run costs roughly the slower side instead of the sum.
+    /// </para>
+    /// <para>
+    /// The channel is bounded and the producer waits when it is full, so at most
+    /// <paramref name="capacity"/> entities are buffered no matter how far ahead
+    /// the reader gets. That bound matters for wide documents (a
+    /// <c>FlagRevision</c> embeds an entire feature flag). A producer failure is
+    /// rethrown to the consumer on its next read, preserving fail-fast.
+    /// </para>
+    /// </summary>
+    protected async IAsyncEnumerable<T> ReadEntitiesPrefetchedAsync(
+        MigrationContext ctx, int capacity = DefaultPrefetchCapacity)
+    {
+        var channel = Channel.CreateBounded<T>(new BoundedChannelOptions(capacity)
+        {
+            SingleReader = true,
+            SingleWriter = true,
+            FullMode = BoundedChannelFullMode.Wait
+        });
+
+        var producer = Task.Run(async () =>
+        {
+            try
+            {
+                await foreach (var entity in ReadEntitiesAsync(ctx))
+                {
+                    await channel.Writer.WriteAsync(entity);
+                }
+
+                channel.Writer.Complete();
+            }
+            catch (Exception ex)
+            {
+                channel.Writer.Complete(ex);
+            }
+        });
+
+        await foreach (var entity in channel.Reader.ReadAllAsync())
+        {
+            yield return entity;
+        }
+
+        // Observes a producer fault that surfaced after the channel drained.
+        await producer;
+    }
+
+    /// <summary>
+    /// Default number of entities buffered ahead of the writer. Sized to hold
+    /// roughly two MongoDB server batches (16 MB each) so the reader can stay a
+    /// full batch ahead while still bounding memory for wide documents.
+    /// </summary>
+    protected const int DefaultPrefetchCapacity = 20_000;
 
     /// <summary>
     /// Saves a chunk in a single round-trip. If the chunk violates a target

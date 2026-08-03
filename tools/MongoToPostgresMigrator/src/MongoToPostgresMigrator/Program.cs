@@ -48,12 +48,22 @@ public static class Program
         builder.Services.TryAddMongoDb(builder.Configuration);
         builder.Services.TryAddPostgres(builder.Configuration);
 
+        // Timestamp every console line. Migration runs are long and are captured
+        // to a log file, so per-line times are what make it possible to attribute
+        // elapsed time to a specific entity (and to spot stalls between batches).
+        // UTC keeps the log comparable with server-side timings.
+        builder.Logging.AddSimpleConsole(options =>
+        {
+            options.TimestampFormat = "[yyyy-MM-dd HH:mm:ss.fff] ";
+            options.UseUtcTimestamp = true;
+        });
+
         using var host = builder.Build();
 
         var logger = host.Services.GetRequiredService<ILoggerFactory>().CreateLogger("MongoToPostgresMigrator");
         var configuration = host.Services.GetRequiredService<IConfiguration>();
         var batchSize = configuration.GetValue("Migrator:BatchSize", 500);
-        var copyBatchSize = configuration.GetValue("Migrator:CopyBatchSize", 50_000);
+        var copyBatchSize = configuration.GetValue("Migrator:CopyBatchSize", 1000);
 
         // Optional: entities to skip this run (e.g. EndUsers during a freeze
         // migration, backfilled online afterwards). Case-insensitive; unknown
