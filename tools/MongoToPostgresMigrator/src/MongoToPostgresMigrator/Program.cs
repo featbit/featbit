@@ -29,6 +29,57 @@ public static class Program
     // Number of FeatureFlags sampled for the jsonb integrity spot-check.
     private const int JsonbSampleSize = 25;
 
+    // Npgsql's defaults (15s connect, 30s command) assume a local database. A
+    // migration run crosses a network, moves millions of rows, and — critically
+    // — the raw NpgsqlDataSource used by the COPY steps has NO EF execution
+    // strategy, so unlike the EF path a transient timeout is not retried: it
+    // aborts the run (exit 3) leaving partial data. These floors buy headroom
+    // for a slow connect (DNS + TCP + TLS + directory auth) and for verify's
+    // COUNT(*) over multi-million-row tables.
+    private const int MinConnectTimeoutSeconds = 30;
+    private const int MinCommandTimeoutSeconds = 300;
+
+    /// <summary>
+    /// Raises the PostgreSQL connect and command timeouts to a floor suitable
+    /// for a cross-network migration. Values already configured higher are left
+    /// alone, and an explicit <c>CommandTimeout=0</c> (infinite) is preserved.
+    /// </summary>
+    /// <returns>The effective timeouts, for logging, or null if unchanged.</returns>
+    private static (int Connect, int Command)? ApplyPostgresTimeoutFloors(
+        ConfigurationManager configuration)
+    {
+        var connectionString = configuration["Postgres:ConnectionString"];
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            return null;
+        }
+
+        var csb = new NpgsqlConnectionStringBuilder(connectionString);
+
+        var connect = Math.Max(csb.Timeout, MinConnectTimeoutSeconds);
+        // 0 means "no timeout" — a deliberate choice, never something to lower.
+        var command = csb.CommandTimeout == 0
+            ? 0
+            : Math.Max(csb.CommandTimeout, MinCommandTimeoutSeconds);
+
+        if (connect == csb.Timeout && command == csb.CommandTimeout)
+        {
+            return null;
+        }
+
+        csb.Timeout = connect;
+        csb.CommandTimeout = command;
+
+        // The rebuilt string may contain the password, so it is only ever put
+        // back into configuration — never logged.
+        configuration.AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["Postgres:ConnectionString"] = csb.ToString()
+        });
+
+        return (connect, command);
+    }
+
     public static async Task<int> Main(string[] args)
     {
         var dryRun = args.Contains("--dry-run", StringComparer.OrdinalIgnoreCase);
@@ -46,6 +97,11 @@ public static class Program
         // Infrastructure.Initialization (a [ModuleInitializer]) which registers
         // the Guid serializer, camelCase conventions, and ClassMaps.
         builder.Services.TryAddMongoDb(builder.Configuration);
+
+        // Must run BEFORE TryAddPostgres: that call reads the connection string
+        // eagerly to build the NpgsqlDataSource, so a later change is ignored.
+        var timeouts = ApplyPostgresTimeoutFloors(builder.Configuration);
+
         builder.Services.TryAddPostgres(builder.Configuration);
 
         // Timestamp every console line. Migration runs are long and are captured
@@ -101,6 +157,15 @@ public static class Program
         logger.LogInformation(
             "MongoToPostgresMigrator starting ({Mode}, batch size {BatchSize}, copy batch size {CopyBatchSize})",
             dryRun ? "dry-run" : "migrate", batchSize, copyBatchSize);
+
+        if (timeouts is { } t)
+        {
+            logger.LogInformation(
+                "PostgreSQL timeouts raised for this run: connect {Connect}s, command {Command}. " +
+                "The COPY path has no automatic retry, so the defaults (15s/30s) risk aborting " +
+                "a cross-network run with partial data.",
+                t.Connect, t.Command == 0 ? "unlimited" : $"{t.Command}s");
+        }
 
         // 1. Preflight — every target table must be empty. Also captures the
         //    source counts used both for the dry-run report and the live-write
