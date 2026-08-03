@@ -1,0 +1,80 @@
+# MirrorMaker — Remote Replication (kafka → other cluster's kafka-aggregate)
+#
+# Replicates flag and segment change messages from this cluster's local main
+# broker (kafka:9092) to the OTHER cluster's aggregate broker via its NodePort
+# on the shared bridge network (172.31.0.x:30094).
+#
+# REMOTE_BOOTSTRAP_SERVERS is a placeholder patched by Deploy-FeatBitClusters.ps1
+# after the shared bridge network node IPs are known:
+#   West cluster:  REMOTE_BOOTSTRAP_SERVERS = 172.31.0.20:30094  (→ east)
+#   East cluster:  REMOTE_BOOTSTRAP_SERVERS = 172.31.0.10:30094  (→ west)
+#
+# The MirrorMaker consumer group ID is randomized so multiple clusters can
+# replicate from the same source topic without interfering with each other.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: kafka-mirrormaker-remote
+  name: kafka-mirrormaker-remote
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka-mirrormaker-remote
+  template:
+    metadata:
+      labels:
+        app: kafka-mirrormaker-remote
+    spec:
+      securityContext:
+        runAsUser: 1001
+        runAsGroup: 1001
+      imagePullSecrets:
+        - name: registry-credentials
+      containers:
+        - name: mirrormaker
+          image: bitnamilegacy/kafka:3.8
+          env:
+            # PLACEHOLDER — deploy script sets this to the other cluster's
+            # kafka-aggregate NodePort address: <OTHER_NODE_SHARED_IP>:30094
+            - name: REMOTE_BOOTSTRAP_SERVERS
+              value: "127.0.0.1:30094"
+          command:
+            - /bin/bash
+            - -c
+            - |
+              mkdir -p /tmp/mm
+
+              # Use a unique group ID per pod to ensure this cluster's MM has
+              # its own independent offset tracking on the source topic.
+              GROUP_ID="featbit-mirrormaker-remote-$(hostname)"
+
+              cat > /tmp/mm/consumer.properties << EOF
+              bootstrap.servers=kafka:9092
+              group.id=${GROUP_ID}
+              auto.offset.reset=earliest
+              auto.commit.enable=true
+              EOF
+
+              cat > /tmp/mm/producer.properties << EOF
+              bootstrap.servers=${REMOTE_BOOTSTRAP_SERVERS}
+              EOF
+
+              echo "Starting remote MirrorMaker: kafka:9092 -> ${REMOTE_BOOTSTRAP_SERVERS}"
+              exec /opt/bitnami/kafka/bin/kafka-mirror-maker.sh \
+                --consumer.config /tmp/mm/consumer.properties \
+                --producer.config /tmp/mm/producer.properties \
+                --whitelist 'featbit-feature-flag-change|featbit-segment-change|featbit-control-plane-push-full-sync-change' \
+                --num.streams 1
+          resources:
+            requests:
+              memory: 192Mi
+              cpu: 50m
+              ephemeral-storage: 512Mi
+            limits:
+              memory: 320Mi
+              cpu: 750m
+              ephemeral-storage: 1Gi
+      restartPolicy: Always
+status: {}

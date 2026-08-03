@@ -1,5 +1,7 @@
 using Application.Caches;
 using Domain.Environments;
+using Domain.Messages;
+using Microsoft.Extensions.Configuration;
 
 namespace Application.Environments;
 
@@ -16,21 +18,23 @@ public class OnSecretAdded : INotification
     }
 }
 
-public class OnSecretAddedHandler : INotificationHandler<OnSecretAdded>
+public class OnSecretAddedHandler(
+    ICacheService cache,
+    IEnvironmentService envService,
+    IConfiguration configuration,
+    IMessageProducer messageProducer)
+    : INotificationHandler<OnSecretAdded>
 {
-    private readonly ICacheService _cache;
-    private readonly IEnvironmentService _envService;
-
-    public OnSecretAddedHandler(ICacheService cache, IEnvironmentService envService)
-    {
-        _cache = cache;
-        _envService = envService;
-    }
-
     public async Task Handle(OnSecretAdded notification, CancellationToken cancellationToken)
     {
-        var resourceDescriptor = await _envService.GetResourceDescriptorAsync(notification.EnvId);
+        var resourceDescriptor = await envService.GetResourceDescriptorAsync(notification.EnvId);
 
-        await _cache.UpsertSecretAsync(resourceDescriptor, notification.Secret);
+        await cache.UpsertSecretAsync(resourceDescriptor, notification.Secret);
+
+        if (configuration.UseControlPlane())
+        {
+            var message = ControlPlaneSecretHelpers.CreateAddMessage(resourceDescriptor, notification.Secret);
+            await messageProducer.PublishAsync(ControlPlaneTopics.ControlPlaneSecretChange, message);
+        }
     }
 }

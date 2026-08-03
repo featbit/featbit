@@ -1,6 +1,6 @@
 # Testing conventions
 
-This document defines the standard for tests in the **back-end** (`modules/back-end`) and **evaluation-server** (`modules/evaluation-server`) modules. All new tests must follow it; existing tests are migrated opportunistically.
+This document defines the standard for tests in the **back-end** (`modules/back-end`), **evaluation-server** (`modules/evaluation-server`), and **control-plane** (`modules/control-plane`) modules. All new tests must follow it; existing tests are migrated opportunistically.
 
 ## 1. Project layout
 
@@ -28,6 +28,7 @@ modules/<module>/
 - **`Infrastructure.UnitTests`** exists in *both* modules (back-end and evaluation-server) — every project that ships under `src/` has a matching `<Project>.UnitTests` peer.
 - **Integration tests** (anything that boots `WebApplicationFactory<Program>`, hits the network/FS/DB, or shares an expensive fixture) live in `Application.IntegrationTests/` (in-process host) or `Infrastructure.IntegrationTests/` (real backing stores via Testcontainers). See §8 and §12.
 - All other tests are **unit tests** and live in `<Project>.UnitTests/`.
+- **Single-project modules** (control-plane ships one `src/Api` project with `Application`/`Domain`/`Infrastructure` as folders) get one `Api.UnitTests` peer and one `Api.IntegrationTests` project that plays the `Infrastructure.IntegrationTests` role (Testcontainers, `Category=Integration`, local-only — all of §12 applies to it verbatim). Folder mirroring (§2) still applies inside both.
 
 ## 2. Folder mirroring
 
@@ -95,7 +96,7 @@ No FluentAssertions, Shouldly, NSubstitute, AutoFixture, or Bogus.
 Run this at the repo root before sending a test-related PR:
 
 ```powershell
-rg -n --type cs '(FluentAssertions|Shouldly|NSubstitute|AutoFixture|Bogus|Mock<ILogger)' modules\back-end\tests modules\evaluation-server\tests
+rg -n --type cs 'using (FluentAssertions|Shouldly|NSubstitute|AutoFixture|Bogus)|Mock<ILogger' modules\back-end\tests modules\evaluation-server\tests modules\control-plane\tests
 ```
 
 A clean run produces no output. Any hit must be replaced with the approved equivalent (Moq for mocks, `FakeLogger<T>` for loggers) before merging.
@@ -138,13 +139,13 @@ If a test needs any of those, it belongs in `Application.IntegrationTests/` (in-
 - `Thread.Sleep` is **forbidden** in tests.
 - Bare `Task.Delay` is **forbidden** in tests.
 - For time-dependent code, inject `TimeProvider` and use `FakeTimeProvider` (`Microsoft.Extensions.TimeProvider.Testing`).
-- For "wait until condition" synchronization, use `TaskCompletionSource`, signal handles, or polling with a hard timeout (`Assert.True(await WaitForAsync(...))`).
+- For "wait until condition" synchronization, use `TaskCompletionSource`, signal handles, or polling with a hard timeout (`Assert.True(await WaitForAsync(...))`). The same pattern covers **negative** assertions: poll for the *violation* and assert the wait times out (`Assert.False(await WaitForAsync(...))`).
 
 ## 10. CI and coverage
 
-- Both modules build and run their full test suite on every PR (`build-and-test-api.yml`, `build-and-test-els.yml`).
+- All three modules build and run their full test suite on every PR (`build-and-test-api.yml`, `build-and-test-els.yml`, `build-and-test-control-plane.yml`).
 - CI runs with `--filter "Category!=Integration"`, which **builds** `Infrastructure.IntegrationTests` (proving it compiles) but **skips** every test inside it. Testcontainers-backed tests are local-only — see §12.
-- Coverage is collected via `dotnet test --collect:"XPlat Code Coverage"` and published as a workflow artifact (`coverage-back-end`, `coverage-evaluation-server`). **No threshold gate yet** — report only, until baselines stabilize.
+- Coverage is collected via `dotnet test --collect:"XPlat Code Coverage"` and published as a workflow artifact (`coverage-back-end`, `coverage-evaluation-server`, `coverage-control-plane`). **No threshold gate yet** — report only, until baselines stabilize.
 - The `coverlet.collector` package must be referenced directly by each test project (not transitively through `TestBase` with `PrivateAssets="all"`, which would silently break `dotnet test --collect:"XPlat Code Coverage"`).
 
 ### Baseline (captured 2026-06-25)
@@ -172,7 +173,14 @@ Test counts at the introduction of this standard. Use these as the "before" poin
 | Application.IntegrationTests | 65 |
 | Infrastructure.IntegrationTests | 26 (local-only, `Category=Integration`) |
 
-Coverage reports are uploaded as CI artifacts (`coverage-back-end`, `coverage-evaluation-server`); no threshold gate yet — report only, until baselines stabilize.
+**Control-plane — 177 tests total (captured 2026-07-09, when the module was added to this standard)**
+
+| Project | Tests |
+|---|---|
+| Api.UnitTests | 134 |
+| Api.IntegrationTests | 43 (local-only, `Category=Integration`) |
+
+Coverage reports are uploaded as CI artifacts (`coverage-back-end`, `coverage-evaluation-server`, `coverage-control-plane`); no threshold gate yet — report only, until baselines stabilize.
 
 ## 11. Required cleanups (tracked separately)
 

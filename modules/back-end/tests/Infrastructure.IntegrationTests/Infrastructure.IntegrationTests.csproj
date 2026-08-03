@@ -10,6 +10,7 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.5.1" />
+        <PackageReference Include="Microsoft.Extensions.Diagnostics.Testing" Version="10.6.0" />
         <PackageReference Include="xunit" Version="2.9.3" />
         <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
             <PrivateAssets>all</PrivateAssets>
@@ -45,6 +46,15 @@
         -->
         <EmbeddedResource Include="..\..\..\..\infra\postgresql\docker-entrypoint-initdb.d\*.sql">
             <LogicalName>FeatBitPostgresInitDb.%(Filename)%(Extension)</LogicalName>
+        </EmbeddedResource>
+
+        <!--
+            Schema changes not yet in a released vX.Y.Z.sql script, kept here
+            (not under infra/) so they can never reach a real deployment.
+            Always applied last, after all released scripts.
+        -->
+        <EmbeddedResource Include="Fixtures\vNext.sql">
+            <LogicalName>FeatBitPostgresInitDb.vNext.sql</LogicalName>
         </EmbeddedResource>
     </ItemGroup>
 

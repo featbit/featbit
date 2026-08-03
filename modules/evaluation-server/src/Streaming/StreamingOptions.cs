@@ -16,4 +16,12 @@ public class StreamingOptions
     public bool TrackClientHostName { get; set; } = true;
 
     public int TokenExpirySeconds { get; set; } = 30;
+
+    /// <summary>
+    /// Maximum number of in-flight payload evaluations + sends during a
+    /// <c>PushFullSyncToAllActiveSdks</c> call. The cap is shared across all envs and all
+    /// connections to bound CPU / GC / network pressure during the refresh.
+    /// Must be at least 1. Defaults to 50.
+    /// </summary>
+    public int PushFullSyncMaxConcurrency { get; set; } = 50;
 }

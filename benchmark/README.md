@@ -33,11 +33,11 @@ sudo dpkg -i packages-microsoft-prod.deb
 rm packages-microsoft-prod.deb
 ```
 
-The .NET SDK allows you to develop apps with .NET. If you install the .NET 8.0 SDK, you don't need to install the
+The .NET SDK allows you to develop apps with .NET. If you install the .NET 10.0 SDK, you don't need to install the
 corresponding runtime. To install the .NET SDK, run the following commands:
 
 ```bash
-sudo apt-get update && sudo apt-get install -y dotnet-sdk-8.0
+sudo apt-get update && sudo apt-get install -y dotnet-sdk-10.0
 ```
 
 ## Run Evaluation Server
@@ -47,7 +47,7 @@ Go to the Api folder **modules/evaluation-server/src/Api**
 - Publish
 
 ```bash
-dotnet publish --framework net8.0 --self-contained false --runtime linux-x64 --output publish
+dotnet publish --framework net10.0 --self-contained false --runtime linux-x64 --output publish
 ```
 
 - Run

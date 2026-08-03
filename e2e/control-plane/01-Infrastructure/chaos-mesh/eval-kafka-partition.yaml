@@ -1,0 +1,46 @@
+# Intra-cluster eval <-> kafka partition for the GatedCommit readiness fence (CP-13).
+#
+# Unlike the cross-DC partition, this is a LOCAL failure: the evaluation-server pod stays
+# up and serving (its /health/* endpoint remains reachable) but is cut off from its local
+# kafka, so it can no longer publish heartbeats to the control plane. Under GatedCommit,
+# once heartbeat staleness exceeds ControlPlane:HeartbeatStalenessThresholdSeconds the
+# HeartbeatFreshnessHealthCheck fails /health/readiness (503) — a hard readiness fence —
+# while /health/liveness stays 200 (the pod is pulled from rotation, not restarted).
+#
+# Apply in the cluster whose eval-server is under test (east for CP-13).
+#   start: kubectl --context east apply  -f eval-kafka-partition.yaml
+#   stop:  kubectl --context east delete -f eval-kafka-partition.yaml --ignore-not-found
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: eval-kafka-partition
+  namespace: chaos-mesh
+spec:
+  action: partition
+  mode: all
+  selector:
+    namespaces:
+      - featbit
+    labelSelectors:
+      app: evaluation-server
+  direction: both
+  # Cover BOTH kafka topologies (#113 — targeting only the host gateway made this
+  # chaos a no-op on Advanced mode, so heartbeats never stopped and the fence
+  # never tripped):
+  #   * Advanced mode: kafka runs in-cluster as a pod labeled app=kafka — the
+  #     pod-selector target below severs eval <-> kafka directly.
+  #   * Host-infra mode: kafka lives on the host (ExternalName ->
+  #     host.minikube.internal) — the externalTargets entry blocks the eval
+  #     pods' egress to east's host gateway.
+  # Either way the eval pods' kafka producers (heartbeats) are cut while
+  # in-cluster serving (Redis, /health endpoints, port-forwards) stays up.
+  target:
+    mode: all
+    selector:
+      namespaces:
+        - featbit
+      labelSelectors:
+        app: kafka
+  externalTargets:
+    - "192.168.58.1"
+  duration: "10m"

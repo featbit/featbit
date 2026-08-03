@@ -1,0 +1,91 @@
+# Cross-cluster Redis master forwarder.
+#
+# Per-cluster redis+sentinel announce the master's IN-CLUSTER FQDN
+# (featbit-redis-node-N.featbit-redis-headless.featbit.svc.cluster.local). Because
+# both clusters use the SAME service name + 'featbit' namespace, that FQDN resolves
+# to the LOCAL cluster's same-ordinal pod in either cluster -> a peer using the peer
+# Sentinel's announced master would be MISDIRECTED to its own redis. So cross-cluster
+# Instances__1 cannot use Sentinel discovery directly.
+#
+# This HAProxy gives the PEER a stable, cross-reachable, MASTER-ONLY endpoint:
+#   - tcp-check selects the redis node currently reporting role:master (follows failover)
+#   - published via NodePort 31649 -> reachable from the peer cluster at <node-ip>:31649
+#   - the peer's control-plane sets Redis__Instances__1__ConnectionString=<peer-node-ip>:31649
+#     (NO serviceName -> direct master, no FQDN misdirection)
+#
+# The LOCAL sentinel path (featbit-redis:26379,serviceName=mymaster) is untouched.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: featbit-redis-master-fwd
+  labels: { app: featbit-redis-master-fwd, purpose: cross-cluster }
+data:
+  haproxy.cfg: |
+    global
+      daemon
+      maxconn 512
+    defaults
+      mode tcp
+      timeout connect 3s
+      timeout client 1h
+      timeout server 1h
+      timeout check 2s
+    frontend redis_master_in
+      bind *:6379
+      default_backend redis_master
+    backend redis_master
+      # only the node answering role:master passes the check -> master-only routing
+      option tcp-check
+      tcp-check send PING\r\n
+      tcp-check expect string +PONG
+      tcp-check send info\ replication\r\n
+      tcp-check expect string role:master
+      tcp-check send QUIT\r\n
+      tcp-check expect string +OK
+      server r0 featbit-redis-node-0.featbit-redis-headless.featbit.svc.cluster.local:6379 check inter 1s fall 2 rise 1
+      server r1 featbit-redis-node-1.featbit-redis-headless.featbit.svc.cluster.local:6379 check inter 1s fall 2 rise 1
+      server r2 featbit-redis-node-2.featbit-redis-headless.featbit.svc.cluster.local:6379 check inter 1s fall 2 rise 1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: featbit-redis-master-fwd
+  labels: { app: featbit-redis-master-fwd, purpose: cross-cluster }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: featbit-redis-master-fwd }
+  template:
+    metadata:
+      labels: { app: featbit-redis-master-fwd, purpose: cross-cluster }
+    spec:
+      containers:
+        - name: haproxy
+          image: haproxy:2.9-alpine
+          ports:
+            - containerPort: 6379
+              name: redis
+          volumeMounts:
+            - name: cfg
+              mountPath: /usr/local/etc/haproxy
+          resources:
+            requests: { cpu: 10m, memory: 24Mi }
+            limits: { cpu: 100m, memory: 64Mi }
+      volumes:
+        - name: cfg
+          configMap: { name: featbit-redis-master-fwd }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: featbit-redis-master-fwd
+  labels: { app: featbit-redis-master-fwd, purpose: cross-cluster }
+spec:
+  type: NodePort
+  selector:
+    app: featbit-redis-master-fwd
+  ports:
+    - name: redis
+      port: 6379
+      targetPort: 6379
+      nodePort: 31649

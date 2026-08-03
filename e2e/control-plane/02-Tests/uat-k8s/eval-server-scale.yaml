@@ -1,0 +1,18 @@
+# Evaluation Server Scale Patch
+#
+# Strategic merge patch to scale the evaluation-server deployment for UAT.
+# The default UAT replica count is 3 (production default is 1).
+#
+# Usage:
+#   kubectl patch deployment evaluation-server --patch-file eval-server-scale.yaml
+#   Or simply: kubectl scale deployment evaluation-server --replicas=N
+#
+# The deploy-test-apps.ps1 script handles scaling automatically via the
+# -EvalServerReplicas parameter.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: evaluation-server
+spec:
+  replicas: 3

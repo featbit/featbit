@@ -11,7 +11,8 @@ namespace Infrastructure.MQ.Postgres;
 public partial class PostgresMessageConsumer(
     IServiceScopeFactory scopeFactory,
     NpgsqlDataSource dataSource,
-    ILogger<PostgresMessageConsumer> logger)
+    ILogger<PostgresMessageConsumer> logger,
+    string[] topics)
     : BackgroundService
 {
     private const int PollBatchSize = 100;
@@ -42,12 +43,7 @@ public partial class PostgresMessageConsumer(
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var tasks = new[]
-        {
-            ProcessAsync(Topics.EndUser, stoppingToken),
-            ProcessAsync(Topics.Insights, stoppingToken),
-            ProcessAsync(Topics.Usage, stoppingToken)
-        };
+        var tasks = topics.Select(topic => ProcessAsync(topic, stoppingToken));
 
         return Task.WhenAll(tasks);
     }

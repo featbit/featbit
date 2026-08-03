@@ -86,4 +86,41 @@ public class FeatureFlagControllerTests : IClassFixture<PermissionCheckTestApp>
             s => s.Send(It.IsAny<GetFeatureFlagList>(), It.IsAny<CancellationToken>()),
             Times.Never);
     }
+
+    [Fact]
+    public async Task UpdateGeneralAsync_Authenticated_SendsCombinedRequest()
+    {
+        var expectedRevision = Guid.NewGuid();
+        _app.Sender
+            .Setup(s => s.Send(It.IsAny<UpdateGeneral>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(expectedRevision);
+
+        var client = await _app.CreateAuthenticatedClientAsync();
+        var response = await client.PutAsJsonAsync(
+            $"/api/v1/envs/{EnvId}/feature-flags/checkout/general",
+            new
+            {
+                name = "Checkout rollout",
+                description = "Updated description",
+                tags = new[] { "checkout", "release" },
+                comment = "Update general settings"
+            });
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var body = await response.Content.ReadFromJsonAsync<ApiResponse<Guid>>(JsonOptions);
+        Assert.NotNull(body);
+        Assert.True(body!.Success);
+        Assert.Equal(expectedRevision, body.Data);
+        _app.Sender.Verify(
+            s => s.Send(
+                It.Is<UpdateGeneral>(r =>
+                    r.EnvId == EnvId &&
+                    r.Key == "checkout" &&
+                    r.Name == "Checkout rollout" &&
+                    r.Description == "Updated description" &&
+                    r.Tags.SequenceEqual(new[] { "checkout", "release" }) &&
+                    r.Comment == "Update general settings"),
+                It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
 }

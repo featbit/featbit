@@ -16,10 +16,16 @@ namespace Infrastructure.IntegrationTests.Fixtures;
 /// the <c>create database featbit</c> bootstrap statement to the default
 /// <c>postgres</c> database — everything else (table DDL, constraints,
 /// indexes, ALTERs across versions) runs verbatim.
+///
+/// <c>Fixtures/vNext.sql</c> is embedded under the same logical-name
+/// prefix and always applies last, after every released <c>vX.Y.Z.sql</c>
+/// script — it holds schema changes still under development that haven't
+/// been cut into a release yet.
 /// </summary>
 public sealed class FeatBitPostgresFixture : IAsyncLifetime
 {
     private const string ResourcePrefix = "FeatBitPostgresInitDb.";
+    private const string VNextResourceName = ResourcePrefix + "vNext.sql";
     private const string TargetDatabase = "featbit";
     private static readonly Regex ConnectMeta =
         new(@"^\s*\\connect\s+featbit\s*;?\s*$", RegexOptions.IgnoreCase | RegexOptions.Multiline);
@@ -118,7 +124,8 @@ public sealed class FeatBitPostgresFixture : IAsyncLifetime
         var asm = typeof(FeatBitPostgresFixture).Assembly;
         var names = asm.GetManifestResourceNames()
             .Where(n => n.StartsWith(ResourcePrefix, StringComparison.Ordinal))
-            .OrderBy(VersionKey)
+            .OrderBy(n => n == VNextResourceName) // vNext.sql always applies last
+            .ThenBy(VersionKey)
             .ThenBy(n => n, StringComparer.Ordinal)
             .ToArray();
 

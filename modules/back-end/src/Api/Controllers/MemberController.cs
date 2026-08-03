@@ -157,6 +157,50 @@ public class MemberController : ApiControllerBase
     }
 
     /// <summary>
+    /// Get all assigned permission rules of the member user
+    /// </summary>
+    /// <remarks>
+    /// Gets permission rules from direct and inherited policies, including every assignment source.
+    /// </remarks>
+    [OpenApi]
+    [HttpGet("{memberId:guid}/permissions")]
+    public async Task<ApiResponse<IReadOnlyCollection<MemberPermissionVm>>> GetPermissionsAsync(Guid memberId)
+    {
+        var request = new GetMemberPermissions
+        {
+            OrganizationId = OrgId,
+            MemberId = memberId
+        };
+
+        var permissions = await Mediator.Send(request);
+        return Ok(permissions);
+    }
+
+    /// <summary>
+    /// Evaluate a member user's access to a resource
+    /// </summary>
+    /// <remarks>
+    /// Evaluates one concrete resource and action using the same wildcard and deny precedence rules as request authorization.
+    /// </remarks>
+    [OpenApi]
+    [HttpPost("{memberId:guid}/permissions/evaluate")]
+    public async Task<ApiResponse<MemberPermissionEvaluationVm>> EvaluatePermissionAsync(
+        Guid memberId,
+        [FromBody] EvaluateMemberPermissionPayload payload)
+    {
+        var request = new EvaluateMemberPermission
+        {
+            OrganizationId = OrgId,
+            MemberId = memberId,
+            Resource = payload.Resource,
+            Action = payload.Action
+        };
+
+        var evaluation = await Mediator.Send(request);
+        return Ok(evaluation);
+    }
+
+    /// <summary>
     /// Get all direct policies of the member user
     /// </summary>
     /// <remarks>

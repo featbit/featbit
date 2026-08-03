@@ -1,0 +1,12 @@
+# Folders
+**/bin/
+**/obj/
+**/deploy/
+.idea/
+
+# Files
+**/global.json
+*.user
+.dockerignore*
+.gitignore
+README.md

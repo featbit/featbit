@@ -26,7 +26,6 @@ public class RedisStore(IRedisClient redisClient, ILogger<RedisStore> logger) : 
             keys[i] = RedisKeys.Flag(ids[i]!);
         }
 
-        // get flags
         var tasks = new Task<RedisValue>[keys.Length];
         for (var i = 0; i < keys.Length; i++)
         {
@@ -76,7 +75,6 @@ public class RedisStore(IRedisClient redisClient, ILogger<RedisStore> logger) : 
             keys[i] = RedisKeys.Segment(ids[i]!);
         }
 
-        // get segments
         var tasks = new Task<RedisValue>[keys.Length];
         for (var i = 0; i < keys.Length; i++)
         {
@@ -92,7 +90,6 @@ public class RedisStore(IRedisClient redisClient, ILogger<RedisStore> logger) : 
         var jsonBytes = new List<byte[]>(values.Length);
         for (var i = 0; i < values.Length; i++)
         {
-            // skip orphan values
             if (!values[i].HasValue)
             {
                 orphans.Add(keys[i].ToString());
@@ -133,10 +130,10 @@ public class RedisStore(IRedisClient redisClient, ILogger<RedisStore> logger) : 
         );
     }
 
-    // Filters out RedisValues whose backing key was missing (HasValue == false) and logs the
-    // orphan keys so operators can spot accumulating drift between an env's index and its values.
-    // Without this filter, a single orphan index member produces a null byte[] that crashes
-    // JsonDocument.Parse downstream and aborts the entire env's data-sync.
+    // Filters out entries whose backing key was missing and logs the orphan keys so
+    // operators can spot accumulating drift between an env's index and its values. Without this
+    // filter, a single orphan index member produces a null byte[] that crashes JsonDocument.Parse
+    // downstream and aborts the entire env's data-sync.
     private IEnumerable<byte[]> FilterOrphans(
         RedisValue[] values,
         RedisKey[] keys,

@@ -1,0 +1,81 @@
+server {
+  server_tokens off;
+
+  gzip            on;
+  gzip_vary       on;
+  gzip_types      text/plain text/css application/json application/javascript image/svg+xml text/xml application/xml application/xml+rss text/javascript;
+  gzip_proxied    no-cache no-store private expired auth;
+  gzip_min_length 1000;
+
+  listen 80;
+  server_name featbit;
+  root /usr/share/nginx/featbit;
+
+  add_header_inherit merge;
+  add_header X-Content-Type-Options "nosniff" always;
+  add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+  add_header X-Frame-Options "SAMEORIGIN" always;
+  add_header Content-Security-Policy "frame-ancestors 'self'" always;
+
+  location = /health {
+    access_log off;
+    default_type text/plain;
+    add_header Cache-Control "no-store";
+    return 200 "healthy\n";
+  }
+
+  location ^~ /health/ {
+    return 404;
+  }
+
+  location = ${BASE_HREF}/assets/env.js {
+    rewrite ^${BASE_HREF}/(.*)$ /$1 break;
+    try_files $uri =404;
+    add_header Cache-Control "no-store";
+  }
+
+  location ~* \.map$ {
+    access_log off;
+    return 404;
+  }
+
+  location ~* "^${BASE_HREF}/assets/.+-[A-Za-z0-9_-]{8,}\.(?:css|js|jpg|jpeg|gif|png|ico|cur|svg|svgz|mp4|ogg|ogv|webm|htc|woff|woff2)$" {
+    rewrite ^${BASE_HREF}/(.*)$ /$1 break;
+    try_files $uri =404;
+    add_header Cache-Control "public, max-age=31536000, immutable";
+    access_log off;
+  }
+
+  location ~* ^${BASE_HREF}/assets/ {
+    rewrite ^${BASE_HREF}/(.*)$ /$1 break;
+    try_files $uri =404;
+    add_header Cache-Control "public, max-age=2592000";
+    access_log off;
+  }
+
+  location = /index.html {
+    internal;
+    try_files $uri =404;
+    add_header Cache-Control "no-store";
+  }
+
+  location = ${BASE_HREF} {
+    rewrite ^ /index.html last;
+  }
+
+  location ~* ^${BASE_HREF}/(en|zh)(/.*)?$ {
+    try_files $uri $uri/ /index.html;
+  }
+
+  location ~ ^${BASE_HREF}/.+\..+$ {
+    return 404;
+  }
+
+  location ${BASE_HREF}/ {
+    try_files $uri $uri/ /index.html;
+  }
+
+  location / {
+    return 404;
+  }
+}

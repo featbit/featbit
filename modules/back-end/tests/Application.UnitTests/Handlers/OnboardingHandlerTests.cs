@@ -18,7 +18,7 @@ public class OnboardingHandlerTests
         var orgSvc = new Mock<IOrganizationService>();
         orgSvc.Setup(x => x.GetAsync(orgId)).ReturnsAsync(org);
 
-        ProjectWithEnvs captured = null;
+        ProjectWithEnvs? captured = null;
         var projectSvc = new Mock<IProjectService>();
         projectSvc.Setup(x => x.AddWithEnvsAsync(It.IsAny<Project>(), It.IsAny<IEnumerable<string>>()))
             .ReturnsAsync((Project p, IEnumerable<string> envs) =>

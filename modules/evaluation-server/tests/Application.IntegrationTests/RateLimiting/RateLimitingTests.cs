@@ -12,6 +12,7 @@ namespace Application.IntegrationTests.RateLimiting;
 
 [Trait("Category", "Host")]
 [Collection(nameof(TestApp))]
+[Trait("Category", "Integration")]
 public class RateLimitingTests
 {
     private readonly TestApp _app;

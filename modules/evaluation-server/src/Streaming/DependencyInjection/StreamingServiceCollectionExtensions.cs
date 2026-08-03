@@ -35,7 +35,8 @@ public static class StreamingServiceCollectionExtensions
         // services
         services
             .AddEvaluator()
-            .AddTransient<IDataSyncService, DataSyncService>();
+            .AddTransient<IDataSyncService, DataSyncService>()
+            .AddTransient<IAdminService, AdminService>();
 
         var rpServiceType = options.CustomRpService != null
             ? options.CustomRpService.GetType()
@@ -44,7 +45,7 @@ public static class StreamingServiceCollectionExtensions
         services.AddTransient(typeof(IRelayProxyService), rpServiceType);
 
         // connection
-        services.AddSingleton<IConnectionManager, ConnectionManager>();
+        services.AddSingleton<IConnectionManager, DefaultConnectionManager>();
 
         // message handlers
         services
@@ -57,7 +58,8 @@ public static class StreamingServiceCollectionExtensions
         // mq message consumers
         services
             .AddSingleton<IMessageConsumer, FeatureFlagChangeMessageConsumer>()
-            .AddSingleton<IMessageConsumer, SegmentChangeMessageConsumer>();
+            .AddSingleton<IMessageConsumer, SegmentChangeMessageConsumer>()
+            .AddSingleton<IMessageConsumer, ControlPlaneCommandMessageConsumer>();
 
         return new StreamingBuilder(services);
     }
