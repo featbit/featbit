@@ -45,7 +45,7 @@ public class MemberService(MongoDbClient mongoDb) : IMemberService
         return member;
     }
 
-    public async Task<ICollection<Member>> GetListAsync(Guid organizationId, IEnumerable<Guid> ids)
+    public async Task<ICollection<Member>> GetListAsync(Guid organizationId, Guid[] ids)
     {
         var users = mongoDb.QueryableOf<User>();
         var organizationUsers = mongoDb.QueryableOf<OrganizationUser>();

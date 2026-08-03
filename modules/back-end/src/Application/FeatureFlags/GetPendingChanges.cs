@@ -50,7 +50,8 @@ public class GetPendingChangesHandler(
         var reviewerIds = pendingChangeRequests
             .SelectMany(changeRequest => changeRequest.Reviewers)
             .Select(reviewer => reviewer.MemberId)
-            .Distinct();
+            .Distinct()
+            .ToArray();
         var reviewerMembers = (await memberService.GetListAsync(request.OrgId, reviewerIds))
             .ToDictionary(member => member.Id, member => (member.Name, member.Email));
 

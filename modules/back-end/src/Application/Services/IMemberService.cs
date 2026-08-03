@@ -9,7 +9,7 @@ public interface IMemberService
 {
     Task<Member> GetAsync(Guid organizationId, Guid memberId);
 
-    Task<ICollection<Member>> GetListAsync(Guid organizationId, IEnumerable<Guid> ids);
+    Task<ICollection<Member>> GetListAsync(Guid organizationId, Guid[] ids);
 
     Task DeleteAsync(Guid organizationId, Guid memberId);
 

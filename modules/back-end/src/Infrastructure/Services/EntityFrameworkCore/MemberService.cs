@@ -47,7 +47,7 @@ public class MemberService(AppDbContext dbContext) : IMemberService
         return member;
     }
 
-    public async Task<ICollection<Member>> GetListAsync(Guid organizationId, IEnumerable<Guid> ids)
+    public async Task<ICollection<Member>> GetListAsync(Guid organizationId, Guid[] ids)
     {
         var users = QueryableOf<User>();
         var organizationUsers = QueryableOf<OrganizationUser>();

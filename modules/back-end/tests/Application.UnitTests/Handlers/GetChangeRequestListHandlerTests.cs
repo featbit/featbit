@@ -79,7 +79,7 @@ public class GetChangeRequestListHandlerTests
             .ReturnsAsync([creator, updator]);
         var memberService = new Mock<IMemberService>();
         memberService
-            .Setup(service => service.GetListAsync(orgId, It.IsAny<IEnumerable<Guid>>()))
+            .Setup(service => service.GetListAsync(orgId, It.IsAny<Guid[]>()))
             .ReturnsAsync([reviewer]);
         var currentUser = new Mock<ICurrentUser>();
         currentUser.SetupGet(user => user.Id).Returns(currentUserId);
