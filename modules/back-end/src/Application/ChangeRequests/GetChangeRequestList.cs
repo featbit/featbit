@@ -1,4 +1,3 @@
-using Application.Bases.Exceptions;
 using Application.Users;
 using Domain.FeatureFlags;
 using Domain.FlagDrafts;
@@ -68,20 +67,8 @@ public class GetChangeRequestListHandler(
                 await resourceService.GetEnvRnAsync(environmentId) ?? string.Empty;
         }
 
-        var reviewerMembers = new Dictionary<Guid, (string Name, string Email)>();
-
-        foreach (var reviewerId in reviewerIds)
-        {
-            try
-            {
-                var member = await memberService.GetAsync(request.OrgId, reviewerId);
-                reviewerMembers[reviewerId] = (member.Name, member.Email);
-            }
-            catch (EntityNotFoundException)
-            {
-                // Preserve the reviewer id as a frontend fallback when a member no longer exists.
-            }
-        }
+        var reviewerMembers = (await memberService.GetListAsync(request.OrgId, reviewerIds))
+            .ToDictionary(member => member.Id, member => (member.Name, member.Email));
 
         var items = page.Items.Select(changeRequest =>
         {

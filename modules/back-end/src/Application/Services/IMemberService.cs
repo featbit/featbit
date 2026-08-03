@@ -9,6 +9,8 @@ public interface IMemberService
 {
     Task<Member> GetAsync(Guid organizationId, Guid memberId);
 
+    Task<ICollection<Member>> GetListAsync(Guid organizationId, IEnumerable<Guid> ids);
+
     Task DeleteAsync(Guid organizationId, Guid memberId);
 
     Task<PagedResult<Member>> GetListAsync(Guid organizationId, MemberFilter filter);

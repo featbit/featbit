@@ -45,6 +45,29 @@ public class MemberService(MongoDbClient mongoDb) : IMemberService
         return member;
     }
 
+    public async Task<ICollection<Member>> GetListAsync(Guid organizationId, IEnumerable<Guid> ids)
+    {
+        var users = mongoDb.QueryableOf<User>();
+        var organizationUsers = mongoDb.QueryableOf<OrganizationUser>();
+
+        var query =
+            from user in users
+            join organizationUser in organizationUsers
+                on user.Id equals organizationUser.UserId
+            where organizationUser.OrganizationId == organizationId && ids.Contains(user.Id)
+            select new Member
+            {
+                Id = user.Id,
+                Email = user.Email,
+                Name = user.Name,
+                CreatedAt = user.CreatedAt,
+                InvitorId = organizationUser.InvitorId,
+                InitialPassword = user.InitialPassword
+            };
+
+        return await query.ToListAsync();
+    }
+
     public async Task DeleteAsync(Guid organizationId, Guid memberId)
     {
         // delete organization user

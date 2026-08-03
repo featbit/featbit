@@ -1,4 +1,3 @@
-using Application.Bases.Exceptions;
 using Domain.FlagChangeRequests;
 using Domain.FlagSchedules;
 using Domain.SemanticPatch;
@@ -48,23 +47,12 @@ public class GetPendingChangesHandler(
         var users = await userService.GetListAsync(userIds);
 
         // get reviewers
-        var reviewerMembers = new Dictionary<Guid, (string Name, string Email)>();
         var reviewerIds = pendingChangeRequests
             .SelectMany(changeRequest => changeRequest.Reviewers)
             .Select(reviewer => reviewer.MemberId)
             .Distinct();
-        foreach (var reviewerId in reviewerIds)
-        {
-            try
-            {
-                var member = await memberService.GetAsync(request.OrgId, reviewerId);
-                reviewerMembers[reviewerId] = (member.Name, member.Email);
-            }
-            catch (EntityNotFoundException)
-            {
-                // Keep the reviewer ID as the frontend fallback if the member no longer exists.
-            }
-        }
+        var reviewerMembers = (await memberService.GetListAsync(request.OrgId, reviewerIds))
+            .ToDictionary(member => member.Id, member => (member.Name, member.Email));
 
         var result = new List<PendingChangesVm>();
 
