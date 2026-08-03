@@ -70,10 +70,12 @@ public class FlagChangeRequest : FullAuditedEntity
             return false;
         }
 
-        var isReviewer = Reviewers.Any(r => r.MemberId == operatorId);
+        var isApprovedReviewer = Reviewers.Any(r =>
+            r.MemberId == operatorId && r.Action == FlagChangeRequestAction.Approve
+        );
         var isCreator = CreatorId == operatorId;
 
-        return isReviewer || isCreator;
+        return isApprovedReviewer || isCreator;
     }
 
     public bool CanBeDeclinedBy(Guid operatorId)

@@ -34,6 +34,7 @@ public class CreateFlagScheduleHandlerTests
 
     private static FlagTargeting NewTargeting(FeatureFlag flag) => new()
     {
+        DisabledVariationId = flag.DisabledVariationId,
         TargetUsers = flag.TargetUsers,
         Rules = new List<TargetRule>(),
         Fallthrough = flag.Fallthrough,

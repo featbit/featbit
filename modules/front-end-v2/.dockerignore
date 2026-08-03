@@ -1,0 +1,32 @@
+# Dependencies and build output
+node_modules
+dist
+dist-ssr
+
+# Test and local tooling output
+test-results
+playwright-report
+coverage
+*.log
+
+# Design assets, migration notes, and scripts are not used by the production build
+design
+implementation-details
+.impeccable
+scripts
+AGENTS.md
+DESIGN.md
+PRODUCT.md
+README.md
+plan.md
+
+# Local configuration and credentials
+.env*
+!.env.example
+.npmrc
+*.local
+
+# Version control and editor metadata
+.git
+.idea
+.vscode

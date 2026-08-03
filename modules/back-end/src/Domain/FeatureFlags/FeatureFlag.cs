@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Domain.AuditLogs;
 using Domain.FlagDrafts;
 using Domain.Targeting;
@@ -175,6 +176,18 @@ public class FeatureFlag : FullAuditedEntity
         return dataChange.To(this);
     }
 
+    public DataChange UpdateGeneral(string name, string description, string[] tags, Guid currentUserId)
+    {
+        var dataChange = new DataChange(this);
+
+        Name = name;
+        Description = description;
+        Tags = tags ?? [];
+        MarkAsUpdated(currentUserId);
+
+        return dataChange.To(this);
+    }
+
     public DataChange UpdateOffVariation(string offVariationId, Guid currentUserId)
     {
         var dataChange = new DataChange(this);
@@ -212,6 +225,7 @@ public class FeatureFlag : FullAuditedEntity
     {
         var dataChange = new DataChange(this);
 
+        DisabledVariationId = targeting.DisabledVariationId;
         TargetUsers = targeting.TargetUsers;
         Rules = targeting.Rules;
         Fallthrough = targeting.Fallthrough;
@@ -310,6 +324,15 @@ public class FeatureFlag : FullAuditedEntity
         MarkAsUpdated(draft.CreatorId);
 
         return dataChange.To(this);
+    }
+
+    /// <summary>
+    /// Creates a deep copy of this feature flag.
+    /// </summary>
+    public FeatureFlag Clone()
+    {
+        var json = JsonSerializer.Serialize(this, ReusableJsonSerializerOptions.Web);
+        return JsonSerializer.Deserialize<FeatureFlag>(json, ReusableJsonSerializerOptions.Web)!;
     }
 
     /// <summary>

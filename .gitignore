@@ -33,6 +33,15 @@ benchmark/k6-scripts/test-results/
 #Ignore IntelliJ IDEA files
 .idea/
 
+/modules/node_modules
+modules/package-lock.json
+modules/package.json
+modules/front-end-v2/test-results/
+
+/modules/.codex
+/modules/.impeccable
+/modules/.agents
+
 # Control-plane QA local artifacts (never commit)
 /e2e/control-plane/deployment.env
 /e2e/control-plane/port-forwards.log

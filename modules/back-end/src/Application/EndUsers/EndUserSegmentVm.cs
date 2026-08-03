@@ -10,6 +10,8 @@ public class EndUserSegmentVm
 
     public string Type { get; set; }
 
+    public ICollection<string> Scopes { get; set; }
+
     public DateTime UpdatedAt { get; set; }
 
     public EndUserSegmentVm(Segment segment)
@@ -17,6 +19,7 @@ public class EndUserSegmentVm
         Id = segment.Id.ToString();
         Name = segment.Name;
         Type = segment.Type;
+        Scopes = segment.Scopes;
         UpdatedAt = segment.UpdatedAt;
     }
 }
