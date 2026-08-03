@@ -79,8 +79,7 @@ public class MemberPermissionEvaluationVm
 
 public static class MemberPermissionMapper
 {
-    public static IReadOnlyCollection<MemberPermissionVm> Map(
-        IEnumerable<MemberPermissionPolicyAssignment> assignments)
+    public static IReadOnlyCollection<MemberPermissionVm> Map(IEnumerable<MemberPermissionPolicyAssignment> assignments)
     {
         var permissions = new List<MemberPermissionVm>();
 

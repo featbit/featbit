@@ -22,9 +22,7 @@ public class GetMemberLookupListHandler(
         GetMemberLookupList request,
         CancellationToken cancellationToken)
     {
-        var isOrganizationMember = await organizationService.ContainsUserAsync(
-            request.OrganizationId,
-            currentUser.Id);
+        var isOrganizationMember = await organizationService.ContainsUserAsync(request.OrganizationId, currentUser.Id);
         if (!isOrganizationMember)
         {
             throw new ForbiddenException();

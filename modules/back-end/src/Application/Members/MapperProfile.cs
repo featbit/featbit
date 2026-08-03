@@ -13,7 +13,6 @@ public class MapperProfile : Profile
 
         CreateMap<PagedResult<Member>, PagedResult<MemberVm>>();
         CreateMap<PagedResult<MemberGroup>, PagedResult<MemberGroupVm>>();
-
         CreateMap<PagedResult<Member>, PagedResult<MemberLookupVm>>();
     }
 }

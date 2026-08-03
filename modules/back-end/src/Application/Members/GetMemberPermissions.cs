@@ -14,7 +14,9 @@ public class GetMemberPermissionsHandler(IMemberService service)
         GetMemberPermissions request,
         CancellationToken cancellationToken)
     {
-        var assignments = await service.GetPermissionAssignmentsAsync(request.OrganizationId, request.MemberId);
+        var assignments =
+            await service.GetPermissionAssignmentsAsync(request.OrganizationId, request.MemberId);
+
         return MemberPermissionMapper.Map(assignments);
     }
 }
