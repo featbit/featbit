@@ -45,7 +45,8 @@ public class FlagChangeRequestService(AppDbContext dbContext)
         var items = filtered.ToArray();
         var needsReviewCount = items.LongCount(item =>
             item.Status == FlagChangeRequestStatus.PendingReview &&
-            item.Reviewers.Any(reviewer => reviewer.MemberId == currentUserId));
+            item.Reviewers.Any(reviewer => reviewer.MemberId == currentUserId)
+        );
         var pageIndex = Math.Max(0, filter.PageIndex);
         var pageSize = Math.Clamp(filter.PageSize, 1, 100);
         var pageItems = items

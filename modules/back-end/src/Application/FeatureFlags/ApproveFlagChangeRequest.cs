@@ -51,7 +51,6 @@ public class ApproveFlagChangeRequestHandler(
             return false;
         }
 
-        var comment = request.Comment?.Trim() ?? string.Empty;
         changeRequest.Approve(currentUser.Id);
         await changeRequestService.UpdateAsync(changeRequest);
 
@@ -70,7 +69,7 @@ public class ApproveFlagChangeRequestHandler(
             flag,
             Operations.ApproveFlagChangeRequest,
             dataChange,
-            comment,
+            request.Comment?.Trim() ?? string.Empty,
             currentUser.Id
         );
         await auditLogService.AddOneAsync(auditLog);

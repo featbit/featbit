@@ -25,7 +25,8 @@ public interface IMemberService
 
     Task<IReadOnlyCollection<MemberPermissionPolicyAssignment>> GetPermissionAssignmentsAsync(
         Guid organizationId,
-        Guid memberId);
+        Guid memberId
+    );
 
     Task<PolicyStatement[]> GetPermissionsAsync(Guid organizationId, Guid memberId);
 
