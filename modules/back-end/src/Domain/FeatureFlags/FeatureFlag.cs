@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Domain.AuditLogs;
 using Domain.FlagDrafts;
 using Domain.Targeting;
@@ -323,6 +324,15 @@ public class FeatureFlag : FullAuditedEntity
         MarkAsUpdated(draft.CreatorId);
 
         return dataChange.To(this);
+    }
+
+    /// <summary>
+    /// Creates a deep copy of this feature flag.
+    /// </summary>
+    public FeatureFlag Clone()
+    {
+        var json = JsonSerializer.Serialize(this, ReusableJsonSerializerOptions.Web);
+        return JsonSerializer.Deserialize<FeatureFlag>(json, ReusableJsonSerializerOptions.Web)!;
     }
 
     /// <summary>

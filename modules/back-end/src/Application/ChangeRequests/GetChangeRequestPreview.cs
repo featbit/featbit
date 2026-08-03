@@ -1,8 +1,6 @@
-using System.Text.Json;
 using Application.Bases.Exceptions;
 using Domain.FeatureFlags;
 using Domain.FlagChangeRequests;
-using Domain.Utils;
 
 namespace Application.ChangeRequests;
 
@@ -46,7 +44,7 @@ public class GetChangeRequestPreviewHandler(
             throw new EntityNotFoundException(nameof(FeatureFlag), changeRequest.FlagId.ToString());
         }
 
-        var previewFlag = Clone(currentFlag);
+        var previewFlag = currentFlag.Clone();
         if (changeRequest.Status != FlagChangeRequestStatus.Applied)
         {
             previewFlag.ApplyDraft(draft);
@@ -59,11 +57,5 @@ public class GetChangeRequestPreviewHandler(
             Status = changeRequest.Status,
             Flag = previewFlag
         };
-    }
-
-    private static FeatureFlag Clone(FeatureFlag flag)
-    {
-        var json = JsonSerializer.Serialize(flag, ReusableJsonSerializerOptions.Web);
-        return JsonSerializer.Deserialize<FeatureFlag>(json, ReusableJsonSerializerOptions.Web)!;
     }
 }

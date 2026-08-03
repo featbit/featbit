@@ -1,10 +1,7 @@
 using Application.Bases.Exceptions;
 using Application.Users;
-using Domain.AuditLogs;
 using Domain.FeatureFlags;
-using Domain.FlagChangeRequests;
 using Domain.FlagDrafts;
-using Domain.SemanticPatch;
 using Domain.Users;
 
 namespace Application.ChangeRequests;
@@ -92,50 +89,19 @@ public class GetChangeRequestListHandler(
             var draft = drafts.FirstOrDefault(item => item.Id == changeRequest.FlagDraftId);
             var creator = users.FirstOrDefault(item => item.Id == changeRequest.CreatorId);
             var updator = users.FirstOrDefault(item => item.Id == changeRequest.UpdatorId);
-            return new ChangeRequestVm
-            {
-                Id = changeRequest.Id,
-                FlagId = changeRequest.FlagId,
-                FlagName = flag?.Name ?? string.Empty,
-                FlagKey = flag?.Key ?? string.Empty,
-                ScopeRn = environmentRns.GetValueOrDefault(changeRequest.EnvId, string.Empty),
-                Reason = changeRequest.Reason,
-                Status = changeRequest.Status,
-                CreatorId = changeRequest.CreatorId,
-                CreatorName = creator?.Name ?? string.Empty,
-                CreatorEmail = creator?.Email ?? string.Empty,
-                CreatedAt = changeRequest.CreatedAt,
-                UpdatedAt = changeRequest.UpdatedAt,
-                UpdatorId = changeRequest.UpdatorId,
-                UpdatorName = updator?.Name ?? string.Empty,
-                UpdatorEmail = updator?.Email ?? string.Empty,
-                DataChange = draft?.DataChange ?? new DataChange(),
-                Instructions = draft == null
-                    ? Array.Empty<FlagInstruction>()
-                    : FlagComparer.Compare(draft.DataChange),
-                Reviewers = changeRequest.Reviewers.Select(reviewer =>
-                {
-                    reviewerMembers.TryGetValue(reviewer.MemberId, out var member);
-                    return new ChangeRequestReviewerVm
-                    {
-                        MemberId = reviewer.MemberId,
-                        Name = member.Name ?? string.Empty,
-                        Email = member.Email ?? string.Empty,
-                        Action = reviewer.Action,
-                        Timestamp = reviewer.Timestamp
-                    };
-                }).ToArray(),
-                CanReview = changeRequest.Status == FlagChangeRequestStatus.PendingReview &&
-                            changeRequest.CanBeApprovedBy(currentUser.Id),
-                CanApply = changeRequest.CanBeAppliedBy(currentUser.Id)
-            };
+            var scopeRn = environmentRns.GetValueOrDefault(changeRequest.EnvId, string.Empty);
+            return new ChangeRequestVm(
+                changeRequest,
+                flag,
+                draft,
+                creator,
+                updator,
+                reviewerMembers,
+                scopeRn,
+                currentUser.Id
+            );
         }).ToArray();
 
-        return new ChangeRequestListVm
-        {
-            TotalCount = page.TotalCount,
-            NeedsReviewCount = page.NeedsReviewCount,
-            Items = items
-        };
+        return new ChangeRequestListVm(page.TotalCount, page.NeedsReviewCount, items);
     }
 }
