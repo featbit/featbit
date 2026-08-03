@@ -94,8 +94,7 @@ public class UpdateGeneralHandler(
         }
 
         var segmentRn = await resourceService.GetSegmentRnAsync(segment.EnvId, segment.Id);
-        if (requiredPermissions.Any(permission =>
-                !PolicyHelper.IsAllowed(request.Permissions, segmentRn, permission)))
+        if (requiredPermissions.Any(permission => !PolicyHelper.IsAllowed(request.Permissions, segmentRn, permission)))
         {
             throw new ForbiddenException();
         }
@@ -103,7 +102,8 @@ public class UpdateGeneralHandler(
         var dataChange = segment.UpdateGeneral(
             request.Name,
             request.Description,
-            tagsChanged ? requestedTags : currentTags);
+            tagsChanged ? requestedTags : currentTags
+        );
         await service.UpdateAsync(segment);
 
         var notification = new OnSegmentChange(

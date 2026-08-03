@@ -98,8 +98,7 @@ public class UpdateGeneralHandler(
         }
 
         var flagRn = await resourceService.GetFlagRnAsync(flag.EnvId, flag.Key);
-        if (requiredPermissions.Any(permission =>
-                !PolicyHelper.IsAllowed(request.Permissions, flagRn, permission)))
+        if (requiredPermissions.Any(permission => !PolicyHelper.IsAllowed(request.Permissions, flagRn, permission)))
         {
             throw new ForbiddenException();
         }
@@ -116,7 +115,8 @@ public class UpdateGeneralHandler(
             Operations.Update,
             dataChange,
             currentUser.Id,
-            comment: request.Comment);
+            comment: request.Comment
+        );
         await publisher.Publish(notification, cancellationToken);
 
         return flag.Revision;
