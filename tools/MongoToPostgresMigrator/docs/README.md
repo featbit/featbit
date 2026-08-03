@@ -50,7 +50,7 @@ Section names match the FeatBit application, so the same values can be reused.
 {
   "MongoDb":  { "ConnectionString": "mongodb://localhost:27017", "Database": "featbit" },
   "Postgres": { "ConnectionString": "Host=localhost;Port=5432;Username=postgres;Password=...;Database=featbit" },
-  "Migrator": { "BatchSize": 500, "CopyBatchSize": 50000, "ExcludeEntities": [] }
+  "Migrator": { "BatchSize": 500, "CopyBatchSize": 1000, "ExcludeEntities": [] }
 }
 ```
 

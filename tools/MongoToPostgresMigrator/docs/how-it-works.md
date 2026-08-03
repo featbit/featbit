@@ -192,11 +192,30 @@ fast path degrades to the proven EF path only for the affected block.
 | Setting | Default | Effect |
 |---------|---------|--------|
 | `Migrator:BatchSize` | `500` | Rows per EF `SaveChanges` batch (the EF path and COPY fallback). |
-| `Migrator:CopyBatchSize` | `50000` | Rows per binary COPY block. Larger blocks amortise round-trips; smaller blocks narrow the fallback window if a block is rejected. |
+| `Migrator:CopyBatchSize` | `1000` | Rows per binary COPY block. Batch size is **not** a meaningful throughput lever — per-batch handoff measures under 1% of a block's cost — so the default favours a narrow fallback window: a rejected block degrades 1,000 rows to the EF path rather than 50,000. |
 | `Migrator:ExcludeEntities` | `[]` | Entity names to skip this run (case-insensitive). Excluded entities are neither copied nor verified. See [Excluding entities at runtime](#excluding-entities-at-runtime). |
 
 Both are overridable without a rebuild (`Migrator__BatchSize`,
 `Migrator__CopyBatchSize`).
+
+### Read/write overlap
+
+Each COPY block is fed by a bounded prefetch channel
+(`EntityStep.ReadEntitiesPrefetchedAsync`, capacity 20,000), so the MongoDB
+cursor reads ahead while the current block is streaming into PostgreSQL. Without
+it the two phases run strictly serially and the run costs `read + write` rather
+than `max(read, write)` — barely noticeable against a local database, but the
+dominant cost when either endpoint is remote.
+
+The channel is bounded deliberately: `FlagRevision` embeds an entire
+`FeatureFlag` object graph, so an unbounded queue would consume unbounded memory
+on precisely the largest table. Producer exceptions surface at the consumer, so
+fail-fast behaviour is unchanged.
+
+Because the read is prefetched, a remote run is usually **write-bound** — but only
+if the source connection can keep up. Over a network, enable driver-level wire
+compression (for MongoDB, `compressors=snappy` on the connection URI); without it
+the read side, not PostgreSQL, sets the pace.
 
 ### Excluding entities at runtime
 

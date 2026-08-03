@@ -94,19 +94,19 @@ queue.
    not apply the provider change. The migrator never modified MongoDB, so writes
    resume with zero harm — nothing destructive has happened yet.
 4. **Cut over** (only after the gate passes):
-   1. Scale the **evaluation server** to zero (drops SDK connections).
-   2. **Fully flush the cache** if Redis is used (the message-queue backlog is
-      preserved).
-   3. Restart the **API** with `DbProvider=Postgres`. It repopulates the cache
-      from PostgreSQL and consumes any message-queue backlog.
-   4. Restart the **control plane** (if present) with `DbProvider=Postgres`.
-   5. **Wait for cache repopulation to finish before starting the evaluation
-      server.** If Redis is used, confirm the API has completed repopulation — the
-      marker key exists and flag/segment keys are present — before bringing the
-      evaluation server up. Starting it against a half-filled cache would serve
-      empty or partial flags to SDK clients.
-   6. Start the **evaluation server** with `DbProvider=Postgres`, last. It reads
-      the freshly, fully repopulated cache.
+    1. Scale the **evaluation server** to zero (drops SDK connections).
+    2. **Fully flush the cache** if Redis is used (the message-queue backlog is
+       preserved).
+    3. Restart the **API** with `DbProvider=Postgres`. It repopulates the cache
+       from PostgreSQL and consumes any message-queue backlog.
+    4. Restart the **control plane** (if present) with `DbProvider=Postgres`.
+    5. **Wait for cache repopulation to finish before starting the evaluation
+       server.** If Redis is used, confirm the API has completed repopulation — the
+       marker key exists and flag/segment keys are present — before bringing the
+       evaluation server up. Starting it against a half-filled cache would serve
+       empty or partial flags to SDK clients.
+    6. Start the **evaluation server** with `DbProvider=Postgres`, last. It reads
+       the freshly, fully repopulated cache.
 5. **Verify.** Log in through the UI; confirm flags render and evaluate. Confirm
    SDK clients reconnect and receive correct values. Toggle a flag and confirm
    the write lands in PostgreSQL.
@@ -132,10 +132,18 @@ The migrator is read-only against MongoDB, so rollback is clean at any point:
 The freeze window ≈ migrator runtime (dominated by the end-user, audit-log, and
 flag-revision copies) + cache repopulation + service restarts. Those high-volume
 tables use the binary `COPY` write path, so the copy phase is far shorter than an
-all-EF run; tune it with `Migrator:CopyBatchSize` (see
-[how-it-works.md](how-it-works.md#write-paths-and-performance)) rather than
-`Migrator:BatchSize`. Measure the window against a production-sized snapshot in a
-staging environment and add margin.
+all-EF run. Measure the window against a production-sized snapshot in a staging
+environment and add margin — and measure it **with the databases as far away as
+they will be in production**, since a loopback run can understate a remote one by
+several times.
+
+When either endpoint is remote, connection settings dominate batch settings. Wire
+compression on the source connection (for MongoDB, `compressors=snappy`) is the
+single highest-impact setting, because the copy steps stream whole documents and
+the read side will otherwise starve the `COPY` stream. `Migrator:CopyBatchSize` is
+**not** a meaningful throughput lever — per-batch overhead is under 1% of a
+block's cost — and is better left small to narrow the fallback window (see
+[how-it-works.md](how-it-works.md#write-paths-and-performance)).
 
 If the end-user table dominates the runtime and can tolerate eventual
 consistency, consider excluding it from the freeze with
