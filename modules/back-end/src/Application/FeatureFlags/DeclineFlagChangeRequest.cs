@@ -1,3 +1,4 @@
+using Application.Bases;
 using Application.Users;
 using Domain.AuditLogs;
 
@@ -14,6 +15,15 @@ public class DeclineFlagChangeRequest : IRequest<bool>
     public string Comment { get; set; }
 }
 
+public class DeclineFlagChangeRequestValidator : AbstractValidator<DeclineFlagChangeRequest>
+{
+    public DeclineFlagChangeRequestValidator()
+    {
+        RuleFor(x => x.Comment)
+            .NotEmpty().WithErrorCode(ErrorCodes.Required("comment"));
+    }
+}
+
 public class DeclineFlagChangeRequestHandler(
     IFlagChangeRequestService changeRequestService,
     IFlagScheduleService scheduleService,
@@ -25,12 +35,6 @@ public class DeclineFlagChangeRequestHandler(
 {
     public async Task<bool> Handle(DeclineFlagChangeRequest request, CancellationToken cancellationToken)
     {
-        var comment = request.Comment?.Trim() ?? string.Empty;
-        if (string.IsNullOrWhiteSpace(comment))
-        {
-            return false;
-        }
-
         var changeRequest = await changeRequestService.FindOneAsync(
             x => x.OrgId == request.OrgId && x.EnvId == request.EnvId && x.Id == request.Id
         );
@@ -75,7 +79,7 @@ public class DeclineFlagChangeRequestHandler(
             flag,
             Operations.DeclineFlagChangeRequest,
             dataChange,
-            comment,
+            request.Comment?.Trim() ?? string.Empty,
             currentUser.Id
         );
         await auditLogService.AddOneAsync(auditLog);

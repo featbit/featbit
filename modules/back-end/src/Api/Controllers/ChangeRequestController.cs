@@ -5,6 +5,7 @@ using Domain.Workspaces;
 namespace Api.Controllers;
 
 [Route("api/v{version:apiVersion}/envs/{envId:guid}/change-requests")]
+[Authorize(LicenseFeatures.ChangeRequest)]
 public class ChangeRequestController : ApiControllerBase
 {
     /// <summary>
@@ -30,7 +31,6 @@ public class ChangeRequestController : ApiControllerBase
     /// Preview the targeting configuration produced by a change request without applying it.
     /// </summary>
     [HttpGet("{id:guid}/preview")]
-    [Authorize(LicenseFeatures.ChangeRequest)]
     public async Task<ApiResponse<ChangeRequestPreviewVm>> GetPreviewAsync(Guid envId, Guid id)
     {
         var request = new GetChangeRequestPreview
@@ -48,7 +48,6 @@ public class ChangeRequestController : ApiControllerBase
     /// Create a change request for a feature flag.
     /// </summary>
     [HttpPost("{key}")]
-    [Authorize(LicenseFeatures.ChangeRequest)]
     public async Task<ApiResponse<bool>> CreateAsync(
         Guid envId,
         string key,
@@ -66,7 +65,6 @@ public class ChangeRequestController : ApiControllerBase
     /// Approve a change request assigned to the current user.
     /// </summary>
     [HttpPut("{id:guid}/approve")]
-    [Authorize(LicenseFeatures.ChangeRequest)]
     public async Task<ApiResponse<bool>> ApproveAsync(
         Guid envId,
         Guid id,
@@ -88,7 +86,6 @@ public class ChangeRequestController : ApiControllerBase
     /// Decline a change request assigned to the current user.
     /// </summary>
     [HttpPut("{id:guid}/decline")]
-    [Authorize(LicenseFeatures.ChangeRequest)]
     public async Task<ApiResponse<bool>> DeclineAsync(
         Guid envId,
         Guid id,
@@ -110,7 +107,6 @@ public class ChangeRequestController : ApiControllerBase
     /// Apply an approved change request when the current user is the creator or an approving reviewer.
     /// </summary>
     [HttpPut("{id:guid}/apply")]
-    [Authorize(LicenseFeatures.ChangeRequest)]
     public async Task<ApiResponse<bool>> ApplyAsync(Guid envId, Guid id)
     {
         var request = new ApplyFlagChangeRequest
@@ -128,7 +124,6 @@ public class ChangeRequestController : ApiControllerBase
     /// Delete a change request.
     /// </summary>
     [HttpDelete("{id:guid}")]
-    [Authorize(LicenseFeatures.ChangeRequest)]
     public async Task<ApiResponse<bool>> DeleteAsync(Guid id)
     {
         var request = new DeleteFlagChangeRequest
