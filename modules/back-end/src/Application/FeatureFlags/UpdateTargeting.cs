@@ -55,6 +55,12 @@ public class UpdateTargetingValidator : AbstractValidator<UpdateTargeting>
     {
         RuleFor(x => x.Targeting)
             .NotNull().WithErrorCode(ErrorCodes.Required("targeting"));
+
+        When(x => x.Targeting is not null, () =>
+        {
+            RuleFor(x => x.Targeting.DisabledVariationId)
+                .NotEmpty().WithErrorCode(ErrorCodes.Required("disabledVariationId"));
+        });
     }
 }
 
