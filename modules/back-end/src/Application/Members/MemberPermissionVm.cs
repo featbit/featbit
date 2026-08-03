@@ -54,6 +54,27 @@ public class MemberPermissionVm
 
     public IReadOnlyCollection<MemberPermissionSourceVm> Sources { get; set; } = [];
 
+    // for deserialization
+    public MemberPermissionVm()
+    {
+    }
+
+    public MemberPermissionVm(
+        PolicyStatement statement,
+        Policy policy,
+        IReadOnlyCollection<MemberPermissionSourceVm> sources)
+    {
+        StatementId = statement.Id;
+        ResourceType = statement.ResourceType;
+        Effect = statement.Effect;
+        Actions = statement.Actions?.ToArray() ?? [];
+        Resources = statement.Resources?.ToArray() ?? [];
+        PolicyId = policy.Id;
+        PolicyName = policy.Name;
+        PolicyType = policy.Type;
+        Sources = sources;
+    }
+
     public PolicyStatement ToStatement() => new()
     {
         Id = StatementId,
@@ -103,18 +124,7 @@ public static class MemberPermissionMapper
 
             foreach (var statement in policy.Statements ?? [])
             {
-                permissions.Add(new MemberPermissionVm
-                {
-                    StatementId = statement.Id,
-                    ResourceType = statement.ResourceType,
-                    Effect = statement.Effect,
-                    Actions = statement.Actions?.ToArray() ?? [],
-                    Resources = statement.Resources?.ToArray() ?? [],
-                    PolicyId = policy.Id,
-                    PolicyName = policy.Name,
-                    PolicyType = policy.Type,
-                    Sources = sources
-                });
+                permissions.Add(new MemberPermissionVm(statement, policy, sources));
             }
         }
 
