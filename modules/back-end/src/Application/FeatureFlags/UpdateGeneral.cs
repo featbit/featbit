@@ -1,6 +1,5 @@
 using Application.AuditLogs;
 using Application.Bases;
-using Application.Bases.Exceptions;
 using Application.Users;
 using Domain.AuditLogs;
 using Domain.Policies;
@@ -61,7 +60,7 @@ public class UpdateGeneralValidator : AbstractValidator<UpdateGeneral>
 
 public class UpdateGeneralHandler(
     IFeatureFlagService service,
-    IResourceService resourceService,
+    IPermissionGuard permissionGuard,
     ICurrentUser currentUser,
     IPublisher publisher)
     : IRequestHandler<UpdateGeneral, Guid>
@@ -76,38 +75,18 @@ public class UpdateGeneralHandler(
         var descriptionChanged = flag.Description != request.Description;
         var tagsChanged = !currentTags.ToHashSet().SetEquals(requestedTags);
 
-        var requiredPermissions = new HashSet<string>();
-        if (nameChanged)
-        {
-            requiredPermissions.Add(Permissions.UpdateFlagName);
-        }
-
-        if (descriptionChanged)
-        {
-            requiredPermissions.Add(Permissions.UpdateFlagDescription);
-        }
-
-        if (tagsChanged)
-        {
-            requiredPermissions.Add(Permissions.UpdateFlagTags);
-        }
-
-        if (requiredPermissions.Count == 0)
+        if (!nameChanged && !descriptionChanged && !tagsChanged)
         {
             return flag.Revision;
-        }
-
-        var flagRn = await resourceService.GetFlagRnAsync(flag.EnvId, flag.Key);
-        if (requiredPermissions.Any(permission => !PolicyHelper.IsAllowed(request.Permissions, flagRn, permission)))
-        {
-            throw new ForbiddenException();
         }
 
         var dataChange = flag.UpdateGeneral(
             request.Name,
             request.Description,
             tagsChanged ? requestedTags : currentTags,
-            currentUser.Id);
+            currentUser.Id
+        );
+        await permissionGuard.EnsureFlagChangeAllowedAsync(flag, dataChange, request.Permissions);
         await service.UpdateAsync(flag);
 
         var notification = new OnFeatureFlagChanged(

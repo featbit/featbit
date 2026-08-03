@@ -1,4 +1,5 @@
 using Application.Bases.Exceptions;
+using Application.Policies;
 using Application.Segments;
 using Application.Services;
 using Application.Users;
@@ -78,7 +79,7 @@ public class UpdateSegmentGeneralHandlerTests
 
         return new UpdateGeneralHandler(
             segmentService.Object,
-            resourceService.Object,
+            new PermissionGuard(resourceService.Object),
             currentUser.Object,
             publisher.Object);
     }

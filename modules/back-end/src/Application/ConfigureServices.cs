@@ -2,6 +2,7 @@ using System.Reflection;
 using Application;
 using Application.Bases.Behaviours;
 using Application.FeatureFlags;
+using Application.Policies;
 using Application.Segments;
 using Application.Users;
 using Microsoft.Extensions.Configuration;
@@ -30,6 +31,7 @@ public static class ConfigureServices
         // custom services
         services.AddHttpContextAccessor();
         services.AddSingleton<ICurrentUser, CurrentUser>();
+        services.AddTransient<IPermissionGuard, PermissionGuard>();
         services.AddTransient<ISegmentMessageService, SegmentMessageService>();
         if (configuration.UseControlPlane())
         {

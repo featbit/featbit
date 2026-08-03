@@ -1,6 +1,5 @@
 using Application.AuditLogs;
 using Application.Bases;
-using Application.Bases.Exceptions;
 using Application.Users;
 using Domain.AuditLogs;
 using Domain.Policies;
@@ -57,7 +56,7 @@ public class UpdateGeneralValidator : AbstractValidator<UpdateGeneral>
 
 public class UpdateGeneralHandler(
     ISegmentService service,
-    IResourceService resourceService,
+    IPermissionGuard permissionGuard,
     ICurrentUser currentUser,
     IPublisher publisher)
     : IRequestHandler<UpdateGeneral, bool>
@@ -72,31 +71,9 @@ public class UpdateGeneralHandler(
         var descriptionChanged = segment.Description != request.Description;
         var tagsChanged = !currentTags.ToHashSet().SetEquals(requestedTags);
 
-        var requiredPermissions = new HashSet<string>();
-        if (nameChanged)
-        {
-            requiredPermissions.Add(Permissions.UpdateSegmentName);
-        }
-
-        if (descriptionChanged)
-        {
-            requiredPermissions.Add(Permissions.UpdateSegmentDescription);
-        }
-
-        if (tagsChanged)
-        {
-            requiredPermissions.Add(Permissions.UpdateSegmentTags);
-        }
-
-        if (requiredPermissions.Count == 0)
+        if (!nameChanged && !descriptionChanged && !tagsChanged)
         {
             return true;
-        }
-
-        var segmentRn = await resourceService.GetSegmentRnAsync(segment.EnvId, segment.Id);
-        if (requiredPermissions.Any(permission => !PolicyHelper.IsAllowed(request.Permissions, segmentRn, permission)))
-        {
-            throw new ForbiddenException();
         }
 
         var dataChange = segment.UpdateGeneral(
@@ -104,6 +81,7 @@ public class UpdateGeneralHandler(
             request.Description,
             tagsChanged ? requestedTags : currentTags
         );
+        await permissionGuard.EnsureSegmentChangeAllowedAsync(segment, dataChange, request.Permissions);
         await service.UpdateAsync(segment);
 
         var notification = new OnSegmentChange(

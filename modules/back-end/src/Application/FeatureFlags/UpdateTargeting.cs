@@ -5,7 +5,6 @@ using Application.Users;
 using Domain.AuditLogs;
 using Domain.FeatureFlags;
 using Domain.Policies;
-using Domain.SemanticPatch;
 
 namespace Application.FeatureFlags;
 
@@ -61,7 +60,7 @@ public class UpdateTargetingValidator : AbstractValidator<UpdateTargeting>
 
 public class UpdateTargetingHandler(
     IFeatureFlagService flagService,
-    IResourceService resourceService,
+    IPermissionGuard permissionGuard,
     ICurrentUser currentUser,
     IPublisher publisher)
     : IRequestHandler<UpdateTargeting, Guid>
@@ -76,7 +75,7 @@ public class UpdateTargetingHandler(
 
         var dataChange = flag.UpdateTargeting(request.Targeting, currentUser.Id);
 
-        await CheckPermissionsAsync();
+        await permissionGuard.EnsureFlagChangeAllowedAsync(flag, dataChange, request.Permissions);
 
         await flagService.UpdateAsync(flag);
 
@@ -91,25 +90,5 @@ public class UpdateTargetingHandler(
         await publisher.Publish(notification, cancellationToken);
 
         return flag.Revision;
-
-        async Task CheckPermissionsAsync()
-        {
-            var instructions = FlagComparer.Compare(dataChange).ToArray();
-            var requiredPermissions = instructions
-                .Select(x => x.Permission)
-                .Where(permission => !string.IsNullOrEmpty(permission))
-                .ToHashSet();
-
-            if (requiredPermissions.Count == 0)
-            {
-                return;
-            }
-
-            var flagRn = await resourceService.GetFlagRnAsync(flag.EnvId, flag.Key);
-            if (requiredPermissions.Any(permission => !PolicyHelper.IsAllowed(request.Permissions, flagRn, permission)))
-            {
-                throw new ForbiddenException();
-            }
-        }
     }
 }
