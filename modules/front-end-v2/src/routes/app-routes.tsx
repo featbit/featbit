@@ -10,6 +10,7 @@ import {
 import { AuthenticatedEntry } from "@/features/auth/authenticated-entry"
 import { getIdentityToken, onSessionExpired } from "@/features/auth/auth-api"
 import { getAuthenticatedLandingPath } from "@/features/get-started/get-started-state"
+import { IamRouteGuard } from "@/features/iam/iam-route-guard"
 import { LayoutPlaceholder } from "@/features/layout/layout-placeholder"
 
 const AuthPage = lazy(() =>
@@ -366,19 +367,18 @@ export function AppRoutes() {
             path="organization/projects"
             element={<OrganizationProjectsPage />}
           />
-          <Route path="iam" element={<Navigate to="team" replace />} />
-          <Route path="iam/team" element={<TeamPage />} />
-          <Route path="iam/team/:memberId/:tab" element={<TeamDetailsPage />} />
-          <Route path="iam/groups" element={<GroupPage />} />
-          <Route
-            path="iam/groups/:groupId/:tab"
-            element={<GroupDetailsPage />}
-          />
-          <Route path="iam/policies" element={<PolicyPage />} />
-          <Route
-            path="iam/policies/:policyId/:tab"
-            element={<PolicyDetailsPage />}
-          />
+          <Route path="iam" element={<IamRouteGuard />}>
+            <Route index element={<Navigate to="team" replace />} />
+            <Route path="team" element={<TeamPage />} />
+            <Route path="team/:memberId/:tab" element={<TeamDetailsPage />} />
+            <Route path="groups" element={<GroupPage />} />
+            <Route path="groups/:groupId/:tab" element={<GroupDetailsPage />} />
+            <Route path="policies" element={<PolicyPage />} />
+            <Route
+              path="policies/:policyId/:tab"
+              element={<PolicyDetailsPage />}
+            />
+          </Route>
           <Route path="access-tokens" element={<AccessTokensPage />} />
           <Route path="relay-proxies" element={<RelayProxiesPage />} />
           <Route path="webhooks" element={<WebhooksPage />} />

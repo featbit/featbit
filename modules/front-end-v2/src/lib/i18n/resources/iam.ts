@@ -1,4 +1,7 @@
 export const enIam = {
+  unavailableTitle: "IAM unavailable",
+  unavailableDescription:
+    "You don't have permission to access identity and access management in this workspace.",
   team: {
     title: "Team",
     subtitle: "Manage organization members and their effective access.",
@@ -506,6 +509,8 @@ export const enIam = {
 } as const
 
 export const zhIam = {
+  unavailableTitle: "无法访问 IAM",
+  unavailableDescription: "你没有在此工作区访问身份与权限管理的权限。",
   team: {
     title: "团队",
     subtitle: "管理机构成员及其有效访问权限。",
