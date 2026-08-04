@@ -108,6 +108,19 @@ public class DefaultPermissionCheckerTests
     }
 
     [Fact]
+    public async Task IsGranted_OrganizationPermission_UsesOrganizationWildcardRn()
+    {
+        var (sut, _, perms) = BuildSut();
+        var req = new PermissionRequirement(Permissions.CreateOrg);
+        perms.Setup(x => x.GetAsync(It.IsAny<HttpContext>()))
+            .ReturnsAsync(AllowStatement(Permissions.CreateOrg, RN.ForOrganization()));
+
+        var result = await sut.IsGrantedAsync(BuildHttpContext(), req);
+
+        Assert.True(result);
+    }
+
+    [Fact]
     public async Task IsGranted_CreateProject_UsesProjectWildcardRn()
     {
         var (sut, _, perms) = BuildSut();

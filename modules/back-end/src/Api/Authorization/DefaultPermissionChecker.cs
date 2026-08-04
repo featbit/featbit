@@ -49,6 +49,11 @@ public class DefaultPermissionChecker(
             return RN.ForAccessToken();
         }
 
+        if (resourceType == ResourceTypes.Organization)
+        {
+            return RN.ForOrganization();
+        }
+
         var routeValues = request.RouteValues;
 
         return resourceType switch

@@ -41,9 +41,25 @@ export type OrganizationGroup = {
   description?: string
 }
 
+export type OrganizationDefaultPermissionOptions = {
+  policies: OrganizationPolicy[]
+  groups: OrganizationGroup[]
+}
+
 export type PagedResult<T> = {
   totalCount: number
   items: T[]
+}
+
+export type OrganizationUserPolicy = {
+  name: string
+  type: string
+  statements?: Array<{
+    resourceType: string
+    effect: string
+    actions: string[]
+    resources: string[]
+  }>
 }
 
 async function organizationRequest<T>(path: string, init?: RequestInit) {
@@ -148,4 +164,14 @@ export async function fetchOrganizationGroups(search = "", pageSize = 50) {
   return organizationRequest<PagedResult<OrganizationGroup>>(
     `/api/v1/groups?${pageQuery(search, pageSize)}`
   )
+}
+
+export function fetchOrganizationDefaultPermissionOptions() {
+  return organizationRequest<OrganizationDefaultPermissionOptions>(
+    "/api/v1/organizations/default-permission-options"
+  )
+}
+
+export function fetchCurrentUserOrganizationPolicies() {
+  return organizationRequest<OrganizationUserPolicy[]>("/api/v1/user/policies")
 }

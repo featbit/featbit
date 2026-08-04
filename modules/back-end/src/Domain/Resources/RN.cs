@@ -54,6 +54,8 @@ public static class RN
 
     public static string ForAccessToken() => "access-token/*";
 
+    public static string ForOrganization() => "organization/*";
+
     public static string ForProject(string projectKey) => $"project/{projectKey}";
 
     public static string ForEnv(string projectKey, string envKey) => $"project/{projectKey}:env/{envKey}";

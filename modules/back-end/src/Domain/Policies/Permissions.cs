@@ -17,6 +17,12 @@ public static class Permissions
     public const string ManagePersonalAccessTokens = nameof(ManagePersonalAccessTokens);
     public const string ManageServiceAccessTokens = nameof(ManageServiceAccessTokens);
 
+    // Organizations
+    public const string UpdateOrgName = nameof(UpdateOrgName);
+    public const string UpdateOrgSortFlagsBy = nameof(UpdateOrgSortFlagsBy);
+    public const string UpdateOrgDefaultUserPermissions = nameof(UpdateOrgDefaultUserPermissions);
+    public const string CreateOrg = nameof(CreateOrg);
+
     // Projects
     public const string CanAccessProject = nameof(CanAccessProject);
     public const string CreateProject = nameof(CreateProject);
@@ -74,6 +80,12 @@ public static class Permissions
         { ListAccessTokens, ResourceTypes.AccessToken },
         { ManagePersonalAccessTokens, ResourceTypes.AccessToken },
         { ManageServiceAccessTokens, ResourceTypes.AccessToken },
+
+        // Organizations
+        { UpdateOrgName, ResourceTypes.Organization },
+        { UpdateOrgSortFlagsBy, ResourceTypes.Organization },
+        { UpdateOrgDefaultUserPermissions, ResourceTypes.Organization },
+        { CreateOrg, ResourceTypes.Organization },
 
         // Projects
         { CanAccessProject, ResourceTypes.Project },

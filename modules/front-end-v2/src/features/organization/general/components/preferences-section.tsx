@@ -18,17 +18,6 @@ import type {
 } from "@/features/organization/organization-api"
 import { flagSortOptions } from "@/features/organization/organization-options"
 
-function ensureSelectedOption(
-  options: { value: string; label: string; badge?: string }[],
-  value: string
-) {
-  if (!value || options.some((option) => option.value === value)) {
-    return options
-  }
-
-  return [{ value, label: value }, ...options]
-}
-
 export function PreferencesSection({
   sortBy,
   policyId,
@@ -39,6 +28,8 @@ export function PreferencesSection({
   groupsLoading,
   isSavingSorting,
   isSavingPermissions,
+  canUpdateSorting,
+  canUpdateDefaultPermissions,
   onSortByChange,
   onPolicyChange,
   onGroupChange,
@@ -54,6 +45,8 @@ export function PreferencesSection({
   groupsLoading: boolean
   isSavingSorting: boolean
   isSavingPermissions: boolean
+  canUpdateSorting: boolean
+  canUpdateDefaultPermissions: boolean
   onSortByChange: (value: FlagSortedBy) => void
   onPolicyChange: (value: string) => void
   onGroupChange: (value: string) => void
@@ -61,24 +54,18 @@ export function PreferencesSection({
   onSavePermissions: () => void
 }) {
   const { t } = useTranslation()
-  const policySelectOptions = ensureSelectedOption(
-    policies.map((policy) => ({
-      value: policy.id,
-      label: policy.name,
-      badge:
-        policy.type === "SysManaged"
-          ? t("organization.options.systemManaged")
-          : undefined,
-    })),
-    policyId
-  )
-  const groupSelectOptions = ensureSelectedOption(
-    groups.map((group) => ({
-      value: group.id,
-      label: group.name,
-    })),
-    groupId
-  )
+  const policySelectOptions = policies.map((policy) => ({
+    value: policy.id,
+    label: policy.name,
+    badge:
+      policy.type === "SysManaged"
+        ? t("organization.options.systemManaged")
+        : undefined,
+  }))
+  const groupSelectOptions = groups.map((group) => ({
+    value: group.id,
+    label: group.name,
+  }))
   const sortSelectOptions = flagSortOptions.map((option) => ({
     value: option.value,
     label: t(option.labelKey),
@@ -102,6 +89,7 @@ export function PreferencesSection({
                 value={sortBy}
                 options={sortSelectOptions}
                 ariaLabel={t("organization.preferences.sortFlagsBy")}
+                disabled={!canUpdateSorting}
                 onChange={(value) => onSortByChange(value as FlagSortedBy)}
               />
             </Field>
@@ -110,7 +98,7 @@ export function PreferencesSection({
             <Button
               type="submit"
               className={ACTION_BUTTON_CLASS}
-              disabled={isSavingSorting}
+              disabled={isSavingSorting || !canUpdateSorting}
             >
               {isSavingSorting ? (
                 <Loader2 className="size-4 animate-spin" />
@@ -137,7 +125,7 @@ export function PreferencesSection({
                 value={policyId}
                 options={policySelectOptions}
                 ariaLabel={t("organization.preferences.defaultPolicy")}
-                disabled={policiesLoading}
+                disabled={policiesLoading || !canUpdateDefaultPermissions}
                 placeholder={
                   policiesLoading
                     ? t("organization.select.loading")
@@ -167,7 +155,7 @@ export function PreferencesSection({
                 value={groupId}
                 options={groupSelectOptions}
                 ariaLabel={t("organization.preferences.defaultGroup")}
-                disabled={groupsLoading}
+                disabled={groupsLoading || !canUpdateDefaultPermissions}
                 placeholder={
                   groupsLoading
                     ? t("organization.select.loading")
@@ -183,7 +171,11 @@ export function PreferencesSection({
             <Button
               type="submit"
               className={ACTION_BUTTON_CLASS}
-              disabled={isSavingPermissions || (!policyId && !groupId)}
+              disabled={
+                isSavingPermissions ||
+                !canUpdateDefaultPermissions ||
+                (!policyId && !groupId)
+              }
             >
               {isSavingPermissions ? (
                 <Loader2 className="size-4 animate-spin" />
