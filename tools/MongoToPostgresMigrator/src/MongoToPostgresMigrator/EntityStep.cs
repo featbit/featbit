@@ -256,13 +256,20 @@ public class EntityStep<T>(string name) : IEntityStep where T : Entity
     /// The binary-split isolation algorithm behind <see cref="SaveChunkAsync"/>,
     /// separated from EF Core so it can be exercised without a database. Attempts
     /// to save the whole chunk via <paramref name="saveAsync"/> in one round-trip;
-    /// if that throws a <see cref="DbUpdateException"/> (e.g. one row violates a
-    /// target constraint such as a value longer than the column allows), the chunk
-    /// is split in half and each half retried, recursing only into halves that
-    /// still fail. A lone row that still fails is skipped via
+    /// if that throws a <see cref="DbUpdateException"/> caused by a bad row (see
+    /// <see cref="IsBadRowFailure"/> — e.g. a value longer than the column allows),
+    /// the chunk is split in half and each half retried, recursing only into halves
+    /// that still fail. A lone row that still fails is skipped via
     /// <paramref name="onSkip"/> and excluded from the returned count. So a sparse
     /// bad row is isolated in ~log2(chunk) steps instead of degrading the whole
     /// chunk to one-row-at-a-time inserts. Returns the number of rows saved.
+    /// <para>
+    /// A <see cref="DbUpdateException"/> that is <i>not</i> attributable to the row
+    /// data (a dropped connection, a lock timeout, an out-of-disk server) is
+    /// rethrown so the run aborts. Treating those as skips would silently drop every
+    /// row of the chunk while still satisfying the verify arithmetic
+    /// (<c>target == source - skipped</c>), turning data loss into a clean exit 0.
+    /// </para>
     /// </summary>
     protected static async Task<long> SaveWithIsolationAsync(
         T[] chunk, Func<T[], Task> saveAsync, Action<T, Exception> onSkip)
@@ -277,7 +284,7 @@ public class EntityStep<T>(string name) : IEntityStep where T : Entity
             await saveAsync(chunk);
             return chunk.Length;
         }
-        catch (DbUpdateException ex)
+        catch (DbUpdateException ex) when (IsBadRowFailure(ex))
         {
             if (chunk.Length == 1)
             {
@@ -290,6 +297,43 @@ public class EntityStep<T>(string name) : IEntityStep where T : Entity
             written += await SaveWithIsolationAsync(chunk[mid..], saveAsync, onSkip);
             return written;
         }
+    }
+
+    /// <summary>
+    /// True when a <see cref="DbUpdateException"/> is attributable to the row being
+    /// written rather than to the connection or the server, i.e. when it is safe to
+    /// isolate and skip the offending row.
+    /// <para>
+    /// The decision is made on the PostgreSQL SQLSTATE, not on the exception type:
+    /// EF Core wraps infrastructure faults in the same <see cref="DbUpdateException"/>.
+    /// Class <c>22</c> (data exception — e.g. <c>22001</c> string data right
+    /// truncation) and class <c>23</c> (integrity constraint violation — e.g.
+    /// <c>23505</c> unique violation) are the row-attributable classes. Anything
+    /// else — class <c>08</c> connection exception, <c>40</c> transaction rollback /
+    /// deadlock, <c>53</c> insufficient resources, <c>57</c> operator intervention —
+    /// affects the whole batch and must abort the run.
+    /// </para>
+    /// <para>
+    /// A <see cref="DbUpdateException"/> with no <see cref="PostgresException"/>
+    /// inside it (for example EF's own concurrency bookkeeping, or the plain
+    /// exception used by the unit tests' fake save) is also treated as
+    /// row-attributable: it is raised while translating the rows themselves and
+    /// carries no server-side fault.
+    /// </para>
+    /// </summary>
+    internal static bool IsBadRowFailure(DbUpdateException ex)
+    {
+        // Walk the chain: EF may nest the driver exception more than one level deep.
+        for (Exception? inner = ex.InnerException; inner is not null; inner = inner.InnerException)
+        {
+            if (inner is PostgresException pg)
+            {
+                var sqlStateClass = pg.SqlState.Length >= 2 ? pg.SqlState[..2] : pg.SqlState;
+                return sqlStateClass is "22" or "23";
+            }
+        }
+
+        return true;
     }
 
     /// <summary>

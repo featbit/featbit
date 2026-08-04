@@ -115,6 +115,22 @@ masquerade as a silent data loss. The three classes observed in real data:
 the `end_users` COPY path (see [Write paths](#write-paths-and-performance))
 rather than one row at a time.
 
+**Only row-attributable failures are skippable.** The skip decision is made on
+the PostgreSQL `SQLSTATE`, not on the exception type: EF Core reports an
+infrastructure fault (a dropped connection, a deadlock, a statement timeout, a
+full disk) with the same `DbUpdateException` as a constraint violation. Only
+class `22` (data exception) and class `23` (integrity constraint violation) —
+the classes in the table above — identify a specific bad row. Anything else
+(`08*` connection, `40*` transaction rollback, `53*` insufficient resources,
+`57*` operator intervention) affects the whole batch and **aborts the run**
+(exit `3`).
+
+That boundary is what keeps the verify arithmetic honest. Were an infrastructure
+fault treated as a bad row, the binary split would recurse down to single rows,
+each retry would fail for the same reason, and every row would be recorded as a
+skip — leaving `target = source − skipped` satisfied and the run exiting `0`
+having silently dropped the data.
+
 ## Safety model
 
 The migrator is **read-only against MongoDB** — the source is never modified, so
@@ -157,7 +173,7 @@ fully into memory). Two write paths turn that stream into PostgreSQL rows:
 
 | Path | Used for | Throughput | Mechanism |
 |------|----------|-----------|-----------|
-| **EF Core** | All entities except the three below | ~2–3k rows/s | `AddRange` + `SaveChanges` per batch, change tracker cleared after each. On a batch constraint violation, a **binary-split** retry isolates the bad row in ~log₂(batch) sub-saves and skips only it. |
+| **EF Core** | All entities except the three below | ~2–3k rows/s | `AddRange` + `SaveChanges` per batch, change tracker cleared after each. On a batch constraint violation, a **binary-split** retry isolates the bad row in ~log₂(batch) sub-saves and skips only it. Infrastructure failures are never skipped — they abort the run (see [Constraint violations](#constraint-violations-skipped)). |
 | **Binary COPY** | `EndUsers`, `AuditLogs`, `FlagRevisions` | ~10–100× faster | PostgreSQL `COPY … FROM STDIN (FORMAT BINARY)` through the application's own `NpgsqlDataSource`, so `jsonb`/`timestamptz`/`uuid` bytes stay identical to the EF path. |
 
 At production scale the high-volume tables (tens of millions of rows) dominate

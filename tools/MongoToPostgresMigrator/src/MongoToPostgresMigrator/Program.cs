@@ -22,6 +22,7 @@ public static class Program
 {
     // Exit codes (see tool-spec.md §11).
     private const int ExitSuccess = 0;
+    private const int ExitInvalidArguments = 1;
     private const int ExitTargetNotEmpty = 2;
     private const int ExitCopyThrew = 3;
     private const int ExitVerifyMismatch = 4;
@@ -80,9 +81,37 @@ public static class Program
         return (connect, command);
     }
 
+    /// <summary>
+    /// The only recognized command-line switch. Configuration comes from
+    /// appsettings.json and environment variables, never from argv.
+    /// </summary>
+    internal const string DryRunSwitch = "--dry-run";
+
+    /// <summary>
+    /// Parses argv. This tool runs during a production cutover where the
+    /// difference between dry-run and a real write is the whole point, so an
+    /// argument that is not recognized exactly (a typo such as <c>--dryrun</c>,
+    /// <c>-dry-run</c> or <c>--dry-run=true</c>) must fail rather than silently
+    /// fall through to a live migration. Returns null when the arguments are
+    /// valid, otherwise the list of unrecognized tokens.
+    /// </summary>
+    internal static IReadOnlyList<string> UnrecognizedArguments(string[] args) =>
+        args.Where(a => !string.Equals(a, DryRunSwitch, StringComparison.OrdinalIgnoreCase)).ToList();
+
     public static async Task<int> Main(string[] args)
     {
-        var dryRun = args.Contains("--dry-run", StringComparer.OrdinalIgnoreCase);
+        var unrecognized = UnrecognizedArguments(args);
+        if (unrecognized.Count > 0)
+        {
+            await Console.Error.WriteLineAsync(
+                $"Unrecognized argument(s): {string.Join(", ", unrecognized)}." +
+                $" The only supported switch is '{DryRunSwitch}'." +
+                " All other settings come from appsettings.json or environment variables" +
+                " (e.g. Migrator__BatchSize). Refusing to run.");
+            return ExitInvalidArguments;
+        }
+
+        var dryRun = args.Contains(DryRunSwitch, StringComparer.OrdinalIgnoreCase);
 
         // Do NOT forward args to the config command-line provider: a bare
         // "--dry-run" switch would trip its key/value parser. Config still comes
@@ -175,8 +204,14 @@ public static class Program
 
         if (!targetEmpty)
         {
+            // Name the offending tables rather than quoting a fixed table count:
+            // the authoritative set is the pipeline itself, and a run that
+            // excludes entities checks fewer tables than the full domain set.
+            var nonEmpty = sourceCounts.Where(r => r.Target != 0).Select(r => r.Entity).ToList();
             logger.LogError(
-                "Preflight failed: target is not empty. Truncate the 29 domain tables and re-run.");
+                "Preflight failed: target is not empty. {Count} of {Checked} checked table(s) hold rows: {Entities}. " +
+                "Truncate them (see docs/scripts/truncate-domain-tables.sql) and re-run.",
+                nonEmpty.Count, sourceCounts.Count, string.Join(", ", nonEmpty));
             return ExitTargetNotEmpty;
         }
 

@@ -47,15 +47,23 @@ queue.
 1. **Provision and empty the target PostgreSQL.** From a workstation with the
    `psql` client, run
    [`scripts/Initialize-MigrationTarget.ps1`](scripts/Initialize-MigrationTarget.ps1).
-   It creates the database if needed, applies **every** versioned schema init
-   script (`infra/postgresql/docker-entrypoint-initdb.d/`, v0.0.0 → latest) in
-   order, then truncates the 29 domain tables so the tool's preflight passes:
+   It creates the database if needed, applies the versioned schema init scripts
+   (`infra/postgresql/docker-entrypoint-initdb.d/`, v0.0.0 → latest) that are
+   still pending, then truncates the 29 domain tables so the tool's preflight
+   passes:
 
    ```powershell
    $env:PGPASSWORD = "<pg-password>"
    .\scripts\Initialize-MigrationTarget.ps1 `
        -PgHost <pg-host> -Port 5432 -Database featbit -Username <pg-admin-user>
    ```
+
+   Applied scripts are recorded in a `featbit_migration_schema_history` table in
+   the target, so re-running only applies what is still pending. If the database
+   already has a FeatBit schema this script did not provision (e.g. created by
+   the docker entrypoint), provisioning is skipped with a warning — pass
+   `-BaselineVersion <version>` (e.g. `-BaselineVersion 5.3.2`) to declare the
+   version it is already at so only the later scripts run.
 
    Add `-SkipDatabaseCreate` if the managed instance's database is pre-created
    and your user cannot issue `CREATE DATABASE`; use `-TruncateOnly` to reset the
@@ -109,23 +117,52 @@ queue.
        the freshly, fully repopulated cache.
 5. **Verify.** Log in through the UI; confirm flags render and evaluate. Confirm
    SDK clients reconnect and receive correct values. Toggle a flag and confirm
-   the write lands in PostgreSQL.
+   the write lands in PostgreSQL. **That toggle is a PostgreSQL-only write and
+   will not survive a rollback** — keep it reversible and see
+   [Rollback](#rollback) before admitting real traffic.
 
 Only `DbProvider` and the connection string change. Leave the message-queue and
 cache providers as they were, and do not reset message-queue consumer offsets.
 
 ## Rollback
 
-The migrator is read-only against MongoDB, so rollback is clean at any point:
+The migrator is read-only against MongoDB, so **rolling back is clean up to the
+cutover — and lossy after it.**
 
-- **Before the gate / during migration:** bring the API back up on MongoDB;
-  discard the staged provider change.
+- **Before the gate / during migration:** fully clean. Bring the API back up on
+  MongoDB and discard the staged provider change. MongoDB was never modified.
 - **After cutover:** revert `DbProvider` to `MongoDb` (and the MongoDB connection
   string) on the API, control plane, and evaluation server; fully flush the cache
   and let the API repopulate it from MongoDB; then restart the control plane and
-  evaluation server. Any end-user/insight data written to PostgreSQL after
-  cutover would not be reflected back into MongoDB — acceptable when usage
-  history is out of scope (see [how-it-works.md](how-it-works.md)).
+  evaluation server.
+
+  **Every write made while PostgreSQL was live is lost** — not just end-user and
+  insight data. MongoDB is frozen at its pre-cutover state and nothing replays
+  PostgreSQL writes back into it. That includes domain writes: flag toggles and
+  targeting changes, segments, change requests and schedules, projects and
+  environments, members and permissions, access tokens, webhooks, and audit logs.
+  Note that step 5 of the cutover ("toggle a flag and confirm the write lands in
+  PostgreSQL") is itself such a write.
+
+Because of that, decide the rollback policy **before** starting the cutover and
+pick one of:
+
+- **No-write rollback window (recommended).** Keep the application in its
+  maintenance/frozen state after the provider change and restrict post-cutover
+  activity to the read-only smoke checks plus a single reversible verification
+  toggle, until you commit to PostgreSQL. Roll back freely inside that window,
+  since there is nothing to lose. Record when the window closes and announce it.
+- **Capture and replay.** If real traffic must be admitted before the commit
+  point, capture the PostgreSQL-only changes so they can be reapplied to MongoDB:
+  note the cutover timestamp, and on rollback use the `audit_logs` table (plus the
+  `updated_at` columns on the domain tables) to identify and manually reapply
+  everything written after it. Rehearse this in staging — it is a manual
+  procedure, not a supported tool feature.
+- **Roll forward instead.** Past the commit point, treat PostgreSQL as
+  authoritative and fix problems in place rather than reverting.
+
+Once real user traffic has been served from PostgreSQL, roll-forward is normally
+the only safe option.
 
 ## Sizing the maintenance window
 

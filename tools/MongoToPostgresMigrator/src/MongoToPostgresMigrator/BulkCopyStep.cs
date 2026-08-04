@@ -39,9 +39,17 @@ public sealed class BulkCopyStep<T>(string name, int copyBatchSize) : EntityStep
     public override async Task<long> CopyAsync(MigrationContext ctx)
     {
         var columns = BuildColumnMap(ctx);
-        var table = ctx.Db.Model.FindEntityType(typeof(T))!.GetTableName()!;
-        var columnList = string.Join(", ", columns.Select(c => c.Name));
-        var copySql = $"COPY {table} ({columnList}) FROM STDIN (FORMAT BINARY)";
+        var entityType = ctx.Db.Model.FindEntityType(typeof(T))!;
+        // Schema-qualify to match BuildColumnMap, which resolves column names via
+        // StoreObjectIdentifier.Table(table, schema). Falling back to search_path
+        // here would let COPY target a different table than the column map describes.
+        var schema = entityType.GetSchema();
+        var table = entityType.GetTableName()!;
+        var qualifiedTable = string.IsNullOrEmpty(schema)
+            ? Quote(table)
+            : $"{Quote(schema)}.{Quote(table)}";
+        var columnList = string.Join(", ", columns.Select(c => Quote(c.Name)));
+        var copySql = $"COPY {qualifiedTable} ({columnList}) FROM STDIN (FORMAT BINARY)";
 
         await using var conn = await ctx.DataSource.OpenConnectionAsync();
 
@@ -158,4 +166,11 @@ public sealed class BulkCopyStep<T>(string name, int copyBatchSize) : EntityStep
     }
 
     private sealed record Column(string Name, NpgsqlDbType Type, Func<T, object?> ValueOf);
+
+    /// <summary>
+    /// Quotes a PostgreSQL identifier so a name that is reserved or not
+    /// lower-case (as the EF model may produce) resolves to exactly the mapped
+    /// object rather than being folded by the server.
+    /// </summary>
+    private static string Quote(string identifier) => $"\"{identifier.Replace("\"", "\"\"")}\"";
 }

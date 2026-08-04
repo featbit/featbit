@@ -98,7 +98,10 @@ public class MigrationPipelineTests
     [Fact]
     public void Build_ExclusionIsCaseInsensitive()
     {
-        var exclude = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "endusers" };
+        // Deliberately the default (ordinal) comparer: Build must apply
+        // case-insensitive matching itself rather than inheriting it from the
+        // caller's set, which is the documented contract.
+        var exclude = new HashSet<string> { "endusers" };
 
         var names = MigrationPipeline.Build(50_000, exclude).Select(s => s.Name).ToList();
 

@@ -11,11 +11,22 @@
 
     By default it:
       1. Creates the target database if it does not already exist.
-      2. Applies every versioned schema init script in version order
-         (infra/postgresql/docker-entrypoint-initdb.d, v0.0.0 -> latest),
-         so the target always matches the current schema.
+      2. Applies the versioned schema init scripts in version order
+         (infra/postgresql/docker-entrypoint-initdb.d, v0.0.0 -> latest), so the
+         target always matches the current schema. Applied scripts are recorded
+         in a bookkeeping table (featbit_migration_schema_history) in the target
+         database, so re-running only applies what is still pending. The scripts
+         are rewritten in memory to drop their hard-coded 'create database
+         featbit' / '\connect featbit' lines, so -Database is always honoured.
       3. Truncates the 29 domain tables so the migrator's empty-target preflight
          passes.
+
+    If the target database already contains a FeatBit schema that this script
+    did not provision (e.g. it was created by the docker entrypoint), schema
+    provisioning is skipped with a warning — re-applying the init scripts would
+    fail on the existing relations. Pass -BaselineVersion to declare which
+    schema version that database is already at; the scripts up to and including
+    that version are then recorded as applied and only the later ones run.
 
     Use -TruncateOnly to skip schema provisioning and only empty the domain
     tables (e.g. to reset the target for a re-run after a failed migration).
@@ -42,11 +53,17 @@
 
 .PARAMETER MaintenanceDatabase
     Database to connect to for the initial existence check / CREATE DATABASE
-    (default 'postgres'). The init scripts then \connect to the target.
+    (default 'postgres'). All schema and truncate work runs against -Database.
 
 .PARAMETER InitScriptsDir
     Location of the versioned init scripts. Defaults to the repo's
     infra/postgresql/docker-entrypoint-initdb.d relative to this script.
+
+.PARAMETER BaselineVersion
+    Schema version the target database is already at (e.g. '5.3.2'). Only used
+    when the database already has a FeatBit schema that this script did not
+    provision: init scripts up to and including this version are recorded as
+    applied without being executed, and the later ones are applied.
 
 .PARAMETER TruncateOnly
     Skip schema provisioning; only truncate the domain tables.
@@ -58,6 +75,11 @@
 .EXAMPLE
     $env:PGPASSWORD = '...'
     .\Initialize-MigrationTarget.ps1 -PgHost pg.dev.example.com -Username featbit_admin
+
+.EXAMPLE
+    # bring an existing v5.3.2 database up to the latest schema
+    .\Initialize-MigrationTarget.ps1 -PgHost pg.dev.example.com -Username featbit_admin `
+        -Database featbit_migration -BaselineVersion 5.3.2
 
 .EXAMPLE
     # reset the target between migration attempts
@@ -72,11 +94,17 @@ param(
     [string]$Password,
     [string]$MaintenanceDatabase = 'postgres',
     [string]$InitScriptsDir = (Join-Path $PSScriptRoot '..\..\..\..\infra\postgresql\docker-entrypoint-initdb.d'),
+    [string]$BaselineVersion,
     [switch]$TruncateOnly,
     [switch]$SkipDatabaseCreate
 )
 
 $ErrorActionPreference = 'Stop'
+
+$HistoryTable = 'featbit_migration_schema_history'
+# Any table from the v0.0.0 baseline; its presence means the database already
+# carries a FeatBit schema.
+$SchemaProbeTable = 'feature_flags'
 
 if (-not (Get-Command psql -ErrorAction SilentlyContinue)) {
     throw "The 'psql' client was not found on PATH. Install the PostgreSQL client tools and retry."
@@ -88,8 +116,15 @@ if (-not $env:PGPASSWORD) {
 }
 
 function Invoke-PsqlFile {
-    param([Parameter(Mandatory)][string]$DbName, [Parameter(Mandatory)][string]$Path)
-    & psql -v ON_ERROR_STOP=1 --no-psqlrc -h $PgHost -p $Port -U $Username -d $DbName -f $Path
+    param(
+        [Parameter(Mandatory)][string]$DbName,
+        [Parameter(Mandatory)][string]$Path,
+        [switch]$SingleTransaction
+    )
+    $psqlArgs = @('-v', 'ON_ERROR_STOP=1', '--no-psqlrc')
+    if ($SingleTransaction) { $psqlArgs += '--single-transaction' }
+    $psqlArgs += @('-h', $PgHost, '-p', $Port, '-U', $Username, '-d', $DbName, '-f', $Path)
+    & psql @psqlArgs
     if ($LASTEXITCODE -ne 0) { throw "psql failed running '$Path' (exit $LASTEXITCODE)." }
 }
 
@@ -98,6 +133,26 @@ function Invoke-PsqlScalar {
     $out = & psql -v ON_ERROR_STOP=1 --no-psqlrc -tAq -h $PgHost -p $Port -U $Username -d $DbName -c $Sql
     if ($LASTEXITCODE -ne 0) { throw "psql query failed (exit $LASTEXITCODE)." }
     return ($out | Select-Object -First 1)
+}
+
+function Invoke-PsqlCommand {
+    param([Parameter(Mandatory)][string]$DbName, [Parameter(Mandatory)][string]$Sql)
+    & psql -v ON_ERROR_STOP=1 --no-psqlrc -tAq -h $PgHost -p $Port -U $Username -d $DbName -c $Sql | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw "psql command failed (exit $LASTEXITCODE)." }
+}
+
+function Get-ScriptVersion {
+    param([Parameter(Mandatory)][System.IO.FileInfo]$File)
+    return [version]($File.BaseName.TrimStart('v', 'V'))
+}
+
+if ($Database -notmatch '^[A-Za-z_][A-Za-z0-9_$]*$') {
+    throw "Invalid -Database name '$Database'. Use letters, digits, '_' and '`$', starting with a letter or '_'."
+}
+
+if ($BaselineVersion) {
+    try { $baseline = [version]$BaselineVersion.TrimStart('v', 'V') }
+    catch { throw "Invalid -BaselineVersion '$BaselineVersion'. Use a version such as '5.3.2'." }
 }
 
 $truncateSql = Join-Path $PSScriptRoot 'truncate-domain-tables.sql'
@@ -113,42 +168,97 @@ if (-not $TruncateOnly) {
             -Sql "SELECT 1 FROM pg_database WHERE datname = '$Database';"
         if ($exists -ne '1') {
             Write-Host "Creating database '$Database'..."
-            [void](Invoke-PsqlScalar -DbName $MaintenanceDatabase -Sql "CREATE DATABASE $Database;")
+            Invoke-PsqlCommand -DbName $MaintenanceDatabase -Sql "CREATE DATABASE ""$Database"";"
         }
         else {
             Write-Host "Database '$Database' already exists; skipping CREATE DATABASE."
         }
     }
 
-    # 2. Apply every init script in version order. Each script issues
-    #    \connect featbit, so we run them against the maintenance database and
-    #    let psql switch. The very first script also contains
-    #    'create database featbit;' — strip it (the database is guaranteed to
-    #    exist by step 1) so re-running against an existing database is clean.
-    $scripts = Get-ChildItem -Path $resolvedDir -Filter '*.sql' |
-        Sort-Object { [version]($_.BaseName.TrimStart('v')) }
+    $scripts = @(Get-ChildItem -Path $resolvedDir -Filter '*.sql' |
+        Sort-Object { Get-ScriptVersion -File $_ })
 
     if (-not $scripts) { throw "No .sql init scripts found in $resolvedDir." }
 
-    $tempFiles = @()
-    try {
-        foreach ($script in $scripts) {
-            $content = Get-Content $script.FullName -Raw
-            $content = $content -replace '(?im)^\s*create\s+database\s+\w+\s*;', ''
-            $temp = New-TemporaryFile
-            $tempFiles += $temp
-            Set-Content -Path $temp.FullName -Value $content -NoNewline
-            Write-Host "  applying $($script.Name)"
-            Invoke-PsqlFile -DbName $MaintenanceDatabase -Path $temp.FullName
+    # 2. Work out which scripts still need to run. Every connection below targets
+    #    -Database directly; the scripts' hard-coded \connect is stripped so the
+    #    requested database is never silently swapped for 'featbit'.
+    $historyExists = (Invoke-PsqlScalar -DbName $Database `
+            -Sql "SELECT to_regclass('public.$HistoryTable') IS NOT NULL;") -eq 't'
+    $schemaExists = (Invoke-PsqlScalar -DbName $Database `
+            -Sql "SELECT to_regclass('public.$SchemaProbeTable') IS NOT NULL;") -eq 't'
+
+    $provision = $true
+
+    if (-not $historyExists) {
+        if ($schemaExists -and -not $BaselineVersion) {
+            # Re-running the unconditional CREATE TABLEs would abort on the first
+            # existing relation, so leave the schema alone.
+            Write-Warning ("Database '$Database' already contains a FeatBit schema that this script did not " +
+                "provision. Skipping schema provisioning - verify it matches $($scripts[-1].BaseName), or " +
+                're-run with -BaselineVersion <version> to apply only the later init scripts.')
+            $provision = $false
+        }
+        else {
+            Invoke-PsqlCommand -DbName $Database -Sql @"
+CREATE TABLE IF NOT EXISTS $HistoryTable (
+    script_name text PRIMARY KEY,
+    version     text        NOT NULL,
+    applied_at  timestamptz NOT NULL DEFAULT now()
+);
+"@
+            if ($schemaExists) {
+                $seeded = @($scripts | Where-Object { (Get-ScriptVersion -File $_) -le $baseline })
+                if (-not $seeded) {
+                    throw "-BaselineVersion '$BaselineVersion' is older than the first init script ($($scripts[0].BaseName)); nothing to baseline."
+                }
+                foreach ($script in $seeded) {
+                    $version = (Get-ScriptVersion -File $script).ToString()
+                    Invoke-PsqlCommand -DbName $Database -Sql (
+                        "INSERT INTO $HistoryTable (script_name, version) VALUES " +
+                        "('$($script.Name)', '$version') ON CONFLICT DO NOTHING;")
+                }
+                Write-Host "Baselined $($seeded.Count) script(s) at or below v$baseline as already applied."
+            }
         }
     }
-    finally {
-        $tempFiles | ForEach-Object { Remove-Item $_.FullName -ErrorAction SilentlyContinue }
+
+    if ($provision) {
+        $applied = @(& psql -v ON_ERROR_STOP=1 --no-psqlrc -tAq -h $PgHost -p $Port -U $Username `
+                -d $Database -c "SELECT script_name FROM $HistoryTable;")
+        if ($LASTEXITCODE -ne 0) { throw "psql failed reading $HistoryTable (exit $LASTEXITCODE)." }
+
+        $pending = @($scripts | Where-Object { $applied -notcontains $_.Name })
+        if (-not $pending) {
+            Write-Host "Schema is already up to date; no init scripts pending."
+        }
+
+        # 3. Apply each pending script. 'create database ...' and '\connect ...'
+        #    are stripped so the file runs against -Database, and the history row
+        #    is written in the same transaction as the DDL.
+        $tempFiles = @()
+        try {
+            foreach ($script in $pending) {
+                $version = (Get-ScriptVersion -File $script).ToString()
+                $content = Get-Content $script.FullName -Raw
+                $content = $content -replace '(?im)^\s*create\s+database\s+\w+\s*;', ''
+                $content = $content -replace '(?im)^[^\S\r\n]*\\connect\b[^\r\n]*', ''
+                $content += "`nINSERT INTO $HistoryTable (script_name, version) VALUES ('$($script.Name)', '$version');`n"
+                $temp = New-TemporaryFile
+                $tempFiles += $temp
+                Set-Content -Path $temp.FullName -Value $content -NoNewline
+                Write-Host "  applying $($script.Name)"
+                Invoke-PsqlFile -DbName $Database -Path $temp.FullName -SingleTransaction
+            }
+        }
+        finally {
+            $tempFiles | ForEach-Object { Remove-Item $_.FullName -ErrorAction SilentlyContinue }
+        }
     }
 }
 
-# 3. Truncate the 29 domain tables (safe to repeat).
+# 4. Truncate the 29 domain tables (safe to repeat).
 Write-Host "Truncating domain tables in '$Database'..."
-Invoke-PsqlFile -DbName $MaintenanceDatabase -Path $truncateSql
+Invoke-PsqlFile -DbName $Database -Path $truncateSql -SingleTransaction
 
 Write-Host "Done. Target '$Database' is provisioned and empty; ready for MongoToPostgresMigrator." -ForegroundColor Green

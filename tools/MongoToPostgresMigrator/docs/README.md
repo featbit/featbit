@@ -41,6 +41,10 @@ run otherwise).
 | Dry-run | `--dry-run` | Read-only. Runs preflight and prints a per-entity source/target count table. Writes nothing. |
 | Migrate | _(default)_ | Runs preflight, copies all entities, then verifies counts and `jsonb` integrity. |
 
+`--dry-run` is the only accepted argument. Anything else — including a near miss
+such as `--dryrun` or `--dry-run=true` — exits `1` without running, so a typo can
+never turn a rehearsal into a live migration.
+
 ## Configuration
 
 Section names match the FeatBit application, so the same values can be reused.
@@ -76,6 +80,7 @@ Migrator__ExcludeEntities__0=EndUsers   # list elements are indexed
 | Code | Meaning |
 |------|---------|
 | `0` | Migrate + verify succeeded (all entities matched). |
+| `1` | An unrecognized command-line argument was supplied — nothing ran. Only `--dry-run` is accepted; everything else is configuration. |
 | `2` | Preflight failed — the target is not empty. |
 | `3` | A copy step threw (fail-fast; partial data is left in place for inspection). |
 | `4` | Verify failed (count mismatch, `jsonb` spot-check failure, or a live write was detected). |
@@ -87,7 +92,7 @@ Migrator__ExcludeEntities__0=EndUsers   # list elements are indexed
 | [how-it-works.md](how-it-works.md) | Understand what the tool migrates, what it excludes, and why it is safe. |
 | [local-testing.md](local-testing.md) | Validate the tool end-to-end against a safe snapshot of a real database. |
 | [production-cutover.md](production-cutover.md) | Plan and run the real cutover with a go/no-go gate and rollback. |
-| [scripts/](scripts/) | Provision and empty a target instance: `Initialize-MigrationTarget.ps1` (applies every schema init script in version order, then truncates) and its companion `truncate-domain-tables.sql`. |
+| [scripts/](scripts/) | Provision and empty a target instance: `Initialize-MigrationTarget.ps1` (applies pending schema init scripts in version order — tracked in the target so re-runs are safe — then truncates) and its companion `truncate-domain-tables.sql`. |
 
 ## Project layout
 

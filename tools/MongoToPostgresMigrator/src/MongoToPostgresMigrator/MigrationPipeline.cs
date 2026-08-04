@@ -102,7 +102,11 @@ public static class MigrationPipeline
 
         if (exclude is { Count: > 0 })
         {
-            return steps.Where(s => !exclude.Contains(s.Name)).ToList();
+            // Re-wrap with an explicitly case-insensitive comparer: the documented
+            // contract is case-insensitive matching, and relying on the comparer of
+            // the caller's set would silently exclude nothing for an ordinal set.
+            var excludeSet = new HashSet<string>(exclude, StringComparer.OrdinalIgnoreCase);
+            return steps.Where(s => !excludeSet.Contains(s.Name)).ToList();
         }
 
         return steps;

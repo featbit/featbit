@@ -7,8 +7,11 @@
 --
 -- PostgreSQL defines no foreign keys between these tables, so a plain TRUNCATE
 -- of the whole set succeeds regardless of order.
-
-\connect featbit
+--
+-- Run it against the target database, e.g.
+--   psql -h <host> -U <user> -d <database> -f truncate-domain-tables.sql
+-- Deliberately no '\connect' here: the database is chosen by the caller, so this
+-- file never overrides a non-default target.
 
 TRUNCATE
     workspaces,

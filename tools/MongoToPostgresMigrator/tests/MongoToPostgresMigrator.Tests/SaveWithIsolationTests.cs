@@ -1,5 +1,6 @@
 using Domain.Bases;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace MongoToPostgresMigrator.Tests;
 
@@ -27,7 +28,10 @@ public class SaveWithIsolationTests
     /// <summary>
     /// A save that mimics an atomic batch insert: if any row in the batch is
     /// poisoned the whole batch throws (as a real INSERT would on a length
-    /// violation); otherwise every row is recorded as saved.
+    /// violation); otherwise every row is recorded as saved. The thrown exception
+    /// carries a <see cref="PostgresException"/> with SQLSTATE <c>22001</c>
+    /// (string data right truncation), exactly as Npgsql surfaces the
+    /// <c>varchar(128)</c> violation named in the class comment.
     /// </summary>
     private sealed class FakeSave(IReadOnlySet<Guid> poisoned)
     {
@@ -39,7 +43,7 @@ public class SaveWithIsolationTests
             Calls++;
             if (batch.Any(e => poisoned.Contains(e.Id)))
             {
-                throw new DbUpdateException("value too long for type character varying(128)");
+                throw DbUpdate("22001", "value too long for type character varying(128)");
             }
 
             foreach (var e in batch)
@@ -50,6 +54,15 @@ public class SaveWithIsolationTests
             return Task.CompletedTask;
         }
     }
+
+    /// <summary>
+    /// Builds the exception shape EF Core produces for a failed SaveChanges: a
+    /// <see cref="DbUpdateException"/> wrapping the driver's
+    /// <see cref="PostgresException"/>, which carries the SQLSTATE that decides
+    /// whether the failure is attributable to the row or to the connection.
+    /// </summary>
+    private static DbUpdateException DbUpdate(string sqlState, string message) =>
+        new(message, new PostgresException(message, "ERROR", "ERROR", sqlState));
 
     private static FakeEntity[] Rows(int count) =>
         Enumerable.Range(0, count).Select(_ => new FakeEntity { Id = Guid.NewGuid() }).ToArray();
@@ -143,6 +156,93 @@ public class SaveWithIsolationTests
         Func<FakeEntity[], Task> save = _ => throw new InvalidOperationException("connection lost");
 
         await Assert.ThrowsAsync<InvalidOperationException>(
+            () => TestableStep.Isolate(rows, save, (_, _) => { }));
+    }
+
+    /// <summary>
+    /// EF Core wraps infrastructure faults in the same <see cref="DbUpdateException"/>
+    /// as constraint violations. Isolating one would binary-split down to single rows,
+    /// fail identically on each, and record the entire chunk as "skipped" — which the
+    /// verify pass accepts because it only checks <c>target == source - skipped</c>.
+    /// The run would exit 0 having silently dropped the data, so these must propagate.
+    /// </summary>
+    [Theory]
+    [InlineData("08006")] // connection_failure
+    [InlineData("08003")] // connection_does_not_exist
+    [InlineData("40001")] // serialization_failure
+    [InlineData("40P01")] // deadlock_detected
+    [InlineData("53100")] // disk_full
+    [InlineData("57014")] // query_canceled (statement timeout)
+    public async Task InfrastructureSqlState_Propagates_AndIsNeverSkipped(string sqlState)
+    {
+        var rows = Rows(8);
+        var skipped = new List<FakeEntity>();
+        Func<FakeEntity[], Task> save = _ =>
+            throw new DbUpdateException(
+                "transient failure", new PostgresException("transient failure", "ERROR", "ERROR", sqlState));
+
+        var ex = await Assert.ThrowsAsync<DbUpdateException>(
+            () => TestableStep.Isolate(rows, save, (r, _) => skipped.Add(r)));
+
+        Assert.Equal(sqlState, Assert.IsType<PostgresException>(ex.InnerException).SqlState);
+        Assert.Empty(skipped);
+    }
+
+    /// <summary>
+    /// The row-attributable SQLSTATE classes: 22 (data exception) and 23 (integrity
+    /// constraint violation). These are the failures a single bad source row causes,
+    /// so they are isolated and skipped.
+    /// </summary>
+    [Theory]
+    [InlineData("22001")] // string_data_right_truncation
+    [InlineData("22007")] // invalid_datetime_format
+    [InlineData("23505")] // unique_violation
+    [InlineData("23502")] // not_null_violation
+    public async Task RowAttributableSqlState_IsIsolatedAndSkipped(string sqlState)
+    {
+        var rows = Rows(8);
+        var bad = rows[5];
+        var skipped = new List<FakeEntity>();
+        var saved = new HashSet<Guid>();
+
+        Func<FakeEntity[], Task> save = batch =>
+        {
+            if (batch.Any(e => e.Id == bad.Id))
+            {
+                throw new DbUpdateException(
+                    "bad row", new PostgresException("bad row", "ERROR", "ERROR", sqlState));
+            }
+
+            foreach (var e in batch)
+            {
+                saved.Add(e.Id);
+            }
+
+            return Task.CompletedTask;
+        };
+
+        var written = await TestableStep.Isolate(rows, save, (r, _) => skipped.Add(r));
+
+        Assert.Equal(7, written);
+        Assert.Equal(bad.Id, Assert.Single(skipped).Id);
+        Assert.DoesNotContain(bad.Id, saved);
+    }
+
+    /// <summary>
+    /// A nested driver exception must still be classified — EF can wrap the
+    /// Npgsql exception more than one level deep.
+    /// </summary>
+    [Fact]
+    public async Task NestedInfrastructureSqlState_Propagates()
+    {
+        var rows = Rows(4);
+        Func<FakeEntity[], Task> save = _ =>
+            throw new DbUpdateException(
+                "save failed",
+                new InvalidOperationException(
+                    "inner", new PostgresException("connection lost", "FATAL", "FATAL", "08006")));
+
+        await Assert.ThrowsAsync<DbUpdateException>(
             () => TestableStep.Isolate(rows, save, (_, _) => { }));
     }
 }

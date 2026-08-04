@@ -111,8 +111,10 @@ intentionally left untouched.
 > **Provisioning an external target?** The container mount + `TRUNCATE` above is
 > the quickest path for a throwaway local target. For an external instance
 > (dev/test/prod), use [`scripts/Initialize-MigrationTarget.ps1`](scripts/Initialize-MigrationTarget.ps1)
-> instead — it applies every init script in version order and truncates the same
-> 29 tables over a `psql` connection. See [production-cutover.md](production-cutover.md).
+> instead — it applies the init scripts that are still pending in version order
+> (tracked in a `featbit_migration_schema_history` table in the target, so
+> re-runs are safe) and truncates the same 29 tables over a `psql` connection.
+> See [production-cutover.md](production-cutover.md).
 
 **5. Point the migrator at both — dry-run, then migrate**
 
