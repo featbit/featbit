@@ -88,3 +88,19 @@ export function isFeatureGranted(
   const features = license.features ?? []
   return features.includes("*") || features.includes(feature.id)
 }
+
+export function isFineGrainedAccessControlGranted(
+  licenseString: string | undefined
+) {
+  const license = parseLicense(licenseString)
+  return isFeatureGranted(
+    {
+      id: "fine-grained-ac",
+      labelKey: "workspace.license.features.fineGrainedAccessControl.title",
+      descriptionKey:
+        "workspace.license.features.fineGrainedAccessControl.description",
+    },
+    license,
+    getLicenseStatus(license)
+  )
+}

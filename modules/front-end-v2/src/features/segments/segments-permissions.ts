@@ -76,25 +76,56 @@ function statementMatches(
   )
 }
 
+function allActionsStatementMatches(
+  statement: UserPolicy["statements"][number],
+  resourceRn: string
+) {
+  if (
+    statement.resourceType === "*" ||
+    statement.resourceType.toLowerCase() === "all"
+  ) {
+    return true
+  }
+
+  return (
+    statement.resourceType === "segment" &&
+    (statement.actions.includes("*") ||
+      statement.actions.includes("SegmentAllActions")) &&
+    statement.resources.some((pattern) => resourceMatches(resourceRn, pattern))
+  )
+}
+
+function allMatchingStatementsAllow(
+  statements: UserPolicy["statements"],
+  matches: (statement: UserPolicy["statements"][number]) => boolean
+) {
+  const matching = statements.filter(matches)
+  return (
+    matching.length > 0 &&
+    matching.every((statement) => statement.effect.toLowerCase() === "allow")
+  )
+}
+
 export function canUseSegmentAction(
   policies: UserPolicy[],
   resourceRn: string,
-  action: SegmentAction
+  action: SegmentAction,
+  fineGrainedGranted: boolean
 ) {
   if (policies.some((policy) => policy.type.toLowerCase() === "owner")) {
     return true
   }
 
-  const matchedStatements = policies.flatMap((policy) =>
-    policy.statements.filter((statement) =>
-      statementMatches(statement, resourceRn, action)
-    )
+  const statements = policies.flatMap((policy) => policy.statements)
+  const actionAllowed = allMatchingStatementsAllow(statements, (statement) =>
+    statementMatches(statement, resourceRn, action)
   )
 
-  return (
-    matchedStatements.length > 0 &&
-    matchedStatements.every(
-      (statement) => statement.effect.toLowerCase() === "allow"
-    )
+  return Boolean(
+    actionAllowed &&
+    (fineGrainedGranted ||
+      allMatchingStatementsAllow(statements, (statement) =>
+        allActionsStatementMatches(statement, resourceRn)
+      ))
   )
 }

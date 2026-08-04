@@ -52,6 +52,7 @@ import {
   getCurrentProjectEnv,
   getCurrentWorkspace,
 } from "@/features/layout/layout-context"
+import { isFineGrainedAccessControlGranted } from "@/features/workspace/license/license-utils"
 import { cn } from "@/lib/utils"
 import type { GetStartedFlag } from "../get-started-types"
 import { createBooleanFlagPayload, toFlagKey } from "../get-started-utils"
@@ -166,7 +167,8 @@ export function CreateFeatureFlagStep({
     canUseFlagAction(
       permissionsQuery.data ?? [],
       `${envRn}:flag/*`,
-      "CreateFlag"
+      "CreateFlag",
+      isFineGrainedAccessControlGranted(workspace?.license)
     )
   const autoCreate = Boolean(
     !value &&

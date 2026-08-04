@@ -2,6 +2,7 @@ using Api.Authorization;
 using Application.Services;
 using Domain.Policies;
 using Domain.Resources;
+using Domain.Workspaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -24,13 +25,22 @@ public class DefaultPermissionCheckerTests
 
     private static (DefaultPermissionChecker sut,
         Mock<IResourceService> resourceSvc,
-        Mock<IRequestPermissions> requestPermissions) BuildSut()
+        Mock<IRequestPermissions> requestPermissions) BuildSut(ILicenseService? licenseService = null)
     {
         var resourceSvc = new Mock<IResourceService>();
         var requestPermissions = new Mock<IRequestPermissions>();
+        if (licenseService is null)
+        {
+            var defaultLicenseService = new Mock<ILicenseService>();
+            defaultLicenseService
+                .Setup(x => x.IsFeatureGrantedAsync(It.IsAny<Guid>(), It.IsAny<string>()))
+                .ReturnsAsync(true);
+            licenseService = defaultLicenseService.Object;
+        }
         var sut = new DefaultPermissionChecker(
             resourceSvc.Object,
             requestPermissions.Object,
+            licenseService,
             NullLogger<DefaultPermissionChecker>.Instance);
         return (sut, resourceSvc, requestPermissions);
     }
@@ -46,6 +56,7 @@ public class DefaultPermissionCheckerTests
         ctx.Features.Set<IRoutingFeature>(new RoutingFeature { RouteData = rd });
         // DefaultHttpContext.Request.RouteValues reads from the feature; set values directly:
         ctx.Request.RouteValues = rd.Values;
+        ctx.Request.Headers[ApiConstants.WorkspaceHeaderKey] = Guid.NewGuid().ToString();
         return ctx;
     }
 
@@ -282,6 +293,82 @@ public class DefaultPermissionCheckerTests
         resourceSvc.Verify(x => x.GetFlagRnAsync(It.IsAny<Guid>(), It.IsAny<string>()), Times.Never);
         resourceSvc.Verify(x => x.GetEnvRnAsync(It.IsAny<Guid>()), Times.Never);
         perms.Verify(x => x.GetAsync(It.IsAny<HttpContext>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task IsGranted_FineGrainedFlagPermission_WithoutLicense_ReturnsFalse()
+    {
+        var envId = Guid.NewGuid();
+        var flagRn = "project/p:env/production:flag/checkout";
+        var licenseService = new Mock<ILicenseService>();
+        licenseService
+            .Setup(x => x.IsFeatureGrantedAsync(It.IsAny<Guid>(), LicenseFeatures.FineGrainedAccessControl))
+            .ReturnsAsync(false);
+        var (sut, resourceSvc, perms) = BuildSut(licenseService.Object);
+        resourceSvc.Setup(x => x.GetFlagRnAsync(envId, "checkout")).ReturnsAsync(flagRn);
+        perms.Setup(x => x.GetAsync(It.IsAny<HttpContext>()))
+            .ReturnsAsync(AllowStatement(Permissions.ToggleFlag, flagRn));
+
+        var result = await sut.IsGrantedAsync(
+            BuildHttpContext(("envId", envId.ToString()), ("key", "checkout")),
+            new PermissionRequirement(Permissions.ToggleFlag));
+
+        Assert.False(result);
+    }
+
+    [Fact]
+    public async Task IsGranted_FlagAllActions_WithoutFineGrainedLicense_ReturnsTrue()
+    {
+        var envId = Guid.NewGuid();
+        var flagRn = "project/p:env/production:flag/checkout";
+        var licenseService = new Mock<ILicenseService>();
+        licenseService
+            .Setup(x => x.IsFeatureGrantedAsync(It.IsAny<Guid>(), It.IsAny<string>()))
+            .ReturnsAsync(false);
+        var (sut, resourceSvc, perms) = BuildSut(licenseService.Object);
+        resourceSvc.Setup(x => x.GetFlagRnAsync(envId, "checkout")).ReturnsAsync(flagRn);
+        perms.Setup(x => x.GetAsync(It.IsAny<HttpContext>()))
+            .ReturnsAsync([
+                new PolicyStatement
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    ResourceType = ResourceTypes.FeatureFlag,
+                    Effect = EffectType.Allow,
+                    Actions = ["*"],
+                    Resources = [flagRn]
+                }
+            ]);
+
+        var result = await sut.IsGrantedAsync(
+            BuildHttpContext(("envId", envId.ToString()), ("key", "checkout")),
+            new PermissionRequirement(Permissions.ToggleFlag));
+
+        Assert.True(result);
+        licenseService.Verify(
+            x => x.IsFeatureGrantedAsync(It.IsAny<Guid>(), It.IsAny<string>()),
+            Times.Never);
+    }
+
+    [Fact]
+    public async Task IsGranted_FineGrainedSegmentPermission_WithoutLicense_ReturnsFalse()
+    {
+        var envId = Guid.NewGuid();
+        var segmentId = Guid.NewGuid();
+        var segmentRn = "project/p:env/production:segment/enterprise";
+        var licenseService = new Mock<ILicenseService>();
+        licenseService
+            .Setup(x => x.IsFeatureGrantedAsync(It.IsAny<Guid>(), LicenseFeatures.FineGrainedAccessControl))
+            .ReturnsAsync(false);
+        var (sut, resourceSvc, perms) = BuildSut(licenseService.Object);
+        resourceSvc.Setup(x => x.GetSegmentRnAsync(envId, segmentId)).ReturnsAsync(segmentRn);
+        perms.Setup(x => x.GetAsync(It.IsAny<HttpContext>()))
+            .ReturnsAsync(AllowStatement(Permissions.UpdateSegmentRules, segmentRn));
+
+        var result = await sut.IsGrantedAsync(
+            BuildHttpContext(("envId", envId.ToString()), ("segmentId", segmentId.ToString())),
+            new PermissionRequirement(Permissions.UpdateSegmentRules));
+
+        Assert.False(result);
     }
 
     [Fact]

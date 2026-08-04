@@ -1,12 +1,14 @@
 using Application.Services;
 using Domain.Policies;
 using Domain.Resources;
+using Domain.Workspaces;
 
 namespace Api.Authorization;
 
 public class DefaultPermissionChecker(
     IResourceService resourceService,
     IRequestPermissions requestPermissions,
+    ILicenseService licenseService,
     ILogger<DefaultPermissionChecker> logger)
     : IPermissionChecker
 {
@@ -28,8 +30,29 @@ public class DefaultPermissionChecker(
             return false;
         }
 
-        var statements = await requestPermissions.GetAsync(httpContext);
-        return PolicyHelper.IsAllowed(statements, resourceRN, permission);
+        var statements = (await requestPermissions.GetAsync(httpContext)).ToArray();
+        if (!PolicyHelper.IsAllowed(statements, resourceRN, permission))
+        {
+            return false;
+        }
+
+        if (resourceType is not (ResourceTypes.FeatureFlag or ResourceTypes.Segment))
+        {
+            return true;
+        }
+
+        // A resource-level all-actions grant is the non-fine-grained fallback.
+        // Concrete flag and segment actions require the fine-grained feature.
+        if (PolicyHelper.IsAllowed(statements, resourceRN, "*"))
+        {
+            return true;
+        }
+
+        var workspaceId = httpContext.Request.WorkspaceId();
+        return workspaceId != Guid.Empty &&
+               await licenseService.IsFeatureGrantedAsync(
+                   workspaceId,
+                   LicenseFeatures.FineGrainedAccessControl);
     }
 
     private async ValueTask<string?> GetRnAsync(string permission, string resourceType, HttpRequest request)

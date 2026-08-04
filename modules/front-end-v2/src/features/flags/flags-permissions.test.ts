@@ -41,7 +41,8 @@ describe("feature flag permissions", () => {
       canUseFlagAction(
         [{ type: "Owner", statements: [] }],
         featureFlagRn(envRn, flag),
-        "DeleteFlag"
+        "DeleteFlag",
+        false
       )
     ).toBe(true)
   })
@@ -51,7 +52,8 @@ describe("feature flag permissions", () => {
       canUseFlagAction(
         [policy(["project/*:env/*:flag/*"], ["CopyFlagTo"])],
         featureFlagRn(envRn, flag),
-        "CopyFlagTo"
+        "CopyFlagTo",
+        true
       )
     ).toBe(true)
   })
@@ -61,7 +63,8 @@ describe("feature flag permissions", () => {
       canUseFlagAction(
         [policy(["project/*:env/*:flag/*"], ["UpdateFlagTargetingRules"])],
         featureFlagRn(envRn, flag),
-        "UpdateFlagTargetingRules"
+        "UpdateFlagTargetingRules",
+        true
       )
     ).toBe(true)
   })
@@ -71,7 +74,8 @@ describe("feature flag permissions", () => {
       canUseFlagAction(
         [policy(["project/payments:env/production"], ["*"])],
         featureFlagRn(envRn, flag),
-        "CloneFlag"
+        "CloneFlag",
+        false
       )
     ).toBe(true)
   })
@@ -81,7 +85,8 @@ describe("feature flag permissions", () => {
       canUseFlagAction(
         [policy([`${envRn}:flag/*;internal,pa*`], ["ArchiveFlag"])],
         featureFlagRn(envRn, flag),
-        "ArchiveFlag"
+        "ArchiveFlag",
+        true
       )
     ).toBe(true)
   })
@@ -91,7 +96,8 @@ describe("feature flag permissions", () => {
       canUseFlagAction(
         [policy(["project/other:env/*:flag/*"], ["CopyFlagTo"])],
         featureFlagRn(envRn, flag),
-        "CopyFlagTo"
+        "CopyFlagTo",
+        true
       )
     ).toBe(false)
   })
@@ -104,7 +110,8 @@ describe("feature flag permissions", () => {
           policy([`${envRn}:flag/new-checkout`], ["CopyFlagTo"], "deny"),
         ],
         featureFlagRn(envRn, flag),
-        "CopyFlagTo"
+        "CopyFlagTo",
+        true
       )
     ).toBe(false)
   })
@@ -114,8 +121,31 @@ describe("feature flag permissions", () => {
       canUseFlagAction(
         [policy([], [], "deny", "*")],
         featureFlagRn(envRn, flag),
-        "ToggleFlag"
+        "ToggleFlag",
+        true
       )
     ).toBe(false)
+  })
+
+  it("requires fine-grained access for a concrete action policy", () => {
+    expect(
+      canUseFlagAction(
+        [policy([`${envRn}:flag/*`], ["ToggleFlag"])],
+        featureFlagRn(envRn, flag),
+        "ToggleFlag",
+        false
+      )
+    ).toBe(false)
+  })
+
+  it("allows an all-actions policy without fine-grained access", () => {
+    expect(
+      canUseFlagAction(
+        [policy([`${envRn}:flag/*`], ["*"])],
+        featureFlagRn(envRn, flag),
+        "ToggleFlag",
+        false
+      )
+    ).toBe(true)
   })
 })

@@ -45,6 +45,7 @@ import {
 } from "@/features/layout/layout-context"
 import {
   getLicenseStatus,
+  isFineGrainedAccessControlGranted,
   isFeatureGranted,
   parseLicense,
 } from "@/features/workspace/license/license-utils"
@@ -352,6 +353,9 @@ export function FlagsComparePage() {
   )
 
   const decodedLicense = parseLicense(workspace?.license)
+  const fineGrainedGranted = isFineGrainedAccessControlGranted(
+    workspace?.license
+  )
   const comparisonGranted = isFeatureGranted(
     {
       id: "flag-comparison",
@@ -372,7 +376,8 @@ export function FlagsComparePage() {
       canUseFlagAction(
         permissionsQuery.data ?? [],
         featureFlagRn(envRn, flag),
-        "CopyFlagTo"
+        "CopyFlagTo",
+        fineGrainedGranted
       )
     )
   }

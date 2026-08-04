@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import {
   getLicenseStatus,
+  isFineGrainedAccessControlGranted,
   isFeatureGranted,
   parseLicense,
 } from "@/features/workspace/license/license-utils"
@@ -178,15 +179,29 @@ export function FlagsPage() {
     () => permissionsQuery.data ?? [],
     [permissionsQuery.data]
   )
+  const fineGrainedGranted = useMemo(
+    () => isFineGrainedAccessControlGranted(workspace?.license),
+    [workspace?.license]
+  )
   const canPerform = useCallback(
     (flag: FeatureFlag, action: FlagAction) =>
       permissionsQuery.isSuccess &&
-      canUseFlagAction(policies, featureFlagRn(envRn, flag), action),
-    [envRn, permissionsQuery.isSuccess, policies]
+      canUseFlagAction(
+        policies,
+        featureFlagRn(envRn, flag),
+        action,
+        fineGrainedGranted
+      ),
+    [envRn, fineGrainedGranted, permissionsQuery.isSuccess, policies]
   )
   const canCreate =
     permissionsQuery.isSuccess &&
-    canUseFlagAction(policies, `${envRn}:flag/*`, "CreateFlag")
+    canUseFlagAction(
+      policies,
+      `${envRn}:flag/*`,
+      "CreateFlag",
+      fineGrainedGranted
+    )
   const decodedLicense = parseLicense(workspace?.license)
   const comparisonGranted = isFeatureGranted(
     {

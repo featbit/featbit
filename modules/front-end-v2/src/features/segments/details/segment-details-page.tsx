@@ -11,6 +11,7 @@ import {
   localizedPath,
   resolveLang,
 } from "@/features/layout/layout-context"
+import { isFineGrainedAccessControlGranted } from "@/features/workspace/license/license-utils"
 import {
   fetchCurrentEnvironmentSettings,
   fetchCurrentUserPolicies,
@@ -130,7 +131,8 @@ export function SegmentDetailsPage() {
       canUseSegmentAction(
         permissionsQuery.data,
         segmentRn(envRn, segment),
-        action
+        action,
+        isFineGrainedAccessControlGranted(workspace?.license)
       )
     )
   }

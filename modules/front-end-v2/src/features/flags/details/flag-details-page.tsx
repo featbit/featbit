@@ -29,6 +29,7 @@ import {
 import type { SegmentEndUser } from "@/features/segments/segments-types"
 import {
   getLicenseStatus,
+  isFineGrainedAccessControlGranted,
   isFeatureGranted,
   parseLicense,
 } from "@/features/workspace/license/license-utils"
@@ -109,6 +110,9 @@ export function FlagDetailsPage() {
   const previewing = Boolean(previewChangeRequestId)
   const projectEnv = getCurrentProjectEnv()
   const workspace = getCurrentWorkspace()
+  const fineGrainedGranted = isFineGrainedAccessControlGranted(
+    workspace?.license
+  )
   const envId = projectEnv?.envId ?? ""
   const basePath = localizedPath(lang, "/feature-flags")
   const [targetingDraft, setTargetingDraft] = useState<{
@@ -232,7 +236,12 @@ export function FlagDetailsPage() {
     return Boolean(
       saved &&
       policiesQuery.isSuccess &&
-      canUseFlagAction(policiesQuery.data, resourceRn, action)
+      canUseFlagAction(
+        policiesQuery.data,
+        resourceRn,
+        action,
+        fineGrainedGranted
+      )
     )
   }
   const dirty =

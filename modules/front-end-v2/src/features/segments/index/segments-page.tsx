@@ -22,6 +22,7 @@ import {
 } from "@/features/layout/layout-context"
 import {
   getLicenseStatus,
+  isFineGrainedAccessControlGranted,
   isFeatureGranted,
   parseLicense,
 } from "@/features/workspace/license/license-utils"
@@ -153,16 +154,30 @@ export function SegmentsPage() {
     license,
     getLicenseStatus(license)
   )
+  const fineGrainedGranted = useMemo(
+    () => isFineGrainedAccessControlGranted(workspace?.license),
+    [workspace?.license]
+  )
 
   const canPerform = useCallback(
     (segment: Segment, action: SegmentAction) =>
       permissionsQuery.isSuccess &&
-      canUseSegmentAction(policies, segmentRn(envRn, segment), action),
-    [envRn, permissionsQuery.isSuccess, policies]
+      canUseSegmentAction(
+        policies,
+        segmentRn(envRn, segment),
+        action,
+        fineGrainedGranted
+      ),
+    [envRn, fineGrainedGranted, permissionsQuery.isSuccess, policies]
   )
   const canCreate =
     permissionsQuery.isSuccess &&
-    canUseSegmentAction(policies, `${envRn}:segment/*`, "CreateSegment")
+    canUseSegmentAction(
+      policies,
+      `${envRn}:segment/*`,
+      "CreateSegment",
+      fineGrainedGranted
+    )
 
   const invalidateList = useCallback(
     () => queryClient.invalidateQueries({ queryKey: ["segments"] }),
