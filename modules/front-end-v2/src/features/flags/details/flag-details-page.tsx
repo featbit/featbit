@@ -585,7 +585,7 @@ export function FlagDetailsPage() {
               canUpdateUsers={
                 !previewing && can("UpdateFlagIndividualTargeting")
               }
-              canUpdateRules={!previewing && can("UpdateFlagRules")}
+              canUpdateRules={!previewing && can("UpdateFlagTargetingRules")}
               onDraftChange={(value) => {
                 if (!previewing) {
                   setTargetingDraft({

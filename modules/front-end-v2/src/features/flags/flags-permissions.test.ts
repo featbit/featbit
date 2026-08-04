@@ -56,6 +56,16 @@ describe("feature flag permissions", () => {
     ).toBe(true)
   })
 
+  it("uses the backend targeting-rules action name", () => {
+    expect(
+      canUseFlagAction(
+        [policy(["project/*:env/*:flag/*"], ["UpdateFlagTargetingRules"])],
+        featureFlagRn(envRn, flag),
+        "UpdateFlagTargetingRules"
+      )
+    ).toBe(true)
+  })
+
   it("supports wildcard actions and parent resource scopes", () => {
     expect(
       canUseFlagAction(

@@ -13,7 +13,7 @@ export type FlagAction =
   | "UpdateFlagTags"
   | "UpdateFlagVariations"
   | "UpdateFlagIndividualTargeting"
-  | "UpdateFlagRules"
+  | "UpdateFlagTargetingRules"
   | "UpdateFlagDefaultRule"
   | "UpdateFlagOffVariation"
 
