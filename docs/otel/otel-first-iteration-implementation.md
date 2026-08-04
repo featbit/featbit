@@ -16,17 +16,48 @@ Make FeatBit custom metrics exportable, consistent, and safe for production.
 
 ### What to measure
 
-Use two custom Meter sources:
+Use one custom Meter source per service:
 
-- `FeatBit.Backend`
-- `FeatBit.EvaluationServer`
+| Service | `service.name` | Meter | Instrument namespace |
+| --- | --- | --- | --- |
+| API server | `featbit-api` | `FeatBit.Api` | `featbit.api.*` |
+| Evaluation server | `featbit-els` | `FeatBit.EvaluationServer` | `featbit.evaluation_server.*` |
+| Control plane | `featbit-control-plane` | `FeatBit.ControlPlane` | `featbit.control_plane.*` |
 
-Identify telemetry through resource attributes such as `service.name`, `service.version`, `service.instance.id`, and deployment environment.
+Identify instances through resource attributes such as `service.name`, `service.version`, `service.instance.id`, and deployment environment.
+
+### Instrument naming
+
+Instrument names follow `featbit.<service>.<area>.<name>` and the [OpenTelemetry naming conventions](https://opentelemetry.io/docs/specs/semconv/general/naming/):
+
+- Lowercase throughout. Separate namespace components with `.` and words inside a component with `_`.
+- Restrict names to letters, digits, `_`, and `.`. A `service.name` value keeps its hyphen (`featbit-api`), but the `<service>` component of an instrument name cannot, so use `api`, `evaluation_server`, and `control_plane`.
+- `featbit` is the application prefix the specification recommends for names private to one application, and the system name that [system-specific metrics](https://opentelemetry.io/docs/specs/semconv/general/naming/#system-specific-metrics) must start with. Do not repeat it inside `<service>`.
+- Include `<service>` only when the area belongs to a single service. Streaming, store availability, and rate limiting are evaluation-server concerns, so they carry the token. Messaging, flag-change propagation, buffers, and workers are emitted by several services and stay service-neutral, so one query spans all of them and `service.name` supplies the split.
+- Units belong in the instrument's `unit` argument, not in the name. Drop `_ms` and `_seconds` suffixes.
+- Never append `_total` to a Counter or UpDownCounter.
+
+The instruments that already ship predate this convention. Migrating them is a prefix addition plus a unit-suffix removal:
+
+| Current | Target | Unit |
+| --- | --- | --- |
+| `control_plane.consistency.commits` | `featbit.control_plane.consistency.commits` | `{commit}` |
+| `control_plane.consistency.evicted_commits` | `featbit.control_plane.consistency.evicted_commits` | `{commit}` |
+| `control_plane.consistency.time_to_commit_ms` | `featbit.control_plane.consistency.time_to_commit` | `ms` |
+| `control_plane.consistency.pending_backlog` | `featbit.control_plane.consistency.pending_backlog` | `{message}` |
+| `control_plane.consistency.applied_watermark_lag_ms` | `featbit.control_plane.consistency.applied_watermark_lag` | `ms` |
+| `control_plane.consistency.unmatched_dc_count` | `featbit.control_plane.consistency.unmatched_dc_count` | `{datacenter}` |
+| `control_plane.consistency.is_leader` | `featbit.control_plane.consistency.is_leader` | `{leader}` |
+| `evaluation_server.consistency.heartbeat_staleness_seconds` | `featbit.evaluation_server.consistency.heartbeat_staleness` | `s` |
+
+Renaming an exported metric breaks existing dashboards and alerts, so land the migration in one commit and call it out in the release notes.
+
+Meter names are not governed by the semantic conventions; they surface as `otel.scope.name`. Keep the existing `FeatBit.ControlPlane.Consistency` and `FeatBit.EvaluationServer.Consistency` sources as they are, because the `FeatBit.*` wildcard below exports them either way.
 
 ### How to implement
 
-- Register the relevant Meter through `OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES`.
-- Correct the back-end `OTEL_SERVICE_NAME` and the `locahost` OTLP endpoint typo in both Dockerfiles.
+- Register the relevant Meter through `OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES`. This variable is currently set nowhere in the repository, so the custom meters that already exist—`FeatBit.ControlPlane.Consistency` and `FeatBit.EvaluationServer.Consistency`—are silently dropped by the auto-instrumentation. Fix this first; every metric below depends on it.
+- Register the prefix wildcard `OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES=FeatBit.*` in each service Dockerfile rather than enumerating meters. Auto-instrumentation accepts either an exact source name or a `Prefix.*` form that [registers the entire prefix](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docs/manual-instrumentation.md#metrics), so one value covers every existing and future `FeatBit.*` meter with no further Dockerfile change. This makes the `FeatBit.` prefix mandatory for every custom meter name.
 - Create instruments once and reuse them.
 - Use only finite attributes such as `outcome`, `provider`, `operation`, and `connection.type`.
 - Never use flag keys, environment IDs, tokens, users, connection IDs, URLs, or raw errors as default metric labels.
@@ -46,18 +77,18 @@ HTTP metrics cannot describe long-lived connection capacity. A FeatBit Agent `re
 
 | Metric | Purpose |
 |---|---|
-| `featbit.streaming.upgrade.requests` | New WebSocket attempts by type and outcome |
-| `featbit.streaming.sockets.active` | Current physical sockets |
-| `featbit.streaming.subscriptions.active` | Current logical environment subscriptions |
-| `featbit.streaming.connection.closed` | Normal and abnormal closes |
-| `featbit.streaming.connection.duration` | Connection lifetime distribution |
+| `featbit.evaluation_server.streaming.upgrade.requests` | New WebSocket attempts by type and outcome |
+| `featbit.evaluation_server.streaming.sockets.active` | Current physical sockets |
+| `featbit.evaluation_server.streaming.subscriptions.active` | Current logical environment subscriptions |
+| `featbit.evaluation_server.streaming.connection.closed` | Normal and abnormal closes |
+| `featbit.evaluation_server.streaming.connection.duration` | Connection lifetime distribution |
 
 `subscriptions.active{env.id}` is an optional, disabled-by-default detailed view for selected environments.
 
 ### How to implement
 
 - Record the upgrade result when the handshake is decided, including rate-limit rejection.
-- Maintain socket and subscription counts with atomic deltas in [StreamingMiddleware](../../modules/evaluation-server/src/Streaming/StreamingMiddleware.cs) and [ConnectionManager](../../modules/evaluation-server/src/Streaming/Connections/ConnectionManager.cs).
+- Maintain socket and subscription counts with atomic deltas in [StreamingMiddleware](../../modules/evaluation-server/src/Streaming/StreamingMiddleware.cs) and [DefaultConnectionManager](../../modules/evaluation-server/src/Streaming/Connections/DefaultConnectionManager.cs).
 - Count one subscription for a normal connection and the successfully mapped environment count for an Agent connection.
 - Use `try/finally` so active counts are always decremented.
 - Do not scan the connection dictionary during metric collection.
@@ -92,9 +123,17 @@ Default attributes: `provider`, `destination`, `operation`, and `outcome`.
 ### How to implement
 
 - Instrument the Kafka, Redis, and PostgreSQL adapters rather than every caller.
-- Report publish success only when the provider confirms delivery. Flag and Segment Change publishing must not treat local enqueue as final success.
+- Treat each provider as two independent transports. The shipped implementations are asymmetric, so `provider` alone does not describe the delivery guarantee:
+
+| Direction | Kafka | Redis | PostgreSQL |
+|---|---|---|---|
+| API → ELS | Topic; consumer lag available | Pub/Sub `PublishAsync`; no persistence, no backlog | `pg_notify` drained into a 1000-item bounded channel with `DropOldest` |
+| ELS → API | Topic; consumer lag available | Durable list `ListRightPushAsync`/`ListLeftPopAsync`; `LLEN` is the backlog | `queue_messages` polled with a one-minute visibility timeout |
+
+- Expose backlog only where a durable queue exists: `LLEN` for the ELS → API Redis list, a pending-row count for `queue_messages`, and consumer lag for Kafka. Only the API → ELS Redis direction is Pub/Sub and has nothing to measure.
 - Poll durable queue depth and oldest age in a background task, then expose cached values.
-- Do not expose backlog metrics for Redis Pub/Sub because it has no durable queue.
+- Publish confirmation needs a code change before `outcome` can be trusted. The Kafka producer uses fire-and-forget `Produce()`, and every producer catches all exceptions and returns `Task.CompletedTask`, so no caller can tell delivery from failure. Until the Kafka delivery handler and the swallowed exceptions feed a result back, record `enqueued` rather than `delivered`.
+- Count a Kafka handler failure as a known drop. Both consumers call `StoreOffset` in a `finally` block regardless of handler outcome ([back-end](../../modules/back-end/src/Infrastructure/MQ/Kafka/KafkaMessageConsumer.cs), [evaluation-server](../../modules/evaluation-server/src/Infrastructure/MQ/Kafka/KafkaMessageConsumer.cs)), so a failed message is never replayed. Record handler outcome separately from consume count, otherwise this loss is invisible.
 - Set consumer running state in the loop lifecycle and update heartbeat independently from message traffic.
 - Record drops only when loss is known; do not invent redelivery information when a provider cannot supply it.
 
@@ -126,11 +165,11 @@ The server-side boundary ends after socket send; it does not prove that an SDK a
 - Add a versioned internal message envelope containing `change_id`, `occurred_at`, and the flag payload.
 - Deploy consumers that accept both the old raw payload and the new envelope before changing producers.
 - Record persistence around the actual flag create/update, not audit-log or cache writes.
-- Record publish success only after provider delivery confirmation.
+- Record publish success only after provider delivery confirmation, which depends on the producer change described in M2.
 - In [FeatureFlagChangeMessageConsumer](../../modules/evaluation-server/src/Streaming/Consumers/FeatureFlagChangeMessageConsumer.cs), aggregate target, success, failure, and total duration once per change.
 - Do not add connection, environment, or flag identifiers to metrics.
 
-The current flag revision is a GUID, so numeric `revision.lag` is deferred until FeatBit has a monotonic config sequence.
+[`FeatureFlag.Revision`](../../modules/back-end/src/Domain/FeatureFlags/FeatureFlag.cs) is a `Guid`, but `FeatureFlag.CommittedVersion` is a monotonic `long`. It advances only through `PromotePending`, which the control-plane commit coordinator drives, so it keeps its default value in a standard deployment where the control plane is absent. Numeric `revision.lag` therefore stays deferred for the default topology, and the envelope's `occurred_at` remains the propagation-latency source.
 
 Performance impact: low; a fixed number of recordings is made per Flag Change.
 
@@ -148,11 +187,11 @@ Readiness shows only the current result. It cannot reveal slow probes, intermitt
 
 | Metric | Purpose |
 |---|---|
-| `featbit.store.available` | Last probe result per provider |
-| `featbit.store.selected` | Current routing selection |
-| `featbit.store.last_success.age` | Time since the provider last passed a probe |
-| `featbit.store.health_check.operations/duration` | Probe outcomes and latency |
-| `featbit.store.failover.transitions` | Provider selection changes |
+| `featbit.evaluation_server.store.available` | Last probe result per provider |
+| `featbit.evaluation_server.store.selected` | Current routing selection |
+| `featbit.evaluation_server.store.last_success.age` | Time since the provider last passed a probe |
+| `featbit.evaluation_server.store.health_check.operations/duration` | Probe outcomes and latency |
+| `featbit.evaluation_server.store.failover.transitions` | Provider selection changes |
 
 ### How to implement
 
@@ -186,7 +225,16 @@ Usage, Insights, and PostgreSQL notification paths can remove or overwrite buffe
 | `featbit.worker.last_success.age` | Time since a successful non-empty flush |
 | `featbit.worker.loop.failures` | Loop failures |
 
-Use a fixed buffer/worker name such as `usage`, `insight`, `postgres_notification`, or `store_sentinel`.
+Use a fixed buffer/worker name such as `usage`, `insight`, `postgres_notification`, or `store_sentinel`. Only some of these are bounded, and the applicable metric set differs:
+
+| Buffer | Implementation | Applicable metrics |
+|---|---|---|
+| `usage` | Bounded `Channel` with `DropOldest` in [UsageTracker](../../modules/back-end/src/Application/Usages/UsageTracker.cs) | Full set, including capacity and drops |
+| `postgres_notification` | 1000-item bounded `Channel` with `DropOldest` in the ELS consumer | Full set |
+| `insight` | Unbounded `List<object>` behind a lock in [InsightsWriter](../../modules/back-end/src/Infrastructure/AppService/InsightsWriter.cs) | Occupancy and flush metrics only |
+| `store_sentinel` | Worker with no buffer | Worker metrics only |
+
+`InsightsWriter` cannot drop, so it grows until the flush keeps up or the process runs out of memory. Report its occupancy and alert on sustained growth; `featbit.buffer.capacity` and `featbit.buffer.items.dropped` are undefined for it until it is given a bound, which is a code change rather than instrumentation.
 
 ### How to implement
 
@@ -215,8 +263,8 @@ Rate limiting does not require Redis. When enabled in its default non-distribute
 
 | Metric | Purpose |
 |---|---|
-| `featbit.ratelimit.decisions` | All in-memory and Redis-backed `allowed` and `rejected` decisions; `fail_open` applies only to Redis |
-| `featbit.streaming.validation.operations` | Accepted, invalid, and unavailable results that distinguish client errors from dependency failures |
+| `featbit.evaluation_server.ratelimit.decisions` | All in-memory and Redis-backed `allowed` and `rejected` decisions; `fail_open` applies only to Redis |
+| `featbit.evaluation_server.streaming.validation.operations` | Accepted, invalid, and unavailable results that distinguish client errors from dependency failures |
 
 Use finite attributes for backend, policy, algorithm, result, and reason. Never attach the partition key, environment, IP, token, secret, or raw error.
 
@@ -260,7 +308,7 @@ Alert rules may run in Grafana Alerting or Prometheus. When Prometheus owns the 
 - Scrape application metrics on Collector port `8889` and Collector internal metrics on `8888`.
 - Build dashboards in Grafana. Evaluate alert rules in Grafana Alerting or Prometheus, using Alertmanager when Prometheus owns the rules.
 - Alert on sustained conditions where appropriate; avoid paging on one short probe failure.
-- Do not alert on `last_success.age` alone when there is no incoming work.
+- Do not alert on `last_success.age` alone when there is no incoming work. The exception is the API → ELS Redis transport: because it is Pub/Sub, an evaluation server that restarts silently misses every change published while it was down and then looks idle rather than stale. When the provider is Redis, pair its `last_success.age` with process uptime and with the publisher-side publish rate.
 - Use deployment-specific SLOs and traffic baselines.
 - Verify that an exporter outage never blocks FeatBit traffic.
 

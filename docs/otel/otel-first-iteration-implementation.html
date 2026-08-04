@@ -1182,19 +1182,84 @@
             <button class="help-button" type="button" data-note="meter-source" aria-label="Explain custom Meter sources">?</button>
             per service and identify instances through OTel resource attributes.
           </p>
+          <div class="metric-table-wrap">
+            <table class="diagnostic-table">
+              <thead><tr><th>Service</th><th><code>service.name</code></th><th>Meter</th><th>Instrument namespace</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td>API server</td>
+                  <td><code>featbit-api</code></td>
+                  <td><code>FeatBit.Api</code></td>
+                  <td><code class="metric">featbit.api.*</code></td>
+                </tr>
+                <tr>
+                  <td>Evaluation server</td>
+                  <td><code>featbit-els</code></td>
+                  <td><code>FeatBit.EvaluationServer</code></td>
+                  <td><code class="metric">featbit.evaluation_server.*</code></td>
+                </tr>
+                <tr>
+                  <td>Control plane</td>
+                  <td><code>featbit-control-plane</code></td>
+                  <td><code>FeatBit.ControlPlane</code></td>
+                  <td><code class="metric">featbit.control_plane.*</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
           <div class="inline-code-row">
-            <span class="code-chip">FeatBit.Backend</span>
-            <span class="code-chip">FeatBit.EvaluationServer</span>
+            <span class="code-chip">FeatBit.*</span>
             <span class="code-chip">service.name</span>
+            <span class="code-chip">service.version</span>
             <span class="code-chip">service.instance.id</span>
           </div>
+        </div>
+
+        <div class="measure-block">
+          <h3>Instrument naming</h3>
+          <p>
+            Instrument names follow <code class="metric">featbit.&lt;service&gt;.&lt;area&gt;.&lt;name&gt;</code> and the
+            <a href="https://opentelemetry.io/docs/specs/semconv/general/naming/">OpenTelemetry naming conventions</a>.
+          </p>
+          <ul>
+            <li>Lowercase throughout. Separate namespace components with <code>.</code> and words inside a component with <code>_</code>.</li>
+            <li>Restrict names to letters, digits, <code>_</code>, and <code>.</code>. A <code>service.name</code> value keeps its hyphen (<code>featbit-api</code>), but the <code>&lt;service&gt;</code> component of an instrument name cannot, so use <code>api</code>, <code>evaluation_server</code>, and <code>control_plane</code>.</li>
+            <li><code>featbit</code> is the application prefix the specification recommends for names private to one application, and the system name that <a href="https://opentelemetry.io/docs/specs/semconv/general/naming/#system-specific-metrics">system-specific metrics</a> must start with. Do not repeat it inside <code>&lt;service&gt;</code>.</li>
+            <li>Include <code>&lt;service&gt;</code> only when the area belongs to a single service. Streaming, store availability, and rate limiting are evaluation-server concerns, so they carry the token. Messaging, flag-change propagation, buffers, and workers are emitted by several services and stay service-neutral, so one query spans all of them and <code>service.name</code> supplies the split.</li>
+            <li>Units belong in the instrument's <code>unit</code> argument, not in the name. Drop <code>_ms</code> and <code>_seconds</code> suffixes.</li>
+            <li>Never append <code>_total</code> to a Counter or UpDownCounter.</li>
+          </ul>
+          <p>
+            The instruments that already ship predate this convention. Migrating them is a prefix addition plus a unit-suffix removal.
+          </p>
+          <div class="metric-table-wrap">
+            <table class="diagnostic-table">
+              <thead><tr><th>Current</th><th>Target</th><th>Unit</th></tr></thead>
+              <tbody>
+                <tr><td><code class="metric">control_plane.consistency.commits</code></td><td><code class="metric">featbit.control_plane.consistency.commits</code></td><td><code>{commit}</code></td></tr>
+                <tr><td><code class="metric">control_plane.consistency.evicted_commits</code></td><td><code class="metric">featbit.control_plane.consistency.evicted_commits</code></td><td><code>{commit}</code></td></tr>
+                <tr><td><code class="metric">control_plane.consistency.time_to_commit_ms</code></td><td><code class="metric">featbit.control_plane.consistency.time_to_commit</code></td><td><code>ms</code></td></tr>
+                <tr><td><code class="metric">control_plane.consistency.pending_backlog</code></td><td><code class="metric">featbit.control_plane.consistency.pending_backlog</code></td><td><code>{message}</code></td></tr>
+                <tr><td><code class="metric">control_plane.consistency.applied_watermark_lag_ms</code></td><td><code class="metric">featbit.control_plane.consistency.applied_watermark_lag</code></td><td><code>ms</code></td></tr>
+                <tr><td><code class="metric">control_plane.consistency.unmatched_dc_count</code></td><td><code class="metric">featbit.control_plane.consistency.unmatched_dc_count</code></td><td><code>{datacenter}</code></td></tr>
+                <tr><td><code class="metric">control_plane.consistency.is_leader</code></td><td><code class="metric">featbit.control_plane.consistency.is_leader</code></td><td><code>{leader}</code></td></tr>
+                <tr><td><code class="metric">evaluation_server.consistency.heartbeat_staleness_seconds</code></td><td><code class="metric">featbit.evaluation_server.consistency.heartbeat_staleness</code></td><td><code>s</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            Renaming an exported metric breaks existing dashboards and alerts, so land the migration in one commit and call it out in the release notes.
+            Meter names are not governed by the semantic conventions and surface as <code>otel.scope.name</code>; keep the existing
+            <code>FeatBit.ControlPlane.Consistency</code> and <code>FeatBit.EvaluationServer.Consistency</code> sources, because the
+            <code>FeatBit.*</code> wildcard exports them either way.
+          </p>
         </div>
 
         <div class="implement-block">
           <h3>How to implement</h3>
           <ol class="steps">
-            <li>Register the relevant Meter with <code>OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES</code>.</li>
-            <li>Correct the back-end service name and both Dockerfile endpoint typos.</li>
+            <li>Register the relevant Meter with <code>OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES</code>. This variable is currently set nowhere in the repository, so the custom meters that already exist&mdash;<code>FeatBit.ControlPlane.Consistency</code> and <code>FeatBit.EvaluationServer.Consistency</code>&mdash;are silently dropped by the auto-instrumentation. Fix this first; every metric below depends on it.</li>
+            <li>Register the prefix wildcard <code>OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES=FeatBit.*</code> in each service Dockerfile rather than enumerating meters. Auto-instrumentation accepts either an exact source name or a <code>Prefix.*</code> form that <a href="https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/blob/main/docs/manual-instrumentation.md#metrics">registers the entire prefix</a>, so one value covers every existing and future <code>FeatBit.*</code> meter with no further Dockerfile change. This makes the <code>FeatBit.</code> prefix mandatory for every custom meter name.</li>
             <li>Create instruments once, then reuse them.</li>
             <li>
               Keep metric attributes finite
@@ -1238,7 +1303,7 @@
           </h3>
           <p>
             It is a proposed operational counting unit based on the entries managed by
-            <code>ConnectionManager</code>: one mapped <code>Connection</code> tells ELS where to send changes for one environment.
+            <code>DefaultConnectionManager</code>: one mapped <code>Connection</code> tells ELS where to send changes for one environment.
           </p>
           <div class="mapping-list" aria-label="Socket and logical subscription examples">
             <div class="mapping-row">
@@ -1266,27 +1331,27 @@
               <thead><tr><th>Metric</th><th>What it counts</th><th>Problem it helps reveal</th></tr></thead>
               <tbody>
                 <tr>
-                  <td><code class="metric">featbit.streaming.upgrade.requests</code></td>
+                  <td><code class="metric">featbit.evaluation_server.streaming.upgrade.requests</code></td>
                   <td>WebSocket attempts over time, split by result</td>
                   <td>Reconnect storms, validation failures, or rate-limit rejection</td>
                 </tr>
                 <tr>
-                  <td><code class="metric">featbit.streaming.sockets.active</code></td>
+                  <td><code class="metric">featbit.evaluation_server.streaming.sockets.active</code></td>
                   <td>Accepted physical WebSockets open now</td>
                   <td>Instance capacity, uneven load, or a connection leak</td>
                 </tr>
                 <tr>
-                  <td><code class="metric">featbit.streaming.subscriptions.active</code></td>
+                  <td><code class="metric">featbit.evaluation_server.streaming.subscriptions.active</code></td>
                   <td>Active environment routes represented by those sockets</td>
                   <td>Actual fanout load and the blast radius hidden behind Agent sockets</td>
                 </tr>
                 <tr>
-                  <td><code class="metric">featbit.streaming.connection.closed</code></td>
+                  <td><code class="metric">featbit.evaluation_server.streaming.connection.closed</code></td>
                   <td>Connections closed, split by close outcome</td>
                   <td>Abnormal churn caused by server, client, network, or shutdown</td>
                 </tr>
                 <tr>
-                  <td><code class="metric">featbit.streaming.connection.duration</code></td>
+                  <td><code class="metric">featbit.evaluation_server.streaming.connection.duration</code></td>
                   <td>How long accepted connections remain open</td>
                   <td>Short-lived connection regressions, proxy timeouts, or unstable networks</td>
                 </tr>
@@ -1312,7 +1377,7 @@
           <h3>How to implement</h3>
           <ol class="steps">
             <li>Record the result as soon as the handshake is decided, including rate-limit rejection.</li>
-            <li>Maintain socket and subscription totals with atomic deltas in <a href="../../modules/evaluation-server/src/Streaming/StreamingMiddleware.cs">StreamingMiddleware</a> and <a href="../../modules/evaluation-server/src/Streaming/Connections/ConnectionManager.cs">ConnectionManager</a>.</li>
+            <li>Maintain socket and subscription totals with atomic deltas in <a href="../../modules/evaluation-server/src/Streaming/StreamingMiddleware.cs">StreamingMiddleware</a> and <a href="../../modules/evaluation-server/src/Streaming/Connections/DefaultConnectionManager.cs">DefaultConnectionManager</a>.</li>
             <li>Count one subscription for a normal socket and the mapped environment count for an Agent socket.</li>
             <li>Use <code>try/finally</code> to guarantee decrement; never scan all connections during collection.</li>
           </ol>
@@ -1427,14 +1492,16 @@
           <ol class="steps">
             <li>Instrument provider adapters rather than every caller.</li>
             <li>
-              Treat provider-confirmed delivery as publish success
+              Treat each provider as two independent transports
+              <button class="help-button" type="button" data-note="provider-queues" aria-label="Explain provider-specific queue metrics">?</button>.
+              The shipped implementations are asymmetric, so <code>provider</code> alone does not describe the delivery guarantee.
+            </li>
+            <li>
+              Record <code>enqueued</code>, not <code>delivered</code>, until publish confirmation exists
               <button class="help-button" type="button" data-note="delivery-confirmation" aria-label="Explain provider-confirmed delivery">?</button>.
             </li>
-            <li>Poll durable backlog in the background and expose cached values.</li>
-            <li>
-              Do not expose queue depth for Redis Pub/Sub
-              <button class="help-button" type="button" data-note="provider-queues" aria-label="Explain provider-specific queue metrics">?</button>.
-            </li>
+            <li>Poll durable backlog in the background and expose cached values. Expose backlog only where a durable queue exists; the API &rarr; ELS Redis direction is Pub/Sub and has nothing to measure.</li>
+            <li>Count a Kafka handler failure as a known drop. Both consumers call <code>StoreOffset</code> in a <code>finally</code> block regardless of handler outcome, so a failed message is never replayed and the loss is invisible unless handler outcome is recorded separately from consume count.</li>
             <li>Update consumer heartbeat independently from message traffic; count loss only when it is known.</li>
           </ol>
         </div>
@@ -1590,12 +1657,12 @@
               <thead><tr><th>Metric</th><th>What it measures</th><th>Problem it helps reveal</th></tr></thead>
               <tbody>
                 <tr>
-                  <td><code class="metric">featbit.store.available</code></td>
+                  <td><code class="metric">featbit.evaluation_server.store.available</code></td>
                   <td>Latest health-probe result for each configured provider</td>
                   <td>Redis, MongoDB, or PostgreSQL is unavailable</td>
                 </tr>
                 <tr>
-                  <td><code class="metric">featbit.store.selected</code></td>
+                  <td><code class="metric">featbit.evaluation_server.store.selected</code></td>
                   <td>
                     Which provider currently serves ELS reads
                     <button class="help-button" type="button" data-note="available-selected" aria-label="Explain availability versus selection">?</button>
@@ -1603,17 +1670,17 @@
                   <td>ELS has failed over and is operating on a fallback</td>
                 </tr>
                 <tr>
-                  <td><code class="metric">featbit.store.last_success.age</code></td>
+                  <td><code class="metric">featbit.evaluation_server.store.last_success.age</code></td>
                   <td>Time since each provider last passed a probe</td>
                   <td>A provider has been unhealthy for a sustained period</td>
                 </tr>
                 <tr>
-                  <td><code class="metric">featbit.store.health_check.operations/duration</code></td>
+                  <td><code class="metric">featbit.evaluation_server.store.health_check.operations/duration</code></td>
                   <td>Probe outcome and elapsed time</td>
                   <td>Timeouts, intermittent errors, or a provider becoming slow before failure</td>
                 </tr>
                 <tr>
-                  <td><code class="metric">featbit.store.failover.transitions</code></td>
+                  <td><code class="metric">featbit.evaluation_server.store.failover.transitions</code></td>
                   <td>Changes from one selected provider to another</td>
                   <td>Failover flapping or frequent primary/fallback switching</td>
                 </tr>
@@ -1745,6 +1812,41 @@
               </tbody>
             </table>
           </div>
+          <p>
+            Only some of these buffers are bounded, so the applicable metric set differs by target.
+          </p>
+          <div class="metric-table-wrap">
+            <table class="diagnostic-table">
+              <thead><tr><th>Buffer</th><th>Implementation</th><th>Applicable metrics</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><code>usage</code></td>
+                  <td>Bounded <code>Channel</code> with <code>DropOldest</code> in <a href="../../modules/back-end/src/Application/Usages/UsageTracker.cs">UsageTracker</a></td>
+                  <td>Full set, including capacity and drops</td>
+                </tr>
+                <tr>
+                  <td><code>postgres_notification</code></td>
+                  <td>1000-item bounded <code>Channel</code> with <code>DropOldest</code> in the ELS consumer</td>
+                  <td>Full set</td>
+                </tr>
+                <tr>
+                  <td><code>insight</code></td>
+                  <td>Unbounded <code>List&lt;object&gt;</code> behind a lock in <a href="../../modules/back-end/src/Infrastructure/AppService/InsightsWriter.cs">InsightsWriter</a></td>
+                  <td>Occupancy and flush metrics only</td>
+                </tr>
+                <tr>
+                  <td><code>store_sentinel</code></td>
+                  <td>Worker with no buffer</td>
+                  <td>Worker metrics only</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            <code>InsightsWriter</code> cannot drop, so it grows until the flush keeps up or the process runs out of memory. Report its occupancy and alert on
+            sustained growth; <code class="metric">featbit.buffer.capacity</code> and <code class="metric">featbit.buffer.items.dropped</code> are undefined for it
+            until it is given a bound, which is a code change rather than instrumentation.
+          </p>
           <div class="question-strip">
             <strong>M5 answers:</strong>
             <span class="question-pill">Is in-memory work accumulating?</span>
@@ -1803,8 +1905,8 @@
             <table>
               <thead><tr><th>Metric</th><th>Purpose</th></tr></thead>
               <tbody>
-                <tr><td><code class="metric">featbit.ratelimit.decisions</code></td><td>All in-memory and Redis-backed allowed/rejected decisions; fail-open applies only to Redis</td></tr>
-                <tr><td><code class="metric">featbit.streaming.validation.operations</code></td><td>Accepted, invalid, and unavailable results that distinguish client errors from dependency failures</td></tr>
+                <tr><td><code class="metric">featbit.evaluation_server.ratelimit.decisions</code></td><td>All in-memory and Redis-backed allowed/rejected decisions; fail-open applies only to Redis</td></tr>
+                <tr><td><code class="metric">featbit.evaluation_server.streaming.validation.operations</code></td><td>Accepted, invalid, and unavailable results that distinguish client errors from dependency failures</td></tr>
               </tbody>
             </table>
           </div>
@@ -1997,6 +2099,7 @@
       <p class="note-context">Foundation</p>
       <h3>Why a custom Meter source?</h3>
       <p>A .NET <code>Meter</code> owns custom instruments. Auto-instrumentation exports them only when the source name is registered, so stable source names are part of the telemetry contract.</p>
+      <p>Registration accepts a <code>Prefix.*</code> wildcard, so a single <code>FeatBit.*</code> value exports every FeatBit meter. The trade-off is that the <code>FeatBit.</code> prefix becomes mandatory, and a noisy meter cannot be excluded without switching back to an explicit list.</p>
     </article>
   </template>
 
@@ -2022,7 +2125,7 @@
     <article class="note-card" data-rendered-note="socket-subscription">
       <p class="note-context">M1 · Streaming</p>
       <h3>Logical subscription is an ELS routing entry</h3>
-      <p>This is not a user-facing subscription object. It means one active <code>Connection</code> entry associated with an environment secret in <code>ConnectionManager</code>.</p>
+      <p>This is not a user-facing subscription object. It means one active <code>Connection</code> entry associated with an environment secret in <code>DefaultConnectionManager</code>.</p>
       <p>A normal connection creates one entry. A <code>relay-proxy</code> creates one mapped entry for each supplied environment secret while sharing the same WebSocket.</p>
       <p>This count approximates configuration fanout work and the number of environment routes affected if a socket disappears.</p>
     </article>
@@ -2101,20 +2204,21 @@
     <article class="note-card" data-rendered-note="delivery-confirmation">
       <p class="note-context">M2 · Messaging</p>
       <h3>Enqueued is not delivered</h3>
-      <p>For example, Kafka can accept a local enqueue before the broker confirms delivery. A control-plane publish should be marked successful only after the provider reports success.</p>
-      <p>High-throughput event paths may remain callback-based, but the callback must own the final outcome metric.</p>
+      <p>The Kafka producer uses fire-and-forget <code>Produce()</code>, and every producer catches all exceptions and returns <code>Task.CompletedTask</code>, so no caller can currently tell delivery from failure.</p>
+      <p>Reporting a real <code>delivered</code> outcome is therefore a code change, not instrumentation: the Kafka delivery handler and the swallowed exceptions must feed a result back first. Until then the honest value is <code>enqueued</code>.</p>
     </article>
   </template>
 
   <template data-note-template="provider-queues">
     <article class="note-card" data-rendered-note="provider-queues">
       <p class="note-context">M2 · Messaging</p>
-      <h3>Queue metrics depend on the provider</h3>
+      <h3>Queue metrics depend on the provider and the direction</h3>
       <ul>
-        <li>Kafka: consumer lag and message timestamp.</li>
-        <li>PostgreSQL: pending row count and oldest enqueue time.</li>
-        <li>Redis list: list length; age needs an enqueue timestamp.</li>
-        <li>Redis Pub/Sub: no durable backlog exists.</li>
+        <li>API &rarr; ELS Redis: Pub/Sub <code>PublishAsync</code>. No persistence and no backlog to measure.</li>
+        <li>ELS &rarr; API Redis: durable list <code>ListRightPushAsync</code>/<code>ListLeftPopAsync</code>. <code>LLEN</code> is the backlog; age needs an enqueue timestamp.</li>
+        <li>API &rarr; ELS PostgreSQL: <code>pg_notify</code> drained into a 1000-item bounded channel with <code>DropOldest</code>.</li>
+        <li>ELS &rarr; API PostgreSQL: <code>queue_messages</code> polled with a one-minute visibility timeout. Pending row count and oldest enqueue time apply.</li>
+        <li>Kafka, both directions: consumer lag and message timestamp.</li>
       </ul>
     </article>
   </template>
@@ -2166,8 +2270,8 @@
     <article class="note-card" data-rendered-note="revision-guid">
       <p class="note-context">M3 · Flag Change</p>
       <h3>Why there is no numeric revision lag</h3>
-      <p>FeatBit currently uses a GUID for a flag revision. GUIDs provide identity, not ordering, so subtracting two revisions is meaningless.</p>
-      <p>A lag metric needs a monotonic environment or configuration sequence first.</p>
+      <p><code>FeatureFlag.Revision</code> is a <code>Guid</code>, which provides identity but not ordering, so subtracting two revisions is meaningless.</p>
+      <p><code>FeatureFlag.CommittedVersion</code> <em>is</em> a monotonic <code>long</code>, but it advances only through <code>PromotePending</code>, which the control-plane commit coordinator drives. In a standard deployment without the control plane it keeps its default value, so it cannot serve as a general lag source. The envelope's <code>occurred_at</code> remains the propagation-latency source.</p>
     </article>
   </template>
 
@@ -2299,6 +2403,7 @@
       <p class="note-context">Alerts</p>
       <h3>Idle is not necessarily unhealthy</h3>
       <p>If no changes or messages are expected, <code>last_success.age</code> naturally grows. Alert only when it is stale and there is evidence of incoming work, backlog, or publish activity.</p>
+      <p>One exception: the API &rarr; ELS Redis transport is Pub/Sub, so an evaluation server that restarts silently misses every change published while it was down and then looks idle rather than stale. When the provider is Redis, pair <code>last_success.age</code> with process uptime and with the publisher-side publish rate.</p>
     </article>
   </template>
 

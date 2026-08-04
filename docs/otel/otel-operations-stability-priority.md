@@ -14,7 +14,7 @@ Add metrics first, then a small number of traces:
 
 | Phase | Scope |
 |---|---|
-| Prerequisite | Correct the OTel service name and endpoint, and alert on `otelcol_*` receiver refusals, export failures, and queue saturation |
+| Prerequisite | Register the custom Meter sources through `OTEL_DOTNET_AUTO_METRICS_ADDITIONAL_SOURCES`, which is currently unset, and alert on `otelcol_*` receiver refusals, export failures, and queue saturation |
 | P0 | M1–M6 |
 | P1 | T1, M7–M8, T2–T3 |
 | P2 | M9–M10, T4–T5 |
@@ -41,7 +41,7 @@ Shared constraints:
 - Report active gauges per service instance and aggregate globally at query time.
 - Default attributes must be finite enumerations such as `outcome`, `operation`, `connection.type`, and `provider`.
 - Expose `env.id` only through controlled views for explicit use cases. Never put tokens, secrets, users, connections, or flag identifiers in metrics.
-- Do not expose numeric `revision.lag` until config revisions use a monotonic sequence; the current flag revision is a GUID and cannot be subtracted meaningfully.
+- Do not expose numeric `revision.lag` until config revisions use a monotonic sequence. `FeatureFlag.Revision` is a `Guid` and cannot be subtracted meaningfully. `FeatureFlag.CommittedVersion` is a monotonic `long`, but it advances only through the control-plane commit coordinator, which is optional and absent from a standard deployment.
 - Telemetry backpressure must never block streaming or evaluation.
 
 ## 3. Traces: Highest to Lowest Priority
@@ -77,10 +77,12 @@ Keep P0 metrics enabled: let metrics trigger the alert, then temporarily enable 
 
 | Risk | Impact | Signals |
 |---|---|---|
-| A Kafka handler failure may still be followed by offset storage | The failed message is not consumed again | M2, M3, T1 |
-| Redis uses `LPop` before processing | The message is lost if the handler fails | M2, T1 |
-| The PostgreSQL notification channel uses `DropOldest` and ignores `TryWrite` results | Old notifications can be overwritten without crashing the service | M2, M5 |
-| Some producers catch exceptions and only log them | The caller can incorrectly assume that publishing succeeded | M2, T1 |
+| A Kafka handler failure may still be followed by offset storage | The failed message is not consumed again. Both consumers call `StoreOffset` in a `finally` block regardless of outcome | M2, M3, T1 |
+| The back-end Redis consumer uses `ListLeftPopAsync` before processing | The message is lost if the handler fails | M2, T1 |
+| The API → ELS Redis transport is Pub/Sub, not a queue | An evaluation server that restarts misses every change published while it was down, and then looks idle rather than stale | M2, M3 |
+| The ELS PostgreSQL notification channel uses `DropOldest` and ignores `TryWrite` results | Old notifications can be overwritten without crashing the service. The back-end PostgreSQL consumer differs: it polls `queue_messages` with a visibility timeout and does not drop | M2, M5 |
+| Producers are fire-and-forget: Kafka uses `Produce()`, and all providers catch exceptions and return `Task.CompletedTask` | The caller cannot distinguish delivery from failure, so a publish `outcome` can only mean `enqueued` until the producers are changed | M2, T1 |
+| `InsightsWriter` buffers into an unbounded `List<object>` | It cannot drop, so backpressure appears as memory growth rather than a drop counter | M5 |
 | A worker can stop without producing further errors | Failure counters alone cannot detect the stopped worker | M2, M5 |
 | One FeatBit Agent `relay-proxy` socket maps to multiple environments | Physical socket counts understate subscriptions and failure impact | M1 |
 | Fanout sends sequentially | One slow connection extends the entire propagation | M3, M7, T1 |
@@ -117,7 +119,7 @@ Add T1 only if capacity remains. Let actual alerts and failure modes drive the r
 ## 7. Audit References
 
 - [StreamingMiddleware](../../modules/evaluation-server/src/Streaming/StreamingMiddleware.cs)
-- [ConnectionManager](../../modules/evaluation-server/src/Streaming/Connections/ConnectionManager.cs)
+- [DefaultConnectionManager](../../modules/evaluation-server/src/Streaming/Connections/DefaultConnectionManager.cs)
 - [FeatureFlagChangeMessageConsumer](../../modules/evaluation-server/src/Streaming/Consumers/FeatureFlagChangeMessageConsumer.cs)
 - [DataSyncService](../../modules/evaluation-server/src/Streaming/Services/DataSyncService.cs)
 - [StoreAvailableSentinel](../../modules/evaluation-server/src/Infrastructure/Store/StoreAvailableSentinel.cs)
