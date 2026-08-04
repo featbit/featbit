@@ -1,6 +1,11 @@
 # FeatBit OpenTelemetry: First Iteration
 
-> Companion to [OpenTelemetry Priorities for Operational Stability](./otel-operations-stability-priority.md).
+> **Status: Draft proposal.** Nothing here is a ratified specification; instrument names,
+> attributes, and phasing are all open to change until the tracking issue is closed.
+> Discussion and contributions welcome — see the tracking issue linked from the
+> [proposal overview](./README.md).
+>
+> Companion to [OpenTelemetry Priorities for Operational Stability](./README.md).
 >
 > Scope: `modules/back-end` and `modules/evaluation-server`. SDK telemetry, billing, Guarded Rollout metrics, and per-evaluation instrumentation are excluded.
 
@@ -88,7 +93,7 @@ HTTP metrics cannot describe long-lived connection capacity. A FeatBit Agent `re
 ### How to implement
 
 - Record the upgrade result when the handshake is decided, including rate-limit rejection.
-- Maintain socket and subscription counts with atomic deltas in [StreamingMiddleware](../../modules/evaluation-server/src/Streaming/StreamingMiddleware.cs) and [DefaultConnectionManager](../../modules/evaluation-server/src/Streaming/Connections/DefaultConnectionManager.cs).
+- Maintain socket and subscription counts with atomic deltas in [StreamingMiddleware](../../../modules/evaluation-server/src/Streaming/StreamingMiddleware.cs) and [DefaultConnectionManager](../../../modules/evaluation-server/src/Streaming/Connections/DefaultConnectionManager.cs).
 - Count one subscription for a normal connection and the successfully mapped environment count for an Agent connection.
 - Use `try/finally` so active counts are always decremented.
 - Do not scan the connection dictionary during metric collection.
@@ -133,7 +138,7 @@ Default attributes: `provider`, `destination`, `operation`, and `outcome`.
 - Expose backlog only where a durable queue exists: `LLEN` for the ELS → API Redis list, a pending-row count for `queue_messages`, and consumer lag for Kafka. Only the API → ELS Redis direction is Pub/Sub and has nothing to measure.
 - Poll durable queue depth and oldest age in a background task, then expose cached values.
 - Publish confirmation needs a code change before `outcome` can be trusted. The Kafka producer uses fire-and-forget `Produce()`, and every producer catches all exceptions and returns `Task.CompletedTask`, so no caller can tell delivery from failure. Until the Kafka delivery handler and the swallowed exceptions feed a result back, record `enqueued` rather than `delivered`.
-- Count a Kafka handler failure as a known drop. Both consumers call `StoreOffset` in a `finally` block regardless of handler outcome ([back-end](../../modules/back-end/src/Infrastructure/MQ/Kafka/KafkaMessageConsumer.cs), [evaluation-server](../../modules/evaluation-server/src/Infrastructure/MQ/Kafka/KafkaMessageConsumer.cs)), so a failed message is never replayed. Record handler outcome separately from consume count, otherwise this loss is invisible.
+- Count a Kafka handler failure as a known drop. Both consumers call `StoreOffset` in a `finally` block regardless of handler outcome ([back-end](../../../modules/back-end/src/Infrastructure/MQ/Kafka/KafkaMessageConsumer.cs), [evaluation-server](../../../modules/evaluation-server/src/Infrastructure/MQ/Kafka/KafkaMessageConsumer.cs)), so a failed message is never replayed. Record handler outcome separately from consume count, otherwise this loss is invisible.
 - Set consumer running state in the loop lifecycle and update heartbeat independently from message traffic.
 - Record drops only when loss is known; do not invent redelivery information when a provider cannot supply it.
 
@@ -166,10 +171,10 @@ The server-side boundary ends after socket send; it does not prove that an SDK a
 - Deploy consumers that accept both the old raw payload and the new envelope before changing producers.
 - Record persistence around the actual flag create/update, not audit-log or cache writes.
 - Record publish success only after provider delivery confirmation, which depends on the producer change described in M2.
-- In [FeatureFlagChangeMessageConsumer](../../modules/evaluation-server/src/Streaming/Consumers/FeatureFlagChangeMessageConsumer.cs), aggregate target, success, failure, and total duration once per change.
+- In [FeatureFlagChangeMessageConsumer](../../../modules/evaluation-server/src/Streaming/Consumers/FeatureFlagChangeMessageConsumer.cs), aggregate target, success, failure, and total duration once per change.
 - Do not add connection, environment, or flag identifiers to metrics.
 
-[`FeatureFlag.Revision`](../../modules/back-end/src/Domain/FeatureFlags/FeatureFlag.cs) is a `Guid`, but `FeatureFlag.CommittedVersion` is a monotonic `long`. It advances only through `PromotePending`, which the control-plane commit coordinator drives, so it keeps its default value in a standard deployment where the control plane is absent. Numeric `revision.lag` therefore stays deferred for the default topology, and the envelope's `occurred_at` remains the propagation-latency source.
+[`FeatureFlag.Revision`](../../../modules/back-end/src/Domain/FeatureFlags/FeatureFlag.cs) is a `Guid`, but `FeatureFlag.CommittedVersion` is a monotonic `long`. It advances only through `PromotePending`, which the control-plane commit coordinator drives, so it keeps its default value in a standard deployment where the control plane is absent. Numeric `revision.lag` therefore stays deferred for the default topology, and the envelope's `occurred_at` remains the propagation-latency source.
 
 Performance impact: low; a fixed number of recordings is made per Flag Change.
 
@@ -195,7 +200,7 @@ Readiness shows only the current result. It cannot reveal slow probes, intermitt
 
 ### How to implement
 
-- Wrap each existing probe in [StoreAvailableSentinel](../../modules/evaluation-server/src/Infrastructure/Store/StoreAvailableSentinel.cs).
+- Wrap each existing probe in [StoreAvailableSentinel](../../../modules/evaluation-server/src/Infrastructure/Store/StoreAvailableSentinel.cs).
 - Cache the latest result and timestamp for gauge callbacks.
 - Keep availability and selection separate: the current implementation may retain a selected provider after all probes fail.
 - Count a transition only when the selected provider changes.
@@ -229,9 +234,9 @@ Use a fixed buffer/worker name such as `usage`, `insight`, `postgres_notificatio
 
 | Buffer | Implementation | Applicable metrics |
 |---|---|---|
-| `usage` | Bounded `Channel` with `DropOldest` in [UsageTracker](../../modules/back-end/src/Application/Usages/UsageTracker.cs) | Full set, including capacity and drops |
+| `usage` | Bounded `Channel` with `DropOldest` in [UsageTracker](../../../modules/back-end/src/Application/Usages/UsageTracker.cs) | Full set, including capacity and drops |
 | `postgres_notification` | 1000-item bounded `Channel` with `DropOldest` in the ELS consumer | Full set |
-| `insight` | Unbounded `List<object>` behind a lock in [InsightsWriter](../../modules/back-end/src/Infrastructure/AppService/InsightsWriter.cs) | Occupancy and flush metrics only |
+| `insight` | Unbounded `List<object>` behind a lock in [InsightsWriter](../../../modules/back-end/src/Infrastructure/AppService/InsightsWriter.cs) | Occupancy and flush metrics only |
 | `store_sentinel` | Worker with no buffer | Worker metrics only |
 
 `InsightsWriter` cannot drop, so it grows until the flush keeps up or the process runs out of memory. Report its occupancy and alert on sustained growth; `featbit.buffer.capacity` and `featbit.buffer.items.dropped` are undefined for it until it is given a bound, which is a code change rather than instrumentation.

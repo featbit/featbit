@@ -1,5 +1,11 @@
 # FeatBit OpenTelemetry Priorities for Operational Stability
 
+> **Status: Draft proposal.** Nothing here is a ratified specification; instrument names,
+> attributes, and phasing are all open to change until the tracking issue is closed.
+> Discussion and contributions welcome — see the tracking issue.
+>
+> Implementation detail lives in the companion document, [implementation.md](./implementation.md).
+>
 > Scope: `modules/back-end` and `modules/evaluation-server`; billing and Guarded Rollout product metrics are excluded.
 > Baseline: FeatBit `3cd4cb17`, 2026-07-30. Metric names describe the proposed semantics and are not a final naming specification.
 
@@ -118,18 +124,18 @@ Add T1 only if capacity remains. Let actual alerts and failure modes drive the r
 
 ## 7. Audit References
 
-- [StreamingMiddleware](../../modules/evaluation-server/src/Streaming/StreamingMiddleware.cs)
-- [DefaultConnectionManager](../../modules/evaluation-server/src/Streaming/Connections/DefaultConnectionManager.cs)
-- [FeatureFlagChangeMessageConsumer](../../modules/evaluation-server/src/Streaming/Consumers/FeatureFlagChangeMessageConsumer.cs)
-- [DataSyncService](../../modules/evaluation-server/src/Streaming/Services/DataSyncService.cs)
-- [StoreAvailableSentinel](../../modules/evaluation-server/src/Infrastructure/Store/StoreAvailableSentinel.cs)
-- [evaluation-server Kafka consumer](../../modules/evaluation-server/src/Infrastructure/MQ/Kafka/KafkaMessageConsumer.cs)
-- [evaluation-server PostgreSQL consumer](../../modules/evaluation-server/src/Infrastructure/MQ/Postgres/PostgresMessageConsumer.cs)
-- [back-end Kafka consumer](../../modules/back-end/src/Infrastructure/MQ/Kafka/KafkaMessageConsumer.cs)
-- [back-end Redis consumer](../../modules/back-end/src/Infrastructure/MQ/Redis/RedisMessageConsumer.cs)
-- [UsageTracker](../../modules/back-end/src/Application/Usages/UsageTracker.cs)
-- [UsageFlushWorker](../../modules/back-end/src/Infrastructure/AppService/UsageFlushWorker.cs)
-- [InsightsWriter](../../modules/back-end/src/Infrastructure/AppService/InsightsWriter.cs)
-- [OnFeatureFlagChanged](../../modules/back-end/src/Application/FeatureFlags/OnFeatureFlagChanged.cs)
-- [SyncToAgent](../../modules/back-end/src/Application/RelayProxies/SyncToAgent.cs)
-- [AgentService](../../modules/back-end/src/Infrastructure/Services/AgentService.cs)
+- [StreamingMiddleware](../../../modules/evaluation-server/src/Streaming/StreamingMiddleware.cs)
+- [DefaultConnectionManager](../../../modules/evaluation-server/src/Streaming/Connections/DefaultConnectionManager.cs)
+- [FeatureFlagChangeMessageConsumer](../../../modules/evaluation-server/src/Streaming/Consumers/FeatureFlagChangeMessageConsumer.cs)
+- [DataSyncService](../../../modules/evaluation-server/src/Streaming/Services/DataSyncService.cs)
+- [StoreAvailableSentinel](../../../modules/evaluation-server/src/Infrastructure/Store/StoreAvailableSentinel.cs)
+- [evaluation-server Kafka consumer](../../../modules/evaluation-server/src/Infrastructure/MQ/Kafka/KafkaMessageConsumer.cs)
+- [evaluation-server PostgreSQL consumer](../../../modules/evaluation-server/src/Infrastructure/MQ/Postgres/PostgresMessageConsumer.cs)
+- [back-end Kafka consumer](../../../modules/back-end/src/Infrastructure/MQ/Kafka/KafkaMessageConsumer.cs)
+- [back-end Redis consumer](../../../modules/back-end/src/Infrastructure/MQ/Redis/RedisMessageConsumer.cs)
+- [UsageTracker](../../../modules/back-end/src/Application/Usages/UsageTracker.cs)
+- [UsageFlushWorker](../../../modules/back-end/src/Infrastructure/AppService/UsageFlushWorker.cs)
+- [InsightsWriter](../../../modules/back-end/src/Infrastructure/AppService/InsightsWriter.cs)
+- [OnFeatureFlagChanged](../../../modules/back-end/src/Application/FeatureFlags/OnFeatureFlagChanged.cs)
+- [SyncToAgent](../../../modules/back-end/src/Application/RelayProxies/SyncToAgent.cs)
+- [AgentService](../../../modules/back-end/src/Infrastructure/Services/AgentService.cs)
