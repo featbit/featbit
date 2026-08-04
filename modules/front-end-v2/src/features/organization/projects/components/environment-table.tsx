@@ -83,6 +83,10 @@ export function EnvironmentTable({
   project,
   currentProjectEnv,
   sort,
+  canCreateEnvironment,
+  canUpdateEnvironment,
+  canDeleteEnvironment,
+  canCreateSecret,
   onToggleSort,
   onCreateEnvironment,
   onEditEnvironment,
@@ -95,6 +99,19 @@ export function EnvironmentTable({
   project: OrganizationProject
   currentProjectEnv: ProjectEnv | null
   sort: EnvironmentSort
+  canCreateEnvironment: boolean
+  canUpdateEnvironment: (
+    project: OrganizationProject,
+    environment: ProjectEnvironment
+  ) => boolean
+  canDeleteEnvironment: (
+    project: OrganizationProject,
+    environment: ProjectEnvironment
+  ) => boolean
+  canCreateSecret: (
+    project: OrganizationProject,
+    environment: ProjectEnvironment
+  ) => boolean
   onToggleSort: (field: NonNullable<EnvironmentSort>["field"]) => void
   onCreateEnvironment: (project: OrganizationProject) => void
   onEditEnvironment: (
@@ -160,15 +177,17 @@ export function EnvironmentTable({
         {project.environments.length === 0 ? (
           <TableRow>
             <TableCell colSpan={6} className="px-4 py-4">
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => onCreateEnvironment(project)}
-              >
-                <Plus className="size-3.5" />
-                {t("organization.projects.actions.addEnvironment")}
-              </Button>
+              {canCreateEnvironment ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onCreateEnvironment(project)}
+                >
+                  <Plus className="size-3.5" />
+                  {t("organization.projects.actions.addEnvironment")}
+                </Button>
+              ) : null}
             </TableCell>
           </TableRow>
         ) : (
@@ -201,7 +220,9 @@ export function EnvironmentTable({
                         >
                           {environment.description}
                         </TooltipTrigger>
-                        <TooltipContent>{environment.description}</TooltipContent>
+                        <TooltipContent>
+                          {environment.description}
+                        </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
                   ) : (
@@ -223,6 +244,7 @@ export function EnvironmentTable({
                 <TableCell className="px-4 py-2.5 align-middle">
                   <SecretsCell
                     environment={environment}
+                    canAddSecret={canCreateSecret(project, environment)}
                     onAddSecret={onAddSecret}
                     onCopySecret={onCopySecret}
                     onViewSecrets={(selectedEnvironment) =>
@@ -245,37 +267,49 @@ export function EnvironmentTable({
                       <Copy className="size-3" />
                       {t("organization.projects.actions.copyId")}
                     </Button>
-                    <IconTooltip
-                      label={t("organization.projects.actions.editEnvironment")}
-                    >
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon-xs"
-                        aria-label={t(
+                    {canUpdateEnvironment(project, environment) ? (
+                      <IconTooltip
+                        label={t(
                           "organization.projects.actions.editEnvironment"
                         )}
-                        onClick={() => onEditEnvironment(project, environment)}
                       >
-                        <Edit className="size-3" />
-                      </Button>
-                    </IconTooltip>
-                    <IconTooltip
-                      label={t("organization.projects.actions.deleteEnvironment")}
-                    >
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon-xs"
-                        aria-label={t(
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-xs"
+                          aria-label={t(
+                            "organization.projects.actions.editEnvironment"
+                          )}
+                          onClick={() =>
+                            onEditEnvironment(project, environment)
+                          }
+                        >
+                          <Edit className="size-3" />
+                        </Button>
+                      </IconTooltip>
+                    ) : null}
+                    {canDeleteEnvironment(project, environment) ? (
+                      <IconTooltip
+                        label={t(
                           "organization.projects.actions.deleteEnvironment"
                         )}
-                        disabled={isCurrent}
-                        onClick={() => onDeleteEnvironment(project, environment)}
                       >
-                        <Trash2 className="size-3" />
-                      </Button>
-                    </IconTooltip>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon-xs"
+                          aria-label={t(
+                            "organization.projects.actions.deleteEnvironment"
+                          )}
+                          disabled={isCurrent}
+                          onClick={() =>
+                            onDeleteEnvironment(project, environment)
+                          }
+                        >
+                          <Trash2 className="size-3" />
+                        </Button>
+                      </IconTooltip>
+                    ) : null}
                   </div>
                 </TableCell>
               </TableRow>

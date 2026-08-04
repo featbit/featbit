@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react"
+import { useQuery } from "@tanstack/react-query"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useParams, useSearchParams } from "react-router-dom"
 import { toast } from "sonner"
@@ -10,6 +11,12 @@ import {
   saveCurrentProjectEnv,
 } from "@/features/layout/layout-context"
 import type { ProjectEnv } from "@/features/layout/layout-types"
+import {
+  canUseAction,
+  environmentRn,
+  fetchCurrentUserPolicies,
+  projectRn,
+} from "@/features/iam/current-user-permissions"
 import { OrganizationLayout } from "@/features/organization/components/organization-layout"
 import { normalizeOrganization } from "@/features/organization/organization-api"
 import {
@@ -90,6 +97,11 @@ export function OrganizationProjectsPage() {
   const [secretsTarget, setSecretsTarget] = useState<EnvironmentTarget>(null)
   const [secretsSheetOpen, setSecretsSheetOpen] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null)
+  const permissionsQuery = useQuery({
+    queryKey: ["current-user-policies"],
+    queryFn: fetchCurrentUserPolicies,
+  })
+  const policies = permissionsQuery.data ?? []
   const organization = useMemo(
     () => normalizeOrganization(getCurrentOrganization()),
     []
@@ -109,28 +121,36 @@ export function OrganizationProjectsPage() {
     return project && environment ? { project, environment } : null
   }, [projects, searchParams])
 
-  function sortProjects(nextProjects: OrganizationProject[]) {
-    const currentProjectId = currentProjectEnv?.projectId
-    if (!currentProjectId) {
-      return nextProjects
-    }
-
-    return [...nextProjects].sort((a, b) => {
-      if (a.id === currentProjectId) {
-        return -1
+  const sortProjects = useCallback(
+    (nextProjects: OrganizationProject[]) => {
+      const currentProjectId = currentProjectEnv?.projectId
+      if (!currentProjectId) {
+        return nextProjects
       }
-      if (b.id === currentProjectId) {
-        return 1
-      }
-      return a.name.localeCompare(b.name)
-    })
-  }
 
-  function showError(error: unknown) {
-    toast.error(
-      error instanceof Error ? error.message : t("organization.operationFailed")
-    )
-  }
+      return [...nextProjects].sort((a, b) => {
+        if (a.id === currentProjectId) {
+          return -1
+        }
+        if (b.id === currentProjectId) {
+          return 1
+        }
+        return a.name.localeCompare(b.name)
+      })
+    },
+    [currentProjectEnv?.projectId]
+  )
+
+  const showError = useCallback(
+    (error: unknown) => {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : t("organization.operationFailed")
+      )
+    },
+    [t]
+  )
 
   function replaceProject(project: OrganizationProject) {
     setProjects((current) =>
@@ -207,6 +227,59 @@ export function OrganizationProjectsPage() {
     toast.success(t("organization.copied"))
   }
 
+  const canCreateProject = canUseAction(policies, "project/*", "CreateProject")
+  const canUpdateProject = (project: OrganizationProject) =>
+    canUseAction(policies, projectRn(project.key), "UpdateProjectSettings")
+  const canDeleteProject = (project: OrganizationProject) =>
+    canUseAction(policies, projectRn(project.key), "DeleteProject")
+  const canCreateEnvironment = (project: OrganizationProject) =>
+    canUseAction(policies, `${projectRn(project.key)}:env/*`, "CreateEnv")
+  const canUpdateEnvironment = (
+    project: OrganizationProject,
+    environment: ProjectEnvironment
+  ) =>
+    canUseAction(
+      policies,
+      environmentRn(project.key, environment.key),
+      "UpdateEnvSettings"
+    )
+  const canDeleteEnvironment = (
+    project: OrganizationProject,
+    environment: ProjectEnvironment
+  ) =>
+    canUseAction(
+      policies,
+      environmentRn(project.key, environment.key),
+      "DeleteEnv"
+    )
+  const canCreateSecret = (
+    project: OrganizationProject,
+    environment: ProjectEnvironment
+  ) =>
+    canUseAction(
+      policies,
+      environmentRn(project.key, environment.key),
+      "CreateEnvSecret"
+    )
+  const canUpdateSecret = (
+    project: OrganizationProject,
+    environment: ProjectEnvironment
+  ) =>
+    canUseAction(
+      policies,
+      environmentRn(project.key, environment.key),
+      "UpdateEnvSecret"
+    )
+  const canDeleteSecret = (
+    project: OrganizationProject,
+    environment: ProjectEnvironment
+  ) =>
+    canUseAction(
+      policies,
+      environmentRn(project.key, environment.key),
+      "DeleteEnvSecret"
+    )
+
   useEffect(() => {
     let cancelled = false
 
@@ -235,19 +308,22 @@ export function OrganizationProjectsPage() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [showError, sortProjects])
 
   function openCreateProject() {
+    if (!canCreateProject) return
     setProjectTarget({ id: "", name: "", key: "", environments: [] })
     setProjectSheetOpen(true)
   }
 
   function openEditProject(project: OrganizationProject) {
+    if (!canUpdateProject(project)) return
     setProjectTarget(project)
     setProjectSheetOpen(true)
   }
 
   function openDeleteProject(project: OrganizationProject) {
+    if (!canDeleteProject(project)) return
     if (currentProjectEnv?.projectId === project.id) {
       toast.error(t("organization.projects.currentProjectDeleteBlocked"))
       return
@@ -264,6 +340,7 @@ export function OrganizationProjectsPage() {
   }
 
   async function removeProject(project: OrganizationProject) {
+    if (!canDeleteProject(project)) return
     if (currentProjectEnv?.projectId === project.id) {
       toast.error(t("organization.projects.currentProjectDeleteBlocked"))
       return
@@ -287,6 +364,12 @@ export function OrganizationProjectsPage() {
 
   async function submitProject(values: ProjectPayload) {
     const isEditing = Boolean(projectTarget?.id)
+    if (
+      (isEditing && projectTarget && !canUpdateProject(projectTarget)) ||
+      (!isEditing && !canCreateProject)
+    ) {
+      return
+    }
     setSaving(true)
     try {
       if (isEditing && projectTarget) {
@@ -321,6 +404,7 @@ export function OrganizationProjectsPage() {
   }
 
   function openCreateEnvironment(project: OrganizationProject) {
+    if (!canCreateEnvironment(project)) return
     setEnvironmentTarget({
       project,
       environment: {
@@ -340,6 +424,7 @@ export function OrganizationProjectsPage() {
     project: OrganizationProject,
     environment: ProjectEnvironment
   ) {
+    if (!canUpdateEnvironment(project, environment)) return
     setEnvironmentTarget({ project, environment })
     setEnvironmentSheetOpen(true)
   }
@@ -355,6 +440,17 @@ export function OrganizationProjectsPage() {
     }
 
     const isEditing = Boolean(environmentTarget.environment?.id)
+    if (
+      (isEditing &&
+        environmentTarget.environment &&
+        !canUpdateEnvironment(
+          environmentTarget.project,
+          environmentTarget.environment
+        )) ||
+      (!isEditing && !canCreateEnvironment(environmentTarget.project))
+    ) {
+      return
+    }
     const payload: EnvironmentPayload = {
       name: values.name.trim(),
       key: values.key.trim(),
@@ -426,6 +522,7 @@ export function OrganizationProjectsPage() {
     project: OrganizationProject,
     environment: ProjectEnvironment
   ) {
+    if (!canDeleteEnvironment(project, environment)) return
     if (currentProjectEnv?.envId === environment.id) {
       toast.error(t("organization.projects.currentEnvironmentDeleteBlocked"))
       return
@@ -462,6 +559,7 @@ export function OrganizationProjectsPage() {
     project: OrganizationProject,
     environment: ProjectEnvironment
   ) {
+    if (!canDeleteEnvironment(project, environment)) return
     if (currentProjectEnv?.envId === environment.id) {
       toast.error(t("organization.projects.currentEnvironmentDeleteBlocked"))
       return
@@ -478,6 +576,8 @@ export function OrganizationProjectsPage() {
   }
 
   function openAddSecret(environment: ProjectEnvironment) {
+    const project = projects.find((item) => item.id === environment.projectId)
+    if (!project || !canCreateSecret(project, environment)) return
     setSecretTarget({ environment, secret: null })
     setSecretDialogOpen(true)
   }
@@ -486,12 +586,32 @@ export function OrganizationProjectsPage() {
     if (!activeSecretsTarget?.environment) {
       return
     }
+    if (
+      !canUpdateSecret(
+        activeSecretsTarget.project,
+        activeSecretsTarget.environment
+      )
+    ) {
+      return
+    }
     setSecretTarget({ environment: activeSecretsTarget.environment, secret })
     setSecretDialogOpen(true)
   }
 
   async function submitSecret(values: SecretValues) {
     if (!secretTarget) {
+      return
+    }
+
+    const project = projects.find(
+      (item) => item.id === secretTarget.environment.projectId
+    )
+    if (
+      !project ||
+      (secretTarget.secret
+        ? !canUpdateSecret(project, secretTarget.environment)
+        : !canCreateSecret(project, secretTarget.environment))
+    ) {
       return
     }
 
@@ -537,6 +657,14 @@ export function OrganizationProjectsPage() {
     if (!activeSecretsTarget?.environment) {
       return
     }
+    if (
+      !canDeleteSecret(
+        activeSecretsTarget.project,
+        activeSecretsTarget.environment
+      )
+    ) {
+      return
+    }
 
     setSaving(true)
     try {
@@ -558,6 +686,15 @@ export function OrganizationProjectsPage() {
   }
 
   function openDeleteSecret(secret: EnvironmentSecret) {
+    if (
+      !activeSecretsTarget?.environment ||
+      !canDeleteSecret(
+        activeSecretsTarget.project,
+        activeSecretsTarget.environment
+      )
+    ) {
+      return
+    }
     setDeleteTarget({
       type: "secret",
       title: t("organization.projects.confirm.removeSecretTitle"),
@@ -612,6 +749,13 @@ export function OrganizationProjectsPage() {
         currentProjectEnv={currentProjectEnv}
         search={search}
         loading={loading}
+        canCreateProject={canCreateProject}
+        canUpdateProject={canUpdateProject}
+        canDeleteProject={canDeleteProject}
+        canCreateEnvironment={canCreateEnvironment}
+        canUpdateEnvironment={canUpdateEnvironment}
+        canDeleteEnvironment={canDeleteEnvironment}
+        canCreateSecret={canCreateSecret}
         onSearchChange={setSearch}
         onCreateProject={openCreateProject}
         onEditProject={openEditProject}
@@ -645,6 +789,21 @@ export function OrganizationProjectsPage() {
         open={secretsSheetOpen || linkedSecretsTarget !== null}
         project={currentSecretsProject}
         environment={currentSecretsEnvironment}
+        canCreateSecret={Boolean(
+          currentSecretsProject &&
+          currentSecretsEnvironment &&
+          canCreateSecret(currentSecretsProject, currentSecretsEnvironment)
+        )}
+        canUpdateSecret={Boolean(
+          currentSecretsProject &&
+          currentSecretsEnvironment &&
+          canUpdateSecret(currentSecretsProject, currentSecretsEnvironment)
+        )}
+        canDeleteSecret={Boolean(
+          currentSecretsProject &&
+          currentSecretsEnvironment &&
+          canDeleteSecret(currentSecretsProject, currentSecretsEnvironment)
+        )}
         onOpenChange={handleSecretsSheetOpenChange}
         onAddSecret={openAddSecret}
         onCopySecret={copyText}
