@@ -1,0 +1,124 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-headless
+  namespace: featbit
+  labels:
+    app: mongodb
+    region: west
+spec:
+  ports:
+  - port: 27017
+    targetPort: 27017
+    name: mongodb
+  clusterIP: None
+  selector:
+    app: mongodb
+    region: west
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-0-lb
+  namespace: featbit
+  labels:
+    app: mongodb
+    region: west
+    pod: mongodb-0
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 27017
+    targetPort: 27017
+    name: mongodb
+  selector:
+    app: mongodb
+    region: west
+    statefulset.kubernetes.io/pod-name: mongodb-west-0
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-1-lb
+  namespace: featbit
+  labels:
+    app: mongodb
+    region: west
+    pod: mongodb-1
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 27017
+    targetPort: 27017
+    name: mongodb
+  selector:
+    app: mongodb
+    region: west
+    statefulset.kubernetes.io/pod-name: mongodb-west-1
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongodb-west
+  namespace: featbit
+spec:
+  serviceName: mongodb-headless
+  replicas: 2
+  selector:
+    matchLabels:
+      app: mongodb
+      region: west
+  template:
+    metadata:
+      labels:
+        app: mongodb
+        region: west
+    spec:
+      imagePullSecrets:
+        - name: registry-credentials
+      containers:
+      - name: mongodb
+        image: mongo:7.0
+        command:
+        - mongod
+        - "--replSet"
+        - "rs-featbit"
+        - "--bind_ip_all"
+        env:
+        - name: MONGO_INITDB_ROOT_USERNAME
+          value: admin
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          value: password
+        - name: MONGO_INITDB_DATABASE
+          value: featbit
+        ports:
+        - containerPort: 27017
+          name: mongodb
+        volumeMounts:
+        - name: mongodb-data
+          mountPath: /data/db
+        - name: mongodb-init
+          mountPath: /docker-entrypoint-initdb.d
+        resources:
+          requests:
+            memory: "384Mi"
+            cpu: "100m"
+          limits:
+            memory: "768Mi"
+            cpu: "1500m"
+      volumes:
+      - name: mongodb-init
+        configMap:
+          name: mongodb-init
+          items:
+          - key: "init.js"
+            path: "init.js"
+  volumeClaimTemplates:
+  - metadata:
+      name: mongodb-data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 5Gi

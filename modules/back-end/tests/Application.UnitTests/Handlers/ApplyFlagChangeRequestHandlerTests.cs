@@ -92,6 +92,65 @@ public class ApplyFlagChangeRequestHandlerTests
     }
 
     [Fact]
+    public async Task Handle_ApprovedButReviewerDidNotApprove_ReturnsFalse()
+    {
+        var orgId = Guid.NewGuid();
+        var envId = Guid.NewGuid();
+        var pendingReviewerId = Guid.NewGuid();
+        var approvingReviewerId = Guid.NewGuid();
+        var creatorId = Guid.NewGuid();
+        var cr = new FlagChangeRequest(
+            orgId,
+            envId,
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            [pendingReviewerId, approvingReviewerId],
+            creatorId);
+        cr.Approve(approvingReviewerId);
+        var crSvc = new Mock<IFlagChangeRequestService>();
+        crSvc.Setup(x => x.FindOneAsync(It.IsAny<Expression<Func<FlagChangeRequest, bool>>>())).ReturnsAsync(cr);
+        var currentUser = new Mock<ICurrentUser>();
+        currentUser.SetupGet(x => x.Id).Returns(pendingReviewerId);
+        var ffApp = new Mock<IFeatureFlagAppService>();
+        var sut = new ApplyFlagChangeRequestHandler(crSvc.Object, ffApp.Object, currentUser.Object);
+
+        var result = await sut.Handle(
+            new ApplyFlagChangeRequest { OrgId = orgId, EnvId = envId, Id = cr.Id },
+            CancellationToken.None);
+
+        Assert.False(result);
+        ffApp.Verify(x => x.ApplyDraftAsync(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<Guid>()), Times.Never);
+        crSvc.Verify(x => x.UpdateAsync(It.IsAny<FlagChangeRequest>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task Handle_ApprovedAndByApprovingReviewer_AppliesDraftAndMarksApplied()
+    {
+        var orgId = Guid.NewGuid();
+        var envId = Guid.NewGuid();
+        var reviewerId = Guid.NewGuid();
+        var creatorId = Guid.NewGuid();
+        var cr = NewRequest(orgId, envId, reviewerId, creatorId, FlagChangeRequestStatus.PendingReview);
+        cr.Approve(reviewerId);
+        var crSvc = new Mock<IFlagChangeRequestService>();
+        crSvc.Setup(x => x.FindOneAsync(It.IsAny<Expression<Func<FlagChangeRequest, bool>>>())).ReturnsAsync(cr);
+        var currentUser = new Mock<ICurrentUser>();
+        currentUser.SetupGet(x => x.Id).Returns(reviewerId);
+        var ffApp = new Mock<IFeatureFlagAppService>();
+        var sut = new ApplyFlagChangeRequestHandler(crSvc.Object, ffApp.Object, currentUser.Object);
+
+        var result = await sut.Handle(
+            new ApplyFlagChangeRequest { OrgId = orgId, EnvId = envId, Id = cr.Id },
+            CancellationToken.None);
+
+        Assert.True(result);
+        Assert.Equal(FlagChangeRequestStatus.Applied, cr.Status);
+        ffApp.Verify(x => x.ApplyDraftAsync(
+            cr.FlagDraftId, Operations.ApplyFlagChangeRequest, reviewerId), Times.Once);
+        crSvc.Verify(x => x.UpdateAsync(cr), Times.Once);
+    }
+
+    [Fact]
     public async Task Handle_ApprovedAndByCreator_AppliesDraftAndMarksApplied()
     {
         var orgId = Guid.NewGuid();

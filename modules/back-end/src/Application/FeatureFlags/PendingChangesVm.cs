@@ -35,7 +35,7 @@ public class PendingChangesVm
 
     public string ChangeRequestReason { get; set; }
 
-    public IEnumerable<Reviewer> Reviewers { get; set; }
+    public IEnumerable<PendingChangeReviewerVm> Reviewers { get; set; }
 
     public PendingChangesVm(FlagChangeRequest changeRequest)
     {
@@ -45,7 +45,7 @@ public class PendingChangesVm
         CreatedAt = changeRequest.CreatedAt;
         Status = changeRequest.Status;
         ChangeRequestReason = changeRequest.Reason;
-        Reviewers = changeRequest.Reviewers;
+        Reviewers = [.. changeRequest.Reviewers.Select(x => new PendingChangeReviewerVm(x))];
     }
 
     public PendingChangesVm(FlagSchedule schedule, FlagChangeRequest changeRequest)
@@ -63,7 +63,27 @@ public class PendingChangesVm
         if (changeRequest != null)
         {
             ChangeRequestReason = changeRequest.Reason;
-            Reviewers = changeRequest.Reviewers;
+            Reviewers = [.. changeRequest.Reviewers.Select(x => new PendingChangeReviewerVm(x))];
         }
+    }
+}
+
+public class PendingChangeReviewerVm
+{
+    public Guid MemberId { get; set; }
+
+    public string Name { get; set; }
+
+    public string Email { get; set; }
+
+    public string Action { get; set; }
+
+    public DateTime? Timestamp { get; set; }
+
+    public PendingChangeReviewerVm(Reviewer reviewer)
+    {
+        MemberId = reviewer.MemberId;
+        Action = reviewer.Action;
+        Timestamp = reviewer.Timestamp;
     }
 }

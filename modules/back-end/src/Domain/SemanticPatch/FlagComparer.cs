@@ -15,6 +15,11 @@ public static class FlagComparer
             return Array.Empty<FlagInstruction>();
         }
 
+        if (string.Equals(change.Previous, change.Current, StringComparison.Ordinal))
+        {
+            return Array.Empty<FlagInstruction>();
+        }
+
         var original = JsonSerializer.Deserialize<FeatureFlag>(change.Previous, ReusableJsonSerializerOptions.Web);
         var current = JsonSerializer.Deserialize<FeatureFlag>(change.Current, ReusableJsonSerializerOptions.Web);
 

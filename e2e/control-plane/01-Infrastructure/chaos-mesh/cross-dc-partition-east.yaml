@@ -1,0 +1,24 @@
+# Cross-DC partition, EAST side (CP-11 / CP-12). See cross-dc-partition-west.yaml
+# for the west side; the suite applies each file to its own cluster.
+#
+# East loses the west peer (172.31.0.10: west node on the shared cluster network)
+# AND its host gateway (192.168.58.1: host.minikube.internal — shared Kafka/Mongo
+# route on host-infra topologies) — fully isolating it so heartbeats stop, its
+# lease expires, and it becomes the evicted DC. East's own node (172.31.0.20) is
+# deliberately NOT targeted so node->pod traffic (port-forwards) stays up (#113).
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: cross-dc-partition
+  namespace: chaos-mesh
+spec:
+  action: partition
+  mode: all
+  selector:
+    namespaces:
+      - featbit
+  direction: both
+  externalTargets:
+    - "172.31.0.10"
+    - "192.168.58.1"
+  duration: "10m"

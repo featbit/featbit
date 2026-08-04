@@ -1,0 +1,63 @@
+# FeatBit overlay for the OpenTelemetry Demo — applied on top of values-min.yaml.
+#
+# Points the instrumented components at the FeatBit evaluation server via the
+# load-balanced eval endpoint. Each component is a SEPARATE FeatBit project with
+# its OWN server secret — Deploy-OtelDemo.ps1 injects each component's secret at
+# deploy time (--set-string components.<c>.envOverrides[2]) so secrets stay out
+# of git.
+#
+# Image references are NOT set here: Deploy-OtelDemo.ps1 injects
+# components.<c>.imageOverride via --set-string, built from its -Registry/-Repo
+# parameters (default localhost:5000/otel-demo; see the otel-demo README for
+# pointing at a private registry instead). That keeps this file registry-agnostic
+# and lets one values file work for every operator.
+#
+# Client URIs are featbit-eval.127.0.0.1.sslip.io based (active/passive,
+# west-active). otel-demo pods resolve that name to the host proxy via a
+# hostAlias added by the deploy script (-> the cluster's host gateway); the host
+# proxy load-balances to the eval-servers (west primary / east failover).
+#
+# (envOverrides repeated per component rather than YAML-anchored: the chart's
+# values schema rejects unknown top-level keys, so we can't park an anchor here.)
+
+components:
+  recommendation:
+    envOverrides:
+      - { name: FEATBIT_EVENT_URL, value: "http://featbit-eval.127.0.0.1.sslip.io:8080" }
+      - { name: FEATBIT_STREAMING_URL, value: "ws://featbit-eval.127.0.0.1.sslip.io:8080" }
+  product-catalog:
+    envOverrides:
+      - { name: FEATBIT_EVENT_URL, value: "http://featbit-eval.127.0.0.1.sslip.io:8080" }
+      - { name: FEATBIT_STREAMING_URL, value: "ws://featbit-eval.127.0.0.1.sslip.io:8080" }
+  cart:
+    envOverrides:
+      - { name: FEATBIT_EVENT_URL, value: "http://featbit-eval.127.0.0.1.sslip.io:8080" }
+      - { name: FEATBIT_STREAMING_URL, value: "ws://featbit-eval.127.0.0.1.sslip.io:8080" }
+  ad:
+    envOverrides:
+      - { name: FEATBIT_EVENT_URL, value: "http://featbit-eval.127.0.0.1.sslip.io:8080" }
+      - { name: FEATBIT_STREAMING_URL, value: "ws://featbit-eval.127.0.0.1.sslip.io:8080" }
+  payment:
+    envOverrides:
+      - { name: FEATBIT_EVENT_URL, value: "http://featbit-eval.127.0.0.1.sslip.io:8080" }
+      - { name: FEATBIT_STREAMING_URL, value: "ws://featbit-eval.127.0.0.1.sslip.io:8080" }
+  accounting:
+    envOverrides:
+      - { name: FEATBIT_EVENT_URL, value: "http://featbit-eval.127.0.0.1.sslip.io:8080" }
+      - { name: FEATBIT_STREAMING_URL, value: "ws://featbit-eval.127.0.0.1.sslip.io:8080" }
+  checkout:
+    envOverrides:
+      - { name: FEATBIT_EVENT_URL, value: "http://featbit-eval.127.0.0.1.sslip.io:8080" }
+      - { name: FEATBIT_STREAMING_URL, value: "ws://featbit-eval.127.0.0.1.sslip.io:8080" }
+  fraud-detection:
+    envOverrides:
+      - { name: FEATBIT_EVENT_URL, value: "http://featbit-eval.127.0.0.1.sslip.io:8080" }
+      - { name: FEATBIT_STREAMING_URL, value: "ws://featbit-eval.127.0.0.1.sslip.io:8080" }
+  llm:
+    envOverrides:
+      - { name: FEATBIT_EVENT_URL, value: "http://featbit-eval.127.0.0.1.sslip.io:8080" }
+      - { name: FEATBIT_STREAMING_URL, value: "ws://featbit-eval.127.0.0.1.sslip.io:8080" }
+  frontend:
+    envOverrides:
+      - { name: FEATBIT_EVENT_URL, value: "http://featbit-eval.127.0.0.1.sslip.io:8080" }
+      - { name: FEATBIT_STREAMING_URL, value: "ws://featbit-eval.127.0.0.1.sslip.io:8080" }

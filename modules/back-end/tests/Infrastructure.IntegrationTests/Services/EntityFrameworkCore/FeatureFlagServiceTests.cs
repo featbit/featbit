@@ -7,6 +7,7 @@ using Infrastructure.IntegrationTests.Support;
 using Infrastructure.Persistence.EntityFrameworkCore;
 using Infrastructure.Services.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 using System.Text.Json;
 
 namespace Infrastructure.IntegrationTests.Services.EntityFrameworkCore;
@@ -24,7 +25,7 @@ public class FeatureFlagServiceTests : IntegrationTestBase
     private (FeatureFlagService Service, AppDbContext Db) NewService()
     {
         var db = AppDbContextFactory.Create(_fixture.ConnectionString);
-        return (new FeatureFlagService(db), db);
+        return (new FeatureFlagService(db, NullLogger<FeatureFlagService>.Instance), db);
     }
 
     private static FeatureFlag NewFlag(

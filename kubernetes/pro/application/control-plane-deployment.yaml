@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: control-plane
+  name: control-plane
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: control-plane
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: control-plane
+    spec:
+      containers:
+        - env:
+            - name: IS_PRO
+              value: "true"
+            - name: MqProvider
+              value: Kafka
+            - name: Kafka__Producer__bootstrap.servers
+              value: kafka:9092
+            - name: Kafka__Consumer__bootstrap.servers
+              value: kafka:9092
+            - name: MongoDb__ConnectionString
+              value: mongodb://admin:password@mongodb:27017
+            - name: MongoDb__Database
+              value: featbit
+            - name: Redis__Instances__0
+              value: redis:6379
+          image: featbit/featbit-control-plane:latest
+          # NOTE: The control-plane consumes its trigger topic directly from the main broker
+          # (kafka:9092) and produces downstream messages back to the same broker. The aggregate
+          # broker (kafka-aggregate:9092) is used by eval-servers and other multi-DC consumers;
+          # the control-plane trigger topic is intra-cluster only and does not need the aggregate.
+          name: control-plane
+          ports:
+            - containerPort: 5200
+          resources:
+            requests:
+              memory: 256Mi
+              cpu: 50m
+              ephemeral-storage: 2Gi
+            limits:
+              memory: 512Mi
+              cpu: 1500m
+              ephemeral-storage: 4Gi
+      restartPolicy: Always
+status: {}

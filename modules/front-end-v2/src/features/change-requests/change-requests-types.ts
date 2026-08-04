@@ -1,0 +1,58 @@
+import type { FeatureFlag } from "@/features/flags/flags-types"
+
+export type ChangeRequestStatus =
+  "PendingReview" | "Approved" | "Declined" | "Applied"
+
+export type ChangeRequestAction = "approve" | "decline" | "apply"
+
+export type ChangeRequestReviewer = {
+  memberId: string
+  name?: string
+  email?: string
+  action: string
+  timestamp?: string | null
+}
+
+export type ChangeRequestItem = {
+  id: string
+  flagId: string
+  flagName: string
+  flagKey: string
+  scopeRn: string
+  reason: string
+  status: ChangeRequestStatus
+  creatorId: string
+  creatorName: string
+  creatorEmail: string
+  createdAt: string
+  updatedAt: string
+  updatorId: string
+  updatorName: string
+  updatorEmail: string
+  dataChange: { previous?: string; current?: string }
+  instructions: Array<{ kind: string; value: unknown }>
+  reviewers: ChangeRequestReviewer[]
+  canReview: boolean
+  canApply: boolean
+}
+
+export type ChangeRequestPage = {
+  items: ChangeRequestItem[]
+  totalCount: number
+  needsReviewCount: number
+}
+
+export type ChangeRequestPreview = {
+  id: string
+  reason: string
+  status: ChangeRequestStatus
+  flag: FeatureFlag
+}
+
+export type ChangeRequestFilters = {
+  id?: string
+  query: string
+  creatorId?: string
+  reviewerId?: string
+  status?: ChangeRequestStatus
+}

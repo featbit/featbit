@@ -230,6 +230,27 @@ public class FeatureFlagController : ApiControllerBase
     }
 
     /// <summary>
+    /// Update the general information of a feature flag
+    /// </summary>
+    /// <remarks>
+    /// Update the name, description, and tags of a feature flag in a single operation.
+    /// Permissions are checked for each field that is changed.
+    /// </remarks>
+    [OpenApi]
+    [HttpPut("{key}/general")]
+    public async Task<ApiResponse<Guid>> UpdateGeneralAsync(
+        Guid envId,
+        string key,
+        UpdateGeneralPayload payload)
+    {
+        var permissions = await GetRequestPermissionsAsync();
+        var request = new UpdateGeneral(envId, key, payload, permissions);
+
+        var revision = await Mediator.Send(request);
+        return Ok(revision);
+    }
+
+    /// <summary>
     /// Update the off variation of a feature flag
     /// </summary>
     /// <remarks>
@@ -306,6 +327,7 @@ public class FeatureFlagController : ApiControllerBase
     {
         var request = new GetPendingChanges
         {
+            OrgId = OrgId,
             EnvId = envId,
             Key = key
         };
@@ -340,81 +362,11 @@ public class FeatureFlagController : ApiControllerBase
         return Ok(success);
     }
 
-    [Authorize(LicenseFeatures.ChangeRequest)]
-    [HttpPost("{key}/change-requests")]
-    public async Task<ApiResponse<bool>> CreateChangeRequestAsync(Guid envId, string key, CreateFlagChangeRequest request)
-    {
-        request.OrgId = OrgId;
-        request.Key = key;
-        request.EnvId = envId;
-
-        var success = await Mediator.Send(request);
-        return Ok(success);
-    }
-
-    [Authorize(LicenseFeatures.ChangeRequest)]
-    [HttpPut("change-requests/{id:guid}/approve")]
-    public async Task<ApiResponse<bool>> ApproveChangeRequestAsync(Guid envId, Guid id)
-    {
-        var request = new ApproveFlagChangeRequest
-        {
-            OrgId = OrgId,
-            EnvId = envId,
-            Id = id
-        };
-
-        var success = await Mediator.Send(request);
-        return Ok(success);
-    }
-
-    [Authorize(LicenseFeatures.ChangeRequest)]
-    [HttpPut("change-requests/{id:guid}/decline")]
-    public async Task<ApiResponse<bool>> DeclineChangeRequestAsync(Guid envId, Guid id)
-    {
-        var request = new DeclineFlagChangeRequest
-        {
-            OrgId = OrgId,
-            EnvId = envId,
-            Id = id
-        };
-
-        var success = await Mediator.Send(request);
-        return Ok(success);
-    }
-
-    [Authorize(LicenseFeatures.ChangeRequest)]
-    [HttpPut("change-requests/{id:guid}/apply")]
-    public async Task<ApiResponse<bool>> ApplyChangeRequestAsync(Guid envId, Guid id)
-    {
-        var request = new ApplyFlagChangeRequest
-        {
-            OrgId = OrgId,
-            EnvId = envId,
-            Id = id
-        };
-
-        var success = await Mediator.Send(request);
-        return Ok(success);
-    }
-
-    [Authorize(LicenseFeatures.ChangeRequest)]
-    [HttpDelete("change-requests/{id:guid}")]
-    public async Task<ApiResponse<bool>> DeleteChangeRequestAsync(Guid id)
-    {
-        var request = new DeleteFlagChangeRequest
-        {
-            Id = id
-        };
-
-        var success = await Mediator.Send(request);
-        return Ok(success);
-    }
-
     /// <summary>
     /// Update the targeting of a feature flag
     /// </summary>
     /// <remarks>
-    /// Update the targeting users, rules and default rule of a feature flag.
+    /// Update the off variation, targeting users, rules and default rule of a feature flag.
     /// </remarks>
     [OpenApi]
     [HttpPut("{key}/targeting")]

@@ -7,6 +7,7 @@ namespace Application.IntegrationTests.Configuration;
 
 [Trait("Category", "Host")]
 [Collection(nameof(TestApp))]
+[Trait("Category", "Integration")]
 public class DefaultTests
 {
     private readonly TestApp _app;

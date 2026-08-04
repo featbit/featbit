@@ -1,0 +1,17 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: redis-network-loss
+  namespace: chaos-mesh
+spec:
+  action: loss
+  mode: all
+  selector:
+    namespaces:
+      - featbit
+    labelSelectors:
+      app: redis
+  loss:
+    loss: "100"
+  direction: to
+  duration: "10m"

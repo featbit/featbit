@@ -4,19 +4,22 @@ namespace Domain.Policies;
 
 public static class PolicyHelper
 {
+    public static bool IsMatch(PolicyStatement statement, string resourceRN, string permission)
+    {
+        if (statement.ResourceType == ResourceTypes.All)
+        {
+            return true;
+        }
+
+        return statement.Actions.Any(act => act == "*" || act == permission) &&
+               statement.Resources.Any(pattern => RNMatcher.IsMatch(resourceRN, pattern));
+    }
+
     public static bool IsAllowed(IEnumerable<PolicyStatement> statements, string resourceRN, string permission)
     {
-        // get matched statements
-        var matchedStatements = statements.Where(statement =>
-        {
-            if (statement.ResourceType == ResourceTypes.All)
-            {
-                return true;
-            }
-
-            return statement.Actions.Any(act => act == "*" || act == permission) &&
-                   statement.Resources.Any(pattern => RNMatcher.IsMatch(resourceRN, pattern));
-        }).ToArray();
+        var matchedStatements = statements
+            .Where(statement => IsMatch(statement, resourceRN, permission))
+            .ToArray();
 
         // no matched statements
         if (matchedStatements.Length == 0)

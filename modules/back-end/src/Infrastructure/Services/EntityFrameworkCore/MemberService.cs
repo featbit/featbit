@@ -47,6 +47,29 @@ public class MemberService(AppDbContext dbContext) : IMemberService
         return member;
     }
 
+    public async Task<ICollection<Member>> GetListAsync(Guid organizationId, Guid[] ids)
+    {
+        var users = QueryableOf<User>();
+        var organizationUsers = QueryableOf<OrganizationUser>();
+
+        var query =
+            from user in users
+            join organizationUser in organizationUsers
+                on user.Id equals organizationUser.UserId
+            where organizationUser.OrganizationId == organizationId && ids.Contains(user.Id)
+            select new Member
+            {
+                Id = user.Id,
+                Email = user.Email,
+                Name = user.Name,
+                CreatedAt = user.CreatedAt,
+                InvitorId = organizationUser.InvitorId,
+                InitialPassword = user.InitialPassword
+            };
+
+        return await query.ToListAsync();
+    }
+
     public async Task DeleteAsync(Guid organizationId, Guid memberId)
     {
         // delete organization user
@@ -66,6 +89,21 @@ public class MemberService(AppDbContext dbContext) : IMemberService
     }
 
     public async Task<PagedResult<Member>> GetListAsync(Guid organizationId, MemberFilter filter)
+    {
+        var members = await GetLookupListAsync(organizationId, filter);
+
+        // get member groups
+        var memberIds = members.Items.Select(x => x.Id);
+        var groups = await GetGroupsAsync(organizationId, memberIds);
+        foreach (var member in members.Items)
+        {
+            member.Groups = groups.Where(x => x.MemberId == member.Id);
+        }
+
+        return members;
+    }
+
+    public async Task<PagedResult<Member>> GetLookupListAsync(Guid organizationId, MemberFilter filter)
     {
         var users = QueryableOf<User>();
         var organizationUsers = QueryableOf<OrganizationUser>();
@@ -98,14 +136,6 @@ public class MemberService(AppDbContext dbContext) : IMemberService
             .Skip(filter.PageIndex * filter.PageSize)
             .Take(filter.PageSize)
             .ToListAsync();
-
-        // get member groups
-        var memberIds = items.Select(x => x.Id);
-        var groups = await GetGroupsAsync(organizationId, memberIds);
-        foreach (var member in items)
-        {
-            member.Groups = groups.Where(x => x.MemberId == member.Id);
-        }
 
         return new PagedResult<Member>(totalCount, items);
     }
@@ -189,7 +219,17 @@ public class MemberService(AppDbContext dbContext) : IMemberService
 
     public async Task<IEnumerable<Policy>> GetPoliciesAsync(Guid organizationId, Guid memberId)
     {
-        // direct policies
+        var assignments = await GetPermissionAssignmentsAsync(organizationId, memberId);
+
+        return assignments
+            .GroupBy(x => x.Policy.Id)
+            .Select(x => x.First().Policy);
+    }
+
+    public async Task<IReadOnlyCollection<MemberPermissionPolicyAssignment>> GetPermissionAssignmentsAsync(
+        Guid organizationId,
+        Guid memberId)
+    {
         var policies = QueryableOf<Policy>();
         var memberPolicies = QueryableOf<MemberPolicy>();
 
@@ -214,14 +254,38 @@ public class MemberService(AppDbContext dbContext) : IMemberService
             join policy in policies
                 on groupPolicy.PolicyId equals policy.Id
             where groupMember.OrganizationId == organizationId && groupMember.MemberId == memberId
-            select policy;
+            select new
+            {
+                GroupId = theGroup.Id,
+                GroupName = theGroup.Name,
+                Policy = policy
+            };
 
         var directPolicies = await directPolicyQuery.ToListAsync();
         var inheritedPolicies = await inheritedPolicyQuery.ToListAsync();
 
-        // distinct by policy name
-        var allPolicies = directPolicies.Concat(inheritedPolicies).GroupBy(x => x.Name).Select(x => x.First());
-        return allPolicies;
+        var assignments = directPolicies
+            .Select(policy => new MemberPermissionPolicyAssignment
+            {
+                Policy = policy,
+                Source = new MemberPermissionSourceVm
+                {
+                    AssignmentType = MemberPermissionAssignmentTypes.Direct
+                }
+            })
+            .Concat(inheritedPolicies.Select(x => new MemberPermissionPolicyAssignment
+            {
+                Policy = x.Policy,
+                Source = new MemberPermissionSourceVm
+                {
+                    AssignmentType = MemberPermissionAssignmentTypes.Group,
+                    GroupId = x.GroupId,
+                    GroupName = x.GroupName
+                }
+            }))
+            .ToArray();
+
+        return assignments;
     }
 
     public async Task<PolicyStatement[]> GetPermissionsAsync(Guid organizationId, Guid memberId)

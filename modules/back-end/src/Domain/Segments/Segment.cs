@@ -34,7 +34,24 @@ public class Segment : AuditedEntity
 
     public bool IsArchived { get; set; }
 
+    /// <summary>
+    /// Monotonic version of the last COMMITTED change to this segment. The committed
+    /// value is the authoritative value that may be safely served to evaluators.
+    /// </summary>
+    public long CommittedVersion { get; set; }
+
+    /// <summary>
+    /// A staged-but-not-committed change. Null when there is no pending change
+    /// (the default). When set, the committed read must continue to return the
+    /// committed value and ignore this pending change until it is promoted.
+    /// </summary>
+    public PendingSegmentChange Pending { get; set; }
+
     public bool IsEnvironmentSpecific => Type == SegmentType.EnvironmentSpecific;
+
+    public Segment()
+    {
+    }
 
     public Segment(
         Guid workspaceId,
@@ -79,6 +96,18 @@ public class Segment : AuditedEntity
         var dataChange = new DataChange(this);
 
         Description = description;
+        UpdatedAt = DateTime.UtcNow;
+
+        return dataChange.To(this);
+    }
+
+    public DataChange UpdateGeneral(string name, string description, string[] tags)
+    {
+        var dataChange = new DataChange(this);
+
+        Name = name;
+        Description = description;
+        Tags = tags ?? [];
         UpdatedAt = DateTime.UtcNow;
 
         return dataChange.To(this);
@@ -170,5 +199,71 @@ public class Segment : AuditedEntity
         _ = updatorId;
 
         UpdatedAt = DateTime.UtcNow;
+    }
+
+    /// <summary>
+    /// Stage <paramref name="pendingValue"/> as a pending (not-yet-committed) change.
+    /// The committed value is left untouched, so a committed read still returns the
+    /// old value until <see cref="PromotePending"/> is called.
+    /// </summary>
+    public void SetPending(
+        Segment pendingValue,
+        long version,
+        Guid operatorId = default,
+        string operation = Operations.Update,
+        bool isTargetingChange = true)
+    {
+        // A pending value must never itself carry a pending change (no pending-within-pending):
+        // the staged payload describes a single committed-to-be state, so null out any nested
+        // pending before storing it. This keeps the staged document flat and avoids recursive bloat.
+        if (pendingValue != null)
+        {
+            pendingValue.Pending = null;
+        }
+
+        Pending = new PendingSegmentChange
+        {
+            Version = version,
+            Value = pendingValue,
+            OperatorId = operatorId,
+            Operation = operation,
+            IsTargetingChange = isTargetingChange
+        };
+    }
+
+    /// <summary>
+    /// Promote the staged pending change to committed: the pending value becomes the
+    /// committed value, <see cref="CommittedVersion"/> advances to the pending version,
+    /// and the pending slot is cleared. No-op when there is no pending change.
+    /// </summary>
+    public void PromotePending()
+    {
+        if (Pending == null)
+        {
+            return;
+        }
+
+        var promoted = Pending.Value;
+        var version = Pending.Version;
+
+        // adopt the committed-relevant fields from the pending value
+        Name = promoted.Name;
+        Key = promoted.Key;
+        Type = promoted.Type;
+        Scopes = promoted.Scopes;
+        Description = promoted.Description;
+        Included = promoted.Included;
+        Excluded = promoted.Excluded;
+        Rules = promoted.Rules;
+        Tags = promoted.Tags;
+        IsArchived = promoted.IsArchived;
+
+        // Refresh the audit timestamp so the committed value reflects WHEN it was promoted: the
+        // promotion is the moment this value becomes authoritative. (Segment is an AuditedEntity
+        // with no UpdatorId, so only UpdatedAt is carried.)
+        UpdatedAt = DateTime.UtcNow;
+
+        CommittedVersion = version;
+        Pending = null;
     }
 }

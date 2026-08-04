@@ -1,0 +1,34 @@
+# Per-cluster Redis + Sentinel for FeatBit (bitnami/redis chart 23.2.12).
+# One of these is installed in EACH cluster (release name: featbit-redis, ns featbit)
+# so each DC has its own HA redis; FeatBit connects via its own cluster's Sentinel
+# (Redis__ConnectionString = featbit-redis:26379,serviceName=mymaster). No shared redis.
+#
+#   helm upgrade --install featbit-redis bitnami/redis --version 23.2.12 \
+#     --kube-context <west|east> -n featbit -f values.yaml
+architecture: replication        # 1 master + N replicas, Sentinel-managed
+auth:
+  enabled: false                 # matches FeatBit's empty Redis:Password in this env
+networkPolicy:
+  enabled: false                 # allow FeatBit pods to reach redis/sentinel
+sentinel:
+  enabled: true
+  masterSet: mymaster            # serviceName clients use
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/redis-sentinel   # bitnami moved free images to *legacy
+    tag: 8.2.1
+  resources:
+    requests: { cpu: 10m, memory: 32Mi }
+    limits:   { memory: 96Mi }
+image:
+  registry: docker.io
+  repository: bitnamilegacy/redis
+  tag: 8.2.1
+master:
+  persistence: { enabled: false }   # ephemeral for the QA harness; flags re-sync from Mongo
+replica:
+  replicaCount: 3
+  persistence: { enabled: false }
+  resources:
+    requests: { cpu: 25m, memory: 64Mi }
+    limits:   { memory: 192Mi }

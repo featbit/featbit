@@ -1,4 +1,5 @@
 using Application.FeatureFlags;
+using Application.Policies;
 using Application.Services;
 using Application.Users;
 using Domain.AuditLogs;
@@ -53,7 +54,7 @@ public class PatchFeatureFlagHandlerTests
         var publisher = new Mock<IPublisher>();
         var resourceService = new Mock<IResourceService>();
         resourceService.Setup(x => x.GetFlagRnAsync(It.IsAny<Guid>(), It.IsAny<string>())).ReturnsAsync("flag/*");
-        var sut = new PatchFeatureFlagHandler(service.Object, resourceService.Object, currentUser.Object, publisher.Object);
+        var sut = new PatchFeatureFlagHandler(service.Object, new PermissionGuard(resourceService.Object), currentUser.Object, publisher.Object);
 
         var patch = new JsonPatchDocument<FeatureFlag>();
         patch.Replace(x => x.Description, "patched");
@@ -81,7 +82,7 @@ public class PatchFeatureFlagHandlerTests
         var service = new Mock<IFeatureFlagService>();
         service.Setup(x => x.GetAsync(It.IsAny<Guid>(), It.IsAny<string>())).ReturnsAsync(flag);
         var publisher = new Mock<IPublisher>();
-        var sut = new PatchFeatureFlagHandler(service.Object, Mock.Of<IResourceService>(), Mock.Of<ICurrentUser>(), publisher.Object);
+        var sut = new PatchFeatureFlagHandler(service.Object, new PermissionGuard(Mock.Of<IResourceService>()), Mock.Of<ICurrentUser>(), publisher.Object);
 
         // op against a non-existent path produces a JsonPatchError when applied
         var patch = new JsonPatchDocument<FeatureFlag>();

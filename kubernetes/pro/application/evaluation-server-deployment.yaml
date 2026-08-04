@@ -5,7 +5,7 @@ metadata:
     app: evaluation-server
   name: evaluation-server
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: evaluation-server
@@ -15,12 +15,19 @@ spec:
       labels:
         app: evaluation-server
     spec:
+      terminationGracePeriodSeconds: 10
       containers:
         - env:
             - name: IS_PRO
               value: "true"
-            - name: Kafka__BootstrapServers
+            - name: MqProvider
+              value: Kafka
+            - name: Kafka__Producer__bootstrap.servers
               value: kafka:9092
+            - name: Kafka__Consumer__bootstrap.servers
+              value: kafka-aggregate:9092
+            - name: ControlPlane__Enabled
+              value: "true"
             - name: MongoDb__ConnectionString
               value: mongodb://admin:password@mongodb:27017
             - name: MongoDb__Database
@@ -28,17 +35,27 @@ spec:
             - name: Redis__ConnectionString
               value: redis:6379
           image: featbit/featbit-evaluation-server:latest
+          # NOTE: The Kafka and ControlPlane__Enabled settings below are overridden at
+          # deploy time by Deploy-FeatBitClusters.ps1 based on the deployment mode:
+          #   Advanced — Consumer points to kafka-aggregate:9092; ControlPlane__Enabled=true
+          #   Basic    — Consumer points to kafka:9092; ControlPlane__Enabled=true
           name: evaluation-server
           ports:
             - containerPort: 5100
+          readinessProbe:
+            tcpSocket:
+              port: 5100
+            initialDelaySeconds: 3
+            periodSeconds: 5
+            failureThreshold: 3
           resources: 
             requests:
-              memory: 512Mi
-              cpu: 500m
-              ephemeral-storage: 2Gi 
+              memory: 192Mi
+              cpu: 50m
+              ephemeral-storage: 2Gi
             limits:
-              memory: 2Gi
-              cpu: 500m
-              ephemeral-storage: 4Gi 
+              memory: 384Mi
+              cpu: 1500m
+              ephemeral-storage: 4Gi
       restartPolicy: Always
 status: {}

@@ -32,4 +32,9 @@
         <PackageReference Include="EFCore.NamingConventions" Version="10.0.1" />
     </ItemGroup>
 
+    <ItemGroup>
+        <!-- Surface internal members (e.g. RedisClient.EnsureSelfHealingOptions, #106) to unit tests. -->
+        <InternalsVisibleTo Include="Infrastructure.UnitTests"/>
+    </ItemGroup>
+
 </Project>

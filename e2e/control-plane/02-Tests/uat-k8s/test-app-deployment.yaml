@@ -1,0 +1,70 @@
+# UAT Test App Deployment Template
+#
+# This is a parameterized deployment manifest for the UAT test app.
+# Placeholder strings (__INSTANCE_ID__, __ENV_SECRET__, __FLAG_KEYS__) are replaced
+# at deploy time by deploy-test-apps.ps1 using values from uat-config.json.
+#
+# Do not apply this file directly — use deploy-test-apps.ps1 instead.
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: uat-test-app-__INSTANCE_ID__
+  labels:
+    app: uat-test-app
+    instance: __INSTANCE_ID__
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: uat-test-app
+      instance: __INSTANCE_ID__
+  template:
+    metadata:
+      labels:
+        app: uat-test-app
+        instance: __INSTANCE_ID__
+    spec:
+      containers:
+        - name: test-app
+          image: host.minikube.internal:5000/featbit/uat-test-app:__IMAGE_TAG__
+          ports:
+            - containerPort: 8080
+          env:
+            - name: INSTANCE_ID
+              value: "__INSTANCE_ID__"
+            - name: FEATBIT_ENV_SECRET
+              value: "__ENV_SECRET__"
+            - name: FEATBIT_EVAL_URL
+              value: "http://evaluation-server:5100"
+            - name: FEATBIT_STREAMING_URL
+              value: "ws://evaluation-server:5100"
+            - name: FLAG_KEYS
+              value: "__FLAG_KEYS__"
+            - name: TEST_APP_PORT
+              value: "8080"
+            # Disable file-system-watcher-based config reload. Each .NET host
+            # registers an inotify watcher; under load (many pods on one node)
+            # this exhausts fs.inotify.max_user_instances on the minikube host
+            # and the container crashes at WebApplication.CreateBuilder.
+            - name: DOTNET_hostBuilder__reloadConfigOnChange
+              value: "false"
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          resources:
+            requests:
+              memory: 128Mi
+              cpu: 100m
+            limits:
+              memory: 256Mi
+              cpu: 250m

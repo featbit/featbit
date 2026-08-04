@@ -1,10 +1,8 @@
-using Application.Bases.Exceptions;
 using Domain.AuditLogs;
 using Application.Users;
 using Application.Bases.Models;
 using Domain.Policies;
 using Domain.Segments;
-using Domain.SemanticPatch;
 using Microsoft.AspNetCore.JsonPatch.SystemTextJson;
 
 namespace Application.Segments;
@@ -20,7 +18,7 @@ public class PatchSegment : IRequest<PatchResult>
 
 public class PatchSegmentHandler(
     ISegmentService segmentService,
-    IResourceService resourceService,
+    IPermissionGuard permissionGuard,
     ICurrentUser currentUser,
     IPublisher publisher)
     : IRequestHandler<PatchSegment, PatchResult>
@@ -46,7 +44,7 @@ public class PatchSegmentHandler(
         segment.MarkAsUpdated(currentUser.Id);
         dataChange.To(segment);
 
-        await CheckPermissionsAsync();
+        await permissionGuard.EnsureSegmentChangeAllowedAsync(segment, dataChange, request.Permissions);
 
         await segmentService.UpdateAsync(segment);
 
@@ -62,25 +60,5 @@ public class PatchSegmentHandler(
         await publisher.Publish(notification, cancellationToken);
 
         return PatchResult.Ok();
-
-        async Task CheckPermissionsAsync()
-        {
-            var instructions = SegmentComparer.Compare(dataChange).ToArray();
-            var requiredPermissions = instructions
-                .Select(x => x.Permission)
-                .Where(permission => !string.IsNullOrEmpty(permission))
-                .ToHashSet();
-
-            if (requiredPermissions.Count == 0)
-            {
-                return;
-            }
-
-            var rn = await resourceService.GetSegmentRnAsync(segment.EnvId, segment.Id);
-            if (requiredPermissions.Any(permission => !PolicyHelper.IsAllowed(request.Permissions, rn, permission)))
-            {
-                throw new ForbiddenException();
-            }
-        }
     }
 }

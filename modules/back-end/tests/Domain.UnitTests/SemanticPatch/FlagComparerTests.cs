@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Domain.AuditLogs;
 using Domain.FeatureFlags;
 using Domain.SemanticPatch;
 using Domain.Segments;
@@ -348,6 +349,23 @@ public class FlagComparerTests
 
         Assert.All(instructions, i => Assert.NotEqual(FlagInstructionKind.Noop, i.Kind));
         Assert.Contains(instructions, i => i.Kind == FlagInstructionKind.UpdateName);
+    }
+
+    [Fact]
+    public void Compare_IdenticalSparseSnapshots_ReturnsNoInstructions()
+    {
+        var snapshot = new
+        {
+            id = Guid.NewGuid(),
+            name = "Checkout",
+            key = "checkout-v2",
+            changeRequestId = Guid.NewGuid()
+        };
+        var dataChange = new DataChange(snapshot).To(snapshot);
+
+        var instructions = FlagComparer.Compare(dataChange);
+
+        Assert.Empty(instructions);
     }
 
     private static FeatureFlag MakeFlag(string name = "n", string description = "d") => new()

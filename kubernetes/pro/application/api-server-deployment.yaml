@@ -19,8 +19,16 @@ spec:
         - env:
             - name: IS_PRO
               value: "true"
-            - name: Kafka__BootstrapServers
+            - name: Jwt__Key
+              value: please_change_me_to_a_secure_secret_key
+            - name: MqProvider
+              value: Kafka
+            - name: Kafka__Producer__bootstrap.servers
               value: kafka:9092
+            - name: Kafka__Consumer__bootstrap.servers
+              value: kafka-aggregate:9092
+            - name: UseControlPlane
+              value: "true"
             - name: MongoDb__ConnectionString
               value: mongodb://admin:password@mongodb:27017
             - name: MongoDb__Database
@@ -30,17 +38,21 @@ spec:
             - name: Redis__ConnectionString
               value: redis:6379
           image: featbit/featbit-api-server:latest
+          # NOTE: The Kafka and UseControlPlane settings below are overridden at deploy time by
+          # Deploy-FeatBitClusters.ps1 based on the deployment mode:
+          #   Advanced — Consumer points to kafka-aggregate:9092 (aggregate broker); UseControlPlane=true
+          #   Basic    — Consumer points to kafka:9092 (no aggregate); UseControlPlane=true
           name: api-server
           ports:
             - containerPort: 5000
           resources: 
             requests:
-              memory: 1Gi
-              cpu: 500m
-              ephemeral-storage: 2Gi 
+              memory: 256Mi
+              cpu: 50m
+              ephemeral-storage: 2Gi
             limits:
-              memory: 2Gi
-              cpu: 500m
-              ephemeral-storage: 4Gi 
+              memory: 512Mi
+              cpu: 1500m
+              ephemeral-storage: 4Gi
       restartPolicy: Always
 status: {}

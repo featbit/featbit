@@ -1,0 +1,24 @@
+# Cross-DC partition, WEST side (CP-11 / CP-12). See cross-dc-partition-east.yaml
+# for the east side; the suite applies each file to its own cluster.
+#
+# West loses ONLY the east peer (172.31.0.20: east node on the shared cluster
+# network — peer redis fwd :31649 and east mongo NodePort). West's own node
+# (172.31.0.10) must NOT be targeted: node->pod traffic (kubectl port-forwards,
+# NodePort access) can originate from the node's shared-network address, and
+# blocking it cuts the operator/harness path to west's own API (#113 — the old
+# single manifest listed both peer IPs, so each cluster also severed itself).
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: cross-dc-partition
+  namespace: chaos-mesh
+spec:
+  action: partition
+  mode: all
+  selector:
+    namespaces:
+      - featbit
+  direction: both
+  externalTargets:
+    - "172.31.0.20"
+  duration: "10m"

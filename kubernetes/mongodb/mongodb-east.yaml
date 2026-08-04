@@ -1,0 +1,70 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-east
+  namespace: featbit
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 27017
+    targetPort: 27017
+  selector:
+    app: mongodb-east
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-east-headless
+  namespace: featbit
+spec:
+  clusterIP: None
+  ports:
+  - port: 27017
+    targetPort: 27017
+  selector:
+    app: mongodb-east
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongodb-east
+  namespace: featbit
+spec:
+  serviceName: mongodb-east-headless
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongodb-east
+  template:
+    metadata:
+      labels:
+        app: mongodb-east
+    spec:
+      imagePullSecrets:
+      - name: registry-credentials
+      containers:
+      - name: mongodb
+        image: mongo:7.0
+        ports:
+        - containerPort: 27017
+        env:
+        - name: MONGO_INITDB_ROOT_USERNAME
+          value: admin
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          value: password
+        command:
+        - mongod
+        - --replSet
+        - rs0
+        - --bind_ip_all
+        volumeMounts:
+        - name: mongo-data
+          mountPath: /data/db
+  volumeClaimTemplates:
+  - metadata:
+      name: mongo-data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 1Gi
