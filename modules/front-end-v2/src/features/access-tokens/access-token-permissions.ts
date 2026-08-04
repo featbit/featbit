@@ -402,6 +402,15 @@ export function canManageAccessTokenType(
   )
 }
 
+export function canListAccessTokens(policies: UserPolicy[]) {
+  return isPermissionGranted(
+    policies,
+    "access-token/*",
+    "access-token",
+    "ListAccessTokens"
+  )
+}
+
 export function canGrantAction(
   policies: UserPolicy[],
   resourceType: ResourceType,

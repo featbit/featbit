@@ -12,6 +12,11 @@ public static class Permissions
     // IAM
     public const string CanManageIAM = nameof(CanManageIAM);
 
+    // Access tokens
+    public const string ListAccessTokens = nameof(ListAccessTokens);
+    public const string ManagePersonalAccessTokens = nameof(ManagePersonalAccessTokens);
+    public const string ManageServiceAccessTokens = nameof(ManageServiceAccessTokens);
+
     // Projects
     public const string CanAccessProject = nameof(CanAccessProject);
     public const string CreateProject = nameof(CreateProject);
@@ -64,6 +69,11 @@ public static class Permissions
 
         // IAM
         { CanManageIAM, ResourceTypes.Iam },
+
+        // Access tokens
+        { ListAccessTokens, ResourceTypes.AccessToken },
+        { ManagePersonalAccessTokens, ResourceTypes.AccessToken },
+        { ManageServiceAccessTokens, ResourceTypes.AccessToken },
 
         // Projects
         { CanAccessProject, ResourceTypes.Project },

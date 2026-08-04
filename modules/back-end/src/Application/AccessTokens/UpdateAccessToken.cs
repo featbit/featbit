@@ -13,6 +13,8 @@ public class UpdateAccessToken : IRequest<AccessTokenVm>
     public string Name { get; set; }
 
     public PolicyStatement[] Permissions { get; set; } = [];
+
+    public PolicyStatement[] CurrentUserPermissions { get; set; } = [];
 }
 
 public class UpdateAccessTokenValidator : AbstractValidator<UpdateAccessToken>
@@ -29,6 +31,10 @@ public class UpdateAccessTokenHandler(IAccessTokenService service, IMapper mappe
 {
     public async Task<AccessTokenVm> Handle(UpdateAccessToken request, CancellationToken cancellationToken)
     {
+        var accessToken = await service.GetAsync(request.Id);
+        AccessTokenAuthorization.EnsureOrganization(accessToken, request.OrganizationId);
+        AccessTokenAuthorization.EnsureCanManage(request.CurrentUserPermissions, accessToken.Type);
+
         var accessTokenWithSameName = await service.FindOneAsync(x =>
             x.OrganizationId == request.OrganizationId &&
             x.Id != request.Id &&
@@ -39,7 +45,6 @@ public class UpdateAccessTokenHandler(IAccessTokenService service, IMapper mappe
             throw new BusinessException(ErrorCodes.NameHasBeenUsed);
         }
 
-        var accessToken = await service.GetAsync(request.Id);
         accessToken.Update(request.Name, request.Permissions);
         await service.UpdateAsync(accessToken);
 

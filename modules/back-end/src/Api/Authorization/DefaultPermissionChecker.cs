@@ -36,12 +36,17 @@ public class DefaultPermissionChecker(
     {
         if (resourceType == ResourceTypes.Workspace)
         {
-            return "workspace/*";
+            return RN.ForWorkspace();
         }
 
         if (resourceType == ResourceTypes.Iam)
         {
-            return "iam/*";
+            return RN.ForIam();
+        }
+
+        if (resourceType == ResourceTypes.AccessToken)
+        {
+            return RN.ForAccessToken();
         }
 
         var routeValues = request.RouteValues;

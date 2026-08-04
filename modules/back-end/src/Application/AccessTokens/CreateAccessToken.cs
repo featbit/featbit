@@ -15,6 +15,8 @@ public class CreateAccessToken : IRequest<AccessToken>
     public string Type { get; set; }
 
     public PolicyStatement[] Permissions { get; set; } = [];
+
+    public PolicyStatement[] CurrentUserPermissions { get; set; } = [];
 }
 
 public class CreateAccessTokenValidator : AbstractValidator<CreateAccessToken>
@@ -34,6 +36,8 @@ public class CreateAccessTokenHandler(IAccessTokenService service, ICurrentUser 
 {
     public async Task<AccessToken> Handle(CreateAccessToken request, CancellationToken cancellationToken)
     {
+        AccessTokenAuthorization.EnsureCanManage(request.CurrentUserPermissions, request.Type);
+
         var isNameUsed = await service.IsNameUsedAsync(request.OrganizationId, request.Name);
         if (isNameUsed)
         {

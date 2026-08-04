@@ -49,6 +49,10 @@ public static class RN
     public static bool IsInScope(string rn, string scope) => $"{rn}:".StartsWith($"{scope}:");
 
     public static string ForWorkspace() => "workspace/*";
+    
+    public static string ForIam() => "iam/*";
+
+    public static string ForAccessToken() => "access-token/*";
 
     public static string ForProject(string projectKey) => $"project/{projectKey}";
 

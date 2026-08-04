@@ -1,6 +1,7 @@
 using Application.AccessTokens;
 using Application.Bases.Models;
 using Domain.AccessTokens;
+using Domain.Policies;
 
 namespace Api.Controllers;
 
@@ -8,6 +9,7 @@ namespace Api.Controllers;
 public class AccessTokenController : ApiControllerBase
 {
     [HttpGet]
+    [Authorize(Permissions.ListAccessTokens)]
     public async Task<ApiResponse<PagedResult<AccessTokenVm>>> GetListAsync([FromQuery] AccessTokenFilter filter)
     {
         var request = new GetAccessTokenList
@@ -26,7 +28,8 @@ public class AccessTokenController : ApiControllerBase
         var request = new IsAccessTokenNameUsed
         {
             OrganizationId = OrgId,
-            Name = name
+            Name = name,
+            
         };
 
         var isNameUsed = await Mediator.Send(request);
@@ -37,6 +40,7 @@ public class AccessTokenController : ApiControllerBase
     public async Task<ApiResponse<AccessToken>> CreateAsync(CreateAccessToken request)
     {
         request.OrganizationId = OrgId;
+        request.CurrentUserPermissions = await GetRequestPermissionsAsync();
 
         var accessToken = await Mediator.Send(request);
         return Ok(accessToken);
@@ -47,7 +51,9 @@ public class AccessTokenController : ApiControllerBase
     {
         var request = new ToggleAccessTokenStatus
         {
-            Id = id
+            Id = id,
+            OrganizationId = OrgId,
+            CurrentUserPermissions = await GetRequestPermissionsAsync()
         };
 
         var success = await Mediator.Send(request);
@@ -59,7 +65,9 @@ public class AccessTokenController : ApiControllerBase
     {
         var request = new DeleteAccessToken
         {
-            Id = id
+            Id = id,
+            OrganizationId = OrgId,
+            CurrentUserPermissions = await GetRequestPermissionsAsync()
         };
 
         var success = await Mediator.Send(request);
@@ -71,6 +79,7 @@ public class AccessTokenController : ApiControllerBase
     {
         request.OrganizationId = OrgId;
         request.Id = id;
+        request.CurrentUserPermissions = await GetRequestPermissionsAsync();
 
         var accessTokenVm = await Mediator.Send(request);
 
