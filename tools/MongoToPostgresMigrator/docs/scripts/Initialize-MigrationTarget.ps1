@@ -60,10 +60,11 @@
     infra/postgresql/docker-entrypoint-initdb.d relative to this script.
 
 .PARAMETER BaselineVersion
-    Schema version the target database is already at (e.g. '5.3.2'). Only used
-    when the database already has a FeatBit schema that this script did not
-    provision: init scripts up to and including this version are recorded as
-    applied without being executed, and the later ones are applied.
+    Schema version the target database is already at (e.g. '5.3.2'). Must match
+    one of the init scripts in -InitScriptsDir. Only used when the database
+    already has a FeatBit schema that this script did not provision: init scripts
+    up to and including this version are recorded as applied without being
+    executed, and the later ones are applied.
 
 .PARAMETER TruncateOnly
     Skip schema provisioning; only truncate the domain tables.
@@ -105,6 +106,13 @@ $HistoryTable = 'featbit_migration_schema_history'
 # Any table from the v0.0.0 baseline; its presence means the database already
 # carries a FeatBit schema.
 $SchemaProbeTable = 'feature_flags'
+
+# UTF-8 without a BOM, used for every init-script read/write so the round-trip is
+# byte-faithful on Windows PowerShell 5.1 (whose default is the ANSI code page).
+$Utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+
+# Ensure psql interprets those bytes as UTF-8 regardless of the console code page.
+$env:PGCLIENTENCODING = 'UTF8'
 
 if (-not (Get-Command psql -ErrorAction SilentlyContinue)) {
     throw "The 'psql' client was not found on PATH. Install the PostgreSQL client tools and retry."
@@ -180,6 +188,17 @@ if (-not $TruncateOnly) {
 
     if (-not $scripts) { throw "No .sql init scripts found in $resolvedDir." }
 
+    if ($BaselineVersion) {
+        # A baseline must name a real init script. A syntactically valid but
+        # unknown version (e.g. '53.2.0') would otherwise mark every script as
+        # applied and skip provisioning entirely, leaving the schema stale.
+        $scriptVersions = @($scripts | ForEach-Object { Get-ScriptVersion -File $_ })
+        if ($scriptVersions -notcontains $baseline) {
+            throw ("-BaselineVersion '$BaselineVersion' does not match any init script in $resolvedDir. " +
+                "Known versions: $(($scripts | ForEach-Object { $_.BaseName }) -join ', ').")
+        }
+    }
+
     # 2. Work out which scripts still need to run. Every connection below targets
     #    -Database directly; the scripts' hard-coded \connect is stripped so the
     #    requested database is never silently swapped for 'featbit'.
@@ -200,24 +219,31 @@ if (-not $TruncateOnly) {
             $provision = $false
         }
         else {
-            Invoke-PsqlCommand -DbName $Database -Sql @"
+            # Create the history table and seed the baseline rows in ONE
+            # transaction (psql runs a multi-statement -c string as a single
+            # transaction). A partially-seeded history would look complete on the
+            # next run, which would then re-apply unrecorded baseline scripts as
+            # unconditional DDL against relations that already exist.
+            $seedSql = @"
 CREATE TABLE IF NOT EXISTS $HistoryTable (
     script_name text PRIMARY KEY,
     version     text        NOT NULL,
     applied_at  timestamptz NOT NULL DEFAULT now()
 );
 "@
+            $seeded = @()
             if ($schemaExists) {
                 $seeded = @($scripts | Where-Object { (Get-ScriptVersion -File $_) -le $baseline })
-                if (-not $seeded) {
-                    throw "-BaselineVersion '$BaselineVersion' is older than the first init script ($($scripts[0].BaseName)); nothing to baseline."
-                }
                 foreach ($script in $seeded) {
                     $version = (Get-ScriptVersion -File $script).ToString()
-                    Invoke-PsqlCommand -DbName $Database -Sql (
-                        "INSERT INTO $HistoryTable (script_name, version) VALUES " +
-                        "('$($script.Name)', '$version') ON CONFLICT DO NOTHING;")
+                    $seedSql += "`nINSERT INTO $HistoryTable (script_name, version) VALUES " +
+                    "('$($script.Name)', '$version') ON CONFLICT DO NOTHING;"
                 }
+            }
+
+            Invoke-PsqlCommand -DbName $Database -Sql $seedSql
+
+            if ($seeded) {
                 Write-Host "Baselined $($seeded.Count) script(s) at or below v$baseline as already applied."
             }
         }
@@ -240,13 +266,17 @@ CREATE TABLE IF NOT EXISTS $HistoryTable (
         try {
             foreach ($script in $pending) {
                 $version = (Get-ScriptVersion -File $script).ToString()
-                $content = Get-Content $script.FullName -Raw
+                # Explicit UTF-8 both ways: Windows PowerShell 5.1 would otherwise
+                # read and write these with the system ANSI code page, corrupting
+                # any non-ASCII literal in an init script. Written without a BOM,
+                # which psql does not strip.
+                $content = [System.IO.File]::ReadAllText($script.FullName, $Utf8NoBom)
                 $content = $content -replace '(?im)^\s*create\s+database\s+\w+\s*;', ''
                 $content = $content -replace '(?im)^[^\S\r\n]*\\connect\b[^\r\n]*', ''
                 $content += "`nINSERT INTO $HistoryTable (script_name, version) VALUES ('$($script.Name)', '$version');`n"
                 $temp = New-TemporaryFile
                 $tempFiles += $temp
-                Set-Content -Path $temp.FullName -Value $content -NoNewline
+                [System.IO.File]::WriteAllText($temp.FullName, $content, $Utf8NoBom)
                 Write-Host "  applying $($script.Name)"
                 Invoke-PsqlFile -DbName $Database -Path $temp.FullName -SingleTransaction
             }

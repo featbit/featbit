@@ -245,4 +245,52 @@ public class SaveWithIsolationTests
         await Assert.ThrowsAsync<DbUpdateException>(
             () => TestableStep.Isolate(rows, save, (_, _) => { }));
     }
+
+    /// <summary>
+    /// Npgsql reports network and protocol failures as a plain
+    /// <see cref="NpgsqlException"/> — not a <see cref="PostgresException"/> — so
+    /// there is no server SQLSTATE to inspect. Absence of diagnostics is not
+    /// evidence that one row is bad, so the failure must propagate rather than be
+    /// isolated. Skipping here would drop the whole chunk while still satisfying
+    /// the verify arithmetic.
+    /// </summary>
+    [Fact]
+    public async Task NpgsqlExceptionWithoutSqlState_Propagates_AndIsNeverSkipped()
+    {
+        var rows = Rows(8);
+        var skipped = new List<FakeEntity>();
+        Func<FakeEntity[], Task> save = _ =>
+            throw new DbUpdateException(
+                "An exception occurred while writing to the database.",
+                new NpgsqlException("Exception while reading from stream"));
+
+        await Assert.ThrowsAsync<DbUpdateException>(
+            () => TestableStep.Isolate(rows, save, (r, _) => skipped.Add(r)));
+
+        Assert.Empty(skipped);
+    }
+
+    /// <summary>
+    /// The same rule for any other diagnostics-free inner exception (a socket
+    /// timeout, an I/O error) and for a bare <see cref="DbUpdateException"/>.
+    /// </summary>
+    [Theory]
+    [InlineData(typeof(TimeoutException))]
+    [InlineData(typeof(IOException))]
+    [InlineData(null)]
+    public async Task DbUpdateExceptionWithoutPostgresDiagnostics_Propagates(Type? innerType)
+    {
+        var rows = Rows(8);
+        var skipped = new List<FakeEntity>();
+        var inner = innerType is null ? null : (Exception)Activator.CreateInstance(innerType)!;
+        Func<FakeEntity[], Task> save = _ =>
+            throw (inner is null
+                ? new DbUpdateException("save failed")
+                : new DbUpdateException("save failed", inner));
+
+        await Assert.ThrowsAsync<DbUpdateException>(
+            () => TestableStep.Isolate(rows, save, (r, _) => skipped.Add(r)));
+
+        Assert.Empty(skipped);
+    }
 }

@@ -314,11 +314,13 @@ public class EntityStep<T>(string name) : IEntityStep where T : Entity
     /// affects the whole batch and must abort the run.
     /// </para>
     /// <para>
-    /// A <see cref="DbUpdateException"/> with no <see cref="PostgresException"/>
-    /// inside it (for example EF's own concurrency bookkeeping, or the plain
-    /// exception used by the unit tests' fake save) is also treated as
-    /// row-attributable: it is raised while translating the rows themselves and
-    /// carries no server-side fault.
+    /// The default is <b>deny</b>: with no <see cref="PostgresException"/> in the
+    /// chain there is no server SQLSTATE, and therefore no evidence that a specific
+    /// row is at fault. Npgsql reports network and protocol failures as a plain
+    /// <see cref="NpgsqlException"/> (or an <see cref="IOException"/> /
+    /// <see cref="TimeoutException"/>), so treating "no diagnostics" as a bad row
+    /// would reopen exactly the silent-data-loss path this method exists to close.
+    /// Such failures propagate and abort the run.
     /// </para>
     /// </summary>
     internal static bool IsBadRowFailure(DbUpdateException ex)
@@ -333,7 +335,7 @@ public class EntityStep<T>(string name) : IEntityStep where T : Entity
             }
         }
 
-        return true;
+        return false;
     }
 
     /// <summary>
