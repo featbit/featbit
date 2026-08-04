@@ -17,6 +17,10 @@ public static class Permissions
     public const string ManagePersonalAccessTokens = nameof(ManagePersonalAccessTokens);
     public const string ManageServiceAccessTokens = nameof(ManageServiceAccessTokens);
 
+    // Relay proxies
+    public const string ListRelayProxies = nameof(ListRelayProxies);
+    public const string ManageRelayProxies = nameof(ManageRelayProxies);
+
     // Organizations
     public const string UpdateOrgName = nameof(UpdateOrgName);
     public const string UpdateOrgSortFlagsBy = nameof(UpdateOrgSortFlagsBy);
@@ -80,6 +84,10 @@ public static class Permissions
         { ListAccessTokens, ResourceTypes.AccessToken },
         { ManagePersonalAccessTokens, ResourceTypes.AccessToken },
         { ManageServiceAccessTokens, ResourceTypes.AccessToken },
+
+        // Relay proxies
+        { ListRelayProxies, ResourceTypes.RelayProxy },
+        { ManageRelayProxies, ResourceTypes.RelayProxy },
 
         // Organizations
         { UpdateOrgName, ResourceTypes.Organization },

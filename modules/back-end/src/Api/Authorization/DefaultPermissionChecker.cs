@@ -54,6 +54,11 @@ public class DefaultPermissionChecker(
             return RN.ForOrganization();
         }
 
+        if (resourceType == ResourceTypes.RelayProxy)
+        {
+            return RN.ForRelayProxy();
+        }
+
         var routeValues = request.RouteValues;
 
         return resourceType switch

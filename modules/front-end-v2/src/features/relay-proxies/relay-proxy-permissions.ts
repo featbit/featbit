@@ -9,21 +9,22 @@ export function canUseRelayProxies(
   policies: UserPolicy[],
   action: "ListRelayProxies" | "ManageRelayProxies"
 ) {
-  if (policies.some((policy) => policy.type.toLowerCase() === "owner")) {
-    return true
-  }
-
-  return policies.some((policy) =>
-    policy.statements.some(
+  const matchingStatements = policies
+    .flatMap((policy) => policy.statements)
+    .filter(
       (statement) =>
-        statement.effect.toLowerCase() === "allow" &&
-        (statement.resourceType === "relay-proxy" ||
+        statement.resourceType === "*" ||
+        ((statement.actions.includes(action) ||
+          statement.actions.includes("*")) &&
           statement.resources.some((resource) =>
-            wildcardMatches(resource, "relay-proxy/any")
-          )) &&
-        (statement.actions.includes(action) ||
-          statement.actions.includes("*") ||
-          statement.actions.includes("AllRelayProxyActions"))
+            wildcardMatches(resource, "relay-proxy/*")
+          ))
+    )
+
+  return (
+    matchingStatements.length > 0 &&
+    matchingStatements.every(
+      (statement) => statement.effect.toLowerCase() === "allow"
     )
   )
 }
