@@ -50,7 +50,7 @@ export function GeneralPage() {
   const [statusEventId, setStatusEventId] = useState(0)
   const [secretVisible, setSecretVisible] = useState(false)
   const permissionsQuery = useQuery({
-    queryKey: ["current-user-policies"],
+    queryKey: ["current-user-policies", workspace?.id ?? ""],
     queryFn: fetchCurrentUserPolicies,
   })
   const policies = permissionsQuery.data ?? []
