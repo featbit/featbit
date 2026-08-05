@@ -55,7 +55,7 @@ public class Segment : AuditedEntity
     /// Unused by the Mongo provider.
     /// </summary>
     [JsonIgnore]
-    public uint Xmin { get; set; }
+    public uint Xmin { get; private set; }
 
     public bool IsEnvironmentSpecific => Type == SegmentType.EnvironmentSpecific;
 
