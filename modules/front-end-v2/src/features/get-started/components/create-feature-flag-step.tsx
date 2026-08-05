@@ -34,10 +34,10 @@ import {
 } from "@/components/ui/popover"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Textarea } from "@/components/ui/textarea"
+import { currentUserPoliciesQueryOptions } from "@/features/iam/current-user-policy-query"
 import {
   createFeatureFlag,
   fetchFeatureFlags,
-  fetchFlagPolicies,
   isFeatureFlagKeyUsed,
 } from "@/features/flags/flags-api"
 import {
@@ -47,8 +47,10 @@ import {
 import type {
   FeatureFlag,
   FlagCreationPayload,
+  UserPolicy,
 } from "@/features/flags/flags-types"
 import {
+  getCurrentOrganization,
   getCurrentProjectEnv,
   getCurrentWorkspace,
 } from "@/features/layout/layout-context"
@@ -105,6 +107,7 @@ export function CreateFeatureFlagStep({
   const queryClient = useQueryClient()
   const projectEnv = getCurrentProjectEnv()
   const workspace = getCurrentWorkspace()
+  const organizationId = getCurrentOrganization()?.id ?? ""
   const envId = projectEnv?.envId ?? ""
   const envRn = environmentRn({
     projectKey: projectEnv?.projectKey ?? "",
@@ -158,8 +161,7 @@ export function CreateFeatureFlagStep({
     placeholderData: (previous) => previous,
   })
   const permissionsQuery = useQuery({
-    queryKey: ["feature-flag-policies", workspace?.id ?? ""],
-    queryFn: fetchFlagPolicies,
+    ...currentUserPoliciesQueryOptions<UserPolicy>(organizationId),
     staleTime: 5 * 60_000,
   })
   const canCreate =

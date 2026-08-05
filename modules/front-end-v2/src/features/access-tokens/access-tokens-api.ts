@@ -4,7 +4,6 @@ import type {
   AccessTokenPayload,
   PagedAccessTokens,
   PolicyResource,
-  UserPolicy,
 } from "./access-token-types"
 
 type PagedCreators = {
@@ -98,8 +97,4 @@ export function fetchAccessTokenResources(name: string, type: string) {
   return fetchApi<PolicyResource[]>(
     `/api/v1/resources${queryString({ name, type })}`
   )
-}
-
-export function fetchCurrentUserPolicies() {
-  return fetchApi<UserPolicy[]>("/api/v1/user/policies")
 }

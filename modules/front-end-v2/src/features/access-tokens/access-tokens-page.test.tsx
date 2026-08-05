@@ -3,10 +3,8 @@ import { render, screen, waitFor } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { i18n } from "@/lib/i18n/i18n"
-import {
-  fetchAccessTokens,
-  fetchCurrentUserPolicies,
-} from "./access-tokens-api"
+import { fetchCurrentUserPolicies } from "@/features/iam/current-user-permissions"
+import { fetchAccessTokens } from "./access-tokens-api"
 import { AccessTokensPage } from "./access-tokens-page"
 
 vi.mock("./access-tokens-api", async (importOriginal) => {
@@ -14,11 +12,18 @@ vi.mock("./access-tokens-api", async (importOriginal) => {
   return {
     ...actual,
     fetchAccessTokens: vi.fn(),
-    fetchCurrentUserPolicies: vi.fn(),
   }
 })
 
+vi.mock("@/features/iam/current-user-permissions", async (importOriginal) => ({
+  ...(await importOriginal<
+    typeof import("@/features/iam/current-user-permissions")
+  >()),
+  fetchCurrentUserPolicies: vi.fn(),
+}))
+
 vi.mock("@/features/layout/layout-context", () => ({
+  getCurrentOrganization: () => ({ id: "organization-1" }),
   getCurrentWorkspace: () => ({ id: "workspace-1" }),
   resolveLang: () => "en",
 }))

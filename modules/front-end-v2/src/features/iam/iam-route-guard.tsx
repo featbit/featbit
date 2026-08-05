@@ -3,20 +3,19 @@ import { ShieldAlert } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Outlet } from "react-router-dom"
 import { Skeleton } from "@/components/ui/skeleton"
-import { getCurrentWorkspace } from "@/features/layout/layout-context"
-import { canUseAction, fetchCurrentUserPolicies } from "./current-user-permissions"
+import { getCurrentOrganization } from "@/features/layout/layout-context"
+import { currentUserPoliciesQueryOptions } from "./current-user-policy-query"
+import { canUseAction } from "./current-user-permissions"
 
 const IAM_RESOURCE_RN = "iam/*"
 const MANAGE_IAM_ACTION = "CanManageIAM"
 
 export function IamRouteGuard() {
   const { t } = useTranslation()
-  const workspaceId = getCurrentWorkspace()?.id ?? ""
-  const policiesQuery = useQuery({
-    queryKey: ["current-user-policies", workspaceId],
-    queryFn: fetchCurrentUserPolicies,
-    enabled: Boolean(workspaceId),
-  })
+  const organizationId = getCurrentOrganization()?.id ?? ""
+  const policiesQuery = useQuery(
+    currentUserPoliciesQueryOptions(organizationId)
+  )
   const isAllowed = canUseAction(
     policiesQuery.data ?? [],
     IAM_RESOURCE_RN,

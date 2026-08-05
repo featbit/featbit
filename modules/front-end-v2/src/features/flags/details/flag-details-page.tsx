@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { getStoredUserProfile } from "@/features/auth/auth-api"
+import { currentUserPoliciesQueryOptions } from "@/features/iam/current-user-policy-query"
 import {
   createChangeRequest,
   deleteChangeRequest,
@@ -17,6 +18,7 @@ import { changeRequestsCopy } from "@/features/change-requests/change-requests-c
 import { ChangeRequestDecisionDialog } from "@/features/change-requests/components/change-request-decision-dialog"
 import { ChangeRequestPreviewAlert } from "@/features/change-requests/components/change-request-preview-alert"
 import {
+  getCurrentOrganization,
   getCurrentProjectEnv,
   getCurrentWorkspace,
   localizedPath,
@@ -37,7 +39,6 @@ import {
   createFlagSchedule,
   fetchFeatureFlag,
   fetchFlagEnvironmentSettings,
-  fetchFlagPolicies,
   fetchPendingFlagChanges,
   removePendingSchedule,
   toggleFeatureFlag,
@@ -55,6 +56,7 @@ import type {
   FlagTargeting,
   FlagVariation,
   PendingFlagChange,
+  UserPolicy,
 } from "../flags-types"
 import {
   FlagConfirmDialog,
@@ -110,6 +112,7 @@ export function FlagDetailsPage() {
   const previewing = Boolean(previewChangeRequestId)
   const projectEnv = getCurrentProjectEnv()
   const workspace = getCurrentWorkspace()
+  const organizationId = getCurrentOrganization()?.id ?? ""
   const fineGrainedGranted = isFineGrainedAccessControlGranted(
     workspace?.license
   )
@@ -190,12 +193,12 @@ export function FlagDetailsPage() {
     ),
   })
   const policiesQuery = useQuery({
-    queryKey: ["feature-flag-policies", workspace?.id ?? ""],
-    queryFn: fetchFlagPolicies,
+    ...currentUserPoliciesQueryOptions<UserPolicy>(organizationId),
     enabled:
-      (activeTab === "targeting" && !previewing) ||
-      activeTab === "settings" ||
-      activeTab === "variations",
+      Boolean(organizationId) &&
+      ((activeTab === "targeting" && !previewing) ||
+        activeTab === "settings" ||
+        activeTab === "variations"),
     staleTime: 5 * 60_000,
   })
   const settingsQuery = useQuery({

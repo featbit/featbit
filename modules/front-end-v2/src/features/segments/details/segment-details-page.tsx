@@ -5,7 +5,9 @@ import { useNavigate, useParams } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { currentUserPoliciesQueryOptions } from "@/features/iam/current-user-policy-query"
 import {
+  getCurrentOrganization,
   getCurrentProjectEnv,
   getCurrentWorkspace,
   localizedPath,
@@ -14,7 +16,6 @@ import {
 import { isFineGrainedAccessControlGranted } from "@/features/workspace/license/license-utils"
 import {
   fetchCurrentEnvironmentSettings,
-  fetchCurrentUserPolicies,
   fetchSegment,
   fetchSegmentFlagReferences,
   fetchSegmentUserProperties,
@@ -26,7 +27,7 @@ import {
   segmentRn,
   type SegmentAction,
 } from "../segments-permissions"
-import type { Segment } from "../segments-types"
+import type { Segment, UserPolicy } from "../segments-types"
 import { SegmentDetailsHeader } from "./components/segment-details-header"
 import { HistoryTab } from "./history/history-tab"
 import { SettingsTab } from "./settings/settings-tab"
@@ -47,6 +48,7 @@ export function SegmentDetailsPage() {
     requestedTab && tabs.has(requestedTab) ? requestedTab : "targeting"
   ) as DetailsTab
   const workspace = getCurrentWorkspace()
+  const organizationId = getCurrentOrganization()?.id ?? ""
   const projectEnv = getCurrentProjectEnv()
   const envId = projectEnv?.envId ?? ""
   const segmentsPath = localizedPath(lang, "/segments")
@@ -105,8 +107,7 @@ export function SegmentDetailsPage() {
     ),
   })
   const permissionsQuery = useQuery({
-    queryKey: ["segment-user-policies", workspace?.id ?? ""],
-    queryFn: fetchCurrentUserPolicies,
+    ...currentUserPoliciesQueryOptions<UserPolicy>(organizationId),
     staleTime: 5 * 60_000,
   })
   const settingsQuery = useQuery({

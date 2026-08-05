@@ -171,7 +171,3 @@ export function fetchOrganizationDefaultPermissionOptions() {
     "/api/v1/organizations/default-permission-options"
   )
 }
-
-export function fetchCurrentUserOrganizationPolicies() {
-  return organizationRequest<OrganizationUserPolicy[]>("/api/v1/user/policies")
-}

@@ -6,7 +6,6 @@ import type {
   RelayProxy,
   RelayProxyPayload,
   SyncAgentResult,
-  UserPolicy,
 } from "./relay-proxy-types"
 
 const basePath = "/api/v1/relay-proxies"
@@ -76,8 +75,4 @@ export function fetchEnvironmentResources(name = "") {
   return fetchApi<EnvironmentResource[]>(`/api/v2/resources?${params}`).then(
     (resources) => resources.filter((resource) => !resource.rn.includes("*"))
   )
-}
-
-export function fetchCurrentUserPolicies() {
-  return fetchApi<UserPolicy[]>("/api/v1/user/policies")
 }

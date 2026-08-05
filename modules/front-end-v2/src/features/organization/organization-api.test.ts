@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import {
   createOrganization,
-  fetchCurrentUserOrganizationPolicies,
   fetchOrganizationDefaultPermissionOptions,
   fetchOrganizationGroups,
   fetchOrganizationPolicies,
@@ -137,24 +136,6 @@ describe("organization api", () => {
     expect(fetchMock).toHaveBeenNthCalledWith(
       2,
       "http://localhost:5000/api/v1/groups?name=release&pageIndex=0&pageSize=50",
-      expect.anything()
-    )
-  })
-
-  it("fetches the current user's policies for organization authorization", async () => {
-    localStorage.setItem("token", "auth-token")
-
-    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      jsonResponse({
-        success: true,
-        data: [],
-      })
-    )
-
-    await expect(fetchCurrentUserOrganizationPolicies()).resolves.toEqual([])
-
-    expect(fetchMock).toHaveBeenCalledWith(
-      "http://localhost:5000/api/v1/user/policies",
       expect.anything()
     )
   })

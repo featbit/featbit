@@ -16,7 +16,9 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { currentUserPoliciesQueryOptions } from "@/features/iam/current-user-policy-query"
 import {
+  getCurrentOrganization,
   getCurrentWorkspace,
   resolveLang,
 } from "@/features/layout/layout-context"
@@ -27,7 +29,6 @@ import {
 } from "@/features/workspace/license/license-utils"
 import {
   fetchAccessTokens,
-  fetchCurrentUserPolicies,
   removeAccessToken,
   toggleAccessTokenStatus,
 } from "./access-tokens-api"
@@ -41,6 +42,7 @@ import type {
   AccessTokenSheetMode,
   AccessTokenType,
   PagedAccessTokens,
+  UserPolicy,
 } from "./access-token-types"
 import {
   AccessTokenConfirmDialog,
@@ -76,6 +78,7 @@ export function AccessTokensPage() {
     token: string
   } | null>(null)
   const workspace = getCurrentWorkspace()
+  const organizationId = getCurrentOrganization()?.id ?? ""
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
@@ -86,8 +89,7 @@ export function AccessTokensPage() {
   }, [search])
 
   const permissionsQuery = useQuery({
-    queryKey: ["access-token-user-policies", workspace?.id ?? ""],
-    queryFn: fetchCurrentUserPolicies,
+    ...currentUserPoliciesQueryOptions<UserPolicy>(organizationId),
     staleTime: 5 * 60_000,
   })
   const policies = permissionsQuery.data ?? []

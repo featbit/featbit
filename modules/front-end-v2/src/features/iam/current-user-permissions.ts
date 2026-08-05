@@ -10,8 +10,10 @@ export type CurrentUserPolicy = Policy
 
 export { canUseAction }
 
-export function fetchCurrentUserPolicies() {
-  return fetchApi<CurrentUserPolicy[]>("/api/v1/user/policies")
+export function fetchCurrentUserPolicies<
+  TPolicy extends CurrentUserPolicy = CurrentUserPolicy,
+>() {
+  return fetchApi<TPolicy[]>("/api/v1/user/policies")
 }
 
 export function projectRn(projectKey: string) {

@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useParams } from "react-router-dom"
 import { toast } from "sonner"
+import { currentUserPoliciesQueryOptions } from "@/features/iam/current-user-policy-query"
 import {
   clearCurrentProjectEnv,
   fetchOrganizations,
@@ -17,7 +18,6 @@ import { PreferencesSection } from "@/features/organization/general/components/p
 import { SwitchOrganizationSection } from "@/features/organization/general/components/switch-organization-section"
 import {
   createOrganization,
-  fetchCurrentUserOrganizationPolicies,
   fetchOrganizationDefaultPermissionOptions,
   fetchOrganizationGroups,
   fetchOrganizationPolicies,
@@ -27,6 +27,7 @@ import {
   type OrganizationGroup,
   type OrganizationDetails,
   type OrganizationPolicy,
+  type OrganizationUserPolicy,
 } from "@/features/organization/organization-api"
 import { canUseOrganizationAction } from "@/features/organization/organization-permissions"
 
@@ -92,9 +93,9 @@ export function OrganizationGeneralPage() {
   )
 
   const permissionsQuery = useQuery({
-    queryKey: ["organization-user-policies", currentOrganization?.id ?? ""],
-    queryFn: fetchCurrentUserOrganizationPolicies,
-    enabled: Boolean(currentOrganization),
+    ...currentUserPoliciesQueryOptions<OrganizationUserPolicy>(
+      currentOrganization?.id ?? ""
+    ),
     staleTime: 5 * 60_000,
   })
   const currentUserPolicies = permissionsQuery.data ?? []

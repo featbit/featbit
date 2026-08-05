@@ -3,9 +3,11 @@ import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useParams } from "react-router-dom"
 import {
+  getCurrentOrganization,
   getCurrentWorkspace,
   resolveLang,
 } from "@/features/layout/layout-context"
+import { currentUserPoliciesQueryOptions } from "@/features/iam/current-user-policy-query"
 import { WorkspaceLayout } from "@/features/workspace/components/workspace-layout"
 import { EmptyLicenseNotice } from "@/features/workspace/license/components/empty-license-notice"
 import { FeatureGrid } from "@/features/workspace/license/components/feature-grid"
@@ -22,10 +24,7 @@ import {
   type WorkspaceDetails,
 } from "@/features/workspace/workspace-api"
 import { getRuntimeEnv } from "@/lib/env/runtime-env"
-import {
-  canUseAction,
-  fetchCurrentUserPolicies,
-} from "@/features/iam/current-user-permissions"
+import { canUseAction } from "@/features/iam/current-user-permissions"
 
 const HOSTING_MODE_SAAS = "saas"
 
@@ -46,10 +45,10 @@ export function LicensePage() {
   const [statusEventId, setStatusEventId] = useState(0)
   const [licenseUpdateEventId, setLicenseUpdateEventId] = useState(0)
   const isSaas = getRuntimeEnv().hostingMode === HOSTING_MODE_SAAS
-  const permissionsQuery = useQuery({
-    queryKey: ["current-user-policies", workspace?.id ?? ""],
-    queryFn: fetchCurrentUserPolicies,
-  })
+  const organizationId = getCurrentOrganization()?.id ?? ""
+  const permissionsQuery = useQuery(
+    currentUserPoliciesQueryOptions(organizationId)
+  )
   const canUpdateLicense = canUseAction(
     permissionsQuery.data ?? [],
     "workspace/*",

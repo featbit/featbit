@@ -13,6 +13,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { currentUserPoliciesQueryOptions } from "@/features/iam/current-user-policy-query"
 import {
   getCurrentOrganization,
   getCurrentProjectEnv,
@@ -30,7 +31,6 @@ import {
   archiveSegment,
   createSegment,
   fetchCurrentEnvironmentSettings,
-  fetchCurrentUserPolicies,
   fetchSegmentFlagReferences,
   fetchSegments,
   fetchSegmentScopes,
@@ -50,6 +50,7 @@ import type {
   SegmentFlagReference,
   SegmentPayload,
   SegmentType,
+  UserPolicy,
 } from "../segments-types"
 import { SegmentReferencesDialog } from "../components/segment-references-dialog"
 import {
@@ -99,8 +100,7 @@ export function SegmentsPage() {
   }, [search])
 
   const permissionsQuery = useQuery({
-    queryKey: ["segment-user-policies", workspace?.id ?? ""],
-    queryFn: fetchCurrentUserPolicies,
+    ...currentUserPoliciesQueryOptions<UserPolicy>(organization?.id ?? ""),
     staleTime: 5 * 60_000,
   })
   const policies = useMemo(

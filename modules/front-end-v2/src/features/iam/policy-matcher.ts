@@ -1,4 +1,5 @@
 export type PolicyStatement = {
+  id?: string
   resourceType: string
   effect: string
   actions: string[]

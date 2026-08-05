@@ -1,10 +1,20 @@
-import { describe, expect, it } from "vitest"
+import { beforeEach, describe, expect, it, vi } from "vitest"
+import { fetchApi } from "@/lib/api/authenticated-api"
+import {
+  currentUserPoliciesQueryKey,
+  currentUserPoliciesQueryOptions,
+} from "./current-user-policy-query"
 import {
   canUseAction,
   environmentRn,
+  fetchCurrentUserPolicies,
   projectRn,
   type CurrentUserPolicy,
 } from "./current-user-permissions"
+
+vi.mock("@/lib/api/authenticated-api", () => ({
+  fetchApi: vi.fn(),
+}))
 
 function policy(
   effect: "allow" | "deny",
@@ -19,6 +29,29 @@ function policy(
 }
 
 describe("current user permissions", () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it("scopes the shared policy query by organization", () => {
+    expect(currentUserPoliciesQueryKey("organization-1")).toEqual([
+      "current-user-policies",
+      "organization-1",
+    ])
+    expect(currentUserPoliciesQueryKey("organization-2")).not.toEqual(
+      currentUserPoliciesQueryKey("organization-1")
+    )
+    expect(currentUserPoliciesQueryOptions("").enabled).toBe(false)
+  })
+
+  it("loads current-user policies through the shared endpoint", async () => {
+    vi.mocked(fetchApi).mockResolvedValue([])
+
+    await expect(fetchCurrentUserPolicies()).resolves.toEqual([])
+
+    expect(fetchApi).toHaveBeenCalledWith("/api/v1/user/policies")
+  })
+
   it("matches workspace, project, and environment resource names", () => {
     const policies = [
       policy("allow", ["UpdateWorkspaceGeneralSettings"], ["workspace/*"]),

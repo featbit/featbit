@@ -14,9 +14,9 @@ import type { ProjectEnv } from "@/features/layout/layout-types"
 import {
   canUseAction,
   environmentRn,
-  fetchCurrentUserPolicies,
   projectRn,
 } from "@/features/iam/current-user-permissions"
+import { currentUserPoliciesQueryOptions } from "@/features/iam/current-user-policy-query"
 import { OrganizationLayout } from "@/features/organization/components/organization-layout"
 import { normalizeOrganization } from "@/features/organization/organization-api"
 import {
@@ -97,15 +97,14 @@ export function OrganizationProjectsPage() {
   const [secretsTarget, setSecretsTarget] = useState<EnvironmentTarget>(null)
   const [secretsSheetOpen, setSecretsSheetOpen] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null)
-  const permissionsQuery = useQuery({
-    queryKey: ["current-user-policies", getCurrentOrganization()?.id ?? ""],
-    queryFn: fetchCurrentUserPolicies,
-  })
-  const policies = permissionsQuery.data ?? []
   const organization = useMemo(
     () => normalizeOrganization(getCurrentOrganization()),
     []
   )
+  const permissionsQuery = useQuery(
+    currentUserPoliciesQueryOptions(organization?.id ?? "")
+  )
+  const policies = permissionsQuery.data ?? []
   const linkedSecretsTarget = useMemo<EnvironmentTarget>(() => {
     if (searchParams.get("view") !== "secrets") {
       return null

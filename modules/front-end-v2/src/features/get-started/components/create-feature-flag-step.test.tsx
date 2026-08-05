@@ -10,18 +10,25 @@ window.HTMLElement.prototype.scrollIntoView = vi.fn()
 const mocks = vi.hoisted(() => ({
   createFeatureFlag: vi.fn(),
   fetchFeatureFlags: vi.fn(),
-  fetchFlagPolicies: vi.fn(),
+  fetchCurrentUserPolicies: vi.fn(),
   isFeatureFlagKeyUsed: vi.fn(),
 }))
 
 vi.mock("@/features/flags/flags-api", () => ({
   createFeatureFlag: mocks.createFeatureFlag,
   fetchFeatureFlags: mocks.fetchFeatureFlags,
-  fetchFlagPolicies: mocks.fetchFlagPolicies,
   isFeatureFlagKeyUsed: mocks.isFeatureFlagKeyUsed,
 }))
 
+vi.mock("@/features/iam/current-user-permissions", async (importOriginal) => ({
+  ...(await importOriginal<
+    typeof import("@/features/iam/current-user-permissions")
+  >()),
+  fetchCurrentUserPolicies: mocks.fetchCurrentUserPolicies,
+}))
+
 vi.mock("@/features/layout/layout-context", () => ({
+  getCurrentOrganization: () => ({ id: "organization-1" }),
   getCurrentProjectEnv: () => ({
     projectId: "project-1",
     projectName: "Platform",
@@ -51,8 +58,19 @@ describe("CreateFeatureFlagStep", () => {
   beforeEach(async () => {
     await i18n.changeLanguage("en")
     vi.clearAllMocks()
-    mocks.fetchFlagPolicies.mockResolvedValue([
-      { type: "Owner", statements: [] },
+    mocks.fetchCurrentUserPolicies.mockResolvedValue([
+      {
+        name: "Owner",
+        type: "SysManaged",
+        statements: [
+          {
+            resourceType: "*",
+            effect: "Allow",
+            actions: ["*"],
+            resources: ["*"],
+          },
+        ],
+      },
     ])
     mocks.isFeatureFlagKeyUsed.mockResolvedValue(false)
     mocks.createFeatureFlag.mockResolvedValue({ key: "checkout-redesign" })

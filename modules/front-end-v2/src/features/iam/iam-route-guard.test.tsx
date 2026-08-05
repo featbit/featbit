@@ -20,6 +20,10 @@ vi.mock("./current-user-permissions", async (importOriginal) => ({
   fetchCurrentUserPolicies: vi.fn(),
 }))
 
+vi.mock("@/features/layout/layout-context", () => ({
+  getCurrentOrganization: () => ({ id: "organization-1" }),
+}))
+
 function policy(
   effect: "allow" | "deny",
   actions: string[],

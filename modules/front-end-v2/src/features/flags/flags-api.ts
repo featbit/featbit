@@ -9,7 +9,6 @@ import type {
   FeatureFlag,
   PendingFlagChange,
   PagedFeatureFlags,
-  UserPolicy,
   FlagVariation,
 } from "./flags-types"
 
@@ -122,10 +121,6 @@ export function fetchFeatureFlags(envId: string, filter: FlagListFilter) {
 
 export function fetchFeatureFlagTags(envId: string) {
   return fetchApi<string[]>(`${flagsPath(envId)}/all-tags`)
-}
-
-export function fetchFlagPolicies() {
-  return fetchApi<UserPolicy[]>("/api/v1/user/policies")
 }
 
 type ProjectWithSettings = {

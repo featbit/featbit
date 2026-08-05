@@ -7,10 +7,8 @@ import {
   fetchOrganizations,
   getCurrentOrganization,
 } from "@/features/layout/layout-context"
-import {
-  fetchCurrentUserOrganizationPolicies,
-  fetchOrganizationDefaultPermissionOptions,
-} from "@/features/organization/organization-api"
+import { fetchOrganizationDefaultPermissionOptions } from "@/features/organization/organization-api"
+import { fetchCurrentUserPolicies } from "@/features/iam/current-user-permissions"
 import { OrganizationGeneralPage } from "./general-page"
 
 vi.mock("@/features/layout/layout-context", () => ({
@@ -21,6 +19,13 @@ vi.mock("@/features/layout/layout-context", () => ({
   resolveLang: () => "en",
 }))
 
+vi.mock("@/features/iam/current-user-permissions", async (importOriginal) => ({
+  ...(await importOriginal<
+    typeof import("@/features/iam/current-user-permissions")
+  >()),
+  fetchCurrentUserPolicies: vi.fn(),
+}))
+
 vi.mock("@/features/organization/organization-api", async (importOriginal) => {
   const actual =
     await importOriginal<
@@ -29,7 +34,6 @@ vi.mock("@/features/organization/organization-api", async (importOriginal) => {
 
   return {
     ...actual,
-    fetchCurrentUserOrganizationPolicies: vi.fn(),
     fetchOrganizationDefaultPermissionOptions: vi.fn(),
   }
 })
@@ -107,7 +111,7 @@ describe("OrganizationGeneralPage IAM", () => {
   })
 
   it("finishes loading but keeps permission controls disabled when the policy query fails", async () => {
-    vi.mocked(fetchCurrentUserOrganizationPolicies).mockRejectedValue(
+    vi.mocked(fetchCurrentUserPolicies).mockRejectedValue(
       new Error("Policy request failed")
     )
 
