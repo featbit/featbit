@@ -1,21 +1,21 @@
 import { useQuery } from "@tanstack/react-query"
-import { useTranslation } from "react-i18next"
 import { ShieldAlert } from "lucide-react"
+import { useTranslation } from "react-i18next"
 import { Outlet } from "react-router-dom"
 import { Skeleton } from "@/components/ui/skeleton"
-import {
-  canUseAction,
-  fetchCurrentUserPolicies,
-} from "./current-user-permissions"
+import { getCurrentWorkspace } from "@/features/layout/layout-context"
+import { canUseAction, fetchCurrentUserPolicies } from "./current-user-permissions"
 
 const IAM_RESOURCE_RN = "iam/*"
 const MANAGE_IAM_ACTION = "CanManageIAM"
 
 export function IamRouteGuard() {
   const { t } = useTranslation()
+  const workspaceId = getCurrentWorkspace()?.id ?? ""
   const policiesQuery = useQuery({
-    queryKey: ["current-user-policies"],
+    queryKey: ["current-user-policies", workspaceId],
     queryFn: fetchCurrentUserPolicies,
+    enabled: Boolean(workspaceId),
   })
   const isAllowed = canUseAction(
     policiesQuery.data ?? [],
