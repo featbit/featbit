@@ -60,7 +60,7 @@ public class FeatureFlag : FullAuditedEntity
     /// Unused by the Mongo provider.
     /// </summary>
     [JsonIgnore]
-    public uint Xmin { get; set; }
+    public uint Xmin { get; private set; }
 
     public FeatureFlag()
     {
