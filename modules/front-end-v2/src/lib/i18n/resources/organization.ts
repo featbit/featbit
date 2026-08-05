@@ -163,8 +163,7 @@ export const enOrganization = {
         } as const
 
 export const zhOrganization = {
-          permissionDenied:
-            "\u4f60\u6ca1\u6709\u6267\u884c\u6b64 Organization \u64cd\u4f5c\u7684\u6743\u9650\u3002",
+          permissionDenied: "你没有执行此组织机构操作的权限。",
           title: "组织机构",
           operationSucceeded: "操作成功",
           operationFailed: "操作失败",
