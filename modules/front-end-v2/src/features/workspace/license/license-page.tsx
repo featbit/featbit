@@ -47,7 +47,7 @@ export function LicensePage() {
   const [licenseUpdateEventId, setLicenseUpdateEventId] = useState(0)
   const isSaas = getRuntimeEnv().hostingMode === HOSTING_MODE_SAAS
   const permissionsQuery = useQuery({
-    queryKey: ["current-user-policies"],
+    queryKey: ["current-user-policies", workspace?.id ?? ""],
     queryFn: fetchCurrentUserPolicies,
   })
   const canUpdateLicense = canUseAction(
