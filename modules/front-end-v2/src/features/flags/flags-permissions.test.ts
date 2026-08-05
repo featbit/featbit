@@ -39,12 +39,50 @@ describe("feature flag permissions", () => {
   it("grants owners every flag action", () => {
     expect(
       canUseFlagAction(
-        [{ type: "Owner", statements: [] }],
+        [
+          {
+            name: "Owner",
+            type: "SysManaged",
+            statements: [
+              {
+                resourceType: "*",
+                effect: "allow",
+                resources: ["*"],
+                actions: ["*"],
+              },
+            ],
+          },
+        ],
         featureFlagRn(envRn, flag),
         "DeleteFlag",
         false
       )
     ).toBe(true)
+  })
+
+  it("does not let Owner bypass a matching deny", () => {
+    expect(
+      canUseFlagAction(
+        [
+          {
+            name: "Owner",
+            type: "SysManaged",
+            statements: [
+              {
+                resourceType: "*",
+                effect: "allow",
+                resources: ["*"],
+                actions: ["*"],
+              },
+            ],
+          },
+          policy([`${envRn}:flag/*`], ["DeleteFlag"], "deny"),
+        ],
+        featureFlagRn(envRn, flag),
+        "DeleteFlag",
+        false
+      )
+    ).toBe(false)
   })
 
   it("matches the canonical all-flags resource used by IAM policies", () => {

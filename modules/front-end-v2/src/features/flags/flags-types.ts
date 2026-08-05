@@ -122,6 +122,7 @@ export type PagedFeatureFlags = {
 }
 
 export type UserPolicy = {
+  name?: string
   type: string
   statements: Array<{
     resourceType: string

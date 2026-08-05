@@ -17,7 +17,19 @@ import type { PermissionDraft, UserPolicy } from "../access-token-types"
 import { PermissionsEditor } from "./permissions-editor"
 
 const ownerPolicies: UserPolicy[] = [
-  { name: "Owner", type: "SysManaged", statements: [] },
+  {
+    name: "Owner",
+    type: "SysManaged",
+    statements: [
+      {
+        id: crypto.randomUUID(),
+        resourceType: "*",
+        effect: "allow",
+        actions: ["*"],
+        resources: ["*"],
+      },
+    ],
+  },
 ]
 
 function PermissionsEditorHarness({

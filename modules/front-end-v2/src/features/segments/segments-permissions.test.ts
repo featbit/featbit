@@ -36,7 +36,20 @@ describe("segment permissions", () => {
   it("grants owners every segment action", () => {
     expect(
       canUseSegmentAction(
-        [{ type: "Owner", statements: [] }],
+        [
+          {
+            name: "Owner",
+            type: "SysManaged",
+            statements: [
+              {
+                resourceType: "*",
+                effect: "allow",
+                resources: ["*"],
+                actions: ["*"],
+              },
+            ],
+          },
+        ],
         segmentRn(envRn, segment),
         "DeleteSegment",
         false
@@ -44,7 +57,18 @@ describe("segment permissions", () => {
     ).toBe(true)
   })
 
-  it("matches wildcard resources and SegmentAllActions", () => {
+  it("matches wildcard resources and the canonical all-actions value", () => {
+    expect(
+      canUseSegmentAction(
+        [policy([`${envRn}:segment/*`], ["*"])],
+        segmentRn(envRn, segment),
+        "ArchiveSegment",
+        false
+      )
+    ).toBe(true)
+  })
+
+  it("does not treat the frontend action key as a stored permission value", () => {
     expect(
       canUseSegmentAction(
         [policy([`${envRn}:segment/*`], ["SegmentAllActions"])],
@@ -52,7 +76,7 @@ describe("segment permissions", () => {
         "ArchiveSegment",
         false
       )
-    ).toBe(true)
+    ).toBe(false)
   })
 
   it("grants only the independently allowed General field", () => {

@@ -5,6 +5,10 @@ import type {
   ResourceType,
   UserPolicy,
 } from "./access-token-types"
+import {
+  canUseAction,
+  canUseActionOnAnyResource,
+} from "@/features/iam/policy-matcher"
 
 export type PermissionAction = {
   name: string
@@ -332,70 +336,13 @@ export function permissionDraftToStatements(
   })
 }
 
-function userStatements(policies: UserPolicy[]) {
-  return policies.flatMap((policy) => policy.statements ?? [])
-}
-
-export function hasOwnerPolicy(policies: UserPolicy[]) {
-  return policies.some(
-    (policy) => policy.name === "Owner" && policy.type === "SysManaged"
-  )
-}
-
-function wildcardMatch(value: string, pattern: string) {
-  const expression = pattern
-    .replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
-    .replace(/\\\*/g, ".*")
-  return new RegExp(`^${expression}$`).test(value)
-}
-
-function statementMatchesAction(
-  statement: PolicyStatement,
-  resourceType: string,
-  actionName: string
-) {
-  const typeMatches =
-    statement.resourceType === "*" || statement.resourceType === resourceType
-  const actionMatches = statement.actions.some(
-    (actionNameInStatement) =>
-      actionNameInStatement === "*" || actionNameInStatement === actionName
-  )
-
-  return typeMatches && actionMatches
-}
-
-export function isPermissionGranted(
-  policies: UserPolicy[],
-  resourceName: string,
-  resourceType: string,
-  actionName: string
-) {
-  if (hasOwnerPolicy(policies)) {
-    return true
-  }
-
-  const matching = userStatements(policies).filter(
-    (statement) =>
-      statementMatchesAction(statement, resourceType, actionName) &&
-      statement.resources.some((resource) =>
-        wildcardMatch(resourceName, resource)
-      )
-  )
-
-  return (
-    matching.length > 0 &&
-    matching.every((statement) => statement.effect === "allow")
-  )
-}
-
 export function canManageAccessTokenType(
   policies: UserPolicy[],
   type: AccessTokenType
 ) {
-  return isPermissionGranted(
+  return canUseAction(
     policies,
     "access-token/*",
-    "access-token",
     type === "Personal"
       ? "ManagePersonalAccessTokens"
       : "ManageServiceAccessTokens"
@@ -403,31 +350,11 @@ export function canManageAccessTokenType(
 }
 
 export function canListAccessTokens(policies: UserPolicy[]) {
-  return isPermissionGranted(
-    policies,
-    "access-token/*",
-    "access-token",
-    "ListAccessTokens"
-  )
+  return canUseAction(policies, "access-token/*", "ListAccessTokens")
 }
 
-export function canGrantAction(
-  policies: UserPolicy[],
-  resourceType: ResourceType,
-  actionName: string
-) {
-  if (hasOwnerPolicy(policies)) {
-    return true
-  }
-
-  const matching = userStatements(policies).filter((statement) =>
-    statementMatchesAction(statement, resourceType, actionName)
-  )
-
-  return (
-    matching.some((statement) => statement.effect === "allow") &&
-    matching.every((statement) => statement.effect === "allow")
-  )
+export function canGrantAction(policies: UserPolicy[], actionName: string) {
+  return canUseActionOnAnyResource(policies, actionName)
 }
 
 export function resourcePathLabel(resourceName: string) {
