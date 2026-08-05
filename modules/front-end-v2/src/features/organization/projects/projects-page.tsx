@@ -98,7 +98,7 @@ export function OrganizationProjectsPage() {
   const [secretsSheetOpen, setSecretsSheetOpen] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null)
   const permissionsQuery = useQuery({
-    queryKey: ["current-user-policies"],
+    queryKey: ["current-user-policies", getCurrentOrganization()?.id ?? ""],
     queryFn: fetchCurrentUserPolicies,
   })
   const policies = permissionsQuery.data ?? []
