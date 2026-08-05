@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Domain.AuditLogs;
 using Domain.FlagDrafts;
 using Domain.Targeting;
@@ -51,6 +52,15 @@ public class FeatureFlag : FullAuditedEntity
     /// committed value and ignore this pending change until it is promoted.
     /// </summary>
     public PendingFlagChange Pending { get; set; }
+
+    /// <summary>
+    /// Postgres <c>xmin</c> system column, used as the optimistic concurrency token. It is a real
+    /// property rather than an EF shadow property because the DbContext queries with no tracking,
+    /// and shadow values only live on a tracking entry - they would be lost before the update.
+    /// Unused by the Mongo provider.
+    /// </summary>
+    [JsonIgnore]
+    public uint Xmin { get; set; }
 
     public FeatureFlag()
     {
