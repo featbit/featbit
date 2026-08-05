@@ -180,7 +180,17 @@ export function OrganizationGeneralPage() {
     let cancelled = false
 
     async function loadDefaultPermissionOptions() {
-      if (!currentOrganization || !permissionsReady) {
+      if (!currentOrganization) {
+        return
+      }
+
+      if (permissionsQuery.isError) {
+        setPoliciesLoading(false)
+        setGroupsLoading(false)
+        return
+      }
+
+      if (!permissionsReady) {
         return
       }
 
@@ -252,6 +262,7 @@ export function OrganizationGeneralPage() {
   }, [
     canUpdateOrgDefaultUserPermissions,
     currentOrganization,
+    permissionsQuery.isError,
     permissionsReady,
   ])
 
