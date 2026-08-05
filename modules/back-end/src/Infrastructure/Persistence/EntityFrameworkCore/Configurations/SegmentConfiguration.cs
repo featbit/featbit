@@ -29,6 +29,6 @@ public class SegmentConfiguration : IEntityTypeConfiguration<Segment>
         // Postgres xmin as an optimistic concurrency token (#72): changes on every row
         // update, so a racing writer makes SaveChanges throw DbUpdateConcurrencyException
         // instead of silently overwriting. System column - no DDL, Mongo unaffected.
-        builder.Property<uint>("xmin").IsRowVersion();
+        builder.Property(x => x.Xmin).HasColumnName("xmin").HasColumnType("xid").IsRowVersion();
     }
 }

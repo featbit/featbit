@@ -1,6 +1,7 @@
 using Domain.ControlPlane;
 using Domain.FeatureFlags;
 using Domain.Organizations;
+using Domain.Segments;
 using Domain.Users;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
@@ -22,6 +23,17 @@ public static class ClassMaps
         {
             map.AutoMap();
             map.MapMember(x => x.Tags).SetDefaultValue(Array.Empty<string>());
+
+            // Postgres-only concurrency token; never persisted to Mongo.
+            map.UnmapMember(x => x.Xmin);
+        });
+
+        BsonClassMap.RegisterClassMap<Segment>(map =>
+        {
+            map.AutoMap();
+
+            // Postgres-only concurrency token; never persisted to Mongo.
+            map.UnmapMember(x => x.Xmin);
         });
 
         BsonClassMap.RegisterClassMap<User>(map =>
