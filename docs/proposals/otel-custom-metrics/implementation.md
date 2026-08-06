@@ -138,7 +138,7 @@ Default attributes: `provider`, `destination`, `operation`, and `outcome`.
 - Expose backlog only where a durable queue exists: `LLEN` for the ELS → API Redis list, a pending-row count for `queue_messages`, and consumer lag for Kafka. Only the API → ELS Redis direction is Pub/Sub and has nothing to measure.
 - Poll durable queue depth and oldest age in a background task, then expose cached values.
 - Publish confirmation needs a code change before `outcome` can be trusted. The Kafka producer uses fire-and-forget `Produce()`, and every producer catches all exceptions and returns `Task.CompletedTask`, so no caller can tell delivery from failure. Until the Kafka delivery handler and the swallowed exceptions feed a result back, record `enqueued` rather than `delivered`.
-- Count a Kafka handler failure as a known drop. Both consumers call `StoreOffset` in a `finally` block regardless of handler outcome ([back-end](../../../modules/back-end/src/Infrastructure/MQ/Kafka/KafkaMessageConsumer.cs), [evaluation-server](../../../modules/evaluation-server/src/Infrastructure/MQ/Kafka/KafkaMessageConsumer.cs)), so a failed message is never replayed. Record handler outcome separately from consume count, otherwise this loss is invisible.
+- Record a Kafka handler failure separately from consume count, but do not classify it as a known drop from `StoreOffset` alone. Both consumers call `StoreOffset` in a `finally` block regardless of handler outcome ([back-end](../../../modules/back-end/src/Infrastructure/MQ/Kafka/KafkaMessageConsumer.cs), [evaluation-server](../../../modules/evaluation-server/src/Infrastructure/MQ/Kafka/KafkaMessageConsumer.cs)), while `enable.auto.commit` is `true` with a five-second interval. `StoreOffset` only marks the offset for the library-managed asynchronous commit; a commit failure or restart before that commit can cause redelivery. Count a known drop only after successful settlement of the failed record's offset is observed. Alternatively, disable auto-commit and perform manual commits, recording commit failures explicitly.
 - Set consumer running state in the loop lifecycle and update heartbeat independently from message traffic.
 - Record drops only when loss is known; do not invent redelivery information when a provider cannot supply it.
 
@@ -230,7 +230,7 @@ Usage, Insights, and PostgreSQL notification paths can remove or overwrite buffe
 | `featbit.worker.last_success.age` | Time since a successful non-empty flush |
 | `featbit.worker.loop.failures` | Loop failures |
 
-Use a fixed buffer/worker name such as `usage`, `insight`, `postgres_notification`, or `store_sentinel`. Only some of these are bounded, and the applicable metric set differs:
+Every `featbit.buffer.*` measurement must include the finite `buffer.name` attribute. Its allowed values are `usage`, `insight`, and `postgres_notification`. Every `featbit.worker.*` measurement must include the finite `worker.name` attribute. Its allowed values are `usage`, `insight`, `postgres_notification`, and `store_sentinel`. Do not derive either attribute from type names, configuration, or other runtime input; adding a target requires extending these fixed sets. Only some buffers are bounded, and the applicable metric set differs:
 
 | Buffer | Implementation | Applicable metrics |
 |---|---|---|
