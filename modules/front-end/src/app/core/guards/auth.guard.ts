@@ -158,7 +158,7 @@ const trySetAccessibleProjectEnv = async (projectService: ProjectService): Promi
     project = projects.find(pro => pro.id === localProjectEnv.projectId);
     env = project?.environments?.find(env => env.id === localProjectEnv.envId);
   } else {
-    project = projects[0];
+    project = projects.find(project => project.environments?.length > 0);
     env = project?.environments[0];
   }
 
