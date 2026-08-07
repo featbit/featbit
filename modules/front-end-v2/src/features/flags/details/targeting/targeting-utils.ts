@@ -283,6 +283,20 @@ export function targetingReviewChanges(
   return changes
 }
 
+export function targetingReviewSegmentIds(
+  changes: FlagTargetingReviewChange[]
+) {
+  const ids = new Set<string>()
+  for (const change of changes) {
+    for (const rule of [change.previousRule, change.currentRule]) {
+      for (const condition of rule?.conditions ?? []) {
+        segmentConditionValues(condition).forEach((id) => ids.add(id))
+      }
+    }
+  }
+  return [...ids]
+}
+
 export function validateTargeting(
   flag: FeatureFlag,
   messages: {

@@ -1,15 +1,18 @@
-import type { ReactNode } from "react"
+import { useMemo, type ReactNode } from "react"
 import { useTranslation } from "react-i18next"
+import { useQuery } from "@tanstack/react-query"
 import { ChangeLedger as SharedChangeLedger } from "@/features/change-review/change-ledger"
 import { useFlagChangeLedgerAdapter } from "@/features/flags/details/targeting/use-flag-change-ledger-adapter"
 import type { FlagTargetingReviewChange } from "@/features/flags/details/targeting/targeting-utils"
+import { fetchSegmentsByIds } from "@/features/segments/segments-api"
 import { ChangeLedger } from "@/features/segments/details/components/change-ledger"
 import type { ReviewChange } from "@/features/segments/details/segment-details-utils"
 import {
   auditDecisionSnapshot,
+  auditDisplayedChanges,
   auditEventFragments,
   auditEventTitle,
-  auditHistoryChanges,
+  auditLogSegmentIds,
   isChangeRequestDecisionOperation,
 } from "../audit-log-utils"
 import type { AuditLog } from "../audit-logs-types"
@@ -26,9 +29,30 @@ export type AuditLogTableAdapter = {
   changeDetails: (log: AuditLog) => AuditLogChangeDetails
 }
 
-export function useDefaultAuditLogTableAdapter(): AuditLogTableAdapter {
+export function useAuditLogSegmentNames(envId: string, logs: AuditLog[]) {
   const { t } = useTranslation()
-  const flagLedger = useFlagChangeLedgerAdapter()
+  const segmentIds = useMemo(() => auditLogSegmentIds(logs, t), [logs, t])
+  const segmentsQuery = useQuery({
+    queryKey: ["targeting-segments-by-id", envId, segmentIds],
+    queryFn: () => fetchSegmentsByIds(envId, segmentIds),
+    enabled: Boolean(envId && segmentIds.length),
+    staleTime: 60_000,
+  })
+
+  return useMemo(
+    () =>
+      new Map(
+        (segmentsQuery.data ?? []).map((segment) => [segment.id, segment.name])
+      ),
+    [segmentsQuery.data]
+  )
+}
+
+export function useDefaultAuditLogTableAdapter(
+  segmentNames?: ReadonlyMap<string, string>
+): AuditLogTableAdapter {
+  const { t } = useTranslation()
+  const flagLedger = useFlagChangeLedgerAdapter(segmentNames)
 
   return {
     eventTitle: (log) => auditEventTitle(log, t),
@@ -36,17 +60,7 @@ export function useDefaultAuditLogTableAdapter(): AuditLogTableAdapter {
     changeDetails: (log) => {
       if (isChangeRequestDecisionOperation(log.operation)) {
         const snapshot = auditDecisionSnapshot(log)
-        const proposedChanges = snapshot?.proposedDataChange
-          ? auditHistoryChanges(
-              {
-                ...log,
-                operation: "Update",
-                dataChange: snapshot.proposedDataChange,
-                instructions: [],
-              },
-              t
-            )
-          : []
+        const proposedChanges = auditDisplayedChanges(log, t)
 
         return {
           count: proposedChanges.length,
@@ -88,7 +102,7 @@ export function useDefaultAuditLogTableAdapter(): AuditLogTableAdapter {
         }
       }
 
-      const changes = auditHistoryChanges(log, t)
+      const changes = auditDisplayedChanges(log, t)
 
       if (!changes.length) return { count: 0, content: null }
 

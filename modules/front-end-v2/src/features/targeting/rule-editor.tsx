@@ -23,6 +23,7 @@ import {
 import { PropertyPicker } from "./property-picker"
 import { SegmentConditionPicker } from "./segment-condition-picker"
 import { isSegmentConditionProperty } from "./segment-conditions"
+import { MultiValuePicker } from "./multi-value-picker"
 
 const operators = [
   "Equal",
@@ -133,6 +134,11 @@ export function RuleEditor({
             condition.property
           )
           const values = conditionValues(condition)
+          const property = properties.find(
+            (candidate) => candidate.name === condition.property
+          )
+          const multiValue =
+            condition.op === "IsOneOf" || condition.op === "NotOneOf"
           const valueDisabled =
             condition.op === "IsTrue" || condition.op === "IsFalse"
           return (
@@ -164,7 +170,7 @@ export function RuleEditor({
                                   op: "Equal",
                                   value: "",
                                 }
-                              : { ...item, property }
+                              : withConditionValues({ ...item, property }, [])
                           : item
                       ),
                     })
@@ -193,17 +199,26 @@ export function RuleEditor({
                       disabled={disabled}
                       onValueChange={(op) => {
                         if (!op) return
+                        const nextValues =
+                          op === "IsOneOf" || op === "NotOneOf"
+                            ? []
+                            : op === "IsTrue" || op === "IsFalse"
+                              ? [op]
+                              : [""]
                         onChange({
                           ...rule,
                           conditions: rule.conditions.map((item) =>
                             item.id === condition.id
-                              ? withConditionValues({ ...item, op }, values)
+                              ? withConditionValues({ ...item, op }, nextValues)
                               : item
                           ),
                         })
                       }}
                     >
-                      <SelectTrigger className="w-full">
+                      <SelectTrigger
+                        className="w-full"
+                        aria-label={t("targeting.rules.selectOperator")}
+                      >
                         <SelectValue>
                           {t(`targeting.rules.operators.${condition.op}`)}
                         </SelectValue>
@@ -218,35 +233,43 @@ export function RuleEditor({
                         </SelectGroup>
                       </SelectContent>
                     </Select>
-                    <Input
-                      value={valueDisabled ? "" : values.join(", ")}
-                      disabled={disabled || valueDisabled}
-                      placeholder={
-                        condition.op === "IsOneOf" ||
-                        condition.op === "NotOneOf"
-                          ? t("targeting.rules.multiValue")
-                          : t("targeting.rules.value")
-                      }
-                      onChange={(event) =>
-                        onChange({
-                          ...rule,
-                          conditions: rule.conditions.map((item) =>
-                            item.id === condition.id
-                              ? withConditionValues(
-                                  item,
-                                  condition.op === "IsOneOf" ||
-                                    condition.op === "NotOneOf"
-                                    ? event.target.value
-                                        .split(",")
-                                        .map((value) => value.trim())
-                                        .filter(Boolean)
-                                    : [event.target.value]
-                                )
-                              : item
-                          ),
-                        })
-                      }
-                    />
+                    {multiValue ? (
+                      <MultiValuePicker
+                        key={condition.property}
+                        values={values}
+                        presetValues={property?.presetValues ?? []}
+                        presetOnly={property?.usePresetValuesOnly ?? false}
+                        disabled={disabled}
+                        onChange={(nextValues) =>
+                          onChange({
+                            ...rule,
+                            conditions: rule.conditions.map((item) =>
+                              item.id === condition.id
+                                ? withConditionValues(item, nextValues)
+                                : item
+                            ),
+                          })
+                        }
+                      />
+                    ) : (
+                      <Input
+                        value={valueDisabled ? "" : values.join(", ")}
+                        disabled={disabled || valueDisabled}
+                        placeholder={t("targeting.rules.value")}
+                        onChange={(event) =>
+                          onChange({
+                            ...rule,
+                            conditions: rule.conditions.map((item) =>
+                              item.id === condition.id
+                                ? withConditionValues(item, [
+                                    event.target.value,
+                                  ])
+                                : item
+                            ),
+                          })
+                        }
+                      />
+                    )}
                   </>
                 )}
                 <Button

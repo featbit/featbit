@@ -215,6 +215,7 @@ export function TargetingSubmissionDialog({
   mode,
   flagName,
   changes,
+  segmentNames,
   initialReason,
   scheduleGranted,
   changeRequestGranted,
@@ -226,6 +227,7 @@ export function TargetingSubmissionDialog({
   mode: "schedule" | "change-request" | null
   flagName: string
   changes: FlagTargetingReviewChange[]
+  segmentNames?: ReadonlyMap<string, string>
   initialReason?: string
   scheduleGranted: boolean
   changeRequestGranted: boolean
@@ -238,7 +240,7 @@ export function TargetingSubmissionDialog({
   onSubmit: (value: TargetingSubmission) => void
 }) {
   const { t } = useTranslation()
-  const ledger = useFlagChangeLedgerAdapter()
+  const ledger = useFlagChangeLedgerAdapter(segmentNames)
   const schedule = mode === "schedule"
   const [title, setTitle] = useState("")
   const [scheduledTime, setScheduledTime] = useState("")

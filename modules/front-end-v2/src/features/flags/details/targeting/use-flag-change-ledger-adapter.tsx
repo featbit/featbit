@@ -7,7 +7,9 @@ import {
 } from "./flag-rule-change-content"
 import type { FlagTargetingReviewChange } from "./targeting-utils"
 
-export function useFlagChangeLedgerAdapter() {
+export function useFlagChangeLedgerAdapter(
+  segmentNames?: ReadonlyMap<string, string>
+) {
   const { t } = useTranslation()
   return {
     copy: {
@@ -59,6 +61,7 @@ export function useFlagChangeLedgerAdapter() {
             currentRule={change.currentRule}
             previousServing={change.previousServing}
             currentServing={change.currentServing}
+            segmentNames={segmentNames}
           />
         )
       }

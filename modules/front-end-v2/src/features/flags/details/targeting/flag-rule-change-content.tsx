@@ -140,11 +140,13 @@ export function FlagRuleChangeContent({
   currentRule,
   previousServing,
   currentServing,
+  segmentNames,
 }: {
   previousRule?: FlagRule
   currentRule?: FlagRule
   previousServing?: FlagServingReview
   currentServing?: FlagServingReview
+  segmentNames?: ReadonlyMap<string, string>
 }) {
   const definitionChanged =
     !previousRule ||
@@ -158,7 +160,11 @@ export function FlagRuleChangeContent({
   return (
     <div className="min-w-0 space-y-3">
       {definitionChanged ? (
-        <RuleChangeContent previous={previousRule} current={currentRule} />
+        <RuleChangeContent
+          previous={previousRule}
+          current={currentRule}
+          segmentNames={segmentNames}
+        />
       ) : null}
       {servingChanged ? (
         <FlagServeChange previous={previousServing} current={currentServing} />

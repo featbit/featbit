@@ -8,6 +8,7 @@ export function FlagChangeReviewDialog({
   open,
   flagName,
   changes,
+  segmentNames,
   requireComment,
   saving,
   initialComment,
@@ -21,6 +22,7 @@ export function FlagChangeReviewDialog({
   open: boolean
   flagName: string
   changes: FlagTargetingReviewChange[]
+  segmentNames?: ReadonlyMap<string, string>
   requireComment: boolean
   saving: boolean
   initialComment?: string
@@ -32,7 +34,7 @@ export function FlagChangeReviewDialog({
   onChangeRequest: (comment: string) => void
 }) {
   const { t } = useTranslation()
-  const ledger = useFlagChangeLedgerAdapter()
+  const ledger = useFlagChangeLedgerAdapter(segmentNames)
   return (
     <ChangeReviewDialog
       open={open}

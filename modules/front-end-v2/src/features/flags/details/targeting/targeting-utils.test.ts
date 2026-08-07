@@ -6,6 +6,7 @@ import {
   stableFlagTargeting,
   targetingOf,
   targetingReviewChanges,
+  targetingReviewSegmentIds,
   validateTargeting,
 } from "./targeting-utils"
 
@@ -168,5 +169,35 @@ describe("feature flag targeting utilities", () => {
     expect(validateTargeting(current, validationMessages).has("rule-1")).toBe(
       true
     )
+  })
+
+  it("collects unique segment ids used by review conditions", () => {
+    const previous = flag()
+    const current = structuredClone(previous)
+    previous.rules![0].conditions = [
+      {
+        id: "condition-segment",
+        property: "User is in segment",
+        op: "",
+        value: JSON.stringify(["segment-a"]),
+      },
+    ]
+    current.rules![0].conditions = [
+      {
+        id: "condition-segment",
+        property: "User is not in segment",
+        op: "",
+        value: JSON.stringify(["segment-a", "segment-b"]),
+      },
+    ]
+
+    expect(
+      targetingReviewSegmentIds(
+        targetingReviewChanges(previous, current, {
+          flagOn: "Flag ON",
+          flagOff: "Flag OFF",
+        })
+      )
+    ).toEqual(["segment-a", "segment-b"])
   })
 })

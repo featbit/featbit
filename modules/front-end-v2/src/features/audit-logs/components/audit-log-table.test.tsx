@@ -163,6 +163,62 @@ describe("AuditLogTable", () => {
     expect(screen.getByText("Segment-specific change")).toBeInTheDocument()
   })
 
+  it("shows segment names in feature flag history conditions", () => {
+    const segmentId = "019f8b36-6360-7a19-a528-2b16f8d808b0"
+    const historyLog = {
+      ...auditLog,
+      operation: "Create",
+      dataChange: {
+        current: JSON.stringify({
+          id: "flag-1",
+          name: "Checkout redesign",
+          key: "checkout-redesign",
+          variations: [],
+          targetUsers: [],
+          rules: [
+            {
+              id: "rule-1",
+              name: "Rule 1",
+              conditions: [
+                {
+                  id: "condition-1",
+                  property: "User is in segment",
+                  op: "",
+                  value: JSON.stringify([segmentId]),
+                },
+              ],
+              variations: [],
+            },
+          ],
+        }),
+      },
+      instructions: [],
+    }
+
+    render(
+      <MemoryRouter>
+        <TooltipProvider>
+          <AuditLogTable
+            items={[historyLog]}
+            segmentNames={new Map([[segmentId, "Enterprise customers"]])}
+            lang="en"
+            locale="en"
+            loading={false}
+            filtered={false}
+            resourceScoped
+            onClearFilters={vi.fn()}
+            onViewRawData={vi.fn()}
+          />
+        </TooltipProvider>
+      </MemoryRouter>
+    )
+
+    fireEvent.click(screen.getByRole("button", { name: "Expand audit log" }))
+
+    expect(screen.getByText("Enterprise customers")).toBeVisible()
+    expect(screen.queryByText(segmentId)).not.toBeInTheDocument()
+  })
+
   it("shows a decision detail instead of an empty semantic change ledger", () => {
     render(
       <MemoryRouter>
