@@ -34,13 +34,13 @@ function segment(id: string, name: string): Segment {
   }
 }
 
-function renderPicker() {
+function renderPicker(initialValue = "[]") {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   })
 
   function Harness() {
-    const [value, setValue] = useState("[]")
+    const [value, setValue] = useState(initialValue)
     return (
       <>
         <SegmentConditionPicker
@@ -96,5 +96,75 @@ describe("SegmentConditionPicker", () => {
     await waitFor(() =>
       expect(fetchSegmentsByIds).toHaveBeenCalledWith("env-1", ["segment-a"])
     )
+  })
+
+  it("keeps the search result order after selecting a segment", async () => {
+    vi.mocked(fetchSegments).mockResolvedValue({
+      items: [
+        segment("segment-a", "Alpha users"),
+        segment("segment-b", "Beta users"),
+        segment("segment-c", "Customer users"),
+      ],
+      totalCount: 3,
+    })
+
+    renderPicker()
+
+    const trigger = screen.getByRole("combobox", { name: "Select segments" })
+    fireEvent.click(trigger)
+    expect(trigger).toHaveAttribute("aria-expanded", "true")
+    expect(trigger).toHaveClass("hover:bg-transparent")
+    expect(trigger).toHaveClass("aria-expanded:bg-transparent")
+    expect(trigger).not.toHaveClass("hover:bg-muted")
+    const options = await screen.findAllByRole("option")
+    expect(options.map((option) => option.textContent)).toEqual([
+      "Alpha usersalpha-users",
+      "Beta usersbeta-users",
+      "Customer userscustomer-users",
+    ])
+
+    fireEvent.click(options[1])
+
+    await waitFor(() =>
+      expect(fetchSegmentsByIds).toHaveBeenCalledWith("env-1", ["segment-b"])
+    )
+    expect(
+      screen.getAllByRole("option").map((option) => option.textContent)
+    ).toEqual([
+      "Alpha usersalpha-users",
+      "Beta usersbeta-users",
+      "Customer userscustomer-users",
+    ])
+  })
+
+  it("shows every selected segment as a removable token", async () => {
+    renderPicker(
+      JSON.stringify(["segment-a", "segment-b", "segment-c", "segment-d"])
+    )
+
+    await waitFor(() =>
+      expect(fetchSegmentsByIds).toHaveBeenCalledWith("env-1", [
+        "segment-a",
+        "segment-b",
+        "segment-c",
+        "segment-d",
+      ])
+    )
+
+    const field = screen.getByTestId("segment-condition-picker")
+    await waitFor(() =>
+      expect(field).toHaveTextContent("Alpha userssegment-bsegment-csegment-d")
+    )
+    expect(field.querySelectorAll('[data-slot="badge"]')).toHaveLength(4)
+    expect(field).not.toHaveTextContent("+2")
+
+    fireEvent.click(screen.getByRole("button", { name: "Remove segment-b" }))
+
+    expect(
+      screen.getByText('["segment-a","segment-c","segment-d"]')
+    ).toBeVisible()
+    expect(
+      screen.getByRole("combobox", { name: "Select segments" })
+    ).toHaveAttribute("aria-expanded", "false")
   })
 })
