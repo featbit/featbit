@@ -4,6 +4,8 @@ using Application.Bases.Exceptions;
 using Application.Services;
 using Application.Users;
 using Domain.AccessTokens;
+using Domain.Policies;
+using Domain.Resources;
 
 namespace Application.UnitTests.Handlers;
 
@@ -21,7 +23,18 @@ public class CreateAccessTokenHandlerTests
         {
             OrganizationId = Guid.NewGuid(),
             Name = "duplicate",
-            Type = AccessTokenTypes.Personal
+            Type = AccessTokenTypes.Personal,
+            CurrentUserPermissions =
+            [
+                new PolicyStatement
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    ResourceType = ResourceTypes.AccessToken,
+                    Effect = EffectType.Allow,
+                    Actions = [Permissions.ManagePersonalAccessTokens],
+                    Resources = [RN.ForAccessToken()]
+                }
+            ]
         };
 
         var ex = await Assert.ThrowsAsync<BusinessException>(() => sut.Handle(request, CancellationToken.None));
@@ -44,7 +57,18 @@ public class CreateAccessTokenHandlerTests
         {
             OrganizationId = orgId,
             Name = "tok",
-            Type = AccessTokenTypes.Personal
+            Type = AccessTokenTypes.Personal,
+            CurrentUserPermissions =
+            [
+                new PolicyStatement
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    ResourceType = ResourceTypes.AccessToken,
+                    Effect = EffectType.Allow,
+                    Actions = [Permissions.ManagePersonalAccessTokens],
+                    Resources = [RN.ForAccessToken()]
+                }
+            ]
         };
 
         var result = await sut.Handle(request, CancellationToken.None);

@@ -44,6 +44,7 @@ public class RelayProxyController : ApiControllerBase
     }
 
     [HttpGet("is-name-used")]
+    [Authorize(Permissions.ManageRelayProxies)]
     public async Task<ApiResponse<bool>> IsNameUsedAsync(string name)
     {
         var request = new IsRelayProxyNameUsed
