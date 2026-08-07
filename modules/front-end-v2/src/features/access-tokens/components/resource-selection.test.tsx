@@ -4,6 +4,7 @@ import { useRef } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
 import "@/lib/i18n/i18n"
+import type { ResourceType } from "../access-token-types"
 import { ResourceSelection } from "./resource-selection"
 
 const mocks = vi.hoisted(() => ({
@@ -16,10 +17,12 @@ vi.mock("../access-tokens-api", async (importOriginal) => ({
 }))
 
 function ResourceSelectionHarness({
+  resourceType = "segment",
   resources = [],
   onChange,
   onSubmit,
 }: {
+  resourceType?: ResourceType
   resources?: string[]
   onChange: (resources: string[]) => void
   onSubmit?: () => void
@@ -39,7 +42,7 @@ function ResourceSelectionHarness({
           >
             <ResourceSelection
               portalContainer={portalContainer}
-              resourceType="segment"
+              resourceType={resourceType}
               resources={resources}
               readOnly={false}
               invalid={false}
@@ -107,7 +110,11 @@ describe("ResourceSelection", () => {
       </QueryClientProvider>
     )
 
-    expect(screen.getByText(selectedRn)).toBeInTheDocument()
+    const selectedResource = screen.getByText(selectedRn)
+    expect(selectedResource).toBeInTheDocument()
+    expect(selectedResource.closest(".grid")).toHaveClass(
+      "grid-cols-[repeat(auto-fill,minmax(min(100%,22rem),1fr))]"
+    )
     const editRn = screen.getByRole("button", {
       name: "Edit shop / production / beta-users;release,beta",
     })
@@ -140,6 +147,63 @@ describe("ResourceSelection", () => {
     )
     expect(onSubmit).not.toHaveBeenCalled()
   })
+
+  it.each([
+    {
+      resourceType: "flag" as const,
+      resourceLabel: "Feature flag",
+      resourceValue: "checkout",
+      expectedRn: "project/shop:env/production:flag/checkout",
+    },
+    {
+      resourceType: "segment" as const,
+      resourceLabel: "Segment",
+      resourceValue: "beta-users",
+      expectedRn: "project/shop:env/production:segment/beta-users",
+    },
+  ])(
+    "adds a custom $resourceType RN from the resource picker",
+    async ({ resourceType, resourceLabel, resourceValue, expectedRn }) => {
+      const onChange = vi.fn()
+      const onSubmit = vi.fn()
+      const queryClient = new QueryClient({
+        defaultOptions: { queries: { retry: false } },
+      })
+
+      render(
+        <QueryClientProvider client={queryClient}>
+          <ResourceSelectionHarness
+            resourceType={resourceType}
+            onChange={onChange}
+            onSubmit={onSubmit}
+          />
+        </QueryClientProvider>
+      )
+
+      fireEvent.click(screen.getByRole("button", { name: "Add resource" }))
+      fireEvent.click(
+        await screen.findByRole("button", { name: "Add custom RN" })
+      )
+
+      const project = screen.getByLabelText("Project")
+      const environment = screen.getByLabelText("Environment")
+      const resource = screen.getByLabelText(resourceLabel)
+      const preview = screen.getByLabelText("Resulting resource RN")
+      await waitFor(() => expect(project).toHaveValue("*"))
+      expect(environment).toHaveValue("*")
+      expect(resource).toHaveValue("*")
+
+      fireEvent.change(project, { target: { value: "shop" } })
+      fireEvent.change(environment, { target: { value: "production" } })
+      fireEvent.change(resource, { target: { value: resourceValue } })
+      await waitFor(() => expect(preview).toHaveValue(expectedRn))
+
+      fireEvent.click(screen.getByRole("button", { name: "Apply" }))
+
+      await waitFor(() => expect(onChange).toHaveBeenCalledWith([expectedRn]))
+      expect(onSubmit).not.toHaveBeenCalled()
+    }
+  )
 
   it("removes a selected RN without opening the editor", () => {
     const onChange = vi.fn()
