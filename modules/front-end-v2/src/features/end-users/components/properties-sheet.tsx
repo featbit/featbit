@@ -72,6 +72,9 @@ export function PropertiesSheet({
   const [removeTarget, setRemoveTarget] = useState<EndUserProperty | null>(null)
   const [presetTarget, setPresetTarget] = useState<EndUserProperty | null>(null)
   const [validationError, setValidationError] = useState("")
+  const [pendingDigestValues, setPendingDigestValues] = useState<
+    Record<string, boolean>
+  >({})
 
   const filtered = useMemo(() => {
     const filter = search.trim().toLowerCase()
@@ -177,10 +180,24 @@ export function PropertiesSheet({
   }
 
   function toggleDigest(property: EndUserProperty, checked: boolean) {
-    saveMutation.mutate({
-      propertyId: property.id,
-      payload: propertyPayload(property, { isDigestField: checked }),
-    })
+    setPendingDigestValues((current) => ({
+      ...current,
+      [property.id]: checked,
+    }))
+    saveMutation.mutate(
+      {
+        propertyId: property.id,
+        payload: propertyPayload(property, { isDigestField: checked }),
+      },
+      {
+        onSettled: () =>
+          setPendingDigestValues((current) => {
+            const next = { ...current }
+            delete next[property.id]
+            return next
+          }),
+      }
+    )
   }
 
   return (
@@ -273,6 +290,9 @@ export function PropertiesSheet({
                           editing={editing?.id === row.id}
                           editRemark={editing?.remark ?? ""}
                           saving={saveMutation.isPending}
+                          digestChecked={
+                            pendingDigestValues[row.id] ?? row.isDigestField
+                          }
                           onEditRemark={(remark) =>
                             setEditing((current) =>
                               current ? { ...current, remark } : current
