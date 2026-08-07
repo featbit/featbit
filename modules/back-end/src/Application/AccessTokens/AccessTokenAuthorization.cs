@@ -16,8 +16,8 @@ internal static class AccessTokenAuthorization
             _ => string.Empty
         };
 
-        if (string.IsNullOrEmpty(permission) ||
-            !PolicyHelper.IsAllowed(currentUserPermissions, RN.ForAccessToken(), permission))
+        var rn = RN.ForAccessToken();
+        if (string.IsNullOrEmpty(permission) || !PolicyHelper.IsAllowed(currentUserPermissions, rn, permission))
         {
             throw new ForbiddenException();
         }

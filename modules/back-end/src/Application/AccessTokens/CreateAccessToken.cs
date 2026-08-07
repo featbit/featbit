@@ -6,15 +6,18 @@ using Domain.Policies;
 
 namespace Application.AccessTokens;
 
-public class CreateAccessToken : IRequest<AccessToken>
+public class CreateAccessTokenPayload
 {
-    public Guid OrganizationId { get; set; }
-
     public string Name { get; set; }
 
     public string Type { get; set; }
 
     public PolicyStatement[] Permissions { get; set; } = [];
+}
+
+public class CreateAccessToken : CreateAccessTokenPayload, IRequest<AccessToken>
+{
+    public Guid OrganizationId { get; set; }
 
     public PolicyStatement[] CurrentUserPermissions { get; set; } = [];
 }

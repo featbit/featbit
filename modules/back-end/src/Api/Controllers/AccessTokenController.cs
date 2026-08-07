@@ -28,8 +28,7 @@ public class AccessTokenController : ApiControllerBase
         var request = new IsAccessTokenNameUsed
         {
             OrganizationId = OrgId,
-            Name = name,
-            
+            Name = name
         };
 
         var isNameUsed = await Mediator.Send(request);

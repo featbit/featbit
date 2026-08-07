@@ -16,6 +16,7 @@ public class DeleteAccessTokenHandler(IAccessTokenService service) : IRequestHan
     public async Task<bool> Handle(DeleteAccessToken request, CancellationToken cancellationToken)
     {
         var accessToken = await service.GetAsync(request.Id);
+
         AccessTokenAuthorization.EnsureOrganization(accessToken, request.OrganizationId);
         AccessTokenAuthorization.EnsureCanManage(request.CurrentUserPermissions, accessToken.Type);
 
