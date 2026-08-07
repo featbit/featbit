@@ -15,7 +15,7 @@ public static class PolicyHelper
                statement.Resources.Any(pattern => RNMatcher.IsMatch(resourceRN, pattern));
     }
 
-    public static bool IsAllowed(IEnumerable<PolicyStatement> statements, string resourceRN, string permission)
+    public static bool IsAllowed(PolicyStatement[] statements, string resourceRN, string permission)
     {
         var matchedStatements = statements
             .Where(statement => IsMatch(statement, resourceRN, permission))

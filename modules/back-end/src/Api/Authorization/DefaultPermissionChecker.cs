@@ -1,14 +1,12 @@
 using Application.Services;
 using Domain.Policies;
 using Domain.Resources;
-using Domain.Workspaces;
 
 namespace Api.Authorization;
 
 public class DefaultPermissionChecker(
     IResourceService resourceService,
     IRequestPermissions requestPermissions,
-    ILicenseService licenseService,
     ILogger<DefaultPermissionChecker> logger)
     : IPermissionChecker
 {
@@ -30,62 +28,22 @@ public class DefaultPermissionChecker(
             return false;
         }
 
-        var statements = (await requestPermissions.GetAsync(httpContext)).ToArray();
-        if (!PolicyHelper.IsAllowed(statements, resourceRN, permission))
-        {
-            return false;
-        }
-
-        if (resourceType is not (ResourceTypes.FeatureFlag or ResourceTypes.Segment))
-        {
-            return true;
-        }
-
-        // A resource-level all-actions grant is the non-fine-grained fallback.
-        // Concrete flag and segment actions require the fine-grained feature.
-        if (PolicyHelper.IsAllowed(statements, resourceRN, "*"))
-        {
-            return true;
-        }
-
-        var workspaceId = httpContext.Request.WorkspaceId();
-        return workspaceId != Guid.Empty &&
-               await licenseService.IsFeatureGrantedAsync(
-                   workspaceId,
-                   LicenseFeatures.FineGrainedAccessControl);
+        // check if the user has the required permission on the resource
+        var statements = await requestPermissions.GetAsync(httpContext);
+        return PolicyHelper.IsAllowed(statements, resourceRN, permission);
     }
 
     private async ValueTask<string?> GetRnAsync(string permission, string resourceType, HttpRequest request)
     {
-        if (resourceType == ResourceTypes.Workspace)
-        {
-            return RN.ForWorkspace();
-        }
-
-        if (resourceType == ResourceTypes.Iam)
-        {
-            return RN.ForIam();
-        }
-
-        if (resourceType == ResourceTypes.AccessToken)
-        {
-            return RN.ForAccessToken();
-        }
-
-        if (resourceType == ResourceTypes.Organization)
-        {
-            return RN.ForOrganization();
-        }
-
-        if (resourceType == ResourceTypes.RelayProxy)
-        {
-            return RN.ForRelayProxy();
-        }
-
         var routeValues = request.RouteValues;
 
         return resourceType switch
         {
+            ResourceTypes.Workspace => RN.ForWorkspace(),
+            ResourceTypes.Iam => RN.ForIam(),
+            ResourceTypes.AccessToken => RN.ForAccessToken(),
+            ResourceTypes.Organization => RN.ForOrganization(),
+            ResourceTypes.RelayProxy => RN.ForRelayProxy(),
             ResourceTypes.Project => await GetProjectRnAsync(),
             ResourceTypes.Env => await GetEnvRnAsync(),
             ResourceTypes.FeatureFlag => await GetFlagRnAsync(),
