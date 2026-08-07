@@ -27,6 +27,9 @@ export function SecretsSheet({
   open,
   project,
   environment,
+  canCreateSecret,
+  canUpdateSecret,
+  canDeleteSecret,
   onOpenChange,
   onAddSecret,
   onCopySecret,
@@ -36,6 +39,9 @@ export function SecretsSheet({
   open: boolean
   project: OrganizationProject | null
   environment: ProjectEnvironment | null
+  canCreateSecret: boolean
+  canUpdateSecret: boolean
+  canDeleteSecret: boolean
   onOpenChange: (open: boolean) => void
   onAddSecret: (environment: ProjectEnvironment) => void
   onCopySecret: (value: string) => void
@@ -60,7 +66,7 @@ export function SecretsSheet({
         </SheetHeader>
         <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
           <div className="mb-4 flex justify-end">
-            {environment ? (
+            {environment && canCreateSecret ? (
               <Button
                 type="button"
                 size="sm"
@@ -105,7 +111,9 @@ export function SecretsSheet({
                       <TableCell className="px-3 py-2 align-middle">
                         <div className="flex justify-end gap-1">
                           <IconTooltip
-                            label={t("organization.projects.actions.copySecret")}
+                            label={t(
+                              "organization.projects.actions.copySecret"
+                            )}
                           >
                             <Button
                               type="button"
@@ -119,38 +127,44 @@ export function SecretsSheet({
                               <Copy className="size-3" />
                             </Button>
                           </IconTooltip>
-                          <IconTooltip
-                            label={t(
-                              "organization.projects.actions.editSecretName"
-                            )}
-                          >
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon-xs"
-                              aria-label={t(
+                          {canUpdateSecret ? (
+                            <IconTooltip
+                              label={t(
                                 "organization.projects.actions.editSecretName"
                               )}
-                              onClick={() => onEditSecret(secret)}
                             >
-                              <Edit className="size-3" />
-                            </Button>
-                          </IconTooltip>
-                          <IconTooltip
-                            label={t("organization.projects.actions.deleteSecret")}
-                          >
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon-xs"
-                              aria-label={t(
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon-xs"
+                                aria-label={t(
+                                  "organization.projects.actions.editSecretName"
+                                )}
+                                onClick={() => onEditSecret(secret)}
+                              >
+                                <Edit className="size-3" />
+                              </Button>
+                            </IconTooltip>
+                          ) : null}
+                          {canDeleteSecret ? (
+                            <IconTooltip
+                              label={t(
                                 "organization.projects.actions.deleteSecret"
                               )}
-                              onClick={() => onDeleteSecret(secret)}
                             >
-                              <Trash2 className="size-3" />
-                            </Button>
-                          </IconTooltip>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon-xs"
+                                aria-label={t(
+                                  "organization.projects.actions.deleteSecret"
+                                )}
+                                onClick={() => onDeleteSecret(secret)}
+                              >
+                                <Trash2 className="size-3" />
+                              </Button>
+                            </IconTooltip>
+                          ) : null}
                         </div>
                       </TableCell>
                     </TableRow>

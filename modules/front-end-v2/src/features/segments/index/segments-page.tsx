@@ -13,6 +13,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { currentUserPoliciesQueryOptions } from "@/features/iam/current-user-policy-query"
 import {
   getCurrentOrganization,
   getCurrentProjectEnv,
@@ -22,6 +23,7 @@ import {
 } from "@/features/layout/layout-context"
 import {
   getLicenseStatus,
+  isFineGrainedAccessControlGranted,
   isFeatureGranted,
   parseLicense,
 } from "@/features/workspace/license/license-utils"
@@ -29,7 +31,6 @@ import {
   archiveSegment,
   createSegment,
   fetchCurrentEnvironmentSettings,
-  fetchCurrentUserPolicies,
   fetchSegmentFlagReferences,
   fetchSegments,
   fetchSegmentScopes,
@@ -49,6 +50,7 @@ import type {
   SegmentFlagReference,
   SegmentPayload,
   SegmentType,
+  UserPolicy,
 } from "../segments-types"
 import { SegmentReferencesDialog } from "../components/segment-references-dialog"
 import {
@@ -98,8 +100,7 @@ export function SegmentsPage() {
   }, [search])
 
   const permissionsQuery = useQuery({
-    queryKey: ["segment-user-policies", workspace?.id ?? ""],
-    queryFn: fetchCurrentUserPolicies,
+    ...currentUserPoliciesQueryOptions<UserPolicy>(organization?.id ?? ""),
     staleTime: 5 * 60_000,
   })
   const policies = useMemo(
@@ -153,16 +154,30 @@ export function SegmentsPage() {
     license,
     getLicenseStatus(license)
   )
+  const fineGrainedGranted = useMemo(
+    () => isFineGrainedAccessControlGranted(workspace?.license),
+    [workspace?.license]
+  )
 
   const canPerform = useCallback(
     (segment: Segment, action: SegmentAction) =>
       permissionsQuery.isSuccess &&
-      canUseSegmentAction(policies, segmentRn(envRn, segment), action),
-    [envRn, permissionsQuery.isSuccess, policies]
+      canUseSegmentAction(
+        policies,
+        segmentRn(envRn, segment),
+        action,
+        fineGrainedGranted
+      ),
+    [envRn, fineGrainedGranted, permissionsQuery.isSuccess, policies]
   )
   const canCreate =
     permissionsQuery.isSuccess &&
-    canUseSegmentAction(policies, `${envRn}:segment/*`, "CreateSegment")
+    canUseSegmentAction(
+      policies,
+      `${envRn}:segment/*`,
+      "CreateSegment",
+      fineGrainedGranted
+    )
 
   const invalidateList = useCallback(
     () => queryClient.invalidateQueries({ queryKey: ["segments"] }),

@@ -65,11 +65,13 @@ function SecretValue({
 
 export function SecretsCell({
   environment,
+  canAddSecret,
   onAddSecret,
   onCopySecret,
   onViewSecrets,
 }: {
   environment: ProjectEnvironment
+  canAddSecret: boolean
   onAddSecret: (environment: ProjectEnvironment) => void
   onCopySecret: (value: string) => void
   onViewSecrets: (environment: ProjectEnvironment) => void
@@ -93,16 +95,18 @@ export function SecretsCell({
         </div>
       )}
       <div className="flex items-center gap-2">
-        <Button
-          type="button"
-          variant="ghost"
-          size="xs"
-          className="h-6 px-1.5"
-          onClick={() => onAddSecret(environment)}
-        >
-          <Plus className="size-3" />
-          {t("organization.projects.actions.addSecret")}
-        </Button>
+        {canAddSecret ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="xs"
+            className="h-6 px-1.5"
+            onClick={() => onAddSecret(environment)}
+          >
+            <Plus className="size-3" />
+            {t("organization.projects.actions.addSecret")}
+          </Button>
+        ) : null}
         {environment.secrets.length > 0 ? (
           <Button
             type="button"

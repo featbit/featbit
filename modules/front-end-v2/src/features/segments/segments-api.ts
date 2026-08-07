@@ -11,7 +11,6 @@ import type {
   SegmentRule,
   SegmentType,
   SegmentUserProperty,
-  UserPolicy,
 } from "./segments-types"
 
 function segmentBasePath(envId: string) {
@@ -223,10 +222,6 @@ export function fetchSegmentScopes(name = "") {
   return fetchApi<ScopeResource[]>(`/api/v2/resources?${params}`).then(
     (resources) => resources.filter((resource) => !resource.rn.includes("*"))
   )
-}
-
-export function fetchCurrentUserPolicies() {
-  return fetchApi<UserPolicy[]>("/api/v1/user/policies")
 }
 
 type ProjectWithSettings = {

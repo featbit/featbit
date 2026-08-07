@@ -95,6 +95,45 @@ public class DefaultPermissionCheckerTests
     }
 
     [Fact]
+    public async Task IsGranted_AccessTokenPermission_UsesAccessTokenWildcardRn()
+    {
+        var (sut, _, perms) = BuildSut();
+        var req = new PermissionRequirement(Permissions.ListAccessTokens);
+        perms.Setup(x => x.GetAsync(It.IsAny<HttpContext>()))
+            .ReturnsAsync(AllowStatement(Permissions.ListAccessTokens, RN.ForAccessToken()));
+
+        var result = await sut.IsGrantedAsync(BuildHttpContext(), req);
+
+        Assert.True(result);
+    }
+
+    [Fact]
+    public async Task IsGranted_OrganizationPermission_UsesOrganizationWildcardRn()
+    {
+        var (sut, _, perms) = BuildSut();
+        var req = new PermissionRequirement(Permissions.CreateOrg);
+        perms.Setup(x => x.GetAsync(It.IsAny<HttpContext>()))
+            .ReturnsAsync(AllowStatement(Permissions.CreateOrg, RN.ForOrganization()));
+
+        var result = await sut.IsGrantedAsync(BuildHttpContext(), req);
+
+        Assert.True(result);
+    }
+
+    [Fact]
+    public async Task IsGranted_RelayProxyPermission_UsesRelayProxyWildcardRn()
+    {
+        var (sut, _, perms) = BuildSut();
+        var req = new PermissionRequirement(Permissions.ListRelayProxies);
+        perms.Setup(x => x.GetAsync(It.IsAny<HttpContext>()))
+            .ReturnsAsync(AllowStatement(Permissions.ListRelayProxies, RN.ForRelayProxy()));
+
+        var result = await sut.IsGrantedAsync(BuildHttpContext(), req);
+
+        Assert.True(result);
+    }
+
+    [Fact]
     public async Task IsGranted_CreateProject_UsesProjectWildcardRn()
     {
         var (sut, _, perms) = BuildSut();

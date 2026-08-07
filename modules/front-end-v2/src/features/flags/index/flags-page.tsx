@@ -5,8 +5,10 @@ import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { currentUserPoliciesQueryOptions } from "@/features/iam/current-user-policy-query"
 import {
   getLicenseStatus,
+  isFineGrainedAccessControlGranted,
   isFeatureGranted,
   parseLicense,
 } from "@/features/workspace/license/license-utils"
@@ -24,7 +26,6 @@ import {
   fetchFeatureFlags,
   fetchFeatureFlagTags,
   fetchFlagEnvironmentSettings,
-  fetchFlagPolicies,
   isFeatureFlagKeyUsed,
   removeFeatureFlag,
   restoreFeatureFlag,
@@ -36,7 +37,11 @@ import {
   featureFlagRn,
   type FlagAction,
 } from "../flags-permissions"
-import type { FeatureFlag, FlagCreationPayload } from "../flags-types"
+import type {
+  FeatureFlag,
+  FlagCreationPayload,
+  UserPolicy,
+} from "../flags-types"
 import { CopyFlagsDialog } from "../components/copy-flags-dialog"
 import { FlagDifferencesSheet } from "../components/flag-differences-sheet"
 import { FlagEditorSheet } from "./components/flag-editor-sheet"
@@ -164,8 +169,7 @@ export function FlagsPage() {
     staleTime: 5 * 60_000,
   })
   const permissionsQuery = useQuery({
-    queryKey: ["feature-flag-policies", workspace?.id ?? ""],
-    queryFn: fetchFlagPolicies,
+    ...currentUserPoliciesQueryOptions<UserPolicy>(organization?.id ?? ""),
     staleTime: 5 * 60_000,
   })
   const settingsQuery = useQuery({
@@ -178,15 +182,29 @@ export function FlagsPage() {
     () => permissionsQuery.data ?? [],
     [permissionsQuery.data]
   )
+  const fineGrainedGranted = useMemo(
+    () => isFineGrainedAccessControlGranted(workspace?.license),
+    [workspace?.license]
+  )
   const canPerform = useCallback(
     (flag: FeatureFlag, action: FlagAction) =>
       permissionsQuery.isSuccess &&
-      canUseFlagAction(policies, featureFlagRn(envRn, flag), action),
-    [envRn, permissionsQuery.isSuccess, policies]
+      canUseFlagAction(
+        policies,
+        featureFlagRn(envRn, flag),
+        action,
+        fineGrainedGranted
+      ),
+    [envRn, fineGrainedGranted, permissionsQuery.isSuccess, policies]
   )
   const canCreate =
     permissionsQuery.isSuccess &&
-    canUseFlagAction(policies, `${envRn}:flag/*`, "CreateFlag")
+    canUseFlagAction(
+      policies,
+      `${envRn}:flag/*`,
+      "CreateFlag",
+      fineGrainedGranted
+    )
   const decodedLicense = parseLicense(workspace?.license)
   const comparisonGranted = isFeatureGranted(
     {

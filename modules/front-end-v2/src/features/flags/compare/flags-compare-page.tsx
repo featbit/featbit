@@ -35,6 +35,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Popover, PopoverTrigger } from "@/components/ui/popover"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { currentUserPoliciesQueryOptions } from "@/features/iam/current-user-policy-query"
 import {
   fetchProjects,
   getCurrentOrganization,
@@ -45,6 +46,7 @@ import {
 } from "@/features/layout/layout-context"
 import {
   getLicenseStatus,
+  isFineGrainedAccessControlGranted,
   isFeatureGranted,
   parseLicense,
 } from "@/features/workspace/license/license-utils"
@@ -54,8 +56,8 @@ import {
   environmentRn,
   featureFlagRn,
 } from "../flags-permissions"
-import { fetchFeatureFlagTags, fetchFlagPolicies } from "../flags-api"
-import type { FeatureFlag } from "../flags-types"
+import { fetchFeatureFlagTags } from "../flags-api"
+import type { FeatureFlag, UserPolicy } from "../flags-types"
 import { CopyFlagsDialog } from "../components/copy-flags-dialog"
 import { FlagDifferencesSheet } from "../components/flag-differences-sheet"
 import { FlagsCompareMatrix } from "./components/flags-compare-matrix"
@@ -333,8 +335,7 @@ export function FlagsComparePage() {
     staleTime: 5 * 60_000,
   })
   const permissionsQuery = useQuery({
-    queryKey: ["feature-flag-policies", workspace?.id ?? ""],
-    queryFn: fetchFlagPolicies,
+    ...currentUserPoliciesQueryOptions<UserPolicy>(organization?.id ?? ""),
     staleTime: 5 * 60_000,
   })
 
@@ -352,6 +353,9 @@ export function FlagsComparePage() {
   )
 
   const decodedLicense = parseLicense(workspace?.license)
+  const fineGrainedGranted = isFineGrainedAccessControlGranted(
+    workspace?.license
+  )
   const comparisonGranted = isFeatureGranted(
     {
       id: "flag-comparison",
@@ -372,7 +376,8 @@ export function FlagsComparePage() {
       canUseFlagAction(
         permissionsQuery.data ?? [],
         featureFlagRn(envRn, flag),
-        "CopyFlagTo"
+        "CopyFlagTo",
+        fineGrainedGranted
       )
     )
   }

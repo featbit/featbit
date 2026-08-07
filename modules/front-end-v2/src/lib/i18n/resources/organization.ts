@@ -1,4 +1,6 @@
 export const enOrganization = {
+          permissionDenied:
+            "You do not have permission to perform this organization action.",
           title: "Organization",
           operationSucceeded: "Operation succeeded",
           operationFailed: "Operation failed",
@@ -161,6 +163,7 @@ export const enOrganization = {
         } as const
 
 export const zhOrganization = {
+          permissionDenied: "你没有执行此组织机构操作的权限。",
           title: "组织机构",
           operationSucceeded: "操作成功",
           operationFailed: "操作失败",

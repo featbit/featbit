@@ -1,5 +1,5 @@
 import { Plus, Search } from "lucide-react"
-import { useDeferredValue, useEffect, useMemo, useState } from "react"
+import { useDeferredValue, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -8,22 +8,26 @@ import type {
   OrganizationProject,
   ProjectEnvironment,
 } from "@/features/organization/projects/projects-api"
-import {
-  EnvironmentTable,
-  type EnvironmentSort,
-} from "./environment-table"
+import { EnvironmentTable, type EnvironmentSort } from "./environment-table"
 import { ProjectHeader } from "./project-header"
 export { SecretsSheet } from "./secrets-sheet"
 
 type EnvironmentSortByProject = Record<string, EnvironmentSort>
 
-const PROJECT_PAGE_SIZE = 10;
+const PROJECT_PAGE_SIZE = 10
 
 export function ProjectInventory({
   projects,
   currentProjectEnv,
   search,
   loading,
+  canCreateProject,
+  canUpdateProject,
+  canDeleteProject,
+  canCreateEnvironment,
+  canUpdateEnvironment,
+  canDeleteEnvironment,
+  canCreateSecret,
   onSearchChange,
   onCreateProject,
   onEditProject,
@@ -40,6 +44,22 @@ export function ProjectInventory({
   currentProjectEnv: ProjectEnv | null
   search: string
   loading: boolean
+  canCreateProject: boolean
+  canUpdateProject: (project: OrganizationProject) => boolean
+  canDeleteProject: (project: OrganizationProject) => boolean
+  canCreateEnvironment: (project: OrganizationProject) => boolean
+  canUpdateEnvironment: (
+    project: OrganizationProject,
+    environment: ProjectEnvironment
+  ) => boolean
+  canDeleteEnvironment: (
+    project: OrganizationProject,
+    environment: ProjectEnvironment
+  ) => boolean
+  canCreateSecret: (
+    project: OrganizationProject,
+    environment: ProjectEnvironment
+  ) => boolean
   onSearchChange: (value: string) => void
   onCreateProject: () => void
   onEditProject: (project: OrganizationProject) => void
@@ -73,7 +93,9 @@ export function ProjectInventory({
       return projects
     }
 
-    return projects.filter((project) => project.name.toLowerCase().includes(query))
+    return projects.filter((project) =>
+      project.name.toLowerCase().includes(query)
+    )
   }, [deferredSearch, projects])
   const visibleProjects = useMemo(
     () => filteredProjects.slice(0, visibleProjectCount),
@@ -83,10 +105,6 @@ export function ProjectInventory({
     filteredProjects.length - visibleProjects.length,
     0
   )
-
-  useEffect(() => {
-    setVisibleProjectCount(PROJECT_PAGE_SIZE)
-  }, [deferredSearch, projects.length])
 
   function toggleEnvironmentSort(
     projectId: string,
@@ -117,13 +135,18 @@ export function ProjectInventory({
             value={search}
             className="pl-8"
             placeholder={t("organization.projects.search")}
-            onChange={(event) => onSearchChange(event.target.value)}
+            onChange={(event) => {
+              setVisibleProjectCount(PROJECT_PAGE_SIZE)
+              onSearchChange(event.target.value)
+            }}
           />
         </div>
-        <Button type="button" onClick={onCreateProject}>
-          <Plus className="size-4" />
-          {t("organization.projects.actions.createProject")}
-        </Button>
+        {canCreateProject ? (
+          <Button type="button" onClick={onCreateProject}>
+            <Plus className="size-4" />
+            {t("organization.projects.actions.createProject")}
+          </Button>
+        ) : null}
       </div>
 
       <div className="space-y-3">
@@ -149,6 +172,9 @@ export function ProjectInventory({
                 <ProjectHeader
                   project={project}
                   currentProjectEnv={currentProjectEnv}
+                  canCreateEnvironment={canCreateEnvironment(project)}
+                  canUpdateProject={canUpdateProject(project)}
+                  canDeleteProject={canDeleteProject(project)}
                   onCopyText={onCopyText}
                   onCreateEnvironment={onCreateEnvironment}
                   onEditProject={onEditProject}
@@ -158,6 +184,10 @@ export function ProjectInventory({
                   project={project}
                   currentProjectEnv={currentProjectEnv}
                   sort={environmentSort}
+                  canCreateEnvironment={canCreateEnvironment(project)}
+                  canUpdateEnvironment={canUpdateEnvironment}
+                  canDeleteEnvironment={canDeleteEnvironment}
+                  canCreateSecret={canCreateSecret}
                   onToggleSort={(field) =>
                     toggleEnvironmentSort(project.id, field)
                   }

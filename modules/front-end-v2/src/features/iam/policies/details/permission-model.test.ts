@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import {
+  PERMISSION_ACTIONS,
   RESOURCE_PATTERNS,
   actionsForStatement,
   createPolicyStatement,
@@ -37,6 +38,19 @@ describe("permission model", () => {
     expect(isAllResources(statement({ resources: ["project/checkout"] }))).toBe(
       false
     )
+  })
+
+  it("keeps all organization administration actions available to policies", () => {
+    const organizationActions = PERMISSION_ACTIONS.filter(
+      (item) => item.resourceType === "organization"
+    ).map((item) => item.name)
+
+    expect(organizationActions).toEqual([
+      "UpdateOrgSortFlagsBy",
+      "UpdateOrgName",
+      "UpdateOrgDefaultUserPermissions",
+      "CreateOrg",
+    ])
   })
 
   it("removes non-specific actions for specific resources", () => {

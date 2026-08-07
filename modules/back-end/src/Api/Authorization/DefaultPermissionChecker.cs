@@ -28,26 +28,22 @@ public class DefaultPermissionChecker(
             return false;
         }
 
+        // check if the user has the required permission on the resource
         var statements = await requestPermissions.GetAsync(httpContext);
         return PolicyHelper.IsAllowed(statements, resourceRN, permission);
     }
 
     private async ValueTask<string?> GetRnAsync(string permission, string resourceType, HttpRequest request)
     {
-        if (resourceType == ResourceTypes.Workspace)
-        {
-            return "workspace/*";
-        }
-
-        if (resourceType == ResourceTypes.Iam)
-        {
-            return "iam/*";
-        }
-
         var routeValues = request.RouteValues;
 
         return resourceType switch
         {
+            ResourceTypes.Workspace => RN.ForWorkspace(),
+            ResourceTypes.Iam => RN.ForIam(),
+            ResourceTypes.AccessToken => RN.ForAccessToken(),
+            ResourceTypes.Organization => RN.ForOrganization(),
+            ResourceTypes.RelayProxy => RN.ForRelayProxy(),
             ResourceTypes.Project => await GetProjectRnAsync(),
             ResourceTypes.Env => await GetEnvRnAsync(),
             ResourceTypes.FeatureFlag => await GetFlagRnAsync(),

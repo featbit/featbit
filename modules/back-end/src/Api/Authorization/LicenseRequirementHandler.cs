@@ -2,15 +2,8 @@ using Application.Services;
 
 namespace Api.Authorization;
 
-public class LicenseRequirementHandler : AuthorizationHandler<LicenseRequirement>
+public class LicenseRequirementHandler(ILicenseService licenseService) : AuthorizationHandler<LicenseRequirement>
 {
-    private readonly ILicenseService _licenseService;
-
-    public LicenseRequirementHandler(ILicenseService licenseService)
-    {
-        _licenseService = licenseService;
-    }
-
     protected override async Task HandleRequirementAsync(
         AuthorizationHandlerContext context,
         LicenseRequirement requirement)
@@ -20,17 +13,13 @@ public class LicenseRequirementHandler : AuthorizationHandler<LicenseRequirement
             return;
         }
 
-        if (!httpContext.Request.Headers.TryGetValue(ApiConstants.WorkspaceHeaderKey, out var workspaceIdString))
+        var workspaceId = httpContext.Request.WorkspaceId();
+        if (workspaceId == Guid.Empty)
         {
             return;
         }
 
-        if (!Guid.TryParse(workspaceIdString, out var workspaceId))
-        {
-            return;
-        }
-
-        var isFeatureGranted = await _licenseService.IsFeatureGrantedAsync(workspaceId, requirement.Feature);
+        var isFeatureGranted = await licenseService.IsFeatureGrantedAsync(workspaceId, requirement.Feature);
         if (isFeatureGranted)
         {
             context.Succeed(requirement);

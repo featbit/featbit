@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { getStoredUserProfile } from "@/features/auth/auth-api"
+import { currentUserPoliciesQueryOptions } from "@/features/iam/current-user-policy-query"
 import {
   createChangeRequest,
   deleteChangeRequest,
@@ -17,6 +18,7 @@ import { changeRequestsCopy } from "@/features/change-requests/change-requests-c
 import { ChangeRequestDecisionDialog } from "@/features/change-requests/components/change-request-decision-dialog"
 import { ChangeRequestPreviewAlert } from "@/features/change-requests/components/change-request-preview-alert"
 import {
+  getCurrentOrganization,
   getCurrentProjectEnv,
   getCurrentWorkspace,
   localizedPath,
@@ -29,6 +31,7 @@ import {
 import type { SegmentEndUser } from "@/features/segments/segments-types"
 import {
   getLicenseStatus,
+  isFineGrainedAccessControlGranted,
   isFeatureGranted,
   parseLicense,
 } from "@/features/workspace/license/license-utils"
@@ -36,7 +39,6 @@ import {
   createFlagSchedule,
   fetchFeatureFlag,
   fetchFlagEnvironmentSettings,
-  fetchFlagPolicies,
   fetchPendingFlagChanges,
   removePendingSchedule,
   toggleFeatureFlag,
@@ -54,6 +56,7 @@ import type {
   FlagTargeting,
   FlagVariation,
   PendingFlagChange,
+  UserPolicy,
 } from "../flags-types"
 import {
   FlagConfirmDialog,
@@ -109,6 +112,10 @@ export function FlagDetailsPage() {
   const previewing = Boolean(previewChangeRequestId)
   const projectEnv = getCurrentProjectEnv()
   const workspace = getCurrentWorkspace()
+  const organizationId = getCurrentOrganization()?.id ?? ""
+  const fineGrainedGranted = isFineGrainedAccessControlGranted(
+    workspace?.license
+  )
   const envId = projectEnv?.envId ?? ""
   const basePath = localizedPath(lang, "/feature-flags")
   const [targetingDraft, setTargetingDraft] = useState<{
@@ -186,12 +193,12 @@ export function FlagDetailsPage() {
     ),
   })
   const policiesQuery = useQuery({
-    queryKey: ["feature-flag-policies", workspace?.id ?? ""],
-    queryFn: fetchFlagPolicies,
+    ...currentUserPoliciesQueryOptions<UserPolicy>(organizationId),
     enabled:
-      (activeTab === "targeting" && !previewing) ||
-      activeTab === "settings" ||
-      activeTab === "variations",
+      Boolean(organizationId) &&
+      ((activeTab === "targeting" && !previewing) ||
+        activeTab === "settings" ||
+        activeTab === "variations"),
     staleTime: 5 * 60_000,
   })
   const settingsQuery = useQuery({
@@ -232,7 +239,12 @@ export function FlagDetailsPage() {
     return Boolean(
       saved &&
       policiesQuery.isSuccess &&
-      canUseFlagAction(policiesQuery.data, resourceRn, action)
+      canUseFlagAction(
+        policiesQuery.data,
+        resourceRn,
+        action,
+        fineGrainedGranted
+      )
     )
   }
   const dirty =
@@ -585,7 +597,7 @@ export function FlagDetailsPage() {
               canUpdateUsers={
                 !previewing && can("UpdateFlagIndividualTargeting")
               }
-              canUpdateRules={!previewing && can("UpdateFlagRules")}
+              canUpdateRules={!previewing && can("UpdateFlagTargetingRules")}
               onDraftChange={(value) => {
                 if (!previewing) {
                   setTargetingDraft({

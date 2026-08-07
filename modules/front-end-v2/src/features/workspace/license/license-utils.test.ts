@@ -5,6 +5,7 @@ import {
   displayPlan,
   formatDate,
   getLicenseStatus,
+  isFineGrainedAccessControlGranted,
   isFeatureGranted,
   parseLicense,
   toDate,
@@ -97,6 +98,27 @@ describe("license utils", () => {
       false
     )
     expect(isFeatureGranted(ssoFeature, null, "missing")).toBe(false)
+  })
+
+  it("checks fine-grained access against feature and license validity", () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date("2026-07-06T00:00:00.000Z"))
+    const granted = encodeLicense({
+      features: ["fine-grained-ac"],
+      exp: 1_785_974_400,
+    })
+    const missingFeature = encodeLicense({
+      features: ["sso"],
+      exp: 1_785_974_400,
+    })
+    const expired = encodeLicense({
+      features: ["fine-grained-ac"],
+      exp: 1_783_209_600,
+    })
+
+    expect(isFineGrainedAccessControlGranted(granted)).toBe(true)
+    expect(isFineGrainedAccessControlGranted(missingFeature)).toBe(false)
+    expect(isFineGrainedAccessControlGranted(expired)).toBe(false)
   })
 
   it("displays plan names", () => {

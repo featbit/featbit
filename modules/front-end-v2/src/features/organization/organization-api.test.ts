@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import {
   createOrganization,
+  fetchOrganizationDefaultPermissionOptions,
   fetchOrganizationGroups,
   fetchOrganizationPolicies,
   normalizeOrganization,
@@ -135,6 +136,44 @@ describe("organization api", () => {
     expect(fetchMock).toHaveBeenNthCalledWith(
       2,
       "http://localhost:5000/api/v1/groups?name=release&pageIndex=0&pageSize=50",
+      expect.anything()
+    )
+  })
+
+  it("fetches selected default permission names without IAM list access", async () => {
+    localStorage.setItem("token", "auth-token")
+
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      jsonResponse({
+        success: true,
+        data: {
+          policies: [
+            {
+              id: "policy-1",
+              name: "Developer",
+              key: "developer",
+              type: "SysManaged",
+            },
+          ],
+          groups: [{ id: "group-1", name: "Release managers" }],
+        },
+      })
+    )
+
+    await expect(fetchOrganizationDefaultPermissionOptions()).resolves.toEqual({
+      policies: [
+        {
+          id: "policy-1",
+          name: "Developer",
+          key: "developer",
+          type: "SysManaged",
+        },
+      ],
+      groups: [{ id: "group-1", name: "Release managers" }],
+    })
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://localhost:5000/api/v1/organizations/default-permissions",
       expect.anything()
     )
   })

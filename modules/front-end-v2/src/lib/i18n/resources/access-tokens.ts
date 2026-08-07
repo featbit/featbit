@@ -46,6 +46,9 @@ export const enAccessTokens = {
   loading: "Loading...",
   operationSucceeded: "Operation succeeded",
   operationFailed: "Operation failed. Please try again.",
+  unavailableTitle: "Access tokens unavailable",
+  unavailableDescription:
+    "You do not have permission to list access tokens in this workspace.",
   permissionLoadFailed:
     "Your token permissions could not be loaded. Access remains read-only.",
   confirm: {
@@ -234,6 +237,8 @@ export const zhAccessTokens = {
   loading: "加载中...",
   operationSucceeded: "操作成功",
   operationFailed: "操作失败，请重试。",
+  unavailableTitle: "无法访问访问令牌",
+  unavailableDescription: "你没有在此工作区查看访问令牌列表的权限。",
   permissionLoadFailed: "无法加载你的令牌权限，当前仅可查看。",
   confirm: {
     deactivateTitle: "停用访问令牌？",

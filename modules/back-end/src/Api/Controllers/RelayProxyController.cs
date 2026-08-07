@@ -2,6 +2,7 @@
 using Domain.RelayProxies;
 using Application.Bases.Models;
 using Application.RelayProxies;
+using Domain.Policies;
 
 namespace Api.Controllers;
 
@@ -9,6 +10,7 @@ namespace Api.Controllers;
 public class RelayProxyController : ApiControllerBase
 {
     [HttpGet]
+    [Authorize(Permissions.ListRelayProxies)]
     public async Task<ApiResponse<PagedResult<RelayProxyVm>>> GetListAsync([FromQuery] RelayProxyFilter filter)
     {
         var request = new GetRelayProxyList
@@ -22,6 +24,7 @@ public class RelayProxyController : ApiControllerBase
     }
 
     [HttpPost]
+    [Authorize(Permissions.ManageRelayProxies)]
     public async Task<ApiResponse<RelayProxy>> CreateAsync(CreateRelayProxy request)
     {
         request.OrganizationId = OrgId;
@@ -31,6 +34,7 @@ public class RelayProxyController : ApiControllerBase
     }
 
     [HttpPut("{id:guid}")]
+    [Authorize(Permissions.ManageRelayProxies)]
     public async Task<ApiResponse<bool>> UpdateAsync(Guid id, UpdateRelayProxy request)
     {
         request.Id = id;
@@ -40,6 +44,7 @@ public class RelayProxyController : ApiControllerBase
     }
 
     [HttpGet("is-name-used")]
+    [Authorize(Permissions.ManageRelayProxies)]
     public async Task<ApiResponse<bool>> IsNameUsedAsync(string name)
     {
         var request = new IsRelayProxyNameUsed
@@ -53,6 +58,7 @@ public class RelayProxyController : ApiControllerBase
     }
 
     [HttpDelete("{id:guid}")]
+    [Authorize(Permissions.ManageRelayProxies)]
     public async Task<ApiResponse<bool>> DeleteAsync(Guid id)
     {
         var request = new DeleteRelayProxy
@@ -65,6 +71,7 @@ public class RelayProxyController : ApiControllerBase
     }
 
     [HttpGet("agent-availability")]
+    [Authorize(Permissions.ManageRelayProxies)]
     public async Task<ApiResponse<HttpStatusCode>> CheckAgentAvailabilityAsync(string agentHost)
     {
         var request = new CheckAgentAvailability
@@ -77,6 +84,7 @@ public class RelayProxyController : ApiControllerBase
     }
 
     [HttpPut("{rpId:guid}/agents/{agentId}/sync")]
+    [Authorize(Permissions.ManageRelayProxies)]
     public async Task<ApiResponse<SyncResult>> SyncToAgentAsync(Guid rpId, string agentId, string host)
     {
         var request = new SyncToAgent

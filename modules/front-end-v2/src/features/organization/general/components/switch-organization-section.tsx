@@ -10,16 +10,19 @@ import {
   Section,
   SectionFooter,
 } from "@/features/organization/general/components/section-shell"
+import { shouldChangeOrganization } from "@/features/organization/general/organization-switch"
 import type { OrganizationDetails } from "@/features/organization/organization-api"
 
 export function SwitchOrganizationSection({
   organizationId,
   organizations,
+  canCreateOrganization,
   onOrganizationChange,
   onCreateOrganization,
 }: {
   organizationId: string
   organizations: OrganizationDetails[]
+  canCreateOrganization: boolean
   onOrganizationChange: (value: string) => void
   onCreateOrganization: () => void
 }) {
@@ -41,7 +44,13 @@ export function SwitchOrganizationSection({
               value={organizationId}
               options={organizationOptions}
               ariaLabel={t("organization.switch.organization")}
-              onChange={onOrganizationChange}
+              onChange={(nextOrganizationId) => {
+                if (
+                  shouldChangeOrganization(organizationId, nextOrganizationId)
+                ) {
+                  onOrganizationChange(nextOrganizationId)
+                }
+              }}
             />
           </Field>
         </div>
@@ -50,6 +59,7 @@ export function SwitchOrganizationSection({
             type="button"
             variant="outline"
             className={ACTION_BUTTON_CLASS}
+            disabled={!canCreateOrganization}
             onClick={onCreateOrganization}
           >
             <Plus className="size-4" />

@@ -1,4 +1,9 @@
 import type { Segment, UserPolicy } from "./segments-types"
+import {
+  canUseAction,
+  canUseAllActions,
+  hasOwnerPolicy,
+} from "@/features/iam/policy-matcher"
 
 export type SegmentAction =
   | "CreateSegment"
@@ -10,11 +15,6 @@ export type SegmentAction =
   | "UpdateSegmentTags"
   | "UpdateSegmentTargetingUsers"
   | "UpdateSegmentRules"
-
-function wildcardMatches(pattern: string, value: string) {
-  const escaped = pattern.replace(/[.+?^${}()|[\]\\]/g, "\\$&")
-  return new RegExp(`^${escaped.replaceAll("*", ".*")}$`).test(value)
-}
 
 export function environmentRn(input: {
   projectKey: string
@@ -31,70 +31,18 @@ export function segmentRn(
   return `${envRn}:segment/${segment.key}${tags}`
 }
 
-function resourceMatches(resourceRn: string, pattern: string) {
-  if (!resourceRn || !pattern) return false
-
-  const resourceSegments = resourceRn.split(":")
-  const patternSegments = pattern.split(":")
-  if (patternSegments.length > resourceSegments.length) return false
-
-  return patternSegments.every((patternSegment, index) => {
-    const [patternPath, patternTags] = patternSegment.split(";", 2)
-    const [resourcePath, resourceTags] = resourceSegments[index].split(";", 2)
-
-    if (!wildcardMatches(patternPath, resourcePath)) return false
-    if (patternTags === undefined || patternTags === "") return true
-    if (!resourceTags) return false
-
-    const tags = resourceTags.split(",")
-    return patternTags
-      .split(",")
-      .some((patternTag) =>
-        tags.some((tag) => wildcardMatches(patternTag, tag))
-      )
-  })
-}
-
-function statementMatches(
-  statement: UserPolicy["statements"][number],
-  resourceRn: string,
-  action: SegmentAction
-) {
-  if (
-    statement.resourceType === "*" ||
-    statement.resourceType.toLowerCase() === "all"
-  ) {
-    return true
-  }
-
-  return (
-    statement.resourceType === "segment" &&
-    (statement.actions.includes(action) ||
-      statement.actions.includes("*") ||
-      statement.actions.includes("SegmentAllActions")) &&
-    statement.resources.some((pattern) => resourceMatches(resourceRn, pattern))
-  )
-}
-
 export function canUseSegmentAction(
   policies: UserPolicy[],
   resourceRn: string,
-  action: SegmentAction
+  action: SegmentAction,
+  fineGrainedGranted: boolean
 ) {
-  if (policies.some((policy) => policy.type.toLowerCase() === "owner")) {
-    return true
-  }
+  const actionAllowed = canUseAction(policies, resourceRn, action)
 
-  const matchedStatements = policies.flatMap((policy) =>
-    policy.statements.filter((statement) =>
-      statementMatches(statement, resourceRn, action)
-    )
-  )
-
-  return (
-    matchedStatements.length > 0 &&
-    matchedStatements.every(
-      (statement) => statement.effect.toLowerCase() === "allow"
-    )
+  return Boolean(
+    actionAllowed &&
+    (fineGrainedGranted ||
+      hasOwnerPolicy(policies) ||
+      canUseAllActions(policies, resourceRn))
   )
 }

@@ -36,21 +36,47 @@ describe("segment permissions", () => {
   it("grants owners every segment action", () => {
     expect(
       canUseSegmentAction(
-        [{ type: "Owner", statements: [] }],
+        [
+          {
+            name: "Owner",
+            type: "SysManaged",
+            statements: [
+              {
+                resourceType: "*",
+                effect: "allow",
+                resources: ["*"],
+                actions: ["*"],
+              },
+            ],
+          },
+        ],
         segmentRn(envRn, segment),
-        "DeleteSegment"
+        "DeleteSegment",
+        false
       )
     ).toBe(true)
   })
 
-  it("matches wildcard resources and SegmentAllActions", () => {
+  it("matches wildcard resources and the canonical all-actions value", () => {
+    expect(
+      canUseSegmentAction(
+        [policy([`${envRn}:segment/*`], ["*"])],
+        segmentRn(envRn, segment),
+        "ArchiveSegment",
+        false
+      )
+    ).toBe(true)
+  })
+
+  it("does not treat the frontend action key as a stored permission value", () => {
     expect(
       canUseSegmentAction(
         [policy([`${envRn}:segment/*`], ["SegmentAllActions"])],
         segmentRn(envRn, segment),
-        "ArchiveSegment"
+        "ArchiveSegment",
+        false
       )
-    ).toBe(true)
+    ).toBe(false)
   })
 
   it("grants only the independently allowed General field", () => {
@@ -60,14 +86,19 @@ describe("segment permissions", () => {
     const resourceRn = segmentRn(envRn, segment)
 
     expect(
-      canUseSegmentAction(policies, resourceRn, "UpdateSegmentDescription")
+      canUseSegmentAction(
+        policies,
+        resourceRn,
+        "UpdateSegmentDescription",
+        true
+      )
     ).toBe(true)
-    expect(canUseSegmentAction(policies, resourceRn, "UpdateSegmentName")).toBe(
-      false
-    )
-    expect(canUseSegmentAction(policies, resourceRn, "UpdateSegmentTags")).toBe(
-      false
-    )
+    expect(
+      canUseSegmentAction(policies, resourceRn, "UpdateSegmentName", true)
+    ).toBe(false)
+    expect(
+      canUseSegmentAction(policies, resourceRn, "UpdateSegmentTags", true)
+    ).toBe(false)
   })
 
   it("matches parent scopes and tagged resources like the backend matcher", () => {
@@ -77,14 +108,16 @@ describe("segment permissions", () => {
       canUseSegmentAction(
         [policy(["project/payments:env/production"], ["ArchiveSegment"])],
         resourceRn,
-        "ArchiveSegment"
+        "ArchiveSegment",
+        true
       )
     ).toBe(true)
     expect(
       canUseSegmentAction(
         [policy([`${envRn}:segment/*;internal,pa*`], ["ArchiveSegment"])],
         resourceRn,
-        "ArchiveSegment"
+        "ArchiveSegment",
+        true
       )
     ).toBe(true)
   })
@@ -94,7 +127,8 @@ describe("segment permissions", () => {
       canUseSegmentAction(
         [policy(["project/other:env/*:segment/*"], ["ArchiveSegment"])],
         segmentRn(envRn, segment),
-        "ArchiveSegment"
+        "ArchiveSegment",
+        true
       )
     ).toBe(false)
   })
@@ -104,7 +138,8 @@ describe("segment permissions", () => {
       canUseSegmentAction(
         [policy([`${envRn}:segment/*`], ["ArchiveSegment"], "deny")],
         segmentRn(envRn, segment),
-        "ArchiveSegment"
+        "ArchiveSegment",
+        true
       )
     ).toBe(false)
   })
@@ -117,7 +152,19 @@ describe("segment permissions", () => {
           policy([`${envRn}:segment/enterprise`], ["ArchiveSegment"], "deny"),
         ],
         segmentRn(envRn, segment),
-        "ArchiveSegment"
+        "ArchiveSegment",
+        true
+      )
+    ).toBe(false)
+  })
+
+  it("requires fine-grained access for a concrete action policy", () => {
+    expect(
+      canUseSegmentAction(
+        [policy([`${envRn}:segment/*`], ["ArchiveSegment"])],
+        segmentRn(envRn, segment),
+        "ArchiveSegment",
+        false
       )
     ).toBe(false)
   })

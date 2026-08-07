@@ -17,6 +17,7 @@ export function IdentitySection({
   organization,
   name,
   isSaving,
+  canUpdateName,
   onNameChange,
   onCopyId,
   onCopyKey,
@@ -25,6 +26,7 @@ export function IdentitySection({
   organization: OrganizationDetails
   name: string
   isSaving: boolean
+  canUpdateName: boolean
   onNameChange: (value: string) => void
   onCopyId: () => void
   onCopyKey: () => void
@@ -63,7 +65,7 @@ export function IdentitySection({
               <OrganizationInput
                 id="organizationName"
                 value={name}
-                disabled={isSaving}
+                disabled={isSaving || !canUpdateName}
                 onChange={(event) => onNameChange(event.target.value)}
               />
             </Field>
@@ -73,7 +75,7 @@ export function IdentitySection({
               type="submit"
               size="default"
               className={ACTION_BUTTON_CLASS}
-              disabled={isSaving || !name.trim()}
+              disabled={isSaving || !canUpdateName || !name.trim()}
             >
               {isSaving ? (
                 <Loader2 className="size-4 animate-spin" />

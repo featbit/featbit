@@ -138,7 +138,7 @@ export function PermissionsEditor({
           const editableActions = selectableActions.filter(
             (permissionAction) =>
               !readOnly &&
-              canGrantAction(policies, category.type, permissionAction.name) &&
+              canGrantAction(policies, permissionAction.name) &&
               (!permissionAction.fineGrained || fineGrainedGranted)
           )
           const editableNames = editableActions.map((item) => item.name)
@@ -320,7 +320,6 @@ export function PermissionsEditor({
                     {displayedActions.map((permissionAction) => {
                       const authorized = canGrantAction(
                         policies,
-                        category.type,
                         permissionAction.name
                       )
                       const licensed =

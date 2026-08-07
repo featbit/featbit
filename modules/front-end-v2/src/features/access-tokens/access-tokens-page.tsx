@@ -1,11 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { Plus, Search, X } from "lucide-react"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { KeyRound, Plus, Search, X } from "lucide-react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useParams } from "react-router-dom"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   Select,
   SelectContent,
@@ -15,7 +16,9 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { currentUserPoliciesQueryOptions } from "@/features/iam/current-user-policy-query"
 import {
+  getCurrentOrganization,
   getCurrentWorkspace,
   resolveLang,
 } from "@/features/layout/layout-context"
@@ -26,17 +29,20 @@ import {
 } from "@/features/workspace/license/license-utils"
 import {
   fetchAccessTokens,
-  fetchCurrentUserPolicies,
   removeAccessToken,
   toggleAccessTokenStatus,
 } from "./access-tokens-api"
-import { canManageAccessTokenType } from "./access-token-permissions"
+import {
+  canListAccessTokens,
+  canManageAccessTokenType,
+} from "./access-token-permissions"
 import type {
   AccessToken,
   AccessTokenCreator,
   AccessTokenSheetMode,
   AccessTokenType,
   PagedAccessTokens,
+  UserPolicy,
 } from "./access-token-types"
 import {
   AccessTokenConfirmDialog,
@@ -71,8 +77,8 @@ export function AccessTokensPage() {
     name: string
     token: string
   } | null>(null)
-  const permissionErrorShown = useRef(false)
   const workspace = getCurrentWorkspace()
+  const organizationId = getCurrentOrganization()?.id ?? ""
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
@@ -83,21 +89,14 @@ export function AccessTokensPage() {
   }, [search])
 
   const permissionsQuery = useQuery({
-    queryKey: ["access-token-user-policies", workspace?.id ?? ""],
-    queryFn: fetchCurrentUserPolicies,
+    ...currentUserPoliciesQueryOptions<UserPolicy>(organizationId),
     staleTime: 5 * 60_000,
   })
   const policies = permissionsQuery.data ?? []
+  const canList = permissionsQuery.isSuccess && canListAccessTokens(policies)
   const canManagePersonal = canManageAccessTokenType(policies, "Personal")
   const canManageService = canManageAccessTokenType(policies, "Service")
   const canCreate = canManagePersonal || canManageService
-
-  useEffect(() => {
-    if (permissionsQuery.isError && !permissionErrorShown.current) {
-      permissionErrorShown.current = true
-      toast.error(t("accessTokens.permissionLoadFailed"))
-    }
-  }, [permissionsQuery.isError, t])
 
   const fineGrainedGranted = useMemo(() => {
     const license = parseLicense(workspace?.license)
@@ -131,6 +130,7 @@ export function AccessTokensPage() {
         pageIndex: pageIndex - 1,
         pageSize,
       }),
+    enabled: canList,
   })
   const accessTokens = accessTokensQuery.data ?? {
     totalCount: 0,
@@ -197,6 +197,32 @@ export function AccessTokensPage() {
     (toggleMutation.isPending ? toggleMutation.variables?.id : null) ??
     (removeMutation.isPending ? removeMutation.variables?.id : null) ??
     null
+
+  if (permissionsQuery.isLoading) {
+    return (
+      <div className="-m-5 min-h-[calc(100vh-3.5rem)] bg-background px-8 py-6">
+        <Skeleton className="h-8 w-52" />
+        <Skeleton className="mt-3 h-4 w-96" />
+        <Skeleton className="mt-10 h-96 w-full" />
+      </div>
+    )
+  }
+
+  if (permissionsQuery.isError || !canList) {
+    return (
+      <div className="-m-5 flex min-h-[calc(100vh-3.5rem)] items-center justify-center bg-background p-8">
+        <div className="max-w-md text-center">
+          <KeyRound className="mx-auto mb-4 size-8 text-muted-foreground" />
+          <h1 className="text-xl font-semibold">
+            {t("accessTokens.unavailableTitle")}
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {t("accessTokens.unavailableDescription")}
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <TooltipProvider>

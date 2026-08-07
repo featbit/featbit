@@ -20,10 +20,13 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
-import { getCurrentWorkspace } from "@/features/layout/layout-context"
+import { currentUserPoliciesQueryOptions } from "@/features/iam/current-user-policy-query"
+import {
+  getCurrentOrganization,
+  getCurrentWorkspace,
+} from "@/features/layout/layout-context"
 import {
   createRelayProxy,
-  fetchCurrentUserPolicies,
   fetchEnvironmentResources,
   fetchRelayProxies,
   isRelayProxyNameUsed,
@@ -35,6 +38,7 @@ import type {
   RelayProxy,
   RelayProxyPayload,
   RelayProxySheetMode,
+  UserPolicy,
 } from "./relay-proxy-types"
 import {
   RelayProxyKeyDialog,
@@ -52,6 +56,7 @@ export function RelayProxiesPage() {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
   const workspace = getCurrentWorkspace()
+  const organizationId = getCurrentOrganization()?.id ?? ""
   const [search, setSearch] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
   const [pageIndex, setPageIndex] = useState(1)
@@ -71,8 +76,7 @@ export function RelayProxiesPage() {
   }, [search])
 
   const permissionsQuery = useQuery({
-    queryKey: ["relay-proxy-user-policies", workspace?.id ?? ""],
-    queryFn: fetchCurrentUserPolicies,
+    ...currentUserPoliciesQueryOptions<UserPolicy>(organizationId),
     staleTime: 5 * 60_000,
   })
   const policies = permissionsQuery.data ?? []

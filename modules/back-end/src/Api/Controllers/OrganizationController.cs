@@ -1,6 +1,7 @@
 using Application.Bases.Models;
 using Application.Members;
 using Application.Organizations;
+using Domain.Policies;
 using Domain.Workspaces;
 
 namespace Api.Controllers;
@@ -44,8 +45,21 @@ public class OrganizationController : ApiControllerBase
         return Ok(isUsed);
     }
 
+    [HttpGet("default-permissions")]
+    public async Task<ApiResponse<DefaultPermissionsVm>> GetDefaultPermissionAsync()
+    {
+        var request = new GetDefaultPermissions
+        {
+            OrganizationId = OrgId
+        };
+
+        var options = await Mediator.Send(request);
+        return Ok(options);
+    }
+
     [HttpPost]
     [Authorize(LicenseFeatures.MultiOrg)]
+    [Authorize(Permissions.CreateOrg)]
     public async Task<ApiResponse<OrganizationVm>> CreateAsync(CreateOrganization request)
     {
         request.WorkspaceId = WorkspaceId;
@@ -83,6 +97,7 @@ public class OrganizationController : ApiControllerBase
     public async Task<ApiResponse<OrganizationVm>> UpdateAsync(UpdateOrganization request)
     {
         request.Id = OrgId;
+        request.CurrentUserPermissions = await GetRequestPermissionsAsync();
 
         var organization = await Mediator.Send(request);
         return Ok(organization);

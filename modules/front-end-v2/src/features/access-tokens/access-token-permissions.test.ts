@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 import {
   PERMISSION_CATEGORIES,
+  canListAccessTokens,
   canManageAccessTokenType,
   createEmptyPermissionDraft,
   permissionDraftFromStatements,
@@ -27,11 +28,44 @@ function statement(overrides: Partial<PolicyStatement> = {}): PolicyStatement {
 describe("access token permission model", () => {
   it("grants both token types to the system Owner policy", () => {
     const policies: UserPolicy[] = [
-      { name: "Owner", type: "SysManaged", statements: [] },
+      {
+        name: "Owner",
+        type: "SysManaged",
+        statements: [
+          statement({
+            resourceType: "*",
+            actions: ["*"],
+            resources: ["*"],
+          }),
+        ],
+      },
     ]
 
     expect(canManageAccessTokenType(policies, "Personal")).toBe(true)
     expect(canManageAccessTokenType(policies, "Service")).toBe(true)
+  })
+
+  it("does not let the Owner identity bypass a matching deny", () => {
+    const policies: UserPolicy[] = [
+      {
+        name: "Owner",
+        type: "SysManaged",
+        statements: [
+          statement({
+            resourceType: "*",
+            actions: ["*"],
+            resources: ["*"],
+          }),
+        ],
+      },
+      {
+        name: "Restricted",
+        type: "CustomerManaged",
+        statements: [statement({ effect: "deny" })],
+      },
+    ]
+
+    expect(canManageAccessTokenType(policies, "Personal")).toBe(false)
   })
 
   it("keeps Personal and Service management permissions separate", () => {
@@ -39,6 +73,14 @@ describe("access token permission model", () => {
 
     expect(canManageAccessTokenType(policies, "Personal")).toBe(true)
     expect(canManageAccessTokenType(policies, "Service")).toBe(false)
+  })
+
+  it("requires ListAccessTokens independently from management permissions", () => {
+    const manageOnly = policyWithStatements([statement()])
+    expect(canListAccessTokens(manageOnly)).toBe(false)
+
+    const list = statement({ actions: ["ListAccessTokens"] })
+    expect(canListAccessTokens(policyWithStatements([list]))).toBe(true)
   })
 
   it("supports wildcard grants and lets a matching deny win", () => {

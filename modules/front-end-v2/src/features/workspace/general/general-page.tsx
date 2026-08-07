@@ -1,16 +1,20 @@
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useQuery } from "@tanstack/react-query"
 import { useEffect, useMemo, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useParams } from "react-router-dom"
 import { z } from "zod"
 import {
+  getCurrentOrganization,
   getCurrentWorkspace,
   resolveLang,
 } from "@/features/layout/layout-context"
+import { currentUserPoliciesQueryOptions } from "@/features/iam/current-user-policy-query"
 import { IdentitySettingsSection } from "@/features/workspace/general/components/identity-settings-section"
 import { SsoSettingsSection } from "@/features/workspace/general/components/sso-settings-section"
 import { WorkspaceLayout } from "@/features/workspace/components/workspace-layout"
+import { canUseAction } from "@/features/iam/current-user-permissions"
 import { SkeletonForm } from "@/features/workspace/general/components/workspace-shell"
 import {
   fetchWorkspaceDetails,
@@ -44,8 +48,21 @@ export function GeneralPage() {
   )
   const [statusEventId, setStatusEventId] = useState(0)
   const [secretVisible, setSecretVisible] = useState(false)
-  const [canUpdateSsoSettings, setCanUpdateSsoSettings] = useState(true)
-  const canUpdateGeneralSettings = true
+  const organizationId = getCurrentOrganization()?.id ?? ""
+  const permissionsQuery = useQuery(
+    currentUserPoliciesQueryOptions(organizationId)
+  )
+  const policies = permissionsQuery.data ?? []
+  const canUpdateGeneralSettings = canUseAction(
+    policies,
+    "workspace/*",
+    "UpdateWorkspaceGeneralSettings"
+  )
+  const canUpdateSsoSettings = canUseAction(
+    policies,
+    "workspace/*",
+    "UpdateWorkspaceSSOSettings"
+  )
   const ssoLicensed = isSsoLicensed(workspace)
 
   const requiredMessage = t("workspace.validation.required")
@@ -119,7 +136,6 @@ export function GeneralPage() {
           ...loadedWorkspace,
           license: loadedWorkspace.license ?? currentWorkspace?.license,
         })
-        setCanUpdateSsoSettings(loadedWorkspace.sso !== null)
       } catch (error) {
         if (!cancelled) {
           showStatus(
@@ -229,7 +245,7 @@ export function GeneralPage() {
       statusVariant={statusVariant}
       statusEventId={statusEventId}
     >
-      {isLoading ? (
+      {isLoading || permissionsQuery.isLoading ? (
         <div className="py-8">
           <SkeletonForm />
         </div>

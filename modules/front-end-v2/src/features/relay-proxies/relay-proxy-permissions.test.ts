@@ -5,13 +5,17 @@ import {
 } from "./relay-proxy-permissions"
 import type { UserPolicy } from "./relay-proxy-types"
 
-function policy(actions: string[], resources = ["relay-proxy/*"]): UserPolicy {
+function policy(
+  actions: string[],
+  resources = ["relay-proxy/*"],
+  effect = "Allow"
+): UserPolicy {
   return {
     type: "Custom",
     statements: [
       {
         resourceType: "relay-proxy",
-        effect: "Allow",
+        effect,
         actions,
         resources,
       },
@@ -20,8 +24,20 @@ function policy(actions: string[], resources = ["relay-proxy/*"]): UserPolicy {
 }
 
 describe("relay proxy permissions", () => {
-  it("grants owners list and manage access", () => {
-    const policies: UserPolicy[] = [{ type: "Owner", statements: [] }]
+  it("grants global allow statements list and manage access", () => {
+    const policies: UserPolicy[] = [
+      {
+        type: "SysManaged",
+        statements: [
+          {
+            resourceType: "*",
+            effect: "Allow",
+            actions: ["*"],
+            resources: ["*"],
+          },
+        ],
+      },
+    ]
     expect(canUseRelayProxies(policies, "ListRelayProxies")).toBe(true)
     expect(canUseRelayProxies(policies, "ManageRelayProxies")).toBe(true)
   })
@@ -30,6 +46,24 @@ describe("relay proxy permissions", () => {
     const policies = [policy(["ListRelayProxies"])]
     expect(canUseRelayProxies(policies, "ListRelayProxies")).toBe(true)
     expect(canUseRelayProxies(policies, "ManageRelayProxies")).toBe(false)
+  })
+
+  it("lets a matching deny override an allow", () => {
+    const policies = [
+      policy(["ListRelayProxies"]),
+      policy(["ListRelayProxies"], ["relay-proxy/*"], "Deny"),
+    ]
+
+    expect(canUseRelayProxies(policies, "ListRelayProxies")).toBe(false)
+  })
+
+  it("ignores deny statements that do not match the requested action", () => {
+    const policies = [
+      policy(["ListRelayProxies"]),
+      policy(["ManageRelayProxies"], ["relay-proxy/*"], "Deny"),
+    ]
+
+    expect(canUseRelayProxies(policies, "ListRelayProxies")).toBe(true)
   })
 
   it("parses automatic agent status without throwing on invalid JSON", () => {

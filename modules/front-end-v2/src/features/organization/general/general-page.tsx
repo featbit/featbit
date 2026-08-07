@@ -1,7 +1,9 @@
+import { useQuery } from "@tanstack/react-query"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useParams } from "react-router-dom"
 import { toast } from "sonner"
+import { currentUserPoliciesQueryOptions } from "@/features/iam/current-user-policy-query"
 import {
   clearCurrentProjectEnv,
   fetchOrganizations,
@@ -16,6 +18,7 @@ import { PreferencesSection } from "@/features/organization/general/components/p
 import { SwitchOrganizationSection } from "@/features/organization/general/components/switch-organization-section"
 import {
   createOrganization,
+  fetchOrganizationDefaultPermissionOptions,
   fetchOrganizationGroups,
   fetchOrganizationPolicies,
   normalizeOrganization,
@@ -24,7 +27,9 @@ import {
   type OrganizationGroup,
   type OrganizationDetails,
   type OrganizationPolicy,
+  type OrganizationUserPolicy,
 } from "@/features/organization/organization-api"
+import { canUseOrganizationAction } from "@/features/organization/organization-permissions"
 
 const UI_BROADCAST_CHANNEL = "featbit-ui-broadcast-channel"
 const ORG_CHANGED_MESSAGE = "org-changed"
@@ -86,6 +91,30 @@ export function OrganizationGeneralPage() {
     () => organization ?? organizations[0] ?? null,
     [organization, organizations]
   )
+
+  const permissionsQuery = useQuery({
+    ...currentUserPoliciesQueryOptions<OrganizationUserPolicy>(
+      currentOrganization?.id ?? ""
+    ),
+    staleTime: 5 * 60_000,
+  })
+  const currentUserPolicies = permissionsQuery.data ?? []
+  const permissionsReady = permissionsQuery.isSuccess
+  const canUpdateOrgName =
+    permissionsReady &&
+    canUseOrganizationAction(currentUserPolicies, "UpdateOrgName")
+  const canUpdateOrgSortFlagsBy =
+    permissionsReady &&
+    canUseOrganizationAction(currentUserPolicies, "UpdateOrgSortFlagsBy")
+  const canUpdateOrgDefaultUserPermissions =
+    permissionsReady &&
+    canUseOrganizationAction(
+      currentUserPolicies,
+      "UpdateOrgDefaultUserPermissions"
+    )
+  const canCreateOrg =
+    permissionsReady &&
+    canUseOrganizationAction(currentUserPolicies, "CreateOrg")
 
   function showStatus(message: string, variant: "success" | "error") {
     setStatusMessage(message)
@@ -152,21 +181,67 @@ export function OrganizationGeneralPage() {
     let cancelled = false
 
     async function loadDefaultPermissionOptions() {
+      if (!currentOrganization) {
+        return
+      }
+
+      if (permissionsQuery.isError) {
+        setPoliciesLoading(false)
+        setGroupsLoading(false)
+        return
+      }
+
+      if (!permissionsReady) {
+        return
+      }
+
       setPoliciesLoading(true)
       setGroupsLoading(true)
 
       try {
-        const [loadedPolicies, loadedGroups] = await Promise.all([
-          fetchOrganizationPolicies(),
-          fetchOrganizationGroups(),
-        ])
+        const selectedOptions =
+          await fetchOrganizationDefaultPermissionOptions()
 
         if (cancelled) {
           return
         }
 
-        setPolicies(loadedPolicies.items)
-        setGroups(loadedGroups.items)
+        setPolicies(selectedOptions.policies)
+        setGroups(selectedOptions.groups)
+
+        if (canUpdateOrgDefaultUserPermissions) {
+          try {
+            const [loadedPolicies, loadedGroups] = await Promise.all([
+              fetchOrganizationPolicies(),
+              fetchOrganizationGroups(),
+            ])
+
+            if (cancelled) {
+              return
+            }
+
+            setPolicies(
+              Array.from(
+                new Map(
+                  [...loadedPolicies.items, ...selectedOptions.policies].map(
+                    (policy) => [policy.id, policy]
+                  )
+                ).values()
+              )
+            )
+            setGroups(
+              Array.from(
+                new Map(
+                  [...loadedGroups.items, ...selectedOptions.groups].map(
+                    (group) => [group.id, group]
+                  )
+                ).values()
+              )
+            )
+          } catch {
+            // Keep the selected read-only options if the editable lists fail.
+          }
+        }
       } catch {
         if (!cancelled) {
           setPolicies([])
@@ -185,10 +260,20 @@ export function OrganizationGeneralPage() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [
+    canUpdateOrgDefaultUserPermissions,
+    currentOrganization,
+    permissionsQuery.isError,
+    permissionsReady,
+  ])
 
   async function saveIdentity() {
     if (!currentOrganization) {
+      return
+    }
+
+    if (!canUpdateOrgName) {
+      showStatus(t("organization.permissionDenied"), "error")
       return
     }
 
@@ -223,6 +308,11 @@ export function OrganizationGeneralPage() {
 
   async function saveSorting() {
     if (!currentOrganization) {
+      return
+    }
+
+    if (!canUpdateOrgSortFlagsBy) {
+      showStatus(t("organization.permissionDenied"), "error")
       return
     }
 
@@ -262,6 +352,11 @@ export function OrganizationGeneralPage() {
       return
     }
 
+    if (!canUpdateOrgDefaultUserPermissions) {
+      showStatus(t("organization.permissionDenied"), "error")
+      return
+    }
+
     setPermissionsSaving(true)
     try {
       const updatedOrganization = await updateOrganization(
@@ -295,6 +390,10 @@ export function OrganizationGeneralPage() {
   }
 
   function switchOrganization(organizationId: string) {
+    if (organizationId === currentOrganization?.id) {
+      return
+    }
+
     const nextOrganization = organizations.find(
       (item) => item.id === organizationId
     )
@@ -313,6 +412,11 @@ export function OrganizationGeneralPage() {
     name: string
     key: string
   }) {
+    if (!canCreateOrg) {
+      showStatus(t("organization.permissionDenied"), "error")
+      return
+    }
+
     setCreating(true)
     try {
       const createdOrganization = await createOrganization({
@@ -368,6 +472,7 @@ export function OrganizationGeneralPage() {
             organization={currentOrganization}
             name={name}
             isSaving={identitySaving}
+            canUpdateName={canUpdateOrgName}
             onNameChange={setName}
             onCopyId={copyOrganizationId}
             onCopyKey={copyOrganizationKey}
@@ -384,6 +489,8 @@ export function OrganizationGeneralPage() {
             groupsLoading={groupsLoading}
             isSavingSorting={sortingSaving}
             isSavingPermissions={permissionsSaving}
+            canUpdateSorting={canUpdateOrgSortFlagsBy}
+            canUpdateDefaultPermissions={canUpdateOrgDefaultUserPermissions}
             onSortByChange={setSortBy}
             onPolicyChange={setPolicyId}
             onGroupChange={setGroupId}
@@ -394,14 +501,21 @@ export function OrganizationGeneralPage() {
           <SwitchOrganizationSection
             organizationId={currentOrganization.id}
             organizations={organizations}
+            canCreateOrganization={canCreateOrg}
             onOrganizationChange={switchOrganization}
-            onCreateOrganization={() => setCreateOpen(true)}
+            onCreateOrganization={() => {
+              if (!canCreateOrg) {
+                showStatus(t("organization.permissionDenied"), "error")
+                return
+              }
+              setCreateOpen(true)
+            }}
           />
 
           <CreateOrganizationSheet
             open={createOpen}
             isCreating={creating}
-            onOpenChange={setCreateOpen}
+            onOpenChange={(open) => setCreateOpen(open && canCreateOrg)}
             onSubmit={submitCreateOrganization}
           />
         </>

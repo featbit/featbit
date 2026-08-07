@@ -377,7 +377,7 @@ export function RelationshipPickerSheet({
             ))}
           </div>
         ) : (
-          <p className="text-xs leading-5 text-muted-foreground">
+          <p className="text-sm leading-5 text-muted-foreground">
             {noSelectionMessage}
           </p>
         )}

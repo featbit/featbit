@@ -9,6 +9,9 @@ import { IconTooltip } from "./inventory-shared"
 export function ProjectHeader({
   project,
   currentProjectEnv,
+  canCreateEnvironment,
+  canUpdateProject,
+  canDeleteProject,
   onCopyText,
   onCreateEnvironment,
   onEditProject,
@@ -16,6 +19,9 @@ export function ProjectHeader({
 }: {
   project: OrganizationProject
   currentProjectEnv: ProjectEnv | null
+  canCreateEnvironment: boolean
+  canUpdateProject: boolean
+  canDeleteProject: boolean
   onCopyText: (value: string) => void
   onCreateEnvironment: (project: OrganizationProject) => void
   onEditProject: (project: OrganizationProject) => void
@@ -65,38 +71,44 @@ export function ProjectHeader({
         </span>
       </div>
       <div className="flex shrink-0 items-center gap-1.5">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => onCreateEnvironment(project)}
-        >
-          <Plus className="size-3.5" />
-          {t("organization.projects.actions.addEnvironment")}
-        </Button>
-        <IconTooltip label={t("organization.projects.actions.editProject")}>
+        {canCreateEnvironment ? (
           <Button
             type="button"
-            variant="ghost"
-            size="icon-sm"
-            aria-label={t("organization.projects.actions.editProject")}
-            onClick={() => onEditProject(project)}
+            variant="outline"
+            size="sm"
+            onClick={() => onCreateEnvironment(project)}
           >
-            <Edit className="size-3.5" />
+            <Plus className="size-3.5" />
+            {t("organization.projects.actions.addEnvironment")}
           </Button>
-        </IconTooltip>
-        <IconTooltip label={t("organization.projects.actions.deleteProject")}>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            aria-label={t("organization.projects.actions.deleteProject")}
-            disabled={isCurrent}
-            onClick={() => onDeleteProject(project)}
-          >
-            <Trash2 className="size-3.5" />
-          </Button>
-        </IconTooltip>
+        ) : null}
+        {canUpdateProject ? (
+          <IconTooltip label={t("organization.projects.actions.editProject")}>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              aria-label={t("organization.projects.actions.editProject")}
+              onClick={() => onEditProject(project)}
+            >
+              <Edit className="size-3.5" />
+            </Button>
+          </IconTooltip>
+        ) : null}
+        {canDeleteProject ? (
+          <IconTooltip label={t("organization.projects.actions.deleteProject")}>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              aria-label={t("organization.projects.actions.deleteProject")}
+              disabled={isCurrent}
+              onClick={() => onDeleteProject(project)}
+            >
+              <Trash2 className="size-3.5" />
+            </Button>
+          </IconTooltip>
+        ) : null}
       </div>
     </div>
   )
