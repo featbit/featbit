@@ -1,17 +1,17 @@
 import type { ReactNode } from "react"
 import { useEffect, useState } from "react"
+import { useQueryClient } from "@tanstack/react-query"
 import { Navigate, useLocation, useParams } from "react-router-dom"
 import {
   getIdentityToken,
+  getStoredUserProfile,
   signOut,
   signOutCurrentTab,
 } from "@/features/auth/auth-api"
 import {
   chooseProjectEnv,
   clearTabProjectEnv,
-  fetchOrganizations,
-  fetchProjects,
-  fetchWorkspaces,
+  getIsSsoFirstLogin,
   getStoredOrganization,
   getStoredWorkspace,
   joinCurrentOrganizationIfSsoFirstLogin,
@@ -22,6 +22,12 @@ import {
   saveCurrentProjectEnv,
   saveTabProjectEnv,
 } from "@/features/layout/layout-context"
+import {
+  organizationsQueryOptions,
+  projectsQueryOptions,
+  workspacesQueryOptions,
+} from "@/features/layout/auth-context-query"
+import type { Project } from "@/features/layout/layout-types"
 
 type EntryStatus =
   | "loading"
@@ -42,8 +48,11 @@ function EntryLoading() {
 export function AuthenticatedEntry({ children }: { children: ReactNode }) {
   const params = useParams()
   const location = useLocation()
+  const queryClient = useQueryClient()
   const lang = resolveLang(params.lang)
+  const [entryUrl] = useState(() => `${location.pathname}${location.search}`)
   const [status, setStatus] = useState<EntryStatus>("loading")
+  const [projects, setProjects] = useState<Project[] | null>(null)
   const [selectStep, setSelectStep] = useState<"workspace" | "organization">(
     "workspace"
   )
@@ -53,7 +62,10 @@ export function AuthenticatedEntry({ children }: { children: ReactNode }) {
 
     async function enterApplication() {
       try {
-        const workspaces = await fetchWorkspaces()
+        const userId = getStoredUserProfile().id ?? ""
+        const workspaces = await queryClient.ensureQueryData(
+          workspacesQueryOptions(userId)
+        )
         if (cancelled) {
           return
         }
@@ -73,10 +85,7 @@ export function AuthenticatedEntry({ children }: { children: ReactNode }) {
               )
 
         if (!selectedWorkspace) {
-          localStorage.setItem(
-            "login-redirect-url",
-            `${location.pathname}${location.search}`
-          )
+          localStorage.setItem("login-redirect-url", entryUrl)
           setSelectStep("workspace")
           setStatus("select-workspace")
           return
@@ -84,16 +93,20 @@ export function AuthenticatedEntry({ children }: { children: ReactNode }) {
 
         persistCurrentWorkspace(selectedWorkspace)
 
-        const organizations = await fetchOrganizations()
+        const isSsoFirstLogin = getIsSsoFirstLogin()
+        const organizations = await queryClient.ensureQueryData(
+          organizationsQueryOptions(
+            userId,
+            selectedWorkspace.id,
+            isSsoFirstLogin
+          )
+        )
         if (cancelled) {
           return
         }
 
         if (organizations.length === 0) {
-          localStorage.setItem(
-            "login-redirect-url",
-            `${location.pathname}${location.search}`
-          )
+          localStorage.setItem("login-redirect-url", entryUrl)
           setSelectStep("organization")
           setStatus("select-workspace")
           return
@@ -108,10 +121,7 @@ export function AuthenticatedEntry({ children }: { children: ReactNode }) {
               )
 
         if (!selectedOrganization) {
-          localStorage.setItem(
-            "login-redirect-url",
-            `${location.pathname}${location.search}`
-          )
+          localStorage.setItem("login-redirect-url", entryUrl)
           setSelectStep("organization")
           setStatus("select-workspace")
           return
@@ -125,37 +135,13 @@ export function AuthenticatedEntry({ children }: { children: ReactNode }) {
           return
         }
 
-        const projects = await fetchProjects()
+        const loadedProjects = await queryClient.ensureQueryData(
+          projectsQueryOptions(userId, selectedOrganization.id)
+        )
         if (cancelled) {
           return
         }
-
-        const requestedTabProjectEnv = resolveTabProjectEnvRequest(
-          projects,
-          location.search
-        )
-        if (requestedTabProjectEnv === null) {
-          clearTabProjectEnv()
-          signOutCurrentTab()
-          setStatus("permission-denied")
-          return
-        }
-
-        if (requestedTabProjectEnv !== undefined) {
-          clearTabProjectEnv()
-          saveTabProjectEnv(requestedTabProjectEnv)
-        }
-
-        const selectedProjectEnv = chooseProjectEnv(projects)
-        if (!selectedProjectEnv) {
-          signOut()
-          setStatus("permission-denied")
-          return
-        }
-
-        saveCurrentProjectEnv(selectedProjectEnv)
-
-        setStatus("ready")
+        setProjects(loadedProjects)
       } catch {
         if (!cancelled) {
           if (!getIdentityToken()) {
@@ -174,7 +160,50 @@ export function AuthenticatedEntry({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true
     }
-  }, [location.pathname, location.search])
+  }, [entryUrl, queryClient])
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function synchronizeRouteContext() {
+      await Promise.resolve()
+      if (cancelled || !projects) {
+        return
+      }
+
+      const requestedTabProjectEnv = resolveTabProjectEnvRequest(
+        projects,
+        location.search
+      )
+      if (requestedTabProjectEnv === null) {
+        clearTabProjectEnv()
+        signOutCurrentTab()
+        setStatus("permission-denied")
+        return
+      }
+
+      if (requestedTabProjectEnv !== undefined) {
+        clearTabProjectEnv()
+        saveTabProjectEnv(requestedTabProjectEnv)
+      }
+
+      const selectedProjectEnv = chooseProjectEnv(projects)
+      if (!selectedProjectEnv) {
+        signOut()
+        setStatus("permission-denied")
+        return
+      }
+
+      saveCurrentProjectEnv(selectedProjectEnv)
+      setStatus("ready")
+    }
+
+    void synchronizeRouteContext()
+
+    return () => {
+      cancelled = true
+    }
+  }, [location.search, projects])
 
   if (status === "loading") {
     return <EntryLoading />

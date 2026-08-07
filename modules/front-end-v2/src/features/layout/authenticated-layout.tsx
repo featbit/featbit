@@ -1,15 +1,18 @@
-import { useCallback, useEffect, useState } from "react"
-import { useQuery } from "@tanstack/react-query"
+import { Suspense, useCallback, useEffect, useState } from "react"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
 import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom"
-import { signOut } from "@/features/auth/auth-api"
+import { getStoredUserProfile, signOut } from "@/features/auth/auth-api"
+import {
+  authContextQueryKeys,
+  projectsQueryOptions,
+} from "@/features/layout/auth-context-query"
 import { ContextBar } from "@/features/layout/components/context-bar"
 import { GlobalMessageBanner } from "@/features/layout/components/global-message-banner"
 import { buildBillingGlobalMessages } from "@/features/layout/global-message"
 import {
   chooseProjectEnv,
   clearTabProjectEnv,
-  fetchProjects,
   getCurrentOrganization,
   getCurrentProjectEnv,
   getCurrentWorkspace,
@@ -58,6 +61,7 @@ export function AuthenticatedLayout() {
   const { lang: langParam } = useParams()
   const location = useLocation()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const lang = resolveLang(langParam)
   const { i18n } = useTranslation()
   const [collapsed, setCollapsedState] = useState(
@@ -156,7 +160,14 @@ export function AuthenticatedLayout() {
           setOrganization(getCurrentOrganization())
           setCurrentProjectEnv(getCurrentProjectEnv())
 
-          const loadedProjects = await fetchProjects()
+          const userId = getStoredUserProfile().id ?? ""
+          const organizationId = getCurrentOrganization()?.id ?? ""
+          await queryClient.invalidateQueries({
+            queryKey: authContextQueryKeys.projects(userId, organizationId),
+          })
+          const loadedProjects = await queryClient.fetchQuery(
+            projectsQueryOptions(userId, organizationId)
+          )
           const nextProjectEnv = chooseProjectEnv(loadedProjects)
 
           if (!nextProjectEnv) {
@@ -175,7 +186,7 @@ export function AuthenticatedLayout() {
 
       void loadContext()
     })
-  }, [denyEnvironmentAccess])
+  }, [denyEnvironmentAccess, queryClient])
 
   useEffect(() => {
     document.documentElement.lang = lang
@@ -191,7 +202,11 @@ export function AuthenticatedLayout() {
         setOrganization(getCurrentOrganization())
         setCurrentProjectEnv(getCurrentProjectEnv())
 
-        const loadedProjects = await fetchProjects()
+        const userId = getStoredUserProfile().id ?? ""
+        const organizationId = getCurrentOrganization()?.id ?? ""
+        const loadedProjects = await queryClient.ensureQueryData(
+          projectsQueryOptions(userId, organizationId)
+        )
 
         if (cancelled) {
           return
@@ -220,7 +235,7 @@ export function AuthenticatedLayout() {
     return () => {
       cancelled = true
     }
-  }, [denyEnvironmentAccess])
+  }, [denyEnvironmentAccess, queryClient])
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background text-foreground">
@@ -242,7 +257,9 @@ export function AuthenticatedLayout() {
             <SubscriptionLicenseBadge lang={lang} workspace={workspace} />
           </header>
           <main className="min-h-0 flex-1 overflow-y-auto bg-muted/30 p-5">
-            <Outlet />
+            <Suspense fallback={<div className="min-h-32" />}>
+              <Outlet />
+            </Suspense>
           </main>
         </div>
       </div>

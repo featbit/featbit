@@ -9,6 +9,7 @@ import {
   fetchMemberDirectPolicies,
   fetchMemberGroups,
   fetchMemberInheritedPolicies,
+  fetchMemberRelationshipCounts,
   removeMemberFromGroup,
   removePolicyFromMember,
   type MemberDetailGroup,
@@ -71,26 +72,8 @@ export function useTeamRelationships({
 
   const loadCounts = useCallback(() => {
     if (!memberId) return
-    Promise.all([
-      fetchMemberGroups(memberId, { name: "", pageIndex: 0, pageSize: 1 }),
-      fetchMemberDirectPolicies(memberId, {
-        name: "",
-        pageIndex: 0,
-        pageSize: 1,
-      }),
-      fetchMemberInheritedPolicies(memberId, {
-        name: "",
-        pageIndex: 0,
-        pageSize: 1,
-      }),
-    ])
-      .then(([groupResult, directResult, inheritedResult]) =>
-        setCounts({
-          groups: groupResult.totalCount,
-          direct: directResult.totalCount,
-          inherited: inheritedResult.totalCount,
-        })
-      )
+    fetchMemberRelationshipCounts(memberId)
+      .then(setCounts)
       .catch(() => undefined)
   }, [memberId])
 

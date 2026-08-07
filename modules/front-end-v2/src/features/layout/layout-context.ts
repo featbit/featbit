@@ -251,11 +251,14 @@ export async function fetchWorkspaces() {
 }
 
 export async function fetchOrganizations() {
-  const isSsoFirstLogin =
-    localStorage.getItem(IS_SSO_FIRST_LOGIN_STORAGE_KEY) === "true"
+  const isSsoFirstLogin = getIsSsoFirstLogin()
   return fetchApi<Organization[]>(
     `/api/v1/organizations?isSsoFirstLogin=${isSsoFirstLogin}`
   )
+}
+
+export function getIsSsoFirstLogin() {
+  return localStorage.getItem(IS_SSO_FIRST_LOGIN_STORAGE_KEY) === "true"
 }
 
 export async function fetchProjects() {

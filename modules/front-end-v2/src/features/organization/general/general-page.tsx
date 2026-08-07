@@ -3,14 +3,17 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useParams } from "react-router-dom"
 import { toast } from "sonner"
+import { getStoredUserProfile } from "@/features/auth/auth-api"
 import { currentUserPoliciesQueryOptions } from "@/features/iam/current-user-policy-query"
 import {
   clearCurrentProjectEnv,
-  fetchOrganizations,
   getCurrentOrganization,
+  getCurrentWorkspace,
+  getIsSsoFirstLogin,
   persistCurrentOrganization,
   resolveLang,
 } from "@/features/layout/layout-context"
+import { organizationsQueryOptions } from "@/features/layout/auth-context-query"
 import { OrganizationLayout } from "@/features/organization/components/organization-layout"
 import { CreateOrganizationSheet } from "@/features/organization/general/components/create-organization-sheet"
 import { IdentitySection } from "@/features/organization/general/components/identity-section"
@@ -18,10 +21,10 @@ import { PreferencesSection } from "@/features/organization/general/components/p
 import { SwitchOrganizationSection } from "@/features/organization/general/components/switch-organization-section"
 import {
   createOrganization,
-  fetchOrganizationDefaultPermissionOptions,
-  fetchOrganizationGroups,
-  fetchOrganizationPolicies,
   normalizeOrganization,
+  organizationDefaultPermissionOptionsQueryOptions,
+  organizationGroupsQueryOptions,
+  organizationPoliciesQueryOptions,
   updateOrganization,
   type FlagSortedBy,
   type OrganizationGroup,
@@ -72,10 +75,6 @@ export function OrganizationGeneralPage() {
   const [groupId, setGroupId] = useState(
     organization?.defaultPermissions.groupIds[0] ?? ""
   )
-  const [policies, setPolicies] = useState<OrganizationPolicy[]>([])
-  const [groups, setGroups] = useState<OrganizationGroup[]>([])
-  const [policiesLoading, setPoliciesLoading] = useState(true)
-  const [groupsLoading, setGroupsLoading] = useState(true)
   const [createOpen, setCreateOpen] = useState(false)
   const [identitySaving, setIdentitySaving] = useState(false)
   const [sortingSaving, setSortingSaving] = useState(false)
@@ -91,6 +90,13 @@ export function OrganizationGeneralPage() {
     () => organization ?? organizations[0] ?? null,
     [organization, organizations]
   )
+  const userId = getStoredUserProfile().id ?? ""
+  const workspaceId = getCurrentWorkspace()?.id ?? ""
+  const isSsoFirstLogin = getIsSsoFirstLogin()
+  const organizationsQuery = useQuery({
+    ...organizationsQueryOptions(userId, workspaceId, isSsoFirstLogin),
+    enabled: Boolean(userId && workspaceId),
+  })
 
   const permissionsQuery = useQuery({
     ...currentUserPoliciesQueryOptions<OrganizationUserPolicy>(
@@ -115,6 +121,54 @@ export function OrganizationGeneralPage() {
   const canCreateOrg =
     permissionsReady &&
     canUseOrganizationAction(currentUserPolicies, "CreateOrg")
+  const organizationId = currentOrganization?.id ?? ""
+  const defaultPermissionOptionsQuery = useQuery({
+    ...organizationDefaultPermissionOptionsQueryOptions(organizationId),
+    enabled: Boolean(organizationId && permissionsReady),
+  })
+  const organizationPoliciesQuery = useQuery({
+    ...organizationPoliciesQueryOptions(organizationId),
+    enabled: Boolean(
+      organizationId && permissionsReady && canUpdateOrgDefaultUserPermissions
+    ),
+  })
+  const organizationGroupsQuery = useQuery({
+    ...organizationGroupsQueryOptions(organizationId),
+    enabled: Boolean(
+      organizationId && permissionsReady && canUpdateOrgDefaultUserPermissions
+    ),
+  })
+  const policies = useMemo<OrganizationPolicy[]>(() => {
+    const selectedPolicies = defaultPermissionOptionsQuery.data?.policies ?? []
+    const editablePolicies = organizationPoliciesQuery.data?.items ?? []
+
+    return Array.from(
+      new Map(
+        [...editablePolicies, ...selectedPolicies].map((policy) => [
+          policy.id,
+          policy,
+        ])
+      ).values()
+    )
+  }, [defaultPermissionOptionsQuery.data, organizationPoliciesQuery.data])
+  const groups = useMemo<OrganizationGroup[]>(() => {
+    const selectedGroups = defaultPermissionOptionsQuery.data?.groups ?? []
+    const editableGroups = organizationGroupsQuery.data?.items ?? []
+
+    return Array.from(
+      new Map(
+        [...editableGroups, ...selectedGroups].map((group) => [group.id, group])
+      ).values()
+    )
+  }, [defaultPermissionOptionsQuery.data, organizationGroupsQuery.data])
+  const policiesLoading =
+    permissionsQuery.isLoading ||
+    defaultPermissionOptionsQuery.isLoading ||
+    organizationPoliciesQuery.isLoading
+  const groupsLoading =
+    permissionsQuery.isLoading ||
+    defaultPermissionOptionsQuery.isLoading ||
+    organizationGroupsQuery.isLoading
 
   function showStatus(message: string, variant: "success" | "error") {
     setStatusMessage(message)
@@ -141,131 +195,34 @@ export function OrganizationGeneralPage() {
   useEffect(() => {
     let cancelled = false
 
-    async function loadOrganizations() {
-      try {
-        const loadedOrganizations = normalizeOrganizations(
-          await fetchOrganizations()
-        )
-        if (cancelled) {
-          return
-        }
-
-        setOrganizations(loadedOrganizations)
-        const storedOrganization = normalizeOrganization(
-          getCurrentOrganization()
-        )
-        const nextOrganization =
-          loadedOrganizations.find(
-            (item) => item.id === storedOrganization?.id
-          ) ??
-          storedOrganization ??
-          loadedOrganizations[0] ??
-          null
-
-        applyOrganization(nextOrganization)
-      } catch {
-        if (!cancelled) {
-          setOrganizations((current) => current)
-        }
+    async function applyLoadedOrganizations() {
+      await Promise.resolve()
+      if (cancelled || !organizationsQuery.data) {
+        return
       }
+
+      const loadedOrganizations = normalizeOrganizations(
+        organizationsQuery.data
+      )
+      setOrganizations(loadedOrganizations)
+      const storedOrganization = normalizeOrganization(getCurrentOrganization())
+      const nextOrganization =
+        loadedOrganizations.find(
+          (item) => item.id === storedOrganization?.id
+        ) ??
+        storedOrganization ??
+        loadedOrganizations[0] ??
+        null
+
+      applyOrganization(nextOrganization)
     }
 
-    void loadOrganizations()
+    void applyLoadedOrganizations()
 
     return () => {
       cancelled = true
     }
-  }, [applyOrganization])
-
-  useEffect(() => {
-    let cancelled = false
-
-    async function loadDefaultPermissionOptions() {
-      if (!currentOrganization) {
-        return
-      }
-
-      if (permissionsQuery.isError) {
-        setPoliciesLoading(false)
-        setGroupsLoading(false)
-        return
-      }
-
-      if (!permissionsReady) {
-        return
-      }
-
-      setPoliciesLoading(true)
-      setGroupsLoading(true)
-
-      try {
-        const selectedOptions =
-          await fetchOrganizationDefaultPermissionOptions()
-
-        if (cancelled) {
-          return
-        }
-
-        setPolicies(selectedOptions.policies)
-        setGroups(selectedOptions.groups)
-
-        if (canUpdateOrgDefaultUserPermissions) {
-          try {
-            const [loadedPolicies, loadedGroups] = await Promise.all([
-              fetchOrganizationPolicies(),
-              fetchOrganizationGroups(),
-            ])
-
-            if (cancelled) {
-              return
-            }
-
-            setPolicies(
-              Array.from(
-                new Map(
-                  [...loadedPolicies.items, ...selectedOptions.policies].map(
-                    (policy) => [policy.id, policy]
-                  )
-                ).values()
-              )
-            )
-            setGroups(
-              Array.from(
-                new Map(
-                  [...loadedGroups.items, ...selectedOptions.groups].map(
-                    (group) => [group.id, group]
-                  )
-                ).values()
-              )
-            )
-          } catch {
-            // Keep the selected read-only options if the editable lists fail.
-          }
-        }
-      } catch {
-        if (!cancelled) {
-          setPolicies([])
-          setGroups([])
-        }
-      } finally {
-        if (!cancelled) {
-          setPoliciesLoading(false)
-          setGroupsLoading(false)
-        }
-      }
-    }
-
-    void loadDefaultPermissionOptions()
-
-    return () => {
-      cancelled = true
-    }
-  }, [
-    canUpdateOrgDefaultUserPermissions,
-    currentOrganization,
-    permissionsQuery.isError,
-    permissionsReady,
-  ])
+  }, [applyOrganization, organizationsQuery.data])
 
   async function saveIdentity() {
     if (!currentOrganization) {

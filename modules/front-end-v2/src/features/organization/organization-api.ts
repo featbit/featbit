@@ -1,3 +1,4 @@
+import { queryOptions } from "@tanstack/react-query"
 import {
   clearCurrentProjectEnv,
   persistCurrentOrganization,
@@ -170,4 +171,39 @@ export function fetchOrganizationDefaultPermissionOptions() {
   return organizationRequest<OrganizationDefaultPermissionOptions>(
     "/api/v1/organizations/default-permissions"
   )
+}
+
+export const organizationQueryKeys = {
+  defaultPermissionOptions: (organizationId: string) =>
+    ["organization", organizationId, "default-permission-options"] as const,
+  policies: (organizationId: string) =>
+    ["organization", organizationId, "policies"] as const,
+  groups: (organizationId: string) =>
+    ["organization", organizationId, "groups"] as const,
+}
+
+export function organizationDefaultPermissionOptionsQueryOptions(
+  organizationId: string
+) {
+  return queryOptions({
+    queryKey: organizationQueryKeys.defaultPermissionOptions(organizationId),
+    queryFn: fetchOrganizationDefaultPermissionOptions,
+    staleTime: 60_000,
+  })
+}
+
+export function organizationPoliciesQueryOptions(organizationId: string) {
+  return queryOptions({
+    queryKey: organizationQueryKeys.policies(organizationId),
+    queryFn: () => fetchOrganizationPolicies(),
+    staleTime: 60_000,
+  })
+}
+
+export function organizationGroupsQueryOptions(organizationId: string) {
+  return queryOptions({
+    queryKey: organizationQueryKeys.groups(organizationId),
+    queryFn: () => fetchOrganizationGroups(),
+    staleTime: 60_000,
+  })
 }

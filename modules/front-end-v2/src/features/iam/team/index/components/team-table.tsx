@@ -1,6 +1,7 @@
 import { ChevronDown, Copy } from "lucide-react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
+import { Link } from "react-router-dom"
 import { flexRender, type Table as TanStackTable } from "@tanstack/react-table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -30,9 +31,11 @@ import { memberResourceName, type TeamMember } from "../../team-api"
 
 export function EmailResourceCell({
   member,
+  detailsPath,
   onCopy,
 }: {
   member: TeamMember
+  detailsPath: string
   onCopy: () => void
 }) {
   const { t } = useTranslation()
@@ -42,7 +45,12 @@ export function EmailResourceCell({
     <div className="min-w-0 space-y-1">
       <Tooltip>
         <TooltipTrigger
-          render={<span className="block truncate text-foreground" />}
+          render={
+            <Link
+              to={detailsPath}
+              className="block truncate font-medium text-foreground hover:underline"
+            />
+          }
         >
           {member.email || "-"}
         </TooltipTrigger>

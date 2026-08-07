@@ -15,6 +15,12 @@ vi.mock("@/features/layout/layout-context", () => ({
   clearCurrentProjectEnv: vi.fn(),
   fetchOrganizations: vi.fn(),
   getCurrentOrganization: vi.fn(),
+  getCurrentWorkspace: vi.fn(() => ({
+    id: "workspace-1",
+    name: "Workspace",
+    key: "workspace",
+  })),
+  getIsSsoFirstLogin: vi.fn(() => false),
   persistCurrentOrganization: vi.fn(),
   resolveLang: () => "en",
 }))

@@ -75,30 +75,36 @@ export function GroupRelationships({
     return () => window.clearTimeout(timeout)
   }, [search])
 
-  const loadCounts = useCallback(() => {
+  const loadInactiveCount = useCallback(() => {
     if (!groupId) return
-    Promise.all([
-      fetchGroupMembers(groupId, {
-        searchText: "",
-        getAllMembers: false,
-        pageIndex: 0,
-        pageSize: 1,
-      }),
-      fetchGroupPolicies(groupId, {
-        name: "",
-        getAllPolicies: false,
-        pageIndex: 0,
-        pageSize: 1,
-      }),
-    ])
-      .then(([memberResult, policyResult]) =>
-        setCounts({
-          team: memberResult.totalCount,
-          policies: policyResult.totalCount,
-        })
-      )
-      .catch(() => undefined)
-  }, [groupId])
+
+    const request =
+      activeTab === "team"
+        ? fetchGroupPolicies(groupId, {
+            name: "",
+            getAllPolicies: false,
+            pageIndex: 0,
+            pageSize: 1,
+          }).then((result) =>
+            setCounts((current) => ({
+              ...current,
+              policies: result.totalCount,
+            }))
+          )
+        : fetchGroupMembers(groupId, {
+            searchText: "",
+            getAllMembers: false,
+            pageIndex: 0,
+            pageSize: 1,
+          }).then((result) =>
+            setCounts((current) => ({
+              ...current,
+              team: result.totalCount,
+            }))
+          )
+
+    request.catch(() => undefined)
+  }, [activeTab, groupId])
 
   const loadRelationships = useCallback(() => {
     if (!groupId) return
@@ -111,20 +117,32 @@ export function GroupRelationships({
             getAllMembers: false,
             pageIndex: pageIndex - 1,
             pageSize,
-          }).then(setMembers)
+          }).then((result) => {
+            setMembers(result)
+            setCounts((current) => ({
+              ...current,
+              team: result.totalCount,
+            }))
+          })
         : fetchGroupPolicies(groupId, {
             name: debouncedSearch,
             getAllPolicies: false,
             pageIndex: pageIndex - 1,
             pageSize,
-          }).then(setPolicies)
+          }).then((result) => {
+            setPolicies(result)
+            setCounts((current) => ({
+              ...current,
+              policies: result.totalCount,
+            }))
+          })
     request.catch(() => setError(true)).finally(() => setLoading(false))
   }, [activeTab, debouncedSearch, groupId, pageIndex, pageSize])
 
   useEffect(() => {
-    const timeout = window.setTimeout(loadCounts, 0)
+    const timeout = window.setTimeout(loadInactiveCount, 0)
     return () => window.clearTimeout(timeout)
-  }, [loadCounts])
+  }, [loadInactiveCount])
 
   useEffect(() => {
     const timeout = window.setTimeout(loadRelationships, 0)
@@ -193,7 +211,7 @@ export function GroupRelationships({
       toast.success(t("iam.groups.operationSucceeded"))
       setMemberSheetOpen(false)
       loadRelationships()
-      loadCounts()
+      loadInactiveCount()
     } catch {
       toast.error(t("iam.groups.operationFailed"))
     } finally {
@@ -211,7 +229,7 @@ export function GroupRelationships({
       toast.success(t("iam.groups.operationSucceeded"))
       setPolicySheetOpen(false)
       loadRelationships()
-      loadCounts()
+      loadInactiveCount()
     } catch {
       toast.error(t("iam.groups.operationFailed"))
     } finally {
@@ -231,7 +249,7 @@ export function GroupRelationships({
       toast.success(t("iam.groups.operationSucceeded"))
       setRemoveTarget(null)
       loadRelationships()
-      loadCounts()
+      loadInactiveCount()
     } catch {
       toast.error(t("iam.groups.operationFailed"))
     } finally {
