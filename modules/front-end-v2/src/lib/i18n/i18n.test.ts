@@ -93,12 +93,14 @@ describe("global feature translations", () => {
       "Targeting rules"
     )
     expect(i18n.t("targeting.rules.operators.IsOneOf")).toBe("is one of")
+    expect(i18n.t("targeting.rules.noValues")).toBe("No preset values found")
 
     await i18n.changeLanguage("zh")
     expect(i18n.t("featureFlags.title")).toBe("功能开关")
     expect(i18n.t("featureFlags.selected", { count: 2 })).toBe("已选择 2 项")
     expect(i18n.t("featureFlags.detailsPage.targetingRules")).toBe("定向规则")
     expect(i18n.t("targeting.rules.operators.IsOneOf")).toBe("属于其中之一")
+    expect(i18n.t("targeting.rules.noValues")).toBe("未找到预设值")
   })
 
   it("does not expose retired Chinese end-user terminology", async () => {

@@ -38,7 +38,7 @@ export const enTargeting = {
     multiValue: "Separate values with commas",
     selectValues: "Select values",
     searchValues: "Search values",
-    noValues: "No values found.",
+    noValues: "No preset values found",
     addValue: 'Add "{{value}}"',
     removeValue: "Remove {{value}}",
     operators: {
@@ -110,7 +110,7 @@ export const zhTargeting: typeof enTargeting = {
     multiValue: "使用逗号分隔多个值",
     selectValues: "选择值",
     searchValues: "搜索值",
-    noValues: "未找到值。",
+    noValues: "未找到预设值",
     addValue: "添加“{{value}}”",
     removeValue: "移除 {{value}}",
     operators: {
