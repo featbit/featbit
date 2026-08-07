@@ -102,7 +102,7 @@ export function createPolicyColumns({
         <Tooltip>
           <TooltipTrigger
             render={
-              <span className="block min-w-0 truncate text-muted-foreground" />
+              <span className="inline-block max-w-full truncate align-middle text-muted-foreground" />
             }
           >
             {row.original.description || "-"}
