@@ -71,6 +71,21 @@ function renderedDraft() {
 }
 
 describe("PermissionsEditor fine-grained license states", () => {
+  it("describes environment access as including read access to its resources", () => {
+    render(
+      <PermissionsEditorHarness
+        initialDraft={createEmptyPermissionDraft()}
+        fineGrainedGranted={false}
+      />
+    )
+
+    expect(
+      screen.getByRole("button", {
+        name: "Access environments and read their resources",
+      })
+    ).toBeInTheDocument()
+  })
+
   it.each(["Feature flag", "Segment"])(
     "only offers Select all for a new unlicensed %s category",
     (categoryName) => {

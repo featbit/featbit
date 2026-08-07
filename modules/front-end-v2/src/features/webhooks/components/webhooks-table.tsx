@@ -118,8 +118,8 @@ export function WebhooksTable({
               <TableHead className="w-[13%] px-5 py-4 font-semibold">
                 {t("webhooks.columns.events")}
               </TableHead>
-              <TableHead className="px-5 py-4 text-right font-semibold">
-                <span className="sr-only">{t("webhooks.columns.actions")}</span>
+              <TableHead className="w-[13%] px-5 py-4 font-semibold">
+                {t("webhooks.columns.actions")}
               </TableHead>
             </TableRow>
           </TableHeader>
@@ -336,8 +336,8 @@ export function WebhooksTable({
                           <span className="text-muted-foreground">—</span>
                         )}
                       </TableCell>
-                      <TableCell className="pr-4 align-middle">
-                        <div className="flex items-center justify-end gap-1">
+                      <TableCell className="px-5 py-2 align-middle">
+                        <div className="flex items-center gap-1 whitespace-nowrap">
                           <Button
                             type="button"
                             variant="ghost"

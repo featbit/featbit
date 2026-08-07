@@ -66,7 +66,7 @@ export function RelayProxyTable({
             <TableHead className="px-5 py-4 font-semibold">
               {t("relayProxies.columns.lastUpdated")}
             </TableHead>
-            <TableHead className="px-5 py-4 text-right font-semibold">
+            <TableHead className="w-[13%] px-5 py-4 font-semibold">
               {t("relayProxies.columns.actions")}
             </TableHead>
           </TableRow>
@@ -140,8 +140,8 @@ export function RelayProxyTable({
                   <TableCell className="align-middle text-xs text-muted-foreground">
                     {formattedDate(relayProxy.updatedAt, locale)}
                   </TableCell>
-                  <TableCell className="pr-4 align-middle">
-                    <div className="flex justify-end gap-1">
+                  <TableCell className="px-5 py-2 align-middle">
+                    <div className="flex items-center gap-1 whitespace-nowrap">
                       {canManage ? (
                         <>
                           <Button
