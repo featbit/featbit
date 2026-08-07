@@ -260,6 +260,20 @@ export function TargetingTab({
     })
   }
 
+  function addRule() {
+    onDraftChange({
+      ...flag,
+      rules: [
+        ...(flag.rules ?? []),
+        newFlagRule(
+          t("featureFlags.detailsPage.defaultRuleName", {
+            count: (flag.rules?.length ?? 0) + 1,
+          })
+        ),
+      ],
+    })
+  }
+
   function review() {
     const next = validateTargeting(flag, {
       allocation: t("featureFlags.detailsPage.validation.allocation"),
@@ -522,19 +536,7 @@ export function TargetingTab({
             size="sm"
             variant="outline"
             disabled={!canEditRules}
-            onClick={() =>
-              onDraftChange({
-                ...flag,
-                rules: [
-                  ...(flag.rules ?? []),
-                  newFlagRule(
-                    t("featureFlags.detailsPage.defaultRuleName", {
-                      count: (flag.rules?.length ?? 0) + 1,
-                    })
-                  ),
-                ],
-              })
-            }
+            onClick={addRule}
           >
             <Plus />
             {t("featureFlags.detailsPage.addRule")}
@@ -657,8 +659,23 @@ export function TargetingTab({
             </div>
           ))}
           {!flag.rules?.length ? (
-            <div className="rounded-md border border-dashed px-5 py-10 text-center text-sm text-muted-foreground">
-              {t("featureFlags.detailsPage.rulesEmpty")}
+            <div
+              data-slot="targeting-rules-empty"
+              className="flex flex-col items-center rounded-md border border-dashed px-5 py-10 text-center"
+            >
+              <p className="text-sm text-muted-foreground">
+                {t("featureFlags.detailsPage.rulesEmpty")}
+              </p>
+              <Button
+                type="button"
+                size="sm"
+                className="mt-4"
+                disabled={!canEditRules}
+                onClick={addRule}
+              >
+                <Plus />
+                {t("featureFlags.detailsPage.addRule")}
+              </Button>
             </div>
           ) : null}
         </div>

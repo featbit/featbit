@@ -161,6 +161,12 @@ describe("feature flag targeting tab", () => {
         "No rules yet. Add a rule to match users by their properties."
       )
     ).toBeVisible()
+    const emptyRules = screen
+      .getByText("No rules yet. Add a rule to match users by their properties.")
+      .closest('[data-slot="targeting-rules-empty"]')
+    expect(
+      within(emptyRules!).getByRole("button", { name: "Add rule" })
+    ).toBeEnabled()
     expect(
       screen.getByText(
         "When the flag is ON, matched users receive the rule’s variation; unmatched users fall through to the default rule."
@@ -300,7 +306,11 @@ describe("feature flag targeting tab", () => {
     expect(
       screen.getByRole("combobox", { name: "Flag OFF serving variation" })
     ).toBeDisabled()
-    expect(screen.getByRole("button", { name: "Add rule" })).toBeDisabled()
+    for (const addRule of screen.getAllByRole("button", {
+      name: "Add rule",
+    })) {
+      expect(addRule).toBeDisabled()
+    }
     for (const addUser of screen.getAllByRole("button", {
       name: "Search by name or keyId to add",
     })) {
@@ -334,7 +344,11 @@ describe("feature flag targeting tab", () => {
     expect(
       screen.getByRole("combobox", { name: "Flag OFF serving variation" })
     ).toBeDisabled()
-    expect(screen.getByRole("button", { name: "Add rule" })).toBeDisabled()
+    for (const addRule of screen.getAllByRole("button", {
+      name: "Add rule",
+    })) {
+      expect(addRule).toBeDisabled()
+    }
     for (const addUser of screen.getAllByRole("button", {
       name: "Search by name or keyId to add",
     })) {
@@ -356,7 +370,12 @@ describe("feature flag targeting tab", () => {
 
   it("adds a rule through the shared Segment rule editor contract", () => {
     const props = renderTargeting()
-    fireEvent.click(screen.getByRole("button", { name: "Add rule" }))
+    const emptyRules = screen
+      .getByText("No rules yet. Add a rule to match users by their properties.")
+      .closest('[data-slot="targeting-rules-empty"]')
+    fireEvent.click(
+      within(emptyRules!).getByRole("button", { name: "Add rule" })
+    )
     expect(props.onDraftChange).toHaveBeenCalledWith(
       expect.objectContaining({
         rules: [
