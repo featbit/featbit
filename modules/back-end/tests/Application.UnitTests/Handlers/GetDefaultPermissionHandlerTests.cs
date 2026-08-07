@@ -2,13 +2,14 @@ using System.Linq.Expressions;
 using Application.Bases.Exceptions;
 using Application.Organizations;
 using Application.Services;
+using Application.Users;
 using Domain.Groups;
 using Domain.Organizations;
 using Domain.Policies;
 
 namespace Application.UnitTests.Handlers;
 
-public class GetOrganizationDefaultPermissionOptionsHandlerTests
+public class GetDefaultPermissionsHandlerTests
 {
     [Fact]
     public async Task Handle_Member_ReturnsOnlyConfiguredPolicyAndGroupNames()
@@ -59,15 +60,18 @@ public class GetOrganizationDefaultPermissionOptionsHandlerTests
                 new[] { group, otherOrganizationGroup }
                     .Where(predicate.Compile())
                     .ToArray());
-        var sut = new GetOrganizationDefaultPermissionOptionsHandler(
+        var currentUser = new Mock<ICurrentUser>();
+        currentUser.SetupGet(x => x.Id).Returns(userId);
+        var sut = new GetDefaultPermissionsHandler(
             organizationService.Object,
             policyService.Object,
-            groupService.Object);
+            groupService.Object,
+            currentUser.Object
+        );
 
-        var result = await sut.Handle(new GetOrganizationDefaultPermissionOptions
+        var result = await sut.Handle(new GetDefaultPermissions
         {
             OrganizationId = organizationId,
-            UserId = userId
         }, CancellationToken.None);
 
         var policyOption = Assert.Single(result.Policies);
@@ -88,18 +92,21 @@ public class GetOrganizationDefaultPermissionOptionsHandlerTests
         organizationService.Setup(x => x.ContainsUserAsync(organizationId, userId)).ReturnsAsync(false);
         var policyService = new Mock<IPolicyService>();
         var groupService = new Mock<IGroupService>();
-        var sut = new GetOrganizationDefaultPermissionOptionsHandler(
+        var currentUser = new Mock<ICurrentUser>();
+        currentUser.SetupGet(x => x.Id).Returns(userId);
+        var sut = new GetDefaultPermissionsHandler(
             organizationService.Object,
             policyService.Object,
-            groupService.Object);
+            groupService.Object,
+            currentUser.Object
+        );
 
         await Assert.ThrowsAsync<ForbiddenException>(() => sut.Handle(
-            new GetOrganizationDefaultPermissionOptions
+            new GetDefaultPermissions
             {
-                OrganizationId = organizationId,
-                UserId = userId
-            },
-            CancellationToken.None));
+                OrganizationId = organizationId
+            }, CancellationToken.None)
+        );
 
         organizationService.Verify(x => x.GetAsync(It.IsAny<Guid>()), Times.Never);
         policyService.Verify(

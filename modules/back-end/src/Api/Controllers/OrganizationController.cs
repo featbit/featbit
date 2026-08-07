@@ -45,13 +45,12 @@ public class OrganizationController : ApiControllerBase
         return Ok(isUsed);
     }
 
-    [HttpGet("default-permission-options")]
-    public async Task<ApiResponse<OrganizationDefaultPermissionOptionsVm>> GetDefaultPermissionOptionsAsync()
+    [HttpGet("default-permissions")]
+    public async Task<ApiResponse<DefaultPermissionsVm>> GetDefaultPermissionAsync()
     {
-        var request = new GetOrganizationDefaultPermissionOptions
+        var request = new GetDefaultPermissions
         {
-            OrganizationId = OrgId,
-            UserId = CurrentUser.Id
+            OrganizationId = OrgId
         };
 
         var options = await Mediator.Send(request);

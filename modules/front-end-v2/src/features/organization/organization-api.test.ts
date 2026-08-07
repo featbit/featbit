@@ -173,7 +173,7 @@ describe("organization api", () => {
     })
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "http://localhost:5000/api/v1/organizations/default-permission-options",
+      "http://localhost:5000/api/v1/organizations/default-permissions",
       expect.anything()
     )
   })

@@ -168,6 +168,6 @@ export async function fetchOrganizationGroups(search = "", pageSize = 50) {
 
 export function fetchOrganizationDefaultPermissionOptions() {
   return organizationRequest<OrganizationDefaultPermissionOptions>(
-    "/api/v1/organizations/default-permission-options"
+    "/api/v1/organizations/default-permissions"
   )
 }
