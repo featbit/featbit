@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { Loader2, Plus } from "lucide-react"
-import { useMemo, useState } from "react"
+import { useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import {
@@ -75,6 +75,8 @@ export function PropertiesSheet({
   const [pendingDigestValues, setPendingDigestValues] = useState<
     Record<string, boolean>
   >({})
+  const digestMutationVersions = useRef<Record<string, number>>({})
+  const digestMutationQueues = useRef<Record<string, Promise<void>>>({})
 
   const filtered = useMemo(() => {
     const filter = search.trim().toLowerCase()
@@ -136,6 +138,20 @@ export function PropertiesSheet({
     },
     onError: () => toast.error(t("endUsers.operationFailed")),
   })
+  const digestMutation = useMutation({
+    mutationFn: ({
+      property,
+      checked,
+    }: {
+      property: EndUserProperty
+      checked: boolean
+    }) =>
+      upsertEndUserProperty(
+        envId,
+        property.id,
+        propertyPayload(property, { isDigestField: checked })
+      ),
+  })
 
   function validateName(name: string, propertyId?: string) {
     const trimmed = name.trim()
@@ -180,24 +196,52 @@ export function PropertiesSheet({
   }
 
   function toggleDigest(property: EndUserProperty, checked: boolean) {
+    const version = (digestMutationVersions.current[property.id] ?? 0) + 1
+    digestMutationVersions.current[property.id] = version
     setPendingDigestValues((current) => ({
       ...current,
       [property.id]: checked,
     }))
-    saveMutation.mutate(
-      {
-        propertyId: property.id,
-        payload: propertyPayload(property, { isDigestField: checked }),
-      },
-      {
-        onSettled: () =>
+
+    const previous = digestMutationQueues.current[property.id]
+    const next = (previous ?? Promise.resolve())
+      .catch(() => undefined)
+      .then(async () => {
+        try {
+          const saved = await digestMutation.mutateAsync({ property, checked })
+          updateCache((current) =>
+            current.map((item) => (item.id === saved.id ? saved : item))
+          )
+          if (digestMutationVersions.current[property.id] !== version) {
+            return
+          }
+
           setPendingDigestValues((current) => {
             const next = { ...current }
             delete next[property.id]
             return next
-          }),
-      }
-    )
+          })
+          toast.success(t("endUsers.operationSucceeded"))
+        } catch {
+          if (digestMutationVersions.current[property.id] !== version) {
+            return
+          }
+
+          setPendingDigestValues((current) => {
+            const next = { ...current }
+            delete next[property.id]
+            return next
+          })
+          toast.error(t("endUsers.operationFailed"))
+        }
+      })
+      .finally(() => {
+        if (digestMutationQueues.current[property.id] === next) {
+          delete digestMutationQueues.current[property.id]
+        }
+      })
+
+    digestMutationQueues.current[property.id] = next
   }
 
   return (

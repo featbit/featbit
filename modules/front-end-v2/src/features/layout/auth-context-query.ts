@@ -1,4 +1,5 @@
 import { queryOptions } from "@tanstack/react-query"
+import { getAuthSessionId } from "@/features/auth/auth-api"
 import {
   fetchOrganizations,
   fetchProjects,
@@ -9,22 +10,28 @@ const AUTH_CONTEXT_STALE_TIME = 60_000
 
 export const authContextQueryKeys = {
   all: ["authenticated-context"] as const,
+  session: () => [...authContextQueryKeys.all, getAuthSessionId()] as const,
   workspaces: (userId: string) =>
-    [...authContextQueryKeys.all, "workspaces", userId] as const,
+    [...authContextQueryKeys.session(), "workspaces", userId] as const,
   organizations: (
     userId: string,
     workspaceId: string,
     isSsoFirstLogin: boolean
   ) =>
     [
-      ...authContextQueryKeys.all,
+      ...authContextQueryKeys.session(),
       "organizations",
       userId,
       workspaceId,
       isSsoFirstLogin,
     ] as const,
   projects: (userId: string, organizationId: string) =>
-    [...authContextQueryKeys.all, "projects", userId, organizationId] as const,
+    [
+      ...authContextQueryKeys.session(),
+      "projects",
+      userId,
+      organizationId,
+    ] as const,
 }
 
 export function workspacesQueryOptions(userId: string) {

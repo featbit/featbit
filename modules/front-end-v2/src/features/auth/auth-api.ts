@@ -7,6 +7,7 @@ const LOGIN_REDIRECT_URL = "login-redirect-url"
 const REMEMBERED_EMAIL = "remembered-email"
 const SESSION_EXPIRED_EVENT = "featbit:session-expired"
 const TAB_SIGNED_OUT = "featbit:tab-signed-out"
+const AUTH_SESSION_ID = "featbit:auth-session-id"
 
 type ApiEnvelope<T> = {
   success?: boolean
@@ -38,6 +39,7 @@ export type StoredUserProfile = {
 function clearAuthStorage() {
   localStorage.removeItem(IDENTITY_TOKEN)
   localStorage.removeItem(USER_PROFILE)
+  localStorage.removeItem(AUTH_SESSION_ID)
   sessionStorage.removeItem(IDENTITY_TOKEN)
   sessionStorage.removeItem(USER_PROFILE)
   sessionStorage.removeItem(TAB_SIGNED_OUT)
@@ -94,6 +96,10 @@ export function getIdentityToken() {
   }
 
   return localStorage.getItem(IDENTITY_TOKEN)
+}
+
+export function getAuthSessionId() {
+  return localStorage.getItem(AUTH_SESSION_ID) ?? ""
 }
 
 export function getRememberedEmail() {
@@ -208,6 +214,7 @@ export async function completeLogin(
 
   const profile = await getProfile(token)
   localStorage.setItem(USER_PROFILE, JSON.stringify(profile))
+  localStorage.setItem(AUTH_SESSION_ID, crypto.randomUUID())
 
   if (options?.email !== undefined) {
     saveRememberedEmail(options.email, Boolean(options.rememberMe))

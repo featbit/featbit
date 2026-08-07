@@ -32,12 +32,24 @@ const properties: EndUserProperty[] = [
   },
 ]
 
+function deferred<T>() {
+  let resolve!: (value: T) => void
+  let reject!: (reason?: unknown) => void
+  const promise = new Promise<T>((resolvePromise, rejectPromise) => {
+    resolve = resolvePromise
+    reject = rejectPromise
+  })
+
+  return { promise, reject, resolve }
+}
+
 function renderSheet() {
   const queryClient = new QueryClient({
     defaultOptions: { mutations: { retry: false } },
   })
+  queryClient.setQueryData(["end-users", "env-1", "properties"], properties)
 
-  return render(
+  const view = render(
     <QueryClientProvider client={queryClient}>
       <PropertiesSheet
         envId="env-1"
@@ -50,6 +62,8 @@ function renderSheet() {
       />
     </QueryClientProvider>
   )
+
+  return { ...view, queryClient }
 }
 
 describe("PropertiesSheet digest fields", () => {
@@ -82,5 +96,43 @@ describe("PropertiesSheet digest fields", () => {
     await waitFor(() =>
       expect(planDigest).toHaveAttribute("aria-checked", "false")
     )
+  })
+
+  it("serializes overlapping digest updates and preserves the latest selection", async () => {
+    const firstSave = deferred<EndUserProperty>()
+    const secondSave = deferred<EndUserProperty>()
+    vi.mocked(upsertEndUserProperty)
+      .mockReturnValueOnce(firstSave.promise)
+      .mockReturnValueOnce(secondSave.promise)
+    const { queryClient } = renderSheet()
+
+    const [planDigest] = screen.getAllByRole("checkbox")
+    fireEvent.click(planDigest)
+    fireEvent.click(planDigest)
+
+    expect(planDigest).toHaveAttribute("aria-checked", "false")
+    await waitFor(() => expect(upsertEndUserProperty).toHaveBeenCalledTimes(1))
+
+    firstSave.resolve({ ...properties[0], isDigestField: true })
+
+    await waitFor(() => expect(upsertEndUserProperty).toHaveBeenCalledTimes(2))
+    expect(planDigest).toHaveAttribute("aria-checked", "false")
+
+    secondSave.resolve({
+      ...properties[0],
+      remark: "latest digest selection saved",
+      isDigestField: false,
+    })
+
+    await waitFor(() =>
+      expect(
+        queryClient.getQueryData<EndUserProperty[]>([
+          "end-users",
+          "env-1",
+          "properties",
+        ])?.[0].remark
+      ).toBe("latest digest selection saved")
+    )
+    expect(planDigest).toHaveAttribute("aria-checked", "false")
   })
 })

@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import {
   completeLogin,
+  getAuthSessionId,
   getIdentityToken,
   getRememberedEmail,
   getStoredUserProfile,
@@ -61,6 +62,24 @@ describe("auth persistence", () => {
     expect(getIdentityToken()).toBe("auth-token")
     expect(getRememberedEmail()).toBe("user@example.com")
     expect(navigate).toHaveBeenCalledWith("/en")
+  })
+
+  it("creates a new authentication session for every completed login", async () => {
+    await completeLogin(
+      { success: true, data: { token: "first-token" } },
+      vi.fn(),
+      "/en"
+    )
+    const firstSessionId = getAuthSessionId()
+
+    await completeLogin(
+      { success: true, data: { token: "second-token" } },
+      vi.fn(),
+      "/en"
+    )
+
+    expect(firstSessionId).not.toBe("")
+    expect(getAuthSessionId()).not.toBe(firstSessionId)
   })
 
   it("signs out only the current tab and restores it after login", async () => {
