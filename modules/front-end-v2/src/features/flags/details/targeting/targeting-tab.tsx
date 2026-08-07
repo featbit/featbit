@@ -183,6 +183,7 @@ function ServingControl({
 }
 
 export function TargetingTab({
+  envId,
   flag,
   users,
   properties,
@@ -207,6 +208,7 @@ export function TargetingTab({
   onChangeRequest,
   onToggle,
 }: {
+  envId: string
   flag: FeatureFlag
   users: Map<string, SegmentEndUser>
   properties: SegmentUserProperty[]
@@ -494,7 +496,7 @@ export function TargetingTab({
             <UserPanel
               key={variation.id}
               title={variation.name || variation.value}
-              envId={flag.envId ?? ""}
+              envId={envId}
               shared={false}
               keys={keysFor(variation.id)}
               users={users}
@@ -575,8 +577,10 @@ export function TargetingTab({
               }}
             >
               <RuleEditor
+                envId={envId}
                 rule={rule as SegmentRule}
                 properties={properties}
+                includeSegmentConditions
                 disabled={!canEditRules}
                 canMoveUp={index > 0}
                 canMoveDown={index < (flag.rules?.length ?? 0) - 1}

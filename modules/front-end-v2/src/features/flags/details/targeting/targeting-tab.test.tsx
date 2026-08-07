@@ -60,6 +60,7 @@ function renderTargeting(
   })
   const props = {
     lang: "en" as const,
+    envId: "env-1",
     flag,
     users: new Map([
       [
@@ -366,6 +367,49 @@ describe("feature flag targeting tab", () => {
                 property: "keyId",
                 op: "Equal",
                 value: "",
+              }),
+            ],
+          }),
+        ],
+      })
+    )
+  })
+
+  it("offers Angular-compatible segment membership conditions", async () => {
+    const props = renderTargeting(
+      exampleFlag({
+        rules: [
+          {
+            id: "rule-1",
+            name: "Segment members",
+            conditions: [
+              {
+                id: "condition-1",
+                property: "keyId",
+                op: "Equal",
+                value: "",
+              },
+            ],
+            variations: [{ id: "control", rollout: [0, 1] }],
+          },
+        ],
+      })
+    )
+
+    fireEvent.click(screen.getByRole("combobox", { name: "Select property" }))
+    fireEvent.click(
+      await screen.findByRole("option", { name: "User is in segment" })
+    )
+
+    expect(props.onDraftChange).toHaveBeenCalledWith(
+      expect.objectContaining({
+        rules: [
+          expect.objectContaining({
+            conditions: [
+              expect.objectContaining({
+                property: "User is in segment",
+                op: "",
+                value: "[]",
               }),
             ],
           }),

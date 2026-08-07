@@ -3,6 +3,7 @@ import { fetchApi } from "@/lib/api/authenticated-api"
 import {
   createSegmentEndUser,
   fetchAllSegmentTags,
+  fetchSegmentsByIds,
   updateSegmentGeneral,
 } from "./segments-api"
 
@@ -71,6 +72,16 @@ describe("segments tag API", () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ keyId: "new-user", name: "new-user" }),
       }
+    )
+  })
+
+  it("loads referenced segments by id", async () => {
+    vi.mocked(fetchApi).mockResolvedValue([])
+
+    await fetchSegmentsByIds("env / 1", ["segment / a", "segment-b"])
+
+    expect(fetchApi).toHaveBeenCalledWith(
+      "/api/v1/envs/env%20%2F%201/segments/by-ids?ids=segment+%2F+a&ids=segment-b"
     )
   })
 })

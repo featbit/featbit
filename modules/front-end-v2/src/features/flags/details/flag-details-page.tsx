@@ -581,6 +581,7 @@ export function FlagDetailsPage() {
               />
             ) : null}
             <TargetingTab
+              envId={envId}
               flag={targetingFlag!}
               users={users}
               properties={propertiesQuery.data ?? []}

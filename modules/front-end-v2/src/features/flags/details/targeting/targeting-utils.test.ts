@@ -148,4 +148,25 @@ describe("feature flag targeting utilities", () => {
     expect(errors.has("default")).toBe(true)
     expect(errors.has("rule-1")).toBe(true)
   })
+
+  it("validates segment conditions without a normal operator", () => {
+    const current = flag()
+    current.rules![0].conditions = [
+      {
+        id: "condition-segment",
+        property: "User is in segment",
+        op: "",
+        value: JSON.stringify(["segment-1"]),
+      },
+    ]
+
+    expect(validateTargeting(current, validationMessages).has("rule-1")).toBe(
+      false
+    )
+
+    current.rules![0].conditions[0].value = "[]"
+    expect(validateTargeting(current, validationMessages).has("rule-1")).toBe(
+      true
+    )
+  })
 })

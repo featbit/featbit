@@ -1,4 +1,8 @@
 import type { ChangeReviewItem } from "@/features/change-review/change-review-types"
+import {
+  isSegmentConditionProperty,
+  segmentConditionValues,
+} from "@/features/targeting/segment-conditions"
 import type {
   FeatureFlag,
   FlagRule,
@@ -302,8 +306,10 @@ export function validateTargeting(
       rule.conditions.some(
         (item) =>
           !item.property ||
-          !item.op ||
-          (!(item.op === "IsTrue" || item.op === "IsFalse") && !item.value)
+          (isSegmentConditionProperty(item.property)
+            ? segmentConditionValues(item).length === 0
+            : !item.op ||
+              (!(item.op === "IsTrue" || item.op === "IsFalse") && !item.value))
       )
     ) {
       errors.set(rule.id, messages.conditionIncomplete)

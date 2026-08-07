@@ -1,10 +1,17 @@
 import type { SegmentCondition } from "@/features/segments/segments-types"
+import {
+  isSegmentConditionProperty,
+  segmentConditionValues,
+} from "./segment-conditions"
 
 export function newTargetingId() {
   return crypto.randomUUID()
 }
 
 export function conditionValues(condition: SegmentCondition) {
+  if (isSegmentConditionProperty(condition.property)) {
+    return segmentConditionValues(condition)
+  }
   if (condition.op !== "IsOneOf" && condition.op !== "NotOneOf") {
     return [condition.value]
   }

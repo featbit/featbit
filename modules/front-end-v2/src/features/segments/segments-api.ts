@@ -23,6 +23,12 @@ export function fetchSegment(envId: string, segmentId: string) {
   )
 }
 
+export function fetchSegmentsByIds(envId: string, segmentIds: string[]) {
+  const params = new URLSearchParams()
+  segmentIds.forEach((segmentId) => params.append("ids", segmentId))
+  return fetchApi<Segment[]>(`${segmentBasePath(envId)}/by-ids?${params}`)
+}
+
 export function updateSegmentTargeting(
   envId: string,
   segmentId: string,
