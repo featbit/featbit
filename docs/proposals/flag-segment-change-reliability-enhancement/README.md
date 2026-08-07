@@ -141,8 +141,8 @@ Correlate logs and traces with `change_id`, but keep it out of metric attributes
 1. Define the selected consistency model and API error contract.
 2. Add the versioned envelope and deploy backward-compatible ELS consumers.
 3. Make ELS processing idempotent.
-4. Correct provider acknowledgement and failure propagation, starting with Kafka.
-5. Add the transaction or outbox persistence boundary.
+4. Add the transaction or outbox persistence boundary.
+5. Correct provider acknowledgement and failure propagation, starting with Kafka.
 6. Update API endpoints and UI error handling.
 7. Add ELS settlement, retry, and fanout reliability behavior.
 8. Remove legacy raw-message production after the compatibility window.
