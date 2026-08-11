@@ -148,6 +148,31 @@ describe("ResourceSelection", () => {
     expect(onSubmit).not.toHaveBeenCalled()
   })
 
+  it("does not show Edit RN for an unsupported resource type", () => {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    })
+    const selectedRn = "workspace/workspace-1"
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <ResourceSelectionHarness
+          resourceType="workspace"
+          resources={[selectedRn]}
+          onChange={vi.fn()}
+        />
+      </QueryClientProvider>
+    )
+
+    expect(screen.getByText(selectedRn)).toBeInTheDocument()
+    expect(
+      screen.queryByRole("button", { name: "Edit workspace-1" })
+    ).not.toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: "Remove workspace-1" })
+    ).toBeInTheDocument()
+  })
+
   it.each([
     {
       resourceType: "flag" as const,
