@@ -2,7 +2,7 @@
 
 ## 1. Scope
 
-This document defines the React redesign of the **Feature Flags index page** in `front-end-v2`.
+This document defines the React redesign of the **Feature Flags index page** in `front-end`.
 
 The scope includes the index page and the supporting sheets/dialogs launched directly from it:
 

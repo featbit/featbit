@@ -2,8 +2,8 @@
 
 ## React Migration Context
 
-- The existing Angular project in `front-end` is the read-only reference implementation.
-- The new React implementation belongs in `front-end-v2`.
+- The existing Angular project in `front-end-v1` is the read-only reference implementation.
+- The new React implementation belongs in `front-end`.
 - Follow `plan.md` and `implementation-details/*.md` for the migration plan and detailed implementation guidance.
 - Do not rename `plan.md` to `AGENTS.md`; keep this file as durable agent instructions and keep the migration plan separate.
 
@@ -19,14 +19,14 @@
 
 ## UI And Asset Rules
 
-- Do not modify `front-end-v2/src/index.css`.
+- Do not modify `front-end/src/index.css`.
 - Do not copy Angular/ng-zorro styling one-to-one.
 - Prefer shadcn/ui and Tailwind default tokens for buttons, text colors, spacing, radius, focus rings, and common controls.
-- When migrating any module into `front-end-v2`, prefer the native shadcn/Base UI components in `front-end-v2/src/components/ui/*`.
+- When migrating any module into `front-end`, prefer the native shadcn/Base UI components in `front-end/src/components/ui/*`.
 - Do not modify the original `components/ui/*` shadcn component files for migration-specific needs; compose or wrap them from feature/layout files.
-- If a needed shadcn component is missing from `front-end-v2/src/components/ui/*`, it may be added using the shadcn CLI or official shadcn source for the current `front-end-v2` setup. After a shadcn component file is generated or downloaded into `components/ui/*`, do not hand-edit that generated component file.
+- If a needed shadcn component is missing from `front-end/src/components/ui/*`, it may be added using the shadcn CLI or official shadcn source for the current `front-end` setup. After a shadcn component file is generated or downloaded into `components/ui/*`, do not hand-edit that generated component file.
 - Prefer shadcn default component styles and tokens. Add only small amounts of Tailwind in feature or layout files when necessary.
-- Every shadcn/Base UI `Select` must include `SelectGroup` inside `SelectContent`, and every `SelectItem` must be nested in a `SelectGroup`. Never render `SelectItem` directly under `SelectContent`, even when the select has only one logical group. Follow the `OrganizationSelect` composition in `front-end-v2/src/features/organization/general/components/organization-form-fields.tsx`; this preserves the expected option spacing, grouping semantics, and popup alignment with the trigger.
+- Every shadcn/Base UI `Select` must include `SelectGroup` inside `SelectContent`, and every `SelectItem` must be nested in a `SelectGroup`. Never render `SelectItem` directly under `SelectContent`, even when the select has only one logical group. Follow the `OrganizationSelect` composition in `front-end/src/features/organization/general/components/organization-form-fields.tsx`; this preserves the expected option spacing, grouping semantics, and popup alignment with the trigger.
 - Split migrated code by responsibility so individual files do not become unusually large.
 - Copy only necessary assets such as FeatBit logo, brand SVGs, sample JSON, `env.template.js`, required Monaco assets, and irreplaceable business-specific icons.
 - Do not copy the old Angular login background.

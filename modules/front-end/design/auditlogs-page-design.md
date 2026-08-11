@@ -2,7 +2,7 @@
 
 ## Scope
 
-This document defines the React redesign of the environment-level Audit Logs page in `front-end-v2`.
+This document defines the React redesign of the environment-level Audit Logs page in `front-end`.
 
 Included:
 
@@ -20,7 +20,7 @@ Excluded:
 - mobile-first layout work;
 - implementation work of any kind.
 
-The Angular implementation is the functional reference only. The React page must use the compact, neutral shadcn/Base UI and Tailwind workbench language established in `front-end-v2`. It must not reproduce the Angular timeline or ng-zorro styling.
+The Angular implementation is the functional reference only. The React page must use the compact, neutral shadcn/Base UI and Tailwind workbench language established in `front-end`. It must not reproduce the Angular timeline or ng-zorro styling.
 
 ## Design Asset
 

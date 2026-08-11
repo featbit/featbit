@@ -6,10 +6,10 @@ Migrate the main product domains page by page while preserving backend API contr
 
 ## Module Migration Requirements
 
-- Prefer the native shadcn/Base UI components in `front-end-v2/src/components/ui/*` for standard controls and surfaces.
+- Prefer the native shadcn/Base UI components in `front-end/src/components/ui/*` for standard controls and surfaces.
 - Before creating a custom control, first check whether shadcn provides a native component for that UI pattern; if it does, use or add the shadcn component instead of hand-rolling the control.
 - Do not modify the original `components/ui/*` shadcn component files during module migration.
-- If a standard shadcn component needed by a feature is missing, add it to `front-end-v2/src/components/ui/*` through the shadcn CLI or official shadcn source for the current `front-end-v2` setup. After adding it, treat that generated component file as original shadcn source and do not hand-edit it.
+- If a standard shadcn component needed by a feature is missing, add it to `front-end/src/components/ui/*` through the shadcn CLI or official shadcn source for the current `front-end` setup. After adding it, treat that generated component file as original shadcn source and do not hand-edit it.
 - Prefer shadcn default component styles and tokens. Add only small amounts of Tailwind in feature or layout files when the default component composition does not cover the requirement.
 - Split files by responsibility, such as page container, data hooks, table columns, filters, forms, dialogs/drawers, route glue, and shared helpers, so individual module files do not become unusually large.
 

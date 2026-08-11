@@ -2,7 +2,7 @@
 
 ## Scope
 
-This document defines the React redesign of the Feature Flag details main content in `front-end-v2`.
+This document defines the React redesign of the Feature Flag details main content in `front-end`.
 
 Included:
 
@@ -18,7 +18,7 @@ Excluded:
 - the Feature Flags index and Compare page;
 - all experimentation and A/B-test UI, routes, commands, references, warnings, and terminology.
 
-Angular under `front-end/src/app/features/safe/feature-flags/details/` is a read-only functional reference. The visual target is the compact neutral React/shadcn workbench established by `front-end-v2` and the accepted Segment Details design. Do not reproduce Angular/ng-zorro layout or styling.
+Angular under `front-end-v1/src/app/features/safe/feature-flags/details/` is a read-only functional reference. The visual target is the compact neutral React/shadcn workbench established by `front-end` and the accepted Segment Details design. Do not reproduce Angular/ng-zorro layout or styling.
 
 ## Design Assets
 
@@ -161,7 +161,7 @@ If the flag is OFF, show one compact warning above the editor: `Targeting change
 
 ### Individual targeting
 
-The current React `UserPanel` and `UserPicker` in `front-end-v2/src/features/segments/details/targeting/targeting-tab.tsx` are the visual and interaction source of truth. Render one equivalent bounded panel per variation in a two-column grid. Each panel uses the exact Segment structure:
+The current React `UserPanel` and `UserPicker` in `front-end/src/features/segments/details/targeting/targeting-tab.tsx` are the visual and interaction source of truth. Render one equivalent bounded panel per variation in a two-column grid. Each panel uses the exact Segment structure:
 
 - 6px-radius one-pixel border and 16px internal padding;
 - variation name followed inline by ordinary muted `· {count}` text when the panel is non-empty;
@@ -179,7 +179,7 @@ When there are more than two Variations, continue the same two-column grid onto 
 
 ### Targeting rules
 
-The current React implementation in `front-end-v2/src/features/segments/details/targeting/targeting-tab.tsx` is the visual and interaction source of truth for Feature Flag rule structure. The older Segment design document and screenshots must not be used to recreate their former one-row rule layout.
+The current React implementation in `front-end/src/features/segments/details/targeting/targeting-tab.tsx` is the visual and interaction source of truth for Feature Flag rule structure. The older Segment design document and screenshots must not be used to recreate their former one-row rule layout.
 
 Rules occupy the full content width below Individual targeting. Every rule uses the same independent compact bordered card as the current Segment implementation:
 

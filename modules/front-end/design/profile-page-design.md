@@ -20,7 +20,7 @@ This design document covers only the Profile page content area inside the authen
 
 The mockup shows only the Profile page content area. It intentionally excludes the sidebar, Account menu, context bar, and subscription badge because those are layout-owned surfaces and must not be changed by Profile implementation work.
 
-The mockup and this contract must follow the current `front-end-v2` implementation, not legacy design images. Use the real React styles from `WorkspaceLayout`, `Section`, `Input`, `Button`, and existing Workspace/Organization general-setting sections as the source of truth.
+The mockup and this contract must follow the current `front-end` implementation, not legacy design images. Use the real React styles from `WorkspaceLayout`, `Section`, `Input`, `Button`, and existing Workspace/Organization general-setting sections as the source of truth.
 
 ## Angular Functional Reference
 
@@ -163,7 +163,7 @@ Theme scene sentence: A developer or administrator is adjusting their own accoun
 Rules:
 
 - Follow the current React authenticated layout language from `react-layout-design.md`.
-- Match the current `front-end-v2` implementation style from `WorkspaceLayout`, `workspace/general/components/workspace-shell.tsx`, `workspace/general/components/form-fields.tsx`, `organization/general/components/section-shell.tsx`, and shared `Button`/`Input` components.
+- Match the current `front-end` implementation style from `WorkspaceLayout`, `workspace/general/components/workspace-shell.tsx`, `workspace/general/components/form-fields.tsx`, `organization/general/components/section-shell.tsx`, and shared `Button`/`Input` components.
 - Use the actual page container contract: `-m-5 min-h-[calc(100vh-3.5rem)] bg-background px-8 py-6`.
 - Use the actual page header contract: `mb-5 space-y-1`, `text-2xl font-semibold tracking-normal`, and `text-sm text-muted-foreground`.
 - Use actual section rhythm: `border-b py-8 first:pt-7 last:border-b-0`.
@@ -171,7 +171,7 @@ Rules:
 - Use compact settings sections, not Angular's large blank vertical blocks.
 - Use neutral section dividers and form rows instead of standalone cards when the page background already provides separation.
 - Use bordered surfaces with no ambient shadows only if the local page pattern requires a bounded panel.
-- Use the current neutral shadcn palette from `front-end-v2/src/index.css`: `bg-background`, `text-foreground`, `text-muted-foreground`, `border-border`, `border-input`, and `bg-primary text-primary-foreground`.
+- Use the current neutral shadcn palette from `front-end/src/index.css`: `bg-background`, `text-foreground`, `text-muted-foreground`, `border-border`, `border-input`, and `bg-primary text-primary-foreground`.
 - Do not use legacy blue primary buttons unless the existing React component for this surface already does so.
 - Do not use old Angular input prefix icons.
 - Do not use large green brand accents, colored side borders, decorative cards, or marketing-style composition.

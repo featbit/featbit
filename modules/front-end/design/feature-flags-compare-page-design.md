@@ -2,7 +2,7 @@
 
 ## 1. Scope
 
-This document defines the React redesign of the Feature Flags Compare workflow in `front-end-v2`.
+This document defines the React redesign of the Feature Flags Compare workflow in `front-end`.
 
 The scope includes:
 

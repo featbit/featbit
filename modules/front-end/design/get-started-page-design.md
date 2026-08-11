@@ -1,6 +1,6 @@
 # Get Started Page Design
 
-This document defines the React redesign of the authenticated **Get Started** page in `front-end-v2`. The Angular page is the functional source of truth. The React application, `PRODUCT.md`, `DESIGN.md`, and the existing Feature Flags and settings surfaces are the visual source of truth.
+This document defines the React redesign of the authenticated **Get Started** page in `front-end`. The Angular page is the functional source of truth. The React application, `PRODUCT.md`, `DESIGN.md`, and the existing Feature Flags and settings surfaces are the visual source of truth.
 
 This is a design-only contract. No React source, route, API, test, configuration, i18n resource, shared component, sidebar, or context-bar implementation is authorized by this document.
 
@@ -572,7 +572,7 @@ This section is implementation guidance only. It does not authorize source chang
 - If an official shadcn primitive is missing, add it through the approved shadcn workflow only after implementation is authorized.
 - Reuse `resolveSdkEndpoints()` for runtime endpoint display and fallback behavior.
 - Reuse the current environment secret type and masking semantics from `EnvironmentSdkConfigurationPopover`.
-- Reuse Feature Flag list/create/key-validation and Insights API contracts already present in `front-end-v2` rather than duplicating parallel endpoints.
+- Reuse Feature Flag list/create/key-validation and Insights API contracts already present in `front-end` rather than duplicating parallel endpoints.
 - Use TanStack Query for flag, environment, and Insights server state.
 - Use React Hook Form and Zod for Step 1 creation validation.
 - Use the current code-display decision from the React migration: Shiki or a lightweight composed CodeBlock, never Prism.

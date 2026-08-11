@@ -179,7 +179,7 @@ FeatBit is flat by default. Depth is conveyed through borders, tonal layers, sti
 ### Selects
 - **Required composition:** every shadcn/Base UI `Select` must render its options inside `SelectContent > SelectGroup > SelectItem`. This requirement also applies when the select contains only one logical group and does not display a group label.
 - **Do not** render `SelectItem` directly under `SelectContent`. Omitting `SelectGroup` changes the expected option padding/group semantics and can cause the popup to appear misaligned with the trigger.
-- **Reference implementation:** follow `OrganizationSelect` in `front-end-v2/src/features/organization/general/components/organization-form-fields.tsx`.
+- **Reference implementation:** follow `OrganizationSelect` in `front-end/src/features/organization/general/components/organization-form-fields.tsx`.
 
 ```tsx
 <Select value={value} onValueChange={onValueChange}>

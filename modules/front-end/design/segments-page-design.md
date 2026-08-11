@@ -2,7 +2,7 @@
 
 ## Scope
 
-This document defines the React redesign of the Segments index workflow in `front-end-v2`.
+This document defines the React redesign of the Segments index workflow in `front-end`.
 
 Included:
 
@@ -21,7 +21,7 @@ Excluded for now:
 - changes to the organization/project/environment context bar;
 - mobile-first layout work.
 
-The Angular implementation is the functional reference only. The React page must use the existing shadcn/Base UI, Tailwind, TanStack Query, TanStack Table, React Hook Form, Zod, `react-i18next`, Lucide, and Sonner patterns already established in `front-end-v2`.
+The Angular implementation is the functional reference only. The React page must use the existing shadcn/Base UI, Tailwind, TanStack Query, TanStack Table, React Hook Form, Zod, `react-i18next`, Lucide, and Sonner patterns already established in `front-end`.
 
 ## Design Direction
 

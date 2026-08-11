@@ -2,7 +2,7 @@
 
 ## Scope
 
-This document defines the React redesign of the Segment details workflow in `front-end-v2`.
+This document defines the React redesign of the Segment details workflow in `front-end`.
 
 Included:
 
@@ -22,7 +22,7 @@ Excluded:
 - changes to the organization/project/environment context bar;
 - mobile-first layout work.
 
-The Angular page is the functional reference only. The React page must use the compact, neutral shadcn/Base UI and Tailwind patterns established in `front-end-v2`; it must not reproduce the Angular/ng-zorro visual structure.
+The Angular page is the functional reference only. The React page must use the compact, neutral shadcn/Base UI and Tailwind patterns established in `front-end`; it must not reproduce the Angular/ng-zorro visual structure.
 
 ## Design Asset
 
@@ -529,7 +529,7 @@ The date control is a true inclusive start/end range filter, not a single-date p
 - `Clear` removes both endpoints, closes the Popover, resets the trigger to `Any date`, and reloads unfiltered dates.
 - Treat both selected calendar days as inclusive in the user's display timezone and convert them through the shared API date helper so records on the end date are not accidentally excluded.
 - Prevent or normalize an end date earlier than the start date through the range-selection primitive; do not show an impossible range.
-- During implementation, if Calendar is still absent from `front-end-v2/src/components/ui`, add it from the official shadcn source/CLI for the current setup and do not hand-edit the generated primitive.
+- During implementation, if Calendar is still absent from `front-end/src/components/ui`, add it from the official shadcn source/CLI for the current setup and do not hand-edit the generated primitive.
 
 ### Reusable audit table
 
@@ -733,7 +733,7 @@ Do not show errors before a field is interacted with or the user requests review
 
 ## Internationalization And Content
 
-- Add all details-page strings to the centralized Segments feature resources under `front-end-v2/src/lib/i18n/resources` during implementation.
+- Add all details-page strings to the centralized Segments feature resources under `front-end/src/lib/i18n/resources` during implementation.
 - Register resources through the existing global i18n composition; do not register a bundle from the page component.
 - Provide English and Simplified Chinese values together.
 - Use `Shareable` in English and `共享` in Chinese.

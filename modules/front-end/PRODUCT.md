@@ -12,7 +12,7 @@ Users often arrive in the middle of a workflow on desktop or laptop screens: fin
 
 ## Product Purpose
 
-The React front end in `front-end-v2` is a parallel replacement for the existing Angular management UI. It exists to modernize FeatBit's authenticated product experience while preserving backend contracts, language-prefixed routing, runtime configuration, and feature-management workflows.
+The React front end in `front-end` is a parallel replacement for the existing Angular management UI. It exists to modernize FeatBit's authenticated product experience while preserving backend contracts, language-prefixed routing, runtime configuration, and feature-management workflows.
 
 Success means the React app feels like a capable feature-management workbench: clear context, low-noise density, visible risk and status, reliable light and dark themes, and reusable shadcn/Tailwind-based components that make future page migrations faster without copying Angular/ng-zorro styling.
 

@@ -110,7 +110,7 @@ Behavior:
 
 Layout:
 
-- Use the same current `front-end-v2` shadcn form rhythm as Workspace General: labels above fields, `space-y-2`, `h-8` inputs, two equal columns with roughly `gap-5`.
+- Use the same current `front-end` shadcn form rhythm as Workspace General: labels above fields, `space-y-2`, `h-8` inputs, two equal columns with roughly `gap-5`.
 - First row: `ID` in the left column and `Key` in the right column.
 - Second row: `Name` in the left column only. Do not span it across the full page; leave the right column empty.
 - Footer row: helper text on the left and a fixed-width `Save changes` button on the right.
@@ -227,7 +227,7 @@ Toolbar:
 
 Main inventory:
 
-- Use a vertical list of project sections. Each section is a compact `rounded-md border bg-background` resource block matching the current `front-end-v2` table containers, with no ambient shadow and no nested cards.
+- Use a vertical list of project sections. Each section is a compact `rounded-md border bg-background` resource block matching the current `front-end` table containers, with no ambient shadow and no nested cards.
 - Project sections use a single compact header row and an environment `Table` below it. Do not use Angular's separate gray environment cards.
 - The current project appears first and shows a compact neutral `Current` badge beside the project name.
 - Project header must not consume much vertical space. Keep it to one line with tight padding, roughly `px-4 py-2` or equivalent.
@@ -349,7 +349,7 @@ Layout rules:
 - Prefer compact section dividers over nested cards.
 - Use cards only for repeated resource blocks where the boundary helps scanning, such as project sections.
 - The General tab is page-body content only; it must not redesign or depend on sidebar/topbar visuals.
-- Match the current `front-end-v2` shadcn component implementation:
+- Match the current `front-end` shadcn component implementation:
   - Inputs/selects use `h-8`, `rounded-lg`, `border-input`, transparent/background surface, `px-2.5`, and desktop `text-sm`.
   - Default buttons use `h-8`, `rounded-lg`, `bg-primary`, `text-primary-foreground`, compact padding, and no blue primary styling.
   - Outline buttons use neutral borders and background; `Create organization` uses the outline variant.

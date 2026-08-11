@@ -272,7 +272,7 @@ Do not replace the object name with a generic noun, put it on an unrelated line,
 
 ## Code Organization And Boundaries
 
-Keep all feature implementation under `front-end-v2/src/features/iam/policies/` and follow the responsibility split used by Groups:
+Keep all feature implementation under `front-end/src/features/iam/policies/` and follow the responsibility split used by Groups:
 
 - `policy-api.ts`: Policy types and API operations.
 - `index/index-page.tsx`: list-page orchestration and state.
