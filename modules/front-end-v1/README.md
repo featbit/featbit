@@ -30,27 +30,24 @@ docker compose -f ./docker-compse.yml up -d
 The UI will be available at http://localhost:8081
 
 ## Run locally with development mode
-
 If you already have the API server, Evaluation server and Data analytics server running somewhere, and you want to launch UI on a different machine or want to do some development work on UI,
-you can run the UI locally. Open the file [env.js](public/assets/env.js), and fill the variables like this:
-```js
-window.env = window.env || {
-  API_URL: "http://localhost:5000",
-  DEMO_URL: "https://featbit-samples.vercel.app",
-  EVALUATION_URL: "http://localhost:5100",
-  BASE_HREF: "",
-  DISPLAY_API_URL: "",
-  DISPLAY_EVALUATION_URL: "",
-}
+you can run the UI locally. Open the file [environment.ts](src/environments/environment.ts), and fill the variables like this:
+```ts
+export const environment = {
+  production: false,
+  url: 'http://localhost:5000',
+  demoUrl: 'https://featbit-samples.vercel.app',
+  evaluationUrl: 'http://localhost:5100'
+};
 ```
 Assuming you are running other service on the same machine:
-- **API_URL**: the url of the API server
-- **DEMO_URL**: the url of the dino-game demo, it should be running somewhere
-- **EVALUATION_URL**: the url of the evaluation server
+- **url**: the url of the API server
+- **demoUrl**: the url of the dino-game demo, it should be running somewhere
+- **evaluationUrl**: the url of the evaluation server
 
 Then run
 ```
-npm run dev
+npm run start
 ```
 
 The UI will be available at http://localhost:4200
@@ -61,7 +58,7 @@ The following variables could be overridden by environment variables when runnin
 - **API_URL**: **Mandatory**, the url of the API Server, default value is http://localhost:5000, it overrides **url**
 - **DEMO_URL**: **Optional**, set the value if you deploy the [dino-game demo](https://github.com/featbit/featbit-samples/tree/main/samples/dino-game/interactive-demo-vue) on your own server, otherwise it would use our demo deployed on https://featbit-samples.vercel.app. The link doesn't work if you click directly on it, it needs extra parameters. **demoUrl**
 - **EVALUATION_URL**: **Optional**, the url of the evaluation server, this is used by the demo, ignore it if you don't want to run the demo, the default value is http://localhost:5100. It overrides **evaluationUrl**
-- **DISPLAY_API_URL**: **Optional**, the display url of the API server. This is an optional variable used when you want to override the API URL displayed in the 'Getting Started' UI.
+- **DISPLAY_API_URL**: **Optional**, the display url of the API server. This is an optional variable used when you want to override the API URL displayed in the 'Getting Started' UI. 
 - **DISPLAY_EVALUATION_URL**: **Optional**, the display url of the Evaluation server. This is an optional variable used when you want to override the Event and Streaming URL displayed in the 'Getting Started' UI.
 - **BASE_HREF**: **Optional**, set the value if you want to deploy FeatBit UI to a path, for example https://www.example.com/abc/def/, in this case, the value should be `/abc/def/`.
 
@@ -79,3 +76,15 @@ docker run -d -p 8081:80 -e API_URL="http://localhost:5000" -e DEMO_URL="https:/
 ```
 
 Then go to http://localhost:8081
+
+### Switch UI language
+
+When you put http://localhost:8081 in your browser, by default, the UI will redirect to the language defined by **accept-language** of the request headers,
+you can manually switch the language with the language switcher in the UI.
+
+As **ng serve** only support one single locale, during development, the locale-switcher component doesn't work. If you want to check a different language,
+run the app with one of the following
+```
+npm run start:en // English, available at localhost:4200
+npm run start:zh // Chinese, available at localhost:4201
+```
