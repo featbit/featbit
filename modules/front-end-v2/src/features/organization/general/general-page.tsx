@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useParams } from "react-router-dom"
@@ -57,6 +57,7 @@ function reloadAfterOrganizationChanged(lang: string) {
 
 export function OrganizationGeneralPage() {
   const { t } = useTranslation()
+  const queryClient = useQueryClient()
   const params = useParams()
   const lang = resolveLang(params.lang)
   const [organization, setOrganization] = useState<OrganizationDetails | null>(
@@ -93,8 +94,13 @@ export function OrganizationGeneralPage() {
   const userId = getStoredUserProfile().id ?? ""
   const workspaceId = getCurrentWorkspace()?.id ?? ""
   const isSsoFirstLogin = getIsSsoFirstLogin()
+  const organizationsQueryConfig = organizationsQueryOptions(
+    userId,
+    workspaceId,
+    isSsoFirstLogin
+  )
   const organizationsQuery = useQuery({
-    ...organizationsQueryOptions(userId, workspaceId, isSsoFirstLogin),
+    ...organizationsQueryConfig,
     enabled: Boolean(userId && workspaceId),
   })
 
@@ -176,6 +182,28 @@ export function OrganizationGeneralPage() {
     setStatusEventId((current) => current + 1)
   }
 
+  function updateOrganizationsQuery(updatedOrganization: OrganizationDetails) {
+    queryClient.setQueryData(
+      organizationsQueryConfig.queryKey,
+      (currentOrganizations = []) =>
+        currentOrganizations.map((item) =>
+          item.id === updatedOrganization.id ? updatedOrganization : item
+        )
+    )
+  }
+
+  function addOrganizationToQuery(createdOrganization: OrganizationDetails) {
+    queryClient.setQueryData(
+      organizationsQueryConfig.queryKey,
+      (currentOrganizations = []) => [
+        createdOrganization,
+        ...currentOrganizations.filter(
+          (item) => item.id !== createdOrganization.id
+        ),
+      ]
+    )
+  }
+
   const applyOrganization = useCallback(
     (nextOrganization: OrganizationDetails | null) => {
       setOrganization(nextOrganization)
@@ -244,6 +272,7 @@ export function OrganizationGeneralPage() {
           defaultPermissions: currentOrganization.defaultPermissions,
         }
       )
+      updateOrganizationsQuery(updatedOrganization)
       applyOrganization(updatedOrganization)
       setOrganizations((current) =>
         current.map((item) =>
@@ -285,6 +314,7 @@ export function OrganizationGeneralPage() {
           defaultPermissions: currentOrganization.defaultPermissions,
         }
       )
+      updateOrganizationsQuery(updatedOrganization)
       applyOrganization(updatedOrganization)
       setOrganizations((current) =>
         current.map((item) =>
@@ -327,6 +357,7 @@ export function OrganizationGeneralPage() {
           },
         }
       )
+      updateOrganizationsQuery(updatedOrganization)
       applyOrganization(updatedOrganization)
       setOrganizations((current) =>
         current.map((item) =>
@@ -380,6 +411,7 @@ export function OrganizationGeneralPage() {
         name: values.name.trim(),
         key: values.key.trim(),
       })
+      addOrganizationToQuery(createdOrganization)
       setOrganizations((current) => [createdOrganization, ...current])
       applyOrganization(createdOrganization)
       setCreateOpen(false)
