@@ -230,7 +230,11 @@ export function GeneralPage() {
       lang={lang}
       activeTab="general"
       statusMessage={statusMessage ?? workspaceRequestError}
-      statusVariant={workspaceQuery.isError ? "error" : statusVariant}
+      statusVariant={
+        statusMessage === null && workspaceQuery.isError
+          ? "error"
+          : statusVariant
+      }
       statusEventId={statusEventId}
     >
       {workspaceQuery.isLoading || permissionsQuery.isLoading ? (
