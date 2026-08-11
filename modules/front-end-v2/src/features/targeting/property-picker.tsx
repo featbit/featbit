@@ -1,4 +1,9 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import {
+  useMutation,
+  useQueryClient,
+  type QueryClient,
+  type QueryKey,
+} from "@tanstack/react-query"
 import { ChevronsUpDown, Loader2, Plus } from "lucide-react"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -18,6 +23,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 import { upsertEndUserProperty } from "@/features/end-users/end-users-api"
+import type { EndUserProperty } from "@/features/end-users/end-users-types"
 import type { SegmentUserProperty } from "@/features/segments/segments-types"
 import { segmentConditionProperties } from "./segment-conditions"
 
@@ -25,16 +31,31 @@ function propertyKey(name: string) {
   return name.toLocaleLowerCase()
 }
 
-function appendProperty(
-  properties: SegmentUserProperty[] | undefined,
-  property: SegmentUserProperty
+function appendProperty<T extends { name: string }>(
+  properties: T[],
+  property: T
 ) {
-  const current = properties ?? []
-  return current.some(
+  return properties.some(
     (item) => propertyKey(item.name) === propertyKey(property.name)
   )
-    ? current
-    : [...current, property]
+    ? properties
+    : [...properties, property]
+}
+
+function updateExistingPropertyCache<T extends { name: string }>(
+  queryClient: QueryClient,
+  queryKey: QueryKey,
+  property: T
+) {
+  const state = queryClient.getQueryState<T[]>(queryKey)
+  if (state?.data === undefined) {
+    void queryClient.invalidateQueries({ queryKey, exact: true })
+    return
+  }
+
+  queryClient.setQueryData<T[]>(queryKey, (current) =>
+    current === undefined ? undefined : appendProperty(current, property)
+  )
 }
 
 export function PropertyPicker({
@@ -114,15 +135,20 @@ export function PropertyPicker({
       return saved ?? property
     },
     onSuccess: (property) => {
-      const cacheKeys = [
+      updateExistingPropertyCache<SegmentUserProperty>(
+        queryClient,
         ["flag-user-properties", envId],
+        property
+      )
+      updateExistingPropertyCache<SegmentUserProperty>(
+        queryClient,
         ["segment-user-properties", envId],
+        property
+      )
+      updateExistingPropertyCache<EndUserProperty>(
+        queryClient,
         ["end-users", envId, "properties"],
-      ] as const
-      cacheKeys.forEach((cacheKey) =>
-        queryClient.setQueryData<SegmentUserProperty[]>(cacheKey, (current) =>
-          appendProperty(current, property)
-        )
+        property
       )
       onValueChange(property.name)
       setSearch("")

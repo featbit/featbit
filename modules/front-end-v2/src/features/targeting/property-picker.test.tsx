@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { upsertEndUserProperty } from "@/features/end-users/end-users-api"
+import type { EndUserProperty } from "@/features/end-users/end-users-types"
 import type { SegmentUserProperty } from "@/features/segments/segments-types"
 import "@/lib/i18n/i18n"
 import { PropertyPicker } from "./property-picker"
@@ -76,10 +77,16 @@ describe("PropertyPicker", () => {
     expect(onValueChange).toHaveBeenCalledWith("country")
   })
 
-  it("creates and selects a property missing from the catalog", async () => {
+  it("creates, selects, and appends a property to existing caches", async () => {
     const created = { ...properties[0], id: "tier", name: "loyaltyTier" }
     vi.mocked(upsertEndUserProperty).mockResolvedValue(created)
     const { client, onValueChange } = renderPicker()
+    const cacheKeys = [
+      ["flag-user-properties", "env-1"],
+      ["segment-user-properties", "env-1"],
+      ["end-users", "env-1", "properties"],
+    ] as const
+    cacheKeys.forEach((cacheKey) => client.setQueryData(cacheKey, properties))
 
     fireEvent.click(screen.getByRole("combobox", { name: "Select property" }))
     fireEvent.change(
@@ -102,12 +109,60 @@ describe("PropertyPicker", () => {
     await waitFor(() =>
       expect(onValueChange).toHaveBeenCalledWith("loyaltyTier")
     )
+    cacheKeys
+      .slice(0, 2)
+      .forEach((cacheKey) =>
+        expect(
+          client.getQueryData<SegmentUserProperty[]>(cacheKey)
+        ).toContainEqual(created)
+      )
+    expect(client.getQueryData<EndUserProperty[]>(cacheKeys[2])).toContainEqual(
+      created
+    )
+  })
+
+  it("does not seed property caches that have not been fetched", async () => {
+    const created = { ...properties[0], id: "tier", name: "loyaltyTier" }
+    vi.mocked(upsertEndUserProperty).mockResolvedValue(created)
+    const { client, onValueChange } = renderPicker()
+    const invalidateQueries = vi.spyOn(client, "invalidateQueries")
+
+    fireEvent.click(screen.getByRole("combobox", { name: "Select property" }))
+    fireEvent.change(
+      await screen.findByPlaceholderText("Search or create a property"),
+      { target: { value: "loyaltyTier" } }
+    )
+    fireEvent.click(
+      screen.getByRole("option", {
+        name: 'Create property "loyaltyTier"',
+      })
+    )
+
+    await waitFor(() =>
+      expect(onValueChange).toHaveBeenCalledWith("loyaltyTier")
+    )
+    expect(invalidateQueries).toHaveBeenCalledTimes(3)
+    expect(invalidateQueries).toHaveBeenNthCalledWith(1, {
+      queryKey: ["flag-user-properties", "env-1"],
+      exact: true,
+    })
+    expect(invalidateQueries).toHaveBeenNthCalledWith(2, {
+      queryKey: ["segment-user-properties", "env-1"],
+      exact: true,
+    })
+    expect(invalidateQueries).toHaveBeenNthCalledWith(3, {
+      queryKey: ["end-users", "env-1", "properties"],
+      exact: true,
+    })
     expect(
-      client.getQueryData<SegmentUserProperty[]>([
-        "segment-user-properties",
-        "env-1",
-      ])
-    ).toContainEqual(created)
+      client.getQueryData(["flag-user-properties", "env-1"])
+    ).toBeUndefined()
+    expect(
+      client.getQueryData(["segment-user-properties", "env-1"])
+    ).toBeUndefined()
+    expect(
+      client.getQueryData(["end-users", "env-1", "properties"])
+    ).toBeUndefined()
   })
 
   it("offers the reserved segment conditions only when enabled", async () => {
