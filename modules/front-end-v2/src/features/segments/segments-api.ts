@@ -17,16 +17,33 @@ function segmentBasePath(envId: string) {
   return `/api/v1/envs/${encodeURIComponent(envId)}/segments`
 }
 
+const SEGMENT_IDS_BATCH_SIZE = 100
+
 export function fetchSegment(envId: string, segmentId: string) {
   return fetchApi<Segment>(
     `${segmentBasePath(envId)}/${encodeURIComponent(segmentId)}`
   )
 }
 
-export function fetchSegmentsByIds(envId: string, segmentIds: string[]) {
-  const params = new URLSearchParams()
-  segmentIds.forEach((segmentId) => params.append("ids", segmentId))
-  return fetchApi<Segment[]>(`${segmentBasePath(envId)}/by-ids?${params}`)
+export async function fetchSegmentsByIds(envId: string, segmentIds: string[]) {
+  const batches: string[][] = []
+  for (
+    let index = 0;
+    index < segmentIds.length;
+    index += SEGMENT_IDS_BATCH_SIZE
+  ) {
+    batches.push(segmentIds.slice(index, index + SEGMENT_IDS_BATCH_SIZE))
+  }
+
+  const segments = await Promise.all(
+    batches.map((batch) => {
+      const params = new URLSearchParams()
+      batch.forEach((segmentId) => params.append("ids", segmentId))
+      return fetchApi<Segment[]>(`${segmentBasePath(envId)}/by-ids?${params}`)
+    })
+  )
+
+  return segments.flat()
 }
 
 export function updateSegmentTargeting(

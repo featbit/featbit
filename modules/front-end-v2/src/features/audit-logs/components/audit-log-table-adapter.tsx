@@ -1,12 +1,12 @@
-import { useMemo, type ReactNode } from "react"
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 import { useTranslation } from "react-i18next"
-import { useQuery } from "@tanstack/react-query"
 import { ChangeLedger as SharedChangeLedger } from "@/features/change-review/change-ledger"
 import { useFlagChangeLedgerAdapter } from "@/features/flags/details/targeting/use-flag-change-ledger-adapter"
 import type { FlagTargetingReviewChange } from "@/features/flags/details/targeting/targeting-utils"
 import { fetchSegmentsByIds } from "@/features/segments/segments-api"
 import { ChangeLedger } from "@/features/segments/details/components/change-ledger"
 import type { ReviewChange } from "@/features/segments/details/segment-details-utils"
+import type { Segment } from "@/features/segments/segments-types"
 import {
   auditDecisionSnapshot,
   auditDisplayedChanges,
@@ -29,23 +29,51 @@ export type AuditLogTableAdapter = {
   changeDetails: (log: AuditLog) => AuditLogChangeDetails
 }
 
+const EMPTY_SEGMENT_NAMES: ReadonlyMap<string, string> = new Map()
+
+export function useCachedSegmentNames(envId: string, segmentIds: string[]) {
+  const requestedIdsByEnv = useRef(new Map<string, Set<string>>())
+  const [segmentsByEnv, setSegmentsByEnv] = useState(
+    () => new Map<string, Map<string, string>>()
+  )
+
+  useEffect(() => {
+    if (!envId) return
+
+    let requestedIds = requestedIdsByEnv.current.get(envId)
+    if (!requestedIds) {
+      requestedIds = new Set<string>()
+      requestedIdsByEnv.current.set(envId, requestedIds)
+    }
+
+    const newIds = segmentIds.filter((id) => !requestedIds.has(id))
+    if (!newIds.length) return
+
+    newIds.forEach((id) => requestedIds.add(id))
+    void fetchSegmentsByIds(envId, newIds)
+      .then((segments: Segment[]) => {
+        setSegmentsByEnv((current) => {
+          const next = new Map(current)
+          const segmentNames = new Map(next.get(envId))
+          segments.forEach((segment) =>
+            segmentNames.set(segment.id, segment.name)
+          )
+          next.set(envId, segmentNames)
+          return next
+        })
+      })
+      .catch(() => {
+        newIds.forEach((id) => requestedIds.delete(id))
+      })
+  }, [envId, segmentIds])
+
+  return segmentsByEnv.get(envId) ?? EMPTY_SEGMENT_NAMES
+}
+
 export function useAuditLogSegmentNames(envId: string, logs: AuditLog[]) {
   const { t } = useTranslation()
   const segmentIds = useMemo(() => auditLogSegmentIds(logs, t), [logs, t])
-  const segmentsQuery = useQuery({
-    queryKey: ["targeting-segments-by-id", envId, segmentIds],
-    queryFn: () => fetchSegmentsByIds(envId, segmentIds),
-    enabled: Boolean(envId && segmentIds.length),
-    staleTime: 60_000,
-  })
-
-  return useMemo(
-    () =>
-      new Map(
-        (segmentsQuery.data ?? []).map((segment) => [segment.id, segment.name])
-      ),
-    [segmentsQuery.data]
-  )
+  return useCachedSegmentNames(envId, segmentIds)
 }
 
 export function useDefaultAuditLogTableAdapter(
