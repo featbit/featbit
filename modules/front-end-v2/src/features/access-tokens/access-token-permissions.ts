@@ -32,6 +32,92 @@ const action = (
 
 export const PERMISSION_CATEGORIES: PermissionCategory[] = [
   {
+    type: "workspace",
+    labelKey: "accessTokens.permissions.categories.workspace",
+    pattern: "workspace/*",
+    supportsSpecific: false,
+    actions: [
+      action(
+        "UpdateWorkspaceGeneralSettings",
+        "accessTokens.permissionDescriptions.updateWorkspaceGeneralSettings"
+      ),
+      action(
+        "UpdateWorkspaceLicense",
+        "accessTokens.permissionDescriptions.updateWorkspaceLicense"
+      ),
+      action(
+        "UpdateWorkspaceSSOSettings",
+        "accessTokens.permissionDescriptions.updateWorkspaceSsoSettings"
+      ),
+    ],
+  },
+  {
+    type: "iam",
+    labelKey: "accessTokens.permissions.categories.iam",
+    pattern: "iam/*",
+    supportsSpecific: false,
+    actions: [
+      action(
+        "CanManageIAM",
+        "accessTokens.permissionDescriptions.canManageIam"
+      ),
+    ],
+  },
+  {
+    type: "project",
+    labelKey: "accessTokens.permissions.categories.project",
+    pattern: "project/*",
+    supportsSpecific: true,
+    actions: [
+      action(
+        "CanAccessProject",
+        "accessTokens.permissionDescriptions.canAccessProject"
+      ),
+      action(
+        "CreateProject",
+        "accessTokens.permissionDescriptions.createProject"
+      ),
+      action(
+        "DeleteProject",
+        "accessTokens.permissionDescriptions.deleteProject"
+      ),
+      action(
+        "UpdateProjectSettings",
+        "accessTokens.permissionDescriptions.updateProjectSettings"
+      ),
+      action("CreateEnv", "accessTokens.permissionDescriptions.createEnv"),
+    ],
+  },
+  {
+    type: "env",
+    labelKey: "accessTokens.permissions.categories.env",
+    pattern: "project/*:env/*",
+    supportsSpecific: true,
+    actions: [
+      action(
+        "CanAccessEnv",
+        "accessTokens.permissionDescriptions.canAccessEnv"
+      ),
+      action("DeleteEnv", "accessTokens.permissionDescriptions.deleteEnv"),
+      action(
+        "UpdateEnvSettings",
+        "accessTokens.permissionDescriptions.updateEnvSettings"
+      ),
+      action(
+        "DeleteEnvSecret",
+        "accessTokens.permissionDescriptions.deleteEnvSecret"
+      ),
+      action(
+        "CreateEnvSecret",
+        "accessTokens.permissionDescriptions.createEnvSecret"
+      ),
+      action(
+        "UpdateEnvSecret",
+        "accessTokens.permissionDescriptions.updateEnvSecret"
+      ),
+    ],
+  },
+  {
     type: "flag",
     labelKey: "accessTokens.permissions.categories.flag",
     pattern: "project/*:env/*:flag/*",
@@ -156,92 +242,6 @@ export const PERMISSION_CATEGORIES: PermissionCategory[] = [
         "UpdateSegmentRules",
         "accessTokens.permissionDescriptions.updateSegmentRules",
         true
-      ),
-    ],
-  },
-  {
-    type: "project",
-    labelKey: "accessTokens.permissions.categories.project",
-    pattern: "project/*",
-    supportsSpecific: true,
-    actions: [
-      action(
-        "CanAccessProject",
-        "accessTokens.permissionDescriptions.canAccessProject"
-      ),
-      action(
-        "CreateProject",
-        "accessTokens.permissionDescriptions.createProject"
-      ),
-      action(
-        "DeleteProject",
-        "accessTokens.permissionDescriptions.deleteProject"
-      ),
-      action(
-        "UpdateProjectSettings",
-        "accessTokens.permissionDescriptions.updateProjectSettings"
-      ),
-      action("CreateEnv", "accessTokens.permissionDescriptions.createEnv"),
-    ],
-  },
-  {
-    type: "env",
-    labelKey: "accessTokens.permissions.categories.env",
-    pattern: "project/*:env/*",
-    supportsSpecific: true,
-    actions: [
-      action(
-        "CanAccessEnv",
-        "accessTokens.permissionDescriptions.canAccessEnv"
-      ),
-      action("DeleteEnv", "accessTokens.permissionDescriptions.deleteEnv"),
-      action(
-        "UpdateEnvSettings",
-        "accessTokens.permissionDescriptions.updateEnvSettings"
-      ),
-      action(
-        "DeleteEnvSecret",
-        "accessTokens.permissionDescriptions.deleteEnvSecret"
-      ),
-      action(
-        "CreateEnvSecret",
-        "accessTokens.permissionDescriptions.createEnvSecret"
-      ),
-      action(
-        "UpdateEnvSecret",
-        "accessTokens.permissionDescriptions.updateEnvSecret"
-      ),
-    ],
-  },
-  {
-    type: "iam",
-    labelKey: "accessTokens.permissions.categories.iam",
-    pattern: "iam/*",
-    supportsSpecific: false,
-    actions: [
-      action(
-        "CanManageIAM",
-        "accessTokens.permissionDescriptions.canManageIam"
-      ),
-    ],
-  },
-  {
-    type: "workspace",
-    labelKey: "accessTokens.permissions.categories.workspace",
-    pattern: "workspace/*",
-    supportsSpecific: false,
-    actions: [
-      action(
-        "UpdateWorkspaceGeneralSettings",
-        "accessTokens.permissionDescriptions.updateWorkspaceGeneralSettings"
-      ),
-      action(
-        "UpdateWorkspaceLicense",
-        "accessTokens.permissionDescriptions.updateWorkspaceLicense"
-      ),
-      action(
-        "UpdateWorkspaceSSOSettings",
-        "accessTokens.permissionDescriptions.updateWorkspaceSsoSettings"
       ),
     ],
   },

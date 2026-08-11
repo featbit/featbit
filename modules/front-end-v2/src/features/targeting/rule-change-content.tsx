@@ -11,6 +11,7 @@ import type {
   SegmentCondition,
   SegmentRule,
 } from "@/features/segments/segments-types"
+import { isSegmentConditionProperty } from "./segment-conditions"
 import { conditionValues } from "./targeting-utils"
 
 export function RuleChangeLabel({ name }: { name: string }) {
@@ -93,21 +94,46 @@ function changedConditions(
   return changes
 }
 
-function ConditionExpression({ condition }: { condition: SegmentCondition }) {
+function ConditionExpression({
+  condition,
+  segmentNames,
+  muted = false,
+}: {
+  condition: SegmentCondition
+  segmentNames?: ReadonlyMap<string, string>
+  muted?: boolean
+}) {
   const { t } = useTranslation()
   const operation = t(`targeting.rules.operators.${condition.op}`, {
     defaultValue: condition.op,
   })
   const unary = condition.op === "IsTrue" || condition.op === "IsFalse"
+  const values = conditionValues(condition).map((value) =>
+    isSegmentConditionProperty(condition.property)
+      ? (segmentNames?.get(value) ?? value)
+      : value
+  )
   return (
     <span className="inline-flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
-      <span className="break-words">{condition.property}</span>
-      <span className="font-mono font-medium text-muted-foreground">
-        {operation}
+      <span
+        className={muted ? "break-words text-muted-foreground" : "break-words"}
+      >
+        {condition.property}
       </span>
+      {operation ? (
+        <span className="font-mono font-medium text-muted-foreground">
+          {operation}
+        </span>
+      ) : null}
       {unary ? null : (
-        <span className="break-words">
-          {conditionValues(condition).join(", ")}
+        <span
+          className={
+            muted
+              ? "font-medium break-words text-muted-foreground"
+              : "font-medium break-words text-foreground"
+          }
+        >
+          {values.join(", ")}
         </span>
       )}
     </span>
@@ -117,24 +143,36 @@ function ConditionExpression({ condition }: { condition: SegmentCondition }) {
 function ConditionPair({
   previous,
   current,
+  segmentNames,
 }: {
   previous: SegmentCondition
   current: SegmentCondition
+  segmentNames?: ReadonlyMap<string, string>
 }) {
   return (
     <div className="space-y-1">
       <p className="text-muted-foreground">
-        <ConditionExpression condition={previous} />
+        <ConditionExpression
+          condition={previous}
+          segmentNames={segmentNames}
+          muted
+        />
       </p>
       <ArrowDown className="size-3.5 text-muted-foreground" />
       <p>
-        <ConditionExpression condition={current} />
+        <ConditionExpression condition={current} segmentNames={segmentNames} />
       </p>
     </div>
   )
 }
 
-function ConditionSummary({ rule }: { rule: SegmentRule }) {
+function ConditionSummary({
+  rule,
+  segmentNames,
+}: {
+  rule: SegmentRule
+  segmentNames?: ReadonlyMap<string, string>
+}) {
   const { t } = useTranslation()
   if (!rule.conditions.length) return <span>—</span>
   return (
@@ -147,7 +185,10 @@ function ConditionSummary({ rule }: { rule: SegmentRule }) {
             </div>
           ) : null}
           <p>
-            <ConditionExpression condition={condition} />
+            <ConditionExpression
+              condition={condition}
+              segmentNames={segmentNames}
+            />
           </p>
         </div>
       ))}
@@ -158,9 +199,11 @@ function ConditionSummary({ rule }: { rule: SegmentRule }) {
 export function RuleChangeContent({
   previous,
   current,
+  segmentNames,
 }: {
   previous?: SegmentRule
   current?: SegmentRule
+  segmentNames?: ReadonlyMap<string, string>
 }) {
   const { t } = useTranslation()
   const displayedRule = current ?? previous
@@ -172,7 +215,7 @@ export function RuleChangeContent({
         <p className="text-xs font-medium text-muted-foreground">
           {t("targeting.review.labels.conditions")}
         </p>
-        <ConditionSummary rule={displayedRule} />
+        <ConditionSummary rule={displayedRule} segmentNames={segmentNames} />
       </section>
     )
   }
@@ -207,6 +250,7 @@ export function RuleChangeContent({
                   <ConditionPair
                     previous={change.previous!}
                     current={change.current!}
+                    segmentNames={segmentNames}
                   />
                 ) : (
                   <div className="space-y-0.5">
@@ -222,6 +266,7 @@ export function RuleChangeContent({
                     >
                       <ConditionExpression
                         condition={change.current ?? change.previous!}
+                        segmentNames={segmentNames}
                       />
                     </p>
                   </div>

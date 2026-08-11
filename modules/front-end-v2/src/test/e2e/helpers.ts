@@ -85,6 +85,30 @@ export async function mockRuntimeEnv(page: Page, env: Record<string, string>) {
   })
 }
 
+export async function mockCurrentUserPolicies(page: Page) {
+  await page.route("**/api/v1/user/policies", async (route) => {
+    await route.fulfill({
+      json: {
+        success: true,
+        data: [
+          {
+            name: "E2E administrator",
+            type: "SysManaged",
+            statements: [
+              {
+                resourceType: "*",
+                effect: "allow",
+                actions: ["*"],
+                resources: ["*"],
+              },
+            ],
+          },
+        ],
+      },
+    })
+  })
+}
+
 export async function setAuthenticatedUser(
   page: Page,
   user: {
@@ -105,14 +129,18 @@ export async function setAuthenticatedUser(
     ({ id, token, email, name }) => {
       localStorage.setItem("token", token)
       localStorage.setItem("auth", JSON.stringify({ id, email, name }))
+      localStorage.setItem("featbit:auth-session-id", "e2e-auth-session")
     },
     { id, token, email, name }
   )
+
+  await mockCurrentUserPolicies(page)
 }
 
-export async function setCurrentContext(page: Page) {
-  const license = createLicense("Growth")
-
+export async function setCurrentContext(
+  page: Page,
+  license = createLicense("Growth")
+) {
   await page.addInitScript((license) => {
     const userId = "test-user-id"
     localStorage.setItem(
@@ -148,6 +176,7 @@ export async function setCurrentContext(page: Page) {
 }
 
 export async function mockContextEndpoints(page: Page) {
+  await mockCurrentUserPolicies(page)
   await mockContextEndpointResponses(page)
 }
 

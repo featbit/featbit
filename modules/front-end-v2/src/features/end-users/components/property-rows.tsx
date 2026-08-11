@@ -19,6 +19,7 @@ export function PropertyRow({
   editing,
   editRemark,
   saving,
+  digestChecked,
   onEditRemark,
   onEdit,
   onCancel,
@@ -31,6 +32,7 @@ export function PropertyRow({
   editing: boolean
   editRemark: string
   saving: boolean
+  digestChecked: boolean
   onEditRemark: (remark: string) => void
   onEdit: () => void
   onCancel: () => void
@@ -40,7 +42,7 @@ export function PropertyRow({
   onRemove: () => void
 }) {
   const { t } = useTranslation()
-  const digestDisabled = property.isBuiltIn || saving
+  const digestDisabled = property.isBuiltIn
   return (
     <TableRow>
       <TableCell className="truncate px-4 py-3 font-medium">
@@ -48,7 +50,7 @@ export function PropertyRow({
       </TableCell>
       <TableCell className="px-4 py-3 text-center">
         <Checkbox
-          checked={property.isDigestField}
+          checked={digestChecked}
           disabled={digestDisabled}
           className={
             digestDisabled

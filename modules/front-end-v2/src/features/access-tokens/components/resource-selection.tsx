@@ -20,6 +20,8 @@ import {
 } from "@/components/ui/tooltip"
 import { ResourceRnEditorDialog } from "@/features/iam/policies/details/components/resource-rn-editor-dialog"
 import { isEditableResourceType } from "@/features/iam/policies/details/components/resource-rn"
+import { RESOURCE_PATTERNS } from "@/features/iam/policies/details/permission-model"
+import { cn } from "@/lib/utils"
 import { fetchAccessTokenResources } from "../access-tokens-api"
 import { resourcePathLabel } from "../access-token-permissions"
 import type { PolicyResource, ResourceType } from "../access-token-types"
@@ -29,12 +31,14 @@ function ResourcePickerPopover({
   resourceType,
   resources,
   onChange,
+  onAddCustomRn,
   children,
 }: {
   portalContainer: RefObject<HTMLDivElement | null>
   resourceType: ResourceType
   resources: string[]
   onChange: (resources: string[]) => void
+  onAddCustomRn?: () => void
   children: ReactElement
 }) {
   const { t } = useTranslation()
@@ -118,7 +122,26 @@ function ResourcePickerPopover({
             </CommandGroup>
           </CommandList>
         </Command>
-        <div className="flex justify-end border-t p-2">
+        <div
+          className={cn(
+            "flex items-center border-t p-2",
+            onAddCustomRn ? "justify-between" : "justify-end"
+          )}
+        >
+          {onAddCustomRn ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setOpen(false)
+                onAddCustomRn()
+              }}
+            >
+              <Plus className="size-3.5" />
+              {t("accessTokens.permissions.addCustomRn")}
+            </Button>
+          ) : null}
           <Button type="button" size="sm" onClick={() => setOpen(false)}>
             {t("accessTokens.permissions.done")}
           </Button>
@@ -144,7 +167,11 @@ export function ResourceSelection({
   onChange: (resources: string[]) => void
 }) {
   const { t } = useTranslation()
-  const [editingResource, setEditingResource] = useState<string | null>(null)
+  const [editingResource, setEditingResource] = useState<{
+    originalRn?: string
+    rn: string
+  } | null>(null)
+  const canEditResourceRn = isEditableResourceType(resourceType)
 
   return (
     <div className="space-y-2" aria-invalid={invalid || undefined}>
@@ -160,6 +187,14 @@ export function ResourceSelection({
             resourceType={resourceType}
             resources={resources}
             onChange={onChange}
+            onAddCustomRn={
+              canEditResourceRn
+                ? () =>
+                    setEditingResource({
+                      rn: RESOURCE_PATTERNS[resourceType],
+                    })
+                : undefined
+            }
           >
             <Button type="button" variant="outline" size="sm">
               <Plus className="size-3.5" />
@@ -170,7 +205,7 @@ export function ResourceSelection({
       </div>
 
       {resources.length ? (
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,22rem),1fr))] gap-2">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,22rem),1fr))] gap-2">
           {resources.map((resourceName) => {
             const label = resourcePathLabel(resourceName)
             return (
@@ -190,19 +225,26 @@ export function ResourceSelection({
                 </Tooltip>
                 {!readOnly ? (
                   <>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="h-7 shrink-0 gap-1.5 px-2 text-xs"
-                      aria-label={t("accessTokens.permissions.editResource", {
-                        resource: label,
-                      })}
-                      onClick={() => setEditingResource(resourceName)}
-                    >
-                      <Pencil className="size-3.5" />
-                      {t("accessTokens.permissions.editResourceRn")}
-                    </Button>
+                    {canEditResourceRn ? (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-7 shrink-0 gap-1.5 px-2 text-xs"
+                        aria-label={t("accessTokens.permissions.editResource", {
+                          resource: label,
+                        })}
+                        onClick={() =>
+                          setEditingResource({
+                            originalRn: resourceName,
+                            rn: resourceName,
+                          })
+                        }
+                      >
+                        <Pencil className="size-3.5" />
+                        {t("accessTokens.permissions.editResourceRn")}
+                      </Button>
+                    ) : null}
                     <Button
                       type="button"
                       variant="outline"
@@ -237,20 +279,22 @@ export function ResourceSelection({
         </p>
       ) : null}
 
-      {editingResource && isEditableResourceType(resourceType) ? (
+      {editingResource && canEditResourceRn ? (
         <ResourceRnEditorDialog
           open
           resourceType={resourceType}
-          rn={editingResource}
+          rn={editingResource.rn}
           selectedResources={resources}
           onOpenChange={(nextOpen) => {
             if (!nextOpen) setEditingResource(null)
           }}
           onApply={(nextRn) => {
             onChange(
-              resources.map((resource) =>
-                resource === editingResource ? nextRn : resource
-              )
+              editingResource.originalRn
+                ? resources.map((resource) =>
+                    resource === editingResource.originalRn ? nextRn : resource
+                  )
+                : [...resources, nextRn]
             )
             setEditingResource(null)
           }}

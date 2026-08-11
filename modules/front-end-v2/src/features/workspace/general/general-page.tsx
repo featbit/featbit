@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useEffect, useMemo, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -17,10 +17,11 @@ import { WorkspaceLayout } from "@/features/workspace/components/workspace-layou
 import { canUseAction } from "@/features/iam/current-user-permissions"
 import { SkeletonForm } from "@/features/workspace/general/components/workspace-shell"
 import {
-  fetchWorkspaceDetails,
   isWorkspaceKeyUsed,
   updateWorkspaceIdentity,
   updateWorkspaceOidcSettings,
+  workspaceDetailsQueryOptions,
+  workspaceQueryKeys,
   type WorkspaceDetails,
 } from "@/features/workspace/workspace-api"
 import type {
@@ -36,10 +37,30 @@ export function GeneralPage() {
   const { t } = useTranslation()
   const params = useParams()
   const lang = resolveLang(params.lang)
-  const [workspace, setWorkspace] = useState<WorkspaceDetails | null>(() =>
+  const queryClient = useQueryClient()
+  const [storedWorkspace] = useState<WorkspaceDetails | null>(() =>
     getCurrentWorkspace()
   )
-  const [isLoading, setIsLoading] = useState(true)
+  const workspaceId = storedWorkspace?.id ?? ""
+  const workspaceQuery = useQuery({
+    ...workspaceDetailsQueryOptions(workspaceId),
+    enabled: Boolean(workspaceId),
+  })
+  const workspace = useMemo<WorkspaceDetails | null>(() => {
+    if (!workspaceQuery.data) {
+      return storedWorkspace
+    }
+
+    return {
+      ...workspaceQuery.data,
+      license: workspaceQuery.data.license ?? storedWorkspace?.license,
+    }
+  }, [storedWorkspace, workspaceQuery.data])
+  const workspaceRequestError = workspaceQuery.isError
+    ? workspaceQuery.error instanceof Error
+      ? workspaceQuery.error.message
+      : t("workspace.requestFailed")
+    : null
   const [identitySaving, setIdentitySaving] = useState(false)
   const [ssoSaving, setSsoSaving] = useState(false)
   const [statusMessage, setStatusMessage] = useState<string | null>(null)
@@ -121,45 +142,6 @@ export function GeneralPage() {
   }
 
   useEffect(() => {
-    let cancelled = false
-
-    async function loadWorkspace() {
-      setIsLoading(true)
-      try {
-        const currentWorkspace = getCurrentWorkspace()
-        const loadedWorkspace = await fetchWorkspaceDetails()
-        if (cancelled) {
-          return
-        }
-
-        setWorkspace({
-          ...loadedWorkspace,
-          license: loadedWorkspace.license ?? currentWorkspace?.license,
-        })
-      } catch (error) {
-        if (!cancelled) {
-          showStatus(
-            error instanceof Error
-              ? error.message
-              : t("workspace.requestFailed"),
-            "error"
-          )
-        }
-      } finally {
-        if (!cancelled) {
-          setIsLoading(false)
-        }
-      }
-    }
-
-    void loadWorkspace()
-
-    return () => {
-      cancelled = true
-    }
-  }, [t])
-
-  useEffect(() => {
     identityForm.reset({
       name: workspace?.name ?? "",
       key: workspace?.key ?? "",
@@ -201,7 +183,10 @@ export function GeneralPage() {
         id: workspace.id,
         ...trimmedValues,
       })
-      setWorkspace(updatedWorkspace)
+      queryClient.setQueryData(
+        workspaceQueryKeys.details(workspace.id),
+        updatedWorkspace
+      )
       showStatus(t("workspace.operationSucceeded"), "success")
     } catch (error) {
       showStatus(
@@ -224,7 +209,10 @@ export function GeneralPage() {
         id: workspace.id,
         ...values,
       })
-      setWorkspace(updatedWorkspace)
+      queryClient.setQueryData(
+        workspaceQueryKeys.details(workspace.id),
+        updatedWorkspace
+      )
       showStatus(t("workspace.operationSucceeded"), "success")
     } catch (error) {
       showStatus(
@@ -241,11 +229,15 @@ export function GeneralPage() {
       workspace={workspace}
       lang={lang}
       activeTab="general"
-      statusMessage={statusMessage}
-      statusVariant={statusVariant}
+      statusMessage={statusMessage ?? workspaceRequestError}
+      statusVariant={
+        statusMessage === null && workspaceQuery.isError
+          ? "error"
+          : statusVariant
+      }
       statusEventId={statusEventId}
     >
-      {isLoading || permissionsQuery.isLoading ? (
+      {workspaceQuery.isLoading || permissionsQuery.isLoading ? (
         <div className="py-8">
           <SkeletonForm />
         </div>

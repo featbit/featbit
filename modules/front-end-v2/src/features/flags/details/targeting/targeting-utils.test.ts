@@ -6,6 +6,7 @@ import {
   stableFlagTargeting,
   targetingOf,
   targetingReviewChanges,
+  targetingReviewSegmentIds,
   validateTargeting,
 } from "./targeting-utils"
 
@@ -147,5 +148,56 @@ describe("feature flag targeting utilities", () => {
     const errors = validateTargeting(current, validationMessages)
     expect(errors.has("default")).toBe(true)
     expect(errors.has("rule-1")).toBe(true)
+  })
+
+  it("validates segment conditions without a normal operator", () => {
+    const current = flag()
+    current.rules![0].conditions = [
+      {
+        id: "condition-segment",
+        property: "User is in segment",
+        op: "",
+        value: JSON.stringify(["segment-1"]),
+      },
+    ]
+
+    expect(validateTargeting(current, validationMessages).has("rule-1")).toBe(
+      false
+    )
+
+    current.rules![0].conditions[0].value = "[]"
+    expect(validateTargeting(current, validationMessages).has("rule-1")).toBe(
+      true
+    )
+  })
+
+  it("collects unique segment ids used by review conditions", () => {
+    const previous = flag()
+    const current = structuredClone(previous)
+    previous.rules![0].conditions = [
+      {
+        id: "condition-segment",
+        property: "User is in segment",
+        op: "",
+        value: JSON.stringify(["segment-a"]),
+      },
+    ]
+    current.rules![0].conditions = [
+      {
+        id: "condition-segment",
+        property: "User is not in segment",
+        op: "",
+        value: JSON.stringify(["segment-a", "segment-b"]),
+      },
+    ]
+
+    expect(
+      targetingReviewSegmentIds(
+        targetingReviewChanges(previous, current, {
+          flagOn: "Flag ON",
+          flagOff: "Flag OFF",
+        })
+      )
+    ).toEqual(["segment-a", "segment-b"])
   })
 })

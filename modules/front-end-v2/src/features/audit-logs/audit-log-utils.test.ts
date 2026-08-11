@@ -4,6 +4,7 @@ import {
   auditDecisionSnapshot,
   auditEventTitle,
   auditHistoryChanges,
+  auditLogSegmentIds,
   auditObjectIdentity,
   dayAfter,
   hasAppliedFilters,
@@ -203,6 +204,43 @@ describe("audit log presentation", () => {
         expect.objectContaining({ label: "Flag OFF" }),
       ])
     )
+  })
+
+  it("collects segment references from feature flag history", () => {
+    expect(
+      auditLogSegmentIds(
+        [
+          log({
+            operation: "Create",
+            dataChange: {
+              current: JSON.stringify({
+                id: "flag-1",
+                name: "Checkout redesign",
+                key: "checkout-redesign",
+                variations: [],
+                targetUsers: [],
+                rules: [
+                  {
+                    id: "rule-1",
+                    name: "Rule 1",
+                    conditions: [
+                      {
+                        id: "condition-1",
+                        property: "User is in segment",
+                        op: "",
+                        value: JSON.stringify(["segment-1"]),
+                      },
+                    ],
+                    variations: [],
+                  },
+                ],
+              }),
+            },
+          }),
+        ],
+        i18n.t
+      )
+    ).toEqual(["segment-1"])
   })
 
   it("uses inclusive local-day bounds and detects every filter type", () => {

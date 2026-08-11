@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import {
   completeLogin,
+  getAuthSessionId,
   getIdentityToken,
   getRememberedEmail,
   getStoredUserProfile,
@@ -61,6 +62,87 @@ describe("auth persistence", () => {
     expect(getIdentityToken()).toBe("auth-token")
     expect(getRememberedEmail()).toBe("user@example.com")
     expect(navigate).toHaveBeenCalledWith("/en")
+  })
+
+  it("creates a new authentication session for every completed login", async () => {
+    await completeLogin(
+      { success: true, data: { token: "first-token" } },
+      vi.fn(),
+      "/en"
+    )
+    const firstSessionId = getAuthSessionId()
+
+    await completeLogin(
+      { success: true, data: { token: "second-token" } },
+      vi.fn(),
+      "/en"
+    )
+
+    const secondSessionId = getAuthSessionId()
+
+    expect(firstSessionId).not.toBe("")
+    expect(secondSessionId).not.toBe("")
+    expect(secondSessionId).not.toBe(firstSessionId)
+  })
+
+  it("ignores a stale login that completes after a newer login", async () => {
+    let resolveFirstProfile!: (response: Response) => void
+    let resolveSecondProfile!: (response: Response) => void
+    const firstProfile = new Promise<Response>((resolve) => {
+      resolveFirstProfile = resolve
+    })
+    const secondProfile = new Promise<Response>((resolve) => {
+      resolveSecondProfile = resolve
+    })
+    vi.mocked(fetch)
+      .mockImplementationOnce(() => firstProfile)
+      .mockImplementationOnce(() => secondProfile)
+
+    const firstNavigate = vi.fn()
+    const secondNavigate = vi.fn()
+    const firstLogin = completeLogin(
+      { success: true, data: { token: "first-token" } },
+      firstNavigate,
+      "/first"
+    )
+    const secondLogin = completeLogin(
+      { success: true, data: { token: "second-token" } },
+      secondNavigate,
+      "/second"
+    )
+
+    resolveSecondProfile(
+      new Response(
+        JSON.stringify({
+          success: true,
+          data: { id: "user-2", email: "second@example.com" },
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      )
+    )
+    await secondLogin
+    const secondSessionId = getAuthSessionId()
+
+    resolveFirstProfile(
+      new Response(
+        JSON.stringify({
+          success: true,
+          data: { id: "user-1", email: "first@example.com" },
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      )
+    )
+    await firstLogin
+
+    expect(getIdentityToken()).toBe("second-token")
+    expect(getStoredUserProfile()).toEqual({
+      id: "user-2",
+      email: "second@example.com",
+    })
+    expect(getAuthSessionId()).toBe(secondSessionId)
+    expect(secondSessionId).not.toBe("")
+    expect(firstNavigate).not.toHaveBeenCalled()
+    expect(secondNavigate).toHaveBeenCalledWith("/second")
   })
 
   it("signs out only the current tab and restores it after login", async () => {

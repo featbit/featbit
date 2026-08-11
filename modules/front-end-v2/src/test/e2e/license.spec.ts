@@ -116,6 +116,27 @@ async function setupLicensePage({
       },
     })
   })
+
+  if (hostingMode === "saas") {
+    await page.route("**/api/v1/billing/subscription", async (route) => {
+      await route.fulfill({
+        json: {
+          success: true,
+          data: {
+            plan: "Growth",
+            billingCycle: "month",
+            mau: 0,
+            usage: { mau: 0 },
+          },
+        },
+      })
+    })
+    await page.route("**/api/v1/billing/current-cycle", async (route) => {
+      await route.fulfill({
+        json: { success: true, data: { mau: 0 } },
+      })
+    })
+  }
 }
 
 test.describe("workspace license", () => {

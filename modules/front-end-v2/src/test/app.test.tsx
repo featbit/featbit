@@ -34,6 +34,178 @@ describe("App shell", () => {
         )
       }
 
+      if (url.endsWith("/api/v1/user/policies")) {
+        return new Response(
+          JSON.stringify({
+            success: true,
+            data: [
+              {
+                name: "Organization administrator",
+                type: "CustomerManaged",
+                statements: [
+                  {
+                    resourceType: "organization",
+                    effect: "allow",
+                    actions: ["*"],
+                    resources: ["organization/*"],
+                  },
+                  {
+                    resourceType: "iam",
+                    effect: "allow",
+                    actions: ["CanManageIAM"],
+                    resources: ["iam/*"],
+                  },
+                ],
+              },
+            ],
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        )
+      }
+
+      if (url.endsWith("/api/v1/organizations/default-permissions")) {
+        return new Response(
+          JSON.stringify({
+            success: true,
+            data: { policies: [], groups: [] },
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        )
+      }
+
+      if (url.includes("/api/v1/policies?")) {
+        return new Response(
+          JSON.stringify({
+            success: true,
+            data: { totalCount: 0, items: [] },
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        )
+      }
+
+      if (url.includes("/api/v1/groups?")) {
+        return new Response(
+          JSON.stringify({
+            success: true,
+            data: { totalCount: 0, items: [] },
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        )
+      }
+
+      if (url.includes("/api/v1/groups/group-1/members?")) {
+        return new Response(
+          JSON.stringify({
+            success: true,
+            data: { totalCount: 0, items: [] },
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        )
+      }
+
+      if (url.includes("/api/v1/groups/group-1/policies?")) {
+        return new Response(
+          JSON.stringify({
+            success: true,
+            data: { totalCount: 0, items: [] },
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        )
+      }
+
+      if (url.endsWith("/api/v1/groups/group-1")) {
+        return new Response(
+          JSON.stringify({
+            success: true,
+            data: {
+              id: "group-1",
+              name: "Group One",
+              description: "Test group",
+            },
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        )
+      }
+
+      if (url.includes("/api/v1/members?")) {
+        return new Response(
+          JSON.stringify({
+            success: true,
+            data: {
+              totalCount: 1,
+              items: [
+                {
+                  id: "member-1",
+                  name: "Member One",
+                  email: "member@example.com",
+                  groups: [],
+                },
+              ],
+            },
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        )
+      }
+
+      if (url.includes("/api/v1/members/member-1/groups?")) {
+        return new Response(
+          JSON.stringify({
+            success: true,
+            data: { totalCount: 0, items: [] },
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        )
+      }
+
+      if (url.includes("/api/v1/members/member-1/direct-policies?")) {
+        return new Response(
+          JSON.stringify({
+            success: true,
+            data: { totalCount: 0, items: [] },
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        )
+      }
+
+      if (url.includes("/api/v1/members/member-1/inherited-policies?")) {
+        return new Response(
+          JSON.stringify({
+            success: true,
+            data: { totalCount: 0, items: [] },
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        )
+      }
+
+      if (url.endsWith("/api/v1/members/member-1/policies")) {
+        return new Response(JSON.stringify({ success: true, data: [] }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        })
+      }
+
+      if (url.endsWith("/api/v1/members/member-1/permissions")) {
+        return new Response(JSON.stringify({ success: true, data: [] }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        })
+      }
+
+      if (url.endsWith("/api/v1/members/member-1")) {
+        return new Response(
+          JSON.stringify({
+            success: true,
+            data: {
+              id: "member-1",
+              name: "Member One",
+              email: "member@example.com",
+              groups: [],
+            },
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        )
+      }
+
       if (url.includes("/api/v1/organizations")) {
         return new Response(
           JSON.stringify({
@@ -63,6 +235,20 @@ describe("App shell", () => {
                 ],
               },
             ],
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        )
+      }
+
+      if (url.endsWith("/api/v1/workspaces")) {
+        return new Response(
+          JSON.stringify({
+            success: true,
+            data: {
+              id: "ws-real",
+              key: "real",
+              name: "Real Workspace",
+            },
           }),
           { status: 200, headers: { "Content-Type": "application/json" } }
         )
@@ -412,6 +598,181 @@ describe("App shell", () => {
         }),
       })
     )
+  })
+
+  it("reuses authenticated context while navigating between pages", async () => {
+    const fetchMock = mockLayoutContextApi()
+    window.history.pushState({}, "", "/en/migration-placeholder")
+    signIn()
+
+    render(<App />)
+
+    expect(await screen.findByText("Real Platform")).toBeInTheDocument()
+
+    const countRequests = (matcher: (url: string) => boolean) =>
+      fetchMock.mock.calls.filter(([input]) => matcher(String(input))).length
+
+    expect(countRequests((url) => url.includes("/api/v1/organizations"))).toBe(
+      1
+    )
+    expect(countRequests((url) => url.endsWith("/api/v1/projects"))).toBe(1)
+
+    fireEvent.click(screen.getByRole("link", { name: "Experiments" }))
+
+    expect(
+      await screen.findByRole("heading", { name: "Experiments" })
+    ).toBeInTheDocument()
+    expect(countRequests((url) => url.includes("/api/v1/organizations"))).toBe(
+      1
+    )
+    expect(countRequests((url) => url.endsWith("/api/v1/projects"))).toBe(1)
+  })
+
+  it("deduplicates the workspace details request in strict mode", async () => {
+    const fetchMock = mockLayoutContextApi()
+    window.history.pushState({}, "", "/en/workspace")
+    signIn()
+
+    render(<App />)
+
+    expect(
+      await screen.findByRole("heading", { name: "Workspace" })
+    ).toBeInTheDocument()
+    await waitFor(() => {
+      expect(
+        fetchMock.mock.calls.filter(([input]) =>
+          String(input).endsWith("/api/v1/workspaces")
+        )
+      ).toHaveLength(1)
+    })
+  })
+
+  it("deduplicates organization settings requests in strict mode", async () => {
+    const fetchMock = mockLayoutContextApi()
+    window.history.pushState({}, "", "/en/organization")
+    signIn()
+
+    render(<App />)
+
+    expect(
+      await screen.findByRole("heading", { name: "Organization" })
+    ).toBeInTheDocument()
+    await waitFor(() => {
+      const requestUrls = fetchMock.mock.calls.map(([input]) => String(input))
+      expect(
+        requestUrls.filter((url) =>
+          url.includes("/api/v1/organizations?isSsoFirstLogin=false")
+        )
+      ).toHaveLength(1)
+      expect(
+        requestUrls.filter((url) =>
+          url.endsWith("/api/v1/organizations/default-permissions")
+        )
+      ).toHaveLength(1)
+      expect(
+        requestUrls.filter((url) => url.includes("/api/v1/policies?"))
+      ).toHaveLength(1)
+      expect(
+        requestUrls.filter((url) => url.includes("/api/v1/groups?"))
+      ).toHaveLength(1)
+    })
+  })
+
+  it("deduplicates the IAM team member request in strict mode", async () => {
+    const fetchMock = mockLayoutContextApi()
+    window.history.pushState({}, "", "/en/iam/team")
+    signIn()
+
+    render(<App />)
+
+    expect(
+      await screen.findByRole("heading", { name: "Team" })
+    ).toBeInTheDocument()
+    await waitFor(() => {
+      expect(
+        fetchMock.mock.calls.filter(([input]) =>
+          String(input).endsWith("/api/v1/members?pageIndex=0&pageSize=10")
+        )
+      ).toHaveLength(1)
+    })
+  })
+
+  it("opens team member details from the email link", async () => {
+    mockLayoutContextApi()
+    window.history.pushState({}, "", "/en/iam/team")
+    signIn()
+
+    render(<App />)
+
+    fireEvent.click(
+      await screen.findByRole("link", { name: "member@example.com" })
+    )
+
+    expect(
+      await screen.findByRole("heading", { name: "Member One" })
+    ).toBeInTheDocument()
+    expect(window.location.pathname).toBe("/en/iam/team/member-1/permissions")
+  })
+
+  it("does not load policy resources twice for team relationship counts", async () => {
+    const fetchMock = mockLayoutContextApi()
+    window.history.pushState({}, "", "/en/iam/team/member-1/permissions")
+    signIn()
+
+    render(<App />)
+
+    expect(
+      await screen.findByRole("heading", { name: "Member One" })
+    ).toBeInTheDocument()
+    await waitFor(() => {
+      const requestUrls = fetchMock.mock.calls.map(([input]) => String(input))
+      expect(
+        requestUrls.filter((url) =>
+          url.endsWith("/api/v1/members/member-1/permissions")
+        )
+      ).toHaveLength(1)
+      expect(
+        requestUrls.filter((url) =>
+          url.endsWith("/api/v1/members/member-1/policies")
+        )
+      ).toHaveLength(0)
+    })
+  })
+
+  it("uses the active group member page to populate its tab count", async () => {
+    const fetchMock = mockLayoutContextApi()
+    window.history.pushState({}, "", "/en/iam/groups/group-1/team")
+    signIn()
+
+    render(<App />)
+
+    expect(
+      await screen.findByRole("heading", { name: "Group One" })
+    ).toBeInTheDocument()
+    await waitFor(() => {
+      const requestUrls = fetchMock.mock.calls.map(([input]) => String(input))
+      expect(
+        requestUrls.filter((url) =>
+          url.endsWith(
+            "/api/v1/groups/group-1/members?getAllMembers=false&pageIndex=0&pageSize=1"
+          )
+        )
+      ).toHaveLength(0)
+      expect(
+        requestUrls.filter((url) =>
+          url.endsWith(
+            "/api/v1/groups/group-1/members?getAllMembers=false&pageIndex=0&pageSize=20"
+          )
+        )
+      ).toHaveLength(1)
+      expect(
+        requestUrls.filter((url) =>
+          url.endsWith(
+            "/api/v1/groups/group-1/policies?getAllPolicies=false&pageIndex=0&pageSize=1"
+          )
+        )
+      ).toHaveLength(1)
+    })
   })
 
   it("redirects authenticated users without selected workspace to workspace selection", async () => {

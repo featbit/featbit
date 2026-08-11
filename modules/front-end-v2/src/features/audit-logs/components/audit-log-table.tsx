@@ -91,6 +91,7 @@ export function AuditLogTable({
   filtered,
   resourceScoped = false,
   adapter,
+  segmentNames,
   onClearFilters,
   onViewRawData,
 }: {
@@ -101,11 +102,12 @@ export function AuditLogTable({
   filtered: boolean
   resourceScoped?: boolean
   adapter?: AuditLogTableAdapter
+  segmentNames?: ReadonlyMap<string, string>
   onClearFilters: () => void
   onViewRawData: (log: AuditLog) => void
 }) {
   const { t } = useTranslation()
-  const defaultAdapter = useDefaultAuditLogTableAdapter()
+  const defaultAdapter = useDefaultAuditLogTableAdapter(segmentNames)
   const rowAdapter = adapter ?? defaultAdapter
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
   const dateFormatter = useMemo(

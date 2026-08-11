@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { Loader2, Plus } from "lucide-react"
-import { useMemo, useState } from "react"
+import { useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import {
@@ -72,6 +72,11 @@ export function PropertiesSheet({
   const [removeTarget, setRemoveTarget] = useState<EndUserProperty | null>(null)
   const [presetTarget, setPresetTarget] = useState<EndUserProperty | null>(null)
   const [validationError, setValidationError] = useState("")
+  const [pendingDigestValues, setPendingDigestValues] = useState<
+    Record<string, boolean>
+  >({})
+  const digestMutationVersions = useRef<Record<string, number>>({})
+  const propertyMutationQueues = useRef<Record<string, Promise<void>>>({})
 
   const filtered = useMemo(() => {
     const filter = search.trim().toLowerCase()
@@ -96,23 +101,70 @@ export function PropertiesSheet({
     )
   }
 
+  function queuePropertyMutation<T>(
+    propertyId: string,
+    mutation: () => Promise<T>
+  ) {
+    const previous = propertyMutationQueues.current[propertyId]
+    const operation = (previous ?? Promise.resolve())
+      .catch(() => undefined)
+      .then(mutation)
+    const queued = operation.then(
+      () => undefined,
+      () => undefined
+    )
+    propertyMutationQueues.current[propertyId] = queued
+    void queued.then(() => {
+      if (propertyMutationQueues.current[propertyId] === queued) {
+        delete propertyMutationQueues.current[propertyId]
+      }
+    })
+
+    return operation
+  }
+
+  function queuePropertyUpsert({
+    propertyId,
+    fallback,
+    overrides = {},
+  }: {
+    propertyId: string
+    fallback: EndUserPropertyPayload
+    overrides?: Partial<EndUserPropertyPayload>
+  }) {
+    return queuePropertyMutation(propertyId, async () => {
+      const current = queryClient
+        .getQueryData<EndUserProperty[]>(["end-users", envId, "properties"])
+        ?.find((property) => property.id === propertyId)
+      const payload = current
+        ? propertyPayload(current, overrides)
+        : { ...fallback, ...overrides }
+      const saved = await upsertEndUserProperty(envId, propertyId, payload)
+
+      updateCache((properties) => {
+        const exists = properties.some((property) => property.id === saved.id)
+        return exists
+          ? properties.map((property) =>
+              property.id === saved.id ? saved : property
+            )
+          : [...properties, saved]
+      })
+
+      return saved
+    })
+  }
+
   const saveMutation = useMutation({
     mutationFn: ({
       propertyId,
-      payload,
+      fallback,
+      overrides,
     }: {
       propertyId: string
-      payload: EndUserPropertyPayload
-    }) => upsertEndUserProperty(envId, propertyId, payload),
-    onSuccess: (saved) => {
-      updateCache((current) => {
-        const exists = current.some((property) => property.id === saved.id)
-        return exists
-          ? current.map((property) =>
-              property.id === saved.id ? saved : property
-            )
-          : [...current, saved]
-      })
+      fallback: EndUserPropertyPayload
+      overrides?: Partial<EndUserPropertyPayload>
+    }) => queuePropertyUpsert({ propertyId, fallback, overrides }),
+    onSuccess: () => {
       setNewDraft(null)
       setEditing(null)
       setPresetTarget(null)
@@ -123,7 +175,9 @@ export function PropertiesSheet({
   })
   const removeMutation = useMutation({
     mutationFn: (property: EndUserProperty) =>
-      removeEndUserProperty(envId, property.id),
+      queuePropertyMutation(property.id, () =>
+        removeEndUserProperty(envId, property.id)
+      ),
     onSuccess: (_, property) => {
       updateCache((current) =>
         current.filter((item) => item.id !== property.id)
@@ -132,6 +186,20 @@ export function PropertiesSheet({
       toast.success(t("endUsers.operationSucceeded"))
     },
     onError: () => toast.error(t("endUsers.operationFailed")),
+  })
+  const digestMutation = useMutation({
+    mutationFn: ({
+      property,
+      checked,
+    }: {
+      property: EndUserProperty
+      checked: boolean
+    }) =>
+      queuePropertyUpsert({
+        propertyId: property.id,
+        fallback: propertyPayload(property),
+        overrides: { isDigestField: checked },
+      }),
   })
 
   function validateName(name: string, propertyId?: string) {
@@ -158,7 +226,7 @@ export function PropertiesSheet({
     if (!newDraft || !validateName(newDraft.name)) return
     saveMutation.mutate({
       propertyId: newDraft.id,
-      payload: {
+      fallback: {
         name: newDraft.name.trim(),
         remark: newDraft.remark.trim(),
         isDigestField: newDraft.isDigestField,
@@ -172,15 +240,45 @@ export function PropertiesSheet({
     if (!editing) return
     saveMutation.mutate({
       propertyId: property.id,
-      payload: propertyPayload(property, { remark: editing.remark.trim() }),
+      fallback: propertyPayload(property),
+      overrides: { remark: editing.remark.trim() },
     })
   }
 
   function toggleDigest(property: EndUserProperty, checked: boolean) {
-    saveMutation.mutate({
-      propertyId: property.id,
-      payload: propertyPayload(property, { isDigestField: checked }),
-    })
+    const version = (digestMutationVersions.current[property.id] ?? 0) + 1
+    digestMutationVersions.current[property.id] = version
+    setPendingDigestValues((current) => ({
+      ...current,
+      [property.id]: checked,
+    }))
+
+    void digestMutation
+      .mutateAsync({ property, checked })
+      .then(() => {
+        if (digestMutationVersions.current[property.id] !== version) {
+          return
+        }
+
+        setPendingDigestValues((current) => {
+          const next = { ...current }
+          delete next[property.id]
+          return next
+        })
+        toast.success(t("endUsers.operationSucceeded"))
+      })
+      .catch(() => {
+        if (digestMutationVersions.current[property.id] !== version) {
+          return
+        }
+
+        setPendingDigestValues((current) => {
+          const next = { ...current }
+          delete next[property.id]
+          return next
+        })
+        toast.error(t("endUsers.operationFailed"))
+      })
   }
 
   return (
@@ -273,6 +371,9 @@ export function PropertiesSheet({
                           editing={editing?.id === row.id}
                           editRemark={editing?.remark ?? ""}
                           saving={saveMutation.isPending}
+                          digestChecked={
+                            pendingDigestValues[row.id] ?? row.isDigestField
+                          }
                           onEditRemark={(remark) =>
                             setEditing((current) =>
                               current ? { ...current, remark } : current
@@ -334,10 +435,11 @@ export function PropertiesSheet({
           onSave={(property, presetValues, usePresetValuesOnly) =>
             saveMutation.mutate({
               propertyId: property.id,
-              payload: propertyPayload(property, {
+              fallback: propertyPayload(property),
+              overrides: {
                 presetValues,
                 usePresetValuesOnly,
-              }),
+              },
             })
           }
         />

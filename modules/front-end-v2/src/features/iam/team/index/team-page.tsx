@@ -1,5 +1,6 @@
 import { Plus, Search } from "lucide-react"
 import { useCallback, useEffect, useMemo, useState } from "react"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
 import { Link, useParams } from "react-router-dom"
 import { toast } from "sonner"
@@ -12,7 +13,11 @@ import { Button, buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { getStoredUserProfile } from "@/features/auth/auth-api"
-import { localizedPath, resolveLang } from "@/features/layout/layout-context"
+import {
+  getCurrentOrganization,
+  localizedPath,
+  resolveLang,
+} from "@/features/layout/layout-context"
 import { cn } from "@/lib/utils"
 import { AddMemberSheet } from "./components/add-member-sheet"
 import {
@@ -28,10 +33,12 @@ import {
 } from "./components/team-table"
 import { TeamPagination } from "./components/team-pagination"
 import {
-  fetchTeamMembers,
   memberResourceName,
   removeMemberFromOrganization,
   removeMemberFromWorkspace,
+  teamMembersQueryOptions,
+  teamQueryKeys,
+  type PagedResult,
   type TeamMember,
 } from "../team-api"
 
@@ -39,16 +46,13 @@ export function TeamPage() {
   const { t } = useTranslation()
   const params = useParams()
   const lang = resolveLang(params.lang)
+  const queryClient = useQueryClient()
   const profile = useMemo(() => getStoredUserProfile(), [])
+  const organizationId = getCurrentOrganization()?.id ?? ""
   const [search, setSearch] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
   const [pageIndex, setPageIndex] = useState(1)
   const [pageSize, setPageSize] = useState(10)
-  const [data, setData] = useState<{ totalCount: number; items: TeamMember[] }>(
-    { totalCount: 0, items: [] }
-  )
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
   const [addOpen, setAddOpen] = useState(false)
   const [removeTarget, setRemoveTarget] = useState<RemoveTarget>(null)
   const [isRemoving, setIsRemoving] = useState(false)
@@ -61,26 +65,19 @@ export function TeamPage() {
     return () => window.clearTimeout(timeout)
   }, [search])
 
-  const loadMembers = useCallback(() => {
-    setIsLoading(true)
-    setError(null)
-    fetchTeamMembers({
+  const memberParams = useMemo(
+    () => ({
       searchText: debouncedSearch,
       pageIndex: pageIndex - 1,
       pageSize,
-    })
-      .then(setData)
-      .catch((requestError) =>
-        setError(
-          requestError instanceof Error
-            ? requestError.message
-            : t("iam.team.loadFailed")
-        )
-      )
-      .finally(() => setIsLoading(false))
-  }, [debouncedSearch, pageIndex, pageSize, t])
-
-  useEffect(() => loadMembers(), [loadMembers])
+    }),
+    [debouncedSearch, pageIndex, pageSize]
+  )
+  const membersQuery = useQuery({
+    ...teamMembersQueryOptions(organizationId, memberParams),
+    enabled: Boolean(organizationId),
+  })
+  const data = membersQuery.data ?? { totalCount: 0, items: [] }
 
   const copyText = useCallback(
     async (value: string) => {
@@ -100,12 +97,18 @@ export function TeamPage() {
       } else {
         await removeMemberFromWorkspace(removeTarget.member.id)
       }
-      setData((current) => ({
-        totalCount: Math.max(0, current.totalCount - 1),
-        items: current.items.filter(
-          (item) => item.id !== removeTarget.member.id
-        ),
-      }))
+      queryClient.setQueryData<PagedResult<TeamMember>>(
+        teamQueryKeys.members(organizationId, memberParams),
+        (current) => ({
+          totalCount: Math.max(0, (current?.totalCount ?? 0) - 1),
+          items: (current?.items ?? []).filter(
+            (item) => item.id !== removeTarget.member.id
+          ),
+        })
+      )
+      void queryClient.invalidateQueries({
+        queryKey: teamQueryKeys.memberLists(organizationId),
+      })
       toast.success(t("iam.team.operationSucceeded"))
       setRemoveTarget(null)
     } catch {
@@ -120,12 +123,20 @@ export function TeamPage() {
       {
         accessorKey: "email",
         header: t("iam.team.columns.email"),
-        cell: ({ row }) => (
-          <EmailResourceCell
-            member={row.original}
-            onCopy={() => copyText(memberResourceName(row.original))}
-          />
-        ),
+        cell: ({ row }) => {
+          const detailsPath = localizedPath(
+            lang,
+            `/iam/team/${encodeURIComponent(row.original.id)}/permissions`
+          )
+
+          return (
+            <EmailResourceCell
+              member={row.original}
+              detailsPath={detailsPath}
+              onCopy={() => copyText(memberResourceName(row.original))}
+            />
+          )
+        },
       },
       {
         accessorKey: "name",
@@ -233,10 +244,14 @@ export function TeamPage() {
         </div>
 
         <div className="overflow-hidden rounded-md border bg-background">
-          {error ? (
+          {membersQuery.isError ? (
             <div className="flex items-center justify-between border-b bg-destructive/5 px-5 py-3 text-sm text-destructive">
               {t("iam.team.loadFailed")}
-              <Button variant="outline" size="sm" onClick={loadMembers}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => void membersQuery.refetch()}
+              >
                 {t("iam.team.retry")}
               </Button>
             </div>
@@ -244,7 +259,7 @@ export function TeamPage() {
           <TeamTable
             table={table}
             columnsCount={columns.length}
-            isLoading={isLoading}
+            isLoading={membersQuery.isLoading}
             hasSearch={Boolean(debouncedSearch)}
             onClearSearch={() => setSearch("")}
             onAddMember={() => setAddOpen(true)}
@@ -268,7 +283,9 @@ export function TeamPage() {
             onOpenChange={setAddOpen}
             onAdded={() => {
               setAddOpen(false)
-              loadMembers()
+              void queryClient.invalidateQueries({
+                queryKey: teamQueryKeys.memberLists(organizationId),
+              })
             }}
           />
         ) : null}

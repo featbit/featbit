@@ -1,4 +1,8 @@
 import type { ChangeReviewItem } from "@/features/change-review/change-review-types"
+import {
+  isSegmentConditionProperty,
+  segmentConditionValues,
+} from "@/features/targeting/segment-conditions"
 import type {
   FeatureFlag,
   FlagRule,
@@ -279,6 +283,20 @@ export function targetingReviewChanges(
   return changes
 }
 
+export function targetingReviewSegmentIds(
+  changes: FlagTargetingReviewChange[]
+) {
+  const ids = new Set<string>()
+  for (const change of changes) {
+    for (const rule of [change.previousRule, change.currentRule]) {
+      for (const condition of rule?.conditions ?? []) {
+        segmentConditionValues(condition).forEach((id) => ids.add(id))
+      }
+    }
+  }
+  return [...ids]
+}
+
 export function validateTargeting(
   flag: FeatureFlag,
   messages: {
@@ -302,8 +320,10 @@ export function validateTargeting(
       rule.conditions.some(
         (item) =>
           !item.property ||
-          !item.op ||
-          (!(item.op === "IsTrue" || item.op === "IsFalse") && !item.value)
+          (isSegmentConditionProperty(item.property)
+            ? segmentConditionValues(item).length === 0
+            : !item.op ||
+              (!(item.op === "IsTrue" || item.op === "IsFalse") && !item.value))
       )
     ) {
       errors.set(rule.id, messages.conditionIncomplete)

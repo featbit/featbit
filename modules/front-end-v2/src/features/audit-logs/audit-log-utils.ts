@@ -3,6 +3,7 @@ import type { ChangeReviewItem } from "@/features/change-review/change-review-ty
 import type { FeatureFlag } from "@/features/flags/flags-types"
 import {
   targetingReviewChanges,
+  targetingReviewSegmentIds,
   type FlagTargetingReviewChange,
 } from "@/features/flags/details/targeting/targeting-utils"
 import {
@@ -471,6 +472,33 @@ export function auditHistoryChanges(
   }
 
   return genericInstructionChanges(log.instructions)
+}
+
+export function auditDisplayedChanges(log: AuditLog, t: TFunction) {
+  if (!isChangeRequestDecisionOperation(log.operation)) {
+    return auditHistoryChanges(log, t)
+  }
+
+  const proposedDataChange = auditDecisionSnapshot(log)?.proposedDataChange
+  return proposedDataChange
+    ? auditHistoryChanges(
+        {
+          ...log,
+          operation: "Update",
+          dataChange: proposedDataChange,
+          instructions: [],
+        },
+        t
+      )
+    : []
+}
+
+export function auditLogSegmentIds(logs: AuditLog[], t: TFunction) {
+  return targetingReviewSegmentIds(
+    logs.flatMap(
+      (log) => auditDisplayedChanges(log, t) as FlagTargetingReviewChange[]
+    )
+  )
 }
 
 export function hasAppliedFilters(input: {

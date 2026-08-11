@@ -113,7 +113,7 @@ function RowActions({
   }
 
   return (
-    <div className="flex items-center justify-end gap-1">
+    <div className="flex items-center gap-1 whitespace-nowrap">
       <Button
         type="button"
         variant="ghost"
@@ -264,24 +264,18 @@ export function AccessTokenTable({
       {
         id: "actions",
         size: 140,
-        header: () => (
-          <span className="block text-right">
-            {t("accessTokens.columns.actions")}
-          </span>
-        ),
+        header: t("accessTokens.columns.actions"),
         cell: ({ row }) => (
-          <div className="flex justify-end">
-            <RowActions
-              token={row.original}
-              manageable={isManageable(row.original)}
-              mutating={mutatingId === row.original.id}
-              onEdit={onEdit}
-              onView={onView}
-              onActivate={onActivate}
-              onDeactivate={onDeactivate}
-              onRemove={onRemove}
-            />
-          </div>
+          <RowActions
+            token={row.original}
+            manageable={isManageable(row.original)}
+            mutating={mutatingId === row.original.id}
+            onEdit={onEdit}
+            onView={onView}
+            onActivate={onActivate}
+            onDeactivate={onDeactivate}
+            onRemove={onRemove}
+          />
         ),
       },
     ],

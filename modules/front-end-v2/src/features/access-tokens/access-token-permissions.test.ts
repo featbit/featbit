@@ -26,6 +26,17 @@ function statement(overrides: Partial<PolicyStatement> = {}): PolicyStatement {
 }
 
 describe("access token permission model", () => {
+  it("keeps permission categories in the sheet display order", () => {
+    expect(PERMISSION_CATEGORIES.map((category) => category.type)).toEqual([
+      "workspace",
+      "iam",
+      "project",
+      "env",
+      "flag",
+      "segment",
+    ])
+  })
+
   it("grants both token types to the system Owner policy", () => {
     const policies: UserPolicy[] = [
       {

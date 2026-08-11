@@ -16,6 +16,7 @@ import type { AuditLog, AuditUser } from "./audit-logs-types"
 import { AuditLogFilters } from "./components/audit-log-filters"
 import { AuditLogRawDataDialog } from "./components/audit-log-raw-data-dialog"
 import { AuditLogTable } from "./components/audit-log-table"
+import { useAuditLogSegmentNames } from "./components/audit-log-table-adapter"
 
 const PAGE_SIZE = 10
 
@@ -83,6 +84,7 @@ export function AuditLogsPage() {
     () => logsQuery.data?.pages.flatMap((page) => page.items) ?? [],
     [logsQuery.data]
   )
+  const segmentNames = useAuditLogSegmentNames(envId, items)
 
   function clearFilters() {
     setSearch("")
@@ -150,6 +152,7 @@ export function AuditLogsPage() {
             <div className="min-w-[1120px]">
               <AuditLogTable
                 items={items}
+                segmentNames={segmentNames}
                 lang={lang}
                 locale={locale}
                 loading={logsQuery.isLoading}

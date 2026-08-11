@@ -1,3 +1,4 @@
+import { queryOptions } from "@tanstack/react-query"
 import { persistCurrentWorkspace } from "@/features/layout/layout-context"
 import type { Workspace } from "@/features/layout/layout-types"
 import { fetchApi } from "@/lib/api/authenticated-api"
@@ -30,6 +31,19 @@ async function workspaceRequest<T>(path: string, init?: RequestInit) {
 
 export async function fetchWorkspaceDetails() {
   return workspaceRequest<WorkspaceDetails>("/api/v1/workspaces")
+}
+
+export const workspaceQueryKeys = {
+  details: (workspaceId: string) =>
+    ["workspace", "details", workspaceId] as const,
+}
+
+export function workspaceDetailsQueryOptions(workspaceId: string) {
+  return queryOptions({
+    queryKey: workspaceQueryKeys.details(workspaceId),
+    queryFn: fetchWorkspaceDetails,
+    staleTime: 60_000,
+  })
 }
 
 export async function updateWorkspaceIdentity(

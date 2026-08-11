@@ -17,6 +17,7 @@ import type {
 import { AuditLogFilters } from "@/features/audit-logs/components/audit-log-filters"
 import { AuditLogRawDataDialog } from "@/features/audit-logs/components/audit-log-raw-data-dialog"
 import { AuditLogTable } from "@/features/audit-logs/components/audit-log-table"
+import { useAuditLogSegmentNames } from "@/features/audit-logs/components/audit-log-table-adapter"
 import type { Lang } from "@/features/layout/layout-types"
 
 const PAGE_SIZE = 10
@@ -87,6 +88,7 @@ export function HistoryTab({
     () => logsQuery.data?.pages.flatMap((page) => page.items) ?? [],
     [logsQuery.data]
   )
+  const segmentNames = useAuditLogSegmentNames(envId, items)
 
   function clearFilters() {
     setSearch("")
@@ -132,6 +134,7 @@ export function HistoryTab({
           <div className="min-w-[920px]">
             <AuditLogTable
               items={items}
+              segmentNames={segmentNames}
               lang={lang}
               locale={locale}
               loading={logsQuery.isLoading}

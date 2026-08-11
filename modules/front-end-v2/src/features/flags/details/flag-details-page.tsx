@@ -25,6 +25,7 @@ import {
   resolveLang,
 } from "@/features/layout/layout-context"
 import {
+  fetchSegmentsByIds,
   fetchSegmentUserProperties,
   fetchSegmentUsersByKeyIds,
 } from "@/features/segments/segments-api"
@@ -79,6 +80,7 @@ import {
   stableFlagTargeting,
   targetingOf,
   targetingReviewChanges,
+  targetingReviewSegmentIds,
 } from "./targeting/targeting-utils"
 import { TriggersTab } from "./triggers/triggers-tab"
 import { VariationsReviewDialog } from "./variations/variations-review-dialog"
@@ -274,6 +276,26 @@ export function FlagDetailsPage() {
           })
         : [],
     [saved, t, targetingFlag]
+  )
+  const reviewSegmentIds = useMemo(
+    () => targetingReviewSegmentIds(changes),
+    [changes]
+  )
+  const reviewSegmentsQuery = useQuery({
+    queryKey: ["targeting-segments-by-id", envId, reviewSegmentIds],
+    queryFn: () => fetchSegmentsByIds(envId, reviewSegmentIds),
+    enabled: Boolean(envId && reviewSegmentIds.length),
+    staleTime: 60_000,
+  })
+  const reviewSegmentNames = useMemo(
+    () =>
+      new Map(
+        (reviewSegmentsQuery.data ?? []).map((segment) => [
+          segment.id,
+          segment.name,
+        ])
+      ),
+    [reviewSegmentsQuery.data]
   )
   const variationChanges = useMemo(
     () =>
@@ -581,6 +603,7 @@ export function FlagDetailsPage() {
               />
             ) : null}
             <TargetingTab
+              envId={envId}
               flag={targetingFlag!}
               users={users}
               properties={propertiesQuery.data ?? []}
@@ -650,6 +673,7 @@ export function FlagDetailsPage() {
           open={reviewOpen}
           flagName={saved.name}
           changes={changes}
+          segmentNames={reviewSegmentNames}
           requireComment={settingsQuery.data?.requireChangeComment ?? false}
           saving={saveMutation.isPending}
           initialComment={reviewInitialComment}
@@ -729,6 +753,7 @@ export function FlagDetailsPage() {
           mode={submission?.mode ?? null}
           flagName={saved.name}
           changes={changes}
+          segmentNames={reviewSegmentNames}
           initialReason={submission?.initialReason}
           scheduleGranted={scheduleGranted}
           changeRequestGranted={changeRequestGranted}

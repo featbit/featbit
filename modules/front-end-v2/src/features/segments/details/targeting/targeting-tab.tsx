@@ -226,6 +226,7 @@ export function TargetingTab({
               }}
             >
               <RuleEditor
+                envId={envId}
                 rule={rule}
                 properties={properties}
                 disabled={!canUpdateRules}

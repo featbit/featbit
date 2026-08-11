@@ -380,24 +380,17 @@ export function FlagsTable(props: Props) {
                     >
                       {flag.name}
                     </Link>
-                    <Tooltip>
-                      <TooltipTrigger
-                        render={
-                          <button
-                            type="button"
-                            aria-label={t("featureFlags.copyKey", {
-                              key: flag.key,
-                            })}
-                            className="inline-flex max-w-full items-center gap-1.5 rounded bg-muted px-2 py-0.5 font-mono text-xs text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-                            onClick={() => props.onCopyKey(flag.key)}
-                          />
-                        }
-                      >
-                        <span className="truncate">{flag.key}</span>
-                        <Copy className="size-3 shrink-0" />
-                      </TooltipTrigger>
-                      <TooltipContent>{flag.key}</TooltipContent>
-                    </Tooltip>
+                    <button
+                      type="button"
+                      aria-label={t("featureFlags.copyKey", {
+                        key: flag.key,
+                      })}
+                      className="inline-flex max-w-full items-center gap-1.5 rounded bg-muted px-2 py-0.5 font-mono text-xs text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                      onClick={() => props.onCopyKey(flag.key)}
+                    >
+                      <span className="truncate">{flag.key}</span>
+                      <Copy className="size-3 shrink-0" />
+                    </button>
                     {personName(flag.creator) ? (
                       <p className="flex min-w-0 items-center gap-1.5 text-xs">
                         <span className="shrink-0 text-muted-foreground">

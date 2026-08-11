@@ -28,7 +28,9 @@ test.describe("layout", () => {
     await expect(
       page.getByRole("link", { name: "Current Plan: Growth" })
     ).toBeVisible()
-    await expect(page.getByRole("link", { name: "Team" })).toHaveCount(0)
+    await expect(
+      page.getByRole("link", { name: "Team", exact: true })
+    ).toHaveCount(0)
     await expect(page.getByRole("link", { name: "Groups" })).toHaveCount(0)
     await expect(page.getByRole("link", { name: "Policies" })).toHaveCount(0)
     await expect(page.getByRole("link", { name: "Webhooks" })).toBeVisible()
@@ -37,20 +39,28 @@ test.describe("layout", () => {
     ).toBeVisible()
 
     await page.getByRole("button", { name: "IAM" }).click()
-    await expect(page.getByRole("link", { name: "Team" })).toBeVisible()
+    await expect(
+      page.getByRole("link", { name: "Team", exact: true })
+    ).toBeVisible()
     await expect(page.getByRole("link", { name: "Groups" })).toBeVisible()
     await expect(page.getByRole("link", { name: "Policies" })).toBeVisible()
 
     await page.getByRole("button", { name: "Collapse sidebar" }).click()
 
-    await expect(page.getByText("Feature Flags")).toHaveCount(0)
-    await expect(page.getByText("Team")).toHaveCount(0)
-    await expect(page.getByText("Webhooks")).toHaveCount(0)
+    const sidebar = page.locator("aside").first()
+    await expect(sidebar.getByText("Feature Flags")).toHaveCount(0)
+    await expect(sidebar.getByText("Team")).toHaveCount(0)
+    await expect(sidebar.getByText("Webhooks")).toHaveCount(0)
 
     await page.getByRole("button", { name: "IAM" }).click()
-    await expect(page.getByText("Team", { exact: true })).toBeVisible()
-    await expect(page.getByText("Groups", { exact: true })).toBeVisible()
-    await expect(page.getByText("Policies", { exact: true })).toBeVisible()
+    const iamMenu = page.getByRole("menu", { name: "IAM" })
+    await expect(iamMenu.getByRole("menuitem", { name: "Team" })).toBeVisible()
+    await expect(
+      iamMenu.getByRole("menuitem", { name: "Groups" })
+    ).toBeVisible()
+    await expect(
+      iamMenu.getByRole("menuitem", { name: "Policies" })
+    ).toBeVisible()
 
     await expect(
       page.evaluate(() => localStorage.getItem("featbit:sidebar-collapsed"))
@@ -113,11 +123,34 @@ test.describe("layout", () => {
       }
     }, createLicense("Growth"))
 
+    await page.route("**/api/v1/global-users**", async (route) => {
+      await route.fulfill({
+        json: { success: true, data: { totalCount: 0, items: [] } },
+      })
+    })
+    await page.route("**/api/v1/workspaces", async (route) => {
+      await route.fulfill({
+        json: {
+          success: true,
+          data: {
+            id: "ws-1",
+            key: "acme-workspace",
+            name: "Acme Workspace",
+            license: createLicense("Growth"),
+          },
+        },
+      })
+    })
+
     await page.goto("/en/workspace/global-users")
 
     await page.getByRole("button", { name: /Production CN/ }).click()
     await expect(page.getByText("Growth Platform")).toBeVisible()
-    await page.getByRole("option", { name: "Staging" }).click()
+    const environmentSearch = page.getByPlaceholder(
+      "Search projects or environments..."
+    )
+    await environmentSearch.fill("Staging")
+    await environmentSearch.press("Enter")
 
     await expect(page).toHaveURL(/\/en\/workspace$/)
     await expect(page.getByRole("button", { name: /Staging/ })).toBeVisible()
@@ -254,7 +287,9 @@ test.describe("layout", () => {
     await page.goto("/en")
 
     await page.getByRole("button", { name: /Production CN/ }).click()
-    const searchInput = page.getByRole("combobox")
+    const searchInput = page.getByPlaceholder(
+      "Search projects or environments..."
+    )
     await searchInput.fill("P")
 
     await expect(searchInput).toBeFocused()

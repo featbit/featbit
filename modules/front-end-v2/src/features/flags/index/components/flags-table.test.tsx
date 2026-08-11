@@ -85,6 +85,15 @@ describe("FlagsTable serving markers", () => {
     expect(markers[1]).toHaveClass(...variationMarkerColor(1).split(" "))
   })
 
+  it("keeps the flag key copyable without wrapping it in a tooltip", () => {
+    renderTable()
+
+    const copyKey = screen.getByRole("button", {
+      name: "Copy flag key checkout-redesign",
+    })
+    expect(copyKey).not.toHaveAttribute("data-slot", "tooltip-trigger")
+  })
+
   it("links creator and last-change operator to Team member details and shows emails on hover", async () => {
     renderTable()
 

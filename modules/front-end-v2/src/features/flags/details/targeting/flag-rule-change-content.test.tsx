@@ -49,6 +49,66 @@ describe("feature flag rule review content", () => {
     expect(screen.getByText("Variation B")).toBeVisible()
   })
 
+  it("shows segment names in conditions and falls back to unresolved ids", async () => {
+    await i18n.changeLanguage("en")
+    const current = rule([
+      {
+        id: "condition-segment",
+        property: "User is in segment",
+        op: "",
+        value: JSON.stringify(["segment-a", "segment-missing"]),
+      },
+    ])
+
+    render(
+      <FlagRuleChangeContent
+        currentRule={current}
+        currentServing={{
+          variations: [{ id: "new", name: "Variation B" }],
+        }}
+        segmentNames={new Map([["segment-a", "Enterprise customers"]])}
+      />
+    )
+
+    expect(
+      screen.getByText("Enterprise customers, segment-missing")
+    ).toBeVisible()
+    expect(
+      screen.queryByText("segment-a, segment-missing")
+    ).not.toBeInTheDocument()
+    const segmentValue =
+      screen.getByText("User is in segment").nextElementSibling
+    expect(segmentValue).toHaveTextContent(
+      "Enterprise customers, segment-missing"
+    )
+    expect(segmentValue).toHaveClass("font-medium", "text-foreground")
+  })
+
+  it("does not resolve ordinary condition values as segment names", async () => {
+    await i18n.changeLanguage("en")
+    const current = rule([
+      {
+        id: "condition-role",
+        property: "role",
+        op: "Equal",
+        value: "segment-a",
+      },
+    ])
+
+    render(
+      <FlagRuleChangeContent
+        currentRule={current}
+        currentServing={{
+          variations: [{ id: "new", name: "Variation B" }],
+        }}
+        segmentNames={new Map([["segment-a", "Enterprise customers"]])}
+      />
+    )
+
+    expect(screen.getByText("segment-a")).toBeVisible()
+    expect(screen.queryByText("Enterprise customers")).not.toBeInTheDocument()
+  })
+
   it("uses the shared Rule badge and shows added conditions instead of unchanged serving", async () => {
     await i18n.changeLanguage("en")
     const previous = rule([
@@ -99,11 +159,44 @@ describe("feature flag rule review content", () => {
     expect(screen.getByText("is one of")).toHaveClass("font-mono")
     expect(screen.getByText("AND")).toHaveClass("font-mono")
     expect(screen.getByText("region")).not.toHaveClass("font-mono")
+    expect(screen.getByText("EU")).toHaveClass("font-medium", "text-foreground")
     expect(screen.getByText("EU")).not.toHaveClass("font-mono")
     expect(screen.getByText("country")).not.toHaveClass("font-mono")
+    expect(screen.getByText("DE, FR")).toHaveClass(
+      "font-medium",
+      "text-foreground"
+    )
     expect(screen.getByText("DE, FR")).not.toHaveClass("font-mono")
     expect(screen.queryByText("Serve")).not.toBeInTheDocument()
     expect(screen.queryByText(/100%/)).not.toBeInTheDocument()
+  })
+
+  it("mutes the complete previous condition when a condition is updated", async () => {
+    await i18n.changeLanguage("en")
+    const previous = rule([
+      {
+        id: "condition-1",
+        property: "keyId",
+        op: "Equal",
+        value: "asc",
+      },
+    ])
+    const current = rule([
+      {
+        id: "condition-1",
+        property: "name",
+        op: "IsOneOf",
+        value: '["awe","waegaw","ee"]',
+      },
+    ])
+
+    render(
+      <FlagRuleChangeContent previousRule={previous} currentRule={current} />
+    )
+
+    expect(screen.getByText("keyId")).toHaveClass("text-muted-foreground")
+    expect(screen.getByText("asc")).toHaveClass("text-muted-foreground")
+    expect(screen.getByText("awe, waegaw, ee")).toHaveClass("text-foreground")
   })
 
   it("shows User and Default badges with their targeting labels", async () => {

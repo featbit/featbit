@@ -1,3 +1,5 @@
+import { queryOptions } from "@tanstack/react-query"
+import { getAuthSessionId } from "@/features/auth/auth-api"
 import { fetchApi } from "@/lib/api/authenticated-api"
 
 export type PagedResult<T> = {
@@ -119,6 +121,33 @@ export function fetchTeamMembers(params: {
   )
 }
 
+export const teamQueryKeys = {
+  all: () => ["iam", "team", getAuthSessionId()] as const,
+  memberLists: (organizationId: string) =>
+    [...teamQueryKeys.all(), organizationId] as const,
+  members: (
+    organizationId: string,
+    params: { searchText: string; pageIndex: number; pageSize: number }
+  ) =>
+    [
+      ...teamQueryKeys.memberLists(organizationId),
+      params.searchText,
+      params.pageIndex,
+      params.pageSize,
+    ] as const,
+}
+
+export function teamMembersQueryOptions(
+  organizationId: string,
+  params: { searchText: string; pageIndex: number; pageSize: number }
+) {
+  return queryOptions({
+    queryKey: teamQueryKeys.members(organizationId, params),
+    queryFn: () => fetchTeamMembers(params),
+    staleTime: 60_000,
+  })
+}
+
 export function addTeamMember(payload: AddMemberPayload) {
   return fetchApi<boolean>("/api/v1/members/add", {
     method: "POST",
@@ -185,23 +214,50 @@ export function fetchMemberGroups(
   )
 }
 
+function fetchMemberDirectPolicyPage(
+  memberId: string,
+  params: { name: string; pageIndex: number; pageSize: number }
+) {
+  return fetchApi<PagedResult<MemberDirectPolicy>>(
+    memberPath(
+      memberId,
+      `/direct-policies${queryString({
+        name: params.name,
+        getAllPolicies: false,
+        pageIndex: params.pageIndex,
+        pageSize: params.pageSize,
+      })}`
+    )
+  )
+}
+
+function fetchMemberInheritedPolicyPage(
+  memberId: string,
+  params: { name: string; pageIndex: number; pageSize: number }
+) {
+  return fetchApi<PagedResult<MemberInheritedPolicy>>(
+    memberPath(
+      memberId,
+      `/inherited-policies${queryString({
+        name: params.name,
+        pageIndex: params.pageIndex,
+        pageSize: params.pageSize,
+      })}`
+    )
+  )
+}
+
+function fetchMemberPolicyResources(memberId: string) {
+  return fetchApi<MemberPolicyResource[]>(memberPath(memberId, "/policies"))
+}
+
 export async function fetchMemberDirectPolicies(
   memberId: string,
   params: { name: string; pageIndex: number; pageSize: number }
 ) {
   const [result, resources] = await Promise.all([
-    fetchApi<PagedResult<MemberDirectPolicy>>(
-      memberPath(
-        memberId,
-        `/direct-policies${queryString({
-          name: params.name,
-          getAllPolicies: false,
-          pageIndex: params.pageIndex,
-          pageSize: params.pageSize,
-        })}`
-      )
-    ),
-    fetchApi<MemberPolicyResource[]>(memberPath(memberId, "/policies")),
+    fetchMemberDirectPolicyPage(memberId, params),
+    fetchMemberPolicyResources(memberId),
   ])
   const keysById = new Map(resources.map((policy) => [policy.id, policy.key]))
 
@@ -219,17 +275,8 @@ export async function fetchMemberInheritedPolicies(
   params: { name: string; pageIndex: number; pageSize: number }
 ) {
   const [result, resources] = await Promise.all([
-    fetchApi<PagedResult<MemberInheritedPolicy>>(
-      memberPath(
-        memberId,
-        `/inherited-policies${queryString({
-          name: params.name,
-          pageIndex: params.pageIndex,
-          pageSize: params.pageSize,
-        })}`
-      )
-    ),
-    fetchApi<MemberPolicyResource[]>(memberPath(memberId, "/policies")),
+    fetchMemberInheritedPolicyPage(memberId, params),
+    fetchMemberPolicyResources(memberId),
   ])
   const keysById = new Map(resources.map((policy) => [policy.id, policy.key]))
 
@@ -239,6 +286,21 @@ export async function fetchMemberInheritedPolicies(
       ...policy,
       key: keysById.get(policy.id),
     })),
+  }
+}
+
+export async function fetchMemberRelationshipCounts(memberId: string) {
+  const countParams = { name: "", pageIndex: 0, pageSize: 1 }
+  const [groups, directPolicies, inheritedPolicies] = await Promise.all([
+    fetchMemberGroups(memberId, countParams),
+    fetchMemberDirectPolicyPage(memberId, countParams),
+    fetchMemberInheritedPolicyPage(memberId, countParams),
+  ])
+
+  return {
+    groups: groups.totalCount,
+    direct: directPolicies.totalCount,
+    inherited: inheritedPolicies.totalCount,
   }
 }
 

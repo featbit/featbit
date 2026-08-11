@@ -3,6 +3,7 @@ import { fetchApi } from "@/lib/api/authenticated-api"
 import {
   createSegmentEndUser,
   fetchAllSegmentTags,
+  fetchSegmentsByIds,
   updateSegmentGeneral,
 } from "./segments-api"
 
@@ -72,5 +73,44 @@ describe("segments tag API", () => {
         body: JSON.stringify({ keyId: "new-user", name: "new-user" }),
       }
     )
+  })
+
+  it("loads referenced segments by id", async () => {
+    vi.mocked(fetchApi).mockResolvedValue([])
+
+    await fetchSegmentsByIds("env / 1", ["segment / a", "segment-b"])
+
+    expect(fetchApi).toHaveBeenCalledWith(
+      "/api/v1/envs/env%20%2F%201/segments/by-ids?ids=segment+%2F+a&ids=segment-b"
+    )
+  })
+
+  it("loads referenced segments in batches and merges the responses", async () => {
+    const segmentIds = Array.from(
+      { length: 101 },
+      (_, index) => `segment-${index + 1}`
+    )
+    const firstBatchSegment = { id: "segment-1", name: "First segment" }
+    const secondBatchSegment = { id: "segment-101", name: "Last segment" }
+    vi.mocked(fetchApi)
+      .mockResolvedValueOnce([firstBatchSegment])
+      .mockResolvedValueOnce([secondBatchSegment])
+
+    const result = await fetchSegmentsByIds("env-1", segmentIds)
+
+    expect(fetchApi).toHaveBeenCalledTimes(2)
+    const firstBatchParams = new URLSearchParams()
+    segmentIds
+      .slice(0, 100)
+      .forEach((segmentId) => firstBatchParams.append("ids", segmentId))
+    expect(fetchApi).toHaveBeenNthCalledWith(
+      1,
+      `/api/v1/envs/env-1/segments/by-ids?${firstBatchParams}`
+    )
+    expect(fetchApi).toHaveBeenNthCalledWith(
+      2,
+      "/api/v1/envs/env-1/segments/by-ids?ids=segment-101"
+    )
+    expect(result).toEqual([firstBatchSegment, secondBatchSegment])
   })
 })

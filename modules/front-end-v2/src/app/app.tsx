@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { BrowserRouter } from "react-router-dom"
 import { ThemeProvider } from "@/components/theme-provider"
@@ -6,10 +7,9 @@ import { getRuntimeEnv } from "@/lib/env/runtime-env"
 import { AppRoutes } from "@/routes/app-routes"
 import "@/lib/i18n/i18n"
 
-const queryClient = new QueryClient()
-
 export function App() {
   const { baseHref } = getRuntimeEnv()
+  const [queryClient] = useState(() => new QueryClient())
 
   return (
     <ThemeProvider defaultTheme="system" storageKey="featbit:theme">

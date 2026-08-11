@@ -1,6 +1,5 @@
 import { GripVertical, Plus, Trash2, X } from "lucide-react"
 import type { DragEvent, KeyboardEvent, ReactNode } from "react"
-import { useMemo } from "react"
 import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -21,6 +20,10 @@ import {
   newTargetingId,
   withConditionValues,
 } from "./targeting-utils"
+import { PropertyPicker } from "./property-picker"
+import { SegmentConditionPicker } from "./segment-condition-picker"
+import { isSegmentConditionProperty } from "./segment-conditions"
+import { MultiValuePicker } from "./multi-value-picker"
 
 const operators = [
   "Equal",
@@ -42,8 +45,10 @@ const operators = [
 ] as const
 
 export function RuleEditor({
+  envId,
   rule,
   properties,
+  includeSegmentConditions = false,
   disabled,
   canMoveUp,
   canMoveDown,
@@ -56,8 +61,10 @@ export function RuleEditor({
   onRemove,
   footer,
 }: {
+  envId: string
   rule: SegmentRule
   properties: SegmentUserProperty[]
+  includeSegmentConditions?: boolean
   disabled: boolean
   canMoveUp: boolean
   canMoveDown: boolean
@@ -71,15 +78,6 @@ export function RuleEditor({
   footer?: ReactNode
 }) {
   const { t } = useTranslation()
-  const propertyOptions = useMemo(
-    () => [
-      { name: "keyId", id: "keyId" },
-      { name: "name", id: "name" },
-      ...properties,
-    ],
-    [properties]
-  )
-
   function handleReorderKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
     if (event.key === "ArrowUp" && canMoveUp) {
       event.preventDefault()
@@ -132,7 +130,15 @@ export function RuleEditor({
       </div>
       <div className="space-y-2 px-4 py-3">
         {rule.conditions.map((condition, index) => {
+          const segmentCondition = isSegmentConditionProperty(
+            condition.property
+          )
           const values = conditionValues(condition)
+          const property = properties.find(
+            (candidate) => candidate.name === condition.property
+          )
+          const multiValue =
+            condition.op === "IsOneOf" || condition.op === "NotOneOf"
           const valueDisabled =
             condition.op === "IsTrue" || condition.op === "IsFalse"
           return (
@@ -144,90 +150,128 @@ export function RuleEditor({
                 {t(index === 0 ? "targeting.rules.if" : "targeting.rules.and")}
               </span>
               <div className="contents">
-                <Select
+                <PropertyPicker
+                  envId={envId}
                   value={condition.property}
                   disabled={disabled}
+                  properties={properties}
+                  includeSegmentConditions={includeSegmentConditions}
                   onValueChange={(property) => {
-                    if (!property) return
-                    onChange({
-                      ...rule,
-                      conditions: rule.conditions.map((item) =>
-                        item.id === condition.id ? { ...item, property } : item
-                      ),
-                    })
-                  }}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      {propertyOptions.map((property) => (
-                        <SelectItem key={property.id} value={property.name}>
-                          {property.name}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-                <Select
-                  value={condition.op}
-                  disabled={disabled}
-                  onValueChange={(op) => {
-                    if (!op) return
                     onChange({
                       ...rule,
                       conditions: rule.conditions.map((item) =>
                         item.id === condition.id
-                          ? withConditionValues({ ...item, op }, values)
+                          ? isSegmentConditionProperty(property)
+                            ? { ...item, property, op: "", value: "[]" }
+                            : segmentCondition
+                              ? {
+                                  ...item,
+                                  property,
+                                  op: "Equal",
+                                  value: "",
+                                }
+                              : withConditionValues({ ...item, property }, [])
                           : item
                       ),
                     })
                   }}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue>
-                      {t(`targeting.rules.operators.${condition.op}`)}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      {operators.map((operator) => (
-                        <SelectItem key={operator} value={operator}>
-                          {t(`targeting.rules.operators.${operator}`)}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-                <Input
-                  value={valueDisabled ? "" : values.join(", ")}
-                  disabled={disabled || valueDisabled}
-                  placeholder={
-                    condition.op === "IsOneOf" || condition.op === "NotOneOf"
-                      ? t("targeting.rules.multiValue")
-                      : t("targeting.rules.value")
-                  }
-                  onChange={(event) =>
-                    onChange({
-                      ...rule,
-                      conditions: rule.conditions.map((item) =>
-                        item.id === condition.id
-                          ? withConditionValues(
-                              item,
-                              condition.op === "IsOneOf" ||
-                                condition.op === "NotOneOf"
-                                ? event.target.value
-                                    .split(",")
-                                    .map((value) => value.trim())
-                                    .filter(Boolean)
-                                : [event.target.value]
-                            )
-                          : item
-                      ),
-                    })
-                  }
                 />
+                {segmentCondition ? (
+                  <div className="col-span-2">
+                    <SegmentConditionPicker
+                      envId={envId}
+                      value={condition.value}
+                      disabled={disabled}
+                      onValueChange={(value) =>
+                        onChange({
+                          ...rule,
+                          conditions: rule.conditions.map((item) =>
+                            item.id === condition.id ? { ...item, value } : item
+                          ),
+                        })
+                      }
+                    />
+                  </div>
+                ) : (
+                  <>
+                    <Select
+                      value={condition.op}
+                      disabled={disabled}
+                      onValueChange={(op) => {
+                        if (!op) return
+                        const nextValues =
+                          op === "IsOneOf" || op === "NotOneOf"
+                            ? []
+                            : op === "IsTrue" || op === "IsFalse"
+                              ? [op]
+                              : [""]
+                        onChange({
+                          ...rule,
+                          conditions: rule.conditions.map((item) =>
+                            item.id === condition.id
+                              ? withConditionValues({ ...item, op }, nextValues)
+                              : item
+                          ),
+                        })
+                      }}
+                    >
+                      <SelectTrigger
+                        className="w-full"
+                        aria-label={t("targeting.rules.selectOperator")}
+                      >
+                        <SelectValue>
+                          {t(`targeting.rules.operators.${condition.op}`)}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          {operators.map((operator) => (
+                            <SelectItem key={operator} value={operator}>
+                              {t(`targeting.rules.operators.${operator}`)}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                    {multiValue ? (
+                      <MultiValuePicker
+                        key={condition.property}
+                        values={values}
+                        presetValues={property?.presetValues ?? []}
+                        presetOnly={property?.usePresetValuesOnly ?? false}
+                        disabled={disabled}
+                        onChange={(nextValues) =>
+                          onChange({
+                            ...rule,
+                            conditions: rule.conditions.map((item) =>
+                              item.id === condition.id
+                                ? withConditionValues(item, nextValues)
+                                : item
+                            ),
+                          })
+                        }
+                      />
+                    ) : (
+                      <Input
+                        value={valueDisabled ? "" : values.join(", ")}
+                        disabled={disabled || valueDisabled}
+                        placeholder={t("targeting.rules.value")}
+                        onChange={(event) =>
+                          onChange({
+                            ...rule,
+                            conditions: rule.conditions.map((item) =>
+                              item.id === condition.id
+                                ? withConditionValues(item, [
+                                    event.target.value,
+                                  ])
+                                : item
+                            ),
+                          })
+                        }
+                      />
+                    )}
+                  </>
+                )}
                 <Button
                   type="button"
                   size="icon-sm"
