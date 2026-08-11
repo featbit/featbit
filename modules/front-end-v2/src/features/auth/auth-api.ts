@@ -8,6 +8,7 @@ const REMEMBERED_EMAIL = "remembered-email"
 const SESSION_EXPIRED_EVENT = "featbit:session-expired"
 const TAB_SIGNED_OUT = "featbit:tab-signed-out"
 const AUTH_SESSION_ID = "featbit:auth-session-id"
+const AUTH_LOGIN_ATTEMPT_ID = "featbit:auth-login-attempt-id"
 
 type ApiEnvelope<T> = {
   success?: boolean
@@ -40,6 +41,7 @@ function clearAuthStorage() {
   localStorage.removeItem(IDENTITY_TOKEN)
   localStorage.removeItem(USER_PROFILE)
   localStorage.removeItem(AUTH_SESSION_ID)
+  localStorage.removeItem(AUTH_LOGIN_ATTEMPT_ID)
   sessionStorage.removeItem(IDENTITY_TOKEN)
   sessionStorage.removeItem(USER_PROFILE)
   sessionStorage.removeItem(TAB_SIGNED_OUT)
@@ -209,10 +211,19 @@ export async function completeLogin(
     throw new Error("Login response did not include a token")
   }
 
+  const loginAttemptId = crypto.randomUUID()
   clearAuthStorage()
+  localStorage.setItem(AUTH_LOGIN_ATTEMPT_ID, loginAttemptId)
   localStorage.setItem(IDENTITY_TOKEN, token)
 
   const profile = await getProfile(token)
+  const ownsAuthenticationState =
+    localStorage.getItem(IDENTITY_TOKEN) === token &&
+    localStorage.getItem(AUTH_LOGIN_ATTEMPT_ID) === loginAttemptId
+  if (!ownsAuthenticationState) {
+    return
+  }
+
   localStorage.setItem(USER_PROFILE, JSON.stringify(profile))
   localStorage.setItem(AUTH_SESSION_ID, crypto.randomUUID())
 
@@ -226,6 +237,8 @@ export async function completeLogin(
       String(envelope.data.isSsoFirstLogin)
     )
   }
+
+  localStorage.removeItem(AUTH_LOGIN_ATTEMPT_ID)
 
   const redirectUrl = localStorage.getItem(LOGIN_REDIRECT_URL)
   if (redirectUrl) {
