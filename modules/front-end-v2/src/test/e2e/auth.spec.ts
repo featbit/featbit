@@ -128,7 +128,7 @@ test.describe("login page", () => {
 
     await expect(page).toHaveURL(/\/en\/get-started$/)
     await expect(
-      page.getByRole("heading", { name: "Get started" })
+      page.getByRole("heading", { name: "Get started", level: 1 })
     ).toBeVisible()
     await expect(page.getByText("Acme Corp")).toBeVisible()
     await expect(page.getByText("Growth Platform")).toBeVisible()

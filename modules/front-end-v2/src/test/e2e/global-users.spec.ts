@@ -41,7 +41,23 @@ async function setupGlobalUsersPage({
   })
   await mockContextEndpoints(page)
   await setAuthenticatedUser(page)
-  await setCurrentContext(page)
+  await setCurrentContext(page, license)
+
+  await page.route("**/api/v1/user/workspaces", async (route) => {
+    await route.fulfill({
+      json: {
+        success: true,
+        data: [
+          {
+            id: "ws-1",
+            key: "acme-workspace",
+            name: "Acme Workspace",
+            license,
+          },
+        ],
+      },
+    })
+  })
 
   await page.route("**/api/v1/workspaces", async (route) => {
     await route.fulfill({

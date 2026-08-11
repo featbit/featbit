@@ -62,6 +62,20 @@ async function setupUsagePage(
     })
   })
 
+  await page.route("**/api/v1/billing/subscription", async (route) => {
+    await route.fulfill({
+      json: {
+        success: true,
+        data: {
+          plan: "Growth",
+          billingCycle: "month",
+          mau: 0,
+          usage: { mau: 0 },
+        },
+      },
+    })
+  })
+
   await page.route("**/api/v1/workspaces/usages**", async (route) => {
     await route.fulfill({
       json: {
