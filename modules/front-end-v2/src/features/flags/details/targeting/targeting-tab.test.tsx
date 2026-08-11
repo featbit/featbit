@@ -163,7 +163,7 @@ describe("feature flag targeting tab", () => {
     ).toBeVisible()
     const emptyRules = screen
       .getByText("No rules yet. Add a rule to match users by their properties.")
-      .closest('[data-slot="targeting-rules-empty"]')
+      .closest<HTMLElement>('[data-slot="targeting-rules-empty"]')
     expect(
       within(emptyRules!).getByRole("button", { name: "Add rule" })
     ).toBeEnabled()
@@ -372,7 +372,7 @@ describe("feature flag targeting tab", () => {
     const props = renderTargeting()
     const emptyRules = screen
       .getByText("No rules yet. Add a rule to match users by their properties.")
-      .closest('[data-slot="targeting-rules-empty"]')
+      .closest<HTMLElement>('[data-slot="targeting-rules-empty"]')
     fireEvent.click(
       within(emptyRules!).getByRole("button", { name: "Add rule" })
     )
