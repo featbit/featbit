@@ -78,8 +78,11 @@ describe("auth persistence", () => {
       "/en"
     )
 
+    const secondSessionId = getAuthSessionId()
+
     expect(firstSessionId).not.toBe("")
-    expect(getAuthSessionId()).not.toBe(firstSessionId)
+    expect(secondSessionId).not.toBe("")
+    expect(secondSessionId).not.toBe(firstSessionId)
   })
 
   it("signs out only the current tab and restores it after login", async () => {
