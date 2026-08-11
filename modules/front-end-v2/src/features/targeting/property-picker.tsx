@@ -28,7 +28,7 @@ import type { SegmentUserProperty } from "@/features/segments/segments-types"
 import { segmentConditionProperties } from "./segment-conditions"
 
 function propertyKey(name: string) {
-  return name.toLocaleLowerCase()
+  return name.toLowerCase()
 }
 
 function appendProperty<T extends { name: string }>(
