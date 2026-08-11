@@ -36,8 +36,6 @@ benchmark/k6-scripts/test-results/
 /modules/node_modules
 modules/package-lock.json
 modules/package.json
-modules/front-end/test-results/
-/modules/front-end/.impeccable
 
 /modules/.codex
 /modules/.impeccable
