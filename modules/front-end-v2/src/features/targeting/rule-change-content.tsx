@@ -11,6 +11,7 @@ import type {
   SegmentCondition,
   SegmentRule,
 } from "@/features/segments/segments-types"
+import { isSegmentConditionProperty } from "./segment-conditions"
 import { conditionValues } from "./targeting-utils"
 
 export function RuleChangeLabel({ name }: { name: string }) {
@@ -107,8 +108,10 @@ function ConditionExpression({
     defaultValue: condition.op,
   })
   const unary = condition.op === "IsTrue" || condition.op === "IsFalse"
-  const values = conditionValues(condition).map(
-    (value) => segmentNames?.get(value) ?? value
+  const values = conditionValues(condition).map((value) =>
+    isSegmentConditionProperty(condition.property)
+      ? (segmentNames?.get(value) ?? value)
+      : value
   )
   return (
     <span className="inline-flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">

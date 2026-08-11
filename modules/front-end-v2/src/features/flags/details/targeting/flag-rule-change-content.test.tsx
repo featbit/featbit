@@ -84,6 +84,31 @@ describe("feature flag rule review content", () => {
     expect(segmentValue).toHaveClass("font-medium", "text-foreground")
   })
 
+  it("does not resolve ordinary condition values as segment names", async () => {
+    await i18n.changeLanguage("en")
+    const current = rule([
+      {
+        id: "condition-role",
+        property: "role",
+        op: "Equal",
+        value: "segment-a",
+      },
+    ])
+
+    render(
+      <FlagRuleChangeContent
+        currentRule={current}
+        currentServing={{
+          variations: [{ id: "new", name: "Variation B" }],
+        }}
+        segmentNames={new Map([["segment-a", "Enterprise customers"]])}
+      />
+    )
+
+    expect(screen.getByText("segment-a")).toBeVisible()
+    expect(screen.queryByText("Enterprise customers")).not.toBeInTheDocument()
+  })
+
   it("uses the shared Rule badge and shows added conditions instead of unchanged serving", async () => {
     await i18n.changeLanguage("en")
     const previous = rule([
