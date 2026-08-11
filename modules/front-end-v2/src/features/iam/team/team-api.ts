@@ -121,14 +121,14 @@ export function fetchTeamMembers(params: {
 }
 
 export const teamQueryKeys = {
+  memberLists: (organizationId: string) =>
+    ["iam", "team", organizationId] as const,
   members: (
     organizationId: string,
     params: { searchText: string; pageIndex: number; pageSize: number }
   ) =>
     [
-      "iam",
-      "team",
-      organizationId,
+      ...teamQueryKeys.memberLists(organizationId),
       params.searchText,
       params.pageIndex,
       params.pageSize,

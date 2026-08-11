@@ -106,6 +106,9 @@ export function TeamPage() {
           ),
         })
       )
+      void queryClient.invalidateQueries({
+        queryKey: teamQueryKeys.memberLists(organizationId),
+      })
       toast.success(t("iam.team.operationSucceeded"))
       setRemoveTarget(null)
     } catch {
@@ -280,7 +283,9 @@ export function TeamPage() {
             onOpenChange={setAddOpen}
             onAdded={() => {
               setAddOpen(false)
-              void membersQuery.refetch()
+              void queryClient.invalidateQueries({
+                queryKey: teamQueryKeys.memberLists(organizationId),
+              })
             }}
           />
         ) : null}
