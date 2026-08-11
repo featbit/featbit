@@ -101,38 +101,14 @@ export function PropertiesSheet({
     )
   }
 
-  function queuePropertyUpsert({
-    propertyId,
-    fallback,
-    overrides = {},
-  }: {
-    propertyId: string
-    fallback: EndUserPropertyPayload
-    overrides?: Partial<EndUserPropertyPayload>
-  }) {
+  function queuePropertyMutation<T>(
+    propertyId: string,
+    mutation: () => Promise<T>
+  ) {
     const previous = propertyMutationQueues.current[propertyId]
     const operation = (previous ?? Promise.resolve())
       .catch(() => undefined)
-      .then(async () => {
-        const current = queryClient
-          .getQueryData<EndUserProperty[]>(["end-users", envId, "properties"])
-          ?.find((property) => property.id === propertyId)
-        const payload = current
-          ? propertyPayload(current, overrides)
-          : { ...fallback, ...overrides }
-        const saved = await upsertEndUserProperty(envId, propertyId, payload)
-
-        updateCache((properties) => {
-          const exists = properties.some((property) => property.id === saved.id)
-          return exists
-            ? properties.map((property) =>
-                property.id === saved.id ? saved : property
-              )
-            : [...properties, saved]
-        })
-
-        return saved
-      })
+      .then(mutation)
     const queued = operation.then(
       () => undefined,
       () => undefined
@@ -145,6 +121,37 @@ export function PropertiesSheet({
     })
 
     return operation
+  }
+
+  function queuePropertyUpsert({
+    propertyId,
+    fallback,
+    overrides = {},
+  }: {
+    propertyId: string
+    fallback: EndUserPropertyPayload
+    overrides?: Partial<EndUserPropertyPayload>
+  }) {
+    return queuePropertyMutation(propertyId, async () => {
+      const current = queryClient
+        .getQueryData<EndUserProperty[]>(["end-users", envId, "properties"])
+        ?.find((property) => property.id === propertyId)
+      const payload = current
+        ? propertyPayload(current, overrides)
+        : { ...fallback, ...overrides }
+      const saved = await upsertEndUserProperty(envId, propertyId, payload)
+
+      updateCache((properties) => {
+        const exists = properties.some((property) => property.id === saved.id)
+        return exists
+          ? properties.map((property) =>
+              property.id === saved.id ? saved : property
+            )
+          : [...properties, saved]
+      })
+
+      return saved
+    })
   }
 
   const saveMutation = useMutation({
@@ -168,7 +175,9 @@ export function PropertiesSheet({
   })
   const removeMutation = useMutation({
     mutationFn: (property: EndUserProperty) =>
-      removeEndUserProperty(envId, property.id),
+      queuePropertyMutation(property.id, () =>
+        removeEndUserProperty(envId, property.id)
+      ),
     onSuccess: (_, property) => {
       updateCache((current) =>
         current.filter((item) => item.id !== property.id)

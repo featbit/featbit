@@ -8,7 +8,7 @@ import {
 } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n/i18n"
-import { upsertEndUserProperty } from "../end-users-api"
+import { removeEndUserProperty, upsertEndUserProperty } from "../end-users-api"
 import type { EndUserProperty } from "../end-users-types"
 import { PropertiesSheet } from "./properties-sheet"
 
@@ -75,6 +75,7 @@ function renderSheet() {
 describe("PropertiesSheet digest fields", () => {
   beforeEach(() => {
     vi.mocked(upsertEndUserProperty).mockReset()
+    vi.mocked(removeEndUserProperty).mockReset()
   })
 
   it("checks a digest field immediately without disabling any custom fields", async () => {
@@ -194,6 +195,41 @@ describe("PropertiesSheet digest fields", () => {
           "properties",
         ])?.[0]
       ).toMatchObject({ isDigestField: false, remark: "updated remark" })
+    )
+  })
+
+  it("waits for queued saves before removing a property", async () => {
+    const save = deferred<EndUserProperty>()
+    const remove = deferred<boolean>()
+    vi.mocked(upsertEndUserProperty).mockReturnValue(save.promise)
+    vi.mocked(removeEndUserProperty).mockReturnValue(remove.promise)
+    const { queryClient } = renderSheet()
+
+    const [planDigest] = screen.getAllByRole("checkbox")
+    fireEvent.click(planDigest)
+    await waitFor(() => expect(upsertEndUserProperty).toHaveBeenCalledTimes(1))
+
+    const planRow = screen.getByText("plan").closest("tr")
+    expect(planRow).not.toBeNull()
+    fireEvent.click(within(planRow!).getByRole("button", { name: "Remove" }))
+    fireEvent.click(
+      within(
+        screen.getByRole("dialog", { name: "Remove property?" })
+      ).getByRole("button", { name: "Remove" })
+    )
+
+    expect(removeEndUserProperty).not.toHaveBeenCalled()
+
+    save.resolve({ ...properties[0], isDigestField: true })
+    await waitFor(() => expect(removeEndUserProperty).toHaveBeenCalledTimes(1))
+
+    remove.resolve(true)
+    await waitFor(() =>
+      expect(
+        queryClient
+          .getQueryData<EndUserProperty[]>(["end-users", "env-1", "properties"])
+          ?.some((property) => property.id === properties[0].id)
+      ).toBe(false)
     )
   })
 })
