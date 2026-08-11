@@ -104,19 +104,6 @@ public class EndUserController : ApiControllerBase
         return Ok(segments);
     }
 
-    [HttpGet("get-by-featureflag")]
-    public async Task<ApiResponse<PagedResult<FeatureFlagEndUserStatsVm>>> GetListByFeatureFlagAsync(Guid envId, [FromQuery] FeatureFlagEndUserFilter filter)
-    {
-        var request = new GetFeatureFlagEndUserList
-        {
-            EnvId = envId,
-            Filter = filter
-        };
-
-        var users = await Mediator.Send(request);
-        return Ok(users);
-    }
-
     [HttpPost("upload")]
     // request size limit: 510MB
     [RequestSizeLimit(510 * 1024 * 1024)]

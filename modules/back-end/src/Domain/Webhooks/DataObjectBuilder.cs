@@ -63,9 +63,9 @@ public static class DataObjectBuilder
                 ["isEnabled"] = BooleanToString(flag.IsEnabled),
                 ["disabledVariationId"] = flag.DisabledVariationId,
                 ["fallthrough"] = flag.Fallthrough,
-                ["exptIncludeAllTargets"] = BooleanToString(flag.ExptIncludeAllTargets),
                 ["tags"] = flag.Tags,
-                ["isArchived"] = BooleanToString(flag.IsArchived)
+                ["isArchived"] = BooleanToString(flag.IsArchived),
+                ["exptIncludeAllTargets"] = BooleanToString(flag.ExptIncludeAllTargets)
             }
         };
 

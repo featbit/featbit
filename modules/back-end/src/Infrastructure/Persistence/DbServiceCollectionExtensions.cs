@@ -46,8 +46,6 @@ public static class DbServiceCollectionExtensions
             services.AddTransient<ISegmentService, MongoServices.SegmentService>();
             services.AddTransient<IFeatureFlagService, MongoServices.FeatureFlagService>();
             services.AddTransient<ITriggerService, MongoServices.TriggerService>();
-            services.AddTransient<IExperimentService, MongoServices.ExperimentService>();
-            services.AddTransient<IExperimentMetricService, MongoServices.ExperimentMetricService>();
             services.AddTransient<IAuditLogService, MongoServices.AuditLogService>();
             services.AddTransient<IAccessTokenService, MongoServices.AccessTokenService>();
             services.AddTransient<IRelayProxyService, MongoServices.RelayProxyService>();
@@ -86,8 +84,6 @@ public static class DbServiceCollectionExtensions
             services.AddTransient<ISegmentService, EntityFrameworkCoreServices.SegmentService>();
             services.AddTransient<IFeatureFlagService, EntityFrameworkCoreServices.FeatureFlagService>();
             services.AddTransient<ITriggerService, EntityFrameworkCoreServices.TriggerService>();
-            services.AddTransient<IExperimentService, EntityFrameworkCoreServices.ExperimentService>();
-            services.AddTransient<IExperimentMetricService, EntityFrameworkCoreServices.ExperimentMetricService>();
             services.AddTransient<IAuditLogService, EntityFrameworkCoreServices.AuditLogService>();
             services.AddTransient<IAccessTokenService, EntityFrameworkCoreServices.AccessTokenService>();
             services.AddTransient<IRelayProxyService, EntityFrameworkCoreServices.RelayProxyService>();

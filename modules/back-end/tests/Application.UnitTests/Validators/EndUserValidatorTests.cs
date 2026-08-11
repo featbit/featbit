@@ -40,44 +40,4 @@ public class EndUserValidatorTests
         Assert.Contains(result.Errors, e => e.ErrorCode == ErrorCodes.Required("name"));
     }
 
-    [Fact]
-    public void GetFeatureFlagEndUserList_AllFieldsValid_NoErrors()
-    {
-        var request = new GetFeatureFlagEndUserList
-        {
-            EnvId = Guid.NewGuid(),
-            Filter = new FeatureFlagEndUserFilter { FeatureFlagKey = "k", From = 1, To = 2 }
-        };
-
-        var result = new GetFeatureFlagEndUserListValidator().Validate(request);
-
-        Assert.True(result.IsValid);
-    }
-
-    [Fact]
-    public void GetFeatureFlagEndUserList_EmptyKey_FeatureFlagKeyRequiredError()
-    {
-        var request = new GetFeatureFlagEndUserList
-        {
-            Filter = new FeatureFlagEndUserFilter { FeatureFlagKey = string.Empty, From = 1, To = 2 }
-        };
-
-        var result = new GetFeatureFlagEndUserListValidator().Validate(request);
-
-        Assert.Contains(result.Errors, e => e.ErrorCode == ErrorCodes.Required("featureFlagKey"));
-    }
-
-    [Fact]
-    public void GetFeatureFlagEndUserList_FromOrToZero_RangeInvalidErrors()
-    {
-        var request = new GetFeatureFlagEndUserList
-        {
-            Filter = new FeatureFlagEndUserFilter { FeatureFlagKey = "k", From = 0, To = 0 }
-        };
-
-        var result = new GetFeatureFlagEndUserListValidator().Validate(request);
-
-        Assert.Contains(result.Errors, e => e.ErrorCode == ErrorCodes.Invalid("from"));
-        Assert.Contains(result.Errors, e => e.ErrorCode == ErrorCodes.Invalid("to"));
-    }
 }

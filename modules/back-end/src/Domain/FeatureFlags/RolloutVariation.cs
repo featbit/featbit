@@ -5,6 +5,11 @@ namespace Domain.FeatureFlags;
 public class RolloutVariation
 {
     /// <summary>
+    /// Legacy rollout metadata retained for persisted feature-flag compatibility.
+    /// </summary>
+    public double ExptRollout { get; set; }
+
+    /// <summary>
     /// The ID of the served variation.
     /// </summary>
     public string Id { get; set; }
@@ -13,11 +18,6 @@ public class RolloutVariation
     /// The rollout range for the variation.
     /// </summary>
     public double[] Rollout { get; set; }
-
-    /// <summary>
-    /// The rollout percentage for experiments.
-    /// </summary>
-    public double ExptRollout { get; set; }
 
     public bool IsEmpty()
     {

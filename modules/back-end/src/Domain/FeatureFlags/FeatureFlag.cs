@@ -34,6 +34,9 @@ public class FeatureFlag : FullAuditedEntity
 
     public Fallthrough Fallthrough { get; set; }
 
+    /// <summary>
+    /// Legacy targeting metadata retained for persisted feature-flag compatibility.
+    /// </summary>
     public bool ExptIncludeAllTargets { get; set; }
 
     public string[] Tags { get; set; }
@@ -109,7 +112,6 @@ public class FeatureFlag : FullAuditedEntity
             }
         };
         ExptIncludeAllTargets = true;
-
         Tags = tags ?? [];
         IsArchived = false;
     }

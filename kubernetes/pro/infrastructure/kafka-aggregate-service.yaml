@@ -8,7 +8,7 @@ spec:
   # NodePort so the cross-cluster MirrorMaker from the other Minikube cluster
   # can reach this broker via the node's shared bridge network IP (172.31.0.x)
   # at port 30094.  The internal 9092 port is available as ClusterIP to all
-  # pods within the same cluster (eval-server, da-server).
+  # pods within the same cluster (eval-server).
   type: NodePort
   selector:
     app: kafka-aggregate

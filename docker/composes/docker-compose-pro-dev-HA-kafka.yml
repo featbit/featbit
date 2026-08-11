@@ -39,8 +39,6 @@ services:
         condition: service_started
       init-kafka-topics:
         condition: service_completed_successfully
-      da-server:
-        condition: service_started
     ports:
       - "5000:5000"
     networks:
@@ -69,25 +67,6 @@ services:
       - "5100:5100"
     networks:
       - featbit-network
-
-  da-server:
-    image: featbit/data-analytics-server:dev
-    container_name: data-analytics-server
-    build:
-      context: ./modules/data-analytics
-      dockerfile: ./Dockerfile
-    depends_on:
-      - kafka
-      - clickhouse-server
-    ports:
-      - "8200:80"
-    networks:
-      - featbit-network
-    environment:
-      DB_PROVIDER: ClickHouse
-      KAFKA_HOSTS: kafka:9092
-      CLICKHOUSE_HOST: clickhouse-server
-      CLICKHOUSE_KAFKA_HOSTS: kafka-consumer:9092
 
   mongodb:
     image: mongo:5.0.32

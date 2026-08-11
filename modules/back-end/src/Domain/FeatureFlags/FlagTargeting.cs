@@ -5,6 +5,11 @@ namespace Domain.FeatureFlags;
 public class FlagTargeting
 {
     /// <summary>
+    /// Legacy targeting metadata retained for persisted feature-flag compatibility.
+    /// </summary>
+    public bool ExptIncludeAllTargets { get; set; } = true;
+
+    /// <summary>
     /// The variation served when the feature flag is disabled.
     /// </summary>
     public string DisabledVariationId { get; set; }
@@ -24,8 +29,4 @@ public class FlagTargeting
     /// </summary>
     public Fallthrough Fallthrough { get; set; }
 
-    /// <summary>
-    /// Whether all targets should be included in experiments related to this feature flag. Defaults to `true`.
-    /// </summary>
-    public bool ExptIncludeAllTargets { get; set; } = true;
 }

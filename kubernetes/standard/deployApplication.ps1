@@ -23,9 +23,7 @@ kubectl apply -f .\application\evaluation-server-service.yaml
 
 kubectl apply -f .\application\evaluation-server-deployment.yaml
 
-kubectl apply -f .\application\da-server-deployment.yaml  
 
-kubectl apply -f .\application\da-server-service.yaml
 
 kubectl apply -f .\application\ui-service.yaml  
 
