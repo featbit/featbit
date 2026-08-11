@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url"
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url))
 const projectDirectory = path.resolve(scriptDirectory, "..")
 const imageVersion = "nginx-test"
-const testImage = `featbit-front-end-v2-nginx-test:${process.pid}-${Date.now()}`
+const testImage = `featbit-front-end-nginx-test:${process.pid}-${Date.now()}`
 const baseHref = "/fbtest"
 const runtimeEnvironment = {
   API_URL: "https://api.example.test",
