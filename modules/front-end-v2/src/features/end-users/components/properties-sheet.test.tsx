@@ -1,5 +1,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { fireEvent, render, screen, waitFor } from "@testing-library/react"
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n/i18n"
 import { upsertEndUserProperty } from "../end-users-api"
@@ -134,5 +140,60 @@ describe("PropertiesSheet digest fields", () => {
       ).toBe("latest digest selection saved")
     )
     expect(planDigest).toHaveAttribute("aria-checked", "false")
+  })
+
+  it("serializes remark saves with queued digest updates", async () => {
+    const firstDigestSave = deferred<EndUserProperty>()
+    const secondDigestSave = deferred<EndUserProperty>()
+    const remarkSave = deferred<EndUserProperty>()
+    vi.mocked(upsertEndUserProperty)
+      .mockReturnValueOnce(firstDigestSave.promise)
+      .mockReturnValueOnce(secondDigestSave.promise)
+      .mockReturnValueOnce(remarkSave.promise)
+    const { queryClient } = renderSheet()
+
+    const [planDigest] = screen.getAllByRole("checkbox")
+    fireEvent.click(planDigest)
+    fireEvent.click(planDigest)
+    await waitFor(() => expect(upsertEndUserProperty).toHaveBeenCalledTimes(1))
+
+    const planRow = screen.getByText("plan").closest("tr")
+    expect(planRow).not.toBeNull()
+    fireEvent.click(within(planRow!).getByRole("button", { name: "Edit" }))
+    fireEvent.change(within(planRow!).getByRole("textbox"), {
+      target: { value: "updated remark" },
+    })
+    fireEvent.click(within(planRow!).getByRole("button", { name: "Save" }))
+
+    expect(upsertEndUserProperty).toHaveBeenCalledTimes(1)
+
+    firstDigestSave.resolve({ ...properties[0], isDigestField: true })
+    await waitFor(() => expect(upsertEndUserProperty).toHaveBeenCalledTimes(2))
+    expect(vi.mocked(upsertEndUserProperty).mock.calls[1][2]).toMatchObject({
+      isDigestField: false,
+      remark: "",
+    })
+
+    secondDigestSave.resolve({ ...properties[0], isDigestField: false })
+    await waitFor(() => expect(upsertEndUserProperty).toHaveBeenCalledTimes(3))
+    expect(vi.mocked(upsertEndUserProperty).mock.calls[2][2]).toMatchObject({
+      isDigestField: false,
+      remark: "updated remark",
+    })
+
+    remarkSave.resolve({
+      ...properties[0],
+      isDigestField: false,
+      remark: "updated remark",
+    })
+    await waitFor(() =>
+      expect(
+        queryClient.getQueryData<EndUserProperty[]>([
+          "end-users",
+          "env-1",
+          "properties",
+        ])?.[0]
+      ).toMatchObject({ isDigestField: false, remark: "updated remark" })
+    )
   })
 })

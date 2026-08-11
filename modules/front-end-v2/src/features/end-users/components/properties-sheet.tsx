@@ -76,7 +76,7 @@ export function PropertiesSheet({
     Record<string, boolean>
   >({})
   const digestMutationVersions = useRef<Record<string, number>>({})
-  const digestMutationQueues = useRef<Record<string, Promise<void>>>({})
+  const propertyMutationQueues = useRef<Record<string, Promise<void>>>({})
 
   const filtered = useMemo(() => {
     const filter = search.trim().toLowerCase()
@@ -101,23 +101,63 @@ export function PropertiesSheet({
     )
   }
 
+  function queuePropertyUpsert({
+    propertyId,
+    fallback,
+    overrides = {},
+  }: {
+    propertyId: string
+    fallback: EndUserPropertyPayload
+    overrides?: Partial<EndUserPropertyPayload>
+  }) {
+    const previous = propertyMutationQueues.current[propertyId]
+    const operation = (previous ?? Promise.resolve())
+      .catch(() => undefined)
+      .then(async () => {
+        const current = queryClient
+          .getQueryData<EndUserProperty[]>(["end-users", envId, "properties"])
+          ?.find((property) => property.id === propertyId)
+        const payload = current
+          ? propertyPayload(current, overrides)
+          : { ...fallback, ...overrides }
+        const saved = await upsertEndUserProperty(envId, propertyId, payload)
+
+        updateCache((properties) => {
+          const exists = properties.some((property) => property.id === saved.id)
+          return exists
+            ? properties.map((property) =>
+                property.id === saved.id ? saved : property
+              )
+            : [...properties, saved]
+        })
+
+        return saved
+      })
+    const queued = operation.then(
+      () => undefined,
+      () => undefined
+    )
+    propertyMutationQueues.current[propertyId] = queued
+    void queued.then(() => {
+      if (propertyMutationQueues.current[propertyId] === queued) {
+        delete propertyMutationQueues.current[propertyId]
+      }
+    })
+
+    return operation
+  }
+
   const saveMutation = useMutation({
     mutationFn: ({
       propertyId,
-      payload,
+      fallback,
+      overrides,
     }: {
       propertyId: string
-      payload: EndUserPropertyPayload
-    }) => upsertEndUserProperty(envId, propertyId, payload),
-    onSuccess: (saved) => {
-      updateCache((current) => {
-        const exists = current.some((property) => property.id === saved.id)
-        return exists
-          ? current.map((property) =>
-              property.id === saved.id ? saved : property
-            )
-          : [...current, saved]
-      })
+      fallback: EndUserPropertyPayload
+      overrides?: Partial<EndUserPropertyPayload>
+    }) => queuePropertyUpsert({ propertyId, fallback, overrides }),
+    onSuccess: () => {
       setNewDraft(null)
       setEditing(null)
       setPresetTarget(null)
@@ -146,11 +186,11 @@ export function PropertiesSheet({
       property: EndUserProperty
       checked: boolean
     }) =>
-      upsertEndUserProperty(
-        envId,
-        property.id,
-        propertyPayload(property, { isDigestField: checked })
-      ),
+      queuePropertyUpsert({
+        propertyId: property.id,
+        fallback: propertyPayload(property),
+        overrides: { isDigestField: checked },
+      }),
   })
 
   function validateName(name: string, propertyId?: string) {
@@ -177,7 +217,7 @@ export function PropertiesSheet({
     if (!newDraft || !validateName(newDraft.name)) return
     saveMutation.mutate({
       propertyId: newDraft.id,
-      payload: {
+      fallback: {
         name: newDraft.name.trim(),
         remark: newDraft.remark.trim(),
         isDigestField: newDraft.isDigestField,
@@ -191,7 +231,8 @@ export function PropertiesSheet({
     if (!editing) return
     saveMutation.mutate({
       propertyId: property.id,
-      payload: propertyPayload(property, { remark: editing.remark.trim() }),
+      fallback: propertyPayload(property),
+      overrides: { remark: editing.remark.trim() },
     })
   }
 
@@ -203,45 +244,32 @@ export function PropertiesSheet({
       [property.id]: checked,
     }))
 
-    const previous = digestMutationQueues.current[property.id]
-    const next = (previous ?? Promise.resolve())
-      .catch(() => undefined)
-      .then(async () => {
-        try {
-          const saved = await digestMutation.mutateAsync({ property, checked })
-          updateCache((current) =>
-            current.map((item) => (item.id === saved.id ? saved : item))
-          )
-          if (digestMutationVersions.current[property.id] !== version) {
-            return
-          }
-
-          setPendingDigestValues((current) => {
-            const next = { ...current }
-            delete next[property.id]
-            return next
-          })
-          toast.success(t("endUsers.operationSucceeded"))
-        } catch {
-          if (digestMutationVersions.current[property.id] !== version) {
-            return
-          }
-
-          setPendingDigestValues((current) => {
-            const next = { ...current }
-            delete next[property.id]
-            return next
-          })
-          toast.error(t("endUsers.operationFailed"))
+    void digestMutation
+      .mutateAsync({ property, checked })
+      .then(() => {
+        if (digestMutationVersions.current[property.id] !== version) {
+          return
         }
-      })
-      .finally(() => {
-        if (digestMutationQueues.current[property.id] === next) {
-          delete digestMutationQueues.current[property.id]
-        }
-      })
 
-    digestMutationQueues.current[property.id] = next
+        setPendingDigestValues((current) => {
+          const next = { ...current }
+          delete next[property.id]
+          return next
+        })
+        toast.success(t("endUsers.operationSucceeded"))
+      })
+      .catch(() => {
+        if (digestMutationVersions.current[property.id] !== version) {
+          return
+        }
+
+        setPendingDigestValues((current) => {
+          const next = { ...current }
+          delete next[property.id]
+          return next
+        })
+        toast.error(t("endUsers.operationFailed"))
+      })
   }
 
   return (
@@ -398,10 +426,11 @@ export function PropertiesSheet({
           onSave={(property, presetValues, usePresetValuesOnly) =>
             saveMutation.mutate({
               propertyId: property.id,
-              payload: propertyPayload(property, {
+              fallback: propertyPayload(property),
+              overrides: {
                 presetValues,
                 usePresetValuesOnly,
-              }),
+              },
             })
           }
         />

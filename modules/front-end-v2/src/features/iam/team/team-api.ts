@@ -1,4 +1,5 @@
 import { queryOptions } from "@tanstack/react-query"
+import { getAuthSessionId } from "@/features/auth/auth-api"
 import { fetchApi } from "@/lib/api/authenticated-api"
 
 export type PagedResult<T> = {
@@ -121,8 +122,9 @@ export function fetchTeamMembers(params: {
 }
 
 export const teamQueryKeys = {
+  all: () => ["iam", "team", getAuthSessionId()] as const,
   memberLists: (organizationId: string) =>
-    ["iam", "team", organizationId] as const,
+    [...teamQueryKeys.all(), organizationId] as const,
   members: (
     organizationId: string,
     params: { searchText: string; pageIndex: number; pageSize: number }
