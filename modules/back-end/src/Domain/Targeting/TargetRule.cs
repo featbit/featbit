@@ -5,11 +5,6 @@ namespace Domain.Targeting;
 public class TargetRule
 {
     /// <summary>
-    /// Legacy targeting metadata retained for persisted feature-flag compatibility.
-    /// </summary>
-    public bool IncludedInExpt { get; set; }
-
-    /// <summary>
     /// The rule ID. Usually a UUID.
     /// </summary>
     public string Id { get; set; }
@@ -23,6 +18,11 @@ public class TargetRule
     /// The dispatch key for the rule.
     /// </summary>
     public string DispatchKey { get; set; }
+
+    /// <summary>
+    /// Whether the rule is included in experiments.
+    /// </summary>
+    public bool IncludedInExpt { get; set; }
 
     /// <summary>
     /// The conditions for the rule.
