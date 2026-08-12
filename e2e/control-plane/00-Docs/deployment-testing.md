@@ -181,15 +181,7 @@ export K8S_NAMESPACE="featbit"
    docker push ${DOCKER_REGISTRY}/featbit/featbit-evaluation-server:latest
    ```
 
-4. Build Data Analytics Server image:
-   ```bash
-   docker build -t ${DOCKER_REGISTRY}/featbit/featbit-da-server:latest \
-     -f ./modules/data-analytics/Dockerfile \
-     ./modules/data-analytics
-   docker push ${DOCKER_REGISTRY}/featbit/featbit-da-server:latest
-   ```
-
-5. Tag and push UI image (using official image due to build requirements):
+4. Tag and push UI image (using official image due to build requirements):
    ```bash
    docker pull featbit/featbit-ui:latest
    docker tag featbit/featbit-ui:latest ${DOCKER_REGISTRY}/featbit/featbit-ui:latest
@@ -197,7 +189,7 @@ export K8S_NAMESPACE="featbit"
    ```
 
 **Expected Results:**
-- All 5 images successfully built and pushed to the Docker registry
+- All 4 images successfully built and pushed to the Docker registry
 - Images accessible from the Kubernetes cluster nodes
 
 ---
@@ -240,7 +232,6 @@ export K8S_NAMESPACE="featbit"
      value: Kafka
    ```
 
-4. Update `da-server-deployment.yaml` to use MongoDB:
    ```yaml
    - name: MongoDb__ConnectionString
      value: mongodb://admin:password@mongodb:27017
@@ -248,13 +239,13 @@ export K8S_NAMESPACE="featbit"
      value: featbit
    ```
 
-5. Update ingress files in `kubernetes/pro/ingress/` with your domain names:
+4. Update ingress files in `kubernetes/pro/ingress/` with your domain names:
    - `traefik-ingress-ui.yaml`: host: `featbit.east.local`
    - `traefik-ingress-api.yaml`: host: `featbit-api.east.local`
    - `traefik-ingress-evaluation-server.yaml`: host: `featbit-eval.east.local`
    - `traefik-ingress-control-plane.yaml`: host: `featbit-control-plane.east.local`
 
-6. Update `ui-deployment.yaml` with ingress URLs:
+5. Update `ui-deployment.yaml` with ingress URLs:
    ```yaml
    - name: API_URL
      value: https://featbit-api.east.local
@@ -313,13 +304,12 @@ export K8S_NAMESPACE="featbit"
    kubectl apply -f kubernetes/pro/application/api-server-deployment.yaml
    kubectl apply -f kubernetes/pro/application/control-plane-deployment.yaml
    kubectl apply -f kubernetes/pro/application/evaluation-server-deployment.yaml
-   kubectl apply -f kubernetes/pro/application/da-server-deployment.yaml
    kubectl apply -f kubernetes/pro/application/ui-deployment.yaml
    ```
 
 2. Verify all application pods are running:
    ```bash
-   kubectl get pods -n ${K8S_NAMESPACE} | grep -E "(api-server|control-plane|evaluation|da-server|ui)"
+   kubectl get pods -n ${K8S_NAMESPACE} | grep -E "(api-server|control-plane|evaluation|ui)"
    ```
 
 **Expected Results:**
@@ -327,7 +317,6 @@ export K8S_NAMESPACE="featbit"
   - `api-server` (1/1 Ready)
   - `control-plane` (1/1 Ready)
   - `evaluation-server` (1/1 Ready)
-  - `da-server` (1/1 Ready)
   - `ui` (1/1 Ready)
 - No CrashLoopBackOff or Error states
 

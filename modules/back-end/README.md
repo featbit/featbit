@@ -124,7 +124,6 @@ and [consumer configs](https://kafka.apache.org/documentation/#consumerconfigs) 
 
 | Name                | Description                       | Default Value        |
 |---------------------|-----------------------------------|----------------------|
-| `OLAP__ServiceHost` | URI for the data analytics server | `"http://da-server"` |
 
 ### UsageTracking
 

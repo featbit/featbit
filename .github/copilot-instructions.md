@@ -1,6 +1,6 @@
 # FeatBit — Copilot Instructions
 
-FeatBit is an open-source feature flag management platform. It is a polyglot monorepo with .NET APIs, an Angular UI, Python analytics, and Kubernetes-based multi-cluster deployment tooling.
+FeatBit is an open-source feature flag management platform. It is a polyglot monorepo with .NET APIs, an Angular UI, and Kubernetes-based multi-cluster deployment tooling.
 
 ## Workflow
 
@@ -14,7 +14,6 @@ modules/
   evaluation-server/  # Flag evaluation + streaming (.NET 10, C#)
   control-plane/      # Cross-DC control plane API (.NET 10, C#)
   front-end/          # Web UI (Angular 19, TypeScript)
-  data-analytics/     # Analytics server (Python 3.9+, Flask)
 e2e/
   control-plane/  # Control-Plane infrastructure for multi-cluster testing
 ```
@@ -72,10 +71,6 @@ npm run i18n           # extract + validate i18n strings
 
 # After adding UI text, run `npm run i18n` and add translations to src/locale/messages.xx.xlf
 ```
-
-### Data Analytics (`modules/data-analytics/`)
-
-Python 3.9+ with Flask. Dependencies in `requirements.txt`.
 
 ### Control-Plane QA Automation (`e2e/control-plane/02-Tests/automation-py/`)
 

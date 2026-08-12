@@ -357,10 +357,9 @@ SDK (.variation())                       per evaluation, the SDK batches an
   → POST {event_url}/api/public/insight/track   insight event back to the eval server
   → evaluation-server                    produces to the message queue
   → Kafka topic: featbit-insights        (one row per evaluation)
-  → analytics store                      ClickHouse (pro) OR Mongo/Postgres (standard)
-  → da-server (data-analytics)           queries the analytics store
-  → api-server  /feature-flags/insights  delegates to da-server when IS_PRO=true
-  → UI "Insights"
+  → ClickHouse Kafka-engine table         consumes events into analytics tables
+  → back-end                              queries insights and serves the API routes
+  → UI "Insights"                        calls the back-end API
 ```
 
 The event carries the **environment secret**, so each evaluation is attributed
@@ -370,41 +369,19 @@ against their own `otel-*` project and therefore appear under that project's env
 
 ## Provider rule (important)
 
-The **api-server** has `IS_PRO=true` in this deployment. In pro mode the
-flag-insights query (`GET /api/v{n}/envs/{envId}/feature-flags/insights`) is
-**delegated to da-server** (`http://da-server:8200/api/events/stat/featureflag`)
-rather than read from the app database. Therefore:
-
-> **da-server must point at the store that actually ingests `featbit-insights`.**
-> With `IS_PRO=true` that store is **ClickHouse** — ClickHouse's Kafka-engine
-> table drains `featbit-insights` into queryable tables. The app database
-> (Mongo/Postgres) is **not** populated with insights in pro mode (the API's
-> Mongo insight consumer is inactive), so pointing da-server at Mongo while the
-> API is pro leaves the UI Insights empty.
-
-`Deploy-FeatBitClusters.ps1` configures this automatically:
-
-- App services (`api-server`, `control-plane`, `evaluation-server`) use the app
-  DB (`MongoDb`/`Postgres`) for flags/segments/users.
-- **da-server** is configured separately: `DB_PROVIDER=ClickHouse` when
-  ClickHouse is in the deployed infra (the default `HostInfraComponents`),
-  otherwise it falls back to the app DB.
+The API server, control plane, and evaluation server continue to use the app
+database (`MongoDb`/`Postgres`) for flags, segments, and users. In Kafka
+deployments, the back-end intentionally does not subscribe to `featbit-insights`.
+Instead, ClickHouse consumes the topic through its Kafka-engine table and a
+materialized view writes the events into queryable analytics tables.
 
 ### Single-node ClickHouse
 
-The test topology runs a **single-node** ClickHouse (`featbit-infra-clickhouse-server`),
-with no cluster or Keeper/ZooKeeper. The data-analytics migrations default to
-`CLICKHOUSE_REPLICATION=true` (which emits `ON CLUSTER featbit_ch_cluster` +
-`ReplicatedMergeTree` DDL and **fails** on a single node), so the deploy sets:
-
-```
-CLICKHOUSE_REPLICATION=false
-```
-
-On da-server startup, `flask migrate-database` (dispatched to the ClickHouse
-migrations because `DB_PROVIDER=ClickHouse`) creates the `featbit` database, the
-`kafka_events_queue` (Kafka engine), the `events` table, and the `events_mv`
-materialized view that moves rows from the queue into `events`.
+The test topology can run a **single-node** ClickHouse
+(`featbit-infra-clickhouse-server`). During ClickHouse initialization, migration
+scripts must create the analytics database, the Kafka-engine table that consumes
+`featbit-insights`, its materialized view, and the destination tables. Those
+migrations must be compatible with the single-node topology.
 
 ## Verifying / troubleshooting
 
@@ -418,26 +395,13 @@ Check, in order:
 docker exec featbit-infra-kafka-1 \
   kafka-run-class.sh kafka.tools.GetOffsetShell --broker-list localhost:9092 --topic featbit-insights
 
-# 2. Is da-server pointed at the right store?
-kubectl --context west -n featbit get deploy da-server \
-  -o jsonpath='{range .spec.template.spec.containers[0].env[*]}{.name}={.value}{"\n"}{end}' | grep -E 'DB_PROVIDER|CLICKHOUSE'
-#   IS_PRO=true  => DB_PROVIDER must be ClickHouse
-
-# 3. Is ClickHouse ingesting? (row count should grow)
-docker exec featbit-infra-clickhouse-server-1 clickhouse-client --query "SELECT count() FROM featbit.events"
+# 2. Did the ClickHouse initialization migrations create the Kafka-engine table,
+# materialized view, and destination tables, and are they receiving rows?
+# Query the table names defined by the ClickHouse migration scripts.
 ```
 
-**Fix (live):**
-
-```bash
-kubectl --context west -n featbit set env deployment/da-server \
-  DB_PROVIDER=ClickHouse DbProvider=ClickHouse CLICKHOUSE_REPLICATION=false
-kubectl --context east -n featbit set env deployment/da-server \
-  DB_PROVIDER=ClickHouse DbProvider=ClickHouse CLICKHOUSE_REPLICATION=false
-```
-
-This is applied automatically by `Deploy-FeatBitClusters.ps1` (the "Configuring
-Analytics Store (da-server)" step), so a fresh deploy does not need it.
+Ensure the ClickHouse initialization migrations have completed before using the
+UI Insights view.
 
 > **Time range gotcha:** the UI Insights query uses a time window around the
 > browser's clock. If the cluster/host clock differs from the browser, set the
@@ -445,9 +409,9 @@ Analytics Store (da-server)" step), so a fresh deploy does not need it.
 
 ## Related files
 
-- `01-Infrastructure/Deploy-FeatBitClusters.ps1` - "Configuring Analytics Store (da-server)" step
-- `modules/data-analytics/app/clickhouse/` - ClickHouse migrations + Kafka-engine ingestion
-- `modules/back-end/src/Infrastructure/MQ/InsightMessageHandler.cs` - the Mongo/Postgres (non-pro) insight consumer
+- `modules/back-end/src/Infrastructure/MQ/InsightMessageHandler.cs` - the Mongo/Postgres and Redis insight consumer
+- `modules/evaluation-server/src/Api/Public/InsightController.cs` - publishes insight events to `featbit-insights`
+- `infra/clickhouse/` - ClickHouse initialization and migration ownership
 
 ---
 
@@ -465,7 +429,7 @@ This deployment uses **two completely separate sets of images** that come from d
 | Image set | What it contains | Configured by |
 |-----------|-----------------|---------------|
 | **Infrastructure images** | MongoDB, Redis, Kafka, ClickHouse, Kafka UI | `CUSTOM_IMAGE_REGISTRY` |
-| **FeatBit application images** | API Server, UI, Evaluation Server, Control Plane, Data Analytics | `FEATBIT_IMAGE_REGISTRY` |
+| **FeatBit application images** | API Server, UI, Evaluation Server, Control Plane | `FEATBIT_IMAGE_REGISTRY` |
 
 You configure each set separately because they have different sources and different options.
 
@@ -535,9 +499,8 @@ These are the five images built from the source code in this repository:
 | `featbit-evaluation-server` | `modules/evaluation-server` | Only if modifying evaluation-server code |
 | `featbit-control-plane` | `modules/control-plane` | Only if modifying control-plane code |
 | `featbit-ui` | `modules/front-end` | Rarely — published to Docker Hub |
-| `featbit-data-analytics-server` | `modules/data-analytics` | Rarely — published to Docker Hub |
 
-The UI and Data Analytics images in particular do not need to be rebuilt for control-plane QA purposes. All five images are published to Docker Hub as `featbit/featbit-<name>:latest`.
+The UI image in particular does not need to be rebuilt for control-plane QA purposes. All four images are published to Docker Hub as `featbit/featbit-<name>:latest`.
 
 You have three options for each image. Pick **one** option and set `FEATBIT_IMAGE_REGISTRY` accordingly.
 
@@ -553,7 +516,7 @@ You have three options for each image. Pick **one** option and set `FEATBIT_IMAG
 # FEATBIT_IMAGE_REGISTRY=
 ```
 
-Then run `Initialize-LocalRegistry.ps1` before deploying. It starts a local `registry:2` container on `localhost:5000` and builds + pushes all five images from the source in this repo.
+Then run `Initialize-LocalRegistry.ps1` before deploying. It starts a local `registry:2` container on `localhost:5000` and builds + pushes all four images from the source in this repo.
 
 ```powershell
 .\Initialize-LocalRegistry.ps1
@@ -573,7 +536,6 @@ localhost:5000/featbit/featbit-api-server:latest
 localhost:5000/featbit/featbit-ui:latest
 localhost:5000/featbit/featbit-evaluation-server:latest
 localhost:5000/featbit/featbit-control-plane:latest
-localhost:5000/featbit/featbit-data-analytics-server:latest
 ```
 
 > **Rancher Desktop users:** Rancher Desktop uses the `docker-container` buildx driver by default, which does not load built images into the local image store unless you pass `--load`. `Initialize-LocalRegistry.ps1` handles this for you — it always passes `--load` during build.
