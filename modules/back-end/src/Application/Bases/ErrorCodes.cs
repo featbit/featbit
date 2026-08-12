@@ -38,8 +38,6 @@ public static class ErrorCodes
     public const string InvalidTriggerToken = nameof(InvalidTriggerToken);
     public const string TriggerTokenNotMatchOrHasExpired = nameof(TriggerTokenNotMatchOrHasExpired);
 
-    // experiment metrics
-
     public static string Required(string parameterName) => $"{parameterName}_is_required";
     public static string Invalid(string parameterName) => $"{parameterName}_is_invalid";
 }
