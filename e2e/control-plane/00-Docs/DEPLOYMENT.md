@@ -214,7 +214,7 @@ Key settings (all optional — see comments in the file for defaults):
 
 ### Step 1: Build and Push FeatBit Images
 
-Build all five FeatBit service images from source, start the local Docker registry (if not
+Build all four FeatBit service images from source, start the local Docker registry (if not
 running), and push the images to it:
 
 ```powershell
@@ -248,7 +248,7 @@ This script will:
 - ✓ Create west and east Minikube clusters
 - ✓ Connect both nodes to a shared Docker network
 - ✓ Deploy infrastructure (MongoDB, Redis, ClickHouse, Kafka — per your configuration)
-- ✓ Deploy FeatBit applications (UI, API, Evaluation, Control Plane, Data Analytics)
+- ✓ Deploy FeatBit applications (UI, API, Evaluation, Control Plane)
 - ✓ Configure database connection strings
 
 To recreate clusters from scratch: add `-RecreateClusters`.
@@ -349,7 +349,7 @@ Required only to run the cross-DC consistency scenarios (CP-10 – CP-14). See
 
 **Parameters:**
 
-- `-Images` — Image(s) to build. Valid values: `api-server`, `ui`, `evaluation-server`, `control-plane`, `data-analytics-server`. Defaults to all five.
+- `-Images` — Image(s) to build. Valid values: `api-server`, `ui`, `evaluation-server`, `control-plane`. Defaults to all four.
 - `-Registry` — Registry to push to (default: `localhost:5000`)
 - `-Tag` — Image tag (default: `latest`)
 - `-NoPush` — Build locally without pushing
@@ -598,7 +598,6 @@ The following FeatBit images must be available in the local Docker registry at `
 - featbit-ui:latest
 - featbit-evaluation-server:latest
 - featbit-control-plane:latest
-- featbit-data-analytics-server:latest
 
 ### Pushing Images to Local Registry
 
@@ -610,14 +609,12 @@ docker tag <source-image> localhost:5000/featbit/featbit-api-server:latest
 docker tag <source-image> localhost:5000/featbit/featbit-ui:latest
 docker tag <source-image> localhost:5000/featbit/featbit-evaluation-server:latest
 docker tag <source-image> localhost:5000/featbit/featbit-control-plane:latest
-docker tag <source-image> localhost:5000/featbit/featbit-data-analytics-server:latest
 
 # Push to local registry
 docker push localhost:5000/featbit/featbit-api-server:latest
 docker push localhost:5000/featbit/featbit-ui:latest
 docker push localhost:5000/featbit/featbit-evaluation-server:latest
 docker push localhost:5000/featbit/featbit-control-plane:latest
-docker push localhost:5000/featbit/featbit-data-analytics-server:latest
 ```
 
 ## Troubleshooting
@@ -915,7 +912,6 @@ Each cluster runs:
 - **API Server** - REST API backend (port 5000/5001)
 - **Evaluation Server** - Feature flag evaluation engine (port 5100/5101)
 - **Control Plane** - Administrative control services (port 5200)
-- **Data Analytics Server** - Analytics processing (port 8200)
 
 ### Network Flow
 

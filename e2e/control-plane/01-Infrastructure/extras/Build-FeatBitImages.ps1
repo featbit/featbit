@@ -11,14 +11,13 @@
     - featbit-ui                 (modules/front-end)
     - featbit-evaluation-server  (modules/evaluation-server)
     - featbit-control-plane      (modules/control-plane)
-    - featbit-data-analytics-server (modules/data-analytics)
 
     The local registry container (localhost:5000) is started automatically if it
     is not already running.
 
 .PARAMETER Images
-    One or more image names to build. Defaults to all five images.
-    Valid values: api-server, ui, evaluation-server, control-plane, data-analytics-server
+    One or more image names to build. Defaults to all four images.
+    Valid values: api-server, ui, evaluation-server, control-plane
 
 .PARAMETER Registry
     Registry to tag and push images to. Defaults to localhost:5000.
@@ -37,7 +36,7 @@
 
 .EXAMPLE
     .\Build-FeatBitImages.ps1
-    Builds all five images and pushes them to localhost:5000.
+    Builds all four images and pushes them to localhost:5000.
 
 .EXAMPLE
     .\Build-FeatBitImages.ps1 -Images api-server, ui
@@ -54,8 +53,8 @@
 
 [CmdletBinding(SupportsShouldProcess)]
 param(
-    [ValidateSet("api-server", "ui", "evaluation-server", "control-plane", "data-analytics-server")]
-    [string[]]$Images = @("api-server", "ui", "evaluation-server", "control-plane", "data-analytics-server"),
+    [ValidateSet("api-server", "ui", "evaluation-server", "control-plane")]
+    [string[]]$Images = @("api-server", "ui", "evaluation-server", "control-plane"),
 
     [string]$Registry = "localhost:5000",
 
@@ -106,11 +105,6 @@ $imageDefs = [ordered]@{
         # build context must be the modules/ directory.
         Dockerfile = "modules/control-plane/deploy/Dockerfile"
         Context    = "modules"
-    }
-    "data-analytics-server" = @{
-        ImageName  = "featbit-data-analytics-server"
-        Dockerfile = "modules/data-analytics/Dockerfile"
-        Context    = "modules/data-analytics"
     }
 }
 

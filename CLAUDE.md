@@ -4,12 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Architecture Overview
 
-FeatBit is a self-hosted feature flag management platform with a microservices architecture. Five independent services communicate via pluggable message queues:
+FeatBit is a self-hosted feature flag management platform with a microservices architecture. Its services communicate via pluggable message queues:
 
 ```
 UI (Angular 19) → API Server (.NET 10) → Message Queue → Evaluation Server (.NET 10)
-                                       ↓
-                             Data Analytics (Python/Flask)
 
 Control Plane (.NET 10) — optional broker between API and Evaluation Servers
 ```
@@ -21,14 +19,12 @@ Control Plane (.NET 10) — optional broker between API and Evaluation Servers
 | API Server | `modules/back-end/` | 5000 |
 | Evaluation Server | `modules/evaluation-server/` | 5100 |
 | Control Plane | `modules/control-plane/` | — |
-| Data Analytics | `modules/data-analytics/` | 8200 |
 
 ### Pluggable Providers
 All backend services select infrastructure via environment variables:
 - `DbProvider` — `Postgres` or `MongoDB`
 - `MqProvider` — `Postgres`, `Redis`, or `Kafka`
 - `CacheProvider` — `Redis` or `None`
-- `DB_PROVIDER` (analytics) — `PostgreSQL`, `MongoDB`, or `ClickHouse`
 
 Standard edition uses Postgres for everything. Professional edition adds Kafka and ClickHouse for high-throughput analytics.
 

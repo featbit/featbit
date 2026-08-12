@@ -823,8 +823,7 @@ if (-not $SkipImageCheck) {
         "featbit/featbit-api-server",
         "featbit/featbit-ui",
         "featbit/featbit-evaluation-server",
-        "featbit/featbit-control-plane",
-        "featbit/featbit-data-analytics-server"
+        "featbit/featbit-control-plane"
     )
 
     # Query the registry catalog directly so the check works even when the images
@@ -1445,7 +1444,6 @@ $appImageMap = @{
     "featbit/featbit-ui:latest"                    = "featbit/featbit-ui:latest"
     "featbit/featbit-evaluation-server:latest"     = "featbit/featbit-evaluation-server:latest"
     "featbit/featbit-control-plane:latest"         = "featbit/featbit-control-plane:latest"
-    "featbit/featbit-data-analytics-server:latest" = "featbit/featbit-data-analytics-server:latest"
 }
 
 Write-Info "Using FeatBit image registry: $appImageRegistry"
@@ -1501,10 +1499,6 @@ Write-Success "Control-plane API key configured (api-key)"
 Write-Step "Configuring Database Connections"
 
 # Application services that use the app database (flags/segments/users).
-# da-server is intentionally NOT here: it is the OLAP/insights store and is
-# configured separately below (ClickHouse when deployed) — forcing it onto the
-# app DB while the API runs IS_PRO=true (which delegates insight queries to
-# da-server) leaves the FeatBit UI Insights empty.
 $databaseDeployments = @(
     "api-server",
     "control-plane",
@@ -1593,34 +1587,8 @@ else {
     Write-Success "PostgreSQL connection strings configured"
 }
 
-# ── Analytics store (da-server) ─────────────────────────────────────────────────
-# da-server is the OLAP/insights backend. With IS_PRO=true the API server delegates
-# flag-evaluation insight queries to da-server, so da-server must point at the store
-# that actually ingests the featbit-insights stream. When ClickHouse is deployed,
-# that's ClickHouse — its Kafka-engine table drains featbit-insights into queryable
-# tables (created by `flask migrate-database` on start). CLICKHOUSE_REPLICATION=false
-# because this topology runs a SINGLE-NODE ClickHouse (no cluster/Keeper), so the
-# default replicated/ON CLUSTER migrations would fail. Without ClickHouse, da-server
-# falls back to the app database so insights still ingest in non-pro setups.
-Write-Step "Configuring Analytics Store (da-server)"
-$clickhouseDeployed = ($hostComponentSet -and $hostComponentSet.Contains("clickhouse")) -or `
-                      ($clusterInfraComponentSet -and $clusterInfraComponentSet.Contains("clickhouse"))
-foreach ($ctx in @("west", "east")) {
-    if ($clickhouseDeployed) {
-        kubectl --context $ctx -n featbit set env deployment/da-server `
-            DB_PROVIDER=ClickHouse DbProvider=ClickHouse CLICKHOUSE_REPLICATION=false | Out-Null
-    }
-    elseif ($DatabaseProvider -eq "MongoDb") {
-        $connStr = if ($mongoConnectionString) { $mongoConnectionString } else { "mongodb://mongodb-headless:27017/?replicaSet=rs-featbit" }
-        kubectl --context $ctx -n featbit set env deployment/da-server CHECK_DB_LIVNESS=false DB_PROVIDER=MongoDb DbProvider=MongoDb MongoDb__ConnectionString=$connStr | Out-Null
-    }
-    else {
-        kubectl --context $ctx -n featbit set env deployment/da-server CHECK_DB_LIVNESS=false DB_PROVIDER=Postgres DbProvider=Postgres Postgres__ConnectionString=$postgreSqlConnectionString | Out-Null
-    }
-    if ($LASTEXITCODE -ne 0) { Write-Error "Failed to configure da-server analytics store on $ctx"; exit 1 }
-}
-if ($clickhouseDeployed) { Write-Success "da-server analytics store -> ClickHouse (single-node, ingests featbit-insights)" }
-else { Write-Success "da-server analytics store -> $DatabaseProvider" }
+# ClickHouse initialization migrations must create the Kafka-engine table and materialized
+# view that consume `featbit-insights` topic and persist the analytics data queried by the API server.
 
 Write-Step "Configuring App MQ Provider"
 

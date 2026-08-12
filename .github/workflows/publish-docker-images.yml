@@ -39,9 +39,6 @@ jobs:
             # Because the control-plane has dependencies on the back-end module, the build-dir will need to be modules.
             build-dir: modules/
             file: ./control-plane/deploy/Dockerfile
-          - app: featbit-data-analytics-server
-            build-dir: modules/data-analytics
-            file: ./Dockerfile
           - app: featbit-evaluation-server
             build-dir: modules/evaluation-server
             file: ./deploy/Dockerfile

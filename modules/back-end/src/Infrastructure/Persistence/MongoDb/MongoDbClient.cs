@@ -2,8 +2,6 @@ using Domain.AccessTokens;
 using Domain.Workspaces;
 using Domain.AuditLogs;
 using Domain.EndUsers;
-using Domain.ExperimentMetrics;
-using Domain.Experiments;
 using Domain.FeatureFlags;
 using Domain.FlagChangeRequests;
 using Domain.FlagDrafts;
@@ -71,9 +69,6 @@ public class MongoDbClient
         { typeof(GroupMember), "GroupMembers" },
         { typeof(GroupPolicy), "GroupPolicies" },
         { typeof(MemberPolicy), "MemberPolicies" },
-
-        { typeof(Experiment), "Experiments" },
-        { typeof(ExperimentMetric), "ExperimentMetrics" },
 
         { typeof(AccessToken), "AccessTokens" },
         { typeof(RelayProxy), "RelayProxies" },

@@ -15,7 +15,6 @@
     - featbit-ui                (modules/front-end)
     - featbit-evaluation-server (modules/evaluation-server)
     - featbit-control-plane     (modules/control-plane — build context is modules/)
-    - featbit-data-analytics-server (modules/data-analytics)
 
     After this script completes successfully, run Deploy-FeatBitClusters.ps1 to
     stand up the Minikube clusters.
@@ -27,8 +26,8 @@
     Image tag applied to every built image. Default: latest.
 
 .PARAMETER Images
-    Subset of images to build. Omit to build all five. Valid values:
-    api-server, ui, evaluation-server, control-plane, data-analytics-server.
+    Subset of images to build. Omit to build all four. Valid values:
+    api-server, ui, evaluation-server, control-plane.
 
 .PARAMETER NoPush
     Build and tag images but do not push them to the local registry.
@@ -42,7 +41,7 @@
 
 .EXAMPLE
     .\Initialize-LocalRegistry.ps1
-    Ensures the registry is running, then builds and pushes all five images.
+    Ensures the registry is running, then builds and pushes all four images.
 
 .EXAMPLE
     .\Initialize-LocalRegistry.ps1 -Images control-plane, evaluation-server
@@ -71,8 +70,8 @@ param(
 
     [string]$Tag = "latest",
 
-    [ValidateSet("api-server", "ui", "evaluation-server", "control-plane", "data-analytics-server")]
-    [string[]]$Images = @("api-server", "ui", "evaluation-server", "control-plane", "data-analytics-server"),
+    [ValidateSet("api-server", "ui", "evaluation-server", "control-plane")]
+    [string[]]$Images = @("api-server", "ui", "evaluation-server", "control-plane"),
 
     [switch]$NoPush,
 
@@ -116,11 +115,6 @@ $imageDefinitions = [ordered]@{
         # so the build context must be the parent modules/ directory.
         BuildContext = "modules"
         Dockerfile   = "modules/control-plane/deploy/Dockerfile"
-    }
-    "data-analytics-server" = @{
-        LocalName    = "featbit-data-analytics-server"
-        BuildContext = "modules/data-analytics"
-        Dockerfile   = "modules/data-analytics/Dockerfile"
     }
 }
 

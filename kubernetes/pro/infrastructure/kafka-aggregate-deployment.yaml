@@ -1,6 +1,6 @@
 # Kafka Aggregate Broker
 #
-# Dedicated broker that evaluation-server and da-server consumers subscribe to.
+# Dedicated broker that evaluation-server consumers subscribe to.
 # MirrorMaker instances replicate flag/segment change messages from the local
 # main kafka broker (kafka:9092) to this broker.  The remote MirrorMaker from
 # the other cluster also produces INTO this broker via the NodePort (30094),

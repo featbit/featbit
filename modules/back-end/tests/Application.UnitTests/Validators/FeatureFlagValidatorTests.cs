@@ -201,28 +201,4 @@ public class FeatureFlagValidatorTests
         Assert.Contains(result.Errors, e => e.ErrorCode == ErrorCodes.Invalid("key"));
     }
 
-    [Fact]
-    public void GetInsights_FromZeroAndUndefinedInterval_InvalidErrors()
-    {
-        var req = new GetInsights
-        {
-            EnvId = Guid.NewGuid(),
-            Filter = new StatsByVariationFilter { FeatureFlagKey = "k", IntervalType = "n/a", From = 0, To = 0 }
-        };
-
-        var result = new GetInsightsValidator().Validate(req);
-
-        Assert.Contains(result.Errors, e => e.ErrorCode == ErrorCodes.Invalid("from"));
-        Assert.Contains(result.Errors, e => e.ErrorCode == ErrorCodes.Invalid("to"));
-        Assert.Contains(result.Errors, e => e.ErrorCode == ErrorCodes.Invalid("intervalType"));
-    }
-
-    [Fact]
-    public void GetVariationReferences_MissingIds_RequiredErrors()
-    {
-        var result = new GetVariationReferencesValidator().Validate(new GetVariationReferences());
-
-        Assert.Contains(result.Errors, e => e.ErrorCode == ErrorCodes.Required("featureFlagId"));
-        Assert.Contains(result.Errors, e => e.ErrorCode == ErrorCodes.Required("variationId"));
-    }
 }
