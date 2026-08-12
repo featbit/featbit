@@ -232,13 +232,6 @@ export K8S_NAMESPACE="featbit"
      value: Kafka
    ```
 
-   ```yaml
-   - name: MongoDb__ConnectionString
-     value: mongodb://admin:password@mongodb:27017
-   - name: MongoDb__Database
-     value: featbit
-   ```
-
 4. Update ingress files in `kubernetes/pro/ingress/` with your domain names:
    - `traefik-ingress-ui.yaml`: host: `featbit.east.local`
    - `traefik-ingress-api.yaml`: host: `featbit-api.east.local`
