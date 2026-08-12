@@ -24,12 +24,14 @@ services:
       - Kafka__Producer__bootstrap.servers=kafka:9092
       - Kafka__Consumer__bootstrap.servers=kafka:9092
       - Redis__ConnectionString=redis:6379
+      - OLAP__ServiceHost=http://da-server
       - Jwt__Algorithm=HS256
       - Jwt__Key=please_change_me_to_a_secure_secret_key
     depends_on:
       - postgresql
       - redis
       - kafka
+      - da-server
     ports:
       - "5000:5000"
     networks:
@@ -53,6 +55,23 @@ services:
       - "5100:5100"
     networks:
       - featbit-network
+
+  # Deprecated: da-server remains for backward compatibility and will be removed in the official v6.0 release.
+  da-server:
+    image: featbit/featbit-data-analytics-server:latest
+    depends_on:
+      - kafka
+      - clickhouse-server
+    ports:
+      - "8200:80"
+    networks:
+      - featbit-network
+    environment:
+      DB_PROVIDER: ClickHouse
+      KAFKA_HOSTS: kafka:9092
+      CLICKHOUSE_HOST: clickhouse-server
+      CLICKHOUSE_KAFKA_HOSTS: kafka:9092
+      CHECK_DB_LIVNESS: true
 
   postgresql:
     image: postgres:15.10
