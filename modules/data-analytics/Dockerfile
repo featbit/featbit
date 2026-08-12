@@ -1,4 +1,4 @@
-FROM python:3.9-slim-bookworm
+FROM python:3.10-slim-trixie
 ENV TEST=false \
     KAFKA_HOSTS=kafka:9092 \
     KAFKA_SECURITY_PROTOCOL=PLAINTEXT \
@@ -31,10 +31,9 @@ ENV TEST=false \
     OTEL_METRICS_EXPORTER=otlp \
     OTEL_LOGS_EXPORTER=otlp \
     OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
-RUN apt update && \
-    apt install -y nginx && \ 
-    apt install -y supervisor && \ 
-    apt install -y git && \ 
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends nginx supervisor git && \
     rm -rf /var/lib/apt/lists/*
 RUN mkdir -p /var/log/nginx && \
     touch /var/log/nginx/access.log && \
